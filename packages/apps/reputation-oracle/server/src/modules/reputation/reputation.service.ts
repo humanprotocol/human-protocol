@@ -15,7 +15,10 @@ import {
   ReputationOrderBy,
 } from './constants';
 import { ReputationEntity } from './reputation.entity';
-import { ReputationRepository } from './reputation.repository';
+import {
+  ReputationRepository,
+  type ExclusiveReputationCriteria,
+} from './reputation.repository';
 
 type ReputationData = {
   chainId: ChainId;
@@ -23,6 +26,14 @@ type ReputationData = {
   level: ReputationLevel;
   role: ReputationEntityType;
 };
+
+function assertAdjustableReputationPoints(points: number) {
+  if (points > 0 && Number.isInteger(points)) {
+    return;
+  }
+
+  throw new Error('Adjustable reputation points must be positive integer');
+}
 
 @Injectable()
 export class ReputationService {
@@ -53,10 +64,11 @@ export class ReputationService {
    * If the entity doesn't exist in the database - creates it first.
    */
   async increaseReputation(
-    chainId: ChainId,
-    address: string,
-    type: ReputationEntityType,
+    { chainId, address, type }: ExclusiveReputationCriteria,
+    points: number,
   ): Promise<void> {
+    assertAdjustableReputationPoints(points);
+
     const existingEntity = await this.reputationRepository.findExclusive({
       chainId,
       address,
@@ -87,13 +99,14 @@ export class ReputationService {
       }
     }
 
-    await this.reputationRepository.incrementReputation(
+    await this.reputationRepository.increment(
       {
         chainId,
         address,
         type,
       },
-      1,
+      'reputationPoints',
+      points,
     );
   }
 
@@ -102,10 +115,11 @@ export class ReputationService {
    * If the entity doesn't exist in the database - creates it first.
    */
   async decreaseReputation(
-    chainId: ChainId,
-    address: string,
-    type: ReputationEntityType,
+    { chainId, address, type }: ExclusiveReputationCriteria,
+    points: number,
   ): Promise<void> {
+    assertAdjustableReputationPoints(points);
+
     if (
       type === ReputationEntityType.REPUTATION_ORACLE &&
       address === this.web3ConfigService.operatorAddress
@@ -135,13 +149,14 @@ export class ReputationService {
       }
     }
 
-    await this.reputationRepository.decrementReputation(
+    await this.reputationRepository.decrement(
       {
         chainId,
         address,
         type,
       },
-      1,
+      'reputationPoints',
+      points,
     );
   }
 
@@ -203,7 +218,10 @@ export class ReputationService {
       reputationEntityType,
       address,
     ] of reputationTypeToAddress.entries()) {
-      await this.increaseReputation(chainId, address, reputationEntityType);
+      await this.increaseReputation(
+        { chainId, address, type: reputationEntityType },
+        1,
+      );
     }
   }
 }

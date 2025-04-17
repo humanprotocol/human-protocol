@@ -68,40 +68,4 @@ export class ReputationRepository extends BaseRepository<ReputationEntity> {
       skip: options?.skip,
     });
   }
-
-  async incrementReputation(
-    { chainId, address, type }: ExclusiveReputationCriteria,
-    value: number,
-  ) {
-    if (value <= 0) {
-      throw new Error('Value to increment must be positive');
-    }
-    await this.increment(
-      {
-        chainId,
-        address,
-        type,
-      },
-      'reputationPoints',
-      value,
-    );
-  }
-
-  async decrementReputation(
-    { chainId, address, type }: ExclusiveReputationCriteria,
-    value: number,
-  ) {
-    if (value <= 0) {
-      throw new Error('Value to decrement must be positive');
-    }
-    await this.decrement(
-      {
-        chainId,
-        address,
-        type,
-      },
-      'reputationPoints',
-      value,
-    );
-  }
 }
