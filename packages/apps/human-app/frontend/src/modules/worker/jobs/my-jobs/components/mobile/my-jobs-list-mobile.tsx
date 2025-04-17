@@ -1,7 +1,7 @@
 /* eslint-disable camelcase -- ... */
 import { Grid, List, Paper, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { useEffect, type Dispatch, type SetStateAction } from 'react';
+import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Button } from '@/shared/components/ui/button';
 import { FiltersButtonIcon, RefreshIcon } from '@/shared/components/ui/icons';
@@ -30,14 +30,9 @@ import {
 import { useRefreshTasksMutation } from '../../hooks';
 import { getChipStatusColor } from '../../utils';
 import { type MyJob } from '../../schemas';
+import { useMyJobFilterModal } from '../../hooks/use-my-jobs-filter-modal';
 
-interface MyJobsListMobileProps {
-  setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
-}
-
-export function MyJobsListMobile({
-  setIsMobileFilterDrawerOpen,
-}: Readonly<MyJobsListMobileProps>) {
+export function MyJobsListMobile() {
   const { colorPalette } = useColorMode();
   const { filterParams, setPageParams, resetFilterParams } =
     useMyJobsFilterStore();
@@ -58,6 +53,7 @@ export function MyJobsListMobile({
   const { address: oracle_address } = useParams<{ address: string }>();
 
   const allPages = useCombinePages<MyJob>(tableData, filterParams.page);
+  const { openModal } = useMyJobFilterModal();
 
   useEffect(() => {
     return () => {
@@ -78,9 +74,7 @@ export function MyJobsListMobile({
         <Grid item xs={6}>
           <Button
             fullWidth
-            onClick={() => {
-              setIsMobileFilterDrawerOpen(true);
-            }}
+            onClick={openModal}
             sx={{
               marginBottom: '32px',
               marginTop: '21px',
