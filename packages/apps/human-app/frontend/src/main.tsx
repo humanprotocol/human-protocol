@@ -6,6 +6,7 @@ import '@/shared/i18n/i18n';
 import CssBaseline from '@mui/material/CssBaseline';
 import { BrowserRouter } from 'react-router-dom';
 import { DisplayModal } from '@/shared/components/ui/modal/display-modal';
+import { AuthProvider } from '@/modules/auth/context/auth-context';
 import { Router } from '@/router/router';
 import '@fontsource/inter';
 import '@fontsource/inter/400.css';
@@ -18,7 +19,8 @@ import { JWTExpirationCheck } from '@/shared/contexts/jwt-expiration-check';
 import { ColorModeProvider } from '@/shared/contexts/color-mode';
 import { HomePageStateProvider } from '@/shared/contexts/homepage-state';
 import { NotificationProvider } from '@/shared/providers/notifications-provider';
-import { AuthProvider } from './modules/auth/context/auth-context';
+import { ModalProvider } from './shared/contexts/modal-context';
+import { GlobalModal } from './shared/components/ui/modal/global-modal';
 
 const root = document.getElementById('root');
 if (!root) throw Error('root element is undefined');
@@ -41,10 +43,12 @@ createRoot(root).render(
               <HomePageStateProvider>
                 <Web3AuthProvider>
                   <AuthProvider>
-                    <DisplayModal />
-                    <JWTExpirationCheck>
-                      <Router />
-                    </JWTExpirationCheck>
+                    <ModalProvider>
+                      <GlobalModal />
+                      <JWTExpirationCheck>
+                        <Router />
+                      </JWTExpirationCheck>
+                    </ModalProvider>
                   </AuthProvider>
                 </Web3AuthProvider>
               </HomePageStateProvider>

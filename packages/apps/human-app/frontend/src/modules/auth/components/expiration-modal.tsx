@@ -2,17 +2,17 @@ import { t } from 'i18next';
 import { Grid, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/shared/components/ui/button';
-import { useModalStore } from '@/shared/components/ui/modal/modal.store';
 import { routerPaths } from '@/router/router-paths';
 import { browserAuthProvider } from '@/shared/contexts/browser-auth-provider';
 import { breakpoints } from '@/shared/styles/breakpoints';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
 import { useWeb3Auth } from '@/modules/auth-web3/hooks/use-web3-auth';
+import { useModal } from '@/shared/contexts/modal-context';
 
 export function ExpirationModal() {
   const { signOut } = useAuth();
   const { signOut: web3SignOut } = useWeb3Auth();
-  const { closeModal } = useModalStore();
+  const { closeModal } = useModal();
   const navigate = useNavigate();
 
   return (
@@ -70,4 +70,17 @@ export function ExpirationModal() {
       </Grid>
     </Grid>
   );
+}
+
+export function useExpirationModal() {
+  const { openModal } = useModal();
+
+  return {
+    open: () => {
+      openModal({
+        content: <ExpirationModal />,
+        showCloseButton: false,
+      });
+    },
+  };
 }
