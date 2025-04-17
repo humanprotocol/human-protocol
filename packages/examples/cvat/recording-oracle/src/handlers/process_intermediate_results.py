@@ -7,7 +7,6 @@ import logging
 import os
 import zipfile
 from collections import Counter
-from copy import deepcopy
 from dataclasses import dataclass
 from functools import cached_property
 from io import StringIO
@@ -544,45 +543,44 @@ class _AudinoTaskValidator:
 
     def _prepare_merged_dataset(self):
         tempdir = self._require_field(self._temp_dir)
-        gt_dataset = deepcopy(self._require_field(self._input_gt_dataset))
+        # gt_dataset = deepcopy(self._require_field(self._input_gt_dataset))
 
-        # for gt_sample in gt_dataset:
-        #     gt_sample["job_id"] = int(gt_sample["job_id"]) + self._base_job_id
-
-        gt_annotations_json = json.dumps(gt_dataset, indent=4).encode("utf-8")
+        # gt_annotations_json = json.dumps(gt_dataset, indent=4).encode("utf-8")
 
         updated_merged_dataset_path = tempdir / "merged_annotations"
         updated_merged_dataset_path.mkdir(parents=True, exist_ok=True)
 
         updated_merged_dataset_archive = io.BytesIO()
+        original_archive_bytes = io.BytesIO(self._merged_annotations.getvalue())
 
-        with zipfile.ZipFile(updated_merged_dataset_archive, "w") as archive:
-            with zipfile.ZipFile(
-                io.BytesIO(self._merged_annotations.getvalue())
-            ) as original_archive:
-                with original_archive.open("annotations.json") as annotations_file:
-                    annotations_data = json.load(annotations_file)
+        with (
+            zipfile.ZipFile(updated_merged_dataset_archive, "w") as archive,
+            zipfile.ZipFile(original_archive_bytes, "r") as original_archive,
+        ):
+            with original_archive.open("annotations.json") as annotations_file:
+                annotations_data = json.load(annotations_file)
 
-                    # Modify start and end for each annotation to make time stamps absolute
-                    for annotation in annotations_data:
-                        job_id = annotation.get("job_id")
-                        if job_id is not None:
-                            job_time_offset = (
-                                int(job_id) - self._base_job_id
-                            ) * self._meta.job_duration_without_overlap
+                # Modify start and end for each annotation to make time stamps absolute
+                for annotation in annotations_data:
+                    job_id = annotation.get("job_id")
+                    if job_id is not None:
+                        job_time_offset = (
+                            int(job_id) - self._base_job_id
+                        ) * self._meta.job_duration_without_overlap
 
-                            if "start" in annotation:
-                                annotation["start"] += job_time_offset
-                            if "end" in annotation:
-                                annotation["end"] += job_time_offset
+                        if "start" in annotation:
+                            annotation["start"] += job_time_offset
+                        if "end" in annotation:
+                            annotation["end"] += job_time_offset
 
-                archive.writestr("annotations.json", json.dumps(annotations_data, indent=4))
+            sorted_annotations_data = sorted(annotations_data, key=lambda x: x.get("start", 0))
+            archive.writestr("annotations.json", json.dumps(sorted_annotations_data, indent=4))
 
-                for file in original_archive.namelist():
-                    if file.startswith("clips/"):
-                        archive.writestr(file, original_archive.read(file))
+            # for file in original_archive.namelist():
+            #     if file.startswith("clips/"):
+            #         archive.writestr(file, original_archive.read(file))
 
-            archive.writestr("gt_annotations.json", gt_annotations_json)
+            # archive.writestr("gt_annotations.json", gt_annotations_json)
 
         updated_merged_dataset_archive.seek(0)
 
@@ -1190,7 +1188,7 @@ def process_intermediate_results(  # noqa: PLR0912
         # a final annotation result, regardless of the assignment quality.
         job_final_result_ids[job.id] = assignment_validation_result_id
 
-    task_jobs = task.jobs
+    task_jobs = db_service.get_jobs_by_task_id(session, task_id)
 
     db_service.update_escrow_iteration(session, escrow_address, chain_id, task.iteration + 1)
 

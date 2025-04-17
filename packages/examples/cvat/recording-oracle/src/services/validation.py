@@ -47,6 +47,14 @@ def get_task_validation_results(
     )
 
 
+def get_jobs_by_task_id(
+    session: Session, task_id: str, *, for_update: bool | ForUpdateParams = False
+) -> list[Job]:
+    return (
+        _maybe_for_update(session.query(Job), enable=for_update).where(Job.task_id == task_id).all()
+    )
+
+
 def update_escrow_iteration(session: Session, escrow_address: str, chain_id: int, iteration: int):
     expression = (
         update(Task)
