@@ -10,8 +10,6 @@ import { EventType } from '../../common/enums';
 import { isDuplicatedError } from '../../common/errors/database';
 import { ServerConfigService } from '../../config/server-config.service';
 import logger from '../../logger';
-import { ReputationEntityType } from '../reputation/constants';
-import { ReputationService } from '../reputation/reputation.service';
 import { Web3Service } from '../web3/web3.service';
 import { WebhookOutgoingService } from '../webhook/webhook-outgoing.service';
 import { AbuseEntity } from './abuse.entity';
@@ -36,7 +34,6 @@ export class AbuseService {
     private readonly abuseRepository: AbuseRepository,
     private readonly web3Service: Web3Service,
     private readonly serverConfigService: ServerConfigService,
-    private readonly reputationService: ReputationService,
     private readonly webhookOutgoingService: WebhookOutgoingService,
   ) {}
 
@@ -257,11 +254,6 @@ export class AbuseService {
             }
           }
         } else {
-          await this.reputationService.decreaseReputation(
-            chainId,
-            abuseEntity.user?.evmAddress as string,
-            ReputationEntityType.WORKER,
-          );
           const webhookPayload = {
             chainId: chainId,
             escrowAddress: escrowAddress,

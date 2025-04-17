@@ -1,5 +1,4 @@
 export const DATABASE_SCHEMA_NAME = 'hmt';
-export const INITIAL_REPUTATION = 0;
 export const JWT_STRATEGY_NAME = 'jwt-http';
 
 export const CVAT_RESULTS_ANNOTATIONS_FILENAME = 'resulting_annotations.zip';

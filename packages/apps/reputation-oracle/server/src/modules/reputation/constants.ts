@@ -18,3 +18,5 @@ export enum ReputationOrderBy {
 }
 
 export const MAX_REPUTATION_ITEMS_PER_PAGE = 100;
+
+export const INITIAL_REPUTATION = 0;

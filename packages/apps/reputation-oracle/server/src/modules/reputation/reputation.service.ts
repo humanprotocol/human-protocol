@@ -1,41 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { ChainId, EscrowClient } from '@human-protocol/sdk';
-import {
-  AUDINO_VALIDATION_META_FILENAME,
-  CVAT_VALIDATION_META_FILENAME,
-  INITIAL_REPUTATION,
-} from '../../common/constants';
+
+import { SortDirection } from '../../common/enums';
 import { isDuplicatedError } from '../../common/errors/database';
-import {
-  JobRequestType,
-  SolutionError,
-  SortDirection,
-} from '../../common/enums';
-import {
-  AudinoAnnotationMeta,
-  AudinoAnnotationMetaResult,
-  CvatAnnotationMeta,
-  CvatAnnotationMetaResults,
-  FortuneFinalResult,
-} from '../../common/interfaces/job-result';
-import {
-  AudinoManifest,
-  CvatManifest,
-  JobManifest,
-} from '../../common/interfaces/manifest';
 import { ReputationConfigService } from '../../config/reputation-config.service';
 import { Web3ConfigService } from '../../config/web3-config.service';
-import { getRequestType } from '../../utils/manifest';
 
-import { StorageService } from '../storage/storage.service';
 import { Web3Service } from '../web3/web3.service';
 
 import {
+  INITIAL_REPUTATION,
   ReputationEntityType,
   ReputationLevel,
   ReputationOrderBy,
 } from './constants';
-import { RequestAction } from './reputation.interface';
 import { ReputationEntity } from './reputation.entity';
 import { ReputationRepository } from './reputation.repository';
 
@@ -49,7 +27,6 @@ type ReputationData = {
 @Injectable()
 export class ReputationService {
   constructor(
-    private readonly storageService: StorageService,
     private readonly reputationRepository: ReputationRepository,
     private readonly reputationConfigService: ReputationConfigService,
     private readonly web3ConfigService: Web3ConfigService,
@@ -69,234 +46,6 @@ export class ReputationService {
     }
 
     return ReputationLevel.MEDIUM;
-  }
-
-  /**
-   * Perform reputation assessment based on the completion status of a job and its associated entities.
-   * Retrieves necessary data from the escrow client, including manifest and final results URLs,
-   * and delegates reputation adjustments to specialized methods.
-   * @param chainId The ID of the blockchain chain.
-   * @param escrowAddress The address of the escrow contract.
-   * @returns {Promise<void>} A Promise indicating the completion of reputation assessment.
-   */
-  async assessReputationScores(
-    chainId: ChainId,
-    escrowAddress: string,
-  ): Promise<void> {
-    const signer = this.web3Service.getSigner(chainId);
-    const escrowClient = await EscrowClient.build(signer);
-
-    const manifestUrl = await escrowClient.getManifestUrl(escrowAddress);
-
-    const manifest =
-      await this.storageService.downloadJsonLikeData<JobManifest>(manifestUrl);
-
-    const requestType = getRequestType(manifest);
-
-    const { assessWorkerReputationScores } =
-      this.createReputationSpecificActions[requestType];
-
-    // Assess reputation scores for the job launcher entity.
-    // Increases the reputation score for the job launcher.
-    const jobLauncherAddress =
-      await escrowClient.getJobLauncherAddress(escrowAddress);
-    await this.increaseReputation(
-      chainId,
-      jobLauncherAddress,
-      ReputationEntityType.JOB_LAUNCHER,
-    );
-
-    await assessWorkerReputationScores(chainId, escrowAddress, manifest);
-
-    // Assess reputation scores for the exchange oracle entity.
-    // Decreases or increases the reputation score for the exchange oracle based on job completion.
-    const exchangeOracleAddress =
-      await escrowClient.getExchangeOracleAddress(escrowAddress);
-    await this.increaseReputation(
-      chainId,
-      exchangeOracleAddress,
-      ReputationEntityType.EXCHANGE_ORACLE,
-    );
-
-    // Assess reputation scores for the recording oracle entity.
-    // Decreases or increases the reputation score for the recording oracle based on job completion status.
-    const recordingOracleAddress =
-      await escrowClient.getRecordingOracleAddress(escrowAddress);
-    await this.increaseReputation(
-      chainId,
-      recordingOracleAddress,
-      ReputationEntityType.RECORDING_ORACLE,
-    );
-
-    const reputationOracleAddress = this.web3ConfigService.operatorAddress;
-    await this.increaseReputation(
-      chainId,
-      reputationOracleAddress,
-      ReputationEntityType.REPUTATION_ORACLE,
-    );
-  }
-
-  private createReputationSpecificActions: Record<
-    JobRequestType,
-    RequestAction
-  > = {
-    [JobRequestType.FORTUNE]: {
-      assessWorkerReputationScores: async (
-        chainId: ChainId,
-        escrowAddress: string,
-      ): Promise<void> => this.processFortune(chainId, escrowAddress),
-    },
-    [JobRequestType.IMAGE_BOXES]: {
-      assessWorkerReputationScores: async (
-        chainId: ChainId,
-        escrowAddress: string,
-        manifest: CvatManifest,
-      ): Promise<void> => this.processCvat(chainId, escrowAddress, manifest),
-    },
-    [JobRequestType.IMAGE_POINTS]: {
-      assessWorkerReputationScores: async (
-        chainId: ChainId,
-        escrowAddress: string,
-        manifest: CvatManifest,
-      ): Promise<void> => this.processCvat(chainId, escrowAddress, manifest),
-    },
-    [JobRequestType.IMAGE_BOXES_FROM_POINTS]: {
-      assessWorkerReputationScores: async (
-        chainId: ChainId,
-        escrowAddress: string,
-        manifest: CvatManifest,
-      ): Promise<void> => this.processCvat(chainId, escrowAddress, manifest),
-    },
-    [JobRequestType.IMAGE_SKELETONS_FROM_BOXES]: {
-      assessWorkerReputationScores: async (
-        chainId: ChainId,
-        escrowAddress: string,
-        manifest: CvatManifest,
-      ): Promise<void> => this.processCvat(chainId, escrowAddress, manifest),
-    },
-    [JobRequestType.IMAGE_POLYGONS]: {
-      assessWorkerReputationScores: async (
-        chainId: ChainId,
-        escrowAddress: string,
-        manifest: CvatManifest,
-      ): Promise<void> => this.processCvat(chainId, escrowAddress, manifest),
-    },
-    [JobRequestType.AUDIO_TRANSCRIPTION]: {
-      assessWorkerReputationScores: async (
-        chainId: ChainId,
-        escrowAddress: string,
-        manifest: AudinoManifest,
-      ): Promise<void> => this.processAudino(chainId, escrowAddress, manifest),
-    },
-  };
-
-  private async processFortune(
-    chainId: ChainId,
-    escrowAddress: string,
-  ): Promise<void> {
-    const signer = this.web3Service.getSigner(chainId);
-    const escrowClient = await EscrowClient.build(signer);
-
-    const finalResultsUrl = await escrowClient.getResultsUrl(escrowAddress);
-    const finalResults =
-      await this.storageService.downloadJsonLikeData<FortuneFinalResult[]>(
-        finalResultsUrl,
-      );
-
-    // Assess reputation scores for workers based on the final results of a job.
-    // Decreases or increases worker reputation based on the success or failure of their contributions.
-    await Promise.all(
-      finalResults.map(async (result) => {
-        if (result.error) {
-          if (result.error === SolutionError.Duplicated)
-            await this.decreaseReputation(
-              chainId,
-              result.workerAddress,
-              ReputationEntityType.WORKER,
-            );
-        } else {
-          await this.increaseReputation(
-            chainId,
-            result.workerAddress,
-            ReputationEntityType.WORKER,
-          );
-        }
-      }),
-    );
-  }
-
-  private async processCvat(
-    chainId: ChainId,
-    escrowAddress: string,
-    manifest: CvatManifest,
-  ): Promise<void> {
-    const signer = this.web3Service.getSigner(chainId);
-    const escrowClient = await EscrowClient.build(signer);
-
-    const intermediateResultsUrl =
-      await escrowClient.getIntermediateResultsUrl(escrowAddress);
-
-    const annotations =
-      await this.storageService.downloadJsonLikeData<CvatAnnotationMeta>(
-        `${intermediateResultsUrl}/${CVAT_VALIDATION_META_FILENAME}`,
-      );
-
-    // Assess reputation scores for workers based on the annoation quality.
-    // Decreases or increases worker reputation based on comparison annoation quality to minimum threshold.
-    await Promise.all(
-      annotations.results.map(async (result: CvatAnnotationMetaResults) => {
-        if (result.annotation_quality < manifest.validation.min_quality) {
-          await this.decreaseReputation(
-            chainId,
-            result.annotator_wallet_address,
-            ReputationEntityType.WORKER,
-          );
-        } else {
-          await this.increaseReputation(
-            chainId,
-            result.annotator_wallet_address,
-            ReputationEntityType.WORKER,
-          );
-        }
-      }),
-    );
-  }
-
-  private async processAudino(
-    chainId: ChainId,
-    escrowAddress: string,
-    manifest: AudinoManifest,
-  ): Promise<void> {
-    const signer = this.web3Service.getSigner(chainId);
-    const escrowClient = await EscrowClient.build(signer);
-
-    const intermediateResultsUrl =
-      await escrowClient.getIntermediateResultsUrl(escrowAddress);
-
-    const annotations =
-      await this.storageService.downloadJsonLikeData<AudinoAnnotationMeta>(
-        `${intermediateResultsUrl}/${AUDINO_VALIDATION_META_FILENAME}`,
-      );
-
-    // Assess reputation scores for workers based on the annoation quality.
-    // Decreases or increases worker reputation based on comparison annoation quality to minimum threshold.
-    await Promise.all(
-      annotations.results.map(async (result: AudinoAnnotationMetaResult) => {
-        if (result.annotation_quality < manifest.validation.min_quality) {
-          await this.decreaseReputation(
-            chainId,
-            result.annotator_wallet_address,
-            ReputationEntityType.WORKER,
-          );
-        } else {
-          await this.increaseReputation(
-            chainId,
-            result.annotator_wallet_address,
-            ReputationEntityType.WORKER,
-          );
-        }
-      }),
-    );
   }
 
   /**
@@ -424,5 +173,37 @@ export class ReputationService {
       role: reputation.type,
       level: this.getReputationLevel(reputation.reputationPoints),
     }));
+  }
+
+  async assessEscrowParties(
+    chainId: ChainId,
+    escrowAddress: string,
+  ): Promise<void> {
+    const signer = this.web3Service.getSigner(chainId);
+    const escrowClient = await EscrowClient.build(signer);
+
+    const [jobLauncherAddress, exchangeOracleAddress, recordingOracleAddress] =
+      await Promise.all([
+        escrowClient.getJobLauncherAddress(escrowAddress),
+        escrowClient.getExchangeOracleAddress(escrowAddress),
+        escrowClient.getRecordingOracleAddress(escrowAddress),
+      ]);
+
+    const reputationTypeToAddress = new Map([
+      [ReputationEntityType.JOB_LAUNCHER, jobLauncherAddress],
+      [ReputationEntityType.EXCHANGE_ORACLE, exchangeOracleAddress],
+      [ReputationEntityType.RECORDING_ORACLE, recordingOracleAddress],
+      [
+        ReputationEntityType.REPUTATION_ORACLE,
+        this.web3ConfigService.operatorAddress,
+      ],
+    ]);
+
+    for (const [
+      reputationEntityType,
+      address,
+    ] of reputationTypeToAddress.entries()) {
+      await this.increaseReputation(chainId, address, reputationEntityType);
+    }
   }
 }
