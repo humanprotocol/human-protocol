@@ -4,11 +4,8 @@ import { jwtDecode } from 'jwt-decode';
 import { z } from 'zod';
 import { useQueryClient } from '@tanstack/react-query';
 import { browserAuthProvider } from '@/shared/contexts/browser-auth-provider';
-import {
-  ModalType,
-  useModalStore,
-} from '@/shared/components/ui/modal/modal.store';
 import { type AuthTokensSuccessResponse } from '@/shared/schemas';
+import { useExpirationModal } from '@/modules/auth';
 
 export enum OperatorStatus {
   ACTIVE = 'active',
@@ -48,7 +45,7 @@ export const Web3AuthContext = createContext<
 
 export function Web3AuthProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
-  const { openModal } = useModalStore();
+  const { open } = useExpirationModal();
   const [web3AuthState, setWeb3AuthState] = useState<{
     user: Web3UserData | null;
     status: AuthStatus;
@@ -56,11 +53,7 @@ export function Web3AuthProvider({ children }: { children: React.ReactNode }) {
 
   const displayExpirationModal = () => {
     queryClient.setDefaultOptions({ queries: { enabled: false } });
-    openModal({
-      modalType: ModalType.EXPIRATION_MODAL,
-      displayCloseButton: false,
-      maxWidth: 'sm',
-    });
+    open();
   };
 
   const updateUserData = (updateUserDataPayload: Partial<Web3UserData>) => {
