@@ -41,16 +41,16 @@ createRoot(root).render(
           <BrowserRouter>
             <WalletConnectProvider>
               <HomePageStateProvider>
-                <Web3AuthProvider>
-                  <AuthProvider>
-                    <ModalProvider>
+                <ModalProvider>
+                  <Web3AuthProvider>
+                    <AuthProvider>
                       <GlobalModal />
                       <JWTExpirationCheck>
                         <Router />
                       </JWTExpirationCheck>
-                    </ModalProvider>
-                  </AuthProvider>
-                </Web3AuthProvider>
+                    </AuthProvider>
+                  </Web3AuthProvider>
+                </ModalProvider>
               </HomePageStateProvider>
               <ReactQueryDevtools client={queryClient} initialIsOpen={false} />
             </WalletConnectProvider>
