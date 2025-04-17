@@ -4,7 +4,6 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { Divider, IconButton, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import CloseIcon from '@mui/icons-material/Close';
-import type { Dispatch, SetStateAction } from 'react';
 import { HumanLogoIcon } from '@/shared/components/ui/icons';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { useHandleMainNavIconClick } from '@/shared/hooks/use-handle-main-nav-icon-click';
@@ -14,14 +13,14 @@ import { MyJobsStatusFilterMobile } from './my-jobs-status-filter-mobile';
 import { MyJobsExpiresAtSortMobile } from './my-jobs-expires-at-sort-mobile';
 import { MyJobsRewardAmountSortMobile } from './my-jobs-reward-amount-sort-mobile';
 
-interface DrawerMobileProps {
-  setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
+interface MyJobsFilterModalProps {
   chainIdsEnabled: number[];
+  close: () => void;
 }
-export function MyJobsDrawerMobileView({
-  setIsMobileFilterDrawerOpen,
+export function MyJobsFilterModal({
   chainIdsEnabled,
-}: Readonly<DrawerMobileProps>) {
+  close,
+}: Readonly<MyJobsFilterModalProps>) {
   const handleMainNavIconClick = useHandleMainNavIconClick();
   const { colorPalette } = useColorMode();
   const { t } = useTranslation();
@@ -70,9 +69,7 @@ export function MyJobsDrawerMobileView({
           </Stack>
 
           <IconButton
-            onClick={() => {
-              setIsMobileFilterDrawerOpen(false);
-            }}
+            onClick={close}
             sx={{
               zIndex: '99999999',
               marginRight: '15px',
