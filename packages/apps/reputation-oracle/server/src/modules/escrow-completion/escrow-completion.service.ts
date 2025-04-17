@@ -204,7 +204,7 @@ export class EscrowCompletionService {
           // TODO: Technically it's possible that the escrow completion could occur before the reputation scores are assessed,
           // and the app might go down during this window. Currently, there isn’t a clear approach to handle this situation.
           // Consider revisiting this section to explore potential solutions to improve resilience in such scenarios.
-          await this.reputationService.assessReputationScores(
+          await this.reputationService.assessEscrowParties(
             chainId,
             escrowAddress,
           );

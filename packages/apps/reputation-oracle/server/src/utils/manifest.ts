@@ -2,18 +2,18 @@ import { JobManifest } from '../common/interfaces/manifest';
 import { JobRequestType } from '../common/enums';
 import { UnsupportedManifestTypeError } from '../common/errors/manifest';
 
-export function getRequestType(manifest: JobManifest): JobRequestType {
-  let requestType: JobRequestType | undefined;
+export function getJobRequestType(manifest: JobManifest): JobRequestType {
+  let jobRequestType: JobRequestType | undefined;
 
   if ('requestType' in manifest) {
-    requestType = manifest.requestType;
+    jobRequestType = manifest.requestType;
   } else if ('annotation' in manifest) {
-    requestType = manifest.annotation.type;
+    jobRequestType = manifest.annotation.type;
   }
 
-  if (!requestType) {
-    throw new UnsupportedManifestTypeError(requestType);
+  if (!jobRequestType) {
+    throw new UnsupportedManifestTypeError(jobRequestType);
   }
 
-  return requestType;
+  return jobRequestType;
 }

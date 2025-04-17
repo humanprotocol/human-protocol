@@ -8,14 +8,13 @@ import {
   OperatorUtils,
   StakingClient,
 } from '@human-protocol/sdk';
-import { EscrowData } from '@human-protocol/sdk/dist/graphql';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import { EventType, ReputationEntityType } from '../../common/enums';
+
+import { EventType } from '../../common/enums';
 import { PostgresErrorCodes } from '../../common/enums/database';
 import { DatabaseError } from '../../common/errors/database';
 import { ServerConfigService } from '../../config/server-config.service';
-import { ReputationService } from '../reputation/reputation.service';
 import { generateTestnetChainId } from '../web3/fixtures';
 import { Web3Service } from '../web3/web3.service';
 import { WebhookOutgoingService } from '../webhook/webhook-outgoing.service';
@@ -29,7 +28,6 @@ const fakeAddress = faker.finance.ethereumAddress();
 
 const mockAbuseRepository = createMock<AbuseRepository>();
 const mockAbuseSlackBot = createMock<AbuseSlackBot>();
-const mockReputationService = createMock<ReputationService>();
 const mockWeb3Service = createMock<Web3Service>();
 const mockWebhookOutgoingService = createMock<WebhookOutgoingService>();
 
@@ -60,10 +58,6 @@ describe('AbuseService', () => {
           useValue: mockWeb3Service,
         },
         { provide: AbuseRepository, useValue: mockAbuseRepository },
-        {
-          provide: ReputationService,
-          useValue: mockReputationService,
-        },
         {
           provide: WebhookOutgoingService,
           useValue: mockWebhookOutgoingService,
@@ -115,7 +109,7 @@ describe('AbuseService', () => {
       mockAbuseRepository.findOneById.mockResolvedValueOnce(abuseEntity);
       mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
         launcher: fakeAddress,
-      } as EscrowData);
+      } as any);
       const amount = faker.number.int();
       mockedOperatorUtils.getOperator.mockResolvedValueOnce({
         amountStaked: BigInt(amount),
@@ -235,10 +229,10 @@ describe('AbuseService', () => {
       mockedEscrowUtils.getEscrow
         .mockResolvedValueOnce({
           exchangeOracle: fakeAddress,
-        } as EscrowData)
+        } as any)
         .mockResolvedValueOnce({
           exchangeOracle: fakeAddress,
-        } as EscrowData);
+        } as any);
       mockedOperatorUtils.getOperator
         .mockResolvedValueOnce({
           webhookUrl: webhookUrl1,
@@ -269,7 +263,7 @@ describe('AbuseService', () => {
 
       mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
         exchangeOracle: fakeAddress,
-      } as EscrowData);
+      } as any);
       mockedOperatorUtils.getOperator.mockResolvedValueOnce({
         webhookUrl: webhookUrl1,
       } as IOperator);
@@ -298,7 +292,7 @@ describe('AbuseService', () => {
       );
       mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
         exchangeOracle: fakeAddress,
-      } as EscrowData);
+      } as any);
       mockedOperatorUtils.getOperator.mockResolvedValueOnce({
         webhookUrl: webhookUrl1,
       } as IOperator);
@@ -325,10 +319,10 @@ describe('AbuseService', () => {
       mockedEscrowUtils.getEscrow
         .mockResolvedValueOnce({
           exchangeOracle: fakeAddress,
-        } as EscrowData)
+        } as any)
         .mockResolvedValueOnce({
           exchangeOracle: fakeAddress,
-        } as EscrowData);
+        } as any);
       mockedOperatorUtils.getOperator
         .mockResolvedValueOnce({
           webhookUrl: webhookUrl1,
@@ -397,7 +391,7 @@ describe('AbuseService', () => {
       } as unknown as StakingClient);
       mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
         launcher: fakeAddress,
-      } as EscrowData);
+      } as any);
       mockedOperatorUtils.getOperator.mockResolvedValueOnce({
         webhookUrl: webhookUrl1,
       } as IOperator);
@@ -441,20 +435,14 @@ describe('AbuseService', () => {
       );
       mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
         exchangeOracle: fakeAddress,
-      } as EscrowData);
+      } as any);
       mockedOperatorUtils.getOperator.mockResolvedValueOnce({
         webhookUrl: webhookUrl1,
       } as IOperator);
-      mockReputationService.decreaseReputation.mockResolvedValueOnce(undefined);
 
       await abuseService.processClassifiedAbuses();
 
       expect(mockAbuseRepository.findClassified).toHaveBeenCalledTimes(1);
-      expect(mockReputationService.decreaseReputation).toHaveBeenCalledWith(
-        mockAbuseEntities[0].chainId,
-        mockAbuseEntities[0].user?.evmAddress,
-        ReputationEntityType.WORKER,
-      );
       expect(mockAbuseRepository.updateOne).toHaveBeenCalledWith({
         ...mockAbuseEntities[0],
         status: AbuseStatus.COMPLETED,

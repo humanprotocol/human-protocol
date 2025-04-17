@@ -1,53 +1,35 @@
 import { ChainId } from '@human-protocol/sdk';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsEthereumAddress,
-  IsNumber,
-  IsOptional,
-  IsString,
-  Min,
-} from 'class-validator';
 import { Transform } from 'class-transformer';
-import {
-  ReputationEntityType,
-  ReputationLevel,
-  ReputationOrderBy,
-  SortDirection,
-} from '../../common/enums';
+import { IsEthereumAddress, IsOptional, Max, Min } from 'class-validator';
+
+import { SortDirection } from '../../common/enums';
 import { IsChainId, IsLowercasedEnum } from '../../common/validators';
 
-export class ReputationCreateDto {
-  @ApiProperty({ name: 'chain_id' })
-  @IsChainId()
-  public chainId: ChainId;
+import {
+  MAX_REPUTATION_ITEMS_PER_PAGE,
+  ReputationEntityType,
+  ReputationLevel,
+} from './constants';
 
-  @ApiProperty()
-  @IsString()
-  public address: string;
-
-  @ApiProperty({ name: 'reputation_points' })
-  @IsNumber()
-  public reputationPoints: number;
-
-  @ApiProperty()
-  @IsLowercasedEnum(ReputationEntityType)
-  public type: ReputationEntityType;
+export enum GetReputationQueryOrderBy {
+  CREATED_AT = 'created_at',
+  REPUTATION_POINTS = 'reputation_points',
 }
 
-export class ReputationUpdateDto {
-  @ApiProperty({ name: 'reputation_points' })
-  @IsNumber()
-  public reputationPoints: number;
-}
-
-export class ReputationGetAllQueryDto {
+export class GetReputationsQueryDto {
   @ApiPropertyOptional({
     enum: ChainId,
     name: 'chain_id',
   })
   @IsChainId()
   @IsOptional()
-  public chainId?: ChainId;
+  chainId?: ChainId;
+
+  @ApiPropertyOptional()
+  @IsEthereumAddress()
+  @IsOptional()
+  address?: string;
 
   @ApiPropertyOptional({
     type: [ReputationEntityType],
@@ -55,70 +37,61 @@ export class ReputationGetAllQueryDto {
     name: 'roles',
   })
   /**
-   * NOTE: Order here matters
+   * NOTE: Order of decorators here matters
    *
-   * Query param is string if single value and array if multiple
+   * Query param is parsed as string if single value passed
+   * and as array if multiple
    */
   @Transform(({ value }) => (Array.isArray(value) ? value : [value]))
   @IsLowercasedEnum(ReputationEntityType, { each: true })
   @IsOptional()
-  public roles?: ReputationEntityType[];
+  roles?: ReputationEntityType[];
 
   @ApiPropertyOptional({
-    enum: ReputationOrderBy,
-    default: ReputationOrderBy.CREATED_AT,
+    name: 'order_by',
+    enum: GetReputationQueryOrderBy,
+    default: GetReputationQueryOrderBy.CREATED_AT,
   })
-  @IsLowercasedEnum(ReputationOrderBy)
+  @IsLowercasedEnum(GetReputationQueryOrderBy)
   @IsOptional()
-  public orderBy?: ReputationOrderBy;
+  orderBy?: GetReputationQueryOrderBy;
 
   @ApiPropertyOptional({
+    name: 'order_direction',
     enum: SortDirection,
     default: SortDirection.DESC,
   })
   @IsLowercasedEnum(SortDirection)
   @IsOptional()
-  public orderDirection?: SortDirection;
+  orderDirection?: SortDirection;
 
-  @ApiPropertyOptional({ type: Number })
+  @ApiPropertyOptional({
+    type: Number,
+    default: MAX_REPUTATION_ITEMS_PER_PAGE,
+  })
   @IsOptional()
   @Min(1)
+  @Max(MAX_REPUTATION_ITEMS_PER_PAGE)
   @Transform(({ value }) => Number(value))
-  public first?: number;
+  first?: number;
 
   @ApiPropertyOptional({ type: Number })
   @IsOptional()
   @Min(0)
   @Transform(({ value }) => Number(value))
-  public skip?: number;
+  skip?: number;
 }
 
-export class ReputationGetParamsDto {
-  @ApiProperty()
-  @IsEthereumAddress()
-  public address: string;
-}
-
-export class ReputationGetQueryDto {
+export class ReputationResponseDto {
   @ApiProperty({ enum: ChainId, name: 'chain_id' })
-  @IsChainId()
-  public chainId: ChainId;
-}
-
-export class ReputationDto {
-  @ApiProperty({ enum: ChainId, name: 'chain_id' })
-  @IsChainId()
   chainId: ChainId;
 
   @ApiProperty()
-  @IsEthereumAddress()
   address: string;
 
   @ApiProperty({ enum: ReputationLevel })
-  @IsLowercasedEnum(ReputationLevel)
-  reputation: ReputationLevel;
+  level: ReputationLevel;
 
   @ApiProperty({ enum: ReputationEntityType })
-  @IsLowercasedEnum(ReputationEntityType)
   role: ReputationEntityType;
 }
