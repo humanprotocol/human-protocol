@@ -13,7 +13,7 @@ import { useEnableWeb3Operator } from '../hooks';
 export function ProfileEnableButton() {
   const { signMessage } = useConnectedWallet();
   const {
-    mutateAsync,
+    prepareSignature,
     error: signatureDataError,
     isPending: isSignatureDataPending,
   } = usePrepareSignature(PrepareSignatureType.ENABLE_OPERATOR);
@@ -36,7 +36,7 @@ export function ProfileEnableButton() {
   }, [signatureDataError, enableOperatorError, showNotification]);
 
   const enableOperator = async () => {
-    const signaturePayload = await mutateAsync();
+    const signaturePayload = await prepareSignature();
     const signature = await signMessage(JSON.stringify(signaturePayload));
     enableOperatorMutation({ signature: signature ?? '' });
   };

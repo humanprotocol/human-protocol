@@ -8,7 +8,7 @@ import { useWalletConnect } from '@/shared/contexts/wallet-connect';
 export function usePrepareSignature(type: PrepareSignatureType) {
   const { address } = useWalletConnect();
 
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: () => {
       if (!address) {
         throw new Error('No address provided. Please connect your wallet.');
@@ -21,4 +21,11 @@ export function usePrepareSignature(type: PrepareSignatureType) {
     },
     mutationKey: ['prepareSignature', type],
   });
+
+  return {
+    prepareSignature: mutation.mutateAsync,
+    isPending: mutation.isPending,
+    isError: mutation.isError,
+    error: mutation.error,
+  };
 }

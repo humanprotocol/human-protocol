@@ -21,7 +21,7 @@ function useRegisterAddressMutation(callbacks?: RegisterAddressCallbacks) {
   const { user } = useAuthenticatedUser();
   const { refreshAccessTokenAsync } = useAccessTokenRefresh();
   const { address, chainId, signMessage } = useWalletConnect();
-  const { mutateAsync } = usePrepareSignature(
+  const { prepareSignature } = usePrepareSignature(
     PrepareSignatureType.REGISTER_ADDRESS
   );
 
@@ -30,7 +30,7 @@ function useRegisterAddressMutation(callbacks?: RegisterAddressCallbacks) {
       throw new Error(t('errors.noAddress'));
     }
 
-    const data = await mutateAsync();
+    const data = await prepareSignature();
     const messageToSign = JSON.stringify(data);
     const signature = await signMessage(messageToSign);
 

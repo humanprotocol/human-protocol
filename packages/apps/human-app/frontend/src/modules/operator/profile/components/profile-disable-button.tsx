@@ -13,7 +13,7 @@ import { useDisableWeb3Operator } from '../hooks';
 export function ProfileDisableButton() {
   const { signMessage } = useConnectedWallet();
   const {
-    mutateAsync,
+    prepareSignature,
     isPending: isSignatureDataPending,
     error: signatureDataError,
   } = usePrepareSignature(PrepareSignatureType.DISABLE_OPERATOR);
@@ -36,7 +36,7 @@ export function ProfileDisableButton() {
   }, [signatureDataError, disableOperatorError, showNotification]);
 
   const disableOperator = async () => {
-    const signaturePayload = await mutateAsync();
+    const signaturePayload = await prepareSignature();
     const signature = await signMessage(JSON.stringify(signaturePayload));
     disableOperatorMutation({ signature: signature ?? '' });
   };
