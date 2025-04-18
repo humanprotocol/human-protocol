@@ -6,12 +6,12 @@ const apiPaths = {
 };
 
 export class PasswordService {
-  async sendResetLink(data: { email: string }) {
+  async sendResetLink(email: string) {
     try {
       const result = await humanAppApiClient.post<null>(
         apiPaths.sendResetLink,
         {
-          body: data,
+          body: { email },
         }
       );
       return result;

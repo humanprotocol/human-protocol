@@ -9,9 +9,7 @@ export function useDisableWeb3Operator() {
   const { updateUserData } = useWeb3AuthenticatedUser();
   return useMutation({
     mutationFn: async ({ signature }: { signature: string }) => {
-      const result = await operatorProfileService.disableOperator({
-        signature,
-      });
+      const result = await operatorProfileService.disableOperator(signature);
 
       await operatorProfileService.refreshAccessToken();
 

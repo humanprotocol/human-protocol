@@ -14,14 +14,13 @@ export const kycStartSchema = z.object({
 export type KycStartSuccessSchema = z.infer<typeof kycStartSchema>;
 
 export class ProfileService {
-  async startKyc(data: { provider: string }) {
+  async startKyc() {
     try {
       const result =
         await authorizedHumanAppApiClient.post<KycStartSuccessSchema>(
           apiPaths.kycStart,
           {
             successSchema: kycStartSchema,
-            body: data,
           }
         );
       return result;
