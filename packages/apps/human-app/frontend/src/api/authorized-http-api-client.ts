@@ -1,5 +1,10 @@
-import { HttpApiClient, type RequestConfig } from './http-api-client';
-import { type AuthProvider } from './auth-service';
+import { env } from '@/shared/env';
+import {
+  HttpApiClient,
+  humanAppApiClient,
+  type RequestConfig,
+} from './http-api-client';
+import { AuthService, type AuthProvider } from './auth-service';
 
 export class AuthorizedHttpApiClient extends HttpApiClient {
   constructor(
@@ -27,3 +32,10 @@ export class AuthorizedHttpApiClient extends HttpApiClient {
     return super.makeRequest(method, path, _config);
   }
 }
+
+const authService = new AuthService(humanAppApiClient);
+
+export const authorizedHumanAppApiClient = new AuthorizedHttpApiClient(
+  env.VITE_API_URL,
+  authService
+);

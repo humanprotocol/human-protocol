@@ -1,6 +1,5 @@
 import { z } from 'zod';
-import { ApiClientError, HttpApiClient } from '@/api';
-import { env } from '@/shared/env';
+import { ApiClientError, humanAppApiClient } from '@/api';
 
 const apiPaths = {
   web3: {
@@ -31,15 +30,9 @@ export const prepareSignatureSuccessSchema = z.object({
 export type SignatureData = z.infer<typeof prepareSignatureSuccessSchema>;
 
 export class SignatureService {
-  private readonly httpClient: HttpApiClient;
-
-  constructor() {
-    this.httpClient = new HttpApiClient(env.VITE_API_URL);
-  }
-
   async prepareSignature(data: PrepareSignatureBody) {
     try {
-      const result = await this.httpClient.post<SignatureData>(
+      const result = await humanAppApiClient.post<SignatureData>(
         apiPaths.web3.prepareSignature,
         {
           body: { ...data },

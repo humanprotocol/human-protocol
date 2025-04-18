@@ -1,7 +1,5 @@
 import { z } from 'zod';
-import { ApiClientError, AuthorizedHttpApiClient, HttpApiClient } from '@/api';
-import { env } from '@/shared/env';
-import { AuthService } from '@/api/auth-service';
+import { ApiClientError, authorizedHumanAppApiClient } from '@/api';
 
 const apiPaths = {
   kycStart: '/kyc/start',
@@ -16,21 +14,10 @@ export const kycStartSchema = z.object({
 export type KycStartSuccessSchema = z.infer<typeof kycStartSchema>;
 
 export class ProfileService {
-  private readonly authorizedHttpApiClient: AuthorizedHttpApiClient;
-
-  constructor() {
-    const httpClient = new HttpApiClient(env.VITE_API_URL);
-    const authService = new AuthService(httpClient);
-    this.authorizedHttpApiClient = new AuthorizedHttpApiClient(
-      env.VITE_API_URL,
-      authService
-    );
-  }
-
   async startKyc(data: { provider: string }) {
     try {
       const result =
-        await this.authorizedHttpApiClient.post<KycStartSuccessSchema>(
+        await authorizedHumanAppApiClient.post<KycStartSuccessSchema>(
           apiPaths.kycStart,
           {
             successSchema: kycStartSchema,
@@ -53,7 +40,7 @@ export class ProfileService {
     signature?: string;
   }) {
     try {
-      const result = await this.authorizedHttpApiClient.post<null>(
+      const result = await authorizedHumanAppApiClient.post<null>(
         apiPaths.registerAddress,
         {
           body: data,

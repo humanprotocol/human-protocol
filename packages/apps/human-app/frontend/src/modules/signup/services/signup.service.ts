@@ -1,7 +1,6 @@
 /* eslint-disable camelcase */
 import { z } from 'zod';
-import { HttpApiClient, ApiClientError } from '@/api';
-import { env } from '@/shared/env';
+import { ApiClientError, humanAppApiClient } from '@/api';
 import { type SignUpDto } from '../worker/schema';
 
 const apiPaths = {
@@ -25,15 +24,9 @@ export type Web3SignInSuccessResponse = z.infer<
 >;
 
 export class SignupService {
-  private readonly httpClient: HttpApiClient;
-
-  constructor() {
-    this.httpClient = new HttpApiClient(env.VITE_API_URL);
-  }
-
   async workerSignUp(data: Omit<SignUpDto, 'confirmPassword'>) {
     try {
-      const result = await this.httpClient.post(apiPaths.worker.signUp, {
+      const result = await humanAppApiClient.post(apiPaths.worker.signUp, {
         body: data,
       });
 
@@ -52,7 +45,7 @@ export class SignupService {
     address: string;
   }) {
     try {
-      const result = await this.httpClient.post<Web3SignInSuccessResponse>(
+      const result = await humanAppApiClient.post<Web3SignInSuccessResponse>(
         apiPaths.operator.web3Auth.signUp,
         {
           body: data,

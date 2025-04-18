@@ -1,6 +1,4 @@
-import { ApiClientError, AuthorizedHttpApiClient, HttpApiClient } from '@/api';
-import { env } from '@/shared/env';
-import { AuthService } from '@/api/auth-service';
+import { ApiClientError, authorizedHumanAppApiClient } from '@/api';
 import {
   availableJobsSuccessResponseSchema,
   type MyJobPaginationResponse,
@@ -26,21 +24,10 @@ const apiPaths = {
 };
 
 export class JobsService {
-  private readonly authorizedHttpApiClient: AuthorizedHttpApiClient;
-
-  constructor() {
-    const httpClient = new HttpApiClient(env.VITE_API_URL);
-    const authService = new AuthService(httpClient);
-    this.authorizedHttpApiClient = new AuthorizedHttpApiClient(
-      env.VITE_API_URL,
-      authService
-    );
-  }
-
   async fetchAvailableJobs(args: JobsBody) {
     try {
       const result =
-        await this.authorizedHttpApiClient.get<AvailableJobsSuccessResponse>(
+        await authorizedHumanAppApiClient.get<AvailableJobsSuccessResponse>(
           apiPaths.jobs,
           {
             queryParams: args.queryParams,
@@ -61,7 +48,7 @@ export class JobsService {
   async fetchMyJobs(args: JobsBody) {
     try {
       const result =
-        await this.authorizedHttpApiClient.get<MyJobPaginationResponse>(
+        await authorizedHumanAppApiClient.get<MyJobPaginationResponse>(
           apiPaths.myJobs,
           {
             queryParams: args.queryParams,
@@ -81,7 +68,7 @@ export class JobsService {
 
   async assignJob(data: AssignJobBody) {
     try {
-      const result = await this.authorizedHttpApiClient.post(
+      const result = await authorizedHumanAppApiClient.post(
         apiPaths.assignJob,
         {
           body: { ...data },
@@ -99,7 +86,7 @@ export class JobsService {
 
   async resignJob(data: RejectTaskBody) {
     try {
-      const result = await this.authorizedHttpApiClient.post(
+      const result = await authorizedHumanAppApiClient.post(
         apiPaths.resignJob,
         {
           body: { ...data },
@@ -117,7 +104,7 @@ export class JobsService {
 
   async refreshJobs(data: RefreshJobsBody) {
     try {
-      const result = await this.authorizedHttpApiClient.put(
+      const result = await authorizedHumanAppApiClient.put(
         apiPaths.refreshJobs,
         {
           body: { ...data },
@@ -135,7 +122,7 @@ export class JobsService {
 
   async getUiConfig() {
     try {
-      const result = await this.authorizedHttpApiClient.get<UiConfig>(
+      const result = await authorizedHumanAppApiClient.get<UiConfig>(
         apiPaths.uiConfig,
         {
           successSchema: uiConfigSchema,
