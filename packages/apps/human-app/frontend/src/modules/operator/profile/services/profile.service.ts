@@ -19,12 +19,12 @@ export class OperatorProfileService {
     humanAppApiClient
   );
 
-  async enableOperator(data: { signature: string }) {
+  async enableOperator(signature: string) {
     try {
       const result = await authorizedHumanAppApiClient.post<null>(
         apiPaths.enableOperator,
         {
-          body: data,
+          body: { signature },
         }
       );
 
@@ -38,12 +38,12 @@ export class OperatorProfileService {
     }
   }
 
-  async disableOperator(data: { signature: string }) {
+  async disableOperator(signature: string) {
     try {
       const result = await authorizedHumanAppApiClient.post(
         apiPaths.disableOperator,
         {
-          body: data,
+          body: { signature },
         }
       );
 
