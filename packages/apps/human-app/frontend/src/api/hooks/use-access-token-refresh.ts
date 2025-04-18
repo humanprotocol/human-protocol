@@ -29,13 +29,9 @@ export function useAccessTokenRefresh() {
     }) => {
       try {
         await auth.refreshAccessToken();
-
-        const refetchAccessTokenSuccess = await auth.getAccessToken();
-
-        if (!refetchAccessTokenSuccess) {
-          throw new Error('Failed to refresh access token.');
-        }
       } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(error);
         if (authType === 'web2' && web2User) {
           web2SignOut({ throwExpirationModal: false });
         }
