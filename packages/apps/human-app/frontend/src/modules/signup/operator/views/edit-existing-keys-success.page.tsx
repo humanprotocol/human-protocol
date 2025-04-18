@@ -19,7 +19,7 @@ import { useWeb3SignUp } from '../hooks';
 export function EditExistingKeysSuccessPage() {
   const { signMessage } = useConnectedWallet();
   const {
-    mutateAsync,
+    prepareSignature,
     isError: isSignatureDataError,
     error: errorSignatureDataError,
     isPending: isSignatureDataPending,
@@ -33,7 +33,7 @@ export function EditExistingKeysSuccessPage() {
   } = useWeb3SignUp();
 
   const createSignature = async () => {
-    const data: SignatureData = await mutateAsync();
+    const data: SignatureData = await prepareSignature();
     const signature = await signMessage(JSON.stringify(data));
     web3SignUpMutation({ signature: signature ?? '' });
   };

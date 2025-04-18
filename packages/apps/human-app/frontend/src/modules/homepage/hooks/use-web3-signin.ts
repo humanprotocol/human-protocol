@@ -22,11 +22,13 @@ export function useWeb3SignIn() {
   const { address, chainId, signMessage } = useWalletConnect();
   const { signIn } = useWeb3Auth();
   const navigate = useNavigate();
-  const { mutateAsync } = usePrepareSignature(PrepareSignatureType.SIGN_IN);
+  const { prepareSignature } = usePrepareSignature(
+    PrepareSignatureType.SIGN_IN
+  );
 
   return useMutation({
     mutationFn: async () => {
-      const data = await mutateAsync();
+      const data = await prepareSignature();
 
       const signature = await signMessage(JSON.stringify(data));
 
