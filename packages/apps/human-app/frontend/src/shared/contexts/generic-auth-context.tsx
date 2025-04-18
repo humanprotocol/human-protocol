@@ -1,4 +1,3 @@
-// generic-auth-provider.tsx
 import React, { createContext, useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import { type ZodType } from 'zod';
@@ -50,11 +49,11 @@ export function createAuthProvider<T extends UserData | Web3UserData>(config: {
       user: null,
       status: 'loading',
     });
-    const { open } = useExpirationModal();
+    const { openModal } = useExpirationModal();
 
     const displayExpirationModal = () => {
       queryClient.setDefaultOptions({ queries: { enabled: false } });
-      open();
+      openModal();
     };
 
     const handleSignIn = () => {

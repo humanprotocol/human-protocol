@@ -1,5 +1,4 @@
 /* eslint-disable camelcase */
-// web3-auth.tsx
 import { z } from 'zod';
 import { createAuthProvider } from '@/shared/contexts/generic-auth-context';
 

@@ -5,7 +5,7 @@ export function useExpirationModal() {
   const { openModal } = useModal();
 
   return {
-    open: () => {
+    openModal: () => {
       openModal({
         content: <ExpirationModal />,
         showCloseButton: false,
