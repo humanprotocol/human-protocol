@@ -2,9 +2,7 @@ import {
   ApiClientError,
   authorizedHumanAppApiClient,
   HttpApiClient,
-  humanAppApiClient,
 } from '@/api';
-import { AuthService } from '@/api/auth-service';
 import { type OperatorStatsSuccessResponse } from '../types';
 import { operatorStatsSuccessResponseSchema } from '../schemas';
 
@@ -15,10 +13,6 @@ const apiPaths = {
 };
 
 export class OperatorProfileService {
-  private readonly authService: AuthService = new AuthService(
-    humanAppApiClient
-  );
-
   async enableOperator(signature: string) {
     try {
       const result = await authorizedHumanAppApiClient.post<null>(
@@ -72,10 +66,6 @@ export class OperatorProfileService {
     } catch (error) {
       throw new Error('Failed to get stats');
     }
-  }
-
-  async refreshAccessToken() {
-    await this.authService.refreshAccessToken();
   }
 }
 

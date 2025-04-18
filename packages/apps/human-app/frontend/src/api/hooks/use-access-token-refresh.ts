@@ -5,9 +5,7 @@ import { browserAuthProvider } from '@/shared/contexts/browser-auth-provider';
 import type { AuthType } from '@/shared/types/browser-auth-provider';
 import { useWeb3Auth } from '@/modules/auth-web3/hooks/use-web3-auth';
 import { routerPaths } from '@/router/router-paths';
-import { env } from '@/shared/env';
-import { HttpApiClient } from '../http-api-client';
-import { AuthService } from '../auth-service';
+import { authService } from '../authorized-http-api-client';
 
 export function useAccessTokenRefresh() {
   const queryClient = useQueryClient();
@@ -15,9 +13,6 @@ export function useAccessTokenRefresh() {
   const { signOut: web2SignOut, user: web2User } = useAuth();
 
   const { signOut: web3SignOut, user: web3User } = useWeb3Auth();
-
-  const httpClient = new HttpApiClient(env.VITE_API_URL);
-  const auth = new AuthService(httpClient);
 
   const mutation = useMutation({
     mutationFn: async ({
@@ -28,7 +23,7 @@ export function useAccessTokenRefresh() {
       throwExpirationModalOnSignOut?: boolean;
     }) => {
       try {
-        await auth.refreshAccessToken();
+        await authService.refreshAccessToken();
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error(error);
