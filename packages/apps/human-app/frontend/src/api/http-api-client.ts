@@ -67,7 +67,7 @@ export class HttpApiClient {
     const response = await fetch(url, {
       method,
       headers: {
-        'Content-Type': 'application/json',
+        'content-type': 'application/json',
         ...headers,
       },
       body: body ? JSON.stringify(body) : undefined,
