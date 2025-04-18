@@ -4,11 +4,8 @@ import { jwtDecode } from 'jwt-decode';
 import { z } from 'zod';
 import { useQueryClient } from '@tanstack/react-query';
 import { browserAuthProvider } from '@/shared/contexts/browser-auth-provider';
-import {
-  ModalType,
-  useModalStore,
-} from '@/shared/components/ui/modal/modal.store';
 import { type AuthTokensSuccessResponse } from '@/shared/schemas';
+import { useExpirationModal } from '../hooks/use-expiration-modal';
 
 const extendableUserDataSchema = z.object({
   site_key: z.string().optional().nullable(),
@@ -52,7 +49,7 @@ export const AuthContext = createContext<
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
-  const { openModal } = useModalStore();
+  const { openModal } = useExpirationModal();
   const [authState, setAuthState] = useState<{
     user: UserData | null;
     status: AuthStatus;
@@ -60,11 +57,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const displayExpirationModal = () => {
     queryClient.setDefaultOptions({ queries: { enabled: false } });
-    openModal({
-      modalType: ModalType.EXPIRATION_MODAL,
-      displayCloseButton: false,
-      maxWidth: 'sm',
-    });
+    openModal();
   };
 
   const updateUserData = (updateUserDataPayload: UpdateUserDataPayload) => {

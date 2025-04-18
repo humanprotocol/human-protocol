@@ -4,16 +4,14 @@ import { Trans } from 'react-i18next';
 import { useEffect } from 'react';
 import { Button } from '@/shared/components/ui/button';
 import { ConnectWalletBtn } from '@/shared/components/ui/connect-wallet-btn';
-import { useModalStore } from '@/shared/components/ui/modal/modal.store';
 import { useWalletConnect } from '@/shared/contexts/wallet-connect';
 
-export function WalletConnectModal() {
-  const { closeModal } = useModalStore();
+export function WalletConnectModal({ close }: Readonly<{ close: () => void }>) {
   const { isConnected } = useWalletConnect();
 
   useEffect(() => {
     if (isConnected) {
-      closeModal();
+      close();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- ...
   }, [isConnected]);
@@ -52,7 +50,7 @@ export function WalletConnectModal() {
           <Button
             fullWidth
             onClick={() => {
-              closeModal();
+              close();
             }}
             variant="outlined"
           >

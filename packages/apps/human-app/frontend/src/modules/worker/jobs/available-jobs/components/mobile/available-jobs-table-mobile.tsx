@@ -3,17 +3,13 @@ import { Button } from '@/shared/components/ui/button';
 import { FiltersButtonIcon } from '@/shared/components/ui/icons';
 import { useJobsFilterStore } from '../../../hooks';
 import { EscrowAddressSearchForm } from '../../../components';
+import { useAvailableJobsFilterModal } from '../../hooks/use-available-jobs-filter-modal';
 import { AvailableJobsListMobile } from './available-jobs-list-mobile';
 
-interface AvailableJobsTableMobileProps {
-  handleOpenMobileFilterDrawer: () => void;
-}
-
-export function AvailableJobsTableMobile({
-  handleOpenMobileFilterDrawer,
-}: Readonly<AvailableJobsTableMobileProps>) {
+export function AvailableJobsTableMobile() {
   const { t } = useTranslation();
   const { setSearchEscrowAddress } = useJobsFilterStore();
+  const { openModal } = useAvailableJobsFilterModal();
 
   return (
     <>
@@ -26,7 +22,7 @@ export function AvailableJobsTableMobile({
       />
       <Button
         fullWidth
-        onClick={handleOpenMobileFilterDrawer}
+        onClick={openModal}
         sx={{
           marginBottom: '32px',
           marginTop: '21px',
