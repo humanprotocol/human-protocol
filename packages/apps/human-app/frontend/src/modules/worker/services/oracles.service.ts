@@ -1,7 +1,5 @@
 import { z } from 'zod';
-import { ApiClientError, AuthorizedHttpApiClient, HttpApiClient } from '@/api';
-import { env } from '@/shared/env';
-import { AuthService } from '@/api/auth-service';
+import { ApiClientError, authorizedHumanAppApiClient } from '@/api';
 
 const apiPaths = {
   oracles: '/oracles',
@@ -26,22 +24,11 @@ export type Oracle = OracleBase & {
 };
 
 export class OraclesService {
-  private readonly authorizedHttpApiClient: AuthorizedHttpApiClient;
-
-  constructor() {
-    const httpClient = new HttpApiClient(env.VITE_API_URL);
-    const authService = new AuthService(httpClient);
-    this.authorizedHttpApiClient = new AuthorizedHttpApiClient(
-      env.VITE_API_URL,
-      authService
-    );
-  }
-
   async getOracles(params?: Record<string, unknown>) {
     try {
       const queryParams = params ?? {};
 
-      const results = await this.authorizedHttpApiClient.get<OracleBase[]>(
+      const results = await authorizedHumanAppApiClient.get<OracleBase[]>(
         apiPaths.oracles,
         {
           queryParams,

@@ -1,4 +1,5 @@
 import { ZodError, type ZodType } from 'zod';
+import { env } from '@/shared/env';
 
 export class ApiClientError extends Error {
   constructor(
@@ -151,3 +152,5 @@ export class HttpApiClient {
     return this.makeRequest('DELETE', path, config);
   };
 }
+
+export const humanAppApiClient = new HttpApiClient(env.VITE_API_URL);

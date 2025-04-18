@@ -1,6 +1,4 @@
-import { ApiClientError, AuthorizedHttpApiClient, HttpApiClient } from '@/api';
-import { env } from '@/shared/env';
-import { AuthService } from '@/api/auth-service';
+import { ApiClientError, authorizedHumanAppApiClient } from '@/api';
 
 const apiPaths = {
   verifyEmail: '/email-confirmation/email-verification',
@@ -8,20 +6,9 @@ const apiPaths = {
 };
 
 export class EmailVerificationService {
-  private readonly authorizedHttpApiClient: AuthorizedHttpApiClient;
-
-  constructor() {
-    const httpClient = new HttpApiClient(env.VITE_API_URL);
-    const authService = new AuthService(httpClient);
-    this.authorizedHttpApiClient = new AuthorizedHttpApiClient(
-      env.VITE_API_URL,
-      authService
-    );
-  }
-
   async verifyEmail(token: string) {
     try {
-      const result = await this.authorizedHttpApiClient.get(
+      const result = await authorizedHumanAppApiClient.get(
         `${apiPaths.verifyEmail}?token=${token}`
       );
       return result;
@@ -35,7 +22,7 @@ export class EmailVerificationService {
 
   async resendEmailVerification(token: string, email: string) {
     try {
-      const result = await this.authorizedHttpApiClient.post(
+      const result = await authorizedHumanAppApiClient.post(
         apiPaths.resendEmailVerification,
         {
           body: {

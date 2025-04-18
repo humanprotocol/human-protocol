@@ -1,5 +1,4 @@
-import { ApiClientError, HttpApiClient } from '@/api';
-import { env } from '@/shared/env';
+import { ApiClientError, humanAppApiClient } from '@/api';
 import { type Web3SignInSuccessResponse } from '../hooks';
 
 const apiPaths = {
@@ -9,15 +8,9 @@ const apiPaths = {
 };
 
 export class HomepageService {
-  private readonly httpClient: HttpApiClient;
-
-  constructor() {
-    this.httpClient = new HttpApiClient(env.VITE_API_URL);
-  }
-
   async web3SignIn(data: { signature?: string; address?: string }) {
     try {
-      const result = await this.httpClient.post<Web3SignInSuccessResponse>(
+      const result = await humanAppApiClient.post<Web3SignInSuccessResponse>(
         apiPaths.web3Auth.signIn,
         {
           body: data,

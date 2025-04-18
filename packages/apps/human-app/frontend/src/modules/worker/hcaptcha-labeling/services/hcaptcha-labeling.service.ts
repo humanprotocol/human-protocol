@@ -1,6 +1,4 @@
-import { AuthorizedHttpApiClient, HttpApiClient, ApiClientError } from '@/api';
-import { env } from '@/shared/env';
-import { AuthService } from '@/api/auth-service';
+import { ApiClientError, authorizedHumanAppApiClient } from '@/api';
 import {
   enableHCaptchaLabelingResponseSchema,
   hcaptchaUserStatsResponseSchema,
@@ -21,21 +19,10 @@ const apiPaths = {
 };
 
 export class HCaptchaLabelingService {
-  private readonly authorizedHttpApiClient: AuthorizedHttpApiClient;
-
-  constructor() {
-    const httpClient = new HttpApiClient(env.VITE_API_URL);
-    const authService = new AuthService(httpClient);
-    this.authorizedHttpApiClient = new AuthorizedHttpApiClient(
-      env.VITE_API_URL,
-      authService
-    );
-  }
-
   async enableHCaptchaLabeling() {
     try {
       const result =
-        await this.authorizedHttpApiClient.post<EnableHCaptchaLabelingSuccessResponse>(
+        await authorizedHumanAppApiClient.post<EnableHCaptchaLabelingSuccessResponse>(
           apiPaths.enableHCaptchaLabeling,
           {
             successSchema: enableHCaptchaLabelingResponseSchema,
@@ -52,7 +39,7 @@ export class HCaptchaLabelingService {
 
   async verifyHCaptchaLabeling(data: VerifyHCaptchaLabelingBody) {
     try {
-      const result = await this.authorizedHttpApiClient.post<
+      const result = await authorizedHumanAppApiClient.post<
         Record<string, unknown>
       >(apiPaths.verifyHCaptchaLabeling, {
         body: { ...data },
@@ -69,7 +56,7 @@ export class HCaptchaLabelingService {
   async getHCaptchaUserStats() {
     try {
       const result =
-        await this.authorizedHttpApiClient.get<HCaptchaUserStatsSuccess>(
+        await authorizedHumanAppApiClient.get<HCaptchaUserStatsSuccess>(
           apiPaths.hCaptchaUserStats,
           {
             successSchema: hcaptchaUserStatsResponseSchema,
@@ -87,7 +74,7 @@ export class HCaptchaLabelingService {
   async getDailyHmtSpent() {
     try {
       const result =
-        await this.authorizedHttpApiClient.get<DailyHmtSpentResponse>(
+        await authorizedHumanAppApiClient.get<DailyHmtSpentResponse>(
           apiPaths.dailyHmtSpend,
           {
             successSchema: dailyHmtSpentResponseSchema,

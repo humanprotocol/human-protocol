@@ -1,5 +1,9 @@
-import { ApiClientError, AuthorizedHttpApiClient, HttpApiClient } from '@/api';
-import { env } from '@/shared/env';
+import {
+  ApiClientError,
+  authorizedHumanAppApiClient,
+  HttpApiClient,
+  humanAppApiClient,
+} from '@/api';
 import { AuthService } from '@/api/auth-service';
 import { type OperatorStatsSuccessResponse } from '../types';
 import { operatorStatsSuccessResponseSchema } from '../schemas';
@@ -11,23 +15,13 @@ const apiPaths = {
 };
 
 export class OperatorProfileService {
-  private readonly httpApiClient: HttpApiClient;
-  private readonly authorizedHttpApiClient: AuthorizedHttpApiClient;
-  private readonly authService: AuthService;
-
-  constructor() {
-    this.httpApiClient = new HttpApiClient(env.VITE_API_URL);
-    this.authService = new AuthService(this.httpApiClient);
-
-    this.authorizedHttpApiClient = new AuthorizedHttpApiClient(
-      env.VITE_API_URL,
-      this.authService
-    );
-  }
+  private readonly authService: AuthService = new AuthService(
+    humanAppApiClient
+  );
 
   async enableOperator(data: { signature: string }) {
     try {
-      const result = await this.authorizedHttpApiClient.post<null>(
+      const result = await authorizedHumanAppApiClient.post<null>(
         apiPaths.enableOperator,
         {
           body: data,
@@ -46,7 +40,7 @@ export class OperatorProfileService {
 
   async disableOperator(data: { signature: string }) {
     try {
-      const result = await this.authorizedHttpApiClient.post(
+      const result = await authorizedHumanAppApiClient.post(
         apiPaths.disableOperator,
         {
           body: data,
@@ -64,8 +58,10 @@ export class OperatorProfileService {
   }
 
   async getStats(statsBaseUrl: string) {
+    const httpClient = new HttpApiClient(statsBaseUrl);
+
     try {
-      const result = await this.httpApiClient.get<OperatorStatsSuccessResponse>(
+      const result = await httpClient.get<OperatorStatsSuccessResponse>(
         apiPaths.stats,
         {
           baseUrl: statsBaseUrl,

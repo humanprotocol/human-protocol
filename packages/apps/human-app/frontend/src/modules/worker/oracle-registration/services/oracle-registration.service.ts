@@ -1,6 +1,4 @@
-import { ApiClientError, AuthorizedHttpApiClient, HttpApiClient } from '@/api';
-import { env } from '@/shared/env';
-import { AuthService } from '@/api/auth-service';
+import { ApiClientError, authorizedHumanAppApiClient } from '@/api';
 import { type RegistrationInExchangeOracleDto } from '../schema';
 
 const apiPaths = {
@@ -8,20 +6,9 @@ const apiPaths = {
 };
 
 export class OracleRegistrationService {
-  private readonly authorizedHttpApiClient: AuthorizedHttpApiClient;
-
-  constructor() {
-    const httpClient = new HttpApiClient(env.VITE_API_URL);
-    const authService = new AuthService(httpClient);
-    this.authorizedHttpApiClient = new AuthorizedHttpApiClient(
-      env.VITE_API_URL,
-      authService
-    );
-  }
-
   async registerInExchangeOracle(data: RegistrationInExchangeOracleDto) {
     try {
-      const result = await this.authorizedHttpApiClient.post(
+      const result = await authorizedHumanAppApiClient.post(
         apiPaths.registrationInExchangeOracle,
         {
           body: { ...data },
