@@ -54,7 +54,7 @@ export class AuthService implements AuthProvider {
     const currentTime = Math.floor(Date.now() / 1000);
     const tokenExpiration = decodedToken.exp;
 
-    if (tokenExpiration && tokenExpiration - currentTime < 300) {
+    if (tokenExpiration && tokenExpiration - currentTime < 30) {
       await this.refreshAccessToken();
 
       const newAccessToken = this.browserAuthProvider.getAccessToken();
@@ -92,7 +92,6 @@ export class AuthService implements AuthProvider {
   }
 
   private async fetchTokenRefresh(): Promise<AuthTokensSuccessResponse | null> {
-    let response;
     const refreshToken = this.browserAuthProvider.getRefreshToken();
 
     if (!refreshToken) {
@@ -100,7 +99,7 @@ export class AuthService implements AuthProvider {
     }
 
     try {
-      response = await this.httpClient.post<AuthTokensSuccessResponse>(
+      const response = await this.httpClient.post<AuthTokensSuccessResponse>(
         commonApiPaths.auth.refresh.path,
         {
           body: {
@@ -109,10 +108,10 @@ export class AuthService implements AuthProvider {
           },
         }
       );
+
+      return response;
     } catch (error) {
       return null;
     }
-
-    return response;
   }
 }
