@@ -18,7 +18,7 @@ export function ConnectWalletOperatorPage() {
       status: web3ProviderStatus,
     },
   } = useWalletConnect();
-  const { open } = useWalletConnectModal();
+  const { openModal } = useWalletConnectModal();
 
   const getAlert = () => {
     if (web3ProviderStatus === 'error')
@@ -48,7 +48,7 @@ export function ConnectWalletOperatorPage() {
         <Typography variant="body1">
           {t('operator.connectWallet.description')}
         </Typography>
-        <Button onClick={open} variant="contained">
+        <Button onClick={openModal} variant="contained">
           {t('components.wallet.connectBtn.connect')}
         </Button>
       </Grid>

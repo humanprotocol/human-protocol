@@ -5,7 +5,7 @@ export function useWalletConnectModal() {
   const { openModal, closeModal } = useModal();
 
   return {
-    open: () => {
+    openModal: () => {
       openModal({
         content: <WalletConnectModal close={closeModal} />,
         showCloseButton: false,

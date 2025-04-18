@@ -45,7 +45,7 @@ export const Web3AuthContext = createContext<
 
 export function Web3AuthProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
-  const { open } = useExpirationModal();
+  const { openModal } = useExpirationModal();
   const [web3AuthState, setWeb3AuthState] = useState<{
     user: Web3UserData | null;
     status: AuthStatus;
@@ -53,7 +53,7 @@ export function Web3AuthProvider({ children }: { children: React.ReactNode }) {
 
   const displayExpirationModal = () => {
     queryClient.setDefaultOptions({ queries: { enabled: false } });
-    open();
+    openModal();
   };
 
   const updateUserData = (updateUserDataPayload: Partial<Web3UserData>) => {

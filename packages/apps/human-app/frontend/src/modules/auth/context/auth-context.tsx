@@ -49,7 +49,7 @@ export const AuthContext = createContext<
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
-  const { open } = useExpirationModal();
+  const { openModal } = useExpirationModal();
   const [authState, setAuthState] = useState<{
     user: UserData | null;
     status: AuthStatus;
@@ -57,7 +57,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const displayExpirationModal = () => {
     queryClient.setDefaultOptions({ queries: { enabled: false } });
-    open();
+    openModal();
   };
 
   const updateUserData = (updateUserDataPayload: UpdateUserDataPayload) => {
