@@ -33,7 +33,7 @@ export class AuthorizedHttpApiClient extends HttpApiClient {
   }
 }
 
-const authService = new AuthService(humanAppApiClient);
+export const authService = new AuthService(humanAppApiClient);
 
 export const authorizedHumanAppApiClient = new AuthorizedHttpApiClient(
   env.VITE_API_URL,
