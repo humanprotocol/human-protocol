@@ -6,13 +6,21 @@ import {
   authTokensSuccessResponseSchema,
 } from '@/shared/schemas';
 import { type BrowserAuthProvider } from '@/shared/types/browser-auth-provider';
-import { apiPaths } from './api-paths';
 import { type HttpApiClient } from './http-api-client';
+import { commonApiPaths } from './common-api-paths';
 
 export interface AuthProvider {
   getAccessToken: () => Promise<string | null>;
   refreshAccessToken: () => Promise<void>;
 }
+
+const apiPaths = {
+  worker: {
+    signIn: {
+      path: '/auth/signin',
+    },
+  },
+} as const;
 
 export class AuthService implements AuthProvider {
   private readonly browserAuthProvider: BrowserAuthProvider =
@@ -93,7 +101,7 @@ export class AuthService implements AuthProvider {
 
     try {
       response = await this.httpClient.post<AuthTokensSuccessResponse>(
-        apiPaths.common.auth.refresh.path,
+        commonApiPaths.auth.refresh.path,
         {
           body: {
             // eslint-disable-next-line camelcase
