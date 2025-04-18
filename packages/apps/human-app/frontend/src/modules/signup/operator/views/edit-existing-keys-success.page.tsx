@@ -32,7 +32,7 @@ export function EditExistingKeysSuccessPage() {
     isPending: web3SignUpPending,
   } = useWeb3SignUp();
 
-  const createSignature = async () => {
+  const handleWeb3SignUp = async () => {
     const data: SignatureData = await prepareSignature();
     const signature = await signMessage(JSON.stringify(data));
     web3SignUpMutation({ signature: signature ?? '' });
@@ -76,7 +76,7 @@ export function EditExistingKeysSuccessPage() {
           fullWidth
           loading={web3SignUpPending}
           onClick={() => {
-            void createSignature();
+            void handleWeb3SignUp();
           }}
           variant="contained"
         >

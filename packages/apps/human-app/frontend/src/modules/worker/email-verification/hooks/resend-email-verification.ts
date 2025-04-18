@@ -12,8 +12,12 @@ async function resendEmailVerificationMutationFn(
   isAuthenticated: boolean,
   userEmail: string | undefined
 ) {
-  if (!isAuthenticated || !userEmail) {
+  if (!isAuthenticated) {
     throw new Error(t('worker.verifyEmail.authError'));
+  }
+
+  if (!userEmail) {
+    throw new Error(t('worker.verifyEmail.emailError'));
   }
 
   return emailVerificationService.resendEmailVerification(
