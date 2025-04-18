@@ -30,7 +30,7 @@ export const prepareSignatureSuccessSchema = z.object({
 
 export type SignatureData = z.infer<typeof prepareSignatureSuccessSchema>;
 
-export class AuthService {
+export class SignatureService {
   private readonly httpClient: HttpApiClient;
 
   constructor() {
@@ -58,4 +58,4 @@ export class AuthService {
   }
 }
 
-export const authService = new AuthService();
+export const authService = new SignatureService();
