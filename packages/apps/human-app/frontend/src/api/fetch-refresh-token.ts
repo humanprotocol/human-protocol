@@ -1,10 +1,10 @@
-import { apiPaths } from '@/api/api-paths';
 import { browserAuthProvider } from '@/shared/contexts/browser-auth-provider';
 import { authTokensSuccessResponseSchema } from '@/shared/schemas';
+import { commonApiPaths } from './common-api-paths';
 
 export const fetchTokenRefresh = async (baseUrl: string) => {
   const response = await fetch(
-    `${baseUrl}${apiPaths.common.auth.refresh.path}`,
+    `${baseUrl}${commonApiPaths.auth.refresh.path}`,
     {
       method: 'POST',
       headers: {

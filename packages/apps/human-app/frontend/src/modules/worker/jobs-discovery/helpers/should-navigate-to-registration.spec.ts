@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { faker } from '@faker-js/faker';
-import { type Oracle } from '../../hooks';
+import { type Oracle } from '../../services/oracles.service';
 import { shouldNavigateToRegistration } from './should-navigate-to-registration';
 
 describe('shouldNavigateToRegistration Helper', () => {
