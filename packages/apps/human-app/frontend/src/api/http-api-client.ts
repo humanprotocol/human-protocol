@@ -24,7 +24,6 @@ export interface RequestConfig {
   headers?: Record<string, string | number | boolean | null>;
   abortSignal?: AbortSignal;
   successSchema?: ZodType;
-  baseUrl?: string;
 }
 
 type HttpApiClientMethod = <T = unknown>(
@@ -44,7 +43,7 @@ export class HttpApiClient {
     path: string,
     config: RequestConfig
   ): Promise<T> {
-    const url = new URL(path, config.baseUrl ?? this.baseUrl);
+    const url = new URL(path, this.baseUrl);
 
     const { queryParams, body, headers, successSchema, abortSignal } = config;
 
