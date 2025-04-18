@@ -1,4 +1,4 @@
-import { type ZodType } from 'zod';
+import { ZodError, type ZodType } from 'zod';
 
 export class ApiClientError extends Error {
   constructor(
@@ -91,7 +91,15 @@ export class HttpApiClient {
       try {
         successSchema.parse(responseBody);
       } catch (error) {
-        throw new Error(`Error parsing response body: ${String(error)}`);
+        if (error instanceof ZodError) {
+          // eslint-disable-next-line no-console
+          console.error('Response parsing error: ', error.errors);
+          throw new Error('Response schema validation error.');
+        }
+
+        // eslint-disable-next-line no-console
+        console.error('Unexpected error while parsing response body: ', error);
+        throw new Error(`Error parsing response body.`);
       }
     }
 
