@@ -64,7 +64,6 @@ export class OperatorProfileService {
       const result = await httpClient.get<OperatorStatsSuccessResponse>(
         apiPaths.stats,
         {
-          baseUrl: statsBaseUrl,
           successSchema: operatorStatsSuccessResponseSchema,
         }
       );
