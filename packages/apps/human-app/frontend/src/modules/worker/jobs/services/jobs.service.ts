@@ -3,7 +3,6 @@ import {
   availableJobsSuccessResponseSchema,
   type MyJobPaginationResponse,
   myJobsSuccessResponseSchema,
-  uiConfigSchema,
 } from '../schemas';
 import {
   type AssignJobBody,
@@ -11,7 +10,6 @@ import {
   type RefreshJobsBody,
   type RejectTaskBody,
   type AvailableJobsSuccessResponse,
-  type UiConfig,
 } from '../types';
 
 const apiPaths = {
@@ -117,24 +115,6 @@ export class JobsService {
         throw error;
       }
       throw new Error('Failed to refresh jobs');
-    }
-  }
-
-  async getUiConfig() {
-    try {
-      const result = await authorizedHumanAppApiClient.get<UiConfig>(
-        apiPaths.uiConfig,
-        {
-          successSchema: uiConfigSchema,
-        }
-      );
-
-      return result;
-    } catch (error: unknown) {
-      if (error instanceof ApiClientError) {
-        throw error;
-      }
-      throw new Error('Failed to get UI config');
     }
   }
 }

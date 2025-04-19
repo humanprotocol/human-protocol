@@ -1,6 +1,5 @@
 import { type z } from 'zod';
 import {
-  type uiConfigSchema,
   type availableJobSchema,
   type availableJobsSuccessResponseSchema,
 } from './schemas';
@@ -29,8 +28,6 @@ export enum SortDirection {
   ASC = 'asc',
   DESC = 'desc',
 }
-
-export type UiConfig = z.infer<typeof uiConfigSchema>;
 
 export type AvailableJob = z.infer<typeof availableJobSchema>;
 export type AvailableJobsSuccessResponse = z.infer<

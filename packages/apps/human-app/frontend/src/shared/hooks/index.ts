@@ -7,3 +7,4 @@ export * from './use-is-mobile';
 export * from './use-reset-mutation-errors';
 export * from './use-web3-provider';
 export * from './use-prepare-signature';
+export * from './use-get-ui-config';
