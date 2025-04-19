@@ -25,8 +25,7 @@ export function SignUpWorkerPage() {
       email: '',
       password: '',
       confirmPassword: '',
-      // eslint-disable-next-line camelcase -- export vite config
-      h_captcha_token: '',
+      hCaptchaToken: '',
     },
     resolver: zodResolver(signUpDtoSchema),
   });
@@ -89,7 +88,7 @@ export function SignUpWorkerPage() {
                 />
               </Typography>
             </Grid>
-            <HCaptchaForm error={error} name="h_captcha_token" />
+            <HCaptchaForm error={error} name="hCaptchaToken" />
             <Button
               fullWidth
               loading={isLoading}
