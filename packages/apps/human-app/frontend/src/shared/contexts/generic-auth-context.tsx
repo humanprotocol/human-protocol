@@ -15,15 +15,14 @@ import { type AuthType } from '../types/browser-auth-provider';
 
 export type AuthStatus = 'loading' | 'error' | 'success' | 'idle';
 
+interface SignOutOptions {
+  throwExpirationModal?: boolean;
+  status?: AuthStatus;
+}
+
 interface AuthContextType<T> {
   status: AuthStatus;
-  signOut: ({
-    throwExpirationModal,
-    status,
-  }: {
-    throwExpirationModal?: boolean;
-    status?: AuthStatus;
-  }) => void;
+  signOut: (options?: SignOutOptions) => void;
   signIn: (signInSuccess: AuthTokensSuccessResponse) => void;
   updateUserData: (update: Partial<T>) => void;
 }
@@ -69,18 +68,14 @@ export function createAuthProvider<T extends UserData | Web3UserData>(config: {
       try {
         const accessToken = browserAuthProvider.getAccessToken();
         const currentAuthType = browserAuthProvider.getAuthType();
-        const savedUserData = browserAuthProvider.getUserData();
 
         if (!accessToken || currentAuthType !== authType) {
           setAuthState({ user: null, status: 'idle' });
           return;
         }
         const userData = jwtDecode(accessToken);
-        const userDataWithSavedData = savedUserData.data
-          ? { ...userData, ...savedUserData.data }
-          : userData;
 
-        const validUserData = schema.parse(userDataWithSavedData);
+        const validUserData = schema.parse(userData);
 
         setAuthState({ user: validUserData, status: 'success' });
 
@@ -99,10 +94,9 @@ export function createAuthProvider<T extends UserData | Web3UserData>(config: {
       handleSignIn();
     };
 
-    const signOut = ({
-      throwExpirationModal = true,
-      status = 'idle' as AuthStatus,
-    }) => {
+    const signOut = (options?: SignOutOptions) => {
+      const { throwExpirationModal = true, status = 'idle' } = options ?? {};
+
       browserAuthProvider.signOut({
         triggerSignOutSubscriptions: throwExpirationModal,
       });
