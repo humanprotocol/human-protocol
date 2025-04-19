@@ -27,7 +27,11 @@ export class SignupService {
   async workerSignUp(data: Omit<SignUpDto, 'confirmPassword'>) {
     try {
       const result = await humanAppApiClient.post(apiPaths.worker.signUp, {
-        body: data,
+        body: {
+          email: data.email,
+          password: data.password,
+          h_captcha_token: data.hCaptchaToken,
+        },
       });
 
       return result;
