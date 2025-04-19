@@ -13,8 +13,8 @@ import { getErrorMessageForError } from '@/shared/errors';
 import { Alert } from '@/shared/components/ui/alert';
 import { HCaptchaForm } from '@/shared/components/hcaptcha';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
-import { FetchError } from '@/api/fetcher';
 import { useSignUpWorker } from '@/modules/signup/worker/hooks/use-sign-up-worker';
+import { ApiClientError } from '@/api';
 import { signUpDtoSchema } from '../schema';
 
 export function SignUpWorkerPage() {
@@ -25,8 +25,7 @@ export function SignUpWorkerPage() {
       email: '',
       password: '',
       confirmPassword: '',
-      // eslint-disable-next-line camelcase -- export vite config
-      h_captcha_token: '',
+      hCaptchaToken: '',
     },
     resolver: zodResolver(signUpDtoSchema),
   });
@@ -34,7 +33,7 @@ export function SignUpWorkerPage() {
   useResetMutationErrors(methods.watch, reset);
 
   const handleSignupError = (unknownError: unknown) => {
-    if (unknownError instanceof FetchError && unknownError.status === 409) {
+    if (unknownError instanceof ApiClientError && unknownError.status === 409) {
       return t('worker.signUpForm.errors.emailTaken');
     }
   };
@@ -89,7 +88,7 @@ export function SignUpWorkerPage() {
                 />
               </Typography>
             </Grid>
-            <HCaptchaForm error={error} name="h_captcha_token" />
+            <HCaptchaForm error={error} name="hCaptchaToken" />
             <Button
               fullWidth
               loading={isLoading}

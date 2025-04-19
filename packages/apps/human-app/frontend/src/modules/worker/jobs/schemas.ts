@@ -1,7 +1,7 @@
-/* eslint-disable camelcase -- api response*/
+/* eslint-disable camelcase */
 import { z } from 'zod';
 import { createPaginationSchema } from '@/shared/helpers/pagination';
-import { MyJobStatus, UNKNOWN_JOB_STATUS } from '../types';
+import { MyJobStatus, UNKNOWN_JOB_STATUS } from './types';
 
 const myJobSchema = z.object({
   assignment_id: z.string(),
@@ -25,3 +25,20 @@ const myJobSchema = z.object({
 export const myJobsSuccessResponseSchema = createPaginationSchema(myJobSchema);
 
 export type MyJob = z.infer<typeof myJobSchema>;
+
+export type MyJobPaginationResponse = z.infer<
+  typeof myJobsSuccessResponseSchema
+>;
+
+export const availableJobSchema = z.object({
+  escrow_address: z.string(),
+  chain_id: z.number(),
+  job_type: z.string(),
+  status: z.string(),
+  job_description: z.string().optional(),
+  reward_amount: z.string().optional(),
+  reward_token: z.string().optional(),
+});
+
+export const availableJobsSuccessResponseSchema =
+  createPaginationSchema(availableJobSchema);

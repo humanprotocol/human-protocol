@@ -1,10 +1,8 @@
 import { t } from 'i18next';
 import { TableButton } from '@/shared/components/ui/table-button';
 import { useJobsNotifications } from '../../../hooks';
-import {
-  type AssignJobBody,
-  useAssignJobMutation,
-} from '../../hooks/use-assign-job';
+import { useAssignJobMutation } from '../../hooks/use-assign-job';
+import { type AssignJobBody } from '../../../types';
 
 export function AvailableJobsAssignJobButtonMobile({
   assignJobPayload,

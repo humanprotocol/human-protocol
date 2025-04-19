@@ -1,10 +1,16 @@
+import { type z } from 'zod';
+import {
+  type availableJobSchema,
+  type availableJobsSuccessResponseSchema,
+} from './schemas';
+
 export enum MyJobStatus {
-  ACTIVE = 'ACTIVE',
-  CANCELED = 'CANCELED',
-  COMPLETED = 'COMPLETED',
-  VALIDATION = 'VALIDATION',
-  EXPIRED = 'EXPIRED',
-  REJECTED = 'REJECTED',
+  ACTIVE = 'active',
+  CANCELED = 'canceled',
+  COMPLETED = 'completed',
+  VALIDATION = 'validation',
+  EXPIRED = 'expired',
+  REJECTED = 'rejected',
 }
 
 export const UNKNOWN_JOB_STATUS = 'UNKNOWN';
@@ -21,4 +27,28 @@ export enum SortField {
 export enum SortDirection {
   ASC = 'asc',
   DESC = 'desc',
+}
+
+export type AvailableJob = z.infer<typeof availableJobSchema>;
+export type AvailableJobsSuccessResponse = z.infer<
+  typeof availableJobsSuccessResponseSchema
+>;
+
+export interface RejectTaskBody {
+  assignment_id: string;
+  oracle_address: string;
+}
+
+export interface JobsBody {
+  queryParams?: Record<string, unknown>;
+  signal?: AbortSignal;
+}
+
+export interface AssignJobBody {
+  escrow_address: string;
+  chain_id: number;
+}
+
+export interface RefreshJobsBody {
+  oracle_address: string;
 }

@@ -19,7 +19,7 @@ export interface BrowserAuthProvider {
   signOutSubscription?: SubscriptionCallback;
   getAccessToken: () => string | null;
   getRefreshToken: () => string | null;
-  getAuthType: () => string | null;
+  getAuthType: () => AuthType | null;
   setUserData: (userData: UserData | Web3UserData) => void;
   getUserData: () => { data: unknown };
 }

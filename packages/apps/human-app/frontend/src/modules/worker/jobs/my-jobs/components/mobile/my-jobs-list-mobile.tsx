@@ -27,9 +27,9 @@ import {
   useJobsFilterStore,
   useInfiniteGetMyJobsData,
 } from '../../../hooks';
-import { useRefreshTasksMutation } from '../../hooks';
+import { useRefreshJobsMutation } from '../../hooks';
 import { getChipStatusColor } from '../../utils';
-import { type MyJob } from '../../schemas';
+import { type MyJob } from '../../../schemas';
 
 interface MyJobsListMobileProps {
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
@@ -53,7 +53,7 @@ export function MyJobsListMobile({
   } = useInfiniteGetMyJobsData();
 
   const { mutate: refreshTasksMutation, isPending: isRefreshTasksPending } =
-    useRefreshTasksMutation();
+    useRefreshJobsMutation();
   const { setSearchEscrowAddress } = useJobsFilterStore();
   const { address: oracle_address } = useParams<{ address: string }>();
 
@@ -175,6 +175,9 @@ export function MyJobsListMobile({
                           <Typography
                             color={lightModeColorPalette.white}
                             variant="chip"
+                            sx={{
+                              textTransform: 'uppercase',
+                            }}
                           >
                             {d.status}
                           </Typography>
