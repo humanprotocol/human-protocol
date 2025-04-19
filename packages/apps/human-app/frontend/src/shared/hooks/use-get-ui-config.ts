@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import { jobsService } from '../services/jobs.service';
+import { uiConfigService } from '../services/ui-config.service';
 
 export function useGetUiConfig() {
   return useQuery({
     queryKey: ['ui-config'],
-    queryFn: async () => jobsService.getUiConfig(),
+    queryFn: async () => uiConfigService.getUiConfig(),
     staleTime: Infinity,
   });
 }

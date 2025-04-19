@@ -42,7 +42,3 @@ export const availableJobSchema = z.object({
 
 export const availableJobsSuccessResponseSchema =
   createPaginationSchema(availableJobSchema);
-
-export const uiConfigSchema = z.object({
-  chainIdsEnabled: z.array(z.number()),
-});
