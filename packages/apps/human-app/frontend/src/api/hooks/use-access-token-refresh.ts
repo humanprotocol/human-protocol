@@ -43,10 +43,10 @@ export function useAccessTokenRefresh() {
         }
       } catch (error) {
         if (authType === 'web2' && web2User) {
-          web2SignOut(false);
+          web2SignOut({ throwExpirationModal: false });
         }
         if (authType === 'web3' && web3User) {
-          web3SignOut(false);
+          web3SignOut({ throwExpirationModal: false });
         }
         browserAuthProvider.signOut({
           triggerSignOutSubscriptions: throwExpirationModalOnSignOut,
