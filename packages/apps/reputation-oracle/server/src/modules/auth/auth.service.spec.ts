@@ -40,7 +40,7 @@ const mockAuthConfigService = {
   jwtPrivateKey: privateKey,
   jwtPublicKey: publicKey,
   accessTokenExpiresIn: 600,
-  refreshTokenExpiresIn: 3600,
+  refreshTokenExpiresIn: 3600000,
   verifyEmailTokenExpiresIn: 86400000,
   forgotPasswordExpiresIn: 86400000,
   humanAppEmail: faker.internet.email(),
