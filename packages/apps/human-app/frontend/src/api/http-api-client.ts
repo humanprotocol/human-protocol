@@ -64,11 +64,15 @@ export class HttpApiClient {
       });
     }
 
+    const lowercasedHeaders = Object.fromEntries(
+      Object.entries(headers ?? {}).map(([k, v]) => [k.toLowerCase(), v])
+    );
+
     const response = await fetch(url, {
       method,
       headers: {
         'content-type': 'application/json',
-        ...headers,
+        ...lowercasedHeaders,
       },
       body: body ? JSON.stringify(body) : undefined,
       signal: abortSignal,
