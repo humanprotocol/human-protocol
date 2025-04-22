@@ -417,7 +417,7 @@ describe('escrowCompletionService', () => {
   });
 
   describe('processPaidEscrowCompletion', () => {
-    let assessReputationScoresMock: jest.SpyInstance,
+    let assessEscrowPartiesMock: jest.SpyInstance,
       createOutgoingWebhookMock: jest.SpyInstance;
     let escrowCompletionEntity1: Partial<EscrowCompletionEntity>,
       escrowCompletionEntity2: Partial<EscrowCompletionEntity>;
@@ -446,8 +446,8 @@ describe('escrowCompletionService', () => {
         retriesCount: 0,
       };
 
-      assessReputationScoresMock = jest
-        .spyOn(reputationService, 'assessReputationScores')
+      assessEscrowPartiesMock = jest
+        .spyOn(reputationService, 'assessEscrowParties')
         .mockResolvedValue();
 
       createOutgoingWebhookMock = jest
@@ -474,7 +474,7 @@ describe('escrowCompletionService', () => {
           status: EscrowCompletionStatus.COMPLETED,
         }),
       );
-      expect(assessReputationScoresMock).toHaveBeenCalledTimes(1);
+      expect(assessEscrowPartiesMock).toHaveBeenCalledTimes(1);
     });
 
     it('should handle errors during entity processing without skipping remaining entities', async () => {
@@ -495,7 +495,7 @@ describe('escrowCompletionService', () => {
       await escrowCompletionService.processPaidEscrowCompletion();
 
       expect(updateOneMock).toHaveBeenCalledTimes(3);
-      expect(assessReputationScoresMock).toHaveBeenCalledTimes(2);
+      expect(assessEscrowPartiesMock).toHaveBeenCalledTimes(2);
     });
 
     it('should mark the escrow completion as FAILED if retries exceed the threshold', async () => {
@@ -510,7 +510,7 @@ describe('escrowCompletionService', () => {
       );
 
       escrowCompletionEntity1.retriesCount = MOCK_MAX_RETRY_COUNT;
-      assessReputationScoresMock.mockRejectedValueOnce(error);
+      assessEscrowPartiesMock.mockRejectedValueOnce(error);
 
       await escrowCompletionService.processPaidEscrowCompletion();
 
@@ -570,7 +570,7 @@ describe('escrowCompletionService', () => {
       await escrowCompletionService.processPaidEscrowCompletion();
 
       expect(updateOneMock).toHaveBeenCalledTimes(1);
-      expect(assessReputationScoresMock).toHaveBeenCalledTimes(0);
+      expect(assessEscrowPartiesMock).toHaveBeenCalledTimes(0);
       expect(createOutgoingWebhookMock).toHaveBeenCalledTimes(2);
     });
   });
