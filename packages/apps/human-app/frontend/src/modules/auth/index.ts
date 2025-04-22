@@ -1,5 +1,1 @@
-export {
-  useAuth,
-  useAuthenticatedUser,
-  useExpirationModal,
-} from './hooks/index';
+export { useAuth, useAuthenticatedUser } from './hooks/index';
