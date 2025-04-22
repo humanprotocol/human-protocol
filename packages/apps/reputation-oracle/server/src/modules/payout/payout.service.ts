@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ChainId, EscrowClient } from '@human-protocol/sdk';
+
+import crypto from 'crypto';
+import { ethers } from 'ethers';
 
 import {
   AUDINO_RESULTS_ANNOTATIONS_FILENAME,
@@ -8,11 +11,12 @@ import {
   CVAT_RESULTS_ANNOTATIONS_FILENAME,
   CVAT_VALIDATION_META_FILENAME,
 } from '../../common/constants';
-import { ethers } from 'ethers';
+import { PgpEncryptionService } from '../encryption/pgp-encryption.service';
 import { Web3Service } from '../web3/web3.service';
-import { JobRequestType } from '../../common/enums';
+import { ContentType, JobRequestType } from '../../common/enums';
 import { StorageService } from '../storage/storage.service';
 import {
+  JobManifest,
   AudinoManifest,
   CvatManifest,
   FortuneManifest,
@@ -28,16 +32,17 @@ import {
   RequestAction,
   SaveResultDto,
 } from './payout.interface';
-import { getRequestType } from '../../utils/manifest';
+import * as httpUtils from '../../utils/http';
+import { getJobRequestType } from '../../utils/manifest';
 import { assertValidJobRequestType } from '../../utils/type-guards';
 import { MissingManifestUrlError } from '../../common/errors/manifest';
 
 @Injectable()
 export class PayoutService {
   constructor(
-    @Inject(StorageService)
     private readonly storageService: StorageService,
     private readonly web3Service: Web3Service,
+    private readonly pgpEncryptionService: PgpEncryptionService,
   ) {}
 
   /**
@@ -61,15 +66,15 @@ export class PayoutService {
     }
 
     const manifest =
-      await this.storageService.downloadJsonLikeData(manifestUrl);
+      await this.storageService.downloadJsonLikeData<JobManifest>(manifestUrl);
 
-    const requestType = getRequestType(manifest).toLowerCase();
+    const requestType = getJobRequestType(manifest).toLowerCase();
 
     assertValidJobRequestType(requestType);
 
     const { saveResults } = this.createPayoutSpecificActions[requestType];
 
-    const results = await saveResults(chainId, escrowAddress, manifest);
+    const results = await saveResults(chainId, escrowAddress, manifest as any);
 
     return results;
   }
@@ -98,9 +103,9 @@ export class PayoutService {
     }
 
     const manifest =
-      await this.storageService.downloadJsonLikeData(manifestUrl);
+      await this.storageService.downloadJsonLikeData<JobManifest>(manifestUrl);
 
-    const requestType = getRequestType(manifest).toLowerCase();
+    const requestType = getJobRequestType(manifest).toLowerCase();
 
     assertValidJobRequestType(requestType);
 
@@ -218,9 +223,9 @@ export class PayoutService {
     const intermediateResultsUrl =
       await escrowClient.getIntermediateResultsUrl(escrowAddress);
 
-    const intermediateResults = (await this.storageService.downloadJsonLikeData(
-      intermediateResultsUrl,
-    )) as FortuneFinalResult[];
+    const intermediateResults = await this.storageService.downloadJsonLikeData<
+      FortuneFinalResult[]
+    >(intermediateResultsUrl);
 
     if (intermediateResults.length === 0) {
       throw new Error('No intermediate results found');
@@ -231,13 +236,14 @@ export class PayoutService {
       throw new Error('Not all required solutions have been sent');
     }
 
-    const { url, hash } = await this.storageService.uploadJobSolutions(
-      escrowAddress,
+    return this.uploadJobResults(
+      JSON.stringify(intermediateResults),
       chainId,
-      intermediateResults,
+      escrowAddress,
+      {
+        extension: 'json',
+      },
     );
-
-    return { url, hash };
   }
 
   /**
@@ -258,13 +264,44 @@ export class PayoutService {
     const intermediateResultsUrl =
       await escrowClient.getIntermediateResultsUrl(escrowAddress);
 
-    const { url, hash } = await this.storageService.copyFileFromURLToBucket(
-      escrowAddress,
-      chainId,
+    let fileContent = await httpUtils.downloadFile(
       `${intermediateResultsUrl}/${CVAT_RESULTS_ANNOTATIONS_FILENAME}`,
     );
+    fileContent = await this.pgpEncryptionService.maybeDecryptFile(fileContent);
 
-    return { url, hash };
+    return this.uploadJobResults(fileContent, chainId, escrowAddress, {
+      prefix: 's3',
+      extension: 'zip',
+    });
+  }
+
+  /**
+   * Saves final results of a Audino-type job, using intermediate results for annotations.
+   * Retrieves intermediate results, copies files to storage, and returns the final results URL and hash.
+   * @param chainId The blockchain chain ID.
+   * @param escrowAddress The escrow contract address.
+   * @returns {Promise<SaveResultDto>} The URL and hash for the saved results.
+   */
+  public async saveResultsAudino(
+    chainId: ChainId,
+    escrowAddress: string,
+  ): Promise<SaveResultDto> {
+    const signer = this.web3Service.getSigner(chainId);
+
+    const escrowClient = await EscrowClient.build(signer);
+
+    const intermediateResultsUrl =
+      await escrowClient.getIntermediateResultsUrl(escrowAddress);
+
+    let fileContent = await httpUtils.downloadFile(
+      `${intermediateResultsUrl}/${AUDINO_RESULTS_ANNOTATIONS_FILENAME}`,
+    );
+    fileContent = await this.pgpEncryptionService.maybeDecryptFile(fileContent);
+
+    return this.uploadJobResults(fileContent, chainId, escrowAddress, {
+      prefix: 's3',
+      extension: 'zip',
+    });
   }
 
   /**
@@ -278,9 +315,10 @@ export class PayoutService {
     manifest: FortuneManifest,
     finalResultsUrl: string,
   ): Promise<CalculatedPayout[]> {
-    const finalResults = (await this.storageService.downloadJsonLikeData(
-      finalResultsUrl,
-    )) as FortuneFinalResult[];
+    const finalResults =
+      await this.storageService.downloadJsonLikeData<FortuneFinalResult[]>(
+        finalResultsUrl,
+      );
 
     const recipients = finalResults
       .filter((result) => !result.error)
@@ -316,8 +354,8 @@ export class PayoutService {
     const intermediateResultsUrl =
       await escrowClient.getIntermediateResultsUrl(escrowAddress);
 
-    const annotations: CvatAnnotationMeta =
-      await this.storageService.downloadJsonLikeData(
+    const annotations =
+      await this.storageService.downloadJsonLikeData<CvatAnnotationMeta>(
         `${intermediateResultsUrl}/${CVAT_VALIDATION_META_FILENAME}`,
       );
 
@@ -384,8 +422,8 @@ export class PayoutService {
     const intermediateResultsUrl =
       await escrowClient.getIntermediateResultsUrl(escrowAddress);
 
-    const annotations: AudinoAnnotationMeta =
-      await this.storageService.downloadJsonLikeData(
+    const annotations =
+      await this.storageService.downloadJsonLikeData<AudinoAnnotationMeta>(
         `${intermediateResultsUrl}/${AUDINO_VALIDATION_META_FILENAME}`,
       );
 
@@ -429,27 +467,42 @@ export class PayoutService {
   }
 
   /**
-   * Saves final results of a Audino-type job, using intermediate results for annotations.
-   * Retrieves intermediate results, copies files to storage, and returns the final results URL and hash.
-   * @param chainId The blockchain chain ID.
-   * @param escrowAddress The escrow contract address.
-   * @returns {Promise<SaveResultDto>} The URL and hash for the saved results.
+   * Encrypts results w/ JL and RepO PGP
+   * and uploads them to RepO storage.
    */
-  public async saveResultsAudino(
+  public async uploadJobResults(
+    resultsData: string | Buffer,
     chainId: ChainId,
     escrowAddress: string,
-  ): Promise<SaveResultDto> {
+    fileNameOptions: {
+      prefix?: string;
+      extension: string;
+    },
+  ): Promise<{ url: string; hash: string }> {
     const signer = this.web3Service.getSigner(chainId);
 
     const escrowClient = await EscrowClient.build(signer);
 
-    const intermediateResultsUrl =
-      await escrowClient.getIntermediateResultsUrl(escrowAddress);
+    const jobLauncherAddress =
+      await escrowClient.getJobLauncherAddress(escrowAddress);
 
-    const { url, hash } = await this.storageService.copyFileFromURLToBucket(
-      escrowAddress,
+    const encryptedResults = await this.pgpEncryptionService.encrypt(
+      resultsData,
       chainId,
-      `${intermediateResultsUrl}/${AUDINO_RESULTS_ANNOTATIONS_FILENAME}`,
+      [jobLauncherAddress],
+    );
+    const hash = crypto
+      .createHash('sha1')
+      .update(encryptedResults)
+      .digest('hex');
+
+    const prefix = fileNameOptions.prefix || '';
+    const fileName = `${prefix}${hash}.${fileNameOptions.extension}`;
+
+    const url = await this.storageService.uploadData(
+      encryptedResults,
+      fileName,
+      ContentType.PLAIN_TEXT,
     );
 
     return { url, hash };

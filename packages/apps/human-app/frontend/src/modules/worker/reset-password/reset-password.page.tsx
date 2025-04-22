@@ -25,7 +25,7 @@ export function ResetPasswordWorkerPage() {
   const location = useLocation();
   const { token } = queryString.parse(location.search);
 
-  const methods = useForm<ResetPasswordDto>({
+  const methods = useForm({
     defaultValues: {
       password: '',
       confirmPassword: '',

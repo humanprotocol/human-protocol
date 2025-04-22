@@ -1,23 +1,25 @@
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, Index } from 'typeorm';
 
 import { DATABASE_SCHEMA_NAME } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
-import { ReputationEntityType } from '../../common/enums';
+
+import { ReputationEntityType } from './constants';
 
 @Entity({ schema: DATABASE_SCHEMA_NAME, name: 'reputation' })
+@Index(['chainId', 'address', 'type'], { unique: true })
 export class ReputationEntity extends BaseEntity {
   @Column({ type: 'int' })
-  public chainId: number;
+  chainId: number;
 
   @Column({ type: 'varchar' })
-  public address: string;
-
-  @Column({ type: 'int' })
-  public reputationPoints: number;
+  address: string;
 
   @Column({
     type: 'enum',
     enum: ReputationEntityType,
   })
-  public type: ReputationEntityType;
+  type: ReputationEntityType;
+
+  @Column({ type: 'int' })
+  reputationPoints: number;
 }

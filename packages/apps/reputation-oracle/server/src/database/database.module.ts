@@ -16,6 +16,7 @@ import { WebhookIncomingEntity } from '../modules/webhook/webhook-incoming.entit
 import { WebhookOutgoingEntity } from '../modules/webhook/webhook-outgoing.entity';
 import { EscrowCompletionEntity } from '../modules/escrow-completion/escrow-completion.entity';
 import { EscrowPayoutsBatchEntity } from '../modules/escrow-completion/escrow-payouts-batch.entity';
+import { AbuseEntity } from '../modules/abuse/abuse.entity';
 
 import { TypeOrmLoggerModule, TypeOrmLoggerService } from './typeorm';
 
@@ -61,6 +62,7 @@ import { TypeOrmLoggerModule, TypeOrmLoggerService } from './typeorm';
           synchronize: false,
           migrationsRun: false,
           entities: [
+            AbuseEntity,
             WebhookIncomingEntity,
             WebhookOutgoingEntity,
             EscrowCompletionEntity,

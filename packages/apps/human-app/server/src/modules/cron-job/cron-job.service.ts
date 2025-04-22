@@ -11,7 +11,10 @@ import { EnvironmentConfigService } from '../../common/config/environment-config
 import { OracleDiscoveryService } from '../oracle-discovery/oracle-discovery.service';
 import { DiscoveredOracle } from '../oracle-discovery/model/oracle-discovery.model';
 import { WorkerService } from '../user-worker/worker.service';
-import { JobDiscoveryFieldName } from '../../common/enums/global-common';
+import {
+  JobDiscoveryFieldName,
+  JobStatus,
+} from '../../common/enums/global-common';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { JobsDiscoveryService } from '../jobs-discovery/jobs-discovery.service';
 
@@ -119,6 +122,7 @@ export class CronJobService {
         JobDiscoveryFieldName.CreatedAt,
         JobDiscoveryFieldName.UpdatedAt,
       ];
+      command.data.status = JobStatus.ACTIVE;
       const initialResponse =
         await this.exchangeOracleGateway.fetchJobs(command);
 

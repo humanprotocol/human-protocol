@@ -1,7 +1,7 @@
 import { parseISO, format } from 'date-fns';
 
-export const formatDate = (dateString: string) => {
-  const parsedDate = parseISO(dateString);
+export const formatDate = (isoDateString: string) => {
+  const parsedDate = parseISO(isoDateString);
   return format(parsedDate, 'yyyy-MM-dd HH:mm:ss');
 };
 
@@ -13,6 +13,10 @@ export interface ParsedDate {
 }
 
 export function parseDate(delta: number): ParsedDate {
+  if (delta < 0) {
+    throw new Error('Negative values are not allowed');
+  }
+
   const days = Math.floor(delta / (1000 * 60 * 60 * 24));
   const hours = Math.floor((delta % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
   const minutes = Math.floor((delta % (1000 * 60 * 60)) / (1000 * 60));

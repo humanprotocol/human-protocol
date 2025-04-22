@@ -3,16 +3,16 @@ import { t } from 'i18next';
 import {
   EthKVStoreKeys,
   JobType,
-  Role,
+  OPERATOR_ROLES,
 } from '@/modules/smart-contracts/EthKVStore/config';
-import type { GetEthKVStoreValuesSuccessResponse } from '@/modules/operator/hooks/use-get-keys';
+import { type GetEthKVStoreValuesSuccessResponse } from '@/modules/operator/hooks/use-get-keys';
 import { urlDomainSchema } from '@/shared/schemas';
 
 const fieldsValidations = {
   [EthKVStoreKeys.PublicKey]: urlDomainSchema,
   [EthKVStoreKeys.Url]: urlDomainSchema,
   [EthKVStoreKeys.WebhookUrl]: urlDomainSchema,
-  [EthKVStoreKeys.Role]: z.nativeEnum(Role),
+  [EthKVStoreKeys.Role]: z.enum(OPERATOR_ROLES),
   [EthKVStoreKeys.JobTypes]: z.array(z.nativeEnum(JobType)).min(1),
   [EthKVStoreKeys.Fee]: z.coerce
     // eslint-disable-next-line camelcase
@@ -62,43 +62,51 @@ export const setEthKVStoreValuesMutationSchema = (
 export const getEditEthKVStoreValuesMutationSchema = (
   initialData: GetEthKVStoreValuesSuccessResponse
 ) => {
-  return editEthKVStoreValuesMutationSchema.transform((newData, ctx) => {
-    const fieldsThatHasChanges: EditEthKVStoreValuesMutationData = {};
-    Object.values(EthKVStoreKeys).forEach((key) => {
-      const newFiledData = newData[key];
-      const initialFiledData = initialData[key];
+  return editEthKVStoreValuesMutationSchema.transform<EditEthKVStoreValuesMutationData>(
+    (newData, ctx) => {
+      const fieldsThatHasChanges: EditEthKVStoreValuesMutationData = {};
+      Object.values(EthKVStoreKeys).forEach((key) => {
+        const newFiledData = newData[key];
+        const initialFiledData = initialData[key];
 
-      if (Array.isArray(newFiledData) && Array.isArray(initialFiledData)) {
-        if (
-          newFiledData.sort().toString() === initialFiledData.sort().toString()
+        let hasFieldChanged = false;
+        if (Array.isArray(newFiledData) && Array.isArray(initialFiledData)) {
+          if (
+            newFiledData.sort().toString() !==
+            initialFiledData.sort().toString()
+          ) {
+            hasFieldChanged = true;
+          }
+        } else if (
+          typeof newFiledData === 'number' &&
+          newFiledData.toString() !== initialFiledData?.toString()
         ) {
-          return;
+          hasFieldChanged = true;
+        } else {
+          // eslint-disable-next-line eqeqeq -- expect to do conversion for this compare
+          hasFieldChanged = newFiledData != initialFiledData;
         }
-        Object.assign(fieldsThatHasChanges, { [key]: newFiledData.toString() });
-        return;
-      }
 
-      if (
-        typeof newFiledData === 'number' &&
-        newFiledData.toString() !== initialFiledData?.toString()
-      ) {
-        Object.assign(fieldsThatHasChanges, { [key]: newFiledData });
-        return;
-      }
-
-      // eslint-disable-next-line eqeqeq -- expect to do conversion for this compare
-      if (newFiledData != initialFiledData) {
-        Object.assign(fieldsThatHasChanges, { [key]: newFiledData });
-      }
-    });
-
-    if (!Object.values(fieldsThatHasChanges).length) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: t('operator.addKeysPage.editKeysForm.error'),
-        path: ['form'],
+        if (hasFieldChanged) {
+          Object.assign(fieldsThatHasChanges, { [key]: newFiledData });
+        }
       });
+
+      if (Object.values(fieldsThatHasChanges).length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: t('operator.addKeysPage.editKeysForm.error'),
+          path: ['form'],
+        });
+
+        return z.NEVER;
+      }
+
+      return fieldsThatHasChanges;
     }
-    return fieldsThatHasChanges;
-  });
+  ) as z.ZodType<
+    EditEthKVStoreValuesMutationData,
+    z.ZodTypeDef,
+    GetEthKVStoreValuesSuccessResponse
+  >;
 };

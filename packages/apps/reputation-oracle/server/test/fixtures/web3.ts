@@ -1,5 +1,4 @@
 import { faker } from '@faker-js/faker';
-import { ChainId } from '@human-protocol/sdk';
 import { ethers, Wallet } from 'ethers';
 
 export const TEST_PRIVATE_KEY =
@@ -22,12 +21,4 @@ export function generateContractAddress() {
     from: generateEthWallet().address,
     nonce: faker.number.bigInt(),
   });
-}
-
-export function generateTestnetChainId() {
-  return faker.helpers.arrayElement([
-    ChainId.BSC_TESTNET,
-    ChainId.POLYGON_AMOY,
-    ChainId.SEPOLIA,
-  ]);
 }

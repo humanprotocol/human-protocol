@@ -9,7 +9,8 @@ export function handleQueryFailedError(error: QueryFailedError): DatabaseError {
 
   switch ((error.driverError as any).code) {
     case PostgresErrorCodes.Duplicated:
-      message = (error.driverError as any).detail;
+      message =
+        (error.driverError as any).detail + (error.driverError as any).code;
       break;
     case PostgresErrorCodes.NumericFieldOverflow:
       message = 'Incorrect amount';

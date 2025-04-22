@@ -8,7 +8,9 @@
     "start:prod": "serve -s dist",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "prepare": "husky"
+    "prepare": "husky",
+    "test": "vitest --run",
+    "test:watch": "vitest"
   },
   "lint-staged": {
     "*.{ts,tsx}": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
@@ -16,15 +18,16 @@
   "dependencies": {
     "@emotion/react": "^11.11.3",
     "@emotion/styled": "^11.11.0",
+    "@faker-js/faker": "^9.7.0",
     "@fontsource/inter": "^5.0.17",
     "@hcaptcha/react-hcaptcha": "^0.3.6",
-    "@hookform/resolvers": "^3.3.4",
+    "@hookform/resolvers": "^5.0.1",
     "@human-protocol/sdk": "*",
     "@mui/icons-material": "^7.0.1",
     "@mui/material": "^5.16.7",
     "@mui/x-date-pickers": "^7.23.6",
-    "@reown/appkit": "1.3.2",
-    "@reown/appkit-adapter-wagmi": "1.3.2",
+    "@reown/appkit": "^1.7.2",
+    "@reown/appkit-adapter-wagmi": "^1.7.2",
     "@synaps-io/verify-sdk": "^4.0.45",
     "@tanstack/react-query": "^5.67.2",
     "date-fns": "^4.1.0",
@@ -38,7 +41,7 @@
     "query-string": "^9.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-hook-form": "^7.53.2",
+    "react-hook-form": "^7.55.0",
     "react-i18next": "^15.1.0",
     "react-imask": "^7.4.0",
     "react-number-format": "^5.4.3",
@@ -70,6 +73,7 @@
     "lint-staged": "^15.4.3",
     "prettier": "^3.4.2",
     "typescript": "^5.6.3",
-    "vite": "^6.2.4"
+    "vite": "^6.2.4",
+    "vitest": "^3.1.1"
   }
 }

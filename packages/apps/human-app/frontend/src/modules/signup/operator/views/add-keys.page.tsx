@@ -1,4 +1,3 @@
-import type { UseFormReturn } from 'react-hook-form';
 import { t } from 'i18next';
 import {
   PageCardError,
@@ -7,18 +6,9 @@ import {
 } from '@/shared/components/ui/page-card';
 import { getErrorMessageForError, jsonRpcErrorHandler } from '@/shared/errors';
 import { Alert } from '@/shared/components/ui/alert';
-import {
-  type GetEthKVStoreValuesSuccessResponse,
-  useGetKeys,
-} from '@/modules/operator/hooks';
+import { useGetKeys } from '@/modules/operator/hooks';
 import { useEditExistingKeysMutationState } from '../hooks';
-import { type EditEthKVStoreValuesMutationData } from '../schema';
 import { AddKeysForm } from '../components/add-keys';
-
-export type UseFormResult = UseFormReturn<
-  GetEthKVStoreValuesSuccessResponse,
-  EditEthKVStoreValuesMutationData
->;
 
 export function AddKeysOperatorPage() {
   const {

@@ -3,12 +3,16 @@ import {
   Web3ConfigService,
   Web3Network,
 } from '../../config/web3-config.service';
-import {
-  generateEthWallet,
-  generateTestnetChainId,
-} from '../../../test/fixtures/web3';
+import { generateEthWallet } from '../../../test/fixtures/web3';
+import { supportedChainIdsByNetwork } from './web3.service';
 
 const testWallet = generateEthWallet();
+
+export function generateTestnetChainId() {
+  return faker.helpers.arrayElement(
+    supportedChainIdsByNetwork[Web3Network.TESTNET],
+  );
+}
 
 export const mockWeb3ConfigService: Omit<Web3ConfigService, 'configService'> = {
   privateKey: testWallet.privateKey,

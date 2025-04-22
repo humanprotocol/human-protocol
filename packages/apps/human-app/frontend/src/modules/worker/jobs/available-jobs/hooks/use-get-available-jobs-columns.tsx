@@ -49,24 +49,19 @@ export const useGetAvailableJobsColumns = (
         Cell: (props) => {
           return getNetworkName(props.row.original.chain_id);
         },
-        muiTableHeadCellProps: () => ({
-          component: (props) => {
-            return (
-              <TableHeaderCell
-                {...props}
-                headerText={t('worker.jobs.network')}
-                iconType="filter"
-                popoverContent={
-                  <AvailableJobsNetworkFilter
-                    chainIdsEnabled={chainIdsEnabled}
-                    showClearButton
-                    showTitle
-                  />
-                }
+        Header: (
+          <TableHeaderCell
+            headerText={t('worker.jobs.network')}
+            iconType="filter"
+            popoverContent={
+              <AvailableJobsNetworkFilter
+                chainIdsEnabled={chainIdsEnabled}
+                showClearButton
+                showTitle
               />
-            );
-          },
-        }),
+            }
+          />
+        ),
       },
       {
         accessorKey: 'reward_amount',
@@ -82,16 +77,13 @@ export const useGetAvailableJobsColumns = (
             />
           );
         },
-        muiTableHeadCellProps: () => ({
-          component: (props) => (
-            <TableHeaderCell
-              {...props}
-              headerText={t('worker.jobs.rewardAmount')}
-              iconType="filter"
-              popoverContent={<AvailableJobsRewardAmountSort />}
-            />
-          ),
-        }),
+        Header: (
+          <TableHeaderCell
+            headerText={t('worker.jobs.rewardAmount')}
+            iconType="filter"
+            popoverContent={<AvailableJobsRewardAmountSort />}
+          />
+        ),
       },
       {
         accessorKey: 'job_type',
@@ -102,20 +94,15 @@ export const useGetAvailableJobsColumns = (
           const label = t(`jobTypeLabels.${row.original.job_type as JobType}`);
           return <Chip label={label} />;
         },
-        muiTableHeadCellProps: () => ({
-          component: (props) => {
-            return (
-              <TableHeaderCell
-                {...props}
-                headerText={t('worker.jobs.jobType')}
-                iconType="filter"
-                popoverContent={
-                  <AvailableJobsJobTypeFilter showClearButton showTitle />
-                }
-              />
-            );
-          },
-        }),
+        Header: (
+          <TableHeaderCell
+            headerText={t('worker.jobs.jobType')}
+            iconType="filter"
+            popoverContent={
+              <AvailableJobsJobTypeFilter showClearButton showTitle />
+            }
+          />
+        ),
       },
       {
         accessorKey: 'escrow_address',

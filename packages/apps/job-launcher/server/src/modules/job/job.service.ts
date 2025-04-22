@@ -1533,6 +1533,8 @@ export class JobService {
       return OracleType.FORTUNE;
     } else if (requestType === JobRequestType.HCAPTCHA) {
       return OracleType.HCAPTCHA;
+    } else if (requestType === JobRequestType.AUDIO_TRANSCRIPTION) {
+      return OracleType.AUDINO;
     } else {
       return OracleType.CVAT;
     }
@@ -1806,8 +1808,14 @@ export class JobService {
     if (jobEntity.status === JobStatus.COMPLETED) {
       return;
     }
-    if (jobEntity.status !== JobStatus.LAUNCHED) {
-      throw new ControlledError(ErrorJob.NotLaunched, HttpStatus.CONFLICT);
+    if (
+      jobEntity.status !== JobStatus.LAUNCHED &&
+      jobEntity.status !== JobStatus.PARTIAL
+    ) {
+      throw new ControlledError(
+        ErrorJob.InvalidStatusCompletion,
+        HttpStatus.CONFLICT,
+      );
     }
 
     jobEntity.status = JobStatus.COMPLETED;

@@ -6,6 +6,7 @@ import { CronJobType } from '../../common/enums/cron-job';
 import { WebhookOutgoingService } from '../webhook/webhook-outgoing.service';
 import { WebhookIncomingService } from '../webhook/webhook-incoming.service';
 import { EscrowCompletionService } from '../escrow-completion/escrow-completion.service';
+import { AbuseService } from '../abuse/abuse.service';
 
 describe('CronJobService', () => {
   let service: CronJobService;
@@ -13,6 +14,7 @@ describe('CronJobService', () => {
   let webhookIncomingService: jest.Mocked<WebhookIncomingService>;
   let webhookOutgoingService: jest.Mocked<WebhookOutgoingService>;
   let escrowCompletionService: jest.Mocked<EscrowCompletionService>;
+  let abuseService: jest.Mocked<AbuseService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -46,6 +48,13 @@ describe('CronJobService', () => {
             processAwaitingPayouts: jest.fn(),
           },
         },
+        {
+          provide: AbuseService,
+          useValue: {
+            processAbuseRequests: jest.fn(),
+            processClassifiedAbuses: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
@@ -54,6 +63,7 @@ describe('CronJobService', () => {
     webhookIncomingService = module.get(WebhookIncomingService);
     webhookOutgoingService = module.get(WebhookOutgoingService);
     escrowCompletionService = module.get(EscrowCompletionService);
+    abuseService = module.get(AbuseService);
   });
 
   describe('startCronJob', () => {
@@ -427,6 +437,98 @@ describe('CronJobService', () => {
       );
 
       await service.processPendingOutgoingWebhooks();
+
+      expect(service.completeCronJob).toHaveBeenCalled();
+    });
+  });
+
+  describe('processClassifiedAbuses', () => {
+    it('should skip processing if a cron job is already running', async () => {
+      jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(true);
+
+      await service.processClassifiedAbuses();
+
+      expect(abuseService.processClassifiedAbuses).not.toHaveBeenCalled();
+    });
+
+    it('should process classified abuses and complete the cron job', async () => {
+      jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
+      jest
+        .spyOn(service, 'startCronJob')
+        .mockResolvedValue(new CronJobEntity());
+      jest
+        .spyOn(service, 'completeCronJob')
+        .mockResolvedValue(new CronJobEntity());
+
+      await service.processClassifiedAbuses();
+
+      expect(abuseService.processClassifiedAbuses).toHaveBeenCalled();
+      expect(service.startCronJob).toHaveBeenCalledWith(
+        CronJobType.ProcessClassifiedAbuse,
+      );
+      expect(service.completeCronJob).toHaveBeenCalled();
+    });
+
+    it('should complete the cron job even if processing fails', async () => {
+      jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
+      jest
+        .spyOn(service, 'startCronJob')
+        .mockResolvedValue(new CronJobEntity());
+      jest
+        .spyOn(service, 'completeCronJob')
+        .mockResolvedValue(new CronJobEntity());
+
+      abuseService.processClassifiedAbuses.mockRejectedValue(
+        new Error('Processing error'),
+      );
+
+      await service.processClassifiedAbuses();
+
+      expect(service.completeCronJob).toHaveBeenCalled();
+    });
+  });
+
+  describe('processAbuseRequests', () => {
+    it('should skip processing if a cron job is already running', async () => {
+      jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(true);
+
+      await service.processAbuseRequests();
+
+      expect(abuseService.processAbuseRequests).not.toHaveBeenCalled();
+    });
+
+    it('should process abuse requests and complete the cron job', async () => {
+      jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
+      jest
+        .spyOn(service, 'startCronJob')
+        .mockResolvedValue(new CronJobEntity());
+      jest
+        .spyOn(service, 'completeCronJob')
+        .mockResolvedValue(new CronJobEntity());
+
+      await service.processAbuseRequests();
+
+      expect(abuseService.processAbuseRequests).toHaveBeenCalled();
+      expect(service.startCronJob).toHaveBeenCalledWith(
+        CronJobType.ProcessRequestedAbuse,
+      );
+      expect(service.completeCronJob).toHaveBeenCalled();
+    });
+
+    it('should complete the cron job even if processing fails', async () => {
+      jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
+      jest
+        .spyOn(service, 'startCronJob')
+        .mockResolvedValue(new CronJobEntity());
+      jest
+        .spyOn(service, 'completeCronJob')
+        .mockResolvedValue(new CronJobEntity());
+
+      abuseService.processAbuseRequests.mockRejectedValue(
+        new Error('Processing error'),
+      );
+
+      await service.processAbuseRequests();
 
       expect(service.completeCronJob).toHaveBeenCalled();
     });
