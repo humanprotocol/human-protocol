@@ -93,7 +93,9 @@ export class HttpApiClient {
 
     if (successSchema) {
       try {
-        successSchema.parse(responseBody);
+        // Zod defaulty type is any, but parsing will return the correct type
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        return successSchema.parse(responseBody);
       } catch (error) {
         if (error instanceof ZodError) {
           // eslint-disable-next-line no-console

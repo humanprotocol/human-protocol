@@ -20,13 +20,7 @@ export function StatusChip({ status }: Readonly<{ status: MyJob['status'] }>) {
         borderRadius: '16px',
       }}
     >
-      <Typography
-        color={lightModeColorPalette.white}
-        variant="chip"
-        sx={{
-          textTransform: 'uppercase',
-        }}
-      >
+      <Typography color={lightModeColorPalette.white} variant="chip">
         {status}
       </Typography>
     </Box>

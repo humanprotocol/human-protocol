@@ -5,12 +5,12 @@ import {
 } from './schemas';
 
 export enum MyJobStatus {
-  ACTIVE = 'active',
-  CANCELED = 'canceled',
-  COMPLETED = 'completed',
-  VALIDATION = 'validation',
-  EXPIRED = 'expired',
-  REJECTED = 'rejected',
+  ACTIVE = 'ACTIVE',
+  CANCELED = 'CANCELED',
+  COMPLETED = 'COMPLETED',
+  VALIDATION = 'VALIDATION',
+  EXPIRED = 'EXPIRED',
+  REJECTED = 'REJECTED',
 }
 
 export const UNKNOWN_JOB_STATUS = 'UNKNOWN';
