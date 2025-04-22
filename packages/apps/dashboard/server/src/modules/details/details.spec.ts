@@ -67,7 +67,7 @@ describe('DetailsService', () => {
 
   it('should fetch and return operators with reputations', async () => {
     const mockOperators = [{ address: '0x123', role: 'Reputation Oracle' }];
-    const mockReputations = [{ address: '0x123', level: 'hign' }];
+    const mockReputations = [{ address: '0x123', level: 'high' }];
 
     jest
       .spyOn(OperatorUtils, 'getOperators')
@@ -82,7 +82,7 @@ describe('DetailsService', () => {
       expect.objectContaining({
         address: '0x123',
         role: 'Reputation Oracle',
-        reputation: 'hign',
+        reputation: 'high',
       }),
     ]);
   });
