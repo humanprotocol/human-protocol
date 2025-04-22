@@ -1,4 +1,6 @@
 import { ApiClientError, humanAppApiClient } from '@/api';
+import { type SendResetLinkDto } from '../send-reset-link/schemas';
+import { type ResetPasswordDto } from './types';
 
 const apiPaths = {
   sendResetLink: '/password-reset/forgot-password',
@@ -6,12 +8,12 @@ const apiPaths = {
 };
 
 export class PasswordService {
-  async sendResetLink(email: string) {
+  async sendResetLink(data: SendResetLinkDto) {
     try {
       const result = await humanAppApiClient.post<null>(
         apiPaths.sendResetLink,
         {
-          body: { email },
+          body: data,
         }
       );
       return result;
@@ -24,7 +26,9 @@ export class PasswordService {
     }
   }
 
-  async resetPassword(data: { token: string; password: string }) {
+  async resetPassword(
+    data: Omit<ResetPasswordDto, 'confirmPassword'> & { token: string }
+  ) {
     try {
       const result = await humanAppApiClient.post<null>(
         apiPaths.resetPassword,

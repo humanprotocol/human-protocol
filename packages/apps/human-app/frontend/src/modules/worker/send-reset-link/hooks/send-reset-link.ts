@@ -13,7 +13,7 @@ export function useSendResetLinkMutation() {
 
   return useMutation({
     mutationFn: async (data: SendResetLinkDto) => {
-      return passwordService.sendResetLink(data.email);
+      return passwordService.sendResetLink(data);
     },
     onSuccess: async (_, { email }) => {
       navigate(routerPaths.worker.sendResetLinkSuccess, { state: { email } });

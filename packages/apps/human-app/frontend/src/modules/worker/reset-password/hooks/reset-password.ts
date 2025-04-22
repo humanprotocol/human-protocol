@@ -1,32 +1,9 @@
-/* eslint-disable camelcase */
 import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { t } from 'i18next';
 import { routerPaths } from '@/router/router-paths';
 import { passwordService } from '../password.service';
-
-export const resetPasswordDtoSchema = z
-  .object({
-    password: z
-      .string()
-      .min(8, t('validation.min'))
-      .max(50, t('validation.max', { count: 50 })),
-    confirmPassword: z
-      .string()
-      .min(1, t('validation.required'))
-      .max(50, t('validation.max', { count: 50 })),
-    h_captcha_token: z
-      .string()
-      .min(1, t('validation.captcha'))
-      .default('token'),
-  })
-  .refine(({ password, confirmPassword }) => confirmPassword === password, {
-    message: t('validation.passwordMismatch'),
-    path: ['confirmPassword'],
-  });
-
-export type ResetPasswordDto = z.infer<typeof resetPasswordDtoSchema>;
+import { type ResetPasswordDto } from '../types';
 
 export const ResetPasswordSuccessResponseSchema = z.unknown();
 
@@ -38,10 +15,7 @@ export function useResetPasswordMutation() {
     mutationFn: async (
       data: Omit<ResetPasswordDto, 'confirmPassword'> & { token: string }
     ) => {
-      return passwordService.resetPassword({
-        token: data.token,
-        password: data.password,
-      });
+      return passwordService.resetPassword(data);
     },
     onSuccess: async () => {
       navigate(routerPaths.worker.resetPasswordSuccess);
