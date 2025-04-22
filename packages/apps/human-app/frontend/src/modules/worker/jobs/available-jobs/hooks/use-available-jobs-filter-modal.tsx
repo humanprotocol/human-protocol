@@ -1,5 +1,5 @@
 import { useModal } from '@/shared/contexts/modal-context';
-import { AvailableJobsFilterModal } from '../available-jobs-drawer-mobile-view';
+import { AvailableJobsFilterModal } from '../available-jobs-filter-modal';
 import { useGetUiConfig } from '../../hooks';
 
 export function useAvailableJobsFilterModal() {
