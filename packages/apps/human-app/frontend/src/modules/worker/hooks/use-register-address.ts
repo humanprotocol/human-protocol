@@ -18,7 +18,7 @@ export const RegisterAddressSuccessSchema = z.unknown();
 
 function useRegisterAddressMutation(callbacks?: RegisterAddressCallbacks) {
   const queryClient = useQueryClient();
-  const { user } = useAuthenticatedUser();
+  const { user, updateUserData } = useAuthenticatedUser();
   const { refreshAccessTokenAsync } = useAccessTokenRefresh();
   const { address, chainId, signMessage } = useWalletConnect();
   const { prepareSignature } = usePrepareSignature(
@@ -42,6 +42,10 @@ function useRegisterAddressMutation(callbacks?: RegisterAddressCallbacks) {
     // so we need to refresh the token after the address is registered
     await profileService.registerAddress({ address, chainId, signature });
     await refreshAccessTokenAsync({ authType: 'web2' });
+    updateUserData({
+      // eslint-disable-next-line camelcase
+      wallet_address: address,
+    });
   };
 
   const onSuccess = async () => {
