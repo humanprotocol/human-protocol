@@ -4,10 +4,15 @@ import { useModal } from '../../../contexts/modal-context';
 import { ModalHeader } from './modal-header';
 
 export function GlobalModal() {
-  const { open, closeModal, showCloseButton, content } = useModal();
+  const { open, closeModal, showCloseButton, content, onTransitionExited } =
+    useModal();
 
   return (
-    <DialogMui open={open} onClose={closeModal}>
+    <DialogMui
+      open={open}
+      onClose={closeModal}
+      onTransitionExited={onTransitionExited}
+    >
       <ModalHeader
         closeButton={{
           isVisible: showCloseButton,

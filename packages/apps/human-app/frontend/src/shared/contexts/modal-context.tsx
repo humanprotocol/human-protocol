@@ -12,6 +12,7 @@ interface ModalContextType {
   showCloseButton: boolean;
   openModal: ({ content, showCloseButton }: OpenModalProps) => void;
   closeModal: () => void;
+  onTransitionExited: () => void;
 }
 
 interface OpenModalProps {
@@ -44,9 +45,20 @@ export function ModalProvider({
     setOpen(false);
   }, []);
 
+  const onTransitionExited = useCallback(() => {
+    setContent(null);
+  }, []);
+
   const contextValue = useMemo(
-    () => ({ open, content, showCloseButton, openModal, closeModal }),
-    [open, content, showCloseButton, openModal, closeModal]
+    () => ({
+      open,
+      content,
+      showCloseButton,
+      openModal,
+      closeModal,
+      onTransitionExited,
+    }),
+    [open, content, showCloseButton, openModal, closeModal, onTransitionExited]
   );
 
   return (
