@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { Button } from '@/shared/components/ui/button';
 import { ConnectWalletBtn } from '@/shared/components/ui/connect-wallet-btn';
 import { useWalletConnect } from '@/shared/contexts/wallet-connect';
+import { breakpoints } from '@/shared/styles/breakpoints';
 
 export function WalletConnectModal({ close }: Readonly<{ close: () => void }>) {
   const { isConnected } = useWalletConnect();
@@ -19,7 +20,15 @@ export function WalletConnectModal({ close }: Readonly<{ close: () => void }>) {
   return (
     <Grid
       container
-      sx={{ justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}
+      sx={{
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '60vh',
+        paddingX: '60px',
+        [breakpoints.mobile]: {
+          paddingX: '6px',
+        },
+      }}
     >
       <Grid
         container
