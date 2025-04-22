@@ -30,9 +30,6 @@ export const formatHmtAmount = (amount: string | number): string | number => {
   if (_amount >= 1000) {
     return Math.round(_amount);
   } else {
-    if (Number.isInteger(_amount)) {
-      return _amount;
-    }
-    return _amount.toFixed(3);
+    return parseFloat(_amount.toFixed(3));
   }
 };
