@@ -32,6 +32,10 @@ export function useWeb3SignIn() {
 
       const signature = await signMessage(JSON.stringify(data));
 
+      if (!signature || !address) {
+        throw new Error('Failed to sign message: missing arguments.');
+      }
+
       return homepageService.web3SignIn({
         address,
         signature,

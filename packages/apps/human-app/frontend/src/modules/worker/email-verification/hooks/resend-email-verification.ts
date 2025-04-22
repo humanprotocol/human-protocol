@@ -9,20 +9,14 @@ export const ResendEmailVerificationSuccessResponseSchema = z.unknown();
 
 async function resendEmailVerificationMutationFn(
   _data: ResendEmailVerificationDto,
-  isAuthenticated: boolean,
-  userEmail: string | undefined
+  isAuthenticated: boolean
 ) {
   if (!isAuthenticated) {
     throw new Error(t('worker.verifyEmail.authError'));
   }
 
-  if (!userEmail) {
-    throw new Error(t('worker.verifyEmail.emailError'));
-  }
-
   return emailVerificationService.resendEmailVerification(
-    _data.h_captcha_token,
-    userEmail
+    _data.h_captcha_token
   );
 }
 
@@ -34,7 +28,7 @@ export function useResendEmailVerificationWorkerMutation() {
 
   return useMutation({
     mutationFn: (dto: ResendEmailVerificationDto) =>
-      resendEmailVerificationMutationFn(dto, Boolean(user), user?.email),
+      resendEmailVerificationMutationFn(dto, Boolean(user)),
     onSuccess: async () => {
       await queryClient.invalidateQueries();
     },

@@ -12,7 +12,6 @@ export function useWeb3SignUp() {
   return useMutation({
     mutationFn: async ({ signature }: { signature: string }) =>
       signupService.operatorWeb3SignUp({
-        message: '',
         signature,
         address,
       }),

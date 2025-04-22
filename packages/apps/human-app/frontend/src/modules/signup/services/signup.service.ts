@@ -43,11 +43,7 @@ export class SignupService {
     }
   }
 
-  async operatorWeb3SignUp(data: {
-    message: string;
-    signature: string;
-    address: string;
-  }) {
+  async operatorWeb3SignUp(data: { signature: string; address: string }) {
     try {
       const result = await humanAppApiClient.post<Web3SignInSuccessResponse>(
         apiPaths.operator.web3Auth.signUp,

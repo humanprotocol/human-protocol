@@ -36,10 +36,10 @@ export class ProfileService {
   async registerAddress(data: {
     address: string;
     chainId: number;
-    signature?: string;
+    signature: string;
   }) {
     try {
-      const result = await authorizedHumanAppApiClient.post<null>(
+      const result = await authorizedHumanAppApiClient.post(
         apiPaths.registerAddress,
         {
           body: data,

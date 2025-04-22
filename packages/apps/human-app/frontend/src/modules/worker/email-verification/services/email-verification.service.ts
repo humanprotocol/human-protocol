@@ -20,7 +20,7 @@ export class EmailVerificationService {
     }
   }
 
-  async resendEmailVerification(token: string, email: string) {
+  async resendEmailVerification(token: string) {
     try {
       const result = await authorizedHumanAppApiClient.post(
         apiPaths.resendEmailVerification,
@@ -28,7 +28,6 @@ export class EmailVerificationService {
           body: {
             // eslint-disable-next-line camelcase
             h_captcha_token: token,
-            email,
           },
         }
       );

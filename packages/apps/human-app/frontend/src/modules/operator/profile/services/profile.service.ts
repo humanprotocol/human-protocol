@@ -15,7 +15,7 @@ const apiPaths = {
 export class OperatorProfileService {
   async enableOperator(signature: string) {
     try {
-      const result = await authorizedHumanAppApiClient.post<null>(
+      const result = await authorizedHumanAppApiClient.post(
         apiPaths.enableOperator,
         {
           body: { signature },
