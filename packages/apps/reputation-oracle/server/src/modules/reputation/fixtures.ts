@@ -10,13 +10,17 @@ export function generateReputationEntityType(): ReputationEntityType {
   return faker.helpers.arrayElement(REPUTATION_ENTITY_TYPES);
 }
 
+export function generateRandomScorePoints(): number {
+  return faker.number.int({ min: 1, max: 42 });
+}
+
 export function generateReputationEntity(score?: number): ReputationEntity {
   return {
     id: faker.number.int(),
     chainId: generateTestnetChainId(),
     address: faker.finance.ethereumAddress(),
     type: generateReputationEntityType(),
-    reputationPoints: score || faker.number.int(),
+    reputationPoints: score || generateRandomScorePoints(),
     createdAt: faker.date.recent(),
     updatedAt: new Date(),
   };
