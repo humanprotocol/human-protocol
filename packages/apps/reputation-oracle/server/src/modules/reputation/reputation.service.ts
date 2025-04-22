@@ -69,11 +69,10 @@ export class ReputationService {
   ): Promise<void> {
     assertAdjustableReputationPoints(points);
 
-    const existingEntity = await this.reputationRepository.findExclusive({
-      chainId,
-      address,
-      type,
-    });
+    const searchCriteria = { chainId, address, type };
+
+    let existingEntity =
+      await this.reputationRepository.findExclusive(searchCriteria);
 
     if (!existingEntity) {
       let initialReputation = INITIAL_REPUTATION;
@@ -91,23 +90,24 @@ export class ReputationService {
       reputationEntity.reputationPoints = initialReputation;
 
       try {
-        await this.reputationRepository.createUnique(reputationEntity);
+        existingEntity =
+          await this.reputationRepository.createUnique(reputationEntity);
       } catch (error) {
-        if (!isDuplicatedError(error)) {
-          throw error;
+        /**
+         * Safety-belt for cases where operation is executed concurrently
+         * in absense of distributed lock
+         */
+        if (isDuplicatedError(error)) {
+          existingEntity =
+            await this.reputationRepository.findExclusive(searchCriteria);
         }
+
+        throw error;
       }
     }
 
-    await this.reputationRepository.increment(
-      {
-        chainId,
-        address,
-        type,
-      },
-      'reputationPoints',
-      points,
-    );
+    existingEntity.reputationPoints += points;
+    await this.reputationRepository.updateOne(existingEntity);
   }
 
   /**
@@ -127,11 +127,10 @@ export class ReputationService {
       return;
     }
 
-    const existingEntity = await this.reputationRepository.findExclusive({
-      chainId,
-      address,
-      type,
-    });
+    const searchCriteria = { chainId, address, type };
+
+    let existingEntity =
+      await this.reputationRepository.findExclusive(searchCriteria);
 
     if (!existingEntity) {
       const reputationEntity = new ReputationEntity();
@@ -141,23 +140,24 @@ export class ReputationService {
       reputationEntity.reputationPoints = INITIAL_REPUTATION;
 
       try {
-        await this.reputationRepository.createUnique(reputationEntity);
+        existingEntity =
+          await this.reputationRepository.createUnique(reputationEntity);
       } catch (error) {
-        if (!isDuplicatedError(error)) {
-          throw error;
+        /**
+         * Safety-belt for cases where operation is executed concurrently
+         * in absense of distributed lock
+         */
+        if (isDuplicatedError(error)) {
+          existingEntity =
+            await this.reputationRepository.findExclusive(searchCriteria);
         }
+
+        throw error;
       }
     }
 
-    await this.reputationRepository.decrement(
-      {
-        chainId,
-        address,
-        type,
-      },
-      'reputationPoints',
-      points,
-    );
+    existingEntity.reputationPoints -= points;
+    await this.reputationRepository.updateOne(existingEntity);
   }
 
   /**

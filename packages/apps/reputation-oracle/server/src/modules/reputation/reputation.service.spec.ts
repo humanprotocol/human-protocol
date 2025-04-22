@@ -15,6 +15,7 @@ import {
 import { Web3Service } from '../web3/web3.service';
 
 import {
+  generateRandomScorePoints,
   generateReputationEntity,
   generateReputationEntityType,
 } from './fixtures';
@@ -108,167 +109,215 @@ describe('ReputationService', () => {
     });
   });
 
-  describe('increaseReputation', () => {
-    it.each([faker.number.float(), faker.number.int() * -1])(
-      'throws for invalid score points [%#]',
-      async (score) => {
-        await expect(
-          service.increaseReputation(
-            {
-              chainId: generateTestnetChainId(),
-              address: faker.finance.ethereumAddress(),
-              type: generateReputationEntityType(),
-            },
-            score,
-          ),
-        ).rejects.toThrow(
-          'Adjustable reputation points must be positive integer',
+  describe('reputation adjustments', () => {
+    beforeEach(() => {
+      /**
+       * Shallow copy is necessary here in order to
+       * properly compare mock call arguments,
+       * because jest hold a reference on object
+       */
+      mockReputationRepository.createUnique.mockImplementationOnce(
+        async (entity) => ({ ...entity }),
+      );
+    });
+
+    describe('increaseReputation', () => {
+      it.each([faker.number.float(), faker.number.int() * -1])(
+        'throws for invalid score points [%#]',
+        async (score) => {
+          await expect(
+            service.increaseReputation(
+              {
+                chainId: generateTestnetChainId(),
+                address: faker.finance.ethereumAddress(),
+                type: generateReputationEntityType(),
+              },
+              score,
+            ),
+          ).rejects.toThrow(
+            'Adjustable reputation points must be positive integer',
+          );
+        },
+      );
+
+      it('creates entity if not exists and increases reputation', async () => {
+        mockReputationRepository.findExclusive.mockResolvedValueOnce(null);
+
+        const criteria = {
+          chainId: generateTestnetChainId(),
+          address: faker.finance.ethereumAddress(),
+          type: generateReputationEntityType(),
+        };
+        const score = generateRandomScorePoints();
+
+        await service.increaseReputation(criteria, score);
+
+        expect(mockReputationRepository.createUnique).toHaveBeenCalledTimes(1);
+        expect(mockReputationRepository.createUnique).toHaveBeenCalledWith(
+          expect.objectContaining({
+            ...criteria,
+            reputationPoints: 0,
+          }),
         );
-      },
-    );
 
-    it('creates entity if not exists and increases reputation', async () => {
-      mockReputationRepository.findExclusive.mockResolvedValueOnce(null);
-
-      const criteria = {
-        chainId: generateTestnetChainId(),
-        address: faker.finance.ethereumAddress(),
-        type: generateReputationEntityType(),
-      };
-      const score = faker.number.int({ min: 1 });
-
-      await service.increaseReputation(criteria, score);
-
-      expect(mockReputationRepository.createUnique).toHaveBeenCalledTimes(1);
-      expect(mockReputationRepository.createUnique).toHaveBeenCalledWith(
-        expect.objectContaining({
-          ...criteria,
-          reputationPoints: 0,
-        }),
-      );
-
-      expect(mockReputationRepository.increment).toHaveBeenCalledTimes(1);
-      expect(mockReputationRepository.increment).toHaveBeenCalledWith(
-        criteria,
-        'reputationPoints',
-        score,
-      );
-    });
-
-    it('creates entity if not exists and increases reputation for current reputation oracle', async () => {
-      mockReputationRepository.findExclusive.mockResolvedValueOnce(null);
-
-      const criteria = {
-        chainId: generateTestnetChainId(),
-        address: mockWeb3ConfigService.operatorAddress,
-        type: ReputationEntityType.REPUTATION_ORACLE,
-      };
-      const score = faker.number.int({ min: 1 });
-
-      await service.increaseReputation(criteria, score);
-
-      expect(mockReputationRepository.createUnique).toHaveBeenCalledTimes(1);
-      expect(mockReputationRepository.createUnique).toHaveBeenCalledWith(
-        expect.objectContaining({
-          ...criteria,
-          reputationPoints: mockReputationConfigService.highLevel,
-        }),
-      );
-
-      expect(mockReputationRepository.increment).toHaveBeenCalledTimes(1);
-      expect(mockReputationRepository.increment).toHaveBeenCalledWith(
-        criteria,
-        'reputationPoints',
-        score,
-      );
-    });
-
-    it('increases reputation if entity already exists', async () => {
-      const reputationEntity = generateReputationEntity();
-      mockReputationRepository.findExclusive.mockResolvedValueOnce(
-        reputationEntity,
-      );
-
-      const criteria = {
-        chainId: reputationEntity.chainId,
-        address: reputationEntity.address,
-        type: reputationEntity.type,
-      };
-      const score = faker.number.int({ min: 1 });
-
-      await service.increaseReputation(criteria, score);
-
-      expect(mockReputationRepository.createUnique).not.toHaveBeenCalled();
-
-      expect(mockReputationRepository.increment).toHaveBeenCalledTimes(1);
-      expect(mockReputationRepository.increment).toHaveBeenCalledWith(
-        criteria,
-        'reputationPoints',
-        score,
-      );
-    });
-  });
-
-  describe('decreaseReputation', () => {
-    it.each([faker.number.float(), faker.number.int() * -1])(
-      'throws for invalid score points [%#]',
-      async (score) => {
-        await expect(
-          service.decreaseReputation(
-            {
-              chainId: generateTestnetChainId(),
-              address: faker.finance.ethereumAddress(),
-              type: generateReputationEntityType(),
-            },
-            score,
-          ),
-        ).rejects.toThrow(
-          'Adjustable reputation points must be positive integer',
+        expect(mockReputationRepository.updateOne).toHaveBeenCalledTimes(1);
+        expect(mockReputationRepository.updateOne).toHaveBeenCalledWith(
+          expect.objectContaining({
+            ...criteria,
+            reputationPoints: score,
+          }),
         );
-      },
-    );
+      });
 
-    it('creates entity if not exists and decreases reputation', async () => {
-      mockReputationRepository.findExclusive.mockResolvedValueOnce(null);
+      it('creates entity if not exists and increases reputation for current reputation oracle', async () => {
+        mockReputationRepository.findExclusive.mockResolvedValueOnce(null);
 
-      const criteria = {
-        chainId: generateTestnetChainId(),
-        address: faker.finance.ethereumAddress(),
-        type: generateReputationEntityType(),
-      };
-      const score = faker.number.int({ min: 1 });
+        const criteria = {
+          chainId: generateTestnetChainId(),
+          address: mockWeb3ConfigService.operatorAddress,
+          type: ReputationEntityType.REPUTATION_ORACLE,
+        };
+        const score = generateRandomScorePoints();
 
-      await service.decreaseReputation(criteria, score);
+        await service.increaseReputation(criteria, score);
 
-      expect(mockReputationRepository.createUnique).toHaveBeenCalledTimes(1);
-      expect(mockReputationRepository.createUnique).toHaveBeenCalledWith(
-        expect.objectContaining({
-          ...criteria,
-          reputationPoints: 0,
-        }),
-      );
+        expect(mockReputationRepository.createUnique).toHaveBeenCalledTimes(1);
+        expect(mockReputationRepository.createUnique).toHaveBeenCalledWith(
+          expect.objectContaining({
+            ...criteria,
+            reputationPoints: mockReputationConfigService.highLevel,
+          }),
+        );
 
-      expect(mockReputationRepository.decrement).toHaveBeenCalledTimes(1);
-      expect(mockReputationRepository.decrement).toHaveBeenCalledWith(
-        criteria,
-        'reputationPoints',
-        score,
-      );
+        expect(mockReputationRepository.updateOne).toHaveBeenCalledTimes(1);
+        expect(mockReputationRepository.updateOne).toHaveBeenCalledWith(
+          expect.objectContaining({
+            ...criteria,
+            reputationPoints: score + mockReputationConfigService.highLevel,
+          }),
+        );
+      });
+
+      it('increases reputation if entity already exists', async () => {
+        const reputationEntity = generateReputationEntity();
+        mockReputationRepository.findExclusive.mockResolvedValueOnce(
+          reputationEntity,
+        );
+
+        const criteria = {
+          chainId: reputationEntity.chainId,
+          address: reputationEntity.address,
+          type: reputationEntity.type,
+        };
+        const score = generateRandomScorePoints();
+        const initialEntityScore = reputationEntity.reputationPoints;
+
+        await service.increaseReputation(criteria, score);
+
+        expect(mockReputationRepository.createUnique).not.toHaveBeenCalled();
+
+        expect(mockReputationRepository.updateOne).toHaveBeenCalledTimes(1);
+        expect(mockReputationRepository.updateOne).toHaveBeenCalledWith(
+          expect.objectContaining({
+            ...criteria,
+            reputationPoints: initialEntityScore + score,
+          }),
+        );
+      });
     });
 
-    it('should not decrease reputation for current reputation oracle', async () => {
-      const criteria = {
-        chainId: generateTestnetChainId(),
-        address: mockWeb3ConfigService.operatorAddress,
-        type: ReputationEntityType.REPUTATION_ORACLE,
-      };
-      const score = faker.number.int({ min: 1 });
+    describe('decreaseReputation', () => {
+      it.each([faker.number.float(), faker.number.int() * -1])(
+        'throws for invalid score points [%#]',
+        async (score) => {
+          await expect(
+            service.decreaseReputation(
+              {
+                chainId: generateTestnetChainId(),
+                address: faker.finance.ethereumAddress(),
+                type: generateReputationEntityType(),
+              },
+              score,
+            ),
+          ).rejects.toThrow(
+            'Adjustable reputation points must be positive integer',
+          );
+        },
+      );
 
-      await service.decreaseReputation(criteria, score);
+      it('creates entity if not exists and decreases reputation', async () => {
+        mockReputationRepository.findExclusive.mockResolvedValueOnce(null);
+        mockReputationRepository.createUnique.mockImplementationOnce(
+          async (entity) => ({ ...entity }),
+        );
 
-      expect(mockReputationRepository.createUnique).not.toHaveBeenCalled();
+        const criteria = {
+          chainId: generateTestnetChainId(),
+          address: faker.finance.ethereumAddress(),
+          type: generateReputationEntityType(),
+        };
+        const score = generateRandomScorePoints();
 
-      expect(mockReputationRepository.decrement).not.toHaveBeenCalled();
+        await service.decreaseReputation(criteria, score);
+
+        expect(mockReputationRepository.createUnique).toHaveBeenCalledTimes(1);
+        expect(mockReputationRepository.createUnique).toHaveBeenCalledWith(
+          expect.objectContaining({
+            ...criteria,
+            reputationPoints: 0,
+          }),
+        );
+
+        expect(mockReputationRepository.updateOne).toHaveBeenCalledTimes(1);
+        expect(mockReputationRepository.updateOne).toHaveBeenCalledWith(
+          expect.objectContaining({
+            ...criteria,
+            reputationPoints: -score,
+          }),
+        );
+      });
+
+      it('decreases reputation if entity already exists', async () => {
+        const reputationEntity = generateReputationEntity();
+        mockReputationRepository.findExclusive.mockResolvedValueOnce(
+          reputationEntity,
+        );
+
+        const criteria = {
+          chainId: reputationEntity.chainId,
+          address: reputationEntity.address,
+          type: reputationEntity.type,
+        };
+        const score = generateRandomScorePoints();
+        const initialEntityScore = reputationEntity.reputationPoints;
+
+        await service.decreaseReputation(criteria, score);
+
+        expect(mockReputationRepository.createUnique).not.toHaveBeenCalled();
+
+        expect(mockReputationRepository.updateOne).toHaveBeenCalledTimes(1);
+        expect(mockReputationRepository.updateOne).toHaveBeenCalledWith(
+          expect.objectContaining({
+            ...criteria,
+            reputationPoints: initialEntityScore - score,
+          }),
+        );
+      });
+
+      it('should not decrease reputation for current reputation oracle', async () => {
+        const criteria = {
+          chainId: generateTestnetChainId(),
+          address: mockWeb3ConfigService.operatorAddress,
+          type: ReputationEntityType.REPUTATION_ORACLE,
+        };
+        const score = generateRandomScorePoints();
+
+        await service.decreaseReputation(criteria, score);
+
+        expect(mockReputationRepository.createUnique).not.toHaveBeenCalled();
+
+        expect(mockReputationRepository.decrement).not.toHaveBeenCalled();
+      });
     });
   });
 
@@ -277,6 +326,10 @@ describe('ReputationService', () => {
 
     beforeAll(() => {
       spyOnIncreaseReputation = jest.spyOn(service, 'increaseReputation');
+    });
+
+    beforeEach(() => {
+      spyOnIncreaseReputation.mockImplementation();
     });
 
     afterAll(() => {
