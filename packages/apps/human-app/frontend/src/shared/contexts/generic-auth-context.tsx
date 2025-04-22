@@ -1,17 +1,13 @@
-// generic-auth-provider.tsx
 import React, { createContext, useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import { type ZodType } from 'zod';
 import { useQueryClient } from '@tanstack/react-query';
 import { browserAuthProvider } from '@/shared/contexts/browser-auth-provider';
-import {
-  ModalType,
-  useModalStore,
-} from '@/shared/components/ui/modal/modal.store';
 import { type AuthTokensSuccessResponse } from '@/shared/schemas';
 import { type UserData } from '@/modules/auth/context/auth-context';
 import { type Web3UserData } from '@/modules/auth-web3/context/web3-auth-context';
 import { type AuthType } from '../types/browser-auth-provider';
+import { useExpirationModal } from '../hooks';
 
 export type AuthStatus = 'loading' | 'error' | 'success' | 'idle';
 
@@ -46,7 +42,6 @@ export function createAuthProvider<T extends UserData | Web3UserData>(config: {
 
   function AuthProvider({ children }: Readonly<{ children: React.ReactNode }>) {
     const queryClient = useQueryClient();
-    const { openModal } = useModalStore();
     const [authState, setAuthState] = useState<{
       user: T | null;
       status: AuthStatus;
@@ -54,14 +49,11 @@ export function createAuthProvider<T extends UserData | Web3UserData>(config: {
       user: null,
       status: 'loading',
     });
+    const { openModal } = useExpirationModal();
 
     const displayExpirationModal = () => {
       queryClient.setDefaultOptions({ queries: { enabled: false } });
-      openModal({
-        modalType: ModalType.EXPIRATION_MODAL,
-        displayCloseButton: false,
-        maxWidth: 'sm',
-      });
+      openModal();
     };
 
     const handleSignIn = () => {

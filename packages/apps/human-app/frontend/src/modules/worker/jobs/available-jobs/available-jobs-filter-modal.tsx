@@ -4,24 +4,23 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { Divider, IconButton, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import CloseIcon from '@mui/icons-material/Close';
-import type { Dispatch, SetStateAction } from 'react';
 import { HumanLogoIcon } from '@/shared/components/ui/icons';
-import { useColorMode } from '@/shared/contexts/color-mode';
 import { useHandleMainNavIconClick } from '@/shared/hooks/use-handle-main-nav-icon-click';
-import { MyJobsNetworkFilterMobile } from './my-jobs-network-filter-mobile';
-import { MyJobsJobTypeFilterMobile } from './my-jobs-job-type-filter-mobile';
-import { MyJobsStatusFilterMobile } from './my-jobs-status-filter-mobile';
-import { MyJobsExpiresAtSortMobile } from './my-jobs-expires-at-sort-mobile';
-import { MyJobsRewardAmountSortMobile } from './my-jobs-reward-amount-sort-mobile';
+import { useColorMode } from '@/shared/contexts/color-mode';
+import {
+  AvailableJobsNetworkFilter,
+  AvailableJobsJobTypeFilter,
+} from './components';
+import { AvailableJobsRewardAmountSortMobile } from './components/mobile/available-jobs-reward-amount-sort-mobile';
 
-interface DrawerMobileProps {
-  setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
+interface AvailableJobsFilterModalProps {
   chainIdsEnabled: number[];
+  close: () => void;
 }
-export function MyJobsDrawerMobileView({
-  setIsMobileFilterDrawerOpen,
+export function AvailableJobsFilterModal({
   chainIdsEnabled,
-}: Readonly<DrawerMobileProps>) {
+  close,
+}: Readonly<AvailableJobsFilterModalProps>) {
   const handleMainNavIconClick = useHandleMainNavIconClick();
   const { colorPalette } = useColorMode();
   const { t } = useTranslation();
@@ -60,19 +59,12 @@ export function MyJobsDrawerMobileView({
             zIndex: '999999',
           }}
         >
-          <Stack
-            sx={{ cursor: 'pointer' }}
-            onClick={() => {
-              handleMainNavIconClick();
-            }}
-          >
+          <Stack sx={{ cursor: 'pointer' }} onClick={handleMainNavIconClick}>
             <HumanLogoIcon />
           </Stack>
 
           <IconButton
-            onClick={() => {
-              setIsMobileFilterDrawerOpen(false);
-            }}
+            onClick={close}
             sx={{
               zIndex: '99999999',
               marginRight: '15px',
@@ -94,8 +86,7 @@ export function MyJobsDrawerMobileView({
         <Typography variant="mobileHeaderMid">
           {t('worker.jobs.mobileFilterDrawer.sortBy')}
         </Typography>
-        <MyJobsRewardAmountSortMobile />
-        <MyJobsExpiresAtSortMobile />
+        <AvailableJobsRewardAmountSortMobile />
         <Typography variant="mobileHeaderLarge">
           {t('worker.jobs.mobileFilterDrawer.filters')}
         </Typography>
@@ -109,7 +100,7 @@ export function MyJobsDrawerMobileView({
           {t('worker.jobs.network')}
         </Typography>
         <Stack alignItems="center" flexDirection="row">
-          <MyJobsNetworkFilterMobile chainIdsEnabled={chainIdsEnabled} />
+          <AvailableJobsNetworkFilter chainIdsEnabled={chainIdsEnabled} />
         </Stack>
 
         <Divider
@@ -122,18 +113,8 @@ export function MyJobsDrawerMobileView({
           {t('worker.jobs.jobType')}
         </Typography>
         <Stack alignItems="center" flexDirection="row">
-          <MyJobsJobTypeFilterMobile />
+          <AvailableJobsJobTypeFilter />
         </Stack>
-        <Divider
-          sx={{
-            my: '16px',
-            background: colorPalette.text.secondary,
-          }}
-        />
-        <Typography variant="mobileHeaderMid">
-          {t('worker.jobs.status')}
-        </Typography>
-        <MyJobsStatusFilterMobile />
       </Drawer>
     </Box>
   );
