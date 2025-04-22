@@ -6,8 +6,8 @@ import { browserAuthProvider } from '@/shared/contexts/browser-auth-provider';
 import { type AuthTokensSuccessResponse } from '@/shared/schemas';
 import { type UserData } from '@/modules/auth/context/auth-context';
 import { type Web3UserData } from '@/modules/auth-web3/context/web3-auth-context';
-import { useExpirationModal } from '@/modules/auth';
 import { type AuthType } from '../types/browser-auth-provider';
+import { useExpirationModal } from '../hooks';
 
 export type AuthStatus = 'loading' | 'error' | 'success' | 'idle';
 

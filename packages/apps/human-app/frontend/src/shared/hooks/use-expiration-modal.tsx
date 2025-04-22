@@ -1,5 +1,5 @@
 import { useModal } from '@/shared/contexts/modal-context';
-import { ExpirationModal } from '@/modules/auth/components';
+import { ExpirationModal } from '../components/expiration-modal';
 
 export function useExpirationModal() {
   const { openModal } = useModal();
