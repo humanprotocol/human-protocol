@@ -1,39 +1,33 @@
-import { Box, Container, Grid, Typography, useMediaQuery } from '@mui/material';
+import { FC } from 'react';
+import { Box, Grid, Typography, useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import React, { useState } from 'react';
-import { KVStoreIcon } from '../../assets/KVStoreIcon';
+
 import BalanceCard from '../../components/BalanceCard';
 import LockedAmountCard from '../../components/LockedAmountCard';
-import StakeModal from '../../components/modals/StakeModal';
-import UnstakeModal from '../../components/modals/UnstakeModal';
-import NetworkStatus from '../../components/NetworkStatus';
 import PageWrapper from '../../components/PageWrapper';
-import ShadowIcon from '../../components/ShadowIcon';
 import StakedAmountCard from '../../components/StakedAmountCard';
-import KVStoreTable from '../../components/Tables/kvstore';
 import WithdrawableAmountCard from '../../components/WithdrawableAmountCard';
+import { OverviewIcon } from '../../icons';
 
-const Dashboard: React.FC = () => {
-  const [stakeModalOpen, setStakeModalOpen] = useState(false);
-  const [unstakeModalOpen, setUnstakeModalOpen] = useState(false);
+const Dashboard: FC = () => {
   const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   return (
-    <PageWrapper violetHeader>
-      <Box>
-        <Container maxWidth={false}>
+    <PageWrapper>
+      <Box className="violet-header" flex={1}>
+        <Box mx={{ xs: 4, md: 6, lg: 8 }} display="flex" flexDirection="column">
           <Box
             sx={{
-              mt: 6,
-              mb: 8,
+              mt: 3,
+              mb: 5,
               display: 'flex',
-              flexDirection: isSmallScreen ? 'column' : 'row',
-              justifyContent: 'space-between',
-              alignItems: isSmallScreen ? 'flex-start' : 'center',
+              flexDirection: isMobile ? 'column' : 'row',
+              alignItems: isMobile ? 'flex-start' : 'center',
               gap: 2,
             }}
           >
+            <OverviewIcon sx={{ width: 66, height: 66 }} />
             <Typography
               variant="h1"
               fontWeight="bold"
@@ -41,49 +35,34 @@ const Dashboard: React.FC = () => {
             >
               Staking Overview
             </Typography>
-            <NetworkStatus />
           </Box>
-
-          <Grid container spacing={3}>
-            <Grid item xs={12} sm={6} md={3}>
+          <Grid
+            container
+            columnSpacing={isMobile ? 0 : 3}
+            rowSpacing={isMobile ? 4 : 0}
+          >
+            <Grid item xs={12} sm={6} md={4} pl={0}>
               <BalanceCard />
             </Grid>
-
-            <Grid item xs={12} sm={6} md={3}>
-              <StakedAmountCard
-                onStakeOpen={() => setStakeModalOpen(true)}
-                onUnstakeOpen={() => setUnstakeModalOpen(true)}
-              />
+            <Grid item xs={12} sm={6} md={4}>
+              <StakedAmountCard />
             </Grid>
-
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid
+              item
+              xs={12}
+              sm={12}
+              md={4}
+              display="flex"
+              flexDirection={{ xs: 'column', sm: 'row', md: 'column' }}
+              gap={3}
+              mt={{ xs: 0, sm: 4, md: 0 }}
+            >
               <LockedAmountCard />
-            </Grid>
-
-            <Grid item xs={12} sm={6} md={3}>
               <WithdrawableAmountCard />
             </Grid>
           </Grid>
-
-          <Box mt={8}>
-            <ShadowIcon
-              className="home-page-kvstore"
-              title="KV Store"
-              img={<KVStoreIcon />}
-            />
-            <KVStoreTable />
-          </Box>
-        </Container>
+        </Box>
       </Box>
-
-      <StakeModal
-        open={stakeModalOpen}
-        onClose={() => setStakeModalOpen(false)}
-      />
-      <UnstakeModal
-        open={unstakeModalOpen}
-        onClose={() => setUnstakeModalOpen(false)}
-      />
     </PageWrapper>
   );
 };

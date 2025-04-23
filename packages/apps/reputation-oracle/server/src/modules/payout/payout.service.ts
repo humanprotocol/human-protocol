@@ -33,7 +33,7 @@ import {
   SaveResultDto,
 } from './payout.interface';
 import * as httpUtils from '../../utils/http';
-import { getRequestType } from '../../utils/manifest';
+import { getJobRequestType } from '../../utils/manifest';
 import { assertValidJobRequestType } from '../../utils/type-guards';
 import { MissingManifestUrlError } from '../../common/errors/manifest';
 
@@ -68,7 +68,7 @@ export class PayoutService {
     const manifest =
       await this.storageService.downloadJsonLikeData<JobManifest>(manifestUrl);
 
-    const requestType = getRequestType(manifest).toLowerCase();
+    const requestType = getJobRequestType(manifest).toLowerCase();
 
     assertValidJobRequestType(requestType);
 
@@ -105,7 +105,7 @@ export class PayoutService {
     const manifest =
       await this.storageService.downloadJsonLikeData<JobManifest>(manifestUrl);
 
-    const requestType = getRequestType(manifest).toLowerCase();
+    const requestType = getJobRequestType(manifest).toLowerCase();
 
     assertValidJobRequestType(requestType);
 

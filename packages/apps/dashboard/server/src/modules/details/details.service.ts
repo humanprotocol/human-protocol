@@ -28,6 +28,7 @@ import { ReputationLevel } from '../../common/enums/reputation';
 import {
   MAX_LEADERS_COUNT,
   MIN_AMOUNT_STAKED,
+  REPUTATION_PLACEHOLDER,
 } from '../../common/constants/operator';
 import { GetOperatorsPaginationOptions } from 'src/common/types';
 import { KVStoreDataDto } from './dto/details-response.dto';
@@ -65,7 +66,11 @@ export class DetailsService {
       operatorDto.chainId = chainId;
       operatorDto.balance = await this.getHmtBalance(chainId, address);
 
-      const { reputation } = await this.fetchReputation(chainId, address);
+      const { reputation } = await this.fetchOperatorReputation(
+        chainId,
+        address,
+        operatorDto.role,
+      );
       operatorDto.reputation = reputation;
 
       return operatorDto;
@@ -235,31 +240,40 @@ export class DetailsService {
     return operatorsFilter;
   }
 
-  private async fetchReputation(
+  private async fetchOperatorReputation(
     chainId: ChainId,
     address: string,
+    role?: string,
   ): Promise<{ address: string; reputation: string }> {
     try {
       const response = await firstValueFrom(
-        this.httpService.get(
-          `${this.configService.reputationSource}/reputation/${address}`,
+        this.httpService.get<{ level: string }[]>(
+          `${this.configService.reputationSource}/reputation`,
           {
             params: {
               chain_id: chainId,
-              roles: [
-                Role.JobLauncher,
-                Role.ExchangeOracle,
-                Role.RecordingOracle,
-                Role.ReputationOracle,
-              ],
+              address,
+              roles: role
+                ? [role]
+                : [
+                    Role.JobLauncher,
+                    Role.ExchangeOracle,
+                    Role.RecordingOracle,
+                    Role.ReputationOracle,
+                  ],
             },
           },
         ),
       );
-      return response.data;
+
+      let reputation = REPUTATION_PLACEHOLDER;
+      if (response.data.length) {
+        reputation = response.data[0].level;
+      }
+      return { address, reputation };
     } catch (error) {
       this.logger.error('Error fetching reputation:', error);
-      return { address, reputation: 'Not available' };
+      return { address, reputation: REPUTATION_PLACEHOLDER };
     }
   }
 
@@ -268,7 +282,7 @@ export class DetailsService {
     orderBy?: OperatorsOrderBy,
     orderDirection?: OrderDirection,
     first?: number,
-  ): Promise<{ address: string; reputation: string }[]> {
+  ): Promise<{ address: string; level: string }[]> {
     try {
       const response = await firstValueFrom(
         this.httpService.get(
@@ -304,10 +318,10 @@ export class DetailsService {
 
   private assignReputationsToOperators(
     operators: OperatorDto[],
-    reputations: { address: string; reputation: string }[],
+    reputations: { address: string; level: string }[],
   ): OperatorDto[] {
     const reputationMap = new Map(
-      reputations.map((rep) => [rep.address.toLowerCase(), rep.reputation]),
+      reputations.map((rep) => [rep.address.toLowerCase(), rep.level]),
     );
 
     operators.forEach((operator) => {

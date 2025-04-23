@@ -13,13 +13,12 @@ export const useKVStore = () => {
   const { showError, openSnackbar } = useSnackbar();
 
   const [kvStore, setKVStore] = useState<IKVStore[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [kvstoreClient, setKVStoreClient] = useState<KVStoreClient | null>(
     null
   );
 
   const fetchKVStore = async () => {
-    setLoading(true);
     try {
       if (address && chainId) {
         const data = await getKVStoreData(address, chainId);
@@ -82,7 +81,7 @@ export const useKVStore = () => {
       }
     } catch (err) {
       showError(parseErrorMessage(err));
-      console.error(err);
+      throw err;
     } finally {
       setLoading(false);
     }
@@ -100,7 +99,7 @@ export const useKVStore = () => {
       }
     } catch (err) {
       showError(parseErrorMessage(err));
-      console.error(err);
+      throw err;
     } finally {
       setLoading(false);
     }
