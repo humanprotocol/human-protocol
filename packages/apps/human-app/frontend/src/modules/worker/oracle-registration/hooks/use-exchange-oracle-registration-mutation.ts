@@ -1,26 +1,13 @@
-import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient } from '@/api/api-client';
-import { apiPaths } from '@/api/api-paths';
 import { type RegistrationInExchangeOracleDto } from '../schema';
-
-const RegistrationInExchangeOracleSuccessResponseSchema = z.unknown();
-
-function registrationInExchangeOracleMutationFn(
-  data: RegistrationInExchangeOracleDto
-) {
-  return apiClient(apiPaths.worker.registrationInExchangeOracle.path, {
-    authenticated: true,
-    successSchema: RegistrationInExchangeOracleSuccessResponseSchema,
-    options: { method: 'POST', body: JSON.stringify(data) },
-  });
-}
+import { oracleRegistrationService } from '../services/oracle-registration.service';
 
 export function useExchangeOracleRegistrationMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: registrationInExchangeOracleMutationFn,
+    mutationFn: async (data: RegistrationInExchangeOracleDto) =>
+      oracleRegistrationService.registerInExchangeOracle(data),
     onSuccess: async () => {
       await queryClient.invalidateQueries();
     },

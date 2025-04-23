@@ -1,26 +1,20 @@
 import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { apiClient } from '@/api/api-client';
-import { apiPaths } from '@/api/api-paths';
 import { routerPaths } from '@/router/router-paths';
+import { signupService } from '@/modules/signup/services/signup.service';
 import { type SignUpDto } from '../schema';
 
-const signUpSuccessResponseSchema = z.unknown();
-
-async function signUpMutationFn(data: Omit<SignUpDto, 'confirmPassword'>) {
-  await apiClient(apiPaths.worker.signUp.path, {
-    successSchema: signUpSuccessResponseSchema,
-    options: { method: 'POST', body: JSON.stringify(data) },
-  });
-}
+export const SignUpSuccessResponseSchema = z.unknown();
 
 export function useSignUpMutation() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   return useMutation({
-    mutationFn: signUpMutationFn,
+    mutationFn: async (data: Omit<SignUpDto, 'confirmPassword'>) => {
+      return signupService.workerSignUp(data);
+    },
     onSuccess: async (_, { email }) => {
       navigate(routerPaths.worker.verifyEmail, {
         state: { routerState: { email } },

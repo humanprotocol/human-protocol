@@ -1,49 +1,51 @@
 import { t } from 'i18next';
-import { Typography } from '@mui/material';
+import { useEffect } from 'react';
 import { useConnectedWallet } from '@/shared/contexts/wallet-connect';
 import { Button } from '@/shared/components/ui/button';
-import type { SignatureData } from '@/api/hooks/use-prepare-signature';
 import {
-  PrepareSignatureType,
+  TopNotificationType,
+  useNotification,
   usePrepareSignature,
-} from '@/api/hooks/use-prepare-signature';
+} from '@/shared/hooks';
+import { PrepareSignatureType } from '@/shared/services/signature.service';
 import { useEnableWeb3Operator } from '../hooks';
 
 export function ProfileEnableButton() {
-  const { address, signMessage } = useConnectedWallet();
+  const { signMessage } = useConnectedWallet();
   const {
-    data: signatureData,
-    isError: isSignatureDataError,
+    prepareSignature,
+    error: signatureDataError,
     isPending: isSignatureDataPending,
-  } = usePrepareSignature({
-    address,
-    type: PrepareSignatureType.ENABLE_OPERATOR,
-  });
+  } = usePrepareSignature(PrepareSignatureType.ENABLE_OPERATOR);
 
   const {
     mutate: enableOperatorMutation,
-    isError: isEnableOperatorError,
+    error: enableOperatorError,
     isPending: isEnableOperatorPending,
   } = useEnableWeb3Operator();
 
-  const enableOperator = async (signaturePayload: SignatureData) => {
+  const { showNotification } = useNotification();
+
+  useEffect(() => {
+    if (Boolean(signatureDataError) || Boolean(enableOperatorError)) {
+      showNotification({
+        message: t('operator.profile.activate.cannotActivate'),
+        type: TopNotificationType.WARNING,
+      });
+    }
+  }, [signatureDataError, enableOperatorError, showNotification]);
+
+  const enableOperator = async () => {
+    const signaturePayload = await prepareSignature();
     const signature = await signMessage(JSON.stringify(signaturePayload));
     enableOperatorMutation({ signature: signature ?? '' });
   };
-
-  if (isSignatureDataError || isEnableOperatorError) {
-    return (
-      <Typography>{t('operator.profile.activate.cannotActivate')}</Typography>
-    );
-  }
 
   return (
     <Button
       loading={isSignatureDataPending || isEnableOperatorPending}
       onClick={() => {
-        if (signatureData) {
-          void enableOperator(signatureData);
-        }
+        void enableOperator();
       }}
       variant="contained"
     >

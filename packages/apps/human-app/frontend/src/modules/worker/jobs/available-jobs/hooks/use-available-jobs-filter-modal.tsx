@@ -1,6 +1,6 @@
 import { useModal } from '@/shared/contexts/modal-context';
+import { useGetUiConfig } from '@/shared/hooks';
 import { AvailableJobsFilterModal } from '../available-jobs-filter-modal';
-import { useGetUiConfig } from '../../hooks';
 
 export function useAvailableJobsFilterModal() {
   const { openModal, closeModal } = useModal();
