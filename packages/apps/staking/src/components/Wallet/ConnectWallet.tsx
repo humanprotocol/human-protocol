@@ -1,10 +1,10 @@
-import { Box, Button, Grid, Typography } from '@mui/material';
+import { Button } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useAccount } from 'wagmi';
-import fundCryptoImg from '../../assets/fund-crypto.png';
+
 import WalletModal from './WalletModal';
 
-export const ConnectWallet = () => {
+const ConnectWallet = () => {
   const [walletModalOpen, setWalletModalOpen] = useState(false);
   const { isConnected } = useAccount();
 
@@ -18,62 +18,19 @@ export const ConnectWallet = () => {
     if (isConnected && walletModalOpen) {
       setWalletModalOpen(false);
     }
-  }, [isConnected]);
+  }, [isConnected, walletModalOpen]);
 
   return (
     <>
-      <Box
-        sx={{
-          mx: 'auto',
-          maxWidth: '560px',
-          minHeight: '480px',
-          background: '#fff',
-          overflow: 'hidden',
-          display: 'flex',
-          flexDirection: 'column',
-          borderRadius: '20px',
-          boxShadow:
-            '0px 1px 5px rgba(233, 235, 250, 0.20), 0px 2px 2px rgba(233, 235, 250, 0.50), 0px 3px 1px -2px #E9EBFA',
-        }}
+      <Button
+        variant="contained"
+        color="primary"
+        size="medium"
+        sx={{ borderRadius: '4px', boxShadow: 'none', height: '42px' }}
+        onClick={handleClickCrypto}
       >
-        <Grid container spacing={4} sx={{ flex: 1 }}>
-          <Grid item xs={12}>
-            <Box
-              sx={{
-                width: '100%',
-                height: '100%',
-                background: '#fff',
-                border: '1px solid #dbe1f6',
-                borderRadius: '20px',
-                textAlign: 'center',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                flexDirection: 'column',
-                py: 8,
-              }}
-            >
-              <img
-                src={fundCryptoImg}
-                alt="crypto"
-                style={{ width: 135, height: 'auto', marginBottom: '32px' }}
-              />
-              <Typography variant="h6" color="primary" mb={2}>
-                Connect Your Wallet
-              </Typography>
-              <Button
-                variant="contained"
-                color="primary"
-                size="large"
-                sx={{ mb: 2, borderRadius: '10px' }}
-                onClick={handleClickCrypto}
-              >
-                Connect
-              </Button>
-            </Box>
-          </Grid>
-        </Grid>
-      </Box>
+        Connect Wallet
+      </Button>
       <WalletModal
         open={walletModalOpen}
         onClose={() => setWalletModalOpen(false)}
@@ -81,3 +38,5 @@ export const ConnectWallet = () => {
     </>
   );
 };
+
+export default ConnectWallet;
