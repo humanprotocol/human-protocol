@@ -9,23 +9,23 @@ import { ChainId } from '@human-protocol/sdk';
 @Index(['chainId', 'escrowAddress'], { unique: true })
 export class WebhookIncomingEntity extends BaseEntity {
   @Column({ type: 'int' })
-  public chainId: ChainId;
+  chainId: ChainId;
 
   @Column({ type: 'varchar' })
-  public escrowAddress: string;
+  escrowAddress: string;
 
   @Column({ type: 'varchar', nullable: true })
-  public failureDetail: string;
+  failureDetail: string;
 
   @Column({ type: 'int' })
-  public retriesCount: number;
+  retriesCount: number;
 
   @Column({ type: 'timestamptz' })
-  public waitUntil: Date;
+  waitUntil: Date;
 
   @Column({
     type: 'enum',
     enum: WebhookIncomingStatus,
   })
-  public status: WebhookIncomingStatus;
+  status: WebhookIncomingStatus;
 }

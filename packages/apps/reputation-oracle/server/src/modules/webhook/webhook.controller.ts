@@ -48,9 +48,7 @@ export class WebhookController {
   @UseGuards(new SignatureAuthGuard([AuthSignatureRole.RECORDING_ORACLE]))
   @Post('/')
   @HttpCode(202)
-  public async createIncomingWebhook(
-    @Body() data: IncomingWebhookDto,
-  ): Promise<void> {
+  async createIncomingWebhook(@Body() data: IncomingWebhookDto): Promise<void> {
     await this.webhookIncomingService.createIncomingWebhook(data);
   }
 }

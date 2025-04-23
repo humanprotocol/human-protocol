@@ -8,26 +8,26 @@ import { WebhookOutgoingStatus } from '../../common/enums';
 @Index(['hash'], { unique: true })
 export class WebhookOutgoingEntity extends BaseEntity {
   @Column({ type: 'jsonb' })
-  public payload: Record<string, unknown>;
+  payload: Record<string, unknown>;
 
   @Column({ type: 'varchar' })
-  public hash: string;
+  hash: string;
 
   @Column({ type: 'varchar' })
-  public url: string;
+  url: string;
 
   @Column({ type: 'varchar', nullable: true })
-  public failureDetail: string;
+  failureDetail: string;
 
   @Column({ type: 'int' })
-  public retriesCount: number;
+  retriesCount: number;
 
   @Column({ type: 'timestamptz' })
-  public waitUntil: Date;
+  waitUntil: Date;
 
   @Column({
     type: 'enum',
     enum: WebhookOutgoingStatus,
   })
-  public status: WebhookOutgoingStatus;
+  status: WebhookOutgoingStatus;
 }

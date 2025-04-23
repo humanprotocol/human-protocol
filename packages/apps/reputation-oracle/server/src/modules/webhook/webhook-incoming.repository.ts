@@ -8,13 +8,13 @@ import { ServerConfigService } from '../../config/server-config.service';
 @Injectable()
 export class WebhookIncomingRepository extends BaseRepository<WebhookIncomingEntity> {
   constructor(
-    private dataSource: DataSource,
-    public readonly serverConfigService: ServerConfigService,
+    dataSource: DataSource,
+    private readonly serverConfigService: ServerConfigService,
   ) {
     super(WebhookIncomingEntity, dataSource);
   }
 
-  public findByStatus(
+  findByStatus(
     status: WebhookIncomingStatus,
   ): Promise<WebhookIncomingEntity[]> {
     return this.find({
