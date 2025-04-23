@@ -67,7 +67,7 @@ describe('AbuseService', () => {
     abuseService = moduleRef.get<AbuseService>(AbuseService);
   });
 
-  beforeEach(() => {
+  afterEach(() => {
     jest.resetAllMocks();
   });
 

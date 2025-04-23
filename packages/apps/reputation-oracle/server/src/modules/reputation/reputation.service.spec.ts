@@ -325,11 +325,9 @@ describe('ReputationService', () => {
     let spyOnIncreaseReputation: jest.SpyInstance;
 
     beforeAll(() => {
-      spyOnIncreaseReputation = jest.spyOn(service, 'increaseReputation');
-    });
-
-    beforeEach(() => {
-      spyOnIncreaseReputation.mockImplementation();
+      spyOnIncreaseReputation = jest
+        .spyOn(service, 'increaseReputation')
+        .mockImplementation();
     });
 
     afterAll(() => {
