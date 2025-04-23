@@ -6,11 +6,11 @@ import {
 } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
-import { OutgoingWebhookEventType } from '../../common/enums';
 import { isDuplicatedError } from '../../common/errors/database';
 import { ServerConfigService } from '../../config/server-config.service';
 import logger from '../../logger';
 import { Web3Service } from '../web3/web3.service';
+import { OutgoingWebhookEventType } from '../webhook/types';
 import { OutgoingWebhookService } from '../webhook/webhook-outgoing.service';
 import { AbuseEntity } from './abuse.entity';
 import { AbuseRepository } from './abuse.repository';
