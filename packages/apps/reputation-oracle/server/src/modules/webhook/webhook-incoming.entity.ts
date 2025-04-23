@@ -15,7 +15,7 @@ export class WebhookIncomingEntity extends BaseEntity {
   escrowAddress: string;
 
   @Column({ type: 'varchar', nullable: true })
-  failureDetail: string;
+  failureDetail: string | null;
 
   @Column({ type: 'int' })
   retriesCount: number;

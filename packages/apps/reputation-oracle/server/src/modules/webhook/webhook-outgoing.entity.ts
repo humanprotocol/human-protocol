@@ -17,7 +17,7 @@ export class WebhookOutgoingEntity extends BaseEntity {
   url: string;
 
   @Column({ type: 'varchar', nullable: true })
-  failureDetail: string;
+  failureDetail: string | null;
 
   @Column({ type: 'int' })
   retriesCount: number;
