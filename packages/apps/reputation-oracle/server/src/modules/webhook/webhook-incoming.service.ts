@@ -7,8 +7,7 @@ import { EscrowCompletionService } from '../escrow-completion/escrow-completion.
 import { calculateExponentialBackoffMs } from '../../utils/backoff';
 import logger from '../../logger';
 
-import { IncomingWebhookStatus } from './types';
-import { IncomingWebhookData } from './webhook.dto';
+import { IncomingWebhookData, IncomingWebhookStatus } from './types';
 import { IncomingWebhookEntity } from './webhook-incoming.entity';
 import { IncomingWebhookRepository } from './webhook-incoming.repository';
 

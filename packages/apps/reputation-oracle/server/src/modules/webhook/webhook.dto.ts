@@ -23,10 +23,3 @@ export class IncomingWebhookDto {
   @IsObject()
   eventData?: Record<string, unknown>;
 }
-
-export type IncomingWebhookData = {
-  chainId: ChainId;
-  eventType: IncomingWebhookEventType;
-  escrowAddress: string;
-  eventData?: Record<string, unknown>;
-};

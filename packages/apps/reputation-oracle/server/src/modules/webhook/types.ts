@@ -1,3 +1,12 @@
+import { ChainId } from '@human-protocol/sdk';
+
+export type IncomingWebhookData = {
+  chainId: ChainId;
+  eventType: IncomingWebhookEventType;
+  escrowAddress: string;
+  eventData?: Record<string, unknown>;
+};
+
 export enum IncomingWebhookEventType {
   JOB_COMPLETED = 'job_completed',
 }
