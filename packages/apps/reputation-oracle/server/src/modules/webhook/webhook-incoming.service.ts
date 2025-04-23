@@ -18,21 +18,20 @@ export class IncomingWebhookService {
   });
 
   constructor(
-    private readonly incomingWebhookRepository: IncomingWebhookRepository,
     private readonly escrowCompletionService: EscrowCompletionService,
+    private readonly incomingWebhookRepository: IncomingWebhookRepository,
     private readonly serverConfigService: ServerConfigService,
   ) {}
 
   async createIncomingWebhook(data: IncomingWebhookData): Promise<void> {
-    let webhookEntity = new IncomingWebhookEntity();
+    const webhookEntity = new IncomingWebhookEntity();
     webhookEntity.chainId = data.chainId;
     webhookEntity.escrowAddress = data.escrowAddress;
     webhookEntity.status = IncomingWebhookStatus.PENDING;
     webhookEntity.waitUntil = new Date();
     webhookEntity.retriesCount = 0;
 
-    webhookEntity =
-      await this.incomingWebhookRepository.createUnique(webhookEntity);
+    await this.incomingWebhookRepository.createUnique(webhookEntity);
   }
 
   private async handleIncomingWebhookProcessingError(

@@ -11,10 +11,7 @@ import {
   OperatorUtils,
 } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
-import {
-  EscrowCompletionStatus,
-  OutgoingWebhookEventType,
-} from '../../common/enums';
+import { EscrowCompletionStatus } from '../../common/enums';
 import { ServerConfigService } from '../../config/server-config.service';
 import { EscrowCompletionRepository } from './escrow-completion.repository';
 import { EscrowCompletionEntity } from './escrow-completion.entity';
@@ -32,6 +29,7 @@ import { CalculatedPayout } from '../payout/payout.interface';
 import { EscrowPayoutsBatchEntity } from './escrow-payouts-batch.entity';
 import { EscrowPayoutsBatchRepository } from './escrow-payouts-batch.repository';
 import logger from '../../logger';
+import { OutgoingWebhookEventType } from '../webhook/types';
 
 @Injectable()
 export class EscrowCompletionService {
