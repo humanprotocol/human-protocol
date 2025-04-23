@@ -42,7 +42,7 @@ export class OutgoingWebhookService {
       .update(stringify({ payload, url }) as string)
       .digest('hex');
 
-    let webhookEntity = new OutgoingWebhookEntity();
+    const webhookEntity = new OutgoingWebhookEntity();
     webhookEntity.payload = payload;
     webhookEntity.hash = hash;
     webhookEntity.url = url;
@@ -50,8 +50,7 @@ export class OutgoingWebhookService {
     webhookEntity.waitUntil = new Date();
     webhookEntity.retriesCount = 0;
 
-    webhookEntity =
-      await this.outgoingWebhookRepository.createUnique(webhookEntity);
+    await this.outgoingWebhookRepository.createUnique(webhookEntity);
   }
 
   private async handleOutgoingWebhookProcessingError(
