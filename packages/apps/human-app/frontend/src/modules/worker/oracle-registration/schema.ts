@@ -3,7 +3,7 @@ import { ethers } from 'ethers';
 import { t } from 'i18next';
 import { z } from 'zod';
 
-export const registrationInExchangeOracleDtoSchema = z.object({
+const registrationInExchangeOracleDtoSchema = z.object({
   oracle_address: z
     .string()
     .refine(

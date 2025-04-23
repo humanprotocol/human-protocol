@@ -5,7 +5,7 @@ const apiPaths = {
   registrationInExchangeOracle: '/exchange-oracle-registration',
 };
 
-export class OracleRegistrationService {
+class OracleRegistrationService {
   async registerInExchangeOracle(data: RegistrationInExchangeOracleDto) {
     try {
       await authorizedHumanAppApiClient.post(

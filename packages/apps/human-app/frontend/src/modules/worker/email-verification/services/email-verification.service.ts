@@ -5,7 +5,7 @@ const apiPaths = {
   resendEmailVerification: '/email-confirmation/resend-email-verification',
 };
 
-export class EmailVerificationService {
+class EmailVerificationService {
   async verifyEmail(token: string) {
     try {
       await authorizedHumanAppApiClient.get(

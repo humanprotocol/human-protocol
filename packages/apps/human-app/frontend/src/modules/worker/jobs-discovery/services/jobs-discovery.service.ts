@@ -5,16 +5,16 @@ const apiPaths = {
   registrationInExchangeOracle: '/exchange-oracle-registration',
 };
 
-export const registeredOraclesSuccessResponseSchema = z.object({
+const registeredOraclesSuccessResponseSchema = z.object({
   // eslint-disable-next-line camelcase
   oracle_addresses: z.array(z.string()),
 });
 
-export type RegisteredOraclesSuccessResponse = z.infer<
+type RegisteredOraclesSuccessResponse = z.infer<
   typeof registeredOraclesSuccessResponseSchema
 >;
 
-export class JobsDiscoveryService {
+class JobsDiscoveryService {
   async getRegistrationDataOracles() {
     try {
       const result =

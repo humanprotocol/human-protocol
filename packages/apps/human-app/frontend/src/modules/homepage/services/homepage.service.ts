@@ -7,7 +7,7 @@ const apiPaths = {
   },
 };
 
-export class HomepageService {
+class HomepageService {
   async web3SignIn(data: { signature: string; address: string }) {
     try {
       const result = await humanAppApiClient.post<Web3SignInSuccessResponse>(

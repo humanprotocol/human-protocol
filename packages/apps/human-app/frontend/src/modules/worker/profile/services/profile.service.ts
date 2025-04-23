@@ -7,13 +7,13 @@ const apiPaths = {
   registerAddress: '/user/register-address',
 };
 
-export const kycStartSchema = z.object({
+const kycStartSchema = z.object({
   url: z.string(),
 });
 
-export type KycStartSuccessSchema = z.infer<typeof kycStartSchema>;
+type KycStartSuccessSchema = z.infer<typeof kycStartSchema>;
 
-export class ProfileService {
+class ProfileService {
   async startKyc() {
     try {
       const result =

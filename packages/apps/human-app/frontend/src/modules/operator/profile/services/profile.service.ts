@@ -12,7 +12,7 @@ const apiPaths = {
   stats: '/stats',
 };
 
-export class OperatorProfileService {
+class OperatorProfileService {
   async enableOperator(signature: string) {
     try {
       await authorizedHumanAppApiClient.post(apiPaths.enableOperator, {

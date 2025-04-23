@@ -18,7 +18,7 @@ const apiPaths = {
   dailyHmtSpend: '/labeling/h-captcha/daily-hmt-spent',
 };
 
-export class HCaptchaLabelingService {
+class HCaptchaLabelingService {
   async enableHCaptchaLabeling() {
     try {
       const result =

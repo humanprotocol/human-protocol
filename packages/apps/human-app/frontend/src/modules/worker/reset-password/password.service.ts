@@ -7,7 +7,7 @@ const apiPaths = {
   resetPassword: '/password-reset/restore-password',
 };
 
-export class PasswordService {
+class PasswordService {
   async sendResetLink(data: SendResetLinkDto) {
     try {
       await humanAppApiClient.post(apiPaths.sendResetLink, {

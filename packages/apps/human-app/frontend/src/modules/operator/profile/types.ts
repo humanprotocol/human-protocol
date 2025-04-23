@@ -6,7 +6,7 @@ export type OperatorStatsSuccessResponse = z.infer<
   typeof operatorStatsSuccessResponseSchema
 >;
 
-export type OperatorStatsFailedResponse = typeof failedResponse;
+type OperatorStatsFailedResponse = typeof failedResponse;
 
 export type OperatorStatsResponse =
   | OperatorStatsSuccessResponse

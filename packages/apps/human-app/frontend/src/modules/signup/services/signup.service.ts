@@ -14,16 +14,16 @@ const apiPaths = {
   },
 };
 
-export const web3SignInSuccessResponseSchema = z.object({
+const web3SignInSuccessResponseSchema = z.object({
   access_token: z.string(),
   refresh_token: z.string(),
 });
 
-export type Web3SignInSuccessResponse = z.infer<
+type Web3SignInSuccessResponse = z.infer<
   typeof web3SignInSuccessResponseSchema
 >;
 
-export class SignupService {
+class SignupService {
   async workerSignUp(data: Omit<SignUpDto, 'confirmPassword'>) {
     try {
       const result = await humanAppApiClient.post(apiPaths.worker.signUp, {

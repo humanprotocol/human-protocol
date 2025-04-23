@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { t } from 'i18next';
-import { z } from 'zod';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
 import { useAccessTokenRefresh } from '@/api/hooks/use-access-token-refresh';
 import type { ResponseError } from '@/shared/types/global.type';
@@ -13,8 +12,6 @@ interface RegisterAddressCallbacks {
   onSuccess?: () => void | Promise<void>;
   onError?: (error: ResponseError) => void | Promise<void>;
 }
-
-export const RegisterAddressSuccessSchema = z.unknown();
 
 function useRegisterAddressMutation(callbacks?: RegisterAddressCallbacks) {
   const queryClient = useQueryClient();

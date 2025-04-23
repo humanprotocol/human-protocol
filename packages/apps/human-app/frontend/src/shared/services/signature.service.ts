@@ -7,7 +7,7 @@ const apiPaths = {
   },
 };
 
-export interface PrepareSignatureBody {
+interface PrepareSignatureBody {
   address: string;
   type: PrepareSignatureType;
 }
@@ -20,7 +20,7 @@ export enum PrepareSignatureType {
   REGISTER_ADDRESS = 'register_address',
 }
 
-export const prepareSignatureSuccessSchema = z.object({
+const prepareSignatureSuccessSchema = z.object({
   from: z.string(),
   to: z.string(),
   contents: z.string(),
@@ -29,7 +29,7 @@ export const prepareSignatureSuccessSchema = z.object({
 
 export type SignatureData = z.infer<typeof prepareSignatureSuccessSchema>;
 
-export class SignatureService {
+class SignatureService {
   async prepareSignature(data: PrepareSignatureBody) {
     try {
       const result = await humanAppApiClient.post<SignatureData>(

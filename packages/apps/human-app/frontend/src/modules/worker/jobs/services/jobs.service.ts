@@ -21,7 +21,7 @@ const apiPaths = {
   uiConfig: '/ui-config',
 };
 
-export class JobsService {
+class JobsService {
   async fetchAvailableJobs(args: JobsBody) {
     try {
       const result =

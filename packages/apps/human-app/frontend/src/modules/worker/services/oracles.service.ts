@@ -7,7 +7,7 @@ const apiPaths = {
   oracles: '/oracles',
 };
 
-export const OracleSchema = z.object({
+const OracleSchema = z.object({
   address: z.string(),
   chainId: z.number(),
   role: z.string(),
@@ -17,9 +17,7 @@ export const OracleSchema = z.object({
   registrationInstructions: z.string().optional().nullable(),
 });
 
-export const OraclesDiscoverySuccessSchema = z.array(OracleSchema);
-
-export type OracleBase = z.infer<typeof OracleSchema>;
+type OracleBase = z.infer<typeof OracleSchema>;
 
 export type Oracle = OracleBase & {
   name: string;
@@ -52,7 +50,7 @@ const H_CAPTCHA_ORACLE: Oracle = {
   registrationNeeded: false,
 };
 
-export class OraclesService {
+class OraclesService {
   async getOracles(selectedJobTypes: string[]) {
     try {
       const params = selectedJobTypes.length
