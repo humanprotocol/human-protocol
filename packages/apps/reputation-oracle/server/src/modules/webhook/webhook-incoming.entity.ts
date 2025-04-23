@@ -1,15 +1,14 @@
 import { Column, Entity, Index } from 'typeorm';
 
 import { DATABASE_SCHEMA_NAME } from '../../common/constants';
+import { IncomingWebhookStatus } from '../../common/enums';
 import { BaseEntity } from '../../database/base.entity';
-import { WebhookIncomingStatus } from '../../common/enums';
-import { ChainId } from '@human-protocol/sdk';
 
 @Entity({ schema: DATABASE_SCHEMA_NAME, name: 'webhook_incoming' })
 @Index(['chainId', 'escrowAddress'], { unique: true })
-export class WebhookIncomingEntity extends BaseEntity {
+export class IncomingWebhookEntity extends BaseEntity {
   @Column({ type: 'int' })
-  chainId: ChainId;
+  chainId: number;
 
   @Column({ type: 'varchar' })
   escrowAddress: string;
@@ -25,7 +24,7 @@ export class WebhookIncomingEntity extends BaseEntity {
 
   @Column({
     type: 'enum',
-    enum: WebhookIncomingStatus,
+    enum: IncomingWebhookStatus,
   })
-  status: WebhookIncomingStatus;
+  status: IncomingWebhookStatus;
 }

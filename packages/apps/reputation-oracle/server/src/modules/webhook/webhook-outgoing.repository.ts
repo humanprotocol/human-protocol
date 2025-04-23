@@ -1,22 +1,23 @@
 import { Injectable } from '@nestjs/common';
-import { BaseRepository } from '../../database/base.repository';
 import { DataSource, LessThanOrEqual } from 'typeorm';
-import { WebhookOutgoingStatus } from '../../common/enums/webhook';
-import { WebhookOutgoingEntity } from './webhook-outgoing.entity';
+
 import { ServerConfigService } from '../../config/server-config.service';
+import { OutgoingWebhookStatus } from '../../common/enums/webhook';
+import { BaseRepository } from '../../database/base.repository';
+import { OutgoingWebhookEntity } from './webhook-outgoing.entity';
 
 @Injectable()
-export class WebhookOutgoingRepository extends BaseRepository<WebhookOutgoingEntity> {
+export class OutgoingWebhookRepository extends BaseRepository<OutgoingWebhookEntity> {
   constructor(
     dataSource: DataSource,
     private readonly serverConfigService: ServerConfigService,
   ) {
-    super(WebhookOutgoingEntity, dataSource);
+    super(OutgoingWebhookEntity, dataSource);
   }
 
   findByStatus(
-    status: WebhookOutgoingStatus,
-  ): Promise<WebhookOutgoingEntity[]> {
+    status: OutgoingWebhookStatus,
+  ): Promise<OutgoingWebhookEntity[]> {
     return this.find({
       where: {
         status,

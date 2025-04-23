@@ -1,7 +1,8 @@
 import { ChainId } from '@human-protocol/sdk';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEthereumAddress, IsObject, IsOptional } from 'class-validator';
-import { EventType } from '../../common/enums';
+
+import { IncomingWebhookEventType } from '../../common/enums';
 import { IsChainId, IsLowercasedEnum } from '../../common/validators';
 
 export class IncomingWebhookDto {
@@ -10,8 +11,8 @@ export class IncomingWebhookDto {
   chainId: ChainId;
 
   @ApiProperty({ name: 'event_type' })
-  @IsLowercasedEnum(EventType)
-  eventType: EventType;
+  @IsLowercasedEnum(IncomingWebhookEventType)
+  eventType: IncomingWebhookEventType;
 
   @ApiProperty({ name: 'escrow_address' })
   @IsEthereumAddress()
@@ -20,5 +21,12 @@ export class IncomingWebhookDto {
   @ApiPropertyOptional({ name: 'event_data' })
   @IsOptional()
   @IsObject()
-  eventData?: any;
+  eventData?: Record<string, unknown>;
 }
+
+export type IncomingWebhookData = {
+  chainId: ChainId;
+  eventType: IncomingWebhookEventType;
+  escrowAddress: string;
+  eventData?: Record<string, unknown>;
+};

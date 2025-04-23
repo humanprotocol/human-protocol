@@ -11,7 +11,10 @@ import {
   OperatorUtils,
 } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
-import { EscrowCompletionStatus, EventType } from '../../common/enums';
+import {
+  EscrowCompletionStatus,
+  OutgoingWebhookEventType,
+} from '../../common/enums';
 import { ServerConfigService } from '../../config/server-config.service';
 import { EscrowCompletionRepository } from './escrow-completion.repository';
 import { EscrowCompletionEntity } from './escrow-completion.entity';
@@ -23,7 +26,7 @@ import {
 import { PayoutService } from '../payout/payout.service';
 import { ReputationService } from '../reputation/reputation.service';
 import { Web3Service } from '../web3/web3.service';
-import { WebhookOutgoingService } from '../webhook/webhook-outgoing.service';
+import { OutgoingWebhookService } from '../webhook/webhook-outgoing.service';
 import { isDuplicatedError } from '../../common/errors/database';
 import { CalculatedPayout } from '../payout/payout.interface';
 import { EscrowPayoutsBatchEntity } from './escrow-payouts-batch.entity';
@@ -40,7 +43,7 @@ export class EscrowCompletionService {
     private readonly escrowCompletionRepository: EscrowCompletionRepository,
     private readonly escrowPayoutsBatchRepository: EscrowPayoutsBatchRepository,
     private readonly web3Service: Web3Service,
-    private readonly webhookOutgoingService: WebhookOutgoingService,
+    private readonly outgoingWebhookService: OutgoingWebhookService,
     private readonly payoutService: PayoutService,
     private readonly reputationService: ReputationService,
     public readonly serverConfigService: ServerConfigService,
@@ -219,7 +222,7 @@ export class EscrowCompletionService {
         const webhookPayload = {
           chainId,
           escrowAddress,
-          eventType: EventType.ESCROW_COMPLETED,
+          eventType: OutgoingWebhookEventType.ESCROW_COMPLETED,
         };
 
         let allWebhooksCreated = true;
@@ -239,7 +242,7 @@ export class EscrowCompletionService {
           }
 
           try {
-            await this.webhookOutgoingService.createOutgoingWebhook(
+            await this.outgoingWebhookService.createOutgoingWebhook(
               webhookPayload,
               webhookUrl,
             );

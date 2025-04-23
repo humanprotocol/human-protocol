@@ -12,8 +12,8 @@ import { DatabaseConfigService } from '../config/database-config.service';
 import { SiteKeyEntity } from '../modules/user/site-key.entity';
 import { QualificationEntity } from '../modules/qualification/qualification.entity';
 import { UserQualificationEntity } from '../modules/qualification/user-qualification.entity';
-import { WebhookIncomingEntity } from '../modules/webhook/webhook-incoming.entity';
-import { WebhookOutgoingEntity } from '../modules/webhook/webhook-outgoing.entity';
+import { IncomingWebhookEntity } from '../modules/webhook/webhook-incoming.entity';
+import { OutgoingWebhookEntity } from '../modules/webhook/webhook-outgoing.entity';
 import { EscrowCompletionEntity } from '../modules/escrow-completion/escrow-completion.entity';
 import { EscrowPayoutsBatchEntity } from '../modules/escrow-completion/escrow-payouts-batch.entity';
 import { AbuseEntity } from '../modules/abuse/abuse.entity';
@@ -63,8 +63,8 @@ import { TypeOrmLoggerModule, TypeOrmLoggerService } from './typeorm';
           migrationsRun: false,
           entities: [
             AbuseEntity,
-            WebhookIncomingEntity,
-            WebhookOutgoingEntity,
+            IncomingWebhookEntity,
+            OutgoingWebhookEntity,
             EscrowCompletionEntity,
             EscrowPayoutsBatchEntity,
             ReputationEntity,

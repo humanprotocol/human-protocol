@@ -22,8 +22,8 @@ import { KycModule } from './modules/kyc/kyc.module';
 import { CronJobModule } from './modules/cron-job/cron-job.module';
 import { QualificationModule } from './modules/qualification/qualification.module';
 import { EscrowCompletionModule } from './modules/escrow-completion/escrow-completion.module';
-import { WebhookIncomingModule } from './modules/webhook/webhook-incoming.module';
-import { WebhookOutgoingModule } from './modules/webhook/webhook-outgoing.module';
+import { IncomingWebhookModule } from './modules/webhook/webhook-incoming.module';
+import { OutgoingWebhookModule } from './modules/webhook/webhook-outgoing.module';
 import { UserModule } from './modules/user';
 import { NDAModule } from './modules/nda/nda.module';
 
@@ -90,8 +90,8 @@ import { AbuseModule } from './modules/abuse/abuse.module';
     QualificationModule,
     ReputationModule,
     UserModule,
-    WebhookIncomingModule,
-    WebhookOutgoingModule,
+    IncomingWebhookModule,
+    OutgoingWebhookModule,
   ],
   controllers: [AppController],
 })

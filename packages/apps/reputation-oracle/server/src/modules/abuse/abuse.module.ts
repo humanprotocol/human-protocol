@@ -4,12 +4,12 @@ import { AbuseSlackBot } from './abuse.slack-bot';
 import { AbuseRepository } from './abuse.repository';
 import { AbuseService } from './abuse.service';
 import { Web3Module } from '../web3/web3.module';
-import { WebhookOutgoingModule } from '../webhook/webhook-outgoing.module';
+import { OutgoingWebhookModule } from '../webhook/webhook-outgoing.module';
 import { AbuseController } from './abuse.controller';
 import { AbuseSlackAuthGuard } from './abuse.slack-auth.guard';
 
 @Module({
-  imports: [HttpModule, Web3Module, WebhookOutgoingModule],
+  imports: [HttpModule, Web3Module, OutgoingWebhookModule],
   providers: [
     AbuseRepository,
     AbuseService,

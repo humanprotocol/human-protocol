@@ -22,11 +22,11 @@ import { Web3ConfigService } from '../../config/web3-config.service';
 import { ServerConfigService } from '../../config/server-config.service';
 import { EscrowCompletionService } from './escrow-completion.service';
 import { PostgresErrorCodes } from '../../common/enums/database';
-import { WebhookOutgoingService } from '../webhook/webhook-outgoing.service';
+import { OutgoingWebhookService } from '../webhook/webhook-outgoing.service';
 import { PayoutService } from '../payout/payout.service';
 import { ReputationService } from '../reputation/reputation.service';
 import { DatabaseError } from '../../common/errors/database';
-import { WebhookOutgoingRepository } from '../webhook/webhook-outgoing.repository';
+import { OutgoingWebhookRepository } from '../webhook/webhook-outgoing.repository';
 import { StorageService } from '../storage/storage.service';
 import { ReputationRepository } from '../reputation/reputation.repository';
 import { ReputationConfigService } from '../../config/reputation-config.service';
@@ -85,7 +85,7 @@ describe('escrowCompletionService', () => {
     escrowCompletionRepository: EscrowCompletionRepository,
     escrowPayoutsBatchRepository: EscrowPayoutsBatchRepository,
     web3ConfigService: Web3ConfigService,
-    webhookOutgoingService: WebhookOutgoingService,
+    outgoingWebhookService: OutgoingWebhookService,
     reputationService: ReputationService,
     payoutService: PayoutService;
 
@@ -144,8 +144,8 @@ describe('escrowCompletionService', () => {
           useValue: createMock<EscrowPayoutsBatchRepository>(),
         },
         {
-          provide: WebhookOutgoingRepository,
-          useValue: createMock<WebhookOutgoingRepository>(),
+          provide: OutgoingWebhookRepository,
+          useValue: createMock<OutgoingWebhookRepository>(),
         },
         {
           provide: ReputationRepository,
@@ -164,7 +164,7 @@ describe('escrowCompletionService', () => {
           provide: StorageService,
           useValue: createMock<StorageService>(),
         },
-        WebhookOutgoingService,
+        OutgoingWebhookService,
         PayoutService,
         ReputationService,
         Web3ConfigService,
@@ -181,8 +181,8 @@ describe('escrowCompletionService', () => {
       EscrowCompletionService,
     );
 
-    webhookOutgoingService = moduleRef.get<WebhookOutgoingService>(
-      WebhookOutgoingService,
+    outgoingWebhookService = moduleRef.get<OutgoingWebhookService>(
+      OutgoingWebhookService,
     );
     payoutService = moduleRef.get<PayoutService>(PayoutService);
     reputationService = moduleRef.get<ReputationService>(ReputationService);
@@ -451,7 +451,7 @@ describe('escrowCompletionService', () => {
         .mockResolvedValue();
 
       createOutgoingWebhookMock = jest
-        .spyOn(webhookOutgoingService, 'createOutgoingWebhook')
+        .spyOn(outgoingWebhookService, 'createOutgoingWebhook')
         .mockResolvedValue();
     });
 
@@ -539,7 +539,7 @@ describe('escrowCompletionService', () => {
         .mockResolvedValue(escrowCompletionEntity1 as any);
 
       createOutgoingWebhookMock = jest
-        .spyOn(webhookOutgoingService, 'createOutgoingWebhook')
+        .spyOn(outgoingWebhookService, 'createOutgoingWebhook')
         .mockImplementation(() => {
           throw new DatabaseError(
             'Duplicate entry error',

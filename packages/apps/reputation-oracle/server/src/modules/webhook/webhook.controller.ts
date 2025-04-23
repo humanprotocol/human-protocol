@@ -1,34 +1,26 @@
-import {
-  Body,
-  Controller,
-  HttpCode,
-  Post,
-  UseFilters,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, HttpCode, Post, UseGuards } from '@nestjs/common';
 
 import {
-  ApiTags,
+  ApiBody,
+  ApiHeader,
   ApiOperation,
   ApiResponse,
-  ApiHeader,
-  ApiBody,
+  ApiTags,
 } from '@nestjs/swagger';
+
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { Public } from '../../common/decorators';
 import { AuthSignatureRole, SignatureAuthGuard } from '../../common/guards';
 
-import { WebhookIncomingService } from './webhook-incoming.service';
+import { IncomingWebhookService } from './webhook-incoming.service';
 import { IncomingWebhookDto } from './webhook.dto';
-import { IncomingWebhookErrorFilter } from './webhook.error.filter';
 
 @Public()
 @ApiTags('Webhook')
 @Controller('/webhook')
-@UseFilters(IncomingWebhookErrorFilter)
 export class WebhookController {
   constructor(
-    private readonly webhookIncomingService: WebhookIncomingService,
+    private readonly incomingWebhookService: IncomingWebhookService,
   ) {}
 
   @ApiOperation({
@@ -49,6 +41,6 @@ export class WebhookController {
   @Post('/')
   @HttpCode(202)
   async createIncomingWebhook(@Body() data: IncomingWebhookDto): Promise<void> {
-    await this.webhookIncomingService.createIncomingWebhook(data);
+    await this.incomingWebhookService.createIncomingWebhook(data);
   }
 }

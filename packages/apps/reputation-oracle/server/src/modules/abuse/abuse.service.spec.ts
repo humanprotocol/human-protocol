@@ -10,14 +10,13 @@ import {
 } from '@human-protocol/sdk';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-
-import { EventType } from '../../common/enums';
+import { OutgoingWebhookEventType } from '../../common/enums';
 import { PostgresErrorCodes } from '../../common/enums/database';
 import { DatabaseError } from '../../common/errors/database';
 import { ServerConfigService } from '../../config/server-config.service';
 import { generateTestnetChainId } from '../web3/fixtures';
 import { Web3Service } from '../web3/web3.service';
-import { WebhookOutgoingService } from '../webhook/webhook-outgoing.service';
+import { OutgoingWebhookService } from '../webhook/webhook-outgoing.service';
 import { AbuseRepository } from './abuse.repository';
 import { AbuseService } from './abuse.service';
 import { AbuseSlackBot } from './abuse.slack-bot';
@@ -29,7 +28,7 @@ const fakeAddress = faker.finance.ethereumAddress();
 const mockAbuseRepository = createMock<AbuseRepository>();
 const mockAbuseSlackBot = createMock<AbuseSlackBot>();
 const mockWeb3Service = createMock<Web3Service>();
-const mockWebhookOutgoingService = createMock<WebhookOutgoingService>();
+const mockOutgoingWebhookService = createMock<OutgoingWebhookService>();
 
 const mockedStakingClient = jest.mocked(StakingClient);
 const mockedOperatorUtils = jest.mocked(OperatorUtils);
@@ -59,8 +58,8 @@ describe('AbuseService', () => {
         },
         { provide: AbuseRepository, useValue: mockAbuseRepository },
         {
-          provide: WebhookOutgoingService,
-          useValue: mockWebhookOutgoingService,
+          provide: OutgoingWebhookService,
+          useValue: mockOutgoingWebhookService,
         },
       ],
     }).compile();
@@ -297,7 +296,7 @@ describe('AbuseService', () => {
         webhookUrl: webhookUrl1,
       } as IOperator);
 
-      mockWebhookOutgoingService.createOutgoingWebhook.mockRejectedValueOnce(
+      mockOutgoingWebhookService.createOutgoingWebhook.mockRejectedValueOnce(
         new DatabaseError('Failed to create webhook'),
       );
 
@@ -331,7 +330,7 @@ describe('AbuseService', () => {
           webhookUrl: webhookUrl2,
         } as IOperator);
 
-      mockWebhookOutgoingService.createOutgoingWebhook.mockRejectedValueOnce(
+      mockOutgoingWebhookService.createOutgoingWebhook.mockRejectedValueOnce(
         new DatabaseError(PostgresErrorCodes.Duplicated),
       );
 
@@ -395,7 +394,7 @@ describe('AbuseService', () => {
       mockedOperatorUtils.getOperator.mockResolvedValueOnce({
         webhookUrl: webhookUrl1,
       } as IOperator);
-      mockWebhookOutgoingService.createOutgoingWebhook.mockResolvedValueOnce(
+      mockOutgoingWebhookService.createOutgoingWebhook.mockResolvedValueOnce(
         undefined,
       );
 
@@ -410,12 +409,12 @@ describe('AbuseService', () => {
       //   expect.any(Number),
       // );
       expect(
-        mockWebhookOutgoingService.createOutgoingWebhook,
+        mockOutgoingWebhookService.createOutgoingWebhook,
       ).toHaveBeenCalledWith(
         {
           escrowAddress: mockAbuseEntities[0].escrowAddress,
           chainId: mockAbuseEntities[0].chainId,
-          eventType: EventType.ABUSE_DETECTED,
+          eventType: OutgoingWebhookEventType.ABUSE_DETECTED,
         },
         expect.any(String),
       );
@@ -456,7 +455,7 @@ describe('AbuseService', () => {
 
       expect(mockAbuseRepository.findClassified).toHaveBeenCalledTimes(1);
       expect(
-        mockWebhookOutgoingService.createOutgoingWebhook,
+        mockOutgoingWebhookService.createOutgoingWebhook,
       ).not.toHaveBeenCalled();
       expect(mockAbuseRepository.updateOne).not.toHaveBeenCalled();
     });

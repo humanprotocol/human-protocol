@@ -3,12 +3,12 @@ import { Module } from '@nestjs/common';
 
 import { Web3Module } from '../web3/web3.module';
 
-import { WebhookOutgoingRepository } from './webhook-outgoing.repository';
-import { WebhookOutgoingService } from './webhook-outgoing.service';
+import { OutgoingWebhookRepository } from './webhook-outgoing.repository';
+import { OutgoingWebhookService } from './webhook-outgoing.service';
 
 @Module({
   imports: [Web3Module, HttpModule],
-  providers: [WebhookOutgoingService, WebhookOutgoingRepository],
-  exports: [WebhookOutgoingService],
+  providers: [OutgoingWebhookService, OutgoingWebhookRepository],
+  exports: [OutgoingWebhookService],
 })
-export class WebhookOutgoingModule {}
+export class OutgoingWebhookModule {}
