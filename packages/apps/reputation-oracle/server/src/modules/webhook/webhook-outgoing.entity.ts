@@ -2,7 +2,7 @@ import { Column, Entity, Index } from 'typeorm';
 
 import { DATABASE_SCHEMA_NAME } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
-import { OutgoingWebhookStatus } from '../../common/enums';
+import { OutgoingWebhookStatus } from './types';
 
 @Entity({ schema: DATABASE_SCHEMA_NAME, name: 'webhook_outgoing' })
 @Index(['hash'], { unique: true })

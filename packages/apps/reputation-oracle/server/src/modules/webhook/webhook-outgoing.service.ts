@@ -8,7 +8,6 @@ import {
   BACKOFF_INTERVAL_SECONDS,
   HEADER_SIGNATURE_KEY,
 } from '../../common/constants';
-import { OutgoingWebhookStatus } from '../../common/enums';
 import { ServerConfigService } from '../../config/server-config.service';
 import { Web3ConfigService } from '../../config/web3-config.service';
 import { calculateExponentialBackoffMs } from '../../utils/backoff';
@@ -17,6 +16,7 @@ import { formatAxiosError } from '../../utils/http';
 import { signMessage } from '../../utils/web3';
 import logger from '../../logger';
 
+import { OutgoingWebhookStatus } from './types';
 import { OutgoingWebhookEntity } from './webhook-outgoing.entity';
 import { OutgoingWebhookRepository } from './webhook-outgoing.repository';
 

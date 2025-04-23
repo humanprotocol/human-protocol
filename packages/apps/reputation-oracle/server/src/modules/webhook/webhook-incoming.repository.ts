@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { BaseRepository } from '../../database/base.repository';
 import { DataSource, LessThanOrEqual } from 'typeorm';
-import { IncomingWebhookStatus } from '../../common/enums/webhook';
-import { IncomingWebhookEntity } from './webhook-incoming.entity';
+
 import { ServerConfigService } from '../../config/server-config.service';
+import { BaseRepository } from '../../database/base.repository';
+import { IncomingWebhookStatus } from './types';
+import { IncomingWebhookEntity } from './webhook-incoming.entity';
 
 @Injectable()
 export class IncomingWebhookRepository extends BaseRepository<IncomingWebhookEntity> {

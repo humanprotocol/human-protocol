@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 
 import { BACKOFF_INTERVAL_SECONDS } from '../../common/constants';
-import { IncomingWebhookStatus } from '../../common/enums';
 import { isDuplicatedError } from '../../common/errors/database';
 import { ServerConfigService } from '../../config/server-config.service';
 import { EscrowCompletionService } from '../escrow-completion/escrow-completion.service';
 import { calculateExponentialBackoffMs } from '../../utils/backoff';
 import logger from '../../logger';
 
+import { IncomingWebhookStatus } from './types';
 import { IncomingWebhookData } from './webhook.dto';
 import { IncomingWebhookEntity } from './webhook-incoming.entity';
 import { IncomingWebhookRepository } from './webhook-incoming.repository';
