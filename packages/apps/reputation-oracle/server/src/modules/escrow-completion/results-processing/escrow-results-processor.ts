@@ -1,0 +1,88 @@
+import { ChainId, EscrowClient } from '@human-protocol/sdk';
+import crypto from 'crypto';
+
+import { ContentType } from '../../../common/enums';
+import { JobManifest } from '../../../common/interfaces/manifest';
+import * as httpUtils from '../../../utils/http';
+
+import { PgpEncryptionService } from '../../encryption/pgp-encryption.service';
+import { StorageService } from '../../storage/storage.service';
+import { Web3Service } from '../../web3/web3.service';
+
+type EscrowFinalResultsDetails = {
+  url: string;
+  hash: string;
+};
+
+export interface EscrowResultsProcessor {
+  storeResults(
+    chainId: ChainId,
+    escrowAddress: string,
+    manifest: JobManifest,
+  ): Promise<EscrowFinalResultsDetails>;
+}
+
+export abstract class BaseEscrowResultsProcessor<TManifest extends JobManifest>
+  implements EscrowResultsProcessor
+{
+  constructor(
+    private readonly storageService: StorageService,
+    private readonly pgpEncryptionService: PgpEncryptionService,
+    private readonly web3Service: Web3Service,
+  ) {}
+
+  async storeResults(
+    chainId: ChainId,
+    escrowAddress: string,
+    manifest: TManifest,
+  ): Promise<EscrowFinalResultsDetails> {
+    const signer = this.web3Service.getSigner(chainId);
+    const escrowClient = await EscrowClient.build(signer);
+
+    /**
+     * For some job types it's direct url,
+     * but for some it's url to bucket with files
+     */
+    const baseUrl = await escrowClient.getIntermediateResultsUrl(escrowAddress);
+    const intermediateResultsUrl =
+      this.constructIntermediateResultsUrl(baseUrl);
+
+    let fileContent = await httpUtils.downloadFile(intermediateResultsUrl);
+    fileContent = await this.pgpEncryptionService.maybeDecryptFile(fileContent);
+
+    await this.assertResultsComplete(fileContent, manifest);
+
+    const jobLauncherAddress =
+      await escrowClient.getJobLauncherAddress(escrowAddress);
+
+    const encryptedResults = await this.pgpEncryptionService.encrypt(
+      fileContent,
+      chainId,
+      [jobLauncherAddress],
+    );
+
+    const hash = crypto
+      .createHash('sha1')
+      .update(encryptedResults)
+      .digest('hex');
+
+    const fileName = this.getFinalResultsFileName(hash);
+
+    const url = await this.storageService.uploadData(
+      encryptedResults,
+      fileName,
+      ContentType.PLAIN_TEXT,
+    );
+
+    return { url, hash };
+  }
+
+  abstract constructIntermediateResultsUrl(baseUrl: string): string;
+
+  abstract assertResultsComplete(
+    resultsFileContent: Buffer,
+    manifest: TManifest,
+  ): Promise<void>;
+
+  abstract getFinalResultsFileName(hash: string): string;
+}

@@ -1,8 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-import crypto from 'crypto';
-import { ethers } from 'ethers';
-import stringify from 'json-stable-stringify';
-import _ from 'lodash';
 import {
   ESCROW_BULK_PAYOUT_MAX_ITEMS,
   ChainId,
@@ -11,25 +6,43 @@ import {
   OperatorUtils,
 } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
-import { EscrowCompletionStatus } from '../../common/enums';
-import { ServerConfigService } from '../../config/server-config.service';
-import { EscrowCompletionRepository } from './escrow-completion.repository';
-import { EscrowCompletionEntity } from './escrow-completion.entity';
-import { calculateExponentialBackoffMs } from '../../utils/backoff';
+
+import crypto from 'crypto';
+import { ethers } from 'ethers';
+import stringify from 'json-stable-stringify';
+import _ from 'lodash';
+
 import {
   BACKOFF_INTERVAL_SECONDS,
   DEFAULT_BULK_PAYOUT_TX_ID,
 } from '../../common/constants';
+import { isDuplicatedError } from '../../common/errors/database';
+import { EscrowCompletionStatus, JobRequestType } from '../../common/enums';
+import { JobManifest } from '../../common/interfaces/manifest';
+import { ServerConfigService } from '../../config/server-config.service';
+import logger from '../../logger';
+import { calculateExponentialBackoffMs } from '../../utils/backoff';
+import { getJobRequestType } from '../../utils/manifest';
+import { assertValidJobRequestType } from '../../utils/type-guards';
+
+import { CalculatedPayout } from '../payout/payout.interface';
 import { PayoutService } from '../payout/payout.service';
 import { ReputationService } from '../reputation/reputation.service';
+import { StorageService } from '../storage/storage.service';
 import { Web3Service } from '../web3/web3.service';
 import { OutgoingWebhookService } from '../webhook/webhook-outgoing.service';
-import { isDuplicatedError } from '../../common/errors/database';
-import { CalculatedPayout } from '../payout/payout.interface';
+import { OutgoingWebhookEventType } from '../webhook/types';
+
+import { EscrowCompletionRepository } from './escrow-completion.repository';
+import { EscrowCompletionEntity } from './escrow-completion.entity';
 import { EscrowPayoutsBatchEntity } from './escrow-payouts-batch.entity';
 import { EscrowPayoutsBatchRepository } from './escrow-payouts-batch.repository';
-import logger from '../../logger';
-import { OutgoingWebhookEventType } from '../webhook/types';
+import {
+  AudinoResultsProcessor,
+  CvatResultsProcessor,
+  EscrowResultsProcessor,
+  FortuneResultsProcessor,
+} from './results-processing';
 
 @Injectable()
 export class EscrowCompletionService {
@@ -38,43 +51,33 @@ export class EscrowCompletionService {
   });
 
   constructor(
+    private readonly serverConfigService: ServerConfigService,
     private readonly escrowCompletionRepository: EscrowCompletionRepository,
     private readonly escrowPayoutsBatchRepository: EscrowPayoutsBatchRepository,
     private readonly web3Service: Web3Service,
+    private readonly storageService: StorageService,
     private readonly outgoingWebhookService: OutgoingWebhookService,
     private readonly payoutService: PayoutService,
     private readonly reputationService: ReputationService,
-    public readonly serverConfigService: ServerConfigService,
+    private readonly audinoResultsProcessor: AudinoResultsProcessor,
+    private readonly cvatResultsProcessor: CvatResultsProcessor,
+    private readonly fortuneResultsProcessor: FortuneResultsProcessor,
   ) {}
 
-  /**
-   * Creates a tracking record for escrow completion in the repository.
-   * Sets initial status to 'PENDING'.
-   * @param {ChainId} chainId - The blockchain chain ID.
-   * @param {string} escrowAddress - The address of the escrow contract.
-   */
-  public async createEscrowCompletion(
+  async createEscrowCompletion(
     chainId: ChainId,
     escrowAddress: string,
   ): Promise<void> {
-    let escrowCompletionEntity = new EscrowCompletionEntity();
+    const escrowCompletionEntity = new EscrowCompletionEntity();
     escrowCompletionEntity.chainId = chainId;
     escrowCompletionEntity.escrowAddress = escrowAddress;
     escrowCompletionEntity.status = EscrowCompletionStatus.PENDING;
     escrowCompletionEntity.waitUntil = new Date();
     escrowCompletionEntity.retriesCount = 0;
 
-    escrowCompletionEntity = await this.escrowCompletionRepository.createUnique(
-      escrowCompletionEntity,
-    );
+    await this.escrowCompletionRepository.createUnique(escrowCompletionEntity);
   }
 
-  /**
-   * Handles errors that occur during escrow completion.
-   * If retry count is below the maximum, increments retry count and reschedules; otherwise, marks as 'FAILED'.
-   * @param escrowCompletionEntity - The escrow entity.
-   * @param failureDetail - Reason for the failure.
-   */
   private async handleEscrowCompletionError(
     escrowCompletionEntity: EscrowCompletionEntity,
     failureDetail: string,
@@ -98,7 +101,7 @@ export class EscrowCompletionService {
     await this.escrowCompletionRepository.updateOne(escrowCompletionEntity);
   }
 
-  public async processPendingEscrowCompletion(): Promise<void> {
+  async processPendingRecords(): Promise<void> {
     const escrowCompletionEntities =
       await this.escrowCompletionRepository.findByStatus(
         EscrowCompletionStatus.PENDING,
@@ -115,10 +118,24 @@ export class EscrowCompletionService {
           escrowCompletionEntity.escrowAddress,
         );
         if (escrowStatus === EscrowStatus.Pending) {
+          const manifestUrl = await escrowClient.getManifestUrl(
+            escrowCompletionEntity.escrowAddress,
+          );
+          const manifest =
+            await this.storageService.downloadJsonLikeData<JobManifest>(
+              manifestUrl,
+            );
+          const jobRequestType = getJobRequestType(manifest);
+          assertValidJobRequestType(jobRequestType);
+
           if (!escrowCompletionEntity.finalResultsUrl) {
-            const { url, hash } = await this.payoutService.processResults(
+            const escrowResultsProcessor =
+              this.getEscrowResultsProcessor(jobRequestType);
+
+            const { url, hash } = await escrowResultsProcessor.storeResults(
               escrowCompletionEntity.chainId,
               escrowCompletionEntity.escrowAddress,
+              manifest,
             );
 
             escrowCompletionEntity.finalResultsUrl = url;
@@ -413,6 +430,27 @@ export class EscrowCompletionService {
       }
 
       throw error;
+    }
+  }
+
+  private getEscrowResultsProcessor(
+    jobRequestType: JobRequestType,
+  ): EscrowResultsProcessor {
+    switch (jobRequestType) {
+      case JobRequestType.FORTUNE:
+        return this.fortuneResultsProcessor;
+      case JobRequestType.IMAGE_BOXES:
+      case JobRequestType.IMAGE_POINTS:
+      case JobRequestType.IMAGE_BOXES_FROM_POINTS:
+      case JobRequestType.IMAGE_SKELETONS_FROM_BOXES:
+      case JobRequestType.IMAGE_POLYGONS:
+        return this.cvatResultsProcessor;
+      case JobRequestType.AUDIO_TRANSCRIPTION:
+        return this.audinoResultsProcessor;
+      default:
+        throw new Error(
+          `No escrow results processor defined for '${jobRequestType}' jobs`,
+        );
     }
   }
 }

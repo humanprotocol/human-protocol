@@ -68,7 +68,7 @@ export class PayoutService {
     const manifest =
       await this.storageService.downloadJsonLikeData<JobManifest>(manifestUrl);
 
-    const requestType = getJobRequestType(manifest).toLowerCase();
+    const requestType = getJobRequestType(manifest);
 
     assertValidJobRequestType(requestType);
 
@@ -105,7 +105,7 @@ export class PayoutService {
     const manifest =
       await this.storageService.downloadJsonLikeData<JobManifest>(manifestUrl);
 
-    const requestType = getJobRequestType(manifest).toLowerCase();
+    const requestType = getJobRequestType(manifest);
 
     assertValidJobRequestType(requestType);
 

@@ -1,9 +1,8 @@
 import { JobManifest } from '../common/interfaces/manifest';
-import { JobRequestType } from '../common/enums';
 import { UnsupportedManifestTypeError } from '../common/errors/manifest';
 
-export function getJobRequestType(manifest: JobManifest): JobRequestType {
-  let jobRequestType: JobRequestType | undefined;
+export function getJobRequestType(manifest: JobManifest): string {
+  let jobRequestType: string | undefined;
 
   if ('requestType' in manifest) {
     jobRequestType = manifest.requestType;
@@ -15,5 +14,5 @@ export function getJobRequestType(manifest: JobManifest): JobRequestType {
     throw new UnsupportedManifestTypeError(jobRequestType);
   }
 
-  return jobRequestType;
+  return jobRequestType.toLowerCase();
 }
