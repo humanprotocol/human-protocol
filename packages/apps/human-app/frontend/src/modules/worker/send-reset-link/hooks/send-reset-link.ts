@@ -12,9 +12,8 @@ export function useSendResetLinkMutation() {
   const navigate = useNavigate();
 
   return useMutation({
-    mutationFn: async (data: SendResetLinkDto) => {
-      return passwordService.sendResetLink(data);
-    },
+    mutationFn: async (data: SendResetLinkDto) =>
+      passwordService.sendResetLink(data),
     onSuccess: async (_, { email }) => {
       navigate(routerPaths.worker.sendResetLinkSuccess, { state: { email } });
       await queryClient.invalidateQueries();

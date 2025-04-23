@@ -39,12 +39,9 @@ export class HCaptchaLabelingService {
 
   async verifyHCaptchaLabeling(data: VerifyHCaptchaLabelingBody) {
     try {
-      const result = await authorizedHumanAppApiClient.post<
-        Record<string, unknown>
-      >(apiPaths.verifyHCaptchaLabeling, {
+      await authorizedHumanAppApiClient.post(apiPaths.verifyHCaptchaLabeling, {
         body: { ...data },
       });
-      return result;
     } catch (error: unknown) {
       if (error instanceof ApiClientError) {
         throw error;

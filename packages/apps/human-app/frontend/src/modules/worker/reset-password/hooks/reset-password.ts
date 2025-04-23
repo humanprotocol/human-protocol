@@ -14,9 +14,7 @@ export function useResetPasswordMutation() {
   return useMutation({
     mutationFn: async (
       data: Omit<ResetPasswordDto, 'confirmPassword'> & { token: string }
-    ) => {
-      return passwordService.resetPassword(data);
-    },
+    ) => passwordService.resetPassword(data),
     onSuccess: async () => {
       navigate(routerPaths.worker.resetPasswordSuccess);
       await queryClient.invalidateQueries();

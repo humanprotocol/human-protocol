@@ -39,13 +39,9 @@ export class ProfileService {
     signature: string;
   }) {
     try {
-      const result = await authorizedHumanAppApiClient.post(
-        apiPaths.registerAddress,
-        {
-          body: data,
-        }
-      );
-      return result;
+      await authorizedHumanAppApiClient.post(apiPaths.registerAddress, {
+        body: data,
+      });
     } catch (error) {
       if (error instanceof ApiClientError) {
         throw error;

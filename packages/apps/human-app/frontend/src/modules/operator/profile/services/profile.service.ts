@@ -15,14 +15,9 @@ const apiPaths = {
 export class OperatorProfileService {
   async enableOperator(signature: string) {
     try {
-      const result = await authorizedHumanAppApiClient.post(
-        apiPaths.enableOperator,
-        {
-          body: { signature },
-        }
-      );
-
-      return result;
+      await authorizedHumanAppApiClient.post(apiPaths.enableOperator, {
+        body: { signature },
+      });
     } catch (error) {
       if (error instanceof ApiClientError) {
         throw error;
@@ -34,14 +29,9 @@ export class OperatorProfileService {
 
   async disableOperator(signature: string) {
     try {
-      const result = await authorizedHumanAppApiClient.post(
-        apiPaths.disableOperator,
-        {
-          body: { signature },
-        }
-      );
-
-      return result;
+      await authorizedHumanAppApiClient.post(apiPaths.disableOperator, {
+        body: { signature },
+      });
     } catch (error) {
       if (error instanceof ApiClientError) {
         throw error;

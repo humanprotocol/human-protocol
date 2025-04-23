@@ -8,14 +8,12 @@ const apiPaths = {
 export class OracleRegistrationService {
   async registerInExchangeOracle(data: RegistrationInExchangeOracleDto) {
     try {
-      const result = await authorizedHumanAppApiClient.post(
+      await authorizedHumanAppApiClient.post(
         apiPaths.registrationInExchangeOracle,
         {
           body: { ...data },
         }
       );
-
-      return result;
     } catch (error) {
       if (error instanceof ApiClientError) {
         throw error;

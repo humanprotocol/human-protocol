@@ -10,10 +10,9 @@ const apiPaths = {
 export class PasswordService {
   async sendResetLink(data: SendResetLinkDto) {
     try {
-      const result = await humanAppApiClient.post(apiPaths.sendResetLink, {
+      await humanAppApiClient.post(apiPaths.sendResetLink, {
         body: data,
       });
-      return result;
     } catch (error) {
       if (error instanceof ApiClientError) {
         throw error;
@@ -27,10 +26,9 @@ export class PasswordService {
     data: Omit<ResetPasswordDto, 'confirmPassword'> & { token: string }
   ) {
     try {
-      const result = await humanAppApiClient.post(apiPaths.resetPassword, {
+      await humanAppApiClient.post(apiPaths.resetPassword, {
         body: data,
       });
-      return result;
     } catch (error) {
       if (error instanceof ApiClientError) {
         throw error;

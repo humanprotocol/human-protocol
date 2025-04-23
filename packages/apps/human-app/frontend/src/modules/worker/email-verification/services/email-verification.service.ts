@@ -8,10 +8,9 @@ const apiPaths = {
 export class EmailVerificationService {
   async verifyEmail(token: string) {
     try {
-      const result = await authorizedHumanAppApiClient.get(
+      await authorizedHumanAppApiClient.get(
         `${apiPaths.verifyEmail}?token=${token}`
       );
-      return result;
     } catch (error) {
       if (error instanceof ApiClientError) {
         throw error;
@@ -22,16 +21,12 @@ export class EmailVerificationService {
 
   async resendEmailVerification(token: string) {
     try {
-      const result = await authorizedHumanAppApiClient.post(
-        apiPaths.resendEmailVerification,
-        {
-          body: {
-            // eslint-disable-next-line camelcase
-            h_captcha_token: token,
-          },
-        }
-      );
-      return result;
+      await authorizedHumanAppApiClient.post(apiPaths.resendEmailVerification, {
+        body: {
+          // eslint-disable-next-line camelcase
+          h_captcha_token: token,
+        },
+      });
     } catch (error) {
       if (error instanceof ApiClientError) {
         throw error;

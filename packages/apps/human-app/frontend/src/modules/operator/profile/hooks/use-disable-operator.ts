@@ -10,14 +10,12 @@ export function useDisableWeb3Operator() {
   const { updateUserData } = useWeb3AuthenticatedUser();
   return useMutation({
     mutationFn: async ({ signature }: { signature: string }) => {
-      const result = await operatorProfileService.disableOperator(signature);
+      await operatorProfileService.disableOperator(signature);
 
       await authService.refreshAccessToken();
 
       // eslint-disable-next-line camelcase
       updateUserData({ operator_status: OperatorStatus.INACTIVE });
-
-      return result;
     },
     mutationKey: ['disableOperator', address, chainId],
   });

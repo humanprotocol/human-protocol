@@ -66,14 +66,9 @@ export class JobsService {
 
   async assignJob(data: AssignJobBody) {
     try {
-      const result = await authorizedHumanAppApiClient.post(
-        apiPaths.assignJob,
-        {
-          body: { ...data },
-        }
-      );
-
-      return result;
+      await authorizedHumanAppApiClient.post(apiPaths.assignJob, {
+        body: { ...data },
+      });
     } catch (error: unknown) {
       if (error instanceof ApiClientError) {
         throw error;
@@ -84,14 +79,9 @@ export class JobsService {
 
   async resignJob(data: RejectTaskBody) {
     try {
-      const result = await authorizedHumanAppApiClient.post(
-        apiPaths.resignJob,
-        {
-          body: { ...data },
-        }
-      );
-
-      return result;
+      await authorizedHumanAppApiClient.post(apiPaths.resignJob, {
+        body: { ...data },
+      });
     } catch (error: unknown) {
       if (error instanceof ApiClientError) {
         throw error;
@@ -102,14 +92,9 @@ export class JobsService {
 
   async refreshJobs(data: RefreshJobsBody) {
     try {
-      const result = await authorizedHumanAppApiClient.put(
-        apiPaths.refreshJobs,
-        {
-          body: { ...data },
-        }
-      );
-
-      return result;
+      await authorizedHumanAppApiClient.put(apiPaths.refreshJobs, {
+        body: { ...data },
+      });
     } catch (error: unknown) {
       if (error instanceof ApiClientError) {
         throw error;
