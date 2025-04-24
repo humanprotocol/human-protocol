@@ -1,24 +1,9 @@
-/* eslint-disable camelcase */
 import { useQuery } from '@tanstack/react-query';
-import { z } from 'zod';
-import { apiClient } from '@/api/api-client';
-import { apiPaths } from '@/api/api-paths';
-
-const RegisteredOraclesSuccessResponseSchema = z.object({
-  oracle_addresses: z.array(z.string()),
-});
-
-async function getRegistrationDataInOracles() {
-  return apiClient(apiPaths.worker.registrationInExchangeOracle.path, {
-    authenticated: true,
-    successSchema: RegisteredOraclesSuccessResponseSchema,
-    options: { method: 'GET' },
-  });
-}
+import * as jobsDiscoveryService from '../services/jobs-discovery.service';
 
 export function useGetRegistrationDataInOracles() {
   return useQuery({
-    queryFn: () => getRegistrationDataInOracles(),
+    queryFn: async () => jobsDiscoveryService.getRegistrationDataOracles(),
     queryKey: ['getRegistrationDataInOracles'],
     refetchOnMount: false,
     refetchOnWindowFocus: false,

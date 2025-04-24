@@ -1,25 +1,10 @@
-import { z } from 'zod';
 import { useQuery } from '@tanstack/react-query';
-import { apiClient } from '@/api/api-client';
-import { apiPaths } from '@/api/api-paths';
-
-const dailyHmtSpentSchema = z.object({
-  spend: z.number(),
-});
-
-type DailyHmtSpentResponse = z.infer<typeof dailyHmtSpentSchema>;
-
-async function fetchDailyHmtSpent(): Promise<DailyHmtSpentResponse> {
-  return apiClient(apiPaths.worker.dailyHmtSpend.path, {
-    successSchema: dailyHmtSpentSchema,
-    authenticated: true,
-    options: { method: 'GET' },
-  });
-}
+import * as hCaptchaLabelingService from '../services/hcaptcha-labeling.service';
+import { type DailyHmtSpentResponse } from '../types';
 
 export function useDailyHmtSpent() {
   return useQuery<DailyHmtSpentResponse>({
     queryKey: ['dailyHmtSpent'],
-    queryFn: fetchDailyHmtSpent,
+    queryFn: async () => hCaptchaLabelingService.getDailyHmtSpent(),
   });
 }

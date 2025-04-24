@@ -14,7 +14,7 @@ import {
   RewardAmount,
   MyJobsTableActions,
 } from '../../../components';
-import { type MyJob } from '../../schemas';
+import { type MyJob } from '../../../schemas';
 import { StatusChip } from './status-chip';
 import { MyJobsExpiresAtSort } from './my-jobs-expires-at-sort';
 import { MyJobsJobTypeFilter } from './my-jobs-job-type-filter';

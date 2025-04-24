@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { ProfileListItem } from '@/shared/components/ui/profile';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
-import { type OperatorStatsResponse } from '../hooks';
+import { type OperatorStatsResponse } from '../types';
 
 export function OperatorStats({
   statsData,

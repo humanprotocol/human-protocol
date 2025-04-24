@@ -1,5 +1,8 @@
 /* eslint-disable camelcase -- ...*/
-import type { BrowserAuthProvider } from '@/shared/types/browser-auth-provider';
+import type {
+  AuthType,
+  BrowserAuthProvider,
+} from '@/shared/types/browser-auth-provider';
 import { type AuthTokensSuccessResponse } from '../schemas';
 
 const accessTokenKey = btoa('access_token');
@@ -44,6 +47,7 @@ const browserAuthProvider: BrowserAuthProvider = {
   signOutSubscription: undefined,
   getAccessToken() {
     const result = localStorage.getItem(accessTokenKey);
+
     if (!result) {
       return null;
     }
@@ -59,14 +63,14 @@ const browserAuthProvider: BrowserAuthProvider = {
 
     return atob(result);
   },
-  getAuthType() {
+  getAuthType(): AuthType | null {
     const result = localStorage.getItem(authTypeKey);
 
     if (!result) {
       return null;
     }
 
-    return atob(result);
+    return atob(result) as AuthType;
   },
   setUserData(userData) {
     localStorage.setItem(userDataKey, btoa(JSON.stringify(userData)));

@@ -1,5 +1,5 @@
 import { useModal } from '@/shared/contexts/modal-context';
-import { useGetUiConfig } from '../../hooks';
+import { useGetUiConfig } from '@/shared/hooks';
 import { MyJobsFilterModal } from '../components/mobile/my-jobs-filter-modal';
 
 export function useMyJobFilterModal() {

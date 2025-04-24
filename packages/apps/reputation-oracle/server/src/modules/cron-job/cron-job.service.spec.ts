@@ -3,16 +3,16 @@ import { CronJobService } from './cron-job.service';
 import { CronJobRepository } from './cron-job.repository';
 import { CronJobEntity } from './cron-job.entity';
 import { CronJobType } from '../../common/enums/cron-job';
-import { WebhookOutgoingService } from '../webhook/webhook-outgoing.service';
-import { WebhookIncomingService } from '../webhook/webhook-incoming.service';
+import { OutgoingWebhookService } from '../webhook/webhook-outgoing.service';
+import { IncomingWebhookService } from '../webhook/webhook-incoming.service';
 import { EscrowCompletionService } from '../escrow-completion/escrow-completion.service';
 import { AbuseService } from '../abuse/abuse.service';
 
 describe('CronJobService', () => {
   let service: CronJobService;
   let cronJobRepository: jest.Mocked<CronJobRepository>;
-  let webhookIncomingService: jest.Mocked<WebhookIncomingService>;
-  let webhookOutgoingService: jest.Mocked<WebhookOutgoingService>;
+  let incomingWebhookService: jest.Mocked<IncomingWebhookService>;
+  let outgoingWebhookService: jest.Mocked<OutgoingWebhookService>;
   let escrowCompletionService: jest.Mocked<EscrowCompletionService>;
   let abuseService: jest.Mocked<AbuseService>;
 
@@ -29,13 +29,13 @@ describe('CronJobService', () => {
           },
         },
         {
-          provide: WebhookIncomingService,
+          provide: IncomingWebhookService,
           useValue: {
             processPendingIncomingWebhooks: jest.fn(),
           },
         },
         {
-          provide: WebhookOutgoingService,
+          provide: OutgoingWebhookService,
           useValue: {
             processPendingOutgoingWebhooks: jest.fn(),
           },
@@ -60,8 +60,8 @@ describe('CronJobService', () => {
 
     service = module.get<CronJobService>(CronJobService);
     cronJobRepository = module.get(CronJobRepository);
-    webhookIncomingService = module.get(WebhookIncomingService);
-    webhookOutgoingService = module.get(WebhookOutgoingService);
+    incomingWebhookService = module.get(IncomingWebhookService);
+    outgoingWebhookService = module.get(OutgoingWebhookService);
     escrowCompletionService = module.get(EscrowCompletionService);
     abuseService = module.get(AbuseService);
   });
@@ -211,7 +211,7 @@ describe('CronJobService', () => {
       await service.processPendingIncomingWebhooks();
 
       expect(
-        webhookIncomingService.processPendingIncomingWebhooks,
+        incomingWebhookService.processPendingIncomingWebhooks,
       ).not.toHaveBeenCalled();
     });
 
@@ -227,7 +227,7 @@ describe('CronJobService', () => {
       await service.processPendingIncomingWebhooks();
 
       expect(
-        webhookIncomingService.processPendingIncomingWebhooks,
+        incomingWebhookService.processPendingIncomingWebhooks,
       ).toHaveBeenCalled();
       expect(service.startCronJob).toHaveBeenCalled();
       expect(service.completeCronJob).toHaveBeenCalled();
@@ -242,7 +242,7 @@ describe('CronJobService', () => {
         .spyOn(service, 'completeCronJob')
         .mockResolvedValue(new CronJobEntity());
 
-      webhookIncomingService.processPendingIncomingWebhooks.mockRejectedValue(
+      incomingWebhookService.processPendingIncomingWebhooks.mockRejectedValue(
         new Error('Processing error'),
       );
 
@@ -401,7 +401,7 @@ describe('CronJobService', () => {
       await service.processPendingOutgoingWebhooks();
 
       expect(
-        webhookOutgoingService.processPendingOutgoingWebhooks,
+        outgoingWebhookService.processPendingOutgoingWebhooks,
       ).not.toHaveBeenCalled();
     });
 
@@ -417,7 +417,7 @@ describe('CronJobService', () => {
       await service.processPendingOutgoingWebhooks();
 
       expect(
-        webhookOutgoingService.processPendingOutgoingWebhooks,
+        outgoingWebhookService.processPendingOutgoingWebhooks,
       ).toHaveBeenCalled();
       expect(service.startCronJob).toHaveBeenCalled();
       expect(service.completeCronJob).toHaveBeenCalled();
@@ -432,7 +432,7 @@ describe('CronJobService', () => {
         .spyOn(service, 'completeCronJob')
         .mockResolvedValue(new CronJobEntity());
 
-      webhookOutgoingService.processPendingOutgoingWebhooks.mockRejectedValue(
+      outgoingWebhookService.processPendingOutgoingWebhooks.mockRejectedValue(
         new Error('Processing error'),
       );
 

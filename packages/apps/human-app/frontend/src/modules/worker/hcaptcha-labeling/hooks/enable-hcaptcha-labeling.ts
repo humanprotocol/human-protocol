@@ -1,19 +1,8 @@
-/* eslint-disable camelcase -- ...*/
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { z } from 'zod';
 import { routerPaths } from '@/router/router-paths';
-import { apiClient } from '@/api/api-client';
-import { apiPaths } from '@/api/api-paths';
 import { useAccessTokenRefresh } from '@/api/hooks/use-access-token-refresh';
-
-const enableHCaptchaLabelingSuccessSchema = z.object({
-  site_key: z.string(),
-});
-
-export type EnableHCaptchaLabelingSuccessResponse = z.infer<
-  typeof enableHCaptchaLabelingSuccessSchema
->;
+import * as hCaptchaLabelingService from '../services/hcaptcha-labeling.service';
 
 export function useEnableHCaptchaLabelingMutation() {
   const queryClient = useQueryClient();
@@ -21,15 +10,10 @@ export function useEnableHCaptchaLabelingMutation() {
   const { refreshAccessTokenAsync } = useAccessTokenRefresh();
   const mutation = useMutation({
     mutationFn: async () => {
-      const result = await apiClient(
-        apiPaths.worker.enableHCaptchaLabeling.path,
-        {
-          successSchema: enableHCaptchaLabelingSuccessSchema,
-          authenticated: true,
-          options: { method: 'POST' },
-        }
-      );
+      const result = await hCaptchaLabelingService.enableHCaptchaLabeling();
+
       await refreshAccessTokenAsync({ authType: 'web2' });
+
       return result;
     },
     onSuccess: async () => {

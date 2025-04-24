@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useKycErrorNotifications } from '@/modules/worker/hooks/use-kyc-notification';
-import { FetchError } from '@/api/fetcher';
+import { ApiClientError } from '@/api';
 import { useKycStartMutation } from './use-start-kyc-mutation';
 
 export function useStartKyc() {
@@ -21,7 +21,7 @@ export function useStartKyc() {
   useEffect(() => {
     if (kycStartMutationStatus === 'error') {
       if (
-        kycStartMutationError instanceof FetchError &&
+        kycStartMutationError instanceof ApiClientError &&
         kycStartMutationError.status === 400
       ) {
         setIsKYCInProgress(true);

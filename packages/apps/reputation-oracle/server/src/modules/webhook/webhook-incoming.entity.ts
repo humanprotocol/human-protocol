@@ -2,30 +2,29 @@ import { Column, Entity, Index } from 'typeorm';
 
 import { DATABASE_SCHEMA_NAME } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
-import { WebhookIncomingStatus } from '../../common/enums';
-import { ChainId } from '@human-protocol/sdk';
+import { IncomingWebhookStatus } from './types';
 
 @Entity({ schema: DATABASE_SCHEMA_NAME, name: 'webhook_incoming' })
 @Index(['chainId', 'escrowAddress'], { unique: true })
-export class WebhookIncomingEntity extends BaseEntity {
+export class IncomingWebhookEntity extends BaseEntity {
   @Column({ type: 'int' })
-  public chainId: ChainId;
+  chainId: number;
 
   @Column({ type: 'varchar' })
-  public escrowAddress: string;
+  escrowAddress: string;
 
   @Column({ type: 'varchar', nullable: true })
-  public failureDetail: string;
+  failureDetail: string | null;
 
   @Column({ type: 'int' })
-  public retriesCount: number;
+  retriesCount: number;
 
   @Column({ type: 'timestamptz' })
-  public waitUntil: Date;
+  waitUntil: Date;
 
   @Column({
     type: 'enum',
-    enum: WebhookIncomingStatus,
+    enum: IncomingWebhookStatus,
   })
-  public status: WebhookIncomingStatus;
+  status: IncomingWebhookStatus;
 }

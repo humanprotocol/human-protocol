@@ -9,7 +9,7 @@ import { type Web3UserData } from '@/modules/auth-web3/context/web3-auth-context
 import { type AuthType } from '../types/browser-auth-provider';
 import { useExpirationModal } from '../hooks';
 
-export type AuthStatus = 'loading' | 'error' | 'success' | 'idle';
+type AuthStatus = 'loading' | 'error' | 'success' | 'idle';
 
 interface SignOutOptions {
   throwExpirationModal?: boolean;

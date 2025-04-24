@@ -1,24 +1,18 @@
 import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient } from '@/api/api-client';
-import { apiPaths } from '@/api/api-paths';
+import * as jobsService from '../../services/jobs.service';
+import { type RejectTaskBody } from '../../types';
 
-function rejectTask(data: { assignment_id: string; oracle_address: string }) {
-  return apiClient(apiPaths.worker.resignJob.path, {
-    successSchema: z.unknown(),
-    authenticated: true,
-    options: { method: 'POST', body: JSON.stringify(data) },
-  });
-}
+export const rejectTaskSchema = z.unknown();
 
-export function useRejectTaskMutation(callbacks?: {
+export function useResignJobMutation(callbacks?: {
   onSuccess?: () => Promise<void>;
   onError?: (error: unknown) => Promise<void>;
 }) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: rejectTask,
+    mutationFn: async (data: RejectTaskBody) => jobsService.resignJob(data),
     onSuccess: async () => {
       if (callbacks?.onSuccess) {
         void callbacks.onSuccess();
