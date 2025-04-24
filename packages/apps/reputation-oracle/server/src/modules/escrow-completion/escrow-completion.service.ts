@@ -154,13 +154,12 @@ export class EscrowCompletionService {
 
           const payoutsCalculator =
             this.getEscrowPayoutsCalculator(jobRequestType);
-          const calculatedPayouts = await payoutsCalculator.calculate();
-
-          // const calculatedPayouts = await this.payoutService.calculatePayouts(
-          //   escrowCompletionEntity.chainId,
-          //   escrowCompletionEntity.escrowAddress,
-          //   escrowCompletionEntity.finalResultsUrl,
-          // );
+          const calculatedPayouts = await payoutsCalculator.calculate({
+            manifest,
+            chainId: escrowCompletionEntity.chainId,
+            escrowAddress: escrowCompletionEntity.escrowAddress,
+            finalResultsUrl: escrowCompletionEntity.finalResultsUrl,
+          });
 
           /**
            * When creating payout batches we need to guarantee deterministic result,
