@@ -9,7 +9,7 @@ import { omit } from 'lodash';
 
 import { generateES256Keys } from '../../../test/fixtures/crypto';
 import { generateEthWallet } from '../../../test/fixtures/web3';
-import { SignatureType } from '../../common/enums/web3';
+import { SignatureType } from '../../common/enums';
 import { AuthConfigService } from '../../config/auth-config.service';
 import { NDAConfigService } from '../../config/nda-config.service';
 import { ServerConfigService } from '../../config/server-config.service';

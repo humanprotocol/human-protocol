@@ -1,9 +1,7 @@
-import { SolutionError } from '../../common/enums';
-
 export interface FortuneFinalResult {
   workerAddress: string;
   solution: string;
-  error?: SolutionError;
+  error?: 'duplicated' | 'curse_word';
 }
 
 interface CvatAnnotationMetaJobs {

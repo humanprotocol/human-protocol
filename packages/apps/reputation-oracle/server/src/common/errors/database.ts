@@ -1,6 +1,10 @@
 import { QueryFailedError } from 'typeorm';
-import { PostgresErrorCodes } from '../enums/database';
 import { BaseError } from './base';
+
+export enum PostgresErrorCodes {
+  Duplicated = '23505',
+  NumericFieldOverflow = '22003',
+}
 
 export class DatabaseError extends BaseError {}
 

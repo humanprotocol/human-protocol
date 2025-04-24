@@ -7,8 +7,3 @@ export enum JobRequestType {
   IMAGE_POLYGONS = 'image_polygons',
   AUDIO_TRANSCRIPTION = 'audio_transcription',
 }
-
-export enum SolutionError {
-  Duplicated = 'duplicated',
-  CurseWord = 'curse_word',
-}

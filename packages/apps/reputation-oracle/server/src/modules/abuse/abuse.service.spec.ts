@@ -10,8 +10,10 @@ import {
 } from '@human-protocol/sdk';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import { PostgresErrorCodes } from '../../common/enums/database';
-import { DatabaseError } from '../../common/errors/database';
+import {
+  DatabaseError,
+  PostgresErrorCodes,
+} from '../../common/errors/database';
 import { ServerConfigService } from '../../config/server-config.service';
 import { generateTestnetChainId } from '../web3/fixtures';
 import { Web3Service } from '../web3/web3.service';

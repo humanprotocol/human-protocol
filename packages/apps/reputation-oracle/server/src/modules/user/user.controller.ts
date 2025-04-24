@@ -18,7 +18,7 @@ import {
 } from '@nestjs/common';
 
 import { Public } from '../../common/decorators';
-import { SignatureType } from '../../common/enums/web3';
+import { SignatureType } from '../../common/enums';
 import { RequestWithUser } from '../../common/interfaces/request';
 import { Web3ConfigService } from '../../config/web3-config.service';
 import { HCaptchaGuard } from '../../integrations/hcaptcha/hcaptcha.guard';

@@ -12,12 +12,9 @@ import { ethers } from 'ethers';
 import stringify from 'json-stable-stringify';
 import _ from 'lodash';
 
-import {
-  BACKOFF_INTERVAL_SECONDS,
-  DEFAULT_BULK_PAYOUT_TX_ID,
-} from '../../common/constants';
+import { BACKOFF_INTERVAL_SECONDS } from '../../common/constants';
 import { isDuplicatedError } from '../../common/errors/database';
-import { EscrowCompletionStatus, JobRequestType } from '../../common/enums';
+import { JobRequestType } from '../../common/enums';
 import { JobManifest } from '../../common/interfaces/manifest';
 import { ServerConfigService } from '../../config/server-config.service';
 import logger from '../../logger';
@@ -31,6 +28,7 @@ import { Web3Service } from '../web3/web3.service';
 import { OutgoingWebhookService } from '../webhook/webhook-outgoing.service';
 import { OutgoingWebhookEventType } from '../webhook/types';
 
+import { DEFAULT_BULK_PAYOUT_TX_ID, EscrowCompletionStatus } from './constants';
 import { EscrowCompletionRepository } from './escrow-completion.repository';
 import { EscrowCompletionEntity } from './escrow-completion.entity';
 import { EscrowPayoutsBatchEntity } from './escrow-payouts-batch.entity';
