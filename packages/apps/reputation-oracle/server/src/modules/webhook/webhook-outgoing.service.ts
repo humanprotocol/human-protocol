@@ -1,45 +1,39 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { HttpService } from '@nestjs/axios';
+import { Injectable } from '@nestjs/common';
 import * as crypto from 'crypto';
 import stringify from 'json-stable-stringify';
-import { HttpStatus, Injectable } from '@nestjs/common';
-import { WebhookOutgoingStatus } from '../../common/enums';
 import { firstValueFrom } from 'rxjs';
-import { signMessage } from '../../utils/web3';
+
 import {
   BACKOFF_INTERVAL_SECONDS,
   HEADER_SIGNATURE_KEY,
 } from '../../common/constants';
-import { HttpService } from '@nestjs/axios';
-import { transformKeysFromCamelToSnake } from '../../utils/case-converters';
 import { ServerConfigService } from '../../config/server-config.service';
 import { Web3ConfigService } from '../../config/web3-config.service';
-import { WebhookOutgoingEntity } from './webhook-outgoing.entity';
-import { WebhookOutgoingRepository } from './webhook-outgoing.repository';
 import { calculateExponentialBackoffMs } from '../../utils/backoff';
-import { OutgoingWebhookError, WebhookErrorMessage } from './webhook.error';
+import { transformKeysFromCamelToSnake } from '../../utils/case-converters';
+import { formatAxiosError } from '../../utils/http';
+import { signMessage } from '../../utils/web3';
 import logger from '../../logger';
 
+import { OutgoingWebhookStatus } from './types';
+import { OutgoingWebhookEntity } from './webhook-outgoing.entity';
+import { OutgoingWebhookRepository } from './webhook-outgoing.repository';
+
 @Injectable()
-export class WebhookOutgoingService {
+export class OutgoingWebhookService {
   private readonly logger = logger.child({
-    context: WebhookOutgoingService.name,
+    context: OutgoingWebhookService.name,
   });
 
   constructor(
     private readonly httpService: HttpService,
-    private readonly webhookOutgoingRepository: WebhookOutgoingRepository,
-    public readonly serverConfigService: ServerConfigService,
-    public readonly web3ConfigService: Web3ConfigService,
+    private readonly outgoingWebhookRepository: OutgoingWebhookRepository,
+    private readonly serverConfigService: ServerConfigService,
+    private readonly web3ConfigService: Web3ConfigService,
   ) {}
 
-  /**
-   * Creates an outgoing webhook entry in the repository.
-   * Sets initial status to 'PENDING' and stores the provided payload, hash, and URL.
-   * @param {object} payload - The payload to send in the webhook.
-   * @param {string} hash - A hash generated from the URL and payload for unique identification.
-   * @param {string} url - The destination URL for the outgoing webhook.
-   */
-  public async createOutgoingWebhook(
+  async createOutgoingWebhook(
     payload: Record<string, unknown>,
     url: string,
   ): Promise<void> {
@@ -48,26 +42,19 @@ export class WebhookOutgoingService {
       .update(stringify({ payload, url }) as string)
       .digest('hex');
 
-    let webhookEntity = new WebhookOutgoingEntity();
+    const webhookEntity = new OutgoingWebhookEntity();
     webhookEntity.payload = payload;
     webhookEntity.hash = hash;
     webhookEntity.url = url;
-    webhookEntity.status = WebhookOutgoingStatus.PENDING;
+    webhookEntity.status = OutgoingWebhookStatus.PENDING;
     webhookEntity.waitUntil = new Date();
     webhookEntity.retriesCount = 0;
 
-    webhookEntity =
-      await this.webhookOutgoingRepository.createUnique(webhookEntity);
+    await this.outgoingWebhookRepository.createUnique(webhookEntity);
   }
 
-  /**
-   * Handles errors that occur while processing an outgoing webhook.
-   * If retry count is below the maximum, increments retry count and reschedules; otherwise, marks as 'FAILED'.
-   * @param webhookEntity - The outgoing webhook entity.
-   * @param failureDetail - Reason for the failure.
-   */
-  private async handleWebhookOutgoingError(
-    webhookEntity: WebhookOutgoingEntity,
+  private async handleOutgoingWebhookProcessingError(
+    webhookEntity: OutgoingWebhookEntity,
     failureDetail: string,
   ): Promise<void> {
     if (webhookEntity.retriesCount < this.serverConfigService.maxRetryCount) {
@@ -79,21 +66,12 @@ export class WebhookOutgoingService {
       webhookEntity.retriesCount += 1;
     } else {
       webhookEntity.failureDetail = failureDetail;
-      webhookEntity.status = WebhookOutgoingStatus.FAILED;
+      webhookEntity.status = OutgoingWebhookStatus.FAILED;
     }
-    await this.webhookOutgoingRepository.updateOne(webhookEntity);
+    await this.outgoingWebhookRepository.updateOne(webhookEntity);
   }
 
-  /**
-   * Sends a webhook request with a signed payload.
-   * Converts payload to snake_case, signs it, and sends it to the specified URL.
-   * @param {string} url - The target URL to which the webhook is sent.
-   * @param {object} payload - The data payload to send.
-   * @throws {OutgoingWebhookError} If the webhook request fails.
-   */
-  public async sendWebhook(
-    outgoingWebhook: WebhookOutgoingEntity,
-  ): Promise<void> {
+  async sendWebhook(outgoingWebhook: OutgoingWebhookEntity): Promise<void> {
     const snake_case_body = transformKeysFromCamelToSnake(
       outgoingWebhook.payload,
     ) as object;
@@ -101,42 +79,39 @@ export class WebhookOutgoingService {
       snake_case_body,
       this.web3ConfigService.privateKey,
     );
-    const { status } = await firstValueFrom(
-      await this.httpService.post(outgoingWebhook.url, snake_case_body, {
-        headers: { [HEADER_SIGNATURE_KEY]: signedBody },
-      }),
-    );
-
-    if (status !== HttpStatus.CREATED) {
-      throw new OutgoingWebhookError(
-        WebhookErrorMessage.NOT_SENT,
-        outgoingWebhook.hash,
+    try {
+      await firstValueFrom(
+        this.httpService.post(outgoingWebhook.url, snake_case_body, {
+          headers: { [HEADER_SIGNATURE_KEY]: signedBody },
+        }),
       );
+    } catch (error) {
+      const formattedError = formatAxiosError(error);
+      this.logger.error('Webhook not sent', {
+        error: formattedError,
+        hash: outgoingWebhook.hash,
+      });
+      throw new Error(formattedError.message);
     }
   }
 
-  public async processPendingOutgoingWebhooks(): Promise<void> {
-    const webhookEntities = await this.webhookOutgoingRepository.findByStatus(
-      WebhookOutgoingStatus.PENDING,
+  async processPendingOutgoingWebhooks(): Promise<void> {
+    const webhookEntities = await this.outgoingWebhookRepository.findByStatus(
+      OutgoingWebhookStatus.PENDING,
     );
 
     for (const webhookEntity of webhookEntities) {
       try {
         await this.sendWebhook(webhookEntity);
       } catch (error) {
-        this.logger.error('Error processing outgoing webhook', {
-          error,
-          webhookId: webhookEntity.id,
-        });
-
-        await this.handleWebhookOutgoingError(
+        await this.handleOutgoingWebhookProcessingError(
           webhookEntity,
           `Error message: ${error.message}`,
         );
         continue;
       }
-      webhookEntity.status = WebhookOutgoingStatus.SENT;
-      await this.webhookOutgoingRepository.updateOne(webhookEntity);
+      webhookEntity.status = OutgoingWebhookStatus.SENT;
+      await this.outgoingWebhookRepository.updateOne(webhookEntity);
     }
   }
 }

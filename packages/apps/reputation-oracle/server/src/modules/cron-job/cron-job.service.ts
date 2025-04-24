@@ -6,8 +6,8 @@ import { CronJobType } from '../../common/enums/cron-job';
 import logger from '../../logger';
 import { AbuseService } from '../abuse/abuse.service';
 import { EscrowCompletionService } from '../escrow-completion/escrow-completion.service';
-import { WebhookIncomingService } from '../webhook/webhook-incoming.service';
-import { WebhookOutgoingService } from '../webhook/webhook-outgoing.service';
+import { IncomingWebhookService } from '../webhook/webhook-incoming.service';
+import { OutgoingWebhookService } from '../webhook/webhook-outgoing.service';
 import { CronJobEntity } from './cron-job.entity';
 import { CronJobRepository } from './cron-job.repository';
 
@@ -17,8 +17,8 @@ export class CronJobService {
 
   constructor(
     private readonly cronJobRepository: CronJobRepository,
-    private readonly webhookIncomingService: WebhookIncomingService,
-    private readonly webhookOutgoingService: WebhookOutgoingService,
+    private readonly incomingWebhookService: IncomingWebhookService,
+    private readonly outgoingWebhookService: OutgoingWebhookService,
     private readonly escrowCompletionService: EscrowCompletionService,
     private readonly abuseService: AbuseService,
   ) {}
@@ -98,7 +98,7 @@ export class CronJobService {
     );
 
     try {
-      await this.webhookIncomingService.processPendingIncomingWebhooks();
+      await this.incomingWebhookService.processPendingIncomingWebhooks();
     } catch (error) {
       this.logger.error('Error processing pending incoming webhooks', error);
     }
@@ -184,7 +184,7 @@ export class CronJobService {
     );
 
     try {
-      await this.webhookOutgoingService.processPendingOutgoingWebhooks();
+      await this.outgoingWebhookService.processPendingOutgoingWebhooks();
     } catch (error) {
       this.logger.error('Error processing pending outgoing webhooks', error);
     }

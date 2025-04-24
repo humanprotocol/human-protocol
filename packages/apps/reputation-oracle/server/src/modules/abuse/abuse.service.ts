@@ -6,12 +6,12 @@ import {
 } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
-import { EventType } from '../../common/enums';
 import { isDuplicatedError } from '../../common/errors/database';
 import { ServerConfigService } from '../../config/server-config.service';
 import logger from '../../logger';
 import { Web3Service } from '../web3/web3.service';
-import { WebhookOutgoingService } from '../webhook/webhook-outgoing.service';
+import { OutgoingWebhookEventType } from '../webhook/types';
+import { OutgoingWebhookService } from '../webhook/webhook-outgoing.service';
 import { AbuseEntity } from './abuse.entity';
 import { AbuseRepository } from './abuse.repository';
 import { AbuseDecision, AbuseStatus } from './constants';
@@ -34,7 +34,7 @@ export class AbuseService {
     private readonly abuseRepository: AbuseRepository,
     private readonly web3Service: Web3Service,
     private readonly serverConfigService: ServerConfigService,
-    private readonly webhookOutgoingService: WebhookOutgoingService,
+    private readonly outgoingWebhookService: OutgoingWebhookService,
   ) {}
 
   async reportAbuse(data: ReportAbuseInput): Promise<void> {
@@ -169,11 +169,11 @@ export class AbuseService {
         const webhookPayload = {
           chainId: abuseEntity.chainId,
           escrowAddress: abuseEntity.escrowAddress,
-          eventType: EventType.ABUSE_DETECTED,
+          eventType: OutgoingWebhookEventType.ABUSE_DETECTED,
         };
 
         try {
-          await this.webhookOutgoingService.createOutgoingWebhook(
+          await this.outgoingWebhookService.createOutgoingWebhook(
             webhookPayload,
             webhookUrl,
           );
@@ -231,11 +231,11 @@ export class AbuseService {
           const webhookPayload = {
             chainId,
             escrowAddress,
-            eventType: EventType.ABUSE_DETECTED,
+            eventType: OutgoingWebhookEventType.ABUSE_DETECTED,
           };
 
           try {
-            await this.webhookOutgoingService.createOutgoingWebhook(
+            await this.outgoingWebhookService.createOutgoingWebhook(
               webhookPayload,
               webhookUrl,
             );
@@ -257,7 +257,7 @@ export class AbuseService {
           const webhookPayload = {
             chainId: chainId,
             escrowAddress: escrowAddress,
-            eventType: EventType.ABUSE_DISMISSED,
+            eventType: OutgoingWebhookEventType.ABUSE_DISMISSED,
           };
           const webhookUrl = (
             await OperatorUtils.getOperator(
@@ -267,7 +267,7 @@ export class AbuseService {
           ).webhookUrl as string;
 
           try {
-            await this.webhookOutgoingService.createOutgoingWebhook(
+            await this.outgoingWebhookService.createOutgoingWebhook(
               webhookPayload,
               webhookUrl,
             );
