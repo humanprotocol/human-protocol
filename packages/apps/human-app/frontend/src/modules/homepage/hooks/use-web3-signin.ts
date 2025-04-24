@@ -7,7 +7,7 @@ import { routerPaths } from '@/router/router-paths';
 import { useWalletConnect } from '@/shared/contexts/wallet-connect';
 import { usePrepareSignature } from '@/shared/hooks';
 import { PrepareSignatureType } from '@/shared/services/signature.service';
-import { homepageService } from '../services/homepage.service';
+import * as homepageService from '../services/homepage.service';
 
 export const web3SignInSuccessResponseSchema = z.object({
   access_token: z.string(),

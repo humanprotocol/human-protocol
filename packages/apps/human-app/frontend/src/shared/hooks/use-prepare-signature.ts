@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import {
-  authService,
+  prepareSignature,
   type PrepareSignatureType,
 } from '@/shared/services/signature.service';
 import { useWalletConnect } from '@/shared/contexts/wallet-connect';
@@ -14,7 +14,7 @@ export function usePrepareSignature(type: PrepareSignatureType) {
         throw new Error('No address provided. Please connect your wallet.');
       }
 
-      return authService.prepareSignature({
+      return prepareSignature({
         address,
         type,
       });

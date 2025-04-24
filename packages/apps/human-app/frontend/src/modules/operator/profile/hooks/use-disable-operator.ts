@@ -3,7 +3,7 @@ import { useConnectedWallet } from '@/shared/contexts/wallet-connect';
 import { OperatorStatus } from '@/modules/auth-web3/context/web3-auth-context';
 import { useWeb3AuthenticatedUser } from '@/modules/auth-web3/hooks/use-web3-authenticated-user';
 import { authService } from '@/api';
-import { operatorProfileService } from '../services/profile.service';
+import * as operatorProfileService from '../services/profile.service';
 
 export function useDisableWeb3Operator() {
   const { address, chainId } = useConnectedWallet();

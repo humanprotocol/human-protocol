@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
-import { jobsService } from '../services/jobs.service';
+import * as jobsService from '../services/jobs.service';
 import { type MyJobPaginationResponse } from '../schemas';
 import {
   useMyJobsFilterStore,

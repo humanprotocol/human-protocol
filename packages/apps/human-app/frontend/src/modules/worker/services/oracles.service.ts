@@ -7,7 +7,7 @@ const apiPaths = {
   oracles: '/oracles',
 };
 
-export const OracleSchema = z.object({
+const OracleSchema = z.object({
   address: z.string(),
   chainId: z.number(),
   role: z.string(),
@@ -17,9 +17,7 @@ export const OracleSchema = z.object({
   registrationInstructions: z.string().optional().nullable(),
 });
 
-export const OraclesDiscoverySuccessSchema = z.array(OracleSchema);
-
-export type OracleBase = z.infer<typeof OracleSchema>;
+type OracleBase = z.infer<typeof OracleSchema>;
 
 export type Oracle = OracleBase & {
   name: string;
@@ -52,52 +50,50 @@ const H_CAPTCHA_ORACLE: Oracle = {
   registrationNeeded: false,
 };
 
-export class OraclesService {
-  async getOracles(selectedJobTypes: string[]) {
-    try {
-      const params = selectedJobTypes.length
-        ? // eslint-disable-next-line camelcase
-          { selected_job_types: selectedJobTypes }
-        : undefined;
+async function getOracles(selectedJobTypes: string[]) {
+  try {
+    const params = selectedJobTypes.length
+      ? // eslint-disable-next-line camelcase
+        { selected_job_types: selectedJobTypes }
+      : undefined;
 
-      const queryParams = params ?? {};
+    const queryParams = params ?? {};
 
-      let oracles: Oracle[] = [];
+    let oracles: Oracle[] = [];
 
-      if (
-        selectedJobTypes.length === 0 ||
-        selectedJobTypes.some((t) => H_CAPTCHA_ORACLE.jobTypes.includes(t))
-      ) {
-        oracles.push(H_CAPTCHA_ORACLE);
-      }
-
-      if (env.VITE_FEATURE_FLAG_JOBS_DISCOVERY) {
-        const results = await authorizedHumanAppApiClient.get<OracleBase[]>(
-          apiPaths.oracles,
-          {
-            queryParams,
-          }
-        );
-
-        if (Array.isArray(results)) {
-          oracles = oracles.concat(
-            results.map((oracle: OracleBase) => ({
-              ...oracle,
-              name: oracleUrlToNameMap.get(oracle.url) ?? '',
-            }))
-          );
-        }
-      }
-
-      return oracles;
-    } catch (error) {
-      if (error instanceof ApiClientError) {
-        throw error;
-      }
-
-      throw new Error('Failed to get oracles');
+    if (
+      selectedJobTypes.length === 0 ||
+      selectedJobTypes.some((t) => H_CAPTCHA_ORACLE.jobTypes.includes(t))
+    ) {
+      oracles.push(H_CAPTCHA_ORACLE);
     }
+
+    if (env.VITE_FEATURE_FLAG_JOBS_DISCOVERY) {
+      const results = await authorizedHumanAppApiClient.get<OracleBase[]>(
+        apiPaths.oracles,
+        {
+          queryParams,
+        }
+      );
+
+      if (Array.isArray(results)) {
+        oracles = oracles.concat(
+          results.map((oracle: OracleBase) => ({
+            ...oracle,
+            name: oracleUrlToNameMap.get(oracle.url) ?? '',
+          }))
+        );
+      }
+    }
+
+    return oracles;
+  } catch (error) {
+    if (error instanceof ApiClientError) {
+      throw error;
+    }
+
+    throw new Error('Failed to get oracles');
   }
 }
 
-export const oraclesService = new OraclesService();
+export { getOracles };

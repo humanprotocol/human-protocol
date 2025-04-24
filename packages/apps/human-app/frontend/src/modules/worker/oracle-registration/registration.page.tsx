@@ -27,9 +27,9 @@ export function RegistrationPage() {
   const { t } = useTranslation();
   const { address: oracleAddress } = useParams<{ address: string }>();
   const { data, isLoading } = useGetOracles();
-  const isAlreadyRegistered = useIsAlreadyRegistered(oracleAddress);
+  const { registered, isPending } = useIsAlreadyRegistered(oracleAddress);
 
-  if (isLoading) {
+  if (isLoading || isPending) {
     return (
       <Paper sx={styles}>
         <Loader />
@@ -43,7 +43,7 @@ export function RegistrationPage() {
     return <Navigate to={routerPaths.worker.jobsDiscovery} />;
   }
 
-  if (isAlreadyRegistered || !oracleData.registrationNeeded) {
+  if (registered || !oracleData.registrationNeeded) {
     return (
       <Navigate
         to={`${routerPaths.worker.jobs}/${oracleAddress}`}

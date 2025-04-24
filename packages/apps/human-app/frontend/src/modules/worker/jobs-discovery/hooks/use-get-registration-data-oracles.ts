@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { jobsDiscoveryService } from '../services/jobs-discovery.service';
+import * as jobsDiscoveryService from '../services/jobs-discovery.service';
 
 export function useGetRegistrationDataInOracles() {
   return useQuery({

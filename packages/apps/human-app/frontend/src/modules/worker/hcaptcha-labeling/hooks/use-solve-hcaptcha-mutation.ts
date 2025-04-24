@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { ResponseError } from '@/shared/types/global.type';
-import { hCaptchaLabelingService } from '../services/hcaptcha-labeling.service';
+import * as hCaptchaLabelingService from '../services/hcaptcha-labeling.service';
 import { type VerifyHCaptchaLabelingBody } from '../types';
 
 export function useSolveHCaptchaMutation(callbacks?: {

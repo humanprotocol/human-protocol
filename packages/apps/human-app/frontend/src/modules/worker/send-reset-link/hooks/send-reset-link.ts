@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { routerPaths } from '@/router/router-paths';
 import { type SendResetLinkDto } from '../schemas';
-import { passwordService } from '../../reset-password/password.service';
+import * as passwordService from '../../reset-password/password.service';
 
 export const SendResetLinkSuccessResponseSchema = z.unknown();
 
