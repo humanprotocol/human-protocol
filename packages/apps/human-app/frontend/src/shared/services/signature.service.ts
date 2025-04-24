@@ -29,26 +29,24 @@ const prepareSignatureSuccessSchema = z.object({
 
 export type SignatureData = z.infer<typeof prepareSignatureSuccessSchema>;
 
-class SignatureService {
-  async prepareSignature(data: PrepareSignatureBody) {
-    try {
-      const result = await humanAppApiClient.post<SignatureData>(
-        apiPaths.web3.prepareSignature,
-        {
-          body: { ...data },
-          successSchema: prepareSignatureSuccessSchema,
-        }
-      );
-
-      return result;
-    } catch (error) {
-      if (error instanceof ApiClientError) {
-        throw error;
+async function prepareSignature(data: PrepareSignatureBody) {
+  try {
+    const result = await humanAppApiClient.post<SignatureData>(
+      apiPaths.web3.prepareSignature,
+      {
+        body: { ...data },
+        successSchema: prepareSignatureSuccessSchema,
       }
+    );
 
-      throw new Error('Failed to prepare signature');
+    return result;
+  } catch (error) {
+    if (error instanceof ApiClientError) {
+      throw error;
     }
+
+    throw new Error('Failed to prepare signature');
   }
 }
 
-export const authService = new SignatureService();
+export { prepareSignature };

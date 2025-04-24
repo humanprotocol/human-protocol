@@ -7,36 +7,34 @@ const apiPaths = {
   resetPassword: '/password-reset/restore-password',
 };
 
-class PasswordService {
-  async sendResetLink(data: SendResetLinkDto) {
-    try {
-      await humanAppApiClient.post(apiPaths.sendResetLink, {
-        body: data,
-      });
-    } catch (error) {
-      if (error instanceof ApiClientError) {
-        throw error;
-      }
-
-      throw new Error('Failed to send reset link');
+async function sendResetLink(data: SendResetLinkDto) {
+  try {
+    await humanAppApiClient.post(apiPaths.sendResetLink, {
+      body: data,
+    });
+  } catch (error) {
+    if (error instanceof ApiClientError) {
+      throw error;
     }
-  }
 
-  async resetPassword(
-    data: Omit<ResetPasswordDto, 'confirmPassword'> & { token: string }
-  ) {
-    try {
-      await humanAppApiClient.post(apiPaths.resetPassword, {
-        body: data,
-      });
-    } catch (error) {
-      if (error instanceof ApiClientError) {
-        throw error;
-      }
-
-      throw new Error('Failed to reset password');
-    }
+    throw new Error('Failed to send reset link');
   }
 }
 
-export const passwordService = new PasswordService();
+async function resetPassword(
+  data: Omit<ResetPasswordDto, 'confirmPassword'> & { token: string }
+) {
+  try {
+    await humanAppApiClient.post(apiPaths.resetPassword, {
+      body: data,
+    });
+  } catch (error) {
+    if (error instanceof ApiClientError) {
+      throw error;
+    }
+
+    throw new Error('Failed to reset password');
+  }
+}
+
+export { sendResetLink, resetPassword };

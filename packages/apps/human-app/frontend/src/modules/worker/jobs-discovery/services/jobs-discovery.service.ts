@@ -14,26 +14,24 @@ type RegisteredOraclesSuccessResponse = z.infer<
   typeof registeredOraclesSuccessResponseSchema
 >;
 
-class JobsDiscoveryService {
-  async getRegistrationDataOracles() {
-    try {
-      const result =
-        await authorizedHumanAppApiClient.get<RegisteredOraclesSuccessResponse>(
-          apiPaths.registrationInExchangeOracle,
-          {
-            successSchema: registeredOraclesSuccessResponseSchema,
-          }
-        );
+async function getRegistrationDataOracles() {
+  try {
+    const result =
+      await authorizedHumanAppApiClient.get<RegisteredOraclesSuccessResponse>(
+        apiPaths.registrationInExchangeOracle,
+        {
+          successSchema: registeredOraclesSuccessResponseSchema,
+        }
+      );
 
-      return result;
-    } catch (error: unknown) {
-      if (error instanceof ApiClientError) {
-        throw error;
-      }
-
-      throw new Error('Failed to get oracle registration data.');
+    return result;
+  } catch (error: unknown) {
+    if (error instanceof ApiClientError) {
+      throw error;
     }
+
+    throw new Error('Failed to get oracle registration data.');
   }
 }
 
-export const jobsDiscoveryService = new JobsDiscoveryService();
+export { getRegistrationDataOracles };

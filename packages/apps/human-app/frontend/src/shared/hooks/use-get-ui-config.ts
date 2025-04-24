@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { uiConfigService } from '../services/ui-config.service';
+import * as uiConfigService from '../services/ui-config.service';
 
 export function useGetUiConfig() {
   return useQuery({

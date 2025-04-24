@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { routerPaths } from '@/router/router-paths';
-import { signupService } from '@/modules/signup/services/signup.service';
+import * as signupService from '@/modules/signup/services/signup.service';
 import { type SignUpDto } from '../schema';
 
 export function useSignUpMutation() {

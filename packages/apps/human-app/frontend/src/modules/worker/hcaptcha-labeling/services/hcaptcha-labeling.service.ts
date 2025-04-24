@@ -18,74 +18,76 @@ const apiPaths = {
   dailyHmtSpend: '/labeling/h-captcha/daily-hmt-spent',
 };
 
-class HCaptchaLabelingService {
-  async enableHCaptchaLabeling() {
-    try {
-      const result =
-        await authorizedHumanAppApiClient.post<EnableHCaptchaLabelingSuccessResponse>(
-          apiPaths.enableHCaptchaLabeling,
-          {
-            successSchema: enableHCaptchaLabelingResponseSchema,
-          }
-        );
-      return result;
-    } catch (error: unknown) {
-      if (error instanceof ApiClientError) {
-        throw error;
-      }
-      throw new Error('Failed to enable hCaptcha labeling');
+async function enableHCaptchaLabeling() {
+  try {
+    const result =
+      await authorizedHumanAppApiClient.post<EnableHCaptchaLabelingSuccessResponse>(
+        apiPaths.enableHCaptchaLabeling,
+        {
+          successSchema: enableHCaptchaLabelingResponseSchema,
+        }
+      );
+    return result;
+  } catch (error: unknown) {
+    if (error instanceof ApiClientError) {
+      throw error;
     }
-  }
-
-  async verifyHCaptchaLabeling(data: VerifyHCaptchaLabelingBody) {
-    try {
-      await authorizedHumanAppApiClient.post(apiPaths.verifyHCaptchaLabeling, {
-        body: { ...data },
-      });
-    } catch (error: unknown) {
-      if (error instanceof ApiClientError) {
-        throw error;
-      }
-      throw new Error('Failed to verify hCaptcha labeling');
-    }
-  }
-
-  async getHCaptchaUserStats() {
-    try {
-      const result =
-        await authorizedHumanAppApiClient.get<HCaptchaUserStatsSuccess>(
-          apiPaths.hCaptchaUserStats,
-          {
-            successSchema: hcaptchaUserStatsResponseSchema,
-          }
-        );
-      return result;
-    } catch (error: unknown) {
-      if (error instanceof ApiClientError) {
-        throw error;
-      }
-      throw new Error('Failed to get hCaptcha user stats');
-    }
-  }
-
-  async getDailyHmtSpent() {
-    try {
-      const result =
-        await authorizedHumanAppApiClient.get<DailyHmtSpentResponse>(
-          apiPaths.dailyHmtSpend,
-          {
-            successSchema: dailyHmtSpentResponseSchema,
-          }
-        );
-
-      return result;
-    } catch (error: unknown) {
-      if (error instanceof ApiClientError) {
-        throw error;
-      }
-      throw new Error('Failed to get daily HMT spent');
-    }
+    throw new Error('Failed to enable hCaptcha labeling');
   }
 }
 
-export const hCaptchaLabelingService = new HCaptchaLabelingService();
+async function verifyHCaptchaLabeling(data: VerifyHCaptchaLabelingBody) {
+  try {
+    await authorizedHumanAppApiClient.post(apiPaths.verifyHCaptchaLabeling, {
+      body: { ...data },
+    });
+  } catch (error: unknown) {
+    if (error instanceof ApiClientError) {
+      throw error;
+    }
+    throw new Error('Failed to verify hCaptcha labeling');
+  }
+}
+
+async function getHCaptchaUserStats() {
+  try {
+    const result =
+      await authorizedHumanAppApiClient.get<HCaptchaUserStatsSuccess>(
+        apiPaths.hCaptchaUserStats,
+        {
+          successSchema: hcaptchaUserStatsResponseSchema,
+        }
+      );
+    return result;
+  } catch (error: unknown) {
+    if (error instanceof ApiClientError) {
+      throw error;
+    }
+    throw new Error('Failed to get hCaptcha user stats');
+  }
+}
+
+async function getDailyHmtSpent() {
+  try {
+    const result = await authorizedHumanAppApiClient.get<DailyHmtSpentResponse>(
+      apiPaths.dailyHmtSpend,
+      {
+        successSchema: dailyHmtSpentResponseSchema,
+      }
+    );
+
+    return result;
+  } catch (error: unknown) {
+    if (error instanceof ApiClientError) {
+      throw error;
+    }
+    throw new Error('Failed to get daily HMT spent');
+  }
+}
+
+export {
+  enableHCaptchaLabeling,
+  verifyHCaptchaLabeling,
+  getHCaptchaUserStats,
+  getDailyHmtSpent,
+};

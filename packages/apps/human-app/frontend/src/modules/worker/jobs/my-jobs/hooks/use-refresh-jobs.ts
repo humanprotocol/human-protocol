@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { jobsService } from '../../services/jobs.service';
+import * as jobsService from '../../services/jobs.service';
 import { type RefreshJobsBody } from '../../types';
 
 export const refreshTasksSchema = z.unknown();

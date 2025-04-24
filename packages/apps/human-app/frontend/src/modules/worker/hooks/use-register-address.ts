@@ -6,7 +6,7 @@ import type { ResponseError } from '@/shared/types/global.type';
 import { useWalletConnect } from '@/shared/contexts/wallet-connect';
 import { usePrepareSignature } from '@/shared/hooks';
 import { PrepareSignatureType } from '@/shared/services/signature.service';
-import { profileService } from '../profile/services/profile.service';
+import * as profileService from '../profile/services/profile.service';
 
 interface RegisterAddressCallbacks {
   onSuccess?: () => void | Promise<void>;

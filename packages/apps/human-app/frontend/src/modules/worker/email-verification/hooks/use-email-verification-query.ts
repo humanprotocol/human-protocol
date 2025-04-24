@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { useQuery } from '@tanstack/react-query';
-import { emailVerificationService } from '../services/email-verification.service';
+import * as emailVerificationService from '../services/email-verification.service';
 
 export const verifyEmailDtoSchema = z.object({
   token: z.string(),
