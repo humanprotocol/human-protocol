@@ -15,6 +15,11 @@ import {
   CvatResultsProcessor,
   FortuneResultsProcessor,
 } from './results-processing';
+import {
+  AudinoPayoutsCalculator,
+  CvatPayoutsCalculator,
+  FortunePayoutsCalculator,
+} from './payouts-calculation';
 
 @Module({
   imports: [
@@ -32,6 +37,9 @@ import {
     AudinoResultsProcessor,
     FortuneResultsProcessor,
     CvatResultsProcessor,
+    AudinoPayoutsCalculator,
+    CvatPayoutsCalculator,
+    FortunePayoutsCalculator,
   ],
   exports: [EscrowCompletionService],
 })

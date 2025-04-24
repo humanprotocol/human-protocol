@@ -43,6 +43,12 @@ import {
   EscrowResultsProcessor,
   FortuneResultsProcessor,
 } from './results-processing';
+import {
+  AudinoPayoutsCalculator,
+  CvatPayoutsCalculator,
+  FortunePayoutsCalculator,
+  EscrowPayoutsCalculator,
+} from './payouts-calculation';
 
 @Injectable()
 export class EscrowCompletionService {
@@ -62,6 +68,9 @@ export class EscrowCompletionService {
     private readonly audinoResultsProcessor: AudinoResultsProcessor,
     private readonly cvatResultsProcessor: CvatResultsProcessor,
     private readonly fortuneResultsProcessor: FortuneResultsProcessor,
+    private readonly audinoPayoutsCalculator: AudinoPayoutsCalculator,
+    private readonly cvatPayoutsCalculator: CvatPayoutsCalculator,
+    private readonly fortunePayoutsCalculator: FortunePayoutsCalculator,
   ) {}
 
   async createEscrowCompletion(
@@ -145,11 +154,15 @@ export class EscrowCompletionService {
             );
           }
 
-          const calculatedPayouts = await this.payoutService.calculatePayouts(
-            escrowCompletionEntity.chainId,
-            escrowCompletionEntity.escrowAddress,
-            escrowCompletionEntity.finalResultsUrl,
-          );
+          const payoutsCalculator =
+            this.getEscrowPayoutsCalculator(jobRequestType);
+          const calculatedPayouts = await payoutsCalculator.calculate();
+
+          // const calculatedPayouts = await this.payoutService.calculatePayouts(
+          //   escrowCompletionEntity.chainId,
+          //   escrowCompletionEntity.escrowAddress,
+          //   escrowCompletionEntity.finalResultsUrl,
+          // );
 
           /**
            * When creating payout batches we need to guarantee deterministic result,
@@ -450,6 +463,27 @@ export class EscrowCompletionService {
       default:
         throw new Error(
           `No escrow results processor defined for '${jobRequestType}' jobs`,
+        );
+    }
+  }
+
+  private getEscrowPayoutsCalculator(
+    jobRequestType: JobRequestType,
+  ): EscrowPayoutsCalculator {
+    switch (jobRequestType) {
+      case JobRequestType.FORTUNE:
+        return this.fortunePayoutsCalculator;
+      case JobRequestType.IMAGE_BOXES:
+      case JobRequestType.IMAGE_POINTS:
+      case JobRequestType.IMAGE_BOXES_FROM_POINTS:
+      case JobRequestType.IMAGE_SKELETONS_FROM_BOXES:
+      case JobRequestType.IMAGE_POLYGONS:
+        return this.cvatPayoutsCalculator;
+      case JobRequestType.AUDIO_TRANSCRIPTION:
+        return this.audinoPayoutsCalculator;
+      default:
+        throw new Error(
+          `No escrow payouts calculator defined for '${jobRequestType}' jobs`,
         );
     }
   }
