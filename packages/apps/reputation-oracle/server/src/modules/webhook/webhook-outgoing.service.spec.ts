@@ -20,7 +20,6 @@ import {
   generateOutgoingWebhook,
 } from './fixtures';
 import { OutgoingWebhookStatus } from './types';
-import { OutgoingWebhookEntity } from './webhook-outgoing.entity';
 import { OutgoingWebhookRepository } from './webhook-outgoing.repository';
 import { OutgoingWebhookService } from './webhook-outgoing.service';
 
@@ -68,10 +67,6 @@ describe('WebhookOutgoingService', () => {
       const payload = generateOutgoingWebhookPayload();
       const url = faker.internet.url();
 
-      mockOutgoingWebhookRepository.createUnique.mockResolvedValueOnce(
-        {} as OutgoingWebhookEntity,
-      );
-
       const hash = crypto
         .createHash('sha1')
         .update(stringify({ payload, url }) as string)
@@ -112,9 +107,7 @@ describe('WebhookOutgoingService', () => {
       mockOutgoingWebhookRepository.findByStatus.mockResolvedValueOnce([
         outgoingWebhookEntity,
       ]);
-      mockOutgoingWebhookRepository.updateOne.mockResolvedValueOnce(
-        {} as OutgoingWebhookEntity,
-      );
+
       spyOnSendWebhook.mockResolvedValueOnce(null);
 
       await outgoingWebhookService.processPendingOutgoingWebhooks();

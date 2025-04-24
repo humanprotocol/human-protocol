@@ -14,7 +14,6 @@ import {
   IncomingWebhookEventType,
   IncomingWebhookStatus,
 } from './types';
-import { IncomingWebhookEntity } from './webhook-incoming.entity';
 import { IncomingWebhookRepository } from './webhook-incoming.repository';
 import { IncomingWebhookService } from './webhook-incoming.service';
 
@@ -64,10 +63,6 @@ describe('WebhookIncomingService', () => {
         escrowAddress: faker.finance.ethereumAddress(),
       };
 
-      mockIncomingWebhookRepository.createUnique.mockResolvedValueOnce(
-        {} as IncomingWebhookEntity,
-      );
-
       await incomingWebhookService.createIncomingWebhook(data);
 
       expect(mockIncomingWebhookRepository.createUnique).toHaveBeenCalledTimes(
@@ -91,9 +86,6 @@ describe('WebhookIncomingService', () => {
       mockIncomingWebhookRepository.findByStatus.mockResolvedValueOnce([
         incomingWebhookEntity,
       ]);
-      mockIncomingWebhookRepository.updateOne.mockResolvedValueOnce(
-        {} as IncomingWebhookEntity,
-      );
 
       await incomingWebhookService.processPendingIncomingWebhooks();
 
