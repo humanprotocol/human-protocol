@@ -1,8 +1,41 @@
-import { JobRequestType } from '../common/enums';
-import { JobManifest } from '../common/types';
-import { UnsupportedManifestTypeError } from '../common/errors/manifest';
+import { AudinoJobType, CvatJobType, FortuneJobType } from '../common/enums';
+import { JobManifest, JobRequestType } from '../common/types';
 
-export function getJobRequestType(manifest: JobManifest): string {
+const fortuneJobTypes = Object.values(FortuneJobType);
+
+export function isFortuneJobType(value: string): value is FortuneJobType {
+  return fortuneJobTypes.includes(value as FortuneJobType);
+}
+
+const cvatJobTypes = Object.values(CvatJobType);
+
+export function isCvatJobType(value: string): value is CvatJobType {
+  return cvatJobTypes.includes(value as CvatJobType);
+}
+
+const audinoJobTypes = Object.values(AudinoJobType);
+
+export function isAudinoJobType(value: string): value is AudinoJobType {
+  return audinoJobTypes.includes(value as AudinoJobType);
+}
+
+const validJobRequestTypes: string[] = [
+  ...fortuneJobTypes,
+  ...cvatJobTypes,
+  ...audinoJobTypes,
+];
+
+function assertValidJobRequestType(
+  value: string,
+): asserts value is JobRequestType {
+  if (validJobRequestTypes.includes(value)) {
+    return;
+  }
+
+  throw new Error(`Unsupported request type: ${value}`);
+}
+
+export function getJobRequestType(manifest: JobManifest): JobRequestType {
   let jobRequestType: string | undefined;
 
   if ('requestType' in manifest) {
@@ -12,20 +45,10 @@ export function getJobRequestType(manifest: JobManifest): string {
   }
 
   if (!jobRequestType) {
-    throw new UnsupportedManifestTypeError(jobRequestType);
+    throw new Error(`Job request type is missing in manifest`);
   }
 
-  return jobRequestType.toLowerCase();
-}
+  assertValidJobRequestType(jobRequestType);
 
-export function assertValidJobRequestType(
-  value: string,
-): asserts value is JobRequestType {
-  const validValues = Object.values<string>(JobRequestType);
-
-  if (validValues.includes(value)) {
-    return;
-  }
-
-  throw new Error(`Unsupported request type: ${value}`);
+  return jobRequestType;
 }

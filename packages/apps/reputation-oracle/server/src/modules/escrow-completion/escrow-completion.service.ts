@@ -14,15 +14,11 @@ import _ from 'lodash';
 
 import { BACKOFF_INTERVAL_SECONDS } from '../../common/constants';
 import { isDuplicatedError } from '../../common/errors/database';
-import { JobRequestType } from '../../common/enums';
-import { JobManifest } from '../../common/types';
+import { JobManifest, JobRequestType } from '../../common/types';
 import { ServerConfigService } from '../../config/server-config.service';
 import logger from '../../logger';
 import { calculateExponentialBackoffMs } from '../../utils/backoff';
-import {
-  assertValidJobRequestType,
-  getJobRequestType,
-} from '../../utils/manifest';
+import * as manifestUtils from '../../utils/manifest';
 
 import { ReputationService } from '../reputation/reputation.service';
 import { StorageService } from '../storage/storage.service';
@@ -132,8 +128,7 @@ export class EscrowCompletionService {
             await this.storageService.downloadJsonLikeData<JobManifest>(
               manifestUrl,
             );
-          const jobRequestType = getJobRequestType(manifest);
-          assertValidJobRequestType(jobRequestType);
+          const jobRequestType = manifestUtils.getJobRequestType(manifest);
 
           if (!escrowCompletionEntity.finalResultsUrl) {
             const escrowResultsProcessor =
@@ -446,42 +441,40 @@ export class EscrowCompletionService {
   private getEscrowResultsProcessor(
     jobRequestType: JobRequestType,
   ): EscrowResultsProcessor {
-    switch (jobRequestType) {
-      case JobRequestType.FORTUNE:
-        return this.fortuneResultsProcessor;
-      case JobRequestType.IMAGE_BOXES:
-      case JobRequestType.IMAGE_POINTS:
-      case JobRequestType.IMAGE_BOXES_FROM_POINTS:
-      case JobRequestType.IMAGE_SKELETONS_FROM_BOXES:
-      case JobRequestType.IMAGE_POLYGONS:
-        return this.cvatResultsProcessor;
-      case JobRequestType.AUDIO_TRANSCRIPTION:
-        return this.audinoResultsProcessor;
-      default:
-        throw new Error(
-          `No escrow results processor defined for '${jobRequestType}' jobs`,
-        );
+    if (manifestUtils.isFortuneJobType(jobRequestType)) {
+      return this.fortuneResultsProcessor;
     }
+
+    if (manifestUtils.isCvatJobType(jobRequestType)) {
+      return this.cvatResultsProcessor;
+    }
+
+    if (manifestUtils.isAudinoJobType(jobRequestType)) {
+      return this.audinoResultsProcessor;
+    }
+
+    throw new Error(
+      `No escrow results processor defined for '${jobRequestType}' jobs`,
+    );
   }
 
   private getEscrowPayoutsCalculator(
     jobRequestType: JobRequestType,
   ): EscrowPayoutsCalculator {
-    switch (jobRequestType) {
-      case JobRequestType.FORTUNE:
-        return this.fortunePayoutsCalculator;
-      case JobRequestType.IMAGE_BOXES:
-      case JobRequestType.IMAGE_POINTS:
-      case JobRequestType.IMAGE_BOXES_FROM_POINTS:
-      case JobRequestType.IMAGE_SKELETONS_FROM_BOXES:
-      case JobRequestType.IMAGE_POLYGONS:
-        return this.cvatPayoutsCalculator;
-      case JobRequestType.AUDIO_TRANSCRIPTION:
-        return this.audinoPayoutsCalculator;
-      default:
-        throw new Error(
-          `No escrow payouts calculator defined for '${jobRequestType}' jobs`,
-        );
+    if (manifestUtils.isFortuneJobType(jobRequestType)) {
+      return this.fortunePayoutsCalculator;
     }
+
+    if (manifestUtils.isCvatJobType(jobRequestType)) {
+      return this.cvatPayoutsCalculator;
+    }
+
+    if (manifestUtils.isAudinoJobType(jobRequestType)) {
+      return this.audinoPayoutsCalculator;
+    }
+
+    throw new Error(
+      `No escrow payouts calculator defined for '${jobRequestType}' jobs`,
+    );
   }
 }

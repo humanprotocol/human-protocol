@@ -1,48 +1,36 @@
-import { JobRequestType } from '../enums';
-
-type CvatData = {
-  data_url: string;
-};
-
-type Label = {
-  name: string;
-};
-
-type Annotation = {
-  labels: Label[];
-  description: string;
-  type: JobRequestType;
-  job_size: number;
-  max_time: number;
-};
-
-type Validation = {
-  min_quality: number;
-  val_size: number;
-  gt_url: string;
-};
-
-export type CvatManifest = {
-  data: CvatData;
-  annotation: Annotation;
-  validation: Validation;
-  job_bounty: string;
-};
+import { AudinoJobType, CvatJobType, FortuneJobType } from '../enums';
 
 export type FortuneManifest = {
   submissionsRequired: number;
   requesterTitle: string;
   requesterDescription: string;
   fundAmount: number;
-  requestType: JobRequestType;
+  requestType: FortuneJobType;
 };
 
-type AudinoData = {
-  data_url: string;
+type CvatAnnotation = {
+  labels: Array<{
+    name: string;
+  }>;
+  description: string;
+  type: CvatJobType;
+  job_size: number;
+  max_time: number;
 };
 
-type AudinoLabel = {
-  name: string;
+type CvatValidation = {
+  min_quality: number;
+  val_size: number;
+  gt_url: string;
+};
+
+export type CvatManifest = {
+  data: {
+    data_url: string;
+  };
+  annotation: CvatAnnotation;
+  validation: CvatValidation;
+  job_bounty: string;
 };
 
 type AudinoValidation = {
@@ -51,17 +39,23 @@ type AudinoValidation = {
 };
 
 type AudinoAnnotation = {
-  type: JobRequestType;
-  labels: AudinoLabel[];
+  type: AudinoJobType;
+  labels: Array<{
+    name: string;
+  }>;
   description: string;
   segment_duration: number;
 };
 
 export type AudinoManifest = {
-  data: AudinoData;
+  data: {
+    data_url: string;
+  };
   annotation: AudinoAnnotation;
-  job_bounty: string;
   validation: AudinoValidation;
+  job_bounty: string;
 };
 
 export type JobManifest = FortuneManifest | CvatManifest | AudinoManifest;
+
+export type JobRequestType = FortuneJobType | CvatJobType | AudinoJobType;
