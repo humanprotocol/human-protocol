@@ -25,8 +25,6 @@ import { calculateExponentialBackoffMs } from '../../utils/backoff';
 import { getJobRequestType } from '../../utils/manifest';
 import { assertValidJobRequestType } from '../../utils/type-guards';
 
-import { CalculatedPayout } from '../payout/payout.interface';
-import { PayoutService } from '../payout/payout.service';
 import { ReputationService } from '../reputation/reputation.service';
 import { StorageService } from '../storage/storage.service';
 import { Web3Service } from '../web3/web3.service';
@@ -48,6 +46,7 @@ import {
   CvatPayoutsCalculator,
   FortunePayoutsCalculator,
   EscrowPayoutsCalculator,
+  CalculatedPayout,
 } from './payouts-calculation';
 
 @Injectable()
@@ -63,7 +62,6 @@ export class EscrowCompletionService {
     private readonly web3Service: Web3Service,
     private readonly storageService: StorageService,
     private readonly outgoingWebhookService: OutgoingWebhookService,
-    private readonly payoutService: PayoutService,
     private readonly reputationService: ReputationService,
     private readonly audinoResultsProcessor: AudinoResultsProcessor,
     private readonly cvatResultsProcessor: CvatResultsProcessor,
