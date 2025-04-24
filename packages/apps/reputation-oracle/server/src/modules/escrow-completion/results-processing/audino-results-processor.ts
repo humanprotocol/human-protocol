@@ -1,5 +1,5 @@
 import { AUDINO_RESULTS_ANNOTATIONS_FILENAME } from '../../../common/constants';
-import { AudinoManifest } from '../../../common/interfaces/manifest';
+import { AudinoManifest } from '../../../common/types';
 
 import { BaseEscrowResultsProcessor } from './escrow-results-processor';
 

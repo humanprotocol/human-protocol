@@ -1,39 +1,39 @@
-export interface FortuneFinalResult {
+export type FortuneFinalResult = {
   workerAddress: string;
   solution: string;
   error?: 'duplicated' | 'curse_word';
-}
+};
 
-interface CvatAnnotationMetaJobs {
+type CvatAnnotationMetaJob = {
   job_id: number;
   final_result_id: number;
-}
+};
 
-export interface CvatAnnotationMetaResults {
+export type CvatAnnotationMetaResult = {
   id: number;
   job_id: number;
   annotator_wallet_address: string;
   annotation_quality: number;
-}
+};
 
-export interface CvatAnnotationMeta {
-  jobs: CvatAnnotationMetaJobs[];
-  results: CvatAnnotationMetaResults[];
-}
+export type CvatAnnotationMeta = {
+  jobs: CvatAnnotationMetaJob[];
+  results: CvatAnnotationMetaResult[];
+};
 
-interface AudinoAnnotationMetaJob {
+type AudinoAnnotationMetaJob = {
   job_id: number;
   final_result_id: number;
-}
+};
 
-export interface AudinoAnnotationMetaResult {
+export type AudinoAnnotationMetaResult = {
   id: number;
   job_id: number;
   annotator_wallet_address: string;
   annotation_quality: number;
-}
+};
 
-export interface AudinoAnnotationMeta {
+export type AudinoAnnotationMeta = {
   jobs: AudinoAnnotationMetaJob[];
   results: AudinoAnnotationMetaResult[];
-}
+};

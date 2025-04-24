@@ -1,67 +1,67 @@
 import { JobRequestType } from '../enums';
 
-interface CvatData {
+type CvatData = {
   data_url: string;
-}
+};
 
-interface Label {
+type Label = {
   name: string;
-}
+};
 
-interface Annotation {
+type Annotation = {
   labels: Label[];
   description: string;
   type: JobRequestType;
   job_size: number;
   max_time: number;
-}
+};
 
-interface Validation {
+type Validation = {
   min_quality: number;
   val_size: number;
   gt_url: string;
-}
+};
 
-export interface CvatManifest {
+export type CvatManifest = {
   data: CvatData;
   annotation: Annotation;
   validation: Validation;
   job_bounty: string;
-}
+};
 
-export interface FortuneManifest {
+export type FortuneManifest = {
   submissionsRequired: number;
   requesterTitle: string;
   requesterDescription: string;
   fundAmount: number;
   requestType: JobRequestType;
-}
+};
 
-interface AudinoData {
+type AudinoData = {
   data_url: string;
-}
+};
 
-interface AudinoLabel {
+type AudinoLabel = {
   name: string;
-}
+};
 
-interface AudinoValidation {
+type AudinoValidation = {
   gt_url: string;
   min_quality: number;
-}
+};
 
-interface AudinoAnnotation {
+type AudinoAnnotation = {
   type: JobRequestType;
   labels: AudinoLabel[];
   description: string;
   segment_duration: number;
-}
+};
 
-export interface AudinoManifest {
+export type AudinoManifest = {
   data: AudinoData;
   annotation: AudinoAnnotation;
   job_bounty: string;
   validation: AudinoValidation;
-}
+};
 
 export type JobManifest = FortuneManifest | CvatManifest | AudinoManifest;

@@ -1,4 +1,5 @@
-import { JobManifest } from '../common/interfaces/manifest';
+import { JobRequestType } from '../common/enums';
+import { JobManifest } from '../common/types';
 import { UnsupportedManifestTypeError } from '../common/errors/manifest';
 
 export function getJobRequestType(manifest: JobManifest): string {
@@ -15,4 +16,16 @@ export function getJobRequestType(manifest: JobManifest): string {
   }
 
   return jobRequestType.toLowerCase();
+}
+
+export function assertValidJobRequestType(
+  value: string,
+): asserts value is JobRequestType {
+  const validValues = Object.values<string>(JobRequestType);
+
+  if (validValues.includes(value)) {
+    return;
+  }
+
+  throw new Error(`Unsupported request type: ${value}`);
 }

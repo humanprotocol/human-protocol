@@ -15,12 +15,14 @@ import _ from 'lodash';
 import { BACKOFF_INTERVAL_SECONDS } from '../../common/constants';
 import { isDuplicatedError } from '../../common/errors/database';
 import { JobRequestType } from '../../common/enums';
-import { JobManifest } from '../../common/interfaces/manifest';
+import { JobManifest } from '../../common/types';
 import { ServerConfigService } from '../../config/server-config.service';
 import logger from '../../logger';
 import { calculateExponentialBackoffMs } from '../../utils/backoff';
-import { getJobRequestType } from '../../utils/manifest';
-import { assertValidJobRequestType } from '../../utils/type-guards';
+import {
+  assertValidJobRequestType,
+  getJobRequestType,
+} from '../../utils/manifest';
 
 import { ReputationService } from '../reputation/reputation.service';
 import { StorageService } from '../storage/storage.service';

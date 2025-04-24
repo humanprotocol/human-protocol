@@ -1,5 +1,5 @@
 import { CVAT_RESULTS_ANNOTATIONS_FILENAME } from '../../../common/constants';
-import { CvatManifest } from '../../../common/interfaces/manifest';
+import { CvatManifest } from '../../../common/types';
 
 import { BaseEscrowResultsProcessor } from './escrow-results-processor';
 

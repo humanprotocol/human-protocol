@@ -2,7 +2,7 @@ import { ChainId, EscrowClient } from '@human-protocol/sdk';
 import crypto from 'crypto';
 
 import { ContentType } from '../../../common/enums';
-import { JobManifest } from '../../../common/interfaces/manifest';
+import { JobManifest } from '../../../common/types';
 import * as httpUtils from '../../../utils/http';
 
 import { PgpEncryptionService } from '../../encryption/pgp-encryption.service';

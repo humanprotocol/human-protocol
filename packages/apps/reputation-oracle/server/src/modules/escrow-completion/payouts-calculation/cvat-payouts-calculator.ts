@@ -3,8 +3,7 @@ import { ethers } from 'ethers';
 import type { OverrideProperties } from 'type-fest';
 
 import { CVAT_VALIDATION_META_FILENAME } from '../../../common/constants';
-import { CvatAnnotationMeta } from '../../../common/interfaces/job-result';
-import { CvatManifest } from '../../../common/interfaces/manifest';
+import { CvatAnnotationMeta, CvatManifest } from '../../../common/types';
 
 import { StorageService } from '../../storage/storage.service';
 import { Web3Service } from '../../web3/web3.service';

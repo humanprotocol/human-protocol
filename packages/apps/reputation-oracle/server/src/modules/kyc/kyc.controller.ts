@@ -18,7 +18,7 @@ import {
 } from '@nestjs/swagger';
 
 import { Public } from '../../common/decorators';
-import { RequestWithUser } from '../../common/interfaces/request';
+import { RequestWithUser } from '../../common/types';
 import {
   StartSessionResponseDto,
   KycSignedAddressDto,

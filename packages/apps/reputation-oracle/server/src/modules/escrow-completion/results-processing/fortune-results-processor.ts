@@ -1,5 +1,4 @@
-import { FortuneFinalResult } from '../../../common/interfaces/job-result';
-import { FortuneManifest } from '../../../common/interfaces/manifest';
+import { FortuneFinalResult, FortuneManifest } from '../../../common/types';
 
 import { BaseEscrowResultsProcessor } from './escrow-results-processor';
 
