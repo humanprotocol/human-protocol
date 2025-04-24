@@ -62,17 +62,13 @@ export const useMyJobsFilterStore = create<MyJobsFilterStoreProps>((set) => ({
     set({ filterParams: initialFiltersState });
   },
   setSearchEscrowAddress: (escrow_address: string) => {
-    set((state) => {
-      if (state.filterParams.escrow_address === escrow_address) return state;
-
-      return {
-        ...state,
-        filterParams: {
-          ...state.filterParams,
-          escrow_address,
-        },
-      };
-    });
+    set((state) => ({
+      ...state,
+      filterParams: {
+        ...state.filterParams,
+        escrow_address,
+      },
+    }));
   },
   setOracleAddress: (oracleAddress: string) => {
     set((state) => ({
