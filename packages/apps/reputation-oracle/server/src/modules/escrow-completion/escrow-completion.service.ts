@@ -238,7 +238,6 @@ export class EscrowCompletionService {
         const oracleAddresses: string[] = [
           escrowData.launcher as string,
           escrowData.exchangeOracle as string,
-          escrowData.recordingOracle as string,
         ];
 
         const webhookPayload = {
