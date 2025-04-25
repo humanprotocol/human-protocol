@@ -13,6 +13,6 @@ export class CvatResultsProcessor extends BaseEscrowResultsProcessor<CvatManifes
   }
 
   getFinalResultsFileName(hash: string): string {
-    return `s3${hash}.zip`;
+    return `${hash}.zip`;
   }
 }

@@ -13,6 +13,6 @@ export class AudinoResultsProcessor extends BaseEscrowResultsProcessor<AudinoMan
   }
 
   getFinalResultsFileName(hash: string): string {
-    return `s3${hash}.zip`;
+    return `${hash}.zip`;
   }
 }
