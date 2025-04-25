@@ -1,3 +1,4 @@
+import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
 import type { OverrideProperties } from 'type-fest';
 
@@ -16,6 +17,7 @@ type CalculateFortunePayoutsInput = OverrideProperties<
   { manifest: FortuneManifest }
 >;
 
+@Injectable()
 export class FortunePayoutsCalculator implements EscrowPayoutsCalculator {
   constructor(private readonly storageService: StorageService) {}
 

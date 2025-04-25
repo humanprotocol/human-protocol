@@ -1,4 +1,5 @@
 import { ChainId, EscrowClient, EscrowUtils } from '@human-protocol/sdk';
+import { Injectable } from '@nestjs/common';
 import crypto from 'crypto';
 
 import { ContentType } from '../../../common/enums';
@@ -22,6 +23,7 @@ export interface EscrowResultsProcessor {
   ): Promise<EscrowFinalResultsDetails>;
 }
 
+@Injectable()
 export abstract class BaseEscrowResultsProcessor<TManifest extends JobManifest>
   implements EscrowResultsProcessor
 {
@@ -36,6 +38,11 @@ export abstract class BaseEscrowResultsProcessor<TManifest extends JobManifest>
     escrowAddress: string,
     manifest: TManifest,
   ): Promise<EscrowFinalResultsDetails> {
+    console.log('heeeeeeeeeeeeeeere', {
+      web3: this.web3Service,
+      storage: this.storageService,
+      pgp: this.pgpEncryptionService,
+    });
     const signer = this.web3Service.getSigner(chainId);
     const escrowClient = await EscrowClient.build(signer);
 

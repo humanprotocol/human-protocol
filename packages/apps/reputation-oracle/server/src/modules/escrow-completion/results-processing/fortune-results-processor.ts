@@ -1,7 +1,10 @@
+import { Injectable } from '@nestjs/common';
+
 import { FortuneFinalResult, FortuneManifest } from '../../../common/types';
 
 import { BaseEscrowResultsProcessor } from './escrow-results-processor';
 
+@Injectable()
 export class FortuneResultsProcessor extends BaseEscrowResultsProcessor<FortuneManifest> {
   constructIntermediateResultsUrl(baseUrl: string): string {
     return baseUrl;

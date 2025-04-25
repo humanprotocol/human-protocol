@@ -1,4 +1,5 @@
 import { EscrowClient } from '@human-protocol/sdk';
+import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
 import type { OverrideProperties } from 'type-fest';
 
@@ -19,6 +20,7 @@ type CalculateCvatPayoutsInput = OverrideProperties<
   { manifest: CvatManifest }
 >;
 
+@Injectable()
 export class CvatPayoutsCalculator implements EscrowPayoutsCalculator {
   constructor(
     private readonly storageService: StorageService,

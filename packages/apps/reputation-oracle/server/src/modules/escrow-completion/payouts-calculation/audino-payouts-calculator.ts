@@ -1,4 +1,5 @@
 import { EscrowClient } from '@human-protocol/sdk';
+import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
 import type { OverrideProperties } from 'type-fest';
 
@@ -19,6 +20,7 @@ type CalculateAudinoPayoutsInput = OverrideProperties<
   { manifest: AudinoManifest }
 >;
 
+@Injectable()
 export class AudinoPayoutsCalculator implements EscrowPayoutsCalculator {
   constructor(
     private readonly storageService: StorageService,
