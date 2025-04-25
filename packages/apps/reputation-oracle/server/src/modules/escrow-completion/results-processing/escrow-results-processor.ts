@@ -77,12 +77,12 @@ export abstract class BaseEscrowResultsProcessor<TManifest extends JobManifest>
     return { url, hash };
   }
 
-  abstract constructIntermediateResultsUrl(baseUrl: string): string;
+  protected abstract constructIntermediateResultsUrl(baseUrl: string): string;
 
-  abstract assertResultsComplete(
+  protected abstract assertResultsComplete(
     resultsFileContent: Buffer,
     manifest: TManifest,
   ): Promise<void>;
 
-  abstract getFinalResultsFileName(hash: string): string;
+  protected abstract getFinalResultsFileName(hash: string): string;
 }

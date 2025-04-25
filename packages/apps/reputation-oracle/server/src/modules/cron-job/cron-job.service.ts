@@ -159,7 +159,7 @@ export class CronJobService {
     );
 
     try {
-      await this.escrowCompletionService.processPaidEscrowCompletion();
+      await this.escrowCompletionService.processPaidEscrows();
     } catch (error) {
       this.logger.error('Error processing paid escrow completion', error);
     }

@@ -203,13 +203,12 @@ export class EscrowCompletionService {
     }
   }
 
-  public async processPaidEscrowCompletion(): Promise<void> {
+  async processPaidEscrows(): Promise<void> {
     const escrowCompletionEntities =
       await this.escrowCompletionRepository.findByStatus(
         EscrowCompletionStatus.PAID,
       );
 
-    // TODO: Add DB transactions
     for (const escrowCompletionEntity of escrowCompletionEntities) {
       try {
         const { chainId, escrowAddress } = escrowCompletionEntity;
@@ -218,15 +217,14 @@ export class EscrowCompletionService {
         const escrowClient = await EscrowClient.build(signer);
 
         const escrowStatus = await escrowClient.getStatus(escrowAddress);
-
         if ([EscrowStatus.Partial, EscrowStatus.Paid].includes(escrowStatus)) {
           await escrowClient.complete(escrowAddress, {
             gasPrice: await this.web3Service.calculateGasPrice(chainId),
           });
 
-          // TODO: Technically it's possible that the escrow completion could occur before the reputation scores are assessed,
-          // and the app might go down during this window. Currently, there isn’t a clear approach to handle this situation.
-          // Consider revisiting this section to explore potential solutions to improve resilience in such scenarios.
+          /**
+           * This operation can fail and lost, so it's "at most once"
+           */
           await this.reputationService.assessEscrowParties(
             chainId,
             escrowAddress,
@@ -246,7 +244,6 @@ export class EscrowCompletionService {
         };
 
         let allWebhooksCreated = true;
-
         for (const oracleAddress of oracleAddresses) {
           const oracleData = await OperatorUtils.getOperator(
             chainId,
@@ -313,7 +310,7 @@ export class EscrowCompletionService {
     }
   }
 
-  public async createEscrowPayoutsBatch(
+  private async createEscrowPayoutsBatch(
     escrowCompletionId: number,
     payoutsBatch: CalculatedPayout[],
   ): Promise<void> {
@@ -337,7 +334,7 @@ export class EscrowCompletionService {
     );
   }
 
-  public async processAwaitingPayouts(): Promise<void> {
+  async processAwaitingPayouts(): Promise<void> {
     const escrowCompletionEntities =
       await this.escrowCompletionRepository.findByStatus(
         EscrowCompletionStatus.AWAITING_PAYOUTS,
@@ -405,8 +402,8 @@ export class EscrowCompletionService {
       escrowCompletionEntity.escrowAddress,
       Array.from(recipientToAmountMap.keys()),
       Array.from(recipientToAmountMap.values()),
-      escrowCompletionEntity.finalResultsUrl,
-      escrowCompletionEntity.finalResultsHash,
+      escrowCompletionEntity.finalResultsUrl as string,
+      escrowCompletionEntity.finalResultsHash as string,
       DEFAULT_BULK_PAYOUT_TX_ID,
       false,
       {
@@ -430,7 +427,7 @@ export class EscrowCompletionService {
       await this.escrowPayoutsBatchRepository.deleteOne(payoutsBatch);
     } catch (error) {
       if (ethers.isError(error, 'NONCE_EXPIRED')) {
-        delete payoutsBatch.txNonce;
+        payoutsBatch.txNonce = null;
         await this.escrowPayoutsBatchRepository.updateOne(payoutsBatch);
       }
 

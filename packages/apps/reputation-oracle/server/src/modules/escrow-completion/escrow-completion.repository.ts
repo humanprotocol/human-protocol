@@ -10,13 +10,13 @@ import { EscrowCompletionEntity } from './escrow-completion.entity';
 @Injectable()
 export class EscrowCompletionRepository extends BaseRepository<EscrowCompletionEntity> {
   constructor(
-    private dataSource: DataSource,
-    public readonly serverConfigService: ServerConfigService,
+    dataSource: DataSource,
+    private readonly serverConfigService: ServerConfigService,
   ) {
     super(EscrowCompletionEntity, dataSource);
   }
 
-  public findByStatus(
+  findByStatus(
     status: EscrowCompletionStatus,
   ): Promise<EscrowCompletionEntity[]> {
     return this.find({

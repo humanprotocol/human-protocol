@@ -1,4 +1,3 @@
-import { ChainId } from '@human-protocol/sdk';
 import { Column, Entity, Index } from 'typeorm';
 
 import { DATABASE_SCHEMA_NAME } from '../../common/constants';
@@ -10,29 +9,29 @@ import { EscrowCompletionStatus } from './constants';
 @Index(['escrowAddress', 'chainId'], { unique: true })
 export class EscrowCompletionEntity extends BaseEntity {
   @Column({ type: 'int' })
-  public chainId: ChainId;
+  chainId: number;
 
   @Column({ type: 'varchar' })
-  public escrowAddress: string;
+  escrowAddress: string;
 
   @Column({ type: 'varchar', nullable: true })
-  public finalResultsUrl: string;
+  finalResultsUrl: string | null;
 
   @Column({ type: 'varchar', nullable: true })
-  public finalResultsHash: string;
+  finalResultsHash: string | null;
 
   @Column({ type: 'varchar', nullable: true })
-  public failureDetail: string;
+  failureDetail: string | null;
 
   @Column({ type: 'int' })
-  public retriesCount: number;
+  retriesCount: number;
 
   @Column({ type: 'timestamptz' })
-  public waitUntil: Date;
+  waitUntil: Date;
 
   @Column({
     type: 'enum',
     enum: EscrowCompletionStatus,
   })
-  public status: EscrowCompletionStatus;
+  status: EscrowCompletionStatus;
 }
