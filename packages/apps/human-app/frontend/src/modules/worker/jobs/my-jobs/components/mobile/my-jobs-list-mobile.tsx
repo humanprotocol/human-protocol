@@ -13,7 +13,6 @@ import { ListItem } from '@/shared/components/ui/list-item';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { Chip } from '@/shared/components/ui/chip';
 import type { JobType } from '@/modules/smart-contracts/EthKVStore/config';
-import { colorPalette as lightModeColorPalette } from '@/shared/styles/color-palette';
 import { formatDate } from '@/shared/helpers/date';
 import { useCombinePages } from '@/shared/hooks';
 import {
@@ -166,10 +165,7 @@ export function MyJobsListMobile() {
                           colorPalette
                         )}
                         label={
-                          <Typography
-                            color={lightModeColorPalette.white}
-                            variant="chip"
-                          >
+                          <Typography color={colorPalette.white} variant="chip">
                             {d.status}
                           </Typography>
                         }
