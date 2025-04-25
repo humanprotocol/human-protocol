@@ -1,4 +1,4 @@
-import { ChainId, EscrowClient } from '@human-protocol/sdk';
+import { ChainId, EscrowClient, EscrowUtils } from '@human-protocol/sdk';
 import crypto from 'crypto';
 
 import { ContentType } from '../../../common/enums';
@@ -52,13 +52,12 @@ export abstract class BaseEscrowResultsProcessor<TManifest extends JobManifest>
 
     await this.assertResultsComplete(fileContent, manifest);
 
-    const jobLauncherAddress =
-      await escrowClient.getJobLauncherAddress(escrowAddress);
+    const escrowData = await EscrowUtils.getEscrow(chainId, escrowAddress);
 
     const encryptedResults = await this.pgpEncryptionService.encrypt(
       fileContent,
       chainId,
-      [jobLauncherAddress],
+      [escrowData.launcher as string],
     );
 
     const hash = crypto

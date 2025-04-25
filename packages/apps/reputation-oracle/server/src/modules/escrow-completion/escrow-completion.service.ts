@@ -3,6 +3,7 @@ import {
   ChainId,
   EscrowClient,
   EscrowStatus,
+  EscrowUtils,
   OperatorUtils,
 } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
@@ -121,12 +122,13 @@ export class EscrowCompletionService {
           escrowCompletionEntity.escrowAddress,
         );
         if (escrowStatus === EscrowStatus.Pending) {
-          const manifestUrl = await escrowClient.getManifestUrl(
+          const escrowData = await EscrowUtils.getEscrow(
+            escrowCompletionEntity.chainId,
             escrowCompletionEntity.escrowAddress,
           );
           const manifest =
             await this.storageService.downloadJsonLikeData<JobManifest>(
-              manifestUrl,
+              escrowData.manifestUrl as string,
             );
           const jobRequestType = manifestUtils.getJobRequestType(manifest);
 
@@ -231,11 +233,13 @@ export class EscrowCompletionService {
           );
         }
 
-        const oracleAddresses = await Promise.all([
-          escrowClient.getJobLauncherAddress(escrowAddress),
-          escrowClient.getExchangeOracleAddress(escrowAddress),
-          // escrowClient.getRecordingOracleAddress(escrowAddress),
-        ]);
+        const escrowData = await EscrowUtils.getEscrow(chainId, escrowAddress);
+
+        const oracleAddresses: string[] = [
+          escrowData.launcher as string,
+          escrowData.exchangeOracle as string,
+          escrowData.recordingOracle as string,
+        ];
 
         const webhookPayload = {
           chainId,
