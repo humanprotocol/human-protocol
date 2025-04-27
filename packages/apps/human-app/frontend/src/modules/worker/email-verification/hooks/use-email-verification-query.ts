@@ -1,19 +1,16 @@
 import { z } from 'zod';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import * as emailVerificationService from '../services/email-verification.service';
 
 export const verifyEmailDtoSchema = z.object({
   token: z.string(),
 });
 
-export type VerifyDto = z.infer<typeof verifyEmailDtoSchema>;
-
 export const VerifyEmailSuccessResponseSchema = z.unknown();
 
-export function useVerifyEmailQuery({ token }: { token: string }) {
-  return useQuery({
-    queryFn: () => emailVerificationService.verifyEmail(token),
-    queryKey: [token],
-    refetchInterval: 0,
+export function useVerifyEmailMutation({ token }: { token: string }) {
+  return useMutation({
+    mutationFn: () => emailVerificationService.verifyEmail(token),
+    mutationKey: ['verify-email', token],
   });
 }
