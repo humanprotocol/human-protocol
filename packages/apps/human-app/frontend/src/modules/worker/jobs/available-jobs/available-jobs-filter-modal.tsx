@@ -37,7 +37,7 @@ export function AvailableJobsFilterModal({
             px: '50px',
             width: '100vw',
             zIndex: '9999999',
-            background: colorPalette.white,
+            background: colorPalette.backgroundColor,
           },
         }}
         variant="persistent"
@@ -51,7 +51,7 @@ export function AvailableJobsFilterModal({
             position: 'absolute',
             left: '0',
             top: '0',
-            background: colorPalette.white,
+            background: colorPalette.backgroundColor,
             display: 'flex',
             width: '100%',
             px: '44px',
@@ -68,7 +68,7 @@ export function AvailableJobsFilterModal({
             sx={{
               zIndex: '99999999',
               marginRight: '15px',
-              backgroundColor: colorPalette.white,
+              backgroundColor: colorPalette.backgroundColor,
             }}
           >
             <CloseIcon />

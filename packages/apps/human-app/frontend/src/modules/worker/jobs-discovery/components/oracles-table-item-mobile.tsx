@@ -31,7 +31,7 @@ export function OraclesTableItemMobile({
   const { selectOracle } = useSelectOracleNavigation();
 
   return (
-    <Paper sx={{ ...styles, backgroundColor: colorPalette.white }}>
+    <Paper sx={{ ...styles, backgroundColor: colorPalette.backgroundColor }}>
       <Grid item>
         <ListItem label={t('worker.oraclesTable.oracleAddress')}>
           <EvmAddress address={oracle.address} />

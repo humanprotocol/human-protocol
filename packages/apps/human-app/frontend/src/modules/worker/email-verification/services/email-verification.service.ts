@@ -7,9 +7,11 @@ const apiPaths = {
 
 async function verifyEmail(token: string) {
   try {
-    await authorizedHumanAppApiClient.get(
-      `${apiPaths.verifyEmail}?token=${token}`
-    );
+    await authorizedHumanAppApiClient.post(apiPaths.verifyEmail, {
+      body: {
+        token,
+      },
+    });
   } catch (error) {
     if (error instanceof ApiClientError) {
       throw error;
