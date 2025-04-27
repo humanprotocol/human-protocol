@@ -11,6 +11,5 @@ export const VerifyEmailSuccessResponseSchema = z.unknown();
 export function useVerifyEmailMutation({ token }: { token: string }) {
   return useMutation({
     mutationFn: () => emailVerificationService.verifyEmail(token),
-    mutationKey: ['verify-email', token],
   });
 }

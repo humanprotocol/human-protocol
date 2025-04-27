@@ -11,19 +11,6 @@ interface EmailVerificationProcessProps {
   token: string;
 }
 
-function useEmailVerification(token: string) {
-  const { error, isError, isPending, mutate } = useVerifyEmailMutation({
-    token,
-  });
-
-  return {
-    mutate,
-    error,
-    isError,
-    isPending,
-  };
-}
-
 export function EmailVerificationProcess({
   token,
 }: Readonly<EmailVerificationProcessProps>) {
@@ -32,7 +19,7 @@ export function EmailVerificationProcess({
     isError,
     isPending,
     mutate: verifyEmailMutation,
-  } = useEmailVerification(token);
+  } = useVerifyEmailMutation({ token });
 
   useEffect(() => {
     verifyEmailMutation();
