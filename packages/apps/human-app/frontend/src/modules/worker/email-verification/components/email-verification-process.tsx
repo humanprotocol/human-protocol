@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import {
   PageCardError,
   PageCardLoader,
@@ -11,9 +12,12 @@ interface EmailVerificationProcessProps {
 }
 
 function useEmailVerification(token: string) {
-  const { error, isError, isPending } = useVerifyEmailMutation({ token });
+  const { error, isError, isPending, mutate } = useVerifyEmailMutation({
+    token,
+  });
 
   return {
+    mutate,
     error,
     isError,
     isPending,
@@ -23,7 +27,16 @@ function useEmailVerification(token: string) {
 export function EmailVerificationProcess({
   token,
 }: Readonly<EmailVerificationProcessProps>) {
-  const { error, isError, isPending } = useEmailVerification(token);
+  const {
+    error,
+    isError,
+    isPending,
+    mutate: verifyEmailMutation,
+  } = useEmailVerification(token);
+
+  useEffect(() => {
+    verifyEmailMutation();
+  }, [token, verifyEmailMutation]);
 
   if (isError) {
     return <PageCardError errorMessage={getErrorMessageForError(error)} />;
