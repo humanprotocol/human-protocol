@@ -145,11 +145,12 @@ describe('StorageService', () => {
     });
   });
 
-  describe('downloadJsonLikeData', () => {
-    const EXPECTED_DOWNLOAD_ERROR_MESSAGE = 'Error downloading json like data';
-    const spyOnDownloadFile = jest.spyOn(httpUtils, 'downloadFile');
+  describe('downloadFile', () => {
+    const EXPECTED_DOWNLOAD_ERROR_MESSAGE = 'Error downloading file';
+    let spyOnDownloadFile: jest.SpyInstance;
 
     beforeAll(() => {
+      spyOnDownloadFile = jest.spyOn(httpUtils, 'downloadFile');
       spyOnDownloadFile.mockImplementation();
     });
 
@@ -161,7 +162,7 @@ describe('StorageService', () => {
       spyOnDownloadFile.mockRejectedValueOnce(new Error(faker.lorem.word()));
 
       await expect(
-        storageService.downloadJsonLikeData(faker.internet.url()),
+        storageService.downloadFile(faker.internet.url()),
       ).rejects.toThrow(EXPECTED_DOWNLOAD_ERROR_MESSAGE);
     });
 
@@ -172,15 +173,52 @@ describe('StorageService', () => {
       );
 
       await expect(
-        storageService.downloadJsonLikeData(faker.internet.url()),
+        storageService.downloadFile(faker.internet.url()),
       ).rejects.toThrow(EXPECTED_DOWNLOAD_ERROR_MESSAGE);
     });
 
-    it('should throw custom error when fails to parse data', async () => {
-      spyOnDownloadFile.mockResolvedValueOnce(Buffer.from(faker.lorem.words()));
+    it('should download file', async () => {
+      const data = {
+        string: faker.string.sample(),
+        number: faker.number.float(),
+        bool: false,
+        null: null,
+      };
+
+      const fileUrl = faker.internet.url();
+      spyOnDownloadFile.mockImplementation(async (url) => {
+        if (url === fileUrl) {
+          return Buffer.from(JSON.stringify(data));
+        }
+
+        throw new Error('File not found');
+      });
       mockedPgpEncryptionService.maybeDecryptFile.mockImplementationOnce(
         async (c) => c,
       );
+
+      const downloadedFile = await storageService.downloadFile(fileUrl);
+      const content = JSON.parse(downloadedFile.toString());
+
+      expect(content).toEqual(data);
+    });
+  });
+
+  describe('downloadJsonLikeData', () => {
+    const EXPECTED_DOWNLOAD_ERROR_MESSAGE = 'Error downloading json like data';
+    let spyOnDownloadFile: jest.SpyInstance;
+
+    beforeAll(() => {
+      spyOnDownloadFile = jest.spyOn(storageService, 'downloadFile');
+      spyOnDownloadFile.mockImplementation();
+    });
+
+    afterAll(() => {
+      spyOnDownloadFile.mockRestore();
+    });
+
+    it('should throw custom error when fails to load file', async () => {
+      spyOnDownloadFile.mockRejectedValueOnce(new Error(faker.lorem.word()));
 
       await expect(
         storageService.downloadJsonLikeData(faker.internet.url()),
@@ -203,9 +241,6 @@ describe('StorageService', () => {
 
         throw new Error('File not found');
       });
-      mockedPgpEncryptionService.maybeDecryptFile.mockImplementationOnce(
-        async (c) => c,
-      );
 
       const downloadedData = await storageService.downloadJsonLikeData(fileUrl);
 

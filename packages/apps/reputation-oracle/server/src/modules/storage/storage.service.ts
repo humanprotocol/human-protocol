@@ -51,12 +51,27 @@ export class StorageService {
     }
   }
 
-  async downloadJsonLikeData<T>(url: string): Promise<T> {
+  async downloadFile(url: string): Promise<Buffer> {
     try {
       let fileContent = await httpUtils.downloadFile(url);
 
       fileContent =
         await this.pgpEncryptionService.maybeDecryptFile(fileContent);
+
+      return fileContent;
+    } catch (error) {
+      const errorMessage = 'Error downloading file';
+      this.logger.error(errorMessage, {
+        error,
+        url,
+      });
+      throw new Error(errorMessage);
+    }
+  }
+
+  async downloadJsonLikeData<T>(url: string): Promise<T> {
+    try {
+      const fileContent = await this.downloadFile(url);
 
       return JSON.parse(fileContent.toString());
     } catch (error) {

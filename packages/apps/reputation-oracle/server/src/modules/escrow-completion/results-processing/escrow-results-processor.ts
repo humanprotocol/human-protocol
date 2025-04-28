@@ -4,7 +4,6 @@ import crypto from 'crypto';
 
 import { ContentType } from '../../../common/enums';
 import { JobManifest } from '../../../common/types';
-import * as httpUtils from '../../../utils/http';
 
 import { PgpEncryptionService } from '../../encryption/pgp-encryption.service';
 import { StorageService } from '../../storage/storage.service';
@@ -38,11 +37,6 @@ export abstract class BaseEscrowResultsProcessor<TManifest extends JobManifest>
     escrowAddress: string,
     manifest: TManifest,
   ): Promise<EscrowFinalResultsDetails> {
-    console.log('heeeeeeeeeeeeeeere', {
-      web3: this.web3Service,
-      storage: this.storageService,
-      pgp: this.pgpEncryptionService,
-    });
     const signer = this.web3Service.getSigner(chainId);
     const escrowClient = await EscrowClient.build(signer);
 
@@ -54,8 +48,9 @@ export abstract class BaseEscrowResultsProcessor<TManifest extends JobManifest>
     const intermediateResultsUrl =
       this.constructIntermediateResultsUrl(baseUrl);
 
-    let fileContent = await httpUtils.downloadFile(intermediateResultsUrl);
-    fileContent = await this.pgpEncryptionService.maybeDecryptFile(fileContent);
+    const fileContent = await this.storageService.downloadFile(
+      intermediateResultsUrl,
+    );
 
     await this.assertResultsComplete(fileContent, manifest);
 
