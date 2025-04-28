@@ -16,4 +16,5 @@ module.exports = {
     '^uuid$': require.resolve('uuid'),
     '^typeorm$': require.resolve('typeorm'),
   },
+  clearMocks: true,
 };

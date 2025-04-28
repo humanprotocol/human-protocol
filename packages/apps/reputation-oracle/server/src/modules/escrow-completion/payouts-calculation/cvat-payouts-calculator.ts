@@ -43,7 +43,7 @@ export class CvatPayoutsCalculator implements EscrowPayoutsCalculator {
         `${intermediateResultsUrl}/${CVAT_VALIDATION_META_FILENAME}`,
       );
 
-    if (annotations.jobs.length === 0 || annotations.results.length === 0) {
+    if (!annotations.jobs.length || !annotations.results.length) {
       throw new Error('Invalid annotation meta');
     }
 
