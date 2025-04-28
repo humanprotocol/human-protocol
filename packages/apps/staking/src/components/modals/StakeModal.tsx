@@ -100,7 +100,7 @@ const StakeModal: FC<Props> = ({ open, onClose }) => {
   const renderIdleState = () => {
     return (
       <>
-        <Typography variant="subtitle2" color="primary" mb={2} py={1}>
+        <Typography variant="subtitle2" mb={2} py={1}>
           Available amount: {tokenBalance} HMT
         </Typography>
 
@@ -136,6 +136,8 @@ const StakeModal: FC<Props> = ({ open, onClose }) => {
                     fontSize: '0.75rem',
                     padding: '4px 10px',
                     minWidth: 'unset',
+                    border: 'none',
+                    boxShadow: 'none',
                   }}
                 >
                   Max

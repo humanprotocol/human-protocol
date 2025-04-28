@@ -1,4 +1,5 @@
 import { FC, useState } from 'react';
+
 import EditIcon from '@mui/icons-material/Edit';
 import { Box, Button, Typography, useTheme } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
@@ -11,11 +12,13 @@ import { useSnackbar } from '../../providers/SnackProvider';
 import KVStoreModal from '../modals/KVStoreModal';
 
 const KVStoreTable: FC = () => {
-  const { kvStore, set, setBulk, loading } = useKVStoreContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const theme = useTheme();
   const { chainId } = useAccount();
   const { showError } = useSnackbar();
+  const { kvStore, set, setBulk, loading } = useKVStoreContext();
+
+  const isDarkMode = theme.palette.mode === 'dark';
   const filteredData = kvStore.filter((item) => item.value !== '');
 
   const handleOpenModal = () => {
@@ -79,7 +82,9 @@ const KVStoreTable: FC = () => {
       sx={{
         width: '100%',
         padding: 4,
-        backgroundColor: theme.palette.white.main,
+        background: isDarkMode
+          ? theme.palette.elevation['1']
+          : theme.palette.white.main,
         borderRadius: '16px',
         display: 'flex',
         flexDirection: 'column',
@@ -91,6 +96,8 @@ const KVStoreTable: FC = () => {
           loading={loading}
           rows={filteredData}
           columns={columns}
+          columnHeaderHeight={56}
+          disableColumnSorting
           getRowId={(row) => row.key}
           getRowHeight={() => (filteredData.length > 0 ? 'auto' : null)}
           disableColumnSelector
@@ -127,11 +134,12 @@ const KVStoreTable: FC = () => {
               outline: 'none',
             },
             '& .MuiDataGrid-columnHeader': {
-              background: 'rgba(20, 6, 178, 0.04)',
+              background: isDarkMode
+                ? 'rgba(255, 255, 255, 0.12)'
+                : 'rgba(20, 6, 178, 0.04)',
               padding: '16px',
               textTransform: 'uppercase',
               borderBottomWidth: '0px !important',
-              borderRadius: '4px',
             },
             '& .MuiDataGrid-columnHeaderTitle': {
               color: theme.palette.primary.main,

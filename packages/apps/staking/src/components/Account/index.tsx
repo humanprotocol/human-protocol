@@ -21,6 +21,7 @@ const Account: FC = () => {
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isDarkMode = theme.palette.mode === 'dark';
 
   const formattedAddress = formatAddress(address);
 
@@ -31,16 +32,18 @@ const Account: FC = () => {
       <Button
         aria-describedby="account-popover"
         onClick={(event) => setAnchorEl(event.currentTarget)}
+        disableRipple
         sx={{
-          bgcolor: '#f6f7fe',
+          bgcolor: isDarkMode ? 'primary.main' : 'background.grey',
           borderRadius: '4px',
+          color: '#320a8d',
           height: isMobile ? '42px' : '100%',
           paddingX: { md: 0.5, lg: 1 },
           fontWeight: 600,
-          borderBottomLeftRadius: 0,
-          borderBottomRightRadius: 0,
-          '& .MuiTouchRipple-root': {
-            display: 'none',
+          borderBottomLeftRadius: anchorEl ? 0 : 4,
+          borderBottomRightRadius: anchorEl ? 0 : 4,
+          '&:hover': {
+            bgcolor: isDarkMode ? 'primary.main' : 'background.grey',
           },
         }}
       >
@@ -55,9 +58,8 @@ const Account: FC = () => {
         )}
         <Typography
           variant="body2"
-          color="textPrimary"
           paddingX={1}
-          sx={{ fontSize: { md: '12px', lg: '14px' } }}
+          sx={{ fontSize: { md: '12px', lg: '14px' }, fontWeight: 600 }}
         >
           {formattedAddress}
         </Typography>
@@ -85,7 +87,7 @@ const Account: FC = () => {
           paper: {
             elevation: 0,
             sx: {
-              backgroundColor: '#f6f7fe',
+              bgcolor: isDarkMode ? 'primary.main' : 'background.grey',
               width: anchorEl?.getBoundingClientRect().width,
               minWidth: 'fit-content',
               borderTopLeftRadius: 0,
@@ -98,7 +100,7 @@ const Account: FC = () => {
         <Button
           onClick={() => disconnect()}
           sx={{
-            color: 'sky.main',
+            color: '#320a8d',
             paddingY: 1,
             paddingX: { md: 0.5, lg: 1 },
             width: '100%',

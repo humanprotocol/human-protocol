@@ -26,7 +26,7 @@ const BaseModal: FC<PropsWithChildren<Props>> = ({
       slotProps={{
         backdrop: {
           sx: {
-            backgroundColor: 'rgba(240, 242, 252, 0.90)',
+            bgcolor: 'backdropColor',
           },
         },
       }}
@@ -36,7 +36,7 @@ const BaseModal: FC<PropsWithChildren<Props>> = ({
           py: 5,
           px: 4,
           width: 500,
-          backgroundColor: '#ffffff',
+          bgcolor: 'background.default',
           borderRadius: 4,
           position: 'relative',
           boxShadow: '0px 0px 10px 0px rgba(50, 10, 141, 0.05)',
@@ -47,6 +47,7 @@ const BaseModal: FC<PropsWithChildren<Props>> = ({
           onClick={onClose}
           sx={{
             p: 0,
+            color: 'text.primary',
             position: 'absolute',
             top: '40px',
             right: '32px',

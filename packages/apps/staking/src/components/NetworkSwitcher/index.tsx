@@ -26,7 +26,16 @@ const NetworkSwitcher = () => {
       <Button
         aria-describedby="network-popover"
         variant="text"
-        sx={{ height: '100%', maxHeight: '42px', gap: '8px' }}
+        disableRipple
+        sx={{
+          height: '100%',
+          maxHeight: '42px',
+          gap: '8px',
+          color: 'text.primary',
+          '&:hover': {
+            bgcolor: 'inherit',
+          },
+        }}
         onClick={(event) => setAnchorEl(event.currentTarget)}
       >
         <NetworkIcon chainId={chain?.id} />
@@ -48,6 +57,14 @@ const NetworkSwitcher = () => {
         transformOrigin={{
           vertical: 'top',
           horizontal: 'right',
+        }}
+        slotProps={{
+          paper: {
+            elevation: 4,
+            sx: {
+              backgroundColor: 'background.default',
+            },
+          },
         }}
       >
         {SUPPORTED_CHAIN_IDS.map((chainId) => (

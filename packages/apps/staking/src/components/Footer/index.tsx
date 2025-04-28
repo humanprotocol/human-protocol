@@ -1,36 +1,61 @@
 import { FC } from 'react';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
-import TwitterIcon from '@mui/icons-material/Twitter';
-import LinkedInIcon from '@mui/icons-material/LinkedIn';
-import GitHubIcon from '@mui/icons-material/GitHub';
-import TelegramIcon from '@mui/icons-material/Telegram';
-import { Link } from '@mui/material';
-import { styled } from '@mui/material/styles';
 
-import { colorPalette } from '../../assets/styles/color-palette';
+import {
+  Box,
+  IconButton,
+  Link,
+  styled,
+  Typography,
+  useTheme,
+} from '@mui/material';
+import { Twitter, LinkedIn, GitHub, Telegram } from '@mui/icons-material';
+
+import Container from '../Container';
 import { DiscordIcon } from '../../icons';
 
-const SocialMediaIconButton = styled(IconButton)({
+const SocialMediaIconButton = styled(IconButton)(({ theme }) => ({
   padding: 0,
-  color: colorPalette.sky.main,
+  color: theme.palette.text.secondary,
 
   '&:hover': {
     background: 'none',
     color: 'inherit',
   },
-});
+}));
 
 const Footer: FC = () => {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === 'dark';
+
   const handleClick = (url: string) => {
     window.open(url, '_blank');
   };
 
   return (
-    <footer className="container">
-      <div className="footer-wrapper">
-        <div className="footer-link-wrapper">
-          <div className="footer-link">
+    <Container
+      component="footer"
+      bgcolor={{
+        xs: isDarkMode ? 'inherit' : 'background.grey',
+        sm: 'inherit',
+      }}
+      mt={{ xs: 4, sm: 0 }}
+    >
+      <Box
+        display="flex"
+        py={4}
+        px={{ xs: 2, sm: 3, md: 5 }}
+        flexDirection={{ xs: 'column-reverse', sm: 'row' }}
+        justifyContent="space-between"
+        alignItems="stretch"
+      >
+        <Box>
+          <Box
+            display="flex"
+            gap={3}
+            mb={3}
+            alignItems="flex-start"
+            flexWrap="wrap"
+          >
             <Link
               variant="subtitle1"
               color="text.secondary"
@@ -52,17 +77,24 @@ const Footer: FC = () => {
             >
               HUMAN Protocol
             </Link>
-          </div>
+          </Box>
           <Typography variant="subtitle1" color="text.secondary">
             © 2025 HPF. HUMAN Protocol® is a registered trademark
           </Typography>
-        </div>
-        <div className="footer-icon">
+        </Box>
+        <Box
+          display="flex"
+          flexWrap="wrap"
+          gap={4}
+          mb={{ xs: 4, sm: 0 }}
+          alignItems={{ xs: 'flex-start', sm: 'center' }}
+          justifyContent={{ xs: 'space-between', sm: 'flex-start' }}
+        >
           <SocialMediaIconButton
             aria-label="GitHub"
             onClick={() => handleClick(import.meta.env.VITE_FOOTER_LINK_GITHUB)}
           >
-            <GitHubIcon />
+            <GitHub />
           </SocialMediaIconButton>
 
           <SocialMediaIconButton
@@ -78,7 +110,7 @@ const Footer: FC = () => {
             aria-label="X"
             onClick={() => handleClick(import.meta.env.VITE_FOOTER_LINK_X)}
           >
-            <TwitterIcon />
+            <Twitter />
           </SocialMediaIconButton>
 
           <SocialMediaIconButton
@@ -87,7 +119,7 @@ const Footer: FC = () => {
               handleClick(import.meta.env.VITE_FOOTER_LINK_TELEGRAM)
             }
           >
-            <TelegramIcon />
+            <Telegram />
           </SocialMediaIconButton>
 
           <SocialMediaIconButton
@@ -96,11 +128,11 @@ const Footer: FC = () => {
               handleClick(import.meta.env.VITE_FOOTER_LINK_LINKEDIN)
             }
           >
-            <LinkedInIcon />
+            <LinkedIn />
           </SocialMediaIconButton>
-        </div>
-      </div>
-    </footer>
+        </Box>
+      </Box>
+    </Container>
   );
 };
 
