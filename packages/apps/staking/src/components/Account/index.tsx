@@ -19,8 +19,7 @@ const Account: FC = () => {
   const { data: ensName } = useEnsName({ address });
   const { data: ensAvatar } = useEnsAvatar({ name: ensName! });
 
-  const theme = useTheme();
-  const { isDarkMode, breakpoints } = theme;
+  const { isDarkMode, breakpoints } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('md'));
 
   const formattedAddress = formatAddress(address);
@@ -100,13 +99,14 @@ const Account: FC = () => {
         <Button
           onClick={() => disconnect()}
           sx={{
-            color: isDarkMode ? 'primary.contrastText' : 'primary.main',
+            color: 'text.secondary',
             paddingY: 1,
             paddingX: { md: 0.5, lg: 1 },
             width: '100%',
             gap: 1,
+            justifyContent: 'flex-start',
             '&:hover': {
-              color: 'primary.main',
+              color: isDarkMode ? 'primary.contrastText' : 'primary.main',
               backgroundColor: 'unset',
             },
           }}

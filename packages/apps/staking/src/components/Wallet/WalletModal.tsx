@@ -27,7 +27,7 @@ export default function WalletModal({
 }) {
   const { connect, connectors, error } = useConnect();
 
-  const theme = useTheme();
+  const { palette } = useTheme();
 
   return (
     <Dialog
@@ -41,7 +41,7 @@ export default function WalletModal({
           width={{ xs: '0', md: '50%' }}
           display={{ xs: 'none', md: 'flex' }}
           sx={{
-            background: theme.palette.primary.main,
+            background: palette.primary.main,
             flexDirection: 'column',
             justifyContent: 'space-between',
           }}
@@ -81,7 +81,7 @@ export default function WalletModal({
                   border: `1px solid transparent`,
                   '&:hover': {
                     color: 'text.primary',
-                    border: `1px solid ${theme.palette.primary.main}`,
+                    border: `1px solid ${palette.primary.main}`,
                   },
                 }}
                 key={connector.id}
