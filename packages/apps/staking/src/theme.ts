@@ -7,9 +7,11 @@ import {
 declare module '@mui/material/styles' {
   interface Theme {
     toggleColorMode: () => void;
+    isDarkMode: boolean;
   }
   interface ThemeOptions {
     toggleColorMode?: () => void;
+    isDarkMode?: boolean;
   }
 }
 

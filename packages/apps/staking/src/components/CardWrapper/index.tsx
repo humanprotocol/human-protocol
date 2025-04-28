@@ -10,8 +10,7 @@ const CardWrapper: FC<PropsWithChildren<Props>> = ({
   children,
   size = 'sm',
 }) => {
-  const theme = useTheme();
-  const isDarkMode = theme.palette.mode === 'dark';
+  const { isDarkMode, palette } = useTheme();
 
   return (
     <Paper
@@ -19,8 +18,8 @@ const CardWrapper: FC<PropsWithChildren<Props>> = ({
         py: { xs: 3, sm: 2, md: 2, lg: 3 },
         px: { xs: 2, sm: 2, md: 2, lg: 4 },
         background: isDarkMode
-          ? theme.palette.elevation.medium
-          : theme.palette.background.default,
+          ? palette.elevation.medium
+          : palette.background.default,
         height: size === 'sm' ? '112px' : '248px',
         display: 'flex',
         flexDirection: 'column',

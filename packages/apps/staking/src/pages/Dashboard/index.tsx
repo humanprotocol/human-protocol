@@ -10,9 +10,8 @@ import WithdrawableAmountCard from '../../components/WithdrawableAmountCard';
 import { DarkOverviewIcon, OverviewIcon } from '../../icons';
 
 const Dashboard: FC = () => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isDarkMode = theme.palette.mode === 'dark';
+  const { isDarkMode, breakpoints, palette } = useTheme();
+  const isMobile = useMediaQuery(breakpoints.down('sm'));
 
   return (
     <PageWrapper>
@@ -32,8 +31,8 @@ const Dashboard: FC = () => {
           py={{ xs: 2, sm: 4 }}
           sx={{
             background: isDarkMode
-              ? theme.palette.elevation.light
-              : theme.palette.primary.main,
+              ? palette.elevation.light
+              : palette.primary.main,
           }}
         >
           <Box
@@ -66,8 +65,8 @@ const Dashboard: FC = () => {
           py={{ xs: 4, sm: 0 }}
           sx={{
             background: isDarkMode
-              ? theme.palette.elevation.dark
-              : theme.palette.background.grey,
+              ? palette.elevation.dark
+              : palette.background.grey,
           }}
         >
           <Grid

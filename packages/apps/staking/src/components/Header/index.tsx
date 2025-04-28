@@ -26,10 +26,8 @@ import { ROUTES } from '../../constants';
 import { LogoIcon } from '../../icons';
 
 const NavLink = styled(MuiLink)(({ theme }) => {
-  const isDarkMode = theme.palette.mode === 'dark';
-  const color = isDarkMode
-    ? theme.palette.text.primary
-    : theme.palette.primary.main;
+  const { isDarkMode, palette } = theme;
+  const color = isDarkMode ? palette.text.primary : palette.primary.main;
 
   return {
     color,
@@ -56,9 +54,7 @@ const DefaultHeader: FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [stakeModalOpen, setStakeModalOpen] = useState(false);
   const { isConnected } = useAccount();
-  const theme = useTheme();
-
-  const isDarkMode = theme.palette.mode === 'dark';
+  const { isDarkMode } = useTheme();
 
   const toggleDrawer = (open: boolean) => {
     setMobileMenuOpen(open);

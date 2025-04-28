@@ -6,8 +6,7 @@ import KVStoreTable from '../../components/Tables/kvstore';
 import { DarkKvstoreIcon, KVStoreIcon } from '../../icons';
 
 const KVStore: FC = () => {
-  const theme = useTheme();
-  const isDarkMode = theme.palette.mode === 'dark';
+  const { isDarkMode, palette } = useTheme();
 
   return (
     <PageWrapper>
@@ -20,8 +19,8 @@ const KVStore: FC = () => {
         minHeight="calc(100dvh - 212px)"
         sx={{
           background: isDarkMode
-            ? theme.palette.elevation.light
-            : theme.palette.background.grey,
+            ? palette.elevation.light
+            : palette.background.grey,
         }}
       >
         <Box display="flex" alignItems="center" gap={2} mb={4}>

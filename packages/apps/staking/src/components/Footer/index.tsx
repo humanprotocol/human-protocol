@@ -24,8 +24,7 @@ const SocialMediaIconButton = styled(IconButton)(({ theme }) => ({
 }));
 
 const Footer: FC = () => {
-  const theme = useTheme();
-  const isDarkMode = theme.palette.mode === 'dark';
+  const { isDarkMode } = useTheme();
 
   const handleClick = (url: string) => {
     window.open(url, '_blank');

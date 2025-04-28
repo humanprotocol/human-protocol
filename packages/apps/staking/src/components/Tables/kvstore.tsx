@@ -13,12 +13,11 @@ import KVStoreModal from '../modals/KVStoreModal';
 
 const KVStoreTable: FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const theme = useTheme();
+  const { isDarkMode, palette } = useTheme();
   const { chainId } = useAccount();
   const { showError } = useSnackbar();
   const { kvStore, set, setBulk, loading } = useKVStoreContext();
 
-  const isDarkMode = theme.palette.mode === 'dark';
   const filteredData = kvStore.filter((item) => item.value !== '');
 
   const handleOpenModal = () => {
@@ -82,9 +81,7 @@ const KVStoreTable: FC = () => {
       sx={{
         width: '100%',
         padding: 4,
-        background: isDarkMode
-          ? theme.palette.elevation.medium
-          : theme.palette.white.main,
+        background: isDarkMode ? palette.elevation.medium : palette.white.main,
         borderRadius: '16px',
         display: 'flex',
         flexDirection: 'column',
@@ -142,7 +139,7 @@ const KVStoreTable: FC = () => {
               borderBottomWidth: '0px !important',
             },
             '& .MuiDataGrid-columnHeaderTitle': {
-              color: theme.palette.primary.main,
+              color: palette.primary.main,
               fontSize: '12px',
               fontWeight: 400,
               letterSpacing: '0.4px',

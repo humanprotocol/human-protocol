@@ -5,8 +5,7 @@ import { Switch, FormControlLabel, useTheme } from '@mui/material';
 import { LightModeIcon, DarkModeIcon } from '../../icons';
 
 const ThemeModeSwitch: FC = () => {
-  const theme = useTheme();
-  const isDarkMode = theme.palette.mode === 'dark';
+  const { isDarkMode, toggleColorMode } = useTheme();
 
   return (
     <FormControlLabel
@@ -15,7 +14,7 @@ const ThemeModeSwitch: FC = () => {
           <LightModeIcon sx={{ color: 'text.primary' }} />
           <Switch
             checked={isDarkMode}
-            onChange={theme.toggleColorMode}
+            onChange={toggleColorMode}
             color="primary"
             disableRipple
             sx={{

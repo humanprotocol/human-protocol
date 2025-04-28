@@ -20,8 +20,8 @@ const Account: FC = () => {
   const { data: ensAvatar } = useEnsAvatar({ name: ensName! });
 
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const isDarkMode = theme.palette.mode === 'dark';
+  const { isDarkMode, breakpoints } = theme;
+  const isMobile = useMediaQuery(breakpoints.down('md'));
 
   const formattedAddress = formatAddress(address);
 

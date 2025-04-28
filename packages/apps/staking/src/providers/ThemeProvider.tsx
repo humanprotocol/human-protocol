@@ -54,9 +54,10 @@ const ThemeProvider: FC<PropsWithChildren> = ({ children }) => {
   const extendedTheme = useMemo(
     () => ({
       ...theme,
+      isDarkMode: mode === 'dark',
       toggleColorMode,
     }),
-    [theme, toggleColorMode]
+    [theme, mode, toggleColorMode]
   );
 
   return (
