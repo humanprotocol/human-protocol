@@ -6,11 +6,11 @@ import { BaseEscrowResultsProcessor } from './escrow-results-processor';
 
 @Injectable()
 export class FortuneResultsProcessor extends BaseEscrowResultsProcessor<FortuneManifest> {
-  constructIntermediateResultsUrl(baseUrl: string): string {
+  protected constructIntermediateResultsUrl(baseUrl: string): string {
     return baseUrl;
   }
 
-  async assertResultsComplete(
+  protected async assertResultsComplete(
     resultsFileContent: Buffer,
     manifest: FortuneManifest,
   ): Promise<void> {
@@ -21,7 +21,7 @@ export class FortuneResultsProcessor extends BaseEscrowResultsProcessor<FortuneM
       throw new Error('Failed to parse results data');
     }
 
-    if (intermediateResults.length === 0) {
+    if (!intermediateResults.length) {
       throw new Error('No intermediate results found');
     }
 
@@ -31,7 +31,7 @@ export class FortuneResultsProcessor extends BaseEscrowResultsProcessor<FortuneM
     }
   }
 
-  getFinalResultsFileName(hash: string): string {
+  protected getFinalResultsFileName(hash: string): string {
     return `${hash}.json`;
   }
 }
