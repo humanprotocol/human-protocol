@@ -15,13 +15,12 @@ const CardWrapper: FC<PropsWithChildren<Props>> = ({
 
   return (
     <Paper
-      elevation={1}
       sx={{
         py: { xs: 3, sm: 2, md: 2, lg: 3 },
         px: { xs: 2, sm: 2, md: 2, lg: 4 },
         background: isDarkMode
-          ? theme.palette.elevation['1']
-          : 'background.default',
+          ? theme.palette.elevation.medium
+          : theme.palette.background.default,
         height: size === 'sm' ? '112px' : '248px',
         display: 'flex',
         flexDirection: 'column',

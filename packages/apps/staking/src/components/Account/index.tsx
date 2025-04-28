@@ -36,7 +36,7 @@ const Account: FC = () => {
         sx={{
           bgcolor: isDarkMode ? 'primary.main' : 'background.grey',
           borderRadius: '4px',
-          color: '#320a8d',
+          color: isDarkMode ? 'primary.contrastText' : 'primary.main',
           height: isMobile ? '42px' : '100%',
           paddingX: { md: 0.5, lg: 1 },
           fontWeight: 600,
@@ -100,7 +100,7 @@ const Account: FC = () => {
         <Button
           onClick={() => disconnect()}
           sx={{
-            color: '#320a8d',
+            color: isDarkMode ? 'primary.contrastText' : 'primary.main',
             paddingY: 1,
             paddingX: { md: 0.5, lg: 1 },
             width: '100%',

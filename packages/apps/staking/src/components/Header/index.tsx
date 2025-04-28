@@ -20,7 +20,7 @@ import ConnectWallet from '../Wallet/ConnectWallet';
 import Container from '../Container';
 import StakeModal from '../modals/StakeModal';
 import NetworkSwitcher from '../NetworkSwitcher';
-import SwitchMode from '../SwitchMode';
+import ThemeModeSwitch from '../ThemeModeSwitch';
 
 import { ROUTES } from '../../constants';
 import { LogoIcon } from '../../icons';
@@ -140,7 +140,7 @@ const DefaultHeader: FC = () => {
           <NetworkSwitcher />
           {!isConnected && <ConnectWallet />}
           {isConnected && <Account />}
-          <SwitchMode />
+          <ThemeModeSwitch />
         </Box>
 
         <IconButton
@@ -225,7 +225,7 @@ const DefaultHeader: FC = () => {
             >
               Stake HMT
             </Button>
-            <SwitchMode />
+            <ThemeModeSwitch />
           </Box>
         </Drawer>
       </Toolbar>

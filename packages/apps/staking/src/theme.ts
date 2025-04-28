@@ -20,7 +20,9 @@ declare module '@mui/material/styles' {
   interface Palette {
     white: PaletteColor;
     elevation: {
-      [key: string]: string;
+      light: string;
+      medium: string;
+      dark: string;
     };
     link: {
       main: string;
@@ -31,7 +33,9 @@ declare module '@mui/material/styles' {
   interface PaletteOptions {
     white?: PaletteColorOptions;
     elevation?: {
-      [key: string]: string;
+      light: string;
+      medium: string;
+      dark: string;
     };
     link?: {
       main: string;
@@ -147,9 +151,11 @@ export const createAppTheme = (mode: 'light' | 'dark') => {
               light: '#f20d5f',
             },
             elevation: {
-              1: 'linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.05) 100%), #100735',
-              2: 'linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.07) 100%), #100735',
-              3: 'linear-gradient(180deg, rgba(255, 255, 255, 0.01) 0%, rgba(255, 255, 255, 0.01) 100%), #100735',
+              light:
+                'linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.07) 100%), #100735',
+              medium:
+                'linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.05) 100%), #100735',
+              dark: 'linear-gradient(180deg, rgba(255, 255, 255, 0.01) 0%, rgba(255, 255, 255, 0.01) 100%), #100735',
             },
           }),
     },

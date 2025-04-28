@@ -20,7 +20,7 @@ const KVStore: FC = () => {
         minHeight="calc(100dvh - 212px)"
         sx={{
           background: isDarkMode
-            ? theme.palette.elevation['2']
+            ? theme.palette.elevation.light
             : theme.palette.background.grey,
         }}
       >

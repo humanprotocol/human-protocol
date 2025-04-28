@@ -32,7 +32,7 @@ const Dashboard: FC = () => {
           py={{ xs: 2, sm: 4 }}
           sx={{
             background: isDarkMode
-              ? theme.palette.elevation['2']
+              ? theme.palette.elevation.light
               : theme.palette.primary.main,
           }}
         >
@@ -66,7 +66,7 @@ const Dashboard: FC = () => {
           py={{ xs: 4, sm: 0 }}
           sx={{
             background: isDarkMode
-              ? theme.palette.elevation['3']
+              ? theme.palette.elevation.dark
               : theme.palette.background.grey,
           }}
         >

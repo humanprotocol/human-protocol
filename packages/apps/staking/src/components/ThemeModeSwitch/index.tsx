@@ -4,7 +4,7 @@ import { Switch, FormControlLabel, useTheme } from '@mui/material';
 
 import { LightModeIcon, DarkModeIcon } from '../../icons';
 
-const SwitchMode: FC = () => {
+const ThemeModeSwitch: FC = () => {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
 
@@ -49,4 +49,4 @@ const SwitchMode: FC = () => {
   );
 };
 
-export default SwitchMode;
+export default ThemeModeSwitch;

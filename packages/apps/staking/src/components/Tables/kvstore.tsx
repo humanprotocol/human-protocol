@@ -83,7 +83,7 @@ const KVStoreTable: FC = () => {
         width: '100%',
         padding: 4,
         background: isDarkMode
-          ? theme.palette.elevation['1']
+          ? theme.palette.elevation.medium
           : theme.palette.white.main,
         borderRadius: '16px',
         display: 'flex',

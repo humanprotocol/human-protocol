@@ -60,7 +60,6 @@ const NetworkSwitcher = () => {
         }}
         slotProps={{
           paper: {
-            elevation: 4,
             sx: {
               backgroundColor: 'background.default',
             },
