@@ -27,3 +27,8 @@ export class SigninOperatorResponse {
   refresh_token: string;
   access_token: string;
 }
+
+export class SignupOperatorResponse {
+  refresh_token: string;
+  access_token: string;
+}
