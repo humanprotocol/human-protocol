@@ -30,12 +30,8 @@ const SuccessState: FC<{ amount: number | string }> = ({ amount }) => (
       justifyContent="center"
       py={1}
     >
-      <Typography variant="subtitle2" color="primary">
-        You have successfully staked
-      </Typography>
-      <Typography variant="h6" color="primary">
-        {amount} HMT
-      </Typography>
+      <Typography variant="subtitle2">You have successfully staked</Typography>
+      <Typography variant="h6">{amount} HMT</Typography>
     </Box>
   </ModalSuccess>
 );

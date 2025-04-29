@@ -173,11 +173,11 @@ export const createAppTheme = (mode: 'light' | 'dark') => {
       },
       h3: {
         fontSize: 24,
-        fontWeight: 500,
+        fontWeight: 600,
       },
       h4: {
         fontSize: 20,
-        fontWeight: 500,
+        fontWeight: 600,
       },
       h5: {
         fontSize: 18,

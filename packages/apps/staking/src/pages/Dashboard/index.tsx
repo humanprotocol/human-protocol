@@ -51,7 +51,7 @@ const Dashboard: FC = () => {
             )}
             <Typography
               variant="h1"
-              fontWeight="bold"
+              fontSize={28}
               color={isDarkMode ? 'text.primary' : 'primary.contrastText'}
             >
               Staking Overview

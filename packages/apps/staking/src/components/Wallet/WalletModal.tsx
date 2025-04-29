@@ -48,7 +48,7 @@ export default function WalletModal({
           px={9}
           py={6}
         >
-          <Typography variant="h4" fontWeight={600} color="white.main">
+          <Typography variant="h4" color="white.main">
             Connect
             <br /> your wallet
           </Typography>
