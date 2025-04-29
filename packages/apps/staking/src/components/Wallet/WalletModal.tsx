@@ -38,13 +38,11 @@ export default function WalletModal({
     >
       <Box display="flex" maxWidth="784px">
         <Box
+          flexDirection="column"
+          justifyContent="space-between"
           width={{ xs: '0', md: '50%' }}
           display={{ xs: 'none', md: 'flex' }}
-          sx={{
-            background: palette.primary.main,
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-          }}
+          bgcolor="primary.main"
           px={9}
           py={6}
         >

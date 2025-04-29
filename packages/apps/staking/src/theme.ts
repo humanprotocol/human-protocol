@@ -25,6 +25,7 @@ declare module '@mui/material/styles' {
       light: string;
       medium: string;
       dark: string;
+      red: string;
     };
     link: {
       main: string;
@@ -38,6 +39,7 @@ declare module '@mui/material/styles' {
       light: string;
       medium: string;
       dark: string;
+      red: string;
     };
     link?: {
       main: string;
@@ -66,6 +68,7 @@ declare module '@mui/material/SvgIcon' {
 }
 
 export const createAppTheme = (mode: 'light' | 'dark') => {
+  const isLightMode = mode === 'light';
   return createTheme({
     palette: {
       mode,
@@ -158,6 +161,7 @@ export const createAppTheme = (mode: 'light' | 'dark') => {
               medium:
                 'linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.05) 100%), #100735',
               dark: 'linear-gradient(180deg, rgba(255, 255, 255, 0.01) 0%, rgba(255, 255, 255, 0.01) 100%), #100735',
+              red: 'red',
             },
           }),
     },
@@ -217,12 +221,12 @@ export const createAppTheme = (mode: 'light' | 'dark') => {
             transition: 'none',
 
             '&:disabled': {
-              backgroundColor:
-                mode === 'light' ? '#fbfbfe' : 'rgba(255, 255, 255, 0.12)',
-              color:
-                mode === 'light'
-                  ? 'rgba(203, 207, 232, 0.86)'
-                  : 'rgba(255, 255, 255, 0.30)',
+              backgroundColor: isLightMode
+                ? '#fbfbfe'
+                : 'rgba(255, 255, 255, 0.12)',
+              color: isLightMode
+                ? 'rgba(203, 207, 232, 0.86)'
+                : 'rgba(255, 255, 255, 0.30)',
               border: 'none',
             },
           },
