@@ -25,7 +25,6 @@ declare module '@mui/material/styles' {
       light: string;
       medium: string;
       dark: string;
-      red: string;
     };
     link: {
       main: string;
@@ -39,7 +38,6 @@ declare module '@mui/material/styles' {
       light: string;
       medium: string;
       dark: string;
-      red: string;
     };
     link?: {
       main: string;
@@ -161,7 +159,6 @@ export const createAppTheme = (mode: 'light' | 'dark') => {
               medium:
                 'linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.05) 100%), #100735',
               dark: 'linear-gradient(180deg, rgba(255, 255, 255, 0.01) 0%, rgba(255, 255, 255, 0.01) 100%), #100735',
-              red: 'red',
             },
           }),
     },
