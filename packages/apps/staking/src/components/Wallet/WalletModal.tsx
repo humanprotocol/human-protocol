@@ -1,12 +1,5 @@
 import CloseIcon from '@mui/icons-material/Close';
-import {
-  Box,
-  Button,
-  Dialog,
-  IconButton,
-  Typography,
-  useTheme,
-} from '@mui/material';
+import { Box, Button, Dialog, IconButton, Typography } from '@mui/material';
 import { useConnect } from 'wagmi';
 import coinbaseSvg from '../../assets/coinbase.svg';
 import metaMaskSvg from '../../assets/metamask.svg';
@@ -26,8 +19,6 @@ export default function WalletModal({
   onClose: () => void;
 }) {
   const { connect, connectors, error } = useConnect();
-
-  const { palette } = useTheme();
 
   return (
     <Dialog
@@ -79,7 +70,8 @@ export default function WalletModal({
                   border: `1px solid transparent`,
                   '&:hover': {
                     color: 'text.primary',
-                    border: `1px solid ${palette.primary.main}`,
+                    border: '1px solid',
+                    borderColor: 'primary.main',
                   },
                 }}
                 key={connector.id}
