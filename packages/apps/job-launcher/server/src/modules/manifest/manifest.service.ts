@@ -47,6 +47,7 @@ import {
   listObjectsInBucket,
 } from '../../common/utils/storage';
 import {
+  CreateJob,
   CvatDataDto,
   JobAudinoDto,
   JobCaptchaAdvancedDto,
@@ -88,7 +89,49 @@ export class ManifestService {
     @Inject(Encryption) private readonly encryption: Encryption,
   ) {}
 
-  async createCvatManifest(
+  async createManifest(
+    dto: CreateJob,
+    requestType: JobRequestType,
+    fundAmount?: number,
+  ): Promise<any> {
+    switch (requestType) {
+      case JobRequestType.HCAPTCHA:
+        return this.createHCaptchaManifest(dto as JobCaptchaDto);
+
+      case JobRequestType.FORTUNE:
+        return {
+          ...dto,
+          requestType,
+          fundAmount,
+        };
+
+      case JobRequestType.IMAGE_POLYGONS:
+      case JobRequestType.IMAGE_BOXES:
+      case JobRequestType.IMAGE_POINTS:
+      case JobRequestType.IMAGE_BOXES_FROM_POINTS:
+      case JobRequestType.IMAGE_SKELETONS_FROM_BOXES:
+        return this.createCvatManifest(
+          dto as JobCvatDto,
+          requestType,
+          fundAmount!,
+        );
+
+      case JobRequestType.AUDIO_TRANSCRIPTION:
+        return this.createAudinoManifest(
+          dto as JobAudinoDto,
+          requestType,
+          fundAmount!,
+        );
+
+      default:
+        throw new ControlledError(
+          ErrorJob.InvalidRequestType,
+          HttpStatus.BAD_REQUEST,
+        );
+    }
+  }
+
+  private async createCvatManifest(
     dto: JobCvatDto,
     requestType: JobRequestType,
     tokenFundAmount: number,
@@ -133,7 +176,7 @@ export class ManifestService {
     };
   }
 
-  async createAudinoManifest(
+  private async createAudinoManifest(
     dto: JobAudinoDto,
     requestType: JobRequestType,
     tokenFundAmount: number,
@@ -168,7 +211,7 @@ export class ManifestService {
     };
   }
 
-  async createHCaptchaManifest(
+  private async createHCaptchaManifest(
     jobDto: JobCaptchaDto,
   ): Promise<HCaptchaManifestDto> {
     const jobType = jobDto.annotations.typeOfJob;

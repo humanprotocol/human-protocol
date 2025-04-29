@@ -510,5 +510,8 @@ export class JobCaptchaDto extends JobDto {
   annotations: JobCaptchaAnnotationsDto;
 }
 
-export type CreateJob = JobQuickLaunchDto | JobFortuneDto | JobCvatDto;
-// | JobCaptchaDto;
+export type CreateJob =
+  | JobQuickLaunchDto
+  | JobFortuneDto
+  | JobCvatDto
+  | JobCaptchaDto;

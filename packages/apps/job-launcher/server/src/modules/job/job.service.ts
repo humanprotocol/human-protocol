@@ -68,16 +68,12 @@ import {
   EscrowCancelDto,
   FortuneFinalResultDto,
   GetJobsDto,
-  JobAudinoDto,
-  JobCaptchaDto,
-  JobCvatDto,
   JobDetailsDto,
-  JobFortuneDto,
   JobListDto,
   JobQuickLaunchDto,
 } from './job.dto';
 import { JobEntity } from './job.entity';
-import { EscrowAction, RequestAction } from './job.interface';
+import { EscrowAction } from './job.interface';
 import { JobRepository } from './job.repository';
 @Injectable()
 export class JobService {
@@ -106,71 +102,6 @@ export class JobService {
       strict: false,
     });
   }
-  private createJobSpecificActions: Record<JobRequestType, RequestAction> = {
-    [JobRequestType.HCAPTCHA]: {
-      createManifest: (dto: JobCaptchaDto) =>
-        this.manifestService.createHCaptchaManifest(dto),
-    },
-    [JobRequestType.FORTUNE]: {
-      createManifest: async (
-        dto: JobFortuneDto,
-        requestType: JobRequestType,
-        fundAmount: number,
-      ) => ({
-        ...dto,
-        requestType,
-        fundAmount,
-      }),
-    },
-    [JobRequestType.IMAGE_POLYGONS]: {
-      createManifest: (
-        dto: JobCvatDto,
-        requestType: JobRequestType,
-        fundAmount: number,
-      ) =>
-        this.manifestService.createCvatManifest(dto, requestType, fundAmount),
-    },
-    [JobRequestType.IMAGE_BOXES]: {
-      createManifest: (
-        dto: JobCvatDto,
-        requestType: JobRequestType,
-        fundAmount: number,
-      ) =>
-        this.manifestService.createCvatManifest(dto, requestType, fundAmount),
-    },
-    [JobRequestType.IMAGE_POINTS]: {
-      createManifest: (
-        dto: JobCvatDto,
-        requestType: JobRequestType,
-        fundAmount: number,
-      ) =>
-        this.manifestService.createCvatManifest(dto, requestType, fundAmount),
-    },
-    [JobRequestType.IMAGE_BOXES_FROM_POINTS]: {
-      createManifest: (
-        dto: JobCvatDto,
-        requestType: JobRequestType,
-        fundAmount: number,
-      ) =>
-        this.manifestService.createCvatManifest(dto, requestType, fundAmount),
-    },
-    [JobRequestType.IMAGE_SKELETONS_FROM_BOXES]: {
-      createManifest: (
-        dto: JobCvatDto,
-        requestType: JobRequestType,
-        fundAmount: number,
-      ) =>
-        this.manifestService.createCvatManifest(dto, requestType, fundAmount),
-    },
-    [JobRequestType.AUDIO_TRANSCRIPTION]: {
-      createManifest: (
-        dto: JobAudinoDto,
-        requestType: JobRequestType,
-        fundAmount: number,
-      ) =>
-        this.manifestService.createAudinoManifest(dto, requestType, fundAmount),
-    },
-  };
 
   private createEscrowSpecificActions: Record<JobRequestType, EscrowAction> = {
     [JobRequestType.HCAPTCHA]: {
@@ -322,8 +253,6 @@ export class JobService {
       });
     }
 
-    const { createManifest } = this.createJobSpecificActions[requestType];
-
     let jobEntity = new JobEntity();
 
     if (dto instanceof JobQuickLaunchDto) {
@@ -344,7 +273,7 @@ export class JobService {
 
       jobEntity.manifestUrl = dto.manifestUrl;
     } else {
-      const manifestOrigin = await createManifest(
+      const manifestOrigin = await this.manifestService.createManifest(
         dto,
         requestType,
         fundTokenAmount,
