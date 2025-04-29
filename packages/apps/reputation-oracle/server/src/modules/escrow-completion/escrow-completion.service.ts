@@ -198,7 +198,7 @@ export class EscrowCompletionService {
 
         await this.handleEscrowCompletionError(
           escrowCompletionEntity,
-          `Error message: ${error.message})`,
+          `Error message: ${error.message}`,
         );
         continue;
       }
