@@ -1,12 +1,11 @@
-import { AWSRegions, StorageProviders } from '../src/common/enums/storage';
 import { JobRequestType } from '../src/common/enums/job';
+import { AWSRegions, StorageProviders } from '../src/common/enums/storage';
+import { Web3Env } from '../src/common/enums/web3';
+import { CvatDataDto, StorageDataDto } from '../src/modules/job/job.dto';
 import {
   FortuneManifestDto,
-  StorageDataDto,
-  CvatDataDto,
   Label,
-} from '../src/modules/job/job.dto';
-import { Web3Env } from '../src/common/enums/web3';
+} from '../src/modules/manifest/manifest.dto';
 
 export const MOCK_REQUESTER_TITLE = 'Mock job title';
 export const MOCK_REQUESTER_DESCRIPTION = 'Mock job description';

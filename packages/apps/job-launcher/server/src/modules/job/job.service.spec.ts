@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { createMock } from '@golevelup/ts-jest';
-import { Encryption } from '@human-protocol/sdk';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { PaymentCurrency } from '../../common/enums/payment';
@@ -21,21 +20,19 @@ import { PaymentRepository } from '../payment/payment.repository';
 import { RoutingProtocolService } from '../routing-protocol/routing-protocol.service';
 import { StorageService } from '../storage/storage.service';
 import { ServerConfigService } from '../../common/config/server-config.service';
-import { AuthConfigService } from '../../common/config/auth-config.service';
-import { Web3ConfigService } from '../../common/config/web3-config.service';
-import { CvatConfigService } from '../../common/config/cvat-config.service';
-import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { RateService } from '../rate/rate.service';
 import { QualificationService } from '../qualification/qualification.service';
 import { WhitelistService } from '../whitelist/whitelist.service';
 import { generateRandomEthAddress } from '../../../test/utils/address';
 import { mul } from '../../common/utils/decimal';
+import { ManifestService } from '../manifest/manifest.service';
 
 describe('JobService', () => {
   let jobService: JobService,
     paymentService: PaymentService,
     jobRepository: JobRepository,
-    rateService: RateService;
+    rateService: RateService,
+    manifestService: ManifestService;
 
   beforeAll(async () => {
     jest
@@ -45,26 +42,9 @@ describe('JobService', () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
         JobService,
-        Encryption,
         {
           provide: ServerConfigService,
           useValue: new ServerConfigService(new ConfigService()),
-        },
-        {
-          provide: AuthConfigService,
-          useValue: createMock<AuthConfigService>(),
-        },
-        {
-          provide: Web3ConfigService,
-          useValue: createMock<Web3ConfigService>(),
-        },
-        {
-          provide: CvatConfigService,
-          useValue: createMock<CvatConfigService>(),
-        },
-        {
-          provide: PGPConfigService,
-          useValue: createMock<PGPConfigService>(),
         },
         {
           provide: QualificationService,
@@ -99,6 +79,10 @@ describe('JobService', () => {
           provide: RoutingProtocolService,
           useValue: createMock<RoutingProtocolService>(),
         },
+        {
+          provide: ManifestService,
+          useValue: createMock<ManifestService>(),
+        },
       ],
     }).compile();
 
@@ -106,6 +90,7 @@ describe('JobService', () => {
     paymentService = moduleRef.get<PaymentService>(PaymentService);
     rateService = moduleRef.get<RateService>(RateService);
     jobRepository = moduleRef.get<JobRepository>(JobRepository);
+    manifestService = moduleRef.get<ManifestService>(ManifestService);
   });
 
   describe('createJob', () => {
@@ -135,7 +120,7 @@ describe('JobService', () => {
             reputationOracle: generateRandomEthAddress(),
           };
 
-          jest.spyOn(jobService, 'uploadManifest').mockResolvedValueOnce({
+          jest.spyOn(manifestService, 'uploadManifest').mockResolvedValueOnce({
             url: MOCK_FILE_URL,
             hash: MOCK_FILE_HASH,
           });
@@ -192,7 +177,7 @@ describe('JobService', () => {
             reputationOracle: generateRandomEthAddress(),
           };
 
-          jest.spyOn(jobService, 'uploadManifest').mockResolvedValueOnce({
+          jest.spyOn(manifestService, 'uploadManifest').mockResolvedValueOnce({
             url: MOCK_FILE_URL,
             hash: MOCK_FILE_HASH,
           });
