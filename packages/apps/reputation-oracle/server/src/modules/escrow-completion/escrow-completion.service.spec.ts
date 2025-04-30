@@ -11,7 +11,12 @@ jest.mock('@human-protocol/sdk', () => {
 
 import { faker } from '@faker-js/faker';
 import { createMock } from '@golevelup/ts-jest';
-import { EscrowClient, EscrowStatus, EscrowUtils } from '@human-protocol/sdk';
+import {
+  EscrowClient,
+  EscrowStatus,
+  EscrowUtils,
+  OperatorUtils,
+} from '@human-protocol/sdk';
 import { Test } from '@nestjs/testing';
 import * as crypto from 'crypto';
 import stringify from 'json-stable-stringify';
@@ -65,6 +70,7 @@ const mockCvatPayoutsCalculator = createMock<CvatPayoutsCalculator>();
 
 const mockedEscrowClient = jest.mocked(EscrowClient);
 const mockedEscrowUtils = jest.mocked(EscrowUtils);
+const mockedOperatorUtils = jest.mocked(OperatorUtils);
 
 describe('EscrowCompletionService', () => {
   let service: EscrowCompletionService;
@@ -794,5 +800,283 @@ describe('EscrowCompletionService', () => {
         0,
       );
     });
+  });
+
+  describe('processPaidEscrows', () => {
+    const mockGetEscrowStatus = jest.fn();
+    const mockCompleteEscrow = jest.fn();
+    let launcherAddress: string;
+    let exchangeOracleAddress: string;
+
+    beforeEach(() => {
+      mockedEscrowClient.build.mockResolvedValue({
+        getStatus: mockGetEscrowStatus,
+        complete: mockCompleteEscrow,
+      } as unknown as EscrowClient);
+
+      launcherAddress = faker.finance.ethereumAddress();
+      exchangeOracleAddress = faker.finance.ethereumAddress();
+
+      mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
+        launcher: launcherAddress,
+        exchangeOracle: exchangeOracleAddress,
+      } as any);
+    });
+
+    describe('handle failures', () => {
+      const testError = new Error(faker.lorem.sentence());
+
+      beforeEach(() => {
+        mockGetEscrowStatus.mockRejectedValue(testError);
+      });
+
+      it('should process multiple items and handle failure for each', async () => {
+        const paidPayoutsRecords = [
+          generateEscrowCompletion(EscrowCompletionStatus.PAID),
+          generateEscrowCompletion(EscrowCompletionStatus.PAID),
+        ];
+        mockEscrowCompletionRepository.findByStatus.mockResolvedValueOnce(
+          _.cloneDeep(paidPayoutsRecords),
+        );
+
+        await service.processPaidEscrows();
+
+        expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledTimes(
+          2,
+        );
+        expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: paidPayoutsRecords[0].id,
+            retriesCount: paidPayoutsRecords[0].retriesCount + 1,
+          }),
+        );
+        expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: paidPayoutsRecords[1].id,
+            retriesCount: paidPayoutsRecords[1].retriesCount + 1,
+          }),
+        );
+      });
+
+      it('should handle failure for item that has retries left', async () => {
+        const paidPayoutsRecord = generateEscrowCompletion(
+          EscrowCompletionStatus.PAID,
+        );
+        paidPayoutsRecord.retriesCount =
+          mockServerConfigService.maxRetryCount - 1;
+        mockEscrowCompletionRepository.findByStatus.mockResolvedValueOnce([
+          {
+            ...paidPayoutsRecord,
+          },
+        ]);
+
+        await service.processPaidEscrows();
+
+        expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledWith({
+          ...paidPayoutsRecord,
+          retriesCount: paidPayoutsRecord.retriesCount + 1,
+          waitUntil: expect.any(Date),
+        });
+      });
+
+      it('should handle failure for item that has no retries left', async () => {
+        const paidPayoutsRecord = generateEscrowCompletion(
+          EscrowCompletionStatus.PAID,
+        );
+        paidPayoutsRecord.retriesCount = mockServerConfigService.maxRetryCount;
+        mockEscrowCompletionRepository.findByStatus.mockResolvedValueOnce([
+          {
+            ...paidPayoutsRecord,
+          },
+        ]);
+
+        await service.processPaidEscrows();
+
+        expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledWith({
+          ...paidPayoutsRecord,
+          failureDetail: `Error message: ${testError.message}`,
+          status: 'failed',
+        });
+      });
+
+      it('should handle failure when no webhook url for oracle', async () => {
+        const paidPayoutsRecord = generateEscrowCompletion(
+          EscrowCompletionStatus.PAID,
+        );
+        paidPayoutsRecord.retriesCount = mockServerConfigService.maxRetryCount;
+        mockEscrowCompletionRepository.findByStatus.mockResolvedValueOnce([
+          {
+            ...paidPayoutsRecord,
+          },
+        ]);
+        mockGetEscrowStatus.mockResolvedValueOnce(EscrowStatus.Paid);
+        mockedOperatorUtils.getOperator.mockResolvedValue({
+          webhookUrl: '',
+        } as any);
+
+        await service.processPaidEscrows();
+
+        expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledWith({
+          ...paidPayoutsRecord,
+          failureDetail: 'Error message: Webhook url is no set for oracle',
+          status: 'failed',
+        });
+      });
+
+      it('should handle error when creating webhooks', async () => {
+        const paidPayoutsRecord = generateEscrowCompletion(
+          EscrowCompletionStatus.PAID,
+        );
+        paidPayoutsRecord.retriesCount = mockServerConfigService.maxRetryCount;
+        mockEscrowCompletionRepository.findByStatus.mockResolvedValueOnce([
+          {
+            ...paidPayoutsRecord,
+          },
+        ]);
+        mockGetEscrowStatus.mockResolvedValueOnce(EscrowStatus.Paid);
+        mockedOperatorUtils.getOperator.mockResolvedValue({
+          webhookUrl: faker.internet.url(),
+        } as any);
+        mockOutgoingWebhookService.createOutgoingWebhook.mockRejectedValueOnce(
+          testError,
+        );
+
+        await service.processPaidEscrows();
+
+        expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledWith({
+          ...paidPayoutsRecord,
+          failureDetail: expect.stringContaining(
+            'Failed to create outgoing webhook for oracle. Address: 0x',
+          ),
+          status: 'failed',
+        });
+      });
+    });
+
+    it.each([EscrowStatus.Partial, EscrowStatus.Paid])(
+      'should properly complete escrow with status "%s"',
+      async (escrowStatus) => {
+        mockGetEscrowStatus.mockResolvedValueOnce(escrowStatus);
+        const mockGasPrice = faker.number.bigInt();
+        mockWeb3Service.calculateGasPrice.mockResolvedValueOnce(mockGasPrice);
+
+        const paidPayoutsRecord = generateEscrowCompletion(
+          EscrowCompletionStatus.PAID,
+        );
+        mockEscrowCompletionRepository.findByStatus.mockResolvedValueOnce([
+          {
+            ...paidPayoutsRecord,
+          },
+        ]);
+
+        const launcherWebhookUrl = faker.internet.url();
+        const exchangeOracleWebhookUrl = faker.internet.url();
+        mockedOperatorUtils.getOperator.mockImplementation(
+          async (_chainId, address) => {
+            let webhookUrl: string;
+            switch (address) {
+              case launcherAddress:
+                webhookUrl = launcherWebhookUrl;
+                break;
+              case exchangeOracleAddress:
+                webhookUrl = exchangeOracleWebhookUrl;
+                break;
+              default:
+                webhookUrl = faker.internet.url();
+                break;
+            }
+            return { webhookUrl } as any;
+          },
+        );
+
+        await service.processPaidEscrows();
+
+        expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledWith({
+          ...paidPayoutsRecord,
+          status: 'completed',
+        });
+        expect(mockCompleteEscrow).toHaveBeenCalledWith(
+          paidPayoutsRecord.escrowAddress,
+          {
+            gasPrice: mockGasPrice,
+          },
+        );
+        expect(mockReputationService.assessEscrowParties).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(mockReputationService.assessEscrowParties).toHaveBeenCalledWith(
+          paidPayoutsRecord.chainId,
+          paidPayoutsRecord.escrowAddress,
+        );
+
+        const expectedWebhookData = {
+          chainId: paidPayoutsRecord.chainId,
+          escrowAddress: paidPayoutsRecord.escrowAddress,
+          eventType: 'escrow_completed',
+        };
+        expect(
+          mockOutgoingWebhookService.createOutgoingWebhook,
+        ).toHaveBeenCalledTimes(2);
+        expect(
+          mockOutgoingWebhookService.createOutgoingWebhook,
+        ).toHaveBeenCalledWith(expectedWebhookData, launcherWebhookUrl);
+        expect(
+          mockOutgoingWebhookService.createOutgoingWebhook,
+        ).toHaveBeenCalledWith(expectedWebhookData, exchangeOracleWebhookUrl);
+      },
+    );
+
+    it.each([
+      EscrowStatus.Cancelled,
+      EscrowStatus.Pending,
+      EscrowStatus.Complete,
+    ])(
+      'should not comlete escrow if its status is not partial or paid [%#]',
+      async (escrowStatus) => {
+        mockGetEscrowStatus.mockResolvedValueOnce(escrowStatus);
+
+        const paidPayoutsRecord = generateEscrowCompletion(
+          EscrowCompletionStatus.PAID,
+        );
+        mockEscrowCompletionRepository.findByStatus.mockResolvedValueOnce([
+          {
+            ...paidPayoutsRecord,
+          },
+        ]);
+
+        mockedOperatorUtils.getOperator.mockResolvedValue({
+          webhookUrl: faker.internet.url(),
+        } as any);
+
+        await service.processPaidEscrows();
+
+        expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledWith({
+          ...paidPayoutsRecord,
+          status: 'completed',
+        });
+        expect(mockCompleteEscrow).toHaveBeenCalledTimes(0);
+        expect(mockReputationService.assessEscrowParties).toHaveBeenCalledTimes(
+          0,
+        );
+      },
+    );
   });
 });
