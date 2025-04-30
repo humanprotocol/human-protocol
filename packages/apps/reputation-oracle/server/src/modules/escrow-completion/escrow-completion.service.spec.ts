@@ -24,6 +24,7 @@ import _ from 'lodash';
 
 import { createSignerMock, type SignerMock } from '../../../test/fixtures/web3';
 
+import { CvatJobType, FortuneJobType } from '../../common/enums';
 import { ServerConfigService } from '../../config/server-config.service';
 
 import { ReputationService } from '../reputation/reputation.service';
@@ -1075,6 +1076,44 @@ describe('EscrowCompletionService', () => {
         expect(mockCompleteEscrow).toHaveBeenCalledTimes(0);
         expect(mockReputationService.assessEscrowParties).toHaveBeenCalledTimes(
           0,
+        );
+      },
+    );
+  });
+
+  describe('getEscrowResultsProcessor', () => {
+    it.each(Object.values(FortuneJobType))(
+      'should return fortune processor for "%s" job type',
+      (jobRequestType) => {
+        expect(service['getEscrowResultsProcessor'](jobRequestType)).toBe(
+          mockFortuneResultsProcessor,
+        );
+      },
+    );
+    it.each(Object.values(CvatJobType))(
+      'should return cvat processor for "%s" job type',
+      (jobRequestType) => {
+        expect(service['getEscrowResultsProcessor'](jobRequestType)).toBe(
+          mockCvatResultsProcessor,
+        );
+      },
+    );
+  });
+
+  describe('getEscrowPayoutsCalculator', () => {
+    it.each(Object.values(FortuneJobType))(
+      'should return fortune calculator for "%s" job type',
+      (jobRequestType) => {
+        expect(service['getEscrowPayoutsCalculator'](jobRequestType)).toBe(
+          mockFortunePayoutsCalculator,
+        );
+      },
+    );
+    it.each(Object.values(CvatJobType))(
+      'should return cvat calculator for "%s" job type',
+      (jobRequestType) => {
+        expect(service['getEscrowPayoutsCalculator'](jobRequestType)).toBe(
+          mockCvatPayoutsCalculator,
         );
       },
     );
