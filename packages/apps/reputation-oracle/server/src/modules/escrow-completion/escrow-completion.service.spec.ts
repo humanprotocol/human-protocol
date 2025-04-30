@@ -13,6 +13,9 @@ import { faker } from '@faker-js/faker';
 import { createMock } from '@golevelup/ts-jest';
 import { EscrowClient, EscrowStatus, EscrowUtils } from '@human-protocol/sdk';
 import { Test } from '@nestjs/testing';
+import * as crypto from 'crypto';
+import stringify from 'json-stable-stringify';
+import _ from 'lodash';
 
 import { ServerConfigService } from '../../config/server-config.service';
 
@@ -23,7 +26,10 @@ import { Web3Service } from '../web3/web3.service';
 import { generateTestnetChainId } from '../web3/fixtures';
 
 import { EscrowCompletionStatus } from './constants';
-import { generateEscrowCompletion } from './fixtures/escrow-completion';
+import {
+  generateEscrowCompletion,
+  generateEscrowPayoutsBatch,
+} from './fixtures/escrow-completion';
 import { EscrowCompletionService } from './escrow-completion.service';
 import { EscrowCompletionRepository } from './escrow-completion.repository';
 import { EscrowPayoutsBatchRepository } from './escrow-payouts-batch.repository';
@@ -187,7 +193,7 @@ describe('EscrowCompletionService', () => {
           generateEscrowCompletion(EscrowCompletionStatus.PENDING),
         ];
         mockEscrowCompletionRepository.findByStatus.mockResolvedValueOnce(
-          pendingRecords,
+          _.cloneDeep(pendingRecords),
         );
 
         await service.processPendingRecords();
@@ -198,11 +204,13 @@ describe('EscrowCompletionService', () => {
         expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledWith(
           expect.objectContaining({
             id: pendingRecords[0].id,
+            retriesCount: pendingRecords[0].retriesCount + 1,
           }),
         );
         expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledWith(
           expect.objectContaining({
-            id: pendingRecords[0].id,
+            id: pendingRecords[1].id,
+            retriesCount: pendingRecords[0].retriesCount + 1,
           }),
         );
       });
@@ -419,6 +427,231 @@ describe('EscrowCompletionService', () => {
           id: pendingRecord.id,
           status: EscrowCompletionStatus.AWAITING_PAYOUTS,
         }),
+      );
+    });
+  });
+
+  describe('createEscrowPayoutsBatch', () => {
+    it('should create payouts batch with correct data', async () => {
+      const payoutsBatch = [
+        {
+          address: faker.finance.ethereumAddress(),
+          amount: faker.number.bigInt(),
+        },
+      ];
+      const escrowCompletionId = faker.number.int();
+
+      await service['createEscrowPayoutsBatch'](
+        escrowCompletionId,
+        payoutsBatch,
+      );
+
+      const payoutsWithStringifiedAmount = payoutsBatch.map((b) => ({
+        address: b.address,
+        amount: b.amount.toString(),
+      }));
+
+      const expectedHash = crypto
+        .createHash('sha1')
+        .update(stringify(payoutsWithStringifiedAmount) as string)
+        .digest('hex');
+
+      expect(
+        mockEscrowPayoutsBatchRepository.createUnique,
+      ).toHaveBeenCalledTimes(1);
+      expect(
+        mockEscrowPayoutsBatchRepository.createUnique,
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          escrowCompletionTrackingId: escrowCompletionId,
+          payouts: payoutsWithStringifiedAmount,
+          payoutsHash: expectedHash,
+          txNonce: undefined,
+        }),
+      );
+    });
+  });
+
+  describe('processAwaitingPayouts', () => {
+    let spyOnProcessPayoutsBatch: jest.SpyInstance;
+
+    beforeAll(() => {
+      spyOnProcessPayoutsBatch = jest
+        .spyOn(service as any, 'processPayoutsBatch')
+        .mockImplementation();
+    });
+
+    afterAll(() => {
+      spyOnProcessPayoutsBatch.mockRestore();
+    });
+
+    describe('handle failures', () => {
+      const testError = new Error(faker.lorem.sentence());
+
+      beforeEach(() => {
+        mockEscrowPayoutsBatchRepository.findForEscrowCompletionTracking.mockResolvedValue(
+          [generateEscrowPayoutsBatch()],
+        );
+      });
+
+      it('should process multiple items and handle failure for each', async () => {
+        const awaitingPayoutsRecords = [
+          generateEscrowCompletion(EscrowCompletionStatus.AWAITING_PAYOUTS),
+          generateEscrowCompletion(EscrowCompletionStatus.AWAITING_PAYOUTS),
+        ];
+        mockEscrowCompletionRepository.findByStatus.mockResolvedValueOnce(
+          _.cloneDeep(awaitingPayoutsRecords),
+        );
+        spyOnProcessPayoutsBatch.mockRejectedValue(testError);
+
+        await service.processAwaitingPayouts();
+
+        expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledTimes(
+          2,
+        );
+        expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: awaitingPayoutsRecords[0].id,
+            retriesCount: awaitingPayoutsRecords[0].retriesCount + 1,
+          }),
+        );
+        expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: awaitingPayoutsRecords[1].id,
+            retriesCount: awaitingPayoutsRecords[1].retriesCount + 1,
+          }),
+        );
+      });
+
+      it('should handle failure for item that has retries left', async () => {
+        const awaitingPayoutsRecord = generateEscrowCompletion(
+          EscrowCompletionStatus.AWAITING_PAYOUTS,
+        );
+        awaitingPayoutsRecord.retriesCount =
+          mockServerConfigService.maxRetryCount - 1;
+        mockEscrowCompletionRepository.findByStatus.mockResolvedValueOnce([
+          {
+            ...awaitingPayoutsRecord,
+          },
+        ]);
+        spyOnProcessPayoutsBatch.mockRejectedValue(testError);
+
+        await service.processAwaitingPayouts();
+
+        expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledWith({
+          ...awaitingPayoutsRecord,
+          retriesCount: awaitingPayoutsRecord.retriesCount + 1,
+          waitUntil: expect.any(Date),
+        });
+      });
+
+      it('should handle failure for item that has no retries left', async () => {
+        const awaitingPayoutsRecord = generateEscrowCompletion(
+          EscrowCompletionStatus.AWAITING_PAYOUTS,
+        );
+        awaitingPayoutsRecord.retriesCount =
+          mockServerConfigService.maxRetryCount;
+        mockEscrowCompletionRepository.findByStatus.mockResolvedValueOnce([
+          {
+            ...awaitingPayoutsRecord,
+          },
+        ]);
+        spyOnProcessPayoutsBatch.mockRejectedValue(testError);
+
+        await service.processAwaitingPayouts();
+
+        expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledWith({
+          ...awaitingPayoutsRecord,
+          failureDetail: 'Error message: Not all payouts batches succeeded',
+          status: 'failed',
+        });
+      });
+
+      it('should not mark as paid if not all payout batches succeeded', async () => {
+        const awaitingPayoutsRecord = generateEscrowCompletion(
+          EscrowCompletionStatus.AWAITING_PAYOUTS,
+        );
+        awaitingPayoutsRecord.retriesCount =
+          mockServerConfigService.maxRetryCount - 1;
+        mockEscrowCompletionRepository.findByStatus.mockResolvedValueOnce([
+          {
+            ...awaitingPayoutsRecord,
+          },
+        ]);
+        mockEscrowPayoutsBatchRepository.findForEscrowCompletionTracking.mockResolvedValue(
+          [generateEscrowPayoutsBatch(), generateEscrowPayoutsBatch()],
+        );
+        spyOnProcessPayoutsBatch.mockRejectedValueOnce(testError);
+
+        await service.processAwaitingPayouts();
+
+        expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledWith({
+          ...awaitingPayoutsRecord,
+          retriesCount: awaitingPayoutsRecord.retriesCount + 1,
+          waitUntil: expect.any(Date),
+        });
+      });
+    });
+
+    it('should correctly process payouts batches', async () => {
+      const awaitingPayoutsRecord = generateEscrowCompletion(
+        EscrowCompletionStatus.AWAITING_PAYOUTS,
+      );
+      mockEscrowCompletionRepository.findByStatus.mockResolvedValueOnce([
+        {
+          ...awaitingPayoutsRecord,
+        },
+      ]);
+      const firstPayoutsBatch = generateEscrowPayoutsBatch();
+      const secondPayoutsBatch = generateEscrowPayoutsBatch();
+      mockEscrowPayoutsBatchRepository.findForEscrowCompletionTracking.mockResolvedValue(
+        [firstPayoutsBatch, secondPayoutsBatch],
+      );
+
+      await service.processAwaitingPayouts();
+
+      expect(
+        mockEscrowPayoutsBatchRepository.findForEscrowCompletionTracking,
+      ).toHaveBeenCalledTimes(1);
+      expect(
+        mockEscrowPayoutsBatchRepository.findForEscrowCompletionTracking,
+      ).toHaveBeenCalledWith(awaitingPayoutsRecord.id);
+
+      expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledTimes(1);
+      expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledWith({
+        ...awaitingPayoutsRecord,
+        status: 'paid',
+      });
+
+      /**
+       * This entity is used by reference while processing,
+       * so if we pass it as is to matcher - it fails
+       * due to having different status
+       */
+      const expectedEscrowCompletionArg = expect.objectContaining({
+        chainId: awaitingPayoutsRecord.chainId,
+        escrowAddress: awaitingPayoutsRecord.escrowAddress,
+        finalResultsUrl: awaitingPayoutsRecord.finalResultsUrl,
+        finalResultsHash: awaitingPayoutsRecord.finalResultsHash,
+      });
+
+      expect(spyOnProcessPayoutsBatch).toHaveBeenCalledTimes(2);
+      expect(spyOnProcessPayoutsBatch).toHaveBeenCalledWith(
+        expectedEscrowCompletionArg,
+        firstPayoutsBatch,
+      );
+      expect(spyOnProcessPayoutsBatch).toHaveBeenCalledWith(
+        expectedEscrowCompletionArg,
+        secondPayoutsBatch,
       );
     });
   });
