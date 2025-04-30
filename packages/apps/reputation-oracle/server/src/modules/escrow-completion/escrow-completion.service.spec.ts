@@ -17,12 +17,14 @@ import * as crypto from 'crypto';
 import stringify from 'json-stable-stringify';
 import _ from 'lodash';
 
+import { createSignerMock, type SignerMock } from '../../../test/fixtures/web3';
+
 import { ServerConfigService } from '../../config/server-config.service';
 
 import { ReputationService } from '../reputation/reputation.service';
 import { StorageService } from '../storage/storage.service';
 import { OutgoingWebhookService } from '../webhook/webhook-outgoing.service';
-import { Web3Service } from '../web3/web3.service';
+import { WalletWithProvider, Web3Service } from '../web3/web3.service';
 import { generateTestnetChainId } from '../web3/fixtures';
 
 import { EscrowCompletionStatus } from './constants';
@@ -652,6 +654,144 @@ describe('EscrowCompletionService', () => {
       expect(spyOnProcessPayoutsBatch).toHaveBeenCalledWith(
         expectedEscrowCompletionArg,
         secondPayoutsBatch,
+      );
+    });
+  });
+
+  describe('processPayoutsBatch', () => {
+    let mockedSigner: SignerMock;
+    const mockedCreateBulkPayoutTransaction = jest.fn();
+    let mockedRawTransaction: { nonce: number };
+
+    beforeEach(() => {
+      mockedSigner = createSignerMock();
+      mockWeb3Service.getSigner.mockReturnValueOnce(
+        mockedSigner as unknown as WalletWithProvider,
+      );
+
+      mockedEscrowClient.build.mockResolvedValue({
+        createBulkPayoutTransaction: mockedCreateBulkPayoutTransaction,
+      } as unknown as EscrowClient);
+
+      mockedRawTransaction = {
+        nonce: faker.number.int(),
+      };
+      mockedCreateBulkPayoutTransaction.mockResolvedValueOnce(
+        mockedRawTransaction,
+      );
+    });
+
+    it('should succesfully process payouts batch', async () => {
+      const awaitingPayoutsRecord = generateEscrowCompletion(
+        EscrowCompletionStatus.AWAITING_PAYOUTS,
+      );
+      const payoutsBatch = generateEscrowPayoutsBatch();
+
+      await service['processPayoutsBatch'](awaitingPayoutsRecord, {
+        ...payoutsBatch,
+      });
+
+      expect(mockEscrowPayoutsBatchRepository.updateOne).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(mockEscrowPayoutsBatchRepository.updateOne).toHaveBeenCalledWith({
+        ...payoutsBatch,
+        txNonce: mockedRawTransaction.nonce,
+      });
+
+      expect(mockedSigner.sendTransaction).toHaveBeenCalledTimes(1);
+      expect(mockedSigner.sendTransaction).toHaveBeenCalledWith(
+        mockedRawTransaction,
+      );
+      expect(mockedSigner.__transactionResponse.wait).toHaveBeenCalledTimes(1);
+
+      expect(mockEscrowPayoutsBatchRepository.deleteOne).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(mockEscrowPayoutsBatchRepository.deleteOne).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: payoutsBatch.id,
+        }),
+      );
+    });
+
+    it('should reset nonce if expired', async () => {
+      const awaitingPayoutsRecord = generateEscrowCompletion(
+        EscrowCompletionStatus.AWAITING_PAYOUTS,
+      );
+      const payoutsBatch = generateEscrowPayoutsBatch();
+
+      const testError = new Error('Synthetic error');
+      (testError as any).code = 'NONCE_EXPIRED';
+
+      mockedSigner.sendTransaction.mockRejectedValueOnce(testError);
+
+      let thrownError;
+      try {
+        await service['processPayoutsBatch'](awaitingPayoutsRecord, {
+          ...payoutsBatch,
+        });
+      } catch (error) {
+        thrownError = error;
+      }
+
+      expect(thrownError).toEqual(testError);
+
+      expect(
+        mockEscrowPayoutsBatchRepository.updateOne,
+      ).toHaveBeenNthCalledWith(2, {
+        ...payoutsBatch,
+        txNonce: null,
+      });
+
+      expect(mockEscrowPayoutsBatchRepository.deleteOne).toHaveBeenCalledTimes(
+        0,
+      );
+    });
+
+    it('should not update nonce if already set', async () => {
+      const awaitingPayoutsRecord = generateEscrowCompletion(
+        EscrowCompletionStatus.AWAITING_PAYOUTS,
+      );
+      const payoutsBatch = generateEscrowPayoutsBatch();
+      payoutsBatch.txNonce = mockedRawTransaction.nonce;
+
+      await service['processPayoutsBatch'](awaitingPayoutsRecord, {
+        ...payoutsBatch,
+      });
+
+      expect(mockEscrowPayoutsBatchRepository.updateOne).toHaveBeenCalledTimes(
+        0,
+      );
+    });
+
+    it('throws when transaction is failed', async () => {
+      const awaitingPayoutsRecord = generateEscrowCompletion(
+        EscrowCompletionStatus.AWAITING_PAYOUTS,
+      );
+      const payoutsBatch = generateEscrowPayoutsBatch();
+      payoutsBatch.txNonce = mockedRawTransaction.nonce;
+
+      const testError = new Error('Synthetic error');
+
+      mockedSigner.__transactionResponse.wait.mockRejectedValueOnce(testError);
+
+      let thrownError;
+      try {
+        await service['processPayoutsBatch'](awaitingPayoutsRecord, {
+          ...payoutsBatch,
+        });
+      } catch (error) {
+        thrownError = error;
+      }
+
+      expect(thrownError).toEqual(testError);
+
+      expect(mockEscrowPayoutsBatchRepository.updateOne).toHaveBeenCalledTimes(
+        0,
+      );
+      expect(mockEscrowPayoutsBatchRepository.deleteOne).toHaveBeenCalledTimes(
+        0,
       );
     });
   });

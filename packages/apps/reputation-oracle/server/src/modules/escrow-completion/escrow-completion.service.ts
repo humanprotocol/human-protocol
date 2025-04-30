@@ -419,9 +419,8 @@ export class EscrowCompletionService {
 
     if (!payoutsBatch.txNonce) {
       payoutsBatch.txNonce = rawTransaction.nonce;
+      await this.escrowPayoutsBatchRepository.updateOne(payoutsBatch);
     }
-
-    await this.escrowPayoutsBatchRepository.updateOne(payoutsBatch);
 
     try {
       const transactionResponse = await signer.sendTransaction(rawTransaction);
