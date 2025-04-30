@@ -1,4 +1,13 @@
-jest.mock('@human-protocol/sdk');
+jest.mock('@human-protocol/sdk', () => {
+  const mockedSdk = jest.createMockFromModule<
+    typeof import('@human-protocol/sdk')
+  >('@human-protocol/sdk');
+
+  return {
+    ...mockedSdk,
+    ESCROW_BULK_PAYOUT_MAX_ITEMS: 2,
+  };
+});
 
 import { faker } from '@faker-js/faker';
 import { createMock } from '@golevelup/ts-jest';
@@ -304,14 +313,14 @@ describe('EscrowCompletionService', () => {
         url: finalResultsUrl,
         hash: finalResultsHash,
       });
-      const payoutsBatch = [
+      const calculatedPayouts = [
         {
           address: faker.finance.ethereumAddress(),
-          amount: faker.number.bigInt({ min: 1, max: 42 }),
+          amount: faker.number.bigInt(),
         },
       ];
       mockFortunePayoutsCalculator.calculate.mockResolvedValueOnce(
-        payoutsBatch,
+        calculatedPayouts,
       );
 
       await service.processPendingRecords();
@@ -340,7 +349,7 @@ describe('EscrowCompletionService', () => {
       expect(spyOnCreateEscrowPayoutsBatch).toHaveBeenCalledTimes(1);
       expect(spyOnCreateEscrowPayoutsBatch).toHaveBeenCalledWith(
         pendingRecord.id,
-        payoutsBatch,
+        calculatedPayouts,
       );
 
       expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledWith(
@@ -351,6 +360,66 @@ describe('EscrowCompletionService', () => {
       );
 
       expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledTimes(2);
+    });
+
+    it('should prepare payout batches when too many payouts', async () => {
+      const pendingRecord = generateEscrowCompletion(
+        EscrowCompletionStatus.PENDING,
+      );
+      pendingRecord.finalResultsUrl = faker.internet.url();
+      pendingRecord.finalResultsHash = faker.string.hexadecimal({ length: 40 });
+
+      mockEscrowCompletionRepository.findByStatus.mockResolvedValueOnce([
+        {
+          ...pendingRecord,
+        },
+      ]);
+      mockGetEscrowStatus.mockResolvedValue(EscrowStatus.Pending);
+      mockedEscrowUtils.getEscrow.mockResolvedValueOnce({} as any);
+      mockStorageService.downloadJsonLikeData.mockResolvedValueOnce(
+        generateFortuneManifest(),
+      );
+
+      const firstAddressPayout = {
+        address: `0x1${faker.finance.ethereumAddress().slice(3)}`,
+        amount: faker.number.bigInt(),
+      };
+      const secondAddressPayout = {
+        address: `0x2${faker.finance.ethereumAddress().slice(3)}`,
+        amount: faker.number.bigInt(),
+      };
+      const thirdAddressPayout = {
+        address: `0x3${faker.finance.ethereumAddress().slice(3)}`,
+        amount: faker.number.bigInt(),
+      };
+
+      mockFortunePayoutsCalculator.calculate.mockResolvedValueOnce(
+        faker.helpers.shuffle([
+          firstAddressPayout,
+          secondAddressPayout,
+          thirdAddressPayout,
+        ]),
+      );
+
+      await service.processPendingRecords();
+
+      expect(spyOnCreateEscrowPayoutsBatch).toHaveBeenCalledTimes(2);
+      expect(spyOnCreateEscrowPayoutsBatch).toHaveBeenCalledWith(
+        pendingRecord.id,
+        [firstAddressPayout, secondAddressPayout],
+      );
+      expect(spyOnCreateEscrowPayoutsBatch).toHaveBeenCalledWith(
+        pendingRecord.id,
+        [thirdAddressPayout],
+      );
+
+      expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledTimes(1);
+      expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: pendingRecord.id,
+          status: EscrowCompletionStatus.AWAITING_PAYOUTS,
+        }),
+      );
     });
   });
 });

@@ -1,4 +1,5 @@
 jest.mock('minio');
+
 import { createMock } from '@golevelup/ts-jest';
 import { faker } from '@faker-js/faker';
 import { Test } from '@nestjs/testing';
