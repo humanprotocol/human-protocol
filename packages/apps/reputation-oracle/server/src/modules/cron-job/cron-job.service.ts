@@ -58,10 +58,6 @@ export class CronJobService {
   }
 
   async completeCronJob(cronJobEntity: CronJobEntity): Promise<CronJobEntity> {
-    if (cronJobEntity.completedAt) {
-      throw new Error('Cron job is already completed');
-    }
-
     cronJobEntity.completedAt = new Date();
     return this.cronJobRepository.updateOne(cronJobEntity);
   }
@@ -143,8 +139,12 @@ export class CronJobService {
 
   @Cron('*/2 * * * *')
   async processPendingOutgoingWebhooks(): Promise<void> {
-    if (await this.isCronJobRunning(CronJobType.ProcessPendingOutgoingWebhook))
+    const isCronJobRunning = await this.isCronJobRunning(
+      CronJobType.ProcessPendingOutgoingWebhook,
+    );
+    if (isCronJobRunning) {
       return;
+    }
 
     this.logger.info('Pending outgoing webhooks START');
     const cronJob = await this.startCronJob(
