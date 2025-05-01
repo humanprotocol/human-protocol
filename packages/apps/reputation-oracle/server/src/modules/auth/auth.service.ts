@@ -2,7 +2,7 @@ import { KVStoreKeys, KVStoreUtils, Role } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
-import { SignatureType } from '../../common/enums/web3';
+import { SignatureType } from '../../common/enums';
 import { AuthConfigService } from '../../config/auth-config.service';
 import { NDAConfigService } from '../../config/nda-config.service';
 import { ServerConfigService } from '../../config/server-config.service';

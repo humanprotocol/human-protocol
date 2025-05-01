@@ -15,7 +15,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
-import { RequestWithUser } from '../../common/interfaces/request';
+import { RequestWithUser } from '../../common/types';
 import { NDAConfigService } from '../../config/nda-config.service';
 
 import { NDASignatureDto } from './nda.dto';

@@ -1,20 +1,22 @@
 import { Injectable } from '@nestjs/common';
-import { BaseRepository } from '../../database/base.repository';
 import { DataSource, LessThanOrEqual } from 'typeorm';
+
 import { ServerConfigService } from '../../config/server-config.service';
+import { BaseRepository } from '../../database/base.repository';
+
+import { EscrowCompletionStatus } from './constants';
 import { EscrowCompletionEntity } from './escrow-completion.entity';
-import { EscrowCompletionStatus } from '../../common/enums';
 
 @Injectable()
 export class EscrowCompletionRepository extends BaseRepository<EscrowCompletionEntity> {
   constructor(
-    private dataSource: DataSource,
-    public readonly serverConfigService: ServerConfigService,
+    dataSource: DataSource,
+    private readonly serverConfigService: ServerConfigService,
   ) {
     super(EscrowCompletionEntity, dataSource);
   }
 
-  public findByStatus(
+  findByStatus(
     status: EscrowCompletionStatus,
   ): Promise<EscrowCompletionEntity[]> {
     return this.find({

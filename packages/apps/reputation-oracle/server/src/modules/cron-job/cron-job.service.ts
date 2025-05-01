@@ -129,7 +129,7 @@ export class CronJobService {
     );
 
     try {
-      await this.escrowCompletionService.processPendingEscrowCompletion();
+      await this.escrowCompletionService.processPendingRecords();
     } catch (error) {
       this.logger.error('Error processing pending escrow completion', error);
     }
@@ -159,7 +159,7 @@ export class CronJobService {
     );
 
     try {
-      await this.escrowCompletionService.processPaidEscrowCompletion();
+      await this.escrowCompletionService.processPaidEscrows();
     } catch (error) {
       this.logger.error('Error processing paid escrow completion', error);
     }

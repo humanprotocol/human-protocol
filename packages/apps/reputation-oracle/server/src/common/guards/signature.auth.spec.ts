@@ -1,12 +1,10 @@
 jest.mock('@human-protocol/sdk');
 
+import { faker } from '@faker-js/faker';
 import { EscrowUtils } from '@human-protocol/sdk';
 import { ExecutionContext, HttpException, HttpStatus } from '@nestjs/common';
 
-import {
-  generateContractAddress,
-  generateEthWallet,
-} from '../../../test/fixtures/web3';
+import { generateEthWallet } from '../../../test/fixtures/web3';
 import {
   createExecutionContextMock,
   ExecutionContextMock,
@@ -43,7 +41,7 @@ describe('SignatureAuthGuard', () => {
       executionContextMock = createExecutionContextMock();
       body = {
         chain_id: generateTestnetChainId(),
-        escrow_address: generateContractAddress(),
+        escrow_address: faker.finance.ethereumAddress(),
       };
     });
 

@@ -43,8 +43,8 @@ describe('CronJobService', () => {
         {
           provide: EscrowCompletionService,
           useValue: {
-            processPendingEscrowCompletion: jest.fn(),
-            processPaidEscrowCompletion: jest.fn(),
+            processPendingRecords: jest.fn(),
+            processPaidEscrows: jest.fn(),
             processAwaitingPayouts: jest.fn(),
           },
         },
@@ -258,9 +258,7 @@ describe('CronJobService', () => {
 
       await service.processPendingEscrowCompletion();
 
-      expect(
-        escrowCompletionService.processPendingEscrowCompletion,
-      ).not.toHaveBeenCalled();
+      expect(escrowCompletionService.processPaidEscrows).not.toHaveBeenCalled();
     });
 
     it('should process pending escrow completion and complete the cron job', async () => {
@@ -274,9 +272,7 @@ describe('CronJobService', () => {
 
       await service.processPendingEscrowCompletion();
 
-      expect(
-        escrowCompletionService.processPendingEscrowCompletion,
-      ).toHaveBeenCalled();
+      expect(escrowCompletionService.processPendingRecords).toHaveBeenCalled();
       expect(service.startCronJob).toHaveBeenCalled();
       expect(service.completeCronJob).toHaveBeenCalled();
     });
@@ -290,7 +286,7 @@ describe('CronJobService', () => {
         .spyOn(service, 'completeCronJob')
         .mockResolvedValue(new CronJobEntity());
 
-      escrowCompletionService.processPendingEscrowCompletion.mockRejectedValue(
+      escrowCompletionService.processPendingRecords.mockRejectedValue(
         new Error('Processing error'),
       );
 
@@ -352,9 +348,7 @@ describe('CronJobService', () => {
 
       await service.processPaidEscrowCompletion();
 
-      expect(
-        escrowCompletionService.processPaidEscrowCompletion,
-      ).not.toHaveBeenCalled();
+      expect(escrowCompletionService.processPaidEscrows).not.toHaveBeenCalled();
     });
 
     it('should process paid escrow completion and complete the cron job', async () => {
@@ -368,9 +362,7 @@ describe('CronJobService', () => {
 
       await service.processPaidEscrowCompletion();
 
-      expect(
-        escrowCompletionService.processPaidEscrowCompletion,
-      ).toHaveBeenCalled();
+      expect(escrowCompletionService.processPaidEscrows).toHaveBeenCalled();
       expect(service.startCronJob).toHaveBeenCalled();
       expect(service.completeCronJob).toHaveBeenCalled();
     });
@@ -384,7 +376,7 @@ describe('CronJobService', () => {
         .spyOn(service, 'completeCronJob')
         .mockResolvedValue(new CronJobEntity());
 
-      escrowCompletionService.processPaidEscrowCompletion.mockRejectedValue(
+      escrowCompletionService.processPaidEscrows.mockRejectedValue(
         new Error('Processing error'),
       );
 
