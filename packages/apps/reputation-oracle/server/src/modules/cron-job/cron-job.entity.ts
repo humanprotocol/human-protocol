@@ -1,8 +1,9 @@
 import { Column, Entity, Index } from 'typeorm';
 
-import { BaseEntity } from '../../database/base.entity';
 import { DATABASE_SCHEMA_NAME } from '../../common/constants';
-import { CronJobType } from '../../common/enums/cron-job';
+import { BaseEntity } from '../../database/base.entity';
+
+import { CronJobType } from './constants';
 
 @Entity({ schema: DATABASE_SCHEMA_NAME, name: 'cron-jobs' })
 @Index(['cronJobType'], { unique: true })
@@ -17,5 +18,5 @@ export class CronJobEntity extends BaseEntity {
   startedAt: Date;
 
   @Column({ type: 'timestamptz', nullable: true })
-  completedAt?: Date | null;
+  completedAt: Date | null;
 }
