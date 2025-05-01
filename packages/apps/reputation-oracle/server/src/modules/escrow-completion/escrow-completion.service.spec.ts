@@ -461,7 +461,7 @@ describe('EscrowCompletionService', () => {
       }));
 
       const expectedHash = crypto
-        .createHash('sha1')
+        .createHash('sha256')
         .update(stringify(payoutsWithStringifiedAmount) as string)
         .digest('hex');
 

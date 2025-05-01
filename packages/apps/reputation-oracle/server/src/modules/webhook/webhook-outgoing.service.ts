@@ -38,7 +38,7 @@ export class OutgoingWebhookService {
     url: string,
   ): Promise<void> {
     const hash = crypto
-      .createHash('sha1')
+      .createHash('sha256')
       .update(stringify({ payload, url }) as string)
       .digest('hex');
 

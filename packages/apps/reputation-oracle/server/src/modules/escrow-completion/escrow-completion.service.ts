@@ -323,7 +323,7 @@ export class EscrowCompletionService {
     }));
 
     const batchHash = crypto
-      .createHash('sha1')
+      .createHash('sha256')
       .update(stringify(formattedPayouts) as string)
       .digest('hex');
 

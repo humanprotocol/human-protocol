@@ -120,7 +120,7 @@ describe('BaseEscrowResultsProcessor', () => {
       mockedPgpEncryptionService.encrypt.mockResolvedValueOnce(encryptedResult);
 
       const encryptedResultHash = crypto
-        .createHash('sha1')
+        .createHash('sha256')
         .update(encryptedResult)
         .digest('hex');
       const storedResultsFileName = `${encryptedResultHash}.${faker.system.fileExt()}`;

@@ -68,7 +68,7 @@ describe('WebhookOutgoingService', () => {
       const url = faker.internet.url();
 
       const hash = crypto
-        .createHash('sha1')
+        .createHash('sha256')
         .update(stringify({ payload, url }) as string)
         .digest('hex');
 

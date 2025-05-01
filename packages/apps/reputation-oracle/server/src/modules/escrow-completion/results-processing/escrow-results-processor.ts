@@ -63,7 +63,7 @@ export abstract class BaseEscrowResultsProcessor<TManifest extends JobManifest>
     );
 
     const hash = crypto
-      .createHash('sha1')
+      .createHash('sha256')
       .update(encryptedResults)
       .digest('hex');
 
