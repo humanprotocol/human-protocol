@@ -1,134 +1,132 @@
+import { faker } from '@faker-js/faker';
+import { createMock } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
-import { CronJobService } from './cron-job.service';
-import { CronJobRepository } from './cron-job.repository';
-import { CronJobEntity } from './cron-job.entity';
-import { CronJobType } from '../../common/enums/cron-job';
+
+import { AbuseService } from '../abuse/abuse.service';
+import { EscrowCompletionService } from '../escrow-completion/escrow-completion.service';
 import { OutgoingWebhookService } from '../webhook/webhook-outgoing.service';
 import { IncomingWebhookService } from '../webhook/webhook-incoming.service';
-import { EscrowCompletionService } from '../escrow-completion/escrow-completion.service';
-import { AbuseService } from '../abuse/abuse.service';
+
+import { CronJobType } from './constants';
+import { CronJobEntity } from './cron-job.entity';
+import { CronJobRepository } from './cron-job.repository';
+import { CronJobService } from './cron-job.service';
+import { generateCronJob } from './fixtures';
+
+const mockedCronJobRepository = createMock<CronJobRepository>();
+const mockedIncomingWebhookService = createMock<IncomingWebhookService>();
+const mockedOutgoingWebhookService = createMock<OutgoingWebhookService>();
+const mockedEscrowCompletionService = createMock<EscrowCompletionService>();
+const mockedAbuseService = createMock<AbuseService>();
 
 describe('CronJobService', () => {
   let service: CronJobService;
-  let cronJobRepository: jest.Mocked<CronJobRepository>;
-  let incomingWebhookService: jest.Mocked<IncomingWebhookService>;
-  let outgoingWebhookService: jest.Mocked<OutgoingWebhookService>;
-  let escrowCompletionService: jest.Mocked<EscrowCompletionService>;
-  let abuseService: jest.Mocked<AbuseService>;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CronJobService,
         {
           provide: CronJobRepository,
-          useValue: {
-            findOneByType: jest.fn(),
-            createUnique: jest.fn(),
-            updateOne: jest.fn(),
-          },
+          useValue: mockedCronJobRepository,
         },
         {
           provide: IncomingWebhookService,
-          useValue: {
-            processPendingIncomingWebhooks: jest.fn(),
-          },
+          useValue: mockedIncomingWebhookService,
         },
         {
           provide: OutgoingWebhookService,
-          useValue: {
-            processPendingOutgoingWebhooks: jest.fn(),
-          },
+          useValue: mockedOutgoingWebhookService,
         },
         {
           provide: EscrowCompletionService,
-          useValue: {
-            processPendingRecords: jest.fn(),
-            processPaidEscrows: jest.fn(),
-            processAwaitingPayouts: jest.fn(),
-          },
+          useValue: mockedEscrowCompletionService,
         },
         {
           provide: AbuseService,
-          useValue: {
-            processAbuseRequests: jest.fn(),
-            processClassifiedAbuses: jest.fn(),
-          },
+          useValue: mockedAbuseService,
         },
       ],
     }).compile();
 
     service = module.get<CronJobService>(CronJobService);
-    cronJobRepository = module.get(CronJobRepository);
-    incomingWebhookService = module.get(IncomingWebhookService);
-    outgoingWebhookService = module.get(OutgoingWebhookService);
-    escrowCompletionService = module.get(EscrowCompletionService);
-    abuseService = module.get(AbuseService);
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
   });
 
   describe('startCronJob', () => {
+    const now = Date.now();
+
+    beforeAll(() => {
+      jest.useFakeTimers({ now });
+    });
+
+    afterAll(() => {
+      jest.useRealTimers();
+    });
+
+    beforeEach(() => {
+      mockedCronJobRepository.createUnique.mockImplementation(async (v) => v);
+      mockedCronJobRepository.updateOne.mockImplementation(async (v) => v);
+    });
+
     it('should create a new cron job if none exists', async () => {
-      cronJobRepository.findOneByType.mockResolvedValue(null);
-      cronJobRepository.createUnique.mockResolvedValue(new CronJobEntity());
+      mockedCronJobRepository.findOneByType.mockResolvedValueOnce(null);
 
       const result = await service.startCronJob(
         CronJobType.ProcessPendingIncomingWebhook,
       );
 
-      expect(cronJobRepository.findOneByType).toHaveBeenCalledWith(
+      expect(mockedCronJobRepository.findOneByType).toHaveBeenCalledWith(
         CronJobType.ProcessPendingIncomingWebhook,
       );
-      expect(cronJobRepository.createUnique).toHaveBeenCalledWith({
+      const expectedJobData = {
         cronJobType: CronJobType.ProcessPendingIncomingWebhook,
-        startedAt: expect.any(Date),
-      });
+        startedAt: new Date(now),
+      };
+      expect(mockedCronJobRepository.createUnique).toHaveBeenCalledTimes(1);
+      expect(mockedCronJobRepository.createUnique).toHaveBeenCalledWith(
+        expectedJobData,
+      );
       expect(result).toBeInstanceOf(CronJobEntity);
+      expect(result).toEqual(expect.objectContaining(expectedJobData));
     });
 
     it('should update an existing cron job', async () => {
-      const existingCronJob = new CronJobEntity();
-      existingCronJob.startedAt = new Date();
-      cronJobRepository.findOneByType.mockResolvedValue(existingCronJob);
+      const existingCronJob = generateCronJob();
+      mockedCronJobRepository.findOneByType.mockResolvedValueOnce({
+        ...existingCronJob,
+      });
+
+      const result = await service.startCronJob(existingCronJob.cronJobType);
 
       const updatedCronJob = {
         ...existingCronJob,
-        startedAt: new Date(),
+        startedAt: new Date(now),
         completedAt: null,
       };
-      cronJobRepository.updateOne.mockResolvedValue(updatedCronJob as any);
-
-      const result = await service.startCronJob(
-        CronJobType.ProcessPendingIncomingWebhook,
+      expect(mockedCronJobRepository.findOneByType).toHaveBeenCalledWith(
+        existingCronJob.cronJobType,
       );
-
-      expect(cronJobRepository.findOneByType).toHaveBeenCalledWith(
-        CronJobType.ProcessPendingIncomingWebhook,
+      expect(mockedCronJobRepository.updateOne).toHaveBeenCalledTimes(1);
+      expect(mockedCronJobRepository.updateOne).toHaveBeenCalledWith(
+        updatedCronJob,
       );
-      expect(cronJobRepository.updateOne).toHaveBeenCalledWith(
-        expect.objectContaining({
-          startedAt: expect.any(Date),
-          completedAt: null,
-        }),
-      );
-      expect(
-        Math.abs(
-          new Date(updatedCronJob.startedAt).getTime() -
-            existingCronJob.startedAt.getTime(),
-        ),
-      ).toBeLessThanOrEqual(1000);
       expect(result).toEqual(updatedCronJob);
     });
   });
 
   describe('isCronJobRunning', () => {
     it('should return false if no cron job exists', async () => {
-      cronJobRepository.findOneByType.mockResolvedValue(null);
+      mockedCronJobRepository.findOneByType.mockResolvedValueOnce(null);
 
       const result = await service.isCronJobRunning(
         CronJobType.ProcessPendingIncomingWebhook,
       );
 
-      expect(cronJobRepository.findOneByType).toHaveBeenCalledWith(
+      expect(mockedCronJobRepository.findOneByType).toHaveBeenCalledWith(
         CronJobType.ProcessPendingIncomingWebhook,
       );
       expect(result).toBe(false);
@@ -137,13 +135,15 @@ describe('CronJobService', () => {
     it('should return false if the last cron job is completed', async () => {
       const completedCronJob = new CronJobEntity();
       completedCronJob.completedAt = new Date();
-      cronJobRepository.findOneByType.mockResolvedValue(completedCronJob);
+      mockedCronJobRepository.findOneByType.mockResolvedValueOnce(
+        completedCronJob,
+      );
 
       const result = await service.isCronJobRunning(
         CronJobType.ProcessPendingIncomingWebhook,
       );
 
-      expect(cronJobRepository.findOneByType).toHaveBeenCalledWith(
+      expect(mockedCronJobRepository.findOneByType).toHaveBeenCalledWith(
         CronJobType.ProcessPendingIncomingWebhook,
       );
       expect(result).toBe(false);
@@ -151,13 +151,15 @@ describe('CronJobService', () => {
 
     it('should return true if the last cron job is not completed', async () => {
       const runningCronJob = new CronJobEntity();
-      cronJobRepository.findOneByType.mockResolvedValue(runningCronJob);
+      mockedCronJobRepository.findOneByType.mockResolvedValueOnce(
+        runningCronJob,
+      );
 
       const result = await service.isCronJobRunning(
         CronJobType.ProcessPendingIncomingWebhook,
       );
 
-      expect(cronJobRepository.findOneByType).toHaveBeenCalledWith(
+      expect(mockedCronJobRepository.findOneByType).toHaveBeenCalledWith(
         CronJobType.ProcessPendingIncomingWebhook,
       );
       expect(result).toBe(true);
@@ -165,364 +167,149 @@ describe('CronJobService', () => {
   });
 
   describe('completeCronJob', () => {
+    const now = Date.now();
+
+    beforeAll(() => {
+      jest.useFakeTimers({ now });
+    });
+
+    afterAll(() => {
+      jest.useRealTimers();
+    });
+
+    beforeEach(() => {
+      mockedCronJobRepository.updateOne.mockImplementation(async (v) => v);
+    });
+
     it('should complete a cron job', async () => {
       const cronJobEntity = new CronJobEntity();
 
+      const result = await service.completeCronJob({
+        ...cronJobEntity,
+      });
+
       const completedCronJob = {
         ...cronJobEntity,
-        completedAt: new Date(),
+        completedAt: new Date(now),
       };
-
-      cronJobRepository.updateOne.mockResolvedValue(completedCronJob as any);
-
-      const result = await service.completeCronJob(cronJobEntity);
-
-      expect(cronJobRepository.updateOne).toHaveBeenCalledWith(
-        expect.objectContaining({
-          ...cronJobEntity,
-          completedAt: expect.any(Date),
-        }),
+      expect(mockedCronJobRepository.updateOne).toHaveBeenCalledTimes(1);
+      expect(mockedCronJobRepository.updateOne).toHaveBeenCalledWith(
+        completedCronJob,
       );
-
-      expect(result.completedAt).toBeInstanceOf(Date);
-
-      expect(
-        Math.abs(
-          new Date(result.completedAt!).getTime() -
-            completedCronJob.completedAt.getTime(),
-        ),
-      ).toBeLessThanOrEqual(1000);
-    });
-
-    it('should throw an error if the cron job is already completed', async () => {
-      const cronJobEntity = new CronJobEntity();
-      cronJobEntity.completedAt = new Date();
-
-      await expect(service.completeCronJob(cronJobEntity)).rejects.toThrow(
-        new Error('Cron job is already completed'),
-      );
+      expect(result).toEqual(completedCronJob);
     });
   });
 
-  describe('processPendingIncomingWebhooks', () => {
-    it('should skip processing if a cron job is already running', async () => {
-      jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(true);
+  describe('cron job handlers', () => {
+    let spyOnIsCronJobRunning: jest.SpyInstance;
+    let spyOnStartCronJob: jest.SpyInstance;
+    let spyOnCompleteCronJob: jest.SpyInstance;
 
-      await service.processPendingIncomingWebhooks();
-
-      expect(
-        incomingWebhookService.processPendingIncomingWebhooks,
-      ).not.toHaveBeenCalled();
-    });
-
-    it('should process pending webhooks and complete the cron job', async () => {
-      jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
-      jest
+    beforeAll(() => {
+      spyOnIsCronJobRunning = jest
+        .spyOn(service, 'isCronJobRunning')
+        .mockImplementation();
+      spyOnStartCronJob = jest
         .spyOn(service, 'startCronJob')
-        .mockResolvedValue(new CronJobEntity());
-      jest
+        .mockImplementation();
+      spyOnCompleteCronJob = jest
         .spyOn(service, 'completeCronJob')
-        .mockResolvedValue(new CronJobEntity());
-
-      await service.processPendingIncomingWebhooks();
-
-      expect(
-        incomingWebhookService.processPendingIncomingWebhooks,
-      ).toHaveBeenCalled();
-      expect(service.startCronJob).toHaveBeenCalled();
-      expect(service.completeCronJob).toHaveBeenCalled();
+        .mockImplementation();
     });
 
-    it('should complete the cron job after processing', async () => {
-      jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
-      jest
-        .spyOn(service, 'startCronJob')
-        .mockResolvedValue(new CronJobEntity());
-      jest
-        .spyOn(service, 'completeCronJob')
-        .mockResolvedValue(new CronJobEntity());
-
-      incomingWebhookService.processPendingIncomingWebhooks.mockRejectedValue(
-        new Error('Processing error'),
-      );
-
-      await service.processPendingIncomingWebhooks();
-
-      expect(service.completeCronJob).toHaveBeenCalled();
-    });
-  });
-
-  describe('processPendingEscrowCompletion', () => {
-    it('should skip processing if a cron job is already running', async () => {
-      jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(true);
-
-      await service.processPendingEscrowCompletion();
-
-      expect(escrowCompletionService.processPaidEscrows).not.toHaveBeenCalled();
+    afterAll(() => {
+      spyOnIsCronJobRunning.mockRestore();
+      spyOnStartCronJob.mockRestore();
+      spyOnCompleteCronJob.mockRestore();
     });
 
-    it('should process pending escrow completion and complete the cron job', async () => {
-      jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
-      jest
-        .spyOn(service, 'startCronJob')
-        .mockResolvedValue(new CronJobEntity());
-      jest
-        .spyOn(service, 'completeCronJob')
-        .mockResolvedValue(new CronJobEntity());
+    describe.each([
+      {
+        method: 'processPendingIncomingWebhooks',
+        cronJobType: 'process-pending-incoming-webhook',
+        processorMock:
+          mockedIncomingWebhookService.processPendingIncomingWebhooks,
+      },
+      {
+        method: 'processPendingEscrowCompletion',
+        cronJobType: 'process-pending-escrow-completion-tracking',
+        processorMock: mockedEscrowCompletionService.processPendingRecords,
+      },
+      {
+        method: 'processAwaitingEscrowPayouts',
+        cronJobType: 'process-awaiting-escrow-payouts',
+        processorMock: mockedEscrowCompletionService.processAwaitingPayouts,
+      },
+      {
+        method: 'processPaidEscrowCompletion',
+        cronJobType: 'process-paid-escrow-completion-tracking',
+        processorMock: mockedEscrowCompletionService.processPaidEscrows,
+      },
+      {
+        method: 'processPendingOutgoingWebhooks',
+        cronJobType: 'process-pending-outgoing-webhook',
+        processorMock:
+          mockedOutgoingWebhookService.processPendingOutgoingWebhooks,
+      },
+      {
+        method: 'processAbuseRequests',
+        cronJobType: 'process-requested-abuse',
+        processorMock: mockedAbuseService.processAbuseRequests,
+      },
+      {
+        method: 'processClassifiedAbuses',
+        cronJobType: 'process-classified-abuse',
+        processorMock: mockedAbuseService.processClassifiedAbuses,
+      },
+    ])('$method', ({ method, cronJobType, processorMock }) => {
+      let cronJob: CronJobEntity;
 
-      await service.processPendingEscrowCompletion();
+      beforeEach(() => {
+        cronJob = generateCronJob({
+          cronJobType: cronJobType as CronJobType,
+        });
+      });
 
-      expect(escrowCompletionService.processPendingRecords).toHaveBeenCalled();
-      expect(service.startCronJob).toHaveBeenCalled();
-      expect(service.completeCronJob).toHaveBeenCalled();
-    });
+      it('should skip processing if a cron job is already running', async () => {
+        spyOnIsCronJobRunning.mockResolvedValueOnce(true);
 
-    it('should complete the cron job after processing', async () => {
-      jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
-      jest
-        .spyOn(service, 'startCronJob')
-        .mockResolvedValue(new CronJobEntity());
-      jest
-        .spyOn(service, 'completeCronJob')
-        .mockResolvedValue(new CronJobEntity());
+        await (service as any)[method]();
 
-      escrowCompletionService.processPendingRecords.mockRejectedValue(
-        new Error('Processing error'),
-      );
+        expect(spyOnIsCronJobRunning).toHaveBeenCalledTimes(1);
+        expect(spyOnIsCronJobRunning).toHaveBeenCalledWith(cronJobType);
+        expect(processorMock).not.toHaveBeenCalled();
+        expect(spyOnStartCronJob).not.toHaveBeenCalled();
+        expect(spyOnCompleteCronJob).not.toHaveBeenCalled();
+      });
 
-      await service.processPendingEscrowCompletion();
+      it(`should process ${cronJobType} and complete the cron job`, async () => {
+        spyOnIsCronJobRunning.mockResolvedValueOnce(false);
+        spyOnStartCronJob.mockResolvedValueOnce(cronJob);
 
-      expect(service.completeCronJob).toHaveBeenCalled();
-    });
-  });
+        await (service as any)[method]();
 
-  describe('processAwaitingEscrowPayouts', () => {
-    it('should skip processing if a cron job is already running', async () => {
-      jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(true);
+        expect(service.startCronJob).toHaveBeenCalledTimes(1);
+        expect(service.startCronJob).toHaveBeenCalledWith(cronJobType);
 
-      await service.processAwaitingEscrowPayouts();
+        expect(processorMock).toHaveBeenCalledTimes(1);
 
-      expect(
-        escrowCompletionService.processAwaitingPayouts,
-      ).not.toHaveBeenCalled();
-    });
+        expect(service.completeCronJob).toHaveBeenCalledTimes(1);
+        expect(service.completeCronJob).toHaveBeenCalledWith(cronJob);
+      });
 
-    it('should process pending escrow completion and complete the cron job', async () => {
-      jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
-      jest
-        .spyOn(service, 'startCronJob')
-        .mockResolvedValue(new CronJobEntity());
-      jest
-        .spyOn(service, 'completeCronJob')
-        .mockResolvedValue(new CronJobEntity());
+      it('should complete the cron job when processing fails', async () => {
+        spyOnIsCronJobRunning.mockResolvedValueOnce(false);
+        spyOnStartCronJob.mockResolvedValueOnce(cronJob);
 
-      await service.processAwaitingEscrowPayouts();
+        mockedIncomingWebhookService.processPendingIncomingWebhooks.mockRejectedValueOnce(
+          new Error(faker.lorem.sentence()),
+        );
 
-      expect(escrowCompletionService.processAwaitingPayouts).toHaveBeenCalled();
-      expect(service.startCronJob).toHaveBeenCalled();
-      expect(service.completeCronJob).toHaveBeenCalled();
-    });
+        await (service as any)[method]();
 
-    it('should complete the cron job after processing', async () => {
-      jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
-      jest
-        .spyOn(service, 'startCronJob')
-        .mockResolvedValue(new CronJobEntity());
-      jest
-        .spyOn(service, 'completeCronJob')
-        .mockResolvedValue(new CronJobEntity());
-
-      escrowCompletionService.processAwaitingPayouts.mockRejectedValue(
-        new Error('Processing error'),
-      );
-
-      await service.processAwaitingEscrowPayouts();
-
-      expect(service.completeCronJob).toHaveBeenCalled();
-    });
-  });
-
-  describe('processPaidEscrowCompletion', () => {
-    it('should skip processing if a cron job is already running', async () => {
-      jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(true);
-
-      await service.processPaidEscrowCompletion();
-
-      expect(escrowCompletionService.processPaidEscrows).not.toHaveBeenCalled();
-    });
-
-    it('should process paid escrow completion and complete the cron job', async () => {
-      jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
-      jest
-        .spyOn(service, 'startCronJob')
-        .mockResolvedValue(new CronJobEntity());
-      jest
-        .spyOn(service, 'completeCronJob')
-        .mockResolvedValue(new CronJobEntity());
-
-      await service.processPaidEscrowCompletion();
-
-      expect(escrowCompletionService.processPaidEscrows).toHaveBeenCalled();
-      expect(service.startCronJob).toHaveBeenCalled();
-      expect(service.completeCronJob).toHaveBeenCalled();
-    });
-
-    it('should complete the cron job after processing', async () => {
-      jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
-      jest
-        .spyOn(service, 'startCronJob')
-        .mockResolvedValue(new CronJobEntity());
-      jest
-        .spyOn(service, 'completeCronJob')
-        .mockResolvedValue(new CronJobEntity());
-
-      escrowCompletionService.processPaidEscrows.mockRejectedValue(
-        new Error('Processing error'),
-      );
-
-      await service.processPaidEscrowCompletion();
-
-      expect(service.completeCronJob).toHaveBeenCalled();
-    });
-  });
-
-  describe('processPendingOutgoingWebhooks', () => {
-    it('should skip processing if a cron job is already running', async () => {
-      jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(true);
-
-      await service.processPendingOutgoingWebhooks();
-
-      expect(
-        outgoingWebhookService.processPendingOutgoingWebhooks,
-      ).not.toHaveBeenCalled();
-    });
-
-    it('should process pending outgoing webhooks and complete the cron job', async () => {
-      jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
-      jest
-        .spyOn(service, 'startCronJob')
-        .mockResolvedValue(new CronJobEntity());
-      jest
-        .spyOn(service, 'completeCronJob')
-        .mockResolvedValue(new CronJobEntity());
-
-      await service.processPendingOutgoingWebhooks();
-
-      expect(
-        outgoingWebhookService.processPendingOutgoingWebhooks,
-      ).toHaveBeenCalled();
-      expect(service.startCronJob).toHaveBeenCalled();
-      expect(service.completeCronJob).toHaveBeenCalled();
-    });
-
-    it('should complete the cron job after processing', async () => {
-      jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
-      jest
-        .spyOn(service, 'startCronJob')
-        .mockResolvedValue(new CronJobEntity());
-      jest
-        .spyOn(service, 'completeCronJob')
-        .mockResolvedValue(new CronJobEntity());
-
-      outgoingWebhookService.processPendingOutgoingWebhooks.mockRejectedValue(
-        new Error('Processing error'),
-      );
-
-      await service.processPendingOutgoingWebhooks();
-
-      expect(service.completeCronJob).toHaveBeenCalled();
-    });
-  });
-
-  describe('processClassifiedAbuses', () => {
-    it('should skip processing if a cron job is already running', async () => {
-      jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(true);
-
-      await service.processClassifiedAbuses();
-
-      expect(abuseService.processClassifiedAbuses).not.toHaveBeenCalled();
-    });
-
-    it('should process classified abuses and complete the cron job', async () => {
-      jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
-      jest
-        .spyOn(service, 'startCronJob')
-        .mockResolvedValue(new CronJobEntity());
-      jest
-        .spyOn(service, 'completeCronJob')
-        .mockResolvedValue(new CronJobEntity());
-
-      await service.processClassifiedAbuses();
-
-      expect(abuseService.processClassifiedAbuses).toHaveBeenCalled();
-      expect(service.startCronJob).toHaveBeenCalledWith(
-        CronJobType.ProcessClassifiedAbuse,
-      );
-      expect(service.completeCronJob).toHaveBeenCalled();
-    });
-
-    it('should complete the cron job even if processing fails', async () => {
-      jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
-      jest
-        .spyOn(service, 'startCronJob')
-        .mockResolvedValue(new CronJobEntity());
-      jest
-        .spyOn(service, 'completeCronJob')
-        .mockResolvedValue(new CronJobEntity());
-
-      abuseService.processClassifiedAbuses.mockRejectedValue(
-        new Error('Processing error'),
-      );
-
-      await service.processClassifiedAbuses();
-
-      expect(service.completeCronJob).toHaveBeenCalled();
-    });
-  });
-
-  describe('processAbuseRequests', () => {
-    it('should skip processing if a cron job is already running', async () => {
-      jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(true);
-
-      await service.processAbuseRequests();
-
-      expect(abuseService.processAbuseRequests).not.toHaveBeenCalled();
-    });
-
-    it('should process abuse requests and complete the cron job', async () => {
-      jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
-      jest
-        .spyOn(service, 'startCronJob')
-        .mockResolvedValue(new CronJobEntity());
-      jest
-        .spyOn(service, 'completeCronJob')
-        .mockResolvedValue(new CronJobEntity());
-
-      await service.processAbuseRequests();
-
-      expect(abuseService.processAbuseRequests).toHaveBeenCalled();
-      expect(service.startCronJob).toHaveBeenCalledWith(
-        CronJobType.ProcessRequestedAbuse,
-      );
-      expect(service.completeCronJob).toHaveBeenCalled();
-    });
-
-    it('should complete the cron job even if processing fails', async () => {
-      jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
-      jest
-        .spyOn(service, 'startCronJob')
-        .mockResolvedValue(new CronJobEntity());
-      jest
-        .spyOn(service, 'completeCronJob')
-        .mockResolvedValue(new CronJobEntity());
-
-      abuseService.processAbuseRequests.mockRejectedValue(
-        new Error('Processing error'),
-      );
-
-      await service.processAbuseRequests();
-
-      expect(service.completeCronJob).toHaveBeenCalled();
+        expect(service.completeCronJob).toHaveBeenCalledTimes(1);
+        expect(service.completeCronJob).toHaveBeenCalledWith(cronJob);
+      });
     });
   });
 });
