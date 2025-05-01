@@ -54,6 +54,7 @@ export class CvatPayoutsCalculator implements EscrowPayoutsCalculator {
       const jobFinalResult = annotations.results.find(
         (result) => result.id === job.final_result_id,
       );
+      // TODO: enable annotation quality validation when ready
       if (
         jobFinalResult
         // && jobFinalResult.annotation_quality >= manifest.validation.min_quality

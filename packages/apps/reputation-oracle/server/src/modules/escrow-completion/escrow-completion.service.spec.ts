@@ -224,7 +224,7 @@ describe('EscrowCompletionService', () => {
         );
       });
 
-      it('should handle failure for item that has retries left', async () => {
+      it('should handle failure for item that has 1 retry left', async () => {
         const pendingRecord = generateEscrowCompletion(
           EscrowCompletionStatus.PENDING,
         );
@@ -247,7 +247,7 @@ describe('EscrowCompletionService', () => {
         });
       });
 
-      it('should handle failure for item that has no retries left', async () => {
+      it('should handle failure and set failed status for item that has no retries left', async () => {
         const pendingRecord = generateEscrowCompletion(
           EscrowCompletionStatus.PENDING,
         );
@@ -271,7 +271,7 @@ describe('EscrowCompletionService', () => {
       });
     });
 
-    it('should not process if escrow has pending status', async () => {
+    it('should skip final results and payout batches processing if escrow status is not pending', async () => {
       const pendingRecord = generateEscrowCompletion(
         EscrowCompletionStatus.PENDING,
       );
@@ -280,7 +280,15 @@ describe('EscrowCompletionService', () => {
           ...pendingRecord,
         },
       ]);
-      mockGetEscrowStatus.mockResolvedValue(faker.string.sample());
+      mockGetEscrowStatus.mockResolvedValue(
+        faker.helpers.arrayElement([
+          EscrowStatus.Launched,
+          EscrowStatus.Cancelled,
+          EscrowStatus.Complete,
+          EscrowStatus.Paid,
+          EscrowStatus.Partial,
+        ]),
+      );
 
       await service.processPendingRecords();
 
@@ -371,12 +379,12 @@ describe('EscrowCompletionService', () => {
       expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledTimes(2);
     });
 
-    it('should prepare payout batches when too many payouts', async () => {
+    it('should prepare multiple batches if amount of receivers exceeds the limit', async () => {
       const pendingRecord = generateEscrowCompletion(
         EscrowCompletionStatus.PENDING,
       );
       pendingRecord.finalResultsUrl = faker.internet.url();
-      pendingRecord.finalResultsHash = faker.string.hexadecimal({ length: 40 });
+      pendingRecord.finalResultsHash = faker.string.hexadecimal({ length: 42 });
 
       mockEscrowCompletionRepository.findByStatus.mockResolvedValueOnce([
         {
@@ -524,7 +532,7 @@ describe('EscrowCompletionService', () => {
         );
       });
 
-      it('should handle failure for item that has retries left', async () => {
+      it('should handle failure for item that has 1 retry left', async () => {
         const awaitingPayoutsRecord = generateEscrowCompletion(
           EscrowCompletionStatus.AWAITING_PAYOUTS,
         );
@@ -549,7 +557,7 @@ describe('EscrowCompletionService', () => {
         });
       });
 
-      it('should handle failure for item that has no retries left', async () => {
+      it('should handle failure and set failed status for item that has no retries left', async () => {
         const awaitingPayoutsRecord = generateEscrowCompletion(
           EscrowCompletionStatus.AWAITING_PAYOUTS,
         );
@@ -851,7 +859,7 @@ describe('EscrowCompletionService', () => {
         );
       });
 
-      it('should handle failure for item that has retries left', async () => {
+      it('should handle failure for item that has 1 retry left', async () => {
         const paidPayoutsRecord = generateEscrowCompletion(
           EscrowCompletionStatus.PAID,
         );
@@ -875,7 +883,7 @@ describe('EscrowCompletionService', () => {
         });
       });
 
-      it('should handle failure for item that has no retries left', async () => {
+      it('should handle failure and set failed status for item that has no retries left', async () => {
         const paidPayoutsRecord = generateEscrowCompletion(
           EscrowCompletionStatus.PAID,
         );
