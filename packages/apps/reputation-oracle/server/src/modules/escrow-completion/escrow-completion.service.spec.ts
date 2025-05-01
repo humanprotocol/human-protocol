@@ -303,26 +303,11 @@ describe('EscrowCompletionService', () => {
       mockGetEscrowStatus.mockResolvedValue(EscrowStatus.Pending);
 
       const manifestUrl = faker.internet.url();
-      mockedEscrowUtils.getEscrow.mockImplementationOnce(
-        async (chainId, escrowAddress) => {
-          if (
-            chainId === pendingRecord.chainId &&
-            escrowAddress === pendingRecord.escrowAddress
-          ) {
-            return { manifestUrl } as any;
-          }
-          throw new Error('Test escrow not found');
-        },
-      );
+      mockedEscrowUtils.getEscrow.mockResolvedValueOnce({ manifestUrl } as any);
 
       const fortuneManifest = generateFortuneManifest();
-      mockStorageService.downloadJsonLikeData.mockImplementationOnce(
-        async (url) => {
-          if (url === manifestUrl) {
-            return fortuneManifest;
-          }
-          return null;
-        },
+      mockStorageService.downloadJsonLikeData.mockResolvedValueOnce(
+        fortuneManifest,
       );
       const finalResultsUrl = faker.internet.url();
       const finalResultsHash = faker.string.hexadecimal({ length: 42 });
@@ -342,6 +327,13 @@ describe('EscrowCompletionService', () => {
 
       await service.processPendingRecords();
 
+      expect(mockedEscrowUtils.getEscrow).toHaveBeenCalledWith(
+        pendingRecord.chainId,
+        pendingRecord.escrowAddress,
+      );
+      expect(mockStorageService.downloadJsonLikeData).toHaveBeenCalledWith(
+        manifestUrl,
+      );
       expect(mockFortuneResultsProcessor.storeResults).toHaveBeenCalledTimes(1);
       expect(mockFortuneResultsProcessor.storeResults).toHaveBeenCalledWith(
         pendingRecord.chainId,

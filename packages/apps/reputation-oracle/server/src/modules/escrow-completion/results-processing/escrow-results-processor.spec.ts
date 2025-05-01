@@ -90,33 +90,18 @@ describe('BaseEscrowResultsProcessor', () => {
       const escrowAddress = faker.finance.ethereumAddress();
 
       const baseResultsUrl = faker.internet.url();
-      mockedGetIntermediateResultsUrl.mockImplementationOnce(
-        async (address) => {
-          if (address === escrowAddress) {
-            return baseResultsUrl;
-          }
-          return 'invalid-escrow-address';
-        },
-      );
+      mockedGetIntermediateResultsUrl.mockResolvedValueOnce(baseResultsUrl);
 
       const resultsUrl = `${baseResultsUrl}/${faker.system.fileName()}`;
-      processor.constructIntermediateResultsUrl.mockImplementationOnce(
-        (baseUrl) => {
-          if (baseUrl === baseResultsUrl) {
-            return resultsUrl;
-          }
-          return 'invalid-base-url';
-        },
-      );
+      processor.constructIntermediateResultsUrl.mockReturnValueOnce(resultsUrl);
 
       const jobResult = faker.number.int();
       const resultsFileContent = Buffer.from(jobResult.toString());
-      mockedStorageService.downloadFile.mockImplementationOnce(async (url) => {
-        if (url === resultsUrl) {
-          return resultsFileContent;
-        }
-        throw new Error('Results file not found');
-      });
+      mockedStorageService.downloadFile.mockResolvedValueOnce(
+        resultsFileContent,
+      );
+
+      processor.assertResultsComplete.mockResolvedValueOnce(undefined);
 
       processor.assertResultsComplete.mockImplementationOnce(
         async (result, manifest) => {
@@ -127,16 +112,9 @@ describe('BaseEscrowResultsProcessor', () => {
       );
 
       const jobLauncherAddress = faker.finance.ethereumAddress();
-      mockedEscrowUtils.getEscrow.mockImplementationOnce(
-        async (chId, address) => {
-          if (chId === chainId && address === escrowAddress) {
-            return {
-              launcher: jobLauncherAddress,
-            } as any;
-          }
-          throw new Error('Null escrow data');
-        },
-      );
+      mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
+        launcher: jobLauncherAddress,
+      } as any);
 
       const encryptedResult = faker.string.ulid();
       mockedPgpEncryptionService.encrypt.mockResolvedValueOnce(encryptedResult);
@@ -164,6 +142,20 @@ describe('BaseEscrowResultsProcessor', () => {
       /** ASSERT */
       expect(storedResultMeta.url).toBe(storedResultsUrl);
       expect(storedResultMeta.hash).toBe(encryptedResultHash);
+
+      expect(mockedGetIntermediateResultsUrl).toHaveBeenCalledWith(
+        escrowAddress,
+      );
+      expect(processor.constructIntermediateResultsUrl).toHaveBeenCalledWith(
+        baseResultsUrl,
+      );
+      expect(mockedStorageService.downloadFile).toHaveBeenCalledWith(
+        resultsUrl,
+      );
+      expect(mockedEscrowUtils.getEscrow).toHaveBeenCalledWith(
+        chainId,
+        escrowAddress,
+      );
 
       expect(mockedPgpEncryptionService.encrypt).toHaveBeenCalledTimes(1);
       expect(mockedPgpEncryptionService.encrypt).toHaveBeenCalledWith(

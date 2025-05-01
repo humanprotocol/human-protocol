@@ -269,15 +269,7 @@ describe('UserService', () => {
       const user = generateWorkerUser();
       user.kyc = generateKycEntity(user.id, KycStatus.APPROVED);
 
-      mockUserRepository.findOneByAddress.mockImplementationOnce(
-        async (address: string) => {
-          if (address === addressToRegister.toLowerCase()) {
-            return user;
-          }
-
-          return null;
-        },
-      );
+      mockUserRepository.findOneByAddress.mockResolvedValueOnce(user);
 
       await expect(
         userService.registerAddress(
@@ -288,7 +280,9 @@ describe('UserService', () => {
       ).rejects.toThrow(
         new DuplicatedWalletAddressError(user.id, addressToRegister),
       );
-
+      expect(mockUserRepository.findOneByAddress).toHaveBeenCalledWith(
+        addressToRegister.toLowerCase(),
+      );
       expect(mockUserRepository.updateOne).toHaveBeenCalledTimes(0);
     });
 
@@ -350,21 +344,15 @@ describe('UserService', () => {
       const siteKey = generateSiteKeyEntity(user.id, SiteKeyType.REGISTRATION);
       const oracleAddress = siteKey.siteKey;
 
-      mockSiteKeyRepository.findByUserSiteKeyAndType.mockImplementationOnce(
-        async (userId, sitekey, type) => {
-          if (
-            userId === user.id &&
-            sitekey === oracleAddress &&
-            type === SiteKeyType.REGISTRATION
-          ) {
-            return siteKey;
-          }
-          return null;
-        },
+      mockSiteKeyRepository.findByUserSiteKeyAndType.mockResolvedValueOnce(
+        siteKey,
       );
 
       await userService.registrationInExchangeOracle(user, oracleAddress);
 
+      expect(
+        mockSiteKeyRepository.findByUserSiteKeyAndType,
+      ).toHaveBeenCalledWith(user.id, oracleAddress, SiteKeyType.REGISTRATION);
       expect(mockSiteKeyRepository.createUnique).toHaveBeenCalledTimes(0);
     });
 

@@ -42,15 +42,8 @@ describe('FortunePayoutsCalculator', () => {
         generateFortuneSolution('duplicated'),
         generateFortuneSolution(faker.string.sample()),
       ]);
+      mockedStorageService.downloadJsonLikeData.mockResolvedValueOnce(results);
       const resultsUrl = faker.internet.url();
-      mockedStorageService.downloadJsonLikeData.mockImplementationOnce(
-        async (url) => {
-          if (url === resultsUrl) {
-            return results;
-          }
-          throw new Error('Results not found');
-        },
-      );
       const manifest = generateFortuneManifest();
 
       const payouts = await calculator.calculate({
@@ -69,6 +62,10 @@ describe('FortunePayoutsCalculator', () => {
 
       expect(_.sortBy(payouts, 'address')).toEqual(
         _.sortBy(expectedPayouts, 'address'),
+      );
+
+      expect(mockedStorageService.downloadJsonLikeData).toHaveBeenCalledWith(
+        resultsUrl,
       );
     });
   });

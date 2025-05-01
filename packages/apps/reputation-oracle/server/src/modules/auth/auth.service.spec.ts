@@ -223,21 +223,17 @@ describe('AuthService', () => {
     it('should throw DuplicatedUserAddressError', async () => {
       const ethWallet = generateEthWallet();
       const signature = faker.string.alpha();
-      mockUserRepository.findOneByAddress.mockImplementationOnce(
-        async (address) => {
-          if (address === ethWallet.address) {
-            return {
-              evmAddress: ethWallet.address,
-            } as UserEntity;
-          }
-          return null;
-        },
-      );
+      mockUserRepository.findOneByAddress.mockResolvedValueOnce({
+        evmAddress: ethWallet.address,
+      } as UserEntity);
 
       await expect(
         service.web3Signup(signature, ethWallet.address),
       ).rejects.toThrow(
         new AuthErrors.DuplicatedUserAddressError(ethWallet.address),
+      );
+      expect(mockUserRepository.findOneByAddress).toHaveBeenCalledWith(
+        ethWallet.address,
       );
     });
 
