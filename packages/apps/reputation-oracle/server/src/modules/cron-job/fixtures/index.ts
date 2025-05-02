@@ -1,6 +1,7 @@
 import { faker } from '@faker-js/faker';
-import { CronJobEntity } from './cron-job.entity';
-import { CronJobType } from './constants';
+
+import { CronJobEntity } from '../cron-job.entity';
+import { CronJobType } from '../constants';
 
 const cronJobTypes = Object.values(CronJobType);
 

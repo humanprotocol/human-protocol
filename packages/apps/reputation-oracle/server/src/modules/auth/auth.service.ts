@@ -414,12 +414,14 @@ export class AuthService {
     }
 
     if (new Date() > tokenEntity.expiresAt) {
+      await this.tokenRepository.deleteOne(tokenEntity);
       throw new AuthError(AuthErrorMessage.EMAIL_TOKEN_EXPIRED);
     }
 
     await this.userRepository.updateOneById(tokenEntity.userId, {
       status: UserStatus.ACTIVE,
     });
+    await this.tokenRepository.deleteOne(tokenEntity);
   }
 
   async resendEmailVerification(user: Web2UserEntity): Promise<void> {

@@ -10,7 +10,7 @@ export class AuthConfigService {
    * Required
    */
   get jwtPrivateKey(): string {
-    return this.configService.getOrThrow<string>('JWT_PRIVATE_KEY');
+    return this.configService.getOrThrow('JWT_PRIVATE_KEY');
   }
 
   /**
@@ -18,7 +18,7 @@ export class AuthConfigService {
    * Required
    */
   get jwtPublicKey(): string {
-    return this.configService.getOrThrow<string>('JWT_PUBLIC_KEY');
+    return this.configService.getOrThrow('JWT_PUBLIC_KEY');
   }
 
   /**
@@ -26,7 +26,7 @@ export class AuthConfigService {
    * Default: 600
    */
   get accessTokenExpiresIn(): number {
-    return +this.configService.get('JWT_ACCESS_TOKEN_EXPIRES_IN', 600);
+    return Number(this.configService.get('JWT_ACCESS_TOKEN_EXPIRES_IN')) || 600;
   }
 
   /**
@@ -34,7 +34,9 @@ export class AuthConfigService {
    * Default: 3600000
    */
   get refreshTokenExpiresIn(): number {
-    return +this.configService.get('JWT_REFRESH_TOKEN_EXPIRES_IN', 3600) * 1000;
+    const configValueSeconds =
+      Number(this.configService.get('JWT_REFRESH_TOKEN_EXPIRES_IN')) || 3600;
+    return configValueSeconds * 1000;
   }
 
   /**
@@ -42,9 +44,9 @@ export class AuthConfigService {
    * Default: 86400000
    */
   get verifyEmailTokenExpiresIn(): number {
-    return (
-      +this.configService.get('VERIFY_EMAIL_TOKEN_EXPIRES_IN', 86400) * 1000
-    );
+    const configValueSeconds =
+      Number(this.configService.get('VERIFY_EMAIL_TOKEN_EXPIRES_IN')) || 86400;
+    return configValueSeconds * 1000;
   }
 
   /**
@@ -52,15 +54,16 @@ export class AuthConfigService {
    * Default: 86400000
    */
   get forgotPasswordExpiresIn(): number {
-    return (
-      +this.configService.get('FORGOT_PASSWORD_TOKEN_EXPIRES_IN', 86400) * 1000
-    );
+    const configValueSeconds =
+      Number(this.configService.get('FORGOT_PASSWORD_TOKEN_EXPIRES_IN')) ||
+      86400;
+    return configValueSeconds * 1000;
   }
 
   /**
    * Human APP email.
    */
   get humanAppEmail(): string {
-    return this.configService.getOrThrow<string>('HUMAN_APP_EMAIL');
+    return this.configService.getOrThrow('HUMAN_APP_EMAIL');
   }
 }
