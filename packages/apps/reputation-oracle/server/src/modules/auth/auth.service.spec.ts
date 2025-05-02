@@ -1007,7 +1007,7 @@ describe('AuthService', () => {
   });
 
   describe('emailVerification', () => {
-    it('should verify an email', async () => {
+    it('should verify an email and remove token', async () => {
       const mockToken = {
         userId: faker.number.int(),
         uuid: faker.string.uuid(),
@@ -1028,6 +1028,8 @@ describe('AuthService', () => {
           status: UserStatus.ACTIVE,
         },
       );
+      expect(mockTokenRepository.deleteOne).toHaveBeenCalledTimes(1);
+      expect(mockTokenRepository.deleteOne).toHaveBeenCalledWith(mockToken);
     });
 
     it('should throw AuthError(AuthErrorMessage.INVALID_EMAIL_TOKEN) if token not found', async () => {
@@ -1042,20 +1044,22 @@ describe('AuthService', () => {
       );
     });
 
-    it('should throw AuthError(AuthErrorMessage.EMAIL_TOKEN_EXPIRED)', async () => {
+    it('should throw AuthError(AuthErrorMessage.EMAIL_TOKEN_EXPIRED) and remove token', async () => {
       const uuid = faker.string.uuid();
-
-      mockTokenRepository.findOneByUuidAndType.mockResolvedValueOnce({
+      const mockToken = {
         uuid,
         expiresAt: faker.date.past(),
-      } as TokenEntity);
-      mockTokenRepository.findOneByUuidAndType.mockResolvedValueOnce(null);
+      } as TokenEntity;
+
+      mockTokenRepository.findOneByUuidAndType.mockResolvedValueOnce(mockToken);
 
       await expect(service.emailVerification(uuid)).rejects.toThrow(
         new AuthErrors.AuthError(
           AuthErrors.AuthErrorMessage.EMAIL_TOKEN_EXPIRED,
         ),
       );
+      expect(mockTokenRepository.deleteOne).toHaveBeenCalledTimes(1);
+      expect(mockTokenRepository.deleteOne).toHaveBeenCalledWith(mockToken);
     });
   });
 
