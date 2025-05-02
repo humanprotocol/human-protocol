@@ -2,14 +2,14 @@ import { faker } from '@faker-js/faker';
 import * as crypto from 'crypto';
 import stringify from 'json-stable-stringify';
 
-import { generateTestnetChainId } from '../web3/fixtures';
+import { generateTestnetChainId } from '../../web3/fixtures';
 import {
   IncomingWebhookStatus,
   OutgoingWebhookEventType,
   OutgoingWebhookStatus,
-} from './types';
-import { IncomingWebhookEntity } from './webhook-incoming.entity';
-import { OutgoingWebhookEntity } from './webhook-outgoing.entity';
+} from '../types';
+import { IncomingWebhookEntity } from '../webhook-incoming.entity';
+import { OutgoingWebhookEntity } from '../webhook-outgoing.entity';
 
 type GenerateIncomingWebhookOptions = {
   retriesCount?: number;

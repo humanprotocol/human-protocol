@@ -1,8 +1,8 @@
 import { faker } from '@faker-js/faker';
-import { generateTestnetChainId } from '../web3/fixtures';
-import { AbuseStatus } from './constants';
-import { generateWorkerUser } from '../user/fixtures';
-import { AbuseEntity } from './abuse.entity';
+import { generateTestnetChainId } from '../../web3/fixtures';
+import { AbuseStatus } from '../constants';
+import { generateWorkerUser } from '../../user/fixtures';
+import { AbuseEntity } from '../abuse.entity';
 
 export function generateAbuseEntity(
   overrides?: Partial<AbuseEntity>,

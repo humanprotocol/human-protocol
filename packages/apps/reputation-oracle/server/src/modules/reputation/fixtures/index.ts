@@ -1,9 +1,9 @@
 import { faker } from '@faker-js/faker';
 
-import { generateTestnetChainId } from '../web3/fixtures';
+import { generateTestnetChainId } from '../../web3/fixtures';
 
-import { ReputationEntityType } from './constants';
-import { ReputationEntity } from './reputation.entity';
+import { ReputationEntityType } from '../constants';
+import { ReputationEntity } from '../reputation.entity';
 
 const REPUTATION_ENTITY_TYPES = Object.values(ReputationEntityType);
 export function generateReputationEntityType(): ReputationEntityType {
