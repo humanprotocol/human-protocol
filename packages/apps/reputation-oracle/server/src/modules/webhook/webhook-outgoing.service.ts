@@ -8,8 +8,7 @@ import {
   BACKOFF_INTERVAL_SECONDS,
   HEADER_SIGNATURE_KEY,
 } from '../../common/constants';
-import { ServerConfigService } from '../../config/server-config.service';
-import { Web3ConfigService } from '../../config/web3-config.service';
+import { ServerConfigService, Web3ConfigService } from '../../config';
 import { calculateExponentialBackoffMs } from '../../utils/backoff';
 import { transformKeysFromCamelToSnake } from '../../utils/case-converters';
 import { formatAxiosError } from '../../utils/http';

@@ -7,7 +7,7 @@ import {
   Not,
 } from 'typeorm';
 import { AbuseStatus } from './constants';
-import { ServerConfigService } from '../../config/server-config.service';
+import { ServerConfigService } from '../../config';
 import { BaseRepository } from '../../database/base.repository';
 import { AbuseEntity } from './abuse.entity';
 

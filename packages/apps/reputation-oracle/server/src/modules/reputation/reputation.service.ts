@@ -3,8 +3,7 @@ import { ChainId, EscrowClient } from '@human-protocol/sdk';
 
 import { SortDirection } from '../../common/enums';
 import { isDuplicatedError } from '../../common/errors/database';
-import { ReputationConfigService } from '../../config/reputation-config.service';
-import { Web3ConfigService } from '../../config/web3-config.service';
+import { ReputationConfigService, Web3ConfigService } from '../../config';
 
 import { Web3Service } from '../web3/web3.service';
 

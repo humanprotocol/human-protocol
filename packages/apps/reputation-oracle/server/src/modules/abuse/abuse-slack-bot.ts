@@ -1,7 +1,7 @@
 import { ChainId } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
-import { SlackConfigService } from '../../config/slack-config.service';
+import { SlackConfigService } from '../../config';
 import { SlackBotApp } from '../../integrations/slack-bot-app/slack-bot-app';
 import { AbuseDecision } from './constants';
 import { View } from '@slack/web-api';

@@ -10,8 +10,7 @@ import {
   createHttpServiceResponse,
 } from '../../../test/mock-creators/nest';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
-import { ServerConfigService } from '../../config/server-config.service';
-import { Web3ConfigService } from '../../config/web3-config.service';
+import { ServerConfigService, Web3ConfigService } from '../../config';
 import { transformKeysFromCamelToSnake } from '../../utils/case-converters';
 import { signMessage } from '../../utils/web3';
 import { mockWeb3ConfigService } from '../web3/fixtures';

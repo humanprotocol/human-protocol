@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 
-import { AuthConfigService } from '../../config/auth-config.service';
+import { AuthConfigService } from '../../config';
 import { HCaptchaModule } from '../../integrations/hcaptcha/hcaptcha.module';
 import { EmailModule } from '../email/module';
 import { UserModule } from '../user';

@@ -25,7 +25,7 @@ import _ from 'lodash';
 import { createSignerMock, type SignerMock } from '../../../test/fixtures/web3';
 
 import { CvatJobType, FortuneJobType } from '../../common/enums';
-import { ServerConfigService } from '../../config/server-config.service';
+import { ServerConfigService } from '../../config';
 
 import { ReputationService } from '../reputation/reputation.service';
 import { StorageService } from '../storage/storage.service';

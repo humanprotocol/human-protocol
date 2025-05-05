@@ -7,7 +7,7 @@ import {
 import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
 import { isDuplicatedError } from '../../common/errors/database';
-import { ServerConfigService } from '../../config/server-config.service';
+import { ServerConfigService } from '../../config';
 import logger from '../../logger';
 import { Web3Service } from '../web3/web3.service';
 import { OutgoingWebhookEventType } from '../webhook/types';

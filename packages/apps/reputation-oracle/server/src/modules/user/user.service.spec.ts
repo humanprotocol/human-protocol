@@ -8,7 +8,7 @@ import { Test } from '@nestjs/testing';
 import { generateEthWallet } from '../../../test/fixtures/web3';
 
 import { SignatureType } from '../../common/enums';
-import { Web3ConfigService } from '../../config/web3-config.service';
+import { Web3ConfigService } from '../../config';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 import * as web3Utils from '../../utils/web3';
 

@@ -4,13 +4,16 @@ import { faker } from '@faker-js/faker';
 import { Test, TestingModule } from '@nestjs/testing';
 import { MailService } from '@sendgrid/mail';
 
-import Environment from '../../utils/environment';
-import { SENDGRID_TEMPLATES, SERVICE_NAME } from './sendgrid.service';
+import { EmailConfigService } from '../../config';
 import logger from '../../logger';
-import { getTemplateId } from './sendgrid.service';
+import Environment from '../../utils/environment';
 import { EmailAction } from './constants';
-import { EmailConfigService } from '../../config/email-config.service';
-import { SendgridEmailService } from './sendgrid.service';
+import {
+  getTemplateId,
+  SendgridEmailService,
+  SENDGRID_TEMPLATES,
+  SERVICE_NAME,
+} from './sendgrid.service';
 
 const mockMailService = {
   setApiKey: jest.fn(),

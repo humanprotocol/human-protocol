@@ -16,7 +16,7 @@ import _ from 'lodash';
 import { BACKOFF_INTERVAL_SECONDS } from '../../common/constants';
 import { isDuplicatedError } from '../../common/errors/database';
 import { JobManifest, JobRequestType } from '../../common/types';
-import { ServerConfigService } from '../../config/server-config.service';
+import { ServerConfigService } from '../../config';
 import logger from '../../logger';
 import { calculateExponentialBackoffMs } from '../../utils/backoff';
 import * as manifestUtils from '../../utils/manifest';

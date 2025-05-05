@@ -14,7 +14,7 @@ import {
   DatabaseError,
   DatabaseErrorMessages,
 } from '../../common/errors/database';
-import { ServerConfigService } from '../../config/server-config.service';
+import { ServerConfigService } from '../../config';
 import { generateTestnetChainId } from '../web3/fixtures';
 import { Web3Service } from '../web3/web3.service';
 import { OutgoingWebhookEventType } from '../webhook/types';

@@ -16,7 +16,7 @@ import {
 } from '@nestjs/swagger';
 
 import { RequestWithUser } from '../../common/types';
-import { NDAConfigService } from '../../config/nda-config.service';
+import { NDAConfigService } from '../../config';
 
 import { NDASignatureDto } from './nda.dto';
 import { NDAErrorFilter } from './nda.error-filter';
