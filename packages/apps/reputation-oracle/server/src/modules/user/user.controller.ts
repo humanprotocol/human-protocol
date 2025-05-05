@@ -35,7 +35,7 @@ import {
   RegistrationInExchangeOraclesResponseDto,
   RegistrationInExchangeOracleResponseDto,
 } from './user.dto';
-import { UserErrorFilter } from './user.error.filter';
+import { UserErrorFilter } from './user.error-filter';
 import { UserService } from './user.service';
 
 /**

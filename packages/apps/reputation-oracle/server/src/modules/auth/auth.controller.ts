@@ -24,7 +24,7 @@ import { HCaptchaGuard } from '../../integrations/hcaptcha/hcaptcha.guard';
 import { AuthService } from './auth.service';
 import { TokenRepository } from './token.repository';
 import { TokenType } from './token.entity';
-import { AuthControllerErrorsFilter } from './auth.error.filter';
+import { AuthControllerErrorsFilter } from './auth.error-filter';
 import {
   ForgotPasswordDto,
   SuccessAuthDto,

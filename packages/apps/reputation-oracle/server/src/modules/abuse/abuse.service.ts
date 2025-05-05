@@ -21,7 +21,7 @@ import {
   ReportAbuseInput,
   SlackInteraction,
 } from './types';
-import { AbuseSlackBot } from './abuse.slack-bot';
+import { AbuseSlackBot } from './abuse-slack-bot';
 
 @Injectable()
 export class AbuseService {

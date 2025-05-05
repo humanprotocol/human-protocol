@@ -24,7 +24,7 @@ import {
   KycSignedAddressDto,
   UpdateKycStatusDto,
 } from './kyc.dto';
-import { KycErrorFilter } from './kyc.error.filter';
+import { KycErrorFilter } from './kyc.error-filter';
 import { KycService } from './kyc.service';
 import { KycWebhookAuthGuard } from './kyc-webhook-auth.guard';
 

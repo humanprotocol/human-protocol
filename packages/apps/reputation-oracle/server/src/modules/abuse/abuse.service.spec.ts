@@ -21,7 +21,7 @@ import { OutgoingWebhookEventType } from '../webhook/types';
 import { OutgoingWebhookService } from '../webhook/webhook-outgoing.service';
 import { AbuseRepository } from './abuse.repository';
 import { AbuseService } from './abuse.service';
-import { AbuseSlackBot } from './abuse.slack-bot';
+import { AbuseSlackBot } from './abuse-slack-bot';
 import { AbuseDecision, AbuseStatus } from './constants';
 import { generateAbuseEntity } from './fixtures';
 
