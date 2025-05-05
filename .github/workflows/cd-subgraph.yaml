@@ -27,10 +27,10 @@ jobs:
       max-parallel: 3
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4 
-        name: Set up Node.js
+      - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
+          cache: yarn
       - name: Filter Networks
         id: filter_networks
         run: |
@@ -47,30 +47,30 @@ jobs:
           done
           echo "Match found: $MATCH"
           echo "::set-output name=continue::$MATCH"
-      - run: npm install --global yarn && yarn
-        name: Install dependencies
+      - name: Install dependencies
         if: steps.filter_networks.outputs.continue == 'true'
-      - run: yarn build
-        name: Build core package
+        run: yarn
+      - name: Build core package
+        if: steps.filter_networks.outputs.continue == 'true'
+        run: yarn build
         working-directory: ./packages/core
+      - name: Install Graph CLI
         if: steps.filter_networks.outputs.continue == 'true'
-      - run: yarn global add @graphprotocol/graph-cli@0.71.2
-        name: Install Graph CLI
+        run: yarn global add @graphprotocol/graph-cli@0.71.2
+      - name: Authenticate Graph CLI
         if: steps.filter_networks.outputs.continue == 'true'
-      - run: graph auth --studio ${API_KEY}
-        name: Authenticate Graph CLI
+        run: graph auth --studio ${API_KEY}
         env:
           API_KEY: ${{ secrets.HP_GRAPH_API_KEY }}
+      - name: Generate and build Subgraph
         if: steps.filter_networks.outputs.continue == 'true'
-      - run: yarn generate && yarn build
-        name: Generate and build Subgraph
+        run: yarn generate && yarn build
         working-directory: ./packages/sdk/typescript/subgraph
         env:
           NETWORK: ${{ matrix.network.name }}
+      - name: Deploy Subgraph
         if: steps.filter_networks.outputs.continue == 'true'
-      - run: graph deploy --studio ${NETWORK} -l ${{ github.event.inputs.label }}
-        name: Deploy Subgraph
+        run: graph deploy --studio ${NETWORK} -l ${{ github.event.inputs.label }}
         working-directory: ./packages/sdk/typescript/subgraph
         env:
           NETWORK: ${{ matrix.network.name }}
-        if: steps.filter_networks.outputs.continue == 'true'

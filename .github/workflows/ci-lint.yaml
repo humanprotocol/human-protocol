@@ -3,9 +3,12 @@ name: Lint check
 on:
   push:
     branches:
-      - "main"
+      - develop
+      - main
   pull_request:
-  workflow_dispatch:
+    branches:
+      - develop
+      - main
 
 jobs:
   lint:
@@ -16,7 +19,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-      - run: npm install --global yarn && yarn
-        name: Install dependencies
-      - run: yarn lint
-        name: Run lint
+          cache: yarn
+      - name: Install dependencies
+        run: yarn
+      - name: Run lint
+        run: yarn lint
