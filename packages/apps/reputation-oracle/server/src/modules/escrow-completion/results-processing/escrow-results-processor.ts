@@ -5,9 +5,9 @@ import crypto from 'crypto';
 import { ContentType } from '../../../common/enums';
 import { JobManifest } from '../../../common/types';
 
-import { PgpEncryptionService } from '../../encryption/pgp-encryption.service';
-import { StorageService } from '../../storage/storage.service';
-import { Web3Service } from '../../web3/web3.service';
+import { PgpEncryptionService } from '../../encryption';
+import { StorageService } from '../../storage';
+import { Web3Service } from '../../web3';
 
 type EscrowFinalResultsDetails = {
   url: string;

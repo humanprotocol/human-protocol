@@ -16,14 +16,14 @@ import _ from 'lodash';
 import { BACKOFF_INTERVAL_SECONDS } from '../../common/constants';
 import { isDuplicatedError } from '../../common/errors/database';
 import { JobManifest, JobRequestType } from '../../common/types';
-import { ServerConfigService } from '../../config/server-config.service';
+import { ServerConfigService } from '../../config';
 import logger from '../../logger';
 import { calculateExponentialBackoffMs } from '../../utils/backoff';
 import * as manifestUtils from '../../utils/manifest';
 
-import { ReputationService } from '../reputation/reputation.service';
-import { StorageService } from '../storage/storage.service';
-import { Web3Service } from '../web3/web3.service';
+import { ReputationService } from '../reputation';
+import { StorageService } from '../storage';
+import { Web3Service } from '../web3';
 import { OutgoingWebhookService } from '../webhook/webhook-outgoing.service';
 import { OutgoingWebhookEventType } from '../webhook/types';
 

@@ -6,8 +6,8 @@ import type { OverrideProperties } from 'type-fest';
 import { AUDINO_RESULTS_ANNOTATIONS_FILENAME } from '../../../common/constants';
 import { AudinoAnnotationMeta, AudinoManifest } from '../../../common/types';
 
-import { StorageService } from '../../storage/storage.service';
-import { Web3Service } from '../../web3/web3.service';
+import { StorageService } from '../../storage';
+import { Web3Service } from '../../web3';
 
 import {
   CalclulatePayoutsInput,

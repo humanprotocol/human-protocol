@@ -6,8 +6,8 @@ import {
   DatabaseError,
   DatabaseErrorMessages,
 } from '../../common/errors/database';
-import { ServerConfigService } from '../../config/server-config.service';
-import { EscrowCompletionService } from '../escrow-completion/escrow-completion.service';
+import { ServerConfigService } from '../../config';
+import { EscrowCompletionService } from '../escrow-completion';
 import { generateTestnetChainId } from '../web3/fixtures';
 
 import { generateIncomingWebhook } from './fixtures';

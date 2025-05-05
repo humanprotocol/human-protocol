@@ -3,17 +3,18 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 import { SignatureType } from '../../common/enums';
-import { AuthConfigService } from '../../config/auth-config.service';
-import { NDAConfigService } from '../../config/nda-config.service';
-import { ServerConfigService } from '../../config/server-config.service';
-import { Web3ConfigService } from '../../config/web3-config.service';
+import {
+  AuthConfigService,
+  NDAConfigService,
+  ServerConfigService,
+  Web3ConfigService,
+} from '../../config';
 import logger from '../../logger';
 import * as httpUtils from '../../utils/http';
 import * as securityUtils from '../../utils/security';
 import * as web3Utils from '../../utils/web3';
 
-import { EmailAction } from '../email/constants';
-import { EmailService } from '../email/email.service';
+import { EmailAction, EmailService } from '../email';
 import {
   OperatorStatus,
   SiteKeyRepository,

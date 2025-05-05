@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import { HCaptchaConfigService } from '../../config/hcaptcha-config.service';
+import { HCaptchaConfigService } from '../../../config';
 
 export const mockHCaptchaConfigService: Omit<
   HCaptchaConfigService,

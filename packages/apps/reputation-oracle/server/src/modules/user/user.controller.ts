@@ -20,7 +20,7 @@ import {
 import { Public } from '../../common/decorators';
 import { SignatureType } from '../../common/enums';
 import { RequestWithUser } from '../../common/types';
-import { Web3ConfigService } from '../../config/web3-config.service';
+import { Web3ConfigService } from '../../config';
 import { HCaptchaGuard } from '../../integrations/hcaptcha/hcaptcha.guard';
 import * as web3Utils from '../../utils/web3';
 
@@ -35,7 +35,7 @@ import {
   RegistrationInExchangeOraclesResponseDto,
   RegistrationInExchangeOracleResponseDto,
 } from './user.dto';
-import { UserErrorFilter } from './user.error.filter';
+import { UserErrorFilter } from './user.error-filter';
 import { UserService } from './user.service';
 
 /**

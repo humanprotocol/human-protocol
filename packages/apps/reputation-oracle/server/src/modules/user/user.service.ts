@@ -2,7 +2,7 @@ import { KVStoreClient, KVStoreUtils } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 
 import { SignatureType } from '../../common/enums';
-import { Web3ConfigService } from '../../config/web3-config.service';
+import { Web3ConfigService } from '../../config';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 import * as web3Utils from '../../utils/web3';
 

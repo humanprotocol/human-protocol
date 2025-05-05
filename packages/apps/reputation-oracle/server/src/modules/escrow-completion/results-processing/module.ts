@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 
-import { EncryptionModule } from '../../encryption/encryption.module';
-import { StorageModule } from '../../storage/storage.module';
-import { Web3Module } from '../../web3/web3.module';
+import { EncryptionModule } from '../../encryption';
+import { StorageModule } from '../../storage';
+import { Web3Module } from '../../web3';
 
 import { AudinoResultsProcessor } from './audino-results-processor';
 import { CvatResultsProcessor } from './cvat-results-processor';

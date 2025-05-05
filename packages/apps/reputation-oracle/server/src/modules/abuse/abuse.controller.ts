@@ -25,7 +25,7 @@ import {
 } from './abuse.dto';
 import { AbuseService } from './abuse.service';
 import { AbuseRepository } from './abuse.repository';
-import { AbuseSlackAuthGuard } from './abuse.slack-auth.guard';
+import { AbuseSlackAuthGuard } from './abuse-slack-auth.guard';
 
 @ApiTags('Abuse')
 @Controller('/abuse')

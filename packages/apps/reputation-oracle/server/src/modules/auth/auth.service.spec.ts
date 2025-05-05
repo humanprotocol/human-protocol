@@ -10,15 +10,16 @@ import { omit } from 'lodash';
 import { generateES256Keys } from '../../../test/fixtures/crypto';
 import { generateEthWallet } from '../../../test/fixtures/web3';
 import { SignatureType } from '../../common/enums';
-import { AuthConfigService } from '../../config/auth-config.service';
-import { NDAConfigService } from '../../config/nda-config.service';
-import { ServerConfigService } from '../../config/server-config.service';
-import { Web3ConfigService } from '../../config/web3-config.service';
+import {
+  AuthConfigService,
+  NDAConfigService,
+  ServerConfigService,
+  Web3ConfigService,
+} from '../../config';
 import * as secutiryUtils from '../../utils/security';
-import { SiteKeyRepository } from '../user/site-key.repository';
+import { SiteKeyRepository } from '../user';
 import * as web3Utils from '../../utils/web3';
-import { EmailAction } from '../email/constants';
-import { EmailService } from '../email/email.service';
+import { EmailAction, EmailService } from '../email';
 import {
   UserStatus,
   UserRole,

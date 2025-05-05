@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
 
-import { ReputationModule } from '../reputation/reputation.module';
-import { StorageModule } from '../storage/storage.module';
-import { Web3Module } from '../web3/web3.module';
+import { ReputationModule } from '../reputation';
+import { StorageModule } from '../storage';
+import { Web3Module } from '../web3';
+
+// Using direct import instead of using index.ts due to the circular dependency
 import { OutgoingWebhookModule } from '../webhook/webhook-outgoing.module';
 
 import { EscrowCompletionRepository } from './escrow-completion.repository';

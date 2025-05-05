@@ -3,7 +3,7 @@ import { Test } from '@nestjs/testing';
 import { FeeData, JsonRpcProvider, Provider } from 'ethers';
 import { faker } from '@faker-js/faker';
 import { WalletWithProvider, Web3Service } from './web3.service';
-import { Web3ConfigService } from '../../config/web3-config.service';
+import { Web3ConfigService } from '../../config';
 
 import { generateTestnetChainId, mockWeb3ConfigService } from './fixtures';
 

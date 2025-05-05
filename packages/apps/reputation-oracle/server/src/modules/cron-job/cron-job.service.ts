@@ -3,10 +3,9 @@ import { Cron } from '@nestjs/schedule';
 
 import logger from '../../logger';
 
-import { AbuseService } from '../abuse/abuse.service';
-import { EscrowCompletionService } from '../escrow-completion/escrow-completion.service';
-import { IncomingWebhookService } from '../webhook/webhook-incoming.service';
-import { OutgoingWebhookService } from '../webhook/webhook-outgoing.service';
+import { AbuseService } from '../abuse';
+import { EscrowCompletionService } from '../escrow-completion';
+import { IncomingWebhookService, OutgoingWebhookService } from '../webhook';
 
 import { CronJobType } from './constants';
 import { CronJobEntity } from './cron-job.entity';

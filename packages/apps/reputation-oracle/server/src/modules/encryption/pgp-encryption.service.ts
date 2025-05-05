@@ -6,10 +6,10 @@ import {
 } from '@human-protocol/sdk';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 
-import { PGPConfigService } from '../../config/pgp-config.service';
+import { PGPConfigService } from '../../config';
 import logger from '../../logger';
 
-import { Web3Service } from '../web3/web3.service';
+import { Web3Service } from '../web3';
 
 @Injectable()
 export class PgpEncryptionService implements OnModuleInit {

@@ -25,12 +25,12 @@ import _ from 'lodash';
 import { createSignerMock, type SignerMock } from '../../../test/fixtures/web3';
 
 import { CvatJobType, FortuneJobType } from '../../common/enums';
-import { ServerConfigService } from '../../config/server-config.service';
+import { ServerConfigService } from '../../config';
 
-import { ReputationService } from '../reputation/reputation.service';
-import { StorageService } from '../storage/storage.service';
-import { OutgoingWebhookService } from '../webhook/webhook-outgoing.service';
-import { WalletWithProvider, Web3Service } from '../web3/web3.service';
+import { ReputationService } from '../reputation';
+import { StorageService } from '../storage';
+import { OutgoingWebhookService } from '../webhook';
+import { WalletWithProvider, Web3Service } from '../web3';
 import { generateTestnetChainId } from '../web3/fixtures';
 
 import { EscrowCompletionStatus } from './constants';
