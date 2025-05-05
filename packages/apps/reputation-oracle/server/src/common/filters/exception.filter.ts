@@ -6,7 +6,7 @@ import {
   HttpException,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { DatabaseError, isDuplicatedError } from '../errors/database';
+import { DatabaseError, isDuplicatedError } from '../../database';
 import logger from '../../logger';
 import { transformKeysFromCamelToSnake } from '../../utils/case-converters';
 

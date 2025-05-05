@@ -6,7 +6,7 @@ import {
 } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
-import { isDuplicatedError } from '../../common/errors/database';
+import { isDuplicatedError } from '../../database';
 import { ServerConfigService } from '../../config';
 import logger from '../../logger';
 import { Web3Service } from '../web3';

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ChainId, EscrowClient } from '@human-protocol/sdk';
 
 import { SortDirection } from '../../common/enums';
-import { isDuplicatedError } from '../../common/errors/database';
+import { isDuplicatedError } from '../../database';
 import { ReputationConfigService, Web3ConfigService } from '../../config';
 
 import { Web3Service } from '../web3';

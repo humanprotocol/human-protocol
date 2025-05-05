@@ -10,10 +10,7 @@ import {
 } from '@human-protocol/sdk';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import {
-  DatabaseError,
-  DatabaseErrorMessages,
-} from '../../common/errors/database';
+import { DatabaseError, DatabaseErrorMessages } from '../../database';
 import { ServerConfigService } from '../../config';
 import { generateTestnetChainId } from '../web3/fixtures';
 import { Web3Service } from '../web3';

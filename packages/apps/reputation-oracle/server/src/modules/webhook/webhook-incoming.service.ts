@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import { BACKOFF_INTERVAL_SECONDS } from '../../common/constants';
-import { isDuplicatedError } from '../../common/errors/database';
+import { isDuplicatedError } from '../../database';
 import { ServerConfigService } from '../../config';
 import { EscrowCompletionService } from '../escrow-completion';
 import { calculateExponentialBackoffMs } from '../../utils/backoff';
