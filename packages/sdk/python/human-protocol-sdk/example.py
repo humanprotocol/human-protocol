@@ -1,8 +1,8 @@
 import datetime
 
-from human_protocol_sdk.constants import ChainId, Status
+from human_protocol_sdk.constants import ChainId, OrderDirection, Status
 from human_protocol_sdk.escrow import EscrowUtils
-from human_protocol_sdk.filter import EscrowFilter, StatisticsFilter
+from human_protocol_sdk.filter import EscrowFilter, PayoutFilter, StatisticsFilter
 from human_protocol_sdk.statistics import (
     StatisticsClient,
     HMTHoldersParam,
@@ -84,6 +84,21 @@ def get_hmt_daily_data(statistics_client: StatisticsClient):
     )
 
 
+def get_payouts():
+    filter = PayoutFilter(
+        chain_id=ChainId.POLYGON,
+        first=5,
+        skip=1,
+        order_direction=OrderDirection.ASC,
+    )
+
+    payouts = EscrowUtils.get_payouts(filter)
+    for payout in payouts:
+        print(
+            f"Payout ID: {payout.id}, Amount: {payout.amount}, Recipient: {payout.recipient}"
+        )
+
+
 def get_escrows():
     print(
         EscrowUtils.get_escrows(
@@ -150,6 +165,7 @@ if __name__ == "__main__":
 
     get_escrows()
     get_operators()
+    get_payouts()
 
     statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
     get_hmt_holders(statistics_client)

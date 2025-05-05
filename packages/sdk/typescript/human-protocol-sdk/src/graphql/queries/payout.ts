@@ -1,5 +1,5 @@
 import gql from 'graphql-tag';
-import { IPayoutFilter } from '../../interfaces';
+import { IPayoutFilter } from 'src/interfaces';
 
 const PAYOUT_FRAGMENT = gql`
   fragment PayoutFields on Payout {
@@ -22,9 +22,6 @@ export const GET_PAYOUTS_QUERY = (filter: IPayoutFilter) => {
       ${to ? `createdAt_lt: $to` : ''}
     }
   `;
-  const LIMIT_CLAUSE = `
-    first: 1000
-  `;
 
   return gql`
     query getPayouts(
@@ -32,12 +29,16 @@ export const GET_PAYOUTS_QUERY = (filter: IPayoutFilter) => {
       $recipient: String
       $from: Int
       $to: Int
+      $first: Int
+      $skip: Int
+      $orderDirection: String
     ) {
       payouts(
         ${WHERE_CLAUSE}
         orderBy: createdAt,
-        orderDirection: desc,
-        ${LIMIT_CLAUSE}
+        orderDirection: $orderDirection,
+        first: $first,
+        skip: $skip
       ) {
         ...PayoutFields
       }
