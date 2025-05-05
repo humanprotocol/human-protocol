@@ -333,7 +333,7 @@ describe('AbuseService', () => {
         } as IOperator);
 
       mockOutgoingWebhookService.createOutgoingWebhook.mockRejectedValueOnce(
-        new DatabaseError(DatabaseErrorMessages.DUPLUCATED),
+        new DatabaseError(DatabaseErrorMessages.DUPLICATED),
       );
 
       await abuseService.processAbuseRequests();

@@ -137,7 +137,7 @@ describe('WebhookIncomingService', () => {
         incomingWebhookEntity,
       ]);
       mockEscrowCompletionService.createEscrowCompletion.mockRejectedValueOnce(
-        new DatabaseError(DatabaseErrorMessages.DUPLUCATED),
+        new DatabaseError(DatabaseErrorMessages.DUPLICATED),
       );
 
       await incomingWebhookService.processPendingIncomingWebhooks();
