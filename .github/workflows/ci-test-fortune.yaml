@@ -3,13 +3,14 @@ name: Fortune check
 on:
   push:
     branches:
-      - 'main'
+      - develop
   pull_request:
+    branches:
+      - develop
     paths:
       - 'packages/core/**'
       - 'packages/sdk/typescript/human-protocol-sdk/**'
       - 'packages/apps/fortune/**'
-  workflow_dispatch:
 
 jobs:
   fortune-exchange-oracle-test:
@@ -20,16 +21,22 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-      - run: npm install --global yarn && yarn
-        name: Install dependencies
-      - run: yarn workspace @human-protocol/fortune-exchange-oracle-server test
-        name: Run Exchange Oracle tests
+          cache: yarn
+      - name: Install dependencies
+        run: yarn
+      - name: Run Exchange Oracle tests
+        run: yarn workspace @human-protocol/fortune-exchange-oracle-server test
+
   fortune-recording-oracle-test:
     name: Fortune Recording Oracle Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: npm install --global yarn && yarn
-        name: Install dependencies
-      - run: yarn workspace @human-protocol/fortune-recording-oracle test
-        name: Run Recording Oracle tests
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+      - name: Install dependencies
+        run: yarn
+      - name: Run Recording Oracle tests
+        run: yarn workspace @human-protocol/fortune-recording-oracle test
