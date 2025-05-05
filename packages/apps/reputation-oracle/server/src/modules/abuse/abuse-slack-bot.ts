@@ -5,7 +5,7 @@ import { View } from '@slack/web-api';
 import { IncomingWebhookSendArguments } from '@slack/webhook';
 
 import { SlackConfigService } from '../../config';
-import { SlackBotApp } from '../../integrations/slack-bot-app/slack-bot-app';
+import { SlackBotApp } from '../../integrations/slack-bot-app';
 import { AbuseDecision } from './constants';
 
 @Injectable()
