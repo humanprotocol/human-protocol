@@ -8,7 +8,7 @@
 
 > `readonly` **UploadFile**: `object`
 
-Defined in: [types.ts:77](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L77)
+Defined in: [types.ts:77](https://github.com/humanprotocol/human-protocol/blob/d770e8f228f083f5eba0523ebbdff361b3188c3d/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L77)
 
 Upload file data
 

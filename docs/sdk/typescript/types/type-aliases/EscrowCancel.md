@@ -8,7 +8,7 @@
 
 > **EscrowCancel**: `object`
 
-Defined in: [types.ts:145](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L145)
+Defined in: [types.ts:145](https://github.com/humanprotocol/human-protocol/blob/d770e8f228f083f5eba0523ebbdff361b3188c3d/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L145)
 
 Represents the response data for an escrow cancellation.
 
