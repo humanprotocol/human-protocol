@@ -2,15 +2,6 @@ name: Lint check
 
 on:
   push:
-    branches:
-      - develop
-      - main
-    paths-ignore:
-      - 'packages/examples/cvat/**'
-  pull_request:
-    branches:
-      - develop
-      - main
     paths-ignore:
       - 'packages/examples/cvat/**'
 
