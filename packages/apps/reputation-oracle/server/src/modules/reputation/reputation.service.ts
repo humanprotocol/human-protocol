@@ -14,17 +14,8 @@ import {
   ReputationOrderBy,
 } from './constants';
 import { ReputationEntity } from './reputation.entity';
-import {
-  ReputationRepository,
-  type ExclusiveReputationCriteria,
-} from './reputation.repository';
-
-type ReputationData = {
-  chainId: ChainId;
-  address: string;
-  level: ReputationLevel;
-  role: ReputationEntityType;
-};
+import { ReputationRepository } from './reputation.repository';
+import type { ExclusiveReputationCriteria, ReputationData } from './types';
 
 function assertAdjustableReputationPoints(points: number) {
   if (points > 0 && Number.isInteger(points)) {

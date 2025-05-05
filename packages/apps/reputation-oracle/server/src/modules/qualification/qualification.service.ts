@@ -11,15 +11,9 @@ import {
   QualificationErrorMessage,
 } from './qualification.error';
 import { QualificationRepository } from './qualification.repository';
+import type { Qualification } from './types';
 import { UserQualificationEntity } from './user-qualification.entity';
 import { UserQualificationRepository } from './user-qualification.repository';
-
-type Qualification = {
-  reference: string;
-  title: string;
-  description: string;
-  expiresAt?: string;
-};
 
 @Injectable()
 export class QualificationService {

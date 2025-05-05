@@ -14,14 +14,7 @@ import { KycSignedAddressDto, UpdateKycStatusDto } from './kyc.dto';
 import { KycEntity } from './kyc.entity';
 import { KycErrorMessage, KycError } from './kyc.error';
 import { KycRepository } from './kyc.repository';
-
-type VeriffCreateSessionResponse = {
-  status: string;
-  verification: {
-    id: string;
-    url: string;
-  };
-};
+import type { VeriffCreateSessionResponse } from './types';
 
 @Injectable()
 export class KycService {
