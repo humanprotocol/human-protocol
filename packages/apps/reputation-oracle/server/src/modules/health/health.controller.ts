@@ -10,8 +10,8 @@ import {
 import packageJson from '../../../package.json';
 import { Public } from '../../common/decorators';
 import { ServerConfigService } from '../../config';
-import { PingResponseDto } from './dto/ping-response.dto';
 import Environment from '../../utils/environment';
+import { PingResponseDto } from './dto/ping-response.dto';
 
 @Public()
 @ApiTags('Health')

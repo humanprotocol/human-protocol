@@ -6,10 +6,10 @@ import { EscrowClient, EscrowUtils } from '@human-protocol/sdk';
 import { Test } from '@nestjs/testing';
 import * as crypto from 'crypto';
 
-import { PgpEncryptionService } from '../../encryption/pgp-encryption.service';
-import { StorageService } from '../../storage/storage.service';
+import { PgpEncryptionService } from '../../encryption';
+import { StorageService } from '../../storage';
 import { generateTestnetChainId } from '../../web3/fixtures';
-import { Web3Service } from '../../web3/web3.service';
+import { Web3Service } from '../../web3';
 
 import { BaseEscrowResultsProcessor } from './escrow-results-processor';
 

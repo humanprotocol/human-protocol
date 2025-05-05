@@ -11,7 +11,7 @@ import {
   generateTestnetChainId,
   mockWeb3ConfigService,
 } from '../web3/fixtures';
-import { Web3Service } from '../web3/web3.service';
+import { Web3Service } from '../web3';
 
 import {
   generateRandomScorePoints,

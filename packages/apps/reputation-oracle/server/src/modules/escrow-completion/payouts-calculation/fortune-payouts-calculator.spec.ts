@@ -4,7 +4,7 @@ import { Test } from '@nestjs/testing';
 import { ethers } from 'ethers';
 import _ from 'lodash';
 
-import { StorageService } from '../../storage/storage.service';
+import { StorageService } from '../../storage';
 
 import { generateFortuneManifest, generateFortuneSolution } from '../fixtures';
 import { FortunePayoutsCalculator } from './fortune-payouts-calculator';

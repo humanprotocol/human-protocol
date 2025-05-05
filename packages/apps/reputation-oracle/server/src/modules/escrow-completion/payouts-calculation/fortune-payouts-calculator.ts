@@ -4,7 +4,7 @@ import type { OverrideProperties } from 'type-fest';
 
 import { FortuneFinalResult, FortuneManifest } from '../../../common/types';
 
-import { StorageService } from '../../storage/storage.service';
+import { StorageService } from '../../storage';
 
 import {
   CalclulatePayoutsInput,

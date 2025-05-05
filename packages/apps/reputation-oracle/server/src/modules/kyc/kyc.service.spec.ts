@@ -14,7 +14,7 @@ import { KycStatus } from '../kyc/constants';
 import { UserEntity } from '../user';
 import { generateWorkerUser } from '../user/fixtures';
 import { mockWeb3ConfigService } from '../web3/fixtures';
-import { Web3Service } from '../web3/web3.service';
+import { Web3Service } from '../web3';
 
 import { UpdateKycStatusDto } from './kyc.dto';
 import { KycEntity } from './kyc.entity';

@@ -5,7 +5,7 @@ import { SortDirection } from '../../common/enums';
 import { isDuplicatedError } from '../../common/errors/database';
 import { ReputationConfigService, Web3ConfigService } from '../../config';
 
-import { Web3Service } from '../web3/web3.service';
+import { Web3Service } from '../web3';
 
 import {
   INITIAL_REPUTATION,

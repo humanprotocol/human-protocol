@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 
-import { StorageModule } from '../../storage/storage.module';
-import { Web3Module } from '../../web3/web3.module';
+import { StorageModule } from '../../storage';
+import { Web3Module } from '../../web3';
 
 import { AudinoPayoutsCalculator } from './audino-payouts-calculator';
 import { CvatPayoutsCalculator } from './cvat-payouts-calculator';

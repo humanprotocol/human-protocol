@@ -16,9 +16,9 @@ import {
 } from '../../common/errors/database';
 import { ServerConfigService } from '../../config';
 import { generateTestnetChainId } from '../web3/fixtures';
-import { Web3Service } from '../web3/web3.service';
-import { OutgoingWebhookEventType } from '../webhook/types';
-import { OutgoingWebhookService } from '../webhook/webhook-outgoing.service';
+import { Web3Service } from '../web3';
+import { OutgoingWebhookEventType, OutgoingWebhookService } from '../webhook';
+
 import { AbuseRepository } from './abuse.repository';
 import { AbuseService } from './abuse.service';
 import { AbuseSlackBot } from './abuse-slack-bot';

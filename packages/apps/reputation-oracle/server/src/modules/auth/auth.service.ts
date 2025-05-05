@@ -14,8 +14,7 @@ import * as httpUtils from '../../utils/http';
 import * as securityUtils from '../../utils/security';
 import * as web3Utils from '../../utils/web3';
 
-import { EmailAction } from '../email/constants';
-import { EmailService } from '../email/email.service';
+import { EmailAction, EmailService } from '../email';
 import {
   OperatorStatus,
   SiteKeyRepository,

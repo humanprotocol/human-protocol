@@ -1,10 +1,7 @@
 import { ChainId } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 import { Provider, Wallet, ethers } from 'ethers';
-import {
-  Web3ConfigService,
-  Web3Network,
-} from '../../config/web3-config.service';
+import { Web3ConfigService, Web3Network } from '../../config';
 
 export const supportedChainIdsByNetwork = {
   [Web3Network.MAINNET]: [ChainId.POLYGON, ChainId.BSC_MAINNET],

@@ -17,10 +17,9 @@ import {
   Web3ConfigService,
 } from '../../config';
 import * as secutiryUtils from '../../utils/security';
-import { SiteKeyRepository } from '../user/site-key.repository';
+import { SiteKeyRepository } from '../user';
 import * as web3Utils from '../../utils/web3';
-import { EmailAction } from '../email/constants';
-import { EmailService } from '../email/email.service';
+import { EmailAction, EmailService } from '../email';
 import {
   UserStatus,
   UserRole,

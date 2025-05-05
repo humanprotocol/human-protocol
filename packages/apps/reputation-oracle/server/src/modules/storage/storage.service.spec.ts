@@ -9,7 +9,7 @@ import { ContentType } from '../../common/enums';
 import { S3ConfigService } from '../../config';
 import * as httpUtils from '../../utils/http';
 
-import { PgpEncryptionService } from '../encryption/pgp-encryption.service';
+import { PgpEncryptionService } from '../encryption';
 
 import { MinioErrorCodes } from './minio.constants';
 import { StorageService } from './storage.service';
