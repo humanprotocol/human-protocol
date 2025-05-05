@@ -12,7 +12,7 @@ import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import {
   DatabaseError,
-  PostgresErrorCodes,
+  DatabaseErrorMessages,
 } from '../../common/errors/database';
 import { ServerConfigService } from '../../config/server-config.service';
 import { generateTestnetChainId } from '../web3/fixtures';
@@ -333,7 +333,7 @@ describe('AbuseService', () => {
         } as IOperator);
 
       mockOutgoingWebhookService.createOutgoingWebhook.mockRejectedValueOnce(
-        new DatabaseError(PostgresErrorCodes.Duplicated),
+        new DatabaseError(DatabaseErrorMessages.DUPLICATED),
       );
 
       await abuseService.processAbuseRequests();

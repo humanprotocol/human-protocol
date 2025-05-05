@@ -1,35 +1,26 @@
-import { QueryFailedError } from 'typeorm';
 import { BaseError } from './base';
 
 export enum PostgresErrorCodes {
   Duplicated = '23505',
-  NumericFieldOverflow = '22003',
 }
 
 export class DatabaseError extends BaseError {}
 
-export function handleQueryFailedError(error: QueryFailedError): DatabaseError {
-  let message: string;
+export enum DatabaseErrorMessages {
+  DUPLICATED = 'Entity duplication error',
+}
 
-  switch ((error.driverError as any).code) {
-    case PostgresErrorCodes.Duplicated:
-      message =
-        (error.driverError as any).detail + (error.driverError as any).code;
-      break;
-    case PostgresErrorCodes.NumericFieldOverflow:
-      message = 'Incorrect amount';
-      break;
-    default:
-      message = error.message;
-      break;
+export function handleDbError(error: any): DatabaseError {
+  if (error.code === PostgresErrorCodes.Duplicated) {
+    return new DatabaseError(DatabaseErrorMessages.DUPLICATED);
   }
 
-  return new DatabaseError(message, error);
+  return new DatabaseError(error.message, error);
 }
 
 export function isDuplicatedError(error: unknown): boolean {
   return (
     error instanceof DatabaseError &&
-    error.message.includes(PostgresErrorCodes.Duplicated)
+    error.message === DatabaseErrorMessages.DUPLICATED
   );
 }
