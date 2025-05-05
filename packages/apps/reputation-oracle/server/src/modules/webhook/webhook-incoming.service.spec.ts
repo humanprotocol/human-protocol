@@ -4,7 +4,7 @@ import { Test } from '@nestjs/testing';
 
 import {
   DatabaseError,
-  PostgresErrorCodes,
+  DatabaseErrorMessages,
 } from '../../common/errors/database';
 import { ServerConfigService } from '../../config/server-config.service';
 import { EscrowCompletionService } from '../escrow-completion/escrow-completion.service';
@@ -137,7 +137,7 @@ describe('WebhookIncomingService', () => {
         incomingWebhookEntity,
       ]);
       mockEscrowCompletionService.createEscrowCompletion.mockRejectedValueOnce(
-        new DatabaseError(PostgresErrorCodes.Duplicated),
+        new DatabaseError(DatabaseErrorMessages.DUPLUCATED),
       );
 
       await incomingWebhookService.processPendingIncomingWebhooks();

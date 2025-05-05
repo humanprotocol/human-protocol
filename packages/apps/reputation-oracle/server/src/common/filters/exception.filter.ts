@@ -6,7 +6,7 @@ import {
   HttpException,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { DatabaseError } from '../errors/database';
+import { DatabaseError, isDuplicatedError } from '../errors/database';
 import logger from '../../logger';
 import { transformKeysFromCamelToSnake } from '../../utils/case-converters';
 
@@ -25,9 +25,10 @@ export class ExceptionFilter implements IExceptionFilter {
     };
 
     if (exception instanceof DatabaseError) {
-      status = HttpStatus.UNPROCESSABLE_ENTITY;
-      responseBody.message = exception.message;
-
+      if (isDuplicatedError(exception)) {
+        status = HttpStatus.UNPROCESSABLE_ENTITY;
+        responseBody.message = 'Unprocessable entity';
+      }
       this.logger.error('Database error', exception);
     } else if (exception instanceof HttpException) {
       status = exception.getStatus();
