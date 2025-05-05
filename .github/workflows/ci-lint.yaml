@@ -5,10 +5,18 @@ on:
     branches:
       - develop
       - main
+    paths:
+      - 'packages/**'
+    paths-ignore:
+      - 'packages/examples/cvat/**'
   pull_request:
     branches:
       - develop
       - main
+    paths:
+      - 'packages/**'
+    paths-ignore:
+      - 'packages/examples/cvat/**'
 
 jobs:
   lint:
