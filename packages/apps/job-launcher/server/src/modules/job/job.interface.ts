@@ -13,6 +13,7 @@ export interface RequestAction {
     dto: JobFortuneDto | JobCvatDto | JobCaptchaDto,
     requestType: JobRequestType,
     fundAmount: number,
+    decimals: number,
   ) => Promise<any>;
 }
 
@@ -41,6 +42,7 @@ export interface OracleAddresses {
 export interface CvatCalculateJobBounty {
   requestType: JobRequestType;
   fundAmount: number;
+  decimals: number;
   urls: GenerateUrls;
   nodesTotal?: number;
 }
