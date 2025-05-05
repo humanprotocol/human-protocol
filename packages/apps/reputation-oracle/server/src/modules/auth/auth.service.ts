@@ -40,11 +40,7 @@ import {
 } from './auth.error';
 import { TokenEntity, TokenType } from './token.entity';
 import { TokenRepository } from './token.repository';
-
-type AuthTokens = {
-  accessToken: string;
-  refreshToken: string;
-};
+import type { AuthTokens } from './types';
 
 @Injectable()
 export class AuthService {

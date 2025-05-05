@@ -14,7 +14,7 @@ import stringify from 'json-stable-stringify';
 import _ from 'lodash';
 
 import { BACKOFF_INTERVAL_SECONDS } from '../../common/constants';
-import { isDuplicatedError } from '../../common/errors/database';
+import { isDuplicatedError } from '../../database';
 import { JobManifest, JobRequestType } from '../../common/types';
 import { ServerConfigService } from '../../config';
 import logger from '../../logger';

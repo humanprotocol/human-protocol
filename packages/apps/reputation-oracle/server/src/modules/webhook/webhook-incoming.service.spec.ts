@@ -2,10 +2,7 @@ import { faker } from '@faker-js/faker';
 import { createMock } from '@golevelup/ts-jest';
 import { Test } from '@nestjs/testing';
 
-import {
-  DatabaseError,
-  DatabaseErrorMessages,
-} from '../../common/errors/database';
+import { DatabaseError, DatabaseErrorMessages } from '../../database';
 import { ServerConfigService } from '../../config';
 import { EscrowCompletionService } from '../escrow-completion';
 import { generateTestnetChainId } from '../web3/fixtures';

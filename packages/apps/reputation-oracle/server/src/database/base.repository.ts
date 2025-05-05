@@ -1,5 +1,5 @@
 import { DataSource, EntityTarget, ObjectLiteral, Repository } from 'typeorm';
-import { DatabaseError, handleDbError } from '../common/errors/database';
+import { DatabaseError, handleDbError } from './errors';
 import { BaseEntity } from './base.entity';
 
 export class BaseRepository<

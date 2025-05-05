@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ChainId, EscrowClient } from '@human-protocol/sdk';
 
 import { SortDirection } from '../../common/enums';
-import { isDuplicatedError } from '../../common/errors/database';
+import { isDuplicatedError } from '../../database';
 import { ReputationConfigService, Web3ConfigService } from '../../config';
 
 import { Web3Service } from '../web3';
@@ -14,17 +14,8 @@ import {
   ReputationOrderBy,
 } from './constants';
 import { ReputationEntity } from './reputation.entity';
-import {
-  ReputationRepository,
-  type ExclusiveReputationCriteria,
-} from './reputation.repository';
-
-type ReputationData = {
-  chainId: ChainId;
-  address: string;
-  level: ReputationLevel;
-  role: ReputationEntityType;
-};
+import { ReputationRepository } from './reputation.repository';
+import type { ExclusiveReputationCriteria, ReputationData } from './types';
 
 function assertAdjustableReputationPoints(points: number) {
   if (points > 0 && Number.isInteger(points)) {
