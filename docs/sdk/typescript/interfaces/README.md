@@ -23,6 +23,7 @@
 - [IReputationNetworkSubgraph](interfaces/IReputationNetworkSubgraph.md)
 - [IReward](interfaces/IReward.md)
 - [IStatisticsFilter](interfaces/IStatisticsFilter.md)
+- [IStatusEventFilter](interfaces/IStatusEventFilter.md)
 - [ITransaction](interfaces/ITransaction.md)
 - [ITransactionsFilter](interfaces/ITransactionsFilter.md)
 - [StakerInfo](interfaces/StakerInfo.md)

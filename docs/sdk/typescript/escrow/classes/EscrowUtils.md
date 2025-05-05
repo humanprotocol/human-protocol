@@ -6,7 +6,7 @@
 
 # Class: EscrowUtils
 
-Defined in: [escrow.ts:1558](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1558)
+Defined in: [escrow.ts:1565](https://github.com/humanprotocol/human-protocol/blob/d770e8f228f083f5eba0523ebbdff361b3188c3d/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1565)
 
 ## Introduction
 
@@ -54,7 +54,7 @@ const escrowAddresses = new EscrowUtils.getEscrows({
 
 > `static` **getEscrow**(`chainId`, `escrowAddress`): `Promise`\<[`EscrowData`](../../graphql/types/type-aliases/EscrowData.md)\>
 
-Defined in: [escrow.ts:1773](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1773)
+Defined in: [escrow.ts:1780](https://github.com/humanprotocol/human-protocol/blob/d770e8f228f083f5eba0523ebbdff361b3188c3d/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1780)
 
 This function returns the escrow data for a given address.
 
@@ -133,7 +133,7 @@ const escrowData = new EscrowUtils.getEscrow(ChainId.POLYGON_AMOY, "0x1234567890
 
 > `static` **getEscrows**(`filter`): `Promise`\<[`EscrowData`](../../graphql/types/type-aliases/EscrowData.md)[]\>
 
-Defined in: [escrow.ts:1655](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1655)
+Defined in: [escrow.ts:1662](https://github.com/humanprotocol/human-protocol/blob/d770e8f228f083f5eba0523ebbdff361b3188c3d/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1662)
 
 This function returns an array of escrows based on the specified filter parameters.
 
@@ -241,11 +241,55 @@ const escrowDatas = await EscrowUtils.getEscrows(filters);
 
 ***
 
+### getPayouts()
+
+> `static` **getPayouts**(`filter`): `Promise`\<[`Payout`](../../types/type-aliases/Payout.md)[]\>
+
+Defined in: [escrow.ts:1950](https://github.com/humanprotocol/human-protocol/blob/d770e8f228f083f5eba0523ebbdff361b3188c3d/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1950)
+
+This function returns the payouts for a given set of networks.
+
+> This uses Subgraph
+
+**Input parameters**
+Fetch payouts from the subgraph.
+
+#### Parameters
+
+##### filter
+
+[`IPayoutFilter`](../../interfaces/interfaces/IPayoutFilter.md)
+
+Filter parameters.
+
+#### Returns
+
+`Promise`\<[`Payout`](../../types/type-aliases/Payout.md)[]\>
+
+List of payouts matching the filters.
+
+**Code example**
+
+```ts
+import { ChainId, EscrowUtils } from '@human-protocol/sdk';
+
+const payouts = await EscrowUtils.getPayouts({
+  chainId: ChainId.POLYGON,
+  escrowAddress: '0x1234567890123456789012345678901234567890',
+  recipient: '0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef',
+  from: new Date('2023-01-01'),
+  to: new Date('2023-12-31')
+});
+console.log(payouts);
+```
+
+***
+
 ### getStatusEvents()
 
-> `static` **getStatusEvents**(`chainId`, `statuses`?, `from`?, `to`?, `launcher`?, `first`?, `skip`?, `orderDirection`?): `Promise`\<[`StatusEvent`](../../graphql/types/type-aliases/StatusEvent.md)[]\>
+> `static` **getStatusEvents**(`filter`): `Promise`\<[`StatusEvent`](../../graphql/types/type-aliases/StatusEvent.md)[]\>
 
-Defined in: [escrow.ts:1860](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1860)
+Defined in: [escrow.ts:1859](https://github.com/humanprotocol/human-protocol/blob/d770e8f228f083f5eba0523ebbdff361b3188c3d/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1859)
 
 This function returns the status events for a given set of networks within an optional date range.
 
@@ -283,53 +327,11 @@ type Status = {
 
 #### Parameters
 
-##### chainId
+##### filter
 
-[`ChainId`](../../enums/enumerations/ChainId.md)
+[`IStatusEventFilter`](../../interfaces/interfaces/IStatusEventFilter.md)
 
-List of network IDs to query for status events.
-
-##### statuses?
-
-[`EscrowStatus`](../../types/enumerations/EscrowStatus.md)[]
-
-Optional array of statuses to query for. If not provided, queries for all statuses.
-
-##### from?
-
-`Date`
-
-Optional start date to filter events.
-
-##### to?
-
-`Date`
-
-Optional end date to filter events.
-
-##### launcher?
-
-`string`
-
-Optional launcher address to filter events. Must be a valid Ethereum address.
-
-##### first?
-
-`number`
-
-Optional number of transactions per page. Default is 10.
-
-##### skip?
-
-`number`
-
-Optional number of transactions to skip. Default is 0.
-
-##### orderDirection?
-
-[`OrderDirection`](../../enums/enumerations/OrderDirection.md)
-
-Optional order of the results. Default is DESC.
+Filter parameters.
 
 #### Returns
 
@@ -345,12 +347,12 @@ import { ChainId, EscrowUtils, EscrowStatus } from '@human-protocol/sdk';
 (async () => {
   const fromDate = new Date('2023-01-01');
   const toDate = new Date('2023-12-31');
-  const statusEvents = await EscrowUtils.getStatusEvents(
-    [ChainId.POLYGON, ChainId.MAINNET],
-    [EscrowStatus.Pending, EscrowStatus.Complete],
-    fromDate,
-    toDate
-  );
+  const statusEvents = await EscrowUtils.getStatusEvents({
+    chainId: ChainId.POLYGON,
+    statuses: [EscrowStatus.Pending, EscrowStatus.Complete],
+    from: fromDate,
+    to: toDate
+  });
   console.log(statusEvents);
 })();
 ```

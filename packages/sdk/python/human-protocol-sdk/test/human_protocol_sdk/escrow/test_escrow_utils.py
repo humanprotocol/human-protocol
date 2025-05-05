@@ -11,7 +11,12 @@ from human_protocol_sdk.escrow import (
     EscrowClientError,
     EscrowUtils,
 )
-from human_protocol_sdk.filter import EscrowFilter, StatusEventFilter, PayoutFilter
+from human_protocol_sdk.filter import (
+    EscrowFilter,
+    FilterError,
+    StatusEventFilter,
+    PayoutFilter,
+)
 
 
 class TestEscrowUtils(unittest.TestCase):
@@ -303,20 +308,16 @@ class TestEscrowUtils(unittest.TestCase):
         self.assertEqual(str(context.exception), "Unsupported Chain ID")
 
     def test_get_payouts_invalid_escrow_address(self):
-        filter = PayoutFilter(
-            chain_id=ChainId.POLYGON_AMOY, escrow_address="invalid_address"
-        )
-        with self.assertRaises(EscrowClientError) as context:
-            EscrowUtils.get_payouts(filter)
-        self.assertEqual(str(context.exception), "Invalid escrow address")
+        with self.assertRaises(FilterError) as context:
+            PayoutFilter(
+                chain_id=ChainId.POLYGON_AMOY, escrow_address="invalid_address"
+            )
+        self.assertEqual(str(context.exception), "Invalid address: invalid_address")
 
     def test_get_payouts_invalid_recipient(self):
-        filter = PayoutFilter(
-            chain_id=ChainId.POLYGON_AMOY, recipient="invalid_address"
-        )
-        with self.assertRaises(EscrowClientError) as context:
-            EscrowUtils.get_payouts(filter)
-        self.assertEqual(str(context.exception), "Invalid recipient address")
+        with self.assertRaises(FilterError) as context:
+            PayoutFilter(chain_id=ChainId.POLYGON_AMOY, recipient="invalid_address")
+        self.assertEqual(str(context.exception), "Invalid address: invalid_address")
 
     def test_get_payouts(self):
         with patch(
