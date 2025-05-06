@@ -1,4 +1,4 @@
-import { JobRequestType } from '../../common/enums/job';
+import { CvatJobType, JobRequestType } from '../../common/enums/job';
 import {
   CvatDataDto,
   JobCaptchaDto,
@@ -39,7 +39,7 @@ export interface OracleAddresses {
 }
 
 export interface CvatCalculateJobBounty {
-  requestType: JobRequestType;
+  requestType: CvatJobType;
   fundAmount: number;
   urls: GenerateUrls;
   nodesTotal?: number;

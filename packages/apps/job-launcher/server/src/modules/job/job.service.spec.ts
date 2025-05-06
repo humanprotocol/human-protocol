@@ -4,9 +4,9 @@ import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { PaymentCurrency } from '../../common/enums/payment';
 import {
-  JobRequestType,
   JobStatus,
   EscrowFundToken,
+  FortuneJobType,
 } from '../../common/enums/job';
 import { MOCK_FILE_HASH, MOCK_FILE_URL } from '../../../test/constants';
 import { PaymentService } from '../payment/payment.service';
@@ -132,7 +132,7 @@ describe('JobService', () => {
 
           await jobService.createJob(
             userMock,
-            JobRequestType.FORTUNE,
+            FortuneJobType.FORTUNE,
             fortuneJobDto,
           );
 
@@ -150,10 +150,10 @@ describe('JobService', () => {
             userId: userMock.id,
             manifestUrl: MOCK_FILE_URL,
             manifestHash: MOCK_FILE_HASH,
-            requestType: JobRequestType.FORTUNE,
+            requestType: FortuneJobType.FORTUNE,
             fee: expect.any(Number),
             fundAmount: fortuneJobDto.paymentAmount,
-            status: JobStatus.PAID,
+            status: JobStatus.MODERATION_PASSED,
             waitUntil: expect.any(Date),
             token: fortuneJobDto.escrowFundToken,
             exchangeOracle: fortuneJobDto.exchangeOracle,
@@ -199,7 +199,7 @@ describe('JobService', () => {
 
           await jobService.createJob(
             userMock,
-            JobRequestType.FORTUNE,
+            FortuneJobType.FORTUNE,
             fortuneJobDto,
           );
 
@@ -214,7 +214,7 @@ describe('JobService', () => {
             userId: userMock.id,
             manifestUrl: MOCK_FILE_URL,
             manifestHash: MOCK_FILE_HASH,
-            requestType: JobRequestType.FORTUNE,
+            requestType: FortuneJobType.FORTUNE,
             fee: expect.any(Number),
             fundAmount: Number(
               mul(
@@ -222,7 +222,7 @@ describe('JobService', () => {
                 usdToTokenRate,
               ).toFixed(6),
             ),
-            status: JobStatus.PAID,
+            status: JobStatus.MODERATION_PASSED,
             waitUntil: expect.any(Date),
             token: fortuneJobDto.escrowFundToken,
             exchangeOracle: fortuneJobDto.exchangeOracle,

@@ -31,6 +31,9 @@ import {
   WorkerBrowser,
   WorkerLanguage,
   Country,
+  AudinoJobType,
+  CvatJobType,
+  JobType,
 } from '../../common/enums/job';
 import { Transform } from 'class-transformer';
 import { AWSRegions, StorageProviders } from '../../common/enums/storage';
@@ -93,9 +96,9 @@ export class JobQuickLaunchDto extends JobDto {
   @ApiProperty({
     description: 'Request type',
     name: 'request_type',
-    enum: JobRequestType,
+    enum: JobType,
   })
-  @IsEnumCaseInsensitive(JobRequestType)
+  @IsEnumCaseInsensitive(JobType)
   public requestType: JobRequestType;
 
   @ApiProperty({ name: 'manifest_url' })
@@ -187,9 +190,9 @@ export class JobCvatDto extends JobDto {
   @IsUrl()
   public userGuide: string;
 
-  @ApiProperty({ enum: JobRequestType })
-  @IsEnumCaseInsensitive(JobRequestType)
-  public type: JobRequestType;
+  @ApiProperty({ enum: CvatJobType })
+  @IsEnumCaseInsensitive(CvatJobType)
+  public type: CvatJobType;
 }
 
 class AudinoLabel {
@@ -232,9 +235,9 @@ export class JobAudinoDto extends JobDto {
   @IsUrl()
   public userGuide: string;
 
-  @ApiProperty({ enum: JobRequestType })
-  @IsEnumCaseInsensitive(JobRequestType)
-  public type: JobRequestType;
+  @ApiProperty({ enum: AudinoJobType })
+  @IsEnumCaseInsensitive(AudinoJobType)
+  public type: AudinoJobType;
 
   @ApiProperty({ name: 'audio_duration' })
   @IsNumber()
@@ -514,4 +517,5 @@ export type CreateJob =
   | JobQuickLaunchDto
   | JobFortuneDto
   | JobCvatDto
+  | JobAudinoDto
   | JobCaptchaDto;

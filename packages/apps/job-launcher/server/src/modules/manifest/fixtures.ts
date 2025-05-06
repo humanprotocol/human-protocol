@@ -4,9 +4,10 @@ import { AWSRegions, StorageProviders } from '../../common/enums/storage';
 import { ChainId } from '@human-protocol/sdk';
 import { PaymentCurrency } from '../../common/enums/payment';
 import {
+  AudinoJobType,
+  CvatJobType,
   EscrowFundToken,
   JobCaptchaShapeType,
-  JobRequestType,
 } from '../../common/enums/job';
 import { CvatConfigService } from '../../common/config/cvat-config.service';
 import { AuthConfigService } from '../../common/config/auth-config.service';
@@ -68,7 +69,7 @@ export function createJobCvatDto(
       bucketName: faker.lorem.word(),
       path: faker.system.filePath(),
     },
-    type: JobRequestType.IMAGE_BOXES,
+    type: CvatJobType.IMAGE_BOXES,
     chainId: faker.helpers.arrayElement(Object.values(ChainId)) as ChainId,
     paymentCurrency: faker.helpers.arrayElement(Object.values(PaymentCurrency)),
     paymentAmount: faker.number.int({ min: 1, max: 1000 }),
@@ -102,7 +103,7 @@ export function createJobAudinoDto(
     userGuide: faker.internet.url(),
     qualifications: [faker.lorem.word()],
     minQuality: faker.number.int({ min: 1, max: 100 }),
-    type: JobRequestType.AUDIO_TRANSCRIPTION,
+    type: AudinoJobType.AUDIO_TRANSCRIPTION,
     paymentCurrency: faker.helpers.arrayElement(Object.values(PaymentCurrency)),
     paymentAmount: faker.number.int({ min: 1, max: 1000 }),
     escrowFundToken: faker.helpers.arrayElement(Object.values(EscrowFundToken)),

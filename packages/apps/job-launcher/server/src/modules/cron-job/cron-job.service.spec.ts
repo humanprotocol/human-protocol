@@ -37,7 +37,7 @@ import {
   ErrorContentModeration,
   ErrorCronJob,
 } from '../../common/constants/errors';
-import { JobRequestType, JobStatus } from '../../common/enums/job';
+import { CvatJobType, FortuneJobType, JobStatus } from '../../common/enums/job';
 import { WebhookStatus } from '../../common/enums/webhook';
 import { ControlledError } from '../../common/errors/controlled';
 import { ContentModerationRequestRepository } from '../content-moderation/content-moderation-request.repository';
@@ -612,7 +612,7 @@ describe('CronJobService', () => {
           data_url: MOCK_FILE_URL,
         },
         annotation: {
-          type: JobRequestType.IMAGE_POINTS,
+          type: CvatJobType.IMAGE_POINTS,
         },
       };
       jest
@@ -744,7 +744,7 @@ describe('CronJobService', () => {
         .mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
 
       const manifestMock = {
-        requestType: JobRequestType.FORTUNE,
+        requestType: FortuneJobType.FORTUNE,
       };
       storageService.downloadJsonLikeData = jest
         .fn()

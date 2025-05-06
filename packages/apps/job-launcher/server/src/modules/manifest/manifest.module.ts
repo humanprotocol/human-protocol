@@ -6,10 +6,6 @@ import { EncryptionModule } from '../encryption/encryption.module';
 import { RoutingProtocolModule } from '../routing-protocol/routing-protocol.module';
 import { RateModule } from '../rate/rate.module';
 import { QualificationModule } from '../qualification/qualification.module';
-import { AuthConfigService } from '../../common/config/auth-config.service';
-import { CvatConfigService } from '../../common/config/cvat-config.service';
-import { Web3ConfigService } from '../../common/config/web3-config.service';
-import { PGPConfigService } from '../../common/config/pgp-config.service';
 
 @Module({
   imports: [
@@ -20,13 +16,7 @@ import { PGPConfigService } from '../../common/config/pgp-config.service';
     RateModule,
     QualificationModule,
   ],
-  providers: [
-    ManifestService,
-    AuthConfigService,
-    CvatConfigService,
-    Web3ConfigService,
-    PGPConfigService,
-  ],
+  providers: [ManifestService],
   exports: [ManifestService],
 })
 export class ManifestModule {}

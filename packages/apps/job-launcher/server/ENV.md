@@ -180,24 +180,9 @@ REPUTATION_ORACLE_ADDRESS=
 ### List of reputation oracle addresses, typically comma-separated. Required
 REPUTATION_ORACLES=
 
-### Address of the Fortune exchange oracle contract. Required
-FORTUNE_EXCHANGE_ORACLE_ADDRESS=
-
-### Address of the Fortune recording oracle contract. Required
-FORTUNE_RECORDING_ORACLE_ADDRESS=
-
-### Address of the CVAT exchange oracle contract. Required
-CVAT_EXCHANGE_ORACLE_ADDRESS=
-
-### Address of the CVAT recording oracle contract. Required
-CVAT_RECORDING_ORACLE_ADDRESS=
-
 ### URI for the hCaptcha recording oracle service. Required
 HCAPTCHA_RECORDING_ORACLE_URI=
 
 ### URI for the hCaptcha reputation oracle service. Required
 HCAPTCHA_REPUTATION_ORACLE_URI=
-
-### Address of the hCaptcha oracle contract. Required
-HCAPTCHA_ORACLE_ADDRESS=
 

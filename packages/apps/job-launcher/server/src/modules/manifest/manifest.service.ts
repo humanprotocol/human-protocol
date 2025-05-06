@@ -7,7 +7,6 @@ import {
 } from '@human-protocol/sdk';
 import {
   HttpStatus,
-  Inject,
   Injectable,
   Logger,
   ValidationError,
@@ -36,6 +35,10 @@ import {
 } from '../../common/constants';
 import { ErrorJob } from '../../common/constants/errors';
 import {
+  AudinoJobType,
+  CvatJobType,
+  FortuneJobType,
+  HCaptchaJobType,
   JobCaptchaMode,
   JobCaptchaRequestType,
   JobCaptchaShapeType,
@@ -48,19 +51,16 @@ import {
 } from '../../common/utils/storage';
 import {
   CreateJob,
-  CvatDataDto,
   JobAudinoDto,
   JobCaptchaAdvancedDto,
   JobCaptchaDto,
   JobCvatDto,
-  StorageDataDto,
 } from '../job/job.dto';
 import {
   CvatAnnotationData,
   CvatCalculateJobBounty,
   CvatImageData,
   GenerateUrls,
-  ManifestAction,
 } from '../job/job.interface';
 import { StorageService } from '../storage/storage.service';
 import { Web3Service } from '../web3/web3.service';
@@ -70,6 +70,7 @@ import {
   HCaptchaManifestDto,
   FortuneManifestDto,
   RestrictedAudience,
+  ManifestDto,
 } from './manifest.dto';
 
 @Injectable()
@@ -79,14 +80,13 @@ export class ManifestService {
   public readonly bucket: string;
 
   constructor(
-    @Inject(Web3Service)
     private readonly web3Service: Web3Service,
     private readonly authConfigService: AuthConfigService,
     private readonly web3ConfigService: Web3ConfigService,
     private readonly cvatConfigService: CvatConfigService,
     private readonly pgpConfigService: PGPConfigService,
     private readonly storageService: StorageService,
-    @Inject(Encryption) private readonly encryption: Encryption,
+    private readonly encryption: Encryption,
   ) {}
 
   async createManifest(
@@ -95,28 +95,28 @@ export class ManifestService {
     fundAmount?: number,
   ): Promise<any> {
     switch (requestType) {
-      case JobRequestType.HCAPTCHA:
+      case HCaptchaJobType.HCAPTCHA:
         return this.createHCaptchaManifest(dto as JobCaptchaDto);
 
-      case JobRequestType.FORTUNE:
+      case FortuneJobType.FORTUNE:
         return {
           ...dto,
           requestType,
           fundAmount,
         };
 
-      case JobRequestType.IMAGE_POLYGONS:
-      case JobRequestType.IMAGE_BOXES:
-      case JobRequestType.IMAGE_POINTS:
-      case JobRequestType.IMAGE_BOXES_FROM_POINTS:
-      case JobRequestType.IMAGE_SKELETONS_FROM_BOXES:
+      case CvatJobType.IMAGE_POLYGONS:
+      case CvatJobType.IMAGE_BOXES:
+      case CvatJobType.IMAGE_POINTS:
+      case CvatJobType.IMAGE_BOXES_FROM_POINTS:
+      case CvatJobType.IMAGE_SKELETONS_FROM_BOXES:
         return this.createCvatManifest(
           dto as JobCvatDto,
           requestType,
           fundAmount!,
         );
 
-      case JobRequestType.AUDIO_TRANSCRIPTION:
+      case AudinoJobType.AUDIO_TRANSCRIPTION:
         return this.createAudinoManifest(
           dto as JobAudinoDto,
           requestType,
@@ -131,14 +131,180 @@ export class ManifestService {
     }
   }
 
+  private async getCvatElementsCount(
+    urls: GenerateUrls,
+    requestType: CvatJobType,
+  ): Promise<number> {
+    let gt: any, gtEntries: number;
+    switch (requestType) {
+      case CvatJobType.IMAGE_POLYGONS:
+      case CvatJobType.IMAGE_BOXES:
+      case CvatJobType.IMAGE_POINTS:
+        const data = await listObjectsInBucket(urls.dataUrl);
+        if (!data || data.length === 0 || !data[0])
+          throw new ControlledError(
+            ErrorJob.DatasetValidationFailed,
+            HttpStatus.BAD_REQUEST,
+          );
+        gt = (await this.storageService.downloadJsonLikeData(
+          `${urls.gtUrl.protocol}//${urls.gtUrl.host}${urls.gtUrl.pathname}`,
+        )) as any;
+        if (!gt || !gt.images || gt.images.length === 0)
+          throw new ControlledError(
+            ErrorJob.GroundThuthValidationFailed,
+            HttpStatus.BAD_REQUEST,
+          );
+
+        await this.checkImageConsistency(gt.images, data);
+
+        return data.length - gt.images.length;
+
+      case CvatJobType.IMAGE_BOXES_FROM_POINTS:
+        const points = (await this.storageService.downloadJsonLikeData(
+          urls.pointsUrl!.href,
+        )) as any;
+        gt = (await this.storageService.downloadJsonLikeData(
+          urls.gtUrl.href,
+        )) as any;
+
+        if (!gt || !gt.images || gt.images.length === 0) {
+          throw new ControlledError(
+            ErrorJob.GroundThuthValidationFailed,
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+
+        gtEntries = 0;
+        gt.images.forEach((gtImage: CvatImageData) => {
+          const { id } = points.images.find(
+            (dataImage: CvatImageData) =>
+              dataImage.file_name === gtImage.file_name,
+          );
+
+          if (id) {
+            const matchingAnnotations = points.annotations.filter(
+              (dataAnnotation: CvatAnnotationData) =>
+                dataAnnotation.image_id === id,
+            );
+            gtEntries += matchingAnnotations.length;
+          }
+        });
+
+        return points.annotations.length - gtEntries;
+
+      case CvatJobType.IMAGE_SKELETONS_FROM_BOXES:
+        const boxes = (await this.storageService.downloadJsonLikeData(
+          urls.boxesUrl!.href,
+        )) as any;
+        gt = (await this.storageService.downloadJsonLikeData(
+          urls.gtUrl.href,
+        )) as any;
+
+        if (!gt || !gt.images || gt.images.length === 0) {
+          throw new ControlledError(
+            ErrorJob.GroundThuthValidationFailed,
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+
+        gtEntries = 0;
+        gt.images.forEach((gtImage: CvatImageData) => {
+          const { id } = boxes.images.find(
+            (dataImage: CvatImageData) =>
+              dataImage.file_name === gtImage.file_name,
+          );
+
+          if (id) {
+            const matchingAnnotations = boxes.annotations.filter(
+              (dataAnnotation: CvatAnnotationData) =>
+                dataAnnotation.image_id === id,
+            );
+            gtEntries += matchingAnnotations.length;
+          }
+        });
+
+        return boxes.annotations.length - gtEntries;
+
+      default:
+        throw new ControlledError(
+          ErrorJob.InvalidRequestType,
+          HttpStatus.BAD_REQUEST,
+        );
+    }
+  }
+
+  private async checkImageConsistency(
+    gtImages: any[],
+    dataFiles: string[],
+  ): Promise<void> {
+    const gtFileNames = gtImages.map((image: any) => image.file_name);
+    const baseFileNames = dataFiles.map((fileName) =>
+      fileName.split('/').pop(),
+    );
+    const missingFileNames = gtFileNames.filter(
+      (fileName: any) => !baseFileNames.includes(fileName),
+    );
+
+    if (missingFileNames.length !== 0) {
+      throw new ControlledError(
+        ErrorJob.ImageConsistency,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  private async calculateJobBounty(
+    params: CvatCalculateJobBounty,
+  ): Promise<string> {
+    const { requestType, fundAmount, urls, nodesTotal } = params;
+
+    const elementsCount = await this.getCvatElementsCount(urls, requestType);
+
+    let jobSize = Number(this.cvatConfigService.jobSize);
+
+    if (requestType === CvatJobType.IMAGE_SKELETONS_FROM_BOXES) {
+      const jobSizeMultiplier = Number(
+        this.cvatConfigService.skeletonsJobSizeMultiplier,
+      );
+      jobSize *= jobSizeMultiplier;
+    }
+
+    let totalJobs: number;
+
+    // For each skeleton node CVAT creates a separate project thus increasing amount of jobs
+    if (requestType === CvatJobType.IMAGE_SKELETONS_FROM_BOXES && nodesTotal) {
+      totalJobs = Math.ceil(elementsCount / jobSize) * nodesTotal;
+    } else {
+      totalJobs = Math.ceil(elementsCount / jobSize);
+    }
+    const jobBounty =
+      ethers.parseUnits(fundAmount.toString(), 'ether') / BigInt(totalJobs);
+    return ethers.formatEther(jobBounty);
+  }
+
   private async createCvatManifest(
     dto: JobCvatDto,
-    requestType: JobRequestType,
+    requestType: CvatJobType,
     tokenFundAmount: number,
   ): Promise<CvatManifestDto> {
-    const { generateUrls } = this.createManifestActions[requestType];
+    if (
+      (requestType === CvatJobType.IMAGE_SKELETONS_FROM_BOXES &&
+        !dto.data.boxes) ||
+      (requestType === CvatJobType.IMAGE_BOXES_FROM_POINTS && !dto.data.points)
+    ) {
+      throw new ControlledError(ErrorJob.DataNotExist, HttpStatus.CONFLICT);
+    }
 
-    const urls = generateUrls(dto.data, dto.groundTruth);
+    const urls = {
+      dataUrl: generateBucketUrl(dto.data.dataset, requestType),
+      gtUrl: generateBucketUrl(dto.groundTruth, requestType),
+      boxesUrl: dto.data.boxes
+        ? generateBucketUrl(dto.data.boxes, requestType)
+        : undefined,
+      pointsUrl: dto.data.points
+        ? generateBucketUrl(dto.data.points, requestType)
+        : undefined,
+    };
 
     const jobBounty = await this.calculateJobBounty({
       requestType,
@@ -161,7 +327,7 @@ export class ManifestService {
         labels: dto.labels,
         description: dto.requesterDescription,
         user_guide: dto.userGuide,
-        type: requestType,
+        type: requestType as CvatJobType,
         job_size: this.cvatConfigService.jobSize,
         ...(dto.qualifications && {
           qualifications: dto.qualifications,
@@ -178,11 +344,9 @@ export class ManifestService {
 
   private async createAudinoManifest(
     dto: JobAudinoDto,
-    requestType: JobRequestType,
+    requestType: AudinoJobType,
     tokenFundAmount: number,
   ): Promise<any> {
-    const { generateUrls } = this.createManifestActions[requestType];
-    const urls = generateUrls(dto.data, dto.groundTruth);
     const totalSegments = Math.ceil(
       (dto.audioDuration * 1000) / dto.segmentDuration,
     );
@@ -201,11 +365,11 @@ export class ManifestService {
         segment_duration: dto.segmentDuration,
       },
       data: {
-        data_url: urls.dataUrl.href,
+        data_url: generateBucketUrl(dto.data.dataset, requestType).href,
       },
       job_bounty: ethers.formatEther(jobBounty),
       validation: {
-        gt_url: urls.gtUrl.href,
+        gt_url: generateBucketUrl(dto.groundTruth, requestType).href,
         min_quality: dto.minQuality,
       },
     };
@@ -215,7 +379,7 @@ export class ManifestService {
     jobDto: JobCaptchaDto,
   ): Promise<HCaptchaManifestDto> {
     const jobType = jobDto.annotations.typeOfJob;
-    const dataUrl = generateBucketUrl(jobDto.data, JobRequestType.HCAPTCHA);
+    const dataUrl = generateBucketUrl(jobDto.data, HCaptchaJobType.HCAPTCHA);
     const objectsInBucket = await listObjectsInBucket(dataUrl);
 
     const commonManifestProperties = {
@@ -452,261 +616,6 @@ export class ManifestService {
     return url;
   }
 
-  private createManifestActions: Record<JobRequestType, ManifestAction> = {
-    [JobRequestType.HCAPTCHA]: {
-      getElementsCount: async () => 0,
-      generateUrls: () => ({ dataUrl: new URL(''), gtUrl: new URL('') }),
-    },
-    [JobRequestType.FORTUNE]: {
-      getElementsCount: async () => 0,
-      generateUrls: () => ({ dataUrl: new URL(''), gtUrl: new URL('') }),
-    },
-    [JobRequestType.IMAGE_POLYGONS]: {
-      getElementsCount: async (urls: GenerateUrls) => {
-        const gt = (await this.storageService.downloadJsonLikeData(
-          `${urls.gtUrl.protocol}//${urls.gtUrl.host}${urls.gtUrl.pathname}`,
-        )) as any;
-        if (!gt || !gt.images || gt.images.length === 0)
-          throw new ControlledError(
-            ErrorJob.GroundThuthValidationFailed,
-            HttpStatus.BAD_REQUEST,
-          );
-
-        const data = await listObjectsInBucket(urls.dataUrl);
-        if (!data || data.length === 0 || !data[0])
-          throw new ControlledError(
-            ErrorJob.DatasetValidationFailed,
-            HttpStatus.BAD_REQUEST,
-          );
-
-        await this.checkImageConsistency(gt.images, data);
-
-        return data.length - gt.images.length;
-      },
-      generateUrls: (
-        data: CvatDataDto,
-        groundTruth: StorageDataDto,
-      ): GenerateUrls => {
-        const requestType = JobRequestType.IMAGE_POLYGONS;
-        return {
-          dataUrl: generateBucketUrl(data.dataset, requestType),
-          gtUrl: generateBucketUrl(groundTruth, requestType),
-        };
-      },
-    },
-    [JobRequestType.IMAGE_BOXES]: {
-      getElementsCount: async (urls: GenerateUrls) => {
-        const gt = (await this.storageService.downloadJsonLikeData(
-          `${urls.gtUrl.protocol}//${urls.gtUrl.host}${urls.gtUrl.pathname}`,
-        )) as any;
-        if (!gt || !gt.images || gt.images.length === 0)
-          throw new ControlledError(
-            ErrorJob.GroundThuthValidationFailed,
-            HttpStatus.BAD_REQUEST,
-          );
-
-        const data = await listObjectsInBucket(urls.dataUrl);
-        if (!data || data.length === 0 || !data[0])
-          throw new ControlledError(
-            ErrorJob.DatasetValidationFailed,
-            HttpStatus.BAD_REQUEST,
-          );
-
-        await this.checkImageConsistency(gt.images, data);
-
-        return data.length - gt.images.length;
-      },
-      generateUrls: (
-        data: CvatDataDto,
-        groundTruth: StorageDataDto,
-      ): GenerateUrls => {
-        const requestType = JobRequestType.IMAGE_BOXES;
-        return {
-          dataUrl: generateBucketUrl(data.dataset, requestType),
-          gtUrl: generateBucketUrl(groundTruth, requestType),
-        };
-      },
-    },
-    [JobRequestType.IMAGE_POINTS]: {
-      getElementsCount: async (urls: GenerateUrls) => {
-        const gt = (await this.storageService.downloadJsonLikeData(
-          `${urls.gtUrl.protocol}//${urls.gtUrl.host}${urls.gtUrl.pathname}`,
-        )) as any;
-        if (!gt || !gt.images || gt.images.length === 0)
-          throw new ControlledError(
-            ErrorJob.GroundThuthValidationFailed,
-            HttpStatus.BAD_REQUEST,
-          );
-
-        const data = await listObjectsInBucket(urls.dataUrl);
-        if (!data || data.length === 0 || !data[0])
-          throw new ControlledError(
-            ErrorJob.DatasetValidationFailed,
-            HttpStatus.BAD_REQUEST,
-          );
-
-        await this.checkImageConsistency(gt.images, data);
-
-        return data.length - gt.images.length;
-      },
-      generateUrls: (
-        data: CvatDataDto,
-        groundTruth: StorageDataDto,
-      ): GenerateUrls => {
-        const requestType = JobRequestType.IMAGE_POINTS;
-
-        return {
-          dataUrl: generateBucketUrl(data.dataset, requestType),
-          gtUrl: generateBucketUrl(groundTruth, requestType),
-        };
-      },
-    },
-    [JobRequestType.IMAGE_BOXES_FROM_POINTS]: {
-      getElementsCount: async (urls: GenerateUrls) =>
-        this.getCvatElementsCount(urls.gtUrl, urls.pointsUrl!),
-      generateUrls: (
-        data: CvatDataDto,
-        groundTruth: StorageDataDto,
-      ): GenerateUrls => {
-        if (!data.points) {
-          throw new ControlledError(ErrorJob.DataNotExist, HttpStatus.CONFLICT);
-        }
-
-        const requestType = JobRequestType.IMAGE_BOXES_FROM_POINTS;
-
-        return {
-          dataUrl: generateBucketUrl(data.dataset, requestType),
-          gtUrl: generateBucketUrl(groundTruth, requestType),
-          pointsUrl: generateBucketUrl(data.points, requestType),
-        };
-      },
-    },
-    [JobRequestType.IMAGE_SKELETONS_FROM_BOXES]: {
-      getElementsCount: async (urls: GenerateUrls) =>
-        this.getCvatElementsCount(urls.gtUrl, urls.boxesUrl!),
-      generateUrls: (
-        data: CvatDataDto,
-        groundTruth: StorageDataDto,
-      ): GenerateUrls => {
-        if (!data.boxes) {
-          throw new ControlledError(ErrorJob.DataNotExist, HttpStatus.CONFLICT);
-        }
-
-        const requestType = JobRequestType.IMAGE_SKELETONS_FROM_BOXES;
-
-        return {
-          dataUrl: generateBucketUrl(data.dataset, requestType),
-          gtUrl: generateBucketUrl(groundTruth, requestType),
-          boxesUrl: generateBucketUrl(data.boxes, requestType),
-        };
-      },
-    },
-    [JobRequestType.AUDIO_TRANSCRIPTION]: {
-      getElementsCount: async () => 0,
-      generateUrls: (
-        data: CvatDataDto,
-        groundTruth: StorageDataDto,
-      ): GenerateUrls => {
-        const requestType = JobRequestType.AUDIO_TRANSCRIPTION;
-
-        return {
-          dataUrl: generateBucketUrl(data.dataset, requestType),
-          gtUrl: generateBucketUrl(groundTruth, requestType),
-        };
-      },
-    },
-  };
-
-  private async checkImageConsistency(
-    gtImages: any[],
-    dataFiles: string[],
-  ): Promise<void> {
-    const gtFileNames = gtImages.map((image: any) => image.file_name);
-    const baseFileNames = dataFiles.map((fileName) =>
-      fileName.split('/').pop(),
-    );
-    const missingFileNames = gtFileNames.filter(
-      (fileName: any) => !baseFileNames.includes(fileName),
-    );
-
-    if (missingFileNames.length !== 0) {
-      throw new ControlledError(
-        ErrorJob.ImageConsistency,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-  }
-
-  private async getCvatElementsCount(
-    gtUrl: URL,
-    dataUrl: URL,
-  ): Promise<number> {
-    const data = (await this.storageService.downloadJsonLikeData(
-      dataUrl.href,
-    )) as any;
-    const gt = (await this.storageService.downloadJsonLikeData(
-      gtUrl.href,
-    )) as any;
-
-    if (!gt || !gt.images || gt.images.length === 0) {
-      throw new ControlledError(
-        ErrorJob.GroundThuthValidationFailed,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    let gtEntries = 0;
-
-    gt.images.forEach((gtImage: CvatImageData) => {
-      const { id } = data.images.find(
-        (dataImage: CvatImageData) => dataImage.file_name === gtImage.file_name,
-      );
-
-      if (id) {
-        const matchingAnnotations = data.annotations.filter(
-          (dataAnnotation: CvatAnnotationData) =>
-            dataAnnotation.image_id === id,
-        );
-        gtEntries += matchingAnnotations.length;
-      }
-    });
-
-    return data.annotations.length - gtEntries;
-  }
-
-  private async calculateJobBounty(
-    params: CvatCalculateJobBounty,
-  ): Promise<string> {
-    const { requestType, fundAmount, urls, nodesTotal } = params;
-
-    const { getElementsCount } = this.createManifestActions[requestType];
-    const elementsCount = await getElementsCount(urls);
-
-    let jobSize = Number(this.cvatConfigService.jobSize);
-
-    if (requestType === JobRequestType.IMAGE_SKELETONS_FROM_BOXES) {
-      const jobSizeMultiplier = Number(
-        this.cvatConfigService.skeletonsJobSizeMultiplier,
-      );
-      jobSize *= jobSizeMultiplier;
-    }
-
-    let totalJobs: number;
-
-    // For each skeleton node CVAT creates a separate project thus increasing amount of jobs
-    if (
-      requestType === JobRequestType.IMAGE_SKELETONS_FROM_BOXES &&
-      nodesTotal
-    ) {
-      totalJobs = Math.ceil(elementsCount / jobSize) * nodesTotal;
-    } else {
-      totalJobs = Math.ceil(elementsCount / jobSize);
-    }
-    const jobBounty =
-      ethers.parseUnits(fundAmount.toString(), 'ether') / BigInt(totalJobs);
-    return ethers.formatEther(jobBounty);
-  }
-
   async uploadManifest(
     chainId: ChainId,
     data: any,
@@ -736,16 +645,20 @@ export class ManifestService {
 
   private async validateManifest(
     requestType: JobRequestType,
-    manifest: FortuneManifestDto | CvatManifestDto | HCaptchaManifestDto,
+    manifest:
+      | FortuneManifestDto
+      | CvatManifestDto
+      | HCaptchaManifestDto
+      | AudinoManifestDto,
   ): Promise<void> {
     let dtoCheck;
 
-    if (requestType === JobRequestType.FORTUNE) {
+    if (requestType === FortuneJobType.FORTUNE) {
       dtoCheck = new FortuneManifestDto();
-    } else if (requestType === JobRequestType.HCAPTCHA) {
+    } else if (requestType === HCaptchaJobType.HCAPTCHA) {
       return;
       dtoCheck = new HCaptchaManifestDto();
-    } else if (requestType === JobRequestType.AUDIO_TRANSCRIPTION) {
+    } else if (requestType === AudinoJobType.AUDIO_TRANSCRIPTION) {
       dtoCheck = new AudinoManifestDto();
     } else {
       dtoCheck = new CvatManifestDto();
@@ -773,7 +686,7 @@ export class ManifestService {
   > {
     const manifest = (await this.storageService.downloadJsonLikeData(
       manifestUrl,
-    )) as any;
+    )) as ManifestDto;
 
     await this.validateManifest(requestType, manifest);
 

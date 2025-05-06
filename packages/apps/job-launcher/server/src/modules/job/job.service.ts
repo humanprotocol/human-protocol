@@ -34,7 +34,11 @@ import {
 import { TOKEN_ADDRESSES } from '../../common/constants/tokens';
 import { CronJobType } from '../../common/enums/cron-job';
 import {
+  AudinoJobType,
+  CvatJobType,
   EscrowFundToken,
+  FortuneJobType,
+  HCaptchaJobType,
   JobRequestType,
   JobStatus,
 } from '../../common/enums/job';
@@ -104,28 +108,28 @@ export class JobService {
   }
 
   private createEscrowSpecificActions: Record<JobRequestType, EscrowAction> = {
-    [JobRequestType.HCAPTCHA]: {
+    [HCaptchaJobType.HCAPTCHA]: {
       getTrustedHandlers: () => [],
     },
-    [JobRequestType.FORTUNE]: {
+    [FortuneJobType.FORTUNE]: {
       getTrustedHandlers: () => [],
     },
-    [JobRequestType.IMAGE_POLYGONS]: {
+    [CvatJobType.IMAGE_POLYGONS]: {
       getTrustedHandlers: () => [],
     },
-    [JobRequestType.IMAGE_BOXES]: {
+    [CvatJobType.IMAGE_BOXES]: {
       getTrustedHandlers: () => [],
     },
-    [JobRequestType.IMAGE_POINTS]: {
+    [CvatJobType.IMAGE_POINTS]: {
       getTrustedHandlers: () => [],
     },
-    [JobRequestType.IMAGE_BOXES_FROM_POINTS]: {
+    [CvatJobType.IMAGE_BOXES_FROM_POINTS]: {
       getTrustedHandlers: () => [],
     },
-    [JobRequestType.IMAGE_SKELETONS_FROM_BOXES]: {
+    [CvatJobType.IMAGE_SKELETONS_FROM_BOXES]: {
       getTrustedHandlers: () => [],
     },
-    [JobRequestType.AUDIO_TRANSCRIPTION]: {
+    [AudinoJobType.AUDIO_TRANSCRIPTION]: {
       getTrustedHandlers: () => [],
     },
   };
@@ -136,13 +140,6 @@ export class JobService {
     dto: CreateJob,
   ): Promise<number> {
     let { chainId, reputationOracle, exchangeOracle, recordingOracle } = dto;
-
-    if (!Object.values(JobRequestType).includes(requestType)) {
-      throw new ControlledError(
-        ErrorJob.InvalidRequestType,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
 
     // Select network
     chainId = chainId || this.routingProtocolService.selectNetwork();
@@ -310,7 +307,13 @@ export class JobService {
 
     if (
       user.whitelist ||
-      [JobRequestType.AUDIO_TRANSCRIPTION].includes(requestType)
+      (
+        [
+          AudinoJobType.AUDIO_TRANSCRIPTION,
+          FortuneJobType.FORTUNE,
+          HCaptchaJobType.HCAPTCHA,
+        ] as JobRequestType[]
+      ).includes(requestType)
     ) {
       jobEntity.status = JobStatus.MODERATION_PASSED;
     } else {
@@ -582,7 +585,7 @@ export class JobService {
       throw new ControlledError(ErrorJob.ResultNotFound, HttpStatus.NOT_FOUND);
     }
 
-    if (jobEntity.requestType === JobRequestType.FORTUNE) {
+    if (jobEntity.requestType === FortuneJobType.FORTUNE) {
       const data = (await this.storageService.downloadJsonLikeData(
         finalResultUrl,
       )) as Array<FortuneFinalResultDto>;
@@ -640,7 +643,7 @@ export class JobService {
       throw new ControlledError(ErrorJob.ResultNotFound, HttpStatus.NOT_FOUND);
     }
 
-    if (jobEntity.requestType === JobRequestType.FORTUNE) {
+    if (jobEntity.requestType === FortuneJobType.FORTUNE) {
       throw new ControlledError(
         ErrorJob.InvalidRequestType,
         HttpStatus.BAD_REQUEST,
@@ -681,11 +684,11 @@ export class JobService {
   };
 
   public getOracleType(requestType: JobRequestType): OracleType {
-    if (requestType === JobRequestType.FORTUNE) {
+    if (requestType === FortuneJobType.FORTUNE) {
       return OracleType.FORTUNE;
-    } else if (requestType === JobRequestType.HCAPTCHA) {
+    } else if (requestType === HCaptchaJobType.HCAPTCHA) {
       return OracleType.HCAPTCHA;
-    } else if (requestType === JobRequestType.AUDIO_TRANSCRIPTION) {
+    } else if (requestType === AudinoJobType.AUDIO_TRANSCRIPTION) {
       return OracleType.AUDINO;
     } else {
       return OracleType.CVAT;
@@ -788,16 +791,10 @@ export class JobService {
       escrow = await EscrowUtils.getEscrow(chainId, escrowAddress);
     }
 
-    const manifestData = (await this.storageService.downloadJsonLikeData(
+    const manifestData = await this.manifestService.downloadManifest(
       manifestUrl,
-    )) as any;
-
-    if (!manifestData) {
-      throw new ControlledError(
-        ErrorJob.ManifestNotFound,
-        HttpStatus.NOT_FOUND,
-      );
-    }
+      jobEntity.requestType,
+    );
 
     const baseManifestDetails = {
       chainId,
@@ -812,22 +809,22 @@ export class JobService {
     };
 
     let specificManifestDetails;
-    if (jobEntity.requestType === JobRequestType.FORTUNE) {
+    if (jobEntity.requestType === FortuneJobType.FORTUNE) {
       const manifest = manifestData as FortuneManifestDto;
       specificManifestDetails = {
         title: manifest.requesterTitle,
         description: manifest.requesterDescription,
-        requestType: JobRequestType.FORTUNE,
+        requestType: FortuneJobType.FORTUNE,
         submissionsRequired: manifest.submissionsRequired,
         ...(manifest.qualifications &&
           manifest.qualifications?.length > 0 && {
             qualifications: manifest.qualifications,
           }),
       };
-    } else if (jobEntity.requestType === JobRequestType.HCAPTCHA) {
+    } else if (jobEntity.requestType === HCaptchaJobType.HCAPTCHA) {
       const manifest = manifestData as HCaptchaManifestDto;
       specificManifestDetails = {
-        requestType: JobRequestType.HCAPTCHA,
+        requestType: HCaptchaJobType.HCAPTCHA,
         submissionsRequired: manifest.job_total_tasks,
         ...(manifest.qualifications &&
           manifest.qualifications?.length > 0 && {

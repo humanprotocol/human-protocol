@@ -1,3 +1,8 @@
+jest.mock('../../common/utils/storage', () => ({
+  ...jest.requireActual('../../common/utils/storage'),
+  listObjectsInBucket: jest.fn(),
+}));
+
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { faker } from '@faker-js/faker';
 import { createMock } from '@golevelup/ts-jest';
@@ -11,13 +16,19 @@ import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ErrorJob } from '../../common/constants/errors';
 import {
+  AudinoJobType,
+  CvatJobType,
+  FortuneJobType,
+  HCaptchaJobType,
   JobCaptchaMode,
   JobCaptchaRequestType,
   JobCaptchaShapeType,
-  JobRequestType,
 } from '../../common/enums/job';
 import { ControlledError } from '../../common/errors/controlled';
-import { listObjectsInBucket } from '../../common/utils/storage';
+import {
+  generateBucketUrl,
+  listObjectsInBucket,
+} from '../../common/utils/storage';
 import { StorageService } from '../storage/storage.service';
 import { Web3Service } from '../web3/web3.service';
 import {
@@ -33,21 +44,19 @@ import {
 import { FortuneManifestDto } from './manifest.dto';
 import { ManifestService } from './manifest.service';
 
-jest.mock('../../common/utils/storage', () => ({
-  ...jest.requireActual('../../common/utils/storage'),
-  listObjectsInBucket: jest.fn(),
-}));
-
 describe('ManifestService', () => {
   let manifestService: ManifestService;
-  let storageService: StorageService;
+  const mockStorageService = {
+    uploadJsonLikeData: jest.fn(),
+    downloadJsonLikeData: jest.fn(),
+  };
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
         ManifestService,
         { provide: Web3Service, useValue: createMock<Web3Service>() },
-        { provide: StorageService, useValue: createMock<StorageService>() },
+        { provide: StorageService, useValue: mockStorageService },
         {
           provide: AuthConfigService,
           useValue: mockAuthConfigService,
@@ -66,7 +75,6 @@ describe('ManifestService', () => {
     }).compile();
 
     manifestService = moduleRef.get<ManifestService>(ManifestService);
-    storageService = moduleRef.get<StorageService>(StorageService);
   });
 
   afterEach(() => {
@@ -76,16 +84,16 @@ describe('ManifestService', () => {
   describe('createManifest', () => {
     describe('createCvatManifest', () => {
       let jobBounty: string;
-      beforeEach(() => {
+      beforeAll(() => {
         jobBounty = faker.number.int({ min: 1, max: 1000 }).toString();
-        jest
-          .spyOn(manifestService as any, 'calculateJobBounty')
-          .mockResolvedValueOnce(jobBounty);
+        manifestService['calculateJobBounty'] = jest
+          .fn()
+          .mockResolvedValue(jobBounty);
       });
 
       it('should create a valid CVAT manifest for image boxes job type', async () => {
-        const dto = createJobCvatDto({ type: JobRequestType.IMAGE_BOXES });
-        const requestType = JobRequestType.IMAGE_BOXES;
+        const dto = createJobCvatDto({ type: CvatJobType.IMAGE_BOXES });
+        const requestType = CvatJobType.IMAGE_BOXES;
         const tokenFundAmount = faker.number.int({ min: 1, max: 1000 });
 
         const result = await manifestService.createManifest(
@@ -96,14 +104,14 @@ describe('ManifestService', () => {
 
         expect(result).toEqual({
           data: {
-            data_url: expect.any(String),
+            data_url: generateBucketUrl(dto.data.dataset, requestType).href,
           },
           annotation: {
             labels: dto.labels,
             description: dto.requesterDescription,
             user_guide: dto.userGuide,
             type: requestType,
-            job_size: expect.any(Number),
+            job_size: mockCvatConfigService.jobSize,
           },
           validation: {
             min_quality: dto.minQuality,
@@ -115,8 +123,8 @@ describe('ManifestService', () => {
       });
 
       it('should create a valid CVAT manifest for image polygons job type', async () => {
-        const dto = createJobCvatDto({ type: JobRequestType.IMAGE_POLYGONS });
-        const requestType = JobRequestType.IMAGE_POLYGONS;
+        const dto = createJobCvatDto({ type: CvatJobType.IMAGE_POLYGONS });
+        const requestType = CvatJobType.IMAGE_POLYGONS;
         const tokenFundAmount = faker.number.int({ min: 1, max: 1000 });
 
         const result = await manifestService.createManifest(
@@ -127,14 +135,14 @@ describe('ManifestService', () => {
 
         expect(result).toEqual({
           data: {
-            data_url: expect.any(String),
+            data_url: generateBucketUrl(dto.data.dataset, requestType).href,
           },
           annotation: {
             labels: dto.labels,
             description: dto.requesterDescription,
             user_guide: dto.userGuide,
             type: requestType,
-            job_size: expect.any(Number),
+            job_size: mockCvatConfigService.jobSize,
           },
           validation: {
             min_quality: dto.minQuality,
@@ -161,9 +169,9 @@ describe('ManifestService', () => {
               path: faker.system.filePath(),
             },
           },
-          type: JobRequestType.IMAGE_BOXES_FROM_POINTS,
+          type: CvatJobType.IMAGE_BOXES_FROM_POINTS,
         });
-        const requestType = JobRequestType.IMAGE_BOXES_FROM_POINTS;
+        const requestType = CvatJobType.IMAGE_BOXES_FROM_POINTS;
         const tokenFundAmount = faker.number.int({ min: 1, max: 1000 });
 
         const result = await manifestService.createManifest(
@@ -174,20 +182,20 @@ describe('ManifestService', () => {
 
         expect(result).toEqual({
           data: {
-            data_url: expect.any(String),
-            points_url: expect.any(String),
+            data_url: generateBucketUrl(dto.data.dataset, requestType).href,
+            points_url: generateBucketUrl(dto.data.points!, requestType).href,
           },
           annotation: {
             labels: dto.labels,
             description: dto.requesterDescription,
             user_guide: dto.userGuide,
             type: requestType,
-            job_size: expect.any(Number),
+            job_size: mockCvatConfigService.jobSize,
           },
           validation: {
             min_quality: dto.minQuality,
             val_size: expect.any(Number),
-            gt_url: expect.any(String),
+            gt_url: generateBucketUrl(dto.groundTruth, requestType).href,
           },
           job_bounty: jobBounty,
         });
@@ -209,9 +217,9 @@ describe('ManifestService', () => {
               path: faker.system.filePath(),
             },
           },
-          type: JobRequestType.IMAGE_SKELETONS_FROM_BOXES,
+          type: CvatJobType.IMAGE_SKELETONS_FROM_BOXES,
         });
-        const requestType = JobRequestType.IMAGE_SKELETONS_FROM_BOXES;
+        const requestType = CvatJobType.IMAGE_SKELETONS_FROM_BOXES;
         const tokenFundAmount = faker.number.int({ min: 1, max: 1000 });
 
         const result = await manifestService.createManifest(
@@ -222,27 +230,27 @@ describe('ManifestService', () => {
 
         expect(result).toEqual({
           data: {
-            data_url: expect.any(String),
-            boxes_url: expect.any(String),
+            data_url: generateBucketUrl(dto.data.dataset, requestType).href,
+            boxes_url: generateBucketUrl(dto.data.boxes!, requestType).href,
           },
           annotation: {
             labels: dto.labels,
             description: dto.requesterDescription,
             user_guide: dto.userGuide,
             type: requestType,
-            job_size: expect.any(Number),
+            job_size: mockCvatConfigService.jobSize,
           },
           validation: {
             min_quality: dto.minQuality,
             val_size: expect.any(Number),
-            gt_url: expect.any(String),
+            gt_url: generateBucketUrl(dto.groundTruth, requestType).href,
           },
           job_bounty: jobBounty,
         });
       });
 
       it('should throw an error if data does not exist for image boxes from points job type', async () => {
-        const requestType = JobRequestType.IMAGE_BOXES_FROM_POINTS;
+        const requestType = CvatJobType.IMAGE_BOXES_FROM_POINTS;
 
         const dto = createJobCvatDto({ type: requestType });
         const tokenFundAmount = faker.number.int({ min: 1, max: 1000 });
@@ -255,7 +263,7 @@ describe('ManifestService', () => {
       });
 
       it('should throw an error if data does not exist for image skeletons from boxes job type', async () => {
-        const requestType = JobRequestType.IMAGE_SKELETONS_FROM_BOXES;
+        const requestType = CvatJobType.IMAGE_SKELETONS_FROM_BOXES;
 
         const dto = createJobCvatDto({ type: requestType });
         const tokenFundAmount = faker.number.int({ min: 1, max: 1000 });
@@ -271,7 +279,7 @@ describe('ManifestService', () => {
     describe('createAudinoManifest', () => {
       it('should create an Audino manifest successfully', async () => {
         const mockDto = createJobAudinoDto(); // Use the helper function
-        const mockRequestType = JobRequestType.AUDIO_TRANSCRIPTION;
+        const mockRequestType = AudinoJobType.AUDIO_TRANSCRIPTION;
         const mockTokenFundAmount = faker.number.int({ min: 1, max: 1000 });
 
         const result = await manifestService.createManifest(
@@ -297,11 +305,13 @@ describe('ManifestService', () => {
             segment_duration: mockDto.segmentDuration,
           },
           data: {
-            data_url: expect.any(String),
+            data_url: generateBucketUrl(mockDto.data.dataset, mockRequestType)
+              .href,
           },
           job_bounty: ethers.formatEther(jobBounty),
           validation: {
-            gt_url: expect.any(String),
+            gt_url: generateBucketUrl(mockDto.groundTruth, mockRequestType)
+              .href,
             min_quality: mockDto.minQuality,
           },
         });
@@ -309,7 +319,7 @@ describe('ManifestService', () => {
     });
 
     describe('createHCaptchaManifest', () => {
-      const requestType = JobRequestType.HCAPTCHA;
+      const requestType = HCaptchaJobType.HCAPTCHA;
       const tokenFundAmount = faker.number.int({ min: 1, max: 1000 });
 
       beforeEach(() => {
@@ -321,13 +331,13 @@ describe('ManifestService', () => {
           `${faker.word.sample()}.jpg`,
           `${faker.word.sample()}.jpg`,
         ]);
-        jest.spyOn(storageService, 'uploadJsonLikeData').mockResolvedValueOnce({
+        mockStorageService.uploadJsonLikeData.mockResolvedValueOnce({
           url: faker.internet.url(),
           hash: faker.string.uuid(),
         });
-        jest
-          .spyOn(storageService, 'downloadJsonLikeData')
-          .mockResolvedValueOnce(fileContent);
+        mockStorageService.downloadJsonLikeData.mockResolvedValueOnce(
+          fileContent,
+        );
       });
 
       it('should create a valid HCaptcha manifest for COMPARISON job type', async () => {
@@ -710,11 +720,14 @@ describe('ManifestService', () => {
       const mockChainId = faker.number.int();
       const mockData = { key: faker.lorem.word() };
       const mockOracleAddresses: string[] = [];
-
-      jest.spyOn(storageService, 'uploadJsonLikeData').mockResolvedValueOnce({
+      const mockManifestData = {
         url: faker.internet.url(),
         hash: faker.string.uuid(),
-      });
+      };
+
+      mockStorageService.uploadJsonLikeData.mockResolvedValueOnce(
+        mockManifestData,
+      );
 
       const result = await manifestService.uploadManifest(
         mockChainId,
@@ -724,8 +737,8 @@ describe('ManifestService', () => {
 
       expect(result).toEqual(
         expect.objectContaining({
-          url: expect.any(String),
-          hash: expect.any(String),
+          url: mockManifestData.url,
+          hash: mockManifestData.hash,
         }),
       );
     });
@@ -735,11 +748,9 @@ describe('ManifestService', () => {
       const mockData = { key: faker.lorem.word() };
       const mockOracleAddresses: string[] = [];
 
-      jest
-        .spyOn(storageService, 'uploadJsonLikeData')
-        .mockRejectedValue(
-          new ControlledError('File not uploaded', HttpStatus.BAD_REQUEST),
-        );
+      mockStorageService.uploadJsonLikeData.mockRejectedValue(
+        new ControlledError('File not uploaded', HttpStatus.BAD_REQUEST),
+      );
 
       await expect(
         manifestService.uploadManifest(
@@ -754,18 +765,18 @@ describe('ManifestService', () => {
   describe('downloadManifest', () => {
     it('should download and validate a manifest successfully', async () => {
       const mockManifestUrl = faker.internet.url();
-      const mockRequestType = JobRequestType.FORTUNE;
+      const mockRequestType = FortuneJobType.FORTUNE;
       const mockManifest: FortuneManifestDto = {
         submissionsRequired: faker.number.int({ min: 1, max: 100 }),
         requesterTitle: faker.lorem.words(3),
         requesterDescription: faker.lorem.sentence(),
         fundAmount: faker.number.float({ min: 1, max: 1000 }),
-        requestType: JobRequestType.FORTUNE,
+        requestType: FortuneJobType.FORTUNE,
         qualifications: [faker.lorem.word(), faker.lorem.word()],
       };
-      jest
-        .spyOn(storageService, 'downloadJsonLikeData')
-        .mockResolvedValueOnce(mockManifest);
+      mockStorageService.downloadJsonLikeData.mockResolvedValueOnce(
+        mockManifest,
+      );
       const result = await manifestService.downloadManifest(
         mockManifestUrl,
         mockRequestType,
@@ -775,18 +786,18 @@ describe('ManifestService', () => {
 
     it('should throw an error if validation fails', async () => {
       const mockManifestUrl = faker.internet.url();
-      const mockRequestType = JobRequestType.IMAGE_BOXES;
+      const mockRequestType = CvatJobType.IMAGE_BOXES;
       const mockManifest: FortuneManifestDto = {
         submissionsRequired: faker.number.int({ min: 1, max: 100 }),
         requesterTitle: faker.lorem.words(3),
         requesterDescription: faker.lorem.sentence(),
         fundAmount: faker.number.float({ min: 1, max: 1000 }),
-        requestType: JobRequestType.FORTUNE,
+        requestType: FortuneJobType.FORTUNE,
         qualifications: [faker.lorem.word(), faker.lorem.word()],
       };
-      jest
-        .spyOn(storageService, 'downloadJsonLikeData')
-        .mockResolvedValueOnce(mockManifest);
+      mockStorageService.downloadJsonLikeData.mockResolvedValueOnce(
+        mockManifest,
+      );
       await expect(
         manifestService.downloadManifest(mockManifestUrl, mockRequestType),
       ).rejects.toThrow(ControlledError);

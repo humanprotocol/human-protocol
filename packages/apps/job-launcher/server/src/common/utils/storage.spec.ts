@@ -1,5 +1,5 @@
 import { AWSRegions, StorageProviders } from '../enums/storage';
-import { JobRequestType } from '../enums/job';
+import { CvatJobType } from '../enums/job';
 import axios from 'axios';
 import { StorageDataDto } from '../../modules/job/job.dto';
 import { generateBucketUrl, listObjectsInBucket } from './storage';
@@ -15,7 +15,7 @@ describe('Storage utils', () => {
         bucketName: 'my-bucket',
         path: 'my-folder',
       };
-      const url = generateBucketUrl(storageData, JobRequestType.IMAGE_POINTS);
+      const url = generateBucketUrl(storageData, CvatJobType.IMAGE_POINTS);
       const objects = ['object1', 'object2'];
       const response = {
         status: 200,
@@ -44,7 +44,7 @@ describe('Storage utils', () => {
         bucketName: 'my-bucket',
         path: 'my-folder',
       };
-      const url = generateBucketUrl(storageData, JobRequestType.IMAGE_POINTS);
+      const url = generateBucketUrl(storageData, CvatJobType.IMAGE_POINTS);
       const objects = Array.from({ length: 4 }, (_, i) => `object${i + 1}`);
       const response1 = {
         status: 200,
@@ -90,7 +90,7 @@ describe('Storage utils', () => {
         bucketName: 'my-bucket',
         path: 'my-folder',
       };
-      const url = generateBucketUrl(storageData, JobRequestType.IMAGE_POINTS);
+      const url = generateBucketUrl(storageData, CvatJobType.IMAGE_POINTS);
       const response = {
         status: 200,
         data: `
@@ -112,7 +112,7 @@ describe('Storage utils', () => {
         bucketName: 'non-existent-bucket',
         path: 'my-folder',
       };
-      const url = generateBucketUrl(storageData, JobRequestType.IMAGE_POINTS);
+      const url = generateBucketUrl(storageData, CvatJobType.IMAGE_POINTS);
       const response = {
         status: 404,
         data: 'Bucket not found',
@@ -131,7 +131,7 @@ describe('Storage utils', () => {
         bucketName: 'private-bucket',
         path: 'my-folder',
       };
-      const url = generateBucketUrl(storageData, JobRequestType.IMAGE_POINTS);
+      const url = generateBucketUrl(storageData, CvatJobType.IMAGE_POINTS);
       const response = {
         status: 403,
         data: 'Access denied',

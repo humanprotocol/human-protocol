@@ -8,7 +8,7 @@ import { NetworkConfigService } from '../../common/config/network-config.service
 import { Web3Service } from '../web3/web3.service';
 import { ConfigService } from '@nestjs/config';
 import { ControlledError } from '../../common/errors/controlled';
-import { JobRequestType } from '../../common/enums/job';
+import { FortuneJobType } from '../../common/enums/job';
 import { ErrorRoutingProtocol } from '../../common/constants/errors';
 import { HttpStatus } from '@nestjs/common';
 import { hashString } from '../../common/utils';
@@ -354,7 +354,7 @@ describe('RoutingProtocolService', () => {
 
       const result = await routingProtocolService.selectOracles(
         ChainId.POLYGON_AMOY,
-        JobRequestType.FORTUNE,
+        FortuneJobType.FORTUNE,
       );
       expect(result.reputationOracle).toBeDefined();
       expect(result.exchangeOracle).toBe('0xExchangeOracle1');
@@ -366,7 +366,7 @@ describe('RoutingProtocolService', () => {
 
       const result = await routingProtocolService.selectOracles(
         ChainId.POLYGON_AMOY,
-        JobRequestType.FORTUNE,
+        FortuneJobType.FORTUNE,
       );
       expect(result.exchangeOracle).toBe('');
       expect(result.recordingOracle).toBe('');
@@ -395,7 +395,7 @@ describe('RoutingProtocolService', () => {
       await expect(
         routingProtocolService.validateOracles(
           chainId,
-          JobRequestType.FORTUNE,
+          FortuneJobType.FORTUNE,
           reputationOracle,
           exchangeOracle,
           recordingOracle,
@@ -418,7 +418,7 @@ describe('RoutingProtocolService', () => {
       await expect(
         routingProtocolService.validateOracles(
           chainId,
-          JobRequestType.FORTUNE,
+          FortuneJobType.FORTUNE,
           invalidReputationOracle,
         ),
       ).rejects.toThrow(
@@ -449,7 +449,7 @@ describe('RoutingProtocolService', () => {
       await expect(
         routingProtocolService.validateOracles(
           chainId,
-          JobRequestType.FORTUNE,
+          FortuneJobType.FORTUNE,
           reputationOracle,
           'invalidExchangeOracle',
         ),
@@ -481,7 +481,7 @@ describe('RoutingProtocolService', () => {
       await expect(
         routingProtocolService.validateOracles(
           chainId,
-          JobRequestType.FORTUNE,
+          FortuneJobType.FORTUNE,
           reputationOracle,
           undefined,
           'invalidRecordingOracle',

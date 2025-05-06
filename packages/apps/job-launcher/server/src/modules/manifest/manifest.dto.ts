@@ -19,6 +19,11 @@ import {
   JobCaptchaShapeType,
   JobRequestType,
 } from '../../common/enums/job';
+import {
+  FortuneJobType,
+  CvatJobType,
+  AudinoJobType,
+} from '../../common/enums/job';
 
 export class FortuneManifestDto {
   @ApiProperty({ name: 'submissions_required' })
@@ -39,11 +44,12 @@ export class FortuneManifestDto {
   @IsPositive()
   public fundAmount: number;
 
-  @ApiProperty({ enum: JobRequestType, name: 'request_type' })
-  @IsEnumCaseInsensitive(JobRequestType)
-  public requestType: JobRequestType;
+  @ApiProperty({ enum: FortuneJobType, name: 'request_type' })
+  @IsEnumCaseInsensitive(FortuneJobType)
+  public requestType: FortuneJobType;
 
   @IsArray()
+  @IsString({ each: true })
   @IsOptional()
   public qualifications?: string[];
 }
@@ -79,6 +85,7 @@ export class Label {
 
 class Annotation {
   @IsArray()
+  @ValidateNested()
   public labels: Label[];
 
   @IsString()
@@ -87,14 +94,15 @@ class Annotation {
   @IsString()
   public user_guide: string;
 
-  @IsEnumCaseInsensitive(JobRequestType)
-  public type: JobRequestType;
+  @IsEnumCaseInsensitive(CvatJobType)
+  public type: CvatJobType;
 
   @IsNumber()
   @IsPositive()
   public job_size: number;
 
   @IsArray()
+  @IsString({ each: true })
   @IsOptional()
   public qualifications?: string[];
 }
@@ -114,12 +122,15 @@ class Validation {
 
 export class CvatManifestDto {
   @IsObject()
+  @ValidateNested()
   public data: CvatData;
 
   @IsObject()
+  @ValidateNested()
   public annotation: Annotation;
 
   @IsObject()
+  @ValidateNested()
   public validation: Validation;
 
   @IsString()
@@ -142,14 +153,15 @@ class AudinoAnnotation {
   @IsUrl()
   public user_guide: string;
 
-  @Equals(JobRequestType.AUDIO_TRANSCRIPTION)
-  public type: JobRequestType.AUDIO_TRANSCRIPTION;
+  @Equals(AudinoJobType.AUDIO_TRANSCRIPTION)
+  public type: AudinoJobType.AUDIO_TRANSCRIPTION;
 
   @IsNumber()
   @IsPositive()
   public segment_duration: number;
 
   @IsArray()
+  @IsString({ each: true })
   @IsOptional()
   public qualifications?: string[];
 }
@@ -166,12 +178,15 @@ class AudinoValidation {
 
 export class AudinoManifestDto {
   @IsObject()
+  @ValidateNested()
   public data: AudinoData;
 
   @IsObject()
+  @ValidateNested()
   public annotation: AudinoAnnotation;
 
   @IsObject()
+  @ValidateNested()
   public validation: AudinoValidation;
 
   @IsString()
@@ -302,15 +317,16 @@ export class HCaptchaManifestDto {
   restricted_audience: RestrictedAudience;
 
   @IsObject()
-  @ValidateNested({ each: true })
+  @ValidateNested()
   requester_restricted_answer_set: RequesterRestrictedAnswer;
 
   @IsOptional()
   @IsArray()
-  @ValidateNested({ each: true })
+  @ValidateNested()
   taskdata?: TaskData[];
 
   @IsArray()
+  @IsString({ each: true })
   @IsOptional()
   public qualifications?: string[];
 }
@@ -378,7 +394,7 @@ export class ManifestDetails {
   public requesterAddress: string;
 
   @ApiProperty({ description: 'Request type', name: 'request_type' })
-  @IsEnumCaseInsensitive(JobRequestType)
+  @IsString()
   public requestType: JobRequestType;
 
   @ApiProperty({
@@ -408,3 +424,9 @@ export class ManifestDetails {
   @IsString()
   public reputationOracleAddress?: string;
 }
+
+export type ManifestDto =
+  | FortuneManifestDto
+  | CvatManifestDto
+  | HCaptchaManifestDto
+  | AudinoManifestDto;

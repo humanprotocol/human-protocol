@@ -2,7 +2,7 @@ import { HttpStatus } from '@nestjs/common';
 import { StorageDataDto } from '../../modules/job/job.dto';
 import { AWSRegions, StorageProviders } from '../enums/storage';
 import { ErrorBucket } from '../constants/errors';
-import { JobRequestType } from '../enums/job';
+import { AudinoJobType, CvatJobType, JobRequestType } from '../enums/job';
 import axios from 'axios';
 import { parseString } from 'xml2js';
 import { ControlledError } from '../errors/controlled';
@@ -16,14 +16,16 @@ export function generateBucketUrl(
   jobType: JobRequestType,
 ): URL {
   if (
-    [
-      JobRequestType.IMAGE_POLYGONS,
-      JobRequestType.IMAGE_BOXES,
-      JobRequestType.IMAGE_POINTS,
-      JobRequestType.IMAGE_BOXES_FROM_POINTS,
-      JobRequestType.IMAGE_SKELETONS_FROM_BOXES,
-      JobRequestType.AUDIO_TRANSCRIPTION,
-    ].includes(jobType) &&
+    (
+      [
+        CvatJobType.IMAGE_POLYGONS,
+        CvatJobType.IMAGE_BOXES,
+        CvatJobType.IMAGE_POINTS,
+        CvatJobType.IMAGE_BOXES_FROM_POINTS,
+        CvatJobType.IMAGE_SKELETONS_FROM_BOXES,
+        AudinoJobType.AUDIO_TRANSCRIPTION,
+      ] as JobRequestType[]
+    ).includes(jobType) &&
     storageData.provider != StorageProviders.AWS &&
     storageData.provider != StorageProviders.GCS &&
     storageData.provider != StorageProviders.LOCAL
