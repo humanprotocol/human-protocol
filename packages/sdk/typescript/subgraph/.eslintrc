@@ -7,8 +7,30 @@
       "parserOptions": {
         "schema": "./schema.graphql"
       },
-      // TODO: Add GraphQL ESLint rules here
-      "rules": {}
+      // GraphQL ESLint rules
+      "rules": {
+        "@graphql-eslint/no-anonymous-operations": "error",
+        "@graphql-eslint/naming-convention": [
+          "error",
+          {
+            "OperationDefinition": {
+              "style": "camelCase"
+            },
+            "FragmentDefinition": {
+              "style": "camelCase"
+            }
+          }
+        ],
+        "@graphql-eslint/require-description": [
+          "warn",
+          {
+            "types": true,
+            "fields": true
+          }
+        ],
+        "@graphql-eslint/no-duplicate-fields": "error",
+        "@graphql-eslint/fields-on-correct-type": "error"
+      }
     },
     {
       "files": ["*.ts"],
