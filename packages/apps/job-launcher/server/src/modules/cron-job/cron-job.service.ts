@@ -457,15 +457,14 @@ export class CronJobService {
         let eventsBatch;
 
         do {
-          eventsBatch = await EscrowUtils.getStatusEvents(
-            network.chainId,
+          eventsBatch = await EscrowUtils.getStatusEvents({
+            chainId: network.chainId,
             statuses,
             from,
-            undefined,
-            this.web3Service.getOperatorAddress(),
-            100,
+            launcher: this.web3Service.getOperatorAddress(),
+            first: 100,
             skip,
-          );
+          });
 
           events.push(...eventsBatch);
           skip += 100;

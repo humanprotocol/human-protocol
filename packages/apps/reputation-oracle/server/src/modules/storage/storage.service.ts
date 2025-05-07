@@ -2,11 +2,11 @@ import { Injectable } from '@nestjs/common';
 import * as Minio from 'minio';
 
 import { ContentType } from '../../common/enums';
-import { S3ConfigService } from '../../config/s3-config.service';
+import { S3ConfigService } from '../../config';
 import logger from '../../logger';
 import * as httpUtils from '../../utils/http';
 
-import { PgpEncryptionService } from '../encryption/pgp-encryption.service';
+import { PgpEncryptionService } from '../encryption';
 
 import { MinioErrorCodes } from './minio.constants';
 
@@ -51,12 +51,27 @@ export class StorageService {
     }
   }
 
-  async downloadJsonLikeData<T>(url: string): Promise<T> {
+  async downloadFile(url: string): Promise<Buffer> {
     try {
       let fileContent = await httpUtils.downloadFile(url);
 
       fileContent =
         await this.pgpEncryptionService.maybeDecryptFile(fileContent);
+
+      return fileContent;
+    } catch (error) {
+      const errorMessage = 'Error downloading file';
+      this.logger.error(errorMessage, {
+        error,
+        url,
+      });
+      throw new Error(errorMessage);
+    }
+  }
+
+  async downloadJsonLikeData<T>(url: string): Promise<T> {
+    try {
+      const fileContent = await this.downloadFile(url);
 
       return JSON.parse(fileContent.toString());
     } catch (error) {

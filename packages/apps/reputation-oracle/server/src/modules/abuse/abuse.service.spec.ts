@@ -10,16 +10,15 @@ import {
 } from '@human-protocol/sdk';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import { PostgresErrorCodes } from '../../common/enums/database';
-import { DatabaseError } from '../../common/errors/database';
-import { ServerConfigService } from '../../config/server-config.service';
+import { DatabaseError, DatabaseErrorMessages } from '../../database';
+import { ServerConfigService } from '../../config';
 import { generateTestnetChainId } from '../web3/fixtures';
-import { Web3Service } from '../web3/web3.service';
-import { OutgoingWebhookEventType } from '../webhook/types';
-import { OutgoingWebhookService } from '../webhook/webhook-outgoing.service';
+import { Web3Service } from '../web3';
+import { OutgoingWebhookEventType, OutgoingWebhookService } from '../webhook';
+
 import { AbuseRepository } from './abuse.repository';
 import { AbuseService } from './abuse.service';
-import { AbuseSlackBot } from './abuse.slack-bot';
+import { AbuseSlackBot } from './abuse-slack-bot';
 import { AbuseDecision, AbuseStatus } from './constants';
 import { generateAbuseEntity } from './fixtures';
 
@@ -67,7 +66,7 @@ describe('AbuseService', () => {
     abuseService = moduleRef.get<AbuseService>(AbuseService);
   });
 
-  beforeEach(() => {
+  afterEach(() => {
     jest.resetAllMocks();
   });
 
@@ -331,7 +330,7 @@ describe('AbuseService', () => {
         } as IOperator);
 
       mockOutgoingWebhookService.createOutgoingWebhook.mockRejectedValueOnce(
-        new DatabaseError(PostgresErrorCodes.Duplicated),
+        new DatabaseError(DatabaseErrorMessages.DUPLICATED),
       );
 
       await abuseService.processAbuseRequests();

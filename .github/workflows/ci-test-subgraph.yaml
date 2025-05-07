@@ -3,12 +3,15 @@ name: Subgraph check
 on:
   push:
     branches:
-      - 'main'
+      - develop
+      - main
   pull_request:
+    branches:
+      - develop
+      - main
     paths:
       - 'packages/core/**'
       - 'packages/sdk/typescript/subgraph/**'
-  workflow_dispatch:
 
 jobs:
   subgraph-test:
@@ -20,7 +23,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-      - run: npm install --global yarn && yarn
-        name: Install dependencies
-      - run: yarn workspace @human-protocol/subgraph test
-        name: Run subgraph test
+          cache: yarn
+      - name: Install dependencies
+        run: yarn
+      - name: Run subgraph test
+        run: yarn workspace @human-protocol/subgraph test

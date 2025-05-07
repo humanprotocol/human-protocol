@@ -1,9 +1,9 @@
+import { ChainId } from '@human-protocol/sdk';
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 
 import { DATABASE_SCHEMA_NAME } from '../../common/constants';
-import { BaseEntity } from '../../database/base.entity';
-import { UserEntity } from '../user/user.entity';
-import { ChainId } from '@human-protocol/sdk';
+import { BaseEntity } from '../../database';
+import type { UserEntity } from '../user';
 import { AbuseDecision, AbuseStatus } from './constants';
 
 @Entity({ schema: DATABASE_SCHEMA_NAME, name: 'abuses' })

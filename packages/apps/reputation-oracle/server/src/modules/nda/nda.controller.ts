@@ -15,11 +15,11 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
-import { RequestWithUser } from '../../common/interfaces/request';
-import { NDAConfigService } from '../../config/nda-config.service';
+import { RequestWithUser } from '../../common/types';
+import { NDAConfigService } from '../../config';
 
 import { NDASignatureDto } from './nda.dto';
-import { NDAErrorFilter } from './nda.error.filter';
+import { NDAErrorFilter } from './nda.error-filter';
 import { NDAService } from './nda.service';
 
 @ApiTags('NDA')

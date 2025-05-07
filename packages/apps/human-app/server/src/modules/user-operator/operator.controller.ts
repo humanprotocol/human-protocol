@@ -21,6 +21,7 @@ import {
   SigninOperatorCommand,
   SigninOperatorDto,
   SigninOperatorResponse,
+  SignupOperatorResponse,
 } from './model/operator-signin.model';
 import {
   DisableOperatorCommand,
@@ -44,13 +45,13 @@ export class OperatorController {
   @UsePipes(new ValidationPipe())
   async signupOperator(
     @Body() signupOperatorDto: SignupOperatorDto,
-  ): Promise<void> {
+  ): Promise<SignupOperatorResponse> {
     const signupOperatorCommand = this.mapper.map(
       signupOperatorDto,
       SignupOperatorDto,
       SignupOperatorCommand,
     );
-    await this.service.signupOperator(signupOperatorCommand);
+    return this.service.signupOperator(signupOperatorCommand);
   }
 
   @ApiTags('User-Operator')

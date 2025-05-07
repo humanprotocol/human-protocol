@@ -4,7 +4,7 @@ from datetime import datetime
 
 from typing import List, Optional
 
-from human_protocol_sdk.constants import NETWORKS, ChainId, Status, OrderDirection
+from human_protocol_sdk.constants import ChainId, Status, OrderDirection
 
 from web3 import Web3
 
@@ -100,18 +100,26 @@ class PayoutFilter:
 
     def __init__(
         self,
+        chain_id: ChainId,
         escrow_address: Optional[str] = None,
         recipient: Optional[str] = None,
         date_from: Optional[datetime] = None,
         date_to: Optional[datetime] = None,
+        first: int = 10,
+        skip: int = 0,
+        order_direction: OrderDirection = OrderDirection.DESC,
     ):
         """
-        Initializes a PayoutFilter instance.
+        Initializes a filter for payouts.
 
-        :param escrow_address: Escrow address
-        :param recipient: Recipient address
-        :param date_from: Created from date
-        :param date_to: Created to date
+        :param chain_id: The chain ID where the payouts are recorded.
+        :param escrow_address: Optional escrow address to filter payouts.
+        :param recipient: Optional recipient address to filter payouts.
+        :param date_from: Optional start date for filtering.
+        :param date_to: Optional end date for filtering.
+        :param first: Optional number of payouts per page. Default is 10.
+        :param skip: Optional number of payouts to skip. Default is 0.
+        :param order_direction: Optional order direction. Default is DESC.
         """
 
         if escrow_address and not Web3.is_address(escrow_address):
@@ -125,10 +133,14 @@ class PayoutFilter:
                 f"Invalid dates: {date_from} must be earlier than {date_to}"
             )
 
+        self.chain_id = chain_id
         self.escrow_address = escrow_address
         self.recipient = recipient
         self.date_from = date_from
         self.date_to = date_to
+        self.first = first
+        self.skip = skip
+        self.order_direction = order_direction
 
 
 class TransactionFilter:
@@ -249,5 +261,46 @@ class StatisticsFilter:
         self.date_from = date_from
         self.date_to = date_to
         self.first = min(first, 1000)
+        self.skip = skip
+        self.order_direction = order_direction
+
+
+class StatusEventFilter:
+    def __init__(
+        self,
+        chain_id: ChainId,
+        statuses: Optional[List[Status]] = None,
+        date_from: Optional[datetime] = None,
+        date_to: Optional[datetime] = None,
+        launcher: Optional[str] = None,
+        first: int = 10,
+        skip: int = 0,
+        order_direction: OrderDirection = OrderDirection.DESC,
+    ):
+        """
+        Initializes a filter for status events.
+
+        :param chain_id: The chain ID where the events are recorded.
+        :param statuses: Optional list of statuses to filter by.
+        :param date_from: Optional start date for filtering.
+        :param date_to: Optional end date for filtering.
+        :param launcher: Optional launcher address to filter by.
+        :param first: Optional number of events per page. Default is 10.
+        :param skip: Optional number of events to skip. Default is 0.
+        :param order_direction: Optional order direction. Default is DESC.
+        """
+        self.chain_id = chain_id
+        self.statuses = statuses or [
+            Status.Launched,
+            Status.Pending,
+            Status.Partial,
+            Status.Paid,
+            Status.Complete,
+            Status.Cancelled,
+        ]
+        self.date_from = date_from
+        self.date_to = date_to
+        self.launcher = launcher
+        self.first = first
         self.skip = skip
         self.order_direction = order_direction

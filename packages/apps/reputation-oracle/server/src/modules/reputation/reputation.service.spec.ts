@@ -5,14 +5,13 @@ import { faker } from '@faker-js/faker';
 import { EscrowClient } from '@human-protocol/sdk';
 import { Test } from '@nestjs/testing';
 
-import { ReputationConfigService } from '../../config/reputation-config.service';
-import { Web3ConfigService } from '../../config/web3-config.service';
+import { ReputationConfigService, Web3ConfigService } from '../../config';
 
 import {
   generateTestnetChainId,
   mockWeb3ConfigService,
 } from '../web3/fixtures';
-import { Web3Service } from '../web3/web3.service';
+import { Web3Service } from '../web3';
 
 import {
   generateRandomScorePoints,
@@ -325,11 +324,9 @@ describe('ReputationService', () => {
     let spyOnIncreaseReputation: jest.SpyInstance;
 
     beforeAll(() => {
-      spyOnIncreaseReputation = jest.spyOn(service, 'increaseReputation');
-    });
-
-    beforeEach(() => {
-      spyOnIncreaseReputation.mockImplementation();
+      spyOnIncreaseReputation = jest
+        .spyOn(service, 'increaseReputation')
+        .mockImplementation();
     });
 
     afterAll(() => {

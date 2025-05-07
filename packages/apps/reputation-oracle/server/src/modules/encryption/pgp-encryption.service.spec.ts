@@ -14,13 +14,12 @@ import { faker } from '@faker-js/faker';
 import { Encryption, EncryptionUtils, KVStoreUtils } from '@human-protocol/sdk';
 import { Test } from '@nestjs/testing';
 
-import { PGPConfigService } from '../../config/pgp-config.service';
-import { Web3ConfigService } from '../../config/web3-config.service';
+import { PGPConfigService, Web3ConfigService } from '../../config';
 import {
   generateTestnetChainId,
   mockWeb3ConfigService,
 } from '../web3/fixtures';
-import { Web3Service } from '../web3/web3.service';
+import { Web3Service } from '../web3';
 
 import { PgpEncryptionService } from './pgp-encryption.service';
 

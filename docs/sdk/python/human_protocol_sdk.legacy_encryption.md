@@ -17,7 +17,7 @@ Encryption class specialized in encrypting and decrypting a byte string.
 
 #### CIPHER
 
-Cipher algorithm defintion.
+Cipher algorithm definition.
 
 alias of `AES`
 

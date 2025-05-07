@@ -6,7 +6,7 @@ import { NETWORKS } from '../src/constants';
 import { ChainId, OrderDirection } from '../src/enums';
 import {
   ErrorCannotUseDateAndBlockSimultaneously,
-  ErrorInvalidHahsProvided,
+  ErrorInvalidHashProvided,
 } from '../src/error';
 import { GET_TRANSACTION_QUERY } from '../src/graphql/queries/transaction';
 import { ITransaction, ITransactionsFilter } from '../src/interfaces';
@@ -64,7 +64,7 @@ describe('TransactionUtils', () => {
     test('should throw an error for an invalid transaction hash', async () => {
       await expect(
         TransactionUtils.getTransaction(ChainId.LOCALHOST, invalidHash)
-      ).rejects.toThrow(ErrorInvalidHahsProvided);
+      ).rejects.toThrow(ErrorInvalidHashProvided);
     });
 
     test('should throw an error if the gql fetch fails', async () => {

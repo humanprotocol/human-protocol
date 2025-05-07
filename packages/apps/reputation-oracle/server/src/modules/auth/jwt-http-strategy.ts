@@ -8,7 +8,7 @@ import {
   RESEND_EMAIL_VERIFICATION_PATH,
 } from '../../common/constants';
 import { UserEntity, UserStatus, UserRepository } from '../user';
-import { AuthConfigService } from '../../config/auth-config.service';
+import { AuthConfigService } from '../../config';
 import { TokenType } from './token.entity';
 import { TokenRepository } from './token.repository';
 

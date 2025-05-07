@@ -1,9 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
-  HMToken,
-  HMToken__factory,
-} from '@human-protocol/core/typechain-types';
-import {
   ChainId,
   EscrowClient,
   EscrowStatus,
@@ -22,7 +18,6 @@ import {
 } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { validate } from 'class-validator';
-import Decimal from 'decimal.js';
 import { ethers } from 'ethers';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { CANCEL_JOB_STATUSES } from '../../common/constants';
@@ -274,6 +269,7 @@ export class JobService {
         dto,
         requestType,
         fundTokenAmount,
+        fundTokenDecimals,
       );
 
       const { url, hash } = await this.manifestService.uploadManifest(
@@ -796,12 +792,19 @@ export class JobService {
       jobEntity.requestType,
     );
 
+    const fundTokenDecimals = getTokenDecimals(
+      chainId,
+      jobEntity.token as EscrowFundToken,
+    );
+
     const baseManifestDetails = {
       chainId,
       tokenAddress: escrow ? escrow.token : ethers.ZeroAddress,
       requesterAddress: signer.address,
       fundAmount: escrow
-        ? Number(ethers.formatEther(escrow.totalFundedAmount))
+        ? Number(
+            ethers.formatUnits(escrow.totalFundedAmount, fundTokenDecimals),
+          )
         : 0,
       exchangeOracleAddress: escrow?.exchangeOracle || ethers.ZeroAddress,
       recordingOracleAddress: escrow?.recordingOracle || ethers.ZeroAddress,
@@ -869,61 +872,18 @@ export class JobService {
         escrowAddress,
         manifestUrl,
         manifestHash,
-        balance: Number(ethers.formatEther(escrow?.balance || 0)),
-        paidOut: Number(ethers.formatEther(escrow?.amountPaid || 0)),
+        balance: Number(
+          ethers.formatUnits(escrow?.balance || 0, fundTokenDecimals),
+        ),
+        paidOut: Number(
+          ethers.formatUnits(escrow?.amountPaid || 0, fundTokenDecimals),
+        ),
         currency: jobEntity.token as EscrowFundToken,
         status: jobEntity.status,
         failedReason: jobEntity.failedReason,
       },
       manifest: manifestDetails,
     };
-  }
-
-  public async getTransferLogs(
-    chainId: ChainId,
-    tokenAddress: string,
-    fromBlock: number,
-    toBlock: string | number,
-  ) {
-    const signer = this.web3Service.getSigner(chainId);
-    const filter = {
-      address: tokenAddress,
-      topics: [ethers.id('Transfer(address,address,uint256)')],
-      fromBlock: fromBlock,
-      toBlock: toBlock,
-    };
-
-    return signer.provider?.getLogs(filter);
-  }
-
-  public async getPaidOutAmount(
-    chainId: ChainId,
-    tokenAddress: string,
-    escrowAddress: string,
-  ): Promise<number> {
-    const signer = this.web3Service.getSigner(chainId);
-    const tokenContract: HMToken = HMToken__factory.connect(
-      tokenAddress,
-      signer,
-    );
-
-    const logs = await this.getTransferLogs(chainId, tokenAddress, 0, 'latest');
-    let paidOutAmount = new Decimal(0);
-
-    logs?.forEach((log) => {
-      const parsedLog = tokenContract.interface.parseLog({
-        topics: log.topics as string[],
-        data: log.data,
-      });
-      const from = parsedLog?.args[0];
-      const amount = parsedLog?.args[2];
-
-      if (from === escrowAddress) {
-        paidOutAmount = paidOutAmount.add(ethers.formatEther(amount));
-      }
-    });
-
-    return Number(paidOutAmount);
   }
 
   private async getOracleFee(

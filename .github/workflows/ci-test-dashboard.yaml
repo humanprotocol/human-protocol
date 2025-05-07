@@ -3,13 +3,16 @@ name: Dashboard Check
 on:
   push:
     branches:
-      - 'main'
+      - develop
+      - main
   pull_request:
+    branches:
+      - develop
+      - main
     paths:
       - 'packages/core/**'
       - 'packages/sdk/typescript/human-protocol-sdk/**'
       - 'packages/apps/dashboard/**'
-  workflow_dispatch:
 
 jobs:
   dashboard-server-test:
@@ -20,7 +23,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-      - run: npm install --global yarn && yarn
-        name: Install dependencies
-      - run: yarn workspace @human-protocol/dashboard-server test
-        name: Run dashboard Server test
+          cache: yarn
+      - name: Install dependencies
+        run: yarn
+      - name: Run dashboard Server test
+        run: yarn workspace @human-protocol/dashboard-server test

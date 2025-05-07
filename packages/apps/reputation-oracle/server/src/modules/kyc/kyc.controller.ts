@@ -18,13 +18,13 @@ import {
 } from '@nestjs/swagger';
 
 import { Public } from '../../common/decorators';
-import { RequestWithUser } from '../../common/interfaces/request';
+import { RequestWithUser } from '../../common/types';
 import {
   StartSessionResponseDto,
   KycSignedAddressDto,
   UpdateKycStatusDto,
 } from './kyc.dto';
-import { KycErrorFilter } from './kyc.error.filter';
+import { KycErrorFilter } from './kyc.error-filter';
 import { KycService } from './kyc.service';
 import { KycWebhookAuthGuard } from './kyc-webhook-auth.guard';
 

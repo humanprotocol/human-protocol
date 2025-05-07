@@ -9,9 +9,9 @@ import {
 } from '@nestjs/terminus';
 import packageJson from '../../../package.json';
 import { Public } from '../../common/decorators';
-import { ServerConfigService } from '../../config/server-config.service';
-import { PingResponseDto } from './dto/ping-response.dto';
+import { ServerConfigService } from '../../config';
 import Environment from '../../utils/environment';
+import { PingResponseDto } from './dto/ping-response.dto';
 
 @Public()
 @ApiTags('Health')
