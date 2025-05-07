@@ -2,11 +2,6 @@ name: Fortune check
 
 on:
   push:
-    branches:
-      - develop
-  pull_request:
-    branches:
-      - develop
     paths:
       - 'packages/core/**'
       - 'packages/sdk/typescript/human-protocol-sdk/**'
