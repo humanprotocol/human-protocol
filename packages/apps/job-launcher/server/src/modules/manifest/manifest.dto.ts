@@ -24,6 +24,7 @@ import {
   CvatJobType,
   AudinoJobType,
 } from '../../common/enums/job';
+import { Type } from 'class-transformer';
 
 export class FortuneManifestDto {
   @ApiProperty({ name: 'submissions_required' })
@@ -73,11 +74,13 @@ export class Label {
   public name: string;
 
   @ApiPropertyOptional()
+  @IsString({ each: true })
   @IsArray()
   @IsOptional()
   public nodes?: string[];
 
   @ApiPropertyOptional()
+  @IsString({ each: true })
   @IsArray()
   @IsOptional()
   public joints?: string[];
@@ -86,6 +89,7 @@ export class Label {
 class Annotation {
   @IsArray()
   @ValidateNested()
+  @Type(() => Label)
   public labels: Label[];
 
   @IsString()
@@ -123,14 +127,17 @@ class Validation {
 export class CvatManifestDto {
   @IsObject()
   @ValidateNested()
+  @Type(() => CvatData)
   public data: CvatData;
 
   @IsObject()
   @ValidateNested()
+  @Type(() => Annotation)
   public annotation: Annotation;
 
   @IsObject()
   @ValidateNested()
+  @Type(() => Validation)
   public validation: Validation;
 
   @IsString()
@@ -179,14 +186,17 @@ class AudinoValidation {
 export class AudinoManifestDto {
   @IsObject()
   @ValidateNested()
+  @Type(() => AudinoData)
   public data: AudinoData;
 
   @IsObject()
   @ValidateNested()
+  @Type(() => AudinoAnnotation)
   public annotation: AudinoAnnotation;
 
   @IsObject()
   @ValidateNested()
+  @Type(() => AudinoValidation)
   public validation: AudinoValidation;
 
   @IsString()
@@ -195,69 +205,87 @@ export class AudinoManifestDto {
 
 export class RestrictedAudience {
   @IsObject()
+  @IsOptional()
   sitekey?: Record<string, { score: number }>[];
 
   @IsObject()
+  @IsOptional()
   lang?: Record<string, { score: number }>[];
 
   @IsObject()
+  @IsOptional()
   browser?: Record<string, { score: number }>[];
 
   @IsObject()
+  @IsOptional()
   country?: Record<string, { score: number }>[];
 }
 
 class RequesterRestrictedAnswer {
   @IsString()
+  @IsOptional()
   en?: string;
 
   @IsUrl()
+  @IsOptional()
   answer_example_uri?: string;
 }
 
 class RequestConfig {
   @IsEnumCaseInsensitive(JobCaptchaShapeType)
+  @IsOptional()
   shape_type?: JobCaptchaShapeType;
 
   @IsNumber()
   @IsPositive()
+  @IsOptional()
   min_shapes_per_image?: number;
 
   @IsNumber()
   @IsPositive()
+  @IsOptional()
   max_shapes_per_image?: number;
 
   @IsNumber()
   @IsPositive()
+  @IsOptional()
   min_points?: number;
 
   @IsNumber()
   @IsPositive()
+  @IsOptional()
   max_points?: number;
 
   @IsNumber()
   @IsPositive()
+  @IsOptional()
   minimum_selection_area_per_shape?: number;
 
   @IsNumber()
   @IsPositive()
+  @IsOptional()
   multiple_choice_max_choices?: number;
 
   @IsNumber()
   @IsPositive()
+  @IsOptional()
   multiple_choice_min_choices?: number;
 
   @IsString()
+  @IsOptional()
   answer_type?: string;
 
+  @IsOptional()
   overlap_threshold?: any;
 
   @IsNumber()
   @IsPositive()
+  @IsOptional()
   max_length?: number;
 
   @IsNumber()
   @IsPositive()
+  @IsOptional()
   min_length?: number;
 }
 
@@ -270,6 +298,7 @@ export class HCaptchaManifestDto {
 
   @IsObject()
   @ValidateNested()
+  @Type(() => RequestConfig)
   request_config: RequestConfig;
 
   @IsNumber()
@@ -299,6 +328,7 @@ export class HCaptchaManifestDto {
   task_bid_price: number;
 
   @IsUrl()
+  @IsOptional()
   groundtruth_uri?: string;
 
   public_results: boolean;
@@ -314,15 +344,18 @@ export class HCaptchaManifestDto {
 
   @IsObject()
   @ValidateNested()
+  @Type(() => RestrictedAudience)
   restricted_audience: RestrictedAudience;
 
   @IsObject()
   @ValidateNested()
+  @Type(() => RequesterRestrictedAnswer)
   requester_restricted_answer_set: RequesterRestrictedAnswer;
 
   @IsOptional()
   @IsArray()
   @ValidateNested()
+  @Type(() => TaskData)
   taskdata?: TaskData[];
 
   @IsArray()
@@ -366,6 +399,7 @@ export class ManifestDetails {
   @ApiProperty({ description: 'Description' })
   @IsNotEmpty()
   @IsString()
+  @IsOptional()
   public description?: string;
 
   @ApiProperty({
@@ -403,7 +437,7 @@ export class ManifestDetails {
   })
   @IsOptional()
   @IsNotEmpty()
-  @IsString()
+  @IsEthereumAddress()
   public exchangeOracleAddress?: string;
 
   @ApiProperty({
@@ -412,7 +446,7 @@ export class ManifestDetails {
   })
   @IsOptional()
   @IsNotEmpty()
-  @IsString()
+  @IsEthereumAddress()
   public recordingOracleAddress?: string;
 
   @ApiProperty({
@@ -421,7 +455,7 @@ export class ManifestDetails {
   })
   @IsOptional()
   @IsNotEmpty()
-  @IsString()
+  @IsEthereumAddress()
   public reputationOracleAddress?: string;
 }
 

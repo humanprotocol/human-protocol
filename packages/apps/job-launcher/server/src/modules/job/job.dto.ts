@@ -117,10 +117,12 @@ export class JobQuickLaunchDto extends JobDto {
 export class JobFortuneDto extends JobDto {
   @ApiProperty({ name: 'requester_title' })
   @IsString()
+  @IsNotEmpty()
   public requesterTitle: string;
 
   @ApiProperty({ name: 'requester_description' })
   @IsString()
+  @IsNotEmpty()
   public requesterDescription: string;
 
   @ApiProperty({ name: 'submissions_required' })
@@ -140,12 +142,13 @@ export class StorageDataDto {
 
   @ApiProperty({ name: 'bucket_name' })
   @IsString()
+  @IsNotEmpty()
   public bucketName: string;
 
   @ApiProperty()
   @IsOptional()
   @IsString()
-  public path: string;
+  public path?: string;
 }
 
 export class CvatDataDto {
@@ -167,6 +170,7 @@ export class CvatDataDto {
 export class JobCvatDto extends JobDto {
   @ApiProperty({ name: 'requester_description' })
   @IsString()
+  @IsNotEmpty()
   public requesterDescription: string;
 
   @ApiProperty()
@@ -200,6 +204,7 @@ export class JobCvatDto extends JobDto {
 class AudinoLabel {
   @ApiProperty()
   @IsString()
+  @IsNotEmpty()
   public name: string;
 }
 
@@ -212,6 +217,7 @@ class AudinoDataDto {
 export class JobAudinoDto extends JobDto {
   @ApiProperty({ name: 'requester_description' })
   @IsString()
+  @IsNotEmpty()
   public requesterDescription: string;
 
   @ApiProperty()
@@ -337,7 +343,7 @@ export class JobDetailsDto {
 export class FortuneFinalResultDto {
   @ApiProperty({ name: 'worker_address' })
   @IsNotEmpty()
-  @IsString()
+  @IsEthereumAddress()
   public workerAddress: string;
 
   @ApiProperty()

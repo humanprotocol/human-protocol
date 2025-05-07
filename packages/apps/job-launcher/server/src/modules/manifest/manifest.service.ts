@@ -255,7 +255,7 @@ export class ManifestService {
     }
   }
 
-  private async calculateJobBounty(
+  private async calculateCvatJobBounty(
     params: CvatCalculateJobBounty,
   ): Promise<string> {
     const { requestType, fundAmount, urls, nodesTotal } = params;
@@ -312,7 +312,7 @@ export class ManifestService {
         : undefined,
     };
 
-    const jobBounty = await this.calculateJobBounty({
+    const jobBounty = await this.calculateCvatJobBounty({
       requestType,
       fundAmount: tokenFundAmount,
       decimals,

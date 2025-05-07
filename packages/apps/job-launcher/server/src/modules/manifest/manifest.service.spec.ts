@@ -14,6 +14,20 @@ import { AuthConfigService } from '../../common/config/auth-config.service';
 import { CvatConfigService } from '../../common/config/cvat-config.service';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
+import {
+  HCAPTCHA_BOUNDING_BOX_MAX_POINTS,
+  HCAPTCHA_BOUNDING_BOX_MIN_POINTS,
+  HCAPTCHA_IMMO_MAX_LENGTH,
+  HCAPTCHA_IMMO_MIN_LENGTH,
+  HCAPTCHA_LANDMARK_MAX_POINTS,
+  HCAPTCHA_LANDMARK_MIN_POINTS,
+  HCAPTCHA_MAX_SHAPES_PER_IMAGE,
+  HCAPTCHA_MIN_SHAPES_PER_IMAGE,
+  HCAPTCHA_MINIMUM_SELECTION_AREA_PER_SHAPE,
+  HCAPTCHA_ORACLE_STAKE,
+  HCAPTCHA_POLYGON_MAX_POINTS,
+  HCAPTCHA_POLYGON_MIN_POINTS,
+} from '../../common/constants';
 import { ErrorJob } from '../../common/constants/errors';
 import {
   AudinoJobType,
@@ -89,7 +103,7 @@ describe('ManifestService', () => {
 
       beforeAll(() => {
         jobBounty = faker.number.int({ min: 1, max: 1000 }).toString();
-        manifestService['calculateJobBounty'] = jest
+        manifestService['calculateCvatJobBounty'] = jest
           .fn()
           .mockResolvedValue(jobBounty);
       });
@@ -118,8 +132,8 @@ describe('ManifestService', () => {
           },
           validation: {
             min_quality: dto.minQuality,
-            val_size: expect.any(Number),
-            gt_url: expect.any(String),
+            val_size: mockCvatConfigService.valSize,
+            gt_url: generateBucketUrl(dto.groundTruth, requestType).href,
           },
           job_bounty: jobBounty,
         });
@@ -149,8 +163,8 @@ describe('ManifestService', () => {
           },
           validation: {
             min_quality: dto.minQuality,
-            val_size: expect.any(Number),
-            gt_url: expect.any(String),
+            val_size: mockCvatConfigService.valSize,
+            gt_url: generateBucketUrl(dto.groundTruth, requestType).href,
           },
           job_bounty: jobBounty,
         });
@@ -197,7 +211,7 @@ describe('ManifestService', () => {
           },
           validation: {
             min_quality: dto.minQuality,
-            val_size: expect.any(Number),
+            val_size: mockCvatConfigService.valSize,
             gt_url: generateBucketUrl(dto.groundTruth, requestType).href,
           },
           job_bounty: jobBounty,
@@ -245,7 +259,7 @@ describe('ManifestService', () => {
           },
           validation: {
             min_quality: dto.minQuality,
-            val_size: expect.any(Number),
+            val_size: mockCvatConfigService.valSize,
             gt_url: generateBucketUrl(dto.groundTruth, requestType).href,
           },
           job_bounty: jobBounty,
@@ -375,21 +389,23 @@ describe('ManifestService', () => {
         expect(result).toEqual({
           job_mode: JobCaptchaMode.BATCH,
           requester_accuracy_target: jobDto.accuracyTarget,
-          request_config: expect.any(Object),
-          restricted_audience: expect.any(Object),
+          request_config: {},
+          restricted_audience: {
+            sitekey: [expect.any(Object)],
+          },
           requester_max_repeats: jobDto.maxRequests,
           requester_min_repeats: jobDto.minRequests,
           requester_question: { en: jobDto.annotations.labelingPrompt },
-          job_total_tasks: expect.any(Number),
+          job_total_tasks: 3,
           task_bid_price: jobDto.annotations.taskBidPrice,
           taskdata_uri: expect.any(String),
           public_results: true,
-          oracle_stake: expect.any(Number),
-          repo_uri: expect.any(String),
-          ro_uri: expect.any(String),
-          request_type: expect.any(String),
-          groundtruth_uri: expect.any(String),
-          requester_restricted_answer_set: expect.any(Object),
+          oracle_stake: HCAPTCHA_ORACLE_STAKE,
+          repo_uri: mockWeb3ConfigService.hCaptchaReputationOracleURI,
+          ro_uri: mockWeb3ConfigService.hCaptchaRecordingOracleURI,
+          request_type: JobCaptchaRequestType.IMAGE_LABEL_BINARY,
+          groundtruth_uri: jobDto.annotations.groundTruths,
+          requester_restricted_answer_set: {},
           requester_question_example: jobDto.annotations.exampleImages,
         });
       });
@@ -414,20 +430,22 @@ describe('ManifestService', () => {
         expect(result).toEqual({
           job_mode: JobCaptchaMode.BATCH,
           requester_accuracy_target: jobDto.accuracyTarget,
-          request_config: expect.any(Object),
-          restricted_audience: expect.any(Object),
+          request_config: {},
+          restricted_audience: {
+            sitekey: [expect.any(Object)],
+          },
           requester_max_repeats: jobDto.maxRequests,
           requester_min_repeats: jobDto.minRequests,
           requester_question: { en: jobDto.annotations.labelingPrompt },
-          job_total_tasks: expect.any(Number),
+          job_total_tasks: 3,
           task_bid_price: jobDto.annotations.taskBidPrice,
           taskdata_uri: expect.any(String),
           public_results: true,
-          oracle_stake: expect.any(Number),
-          repo_uri: expect.any(String),
-          ro_uri: expect.any(String),
-          request_type: expect.any(String),
-          groundtruth_uri: expect.any(String),
+          oracle_stake: HCAPTCHA_ORACLE_STAKE,
+          repo_uri: mockWeb3ConfigService.hCaptchaReputationOracleURI,
+          ro_uri: mockWeb3ConfigService.hCaptchaRecordingOracleURI,
+          request_type: JobCaptchaRequestType.IMAGE_LABEL_MULTIPLE_CHOICE,
+          groundtruth_uri: jobDto.annotations.groundTruths,
           requester_restricted_answer_set: expect.any(Object),
         });
       });
@@ -455,11 +473,12 @@ describe('ManifestService', () => {
           requester_accuracy_target: jobDto.accuracyTarget,
           request_config: {
             shape_type: JobCaptchaShapeType.POLYGON,
-            min_shapes_per_image: expect.any(Number),
-            max_shapes_per_image: expect.any(Number),
-            min_points: expect.any(Number),
-            max_points: expect.any(Number),
-            minimum_selection_area_per_shape: expect.any(Number),
+            min_shapes_per_image: HCAPTCHA_MIN_SHAPES_PER_IMAGE,
+            max_shapes_per_image: HCAPTCHA_MAX_SHAPES_PER_IMAGE,
+            min_points: HCAPTCHA_POLYGON_MIN_POINTS,
+            max_points: HCAPTCHA_POLYGON_MAX_POINTS,
+            minimum_selection_area_per_shape:
+              HCAPTCHA_MINIMUM_SELECTION_AREA_PER_SHAPE,
           },
           restricted_audience: {
             sitekey: [expect.any(Object)],
@@ -468,13 +487,13 @@ describe('ManifestService', () => {
           requester_min_repeats: jobDto.minRequests,
           requester_question: { en: jobDto.annotations.labelingPrompt },
           requester_question_example: [],
-          job_total_tasks: expect.any(Number),
+          job_total_tasks: 3,
           task_bid_price: jobDto.annotations.taskBidPrice,
           taskdata_uri: expect.any(String),
           public_results: true,
-          oracle_stake: expect.any(Number),
-          repo_uri: expect.any(String),
-          ro_uri: expect.any(String),
+          oracle_stake: HCAPTCHA_ORACLE_STAKE,
+          repo_uri: mockWeb3ConfigService.hCaptchaReputationOracleURI,
+          ro_uri: mockWeb3ConfigService.hCaptchaRecordingOracleURI,
           request_type: JobCaptchaRequestType.IMAGE_LABEL_AREA_SELECT,
           groundtruth_uri: jobDto.annotations.groundTruths,
           requester_restricted_answer_set: {
@@ -531,10 +550,10 @@ describe('ManifestService', () => {
           requester_accuracy_target: jobDto.accuracyTarget,
           request_config: {
             shape_type: JobCaptchaShapeType.POINT,
-            min_shapes_per_image: expect.any(Number),
-            max_shapes_per_image: expect.any(Number),
-            min_points: expect.any(Number),
-            max_points: expect.any(Number),
+            min_shapes_per_image: HCAPTCHA_MIN_SHAPES_PER_IMAGE,
+            max_shapes_per_image: HCAPTCHA_MAX_SHAPES_PER_IMAGE,
+            min_points: HCAPTCHA_LANDMARK_MIN_POINTS,
+            max_points: HCAPTCHA_LANDMARK_MAX_POINTS,
           },
           restricted_audience: {
             sitekey: [expect.any(Object)],
@@ -543,13 +562,13 @@ describe('ManifestService', () => {
           requester_min_repeats: jobDto.minRequests,
           requester_question: { en: jobDto.annotations.labelingPrompt },
           requester_question_example: jobDto.annotations.exampleImages || [],
-          job_total_tasks: expect.any(Number),
+          job_total_tasks: 3,
           task_bid_price: jobDto.annotations.taskBidPrice,
           taskdata_uri: expect.any(String),
           public_results: true,
-          oracle_stake: expect.any(Number),
-          repo_uri: expect.any(String),
-          ro_uri: expect.any(String),
+          oracle_stake: HCAPTCHA_ORACLE_STAKE,
+          repo_uri: mockWeb3ConfigService.hCaptchaReputationOracleURI,
+          ro_uri: mockWeb3ConfigService.hCaptchaRecordingOracleURI,
           request_type: JobCaptchaRequestType.IMAGE_LABEL_AREA_SELECT,
           groundtruth_uri: jobDto.annotations.groundTruths,
           requester_restricted_answer_set: {
@@ -606,10 +625,10 @@ describe('ManifestService', () => {
           requester_accuracy_target: jobDto.accuracyTarget,
           request_config: {
             shape_type: JobCaptchaShapeType.BOUNDING_BOX,
-            min_shapes_per_image: expect.any(Number),
-            max_shapes_per_image: expect.any(Number),
-            min_points: expect.any(Number),
-            max_points: expect.any(Number),
+            min_shapes_per_image: HCAPTCHA_MIN_SHAPES_PER_IMAGE,
+            max_shapes_per_image: HCAPTCHA_MAX_SHAPES_PER_IMAGE,
+            min_points: HCAPTCHA_BOUNDING_BOX_MIN_POINTS,
+            max_points: HCAPTCHA_BOUNDING_BOX_MAX_POINTS,
           },
           restricted_audience: {
             sitekey: [expect.any(Object)],
@@ -618,13 +637,13 @@ describe('ManifestService', () => {
           requester_min_repeats: jobDto.minRequests,
           requester_question: { en: jobDto.annotations.labelingPrompt },
           requester_question_example: jobDto.annotations.exampleImages || [],
-          job_total_tasks: expect.any(Number),
+          job_total_tasks: 3,
           task_bid_price: jobDto.annotations.taskBidPrice,
           taskdata_uri: expect.any(String),
           public_results: true,
-          oracle_stake: expect.any(Number),
-          repo_uri: expect.any(String),
-          ro_uri: expect.any(String),
+          oracle_stake: HCAPTCHA_ORACLE_STAKE,
+          repo_uri: mockWeb3ConfigService.hCaptchaReputationOracleURI,
+          ro_uri: mockWeb3ConfigService.hCaptchaRecordingOracleURI,
           request_type: JobCaptchaRequestType.IMAGE_LABEL_AREA_SELECT,
           groundtruth_uri: jobDto.annotations.groundTruths,
           requester_restricted_answer_set: {
@@ -684,8 +703,8 @@ describe('ManifestService', () => {
             multiple_choice_min_choices: 1,
             overlap_threshold: null,
             answer_type: 'str',
-            max_length: expect.any(Number),
-            min_length: expect.any(Number),
+            max_length: HCAPTCHA_IMMO_MAX_LENGTH,
+            min_length: HCAPTCHA_IMMO_MIN_LENGTH,
           },
           restricted_audience: {
             sitekey: [expect.any(Object)],
@@ -693,14 +712,14 @@ describe('ManifestService', () => {
           requester_max_repeats: jobDto.maxRequests,
           requester_min_repeats: jobDto.minRequests,
           requester_question: { en: jobDto.annotations.labelingPrompt },
-          job_total_tasks: expect.any(Number),
+          job_total_tasks: 3,
           task_bid_price: jobDto.annotations.taskBidPrice,
           taskdata: [],
           taskdata_uri: expect.any(String),
           public_results: true,
-          oracle_stake: expect.any(Number),
-          repo_uri: expect.any(String),
-          ro_uri: expect.any(String),
+          oracle_stake: HCAPTCHA_ORACLE_STAKE,
+          repo_uri: mockWeb3ConfigService.hCaptchaReputationOracleURI,
+          ro_uri: mockWeb3ConfigService.hCaptchaRecordingOracleURI,
           request_type: JobCaptchaRequestType.TEXT_FREEE_NTRY,
           requester_restricted_answer_set: {
             [jobDto.annotations.label!]: { en: jobDto.annotations.label },
@@ -845,7 +864,12 @@ describe('ManifestService', () => {
       );
       await expect(
         manifestService.downloadManifest(mockManifestUrl, mockRequestType),
-      ).rejects.toThrow(ControlledError);
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorJob.ManifestValidationFailed,
+          HttpStatus.NOT_FOUND,
+        ),
+      );
     });
   });
 });
