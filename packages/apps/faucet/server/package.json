@@ -1,5 +1,6 @@
 {
   "name": "@human-protocol/faucet-server",
+  "private": true,
   "version": "1.0.0",
   "description": "Human Protocol faucet for private Ethereum testnet.",
   "main": "src/index.ts",

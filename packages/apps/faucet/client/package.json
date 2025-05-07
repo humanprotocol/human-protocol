@@ -1,6 +1,6 @@
 {
-  "private": "true",
   "name": "@human-protocol/faucet-client",
+  "private": true,
   "version": "1.0.0",
   "description": "Human Protocol Faucet",
   "license": "MIT",

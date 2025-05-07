@@ -1,9 +1,9 @@
 {
   "name": "@human-protocol/reputation-oracle",
+  "private": true,
   "version": "0.0.1",
   "description": "",
   "author": "",
-  "private": true,
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",

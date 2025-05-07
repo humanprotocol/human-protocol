@@ -1,6 +1,6 @@
 {
-  "private": "true",
   "name": "@human-protocol/dashboard-client",
+  "private": true,
   "version": "1.0.0",
   "description": "Human Protocol Dashboard",
   "license": "MIT",

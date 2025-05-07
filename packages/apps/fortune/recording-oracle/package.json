@@ -1,5 +1,6 @@
 {
   "name": "@human-protocol/fortune-recording-oracle",
+  "private": true,
   "version": "1.0.0",
   "description": "Fortune Recording Oracle",
   "author": "Human Protocol",

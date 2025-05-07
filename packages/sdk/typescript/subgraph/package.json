@@ -1,5 +1,6 @@
 {
   "name": "@human-protocol/subgraph",
+  "private": true,
   "description": "Human Protocol Subgraph",
   "version": "1.0.0",
   "files": [
