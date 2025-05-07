@@ -54,7 +54,7 @@ export class AbuseController {
     await this.abuseService.reportAbuse({
       escrowAddress: data.escrowAddress,
       chainId: data.chainId,
-      userId: request.user.id,
+      userId: request.user,
     });
   }
 
@@ -73,9 +73,7 @@ export class AbuseController {
   async getUserAbuseReports(
     @Req() request: RequestWithUser,
   ): Promise<AbuseResponseDto[]> {
-    const abuseEntities = await this.abuseRepository.findByUserId(
-      request.user.id,
-    );
+    const abuseEntities = await this.abuseRepository.findByUserId(request.user);
     return abuseEntities.map((abuseEntity) => {
       return {
         id: abuseEntity.id,

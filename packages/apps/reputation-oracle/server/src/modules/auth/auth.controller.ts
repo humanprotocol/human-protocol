@@ -235,7 +235,7 @@ export class AuthController {
   async logout(@Req() request: RequestWithUser): Promise<void> {
     await this.tokenRepository.deleteOneByTypeAndUserId(
       TokenType.REFRESH,
-      request.user.id,
+      request.user,
     );
   }
 }

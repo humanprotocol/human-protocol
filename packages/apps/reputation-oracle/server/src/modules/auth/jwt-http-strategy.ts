@@ -7,21 +7,15 @@ import {
   LOGOUT_PATH,
   RESEND_EMAIL_VERIFICATION_PATH,
 } from '../../common/constants';
-import { UserEntity, UserStatus, UserRepository } from '../user';
+import { UserStatus } from '../user';
 import { AuthConfigService } from '../../config';
-import { TokenType } from './token.entity';
-import { TokenRepository } from './token.repository';
 
 @Injectable()
 export class JwtHttpStrategy extends PassportStrategy(
   Strategy,
   JWT_STRATEGY_NAME,
 ) {
-  constructor(
-    private readonly userRepository: UserRepository,
-    private readonly tokenRepository: TokenRepository,
-    authConfigService: AuthConfigService,
-  ) {
+  constructor(authConfigService: AuthConfigService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -32,36 +26,16 @@ export class JwtHttpStrategy extends PassportStrategy(
 
   async validate(
     @Req() request: any,
-    payload: { user_id: number },
-  ): Promise<UserEntity> {
-    const token = await this.tokenRepository.findOneByUserIdAndType(
-      payload.user_id,
-      TokenType.REFRESH,
-    );
-
-    if (!token) {
-      throw new UnauthorizedException('User is not authorized');
-    }
-
-    const user = await this.userRepository.findOneById(payload.user_id, {
-      relations: {
-        kyc: true,
-        siteKeys: true,
-      },
-    });
-
-    if (!user) {
-      throw new UnauthorizedException('User not found');
-    }
-
+    payload: { user_id: number; status: UserStatus },
+  ): Promise<number> {
     if (
-      user.status !== UserStatus.ACTIVE &&
+      payload.status !== UserStatus.ACTIVE &&
       request.url !== RESEND_EMAIL_VERIFICATION_PATH &&
       request.url !== LOGOUT_PATH
     ) {
       throw new UnauthorizedException('User not active');
     }
 
-    return user;
+    return payload.user_id;
   }
 }
