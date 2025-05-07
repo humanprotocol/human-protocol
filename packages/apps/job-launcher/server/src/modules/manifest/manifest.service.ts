@@ -92,7 +92,8 @@ export class ManifestService {
   async createManifest(
     dto: CreateJob,
     requestType: JobRequestType,
-    fundAmount?: number,
+    fundAmount: number,
+    decimals: number,
   ): Promise<any> {
     switch (requestType) {
       case HCaptchaJobType.HCAPTCHA:
@@ -113,14 +114,15 @@ export class ManifestService {
         return this.createCvatManifest(
           dto as JobCvatDto,
           requestType,
-          fundAmount!,
+          fundAmount,
+          decimals,
         );
 
       case AudinoJobType.AUDIO_TRANSCRIPTION:
         return this.createAudinoManifest(
           dto as JobAudinoDto,
           requestType,
-          fundAmount!,
+          fundAmount,
         );
 
       default:
@@ -271,21 +273,25 @@ export class ManifestService {
 
     let totalJobs: number;
 
-    // For each skeleton node CVAT creates a separate project thus increasing amount of jobs
+    // For each skeleton node CVAT creates a separate project thus increasing the number of jobs
     if (requestType === CvatJobType.IMAGE_SKELETONS_FROM_BOXES && nodesTotal) {
       totalJobs = Math.ceil(elementsCount / jobSize) * nodesTotal;
     } else {
       totalJobs = Math.ceil(elementsCount / jobSize);
     }
+
     const jobBounty =
-      ethers.parseUnits(fundAmount.toString(), 'ether') / BigInt(totalJobs);
-    return ethers.formatEther(jobBounty);
+      ethers.parseUnits(fundAmount.toString(), params.decimals) /
+      BigInt(totalJobs);
+
+    return ethers.formatUnits(jobBounty, params.decimals);
   }
 
   private async createCvatManifest(
     dto: JobCvatDto,
     requestType: CvatJobType,
     tokenFundAmount: number,
+    decimals: number,
   ): Promise<CvatManifestDto> {
     if (
       (requestType === CvatJobType.IMAGE_SKELETONS_FROM_BOXES &&
@@ -309,6 +315,7 @@ export class ManifestService {
     const jobBounty = await this.calculateJobBounty({
       requestType,
       fundAmount: tokenFundAmount,
+      decimals,
       urls,
       nodesTotal: dto.labels[0]?.nodes?.length,
     });

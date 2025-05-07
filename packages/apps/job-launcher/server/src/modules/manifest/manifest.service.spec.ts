@@ -83,7 +83,10 @@ describe('ManifestService', () => {
 
   describe('createManifest', () => {
     describe('createCvatManifest', () => {
+      const tokenFundAmount = faker.number.int({ min: 1, max: 1000 });
+      const tokenFundDecimals = faker.number.int({ min: 1, max: 18 });
       let jobBounty: string;
+
       beforeAll(() => {
         jobBounty = faker.number.int({ min: 1, max: 1000 }).toString();
         manifestService['calculateJobBounty'] = jest
@@ -94,12 +97,12 @@ describe('ManifestService', () => {
       it('should create a valid CVAT manifest for image boxes job type', async () => {
         const dto = createJobCvatDto({ type: CvatJobType.IMAGE_BOXES });
         const requestType = CvatJobType.IMAGE_BOXES;
-        const tokenFundAmount = faker.number.int({ min: 1, max: 1000 });
 
         const result = await manifestService.createManifest(
           dto,
           requestType,
           tokenFundAmount,
+          tokenFundDecimals,
         );
 
         expect(result).toEqual({
@@ -125,12 +128,12 @@ describe('ManifestService', () => {
       it('should create a valid CVAT manifest for image polygons job type', async () => {
         const dto = createJobCvatDto({ type: CvatJobType.IMAGE_POLYGONS });
         const requestType = CvatJobType.IMAGE_POLYGONS;
-        const tokenFundAmount = faker.number.int({ min: 1, max: 1000 });
 
         const result = await manifestService.createManifest(
           dto,
           requestType,
           tokenFundAmount,
+          tokenFundDecimals,
         );
 
         expect(result).toEqual({
@@ -172,12 +175,12 @@ describe('ManifestService', () => {
           type: CvatJobType.IMAGE_BOXES_FROM_POINTS,
         });
         const requestType = CvatJobType.IMAGE_BOXES_FROM_POINTS;
-        const tokenFundAmount = faker.number.int({ min: 1, max: 1000 });
 
         const result = await manifestService.createManifest(
           dto,
           requestType,
           tokenFundAmount,
+          tokenFundDecimals,
         );
 
         expect(result).toEqual({
@@ -220,12 +223,12 @@ describe('ManifestService', () => {
           type: CvatJobType.IMAGE_SKELETONS_FROM_BOXES,
         });
         const requestType = CvatJobType.IMAGE_SKELETONS_FROM_BOXES;
-        const tokenFundAmount = faker.number.int({ min: 1, max: 1000 });
 
         const result = await manifestService.createManifest(
           dto,
           requestType,
           tokenFundAmount,
+          tokenFundDecimals,
         );
 
         expect(result).toEqual({
@@ -253,10 +256,14 @@ describe('ManifestService', () => {
         const requestType = CvatJobType.IMAGE_BOXES_FROM_POINTS;
 
         const dto = createJobCvatDto({ type: requestType });
-        const tokenFundAmount = faker.number.int({ min: 1, max: 1000 });
 
         await expect(
-          manifestService.createManifest(dto, requestType, tokenFundAmount),
+          manifestService.createManifest(
+            dto,
+            requestType,
+            tokenFundAmount,
+            tokenFundDecimals,
+          ),
         ).rejects.toThrow(
           new ControlledError(ErrorJob.DataNotExist, HttpStatus.CONFLICT),
         );
@@ -266,10 +273,14 @@ describe('ManifestService', () => {
         const requestType = CvatJobType.IMAGE_SKELETONS_FROM_BOXES;
 
         const dto = createJobCvatDto({ type: requestType });
-        const tokenFundAmount = faker.number.int({ min: 1, max: 1000 });
 
         await expect(
-          manifestService.createManifest(dto, requestType, tokenFundAmount),
+          manifestService.createManifest(
+            dto,
+            requestType,
+            tokenFundAmount,
+            tokenFundDecimals,
+          ),
         ).rejects.toThrow(
           new ControlledError(ErrorJob.DataNotExist, HttpStatus.CONFLICT),
         );
@@ -281,11 +292,13 @@ describe('ManifestService', () => {
         const mockDto = createJobAudinoDto(); // Use the helper function
         const mockRequestType = AudinoJobType.AUDIO_TRANSCRIPTION;
         const mockTokenFundAmount = faker.number.int({ min: 1, max: 1000 });
+        const mockTokenFundDecimals = faker.number.int({ min: 1, max: 18 });
 
         const result = await manifestService.createManifest(
           mockDto as any,
           mockRequestType,
           mockTokenFundAmount,
+          mockTokenFundDecimals,
         );
 
         const totalSegments = Math.ceil(
@@ -321,6 +334,7 @@ describe('ManifestService', () => {
     describe('createHCaptchaManifest', () => {
       const requestType = HCaptchaJobType.HCAPTCHA;
       const tokenFundAmount = faker.number.int({ min: 1, max: 1000 });
+      const tokenFundDecimals = faker.number.int({ min: 1, max: 18 });
 
       beforeEach(() => {
         const fileContent = JSON.stringify({
@@ -355,6 +369,7 @@ describe('ManifestService', () => {
           jobDto,
           requestType,
           tokenFundAmount,
+          tokenFundDecimals,
         );
 
         expect(result).toEqual({
@@ -393,6 +408,7 @@ describe('ManifestService', () => {
           jobDto,
           requestType,
           tokenFundAmount,
+          tokenFundDecimals,
         );
 
         expect(result).toEqual({
@@ -431,6 +447,7 @@ describe('ManifestService', () => {
           jobDto,
           requestType,
           tokenFundAmount,
+          tokenFundDecimals,
         );
 
         expect(result).toEqual({
@@ -477,7 +494,12 @@ describe('ManifestService', () => {
         });
 
         await expect(
-          manifestService.createManifest(jobDto, requestType, tokenFundAmount),
+          manifestService.createManifest(
+            jobDto,
+            requestType,
+            tokenFundAmount,
+            tokenFundDecimals,
+          ),
         ).rejects.toThrow(
           new ControlledError(
             ErrorJob.JobParamsValidationFailed,
@@ -501,6 +523,7 @@ describe('ManifestService', () => {
           jobDto,
           requestType,
           tokenFundAmount,
+          tokenFundDecimals,
         );
 
         expect(result).toEqual({
@@ -546,7 +569,12 @@ describe('ManifestService', () => {
         });
 
         await expect(
-          manifestService.createManifest(jobDto, requestType, tokenFundAmount),
+          manifestService.createManifest(
+            jobDto,
+            requestType,
+            tokenFundAmount,
+            tokenFundDecimals,
+          ),
         ).rejects.toThrow(
           new ControlledError(
             ErrorJob.JobParamsValidationFailed,
@@ -570,6 +598,7 @@ describe('ManifestService', () => {
           jobDto,
           requestType,
           tokenFundAmount,
+          tokenFundDecimals,
         );
 
         expect(result).toEqual({
@@ -615,7 +644,12 @@ describe('ManifestService', () => {
         });
 
         await expect(
-          manifestService.createManifest(jobDto, requestType, tokenFundAmount),
+          manifestService.createManifest(
+            jobDto,
+            requestType,
+            tokenFundAmount,
+            tokenFundDecimals,
+          ),
         ).rejects.toThrow(
           new ControlledError(
             ErrorJob.JobParamsValidationFailed,
@@ -639,6 +673,7 @@ describe('ManifestService', () => {
           jobDto,
           requestType,
           tokenFundAmount,
+          tokenFundDecimals,
         );
 
         expect(result).toEqual({
@@ -684,7 +719,12 @@ describe('ManifestService', () => {
         });
 
         await expect(
-          manifestService.createManifest(jobDto, requestType, tokenFundAmount),
+          manifestService.createManifest(
+            jobDto,
+            requestType,
+            tokenFundAmount,
+            tokenFundDecimals,
+          ),
         ).rejects.toThrow(
           new ControlledError(
             ErrorJob.JobParamsValidationFailed,
@@ -704,7 +744,12 @@ describe('ManifestService', () => {
         });
 
         await expect(
-          manifestService.createManifest(jobDto, requestType, tokenFundAmount),
+          manifestService.createManifest(
+            jobDto,
+            requestType,
+            tokenFundAmount,
+            tokenFundDecimals,
+          ),
         ).rejects.toThrow(
           new ControlledError(
             ErrorJob.HCaptchaInvalidJobType,
