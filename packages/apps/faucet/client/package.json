@@ -27,7 +27,7 @@
     "prettier": "^3.4.2",
     "typescript": "^5.8.3",
     "vite": "^6.2.4",
-    "vite-plugin-node-polyfills": "^0.22.0"
+    "vite-plugin-node-polyfills": "^0.23.0"
   },
   "scripts": {
     "clean": "rm -rf dist",
