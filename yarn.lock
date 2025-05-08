@@ -3876,7 +3876,7 @@ __metadata:
   dependencies:
     "@emotion/react": "npm:^11.11.4"
     "@emotion/styled": "npm:^11.11.5"
-    "@human-protocol/sdk": "npm:*"
+    "@human-protocol/sdk": "workspace:*"
     "@mui/icons-material": "npm:^7.0.1"
     "@mui/material": "npm:^5.15.18"
     "@mui/styled-engine-sc": "npm:6.4.0"
@@ -4412,7 +4412,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@human-protocol/sdk@npm:*, @human-protocol/sdk@workspace:packages/sdk/typescript/human-protocol-sdk":
+"@human-protocol/sdk@npm:*, @human-protocol/sdk@workspace:*, @human-protocol/sdk@workspace:packages/sdk/typescript/human-protocol-sdk":
   version: 0.0.0-use.local
   resolution: "@human-protocol/sdk@workspace:packages/sdk/typescript/human-protocol-sdk"
   dependencies:

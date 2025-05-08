@@ -31,5 +31,8 @@
     }
   },
   "include": ["src"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "exclude": ["./vite.config.ts"],
+  "references": [{
+    "path": "../../../sdk/typescript/human-protocol-sdk"
+  }]
 }
