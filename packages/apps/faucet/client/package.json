@@ -16,6 +16,7 @@
     "viem": "2.x"
   },
   "devDependencies": {
+    "@types/react": "^18.3.12",
     "dotenv": "^16.3.2",
     "eslint": "^8.55.0",
     "eslint-config-react-app": "^7.0.1",
@@ -24,6 +25,7 @@
     "eslint-plugin-react": "^7.34.3",
     "eslint-plugin-react-hooks": "^5.1.0",
     "prettier": "^3.4.2",
+    "typescript": "^5.8.3",
     "vite": "^6.2.4",
     "vite-plugin-node-polyfills": "^0.22.0"
   },
