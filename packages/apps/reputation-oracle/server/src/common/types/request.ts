@@ -1,3 +1,3 @@
 export interface RequestWithUser extends Request {
-  user: number;
+  user: { id: number };
 }

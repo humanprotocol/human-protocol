@@ -218,7 +218,7 @@ export class AuthController {
   async resendEmailVerification(
     @Req() request: RequestWithUser,
   ): Promise<void> {
-    await this.authService.resendEmailVerification(request.user);
+    await this.authService.resendEmailVerification(request.user.id);
   }
 
   @ApiOperation({
@@ -235,7 +235,7 @@ export class AuthController {
   async logout(@Req() request: RequestWithUser): Promise<void> {
     await this.tokenRepository.deleteOneByTypeAndUserId(
       TokenType.REFRESH,
-      request.user,
+      request.user.id,
     );
   }
 }

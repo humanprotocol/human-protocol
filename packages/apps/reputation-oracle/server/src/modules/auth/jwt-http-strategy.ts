@@ -27,7 +27,7 @@ export class JwtHttpStrategy extends PassportStrategy(
   async validate(
     @Req() request: any,
     payload: { user_id: number; status: UserStatus },
-  ): Promise<number> {
+  ): Promise<{ id: number }> {
     if (
       payload.status !== UserStatus.ACTIVE &&
       request.url !== RESEND_EMAIL_VERIFICATION_PATH &&
@@ -36,6 +36,6 @@ export class JwtHttpStrategy extends PassportStrategy(
       throw new UnauthorizedException('User not active');
     }
 
-    return payload.user_id;
+    return { id: payload.user_id };
   }
 }

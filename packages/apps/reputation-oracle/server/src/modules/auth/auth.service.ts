@@ -422,7 +422,9 @@ export class AuthService {
   }
 
   async resendEmailVerification(userId: number): Promise<void> {
-    const user = await this.userRepository.findOneById(userId);
+    const user = (await this.userRepository.findOneById(
+      userId,
+    )) as Web2UserEntity;
 
     if (!user || user.status !== UserStatus.PENDING) {
       return;
@@ -446,12 +448,8 @@ export class AuthService {
     );
 
     const token = await this.tokenRepository.createUnique(tokenEntity);
-    await this.emailService.sendEmail(
-      user.email as string,
-      EmailAction.SIGNUP,
-      {
-        url: `${this.serverConfigService.feURL}/verify?token=${token.uuid}`,
-      },
-    );
+    await this.emailService.sendEmail(user.email, EmailAction.SIGNUP, {
+      url: `${this.serverConfigService.feURL}/verify?token=${token.uuid}`,
+    });
   }
 }
