@@ -77,10 +77,10 @@ Following networks are supported :
 You can find networks configuration in the directory `config`. Each JSON file is use to generate the `subgraph.yaml` file for each network.
 
 1. Add your network configuration as `config/NETWORK.json`
-2. Run authentication command: `npx graph auth --product hosted-service [AUTH_TOKEN]`
+2. Run authentication command: `yarn dlx graph auth --product hosted-service [AUTH_TOKEN]`
 3. Generate `NETWORK=[NETWORK] yarn generate`
 4. Go to your hosted [service dashboard](https://thegraph.com/hosted-service/dashboard) and create the new subgraph
-5. Deploy the subgraph `npx graph deploy --product hosted-service humanprotocol/[SUBGRAPH_NAME]`
+5. Deploy the subgraph `yarn dlx graph deploy --product hosted-service humanprotocol/[SUBGRAPH_NAME]`
 6. On the `./.github/workflows/cd-subgraph.yaml` add your network name and graph name.
 
 # Existing subgraphs

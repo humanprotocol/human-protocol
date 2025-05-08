@@ -13,7 +13,7 @@
     "clean:doc": "rm -rf ../../../../docs/sdk/typescript/",
     "prebuild": "yarn workspace @human-protocol/core build",
     "build": "yarn prebuild && yarn clean && tsc --build",
-    "build:doc": "yarn clean:doc && npx typedoc --plugin typedoc-plugin-markdown --out ../../../../docs/sdk/typescript/",
+    "build:doc": "yarn clean:doc && typedoc --plugin typedoc-plugin-markdown --out ../../../../docs/sdk/typescript/",
     "prepublish": "yarn build",
     "test": "vitest -u",
     "lint": "eslint .",
@@ -51,7 +51,9 @@
     "vitest": "^3.0.9"
   },
   "devDependencies": {
-    "typedoc": "^0.27.5",
+    "eslint": "^8.55.0",
+    "prettier": "^3.4.2",
+    "typedoc": "^0.28.4",
     "typedoc-plugin-markdown": "^4.2.3",
     "typescript": "^5.8.3"
   },
