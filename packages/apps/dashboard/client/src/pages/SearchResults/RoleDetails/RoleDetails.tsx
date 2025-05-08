@@ -1,23 +1,27 @@
-import Card from '@mui/material/Card';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import { colorPalette } from '@assets/styles/color-palette';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import Stack from '@mui/material/Stack';
 import IconButton from '@mui/material/IconButton';
+import { Role } from '@human-protocol/sdk';
+
+import CustomTooltip from '@components/CustomTooltip';
+import SectionWrapper from '@components/SectionWrapper';
+import KVStore from '../KVStore';
+import StakeInfo from '../StakeInfo';
+import { RoleDetailsEscrowsTable } from '@pages/SearchResults/RoleDetails/RoleDetailsEscrows/RoleDetailsEscrowsTable';
+
 import ReputationOracleIcon from '@assets/icons/reputation-oracle.svg';
 import ExchangeOracleIcon from '@assets/icons/exchange-oracle.svg';
 import JobLauncherIcon from '@assets/icons/job-launcher.svg';
 import RecordingOracleIcon from '@assets/icons/recording-oracle.svg';
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+
 import { AddressDetailsOperator } from '@services/api/use-address-details';
 import { getNetwork } from '@utils/config/networks';
 import { useWalletSearch } from '@utils/hooks/use-wallet-search';
-import { RoleDetailsEscrowsTable } from '@pages/SearchResults/RoleDetails/RoleDetailsEscrows/RoleDetailsEscrowsTable';
 import { Reputation } from '@services/api/use-leaderboard-details';
 import { env } from '@helpers/env';
-import { FormatNumberWithDecimals } from '@components/Home/FormatNumber';
-import CustomTooltip from '@components/CustomTooltip';
-import { Role } from '@human-protocol/sdk';
+import { colorPalette } from '@assets/styles/color-palette';
 
 interface RoleInfoProps {
   title: string;
@@ -179,26 +183,9 @@ const RoleDetails = ({
 
   return (
     <>
-      <Card
-        sx={{
-          paddingX: { xs: 2, md: 8 },
-          paddingY: { xs: 4, md: 6 },
-          marginBottom: 4,
-          borderRadius: '16px',
-          boxShadow: 'none',
-        }}
-      >
-        <Box
-          sx={{
-            marginBottom: { xs: 4, md: 8 },
-          }}
-        >
-          <Typography
-            sx={{
-              marginBottom: 1.5,
-            }}
-            variant="h5"
-          >
+      <SectionWrapper>
+        <Box mb={{ xs: 4, md: 8 }}>
+          <Typography variant="h5" mb={1.5}>
             Overview
           </Typography>
           {env.VITE_HUMANPROTOCOL_CORE_ARCHITECTURE ? (
@@ -227,13 +214,7 @@ const RoleDetails = ({
             alignItems="baseline"
             direction={{ sm: 'column', md: 'row' }}
           >
-            <Stack
-              sx={{
-                width: 300,
-              }}
-              direction="row"
-              alignItems="center"
-            >
+            <Stack direction="row" alignItems="center" width={300}>
               <Typography variant="subtitle2">Role</Typography>
             </Stack>
             <Stack gap={2} direction="column">
@@ -242,12 +223,7 @@ const RoleDetails = ({
             </Stack>
           </Stack>
           <Stack gap={{ xs: 1, md: 0 }} direction={{ sm: 'column', md: 'row' }}>
-            <Typography
-              sx={{
-                width: 300,
-              }}
-              variant="subtitle2"
-            >
+            <Typography variant="subtitle2" width={300}>
               Network
             </Typography>
             <Typography variant="body2">
@@ -259,13 +235,7 @@ const RoleDetails = ({
             gap={{ xs: 1, md: 0 }}
             direction={{ sm: 'column', md: 'row' }}
           >
-            <Stack
-              sx={{
-                width: 300,
-              }}
-              direction="row"
-              alignItems="center"
-            >
+            <Stack direction="row" alignItems="center" width={300}>
               <CustomTooltip title="Reputation of the role as per their activities">
                 <IconButton
                   sx={{
@@ -282,108 +252,21 @@ const RoleDetails = ({
             {renderReputationTitle(reputation)}
           </Stack>
           <Stack gap={{ xs: 1, md: 0 }} direction={{ sm: 'column', md: 'row' }}>
-            <Typography
-              sx={{
-                width: 300,
-              }}
-              variant="subtitle2"
-            >
+            <Typography variant="subtitle2" width={300}>
               Jobs Launched
             </Typography>
             <Typography>{amountJobsProcessed}</Typography>
           </Stack>
         </Stack>
-      </Card>
+      </SectionWrapper>
 
-      <Card
-        sx={{
-          paddingX: { xs: 2, md: 8 },
-          paddingY: { xs: 4, md: 6 },
-          marginBottom: 4,
-          borderRadius: '16px',
-          boxShadow: 'none',
-        }}
-      >
-        <Box
-          sx={{
-            marginBottom: { xs: 4, md: 8 },
-          }}
-        >
-          <Typography
-            sx={{
-              marginBottom: 1.5,
-            }}
-            variant="h5"
-          >
-            Stake Info
-          </Typography>
-        </Box>
-        <Stack gap={4}>
-          {amountStaked !== undefined && amountStaked !== null ? (
-            <Stack
-              gap={{ xs: 1, md: 0 }}
-              direction={{ sm: 'column', md: 'row' }}
-            >
-              <Typography
-                sx={{
-                  width: 300,
-                }}
-                variant="subtitle2"
-              >
-                Tokens Staked
-              </Typography>
-              <Stack sx={{ whiteSpace: 'nowrap', flexDirection: 'row' }}>
-                <Typography variant="body2">
-                  <FormatNumberWithDecimals value={amountStaked} />
-                </Typography>
-                <Typography
-                  sx={{
-                    marginLeft: 0.5,
-                  }}
-                  variant="body2"
-                  color={colorPalette.fog.main}
-                  component="span"
-                >
-                  HMT
-                </Typography>
-              </Stack>
-            </Stack>
-          ) : null}
-          {amountLocked !== undefined && amountLocked !== null ? (
-            <Stack
-              gap={{ xs: 1, md: 0 }}
-              direction={{ sm: 'column', md: 'row' }}
-            >
-              <Typography
-                sx={{
-                  width: 300,
-                }}
-                variant="subtitle2"
-              >
-                Tokens Locked
-              </Typography>
-              <Stack sx={{ whiteSpace: 'nowrap', flexDirection: 'row' }}>
-                <Typography variant="body2">
-                  <FormatNumberWithDecimals value={amountLocked} />
-                </Typography>
-                <Typography
-                  sx={{
-                    marginLeft: 0.5,
-                  }}
-                  variant="body2"
-                  color={colorPalette.fog.main}
-                  component="span"
-                >
-                  HMT
-                </Typography>
-              </Stack>
-            </Stack>
-          ) : null}
-        </Stack>
-      </Card>
+      <StakeInfo amountStaked={amountStaked} amountLocked={amountLocked} />
 
       {filterParams.address && filterParams.chainId ? (
-        <RoleDetailsEscrowsTable role={role} />
+        <>
+          <KVStore />
+          <RoleDetailsEscrowsTable role={role} />
+        </>
       ) : null}
     </>
   );

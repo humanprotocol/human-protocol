@@ -3,7 +3,7 @@ import Typography from '@mui/material/Typography';
 import { useGeneralStats } from '@services/api/use-general-stats';
 
 export function Holders() {
-  const { data, status } = useGeneralStats();
+  const { data, isSuccess, isPending, isError } = useGeneralStats();
 
   return (
     <div>
@@ -11,9 +11,9 @@ export function Holders() {
         Holders
       </Typography>
       <div className="count">
-        {status === 'success' && <FormatNumber value={data.totalHolders} />}
-        {status === 'pending' && '...'}
-        {status === 'error' && 'No data'}
+        {isSuccess && <FormatNumber value={data.totalHolders} />}
+        {isPending && '...'}
+        {isError && 'No data'}
       </div>
     </div>
   );
