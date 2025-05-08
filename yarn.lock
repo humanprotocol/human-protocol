@@ -15223,7 +15223,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dotenv@npm:^16.3.2, dotenv@npm:^16.4.5, dotenv@npm:^16.4.7":
+"dotenv@npm:^16.3.2, dotenv@npm:^16.4.5, dotenv@npm:^16.4.7, dotenv@npm:^16.5.0":
   version: 16.5.0
   resolution: "dotenv@npm:16.5.0"
   checksum: 10c0/5bc94c919fbd955bf0ba44d33922a1e93d1078e64a1db5c30faeded1d996e7a83c55332cb8ea4fae5a9ca4d0be44cbceb95c5811e70f9f095298df09d1997dd9
@@ -17500,6 +17500,14 @@ __metadata:
   resolution: "gcv@workspace:packages/examples/gcv"
   dependencies:
     "@google-cloud/vision": "npm:^4.3.2"
+    "@nestjs/common": "npm:^10.2.7"
+    "@types/xml2js": "npm:^0.4.14"
+    axios: "npm:^1.7.2"
+    dotenv: "npm:^16.5.0"
+    eslint: "npm:^8.55.0"
+    jest: "npm:^29.7.0"
+    typescript: "npm:^5.8.3"
+    xml2js: "npm:^0.6.2"
   languageName: unknown
   linkType: soft
 

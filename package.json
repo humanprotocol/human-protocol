@@ -6,9 +6,8 @@
   "repository": "https://github.com/humanprotocol/human-protocol",
   "license": "MIT",
   "scripts": {
-    "clean": "yarn workspaces --all -pt clean",
-    "lint": "yarn workspaces --all -pt lint",
-    "test": "yarn workspaces --all -pt test",
+    "clean": "yarn workspaces foreach --all -p run clean",
+    "lint": "yarn workspaces foreach --all -p run lint",
     "build:core": "yarn workspace @human-protocol/core build",
     "build:sdk": "yarn workspace @human-protocol/sdk build",
     "build:libs": "yarn build:core && yarn build:sdk"
