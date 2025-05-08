@@ -6,6 +6,7 @@
   "author": "",
   "license": "UNLICENSED",
   "scripts": {
+    "clean": "rm -rf dist",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
@@ -30,7 +31,7 @@
   "dependencies": {
     "@google-cloud/storage": "^7.15.0",
     "@google-cloud/vision": "^4.3.2",
-    "@human-protocol/sdk": "*",
+    "@human-protocol/sdk": "workspace:*",
     "@nestjs/axios": "^3.1.2",
     "@nestjs/common": "^10.2.7",
     "@nestjs/config": "^3.1.1",
@@ -47,6 +48,7 @@
     "@types/passport-jwt": "^4.0.1",
     "@types/uuid": "^10.0.0",
     "async-mutex": "^0.5.0",
+    "axios": "^1.7.2",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.3",
     "class-transformer": "^0.5.1",
@@ -90,7 +92,6 @@
     "source-map-support": "^0.5.20",
     "supertest": "^7.0.0",
     "ts-jest": "29.2.5",
-    "ts-loader": "^9.2.3",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "4.2.0",
     "typescript": "^5.6.3"
