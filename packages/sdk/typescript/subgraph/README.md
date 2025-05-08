@@ -26,7 +26,7 @@ To get more information about how the graph works :
 Package installation
 
 ```
-npm install
+yarn install
 ```
 
 ## 🏊 Deploying graphs for live networks

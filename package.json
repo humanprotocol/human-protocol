@@ -8,6 +8,7 @@
   "scripts": {
     "lint": "yarn workspaces --all -pt lint",
     "test": "yarn workspaces --all -pt test",
+    "build:core": "yarn workspace @human-protocol/core build",
     "build:sdk": "yarn workspace @human-protocol/sdk build"
   },
   "workspaces": [

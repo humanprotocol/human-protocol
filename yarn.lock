@@ -4474,10 +4474,12 @@ __metadata:
     "@graphprotocol/graph-cli": "npm:^0.95.0"
     "@graphprotocol/graph-ts": "npm:^0.38.0"
     "@graphql-eslint/eslint-plugin": "npm:^3.19.1"
-    "@human-protocol/core": "npm:*"
+    "@human-protocol/core": "workspace:*"
+    eslint: "npm:^8.55.0"
     graphql: "npm:^16.6.0"
     matchstick-as: "npm:^0.6.0"
     mustache: "npm:^4.2.0"
+    prettier: "npm:^3.4.2"
   languageName: unknown
   linkType: soft
 
