@@ -7,10 +7,11 @@
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
     "@hcaptcha/react-hcaptcha": "^1.10.1",
-    "@human-protocol/sdk": "*",
+    "@human-protocol/sdk": "workspace:*",
     "@mui/icons-material": "^7.0.1",
     "@mui/lab": "^5.0.0-alpha.141",
     "@mui/material": "^5.16.7",
+    "@mui/system": "^5.15.14",
     "@mui/x-date-pickers": "^7.23.6",
     "@reduxjs/toolkit": "^2.5.0",
     "@stripe/react-stripe-js": "^3.0.0",
@@ -40,6 +41,7 @@
     "yup": "^1.6.1"
   },
   "scripts": {
+    "clean": "rm -rf dist",
     "lint": "eslint \"**/*.{ts,tsx}\"",
     "start": "vite --port 3005",
     "build": "vite build",
@@ -48,7 +50,7 @@
     "format:prettier": "prettier --write \"**/*.{ts,tsx,js,jsx}\"",
     "format:lint": "eslint --fix \"**/*.{ts,tsx,js,jsx}\"",
     "format": "yarn format:prettier && yarn format:lint",
-    "vercel-build": "yarn workspace @human-protocol/sdk build && yarn build"
+    "vercel-build": "yarn workspace human-protocol build:libs && yarn build"
   },
   "browserslist": {
     "production": [
@@ -68,11 +70,13 @@
     "@types/react-dom": "^18.2.25",
     "@types/xml2js": "^0.4.14",
     "@vitejs/plugin-react": "^4.2.1",
+    "eslint": "^8.55.0",
     "eslint-config-react-app": "^7.0.1",
     "eslint-import-resolver-typescript": "^3.7.0",
     "eslint-plugin-import": "^2.29.0",
     "eslint-plugin-react": "^7.34.3",
     "eslint-plugin-react-hooks": "^5.1.0",
+    "prettier": "^3.4.2",
     "resize-observer-polyfill": "^1.5.1",
     "vite": "^6.2.4",
     "vite-plugin-node-polyfills": "^0.22.0"
