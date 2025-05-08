@@ -1,6 +1,6 @@
-import { colorPalette } from '@assets/styles/color-palette';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+
 import { useHMTPrice } from '@services/api/use-hmt-price';
 
 export const HMTBalance = ({ HMTBalance }: { HMTBalance: number }) => {
@@ -13,18 +13,16 @@ export const HMTBalance = ({ HMTBalance }: { HMTBalance: number }) => {
   if (isPending) {
     return <span>...</span>;
   }
-  const HMTBalanceInDollars = HMTBalance * data.hmtPrice;
+  const HMTBalanceInDollars = HMTBalance * data;
 
   return (
-    <Stack sx={{ whiteSpace: 'nowrap', flexDirection: 'row' }}>
+    <Stack flexDirection="row" whiteSpace="nowrap">
       <Typography variant="body2">{HMTBalance}</Typography>
       <Typography
-        sx={{
-          marginLeft: 0.5,
-        }}
-        color={colorPalette.fog.main}
         component="span"
         variant="body2"
+        ml={0.5}
+        color="text.secondary"
       >
         {`HMT($${HMTBalanceInDollars.toFixed(2)})`}
       </Typography>

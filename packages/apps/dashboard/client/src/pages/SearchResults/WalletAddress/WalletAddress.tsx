@@ -1,43 +1,35 @@
 import Typography from '@mui/material/Typography';
-import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
-import TitleSectionWrapper from '@components/SearchResults';
-import { colorPalette } from '@assets/styles/color-palette';
-import { AddressDetailsWallet } from '@services/api/use-address-details';
-import { useHMTPrice } from '@services/api/use-hmt-price';
-import { WalletAddressTransactionsTable } from '@pages/SearchResults/WalletAddress/WalletAddressTransactions/WalletAddressTransactionsTable';
-import { useWalletSearch } from '@utils/hooks/use-wallet-search';
 import { NumericFormat } from 'react-number-format';
+
+import TitleSectionWrapper from '@components/SearchResults';
+import SectionWrapper from '@components/SectionWrapper';
+
+import { useHMTPrice } from '@services/api/use-hmt-price';
 import { useBreakPoints } from '@utils/hooks/use-is-mobile';
+import StakeInfo from '../StakeInfo';
+import KVStore from '../KVStore';
 
 const HmtPrice = () => {
-  const {
-    data: hmtPrice,
-    isError: isHmtPriceError,
-    isPending: isHmtPricePending,
-  } = useHMTPrice();
+  const { data, isError, isPending } = useHMTPrice();
 
-  if (isHmtPriceError) {
+  if (isError) {
     return <TitleSectionWrapper title="HMT Price">N/A</TitleSectionWrapper>;
   }
 
-  if (isHmtPricePending) {
+  if (isPending) {
     return <TitleSectionWrapper title="HMT Price">...</TitleSectionWrapper>;
   }
 
   return (
     <TitleSectionWrapper title="HMT Price">
-      <Stack sx={{ whiteSpace: 'nowrap', flexDirection: 'row' }}>
-        <Typography variant="body2">
-          <>{hmtPrice.hmtPrice}</>
-        </Typography>
+      <Stack flexDirection="row" whiteSpace="nowrap">
+        <Typography variant="body2">{data}</Typography>
         <Typography
-          sx={{
-            marginLeft: 0.5,
-          }}
-          color={colorPalette.fog.main}
           component="span"
           variant="body2"
+          color="text.secondary"
+          ml={0.5}
         >
           $
         </Typography>
@@ -46,28 +38,15 @@ const HmtPrice = () => {
   );
 };
 
-const WalletAddress = ({
-  data: { balance },
-}: {
-  data: AddressDetailsWallet;
-}) => {
-  const { filterParams } = useWalletSearch();
+const WalletAddress = ({ balance }: { balance: number | null | undefined }) => {
   const { mobile } = useBreakPoints();
 
   return (
     <>
-      <Card
-        sx={{
-          paddingX: { xs: 2, md: 8 },
-          paddingY: { xs: 4, md: 6 },
-          marginBottom: 4,
-          borderRadius: '16px',
-          boxShadow: 'none',
-        }}
-      >
+      <SectionWrapper>
         <Stack gap={4}>
           <TitleSectionWrapper title="Balance">
-            <Stack sx={{ whiteSpace: 'nowrap', flexDirection: 'row' }}>
+            <Stack direction="row" whiteSpace="nowrap">
               <Typography variant="body2">
                 <NumericFormat
                   displayType="text"
@@ -77,12 +56,10 @@ const WalletAddress = ({
                 />
               </Typography>
               <Typography
-                sx={{
-                  marginLeft: 0.5,
-                }}
-                color={colorPalette.fog.main}
                 component="span"
                 variant="body2"
+                color="text.secondary"
+                ml={0.5}
               >
                 HMT
               </Typography>
@@ -90,11 +67,9 @@ const WalletAddress = ({
           </TitleSectionWrapper>
           <HmtPrice />
         </Stack>
-      </Card>
-
-      {filterParams.address && filterParams.chainId ? (
-        <WalletAddressTransactionsTable />
-      ) : null}
+      </SectionWrapper>
+      <StakeInfo />
+      <KVStore />
     </>
   );
 };

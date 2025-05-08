@@ -1,13 +1,16 @@
-import Typography from '@mui/material/Typography';
-import Card from '@mui/material/Card';
-import TableContainer from '@mui/material/TableContainer';
-import Table from '@mui/material/Table';
 import SimpleBar from 'simplebar-react';
+import Table from '@mui/material/Table';
+import TableContainer from '@mui/material/TableContainer';
+import TableFooter from '@mui/material/TableFooter';
 import TablePagination from '@mui/material/TablePagination';
+import TableRow from '@mui/material/TableRow';
+import Typography from '@mui/material/Typography';
+
 import { TransactionsTableHead } from '@pages/SearchResults/WalletAddress/WalletAddressTransactions/tableComponents/TransactionsTableHead';
 import { TransactionsTableBody } from '@pages/SearchResults/WalletAddress/WalletAddressTransactions/tableComponents/TransactionsTableBody';
+import SectionWrapper from '@components/SectionWrapper';
+
 import { useTransactionDetailsDto } from '@utils/hooks/use-transactions-details-dto';
-import { TableFooter } from '@mui/material';
 import { useTransactionDetails } from '@services/api/use-transaction-details';
 
 export const WalletAddressTransactionsTable = () => {
@@ -20,15 +23,8 @@ export const WalletAddressTransactionsTable = () => {
   } = useTransactionDetailsDto();
 
   return (
-    <Card
-      sx={{
-        paddingX: { xs: 2, md: 8 },
-        paddingY: { xs: 4, md: 6 },
-        borderRadius: '16px',
-        boxShadow: 'none',
-      }}
-    >
-      <Typography sx={{ marginBottom: 2 }} variant="h5" component="p">
+    <SectionWrapper>
+      <Typography variant="h5" component="p" mb={2}>
         Transactions
       </Typography>
       <TableContainer>
@@ -45,7 +41,7 @@ export const WalletAddressTransactionsTable = () => {
             <TransactionsTableHead />
             <TransactionsTableBody />
             <TableFooter>
-              <tr>
+              <TableRow>
                 <TablePagination
                   // count is unknown but required as props
                   count={9999}
@@ -83,11 +79,11 @@ export const WalletAddressTransactionsTable = () => {
                     },
                   }}
                 />
-              </tr>
+              </TableRow>
             </TableFooter>
           </Table>
         </SimpleBar>
       </TableContainer>
-    </Card>
+    </SectionWrapper>
   );
 };

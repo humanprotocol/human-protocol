@@ -14,7 +14,6 @@ import Loader from '@components/Loader';
 import { getNetwork } from '@utils/config/networks';
 import {
   AddressDetails,
-  AddressDetailsWallet,
   useAddressDetails,
 } from '@services/api/use-address-details';
 import { handleErrorMessage } from '@services/handle-error-message';
@@ -22,6 +21,7 @@ import RoleDetails from '@pages/SearchResults/RoleDetails/RoleDetails';
 import { AxiosError } from 'axios';
 import { WalletIcon } from '@components/Icons/WalletIcon';
 import { EscrowAddressIcon } from '@components/Icons/EscrowAddressIcon';
+import { WalletAddressTransactionsTable } from './WalletAddress/WalletAddressTransactions/WalletAddressTransactionsTable';
 
 const renderCurrentResultType = (
   addressDetails: AddressDetails,
@@ -84,14 +84,18 @@ const Results = () => {
     return <ResultError error={error} />;
   }
 
-  const selectedWalletData: AddressDetailsWallet | undefined =
-    data.wallet ||
-    (data.operator && data.operator.role === null ? data.operator : undefined);
+  const showTransactions = !!data.wallet || !!data.operator;
+
+  const walletBalance =
+    data.wallet?.balance ||
+    (data.operator && data.operator.role === null
+      ? data.operator?.balance
+      : undefined);
 
   return (
     <>
       <Stack
-        sx={{ marginBottom: 2, marginTop: { xs: 2, md: 4 } }}
+        sx={{ mb: 2, mt: { xs: 2, md: 4 } }}
         direction={{ xs: 'column', md: 'row' }}
         gap={3}
         alignItems={{ xs: 'stretch', md: 'center' }}
@@ -102,11 +106,18 @@ const Results = () => {
       {data.operator && data.operator.role ? (
         <RoleDetails data={data.operator} />
       ) : null}
-      {selectedWalletData ? <WalletAddress data={selectedWalletData} /> : null}
-      {data.escrow ? <EscrowAddress data={data.escrow} /> : null}
+      {walletBalance ? <WalletAddress balance={walletBalance} /> : null}
+      {data.escrow && <EscrowAddress data={data.escrow} />}
+      {showTransactions && <WalletAddressTransactionsTable />}
     </>
   );
 };
+
+enum ParamsStatus {
+  LOADING = 'loading',
+  ERROR = 'error',
+  SUCCESS = 'success',
+}
 
 const SearchResults = () => {
   const location = useLocation();
@@ -116,20 +127,21 @@ const SearchResults = () => {
     setChainId,
     filterParams: { chainId, address },
   } = useWalletSearch();
-  const [paramsStatus, setParamsStatus] = useState<
-    'loading' | 'error' | 'success'
-  >('loading');
+
+  const [paramsStatus, setParamsStatus] = useState<ParamsStatus>(
+    ParamsStatus.LOADING
+  );
 
   useEffect(() => {
-    setParamsStatus('loading');
+    setParamsStatus(ParamsStatus.LOADING);
   }, [location]);
 
   useEffect(() => {
-    if (paramsStatus === 'success') return;
+    if (paramsStatus === ParamsStatus.SUCCESS) return;
     if (urlAddress) {
       setAddress(urlAddress);
     } else {
-      setParamsStatus('error');
+      setParamsStatus(ParamsStatus.ERROR);
       return;
     }
     const chainIdFromUrl = Number(urlChainId);
@@ -140,7 +152,7 @@ const SearchResults = () => {
     ) {
       setChainId(chainIdFromUrl);
     } else {
-      setParamsStatus('error');
+      setParamsStatus(ParamsStatus.ERROR);
     }
   }, [
     address,
@@ -153,8 +165,8 @@ const SearchResults = () => {
   ]);
 
   useEffect(() => {
-    if (address && chainId && paramsStatus !== 'success') {
-      setParamsStatus('success');
+    if (address && chainId && paramsStatus !== ParamsStatus.SUCCESS) {
+      setParamsStatus(ParamsStatus.SUCCESS);
     }
   }, [address, chainId, paramsStatus]);
 
@@ -162,11 +174,13 @@ const SearchResults = () => {
     <PageWrapper className="standard-background">
       <Breadcrumbs title="Search Results" />
       <SearchBar className="search-results-bar" />
-      {paramsStatus === 'loading' && <Loader height="auto" paddingTop="2rem" />}
-      {paramsStatus === 'error' && (
-        <Stack sx={{ paddingTop: '2rem' }}>Something went wrong</Stack>
+      {paramsStatus === ParamsStatus.LOADING && (
+        <Loader height="auto" paddingTop="2rem" />
       )}
-      {paramsStatus === 'success' && <Results />}
+      {paramsStatus === ParamsStatus.ERROR && (
+        <Stack pt="2rem">Something went wrong</Stack>
+      )}
+      {paramsStatus === ParamsStatus.SUCCESS && <Results />}
     </PageWrapper>
   );
 };

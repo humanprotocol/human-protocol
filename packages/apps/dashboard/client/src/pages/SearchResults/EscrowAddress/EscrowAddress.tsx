@@ -1,11 +1,12 @@
-import Typography from '@mui/material/Typography';
-import Card from '@mui/material/Card';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
-import { colorPalette } from '@assets/styles/color-palette';
+import Typography from '@mui/material/Typography';
+
 import TitleSectionWrapper from '@components/SearchResults';
-import { AddressDetailsEscrowSchema } from '@services/api/use-address-details';
+import SectionWrapper from '@components/SectionWrapper';
 import { HMTBalance } from '@pages/SearchResults/EscrowAddress/HMTBalance';
+
+import { AddressDetailsEscrowSchema } from '@services/api/use-address-details';
 
 const EscrowAddress = ({
   data: {
@@ -24,14 +25,7 @@ const EscrowAddress = ({
   data: AddressDetailsEscrowSchema;
 }) => {
   return (
-    <Card
-      sx={{
-        paddingX: { xs: 2, md: 8 },
-        paddingY: { xs: 4, md: 6 },
-        borderRadius: '16px',
-        boxShadow: 'none',
-      }}
-    >
+    <SectionWrapper>
       <Stack gap={4}>
         <TitleSectionWrapper title="Token">
           <Typography variant="body2">{token}</Typography>
@@ -51,30 +45,26 @@ const EscrowAddress = ({
           <Typography variant="body2">{factoryAddress}</Typography>
         </TitleSectionWrapper>
         <TitleSectionWrapper title="Total Funded Amount">
-          <Stack sx={{ whiteSpace: 'nowrap', flexDirection: 'row' }}>
+          <Stack direction="row" whiteSpace="nowrap">
             <Typography variant="body2">{totalFundedAmount}</Typography>
             <Typography
-              sx={{
-                marginLeft: 0.5,
-              }}
-              color={colorPalette.fog.main}
               component="span"
               variant="body2"
+              ml={0.5}
+              color="text.secondary"
             >
               HMT
             </Typography>
           </Stack>
         </TitleSectionWrapper>
         <TitleSectionWrapper title="Paid Amount">
-          <Stack sx={{ whiteSpace: 'nowrap', flexDirection: 'row' }}>
+          <Stack direction="row" whiteSpace="nowrap">
             <Typography variant="body2">{amountPaid}</Typography>
             <Typography
-              sx={{
-                marginLeft: 0.5,
-              }}
-              color={colorPalette.fog.main}
               component="span"
               variant="body2"
+              ml={0.5}
+              color="text.secondary"
             >
               HMT
             </Typography>
@@ -86,13 +76,11 @@ const EscrowAddress = ({
             sx={{
               padding: '3px 8px',
               borderRadius: '16px',
-              border: `1px solid ${colorPalette.secondary.light}`,
+              border: '1px solid',
+              borderColor: 'secondary.light',
             }}
           >
-            <Typography
-              variant="Components/Chip"
-              color={colorPalette.secondary.main}
-            >
+            <Typography variant="Components/Chip" color="secondary.main">
               {status}
             </Typography>
           </Box>
@@ -142,7 +130,7 @@ const EscrowAddress = ({
           <Typography variant="body2">{reputationOracle}</Typography>
         </TitleSectionWrapper>
       </Stack>
-    </Card>
+    </SectionWrapper>
   );
 };
 
