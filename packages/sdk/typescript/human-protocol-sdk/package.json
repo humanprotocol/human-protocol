@@ -11,8 +11,7 @@
   "scripts": {
     "clean": "tsc --build --clean && rm -rf ./dist",
     "clean:doc": "rm -rf ../../../../docs/sdk/typescript/",
-    "prebuild": "yarn workspace @human-protocol/core build",
-    "build": "yarn prebuild && yarn clean && tsc --build",
+    "build": "tsc --build",
     "build:doc": "yarn clean:doc && typedoc --plugin typedoc-plugin-markdown --out ../../../../docs/sdk/typescript/",
     "prepublish": "yarn build",
     "test": "vitest -u",

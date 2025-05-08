@@ -18,5 +18,8 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "esModuleInterop": true
-  }
+  },
+  "references": [{
+    "path": "../../../sdk/typescript/human-protocol-sdk"
+  }]
 }
