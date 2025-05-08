@@ -3963,6 +3963,7 @@ __metadata:
     "@human-protocol/sdk": "workspace:*"
     "@types/cors": "npm:^2.8.17"
     "@types/express": "npm:^4.17.14"
+    "@types/node": "npm:^22.15.16"
     axios: "npm:^1.3.4"
     body-parser: "npm:^1.20.0"
     concurrently: "npm:^9.1.2"
@@ -3983,7 +3984,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@human-protocol/fortune-exchange-oracle-client@workspace:packages/apps/fortune/exchange-oracle/client"
   dependencies:
-    "@human-protocol/sdk": "npm:*"
+    "@human-protocol/sdk": "workspace:^"
     "@mui/material": "npm:^5.16.7"
     "@tanstack/query-sync-storage-persister": "npm:^5.68.0"
     "@tanstack/react-query": "npm:^5.67.2"
@@ -3999,11 +4000,13 @@ __metadata:
     eslint-plugin-react-hooks: "npm:^5.1.0"
     eslint-plugin-react-refresh: "npm:^0.4.11"
     ethers: "npm:^6.13.5"
+    prettier: "npm:^3.4.2"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
     react-router-dom: "npm:^6.24.1"
     serve: "npm:^14.2.4"
     typescript: "npm:^5.6.3"
+    viem: "npm:2.x"
     vite: "npm:^6.2.4"
     vite-plugin-node-polyfills: "npm:^0.22.0"
     wagmi: "npm:^2.14.6"
@@ -4015,13 +4018,14 @@ __metadata:
   resolution: "@human-protocol/fortune-exchange-oracle-server@workspace:packages/apps/fortune/exchange-oracle/server"
   dependencies:
     "@golevelup/ts-jest": "npm:^0.6.1"
-    "@human-protocol/sdk": "npm:*"
+    "@human-protocol/sdk": "workspace:*"
     "@nestjs/axios": "npm:^3.1.2"
     "@nestjs/cli": "npm:^10.3.2"
     "@nestjs/common": "npm:^10.2.7"
     "@nestjs/core": "npm:^10.3.10"
     "@nestjs/schematics": "npm:^11.0.2"
     "@nestjs/testing": "npm:^10.4.6"
+    "@nestjs/typeorm": "npm:^10.0.1"
     "@types/express": "npm:^4.17.13"
     "@types/jest": "npm:29.5.12"
     "@types/node": "npm:22.10.5"
@@ -4029,6 +4033,9 @@ __metadata:
     "@types/supertest": "npm:^6.0.2"
     "@typescript-eslint/eslint-plugin": "npm:^5.0.0"
     "@typescript-eslint/parser": "npm:^5.0.0"
+    axios: "npm:^1.3.1"
+    class-transformer: "npm:^0.5.1"
+    class-validator: "npm:0.14.1"
     eslint: "npm:^8.55.0"
     eslint-config-prettier: "npm:^9.1.0"
     eslint-plugin-prettier: "npm:^5.2.1"
@@ -4041,9 +4048,10 @@ __metadata:
     source-map-support: "npm:^0.5.20"
     supertest: "npm:^7.0.0"
     ts-jest: "npm:29.2.5"
-    ts-loader: "npm:^9.2.3"
     ts-node: "npm:^10.9.2"
     tsconfig-paths: "npm:4.2.0"
+    typeorm: "npm:^0.3.23"
+    typeorm-naming-strategies: "npm:^4.1.0"
     typescript: "npm:^5.6.3"
   languageName: unknown
   linkType: soft
@@ -4391,7 +4399,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@human-protocol/sdk@npm:*, @human-protocol/sdk@workspace:*, @human-protocol/sdk@workspace:packages/sdk/typescript/human-protocol-sdk":
+"@human-protocol/sdk@npm:*, @human-protocol/sdk@workspace:*, @human-protocol/sdk@workspace:^, @human-protocol/sdk@workspace:packages/sdk/typescript/human-protocol-sdk":
   version: 0.0.0-use.local
   resolution: "@human-protocol/sdk@workspace:packages/sdk/typescript/human-protocol-sdk"
   dependencies:
@@ -14182,6 +14190,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"class-validator@npm:0.14.1":
+  version: 0.14.1
+  resolution: "class-validator@npm:0.14.1"
+  dependencies:
+    "@types/validator": "npm:^13.11.8"
+    libphonenumber-js: "npm:^1.10.53"
+    validator: "npm:^13.9.0"
+  checksum: 10c0/946e914e47548b5081449c720ea6a4877bac63dc960e14fca4b990b56e64efe3802d12f07ec22d6420c290245b72ea2d646939239f2a3b597794e6c4c2a4f2ae
+  languageName: node
+  linkType: hard
+
 "class-validator@npm:^0.14.1":
   version: 0.14.2
   resolution: "class-validator@npm:0.14.2"
@@ -21141,6 +21160,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"libphonenumber-js@npm:^1.10.53":
+  version: 1.12.8
+  resolution: "libphonenumber-js@npm:1.12.8"
+  checksum: 10c0/9c60d0f7b7b1c5bd85973fb80b8f7d7bbaf57fab2ca89b4f3712ad2e65ac7df8a3f52746a94104fffb618da4109f26fee07fc3225ac65dd17058b0d5d178cb47
+  languageName: node
+  linkType: hard
+
 "libphonenumber-js@npm:^1.11.1":
   version: 1.12.7
   resolution: "libphonenumber-js@npm:1.12.7"
@@ -27911,7 +27937,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typeorm@npm:^0.3.16, typeorm@npm:^0.3.17":
+"typeorm@npm:^0.3.16, typeorm@npm:^0.3.17, typeorm@npm:^0.3.23":
   version: 0.3.23
   resolution: "typeorm@npm:0.3.23"
   dependencies:

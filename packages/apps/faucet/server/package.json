@@ -27,6 +27,7 @@
   "devDependencies": {
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.14",
+    "@types/node": "^22.15.16",
     "concurrently": "^9.1.2",
     "eslint": "^8.55.0",
     "hardhat": "^2.24.0",
