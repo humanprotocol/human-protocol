@@ -4060,7 +4060,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@human-protocol/fortune-recording-oracle@workspace:packages/apps/fortune/recording-oracle"
   dependencies:
-    "@human-protocol/sdk": "npm:*"
+    "@human-protocol/sdk": "workspace:*"
     "@nestjs/axios": "npm:^3.1.2"
     "@nestjs/cli": "npm:^10.3.2"
     "@nestjs/common": "npm:^10.2.7"
@@ -4070,10 +4070,18 @@ __metadata:
     "@nestjs/swagger": "npm:^7.4.2"
     "@nestjs/testing": "npm:^10.4.6"
     "@types/express": "npm:^4.17.13"
+    "@types/node": "npm:^22.15.16"
+    axios: "npm:^1.3.1"
     body-parser: "npm:^1.20.2"
     class-validator: "npm:^0.14.1"
+    eslint: "npm:^8.55.0"
     helmet: "npm:^7.1.0"
+    jest: "npm:^29.7.0"
+    prettier: "npm:^3.4.2"
     reflect-metadata: "npm:^0.2.2"
+    rxjs: "npm:^7.2.0"
+    ts-node: "npm:^10.9.2"
+    typescript: "npm:^5.8.3"
   languageName: unknown
   linkType: soft
 
