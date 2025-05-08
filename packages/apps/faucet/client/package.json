@@ -17,11 +17,13 @@
   },
   "devDependencies": {
     "dotenv": "^16.3.2",
+    "eslint": "^8.55.0",
     "eslint-config-react-app": "^7.0.1",
     "eslint-import-resolver-typescript": "^3.7.0",
     "eslint-plugin-import": "^2.29.0",
     "eslint-plugin-react": "^7.34.3",
     "eslint-plugin-react-hooks": "^5.1.0",
+    "prettier": "^3.4.2",
     "vite": "^6.2.4",
     "vite-plugin-node-polyfills": "^0.22.0"
   },
@@ -34,7 +36,8 @@
     "format:prettier": "prettier --write '**/*.{ts,tsx}'",
     "format:lint": "eslint --fix '**/*.{ts,tsx}'",
     "format": "yarn format:prettier && yarn format:lint",
-    "vercel-build": "yarn workspace @human-protocol/sdk build && yarn build"
+    "vercel-build": "yarn workspace human-protocol build:libs && yarn build",
+    "test": "exit 0"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
