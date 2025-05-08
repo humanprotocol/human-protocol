@@ -54,6 +54,8 @@ The deployment of the graph on each network is automatically triggered by the gi
 To run tests next commands should be executed:
 
 ```bash
+NETWORK=polygon yarn generate
+
 yarn codegen
 
 yarn build

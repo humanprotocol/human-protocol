@@ -3932,7 +3932,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@human-protocol/faucet-client@workspace:packages/apps/faucet/client"
   dependencies:
-    "@human-protocol/sdk": "npm:*"
+    "@human-protocol/sdk": "workspace:*"
     "@mui/icons-material": "npm:^7.0.1"
     "@mui/material": "npm:^5.16.7"
     "@types/react": "npm:^18.3.12"
@@ -3960,15 +3960,21 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@human-protocol/faucet-server@workspace:packages/apps/faucet/server"
   dependencies:
-    "@human-protocol/sdk": "npm:*"
+    "@human-protocol/sdk": "workspace:*"
     "@types/cors": "npm:^2.8.17"
     "@types/express": "npm:^4.17.14"
     axios: "npm:^1.3.4"
     body-parser: "npm:^1.20.0"
+    concurrently: "npm:^9.1.2"
     cors: "npm:^2.8.5"
+    eslint: "npm:^8.55.0"
     express: "npm:^4.21.0"
     express-rate-limit: "npm:^7.3.0"
+    hardhat: "npm:^2.24.0"
+    jest: "npm:^29.7.0"
     node-cache: "npm:^5.1.2"
+    ts-node: "npm:^10.9.2"
+    typescript: "npm:^5.8.3"
     web3: "npm:^4.12.1"
   languageName: unknown
   linkType: soft
@@ -18659,7 +18665,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hardhat@npm:^2.22.18":
+"hardhat@npm:^2.22.18, hardhat@npm:^2.24.0":
   version: 2.24.0
   resolution: "hardhat@npm:2.24.0"
   dependencies:
@@ -20581,7 +20587,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest@npm:29.7.0":
+"jest@npm:29.7.0, jest@npm:^29.7.0":
   version: 29.7.0
   resolution: "jest@npm:29.7.0"
   dependencies:
