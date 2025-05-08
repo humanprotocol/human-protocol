@@ -11,7 +11,8 @@
     "build": "tsc --build && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "vercel-build": "yarn workspace human-protocol build:libs && yarn build"
+    "vercel-build": "yarn workspace human-protocol build:libs && yarn build",
+    "test": "exit 0"
   },
   "dependencies": {
     "@emotion/react": "^11.11.4",
@@ -50,7 +51,7 @@
     "eslint": "^8.57.0",
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-react-refresh": "^0.4.11",
-    "prettier": "3.4.2",
+    "prettier": "^3.4.2",
     "sass": "^1.85.0",
     "stylelint-prettier": "^5.0.0",
     "typescript": "^5.6.3",
