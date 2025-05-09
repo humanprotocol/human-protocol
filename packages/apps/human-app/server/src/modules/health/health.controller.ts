@@ -9,7 +9,6 @@ import {
   HealthCheckService,
 } from '@nestjs/terminus';
 
-import packageJson from '../../../package.json';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
 import { PingResponseDto } from './dto/ping-response.dto';
 import { CacheManagerHealthIndicator } from './indicators/cache-manager.health';
@@ -41,7 +40,6 @@ export class HealthController {
   @Get('/ping')
   async ping(): Promise<PingResponseDto> {
     return {
-      appName: packageJson.name,
       gitHash: this.environmentConfigService.gitHash,
     };
   }

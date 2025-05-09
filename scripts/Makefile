@@ -2,7 +2,7 @@
 
 check-core-folders:
 	@if [ ! -d "../packages/core/abis/legacy" ] || [ ! -d "../packages/core/typechain-types" ]; then \
-		yarn workspace @human-protocol/sdk build; \
+		yarn workspace human-protocol build:libs; \
 	fi
 
 create-env-files:

@@ -18,6 +18,8 @@ jobs:
           node-version-file: .nvmrc
           cache: yarn
       - name: Install dependencies
-        run: yarn
+        run: yarn install --immutable
+      - name: Build libs
+        run: yarn build:libs
       - name: Run dashboard Server test
         run: yarn workspace @human-protocol/dashboard-server test

@@ -62,7 +62,6 @@ describe('HealthController', () => {
 
   it('/ping should return proper info', async () => {
     await expect(healthController.ping()).resolves.toEqual({
-      appName: '@human-protocol/reputation-oracle',
       gitHash: mockServerConfigService.gitHash,
       nodeEnv: 'test',
     });

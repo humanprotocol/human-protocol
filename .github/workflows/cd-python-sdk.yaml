@@ -20,10 +20,9 @@ jobs:
           node-version-file: .nvmrc
           cache: yarn
       - name: Install dependencies
-        run: yarn --ignore-scripts
+        run: yarn install
       - name: Build core package
-        run: yarn build
-        working-directory: ./packages/core
+        run: yarn build:core
       - name: Set up Python
         uses: actions/setup-python@v5
         with:

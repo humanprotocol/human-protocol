@@ -16,6 +16,6 @@ jobs:
           node-version-file: .nvmrc
           cache: yarn
       - name: Install dependencies
-        run: yarn --ignore-scripts
+        run: yarn install --immutable
       - name: Run protocol test
         run: yarn workspace @human-protocol/core test

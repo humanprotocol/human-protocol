@@ -87,9 +87,11 @@ describe('VisionModeration', () => {
     });
 
     it('should return an empty array if no moderation results are found', async () => {
-      mockBatchAnnotateImages.mockResolvedValue([{
-        responses: [{}], // No safeSearchAnnotation
-      }]);
+      mockBatchAnnotateImages.mockResolvedValue([
+        {
+          responses: [{}], // No safeSearchAnnotation
+        },
+      ]);
 
       const result = await visionModeration.analyzeImagesForModeration([
         'http://test.com/image.jpg',
@@ -135,8 +137,14 @@ describe('VisionModeration', () => {
       };
       const mockObjectKeys = ['image1.jpg', 'image2.jpg'];
       const mockModerationResults = [
-        { imageUrl: 'http://test.com/image1.jpg', moderationResult: { adult: 'LIKELY' } },
-        { imageUrl: 'http://test.com/image2.jpg', moderationResult: { adult: 'VERY_LIKELY' } },
+        {
+          imageUrl: 'http://test.com/image1.jpg',
+          moderationResult: { adult: 'LIKELY' },
+        },
+        {
+          imageUrl: 'http://test.com/image2.jpg',
+          moderationResult: { adult: 'VERY_LIKELY' },
+        },
       ];
 
       (generateBucketUrl as jest.Mock).mockReturnValue(mockBucketUrl);
@@ -146,8 +154,7 @@ describe('VisionModeration', () => {
         .spyOn(visionModeration, 'analyzeImagesForModeration')
         .mockResolvedValue(mockModerationResults);
 
-      jest
-        .spyOn(visionModeration, 'saveResultsToJson');
+      jest.spyOn(visionModeration, 'saveResultsToJson');
 
       const storageData: StorageDataDto = {
         provider: StorageProviders.AWS,
@@ -178,7 +185,10 @@ describe('VisionModeration', () => {
       };
       const mockObjectKeys = ['image1.jpg'];
       const mockModerationResults = [
-        { imageUrl: 'http://test.com/image1.jpg', moderationResult: { adult: 'LIKELY' } },
+        {
+          imageUrl: 'http://test.com/image1.jpg',
+          moderationResult: { adult: 'LIKELY' },
+        },
       ];
 
       (generateBucketUrl as jest.Mock).mockReturnValue(mockBucketUrl);

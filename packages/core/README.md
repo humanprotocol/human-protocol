@@ -177,7 +177,7 @@ yarn deploy:proxy --network [NETWORK_NAME]
 4. Verify every contract runing the following line for each contract address(for those that use a proxy just verifyin the proxy will verify the implementation too):
 
 ```bash
-npx hardhat verify --network [NETWORK_NAME] [CONTRACT_ADDRESS]
+yarn dlx hardhat verify --network [NETWORK_NAME] [CONTRACT_ADDRESS]
 ```
 
 5. Request the Human Protocol team to include the new contract address in the document at https://tech-docs.humanprotocol.org/contracts/contract-addresses.
@@ -211,7 +211,7 @@ yarn upgrade:proxy --network [NETWORK_NAME]
 5. Verify the contract runing the following line:
 
 ```bash
-npx hardhat verify --network [NETWORK_NAME] [CONTRACT_ADDRESS]
+yarn dlx hardhat verify --network [NETWORK_NAME] [CONTRACT_ADDRESS]
 ```
 
 ## Documentation

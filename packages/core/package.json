@@ -11,9 +11,9 @@
     "dist/typechain-types"
   ],
   "scripts": {
-    "clean": "hardhat clean && rm -rf abis cache artifacts typechain-types",
-    "precompile": "yarn clean",
-    "compile": "hardhat compile",
+    "clean": "yarn clean:compile && yarn clean:build",
+    "clean:compile": "hardhat clean && rm -rf abis cache artifacts typechain-types",
+    "compile": "yarn clean:compile && hardhat compile",
     "verify": "hardhat verify",
     "test": "hardhat test",
     "test:coverage": "hardhat coverage",
@@ -33,8 +33,8 @@
     "format:contracts": "prettier --write '**/*.sol'",
     "format:scripts": "prettier --write '**/*.ts'",
     "format": "yarn format:contracts && yarn format:scripts",
-    "build": "yarn compile && tsc",
-    "prebuild": "rm -rf dist",
+    "clean:build": "tsc --build --clean && rm -rf dist",
+    "build": "yarn compile && yarn clean:build && tsc --build",
     "prepublish": "yarn build"
   },
   "repository": {
@@ -64,18 +64,28 @@
     "@typechain/hardhat": "^9.1.0",
     "@types/chai": "^4.3.3",
     "@types/mocha": "^10.0.8",
+    "@types/node": "^22.15.16",
     "chai": "^4.5.0",
+    "concurrently": "^9.1.2",
+    "eslint": "^8.55.0",
+    "ethers": "~6.13.5",
     "hardhat": "^2.22.18",
     "hardhat-abi-exporter": "^2.10.1",
     "hardhat-contract-sizer": "^2.6.1",
     "hardhat-dependency-compiler": "^1.2.1",
     "hardhat-gas-reporter": "^2.0.2",
     "openpgp": "5.11.2",
+    "prettier": "^3.4.2",
     "prettier-plugin-solidity": "^1.3.1",
     "solidity-coverage": "^0.8.2",
     "tenderly": "^0.9.1",
+    "ts-node": "^10.9.2",
     "typechain": "^8.3.2",
+    "typescript": "^5.8.3",
     "xdeployer": "3.1.6"
+  },
+  "peerDependencies": {
+    "ethers": "~6.13.5"
   },
   "lint-staged": {
     "*.sol": [
