@@ -17,7 +17,7 @@ COPY ${APP_PATH}/package.json ./${APP_PATH}/
 COPY packages/core ./packages/core
 COPY packages/sdk ./packages/sdk
 
-RUN yarn install --immutable
+RUN yarn install
 
 # Copy base TS config that is required to build pacakges
 COPY tsconfig.base.json ./

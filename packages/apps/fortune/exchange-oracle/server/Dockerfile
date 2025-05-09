@@ -8,7 +8,7 @@ WORKDIR /usr/src/app
 COPY . .
 
 # Install app dependencies
-RUN yarn install --immutable
+RUN yarn install
 RUN yarn build:libs
 
 # Creates a "dist" folder with the production build
