@@ -10,12 +10,10 @@ export const getWorkers = async () => {
   });
 
   console.log('Filtered workers:', workers);
-};
 
-export const getWorker = async () => {
   const worker = await WorkerUtils.getWorker(
     ChainId.POLYGON_AMOY,
-    '0x4163766Cde8410fDDabC4C75a0E2939c55116cC7'
+    workers[0].address
   );
 
   console.log('Worker details:', worker);
@@ -23,5 +21,4 @@ export const getWorker = async () => {
 
 (async () => {
   await getWorkers();
-  await getWorker();
 })();
