@@ -2,13 +2,13 @@ import * as gqlFetch from 'graphql-request';
 import { describe, expect, test, vi } from 'vitest';
 import { NETWORKS } from '../src/constants';
 import { ChainId } from '../src/enums';
-import { WorkerUtils } from '../src/worker';
+import { ErrorInvalidAddress } from '../src/error';
 import {
   GET_WORKER_QUERY,
   GET_WORKERS_QUERY,
 } from '../src/graphql/queries/worker';
 import { IWorker, IWorkersFilter } from '../src/interfaces';
-import { ErrorInvalidAddress } from '../dist/error';
+import { WorkerUtils } from '../src/worker';
 
 vi.mock('graphql-request', () => {
   return {
