@@ -1,12 +1,5 @@
 import CloseIcon from '@mui/icons-material/Close';
-import {
-  Box,
-  Button,
-  Dialog,
-  IconButton,
-  Typography,
-  useTheme,
-} from '@mui/material';
+import { Box, Button, Dialog, IconButton, Typography } from '@mui/material';
 import { useConnect } from 'wagmi';
 import coinbaseSvg from '../../assets/coinbase.svg';
 import metaMaskSvg from '../../assets/metamask.svg';
@@ -27,29 +20,24 @@ export default function WalletModal({
 }) {
   const { connect, connectors, error } = useConnect();
 
-  const theme = useTheme();
-
   return (
     <Dialog
       open={open}
       onClose={onClose}
       maxWidth={false}
-      PaperProps={{ sx: { mx: 2, maxWidth: 'calc(100% - 32px)' } }}
+      PaperProps={{ sx: { m: 0, maxWidth: 'calc(100% - 32px)' } }}
     >
       <Box display="flex" maxWidth="784px">
         <Box
+          flexDirection="column"
+          justifyContent="space-between"
           width={{ xs: '0', md: '50%' }}
           display={{ xs: 'none', md: 'flex' }}
-          sx={{
-            background: theme.palette.primary.main,
-            boxSizing: 'border-box',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-          }}
+          bgcolor="primary.main"
           px={9}
           py={6}
         >
-          <Typography variant="h4" fontWeight={600} color="#fff">
+          <Typography variant="h4" color="white.main">
             Connect
             <br /> your wallet
           </Typography>
@@ -59,11 +47,11 @@ export default function WalletModal({
           </Typography>
         </Box>
         <Box
-          sx={{ boxSizing: 'border-box' }}
           width={{ xs: '100%', md: '50%' }}
           minWidth={{ xs: '340px', sm: '392px' }}
           display="flex"
           flexDirection="column"
+          bgcolor="background.default"
           p={{ xs: 2, sm: 4 }}
         >
           <IconButton sx={{ ml: 'auto', mb: 3 }} onClick={onClose}>
@@ -77,12 +65,13 @@ export default function WalletModal({
                   justifyContent: 'space-between',
                   px: 2,
                   py: 3,
-                  background: '#f6f7fe',
-                  color: theme.palette.text.secondary,
+                  bgcolor: 'background.grey',
+                  color: 'text.secondary',
                   border: `1px solid transparent`,
                   '&:hover': {
-                    color: theme.palette.text.primary,
-                    border: `1px solid ${theme.palette.primary.main}`,
+                    color: 'text.primary',
+                    border: '1px solid',
+                    borderColor: 'primary.main',
                   },
                 }}
                 key={connector.id}

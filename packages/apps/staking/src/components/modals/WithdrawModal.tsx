@@ -18,10 +18,10 @@ const IdleState: FC<{ withdrawableAmount: number | string }> = ({
   withdrawableAmount,
 }) => (
   <>
-    <Typography variant="subtitle2" color="primary" mb={1}>
+    <Typography variant="subtitle2" mb={1}>
       Withdraw amount:
     </Typography>
-    <Typography component="p" variant="h2" color="primary">
+    <Typography component="p" variant="h2">
       {withdrawableAmount} HMT
     </Typography>
   </>
@@ -36,12 +36,10 @@ const SuccessState: FC<{ amount: number }> = ({ amount }) => (
       justifyContent="center"
       py={1}
     >
-      <Typography variant="subtitle2" color="primary">
+      <Typography variant="subtitle2">
         You have successfully withdrawn
       </Typography>
-      <Typography variant="h6" color="primary">
-        {amount} HMT
-      </Typography>
+      <Typography variant="h6">{amount} HMT</Typography>
     </Box>
   </ModalSuccess>
 );

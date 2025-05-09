@@ -1,5 +1,6 @@
-import { Button } from '@mui/material';
 import { useEffect, useState } from 'react';
+
+import { Button } from '@mui/material';
 import { useAccount } from 'wagmi';
 
 import WalletModal from './WalletModal';
@@ -7,12 +8,6 @@ import WalletModal from './WalletModal';
 const ConnectWallet = () => {
   const [walletModalOpen, setWalletModalOpen] = useState(false);
   const { isConnected } = useAccount();
-
-  const handleClickCrypto = () => {
-    if (!isConnected) {
-      setWalletModalOpen(true);
-    }
-  };
 
   useEffect(() => {
     if (isConnected && walletModalOpen) {
@@ -24,10 +19,9 @@ const ConnectWallet = () => {
     <>
       <Button
         variant="contained"
-        color="primary"
         size="medium"
         sx={{ borderRadius: '4px', boxShadow: 'none', height: '42px' }}
-        onClick={handleClickCrypto}
+        onClick={() => setWalletModalOpen(true)}
       >
         Connect Wallet
       </Button>

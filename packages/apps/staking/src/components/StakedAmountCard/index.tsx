@@ -3,7 +3,6 @@ import { Box, Button, Typography } from '@mui/material';
 import { useAccount } from 'wagmi';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 
-import { colorPalette } from '../../assets/styles/color-palette';
 import { useStakeContext } from '../../contexts/stake';
 import CustomTooltip from '../CustomTooltip';
 import CardWrapper from '../CardWrapper';
@@ -24,7 +23,7 @@ const StakedAmountCard: FC = () => {
           <CustomTooltip title="Tokens you have staked" arrow>
             <HelpOutlineIcon
               fontSize="medium"
-              sx={{ color: colorPalette.sky.main }}
+              sx={{ color: 'text.secondary' }}
             />
           </CustomTooltip>
           <Box
@@ -44,7 +43,7 @@ const StakedAmountCard: FC = () => {
             </Box>
             <Box display="flex" gap={1} mb={1}>
               <Button
-                size="medium"
+                size="small"
                 variant="contained"
                 disabled={!isConnected}
                 onClick={() => isConnected && setStakeModalOpen(true)}

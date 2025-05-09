@@ -3,28 +3,33 @@ import { Box, Typography, useTheme } from '@mui/material';
 
 import PageWrapper from '../../components/PageWrapper';
 import KVStoreTable from '../../components/Tables/kvstore';
-import { KVStoreIcon } from '../../icons';
+import { DarkKvstoreIcon, KVStoreIcon } from '../../icons';
 
 const KVStore: FC = () => {
-  const theme = useTheme();
+  const { isDarkMode, palette } = useTheme();
 
   return (
     <PageWrapper>
       <Box
-        paddingX={{ xs: 2, md: 8 }}
+        px={{ xs: 2, md: 8 }}
         pt={3}
         pb={8}
-        bgcolor="#f6f7fe"
-        borderRadius="20px"
+        mx={{ xs: -3, sm: 0 }}
+        borderRadius={{ xs: 0, sm: '20px' }}
         minHeight="calc(100dvh - 212px)"
+        sx={{
+          background: isDarkMode
+            ? palette.elevation.light
+            : palette.background.grey,
+        }}
       >
         <Box display="flex" alignItems="center" gap={2} mb={4}>
-          <KVStoreIcon sx={{ width: 66, height: 66 }} />
-          <Typography
-            variant="h1"
-            fontSize={28}
-            color={theme.palette.primary.main}
-          >
+          {isDarkMode ? (
+            <DarkKvstoreIcon sx={{ width: 66, height: 66 }} />
+          ) : (
+            <KVStoreIcon sx={{ width: 66, height: 66 }} />
+          )}
+          <Typography variant="h1" fontSize={28}>
             KV Store
           </Typography>
         </Box>
