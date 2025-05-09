@@ -80,6 +80,7 @@ import {
   SigninOperatorCommand,
   SigninOperatorData,
   SigninOperatorResponse,
+  SignupOperatorResponse,
 } from '../../modules/user-operator/model/operator-signin.model';
 import {
   GetNDACommand,
@@ -149,7 +150,9 @@ export class ReputationOracleGateway {
     return this.handleRequestToReputationOracle<void>(options);
   }
 
-  async sendOperatorSignup(command: SignupOperatorCommand): Promise<void> {
+  async sendOperatorSignup(
+    command: SignupOperatorCommand,
+  ): Promise<SignupOperatorResponse> {
     const data = this.mapper.map(
       command,
       SignupOperatorCommand,
@@ -159,8 +162,11 @@ export class ReputationOracleGateway {
       ReputationOracleEndpoints.OPERATOR_SIGNUP,
       data,
     );
-    return this.handleRequestToReputationOracle<void>(options);
+    return this.handleRequestToReputationOracle<SignupOperatorResponse>(
+      options,
+    );
   }
+
   async sendOperatorSignin(
     command: SigninOperatorCommand,
   ): Promise<SigninOperatorResponse> {

@@ -34,7 +34,7 @@ import {
   JobAudinoDto,
 } from './job.dto';
 import { JobService } from './job.service';
-import { JobRequestType } from '../../common/enums/job';
+import { FortuneJobType } from '../../common/enums/job';
 import { ApiKey } from '../../common/decorators';
 import { ChainId } from '@human-protocol/sdk';
 import { ControlledError } from '../../common/errors/controlled';
@@ -134,7 +134,7 @@ export class JobController {
       async () => {
         return await this.jobService.createJob(
           req.user,
-          JobRequestType.FORTUNE,
+          FortuneJobType.FORTUNE,
           data,
         );
       },

@@ -9,9 +9,7 @@ import { HttpModule } from '@nestjs/axios';
 import { PaymentModule } from '../payment/payment.module';
 import { JobRepository } from './job.repository';
 import { Web3Module } from '../web3/web3.module';
-import { EncryptionModule } from '../encryption/encryption.module';
 import { StorageModule } from '../storage/storage.module';
-import { AuthModule } from '../auth/auth.module';
 import { WebhookEntity } from '../webhook/webhook.entity';
 import { WebhookRepository } from '../webhook/webhook.repository';
 import { MutexManagerService } from '../mutex/mutex-manager.service';
@@ -19,21 +17,21 @@ import { QualificationModule } from '../qualification/qualification.module';
 import { WhitelistModule } from '../whitelist/whitelist.module';
 import { RoutingProtocolModule } from '../routing-protocol/routing-protocol.module';
 import { RateModule } from '../rate/rate.module';
+import { ManifestModule } from '../manifest/manifest.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([JobEntity, WebhookEntity]),
     ConfigModule,
     HttpModule,
-    AuthModule,
     PaymentModule,
     Web3Module,
-    EncryptionModule,
     StorageModule,
     QualificationModule,
     WhitelistModule,
     RoutingProtocolModule,
     RateModule,
+    ManifestModule,
   ],
   controllers: [JobController],
   providers: [

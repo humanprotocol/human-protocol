@@ -14,16 +14,18 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+
+import { Public } from '../../common/decorators';
+import { RequestWithUser } from '../../common/types';
+
 import {
   AbuseResponseDto,
   ReportAbuseDto,
   SlackInteractionDto,
 } from './abuse.dto';
 import { AbuseService } from './abuse.service';
-import { RequestWithUser } from '../../common/interfaces/request';
-import { Public } from '../../common/decorators';
 import { AbuseRepository } from './abuse.repository';
-import { AbuseSlackAuthGuard } from './abuse.slack-auth.guard';
+import { AbuseSlackAuthGuard } from './abuse-slack-auth.guard';
 
 @ApiTags('Abuse')
 @Controller('/abuse')

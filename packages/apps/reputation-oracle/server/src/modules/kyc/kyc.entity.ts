@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 
 import { DATABASE_SCHEMA_NAME } from '../../common/constants';
-import { BaseEntity } from '../../database/base.entity';
+import { BaseEntity } from '../../database';
 import { KycStatus } from './constants';
 
 import type { UserEntity } from '../user';

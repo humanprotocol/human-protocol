@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 
-import { EncryptionModule } from '../encryption/encryption.module';
+import { EncryptionModule } from '../encryption';
 
 import { StorageService } from './storage.service';
 

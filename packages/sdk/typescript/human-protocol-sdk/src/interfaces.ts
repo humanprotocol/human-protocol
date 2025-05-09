@@ -104,10 +104,14 @@ export interface IHMTHoldersParams extends IPagination {
 }
 
 export interface IPayoutFilter {
+  chainId: ChainId;
   escrowAddress?: string;
   recipient?: string;
   from?: Date;
   to?: Date;
+  first?: number;
+  skip?: number;
+  orderDirection?: OrderDirection;
 }
 
 export interface IKVStore {
@@ -160,4 +164,15 @@ export interface StakerInfo {
   lockedAmount: bigint;
   lockedUntil: bigint;
   withdrawableAmount: bigint;
+}
+
+export interface IStatusEventFilter {
+  chainId: ChainId;
+  statuses?: EscrowStatus[];
+  from?: Date;
+  to?: Date;
+  launcher?: string;
+  first?: number;
+  skip?: number;
+  orderDirection?: OrderDirection;
 }

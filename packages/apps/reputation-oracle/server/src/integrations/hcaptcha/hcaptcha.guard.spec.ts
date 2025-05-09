@@ -7,7 +7,7 @@ import {
 } from '../../../test/mock-creators/nest';
 
 import { HCaptchaGuard } from './hcaptcha.guard';
-import { AuthConfigService } from 'src/config/auth-config.service';
+import { AuthConfigService } from '../../config';
 import { HCaptchaService } from './hcaptcha.service';
 
 const mockHCaptchaService = {

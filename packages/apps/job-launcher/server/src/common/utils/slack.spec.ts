@@ -1,8 +1,7 @@
 import axios from 'axios';
 import { sendSlackNotification } from './slack';
 
-export const MOCK_SLACK_ABUSE_NOTIFICATION_WEBHOOK_URL =
-  'https://slack.com/webhook';
+const MOCK_SLACK_ABUSE_NOTIFICATION_WEBHOOK_URL = 'https://slack.com/webhook';
 
 jest.mock('axios');
 describe('sendSlackNotification', () => {

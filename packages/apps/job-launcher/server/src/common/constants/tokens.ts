@@ -59,4 +59,10 @@ export const TOKEN_ADDRESSES: {
     //   decimals: 6,
     // },
   },
+  [ChainId.BSC_TESTNET]: {
+    [EscrowFundToken.HMT]: {
+      address: NETWORKS[ChainId.BSC_TESTNET]!.hmtAddress,
+      decimals: 18,
+    },
+  },
 };

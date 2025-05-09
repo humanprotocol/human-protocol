@@ -29,7 +29,7 @@ import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ControlledError } from '../../common/errors/controlled';
 import { JobRepository } from '../job/job.repository';
-import { JobRequestType } from '../../common/enums/job';
+import { FortuneJobType } from '../../common/enums/job';
 import { faker } from '@faker-js/faker/.';
 
 jest.mock('@human-protocol/sdk', () => ({
@@ -352,7 +352,7 @@ describe('WebhookService', () => {
 
       jest
         .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
-        .mockResolvedValueOnce({ requestType: JobRequestType.FORTUNE } as any);
+        .mockResolvedValueOnce({ requestType: FortuneJobType.FORTUNE } as any);
       jest
         .spyOn(jobService, 'getOracleType')
         .mockReturnValueOnce(OracleType.FORTUNE);
@@ -399,7 +399,7 @@ describe('WebhookService', () => {
 
       jest
         .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
-        .mockResolvedValueOnce({ requestType: JobRequestType.FORTUNE } as any);
+        .mockResolvedValueOnce({ requestType: FortuneJobType.FORTUNE } as any);
       jest
         .spyOn(jobService, 'getOracleType')
         .mockReturnValueOnce(OracleType.FORTUNE);

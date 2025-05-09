@@ -2,18 +2,19 @@ import { KVStoreKeys, KVStoreUtils, Role } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
-import { SignatureType } from '../../common/enums/web3';
-import { AuthConfigService } from '../../config/auth-config.service';
-import { NDAConfigService } from '../../config/nda-config.service';
-import { ServerConfigService } from '../../config/server-config.service';
-import { Web3ConfigService } from '../../config/web3-config.service';
+import { SignatureType } from '../../common/enums';
+import {
+  AuthConfigService,
+  NDAConfigService,
+  ServerConfigService,
+  Web3ConfigService,
+} from '../../config';
 import logger from '../../logger';
 import * as httpUtils from '../../utils/http';
 import * as securityUtils from '../../utils/security';
 import * as web3Utils from '../../utils/web3';
 
-import { EmailAction } from '../email/constants';
-import { EmailService } from '../email/email.service';
+import { EmailAction, EmailService } from '../email';
 import {
   OperatorStatus,
   SiteKeyRepository,
@@ -39,11 +40,7 @@ import {
 } from './auth.error';
 import { TokenEntity, TokenType } from './token.entity';
 import { TokenRepository } from './token.repository';
-
-type AuthTokens = {
-  accessToken: string;
-  refreshToken: string;
-};
+import type { AuthTokens } from './types';
 
 @Injectable()
 export class AuthService {
@@ -414,12 +411,14 @@ export class AuthService {
     }
 
     if (new Date() > tokenEntity.expiresAt) {
+      await this.tokenRepository.deleteOne(tokenEntity);
       throw new AuthError(AuthErrorMessage.EMAIL_TOKEN_EXPIRED);
     }
 
     await this.userRepository.updateOneById(tokenEntity.userId, {
       status: UserStatus.ACTIVE,
     });
+    await this.tokenRepository.deleteOne(tokenEntity);
   }
 
   async resendEmailVerification(user: Web2UserEntity): Promise<void> {

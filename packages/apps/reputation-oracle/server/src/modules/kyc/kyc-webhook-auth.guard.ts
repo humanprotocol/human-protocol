@@ -8,7 +8,7 @@ import {
 import { createHmac } from 'crypto';
 import { Request } from 'express';
 
-import { KycConfigService } from '../../config/kyc-config.service';
+import { KycConfigService } from '../../config';
 
 @Injectable()
 export class KycWebhookAuthGuard implements CanActivate {

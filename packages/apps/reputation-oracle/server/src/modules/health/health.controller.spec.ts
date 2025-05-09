@@ -8,7 +8,7 @@ import {
   TypeOrmHealthIndicator,
 } from '@nestjs/terminus';
 import { nestLoggerOverride } from '../../logger';
-import { ServerConfigService } from '../../config/server-config.service';
+import { ServerConfigService } from '../../config';
 import { HealthController } from './health.controller';
 
 const mockServerConfigService = {

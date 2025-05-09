@@ -10,7 +10,7 @@ export class HCaptchaConfigService {
    * Required
    */
   get siteKey(): string {
-    return this.configService.getOrThrow<string>('HCAPTCHA_SITE_KEY');
+    return this.configService.getOrThrow('HCAPTCHA_SITE_KEY');
   }
 
   /**
@@ -18,7 +18,7 @@ export class HCaptchaConfigService {
    * Required
    */
   get apiKey(): string {
-    return this.configService.getOrThrow<string>('HCAPTCHA_API_KEY');
+    return this.configService.getOrThrow('HCAPTCHA_API_KEY');
   }
 
   /**
@@ -26,7 +26,7 @@ export class HCaptchaConfigService {
    * Required
    */
   get secret(): string {
-    return this.configService.getOrThrow<string>('HCAPTCHA_SECRET');
+    return this.configService.getOrThrow('HCAPTCHA_SECRET');
   }
 
   /**
@@ -34,7 +34,7 @@ export class HCaptchaConfigService {
    * Default: 'https://api.hcaptcha.com'
    */
   get protectionURL(): string {
-    return this.configService.get<string>(
+    return this.configService.get(
       'HCAPTCHA_PROTECTION_URL',
       'https://api.hcaptcha.com',
     );
@@ -45,7 +45,7 @@ export class HCaptchaConfigService {
    * Default: 'https://foundation-accounts.hmt.ai'
    */
   get labelingURL(): string {
-    return this.configService.get<string>(
+    return this.configService.get(
       'HCAPTCHA_LABELING_URL',
       'https://foundation-accounts.hmt.ai',
     );
@@ -56,9 +56,6 @@ export class HCaptchaConfigService {
    * Default: 'en'
    */
   get defaultLabelerLang(): string {
-    return this.configService.get<string>(
-      'HCAPTCHA_DEFAULT_LABELER_LANG',
-      'en',
-    );
+    return this.configService.get('HCAPTCHA_DEFAULT_LABELER_LANG', 'en');
   }
 }

@@ -44,16 +44,23 @@ import {
   EscrowData,
   GET_ESCROWS_QUERY,
   GET_ESCROW_BY_ADDRESS_QUERY,
+  GET_PAYOUTS_QUERY,
   GET_STATUS_UPDATES_QUERY,
   StatusEvent,
 } from './graphql';
-import { IEscrowConfig, IEscrowsFilter } from './interfaces';
+import {
+  IEscrowConfig,
+  IEscrowsFilter,
+  IPayoutFilter,
+  IStatusEventFilter,
+} from './interfaces';
 import {
   EscrowCancel,
   EscrowStatus,
   EscrowWithdraw,
   NetworkData,
   TransactionLikeWithNonce,
+  Payout,
 } from './types';
 import {
   getSubgraphUrl,
@@ -1828,14 +1835,7 @@ export class EscrowUtils {
    * };
    * ```
    *
-   * @param {ChainId} chainId - List of network IDs to query for status events.
-   * @param {EscrowStatus[]} [statuses] - Optional array of statuses to query for. If not provided, queries for all statuses.
-   * @param {Date} [from] - Optional start date to filter events.
-   * @param {Date} [to] - Optional end date to filter events.
-   * @param {string} [launcher] - Optional launcher address to filter events. Must be a valid Ethereum address.
-   * @param {number} [first] - Optional number of transactions per page. Default is 10.
-   * @param {number} [skip] - Optional number of transactions to skip. Default is 0.
-   * @param {OrderDirection} [orderDirection] - Optional order of the results. Default is DESC.
+   * @param {IStatusEventFilter} filter Filter parameters.
    * @returns {Promise<StatusEvent[]>} - Array of status events with their corresponding statuses.
    *
    * **Code example**
@@ -1846,34 +1846,38 @@ export class EscrowUtils {
    * (async () => {
    *   const fromDate = new Date('2023-01-01');
    *   const toDate = new Date('2023-12-31');
-   *   const statusEvents = await EscrowUtils.getStatusEvents(
-   *     [ChainId.POLYGON, ChainId.MAINNET],
-   *     [EscrowStatus.Pending, EscrowStatus.Complete],
-   *     fromDate,
-   *     toDate
-   *   );
+   *   const statusEvents = await EscrowUtils.getStatusEvents({
+   *     chainId: ChainId.POLYGON,
+   *     statuses: [EscrowStatus.Pending, EscrowStatus.Complete],
+   *     from: fromDate,
+   *     to: toDate
+   *   });
    *   console.log(statusEvents);
    * })();
    * ```
    */
-
   public static async getStatusEvents(
-    chainId: ChainId,
-    statuses?: EscrowStatus[],
-    from?: Date,
-    to?: Date,
-    launcher?: string,
-    first?: number,
-    skip?: number,
-    orderDirection?: OrderDirection
+    filter: IStatusEventFilter
   ): Promise<StatusEvent[]> {
+    const {
+      chainId,
+      statuses,
+      from,
+      to,
+      launcher,
+      first = 10,
+      skip = 0,
+      orderDirection = OrderDirection.DESC,
+    } = filter;
+
     if (launcher && !ethers.isAddress(launcher)) {
       throw ErrorInvalidAddress;
     }
 
-    first = first !== undefined ? Math.min(first, 1000) : 10;
-    skip = skip || 0;
-    orderDirection = orderDirection || OrderDirection.DESC;
+    const networkData = NETWORKS[chainId];
+    if (!networkData) {
+      throw ErrorUnsupportedChainID;
+    }
 
     // If statuses are not provided, use all statuses except Launched
     const effectiveStatuses = statuses ?? [
@@ -1884,11 +1888,6 @@ export class EscrowUtils {
       EscrowStatus.Complete,
       EscrowStatus.Cancelled,
     ];
-
-    const networkData = NETWORKS[chainId];
-    if (!networkData) {
-      throw ErrorUnsupportedChainID;
-    }
 
     const statusNames = effectiveStatuses.map((status) => EscrowStatus[status]);
 
@@ -1902,9 +1901,9 @@ export class EscrowUtils {
         from: from ? getUnixTimestamp(from) : undefined,
         to: to ? getUnixTimestamp(to) : undefined,
         launcher: launcher || undefined,
-        orderDirection: orderDirection,
-        first: first,
-        skip: skip,
+        orderDirection,
+        first: Math.min(first, 1000),
+        skip,
       }
     );
 
@@ -1920,5 +1919,65 @@ export class EscrowUtils {
     }));
 
     return eventsWithChainId;
+  }
+
+  /**
+   * This function returns the payouts for a given set of networks.
+   *
+   * > This uses Subgraph
+   *
+   * **Input parameters**
+   * Fetch payouts from the subgraph.
+   *
+   * @param {IPayoutFilter} filter Filter parameters.
+   * @returns {Promise<Payout[]>} List of payouts matching the filters.
+   *
+   * **Code example**
+   *
+   * ```ts
+   * import { ChainId, EscrowUtils } from '@human-protocol/sdk';
+   *
+   * const payouts = await EscrowUtils.getPayouts({
+   *   chainId: ChainId.POLYGON,
+   *   escrowAddress: '0x1234567890123456789012345678901234567890',
+   *   recipient: '0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef',
+   *   from: new Date('2023-01-01'),
+   *   to: new Date('2023-12-31')
+   * });
+   * console.log(payouts);
+   * ```
+   */
+  public static async getPayouts(filter: IPayoutFilter): Promise<Payout[]> {
+    const networkData = NETWORKS[filter.chainId];
+    if (!networkData) {
+      throw ErrorUnsupportedChainID;
+    }
+    if (filter.escrowAddress && !ethers.isAddress(filter.escrowAddress)) {
+      throw ErrorInvalidAddress;
+    }
+    if (filter.recipient && !ethers.isAddress(filter.recipient)) {
+      throw ErrorInvalidAddress;
+    }
+
+    const first =
+      filter.first !== undefined ? Math.min(filter.first, 1000) : 10;
+    const skip = filter.skip || 0;
+    const orderDirection = filter.orderDirection || OrderDirection.DESC;
+
+    const { payouts } = await gqlFetch<{ payouts: Payout[] }>(
+      getSubgraphUrl(networkData),
+      GET_PAYOUTS_QUERY(filter),
+      {
+        escrowAddress: filter.escrowAddress?.toLowerCase(),
+        recipient: filter.recipient?.toLowerCase(),
+        from: filter.from ? getUnixTimestamp(filter.from) : undefined,
+        to: filter.to ? getUnixTimestamp(filter.to) : undefined,
+        first: Math.min(first, 1000),
+        skip,
+        orderDirection,
+      }
+    );
+
+    return payouts || [];
   }
 }

@@ -11,7 +11,7 @@ export class ReputationConfigService {
    * Default: 300
    */
   get lowLevel(): number {
-    return +this.configService.get<number>('REPUTATION_LEVEL_LOW', 300);
+    return Number(this.configService.get('REPUTATION_LEVEL_LOW')) || 300;
   }
 
   /**
@@ -20,6 +20,6 @@ export class ReputationConfigService {
    * Default: 700
    */
   get highLevel(): number {
-    return +this.configService.get<number>('REPUTATION_LEVEL_HIGH', 700);
+    return Number(this.configService.get('REPUTATION_LEVEL_HIGH')) || 700;
   }
 }

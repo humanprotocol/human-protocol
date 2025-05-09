@@ -6,7 +6,7 @@
 
 # Interface: IPagination
 
-Defined in: [interfaces.ts:152](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L152)
+Defined in: [interfaces.ts:156](https://github.com/humanprotocol/human-protocol/blob/d770e8f228f083f5eba0523ebbdff361b3188c3d/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L156)
 
 ## Extended by
 
@@ -22,7 +22,7 @@ Defined in: [interfaces.ts:152](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **first**: `number`
 
-Defined in: [interfaces.ts:153](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L153)
+Defined in: [interfaces.ts:157](https://github.com/humanprotocol/human-protocol/blob/d770e8f228f083f5eba0523ebbdff361b3188c3d/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L157)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [interfaces.ts:153](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **orderDirection**: [`OrderDirection`](../../enums/enumerations/OrderDirection.md)
 
-Defined in: [interfaces.ts:155](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L155)
+Defined in: [interfaces.ts:159](https://github.com/humanprotocol/human-protocol/blob/d770e8f228f083f5eba0523ebbdff361b3188c3d/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L159)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [interfaces.ts:155](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **skip**: `number`
 
-Defined in: [interfaces.ts:154](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L154)
+Defined in: [interfaces.ts:158](https://github.com/humanprotocol/human-protocol/blob/d770e8f228f083f5eba0523ebbdff361b3188c3d/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L158)

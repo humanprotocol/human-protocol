@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 
-import { BaseRepository } from '../../database/base.repository';
+import { BaseRepository } from '../../database';
 
 import { SiteKeyEntity, SiteKeyType } from './site-key.entity';
 

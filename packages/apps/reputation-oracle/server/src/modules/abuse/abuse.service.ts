@@ -6,12 +6,12 @@ import {
 } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
-import { isDuplicatedError } from '../../common/errors/database';
-import { ServerConfigService } from '../../config/server-config.service';
+import { isDuplicatedError } from '../../database';
+import { ServerConfigService } from '../../config';
 import logger from '../../logger';
-import { Web3Service } from '../web3/web3.service';
-import { OutgoingWebhookEventType } from '../webhook/types';
-import { OutgoingWebhookService } from '../webhook/webhook-outgoing.service';
+import { Web3Service } from '../web3';
+import { OutgoingWebhookEventType, OutgoingWebhookService } from '../webhook';
+
 import { AbuseEntity } from './abuse.entity';
 import { AbuseRepository } from './abuse.repository';
 import { AbuseDecision, AbuseStatus } from './constants';
@@ -21,7 +21,7 @@ import {
   ReportAbuseInput,
   SlackInteraction,
 } from './types';
-import { AbuseSlackBot } from './abuse.slack-bot';
+import { AbuseSlackBot } from './abuse-slack-bot';
 
 @Injectable()
 export class AbuseService {

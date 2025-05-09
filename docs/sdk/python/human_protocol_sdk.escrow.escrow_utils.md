@@ -108,44 +108,47 @@ Get an array of escrow addresses based on the specified filter parameters.
   )
   ```
 
-#### *static* get_status_events(chain_id, statuses=None, date_from=None, date_to=None, launcher=None, first=10, skip=0, order_direction=OrderDirection.DESC)
+#### *static* get_payouts(filter)
+
+Fetch payouts from the subgraph based on the provided filter.
+
+* **Parameters:**
+  **filter** ([`PayoutFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.PayoutFilter)) – Object containing all the necessary parameters to filter payouts.
+* **Return List[Payout]:**
+  List of payouts matching the query parameters.
+* **Raises:**
+  [**EscrowClientError**](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowClientError) – If an unsupported chain ID or invalid addresses are provided.
+* **Return type:**
+  `List`[[`Payout`](#human_protocol_sdk.escrow.escrow_utils.Payout)]
+
+#### *static* get_status_events(filter)
 
 Retrieve status events for specified networks and statuses within a date range.
 
 * **Parameters:**
-  * **chain_id** ([`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)) – Network to request data.
-  * **(****Optional****[****List****[****Status****]****]****)** (*statuses*) – List of statuses to filter by.
-  * **(****Optional****[****datetime****]****)** (*date_to*) – Start date for the query range.
-  * **(****Optional****[****datetime****]****)** – End date for the query range.
-  * **(****Optional****[****str****]****)** (*launcher*) – Address of the launcher to filter by.
-  * **(****int****)** (*skip*) – Number of items per page.
-  * **(****int****)** – Page number to retrieve.
-  * **(****OrderDirection****)** (*order_direction*) – Order of results, “asc” or “desc”.
+  **filter** ([`StatusEventFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.StatusEventFilter)) – Object containing all the necessary parameters to filter status events.
 * **Return List[StatusEvent]:**
   List of status events matching the query parameters.
 * **Raises:**
   [**EscrowClientError**](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowClientError) – If an unsupported chain ID or invalid launcher address is provided.
-* **Example:**
-  ```python
-  from datetime import datetime
-  from human_protocol_sdk.constants import ChainId, Status
-  from human_protocol_sdk.escrow import EscrowUtils
-
-  print(
-      EscrowUtils.get_status_events(
-          chain_id=ChainId.POLYGON_AMOY,
-          statuses=[Status.Pending, Status.Paid],
-          date_from=datetime(2023, 1, 1),
-          date_to=datetime(2023, 12, 31),
-          launcher="0x1234567890abcdef1234567890abcdef12345678",
-          first=20,
-          skip=0,
-          order_direction=OrderDirection.DESC
-      )
-  )
-  ```
 * **Return type:**
   `List`[[`StatusEvent`](#human_protocol_sdk.escrow.escrow_utils.StatusEvent)]
+
+### *class* human_protocol_sdk.escrow.escrow_utils.Payout(id, escrow_address, recipient, amount, created_at)
+
+Bases: `object`
+
+Initializes a Payout instance.
+
+* **Parameters:**
+  * **id** (`str`) – The id of the payout.
+  * **chain_id** – The chain identifier where the payout occurred.
+  * **escrow_address** (`str`) – The address of the escrow that executed the payout.
+  * **recipient** (`str`) – The address of the recipient.
+  * **amount** (`int`) – The amount of the payout.
+  * **created_at** (`int`) – The time of creation of the payout.
+
+#### \_\_init_\_(id, escrow_address, recipient, amount, created_at)
 
 ### *class* human_protocol_sdk.escrow.escrow_utils.StatusEvent(timestamp, status, chain_id, escrow_address)
 

@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 
 import { CronJobType } from '../../common/enums/cron-job';
 
+import { faker } from '@faker-js/faker';
 import { createMock } from '@golevelup/ts-jest';
 import {
   ChainId,
@@ -27,10 +28,7 @@ import {
   MOCK_MAX_RETRY_COUNT,
   MOCK_TRANSACTION_HASH,
 } from '../../../test/constants';
-import { AuthConfigService } from '../../common/config/auth-config.service';
-import { CvatConfigService } from '../../common/config/cvat-config.service';
 import { NetworkConfigService } from '../../common/config/network-config.service';
-import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { SlackConfigService } from '../../common/config/slack-config.service';
 import { VisionConfigService } from '../../common/config/vision-config.service';
@@ -39,19 +37,21 @@ import {
   ErrorContentModeration,
   ErrorCronJob,
 } from '../../common/constants/errors';
-import { JobRequestType, JobStatus } from '../../common/enums/job';
+import { CvatJobType, FortuneJobType, JobStatus } from '../../common/enums/job';
 import { WebhookStatus } from '../../common/enums/webhook';
 import { ControlledError } from '../../common/errors/controlled';
 import { ContentModerationRequestRepository } from '../content-moderation/content-moderation-request.repository';
 import { GCVContentModerationService } from '../content-moderation/gcv-content-moderation.service';
-import { CvatManifestDto } from '../job/job.dto';
 import { JobEntity } from '../job/job.entity';
 import { JobRepository } from '../job/job.repository';
 import { JobService } from '../job/job.service';
+import { CvatManifestDto } from '../manifest/manifest.dto';
+import { ManifestService } from '../manifest/manifest.service';
 import { PaymentRepository } from '../payment/payment.repository';
 import { PaymentService } from '../payment/payment.service';
 import { QualificationService } from '../qualification/qualification.service';
 import { RateService } from '../rate/rate.service';
+import { RoutingProtocolService } from '../routing-protocol/routing-protocol.service';
 import { StorageService } from '../storage/storage.service';
 import { Web3Service } from '../web3/web3.service';
 import { WebhookEntity } from '../webhook/webhook.entity';
@@ -61,8 +61,6 @@ import { WhitelistService } from '../whitelist/whitelist.service';
 import { CronJobEntity } from './cron-job.entity';
 import { CronJobRepository } from './cron-job.repository';
 import { CronJobService } from './cron-job.service';
-import { RoutingProtocolService } from '../routing-protocol/routing-protocol.service';
-import { faker } from '@faker-js/faker';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -127,10 +125,7 @@ describe('CronJobService', () => {
         WebhookService,
         Encryption,
         ServerConfigService,
-        AuthConfigService,
         Web3ConfigService,
-        CvatConfigService,
-        PGPConfigService,
         NetworkConfigService,
         {
           provide: VisionConfigService,
@@ -176,6 +171,10 @@ describe('CronJobService', () => {
           useValue: createMock<RateService>(),
         },
         { provide: HttpService, useValue: createMock<HttpService>() },
+        {
+          provide: ManifestService,
+          useValue: createMock<ManifestService>(),
+        },
       ],
     }).compile();
 
@@ -613,7 +612,7 @@ describe('CronJobService', () => {
           data_url: MOCK_FILE_URL,
         },
         annotation: {
-          type: JobRequestType.IMAGE_POINTS,
+          type: CvatJobType.IMAGE_POINTS,
         },
       };
       jest
@@ -745,7 +744,7 @@ describe('CronJobService', () => {
         .mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
 
       const manifestMock = {
-        requestType: JobRequestType.FORTUNE,
+        requestType: FortuneJobType.FORTUNE,
       };
       storageService.downloadJsonLikeData = jest
         .fn()

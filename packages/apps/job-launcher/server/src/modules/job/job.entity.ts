@@ -2,7 +2,7 @@ import { Column, Entity, Index, ManyToOne, OneToMany } from 'typeorm';
 
 import { NS } from '../../common/constants';
 import { IJob } from '../../common/interfaces';
-import { JobRequestType, JobStatus } from '../../common/enums/job';
+import { JobRequestType, JobStatus, JobType } from '../../common/enums/job';
 import { BaseEntity } from '../../database/base.entity';
 import { UserEntity } from '../user/user.entity';
 import { PaymentEntity } from '../payment/payment.entity';
@@ -46,7 +46,7 @@ export class JobEntity extends BaseEntity implements IJob {
 
   @Column({
     type: 'enum',
-    enum: JobRequestType,
+    enum: JobType,
   })
   public requestType: JobRequestType;
 

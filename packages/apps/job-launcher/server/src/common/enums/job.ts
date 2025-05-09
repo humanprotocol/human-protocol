@@ -27,16 +27,38 @@ export enum JobSortField {
   CREATED_AT = 'created_at',
 }
 
-export enum JobRequestType {
+export enum FortuneJobType {
+  FORTUNE = 'fortune',
+}
+
+export enum HCaptchaJobType {
+  HCAPTCHA = 'hcaptcha',
+}
+
+export enum CvatJobType {
   IMAGE_POINTS = 'image_points',
   IMAGE_POLYGONS = 'image_polygons',
   IMAGE_BOXES = 'image_boxes',
   IMAGE_BOXES_FROM_POINTS = 'image_boxes_from_points',
   IMAGE_SKELETONS_FROM_BOXES = 'image_skeletons_from_boxes',
-  HCAPTCHA = 'hcaptcha',
-  FORTUNE = 'fortune',
+}
+
+export enum AudinoJobType {
   AUDIO_TRANSCRIPTION = 'audio_transcription',
 }
+
+export const JobType = [
+  ...Object.values(CvatJobType),
+  ...Object.values(FortuneJobType),
+  ...Object.values(HCaptchaJobType),
+  ...Object.values(AudinoJobType),
+];
+
+export type JobRequestType =
+  | CvatJobType
+  | FortuneJobType
+  | AudinoJobType
+  | HCaptchaJobType;
 
 export enum JobCaptchaMode {
   BATCH = 'batch',

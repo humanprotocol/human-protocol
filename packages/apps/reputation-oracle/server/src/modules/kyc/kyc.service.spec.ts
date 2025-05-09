@@ -4,20 +4,17 @@ import { HttpService } from '@nestjs/axios';
 import { Test } from '@nestjs/testing';
 import { ethers } from 'ethers';
 
-import { KycConfigService } from '../../config/kyc-config.service';
-import { Web3ConfigService } from '../../config/web3-config.service';
-
 import { generateEthWallet } from '../../../test/fixtures/web3';
 import {
   createHttpServiceMock,
   createHttpServiceResponse,
 } from '../../../test/mock-creators/nest';
-
+import { KycConfigService, Web3ConfigService } from '../../config';
 import { KycStatus } from '../kyc/constants';
 import { UserEntity } from '../user';
 import { generateWorkerUser } from '../user/fixtures';
 import { mockWeb3ConfigService } from '../web3/fixtures';
-import { Web3Service } from '../web3/web3.service';
+import { Web3Service } from '../web3';
 
 import { UpdateKycStatusDto } from './kyc.dto';
 import { KycEntity } from './kyc.entity';

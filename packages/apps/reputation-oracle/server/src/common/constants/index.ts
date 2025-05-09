@@ -7,8 +7,6 @@ export const CVAT_VALIDATION_META_FILENAME = 'validation_meta.json';
 export const AUDINO_RESULTS_ANNOTATIONS_FILENAME = 'resulting_annotations.zip';
 export const AUDINO_VALIDATION_META_FILENAME = 'validation_meta.json';
 
-export const DEFAULT_BULK_PAYOUT_TX_ID = 1;
-
 export const HEADER_SIGNATURE_KEY = 'human-signature';
 
 export const RESEND_EMAIL_VERIFICATION_PATH =

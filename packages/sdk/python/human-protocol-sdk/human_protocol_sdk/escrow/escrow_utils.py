@@ -32,7 +32,7 @@ from typing import Dict, List, Optional
 from web3 import Web3
 
 from human_protocol_sdk.constants import NETWORKS, ChainId, Status, OrderDirection
-from human_protocol_sdk.filter import EscrowFilter
+from human_protocol_sdk.filter import EscrowFilter, StatusEventFilter, PayoutFilter
 from human_protocol_sdk.utils import (
     get_data_from_subgraph,
 )
@@ -127,6 +127,28 @@ class StatusEvent:
         self.status = status
         self.chain_id = chain_id
         self.escrow_address = escrow_address
+
+
+class Payout:
+    """
+    Initializes a Payout instance.
+
+    :param id: The id of the payout.
+    :param chain_id: The chain identifier where the payout occurred.
+    :param escrow_address: The address of the escrow that executed the payout.
+    :param recipient: The address of the recipient.
+    :param amount: The amount of the payout.
+    :param created_at: The time of creation of the payout.
+    """
+
+    def __init__(
+        self, id: str, escrow_address: str, recipient: str, amount: int, created_at: int
+    ):
+        self.id = id
+        self.escrow_address = escrow_address
+        self.recipient = recipient
+        self.amount = amount
+        self.created_at = created_at
 
 
 class EscrowUtils:
@@ -313,86 +335,38 @@ class EscrowUtils:
         )
 
     @staticmethod
-    def get_status_events(
-        chain_id: ChainId,
-        statuses: Optional[List[Status]] = None,
-        date_from: Optional[datetime] = None,
-        date_to: Optional[datetime] = None,
-        launcher: Optional[str] = None,
-        first: int = 10,
-        skip: int = 0,
-        order_direction: OrderDirection = OrderDirection.DESC,
-    ) -> List[StatusEvent]:
+    def get_status_events(filter: StatusEventFilter) -> List[StatusEvent]:
         """
         Retrieve status events for specified networks and statuses within a date range.
 
-        :param chain_id: Network to request data.
-        :param statuses (Optional[List[Status]]): List of statuses to filter by.
-        :param date_from (Optional[datetime]): Start date for the query range.
-        :param date_to (Optional[datetime]): End date for the query range.
-        :param launcher (Optional[str]): Address of the launcher to filter by.
-        :param first (int): Number of items per page.
-        :param skip (int): Page number to retrieve.
-        :param order_direction (OrderDirection): Order of results, "asc" or "desc".
+        :param filter: Object containing all the necessary parameters to filter status events.
 
         :return List[StatusEvent]: List of status events matching the query parameters.
 
         :raise EscrowClientError: If an unsupported chain ID or invalid launcher address is provided.
-
-        :example:
-            .. code-block:: python
-
-                from datetime import datetime
-                from human_protocol_sdk.constants import ChainId, Status
-                from human_protocol_sdk.escrow import EscrowUtils
-
-                print(
-                    EscrowUtils.get_status_events(
-                        chain_id=ChainId.POLYGON_AMOY,
-                        statuses=[Status.Pending, Status.Paid],
-                        date_from=datetime(2023, 1, 1),
-                        date_to=datetime(2023, 12, 31),
-                        launcher="0x1234567890abcdef1234567890abcdef12345678",
-                        first=20,
-                        skip=0,
-                        order_direction=OrderDirection.DESC
-                    )
-                )
         """
-        from human_protocol_sdk.gql.escrow import (
-            get_status_query,
-        )
+        from human_protocol_sdk.gql.escrow import get_status_query
 
-        if launcher and not Web3.is_address(launcher):
+        if filter.launcher and not Web3.is_address(filter.launcher):
             raise EscrowClientError("Invalid Address")
 
-        # If statuses are not provided, use all statuses except Launched
-        effective_statuses = statuses or [
-            Status.Launched,
-            Status.Pending,
-            Status.Partial,
-            Status.Paid,
-            Status.Complete,
-            Status.Cancelled,
-        ]
-
-        network = NETWORKS.get(chain_id)
+        network = NETWORKS.get(filter.chain_id)
         if not network:
             raise EscrowClientError("Unsupported Chain ID")
 
-        status_names = [status.name for status in effective_statuses]
+        status_names = [status.name for status in filter.statuses]
 
         data = get_data_from_subgraph(
             network,
-            get_status_query(date_from, date_to, launcher),
+            get_status_query(filter.date_from, filter.date_to, filter.launcher),
             {
                 "status": status_names,
-                "from": int(date_from.timestamp()) if date_from else None,
-                "to": int(date_to.timestamp()) if date_to else None,
-                "launcher": launcher or None,
-                "first": first,
-                "skip": skip,
-                "orderDirection": order_direction.value,
+                "from": int(filter.date_from.timestamp()) if filter.date_from else None,
+                "to": int(filter.date_to.timestamp()) if filter.date_to else None,
+                "launcher": filter.launcher.lower() if filter.launcher else None,
+                "first": filter.first,
+                "skip": filter.skip,
+                "orderDirection": filter.order_direction.value,
             },
         )
 
@@ -411,9 +385,71 @@ class EscrowUtils:
                 timestamp=event["timestamp"],
                 escrow_address=event["escrowAddress"],
                 status=event["status"],
-                chain_id=chain_id,
+                chain_id=filter.chain_id,
             )
             for event in status_events
         ]
 
         return events_with_chain_id
+
+    @staticmethod
+    def get_payouts(filter: PayoutFilter) -> List[Payout]:
+        """
+        Fetch payouts from the subgraph based on the provided filter.
+
+        :param filter: Object containing all the necessary parameters to filter payouts.
+
+        :return List[Payout]: List of payouts matching the query parameters.
+
+        :raise EscrowClientError: If an unsupported chain ID or invalid addresses are provided.
+        """
+        from human_protocol_sdk.gql.payout import get_payouts_query
+
+        if filter.escrow_address and not Web3.is_address(filter.escrow_address):
+            raise EscrowClientError("Invalid escrow address")
+
+        if filter.recipient and not Web3.is_address(filter.recipient):
+            raise EscrowClientError("Invalid recipient address")
+
+        network = NETWORKS.get(filter.chain_id)
+        if not network:
+            raise EscrowClientError("Unsupported Chain ID")
+
+        data = get_data_from_subgraph(
+            network,
+            get_payouts_query(filter),
+            {
+                "escrowAddress": (
+                    filter.escrow_address.lower() if filter.escrow_address else None
+                ),
+                "recipient": filter.recipient.lower() if filter.recipient else None,
+                "from": int(filter.date_from.timestamp()) if filter.date_from else None,
+                "to": int(filter.date_to.timestamp()) if filter.date_to else None,
+                "first": min(filter.first, 1000),
+                "skip": filter.skip,
+                "orderDirection": filter.order_direction.value,
+            },
+        )
+
+        if (
+            not data
+            or "data" not in data
+            or "payouts" not in data["data"]
+            or not data["data"]["payouts"]
+        ):
+            return []
+
+        payouts_raw = data["data"]["payouts"]
+
+        payouts = [
+            Payout(
+                id=payout["id"],
+                escrow_address=payout["escrowAddress"],
+                recipient=payout["recipient"],
+                amount=int(payout["amount"]),
+                created_at=int(payout["createdAt"]),
+            )
+            for payout in payouts_raw
+        ]
+
+        return payouts

@@ -9,7 +9,7 @@ import {
 
 import type { UserEntity } from '../user';
 import { DATABASE_SCHEMA_NAME } from '../../common/constants';
-import { BaseEntity } from '../../database/base.entity';
+import { BaseEntity } from '../../database';
 
 export enum TokenType {
   EMAIL = 'email',

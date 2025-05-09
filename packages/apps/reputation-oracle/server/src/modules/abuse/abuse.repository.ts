@@ -6,10 +6,11 @@ import {
   LessThanOrEqual,
   Not,
 } from 'typeorm';
-import { AbuseStatus } from './constants';
-import { ServerConfigService } from '../../config/server-config.service';
-import { BaseRepository } from '../../database/base.repository';
+
+import { ServerConfigService } from '../../config';
+import { BaseRepository } from '../../database';
 import { AbuseEntity } from './abuse.entity';
+import { AbuseStatus } from './constants';
 
 type FindOptions = {
   relations?: FindManyOptions<AbuseEntity>['relations'];

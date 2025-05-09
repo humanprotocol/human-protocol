@@ -4,7 +4,7 @@ import { Test } from '@nestjs/testing';
 import { ethers } from 'ethers';
 
 import { HCaptchaService } from './hcaptcha.service';
-import { HCaptchaConfigService } from '../../config/hcaptcha-config.service';
+import { HCaptchaConfigService } from '../../config';
 
 import {
   createHttpServiceMock,

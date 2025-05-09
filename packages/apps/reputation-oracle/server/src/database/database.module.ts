@@ -8,7 +8,7 @@ import { TokenEntity } from '../modules/auth/token.entity';
 import { UserEntity } from '../modules/user/user.entity';
 import { KycEntity } from '../modules/kyc/kyc.entity';
 import { CronJobEntity } from '../modules/cron-job/cron-job.entity';
-import { DatabaseConfigService } from '../config/database-config.service';
+import { DatabaseConfigService } from '../config';
 import { SiteKeyEntity } from '../modules/user/site-key.entity';
 import { QualificationEntity } from '../modules/qualification/qualification.entity';
 import { UserQualificationEntity } from '../modules/qualification/user-qualification.entity';
