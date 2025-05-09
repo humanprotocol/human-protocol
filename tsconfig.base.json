@@ -8,7 +8,6 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": true,
-    "target": "es2023",
-    "types": ["node", "jest"]
+    "target": "es2023"
   }
 }

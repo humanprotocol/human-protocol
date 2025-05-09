@@ -8,7 +8,8 @@ WORKDIR /usr/src/app
 COPY . .
 
 # Install app dependencies
-RUN yarn install
+RUN yarn install --immutable
+RUN yarn build:libs
 
 # Creates a "dist" folder with the production build
 RUN yarn workspace @human-protocol/fortune-exchange-oracle-server build
