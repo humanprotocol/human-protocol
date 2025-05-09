@@ -21,5 +21,7 @@ jobs:
         run: yarn install --immutable
       - name: Build core package
         run: yarn build:core
+      - name: Generate manifest for Polygon for tests
+      - run: NETWORK=polygon yarn workspace @human-protocol/subgraph generate 
       - name: Run subgraph test
         run: yarn workspace @human-protocol/subgraph test
