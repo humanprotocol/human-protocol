@@ -169,6 +169,8 @@
     * [`StatusEventFilter.__init__()`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.StatusEventFilter.__init__)
   * [`TransactionFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.TransactionFilter)
     * [`TransactionFilter.__init__()`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.TransactionFilter.__init__)
+  * [`WorkerFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.WorkerFilter)
+    * [`WorkerFilter.__init__()`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.WorkerFilter.__init__)
 * [human_protocol_sdk.legacy_encryption module](human_protocol_sdk.legacy_encryption.md)
   * [`DecryptionError`](human_protocol_sdk.legacy_encryption.md#human_protocol_sdk.legacy_encryption.DecryptionError)
   * [`Encryption`](human_protocol_sdk.legacy_encryption.md#human_protocol_sdk.legacy_encryption.Encryption)

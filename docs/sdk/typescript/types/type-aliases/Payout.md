@@ -8,7 +8,7 @@
 
 > **Payout**: `object`
 
-Defined in: [types.ts:177](https://github.com/humanprotocol/human-protocol/blob/d770e8f228f083f5eba0523ebbdff361b3188c3d/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L177)
+Defined in: [types.ts:177](https://github.com/humanprotocol/human-protocol/blob/508a14bc6124efbce87c3168c916200b52bfc694/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L177)
 
 Represents a payout from an escrow.
 
