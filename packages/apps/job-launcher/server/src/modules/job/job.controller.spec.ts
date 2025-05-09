@@ -12,7 +12,12 @@ import { MutexManagerService } from '../mutex/mutex-manager.service';
 import { RequestWithUser } from '../../common/types';
 import { JwtAuthGuard } from '../../common/guards';
 import { JobCvatDto, JobFortuneDto, JobQuickLaunchDto } from './job.dto';
-import { EscrowFundToken, JobRequestType } from '../../common/enums/job';
+import {
+  CvatJobType,
+  EscrowFundToken,
+  FortuneJobType,
+  JobRequestType,
+} from '../../common/enums/job';
 import {
   MOCK_FILE_HASH,
   MOCK_FILE_URL,
@@ -207,7 +212,7 @@ describe('JobController', () => {
       );
       expect(mockJobService.createJob).toHaveBeenCalledWith(
         mockRequest.user,
-        JobRequestType.FORTUNE,
+        FortuneJobType.FORTUNE,
         jobFortuneDto,
       );
     });
@@ -289,7 +294,7 @@ describe('JobController', () => {
         path: 'path/to/groundtruth',
       },
       userGuide: 'https://example.com/user-guide',
-      type: JobRequestType.IMAGE_BOXES,
+      type: CvatJobType.IMAGE_BOXES,
       paymentCurrency: PaymentCurrency.HMT,
       paymentAmount: 500,
       escrowFundToken: EscrowFundToken.HMT,
@@ -311,7 +316,7 @@ describe('JobController', () => {
       );
       expect(mockJobService.createJob).toHaveBeenCalledWith(
         mockRequest.user,
-        JobRequestType.IMAGE_BOXES,
+        CvatJobType.IMAGE_BOXES,
         jobCvatDto,
       );
     });

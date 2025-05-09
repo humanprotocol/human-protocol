@@ -25,12 +25,13 @@ import { sendSlackNotification } from '../../common/utils/slack';
 import { listObjectsInBucket } from '../../common/utils/storage';
 import { JobEntity } from '../job/job.entity';
 import { JobRepository } from '../job/job.repository';
-import { StorageService } from '../storage/storage.service';
 import { ContentModerationRequestEntity } from './content-moderation-request.entity';
 import { ContentModerationRequestRepository } from './content-moderation-request.repository';
 import { IContentModeratorService } from './content-moderation.interface';
 import { ModerationResultDto } from './content-moderation.dto';
 import NodeCache from 'node-cache';
+import { ManifestService } from '../manifest/manifest.service';
+import { CvatManifestDto } from '../manifest/manifest.dto';
 
 @Injectable()
 export class GCVContentModerationService implements IContentModeratorService {
@@ -50,7 +51,7 @@ export class GCVContentModerationService implements IContentModeratorService {
     private readonly contentModerationRequestRepository: ContentModerationRequestRepository,
     private readonly visionConfigService: VisionConfigService,
     private readonly slackConfigService: SlackConfigService,
-    private readonly storageService: StorageService,
+    private readonly manifestService: ManifestService,
   ) {
     this.visionClient = new ImageAnnotatorClient({
       projectId: this.visionConfigService.projectId,
@@ -97,9 +98,10 @@ export class GCVContentModerationService implements IContentModeratorService {
     }
 
     try {
-      const manifest: any = await this.storageService.downloadJsonLikeData(
+      const manifest = (await this.manifestService.downloadManifest(
         jobEntity.manifestUrl,
-      );
+        jobEntity.requestType,
+      )) as CvatManifestDto;
       const dataUrl = manifest?.data?.data_url;
 
       if (!dataUrl || !isGCSBucketUrl(dataUrl)) {

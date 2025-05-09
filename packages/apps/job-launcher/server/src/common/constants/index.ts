@@ -1,5 +1,5 @@
 import { ChainId } from '@human-protocol/sdk';
-import { JobRequestType, JobStatus } from '../enums/job';
+import { CvatJobType, JobStatus } from '../enums/job';
 
 export const SERVICE_NAME = 'Job Launcher';
 export const NS = 'hmt';
@@ -26,11 +26,11 @@ export const SENDGRID_API_KEY_DISABLED = 'sendgrid-disabled';
 export const HEADER_SIGNATURE_KEY = 'human-signature';
 
 export const CVAT_JOB_TYPES = [
-  JobRequestType.IMAGE_POLYGONS,
-  JobRequestType.IMAGE_BOXES,
-  JobRequestType.IMAGE_POINTS,
-  JobRequestType.IMAGE_BOXES_FROM_POINTS,
-  JobRequestType.IMAGE_SKELETONS_FROM_BOXES,
+  CvatJobType.IMAGE_POLYGONS,
+  CvatJobType.IMAGE_BOXES,
+  CvatJobType.IMAGE_POINTS,
+  CvatJobType.IMAGE_BOXES_FROM_POINTS,
+  CvatJobType.IMAGE_SKELETONS_FROM_BOXES,
 ];
 
 export const CANCEL_JOB_STATUSES = [
