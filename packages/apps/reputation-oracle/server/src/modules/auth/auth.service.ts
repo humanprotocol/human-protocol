@@ -421,8 +421,12 @@ export class AuthService {
     await this.tokenRepository.deleteOne(tokenEntity);
   }
 
-  async resendEmailVerification(user: Web2UserEntity): Promise<void> {
-    if (user.status !== UserStatus.PENDING) {
+  async resendEmailVerification(userId: number): Promise<void> {
+    const user = (await this.userRepository.findOneById(
+      userId,
+    )) as Web2UserEntity;
+
+    if (!user || user.status !== UserStatus.PENDING) {
       return;
     }
 

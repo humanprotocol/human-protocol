@@ -12,12 +12,13 @@ import { Web3Service } from '../web3/web3.service';
 import { SiteKeyEntity, SiteKeyType } from './site-key.entity';
 import { SiteKeyRepository } from './site-key.repository';
 import { OperatorUserEntity, Web2UserEntity } from './types';
-import { Role as UserRole, UserEntity } from './user.entity';
+import { Role as UserRole } from './user.entity';
 import {
-  UserError,
-  UserErrorMessage,
   DuplicatedWalletAddressError,
   InvalidWeb3SignatureError,
+  UserError,
+  UserErrorMessage,
+  UserNotFoundError,
 } from './user.error';
 import { UserRepository } from './user.repository';
 
@@ -69,7 +70,16 @@ export class UserService {
     return null;
   }
 
-  async registerLabeler(user: Web2UserEntity): Promise<string> {
+  async registerLabeler(userId: number): Promise<string> {
+    const user = (await this.userRepository.findOneById(userId, {
+      relations: {
+        kyc: true,
+        siteKeys: true,
+      },
+    })) as Web2UserEntity;
+    if (!user) {
+      throw new UserNotFoundError(userId);
+    }
     if (user.role !== UserRole.WORKER) {
       throw new UserError(UserErrorMessage.INVALID_ROLE, user.id);
     }
@@ -122,11 +132,20 @@ export class UserService {
   }
 
   async registerAddress(
-    user: UserEntity,
+    userId: number,
     address: string,
     signature: string,
   ): Promise<void> {
     const lowercasedAddress = address.toLocaleLowerCase();
+
+    const user = await this.userRepository.findOneById(userId, {
+      relations: {
+        kyc: true,
+      },
+    });
+    if (!user) {
+      throw new UserNotFoundError(userId);
+    }
 
     if (user.evmAddress) {
       throw new UserError(UserErrorMessage.ADDRESS_EXISTS, user.id);
@@ -161,22 +180,28 @@ export class UserService {
     await this.userRepository.updateOne(user);
   }
 
-  async enableOperator(
-    user: OperatorUserEntity,
-    signature: string,
-  ): Promise<void> {
+  async enableOperator(userId: number, signature: string): Promise<void> {
+    const operatorUser = (await this.userRepository.findOneById(
+      userId,
+    )) as OperatorUserEntity;
+    if (!operatorUser) {
+      throw new UserNotFoundError(userId);
+    }
     const signedData = web3Utils.prepareSignatureBody({
-      from: user.evmAddress,
+      from: operatorUser.evmAddress,
       to: this.web3ConfigService.operatorAddress,
       contents: SignatureType.ENABLE_OPERATOR,
     });
 
     const verified = web3Utils.verifySignature(signedData, signature, [
-      user.evmAddress,
+      operatorUser.evmAddress,
     ]);
 
     if (!verified) {
-      throw new InvalidWeb3SignatureError(user.id, user.evmAddress);
+      throw new InvalidWeb3SignatureError(
+        operatorUser.id,
+        operatorUser.evmAddress,
+      );
     }
 
     const chainId = this.web3ConfigService.reputationNetworkChainId;
@@ -185,32 +210,45 @@ export class UserService {
 
     let status: string | undefined;
     try {
-      status = await KVStoreUtils.get(chainId, signer.address, user.evmAddress);
+      status = await KVStoreUtils.get(
+        chainId,
+        signer.address,
+        operatorUser.evmAddress,
+      );
     } catch {}
 
     if (status === OperatorStatus.ACTIVE) {
-      throw new UserError(UserErrorMessage.OPERATOR_ALREADY_ACTIVE, user.id);
+      throw new UserError(
+        UserErrorMessage.OPERATOR_ALREADY_ACTIVE,
+        operatorUser.id,
+      );
     }
 
-    await kvstore.set(user.evmAddress, OperatorStatus.ACTIVE);
+    await kvstore.set(operatorUser.evmAddress, OperatorStatus.ACTIVE);
   }
 
-  async disableOperator(
-    user: OperatorUserEntity,
-    signature: string,
-  ): Promise<void> {
+  async disableOperator(userId: number, signature: string): Promise<void> {
+    const operatorUser = (await this.userRepository.findOneById(
+      userId,
+    )) as OperatorUserEntity;
+    if (!operatorUser) {
+      throw new UserNotFoundError(userId);
+    }
     const signedData = web3Utils.prepareSignatureBody({
-      from: user.evmAddress,
+      from: operatorUser.evmAddress,
       to: this.web3ConfigService.operatorAddress,
       contents: SignatureType.DISABLE_OPERATOR,
     });
 
     const verified = web3Utils.verifySignature(signedData, signature, [
-      user.evmAddress,
+      operatorUser.evmAddress,
     ]);
 
     if (!verified) {
-      throw new InvalidWeb3SignatureError(user.id, user.evmAddress);
+      throw new InvalidWeb3SignatureError(
+        operatorUser.id,
+        operatorUser.evmAddress,
+      );
     }
 
     const chainId = this.web3ConfigService.reputationNetworkChainId;
@@ -220,20 +258,27 @@ export class UserService {
     const status = await KVStoreUtils.get(
       chainId,
       signer.address,
-      user.evmAddress,
+      operatorUser.evmAddress,
     );
 
     if (status === OperatorStatus.INACTIVE) {
-      throw new UserError(UserErrorMessage.OPERATOR_NOT_ACTIVE, user.id);
+      throw new UserError(
+        UserErrorMessage.OPERATOR_NOT_ACTIVE,
+        operatorUser.id,
+      );
     }
 
-    await kvstore.set(user.evmAddress, OperatorStatus.INACTIVE);
+    await kvstore.set(operatorUser.evmAddress, OperatorStatus.INACTIVE);
   }
 
   async registrationInExchangeOracle(
-    user: Web2UserEntity,
+    userId: number,
     oracleAddress: string,
   ): Promise<void> {
+    const user = await this.userRepository.findOneById(userId);
+    if (!user) {
+      throw new UserNotFoundError(userId);
+    }
     const siteKey = await this.siteKeyRepository.findByUserSiteKeyAndType(
       user.id,
       oracleAddress,
@@ -251,9 +296,9 @@ export class UserService {
     await this.siteKeyRepository.createUnique(newSiteKey);
   }
 
-  async getRegistrationInExchangeOracles(user: UserEntity): Promise<string[]> {
+  async getRegistrationInExchangeOracles(userId: number): Promise<string[]> {
     const siteKeys = await this.siteKeyRepository.findByUserAndType(
-      user.id,
+      userId,
       SiteKeyType.REGISTRATION,
     );
     return siteKeys.map((siteKey) => siteKey.siteKey);

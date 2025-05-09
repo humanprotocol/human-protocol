@@ -1071,7 +1071,7 @@ describe('AuthService', () => {
         const user = generateWorkerUser({ status: UserStatus.PENDING });
         const tokenUuid = faker.string.uuid();
 
-        mockUserRepository.findOneByEmail.mockResolvedValueOnce(user);
+        mockUserRepository.findOneById.mockResolvedValueOnce(user);
         mockTokenRepository.findOneByUserIdAndType.mockResolvedValueOnce(
           existingEmailToken as TokenEntity,
         );
@@ -1079,7 +1079,7 @@ describe('AuthService', () => {
           uuid: tokenUuid,
         } as TokenEntity);
 
-        await service.resendEmailVerification(user);
+        await service.resendEmailVerification(user.id);
 
         if (existingEmailToken) {
           expect(mockTokenRepository.deleteOne).toHaveBeenCalledTimes(1);
@@ -1110,9 +1110,9 @@ describe('AuthService', () => {
       async (userStatus) => {
         const user = generateWorkerUser({ status: userStatus });
 
-        mockUserRepository.findOneByEmail.mockResolvedValueOnce(null);
+        mockUserRepository.findOneById.mockResolvedValueOnce(null);
 
-        await service.resendEmailVerification(user);
+        await service.resendEmailVerification(user.id);
 
         expect(
           mockTokenRepository.findOneByUserIdAndType,

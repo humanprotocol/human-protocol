@@ -6,7 +6,7 @@ import { catchError, firstValueFrom } from 'rxjs';
 import { KycConfigService, Web3ConfigService } from '../../config';
 import logger from '../../logger';
 import * as httpUtils from '../../utils/http';
-import { UserEntity } from '../user';
+import { UserNotFoundError, UserRepository } from '../user';
 import { Web3Service } from '../web3';
 
 import { KycStatus } from './constants';
@@ -24,35 +24,35 @@ export class KycService {
     private readonly kycRepository: KycRepository,
     private readonly httpService: HttpService,
     private readonly kycConfigService: KycConfigService,
+    private readonly userRepository: UserRepository,
     private readonly web3Service: Web3Service,
     private readonly web3ConfigService: Web3ConfigService,
   ) {}
 
-  async initSession(userEntity: UserEntity): Promise<{ url: string }> {
-    if (userEntity.kyc?.sessionId) {
-      if (userEntity.kyc.status === KycStatus.APPROVED) {
-        throw new KycError(KycErrorMessage.ALREADY_APPROVED, userEntity.id);
+  async initSession(userId: number): Promise<{ url: string }> {
+    const existingKycEntity = await this.kycRepository.findOneByUserId(userId);
+
+    if (existingKycEntity) {
+      if (existingKycEntity.status === KycStatus.APPROVED) {
+        throw new KycError(KycErrorMessage.ALREADY_APPROVED, userId);
       }
 
-      if (userEntity.kyc.status === KycStatus.REVIEW) {
-        throw new KycError(
-          KycErrorMessage.VERIFICATION_IN_PROGRESS,
-          userEntity.id,
-        );
+      if (existingKycEntity.status === KycStatus.REVIEW) {
+        throw new KycError(KycErrorMessage.VERIFICATION_IN_PROGRESS, userId);
       }
 
-      if (userEntity.kyc.status === KycStatus.DECLINED) {
-        throw new KycError(KycErrorMessage.DECLINED, userEntity.id);
+      if (existingKycEntity.status === KycStatus.DECLINED) {
+        throw new KycError(KycErrorMessage.DECLINED, userId);
       }
 
       return {
-        url: userEntity.kyc.url,
+        url: existingKycEntity.url,
       };
     }
 
     const body = {
       verification: {
-        vendorData: `${userEntity.id}`,
+        vendorData: `${userId}`,
       },
     };
 
@@ -74,7 +74,7 @@ export class KycService {
               'Error occurred while initializing KYC session';
             this.logger.error(errorMessage, {
               error: formattedError,
-              userId: userEntity.id,
+              userId,
             });
             throw new Error(errorMessage);
           }),
@@ -84,14 +84,14 @@ export class KycService {
     if (data?.status !== 'success' || !data?.verification?.url) {
       throw new KycError(
         KycErrorMessage.INVALID_KYC_PROVIDER_API_RESPONSE,
-        userEntity.id,
+        userId,
       );
     }
 
     const kycEntity = new KycEntity();
     kycEntity.sessionId = data.verification.id;
     kycEntity.status = KycStatus.NONE;
-    kycEntity.userId = userEntity.id;
+    kycEntity.userId = userId;
     kycEntity.url = data.verification.url;
 
     await this.kycRepository.createUnique(kycEntity);
@@ -140,12 +140,20 @@ export class KycService {
     await this.kycRepository.updateOne(kycEntity);
   }
 
-  async getSignedAddress(user: UserEntity): Promise<KycSignedAddressDto> {
-    if (!user.evmAddress)
-      throw new KycError(KycErrorMessage.NO_WALLET_ADDRESS_REGISTERED, user.id);
+  async getSignedAddress(userId: number): Promise<KycSignedAddressDto> {
+    const user = await this.userRepository.findOneById(userId, {
+      relations: { kyc: true },
+    });
+    if (!user) {
+      throw new UserNotFoundError(userId);
+    }
+    if (!user.evmAddress) {
+      throw new KycError(KycErrorMessage.NO_WALLET_ADDRESS_REGISTERED, userId);
+    }
 
-    if (user.kyc?.status !== KycStatus.APPROVED)
-      throw new KycError(KycErrorMessage.KYC_NOT_APPROVED, user.id);
+    if (user.kyc?.status !== KycStatus.APPROVED) {
+      throw new KycError(KycErrorMessage.KYC_NOT_APPROVED, userId);
+    }
 
     const address = user.evmAddress.toLowerCase();
     const signature = await this.web3Service

@@ -65,7 +65,7 @@ export class NDAController {
   })
   @Post('sign')
   async signNDA(@Req() request: RequestWithUser, @Body() nda: NDASignatureDto) {
-    await this.ndaService.signNDA(request.user, nda);
+    await this.ndaService.signNDA(request.user.id, nda);
     return { message: 'NDA signed successfully' };
   }
 }
