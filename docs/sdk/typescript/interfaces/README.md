@@ -26,4 +26,6 @@
 - [IStatusEventFilter](interfaces/IStatusEventFilter.md)
 - [ITransaction](interfaces/ITransaction.md)
 - [ITransactionsFilter](interfaces/ITransactionsFilter.md)
+- [IWorker](interfaces/IWorker.md)
+- [IWorkersFilter](interfaces/IWorkersFilter.md)
 - [StakerInfo](interfaces/StakerInfo.md)

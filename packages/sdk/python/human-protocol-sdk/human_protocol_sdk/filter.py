@@ -304,3 +304,30 @@ class StatusEventFilter:
         self.first = first
         self.skip = skip
         self.order_direction = order_direction
+
+
+class WorkerFilter:
+    """
+    A class used to filter workers.
+    """
+
+    def __init__(
+        self,
+        chain_id: ChainId,
+        worker_address: Optional[str] = None,
+        first: int = 10,
+        skip: int = 0,
+    ):
+        """
+        Initializes a WorkerFilter instance.
+
+        :param chain_id: Chain ID to request data
+        :param worker_address: Address to filter by
+        :param first: Number of items per page
+        :param skip: Number of items to skip (for pagination)
+        """
+
+        self.chain_id = chain_id
+        self.worker_address = worker_address
+        self.first = min(max(first, 1), 1000)
+        self.skip = max(skip, 0)

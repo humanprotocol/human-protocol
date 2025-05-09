@@ -6,6 +6,7 @@ import { StatisticsClient } from './statistics';
 import { Encryption, EncryptionUtils } from './encryption';
 import { OperatorUtils } from './operator';
 import { TransactionUtils } from './transaction';
+import { WorkerUtils } from './worker';
 
 export * from './constants';
 export * from './types';
@@ -24,4 +25,5 @@ export {
   EncryptionUtils,
   OperatorUtils,
   TransactionUtils,
+  WorkerUtils,
 };

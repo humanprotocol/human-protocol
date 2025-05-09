@@ -57,6 +57,7 @@ pip install human-protocol-sdk[agreement]
       * [`StatisticsFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.StatisticsFilter)
       * [`StatusEventFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.StatusEventFilter)
       * [`TransactionFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.TransactionFilter)
+      * [`WorkerFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.WorkerFilter)
     * [human_protocol_sdk.legacy_encryption module](human_protocol_sdk.legacy_encryption.md)
       * [`DecryptionError`](human_protocol_sdk.legacy_encryption.md#human_protocol_sdk.legacy_encryption.DecryptionError)
       * [`Encryption`](human_protocol_sdk.legacy_encryption.md#human_protocol_sdk.legacy_encryption.Encryption)
