@@ -18,6 +18,8 @@ jobs:
           node-version-file: .nvmrc
           cache: yarn
       - name: Install dependencies
-        run: yarn
+        run: yarn install --immutable
+      - name: Build core package
+        run: yarn build:core
       - name: Run subgraph test
         run: yarn workspace @human-protocol/subgraph test

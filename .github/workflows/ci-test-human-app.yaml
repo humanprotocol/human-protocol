@@ -18,6 +18,8 @@ jobs:
           node-version-file: .nvmrc
           cache: yarn
       - name: Install dependencies
-        run: yarn
+        run: yarn install --immutable
+      - name: Build libs
+        run: yarn build:libs
       - name: Run Job Human App unit tests
         run: yarn workspace @human-protocol/human-app-server test

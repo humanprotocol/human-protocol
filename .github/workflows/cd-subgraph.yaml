@@ -49,11 +49,10 @@ jobs:
           echo "::set-output name=continue::$MATCH"
       - name: Install dependencies
         if: steps.filter_networks.outputs.continue == 'true'
-        run: yarn
+        run: yarn install --immutable
       - name: Build core package
         if: steps.filter_networks.outputs.continue == 'true'
-        run: yarn build
-        working-directory: ./packages/core
+        run: yarn build:core
       - name: Install Graph CLI
         if: steps.filter_networks.outputs.continue == 'true'
         run: yarn global add @graphprotocol/graph-cli@0.71.2
