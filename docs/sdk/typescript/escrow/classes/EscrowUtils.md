@@ -6,7 +6,7 @@
 
 # Class: EscrowUtils
 
-Defined in: [escrow.ts:1565](https://github.com/humanprotocol/human-protocol/blob/508a14bc6124efbce87c3168c916200b52bfc694/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1565)
+Defined in: [escrow.ts:1565](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1565)
 
 ## Introduction
 
@@ -54,7 +54,7 @@ const escrowAddresses = new EscrowUtils.getEscrows({
 
 > `static` **getEscrow**(`chainId`, `escrowAddress`): `Promise`\<[`EscrowData`](../../graphql/types/type-aliases/EscrowData.md)\>
 
-Defined in: [escrow.ts:1780](https://github.com/humanprotocol/human-protocol/blob/508a14bc6124efbce87c3168c916200b52bfc694/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1780)
+Defined in: [escrow.ts:1780](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1780)
 
 This function returns the escrow data for a given address.
 
@@ -133,7 +133,7 @@ const escrowData = new EscrowUtils.getEscrow(ChainId.POLYGON_AMOY, "0x1234567890
 
 > `static` **getEscrows**(`filter`): `Promise`\<[`EscrowData`](../../graphql/types/type-aliases/EscrowData.md)[]\>
 
-Defined in: [escrow.ts:1662](https://github.com/humanprotocol/human-protocol/blob/508a14bc6124efbce87c3168c916200b52bfc694/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1662)
+Defined in: [escrow.ts:1662](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1662)
 
 This function returns an array of escrows based on the specified filter parameters.
 
@@ -245,7 +245,7 @@ const escrowDatas = await EscrowUtils.getEscrows(filters);
 
 > `static` **getPayouts**(`filter`): `Promise`\<[`Payout`](../../types/type-aliases/Payout.md)[]\>
 
-Defined in: [escrow.ts:1950](https://github.com/humanprotocol/human-protocol/blob/508a14bc6124efbce87c3168c916200b52bfc694/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1950)
+Defined in: [escrow.ts:1950](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1950)
 
 This function returns the payouts for a given set of networks.
 
@@ -289,7 +289,7 @@ console.log(payouts);
 
 > `static` **getStatusEvents**(`filter`): `Promise`\<[`StatusEvent`](../../graphql/types/type-aliases/StatusEvent.md)[]\>
 
-Defined in: [escrow.ts:1859](https://github.com/humanprotocol/human-protocol/blob/508a14bc6124efbce87c3168c916200b52bfc694/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1859)
+Defined in: [escrow.ts:1859](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1859)
 
 This function returns the status events for a given set of networks within an optional date range.
 

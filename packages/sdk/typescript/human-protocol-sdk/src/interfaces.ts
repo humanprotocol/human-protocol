@@ -178,9 +178,8 @@ export interface IWorker {
   payoutCount: number;
 }
 
-export interface IWorkersFilter {
+export interface IWorkersFilter extends IPagination {
   chainId: ChainId;
   address?: string;
-  first?: number;
-  skip?: number;
+  orderBy?: string;
 }

@@ -6,7 +6,7 @@
 
 # Interface: IEscrowConfig
 
-Defined in: [interfaces.ts:79](https://github.com/humanprotocol/human-protocol/blob/508a14bc6124efbce87c3168c916200b52bfc694/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L79)
+Defined in: [interfaces.ts:79](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L79)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [interfaces.ts:79](https://github.com/humanprotocol/human-protocol/b
 
 > **exchangeOracle**: `string`
 
-Defined in: [interfaces.ts:82](https://github.com/humanprotocol/human-protocol/blob/508a14bc6124efbce87c3168c916200b52bfc694/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L82)
+Defined in: [interfaces.ts:82](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L82)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [interfaces.ts:82](https://github.com/humanprotocol/human-protocol/b
 
 > **exchangeOracleFee**: `bigint`
 
-Defined in: [interfaces.ts:85](https://github.com/humanprotocol/human-protocol/blob/508a14bc6124efbce87c3168c916200b52bfc694/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L85)
+Defined in: [interfaces.ts:85](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L85)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [interfaces.ts:85](https://github.com/humanprotocol/human-protocol/b
 
 > **manifestHash**: `string`
 
-Defined in: [interfaces.ts:87](https://github.com/humanprotocol/human-protocol/blob/508a14bc6124efbce87c3168c916200b52bfc694/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L87)
+Defined in: [interfaces.ts:87](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L87)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [interfaces.ts:87](https://github.com/humanprotocol/human-protocol/b
 
 > **manifestUrl**: `string`
 
-Defined in: [interfaces.ts:86](https://github.com/humanprotocol/human-protocol/blob/508a14bc6124efbce87c3168c916200b52bfc694/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L86)
+Defined in: [interfaces.ts:86](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L86)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [interfaces.ts:86](https://github.com/humanprotocol/human-protocol/b
 
 > **recordingOracle**: `string`
 
-Defined in: [interfaces.ts:80](https://github.com/humanprotocol/human-protocol/blob/508a14bc6124efbce87c3168c916200b52bfc694/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L80)
+Defined in: [interfaces.ts:80](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L80)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [interfaces.ts:80](https://github.com/humanprotocol/human-protocol/b
 
 > **recordingOracleFee**: `bigint`
 
-Defined in: [interfaces.ts:83](https://github.com/humanprotocol/human-protocol/blob/508a14bc6124efbce87c3168c916200b52bfc694/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L83)
+Defined in: [interfaces.ts:83](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L83)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [interfaces.ts:83](https://github.com/humanprotocol/human-protocol/b
 
 > **reputationOracle**: `string`
 
-Defined in: [interfaces.ts:81](https://github.com/humanprotocol/human-protocol/blob/508a14bc6124efbce87c3168c916200b52bfc694/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L81)
+Defined in: [interfaces.ts:81](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L81)
 
 ***
 
@@ -70,4 +70,4 @@ Defined in: [interfaces.ts:81](https://github.com/humanprotocol/human-protocol/b
 
 > **reputationOracleFee**: `bigint`
 
-Defined in: [interfaces.ts:84](https://github.com/humanprotocol/human-protocol/blob/508a14bc6124efbce87c3168c916200b52bfc694/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L84)
+Defined in: [interfaces.ts:84](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L84)

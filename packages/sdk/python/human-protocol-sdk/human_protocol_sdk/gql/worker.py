@@ -27,6 +27,8 @@ def get_workers_query(filter: WorkerFilter) -> str:
     return """
 query GetWorkers(
     $address: String
+    $orderBy: String
+    $orderDirection: String
     $first: Int
     $skip: Int
 ) {{
@@ -34,6 +36,8 @@ query GetWorkers(
         where: {{
             {address_clause}
         }}
+        orderBy: $orderBy
+        orderDirection: $orderDirection
         first: $first
         skip: $skip
     ) {{

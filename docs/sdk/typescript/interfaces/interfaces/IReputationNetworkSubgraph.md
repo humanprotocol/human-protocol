@@ -6,7 +6,7 @@
 
 # Interface: IReputationNetworkSubgraph
 
-Defined in: [interfaces.ts:53](https://github.com/humanprotocol/human-protocol/blob/508a14bc6124efbce87c3168c916200b52bfc694/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L53)
+Defined in: [interfaces.ts:53](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L53)
 
 ## Extends
 
@@ -18,7 +18,7 @@ Defined in: [interfaces.ts:53](https://github.com/humanprotocol/human-protocol/b
 
 > **address**: `string`
 
-Defined in: [interfaces.ts:49](https://github.com/humanprotocol/human-protocol/blob/508a14bc6124efbce87c3168c916200b52bfc694/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L49)
+Defined in: [interfaces.ts:49](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L49)
 
 #### Inherited from
 
@@ -30,7 +30,7 @@ Defined in: [interfaces.ts:49](https://github.com/humanprotocol/human-protocol/b
 
 > **id**: `string`
 
-Defined in: [interfaces.ts:48](https://github.com/humanprotocol/human-protocol/blob/508a14bc6124efbce87c3168c916200b52bfc694/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L48)
+Defined in: [interfaces.ts:48](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L48)
 
 #### Inherited from
 
@@ -42,4 +42,4 @@ Defined in: [interfaces.ts:48](https://github.com/humanprotocol/human-protocol/b
 
 > **operators**: [`IOperatorSubgraph`](IOperatorSubgraph.md)[]
 
-Defined in: [interfaces.ts:55](https://github.com/humanprotocol/human-protocol/blob/508a14bc6124efbce87c3168c916200b52bfc694/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L55)
+Defined in: [interfaces.ts:55](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L55)

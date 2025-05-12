@@ -315,6 +315,8 @@ class WorkerFilter:
         self,
         chain_id: ChainId,
         worker_address: Optional[str] = None,
+        order_by: Optional[str] = "payoutCount",
+        order_direction: OrderDirection = OrderDirection.DESC,
         first: int = 10,
         skip: int = 0,
     ):
@@ -323,11 +325,19 @@ class WorkerFilter:
 
         :param chain_id: Chain ID to request data
         :param worker_address: Address to filter by
+        :param order_by: Property to order by, e.g., "payoutCount"
+        :param order_direction: Order direction of results, "asc" or "desc"
         :param first: Number of items per page
         :param skip: Number of items to skip (for pagination)
         """
+        if order_direction.value not in set(
+            order_direction.value for order_direction in OrderDirection
+        ):
+            raise FilterError("Invalid order direction")
 
         self.chain_id = chain_id
         self.worker_address = worker_address
+        self.order_by = order_by
+        self.order_direction = order_direction
         self.first = min(max(first, 1), 1000)
         self.skip = max(skip, 0)

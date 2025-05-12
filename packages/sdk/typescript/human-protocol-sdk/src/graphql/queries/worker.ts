@@ -20,6 +20,8 @@ export const GET_WORKERS_QUERY = (filter: IWorkersFilter) => {
     $address: String
     $first: Int
     $skip: Int
+    $orderBy: String
+    $orderDirection: String
   ) {
     workers(
       where: {
@@ -27,6 +29,8 @@ export const GET_WORKERS_QUERY = (filter: IWorkersFilter) => {
       }
       first: $first
       skip: $skip
+      orderBy: $orderBy
+      orderDirection: $orderDirection
     ) {
       id
       address

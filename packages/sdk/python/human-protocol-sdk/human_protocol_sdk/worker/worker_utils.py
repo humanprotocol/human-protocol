@@ -67,6 +67,8 @@ class WorkerUtils:
             query=get_workers_query(filter),
             params={
                 "address": filter.worker_address,
+                "orderBy": filter.order_by,
+                "orderDirection": filter.order_direction.value,
                 "first": filter.first,
                 "skip": filter.skip,
             },

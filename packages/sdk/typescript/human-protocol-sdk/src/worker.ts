@@ -1,6 +1,6 @@
 import gqlFetch from 'graphql-request';
 import { NETWORKS } from './constants';
-import { ChainId } from './enums';
+import { ChainId, OrderDirection } from './enums';
 import { ErrorInvalidAddress, ErrorUnsupportedChainID } from './error';
 import { GET_WORKER_QUERY, GET_WORKERS_QUERY } from './graphql/queries/worker';
 import { IWorker, IWorkersFilter } from './interfaces';
@@ -54,6 +54,8 @@ export class WorkerUtils {
    * interface IWorkersFilter {
    *   chainId: ChainId; // List of chain IDs to query.
    *   address?: string; // (Optional) The worker address to filter by.
+   *   orderBy?: string; // (Optional) The field to order by. Default is 'payoutCount'.
+   *   orderDirection?: OrderDirection; // (Optional) The direction of the order. Default is 'DESC'.
    *   first?: number; // (Optional) Number of workers per page. Default is 10.
    *   skip?: number; // (Optional) Number of workers to skip. Default is 0.
    * }
@@ -88,6 +90,8 @@ export class WorkerUtils {
     const first =
       filter.first !== undefined ? Math.min(filter.first, 1000) : 10;
     const skip = filter.skip || 0;
+    const orderBy = filter.orderBy || 'payoutCount';
+    const orderDirection = filter.orderDirection || OrderDirection.DESC;
 
     const networkData = NETWORKS[filter.chainId];
     if (!networkData) {
@@ -103,6 +107,8 @@ export class WorkerUtils {
       address: filter?.address?.toLowerCase(),
       first: first,
       skip: skip,
+      orderBy: orderBy,
+      orderDirection: orderDirection,
     });
 
     if (!workers) {
