@@ -1,7 +1,6 @@
-import { HttpStatus } from '@nestjs/common';
 import { ethers } from 'ethers';
 import { ErrorSignature } from '../constants/errors';
-import { ControlledError } from '../errors/controlled';
+import { ConflictError } from '../errors';
 
 export function verifySignature(
   message: object | string,
@@ -13,10 +12,7 @@ export function verifySignature(
   if (
     !addresses.some((address) => address.toLowerCase() === signer.toLowerCase())
   ) {
-    throw new ControlledError(
-      ErrorSignature.SignatureNotVerified,
-      HttpStatus.CONFLICT,
-    );
+    throw new ConflictError(ErrorSignature.SignatureNotVerified);
   }
 
   return true;
@@ -47,9 +43,6 @@ export function recoverSigner(
   try {
     return ethers.verifyMessage(message, signature);
   } catch (_error) {
-    throw new ControlledError(
-      ErrorSignature.InvalidSignature,
-      HttpStatus.CONFLICT,
-    );
+    throw new ConflictError(ErrorSignature.InvalidSignature);
   }
 }

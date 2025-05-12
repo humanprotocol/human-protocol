@@ -1,28 +1,31 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import {
   ChainId,
   EscrowClient,
   KVStoreKeys,
   KVStoreUtils,
 } from '@human-protocol/sdk';
+import { HttpService } from '@nestjs/axios';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { firstValueFrom } from 'rxjs';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
-import { signMessage } from '../../common/utils/signature';
-import { WebhookRepository } from './webhook.repository';
-import { firstValueFrom } from 'rxjs';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
-import { HttpService } from '@nestjs/axios';
-import { Web3Service } from '../web3/web3.service';
-import { WebhookStatus } from '../../common/enums/webhook';
 import { ErrorWebhook } from '../../common/constants/errors';
-import { WebhookEntity } from './webhook.entity';
-import { WebhookDataDto } from './webhook.dto';
+import { EventType, WebhookStatus } from '../../common/enums/webhook';
+import {
+  NotFoundError,
+  ServerError,
+  ValidationError,
+} from '../../common/errors';
 import { CaseConverter } from '../../common/utils/case-converter';
-import { EventType } from '../../common/enums/webhook';
-import { JobService } from '../job/job.service';
-import { ControlledError } from '../../common/errors/controlled';
+import { signMessage } from '../../common/utils/signature';
 import { JobRepository } from '../job/job.repository';
+import { JobService } from '../job/job.service';
+import { Web3Service } from '../web3/web3.service';
+import { WebhookDataDto } from './webhook.dto';
+import { WebhookEntity } from './webhook.entity';
+import { WebhookRepository } from './webhook.repository';
 @Injectable()
 export class WebhookService {
   constructor(
@@ -52,7 +55,7 @@ export class WebhookService {
 
     // Check if the webhook URL was found.
     if (!webhookUrl) {
-      throw new ControlledError(ErrorWebhook.UrlNotFound, HttpStatus.NOT_FOUND);
+      throw new ServerError(ErrorWebhook.UrlNotFound);
     }
 
     // Build the webhook data object based on the oracle type.
@@ -81,7 +84,7 @@ export class WebhookService {
 
     // Check if the request was successful.
     if (status !== HttpStatus.CREATED && status !== HttpStatus.OK) {
-      throw new ControlledError(ErrorWebhook.NotSent, HttpStatus.NOT_FOUND);
+      throw new ServerError(ErrorWebhook.NotSent);
     }
   }
 
@@ -144,9 +147,8 @@ export class WebhookService {
         break;
 
       default:
-        throw new ControlledError(
+        throw new ValidationError(
           `Invalid webhook event type: ${webhook.eventType}`,
-          HttpStatus.BAD_REQUEST,
         );
     }
   }
@@ -158,10 +160,7 @@ export class WebhookService {
     );
 
     if (!jobEntity) {
-      throw new ControlledError(
-        ErrorWebhook.InvalidEscrow,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new NotFoundError(ErrorWebhook.InvalidEscrow);
     }
 
     const webhookEntity = new WebhookEntity();

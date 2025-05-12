@@ -1,19 +1,18 @@
 import { Encryption, EncryptionUtils } from '@human-protocol/sdk';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import axios from 'axios';
-import * as Minio from 'minio';
 import stringify from 'json-stable-stringify';
-import { ErrorBucket } from '../../common/constants/errors';
-import { ContentType, Extension } from '../../common/enums/storage';
-import { UploadedFile } from '../../common/interfaces';
+import * as Minio from 'minio';
 import { S3ConfigService } from '../../common/config/s3-config.service';
-import { ControlledError } from '../../common/errors/controlled';
-import { hashString } from '../../common/utils';
+import { ErrorBucket, ErrorStorage } from '../../common/constants/errors';
+import { ContentType, Extension } from '../../common/enums/storage';
 import {
-  FileDownloadError,
-  FileNotFoundError,
-  InvalidFileUrl,
-} from './storage.errors';
+  NotFoundError,
+  ServerError,
+  ValidationError,
+} from '../../common/errors';
+import { UploadedFile } from '../../common/interfaces';
+import { hashString } from '../../common/utils';
 
 @Injectable()
 export class StorageService {
@@ -43,7 +42,7 @@ export class StorageService {
 
   public static async downloadFileFromUrl(url: string): Promise<Buffer> {
     if (!this.isValidUrl(url)) {
-      throw new InvalidFileUrl(url);
+      throw new ValidationError(`${ErrorStorage.InvalidUrl}: ${url}`);
     }
 
     try {
@@ -54,9 +53,9 @@ export class StorageService {
       return Buffer.from(data);
     } catch (error) {
       if (error.response?.status === HttpStatus.NOT_FOUND) {
-        throw new FileNotFoundError(url);
+        throw new NotFoundError(`${ErrorStorage.NotFound}: ${url}`);
       }
-      throw new FileDownloadError(url, error.cause || error.message);
+      throw new ServerError(`${ErrorStorage.FailedToDownload}: ${url}`);
     }
   }
 
@@ -106,7 +105,7 @@ export class StorageService {
     data: string | object,
   ): Promise<UploadedFile> {
     if (!(await this.minioClient.bucketExists(this.s3ConfigService.bucket))) {
-      throw new ControlledError(ErrorBucket.NotExist, HttpStatus.BAD_REQUEST);
+      throw new ServerError(ErrorBucket.NotExist);
     }
 
     let fileContents: string;
@@ -141,7 +140,7 @@ export class StorageService {
         hash,
       };
     } catch (_error) {
-      throw new ControlledError('File not uploaded', HttpStatus.BAD_REQUEST);
+      throw new ServerError(ErrorStorage.FileNotUploaded);
     }
   }
 }

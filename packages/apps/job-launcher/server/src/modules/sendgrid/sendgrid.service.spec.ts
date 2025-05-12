@@ -1,8 +1,6 @@
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import { SendGridService } from './sendgrid.service';
 import { MailService } from '@sendgrid/mail';
-import { ErrorSendGrid } from '../../common/constants/errors';
 import {
   MOCK_SENDGRID_API_KEY,
   MOCK_SENDGRID_FROM_EMAIL,
@@ -10,8 +8,9 @@ import {
   mockConfig,
 } from '../../../test/constants';
 import { SendgridConfigService } from '../../common/config/sendgrid-config.service';
-import { ControlledError } from '../../common/errors/controlled';
-import { HttpStatus } from '@nestjs/common';
+import { ErrorSendGrid } from '../../common/constants/errors';
+import { ConflictError, ServerError } from '../../common/errors';
+import { SendGridService } from './sendgrid.service';
 
 describe('SendGridService', () => {
   let sendGridService: SendGridService;
@@ -102,9 +101,7 @@ describe('SendGridService', () => {
           text: 'and easy to do anywhere, even with Node.js',
           html: '<strong>and easy to do anywhere, even with Node.js</strong>',
         }),
-      ).rejects.toThrow(
-        new ControlledError(ErrorSendGrid.EmailNotSent, HttpStatus.BAD_REQUEST),
-      );
+      ).rejects.toThrow(new ServerError(ErrorSendGrid.EmailNotSent));
     });
   });
 
@@ -132,9 +129,7 @@ describe('SendGridService', () => {
           mailService,
           configService as any,
         );
-      }).toThrow(
-        new ControlledError(ErrorSendGrid.InvalidApiKey, HttpStatus.CONFLICT),
-      );
+      }).toThrow(new ConflictError(ErrorSendGrid.InvalidApiKey));
     });
   });
 });

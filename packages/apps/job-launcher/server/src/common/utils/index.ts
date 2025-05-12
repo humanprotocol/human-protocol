@@ -1,7 +1,6 @@
-import { HttpStatus } from '@nestjs/common';
 import * as crypto from 'crypto';
 import { Readable } from 'stream';
-import { ControlledError } from '../errors/controlled';
+import { ValidationError } from '../errors';
 
 export const parseUrl = (
   url: string,
@@ -76,7 +75,7 @@ export const parseUrl = (
     }
   }
 
-  throw new ControlledError('Invalid URL', HttpStatus.BAD_REQUEST);
+  throw new ValidationError('Invalid URL');
 };
 
 export function hashStream(stream: Readable): Promise<string> {

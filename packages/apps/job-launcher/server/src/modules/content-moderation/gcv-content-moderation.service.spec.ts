@@ -1,24 +1,3 @@
-import { faker } from '@faker-js/faker';
-import { Storage } from '@google-cloud/storage';
-import { ImageAnnotatorClient } from '@google-cloud/vision';
-import { Test, TestingModule } from '@nestjs/testing';
-
-import { SlackConfigService } from '../../common/config/slack-config.service';
-import { VisionConfigService } from '../../common/config/vision-config.service';
-import { ErrorContentModeration } from '../../common/constants/errors';
-import { ContentModerationLevel } from '../../common/enums/gcv';
-import { ContentModerationRequestStatus } from '../../common/enums/content-moderation';
-import { JobStatus } from '../../common/enums/job';
-import { ControlledError } from '../../common/errors/controlled';
-import { JobEntity } from '../job/job.entity';
-import { JobRepository } from '../job/job.repository';
-import { ContentModerationRequestEntity } from './content-moderation-request.entity';
-import { ContentModerationRequestRepository } from './content-moderation-request.repository';
-import { GCVContentModerationService } from './gcv-content-moderation.service';
-import { sendSlackNotification } from '../../common/utils/slack';
-import { listObjectsInBucket } from '../../common/utils/storage';
-import { ManifestService } from '../manifest/manifest.service';
-
 jest.mock('@google-cloud/storage');
 jest.mock('@google-cloud/vision');
 jest.mock('../../common/utils/slack', () => ({
@@ -28,6 +7,26 @@ jest.mock('../../common/utils/storage', () => ({
   ...jest.requireActual('../../common/utils/storage'),
   listObjectsInBucket: jest.fn(),
 }));
+
+import { faker } from '@faker-js/faker';
+import { Storage } from '@google-cloud/storage';
+import { ImageAnnotatorClient } from '@google-cloud/vision';
+import { Test, TestingModule } from '@nestjs/testing';
+
+import { SlackConfigService } from '../../common/config/slack-config.service';
+import { VisionConfigService } from '../../common/config/vision-config.service';
+import { ErrorContentModeration } from '../../common/constants/errors';
+import { ContentModerationRequestStatus } from '../../common/enums/content-moderation';
+import { ContentModerationLevel } from '../../common/enums/gcv';
+import { JobStatus } from '../../common/enums/job';
+import { sendSlackNotification } from '../../common/utils/slack';
+import { listObjectsInBucket } from '../../common/utils/storage';
+import { JobEntity } from '../job/job.entity';
+import { JobRepository } from '../job/job.repository';
+import { ManifestService } from '../manifest/manifest.service';
+import { ContentModerationRequestEntity } from './content-moderation-request.entity';
+import { ContentModerationRequestRepository } from './content-moderation-request.repository';
+import { GCVContentModerationService } from './gcv-content-moderation.service';
 
 describe('GCVContentModerationService', () => {
   let service: GCVContentModerationService;
@@ -465,14 +464,14 @@ describe('GCVContentModerationService', () => {
       );
     });
 
-    it('should throw ControlledError if vision call fails', async () => {
+    it('should throw Error if vision call fails', async () => {
       mockVisionClient.asyncBatchAnnotateImages.mockRejectedValueOnce(
         new Error('Vision failure'),
       );
 
       await expect(
         (service as any).asyncBatchAnnotateImages([], 'my-file'),
-      ).rejects.toThrow(ControlledError);
+      ).rejects.toThrow(Error);
     });
   });
 

@@ -7,7 +7,6 @@ jest.mock('../../common/utils/storage', () => ({
 import { faker } from '@faker-js/faker';
 import { createMock } from '@golevelup/ts-jest';
 import { Encryption } from '@human-protocol/sdk';
-import { HttpStatus } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { ethers } from 'ethers';
 import { AuthConfigService } from '../../common/config/auth-config.service';
@@ -38,7 +37,11 @@ import {
   JobCaptchaRequestType,
   JobCaptchaShapeType,
 } from '../../common/enums/job';
-import { ControlledError } from '../../common/errors/controlled';
+import {
+  ConflictError,
+  ServerError,
+  ValidationError,
+} from '../../common/errors';
 import {
   generateBucketUrl,
   listObjectsInBucket,
@@ -278,9 +281,7 @@ describe('ManifestService', () => {
             tokenFundAmount,
             tokenFundDecimals,
           ),
-        ).rejects.toThrow(
-          new ControlledError(ErrorJob.DataNotExist, HttpStatus.CONFLICT),
-        );
+        ).rejects.toThrow(new ConflictError(ErrorJob.DataNotExist));
       });
 
       it('should throw an error if data does not exist for image skeletons from boxes job type', async () => {
@@ -295,9 +296,7 @@ describe('ManifestService', () => {
             tokenFundAmount,
             tokenFundDecimals,
           ),
-        ).rejects.toThrow(
-          new ControlledError(ErrorJob.DataNotExist, HttpStatus.CONFLICT),
-        );
+        ).rejects.toThrow(new ConflictError(ErrorJob.DataNotExist));
       });
     });
 
@@ -502,7 +501,7 @@ describe('ManifestService', () => {
         });
       });
 
-      it('should throw ControlledError for invalid POLYGON job type without label', async () => {
+      it('should throw ValidationError for invalid POLYGON job type without label', async () => {
         const jobDto = createJobCaptchaDto({
           annotations: {
             typeOfJob: JobCaptchaShapeType.POLYGON,
@@ -520,10 +519,7 @@ describe('ManifestService', () => {
             tokenFundDecimals,
           ),
         ).rejects.toThrow(
-          new ControlledError(
-            ErrorJob.JobParamsValidationFailed,
-            HttpStatus.BAD_REQUEST,
-          ),
+          new ValidationError(ErrorJob.JobParamsValidationFailed),
         );
       });
 
@@ -577,7 +573,7 @@ describe('ManifestService', () => {
         });
       });
 
-      it('should throw ControlledError for invalid POINT job type without label', async () => {
+      it('should throw ValidationError for invalid POINT job type without label', async () => {
         const jobDto = createJobCaptchaDto({
           annotations: {
             typeOfJob: JobCaptchaShapeType.POINT,
@@ -595,10 +591,7 @@ describe('ManifestService', () => {
             tokenFundDecimals,
           ),
         ).rejects.toThrow(
-          new ControlledError(
-            ErrorJob.JobParamsValidationFailed,
-            HttpStatus.BAD_REQUEST,
-          ),
+          new ValidationError(ErrorJob.JobParamsValidationFailed),
         );
       });
 
@@ -652,7 +645,7 @@ describe('ManifestService', () => {
         });
       });
 
-      it('should throw ControlledError for invalid BOUNDING_BOX job type without label', async () => {
+      it('should throw ValidationError for invalid BOUNDING_BOX job type without label', async () => {
         const jobDto = createJobCaptchaDto({
           annotations: {
             typeOfJob: JobCaptchaShapeType.BOUNDING_BOX,
@@ -670,10 +663,7 @@ describe('ManifestService', () => {
             tokenFundDecimals,
           ),
         ).rejects.toThrow(
-          new ControlledError(
-            ErrorJob.JobParamsValidationFailed,
-            HttpStatus.BAD_REQUEST,
-          ),
+          new ValidationError(ErrorJob.JobParamsValidationFailed),
         );
       });
 
@@ -727,7 +717,7 @@ describe('ManifestService', () => {
         });
       });
 
-      it('should throw ControlledError for invalid IMMO job type without label', async () => {
+      it('should throw ValidationError for invalid IMMO job type without label', async () => {
         const jobDto = createJobCaptchaDto({
           annotations: {
             typeOfJob: JobCaptchaShapeType.IMMO,
@@ -745,14 +735,11 @@ describe('ManifestService', () => {
             tokenFundDecimals,
           ),
         ).rejects.toThrow(
-          new ControlledError(
-            ErrorJob.JobParamsValidationFailed,
-            HttpStatus.BAD_REQUEST,
-          ),
+          new ValidationError(ErrorJob.JobParamsValidationFailed),
         );
       });
 
-      it('should throw ControlledError for invalid job type', async () => {
+      it('should throw ValidationError for invalid job type', async () => {
         const jobDto = createJobCaptchaDto({
           annotations: {
             typeOfJob: 'INVALID_JOB_TYPE' as JobCaptchaShapeType,
@@ -769,12 +756,7 @@ describe('ManifestService', () => {
             tokenFundAmount,
             tokenFundDecimals,
           ),
-        ).rejects.toThrow(
-          new ControlledError(
-            ErrorJob.HCaptchaInvalidJobType,
-            HttpStatus.CONFLICT,
-          ),
-        );
+        ).rejects.toThrow(new ValidationError(ErrorJob.HCaptchaInvalidJobType));
       });
     });
   });
@@ -813,7 +795,7 @@ describe('ManifestService', () => {
       const mockOracleAddresses: string[] = [];
 
       mockStorageService.uploadJsonLikeData.mockRejectedValue(
-        new ControlledError('File not uploaded', HttpStatus.BAD_REQUEST),
+        new ServerError('File not uploaded'),
       );
 
       await expect(
@@ -822,7 +804,7 @@ describe('ManifestService', () => {
           mockData,
           mockOracleAddresses,
         ),
-      ).rejects.toThrow(ControlledError);
+      ).rejects.toThrow(ServerError);
     });
   });
 
@@ -864,12 +846,7 @@ describe('ManifestService', () => {
       );
       await expect(
         manifestService.downloadManifest(mockManifestUrl, mockRequestType),
-      ).rejects.toThrow(
-        new ControlledError(
-          ErrorJob.ManifestValidationFailed,
-          HttpStatus.NOT_FOUND,
-        ),
-      );
+      ).rejects.toThrow(new ValidationError(ErrorJob.ManifestValidationFailed));
     });
   });
 });

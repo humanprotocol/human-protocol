@@ -1,9 +1,29 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
-import Stripe from 'stripe';
+import {
+  HMToken,
+  HMToken__factory,
+} from '@human-protocol/core/typechain-types';
+import { Injectable, Logger } from '@nestjs/common';
 import { ethers, formatUnits } from 'ethers';
+import Stripe from 'stripe';
+import { NetworkConfigService } from '../../common/config/network-config.service';
+import { ServerConfigService } from '../../common/config/server-config.service';
+import { StripeConfigService } from '../../common/config/stripe-config.service';
+import { TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
 import { ErrorPayment } from '../../common/constants/errors';
-import { PaymentRepository } from './payment.repository';
+import { CoingeckoTokenId } from '../../common/constants/payment';
+import {
+  FiatCurrency,
+  PaymentCurrency,
+  PaymentSource,
+  PaymentStatus,
+  PaymentType,
+  StripePaymentStatus,
+  VatType,
+} from '../../common/enums/payment';
+import { add, div, eq, lt, mul } from '../../common/utils/decimal';
+import { verifySignature } from '../../common/utils/signature';
+import { Web3Service } from '../web3/web3.service';
 import {
   AddressDto,
   BillingInfoDto,
@@ -18,37 +38,18 @@ import {
   PaymentRefund,
   UserBalanceDto,
 } from './payment.dto';
-import {
-  FiatCurrency,
-  PaymentCurrency,
-  PaymentSource,
-  PaymentStatus,
-  PaymentType,
-  StripePaymentStatus,
-  VatType,
-} from '../../common/enums/payment';
-import { TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
-import { NetworkConfigService } from '../../common/config/network-config.service';
-import { StripeConfigService } from '../../common/config/stripe-config.service';
-import { ServerConfigService } from '../../common/config/server-config.service';
-import {
-  HMToken,
-  HMToken__factory,
-} from '@human-protocol/core/typechain-types';
-import { Web3Service } from '../web3/web3.service';
-import { CoingeckoTokenId } from '../../common/constants/payment';
-import { div, eq, mul, add, lt } from '../../common/utils/decimal';
-import { verifySignature } from '../../common/utils/signature';
 import { PaymentEntity } from './payment.entity';
-import { ControlledError } from '../../common/errors/controlled';
+import { PaymentRepository } from './payment.repository';
+
+import { TOKEN_ADDRESSES } from '../../common/constants/tokens';
+import { EscrowFundToken } from '../../common/enums/job';
+import { ConflictError, NotFoundError, ServerError } from '../../common/errors';
+import { PageDto } from '../../common/pagination/pagination.dto';
+import { JobEntity } from '../job/job.entity';
+import { JobRepository } from '../job/job.repository';
 import { RateService } from '../rate/rate.service';
 import { UserEntity } from '../user/user.entity';
 import { UserRepository } from '../user/user.repository';
-import { JobRepository } from '../job/job.repository';
-import { PageDto } from '../../common/pagination/pagination.dto';
-import { TOKEN_ADDRESSES } from '../../common/constants/tokens';
-import { EscrowFundToken } from '../../common/enums/job';
-import { JobEntity } from '../job/job.entity';
 
 @Injectable()
 export class PaymentService {
@@ -91,10 +92,7 @@ export class PaymentService {
         ).id;
       } catch (error) {
         this.logger.log(error.message, PaymentService.name);
-        throw new ControlledError(
-          ErrorPayment.CustomerNotCreated,
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new ServerError(ErrorPayment.CustomerNotCreated);
       }
     }
     try {
@@ -107,10 +105,7 @@ export class PaymentService {
       });
     } catch (error) {
       this.logger.log(error.message, PaymentService.name);
-      throw new ControlledError(
-        ErrorPayment.CardNotAssigned,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new ServerError(ErrorPayment.CardNotAssigned);
     }
 
     // Ensure the SetupIntent contains a client secret for completing the card setup process.
@@ -119,10 +114,7 @@ export class PaymentService {
         ErrorPayment.ClientSecretDoesNotExist,
         PaymentService.name,
       );
-      throw new ControlledError(
-        ErrorPayment.ClientSecretDoesNotExist,
-        HttpStatus.NOT_FOUND,
-      );
+      throw new ServerError(ErrorPayment.ClientSecretDoesNotExist);
     }
 
     return setupIntent.client_secret;
@@ -137,10 +129,7 @@ export class PaymentService {
 
     if (!setup) {
       this.logger.log(ErrorPayment.SetupNotFound, PaymentService.name);
-      throw new ControlledError(
-        ErrorPayment.SetupNotFound,
-        HttpStatus.NOT_FOUND,
-      );
+      throw new NotFoundError(ErrorPayment.SetupNotFound);
     }
     if (data.defaultCard || !user.stripeCustomerId) {
       // Update Stripe customer settings to use this payment method by default.
@@ -185,10 +174,7 @@ export class PaymentService {
     );
 
     if (paymentEntity) {
-      throw new ControlledError(
-        ErrorPayment.TransactionAlreadyExists,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new ConflictError(ErrorPayment.TransactionAlreadyExists);
     }
 
     const newPaymentEntity = new PaymentEntity();
@@ -217,7 +203,7 @@ export class PaymentService {
     );
 
     if (!paymentData) {
-      throw new ControlledError(ErrorPayment.NotFound, HttpStatus.NOT_FOUND);
+      throw new NotFoundError(ErrorPayment.NotFound);
     }
 
     const paymentEntity = await this.paymentRepository.findOneByTransaction(
@@ -232,7 +218,7 @@ export class PaymentService {
       !eq(paymentEntity.amount, div(paymentData.amount_received, 100)) ||
       paymentEntity.currency !== paymentData.currency
     ) {
-      throw new ControlledError(ErrorPayment.NotFound, HttpStatus.NOT_FOUND);
+      throw new NotFoundError(ErrorPayment.NotFound);
     }
 
     if (
@@ -241,10 +227,7 @@ export class PaymentService {
     ) {
       paymentEntity.status = PaymentStatus.FAILED;
       await this.paymentRepository.updateOne(paymentEntity);
-      throw new ControlledError(
-        ErrorPayment.NotSuccess,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new ConflictError(ErrorPayment.NotSuccess);
     } else if (paymentData?.status !== StripePaymentStatus.SUCCEEDED) {
       return false; // TODO: Handling other cases
     }
@@ -272,28 +255,21 @@ export class PaymentService {
     );
 
     if (!transaction) {
-      throw new ControlledError(
-        ErrorPayment.TransactionNotFoundByHash,
-        HttpStatus.NOT_FOUND,
-      );
+      throw new NotFoundError(ErrorPayment.TransactionNotFoundByHash);
     }
 
     verifySignature(dto, signature, [transaction.from]);
 
     if (!transaction.logs[0] || !transaction.logs[0].data) {
-      throw new ControlledError(
-        ErrorPayment.InvalidTransactionData,
-        HttpStatus.NOT_FOUND,
-      );
+      throw new ServerError(ErrorPayment.InvalidTransactionData);
     }
 
     if ((await transaction.confirmations()) < TX_CONFIRMATION_TRESHOLD) {
       this.logger.error(
         `Transaction has ${transaction.confirmations} confirmations instead of ${TX_CONFIRMATION_TRESHOLD}`,
       );
-      throw new ControlledError(
+      throw new ConflictError(
         ErrorPayment.TransactionHasNotEnoughAmountOfConfirmations,
-        HttpStatus.NOT_FOUND,
       );
     }
 
@@ -313,20 +289,14 @@ export class PaymentService {
         })?.args['_to'],
       ) !== ethers.hexlify(signer.address)
     ) {
-      throw new ControlledError(
-        ErrorPayment.InvalidRecipient,
-        HttpStatus.CONFLICT,
-      );
+      throw new ConflictError(ErrorPayment.InvalidRecipient);
     }
 
     const tokenId = (await tokenContract.symbol()).toLowerCase();
     const token = TOKEN_ADDRESSES[dto.chainId]?.[tokenId as EscrowFundToken];
 
     if (token?.address !== tokenAddress || !CoingeckoTokenId[tokenId]) {
-      throw new ControlledError(
-        ErrorPayment.UnsupportedToken,
-        HttpStatus.CONFLICT,
-      );
+      throw new ConflictError(ErrorPayment.UnsupportedToken);
     }
 
     const amount = Number(
@@ -339,10 +309,7 @@ export class PaymentService {
     );
 
     if (paymentEntity) {
-      throw new ControlledError(
-        ErrorPayment.TransactionAlreadyExists,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new ConflictError(ErrorPayment.TransactionAlreadyExists);
     }
 
     const rate = await this.rateService.getRate(tokenId, FiatCurrency.USD);
@@ -435,10 +402,7 @@ export class PaymentService {
     invoice = await this.stripe.invoices.finalizeInvoice(invoice.id);
 
     if (!invoice.payment_intent) {
-      throw new ControlledError(
-        ErrorPayment.IntentNotCreated,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw new ServerError(ErrorPayment.IntentNotCreated);
     }
 
     return invoice;
@@ -463,20 +427,14 @@ export class PaymentService {
         });
       }
     } catch {
-      throw new ControlledError(
-        ErrorPayment.PaymentMethodAssociationFailed,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw new ServerError(ErrorPayment.PaymentMethodAssociationFailed);
     }
 
     const paymentIntent =
       await this.stripe.paymentIntents.retrieve(paymentIntentId);
 
     if (!paymentIntent?.client_secret) {
-      throw new ControlledError(
-        ErrorPayment.ClientSecretDoesNotExist,
-        HttpStatus.NOT_FOUND,
-      );
+      throw new ServerError(ErrorPayment.ClientSecretDoesNotExist);
     }
 
     return paymentIntent;
@@ -489,10 +447,7 @@ export class PaymentService {
     const user = await this.userRepository.findById(job.userId);
     if (!user) {
       this.logger.log(ErrorPayment.CustomerNotFound, PaymentService.name);
-      throw new ControlledError(
-        ErrorPayment.CustomerNotFound,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new NotFoundError(ErrorPayment.CustomerNotFound);
     }
 
     const amountInCents = Math.ceil(mul(amount, 100));
@@ -508,10 +463,7 @@ export class PaymentService {
     );
 
     if (!defaultPaymentMethod) {
-      throw new ControlledError(
-        ErrorPayment.NotDefaultPaymentMethod,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw new ServerError(ErrorPayment.NotDefaultPaymentMethod);
     }
 
     const paymentIntent = await this.handleStripePaymentIntent(
@@ -556,10 +508,7 @@ export class PaymentService {
     // Check if the user has enough balance
     const userBalance = await this.getUserBalanceByCurrency(userId, currency);
     if (lt(userBalance, amount)) {
-      throw new ControlledError(
-        ErrorPayment.NotEnoughFunds,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new ServerError(ErrorPayment.NotEnoughFunds);
     }
 
     const paymentEntity = new PaymentEntity();
@@ -618,10 +567,7 @@ export class PaymentService {
         (await this.getDefaultPaymentMethod(user.stripeCustomerId)) &&
       (await this.isPaymentMethodInUse(user.id))
     ) {
-      throw new ControlledError(
-        ErrorPayment.PaymentMethodInUse,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new ConflictError(ErrorPayment.PaymentMethodInUse);
     }
 
     // Detach the payment method from the user's account
@@ -663,10 +609,7 @@ export class PaymentService {
     updateBillingInfoDto: BillingInfoDto,
   ) {
     if (!user.stripeCustomerId) {
-      throw new ControlledError(
-        ErrorPayment.CustomerNotFound,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new NotFoundError(ErrorPayment.CustomerNotFound);
     }
     // If the VAT or VAT type has changed, update it in Stripe
     const existingTaxIds = await this.stripe.customers.listTaxIds(
@@ -714,10 +657,7 @@ export class PaymentService {
 
   async getDefaultPaymentMethod(customerId: string): Promise<string | null> {
     if (!customerId) {
-      throw new ControlledError(
-        ErrorPayment.CustomerNotFound,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new NotFoundError(ErrorPayment.CustomerNotFound);
     }
 
     // Retrieve the customer from Stripe and return the default payment method
@@ -770,7 +710,7 @@ export class PaymentService {
     const paymentIntent = await this.stripe.paymentIntents.retrieve(paymentId);
 
     if (!paymentIntent || paymentIntent.customer !== user.stripeCustomerId) {
-      throw new ControlledError(ErrorPayment.NotFound, HttpStatus.NOT_FOUND);
+      throw new NotFoundError(ErrorPayment.NotFound);
     }
 
     // Retrieve the charge for the payment intent and ensure it has a receipt URL
@@ -778,7 +718,7 @@ export class PaymentService {
       paymentIntent.latest_charge as string,
     );
     if (!charge || !charge.receipt_url) {
-      throw new ControlledError(ErrorPayment.NotFound, HttpStatus.NOT_FOUND);
+      throw new NotFoundError(ErrorPayment.NotFound);
     }
 
     return charge.receipt_url;

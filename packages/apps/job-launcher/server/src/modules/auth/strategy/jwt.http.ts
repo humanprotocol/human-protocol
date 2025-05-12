@@ -1,18 +1,18 @@
-import { ExtractJwt, Strategy } from 'passport-jwt';
+import { Injectable, Req } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { HttpStatus, Injectable, Req } from '@nestjs/common';
+import { ExtractJwt, Strategy } from 'passport-jwt';
 
-import { UserEntity } from '../../user/user.entity';
+import { AuthConfigService } from '../../../common/config/auth-config.service';
 import {
   LOGOUT_PATH,
   RESEND_EMAIL_VERIFICATION_PATH,
 } from '../../../common/constants';
 import { UserStatus } from '../../../common/enums/user';
-import { AuthConfigService } from '../../../common/config/auth-config.service';
+import { AuthError } from '../../../common/errors';
+import { UserEntity } from '../../user/user.entity';
 import { UserRepository } from '../../user/user.repository';
-import { ControlledError } from '../../../common/errors/controlled';
-import { TokenRepository } from '../token.repository';
 import { TokenType } from '../token.entity';
+import { TokenRepository } from '../token.repository';
 
 @Injectable()
 export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
@@ -36,7 +36,7 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
     const user = await this.userRepository.findById(payload.userId);
 
     if (!user) {
-      throw new ControlledError('User not found', HttpStatus.UNAUTHORIZED);
+      throw new AuthError('User not found');
     }
 
     if (
@@ -44,7 +44,7 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
       request.url !== RESEND_EMAIL_VERIFICATION_PATH &&
       request.url !== LOGOUT_PATH
     ) {
-      throw new ControlledError('User not active', HttpStatus.UNAUTHORIZED);
+      throw new AuthError('User not active');
     }
 
     const token = await this.tokenRepository.findOneByUserIdAndType(
@@ -53,10 +53,7 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
     );
 
     if (!token) {
-      throw new ControlledError(
-        'User is not authorized',
-        HttpStatus.UNAUTHORIZED,
-      );
+      throw new AuthError('User is not authorized');
     }
 
     return user;
