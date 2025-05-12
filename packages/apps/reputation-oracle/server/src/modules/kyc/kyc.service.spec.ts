@@ -11,7 +11,7 @@ import {
 } from '../../../test/mock-creators/nest';
 import { KycConfigService, Web3ConfigService } from '../../config';
 import { KycStatus } from '../kyc/constants';
-import { UserEntity } from '../user';
+import { UserRepository } from '../user';
 import { generateWorkerUser } from '../user/fixtures';
 import { mockWeb3ConfigService } from '../web3/fixtures';
 import { Web3Service } from '../web3';
@@ -26,6 +26,7 @@ import { generateKycEntity, mockKycConfigService } from './fixtures';
 const mockHttpService = createHttpServiceMock();
 
 const mockKycRepository = createMock<KycRepository>();
+const mockUserRepository = createMock<UserRepository>();
 
 describe('Kyc Service', () => {
   let kycService: KycService;
@@ -39,6 +40,7 @@ describe('Kyc Service', () => {
         { provide: HttpService, useValue: mockHttpService },
         { provide: KycConfigService, useValue: mockKycConfigService },
         { provide: KycRepository, useValue: mockKycRepository },
+        { provide: UserRepository, useValue: mockUserRepository },
         {
           provide: Web3ConfigService,
           useValue: mockWeb3ConfigService,
@@ -59,63 +61,59 @@ describe('Kyc Service', () => {
   describe('initSession', () => {
     describe('Should return existing session url if user already has an active Kyc session, and is waiting for user to make an action', () => {
       it('status is none', async () => {
-        const mockUserEntity = generateWorkerUser();
-        mockUserEntity.kyc = generateKycEntity(
-          mockUserEntity.id,
+        const mockKycEntity = generateKycEntity(
+          faker.number.int(),
           KycStatus.NONE,
         );
+        mockKycRepository.findOneByUserId.mockResolvedValueOnce(mockKycEntity);
 
-        const result = await kycService.initSession(
-          mockUserEntity as UserEntity,
-        );
+        const result = await kycService.initSession(mockKycEntity.userId);
 
         expect(result).toEqual({
-          url: mockUserEntity.kyc.url,
+          url: mockKycEntity.url,
         });
       });
 
       it('status is resubmission_requested', async () => {
-        const mockUserEntity = generateWorkerUser();
-        mockUserEntity.kyc = generateKycEntity(
-          mockUserEntity.id,
+        const mockKycEntity = generateKycEntity(
+          faker.number.int(),
           KycStatus.RESUBMISSION_REQUESTED,
         );
+        mockKycRepository.findOneByUserId.mockResolvedValueOnce(mockKycEntity);
 
-        const result = await kycService.initSession(
-          mockUserEntity as UserEntity,
-        );
+        const result = await kycService.initSession(mockKycEntity.userId);
 
         expect(result).toEqual({
-          url: mockUserEntity.kyc.url,
+          url: mockKycEntity.url,
         });
       });
     });
 
     it('Should throw an error if user already has an active Kyc session, but is approved already', async () => {
-      const mockUserEntity = generateWorkerUser();
-      mockUserEntity.kyc = generateKycEntity(
-        mockUserEntity.id,
+      const mockKycEntity = generateKycEntity(
+        faker.number.int(),
         KycStatus.APPROVED,
       );
+      mockKycRepository.findOneByUserId.mockResolvedValueOnce(mockKycEntity);
 
       await expect(
-        kycService.initSession(mockUserEntity as any),
+        kycService.initSession(mockKycEntity.userId),
       ).rejects.toThrow(
-        new KycError(KycErrorMessage.ALREADY_APPROVED, mockUserEntity.id),
+        new KycError(KycErrorMessage.ALREADY_APPROVED, mockKycEntity.userId),
       );
     });
 
     it("Should throw an error if user already has an active Kyc session, but it's declined", async () => {
-      const mockUserEntity = generateWorkerUser();
-      mockUserEntity.kyc = generateKycEntity(
-        mockUserEntity.id,
+      const mockKycEntity = generateKycEntity(
+        faker.number.int(),
         KycStatus.DECLINED,
       );
+      mockKycRepository.findOneByUserId.mockResolvedValueOnce(mockKycEntity);
 
       await expect(
-        kycService.initSession(mockUserEntity as any),
+        kycService.initSession(mockKycEntity.userId),
       ).rejects.toThrow(
-        new KycError(KycErrorMessage.DECLINED, mockUserEntity.id),
+        new KycError(KycErrorMessage.DECLINED, mockKycEntity.userId),
       );
     });
 
@@ -133,8 +131,10 @@ describe('Kyc Service', () => {
         createHttpServiceResponse(200, mockPostKycRespose),
       );
 
+      mockKycRepository.findOneByUserId.mockResolvedValueOnce(null);
       mockKycRepository.createUnique.mockResolvedValueOnce({} as KycEntity);
-      const result = await kycService.initSession(mockUserEntity);
+
+      const result = await kycService.initSession(mockUserEntity.id);
 
       expect(result).toEqual({
         url: mockPostKycRespose.verification.url,
@@ -232,9 +232,10 @@ describe('Kyc Service', () => {
   describe('getSignedAddress', () => {
     it('Should throw an error if the user has no wallet address registered', async () => {
       const mockUserEntity = generateWorkerUser();
+      mockUserRepository.findOneById.mockResolvedValueOnce(mockUserEntity);
 
       await expect(
-        kycService.getSignedAddress(mockUserEntity as UserEntity),
+        kycService.getSignedAddress(mockUserEntity.id),
       ).rejects.toThrow(
         new KycError(
           KycErrorMessage.NO_WALLET_ADDRESS_REGISTERED,
@@ -248,9 +249,10 @@ describe('Kyc Service', () => {
         privateKey: generateEthWallet().privateKey,
       });
       mockUserEntity.kyc = generateKycEntity(mockUserEntity.id, KycStatus.NONE);
+      mockUserRepository.findOneById.mockResolvedValueOnce(mockUserEntity);
 
       await expect(
-        kycService.getSignedAddress(mockUserEntity as UserEntity),
+        kycService.getSignedAddress(mockUserEntity.id),
       ).rejects.toThrow(
         new KycError(KycErrorMessage.KYC_NOT_APPROVED, mockUserEntity.id),
       );
@@ -264,10 +266,9 @@ describe('Kyc Service', () => {
         mockUserEntity.id,
         KycStatus.APPROVED,
       );
+      mockUserRepository.findOneById.mockResolvedValueOnce(mockUserEntity);
 
-      const result = await kycService.getSignedAddress(
-        mockUserEntity as UserEntity,
-      );
+      const result = await kycService.getSignedAddress(mockUserEntity.id);
 
       const wallet = new ethers.Wallet(mockWeb3ConfigService.privateKey);
       const signedUserAddressWithOperatorPrivateKey = await wallet.signMessage(

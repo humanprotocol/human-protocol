@@ -70,7 +70,7 @@ export class UserController {
   async registerLabeler(
     @Req() request: RequestWithUser,
   ): Promise<RegisterLabelerResponseDto> {
-    const siteKey = await this.userService.registerLabeler(request.user);
+    const siteKey = await this.userService.registerLabeler(request.user.id);
 
     return { siteKey };
   }
@@ -95,7 +95,7 @@ export class UserController {
     @Body() data: RegisterAddressRequestDto,
   ): Promise<void> {
     await this.userService.registerAddress(
-      request.user,
+      request.user.id,
       data.address,
       data.signature,
     );
@@ -114,9 +114,9 @@ export class UserController {
   @HttpCode(200)
   async enableOperator(
     @Body() data: EnableOperatorDto,
-    @Request() req: RequestWithUser,
+    @Request() request: RequestWithUser,
   ): Promise<void> {
-    await this.userService.enableOperator(req.user, data.signature);
+    await this.userService.enableOperator(request.user.id, data.signature);
   }
 
   @ApiOperation({
@@ -132,9 +132,9 @@ export class UserController {
   @HttpCode(200)
   async disableOperator(
     @Body() data: DisableOperatorDto,
-    @Request() req: RequestWithUser,
+    @Request() request: RequestWithUser,
   ): Promise<void> {
-    await this.userService.disableOperator(req.user, data.signature);
+    await this.userService.disableOperator(request.user.id, data.signature);
   }
 
   @ApiOperation({
@@ -189,7 +189,7 @@ export class UserController {
     @Body() data: RegistrationInExchangeOracleDto,
   ): Promise<RegistrationInExchangeOracleResponseDto> {
     await this.userService.registrationInExchangeOracle(
-      request.user,
+      request.user.id,
       data.oracleAddress,
     );
 
@@ -215,7 +215,7 @@ export class UserController {
     @Req() request: RequestWithUser,
   ): Promise<RegistrationInExchangeOraclesResponseDto> {
     const oracleAddresses =
-      await this.userService.getRegistrationInExchangeOracles(request.user);
+      await this.userService.getRegistrationInExchangeOracles(request.user.id);
 
     return { oracleAddresses };
   }
