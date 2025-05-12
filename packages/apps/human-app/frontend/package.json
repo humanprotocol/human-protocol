@@ -23,7 +23,7 @@
     "@hcaptcha/react-hcaptcha": "^0.3.6",
     "@hookform/resolvers": "^5.0.1",
     "@human-protocol/sdk": "*",
-    "@mui/icons-material": "^7.0.1",
+    "@mui/icons-material": "^7.1.0",
     "@mui/material": "^5.16.7",
     "@mui/x-date-pickers": "^7.23.6",
     "@reown/appkit": "^1.7.2",

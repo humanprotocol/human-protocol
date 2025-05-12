@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@human-protocol/sdk": "*",
-    "@mui/icons-material": "^7.0.1",
+    "@mui/icons-material": "^7.1.0",
     "@mui/material": "^5.16.7",
     "@tanstack/query-sync-storage-persister": "^5.68.0",
     "@tanstack/react-query": "^5.67.2",
