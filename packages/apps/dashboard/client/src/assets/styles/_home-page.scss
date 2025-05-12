@@ -1,57 +1,5 @@
-.home-page-header {
-	color: $white;
-	.home-page-search {
-		margin-top: 24px;
-	}
-}
-
-.home-page-boxes {
-	display: flex;
-	gap: 24px;
-	margin-top: 62px;
-
-	.home-page-box {
-		color: $primary;
-		background-color: $white;
-		border-radius: 16px;
-		padding: 24px 32px;
-		width: calc(38% - 24px);
-
-		@media (max-width: 660px) {
-			padding: 24px 16px;
-		}
-
-		.box-title {
-			font-size: 14px;
-			height: 32px;
-			margin-bottom: 24px;
-			display: flex;
-			align-items: center;
-			justify-content: space-between;
-		}
-		.box-content {
-			display: flex;
-			.count {
-				font-size: 20px;
-				font-weight: 500;
-				margin-top: 3px;
-			}
-			.box-icon {
-				margin-right: 10px;
-			}
-		}
-	}
-
-	.home-page-box:first-child {
-		width: 24%;
-	}
-	@media (max-width: 1250px) {
-		flex-wrap: wrap;
-		.home-page-box,
-		.home-page-box:first-child {
-			width: 100%;
-		}
-	}
+.home-page-search {
+	margin-top: 24px;
 }
 
 .home-page-find {

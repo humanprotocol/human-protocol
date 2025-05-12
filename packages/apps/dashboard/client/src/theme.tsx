@@ -120,7 +120,7 @@ const theme: ThemeOptions = createTheme({
     },
     h3: {
       fontSize: 24,
-      fontWeight: 500,
+      fontWeight: 600,
       '@media (max-width:600px)': {
         fontSize: 20,
       },
