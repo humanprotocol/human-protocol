@@ -1,7 +1,7 @@
 import * as gqlFetch from 'graphql-request';
 import { describe, expect, test, vi } from 'vitest';
 import { NETWORKS } from '../src/constants';
-import { ChainId } from '../src/enums';
+import { ChainId, OrderDirection } from '../src/enums';
 import { ErrorInvalidAddress } from '../src/error';
 import {
   GET_WORKER_QUERY,
@@ -109,6 +109,8 @@ describe('WorkerUtils', () => {
         chainId: ChainId.LOCALHOST,
         first: 10,
         skip: 0,
+        orderBy: 'totalAmountReceived',
+        orderDirection: OrderDirection.ASC,
       };
 
       const result = await WorkerUtils.getWorkers(filter);
@@ -120,6 +122,8 @@ describe('WorkerUtils', () => {
           address: undefined,
           first: 10,
           skip: 0,
+          orderBy: 'totalAmountReceived',
+          orderDirection: 'asc',
         }
       );
       expect(result).toEqual(mockWorkers);
@@ -145,6 +149,8 @@ describe('WorkerUtils', () => {
           address: undefined,
           first: 10,
           skip: 0,
+          orderBy: 'payoutCount',
+          orderDirection: 'desc',
         }
       );
       expect(result).toEqual([]);
@@ -184,6 +190,8 @@ describe('WorkerUtils', () => {
           address: undefined,
           first: 1000,
           skip: 0,
+          orderBy: 'payoutCount',
+          orderDirection: 'desc',
         }
       );
       expect(result).toEqual(mockWorkers);

@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch
 
-from human_protocol_sdk.constants import NETWORKS, ChainId
+from human_protocol_sdk.constants import NETWORKS, ChainId, OrderDirection
 from human_protocol_sdk.worker.worker_utils import WorkerUtils, WorkerUtilsError
 from human_protocol_sdk.filter import WorkerFilter
 from human_protocol_sdk.gql.worker import get_worker_query, get_workers_query
@@ -31,6 +31,8 @@ class TestWorkerUtils(unittest.TestCase):
 
             filter = WorkerFilter(
                 chain_id=ChainId.POLYGON_AMOY,
+                order_by="totalAmountReceived",
+                order_direction=OrderDirection.ASC,
             )
 
             workers = WorkerUtils.get_workers(filter)
@@ -42,6 +44,8 @@ class TestWorkerUtils(unittest.TestCase):
                     "address": None,
                     "first": 10,
                     "skip": 0,
+                    "orderBy": "totalAmountReceived",
+                    "orderDirection": "asc",
                 },
             )
             self.assertEqual(len(workers), 2)
@@ -68,6 +72,8 @@ class TestWorkerUtils(unittest.TestCase):
                     "address": "0x1234567890123456789012345678901234567890",
                     "first": 10,
                     "skip": 0,
+                    "orderBy": "payoutCount",
+                    "orderDirection": "desc",
                 },
             )
             self.assertEqual(len(workers), 0)
