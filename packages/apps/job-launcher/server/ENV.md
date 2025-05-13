@@ -180,6 +180,21 @@ REPUTATION_ORACLE_ADDRESS=
 ### List of reputation oracle addresses, typically comma-separated. Required
 REPUTATION_ORACLES=
 
+### Address of the CVAT exchange oracle contract. Required
+CVAT_EXCHANGE_ORACLE_ADDRESS=
+
+### Address of the CVAT recording oracle contract. Required
+CVAT_RECORDING_ORACLE_ADDRESS=
+
+### Address of the Audino exchange oracle contract. Required
+AUDINO_EXCHANGE_ORACLE_ADDRESS=
+
+### Address of the Audino recording oracle contract. Required
+AUDINO_RECORDING_ORACLE_ADDRESS=
+
+### Address of the hCaptcha oracle contract. Required
+HCAPTCHA_ORACLE_ADDRESS=
+
 ### URI for the hCaptcha recording oracle service. Required
 HCAPTCHA_RECORDING_ORACLE_URI=
 
