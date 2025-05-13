@@ -37,7 +37,7 @@ const Account: FC = () => {
           borderRadius: '4px',
           color: isDarkMode ? 'primary.contrastText' : 'primary.main',
           height: isMobile ? '42px' : '100%',
-          paddingX: { md: 0.5, lg: 1 },
+          px: 1,
           fontWeight: 600,
           borderBottomLeftRadius: anchorEl ? 0 : 4,
           borderBottomRightRadius: anchorEl ? 0 : 4,
@@ -55,11 +55,7 @@ const Account: FC = () => {
         ) : (
           <AvatarIcon />
         )}
-        <Typography
-          variant="body2"
-          paddingX={1}
-          sx={{ fontSize: { md: '12px', lg: '14px' }, fontWeight: 600 }}
-        >
+        <Typography variant="body2" px={1} fontSize={14} fontWeight={600}>
           {formattedAddress}
         </Typography>
         <ChevronIcon
@@ -100,8 +96,7 @@ const Account: FC = () => {
           onClick={() => disconnect()}
           sx={{
             color: 'text.secondary',
-            paddingY: 1,
-            paddingX: { md: 0.5, lg: 1 },
+            p: 1,
             width: '100%',
             gap: 1,
             justifyContent: 'flex-start',

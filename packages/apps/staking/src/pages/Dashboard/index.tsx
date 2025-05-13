@@ -73,7 +73,7 @@ const Dashboard: FC = () => {
             container
             columnSpacing={isMobile ? 0 : 3}
             rowSpacing={isMobile ? 4 : 0}
-            mt={-6}
+            mt={isMobile ? -12 : -6}
           >
             <Grid item xs={12} sm={6} md={4} pl={0}>
               <BalanceCard />

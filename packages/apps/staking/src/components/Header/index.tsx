@@ -6,7 +6,6 @@ import {
   IconButton,
   Drawer,
   Typography,
-  styled,
   Button,
   useTheme,
 } from '@mui/material';
@@ -24,31 +23,7 @@ import ThemeModeSwitch from '../ThemeModeSwitch';
 
 import { ROUTES } from '../../constants';
 import { LogoIcon } from '../../icons';
-
-const NavLink = styled(MuiLink)(({ theme }) => {
-  const { isDarkMode, palette } = theme;
-  const color = isDarkMode ? palette.text.primary : palette.primary.main;
-
-  return {
-    color,
-    padding: '6px 8px',
-    fontSize: '14px',
-    lineHeight: '150%',
-    letterSpacing: '0.1px',
-    fontWeight: 600,
-    textDecoration: 'none',
-    cursor: 'pointer',
-
-    '&:visited, &:hover': {
-      color,
-    },
-
-    '@media (min-width: 900px) and (max-width: 1200px)': {
-      padding: '6px 4px',
-      fontSize: '12px',
-    },
-  };
-});
+import HeaderMenu from '../HeaderMenu';
 
 const DefaultHeader: FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -94,7 +69,7 @@ const DefaultHeader: FC = () => {
             variant="body1"
             ml={1.5}
             display={{ xs: 'none', sm: 'block' }}
-            sx={{ fontSize: { md: '14px', lg: '16px' } }}
+            fontSize={16}
             color="text.primary"
           >
             Staking
@@ -105,26 +80,16 @@ const DefaultHeader: FC = () => {
           paddingY={{ sm: 0, md: 2.5 }}
           height="100%"
           alignItems="center"
-          gap={{ md: 1, lg: 2 }}
+          gap={2}
         >
-          <NavLink href={ROUTES.DASHBOARD}>Staking Overview</NavLink>
-          <NavLink href={ROUTES.KVSTORE}>KV Store</NavLink>
-          <NavLink
-            href={import.meta.env.VITE_HEADER_LINK_DASHBOARD}
-            target="_blank"
-          >
-            Dashboard
-          </NavLink>
-          <NavLink href="https://humanprotocol.org" target="_blank">
-            HUMAN Website
-          </NavLink>
+          <HeaderMenu />
           <Button
             size="medium"
             variant="outlined"
             disabled={!isConnected}
             sx={{
-              px: { md: 1, lg: 2 },
-              fontSize: { md: '12px', lg: '14px' },
+              px: 2,
+              fontSize: '14px',
               height: '100%',
               color: 'text.primary',
               borderColor: 'text.primary',
@@ -133,9 +98,9 @@ const DefaultHeader: FC = () => {
           >
             Stake HMT
           </Button>
-          <NetworkSwitcher />
           {!isConnected && <ConnectWallet />}
           {isConnected && <Account />}
+          <NetworkSwitcher />
           <ThemeModeSwitch />
         </Box>
 

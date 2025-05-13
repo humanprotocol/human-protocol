@@ -98,7 +98,7 @@ export const createAppTheme = (mode: 'light' | 'dark') => {
             link: {
               main: '#0000ee',
               hover: '#1406b2',
-              visited: '#551a8b',
+              visited: '#7022b8',
             },
             success: {
               main: '#0ad397',
@@ -137,9 +137,9 @@ export const createAppTheme = (mode: 'light' | 'dark') => {
             },
             backdropColor: 'rgba(16, 7, 53, 0.80)',
             link: {
-              main: '#0000ee',
-              hover: '#1406b2',
-              visited: '#551a8b',
+              main: '#5757f8',
+              hover: '#5757f8',
+              visited: '#9d4ff7',
             },
             success: {
               main: '#0ad397',
