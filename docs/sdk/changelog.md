@@ -1,34 +1,42 @@
-# Changelog
+# CHANGELOG
 
-### Added
+## Changelog
 
-### Changed
+#### Added
 
-### Deprecated
+* New `WorkerUtils`&#x20;
+* Enhanced `EscrowUtils` with methods to retrieve payouts
+* `chainId` filter and pagination options for payouts filter
 
-### Removed
+#### Changed
 
-### Fixed
+* `getStatusEvents` has new signature for params
 
-### Security
+#### Deprecated
 
-# How to upgrade
+#### Removed
 
-## Typescript
+#### Fixed
 
-### yarn
+#### Security
+
+## How to upgrade
+
+### Typescript
+
+#### yarn
 
 ```
 yarn upgrade @human-protocol/sdk
 ```
 
-### npm
+#### npm
 
 ```
 npm update @human-protocol/sdk
 ```
 
-## Python
+### Python
 
 ```
 pip install --upgrade human-protocol-sdk
