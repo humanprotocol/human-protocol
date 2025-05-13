@@ -38,9 +38,10 @@ const PopoverArrow = () => (
       left: 'calc(50% - 7px)',
       width: 14,
       height: 14,
-      bgcolor: 'white.main',
-      borderLeft: '1px solid rgba(218, 220, 232, 0.70)',
-      borderTop: '1px solid rgba(218, 220, 232, 0.70)',
+      bgcolor: 'background.default',
+      borderLeft: '1px solid',
+      borderTop: '1px solid',
+      borderColor: 'rgba(218, 220, 232, 0.70)',
       transform: 'rotate(45deg)',
       zIndex: 0,
     }}
@@ -85,6 +86,7 @@ const HeaderMenu: FC = () => {
           paper: {
             elevation: 0,
             sx: {
+              bgcolor: 'background.default',
               borderRadius: '12px',
               border: '1px solid rgba(218, 220, 232, 0.70)',
               mt: 1,
