@@ -4013,6 +4013,7 @@ __metadata:
     "@nestjs/common": "npm:^10.2.7"
     "@nestjs/core": "npm:^10.3.10"
     "@nestjs/schematics": "npm:^11.0.2"
+    "@nestjs/terminus": "npm:^11.0.0"
     "@nestjs/testing": "npm:^10.4.6"
     "@nestjs/typeorm": "npm:^10.0.1"
     "@types/express": "npm:^4.17.13"
