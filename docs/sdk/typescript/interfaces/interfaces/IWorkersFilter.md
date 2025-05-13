@@ -2,11 +2,11 @@
 
 ***
 
-[@human-protocol/sdk](../../modules.md) / [interfaces](../README.md) / IHMTHoldersParams
+[@human-protocol/sdk](../../modules.md) / [interfaces](../README.md) / IWorkersFilter
 
-# Interface: IHMTHoldersParams
+# Interface: IWorkersFilter
 
-Defined in: [interfaces.ts:102](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L102)
+Defined in: [interfaces.ts:181](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L181)
 
 ## Extends
 
@@ -18,7 +18,15 @@ Defined in: [interfaces.ts:102](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **address**: `string`
 
-Defined in: [interfaces.ts:103](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L103)
+Defined in: [interfaces.ts:183](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L183)
+
+***
+
+### chainId
+
+> **chainId**: [`ChainId`](../../enums/enumerations/ChainId.md)
+
+Defined in: [interfaces.ts:182](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L182)
 
 ***
 
@@ -31,6 +39,14 @@ Defined in: [interfaces.ts:154](https://github.com/humanprotocol/human-protocol/
 #### Inherited from
 
 [`IPagination`](IPagination.md).[`first`](IPagination.md#first)
+
+***
+
+### orderBy?
+
+> `optional` **orderBy**: `string`
+
+Defined in: [interfaces.ts:184](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L184)
 
 ***
 

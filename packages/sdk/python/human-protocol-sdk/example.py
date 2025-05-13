@@ -2,7 +2,13 @@ import datetime
 
 from human_protocol_sdk.constants import ChainId, OrderDirection, Status
 from human_protocol_sdk.escrow import EscrowUtils
-from human_protocol_sdk.filter import EscrowFilter, PayoutFilter, StatisticsFilter
+from human_protocol_sdk.worker import WorkerUtils
+from human_protocol_sdk.filter import (
+    EscrowFilter,
+    PayoutFilter,
+    StatisticsFilter,
+    WorkerFilter,
+)
 from human_protocol_sdk.statistics import (
     StatisticsClient,
     HMTHoldersParam,
@@ -146,6 +152,18 @@ def get_operators():
     print(len(operators))
 
 
+def get_workers():
+    workers = WorkerUtils.get_workers(
+        WorkerFilter(chain_id=ChainId.POLYGON_AMOY, first=2)
+    )
+    print(workers)
+    print(WorkerUtils.get_worker(ChainId.POLYGON_AMOY, workers[0].address))
+    workers = WorkerUtils.get_workers(
+        WorkerFilter(chain_id=ChainId.POLYGON_AMOY, worker_address=workers[0].address)
+    )
+    print(len(workers))
+
+
 def agreement_example():
     annotations = [
         ["cat", "not", "cat"],
@@ -176,3 +194,4 @@ if __name__ == "__main__":
     get_hmt_daily_data(statistics_client)
 
     agreement_example()
+    get_workers()

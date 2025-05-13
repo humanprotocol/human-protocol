@@ -11,6 +11,8 @@ import {
   OrderDirection,
   KVStoreUtils,
   IOperatorsFilter,
+  StakingClient,
+  WorkerUtils,
 } from '@human-protocol/sdk';
 
 import { WalletDto } from './dto/wallet.dto';
@@ -53,6 +55,14 @@ export class DetailsService {
       });
       return escrowDto;
     }
+    const network = this.networkConfig.networks.find(
+      (network) => network.chainId === chainId,
+    );
+    if (!network) throw new BadRequestException('Invalid chainId provided');
+    const provider = new ethers.JsonRpcProvider(network.rpcUrl);
+    const stakingClient = await StakingClient.build(provider);
+    const stakingData = await stakingClient.getStakerInfo(address);
+
     const operatorData = await OperatorUtils.getOperator(chainId, address);
     if (operatorData) {
       const operatorDto: OperatorDto = plainToInstance(
@@ -65,6 +75,11 @@ export class DetailsService {
 
       operatorDto.chainId = chainId;
       operatorDto.balance = await this.getHmtBalance(chainId, address);
+      operatorDto.amountStaked = ethers.formatEther(stakingData.stakedAmount);
+      operatorDto.amountLocked = ethers.formatEther(stakingData.lockedAmount);
+      operatorDto.amountWithdrawable = ethers.formatEther(
+        stakingData.withdrawableAmount,
+      );
 
       const { reputation } = await this.fetchOperatorReputation(
         chainId,
@@ -75,10 +90,22 @@ export class DetailsService {
 
       return operatorDto;
     }
+
+    const workerData = await WorkerUtils.getWorker(chainId, address);
+
     const walletDto: WalletDto = plainToInstance(WalletDto, {
       chainId,
       address,
       balance: await this.getHmtBalance(chainId, address),
+      amountStaked: ethers.formatEther(stakingData.stakedAmount),
+      amountLocked: ethers.formatEther(stakingData.lockedAmount),
+      amountWithdrawable: ethers.formatEther(stakingData.withdrawableAmount),
+      reputation: (await this.fetchOperatorReputation(chainId, address))
+        .reputation,
+      totalAmountReceived: ethers.formatEther(
+        workerData?.totalAmountReceived || 0,
+      ),
+      payoutCount: workerData?.payoutCount || 0,
     });
 
     return walletDto;
