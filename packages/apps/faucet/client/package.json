@@ -1,11 +1,11 @@
 {
-  "private": "true",
   "name": "@human-protocol/faucet-client",
+  "private": true,
   "version": "1.0.0",
   "description": "Human Protocol Faucet",
   "license": "MIT",
   "dependencies": {
-    "@human-protocol/sdk": "*",
+    "@human-protocol/sdk": "workspace:*",
     "@mui/icons-material": "^7.0.1",
     "@mui/material": "^5.16.7",
     "react": "^18.2.0",
@@ -16,16 +16,21 @@
     "viem": "2.x"
   },
   "devDependencies": {
+    "@types/react": "^18.3.12",
     "dotenv": "^16.3.2",
+    "eslint": "^8.55.0",
     "eslint-config-react-app": "^7.0.1",
     "eslint-import-resolver-typescript": "^3.7.0",
     "eslint-plugin-import": "^2.29.0",
     "eslint-plugin-react": "^7.34.3",
     "eslint-plugin-react-hooks": "^5.1.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.8.3",
     "vite": "^6.2.4",
-    "vite-plugin-node-polyfills": "^0.22.0"
+    "vite-plugin-node-polyfills": "^0.23.0"
   },
   "scripts": {
+    "clean": "rm -rf dist",
     "lint": "eslint '**/*.{ts,tsx}'",
     "start": "vite",
     "build": "vite build",
@@ -34,7 +39,8 @@
     "format:prettier": "prettier --write '**/*.{ts,tsx}'",
     "format:lint": "eslint --fix '**/*.{ts,tsx}'",
     "format": "yarn format:prettier && yarn format:lint",
-    "vercel-build": "yarn workspace @human-protocol/sdk build && yarn build"
+    "vercel-build": "yarn workspace human-protocol build:libs && yarn build",
+    "test": "exit 0"
   },
   "lint-staged": {
     "*.{ts,tsx}": [

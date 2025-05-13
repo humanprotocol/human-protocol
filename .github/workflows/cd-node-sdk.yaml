@@ -19,11 +19,10 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: yarn
-      - run: yarn --ignore-scripts
-        name: Install dependencies
-      - run: yarn build
-        name: Build core package
-        working-directory: ./packages/core
+      - name: Install dependencies
+        run: yarn install --immutable
+      - name: Build core package
+        run: yarn build:core
       - name: Change Node.js SDK version
         uses: jossef/action-set-json-field@v2
         if: ${{ github.event_name != 'workflow_dispatch' }}
@@ -38,8 +37,8 @@ jobs:
           file: ./packages/sdk/typescript/human-protocol-sdk/package.json
           field: version
           value: ${{ github.event.inputs.release_version }}
-      - run: yarn build
-        name: Build SDK package
+      - name: Build SDK package
+        run: yarn build
         working-directory: ./packages/sdk/typescript/human-protocol-sdk
       - uses: JS-DevTools/npm-publish@v3
         name: Publish

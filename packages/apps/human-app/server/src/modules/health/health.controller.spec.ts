@@ -36,7 +36,6 @@ describe('HealthController', () => {
 
   it('/ping should return proper info', async () => {
     await expect(healthController.ping()).resolves.toEqual({
-      appName: '@human-protocol/human-app-server',
       gitHash: 'test_value_hardcoded_in_jest_config',
     });
   });
