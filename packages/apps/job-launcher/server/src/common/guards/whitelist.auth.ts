@@ -1,9 +1,16 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { WhitelistService } from '../../modules/whitelist/whitelist.service';
 import { AuthError } from '../errors';
 
 @Injectable()
 export class WhitelistAuthGuard implements CanActivate {
+  private readonly logger = new Logger(WhitelistAuthGuard.name);
+
   constructor(private readonly whitelistService: WhitelistService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -11,6 +18,7 @@ export class WhitelistAuthGuard implements CanActivate {
     const user = request.user;
 
     if (!user) {
+      this.logger.error('User object is missing in the request.', request);
       throw new AuthError('User not found.');
     }
 
