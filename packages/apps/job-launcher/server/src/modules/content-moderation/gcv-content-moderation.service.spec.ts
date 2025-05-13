@@ -12,12 +12,12 @@ import { JobStatus } from '../../common/enums/job';
 import { ControlledError } from '../../common/errors/controlled';
 import { JobEntity } from '../job/job.entity';
 import { JobRepository } from '../job/job.repository';
-import { StorageService } from '../storage/storage.service';
 import { ContentModerationRequestEntity } from './content-moderation-request.entity';
 import { ContentModerationRequestRepository } from './content-moderation-request.repository';
 import { GCVContentModerationService } from './gcv-content-moderation.service';
 import { sendSlackNotification } from '../../common/utils/slack';
 import { listObjectsInBucket } from '../../common/utils/storage';
+import { ManifestService } from '../manifest/manifest.service';
 
 jest.mock('@google-cloud/storage');
 jest.mock('@google-cloud/vision');
@@ -35,7 +35,7 @@ describe('GCVContentModerationService', () => {
   let jobRepository: JobRepository;
   let contentModerationRequestRepository: ContentModerationRequestRepository;
   let slackConfigService: SlackConfigService;
-  let storageService: StorageService;
+  let manifestService: ManifestService;
   let jobEntity: JobEntity;
 
   const mockStorage = {
@@ -92,9 +92,9 @@ describe('GCVContentModerationService', () => {
           },
         },
         {
-          provide: StorageService,
+          provide: ManifestService,
           useValue: {
-            downloadJsonLikeData: jest.fn(),
+            downloadManifest: jest.fn(),
           },
         },
       ],
@@ -108,7 +108,7 @@ describe('GCVContentModerationService', () => {
         ContentModerationRequestRepository,
       );
     slackConfigService = module.get<SlackConfigService>(SlackConfigService);
-    storageService = module.get<StorageService>(StorageService);
+    manifestService = module.get<ManifestService>(ManifestService);
 
     jobEntity = {
       id: faker.number.int(),
@@ -167,7 +167,7 @@ describe('GCVContentModerationService', () => {
 
     it('should set job to MODERATION_PASSED if data_url is missing or invalid', async () => {
       jobEntity.status = JobStatus.PAID;
-      (storageService.downloadJsonLikeData as jest.Mock).mockResolvedValueOnce({
+      (manifestService.downloadManifest as jest.Mock).mockResolvedValueOnce({
         data: { data_url: null },
       });
 
@@ -178,7 +178,7 @@ describe('GCVContentModerationService', () => {
 
     it('should do nothing if no valid files found in GCS', async () => {
       jobEntity.status = JobStatus.PAID;
-      (storageService.downloadJsonLikeData as jest.Mock).mockResolvedValueOnce({
+      (manifestService.downloadManifest as jest.Mock).mockResolvedValueOnce({
         data: {
           data_url: `gs://${faker.word.sample({ length: { min: 5, max: 10 } })}`,
         },
@@ -192,7 +192,7 @@ describe('GCVContentModerationService', () => {
 
     it('should create new requests in PENDING and set job to UNDER_MODERATION', async () => {
       jobEntity.status = JobStatus.PAID;
-      (storageService.downloadJsonLikeData as jest.Mock).mockResolvedValueOnce({
+      (manifestService.downloadManifest as jest.Mock).mockResolvedValueOnce({
         data: {
           data_url: `gs://${faker.word.sample({ length: { min: 5, max: 10 } })}`,
         },
@@ -215,7 +215,7 @@ describe('GCVContentModerationService', () => {
 
     it('should throw if an error occurs in creation logic', async () => {
       jobEntity.status = JobStatus.PAID;
-      (storageService.downloadJsonLikeData as jest.Mock).mockResolvedValueOnce({
+      (manifestService.downloadManifest as jest.Mock).mockResolvedValueOnce({
         data: {
           data_url: `gs://${faker.word.sample({ length: { min: 5, max: 10 } })}`,
         },

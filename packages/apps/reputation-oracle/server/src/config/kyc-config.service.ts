@@ -10,7 +10,7 @@ export class KycConfigService {
    * Required
    */
   get apiKey(): string {
-    return this.configService.getOrThrow<string>('KYC_API_KEY');
+    return this.configService.getOrThrow('KYC_API_KEY');
   }
 
   /**
@@ -18,7 +18,7 @@ export class KycConfigService {
    * Required
    */
   get apiPrivateKey(): string {
-    return this.configService.getOrThrow<string>('KYC_API_PRIVATE_KEY');
+    return this.configService.getOrThrow('KYC_API_PRIVATE_KEY');
   }
 
   /**
@@ -26,7 +26,7 @@ export class KycConfigService {
    * Default: 'https://stationapi.veriff.com/v1'
    */
   get baseUrl(): string {
-    return this.configService.get<string>(
+    return this.configService.get(
       'KYC_BASE_URL',
       'https://stationapi.veriff.com/v1',
     );

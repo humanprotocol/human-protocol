@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 
-import { AuthConfigService } from '../../config/auth-config.service';
-import { HCaptchaModule } from '../../integrations/hcaptcha/hcaptcha.module';
-import { EmailModule } from '../email/module';
+import { AuthConfigService } from '../../config';
+import { HCaptchaModule } from '../../integrations/hcaptcha';
+import { EmailModule } from '../email';
 import { UserModule } from '../user';
-import { Web3Module } from '../web3/web3.module';
+import { Web3Module } from '../web3';
 
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';

@@ -1,14 +1,5 @@
-import {
-  DataSource,
-  EntityTarget,
-  ObjectLiteral,
-  QueryFailedError,
-  Repository,
-} from 'typeorm';
-import {
-  DatabaseError,
-  handleQueryFailedError,
-} from '../common/errors/database';
+import { DataSource, EntityTarget, ObjectLiteral, Repository } from 'typeorm';
+import { DatabaseError, handleDbError } from './errors';
 import { BaseEntity } from './base.entity';
 
 export class BaseRepository<
@@ -26,11 +17,7 @@ export class BaseRepository<
 
       await this.insert(item);
     } catch (error) {
-      if (error instanceof QueryFailedError) {
-        throw handleQueryFailedError(error);
-      } else {
-        throw error;
-      }
+      throw handleDbError(error);
     }
     return item;
   }
@@ -40,11 +27,7 @@ export class BaseRepository<
       item.updatedAt = new Date();
       await this.save(item);
     } catch (error) {
-      if (error instanceof QueryFailedError) {
-        throw handleQueryFailedError(error);
-      } else {
-        throw error;
-      }
+      throw handleDbError(error);
     }
     return item;
   }
@@ -67,11 +50,7 @@ export class BaseRepository<
 
       return result.affected > 0;
     } catch (error) {
-      if (error instanceof QueryFailedError) {
-        throw handleQueryFailedError(error);
-      } else {
-        throw error;
-      }
+      throw handleDbError(error);
     }
   }
 
@@ -79,11 +58,7 @@ export class BaseRepository<
     try {
       await this.remove(item);
     } catch (error) {
-      if (error instanceof QueryFailedError) {
-        throw handleQueryFailedError(error);
-      } else {
-        throw error;
-      }
+      throw handleDbError(error);
     }
   }
 }

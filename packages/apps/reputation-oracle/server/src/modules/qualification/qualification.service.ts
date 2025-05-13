@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { v4 as uuidV4 } from 'uuid';
 
-import { ServerConfigService } from '../../config/server-config.service';
+import { ServerConfigService } from '../../config';
 import logger from '../../logger';
 import { UserRepository, UserStatus } from '../user';
 
@@ -11,15 +11,9 @@ import {
   QualificationErrorMessage,
 } from './qualification.error';
 import { QualificationRepository } from './qualification.repository';
+import type { Qualification } from './types';
 import { UserQualificationEntity } from './user-qualification.entity';
 import { UserQualificationRepository } from './user-qualification.repository';
-
-type Qualification = {
-  reference: string;
-  title: string;
-  description: string;
-  expiresAt?: string;
-};
 
 @Injectable()
 export class QualificationService {

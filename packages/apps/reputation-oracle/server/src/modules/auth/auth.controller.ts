@@ -16,13 +16,15 @@ import {
   UseFilters,
   HttpCode,
 } from '@nestjs/common';
+
 import { Public } from '../../common/decorators';
-import { AuthService } from './auth.service';
-import { RequestWithUser } from '../../common/interfaces/request';
+import { RequestWithUser } from '../../common/types';
 import { HCaptchaGuard } from '../../integrations/hcaptcha/hcaptcha.guard';
+
+import { AuthService } from './auth.service';
 import { TokenRepository } from './token.repository';
 import { TokenType } from './token.entity';
-import { AuthControllerErrorsFilter } from './auth.error.filter';
+import { AuthControllerErrorsFilter } from './auth.error-filter';
 import {
   ForgotPasswordDto,
   SuccessAuthDto,
@@ -216,7 +218,7 @@ export class AuthController {
   async resendEmailVerification(
     @Req() request: RequestWithUser,
   ): Promise<void> {
-    await this.authService.resendEmailVerification(request.user);
+    await this.authService.resendEmailVerification(request.user.id);
   }
 
   @ApiOperation({

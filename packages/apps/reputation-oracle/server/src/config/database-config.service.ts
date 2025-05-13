@@ -9,7 +9,7 @@ export class DatabaseConfigService {
    * The URL for connecting to the PostgreSQL database.
    */
   get url(): string | undefined {
-    return this.configService.get<string>('POSTGRES_URL');
+    return this.configService.get('POSTGRES_URL');
   }
 
   /**
@@ -17,7 +17,7 @@ export class DatabaseConfigService {
    * Default: '127.0.0.1'
    */
   get host(): string {
-    return this.configService.get<string>('POSTGRES_HOST', '127.0.0.1');
+    return this.configService.get('POSTGRES_HOST', '127.0.0.1');
   }
 
   /**
@@ -25,7 +25,7 @@ export class DatabaseConfigService {
    * Default: 5432
    */
   get port(): number {
-    return +this.configService.get<number>('POSTGRES_PORT', 5432);
+    return Number(this.configService.get('POSTGRES_PORT')) || 5432;
   }
 
   /**
@@ -33,7 +33,7 @@ export class DatabaseConfigService {
    * Default: 'operator'
    */
   get user(): string {
-    return this.configService.get<string>('POSTGRES_USER', 'operator');
+    return this.configService.get('POSTGRES_USER', 'operator');
   }
 
   /**
@@ -41,7 +41,7 @@ export class DatabaseConfigService {
    * Default: 'qwerty'
    */
   get password(): string {
-    return this.configService.get<string>('POSTGRES_PASSWORD', 'qwerty');
+    return this.configService.get('POSTGRES_PASSWORD', 'qwerty');
   }
 
   /**
@@ -49,10 +49,7 @@ export class DatabaseConfigService {
    * Default: 'reputation-oracle'
    */
   get database(): string {
-    return this.configService.get<string>(
-      'POSTGRES_DATABASE',
-      'reputation-oracle',
-    );
+    return this.configService.get('POSTGRES_DATABASE', 'reputation-oracle');
   }
 
   /**
@@ -60,7 +57,7 @@ export class DatabaseConfigService {
    * Default: false
    */
   get ssl(): boolean {
-    return this.configService.get<string>('POSTGRES_SSL', 'false') === 'true';
+    return this.configService.get('POSTGRES_SSL', 'false') === 'true';
   }
 
   /**
@@ -68,9 +65,6 @@ export class DatabaseConfigService {
    * Default: 'log,info,warn,error'
    */
   get logging(): string {
-    return this.configService.get<string>(
-      'POSTGRES_LOGGING',
-      'log,info,warn,error',
-    );
+    return this.configService.get('POSTGRES_LOGGING', 'log,info,warn,error');
   }
 }

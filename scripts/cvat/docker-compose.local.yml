@@ -440,9 +440,7 @@ services:
       PORT: *backend_apps_internal_port
       POSTGRES_DATABASE: job-launcher
       S3_BUCKET: *bucket_name_manifests
-      REPUTATION_ORACLES: *exchange_oracle_address
-      CVAT_EXCHANGE_ORACLE_ADDRESS: *exchange_oracle_address
-      CVAT_RECORDING_ORACLE_ADDRESS: *recording_oracle_address
+      REPUTATION_ORACLES: *reputation_oracle_address
       REPUTATION_ORACLE_ADDRESS: *reputation_oracle_address
       FE_URL: http://localhost:${JOB_LAUNCHER_CLIENT_PORT:?}
 

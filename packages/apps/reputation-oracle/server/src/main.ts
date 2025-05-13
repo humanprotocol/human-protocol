@@ -3,12 +3,13 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { json, urlencoded } from 'body-parser';
-import helmet from 'helmet';
-import { AppModule } from './app.module';
 import { useContainer } from 'class-validator';
-import { ServerConfigService } from './config/server-config.service';
-import logger, { nestLoggerOverride } from './logger';
+import helmet from 'helmet';
 import { IncomingMessage, ServerResponse } from 'http';
+
+import { AppModule } from './app.module';
+import { ServerConfigService } from './config';
+import logger, { nestLoggerOverride } from './logger';
 
 function rawBodyMiddleware(
   req: any,

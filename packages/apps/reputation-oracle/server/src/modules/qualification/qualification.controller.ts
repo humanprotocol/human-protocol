@@ -27,7 +27,7 @@ import {
   UnassignQualificationDto,
   UserQualificationOperationResponseDto,
 } from './qualification.dto';
-import { QualificationErrorFilter } from './qualification.error.filter';
+import { QualificationErrorFilter } from './qualification.error-filter';
 import { QualificationService } from './qualification.service';
 
 @ApiTags('Qualification')

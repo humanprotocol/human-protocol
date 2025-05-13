@@ -38,8 +38,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
+          cache: yarn
       - name: Install dependencies
-        run: npm install --global yarn && yarn --ignore-scripts
+        run: yarn --ignore-scripts
       - run: yarn build
         name: Build core package
         working-directory: ./packages/core

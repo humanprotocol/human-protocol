@@ -8,7 +8,7 @@
 
 > **EscrowWithdraw**: `object`
 
-Defined in: [types.ts:159](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L159)
+Defined in: [types.ts:159](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L159)
 
 Represents the response data for an escrow withdrawal.
 

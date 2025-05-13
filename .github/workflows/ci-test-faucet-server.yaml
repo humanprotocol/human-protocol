@@ -2,14 +2,10 @@ name: Faucet server check
 
 on:
   push:
-    branches:
-      - 'main'
-  pull_request:
     paths:
       - 'packages/core/**'
       - 'packages/sdk/typescript/human-protocol-sdk/**'
       - 'packages/apps/faucet/server/**'
-  workflow_dispatch:
 
 jobs:
   faucet-server-test:
@@ -20,10 +16,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-      - run: npm install --global yarn && yarn
-        name: Install dependencies
-      - run: cp .env.example .env
-        name: Create .env file
+          cache: yarn
+      - name: Install dependencies
+        run: yarn
+      - name: Create .env file
+        run: cp .env.example .env
         working-directory: packages/apps/faucet/server
-      - run: yarn workspace @human-protocol/faucet-server test
-        name: Run faucet/server test
+      - name: Run faucet/server test
+        run: yarn workspace @human-protocol/faucet-server test
