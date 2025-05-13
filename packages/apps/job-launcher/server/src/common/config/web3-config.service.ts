@@ -64,4 +64,50 @@ export class Web3ConfigService {
       'HCAPTCHA_REPUTATION_ORACLE_URI',
     );
   }
+
+  /**
+   * Address of the CVAT exchange oracle contract.
+   * Required
+   */
+  get cvatExchangeOracleAddress(): string {
+    return this.configService.getOrThrow<string>(
+      'CVAT_EXCHANGE_ORACLE_ADDRESS',
+    );
+  }
+
+  /**
+   * Address of the CVAT recording oracle contract.
+   * Required
+   */
+  get cvatRecordingOracleAddress(): string {
+    return this.configService.getOrThrow<string>(
+      'CVAT_RECORDING_ORACLE_ADDRESS',
+    );
+  }
+
+  /**
+   * Address of the hCaptcha oracle contract.
+   * Required
+   */
+  get hCaptchaOracleAddress(): string {
+    return this.configService.getOrThrow<string>('HCAPTCHA_ORACLE_ADDRESS');
+  }
+
+  /**
+   * Address of the Audino exchange oracle.
+   */
+  get audinoExchangeOracleAddress(): string {
+    return this.configService.getOrThrow<string>(
+      'AUDINO_EXCHANGE_ORACLE_ADDRESS',
+    );
+  }
+
+  /**
+   * Address of the Audino recording oracle.
+   */
+  get audinoRecordingOracleAddress(): string {
+    return this.configService.getOrThrow<string>(
+      'AUDINO_RECORDING_ORACLE_ADDRESS',
+    );
+  }
 }
