@@ -3,7 +3,12 @@ import { Injectable, Logger } from '@nestjs/common';
 import { NetworkConfigService } from '../../common/config/network-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ErrorRoutingProtocol } from '../../common/constants/errors';
-import { JobRequestType } from '../../common/enums/job';
+import {
+  AudinoJobType,
+  CvatJobType,
+  HCaptchaJobType,
+  JobRequestType,
+} from '../../common/enums/job';
 import { ServerError } from '../../common/errors';
 import { hashString } from '../../common/utils';
 import { Web3Service } from '../web3/web3.service';
@@ -155,6 +160,26 @@ export class RoutingProtocolService {
     exchangeOracle: string;
     recordingOracle: string;
   }> {
+    if (jobType === HCaptchaJobType.HCAPTCHA) {
+      return {
+        reputationOracle: this.web3ConfigService.hCaptchaOracleAddress,
+        exchangeOracle: this.web3ConfigService.hCaptchaOracleAddress,
+        recordingOracle: this.web3ConfigService.hCaptchaOracleAddress,
+      };
+    } else if (Object.values(CvatJobType).includes(jobType as CvatJobType)) {
+      return {
+        reputationOracle: this.web3ConfigService.reputationOracleAddress,
+        exchangeOracle: this.web3ConfigService.cvatExchangeOracleAddress,
+        recordingOracle: this.web3ConfigService.cvatRecordingOracleAddress,
+      };
+    } else if (jobType === AudinoJobType.AUDIO_TRANSCRIPTION) {
+      return {
+        reputationOracle: this.web3ConfigService.reputationOracleAddress,
+        exchangeOracle: this.web3ConfigService.audinoExchangeOracleAddress,
+        recordingOracle: this.web3ConfigService.audinoRecordingOracleAddress,
+      };
+    }
+
     const reputationOracle = this.selectReputationOracle();
     const availableOracles = await this.web3Service.findAvailableOracles(
       chainId,

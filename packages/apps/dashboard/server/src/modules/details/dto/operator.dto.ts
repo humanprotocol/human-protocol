@@ -38,6 +38,18 @@ export class OperatorDto {
   @Expose()
   public amountStaked: string;
 
+  @ApiProperty({ example: '0.07007358932392' })
+  @Transform(({ value }) => value?.toString())
+  @IsString()
+  @Expose()
+  public amountLocked: string;
+
+  @ApiProperty({ example: '0.07007358932392' })
+  @Transform(({ value }) => value?.toString())
+  @IsString()
+  @Expose()
+  public amountWithdrawable: string;
+
   @ApiProperty({ example: 'High' })
   @Transform(({ value }) => value?.toString())
   @IsString()

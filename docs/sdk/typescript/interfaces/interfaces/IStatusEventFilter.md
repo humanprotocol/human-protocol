@@ -6,7 +6,11 @@
 
 # Interface: IStatusEventFilter
 
-Defined in: [interfaces.ts:169](https://github.com/humanprotocol/human-protocol/blob/d770e8f228f083f5eba0523ebbdff361b3188c3d/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L169)
+Defined in: [interfaces.ts:166](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L166)
+
+## Extends
+
+- [`IPagination`](IPagination.md)
 
 ## Properties
 
@@ -14,7 +18,7 @@ Defined in: [interfaces.ts:169](https://github.com/humanprotocol/human-protocol/
 
 > **chainId**: [`ChainId`](../../enums/enumerations/ChainId.md)
 
-Defined in: [interfaces.ts:170](https://github.com/humanprotocol/human-protocol/blob/d770e8f228f083f5eba0523ebbdff361b3188c3d/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L170)
+Defined in: [interfaces.ts:167](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L167)
 
 ***
 
@@ -22,7 +26,11 @@ Defined in: [interfaces.ts:170](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **first**: `number`
 
-Defined in: [interfaces.ts:175](https://github.com/humanprotocol/human-protocol/blob/d770e8f228f083f5eba0523ebbdff361b3188c3d/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L175)
+Defined in: [interfaces.ts:154](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L154)
+
+#### Inherited from
+
+[`IPagination`](IPagination.md).[`first`](IPagination.md#first)
 
 ***
 
@@ -30,7 +38,7 @@ Defined in: [interfaces.ts:175](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **from**: `Date`
 
-Defined in: [interfaces.ts:172](https://github.com/humanprotocol/human-protocol/blob/d770e8f228f083f5eba0523ebbdff361b3188c3d/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L172)
+Defined in: [interfaces.ts:169](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L169)
 
 ***
 
@@ -38,7 +46,7 @@ Defined in: [interfaces.ts:172](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **launcher**: `string`
 
-Defined in: [interfaces.ts:174](https://github.com/humanprotocol/human-protocol/blob/d770e8f228f083f5eba0523ebbdff361b3188c3d/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L174)
+Defined in: [interfaces.ts:171](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L171)
 
 ***
 
@@ -46,7 +54,11 @@ Defined in: [interfaces.ts:174](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **orderDirection**: [`OrderDirection`](../../enums/enumerations/OrderDirection.md)
 
-Defined in: [interfaces.ts:177](https://github.com/humanprotocol/human-protocol/blob/d770e8f228f083f5eba0523ebbdff361b3188c3d/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L177)
+Defined in: [interfaces.ts:156](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L156)
+
+#### Inherited from
+
+[`IPagination`](IPagination.md).[`orderDirection`](IPagination.md#orderdirection)
 
 ***
 
@@ -54,7 +66,11 @@ Defined in: [interfaces.ts:177](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **skip**: `number`
 
-Defined in: [interfaces.ts:176](https://github.com/humanprotocol/human-protocol/blob/d770e8f228f083f5eba0523ebbdff361b3188c3d/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L176)
+Defined in: [interfaces.ts:155](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L155)
+
+#### Inherited from
+
+[`IPagination`](IPagination.md).[`skip`](IPagination.md#skip)
 
 ***
 
@@ -62,7 +78,7 @@ Defined in: [interfaces.ts:176](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **statuses**: [`EscrowStatus`](../../types/enumerations/EscrowStatus.md)[]
 
-Defined in: [interfaces.ts:171](https://github.com/humanprotocol/human-protocol/blob/d770e8f228f083f5eba0523ebbdff361b3188c3d/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L171)
+Defined in: [interfaces.ts:168](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L168)
 
 ***
 
@@ -70,4 +86,4 @@ Defined in: [interfaces.ts:171](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **to**: `Date`
 
-Defined in: [interfaces.ts:173](https://github.com/humanprotocol/human-protocol/blob/d770e8f228f083f5eba0523ebbdff361b3188c3d/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L173)
+Defined in: [interfaces.ts:170](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L170)

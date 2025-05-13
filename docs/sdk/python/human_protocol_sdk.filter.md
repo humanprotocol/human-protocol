@@ -119,3 +119,21 @@ Initializes a TransactionsFilter instance.
   * **order** – Order of results, “asc” or “desc”
 * **Raises:**
   **ValueError** – If start_date is after end_date
+
+### *class* human_protocol_sdk.filter.WorkerFilter(chain_id, worker_address=None, order_by=None, order_direction=OrderDirection.DESC, first=10, skip=0)
+
+Bases: `object`
+
+A class used to filter workers.
+
+#### \_\_init_\_(chain_id, worker_address=None, order_by=None, order_direction=OrderDirection.DESC, first=10, skip=0)
+
+Initializes a WorkerFilter instance.
+
+* **Parameters:**
+  * **chain_id** ([`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)) – Chain ID to request data
+  * **worker_address** (`Optional`[`str`]) – Address to filter by
+  * **order_by** (`Optional`[`str`]) – Property to order by, e.g., “payoutCount”
+  * **order_direction** ([`OrderDirection`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.OrderDirection)) – Order direction of results, “asc” or “desc”
+  * **first** (`int`) – Number of items per page
+  * **skip** (`int`) – Number of items to skip (for pagination)
