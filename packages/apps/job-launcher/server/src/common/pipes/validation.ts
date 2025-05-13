@@ -11,13 +11,8 @@ export class HttpValidationPipe extends ValidationPipe {
   constructor(options?: ValidationPipeOptions) {
     super({
       exceptionFactory: (errors: ValidError[]): ValidationError => {
-        const errorMessages = errors
-          .map(
-            (error) =>
-              Object.values((error as any).constraints) as unknown as string,
-          )
-          .flat();
-        throw new ValidationError(errorMessages.join(', '));
+        const flattenErrors = this.flattenValidationErrors(errors);
+        throw new ValidationError(flattenErrors.join(', '));
       },
       transform: true,
       whitelist: true,

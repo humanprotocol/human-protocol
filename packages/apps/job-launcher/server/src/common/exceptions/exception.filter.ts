@@ -34,7 +34,7 @@ export class ExceptionFilter implements IExceptionFilter {
     } else if (exception instanceof ServerError) {
       return HttpStatus.UNPROCESSABLE_ENTITY;
     } else if (exception instanceof DatabaseError) {
-      return HttpStatus.CONFLICT;
+      return HttpStatus.UNPROCESSABLE_ENTITY;
     } else if (exception.statusCode) {
       return exception.statusCode;
     }

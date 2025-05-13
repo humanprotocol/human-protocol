@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 import { ErrorSignature } from '../constants/errors';
-import { ConflictError } from '../errors';
+import { ConflictError, ValidationError } from '../errors';
 
 export function verifySignature(
   message: object | string,
@@ -12,7 +12,7 @@ export function verifySignature(
   if (
     !addresses.some((address) => address.toLowerCase() === signer.toLowerCase())
   ) {
-    throw new ConflictError(ErrorSignature.SignatureNotVerified);
+    throw new ValidationError(ErrorSignature.SignatureNotVerified);
   }
 
   return true;

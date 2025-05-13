@@ -6,19 +6,16 @@ import {
   KVStoreUtils,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
-import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { ErrorWebhook } from '../../common/constants/errors';
 import { EventType, WebhookStatus } from '../../common/enums/webhook';
-import {
-  NotFoundError,
-  ServerError,
-  ValidationError,
-} from '../../common/errors';
+import { ServerError, ValidationError } from '../../common/errors';
 import { CaseConverter } from '../../common/utils/case-converter';
+import { formatAxiosError } from '../../common/utils/http';
 import { signMessage } from '../../common/utils/signature';
 import { JobRepository } from '../job/job.repository';
 import { JobService } from '../job/job.service';
@@ -26,8 +23,11 @@ import { Web3Service } from '../web3/web3.service';
 import { WebhookDataDto } from './webhook.dto';
 import { WebhookEntity } from './webhook.entity';
 import { WebhookRepository } from './webhook.repository';
+
 @Injectable()
 export class WebhookService {
+  private readonly logger = new Logger(WebhookService.name);
+
   constructor(
     @Inject(Web3Service)
     private readonly web3Service: Web3Service,
@@ -78,13 +78,16 @@ export class WebhookService {
     }
 
     // Make the HTTP request to the webhook.
-    const { status } = await firstValueFrom(
-      this.httpService.post(webhookUrl, webhookData, config),
-    );
-
-    // Check if the request was successful.
-    if (status !== HttpStatus.CREATED && status !== HttpStatus.OK) {
-      throw new ServerError(ErrorWebhook.NotSent);
+    try {
+      await firstValueFrom(
+        this.httpService.post(webhookUrl, webhookData, config),
+      );
+    } catch (error) {
+      const formattedError = formatAxiosError(error);
+      this.logger.error('Webhook not sent', {
+        error: formattedError,
+      });
+      throw new Error(formattedError.message);
     }
   }
 
@@ -160,7 +163,7 @@ export class WebhookService {
     );
 
     if (!jobEntity) {
-      throw new NotFoundError(ErrorWebhook.InvalidEscrow);
+      throw new Error(ErrorWebhook.InvalidEscrow);
     }
 
     const webhookEntity = new WebhookEntity();

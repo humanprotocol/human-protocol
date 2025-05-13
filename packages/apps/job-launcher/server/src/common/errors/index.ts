@@ -6,8 +6,6 @@ export class BaseError extends Error {
     this.name = this.constructor.name;
     if (stack) {
       this.stack = stack;
-    } else {
-      Error.captureStackTrace(this, this.constructor);
     }
   }
 }

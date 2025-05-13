@@ -12,7 +12,7 @@ import { HttpService } from '@nestjs/axios';
 import { HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import {
   MOCK_ADDRESS,
   MOCK_EXCHANGE_ORACLE_ADDRESS,
@@ -130,13 +130,11 @@ describe('WebhookService', () => {
         .spyOn(webhookService as any, 'getExchangeOracleWebhookUrl')
         .mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
       jest.spyOn(httpService as any, 'post').mockImplementation(() => {
-        return of({
-          data: undefined,
-        });
+        return throwError(() => new Error('HTTP request failed'));
       });
       await expect(
         (webhookService as any).sendWebhook(webhookEntity),
-      ).rejects.toThrow(new ServerError(ErrorWebhook.NotSent));
+      ).rejects.toThrow(new ServerError('HTTP request failed'));
     });
 
     it('should successfully process a fortune webhook', async () => {

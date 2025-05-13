@@ -6,11 +6,7 @@ import * as Minio from 'minio';
 import { S3ConfigService } from '../../common/config/s3-config.service';
 import { ErrorBucket, ErrorStorage } from '../../common/constants/errors';
 import { ContentType, Extension } from '../../common/enums/storage';
-import {
-  NotFoundError,
-  ServerError,
-  ValidationError,
-} from '../../common/errors';
+import { ServerError, ValidationError } from '../../common/errors';
 import { UploadedFile } from '../../common/interfaces';
 import { hashString } from '../../common/utils';
 
@@ -53,7 +49,7 @@ export class StorageService {
       return Buffer.from(data);
     } catch (error) {
       if (error.response?.status === HttpStatus.NOT_FOUND) {
-        throw new NotFoundError(`${ErrorStorage.NotFound}: ${url}`);
+        throw new ServerError(`${ErrorStorage.NotFound}: ${url}`);
       }
       throw new ServerError(`${ErrorStorage.FailedToDownload}: ${url}`);
     }

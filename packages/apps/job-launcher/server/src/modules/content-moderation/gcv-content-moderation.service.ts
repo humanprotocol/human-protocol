@@ -15,7 +15,6 @@ import {
   ContentModerationLevel,
 } from '../../common/enums/gcv';
 import { JobStatus } from '../../common/enums/job';
-import { NotFoundError } from '../../common/errors';
 import {
   constructGcsPath,
   convertToGCSPath,
@@ -376,7 +375,7 @@ export class GCVContentModerationService implements IContentModeratorService {
 
       const [files] = await bucket.getFiles({ prefix: bucketPrefix });
       if (!files || files.length === 0) {
-        throw new NotFoundError(ErrorContentModeration.NoResultsFound);
+        throw new Error(ErrorContentModeration.NoResultsFound);
       }
 
       const allResponses = [];
@@ -391,10 +390,10 @@ export class GCVContentModerationService implements IContentModeratorService {
       }
       return this.categorizeModerationResults(allResponses);
     } catch (err) {
-      this.logger.error('Error collecting moderation results:', err);
-      if (err instanceof NotFoundError) {
+      if (err.message === ErrorContentModeration.NoResultsFound) {
         throw err;
       }
+      this.logger.error('Error collecting moderation results:', err);
       throw new Error(ErrorContentModeration.ResultsParsingFailed);
     }
   }

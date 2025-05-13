@@ -528,7 +528,7 @@ describe('AuthService', () => {
       findByEmailMock.mockResolvedValue(userEntity);
       expect(
         authService.resendEmailVerification({ email: 'user@example.com' }),
-      ).rejects.toThrow(new NotFoundError(ErrorUser.NotFound));
+      ).rejects.toThrow(new ConflictError(ErrorUser.InvalidStatus));
     });
 
     it('should create token and send email', async () => {

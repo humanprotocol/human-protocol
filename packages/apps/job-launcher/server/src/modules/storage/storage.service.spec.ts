@@ -35,11 +35,7 @@ import {
 import { S3ConfigService } from '../../common/config/s3-config.service';
 import { ErrorBucket, ErrorStorage } from '../../common/constants/errors';
 import { ContentType } from '../../common/enums/storage';
-import {
-  NotFoundError,
-  ServerError,
-  ValidationError,
-} from '../../common/errors';
+import { ServerError, ValidationError } from '../../common/errors';
 import { hashString } from '../../common/utils';
 import { StorageService } from './storage.service';
 
@@ -124,7 +120,7 @@ describe('StorageService', () => {
         thrownError = error;
       }
 
-      expect(thrownError).toBeInstanceOf(NotFoundError);
+      expect(thrownError).toBeInstanceOf(ServerError);
       expect(thrownError.message).toContain(
         `${ErrorStorage.NotFound}: ${testUrl}`,
       );

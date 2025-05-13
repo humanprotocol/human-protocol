@@ -72,6 +72,7 @@ export enum ErrorEscrow {
  */
 export enum ErrorUser {
   NotFound = 'User not found.',
+  InvalidStatus = 'User has an invalid status.',
   AccountCannotBeRegistered = 'Account cannot be registered.',
   InvalidCredentials = 'Invalid credentials.',
   UserNotActive = 'User not active.',

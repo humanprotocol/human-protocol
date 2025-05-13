@@ -295,8 +295,10 @@ export class AuthService {
   ): Promise<void> {
     const userEntity = await this.userRepository.findByEmail(data.email);
 
-    if (!userEntity || userEntity?.status != UserStatus.PENDING) {
+    if (!userEntity) {
       throw new NotFoundError(ErrorUser.NotFound);
+    } else if (userEntity?.status != UserStatus.PENDING) {
+      throw new ConflictError(ErrorUser.InvalidStatus);
     }
 
     const existingToken = await this.tokenRepository.findOneByUserIdAndType(
