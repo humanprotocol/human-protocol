@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "declaration": false,
+    "declarationMap": false,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "commonjs",
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "es2023"
+  }
+}

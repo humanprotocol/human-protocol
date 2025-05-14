@@ -1,11 +1,8 @@
-import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { t } from 'i18next';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
 import { type ResendEmailVerificationDto } from '../schemas';
-import { emailVerificationService } from '../services/email-verification.service';
-
-export const ResendEmailVerificationSuccessResponseSchema = z.unknown();
+import * as emailVerificationService from '../services/email-verification.service';
 
 async function resendEmailVerificationMutationFn(
   _data: ResendEmailVerificationDto,

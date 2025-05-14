@@ -23,7 +23,7 @@ export class Web3ConfigService {
    * Default: 'testnet'
    */
   get network(): Web3Network {
-    return this.configService.get<Web3Network>('WEB3_ENV', Web3Network.TESTNET);
+    return this.configService.get('WEB3_ENV', Web3Network.TESTNET);
   }
 
   /**
@@ -31,7 +31,7 @@ export class Web3ConfigService {
    * Required
    */
   get privateKey(): string {
-    return this.configService.getOrThrow<string>('WEB3_PRIVATE_KEY');
+    return this.configService.getOrThrow('WEB3_PRIVATE_KEY');
   }
 
   /**
@@ -53,23 +53,17 @@ export class Web3ConfigService {
    * Default: 1
    */
   get gasPriceMultiplier(): number {
-    return +this.configService.get<number>('GAS_PRICE_MULTIPLIER', 1);
+    return Number(this.configService.get('GAS_PRICE_MULTIPLIER')) || 1;
   }
 
   getRpcUrlByChainId(chainId: number): string | undefined {
     const rpcUrlsByChainId: Record<string, string | undefined> = {
-      [ChainId.POLYGON]: this.configService.get<string>('RPC_URL_POLYGON'),
-      [ChainId.POLYGON_AMOY]: this.configService.get<string>(
-        'RPC_URL_POLYGON_AMOY',
-      ),
-      [ChainId.BSC_MAINNET]: this.configService.get<string>(
-        'RPC_URL_BSC_MAINNET',
-      ),
-      [ChainId.BSC_TESTNET]: this.configService.get<string>(
-        'RPC_URL_BSC_TESTNET',
-      ),
-      [ChainId.SEPOLIA]: this.configService.get<string>('RPC_URL_SEPOLIA'),
-      [ChainId.LOCALHOST]: this.configService.get<string>('RPC_URL_LOCALHOST'),
+      [ChainId.POLYGON]: this.configService.get('RPC_URL_POLYGON'),
+      [ChainId.POLYGON_AMOY]: this.configService.get('RPC_URL_POLYGON_AMOY'),
+      [ChainId.BSC_MAINNET]: this.configService.get('RPC_URL_BSC_MAINNET'),
+      [ChainId.BSC_TESTNET]: this.configService.get('RPC_URL_BSC_TESTNET'),
+      [ChainId.SEPOLIA]: this.configService.get('RPC_URL_SEPOLIA'),
+      [ChainId.LOCALHOST]: this.configService.get('RPC_URL_LOCALHOST'),
     };
 
     return rpcUrlsByChainId[chainId];

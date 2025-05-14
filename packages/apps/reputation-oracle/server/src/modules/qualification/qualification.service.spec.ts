@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 
 import { generateEthWallet } from '../../../test/fixtures/web3';
-import { ServerConfigService } from '../../config/server-config.service';
+import { ServerConfigService } from '../../config';
 import { UserStatus, UserRepository } from '../user';
 import { generateWorkerUser } from '../user/fixtures';
 

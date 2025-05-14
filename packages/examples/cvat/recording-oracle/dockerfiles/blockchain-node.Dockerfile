@@ -8,13 +8,13 @@ WORKDIR /usr/src/app
 
 # Copy expected yarn dist
 COPY .yarn ./.yarn
-COPY .yarnrc ./
+COPY .yarnrc.yml ./
 # Copy files for deps installation
 COPY package.json yarn.lock ./
 
-COPY tsconfig.json ./
+COPY tsconfig.base.json ./
 COPY packages/core ./packages/core
-RUN yarn workspace @human-protocol/core install --ignore-scripts
+RUN yarn workspace @human-protocol/core install
 RUN yarn workspace @human-protocol/core build
 
 EXPOSE 8545

@@ -15,11 +15,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: yarn --ignore-scripts
-        name: Install dependencies
-      - run: yarn build
-        name: Build core package
-        working-directory: ./packages/core
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+      - name: Install dependencies
+        run: yarn install
+      - name: Build core package
+        run: yarn build:core
       - name: Set up Python
         uses: actions/setup-python@v5
         with:

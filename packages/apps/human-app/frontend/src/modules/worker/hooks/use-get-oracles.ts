@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useJobsTypesOraclesFilterStore } from '../jobs/hooks';
-import { oraclesService } from '../services/oracles.service';
+import * as oraclesService from '../services/oracles.service';
 
 export function useGetOracles() {
   const { selectedJobTypes } = useJobsTypesOraclesFilterStore();

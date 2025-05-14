@@ -1,7 +1,7 @@
 import type { colorPalette } from '@/shared/styles/color-palette';
 
 export const darkColorPalette = {
-  white: 'rgba(16, 7, 53, 1)',
+  white: '#FFFFFF',
   black: '#000000',
   backgroundColor: 'rgba(16, 7, 53, 1)',
   text: {

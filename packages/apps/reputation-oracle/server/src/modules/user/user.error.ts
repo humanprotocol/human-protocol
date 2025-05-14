@@ -33,3 +33,11 @@ export class InvalidWeb3SignatureError extends BaseError {
     this.userId = userId;
   }
 }
+
+export class UserNotFoundError extends BaseError {
+  userId: number;
+  constructor(userId: number) {
+    super(`User not found: ${userId}`);
+    this.userId = userId;
+  }
+}

@@ -6,7 +6,7 @@ interface ChipProps {
   key?: string;
   backgroundColor?: string;
 }
-export function Chip({ label, backgroundColor }: ChipProps) {
+export function Chip({ label, backgroundColor }: Readonly<ChipProps>) {
   const { colorPalette } = useColorMode();
 
   return (
@@ -14,9 +14,7 @@ export function Chip({ label, backgroundColor }: ChipProps) {
       component="span"
       key={crypto.randomUUID()}
       sx={{
-        backgroundColor: backgroundColor
-          ? backgroundColor
-          : colorPalette.chip.main,
+        backgroundColor: backgroundColor ?? colorPalette.chip.main,
         width: 'fit-content',
         px: '10px',
         py: '2px',

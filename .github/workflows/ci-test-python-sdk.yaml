@@ -2,13 +2,9 @@ name: Python SDK check
 
 on:
   push:
-    branches:
-      - 'main'
-  pull_request:
     paths:
       - 'packages/core/**'
       - 'packages/sdk/python/human-protocol-sdk/**'
-  workflow_dispatch:
 
 jobs:
   python-test:
@@ -16,11 +12,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install Node
-        run: yarn --ignore-scripts
-      - run: yarn build
-        name: Build core package
-        working-directory: ./packages/core
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+      - name: Install core package dependencies
+        run: yarn install --immutable
+      - name: Build core package
+        run: yarn build:core
       - name: Set up Python 3.10
         uses: actions/setup-python@v5
         with:

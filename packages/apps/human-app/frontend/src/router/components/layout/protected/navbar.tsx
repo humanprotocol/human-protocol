@@ -71,7 +71,7 @@ export function Navbar({
       direction="row"
       justifyContent="space-between"
       sx={{
-        backgroundColor: colorPalette.white,
+        backgroundColor: colorPalette.backgroundColor,
         display: { xs: 'flex', md: 'none' },
         width: '100%',
         px: isMobile ? NAVBAR_PADDING : 0,

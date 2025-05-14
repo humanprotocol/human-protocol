@@ -27,13 +27,10 @@ export function HomePage() {
 
   const paperBackgroundColor = (() => {
     if (isDarkMode) {
-      if (isMobile) {
-        return colorPalette.backgroundColor;
-      }
       return colorPalette.paper.main;
     }
 
-    return colorPalette.white;
+    return colorPalette.backgroundColor;
   })();
 
   return (

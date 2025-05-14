@@ -1,8 +1,14 @@
 import datetime
 
-from human_protocol_sdk.constants import ChainId, Status
+from human_protocol_sdk.constants import ChainId, OrderDirection, Status
 from human_protocol_sdk.escrow import EscrowUtils
-from human_protocol_sdk.filter import EscrowFilter, StatisticsFilter
+from human_protocol_sdk.worker import WorkerUtils
+from human_protocol_sdk.filter import (
+    EscrowFilter,
+    PayoutFilter,
+    StatisticsFilter,
+    WorkerFilter,
+)
 from human_protocol_sdk.statistics import (
     StatisticsClient,
     HMTHoldersParam,
@@ -84,6 +90,21 @@ def get_hmt_daily_data(statistics_client: StatisticsClient):
     )
 
 
+def get_payouts():
+    filter = PayoutFilter(
+        chain_id=ChainId.POLYGON,
+        first=5,
+        skip=1,
+        order_direction=OrderDirection.ASC,
+    )
+
+    payouts = EscrowUtils.get_payouts(filter)
+    for payout in payouts:
+        print(
+            f"Payout ID: {payout.id}, Amount: {payout.amount}, Recipient: {payout.recipient}"
+        )
+
+
 def get_escrows():
     print(
         EscrowUtils.get_escrows(
@@ -131,6 +152,18 @@ def get_operators():
     print(len(operators))
 
 
+def get_workers():
+    workers = WorkerUtils.get_workers(
+        WorkerFilter(chain_id=ChainId.POLYGON_AMOY, first=2)
+    )
+    print(workers)
+    print(WorkerUtils.get_worker(ChainId.POLYGON_AMOY, workers[0].address))
+    workers = WorkerUtils.get_workers(
+        WorkerFilter(chain_id=ChainId.POLYGON_AMOY, worker_address=workers[0].address)
+    )
+    print(len(workers))
+
+
 def agreement_example():
     annotations = [
         ["cat", "not", "cat"],
@@ -150,6 +183,7 @@ if __name__ == "__main__":
 
     get_escrows()
     get_operators()
+    get_payouts()
 
     statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
     get_hmt_holders(statistics_client)
@@ -160,3 +194,4 @@ if __name__ == "__main__":
     get_hmt_daily_data(statistics_client)
 
     agreement_example()
+    get_workers()

@@ -5,31 +5,30 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 
-import { envValidator } from './config';
-import { EnvConfigModule } from './config/config.module';
-
-import { DatabaseModule } from './database/database.module';
-
+import { AppController } from './app.controller';
 import { JwtAuthGuard } from './common/guards';
 import { ExceptionFilter } from './common/filters/exception.filter';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { HttpValidationPipe } from './common/pipes';
+import { envValidator, EnvConfigModule } from './config';
+import { DatabaseModule } from './database';
 
-import { HealthModule } from './modules/health/health.module';
-import { ReputationModule } from './modules/reputation/reputation.module';
-import { AuthModule } from './modules/auth/auth.module';
-import { KycModule } from './modules/kyc/kyc.module';
-import { CronJobModule } from './modules/cron-job/cron-job.module';
-import { QualificationModule } from './modules/qualification/qualification.module';
-import { EscrowCompletionModule } from './modules/escrow-completion/escrow-completion.module';
-import { IncomingWebhookModule } from './modules/webhook/webhook-incoming.module';
-import { OutgoingWebhookModule } from './modules/webhook/webhook-outgoing.module';
+import { AbuseModule } from './modules/abuse';
+import { AuthModule } from './modules/auth';
+import { CronJobModule } from './modules/cron-job';
+import { EscrowCompletionModule } from './modules/escrow-completion';
+import { HealthModule } from './modules/health';
+import {
+  IncomingWebhookModule,
+  OutgoingWebhookModule,
+} from './modules/webhook';
+import { KycModule } from './modules/kyc';
+import { NDAModule } from './modules/nda';
+import { QualificationModule } from './modules/qualification';
+import { ReputationModule } from './modules/reputation';
 import { UserModule } from './modules/user';
-import { NDAModule } from './modules/nda/nda.module';
 
 import Environment from './utils/environment';
-import { AppController } from './app.controller';
-import { AbuseModule } from './modules/abuse/abuse.module';
 
 @Module({
   providers: [

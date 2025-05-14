@@ -1,4 +1,3 @@
-import { faker } from '@faker-js/faker';
 import { ethers, Wallet } from 'ethers';
 
 export const TEST_PRIVATE_KEY =
@@ -16,9 +15,19 @@ export function generateEthWallet(privateKey?: string) {
   };
 }
 
-export function generateContractAddress() {
-  return ethers.getCreateAddress({
-    from: generateEthWallet().address,
-    nonce: faker.number.bigInt(),
-  });
+export type SignerMock = jest.Mocked<Pick<Wallet, 'sendTransaction'>> & {
+  __transactionResponse: {
+    wait: jest.Mock;
+  };
+};
+
+export function createSignerMock(): SignerMock {
+  const transactionResponse = {
+    wait: jest.fn(),
+  };
+
+  return {
+    sendTransaction: jest.fn().mockResolvedValue(transactionResponse),
+    __transactionResponse: transactionResponse,
+  };
 }

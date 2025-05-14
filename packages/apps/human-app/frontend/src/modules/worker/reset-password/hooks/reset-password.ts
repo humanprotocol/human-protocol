@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { routerPaths } from '@/router/router-paths';
-import { passwordService } from '../password.service';
+import * as passwordService from '../password.service';
 import { type ResetPasswordDto } from '../types';
 
 export const ResetPasswordSuccessResponseSchema = z.unknown();

@@ -1,7 +1,7 @@
 /* eslint-disable camelcase -- ... */
 import { useQuery } from '@tanstack/react-query';
 import { useGetKeys } from '@/modules/operator/hooks/use-get-keys';
-import { operatorProfileService } from '../services/profile.service';
+import * as operatorProfileService from '../services/profile.service';
 
 export const failedResponse = {
   workers_total: '-',

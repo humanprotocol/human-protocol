@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { hCaptchaLabelingService } from '../services/hcaptcha-labeling.service';
+import * as hCaptchaLabelingService from '../services/hcaptcha-labeling.service';
 
 export function useHCaptchaUserStats() {
   return useQuery({

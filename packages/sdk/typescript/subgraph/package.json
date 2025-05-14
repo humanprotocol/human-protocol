@@ -1,18 +1,19 @@
 {
   "name": "@human-protocol/subgraph",
+  "private": true,
   "description": "Human Protocol Subgraph",
   "version": "1.0.0",
   "files": [
     "generated"
   ],
   "scripts": {
+    "clean": "rm -rf build generated subgraph.yaml",
     "generate": "mustache ./config/$NETWORK.json template.yaml > subgraph.yaml && yarn generate-escrow && yarn generate-hmt && yarn generate-staking && graph codegen",
     "generate-escrow": "mustache ./config/$NETWORK.json src/mapping/EscrowTemplate.ts > src/mapping/Escrow.ts",
     "generate-hmt": "mustache ./config/$NETWORK.json src/mapping/HMTokenTemplate.ts > src/mapping/HMToken.ts",
     "generate-staking": "mustache ./config/$NETWORK.json src/mapping/StakingTemplate.ts > src/mapping/Staking.ts",
     "codegen": "graph codegen",
     "build": "graph build",
-    "pretest": "NETWORK=polygon yarn generate",
     "test": "graph test",
     "create-local": "graph create --node http://localhost:8020/ humanprotocol/localhost",
     "remove-local": "graph remove --node http://localhost:8020/ humanprotocol/localhost",
@@ -39,10 +40,13 @@
     "@graphprotocol/graph-cli": "^0.95.0",
     "@graphprotocol/graph-ts": "^0.38.0",
     "@graphql-eslint/eslint-plugin": "^3.19.1",
-    "@human-protocol/core": "*",
+    "@human-protocol/core": "workspace:*",
+    "eslint": "^8.55.0",
+    "ethers": "~6.13.5",
     "graphql": "^16.6.0",
     "matchstick-as": "^0.6.0",
-    "mustache": "^4.2.0"
+    "mustache": "^4.2.0",
+    "prettier": "^3.4.2"
   },
   "lint-staged": {
     "*.{ts,graphql}": [

@@ -7,24 +7,22 @@ const apiPaths = {
   },
 };
 
-export class HomepageService {
-  async web3SignIn(data: { signature: string; address: string }) {
-    try {
-      const result = await humanAppApiClient.post<Web3SignInSuccessResponse>(
-        apiPaths.web3Auth.signIn,
-        {
-          body: data,
-        }
-      );
-      return result;
-    } catch (error) {
-      if (error instanceof ApiClientError) {
-        throw error;
+async function web3SignIn(data: { signature: string; address: string }) {
+  try {
+    const result = await humanAppApiClient.post<Web3SignInSuccessResponse>(
+      apiPaths.web3Auth.signIn,
+      {
+        body: data,
       }
-
-      throw new Error('Failed to log in using web3.');
+    );
+    return result;
+  } catch (error) {
+    if (error instanceof ApiClientError) {
+      throw error;
     }
+
+    throw new Error('Failed to log in using web3.');
   }
 }
 
-export const homepageService = new HomepageService();
+export { web3SignIn };

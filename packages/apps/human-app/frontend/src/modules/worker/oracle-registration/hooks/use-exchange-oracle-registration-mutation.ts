@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { type RegistrationInExchangeOracleDto } from '../schema';
-import { oracleRegistrationService } from '../services/oracle-registration.service';
+import * as oracleRegistrationService from '../services/oracle-registration.service';
 
 export function useExchangeOracleRegistrationMutation() {
   const queryClient = useQueryClient();

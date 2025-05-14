@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { routerPaths } from '@/router/router-paths';
 import { useAccessTokenRefresh } from '@/api/hooks/use-access-token-refresh';
-import { hCaptchaLabelingService } from '../services/hcaptcha-labeling.service';
+import * as hCaptchaLabelingService from '../services/hcaptcha-labeling.service';
 
 export function useEnableHCaptchaLabelingMutation() {
   const queryClient = useQueryClient();

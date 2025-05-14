@@ -7,11 +7,10 @@ import {
   HealthIndicatorResult,
   TypeOrmHealthIndicator,
 } from '@nestjs/terminus';
-import packageJson from '../../../package.json';
 import { Public } from '../../common/decorators';
-import { ServerConfigService } from '../../config/server-config.service';
-import { PingResponseDto } from './dto/ping-response.dto';
+import { ServerConfigService } from '../../config';
 import Environment from '../../utils/environment';
+import { PingResponseDto } from './dto/ping-response.dto';
 
 @Public()
 @ApiTags('Health')
@@ -40,7 +39,6 @@ export class HealthController {
   @Get('/ping')
   async ping(): Promise<PingResponseDto> {
     return {
-      appName: packageJson.name,
       nodeEnv: Environment.name,
       gitHash: this.serverConfigService.gitHash,
     };

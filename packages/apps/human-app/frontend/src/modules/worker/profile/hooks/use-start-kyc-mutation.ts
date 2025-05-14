@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
-import { profileService } from '../services/profile.service';
+import * as profileService from '../services/profile.service';
 
 export function useKycStartMutation() {
   const queryClient = useQueryClient();

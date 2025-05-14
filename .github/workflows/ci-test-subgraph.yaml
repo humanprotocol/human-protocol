@@ -2,13 +2,9 @@ name: Subgraph check
 
 on:
   push:
-    branches:
-      - 'main'
-  pull_request:
     paths:
       - 'packages/core/**'
       - 'packages/sdk/typescript/subgraph/**'
-  workflow_dispatch:
 
 jobs:
   subgraph-test:
@@ -20,7 +16,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-      - run: npm install --global yarn && yarn
-        name: Install dependencies
-      - run: yarn workspace @human-protocol/subgraph test
-        name: Run subgraph test
+          cache: yarn
+      - name: Install dependencies
+        run: yarn install --immutable
+      - name: Build core package
+        run: yarn build:core
+      - name: Generate manifest for Polygon for tests
+      - run: NETWORK=polygon yarn workspace @human-protocol/subgraph generate 
+      - name: Run subgraph test
+        run: yarn workspace @human-protocol/subgraph test

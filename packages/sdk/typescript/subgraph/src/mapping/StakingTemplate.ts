@@ -19,8 +19,9 @@ import { toEventId } from './utils/event';
 import { createTransaction } from './utils/transaction';
 import { toBytes } from './utils/string';
 
-export const STATISTICS_ENTITY_ID = toBytes('operator-statistics-id');
+// eslint-disable-next-line prettier/prettier
 export const TOKEN_ADDRESS = Address.fromString('{{ HMToken.address }}');
+export const STATISTICS_ENTITY_ID = toBytes('operator-statistics-id');
 
 function constructStatsEntity(): OperatorStatistics {
   const entity = new OperatorStatistics(STATISTICS_ENTITY_ID);

@@ -7,8 +7,8 @@ import { Test } from '@nestjs/testing';
 
 import { generateEthWallet } from '../../../test/fixtures/web3';
 
-import { SignatureType } from '../../common/enums/web3';
-import { Web3ConfigService } from '../../config/web3-config.service';
+import { SignatureType } from '../../common/enums';
+import { Web3ConfigService } from '../../config';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 import * as web3Utils from '../../utils/web3';
 
@@ -100,7 +100,9 @@ describe('UserService', () => {
       const user = generateWorkerUser();
       user.role = Role.ADMIN;
 
-      await expect(userService.registerLabeler(user)).rejects.toThrow(
+      mockUserRepository.findOneById.mockResolvedValueOnce(user);
+
+      await expect(userService.registerLabeler(user.id)).rejects.toThrow(
         new UserError(UserErrorMessage.INVALID_ROLE, user.id),
       );
 
@@ -109,8 +111,9 @@ describe('UserService', () => {
 
     it('should throw if worker does not have evm address', async () => {
       const user = generateWorkerUser();
+      mockUserRepository.findOneById.mockResolvedValueOnce(user);
 
-      await expect(userService.registerLabeler(user)).rejects.toThrow(
+      await expect(userService.registerLabeler(user.id)).rejects.toThrow(
         new UserError(UserErrorMessage.MISSING_ADDRESS, user.id),
       );
 
@@ -123,7 +126,9 @@ describe('UserService', () => {
       });
       user.kyc = generateKycEntity(user.id, KycStatus.NONE);
 
-      await expect(userService.registerLabeler(user)).rejects.toThrow(
+      mockUserRepository.findOneById.mockResolvedValueOnce(user);
+
+      await expect(userService.registerLabeler(user.id)).rejects.toThrow(
         new UserError(UserErrorMessage.KYC_NOT_APPROVED, user.id),
       );
 
@@ -142,7 +147,9 @@ describe('UserService', () => {
       );
       user.siteKeys = [existingSitekey];
 
-      const result = await userService.registerLabeler(user);
+      mockUserRepository.findOneById.mockResolvedValueOnce(user);
+
+      const result = await userService.registerLabeler(user.id);
 
       expect(result).toBe(existingSitekey.siteKey);
 
@@ -155,9 +162,10 @@ describe('UserService', () => {
       });
       user.kyc = generateKycEntity(user.id, KycStatus.APPROVED);
 
+      mockUserRepository.findOneById.mockResolvedValueOnce(user);
       mockHCaptchaService.registerLabeler.mockResolvedValueOnce(false);
 
-      await expect(userService.registerLabeler(user)).rejects.toThrow(
+      await expect(userService.registerLabeler(user.id)).rejects.toThrow(
         new UserError(UserErrorMessage.LABELING_ENABLE_FAILED, user.id),
       );
     });
@@ -168,11 +176,11 @@ describe('UserService', () => {
       });
       user.kyc = generateKycEntity(user.id, KycStatus.APPROVED);
 
+      mockUserRepository.findOneById.mockResolvedValueOnce(user);
       mockHCaptchaService.registerLabeler.mockResolvedValueOnce(true);
-
       mockHCaptchaService.getLabelerData.mockResolvedValueOnce(null);
 
-      await expect(userService.registerLabeler(user)).rejects.toThrow(
+      await expect(userService.registerLabeler(user.id)).rejects.toThrow(
         new UserError(UserErrorMessage.LABELING_ENABLE_FAILED, user.id),
       );
     });
@@ -185,6 +193,7 @@ describe('UserService', () => {
       user.siteKeys = [
         generateSiteKeyEntity(user.id, SiteKeyType.REGISTRATION),
       ];
+      mockUserRepository.findOneById.mockResolvedValueOnce(user);
       mockHCaptchaService.registerLabeler.mockResolvedValueOnce(true);
 
       const registeredSitekey = faker.string.uuid();
@@ -195,7 +204,7 @@ describe('UserService', () => {
         mockedLabelerData,
       );
 
-      const result = await userService.registerLabeler(user);
+      const result = await userService.registerLabeler(user.id);
 
       expect(result).toBe(registeredSitekey);
 
@@ -234,10 +243,11 @@ describe('UserService', () => {
       const user = generateWorkerUser({
         privateKey: generateEthWallet().privateKey,
       });
+      mockUserRepository.findOneById.mockResolvedValueOnce(user);
 
       await expect(
         userService.registerAddress(
-          user,
+          user.id,
           addressToRegister,
           faker.string.alphanumeric(),
         ),
@@ -251,10 +261,11 @@ describe('UserService', () => {
     it('should throw if kyc is not approved', async () => {
       const user = generateWorkerUser();
       user.kyc = generateKycEntity(user.id, KycStatus.NONE);
+      mockUserRepository.findOneById.mockResolvedValueOnce(user);
 
       await expect(
         userService.registerAddress(
-          user,
+          user.id,
           addressToRegister,
           faker.string.alphanumeric(),
         ),
@@ -267,38 +278,37 @@ describe('UserService', () => {
 
     it('should throw if same address already exists', async () => {
       const user = generateWorkerUser();
+      const existingUser = generateWorkerUser({
+        privateKey: generateEthWallet().privateKey,
+      });
       user.kyc = generateKycEntity(user.id, KycStatus.APPROVED);
 
-      mockUserRepository.findOneByAddress.mockImplementationOnce(
-        async (address: string) => {
-          if (address === addressToRegister.toLowerCase()) {
-            return user;
-          }
-
-          return null;
-        },
-      );
+      mockUserRepository.findOneById.mockResolvedValueOnce(user);
+      mockUserRepository.findOneByAddress.mockResolvedValueOnce(existingUser);
 
       await expect(
         userService.registerAddress(
-          user,
+          user.id,
           addressToRegister,
           faker.string.alphanumeric(),
         ),
       ).rejects.toThrow(
         new DuplicatedWalletAddressError(user.id, addressToRegister),
       );
-
+      expect(mockUserRepository.findOneByAddress).toHaveBeenCalledWith(
+        addressToRegister.toLowerCase(),
+      );
       expect(mockUserRepository.updateOne).toHaveBeenCalledTimes(0);
     });
 
     it('should throw if invalid signature', async () => {
       const user = generateWorkerUser();
       user.kyc = generateKycEntity(user.id, KycStatus.APPROVED);
+      mockUserRepository.findOneById.mockResolvedValueOnce(user);
 
       await expect(
         userService.registerAddress(
-          user,
+          user.id,
           addressToRegister,
           faker.string.alphanumeric(),
         ),
@@ -313,6 +323,8 @@ describe('UserService', () => {
       const user = generateWorkerUser();
       user.kyc = generateKycEntity(user.id, KycStatus.APPROVED);
 
+      mockUserRepository.findOneById.mockResolvedValueOnce(user);
+
       const signature = await web3Utils.signMessage(
         web3Utils.prepareSignatureBody({
           from: addressToRegister,
@@ -322,7 +334,7 @@ describe('UserService', () => {
         privateKey,
       );
 
-      await userService.registerAddress(user, addressToRegister, signature);
+      await userService.registerAddress(user.id, addressToRegister, signature);
 
       expect(user.evmAddress).toBe(addressToRegister.toLowerCase());
 
@@ -338,7 +350,9 @@ describe('UserService', () => {
 
       mockSiteKeyRepository.findByUserAndType.mockResolvedValueOnce([siteKey]);
 
-      const result = await userService.getRegistrationInExchangeOracles(user);
+      const result = await userService.getRegistrationInExchangeOracles(
+        user.id,
+      );
 
       expect(result).toEqual([siteKey.siteKey]);
     });
@@ -350,21 +364,16 @@ describe('UserService', () => {
       const siteKey = generateSiteKeyEntity(user.id, SiteKeyType.REGISTRATION);
       const oracleAddress = siteKey.siteKey;
 
-      mockSiteKeyRepository.findByUserSiteKeyAndType.mockImplementationOnce(
-        async (userId, sitekey, type) => {
-          if (
-            userId === user.id &&
-            sitekey === oracleAddress &&
-            type === SiteKeyType.REGISTRATION
-          ) {
-            return siteKey;
-          }
-          return null;
-        },
+      mockUserRepository.findOneById.mockResolvedValueOnce(user);
+      mockSiteKeyRepository.findByUserSiteKeyAndType.mockResolvedValueOnce(
+        siteKey,
       );
 
-      await userService.registrationInExchangeOracle(user, oracleAddress);
+      await userService.registrationInExchangeOracle(user.id, oracleAddress);
 
+      expect(
+        mockSiteKeyRepository.findByUserSiteKeyAndType,
+      ).toHaveBeenCalledWith(user.id, oracleAddress, SiteKeyType.REGISTRATION);
       expect(mockSiteKeyRepository.createUnique).toHaveBeenCalledTimes(0);
     });
 
@@ -372,11 +381,12 @@ describe('UserService', () => {
       const user = generateWorkerUser();
       const oracleAddress = generateEthWallet().address;
 
+      mockUserRepository.findOneById.mockResolvedValueOnce(user);
       mockSiteKeyRepository.findByUserSiteKeyAndType.mockResolvedValueOnce(
         null,
       );
 
-      await userService.registrationInExchangeOracle(user, oracleAddress);
+      await userService.registrationInExchangeOracle(user.id, oracleAddress);
 
       expect(mockSiteKeyRepository.createUnique).toHaveBeenCalledTimes(1);
       expect(mockSiteKeyRepository.createUnique).toHaveBeenCalledWith({
@@ -405,9 +415,13 @@ describe('UserService', () => {
         to: mockWeb3ConfigService.operatorAddress,
         contents: SignatureType.ENABLE_OPERATOR,
       });
+      mockUserRepository.findOneById.mockResolvedValueOnce(user);
+
       const signature = await web3Utils.signMessage(signatureBody, privateKey);
 
-      await expect(userService.enableOperator(user, signature)).rejects.toThrow(
+      await expect(
+        userService.enableOperator(user.id, signature),
+      ).rejects.toThrow(
         new InvalidWeb3SignatureError(user.id, user.evmAddress),
       );
       expect(mockedKVStoreSet).toHaveBeenCalledTimes(0);
@@ -422,11 +436,15 @@ describe('UserService', () => {
         to: mockWeb3ConfigService.operatorAddress,
         contents: SignatureType.ENABLE_OPERATOR,
       });
+      mockUserRepository.findOneById.mockResolvedValueOnce(user);
+
       const signature = await web3Utils.signMessage(signatureBody, privateKey);
 
       mockedKVStoreUtils.get.mockResolvedValueOnce(OperatorStatus.ACTIVE);
 
-      await expect(userService.enableOperator(user, signature)).rejects.toThrow(
+      await expect(
+        userService.enableOperator(user.id, signature),
+      ).rejects.toThrow(
         new UserError(UserErrorMessage.OPERATOR_ALREADY_ACTIVE, user.id),
       );
       expect(mockedKVStoreUtils.get).toHaveBeenCalledTimes(1);
@@ -447,9 +465,11 @@ describe('UserService', () => {
         to: mockWeb3ConfigService.operatorAddress,
         contents: SignatureType.ENABLE_OPERATOR,
       });
+      mockUserRepository.findOneById.mockResolvedValueOnce(user);
+
       const signature = await web3Utils.signMessage(signatureBody, privateKey);
 
-      await userService.enableOperator(user, signature);
+      await userService.enableOperator(user.id, signature);
 
       expect(mockedKVStoreSet).toHaveBeenCalledTimes(1);
       expect(mockedKVStoreSet).toHaveBeenCalledWith(
@@ -477,10 +497,12 @@ describe('UserService', () => {
         to: mockWeb3ConfigService.operatorAddress,
         contents: SignatureType.DISABLE_OPERATOR,
       });
+      mockUserRepository.findOneById.mockResolvedValueOnce(user);
+
       const signature = await web3Utils.signMessage(signatureBody, privateKey);
 
       await expect(
-        userService.disableOperator(user, signature),
+        userService.disableOperator(user.id, signature),
       ).rejects.toThrow(
         new InvalidWeb3SignatureError(user.id, user.evmAddress),
       );
@@ -496,12 +518,14 @@ describe('UserService', () => {
         to: mockWeb3ConfigService.operatorAddress,
         contents: SignatureType.DISABLE_OPERATOR,
       });
+      mockUserRepository.findOneById.mockResolvedValueOnce(user);
+
       const signature = await web3Utils.signMessage(signatureBody, privateKey);
 
       mockedKVStoreUtils.get.mockResolvedValueOnce(OperatorStatus.INACTIVE);
 
       await expect(
-        userService.disableOperator(user, signature),
+        userService.disableOperator(user.id, signature),
       ).rejects.toThrow(
         new UserError(UserErrorMessage.OPERATOR_NOT_ACTIVE, user.id),
       );
@@ -523,9 +547,11 @@ describe('UserService', () => {
         to: mockWeb3ConfigService.operatorAddress,
         contents: SignatureType.DISABLE_OPERATOR,
       });
+      mockUserRepository.findOneById.mockResolvedValueOnce(user);
+
       const signature = await web3Utils.signMessage(signatureBody, privateKey);
 
-      await userService.disableOperator(user, signature);
+      await userService.disableOperator(user.id, signature);
 
       expect(mockedKVStoreSet).toHaveBeenCalledTimes(1);
       expect(mockedKVStoreSet).toHaveBeenCalledWith(

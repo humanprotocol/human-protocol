@@ -1,11 +1,17 @@
 import { useGetRegistrationDataInOracles } from '../../jobs-discovery';
 
 export const useIsAlreadyRegistered = (address: string | undefined) => {
-  const { data } = useGetRegistrationDataInOracles();
+  const { data, isPending } = useGetRegistrationDataInOracles();
 
   if (!address) {
-    return false;
+    return {
+      registered: false,
+      isPending: false,
+    };
   }
 
-  return (data?.oracle_addresses ?? []).includes(address);
+  return {
+    registered: (data?.oracle_addresses ?? []).includes(address),
+    isPending,
+  };
 };

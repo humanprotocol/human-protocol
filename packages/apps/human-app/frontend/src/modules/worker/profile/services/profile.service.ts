@@ -7,49 +7,47 @@ const apiPaths = {
   registerAddress: '/user/register-address',
 };
 
-export const kycStartSchema = z.object({
+const kycStartSchema = z.object({
   url: z.string(),
 });
 
-export type KycStartSuccessSchema = z.infer<typeof kycStartSchema>;
+type KycStartSuccessSchema = z.infer<typeof kycStartSchema>;
 
-export class ProfileService {
-  async startKyc() {
-    try {
-      const result =
-        await authorizedHumanAppApiClient.post<KycStartSuccessSchema>(
-          apiPaths.kycStart,
-          {
-            successSchema: kycStartSchema,
-          }
-        );
-      return result;
-    } catch (error) {
-      if (error instanceof ApiClientError) {
-        throw error;
-      }
-
-      throw new Error('Failed to start KYC process');
+async function startKyc() {
+  try {
+    const result =
+      await authorizedHumanAppApiClient.post<KycStartSuccessSchema>(
+        apiPaths.kycStart,
+        {
+          successSchema: kycStartSchema,
+        }
+      );
+    return result;
+  } catch (error) {
+    if (error instanceof ApiClientError) {
+      throw error;
     }
-  }
 
-  async registerAddress(data: {
-    address: string;
-    chainId: number;
-    signature: string;
-  }) {
-    try {
-      await authorizedHumanAppApiClient.post(apiPaths.registerAddress, {
-        body: data,
-      });
-    } catch (error) {
-      if (error instanceof ApiClientError) {
-        throw error;
-      }
-
-      throw new Error('Failed to register address.');
-    }
+    throw new Error('Failed to start KYC process');
   }
 }
 
-export const profileService = new ProfileService();
+async function registerAddress(data: {
+  address: string;
+  chainId: number;
+  signature: string;
+}) {
+  try {
+    await authorizedHumanAppApiClient.post(apiPaths.registerAddress, {
+      body: data,
+    });
+  } catch (error) {
+    if (error instanceof ApiClientError) {
+      throw error;
+    }
+
+    throw new Error('Failed to register address.');
+  }
+}
+
+export { startKyc, registerAddress };

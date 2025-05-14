@@ -103,7 +103,8 @@ export interface IHMTHoldersParams extends IPagination {
   address?: string;
 }
 
-export interface IPayoutFilter {
+export interface IPayoutFilter extends IPagination {
+  chainId: ChainId;
   escrowAddress?: string;
   recipient?: string;
   from?: Date;
@@ -160,4 +161,25 @@ export interface StakerInfo {
   lockedAmount: bigint;
   lockedUntil: bigint;
   withdrawableAmount: bigint;
+}
+
+export interface IStatusEventFilter extends IPagination {
+  chainId: ChainId;
+  statuses?: EscrowStatus[];
+  from?: Date;
+  to?: Date;
+  launcher?: string;
+}
+
+export interface IWorker {
+  id: string;
+  address: string;
+  totalAmountReceived: number;
+  payoutCount: number;
+}
+
+export interface IWorkersFilter extends IPagination {
+  chainId: ChainId;
+  address?: string;
+  orderBy?: string;
 }
