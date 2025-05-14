@@ -588,7 +588,7 @@ describe('AuthService', () => {
     });
   });
 
-  describe('signin', () => {
+  describe('m2mSignin', () => {
     it('should throw AuthError(AuthErrorMessage.INVALID_SECRET_KEY) if invalid secret', async () => {
       const invalidSecretKey = faker.string.alphanumeric({ length: 42 });
 
@@ -609,6 +609,7 @@ describe('AuthService', () => {
       });
 
       expect(omit(decodedAccessToken, ['exp', 'iat'])).toEqual({
+        email: 'human-app@hmt.ai',
         role: 'human_app',
         user_id: 'human_app',
         status: 'active',

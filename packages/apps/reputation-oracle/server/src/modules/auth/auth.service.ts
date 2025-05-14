@@ -210,8 +210,11 @@ export class AuthService {
 
     if (this.authConfigService.humanAppSecretKey === secretKey) {
       jwtPayload = {
+        // email precense is part of jwt validation in ExcO
+        email: 'human-app@hmt.ai',
         status: UserStatus.ACTIVE,
         user_id: HUMAN_APP_IDENTIFIER,
+        // specific role value is checked to grant machine-level access
         role: HUMAN_APP_IDENTIFIER,
         reputation_network: this.web3ConfigService.operatorAddress,
       };
