@@ -1,8 +1,9 @@
 {
-  "extends": "../../../../tsconfig.json",
+  "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
+    "composite": false,
     "useDefineForClassFields": true,
-    "module": "Preserve",
+    "module": "ESNext",
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "types": ["vite-plugin-svgr/client", "vite/client", "vitest/globals"],
     "strictNullChecks": true,
@@ -24,6 +25,5 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
 }
