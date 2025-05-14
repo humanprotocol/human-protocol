@@ -23,9 +23,10 @@ export class JwtAuthGuard extends AuthGuard('jwt-http') implements CanActivate {
     }
 
     // Try to authenticate with JWT
-    const canActivate = (await super.canActivate(context)) as boolean;
-    if (!canActivate) {
-      throw new AuthError('JWT authentication failed');
+    try {
+      await super.canActivate(context);
+    } catch (jwtError) {
+      throw new AuthError('Unauthorized');
     }
 
     // Roles verification
