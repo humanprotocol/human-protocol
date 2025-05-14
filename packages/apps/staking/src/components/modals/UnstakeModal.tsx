@@ -30,12 +30,10 @@ const SuccessState: FC<{ amount: number | string }> = ({ amount }) => (
       justifyContent="center"
       py={1}
     >
-      <Typography variant="subtitle2" color="primary">
+      <Typography variant="subtitle2">
         You have successfully unstaked
       </Typography>
-      <Typography variant="h6" color="primary">
-        {amount} HMT
-      </Typography>
+      <Typography variant="h6">{amount} HMT</Typography>
     </Box>
   </ModalSuccess>
 );
@@ -107,7 +105,7 @@ const UnstakeModal: FC<Props> = ({ open, onClose }) => {
   const renderIdleState = () => {
     return (
       <>
-        <Typography variant="subtitle2" color="primary" mb={2} py={1}>
+        <Typography variant="subtitle2" mb={2} py={1}>
           Available Amount: {availableAmount} HMT
         </Typography>
 

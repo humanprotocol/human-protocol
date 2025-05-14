@@ -1,14 +1,13 @@
 import { FC, useState } from 'react';
 import {
-  AppBar,
   Box,
   Link as MuiLink,
   Toolbar,
   IconButton,
   Drawer,
   Typography,
-  styled,
   Button,
+  useTheme,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
@@ -17,42 +16,32 @@ import { useAccount } from 'wagmi';
 
 import Account from '../Account';
 import ConnectWallet from '../Wallet/ConnectWallet';
+import Container from '../Container';
 import StakeModal from '../modals/StakeModal';
-import logoImg from '../../assets/logo.svg';
-import { colorPalette } from '../../assets/styles/color-palette';
-import { ROUTES } from '../../constants';
 import NetworkSwitcher from '../NetworkSwitcher';
+import ThemeModeSwitch from '../ThemeModeSwitch';
 
-const NavLink = styled(MuiLink)({
-  color: colorPalette.primary.main,
-  padding: '6px 8px',
-  fontSize: '14px',
-  lineHeight: '150%',
-  letterSpacing: '0.1px',
-  fontWeight: 600,
-  textDecoration: 'none',
-  cursor: 'pointer',
-
-  '@media (min-width: 900px) and (max-width: 1200px)': {
-    padding: '6px 4px',
-    fontSize: '12px',
-  },
-});
+import { ROUTES } from '../../constants';
+import { LogoIcon } from '../../icons';
+import HeaderMenu from '../HeaderMenu';
 
 const DefaultHeader: FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [stakeModalOpen, setStakeModalOpen] = useState(false);
   const { isConnected } = useAccount();
+  const { isDarkMode } = useTheme();
 
   const toggleDrawer = (open: boolean) => {
     setMobileMenuOpen(open);
   };
 
   return (
-    <AppBar
-      className="container"
+    <Container
+      component="header"
+      display="flex"
       position="static"
-      sx={{ bgcolor: '#fff', boxShadow: 'none' }}
+      bgcolor="background.default"
+      boxShadow="none"
     >
       <Toolbar
         sx={{
@@ -60,60 +49,59 @@ const DefaultHeader: FC = () => {
           justifyContent: 'space-between',
           width: '100%',
           height: { xs: 64, md: 82 },
+          p: { xs: 0, sm: 0 },
         }}
       >
-        <Link
+        <MuiLink
+          component={Link}
           to={ROUTES.DASHBOARD}
-          style={{ display: 'flex', alignItems: 'center' }}
+          display="flex"
+          alignItems="center"
         >
-          <img
-            src={logoImg}
-            alt="Staking Dashboard"
-            style={{ width: 118, height: 28 }}
+          <LogoIcon
+            sx={{
+              width: 118,
+              height: 28,
+              color: isDarkMode ? 'text.primary' : 'primary.light',
+            }}
           />
           <Typography
             variant="body1"
             ml={1.5}
             display={{ xs: 'none', sm: 'block' }}
-            sx={{ fontSize: { md: '14px', lg: '16px' } }}
+            fontSize={16}
+            color="text.primary"
           >
             Staking
           </Typography>
-        </Link>
+        </MuiLink>
         <Box
           display={{ xs: 'none', md: 'flex' }}
           paddingY={{ sm: 0, md: 2.5 }}
           height="100%"
           alignItems="center"
-          gap={{ md: 1, lg: 2 }}
+          gap={2}
         >
-          <NavLink href={ROUTES.DASHBOARD}>Staking Overview</NavLink>
-          <NavLink href={ROUTES.KVSTORE}>KV Store</NavLink>
-          <NavLink
-            href={import.meta.env.VITE_HEADER_LINK_DASHBOARD}
-            target="_blank"
-          >
-            Dashboard
-          </NavLink>
-          <NavLink href="https://humanprotocol.org" target="_blank">
-            HUMAN Website
-          </NavLink>
+          <HeaderMenu />
           <Button
             size="medium"
             variant="outlined"
             disabled={!isConnected}
             sx={{
-              px: { md: 1, lg: 2 },
-              fontSize: { md: '12px', lg: '14px' },
+              px: 2,
+              fontSize: '14px',
               height: '100%',
+              color: 'text.primary',
+              borderColor: 'text.primary',
             }}
             onClick={() => isConnected && setStakeModalOpen(true)}
           >
             Stake HMT
           </Button>
-          <NetworkSwitcher />
           {!isConnected && <ConnectWallet />}
           {isConnected && <Account />}
+          <NetworkSwitcher />
+          <ThemeModeSwitch />
         </Box>
 
         <IconButton
@@ -128,7 +116,7 @@ const DefaultHeader: FC = () => {
           anchor="right"
           open={mobileMenuOpen}
           onClose={() => toggleDrawer(false)}
-          PaperProps={{ sx: { width: '75%' } }}
+          PaperProps={{ sx: { width: '75%', bgcolor: 'background.default' } }}
         >
           <Box
             sx={{
@@ -198,6 +186,7 @@ const DefaultHeader: FC = () => {
             >
               Stake HMT
             </Button>
+            <ThemeModeSwitch />
           </Box>
         </Drawer>
       </Toolbar>
@@ -205,7 +194,7 @@ const DefaultHeader: FC = () => {
         open={stakeModalOpen}
         onClose={() => setStakeModalOpen(false)}
       />
-    </AppBar>
+    </Container>
   );
 };
 

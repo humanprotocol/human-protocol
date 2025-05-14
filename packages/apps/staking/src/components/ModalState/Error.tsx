@@ -1,7 +1,6 @@
 import { FC } from 'react';
 import { Box, Typography } from '@mui/material';
 
-import { colorPalette } from '../../assets/styles/color-palette';
 import { CloseIcon } from '../../icons';
 
 const ModalError: FC = () => {
@@ -13,13 +12,13 @@ const ModalError: FC = () => {
         alignItems="center"
         mb={2}
         p="3px"
-        color={colorPalette.whiteBackground}
-        bgcolor={colorPalette.error.main}
+        color="background.default"
+        bgcolor="error.main"
         borderRadius={100}
       >
         <CloseIcon sx={{ width: 34, height: 34 }} />
       </Box>
-      <Typography variant="subtitle2" color={colorPalette.error.main}>
+      <Typography variant="subtitle2" color="error.main">
         An error occurred, please try again.
       </Typography>
     </>
