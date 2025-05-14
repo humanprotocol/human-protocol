@@ -303,7 +303,8 @@ export class EnvironmentConfigService {
   }
 
   /**
-   * Secret key to authorize HUMAN App in Reputation Oracle
+   * Secret key for machine-to-machine authorization
+   * of HUMAN App in Reputation Oracle
    * Required
    */
   get m2mAuthSecretKey(): string {
