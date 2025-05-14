@@ -1,12 +1,7 @@
-import {
-  Injectable,
-  ExecutionContext,
-  CanActivate,
-  HttpStatus,
-} from '@nestjs/common';
+import { Injectable, ExecutionContext, CanActivate } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthService } from '../../modules/auth/auth.service';
-import { ControlledError } from '../errors/controlled';
+import { AuthError } from '../errors';
 
 @Injectable()
 export class ApiKeyGuard implements CanActivate {
@@ -35,9 +30,9 @@ export class ApiKeyGuard implements CanActivate {
           return true;
         }
       } else {
-        throw new ControlledError('Invalid API Key', HttpStatus.UNAUTHORIZED);
+        throw new AuthError('Invalid API Key');
       }
     }
-    throw new ControlledError('Unauthorized', HttpStatus.UNAUTHORIZED);
+    throw new AuthError('Unauthorized');
   }
 }

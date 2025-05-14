@@ -9,15 +9,12 @@ import {
   NETWORKS,
   StorageParams,
 } from '@human-protocol/sdk';
-import {
-  HttpStatus,
-  Inject,
-  Injectable,
-  Logger,
-  ValidationError,
-} from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
-import { validate } from 'class-validator';
+import {
+  ValidationError as ClassValidationError,
+  validate,
+} from 'class-validator';
 import { ethers } from 'ethers';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { CANCEL_JOB_STATUSES } from '../../common/constants';
@@ -39,7 +36,12 @@ import {
 } from '../../common/enums/job';
 import { FiatCurrency } from '../../common/enums/payment';
 import { EventType, OracleType } from '../../common/enums/webhook';
-import { ControlledError } from '../../common/errors/controlled';
+import {
+  ConflictError,
+  NotFoundError,
+  ServerError,
+  ValidationError,
+} from '../../common/errors';
 import { PageDto } from '../../common/pagination/pagination.dto';
 import { parseUrl } from '../../common/utils';
 import { add, div, max, mul } from '../../common/utils/decimal';
@@ -148,10 +150,7 @@ export class JobService {
           user.stripeCustomerId,
         ))
       )
-        throw new ControlledError(
-          ErrorJob.NotActiveCard,
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new ValidationError(ErrorJob.NotActiveCard);
     }
 
     const feePercentage = Number(
@@ -237,10 +236,7 @@ export class JobService {
 
       dto.qualifications.forEach((qualification) => {
         if (!validQualificationReferences.includes(qualification)) {
-          throw new ControlledError(
-            ErrorQualification.InvalidQualification,
-            HttpStatus.BAD_REQUEST,
-          );
+          throw new ValidationError(ErrorQualification.InvalidQualification);
         }
       });
     }
@@ -252,10 +248,7 @@ export class JobService {
         const { filename } = parseUrl(dto.manifestUrl);
 
         if (!filename) {
-          throw new ControlledError(
-            ErrorJob.ManifestHashNotExist,
-            HttpStatus.CONFLICT,
-          );
+          throw new ValidationError(ErrorJob.ManifestHashNotExist);
         }
 
         jobEntity.manifestHash = filename;
@@ -341,7 +334,7 @@ export class JobService {
     );
 
     if (!escrowAddress) {
-      throw new ControlledError(ErrorEscrow.NotCreated, HttpStatus.NOT_FOUND);
+      throw new ConflictError(ErrorEscrow.NotCreated);
     }
 
     jobEntity.status = JobStatus.CREATED;
@@ -430,7 +423,7 @@ export class JobService {
     );
 
     if (!jobEntity) {
-      throw new ControlledError(ErrorJob.NotFound, HttpStatus.NOT_FOUND);
+      throw new NotFoundError(ErrorJob.NotFound);
     }
 
     await this.requestToCancelJob(jobEntity);
@@ -449,7 +442,7 @@ export class JobService {
     );
 
     if (!jobEntity || (jobEntity && jobEntity.userId !== userId)) {
-      throw new ControlledError(ErrorJob.NotFound, HttpStatus.NOT_FOUND);
+      throw new NotFoundError(ErrorJob.NotFound);
     }
 
     await this.requestToCancelJob(jobEntity);
@@ -467,10 +460,7 @@ export class JobService {
 
   private async requestToCancelJob(jobEntity: JobEntity): Promise<void> {
     if (!CANCEL_JOB_STATUSES.includes(jobEntity.status)) {
-      throw new ControlledError(
-        ErrorJob.InvalidStatusCancellation,
-        HttpStatus.CONFLICT,
-      );
+      throw new ConflictError(ErrorJob.InvalidStatusCancellation);
     }
 
     let status = JobStatus.CANCELED;
@@ -496,10 +486,7 @@ export class JobService {
     }
 
     if (status === JobStatus.FAILED) {
-      throw new ControlledError(
-        ErrorJob.CancelWhileProcessing,
-        HttpStatus.CONFLICT,
-      );
+      throw new ConflictError(ErrorJob.CancelWhileProcessing);
     }
 
     if (status === JobStatus.CANCELED) {
@@ -545,11 +532,7 @@ export class JobService {
 
       return new PageDto(data.page!, data.pageSize!, itemCount, jobs);
     } catch (error) {
-      throw new ControlledError(
-        error.message,
-        HttpStatus.BAD_REQUEST,
-        error.stack,
-      );
+      throw new ServerError(error.message, error.stack);
     }
   }
 
@@ -563,11 +546,11 @@ export class JobService {
     );
 
     if (!jobEntity) {
-      throw new ControlledError(ErrorJob.NotFound, HttpStatus.NOT_FOUND);
+      throw new NotFoundError(ErrorJob.NotFound);
     }
 
     if (!jobEntity.escrowAddress) {
-      throw new ControlledError(ErrorJob.ResultNotFound, HttpStatus.NOT_FOUND);
+      throw new NotFoundError(ErrorJob.ResultNotFound);
     }
 
     const signer = this.web3Service.getSigner(jobEntity.chainId);
@@ -578,7 +561,7 @@ export class JobService {
     );
 
     if (!finalResultUrl) {
-      throw new ControlledError(ErrorJob.ResultNotFound, HttpStatus.NOT_FOUND);
+      throw new NotFoundError(ErrorJob.ResultNotFound);
     }
 
     if (jobEntity.requestType === FortuneJobType.FORTUNE) {
@@ -587,18 +570,15 @@ export class JobService {
       )) as Array<FortuneFinalResultDto>;
 
       if (!data.length) {
-        throw new ControlledError(
-          ErrorJob.ResultNotFound,
-          HttpStatus.NOT_FOUND,
-        );
+        throw new NotFoundError(ErrorJob.ResultNotFound);
       }
 
-      const allFortuneValidationErrors: ValidationError[] = [];
+      const allFortuneValidationErrors: ClassValidationError[] = [];
 
       for (const fortune of data) {
         const fortuneDtoCheck = new FortuneFinalResultDto();
         Object.assign(fortuneDtoCheck, fortune);
-        const fortuneValidationErrors: ValidationError[] =
+        const fortuneValidationErrors: ClassValidationError[] =
           await validate(fortuneDtoCheck);
         allFortuneValidationErrors.push(...fortuneValidationErrors);
       }
@@ -609,10 +589,7 @@ export class JobService {
           JobService.name,
           allFortuneValidationErrors,
         );
-        throw new ControlledError(
-          ErrorJob.ResultValidationFailed,
-          HttpStatus.NOT_FOUND,
-        );
+        throw new ValidationError(ErrorJob.ResultValidationFailed);
       }
       return data;
     }
@@ -632,18 +609,15 @@ export class JobService {
     );
 
     if (!jobEntity) {
-      throw new ControlledError(ErrorJob.NotFound, HttpStatus.NOT_FOUND);
+      throw new NotFoundError(ErrorJob.NotFound);
     }
 
     if (!jobEntity.escrowAddress) {
-      throw new ControlledError(ErrorJob.ResultNotFound, HttpStatus.NOT_FOUND);
+      throw new NotFoundError(ErrorJob.ResultNotFound);
     }
 
     if (jobEntity.requestType === FortuneJobType.FORTUNE) {
-      throw new ControlledError(
-        ErrorJob.InvalidRequestType,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new ValidationError(ErrorJob.InvalidRequestType);
     }
 
     const signer = this.web3Service.getSigner(jobEntity.chainId);
@@ -654,7 +628,7 @@ export class JobService {
     );
 
     if (!finalResultUrl) {
-      throw new ControlledError(ErrorJob.ResultNotFound, HttpStatus.NOT_FOUND);
+      throw new NotFoundError(ErrorJob.ResultNotFound);
     }
 
     const contents = await this.storageService.downloadFile(finalResultUrl);
@@ -705,18 +679,12 @@ export class JobService {
       escrowStatus === EscrowStatus.Paid ||
       escrowStatus === EscrowStatus.Cancelled
     ) {
-      throw new ControlledError(
-        ErrorEscrow.InvalidStatusCancellation,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new ConflictError(ErrorEscrow.InvalidStatusCancellation);
     }
 
     const balance = await escrowClient.getBalance(escrowAddress);
     if (balance === 0n) {
-      throw new ControlledError(
-        ErrorEscrow.InvalidBalanceCancellation,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new ConflictError(ErrorEscrow.InvalidBalanceCancellation);
     }
 
     return escrowClient.cancel(escrowAddress, {
@@ -726,10 +694,7 @@ export class JobService {
 
   public async escrowFailedWebhook(dto: WebhookDataDto): Promise<void> {
     if (dto.eventType !== EventType.ESCROW_FAILED) {
-      throw new ControlledError(
-        ErrorJob.InvalidEventType,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new ValidationError(ErrorJob.InvalidEventType);
     }
     const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
       dto.chainId,
@@ -737,27 +702,21 @@ export class JobService {
     );
 
     if (!jobEntity) {
-      throw new ControlledError(ErrorJob.NotFound, HttpStatus.NOT_FOUND);
+      throw new NotFoundError(ErrorJob.NotFound);
     }
 
     if (jobEntity.status !== JobStatus.LAUNCHED) {
-      throw new ControlledError(ErrorJob.NotLaunched, HttpStatus.CONFLICT);
+      throw new ConflictError(ErrorJob.NotLaunched);
     }
 
     if (!dto.eventData) {
-      throw new ControlledError(
-        'Event data is required but was not provided.',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new ValidationError('Event data is required but was not provided.');
     }
 
     const reason = dto.eventData.reason;
 
     if (!reason) {
-      throw new ControlledError(
-        'Reason is undefined in event data.',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new ValidationError('Reason is undefined in event data.');
     }
 
     jobEntity.status = JobStatus.FAILED;
@@ -775,7 +734,7 @@ export class JobService {
     );
 
     if (!jobEntity) {
-      throw new ControlledError(ErrorJob.NotFound, HttpStatus.NOT_FOUND);
+      throw new NotFoundError(ErrorJob.NotFound);
     }
 
     const { chainId, escrowAddress, manifestUrl, manifestHash } = jobEntity;
@@ -910,7 +869,7 @@ export class JobService {
     );
 
     if (!jobEntity) {
-      throw new ControlledError(ErrorJob.NotFound, HttpStatus.NOT_FOUND);
+      throw new NotFoundError(ErrorJob.NotFound);
     }
 
     // If job status already completed by getDetails do nothing
@@ -921,10 +880,7 @@ export class JobService {
       jobEntity.status !== JobStatus.LAUNCHED &&
       jobEntity.status !== JobStatus.PARTIAL
     ) {
-      throw new ControlledError(
-        ErrorJob.InvalidStatusCompletion,
-        HttpStatus.CONFLICT,
-      );
+      throw new ConflictError(ErrorJob.InvalidStatusCompletion);
     }
 
     jobEntity.status = JobStatus.COMPLETED;

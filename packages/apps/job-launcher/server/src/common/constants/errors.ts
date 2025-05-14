@@ -72,6 +72,7 @@ export enum ErrorEscrow {
  */
 export enum ErrorUser {
   NotFound = 'User not found.',
+  InvalidStatus = 'User has an invalid status.',
   AccountCannotBeRegistered = 'Account cannot be registered.',
   InvalidCredentials = 'Invalid credentials.',
   UserNotActive = 'User not active.',
@@ -215,4 +216,14 @@ export enum ErrorQualification {
  */
 export enum ErrorEncryption {
   MissingPrivateKey = 'Encryption private key cannot be empty, when it is enabled',
+}
+
+/**
+ * Represents error messages associated to storage.
+ */
+export enum ErrorStorage {
+  FailedToDownload = 'Failed to download file',
+  NotFound = 'File not found',
+  InvalidUrl = 'Invalid file URL',
+  FileNotUploaded = 'File not uploaded',
 }

@@ -6,44 +6,53 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { DatabaseError } from '../errors/database';
-import { ControlledError } from '../errors/controlled';
+import {
+  ValidationError,
+  AuthError,
+  ForbiddenError,
+  NotFoundError,
+  ConflictError,
+  ServerError,
+  DatabaseError,
+} from '../errors';
 
 @Catch()
 export class ExceptionFilter implements IExceptionFilter {
   private logger = new Logger(ExceptionFilter.name);
+
+  private getStatus(exception: any): number {
+    if (exception instanceof ValidationError) {
+      return HttpStatus.BAD_REQUEST;
+    } else if (exception instanceof AuthError) {
+      return HttpStatus.UNAUTHORIZED;
+    } else if (exception instanceof ForbiddenError) {
+      return HttpStatus.FORBIDDEN;
+    } else if (exception instanceof NotFoundError) {
+      return HttpStatus.NOT_FOUND;
+    } else if (exception instanceof ConflictError) {
+      return HttpStatus.CONFLICT;
+    } else if (exception instanceof ServerError) {
+      return HttpStatus.UNPROCESSABLE_ENTITY;
+    } else if (exception instanceof DatabaseError) {
+      return HttpStatus.UNPROCESSABLE_ENTITY;
+    } else if (exception.statusCode) {
+      return exception.statusCode;
+    }
+    return HttpStatus.INTERNAL_SERVER_ERROR;
+  }
 
   catch(exception: any, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    let status = HttpStatus.INTERNAL_SERVER_ERROR;
-    let message = 'Internal server error';
+    const status = this.getStatus(exception);
+    const message = exception.message || 'Internal server error';
 
-    if (exception instanceof ControlledError) {
-      status = exception.status;
-      message = exception.message;
-
-      this.logger.error(`Job Launcher error: ${message}`, exception.stack);
-    } else if (exception instanceof DatabaseError) {
-      status = HttpStatus.UNPROCESSABLE_ENTITY;
-      message = exception.message;
-
-      this.logger.error(
-        `Database error: ${exception.message}`,
-        exception.stack,
-      );
-    } else {
-      if (exception.statusCode === HttpStatus.BAD_REQUEST) {
-        status = exception.statusCode;
-        message = exception.message;
-      }
-      this.logger.error(
-        `Unhandled exception: ${exception.message}`,
-        exception.stack,
-      );
-    }
+    this.logger.error(
+      `Exception caught: ${message}`,
+      exception.stack || 'No stack trace available',
+    );
 
     response.status(status).json({
       statusCode: status,

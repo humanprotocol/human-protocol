@@ -1,6 +1,19 @@
-import { Test, TestingModule } from '@nestjs/testing';
-
-import { CronJobType } from '../../common/enums/cron-job';
+jest.mock('@human-protocol/sdk', () => ({
+  ...jest.requireActual('@human-protocol/sdk'),
+  EscrowClient: {
+    build: jest.fn().mockImplementation(() => ({
+      createEscrow: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+      setup: jest.fn().mockResolvedValue(null),
+      fund: jest.fn().mockResolvedValue(null),
+    })),
+  },
+  KVStoreUtils: {
+    get: jest.fn(),
+  },
+  EscrowUtils: {
+    getStatusEvents: jest.fn(),
+  },
+}));
 
 import { faker } from '@faker-js/faker';
 import { createMock } from '@golevelup/ts-jest';
@@ -15,8 +28,8 @@ import {
 } from '@human-protocol/sdk';
 import { StatusEvent } from '@human-protocol/sdk/dist/graphql';
 import { HttpService } from '@nestjs/axios';
-import { HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Test, TestingModule } from '@nestjs/testing';
 import { ethers } from 'ethers';
 import { DeepPartial } from 'typeorm';
 import {
@@ -37,9 +50,10 @@ import {
   ErrorContentModeration,
   ErrorCronJob,
 } from '../../common/constants/errors';
+import { CronJobType } from '../../common/enums/cron-job';
 import { CvatJobType, FortuneJobType, JobStatus } from '../../common/enums/job';
 import { WebhookStatus } from '../../common/enums/webhook';
-import { ControlledError } from '../../common/errors/controlled';
+import { ConflictError } from '../../common/errors';
 import { ContentModerationRequestRepository } from '../content-moderation/content-moderation-request.repository';
 import { GCVContentModerationService } from '../content-moderation/gcv-content-moderation.service';
 import { JobEntity } from '../job/job.entity';
@@ -61,23 +75,6 @@ import { WhitelistService } from '../whitelist/whitelist.service';
 import { CronJobEntity } from './cron-job.entity';
 import { CronJobRepository } from './cron-job.repository';
 import { CronJobService } from './cron-job.service';
-
-jest.mock('@human-protocol/sdk', () => ({
-  ...jest.requireActual('@human-protocol/sdk'),
-  EscrowClient: {
-    build: jest.fn().mockImplementation(() => ({
-      createEscrow: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-      setup: jest.fn().mockResolvedValue(null),
-      fund: jest.fn().mockResolvedValue(null),
-    })),
-  },
-  KVStoreUtils: {
-    get: jest.fn(),
-  },
-  EscrowUtils: {
-    getStatusEvents: jest.fn(),
-  },
-}));
 
 describe('CronJobService', () => {
   let service: CronJobService,
@@ -327,7 +324,7 @@ describe('CronJobService', () => {
         .mockResolvedValue(cronJobEntity);
 
       await expect(service.completeCronJob(cronJobEntity)).rejects.toThrow(
-        new ControlledError(ErrorCronJob.Completed, HttpStatus.BAD_REQUEST),
+        new ConflictError(ErrorCronJob.Completed),
       );
       expect(updateOneSpy).not.toHaveBeenCalled();
     });

@@ -1,12 +1,12 @@
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { MailDataRequired, MailService } from '@sendgrid/mail';
+import { SendgridConfigService } from '../../common/config/sendgrid-config.service';
 import {
   SENDGRID_API_KEY_DISABLED,
   SENDGRID_API_KEY_REGEX,
 } from '../../common/constants';
 import { ErrorSendGrid } from '../../common/constants/errors';
-import { SendgridConfigService } from '../../common/config/sendgrid-config.service';
-import { ControlledError } from '../../common/errors/controlled';
+import { ConflictError, ServerError } from '../../common/errors';
 
 @Injectable()
 export class SendGridService {
@@ -24,10 +24,7 @@ export class SendGridService {
     }
 
     if (!SENDGRID_API_KEY_REGEX.test(this.sendgridConfigService.apiKey)) {
-      throw new ControlledError(
-        ErrorSendGrid.InvalidApiKey,
-        HttpStatus.CONFLICT,
-      );
+      throw new ConflictError(ErrorSendGrid.InvalidApiKey);
     }
 
     this.mailService.setApiKey(this.sendgridConfigService.apiKey);
@@ -61,10 +58,7 @@ export class SendGridService {
       return;
     } catch (error) {
       this.logger.error(error, SendGridService.name);
-      throw new ControlledError(
-        ErrorSendGrid.EmailNotSent,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new ServerError(ErrorSendGrid.EmailNotSent);
     }
   }
 }

@@ -6,10 +6,9 @@ import {
   StorageParams,
 } from '@human-protocol/sdk';
 import {
-  HttpStatus,
+  ValidationError as ClassValidationError,
   Injectable,
   Logger,
-  ValidationError,
 } from '@nestjs/common';
 import { validate } from 'class-validator';
 import { ethers } from 'ethers';
@@ -44,7 +43,7 @@ import {
   JobCaptchaShapeType,
   JobRequestType,
 } from '../../common/enums/job';
-import { ControlledError } from '../../common/errors/controlled';
+import { ConflictError, ValidationError } from '../../common/errors';
 import {
   generateBucketUrl,
   listObjectsInBucket,
@@ -67,10 +66,10 @@ import { Web3Service } from '../web3/web3.service';
 import {
   AudinoManifestDto,
   CvatManifestDto,
-  HCaptchaManifestDto,
   FortuneManifestDto,
-  RestrictedAudience,
+  HCaptchaManifestDto,
   ManifestDto,
+  RestrictedAudience,
 } from './manifest.dto';
 
 @Injectable()
@@ -126,10 +125,7 @@ export class ManifestService {
         );
 
       default:
-        throw new ControlledError(
-          ErrorJob.InvalidRequestType,
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new ValidationError(ErrorJob.InvalidRequestType);
     }
   }
 
@@ -144,18 +140,12 @@ export class ManifestService {
       case CvatJobType.IMAGE_POINTS:
         const data = await listObjectsInBucket(urls.dataUrl);
         if (!data || data.length === 0 || !data[0])
-          throw new ControlledError(
-            ErrorJob.DatasetValidationFailed,
-            HttpStatus.BAD_REQUEST,
-          );
+          throw new ValidationError(ErrorJob.DatasetValidationFailed);
         gt = (await this.storageService.downloadJsonLikeData(
           `${urls.gtUrl.protocol}//${urls.gtUrl.host}${urls.gtUrl.pathname}`,
         )) as any;
         if (!gt || !gt.images || gt.images.length === 0)
-          throw new ControlledError(
-            ErrorJob.GroundThuthValidationFailed,
-            HttpStatus.BAD_REQUEST,
-          );
+          throw new ValidationError(ErrorJob.GroundThuthValidationFailed);
 
         await this.checkImageConsistency(gt.images, data);
 
@@ -170,10 +160,7 @@ export class ManifestService {
         )) as any;
 
         if (!gt || !gt.images || gt.images.length === 0) {
-          throw new ControlledError(
-            ErrorJob.GroundThuthValidationFailed,
-            HttpStatus.BAD_REQUEST,
-          );
+          throw new ValidationError(ErrorJob.GroundThuthValidationFailed);
         }
 
         gtEntries = 0;
@@ -203,10 +190,7 @@ export class ManifestService {
         )) as any;
 
         if (!gt || !gt.images || gt.images.length === 0) {
-          throw new ControlledError(
-            ErrorJob.GroundThuthValidationFailed,
-            HttpStatus.BAD_REQUEST,
-          );
+          throw new ValidationError(ErrorJob.GroundThuthValidationFailed);
         }
 
         gtEntries = 0;
@@ -228,10 +212,7 @@ export class ManifestService {
         return boxes.annotations.length - gtEntries;
 
       default:
-        throw new ControlledError(
-          ErrorJob.InvalidRequestType,
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new ValidationError(ErrorJob.InvalidRequestType);
     }
   }
 
@@ -248,10 +229,7 @@ export class ManifestService {
     );
 
     if (missingFileNames.length !== 0) {
-      throw new ControlledError(
-        ErrorJob.ImageConsistency,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new ConflictError(ErrorJob.ImageConsistency);
     }
   }
 
@@ -298,7 +276,7 @@ export class ManifestService {
         !dto.data.boxes) ||
       (requestType === CvatJobType.IMAGE_BOXES_FROM_POINTS && !dto.data.points)
     ) {
-      throw new ControlledError(ErrorJob.DataNotExist, HttpStatus.CONFLICT);
+      throw new ConflictError(ErrorJob.DataNotExist);
     }
 
     const urls = {
@@ -442,10 +420,7 @@ export class ManifestService {
 
       case JobCaptchaShapeType.POLYGON:
         if (!jobDto.annotations.label) {
-          throw new ControlledError(
-            ErrorJob.JobParamsValidationFailed,
-            HttpStatus.BAD_REQUEST,
-          );
+          throw new ValidationError(ErrorJob.JobParamsValidationFailed);
         }
 
         const polygonManifest = {
@@ -471,10 +446,7 @@ export class ManifestService {
 
       case JobCaptchaShapeType.POINT:
         if (!jobDto.annotations.label) {
-          throw new ControlledError(
-            ErrorJob.JobParamsValidationFailed,
-            HttpStatus.BAD_REQUEST,
-          );
+          throw new ValidationError(ErrorJob.JobParamsValidationFailed);
         }
 
         const pointManifest = {
@@ -497,10 +469,7 @@ export class ManifestService {
         return pointManifest;
       case JobCaptchaShapeType.BOUNDING_BOX:
         if (!jobDto.annotations.label) {
-          throw new ControlledError(
-            ErrorJob.JobParamsValidationFailed,
-            HttpStatus.BAD_REQUEST,
-          );
+          throw new ValidationError(ErrorJob.JobParamsValidationFailed);
         }
 
         const boundingBoxManifest = {
@@ -523,10 +492,7 @@ export class ManifestService {
         return boundingBoxManifest;
       case JobCaptchaShapeType.IMMO:
         if (!jobDto.annotations.label) {
-          throw new ControlledError(
-            ErrorJob.JobParamsValidationFailed,
-            HttpStatus.BAD_REQUEST,
-          );
+          throw new ValidationError(ErrorJob.JobParamsValidationFailed);
         }
 
         const immoManifest = {
@@ -549,10 +515,7 @@ export class ManifestService {
         return immoManifest;
 
       default:
-        throw new ControlledError(
-          ErrorJob.HCaptchaInvalidJobType,
-          HttpStatus.CONFLICT,
-        );
+        throw new ValidationError(ErrorJob.HCaptchaInvalidJobType);
     }
   }
 
@@ -673,12 +636,9 @@ export class ManifestService {
 
     Object.assign(dtoCheck, manifest);
 
-    const validationErrors: ValidationError[] = await validate(dtoCheck);
+    const validationErrors: ClassValidationError[] = await validate(dtoCheck);
     if (validationErrors.length > 0) {
-      throw new ControlledError(
-        ErrorJob.ManifestValidationFailed,
-        HttpStatus.NOT_FOUND,
-      );
+      throw new ValidationError(ErrorJob.ManifestValidationFailed);
     }
   }
 

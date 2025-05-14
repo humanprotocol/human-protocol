@@ -4,7 +4,6 @@ import {
   Delete,
   Get,
   Headers,
-  HttpStatus,
   Param,
   Patch,
   Post,
@@ -25,11 +24,14 @@ import { RequestWithUser } from '../../common/types';
 import { ChainId } from '@human-protocol/sdk';
 import { ErrorPayment } from 'src/common/constants/errors';
 import { ServerConfigService } from '../../common/config/server-config.service';
-import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { TOKEN_ADDRESSES } from '../../common/constants/tokens';
 import { ApiKey } from '../../common/decorators';
-import { ControlledError } from '../../common/errors/controlled';
+import {
+  ConflictError,
+  ServerError,
+  ValidationError,
+} from '../../common/errors';
 import { WhitelistAuthGuard } from '../../common/guards/whitelist.auth';
 import { PageDto } from '../../common/pagination/pagination.dto';
 import { RateService } from '../rate/rate.service';
@@ -44,11 +46,11 @@ import {
   PaymentFiatConfirmDto,
   PaymentFiatCreateDto,
   PaymentMethodIdDto,
+  TokenDto,
   TokensResponseDto,
   UserBalanceDto,
 } from './payment.dto';
 import { PaymentService } from './payment.service';
-import { TokenDto } from './payment.dto';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -59,7 +61,6 @@ export class PaymentController {
     private readonly paymentService: PaymentService,
     private readonly serverConfigService: ServerConfigService,
     private readonly rateService: RateService,
-    private readonly web3ConfigService: Web3ConfigService,
   ) {}
 
   @ApiOperation({
@@ -83,10 +84,7 @@ export class PaymentController {
     try {
       return this.paymentService.getUserBalance(req.user.id);
     } catch {
-      throw new ControlledError(
-        ErrorPayment.BalanceCouldNotBeRetrieved,
-        HttpStatus.UNPROCESSABLE_ENTITY,
-      );
+      throw new ServerError(ErrorPayment.BalanceCouldNotBeRetrieved);
     }
   }
 
@@ -152,11 +150,7 @@ export class PaymentController {
     try {
       return this.rateService.getRate(data.from, data.to);
     } catch (e) {
-      throw new ControlledError(
-        'Error getting rates',
-        HttpStatus.CONFLICT,
-        e.stack,
-      );
+      throw new ConflictError('Error getting rates', e.stack);
     }
   }
 
@@ -454,10 +448,7 @@ export class PaymentController {
   ): Promise<TokensResponseDto> {
     const tokens = TOKEN_ADDRESSES[chainId];
     if (!tokens) {
-      throw new ControlledError(
-        ErrorPayment.InvalidChainId,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new ValidationError(ErrorPayment.InvalidChainId);
     }
 
     return tokens;

@@ -1,17 +1,19 @@
+import { EscrowUtils } from '@human-protocol/sdk';
 import {
   CanActivate,
   ExecutionContext,
-  HttpStatus,
   Injectable,
+  Logger,
 } from '@nestjs/common';
-import { verifySignature } from '../utils/signature';
 import { HEADER_SIGNATURE_KEY } from '../constants';
-import { EscrowUtils } from '@human-protocol/sdk';
 import { Role } from '../enums/role';
-import { ControlledError } from '../errors/controlled';
+import { AuthError } from '../errors';
+import { verifySignature } from '../utils/signature';
 
 @Injectable()
 export class SignatureAuthGuard implements CanActivate {
+  private readonly logger = new Logger(SignatureAuthGuard.name);
+
   constructor(private role: Role[]) {}
 
   public async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -47,9 +49,12 @@ export class SignatureAuthGuard implements CanActivate {
         return true;
       }
     } catch (error) {
-      console.error(error);
+      this.logger.error(
+        `Error verifying signature: ${error.message}`,
+        error.stack,
+      );
     }
 
-    throw new ControlledError('Unauthorized', HttpStatus.UNAUTHORIZED);
+    throw new AuthError('Unauthorized');
   }
 }
