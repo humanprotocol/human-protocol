@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 import { ErrorSignature } from '../constants/errors';
-import { ConflictError, ValidationError } from '../errors';
+import { ValidationError } from '../errors';
 
 export function verifySignature(
   message: object | string,
@@ -43,6 +43,6 @@ export function recoverSigner(
   try {
     return ethers.verifyMessage(message, signature);
   } catch (_error) {
-    throw new ConflictError(ErrorSignature.InvalidSignature);
+    throw new ValidationError(ErrorSignature.InvalidSignature);
   }
 }
