@@ -1,9 +1,9 @@
-import { ExecutionContext, HttpStatus } from '@nestjs/common';
+import { ExecutionContext } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { ApiKeyGuard } from './apikey.auth';
 import { AuthService } from '../../modules/auth/auth.service';
 import { UserEntity } from '../../modules/user/user.entity';
-import { ControlledError } from '../errors/controlled';
+import { AuthError } from '../errors';
+import { ApiKeyGuard } from './apikey.auth';
 
 describe('ApiKeyGuard', () => {
   let guard: ApiKeyGuard;
@@ -71,7 +71,7 @@ describe('ApiKeyGuard', () => {
         .mockResolvedValue(null);
 
       await expect(guard.canActivate(context)).rejects.toThrow(
-        new ControlledError('Unauthorized', HttpStatus.UNAUTHORIZED),
+        new AuthError('Unauthorized'),
       );
     });
 

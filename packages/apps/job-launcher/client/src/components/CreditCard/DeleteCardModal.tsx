@@ -43,7 +43,7 @@ const DeleteCardModal = ({
       onSuccess();
     } catch (error: any) {
       if (
-        error.response?.status === 400 &&
+        error.response?.status === 409 &&
         error.response?.data?.message ===
           'Cannot delete the default payment method in use'
       ) {

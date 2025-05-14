@@ -1,27 +1,26 @@
-import { Test } from '@nestjs/testing';
-import { QualificationService } from './qualification.service';
-import { Web3ConfigService } from '../../common/config/web3-config.service';
-import { ConfigService } from '@nestjs/config';
-import { HttpService } from '@nestjs/axios';
-import { of, throwError } from 'rxjs';
-import { ChainId, KVStoreUtils } from '@human-protocol/sdk';
-import {
-  MOCK_REPUTATION_ORACLE_URL,
-  MOCK_WEB3_RPC_URL,
-  mockConfig,
-} from '../../../test/constants';
-import { ControlledError } from '../../common/errors/controlled';
-import { ErrorQualification, ErrorWeb3 } from '../../common/constants/errors';
-import { HttpStatus } from '@nestjs/common';
-import { NetworkConfigService } from '../../common/config/network-config.service';
-import { Web3Service } from '../web3/web3.service';
-
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
   KVStoreUtils: {
     get: jest.fn(),
   },
 }));
+
+import { ChainId, KVStoreUtils } from '@human-protocol/sdk';
+import { HttpService } from '@nestjs/axios';
+import { ConfigService } from '@nestjs/config';
+import { Test } from '@nestjs/testing';
+import { of, throwError } from 'rxjs';
+import {
+  MOCK_REPUTATION_ORACLE_URL,
+  MOCK_WEB3_RPC_URL,
+  mockConfig,
+} from '../../../test/constants';
+import { NetworkConfigService } from '../../common/config/network-config.service';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { ErrorQualification, ErrorWeb3 } from '../../common/constants/errors';
+import { ServerError, ValidationError } from '../../common/errors';
+import { Web3Service } from '../web3/web3.service';
+import { QualificationService } from './qualification.service';
 
 describe.only('QualificationService', () => {
   let qualificationService: QualificationService, httpService: HttpService;
@@ -97,37 +96,31 @@ describe.only('QualificationService', () => {
       expect(result).toEqual(qualifications);
     });
 
-    it('should throw a ControlledError when KVStoreUtils.get fails', async () => {
+    it('should throw a ServerError when KVStoreUtils.get fails', async () => {
       (KVStoreUtils.get as any).mockRejectedValue(new Error('KV store error'));
 
       await expect(
         qualificationService.getQualifications(ChainId.LOCALHOST),
-      ).rejects.toThrow(
-        new ControlledError(
-          ErrorWeb3.ReputationOracleUrlNotSet,
-          HttpStatus.BAD_REQUEST,
-        ),
-      );
+      ).rejects.toThrow(new ServerError(ErrorWeb3.ReputationOracleUrlNotSet));
     });
 
-    it('should throw a ControlledError when HTTP request fails', async () => {
+    it('should throw a ServerError when HTTP request fails', async () => {
       (KVStoreUtils.get as any).mockResolvedValue(MOCK_REPUTATION_ORACLE_URL);
 
       jest
         .spyOn(httpService, 'get')
-        .mockImplementation(() => throwError(new Error('HTTP error')) as any);
+        .mockImplementation(
+          () => throwError(() => new Error('HTTP error')) as any,
+        );
 
       await expect(
         qualificationService.getQualifications(ChainId.LOCALHOST),
       ).rejects.toThrow(
-        new ControlledError(
-          ErrorQualification.FailedToFetchQualifications,
-          HttpStatus.BAD_REQUEST,
-        ),
+        new ServerError(ErrorQualification.FailedToFetchQualifications),
       );
     });
 
-    it('should throw a ControlledError when invalid chainId', async () => {
+    it('should throw a ValidationError when invalid chainId', async () => {
       (KVStoreUtils.get as any).mockResolvedValue(MOCK_REPUTATION_ORACLE_URL);
 
       jest
@@ -136,9 +129,7 @@ describe.only('QualificationService', () => {
 
       await expect(
         qualificationService.getQualifications(ChainId.MAINNET),
-      ).rejects.toThrow(
-        new ControlledError(ErrorWeb3.InvalidChainId, HttpStatus.BAD_REQUEST),
-      );
+      ).rejects.toThrow(new ValidationError(ErrorWeb3.InvalidChainId));
     });
   });
 });

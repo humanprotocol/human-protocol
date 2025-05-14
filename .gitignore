@@ -44,6 +44,8 @@ yarn-error.log*
 
 build
 dist
+*.tsbuildinfo
+hardhat-dependency-compiler
 
 #cache
 cache

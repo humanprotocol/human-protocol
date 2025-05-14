@@ -49,7 +49,7 @@ export class KycController {
   async startKyc(
     @Req() request: RequestWithUser,
   ): Promise<StartSessionResponseDto> {
-    return await this.kycService.initSession(request.user);
+    return await this.kycService.initSession(request.user.id);
   }
 
   @ApiOperation({
@@ -101,7 +101,7 @@ export class KycController {
     @Req() request: RequestWithUser,
   ): Promise<KycSignedAddressDto> {
     const signedAddressData = await this.kycService.getSignedAddress(
-      request.user,
+      request.user.id,
     );
     return signedAddressData;
   }

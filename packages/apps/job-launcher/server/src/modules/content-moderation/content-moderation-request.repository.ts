@@ -6,7 +6,7 @@ import { ContentModerationRequestStatus } from '../../common/enums/content-moder
 import { BaseRepository } from '../../database/base.repository';
 import { ContentModerationRequestEntity } from './content-moderation-request.entity';
 import { QueryFailedError } from 'typeorm';
-import { handleQueryFailedError } from '../../common/errors/database';
+import { handleQueryFailedError } from '../../common/errors';
 
 @Injectable()
 export class ContentModerationRequestRepository extends BaseRepository<ContentModerationRequestEntity> {

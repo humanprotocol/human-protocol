@@ -2,13 +2,6 @@ name: Python SDK check
 
 on:
   push:
-    branches:
-      - develop
-      - main
-  pull_request:
-    branches:
-      - develop
-      - main
     paths:
       - 'packages/core/**'
       - 'packages/sdk/python/human-protocol-sdk/**'
@@ -24,10 +17,9 @@ jobs:
           node-version-file: .nvmrc
           cache: yarn
       - name: Install core package dependencies
-        run: yarn --ignore-scripts
+        run: yarn install --immutable
       - name: Build core package
-        run: yarn build
-        working-directory: ./packages/core
+        run: yarn build:core
       - name: Set up Python 3.10
         uses: actions/setup-python@v5
         with:

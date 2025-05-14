@@ -2,7 +2,6 @@ import { FC, PropsWithChildren } from 'react';
 import { Box } from '@mui/material';
 
 import { SuccessIcon } from '../../icons';
-import { colorPalette } from '../../assets/styles/color-palette';
 
 const ModalSuccess: FC<PropsWithChildren> = ({ children }) => {
   return (
@@ -13,8 +12,8 @@ const ModalSuccess: FC<PropsWithChildren> = ({ children }) => {
         alignItems="center"
         mb={2}
         p="3px"
-        color={colorPalette.whiteBackground}
-        bgcolor={colorPalette.success.main}
+        color="background.default"
+        bgcolor="success.main"
         borderRadius={100}
       >
         <SuccessIcon sx={{ width: 34, height: 34 }} />

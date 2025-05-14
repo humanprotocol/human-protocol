@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import {
   ErrorContentModeration,
@@ -18,7 +18,7 @@ import {
   OracleType,
   WebhookStatus,
 } from '../../common/enums/webhook';
-import { ControlledError } from '../../common/errors/controlled';
+import { ConflictError, NotFoundError } from '../../common/errors';
 import { GCVContentModerationService } from '../content-moderation/gcv-content-moderation.service';
 import { JobEntity } from '../job/job.entity';
 import { JobRepository } from '../job/job.repository';
@@ -75,7 +75,7 @@ export class CronJobService {
     cronJobEntity: CronJobEntity,
   ): Promise<CronJobEntity> {
     if (cronJobEntity.completedAt) {
-      throw new ControlledError(ErrorCronJob.Completed, HttpStatus.BAD_REQUEST);
+      throw new ConflictError(ErrorCronJob.Completed);
     }
 
     cronJobEntity.completedAt = new Date();
@@ -395,10 +395,7 @@ export class CronJobService {
             );
           if (!jobEntity) {
             this.logger.log(ErrorJob.NotFound, JobService.name);
-            throw new ControlledError(
-              ErrorJob.NotFound,
-              HttpStatus.BAD_REQUEST,
-            );
+            throw new NotFoundError(ErrorJob.NotFound);
           }
           if (
             jobEntity.escrowAddress &&

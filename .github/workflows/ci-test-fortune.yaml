@@ -2,11 +2,6 @@ name: Fortune check
 
 on:
   push:
-    branches:
-      - develop
-  pull_request:
-    branches:
-      - develop
     paths:
       - 'packages/core/**'
       - 'packages/sdk/typescript/human-protocol-sdk/**'
@@ -23,7 +18,9 @@ jobs:
           node-version-file: .nvmrc
           cache: yarn
       - name: Install dependencies
-        run: yarn
+        run: yarn install --immutable
+      - name: Build libs
+        run: yarn build:libs
       - name: Run Exchange Oracle tests
         run: yarn workspace @human-protocol/fortune-exchange-oracle-server test
 
@@ -37,6 +34,8 @@ jobs:
           node-version-file: .nvmrc
           cache: yarn
       - name: Install dependencies
-        run: yarn
+        run: yarn install --immutable
+      - name: Build libs
+        run: yarn build:libs
       - name: Run Recording Oracle tests
         run: yarn workspace @human-protocol/fortune-recording-oracle test

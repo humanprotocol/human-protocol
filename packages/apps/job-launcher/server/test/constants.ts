@@ -1,12 +1,11 @@
+import { FortuneJobType } from '../src/common/enums/job';
 import { AWSRegions, StorageProviders } from '../src/common/enums/storage';
-import { JobRequestType } from '../src/common/enums/job';
+import { Web3Env } from '../src/common/enums/web3';
+import { CvatDataDto, StorageDataDto } from '../src/modules/job/job.dto';
 import {
   FortuneManifestDto,
-  StorageDataDto,
-  CvatDataDto,
   Label,
-} from '../src/modules/job/job.dto';
-import { Web3Env } from '../src/common/enums/web3';
+} from '../src/modules/manifest/manifest.dto';
 
 export const MOCK_REQUESTER_TITLE = 'Mock job title';
 export const MOCK_REQUESTER_DESCRIPTION = 'Mock job description';
@@ -85,7 +84,7 @@ export const MOCK_MANIFEST: FortuneManifestDto = {
   requesterTitle: 'Fortune',
   requesterDescription: 'Some desc',
   fundAmount: 10,
-  requestType: JobRequestType.FORTUNE,
+  requestType: FortuneJobType.FORTUNE,
 };
 
 export const MOCK_ENCRYPTED_MANIFEST = 'encryptedManifest';
@@ -248,14 +247,13 @@ export const mockConfig: any = {
   PGP_PRIVATE_KEY: MOCK_PGP_PRIVATE_KEY,
   PGP_PASSPHRASE: MOCK_PGP_PASSPHRASE,
   REPUTATION_ORACLE_ADDRESS: MOCK_ADDRESS,
-  CVAT_EXCHANGE_ORACLE_ADDRESS: MOCK_ADDRESS,
-  FORTUNE_EXCHANGE_ORACLE_ADDRESS: MOCK_ADDRESS,
-  FORTUNE_RECORDING_ORACLE_ADDRESS: MOCK_ADDRESS,
   WEB3_PRIVATE_KEY: MOCK_PRIVATE_KEY,
   STRIPE_SECRET_KEY: MOCK_STRIPE_SECRET_KEY,
   STRIPE_API_VERSION: MOCK_STRIPE_API_VERSION,
   STRIPE_APP_NAME: MOCK_STRIPE_APP_NAME,
   STRIPE_APP_INFO_URL: MOCK_STRIPE_APP_INFO_URL,
+  CVAT_EXCHANGE_ORACLE_ADDRESS: MOCK_ADDRESS,
+  CVAT_RECORDING_ORACLE_ADDRESS: MOCK_ADDRESS,
   HCAPTCHA_SITE_KEY: MOCK_HCAPTCHA_SITE_KEY,
   HCAPTCHA_RECORDING_ORACLE_URI: MOCK_RECORDING_ORACLE_URL,
   HCAPTCHA_REPUTATION_ORACLE_URI: MOCK_REPUTATION_ORACLE_URL,
@@ -266,7 +264,6 @@ export const mockConfig: any = {
   CVAT_MAX_TIME: MOCK_CVAT_MAX_TIME,
   CVAT_VAL_SIZE: MOCK_CVAT_VAL_SIZE,
   CVAT_SKELETONS_JOB_SIZE_MULTIPLIER: MOCK_CVAT_SKELETONS_JOB_SIZE_MULTIPLIER,
-  CVAT_RECORDING_ORACLE_ADDRESS: MOCK_ADDRESS,
   MAX_RETRY_COUNT: MOCK_MAX_RETRY_COUNT,
   RPC_URL_POLYGON_AMOY: MOCK_WEB3_RPC_URL,
   SENDGRID_API_KEY: MOCK_SENDGRID_API_KEY,

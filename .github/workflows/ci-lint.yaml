@@ -2,15 +2,6 @@ name: Lint check
 
 on:
   push:
-    branches:
-      - develop
-      - main
-    paths-ignore:
-      - 'packages/examples/cvat/**'
-  pull_request:
-    branches:
-      - develop
-      - main
     paths-ignore:
       - 'packages/examples/cvat/**'
 
@@ -25,6 +16,8 @@ jobs:
           node-version-file: .nvmrc
           cache: yarn
       - name: Install dependencies
-        run: yarn
+        run: yarn install --immutable
+      - name: Build libs
+        run: yarn build:libs
       - name: Run lint
         run: yarn lint

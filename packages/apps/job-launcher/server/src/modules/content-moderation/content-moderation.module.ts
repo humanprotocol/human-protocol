@@ -5,9 +5,9 @@ import { JobModule } from '../job/job.module';
 import { ContentModerationRequestEntity } from './content-moderation-request.entity';
 import { ContentModerationRequestRepository } from './content-moderation-request.repository';
 import { GCVContentModerationService } from './gcv-content-moderation.service';
-import { StorageModule } from '../storage/storage.module';
 import { JobEntity } from '../job/job.entity';
 import { JobRepository } from '../job/job.repository';
+import { ManifestModule } from '../manifest/manifest.module';
 
 @Global()
 @Module({
@@ -15,7 +15,7 @@ import { JobRepository } from '../job/job.repository';
     TypeOrmModule.forFeature([ContentModerationRequestEntity, JobEntity]),
     ConfigModule,
     JobModule,
-    StorageModule,
+    ManifestModule,
   ],
   providers: [
     ContentModerationRequestRepository,

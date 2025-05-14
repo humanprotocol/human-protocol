@@ -2,17 +2,9 @@ name: Node.js SDK check
 
 on:
   push:
-    branches:
-      - develop
-      - main
-  pull_request:
-    branches:
-      - develop
-      - main
     paths:
       - 'packages/core/**'
       - 'packages/sdk/typescript/human-protocol-sdk/**'
-  workflow_dispatch:
 
 jobs:
   node-sdk-test:
@@ -25,9 +17,8 @@ jobs:
           node-version-file: .nvmrc
           cache: yarn
       - name: Install dependencies
-        run: yarn --ignore-scripts
+        run: yarn install --immutable
       - name: Build core package
-        run: yarn build
-        working-directory: ./packages/core
+        run: yarn build:core
       - name: Run Node.js SDK test
         run: yarn workspace @human-protocol/sdk test

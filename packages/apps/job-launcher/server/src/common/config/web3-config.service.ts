@@ -46,22 +46,22 @@ export class Web3ConfigService {
   }
 
   /**
-   * Address of the Fortune exchange oracle contract.
+   * URI for the hCaptcha recording oracle service.
    * Required
    */
-  get fortuneExchangeOracleAddress(): string {
+  get hCaptchaRecordingOracleURI(): string {
     return this.configService.getOrThrow<string>(
-      'FORTUNE_EXCHANGE_ORACLE_ADDRESS',
+      'HCAPTCHA_RECORDING_ORACLE_URI',
     );
   }
 
   /**
-   * Address of the Fortune recording oracle contract.
+   * URI for the hCaptcha reputation oracle service.
    * Required
    */
-  get fortuneRecordingOracleAddress(): string {
+  get hCaptchaReputationOracleURI(): string {
     return this.configService.getOrThrow<string>(
-      'FORTUNE_RECORDING_ORACLE_ADDRESS',
+      'HCAPTCHA_REPUTATION_ORACLE_URI',
     );
   }
 
@@ -82,26 +82,6 @@ export class Web3ConfigService {
   get cvatRecordingOracleAddress(): string {
     return this.configService.getOrThrow<string>(
       'CVAT_RECORDING_ORACLE_ADDRESS',
-    );
-  }
-
-  /**
-   * URI for the hCaptcha recording oracle service.
-   * Required
-   */
-  get hCaptchaRecordingOracleURI(): string {
-    return this.configService.getOrThrow<string>(
-      'HCAPTCHA_RECORDING_ORACLE_URI',
-    );
-  }
-
-  /**
-   * URI for the hCaptcha reputation oracle service.
-   * Required
-   */
-  get hCaptchaReputationOracleURI(): string {
-    return this.configService.getOrThrow<string>(
-      'HCAPTCHA_REPUTATION_ORACLE_URI',
     );
   }
 

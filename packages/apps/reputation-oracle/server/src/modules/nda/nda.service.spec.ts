@@ -4,7 +4,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 
 import { NDAConfigService } from '../../config';
 import { generateWorkerUser } from '../user/fixtures';
-import { UserEntity, UserRepository } from '../user';
+import { UserRepository } from '../user';
 
 import { NDASignatureDto } from './nda.dto';
 import { NDAError, NDAErrorMessage } from './nda.error';
@@ -39,8 +39,9 @@ describe('NDAService', () => {
       const nda: NDASignatureDto = {
         url: mockNdaConfigService.latestNdaUrl,
       };
+      mockUserRepository.findOneById.mockResolvedValue(user);
 
-      await service.signNDA(user, nda);
+      await service.signNDA(user.id, nda);
 
       expect(user.ndaSignedUrl).toBe(mockNdaConfigService.latestNdaUrl);
       expect(mockUserRepository.updateOne).toHaveBeenCalledWith(user);
@@ -52,10 +53,11 @@ describe('NDAService', () => {
       const invalidNda: NDASignatureDto = {
         url: faker.internet.url(),
       };
+      mockUserRepository.findOneById.mockResolvedValue(user);
 
-      await expect(
-        service.signNDA(user as UserEntity, invalidNda),
-      ).rejects.toThrow(new NDAError(NDAErrorMessage.INVALID_NDA, user.id));
+      await expect(service.signNDA(user.id, invalidNda)).rejects.toThrow(
+        new NDAError(NDAErrorMessage.INVALID_NDA, user.id),
+      );
     });
 
     it('should return ok if the user has already signed the NDA', async () => {
@@ -65,8 +67,9 @@ describe('NDAService', () => {
       const nda: NDASignatureDto = {
         url: mockNdaConfigService.latestNdaUrl,
       };
+      mockUserRepository.findOneById.mockResolvedValue(user);
 
-      await service.signNDA(user as UserEntity, nda);
+      await service.signNDA(user.id, nda);
 
       expect(mockUserRepository.updateOne).not.toHaveBeenCalled();
     });

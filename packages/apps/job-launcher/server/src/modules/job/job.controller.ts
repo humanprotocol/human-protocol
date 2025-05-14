@@ -1,8 +1,8 @@
+import { ChainId } from '@human-protocol/sdk';
 import {
   Body,
   Controller,
   Get,
-  HttpStatus,
   Param,
   Patch,
   Post,
@@ -13,36 +13,35 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
-  ApiOperation,
-  ApiTags,
   ApiBody,
+  ApiOperation,
   ApiResponse,
+  ApiTags,
 } from '@nestjs/swagger';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { MUTEX_TIMEOUT } from '../../common/constants';
+import { ApiKey } from '../../common/decorators';
+import { FortuneJobType } from '../../common/enums/job';
+import { Web3Env } from '../../common/enums/web3';
+import { ForbiddenError } from '../../common/errors';
 import { JwtAuthGuard } from '../../common/guards';
+import { PageDto } from '../../common/pagination/pagination.dto';
 import { RequestWithUser } from '../../common/types';
+import { MutexManagerService } from '../mutex/mutex-manager.service';
 import {
-  JobFortuneDto,
-  JobCvatDto,
-  JobListDto,
-  JobDetailsDto,
-  JobIdDto,
   FortuneFinalResultDto,
-  // JobCaptchaDto,
-  JobQuickLaunchDto,
-  JobCancelDto,
   GetJobsDto,
   JobAudinoDto,
+  JobCancelDto,
+  JobCvatDto,
+  JobDetailsDto,
+  JobFortuneDto,
+  JobIdDto,
+  JobListDto,
+  // JobCaptchaDto,
+  JobQuickLaunchDto,
 } from './job.dto';
 import { JobService } from './job.service';
-import { JobRequestType } from '../../common/enums/job';
-import { ApiKey } from '../../common/decorators';
-import { ChainId } from '@human-protocol/sdk';
-import { ControlledError } from '../../common/errors/controlled';
-import { PageDto } from '../../common/pagination/pagination.dto';
-import { MutexManagerService } from '../mutex/mutex-manager.service';
-import { MUTEX_TIMEOUT } from '../../common/constants';
-import { Web3ConfigService } from '../../common/config/web3-config.service';
-import { Web3Env } from '../../common/enums/web3';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -125,7 +124,7 @@ export class JobController {
     @Request() req: RequestWithUser,
   ): Promise<number> {
     if (this.web3ConfigService.env === Web3Env.MAINNET) {
-      throw new ControlledError('Disabled', HttpStatus.METHOD_NOT_ALLOWED);
+      throw new ForbiddenError('Disabled');
     }
 
     return await this.mutexManagerService.runExclusive(
@@ -134,7 +133,7 @@ export class JobController {
       async () => {
         return await this.jobService.createJob(
           req.user,
-          JobRequestType.FORTUNE,
+          FortuneJobType.FORTUNE,
           data,
         );
       },
@@ -205,7 +204,7 @@ export class JobController {
     @Request() req: RequestWithUser,
   ): Promise<number> {
     if (this.web3ConfigService.env === Web3Env.MAINNET) {
-      throw new ControlledError('Disabled', HttpStatus.METHOD_NOT_ALLOWED);
+      throw new ForbiddenError('Disabled');
     }
 
     return await this.mutexManagerService.runExclusive(
@@ -244,9 +243,8 @@ export class JobController {
   //   @Body() data: JobCaptchaDto,
   //   @Request() req: RequestWithUser,
   // ): Promise<number> {
-  //   throw new ControlledError(
+  //   throw new ForbiddenError(
   //     'Hcaptcha jobs disabled temporally',
-  //     HttpStatus.UNAUTHORIZED,
   //   );
   //   return await this.mutexManagerService.runExclusive(
   //     { id: `user${req.user.id}` },

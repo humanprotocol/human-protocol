@@ -14,10 +14,11 @@ jest.mock('minio', () => {
 
 jest.mock('axios');
 
-import { Encryption, EncryptionUtils, HttpStatus } from '@human-protocol/sdk';
+import { Encryption, EncryptionUtils } from '@human-protocol/sdk';
 import { ConfigModule, ConfigService, registerAs } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import axios from 'axios';
+import stringify from 'json-stable-stringify';
 import {
   MOCK_FILE_URL,
   MOCK_MANIFEST,
@@ -31,18 +32,12 @@ import {
   MOCK_S3_USE_SSL,
   mockConfig,
 } from '../../../test/constants';
-import { StorageService } from './storage.service';
-import stringify from 'json-stable-stringify';
-import { ErrorBucket } from '../../common/constants/errors';
-import { hashString } from '../../common/utils';
-import { ContentType } from '../../common/enums/storage';
 import { S3ConfigService } from '../../common/config/s3-config.service';
-import { ControlledError } from '../../common/errors/controlled';
-import {
-  FileDownloadError,
-  FileNotFoundError,
-  InvalidFileUrl,
-} from './storage.errors';
+import { ErrorBucket, ErrorStorage } from '../../common/constants/errors';
+import { ContentType } from '../../common/enums/storage';
+import { ServerError, ValidationError } from '../../common/errors';
+import { hashString } from '../../common/utils';
+import { StorageService } from './storage.service';
 
 describe('StorageService', () => {
   let storageService: StorageService;
@@ -98,7 +93,10 @@ describe('StorageService', () => {
           thrownError = error;
         }
 
-        expect(thrownError).toBeInstanceOf(InvalidFileUrl);
+        expect(thrownError).toBeInstanceOf(ValidationError);
+        expect(thrownError.message).toContain(
+          `${ErrorStorage.InvalidUrl}: ${url}`,
+        );
       },
     );
 
@@ -122,11 +120,13 @@ describe('StorageService', () => {
         thrownError = error;
       }
 
-      expect(thrownError).toBeInstanceOf(FileNotFoundError);
-      expect(thrownError.location).toBe(testUrl);
+      expect(thrownError).toBeInstanceOf(ServerError);
+      expect(thrownError.message).toContain(
+        `${ErrorStorage.NotFound}: ${testUrl}`,
+      );
     });
 
-    it('throws if netrowk error', async () => {
+    it('throws if network error', async () => {
       const testUrl = 'https://network-error.io';
       const testError = new Error('ECONNRESET :443');
       (axios.get as jest.Mock).mockImplementationOnce((url) => {
@@ -145,9 +145,10 @@ describe('StorageService', () => {
         thrownError = error;
       }
 
-      expect(thrownError).toBeInstanceOf(FileDownloadError);
-      expect(thrownError.location).toBe(testUrl);
-      expect(thrownError.cause).toBe(testError);
+      expect(thrownError).toBeInstanceOf(ServerError);
+      expect(thrownError.message).toContain(
+        `${ErrorStorage.FailedToDownload}: ${testUrl}`,
+      );
     });
 
     it('returns response as buffer', async () => {
@@ -203,9 +204,7 @@ describe('StorageService', () => {
 
       await expect(
         storageService.uploadJsonLikeData(MOCK_MANIFEST),
-      ).rejects.toThrow(
-        new ControlledError(ErrorBucket.NotExist, HttpStatus.BAD_REQUEST),
-      );
+      ).rejects.toThrow(new ServerError(ErrorBucket.NotExist));
     });
 
     it('should fail if the file cannot be uploaded', async () => {
@@ -218,9 +217,7 @@ describe('StorageService', () => {
 
       await expect(
         storageService.uploadJsonLikeData(MOCK_MANIFEST),
-      ).rejects.toThrow(
-        new ControlledError('File not uploaded', HttpStatus.BAD_REQUEST),
-      );
+      ).rejects.toThrow(new ServerError(ErrorStorage.FileNotUploaded));
     });
   });
 
