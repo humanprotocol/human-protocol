@@ -56,9 +56,7 @@ describe('HCaptchaGuard', () => {
 
     it('should throw bad request exception if token is not provided', async () => {
       const request = {
-        body: {
-          email: faker.internet.email(),
-        },
+        body: {},
       };
       executionContextMock.__getRequest.mockReturnValueOnce(request);
 
