@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { envValidator } from './common/config';
@@ -18,9 +18,14 @@ import { StatsModule } from './modules/stats/stats.module';
 import { UserModule } from './modules/user/user.module';
 import { Web3Module } from './modules/web3/web3.module';
 import { WebhookModule } from './modules/webhook/webhook.module';
+import { HttpValidationPipe } from './common/pipes';
 
 @Module({
   providers: [
+    {
+      provide: APP_PIPE,
+      useClass: HttpValidationPipe,
+    },
     {
       provide: APP_INTERCEPTOR,
       useClass: SnakeCaseInterceptor,
