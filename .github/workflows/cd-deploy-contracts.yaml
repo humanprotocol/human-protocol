@@ -40,10 +40,9 @@ jobs:
           node-version-file: .nvmrc
           cache: yarn
       - name: Install dependencies
-        run: yarn --ignore-scripts
-      - run: yarn build
-        name: Build core package
-        working-directory: ./packages/core
+        run: yarn --immutable
+      - name: Build core package
+        run: yarn build:core
       - name: Networks list
         id: networks
         run: |
@@ -104,7 +103,7 @@ jobs:
 
       - name: Verify Escrow Factory Proxy
         if: always() && github.event.inputs.escrowFactory == 'true'
-        run: npx hardhat verify --network ${{ github.event.inputs.network }} ${{ steps.networks.outputs.escrow_factory }}
+        run: yarn hardhat verify --network ${{ github.event.inputs.network }} ${{ steps.networks.outputs.escrow_factory }}
         working-directory: ./packages/core
         #Commit changes to develop
       - name: Check for Changes
