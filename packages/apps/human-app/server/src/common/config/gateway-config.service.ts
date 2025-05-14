@@ -41,6 +41,11 @@ export class GatewayConfigService {
               method: HttpMethod.POST,
               headers: this.JSON_HEADER,
             },
+            [ReputationOracleEndpoints.M2M_SIGNIN]: {
+              endpoint: '/auth/m2m/signin',
+              method: HttpMethod.POST,
+              headers: this.JSON_HEADER,
+            },
             [ReputationOracleEndpoints.REGISTRATION_IN_EXCHANGE_ORACLE]: {
               endpoint: '/user/exchange-oracle-registration',
               method: HttpMethod.POST,

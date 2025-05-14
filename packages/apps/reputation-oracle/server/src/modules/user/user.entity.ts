@@ -18,7 +18,6 @@ export enum UserStatus {
 export enum Role {
   OPERATOR = 'operator',
   WORKER = 'worker',
-  HUMAN_APP = 'human_app',
   ADMIN = 'admin',
 }
 
