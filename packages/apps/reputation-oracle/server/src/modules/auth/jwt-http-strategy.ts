@@ -7,7 +7,7 @@ import {
   LOGOUT_PATH,
   RESEND_EMAIL_VERIFICATION_PATH,
 } from '../../common/constants';
-import { UserStatus } from '../user';
+import { UserRole, UserStatus } from '../user';
 import { AuthConfigService } from '../../config';
 
 @Injectable()
@@ -26,8 +26,8 @@ export class JwtHttpStrategy extends PassportStrategy(
 
   async validate(
     @Req() request: any,
-    payload: { user_id: number; status: UserStatus },
-  ): Promise<{ id: number }> {
+    payload: { user_id: number; status: UserStatus; role: UserRole },
+  ): Promise<{ id: number; role: UserRole }> {
     if (
       payload.status !== UserStatus.ACTIVE &&
       request.url !== RESEND_EMAIL_VERIFICATION_PATH &&
@@ -36,6 +36,6 @@ export class JwtHttpStrategy extends PassportStrategy(
       throw new UnauthorizedException('User not active');
     }
 
-    return { id: payload.user_id };
+    return { id: payload.user_id, role: payload.role };
   }
 }

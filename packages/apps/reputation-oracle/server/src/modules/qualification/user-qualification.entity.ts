@@ -8,7 +8,9 @@ import type { UserEntity } from '../user';
 @Entity({ schema: DATABASE_SCHEMA_NAME, name: 'user_qualifications' })
 @Index(['user', 'qualification'], { unique: true })
 export class UserQualificationEntity extends BaseEntity {
-  @ManyToOne('UserEntity', (user: UserEntity) => user.userQualifications)
+  @ManyToOne('UserEntity', (user: UserEntity) => user.userQualifications, {
+    onDelete: 'CASCADE',
+  })
   user?: UserEntity;
 
   @Column({ type: 'int' })
@@ -17,6 +19,7 @@ export class UserQualificationEntity extends BaseEntity {
   @ManyToOne(
     'QualificationEntity',
     (qualification: QualificationEntity) => qualification.userQualifications,
+    { onDelete: 'CASCADE' },
   )
   qualification?: QualificationEntity;
 
