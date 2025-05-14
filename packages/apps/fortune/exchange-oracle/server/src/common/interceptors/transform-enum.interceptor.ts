@@ -1,15 +1,15 @@
 import {
+  CallHandler,
+  ExecutionContext,
   Injectable,
   NestInterceptor,
-  ExecutionContext,
-  CallHandler,
-  BadRequestException,
 } from '@nestjs/common';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { plainToInstance, ClassConstructor } from 'class-transformer';
+import { ClassConstructor, plainToInstance } from 'class-transformer';
 import { validateSync } from 'class-validator';
 import 'reflect-metadata';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { ValidationError } from '../errors';
 
 @Injectable()
 export class TransformEnumInterceptor implements NestInterceptor {
@@ -72,7 +72,7 @@ export class TransformEnumInterceptor implements NestInterceptor {
     // Validate the transformed data
     const validationErrors = validateSync(transformedInstance);
     if (validationErrors.length > 0) {
-      throw new BadRequestException('Validation failed');
+      throw new ValidationError('Validation failed');
     }
 
     return bodyOrQuery;

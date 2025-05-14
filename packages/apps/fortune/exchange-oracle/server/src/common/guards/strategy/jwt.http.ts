@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  Req,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, Req } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
@@ -15,6 +10,7 @@ import { JWT_KVSTORE_KEY, KYC_APPROVED } from '../../../common/constant';
 import { Role } from '../../../common/enums/role';
 import { JwtUser } from '../../../common/types/jwt';
 import { Web3Service } from '../../../modules/web3/web3.service';
+import { AuthError, ServerError, ValidationError } from '../../errors';
 
 @Injectable()
 export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
@@ -62,32 +58,30 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
     },
   ): Promise<JwtUser> {
     if (!payload.email) {
-      throw new UnauthorizedException('Invalid token: missing email');
+      throw new AuthError('Invalid token: missing email');
     }
 
     if (!payload.role) {
-      throw new UnauthorizedException('Invalid token: missing role');
+      throw new AuthError('Invalid token: missing role');
     }
 
     if (!Object.values(Role).includes(payload.role as Role)) {
-      throw new UnauthorizedException(
-        `Invalid token: unrecognized role "${payload.role}"`,
-      );
+      throw new AuthError(`Invalid token: unrecognized role "${payload.role}"`);
     }
 
     const role: Role = payload.role as Role;
 
     if (role !== Role.HumanApp) {
       if (!payload.kyc_status) {
-        throw new UnauthorizedException('Invalid token: missing KYC status');
+        throw new AuthError('Invalid token: missing KYC status');
       }
 
       if (!payload.wallet_address) {
-        throw new UnauthorizedException('Invalid token: missing address');
+        throw new AuthError('Invalid token: missing address');
       }
 
       if (payload.kyc_status !== KYC_APPROVED) {
-        throw new UnauthorizedException(
+        throw new AuthError(
           `Invalid token: expected KYC status "${KYC_APPROVED}", but received "${payload.kyc_status}"`,
         );
       }
@@ -110,7 +104,7 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
     urlKey = 'url',
   ): Promise<string> {
     if (!ethers.isAddress(address)) {
-      throw new BadRequestException('Invalid address');
+      throw new ValidationError('Invalid address');
     }
 
     const hashKey = urlKey + '_hash';
@@ -126,7 +120,7 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
       url = await contract.get(address, urlKey);
     } catch (e) {
       if (e instanceof Error) {
-        throw new Error(`Failed to get URL: ${e.message}`);
+        throw new ServerError(`Failed to get URL: ${e.message}`);
       }
     }
 
@@ -138,7 +132,7 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
       hash = await contract.get(address, hashKey);
     } catch (e) {
       if (e instanceof Error) {
-        throw new Error(`Failed to get Hash: ${e.message}`);
+        throw new ServerError(`Failed to get Hash: ${e.message}`);
       }
     }
 
@@ -149,7 +143,7 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
     const formattedContentHash = contentHash?.replace(/^0x/, '');
 
     if (formattedHash !== formattedContentHash) {
-      throw new BadRequestException('Invalid hash');
+      throw new ValidationError('Invalid hash');
     }
 
     return url;

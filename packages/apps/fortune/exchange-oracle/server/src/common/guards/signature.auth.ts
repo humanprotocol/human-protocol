@@ -1,17 +1,12 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-  NotImplementedException,
-  UnauthorizedException,
-} from '@nestjs/common';
-import { verifySignature } from '../utils/signature';
-import { HEADER_SIGNATURE_KEY } from '../constant';
 import { EscrowUtils } from '@human-protocol/sdk';
-import { AuthSignatureRole } from '../enums/role';
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AssignmentRepository } from '../../modules/assignment/assignment.repository';
+import { HEADER_SIGNATURE_KEY } from '../constant';
 import { ErrorAssignment, ErrorSignature } from '../constant/errors';
+import { AuthSignatureRole } from '../enums/role';
+import { AuthError } from '../errors';
+import { verifySignature } from '../utils/signature';
 
 @Injectable()
 export class SignatureAuthGuard implements CanActivate {
@@ -25,7 +20,7 @@ export class SignatureAuthGuard implements CanActivate {
       'roles',
       context.getHandler(),
     );
-    if (!roles) throw new NotImplementedException(ErrorSignature.MissingRoles);
+    if (!roles) throw new Error(ErrorSignature.MissingRoles);
     const request = context.switchToHttp().getRequest();
     const data = request.body;
     const signature = request.headers[HEADER_SIGNATURE_KEY];
@@ -38,7 +33,7 @@ export class SignatureAuthGuard implements CanActivate {
       if (assignment) {
         oracleAdresses.push(assignment.workerAddress);
       } else {
-        throw new UnauthorizedException(ErrorAssignment.NotFound);
+        throw new AuthError(ErrorAssignment.NotFound);
       }
     } else {
       const escrowData = await EscrowUtils.getEscrow(
@@ -67,6 +62,6 @@ export class SignatureAuthGuard implements CanActivate {
       console.error(error);
     }
 
-    throw new UnauthorizedException('Unauthorized');
+    throw new AuthError('Unauthorized');
   }
 }

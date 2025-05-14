@@ -1,12 +1,13 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
-import { SignatureAuthGuard } from './signature.auth';
-import { verifySignature } from '../utils/signature';
 import { ChainId, EscrowUtils } from '@human-protocol/sdk';
-import { AuthSignatureRole } from '../enums/role';
-import { HEADER_SIGNATURE_KEY } from '../constant';
-import { AssignmentRepository } from '../../modules/assignment/assignment.repository';
+import { ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { Test, TestingModule } from '@nestjs/testing';
+import { AssignmentRepository } from '../../modules/assignment/assignment.repository';
+import { HEADER_SIGNATURE_KEY } from '../constant';
+import { AuthSignatureRole } from '../enums/role';
+import { AuthError } from '../errors';
+import { verifySignature } from '../utils/signature';
+import { SignatureAuthGuard } from './signature.auth';
 
 jest.mock('../utils/signature');
 jest.mock('@human-protocol/sdk', () => ({
@@ -84,7 +85,7 @@ describe('SignatureAuthGuard', () => {
       );
     });
 
-    it('should throw UnauthorizedException if signature is not verified', async () => {
+    it('should throw AuthError if signature is not verified', async () => {
       reflector.get = jest
         .fn()
         .mockReturnValue([AuthSignatureRole.JobLauncher]);
@@ -96,9 +97,7 @@ describe('SignatureAuthGuard', () => {
       };
       (verifySignature as jest.Mock).mockReturnValue(false);
 
-      await expect(guard.canActivate(context)).rejects.toThrow(
-        UnauthorizedException,
-      );
+      await expect(guard.canActivate(context)).rejects.toThrow(AuthError);
     });
 
     it('should handle Worker role and verify signature', async () => {
@@ -118,7 +117,7 @@ describe('SignatureAuthGuard', () => {
       expect(assignmentRepository.findOneById).toHaveBeenCalledWith('1');
     });
 
-    it('should throw UnauthorizedException if assignment is not found for Worker role', async () => {
+    it('should throw AuthError if assignment is not found for Worker role', async () => {
       reflector.get = jest.fn().mockReturnValue([AuthSignatureRole.Worker]);
 
       mockRequest.headers[HEADER_SIGNATURE_KEY] = 'validSignature';
@@ -128,9 +127,7 @@ describe('SignatureAuthGuard', () => {
       (verifySignature as jest.Mock).mockReturnValue(true);
       assignmentRepository.findOneById.mockResolvedValue(null);
 
-      await expect(guard.canActivate(context)).rejects.toThrow(
-        UnauthorizedException,
-      );
+      await expect(guard.canActivate(context)).rejects.toThrow(AuthError);
     });
 
     it('should handle multiple roles and verify signature', async () => {

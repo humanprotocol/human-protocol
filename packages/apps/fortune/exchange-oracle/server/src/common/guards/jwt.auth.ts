@@ -1,12 +1,8 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { Role } from '../enums/role';
+import { AuthError } from '../errors';
 import { JwtUser } from '../types/jwt';
 
 @Injectable()
@@ -29,7 +25,7 @@ export class JwtAuthGuard extends AuthGuard('jwt-http') implements CanActivate {
     // Try to authenticate with JWT
     const canActivate = (await super.canActivate(context)) as boolean;
     if (!canActivate) {
-      throw new UnauthorizedException('JWT authentication failed');
+      throw new AuthError('JWT authentication failed');
     }
 
     // Roles verification
@@ -39,11 +35,11 @@ export class JwtAuthGuard extends AuthGuard('jwt-http') implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const user = request.user as JwtUser;
     if (!user) {
-      throw new UnauthorizedException('User not found in request');
+      throw new AuthError('User not found in request');
     }
 
     if (!roles.includes(user.role)) {
-      throw new UnauthorizedException('Invalid role');
+      throw new AuthError('Invalid role');
     }
 
     return true;

@@ -1,27 +1,23 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import {
-  BadRequestException,
-  HttpStatus,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
-import { EventType, WebhookStatus } from '../../common/enums/webhook';
-import { WebhookDto } from './webhook.dto';
-import { JobService } from '../job/job.service';
-import { WebhookEntity } from './webhook.entity';
-import { CaseConverter } from '../../common/utils/case-converter';
-import { signMessage } from '../../common/utils/signature';
-import { HEADER_SIGNATURE_KEY } from '../../common/constant';
-import { firstValueFrom } from 'rxjs';
-import { HttpService } from '@nestjs/axios';
-import { ErrorWebhook } from '../../common/constant/errors';
-import { WebhookRepository } from './webhook.repository';
 import { ChainId, EscrowClient, OperatorUtils } from '@human-protocol/sdk';
-import { Web3Service } from '../web3/web3.service';
-import { StorageService } from '../storage/storage.service';
-import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { HttpService } from '@nestjs/axios';
+import { Injectable, Logger } from '@nestjs/common';
+import { firstValueFrom } from 'rxjs';
 import { ServerConfigService } from '../../common/config/server-config.service';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { HEADER_SIGNATURE_KEY } from '../../common/constant';
+import { ErrorWebhook } from '../../common/constant/errors';
+import { EventType, WebhookStatus } from '../../common/enums/webhook';
+import { NotFoundError, ValidationError } from '../../common/errors';
+import { CaseConverter } from '../../common/utils/case-converter';
+import { formatAxiosError } from '../../common/utils/http';
+import { signMessage } from '../../common/utils/signature';
+import { JobService } from '../job/job.service';
+import { StorageService } from '../storage/storage.service';
+import { Web3Service } from '../web3/web3.service';
+import { WebhookDto } from './webhook.dto';
+import { WebhookEntity } from './webhook.entity';
+import { WebhookRepository } from './webhook.repository';
 
 @Injectable()
 export class WebhookService {
@@ -64,7 +60,7 @@ export class WebhookService {
         break;
 
       default:
-        throw new BadRequestException(
+        throw new ValidationError(
           `Invalid webhook event type: ${webhook.eventType}`,
         );
     }
@@ -88,7 +84,7 @@ export class WebhookService {
     // Check if the webhook URL was found.
     if (!webhookUrl) {
       this.logger.log(ErrorWebhook.UrlNotFound, WebhookService.name);
-      throw new NotFoundException(ErrorWebhook.UrlNotFound);
+      throw new NotFoundError(ErrorWebhook.UrlNotFound);
     }
 
     // Build the webhook data object based on the oracle type.
@@ -122,14 +118,16 @@ export class WebhookService {
     };
 
     // Make the HTTP request to the webhook.
-    const { status } = await firstValueFrom(
-      this.httpService.post(webhookUrl, transformedWebhook, config),
-    );
-
-    // Check if the request was successful.
-    if (status !== HttpStatus.CREATED) {
-      this.logger.log(ErrorWebhook.NotSent, WebhookService.name);
-      throw new NotFoundException(ErrorWebhook.NotSent);
+    try {
+      await firstValueFrom(
+        this.httpService.post(webhookUrl, transformedWebhook, config),
+      );
+    } catch (error) {
+      const formattedError = formatAxiosError(error);
+      this.logger.error('Webhook not sent', {
+        error: formattedError,
+      });
+      throw new Error(formattedError.message);
     }
   }
 
@@ -175,7 +173,7 @@ export class WebhookService {
           await escrowClient.getRecordingOracleAddress(escrowAddress);
         break;
       default:
-        throw new BadRequestException('Invalid outgoing event type');
+        throw new ValidationError('Invalid outgoing event type');
     }
     const oracle = await OperatorUtils.getOperator(chainId, oracleAddress);
     const oracleWebhookUrl = oracle.webhookUrl;
