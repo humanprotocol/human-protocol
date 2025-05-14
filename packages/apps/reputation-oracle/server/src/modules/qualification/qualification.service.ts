@@ -94,17 +94,6 @@ export class QualificationService {
       );
     }
 
-    const userQualifications =
-      await this.userQualificationRepository.findByQualification(
-        qualificationEntity.id,
-      );
-    if (userQualifications.length > 0) {
-      throw new QualificationError(
-        QualificationErrorMessage.CANNOT_DETELE_ASSIGNED_QUALIFICATION,
-        reference,
-      );
-    }
-
     await this.qualificationRepository.deleteOne(qualificationEntity);
   }
 
