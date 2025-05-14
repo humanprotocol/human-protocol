@@ -6,15 +6,11 @@ import {
   HttpException,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { AuthConfigService } from '../../config/auth-config.service';
 import { HCaptchaService } from './hcaptcha.service';
 
 @Injectable()
 export class HCaptchaGuard implements CanActivate {
-  constructor(
-    private readonly hCaptchaService: HCaptchaService,
-    private readonly authConfigSerice: AuthConfigService,
-  ) {}
+  constructor(private readonly hCaptchaService: HCaptchaService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request: Request = context.switchToHttp().getRequest();
@@ -25,15 +21,6 @@ export class HCaptchaGuard implements CanActivate {
      * so we need to access body params as is
      */
     const hCaptchaToken = body['h_captcha_token'];
-    // TODO: Remove 27-45 lines once we figure out how to replace human app user
-    if (request.path === '/auth/web2/signin') {
-      const email = body['email'];
-      // Checking email here to avoid unnecessary db calls
-      if (email === this.authConfigSerice.humanAppEmail) {
-        return true;
-      }
-    }
-
     if (!hCaptchaToken) {
       throw new HttpException(
         'hCaptcha token not provided',

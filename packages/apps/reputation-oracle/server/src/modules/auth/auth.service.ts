@@ -38,6 +38,7 @@ import {
   InvalidOperatorRoleError,
   InvalidOperatorUrlError,
 } from './auth.error';
+import { HUMAN_APP_IDENTIFIER } from './constants';
 import { TokenEntity, TokenType } from './token.entity';
 import { TokenRepository } from './token.repository';
 import type { AuthTokens } from './types';
@@ -202,6 +203,28 @@ export class AuthService {
     await this.userRepository.updateOneById(userEntity.id, { nonce });
 
     return this.web3Auth(userEntity);
+  }
+
+  async m2mSignin(secretKey: string): Promise<string> {
+    let jwtPayload: Record<string, unknown> | undefined;
+
+    if (this.authConfigService.humanAppSecretKey === secretKey) {
+      jwtPayload = {
+        status: UserStatus.ACTIVE,
+        user_id: HUMAN_APP_IDENTIFIER,
+        role: HUMAN_APP_IDENTIFIER,
+        reputation_network: this.web3ConfigService.operatorAddress,
+      };
+    }
+
+    if (!jwtPayload) {
+      throw new AuthError(AuthErrorMessage.INVALID_SECRET_KEY);
+    }
+
+    const accessToken = await this.jwtService.signAsync(jwtPayload, {
+      expiresIn: this.authConfigService.accessTokenExpiresIn,
+    });
+    return accessToken;
   }
 
   async auth(userEntity: Web2UserEntity | UserEntity): Promise<AuthTokens> {

@@ -61,9 +61,9 @@ export class AuthConfigService {
   }
 
   /**
-   * Human APP email.
+   * HUMAN App secret key for m2m communication
    */
-  get humanAppEmail(): string {
-    return this.configService.getOrThrow('HUMAN_APP_EMAIL');
+  get humanAppSecretKey(): string {
+    return this.configService.getOrThrow('HUMAN_APP_SECRET_KEY');
   }
 }
