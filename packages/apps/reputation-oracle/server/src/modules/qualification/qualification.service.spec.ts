@@ -3,6 +3,7 @@ import { createMock } from '@golevelup/ts-jest';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 
+import { generateFutureDate } from '../../../test/fixtures/date';
 import { generateEthWallet } from '../../../test/fixtures/web3';
 import { ServerConfigService } from '../../config';
 import { UserStatus, UserRepository } from '../user';
@@ -54,7 +55,7 @@ describe('QualificationService', () => {
   });
 
   describe('createQualification', () => {
-    it.each([faker.date.future({ years: 1 }), undefined])(
+    it.each([generateFutureDate(2), undefined])(
       'should create a new qualification',
       async (expiresAt) => {
         const newQualification = {
