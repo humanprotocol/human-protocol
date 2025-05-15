@@ -5,7 +5,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AssignmentRepository } from '../../modules/assignment/assignment.repository';
 import { HEADER_SIGNATURE_KEY } from '../constant';
 import { AuthSignatureRole } from '../enums/role';
-import { AuthError } from '../errors';
+import { AuthError, NotFoundError } from '../errors';
 import { verifySignature } from '../utils/signature';
 import { SignatureAuthGuard } from './signature.auth';
 
@@ -127,7 +127,7 @@ describe('SignatureAuthGuard', () => {
       (verifySignature as jest.Mock).mockReturnValue(true);
       assignmentRepository.findOneById.mockResolvedValue(null);
 
-      await expect(guard.canActivate(context)).rejects.toThrow(AuthError);
+      await expect(guard.canActivate(context)).rejects.toThrow(NotFoundError);
     });
 
     it('should handle multiple roles and verify signature', async () => {
