@@ -233,7 +233,7 @@ export class CronJobService {
     await this.completeCronJob(cronJob);
   }
 
-  @Cron('*/5 * * * *')
+  @Cron('29,58 * * * *')
   async deleteExpiredDatabaseRecords(): Promise<void> {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.DeleteExpiredDbRecords,
