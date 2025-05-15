@@ -131,7 +131,15 @@ export class PaymentService {
       this.logger.log(ErrorPayment.SetupNotFound, PaymentService.name);
       throw new NotFoundError(ErrorPayment.SetupNotFound);
     }
-    if (data.defaultCard || !user.stripeCustomerId) {
+
+    let defaultPaymentMethod: string | null = null;
+    if (user.stripeCustomerId) {
+      defaultPaymentMethod = await this.getDefaultPaymentMethod(
+        user.stripeCustomerId,
+      );
+    }
+
+    if (data.defaultCard || !defaultPaymentMethod) {
       // Update Stripe customer settings to use this payment method by default.
       await this.stripe.customers.update(<string>setup.customer, {
         invoice_settings: {
@@ -139,6 +147,7 @@ export class PaymentService {
         },
       });
     }
+
     if (!user.stripeCustomerId) {
       // Assign the Stripe customer ID to the user if it does not exist yet.
       user.stripeCustomerId = setup.customer as string;
