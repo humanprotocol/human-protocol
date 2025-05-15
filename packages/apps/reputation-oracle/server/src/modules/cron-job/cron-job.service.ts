@@ -4,6 +4,7 @@ import { Cron } from '@nestjs/schedule';
 import logger from '../../logger';
 
 import { AbuseService } from '../abuse';
+import { TokenRepository } from '../auth';
 import { EscrowCompletionService } from '../escrow-completion';
 import { IncomingWebhookService, OutgoingWebhookService } from '../webhook';
 
@@ -21,6 +22,7 @@ export class CronJobService {
     private readonly outgoingWebhookService: OutgoingWebhookService,
     private readonly escrowCompletionService: EscrowCompletionService,
     private readonly abuseService: AbuseService,
+    private readonly tokenRepository: TokenRepository,
   ) {}
 
   /**
@@ -228,6 +230,29 @@ export class CronJobService {
     }
 
     this.logger.info('Process classified abuses STOP');
+    await this.completeCronJob(cronJob);
+  }
+
+  @Cron('*/5 * * * *')
+  async deleteExpiredDatabaseRecords(): Promise<void> {
+    const isCronJobRunning = await this.isCronJobRunning(
+      CronJobType.DeleteExpiredDbRecords,
+    );
+
+    if (isCronJobRunning) {
+      return;
+    }
+
+    this.logger.info('Delete expired DB records START');
+    const cronJob = await this.startCronJob(CronJobType.DeleteExpiredDbRecords);
+
+    try {
+      await this.tokenRepository.deleteExpired();
+    } catch (e) {
+      this.logger.error('Error deleting expired DB records', e);
+    }
+
+    this.logger.info('Delete expired DB records STOP');
     await this.completeCronJob(cronJob);
   }
 }
