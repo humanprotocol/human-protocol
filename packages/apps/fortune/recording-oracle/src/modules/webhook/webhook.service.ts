@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { EventType } from '../../common/enums/webhook';
-import { WebhookDto } from './webhook.dto';
+import { ValidationError } from '../../common/errors';
 import { JobService } from '../job/job.service';
+import { WebhookDto } from './webhook.dto';
 
 @Injectable()
 export class WebhookService {
@@ -18,7 +19,7 @@ export class WebhookService {
         break;
 
       default:
-        throw new BadRequestException(
+        throw new ValidationError(
           `Invalid webhook event type: ${wehbook.eventType}`,
         );
     }

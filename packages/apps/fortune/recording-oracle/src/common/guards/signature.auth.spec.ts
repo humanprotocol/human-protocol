@@ -1,11 +1,12 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
-import { SignatureAuthGuard } from './signature.auth';
-import { verifySignature } from '../utils/signature';
 import { ChainId, EscrowUtils } from '@human-protocol/sdk';
+import { ExecutionContext } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
 import { MOCK_ADDRESS } from '../../../test/constants';
-import { Role } from '../enums/role';
 import { HEADER_SIGNATURE_KEY } from '../constants';
+import { Role } from '../enums/role';
+import { AuthError } from '../errors';
+import { verifySignature } from '../utils/signature';
+import { SignatureAuthGuard } from './signature.auth';
 
 jest.mock('../../common/utils/signature');
 
@@ -77,18 +78,18 @@ describe('SignatureAuthGuard', () => {
       );
     });
 
-    it('should throw unauthorized exception if signature is not verified', async () => {
+    it('should throw AuthError if signature is not verified', async () => {
       (verifySignature as jest.Mock).mockReturnValue(false);
 
       await expect(guard.canActivate(context as any)).rejects.toThrow(
-        UnauthorizedException,
+        AuthError,
       );
     });
 
-    it('should throw unauthorized exception for unrecognized oracle type', async () => {
+    it('should throw AuthError for unrecognized oracle type', async () => {
       mockRequest.originalUrl = '/some/random/path';
       await expect(guard.canActivate(context as any)).rejects.toThrow(
-        UnauthorizedException,
+        AuthError,
       );
     });
   });
