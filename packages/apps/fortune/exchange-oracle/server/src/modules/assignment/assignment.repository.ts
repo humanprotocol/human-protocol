@@ -7,7 +7,7 @@ import { AssignmentStatus } from '../../common/enums/job';
 import { ChainId } from '@human-protocol/sdk';
 import { AssignmentFilterData, ListResult } from './assignment.interface';
 import { AssignmentSortField } from '../../common/enums/job';
-import { convertToDatabaseSortDirection } from '../../database/database.utils';
+import { convertToDatabaseSortDirection } from '../../common/utils/database';
 
 @Injectable()
 export class AssignmentRepository extends BaseRepository<AssignmentEntity> {

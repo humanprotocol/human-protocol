@@ -1,5 +1,5 @@
-import { SortDirection } from '../common/enums/collection';
-import { SortDirectionDb } from './database.enum';
+import { SortDirection } from '../enums/collection';
+import { SortDirectionDb } from '../enums/database';
 
 export function convertToDatabaseSortDirection(
   value?: SortDirection,

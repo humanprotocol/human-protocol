@@ -1,12 +1,6 @@
 import { QueryFailedError } from 'typeorm';
-import { PostgresErrorCodes } from './database.enum';
-
-export class DatabaseError extends Error {
-  constructor(message: string, stack: string) {
-    super(message);
-    this.stack = stack;
-  }
-}
+import { DatabaseError } from '.';
+import { PostgresErrorCodes } from '../enums/database';
 
 export function handleQueryFailedError(error: QueryFailedError): DatabaseError {
   const stack = error.stack || '';
