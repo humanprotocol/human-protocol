@@ -133,7 +133,12 @@ export class PaymentService {
     }
 
     let defaultPaymentMethod: string | null = null;
-    if (user.stripeCustomerId) {
+    if (!user.stripeCustomerId) {
+      // Assign the Stripe customer ID to the user if it does not exist yet.
+      user.stripeCustomerId = setup.customer as string;
+      await this.userRepository.updateOne(user);
+    } else {
+      // Check if the user already has a default payment method.
       defaultPaymentMethod = await this.getDefaultPaymentMethod(
         user.stripeCustomerId,
       );
@@ -141,17 +146,11 @@ export class PaymentService {
 
     if (data.defaultCard || !defaultPaymentMethod) {
       // Update Stripe customer settings to use this payment method by default.
-      await this.stripe.customers.update(<string>setup.customer, {
+      await this.stripe.customers.update(user.stripeCustomerId, {
         invoice_settings: {
           default_payment_method: <string>setup.payment_method,
         },
       });
-    }
-
-    if (!user.stripeCustomerId) {
-      // Assign the Stripe customer ID to the user if it does not exist yet.
-      user.stripeCustomerId = setup.customer as string;
-      await this.userRepository.updateOne(user);
     }
 
     return true;
