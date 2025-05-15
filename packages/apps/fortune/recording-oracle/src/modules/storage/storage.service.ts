@@ -3,17 +3,18 @@ import {
   Encryption,
   EncryptionUtils,
   EscrowClient,
-  StorageClient,
   KVStoreUtils,
+  StorageClient,
 } from '@human-protocol/sdk';
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-import * as Minio from 'minio';
-import { ISolution } from '../../common/interfaces/job';
+import { Inject, Injectable } from '@nestjs/common';
 import crypto from 'crypto';
+import * as Minio from 'minio';
+import { PGPConfigService } from '../../common/config/pgp-config.service';
+import { S3ConfigService } from '../../common/config/s3-config.service';
+import { ServerError, ValidationError } from '../../common/errors';
+import { ISolution } from '../../common/interfaces/job';
 import { SaveSolutionsDto } from '../job/job.dto';
 import { Web3Service } from '../web3/web3.service';
-import { S3ConfigService } from '../../common/config/s3-config.service';
-import { PGPConfigService } from '../../common/config/pgp-config.service';
 
 @Injectable()
 export class StorageService {
@@ -56,7 +57,7 @@ export class StorageService {
           const decryptedData = await encryption.decrypt(fileContent);
           return JSON.parse(Buffer.from(decryptedData).toString());
         } catch {
-          throw new Error('Unable to decrypt manifest');
+          throw new ServerError('Unable to decrypt manifest');
         }
       } else {
         try {
@@ -78,7 +79,7 @@ export class StorageService {
     solutions: ISolution[],
   ): Promise<SaveSolutionsDto> {
     if (!(await this.minioClient.bucketExists(this.s3ConfigService.bucket))) {
-      throw new BadRequestException('Bucket not found');
+      throw new ValidationError('Bucket not found');
     }
 
     let fileToUpload = JSON.stringify(solutions);
@@ -98,14 +99,12 @@ export class StorageService {
           reputationOracleAddress,
         );
         if (
+          !recordingOraclePublicKey ||
           !recordingOraclePublicKey.length ||
+          !reputationOraclePublicKey ||
           !reputationOraclePublicKey.length
         ) {
-          throw new BadRequestException('Missing public key');
-        }
-
-        if (!recordingOraclePublicKey || !reputationOraclePublicKey) {
-          throw new Error();
+          throw new ServerError('Missing public key');
         }
 
         fileToUpload = await EncryptionUtils.encrypt(fileToUpload, [
@@ -113,7 +112,7 @@ export class StorageService {
           reputationOraclePublicKey,
         ]);
       } catch (e) {
-        throw new BadRequestException('Encryption error');
+        throw new ServerError('Encryption error');
       }
     }
 
@@ -131,7 +130,7 @@ export class StorageService {
 
       return { url: this.getJobUrl(hash), hash };
     } catch (e) {
-      throw new BadRequestException('File not uploaded');
+      throw new ServerError('File not uploaded');
     }
   }
 }

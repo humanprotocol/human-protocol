@@ -1,13 +1,9 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
-import { verifySignature } from '../utils/signature';
-import { HEADER_SIGNATURE_KEY } from '../constants';
 import { EscrowUtils } from '@human-protocol/sdk';
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import { HEADER_SIGNATURE_KEY } from '../constants';
 import { Role } from '../enums/role';
+import { AuthError, ValidationError } from '../errors';
+import { verifySignature } from '../utils/signature';
 
 @Injectable()
 export class SignatureAuthGuard implements CanActivate {
@@ -42,11 +38,10 @@ export class SignatureAuthGuard implements CanActivate {
       if (isVerified) {
         return true;
       }
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(error);
+    } catch (error: any) {
+      throw new ValidationError(error.message);
     }
 
-    throw new UnauthorizedException('Unauthorized');
+    throw new AuthError('Unauthorized');
   }
 }

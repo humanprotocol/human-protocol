@@ -5,28 +5,24 @@ import {
   KVStoreUtils,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  Logger,
-} from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ethers } from 'ethers';
 import * as Minio from 'minio';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ErrorJob } from '../../common/constants/errors';
 import { JobRequestType, SolutionError } from '../../common/enums/job';
+import { EventType } from '../../common/enums/webhook';
+import { ConflictError, ValidationError } from '../../common/errors';
 import { IManifest, ISolution } from '../../common/interfaces/job';
 import { checkCurseWords } from '../../common/utils/curseWords';
 import { sendWebhook } from '../../common/utils/webhook';
 import { StorageService } from '../storage/storage.service';
 import { Web3Service } from '../web3/web3.service';
-import { EventType } from '../../common/enums/webhook';
 import {
   AssignmentRejection,
   SolutionEventData,
   WebhookDto,
 } from '../webhook/webhook.dto';
-import { Web3ConfigService } from '../../common/config/web3-config.service';
 
 @Injectable()
 export class JobService {
@@ -100,7 +96,7 @@ export class JobService {
       ethers.getAddress(recordingOracleAddress) !== (await signer.getAddress())
     ) {
       this.logger.log(ErrorJob.AddressMismatches, JobService.name);
-      throw new BadRequestException(ErrorJob.AddressMismatches);
+      throw new ValidationError(ErrorJob.AddressMismatches);
     }
 
     const escrowStatus = await escrowClient.getStatus(webhook.escrowAddress);
@@ -109,7 +105,7 @@ export class JobService {
       escrowStatus !== EscrowStatus.Partial
     ) {
       this.logger.log(ErrorJob.InvalidStatus, JobService.name);
-      throw new BadRequestException(ErrorJob.InvalidStatus);
+      throw new ConflictError(ErrorJob.InvalidStatus);
     }
 
     const manifestUrl = await escrowClient.getManifestUrl(
@@ -120,12 +116,12 @@ export class JobService {
 
     if (!submissionsRequired || !requestType) {
       this.logger.log(ErrorJob.InvalidManifest, JobService.name);
-      throw new BadRequestException(ErrorJob.InvalidManifest);
+      throw new ValidationError(ErrorJob.InvalidManifest);
     }
 
     if (requestType !== JobRequestType.FORTUNE) {
       this.logger.log(ErrorJob.InvalidJobType, JobService.name);
-      throw new BadRequestException(ErrorJob.InvalidJobType);
+      throw new ValidationError(ErrorJob.InvalidJobType);
     }
 
     const existingJobSolutionsURL =
@@ -143,7 +139,7 @@ export class JobService {
         ErrorJob.AllSolutionsHaveAlreadyBeenSent,
         JobService.name,
       );
-      throw new BadRequestException(ErrorJob.AllSolutionsHaveAlreadyBeenSent);
+      throw new ConflictError(ErrorJob.AllSolutionsHaveAlreadyBeenSent);
     }
 
     const exchangeJobSolutions: ISolution[] =
