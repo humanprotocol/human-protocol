@@ -98,7 +98,7 @@ export class JobService {
       );
 
     if (!jobEntity) {
-      throw new NotFoundError(ErrorJob.NotFound);
+      throw new ServerError(ErrorJob.NotFound);
     }
 
     if (jobEntity.status === JobStatus.COMPLETED) {
@@ -123,7 +123,7 @@ export class JobService {
       );
 
     if (!jobEntity) {
-      throw new NotFoundError(ErrorJob.NotFound);
+      throw new ServerError(ErrorJob.NotFound);
     }
 
     if (jobEntity.status === JobStatus.CANCELED) {
@@ -220,7 +220,7 @@ export class JobService {
     const assignment =
       await this.assignmentRepository.findOneById(assignmentId);
     if (!assignment) {
-      throw new NotFoundError(ErrorAssignment.NotFound);
+      throw new ServerError(ErrorAssignment.NotFound);
     }
 
     if (assignment.status !== AssignmentStatus.ACTIVE) {
@@ -391,7 +391,7 @@ export class JobService {
       webhook.escrowAddress,
     );
     if (!jobEntity) {
-      throw new NotFoundError(ErrorJob.NotFound);
+      throw new ServerError(ErrorJob.NotFound);
     }
     if (jobEntity.status !== JobStatus.ACTIVE) {
       throw new ConflictError(ErrorJob.InvalidStatus);
@@ -406,7 +406,7 @@ export class JobService {
       webhook.escrowAddress,
     );
     if (!jobEntity) {
-      throw new NotFoundError(ErrorJob.NotFound);
+      throw new ServerError(ErrorJob.NotFound);
     }
     if (jobEntity.status !== JobStatus.PAUSED) {
       throw new ConflictError(ErrorJob.InvalidStatus);

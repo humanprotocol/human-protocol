@@ -5,7 +5,7 @@ import { ErrorAssignment, ErrorJob } from '../../common/constant/errors';
 import { AssignmentStatus, JobStatus, JobType } from '../../common/enums/job';
 import {
   ConflictError,
-  NotFoundError,
+  ServerError,
   ValidationError,
 } from '../../common/errors';
 import { PageDto } from '../../common/pagination/pagination.dto';
@@ -44,7 +44,7 @@ export class AssignmentService {
 
     if (!jobEntity) {
       this.logger.log(ErrorAssignment.JobNotFound, AssignmentService.name);
-      throw new NotFoundError(ErrorAssignment.JobNotFound);
+      throw new ServerError(ErrorAssignment.JobNotFound);
     } else if (jobEntity.status !== JobStatus.ACTIVE) {
       this.logger.log(ErrorJob.InvalidStatus, AssignmentService.name);
       throw new ConflictError(ErrorJob.InvalidStatus);
@@ -164,10 +164,10 @@ export class AssignmentService {
       await this.assignmentRepository.findOneById(assignmentId);
 
     if (!assignment) {
-      throw new NotFoundError(ErrorAssignment.NotFound);
+      throw new ServerError(ErrorAssignment.NotFound);
     }
     if (assignment.workerAddress !== workerAddress) {
-      throw new ValidationError(ErrorAssignment.InvalidAssignment);
+      throw new ConflictError(ErrorAssignment.InvalidAssignment);
     }
 
     if (assignment.status !== AssignmentStatus.ACTIVE) {

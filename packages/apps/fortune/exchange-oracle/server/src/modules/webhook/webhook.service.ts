@@ -8,7 +8,7 @@ import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { HEADER_SIGNATURE_KEY } from '../../common/constant';
 import { ErrorWebhook } from '../../common/constant/errors';
 import { EventType, WebhookStatus } from '../../common/enums/webhook';
-import { NotFoundError, ValidationError } from '../../common/errors';
+import { ValidationError } from '../../common/errors';
 import { CaseConverter } from '../../common/utils/case-converter';
 import { formatAxiosError } from '../../common/utils/http';
 import { signMessage } from '../../common/utils/signature';
@@ -83,8 +83,7 @@ export class WebhookService {
 
     // Check if the webhook URL was found.
     if (!webhookUrl) {
-      this.logger.log(ErrorWebhook.UrlNotFound, WebhookService.name);
-      throw new NotFoundError(ErrorWebhook.UrlNotFound);
+      throw new Error(ErrorWebhook.UrlNotFound);
     }
 
     // Build the webhook data object based on the oracle type.

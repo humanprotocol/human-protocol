@@ -10,7 +10,7 @@ import { JWT_KVSTORE_KEY, KYC_APPROVED } from '../../../common/constant';
 import { Role } from '../../../common/enums/role';
 import { JwtUser } from '../../../common/types/jwt';
 import { Web3Service } from '../../../modules/web3/web3.service';
-import { AuthError, ServerError, ValidationError } from '../../errors';
+import { AuthError, ValidationError } from '../../errors';
 
 @Injectable()
 export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
@@ -119,9 +119,7 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
     try {
       url = await contract.get(address, urlKey);
     } catch (e) {
-      if (e instanceof Error) {
-        throw new ServerError(`Failed to get URL: ${e.message}`);
-      }
+      throw new Error(`Failed to get URL: ${e.message}`);
     }
 
     if (!url?.length) {
@@ -131,9 +129,7 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
     try {
       hash = await contract.get(address, hashKey);
     } catch (e) {
-      if (e instanceof Error) {
-        throw new ServerError(`Failed to get Hash: ${e.message}`);
-      }
+      throw new Error(`Failed to get Hash: ${e.message}`);
     }
 
     const content = await fetch(url).then((res) => res.text());
