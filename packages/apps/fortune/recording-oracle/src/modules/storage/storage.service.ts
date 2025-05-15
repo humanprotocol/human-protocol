@@ -50,6 +50,7 @@ export class StorageService {
       ) {
         try {
           const encryption = await Encryption.build(
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             this.pgpConfigService.privateKey!,
             this.pgpConfigService.passphrase,
           );
