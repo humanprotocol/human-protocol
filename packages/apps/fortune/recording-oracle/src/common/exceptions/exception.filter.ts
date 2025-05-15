@@ -51,7 +51,7 @@ export class ExceptionFilter implements IExceptionFilter {
     );
 
     response.status(status).json({
-      statusCode: status,
+      status_code: status,
       timestamp: new Date().toISOString(),
       message: message,
       path: request.url,

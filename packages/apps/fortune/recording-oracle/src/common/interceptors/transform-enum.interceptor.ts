@@ -9,7 +9,7 @@ import { validateSync } from 'class-validator';
 import 'reflect-metadata';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { AuthError } from '../errors';
+import { ValidationError } from '../errors';
 
 @Injectable()
 export class TransformEnumInterceptor implements NestInterceptor {
@@ -72,7 +72,7 @@ export class TransformEnumInterceptor implements NestInterceptor {
     // Validate the transformed data
     const validationErrors = validateSync(transformedInstance);
     if (validationErrors.length > 0) {
-      throw new AuthError('Validation failed');
+      throw new ValidationError('Validation failed');
     }
 
     return bodyOrQuery;
