@@ -5,7 +5,7 @@ import { AssignmentRepository } from '../../modules/assignment/assignment.reposi
 import { HEADER_SIGNATURE_KEY } from '../constant';
 import { ErrorAssignment, ErrorSignature } from '../constant/errors';
 import { AuthSignatureRole } from '../enums/role';
-import { AuthError } from '../errors';
+import { AuthError, NotFoundError } from '../errors';
 import { verifySignature } from '../utils/signature';
 
 @Injectable()
@@ -33,7 +33,7 @@ export class SignatureAuthGuard implements CanActivate {
       if (assignment) {
         oracleAdresses.push(assignment.workerAddress);
       } else {
-        throw new AuthError(ErrorAssignment.NotFound);
+        throw new NotFoundError(ErrorAssignment.NotFound);
       }
     } else {
       const escrowData = await EscrowUtils.getEscrow(
