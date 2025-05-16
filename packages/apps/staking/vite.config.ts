@@ -33,6 +33,6 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3006,
+    port: 3004,
   },
 });
