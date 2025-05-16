@@ -237,7 +237,7 @@ services:
     ports:
       - name: server_port
         target: *backend_apps_internal_port
-        published: ${REPUTATION_ORACLE_PORT:-5001}
+        published: ${REPUTATION_ORACLE_EXPOSED_PORT:?}
     env_file: ./.env.reputation-oracle.local
     environment:
       <<: [*nodejs_app_vars, *nodejs_app_postgres_vars, *nodejs_app_s3_vars]
@@ -248,7 +248,7 @@ services:
       HUMAN_APP_SECRET_KEY: *human_app_secret_key
       # It is accessed by user, not from container
       # so put here exposed port, not internal
-      FE_URL: http://localhost:${HUMAN_APP_CLIENT_PORT:?}
+      FE_URL: http://localhost:${HUMAN_APP_CLIENT_EXPOSED_PORT:?}
       JWT_PUBLIC_KEY: *reputation_oracle_jwt_public_key
 
   human-app-server:
@@ -271,7 +271,7 @@ services:
     ports:
       - name: server_port
         target: *backend_apps_internal_port
-        published: ${HUMAN_APP_SERVER_PORT:-5002}
+        published: ${HUMAN_APP_SERVER_EXPOSED_PORT:?}
     env_file: ./.env.human-app-server.local
     environment:
       <<: [*nodejs_app_vars, *redis_app_vars]
@@ -336,7 +336,7 @@ services:
     ports:
       - name: server_port
         target: *backend_apps_internal_port
-        published: ${EXCHANGE_ORACLE_PORT:-5003}
+        published: ${EXCHANGE_ORACLE_EXPOSED_PORT:?}
     env_file: ./.env.exchange-oracle.local
     environment:
       HOST: *all_interfaces_ip
@@ -383,7 +383,7 @@ services:
     ports:
       - name: server_port
         target: *backend_apps_internal_port
-        published: ${RECORDING_ORACLE_PORT:-5004}
+        published: ${RECORDING_ORACLE_EXPOSED_PORT:?}
     env_file: ./.env.recording-oracle.local
     environment:
       HOST: *all_interfaces_ip
@@ -432,7 +432,7 @@ services:
     ports:
       - name: server_port
         target: *backend_apps_internal_port
-        published: ${JOB_LAUNCHER_PORT:-5005}
+        published: ${JOB_LAUNCHER_EXPOSED_PORT:?}
     env_file: ./.env.job-launcher.local
     environment:
       <<: [*nodejs_app_vars, *nodejs_app_postgres_vars, *nodejs_app_s3_vars]
@@ -444,7 +444,7 @@ services:
       REPUTATION_ORACLE_ADDRESS: *reputation_oracle_address
       CVAT_EXCHANGE_ORACLE_ADDRESS: *exchange_oracle_address
       CVAT_RECORDING_ORACLE_ADDRESS: *recording_oracle_address
-      FE_URL: http://localhost:${JOB_LAUNCHER_CLIENT_PORT:?}
+      FE_URL: http://localhost:${JOB_LAUNCHER_CLIENT_EXPOSED_PORT:?}
 
   job-launcher-client:
     container_name: job-launcher-client
@@ -466,7 +466,7 @@ services:
     ports:
       - name: server_port
         target: *frontend_default_port
-        published: ${JOB_LAUNCHER_CLIENT_PORT:?}
+        published: ${JOB_LAUNCHER_CLIENT_EXPOSED_PORT:?}
     environment:
       PORT: *frontend_default_port
 
