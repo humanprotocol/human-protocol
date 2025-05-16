@@ -1,7 +1,18 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { Escrow__factory } from '@human-protocol/core/typechain-types';
+import { Injectable, Logger } from '@nestjs/common';
+import { ServerConfigService } from '../../common/config/server-config.service';
+import { ErrorAssignment, ErrorJob } from '../../common/constant/errors';
 import { AssignmentStatus, JobStatus, JobType } from '../../common/enums/job';
+import {
+  ConflictError,
+  ServerError,
+  ValidationError,
+} from '../../common/errors';
+import { PageDto } from '../../common/pagination/pagination.dto';
 import { JwtUser } from '../../common/types/jwt';
 import { JobRepository } from '../job/job.repository';
+import { JobService } from '../job/job.service';
+import { Web3Service } from '../web3/web3.service';
 import {
   AssignmentDto,
   CreateAssignmentDto,
@@ -9,12 +20,6 @@ import {
 } from './assignment.dto';
 import { AssignmentEntity } from './assignment.entity';
 import { AssignmentRepository } from './assignment.repository';
-import { PageDto } from '../../common/pagination/pagination.dto';
-import { JobService } from '../job/job.service';
-import { Escrow__factory } from '@human-protocol/core/typechain-types';
-import { Web3Service } from '../web3/web3.service';
-import { ErrorAssignment, ErrorJob } from '../../common/constant/errors';
-import { ServerConfigService } from '../../common/config/server-config.service';
 
 @Injectable()
 export class AssignmentService {
@@ -39,16 +44,16 @@ export class AssignmentService {
 
     if (!jobEntity) {
       this.logger.log(ErrorAssignment.JobNotFound, AssignmentService.name);
-      throw new BadRequestException(ErrorAssignment.JobNotFound);
+      throw new ServerError(ErrorAssignment.JobNotFound);
     } else if (jobEntity.status !== JobStatus.ACTIVE) {
       this.logger.log(ErrorJob.InvalidStatus, AssignmentService.name);
-      throw new BadRequestException(ErrorJob.InvalidStatus);
+      throw new ConflictError(ErrorJob.InvalidStatus);
     } else if (jobEntity.reputationNetwork !== jwtUser.reputationNetwork) {
       this.logger.log(
         ErrorAssignment.ReputationNetworkMismatch,
         AssignmentService.name,
       );
-      throw new BadRequestException(ErrorAssignment.ReputationNetworkMismatch);
+      throw new ValidationError(ErrorAssignment.ReputationNetworkMismatch);
     }
 
     const assignmentEntity =
@@ -62,7 +67,7 @@ export class AssignmentService {
       assignmentEntity.status !== AssignmentStatus.CANCELED
     ) {
       this.logger.log(ErrorAssignment.AlreadyExists, AssignmentService.name);
-      throw new BadRequestException(ErrorAssignment.AlreadyExists);
+      throw new ConflictError(ErrorAssignment.AlreadyExists);
     }
 
     const currentAssignments = await this.assignmentRepository.countByJobId(
@@ -81,14 +86,12 @@ export class AssignmentService {
       (qualification) => !userQualificationsSet.has(qualification),
     );
     if (missingQualifications && missingQualifications.length > 0) {
-      throw new BadRequestException(
-        ErrorAssignment.InvalidAssignmentQualification,
-      );
+      throw new ValidationError(ErrorAssignment.InvalidAssignmentQualification);
     }
 
     if (currentAssignments >= manifest.submissionsRequired) {
       this.logger.log(ErrorAssignment.FullyAssigned, AssignmentService.name);
-      throw new BadRequestException(ErrorAssignment.FullyAssigned);
+      throw new ValidationError(ErrorAssignment.FullyAssigned);
     }
 
     const signer = this.web3Service.getSigner(data.chainId);
@@ -96,7 +99,7 @@ export class AssignmentService {
     const expirationDate = new Date(Number(await escrow.duration()) * 1000);
     if (expirationDate < new Date()) {
       this.logger.log(ErrorAssignment.ExpiredEscrow, AssignmentService.name);
-      throw new BadRequestException(ErrorAssignment.ExpiredEscrow);
+      throw new ValidationError(ErrorAssignment.ExpiredEscrow);
     }
 
     // Allow reassignation when status is Canceled
@@ -161,14 +164,14 @@ export class AssignmentService {
       await this.assignmentRepository.findOneById(assignmentId);
 
     if (!assignment) {
-      throw new BadRequestException(ErrorAssignment.NotFound);
+      throw new ServerError(ErrorAssignment.NotFound);
     }
     if (assignment.workerAddress !== workerAddress) {
-      throw new BadRequestException(ErrorAssignment.InvalidAssignment);
+      throw new ConflictError(ErrorAssignment.InvalidAssignment);
     }
 
     if (assignment.status !== AssignmentStatus.ACTIVE) {
-      throw new BadRequestException(ErrorAssignment.InvalidStatus);
+      throw new ConflictError(ErrorAssignment.InvalidStatus);
     }
 
     assignment.status = AssignmentStatus.CANCELED;

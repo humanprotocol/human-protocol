@@ -197,6 +197,19 @@ export class ReputationOracleGateway {
     return this.handleRequestToReputationOracle<SigninWorkerResponse>(options);
   }
 
+  async sendM2mSignin(secretKey: string) {
+    const options = this.getEndpointOptions(
+      ReputationOracleEndpoints.M2M_SIGNIN,
+    );
+    options.headers = {
+      ...options.headers,
+      'human-m2m-auth-key': secretKey,
+    };
+    return this.handleRequestToReputationOracle<{ access_token: string }>(
+      options,
+    );
+  }
+
   async sendRegistrationInExchangeOracle(
     command: RegistrationInExchangeOracleCommand,
   ) {

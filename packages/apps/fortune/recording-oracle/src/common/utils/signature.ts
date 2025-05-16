@@ -1,5 +1,5 @@
-import { ConflictException } from '@nestjs/common';
 import { ethers } from 'ethers';
+import { ValidationError } from '../errors';
 
 export function verifySignature(
   message: object | string,
@@ -11,7 +11,7 @@ export function verifySignature(
   if (
     !addresses.some((address) => address.toLowerCase() === signer.toLowerCase())
   ) {
-    throw new ConflictException('Signature not verified');
+    throw new ValidationError('Signature not verified');
   }
 
   return true;
@@ -42,6 +42,6 @@ export function recoverSigner(
   try {
     return ethers.verifyMessage(message, signature);
   } catch (e) {
-    throw new ConflictException('Invalid signature');
+    throw new ValidationError('Invalid signature');
   }
 }

@@ -1,26 +1,18 @@
-import { ethers } from 'ethers';
-import { Test } from '@nestjs/testing';
-import Stripe from 'stripe';
-import { PaymentService } from './payment.service';
-import { PaymentRepository } from './payment.repository';
-import { ConfigService } from '@nestjs/config';
-import { HttpService } from '@nestjs/axios';
+jest.mock('@human-protocol/sdk');
+jest.mock('../../common/utils/signature', () => ({
+  verifySignature: jest.fn().mockReturnValue(true),
+}));
+
+import { faker } from '@faker-js/faker/.';
 import { createMock } from '@golevelup/ts-jest';
-import {
-  ErrorPayment,
-  ErrorPostgres,
-  ErrorSignature,
-} from '../../common/constants/errors';
-import {
-  PaymentSortField,
-  PaymentSource,
-  PaymentStatus,
-  PaymentType,
-  StripePaymentStatus,
-  VatType,
-  PaymentCurrency,
-} from '../../common/enums/payment';
-import { TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
+import { HMToken__factory } from '@human-protocol/core/typechain-types';
+import { ChainId, NETWORKS } from '@human-protocol/sdk';
+import { HttpService } from '@nestjs/axios';
+import { ConflictException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { Test } from '@nestjs/testing';
+import { ethers } from 'ethers';
+import Stripe from 'stripe';
 import {
   MOCK_ADDRESS,
   MOCK_PAYMENT_ID,
@@ -28,30 +20,41 @@ import {
   MOCK_TRANSACTION_HASH,
   mockConfig,
 } from '../../../test/constants';
-import { ServerConfigService } from '../../common/config/server-config.service';
-import { Web3Service } from '../web3/web3.service';
-import { HMToken__factory } from '@human-protocol/core/typechain-types';
-import { ChainId, NETWORKS } from '@human-protocol/sdk';
-import { PaymentEntity } from './payment.entity';
-import { verifySignature } from '../../common/utils/signature';
-import { ConflictException, HttpStatus } from '@nestjs/common';
-import { DatabaseError } from '../../common/errors/database';
-import { StripeConfigService } from '../../common/config/stripe-config.service';
 import { NetworkConfigService } from '../../common/config/network-config.service';
-import { ControlledError } from '../../common/errors/controlled';
-import { RateService } from '../rate/rate.service';
-import { UserRepository } from '../user/user.repository';
-import { JobRepository } from '../job/job.repository';
-import { GetPaymentsDto, UserBalanceDto } from './payment.dto';
+import { ServerConfigService } from '../../common/config/server-config.service';
+import { StripeConfigService } from '../../common/config/stripe-config.service';
+import { TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
+import {
+  ErrorPayment,
+  ErrorPostgres,
+  ErrorSignature,
+} from '../../common/constants/errors';
 import { SortDirection } from '../../common/enums/collection';
 import { Country } from '../../common/enums/job';
-import { faker } from '@faker-js/faker/.';
-
-jest.mock('@human-protocol/sdk');
-
-jest.mock('../../common/utils/signature', () => ({
-  verifySignature: jest.fn().mockReturnValue(true),
-}));
+import {
+  PaymentCurrency,
+  PaymentSortField,
+  PaymentSource,
+  PaymentStatus,
+  PaymentType,
+  StripePaymentStatus,
+  VatType,
+} from '../../common/enums/payment';
+import {
+  ConflictError,
+  DatabaseError,
+  NotFoundError,
+  ServerError,
+} from '../../common/errors';
+import { verifySignature } from '../../common/utils/signature';
+import { JobRepository } from '../job/job.repository';
+import { RateService } from '../rate/rate.service';
+import { UserRepository } from '../user/user.repository';
+import { Web3Service } from '../web3/web3.service';
+import { GetPaymentsDto, UserBalanceDto } from './payment.dto';
+import { PaymentEntity } from './payment.entity';
+import { PaymentRepository } from './payment.repository';
+import { PaymentService } from './payment.service';
 
 describe('PaymentService', () => {
   let stripe: Stripe;
@@ -283,10 +286,7 @@ describe('PaymentService', () => {
       await expect(
         paymentService.createFiatPayment(user as any, dto),
       ).rejects.toThrow(
-        new ControlledError(
-          ErrorPayment.TransactionAlreadyExists,
-          HttpStatus.BAD_REQUEST,
-        ),
+        new ConflictError(ErrorPayment.TransactionAlreadyExists),
       );
     });
 
@@ -321,12 +321,7 @@ describe('PaymentService', () => {
 
       await expect(
         paymentService.createFiatPayment(user as any, dto),
-      ).rejects.toThrow(
-        new ControlledError(
-          ErrorPayment.ClientSecretDoesNotExist,
-          HttpStatus.NOT_FOUND,
-        ),
-      );
+      ).rejects.toThrow(new ServerError(ErrorPayment.ClientSecretDoesNotExist));
     });
   });
 
@@ -395,9 +390,7 @@ describe('PaymentService', () => {
 
       await expect(
         paymentService.confirmFiatPayment(userId, dto),
-      ).rejects.toThrow(
-        new ControlledError(ErrorPayment.NotSuccess, HttpStatus.BAD_REQUEST),
-      );
+      ).rejects.toThrow(new ConflictError(ErrorPayment.NotSuccess));
     });
 
     it('should handle payment requiring a payment method', async () => {
@@ -425,9 +418,7 @@ describe('PaymentService', () => {
 
       await expect(
         paymentService.confirmFiatPayment(userId, dto),
-      ).rejects.toThrow(
-        new ControlledError(ErrorPayment.NotSuccess, HttpStatus.BAD_REQUEST),
-      );
+      ).rejects.toThrow(new ConflictError(ErrorPayment.NotSuccess));
     });
 
     it('should handle payment status other than succeeded', async () => {
@@ -468,9 +459,7 @@ describe('PaymentService', () => {
 
       await expect(
         paymentService.confirmFiatPayment(userId, dto),
-      ).rejects.toThrow(
-        new ControlledError(ErrorPayment.NotFound, HttpStatus.NOT_FOUND),
-      );
+      ).rejects.toThrow(new NotFoundError(ErrorPayment.NotFound));
     });
   });
 
@@ -600,9 +589,7 @@ describe('PaymentService', () => {
 
       await expect(
         paymentService.createCryptoPayment(userId, dto, MOCK_SIGNATURE),
-      ).rejects.toThrow(
-        new ControlledError(ErrorPayment.UnsupportedToken, HttpStatus.CONFLICT),
-      );
+      ).rejects.toThrow(new ConflictError(ErrorPayment.UnsupportedToken));
     });
 
     it('should throw a conflict exception if an unsupported token is used', async () => {
@@ -641,9 +628,7 @@ describe('PaymentService', () => {
 
       await expect(
         paymentService.createCryptoPayment(userId, dto, MOCK_SIGNATURE),
-      ).rejects.toThrow(
-        new ControlledError(ErrorPayment.UnsupportedToken, HttpStatus.CONFLICT),
-      );
+      ).rejects.toThrow(new ConflictError(ErrorPayment.UnsupportedToken));
     });
 
     it('should throw a signature error if the signature is wrong', async () => {
@@ -668,12 +653,7 @@ describe('PaymentService', () => {
 
       await expect(
         paymentService.createCryptoPayment(userId, dto, MOCK_SIGNATURE),
-      ).rejects.toThrow(
-        new ControlledError(
-          ErrorSignature.SignatureNotVerified,
-          HttpStatus.CONFLICT,
-        ),
-      );
+      ).rejects.toThrow(new ConflictError(ErrorSignature.SignatureNotVerified));
     });
 
     it('should throw a not found exception if the transaction is not found by hash', async () => {
@@ -688,10 +668,7 @@ describe('PaymentService', () => {
       await expect(
         paymentService.createCryptoPayment(userId, dto, MOCK_SIGNATURE),
       ).rejects.toThrow(
-        new ControlledError(
-          ErrorPayment.TransactionNotFoundByHash,
-          HttpStatus.NOT_FOUND,
-        ),
+        new NotFoundError(ErrorPayment.TransactionNotFoundByHash),
       );
     });
 
@@ -714,12 +691,7 @@ describe('PaymentService', () => {
 
       await expect(
         paymentService.createCryptoPayment(userId, dto, MOCK_SIGNATURE),
-      ).rejects.toThrow(
-        new ControlledError(
-          ErrorPayment.InvalidTransactionData,
-          HttpStatus.NOT_FOUND,
-        ),
-      );
+      ).rejects.toThrow(new ServerError(ErrorPayment.InvalidTransactionData));
     });
 
     it('should throw a not found exception if the transaction has insufficient confirmations', async () => {
@@ -757,9 +729,8 @@ describe('PaymentService', () => {
       await expect(
         paymentService.createCryptoPayment(userId, dto, MOCK_SIGNATURE),
       ).rejects.toThrow(
-        new ControlledError(
+        new ConflictError(
           ErrorPayment.TransactionHasNotEnoughAmountOfConfirmations,
-          HttpStatus.NOT_FOUND,
         ),
       );
     });
@@ -801,10 +772,7 @@ describe('PaymentService', () => {
       await expect(
         paymentService.createCryptoPayment(userId, dto, MOCK_SIGNATURE),
       ).rejects.toThrow(
-        new ControlledError(
-          ErrorPayment.TransactionAlreadyExists,
-          HttpStatus.BAD_REQUEST,
-        ),
+        new ConflictError(ErrorPayment.TransactionAlreadyExists),
       );
     });
   });
@@ -923,12 +891,7 @@ describe('PaymentService', () => {
 
       await expect(
         paymentService.createCustomerAndAssignCard(user as any),
-      ).rejects.toThrow(
-        new ControlledError(
-          ErrorPayment.CustomerNotCreated,
-          HttpStatus.NOT_FOUND,
-        ),
-      );
+      ).rejects.toThrow(new ServerError(ErrorPayment.CustomerNotCreated));
     });
 
     it('should throw a bad request exception if the setup intent creation fails', async () => {
@@ -1210,12 +1173,7 @@ describe('PaymentService', () => {
 
       await expect(
         paymentService.deletePaymentMethod(user as any, 'pm_123'),
-      ).rejects.toThrow(
-        new ControlledError(
-          ErrorPayment.PaymentMethodInUse,
-          HttpStatus.BAD_REQUEST,
-        ),
-      );
+      ).rejects.toThrow(new ConflictError(ErrorPayment.PaymentMethodInUse));
     });
   });
 
@@ -1508,7 +1466,7 @@ describe('PaymentService', () => {
       retrievePaymentIntentMock.mockResolvedValue(null);
 
       await expect(paymentService.getReceipt(paymentId, user)).rejects.toThrow(
-        new ControlledError(ErrorPayment.NotFound, HttpStatus.NOT_FOUND),
+        new NotFoundError(ErrorPayment.NotFound),
       );
     });
 
@@ -1524,7 +1482,7 @@ describe('PaymentService', () => {
       retrieveChargeMock.mockResolvedValue(null);
 
       await expect(paymentService.getReceipt(paymentId, user)).rejects.toThrow(
-        new ControlledError(ErrorPayment.NotFound, HttpStatus.NOT_FOUND),
+        new NotFoundError(ErrorPayment.NotFound),
       );
     });
   });
@@ -1644,12 +1602,7 @@ describe('PaymentService', () => {
 
       await expect(
         paymentService.createWithdrawalPayment(userId, amount, currency, rate),
-      ).rejects.toThrow(
-        new ControlledError(
-          ErrorPayment.NotEnoughFunds,
-          HttpStatus.BAD_REQUEST,
-        ),
-      );
+      ).rejects.toThrow(new ServerError(ErrorPayment.NotEnoughFunds));
     });
   });
 });

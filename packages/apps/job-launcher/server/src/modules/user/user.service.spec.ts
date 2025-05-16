@@ -1,3 +1,5 @@
+jest.mock('@human-protocol/sdk');
+
 import { createMock } from '@golevelup/ts-jest';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
@@ -7,8 +9,6 @@ import { UserCreateDto } from './user.dto';
 import { UserEntity } from './user.entity';
 import { UserRepository } from './user.repository';
 import { UserService } from './user.service';
-
-jest.mock('@human-protocol/sdk');
 
 describe('UserService', () => {
   let userService: UserService;

@@ -1,5 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, IsNumber, IsDate } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsNumber,
+  IsDate,
+  IsEthereumAddress,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import {
   JobFieldName,
@@ -56,7 +62,7 @@ export class GetJobsDto extends PageOptionsDto {
 
   @ApiPropertyOptional({ name: 'escrow_address' })
   @IsOptional()
-  @IsString()
+  @IsEthereumAddress()
   escrowAddress: string;
 
   @ApiPropertyOptional({ enum: JobStatus })

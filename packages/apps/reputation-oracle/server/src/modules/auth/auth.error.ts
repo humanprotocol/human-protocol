@@ -10,6 +10,7 @@ export enum AuthErrorMessage {
   INVALID_EMAIL_TOKEN = 'Email token is not valid',
   INVALID_WEB3_SIGNATURE = 'Invalid signature',
   INVALID_ADDRESS = 'Invalid address',
+  INVALID_SECRET_KEY = 'Invalid secret key',
 }
 
 export class AuthError extends BaseError {

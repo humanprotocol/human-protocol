@@ -38,9 +38,7 @@ export class UserService {
   ) {}
 
   static isWeb2UserRole(userRole: string): boolean {
-    return [UserRole.ADMIN, UserRole.HUMAN_APP, UserRole.WORKER].includes(
-      userRole as UserRole,
-    );
+    return [UserRole.ADMIN, UserRole.WORKER].includes(userRole as UserRole);
   }
 
   async findWeb2UserByEmail(email: string): Promise<Web2UserEntity | null> {

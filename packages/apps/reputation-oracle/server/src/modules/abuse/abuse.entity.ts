@@ -32,7 +32,7 @@ export class AbuseEntity extends BaseEntity {
   amount: number | null;
 
   @JoinColumn()
-  @ManyToOne('UserEntity', { nullable: false })
+  @ManyToOne('UserEntity', { nullable: false, onDelete: 'CASCADE' })
   user?: UserEntity;
 
   @Column({ type: 'int' })

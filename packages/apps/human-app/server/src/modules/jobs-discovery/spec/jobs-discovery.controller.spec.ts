@@ -22,8 +22,6 @@ describe('JobsDiscoveryController', () => {
   let controller: JobsDiscoveryController;
   let jobsDiscoveryService: JobsDiscoveryService;
   const configServiceMock: Partial<EnvironmentConfigService> = {
-    email: 'human-app@hmt.ai',
-    password: 'Test1234*',
     cacheTtlOracleDiscovery: 600,
     chainIdsEnabled: [ChainId.POLYGON, ChainId.MAINNET],
     jobsDiscoveryFlag: true,

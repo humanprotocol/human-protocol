@@ -4,6 +4,7 @@ import {
   ApiTags,
   ApiBody,
   ApiBearerAuth,
+  ApiHeader,
 } from '@nestjs/swagger';
 import {
   Body,
@@ -15,6 +16,7 @@ import {
   UseInterceptors,
   UseFilters,
   HttpCode,
+  Headers,
 } from '@nestjs/common';
 
 import { Public } from '../../common/decorators';
@@ -22,9 +24,8 @@ import { RequestWithUser } from '../../common/types';
 import { HCaptchaGuard } from '../../integrations/hcaptcha/hcaptcha.guard';
 
 import { AuthService } from './auth.service';
-import { TokenRepository } from './token.repository';
-import { TokenType } from './token.entity';
 import { AuthControllerErrorsFilter } from './auth.error-filter';
+import { HEADER_M2M_AUTH } from './constants';
 import {
   ForgotPasswordDto,
   SuccessAuthDto,
@@ -36,7 +37,10 @@ import {
   Web2SignInDto,
   Web3SignInDto,
   Web3SignUpDto,
+  SuccessM2mAuthDto,
 } from './dto';
+import { TokenRepository } from './token.repository';
+import { TokenType } from './token.entity';
 
 @ApiTags('Auth')
 @Controller('/auth')
@@ -132,6 +136,32 @@ export class AuthController {
       data.signature,
     );
     return authTokens;
+  }
+
+  @ApiOperation({
+    summary: 'M2M signin',
+    description: 'Endpoint for machine-to-machine authentication',
+  })
+  @ApiHeader({
+    name: HEADER_M2M_AUTH,
+    description:
+      'Basic auth with base64url secret key as username only credential',
+    required: true,
+    example: 'sk_example_a-base64urlSafe-string-Xi8dQHy1SvcPm307lps',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Service authenticated successfully',
+    type: SuccessAuthDto,
+  })
+  @Public()
+  @Post('/m2m/signin')
+  @HttpCode(200)
+  async m2mSignIn(
+    @Headers(HEADER_M2M_AUTH) secretKey: string,
+  ): Promise<SuccessM2mAuthDto> {
+    const accessToken = await this.authService.m2mSignin(secretKey);
+    return { accessToken };
   }
 
   @ApiBody({ type: RefreshDto })

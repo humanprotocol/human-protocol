@@ -1,11 +1,11 @@
-import { HttpStatus, Logger, NotFoundException } from '@nestjs/common';
-import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
-import { ErrorJob } from '../constants/errors';
-import { signMessage } from './signature';
+import { Logger } from '@nestjs/common';
+import { firstValueFrom } from 'rxjs';
+import { WebhookDto } from '../../modules/webhook/webhook.dto';
 import { HEADER_SIGNATURE_KEY } from '../constants';
 import { CaseConverter } from './case-converter';
-import { WebhookDto } from '../../modules/webhook/webhook.dto';
+import { signMessage } from './signature';
+import { formatAxiosError } from './http';
 
 export async function sendWebhook(
   httpService: HttpService,
@@ -16,15 +16,18 @@ export async function sendWebhook(
 ): Promise<boolean> {
   const snake_case_body = CaseConverter.transformToSnakeCase(webhookBody);
   const signedBody = await signMessage(snake_case_body, privateKey);
-  const { status } = await firstValueFrom(
-    await httpService.post(webhookUrl, snake_case_body, {
-      headers: { [HEADER_SIGNATURE_KEY]: signedBody },
-    }),
-  );
-
-  if (status !== HttpStatus.CREATED) {
-    logger.log(ErrorJob.WebhookWasNotSent, 'JobService');
-    throw new NotFoundException(ErrorJob.WebhookWasNotSent);
+  try {
+    await firstValueFrom(
+      httpService.post(webhookUrl, snake_case_body, {
+        headers: { [HEADER_SIGNATURE_KEY]: signedBody },
+      }),
+    );
+  } catch (error: any) {
+    const formattedError = formatAxiosError(error);
+    logger.error('Webhook not sent', {
+      error: formattedError,
+    });
+    throw new Error(formattedError.message);
   }
 
   return true;

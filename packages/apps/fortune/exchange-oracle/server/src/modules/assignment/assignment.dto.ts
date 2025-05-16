@@ -1,7 +1,13 @@
 import { ChainId } from '@human-protocol/sdk';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsNumber, IsOptional, IsString, IsDate } from 'class-validator';
+import {
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsDate,
+  IsEthereumAddress,
+} from 'class-validator';
 import {
   AssignmentSortField,
   AssignmentStatus,
@@ -20,7 +26,7 @@ export class CreateAssignmentDto {
   chainId: ChainId;
 
   @ApiProperty({ name: 'escrow_address' })
-  @IsString()
+  @IsEthereumAddress()
   escrowAddress: string;
 }
 
@@ -47,7 +53,7 @@ export class GetAssignmentsDto extends PageOptionsDto {
 
   @ApiPropertyOptional({ name: 'escrow_address' })
   @IsOptional()
-  @IsString()
+  @IsEthereumAddress()
   escrowAddress?: string;
 
   @ApiPropertyOptional({ enum: AssignmentStatus })

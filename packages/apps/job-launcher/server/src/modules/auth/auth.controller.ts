@@ -2,43 +2,42 @@ import {
   Body,
   ClassSerializerInterceptor,
   Controller,
+  HttpCode,
+  Ip,
+  Logger,
   Post,
   Req,
+  Request,
   UseGuards,
   UseInterceptors,
-  Request,
-  Logger,
-  Ip,
-  HttpCode,
-  HttpStatus,
 } from '@nestjs/common';
 
 import {
   ApiBearerAuth,
-  ApiTags,
-  ApiResponse,
   ApiBody,
   ApiOperation,
+  ApiResponse,
+  ApiTags,
 } from '@nestjs/swagger';
+import { ErrorAuth } from '../../common/constants/errors';
 import { Public } from '../../common/decorators';
+import { ValidationError } from '../../common/errors';
+import { JwtAuthGuard } from '../../common/guards';
+import { RequestWithUser } from '../../common/types';
 import { UserCreateDto } from '../user/user.dto';
 import {
   ApiKeyDto,
   AuthDto,
   ForgotPasswordDto,
+  RefreshDto,
   ResendEmailVerificationDto,
   RestorePasswordDto,
   SignInDto,
   VerifyEmailDto,
-  RefreshDto,
 } from './auth.dto';
 import { AuthService } from './auth.service';
-import { JwtAuthGuard } from '../../common/guards';
-import { RequestWithUser } from '../../common/types';
-import { ErrorAuth } from '../../common/constants/errors';
-import { TokenRepository } from './token.repository';
 import { TokenType } from './token.entity';
-import { ControlledError } from '../../common/errors/controlled';
+import { TokenRepository } from './token.repository';
 
 @ApiTags('Auth')
 @ApiResponse({
@@ -251,10 +250,7 @@ export class AuthJwtController {
         e.message,
         `${AuthJwtController.name} - ${ErrorAuth.ApiKeyCouldNotBeCreatedOrUpdated}`,
       );
-      throw new ControlledError(
-        ErrorAuth.ApiKeyCouldNotBeCreatedOrUpdated,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new ValidationError(ErrorAuth.ApiKeyCouldNotBeCreatedOrUpdated);
     }
   }
 }

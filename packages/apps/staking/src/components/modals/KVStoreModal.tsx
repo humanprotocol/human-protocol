@@ -16,7 +16,6 @@ import {
   MenuItem,
   Select,
   TextField,
-  Tooltip,
   Typography,
 } from '@mui/material';
 
@@ -44,7 +43,7 @@ type Field = {
 
 const SuccessState: FC = () => (
   <ModalSuccess>
-    <Typography variant="subtitle2" color="primary" p={1}>
+    <Typography variant="subtitle2" p={1}>
       You have successfully edited your KV Store
     </Typography>
   </ModalSuccess>
@@ -261,6 +260,13 @@ const KVStoreModal: FC<Props> = ({ open, onClose, initialData, onSave }) => {
                     value={item.isCustom ? 'custom' : item.key}
                     onChange={(e) => handleKeyChange(index, e.target.value)}
                     disabled={initialData.some((data) => data.key === item.key)}
+                    MenuProps={{
+                      PaperProps: {
+                        sx: {
+                          bgcolor: 'background.default',
+                        },
+                      },
+                    }}
                   >
                     <MenuItem value="" disabled>
                       Select Key
@@ -298,6 +304,13 @@ const KVStoreModal: FC<Props> = ({ open, onClose, initialData, onSave }) => {
                     label="Value"
                     value={item.value}
                     onChange={(e) => handleValueChange(index, e.target.value)}
+                    MenuProps={{
+                      PaperProps: {
+                        sx: {
+                          bgcolor: 'background.default',
+                        },
+                      },
+                    }}
                   >
                     {Object.entries(Role).map(([roleKey, roleValue]) => (
                       <MenuItem key={roleKey} value={roleValue}>
@@ -316,6 +329,13 @@ const KVStoreModal: FC<Props> = ({ open, onClose, initialData, onSave }) => {
                     label="Value"
                     value={item.value}
                     onChange={(e) => handleValueChange(index, e.target.value)}
+                    MenuProps={{
+                      PaperProps: {
+                        sx: {
+                          bgcolor: 'background.default',
+                        },
+                      },
+                    }}
                   >
                     {Object.entries(OperatorCategory).map(
                       ([categoryKey, categoryValue]) => (
@@ -338,11 +358,9 @@ const KVStoreModal: FC<Props> = ({ open, onClose, initialData, onSave }) => {
               )}
             </Grid>
             <Grid item xs={1}>
-              <Tooltip title="Delete">
-                <IconButton onClick={() => handleDelete(index)}>
-                  <DeleteIcon />
-                </IconButton>
-              </Tooltip>
+              <IconButton onClick={() => handleDelete(index)}>
+                <DeleteIcon sx={{ color: 'primary.main' }} />
+              </IconButton>
             </Grid>
           </Grid>
         ))}

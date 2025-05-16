@@ -9,7 +9,7 @@ const NetworkStatus: React.FC = () => {
 
   return (
     <Box display="flex" flexDirection="column" alignItems="flex-start" ml={4}>
-      <Typography variant="body1" color="primary" mb={1}>
+      <Typography variant="body1" color="text.primary" mb={1}>
         Network
       </Typography>
       <Box display="flex" alignItems="center">
@@ -21,7 +21,7 @@ const NetworkStatus: React.FC = () => {
             fontSize: { xs: 24, sm: 18, lg: 24 },
             fontWeight: 400,
             lineHeight: 1.5,
-            color: 'primary.main',
+            color: 'text.primary',
             marginLeft: 1,
           }}
         >

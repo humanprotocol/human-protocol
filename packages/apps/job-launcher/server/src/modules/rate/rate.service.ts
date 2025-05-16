@@ -1,12 +1,12 @@
 import { HttpService } from '@nestjs/axios';
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { COINGECKO_API_URL } from '../../common/constants';
 import { ErrorCurrency } from '../../common/constants/errors';
 import { CoingeckoTokenId } from '../../common/constants/payment';
-import { ControlledError } from '../../common/errors/controlled';
 import { EscrowFundToken } from '../../common/enums/job';
+import { NotFoundError } from '../../common/errors';
 
 @Injectable()
 export class RateService {
@@ -67,10 +67,7 @@ export class RateService {
       )) as any;
 
       if (!data[coingeckoFrom] || !data[coingeckoFrom][coingeckoTo]) {
-        throw new ControlledError(
-          ErrorCurrency.PairNotFound,
-          HttpStatus.NOT_FOUND,
-        );
+        throw new NotFoundError(ErrorCurrency.PairNotFound);
       }
       const rate = data[coingeckoFrom][coingeckoTo];
       const finalRate = reversed ? 1 / rate : rate;
@@ -80,10 +77,7 @@ export class RateService {
       return finalRate;
     } catch (error) {
       this.logger.error(error);
-      throw new ControlledError(
-        ErrorCurrency.PairNotFound,
-        HttpStatus.NOT_FOUND,
-      );
+      throw new NotFoundError(ErrorCurrency.PairNotFound);
     }
   }
 }

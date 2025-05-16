@@ -37,14 +37,14 @@ import { TokenRepository } from './token.repository';
 const mockKVStoreUtils = jest.mocked(KVStoreUtils);
 
 const { publicKey, privateKey } = generateES256Keys();
-const mockAuthConfigService = {
+const mockAuthConfigService: Omit<AuthConfigService, 'configService'> = {
   jwtPrivateKey: privateKey,
   jwtPublicKey: publicKey,
   accessTokenExpiresIn: 600,
   refreshTokenExpiresIn: 3600000,
   verifyEmailTokenExpiresIn: 86400000,
   forgotPasswordExpiresIn: 86400000,
-  humanAppEmail: faker.internet.email(),
+  humanAppSecretKey: faker.string.alphanumeric({ length: 42 }),
 };
 
 const mockEmailService = createMock<EmailService>();
@@ -585,6 +585,36 @@ describe('AuthService', () => {
       await expect(
         service.web3Signin(operator.evmAddress, signature),
       ).rejects.toThrow(new AuthErrors.InactiveUserError(operator.id));
+    });
+  });
+
+  describe('m2mSignin', () => {
+    it('should throw AuthError(AuthErrorMessage.INVALID_SECRET_KEY) if invalid secret', async () => {
+      const invalidSecretKey = faker.string.alphanumeric({ length: 42 });
+
+      await expect(service.m2mSignin(invalidSecretKey)).rejects.toThrow(
+        new AuthErrors.AuthError(
+          AuthErrors.AuthErrorMessage.INVALID_SECRET_KEY,
+        ),
+      );
+    });
+
+    it('should signin human app', async () => {
+      const accessToken = await service.m2mSignin(
+        mockAuthConfigService.humanAppSecretKey,
+      );
+
+      const decodedAccessToken = await jwtService.verifyAsync(accessToken, {
+        secret: mockAuthConfigService.jwtPrivateKey,
+      });
+
+      expect(omit(decodedAccessToken, ['exp', 'iat'])).toEqual({
+        email: 'human-app@hmt.ai',
+        role: 'human_app',
+        user_id: 'human_app',
+        status: 'active',
+        reputation_network: mockWeb3ConfigService.operatorAddress,
+      });
     });
   });
 

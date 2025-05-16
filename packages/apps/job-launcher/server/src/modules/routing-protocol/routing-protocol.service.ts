@@ -1,8 +1,7 @@
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { ChainId, Role } from '@human-protocol/sdk';
-import { Web3Service } from '../web3/web3.service';
+import { Injectable, Logger } from '@nestjs/common';
+import { NetworkConfigService } from '../../common/config/network-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
-import { hashString } from '../../common/utils';
 import { ErrorRoutingProtocol } from '../../common/constants/errors';
 import {
   AudinoJobType,
@@ -10,8 +9,9 @@ import {
   HCaptchaJobType,
   JobRequestType,
 } from '../../common/enums/job';
-import { ControlledError } from '../../common/errors/controlled';
-import { NetworkConfigService } from '../../common/config/network-config.service';
+import { ServerError } from '../../common/errors';
+import { hashString } from '../../common/utils';
+import { Web3Service } from '../web3/web3.service';
 import {
   OracleHash,
   OracleIndex,
@@ -217,10 +217,7 @@ export class RoutingProtocolService {
       .map((address) => address.trim());
 
     if (!reputationOracles.includes(reputationOracle)) {
-      throw new ControlledError(
-        ErrorRoutingProtocol.ReputationOracleNotFound,
-        HttpStatus.NOT_FOUND,
-      );
+      throw new ServerError(ErrorRoutingProtocol.ReputationOracleNotFound);
     }
 
     const availableOracles = await this.web3Service.findAvailableOracles(
@@ -237,10 +234,7 @@ export class RoutingProtocolService {
         Role.ExchangeOracle,
       )
     ) {
-      throw new ControlledError(
-        ErrorRoutingProtocol.ExchangeOracleNotFound,
-        HttpStatus.NOT_FOUND,
-      );
+      throw new ServerError(ErrorRoutingProtocol.ExchangeOracleNotFound);
     }
 
     if (
@@ -251,10 +245,7 @@ export class RoutingProtocolService {
         Role.RecordingOracle,
       )
     ) {
-      throw new ControlledError(
-        ErrorRoutingProtocol.RecordingOracleNotFound,
-        HttpStatus.NOT_FOUND,
-      );
+      throw new ServerError(ErrorRoutingProtocol.RecordingOracleNotFound);
     }
   }
 

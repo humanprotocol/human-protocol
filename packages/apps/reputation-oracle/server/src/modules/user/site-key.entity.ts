@@ -24,6 +24,7 @@ export class SiteKeyEntity extends BaseEntity {
 
   @ManyToOne('UserEntity', (user: UserEntity) => user.siteKeys, {
     persistence: false,
+    onDelete: 'CASCADE',
   })
   @JoinColumn()
   user?: UserEntity;

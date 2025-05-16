@@ -1,16 +1,11 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { WebhookController } from './webhook.controller';
-import { WebhookService } from './webhook.service';
-import { WebhookRepository } from './webhook.repository';
-import { Web3Service } from '../web3/web3.service';
-import { ConfigService } from '@nestjs/config';
-import { HttpService } from '@nestjs/axios';
-import { JobService } from '../job/job.service';
-import { EventType } from '../../common/enums/webhook';
-import { ChainId } from '@human-protocol/sdk';
-import { WebhookDataDto } from './webhook.dto';
+jest.mock('@human-protocol/sdk');
+
 import { createMock } from '@golevelup/ts-jest';
-import { BadRequestException, HttpStatus } from '@nestjs/common';
+import { ChainId } from '@human-protocol/sdk';
+import { HttpService } from '@nestjs/axios';
+import { BadRequestException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { Test, TestingModule } from '@nestjs/testing';
 import {
   MOCK_ADDRESS,
   MOCK_CVAT_JOB_SIZE,
@@ -19,6 +14,7 @@ import {
   MOCK_CVAT_VAL_SIZE,
   MOCK_EXPIRES_IN,
   MOCK_HCAPTCHA_SITE_KEY,
+  MOCK_MAX_RETRY_COUNT,
   MOCK_PGP_PASSPHRASE,
   MOCK_PGP_PRIVATE_KEY,
   MOCK_PRIVATE_KEY,
@@ -34,14 +30,18 @@ import {
   MOCK_STRIPE_API_VERSION,
   MOCK_STRIPE_APP_INFO_URL,
   MOCK_STRIPE_SECRET_KEY,
-  MOCK_MAX_RETRY_COUNT,
 } from '../../../test/constants';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
-import { ControlledError } from '../../common/errors/controlled';
+import { EventType } from '../../common/enums/webhook';
+import { ValidationError } from '../../common/errors';
 import { JobRepository } from '../job/job.repository';
-
-jest.mock('@human-protocol/sdk');
+import { JobService } from '../job/job.service';
+import { Web3Service } from '../web3/web3.service';
+import { WebhookController } from './webhook.controller';
+import { WebhookDataDto } from './webhook.dto';
+import { WebhookRepository } from './webhook.repository';
+import { WebhookService } from './webhook.service';
 
 describe('WebhookController', () => {
   let webhookController: WebhookController;
@@ -163,17 +163,12 @@ describe('WebhookController', () => {
       jest
         .spyOn(jobService, 'escrowFailedWebhook')
         .mockImplementation(async () => {
-          throw new ControlledError(
-            'Invalid manifest URL',
-            HttpStatus.BAD_REQUEST,
-          );
+          throw new ValidationError('Invalid manifest URL');
         });
 
       await expect(
         webhookController.processWebhook(invalidDto),
-      ).rejects.toThrow(
-        new ControlledError('Invalid manifest URL', HttpStatus.BAD_REQUEST),
-      );
+      ).rejects.toThrow(new ValidationError('Invalid manifest URL'));
 
       expect(jobService.escrowFailedWebhook).toHaveBeenCalledWith(invalidDto);
     });

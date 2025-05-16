@@ -1,6 +1,7 @@
 import { Storage } from '@google-cloud/storage';
 import { ImageAnnotatorClient, protos } from '@google-cloud/vision';
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import NodeCache from 'node-cache';
 import { SlackConfigService } from '../../common/config/slack-config.service';
 import { VisionConfigService } from '../../common/config/vision-config.service';
 import {
@@ -8,13 +9,12 @@ import {
   GCV_CONTENT_MODERATION_BATCH_SIZE_PER_TASK,
 } from '../../common/constants';
 import { ErrorContentModeration } from '../../common/constants/errors';
+import { ContentModerationRequestStatus } from '../../common/enums/content-moderation';
 import {
   ContentModerationFeature,
   ContentModerationLevel,
 } from '../../common/enums/gcv';
-import { ContentModerationRequestStatus } from '../../common/enums/content-moderation';
 import { JobStatus } from '../../common/enums/job';
-import { ControlledError } from '../../common/errors/controlled';
 import {
   constructGcsPath,
   convertToGCSPath,
@@ -25,13 +25,12 @@ import { sendSlackNotification } from '../../common/utils/slack';
 import { listObjectsInBucket } from '../../common/utils/storage';
 import { JobEntity } from '../job/job.entity';
 import { JobRepository } from '../job/job.repository';
+import { CvatManifestDto } from '../manifest/manifest.dto';
+import { ManifestService } from '../manifest/manifest.service';
 import { ContentModerationRequestEntity } from './content-moderation-request.entity';
 import { ContentModerationRequestRepository } from './content-moderation-request.repository';
-import { IContentModeratorService } from './content-moderation.interface';
 import { ModerationResultDto } from './content-moderation.dto';
-import NodeCache from 'node-cache';
-import { ManifestService } from '../manifest/manifest.service';
-import { CvatManifestDto } from '../manifest/manifest.dto';
+import { IContentModeratorService } from './content-moderation.interface';
 
 @Injectable()
 export class GCVContentModerationService implements IContentModeratorService {
@@ -333,10 +332,7 @@ export class GCVContentModerationService implements IContentModeratorService {
       );
     } catch (error) {
       this.logger.error('Error analyzing images:', error);
-      throw new ControlledError(
-        ErrorContentModeration.ContentModerationFailed,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new Error(ErrorContentModeration.ContentModerationFailed);
     }
   }
 
@@ -379,10 +375,7 @@ export class GCVContentModerationService implements IContentModeratorService {
 
       const [files] = await bucket.getFiles({ prefix: bucketPrefix });
       if (!files || files.length === 0) {
-        throw new ControlledError(
-          ErrorContentModeration.NoResultsFound,
-          HttpStatus.NOT_FOUND,
-        );
+        throw new Error(ErrorContentModeration.NoResultsFound);
       }
 
       const allResponses = [];
@@ -397,15 +390,11 @@ export class GCVContentModerationService implements IContentModeratorService {
       }
       return this.categorizeModerationResults(allResponses);
     } catch (err) {
-      this.logger.error('Error collecting moderation results:', err);
-      if (err instanceof ControlledError) {
+      if (err.message === ErrorContentModeration.NoResultsFound) {
         throw err;
-      } else {
-        throw new ControlledError(
-          ErrorContentModeration.ResultsParsingFailed,
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
       }
+      this.logger.error('Error collecting moderation results:', err);
+      throw new Error(ErrorContentModeration.ResultsParsingFailed);
     }
   }
 

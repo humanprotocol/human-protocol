@@ -1,8 +1,18 @@
+jest.mock('@human-protocol/sdk', () => ({
+  ...jest.requireActual('@human-protocol/sdk'),
+  EscrowClient: {
+    build: jest.fn(),
+  },
+}));
+
+import { faker } from '@faker-js/faker/.';
 import { createMock } from '@golevelup/ts-jest';
 import { ChainId, EscrowClient, KVStoreUtils } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
+import { HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
+import { of, throwError } from 'rxjs';
 import {
   MOCK_ADDRESS,
   MOCK_EXCHANGE_ORACLE_ADDRESS,
@@ -10,34 +20,24 @@ import {
   MOCK_MAX_RETRY_COUNT,
   mockConfig,
 } from '../../../test/constants';
+import { ServerConfigService } from '../../common/config/server-config.service';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { ErrorWebhook } from '../../common/constants/errors';
+import { FortuneJobType } from '../../common/enums/job';
 import {
   EventType,
   OracleType,
   WebhookStatus,
 } from '../../common/enums/webhook';
+import { ServerError, ValidationError } from '../../common/errors';
+import { JobRepository } from '../job/job.repository';
+import { JobService } from '../job/job.service';
 import { Web3Service } from '../web3/web3.service';
+import { WebhookDataDto } from './webhook.dto';
 import { WebhookEntity } from './webhook.entity';
 import { WebhookRepository } from './webhook.repository';
 import { WebhookService } from './webhook.service';
-import { of } from 'rxjs';
-import { HEADER_SIGNATURE_KEY } from '../../common/constants';
-import { JobService } from '../job/job.service';
-import { WebhookDataDto } from './webhook.dto';
-import { HttpStatus } from '@nestjs/common';
-import { ServerConfigService } from '../../common/config/server-config.service';
-import { Web3ConfigService } from '../../common/config/web3-config.service';
-import { ControlledError } from '../../common/errors/controlled';
-import { JobRepository } from '../job/job.repository';
-import { FortuneJobType } from '../../common/enums/job';
-import { faker } from '@faker-js/faker/.';
-
-jest.mock('@human-protocol/sdk', () => ({
-  ...jest.requireActual('@human-protocol/sdk'),
-  EscrowClient: {
-    build: jest.fn(),
-  },
-}));
 
 describe('WebhookService', () => {
   let webhookService: WebhookService,
@@ -122,9 +122,7 @@ describe('WebhookService', () => {
         .mockResolvedValue('');
       await expect(
         (webhookService as any).sendWebhook(webhookEntity),
-      ).rejects.toThrow(
-        new ControlledError(ErrorWebhook.UrlNotFound, HttpStatus.NOT_FOUND),
-      );
+      ).rejects.toThrow(new ServerError(ErrorWebhook.UrlNotFound));
     });
 
     it('should handle error if any exception is thrown', async () => {
@@ -132,15 +130,11 @@ describe('WebhookService', () => {
         .spyOn(webhookService as any, 'getExchangeOracleWebhookUrl')
         .mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
       jest.spyOn(httpService as any, 'post').mockImplementation(() => {
-        return of({
-          data: undefined,
-        });
+        return throwError(() => new Error('HTTP request failed'));
       });
       await expect(
         (webhookService as any).sendWebhook(webhookEntity),
-      ).rejects.toThrow(
-        new ControlledError(ErrorWebhook.NotSent, HttpStatus.NOT_FOUND),
-      );
+      ).rejects.toThrow(new ServerError('HTTP request failed'));
     });
 
     it('should successfully process a fortune webhook', async () => {
@@ -382,10 +376,7 @@ describe('WebhookService', () => {
       };
 
       await expect(webhookService.handleWebhook(webhook)).rejects.toThrow(
-        new ControlledError(
-          'Invalid webhook event type: escrow_canceled',
-          HttpStatus.BAD_REQUEST,
-        ),
+        new ValidationError(`Invalid webhook event type: ${webhook.eventType}`),
       );
     });
   });

@@ -30,12 +30,8 @@ const SuccessState: FC<{ amount: number | string }> = ({ amount }) => (
       justifyContent="center"
       py={1}
     >
-      <Typography variant="subtitle2" color="primary">
-        You have successfully staked
-      </Typography>
-      <Typography variant="h6" color="primary">
-        {amount} HMT
-      </Typography>
+      <Typography variant="subtitle2">You have successfully staked</Typography>
+      <Typography variant="h6">{amount} HMT</Typography>
     </Box>
   </ModalSuccess>
 );
@@ -100,7 +96,7 @@ const StakeModal: FC<Props> = ({ open, onClose }) => {
   const renderIdleState = () => {
     return (
       <>
-        <Typography variant="subtitle2" color="primary" mb={2} py={1}>
+        <Typography variant="subtitle2" mb={2} py={1}>
           Available amount: {tokenBalance} HMT
         </Typography>
 
@@ -136,6 +132,8 @@ const StakeModal: FC<Props> = ({ open, onClose }) => {
                     fontSize: '0.75rem',
                     padding: '4px 10px',
                     minWidth: 'unset',
+                    border: 'none',
+                    boxShadow: 'none',
                   }}
                 >
                   Max
