@@ -1,6 +1,7 @@
 import { FC } from 'react';
 
 import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 
 import TitleSectionWrapper from '@components/SearchResults';
 import SectionWrapper from '@components/SectionWrapper';
@@ -21,6 +22,7 @@ type Props = {
 
 const WalletAddress: FC<Props> = ({ data }) => {
   const { balance, amountStaked, amountLocked, reputation } = data;
+  const isWallet = 'totalAmountReceived' in data;
 
   return (
     <>
@@ -38,6 +40,24 @@ const WalletAddress: FC<Props> = ({ data }) => {
           >
             <ReputationScore reputation={reputation} />
           </TitleSectionWrapper>
+          {isWallet && (
+            <TitleSectionWrapper
+              title="Received Payouts"
+              tooltip="Received payouts from the operator"
+            >
+              <Typography variant="body2">
+                {data?.totalAmountReceived}
+              </Typography>
+              <Typography
+                component="span"
+                variant="body2"
+                ml={0.5}
+                color="text.secondary"
+              >
+                HMT
+              </Typography>
+            </TitleSectionWrapper>
+          )}
         </Stack>
       </SectionWrapper>
       <StakeInfo amountStaked={amountStaked} amountLocked={amountLocked} />

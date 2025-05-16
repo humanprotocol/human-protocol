@@ -31,7 +31,7 @@ const Clipboard = ({ value }: ClipboardProps) => {
         justifyContent="space-between"
       >
         <Typography
-          fontWeight={600}
+          variant="subtitle2"
           sx={{
             textOverflow: 'ellipsis',
             overflow: 'hidden',

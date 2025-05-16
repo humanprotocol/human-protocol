@@ -3,10 +3,21 @@ import Stack from '@mui/material/Stack';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
-import IconButton from '@mui/material/IconButton';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 
 import CustomTooltip from '@components/CustomTooltip';
+
+const InfoTooltip = ({ title }: { title: string }) => (
+  <CustomTooltip title={title}>
+    <HelpOutlineIcon
+      fontSize="small"
+      sx={{
+        color: 'text.secondary',
+        ml: 1,
+      }}
+    />
+  </CustomTooltip>
+);
 
 export const TransactionsTableHead = () => {
   return (
@@ -17,36 +28,18 @@ export const TransactionsTableHead = () => {
       }}
     >
       <TableRow>
-        <TableCell sx={{ p: 0 }}>
+        <TableCell>
           <Stack direction="row" alignItems="center">
-            <CustomTooltip title="Transaction identifier">
-              <IconButton sx={{ p: 0, mr: 1 }}>
-                <HelpOutlineIcon
-                  fontSize="small"
-                  sx={{
-                    color: 'text.secondary',
-                  }}
-                />
-              </IconButton>
-            </CustomTooltip>
             <Typography variant="Components/Table Header">
               Transaction Hash
             </Typography>
+            <InfoTooltip title="Transaction identifier" />
           </Stack>
         </TableCell>
         <TableCell>
           <Stack direction="row" alignItems="center">
-            <CustomTooltip title="Function executed in the transaction">
-              <IconButton sx={{ p: 0, mr: 1 }}>
-                <HelpOutlineIcon
-                  fontSize="small"
-                  sx={{
-                    color: 'text.secondary',
-                  }}
-                />
-              </IconButton>
-            </CustomTooltip>
             <Typography variant="Components/Table Header">Method</Typography>
+            <InfoTooltip title="Function executed in the transaction" />
           </Stack>
         </TableCell>
         <TableCell>
@@ -57,32 +50,14 @@ export const TransactionsTableHead = () => {
         </TableCell>
         <TableCell>
           <Stack direction="row" alignItems="center">
-            <CustomTooltip title="Identifier of the block that contains the transaction">
-              <IconButton sx={{ p: 0, mr: 1 }}>
-                <HelpOutlineIcon
-                  fontSize="small"
-                  sx={{
-                    color: 'text.secondary',
-                  }}
-                />
-              </IconButton>
-            </CustomTooltip>
             <Typography variant="Components/Table Header">Block</Typography>
+            <InfoTooltip title="Identifier of the block that contains the transaction" />
           </Stack>
         </TableCell>
         <TableCell>
           <Stack direction="row" alignItems="center">
-            <CustomTooltip title="Amount of HMT transferred in the transaction">
-              <IconButton sx={{ p: 0, mr: 1 }}>
-                <HelpOutlineIcon
-                  fontSize="small"
-                  sx={{
-                    color: 'text.secondary',
-                  }}
-                />
-              </IconButton>
-            </CustomTooltip>
             <Typography variant="Components/Table Header">Value</Typography>
+            <InfoTooltip title="Amount of HMT transferred in the transaction" />
           </Stack>
         </TableCell>
       </TableRow>

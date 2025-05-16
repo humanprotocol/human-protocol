@@ -7,7 +7,7 @@ const HmtPrice = () => {
 
   return (
     <Stack flexDirection="row" whiteSpace="nowrap">
-      <Typography component="span" variant="body2" ml={0.5}>
+      <Typography component="span" variant="body2">
         $
       </Typography>
       <Typography variant="body2">
