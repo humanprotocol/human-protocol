@@ -47,15 +47,23 @@ def _request_annotations(endpoint: Endpoint, cvat_id: int, format_name: str) -> 
     _get_annotations(request_id, ...)
     """
 
-    (_, response) = endpoint.call_with_http_info(
-        id=cvat_id,
-        format=format_name,
-        save_images=False,
-        _parse_response=False,
-    )
+    try:
+        (_, response) = endpoint.call_with_http_info(
+            id=cvat_id,
+            format=format_name,
+            save_images=False,
+            _parse_response=False,
+        )
 
-    assert response.status in [HTTPStatus.ACCEPTED, HTTPStatus.CREATED]
-    return response.json()["rq_id"]
+        assert response.status in [HTTPStatus.ACCEPTED, HTTPStatus.CREATED]
+        rq_id = response.json()["rq_id"]
+    except exceptions.ApiException as e:
+        if e.status == HTTPStatus.CONFLICT:
+            rq_id = json.loads(e.body)["rq_id"]
+        else:
+            raise
+
+    return rq_id
 
 
 def _get_annotations(
@@ -462,6 +470,7 @@ def fetch_task_jobs(task_id: int) -> list[models.JobRead]:
                 api_client.jobs_api.list_endpoint,
                 task_id=task_id,
                 type="annotation",
+                page_size=Config.cvat_config.jobs_page_size,
             )
         except exceptions.ApiException as e:
             logger.exception(f"Exception when calling JobsApi.list: {e}\n")
@@ -535,6 +544,7 @@ def fetch_projects(assignee: str = "") -> list[models.ProjectRead]:
             return get_paginated_collection(
                 api_client.projects_api.list_endpoint,
                 **({"assignee": assignee} if assignee else {}),
+                page_size=Config.cvat_config.projects_page_size,
             )
         except exceptions.ApiException as e:
             logger.exception(f"Exception when calling ProjectsApi.list(): {e}\n")
@@ -711,6 +721,7 @@ def update_quality_control_settings(
     logger = logging.getLogger("app")
 
     params = {
+        "inherit": False,
         "max_validations_per_job": max_validations_per_job,
         "target_metric": target_metric,
         "target_metric_threshold": target_metric_threshold,

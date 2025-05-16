@@ -146,7 +146,7 @@ class CronConfig:
     "Maximum number of downloading attempts per job or project during results downloading"
 
     track_completed_escrows_jobs_downloading_batch_size = int(
-        getenv("TRACK_COMPLETED_ESCROWS_JOBS_DOWNLOADING_BATCH_SIZE", 500)
+        getenv("TRACK_COMPLETED_ESCROWS_JOBS_DOWNLOADING_BATCH_SIZE", 10)
     )
     "Maximum number of parallel downloading requests during results downloading"
 
@@ -182,6 +182,9 @@ class CvatConfig:
 
     incoming_webhooks_url = getenv("CVAT_INCOMING_WEBHOOKS_URL")
     webhook_secret = getenv("CVAT_WEBHOOK_SECRET", "thisisasamplesecret")
+
+    projects_page_size = int(getenv("CVAT_PROJECTS_PAGE_SIZE", 100))
+    jobs_page_size = int(getenv("CVAT_JOBS_PAGE_SIZE", 100))
 
 
 class StorageConfig:

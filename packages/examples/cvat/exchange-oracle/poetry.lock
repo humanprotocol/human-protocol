@@ -945,13 +945,13 @@ test-randomorder = ["pytest-randomly"]
 
 [[package]]
 name = "cvat-sdk"
-version = "2.31.0"
+version = "2.37.0"
 description = "CVAT REST API"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "cvat_sdk-2.31.0-py3-none-any.whl", hash = "sha256:b33e8526dad8c481f82e445badfced5d69747eaf7e5660b0d176cf86d394a02e"},
-    {file = "cvat_sdk-2.31.0.tar.gz", hash = "sha256:aaeff833c32bfe711f418c62bdab135e0746eff0e89757e8b61cfad14a42ef23"},
+    {file = "cvat_sdk-2.37.0-py3-none-any.whl", hash = "sha256:faa94cfd6678089814179a8da828761dfa3daf08eb752490ee85551a1045dac5"},
+    {file = "cvat_sdk-2.37.0.tar.gz", hash = "sha256:e990908a473c499eb6d7b84f7f2e640ea729ef027d4c4cc32a5a925752532689"},
 ]
 
 [package.dependencies]
@@ -5047,4 +5047,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10,<3.13"
-content-hash = "c643f28ae7113ae0b8051952c0adfcb74a0ae182ba5039133f57f52b78608007"
+content-hash = "8bf7f09b99af5cd8b02a36fc0a1b5ad4af28d5d17d7c0275afa38edb281c3cfc"
