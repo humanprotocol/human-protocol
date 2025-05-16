@@ -195,6 +195,7 @@ class ValidationConfig:
     warmup_iterations = int(getenv("WARMUP_ITERATIONS", "1"))
     """
     The first escrow iterations where the annotation speed is checked to be big enough.
+    Set to 0 to disable.
     """
 
     min_warmup_progress = float(getenv("MIN_WARMUP_PROGRESS", "10"))
