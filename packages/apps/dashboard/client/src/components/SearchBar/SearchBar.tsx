@@ -102,7 +102,9 @@ const SearchBar: FC<SearchBarProps> = ({
   if (isLoading) return <CircularProgress />;
 
   const renderEmptyValue = (
-    <span style={{ color: colorPalette.sky.main }}>Network</span>
+    <Box component="span" color="text.secondary">
+      Network
+    </Box>
   );
 
   const renderSelectedValue = (
@@ -173,9 +175,9 @@ const SearchBar: FC<SearchBarProps> = ({
             <InputAdornment sx={endAdornmentInputAdornmentSx} position="end">
               <IconButton onClick={handleClearClick} edge="end">
                 <CloseIcon
-                  style={{
+                  sx={{
                     color: focus
-                      ? colorPalette.textSecondary.main
+                      ? colorPalette.sky.main
                       : colorPalette.primary.main,
                   }}
                 />
@@ -192,7 +194,7 @@ const SearchBar: FC<SearchBarProps> = ({
                   }}
                 >
                   <SearchIcon
-                    style={{
+                    sx={{
                       color: error
                         ? colorPalette.error.main
                         : colorPalette.white,

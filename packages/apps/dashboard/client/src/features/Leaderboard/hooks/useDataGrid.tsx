@@ -5,7 +5,6 @@ import { useBreakPoints } from '@utils/hooks/use-is-mobile';
 import { useLeaderboardSearch } from '@utils/hooks/use-leaderboard-search';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import CustomTooltip from '@components/CustomTooltip';
-import { colorPalette } from '@assets/styles/color-palette';
 import { useMemo } from 'react';
 
 import { RoleCell } from '../components/RoleCell';
@@ -75,8 +74,8 @@ export const useDataGrid = (data: LeaderBoardData) => {
           <Box display="flex" gap="8px" alignItems="center">
             <CustomTooltip title="Address of the role" arrow>
               <HelpOutlineIcon
-                style={{
-                  color: colorPalette.sky.main,
+                sx={{
+                  color: 'text.secondary',
                 }}
               />
             </CustomTooltip>
@@ -98,8 +97,8 @@ export const useDataGrid = (data: LeaderBoardData) => {
           <Box display="flex" gap="8px" alignItems="center">
             <CustomTooltip title="Amount of HMT staked" arrow>
               <HelpOutlineIcon
-                style={{
-                  color: colorPalette.sky.main,
+                sx={{
+                  color: 'text.secondary',
                 }}
               />
             </CustomTooltip>

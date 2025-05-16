@@ -2,21 +2,23 @@ import ToggleButton from '@mui/material/ToggleButton';
 import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
-import { colorPalette } from '@assets/styles/color-palette';
 import {
   TIME_PERIOD_OPTIONS,
   TimePeriod,
   useGraphPageChartParams,
 } from '@utils/hooks/use-graph-page-chart-params';
 
-export const StyledToggleButtonGroup = styled(ToggleButtonGroup)({
-  '.MuiToggleButtonGroup-grouped': {
-    border: 'none',
-    borderRadius: 4,
-    width: 50,
-    color: colorPalette.primary.main,
-  },
-});
+export const StyledToggleButtonGroup = styled(ToggleButtonGroup)(
+  ({ theme }) => ({
+    '.MuiToggleButtonGroup-grouped': {
+      border: 'none',
+      borderRadius: 4,
+      width: 47,
+      height: 30,
+      color: theme.palette.primary.main,
+    },
+  })
+);
 
 const ToggleButtons = () => {
   const { setTimePeriod, selectedTimePeriod, dateRangeParams } =
@@ -36,25 +38,22 @@ const ToggleButtons = () => {
     >
       {TIME_PERIOD_OPTIONS.map((elem) => (
         <ToggleButton
-          onClick={() => {
-            setTimePeriod(elem);
-          }}
-          selected={checkIfSelected(elem)}
           key={elem.name}
+          onClick={() => setTimePeriod(elem)}
+          selected={checkIfSelected(elem)}
+          value={elem.name}
           sx={{
             '.MuiTypography-root': {
               wordBreak: 'normal',
             },
             '&.Mui-selected': {
-              backgroundColor: colorPalette.primary.main,
-              color: colorPalette.white,
+              backgroundColor: 'primary.main',
+              color: 'white.main',
             },
             '&.Mui-selected:hover': {
-              cursor: 'pointer',
-              backgroundColor: colorPalette.primary.main,
+              backgroundColor: 'primary.main',
             },
           }}
-          value={elem.name}
         >
           <Typography variant="Components/Button Small">{elem.name}</Typography>
         </ToggleButton>

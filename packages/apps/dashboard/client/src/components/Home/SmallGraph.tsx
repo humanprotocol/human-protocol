@@ -11,7 +11,7 @@ import {
 import Card from '@mui/material/Card';
 import { colorPalette } from '@assets/styles/color-palette';
 import Box from '@mui/material/Box';
-import { Typography } from '@mui/material';
+import { Typography, useMediaQuery, useTheme } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import ToggleButtons from '@components/DataEntry/ToggleButtons';
 import { Fragment } from 'react';
@@ -29,12 +29,7 @@ const CustomSmallChartTooltip = ({
           border: `2px solid ${colorPalette.fog.light}`,
         }}
       >
-        <Box
-          sx={{
-            paddingX: 2,
-            paddingY: 1,
-          }}
-        >
+        <Box px={2} py={1}>
           {payload?.map((elem) => (
             <Fragment key={elem.name}>
               <Typography fontWeight={500} variant="caption">
@@ -60,10 +55,29 @@ interface SmallGraphProps {
   title: string;
 }
 
+const GraphSettings = ({ title }: { title: string }) => (
+  <Stack
+    mb={2}
+    direction={{ sm: 'column', md: 'row' }}
+    justifyContent="end"
+    alignItems="center"
+    gap={2}
+    order={{ xs: 2, md: 1 }}
+  >
+    <Typography variant="body1" component="p">
+      {title}
+    </Typography>
+    <ToggleButtons />
+  </Stack>
+);
+
 const SmallGraph = ({ title, graphData }: SmallGraphProps) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   return (
     <>
-      <ResponsiveContainer height={150}>
+      {!isMobile && <GraphSettings title={title} />}
+      <ResponsiveContainer height={215}>
         <AreaChart
           data={graphData}
           margin={{
@@ -113,20 +127,7 @@ const SmallGraph = ({ title, graphData }: SmallGraphProps) => {
           />
         </AreaChart>
       </ResponsiveContainer>
-      <Stack
-        sx={{
-          marginTop: 2,
-        }}
-        direction={{ xs: 'column', xl: 'row' }}
-        justifyContent="center"
-        alignItems="center"
-        gap={2}
-      >
-        <Typography fontWeight={400} variant="body1" component="p">
-          {title}
-        </Typography>
-        <ToggleButtons />
-      </Stack>
+      {isMobile && <GraphSettings title={title} />}
     </>
   );
 };
