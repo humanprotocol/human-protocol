@@ -18,7 +18,7 @@ class UserHasUnfinishedAssignmentError(Exception):
         )
 
 
-def create_assignment(escrow_address: str, chain_id: Networks, wallet_address: str) -> str | None:  # noqa: ARG001 (don't we want to use chain_id for filter?)
+def create_assignment(escrow_address: str, chain_id: Networks, wallet_address: str) -> str | None:
     with SessionLocal.begin() as session:
         user = get_or_404(
             cvat_service.get_user_by_id(session, wallet_address, for_update=True),
@@ -26,44 +26,37 @@ def create_assignment(escrow_address: str, chain_id: Networks, wallet_address: s
             "user",
         )
 
-        # There can be several projects under one escrow, we need any
-        project = cvat_service.get_project_by_escrow_address(
+        if cvat_service.has_active_user_assignments(
             session,
-            escrow_address,
-            status_in=[
-                ProjectStatuses.annotation
-            ],  # avoid unnecessary locking on completed projects
-            for_update=True,
-        )
-
-        if not project:
-            # Retry without a lock to check if the project doesn't exist
-            get_or_404(
-                cvat_service.get_project_by_escrow_address(
-                    session, escrow_address, status_in=[ProjectStatuses.annotation]
-                ),
-                escrow_address,
-                "job",
-            )
-            return None
-
-        has_active_assignments = (
-            cvat_service.count_active_user_assignments(
-                session, wallet_address=wallet_address, cvat_projects=[project.cvat_id]
-            )
-            > 0
-        )
-        if has_active_assignments:
+            wallet_address=wallet_address,
+            escrow_address=escrow_address,
+            chain_id=chain_id.value,
+        ):
             raise UserHasUnfinishedAssignmentError(
                 "The user already has an unfinished assignment in this project"
             )
 
+        # TODO: Try to put into 1 request. SQLAlchemy generates 2 queries with simple
+        # .options(selectinload(Job.project))
+        project = get_or_404(
+            cvat_service.get_project_by_escrow_address(
+                session, escrow_address, status_in=[ProjectStatuses.annotation]
+            ),
+            escrow_address,
+            "job",
+        )
+
         unassigned_job = cvat_service.get_free_job(
             session,
-            cvat_projects=[project.cvat_id],
+            escrow_address=escrow_address,
+            chain_id=chain_id.value,
             user_wallet_address=wallet_address,
             for_update=True,
+            # lock the job to be able to make a rollback if CVAT requests fail
+            # can potentially be optimized to make less DB requests
+            # and rely only on assignment expiration
         )
+
         if not unassigned_job:
             return None
 
@@ -72,7 +65,12 @@ def create_assignment(escrow_address: str, chain_id: Networks, wallet_address: s
             wallet_address=user.wallet_address,
             cvat_job_id=unassigned_job.cvat_id,
             expires_at=utcnow()
-            + timedelta(seconds=get_default_assignment_timeout(TaskTypes(project.job_type))),
+            + timedelta(
+                seconds=get_default_assignment_timeout(
+                    TaskTypes(project.job_type)
+                    # TODO: need to update this if we have multiple job types per escrow
+                )
+            ),
         )
 
         cvat_service.touch(session, Job, [unassigned_job.id])

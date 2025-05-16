@@ -794,7 +794,8 @@ def count_jobs_by_escrow_address(
 
 def get_free_job(
     session: Session,
-    cvat_projects: list[int],
+    escrow_address: str,
+    chain_id: int,
     *,
     user_wallet_address: str,
     for_update: bool | ForUpdateParams = False,
@@ -805,7 +806,11 @@ def get_free_job(
     return (
         _maybe_for_update(session.query(Job), enable=for_update)
         .where(
-            Job.cvat_project_id.in_(cvat_projects),
+            Job.project.has(
+                (Project.escrow_address == escrow_address)
+                & (Project.chain_id == chain_id)
+                & (Project.status == ProjectStatuses.annotation)
+            ),
             Job.status == JobStatuses.new,
             ~Job.assignments.any(
                 (
@@ -984,22 +989,27 @@ def get_user_assignments_in_cvat_projects(
     )
 
 
-def count_active_user_assignments(
+def has_active_user_assignments(
     session: Session,
     wallet_address: int,
-    cvat_projects: list[int],
-) -> int:
-    return (
+    escrow_address: str,
+    chain_id: int,
+) -> bool:
+    return session.query(
         session.query(Assignment)
         .where(
-            Assignment.job.has(Job.cvat_project_id.in_(cvat_projects)),
+            Assignment.job.has(
+                Job.project.has(
+                    (Project.escrow_address == escrow_address) & (Project.chain_id == chain_id)
+                )
+            ),
             Assignment.user_wallet_address == wallet_address,
             Assignment.status == AssignmentStatuses.created.value,
             Assignment.completed_at == None,
             utcnow() < Assignment.expires_at,
         )
-        .count()
-    )
+        .exists()
+    ).scalar()
 
 
 # Image
