@@ -1,0 +1,50 @@
+import { FC } from 'react';
+
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+import { NumericFormat } from 'react-number-format';
+
+import { useHMTPrice } from '@services/api/use-hmt-price';
+import { useBreakPoints } from '@utils/hooks/use-is-mobile';
+
+type Props = {
+  balance?: number | null;
+};
+
+const HmtBalance: FC<Props> = ({ balance }) => {
+  const { data, isError, isPending } = useHMTPrice();
+  const { mobile } = useBreakPoints();
+
+  if (isError) {
+    return <span>N/A</span>;
+  }
+
+  if (isPending) {
+    return <span>...</span>;
+  }
+
+  const balanceInDollars = balance ? (balance * data).toFixed(2) : 0;
+
+  return (
+    <Stack flexDirection="row" whiteSpace="nowrap">
+      <Typography variant="body2">
+        <NumericFormat
+          displayType="text"
+          value={Number(balance) < 1 ? Number(balance) * 1e18 : balance}
+          thousandSeparator=","
+          decimalScale={mobile.isMobile ? 4 : 9}
+        />
+      </Typography>
+      <Typography
+        component="span"
+        variant="body2"
+        ml={0.5}
+        color="text.secondary"
+      >
+        {`HMT($${balanceInDollars})`}
+      </Typography>
+    </Stack>
+  );
+};
+
+export default HmtBalance;

@@ -4,7 +4,7 @@ import Typography from '@mui/material/Typography';
 
 import TitleSectionWrapper from '@components/SearchResults';
 import SectionWrapper from '@components/SectionWrapper';
-import { HMTBalance } from '@pages/SearchResults/EscrowAddress/HMTBalance';
+import HmtBalance from '../HmtBalance';
 
 import { AddressDetailsEscrowSchema } from '@services/api/use-address-details';
 
@@ -31,16 +31,13 @@ const EscrowAddress = ({
           <Typography variant="body2">{token}</Typography>
         </TitleSectionWrapper>
         {balance !== undefined && balance !== null ? (
-          <TitleSectionWrapper
-            tooltip={{ description: 'Amount of HMT in Escrow' }}
-            title="Balance"
-          >
-            <HMTBalance HMTBalance={balance} />
+          <TitleSectionWrapper title="Balance">
+            <HmtBalance balance={balance} />
           </TitleSectionWrapper>
         ) : null}
         <TitleSectionWrapper
           title="Factory Address"
-          tooltip={{ description: 'Address of EscrowFactory contract' }}
+          tooltip="Address of EscrowFactory contract"
         >
           <Typography variant="body2">{factoryAddress}</Typography>
         </TitleSectionWrapper>
@@ -88,9 +85,7 @@ const EscrowAddress = ({
 
         <TitleSectionWrapper
           title="Job Launcher"
-          tooltip={{
-            description: 'Address of the Job Launcher that created the escrow',
-          }}
+          tooltip="Address of the Job Launcher that created the escrow"
         >
           <Typography variant="body2" sx={{ wordBreak: 'break-word' }}>
             {launcher}
@@ -99,33 +94,29 @@ const EscrowAddress = ({
 
         <TitleSectionWrapper
           title="Exchange Oracle"
-          tooltip={{
-            description:
-              "The Exchange Oracle is HUMAN Protocol's powerhouse, routing tasks to skilled workers ensuring smooth communication.",
-          }}
+          tooltip="The Exchange Oracle is HUMAN Protocol's powerhouse, routing tasks to skilled workers ensuring smooth communication."
         >
           <Typography variant="body2">{exchangeOracle}</Typography>
         </TitleSectionWrapper>
 
         <TitleSectionWrapper
           title="Recording Oracle"
-          tooltip={{
-            description:
-              'The Recording Oracle is where task solutions get the green light. It is storing, and recording task solutions on the blockchain.\n' +
-              '\n' +
-              "From quality checks to reputation adjustments, it's the assurance you need for dependable results.",
-          }}
+          tooltip={
+            'The Recording Oracle is where task solutions get the green light. It is storing, and recording task solutions on the blockchain.\n' +
+            '\n' +
+            "From quality checks to reputation adjustments, it's the assurance you need for dependable results."
+          }
         >
           <Typography variant="body2">{recordingOracle}</Typography>
         </TitleSectionWrapper>
 
         <TitleSectionWrapper
           title="Reputation Oracle"
-          tooltip={{
-            description:
-              'The Reputation Oracle is the trust engine of the HUMAN Protocol. It cross-checks validated solutions from the Recording Oracle, adjusts reputation scores, and manages payments.\n' +
-              "It's the final seal of quality and trust within the ecosystem.",
-          }}
+          tooltip={
+            'The Reputation Oracle is the trust engine of the HUMAN Protocol. It cross-checks validated solutions from the Recording Oracle, adjusts reputation scores, and manages payments.\n' +
+            '\n' +
+            "It's the final seal of quality and trust within the ecosystem."
+          }
         >
           <Typography variant="body2">{reputationOracle}</Typography>
         </TitleSectionWrapper>

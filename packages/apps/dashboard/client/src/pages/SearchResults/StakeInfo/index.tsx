@@ -1,6 +1,5 @@
 import { FC } from 'react';
 
-import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
@@ -17,11 +16,9 @@ const StakeInfo: FC<Props> = ({ amountStaked, amountLocked }) => {
 
   return (
     <SectionWrapper>
-      <Box mb={{ xs: 4, md: 8 }}>
-        <Typography variant="h5" mb={1.5}>
-          Stake Info
-        </Typography>
-      </Box>
+      <Typography variant="h5" mb={4}>
+        Stake Info
+      </Typography>
       <Stack gap={4}>
         {amountStaked !== undefined && amountStaked !== null ? (
           <Stack gap={{ xs: 1, md: 0 }} direction={{ sm: 'column', md: 'row' }}>

@@ -3,7 +3,7 @@ import {
   PaletteColorOptions,
   PaletteColor,
 } from '@mui/material/styles/createPalette';
-import { ThemeOptions } from '@mui/material';
+import { Shadows, ThemeOptions } from '@mui/material';
 import { colorPalette } from '@assets/styles/color-palette';
 import { CSSProperties } from 'react';
 
@@ -43,12 +43,10 @@ declare module '@mui/material/styles' {
   interface Palette {
     sky: PaletteColor;
     white: PaletteColor;
-    textSecondary: PaletteColor;
   }
   interface PaletteOptions {
     sky?: PaletteColorOptions;
     white?: PaletteColorOptions;
-    textSecondary?: PaletteColorOptions;
   }
 }
 
@@ -56,7 +54,6 @@ declare module '@mui/material/Button' {
   interface ButtonPropsColorOverrides {
     sky: true;
     white: true;
-    textSecondary: true;
   }
 }
 
@@ -64,7 +61,6 @@ declare module '@mui/material/IconButton' {
   interface IconButtonPropsColorOverrides {
     sky: true;
     white: true;
-    textSecondary: true;
   }
 }
 
@@ -72,7 +68,6 @@ declare module '@mui/material/SvgIcon' {
   interface SvgIconPropsColorOverrides {
     sky: true;
     white: true;
-    textSecondary: true;
   }
 }
 
@@ -107,7 +102,6 @@ const theme: ThemeOptions = createTheme({
       dark: '#fff',
       contrastText: '#fff',
     },
-    textSecondary: colorPalette.textSecondary,
   },
   typography: {
     fontFamily: 'Inter, Arial, sans-serif',
@@ -200,6 +194,14 @@ const theme: ThemeOptions = createTheme({
       fontSize: 10,
     },
   },
+  shadows: [
+    ...createTheme({}).shadows.map((shadow, i) => {
+      if (i === 2) {
+        return '0px 3px 1px -2px #e9ebfa, 0px 2px 2px 0px rgba(233, 235, 250, 0.50), 0px 1px 5px 0px rgba(233, 235, 250, 0.20)';
+      }
+      return shadow;
+    }),
+  ] as Shadows,
   components: {
     MuiButton: {
       styleOverrides: {

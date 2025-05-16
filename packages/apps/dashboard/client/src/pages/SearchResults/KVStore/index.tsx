@@ -14,7 +14,11 @@ import CustomTooltip from '@components/CustomTooltip';
 
 const KVStore = () => {
   const { data } = useKvstoreData();
-  console.log(data);
+
+  if (data?.length === 0) {
+    return null;
+  }
+
   return (
     <SectionWrapper>
       <Typography variant="h5" mb={1}>

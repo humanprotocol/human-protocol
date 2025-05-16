@@ -6,6 +6,8 @@ const SectionWrapper: FC<PropsWithChildren> = ({ children }) => {
   return (
     <Card
       sx={{
+        display: 'flex',
+        flexDirection: 'column',
         px: { xs: 2, md: 8 },
         py: { xs: 4, md: 6 },
         mb: 4,

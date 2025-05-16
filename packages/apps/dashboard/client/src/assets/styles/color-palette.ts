@@ -55,12 +55,6 @@ export const colorPalette = {
     main: '#ED6C02',
     light: '#ED6C0280',
   },
-  textSecondary: {
-    main: '#858ec6',
-    light: '#858ec6',
-    dark: '#858ec6',
-    contrastText: '#858ec6',
-  },
   table: {
     main: '#FFFFFF01',
     selected: '#1406B21F',

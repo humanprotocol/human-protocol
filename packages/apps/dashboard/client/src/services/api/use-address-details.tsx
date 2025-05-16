@@ -29,6 +29,12 @@ const walletSchema = z.object({
   chainId: z.number(),
   address: z.string(),
   balance: z.string().transform(transformOptionalTokenAmount),
+  amountStaked: z.string().transform(transformOptionalTokenAmount),
+  amountLocked: z.string().transform(transformOptionalTokenAmount),
+  amountWithdrawable: z.string().transform(transformOptionalTokenAmount),
+  reputation: reputationSchema,
+  totalAmountReceived: z.string().transform(transformOptionalTokenAmount),
+  payoutCount: z.number(),
 });
 
 export type AddressDetailsWallet = z.infer<typeof walletSchema>;

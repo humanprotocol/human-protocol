@@ -86,11 +86,9 @@ const Results = () => {
 
   const showTransactions = !!data.wallet || !!data.operator;
 
-  const walletBalance =
-    data.wallet?.balance ||
-    (data.operator && data.operator.role === null
-      ? data.operator?.balance
-      : undefined);
+  const walletData =
+    data.wallet ||
+    (data.operator && data.operator.role === null ? data.operator : undefined);
 
   return (
     <>
@@ -106,7 +104,7 @@ const Results = () => {
       {data.operator && data.operator.role ? (
         <RoleDetails data={data.operator} />
       ) : null}
-      {walletBalance ? <WalletAddress balance={walletBalance} /> : null}
+      {walletData ? <WalletAddress data={walletData} /> : null}
       {data.escrow && <EscrowAddress data={data.escrow} />}
       {showTransactions && <WalletAddressTransactionsTable />}
     </>
