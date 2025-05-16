@@ -470,6 +470,7 @@ def fetch_task_jobs(task_id: int) -> list[models.JobRead]:
                 api_client.jobs_api.list_endpoint,
                 task_id=task_id,
                 type="annotation",
+                page_size=Config.cvat_config.jobs_page_size,
             )
         except exceptions.ApiException as e:
             logger.exception(f"Exception when calling JobsApi.list: {e}\n")
@@ -543,6 +544,7 @@ def fetch_projects(assignee: str = "") -> list[models.ProjectRead]:
             return get_paginated_collection(
                 api_client.projects_api.list_endpoint,
                 **({"assignee": assignee} if assignee else {}),
+                page_size=Config.cvat_config.projects_page_size,
             )
         except exceptions.ApiException as e:
             logger.exception(f"Exception when calling ProjectsApi.list(): {e}\n")
