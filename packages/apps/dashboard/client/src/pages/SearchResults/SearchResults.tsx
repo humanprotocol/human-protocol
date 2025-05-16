@@ -93,9 +93,10 @@ const Results = () => {
   return (
     <>
       <Stack
-        sx={{ mb: 2, mt: { xs: 2, md: 4 } }}
+        mt={{ xs: 1, md: 4 }}
+        mb={4}
         direction={{ xs: 'column', md: 'row' }}
-        gap={3}
+        gap={{ xs: 1, md: 3 }}
         alignItems={{ xs: 'stretch', md: 'center' }}
       >
         {renderCurrentResultType(data, filterParams.address)}

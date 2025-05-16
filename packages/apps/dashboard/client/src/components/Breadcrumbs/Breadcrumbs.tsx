@@ -9,7 +9,7 @@ import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 
 const Breadcrumbs: FC<{ title?: string }> = ({ title }) => {
   return (
-    <Box display="flex" alignItems="center" gap={1} mb={{ sm: 3, md: 4 }}>
+    <Box display="flex" alignItems="center" gap={1} mb={{ xs: 3, md: 4 }}>
       <Link
         to="/"
         component={RouterLink}
