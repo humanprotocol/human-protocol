@@ -43,8 +43,8 @@ x-general-env-variables:
   bucket_name_rec_o: &bucket_name_rec_o ${BUCKET_NAME_RECORDING_ORACLE:-recording-oracle}
   # WEB3 ADDRESSES
   reputation_oracle_address: &reputation_oracle_address ${REPUTATION_ORACLE_ADDRESS:?}
-  exchange_oracle_address: &exchange_oracle_address ${EXCHANGE_ORACLE_ADDRESS:?}
-  recording_oracle_address: &recording_oracle_address ${RECORDING_ORACLE_ADDRESS:?}
+  cvat_exchange_oracle_address: &cvat_exchange_oracle_address ${CVAT_EXCHANGE_ORACLE_ADDRESS:?}
+  cvat_recording_oracle_address: &cvat_recording_oracle_address ${CVAT_RECORDING_ORACLE_ADDRESS:?}
   # OTHER
   backend_apps_internal_port: &backend_apps_internal_port ${BACKEND_APPS_INTERNAL_PORT:?}
   human_app_secret_key: &human_app_secret_key ${HUMAN_APP_SECRET_KEY:?}
@@ -303,7 +303,7 @@ services:
     ports:
       - name: server_port
         target: *frontend_default_port
-        published: ${HUMAN_APP_CLIENT_PORT:?}
+        published: ${HUMAN_APP_CLIENT_EXPOSED_PORT:?}
     environment:
       PORT: *frontend_default_port
 
@@ -350,13 +350,13 @@ services:
       REDIS_DB: 2
       PG_DB: exchange-oracle
       POLYGON_AMOY_RPC_API_URL: *rpc_url_polygon_amoy
-      POLYGON_AMOY_ADDR: *exchange_oracle_address
+      POLYGON_AMOY_ADDR: *cvat_exchange_oracle_address
       STORAGE_BUCKET_NAME: *bucket_name_exc_o
       HUMAN_APP_JWT_KEY: *reputation_oracle_jwt_public_key
       CVAT_INCOMING_WEBHOOKS_URL: "http://exchange-oracle.app:${BACKEND_APPS_INTERNAL_PORT:?}/cvat-webhook"
       LOCALHOST_RECORDING_ORACLE_URL: "http://recording-oracle:${BACKEND_APPS_INTERNAL_PORT:?}/webhook"
       LOCALHOST_JOB_LAUNCHER_URL: "http://job-launcher:${BACKEND_APPS_INTERNAL_PORT:?}/webhook"
-      LOCALHOST_RECORDING_ORACLE_ADDRESS: *recording_oracle_address
+      LOCALHOST_RECORDING_ORACLE_ADDRESS: *cvat_recording_oracle_address
 
   recording-oracle:
     container_name: recording-oracle-cvat
@@ -395,7 +395,7 @@ services:
       ]
       PG_DB: recording-oracle
       POLYGON_AMOY_RPC_API_URL: *rpc_url_polygon_amoy
-      POLYGON_AMOY_ADDR: *recording_oracle_address
+      POLYGON_AMOY_ADDR: *cvat_recording_oracle_address
       STORAGE_RESULTS_BUCKET_NAME: *bucket_name_rec_o
       STORAGE_USE_PATH_STYLE: "true"
       EXCHANGE_ORACLE_STORAGE_PROVIDER: *cvat_oracle_storage_provider
@@ -406,7 +406,7 @@ services:
       EXCHANGE_ORACLE_STORAGE_USE_SSL: 'false'
       LOCALHOST_EXCHANGE_ORACLE_URL: "http://exchange-oracle:${BACKEND_APPS_INTERNAL_PORT:?}/webhook"
       LOCALHOST_REPUTATION_ORACLE_URL: "http://reputation-oracle:${BACKEND_APPS_INTERNAL_PORT:?}/webhook"
-      LOCALHOST_EXCHANGE_ORACLE_ADDRESS: *exchange_oracle_address
+      LOCALHOST_EXCHANGE_ORACLE_ADDRESS: *cvat_exchange_oracle_address
 
   job-launcher:
     container_name: job-launcher
@@ -442,8 +442,8 @@ services:
       S3_BUCKET: *bucket_name_manifests
       REPUTATION_ORACLES: *reputation_oracle_address
       REPUTATION_ORACLE_ADDRESS: *reputation_oracle_address
-      CVAT_EXCHANGE_ORACLE_ADDRESS: *exchange_oracle_address
-      CVAT_RECORDING_ORACLE_ADDRESS: *recording_oracle_address
+      CVAT_EXCHANGE_ORACLE_ADDRESS: *cvat_exchange_oracle_address
+      CVAT_RECORDING_ORACLE_ADDRESS: *cvat_recording_oracle_address
       FE_URL: http://localhost:${JOB_LAUNCHER_CLIENT_EXPOSED_PORT:?}
 
   job-launcher-client:
