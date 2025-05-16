@@ -2,12 +2,8 @@ name: Protocol check
 
 on:
   push:
-    branches:
-      - 'main'
-  pull_request:
     paths:
       - 'packages/core/**'
-  workflow_dispatch:
 
 jobs:
   core-test:
@@ -18,7 +14,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-      - run: npm install --global yarn && yarn --ignore-scripts
-        name: Install dependencies
-      - run: yarn workspace @human-protocol/core test
-        name: Run protocol test
+          cache: yarn
+      - name: Install dependencies
+        run: yarn install --immutable
+      - name: Run protocol test
+        run: yarn workspace @human-protocol/core test

@@ -171,4 +171,30 @@ export type EscrowWithdraw = {
   amountWithdrawn: bigint;
 };
 
+/**
+ * Represents a payout from an escrow.
+ */
+export type Payout = {
+  /**
+   * Unique identifier of the payout.
+   */
+  id: string;
+  /**
+   * The address of the escrow associated with the payout.
+   */
+  escrowAddress: string;
+  /**
+   * The address of the recipient who received the payout.
+   */
+  recipient: string;
+  /**
+   * The amount paid to the recipient.
+   */
+  amount: bigint;
+  /**
+   * The timestamp when the payout was created (in UNIX format).
+   */
+  createdAt: number;
+};
+
 export type TransactionLikeWithNonce = TransactionLike & { nonce: number };

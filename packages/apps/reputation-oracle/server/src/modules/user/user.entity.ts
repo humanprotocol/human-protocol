@@ -2,7 +2,7 @@ import { Exclude } from 'class-transformer';
 import { Column, Entity, OneToMany, OneToOne } from 'typeorm';
 
 import { DATABASE_SCHEMA_NAME } from '../../common/constants';
-import { BaseEntity } from '../../database/base.entity';
+import { BaseEntity } from '../../database';
 
 import type { KycEntity } from '../kyc/kyc.entity';
 import type { UserQualificationEntity } from '../qualification/user-qualification.entity';
@@ -18,7 +18,6 @@ export enum UserStatus {
 export enum Role {
   OPERATOR = 'operator',
   WORKER = 'worker',
-  HUMAN_APP = 'human_app',
   ADMIN = 'admin',
 }
 

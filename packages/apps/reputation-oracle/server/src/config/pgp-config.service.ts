@@ -10,20 +10,20 @@ export class PGPConfigService {
    * Default: false
    */
   get encrypt(): boolean {
-    return this.configService.get<string>('PGP_ENCRYPT', 'false') === 'true';
+    return this.configService.get('PGP_ENCRYPT', 'false') === 'true';
   }
 
   /**
    * The private key used for PGP encryption or decryption.
    */
-  get privateKey(): string | undefined {
-    return this.configService.get<string>('PGP_PRIVATE_KEY');
+  get privateKey(): string {
+    return this.configService.getOrThrow('PGP_PRIVATE_KEY');
   }
 
   /**
    * The passphrase associated with the PGP private key.
    */
-  get passphrase(): string | undefined {
-    return this.configService.get<string>('PGP_PASSPHRASE');
+  get passphrase(): string {
+    return this.configService.getOrThrow('PGP_PASSPHRASE');
   }
 }

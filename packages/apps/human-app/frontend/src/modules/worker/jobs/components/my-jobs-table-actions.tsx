@@ -2,9 +2,9 @@
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { TableButton } from '@/shared/components/ui/table-button';
-import { useRejectTaskMutation } from '../my-jobs/hooks';
+import { useResignJobMutation } from '../my-jobs/hooks';
 import { MyJobStatus } from '../types';
-import { type MyJob } from '../my-jobs/schemas';
+import { type MyJob } from '../schemas';
 import { RejectButton } from './reject-button';
 
 interface MyJobsTableRejectActionProps {
@@ -16,7 +16,7 @@ export function MyJobsTableActions({
 }: Readonly<MyJobsTableRejectActionProps>) {
   const { t } = useTranslation();
   const { mutate: rejectTaskMutation, isPending: isRejectPending } =
-    useRejectTaskMutation();
+    useResignJobMutation();
   const { address: oracleAddress } = useParams<{ address: string }>();
   const buttonDisabled = job.status !== MyJobStatus.ACTIVE || isRejectPending;
 

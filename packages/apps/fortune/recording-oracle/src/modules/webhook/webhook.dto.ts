@@ -1,7 +1,12 @@
 import { ChainId } from '@human-protocol/sdk';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsObject, IsOptional, IsString } from 'class-validator';
-import { IsValidEthereumAddress } from '../../common/validators';
+import {
+  IsArray,
+  IsEthereumAddress,
+  IsObject,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { EventType } from '../../common/enums/webhook';
 import { IsEnumCaseInsensitive } from '@/common/decorators';
 
@@ -40,8 +45,7 @@ export class WebhookDto {
   public chainId: ChainId;
 
   @ApiProperty({ name: 'escrow_address' })
-  @IsString()
-  @IsValidEthereumAddress()
+  @IsEthereumAddress()
   public escrowAddress: string;
 
   @ApiProperty({

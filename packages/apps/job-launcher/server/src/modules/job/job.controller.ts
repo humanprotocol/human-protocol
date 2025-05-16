@@ -1,8 +1,8 @@
+import { ChainId } from '@human-protocol/sdk';
 import {
   Body,
   Controller,
   Get,
-  HttpStatus,
   Param,
   Patch,
   Post,
@@ -13,35 +13,35 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
-  ApiOperation,
-  ApiTags,
   ApiBody,
+  ApiOperation,
   ApiResponse,
+  ApiTags,
 } from '@nestjs/swagger';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { MUTEX_TIMEOUT } from '../../common/constants';
+import { ApiKey } from '../../common/decorators';
+import { FortuneJobType } from '../../common/enums/job';
+import { Web3Env } from '../../common/enums/web3';
+import { ForbiddenError } from '../../common/errors';
 import { JwtAuthGuard } from '../../common/guards';
+import { PageDto } from '../../common/pagination/pagination.dto';
 import { RequestWithUser } from '../../common/types';
+import { MutexManagerService } from '../mutex/mutex-manager.service';
 import {
-  JobFortuneDto,
-  JobCvatDto,
-  JobListDto,
-  JobDetailsDto,
-  JobIdDto,
   FortuneFinalResultDto,
+  GetJobsDto,
+  JobAudinoDto,
+  JobCancelDto,
+  JobCvatDto,
+  JobDetailsDto,
+  JobFortuneDto,
+  JobIdDto,
+  JobListDto,
   // JobCaptchaDto,
   JobQuickLaunchDto,
-  JobCancelDto,
-  GetJobsDto,
 } from './job.dto';
 import { JobService } from './job.service';
-import { JobRequestType } from '../../common/enums/job';
-import { ApiKey } from '../../common/decorators';
-import { ChainId } from '@human-protocol/sdk';
-import { ControlledError } from '../../common/errors/controlled';
-import { PageDto } from '../../common/pagination/pagination.dto';
-import { MutexManagerService } from '../mutex/mutex-manager.service';
-import { MUTEX_TIMEOUT } from '../../common/constants';
-import { Web3ConfigService } from '../../common/config/web3-config.service';
-import { Web3Env } from '../../common/enums/web3';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -124,7 +124,7 @@ export class JobController {
     @Request() req: RequestWithUser,
   ): Promise<number> {
     if (this.web3ConfigService.env === Web3Env.MAINNET) {
-      throw new ControlledError('Disabled', HttpStatus.METHOD_NOT_ALLOWED);
+      throw new ForbiddenError('Disabled');
     }
 
     return await this.mutexManagerService.runExclusive(
@@ -133,7 +133,7 @@ export class JobController {
       async () => {
         return await this.jobService.createJob(
           req.user,
-          JobRequestType.FORTUNE,
+          FortuneJobType.FORTUNE,
           data,
         );
       },
@@ -176,6 +176,46 @@ export class JobController {
     );
   }
 
+  @ApiOperation({
+    summary: 'Create an Audino job',
+    description: 'Endpoint to create a new Audino job.',
+  })
+  @ApiBody({ type: JobAudinoDto })
+  @ApiResponse({
+    status: 201,
+    description: 'ID of the created Audino job.',
+    type: Number,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request. Invalid input parameters.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Missing or invalid credentials.',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Conflict. Conflict with the current state of the server.',
+  })
+  @Post('/audino')
+  public async createAudinoJob(
+    @Body() data: JobAudinoDto,
+    @Request() req: RequestWithUser,
+  ): Promise<number> {
+    if (this.web3ConfigService.env === Web3Env.MAINNET) {
+      throw new ForbiddenError('Disabled');
+    }
+
+    return await this.mutexManagerService.runExclusive(
+      { id: `user${req.user.id}` },
+      MUTEX_TIMEOUT,
+      async () => {
+        return await this.jobService.createJob(req.user, data.type, data);
+      },
+    );
+  }
+
   // @ApiOperation({
   //   summary: 'Create a hCaptcha job',
   //   description: 'Endpoint to create a new hCaptcha job.',
@@ -203,9 +243,8 @@ export class JobController {
   //   @Body() data: JobCaptchaDto,
   //   @Request() req: RequestWithUser,
   // ): Promise<number> {
-  //   throw new ControlledError(
+  //   throw new ForbiddenError(
   //     'Hcaptcha jobs disabled temporally',
-  //     HttpStatus.UNAUTHORIZED,
   //   );
   //   return await this.mutexManagerService.runExclusive(
   //     { id: `user${req.user.id}` },

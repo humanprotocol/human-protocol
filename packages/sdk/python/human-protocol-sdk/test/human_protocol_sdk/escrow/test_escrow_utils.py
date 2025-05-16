@@ -2,7 +2,7 @@ import unittest
 from datetime import datetime
 from unittest.mock import patch
 
-from human_protocol_sdk.constants import NETWORKS, ChainId, Status
+from human_protocol_sdk.constants import NETWORKS, ChainId, Status, OrderDirection
 from human_protocol_sdk.gql.escrow import (
     get_escrow_query,
     get_escrows_query,
@@ -11,7 +11,12 @@ from human_protocol_sdk.escrow import (
     EscrowClientError,
     EscrowUtils,
 )
-from human_protocol_sdk.filter import EscrowFilter
+from human_protocol_sdk.filter import (
+    EscrowFilter,
+    FilterError,
+    StatusEventFilter,
+    PayoutFilter,
+)
 
 
 class TestEscrowUtils(unittest.TestCase):
@@ -181,15 +186,17 @@ class TestEscrowUtils(unittest.TestCase):
         self.assertEqual("Invalid escrow address: invalid_address", str(cm.exception))
 
     def test_get_status_events_unsupported_chain_id(self):
+        filter = StatusEventFilter(chain_id=9999)
         with self.assertRaises(EscrowClientError) as context:
-            EscrowUtils.get_status_events(9999)
+            EscrowUtils.get_status_events(filter)
         self.assertEqual(str(context.exception), "Unsupported Chain ID")
 
     def test_get_status_events_invalid_launcher(self):
+        filter = StatusEventFilter(
+            chain_id=ChainId.POLYGON_AMOY, launcher="invalid_address"
+        )
         with self.assertRaises(EscrowClientError) as context:
-            EscrowUtils.get_status_events(
-                ChainId.POLYGON_AMOY, launcher="invalid_address"
-            )
+            EscrowUtils.get_status_events(filter)
         self.assertEqual(str(context.exception), "Invalid Address")
 
     def test_get_status_events(self):
@@ -208,9 +215,10 @@ class TestEscrowUtils(unittest.TestCase):
                 }
             }
 
-            result = EscrowUtils.get_status_events(
-                ChainId.POLYGON_AMOY, statuses=[Status.Pending]
+            filter = StatusEventFilter(
+                chain_id=ChainId.POLYGON_AMOY, statuses=[Status.Pending]
             )
+            result = EscrowUtils.get_status_events(filter)
 
             self.assertEqual(len(result), 1)
             self.assertEqual(result[0].timestamp, 1620000000)
@@ -237,12 +245,13 @@ class TestEscrowUtils(unittest.TestCase):
             date_from = datetime(2021, 1, 1)
             date_to = datetime(2021, 12, 31)
 
-            result = EscrowUtils.get_status_events(
-                ChainId.POLYGON_AMOY,
+            filter = StatusEventFilter(
+                chain_id=ChainId.POLYGON_AMOY,
                 statuses=[Status.Pending],
                 date_from=date_from,
                 date_to=date_to,
             )
+            result = EscrowUtils.get_status_events(filter)
 
             self.assertEqual(len(result), 1)
             self.assertEqual(result[0].timestamp, 1620000000)
@@ -256,9 +265,10 @@ class TestEscrowUtils(unittest.TestCase):
         ) as mock_get_data_from_subgraph:
             mock_get_data_from_subgraph.return_value = {"data": {}}
 
-            result = EscrowUtils.get_status_events(
-                ChainId.POLYGON_AMOY, statuses=[Status.Pending]
+            filter = StatusEventFilter(
+                chain_id=ChainId.POLYGON_AMOY, statuses=[Status.Pending]
             )
+            result = EscrowUtils.get_status_events(filter)
 
             self.assertEqual(len(result), 0)
 
@@ -278,17 +288,151 @@ class TestEscrowUtils(unittest.TestCase):
                 }
             }
 
-            result = EscrowUtils.get_status_events(
-                ChainId.POLYGON_AMOY,
+            filter = StatusEventFilter(
+                chain_id=ChainId.POLYGON_AMOY,
                 statuses=[Status.Pending],
                 launcher="0x1234567890abcdef1234567890abcdef12345678",
             )
+            result = EscrowUtils.get_status_events(filter)
 
             self.assertEqual(len(result), 1)
             self.assertEqual(result[0].timestamp, 1620000000)
             self.assertEqual(result[0].escrow_address, "0x123")
             self.assertEqual(result[0].status, "Pending")
             self.assertEqual(result[0].chain_id, ChainId.POLYGON_AMOY)
+
+    def test_get_payouts_unsupported_chain_id(self):
+        filter = PayoutFilter(chain_id=9999)
+        with self.assertRaises(EscrowClientError) as context:
+            EscrowUtils.get_payouts(filter)
+        self.assertEqual(str(context.exception), "Unsupported Chain ID")
+
+    def test_get_payouts_invalid_escrow_address(self):
+        with self.assertRaises(FilterError) as context:
+            PayoutFilter(
+                chain_id=ChainId.POLYGON_AMOY, escrow_address="invalid_address"
+            )
+        self.assertEqual(str(context.exception), "Invalid address: invalid_address")
+
+    def test_get_payouts_invalid_recipient(self):
+        with self.assertRaises(FilterError) as context:
+            PayoutFilter(chain_id=ChainId.POLYGON_AMOY, recipient="invalid_address")
+        self.assertEqual(str(context.exception), "Invalid address: invalid_address")
+
+    def test_get_payouts(self):
+        with patch(
+            "human_protocol_sdk.escrow.escrow_utils.get_data_from_subgraph"
+        ) as mock_get_data_from_subgraph:
+            mock_get_data_from_subgraph.return_value = {
+                "data": {
+                    "payouts": [
+                        {
+                            "id": "1",
+                            "escrowAddress": "0x1234567890123456789012345678901234567890",
+                            "recipient": "0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef",
+                            "amount": "1000000000000000000",
+                            "createdAt": "1672531200",
+                        }
+                    ]
+                }
+            }
+
+            filter = PayoutFilter(chain_id=ChainId.POLYGON_AMOY)
+            result = EscrowUtils.get_payouts(filter)
+
+            self.assertEqual(len(result), 1)
+            self.assertEqual(result[0].id, "1")
+            self.assertEqual(
+                result[0].escrow_address, "0x1234567890123456789012345678901234567890"
+            )
+            self.assertEqual(
+                result[0].recipient, "0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef"
+            )
+            self.assertEqual(result[0].amount, 1000000000000000000)
+            self.assertEqual(result[0].created_at, 1672531200)
+
+    def test_get_payouts_with_filters(self):
+        with patch(
+            "human_protocol_sdk.escrow.escrow_utils.get_data_from_subgraph"
+        ) as mock_get_data_from_subgraph:
+            mock_get_data_from_subgraph.return_value = {
+                "data": {
+                    "payouts": [
+                        {
+                            "id": "1",
+                            "escrowAddress": "0x1234567890123456789012345678901234567891",
+                            "recipient": "0x1234567890123456789012345678901234567892",
+                            "amount": "1000000000000000000",
+                            "createdAt": "1672531200",
+                        }
+                    ]
+                }
+            }
+
+            filter = PayoutFilter(
+                chain_id=ChainId.POLYGON_AMOY,
+                escrow_address="0x1234567890123456789012345678901234567891",
+                recipient="0x1234567890123456789012345678901234567892",
+                date_from=datetime(2023, 1, 1),
+                date_to=datetime(2023, 12, 31),
+            )
+            result = EscrowUtils.get_payouts(filter)
+
+            self.assertEqual(len(result), 1)
+            self.assertEqual(result[0].id, "1")
+            self.assertEqual(
+                result[0].escrow_address, "0x1234567890123456789012345678901234567891"
+            )
+            self.assertEqual(
+                result[0].recipient, "0x1234567890123456789012345678901234567892"
+            )
+            self.assertEqual(result[0].amount, 1000000000000000000)
+            self.assertEqual(result[0].created_at, 1672531200)
+
+    def test_get_payouts_no_data(self):
+        with patch(
+            "human_protocol_sdk.escrow.escrow_utils.get_data_from_subgraph"
+        ) as mock_get_data_from_subgraph:
+            mock_get_data_from_subgraph.return_value = {"data": {"payouts": []}}
+
+            filter = PayoutFilter(chain_id=ChainId.POLYGON_AMOY)
+            result = EscrowUtils.get_payouts(filter)
+
+            self.assertEqual(len(result), 0)
+
+    def test_get_payouts_with_pagination(self):
+        with patch(
+            "human_protocol_sdk.escrow.escrow_utils.get_data_from_subgraph"
+        ) as mock_get_data_from_subgraph:
+            mock_get_data_from_subgraph.return_value = {
+                "data": {
+                    "payouts": [
+                        {
+                            "id": "1",
+                            "escrowAddress": "0x1234567890123456789012345678901234567890",
+                            "recipient": "0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef",
+                            "amount": "1000000000000000000",
+                            "createdAt": "1672531200",
+                        },
+                        {
+                            "id": "2",
+                            "escrowAddress": "0x1234567890123456789012345678901234567890",
+                            "recipient": "0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef",
+                            "amount": "2000000000000000000",
+                            "createdAt": "1672617600",
+                        },
+                    ]
+                }
+            }
+
+            filter = PayoutFilter(chain_id=ChainId.POLYGON_AMOY, first=20, skip=10)
+            result = EscrowUtils.get_payouts(filter)
+
+            self.assertEqual(len(result), 2)
+            self.assertEqual(result[0].id, "1")
+            self.assertEqual(result[1].id, "2")
+            self.assertEqual(result[0].amount, 1000000000000000000)
+            self.assertEqual(result[1].amount, 2000000000000000000)
 
 
 if __name__ == "__main__":

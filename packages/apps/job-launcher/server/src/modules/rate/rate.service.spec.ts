@@ -1,13 +1,12 @@
 import { HttpService } from '@nestjs/axios';
+import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { of } from 'rxjs';
-import { RateService } from './rate.service';
-import { ControlledError } from '../../common/errors/controlled';
-import { ErrorCurrency } from '../../common/constants/errors';
-import { ServerConfigService } from '../../common/config/server-config.service';
-import { HttpStatus } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { mockConfig } from '../../../test/constants';
+import { ServerConfigService } from '../../common/config/server-config.service';
+import { ErrorCurrency } from '../../common/constants/errors';
+import { NotFoundError } from '../../common/errors';
+import { RateService } from './rate.service';
 
 describe('RateService', () => {
   let service: RateService;
@@ -89,8 +88,8 @@ describe('RateService', () => {
         }) as any,
     );
 
-    await expect(service.getRate(from, to)).rejects.toThrowError(
-      new ControlledError(ErrorCurrency.PairNotFound, HttpStatus.NOT_FOUND),
+    await expect(service.getRate(from, to)).rejects.toThrow(
+      new NotFoundError(ErrorCurrency.PairNotFound),
     );
   });
 });

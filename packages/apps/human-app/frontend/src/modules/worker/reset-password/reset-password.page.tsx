@@ -15,17 +15,15 @@ import { getErrorMessageForError } from '@/shared/errors';
 import { routerPaths } from '@/router/router-paths';
 import { HCaptchaForm } from '@/shared/components/hcaptcha';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
-import {
-  type ResetPasswordDto,
-  resetPasswordDtoSchema,
-  useResetPasswordMutation,
-} from './hooks';
+import { useResetPasswordMutation } from './hooks';
+import { resetPasswordDtoSchema } from './schemas';
+import { type ResetPasswordDto } from './types';
 
 export function ResetPasswordWorkerPage() {
   const location = useLocation();
   const { token } = queryString.parse(location.search);
 
-  const methods = useForm<ResetPasswordDto>({
+  const methods = useForm({
     defaultValues: {
       password: '',
       confirmPassword: '',

@@ -1,21 +1,18 @@
 import {
+  HMToken,
+  HMToken__factory,
+} from '@human-protocol/core/typechain-types';
+import {
   ChainId,
   Encryption,
   EncryptionUtils,
   EscrowClient,
   StorageClient,
 } from '@human-protocol/sdk';
-import {
-  HMToken,
-  HMToken__factory,
-} from '@human-protocol/core/typechain-types';
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import { PGPConfigService } from '../../common/config/pgp-config.service';
+import { ErrorAssignment, ErrorJob } from '../../common/constant/errors';
+import { SortDirection } from '../../common/enums/collection';
 import {
   AssignmentStatus,
   JobFieldName,
@@ -24,8 +21,16 @@ import {
   JobType,
 } from '../../common/enums/job';
 import { EventType } from '../../common/enums/webhook';
+import {
+  ConflictError,
+  NotFoundError,
+  ServerError,
+  ValidationError,
+} from '../../common/errors';
 import { ISolution } from '../../common/interfaces/job';
 import { PageDto } from '../../common/pagination/pagination.dto';
+import { AssignmentEntity } from '../assignment/assignment.entity';
+import { AssignmentRepository } from '../assignment/assignment.repository';
 import { StorageService } from '../storage/storage.service';
 import { Web3Service } from '../web3/web3.service';
 import { RejectionEventData, WebhookDto } from '../webhook/webhook.dto';
@@ -34,11 +39,6 @@ import { WebhookRepository } from '../webhook/webhook.repository';
 import { GetJobsDto, JobDto, ManifestDto } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
-import { AssignmentRepository } from '../assignment/assignment.repository';
-import { PGPConfigService } from '../../common/config/pgp-config.service';
-import { ErrorJob, ErrorAssignment } from '../../common/constant/errors';
-import { SortDirection } from '../../common/enums/collection';
-import { AssignmentEntity } from '../assignment/assignment.entity';
 
 @Injectable()
 export class JobService {
@@ -64,7 +64,7 @@ export class JobService {
 
     if (jobEntity) {
       this.logger.log(ErrorJob.AlreadyExists, JobService.name);
-      throw new BadRequestException(ErrorJob.AlreadyExists);
+      throw new ConflictError(ErrorJob.AlreadyExists);
     }
 
     const signer = this.web3Service.getSigner(chainId);
@@ -98,11 +98,11 @@ export class JobService {
       );
 
     if (!jobEntity) {
-      throw new NotFoundException(ErrorJob.NotFound);
+      throw new ServerError(ErrorJob.NotFound);
     }
 
     if (jobEntity.status === JobStatus.COMPLETED) {
-      throw new BadRequestException(ErrorJob.AlreadyCompleted);
+      throw new ConflictError(ErrorJob.AlreadyCompleted);
     }
 
     jobEntity.status = JobStatus.COMPLETED;
@@ -123,11 +123,11 @@ export class JobService {
       );
 
     if (!jobEntity) {
-      throw new NotFoundException(ErrorJob.NotFound);
+      throw new ServerError(ErrorJob.NotFound);
     }
 
     if (jobEntity.status === JobStatus.CANCELED) {
-      throw new BadRequestException(ErrorJob.AlreadyCanceled);
+      throw new ConflictError(ErrorJob.AlreadyCanceled);
     }
 
     jobEntity.status = JobStatus.CANCELED;
@@ -220,13 +220,13 @@ export class JobService {
     const assignment =
       await this.assignmentRepository.findOneById(assignmentId);
     if (!assignment) {
-      throw new BadRequestException(ErrorAssignment.NotFound);
+      throw new ServerError(ErrorAssignment.NotFound);
     }
 
     if (assignment.status !== AssignmentStatus.ACTIVE) {
-      throw new BadRequestException(ErrorAssignment.InvalidStatus);
+      throw new ConflictError(ErrorAssignment.InvalidStatus);
     } else if (assignment.job.status !== JobStatus.ACTIVE) {
-      throw new BadRequestException(ErrorJob.InvalidStatus);
+      throw new ConflictError(ErrorJob.InvalidStatus);
     }
 
     await this.addSolution(
@@ -277,7 +277,7 @@ export class JobService {
             this.assignmentRepository.updateOne(assignment);
           }
         } else {
-          throw new BadRequestException(
+          throw new ServerError(
             `Solution not found in Escrow: ${invalidJobSolution.escrowAddress}`,
           );
         }
@@ -308,7 +308,7 @@ export class JobService {
         (solution) => solution.workerAddress === workerAddress,
       )
     ) {
-      throw new BadRequestException(ErrorJob.SolutionAlreadySubmitted);
+      throw new ValidationError(ErrorJob.SolutionAlreadySubmitted);
     }
 
     const manifest = await this.getManifest(
@@ -320,7 +320,7 @@ export class JobService {
       existingJobSolutions.filter((solution) => !solution.error).length >=
       manifest.submissionsRequired
     ) {
-      throw new BadRequestException(ErrorJob.JobCompleted);
+      throw new ConflictError(ErrorJob.JobCompleted);
     }
 
     const newJobSolutions: ISolution[] = [
@@ -379,7 +379,7 @@ export class JobService {
       webhook.failureDetail = ErrorJob.ManifestNotFound;
 
       await this.webhookRepository.createUnique(webhook);
-      throw new NotFoundException(ErrorJob.ManifestNotFound);
+      throw new NotFoundError(ErrorJob.ManifestNotFound);
     }
 
     return manifest;
@@ -391,10 +391,10 @@ export class JobService {
       webhook.escrowAddress,
     );
     if (!jobEntity) {
-      throw new NotFoundException(ErrorJob.NotFound);
+      throw new ServerError(ErrorJob.NotFound);
     }
     if (jobEntity.status !== JobStatus.ACTIVE) {
-      throw new BadRequestException(ErrorJob.InvalidStatus);
+      throw new ConflictError(ErrorJob.InvalidStatus);
     }
     jobEntity.status = JobStatus.PAUSED;
     await this.jobRepository.updateOne(jobEntity);
@@ -406,10 +406,10 @@ export class JobService {
       webhook.escrowAddress,
     );
     if (!jobEntity) {
-      throw new NotFoundException(ErrorJob.NotFound);
+      throw new ServerError(ErrorJob.NotFound);
     }
     if (jobEntity.status !== JobStatus.PAUSED) {
-      throw new BadRequestException(ErrorJob.InvalidStatus);
+      throw new ConflictError(ErrorJob.InvalidStatus);
     }
     jobEntity.status = JobStatus.ACTIVE;
     await this.jobRepository.updateOne(jobEntity);

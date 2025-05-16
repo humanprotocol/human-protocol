@@ -80,6 +80,7 @@ import {
   SigninOperatorCommand,
   SigninOperatorData,
   SigninOperatorResponse,
+  SignupOperatorResponse,
 } from '../../modules/user-operator/model/operator-signin.model';
 import {
   GetNDACommand,
@@ -88,6 +89,11 @@ import {
   SignNDAData,
   SignNDAResponse,
 } from '../../modules/nda/model/nda.model';
+import {
+  ReportAbuseCommand,
+  ReportAbuseData,
+  ReportedAbuseResponse,
+} from '../../modules/abuse/model/abuse.model';
 
 @Injectable()
 export class ReputationOracleGateway {
@@ -144,7 +150,9 @@ export class ReputationOracleGateway {
     return this.handleRequestToReputationOracle<void>(options);
   }
 
-  async sendOperatorSignup(command: SignupOperatorCommand): Promise<void> {
+  async sendOperatorSignup(
+    command: SignupOperatorCommand,
+  ): Promise<SignupOperatorResponse> {
     const data = this.mapper.map(
       command,
       SignupOperatorCommand,
@@ -154,8 +162,11 @@ export class ReputationOracleGateway {
       ReputationOracleEndpoints.OPERATOR_SIGNUP,
       data,
     );
-    return this.handleRequestToReputationOracle<void>(options);
+    return this.handleRequestToReputationOracle<SignupOperatorResponse>(
+      options,
+    );
   }
+
   async sendOperatorSignin(
     command: SigninOperatorCommand,
   ): Promise<SigninOperatorResponse> {
@@ -184,6 +195,19 @@ export class ReputationOracleGateway {
       data,
     );
     return this.handleRequestToReputationOracle<SigninWorkerResponse>(options);
+  }
+
+  async sendM2mSignin(secretKey: string) {
+    const options = this.getEndpointOptions(
+      ReputationOracleEndpoints.M2M_SIGNIN,
+    );
+    options.headers = {
+      ...options.headers,
+      'human-m2m-auth-key': secretKey,
+    };
+    return this.handleRequestToReputationOracle<{ access_token: string }>(
+      options,
+    );
   }
 
   async sendRegistrationInExchangeOracle(
@@ -394,5 +418,24 @@ export class ReputationOracleGateway {
     return this.handleRequestToReputationOracle<RegistrationInExchangeOraclesResponse>(
       options,
     );
+  }
+
+  async sendAbuseReport(command: ReportAbuseCommand) {
+    const data = this.mapper.map(command, ReportAbuseCommand, ReportAbuseData);
+    const options = this.getEndpointOptions(
+      ReputationOracleEndpoints.REPORT_ABUSE,
+      data,
+      command.token,
+    );
+    return this.handleRequestToReputationOracle<void>(options);
+  }
+
+  async getAbuseReports(token: string): Promise<ReportedAbuseResponse> {
+    const options = this.getEndpointOptions(
+      ReputationOracleEndpoints.GET_ABUSE_REPORTS,
+      undefined,
+      token,
+    );
+    return this.handleRequestToReputationOracle<ReportedAbuseResponse>(options);
   }
 }

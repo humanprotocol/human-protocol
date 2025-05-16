@@ -7,7 +7,6 @@ import { useWalletConnect } from '@/shared/contexts/wallet-connect';
 import { useWeb3Auth } from '@/modules/auth-web3/hooks/use-web3-auth';
 import { routerPaths } from '@/router/router-paths';
 import { getErrorMessageForError } from '@/shared/errors';
-import { PrepareSignatureType } from '@/api/hooks/use-prepare-signature';
 import { useWeb3SignIn } from '../hooks';
 
 export function OperatorSignIn() {
@@ -22,7 +21,7 @@ export function OperatorSignIn() {
 
   useEffect(() => {
     if (isConnected && modalWasOpened.current) {
-      signInMutation({ address, type: PrepareSignatureType.SIGN_IN });
+      signInMutation();
     }
   }, [address, isConnected, signInMutation]);
 
@@ -77,7 +76,7 @@ export function OperatorSignIn() {
       <Button
         fullWidth
         onClick={() => {
-          signInMutation({ address, type: PrepareSignatureType.SIGN_IN });
+          signInMutation();
         }}
         size="large"
         variant="outlined"

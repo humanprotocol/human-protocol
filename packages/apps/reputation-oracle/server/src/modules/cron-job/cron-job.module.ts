@@ -1,17 +1,20 @@
 import { Module } from '@nestjs/common';
 
-import { EscrowCompletionModule } from '../escrow-completion/escrow-completion.module';
-import { WebhookIncomingModule } from '../webhook/webhook-incoming.module';
-import { WebhookOutgoingModule } from '../webhook/webhook-outgoing.module';
+import { AbuseModule } from '../abuse';
+import { AuthModule } from '../auth';
+import { EscrowCompletionModule } from '../escrow-completion';
+import { IncomingWebhookModule, OutgoingWebhookModule } from '../webhook';
 
 import { CronJobService } from './cron-job.service';
 import { CronJobRepository } from './cron-job.repository';
 
 @Module({
   imports: [
-    WebhookIncomingModule,
-    WebhookOutgoingModule,
+    IncomingWebhookModule,
+    OutgoingWebhookModule,
     EscrowCompletionModule,
+    AbuseModule,
+    AuthModule,
   ],
   providers: [CronJobService, CronJobRepository],
 })

@@ -81,9 +81,9 @@ services:
       STORAGE_ACCESS_KEY: 'dev'
       STORAGE_SECRET_KEY: 'devdevdev'
       STORAGE_RESULTS_BUCKET_NAME: 'results'
-      STORAGE_USE_SSL: False
+      STORAGE_USE_SSL: 'False'
       STORAGE_PROVIDER: 'aws'
-      ENABLE_CUSTOM_CLOUD_HOST: Yes
+      ENABLE_CUSTOM_CLOUD_HOST: 'Yes'
       REDIS_HOST: 'redis'
     depends_on:
       postgres:

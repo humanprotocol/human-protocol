@@ -84,11 +84,8 @@ CHAIN_IDS_ENABLED="false"
 ### The email address for the human app. Required
 IS_CACHE_TO_RESTART=
 
-### The password for the human app. Required
-HUMAN_APP_EMAIL=
-
-### The maximum number of iteration to skip. Default: 5
-HUMAN_APP_PASSWORD="5"
+### The secret key for Reputation Oracle. Required
+HUMAN_APP_SECRET_KEY=
 
 ### Feature flag for job discovery
 MAX_EXECUTIONS_TO_SKIP=

@@ -22,7 +22,6 @@ import {
 import { Type } from 'class-transformer';
 import { ChainId } from '@human-protocol/sdk';
 import {
-  JobCaptchaRequestType,
   JobCaptchaShapeType,
   EscrowFundToken,
   JobRequestType,
@@ -32,6 +31,9 @@ import {
   WorkerBrowser,
   WorkerLanguage,
   Country,
+  AudinoJobType,
+  CvatJobType,
+  JobType,
 } from '../../common/enums/job';
 import { Transform } from 'class-transformer';
 import { AWSRegions, StorageProviders } from '../../common/enums/storage';
@@ -39,6 +41,8 @@ import { PageOptionsDto } from '../../common/pagination/pagination.dto';
 import { IsEnumCaseInsensitive } from '../../common/decorators';
 import { PaymentCurrency } from '../../common/enums/payment';
 import { IsValidToken } from '../../common/validators/tokens';
+import { Label, ManifestDetails } from '../manifest/manifest.dto';
+import { IsValidTokenDecimals } from '../../common/validators/token-decimals';
 
 export class JobDto {
   @ApiProperty({ enum: ChainId, required: false, name: 'chain_id' })
@@ -82,6 +86,7 @@ export class JobDto {
   @ApiProperty({ name: 'payment_amount' })
   @IsNumber()
   @IsPositive()
+  @IsValidTokenDecimals('paymentCurrency')
   public paymentAmount: number;
 
   @ApiProperty({ enum: EscrowFundToken, name: 'escrow_fund_token' })
@@ -93,9 +98,9 @@ export class JobQuickLaunchDto extends JobDto {
   @ApiProperty({
     description: 'Request type',
     name: 'request_type',
-    enum: JobRequestType,
+    enum: JobType,
   })
-  @IsEnumCaseInsensitive(JobRequestType)
+  @IsEnumCaseInsensitive(JobType)
   public requestType: JobRequestType;
 
   @ApiProperty({ name: 'manifest_url' })
@@ -112,10 +117,12 @@ export class JobQuickLaunchDto extends JobDto {
 export class JobFortuneDto extends JobDto {
   @ApiProperty({ name: 'requester_title' })
   @IsString()
+  @IsNotEmpty()
   public requesterTitle: string;
 
   @ApiProperty({ name: 'requester_description' })
   @IsString()
+  @IsNotEmpty()
   public requesterDescription: string;
 
   @ApiProperty({ name: 'submissions_required' })
@@ -135,12 +142,13 @@ export class StorageDataDto {
 
   @ApiProperty({ name: 'bucket_name' })
   @IsString()
+  @IsNotEmpty()
   public bucketName: string;
 
   @ApiProperty()
   @IsOptional()
   @IsString()
-  public path: string;
+  public path?: string;
 }
 
 export class CvatDataDto {
@@ -159,25 +167,10 @@ export class CvatDataDto {
   public boxes?: StorageDataDto;
 }
 
-export class Label {
-  @ApiProperty()
-  @IsString()
-  public name: string;
-
-  @ApiPropertyOptional()
-  @IsArray()
-  @IsOptional()
-  public nodes?: string[];
-
-  @ApiPropertyOptional()
-  @IsArray()
-  @IsOptional()
-  public joints?: string[];
-}
-
 export class JobCvatDto extends JobDto {
   @ApiProperty({ name: 'requester_description' })
   @IsString()
+  @IsNotEmpty()
   public requesterDescription: string;
 
   @ApiProperty()
@@ -203,9 +196,66 @@ export class JobCvatDto extends JobDto {
   @IsUrl()
   public userGuide: string;
 
-  @ApiProperty({ enum: JobRequestType })
-  @IsEnumCaseInsensitive(JobRequestType)
-  public type: JobRequestType;
+  @ApiProperty({ enum: CvatJobType })
+  @IsEnumCaseInsensitive(CvatJobType)
+  public type: CvatJobType;
+}
+
+class AudinoLabel {
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  public name: string;
+}
+
+class AudinoDataDto {
+  @ApiProperty()
+  @IsObject()
+  public dataset: StorageDataDto;
+}
+
+export class JobAudinoDto extends JobDto {
+  @ApiProperty({ name: 'requester_description' })
+  @IsString()
+  @IsNotEmpty()
+  public requesterDescription: string;
+
+  @ApiProperty()
+  @IsObject()
+  public data: AudinoDataDto;
+
+  @ApiProperty({ type: [AudinoLabel] })
+  @IsArray()
+  @ArrayMinSize(1)
+  public labels: AudinoLabel[];
+
+  @ApiProperty({ name: 'min_quality' })
+  @IsNumber()
+  @IsPositive()
+  @Max(1)
+  public minQuality: number;
+
+  @ApiProperty({ name: 'ground_truth' })
+  @IsObject()
+  public groundTruth: StorageDataDto;
+
+  @ApiProperty({ name: 'user_guide' })
+  @IsUrl()
+  public userGuide: string;
+
+  @ApiProperty({ enum: AudinoJobType })
+  @IsEnumCaseInsensitive(AudinoJobType)
+  public type: AudinoJobType;
+
+  @ApiProperty({ name: 'audio_duration' })
+  @IsNumber()
+  @IsPositive()
+  public audioDuration: number;
+
+  @ApiProperty({ name: 'segment_duration' })
+  @IsNumber()
+  @IsPositive()
+  public segmentDuration: number;
 }
 
 export class JobCancelDto {
@@ -220,80 +270,7 @@ export class JobIdDto {
   public id: number;
 }
 
-export class ManifestDetails {
-  @ApiProperty({ description: 'Chain ID', name: 'chain_id' })
-  @IsNumber()
-  @Min(1)
-  public chainId: number;
-
-  @ApiProperty({ description: 'Title (optional)' })
-  @IsOptional()
-  @IsString()
-  public title?: string;
-
-  @ApiProperty({ description: 'Description' })
-  @IsNotEmpty()
-  @IsString()
-  public description?: string;
-
-  @ApiProperty({
-    description: 'Submissions required',
-    name: 'submissions_required',
-  })
-  @IsNumber()
-  public submissionsRequired: number;
-
-  @ApiProperty({
-    description: 'Ethereum address of the token',
-    name: 'token_address',
-  })
-  @IsEthereumAddress()
-  public tokenAddress: string;
-
-  @ApiProperty({ description: 'Amount of funds', name: 'fund_amount' })
-  @IsNumber()
-  public fundAmount: number;
-
-  @ApiProperty({
-    description: 'Ethereum address of the requester',
-    name: 'requester_address',
-  })
-  @IsEthereumAddress()
-  public requesterAddress: string;
-
-  @ApiProperty({ description: 'Request type', name: 'request_type' })
-  @IsEnumCaseInsensitive(JobRequestType)
-  public requestType: JobRequestType;
-
-  @ApiProperty({
-    description: 'Address of the exchange oracle (optional)',
-    name: 'exchange_oracle_address',
-  })
-  @IsOptional()
-  @IsNotEmpty()
-  @IsString()
-  public exchangeOracleAddress?: string;
-
-  @ApiProperty({
-    description: 'Address of the recording oracle (optional)',
-    name: 'recording_oracle_address',
-  })
-  @IsOptional()
-  @IsNotEmpty()
-  @IsString()
-  public recordingOracleAddress?: string;
-
-  @ApiProperty({
-    description: 'Address of the reputation oracle (optional)',
-    name: 'reputation_oracle_address',
-  })
-  @IsOptional()
-  @IsNotEmpty()
-  @IsString()
-  public reputationOracleAddress?: string;
-}
-
-export class CommonDetails {
+class CommonDetails {
   @ApiProperty({
     description: 'Ethereum address of the escrow',
     name: 'escrow_address',
@@ -363,100 +340,10 @@ export class JobDetailsDto {
   public manifest: ManifestDetails;
 }
 
-export class FortuneManifestDto {
-  @ApiProperty({ name: 'submissions_required' })
-  @IsNumber()
-  @IsPositive()
-  public submissionsRequired: number;
-
-  @ApiProperty({ name: 'requester_title' })
-  @IsString()
-  public requesterTitle: string;
-
-  @ApiProperty({ name: 'requester_description' })
-  @IsString()
-  public requesterDescription: string;
-
-  @ApiProperty({ name: 'fund_amount' })
-  @IsNumber()
-  @IsPositive()
-  public fundAmount: number;
-
-  @ApiProperty({ enum: JobRequestType, name: 'request_type' })
-  @IsEnumCaseInsensitive(JobRequestType)
-  public requestType: JobRequestType;
-
-  @IsArray()
-  @IsOptional()
-  public qualifications?: string[];
-}
-
-export class CvatData {
-  @IsUrl()
-  public data_url: string;
-
-  @IsUrl()
-  @IsOptional()
-  public points_url?: string;
-
-  @IsUrl()
-  @IsOptional()
-  public boxes_url?: string;
-}
-
-export class Annotation {
-  @IsArray()
-  public labels: Label[];
-
-  @IsString()
-  public description: string;
-
-  @IsString()
-  public user_guide: string;
-
-  @IsEnumCaseInsensitive(JobRequestType)
-  public type: JobRequestType;
-
-  @IsNumber()
-  @IsPositive()
-  public job_size: number;
-
-  @IsArray()
-  @IsOptional()
-  public qualifications?: string[];
-}
-
-export class Validation {
-  @IsNumber()
-  @IsPositive()
-  public min_quality: number;
-
-  @IsNumber()
-  @IsPositive()
-  public val_size: number;
-
-  @IsString()
-  public gt_url: string;
-}
-
-export class CvatManifestDto {
-  @IsObject()
-  public data: CvatData;
-
-  @IsObject()
-  public annotation: Annotation;
-
-  @IsObject()
-  public validation: Validation;
-
-  @IsString()
-  public job_bounty: string;
-}
-
 export class FortuneFinalResultDto {
   @ApiProperty({ name: 'worker_address' })
   @IsNotEmpty()
-  @IsString()
+  @IsEthereumAddress()
   public workerAddress: string;
 
   @ApiProperty()
@@ -558,7 +445,7 @@ export class JobCaptchaAdvancedDto {
   targetBrowser?: WorkerBrowser;
 }
 
-export class JobCaptchaAnnotationsDto {
+class JobCaptchaAnnotationsDto {
   @ApiProperty({
     enum: JobCaptchaShapeType,
     name: 'type_of_job',
@@ -634,163 +521,9 @@ export class JobCaptchaDto extends JobDto {
   annotations: JobCaptchaAnnotationsDto;
 }
 
-export class RestrictedAudience {
-  @IsObject()
-  sitekey?: Record<string, { score: number }>[];
-
-  @IsObject()
-  lang?: Record<string, { score: number }>[];
-
-  @IsObject()
-  browser?: Record<string, { score: number }>[];
-
-  @IsObject()
-  country?: Record<string, { score: number }>[];
-}
-
-class RequesterRestrictedAnswer {
-  @IsString()
-  en?: string;
-
-  @IsUrl()
-  answer_example_uri?: string;
-}
-
-class RequestConfig {
-  @IsEnumCaseInsensitive(JobCaptchaShapeType)
-  shape_type?: JobCaptchaShapeType;
-
-  @IsNumber()
-  @IsPositive()
-  min_shapes_per_image?: number;
-
-  @IsNumber()
-  @IsPositive()
-  max_shapes_per_image?: number;
-
-  @IsNumber()
-  @IsPositive()
-  min_points?: number;
-
-  @IsNumber()
-  @IsPositive()
-  max_points?: number;
-
-  @IsNumber()
-  @IsPositive()
-  minimum_selection_area_per_shape?: number;
-
-  @IsNumber()
-  @IsPositive()
-  multiple_choice_max_choices?: number;
-
-  @IsNumber()
-  @IsPositive()
-  multiple_choice_min_choices?: number;
-
-  @IsString()
-  answer_type?: string;
-
-  overlap_threshold?: any;
-
-  @IsNumber()
-  @IsPositive()
-  max_length?: number;
-
-  @IsNumber()
-  @IsPositive()
-  min_length?: number;
-}
-
-export class HCaptchaManifestDto {
-  @IsString()
-  job_mode: string;
-
-  @IsEnumCaseInsensitive(JobCaptchaRequestType)
-  request_type: JobCaptchaRequestType;
-
-  @IsObject()
-  @ValidateNested()
-  request_config: RequestConfig;
-
-  @IsNumber()
-  requester_accuracy_target: number;
-
-  @IsNumber()
-  requester_max_repeats: number;
-
-  @IsNumber()
-  requester_min_repeats: number;
-
-  @IsArray()
-  @IsUrl({}, { each: true })
-  @IsOptional()
-  requester_question_example?: string[];
-
-  @IsObject()
-  requester_question: Record<string, string>;
-
-  @IsUrl()
-  taskdata_uri: string;
-
-  @IsNumber()
-  job_total_tasks: number;
-
-  @IsNumber()
-  task_bid_price: number;
-
-  @IsUrl()
-  groundtruth_uri?: string;
-
-  public_results: boolean;
-
-  @IsNumber()
-  oracle_stake: number;
-
-  @IsString()
-  repo_uri: string;
-
-  @IsString()
-  ro_uri: string;
-
-  @IsObject()
-  @ValidateNested()
-  restricted_audience: RestrictedAudience;
-
-  @IsObject()
-  @ValidateNested({ each: true })
-  requester_restricted_answer_set: RequesterRestrictedAnswer;
-
-  @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  taskdata?: TaskData[];
-
-  @IsArray()
-  @IsOptional()
-  public qualifications?: string[];
-}
-
-class DatapointText {
-  @IsString()
-  en: string;
-}
-
-class TaskData {
-  @IsString()
-  task_key: string;
-
-  @IsOptional()
-  @IsString()
-  datapoint_uri?: string;
-
-  @IsString()
-  datapoint_hash: string;
-
-  @IsObject()
-  @IsOptional()
-  datapoint_text?: DatapointText;
-}
-
-export type CreateJob = JobQuickLaunchDto | JobFortuneDto | JobCvatDto;
-// | JobCaptchaDto;
+export type CreateJob =
+  | JobQuickLaunchDto
+  | JobFortuneDto
+  | JobCvatDto
+  | JobAudinoDto
+  | JobCaptchaDto;

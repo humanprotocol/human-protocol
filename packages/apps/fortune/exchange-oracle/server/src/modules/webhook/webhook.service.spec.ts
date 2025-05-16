@@ -4,7 +4,7 @@ import { HttpService } from '@nestjs/axios';
 import { HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import {
   JOB_LAUNCHER_WEBHOOK_URL,
   MOCK_ADDRESS,
@@ -12,6 +12,10 @@ import {
   MOCK_RECORDING_ORACLE_WEBHOOK_URL,
   mockConfig,
 } from '../../../test/constants';
+import { PGPConfigService } from '../../common/config/pgp-config.service';
+import { S3ConfigService } from '../../common/config/s3-config.service';
+import { ServerConfigService } from '../../common/config/server-config.service';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { HEADER_SIGNATURE_KEY } from '../../common/constant';
 import { ErrorWebhook } from '../../common/constant/errors';
 import { EventType, WebhookStatus } from '../../common/enums/webhook';
@@ -24,10 +28,6 @@ import { WebhookDto } from './webhook.dto';
 import { WebhookEntity } from './webhook.entity';
 import { WebhookRepository } from './webhook.repository';
 import { WebhookService } from './webhook.service';
-import { Web3ConfigService } from '../../common/config/web3-config.service';
-import { ServerConfigService } from '../../common/config/server-config.service';
-import { PGPConfigService } from '../../common/config/pgp-config.service';
-import { S3ConfigService } from '../../common/config/s3-config.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -223,13 +223,11 @@ describe('WebhookService', () => {
         .spyOn(webhookService as any, 'getOracleWebhookUrl')
         .mockResolvedValue(MOCK_RECORDING_ORACLE_WEBHOOK_URL);
       jest.spyOn(httpService as any, 'post').mockImplementation(() => {
-        return of({
-          data: undefined,
-        });
+        return throwError(() => new Error('HTTP request failed'));
       });
       await expect(
         (webhookService as any).sendWebhook(webhookEntity),
-      ).rejects.toThrowError(ErrorWebhook.NotSent);
+      ).rejects.toThrowError('HTTP request failed');
     });
 
     it('should successfully process a webhook with signature', async () => {

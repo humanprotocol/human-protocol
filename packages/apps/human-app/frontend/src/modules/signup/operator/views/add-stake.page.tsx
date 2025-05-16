@@ -71,11 +71,7 @@ export function AddStakeOperatorPage() {
     );
   }
 
-  if (
-    isGetStakedAmountPending ||
-    isDecimalsDataPending ||
-    decimalsData === undefined
-  ) {
+  if (isGetStakedAmountPending || isDecimalsDataPending) {
     return <PageCardLoader />;
   }
 

@@ -1,9 +1,11 @@
 import { ChainId, OperatorUtils, Role } from '@human-protocol/sdk';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
+import { NetworkConfigService } from '../../common/config/network-config.service';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ErrorWeb3 } from '../../common/constants/errors';
 import { Web3Env } from '../../common/enums/web3';
-import { Web3Service } from './web3.service';
+import { ConflictError, ValidationError } from '../../common/errors';
 import {
   MOCK_ADDRESS,
   MOCK_EXCHANGE_ORACLE_URL,
@@ -11,11 +13,8 @@ import {
   MOCK_REPUTATION_ORACLES,
   mockConfig,
 } from './../../../test/constants';
-import { NetworkConfigService } from '../../common/config/network-config.service';
-import { Web3ConfigService } from '../../common/config/web3-config.service';
-import { ControlledError } from '../../common/errors/controlled';
-import { HttpStatus } from '@nestjs/common';
 import { OracleDataDto } from './web3.dto';
+import { Web3Service } from './web3.service';
 
 jest.mock('@human-protocol/sdk', () => {
   const actualSdk = jest.requireActual('@human-protocol/sdk');
@@ -70,9 +69,7 @@ describe('Web3Service', () => {
             new Web3ConfigService(configService),
             new NetworkConfigService(configService),
           ),
-      ).toThrow(
-        new ControlledError(ErrorWeb3.NoValidNetworks, HttpStatus.BAD_REQUEST),
-      );
+      ).toThrow(new Error(ErrorWeb3.NoValidNetworks));
     });
   });
 
@@ -92,7 +89,7 @@ describe('Web3Service', () => {
       const invalidChainId = ChainId.POLYGON;
 
       expect(() => web3Service.getSigner(invalidChainId)).toThrow(
-        new ControlledError(ErrorWeb3.InvalidChainId, HttpStatus.BAD_REQUEST),
+        new ValidationError(ErrorWeb3.InvalidChainId),
       );
     });
   });
@@ -137,9 +134,7 @@ describe('Web3Service', () => {
 
       await expect(
         web3Service.calculateGasPrice(ChainId.POLYGON_AMOY),
-      ).rejects.toThrow(
-        new ControlledError(ErrorWeb3.GasPriceError, HttpStatus.CONFLICT),
-      );
+      ).rejects.toThrow(new ConflictError(ErrorWeb3.GasPriceError));
     });
   });
 
@@ -153,7 +148,7 @@ describe('Web3Service', () => {
     it('should throw an error for an invalid chainId', () => {
       const invalidChainId = ChainId.POLYGON;
       expect(() => web3Service.validateChainId(invalidChainId)).toThrow(
-        new ControlledError(ErrorWeb3.InvalidChainId, HttpStatus.BAD_REQUEST),
+        new ValidationError(ErrorWeb3.InvalidChainId),
       );
     });
   });

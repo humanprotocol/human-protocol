@@ -1,7 +1,7 @@
 /* eslint-disable camelcase -- ... */
 import { Grid, List, Paper, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { useEffect, type Dispatch, type SetStateAction } from 'react';
+import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Button } from '@/shared/components/ui/button';
 import { FiltersButtonIcon, RefreshIcon } from '@/shared/components/ui/icons';
@@ -13,7 +13,6 @@ import { ListItem } from '@/shared/components/ui/list-item';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { Chip } from '@/shared/components/ui/chip';
 import type { JobType } from '@/modules/smart-contracts/EthKVStore/config';
-import { colorPalette as lightModeColorPalette } from '@/shared/styles/color-palette';
 import { formatDate } from '@/shared/helpers/date';
 import { useCombinePages } from '@/shared/hooks';
 import {
@@ -27,17 +26,12 @@ import {
   useJobsFilterStore,
   useInfiniteGetMyJobsData,
 } from '../../../hooks';
-import { useRefreshTasksMutation } from '../../hooks';
+import { useRefreshJobsMutation } from '../../hooks';
 import { getChipStatusColor } from '../../utils';
-import { type MyJob } from '../../schemas';
+import { type MyJob } from '../../../schemas';
+import { useMyJobFilterModal } from '../../hooks/use-my-jobs-filter-modal';
 
-interface MyJobsListMobileProps {
-  setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
-}
-
-export function MyJobsListMobile({
-  setIsMobileFilterDrawerOpen,
-}: Readonly<MyJobsListMobileProps>) {
+export function MyJobsListMobile() {
   const { colorPalette } = useColorMode();
   const { filterParams, setPageParams, resetFilterParams } =
     useMyJobsFilterStore();
@@ -53,11 +47,12 @@ export function MyJobsListMobile({
   } = useInfiniteGetMyJobsData();
 
   const { mutate: refreshTasksMutation, isPending: isRefreshTasksPending } =
-    useRefreshTasksMutation();
+    useRefreshJobsMutation();
   const { setSearchEscrowAddress } = useJobsFilterStore();
   const { address: oracle_address } = useParams<{ address: string }>();
 
   const allPages = useCombinePages<MyJob>(tableData, filterParams.page);
+  const { openModal } = useMyJobFilterModal();
 
   useEffect(() => {
     return () => {
@@ -78,9 +73,7 @@ export function MyJobsListMobile({
         <Grid item xs={6}>
           <Button
             fullWidth
-            onClick={() => {
-              setIsMobileFilterDrawerOpen(true);
-            }}
+            onClick={openModal}
             sx={{
               marginBottom: '32px',
               marginTop: '21px',
@@ -172,10 +165,7 @@ export function MyJobsListMobile({
                           colorPalette
                         )}
                         label={
-                          <Typography
-                            color={lightModeColorPalette.white}
-                            variant="chip"
-                          >
+                          <Typography color={colorPalette.white} variant="chip">
                             {d.status}
                           </Typography>
                         }

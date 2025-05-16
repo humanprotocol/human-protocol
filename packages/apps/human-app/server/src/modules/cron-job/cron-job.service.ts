@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { CronJob } from 'cron';
 import { ExchangeOracleGateway } from '../../integrations/exchange-oracle/exchange-oracle.gateway';
+import { ReputationOracleGateway } from '../../integrations/reputation-oracle/reputation-oracle.gateway';
 import {
   DiscoveredJob,
   JobsDiscoveryParams,
@@ -10,8 +11,10 @@ import {
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
 import { OracleDiscoveryService } from '../oracle-discovery/oracle-discovery.service';
 import { DiscoveredOracle } from '../oracle-discovery/model/oracle-discovery.model';
-import { WorkerService } from '../user-worker/worker.service';
-import { JobDiscoveryFieldName } from '../../common/enums/global-common';
+import {
+  JobDiscoveryFieldName,
+  JobStatus,
+} from '../../common/enums/global-common';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { JobsDiscoveryService } from '../jobs-discovery/jobs-discovery.service';
 
@@ -40,12 +43,12 @@ function assertJobsDiscoveryResponseItemsFormat(
 export class CronJobService {
   private readonly logger = new Logger(CronJobService.name);
   constructor(
+    private readonly reputationOracleGateway: ReputationOracleGateway,
     private readonly exchangeOracleGateway: ExchangeOracleGateway,
-    private configService: EnvironmentConfigService,
-    private oracleDiscoveryService: OracleDiscoveryService,
-    private jobsDiscoveryService: JobsDiscoveryService,
-    private workerService: WorkerService,
-    private schedulerRegistry: SchedulerRegistry,
+    private readonly configService: EnvironmentConfigService,
+    private readonly oracleDiscoveryService: OracleDiscoveryService,
+    private readonly jobsDiscoveryService: JobsDiscoveryService,
+    private readonly schedulerRegistry: SchedulerRegistry,
   ) {
     if (this.configService.jobsDiscoveryFlag) {
       this.initializeCronJob();
@@ -71,10 +74,9 @@ export class CronJobService {
     }
 
     try {
-      const response = await this.workerService.signinWorker({
-        email: this.configService.email,
-        password: this.configService.password,
-      });
+      const response = await this.reputationOracleGateway.sendM2mSignin(
+        this.configService.m2mAuthSecretKey,
+      );
 
       for (const oracle of oracles) {
         if (oracle.executionsToSkip > 0) {
@@ -119,6 +121,7 @@ export class CronJobService {
         JobDiscoveryFieldName.CreatedAt,
         JobDiscoveryFieldName.UpdatedAt,
       ];
+      command.data.status = JobStatus.ACTIVE;
       const initialResponse =
         await this.exchangeOracleGateway.fetchJobs(command);
 

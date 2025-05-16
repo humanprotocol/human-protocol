@@ -1,14 +1,14 @@
 import { HttpStatus } from '@nestjs/common';
-import { StorageDataDto } from '../../modules/job/job.dto';
-import { AWSRegions, StorageProviders } from '../enums/storage';
-import { ErrorBucket } from '../constants/errors';
-import { JobRequestType } from '../enums/job';
 import axios from 'axios';
 import { parseString } from 'xml2js';
-import { ControlledError } from '../errors/controlled';
+import { StorageDataDto } from '../../modules/job/job.dto';
+import { ErrorBucket } from '../constants/errors';
+import { AudinoJobType, CvatJobType, JobRequestType } from '../enums/job';
+import { AWSRegions, StorageProviders } from '../enums/storage';
+import { ValidationError } from '../errors';
 import {
-  GCS_HTTP_REGEX_SUBDOMAIN,
   GCS_HTTP_REGEX_PATH_BASED,
+  GCS_HTTP_REGEX_SUBDOMAIN,
 } from './gcstorage';
 
 export function generateBucketUrl(
@@ -16,37 +16,33 @@ export function generateBucketUrl(
   jobType: JobRequestType,
 ): URL {
   if (
-    (jobType === JobRequestType.IMAGE_POLYGONS ||
-      jobType === JobRequestType.IMAGE_BOXES ||
-      jobType === JobRequestType.IMAGE_POINTS ||
-      jobType === JobRequestType.IMAGE_BOXES_FROM_POINTS ||
-      jobType === JobRequestType.IMAGE_SKELETONS_FROM_BOXES) &&
+    (
+      [
+        CvatJobType.IMAGE_POLYGONS,
+        CvatJobType.IMAGE_BOXES,
+        CvatJobType.IMAGE_POINTS,
+        CvatJobType.IMAGE_BOXES_FROM_POINTS,
+        CvatJobType.IMAGE_SKELETONS_FROM_BOXES,
+        AudinoJobType.AUDIO_TRANSCRIPTION,
+      ] as JobRequestType[]
+    ).includes(jobType) &&
     storageData.provider != StorageProviders.AWS &&
     storageData.provider != StorageProviders.GCS &&
     storageData.provider != StorageProviders.LOCAL
   ) {
-    throw new ControlledError(
-      ErrorBucket.InvalidProvider,
-      HttpStatus.BAD_REQUEST,
-    );
+    throw new ValidationError(ErrorBucket.InvalidProvider);
   }
   if (!storageData.bucketName) {
-    throw new ControlledError(ErrorBucket.EmptyBucket, HttpStatus.BAD_REQUEST);
+    throw new ValidationError(ErrorBucket.EmptyBucket);
   }
 
   switch (storageData.provider) {
     case StorageProviders.AWS:
       if (!storageData.region) {
-        throw new ControlledError(
-          ErrorBucket.EmptyRegion,
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new ValidationError(ErrorBucket.EmptyRegion);
       }
       if (!isRegion(storageData.region)) {
-        throw new ControlledError(
-          ErrorBucket.InvalidRegion,
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new ValidationError(ErrorBucket.InvalidRegion);
       }
       return new URL(
         `https://${storageData.bucketName}.s3.${
@@ -68,10 +64,7 @@ export function generateBucketUrl(
         }`,
       );
     default:
-      throw new ControlledError(
-        ErrorBucket.InvalidProvider,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new ValidationError(ErrorBucket.InvalidProvider);
   }
 }
 

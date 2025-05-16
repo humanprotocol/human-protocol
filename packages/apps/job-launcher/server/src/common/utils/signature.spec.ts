@@ -1,8 +1,7 @@
-import { verifySignature, recoverSigner, signMessage } from './signature';
 import { MOCK_ADDRESS, MOCK_PRIVATE_KEY } from '../../../test/constants';
 import { ErrorSignature } from '../constants/errors';
-import { ControlledError } from '../errors/controlled';
-import { HttpStatus } from '@nestjs/common';
+import { ConflictError } from '../errors';
+import { recoverSigner, signMessage, verifySignature } from './signature';
 
 jest.doMock('ethers', () => {
   return {
@@ -12,10 +11,7 @@ jest.doMock('ethers', () => {
           if (message === 'valid-message' && signature === 'valid-signature') {
             return 'recovered-address';
           } else {
-            throw new ControlledError(
-              'Invalid signature',
-              HttpStatus.BAD_REQUEST,
-            );
+            throw new ConflictError('Invalid signature');
           }
         });
       },
@@ -42,12 +38,7 @@ describe('Signature utility', () => {
 
       expect(() => {
         verifySignature(message, invalidSignature, [invalidAddress]);
-      }).toThrow(
-        new ControlledError(
-          ErrorSignature.SignatureNotVerified,
-          HttpStatus.CONFLICT,
-        ),
-      );
+      }).toThrow(new ConflictError(ErrorSignature.SignatureNotVerified));
     });
 
     it('should throw conflict exception for invalid signature', () => {
@@ -56,12 +47,7 @@ describe('Signature utility', () => {
 
       expect(() => {
         verifySignature(message, invalidSignature, [MOCK_ADDRESS]);
-      }).toThrow(
-        new ControlledError(
-          ErrorSignature.InvalidSignature,
-          HttpStatus.CONFLICT,
-        ),
-      );
+      }).toThrow(new ConflictError(ErrorSignature.InvalidSignature));
     });
   });
 
@@ -81,12 +67,7 @@ describe('Signature utility', () => {
 
       expect(() => {
         recoverSigner(message, invalidSignature);
-      }).toThrow(
-        new ControlledError(
-          ErrorSignature.InvalidSignature,
-          HttpStatus.CONFLICT,
-        ),
-      );
+      }).toThrow(new ConflictError(ErrorSignature.InvalidSignature));
     });
 
     it('should stringify message object if it is not already a string', async () => {

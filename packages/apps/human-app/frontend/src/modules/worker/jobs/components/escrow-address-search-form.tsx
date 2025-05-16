@@ -3,7 +3,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import Grid from '@mui/material/Grid';
 import debounce from 'lodash/debounce';
 import { useColorMode } from '@/shared/contexts/color-mode';
@@ -24,10 +24,10 @@ export function EscrowAddressSearchForm({
   placeholder,
   updater,
   fullWidth = false,
-}: SearchFormProps) {
+}: Readonly<SearchFormProps>) {
   const isMobile = useIsMobile();
   const { colorPalette } = useColorMode();
-  const methods = useForm<{ searchValue: string }>({
+  const methods = useForm({
     defaultValues: {
       searchValue: '',
     },
@@ -36,24 +36,33 @@ export function EscrowAddressSearchForm({
     ),
   });
 
-  const debouncedUpdater = debounce((value: string) => {
-    updater(value);
-  }, 500);
+  const debouncedUpdater = useMemo(
+    () =>
+      debounce(async (value: string) => {
+        const isValid = await methods.trigger('searchValue');
+        if (isValid) {
+          updater(value);
+        }
+      }, 500),
+    [updater, methods]
+  );
 
   useEffect(() => {
-    const subscription = methods.watch(() => {
-      void methods.trigger('searchValue').then((isSearchValueValid) => {
-        const inputValue = methods.getValues('searchValue');
-        if (isSearchValueValid) {
-          debouncedUpdater(inputValue);
-        }
-      });
-    });
+    return () => {
+      debouncedUpdater.cancel();
+    };
+  }, [debouncedUpdater]);
 
+  useEffect(() => {
+    const subscription = methods.watch((value, { name }) => {
+      if (name === 'searchValue') {
+        void debouncedUpdater(value.searchValue ?? '');
+      }
+    });
     return () => {
       subscription.unsubscribe();
     };
-  }, [debouncedUpdater, methods, updater]);
+  }, [debouncedUpdater, methods]);
 
   return (
     <Grid
@@ -81,6 +90,9 @@ export function EscrowAddressSearchForm({
           sx={{
             width: fullWidth ? '100%' : '362px',
             margin: fullWidth ? '0' : '1rem',
+          }}
+          onBlur={() => {
+            void methods.trigger('searchValue');
           }}
         />
       </FormProvider>

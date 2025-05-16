@@ -10,7 +10,7 @@ export class S3ConfigService {
    * Default: '127.0.0.1'
    */
   get endpoint(): string {
-    return this.configService.get<string>('S3_ENDPOINT', '127.0.0.1');
+    return this.configService.get('S3_ENDPOINT', '127.0.0.1');
   }
 
   /**
@@ -18,7 +18,7 @@ export class S3ConfigService {
    * Default: 9000
    */
   get port(): number {
-    return +this.configService.get<number>('S3_PORT', 9000);
+    return Number(this.configService.get('S3_PORT')) || 9000;
   }
 
   /**
@@ -26,7 +26,7 @@ export class S3ConfigService {
    * Required
    */
   get accessKey(): string {
-    return this.configService.getOrThrow<string>('S3_ACCESS_KEY');
+    return this.configService.getOrThrow('S3_ACCESS_KEY');
   }
 
   /**
@@ -34,7 +34,7 @@ export class S3ConfigService {
    * Required
    */
   get secretKey(): string {
-    return this.configService.getOrThrow<string>('S3_SECRET_KEY');
+    return this.configService.getOrThrow('S3_SECRET_KEY');
   }
 
   /**
@@ -42,7 +42,7 @@ export class S3ConfigService {
    * Default: 'reputation'
    */
   get bucket(): string {
-    return this.configService.get<string>('S3_BUCKET', 'reputation');
+    return this.configService.get('S3_BUCKET', 'reputation');
   }
 
   /**
@@ -50,6 +50,6 @@ export class S3ConfigService {
    * Default: false
    */
   get useSSL(): boolean {
-    return this.configService.get<string>('S3_USE_SSL', 'false') === 'true';
+    return this.configService.get('S3_USE_SSL', 'false') === 'true';
   }
 }

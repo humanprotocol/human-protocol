@@ -44,6 +44,8 @@ import { HealthModule } from './modules/health/health.module';
 import { UiConfigurationModule } from './modules/ui-configuration/ui-configuration.module';
 import { NDAModule } from './modules/nda/nda.module';
 import { NDAController } from './modules/nda/nda.controller';
+import { AbuseController } from './modules/abuse/abuse.controller';
+import { AbuseModule } from './modules/abuse/abuse.module';
 
 const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
 
@@ -77,8 +79,7 @@ const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
             return value;
           })
           .required(),
-        HUMAN_APP_EMAIL: Joi.string().email().required(),
-        HUMAN_APP_PASSWORD: Joi.string().required(),
+        HUMAN_APP_SECRET_KEY: Joi.string().required(),
         IS_AXIOS_REQUEST_LOGGING_ENABLED: JOI_BOOLEAN_STRING_SCHEMA,
         ALLOWED_HOST: Joi.string().required(),
         CORS_ENABLED: JOI_BOOLEAN_STRING_SCHEMA,
@@ -126,6 +127,7 @@ const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
     HealthModule,
     UiConfigurationModule,
     NDAModule,
+    AbuseModule,
   ],
   controllers: [
     AppController,
@@ -139,6 +141,7 @@ const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
     RegisterAddressController,
     TokenRefreshController,
     NDAController,
+    AbuseController,
   ],
   exports: [HttpModule],
   providers: [EnvironmentConfigService],

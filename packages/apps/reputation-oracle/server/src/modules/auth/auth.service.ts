@@ -2,18 +2,19 @@ import { KVStoreKeys, KVStoreUtils, Role } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
-import { SignatureType } from '../../common/enums/web3';
-import { AuthConfigService } from '../../config/auth-config.service';
-import { NDAConfigService } from '../../config/nda-config.service';
-import { ServerConfigService } from '../../config/server-config.service';
-import { Web3ConfigService } from '../../config/web3-config.service';
+import { SignatureType } from '../../common/enums';
+import {
+  AuthConfigService,
+  NDAConfigService,
+  ServerConfigService,
+  Web3ConfigService,
+} from '../../config';
 import logger from '../../logger';
-import * as web3Utils from '../../utils/web3';
+import * as httpUtils from '../../utils/http';
 import * as securityUtils from '../../utils/security';
+import * as web3Utils from '../../utils/web3';
 
-import { EmailAction } from '../email/constants';
-import { EmailService } from '../email/email.service';
-import { StorageService } from '../storage/storage.service';
+import { EmailAction, EmailService } from '../email';
 import {
   OperatorStatus,
   SiteKeyRepository,
@@ -37,13 +38,10 @@ import {
   InvalidOperatorRoleError,
   InvalidOperatorUrlError,
 } from './auth.error';
+import { HUMAN_APP_IDENTIFIER } from './constants';
 import { TokenEntity, TokenType } from './token.entity';
 import { TokenRepository } from './token.repository';
-
-type AuthTokens = {
-  accessToken: string;
-  refreshToken: string;
-};
+import type { AuthTokens } from './types';
 
 @Injectable()
 export class AuthService {
@@ -142,7 +140,7 @@ export class AuthService {
     try {
       url = await KVStoreUtils.get(chainId, address, KVStoreKeys.url);
     } catch (noop) {}
-    if (!url || !StorageService.isValidUrl(url)) {
+    if (!url || !httpUtils.isValidHttpUrl(url)) {
       throw new InvalidOperatorUrlError(url);
     }
 
@@ -207,6 +205,31 @@ export class AuthService {
     return this.web3Auth(userEntity);
   }
 
+  async m2mSignin(secretKey: string): Promise<string> {
+    let jwtPayload: Record<string, unknown> | undefined;
+
+    if (this.authConfigService.humanAppSecretKey === secretKey) {
+      jwtPayload = {
+        // email precense is part of jwt validation in ExcO
+        email: 'human-app@hmt.ai',
+        status: UserStatus.ACTIVE,
+        user_id: HUMAN_APP_IDENTIFIER,
+        // specific role value is checked to grant machine-level access
+        role: HUMAN_APP_IDENTIFIER,
+        reputation_network: this.web3ConfigService.operatorAddress,
+      };
+    }
+
+    if (!jwtPayload) {
+      throw new AuthError(AuthErrorMessage.INVALID_SECRET_KEY);
+    }
+
+    const accessToken = await this.jwtService.signAsync(jwtPayload, {
+      expiresIn: this.authConfigService.accessTokenExpiresIn,
+    });
+    return accessToken;
+  }
+
   async auth(userEntity: Web2UserEntity | UserEntity): Promise<AuthTokens> {
     let hCaptchaSiteKey: string | undefined;
     const hCaptchaSiteKeys = await this.siteKeyRepository.findByUserAndType(
@@ -230,7 +253,7 @@ export class AuthService {
       reputation_network: this.web3ConfigService.operatorAddress,
       qualifications: userEntity.userQualifications
         ? userEntity.userQualifications.map(
-            (userQualification) => userQualification.qualification.reference,
+            (userQualification) => userQualification.qualification?.reference,
           )
         : [],
       site_key: hCaptchaSiteKey,
@@ -414,16 +437,22 @@ export class AuthService {
     }
 
     if (new Date() > tokenEntity.expiresAt) {
+      await this.tokenRepository.deleteOne(tokenEntity);
       throw new AuthError(AuthErrorMessage.EMAIL_TOKEN_EXPIRED);
     }
 
     await this.userRepository.updateOneById(tokenEntity.userId, {
       status: UserStatus.ACTIVE,
     });
+    await this.tokenRepository.deleteOne(tokenEntity);
   }
 
-  async resendEmailVerification(user: Web2UserEntity): Promise<void> {
-    if (user.status !== UserStatus.PENDING) {
+  async resendEmailVerification(userId: number): Promise<void> {
+    const user = (await this.userRepository.findOneById(
+      userId,
+    )) as Web2UserEntity;
+
+    if (!user || user.status !== UserStatus.PENDING) {
       return;
     }
 

@@ -11,7 +11,7 @@ export class EmailConfigService {
    * Default: 'disabled'
    */
   get apiKey(): string {
-    return this.configService.get<string>('SENDGRID_API_KEY', 'disabled');
+    return this.configService.get('SENDGRID_API_KEY', 'disabled');
   }
 
   /**
@@ -19,10 +19,7 @@ export class EmailConfigService {
    * Default: 'app@humanprotocol.org'
    */
   get from(): string {
-    return this.configService.get<string>(
-      'EMAIL_FROM',
-      'app@humanprotocol.org',
-    );
+    return this.configService.get('EMAIL_FROM', 'app@humanprotocol.org');
   }
 
   /**
@@ -30,6 +27,6 @@ export class EmailConfigService {
    * Default: 'Human Protocol'
    */
   get fromName(): string {
-    return this.configService.get<string>('EMAIL_FROM_NAME', 'Human Protocol');
+    return this.configService.get('EMAIL_FROM_NAME', 'Human Protocol');
   }
 }

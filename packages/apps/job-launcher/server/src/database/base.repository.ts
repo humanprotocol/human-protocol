@@ -6,7 +6,7 @@ import {
   QueryFailedError,
   Repository,
 } from 'typeorm';
-import { handleQueryFailedError } from '../common/errors/database';
+import { handleQueryFailedError } from '../common/errors';
 
 export class BaseRepository<T extends ObjectLiteral> extends Repository<T> {
   private readonly entityManager: EntityManager;

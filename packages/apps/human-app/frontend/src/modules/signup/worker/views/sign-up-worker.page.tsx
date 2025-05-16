@@ -13,20 +13,19 @@ import { getErrorMessageForError } from '@/shared/errors';
 import { Alert } from '@/shared/components/ui/alert';
 import { HCaptchaForm } from '@/shared/components/hcaptcha';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
-import { FetchError } from '@/api/fetcher';
 import { useSignUpWorker } from '@/modules/signup/worker/hooks/use-sign-up-worker';
-import { signUpDtoSchema, type SignUpDto } from '../schema';
+import { ApiClientError } from '@/api';
+import { signUpDtoSchema } from '../schema';
 
 export function SignUpWorkerPage() {
   const { t } = useTranslation();
   const { signUp, error, isError, isLoading, reset } = useSignUpWorker();
-  const methods = useForm<SignUpDto>({
+  const methods = useForm({
     defaultValues: {
       email: '',
       password: '',
       confirmPassword: '',
-      // eslint-disable-next-line camelcase -- export vite config
-      h_captcha_token: '',
+      hCaptchaToken: '',
     },
     resolver: zodResolver(signUpDtoSchema),
   });
@@ -34,7 +33,7 @@ export function SignUpWorkerPage() {
   useResetMutationErrors(methods.watch, reset);
 
   const handleSignupError = (unknownError: unknown) => {
-    if (unknownError instanceof FetchError && unknownError.status === 409) {
+    if (unknownError instanceof ApiClientError && unknownError.status === 409) {
       return t('worker.signUpForm.errors.emailTaken');
     }
   };
@@ -48,7 +47,7 @@ export function SignUpWorkerPage() {
       alert={
         isError ? (
           <Alert color="error" severity="error" sx={{ width: '100%' }}>
-            {getErrorMessageForError(isError, handleSignupError)}
+            {getErrorMessageForError(error, handleSignupError)}
           </Alert>
         ) : undefined
       }
@@ -89,7 +88,7 @@ export function SignUpWorkerPage() {
                 />
               </Typography>
             </Grid>
-            <HCaptchaForm error={error} name="h_captcha_token" />
+            <HCaptchaForm error={error} name="hCaptchaToken" />
             <Button
               fullWidth
               loading={isLoading}

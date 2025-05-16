@@ -1,21 +1,23 @@
-import { ChainId } from '@human-protocol/sdk';
+import { FC, useState } from 'react';
+
 import EditIcon from '@mui/icons-material/Edit';
-import InfoIcon from '@mui/icons-material/Info';
 import { Box, Button, Typography, useTheme } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import React, { useState } from 'react';
 import { useAccount } from 'wagmi';
+import { ChainId } from '@human-protocol/sdk';
+
 import { SUPPORTED_CHAIN_IDS } from '../../constants/chains';
 import { useKVStoreContext } from '../../contexts/kvstore';
 import { useSnackbar } from '../../providers/SnackProvider';
 import KVStoreModal from '../modals/KVStoreModal';
 
-const KVStoreTable: React.FC = () => {
-  const { kvStore, set, setBulk } = useKVStoreContext();
+const KVStoreTable: FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const theme = useTheme();
+  const { isDarkMode, palette } = useTheme();
   const { chainId } = useAccount();
   const { showError } = useSnackbar();
+  const { kvStore, set, setBulk, loading } = useKVStoreContext();
+
   const filteredData = kvStore.filter((item) => item.value !== '');
 
   const handleOpenModal = () => {
@@ -35,6 +37,7 @@ const KVStoreTable: React.FC = () => {
       }
     } catch (err) {
       console.error('Failed to update KVStore:', err);
+      throw err;
     }
   };
 
@@ -77,37 +80,32 @@ const KVStoreTable: React.FC = () => {
     <Box
       sx={{
         width: '100%',
-        marginBottom: 3,
-        padding: 3,
-        backgroundColor: theme.palette.white.main,
+        padding: 4,
+        background: isDarkMode ? palette.elevation.medium : palette.white.main,
         borderRadius: '16px',
         display: 'flex',
         flexDirection: 'column',
         gap: 2,
       }}
     >
-      <Box
-        sx={{
-          flexGrow: 1,
-        }}
-      >
+      <Box flexGrow={1}>
         <DataGrid
+          loading={loading}
           rows={filteredData}
           columns={columns}
+          columnHeaderHeight={56}
+          disableColumnSorting
           getRowId={(row) => row.key}
           getRowHeight={() => (filteredData.length > 0 ? 'auto' : null)}
-          pageSizeOptions={[5, 10, 25]}
-          initialState={{
-            pagination: {
-              paginationModel: { pageSize: 10 },
-            },
-          }}
           disableColumnSelector
           disableRowSelectionOnClick
           disableColumnMenu
-          hideFooterPagination={filteredData.length === 0}
+          hideFooterPagination
           sx={{
             border: 0,
+            '& .MuiDataGrid-main': {
+              maxHeight: '500px',
+            },
             '& .MuiDataGrid-cell': {
               borderTop: 'none',
               padding: '12px 16px',
@@ -118,9 +116,13 @@ const KVStoreTable: React.FC = () => {
             },
             '& .MuiDataGrid-row': {
               borderTop: 'none',
+              borderBottom: '1px solid rgba(99, 9, 255, 0.08)',
               '&:hover': {
                 background: 'rgba(20, 6, 178, 0.04)',
               },
+            },
+            '& .MuiDataGrid-row--lastVisible': {
+              borderBottom: 'none',
             },
             '& .MuiDataGrid-cell:focus': {
               outline: 'none',
@@ -128,15 +130,22 @@ const KVStoreTable: React.FC = () => {
             '& .MuiDataGrid-cell:focus-within': {
               outline: 'none',
             },
-            '& .MuiDataGrid-columnHeaders': {
-              background: 'rgba(20, 6, 178, 0.04)',
-              color: '#333',
-              fontWeight: 'bold',
-              fontSize: '1.1rem',
+            '& .MuiDataGrid-columnHeader': {
+              background: isDarkMode
+                ? 'rgba(255, 255, 255, 0.12)'
+                : 'rgba(20, 6, 178, 0.04)',
+              padding: '16px',
               textTransform: 'uppercase',
+              borderBottomWidth: '0px !important',
+            },
+            '& .MuiDataGrid-columnHeaderTitle': {
+              color: palette.primary.main,
+              fontSize: '12px',
+              fontWeight: 400,
+              letterSpacing: '0.4px',
             },
             '& .MuiDataGrid-footerContainer': {
-              borderTop: '1px solid #E0E0E0',
+              border: 'none',
             },
             '& .MuiDataGrid-columnHeader:hover': {
               color: 'rgb(133, 142, 198)',
@@ -153,7 +162,6 @@ const KVStoreTable: React.FC = () => {
             '& .MuiDataGrid-filler': {
               display: 'none',
             },
-            '&, [class^=MuiDataGrid]': { border: 'none' },
           }}
           slots={{
             noRowsOverlay: () => (
@@ -188,22 +196,6 @@ const KVStoreTable: React.FC = () => {
         initialData={filteredData}
         onSave={handleSaveChanges}
       />
-      <Typography
-        variant="body2"
-        color="textSecondary"
-        sx={{
-          mt: 2,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 1,
-        }}
-      >
-        <InfoIcon fontSize="small" />
-        Please note: The data displayed is fetched from the subgraph and may
-        take some time to update. As a result, the table might temporarily show
-        outdated information.
-      </Typography>
     </Box>
   );
 };

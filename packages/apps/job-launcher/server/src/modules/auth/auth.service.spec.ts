@@ -1,14 +1,18 @@
-import { Test } from '@nestjs/testing';
-import { AuthService } from './auth.service';
-import { TokenRepository } from './token.repository';
-import { ConfigService } from '@nestjs/config';
-import { HttpService } from '@nestjs/axios';
+jest.mock('@human-protocol/sdk');
+jest.mock('../../common/utils/hcaptcha', () => ({
+  verifyToken: jest.fn().mockReturnValue({ success: true }),
+}));
+
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('mocked-uuid'),
+}));
+
 import { createMock } from '@golevelup/ts-jest';
-import { UserRepository } from '../user/user.repository';
+import { HttpService } from '@nestjs/axios';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from '../user/user.service';
-import { UserEntity } from '../user/user.entity';
-import { ErrorAuth, ErrorUser } from '../../common/constants/errors';
+import { Test } from '@nestjs/testing';
+import { v4 } from 'uuid';
 import {
   MOCK_ACCESS_TOKEN,
   MOCK_EMAIL,
@@ -19,27 +23,26 @@ import {
   MOCK_REFRESH_TOKEN,
   mockConfig,
 } from '../../../test/constants';
-import { TokenEntity, TokenType } from './token.entity';
-import { v4 } from 'uuid';
-import { PaymentService } from '../payment/payment.service';
-import { UserStatus } from '../../common/enums/user';
-import { SendGridService } from '../sendgrid/sendgrid.service';
-import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
-import { ApiKeyRepository } from './apikey.repository';
-import { ServerConfigService } from '../../common/config/server-config.service';
 import { AuthConfigService } from '../../common/config/auth-config.service';
-import { ControlledError } from '../../common/errors/controlled';
-import { HttpStatus } from '@nestjs/common';
+import { ServerConfigService } from '../../common/config/server-config.service';
+import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
+import { ErrorAuth, ErrorUser } from '../../common/constants/errors';
+import { UserStatus } from '../../common/enums/user';
+import {
+  ConflictError,
+  ForbiddenError,
+  NotFoundError,
+} from '../../common/errors';
+import { PaymentService } from '../payment/payment.service';
+import { SendGridService } from '../sendgrid/sendgrid.service';
+import { UserEntity } from '../user/user.entity';
+import { UserRepository } from '../user/user.repository';
+import { UserService } from '../user/user.service';
 import { WhitelistService } from '../whitelist/whitelist.service';
-
-jest.mock('@human-protocol/sdk');
-jest.mock('../../common/utils/hcaptcha', () => ({
-  verifyToken: jest.fn().mockReturnValue({ success: true }),
-}));
-
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('mocked-uuid'),
-}));
+import { ApiKeyRepository } from './apikey.repository';
+import { AuthService } from './auth.service';
+import { TokenEntity, TokenType } from './token.entity';
+import { TokenRepository } from './token.repository';
 
 describe('AuthService', () => {
   let authService: AuthService;
@@ -142,14 +145,11 @@ describe('AuthService', () => {
       });
     });
 
-    it('should throw UnauthorizedException if user credentials are invalid', async () => {
+    it('should throw ForbiddenError if user credentials are invalid', async () => {
       getByCredentialsMock.mockResolvedValue(undefined);
 
       await expect(authService.signin(signInDto)).rejects.toThrow(
-        new ControlledError(
-          ErrorAuth.InvalidEmailOrPassword,
-          HttpStatus.FORBIDDEN,
-        ),
+        new ForbiddenError(ErrorAuth.InvalidEmailOrPassword),
       );
 
       expect(userService.getByCredentials).toHaveBeenCalledWith(
@@ -212,7 +212,7 @@ describe('AuthService', () => {
         .mockResolvedValue(userEntity as any);
 
       await expect(authService.signup(userCreateDto)).rejects.toThrow(
-        new ControlledError(ErrorUser.DuplicatedEmail, HttpStatus.BAD_REQUEST),
+        new ConflictError(ErrorUser.DuplicatedEmail),
       );
 
       expect(userRepository.findByEmail).toHaveBeenCalledWith(userEntity.email);
@@ -327,23 +327,19 @@ describe('AuthService', () => {
       jest.clearAllMocks();
     });
 
-    it('should throw NotFound exception if user is not found', () => {
+    it('should throw NotFoundError if user is not found', () => {
       findByEmailMock.mockResolvedValue(null);
       expect(
         authService.forgotPassword({ email: 'user@example.com' }),
-      ).rejects.toThrow(
-        new ControlledError(ErrorUser.NotFound, HttpStatus.NO_CONTENT),
-      );
+      ).rejects.toThrow(new NotFoundError(ErrorUser.NotFound));
     });
 
-    it('should throw Unauthorized exception if user is not active', () => {
+    it('should throw ForbiddenError if user is not active', () => {
       userEntity.status = UserStatus.INACTIVE;
       findByEmailMock.mockResolvedValue(userEntity);
       expect(
         authService.forgotPassword({ email: 'user@example.com' }),
-      ).rejects.toThrow(
-        new ControlledError(ErrorUser.UserNotActive, HttpStatus.FORBIDDEN),
-      );
+      ).rejects.toThrow(new ForbiddenError(ErrorUser.UserNotActive));
     });
 
     it('should remove existing token if it exists', async () => {
@@ -410,9 +406,7 @@ describe('AuthService', () => {
           password: 'password',
           hCaptchaToken: 'token',
         }),
-      ).rejects.toThrow(
-        new ControlledError(ErrorAuth.InvalidToken, HttpStatus.FORBIDDEN),
-      );
+      ).rejects.toThrow(new ForbiddenError(ErrorAuth.InvalidToken));
     });
 
     it('should throw an error if token is expired', () => {
@@ -425,9 +419,7 @@ describe('AuthService', () => {
           password: 'password',
           hCaptchaToken: 'token',
         }),
-      ).rejects.toThrow(
-        new ControlledError(ErrorAuth.TokenExpired, HttpStatus.FORBIDDEN),
-      );
+      ).rejects.toThrow(new ForbiddenError(ErrorAuth.TokenExpired));
     });
 
     it('should update password and send email', async () => {
@@ -478,14 +470,14 @@ describe('AuthService', () => {
     it('should throw an error if token is not found', () => {
       findTokenMock.mockResolvedValue(null);
       expect(authService.emailVerification({ token: 'token' })).rejects.toThrow(
-        new ControlledError(ErrorAuth.NotFound, HttpStatus.FORBIDDEN),
+        new NotFoundError(ErrorAuth.NotFound),
       );
     });
     it('should throw an error if token is expired', () => {
       tokenEntity.expiresAt = new Date(new Date().getDate() - 1);
       findTokenMock.mockResolvedValue(tokenEntity as TokenEntity);
       expect(authService.emailVerification({ token: 'token' })).rejects.toThrow(
-        new ControlledError(ErrorAuth.TokenExpired, HttpStatus.FORBIDDEN),
+        new ForbiddenError(ErrorAuth.TokenExpired),
       );
     });
 
@@ -528,9 +520,7 @@ describe('AuthService', () => {
       findByEmailMock.mockResolvedValue(null);
       expect(
         authService.resendEmailVerification({ email: 'user@example.com' }),
-      ).rejects.toThrow(
-        new ControlledError(ErrorUser.NotFound, HttpStatus.NO_CONTENT),
-      );
+      ).rejects.toThrow(new NotFoundError(ErrorUser.NotFound));
     });
 
     it('should throw an error if user is not pending', () => {
@@ -538,9 +528,7 @@ describe('AuthService', () => {
       findByEmailMock.mockResolvedValue(userEntity);
       expect(
         authService.resendEmailVerification({ email: 'user@example.com' }),
-      ).rejects.toThrow(
-        new ControlledError(ErrorUser.NotFound, HttpStatus.NO_CONTENT),
-      );
+      ).rejects.toThrow(new ConflictError(ErrorUser.InvalidStatus));
     });
 
     it('should create token and send email', async () => {

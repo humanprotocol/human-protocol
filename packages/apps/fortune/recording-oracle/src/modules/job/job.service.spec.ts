@@ -10,7 +10,7 @@ import {
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import {
   MOCK_ADDRESS,
   MOCK_EXCHANGE_ORACLE_WEBHOOK_URL,
@@ -346,9 +346,9 @@ describe('JobService', () => {
         .mockResolvedValueOnce(JSON.stringify(existingJobSolutions))
         .mockResolvedValue(JSON.stringify(exchangeJobSolutions));
 
-      httpServicePostMock.mockRejectedValueOnce(
-        new Error(ErrorJob.WebhookWasNotSent),
-      );
+      httpServicePostMock.mockImplementationOnce(() => {
+        return throwError(() => new Error('HTTP request failed'));
+      });
       KVStoreUtils.get = jest
         .fn()
         .mockResolvedValueOnce(MOCK_REPUTATION_ORACLE_WEBHOOK_URL);
@@ -360,9 +360,9 @@ describe('JobService', () => {
         eventData: { solutionsUrl: MOCK_FILE_URL },
       };
 
-      await expect(
-        jobService.processJobSolution(newSolution),
-      ).rejects.toThrowError(ErrorJob.WebhookWasNotSent);
+      await expect(jobService.processJobSolution(newSolution)).rejects.toThrow(
+        'HTTP request failed',
+      );
     });
 
     it('should return solution are recorded when one solution is sent', async () => {

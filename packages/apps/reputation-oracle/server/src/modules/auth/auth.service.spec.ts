@@ -9,16 +9,17 @@ import { omit } from 'lodash';
 
 import { generateES256Keys } from '../../../test/fixtures/crypto';
 import { generateEthWallet } from '../../../test/fixtures/web3';
-import { SignatureType } from '../../common/enums/web3';
-import { AuthConfigService } from '../../config/auth-config.service';
-import { NDAConfigService } from '../../config/nda-config.service';
-import { ServerConfigService } from '../../config/server-config.service';
-import { Web3ConfigService } from '../../config/web3-config.service';
+import { SignatureType } from '../../common/enums';
+import {
+  AuthConfigService,
+  NDAConfigService,
+  ServerConfigService,
+  Web3ConfigService,
+} from '../../config';
 import * as secutiryUtils from '../../utils/security';
-import { SiteKeyRepository } from '../user/site-key.repository';
+import { SiteKeyRepository } from '../user';
 import * as web3Utils from '../../utils/web3';
-import { EmailAction } from '../email/constants';
-import { EmailService } from '../email/email.service';
+import { EmailAction, EmailService } from '../email';
 import {
   UserStatus,
   UserRole,
@@ -36,14 +37,14 @@ import { TokenRepository } from './token.repository';
 const mockKVStoreUtils = jest.mocked(KVStoreUtils);
 
 const { publicKey, privateKey } = generateES256Keys();
-const mockAuthConfigService = {
+const mockAuthConfigService: Omit<AuthConfigService, 'configService'> = {
   jwtPrivateKey: privateKey,
   jwtPublicKey: publicKey,
-  accessTokenExpiresIn: 600000,
+  accessTokenExpiresIn: 600,
   refreshTokenExpiresIn: 3600000,
   verifyEmailTokenExpiresIn: 86400000,
   forgotPasswordExpiresIn: 86400000,
-  humanAppEmail: faker.internet.email(),
+  humanAppSecretKey: faker.string.alphanumeric({ length: 42 }),
 };
 
 const mockEmailService = createMock<EmailService>();
@@ -223,21 +224,17 @@ describe('AuthService', () => {
     it('should throw DuplicatedUserAddressError', async () => {
       const ethWallet = generateEthWallet();
       const signature = faker.string.alpha();
-      mockUserRepository.findOneByAddress.mockImplementationOnce(
-        async (address) => {
-          if (address === ethWallet.address) {
-            return {
-              evmAddress: ethWallet.address,
-            } as UserEntity;
-          }
-          return null;
-        },
-      );
+      mockUserRepository.findOneByAddress.mockResolvedValueOnce({
+        evmAddress: ethWallet.address,
+      } as UserEntity);
 
       await expect(
         service.web3Signup(signature, ethWallet.address),
       ).rejects.toThrow(
         new AuthErrors.DuplicatedUserAddressError(ethWallet.address),
+      );
+      expect(mockUserRepository.findOneByAddress).toHaveBeenCalledWith(
+        ethWallet.address,
       );
     });
 
@@ -591,6 +588,36 @@ describe('AuthService', () => {
     });
   });
 
+  describe('m2mSignin', () => {
+    it('should throw AuthError(AuthErrorMessage.INVALID_SECRET_KEY) if invalid secret', async () => {
+      const invalidSecretKey = faker.string.alphanumeric({ length: 42 });
+
+      await expect(service.m2mSignin(invalidSecretKey)).rejects.toThrow(
+        new AuthErrors.AuthError(
+          AuthErrors.AuthErrorMessage.INVALID_SECRET_KEY,
+        ),
+      );
+    });
+
+    it('should signin human app', async () => {
+      const accessToken = await service.m2mSignin(
+        mockAuthConfigService.humanAppSecretKey,
+      );
+
+      const decodedAccessToken = await jwtService.verifyAsync(accessToken, {
+        secret: mockAuthConfigService.jwtPrivateKey,
+      });
+
+      expect(omit(decodedAccessToken, ['exp', 'iat'])).toEqual({
+        email: 'human-app@hmt.ai',
+        role: 'human_app',
+        user_id: 'human_app',
+        status: 'active',
+        reputation_network: mockWeb3ConfigService.operatorAddress,
+      });
+    });
+  });
+
   describe('auth', () => {
     it('should generate jwt payload for worker', async () => {
       const user = generateWorkerUser();
@@ -608,7 +635,7 @@ describe('AuthService', () => {
         reputation_network: mockWeb3ConfigService.operatorAddress,
         qualifications: user.userQualifications
           ? user.userQualifications.map(
-              (userQualification) => userQualification.qualification.reference,
+              (userQualification) => userQualification.qualification?.reference,
             )
           : [],
       };
@@ -728,7 +755,7 @@ describe('AuthService', () => {
           qualifications: user.userQualifications
             ? user.userQualifications.map(
                 (userQualification) =>
-                  userQualification.qualification.reference,
+                  userQualification.qualification?.reference,
               )
             : [],
         };
@@ -1011,7 +1038,7 @@ describe('AuthService', () => {
   });
 
   describe('emailVerification', () => {
-    it('should verify an email', async () => {
+    it('should verify an email and remove token', async () => {
       const mockToken = {
         userId: faker.number.int(),
         uuid: faker.string.uuid(),
@@ -1032,6 +1059,8 @@ describe('AuthService', () => {
           status: UserStatus.ACTIVE,
         },
       );
+      expect(mockTokenRepository.deleteOne).toHaveBeenCalledTimes(1);
+      expect(mockTokenRepository.deleteOne).toHaveBeenCalledWith(mockToken);
     });
 
     it('should throw AuthError(AuthErrorMessage.INVALID_EMAIL_TOKEN) if token not found', async () => {
@@ -1046,20 +1075,22 @@ describe('AuthService', () => {
       );
     });
 
-    it('should throw AuthError(AuthErrorMessage.EMAIL_TOKEN_EXPIRED)', async () => {
+    it('should throw AuthError(AuthErrorMessage.EMAIL_TOKEN_EXPIRED) and remove token', async () => {
       const uuid = faker.string.uuid();
-
-      mockTokenRepository.findOneByUuidAndType.mockResolvedValueOnce({
+      const mockToken = {
         uuid,
         expiresAt: faker.date.past(),
-      } as TokenEntity);
-      mockTokenRepository.findOneByUuidAndType.mockResolvedValueOnce(null);
+      } as TokenEntity;
+
+      mockTokenRepository.findOneByUuidAndType.mockResolvedValueOnce(mockToken);
 
       await expect(service.emailVerification(uuid)).rejects.toThrow(
         new AuthErrors.AuthError(
           AuthErrors.AuthErrorMessage.EMAIL_TOKEN_EXPIRED,
         ),
       );
+      expect(mockTokenRepository.deleteOne).toHaveBeenCalledTimes(1);
+      expect(mockTokenRepository.deleteOne).toHaveBeenCalledWith(mockToken);
     });
   });
 
@@ -1070,7 +1101,7 @@ describe('AuthService', () => {
         const user = generateWorkerUser({ status: UserStatus.PENDING });
         const tokenUuid = faker.string.uuid();
 
-        mockUserRepository.findOneByEmail.mockResolvedValueOnce(user);
+        mockUserRepository.findOneById.mockResolvedValueOnce(user);
         mockTokenRepository.findOneByUserIdAndType.mockResolvedValueOnce(
           existingEmailToken as TokenEntity,
         );
@@ -1078,7 +1109,7 @@ describe('AuthService', () => {
           uuid: tokenUuid,
         } as TokenEntity);
 
-        await service.resendEmailVerification(user);
+        await service.resendEmailVerification(user.id);
 
         if (existingEmailToken) {
           expect(mockTokenRepository.deleteOne).toHaveBeenCalledTimes(1);
@@ -1109,9 +1140,9 @@ describe('AuthService', () => {
       async (userStatus) => {
         const user = generateWorkerUser({ status: userStatus });
 
-        mockUserRepository.findOneByEmail.mockResolvedValueOnce(null);
+        mockUserRepository.findOneById.mockResolvedValueOnce(null);
 
-        await service.resendEmailVerification(user);
+        await service.resendEmailVerification(user.id);
 
         expect(
           mockTokenRepository.findOneByUserIdAndType,

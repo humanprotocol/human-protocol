@@ -3,8 +3,8 @@ import { SchedulerRegistry } from '@nestjs/schedule';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CronJobService } from '../cron-job.service';
 import { ExchangeOracleGateway } from '../../../integrations/exchange-oracle/exchange-oracle.gateway';
+import { ReputationOracleGateway } from '../../../integrations/reputation-oracle/reputation-oracle.gateway';
 import { OracleDiscoveryService } from '../../../modules/oracle-discovery/oracle-discovery.service';
-import { WorkerService } from '../../../modules/user-worker/worker.service';
 import { EnvironmentConfigService } from '../../../common/config/environment-config.service';
 import {
   DiscoveredJob,
@@ -31,7 +31,7 @@ describe('CronJobService', () => {
   let exchangeOracleGatewayMock: Partial<ExchangeOracleGateway>;
   let oracleDiscoveryServiceMock: Partial<OracleDiscoveryService>;
   let jobDiscoveryServiceMock: Partial<JobsDiscoveryService>;
-  let workerServiceMock: Partial<WorkerService>;
+  let reputationOracleGatewayMock: Partial<ReputationOracleGateway>;
   let configServiceMock: Partial<EnvironmentConfigService>;
 
   beforeEach(async () => {
@@ -48,13 +48,12 @@ describe('CronJobService', () => {
       setCachedJobs: jest.fn(),
     };
 
-    workerServiceMock = {
-      signinWorker: jest.fn(),
+    reputationOracleGatewayMock = {
+      sendM2mSignin: jest.fn(),
     };
 
     configServiceMock = {
-      email: 'human-app@hmt.ai',
-      password: 'Test1234*',
+      m2mAuthSecretKey: 'sk_test_e7ODIlpLSKNlNV8nRK_2rqLsGu_ft-84C7c-dJzJ3kU',
       cacheTtlOracleDiscovery: 600,
       chainIdsEnabled: [ChainId.POLYGON, ChainId.MAINNET],
       jobsDiscoveryFlag: false,
@@ -73,7 +72,10 @@ describe('CronJobService', () => {
           provide: JobsDiscoveryService,
           useValue: jobDiscoveryServiceMock,
         },
-        { provide: WorkerService, useValue: workerServiceMock },
+        {
+          provide: ReputationOracleGateway,
+          useValue: reputationOracleGatewayMock,
+        },
         { provide: EnvironmentConfigService, useValue: configServiceMock },
         SchedulerRegistry,
       ],
@@ -99,11 +101,11 @@ describe('CronJobService', () => {
       (configServiceMock as any).jobsDiscoveryFlag = true;
 
       service = new CronJobService(
+        reputationOracleGatewayMock as ReputationOracleGateway,
         exchangeOracleGatewayMock as ExchangeOracleGateway,
         configServiceMock as any,
         oracleDiscoveryServiceMock as OracleDiscoveryService,
         jobDiscoveryServiceMock as JobsDiscoveryService,
-        workerServiceMock as WorkerService,
         schedulerRegistryMock,
       );
 
@@ -114,11 +116,11 @@ describe('CronJobService', () => {
       (configServiceMock as any).jobsDiscoveryFlag = false;
 
       service = new CronJobService(
+        reputationOracleGatewayMock as ReputationOracleGateway,
         exchangeOracleGatewayMock as ExchangeOracleGateway,
         configServiceMock as any,
         oracleDiscoveryServiceMock as OracleDiscoveryService,
         jobDiscoveryServiceMock as JobsDiscoveryService,
-        workerServiceMock as WorkerService,
         schedulerRegistryMock,
       );
 
@@ -135,7 +137,7 @@ describe('CronJobService', () => {
       await service.updateJobsListCron();
 
       expect(oracleDiscoveryServiceMock.discoverOracles).toHaveBeenCalledWith();
-      expect(workerServiceMock.signinWorker).not.toHaveBeenCalled();
+      expect(reputationOracleGatewayMock.sendM2mSignin).not.toHaveBeenCalled();
     });
 
     it('should proceed with valid oracles and update jobs list cache', async () => {
@@ -143,7 +145,9 @@ describe('CronJobService', () => {
       (
         oracleDiscoveryServiceMock.discoverOracles as jest.Mock
       ).mockResolvedValue(oraclesDiscovery);
-      (workerServiceMock.signinWorker as jest.Mock).mockResolvedValue({
+      (
+        reputationOracleGatewayMock.sendM2mSignin as jest.Mock
+      ).mockResolvedValue({
         access_token: 'token',
       });
 
@@ -154,10 +158,9 @@ describe('CronJobService', () => {
       await service.updateJobsListCron();
 
       expect(oracleDiscoveryServiceMock.discoverOracles).toHaveBeenCalledWith();
-      expect(workerServiceMock.signinWorker).toHaveBeenCalledWith({
-        email: configServiceMock.email,
-        password: configServiceMock.password,
-      });
+      expect(reputationOracleGatewayMock.sendM2mSignin).toHaveBeenCalledWith(
+        configServiceMock.m2mAuthSecretKey,
+      );
       expect(updateJobsListCacheSpy).toHaveBeenCalledWith(
         oraclesDiscovery[0],
         'Bearer token',

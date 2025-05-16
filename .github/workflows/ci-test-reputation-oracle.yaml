@@ -2,14 +2,10 @@ name: Reputation Oracle Check
 
 on:
   push:
-    branches:
-      - 'main'
-  pull_request:
     paths:
       - 'packages/core/**'
       - 'packages/sdk/typescript/human-protocol-sdk/**'
       - 'packages/apps/reputation-oracle/**'
-  workflow_dispatch:
 
 jobs:
   reputation-oracle-test:
@@ -20,7 +16,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-      - run: npm install --global yarn && yarn
-        name: Install dependencies
-      - run: yarn workspace @human-protocol/reputation-oracle test
-        name: Run reputation oracle test
+          cache: yarn
+      - name: Install dependencies
+        run: yarn install --immutable
+      - name: Build libs
+        run: yarn build:libs
+      - name: Run reputation oracle test
+        run: yarn workspace @human-protocol/reputation-oracle test

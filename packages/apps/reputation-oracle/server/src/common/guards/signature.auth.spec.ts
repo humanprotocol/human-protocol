@@ -1,25 +1,20 @@
-jest.mock('@human-protocol/sdk', () => ({
-  ...jest.requireActual('@human-protocol/sdk'),
-  EscrowUtils: {
-    getEscrow: jest.fn(),
-  },
-}));
+jest.mock('@human-protocol/sdk');
 
+import { faker } from '@faker-js/faker';
 import { EscrowUtils } from '@human-protocol/sdk';
 import { ExecutionContext, HttpException, HttpStatus } from '@nestjs/common';
 
-import {
-  generateContractAddress,
-  generateEthWallet,
-  generateTestnetChainId,
-} from '../../../test/fixtures/web3';
+import { generateEthWallet } from '../../../test/fixtures/web3';
 import {
   createExecutionContextMock,
   ExecutionContextMock,
 } from '../../../test/mock-creators/nest';
+import { generateTestnetChainId } from '../../modules/web3/fixtures';
 import { signMessage } from '../../utils/web3';
 
 import { AuthSignatureRole, SignatureAuthGuard } from './signature.auth';
+
+const mockedEscrowUtils = jest.mocked(EscrowUtils);
 
 describe('SignatureAuthGuard', () => {
   it('should throw if empty roles provided in constructor', async () => {
@@ -46,7 +41,7 @@ describe('SignatureAuthGuard', () => {
       executionContextMock = createExecutionContextMock();
       body = {
         chain_id: generateTestnetChainId(),
-        escrow_address: generateContractAddress(),
+        escrow_address: faker.finance.ethereumAddress(),
       };
     });
 
@@ -70,9 +65,9 @@ describe('SignatureAuthGuard', () => {
 
         const { privateKey, address } = generateEthWallet();
 
-        (EscrowUtils.getEscrow as jest.Mock).mockResolvedValueOnce({
+        mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
           [name]: address,
-        });
+        } as any);
 
         const signature = await signMessage(body, privateKey);
 
@@ -100,9 +95,11 @@ describe('SignatureAuthGuard', () => {
       const guard = new SignatureAuthGuard([AuthSignatureRole.JOB_LAUNCHER]);
 
       const { privateKey, address } = generateEthWallet();
-      (EscrowUtils.getEscrow as jest.Mock).mockResolvedValueOnce({
+
+      mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
         launcher: address,
-      });
+      } as any);
+
       const signature = await signMessage(
         {
           'same-signer': 'different-message',
@@ -137,10 +134,11 @@ describe('SignatureAuthGuard', () => {
       ]);
 
       const { privateKey, address } = generateEthWallet();
-      (EscrowUtils.getEscrow as jest.Mock).mockResolvedValueOnce({
+
+      mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
         launcher: address,
         exchangeOracle: address,
-      });
+      } as any);
 
       const signature = await signMessage(body, privateKey);
 
@@ -173,11 +171,12 @@ describe('SignatureAuthGuard', () => {
       ]);
 
       const { privateKey } = generateEthWallet();
-      (EscrowUtils.getEscrow as jest.Mock).mockResolvedValueOnce({
+
+      mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
         launcher: '',
         exchangeOracle: '',
         recordingOracle: '',
-      });
+      } as any);
 
       const signature = await signMessage(body, privateKey);
 

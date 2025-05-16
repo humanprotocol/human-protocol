@@ -13,11 +13,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-      - run: yarn --ignore-scripts
-        name: Install dependencies
-      - run: yarn build
-        name: Build core package
-        working-directory: ./packages/core
+          cache: yarn
+      - name: Install dependencies
+        run: yarn install --immutable
+      - name: Build core package
+        run: yarn build:core
       - name: Change core version
         uses: jossef/action-set-json-field@v2
         with:
