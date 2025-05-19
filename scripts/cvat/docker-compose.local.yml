@@ -307,7 +307,7 @@ services:
     environment:
       PORT: *frontend_default_port
 
-  exchange-oracle:
+  exchange-oracle-cvat:
     container_name: exchange-oracle-cvat
     image: human-protocol/exchange-oracle-cvat
     pull_policy: build
@@ -358,7 +358,7 @@ services:
       LOCALHOST_JOB_LAUNCHER_URL: "http://job-launcher:${BACKEND_APPS_INTERNAL_PORT:?}/webhook"
       LOCALHOST_RECORDING_ORACLE_ADDRESS: *cvat_recording_oracle_address
 
-  recording-oracle:
+  recording-oracle-cvat:
     container_name: recording-oracle-cvat
     image: human-protocol/recording-oracle-cvat
     pull_policy: build
@@ -404,7 +404,7 @@ services:
       EXCHANGE_ORACLE_STORAGE_SECRET_KEY: *minio_services_secret_key
       EXCHANGE_ORACLE_STORAGE_RESULTS_BUCKET_NAME: *bucket_name_exc_o
       EXCHANGE_ORACLE_STORAGE_USE_SSL: 'false'
-      LOCALHOST_EXCHANGE_ORACLE_URL: "http://exchange-oracle:${BACKEND_APPS_INTERNAL_PORT:?}/webhook"
+      LOCALHOST_EXCHANGE_ORACLE_URL: "http://exchange-oracle-cvat:${BACKEND_APPS_INTERNAL_PORT:?}/webhook"
       LOCALHOST_REPUTATION_ORACLE_URL: "http://reputation-oracle:${BACKEND_APPS_INTERNAL_PORT:?}/webhook"
       LOCALHOST_EXCHANGE_ORACLE_ADDRESS: *cvat_exchange_oracle_address
 
