@@ -39,8 +39,8 @@ x-general-env-variables:
   bucket_name_manifests: &bucket_name_manifests ${BUCKET_NAME_MANIFESTS:-manifests}
   bucket_name_datasets: &bucket_name_datasets ${BUCKET_NAME_DATASETS:-datasets}
   bucket_name_rep_o: &bucket_name_rep_o ${BUCKET_NAME_REPUTATION_ORACLE:-reputation-oracle}
-  bucket_name_exc_o: &bucket_name_exc_o ${BUCKET_NAME_EXCHANGE_ORACLE:-exchange-oracle}
-  bucket_name_rec_o: &bucket_name_rec_o ${BUCKET_NAME_RECORDING_ORACLE:-recording-oracle}
+  bucket_name_cvat_exc_o: &bucket_name_cvat_exc_o ${BUCKET_NAME_CVAT_EXCHANGE_ORACLE:-cvat-exchange-oracle}
+  bucket_name_cvat_rec_o: &bucket_name_cvat_rec_o ${BUCKET_NAME_CVAT_RECORDING_ORACLE:-cvat-recording-oracle}
   bucket_name_fortune: &bucket_name_fortune ${BUCKEN_NAME_FORTUNE:-fortune}
   # WEB3 ADDRESSES
   reputation_oracle_address: &reputation_oracle_address ${REPUTATION_ORACLE_ADDRESS:?}
@@ -189,8 +189,8 @@ services:
       BUCKET_MANIFESTS: *bucket_name_manifests
       BUCKET_DATASETS: *bucket_name_datasets
       BUCKET_REPUTATION_ORACLE: *bucket_name_rep_o
-      BUCKET_EXCHANGE_ORACLE: *bucket_name_exc_o
-      BUCKET_RECORDING_ORACLE: *bucket_name_rec_o
+      BUCKET_CVAT_EXCHANGE_ORACLE: *bucket_name_cvat_exc_o
+      BUCKET_CVAT_RECORDING_ORACLE: *bucket_name_cvat_rec_o
       BUCKET_FORTUNE: *bucket_name_fortune
     entrypoint: >
       /bin/sh -c "
@@ -208,11 +208,11 @@ services:
         mc mb myminio/$$BUCKET_REPUTATION_ORACLE;
         mc anonymous set public myminio/$$BUCKET_REPUTATION_ORACLE;
 
-        mc mb myminio/$$BUCKET_EXCHANGE_ORACLE;
-        mc anonymous set public myminio/$$BUCKET_EXCHANGE_ORACLE;
+        mc mb myminio/$$BUCKET_CVAT_EXCHANGE_ORACLE;
+        mc anonymous set public myminio/$$BUCKET_CVAT_EXCHANGE_ORACLE;
 
-        mc mb myminio/$$BUCKET_RECORDING_ORACLE;
-        mc anonymous set public myminio/$$BUCKET_RECORDING_ORACLE;
+        mc mb myminio/$$BUCKET_CVAT_RECORDING_ORACLE;
+        mc anonymous set public myminio/$$BUCKET_CVAT_RECORDING_ORACLE;
 
         mc mb myminio/$$BUCKET_FORTUNE;
         mc anonymous set public myminio/$$BUCKET_FORTUNE;
@@ -356,7 +356,7 @@ services:
       PG_DB: exchange-oracle-cvat
       POLYGON_AMOY_RPC_API_URL: *rpc_url_polygon_amoy
       POLYGON_AMOY_ADDR: *cvat_exchange_oracle_address
-      STORAGE_BUCKET_NAME: *bucket_name_exc_o
+      STORAGE_BUCKET_NAME: *bucket_name_cvat_exc_o
       HUMAN_APP_JWT_KEY: *reputation_oracle_jwt_public_key
       CVAT_INCOMING_WEBHOOKS_URL: "http://exchange-oracle.app:${BACKEND_APPS_INTERNAL_PORT:?}/cvat-webhook"
       LOCALHOST_RECORDING_ORACLE_URL: "http://recording-oracle:${BACKEND_APPS_INTERNAL_PORT:?}/webhook"
@@ -401,13 +401,13 @@ services:
       PG_DB: recording-oracle-cvat
       POLYGON_AMOY_RPC_API_URL: *rpc_url_polygon_amoy
       POLYGON_AMOY_ADDR: *cvat_recording_oracle_address
-      STORAGE_RESULTS_BUCKET_NAME: *bucket_name_rec_o
+      STORAGE_RESULTS_BUCKET_NAME: *bucket_name_cvat_rec_o
       STORAGE_USE_PATH_STYLE: "true"
       EXCHANGE_ORACLE_STORAGE_PROVIDER: *cvat_oracle_storage_provider
       EXCHANGE_ORACLE_STORAGE_ENDPOINT_URL: *cvat_oracle_storage_endpoint
       EXCHANGE_ORACLE_STORAGE_ACCESS_KEY: *minio_services_access_key
       EXCHANGE_ORACLE_STORAGE_SECRET_KEY: *minio_services_secret_key
-      EXCHANGE_ORACLE_STORAGE_RESULTS_BUCKET_NAME: *bucket_name_exc_o
+      EXCHANGE_ORACLE_STORAGE_RESULTS_BUCKET_NAME: *bucket_name_cvat_exc_o
       EXCHANGE_ORACLE_STORAGE_USE_SSL: 'false'
       LOCALHOST_EXCHANGE_ORACLE_URL: "http://exchange-oracle-cvat:${BACKEND_APPS_INTERNAL_PORT:?}/webhook"
       LOCALHOST_REPUTATION_ORACLE_URL: "http://reputation-oracle:${BACKEND_APPS_INTERNAL_PORT:?}/webhook"
