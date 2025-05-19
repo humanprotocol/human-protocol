@@ -249,7 +249,6 @@ contract Escrow is IEscrow, ReentrancyGuard {
         );
         require(bytes(_url).length != 0, "URL can't be empty");
         require(bytes(_hash).length != 0, "Hash can't be empty");
-        require(_amount > 0, 'Amount must be greater than zero');
         require(
             _amount <= remainingFunds - reservedFunds,
             'Not enough unreserved funds'

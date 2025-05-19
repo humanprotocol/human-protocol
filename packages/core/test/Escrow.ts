@@ -229,17 +229,6 @@ describe('Escrow', function () {
         );
       });
 
-      it('Should revert with the right error if amount sent is 0', async function () {
-        await fundEscrow();
-        await setupEscrow();
-        await escrow
-          .connect(owner)
-          .addTrustedHandlers([await reputationOracle.getAddress()]);
-        await expect(
-          escrow.connect(reputationOracle).storeResults(MOCK_URL, MOCK_HASH, 0)
-        ).to.be.revertedWith('Amount must be greater than zero');
-      });
-
       it('Should revert with the right error if amount is higher than unreserved funds', async function () {
         await fundEscrow();
         await setupEscrow();

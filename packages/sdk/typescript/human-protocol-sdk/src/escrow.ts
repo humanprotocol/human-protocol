@@ -17,6 +17,7 @@ import { requiresSigner } from './decorators';
 import { ChainId, OrderDirection } from './enums';
 import {
   ErrorAmountMustBeGreaterThanZero,
+  ErrorAmountMustBePositive,
   ErrorAmountsCannotBeEmptyArray,
   ErrorEscrowAddressIsNotProvidedByFactory,
   ErrorEscrowDoesNotHaveEnoughBalance,
@@ -455,11 +456,12 @@ export class EscrowClient extends BaseEthersClient {
   }
 
   /**
-   * This function stores the results URL and hash.
+   * This function stores the results URL and hash, and reserves the specified amount of funds.
    *
    * @param {string} escrowAddress Address of the escrow.
    * @param {string} url Results file URL.
    * @param {string} hash Results file hash.
+   * @param {bigint} amount Amount to reserve for payouts.
    * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @returns Returns void if successful. Throws error if any.
    *
@@ -479,7 +481,7 @@ export class EscrowClient extends BaseEthersClient {
    * const signer = new Wallet(privateKey, provider);
    * const escrowClient = await EscrowClient.build(signer);
    *
-   * await escrowClient.storeResults('0x62dD51230A30401C455c8398d06F85e4EaB6309f', 'http://localhost/results.json', 'b5dad76bf6772c0f07fd5e048f6e75a5f86ee079');
+   * await escrowClient.storeResults('0x62dD51230A30401C455c8398d06F85e4EaB6309f', 'http://localhost/results.json', 'b5dad76bf6772c0f07fd5e048f6e75a5f86ee079', 50n);
    * ```
    */
   @requiresSigner
@@ -487,6 +489,7 @@ export class EscrowClient extends BaseEthersClient {
     escrowAddress: string,
     url: string,
     hash: string,
+    amount: bigint,
     txOptions: Overrides = {}
   ): Promise<void> {
     if (!ethers.isAddress(escrowAddress)) {
@@ -505,6 +508,10 @@ export class EscrowClient extends BaseEthersClient {
       throw ErrorHashIsEmptyString;
     }
 
+    if (amount <= 0n) {
+      throw ErrorAmountMustBePositive;
+    }
+
     if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
       throw ErrorEscrowAddressIsNotProvidedByFactory;
     }
@@ -512,7 +519,9 @@ export class EscrowClient extends BaseEthersClient {
     try {
       const escrowContract = this.getEscrowContract(escrowAddress);
 
-      await (await escrowContract.storeResults(url, hash, txOptions)).wait();
+      await (
+        await escrowContract.storeResults(url, hash, amount, txOptions)
+      ).wait();
 
       return;
     } catch (e) {
@@ -942,6 +951,7 @@ export class EscrowClient extends BaseEthersClient {
    * const signedTransaction = await signer.signTransaction(rawTransaction);
    * console.log('Tx hash:', ethers.keccak256(signedTransaction));
    * (await signer.sendTransaction(rawTransaction)).wait();
+   * ```
    */
   @requiresSigner
   async createBulkPayoutTransaction(
