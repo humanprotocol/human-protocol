@@ -348,7 +348,7 @@ services:
         *cvat_connection_vars
       ]
       REDIS_DB: 2
-      PG_DB: exchange-oracle
+      PG_DB: exchange-oracle-cvat
       POLYGON_AMOY_RPC_API_URL: *rpc_url_polygon_amoy
       POLYGON_AMOY_ADDR: *cvat_exchange_oracle_address
       STORAGE_BUCKET_NAME: *bucket_name_exc_o
@@ -393,7 +393,7 @@ services:
         *cvat_oracle_storage_connection_vars,
         *cvat_connection_vars
       ]
-      PG_DB: recording-oracle
+      PG_DB: recording-oracle-cvat
       POLYGON_AMOY_RPC_API_URL: *rpc_url_polygon_amoy
       POLYGON_AMOY_ADDR: *cvat_recording_oracle_address
       STORAGE_RESULTS_BUCKET_NAME: *bucket_name_rec_o
