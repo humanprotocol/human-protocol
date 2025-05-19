@@ -337,7 +337,7 @@ services:
       - name: server_port
         target: *backend_apps_internal_port
         published: ${EXCHANGE_ORACLE_EXPOSED_PORT:?}
-    env_file: ./.env.exchange-oracle.local
+    env_file: ./.env.exchange-oracle-cvat.local
     environment:
       HOST: *all_interfaces_ip
       PORT: *backend_apps_internal_port
@@ -384,7 +384,7 @@ services:
       - name: server_port
         target: *backend_apps_internal_port
         published: ${RECORDING_ORACLE_EXPOSED_PORT:?}
-    env_file: ./.env.recording-oracle.local
+    env_file: ./.env.recording-oracle-cvat.local
     environment:
       HOST: *all_interfaces_ip
       PORT: *backend_apps_internal_port

@@ -7,8 +7,8 @@ copy-env-files:
 	@cp ./env-files/.env.reputation-oracle ./.env.reputation-oracle.local
 	@cp ./env-files/.env.human-app-server .env.human-app-server.local
 	@cp ./env-files/.env.job-launcher ./.env.job-launcher.local
-	@cp ./env-files/.env.exchange-oracle ./.env.exchange-oracle.local
-	@cp ./env-files/.env.recording-oracle ./.env.recording-oracle.local
+	@cp ./env-files/.env.exchange-oracle-cvat ./.env.exchange-oracle-cvat.local
+	@cp ./env-files/.env.recording-oracle-cvat ./.env.recording-oracle-cvat.local
 # Copying .env files for client apps.
 # It should be placed in corresponding app folder
 # because used during Docker image build process
