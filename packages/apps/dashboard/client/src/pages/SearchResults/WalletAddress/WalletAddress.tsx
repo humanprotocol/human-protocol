@@ -43,7 +43,7 @@ const WalletAddress: FC<Props> = ({ data }) => {
           {isWallet && (
             <TitleSectionWrapper
               title="Received Payouts"
-              tooltip="Received payouts from the operator"
+              tooltip="Total amount received by participating in jobs"
             >
               <Typography variant="body2">
                 {data?.totalAmountReceived}

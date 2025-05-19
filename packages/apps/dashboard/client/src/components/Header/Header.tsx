@@ -90,7 +90,7 @@ const Header: FC = () => {
           edge="start"
           color="inherit"
           aria-label="open drawer"
-          sx={{ display: { xs: 'block', md: 'none' } }}
+          sx={{ display: { xs: 'flex', md: 'none' } }}
           onClick={() => toggleDrawer(true)}
         >
           <MenuIcon />

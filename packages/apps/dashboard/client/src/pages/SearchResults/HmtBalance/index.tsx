@@ -23,14 +23,15 @@ const HmtBalance: FC<Props> = ({ balance }) => {
     return <span>...</span>;
   }
 
-  const balanceInDollars = balance ? (balance * data).toFixed(2) : 0;
+  const _balance = Number(balance) * 1e18;
+  const balanceInDollars = balance ? (_balance * data).toFixed(2) : 0;
 
   return (
     <Stack flexDirection="row" whiteSpace="nowrap">
       <Typography variant="body2">
         <NumericFormat
           displayType="text"
-          value={Number(balance) < 1 ? Number(balance) * 1e18 : balance}
+          value={_balance}
           thousandSeparator=","
           decimalScale={mobile.isMobile ? 4 : 9}
         />

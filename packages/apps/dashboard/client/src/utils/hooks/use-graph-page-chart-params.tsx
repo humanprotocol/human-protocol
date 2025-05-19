@@ -95,6 +95,7 @@ export const useGraphPageChartParams = create<GraphPageChartParams>((set) => ({
         dateRangeParams: {
           ...state.dateRangeParams,
           from: timePeriod.value,
+          to: dayjs(),
         },
       };
     });

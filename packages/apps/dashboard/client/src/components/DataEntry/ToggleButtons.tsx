@@ -7,6 +7,7 @@ import {
   TimePeriod,
   useGraphPageChartParams,
 } from '@utils/hooks/use-graph-page-chart-params';
+import dayjs from 'dayjs';
 
 export const StyledToggleButtonGroup = styled(ToggleButtonGroup)(
   ({ theme }) => ({
@@ -26,7 +27,10 @@ const ToggleButtons = () => {
 
   const checkIfSelected = (element: TimePeriod) => {
     if (element.name !== 'ALL') {
-      return element.value.isSame(dateRangeParams.from);
+      return (
+        element.value.isSame(dateRangeParams.from) &&
+        dateRangeParams.to.isSame(dayjs(), 'day')
+      );
     }
   };
 
