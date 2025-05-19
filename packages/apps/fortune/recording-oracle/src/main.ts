@@ -6,7 +6,6 @@ import helmet from 'helmet';
 
 import { INestApplication } from '@nestjs/common';
 import { AppModule } from './app.module';
-import { GlobalExceptionsFilter } from './common/filter';
 import { ServerConfigService } from './common/config/server-config.service';
 import { ConfigService } from '@nestjs/config';
 
@@ -20,8 +19,6 @@ async function bootstrap() {
 
   const host = serverConfigService.host;
   const port = serverConfigService.port;
-
-  app.useGlobalFilters(new GlobalExceptionsFilter());
 
   app.enableCors({
     origin: true,

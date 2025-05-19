@@ -4,7 +4,7 @@ import { Input } from '@/shared/components/data-entry/input';
 import type { EthKVStoreKeyValues } from '@/modules/smart-contracts/EthKVStore/config';
 import {
   EthKVStoreKeys,
-  Role,
+  OPERATOR_ROLES,
 } from '@/modules/smart-contracts/EthKVStore/config';
 import { Select } from '@/shared/components/data-entry/select';
 import { MultiSelect } from '@/shared/components/data-entry/multi-select';
@@ -12,12 +12,6 @@ import { JOB_TYPES } from '@/shared/consts';
 import type { GetEthKVStoreValuesSuccessResponse } from '@/modules/operator/hooks/use-get-keys';
 import { PercentsInputMask } from '@/shared/components/data-entry/input-masks';
 import { sortFormKeys, STORE_KEYS_ORDER } from '../../utils';
-
-const OPTIONS = [
-  Role.EXCHANGE_ORACLE,
-  Role.JOB_LAUNCHER,
-  Role.RECORDING_ORACLE,
-];
 
 const formInputsConfig: Record<EthKVStoreKeyValues, React.ReactElement> = {
   [EthKVStoreKeys.Fee]: (
@@ -54,7 +48,7 @@ const formInputsConfig: Record<EthKVStoreKeyValues, React.ReactElement> = {
       isChipRenderValue
       label={t('operator.addKeysPage.existingKeys.role')}
       name={EthKVStoreKeys.Role}
-      options={OPTIONS.map((role, i) => ({
+      options={OPERATOR_ROLES.map((role, i) => ({
         name: role,
         value: role,
         id: i,

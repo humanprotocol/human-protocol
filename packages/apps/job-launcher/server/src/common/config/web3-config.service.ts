@@ -46,22 +46,22 @@ export class Web3ConfigService {
   }
 
   /**
-   * Address of the Fortune exchange oracle contract.
+   * URI for the hCaptcha recording oracle service.
    * Required
    */
-  get fortuneExchangeOracleAddress(): string {
+  get hCaptchaRecordingOracleURI(): string {
     return this.configService.getOrThrow<string>(
-      'FORTUNE_EXCHANGE_ORACLE_ADDRESS',
+      'HCAPTCHA_RECORDING_ORACLE_URI',
     );
   }
 
   /**
-   * Address of the Fortune recording oracle contract.
+   * URI for the hCaptcha reputation oracle service.
    * Required
    */
-  get fortuneRecordingOracleAddress(): string {
+  get hCaptchaReputationOracleURI(): string {
     return this.configService.getOrThrow<string>(
-      'FORTUNE_RECORDING_ORACLE_ADDRESS',
+      'HCAPTCHA_REPUTATION_ORACLE_URI',
     );
   }
 
@@ -86,30 +86,28 @@ export class Web3ConfigService {
   }
 
   /**
-   * URI for the hCaptcha recording oracle service.
-   * Required
-   */
-  get hCaptchaRecordingOracleURI(): string {
-    return this.configService.getOrThrow<string>(
-      'HCAPTCHA_RECORDING_ORACLE_URI',
-    );
-  }
-
-  /**
-   * URI for the hCaptcha reputation oracle service.
-   * Required
-   */
-  get hCaptchaReputationOracleURI(): string {
-    return this.configService.getOrThrow<string>(
-      'HCAPTCHA_REPUTATION_ORACLE_URI',
-    );
-  }
-
-  /**
    * Address of the hCaptcha oracle contract.
    * Required
    */
   get hCaptchaOracleAddress(): string {
     return this.configService.getOrThrow<string>('HCAPTCHA_ORACLE_ADDRESS');
+  }
+
+  /**
+   * Address of the Audino exchange oracle.
+   */
+  get audinoExchangeOracleAddress(): string {
+    return this.configService.getOrThrow<string>(
+      'AUDINO_EXCHANGE_ORACLE_ADDRESS',
+    );
+  }
+
+  /**
+   * Address of the Audino recording oracle.
+   */
+  get audinoRecordingOracleAddress(): string {
+    return this.configService.getOrThrow<string>(
+      'AUDINO_RECORDING_ORACLE_ADDRESS',
+    );
   }
 }

@@ -3,20 +3,16 @@ import {
   Encryption,
   EncryptionUtils,
   EscrowClient,
-  StorageClient,
   KVStoreUtils,
+  StorageClient,
 } from '@human-protocol/sdk';
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  Logger,
-} from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import * as Minio from 'minio';
+import { PGPConfigService } from '../../common/config/pgp-config.service';
+import { S3ConfigService } from '../../common/config/s3-config.service';
+import { NotFoundError, ServerError } from '../../common/errors';
 import { ISolution } from '../../common/interfaces/job';
 import { Web3Service } from '../web3/web3.service';
-import { S3ConfigService } from '../../common/config/s3-config.service';
-import { PGPConfigService } from '../../common/config/pgp-config.service';
 
 @Injectable()
 export class StorageService {
@@ -75,7 +71,7 @@ export class StorageService {
     solutions: ISolution[],
   ): Promise<string> {
     if (!(await this.minioClient.bucketExists(this.s3ConfigService.bucket))) {
-      throw new BadRequestException('Bucket not found');
+      throw new NotFoundError('Bucket not found');
     }
 
     let fileToUpload = JSON.stringify(solutions);
@@ -98,7 +94,7 @@ export class StorageService {
           !exchangeOraclePublickKey.length ||
           !recordingOraclePublicKey.length
         ) {
-          throw new BadRequestException('Missing public key');
+          throw new ServerError('Missing public key');
         }
 
         fileToUpload = await EncryptionUtils.encrypt(fileToUpload, [
@@ -107,7 +103,7 @@ export class StorageService {
         ]);
       } catch (e) {
         Logger.error(e);
-        throw new BadRequestException('Encryption error');
+        throw new ServerError('Encryption error');
       }
     }
 
@@ -125,7 +121,7 @@ export class StorageService {
       return this.getJobUrl(escrowAddress, chainId);
     } catch (e) {
       Logger.error(e);
-      throw new BadRequestException('File not uploaded');
+      throw new ServerError('File not uploaded');
     }
   }
 }

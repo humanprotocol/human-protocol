@@ -6,8 +6,8 @@ import {
 } from '@nestjs/common';
 import { ModuleRef, Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
+import { AuthError, ForbiddenError } from '../errors';
 import { ApiKeyGuard } from './apikey.auth';
-import { ControlledError } from '../errors/controlled';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt-http') implements CanActivate {
@@ -33,7 +33,7 @@ export class JwtAuthGuard extends AuthGuard('jwt-http') implements CanActivate {
       }
     }
 
-    throw new ControlledError('Unauthorized', HttpStatus.UNAUTHORIZED);
+    throw new AuthError('Unauthorized');
   }
 
   public async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -58,11 +58,11 @@ export class JwtAuthGuard extends AuthGuard('jwt-http') implements CanActivate {
           return this.handleApiKeyAuthentication(context);
         case HttpStatus.FORBIDDEN:
           if (jwtError?.response?.message === 'Forbidden') {
-            throw new ControlledError('Forbidden', HttpStatus.FORBIDDEN);
+            throw new ForbiddenError('Forbidden');
           }
           break;
         default:
-          throw new ControlledError('Unauthorized', HttpStatus.UNAUTHORIZED);
+          throw new AuthError('Unauthorized');
       }
 
       return false;

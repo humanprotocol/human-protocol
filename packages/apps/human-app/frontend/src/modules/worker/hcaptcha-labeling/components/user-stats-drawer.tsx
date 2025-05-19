@@ -6,7 +6,8 @@ import { t } from 'i18next';
 import { Loader } from '@/shared/components/ui/loader';
 import { Alert } from '@/shared/components/ui/alert';
 import { getErrorMessageForError } from '@/shared/errors';
-import { type HCaptchaUserStatsSuccess, useHCaptchaUserStats } from '../hooks';
+import { type HCaptchaUserStatsSuccess } from '../types';
+import { useHCaptchaUserStats } from '../hooks';
 import { UserStatsDetails } from './user-stats-details';
 
 export interface UserStatsDrawerNavigationProps {

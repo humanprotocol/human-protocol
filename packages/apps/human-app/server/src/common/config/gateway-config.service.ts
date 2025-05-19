@@ -41,6 +41,11 @@ export class GatewayConfigService {
               method: HttpMethod.POST,
               headers: this.JSON_HEADER,
             },
+            [ReputationOracleEndpoints.M2M_SIGNIN]: {
+              endpoint: '/auth/m2m/signin',
+              method: HttpMethod.POST,
+              headers: this.JSON_HEADER,
+            },
             [ReputationOracleEndpoints.REGISTRATION_IN_EXCHANGE_ORACLE]: {
               endpoint: '/user/exchange-oracle-registration',
               method: HttpMethod.POST,
@@ -123,6 +128,16 @@ export class GatewayConfigService {
             [ReputationOracleEndpoints.SIGN_NDA]: {
               endpoint: '/nda/sign',
               method: HttpMethod.POST,
+              headers: this.JSON_HEADER,
+            },
+            [ReputationOracleEndpoints.REPORT_ABUSE]: {
+              endpoint: '/abuse/report',
+              method: HttpMethod.POST,
+              headers: this.JSON_HEADER,
+            },
+            [ReputationOracleEndpoints.GET_ABUSE_REPORTS]: {
+              endpoint: '/abuse/reports',
+              method: HttpMethod.GET,
               headers: this.JSON_HEADER,
             },
           } as Record<ReputationOracleEndpoints, GatewayEndpointConfig>,

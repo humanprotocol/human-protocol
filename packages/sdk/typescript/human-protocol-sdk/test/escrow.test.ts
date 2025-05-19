@@ -35,7 +35,11 @@ import {
   InvalidEthereumAddressError,
 } from '../src/error';
 import { EscrowClient, EscrowUtils } from '../src/escrow';
-import { GET_ESCROWS_QUERY, GET_ESCROW_BY_ADDRESS_QUERY } from '../src/graphql';
+import {
+  GET_ESCROWS_QUERY,
+  GET_ESCROW_BY_ADDRESS_QUERY,
+  GET_PAYOUTS_QUERY,
+} from '../src/graphql';
 import { EscrowStatus } from '../src/types';
 import {
   DEFAULT_GAS_PAYER_PRIVKEY,
@@ -2917,13 +2921,10 @@ describe('EscrowUtils', () => {
 
     test('should throw an error if launcher address is invalid', async () => {
       await expect(
-        EscrowUtils.getStatusEvents(
-          ChainId.POLYGON_AMOY,
-          undefined,
-          undefined,
-          undefined,
-          'invalid_address'
-        )
+        EscrowUtils.getStatusEvents({
+          chainId: ChainId.POLYGON_AMOY,
+          launcher: 'invalid_address',
+        })
       ).rejects.toThrow(ErrorInvalidAddress);
     });
 
@@ -2947,7 +2948,9 @@ describe('EscrowUtils', () => {
         .spyOn(gqlFetch, 'default')
         .mockResolvedValueOnce({ escrowStatusEvents: pendingEvents });
 
-      const result = await EscrowUtils.getStatusEvents(ChainId.LOCALHOST);
+      const result = await EscrowUtils.getStatusEvents({
+        chainId: ChainId.LOCALHOST,
+      });
       expect(result).toEqual(pendingEvents);
       expect(gqlFetchSpy).toHaveBeenCalled();
     });
@@ -2975,12 +2978,11 @@ describe('EscrowUtils', () => {
         .spyOn(gqlFetch, 'default')
         .mockResolvedValueOnce({ escrowStatusEvents: pendingEvents });
 
-      const result = await EscrowUtils.getStatusEvents(
-        ChainId.POLYGON_AMOY,
-        undefined,
-        fromDate,
-        toDate
-      );
+      const result = await EscrowUtils.getStatusEvents({
+        chainId: ChainId.POLYGON_AMOY,
+        from: fromDate,
+        to: toDate,
+      });
 
       expect(result).toEqual(pendingEvents);
       expect(gqlFetchSpy).toHaveBeenCalled();
@@ -3009,12 +3011,12 @@ describe('EscrowUtils', () => {
         .spyOn(gqlFetch, 'default')
         .mockResolvedValueOnce({ escrowStatusEvents: partialEvents });
 
-      const result = await EscrowUtils.getStatusEvents(
-        ChainId.POLYGON_AMOY,
-        [EscrowStatus.Partial],
-        fromDate,
-        toDate
-      );
+      const result = await EscrowUtils.getStatusEvents({
+        chainId: ChainId.POLYGON_AMOY,
+        statuses: [EscrowStatus.Partial],
+        from: fromDate,
+        to: toDate,
+      });
 
       expect(result).toEqual(partialEvents);
       expect(gqlFetchSpy).toHaveBeenCalled();
@@ -3043,14 +3045,234 @@ describe('EscrowUtils', () => {
         .spyOn(gqlFetch, 'default')
         .mockResolvedValueOnce({ escrowStatusEvents: pendingEvents });
 
-      const result = await EscrowUtils.getStatusEvents(
-        ChainId.POLYGON_AMOY,
-        undefined,
-        fromDate,
-        toDate
-      );
+      const result = await EscrowUtils.getStatusEvents({
+        chainId: ChainId.POLYGON_AMOY,
+        from: fromDate,
+        to: toDate,
+      });
 
       expect(result).toEqual(pendingEvents);
+      expect(gqlFetchSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('getPayouts', () => {
+    afterEach(() => {
+      vi.clearAllMocks();
+    });
+
+    test('should throw an error if chainId is invalid', async () => {
+      await expect(
+        EscrowUtils.getPayouts({ chainId: 123 } as any)
+      ).rejects.toThrow(ErrorUnsupportedChainID);
+    });
+
+    test('should throw an error if escrowAddress is an invalid address', async () => {
+      const filter = {
+        chainId: ChainId.POLYGON_AMOY,
+        escrowAddress: 'invalid_address',
+      };
+
+      await expect(EscrowUtils.getPayouts(filter)).rejects.toThrow(
+        ErrorInvalidAddress
+      );
+    });
+
+    test('should throw an error if recipient is an invalid address', async () => {
+      const filter = {
+        chainId: ChainId.POLYGON_AMOY,
+        recipient: 'invalid_address',
+      };
+
+      await expect(EscrowUtils.getPayouts(filter)).rejects.toThrow(
+        ErrorInvalidAddress
+      );
+    });
+
+    test('should successfully getPayouts', async () => {
+      const payouts = [
+        {
+          id: '1',
+          escrowAddress: '0x1234567890123456789012345678901234567890',
+          recipient: '0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef',
+          amount: '1000000000000000000',
+          createdAt: '1672531200',
+        },
+        {
+          id: '2',
+          escrowAddress: '0x1234567890123456789012345678901234567890',
+          recipient: '0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef',
+          amount: '2000000000000000000',
+          createdAt: '1672617600',
+        },
+      ];
+
+      const gqlFetchSpy = vi
+        .spyOn(gqlFetch, 'default')
+        .mockResolvedValue({ payouts });
+
+      const filter = {
+        chainId: ChainId.POLYGON_AMOY,
+      };
+
+      const result = await EscrowUtils.getPayouts(filter);
+      expect(result).toEqual(payouts);
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        'https://api.studio.thegraph.com/query/74256/amoy/version/latest',
+        GET_PAYOUTS_QUERY(filter),
+        {
+          escrowAddress: undefined,
+          recipient: undefined,
+          from: undefined,
+          to: undefined,
+          first: 10,
+          skip: 0,
+          orderDirection: OrderDirection.DESC,
+        }
+      );
+    });
+
+    test('should successfully getPayouts with filters', async () => {
+      const payouts = [
+        {
+          id: '1',
+          escrowAddress: '0x1234567890123456789012345678901234567890',
+          recipient: '0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef',
+          amount: '1000000000000000000',
+          createdAt: '1672531200',
+        },
+      ];
+
+      const gqlFetchSpy = vi
+        .spyOn(gqlFetch, 'default')
+        .mockResolvedValue({ payouts });
+
+      const filter = {
+        chainId: ChainId.POLYGON_AMOY,
+        escrowAddress: ethers.ZeroAddress,
+        recipient: ethers.ZeroAddress,
+        from: new Date('2023-01-01'),
+        to: new Date('2023-01-02'),
+      };
+
+      const result = await EscrowUtils.getPayouts(filter);
+      expect(result).toEqual(payouts);
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        'https://api.studio.thegraph.com/query/74256/amoy/version/latest',
+        GET_PAYOUTS_QUERY(filter),
+        {
+          escrowAddress: filter.escrowAddress.toLowerCase(),
+          recipient: filter.recipient.toLowerCase(),
+          from: Math.floor(filter.from.getTime() / 1000),
+          to: Math.floor(filter.to.getTime() / 1000),
+          first: 10,
+          skip: 0,
+          orderDirection: OrderDirection.DESC,
+        }
+      );
+    });
+
+    test('should successfully getPayouts with pagination', async () => {
+      const payouts = [
+        {
+          id: '1',
+          escrowAddress: '0x1234567890123456789012345678901234567890',
+          recipient: '0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef',
+          amount: '1000000000000000000',
+          createdAt: '1672531200',
+        },
+        {
+          id: '2',
+          escrowAddress: '0x1234567890123456789012345678901234567890',
+          recipient: '0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef',
+          amount: '2000000000000000000',
+          createdAt: '1672617600',
+        },
+      ];
+
+      const gqlFetchSpy = vi
+        .spyOn(gqlFetch, 'default')
+        .mockResolvedValue({ payouts });
+
+      const filter = {
+        chainId: ChainId.POLYGON_AMOY,
+        first: 20,
+        skip: 10,
+      };
+
+      const result = await EscrowUtils.getPayouts(filter);
+      expect(result).toEqual(payouts);
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        'https://api.studio.thegraph.com/query/74256/amoy/version/latest',
+        GET_PAYOUTS_QUERY(filter),
+        {
+          escrowAddress: undefined,
+          recipient: undefined,
+          from: undefined,
+          to: undefined,
+          first: 20,
+          skip: 10,
+          orderDirection: OrderDirection.DESC,
+        }
+      );
+    });
+
+    test('should successfully getPayouts with pagination over limits', async () => {
+      const payouts = [
+        {
+          id: '1',
+          escrowAddress: '0x1234567890123456789012345678901234567890',
+          recipient: '0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef',
+          amount: '1000000000000000000',
+          createdAt: '1672531200',
+        },
+        {
+          id: '2',
+          escrowAddress: '0x1234567890123456789012345678901234567890',
+          recipient: '0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef',
+          amount: '2000000000000000000',
+          createdAt: '1672617600',
+        },
+      ];
+
+      const gqlFetchSpy = vi
+        .spyOn(gqlFetch, 'default')
+        .mockResolvedValue({ payouts });
+
+      const filter = {
+        chainId: ChainId.POLYGON_AMOY,
+        first: 20000,
+        skip: 10,
+      };
+
+      const result = await EscrowUtils.getPayouts(filter);
+      expect(result).toEqual(payouts);
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        'https://api.studio.thegraph.com/query/74256/amoy/version/latest',
+        GET_PAYOUTS_QUERY(filter),
+        {
+          escrowAddress: undefined,
+          recipient: undefined,
+          from: undefined,
+          to: undefined,
+          first: 1000,
+          skip: 10,
+          orderDirection: OrderDirection.DESC,
+        }
+      );
+    });
+
+    test('should return an empty array if no payouts are found', async () => {
+      const gqlFetchSpy = vi
+        .spyOn(gqlFetch, 'default')
+        .mockResolvedValue({ payouts: [] });
+
+      const filter = {
+        chainId: ChainId.POLYGON_AMOY,
+      };
+
+      const result = await EscrowUtils.getPayouts(filter);
+      expect(result).toEqual([]);
       expect(gqlFetchSpy).toHaveBeenCalled();
     });
   });

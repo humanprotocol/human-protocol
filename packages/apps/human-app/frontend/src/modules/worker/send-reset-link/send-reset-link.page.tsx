@@ -19,7 +19,7 @@ export function SendResetLinkWorkerPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
 
-  const methods = useForm<SendResetLinkDto>({
+  const methods = useForm({
     defaultValues: {
       email: user?.email ?? '',
       h_captcha_token: '',

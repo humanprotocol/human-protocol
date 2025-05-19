@@ -1,26 +1,18 @@
 import { FC, PropsWithChildren } from 'react';
-import clsx from 'clsx';
-import { DefaultHeader } from '../Headers/DefaultHeader';
-import Footer from '../Footer/Footer';
 
-const PageWrapper: FC<
-  PropsWithChildren<{
-    violetHeader?: boolean;
-    className?: string;
-  }>
-> = ({ children, violetHeader, className }) => {
+import { Box } from '@mui/material';
+
+import Container from '../Container';
+import DefaultHeader from '../Header';
+import Footer from '../Footer';
+
+const PageWrapper: FC<PropsWithChildren> = ({ children }) => {
   return (
-    <div className="page-wrapper">
+    <Box minHeight="100dvh">
       <DefaultHeader />
-      <div
-        className={clsx(className, {
-          'violet-header': violetHeader,
-        })}
-      >
-        <div className="container">{children}</div>
-      </div>
+      <Container component="main">{children}</Container>
       <Footer />
-    </div>
+    </Box>
   );
 };
 

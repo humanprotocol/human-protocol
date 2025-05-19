@@ -1,11 +1,11 @@
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { ChainId, OperatorUtils, Role } from '@human-protocol/sdk';
+import { Injectable, Logger } from '@nestjs/common';
 import { Wallet, ethers } from 'ethers';
 import { NetworkConfigService } from '../../common/config/network-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ErrorWeb3 } from '../../common/constants/errors';
-import { ControlledError } from '../../common/errors/controlled';
+import { ConflictError, ValidationError } from '../../common/errors';
 import { AvailableOraclesDto, OracleDataDto } from './web3.dto';
-import { ChainId, OperatorUtils, Role } from '@human-protocol/sdk';
 
 @Injectable()
 export class Web3Service {
@@ -20,10 +20,7 @@ export class Web3Service {
     const privateKey = this.web3ConfigService.privateKey;
 
     if (!this.networkConfigService.networks.length) {
-      throw new ControlledError(
-        ErrorWeb3.NoValidNetworks,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new Error(ErrorWeb3.NoValidNetworks);
     }
 
     for (const network of this.networkConfigService.networks) {
@@ -39,10 +36,7 @@ export class Web3Service {
 
   public validateChainId(chainId: number): void {
     if (!this.signers[chainId]) {
-      throw new ControlledError(
-        ErrorWeb3.InvalidChainId,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new ValidationError(ErrorWeb3.InvalidChainId);
     }
   }
 
@@ -54,7 +48,7 @@ export class Web3Service {
     if (gasPrice) {
       return gasPrice * BigInt(multiplier);
     }
-    throw new ControlledError(ErrorWeb3.GasPriceError, HttpStatus.CONFLICT);
+    throw new ConflictError(ErrorWeb3.GasPriceError);
   }
 
   public getOperatorAddress(): string {

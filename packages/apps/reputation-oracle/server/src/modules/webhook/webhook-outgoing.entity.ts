@@ -1,33 +1,33 @@
 import { Column, Entity, Index } from 'typeorm';
 
 import { DATABASE_SCHEMA_NAME } from '../../common/constants';
-import { BaseEntity } from '../../database/base.entity';
-import { WebhookOutgoingStatus } from '../../common/enums';
+import { BaseEntity } from '../../database';
+import { OutgoingWebhookStatus } from './types';
 
 @Entity({ schema: DATABASE_SCHEMA_NAME, name: 'webhook_outgoing' })
 @Index(['hash'], { unique: true })
-export class WebhookOutgoingEntity extends BaseEntity {
+export class OutgoingWebhookEntity extends BaseEntity {
   @Column({ type: 'jsonb' })
-  public payload: Record<string, unknown>;
+  payload: Record<string, unknown>;
 
   @Column({ type: 'varchar' })
-  public hash: string;
+  hash: string;
 
   @Column({ type: 'varchar' })
-  public url: string;
+  url: string;
 
   @Column({ type: 'varchar', nullable: true })
-  public failureDetail: string;
+  failureDetail: string | null;
 
   @Column({ type: 'int' })
-  public retriesCount: number;
+  retriesCount: number;
 
   @Column({ type: 'timestamptz' })
-  public waitUntil: Date;
+  waitUntil: Date;
 
   @Column({
     type: 'enum',
-    enum: WebhookOutgoingStatus,
+    enum: OutgoingWebhookStatus,
   })
-  public status: WebhookOutgoingStatus;
+  status: OutgoingWebhookStatus;
 }

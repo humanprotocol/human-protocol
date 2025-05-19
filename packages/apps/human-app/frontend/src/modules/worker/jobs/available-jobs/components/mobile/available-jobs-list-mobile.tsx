@@ -13,11 +13,9 @@ import { useColorMode } from '@/shared/contexts/color-mode';
 import { getErrorMessageForError } from '@/shared/errors';
 import { useCombinePages } from '@/shared/hooks';
 import { useJobsFilterStore } from '../../../hooks';
-import {
-  useInifiniteGetAvailableJobsData,
-  type AvailableJob,
-} from '../../hooks/use-get-available-jobs-data';
+import { useInifiniteGetAvailableJobsData } from '../../hooks/use-get-available-jobs-data';
 import { EvmAddress, RewardAmount } from '../../../components';
+import { type AvailableJob } from '../../../types';
 import { AvailableJobsAssignJobButtonMobile } from './available-jobs-assign-job-button-mobile';
 
 export function AvailableJobsListMobile() {

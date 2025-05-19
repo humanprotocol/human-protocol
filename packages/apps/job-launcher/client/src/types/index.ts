@@ -52,12 +52,29 @@ export type CreateCvatJobRequest = {
   paymentCurrency: string;
   paymentAmount: number;
   escrowFundToken: string;
-  data: CvatDataSource;
-  labels: string[];
+  data: CvatData;
+  labels: Label[];
   minQuality: number;
   groundTruth: CvatDataSource;
   userGuide: string;
   type: CvatJobType;
+};
+
+export type CreateAudinoJobRequest = {
+  chainId: number;
+  requesterDescription: string;
+  qualifications?: string[];
+  paymentCurrency: string;
+  paymentAmount: number;
+  escrowFundToken: string;
+  data: AudinoData;
+  labels: Array<{ name: string }>;
+  minQuality: number;
+  groundTruth: AudinoDataSource;
+  userGuide: string;
+  type: AudinoJobType;
+  audioDuration: number;
+  segmentDuration: number;
 };
 
 export enum CreateJobStep {
@@ -80,9 +97,10 @@ export enum PayingStatus {
 }
 
 export enum JobType {
-  Fortune,
-  CVAT,
-  HCAPTCHA,
+  FORTUNE = 'fortune',
+  CVAT = 'cvat',
+  HCAPTCHA = 'hcaptcha',
+  AUDINO = 'audino',
 }
 
 export enum CvatJobType {
@@ -99,6 +117,10 @@ export enum HCaptchaJobType {
   POINT = 'point',
   BOUNDING_BOX = 'bounding_box',
   COMPARISON = 'comparison',
+}
+
+export enum AudinoJobType {
+  AUDIO_TRANSCRIPTION = 'audio_transcription',
 }
 
 export type FortuneRequest = {
@@ -242,12 +264,37 @@ export type HCaptchaRequest = {
   };
 };
 
+type AudinoDataSource = {
+  provider: StorageProviders;
+  region: AWSRegions | GCSRegions;
+  bucketName: string;
+  path: string;
+};
+
+type AudinoData = {
+  dataset: AudinoDataSource;
+};
+
+export type AudinoRequest = {
+  labels: Array<{ name: string }>;
+  type: AudinoJobType;
+  description: string;
+  qualifications?: string[];
+  data: AudinoData;
+  groundTruth: AudinoDataSource;
+  userGuide: string;
+  accuracyTarget: number;
+  audioDuration: number;
+  segmentDuration: number;
+};
+
 export type JobRequest = {
   jobType: JobType;
   chainId?: ChainId;
   fortuneRequest?: FortuneRequest;
   cvatRequest?: CvatRequest;
   hCaptchaRequest?: HCaptchaRequest;
+  audinoRequest?: AudinoRequest;
 };
 
 export enum JobStatus {

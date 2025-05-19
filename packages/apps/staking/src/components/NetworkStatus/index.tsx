@@ -1,56 +1,34 @@
 import React from 'react';
-import { Box, Chip, Typography, useTheme } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { useAccount } from 'wagmi';
+
 import { NetworkIcon } from './NetworkIcon';
 
 const NetworkStatus: React.FC = () => {
   const { chain } = useAccount();
-  const theme = useTheme();
-
-  if (!chain) return null;
 
   return (
-    <Chip
-      avatar={
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: 56,
-            height: 56,
-            svg: {
-              width: 30,
-              height: 30,
-            },
-          }}
-        >
-          <NetworkIcon chainId={chain.id} />
-        </Box>
-      }
-      label={
+    <Box display="flex" flexDirection="column" alignItems="flex-start" ml={4}>
+      <Typography variant="body1" color="text.primary" mb={1}>
+        Network
+      </Typography>
+      <Box display="flex" alignItems="center">
+        <NetworkIcon chainId={chain?.id} />
         <Typography
-          variant="h6"
-          fontWeight="bold"
+          variant="h3"
           sx={{
-            lineHeight: 1.2,
-            whiteSpace: 'nowrap',
-            color: theme.palette.primary.main,
-            paddingLeft: 1,
+            padding: 0,
+            fontSize: { xs: 24, sm: 18, lg: 24 },
+            fontWeight: 400,
+            lineHeight: 1.5,
+            color: 'text.primary',
+            marginLeft: 1,
           }}
         >
-          {chain.name}
+          {chain?.name || 'Polygon'}
         </Typography>
-      }
-      sx={{
-        backgroundColor: theme.palette.background.default,
-        color: theme.palette.primary.contrastText,
-        height: 64,
-        paddingRight: 2,
-        paddingLeft: 2,
-        borderRadius: '12px',
-      }}
-    />
+      </Box>
+    </Box>
   );
 };
 

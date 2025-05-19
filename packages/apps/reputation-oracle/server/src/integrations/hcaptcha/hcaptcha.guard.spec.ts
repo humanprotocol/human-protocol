@@ -7,14 +7,10 @@ import {
 } from '../../../test/mock-creators/nest';
 
 import { HCaptchaGuard } from './hcaptcha.guard';
-import { AuthConfigService } from 'src/config/auth-config.service';
 import { HCaptchaService } from './hcaptcha.service';
 
 const mockHCaptchaService = {
   verifyToken: jest.fn(),
-};
-const mockAuthConfigService: Partial<AuthConfigService> = {
-  humanAppEmail: faker.internet.email(),
 };
 
 describe('HCaptchaGuard', () => {
@@ -29,7 +25,6 @@ describe('HCaptchaGuard', () => {
     beforeAll(() => {
       hCaptchaGuard = new HCaptchaGuard(
         mockHCaptchaService as unknown as HCaptchaService,
-        mockAuthConfigService as unknown as AuthConfigService,
       );
     });
 
@@ -37,52 +32,12 @@ describe('HCaptchaGuard', () => {
       executionContextMock = createExecutionContextMock();
     });
 
-    it('should return true and skip verify if human app signin', async () => {
-      const request = {
-        path: '/auth/web2/signin',
-        body: {
-          email: mockAuthConfigService.humanAppEmail,
-        },
-      };
-      executionContextMock.__getRequest.mockReturnValueOnce(request);
-
-      const result = await hCaptchaGuard.canActivate(
-        executionContextMock as unknown as ExecutionContext,
-      );
-
-      expect(result).toBe(true);
-    });
-
-    it('should verify and return true if not human app signin', async () => {
+    it('should verify and return true', async () => {
       const testToken = faker.string.alphanumeric();
 
       const request = {
         path: '/auth/web2/signin',
         body: {
-          email: faker.internet.email(),
-          h_captcha_token: testToken,
-        },
-      };
-      executionContextMock.__getRequest.mockReturnValueOnce(request);
-
-      mockHCaptchaService.verifyToken.mockResolvedValueOnce(true);
-
-      const result = await hCaptchaGuard.canActivate(
-        executionContextMock as unknown as ExecutionContext,
-      );
-
-      expect(result).toBe(true);
-      expect(mockHCaptchaService.verifyToken).toHaveBeenCalledTimes(1);
-      expect(mockHCaptchaService.verifyToken).toHaveBeenCalledWith(testToken);
-    });
-
-    it('should verify and return true if not signin route', async () => {
-      const testToken = faker.string.alphanumeric();
-
-      const request = {
-        path: `/not-signin-route`,
-        body: {
-          email: mockAuthConfigService.humanAppEmail,
           h_captcha_token: testToken,
         },
       };
@@ -101,9 +56,7 @@ describe('HCaptchaGuard', () => {
 
     it('should throw bad request exception if token is not provided', async () => {
       const request = {
-        body: {
-          email: mockAuthConfigService.humanAppEmail,
-        },
+        body: {},
       };
       executionContextMock.__getRequest.mockReturnValueOnce(request);
 

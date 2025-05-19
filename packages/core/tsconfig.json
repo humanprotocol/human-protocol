@@ -1,13 +1,10 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "baseUrl": ".",
-    "target": "es2023",
-    "module": "commonjs",
     "declaration": true,
-    "outDir": "./dist",
     "declarationMap": true,
-    "esModuleInterop": true
+    "outDir": "./dist",
   },
   "include": ["./scripts", "./test", "./typechain-types"],
   "files": ["./hardhat.config.ts"]

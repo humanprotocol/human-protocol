@@ -6,15 +6,11 @@ import { useWalletConnect } from '@/shared/contexts/wallet-connect';
 import { Alert } from '@/shared/components/ui/alert';
 import { getErrorMessageForError } from '@/shared/errors';
 import { Button } from '@/shared/components/ui/button';
-import {
-  ModalType,
-  useModalStore,
-} from '@/shared/components/ui/modal/modal.store';
 import { routerPaths } from '@/router/router-paths';
+import { useWalletConnectModal } from '@/modules/auth-web3/hooks/use-wallet-connect-modal';
 
 export function ConnectWalletOperatorPage() {
   const { t } = useTranslation();
-  const { openModal } = useModalStore();
   const {
     isConnected,
     web3ProviderMutation: {
@@ -22,6 +18,7 @@ export function ConnectWalletOperatorPage() {
       status: web3ProviderStatus,
     },
   } = useWalletConnect();
+  const { openModal } = useWalletConnectModal();
 
   const getAlert = () => {
     if (web3ProviderStatus === 'error')
@@ -51,12 +48,7 @@ export function ConnectWalletOperatorPage() {
         <Typography variant="body1">
           {t('operator.connectWallet.description')}
         </Typography>
-        <Button
-          onClick={() => {
-            openModal({ modalType: ModalType.WALLET_CONNECT });
-          }}
-          variant="contained"
-        >
+        <Button onClick={openModal} variant="contained">
           {t('components.wallet.connectBtn.connect')}
         </Button>
       </Grid>

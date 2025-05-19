@@ -12,7 +12,7 @@ export const darkTheme: ThemeOptions = {
     MuiCssBaseline: {
       styleOverrides: {
         body: {
-          backgroundColor: darkColorPalette.white,
+          backgroundColor: darkColorPalette.backgroundColor,
         },
       },
     },
@@ -76,7 +76,7 @@ export const darkTheme: ThemeOptions = {
       styleOverrides: {
         tooltip: {
           fontSize: 'inherit',
-          backgroundColor: darkColorPalette.white,
+          backgroundColor: darkColorPalette.backgroundColor,
           boxShadow: 'rgba(99, 99, 99, 0.2) 0px 2px 8px 0px',
           color: darkColorPalette.text.primary,
         },

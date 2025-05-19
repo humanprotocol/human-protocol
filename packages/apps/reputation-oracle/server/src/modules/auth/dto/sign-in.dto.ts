@@ -33,10 +33,13 @@ export class Web3SignInDto {
 
 export class SuccessAuthDto {
   @ApiProperty({ name: 'access_token' })
-  @IsString()
   accessToken: string;
 
   @ApiProperty({ name: 'refresh_token' })
-  @IsString()
   refreshToken: string;
+}
+
+export class SuccessM2mAuthDto {
+  @ApiProperty({ name: 'access_token' })
+  accessToken: string;
 }

@@ -3,20 +3,14 @@ import { AvailableJobsTableDesktop } from './components/desktop';
 import { AvailableJobsTableMobile } from './components/mobile';
 
 interface AvailableJobsTableView {
-  handleOpenMobileFilterDrawer: () => void;
   chainIdsEnabled: number[];
 }
 
-export function AvailableJobsView({
-  handleOpenMobileFilterDrawer,
-  chainIdsEnabled,
-}: AvailableJobsTableView) {
+export function AvailableJobsView({ chainIdsEnabled }: AvailableJobsTableView) {
   const isMobile = useIsMobile();
 
   return isMobile ? (
-    <AvailableJobsTableMobile
-      handleOpenMobileFilterDrawer={handleOpenMobileFilterDrawer}
-    />
+    <AvailableJobsTableMobile />
   ) : (
     <AvailableJobsTableDesktop chainIdsEnabled={chainIdsEnabled} />
   );

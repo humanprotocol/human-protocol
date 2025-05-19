@@ -1,9 +1,10 @@
-export enum Role {
-  JOB_LAUNCHER = 'Job Launcher',
-  EXCHANGE_ORACLE = 'Exchange Oracle',
-  REPUTATION_ORACLE = 'Reputation Oracle',
-  RECORDING_ORACLE = 'Recording Oracle',
-}
+import { Role } from '@human-protocol/sdk/src/constants';
+
+export const OPERATOR_ROLES = [
+  Role.ExchangeOracle,
+  Role.JobLauncher,
+  Role.RecordingOracle,
+] as const;
 
 export enum JobType {
   FORTUNE = 'fortune',

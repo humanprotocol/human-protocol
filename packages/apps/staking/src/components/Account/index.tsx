@@ -1,85 +1,117 @@
+import { FC, useState } from 'react';
 import {
   Avatar,
-  Box,
   Button,
+  Popover,
   Typography,
   useMediaQuery,
   useTheme,
 } from '@mui/material';
 import { useAccount, useDisconnect, useEnsAvatar, useEnsName } from 'wagmi';
 
-export function Account() {
-  const { address, connector } = useAccount();
+import { formatAddress } from '../../utils/string';
+import { AvatarIcon, ChevronIcon, PowerIcon } from '../../icons';
+
+const Account: FC = () => {
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+  const { address } = useAccount();
   const { disconnect } = useDisconnect();
   const { data: ensName } = useEnsName({ address });
   const { data: ensAvatar } = useEnsAvatar({ name: ensName! });
 
-  const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
-  const isMediumScreen = useMediaQuery(theme.breakpoints.down(1800));
+  const { isDarkMode, breakpoints } = useTheme();
+  const isMobile = useMediaQuery(breakpoints.down('md'));
 
-  const formattedAddress = isMediumScreen ? formatAddress(address) : address;
+  const formattedAddress = formatAddress(address);
+
+  const handleClosePopover = () => setAnchorEl(null);
 
   return (
-    <Box
-      display="flex"
-      flexDirection={isSmallScreen ? 'column' : 'row'}
-      alignItems={isSmallScreen ? 'center' : 'center'}
-      gap={isSmallScreen ? 1 : 2}
-      sx={{ marginLeft: { xs: 0, md: 3 } }}
-    >
-      <Box
-        display="flex"
-        justifyContent={isSmallScreen ? 'center' : 'flex-start'}
-        width={isSmallScreen ? '100%' : 'auto'}
+    <>
+      <Button
+        aria-describedby="account-popover"
+        onClick={(event) => setAnchorEl(event.currentTarget)}
+        disableRipple
+        sx={{
+          bgcolor: isDarkMode ? 'primary.main' : 'background.grey',
+          borderRadius: '4px',
+          color: isDarkMode ? 'primary.contrastText' : 'primary.main',
+          height: isMobile ? '42px' : '100%',
+          px: 1,
+          fontWeight: 600,
+          borderBottomLeftRadius: anchorEl ? 0 : 4,
+          borderBottomRightRadius: anchorEl ? 0 : 4,
+          '&:hover': {
+            bgcolor: isDarkMode ? 'primary.main' : 'background.grey',
+          },
+        }}
       >
         {ensAvatar ? (
           <Avatar
             alt="ENS Avatar"
             src={ensAvatar}
-            sx={{ width: 40, height: 40 }}
+            sx={{ width: 24, height: 24 }}
           />
         ) : (
-          <Avatar sx={{ width: 40, height: 40 }}>
-            {ensName ? ensName[0].toUpperCase() : formattedAddress![0]}
-          </Avatar>
+          <AvatarIcon />
         )}
-      </Box>
-
-      <Box
-        display="flex"
-        flexDirection="column"
-        alignItems={isSmallScreen ? 'center' : 'flex-start'}
-        textAlign={isSmallScreen ? 'center' : 'left'}
-      >
-        <Typography
-          variant="body2"
-          fontSize={isSmallScreen ? 14 : 18}
-          color="textPrimary"
-        >
-          {ensName ? `${ensName} (${formattedAddress})` : formattedAddress}
+        <Typography variant="body2" px={1} fontSize={14} fontWeight={600}>
+          {formattedAddress}
         </Typography>
-        <Typography variant="caption" color="textSecondary">
-          Connected to {connector?.name}
-        </Typography>
-      </Box>
-
-      <Button
-        variant="contained"
-        size="medium"
-        onClick={() => disconnect()}
-        sx={{
-          mt: isSmallScreen ? 1 : 0,
-          width: isSmallScreen ? '100%' : 'auto',
+        <ChevronIcon
+          sx={{
+            transform: anchorEl ? 'rotate(180deg)' : 'rotate(0deg)',
+            transition: 'transform 0.2s ease-in-out',
+          }}
+        />
+      </Button>
+      <Popover
+        id="account-popover"
+        open={!!anchorEl}
+        onClose={handleClosePopover}
+        anchorEl={anchorEl}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'left',
+        }}
+        slotProps={{
+          paper: {
+            elevation: 0,
+            sx: {
+              bgcolor: isDarkMode ? 'primary.main' : 'background.grey',
+              width: anchorEl?.getBoundingClientRect().width,
+              minWidth: 'fit-content',
+              borderTopLeftRadius: 0,
+              borderTopRightRadius: 0,
+              border: 'none',
+            },
+          },
         }}
       >
-        Disconnect
-      </Button>
-    </Box>
+        <Button
+          onClick={() => disconnect()}
+          sx={{
+            color: 'text.secondary',
+            p: 1,
+            width: '100%',
+            gap: 1,
+            justifyContent: 'flex-start',
+            '&:hover': {
+              color: isDarkMode ? 'primary.contrastText' : 'primary.main',
+              backgroundColor: 'unset',
+            },
+          }}
+        >
+          <PowerIcon />
+          Disconnect wallet
+        </Button>
+      </Popover>
+    </>
   );
-}
+};
 
-function formatAddress(address?: string) {
-  if (!address) return '';
-  return `${address.slice(0, 6)}…${address.slice(-4)}`;
-}
+export default Account;

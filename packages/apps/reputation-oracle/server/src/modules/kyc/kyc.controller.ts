@@ -18,13 +18,13 @@ import {
 } from '@nestjs/swagger';
 
 import { Public } from '../../common/decorators';
-import { RequestWithUser } from '../../common/interfaces/request';
+import { RequestWithUser } from '../../common/types';
 import {
   StartSessionResponseDto,
   KycSignedAddressDto,
   UpdateKycStatusDto,
 } from './kyc.dto';
-import { KycErrorFilter } from './kyc.error.filter';
+import { KycErrorFilter } from './kyc.error-filter';
 import { KycService } from './kyc.service';
 import { KycWebhookAuthGuard } from './kyc-webhook-auth.guard';
 
@@ -49,7 +49,7 @@ export class KycController {
   async startKyc(
     @Req() request: RequestWithUser,
   ): Promise<StartSessionResponseDto> {
-    return await this.kycService.initSession(request.user);
+    return await this.kycService.initSession(request.user.id);
   }
 
   @ApiOperation({
@@ -101,7 +101,7 @@ export class KycController {
     @Req() request: RequestWithUser,
   ): Promise<KycSignedAddressDto> {
     const signedAddressData = await this.kycService.getSignedAddress(
-      request.user,
+      request.user.id,
     );
     return signedAddressData;
   }

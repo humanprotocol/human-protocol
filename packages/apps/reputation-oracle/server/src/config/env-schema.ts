@@ -71,14 +71,19 @@ export const envValidator = Joi.object({
   REPUTATION_LEVEL_LOW: Joi.number(),
   REPUTATION_LEVEL_HIGH: Joi.number(),
   // Encryption
-  PGP_PRIVATE_KEY: Joi.string(),
-  PGP_PASSPHRASE: Joi.string(),
+  PGP_PRIVATE_KEY: Joi.string().required(),
+  PGP_PASSPHRASE: Joi.string().required(),
   PGP_ENCRYPT: Joi.string().valid('true', 'false'),
   // Kyc
   KYC_API_KEY: Joi.string(),
   KYC_API_PRIVATE_KEY: Joi.string().required(),
   KYC_BASE_URL: Joi.string().uri({ scheme: ['http', 'https'] }),
-
   // Human App
-  HUMAN_APP_EMAIL: Joi.string().email().required(),
+  HUMAN_APP_SECRET_KEY: Joi.string().required(),
+  // Slack notifications
+  ABUSE_SLACK_WEBHOOK_URL: Joi.string()
+    .uri({ scheme: ['http', 'https'] })
+    .required(),
+  ABUSE_SLACK_OAUTH_TOKEN: Joi.string().required(),
+  ABUSE_SLACK_SIGNING_SECRET: Joi.string().required(),
 });

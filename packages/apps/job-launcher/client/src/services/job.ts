@@ -8,6 +8,8 @@ import {
   JobDetailsResponse,
   HCaptchaRequest,
   FortuneFinalResult,
+  AudinoRequest,
+  CreateAudinoJobRequest,
 } from '../types';
 import api from '../utils/api';
 import { getFilenameFromContentDisposition } from '../utils/string';
@@ -64,6 +66,33 @@ export const createHCaptchaJob = async (
     chainId,
     ...data,
   });
+};
+
+export const createAudinoJob = async (
+  chainId: number,
+  data: AudinoRequest,
+  paymentCurrency: string,
+  paymentAmount: number | string,
+  escrowFundToken: string,
+) => {
+  const body: CreateAudinoJobRequest = {
+    chainId,
+    requesterDescription: data.description,
+    paymentCurrency,
+    paymentAmount: Number(paymentAmount),
+    escrowFundToken,
+    data: data.data,
+    labels: data.labels,
+    minQuality: Number(data.accuracyTarget) / 100,
+    groundTruth: data.groundTruth,
+    userGuide: data.userGuide,
+    type: data.type,
+    qualifications: data.qualifications,
+    audioDuration: Number(data.audioDuration),
+    segmentDuration: Number(data.segmentDuration),
+  };
+
+  await api.post('/job/audino', body);
 };
 
 export const getJobList = async ({

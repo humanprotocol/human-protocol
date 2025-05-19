@@ -30,21 +30,25 @@ Bases: `Exception`
 
 Raises when some error happens when building filter object.
 
-### *class* human_protocol_sdk.filter.PayoutFilter(escrow_address=None, recipient=None, date_from=None, date_to=None)
+### *class* human_protocol_sdk.filter.PayoutFilter(chain_id, escrow_address=None, recipient=None, date_from=None, date_to=None, first=10, skip=0, order_direction=OrderDirection.DESC)
 
 Bases: `object`
 
 A class used to filter payout requests.
 
-#### \_\_init_\_(escrow_address=None, recipient=None, date_from=None, date_to=None)
+#### \_\_init_\_(chain_id, escrow_address=None, recipient=None, date_from=None, date_to=None, first=10, skip=0, order_direction=OrderDirection.DESC)
 
-Initializes a PayoutFilter instance.
+Initializes a filter for payouts.
 
 * **Parameters:**
-  * **escrow_address** (`Optional`[`str`]) – Escrow address
-  * **recipient** (`Optional`[`str`]) – Recipient address
-  * **date_from** (`Optional`[`datetime`]) – Created from date
-  * **date_to** (`Optional`[`datetime`]) – Created to date
+  * **chain_id** ([`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)) – The chain ID where the payouts are recorded.
+  * **escrow_address** (`Optional`[`str`]) – Optional escrow address to filter payouts.
+  * **recipient** (`Optional`[`str`]) – Optional recipient address to filter payouts.
+  * **date_from** (`Optional`[`datetime`]) – Optional start date for filtering.
+  * **date_to** (`Optional`[`datetime`]) – Optional end date for filtering.
+  * **first** (`int`) – Optional number of payouts per page. Default is 10.
+  * **skip** (`int`) – Optional number of payouts to skip. Default is 0.
+  * **order_direction** ([`OrderDirection`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.OrderDirection)) – Optional order direction. Default is DESC.
 
 ### *class* human_protocol_sdk.filter.StatisticsFilter(date_from=None, date_to=None, first=10, skip=0, order_direction=OrderDirection.ASC)
 
@@ -74,6 +78,24 @@ A class used to filter statistical data.
 
 #### \_\_init_\_(date_from=None, date_to=None, first=10, skip=0, order_direction=OrderDirection.ASC)
 
+### *class* human_protocol_sdk.filter.StatusEventFilter(chain_id, statuses=None, date_from=None, date_to=None, launcher=None, first=10, skip=0, order_direction=OrderDirection.DESC)
+
+Bases: `object`
+
+#### \_\_init_\_(chain_id, statuses=None, date_from=None, date_to=None, launcher=None, first=10, skip=0, order_direction=OrderDirection.DESC)
+
+Initializes a filter for status events.
+
+* **Parameters:**
+  * **chain_id** ([`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)) – The chain ID where the events are recorded.
+  * **statuses** (`Optional`[`List`[[`Status`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.Status)]]) – Optional list of statuses to filter by.
+  * **date_from** (`Optional`[`datetime`]) – Optional start date for filtering.
+  * **date_to** (`Optional`[`datetime`]) – Optional end date for filtering.
+  * **launcher** (`Optional`[`str`]) – Optional launcher address to filter by.
+  * **first** (`int`) – Optional number of events per page. Default is 10.
+  * **skip** (`int`) – Optional number of events to skip. Default is 0.
+  * **order_direction** ([`OrderDirection`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.OrderDirection)) – Optional order direction. Default is DESC.
+
 ### *class* human_protocol_sdk.filter.TransactionFilter(chain_id, from_address=None, to_address=None, start_date=None, end_date=None, start_block=None, end_block=None, first=10, skip=0, order_direction=OrderDirection.DESC)
 
 Bases: `object`
@@ -97,3 +119,21 @@ Initializes a TransactionsFilter instance.
   * **order** – Order of results, “asc” or “desc”
 * **Raises:**
   **ValueError** – If start_date is after end_date
+
+### *class* human_protocol_sdk.filter.WorkerFilter(chain_id, worker_address=None, order_by=None, order_direction=OrderDirection.DESC, first=10, skip=0)
+
+Bases: `object`
+
+A class used to filter workers.
+
+#### \_\_init_\_(chain_id, worker_address=None, order_by=None, order_direction=OrderDirection.DESC, first=10, skip=0)
+
+Initializes a WorkerFilter instance.
+
+* **Parameters:**
+  * **chain_id** ([`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)) – Chain ID to request data
+  * **worker_address** (`Optional`[`str`]) – Address to filter by
+  * **order_by** (`Optional`[`str`]) – Property to order by, e.g., “payoutCount”
+  * **order_direction** ([`OrderDirection`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.OrderDirection)) – Order direction of results, “asc” or “desc”
+  * **first** (`int`) – Number of items per page
+  * **skip** (`int`) – Number of items to skip (for pagination)

@@ -1,55 +1,35 @@
+import { FC } from 'react';
+
+import { Box, Typography } from '@mui/material';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
-import { Box, Paper, Typography } from '@mui/material';
-import React from 'react';
-import { colorPalette } from '../../assets/styles/color-palette';
+import { useAccount } from 'wagmi';
+
 import { useStakeContext } from '../../contexts/stake';
 import CustomTooltip from '../CustomTooltip';
+import CardWrapper from '../CardWrapper';
+import Amount from '../Amount';
 
-const LockedAmountCard: React.FC = () => {
-  const { lockedAmount, lockedUntil } = useStakeContext();
+const LockedAmountCard: FC = () => {
+  const { lockedAmount } = useStakeContext();
+  const { isConnected } = useAccount();
 
   return (
-    <Paper
-      elevation={3}
-      sx={{
-        p: 3,
-        height: '200px',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-start',
-        alignItems: 'flex-start',
-        borderRadius: '20px',
-        boxShadow: 'none',
-        position: 'relative',
-      }}
-    >
-      <Box sx={{ position: 'absolute', top: 30, right: 30 }}>
+    <CardWrapper size="sm">
+      <Box display="flex" gap={1}>
         <CustomTooltip
           title="Tokens currently locked until a certain block"
           arrow
         >
-          <HelpOutlineIcon
-            fontSize="small"
-            sx={{ color: colorPalette.sky.main }}
-          />
+          <HelpOutlineIcon fontSize="medium" sx={{ color: 'text.secondary' }} />
         </CustomTooltip>
+        <Box display="flex" flexDirection="column">
+          <Typography variant="body1" color="text.primary" mb={1}>
+            Locked Amount <strong>HMT</strong>
+          </Typography>
+          <Amount size="sm" amount={lockedAmount} isConnected={isConnected} />
+        </Box>
       </Box>
-      <Box display="flex" alignItems="center" gap={1} mb={1}>
-        <Typography variant="h6" color="primary">
-          Locked Amount
-        </Typography>
-      </Box>
-
-      <Typography variant="h4" fontWeight="bold" fontSize={30}>
-        {lockedAmount} HMT
-      </Typography>
-
-      {lockedUntil !== undefined && lockedUntil > 0n && (
-        <Typography variant="caption" color="textSecondary" pt={1}>
-          Until block {lockedUntil.toString()}
-        </Typography>
-      )}
-    </Paper>
+    </CardWrapper>
   );
 };
 

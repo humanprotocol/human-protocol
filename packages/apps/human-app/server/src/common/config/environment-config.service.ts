@@ -303,19 +303,12 @@ export class EnvironmentConfigService {
   }
 
   /**
-   * The email address for the human app.
+   * Secret key for machine-to-machine authorization
+   * of HUMAN App in Reputation Oracle
    * Required
    */
-  get email(): string {
-    return this.configService.getOrThrow<string>('HUMAN_APP_EMAIL');
-  }
-
-  /**
-   * The password for the human app.
-   * Required
-   */
-  get password(): string {
-    return this.configService.getOrThrow<string>('HUMAN_APP_PASSWORD');
+  get m2mAuthSecretKey(): string {
+    return this.configService.getOrThrow<string>('HUMAN_APP_SECRET_KEY');
   }
 
   /**

@@ -7,7 +7,7 @@ import type { JobType } from '@/modules/smart-contracts/EthKVStore/config';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { useSelectOracleNavigation } from '../hooks/use-select-oracle-navigation';
 import { EvmAddress } from '../../jobs/components';
-import { type Oracle } from '../../hooks';
+import { type Oracle } from '../../services/oracles.service';
 
 interface OraclesTableItemMobileProps {
   oracle: Oracle;
@@ -31,7 +31,7 @@ export function OraclesTableItemMobile({
   const { selectOracle } = useSelectOracleNavigation();
 
   return (
-    <Paper sx={{ ...styles, backgroundColor: colorPalette.white }}>
+    <Paper sx={{ ...styles, backgroundColor: colorPalette.backgroundColor }}>
       <Grid item>
         <ListItem label={t('worker.oraclesTable.oracleAddress')}>
           <EvmAddress address={oracle.address} />

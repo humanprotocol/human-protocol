@@ -12,12 +12,18 @@ interface ModalHeaderProps {
   closeButton?: ModalHeaderElementProps;
 }
 
-export function ModalHeader({ closeButton }: ModalHeaderProps) {
+export function ModalHeader({ closeButton }: Readonly<ModalHeaderProps>) {
   const { t } = useTranslation();
   return (
-    <Grid container direction="row" justifyContent="flex-end" width="100%">
+    <Grid
+      container
+      direction="row"
+      justifyContent="flex-end"
+      width="100%"
+      padding="16px"
+    >
       <Grid item>
-        {closeButton?.isVisible ? (
+        {closeButton?.isVisible && (
           <Grid>
             <Button
               data-testid="button-close-modal"
@@ -29,7 +35,7 @@ export function ModalHeader({ closeButton }: ModalHeaderProps) {
               </Typography>
             </Button>
           </Grid>
-        ) : null}
+        )}
       </Grid>
     </Grid>
   );

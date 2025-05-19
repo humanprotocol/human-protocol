@@ -1,10 +1,11 @@
 export const DATABASE_SCHEMA_NAME = 'hmt';
-export const INITIAL_REPUTATION = 0;
 export const JWT_STRATEGY_NAME = 'jwt-http';
 
 export const CVAT_RESULTS_ANNOTATIONS_FILENAME = 'resulting_annotations.zip';
 export const CVAT_VALIDATION_META_FILENAME = 'validation_meta.json';
-export const DEFAULT_BULK_PAYOUT_TX_ID = 1;
+
+export const AUDINO_RESULTS_ANNOTATIONS_FILENAME = 'resulting_annotations.zip';
+export const AUDINO_VALIDATION_META_FILENAME = 'validation_meta.json';
 
 export const HEADER_SIGNATURE_KEY = 'human-signature';
 

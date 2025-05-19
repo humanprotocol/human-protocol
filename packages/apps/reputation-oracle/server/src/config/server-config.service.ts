@@ -6,7 +6,7 @@ export class ServerConfigService {
   constructor(private configService: ConfigService) {}
 
   get gitHash(): string {
-    return this.configService.get<string>('GIT_HASH', '');
+    return this.configService.get('GIT_HASH', '');
   }
 
   /**
@@ -14,7 +14,7 @@ export class ServerConfigService {
    * Default: 'localhost'
    */
   get host(): string {
-    return this.configService.get<string>('HOST', 'localhost');
+    return this.configService.get('HOST', 'localhost');
   }
 
   /**
@@ -22,7 +22,7 @@ export class ServerConfigService {
    * Default: 5003
    */
   get port(): number {
-    return +this.configService.get<number>('PORT', 5003);
+    return Number(this.configService.get('PORT')) || 5003;
   }
 
   /**
@@ -30,7 +30,7 @@ export class ServerConfigService {
    * Default: 'http://localhost:3001'
    */
   get feURL(): string {
-    return this.configService.get<string>('FE_URL', 'http://localhost:3001');
+    return this.configService.get('FE_URL', 'http://localhost:3001');
   }
 
   /**
@@ -38,7 +38,7 @@ export class ServerConfigService {
    * Default: 'session_key'
    */
   get sessionSecret(): string {
-    return this.configService.get<string>('SESSION_SECRET', 'session_key');
+    return this.configService.get('SESSION_SECRET', 'session_key');
   }
 
   /**
@@ -46,14 +46,17 @@ export class ServerConfigService {
    * Default: 5
    */
   get maxRetryCount(): number {
-    return +this.configService.get<number>('MAX_RETRY_COUNT', 5);
+    return Number(this.configService.get('MAX_RETRY_COUNT')) || 5;
   }
 
   /**
-   * The minimum validity period (in days) for a qualification.
-   * Default: 1 day
+   * The minimum validity period (in ms) for a qualification.
+   * Default: 1 day (24 * 60 * 60 * 1000 ms)
    */
   get qualificationMinValidity(): number {
-    return +this.configService.get<number>('QUALIFICATION_MIN_VALIDITY', 1);
+    const configValueDays =
+      Number(this.configService.get('QUALIFICATION_MIN_VALIDITY')) || 1;
+
+    return configValueDays * 24 * 60 * 60 * 1000;
   }
 }

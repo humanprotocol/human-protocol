@@ -47,7 +47,7 @@ x-general-env-variables:
   recording_oracle_address: &recording_oracle_address ${RECORDING_ORACLE_ADDRESS:?}
   # OTHER
   backend_apps_internal_port: &backend_apps_internal_port ${BACKEND_APPS_INTERNAL_PORT:?}
-  human_app_email: &human_app_email ${HUMAN_APP_EMAIL:?}
+  human_app_secret_key: &human_app_secret_key ${HUMAN_APP_SECRET_KEY:?}
   reputation_oracle_jwt_public_key: &reputation_oracle_jwt_public_key ${REPUTATION_ORACLE_JWT_PUBLIC_KEY:?}
   cvat_oracle_storage_endpoint: &cvat_oracle_storage_endpoint minio:${MINIO_PORT:?}
 
@@ -245,7 +245,7 @@ services:
       PORT: *backend_apps_internal_port
       POSTGRES_DATABASE: reputation-oracle
       S3_BUCKET: *bucket_name_rep_o
-      HUMAN_APP_EMAIL: *human_app_email
+      HUMAN_APP_SECRET_KEY: *human_app_secret_key
       # It is accessed by user, not from container
       # so put here exposed port, not internal
       FE_URL: http://localhost:${HUMAN_APP_CLIENT_PORT:?}
@@ -279,7 +279,7 @@ services:
       PORT: *backend_apps_internal_port
       REDIS_DB: 1
       RPC_URL: *rpc_url_polygon_amoy
-      HUMAN_APP_EMAIL: *human_app_email
+      HUMAN_APP_SECRET_KEY: *human_app_secret_key
       REPUTATION_ORACLE_URL: "http://reputation-oracle:${BACKEND_APPS_INTERNAL_PORT:?}"
       REPUTATION_ORACLE_ADDRESS: *reputation_oracle_address
 
@@ -440,10 +440,10 @@ services:
       PORT: *backend_apps_internal_port
       POSTGRES_DATABASE: job-launcher
       S3_BUCKET: *bucket_name_manifests
-      REPUTATION_ORACLES: *exchange_oracle_address
+      REPUTATION_ORACLES: *reputation_oracle_address
+      REPUTATION_ORACLE_ADDRESS: *reputation_oracle_address
       CVAT_EXCHANGE_ORACLE_ADDRESS: *exchange_oracle_address
       CVAT_RECORDING_ORACLE_ADDRESS: *recording_oracle_address
-      REPUTATION_ORACLE_ADDRESS: *reputation_oracle_address
       FE_URL: http://localhost:${JOB_LAUNCHER_CLIENT_PORT:?}
 
   job-launcher-client:

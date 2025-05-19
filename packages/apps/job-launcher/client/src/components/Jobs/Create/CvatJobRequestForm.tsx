@@ -718,9 +718,9 @@ export const CvatJobRequestForm = () => {
                         </MenuItem>
                       ))}
                     </Select>
-                    {errors.dataRegion && (
+                    {errors.gtRegion && (
                       <FormHelperText sx={{ mx: '14px', mt: '3px' }} error>
-                        {errors.dataRegion}
+                        {errors.gtRegion}
                       </FormHelperText>
                     )}
                   </FormControl>

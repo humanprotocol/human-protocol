@@ -1,8 +1,8 @@
-import { ExecutionContext, HttpStatus } from '@nestjs/common';
+import { ExecutionContext } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { WhitelistAuthGuard } from './whitelist.auth';
 import { WhitelistService } from '../../modules/whitelist/whitelist.service';
-import { ControlledError } from '../errors/controlled';
+import { AuthError } from '../errors';
+import { WhitelistAuthGuard } from './whitelist.auth';
 
 describe('WhitelistAuthGuard', () => {
   let guard: WhitelistAuthGuard;
@@ -36,9 +36,7 @@ describe('WhitelistAuthGuard', () => {
 
     await expect(
       guard.canActivate(mockContext as ExecutionContext),
-    ).rejects.toThrow(
-      new ControlledError('User not found.', HttpStatus.UNAUTHORIZED),
-    );
+    ).rejects.toThrow(new AuthError('User not found.'));
   });
 
   it('should throw an error if the user is not whitelisted', async () => {
@@ -54,9 +52,7 @@ describe('WhitelistAuthGuard', () => {
 
     await expect(
       guard.canActivate(mockContext as ExecutionContext),
-    ).rejects.toThrow(
-      new ControlledError('Unauthorized.', HttpStatus.UNAUTHORIZED),
-    );
+    ).rejects.toThrow(new AuthError('Unauthorized.'));
   });
 
   it('should return true if the user is whitelisted', async () => {

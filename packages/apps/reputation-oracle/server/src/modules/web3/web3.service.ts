@@ -1,12 +1,10 @@
 import { ChainId } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
-import { Provider, Wallet, ethers } from 'ethers';
-import {
-  Web3ConfigService,
-  Web3Network,
-} from '../../config/web3-config.service';
+import { Wallet, ethers } from 'ethers';
+import { Web3ConfigService, Web3Network } from '../../config';
+import type { Chain, WalletWithProvider } from './types';
 
-const supportedChainIdsByNetwork = {
+export const supportedChainIdsByNetwork = {
   [Web3Network.MAINNET]: [ChainId.POLYGON, ChainId.BSC_MAINNET],
   [Web3Network.TESTNET]: [
     ChainId.POLYGON_AMOY,
@@ -15,13 +13,6 @@ const supportedChainIdsByNetwork = {
   ],
   [Web3Network.LOCAL]: [ChainId.LOCALHOST],
 } as const;
-
-type Chain = {
-  id: ChainId;
-  rpcUrl: string;
-};
-
-export type WalletWithProvider = Wallet & { provider: Provider };
 
 @Injectable()
 export class Web3Service {

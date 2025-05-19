@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource, FindManyOptions } from 'typeorm';
+import { DataSource, FindManyOptions, LessThan } from 'typeorm';
 
-import { BaseRepository } from '../../database/base.repository';
+import { BaseRepository } from '../../database';
 import { TokenEntity, TokenType } from './token.entity';
 
 type FindOptions = {
@@ -47,5 +47,11 @@ export class TokenRepository extends BaseRepository<TokenEntity> {
     userId: number,
   ): Promise<void> {
     await this.delete({ type, userId });
+  }
+
+  async deleteExpired(): Promise<void> {
+    await this.delete({
+      expiresAt: LessThan(new Date()),
+    });
   }
 }

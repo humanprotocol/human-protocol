@@ -7,26 +7,23 @@ import {
 } from '@/shared/components/ui/page-card';
 import { Button } from '@/shared/components/ui/button';
 import { getErrorMessageForError } from '@/shared/errors';
-import type { SignatureData } from '@/api/hooks/use-prepare-signature';
-import {
-  PrepareSignatureType,
-  usePrepareSignature,
-} from '@/api/hooks/use-prepare-signature';
 import { Alert } from '@/shared/components/ui/alert';
 import { useConnectedWallet } from '@/shared/contexts/wallet-connect';
+import { usePrepareSignature } from '@/shared/hooks';
+import {
+  PrepareSignatureType,
+  type SignatureData,
+} from '@/shared/services/signature.service';
 import { useWeb3SignUp } from '../hooks';
 
 export function EditExistingKeysSuccessPage() {
-  const { address, signMessage } = useConnectedWallet();
+  const { signMessage } = useConnectedWallet();
   const {
-    data: signatureData,
+    prepareSignature,
     isError: isSignatureDataError,
     error: errorSignatureDataError,
     isPending: isSignatureDataPending,
-  } = usePrepareSignature({
-    address,
-    type: PrepareSignatureType.SIGN_UP,
-  });
+  } = usePrepareSignature(PrepareSignatureType.SIGN_UP);
 
   const {
     mutate: web3SignUpMutation,
@@ -35,7 +32,8 @@ export function EditExistingKeysSuccessPage() {
     isPending: web3SignUpPending,
   } = useWeb3SignUp();
 
-  const createSignature = async (data: SignatureData) => {
+  const handleWeb3SignUp = async () => {
+    const data: SignatureData = await prepareSignature();
     const signature = await signMessage(JSON.stringify(data));
     web3SignUpMutation({ signature: signature ?? '' });
   };
@@ -78,7 +76,7 @@ export function EditExistingKeysSuccessPage() {
           fullWidth
           loading={web3SignUpPending}
           onClick={() => {
-            void createSignature(signatureData);
+            void handleWeb3SignUp();
           }}
           variant="contained"
         >

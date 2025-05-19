@@ -9,7 +9,7 @@ import {
 
 import type { UserEntity } from '../user';
 import { DATABASE_SCHEMA_NAME } from '../../common/constants';
-import { BaseEntity } from '../../database/base.entity';
+import { BaseEntity } from '../../database';
 
 export enum TokenType {
   EMAIL = 'email',
@@ -34,7 +34,7 @@ export class TokenEntity extends BaseEntity {
   expiresAt: Date;
 
   @JoinColumn()
-  @ManyToOne('UserEntity', { persistence: false })
+  @ManyToOne('UserEntity', { persistence: false, onDelete: 'CASCADE' })
   user?: UserEntity;
 
   @Column({ type: 'int' })

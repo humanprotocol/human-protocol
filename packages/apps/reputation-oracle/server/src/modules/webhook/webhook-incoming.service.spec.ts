@@ -1,293 +1,172 @@
+import { faker } from '@faker-js/faker';
 import { createMock } from '@golevelup/ts-jest';
-import { ChainId } from '@human-protocol/sdk';
-import { HttpService } from '@nestjs/axios';
-import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
+
+import { DatabaseError, DatabaseErrorMessages } from '../../database';
+import { ServerConfigService } from '../../config';
+import { EscrowCompletionService } from '../escrow-completion';
+import { generateTestnetChainId } from '../web3/fixtures';
+
+import { generateIncomingWebhook } from './fixtures';
 import {
-  MOCK_ADDRESS,
-  MOCK_MAX_RETRY_COUNT,
-  MOCK_PRIVATE_KEY,
-  mockConfig,
-} from '../../../test/constants';
-import { EventType, WebhookIncomingStatus } from '../../common/enums/webhook';
-import { Web3Service } from '../web3/web3.service';
-import { WebhookIncomingRepository } from './webhook-incoming.repository';
-import { WebhookOutgoingRepository } from './webhook-outgoing.repository';
-import { WebhookIncomingService } from './webhook-incoming.service';
-import { WebhookIncomingEntity } from './webhook-incoming.entity';
-import { IncomingWebhookDto } from './webhook.dto';
-import { Web3ConfigService } from '../../config/web3-config.service';
-import { ServerConfigService } from '../../config/server-config.service';
-import { ReputationService } from '../reputation/reputation.service';
-import { EscrowCompletionRepository } from '../escrow-completion/escrow-completion.repository';
-import { EscrowCompletionService } from '../escrow-completion/escrow-completion.service';
-import { PostgresErrorCodes } from '../../common/enums/database';
-import { DatabaseError } from '../../common/errors/database';
-import { WebhookOutgoingService } from './webhook-outgoing.service';
-import { PayoutService } from '../payout/payout.service';
-import { StorageService } from '../storage/storage.service';
-import { ReputationRepository } from '../reputation/reputation.repository';
-import { ReputationConfigService } from '../../config/reputation-config.service';
-import { S3ConfigService } from '../../config/s3-config.service';
-import { PGPConfigService } from '../../config/pgp-config.service';
-import { IncomingWebhookError, WebhookErrorMessage } from './webhook.error';
-import { EscrowPayoutsBatchRepository } from '../escrow-completion/escrow-payouts-batch.repository';
+  IncomingWebhookData,
+  IncomingWebhookEventType,
+  IncomingWebhookStatus,
+} from './types';
+import { IncomingWebhookRepository } from './webhook-incoming.repository';
+import { IncomingWebhookService } from './webhook-incoming.service';
+
+const mockServerConfigService = {
+  maxRetryCount: 1,
+};
+
+const mockEscrowCompletionService = createMock<EscrowCompletionService>();
+const mockIncomingWebhookRepository = createMock<IncomingWebhookRepository>();
 
 describe('WebhookIncomingService', () => {
-  let webhookIncomingService: WebhookIncomingService,
-    webhookIncomingRepository: WebhookIncomingRepository,
-    web3ConfigService: Web3ConfigService,
-    escrowCompletionService: EscrowCompletionService;
+  let incomingWebhookService: IncomingWebhookService;
 
-  const signerMock = {
-    address: MOCK_ADDRESS,
-    getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
-  };
-
-  // Mock ConfigService to return the mock configuration values
-  const mockConfigService = {
-    get: jest.fn((key: string) => mockConfig[key]),
-    getOrThrow: jest.fn((key: string) => {
-      if (!mockConfig[key])
-        throw new Error(`Configuration key "${key}" does not exist`);
-      return mockConfig[key];
-    }),
-  };
-
-  // Mock Web3Service
-  const mockWeb3Service = {
-    getSigner: jest.fn().mockReturnValue(signerMock),
-  };
-
-  beforeEach(async () => {
+  beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
-        WebhookIncomingService,
-        WebhookOutgoingService,
-        EscrowCompletionService,
-        Web3ConfigService,
-        ServerConfigService,
-        PayoutService,
-        ReputationService,
-        HttpService,
-        StorageService,
-        ReputationConfigService,
-        S3ConfigService,
-        PGPConfigService,
+        IncomingWebhookService,
         {
-          provide: EscrowCompletionRepository,
-          useValue: createMock<EscrowCompletionRepository>(),
+          provide: ServerConfigService,
+          useValue: mockServerConfigService,
         },
         {
-          provide: EscrowPayoutsBatchRepository,
-          useValue: createMock<EscrowPayoutsBatchRepository>(),
+          provide: EscrowCompletionService,
+          useValue: mockEscrowCompletionService,
         },
         {
-          provide: WebhookOutgoingRepository,
-          useValue: createMock<WebhookOutgoingRepository>(),
+          provide: IncomingWebhookRepository,
+          useValue: mockIncomingWebhookRepository,
         },
-        {
-          provide: ReputationRepository,
-          useValue: createMock<ReputationRepository>(),
-        },
-        // Mocked services
-        {
-          provide: ConfigService,
-          useValue: mockConfigService,
-        },
-        {
-          provide: Web3Service,
-          useValue: mockWeb3Service,
-        },
-        {
-          provide: WebhookIncomingRepository,
-          useValue: createMock<WebhookIncomingRepository>(),
-        },
-        { provide: HttpService, useValue: createMock<HttpService>() },
       ],
     }).compile();
 
-    // Assign injected dependencies to variables
-    webhookIncomingService = moduleRef.get<WebhookIncomingService>(
-      WebhookIncomingService,
+    incomingWebhookService = moduleRef.get<IncomingWebhookService>(
+      IncomingWebhookService,
     );
-    webhookIncomingRepository = moduleRef.get(WebhookIncomingRepository);
-    escrowCompletionService = moduleRef.get<EscrowCompletionService>(
-      EscrowCompletionService,
-    );
-    web3ConfigService = moduleRef.get(Web3ConfigService);
-
-    // Mocking privateKey getter
-    jest
-      .spyOn(web3ConfigService, 'privateKey', 'get')
-      .mockReturnValue(MOCK_PRIVATE_KEY);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   describe('createIncomingWebhook', () => {
-    const validDto: IncomingWebhookDto = {
-      chainId: ChainId.LOCALHOST,
-      escrowAddress: MOCK_ADDRESS,
-      eventType: EventType.JOB_COMPLETED,
-    };
+    it('should create an incoming webhook', async () => {
+      const data: IncomingWebhookData = {
+        chainId: generateTestnetChainId(),
+        eventType: IncomingWebhookEventType.JOB_COMPLETED,
+        escrowAddress: faker.finance.ethereumAddress(),
+      };
 
-    const invalidDto: IncomingWebhookDto = {
-      chainId: ChainId.LOCALHOST,
-      escrowAddress: MOCK_ADDRESS,
-      eventType: 'JOB_FAILED' as EventType,
-    };
+      await incomingWebhookService.createIncomingWebhook(data);
 
-    const webhookEntity: Partial<WebhookIncomingEntity> = {
-      chainId: ChainId.LOCALHOST,
-      escrowAddress: MOCK_ADDRESS,
-      status: WebhookIncomingStatus.PENDING,
-      waitUntil: new Date(),
-      retriesCount: 0,
-    };
-
-    it('should successfully create an incoming webhook with valid DTO', async () => {
-      jest
-        .spyOn(webhookIncomingRepository, 'createUnique')
-        .mockResolvedValue(webhookEntity as WebhookIncomingEntity);
-
-      await webhookIncomingService.createIncomingWebhook(validDto);
-
-      expect(webhookIncomingRepository.createUnique).toHaveBeenCalledWith(
-        expect.objectContaining({
-          chainId: validDto.chainId,
-          escrowAddress: validDto.escrowAddress,
-        }),
+      expect(mockIncomingWebhookRepository.createUnique).toHaveBeenCalledTimes(
+        1,
       );
-    });
-
-    it('should throw BadRequestException with an invalid event type', async () => {
-      await expect(
-        webhookIncomingService.createIncomingWebhook(invalidDto),
-      ).rejects.toThrow(
-        new IncomingWebhookError(
-          WebhookErrorMessage.INVALID_EVENT_TYPE,
-          invalidDto.chainId,
-          invalidDto.escrowAddress,
-        ),
+      expect(mockIncomingWebhookRepository.createUnique).toHaveBeenCalledWith(
+        expect.objectContaining({
+          chainId: data.chainId,
+          escrowAddress: data.escrowAddress,
+          status: IncomingWebhookStatus.PENDING,
+          retriesCount: 0,
+        }),
       );
     });
   });
 
   describe('processPendingIncomingWebhooks', () => {
-    let createEscrowCompletionMock: any;
-    let webhookEntity1: Partial<WebhookIncomingEntity>,
-      webhookEntity2: Partial<WebhookIncomingEntity>;
+    it('should process pending webhooks', async () => {
+      const incomingWebhookEntity = generateIncomingWebhook();
 
-    beforeEach(() => {
-      webhookEntity1 = {
-        id: 1,
-        chainId: ChainId.LOCALHOST,
-        escrowAddress: MOCK_ADDRESS,
-        status: WebhookIncomingStatus.PENDING,
-        waitUntil: new Date(),
-        retriesCount: 0,
-      };
+      mockIncomingWebhookRepository.findByStatus.mockResolvedValueOnce([
+        incomingWebhookEntity,
+      ]);
 
-      webhookEntity2 = {
-        id: 2,
-        chainId: ChainId.LOCALHOST,
-        escrowAddress: MOCK_ADDRESS,
-        status: WebhookIncomingStatus.PENDING,
-        waitUntil: new Date(),
-        retriesCount: 0,
-      };
+      await incomingWebhookService.processPendingIncomingWebhooks();
 
-      jest
-        .spyOn(webhookIncomingRepository, 'findByStatus')
-        .mockResolvedValue([webhookEntity1 as any, webhookEntity2 as any]);
-
-      createEscrowCompletionMock = jest.spyOn(
-        escrowCompletionService as any,
-        'createEscrowCompletion',
+      expect(
+        mockEscrowCompletionService.createEscrowCompletion,
+      ).toHaveBeenCalledTimes(1);
+      expect(
+        mockEscrowCompletionService.createEscrowCompletion,
+      ).toHaveBeenCalledWith(
+        incomingWebhookEntity.chainId,
+        incomingWebhookEntity.escrowAddress,
       );
-      createEscrowCompletionMock.mockResolvedValue(undefined);
+
+      incomingWebhookEntity.status = IncomingWebhookStatus.COMPLETED;
+      expect(mockIncomingWebhookRepository.updateOne).toHaveBeenCalledTimes(1);
+      expect(mockIncomingWebhookRepository.updateOne).toHaveBeenCalledWith(
+        incomingWebhookEntity,
+      );
     });
 
-    afterEach(() => {
-      jest.restoreAllMocks();
-    });
+    it('should increase retries count in case of an error', async () => {
+      const incomingWebhookEntity = generateIncomingWebhook();
 
-    it('should process pending incoming webhooks and mark them as COMPLETED', async () => {
-      await webhookIncomingService.processPendingIncomingWebhooks();
-
-      expect(createEscrowCompletionMock).toHaveBeenCalledTimes(2);
-      expect(createEscrowCompletionMock).toHaveBeenCalledWith(
-        webhookEntity1.chainId,
-        webhookEntity1.escrowAddress,
-      );
-      expect(createEscrowCompletionMock).toHaveBeenCalledWith(
-        webhookEntity2.chainId,
-        webhookEntity2.escrowAddress,
+      mockIncomingWebhookRepository.findByStatus.mockResolvedValueOnce([
+        incomingWebhookEntity,
+      ]);
+      mockEscrowCompletionService.createEscrowCompletion.mockRejectedValueOnce(
+        new Error(),
       );
 
-      expect(webhookIncomingRepository.updateOne).toHaveBeenCalledTimes(2);
-      expect(webhookEntity1.status).toBe(WebhookIncomingStatus.COMPLETED);
-      expect(webhookEntity2.status).toBe(WebhookIncomingStatus.COMPLETED);
-    });
+      await incomingWebhookService.processPendingIncomingWebhooks();
 
-    it('should retry the webhook if processing fails and retries are below threshold', async () => {
-      createEscrowCompletionMock.mockRejectedValueOnce(
-        new Error('Processing error'),
-      );
-
-      await webhookIncomingService.processPendingIncomingWebhooks();
-
-      expect(webhookIncomingRepository.updateOne).toHaveBeenCalledWith(
+      expect(mockIncomingWebhookRepository.updateOne).toHaveBeenCalledTimes(1);
+      expect(mockIncomingWebhookRepository.updateOne).toHaveBeenCalledWith(
         expect.objectContaining({
-          status: WebhookIncomingStatus.PENDING,
+          id: incomingWebhookEntity.id,
+          status: incomingWebhookEntity.status,
           retriesCount: 1,
         }),
       );
     });
 
-    it('should mark the webhook as FAILED if retries exceed the threshold', async () => {
-      const error = new Error('Processing error');
-      const loggerErrorSpy = jest.spyOn(
-        webhookIncomingService['logger'],
-        'error',
+    it('should continue in case of a duplicated error', async () => {
+      const incomingWebhookEntity = generateIncomingWebhook();
+
+      mockIncomingWebhookRepository.findByStatus.mockResolvedValueOnce([
+        incomingWebhookEntity,
+      ]);
+      mockEscrowCompletionService.createEscrowCompletion.mockRejectedValueOnce(
+        new DatabaseError(DatabaseErrorMessages.DUPLICATED),
       );
 
-      webhookEntity1.retriesCount = MOCK_MAX_RETRY_COUNT;
-      createEscrowCompletionMock.mockRejectedValueOnce(error);
+      await incomingWebhookService.processPendingIncomingWebhooks();
 
-      await webhookIncomingService.processPendingIncomingWebhooks();
-
-      expect(webhookIncomingRepository.updateOne).toHaveBeenCalledWith(
+      expect(mockIncomingWebhookRepository.updateOne).toHaveBeenCalledTimes(1);
+      expect(mockIncomingWebhookRepository.updateOne).toHaveBeenCalledWith(
         expect.objectContaining({
-          status: WebhookIncomingStatus.FAILED,
-          retriesCount: MOCK_MAX_RETRY_COUNT,
+          id: incomingWebhookEntity.id,
+          status: IncomingWebhookStatus.COMPLETED,
         }),
-      );
-      expect(loggerErrorSpy).toHaveBeenCalledWith(
-        'Error processing incoming webhook',
-        {
-          error,
-          webhookId: expect.any(Number),
-        },
       );
     });
 
-    it('should handle duplicated errors and mark the webhook as COMPLETED', async () => {
-      createEscrowCompletionMock.mockImplementationOnce(() => {
-        throw new DatabaseError(
-          'Duplicate entry',
-          PostgresErrorCodes.Duplicated,
-        );
+    it('should set failed status if retries count exceeds the limit', async () => {
+      const incomingWebhookEntity = generateIncomingWebhook({
+        retriesCount: 1,
       });
 
-      await webhookIncomingService.processPendingIncomingWebhooks();
+      mockIncomingWebhookRepository.findByStatus.mockResolvedValueOnce([
+        incomingWebhookEntity,
+      ]);
+      mockEscrowCompletionService.createEscrowCompletion.mockRejectedValueOnce(
+        new Error(),
+      );
 
-      expect(webhookIncomingRepository.updateOne).toHaveBeenCalledWith(
+      await incomingWebhookService.processPendingIncomingWebhooks();
+
+      expect(mockIncomingWebhookRepository.updateOne).toHaveBeenCalledTimes(1);
+      expect(mockIncomingWebhookRepository.updateOne).toHaveBeenCalledWith(
         expect.objectContaining({
-          status: WebhookIncomingStatus.COMPLETED,
+          id: incomingWebhookEntity.id,
+          status: IncomingWebhookStatus.FAILED,
         }),
       );
     });

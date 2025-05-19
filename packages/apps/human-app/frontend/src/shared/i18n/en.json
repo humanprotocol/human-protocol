@@ -1,7 +1,7 @@
 {
   "humanCurrencySymbol": "HMT",
   "inputMasks": {
-    "humanCurrencySuffix": " HMT",
+    "humanCurrencySuffix": "HMT",
     "percentSuffix": "%",
     "plusPrefix": "+"
   },
@@ -149,7 +149,8 @@
       "paragraph3": "<1>Can't find our email?</1> If you can't find the email in your inbox please check the spam folder.",
       "paragraph4": "<1>Having trouble?</1> Please <2>Contact Support</2>",
       "successResent": "Verification email has been successfully resent.",
-      "authError": "Log in before you resend email verification"
+      "authError": "Log in before you resend email verification",
+      "emailError": "No email provided."
     },
     "emailVerification": {
       "title": "Email Verified",

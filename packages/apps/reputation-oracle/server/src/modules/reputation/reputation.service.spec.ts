@@ -1,523 +1,393 @@
+jest.mock('@human-protocol/sdk');
+
 import { createMock } from '@golevelup/ts-jest';
-import { ChainId, EscrowClient } from '@human-protocol/sdk';
-import { ConfigModule, ConfigService, registerAs } from '@nestjs/config';
+import { faker } from '@faker-js/faker';
+import { EscrowClient } from '@human-protocol/sdk';
 import { Test } from '@nestjs/testing';
+
+import { ReputationConfigService, Web3ConfigService } from '../../config';
+
+import {
+  generateTestnetChainId,
+  mockWeb3ConfigService,
+} from '../web3/fixtures';
+import { Web3Service } from '../web3';
+
+import {
+  generateRandomScorePoints,
+  generateReputationEntity,
+  generateReputationEntityType,
+} from './fixtures';
 import { ReputationService } from './reputation.service';
 import { ReputationRepository } from './reputation.repository';
-import { ReputationEntity } from './reputation.entity';
-import {
-  MOCK_ADDRESS,
-  MOCK_FILE_URL,
-  MOCK_S3_ACCESS_KEY,
-  MOCK_S3_BUCKET,
-  MOCK_S3_ENDPOINT,
-  MOCK_S3_PORT,
-  MOCK_S3_SECRET_KEY,
-  MOCK_S3_USE_SSL,
-  mockConfig,
-} from '../../../test/constants';
-import {
-  JobRequestType,
-  ReputationEntityType,
-  ReputationLevel,
-  SolutionError,
-} from '../../common/enums';
-import { Web3Service } from '../web3/web3.service';
-import { StorageService } from '../storage/storage.service';
-import { ReputationConfigService } from '../../config/reputation-config.service';
-import { ReputationError, ReputationErrorMessage } from './reputation.error';
-import { Web3ConfigService } from '../../config/web3-config.service';
+import { ReputationEntityType } from './constants';
 
-jest.mock('@human-protocol/sdk', () => ({
-  ...jest.requireActual('@human-protocol/sdk'),
-  EscrowClient: {
-    build: jest.fn().mockImplementation(() => ({
-      getJobLauncherAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-      getExchangeOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-      getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-      getResultsUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
-      getManifestUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
-    })),
-  },
-}));
+const mockReputationRepository = createMock<ReputationRepository>();
+
+const LOW_REPUTATION_SCORE = faker.number.int({ min: 100, max: 300 });
+const HIGH_REPUTATION_SCORE = faker.number.int({
+  min: LOW_REPUTATION_SCORE * 2,
+  max: LOW_REPUTATION_SCORE * 3,
+});
+const mockReputationConfigService: Omit<
+  ReputationConfigService,
+  'configService'
+> = {
+  lowLevel: LOW_REPUTATION_SCORE,
+  highLevel: HIGH_REPUTATION_SCORE,
+};
+
+const mockedEscrowClient = jest.mocked(EscrowClient);
 
 describe('ReputationService', () => {
-  let reputationService: ReputationService,
-    reputationRepository: ReputationRepository,
-    storageService: StorageService;
+  let service: ReputationService;
 
-  const signerMock = {
-    address: MOCK_ADDRESS,
-    getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
-  };
-
-  beforeEach(async () => {
+  beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [
-        ConfigModule.forFeature(
-          registerAs('s3', () => ({
-            accessKey: MOCK_S3_ACCESS_KEY,
-            secretKey: MOCK_S3_SECRET_KEY,
-            endPoint: MOCK_S3_ENDPOINT,
-            port: MOCK_S3_PORT,
-            useSSL: MOCK_S3_USE_SSL,
-            bucket: MOCK_S3_BUCKET,
-          })),
-        ),
-      ],
       providers: [
-        {
-          provide: ConfigService,
-          useValue: {
-            get: jest.fn((key: string) => mockConfig[key]),
-            getOrThrow: jest.fn((key: string) => {
-              if (!mockConfig[key]) {
-                throw new Error(`Configuration key "${key}" does not exist`);
-              }
-              return mockConfig[key];
-            }),
-          },
-        },
-        Web3ConfigService,
-        {
-          provide: Web3Service,
-          useValue: {
-            getSigner: jest.fn().mockReturnValue(signerMock),
-          },
-        },
-        { provide: StorageService, useValue: createMock<StorageService>() },
         ReputationService,
         {
-          provide: ReputationRepository,
-          useValue: createMock<ReputationRepository>(),
+          provide: ReputationConfigService,
+          useValue: mockReputationConfigService,
         },
-        ReputationConfigService,
+        {
+          provide: ReputationRepository,
+          useValue: mockReputationRepository,
+        },
+        {
+          provide: Web3ConfigService,
+          useValue: mockWeb3ConfigService,
+        },
+        Web3Service,
       ],
     }).compile();
 
-    reputationService = moduleRef.get<ReputationService>(ReputationService);
-    reputationRepository = moduleRef.get(ReputationRepository);
-    storageService = moduleRef.get<StorageService>(StorageService);
+    service = moduleRef.get<ReputationService>(ReputationService);
   });
 
-  describe('assessReputationScores', () => {
-    const chainId = ChainId.LOCALHOST;
-    const escrowAddress = 'mockEscrowAddress';
-
-    describe('fortune', () => {
-      it('should assess reputation scores', async () => {
-        const manifest = {
-          requestType: JobRequestType.FORTUNE,
-        };
-        const finalResults = [
-          { workerAddress: 'worker1', error: undefined },
-          { workerAddress: 'worker2', error: SolutionError.Duplicated },
-        ];
-
-        jest
-          .spyOn(storageService, 'downloadJsonLikeData')
-          .mockResolvedValueOnce(manifest)
-          .mockResolvedValueOnce(finalResults);
-
-        jest.spyOn(reputationService, 'increaseReputation').mockResolvedValue();
-        jest.spyOn(reputationService, 'decreaseReputation').mockResolvedValue();
-
-        await reputationService.assessReputationScores(chainId, escrowAddress);
-
-        expect(reputationService.increaseReputation).toHaveBeenCalledWith(
-          chainId,
-          MOCK_ADDRESS,
-          ReputationEntityType.JOB_LAUNCHER,
-        );
-
-        expect(reputationService.increaseReputation).toHaveBeenCalledWith(
-          chainId,
-          'worker1',
-          ReputationEntityType.WORKER,
-        );
-
-        expect(reputationService.decreaseReputation).toHaveBeenCalledWith(
-          chainId,
-          'worker2',
-          ReputationEntityType.WORKER,
-        );
-
-        expect(reputationService.increaseReputation).toHaveBeenCalledWith(
-          chainId,
-          MOCK_ADDRESS,
-          ReputationEntityType.EXCHANGE_ORACLE,
-        );
-
-        expect(reputationService.increaseReputation).toHaveBeenCalledWith(
-          chainId,
-          MOCK_ADDRESS,
-          ReputationEntityType.RECORDING_ORACLE,
-        );
-      });
-    });
-
-    describe('cvat', () => {
-      const manifest = {
-        requestType: JobRequestType.IMAGE_BOXES,
-        data: {
-          data_url: MOCK_FILE_URL,
-        },
-        annotation: {
-          labels: [{ name: 'cat' }, { name: 'dog' }],
-          description: 'Description',
-          type: JobRequestType.IMAGE_BOXES,
-          job_size: 10,
-          max_time: 10,
-        },
-        validation: {
-          min_quality: 0.95,
-          val_size: 10,
-          gt_url: MOCK_FILE_URL,
-        },
-        job_bounty: '10',
-      };
-
-      (EscrowClient.build as any).mockImplementation(() => ({
-        getJobLauncherAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-        getExchangeOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-        getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-        getResultsUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
-        getIntermediateResultsUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
-        getManifestUrl: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-      }));
-
-      it('should assess reputation scores', async () => {
-        const annotationMeta = {
-          jobs: [
-            {
-              id: 1,
-              job_id: 1,
-              annotator_wallet_address: 'worker1',
-              annotation_quality: 0.96,
-            },
-            {
-              id: 2,
-              job_id: 2,
-              annotator_wallet_address: 'worker2',
-              annotation_quality: 0.94,
-            },
-          ],
-          results: [
-            {
-              id: 1,
-              job_id: 1,
-              annotator_wallet_address: 'worker1',
-              annotation_quality: 0.96,
-            },
-            {
-              id: 2,
-              job_id: 2,
-              annotator_wallet_address: 'worker2',
-              annotation_quality: 0.94,
-            },
-          ],
-        };
-
-        jest
-          .spyOn(storageService, 'downloadJsonLikeData')
-          .mockResolvedValueOnce(manifest)
-          .mockResolvedValueOnce(annotationMeta);
-
-        jest.spyOn(reputationService, 'increaseReputation').mockResolvedValue();
-        jest.spyOn(reputationService, 'decreaseReputation').mockResolvedValue();
-
-        await reputationService.assessReputationScores(chainId, escrowAddress);
-
-        expect(reputationService.increaseReputation).toHaveBeenCalledWith(
-          chainId,
-          MOCK_ADDRESS,
-          ReputationEntityType.JOB_LAUNCHER,
-        );
-
-        expect(reputationService.increaseReputation).toHaveBeenCalledWith(
-          chainId,
-          'worker1',
-          ReputationEntityType.WORKER,
-        );
-
-        expect(reputationService.decreaseReputation).toHaveBeenCalledWith(
-          chainId,
-          'worker2',
-          ReputationEntityType.WORKER,
-        );
-
-        expect(reputationService.increaseReputation).toHaveBeenCalledWith(
-          chainId,
-          MOCK_ADDRESS,
-          ReputationEntityType.EXCHANGE_ORACLE,
-        );
-
-        expect(reputationService.increaseReputation).toHaveBeenCalledWith(
-          chainId,
-          MOCK_ADDRESS,
-          ReputationEntityType.RECORDING_ORACLE,
-        );
-      });
-    });
-  });
-
-  describe('increaseReputation', () => {
-    const chainId = ChainId.LOCALHOST;
-    const address = MOCK_ADDRESS;
-    const type = ReputationEntityType.WORKER;
-
-    it('should create a new reputation entity if not found', async () => {
-      jest
-        .spyOn(reputationRepository, 'findOneByAddress')
-        .mockResolvedValueOnce(undefined as any);
-      jest.spyOn(reputationRepository, 'createUnique');
-
-      await reputationService.increaseReputation(chainId, address, type);
-
-      expect(reputationRepository.findOneByAddress).toHaveBeenCalledWith(
-        address,
-      );
-      expect(reputationRepository.createUnique).toHaveBeenCalledWith({
-        chainId,
-        address,
-        reputationPoints: 1,
-        type,
-      });
-    });
-
-    it('should create a new reputation entity with Reputation Oracle type if not found', async () => {
-      jest
-        .spyOn(reputationRepository, 'findOneByAddress')
-        .mockResolvedValueOnce(undefined as any);
-      jest.spyOn(reputationRepository, 'createUnique');
-
-      await reputationService.increaseReputation(
-        chainId,
-        address,
-        ReputationEntityType.REPUTATION_ORACLE,
-      );
-
-      expect(reputationRepository.findOneByAddress).toHaveBeenCalledWith(
-        address,
-      );
-      expect(reputationRepository.createUnique).toHaveBeenCalledWith({
-        chainId,
-        address,
-        reputationPoints: 700,
-        type: ReputationEntityType.REPUTATION_ORACLE,
-      });
-    });
-
-    it('should increase reputation points if entity found', async () => {
-      const reputationEntity: Partial<ReputationEntity> = {
-        address,
-        reputationPoints: 1,
-        type: ReputationEntityType.RECORDING_ORACLE,
-      };
-
-      jest
-        .spyOn(reputationRepository, 'findOneByAddress')
-        .mockResolvedValueOnce(reputationEntity as ReputationEntity);
-
-      await reputationService.increaseReputation(chainId, address, type);
-
-      expect(reputationRepository.findOneByAddress).toHaveBeenCalledWith(
-        address,
-      );
-      expect(reputationEntity.reputationPoints).toBe(2);
-      expect(reputationRepository.updateOne).toHaveBeenCalled();
-    });
-  });
-
-  describe('decreaseReputation', () => {
-    const chainId = ChainId.LOCALHOST;
-    const address = MOCK_ADDRESS;
-    const type = ReputationEntityType.WORKER;
-
-    it('should create a new reputation entity if not found', async () => {
-      jest
-        .spyOn(reputationRepository, 'findOneByAddress')
-        .mockResolvedValueOnce(undefined as any);
-      jest.spyOn(reputationRepository, 'createUnique');
-
-      await reputationService.decreaseReputation(chainId, address, type);
-
-      expect(reputationRepository.findOneByAddress).toHaveBeenCalledWith(
-        address,
-      );
-      expect(reputationRepository.createUnique).toHaveBeenCalledWith({
-        chainId,
-        address,
-        reputationPoints: 0,
-        type,
-      });
-    });
-
-    it('should decrease reputation points if entity found', async () => {
-      const reputationEntity: Partial<ReputationEntity> = {
-        address,
-        reputationPoints: 1,
-        type: ReputationEntityType.RECORDING_ORACLE,
-      };
-
-      jest
-        .spyOn(reputationRepository, 'findOneByAddress')
-        .mockResolvedValueOnce(reputationEntity as ReputationEntity);
-
-      await reputationService.decreaseReputation(chainId, address, type);
-
-      expect(reputationRepository.findOneByAddress).toHaveBeenCalledWith(
-        address,
-      );
-      expect(reputationEntity.reputationPoints).toBe(0);
-      expect(reputationRepository.updateOne).toHaveBeenCalled();
-    });
-
-    it('should return if called for Reputation Oracle itself', async () => {
-      const reputationEntity: Partial<ReputationEntity> = {
-        address,
-        reputationPoints: 701,
-        type: ReputationEntityType.RECORDING_ORACLE,
-      };
-
-      jest
-        .spyOn(reputationRepository, 'findOneByAddress')
-        .mockResolvedValueOnce(reputationEntity as ReputationEntity);
-
-      await reputationService.decreaseReputation(
-        chainId,
-        address,
-        ReputationEntityType.REPUTATION_ORACLE,
-      );
-
-      expect(reputationRepository.findOneByAddress).toHaveBeenCalledWith(
-        address,
-      );
-      expect(reputationEntity.reputationPoints).toBe(701);
-      expect(reputationRepository.updateOne).toHaveBeenCalledTimes(0);
-    });
-  });
-
-  describe('getReputationLevel', () => {
-    it('should return LOW if reputation points are less than 300', () => {
-      expect(reputationService.getReputationLevel(299)).toBe(
-        ReputationLevel.LOW,
-      );
-    });
-    it('should return MEDIUM if reputation points are less than 700', () => {
-      expect(reputationService.getReputationLevel(699)).toBe(
-        ReputationLevel.MEDIUM,
-      );
-    });
-
-    it('should return HIGH if reputation points are greater than 700', () => {
-      expect(reputationService.getReputationLevel(701)).toBe(
-        ReputationLevel.HIGH,
-      );
-    });
-  });
-
-  describe('getReputation', () => {
-    const chainId = ChainId.LOCALHOST;
-    const address = MOCK_ADDRESS;
-
-    it('should return HIGH reputation for Reputation Oracle Address', async () => {
-      const reputationEntity: Partial<ReputationEntity> = {
-        chainId,
-        address,
-        reputationPoints: 1,
-        type: ReputationEntityType.RECORDING_ORACLE,
-      };
-
-      jest
-        .spyOn(reputationRepository, 'findOneByAddressAndChainId')
-        .mockResolvedValueOnce(reputationEntity as ReputationEntity);
-
-      const result = await reputationService.getReputation(chainId, address);
-
-      const resultReputation = {
-        chainId,
-        address,
-        reputation: ReputationLevel.HIGH,
-        role: ReputationEntityType.REPUTATION_ORACLE,
-      };
-
-      expect(result).toEqual(resultReputation);
-    });
-
-    it('should return reputation entity', async () => {
-      const NOT_ORACLE_ADDRESS = '0x0000000000000000000000000000000000000000';
-      const reputationEntity: Partial<ReputationEntity> = {
-        chainId,
-        address: NOT_ORACLE_ADDRESS,
-        reputationPoints: 1,
-        type: ReputationEntityType.RECORDING_ORACLE,
-      };
-
-      jest
-        .spyOn(reputationRepository, 'findOneByAddressAndChainId')
-        .mockResolvedValueOnce(reputationEntity as ReputationEntity);
-
-      const result = await reputationService.getReputation(
-        chainId,
-        NOT_ORACLE_ADDRESS,
-      );
-
-      const resultReputation = {
-        chainId,
-        address: NOT_ORACLE_ADDRESS,
-        reputation: ReputationLevel.LOW,
-        role: ReputationEntityType.RECORDING_ORACLE,
-      };
-
-      expect(
-        reputationRepository.findOneByAddressAndChainId,
-      ).toHaveBeenCalledWith(NOT_ORACLE_ADDRESS, chainId);
-
-      expect(result).toEqual(resultReputation);
-    });
-
-    it('should handle reputation not found', async () => {
-      const NOT_ORACLE_ADDRESS = '0x0000000000000000000000000000000000000000';
-      jest
-        .spyOn(reputationRepository, 'findOneByAddressAndChainId')
-        .mockResolvedValueOnce(null);
-
-      await expect(
-        reputationService.getReputation(chainId, NOT_ORACLE_ADDRESS),
-      ).rejects.toThrow(
-        new ReputationError(ReputationErrorMessage.NOT_FOUND, chainId, address),
-      );
-    });
+  afterEach(() => {
+    jest.resetAllMocks();
   });
 
   describe('getReputations', () => {
-    const chainId = ChainId.LOCALHOST;
-    const address = MOCK_ADDRESS;
+    it('should return reputations data with proper score level', async () => {
+      const withLowScore = generateReputationEntity(LOW_REPUTATION_SCORE);
+      const withMediumScore = generateReputationEntity(
+        faker.number.int({
+          min: LOW_REPUTATION_SCORE + 1,
+          max: HIGH_REPUTATION_SCORE - 1,
+        }),
+      );
+      const withHighScore = generateReputationEntity(HIGH_REPUTATION_SCORE);
 
-    it('should return all reputations', async () => {
-      const reputationEntity: Partial<ReputationEntity> = {
-        chainId,
-        address,
-        reputationPoints: 1,
-        type: ReputationEntityType.RECORDING_ORACLE,
-      };
+      mockReputationRepository.findPaginated.mockResolvedValueOnce([
+        withLowScore,
+        withMediumScore,
+        withHighScore,
+      ]);
 
-      jest
-        .spyOn(reputationRepository, 'findByChainIdAndTypes')
-        .mockResolvedValueOnce([reputationEntity as ReputationEntity]);
+      const reputations = await service.getReputations({});
+      expect(reputations[0]).toEqual({
+        chainId: withLowScore.chainId,
+        address: withLowScore.address,
+        role: withLowScore.type,
+        level: 'low',
+      });
+      expect(reputations[1]).toEqual({
+        chainId: withMediumScore.chainId,
+        address: withMediumScore.address,
+        role: withMediumScore.type,
+        level: 'medium',
+      });
+      expect(reputations[2]).toEqual({
+        chainId: withHighScore.chainId,
+        address: withHighScore.address,
+        role: withHighScore.type,
+        level: 'high',
+      });
+    });
+  });
 
-      const result = await reputationService.getReputations();
+  describe('reputation adjustments', () => {
+    beforeEach(() => {
+      /**
+       * Shallow copy is necessary here in order to
+       * properly compare mock call arguments,
+       * because jest hold a reference on object
+       */
+      mockReputationRepository.createUnique.mockImplementationOnce(
+        async (entity) => ({ ...entity }),
+      );
+    });
 
-      const resultReputation = {
-        chainId,
-        address,
-        reputation: ReputationLevel.LOW,
-        role: ReputationEntityType.RECORDING_ORACLE,
-      };
+    describe('increaseReputation', () => {
+      it.each([faker.number.float(), faker.number.int() * -1])(
+        'throws for invalid score points [%#]',
+        async (score) => {
+          await expect(
+            service.increaseReputation(
+              {
+                chainId: generateTestnetChainId(),
+                address: faker.finance.ethereumAddress(),
+                type: generateReputationEntityType(),
+              },
+              score,
+            ),
+          ).rejects.toThrow(
+            'Adjustable reputation points must be positive integer',
+          );
+        },
+      );
 
-      expect(reputationRepository.findByChainIdAndTypes).toHaveBeenCalled();
-      expect(result).toEqual([resultReputation]);
+      it('creates entity if not exists and increases reputation', async () => {
+        mockReputationRepository.findExclusive.mockResolvedValueOnce(null);
+
+        const criteria = {
+          chainId: generateTestnetChainId(),
+          address: faker.finance.ethereumAddress(),
+          type: generateReputationEntityType(),
+        };
+        const score = generateRandomScorePoints();
+
+        await service.increaseReputation(criteria, score);
+
+        expect(mockReputationRepository.createUnique).toHaveBeenCalledTimes(1);
+        expect(mockReputationRepository.createUnique).toHaveBeenCalledWith(
+          expect.objectContaining({
+            ...criteria,
+            reputationPoints: 0,
+          }),
+        );
+
+        expect(mockReputationRepository.updateOne).toHaveBeenCalledTimes(1);
+        expect(mockReputationRepository.updateOne).toHaveBeenCalledWith(
+          expect.objectContaining({
+            ...criteria,
+            reputationPoints: score,
+          }),
+        );
+      });
+
+      it('creates entity if not exists and increases reputation for current reputation oracle', async () => {
+        mockReputationRepository.findExclusive.mockResolvedValueOnce(null);
+
+        const criteria = {
+          chainId: generateTestnetChainId(),
+          address: mockWeb3ConfigService.operatorAddress,
+          type: ReputationEntityType.REPUTATION_ORACLE,
+        };
+        const score = generateRandomScorePoints();
+
+        await service.increaseReputation(criteria, score);
+
+        expect(mockReputationRepository.createUnique).toHaveBeenCalledTimes(1);
+        expect(mockReputationRepository.createUnique).toHaveBeenCalledWith(
+          expect.objectContaining({
+            ...criteria,
+            reputationPoints: mockReputationConfigService.highLevel,
+          }),
+        );
+
+        expect(mockReputationRepository.updateOne).toHaveBeenCalledTimes(1);
+        expect(mockReputationRepository.updateOne).toHaveBeenCalledWith(
+          expect.objectContaining({
+            ...criteria,
+            reputationPoints: score + mockReputationConfigService.highLevel,
+          }),
+        );
+      });
+
+      it('increases reputation if entity already exists', async () => {
+        const reputationEntity = generateReputationEntity();
+        mockReputationRepository.findExclusive.mockResolvedValueOnce(
+          reputationEntity,
+        );
+
+        const criteria = {
+          chainId: reputationEntity.chainId,
+          address: reputationEntity.address,
+          type: reputationEntity.type,
+        };
+        const score = generateRandomScorePoints();
+        const initialEntityScore = reputationEntity.reputationPoints;
+
+        await service.increaseReputation(criteria, score);
+
+        expect(mockReputationRepository.createUnique).not.toHaveBeenCalled();
+
+        expect(mockReputationRepository.updateOne).toHaveBeenCalledTimes(1);
+        expect(mockReputationRepository.updateOne).toHaveBeenCalledWith(
+          expect.objectContaining({
+            ...criteria,
+            reputationPoints: initialEntityScore + score,
+          }),
+        );
+      });
+    });
+
+    describe('decreaseReputation', () => {
+      it.each([faker.number.float(), faker.number.int() * -1])(
+        'throws for invalid score points [%#]',
+        async (score) => {
+          await expect(
+            service.decreaseReputation(
+              {
+                chainId: generateTestnetChainId(),
+                address: faker.finance.ethereumAddress(),
+                type: generateReputationEntityType(),
+              },
+              score,
+            ),
+          ).rejects.toThrow(
+            'Adjustable reputation points must be positive integer',
+          );
+        },
+      );
+
+      it('creates entity if not exists and decreases reputation', async () => {
+        mockReputationRepository.findExclusive.mockResolvedValueOnce(null);
+        mockReputationRepository.createUnique.mockImplementationOnce(
+          async (entity) => ({ ...entity }),
+        );
+
+        const criteria = {
+          chainId: generateTestnetChainId(),
+          address: faker.finance.ethereumAddress(),
+          type: generateReputationEntityType(),
+        };
+        const score = generateRandomScorePoints();
+
+        await service.decreaseReputation(criteria, score);
+
+        expect(mockReputationRepository.createUnique).toHaveBeenCalledTimes(1);
+        expect(mockReputationRepository.createUnique).toHaveBeenCalledWith(
+          expect.objectContaining({
+            ...criteria,
+            reputationPoints: 0,
+          }),
+        );
+
+        expect(mockReputationRepository.updateOne).toHaveBeenCalledTimes(1);
+        expect(mockReputationRepository.updateOne).toHaveBeenCalledWith(
+          expect.objectContaining({
+            ...criteria,
+            reputationPoints: -score,
+          }),
+        );
+      });
+
+      it('decreases reputation if entity already exists', async () => {
+        const reputationEntity = generateReputationEntity();
+        mockReputationRepository.findExclusive.mockResolvedValueOnce(
+          reputationEntity,
+        );
+
+        const criteria = {
+          chainId: reputationEntity.chainId,
+          address: reputationEntity.address,
+          type: reputationEntity.type,
+        };
+        const score = generateRandomScorePoints();
+        const initialEntityScore = reputationEntity.reputationPoints;
+
+        await service.decreaseReputation(criteria, score);
+
+        expect(mockReputationRepository.createUnique).not.toHaveBeenCalled();
+
+        expect(mockReputationRepository.updateOne).toHaveBeenCalledTimes(1);
+        expect(mockReputationRepository.updateOne).toHaveBeenCalledWith(
+          expect.objectContaining({
+            ...criteria,
+            reputationPoints: initialEntityScore - score,
+          }),
+        );
+      });
+
+      it('should not decrease reputation for current reputation oracle', async () => {
+        const criteria = {
+          chainId: generateTestnetChainId(),
+          address: mockWeb3ConfigService.operatorAddress,
+          type: ReputationEntityType.REPUTATION_ORACLE,
+        };
+        const score = generateRandomScorePoints();
+
+        await service.decreaseReputation(criteria, score);
+
+        expect(mockReputationRepository.createUnique).not.toHaveBeenCalled();
+
+        expect(mockReputationRepository.decrement).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('assessEscrowParties', () => {
+    let spyOnIncreaseReputation: jest.SpyInstance;
+
+    beforeAll(() => {
+      spyOnIncreaseReputation = jest
+        .spyOn(service, 'increaseReputation')
+        .mockImplementation();
+    });
+
+    afterAll(() => {
+      spyOnIncreaseReputation.mockRestore();
+    });
+
+    it('should increase reputation for escrow oracles by one', async () => {
+      const jobLauncherAddress = faker.finance.ethereumAddress();
+      const exchangeOracleAddress = faker.finance.ethereumAddress();
+      const recordingOracleAddress = faker.finance.ethereumAddress();
+
+      mockedEscrowClient.build.mockResolvedValueOnce({
+        getExchangeOracleAddress: jest
+          .fn()
+          .mockResolvedValueOnce(exchangeOracleAddress),
+        getJobLauncherAddress: jest
+          .fn()
+          .mockResolvedValueOnce(jobLauncherAddress),
+        getRecordingOracleAddress: jest
+          .fn()
+          .mockResolvedValueOnce(recordingOracleAddress),
+      } as unknown as EscrowClient);
+
+      const chainId = generateTestnetChainId();
+      const escrowAddress = faker.finance.ethereumAddress();
+
+      await service.assessEscrowParties(chainId, escrowAddress);
+
+      expect(spyOnIncreaseReputation).toHaveBeenCalledTimes(4);
+      expect(spyOnIncreaseReputation).toHaveBeenCalledWith(
+        {
+          chainId,
+          address: jobLauncherAddress,
+          type: ReputationEntityType.JOB_LAUNCHER,
+        },
+        1,
+      );
+      expect(spyOnIncreaseReputation).toHaveBeenCalledWith(
+        {
+          chainId,
+          address: exchangeOracleAddress,
+          type: ReputationEntityType.EXCHANGE_ORACLE,
+        },
+        1,
+      );
+      expect(spyOnIncreaseReputation).toHaveBeenCalledWith(
+        {
+          chainId,
+          address: recordingOracleAddress,
+          type: ReputationEntityType.RECORDING_ORACLE,
+        },
+        1,
+      );
+      expect(spyOnIncreaseReputation).toHaveBeenCalledWith(
+        {
+          chainId,
+          address: mockWeb3ConfigService.operatorAddress,
+          type: ReputationEntityType.REPUTATION_ORACLE,
+        },
+        1,
+      );
     });
   });
 });

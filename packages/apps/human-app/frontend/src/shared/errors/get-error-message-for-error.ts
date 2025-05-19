@@ -1,11 +1,11 @@
 import { t } from 'i18next';
-import { FetchError } from '@/api/fetcher';
 import { JsonRpcError } from '@/modules/smart-contracts/json-rpc-error';
+import { ApiClientError } from '@/api';
 
 type CustomErrorHandler = (unknownError: unknown) => string | undefined;
 
 export function getErrorMessageForError(
-  unknownError: unknown,
+  unknownError: Error | null,
   customErrorHandler?: CustomErrorHandler
 ): string {
   let customError: string | undefined;
@@ -22,11 +22,7 @@ export function getErrorMessageForError(
     return t('errors.jsonRpcError');
   }
 
-  if (unknownError instanceof FetchError) {
-    if (typeof unknownError.data === 'string') {
-      return unknownError.data;
-    }
-
+  if (unknownError instanceof ApiClientError) {
     if (unknownError.message) {
       return unknownError.message;
     }

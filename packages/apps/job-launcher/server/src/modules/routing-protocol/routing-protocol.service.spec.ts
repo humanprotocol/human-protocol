@@ -1,18 +1,3 @@
-import { Test } from '@nestjs/testing';
-
-import { RoutingProtocolService } from './routing-protocol.service';
-import { ChainId, Role } from '@human-protocol/sdk';
-import { MOCK_REPUTATION_ORACLE_1, mockConfig } from '../../../test/constants';
-import { Web3ConfigService } from '../../common/config/web3-config.service';
-import { NetworkConfigService } from '../../common/config/network-config.service';
-import { Web3Service } from '../web3/web3.service';
-import { ConfigService } from '@nestjs/config';
-import { ControlledError } from '../../common/errors/controlled';
-import { JobRequestType } from '../../common/enums/job';
-import { ErrorRoutingProtocol } from '../../common/constants/errors';
-import { HttpStatus } from '@nestjs/common';
-import { hashString } from '../../common/utils';
-
 jest.mock('../../common/utils', () => ({
   ...jest.requireActual('../../common/utils'),
   hashString: jest.fn(),
@@ -24,6 +9,19 @@ jest.mock('@human-protocol/sdk', () => ({
     build: jest.fn().mockImplementation(() => ({})),
   },
 }));
+
+import { ChainId, Role } from '@human-protocol/sdk';
+import { ConfigService } from '@nestjs/config';
+import { Test } from '@nestjs/testing';
+import { MOCK_REPUTATION_ORACLE_1, mockConfig } from '../../../test/constants';
+import { NetworkConfigService } from '../../common/config/network-config.service';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { ErrorRoutingProtocol } from '../../common/constants/errors';
+import { FortuneJobType } from '../../common/enums/job';
+import { ServerError } from '../../common/errors';
+import { hashString } from '../../common/utils';
+import { Web3Service } from '../web3/web3.service';
+import { RoutingProtocolService } from './routing-protocol.service';
 
 describe('RoutingProtocolService', () => {
   let web3Service: Web3Service;
@@ -354,7 +352,7 @@ describe('RoutingProtocolService', () => {
 
       const result = await routingProtocolService.selectOracles(
         ChainId.POLYGON_AMOY,
-        JobRequestType.FORTUNE,
+        FortuneJobType.FORTUNE,
       );
       expect(result.reputationOracle).toBeDefined();
       expect(result.exchangeOracle).toBe('0xExchangeOracle1');
@@ -366,7 +364,7 @@ describe('RoutingProtocolService', () => {
 
       const result = await routingProtocolService.selectOracles(
         ChainId.POLYGON_AMOY,
-        JobRequestType.FORTUNE,
+        FortuneJobType.FORTUNE,
       );
       expect(result.exchangeOracle).toBe('');
       expect(result.recordingOracle).toBe('');
@@ -395,7 +393,7 @@ describe('RoutingProtocolService', () => {
       await expect(
         routingProtocolService.validateOracles(
           chainId,
-          JobRequestType.FORTUNE,
+          FortuneJobType.FORTUNE,
           reputationOracle,
           exchangeOracle,
           recordingOracle,
@@ -418,14 +416,11 @@ describe('RoutingProtocolService', () => {
       await expect(
         routingProtocolService.validateOracles(
           chainId,
-          JobRequestType.FORTUNE,
+          FortuneJobType.FORTUNE,
           invalidReputationOracle,
         ),
       ).rejects.toThrow(
-        new ControlledError(
-          ErrorRoutingProtocol.ReputationOracleNotFound,
-          HttpStatus.NOT_FOUND,
-        ),
+        new ServerError(ErrorRoutingProtocol.ReputationOracleNotFound),
       );
     });
 
@@ -449,15 +444,12 @@ describe('RoutingProtocolService', () => {
       await expect(
         routingProtocolService.validateOracles(
           chainId,
-          JobRequestType.FORTUNE,
+          FortuneJobType.FORTUNE,
           reputationOracle,
           'invalidExchangeOracle',
         ),
       ).rejects.toThrow(
-        new ControlledError(
-          ErrorRoutingProtocol.ExchangeOracleNotFound,
-          HttpStatus.NOT_FOUND,
-        ),
+        new ServerError(ErrorRoutingProtocol.ExchangeOracleNotFound),
       );
     });
 
@@ -481,16 +473,13 @@ describe('RoutingProtocolService', () => {
       await expect(
         routingProtocolService.validateOracles(
           chainId,
-          JobRequestType.FORTUNE,
+          FortuneJobType.FORTUNE,
           reputationOracle,
           undefined,
           'invalidRecordingOracle',
         ),
       ).rejects.toThrow(
-        new ControlledError(
-          ErrorRoutingProtocol.RecordingOracleNotFound,
-          HttpStatus.NOT_FOUND,
-        ),
+        new ServerError(ErrorRoutingProtocol.RecordingOracleNotFound),
       );
     });
   });

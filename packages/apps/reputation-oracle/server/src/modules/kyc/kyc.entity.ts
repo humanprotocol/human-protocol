@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 
 import { DATABASE_SCHEMA_NAME } from '../../common/constants';
-import { BaseEntity } from '../../database/base.entity';
+import { BaseEntity } from '../../database';
 import { KycStatus } from './constants';
 
 import type { UserEntity } from '../user';
@@ -27,6 +27,7 @@ export class KycEntity extends BaseEntity {
   @JoinColumn()
   @OneToOne('UserEntity', (user: UserEntity) => user.kyc, {
     persistence: false,
+    onDelete: 'CASCADE',
   })
   user?: UserEntity;
 

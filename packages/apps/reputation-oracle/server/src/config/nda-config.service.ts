@@ -9,6 +9,6 @@ export class NDAConfigService {
    * Latest NDA Url.
    */
   get latestNdaUrl(): string {
-    return this.configService.getOrThrow<string>('NDA_URL');
+    return this.configService.getOrThrow('NDA_URL');
   }
 }

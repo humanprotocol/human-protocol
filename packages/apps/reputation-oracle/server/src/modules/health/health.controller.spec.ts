@@ -8,7 +8,7 @@ import {
   TypeOrmHealthIndicator,
 } from '@nestjs/terminus';
 import { nestLoggerOverride } from '../../logger';
-import { ServerConfigService } from '../../config/server-config.service';
+import { ServerConfigService } from '../../config';
 import { HealthController } from './health.controller';
 
 const mockServerConfigService = {
@@ -62,7 +62,6 @@ describe('HealthController', () => {
 
   it('/ping should return proper info', async () => {
     await expect(healthController.ping()).resolves.toEqual({
-      appName: '@human-protocol/reputation-oracle',
       gitHash: mockServerConfigService.gitHash,
       nodeEnv: 'test',
     });
