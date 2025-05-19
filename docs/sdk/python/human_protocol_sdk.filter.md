@@ -120,13 +120,13 @@ Initializes a TransactionsFilter instance.
 * **Raises:**
   **ValueError** – If start_date is after end_date
 
-### *class* human_protocol_sdk.filter.WorkerFilter(chain_id, worker_address=None, order_by=None, order_direction=OrderDirection.DESC, first=10, skip=0)
+### *class* human_protocol_sdk.filter.WorkerFilter(chain_id, worker_address=None, order_by='payoutCount', order_direction=OrderDirection.DESC, first=10, skip=0)
 
 Bases: `object`
 
 A class used to filter workers.
 
-#### \_\_init_\_(chain_id, worker_address=None, order_by=None, order_direction=OrderDirection.DESC, first=10, skip=0)
+#### \_\_init_\_(chain_id, worker_address=None, order_by='payoutCount', order_direction=OrderDirection.DESC, first=10, skip=0)
 
 Initializes a WorkerFilter instance.
 
