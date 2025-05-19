@@ -41,6 +41,7 @@ x-general-env-variables:
   bucket_name_rep_o: &bucket_name_rep_o ${BUCKET_NAME_REPUTATION_ORACLE:-reputation-oracle}
   bucket_name_exc_o: &bucket_name_exc_o ${BUCKET_NAME_EXCHANGE_ORACLE:-exchange-oracle}
   bucket_name_rec_o: &bucket_name_rec_o ${BUCKET_NAME_RECORDING_ORACLE:-recording-oracle}
+  bucket_name_fortune: &bucket_name_fortune ${BUCKEN_NAME_FORTUNE:-fortune}
   # WEB3 ADDRESSES
   reputation_oracle_address: &reputation_oracle_address ${REPUTATION_ORACLE_ADDRESS:?}
   cvat_exchange_oracle_address: &cvat_exchange_oracle_address ${CVAT_EXCHANGE_ORACLE_ADDRESS:?}
@@ -190,6 +191,7 @@ services:
       BUCKET_REPUTATION_ORACLE: *bucket_name_rep_o
       BUCKET_EXCHANGE_ORACLE: *bucket_name_exc_o
       BUCKET_RECORDING_ORACLE: *bucket_name_rec_o
+      BUCKET_FORTUNE: *bucket_name_fortune
     entrypoint: >
       /bin/sh -c "
         mc alias set myminio http://minio:9000 $$MINIO_ROOT_USER $$MINIO_ROOT_PASSWORD
@@ -211,6 +213,9 @@ services:
 
         mc mb myminio/$$BUCKET_RECORDING_ORACLE;
         mc anonymous set public myminio/$$BUCKET_RECORDING_ORACLE;
+
+        mc mb myminio/$$BUCKET_FORTUNE;
+        mc anonymous set public myminio/$$BUCKET_FORTUNE;
       "
 
   reputation-oracle:

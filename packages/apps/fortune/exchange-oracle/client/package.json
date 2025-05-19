@@ -6,7 +6,7 @@
   "scripts": {
     "clean": "rm -rf dist",
     "lint": "eslint \"**/*.{ts,tsx}\"",
-    "start": "vite --port 3006",
+    "start": "vite",
     "build": "vite build",
     "preview": "vite preview",
     "start:prod": "serve -s dist",
