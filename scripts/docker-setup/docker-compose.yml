@@ -359,7 +359,7 @@ services:
       STORAGE_BUCKET_NAME: *bucket_name_cvat_exc_o
       HUMAN_APP_JWT_KEY: *reputation_oracle_jwt_public_key
       CVAT_INCOMING_WEBHOOKS_URL: "http://exchange-oracle.app:${BACKEND_APPS_INTERNAL_PORT:?}/cvat-webhook"
-      LOCALHOST_RECORDING_ORACLE_URL: "http://recording-oracle:${BACKEND_APPS_INTERNAL_PORT:?}/webhook"
+      LOCALHOST_RECORDING_ORACLE_URL: "http://recording-oracle-cvat:${BACKEND_APPS_INTERNAL_PORT:?}/webhook"
       LOCALHOST_JOB_LAUNCHER_URL: "http://job-launcher:${BACKEND_APPS_INTERNAL_PORT:?}/webhook"
       LOCALHOST_RECORDING_ORACLE_ADDRESS: *cvat_recording_oracle_address
 
