@@ -20,7 +20,7 @@ import cv2
 import datumaro as dm
 import numpy as np
 from datumaro.util import filter_dict, take_by
-from datumaro.util.annotation_util import BboxCoords, bbox_iou
+from datumaro.util.annotation_util import BboxCoords, bbox_iou, find_instances
 from datumaro.util.image import IMAGE_EXTENSIONS, decode_image, encode_image
 
 import src.core.tasks.boxes_from_points as boxes_from_points_task
@@ -1709,12 +1709,17 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
         )
         "Minimum absolute ROI size, (w, h)"
 
-        self.boxes_format = "coco_instances"
+        self.boxes_format = "coco_person_keypoints"
 
         self.embed_bbox_in_roi_image = True
         "Put a bbox into the extracted skeleton RoI images"
 
         self.embed_tile_border = True
+
+        self.embedded_point_radius = 15
+        self.min_embedded_point_radius_percent = 0.005
+        self.max_embedded_point_radius_percent = 0.01
+        self.embedded_point_color = (0, 255, 255)
 
         self.roi_embedded_bbox_color = (0, 255, 255)  # BGR
         self.roi_background_color = (245, 240, 242)  # BGR - CVAT background color
@@ -1948,7 +1953,7 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
                 )
             )
 
-    def _validate_boxes_annotations(self):
+    def _validate_boxes_annotations(self):  # noqa: PLR0912
         # Convert possible polygons and masks into boxes
         self._boxes_dataset.transform(InstanceSegmentsToBbox)
         self._boxes_dataset.init_cache()
@@ -1962,16 +1967,81 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
             # Could fail on this as well
             image_h, image_w = sample.media_as(dm.Image).size
 
-            sample_boxes = [a for a in sample.annotations if isinstance(a, dm.Bbox)]
-            valid_boxes = []
-            for bbox in sample_boxes:
-                if not (
-                    (0 <= int(bbox.x) < int(bbox.x + bbox.w) <= image_w)
-                    and (0 <= int(bbox.y) < int(bbox.y + bbox.h) <= image_h)
-                ):
+            valid_instances: list[tuple[dm.Bbox, dm.Points]] = []
+            instances = find_instances(
+                [a for a in sample.annotations if isinstance(a, dm.Bbox | dm.Skeleton)]
+            )
+            for instance_anns in instances:
+                if len(instance_anns) != 2:
                     excluded_boxes_info.add_message(
-                        "Sample '{}': bbox #{} ({}) skipped - invalid coordinates".format(
+                        "Sample '{}': object #{} ({}) skipped - unexpected group size ({})".format(
+                            sample.id,
+                            instance_anns[0].id,
+                            label_cat[instance_anns[0].label].name,
+                            len(instance_anns),
+                        ),
+                        sample_id=sample.id,
+                        sample_subset=sample.subset,
+                    )
+                    continue
+
+                bbox = next((a for a in instance_anns if isinstance(a, dm.Bbox)), None)
+                if not bbox:
+                    excluded_boxes_info.add_message(
+                        "Sample '{}': object #{} ({}) skipped - no matching bbox".format(
+                            sample.id, instance_anns[0].id, label_cat[instance_anns[0].label].name
+                        ),
+                        sample_id=sample.id,
+                        sample_subset=sample.subset,
+                    )
+                    continue
+
+                skeleton = next((a for a in instance_anns if isinstance(a, dm.Skeleton)), None)
+                if not skeleton:
+                    excluded_boxes_info.add_message(
+                        "Sample '{}': object #{} ({}) skipped - no matching skeleton".format(
+                            sample.id, instance_anns[0].id, label_cat[instance_anns[0].label].name
+                        ),
+                        sample_id=sample.id,
+                        sample_subset=sample.subset,
+                    )
+                    continue
+
+                if len(skeleton.elements) != 1 or len(skeleton.elements[0].points) != 2:
+                    excluded_boxes_info.add_message(
+                        "Sample '{}': object #{} ({}) skipped - invalid skeleton points".format(
+                            sample.id, skeleton.id, label_cat[skeleton.label].name
+                        ),
+                        sample_id=sample.id,
+                        sample_subset=sample.subset,
+                    )
+                    continue
+
+                point = skeleton.elements[0]
+                if not is_point_in_bbox(point.points[0], point.points[1], (0, 0, image_w, image_h)):
+                    excluded_boxes_info.add_message(
+                        "Sample '{}': object #{} ({}) skipped - invalid point coordinates".format(
+                            sample.id, skeleton.id, label_cat[skeleton.label].name
+                        ),
+                        sample_id=sample.id,
+                        sample_subset=sample.subset,
+                    )
+                    continue
+
+                if not is_point_in_bbox(int(bbox.x), int(bbox.y), (0, 0, image_w, image_h)):
+                    excluded_boxes_info.add_message(
+                        "Sample '{}': object #{} ({}) skipped - invalid bbox coordinates".format(
                             sample.id, bbox.id, label_cat[bbox.label].name
+                        ),
+                        sample_id=sample.id,
+                        sample_subset=sample.subset,
+                    )
+                    continue
+
+                if not is_point_in_bbox(point.points[0], point.points[1], bbox):
+                    excluded_boxes_info.add_message(
+                        "Sample '{}': object #{} ({}) skipped - point is outside the bbox".format(
+                            sample.id, skeleton.id, label_cat[skeleton.label].name
                         ),
                         sample_id=sample.id,
                         sample_subset=sample.subset,
@@ -1988,14 +2058,16 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
                     )
                     continue
 
-                valid_boxes.append(bbox)
+                valid_instances.append((bbox, point.wrap(group=bbox.group, id=bbox.id)))
                 visited_ids.add(bbox.id)
 
-            excluded_boxes_info.excluded_count += len(sample_boxes) - len(valid_boxes)
-            excluded_boxes_info.total_count += len(sample_boxes)
+            excluded_boxes_info.excluded_count += len(instances) - len(valid_instances)
+            excluded_boxes_info.total_count += len(instances)
 
-            if len(valid_boxes) != len(sample.annotations):
-                self._boxes_dataset.put(sample.wrap(annotations=valid_boxes))
+            if len(valid_instances) != len(sample.annotations):
+                self._boxes_dataset.put(
+                    sample.wrap(annotations=list(chain.from_iterable(valid_instances)))
+                )
 
         if excluded_boxes_info.excluded_count > ceil(
             excluded_boxes_info.total_count * self.max_discarded_threshold
@@ -2294,9 +2366,10 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
 
         rois: list[skeletons_from_boxes_task.RoiInfo] = []
         for sample in self._boxes_dataset:
-            for bbox in sample.annotations:
-                if not isinstance(bbox, dm.Bbox):
-                    continue
+            instances = find_instances(sample.annotations)
+            for instance_anns in instances:
+                bbox = next(a for a in instance_anns if isinstance(a, dm.Bbox))
+                point = next(a for a in instance_anns if isinstance(a, dm.Points))
 
                 # RoI is centered on bbox center
                 original_bbox_cx = int(bbox.x + bbox.w / 2)
@@ -2320,6 +2393,8 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
                         bbox_label=bbox.label,
                         bbox_x=new_bbox_x,
                         bbox_y=new_bbox_y,
+                        point_x=point.points[0] - roi_x,
+                        point_y=point.points[1] - roi_y,
                         roi_x=roi_x,
                         roi_y=roi_y,
                         roi_w=roi_w,
@@ -2511,6 +2586,32 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
             cv2.LINE_4,
         )
 
+    def _draw_roi_point(self, roi_image: np.ndarray, point: tuple[float, float]) -> np.ndarray:
+        roi_r = (roi_image.shape[0] ** 2 + roi_image.shape[1] ** 2) ** 0.5 / 2
+        radius = int(
+            min(
+                self.max_embedded_point_radius_percent * roi_r,
+                max(self.embedded_point_radius, self.min_embedded_point_radius_percent * roi_r),
+            )
+        )
+
+        roi_image = cv2.circle(
+            roi_image,
+            tuple(map(int, (point[0], point[1]))),
+            radius + 1,
+            (255, 255, 255),
+            -1,
+            cv2.LINE_4,
+        )
+        return cv2.circle(
+            roi_image,
+            tuple(map(int, (point[0], point[1]))),
+            radius,
+            self.embedded_point_color,
+            -1,
+            cv2.LINE_4,
+        )
+
     def _extract_and_upload_rois(self):
         assert self._roi_filenames is not _unset
         assert self._roi_infos is not _unset
@@ -2564,6 +2665,9 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
 
                 if self.embed_bbox_in_roi_image:
                     roi_pixels = self._draw_roi_bbox(roi_pixels, bbox_by_id[roi_info.bbox_id])
+                    roi_pixels = self._draw_roi_point(
+                        roi_pixels, (roi_info.point_x, roi_info.point_y)
+                    )
 
                 filename = self._roi_filenames[roi_info.bbox_id]
                 roi_bytes = encode_image(roi_pixels, os.path.splitext(filename)[-1])
