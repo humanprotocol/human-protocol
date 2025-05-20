@@ -1,12 +1,10 @@
-import { Box, Typography } from '@mui/material';
-import { GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
-import { LeaderBoardData } from '@services/api/use-leaderboard-details';
-import { useBreakPoints } from '@utils/hooks/use-is-mobile';
-import { useLeaderboardSearch } from '@utils/hooks/use-leaderboard-search';
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
-import CustomTooltip from '@components/CustomTooltip';
 import { useMemo } from 'react';
 
+import { Box, Typography } from '@mui/material';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import { GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
+
+import CustomTooltip from '@components/CustomTooltip';
 import { RoleCell } from '../components/RoleCell';
 import { AddressCell } from '../components/AddressCell';
 import { ChainCell } from '../components/ChainCell';
@@ -14,7 +12,22 @@ import { SelectNetwork } from '../components/SelectNetwork';
 import { TextCell } from '../components/TextCell';
 import { CategoryCell } from '../components/CategoryCell';
 
-export const useDataGrid = (data: LeaderBoardData) => {
+import { LeaderBoardData } from '@services/api/use-leaderboard-details';
+import { useBreakPoints } from '@utils/hooks/use-is-mobile';
+import { useLeaderboardSearch } from '@utils/hooks/use-leaderboard-search';
+
+// eslint-disable-next-line react-refresh/only-export-components
+const InfoTooltip = ({ title }: { title: string }) => (
+  <CustomTooltip title={title} arrow>
+    <HelpOutlineIcon
+      sx={{
+        color: 'text.secondary',
+      }}
+    />
+  </CustomTooltip>
+);
+
+const useDataGrid = (data: LeaderBoardData) => {
   const {
     filterParams: { chainId },
   } = useLeaderboardSearch();
@@ -32,7 +45,7 @@ export const useDataGrid = (data: LeaderBoardData) => {
     });
   }, [data]);
 
-  const visibleRows = useMemo(() => {
+  const rows = useMemo(() => {
     if (chainId !== -1) {
       return formattedData.filter((elem) => elem.chainId === chainId);
     }
@@ -40,24 +53,17 @@ export const useDataGrid = (data: LeaderBoardData) => {
     return formattedData;
   }, [formattedData, chainId]);
 
-  const columns: GridColDef<(typeof visibleRows)[number]>[] = useMemo(
+  const columns: GridColDef[] = useMemo(
     () => [
       {
         field: 'role',
+        flex: 1.5,
+        minWidth: isMobile ? 250 : 340,
         sortable: false,
-        flex: isMobile ? 0.8 : 1.5,
-        minWidth: isMobile ? 100 : 360,
-        headerClassName: isMobile
-          ? 'home-page-table-header pinned-column--header'
-          : 'home-page-table-header',
-        cellClassName: isMobile ? 'pinned-column--cell' : '',
-        renderHeader: () => (
-          <Typography component="span" variant="body3">
-            Role
-          </Typography>
-        ),
+        renderHeader: () => <Typography variant="body3">Role</Typography>,
         renderCell: (params: GridRenderCellParams) => (
           <RoleCell
+            rank={params.row.rowIndex + 1}
             role={params.value}
             websiteUrl={params.row.website}
             name={params.row.name}
@@ -68,20 +74,11 @@ export const useDataGrid = (data: LeaderBoardData) => {
         field: 'address',
         sortable: false,
         flex: 1,
-        minWidth: 150,
-        headerClassName: 'home-page-table-header',
+        minWidth: isMobile ? 180 : 260,
         renderHeader: () => (
-          <Box display="flex" gap="8px" alignItems="center">
-            <CustomTooltip title="Address of the role" arrow>
-              <HelpOutlineIcon
-                sx={{
-                  color: 'text.secondary',
-                }}
-              />
-            </CustomTooltip>
-            <Typography component="span" variant="body3">
-              Address
-            </Typography>
+          <Box display="flex" alignItems="center" gap={1}>
+            <InfoTooltip title="Address of the role" />
+            <Typography variant="body3">Address</Typography>
           </Box>
         ),
         renderCell: (params: GridRenderCellParams) => (
@@ -90,21 +87,13 @@ export const useDataGrid = (data: LeaderBoardData) => {
       },
       {
         field: 'amountStaked',
+        sortable: false,
         flex: 1,
-        minWidth: 130,
-        headerClassName: 'home-page-table-header',
+        minWidth: isMobile ? 130 : 260,
         renderHeader: () => (
-          <Box display="flex" gap="8px" alignItems="center">
-            <CustomTooltip title="Amount of HMT staked" arrow>
-              <HelpOutlineIcon
-                sx={{
-                  color: 'text.secondary',
-                }}
-              />
-            </CustomTooltip>
-            <Typography component="span" variant="body3">
-              Stake
-            </Typography>
+          <Box display="flex" alignItems="center" gap={1}>
+            <InfoTooltip title="Amount of HMT staked" />
+            <Typography variant="body3">Stake</Typography>
           </Box>
         ),
         valueFormatter: (value: string) => {
@@ -118,16 +107,12 @@ export const useDataGrid = (data: LeaderBoardData) => {
         field: 'chainId',
         headerName: 'Network',
         flex: isMobile ? 1 : 1.5,
-        sortable: false,
-        minWidth: isMobile ? 150 : 245,
-        headerClassName: 'home-page-table-header',
+        minWidth: isMobile ? 130 : 245,
         renderHeader: () => {
           return (
             <>
               {isMobile ? (
-                <Typography component="span" variant="body3">
-                  Network
-                </Typography>
+                <Typography variant="body3">Network</Typography>
               ) : (
                 <SelectNetwork />
               )}
@@ -140,25 +125,21 @@ export const useDataGrid = (data: LeaderBoardData) => {
       },
       {
         field: 'category',
-        minWidth: 200,
+        sortable: false,
+        minWidth: isMobile ? 180 : 260,
         headerName: 'Category',
-        headerClassName: 'home-page-table-header',
-        renderHeader: () => (
-          <Typography variant="body3" component="div">
-            Category
-          </Typography>
-        ),
+        renderHeader: () => <Typography variant="body3">Category</Typography>,
         renderCell: (params: GridRenderCellParams) => (
           <CategoryCell value={params.value} />
         ),
       },
       {
         field: 'fee',
-        minWidth: 150,
+        sortable: false,
+        minWidth: isMobile ? 100 : 130,
         headerName: 'Operator Fee',
-        headerClassName: 'home-page-table-header',
         renderHeader: () => (
-          <Typography variant="body3" component="div">
+          <Typography variant="body3" component="p">
             Operator Fee
           </Typography>
         ),
@@ -179,6 +160,8 @@ export const useDataGrid = (data: LeaderBoardData) => {
 
   return {
     columns,
-    visibleRows,
+    rows,
   };
 };
+
+export default useDataGrid;

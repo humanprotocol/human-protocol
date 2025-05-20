@@ -11,6 +11,7 @@ import dayjs from 'dayjs';
 
 export const StyledToggleButtonGroup = styled(ToggleButtonGroup)(
   ({ theme }) => ({
+    gap: 8,
     '.MuiToggleButtonGroup-grouped': {
       border: 'none',
       borderRadius: 4,

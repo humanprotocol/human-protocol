@@ -1,5 +1,9 @@
 .swiper-button-next, .swiper-button-prev {
-  top: 50%
+  top: 50%;
+
+  @media (max-width: 1100px) {
+    top: 30%;
+  }
 }
 
 .swiper-button-next::after, .swiper-button-prev::after {

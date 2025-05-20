@@ -25,17 +25,19 @@ const CustomSmallChartTooltip = ({
   if (active) {
     return (
       <Card
+        elevation={0}
         sx={{
-          border: `2px solid ${colorPalette.fog.light}`,
+          border: `1px solid ${colorPalette.fog.light}`,
+          borderRadius: 2,
         }}
       >
-        <Box px={2} py={1}>
+        <Box p={1}>
           {payload?.map((elem) => (
             <Fragment key={elem.name}>
               <Typography fontWeight={500} variant="caption">
                 {formatDate(elem.payload.date, 'MMMM DD, YYYY')}
               </Typography>
-              <Typography fontWeight={500} variant="h6" component="p">
+              <Typography fontWeight={500} variant="body1">
                 {elem.value ? elem.value.toLocaleString('en-US') : ''}
               </Typography>
             </Fragment>
@@ -57,12 +59,14 @@ interface SmallGraphProps {
 
 const GraphSettings = ({ title }: { title: string }) => (
   <Stack
-    mb={2}
     direction={{ sm: 'column', md: 'row' }}
     justifyContent="end"
     alignItems="center"
+    mt={{ xs: 1.5, md: 0 }}
+    mb={{ xs: 0, md: 2 }}
+    mr={{ xs: 0, md: 4 }}
     gap={2}
-    order={{ xs: 2, md: 1 }}
+    flexWrap="wrap"
   >
     <Typography variant="body1" component="p">
       {title}
@@ -74,10 +78,11 @@ const GraphSettings = ({ title }: { title: string }) => (
 const SmallGraph = ({ title, graphData }: SmallGraphProps) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
   return (
     <>
       {!isMobile && <GraphSettings title={title} />}
-      <ResponsiveContainer height={215}>
+      <ResponsiveContainer height={isMobile ? 150 : 215}>
         <AreaChart
           data={graphData}
           margin={{
@@ -88,8 +93,8 @@ const SmallGraph = ({ title, graphData }: SmallGraphProps) => {
         >
           <defs>
             <linearGradient id="value" x1="0" y1="0" x2="0" y2="1">
-              <stop offset={'90%'} stopColor="#244CB20F" stopOpacity={0.9} />
-              <stop offset={'100%'} stopColor="#B4C2E505" stopOpacity={0} />
+              <stop offset="90%" stopColor="#244CB20F" stopOpacity={0.9} />
+              <stop offset="100%" stopColor="#B4C2E505" stopOpacity={0} />
             </linearGradient>
           </defs>
           <XAxis
@@ -117,12 +122,16 @@ const SmallGraph = ({ title, graphData }: SmallGraphProps) => {
             stroke={colorPalette.fog.main}
             tickFormatter={formatNumber}
           />
-          <CartesianGrid stroke="#ccc" strokeDasharray="7" vertical={false} />
+          <CartesianGrid
+            stroke={colorPalette.fog.light}
+            strokeDasharray={1}
+            vertical={false}
+          />
           <Tooltip content={<CustomSmallChartTooltip />} />
           <Area
             type="monotone"
             dataKey="value"
-            stroke={colorPalette.primary.main}
+            stroke={colorPalette.secondary.main}
             fill="url(#value)"
           />
         </AreaChart>

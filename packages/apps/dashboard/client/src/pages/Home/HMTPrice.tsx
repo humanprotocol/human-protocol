@@ -3,19 +3,19 @@ import Typography from '@mui/material/Typography';
 
 import { useHMTPrice } from '../../services/api/use-hmt-price';
 
-export function HMTPrice() {
+const HMTPrice = () => {
   const { data, isError, isPending, isSuccess } = useHMTPrice();
 
   return (
-    <div>
-      <Typography variant="body1" component="p">
-        HMT Price
-      </Typography>
-      <Box display="flex" fontSize={20} fontWeight={500} mt={0.5}>
+    <Box display="flex" flexDirection="column" gap={0.5}>
+      <Typography variant="body1">HMT Price</Typography>
+      <Typography variant="h6" component="p">
         {isSuccess && `$${data}`}
         {isPending && '...'}
         {isError && 'No data'}
-      </Box>
-    </div>
+      </Typography>
+    </Box>
   );
-}
+};
+
+export default HMTPrice;

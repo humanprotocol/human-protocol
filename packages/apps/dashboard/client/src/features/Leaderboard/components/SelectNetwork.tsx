@@ -59,6 +59,11 @@ export const SelectNetwork = () => {
         value={chainId === -1 ? '' : chainId}
         label="By Network"
         onChange={handleChange}
+        sx={{
+          '& #network-select svg': {
+            display: 'none',
+          },
+        }}
       >
         {filteredNetworks.map((network) => (
           <MenuItem
