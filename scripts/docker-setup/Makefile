@@ -12,6 +12,7 @@ copy-env-files:
 	@cp ./env-files/.env.recording-oracle-cvat ./.env.recording-oracle-cvat.local
 # Copying .env files for fortune services
 	@cp ./env-files/.env.exchange-oracle-fortune ./.env.exchange-oracle-fortune.local
+	@cp ./env-files/.env.recording-oracle-fortune ./.env.recording-oracle-fortune.local
 # Copying .env files for client apps.
 # It should be placed in corresponding app folder
 # because used during Docker image build process

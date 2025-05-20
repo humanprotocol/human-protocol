@@ -532,6 +532,36 @@ services:
     environment:
       PORT: *frontend_default_port
 
+  recording-oracle-fortune:
+    container_name: recording-oracle-fortune
+    image: human-protocol/recording-oracle-fortune
+    pull_policy: build
+    depends_on:
+      minio:
+        condition: service_healthy
+      minio-client:
+        condition: service_completed_successfully
+    restart: *default-restart
+    logging:
+      <<: *default-logging
+    build:
+      context: ../../
+      dockerfile: packages/apps/fortune/recording-oracle/Dockerfile
+    expose:
+      - *backend_apps_internal_port
+    networks:
+      - human_protocol
+    ports:
+      - name: server_port
+        target: *backend_apps_internal_port
+        published: ${RECORDING_ORACLE_FORTUNE_EXPOSED_PORT:?}
+    env_file: ./.env.recording-oracle-fortune.local
+    environment:
+      <<: [*nodejs_app_vars, *nodejs_app_s3_vars]
+      HOST: *all_interfaces_ip
+      PORT: *backend_apps_internal_port
+      S3_BUCKET: *bucket_name_fortune
+
 volumes:
   # When init for the first time postgres requires empty directory
   # that is exclusive to its user, so providing a separate volume
