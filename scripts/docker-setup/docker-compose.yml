@@ -508,6 +508,30 @@ services:
       POSTGRES_DATABASE: exchange-oracle-fortune
       S3_BUCKET: *bucket_name_fortune
 
+  fortune-client:
+    container_name: fortune-client
+    image: human-protocol/fortune-client
+    pull_policy: build
+    depends_on:
+      exchange-oracle-fortune:
+        condition: service_started
+    restart: *default-restart
+    logging:
+      <<: *default-logging
+    build:
+      context: ../../
+      dockerfile: packages/apps/fortune/exchange-oracle/client/Dockerfile
+    expose:
+      - *frontend_default_port
+    networks:
+      - human_protocol
+    ports:
+      - name: server_port
+        target: *frontend_default_port
+        published: ${FORTUNE_CLIENT_EXPOSED_PORT:?}
+    environment:
+      PORT: *frontend_default_port
+
 volumes:
   # When init for the first time postgres requires empty directory
   # that is exclusive to its user, so providing a separate volume

@@ -27,7 +27,10 @@
     ]
   },
   "dependencies": {
+    "@emotion/react": "^11.11.3",
+    "@emotion/styled": "^11.11.0",
     "@human-protocol/sdk": "workspace:^",
+    "@mui/icons-material": "^7.0.1",
     "@mui/material": "^5.16.7",
     "@tanstack/query-sync-storage-persister": "^5.68.0",
     "@tanstack/react-query": "^5.67.2",

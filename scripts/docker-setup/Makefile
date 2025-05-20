@@ -17,5 +17,6 @@ copy-env-files:
 # because used during Docker image build process
 	@cp ./env-files/.env.human-app-client ../../packages/apps/human-app/frontend/.env.local
 	@cp ./env-files/.env.job-launcher-client ../../packages/apps/job-launcher/client/.env.local
+	@cp ./env-files/.env.fortune-client ../../packages/apps/fortune/exchange-oracle/client/.env.local
 # Restore original files
 	@git checkout . > /dev/null 2>&1
