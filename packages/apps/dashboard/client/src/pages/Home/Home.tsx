@@ -21,7 +21,7 @@ import TotalTransactions from '@pages/Home/TotalTransactions';
 import { LeaderboardIcon } from '@components/Icons/LeaderboardIcon';
 import CustomTooltip from '@components/CustomTooltip';
 
-import { useBreakPoints } from '@utils/hooks/use-is-mobile';
+import { useIsMobile } from '@utils/hooks/use-breakpoints';
 
 const CardWrapper = styled(Grid)(({ theme }) => ({
   display: 'flex',
@@ -43,9 +43,7 @@ const InfoTooltip = ({ title }: { title: string }) => (
 );
 
 const Home: FC = () => {
-  const {
-    mobile: { isMobile },
-  } = useBreakPoints();
+  const isMobile = useIsMobile();
 
   return (
     <PageWrapper violetHeader>

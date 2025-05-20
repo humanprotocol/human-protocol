@@ -8,7 +8,7 @@ const Holders = () => {
   const { data, isSuccess, isPending, isError } = useGeneralStats();
 
   return (
-    <Box display="flex" alignItems="center" gap={0.5}>
+    <Box display="flex" flexDirection="column" gap={0.5}>
       <Typography variant="body1" component="p">
         Holders
       </Typography>

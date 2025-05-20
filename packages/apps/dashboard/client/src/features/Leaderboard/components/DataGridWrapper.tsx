@@ -5,7 +5,7 @@ import Loader from '@components/Loader';
 
 import { LeaderBoardData } from '@services/api/use-leaderboard-details';
 import { handleErrorMessage } from '@services/handle-error-message';
-import { useBreakPoints } from '@utils/hooks/use-is-mobile';
+import { useIsMobile } from '@utils/hooks/use-breakpoints';
 import { colorPalette } from '@assets/styles/color-palette';
 import useDataGrid from '../hooks/useDataGrid';
 
@@ -19,9 +19,7 @@ export const DataGridWrapper = ({
   error: unknown;
 }) => {
   const { columns, rows } = useDataGrid(data);
-  const {
-    mobile: { isMobile },
-  } = useBreakPoints();
+  const isMobile = useIsMobile();
 
   const tableIsEmpty = status === 'success' && rows.length === 0;
   const tableMinHeight = status === 'success' && !tableIsEmpty ? 'unset' : 300;

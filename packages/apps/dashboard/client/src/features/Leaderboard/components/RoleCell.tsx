@@ -1,6 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import { Launch as LaunchIcon } from '@mui/icons-material';
-import { useBreakPoints } from '@utils/hooks/use-is-mobile';
+import { useIsMobile } from '@utils/hooks/use-breakpoints';
 import { Link } from 'react-router-dom';
 import { EntityIcon } from './EntityIcon';
 import { CaseConverter } from '@utils/case-converter';
@@ -40,9 +40,7 @@ export const RoleCell = ({
   websiteUrl?: string;
   name?: string;
 }) => {
-  const {
-    mobile: { isMobile },
-  } = useBreakPoints();
+  const isMobile = useIsMobile();
   const humanReadableRole = CaseConverter.convertSnakeToHumanReadable(role);
   const formattedName = name ? name.split(' ')[0] : null;
 

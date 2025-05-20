@@ -13,7 +13,7 @@ import { TextCell } from '../components/TextCell';
 import { CategoryCell } from '../components/CategoryCell';
 
 import { LeaderBoardData } from '@services/api/use-leaderboard-details';
-import { useBreakPoints } from '@utils/hooks/use-is-mobile';
+import { useIsMobile } from '@utils/hooks/use-breakpoints';
 import { useLeaderboardSearch } from '@utils/hooks/use-leaderboard-search';
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -32,9 +32,8 @@ const useDataGrid = (data: LeaderBoardData) => {
     filterParams: { chainId },
   } = useLeaderboardSearch();
 
-  const {
-    mobile: { isMobile },
-  } = useBreakPoints();
+  const isMobile = useIsMobile();
+
   const formattedData = useMemo(() => {
     return data.map((row, idx) => {
       return {

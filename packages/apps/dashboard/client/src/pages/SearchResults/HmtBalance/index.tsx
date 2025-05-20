@@ -5,7 +5,7 @@ import Typography from '@mui/material/Typography';
 import { NumericFormat } from 'react-number-format';
 
 import { useHMTPrice } from '@services/api/use-hmt-price';
-import { useBreakPoints } from '@utils/hooks/use-is-mobile';
+import { useIsMobile } from '@utils/hooks/use-breakpoints';
 
 type Props = {
   balance?: number | null;
@@ -13,7 +13,7 @@ type Props = {
 
 const HmtBalance: FC<Props> = ({ balance }) => {
   const { data, isError, isPending } = useHMTPrice();
-  const { mobile } = useBreakPoints();
+  const isMobile = useIsMobile();
 
   if (isError) {
     return <span>N/A</span>;
@@ -33,7 +33,7 @@ const HmtBalance: FC<Props> = ({ balance }) => {
           displayType="text"
           value={_balance}
           thousandSeparator=","
-          decimalScale={mobile.isMobile ? 4 : 9}
+          decimalScale={isMobile ? 4 : 9}
         />
       </Typography>
       <Typography
