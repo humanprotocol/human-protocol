@@ -1,5 +1,6 @@
-FROM node:22.14-slim
-ARG APP_PATH=packages/apps/fortune/exchange-oracle/server
+# Using bullseye instead of slim because it needs Python and build tools for node-gyp
+FROM node:22.14-bullseye
+ARG APP_PATH=packages/apps/fortune/exchange-oracle/client
 
 # Create app directory
 WORKDIR /usr/src/app
@@ -28,7 +29,6 @@ RUN yarn build:libs
 COPY ${APP_PATH} ./${APP_PATH}
 
 WORKDIR ./${APP_PATH}
-# Creates a "dist" folder with the production build
 RUN yarn build
 
 # Start the server using the build

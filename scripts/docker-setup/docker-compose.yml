@@ -341,7 +341,7 @@ services:
     ports:
       - name: server_port
         target: *backend_apps_internal_port
-        published: ${EXCHANGE_ORACLE_EXPOSED_PORT:?}
+        published: ${EXCHANGE_ORACLE_CVAT_EXPOSED_PORT:?}
     env_file: ./.env.exchange-oracle-cvat.local
     environment:
       HOST: *all_interfaces_ip
@@ -388,7 +388,7 @@ services:
     ports:
       - name: server_port
         target: *backend_apps_internal_port
-        published: ${RECORDING_ORACLE_EXPOSED_PORT:?}
+        published: ${RECORDING_ORACLE_CVAT_EXPOSED_PORT:?}
     env_file: ./.env.recording-oracle-cvat.local
     environment:
       HOST: *all_interfaces_ip
@@ -474,6 +474,39 @@ services:
         published: ${JOB_LAUNCHER_CLIENT_EXPOSED_PORT:?}
     environment:
       PORT: *frontend_default_port
+
+  exchange-oracle-fortune:
+    container_name: exchange-oracle-fortune
+    image: human-protocol/exchange-oracle-fortune
+    pull_policy: build
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      minio-client:
+        condition: service_completed_successfully
+    restart: *default-restart
+    logging:
+      <<: *default-logging
+    build:
+      context: ../../
+      dockerfile: packages/apps/fortune/exchange-oracle/server/Dockerfile
+    expose:
+      - *backend_apps_internal_port
+    networks:
+      - human_protocol
+    ports:
+      - name: server_port
+        target: *backend_apps_internal_port
+        published: ${EXCHANGE_ORACLE_FORTUNE_EXPOSED_PORT:?}
+    env_file: ./.env.exchange-oracle-fortune.local
+    environment:
+      <<: [*nodejs_app_vars, *nodejs_app_postgres_vars, *nodejs_app_s3_vars]
+      HOST: *all_interfaces_ip
+      PORT: *backend_apps_internal_port
+      POSTGRES_DATABASE: exchange-oracle-fortune
+      S3_BUCKET: *bucket_name_fortune
 
 volumes:
   # When init for the first time postgres requires empty directory
