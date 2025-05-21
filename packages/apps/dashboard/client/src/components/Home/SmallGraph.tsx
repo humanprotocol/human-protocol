@@ -1,3 +1,5 @@
+import { Fragment } from 'react';
+
 import {
   AreaChart,
   Area,
@@ -8,15 +10,16 @@ import {
   ResponsiveContainer,
   TooltipProps,
 } from 'recharts';
-import Card from '@mui/material/Card';
-import { colorPalette } from '@assets/styles/color-palette';
 import Box from '@mui/material/Box';
-import { Typography, useMediaQuery, useTheme } from '@mui/material';
+import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import ToggleButtons from '@components/DataEntry/ToggleButtons';
-import { Fragment } from 'react';
+import Typography from '@mui/material/Typography';
+
+import { colorPalette } from '@assets/styles/color-palette';
 import { formatDate } from '@helpers/formatDate';
 import { formatNumber } from '@helpers/formatNumber';
+import { useIsMobile } from '@utils/hooks/use-breakpoints';
 
 const CustomSmallChartTooltip = ({
   payload,
@@ -76,8 +79,7 @@ const GraphSettings = ({ title }: { title: string }) => (
 );
 
 const SmallGraph = ({ title, graphData }: SmallGraphProps) => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isMobile = useIsMobile();
 
   return (
     <>
