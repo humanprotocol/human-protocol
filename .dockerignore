@@ -4,6 +4,7 @@
 .husky
 audits
 docs
+docker-setup
 scripts
 **/node_modules
 **/build

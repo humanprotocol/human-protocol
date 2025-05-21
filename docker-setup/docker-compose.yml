@@ -233,7 +233,7 @@ services:
     logging:
       <<: *default-logging
     build:
-      context: ../../
+      context: ../
       dockerfile: packages/apps/reputation-oracle/server/Dockerfile
     expose:
       - *backend_apps_internal_port
@@ -269,7 +269,7 @@ services:
     logging:
       <<: *default-logging
     build:
-      context: ../../
+      context: ../
       dockerfile: packages/apps/human-app/server/Dockerfile
     expose:
       - *backend_apps_internal_port
@@ -301,7 +301,7 @@ services:
     logging:
       <<: *default-logging
     build:
-      context: ../../
+      context: ../
       dockerfile: packages/apps/human-app/frontend/Dockerfile
     expose:
       - *frontend_default_port
@@ -331,7 +331,7 @@ services:
     logging:
       <<: *default-logging
     build:
-      context: ../../packages/examples/cvat/exchange-oracle
+      context: ../packages/examples/cvat/exchange-oracle
       dockerfile: ./Dockerfile
     expose:
       - *backend_apps_internal_port
@@ -382,7 +382,7 @@ services:
     logging:
       <<: *default-logging
     build:
-      context: ../../packages/examples/cvat/recording-oracle
+      context: ../packages/examples/cvat/recording-oracle
       dockerfile: ./Dockerfile
     expose:
       - *backend_apps_internal_port
@@ -434,7 +434,7 @@ services:
     logging:
       <<: *default-logging
     build:
-      context: ../../
+      context: ../
       dockerfile: packages/apps/job-launcher/server/Dockerfile
     expose:
       - *backend_apps_internal_port
@@ -470,7 +470,7 @@ services:
     logging:
       <<: *default-logging
     build:
-      context: ../../
+      context: ../
       dockerfile: packages/apps/job-launcher/client/Dockerfile
     expose:
       - *frontend_default_port
@@ -498,7 +498,7 @@ services:
     logging:
       <<: *default-logging
     build:
-      context: ../../
+      context: ../
       dockerfile: packages/apps/fortune/exchange-oracle/server/Dockerfile
     expose:
       - *backend_apps_internal_port
@@ -529,7 +529,7 @@ services:
     logging:
       <<: *default-logging
     build:
-      context: ../../
+      context: ../
       dockerfile: packages/apps/fortune/exchange-oracle/client/Dockerfile
     expose:
       - *frontend_default_port
@@ -555,7 +555,7 @@ services:
     logging:
       <<: *default-logging
     build:
-      context: ../../
+      context: ../
       dockerfile: packages/apps/fortune/recording-oracle/Dockerfile
     expose:
       - *backend_apps_internal_port
