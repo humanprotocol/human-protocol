@@ -592,7 +592,7 @@ describe('Escrow with USDT', function () {
       });
 
       it('Should revert with the right error if address calling is not trusted', async function () {
-        const recepients = [await restAccounts[0].getAddress()];
+        const recipients = [await restAccounts[0].getAddress()];
         const amounts = [10];
 
         await expect(
@@ -600,12 +600,12 @@ describe('Escrow with USDT', function () {
             .connect(externalAddress)
             [
               'bulkPayOut(address[],uint256[],string,string,uint256)'
-            ](recepients, amounts, MOCK_URL, MOCK_HASH, '000')
+            ](recipients, amounts, MOCK_URL, MOCK_HASH, '000')
         ).to.be.revertedWith('Address calling not trusted');
       });
 
       it('Should revert with the right error if address calling is recording oracle', async function () {
-        const recepients = [await restAccounts[0].getAddress()];
+        const recipients = [await restAccounts[0].getAddress()];
         const amounts = [10];
 
         await expect(
@@ -613,12 +613,12 @@ describe('Escrow with USDT', function () {
             .connect(recordingOracle)
             [
               'bulkPayOut(address[],uint256[],string,string,uint256)'
-            ](recepients, amounts, MOCK_URL, MOCK_HASH, '000')
+            ](recipients, amounts, MOCK_URL, MOCK_HASH, '000')
         ).to.be.revertedWith('Address calling not trusted');
       });
 
       it('Should revert with the right error if amount of recipients more then amount of values', async function () {
-        const recepients = [
+        const recipients = [
           await restAccounts[0].getAddress(),
           await restAccounts[1].getAddress(),
           await restAccounts[2].getAddress(),
@@ -630,12 +630,12 @@ describe('Escrow with USDT', function () {
             .connect(reputationOracle)
             [
               'bulkPayOut(address[],uint256[],string,string,uint256)'
-            ](recepients, amounts, MOCK_URL, MOCK_HASH, '000')
+            ](recipients, amounts, MOCK_URL, MOCK_HASH, '000')
         ).to.be.revertedWith("Amount of recipients and values don't match");
       });
 
       it('Should revert with the right error if amount of recipients less then amount of values', async function () {
-        const recepients = [
+        const recipients = [
           await restAccounts[0].getAddress(),
           await restAccounts[1].getAddress(),
         ];
@@ -646,12 +646,12 @@ describe('Escrow with USDT', function () {
             .connect(reputationOracle)
             [
               'bulkPayOut(address[],uint256[],string,string,uint256)'
-            ](recepients, amounts, MOCK_URL, MOCK_HASH, '000')
+            ](recipients, amounts, MOCK_URL, MOCK_HASH, '000')
         ).to.be.revertedWith("Amount of recipients and values don't match");
       });
 
       it('Should revert with the right error if too many recipients', async function () {
-        const recepients = Array.from(
+        const recipients = Array.from(
           new Array(BULK_MAX_COUNT + 1),
           () => ethers.ZeroAddress
         );
@@ -662,7 +662,7 @@ describe('Escrow with USDT', function () {
             .connect(reputationOracle)
             [
               'bulkPayOut(address[],uint256[],string,string,uint256)'
-            ](recepients, amounts, MOCK_URL, MOCK_HASH, '000')
+            ](recipients, amounts, MOCK_URL, MOCK_HASH, '000')
         ).to.be.revertedWith('Too many recipients');
       });
 
@@ -693,18 +693,18 @@ describe('Escrow with USDT', function () {
       });
 
       it('Should emit bulkPayOut and Completed events for complete bulkPayOut', async function () {
-        const recepients = [await restAccounts[0].getAddress()];
+        const recipients = [await restAccounts[0].getAddress()];
         const amounts = [100];
 
         const tx = await escrow
           .connect(owner)
           [
             'bulkPayOut(address[],uint256[],string,string,uint256)'
-          ](recepients, amounts, MOCK_URL, MOCK_HASH, '000');
+          ](recipients, amounts, MOCK_URL, MOCK_HASH, '000');
 
         await expect(tx)
           .to.emit(escrow, 'BulkTransferV2')
-          .withArgs(anyValue, recepients, [100], false, MOCK_URL);
+          .withArgs(anyValue, recipients, [100], false, MOCK_URL);
 
         await expect(tx).to.emit(escrow, 'Completed');
       });
@@ -729,35 +729,35 @@ describe('Escrow with USDT', function () {
       });
 
       it('Should emit only bulkPayOut event for partial bulkPayOut', async function () {
-        const recepients = [await restAccounts[0].getAddress()];
+        const recipients = [await restAccounts[0].getAddress()];
         const amounts = [10];
 
         const tx = await escrow
           .connect(owner)
           [
             'bulkPayOut(address[],uint256[],string,string,uint256)'
-          ](recepients, amounts, MOCK_URL, MOCK_HASH, '000');
+          ](recipients, amounts, MOCK_URL, MOCK_HASH, '000');
 
         await expect(tx)
           .to.emit(escrow, 'BulkTransferV2')
-          .withArgs(anyValue, recepients, [10], true, MOCK_URL);
+          .withArgs(anyValue, recipients, [10], true, MOCK_URL);
 
         await expect(tx).not.to.emit(escrow, 'Completed');
       });
 
       it('Should emit bulkPayOut and Completed events for partial bulkPayOut with forceComplete option', async function () {
-        const recepients = [await restAccounts[0].getAddress()];
+        const recipients = [await restAccounts[0].getAddress()];
         const amounts = [10];
 
         const tx = await escrow
           .connect(owner)
           [
             'bulkPayOut(address[],uint256[],string,string,uint256,bool)'
-          ](recepients, amounts, MOCK_URL, MOCK_HASH, '000', true);
+          ](recipients, amounts, MOCK_URL, MOCK_HASH, '000', true);
 
         await expect(tx)
           .to.emit(escrow, 'BulkTransferV2')
-          .withArgs(anyValue, recepients, [10], false, MOCK_URL);
+          .withArgs(anyValue, recipients, [10], false, MOCK_URL);
 
         await expect(tx).to.emit(escrow, 'Completed');
       });
@@ -814,14 +814,14 @@ describe('Escrow with USDT', function () {
           .connect(owner)
           .balanceOf(await exchangeOracle.getAddress());
 
-        const recepients = [account1, account2, account3];
+        const recipients = [account1, account2, account3];
         const amounts = [10, 20, 30];
 
         await escrow
           .connect(reputationOracle)
           [
             'bulkPayOut(address[],uint256[],string,string,uint256)'
-          ](recepients, amounts, MOCK_URL, MOCK_HASH, '000');
+          ](recipients, amounts, MOCK_URL, MOCK_HASH, '000');
 
         const finalBalanceAccount1 = await usdt
           .connect(owner)
@@ -896,14 +896,14 @@ describe('Escrow with USDT', function () {
           .connect(owner)
           .balanceOf(await exchangeOracle.getAddress());
 
-        const recepients = [account1, account2, account3];
+        const recipients = [account1, account2, account3];
         const amounts = [10, 20, 30];
 
         await escrow
           .connect(reputationOracle)
           [
             'bulkPayOut(address[],uint256[],string,string,uint256,bool)'
-          ](recepients, amounts, MOCK_URL, MOCK_HASH, '000', true);
+          ](recipients, amounts, MOCK_URL, MOCK_HASH, '000', true);
 
         const finalBalanceAccount1 = await usdt
           .connect(owner)
@@ -958,7 +958,7 @@ describe('Escrow with USDT', function () {
       });
 
       it('Should runs from setup to bulkPayOut to complete correctly', async () => {
-        const recepients = [await restAccounts[3].getAddress()];
+        const recipients = [await restAccounts[3].getAddress()];
         const amounts = [100];
 
         expect(await escrow.status()).to.equal(Status.Pending);
@@ -967,12 +967,12 @@ describe('Escrow with USDT', function () {
           .connect(reputationOracle)
           [
             'bulkPayOut(address[],uint256[],string,string,uint256)'
-          ](recepients, amounts, MOCK_URL, MOCK_HASH, '000');
+          ](recipients, amounts, MOCK_URL, MOCK_HASH, '000');
         expect(await escrow.status()).to.equal(Status.Complete);
       });
 
       it('Should runs from setup to bulkPayOut to complete correctly with multiple addresses', async () => {
-        const recepients = [
+        const recipients = [
           await restAccounts[3].getAddress(),
           await restAccounts[4].getAddress(),
           await restAccounts[5].getAddress(),
@@ -985,7 +985,7 @@ describe('Escrow with USDT', function () {
           .connect(reputationOracle)
           [
             'bulkPayOut(address[],uint256[],string,string,uint256)'
-          ](recepients, amounts, MOCK_URL, MOCK_HASH, '000');
+          ](recipients, amounts, MOCK_URL, MOCK_HASH, '000');
         expect(await escrow.status()).to.equal(Status.Complete);
       });
 
@@ -1010,7 +1010,7 @@ describe('Escrow with USDT', function () {
       });
 
       it('Should runs from setup to bulkPayOut to partial correctly', async () => {
-        const recepients = [await restAccounts[3].getAddress()];
+        const recipients = [await restAccounts[3].getAddress()];
         const amounts = [80];
 
         expect(await escrow.status()).to.equal(Status.Pending);
@@ -1019,7 +1019,7 @@ describe('Escrow with USDT', function () {
           .connect(reputationOracle)
           [
             'bulkPayOut(address[],uint256[],string,string,uint256)'
-          ](recepients, amounts, MOCK_URL, MOCK_HASH, '000');
+          ](recipients, amounts, MOCK_URL, MOCK_HASH, '000');
         expect(await escrow.status()).to.equal(Status.Partial);
       });
 
@@ -1040,7 +1040,7 @@ describe('Escrow with USDT', function () {
       });
 
       it('Should runs from setup to bulkPayOut to partial correctly with multiple addresses', async () => {
-        const recepients = [
+        const recipients = [
           await restAccounts[3].getAddress(),
           await restAccounts[4].getAddress(),
           await restAccounts[5].getAddress(),
@@ -1053,7 +1053,7 @@ describe('Escrow with USDT', function () {
           .connect(reputationOracle)
           [
             'bulkPayOut(address[],uint256[],string,string,uint256)'
-          ](recepients, amounts, MOCK_URL, MOCK_HASH, '000');
+          ](recipients, amounts, MOCK_URL, MOCK_HASH, '000');
         expect(await escrow.status()).to.equal(Status.Partial);
       });
     });
