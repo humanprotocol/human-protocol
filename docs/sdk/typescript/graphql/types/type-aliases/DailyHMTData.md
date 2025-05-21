@@ -6,28 +6,46 @@
 
 # Type Alias: DailyHMTData
 
-> **DailyHMTData**: `object`
+> **DailyHMTData** = `object`
 
-Defined in: [graphql/types.ts:127](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L127)
+Defined in: [graphql/types.ts:127](https://github.com/humanprotocol/human-protocol/blob/99b899a11bf48f2fa04884687ea395e0d42d75d1/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L127)
 
-## Type declaration
+## Properties
 
 ### dailyUniqueReceivers
 
 > **dailyUniqueReceivers**: `number`
 
+Defined in: [graphql/types.ts:132](https://github.com/humanprotocol/human-protocol/blob/99b899a11bf48f2fa04884687ea395e0d42d75d1/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L132)
+
+***
+
 ### dailyUniqueSenders
 
 > **dailyUniqueSenders**: `number`
+
+Defined in: [graphql/types.ts:131](https://github.com/humanprotocol/human-protocol/blob/99b899a11bf48f2fa04884687ea395e0d42d75d1/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L131)
+
+***
 
 ### timestamp
 
 > **timestamp**: `Date`
 
+Defined in: [graphql/types.ts:128](https://github.com/humanprotocol/human-protocol/blob/99b899a11bf48f2fa04884687ea395e0d42d75d1/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L128)
+
+***
+
 ### totalTransactionAmount
 
 > **totalTransactionAmount**: `bigint`
 
+Defined in: [graphql/types.ts:129](https://github.com/humanprotocol/human-protocol/blob/99b899a11bf48f2fa04884687ea395e0d42d75d1/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L129)
+
+***
+
 ### totalTransactionCount
 
 > **totalTransactionCount**: `number`
+
+Defined in: [graphql/types.ts:130](https://github.com/humanprotocol/human-protocol/blob/99b899a11bf48f2fa04884687ea395e0d42d75d1/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L130)

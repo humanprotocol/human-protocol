@@ -78,6 +78,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
     mapping(address => bool) public areTrustedHandlers;
 
     uint256 public remainingFunds;
+    uint256 public reservedFunds;
 
     /**
      * @dev Constructor to initialize the escrow contract.
@@ -112,10 +113,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
      * @dev Returns the balance of the escrow contract for the main token.
      */
     function getBalance() public view returns (uint256) {
-        (bool success, bytes memory returnData) = token.staticcall(
-            abi.encodeWithSelector(FUNC_SELECTOR_BALANCE_OF, address(this))
-        );
-        return success ? abi.decode(returnData, (uint256)) : 0;
+        return getTokenBalance(token);
     }
 
     /**
@@ -232,10 +230,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
         nonReentrant
         returns (bool)
     {
-        _safeTransfer(token, canceler, remainingFunds);
-        status = EscrowStatuses.Cancelled;
-        remainingFunds = 0;
-        emit Cancelled();
+        status = EscrowStatuses.ToCancel;
         return true;
     }
 
@@ -270,16 +265,22 @@ contract Escrow is IEscrow, ReentrancyGuard {
             status == EscrowStatuses.Paid || status == EscrowStatuses.Partial,
             'Escrow not in Paid or Partial state'
         );
-        _complete();
+        _finalize();
     }
 
-    function _complete() private {
+    function _finalize() private {
         if (remainingFunds > 0) {
             _safeTransfer(token, launcher, remainingFunds);
             remainingFunds = 0;
+            reservedFunds = 0;
         }
-        status = EscrowStatuses.Complete;
-        emit Completed();
+        if (status == EscrowStatuses.ToCancel) {
+            status = EscrowStatuses.Cancelled;
+            emit Cancelled();
+        } else {
+            status = EscrowStatuses.Complete;
+            emit Completed();
+        }
     }
 
     /**
@@ -289,19 +290,35 @@ contract Escrow is IEscrow, ReentrancyGuard {
      */
     function storeResults(
         string memory _url,
-        string memory _hash
+        string memory _hash,
+        uint256 _amount
     ) external override trustedOrRecordingOracle notExpired {
         require(
             status == EscrowStatuses.Pending ||
-                status == EscrowStatuses.Partial,
-            'Escrow not in Pending or Partial status state'
+                status == EscrowStatuses.Partial ||
+                status == EscrowStatuses.ToCancel,
+            'Escrow not in Pending, Partial or ToCancel status state'
         );
         require(bytes(_url).length != 0, "URL can't be empty");
         require(bytes(_hash).length != 0, "Hash can't be empty");
+        require(
+            _amount <= remainingFunds - reservedFunds,
+            'Not enough unreserved funds'
+        );
 
         intermediateResultsUrl = _url;
+        reservedFunds += _amount;
 
         emit IntermediateStorage(_url, _hash);
+
+        // If the escrow is ToCancel, transfer unreserved funds to launcher
+        if (status == EscrowStatuses.ToCancel) {
+            uint256 unreservedFunds = remainingFunds - reservedFunds;
+            if (unreservedFunds > 0) {
+                _safeTransfer(token, launcher, unreservedFunds);
+                remainingFunds = reservedFunds;
+            }
+        }
     }
 
     /**
@@ -353,16 +370,42 @@ contract Escrow is IEscrow, ReentrancyGuard {
         for (uint256 i = 0; i < _recipients.length; i++) {
             uint256 amount = _amounts[i];
             require(amount > 0, 'Amount should be greater than zero');
+            totalBulkAmount += amount;
+            totalReputationOracleFee +=
+                (reputationOracleFeePercentage * amount) /
+                100;
+            totalRecordingOracleFee +=
+                (recordingOracleFeePercentage * amount) /
+                100;
+            totalExchangeOracleFee +=
+                (exchangeOracleFeePercentage * amount) /
+                100;
+        }
+        require(totalBulkAmount <= reservedFunds, 'Not enough reserved funds');
+
+        uint256 paidReputation = 0;
+        uint256 paidRecording = 0;
+        uint256 paidExchange = 0;
+
+        for (uint256 i = 0; i < _recipients.length; i++) {
+            uint256 amount = _amounts[i];
             uint256 reputationOracleFee = (reputationOracleFeePercentage *
                 amount) / 100;
-            totalReputationOracleFee += reputationOracleFee;
             uint256 recordingOracleFee = (recordingOracleFeePercentage *
                 amount) / 100;
-            totalRecordingOracleFee += recordingOracleFee;
             uint256 exchangeOracleFee = (exchangeOracleFeePercentage * amount) /
                 100;
-            totalExchangeOracleFee += exchangeOracleFee;
-            totalBulkAmount += amount;
+
+            if (i == _recipients.length - 1) {
+                reputationOracleFee = totalReputationOracleFee - paidReputation;
+                recordingOracleFee = totalRecordingOracleFee - paidRecording;
+                exchangeOracleFee = totalExchangeOracleFee - paidExchange;
+            }
+
+            paidReputation += reputationOracleFee;
+            paidRecording += recordingOracleFee;
+            paidExchange += exchangeOracleFee;
+
             _safeTransfer(
                 token,
                 _recipients[i],
@@ -372,8 +415,6 @@ contract Escrow is IEscrow, ReentrancyGuard {
                     exchangeOracleFee
             );
         }
-
-        require(totalBulkAmount <= remainingFunds, 'Not enough balance');
 
         // Transfer oracle fees
         if (reputationOracleFeePercentage > 0) {
@@ -386,6 +427,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
             _safeTransfer(token, exchangeOracle, totalExchangeOracleFee);
         }
         remainingFunds -= totalBulkAmount;
+        reservedFunds -= totalBulkAmount;
 
         finalResultsUrl = _url;
         finalResultsHash = _hash;
@@ -398,9 +440,11 @@ contract Escrow is IEscrow, ReentrancyGuard {
                 false,
                 finalResultsUrl
             );
-            _complete();
+            _finalize();
         } else {
-            status = EscrowStatuses.Partial;
+            if (status != EscrowStatuses.ToCancel) {
+                status = EscrowStatuses.Partial;
+            }
             emit BulkTransferV2(
                 _txId,
                 _recipients,

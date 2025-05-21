@@ -436,6 +436,7 @@ class EscrowClient:
         escrow_address: str,
         url: str,
         hash: str,
+        amount: Decimal,
         tx_options: Optional[TxParams] = None,
     ) -> None:
         """
@@ -444,6 +445,7 @@ class EscrowClient:
         :param escrow_address: Address of the escrow
         :param url: Results file URL
         :param hash: Results file hash
+        :param amount: Amount to reserve for payouts
         :param tx_options: (Optional) Additional transaction parameters
 
         :return: None
@@ -477,7 +479,8 @@ class EscrowClient:
                 escrow_client.store_results(
                     "0x62dD51230A30401C455c8398d06F85e4EaB6309f",
                     "http://localhost/results.json",
-                    "b5dad76bf6772c0f07fd5e048f6e75a5f86ee079"
+                    "b5dad76bf6772c0f07fd5e048f6e75a5f86ee079",
+                    Web3.to_wei(5, 'ether')
                 )
         """
         if not Web3.is_address(escrow_address):
@@ -486,13 +489,17 @@ class EscrowClient:
             raise EscrowClientError("Invalid empty hash")
         if not validate_url(url):
             raise EscrowClientError(f"Invalid URL: {url}")
+        if amount <= 0:
+            raise EscrowClientError("Amount must be positive")
         if not self.w3.eth.default_account:
             raise EscrowClientError("You must add an account to Web3 instance")
 
         handle_transaction(
             self.w3,
             "Store Results",
-            self._get_escrow_contract(escrow_address).functions.storeResults(url, hash),
+            self._get_escrow_contract(escrow_address).functions.storeResults(
+                url, hash, amount
+            ),
             EscrowClientError,
             tx_options,
         )
