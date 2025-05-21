@@ -42,6 +42,26 @@ const InfoTooltip = ({ title }: { title: string }) => (
   </CustomTooltip>
 );
 
+const renderViewChartsButton = (show: boolean) => {
+  if (show) {
+    return (
+      <Button
+        variant="outlined"
+        color="secondary"
+        component={Link}
+        to="/graph"
+        sx={{
+          padding: '4px 10px',
+        }}
+      >
+        View Charts
+      </Button>
+    );
+  } else {
+    return null;
+  }
+};
+
 const Home: FC = () => {
   const isMobile = useIsMobile();
 
@@ -82,18 +102,7 @@ const Home: FC = () => {
                 <Typography variant="body2">
                   Data Overview (All networks)
                 </Typography>
-                <Button
-                  variant="outlined"
-                  color="secondary"
-                  component={Link}
-                  to="/graph"
-                  sx={{
-                    padding: '4px 10px',
-                    display: { xs: 'none', md: 'flex' },
-                  }}
-                >
-                  View Charts
-                </Button>
+                {renderViewChartsButton(!isMobile)}
               </Box>
               <Box display="flex" gap={1}>
                 <InfoTooltip title="Total number of transactions" />
@@ -109,18 +118,7 @@ const Home: FC = () => {
             <Box width={{ xs: 'unset', md: '55%' }} mx={{ xs: -4, md: 0 }}>
               <GraphSwiper />
             </Box>
-            <Button
-              variant="outlined"
-              color="secondary"
-              component={Link}
-              to="/graph"
-              sx={{
-                padding: '4px 10px',
-                display: { xs: 'flex', md: 'none' },
-              }}
-            >
-              View Charts
-            </Button>
+            {renderViewChartsButton(isMobile)}
           </CardWrapper>
         </Grid>
       </Grid>
