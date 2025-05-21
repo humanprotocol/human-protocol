@@ -109,7 +109,7 @@ export const DataGridWrapper = ({
           '& .MuiDataGrid-virtualScroller': {
             position: 'relative',
           },
-          '& .MuiDataGrid-filler': {
+          '& .MuiDataGrid-filler, & .MuiDataGrid-cellEmpty': {
             display: 'none',
           },
         }}

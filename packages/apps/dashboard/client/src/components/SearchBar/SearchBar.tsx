@@ -188,7 +188,7 @@ const SearchBar: FC<SearchBarProps> = ({
                   type="submit"
                   aria-label="search"
                   sx={{
-                    padding: { xs: '4px', md: '0px' },
+                    p: 0.5,
                   }}
                 >
                   <SearchIcon

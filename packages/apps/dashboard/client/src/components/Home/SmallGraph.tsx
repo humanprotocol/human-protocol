@@ -34,7 +34,7 @@ const CustomSmallChartTooltip = ({
           borderRadius: 2,
         }}
       >
-        <Box p={1}>
+        <Box px={1} py={0}>
           {payload?.map((elem) => (
             <Fragment key={elem.name}>
               <Typography variant="Tooltip">

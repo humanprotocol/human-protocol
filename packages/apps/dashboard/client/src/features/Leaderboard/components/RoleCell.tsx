@@ -60,7 +60,7 @@ export const RoleCell = ({
               {websiteUrl ? <LaunchIcon fontSize="small" /> : null}
             </Box>
             {name && role ? (
-              <Typography variant={isMobile ? 'body3' : 'body1'}>
+              <Typography variant={isMobile ? 'body3' : 'subtitle2'}>
                 {humanReadableRole}
               </Typography>
             ) : null}

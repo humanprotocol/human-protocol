@@ -2,11 +2,8 @@ import { FC } from 'react';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
-import TableContainer from '@mui/material/TableContainer';
 import { useNavigate } from 'react-router-dom';
-import SimpleBar from 'simplebar-react';
 
 import { SelectNetwork } from './components/SelectNetwork';
 import { DataGridWrapper } from './components/DataGridWrapper';
@@ -28,15 +25,12 @@ export const Leaderboard: FC<Props> = ({
 }) => {
   const navigate = useNavigate();
   return (
-    <TableContainer
-      component={Paper}
-      elevation={0}
-      sx={{
-        px: { xs: 2, md: 4 },
-        py: 4,
-        mt: 3,
-        borderRadius: '16px',
-      }}
+    <Box
+      px={{ xs: 2, md: 4 }}
+      py={4}
+      mt={3}
+      borderRadius="16px"
+      bgcolor="white.main"
     >
       <Box
         display={{ xs: 'block', md: 'none' }}
@@ -47,9 +41,7 @@ export const Leaderboard: FC<Props> = ({
       >
         <SelectNetwork />
       </Box>
-      <SimpleBar>
-        <DataGridWrapper data={data} status={status} error={error} />
-      </SimpleBar>
+      <DataGridWrapper data={data} status={status} error={error} />
       {viewAllBanner ? (
         <Button
           sx={{
@@ -70,6 +62,6 @@ export const Leaderboard: FC<Props> = ({
           <Typography variant="Button Large">View All</Typography>
         </Button>
       ) : null}
-    </TableContainer>
+    </Box>
   );
 };

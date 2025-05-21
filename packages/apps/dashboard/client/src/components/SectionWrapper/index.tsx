@@ -9,7 +9,7 @@ const SectionWrapper: FC<PropsWithChildren> = ({ children }) => {
         display: 'flex',
         flexDirection: 'column',
         px: { xs: 2, md: 8 },
-        py: { xs: 4, md: 6 },
+        py: { xs: 4, md: 4 },
         mb: 4,
         borderRadius: '16px',
         boxShadow: 'none',

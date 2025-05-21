@@ -34,7 +34,7 @@ const walletSchema = z.object({
   amountWithdrawable: z.string().transform(transformOptionalTokenAmount),
   reputation: reputationSchema,
   totalAmountReceived: z.string().transform(transformOptionalTokenAmount),
-  payoutCount: z.number(),
+  payoutCount: z.number().or(z.string()),
 });
 
 export type AddressDetailsWallet = z.infer<typeof walletSchema>;
@@ -84,6 +84,10 @@ const operatorSchema = z.object({
     .nullable(),
   amountStaked: z.string().optional().transform(transformOptionalTokenAmount),
   amountLocked: z.string().optional().transform(transformOptionalTokenAmount),
+  amountWithdrawable: z
+    .string()
+    .optional()
+    .transform(transformOptionalTokenAmount),
   lockedUntilTimestamp: z.string().optional(),
   reputation: reputationSchema,
   fee: z.number(),

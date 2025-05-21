@@ -1,8 +1,10 @@
 .page-wrapper {
+  display: flex;
+  flex-direction: column;
 	margin: 0 56px;
 	padding: 0;
-	min-height: 100dvh;
   background-color: $maWhite;
+  min-height: 100dvh;
 
 	@media (max-width: 1280px) {
 		margin: 0 24px;

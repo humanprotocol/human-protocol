@@ -2,6 +2,7 @@ import { FC } from 'react';
 
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import { NumericFormat } from 'react-number-format';
 
 import TitleSectionWrapper from '@components/SearchResults';
 import SectionWrapper from '@components/SectionWrapper';
@@ -15,19 +16,28 @@ import {
   AddressDetailsOperator,
   AddressDetailsWallet,
 } from '@services/api/use-address-details';
+import { useIsMobile } from '@utils/hooks/use-breakpoints';
 
 type Props = {
   data: AddressDetailsWallet | AddressDetailsOperator;
 };
 
 const WalletAddress: FC<Props> = ({ data }) => {
-  const { balance, amountStaked, amountLocked, reputation } = data;
+  const {
+    balance,
+    amountStaked,
+    amountLocked,
+    reputation,
+    amountWithdrawable,
+  } = data;
+  const isMobile = useIsMobile();
   const isWallet = 'totalAmountReceived' in data;
 
   return (
     <>
       <SectionWrapper>
         <Stack gap={4}>
+          <Typography variant="h5">Overview</Typography>
           <TitleSectionWrapper title="Balance">
             <HmtBalance balance={balance} />
           </TitleSectionWrapper>
@@ -42,11 +52,16 @@ const WalletAddress: FC<Props> = ({ data }) => {
           </TitleSectionWrapper>
           {isWallet && (
             <TitleSectionWrapper
-              title="Received Payouts"
-              tooltip="Total amount received by participating in jobs"
+              title="Earned Payouts"
+              tooltip="Total amount earned by participating in jobs"
             >
               <Typography variant="body2">
-                {data?.totalAmountReceived}
+                <NumericFormat
+                  displayType="text"
+                  value={(data?.totalAmountReceived || 0) * 1e18}
+                  thousandSeparator=","
+                  decimalScale={isMobile ? 4 : 9}
+                />
               </Typography>
               <Typography
                 component="span"
@@ -60,7 +75,11 @@ const WalletAddress: FC<Props> = ({ data }) => {
           )}
         </Stack>
       </SectionWrapper>
-      <StakeInfo amountStaked={amountStaked} amountLocked={amountLocked} />
+      <StakeInfo
+        amountStaked={amountStaked}
+        amountLocked={amountLocked}
+        amountWithdrawable={amountWithdrawable}
+      />
       <KVStore />
     </>
   );
