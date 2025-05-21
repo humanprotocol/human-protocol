@@ -14,7 +14,7 @@ type Props = {
   amountWithdrawable?: number | null;
 };
 
-const renderAmount = (amount: number | null, isMobile: boolean) => {
+const renderAmount = (amount: number | null | undefined, isMobile: boolean) => {
   return (
     <Stack direction="row" whiteSpace="nowrap">
       <Typography variant="body2">
@@ -43,7 +43,7 @@ const StakeInfo: FC<Props> = ({
   amountWithdrawable,
 }) => {
   const isMobile = useIsMobile();
-  if (!amountStaked) return null;
+  if (!amountStaked && !amountLocked && !amountWithdrawable) return null;
 
   return (
     <SectionWrapper>
@@ -51,30 +51,30 @@ const StakeInfo: FC<Props> = ({
         Stake Info
       </Typography>
       <Stack gap={4}>
-        {amountStaked !== undefined && amountStaked !== null ? (
+        {Number.isFinite(amountStaked) && (
           <Stack gap={{ xs: 1, md: 0 }} direction={{ sm: 'column', md: 'row' }}>
             <Typography variant="subtitle2" width={300}>
               Staked Tokens
             </Typography>
             {renderAmount(amountStaked, isMobile)}
           </Stack>
-        ) : null}
-        {amountLocked !== undefined && amountLocked !== null ? (
+        )}
+        {Number.isFinite(amountLocked) && (
           <Stack gap={{ xs: 1, md: 0 }} direction={{ sm: 'column', md: 'row' }}>
             <Typography variant="subtitle2" width={300}>
               Locked Tokens
             </Typography>
             {renderAmount(amountLocked, isMobile)}
           </Stack>
-        ) : null}
-        {amountWithdrawable !== undefined && amountWithdrawable !== null ? (
+        )}
+        {Number.isFinite(amountWithdrawable) && (
           <Stack gap={{ xs: 1, md: 0 }} direction={{ sm: 'column', md: 'row' }}>
             <Typography variant="subtitle2" width={300}>
               Withdrawable Tokens
             </Typography>
             {renderAmount(amountWithdrawable, isMobile)}
           </Stack>
-        ) : null}
+        )}
       </Stack>
     </SectionWrapper>
   );
