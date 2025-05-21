@@ -96,19 +96,12 @@ const Home: FC = () => {
                 </Button>
               </Box>
               <Box display="flex" gap={1}>
-                <CustomTooltip title="Total number of transactions" arrow>
-                  <HelpOutlineIcon sx={{ color: 'text.secondary' }} />
-                </CustomTooltip>
+                <InfoTooltip title="Total number of transactions" />
                 <TotalTransactions />
               </Box>
               <Divider />
               <Box display="flex" gap={1}>
-                <CustomTooltip
-                  title="Number of tasks that have been launched"
-                  arrow
-                >
-                  <HelpOutlineIcon sx={{ color: 'text.secondary' }} />
-                </CustomTooltip>
+                <InfoTooltip title="Number of tasks that have been launched" />
                 <TotalNumberOfTasks />
               </Box>
               <Divider sx={{ display: { xs: 'block', md: 'none' } }} />
