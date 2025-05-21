@@ -287,11 +287,12 @@ contract Escrow is IEscrow, ReentrancyGuard {
      * @dev Stores intermediate results during the escrow process.
      * @param _url URL of the intermediate results.
      * @param _hash Hash of the intermediate results.
+     * @param _fundsToReserve Amount of funds to reserve for the escrow.
      */
     function storeResults(
         string memory _url,
         string memory _hash,
-        uint256 _amount
+        uint256 _fundsToReserve
     ) external override trustedOrRecordingOracle notExpired {
         require(
             status == EscrowStatuses.Pending ||
@@ -302,16 +303,15 @@ contract Escrow is IEscrow, ReentrancyGuard {
         require(bytes(_url).length != 0, "URL can't be empty");
         require(bytes(_hash).length != 0, "Hash can't be empty");
         require(
-            _amount <= remainingFunds - reservedFunds,
+            _fundsToReserve <= remainingFunds - reservedFunds,
             'Not enough unreserved funds'
         );
 
         intermediateResultsUrl = _url;
-        reservedFunds += _amount;
+        reservedFunds += _fundsToReserve;
 
         emit IntermediateStorage(_url, _hash);
 
-        // If the escrow is ToCancel, transfer unreserved funds to launcher
         if (status == EscrowStatuses.ToCancel) {
             uint256 unreservedFunds = remainingFunds - reservedFunds;
             if (unreservedFunds > 0) {
@@ -363,29 +363,17 @@ contract Escrow is IEscrow, ReentrancyGuard {
         );
 
         uint256 totalBulkAmount = 0;
-        uint256 totalReputationOracleFee = 0;
-        uint256 totalRecordingOracleFee = 0;
-        uint256 totalExchangeOracleFee = 0;
 
         for (uint256 i = 0; i < _recipients.length; i++) {
             uint256 amount = _amounts[i];
             require(amount > 0, 'Amount should be greater than zero');
             totalBulkAmount += amount;
-            totalReputationOracleFee +=
-                (reputationOracleFeePercentage * amount) /
-                100;
-            totalRecordingOracleFee +=
-                (recordingOracleFeePercentage * amount) /
-                100;
-            totalExchangeOracleFee +=
-                (exchangeOracleFeePercentage * amount) /
-                100;
         }
         require(totalBulkAmount <= reservedFunds, 'Not enough reserved funds');
 
-        uint256 paidReputation = 0;
-        uint256 paidRecording = 0;
-        uint256 paidExchange = 0;
+        uint256 totalReputationOracleFee = 0;
+        uint256 totalRecordingOracleFee = 0;
+        uint256 totalExchangeOracleFee = 0;
 
         for (uint256 i = 0; i < _recipients.length; i++) {
             uint256 amount = _amounts[i];
@@ -396,15 +384,9 @@ contract Escrow is IEscrow, ReentrancyGuard {
             uint256 exchangeOracleFee = (exchangeOracleFeePercentage * amount) /
                 100;
 
-            if (i == _recipients.length - 1) {
-                reputationOracleFee = totalReputationOracleFee - paidReputation;
-                recordingOracleFee = totalRecordingOracleFee - paidRecording;
-                exchangeOracleFee = totalExchangeOracleFee - paidExchange;
-            }
-
-            paidReputation += reputationOracleFee;
-            paidRecording += recordingOracleFee;
-            paidExchange += exchangeOracleFee;
+            totalReputationOracleFee += reputationOracleFee;
+            totalRecordingOracleFee += recordingOracleFee;
+            totalExchangeOracleFee += exchangeOracleFee;
 
             _safeTransfer(
                 token,
