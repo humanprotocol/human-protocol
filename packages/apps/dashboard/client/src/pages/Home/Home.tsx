@@ -83,16 +83,16 @@ const Home: FC = () => {
                   Data Overview (All networks)
                 </Typography>
                 <Button
-                  sx={{
-                    padding: '4px 10px',
-                    display: { xs: 'none', md: 'flex' },
-                  }}
                   variant="outlined"
                   color="secondary"
                   component={Link}
                   to="/graph"
+                  sx={{
+                    padding: '4px 10px',
+                    display: { xs: 'none', md: 'flex' },
+                  }}
                 >
-                  Charts by Network
+                  View Charts
                 </Button>
               </Box>
               <Box display="flex" gap={1}>
@@ -117,16 +117,16 @@ const Home: FC = () => {
               <GraphSwiper />
             </Box>
             <Button
-              sx={{
-                padding: '4px 10px',
-                display: { xs: 'flex', md: 'none' },
-              }}
               variant="outlined"
               color="secondary"
               component={Link}
               to="/graph"
+              sx={{
+                padding: '4px 10px',
+                display: { xs: 'flex', md: 'none' },
+              }}
             >
-              Charts by Network
+              View Charts
             </Button>
           </CardWrapper>
         </Grid>
