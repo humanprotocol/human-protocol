@@ -9,14 +9,12 @@ const Holders = () => {
 
   return (
     <Box display="flex" flexDirection="column" gap={0.5}>
-      <Typography variant="body1" component="p">
-        Holders
-      </Typography>
-      <Box display="flex" fontSize={20} fontWeight={500}>
+      <Typography variant="body1">Holders</Typography>
+      <Typography variant="h6" component="p">
         {isSuccess && <FormatNumber value={data.totalHolders} />}
         {isPending && '...'}
         {isError && 'No data'}
-      </Box>
+      </Typography>
     </Box>
   );
 };
