@@ -155,10 +155,7 @@ const RoleDetails = ({ data }: { data: AddressDetailsOperator }) => {
               href={env.VITE_HUMANPROTOCOL_CORE_ARCHITECTURE}
               target="_blank"
             >
-              <Typography
-                variant="Components/Chip"
-                color={colorPalette.ocean.main}
-              >
+              <Typography variant="Chip" color={colorPalette.ocean.main}>
                 HUMAN Protocol core architecture
               </Typography>
             </Box>

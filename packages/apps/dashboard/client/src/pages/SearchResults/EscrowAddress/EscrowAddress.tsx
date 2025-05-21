@@ -77,7 +77,7 @@ const EscrowAddress = ({
               borderColor: 'secondary.light',
             }}
           >
-            <Typography variant="Components/Chip" color="secondary.main">
+            <Typography variant="Chip" color="secondary.main">
               {status}
             </Typography>
           </Box>

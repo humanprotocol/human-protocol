@@ -60,7 +60,7 @@ const ToggleButtons = () => {
             },
           }}
         >
-          <Typography variant="Components/Button Small">{elem.name}</Typography>
+          <Typography variant="Button Small">{elem.name}</Typography>
         </ToggleButton>
       ))}
     </StyledToggleButtonGroup>

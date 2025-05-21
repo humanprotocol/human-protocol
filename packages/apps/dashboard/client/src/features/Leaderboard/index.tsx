@@ -67,7 +67,7 @@ export const Leaderboard: FC<Props> = ({
             navigate('/leaderboard');
           }}
         >
-          <Typography variant="Components/Button Large">View All</Typography>
+          <Typography variant="Button Large">View All</Typography>
         </Button>
       ) : null}
     </TableContainer>

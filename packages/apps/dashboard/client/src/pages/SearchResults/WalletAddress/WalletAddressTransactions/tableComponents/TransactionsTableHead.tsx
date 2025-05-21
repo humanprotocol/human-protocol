@@ -30,33 +30,31 @@ export const TransactionsTableHead = () => {
       <TableRow>
         <TableCell>
           <Stack direction="row" alignItems="center">
-            <Typography variant="Components/Table Header">
-              Transaction Hash
-            </Typography>
+            <Typography variant="Table Header">Transaction Hash</Typography>
             <InfoTooltip title="Transaction identifier" />
           </Stack>
         </TableCell>
         <TableCell>
           <Stack direction="row" alignItems="center">
-            <Typography variant="Components/Table Header">Method</Typography>
+            <Typography variant="Table Header">Method</Typography>
             <InfoTooltip title="Function executed in the transaction" />
           </Stack>
         </TableCell>
         <TableCell>
-          <Typography variant="Components/Table Header">From</Typography>
+          <Typography variant="Table Header">From</Typography>
         </TableCell>
         <TableCell>
-          <Typography variant="Components/Table Header">To</Typography>
+          <Typography variant="Table Header">To</Typography>
         </TableCell>
         <TableCell>
           <Stack direction="row" alignItems="center">
-            <Typography variant="Components/Table Header">Block</Typography>
+            <Typography variant="Table Header">Block</Typography>
             <InfoTooltip title="Identifier of the block that contains the transaction" />
           </Stack>
         </TableCell>
         <TableCell>
           <Stack direction="row" alignItems="center">
-            <Typography variant="Components/Table Header">Value</Typography>
+            <Typography variant="Table Header">Value</Typography>
             <InfoTooltip title="Amount of HMT transferred in the transaction" />
           </Stack>
         </TableCell>

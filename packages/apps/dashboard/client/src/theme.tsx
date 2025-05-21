@@ -9,11 +9,11 @@ import { CSSProperties } from 'react';
 
 declare module '@mui/material/Typography' {
   interface TypographyPropsVariantOverrides {
-    ['Components/Button Small']: true;
-    ['Components/Button Large']: true;
-    ['Components/Chip']: true;
-    ['Components/Table Header']: true;
-    ['Components/Tooltip']: true;
+    ['Button Small']: true;
+    ['Button Large']: true;
+    ['Chip']: true;
+    ['Table Header']: true;
+    ['Tooltip']: true;
     ['H6-Mobile']: true;
     body3: true;
   }
@@ -21,22 +21,22 @@ declare module '@mui/material/Typography' {
 
 declare module '@mui/material/styles' {
   interface TypographyVariants {
-    ['Components/Button Small']: CSSProperties;
-    ['Components/Button Large']: CSSProperties;
-    ['Components/Chip']: CSSProperties;
-    ['Components/Table Header']: CSSProperties;
-    ['Components/Tooltip']: CSSProperties;
+    ['Button Small']: CSSProperties;
+    ['Button Large']: CSSProperties;
+    ['Chip']: CSSProperties;
+    ['Table Header']: CSSProperties;
+    ['Tooltip']: CSSProperties;
     ['H6-Mobile']: CSSProperties;
     body3: CSSProperties;
   }
 
   // allow configuration using `createTheme`
   interface TypographyVariantsOptions {
-    ['Components/Button Small']?: CSSProperties;
-    ['Components/Button Large']?: CSSProperties;
-    ['Components/Chip']?: CSSProperties;
-    ['Components/Table Header']?: CSSProperties;
-    ['Components/Tooltip']?: CSSProperties;
+    ['Button Small']?: CSSProperties;
+    ['Button Large']?: CSSProperties;
+    ['Chip']?: CSSProperties;
+    ['Table Header']?: CSSProperties;
+    ['Tooltip']?: CSSProperties;
     ['H6-Mobile']: CSSProperties;
     body3?: CSSProperties;
   }
@@ -156,28 +156,28 @@ const theme: ThemeOptions = createTheme({
       letterSpacing: '0.4px',
       textAlign: 'left',
     },
-    'Components/Button Small': {
+    'Button Small': {
       fontSize: '13px',
       fontWeight: 600,
       lineHeight: '22px',
       letterSpacing: '0.1px',
       textAlign: 'left',
     },
-    'Components/Button Large': {
+    'Button Large': {
       fontSize: '15px',
       fontWeight: 600,
       lineHeight: '26px',
       letterSpacing: '0.1px',
       textAlign: 'left',
     },
-    'Components/Chip': {
+    Chip: {
       fontSize: '13px',
       fontWeight: 400,
       lineHeight: '18px',
       letterSpacing: '0.16px',
       textAlign: 'left',
     },
-    'Components/Table Header': {
+    'Table Header': {
       fontFamily: 'Roboto',
       fontSize: '14px',
       fontWeight: 500,
@@ -185,7 +185,7 @@ const theme: ThemeOptions = createTheme({
       letterSpacing: '0.17px',
       textAlign: 'left',
     },
-    'Components/Tooltip': {
+    Tooltip: {
       fontSize: 10,
       fontWeight: 500,
       lineHeight: '14px',
