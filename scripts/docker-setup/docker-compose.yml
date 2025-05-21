@@ -255,6 +255,8 @@ services:
       # so put here exposed port, not internal
       FE_URL: http://localhost:${HUMAN_APP_CLIENT_EXPOSED_PORT:?}
       JWT_PUBLIC_KEY: *reputation_oracle_jwt_public_key
+      # User for KV store setup
+      SERVER_URL: http://reputation-oracle:${BACKEND_APPS_INTERNAL_PORT:?}
 
   human-app-server:
     container_name: human-app-server
@@ -285,7 +287,7 @@ services:
       REDIS_DB: 1
       RPC_URL: *rpc_url_polygon_amoy
       HUMAN_APP_SECRET_KEY: *human_app_secret_key
-      REPUTATION_ORACLE_URL: "${REPUTATION_ORACLE_URL:-http://reputation-oracle:${BACKEND_APPS_INTERNAL_PORT:?}}"
+      REPUTATION_ORACLE_URL: http://reputation-oracle:${BACKEND_APPS_INTERNAL_PORT:?}
       REPUTATION_ORACLE_ADDRESS: *reputation_oracle_address
 
   human-app-client:
@@ -362,6 +364,8 @@ services:
       LOCALHOST_RECORDING_ORACLE_URL: "http://recording-oracle-cvat:${BACKEND_APPS_INTERNAL_PORT:?}/webhook"
       LOCALHOST_JOB_LAUNCHER_URL: "http://job-launcher:${BACKEND_APPS_INTERNAL_PORT:?}/webhook"
       LOCALHOST_RECORDING_ORACLE_ADDRESS: *cvat_recording_oracle_address
+      # User for KV store setup
+      SERVER_URL: http://exchange-oracle-cvat:${BACKEND_APPS_INTERNAL_PORT:?}
 
   recording-oracle-cvat:
     container_name: recording-oracle-cvat
@@ -412,6 +416,8 @@ services:
       LOCALHOST_EXCHANGE_ORACLE_URL: "http://exchange-oracle-cvat:${BACKEND_APPS_INTERNAL_PORT:?}/webhook"
       LOCALHOST_REPUTATION_ORACLE_URL: "http://reputation-oracle:${BACKEND_APPS_INTERNAL_PORT:?}/webhook"
       LOCALHOST_EXCHANGE_ORACLE_ADDRESS: *cvat_exchange_oracle_address
+      # User for KV store setup
+      SERVER_URL: http://recording-oracle-cvat:${BACKEND_APPS_INTERNAL_PORT:?}
 
   job-launcher:
     container_name: job-launcher
@@ -450,6 +456,8 @@ services:
       CVAT_EXCHANGE_ORACLE_ADDRESS: *cvat_exchange_oracle_address
       CVAT_RECORDING_ORACLE_ADDRESS: *cvat_recording_oracle_address
       FE_URL: http://localhost:${JOB_LAUNCHER_CLIENT_EXPOSED_PORT:?}
+      # User for KV store setup
+      SERVER_URL: http://job-launcher:${BACKEND_APPS_INTERNAL_PORT:?}
 
   job-launcher-client:
     container_name: job-launcher-client
@@ -507,6 +515,8 @@ services:
       PORT: *backend_apps_internal_port
       POSTGRES_DATABASE: exchange-oracle-fortune
       S3_BUCKET: *bucket_name_fortune
+      # User for KV store setup
+      SERVER_URL: http://exchange-oracle-fortune:${BACKEND_APPS_INTERNAL_PORT:?}
 
   fortune-client:
     container_name: fortune-client
@@ -561,6 +571,8 @@ services:
       HOST: *all_interfaces_ip
       PORT: *backend_apps_internal_port
       S3_BUCKET: *bucket_name_fortune
+      # User for KV store setup
+      SERVER_URL: http://recording-oracle-fortune:${BACKEND_APPS_INTERNAL_PORT:?}
 
 volumes:
   # When init for the first time postgres requires empty directory

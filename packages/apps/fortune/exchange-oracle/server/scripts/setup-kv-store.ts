@@ -3,16 +3,11 @@ import { KVStoreClient, KVStoreKeys, Role } from '@human-protocol/sdk';
 import { Wallet, ethers } from 'ethers';
 import * as Minio from 'minio';
 
-const DEFAULT_SUPPORTED_JOB_TYPES =
-  'fortune,image_boxes,image_boxes_from_points,image_points,image_polygons,image_skeletons_from_boxes';
-const ROLE = Role.ReputationOracle;
+const SUPPORTED_JOB_TYPES = 'fortune';
+const ROLE = Role.ExchangeOracle;
 
 async function setupCommonValues(kvStoreClient: KVStoreClient): Promise<void> {
-  const {
-    SUPPORTED_JOB_TYPES = DEFAULT_SUPPORTED_JOB_TYPES,
-    SERVER_URL = 'http://localhost:5001',
-    FEE = '1',
-  } = process.env;
+  const { SERVER_URL = 'http://localhost:5006', FEE = '1' } = process.env;
 
   if (SUPPORTED_JOB_TYPES.split(',').length === 0) {
     throw new Error('SUPPORTED_JOB_TYPES should be comma-separated list');
@@ -128,12 +123,13 @@ async function setup(): Promise<void> {
   const {
     PGP_ENCRYPT,
     PGP_PUBLIC_KEY,
-    PGP_PUBLIC_KEY_FILE = 'pgp-public-key',
+    PGP_PUBLIC_KEY_FILE = 'pgp-public-key-exco',
   } = process.env;
   if (PGP_ENCRYPT && PGP_ENCRYPT === 'true') {
     if (!PGP_PUBLIC_KEY) {
       throw new Error('PGP public key is empty');
     }
+
     await setupPublicKeyFile(kvStoreClient, minioClient, {
       s3Endpoint,
       s3Port,
@@ -143,19 +139,6 @@ async function setup(): Promise<void> {
       kvKey: KVStoreKeys.publicKey,
     });
   }
-
-  const { JWT_PUBLIC_KEY } = process.env;
-  if (!JWT_PUBLIC_KEY) {
-    throw new Error('JWT_PUBLIC_KEY is missing');
-  }
-  await setupPublicKeyFile(kvStoreClient, minioClient, {
-    s3Endpoint,
-    s3Port,
-    s3Bucket,
-    publicKey: JWT_PUBLIC_KEY,
-    keyName: 'jwt-public-key',
-    kvKey: 'jwt_public_key',
-  });
 }
 
 (async () => {

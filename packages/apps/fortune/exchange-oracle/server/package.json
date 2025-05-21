@@ -20,12 +20,11 @@
     "migration:revert": "yarn build && typeorm-ts-node-commonjs migration:revert -d typeorm.config.ts",
     "migration:run": "yarn build && typeorm-ts-node-commonjs migration:run -d typeorm.config.ts",
     "migration:show": "yarn build && typeorm-ts-node-commonjs migration:show -d typeorm.config.ts",
-    "docker:db:up": "docker compose up -d && yarn migration:run",
-    "docker:db:down": "docker compose down",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "setup:local": "ts-node ./test/setup.ts",
+    "setup:kvstore": "ts-node ./scripts/setup-kv-store.ts",
     "generate-env-doc": "ts-node scripts/generate-env-doc.ts"
   },
   "dependencies": {
