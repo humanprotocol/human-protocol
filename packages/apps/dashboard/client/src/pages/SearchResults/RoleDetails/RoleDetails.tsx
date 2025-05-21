@@ -174,11 +174,14 @@ const RoleDetails = ({ data }: { data: AddressDetailsOperator }) => {
           >
             <ReputationScore reputation={reputation} />
           </TitleSectionWrapper>
-          <TitleSectionWrapper title="Role" tooltip="Role of the operator">
+          <TitleSectionWrapper
+            title="Role"
+            tooltip="Role played by the operator in the protocol"
+          >
             {renderRoleDetailsInfo(role)}
           </TitleSectionWrapper>
           {url && (
-            <TitleSectionWrapper title="URL" tooltip="URL of the operator">
+            <TitleSectionWrapper title="URL" tooltip="Operator website">
               <Link href={url} target="_blank" color="primary.main">
                 {url}
               </Link>
@@ -187,7 +190,7 @@ const RoleDetails = ({ data }: { data: AddressDetailsOperator }) => {
           {jobTypes && jobTypes?.length > 0 && (
             <TitleSectionWrapper
               title="Task Types"
-              tooltip="Task types of the operator"
+              tooltip="Type of tasks the operator can process"
             >
               <Box display="flex" flexWrap="wrap" gap={1}>
                 {jobTypes.map((jobType) => (
@@ -209,7 +212,10 @@ const RoleDetails = ({ data }: { data: AddressDetailsOperator }) => {
               <Typography variant="body2">{fee}%</Typography>
             </TitleSectionWrapper>
           )}
-          <TitleSectionWrapper title="Tasks Processed">
+          <TitleSectionWrapper
+            title="Tasks Processed"
+            tooltip="Number of tasks that the operator has processed so far"
+          >
             <Typography variant="body2">{amountJobsProcessed}</Typography>
           </TitleSectionWrapper>
         </Stack>
