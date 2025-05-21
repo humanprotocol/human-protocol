@@ -8,7 +8,7 @@ from typing import TypeVar
 import datumaro as dm
 import numpy as np
 from datumaro.util import filter_dict, mask_tools
-from datumaro.util.annotation_util import find_group_leader, find_instances, max_bbox
+from datumaro.util.annotation_util import BboxCoords, find_group_leader, find_instances, max_bbox
 from defusedxml import ElementTree
 
 
@@ -343,8 +343,12 @@ class ProjectLabels(dm.ItemTransform):
         return item.wrap(annotations=annotations)
 
 
-def is_point_in_bbox(px: float, py: float, bbox: dm.Bbox) -> bool:
-    return (bbox.x <= px <= bbox.x + bbox.w) and (bbox.y <= py <= bbox.y + bbox.h)
+def is_point_in_bbox(px: float, py: float, bbox: dm.Bbox | BboxCoords) -> bool:
+    if isinstance(bbox, dm.Bbox):
+        bbox = bbox.get_bbox()
+
+    x, y, w, h = bbox
+    return (x <= px <= x + w) and (y <= py <= y + h)
 
 
 class InstanceSegmentsToBbox(dm.ItemTransform):
