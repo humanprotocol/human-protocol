@@ -43,7 +43,7 @@ export const RoleDetailsEscrowsTable = ({ role }: { role: string | null }) => {
       <Stack width="100%">
         <TablePagination
           // count is unknown but required as props
-          count={9999}
+          count={Number.MAX_SAFE_INTEGER}
           // onPageChange is required as props
           onPageChange={() => {}}
           page={page}
