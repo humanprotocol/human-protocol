@@ -34,7 +34,7 @@ const CustomSmallChartTooltip = ({
         <Box p={1}>
           {payload?.map((elem) => (
             <Fragment key={elem.name}>
-              <Typography fontWeight={500} variant="caption">
+              <Typography variant="Components/Tooltip">
                 {formatDate(elem.payload.date, 'MMMM DD, YYYY')}
               </Typography>
               <Typography fontWeight={500} variant="body1">

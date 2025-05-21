@@ -13,6 +13,7 @@ declare module '@mui/material/Typography' {
     ['Components/Button Large']: true;
     ['Components/Chip']: true;
     ['Components/Table Header']: true;
+    ['Components/Tooltip']: true;
     ['H6-Mobile']: true;
     body3: true;
   }
@@ -24,6 +25,7 @@ declare module '@mui/material/styles' {
     ['Components/Button Large']: CSSProperties;
     ['Components/Chip']: CSSProperties;
     ['Components/Table Header']: CSSProperties;
+    ['Components/Tooltip']: CSSProperties;
     ['H6-Mobile']: CSSProperties;
     body3: CSSProperties;
   }
@@ -34,6 +36,7 @@ declare module '@mui/material/styles' {
     ['Components/Button Large']?: CSSProperties;
     ['Components/Chip']?: CSSProperties;
     ['Components/Table Header']?: CSSProperties;
+    ['Components/Tooltip']?: CSSProperties;
     ['H6-Mobile']: CSSProperties;
     body3?: CSSProperties;
   }
@@ -97,10 +100,10 @@ const theme: ThemeOptions = createTheme({
       contrastText: colorPalette.sky.contrastText,
     },
     white: {
-      main: '#fff',
-      light: '#fff',
-      dark: '#fff',
-      contrastText: '#fff',
+      main: '#ffffff',
+      light: '#ffffff',
+      dark: '#f6f7fe',
+      contrastText: '#ffffff',
     },
   },
   typography: {
@@ -182,6 +185,11 @@ const theme: ThemeOptions = createTheme({
       letterSpacing: '0.17px',
       textAlign: 'left',
     },
+    'Components/Tooltip': {
+      fontSize: 10,
+      fontWeight: 500,
+      lineHeight: '14px',
+    },
     subtitle1: {
       fontSize: 12,
     },
@@ -191,7 +199,10 @@ const theme: ThemeOptions = createTheme({
       lineHeight: '21.9px',
     },
     caption: {
-      fontSize: 10,
+      fontSize: 12,
+      fontWeight: 400,
+      lineHeight: 5 / 3,
+      letterSpacing: 0.4,
     },
   },
   shadows: [
