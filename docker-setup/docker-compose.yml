@@ -23,7 +23,7 @@ x-hardcoded-vars:
 x-general-env-variables:
   # GENERAL VARS
   subgraph_api_key: &subgraph_api_key ${SUBGRAPH_API_KEY}
-  rpc_url_polygon_amoy: &rpc_url_polygon_amoy ${RPC_URL_POLYGON_AMOY:-}
+  rpc_url_polygon_amoy: &rpc_url_polygon_amoy ${RPC_URL_POLYGON_AMOY:?}
   # POSTGRES VARS
   postgres_user: &postgres_user ${POSTGRES_USER:-default}
   postgres_password: &postgres_password ${POSTGRES_PASSWORD:-qwerty}
@@ -41,9 +41,6 @@ x-general-env-variables:
   bucket_name_cvat_exc_o: &bucket_name_cvat_exc_o ${BUCKET_NAME_CVAT_EXCHANGE_ORACLE:-cvat-exchange-oracle}
   bucket_name_cvat_rec_o: &bucket_name_cvat_rec_o ${BUCKET_NAME_CVAT_RECORDING_ORACLE:-cvat-recording-oracle}
   bucket_name_fortune: &bucket_name_fortune ${BUCKEN_NAME_FORTUNE:-fortune}
-  # WEB3 ADDRESSES
-  cvat_exchange_oracle_address: &cvat_exchange_oracle_address ${CVAT_EXCHANGE_ORACLE_ADDRESS:?}
-  cvat_recording_oracle_address: &cvat_recording_oracle_address ${CVAT_RECORDING_ORACLE_ADDRESS:?}
   # OTHER
   backend_apps_internal_port: &backend_apps_internal_port ${BACKEND_APPS_INTERNAL_PORT:?}
   cvat_oracle_storage_endpoint: &cvat_oracle_storage_endpoint minio:${MINIO_PORT:?}
@@ -57,6 +54,8 @@ x-service-env-vars-groups:
     REDIS_PORT: *redis_port
   nodejs_app_vars: &nodejs_app_vars
     NODE_ENV: *node_env
+    SUBGRAPH_API_KEY: *subgraph_api_key
+    RPC_URL_POLYGON_AMOY: *rpc_url_polygon_amoy
   nodejs_app_postgres_vars: &nodejs_app_postgres_vars
     <<: *postgres_auth_vars
     POSTGRES_HOST: *postgres_host
@@ -271,6 +270,7 @@ services:
       PORT: *backend_apps_internal_port
       REDIS_DB: 1
       REPUTATION_ORACLE_URL: http://reputation-oracle:${BACKEND_APPS_INTERNAL_PORT:?}
+      RPC_URL: *rpc_url_polygon_amoy
 
   human-app-client:
     container_name: human-app-client
@@ -326,7 +326,6 @@ services:
       - name: server_port
         target: *backend_apps_internal_port
         published: ${EXCHANGE_ORACLE_CVAT_EXPOSED_PORT:?}
-    env_file: ./.env.exchange-oracle-cvat.local
     environment:
       HOST: *all_interfaces_ip
       PORT: *backend_apps_internal_port
@@ -339,12 +338,8 @@ services:
       REDIS_DB: 2
       PG_DB: exchange-oracle-cvat
       POLYGON_AMOY_RPC_API_URL: *rpc_url_polygon_amoy
-      POLYGON_AMOY_ADDR: *cvat_exchange_oracle_address
       STORAGE_BUCKET_NAME: *bucket_name_cvat_exc_o
       CVAT_INCOMING_WEBHOOKS_URL: "http://exchange-oracle.app:${BACKEND_APPS_INTERNAL_PORT:?}/cvat-webhook"
-      LOCALHOST_RECORDING_ORACLE_URL: "http://recording-oracle-cvat:${BACKEND_APPS_INTERNAL_PORT:?}/webhook"
-      LOCALHOST_JOB_LAUNCHER_URL: "http://job-launcher:${BACKEND_APPS_INTERNAL_PORT:?}/webhook"
-      LOCALHOST_RECORDING_ORACLE_ADDRESS: *cvat_recording_oracle_address
       ENABLE_CUSTOM_CLOUD_HOST: yes
       # User for KV store setup
       SERVER_URL: http://exchange-oracle-cvat:${BACKEND_APPS_INTERNAL_PORT:?}
@@ -375,7 +370,6 @@ services:
       - name: server_port
         target: *backend_apps_internal_port
         published: ${RECORDING_ORACLE_CVAT_EXPOSED_PORT:?}
-    env_file: ./.env.recording-oracle-cvat.local
     environment:
       HOST: *all_interfaces_ip
       PORT: *backend_apps_internal_port
@@ -386,18 +380,9 @@ services:
       ]
       PG_DB: recording-oracle-cvat
       POLYGON_AMOY_RPC_API_URL: *rpc_url_polygon_amoy
-      POLYGON_AMOY_ADDR: *cvat_recording_oracle_address
       STORAGE_RESULTS_BUCKET_NAME: *bucket_name_cvat_rec_o
       STORAGE_USE_PATH_STYLE: "true"
-      EXCHANGE_ORACLE_STORAGE_PROVIDER: *cvat_oracle_storage_provider
-      EXCHANGE_ORACLE_STORAGE_ENDPOINT_URL: *cvat_oracle_storage_endpoint
-      EXCHANGE_ORACLE_STORAGE_ACCESS_KEY: *minio_services_access_key
-      EXCHANGE_ORACLE_STORAGE_SECRET_KEY: *minio_services_secret_key
-      EXCHANGE_ORACLE_STORAGE_RESULTS_BUCKET_NAME: *bucket_name_cvat_exc_o
-      EXCHANGE_ORACLE_STORAGE_USE_SSL: 'false'
-      LOCALHOST_EXCHANGE_ORACLE_URL: "http://exchange-oracle-cvat:${BACKEND_APPS_INTERNAL_PORT:?}/webhook"
-      LOCALHOST_REPUTATION_ORACLE_URL: "http://reputation-oracle:${BACKEND_APPS_INTERNAL_PORT:?}/webhook"
-      LOCALHOST_EXCHANGE_ORACLE_ADDRESS: *cvat_exchange_oracle_address
+      ENABLE_CUSTOM_CLOUD_HOST: "yes"
       # User for KV store setup
       SERVER_URL: http://recording-oracle-cvat:${BACKEND_APPS_INTERNAL_PORT:?}
 
