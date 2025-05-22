@@ -7,7 +7,7 @@ import {
 } from 'class-validator';
 import { TOKEN_ADDRESSES } from '../constants/tokens';
 import { ChainId } from '@human-protocol/sdk';
-import { EscrowFundToken } from '../enums/job';
+import { PaymentCurrency } from '../enums/payment';
 
 @ValidatorConstraint({ async: false })
 export class IsValidTokenDecimalsConstraint
@@ -17,10 +17,17 @@ export class IsValidTokenDecimalsConstraint
     const [tokenProperty] = args.constraints;
     const dto = args.object as Record<string, any>;
     const chainId = dto.chainId as ChainId;
-    const token = dto[tokenProperty] as EscrowFundToken;
+    const token = dto[tokenProperty] as PaymentCurrency;
 
     if (!chainId || !token) {
       return false;
+    }
+
+    // Check if the token is a fiat currency
+    if (token === PaymentCurrency.USD) {
+      if (typeof value !== 'number') return false;
+      const [, decimals] = value.toString().split('.');
+      return !decimals || decimals.length <= 2;
     }
 
     const tokenInfo = TOKEN_ADDRESSES[chainId]?.[token];
@@ -35,7 +42,7 @@ export class IsValidTokenDecimalsConstraint
       return false;
     }
 
-    const [_, decimals] = value.toString().split('.');
+    const [, decimals] = value.toString().split('.');
     return !decimals || decimals.length <= maxDecimals;
   }
 
@@ -43,7 +50,12 @@ export class IsValidTokenDecimalsConstraint
     const [tokenProperty] = args.constraints;
     const dto = args.object as Record<string, any>;
     const chainId = dto.chainId as ChainId;
-    const token = dto[tokenProperty] as EscrowFundToken;
+    const token = dto[tokenProperty] as PaymentCurrency;
+
+    if (token === PaymentCurrency.USD) {
+      return `${args.property} must have at most 2 decimal places for USD payments.`;
+    }
+
     const tokenInfo = TOKEN_ADDRESSES[chainId]?.[token];
     const maxDecimals = tokenInfo?.decimals || 'unknown';
 
