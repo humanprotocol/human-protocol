@@ -62,7 +62,7 @@ const ToggleCharts = ({
               <>
                 <Typography variant="subtitle2">{elem.title}</Typography>
                 <Typography variant="h4" component="p">
-                  {elem.amount ? <FormatNumber value={elem.amount} /> : ''}
+                  {elem.amount ? <FormatNumber value={elem.amount} /> : 0}
                   {elem.name === 'totalTransactionAmount' &&
                     elem.isAreaChart && (
                       <Typography
