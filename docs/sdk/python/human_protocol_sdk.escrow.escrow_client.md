@@ -843,7 +843,7 @@ Sets up the parameters of the escrow.
 * **Return type:**
   `None`
 
-#### store_results(escrow_address, url, hash, tx_options=None)
+#### store_results(escrow_address, url, hash, amount, tx_options=None)
 
 Stores the results URL.
 
@@ -851,6 +851,7 @@ Stores the results URL.
   * **escrow_address** (`str`) – Address of the escrow
   * **url** (`str`) – Results file URL
   * **hash** (`str`) – Results file hash
+  * **amount** (`Decimal`) – Amount to reserve for payouts
   * **tx_options** (`Optional`[`TxParams`]) – (Optional) Additional transaction parameters
 * **Return type:**
   `None`
@@ -884,7 +885,8 @@ Stores the results URL.
   escrow_client.store_results(
       "0x62dD51230A30401C455c8398d06F85e4EaB6309f",
       "http://localhost/results.json",
-      "b5dad76bf6772c0f07fd5e048f6e75a5f86ee079"
+      "b5dad76bf6772c0f07fd5e048f6e75a5f86ee079",
+      Web3.to_wei(5, 'ether')
   )
   ```
 

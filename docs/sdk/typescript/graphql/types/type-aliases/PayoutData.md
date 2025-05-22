@@ -6,28 +6,46 @@
 
 # Type Alias: PayoutData
 
-> **PayoutData**: `object`
+> **PayoutData** = `object`
 
-Defined in: [graphql/types.ts:25](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L25)
+Defined in: [graphql/types.ts:25](https://github.com/humanprotocol/human-protocol/blob/99b899a11bf48f2fa04884687ea395e0d42d75d1/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L25)
 
-## Type declaration
+## Properties
 
 ### amount
 
 > **amount**: `string`
 
+Defined in: [graphql/types.ts:29](https://github.com/humanprotocol/human-protocol/blob/99b899a11bf48f2fa04884687ea395e0d42d75d1/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L29)
+
+***
+
 ### createdAt
 
 > **createdAt**: `string`
+
+Defined in: [graphql/types.ts:30](https://github.com/humanprotocol/human-protocol/blob/99b899a11bf48f2fa04884687ea395e0d42d75d1/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L30)
+
+***
 
 ### escrowAddress
 
 > **escrowAddress**: `string`
 
+Defined in: [graphql/types.ts:27](https://github.com/humanprotocol/human-protocol/blob/99b899a11bf48f2fa04884687ea395e0d42d75d1/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L27)
+
+***
+
 ### id
 
 > **id**: `string`
 
+Defined in: [graphql/types.ts:26](https://github.com/humanprotocol/human-protocol/blob/99b899a11bf48f2fa04884687ea395e0d42d75d1/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L26)
+
+***
+
 ### recipient
 
 > **recipient**: `string`
+
+Defined in: [graphql/types.ts:28](https://github.com/humanprotocol/human-protocol/blob/99b899a11bf48f2fa04884687ea395e0d42d75d1/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L28)

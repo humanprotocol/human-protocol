@@ -252,6 +252,11 @@ export const ErrorAmountMustBeGreaterThanZero = new Error(
 );
 
 /**
+ * @constant {Error} - Amount must be positive.
+ */
+export const ErrorAmountMustBePositive = new Error('Amount must be positive');
+
+/**
  * @constant {Error} - Escrow does not have enough balance.
  */
 export const ErrorEscrowDoesNotHaveEnoughBalance = new Error(

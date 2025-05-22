@@ -12,6 +12,7 @@ import { NETWORKS } from '../src/constants';
 import { ChainId, OrderDirection } from '../src/enums';
 import {
   ErrorAmountMustBeGreaterThanZero,
+  ErrorAmountMustBePositive,
   ErrorAmountsCannotBeEmptyArray,
   ErrorEscrowAddressIsNotProvidedByFactory,
   ErrorEscrowDoesNotHaveEnoughBalance,
@@ -45,6 +46,7 @@ import {
   DEFAULT_GAS_PAYER_PRIVKEY,
   DEFAULT_TX_ID,
   FAKE_ADDRESS,
+  FAKE_AMOUNT,
   FAKE_HASH,
   FAKE_URL,
   VALID_URL,
@@ -718,9 +720,10 @@ describe('EscrowClient', () => {
       const invalidAddress = FAKE_ADDRESS;
       const url = VALID_URL;
       const hash = FAKE_HASH;
+      const amount = FAKE_AMOUNT;
 
       await expect(
-        escrowClient.storeResults(invalidAddress, url, hash)
+        escrowClient.storeResults(invalidAddress, url, hash, amount)
       ).rejects.toThrow(ErrorInvalidEscrowAddressProvided);
     });
 
@@ -728,11 +731,12 @@ describe('EscrowClient', () => {
       const escrowAddress = ethers.ZeroAddress;
       const url = VALID_URL;
       const hash = FAKE_HASH;
+      const amount = FAKE_AMOUNT;
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(false);
 
       await expect(
-        escrowClient.storeResults(escrowAddress, url, hash)
+        escrowClient.storeResults(escrowAddress, url, hash, amount)
       ).rejects.toThrow(ErrorEscrowAddressIsNotProvidedByFactory);
     });
 
@@ -740,11 +744,12 @@ describe('EscrowClient', () => {
       const escrowAddress = ethers.ZeroAddress;
       const url = '';
       const hash = FAKE_HASH;
+      const amount = FAKE_AMOUNT;
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
 
       await expect(
-        escrowClient.storeResults(escrowAddress, url, hash)
+        escrowClient.storeResults(escrowAddress, url, hash, amount)
       ).rejects.toThrow(ErrorUrlIsEmptyString);
     });
 
@@ -752,11 +757,12 @@ describe('EscrowClient', () => {
       const escrowAddress = ethers.ZeroAddress;
       const url = FAKE_URL;
       const hash = FAKE_HASH;
+      const amount = FAKE_AMOUNT;
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
 
       await expect(
-        escrowClient.storeResults(escrowAddress, url, hash)
+        escrowClient.storeResults(escrowAddress, url, hash, amount)
       ).rejects.toThrow(ErrorInvalidUrl);
     });
 
@@ -764,18 +770,33 @@ describe('EscrowClient', () => {
       const escrowAddress = ethers.ZeroAddress;
       const url = VALID_URL;
       const hash = '';
+      const amount = FAKE_AMOUNT;
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
 
       await expect(
-        escrowClient.storeResults(escrowAddress, url, hash)
+        escrowClient.storeResults(escrowAddress, url, hash, amount)
       ).rejects.toThrow(ErrorHashIsEmptyString);
+    });
+
+    test('should throw an error if amount is invalid', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+      const url = VALID_URL;
+      const hash = FAKE_HASH;
+      const amount = -10;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+
+      await expect(
+        escrowClient.storeResults(escrowAddress, url, hash, amount)
+      ).rejects.toThrow(ErrorAmountMustBePositive);
     });
 
     test('should successfully store results', async () => {
       const escrowAddress = ethers.ZeroAddress;
       const url = VALID_URL;
       const hash = FAKE_HASH;
+      const amount = FAKE_AMOUNT;
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
       const storeResultsSpy = vi
@@ -784,15 +805,16 @@ describe('EscrowClient', () => {
           wait: vi.fn().mockResolvedValue(true),
         }));
 
-      await escrowClient.storeResults(escrowAddress, url, hash);
+      await escrowClient.storeResults(escrowAddress, url, hash, amount);
 
-      expect(storeResultsSpy).toHaveBeenCalledWith(url, hash, {});
+      expect(storeResultsSpy).toHaveBeenCalledWith(url, hash, amount, {});
     });
 
     test('should throw an error if the store results fails', async () => {
       const escrowAddress = ethers.ZeroAddress;
       const url = VALID_URL;
       const hash = FAKE_HASH;
+      const amount = FAKE_AMOUNT;
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
       escrowClient.escrowContract.storeResults.mockRejectedValueOnce(
@@ -800,12 +822,13 @@ describe('EscrowClient', () => {
       );
 
       await expect(
-        escrowClient.storeResults(escrowAddress, url, hash)
+        escrowClient.storeResults(escrowAddress, url, hash, amount)
       ).rejects.toThrow();
 
       expect(escrowClient.escrowContract.storeResults).toHaveBeenCalledWith(
         url,
         hash,
+        amount,
         {}
       );
     });
@@ -814,6 +837,7 @@ describe('EscrowClient', () => {
       const escrowAddress = ethers.ZeroAddress;
       const url = VALID_URL;
       const hash = FAKE_HASH;
+      const amount = FAKE_AMOUNT;
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
       const storeResultsSpy = vi
@@ -823,9 +847,20 @@ describe('EscrowClient', () => {
         }));
       const txOptions: Overrides = { gasLimit: 45000 };
 
-      await escrowClient.storeResults(escrowAddress, url, hash, txOptions);
+      await escrowClient.storeResults(
+        escrowAddress,
+        url,
+        hash,
+        amount,
+        txOptions
+      );
 
-      expect(storeResultsSpy).toHaveBeenCalledWith(url, hash, txOptions);
+      expect(storeResultsSpy).toHaveBeenCalledWith(
+        url,
+        hash,
+        amount,
+        txOptions
+      );
     });
   });
 

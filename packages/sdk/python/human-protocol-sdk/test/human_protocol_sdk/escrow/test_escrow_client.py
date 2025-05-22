@@ -699,14 +699,17 @@ class TestEscrowClient(unittest.TestCase):
         escrow_address = "0x1234567890123456789012345678901234567890"
         url = "https://www.example.com/result"
         hash = "test"
+        amount = 100
 
         with patch(
             "human_protocol_sdk.escrow.escrow_client.handle_transaction"
         ) as mock_function:
-            self.escrow.store_results(escrow_address, url, hash)
+            self.escrow.store_results(escrow_address, url, hash, amount)
 
             self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
-            mock_contract.functions.storeResults.assert_called_once_with(url, hash)
+            mock_contract.functions.storeResults.assert_called_once_with(
+                url, hash, amount
+            )
             mock_function.assert_called_once_with(
                 self.w3,
                 "Store Results",
@@ -719,28 +722,41 @@ class TestEscrowClient(unittest.TestCase):
         escrow_address = "invalid_address"
         url = "https://www.example.com/result"
         hash = "test"
+        amount = 100
 
         with self.assertRaises(EscrowClientError) as cm:
-            self.escrow.store_results(escrow_address, url, hash)
+            self.escrow.store_results(escrow_address, url, hash, amount)
         self.assertEqual(f"Invalid escrow address: {escrow_address}", str(cm.exception))
 
     def test_store_results_invalid_url(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
         url = "invalid_url"
         hash = "test"
+        amount = 100
 
         with self.assertRaises(EscrowClientError) as cm:
-            self.escrow.store_results(escrow_address, url, hash)
+            self.escrow.store_results(escrow_address, url, hash, amount)
         self.assertEqual(f"Invalid URL: {url}", str(cm.exception))
 
     def test_store_results_invalid_hash(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
         url = "https://www.example.com/result"
         hash = ""
+        amount = 100
 
         with self.assertRaises(EscrowClientError) as cm:
-            self.escrow.store_results(escrow_address, url, hash)
+            self.escrow.store_results(escrow_address, url, hash, amount)
         self.assertEqual("Invalid empty hash", str(cm.exception))
+
+    def test_store_results_invalid_hash(self):
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        url = "https://www.example.com/result"
+        hash = "test"
+        amount = -10
+
+        with self.assertRaises(EscrowClientError) as cm:
+            self.escrow.store_results(escrow_address, url, hash, amount)
+        self.assertEqual("Amount must be positive", str(cm.exception))
 
     def test_store_results_without_account(self):
         mock_provider = MagicMock(spec=HTTPProvider)
@@ -753,9 +769,10 @@ class TestEscrowClient(unittest.TestCase):
         escrow_address = "0x1234567890123456789012345678901234567890"
         url = "https://www.example.com/result"
         hash = "test"
+        amount = 100
 
         with self.assertRaises(EscrowClientError) as cm:
-            escrowClient.store_results(escrow_address, url, hash)
+            escrowClient.store_results(escrow_address, url, hash, amount)
         self.assertEqual("You must add an account to Web3 instance", str(cm.exception))
 
     def test_store_results_invalid_status(self):
@@ -768,9 +785,10 @@ class TestEscrowClient(unittest.TestCase):
         escrow_address = "0x1234567890123456789012345678901234567890"
         url = "https://www.example.com/result"
         hash = "test"
+        amount = 100
 
         with self.assertRaises(EscrowClientError) as cm:
-            self.escrow.store_results(escrow_address, url, hash)
+            self.escrow.store_results(escrow_address, url, hash, amount)
         self.assertEqual(
             "Store Results transaction failed: Escrow not in Pending or Partial status state",
             str(cm.exception),
@@ -786,9 +804,10 @@ class TestEscrowClient(unittest.TestCase):
         escrow_address = "0x1234567890123456789012345678901234567890"
         url = "https://www.example.com/result"
         hash = "test"
+        amount = 100
 
         with self.assertRaises(EscrowClientError) as cm:
-            self.escrow.store_results(escrow_address, url, hash)
+            self.escrow.store_results(escrow_address, url, hash, amount)
         self.assertEqual(
             "Store Results transaction failed: Address calling not trusted",
             str(cm.exception),
@@ -799,9 +818,10 @@ class TestEscrowClient(unittest.TestCase):
         escrow_address = "0x1234567890123456789012345678901234567890"
         url = "https://www.example.com/result"
         hash = "test"
+        amount = 100
 
         with self.assertRaises(EscrowClientError) as cm:
-            self.escrow.store_results(escrow_address, url, hash)
+            self.escrow.store_results(escrow_address, url, hash, amount)
         self.assertEqual(
             "Escrow address is not provided by the factory",
             str(cm.exception),
@@ -814,15 +834,18 @@ class TestEscrowClient(unittest.TestCase):
         escrow_address = "0x1234567890123456789012345678901234567890"
         url = "https://www.example.com/result"
         hash = "test"
+        amount = 100
         tx_options = {"gas": 50000}
 
         with patch(
             "human_protocol_sdk.escrow.escrow_client.handle_transaction"
         ) as mock_function:
-            self.escrow.store_results(escrow_address, url, hash, tx_options)
+            self.escrow.store_results(escrow_address, url, hash, amount, tx_options)
 
             self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
-            mock_contract.functions.storeResults.assert_called_once_with(url, hash)
+            mock_contract.functions.storeResults.assert_called_once_with(
+                url, hash, amount
+            )
             mock_function.assert_called_once_with(
                 self.w3,
                 "Store Results",

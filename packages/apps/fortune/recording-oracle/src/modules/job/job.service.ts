@@ -111,7 +111,7 @@ export class JobService {
     const manifestUrl = await escrowClient.getManifestUrl(
       webhook.escrowAddress,
     );
-    const { submissionsRequired, requestType }: IManifest =
+    const { submissionsRequired, requestType, fundAmount }: IManifest =
       await this.storageService.download(manifestUrl);
 
     if (!submissionsRequired || !requestType) {
@@ -163,10 +163,21 @@ export class JobService {
       recordingOracleSolutions,
     );
 
+    const lastExchangeSolution =
+      exchangeJobSolutions[exchangeJobSolutions.length - 1];
+    const lastProcessedSolution = recordingOracleSolutions.find(
+      (s) =>
+        s.workerAddress === lastExchangeSolution.workerAddress &&
+        s.solution === lastExchangeSolution.solution,
+    );
+
+    const amountToReserve = BigInt(fundAmount) / BigInt(submissionsRequired);
+
     await escrowClient.storeResults(
       webhook.escrowAddress,
       jobSolutionUploaded.url,
       jobSolutionUploaded.hash,
+      !lastProcessedSolution?.error ? amountToReserve : 0n,
     );
 
     if (
