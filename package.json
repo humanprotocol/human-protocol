@@ -10,7 +10,9 @@
     "lint": "yarn workspaces foreach --all -p run lint",
     "build:core": "yarn workspace @human-protocol/core build",
     "build:sdk": "yarn workspace @human-protocol/sdk build",
-    "build:libs": "yarn build:core && yarn build:sdk"
+    "build:libs": "yarn build:core && yarn build:sdk",
+    "docker:infra-up": "make -C ./docker-setup infra-up",
+    "docker:stop": "make -C ./docker-setup services-stop"
   },
   "workspaces": [
     "packages/**"

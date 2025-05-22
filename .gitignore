@@ -52,3 +52,4 @@ cache
 
 #docker databases
 docker-db
+graph-node-db

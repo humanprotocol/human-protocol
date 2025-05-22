@@ -31,10 +31,10 @@ export class ServerConfigService {
 
   /**
    * The URL of the frontend application that the server will communicate with.
-   * Default: 'http://localhost:3005'
+   * Default: 'http://localhost:3002'
    */
   get feURL(): string {
-    return this.configService.get<string>('FE_URL', 'http://localhost:3005');
+    return this.configService.get<string>('FE_URL', 'http://localhost:3002');
   }
 
   /**

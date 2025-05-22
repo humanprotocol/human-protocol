@@ -57,12 +57,12 @@ yarn migration:run
 ```
 
 ### Set up the database with Docker
-
-To run with docker, you need to enter the following command, which raises the container with postgres and runs the migrations:
+To run with docker, you need to enter the following command, which raises necessary infra containers:
 
 ```bash
-yarn docker:db:up
+yarn workspace human-protocol docker:infra-up
 ```
+After that you can run migration.
 
 ## 🚀 Usage
 

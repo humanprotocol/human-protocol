@@ -28,12 +28,4 @@ export class ServerConfigService {
   get port(): number {
     return +this.configService.get<number>('PORT', 5002);
   }
-
-  /**
-   * The secret key used for session encryption and validation.
-   * Default: 'session_key'
-   */
-  get sessionSecret(): string {
-    return this.configService.get<string>('SESSION_SECRET', 'session_key');
-  }
 }

@@ -38,6 +38,6 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3005,
+    port: 3002,
   },
 });

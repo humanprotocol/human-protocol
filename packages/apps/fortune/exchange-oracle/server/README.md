@@ -45,11 +45,11 @@ First of all, postgres needs to be installed, please see here <a href="https://w
 Then run the following commands in the postgres console to create the database and issue permissions:
 
 ```bash
-$ CREATE DATABASE "exchange-oracle";
-$ CREATE USER operator WITH ENCRYPTED PASSWORD 'qwerty';
-$ GRANT ALL PRIVILEGES ON DATABASE "exchange-oracle" TO "operator";
-$ \c "exchange-oracle" postgres
-$ GRANT CREATE ON SCHEMA public TO operator;
+$ CREATE DATABASE "exchange-oracle-fortune";
+$ CREATE USER default WITH ENCRYPTED PASSWORD 'qwerty';
+$ GRANT ALL PRIVILEGES ON DATABASE "exchange-oracle-fortune" TO "default";
+$ \c "exchange-oracle-fortune" postgres
+$ GRANT CREATE ON SCHEMA public TO default;
 ```
 
 Now we're ready to run the migrations:
@@ -59,12 +59,12 @@ yarn migration:run
 ```
 
 ### Set up the database with Docker
-
-To run with docker, you need to enter the following command, which raises the container with postgres and runs the migrations:
+To run with docker, you need to enter the following command, which raises necessary infra containers:
 
 ```bash
-yarn docker:db:up
+yarn workspace human-protocol docker:infra-up
 ```
+After that you can run migration.
 
 ## 🚀 Usage
 
