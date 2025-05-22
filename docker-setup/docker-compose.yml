@@ -56,6 +56,9 @@ x-service-env-vars-groups:
     NODE_ENV: *node_env
     SUBGRAPH_API_KEY: *subgraph_api_key
     RPC_URL_POLYGON_AMOY: *rpc_url_polygon_amoy
+  cvat_oracle_vars: &cvat_oracle_vars
+    SUBGRAPH_API_KEY: *subgraph_api_key
+    POLYGON_AMOY_RPC_API_URL: *rpc_url_polygon_amoy
   nodejs_app_postgres_vars: &nodejs_app_postgres_vars
     <<: *postgres_auth_vars
     POSTGRES_HOST: *postgres_host
@@ -330,6 +333,7 @@ services:
       HOST: *all_interfaces_ip
       PORT: *backend_apps_internal_port
       <<: [
+        *cvat_oracle_vars,
         *cvat_oracle_postgres_vars,
         *redis_app_vars,
         *cvat_oracle_storage_connection_vars,
@@ -337,7 +341,6 @@ services:
       ]
       REDIS_DB: 2
       PG_DB: exchange-oracle-cvat
-      POLYGON_AMOY_RPC_API_URL: *rpc_url_polygon_amoy
       STORAGE_BUCKET_NAME: *bucket_name_cvat_exc_o
       CVAT_INCOMING_WEBHOOKS_URL: "http://exchange-oracle.app:${BACKEND_APPS_INTERNAL_PORT:?}/cvat-webhook"
       ENABLE_CUSTOM_CLOUD_HOST: yes
@@ -374,12 +377,12 @@ services:
       HOST: *all_interfaces_ip
       PORT: *backend_apps_internal_port
       <<: [
+        *cvat_oracle_vars,
         *cvat_oracle_postgres_vars,
         *cvat_oracle_storage_connection_vars,
         *cvat_connection_vars
       ]
       PG_DB: recording-oracle-cvat
-      POLYGON_AMOY_RPC_API_URL: *rpc_url_polygon_amoy
       STORAGE_RESULTS_BUCKET_NAME: *bucket_name_cvat_rec_o
       STORAGE_USE_PATH_STYLE: "true"
       ENABLE_CUSTOM_CLOUD_HOST: "yes"
