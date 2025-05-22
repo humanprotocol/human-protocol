@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
@@ -19,6 +21,12 @@ export const RoleDetailsEscrowsTable = ({ role }: { role: string | null }) => {
     setNextPage,
     setPrevPage,
   } = useEscrowDetailsDto();
+
+  useEffect(() => {
+    return () => {
+      setPageSize(10);
+    };
+  }, [setPageSize]);
 
   return (
     <SectionWrapper>

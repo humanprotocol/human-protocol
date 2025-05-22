@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+
 import SimpleBar from 'simplebar-react';
 import Table from '@mui/material/Table';
 import TableContainer from '@mui/material/TableContainer';
@@ -21,6 +23,12 @@ export const WalletAddressTransactionsTable = () => {
     setNextPage,
     setPrevPage,
   } = useTransactionDetailsDto();
+
+  useEffect(() => {
+    return () => {
+      setPageSize(10);
+    };
+  }, [setPageSize]);
 
   return (
     <SectionWrapper>
