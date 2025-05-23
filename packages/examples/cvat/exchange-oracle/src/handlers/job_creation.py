@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING, TypeVar, cast
 import cv2
 import datumaro as dm
 import numpy as np
+from datumaro.ops import match_segments
 from datumaro.util import filter_dict, take_by
 from datumaro.util.annotation_util import BboxCoords, bbox_iou, find_instances
 from datumaro.util.image import IMAGE_EXTENSIONS, decode_image, encode_image
@@ -2151,112 +2152,50 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
                 for bbox in input_boxes
             }
 
-            matches = [
-                [
-                    (input_bbox.label == gt_skeleton.label)
-                    and (
-                        self._match_boxes(
-                            input_bbox.get_bbox(),
-                            self._get_skeleton_bbox(gt_skeleton, gt_annotations),
-                        )
-                    )
-                    and (input_point := bbox_point_mapping[input_bbox.id])
-                    and is_point_in_bbox(
-                        input_point.points[0],
-                        input_point.points[1],
-                        self._get_skeleton_bbox(gt_skeleton, gt_annotations),
-                    )
-                    and (
-                        # a way to customize matching if the default method is too rough
-                        not (bbox_id := input_bbox.attributes.get(self.gt_id_attribute))
-                        or not (skeleton_id := gt_skeleton.attributes.get(self.gt_id_attribute))
-                        or bbox_id == skeleton_id
-                    )
-                    for gt_skeleton in gt_skeletons
-                ]
-                for input_bbox in input_boxes
-            ]
+            def _dist(b: dm.Bbox, s: dm.Skeleton) -> float:
+                if s.label != b.label:
+                    return 0
 
-            ambiguous_boxes: list[int] = set()
-            ambiguous_skeletons: list[int] = set()
-            for bbox_idx, input_bbox in enumerate(input_boxes):
-                matched_skeletons: list[dm.Skeleton] = [
-                    gt_skeletons[j] for j in range(len(gt_skeletons)) if matches[bbox_idx][j]
-                ]
+                input_point = bbox_point_mapping[b.id]
+                skeleton_bbox = self._get_skeleton_bbox(s, gt_annotations)
+                if not is_point_in_bbox(
+                    input_point.points[0],
+                    input_point.points[1],
+                    skeleton_bbox,
+                ):
+                    return 0
 
-                if len(matched_skeletons) > 1:
-                    # Handle ambiguous matches
-                    excluded_boxes_info.add_message(
-                        "Sample '{}': bbox #{} ({}) and overlapping skeletons skipped - "
-                        "too many matching skeletons ({}) found".format(
-                            boxes_sample.id,
-                            input_bbox.id,
-                            boxes_label_cat[input_bbox.label].name,
-                            format_sequence([f"#{a.id}" for a in matched_skeletons]),
-                        ),
-                        sample_id=boxes_sample.id,
-                        sample_subset=boxes_sample.subset,
-                    )
-                    # not an error, should not be counted as excluded for an error
-                    ambiguous_boxes.add(input_bbox.id)
-                    ambiguous_skeletons.update(s.id for s in matched_skeletons)
-                    continue
+                return bbox_iou(skeleton_bbox, b)
 
-            for skeleton_idx, gt_skeleton in enumerate(gt_skeletons):
-                matched_boxes: list[dm.Bbox] = [
-                    input_boxes[i] for i in range(len(input_boxes)) if matches[i][skeleton_idx]
-                ]
+            matches, _, extra_skeletons, extra_boxes = match_segments(
+                input_boxes, gt_skeletons, distance=_dist, dist_thresh=0.1
+            )
 
-                if len(matched_boxes) > 1:
-                    # Handle ambiguous matches
-                    excluded_gt_info.add_message(
-                        "Sample '{}': GT skeleton #{} ({}) and overlapping boxes skipped - "
-                        "too many matching boxes ({}) found".format(
-                            gt_sample.id,
-                            gt_skeleton.id,
-                            gt_label_cat[gt_skeleton.label].name,
-                            format_sequence([f"#{a.id}" for a in matched_boxes]),
-                        ),
-                        sample_id=gt_sample.id,
-                        sample_subset=gt_sample.subset,
-                    )
-                    # not an error, should not be counted as excluded for an error
-                    ambiguous_skeletons.add(gt_skeleton.id)
-                    ambiguous_boxes.update(b.id for b in matched_boxes)
-                    continue
-                if not matched_boxes:
-                    # Handle unmatched skeletons
-                    excluded_gt_info.add_message(
-                        "Sample '{}': GT skeleton #{} ({}) skipped - "
-                        "no matching boxes found".format(
-                            gt_sample.id,
-                            gt_skeleton.id,
-                            gt_label_cat[gt_skeleton.label].name,
-                        ),
-                        sample_id=gt_sample.id,
-                        sample_subset=gt_sample.subset,
-                    )
-                    excluded_gt_info.excluded_count += 1  # an error
-                    continue
+            for unmatched_skeleton in extra_skeletons:
+                excluded_gt_info.add_message(
+                    "Sample '{}': GT skeleton #{} ({}) skipped - no matching boxes found".format(
+                        gt_sample.id,
+                        unmatched_skeleton.id,
+                        gt_label_cat[unmatched_skeleton.label].name,
+                    ),
+                    sample_id=gt_sample.id,
+                    sample_subset=gt_sample.subset,
+                )
+                excluded_gt_info.excluded_count += 1
 
-            unambiguous_matches: list[tuple[dm.Bbox, dm.Skeleton]] = []
-            for bbox_idx, input_bbox in enumerate(input_boxes):
-                if input_bbox.id in ambiguous_boxes:
-                    continue
+            for unmatched_bbox in extra_boxes:
+                excluded_boxes_info.add_message(
+                    "Sample '{}': bbox #{} ({}) skipped - no matching skeletons found".format(
+                        boxes_sample.id,
+                        unmatched_bbox.id,
+                        boxes_label_cat[unmatched_bbox.label].name,
+                    ),
+                    sample_id=boxes_sample.id,
+                    sample_subset=boxes_sample.subset,
+                )
+                excluded_boxes_info.excluded_count += 1
 
-                matched_skeleton = None
-                for gt_idx, gt_skeleton in enumerate(gt_skeletons):
-                    if gt_skeleton.id in ambiguous_skeletons:
-                        continue
-
-                    if matches[bbox_idx][gt_idx]:
-                        matched_skeleton = gt_skeleton
-                        break
-
-                if matched_skeleton:
-                    unambiguous_matches.append((input_bbox, matched_skeleton))
-
-            return unambiguous_matches
+            return matches
 
         def _find_good_gt_skeletons(
             input_boxes: list[dm.Bbox],
