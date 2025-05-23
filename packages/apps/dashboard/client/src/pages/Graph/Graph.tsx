@@ -13,7 +13,7 @@ const Graph = () => {
   }, []);
 
   return (
-    <PageWrapper>
+    <PageWrapper className="standard-background">
       <Breadcrumbs title="Charts" />
       <AreaChart />
     </PageWrapper>

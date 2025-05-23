@@ -170,7 +170,7 @@ const SearchResults = () => {
   }, [address, chainId, paramsStatus]);
 
   return (
-    <PageWrapper>
+    <PageWrapper className="standard-background">
       <Breadcrumbs title="Search Results" />
       <SearchBar className="search-results-bar" />
       {paramsStatus === ParamsStatus.LOADING && (

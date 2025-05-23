@@ -9,7 +9,7 @@ const LeaderBoard = () => {
   const { data, status, error } = useLeaderboardDetails();
 
   return (
-    <PageWrapper>
+    <PageWrapper className="standard-background">
       <Breadcrumbs title="Leaderboard" />
       <ShadowIcon
         className="home-page-leaderboard"

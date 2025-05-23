@@ -31,6 +31,7 @@ export const DataGridWrapper = ({
         columns={columns}
         rowHeight={90}
         columnHeaderHeight={72}
+        scrollbarSize={0}
         disableColumnResize
         disableColumnMenu
         disableColumnSelector
@@ -112,6 +113,9 @@ export const DataGridWrapper = ({
           '& .MuiDataGrid-filler, & .MuiDataGrid-cellEmpty': {
             display: 'none',
           },
+          // '& .MuiDataGrid-scrollbar': {
+          //   display: 'none',
+          // },
         }}
       />
     </Box>
