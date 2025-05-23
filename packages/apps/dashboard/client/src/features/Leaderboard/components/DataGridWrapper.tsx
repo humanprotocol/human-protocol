@@ -113,9 +113,6 @@ export const DataGridWrapper = ({
           '& .MuiDataGrid-filler, & .MuiDataGrid-cellEmpty': {
             display: 'none',
           },
-          // '& .MuiDataGrid-scrollbar': {
-          //   display: 'none',
-          // },
         }}
       />
     </Box>
