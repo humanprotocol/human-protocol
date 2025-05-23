@@ -1,11 +1,13 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Home from '@pages/Home';
-import Graph from '@pages/Graph';
-import SearchResults from '@pages/SearchResults';
-import { LeaderBoard } from '@pages/Leaderboard';
+import { FC } from 'react';
 
-const App: React.FC = () => {
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+
+import Graph from '@pages/Graph';
+import Home from '@pages/Home';
+import LeaderBoard from '@pages/Leaderboard';
+import SearchResults from '@pages/SearchResults';
+
+const App: FC = () => {
   return (
     <Router>
       <Routes>

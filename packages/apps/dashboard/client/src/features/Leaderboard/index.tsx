@@ -1,49 +1,53 @@
-import { colorPalette } from '@assets/styles/color-palette';
-import Paper from '@mui/material/Paper';
-import TableContainer from '@mui/material/TableContainer';
-import { LeaderBoardData } from '@services/api/use-leaderboard-details';
+import { FC } from 'react';
+
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
 import { useNavigate } from 'react-router-dom';
-import SimpleBar from 'simplebar-react';
+
 import { SelectNetwork } from './components/SelectNetwork';
 import { DataGridWrapper } from './components/DataGridWrapper';
-import { Button, Typography } from '@mui/material';
+import { LeaderBoardData } from '@services/api/use-leaderboard-details';
+import { colorPalette } from '@assets/styles/color-palette';
 
-export type LeaderboardCommonProps = {
+type Props = {
   data: LeaderBoardData | undefined;
   status: 'success' | 'error' | 'pending';
   error: unknown;
+  viewAllBanner?: boolean;
 };
 
-export const Leaderboard = ({
+export const Leaderboard: FC<Props> = ({
   data,
   status,
   error,
   viewAllBanner,
-}: LeaderboardCommonProps & {
-  viewAllBanner?: boolean;
 }) => {
   const navigate = useNavigate();
   return (
-    <TableContainer
-      component={Paper}
-      sx={{
-        padding: '32px',
-        marginTop: '30px',
-        borderRadius: '16px',
-        boxShadow: 'none',
-      }}
+    <Box
+      px={{ xs: 2, md: 4 }}
+      py={4}
+      mt={3}
+      borderRadius="16px"
+      bgcolor="white.main"
     >
-      <div className="mobile-select">
+      <Box
+        display={{ xs: 'block', md: 'none' }}
+        padding="10px"
+        mb={2.5}
+        width="270px"
+        bgcolor={colorPalette.whiteSolid}
+      >
         <SelectNetwork />
-      </div>
-      <SimpleBar>
-        <DataGridWrapper data={data} status={status} error={error} />
-      </SimpleBar>
+      </Box>
+      <DataGridWrapper data={data} status={status} error={error} />
       {viewAllBanner ? (
         <Button
           sx={{
             height: '42px',
-            border: `1px ${colorPalette.primary.main} solid`,
+            border: '1px solid',
+            borderColor: 'primary.main',
             borderRadius: '4px',
             display: 'flex',
             justifyContent: 'center',
@@ -55,9 +59,9 @@ export const Leaderboard = ({
             navigate('/leaderboard');
           }}
         >
-          <Typography variant="Components/Button Large">View All</Typography>
+          <Typography variant="Button Large">View All</Typography>
         </Button>
       ) : null}
-    </TableContainer>
+    </Box>
   );
 };

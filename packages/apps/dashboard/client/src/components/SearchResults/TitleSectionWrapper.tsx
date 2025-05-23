@@ -1,56 +1,50 @@
+import { FC, PropsWithChildren } from 'react';
+
 import Stack from '@mui/material/Stack';
-import IconButton from '@mui/material/IconButton';
+import Box from '@mui/material/Box';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import Typography from '@mui/material/Typography';
-import { colorPalette } from '@assets/styles/color-palette';
+import { SxProps } from '@mui/material';
+
 import CustomTooltip from '@components/CustomTooltip';
 
-const TitleSectionWrapper = ({
-  title,
-  children,
-  tooltip,
-}: {
+type Props = {
   title: string;
-  children: React.ReactNode;
-  tooltip?: {
-    description: string;
-  };
+  tooltip?: string;
+  sx?: SxProps;
+};
+
+const TitleSectionWrapper: FC<PropsWithChildren<Props>> = ({
+  title,
+  tooltip,
+  sx,
+  children,
 }) => {
   return (
     <Stack
       alignItems={{ xs: 'start', md: 'center' }}
       gap={{ xs: 1, md: 0 }}
       direction={{ sm: 'column', md: 'row' }}
-      sx={{ whiteSpace: 'nowrap' }}
+      sx={sx}
     >
       {tooltip ? (
-        <Stack
-          sx={{
-            width: 300,
-          }}
-          direction="row"
-          alignItems="center"
-        >
-          <CustomTooltip title={tooltip.description}>
-            <IconButton
-              sx={{ padding: 0, paddingRight: 1, color: colorPalette.fog.main }}
-            >
-              <HelpOutlineIcon fontSize="small" />
-            </IconButton>
+        <Stack direction="row" alignItems="center" width={300} gap={1}>
+          <CustomTooltip title={tooltip}>
+            <HelpOutlineIcon
+              fontSize="small"
+              sx={{ color: 'text.secondary', cursor: 'help' }}
+            />
           </CustomTooltip>
           <Typography variant="subtitle2">{title}</Typography>
         </Stack>
       ) : (
-        <Typography
-          sx={{
-            width: 300,
-          }}
-          variant="subtitle2"
-        >
+        <Typography variant="subtitle2" width={300}>
           {title}
         </Typography>
       )}
-      {children}
+      <Box display="flex" flex={1}>
+        {children}
+      </Box>
     </Stack>
   );
 };

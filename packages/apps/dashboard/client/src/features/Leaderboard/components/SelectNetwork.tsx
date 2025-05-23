@@ -5,7 +5,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Box from '@mui/material/Box';
 import { useLeaderboardSearch } from '@utils/hooks/use-leaderboard-search';
 import { useFilteredNetworks } from '@utils/hooks/use-filtered-networks';
-import { useBreakPoints } from '@utils/hooks/use-is-mobile';
+import { useIsMobile } from '@utils/hooks/use-breakpoints';
 import { NetworkIcon } from '@components/NetworkIcon';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useEffect } from 'react';
@@ -24,9 +24,7 @@ export const SelectNetwork = () => {
     }
   }, [chainId, filteredNetworks, setChainId]);
 
-  const {
-    mobile: { isMobile },
-  } = useBreakPoints();
+  const isMobile = useIsMobile();
 
   const handleChange = (event: SelectChangeEvent<number>) => {
     const value = Number(event.target.value);
@@ -59,6 +57,11 @@ export const SelectNetwork = () => {
         value={chainId === -1 ? '' : chainId}
         label="By Network"
         onChange={handleChange}
+        sx={{
+          '& #network-select svg': {
+            display: 'none',
+          },
+        }}
       >
         {filteredNetworks.map((network) => (
           <MenuItem

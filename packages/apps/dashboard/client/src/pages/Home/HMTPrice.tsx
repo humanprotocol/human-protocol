@@ -1,18 +1,21 @@
-import { useHMTPrice } from '../../services/api/use-hmt-price';
+import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 
-export function HMTPrice() {
-  const { data, status } = useHMTPrice();
+import { useHMTPrice } from '../../services/api/use-hmt-price';
+
+const HMTPrice = () => {
+  const { data, isError, isPending, isSuccess } = useHMTPrice();
+
   return (
-    <div>
-      <Typography variant="body1" component="p">
-        HMT Price
+    <Box display="flex" flexDirection="column" gap={0.5}>
+      <Typography variant="body1">HMT Price</Typography>
+      <Typography variant="h6" component="p">
+        {isSuccess && `$${data}`}
+        {isPending && '...'}
+        {isError && 'No data'}
       </Typography>
-      <div className="count">
-        {status === 'success' && `$${data.hmtPrice}`}
-        {status === 'pending' && '...'}
-        {status === 'error' && 'No data'}
-      </div>
-    </div>
+    </Box>
   );
-}
+};
+
+export default HMTPrice;

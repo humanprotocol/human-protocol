@@ -3,16 +3,17 @@ import {
   PaletteColorOptions,
   PaletteColor,
 } from '@mui/material/styles/createPalette';
-import { ThemeOptions } from '@mui/material';
+import { Shadows, ThemeOptions } from '@mui/material';
 import { colorPalette } from '@assets/styles/color-palette';
 import { CSSProperties } from 'react';
 
 declare module '@mui/material/Typography' {
   interface TypographyPropsVariantOverrides {
-    ['Components/Button Small']: true;
-    ['Components/Button Large']: true;
-    ['Components/Chip']: true;
-    ['Components/Table Header']: true;
+    ['Button Small']: true;
+    ['Button Large']: true;
+    ['Chip']: true;
+    ['Table Header']: true;
+    ['Tooltip']: true;
     ['H6-Mobile']: true;
     body3: true;
   }
@@ -20,20 +21,22 @@ declare module '@mui/material/Typography' {
 
 declare module '@mui/material/styles' {
   interface TypographyVariants {
-    ['Components/Button Small']: CSSProperties;
-    ['Components/Button Large']: CSSProperties;
-    ['Components/Chip']: CSSProperties;
-    ['Components/Table Header']: CSSProperties;
+    ['Button Small']: CSSProperties;
+    ['Button Large']: CSSProperties;
+    ['Chip']: CSSProperties;
+    ['Table Header']: CSSProperties;
+    ['Tooltip']: CSSProperties;
     ['H6-Mobile']: CSSProperties;
     body3: CSSProperties;
   }
 
   // allow configuration using `createTheme`
   interface TypographyVariantsOptions {
-    ['Components/Button Small']?: CSSProperties;
-    ['Components/Button Large']?: CSSProperties;
-    ['Components/Chip']?: CSSProperties;
-    ['Components/Table Header']?: CSSProperties;
+    ['Button Small']?: CSSProperties;
+    ['Button Large']?: CSSProperties;
+    ['Chip']?: CSSProperties;
+    ['Table Header']?: CSSProperties;
+    ['Tooltip']?: CSSProperties;
     ['H6-Mobile']: CSSProperties;
     body3?: CSSProperties;
   }
@@ -43,12 +46,10 @@ declare module '@mui/material/styles' {
   interface Palette {
     sky: PaletteColor;
     white: PaletteColor;
-    textSecondary: PaletteColor;
   }
   interface PaletteOptions {
     sky?: PaletteColorOptions;
     white?: PaletteColorOptions;
-    textSecondary?: PaletteColorOptions;
   }
 }
 
@@ -56,7 +57,6 @@ declare module '@mui/material/Button' {
   interface ButtonPropsColorOverrides {
     sky: true;
     white: true;
-    textSecondary: true;
   }
 }
 
@@ -64,7 +64,6 @@ declare module '@mui/material/IconButton' {
   interface IconButtonPropsColorOverrides {
     sky: true;
     white: true;
-    textSecondary: true;
   }
 }
 
@@ -72,7 +71,6 @@ declare module '@mui/material/SvgIcon' {
   interface SvgIconPropsColorOverrides {
     sky: true;
     white: true;
-    textSecondary: true;
   }
 }
 
@@ -102,12 +100,11 @@ const theme: ThemeOptions = createTheme({
       contrastText: colorPalette.sky.contrastText,
     },
     white: {
-      main: '#fff',
-      light: '#fff',
-      dark: '#fff',
-      contrastText: '#fff',
+      main: '#ffffff',
+      light: '#ffffff',
+      dark: '#f6f7fe',
+      contrastText: '#ffffff',
     },
-    textSecondary: colorPalette.textSecondary,
   },
   typography: {
     fontFamily: 'Inter, Arial, sans-serif',
@@ -120,7 +117,7 @@ const theme: ThemeOptions = createTheme({
     },
     h3: {
       fontSize: 24,
-      fontWeight: 500,
+      fontWeight: 600,
       '@media (max-width:600px)': {
         fontSize: 20,
       },
@@ -159,34 +156,39 @@ const theme: ThemeOptions = createTheme({
       letterSpacing: '0.4px',
       textAlign: 'left',
     },
-    'Components/Button Small': {
+    'Button Small': {
       fontSize: '13px',
       fontWeight: 600,
       lineHeight: '22px',
       letterSpacing: '0.1px',
       textAlign: 'left',
     },
-    'Components/Button Large': {
+    'Button Large': {
       fontSize: '15px',
       fontWeight: 600,
       lineHeight: '26px',
       letterSpacing: '0.1px',
       textAlign: 'left',
     },
-    'Components/Chip': {
+    Chip: {
       fontSize: '13px',
       fontWeight: 400,
       lineHeight: '18px',
       letterSpacing: '0.16px',
       textAlign: 'left',
     },
-    'Components/Table Header': {
+    'Table Header': {
       fontFamily: 'Roboto',
       fontSize: '14px',
       fontWeight: 500,
       lineHeight: '24px',
       letterSpacing: '0.17px',
       textAlign: 'left',
+    },
+    Tooltip: {
+      fontSize: 10,
+      fontWeight: 500,
+      lineHeight: '14px',
     },
     subtitle1: {
       fontSize: 12,
@@ -197,9 +199,20 @@ const theme: ThemeOptions = createTheme({
       lineHeight: '21.9px',
     },
     caption: {
-      fontSize: 10,
+      fontSize: 12,
+      fontWeight: 400,
+      lineHeight: 5 / 3,
+      letterSpacing: 0.4,
     },
   },
+  shadows: [
+    ...createTheme({}).shadows.map((shadow, i) => {
+      if (i === 2) {
+        return '0px 3px 1px -2px #e9ebfa, 0px 2px 2px 0px rgba(233, 235, 250, 0.50), 0px 1px 5px 0px rgba(233, 235, 250, 0.20)';
+      }
+      return shadow;
+    }),
+  ] as Shadows,
   components: {
     MuiButton: {
       styleOverrides: {

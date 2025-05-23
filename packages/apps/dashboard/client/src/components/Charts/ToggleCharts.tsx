@@ -1,7 +1,6 @@
 import { FormControlLabel, FormGroup, Typography } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import Checkbox from '@mui/material/Checkbox';
-import { colorPalette } from '@assets/styles/color-palette';
 import { FormatNumber } from '@components/Home/FormatNumber';
 
 interface ToggleChartsProps {
@@ -62,16 +61,14 @@ const ToggleCharts = ({
               <>
                 <Typography variant="subtitle2">{elem.title}</Typography>
                 <Typography variant="h4" component="p">
-                  {elem.amount ? <FormatNumber value={elem.amount} /> : ''}
+                  {elem.amount ? <FormatNumber value={elem.amount} /> : 0}
                   {elem.name === 'totalTransactionAmount' &&
                     elem.isAreaChart && (
                       <Typography
                         variant="h4"
                         component="span"
-                        sx={{
-                          marginLeft: 1,
-                          color: colorPalette.fog.main,
-                        }}
+                        ml={1}
+                        color="text.secondary"
                       >
                         HMT
                       </Typography>

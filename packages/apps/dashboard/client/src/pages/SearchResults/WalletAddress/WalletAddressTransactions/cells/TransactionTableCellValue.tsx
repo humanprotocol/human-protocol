@@ -16,7 +16,7 @@ export const TransactionTableCellValue = ({ value }: { value: string }) => {
   return (
     <Typography>
       {formatHMTDecimals(value)}
-      <Typography component="span">HMT</Typography>
+      <Typography component="span"> HMT</Typography>
     </Typography>
   );
 };

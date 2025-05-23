@@ -41,6 +41,10 @@ const AbbreviateClipboard = ({ value, link }: AbbreviateClipboardProps) => {
               underline="none"
               sx={{
                 zIndex: 1,
+                color: 'text.primary',
+                '&:visited': {
+                  color: 'text.primary',
+                },
               }}
             >
               {abbreviateValue(value)}

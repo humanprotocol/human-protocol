@@ -5,7 +5,7 @@ import { Leaderboard } from '../../features/Leaderboard/index';
 import { useLeaderboardDetails } from '@services/api/use-leaderboard-details';
 import { LeaderboardIcon } from '@components/Icons/LeaderboardIcon';
 
-export const LeaderBoard = () => {
+const LeaderBoard = () => {
   const { data, status, error } = useLeaderboardDetails();
 
   return (
@@ -20,3 +20,5 @@ export const LeaderBoard = () => {
     </PageWrapper>
   );
 };
+
+export default LeaderBoard;
