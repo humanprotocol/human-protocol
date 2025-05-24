@@ -553,6 +553,10 @@ class _AudinoTaskValidator:
         updated_merged_dataset_archive = io.BytesIO()
         original_archive_bytes = io.BytesIO(self._merged_annotations.getvalue())
 
+        job_start_time_mapping: dict[int, float] = {
+            job_meta.job_id: job_meta.absolute_start_time for job_meta in self._meta.jobs
+        }
+
         with (
             zipfile.ZipFile(updated_merged_dataset_archive, "w") as archive,
             zipfile.ZipFile(original_archive_bytes, "r") as original_archive,
@@ -564,16 +568,15 @@ class _AudinoTaskValidator:
                 for annotation in annotations_data:
                     job_id = annotation.get("job_id")
                     if job_id is not None:
-                        job_time_offset = (
-                            int(job_id) - self._base_job_id
-                        ) * self._meta.job_duration_without_overlap
-
+                        job_time_offset = job_start_time_mapping.get(job_id)
                         if "start" in annotation:
                             annotation["start"] += job_time_offset
                         if "end" in annotation:
                             annotation["end"] += job_time_offset
 
-            sorted_annotations_data = sorted(annotations_data, key=lambda x: x.get("start", 0))
+            sorted_annotations_data = sorted(
+                annotations_data, key=lambda x: (x.get("job_id"), x.get("start", 0))
+            )
             archive.writestr("annotations.json", json.dumps(sorted_annotations_data, indent=4))
 
             # for file in original_archive.namelist():
@@ -1109,7 +1112,7 @@ def process_intermediate_results(  # noqa: PLR0912
             gt_stats=gt_stats,
         )
 
-    validation_result = validator.validate()
+    validation_result = validator.validate(task.cva)
     job_results = validation_result.job_results
     rejected_jobs = validation_result.rejected_jobs
 

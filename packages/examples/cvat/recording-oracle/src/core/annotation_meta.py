@@ -20,6 +20,7 @@ class JobMeta(BaseModel):
     assignment_id: str
     start_frame: int
     stop_frame: int
+    absolute_start_time: float
 
     @property
     def job_frame_range(self) -> Iterator[int]:
@@ -28,10 +29,8 @@ class JobMeta(BaseModel):
 
 class AnnotationMeta(BaseModel):
     jobs: list[JobMeta]
-    job_duration_without_overlap: float  # in seconds
 
     def skip_assignments(self, assignment_ids: Collection[int]) -> AnnotationMeta:
         return AnnotationMeta(
             jobs=[job for job in self.jobs if job.assignment_id not in assignment_ids],
-            job_duration_without_overlap=self.job_duration_without_overlap,
         )

@@ -1,6 +1,7 @@
 import io
 import os
 import zipfile
+from collections import defaultdict
 from collections.abc import Sequence
 from dataclasses import dataclass
 from tempfile import TemporaryDirectory
@@ -53,14 +54,44 @@ def prepare_annotation_metafile(
     Prepares a task/project annotation descriptor file with annotator mapping.
     """
 
+    sorted(jobs, key=lambda job: job.cvat_id)
+
     if jobs:
         task = cvat_api.get_task(jobs[0].cvat_task_id)
-        overlap = task.overlap
-        overlap_in_ms = (overlap / task.segment_size) * task.segment_duration
-        job_duration_without_overlap = (task.segment_duration - overlap_in_ms) / 1000
-        job_duration_without_overlap = round(job_duration_without_overlap, 3)
+        job_to_audio_index: dict[int, int] = {}
+        current_job_index_in_sorted_jobs = 0
+        for audio_idx, num_jobs_for_audio in enumerate(task.total_jobs_count):
+            for _ in range(num_jobs_for_audio):
+                if current_job_index_in_sorted_jobs < len(jobs):
+                    job_id = jobs[current_job_index_in_sorted_jobs].cvat_id
+                    job_to_audio_index[job_id] = audio_idx
+                    current_job_index_in_sorted_jobs += 1
+
+        job_duration_without_overlap: list[float] = []
+        for audio_idx in range(len(task.audio_total_duration)):
+            duration_ms = task.audio_total_duration[audio_idx]
+            frame_count = task.total_frames_count[audio_idx]
+            if duration_ms > 0 and frame_count > 0:
+                frames_per_ms = frame_count / duration_ms
+                overlap_ms = task.overlap / frames_per_ms if frames_per_ms > 0 else 0
+                effective_segment_duration = task.segment_duration - overlap_ms
+                job_duration_without_overlap.append(effective_segment_duration / 1000.0)
+            else:
+                job_duration_without_overlap.append(0.0)
+
+        jobs_start_time: dict[int, float] = {}
+        audio_job_counters: dict[int, int] = defaultdict(int)
+        for job in jobs:
+            job_id = job.cvat_id
+            audio_index = job_to_audio_index.get(job_id)
+            if audio_index is not None and audio_index < len(job_duration_without_overlap):
+                duration_without_overlap = job_duration_without_overlap[audio_index]
+                jobs_start_time[job_id] = audio_job_counters[audio_index] * duration_without_overlap
+                audio_job_counters[audio_index] += 1
+            else:
+                jobs_start_time[job_id] = 0.0
     else:
-        job_duration_without_overlap = 0.0
+        jobs_start_time: dict[int, float] = {}
 
     meta = AnnotationMeta(
         jobs=[
@@ -72,10 +103,10 @@ def prepare_annotation_metafile(
                 task_id=job.cvat_task_id,
                 start_frame=job.start_frame,
                 stop_frame=job.stop_frame,
+                absolute_start_time=jobs_start_time.get(job.cvat_id, 0.0),
             )
             for job in jobs
-        ],
-        job_duration_without_overlap = job_duration_without_overlap
+        ]
     )
 
     return FileDescriptor(

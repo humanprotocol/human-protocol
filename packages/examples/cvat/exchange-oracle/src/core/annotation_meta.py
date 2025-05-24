@@ -14,8 +14,8 @@ class JobMeta(BaseModel):
     assignment_id: str
     start_frame: int
     stop_frame: int
+    absolute_start_time: float
 
 
 class AnnotationMeta(BaseModel):
     jobs: list[JobMeta]
-    job_duration_without_overlap: float #in seconds
