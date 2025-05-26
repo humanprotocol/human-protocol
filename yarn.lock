@@ -3837,7 +3837,7 @@ __metadata:
     "@mui/material": "npm:^5.15.18"
     "@mui/styled-engine-sc": "npm:6.4.0"
     "@mui/system": "npm:^5.15.14"
-    "@mui/x-data-grid": "npm:^7.23.2"
+    "@mui/x-data-grid": "npm:^8.4.0"
     "@mui/x-date-pickers": "npm:^7.23.6"
     "@tanstack/react-query": "npm:^5.67.2"
     "@types/react": "npm:^18.2.66"
@@ -5684,7 +5684,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/utils@npm:^5.16.6 || ^6.0.0 || ^7.0.0":
+"@mui/utils@npm:^5.16.6 || ^6.0.0 || ^7.0.0, @mui/utils@npm:^7.0.2":
   version: 7.1.0
   resolution: "@mui/utils@npm:7.1.0"
   dependencies:
@@ -5724,17 +5724,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/x-data-grid@npm:^7.23.2":
-  version: 7.29.2
-  resolution: "@mui/x-data-grid@npm:7.29.2"
+"@mui/x-data-grid@npm:^8.4.0":
+  version: 8.4.0
+  resolution: "@mui/x-data-grid@npm:8.4.0"
   dependencies:
-    "@babel/runtime": "npm:^7.25.7"
-    "@mui/utils": "npm:^5.16.6 || ^6.0.0 || ^7.0.0"
-    "@mui/x-internals": "npm:7.29.0"
+    "@babel/runtime": "npm:^7.27.1"
+    "@mui/utils": "npm:^7.0.2"
+    "@mui/x-internals": "npm:8.4.0"
     clsx: "npm:^2.1.1"
     prop-types: "npm:^15.8.1"
     reselect: "npm:^5.1.1"
-    use-sync-external-store: "npm:^1.0.0"
+    use-sync-external-store: "npm:^1.5.0"
   peerDependencies:
     "@emotion/react": ^11.9.0
     "@emotion/styled": ^11.8.1
@@ -5747,7 +5747,7 @@ __metadata:
       optional: true
     "@emotion/styled":
       optional: true
-  checksum: 10c0/6898abe0733f6fc1a5f41c2cd41037988fc2466ffaf2ce0d31cd22054b696e81d48aa788305cb4e7f54c757f6fee2ad8568d8b042954d65cbb23f70317c28861
+  checksum: 10c0/b8aefc5eaa3e30a615ef0c90fa280669f793eb9f27a94e91874211999511f5dcf761392ff6a38ff4d9e213449cb108808ea37a1c9f9bce107cfda5387a84832a
   languageName: node
   linkType: hard
 
@@ -5808,6 +5808,18 @@ __metadata:
   peerDependencies:
     react: ^17.0.0 || ^18.0.0 || ^19.0.0
   checksum: 10c0/adb4358ef0e29f6f57622b50ff479e9d225078761b4c82546343e2976ccb55eed687e122c37874c76a170f4ec2ea6e82f89bf8b9c0ef3b5cb35b32d026761fba
+  languageName: node
+  linkType: hard
+
+"@mui/x-internals@npm:8.4.0":
+  version: 8.4.0
+  resolution: "@mui/x-internals@npm:8.4.0"
+  dependencies:
+    "@babel/runtime": "npm:^7.27.1"
+    "@mui/utils": "npm:^7.0.2"
+  peerDependencies:
+    react: ^17.0.0 || ^18.0.0 || ^19.0.0
+  checksum: 10c0/40a7e0c611650efc67586e86a306d094bbf3a260336e580bfa3e2949140322a5cc1dc5d7e400938fd7e91299bfbc5520306e5094b4a208dcfe5d966642eeb344
   languageName: node
   linkType: hard
 
@@ -27944,7 +27956,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"use-sync-external-store@npm:^1.0.0, use-sync-external-store@npm:^1.2.2, use-sync-external-store@npm:^1.4.0":
+"use-sync-external-store@npm:^1.2.2, use-sync-external-store@npm:^1.4.0, use-sync-external-store@npm:^1.5.0":
   version: 1.5.0
   resolution: "use-sync-external-store@npm:1.5.0"
   peerDependencies:
