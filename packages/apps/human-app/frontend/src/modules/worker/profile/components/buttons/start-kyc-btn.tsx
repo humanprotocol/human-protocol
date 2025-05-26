@@ -8,7 +8,7 @@ export function StartKycBtn() {
   if (isKYCInProgress) {
     return (
       <Button disabled fullWidth variant="contained">
-        {t('worker.profile.KYCInProgress')}
+        {t('worker.profile.identityVerificationInProgress')}
       </Button>
     );
   }
@@ -20,7 +20,7 @@ export function StartKycBtn() {
       onClick={startKYC}
       variant="contained"
     >
-      {t('worker.profile.completeKYC')}
+      {t('worker.profile.completeIdentityVerification')}
     </Button>
   );
 }

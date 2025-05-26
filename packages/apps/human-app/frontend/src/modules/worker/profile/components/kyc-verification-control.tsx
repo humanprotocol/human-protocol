@@ -9,9 +9,13 @@ export function KycVerificationControl() {
 
   return (
     <>
-      {kycApproved && <DoneLabel>{t('worker.profile.kycCompleted')}</DoneLabel>}
+      {kycApproved && (
+        <DoneLabel>{t('worker.profile.identityVerificationStatus')}</DoneLabel>
+      )}
       {kycDeclined && (
-        <ErrorLabel>{t('worker.profile.kycDeclined')}</ErrorLabel>
+        <ErrorLabel>
+          {t('worker.profile.identityVerificationStatus')}
+        </ErrorLabel>
       )}
       {kycToComplete && <StartKycBtn />}
     </>

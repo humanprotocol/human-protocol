@@ -28,7 +28,7 @@ async function startKyc() {
       throw error;
     }
 
-    throw new Error('Failed to start KYC process');
+    throw new Error('Failed to start indentity verification process');
   }
 }
 
