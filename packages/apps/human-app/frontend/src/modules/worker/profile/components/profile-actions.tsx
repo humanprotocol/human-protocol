@@ -1,12 +1,12 @@
 import Grid from '@mui/material/Grid';
-import { KycVerificationControl } from './kyc-verification-control';
+import { IdentityVerificationControl } from './identity-verification-control';
 import { WalletConnectionControl } from './wallet-connection-control';
 
 export function ProfileActions() {
   return (
     <Grid container flexDirection="column" gap="1rem">
       <Grid>
-        <KycVerificationControl />
+        <IdentityVerificationControl />
       </Grid>
 
       <Grid>

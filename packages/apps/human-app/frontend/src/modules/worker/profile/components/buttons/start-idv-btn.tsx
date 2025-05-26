@@ -1,11 +1,11 @@
 import { t } from 'i18next';
 import { Button } from '@/shared/components/ui/button';
-import { useStartKyc } from '../../hooks';
+import { useStartIdv } from '../../hooks';
 
-export function StartKycBtn() {
-  const { isKYCInProgress, kycStartIsPending, startKYC } = useStartKyc();
+export function StartIdvBtn() {
+  const { isIdvAlreadyInProgress, idvStartIsPending, startIdv } = useStartIdv();
 
-  if (isKYCInProgress) {
+  if (isIdvAlreadyInProgress) {
     return (
       <Button disabled fullWidth variant="contained">
         {t('worker.profile.identityVerificationInProgress')}
@@ -16,8 +16,8 @@ export function StartKycBtn() {
   return (
     <Button
       fullWidth
-      loading={kycStartIsPending}
-      onClick={startKYC}
+      loading={idvStartIsPending}
+      onClick={startIdv}
       variant="contained"
     >
       {t('worker.profile.completeIdentityVerification')}

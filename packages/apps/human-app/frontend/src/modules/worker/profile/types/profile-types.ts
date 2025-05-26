@@ -1,5 +1,4 @@
-export interface WorkerProfileStatus {
-  kycApproved: boolean;
-  kycDeclined: boolean;
-  kycToComplete: boolean;
+export interface WorkerItentityVerificationStatus {
+  isVerificationCompleted: boolean;
+  status: string;
 }

@@ -2,24 +2,24 @@ import { z } from 'zod';
 import { ApiClientError, authorizedHumanAppApiClient } from '@/api';
 
 const apiPaths = {
-  kycStart: '/kyc/start',
+  idvStart: '/kyc/start',
   signedAddress: '/kyc/on-chain',
   registerAddress: '/user/register-address',
 };
 
-const kycStartSchema = z.object({
+const idvStartSchema = z.object({
   url: z.string(),
 });
 
-type KycStartSuccessSchema = z.infer<typeof kycStartSchema>;
+type IdvStartSuccessSchema = z.infer<typeof idvStartSchema>;
 
-async function startKyc() {
+async function startIdv() {
   try {
     const result =
-      await authorizedHumanAppApiClient.post<KycStartSuccessSchema>(
-        apiPaths.kycStart,
+      await authorizedHumanAppApiClient.post<IdvStartSuccessSchema>(
+        apiPaths.idvStart,
         {
-          successSchema: kycStartSchema,
+          successSchema: idvStartSchema,
         }
       );
     return result;
@@ -50,4 +50,4 @@ async function registerAddress(data: {
   }
 }
 
-export { startKyc, registerAddress };
+export { startIdv, registerAddress };
