@@ -20,9 +20,7 @@
     "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5010 humanprotocol/localhost -l 0",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "format": "prettier --write '**/*.{ts,json,graphql}'",
-    "local:node:up": "sleep 3 && docker compose up -d && NETWORK=localhost yarn generate && sleep 10 && yarn create-local && yarn deploy-local",
-    "local:node:down": "docker compose down"
+    "format": "prettier --write '**/*.{ts,json,graphql}'"
   },
   "repository": {
     "type": "git",

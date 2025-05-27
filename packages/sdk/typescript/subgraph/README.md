@@ -26,7 +26,7 @@ To get more information about how the graph works :
 Package installation
 
 ```
-yarn install
+yarn install && yarn workspace human-protocol build:core
 ```
 
 ## Development

@@ -1,7 +1,18 @@
-import 'dotenv/config';
 import { KVStoreClient, KVStoreKeys, Role } from '@human-protocol/sdk';
+import * as dotenv from 'dotenv';
 import { Wallet, ethers } from 'ethers';
 import * as Minio from 'minio';
+
+const isLocalEnv = process.env.NODE_ENV === 'local';
+let ENV_FILE_PATH = '.env';
+if (isLocalEnv) {
+  ENV_FILE_PATH += '.local';
+}
+dotenv.config({ path: ENV_FILE_PATH });
+
+const RPC_URL = isLocalEnv
+  ? process.env.RPC_URL_LOCALHOST
+  : process.env.RPC_URL_POLYGON_AMOY;
 
 const DEFAULT_SUPPORTED_JOB_TYPES =
   'fortune,image_boxes,image_boxes_from_points,image_points,image_polygons,image_skeletons_from_boxes';
@@ -10,19 +21,23 @@ const ROLE = Role.JobLauncher;
 async function setupCommonValues(kvStoreClient: KVStoreClient): Promise<void> {
   const {
     SUPPORTED_JOB_TYPES = DEFAULT_SUPPORTED_JOB_TYPES,
-    SERVER_URL = 'http://localhost:5003',
+    SERVER_URL,
+    HOST,
+    PORT,
     FEE = '1',
   } = process.env;
 
   if (SUPPORTED_JOB_TYPES.split(',').length === 0) {
     throw new Error('SUPPORTED_JOB_TYPES should be comma-separated list');
   }
+
+  const serverUrl = SERVER_URL || `http://${HOST}:${PORT}`;
   try {
-    new URL(SERVER_URL || '');
+    new URL(serverUrl);
   } catch (_noop) {
     throw new Error('Invalid SERVER_URL');
   }
-  let url = SERVER_URL.endsWith('/') ? SERVER_URL.slice(0, -1) : SERVER_URL;
+  let url = serverUrl.endsWith('/') ? serverUrl.slice(0, -1) : serverUrl;
   if (!url.startsWith('http')) {
     url = `http://${url}`;
   }
@@ -79,12 +94,13 @@ async function setupPublicKeyFile(
 }
 
 async function setup(): Promise<void> {
-  const { WEB3_PRIVATE_KEY, RPC_URL_POLYGON_AMOY: RPC_URL } = process.env;
-  if (!WEB3_PRIVATE_KEY) {
-    throw new Error('Private key is empty');
-  }
   if (!RPC_URL) {
     throw new Error('RPC url is empty');
+  }
+
+  const { WEB3_PRIVATE_KEY } = process.env;
+  if (!WEB3_PRIVATE_KEY) {
+    throw new Error('Private key is empty');
   }
 
   const provider = new ethers.JsonRpcProvider(RPC_URL);
@@ -130,7 +146,7 @@ async function setup(): Promise<void> {
     PGP_PUBLIC_KEY,
     PGP_PUBLIC_KEY_FILE = 'pgp-public-key',
   } = process.env;
-  if (PGP_ENCRYPT && PGP_ENCRYPT === 'true') {
+  if (PGP_ENCRYPT === 'true') {
     if (!PGP_PUBLIC_KEY) {
       throw new Error('PGP public key is empty');
     }
@@ -151,7 +167,7 @@ async function setup(): Promise<void> {
     await setup();
     process.exit(0);
   } catch (error) {
-    console.error('Failed to setup KV', error);
+    console.error('Failed to setup KV.', error);
     process.exit(1);
   }
 })();
