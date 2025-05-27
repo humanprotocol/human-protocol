@@ -12,6 +12,8 @@
     "build:sdk": "yarn workspace @human-protocol/sdk build",
     "build:libs": "yarn build:core && yarn build:sdk",
     "docker:infra-up": "make -C ./docker-setup check-env-file infra-up",
+    "docker:web3-up": "make -C ./docker-setup web3-up",
+    "docker:web3-down": "make -C ./docker-setup web3-down",
     "docker:stop": "make -C ./docker-setup services-stop"
   },
   "workspaces": [

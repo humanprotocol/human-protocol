@@ -29,6 +29,39 @@ Package installation
 yarn install
 ```
 
+## Development
+### Tests
+
+To run tests next commands should be executed:
+
+```bash
+NETWORK=polygon yarn generate
+
+yarn codegen
+
+yarn build
+
+yarn test
+```
+
+### e2e test using local node
+You can e2e test subgraph changes by running blockchain and graph node locally. To do so, first you will need to run necessary infra in Docker:
+```bash
+yarn workspace human-protocol docker:web3-up
+```
+> In case you already have such infra running and want a clean start w/o previous data - run `yarn workspace human-protocol docker:web3-down` first
+
+After you have the infra running:
+```bash
+# Generate artifacts for running subgraph on localhost
+NETWORK=localhost yarn generate
+# Create graph for localhost
+yarn create-local
+# Deploy the graph
+yarn deploy-local
+```
+After that subgraph should be available on `http://0.0.0.0:8000/subgraphs/name/humanprotocol/localhost`
+
 ## 🏊 Deploying graphs for live networks
 
 1. Generate & deploy on matic
@@ -48,20 +81,6 @@ You can access it on `http://localhost:8020/`
 ### Deploy the graph
 
 The deployment of the graph on each network is automatically triggered by the github CI when mofications are made on the subgraph.
-
-### Tests
-
-To run tests next commands should be executed:
-
-```bash
-NETWORK=polygon yarn generate
-
-yarn codegen
-
-yarn build
-
-yarn test
-```
 
 ### Supported networks
 
