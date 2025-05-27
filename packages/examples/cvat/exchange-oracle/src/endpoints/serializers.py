@@ -43,6 +43,8 @@ def serialize_job(
                     get_escrow_manifest(project.chain_id, project.escrow_address)
                 )
 
+        jobs = cvat_service.get_jobs_by_cvat_project_id(session, project.cvat_id)
+
         if project.status == ProjectStatuses.canceled:
             api_status = service_api.JobStatuses.canceled
         elif project.status == ProjectStatuses.annotation:
@@ -58,7 +60,7 @@ def serialize_job(
             job_type=project.job_type,
             status=api_status,
             job_description=manifest.annotation.description if manifest else None,
-            reward_amount=str(manifest.job_bounty) if manifest else None,
+            reward_amount=str(manifest.job_bounty / len(jobs)) if (manifest and len(jobs)) else None,
             reward_token=(
                 service_api.DEFAULT_TOKEN
             ),  # set a value to avoid being excluded by response_model_exclude_unset=True
