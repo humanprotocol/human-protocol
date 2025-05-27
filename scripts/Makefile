@@ -68,9 +68,7 @@ reputation-oracle: rpc-health-check
 	NODE_ENV=local yarn workspace @human-protocol/reputation-oracle start:dev
 
 rpc-health-check:
-	@until curl -s -X POST "http://localhost:8545" -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"web3_clientVersion","params":[],"id":1}' | grep -q "result"; do \
-		sleep 2; \
-	done
+	yarn workspace @human-protocol/core local:liveness
 	
 fortune: check-core-folders minio
 	@echo "RUNNING FORTUNE..."
