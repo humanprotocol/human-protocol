@@ -27,6 +27,7 @@ export class KycEntity extends BaseEntity {
   @JoinColumn()
   @OneToOne('UserEntity', (user: UserEntity) => user.kyc, {
     persistence: false,
+    onDelete: 'CASCADE',
   })
   user?: UserEntity;
 

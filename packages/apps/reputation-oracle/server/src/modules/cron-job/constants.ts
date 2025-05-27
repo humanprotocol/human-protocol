@@ -6,4 +6,5 @@ export enum CronJobType {
   ProcessAwaitingEscrowPayouts = 'process-awaiting-escrow-payouts',
   ProcessRequestedAbuse = 'process-requested-abuse',
   ProcessClassifiedAbuse = 'process-classified-abuse',
+  DeleteExpiredDbRecords = 'delete-expired-database-records',
 }

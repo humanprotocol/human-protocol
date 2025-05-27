@@ -34,7 +34,7 @@ export class TokenEntity extends BaseEntity {
   expiresAt: Date;
 
   @JoinColumn()
-  @ManyToOne('UserEntity', { persistence: false })
+  @ManyToOne('UserEntity', { persistence: false, onDelete: 'CASCADE' })
   user?: UserEntity;
 
   @Column({ type: 'int' })

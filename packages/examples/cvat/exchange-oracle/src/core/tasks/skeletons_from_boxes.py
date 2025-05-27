@@ -23,6 +23,9 @@ class RoiInfo:
     bbox_y: int
     bbox_label: int
 
+    point_x: int
+    point_y: int
+
     # RoI is centered on the bbox center
     # Coordinates can be out of image boundaries.
     # In this case RoI includes extra margins to be centered on bbox center
@@ -117,7 +120,10 @@ class TaskMetaSerializer:
         return {int(k): int(v) for k, v in parse_json(skeleton_bbox_mapping_data).items()}
 
     def parse_roi_info(self, rois_info_data: bytes) -> RoiInfos:
-        return [RoiInfo(**roi_info) for roi_info in parse_json(rois_info_data)]
+        return [
+            RoiInfo(**{"point_x": 0, "point_y": 0, **roi_info})
+            for roi_info in parse_json(rois_info_data)
+        ]
 
     def parse_roi_filenames(self, roi_filenames_data: bytes) -> RoiFilenames:
         return {int(k): v for k, v in parse_json(roi_filenames_data).items()}

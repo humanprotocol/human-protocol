@@ -79,7 +79,7 @@ export const envValidator = Joi.object({
   KYC_API_PRIVATE_KEY: Joi.string().required(),
   KYC_BASE_URL: Joi.string().uri({ scheme: ['http', 'https'] }),
   // Human App
-  HUMAN_APP_EMAIL: Joi.string().email().required(),
+  HUMAN_APP_SECRET_KEY: Joi.string().required(),
   // Slack notifications
   ABUSE_SLACK_WEBHOOK_URL: Joi.string()
     .uri({ scheme: ['http', 'https'] })

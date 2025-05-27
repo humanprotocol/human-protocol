@@ -3,6 +3,7 @@ import { createMock } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { AbuseService } from '../abuse';
+import { TokenRepository } from '../auth';
 import { EscrowCompletionService } from '../escrow-completion';
 import { IncomingWebhookService, OutgoingWebhookService } from '../webhook';
 
@@ -17,6 +18,7 @@ const mockedIncomingWebhookService = createMock<IncomingWebhookService>();
 const mockedOutgoingWebhookService = createMock<OutgoingWebhookService>();
 const mockedEscrowCompletionService = createMock<EscrowCompletionService>();
 const mockedAbuseService = createMock<AbuseService>();
+const mockedTokenRepository = createMock<TokenRepository>();
 
 describe('CronJobService', () => {
   let service: CronJobService;
@@ -44,6 +46,10 @@ describe('CronJobService', () => {
         {
           provide: AbuseService,
           useValue: mockedAbuseService,
+        },
+        {
+          provide: TokenRepository,
+          useValue: mockedTokenRepository,
         },
       ],
     }).compile();
@@ -300,11 +306,63 @@ describe('CronJobService', () => {
         spyOnIsCronJobRunning.mockResolvedValueOnce(false);
         spyOnStartCronJob.mockResolvedValueOnce(cronJob);
 
-        mockedIncomingWebhookService.processPendingIncomingWebhooks.mockRejectedValueOnce(
+        processorMock.mockRejectedValueOnce(new Error(faker.lorem.sentence()));
+
+        await (service as any)[method]();
+
+        expect(service.completeCronJob).toHaveBeenCalledTimes(1);
+        expect(service.completeCronJob).toHaveBeenCalledWith(cronJob);
+      });
+    });
+
+    describe('deleteExpiredDatabaseRecords', () => {
+      const cronJobType = 'delete-expired-database-records' as CronJobType;
+      let cronJob: CronJobEntity;
+
+      beforeEach(() => {
+        cronJob = generateCronJob({
+          cronJobType,
+        });
+      });
+
+      it('should skip processing if a cron job is already running', async () => {
+        spyOnIsCronJobRunning.mockResolvedValueOnce(true);
+
+        await service.deleteExpiredDatabaseRecords();
+
+        expect(spyOnIsCronJobRunning).toHaveBeenCalledTimes(1);
+        expect(spyOnIsCronJobRunning).toHaveBeenCalledWith(cronJobType);
+
+        expect(mockedTokenRepository.deleteExpired).not.toHaveBeenCalled();
+
+        expect(spyOnStartCronJob).not.toHaveBeenCalled();
+        expect(spyOnCompleteCronJob).not.toHaveBeenCalled();
+      });
+
+      it(`should process ${cronJobType} and complete the cron job`, async () => {
+        spyOnIsCronJobRunning.mockResolvedValueOnce(false);
+        spyOnStartCronJob.mockResolvedValueOnce(cronJob);
+
+        await service.deleteExpiredDatabaseRecords();
+
+        expect(service.startCronJob).toHaveBeenCalledTimes(1);
+        expect(service.startCronJob).toHaveBeenCalledWith(cronJobType);
+
+        expect(mockedTokenRepository.deleteExpired).toHaveBeenCalledTimes(1);
+
+        expect(service.completeCronJob).toHaveBeenCalledTimes(1);
+        expect(service.completeCronJob).toHaveBeenCalledWith(cronJob);
+      });
+
+      it('should complete the cron job when processing fails', async () => {
+        spyOnIsCronJobRunning.mockResolvedValueOnce(false);
+        spyOnStartCronJob.mockResolvedValueOnce(cronJob);
+
+        mockedTokenRepository.deleteExpired.mockRejectedValueOnce(
           new Error(faker.lorem.sentence()),
         );
 
-        await (service as any)[method]();
+        await service.deleteExpiredDatabaseRecords();
 
         expect(service.completeCronJob).toHaveBeenCalledTimes(1);
         expect(service.completeCronJob).toHaveBeenCalledWith(cronJob);

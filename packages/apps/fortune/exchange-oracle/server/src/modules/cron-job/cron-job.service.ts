@@ -1,5 +1,6 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
+import { Cron } from '@nestjs/schedule';
 import { ErrorCronJob } from '../../common/constant/errors';
 import { CronJobType } from '../../common/enums/cron-job';
 import { WebhookStatus } from '../../common/enums/webhook';
@@ -7,7 +8,6 @@ import { WebhookRepository } from '../webhook/webhook.repository';
 import { WebhookService } from '../webhook/webhook.service';
 import { CronJobEntity } from './cron-job.entity';
 import { CronJobRepository } from './cron-job.repository';
-import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class CronJobService {
@@ -48,7 +48,7 @@ export class CronJobService {
   ): Promise<CronJobEntity> {
     if (cronJobEntity.completedAt) {
       this.logger.error(ErrorCronJob.Completed, CronJobService.name);
-      throw new BadRequestException(ErrorCronJob.Completed);
+      throw new Error(ErrorCronJob.Completed);
     }
 
     cronJobEntity.completedAt = new Date();

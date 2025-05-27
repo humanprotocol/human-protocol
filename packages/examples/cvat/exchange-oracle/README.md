@@ -73,5 +73,6 @@ Available at `/docs` route
 
 To run tests
 ```
-docker compose -f docker-compose.test.yml up --build test --attach test --exit-code-from test
+docker compose -f docker-compose.test.yml up --build test --attach test --exit-code-from test && \
+   docker compose -f docker-compose.test.yml down
 ```

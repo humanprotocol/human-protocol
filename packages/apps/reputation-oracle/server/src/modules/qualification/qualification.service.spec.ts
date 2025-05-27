@@ -3,6 +3,7 @@ import { createMock } from '@golevelup/ts-jest';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 
+import { generateFutureDate } from '../../../test/fixtures/date';
 import { generateEthWallet } from '../../../test/fixtures/web3';
 import { ServerConfigService } from '../../config';
 import { UserStatus, UserRepository } from '../user';
@@ -15,7 +16,6 @@ import {
 } from './qualification.error';
 import { QualificationRepository } from './qualification.repository';
 import { QualificationService } from './qualification.service';
-import { UserQualificationEntity } from './user-qualification.entity';
 import { UserQualificationRepository } from './user-qualification.repository';
 
 const mockQualificationRepository = createMock<QualificationRepository>();
@@ -55,7 +55,7 @@ describe('QualificationService', () => {
   });
 
   describe('createQualification', () => {
-    it.each([faker.date.future({ years: 1 }), undefined])(
+    it.each([generateFutureDate(2), undefined])(
       'should create a new qualification',
       async (expiresAt) => {
         const newQualification = {
@@ -139,35 +139,6 @@ describe('QualificationService', () => {
 
       await expect(service.deleteQualification(reference)).rejects.toThrow(
         new QualificationError(QualificationErrorMessage.NOT_FOUND, reference),
-      );
-    });
-
-    it('should throw CANNOT_DETELE_ASSIGNED_QUALIFICATION error', async () => {
-      const reference = faker.string.uuid();
-      const qualificationEntity = {
-        reference,
-        title: faker.string.alpha(),
-        description: faker.string.alpha(),
-      };
-
-      const mockUserQualificationEntity = {
-        userId: faker.number.int(),
-        qualificationId: faker.number.int(),
-      };
-
-      mockQualificationRepository.findByReference.mockResolvedValueOnce(
-        qualificationEntity as QualificationEntity,
-      );
-
-      mockUserQualificationRepository.findByQualification.mockResolvedValueOnce(
-        [mockUserQualificationEntity] as UserQualificationEntity[],
-      );
-
-      await expect(service.deleteQualification(reference)).rejects.toThrow(
-        new QualificationError(
-          QualificationErrorMessage.CANNOT_DETELE_ASSIGNED_QUALIFICATION,
-          reference,
-        ),
       );
     });
   });

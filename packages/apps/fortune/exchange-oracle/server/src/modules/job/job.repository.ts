@@ -6,7 +6,7 @@ import { BaseRepository } from '../../database/base.repository';
 import { JobEntity } from './job.entity';
 import { JobSortField, JobStatus } from '../../common/enums/job';
 import { JobFilterData, ListResult } from './job.interface';
-import { convertToDatabaseSortDirection } from '../../database/database.utils';
+import { convertToDatabaseSortDirection } from '../../common/utils/database';
 
 @Injectable()
 export class JobRepository extends BaseRepository<JobEntity> {

@@ -134,7 +134,10 @@ def get_jobs_quality_reports(parent_id: int) -> list[models.QualityReport]:
     with get_api_client() as api_client:
         try:
             return get_paginated_collection(
-                api_client.quality_api.list_reports_endpoint, parent_id=parent_id, target="job"
+                api_client.quality_api.list_reports_endpoint,
+                parent_id=parent_id,
+                target="job",
+                page_size=Config.cvat_config.quality_reports_page_size,
             )
 
         except exceptions.ApiException as e:

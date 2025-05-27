@@ -376,6 +376,17 @@ export class JobService {
     jobEntity.status = JobStatus.LAUNCHED;
     await this.jobRepository.updateOne(jobEntity);
 
+    const oracleType = this.getOracleType(jobEntity.requestType);
+    const webhookEntity = new WebhookEntity();
+    Object.assign(webhookEntity, {
+      escrowAddress: jobEntity.escrowAddress,
+      chainId: jobEntity.chainId,
+      eventType: EventType.ESCROW_CREATED,
+      oracleType: oracleType,
+      hasSignature: oracleType !== OracleType.HCAPTCHA ? true : false,
+    });
+    await this.webhookRepository.createUnique(webhookEntity);
+
     return jobEntity;
   }
 
@@ -397,20 +408,7 @@ export class JobService {
     });
 
     jobEntity.status = JobStatus.FUNDED;
-    await this.jobRepository.updateOne(jobEntity);
-
-    const oracleType = this.getOracleType(jobEntity.requestType);
-    const webhookEntity = new WebhookEntity();
-    Object.assign(webhookEntity, {
-      escrowAddress: jobEntity.escrowAddress,
-      chainId: jobEntity.chainId,
-      eventType: EventType.ESCROW_CREATED,
-      oracleType: oracleType,
-      hasSignature: oracleType !== OracleType.HCAPTCHA ? true : false,
-    });
-    await this.webhookRepository.createUnique(webhookEntity);
-
-    return jobEntity;
+    return this.jobRepository.updateOne(jobEntity);
   }
 
   public async requestToCancelJobById(
