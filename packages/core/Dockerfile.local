@@ -1,0 +1,29 @@
+FROM node:22.14-slim
+ARG APP_PATH=packages/core
+
+# curl is needed for healthcheck
+RUN apt-get update && apt-get install -y curl
+
+WORKDIR /usr/src/app
+
+# Copy expected yarn dist
+COPY .yarn ./.yarn
+COPY .yarnrc.yml ./
+
+# Copy files for deps installation
+COPY package.json yarn.lock ./
+COPY ${APP_PATH}/package.json ./${APP_PATH}/
+
+RUN yarn install
+
+# Copy base TS config that is required to build package
+COPY tsconfig.base.json ./
+# Copy package itself
+COPY packages/core ./packages/core
+
+WORKDIR ./${APP_PATH}
+
+RUN yarn build
+
+EXPOSE 8545
+CMD yarn local

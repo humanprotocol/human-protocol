@@ -14,12 +14,12 @@ services:
   blockchain-node:
     build: 
       context: ../../../../
-      dockerfile: packages/examples/cvat/recording-oracle/dockerfiles/blockchain-node.Dockerfile
+      dockerfile: packages/core/Dockerfile.local
     healthcheck:
-      test: yarn workspace @human-protocol/core local:readiness
+      test: yarn local:readiness
       interval: 15s
-      timeout: 5s
-      retries: 5
+      timeout: 30s
+      retries: 0
     networks:
       - test-network
 
@@ -45,7 +45,7 @@ services:
 
   minio-mc:
     container_name: minio-mc
-    image: minio/mc
+    image: minio/mc:RELEASE.2022-06-10T22-29-12Z
     depends_on:
       minio:
         condition: service_healthy
