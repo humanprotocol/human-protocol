@@ -5,7 +5,7 @@ import {
 import { getErrorMessageForError } from '@/shared/errors';
 import type { ResponseError } from '@/shared/types/global.type';
 
-export function useKycErrorNotifications() {
+export function useIdvErrorNotifications() {
   const { showNotification } = useNotification();
 
   return (error: ResponseError) => {
