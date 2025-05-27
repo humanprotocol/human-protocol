@@ -23,7 +23,8 @@ const HmtBalance: FC<Props> = ({ balance }) => {
     return <span>...</span>;
   }
 
-  const _balance = Number(balance) * 1e18;
+  const _balance =
+    Number(balance) < 1 ? Number(balance) * 1e18 : Number(balance);
   const balanceInDollars = balance ? (_balance * data).toFixed(2) : 0;
 
   return (
