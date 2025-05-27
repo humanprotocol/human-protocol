@@ -1,4 +1,4 @@
-import { Chip } from '@mui/material';
+import { Chip, Box } from '@mui/material';
 
 interface CategoryCellProps {
   value?: string;
@@ -6,11 +6,13 @@ interface CategoryCellProps {
 
 export const CategoryCell = ({ value }: CategoryCellProps) =>
   value?.length ? (
-    <Chip
-      label={getCategoryLabel(value)}
-      variant="outlined"
-      color={getCategoryColor(value)}
-    />
+    <Box display="flex" alignItems="center" height="100%">
+      <Chip
+        label={getCategoryLabel(value)}
+        variant="outlined"
+        color={getCategoryColor(value)}
+      />
+    </Box>
   ) : null;
 
 const getCategoryLabel = (category: string) => {

@@ -1,22 +1,22 @@
-import { FormatNumber } from '@components/Home/FormatNumber';
+import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
+
+import { FormatNumber } from '@components/Home/FormatNumber';
 import { useGeneralStats } from '@services/api/use-general-stats';
 
-export function TotalTransactions() {
-  const { data, status } = useGeneralStats();
+const TotalTransactions = () => {
+  const { data, isError, isPending, isSuccess } = useGeneralStats();
 
   return (
-    <div>
-      <Typography variant="body1" component="p">
-        Total Transactions
+    <Box display="flex" flexDirection="column" gap={0.5}>
+      <Typography variant="body1">Total Transactions</Typography>
+      <Typography variant="h6" component="p">
+        {isSuccess && <FormatNumber value={data.totalTransactions} />}
+        {isPending && '...'}
+        {isError && 'No data'}
       </Typography>
-      <div className="count">
-        {status === 'success' && (
-          <FormatNumber value={data.totalTransactions} />
-        )}
-        {status === 'pending' && '...'}
-        {status === 'error' && 'No data'}
-      </div>
-    </div>
+    </Box>
   );
-}
+};
+
+export default TotalTransactions;

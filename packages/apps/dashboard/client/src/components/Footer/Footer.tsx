@@ -1,12 +1,37 @@
 import { FC } from 'react';
+
+import Box from '@mui/material/Box';
+import Link from '@mui/material/Link';
+import { IconButton, styled } from '@mui/material';
 import Typography from '@mui/material/Typography';
 import TwitterIcon from '@mui/icons-material/Twitter';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import TelegramIcon from '@mui/icons-material/Telegram';
+
 import DiscordIcon from '@components/Icons/DiscordIcon';
-import { colorPalette } from '@assets/styles/color-palette';
 import { env } from '@helpers/env';
+
+const StyledLink = styled(Link)(({ theme }) => ({
+  textDecoration: 'none',
+  color: theme.palette.text.secondary,
+  '&:visited': {
+    color: theme.palette.text.secondary,
+  },
+}));
+
+const SocialMediaIconButton = styled(IconButton)(({ theme }) => ({
+  padding: 0,
+  color: theme.palette.text.secondary,
+
+  '&:hover': {
+    background: 'none',
+    color: 'inherit',
+  },
+  '& > svg': {
+    fontSize: '32px',
+  },
+}));
 
 const Footer: FC = () => {
   const handleClick = (url: string) => {
@@ -14,70 +39,94 @@ const Footer: FC = () => {
   };
 
   return (
-    <footer>
-      <div className="footer-wrapper">
-        <div className="footer-link-wrapper">
-          <div className="footer-link">
-            <Typography
-              component="span"
-              color="text.secondary"
-              onClick={() => handleClick(env.VITE_FOOTER_LINK_PRIVACY_POLICY)}
+    <Box
+      component="footer"
+      minHeight="124px"
+      mt="auto"
+      bgcolor={{ xs: 'white.dark', md: 'white.main' }}
+      px={{ xs: 3, md: 0 }}
+    >
+      <Box
+        display="flex"
+        flexDirection={{ xs: 'column-reverse', md: 'row' }}
+        justifyContent="space-between"
+        alignItems={{ xs: 'flex-start', md: 'center' }}
+        py={4}
+        px={2}
+      >
+        <Box display="flex" flexDirection="column" gap={3}>
+          <Box
+            display="flex"
+            alignItems="flex-start"
+            gap={3}
+            flexDirection={{ xs: 'column', md: 'row' }}
+            flexWrap="wrap"
+          >
+            <StyledLink
+              variant="caption"
+              href={env.VITE_FOOTER_LINK_PRIVACY_POLICY}
             >
               Privacy Policy
-            </Typography>
-            <Typography
-              component="span"
-              color="text.secondary"
-              onClick={() => handleClick(env.VITE_FOOTER_LINK_TERMS_OF_SERVICE)}
+            </StyledLink>
+            <StyledLink
+              variant="caption"
+              href={env.VITE_FOOTER_LINK_TERMS_OF_SERVICE}
             >
               Terms of Service
-            </Typography>
-            <Typography
-              component="span"
-              color="text.secondary"
-              onClick={() => handleClick(env.VITE_FOOTER_LINK_HUMAN_PROTOCOL)}
+            </StyledLink>
+            <StyledLink
+              variant="caption"
+              href={env.VITE_FOOTER_LINK_HUMAN_PROTOCOL}
             >
               HUMAN Protocol
-            </Typography>
-          </div>
-          <Typography variant="subtitle1" color="text.secondary">
+            </StyledLink>
+          </Box>
+          <Typography component="span" variant="caption" color="text.secondary">
             © 2021 HPF. HUMAN Protocol® is a registered trademark
           </Typography>
-        </div>
-        <div className="footer-icon">
-          <GitHubIcon
-            style={{
-              color: colorPalette.sky.main,
-            }}
+        </Box>
+        <Box
+          display="flex"
+          flexWrap="wrap"
+          gap={4}
+          mb={{ xs: 4, md: 0 }}
+          alignItems={{ xs: 'flex-start', sm: 'center' }}
+          justifyContent={{ xs: 'space-between', sm: 'flex-start' }}
+          width={{ xs: '100%', sm: 'auto' }}
+        >
+          <SocialMediaIconButton
+            aria-label="GitHub"
             onClick={() => handleClick(env.VITE_FOOTER_LINK_GITHUB)}
-          />
-          <DiscordIcon
-            style={{
-              color: colorPalette.sky.main,
-            }}
+          >
+            <GitHubIcon />
+          </SocialMediaIconButton>
+          <SocialMediaIconButton
+            aria-label="Discord"
             onClick={() => handleClick(env.VITE_FOOTER_LINK_DISCORD)}
-          />
-          <TwitterIcon
-            style={{
-              color: colorPalette.sky.main,
-            }}
+          >
+            <DiscordIcon />
+          </SocialMediaIconButton>
+          <SocialMediaIconButton
+            aria-label="X"
             onClick={() => handleClick(env.VITE_FOOTER_LINK_X)}
-          />
-          <TelegramIcon
-            style={{
-              color: colorPalette.sky.main,
-            }}
+          >
+            <TwitterIcon />
+          </SocialMediaIconButton>
+          <SocialMediaIconButton
+            aria-label="Telegram"
             onClick={() => handleClick(env.VITE_FOOTER_LINK_TELEGRAM)}
-          />
-          <LinkedInIcon
-            style={{
-              color: colorPalette.sky.main,
-            }}
+          >
+            <TelegramIcon />
+          </SocialMediaIconButton>
+          <SocialMediaIconButton
+            aria-label="LinkedIn"
             onClick={() => handleClick(env.VITE_FOOTER_LINK_LINKEDIN)}
-          />
-        </div>
-      </div>
-    </footer>
+          >
+            <LinkedInIcon />
+          </SocialMediaIconButton>
+        </Box>
+      </Box>
+    </Box>
   );
 };
 

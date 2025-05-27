@@ -1,124 +1,127 @@
+import { FC } from 'react';
+
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Divider from '@mui/material/Divider';
+import Grid from '@mui/material/Unstable_Grid2';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import Typography from '@mui/material/Typography';
+import { Link } from 'react-router-dom';
+import styled from '@mui/material/styles/styled';
+
 import PageWrapper from '@components/PageWrapper';
 import SearchBar from '@components/SearchBar/SearchBar';
 import ShadowIcon from '@components/ShadowIcon';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
-import Divider from '@mui/material/Divider';
-import { Link } from 'react-router-dom';
 import { Leaderboard } from './Leaderboard';
 import GraphSwiper from '@components/Home/GraphSwiper';
-import { HMTPrice } from '@pages/Home/HMTPrice';
-import { TotalNumberOfTasks } from '@pages/Home/TotalNumberOfTasks';
-import { Holders } from '@pages/Home/Holders';
-import { TotalTransactions } from '@pages/Home/TotalTransactions';
+import HMTPrice from '@pages/Home/HMTPrice';
+import TotalNumberOfTasks from '@pages/Home/TotalNumberOfTasks';
+import Holders from '@pages/Home/Holders';
+import TotalTransactions from '@pages/Home/TotalTransactions';
 import { LeaderboardIcon } from '@components/Icons/LeaderboardIcon';
-import { useBreakPoints } from '@utils/hooks/use-is-mobile';
-import { colorPalette } from '@assets/styles/color-palette';
 import CustomTooltip from '@components/CustomTooltip';
 
-const Home: React.FC = () => {
-  const {
-    mobile: { isMobile },
-  } = useBreakPoints();
+import { useIsMobile } from '@utils/hooks/use-breakpoints';
+
+const CardWrapper = styled(Grid)(({ theme }) => ({
+  display: 'flex',
+  background: theme.palette.white.main,
+  borderRadius: '16px',
+  padding: '24px 32px',
+  [theme.breakpoints.up('md')]: {
+    height: 300,
+  },
+  [theme.breakpoints.down('md')]: {
+    height: 'auto',
+  },
+}));
+
+const InfoTooltip = ({ title }: { title: string }) => (
+  <CustomTooltip title={title} arrow>
+    <HelpOutlineIcon sx={{ color: 'text.secondary' }} />
+  </CustomTooltip>
+);
+
+const renderViewChartsButton = (show: boolean) => {
+  if (show) {
+    return (
+      <Button
+        variant="outlined"
+        color="secondary"
+        component={Link}
+        to="/graph"
+        sx={{
+          padding: '4px 10px',
+        }}
+      >
+        View Charts
+      </Button>
+    );
+  } else {
+    return null;
+  }
+};
+
+const Home: FC = () => {
+  const isMobile = useIsMobile();
+
   return (
     <PageWrapper violetHeader>
-      <div className="home-page-header">
-        <Typography
-          fontWeight={isMobile ? undefined : 600}
-          variant={isMobile ? 'H6-Mobile' : 'h3'}
-        >
-          All HUMAN activity. In one place.
-        </Typography>
-        <SearchBar className="home-page-search" />
-      </div>
-      <div className="home-page-boxes">
-        <div className="home-page-box">
-          <div className="box-title">Token</div>
-          <div className="box-content">
-            <div className="box-icon">
-              <CustomTooltip title="Token Current Price" arrow>
-                <HelpOutlineIcon
-                  style={{
-                    color: colorPalette.sky.main,
-                  }}
-                />
-              </CustomTooltip>
-            </div>
-            <HMTPrice />
-          </div>
-          <Divider
-            sx={{
-              marginY: 3,
-            }}
-          />
-          <div className="box-content">
-            <div className="box-icon">
-              <CustomTooltip title="Number of users holding HMT" arrow>
-                <HelpOutlineIcon
-                  style={{
-                    color: colorPalette.sky.main,
-                  }}
-                />
-              </CustomTooltip>
-            </div>
-            <Holders />
-          </div>
-        </div>
-        <div className="home-page-box">
-          <div className="box-title">
-            Data Overview
-            <Button
-              sx={{ padding: '4px 10px' }}
-              variant="outlined"
-              color="secondary"
-              component={Link}
-              to="/graph"
+      <Typography variant={isMobile ? 'H6-Mobile' : 'h3'} color="white.main">
+        All HUMAN activity. In one place.
+      </Typography>
+      <SearchBar className="home-page-search" />
+      <Grid container mt={{ xs: 6, md: 8 }} columnSpacing={3} rowSpacing={3}>
+        <Grid xs={12} md={3}>
+          <CardWrapper flexDirection="column" gap={3}>
+            <Typography variant="body2">Token</Typography>
+            <Box display="flex" gap={1}>
+              <InfoTooltip title="Token Current Price" />
+              <HMTPrice />
+            </Box>
+            <Divider />
+            <Box display="flex" gap={1}>
+              <InfoTooltip title="Number of users holding HMT" />
+              <Holders />
+            </Box>
+          </CardWrapper>
+        </Grid>
+        <Grid xs={12} md={9}>
+          <CardWrapper gap={4} flexDirection={{ xs: 'column', md: 'row' }}>
+            <Box
+              display="flex"
+              flexDirection="column"
+              gap={3}
+              width={{ xs: 'unset', md: '45%' }}
             >
-              View Charts
-            </Button>
-          </div>
-          <div className="box-content">
-            <div className="box-icon">
-              <CustomTooltip
-                enterTouchDelay={0}
-                title="Total number of transactions"
-                arrow
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
               >
-                <HelpOutlineIcon
-                  style={{
-                    color: colorPalette.sky.main,
-                  }}
-                />
-              </CustomTooltip>
-            </div>
-            <TotalTransactions />
-          </div>
-          <Divider
-            sx={{
-              marginY: 3,
-            }}
-          />
-          <div className="box-content">
-            <div className="box-icon">
-              <CustomTooltip
-                title="Number of tasks that have been launched"
-                arrow
-              >
-                <HelpOutlineIcon
-                  style={{
-                    color: colorPalette.sky.main,
-                  }}
-                />
-              </CustomTooltip>
-            </div>
-            <TotalNumberOfTasks />
-          </div>
-        </div>
-        <div className="home-page-box">
-          <GraphSwiper />
-        </div>
-      </div>
+                <Typography variant="body2">
+                  Data Overview (All networks)
+                </Typography>
+                {renderViewChartsButton(!isMobile)}
+              </Box>
+              <Box display="flex" gap={1}>
+                <InfoTooltip title="Total number of transactions" />
+                <TotalTransactions />
+              </Box>
+              <Divider />
+              <Box display="flex" gap={1}>
+                <InfoTooltip title="Number of tasks that have been launched" />
+                <TotalNumberOfTasks />
+              </Box>
+              <Divider sx={{ display: { xs: 'block', md: 'none' } }} />
+            </Box>
+            <Box width={{ xs: 'unset', md: '55%' }} mx={{ xs: -4, md: 0 }}>
+              <GraphSwiper />
+            </Box>
+            {renderViewChartsButton(isMobile)}
+          </CardWrapper>
+        </Grid>
+      </Grid>
       <ShadowIcon
         className="home-page-leaderboard"
         title="Leaderboard"

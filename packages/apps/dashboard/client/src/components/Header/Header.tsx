@@ -1,20 +1,33 @@
 import { FC, useState } from 'react';
-import clsx from 'clsx';
-import Toolbar from '@mui/material/Toolbar';
+
+import AppBar from '@mui/material/AppBar';
+import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
+import { Link as MuiLink } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import MenuIcon from '@mui/icons-material/Menu';
 import Drawer from '@mui/material/Drawer';
-import Box from '@mui/material/Box';
-import Link from '@mui/material/Link';
-import { env } from '@helpers/env';
-import { useNavigate } from 'react-router-dom';
+import Toolbar from '@mui/material/Toolbar';
+import styled from '@mui/material/styles/styled';
+import { Link } from 'react-router-dom';
+
 import { LogoBlockIcon } from '@components/Icons/LogoBlockIcon';
 import { LogoBlockIconMobile } from '@components/Icons/LogoBlockIconMobile';
-import CloseIcon from '@mui/icons-material/Close';
+import { env } from '@helpers/env';
+
+const NavLink = styled(MuiLink)(({ theme }) => ({
+  color: theme.palette.primary.main,
+  padding: '6px 8px',
+  fontSize: '14px',
+  fontWeight: 600,
+  lineHeight: '150%',
+  cursor: 'pointer',
+  textDecoration: 'none',
+  width: 'fit-content',
+}));
 
 const Header: FC = () => {
-  const navigate = useNavigate();
   const [open, setState] = useState(false);
 
   const handleClick = (url: string) => {
@@ -26,130 +39,104 @@ const Header: FC = () => {
   };
 
   return (
-    <Toolbar className={clsx('header-toolbar')}>
-      <Link
-        onClick={() => {
-          navigate('/');
-        }}
-        underline="none"
+    <AppBar
+      position="static"
+      sx={{
+        bgcolor: 'white.main',
+        boxShadow: 'none',
+      }}
+    >
+      <Toolbar
         sx={{
-          ':hover': {
-            cursor: 'pointer',
-          },
+          justifyContent: 'space-between',
+          px: { xs: 4, md: 0 },
+          height: { xs: 62, md: 82 },
         }}
       >
-        <span className="logo">
-          <LogoBlockIcon />
-        </span>
-        <span className="logo-mobile">
-          <LogoBlockIconMobile />
-        </span>
-      </Link>
+        <Link to="/">
+          <LogoBlockIcon sx={{ display: { xs: 'none', md: 'block' } }} />
+          <LogoBlockIconMobile sx={{ display: { xs: 'block', md: 'none' } }} />
+        </Link>
 
-      <div className="header-list-link">
-        <span
-          className="header-link"
-          onClick={() => handleClick(env.VITE_NAVBAR_LINK_GITBOOK)}
+        <Box
+          display={{ xs: 'none', md: 'flex' }}
+          alignItems="center"
+          height="100%"
+          p={1}
+          gap={2}
         >
-          GitBook
-        </span>
-        <span
-          className="header-link"
-          onClick={() => handleClick(env.VITE_NAVBAR_LINK_FAUCETS)}
-        >
-          Faucet
-        </span>
-        <span
-          className="header-link"
-          onClick={() => handleClick(env.VITE_NAVBAR_LINK_HUMAN_WEBSITE)}
-        >
-          HUMAN Website
-        </span>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => handleClick(env.VITE_NAVBAR_LINK_LAUNCH_JOBS)}
-        >
-          Launch Jobs
-        </Button>
-        <Button
-          variant="contained"
-          color="secondary"
-          onClick={() => handleClick(env.VITE_NAVBAR_LINK_WORK_AND_EARN)}
-        >
-          Work & Earn
-        </Button>
-      </div>
-
-      <IconButton
-        edge="start"
-        color="inherit"
-        aria-label="open drawer"
-        className="mobile-icon"
-        onClick={() => toggleDrawer(true)}
-      >
-        <MenuIcon />
-      </IconButton>
-
-      <Drawer
-        anchor="right"
-        variant="temporary"
-        open={open}
-        onClose={() => toggleDrawer(false)}
-        PaperProps={{
-          sx: {
-            width: '80%',
-          },
-        }}
-      >
-        <Box className="header-mobile-menu">
-          <Box display="flex" justifyContent="flex-end">
-            <CloseIcon onClick={() => toggleDrawer(false)} />
-          </Box>
-
-          <div className="header-list-link">
-            <div>
-              <span
-                className="header-link"
-                onClick={() => handleClick(env.VITE_NAVBAR_LINK_GITBOOK)}
-              >
-                GitBook
-              </span>
-            </div>
-            <div>
-              <span
-                className="header-link"
-                onClick={() => handleClick(env.VITE_NAVBAR_LINK_FAUCETS)}
-              >
-                Faucet
-              </span>
-            </div>
-            <div>
-              <span
-                className="header-link"
-                onClick={() => handleClick(env.VITE_NAVBAR_LINK_HUMAN_WEBSITE)}
-              >
-                HUMAN Website
-              </span>
-            </div>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => handleClick(env.VITE_NAVBAR_LINK_LAUNCH_JOBS)}
-            >
-              Launch Jobs
-            </Button>
-            <Button
-              variant="contained"
-              color="secondary"
-              onClick={() => handleClick(env.VITE_NAVBAR_LINK_WORK_AND_EARN)}
-            >
-              Work & Earn
-            </Button>
-          </div>
+          <NavLink href={env.VITE_NAVBAR_LINK_GITBOOK}>GitBook</NavLink>
+          <NavLink href={env.VITE_NAVBAR_LINK_FAUCETS}>Faucet</NavLink>
+          <NavLink href={env.VITE_NAVBAR_LINK_HUMAN_WEBSITE}>
+            HUMAN Website
+          </NavLink>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => handleClick(env.VITE_NAVBAR_LINK_LAUNCH_JOBS)}
+          >
+            Launch Jobs
+          </Button>
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={() => handleClick(env.VITE_NAVBAR_LINK_WORK_AND_EARN)}
+          >
+            Work & Earn
+          </Button>
         </Box>
-      </Drawer>
-    </Toolbar>
+
+        <IconButton
+          edge="start"
+          color="inherit"
+          aria-label="open drawer"
+          sx={{ display: { xs: 'flex', md: 'none' } }}
+          onClick={() => toggleDrawer(true)}
+        >
+          <MenuIcon />
+        </IconButton>
+
+        <Drawer
+          anchor="right"
+          variant="temporary"
+          open={open}
+          onClose={() => toggleDrawer(false)}
+          PaperProps={{
+            sx: {
+              width: '80%',
+            },
+          }}
+        >
+          <Box py={3} px={2}>
+            <Box display="flex" justifyContent="flex-end">
+              <CloseIcon onClick={() => toggleDrawer(false)} />
+            </Box>
+
+            <Box display="flex" flexDirection="column" gap={2}>
+              <NavLink href={env.VITE_NAVBAR_LINK_GITBOOK}>GitBook</NavLink>
+              <NavLink href={env.VITE_NAVBAR_LINK_FAUCETS}>Faucet</NavLink>
+              <NavLink href={env.VITE_NAVBAR_LINK_HUMAN_WEBSITE}>
+                HUMAN Website
+              </NavLink>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => handleClick(env.VITE_NAVBAR_LINK_LAUNCH_JOBS)}
+              >
+                Launch Jobs
+              </Button>
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={() => handleClick(env.VITE_NAVBAR_LINK_WORK_AND_EARN)}
+              >
+                Work & Earn
+              </Button>
+            </Box>
+          </Box>
+        </Drawer>
+      </Toolbar>
+    </AppBar>
   );
 };
 
