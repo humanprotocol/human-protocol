@@ -1,5 +1,5 @@
 FROM node:22.14-slim
-ARG APP_PATH=packages/apps/fortune/exchange-oracle/server
+ARG APP_PATH=packages/apps/fortune/recording-oracle
 
 # Create app directory
 WORKDIR /usr/src/app
