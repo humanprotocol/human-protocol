@@ -9,9 +9,12 @@ import {
   Fund,
   PendingV2,
   Withdraw,
+  CancellationRequested,
+  CancellationRefund,
 } from '../../generated/templates/Escrow/Escrow';
 import {
   BulkPayoutEvent,
+  CancellationRefundEvent,
   Escrow,
   EscrowStatistics,
   EscrowStatusEvent,
@@ -49,6 +52,7 @@ function constructStatsEntity(): EscrowStatistics {
   entity.storeResultsEventCount = ZERO_BI;
   entity.bulkPayoutEventCount = ZERO_BI;
   entity.pendingStatusEventCount = ZERO_BI;
+  entity.toCancelStatusEventCount = ZERO_BI;
   entity.cancelledStatusEventCount = ZERO_BI;
   entity.partialStatusEventCount = ZERO_BI;
   entity.paidStatusEventCount = ZERO_BI;
@@ -562,63 +566,6 @@ export function handleBulkTransferV2(event: BulkTransferV2): void {
   }
 }
 
-export function handleCancelled(event: Cancelled): void {
-  // Create EscrowStatusEvent entity
-  const eventEntity = new EscrowStatusEvent(toEventId(event));
-  eventEntity.block = event.block.number;
-  eventEntity.timestamp = event.block.timestamp;
-  eventEntity.txHash = event.transaction.hash;
-  eventEntity.escrowAddress = event.address;
-  eventEntity.sender = event.transaction.from;
-  eventEntity.status = 'Cancelled';
-
-  // Update statistics
-  const statsEntity = createOrLoadEscrowStatistics();
-  statsEntity.cancelledStatusEventCount =
-    statsEntity.cancelledStatusEventCount.plus(ONE_BI);
-  statsEntity.totalEventCount = statsEntity.totalEventCount.plus(ONE_BI);
-  statsEntity.save();
-
-  // Update event day data
-  const eventDayData = getEventDayData(event);
-  eventDayData.dailyCancelledStatusEventCount =
-    eventDayData.dailyCancelledStatusEventCount.plus(ONE_BI);
-  eventDayData.dailyTotalEventCount =
-    eventDayData.dailyTotalEventCount.plus(ONE_BI);
-  eventDayData.save();
-
-  // Update escrow entity
-  const escrowEntity = Escrow.load(dataSource.address());
-
-  if (escrowEntity) {
-    const transaction = createTransaction(
-      event,
-      'cancel',
-      event.transaction.from,
-      Address.fromBytes(escrowEntity.address),
-      null,
-      Address.fromBytes(escrowEntity.address)
-    );
-    if (Address.fromBytes(escrowEntity.token) != HMT_ADDRESS) {
-      // If escrow is funded with HMT, balance is already tracked by HMT transfer
-      const internalTransaction = new InternalTransaction(toEventId(event));
-      internalTransaction.from = escrowEntity.address;
-      internalTransaction.to = Address.fromBytes(escrowEntity.token);
-      internalTransaction.receiver = escrowEntity.canceler;
-      internalTransaction.value = escrowEntity.balance;
-      internalTransaction.transaction = transaction.id;
-      internalTransaction.method = 'transfer';
-      internalTransaction.token = Address.fromBytes(escrowEntity.token);
-      internalTransaction.save();
-      escrowEntity.balance = ZERO_BI;
-    }
-    escrowEntity.status = 'Cancelled';
-    escrowEntity.save();
-    eventEntity.launcher = escrowEntity.launcher;
-  }
-  eventEntity.save();
-}
-
 export function handleCompleted(event: Completed): void {
   // Create EscrowStatusEvent entity
   const eventEntity = new EscrowStatusEvent(toEventId(event));
@@ -722,7 +669,7 @@ export function handleWithdraw(event: Withdraw): void {
     event.params._token
   );
 
-  // Crear entidad WithdrawEvent similar a FundEvent
+  // Create WithdrawEvent entity
   const withdrawEventEntity = new WithdrawEvent(toEventId(event));
   withdrawEventEntity.block = event.block.number;
   withdrawEventEntity.timestamp = event.block.timestamp;
@@ -733,4 +680,124 @@ export function handleWithdraw(event: Withdraw): void {
   withdrawEventEntity.amount = event.params._amount;
   withdrawEventEntity.token = event.params._token;
   withdrawEventEntity.save();
+}
+
+export function handleCancellationRequested(
+  event: CancellationRequested
+): void {
+  // Create EscrowStatus entity
+  const statusEventEntity = new EscrowStatusEvent(toEventId(event));
+  statusEventEntity.block = event.block.number;
+  statusEventEntity.timestamp = event.block.timestamp;
+  statusEventEntity.txHash = event.transaction.hash;
+  statusEventEntity.escrowAddress = event.address;
+  statusEventEntity.sender = event.transaction.from;
+  statusEventEntity.status = 'ToCancel';
+  statusEventEntity.save();
+
+  // Update global statistics
+  const statsEntity = createOrLoadEscrowStatistics();
+  statsEntity.toCancelStatusEventCount =
+    statsEntity.toCancelStatusEventCount.plus(ONE_BI);
+  statsEntity.totalEventCount = statsEntity.totalEventCount.plus(ONE_BI);
+  statsEntity.save();
+
+  // Update event day statistics
+  const eventDayData = getEventDayData(event);
+  eventDayData.dailyToCancelStatusEventCount =
+    eventDayData.dailyToCancelStatusEventCount.plus(ONE_BI);
+  eventDayData.dailyTotalEventCount =
+    eventDayData.dailyTotalEventCount.plus(ONE_BI);
+  eventDayData.save();
+
+  //Update escrow entity
+  const escrowEntity = Escrow.load(dataSource.address());
+  if (escrowEntity) {
+    createTransaction(
+      event,
+      'cancel',
+      event.transaction.from,
+      Address.fromBytes(escrowEntity.address),
+      null,
+      Address.fromBytes(escrowEntity.address)
+    );
+    escrowEntity.status = 'ToCancel';
+    escrowEntity.save();
+    statusEventEntity.launcher = escrowEntity.launcher;
+    statusEventEntity.save();
+  }
+}
+
+export function handleCancellationRefund(event: CancellationRefund): void {
+  const escrowEntity = Escrow.load(dataSource.address());
+  if (!escrowEntity) return;
+
+  const transaction = createTransaction(
+    event,
+    'cancellationRefund',
+    event.transaction.from,
+    Address.fromBytes(escrowEntity.address),
+    Address.fromBytes(escrowEntity.launcher),
+    Address.fromBytes(escrowEntity.address),
+    event.params.amount,
+    Address.fromBytes(escrowEntity.token)
+  );
+  if (Address.fromBytes(escrowEntity.token) != HMT_ADDRESS) {
+    // If escrow is funded with HMT, balance is already tracked by HMT transfer
+    const internalTransaction = new InternalTransaction(toEventId(event));
+    internalTransaction.from = escrowEntity.address;
+    internalTransaction.to = Address.fromBytes(escrowEntity.token);
+    internalTransaction.receiver = escrowEntity.canceler;
+    internalTransaction.value = escrowEntity.balance;
+    internalTransaction.transaction = transaction.id;
+    internalTransaction.method = 'transfer';
+    internalTransaction.token = Address.fromBytes(escrowEntity.token);
+    internalTransaction.save();
+    escrowEntity.balance = ZERO_BI;
+  }
+
+  const entity = new CancellationRefundEvent(toEventId(event));
+  entity.block = event.block.number;
+  entity.timestamp = event.block.timestamp;
+  entity.txHash = event.transaction.hash;
+  entity.escrowAddress = event.address;
+  entity.receiver = escrowEntity.launcher;
+  entity.amount = event.params.amount;
+  entity.save();
+}
+
+export function handleCancelled(event: Cancelled): void {
+  // Create EscrowStatusEvent entity
+  const eventEntity = new EscrowStatusEvent(toEventId(event));
+  eventEntity.block = event.block.number;
+  eventEntity.timestamp = event.block.timestamp;
+  eventEntity.txHash = event.transaction.hash;
+  eventEntity.escrowAddress = event.address;
+  eventEntity.sender = event.transaction.from;
+  eventEntity.status = 'Cancelled';
+
+  // Update statistics
+  const statsEntity = createOrLoadEscrowStatistics();
+  statsEntity.cancelledStatusEventCount =
+    statsEntity.cancelledStatusEventCount.plus(ONE_BI);
+  statsEntity.totalEventCount = statsEntity.totalEventCount.plus(ONE_BI);
+  statsEntity.save();
+
+  // Update event day data
+  const eventDayData = getEventDayData(event);
+  eventDayData.dailyCancelledStatusEventCount =
+    eventDayData.dailyCancelledStatusEventCount.plus(ONE_BI);
+  eventDayData.dailyTotalEventCount =
+    eventDayData.dailyTotalEventCount.plus(ONE_BI);
+  eventDayData.save();
+
+  // Update escrow entity
+  const escrowEntity = Escrow.load(dataSource.address());
+
+  if (escrowEntity) {
+    escrowEntity.status = 'Cancelled';
+    escrowEntity.save();
+    eventEntity.launcher = escrowEntity.launcher;
+  }
+  eventEntity.save();
 }

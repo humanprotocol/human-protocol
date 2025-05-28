@@ -121,7 +121,10 @@ export class EscrowCompletionService {
         const escrowStatus = await escrowClient.getStatus(
           escrowCompletionEntity.escrowAddress,
         );
-        if (escrowStatus === EscrowStatus.Pending) {
+        if (
+          escrowStatus === EscrowStatus.Pending ||
+          escrowStatus === EscrowStatus.ToCancel
+        ) {
           const escrowData = await EscrowUtils.getEscrow(
             escrowCompletionEntity.chainId,
             escrowCompletionEntity.escrowAddress,
@@ -243,7 +246,10 @@ export class EscrowCompletionService {
         const webhookPayload = {
           chainId,
           escrowAddress,
-          eventType: OutgoingWebhookEventType.ESCROW_COMPLETED,
+          eventType:
+            escrowData.status === EscrowStatus[EscrowStatus.Cancelled]
+              ? OutgoingWebhookEventType.ESCROW_CANCELED
+              : OutgoingWebhookEventType.ESCROW_COMPLETED,
         };
 
         let allWebhooksCreated = true;

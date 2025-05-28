@@ -8,7 +8,7 @@
 
 > **StatusEvent** = `object`
 
-Defined in: [graphql/types.ts:158](https://github.com/humanprotocol/human-protocol/blob/99b899a11bf48f2fa04884687ea395e0d42d75d1/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L158)
+Defined in: [graphql/types.ts:158](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L158)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [graphql/types.ts:158](https://github.com/humanprotocol/human-protoc
 
 > **chainId**: [`ChainId`](../../../enums/enumerations/ChainId.md)
 
-Defined in: [graphql/types.ts:162](https://github.com/humanprotocol/human-protocol/blob/99b899a11bf48f2fa04884687ea395e0d42d75d1/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L162)
+Defined in: [graphql/types.ts:162](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L162)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [graphql/types.ts:162](https://github.com/humanprotocol/human-protoc
 
 > **escrowAddress**: `string`
 
-Defined in: [graphql/types.ts:160](https://github.com/humanprotocol/human-protocol/blob/99b899a11bf48f2fa04884687ea395e0d42d75d1/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L160)
+Defined in: [graphql/types.ts:160](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L160)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [graphql/types.ts:160](https://github.com/humanprotocol/human-protoc
 
 > **status**: `string`
 
-Defined in: [graphql/types.ts:161](https://github.com/humanprotocol/human-protocol/blob/99b899a11bf48f2fa04884687ea395e0d42d75d1/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L161)
+Defined in: [graphql/types.ts:161](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L161)
 
 ***
 
@@ -40,4 +40,4 @@ Defined in: [graphql/types.ts:161](https://github.com/humanprotocol/human-protoc
 
 > **timestamp**: `number`
 
-Defined in: [graphql/types.ts:159](https://github.com/humanprotocol/human-protocol/blob/99b899a11bf48f2fa04884687ea395e0d42d75d1/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L159)
+Defined in: [graphql/types.ts:159](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L159)

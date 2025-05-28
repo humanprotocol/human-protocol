@@ -43,6 +43,8 @@ import {
 } from './error';
 import {
   EscrowData,
+  GET_CANCELLATION_REFUNDS_QUERY,
+  GET_CANCELLATION_REFUND_BY_ADDRESS_QUERY,
   GET_ESCROWS_QUERY,
   GET_ESCROW_BY_ADDRESS_QUERY,
   GET_PAYOUTS_QUERY,
@@ -56,12 +58,12 @@ import {
   IStatusEventFilter,
 } from './interfaces';
 import {
-  EscrowCancel,
   EscrowStatus,
   EscrowWithdraw,
   NetworkData,
   TransactionLikeWithNonce,
   Payout,
+  CancellationRefund,
 } from './types';
 import {
   getSubgraphUrl,
@@ -508,7 +510,7 @@ export class EscrowClient extends BaseEthersClient {
       throw ErrorHashIsEmptyString;
     }
 
-    if (amount <= 0n) {
+    if (amount < 0n) {
       throw ErrorAmountMustBePositive;
     }
 
@@ -701,7 +703,7 @@ export class EscrowClient extends BaseEthersClient {
   async cancel(
     escrowAddress: string,
     txOptions: Overrides = {}
-  ): Promise<EscrowCancel> {
+  ): Promise<void> {
     if (!ethers.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }
@@ -713,43 +715,9 @@ export class EscrowClient extends BaseEthersClient {
     try {
       const escrowContract = this.getEscrowContract(escrowAddress);
 
-      const transactionReceipt = await (
-        await escrowContract.cancel(txOptions)
-      ).wait();
+      await (await escrowContract.cancel(txOptions)).wait();
 
-      let amountTransferred: bigint | undefined = undefined;
-      const tokenAddress = await escrowContract.token();
-
-      const tokenContract: HMToken = HMToken__factory.connect(
-        tokenAddress,
-        this.runner
-      );
-      if (transactionReceipt)
-        for (const log of transactionReceipt.logs) {
-          if (log.address === tokenAddress) {
-            const parsedLog = tokenContract.interface.parseLog({
-              topics: log.topics as string[],
-              data: log.data,
-            });
-
-            const from = parsedLog?.args[0];
-            if (parsedLog?.name === 'Transfer' && from === escrowAddress) {
-              amountTransferred = parsedLog?.args[2];
-              break;
-            }
-          }
-        }
-
-      if (amountTransferred === undefined) {
-        throw ErrorTransferEventNotFoundInTransactionLogs;
-      }
-
-      const escrowCancelData: EscrowCancel = {
-        txHash: transactionReceipt?.hash || '',
-        amountRefunded: amountTransferred,
-      };
-
-      return escrowCancelData;
+      return;
     } catch (e) {
       return throwError(e);
     }
@@ -1118,6 +1086,43 @@ export class EscrowClient extends BaseEthersClient {
       }
 
       return await escrowContract.getBalance();
+    } catch (e) {
+      return throwError(e);
+    }
+  }
+
+  /**
+   * This function returns the reserved funds for a specified escrow address.
+   *
+   * @param {string} escrowAddress Address of the escrow.
+   * @returns {Promise<bigint>} Reserved funds of the escrow in the token used to fund it.
+   *
+   * **Code example**
+   *
+   * ```ts
+   * import { providers } from 'ethers';
+   * import { EscrowClient } from '@human-protocol/sdk';
+   *
+   * const rpcUrl = 'YOUR_RPC_URL';
+   *
+   * const provider = new providers.JsonRpcProvider(rpcUrl);
+   * const escrowClient = await EscrowClient.build(provider);
+   *
+   * const reservedFunds = await escrowClient.getReservedFunds('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
+   * ```
+   */
+  async getReservedFunds(escrowAddress: string): Promise<bigint> {
+    if (!ethers.isAddress(escrowAddress)) {
+      throw ErrorInvalidEscrowAddressProvided;
+    }
+
+    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
+      throw ErrorEscrowAddressIsNotProvidedByFactory;
+    }
+
+    try {
+      const escrowContract = this.getEscrowContract(escrowAddress);
+      return await escrowContract.reservedFunds();
     } catch (e) {
       return throwError(e);
     }
@@ -1989,5 +1994,159 @@ export class EscrowUtils {
     );
 
     return payouts || [];
+  }
+
+  /**
+   * This function returns the cancellation refunds for a given set of networks.
+   *
+   * > This uses Subgraph
+   *
+   * **Input parameters**
+   *
+   * ```ts
+   * enum ChainId {
+   *  ALL = -1,
+   *  MAINNET = 1,
+   *  SEPOLIA = 11155111,
+   *  BSC_MAINNET = 56,
+   *  BSC_TESTNET = 97,
+   *  POLYGON = 137,
+   *  POLYGON_AMOY = 80002,
+   *  LOCALHOST = 1338,
+   * }
+   * ```
+   *
+   * ```ts
+   * type CancellationRefund = {
+   *   id: string;
+   *   escrowAddress: string;
+   *   receiver: string;
+   *   amount: bigint;
+   *   block: number;
+   *   timestamp: number;
+   *   txHash: string;
+   * };
+   * ```
+   *
+   *
+   * @param {Object} filter Filter parameters.
+   * @returns {Promise<CancellationRefund[]>} List of cancellation refunds matching the filters.
+   *
+   * **Code example**
+   *
+   * ```ts
+   * import { ChainId, EscrowUtils } from '@human-protocol/sdk';
+   *
+   * const cancellationRefunds = await EscrowUtils.getCancellationRefunds({
+   *    chainId: ChainId.POLYGON_AMOY,
+   *    escrowAddress: '0x1234567890123456789012345678901234567890',
+   * });
+   * console.log(cancellationRefunds);
+   * ```
+   */
+  public static async getCancellationRefunds(filter: {
+    chainId: ChainId;
+    escrowAddress?: string;
+    receiver?: string;
+    from?: Date;
+    to?: Date;
+    first?: number;
+    skip?: number;
+    orderDirection?: OrderDirection;
+  }): Promise<CancellationRefund[]> {
+    const networkData = NETWORKS[filter.chainId];
+    if (!networkData) throw ErrorUnsupportedChainID;
+    if (filter.escrowAddress && !ethers.isAddress(filter.escrowAddress)) {
+      throw ErrorInvalidEscrowAddressProvided;
+    }
+    if (filter.receiver && !ethers.isAddress(filter.receiver)) {
+      throw ErrorInvalidAddress;
+    }
+
+    const first =
+      filter.first !== undefined ? Math.min(filter.first, 1000) : 10;
+    const skip = filter.skip || 0;
+    const orderDirection = filter.orderDirection || OrderDirection.DESC;
+
+    const { cancellationRefundEvents } = await gqlFetch<{
+      cancellationRefundEvents: CancellationRefund[];
+    }>(getSubgraphUrl(networkData), GET_CANCELLATION_REFUNDS_QUERY(filter), {
+      escrowAddress: filter.escrowAddress?.toLowerCase(),
+      receiver: filter.receiver?.toLowerCase(),
+      from: filter.from ? getUnixTimestamp(filter.from) : undefined,
+      to: filter.to ? getUnixTimestamp(filter.to) : undefined,
+      first,
+      skip,
+      orderDirection,
+    });
+
+    return cancellationRefundEvents || [];
+  }
+
+  /**
+   * This function returns the cancellation refund for a given escrow address.
+   *
+   * > This uses Subgraph
+   *
+   * **Input parameters**
+   *
+   * ```ts
+   * enum ChainId {
+   *  ALL = -1,
+   *  MAINNET = 1,
+   *  SEPOLIA = 11155111,
+   *  BSC_MAINNET = 56,
+   *  BSC_TESTNET = 97,
+   *  POLYGON = 137,
+   *  POLYGON_AMOY = 80002,
+   *  LOCALHOST = 1338,
+   * }
+   * ```
+   *
+   * ```ts
+   * type CancellationRefund = {
+   *   id: string;
+   *   escrowAddress: string;
+   *   receiver: string;
+   *   amount: bigint;
+   *   block: number;
+   *   timestamp: number;
+   *   txHash: string;
+   * };
+   * ```
+   *
+   *
+   * @param {ChainId} chainId Network in which the escrow has been deployed
+   * @param {string} escrowAddress Address of the escrow
+   * @returns {Promise<CancellationRefund>} Cancellation refund data
+   *
+   * **Code example**
+   *
+   * ```ts
+   * import { ChainId, EscrowUtils } from '@human-protocol/sdk';
+   *
+   * const cancellationRefund = await EscrowUtils.getCancellationRefund(ChainId.POLYGON_AMOY, "0x1234567890123456789012345678901234567890");
+   * ```
+   */
+  public static async getCancellationRefund(
+    chainId: ChainId,
+    escrowAddress: string
+  ): Promise<CancellationRefund> {
+    const networkData = NETWORKS[chainId];
+    if (!networkData) throw ErrorUnsupportedChainID;
+
+    if (!ethers.isAddress(escrowAddress)) {
+      throw ErrorInvalidEscrowAddressProvided;
+    }
+
+    const { cancellationRefundEvents } = await gqlFetch<{
+      cancellationRefundEvents: any;
+    }>(
+      getSubgraphUrl(networkData),
+      GET_CANCELLATION_REFUND_BY_ADDRESS_QUERY(),
+      { escrowAddress: escrowAddress.toLowerCase() }
+    );
+
+    return cancellationRefundEvents?.[0] || null;
   }
 }

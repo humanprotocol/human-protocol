@@ -6,7 +6,7 @@
 
 # Class: EscrowUtils
 
-Defined in: [escrow.ts:1574](https://github.com/humanprotocol/human-protocol/blob/99b899a11bf48f2fa04884687ea395e0d42d75d1/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1574)
+Defined in: [escrow.ts:1580](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1580)
 
 ## Introduction
 
@@ -50,11 +50,173 @@ const escrowAddresses = new EscrowUtils.getEscrows({
 
 ## Methods
 
+### getCancellationRefund()
+
+> `static` **getCancellationRefund**(`chainId`, `escrowAddress`): `Promise`\<[`CancellationRefund`](../../types/type-aliases/CancellationRefund.md)\>
+
+Defined in: [escrow.ts:2131](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L2131)
+
+This function returns the cancellation refund for a given escrow address.
+
+> This uses Subgraph
+
+**Input parameters**
+
+```ts
+enum ChainId {
+ ALL = -1,
+ MAINNET = 1,
+ SEPOLIA = 11155111,
+ BSC_MAINNET = 56,
+ BSC_TESTNET = 97,
+ POLYGON = 137,
+ POLYGON_AMOY = 80002,
+ LOCALHOST = 1338,
+}
+```
+
+```ts
+type CancellationRefund = {
+  id: string;
+  escrowAddress: string;
+  receiver: string;
+  amount: bigint;
+  block: number;
+  timestamp: number;
+  txHash: string;
+};
+```
+
+#### Parameters
+
+##### chainId
+
+[`ChainId`](../../enums/enumerations/ChainId.md)
+
+Network in which the escrow has been deployed
+
+##### escrowAddress
+
+`string`
+
+Address of the escrow
+
+#### Returns
+
+`Promise`\<[`CancellationRefund`](../../types/type-aliases/CancellationRefund.md)\>
+
+Cancellation refund data
+
+**Code example**
+
+```ts
+import { ChainId, EscrowUtils } from '@human-protocol/sdk';
+
+const cancellationRefund = await EscrowUtils.getCancellationRefund(ChainId.POLYGON_AMOY, "0x1234567890123456789012345678901234567890");
+```
+
+***
+
+### getCancellationRefunds()
+
+> `static` **getCancellationRefunds**(`filter`): `Promise`\<[`CancellationRefund`](../../types/type-aliases/CancellationRefund.md)[]\>
+
+Defined in: [escrow.ts:2047](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L2047)
+
+This function returns the cancellation refunds for a given set of networks.
+
+> This uses Subgraph
+
+**Input parameters**
+
+```ts
+enum ChainId {
+ ALL = -1,
+ MAINNET = 1,
+ SEPOLIA = 11155111,
+ BSC_MAINNET = 56,
+ BSC_TESTNET = 97,
+ POLYGON = 137,
+ POLYGON_AMOY = 80002,
+ LOCALHOST = 1338,
+}
+```
+
+```ts
+type CancellationRefund = {
+  id: string;
+  escrowAddress: string;
+  receiver: string;
+  amount: bigint;
+  block: number;
+  timestamp: number;
+  txHash: string;
+};
+```
+
+#### Parameters
+
+##### filter
+
+Filter parameters.
+
+###### chainId
+
+[`ChainId`](../../enums/enumerations/ChainId.md)
+
+###### escrowAddress?
+
+`string`
+
+###### first?
+
+`number`
+
+###### from?
+
+`Date`
+
+###### orderDirection?
+
+[`OrderDirection`](../../enums/enumerations/OrderDirection.md)
+
+###### receiver?
+
+`string`
+
+###### skip?
+
+`number`
+
+###### to?
+
+`Date`
+
+#### Returns
+
+`Promise`\<[`CancellationRefund`](../../types/type-aliases/CancellationRefund.md)[]\>
+
+List of cancellation refunds matching the filters.
+
+**Code example**
+
+```ts
+import { ChainId, EscrowUtils } from '@human-protocol/sdk';
+
+const cancellationRefunds = await EscrowUtils.getCancellationRefunds({
+   chainId: ChainId.POLYGON_AMOY,
+   escrowAddress: '0x1234567890123456789012345678901234567890',
+});
+console.log(cancellationRefunds);
+```
+
+***
+
 ### getEscrow()
 
 > `static` **getEscrow**(`chainId`, `escrowAddress`): `Promise`\<[`EscrowData`](../../graphql/types/type-aliases/EscrowData.md)\>
 
-Defined in: [escrow.ts:1789](https://github.com/humanprotocol/human-protocol/blob/99b899a11bf48f2fa04884687ea395e0d42d75d1/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1789)
+Defined in: [escrow.ts:1795](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1795)
 
 This function returns the escrow data for a given address.
 
@@ -133,7 +295,7 @@ const escrowData = new EscrowUtils.getEscrow(ChainId.POLYGON_AMOY, "0x1234567890
 
 > `static` **getEscrows**(`filter`): `Promise`\<[`EscrowData`](../../graphql/types/type-aliases/EscrowData.md)[]\>
 
-Defined in: [escrow.ts:1671](https://github.com/humanprotocol/human-protocol/blob/99b899a11bf48f2fa04884687ea395e0d42d75d1/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1671)
+Defined in: [escrow.ts:1677](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1677)
 
 This function returns an array of escrows based on the specified filter parameters.
 
@@ -245,7 +407,7 @@ const escrowDatas = await EscrowUtils.getEscrows(filters);
 
 > `static` **getPayouts**(`filter`): `Promise`\<[`Payout`](../../types/type-aliases/Payout.md)[]\>
 
-Defined in: [escrow.ts:1959](https://github.com/humanprotocol/human-protocol/blob/99b899a11bf48f2fa04884687ea395e0d42d75d1/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1959)
+Defined in: [escrow.ts:1965](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1965)
 
 This function returns the payouts for a given set of networks.
 
@@ -289,7 +451,7 @@ console.log(payouts);
 
 > `static` **getStatusEvents**(`filter`): `Promise`\<[`StatusEvent`](../../graphql/types/type-aliases/StatusEvent.md)[]\>
 
-Defined in: [escrow.ts:1868](https://github.com/humanprotocol/human-protocol/blob/99b899a11bf48f2fa04884687ea395e0d42d75d1/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1868)
+Defined in: [escrow.ts:1874](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1874)
 
 This function returns the status events for a given set of networks within an optional date range.
 

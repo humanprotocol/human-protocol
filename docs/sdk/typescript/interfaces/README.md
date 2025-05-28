@@ -8,6 +8,7 @@
 
 ## Interfaces
 
+- [ICancellationRefundFilter](interfaces/ICancellationRefundFilter.md)
 - [IEscrowConfig](interfaces/IEscrowConfig.md)
 - [IEscrowsFilter](interfaces/IEscrowsFilter.md)
 - [IHMTHoldersParams](interfaces/IHMTHoldersParams.md)

@@ -66,6 +66,7 @@ export class MutexManagerService implements OnModuleDestroy {
         );
         throw new Error(
           `Function execution timed out for ${(key as any).id as string}`,
+          e.stack,
         );
       }
       this.logger.error(
@@ -74,6 +75,7 @@ export class MutexManagerService implements OnModuleDestroy {
       );
       throw new ServerError(
         `Function execution failed for ${(key as any).id as string}`,
+        e.stack,
       );
     }
   }

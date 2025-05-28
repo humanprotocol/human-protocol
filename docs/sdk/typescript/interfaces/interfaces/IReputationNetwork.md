@@ -6,7 +6,7 @@
 
 # Interface: IReputationNetwork
 
-Defined in: [interfaces.ts:47](https://github.com/humanprotocol/human-protocol/blob/99b899a11bf48f2fa04884687ea395e0d42d75d1/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L47)
+Defined in: [interfaces.ts:47](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L47)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [interfaces.ts:47](https://github.com/humanprotocol/human-protocol/b
 
 > **address**: `string`
 
-Defined in: [interfaces.ts:49](https://github.com/humanprotocol/human-protocol/blob/99b899a11bf48f2fa04884687ea395e0d42d75d1/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L49)
+Defined in: [interfaces.ts:49](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L49)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [interfaces.ts:49](https://github.com/humanprotocol/human-protocol/b
 
 > **id**: `string`
 
-Defined in: [interfaces.ts:48](https://github.com/humanprotocol/human-protocol/blob/99b899a11bf48f2fa04884687ea395e0d42d75d1/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L48)
+Defined in: [interfaces.ts:48](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L48)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [interfaces.ts:48](https://github.com/humanprotocol/human-protocol/b
 
 > **operators**: [`IOperator`](IOperator.md)[]
 
-Defined in: [interfaces.ts:50](https://github.com/humanprotocol/human-protocol/blob/99b899a11bf48f2fa04884687ea395e0d42d75d1/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L50)
+Defined in: [interfaces.ts:50](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L50)

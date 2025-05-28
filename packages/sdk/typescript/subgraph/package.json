@@ -14,7 +14,7 @@
     "generate-staking": "mustache ./config/$NETWORK.json src/mapping/StakingTemplate.ts > src/mapping/Staking.ts",
     "codegen": "graph codegen",
     "build": "graph build",
-    "test": "graph test",
+    "test": "NETWORK=polygon yarn generate && graph test",
     "create-local": "graph create --node http://localhost:8020/ humanprotocol/localhost",
     "remove-local": "graph remove --node http://localhost:8020/ humanprotocol/localhost",
     "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5010 humanprotocol/localhost -l 0",

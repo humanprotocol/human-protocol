@@ -118,7 +118,11 @@ export class JobRepository extends BaseRepository<JobEntity> {
         ];
         break;
       case JobStatusFilter.CANCELED:
-        statusFilter = [JobStatus.TO_CANCEL, JobStatus.CANCELED];
+        statusFilter = [
+          JobStatus.TO_CANCEL,
+          JobStatus.CANCELING,
+          JobStatus.CANCELED,
+        ];
         break;
       default:
         statusFilter = [data.status as any];

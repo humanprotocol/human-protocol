@@ -41,7 +41,7 @@ import {
   GET_ESCROW_BY_ADDRESS_QUERY,
   GET_PAYOUTS_QUERY,
 } from '../src/graphql';
-import { EscrowStatus } from '../src/types';
+import { CancellationRefund, EscrowStatus } from '../src/types';
 import {
   DEFAULT_GAS_PAYER_PRIVKEY,
   DEFAULT_TX_ID,
@@ -102,6 +102,7 @@ describe('EscrowClient', () => {
       addTrustedHandlers: vi.fn(),
       getBalance: vi.fn(),
       remainingFunds: vi.fn(),
+      reservedFunds: vi.fn(),
       manifestHash: vi.fn(),
       manifestUrl: vi.fn(),
       finalResultsUrl: vi.fn(),
@@ -1603,41 +1604,16 @@ describe('EscrowClient', () => {
 
     test('should successfully cancel escrow', async () => {
       const escrowAddress = ethers.ZeroAddress;
-      const amountRefunded = 1n;
 
       escrowClient.escrowContract.token.mockResolvedValueOnce(
         ethers.ZeroAddress
       );
-
-      const log = {
-        address: ethers.ZeroAddress,
-        name: 'Transfer',
-        args: [ethers.ZeroAddress, ethers.ZeroAddress, amountRefunded],
-      };
-      mockTx.wait.mockResolvedValueOnce({
-        hash: FAKE_HASH,
-        logs: [log],
-      });
-
-      const mockHMTokenFactoryContract = {
-        interface: {
-          parseLog: vi.fn().mockReturnValueOnce(log),
-        },
-      };
-
-      vi.spyOn(HMToken__factory, 'connect').mockReturnValue(
-        mockHMTokenFactoryContract as any
-      );
-
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
       escrowClient.escrowContract.cancel.mockResolvedValueOnce(mockTx);
 
       const result = await escrowClient.cancel(escrowAddress);
 
-      expect(result).toStrictEqual({
-        amountRefunded,
-        txHash: FAKE_HASH,
-      });
+      expect(result).toBe(undefined);
       expect(escrowClient.escrowContract.cancel).toHaveBeenCalledWith({});
     });
 
@@ -1652,85 +1628,19 @@ describe('EscrowClient', () => {
       expect(escrowClient.escrowContract.cancel).toHaveBeenCalledWith({});
     });
 
-    test('should throw an error if the wait fails', async () => {
-      const escrowAddress = ethers.ZeroAddress;
-      mockTx.wait.mockRejectedValueOnce(new Error());
-      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
-      escrowClient.escrowContract.cancel.mockResolvedValueOnce(mockTx);
-
-      await expect(escrowClient.cancel(escrowAddress)).rejects.toThrow();
-
-      expect(escrowClient.escrowContract.cancel).toHaveBeenCalledWith({});
-    });
-
-    test('should throw an error if transfer event not found in transaction logs', async () => {
-      const escrowAddress = ethers.ZeroAddress;
-      mockTx.wait.mockResolvedValueOnce({
-        transactionHash: FAKE_HASH,
-        logs: [
-          {
-            address: ethers.ZeroAddress,
-            name: 'NotTransfer',
-            args: [ethers.ZeroAddress, ethers.ZeroAddress, undefined],
-          },
-        ],
-      });
-      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
-      escrowClient.escrowContract.cancel.mockResolvedValueOnce(mockTx);
-
-      const mockHMTokenFactoryContract = {
-        interface: {
-          parseLog: vi.fn(),
-        },
-      };
-
-      vi.spyOn(HMToken__factory, 'connect').mockReturnValue(
-        mockHMTokenFactoryContract as any
-      );
-
-      await expect(escrowClient.cancel(escrowAddress)).rejects.toThrow();
-
-      expect(escrowClient.escrowContract.cancel).toHaveBeenCalledWith({});
-    });
-
     test('should successfully cancel escrow with transaction options', async () => {
       const escrowAddress = ethers.ZeroAddress;
-      const amountRefunded = 1n;
 
       escrowClient.escrowContract.token.mockResolvedValueOnce(
         ethers.ZeroAddress
       );
-
-      const log = {
-        address: ethers.ZeroAddress,
-        name: 'Transfer',
-        args: [ethers.ZeroAddress, ethers.ZeroAddress, amountRefunded],
-      };
-      mockTx.wait.mockResolvedValueOnce({
-        hash: FAKE_HASH,
-        logs: [log],
-      });
-
-      const mockHMTokenFactoryContract = {
-        interface: {
-          parseLog: vi.fn().mockReturnValueOnce(log),
-        },
-      };
-
-      vi.spyOn(HMToken__factory, 'connect').mockReturnValue(
-        mockHMTokenFactoryContract as any
-      );
-
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
       escrowClient.escrowContract.cancel.mockResolvedValueOnce(mockTx);
       const txOptions: Overrides = { gasLimit: 45000 };
 
       const result = await escrowClient.cancel(escrowAddress, txOptions);
 
-      expect(result).toStrictEqual({
-        amountRefunded,
-        txHash: FAKE_HASH,
-      });
+      expect(result).toBe(undefined);
       expect(escrowClient.escrowContract.cancel).toHaveBeenCalledWith(
         txOptions
       );
@@ -2619,6 +2529,56 @@ describe('EscrowClient', () => {
       expect(escrowClient.escrowContract.escrowFactory).toHaveBeenCalledWith();
     });
   });
+
+  describe('getReservedFunds', () => {
+    test('should throw an error if escrowAddress is an invalid address', async () => {
+      const escrowAddress = FAKE_ADDRESS;
+
+      await expect(
+        escrowClient.getReservedFunds(escrowAddress)
+      ).rejects.toThrow(ErrorInvalidEscrowAddressProvided);
+    });
+
+    test('should throw an error if hasEscrow returns false', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(false);
+
+      await expect(
+        escrowClient.getReservedFunds(escrowAddress)
+      ).rejects.toThrow(ErrorEscrowAddressIsNotProvidedByFactory);
+    });
+
+    test('should successfully getReservedFunds', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+      const reservedAmount = 123n;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.reservedFunds.mockResolvedValueOnce(
+        reservedAmount
+      );
+
+      const result = await escrowClient.getReservedFunds(escrowAddress);
+
+      expect(result).toEqual(reservedAmount);
+      expect(escrowClient.escrowContract.reservedFunds).toHaveBeenCalledWith();
+    });
+
+    test('should throw an error if getReservedFunds fails', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.reservedFunds.mockRejectedValueOnce(
+        new Error()
+      );
+
+      await expect(
+        escrowClient.getReservedFunds(escrowAddress)
+      ).rejects.toThrow();
+
+      expect(escrowClient.escrowContract.reservedFunds).toHaveBeenCalledWith();
+    });
+  });
 });
 
 describe('EscrowUtils', () => {
@@ -3308,6 +3268,149 @@ describe('EscrowUtils', () => {
 
       const result = await EscrowUtils.getPayouts(filter);
       expect(result).toEqual([]);
+      expect(gqlFetchSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('getCancellationRefunds', () => {
+    afterEach(() => {
+      vi.clearAllMocks();
+    });
+
+    test('should throw an error if chainId is invalid', async () => {
+      await expect(
+        EscrowUtils.getCancellationRefunds({ chainId: 123 } as any)
+      ).rejects.toThrow(ErrorUnsupportedChainID);
+    });
+
+    test('should throw an error if escrowAddress is invalid', async () => {
+      const filter = {
+        chainId: ChainId.POLYGON_AMOY,
+        escrowAddress: 'invalid_address',
+      };
+
+      await expect(EscrowUtils.getCancellationRefunds(filter)).rejects.toThrow(
+        ErrorInvalidEscrowAddressProvided
+      );
+    });
+
+    test('should throw an error if receiver is invalid', async () => {
+      const filter = {
+        chainId: ChainId.POLYGON_AMOY,
+        receiver: 'invalid_address',
+      };
+
+      await expect(EscrowUtils.getCancellationRefunds(filter)).rejects.toThrow(
+        ErrorInvalidAddress
+      );
+    });
+
+    test('should successfully getCancellationRefunds', async () => {
+      const refunds: CancellationRefund[] = [
+        {
+          id: '1',
+          escrowAddress: '0x1234567890123456789012345678901234567890',
+          receiver: '0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef',
+          amount: 1000n,
+          block: 123456,
+          timestamp: 1710000000,
+          txHash: '0xhash1',
+        },
+        {
+          id: '2',
+          escrowAddress: '0x1234567890123456789012345678901234567890',
+          receiver: '0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef',
+          amount: 2000n,
+          block: 123457,
+          timestamp: 1710000001,
+          txHash: '0xhash2',
+        },
+      ];
+
+      const gqlFetchSpy = vi
+        .spyOn(gqlFetch, 'default')
+        .mockResolvedValue({ cancellationRefundEvents: refunds });
+
+      const filter = {
+        chainId: ChainId.POLYGON_AMOY,
+      };
+
+      const result = await EscrowUtils.getCancellationRefunds(filter);
+      expect(result).toEqual(refunds);
+      expect(gqlFetchSpy).toHaveBeenCalled();
+    });
+
+    test('should return an empty array if no refunds are found', async () => {
+      const gqlFetchSpy = vi
+        .spyOn(gqlFetch, 'default')
+        .mockResolvedValue({ cancellationRefundEvents: [] });
+
+      const filter = {
+        chainId: ChainId.POLYGON_AMOY,
+      };
+
+      const result = await EscrowUtils.getCancellationRefunds(filter);
+      expect(result).toEqual([]);
+      expect(gqlFetchSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('getCancellationRefund', () => {
+    afterEach(() => {
+      vi.clearAllMocks();
+    });
+
+    test('should throw an error if chainId is invalid', async () => {
+      await expect(
+        EscrowUtils.getCancellationRefund(
+          123 as any,
+          '0x1234567890123456789012345678901234567890'
+        )
+      ).rejects.toThrow(ErrorUnsupportedChainID);
+    });
+
+    test('should throw an error if escrowAddress is invalid', async () => {
+      await expect(
+        EscrowUtils.getCancellationRefund(
+          ChainId.POLYGON_AMOY,
+          'invalid_address'
+        )
+      ).rejects.toThrow(ErrorInvalidEscrowAddressProvided);
+    });
+
+    test('should successfully getCancellationRefund', async () => {
+      const refund: CancellationRefund = {
+        id: '1',
+        escrowAddress: '0x1234567890123456789012345678901234567890',
+        receiver: '0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef',
+        amount: 1000n,
+        block: 123456,
+        timestamp: 1710000000,
+        txHash: '0xhash1',
+      };
+
+      const gqlFetchSpy = vi
+        .spyOn(gqlFetch, 'default')
+        .mockResolvedValue({ cancellationRefundEvents: [refund] });
+
+      const result = await EscrowUtils.getCancellationRefund(
+        ChainId.POLYGON_AMOY,
+        refund.escrowAddress
+      );
+      expect(result).toEqual(refund);
+      expect(gqlFetchSpy).toHaveBeenCalled();
+    });
+
+    test('should return null if no refund is found', async () => {
+      const gqlFetchSpy = vi
+        .spyOn(gqlFetch, 'default')
+        .mockResolvedValue({ cancellationRefundEvents: [] });
+
+      const result = await EscrowUtils.getCancellationRefund(
+        ChainId.POLYGON_AMOY,
+        '0x1234567890123456789012345678901234567890'
+      );
+      expect(result).toBeNull();
       expect(gqlFetchSpy).toHaveBeenCalled();
     });
   });

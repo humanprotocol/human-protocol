@@ -18,6 +18,10 @@ export class WebhookService {
         await this.jobService.processJobSolution(wehbook);
         break;
 
+      case EventType.ESCROW_CANCELED:
+        await this.jobService.cancelJob(wehbook);
+        break;
+
       default:
         throw new ValidationError(
           `Invalid webhook event type: ${wehbook.eventType}`,

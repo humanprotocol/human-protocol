@@ -6,40 +6,43 @@ import {
 } from '@graphprotocol/graph-ts';
 import {
   afterAll,
+  assert,
   beforeAll,
+  beforeEach,
+  clearStore,
+  createMockedFunction,
+  dataSourceMock,
   describe,
   test,
-  assert,
-  clearStore,
-  dataSourceMock,
-  beforeEach,
-  createMockedFunction,
 } from 'matchstick-as/assembly';
-
 import { Escrow } from '../../generated/schema';
 import {
   STATISTICS_ENTITY_ID,
-  handleIntermediateStorage,
-  handlePending,
   handleBulkTransfer,
+  handleBulkTransferV2,
+  handleCancellationRefund,
+  handleCancellationRequested,
   handleCancelled,
   handleCompleted,
   handleFund,
+  handleIntermediateStorage,
+  handlePending,
   handlePendingV2,
-  handleBulkTransferV2,
   handleWithdraw,
 } from '../../src/mapping/Escrow';
 import { toEventId } from '../../src/mapping/utils/event';
 import { ZERO_BI } from '../../src/mapping/utils/number';
 import {
-  createISEvent,
-  createPendingEvent,
   createBulkTransferEvent,
+  createBulkTransferV2Event,
+  createCancellationRefundEvent,
+  createCancellationRequestedEvent,
   createCancelledEvent,
   createCompletedEvent,
   createFundEvent,
+  createISEvent,
+  createPendingEvent,
   createPendingV2Event,
-  createBulkTransferV2Event,
   createWithdrawEvent,
 } from './fixtures';
 
@@ -121,7 +124,12 @@ describe('Escrow', () => {
       'exchangeOracle():(address)'
     ).reverts();
 
-    const newPending1 = createPendingEvent(operatorAddress, URL, HASH);
+    const newPending1 = createPendingEvent(
+      operatorAddress,
+      URL,
+      HASH,
+      BigInt.fromI32(1)
+    );
 
     handlePending(newPending1);
 
@@ -251,7 +259,12 @@ describe('Escrow', () => {
       'exchangeOracle():(address)'
     ).reverts();
 
-    const newPending1 = createPendingEvent(operatorAddress, URL, HASH);
+    const newPending1 = createPendingEvent(
+      operatorAddress,
+      URL,
+      HASH,
+      BigInt.fromI32(2)
+    );
 
     handlePending(newPending1);
 
@@ -398,7 +411,12 @@ describe('Escrow', () => {
       'exchangeOracle():(address)'
     ).returns([ethereum.Value.fromAddress(exchangeOracleAddress)]);
 
-    const newPending1 = createPendingEvent(operatorAddress, URL, HASH);
+    const newPending1 = createPendingEvent(
+      operatorAddress,
+      URL,
+      HASH,
+      BigInt.fromI32(3)
+    );
 
     handlePending(newPending1);
 
@@ -547,7 +565,7 @@ describe('Escrow', () => {
   });
 
   test('Should properly handle Fund event', () => {
-    const fund = createFundEvent(operatorAddress, 100, BigInt.fromI32(10));
+    const fund = createFundEvent(operatorAddress, 100, BigInt.fromI32(4));
 
     handleFund(fund);
 
@@ -606,7 +624,8 @@ describe('Escrow', () => {
       HASH,
       reputationOracleAddress,
       recordingOracleAddress,
-      exchangeOracleAddress
+      exchangeOracleAddress,
+      BigInt.fromI32(5)
     );
 
     handlePendingV2(newPending1);
@@ -753,7 +772,12 @@ describe('Escrow', () => {
 
   test('should properly handle IntermediateStorage event', () => {
     const URL = 'test.com';
-    const newIS = createISEvent(workerAddress, URL, 'is_hash_1');
+    const newIS = createISEvent(
+      workerAddress,
+      URL,
+      'is_hash_1',
+      BigInt.fromI32(6)
+    );
     handleIntermediateStorage(newIS);
 
     const id = toEventId(newIS).toHex();
@@ -825,7 +849,7 @@ describe('Escrow', () => {
       [workerAddress, workerAddress],
       [1, 1],
       true,
-      BigInt.fromI32(10)
+      BigInt.fromI32(7)
     );
 
     handleBulkTransfer(bulk1);
@@ -910,7 +934,7 @@ describe('Escrow', () => {
       [workerAddress, workerAddress, workerAddress, worker2Address],
       [1, 1, 1, 95],
       false,
-      BigInt.fromI32(11)
+      BigInt.fromI32(8)
     );
 
     handleBulkTransfer(bulk2);
@@ -1034,7 +1058,7 @@ describe('Escrow', () => {
       [1, 1],
       true,
       'test.com',
-      BigInt.fromI32(10)
+      BigInt.fromI32(8)
     );
 
     handleBulkTransferV2(bulk1);
@@ -1121,7 +1145,7 @@ describe('Escrow', () => {
       [1, 1, 1, 95],
       false,
       'test.com',
-      BigInt.fromI32(11)
+      BigInt.fromI32(9)
     );
 
     handleBulkTransferV2(bulk2);
@@ -1237,6 +1261,142 @@ describe('Escrow', () => {
     );
   });
 
+  test('Should properly handle CancellationRequested event', () => {
+    const cancellationRequested = createCancellationRequestedEvent(
+      operatorAddress,
+      BigInt.fromI32(10)
+    );
+
+    handleCancellationRequested(cancellationRequested);
+
+    const id = toEventId(cancellationRequested).toHex();
+
+    // EscrowStatusEvent
+    assert.fieldEquals(
+      'EscrowStatusEvent',
+      id,
+      'block',
+      cancellationRequested.block.number.toString()
+    );
+    assert.fieldEquals(
+      'EscrowStatusEvent',
+      id,
+      'timestamp',
+      cancellationRequested.block.timestamp.toString()
+    );
+    assert.fieldEquals(
+      'EscrowStatusEvent',
+      id,
+      'txHash',
+      cancellationRequested.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'EscrowStatusEvent',
+      id,
+      'escrowAddress',
+      escrowAddressString
+    );
+    assert.fieldEquals(
+      'EscrowStatusEvent',
+      id,
+      'sender',
+      operatorAddressString
+    );
+    assert.fieldEquals('EscrowStatusEvent', id, 'status', 'ToCancel');
+
+    // Escrow
+    assert.fieldEquals('Escrow', escrowAddress.toHex(), 'status', 'ToCancel');
+    assert.fieldEquals(
+      'Transaction',
+      cancellationRequested.transaction.hash.toHex(),
+      'txHash',
+      cancellationRequested.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      cancellationRequested.transaction.hash.toHex(),
+      'method',
+      'cancel'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      cancellationRequested.transaction.hash.toHex(),
+      'block',
+      cancellationRequested.block.number.toString()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      cancellationRequested.transaction.hash.toHex(),
+      'from',
+      cancellationRequested.transaction.from.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      cancellationRequested.transaction.hash.toHex(),
+      'to',
+      escrowAddressString
+    );
+  });
+
+  test('Should properly handle CancellationRefund event', () => {
+    const amount = 1000;
+
+    const cancellationRefund = createCancellationRefundEvent(
+      escrowAddress,
+      operatorAddress,
+      amount,
+      BigInt.fromI32(11)
+    );
+    handleCancellationRefund(cancellationRefund);
+
+    // CancellationRefundEvent
+    const id = toEventId(cancellationRefund).toHex();
+    assert.fieldEquals(
+      'CancellationRefundEvent',
+      id,
+      'escrowAddress',
+      escrowAddress.toHex()
+    );
+    assert.fieldEquals(
+      'CancellationRefundEvent',
+      id,
+      'receiver',
+      launcherAddress.toHex()
+    );
+    assert.fieldEquals(
+      'CancellationRefundEvent',
+      id,
+      'amount',
+      amount.toString()
+    );
+
+    // Transaction
+    assert.fieldEquals(
+      'Transaction',
+      cancellationRefund.transaction.hash.toHex(),
+      'method',
+      'cancellationRefund'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      cancellationRefund.transaction.hash.toHex(),
+      'to',
+      escrowAddress.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      cancellationRefund.transaction.hash.toHex(),
+      'receiver',
+      launcherAddress.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      cancellationRefund.transaction.hash.toHex(),
+      'value',
+      amount.toString()
+    );
+  });
+
   test('Should properly handle Cancelled event', () => {
     const newCancelled = createCancelledEvent(operatorAddress);
 
@@ -1285,40 +1445,13 @@ describe('Escrow', () => {
 
     // Escrow
     assert.fieldEquals('Escrow', escrowAddress.toHex(), 'status', 'Cancelled');
-    assert.fieldEquals(
-      'Transaction',
-      newCancelled.transaction.hash.toHex(),
-      'txHash',
-      newCancelled.transaction.hash.toHex()
-    );
-    assert.fieldEquals(
-      'Transaction',
-      newCancelled.transaction.hash.toHex(),
-      'method',
-      'cancel'
-    );
-    assert.fieldEquals(
-      'Transaction',
-      newCancelled.transaction.hash.toHex(),
-      'block',
-      newCancelled.block.number.toString()
-    );
-    assert.fieldEquals(
-      'Transaction',
-      newCancelled.transaction.hash.toHex(),
-      'from',
-      newCancelled.transaction.from.toHex()
-    );
-    assert.fieldEquals(
-      'Transaction',
-      newCancelled.transaction.hash.toHex(),
-      'to',
-      escrowAddressString
-    );
   });
 
   test('Should properly handle Completed event', () => {
-    const newCompleted = createCompletedEvent(operatorAddress);
+    const newCompleted = createCompletedEvent(
+      operatorAddress,
+      BigInt.fromI32(12)
+    );
 
     handleCompleted(newCompleted);
 
@@ -1402,7 +1535,7 @@ describe('Escrow', () => {
       operatorAddress,
       tokenAddress,
       100,
-      BigInt.fromI32(10)
+      BigInt.fromI32(13)
     );
 
     handleWithdraw(withdraw);
@@ -1483,7 +1616,8 @@ describe('Escrow', () => {
         'is_hash_1',
         reputationOracleAddress,
         recordingOracleAddress,
-        exchangeOracleAddress
+        exchangeOracleAddress,
+        BigInt.fromI32(1)
       );
       const newPending2 = createPendingV2Event(
         operatorAddress,
@@ -1491,7 +1625,8 @@ describe('Escrow', () => {
         'is_hash_1',
         reputationOracleAddress,
         recordingOracleAddress,
-        exchangeOracleAddress
+        exchangeOracleAddress,
+        BigInt.fromI32(2)
       );
 
       handlePendingV2(newPending1);
@@ -1508,6 +1643,7 @@ describe('Escrow', () => {
         'fundEventCount',
         'storeResultsEventCount',
         'bulkPayoutEventCount',
+        'toCancelStatusEventCount',
         'cancelledStatusEventCount',
         'partialStatusEventCount',
         'paidStatusEventCount',
@@ -1530,8 +1666,18 @@ describe('Escrow', () => {
     });
 
     test('Should properly calculate StoreResults event in statistics', () => {
-      const newIS = createISEvent(workerAddress, 'test.com', 'is_hash_1');
-      const newIS1 = createISEvent(workerAddress, 'test.com', 'is_hash_1');
+      const newIS = createISEvent(
+        workerAddress,
+        'test.com',
+        'is_hash_1',
+        BigInt.fromI32(1)
+      );
+      const newIS1 = createISEvent(
+        workerAddress,
+        'test.com',
+        'is_hash_1',
+        BigInt.fromI32(2)
+      );
 
       handleIntermediateStorage(newIS);
       handleIntermediateStorage(newIS1);
@@ -1547,6 +1693,7 @@ describe('Escrow', () => {
         'fundEventCount',
         'bulkPayoutEventCount',
         'pendingStatusEventCount',
+        'toCancelStatusEventCount',
         'cancelledStatusEventCount',
         'partialStatusEventCount',
         'paidStatusEventCount',
@@ -1583,7 +1730,7 @@ describe('Escrow', () => {
           [1, 1, 1, 1, 1],
           true,
           'test.com',
-          BigInt.fromI32(11)
+          BigInt.fromI32(1)
         )
       );
       handleBulkTransferV2(
@@ -1594,7 +1741,7 @@ describe('Escrow', () => {
           [1, 1, 1, 1],
           false,
           'test.com',
-          BigInt.fromI32(11)
+          BigInt.fromI32(2)
         )
       );
 
@@ -1621,6 +1768,7 @@ describe('Escrow', () => {
         'fundEventCount',
         'storeResultsEventCount',
         'pendingStatusEventCount',
+        'toCancelStatusEventCount',
         'cancelledStatusEventCount',
         'completedStatusEventCount',
       ].forEach((field) => {
@@ -1658,6 +1806,7 @@ describe('Escrow', () => {
         'fundEventCount',
         'storeResultsEventCount',
         'bulkPayoutEventCount',
+        'toCancelStatusEventCount',
         'pendingStatusEventCount',
         'partialStatusEventCount',
         'paidStatusEventCount',
@@ -1680,8 +1829,14 @@ describe('Escrow', () => {
     });
 
     test('Should properly calculate completed event in statstics', () => {
-      const newCompleted1 = createCompletedEvent(operatorAddress);
-      const newCompleted2 = createCompletedEvent(operatorAddress);
+      const newCompleted1 = createCompletedEvent(
+        operatorAddress,
+        BigInt.fromI32(1)
+      );
+      const newCompleted2 = createCompletedEvent(
+        operatorAddress,
+        BigInt.fromI32(2)
+      );
 
       handleCompleted(newCompleted1);
       handleCompleted(newCompleted2);
@@ -1698,6 +1853,7 @@ describe('Escrow', () => {
         'storeResultsEventCount',
         'bulkPayoutEventCount',
         'pendingStatusEventCount',
+        'toCancelStatusEventCount',
         'cancelledStatusEventCount',
         'partialStatusEventCount',
         'paidStatusEventCount',
@@ -1756,7 +1912,7 @@ describe('Escrow', () => {
 
       escrow.save();
 
-      const newFund1 = createFundEvent(operatorAddress, 1, BigInt.fromI32(10));
+      const newFund1 = createFundEvent(operatorAddress, 1, BigInt.fromI32(1));
 
       handleFund(newFund1);
 
@@ -1771,6 +1927,7 @@ describe('Escrow', () => {
         'storeResultsEventCount',
         'bulkPayoutEventCount',
         'pendingStatusEventCount',
+        'toCancelStatusEventCount',
         'cancelledStatusEventCount',
         'partialStatusEventCount',
         'paidStatusEventCount',
@@ -1789,6 +1946,52 @@ describe('Escrow', () => {
         STATISTICS_ENTITY_ID.toHex(),
         'totalEventCount',
         '1'
+      );
+    });
+
+    test('Should properly calculate toCancel event in statistics', () => {
+      const newCancellationRequested1 = createCancellationRequestedEvent(
+        operatorAddress,
+        BigInt.fromI32(1)
+      );
+      const newCancellationRequested2 = createCancellationRequestedEvent(
+        operatorAddress,
+        BigInt.fromI32(2)
+      );
+
+      handleCancellationRequested(newCancellationRequested1);
+      handleCancellationRequested(newCancellationRequested2);
+
+      assert.fieldEquals(
+        'EscrowStatistics',
+        STATISTICS_ENTITY_ID.toHex(),
+        'toCancelStatusEventCount',
+        '2'
+      );
+
+      [
+        'fundEventCount',
+        'storeResultsEventCount',
+        'bulkPayoutEventCount',
+        'pendingStatusEventCount',
+        'partialStatusEventCount',
+        'paidStatusEventCount',
+        'cancelledStatusEventCount',
+        'completedStatusEventCount',
+      ].forEach((field) => {
+        assert.fieldEquals(
+          'EscrowStatistics',
+          STATISTICS_ENTITY_ID.toHex(),
+          field,
+          '0'
+        );
+      });
+
+      assert.fieldEquals(
+        'EscrowStatistics',
+        STATISTICS_ENTITY_ID.toHex(),
+        'totalEventCount',
+        '2'
       );
     });
   });

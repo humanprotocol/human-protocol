@@ -66,7 +66,6 @@ import { WebhookRepository } from '../webhook/webhook.repository';
 import { WhitelistService } from '../whitelist/whitelist.service';
 import {
   CreateJob,
-  EscrowCancelDto,
   FortuneFinalResultDto,
   GetJobsDto,
   JobDetailsDto,
@@ -384,6 +383,7 @@ export class JobService {
       eventType: EventType.ESCROW_CREATED,
       oracleType: oracleType,
       hasSignature: oracleType !== OracleType.HCAPTCHA ? true : false,
+      oracleAddress: jobEntity.exchangeOracle,
     });
     await this.webhookRepository.createUnique(webhookEntity);
 
@@ -461,7 +461,7 @@ export class JobService {
       throw new ConflictError(ErrorJob.InvalidStatusCancellation);
     }
 
-    let status = JobStatus.CANCELED;
+    let status = JobStatus.TO_CANCEL;
     switch (jobEntity.status) {
       case JobStatus.PAID:
         if (await this.isCronJobRunning(CronJobType.CreateEscrow)) {
@@ -478,22 +478,10 @@ export class JobService {
           status = JobStatus.FAILED;
         }
         break;
-      default:
-        status = JobStatus.TO_CANCEL;
-        break;
     }
 
     if (status === JobStatus.FAILED) {
       throw new ConflictError(ErrorJob.CancelWhileProcessing);
-    }
-
-    if (status === JobStatus.CANCELED) {
-      await this.paymentService.createRefundPayment({
-        refundAmount: jobEntity.fundAmount,
-        refundCurrency: jobEntity.token,
-        userId: jobEntity.userId,
-        jobId: jobEntity.id,
-      });
     }
 
     jobEntity.status = status;
@@ -663,9 +651,7 @@ export class JobService {
     }
   }
 
-  public async processEscrowCancellation(
-    jobEntity: JobEntity,
-  ): Promise<EscrowCancelDto> {
+  public async processEscrowCancellation(jobEntity: JobEntity): Promise<void> {
     const { chainId, escrowAddress } = jobEntity;
 
     const signer = this.web3Service.getSigner(chainId);
@@ -860,7 +846,7 @@ export class JobService {
     return BigInt(feeValue ? feeValue : 1);
   }
 
-  public async completeJob(dto: WebhookDataDto): Promise<void> {
+  public async finalizeJob(dto: WebhookDataDto): Promise<void> {
     const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
       dto.chainId,
       dto.escrowAddress,
@@ -870,19 +856,40 @@ export class JobService {
       throw new NotFoundError(ErrorJob.NotFound);
     }
 
-    // If job status already completed by getDetails do nothing
-    if (jobEntity.status === JobStatus.COMPLETED) {
+    // If job status already completed or cancelled by getDetails do nothing
+    if (
+      jobEntity.status === JobStatus.COMPLETED ||
+      jobEntity.status === JobStatus.CANCELED
+    ) {
       return;
     }
+
     if (
       jobEntity.status !== JobStatus.LAUNCHED &&
-      jobEntity.status !== JobStatus.PARTIAL
+      jobEntity.status !== JobStatus.PARTIAL &&
+      jobEntity.status !== JobStatus.CANCELING
     ) {
       throw new ConflictError(ErrorJob.InvalidStatusCompletion);
     }
 
-    jobEntity.status = JobStatus.COMPLETED;
-    await this.jobRepository.updateOne(jobEntity);
+    // Finalize job based on event type
+    if (
+      dto.eventType === EventType.ESCROW_COMPLETED &&
+      (jobEntity.status === JobStatus.LAUNCHED ||
+        jobEntity.status === JobStatus.PARTIAL)
+    ) {
+      jobEntity.status = JobStatus.COMPLETED;
+      await this.jobRepository.updateOne(jobEntity);
+    } else if (
+      dto.eventType === EventType.ESCROW_CANCELED &&
+      (jobEntity.status === JobStatus.LAUNCHED ||
+        jobEntity.status === JobStatus.PARTIAL ||
+        jobEntity.status === JobStatus.CANCELING)
+    ) {
+      this.cancelJob(jobEntity);
+    } else {
+      throw new ConflictError(ErrorJob.InvalidStatusCompletion);
+    }
   }
 
   public async isEscrowFunded(
@@ -898,5 +905,28 @@ export class JobService {
     }
 
     return false;
+  }
+
+  public async cancelJob(jobEntity: JobEntity): Promise<void> {
+    console.log('Cancelling job');
+    const refund = await EscrowUtils.getCancellationRefund(
+      jobEntity.chainId,
+      jobEntity.escrowAddress,
+    );
+    console.log(refund);
+
+    if (!refund || !refund.amount) {
+      throw new ConflictError(ErrorJob.NoRefundFound);
+    }
+
+    await this.paymentService.createRefundPayment({
+      refundAmount: Number(ethers.formatEther(refund.amount)),
+      refundCurrency: jobEntity.token,
+      userId: jobEntity.userId,
+      jobId: jobEntity.id,
+    });
+
+    jobEntity.status = JobStatus.CANCELED;
+    await this.jobRepository.updateOne(jobEntity);
   }
 }

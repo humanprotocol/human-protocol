@@ -411,14 +411,6 @@ export class GetJobsDto extends PageOptionsDto {
   status?: JobStatusFilter;
 }
 
-export class EscrowCancelDto {
-  @ApiProperty()
-  public txHash: string;
-
-  @ApiProperty()
-  public amountRefunded: bigint;
-}
-
 export class JobCaptchaAdvancedDto {
   @ApiProperty({
     enum: WorkerLanguage,

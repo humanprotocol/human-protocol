@@ -705,6 +705,34 @@ Gets the reputation oracle address of the escrow.
   )
   ```
 
+#### get_reserved_funds(escrow_address)
+
+Gets the reserved funds for a specified escrow address.
+
+* **Parameters:**
+  **escrow_address** (`str`) – Address of the escrow
+* **Return type:**
+  `Decimal`
+* **Returns:**
+  Value of the reserved funds
+* **Raises:**
+  [**EscrowClientError**](#human_protocol_sdk.escrow.escrow_client.EscrowClientError) – If an error occurs while checking the parameters
+* **Example:**
+  ```python
+  from eth_typing import URI
+  from web3 import Web3
+  from web3.providers.auto import load_provider_from_uri
+
+  from human_protocol_sdk.escrow import EscrowClient
+
+  w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+  escrow_client = EscrowClient(w3)
+
+  reserved_funds = escrow_client.get_reserved_funds(
+      "0x62dD51230A30401C455c8398d06F85e4EaB6309f"
+  )
+  ```
+
 #### get_results_url(escrow_address)
 
 Gets the results file URL.

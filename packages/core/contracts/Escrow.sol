@@ -49,6 +49,8 @@ contract Escrow is IEscrow, ReentrancyGuard {
     event Completed();
     event Fund(uint256 _amount);
     event Withdraw(address _token, uint256 _amount);
+    event CancellationRequested();
+    event CancellationRefund(uint256 amount);
 
     EscrowStatuses public override status;
 
@@ -231,6 +233,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
         returns (bool)
     {
         status = EscrowStatuses.ToCancel;
+        emit CancellationRequested();
         return true;
     }
 
@@ -316,6 +319,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
             uint256 unreservedFunds = remainingFunds - reservedFunds;
             if (unreservedFunds > 0) {
                 _safeTransfer(token, launcher, unreservedFunds);
+                emit CancellationRefund(unreservedFunds);
                 remainingFunds = reservedFunds;
             }
         }

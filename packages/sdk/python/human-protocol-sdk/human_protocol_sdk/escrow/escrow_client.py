@@ -1108,6 +1108,40 @@ class EscrowClient:
 
         return self._get_escrow_contract(escrow_address).functions.getBalance().call()
 
+    def get_reserved_funds(self, escrow_address: str) -> Decimal:
+        """
+        Gets the reserved funds for a specified escrow address.
+
+        :param escrow_address: Address of the escrow
+
+        :return: Value of the reserved funds
+
+        :raise EscrowClientError: If an error occurs while checking the parameters
+
+        :example:
+            .. code-block:: python
+
+                from eth_typing import URI
+                from web3 import Web3
+                from web3.providers.auto import load_provider_from_uri
+
+                from human_protocol_sdk.escrow import EscrowClient
+
+                w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                escrow_client = EscrowClient(w3)
+
+                reserved_funds = escrow_client.get_reserved_funds(
+                    "0x62dD51230A30401C455c8398d06F85e4EaB6309f"
+                )
+        """
+
+        if not Web3.is_address(escrow_address):
+            raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
+
+        return (
+            self._get_escrow_contract(escrow_address).functions.reservedFunds().call()
+        )
+
     def get_manifest_hash(self, escrow_address: str) -> str:
         """
         Gets the manifest file hash.

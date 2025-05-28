@@ -23,6 +23,7 @@ import {
   SolutionEventData,
   WebhookDto,
 } from '../webhook/webhook.dto';
+import { HMToken__factory } from '@human-protocol/core/typechain-types';
 
 @Injectable()
 export class JobService {
@@ -171,7 +172,16 @@ export class JobService {
         s.solution === lastExchangeSolution.solution,
     );
 
-    const amountToReserve = BigInt(fundAmount) / BigInt(submissionsRequired);
+    const tokenAddress = await escrowClient.getTokenAddress(
+      webhook.escrowAddress,
+    );
+    const tokenContract = HMToken__factory.connect(
+      tokenAddress,
+      this.web3Service.getSigner(webhook.chainId),
+    );
+    const decimals = await tokenContract.decimals();
+    const fundAmountInWei = ethers.parseUnits(fundAmount.toString(), decimals);
+    const amountToReserve = fundAmountInWei / BigInt(submissionsRequired);
 
     await escrowClient.storeResults(
       webhook.escrowAddress,
@@ -252,5 +262,67 @@ export class JobService {
     }
 
     return 'Solutions recorded.';
+  }
+
+  public async cancelJob(webhook: WebhookDto): Promise<string | void> {
+    const signer = this.web3Service.getSigner(webhook.chainId);
+    const escrowClient = await EscrowClient.build(signer);
+
+    const recordingOracleAddress = await escrowClient.getRecordingOracleAddress(
+      webhook.escrowAddress,
+    );
+    if (
+      ethers.getAddress(recordingOracleAddress) !== (await signer.getAddress())
+    ) {
+      this.logger.log(ErrorJob.AddressMismatches, JobService.name);
+      throw new ValidationError(ErrorJob.AddressMismatches);
+    }
+
+    const escrowStatus = await escrowClient.getStatus(webhook.escrowAddress);
+    if (escrowStatus !== EscrowStatus.ToCancel) {
+      this.logger.log(ErrorJob.InvalidStatus, JobService.name);
+      throw new ConflictError(ErrorJob.InvalidStatus);
+    }
+
+    const intermediateResultsURL = await escrowClient.getIntermediateResultsUrl(
+      webhook.escrowAddress,
+    );
+    const hash =
+      intermediateResultsURL.split('/').pop()?.replace('.json', '') ?? '';
+
+    await escrowClient.storeResults(
+      webhook.escrowAddress,
+      intermediateResultsURL,
+      hash,
+      0n,
+    );
+
+    let reputationOracleWebhook: string | null = null;
+    try {
+      const reputationOracleAddress =
+        await escrowClient.getReputationOracleAddress(webhook.escrowAddress);
+      reputationOracleWebhook = (await KVStoreUtils.get(
+        webhook.chainId,
+        reputationOracleAddress,
+        KVStoreKeys.webhookUrl,
+      )) as string;
+    } catch (e) {
+      //Ignore the error
+    }
+
+    if (reputationOracleWebhook) {
+      await sendWebhook(
+        this.httpService,
+        this.logger,
+        reputationOracleWebhook,
+        {
+          chainId: webhook.chainId,
+          escrowAddress: webhook.escrowAddress,
+          eventType: EventType.JOB_CANCELED,
+        },
+        this.web3ConfigService.privateKey,
+      );
+      return 'The requested job is canceled.';
+    }
   }
 }

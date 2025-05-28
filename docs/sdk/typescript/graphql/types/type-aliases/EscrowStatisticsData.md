@@ -8,7 +8,7 @@
 
 > **EscrowStatisticsData** = `object`
 
-Defined in: [graphql/types.ts:42](https://github.com/humanprotocol/human-protocol/blob/99b899a11bf48f2fa04884687ea395e0d42d75d1/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L42)
+Defined in: [graphql/types.ts:42](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L42)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [graphql/types.ts:42](https://github.com/humanprotocol/human-protoco
 
 > **bulkPayoutEventCount**: `string`
 
-Defined in: [graphql/types.ts:45](https://github.com/humanprotocol/human-protocol/blob/99b899a11bf48f2fa04884687ea395e0d42d75d1/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L45)
+Defined in: [graphql/types.ts:45](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L45)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [graphql/types.ts:45](https://github.com/humanprotocol/human-protoco
 
 > **cancelledStatusEventCount**: `string`
 
-Defined in: [graphql/types.ts:47](https://github.com/humanprotocol/human-protocol/blob/99b899a11bf48f2fa04884687ea395e0d42d75d1/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L47)
+Defined in: [graphql/types.ts:47](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L47)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [graphql/types.ts:47](https://github.com/humanprotocol/human-protoco
 
 > **completedStatusEventCount**: `string`
 
-Defined in: [graphql/types.ts:50](https://github.com/humanprotocol/human-protocol/blob/99b899a11bf48f2fa04884687ea395e0d42d75d1/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L50)
+Defined in: [graphql/types.ts:50](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L50)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [graphql/types.ts:50](https://github.com/humanprotocol/human-protoco
 
 > **fundEventCount**: `string`
 
-Defined in: [graphql/types.ts:43](https://github.com/humanprotocol/human-protocol/blob/99b899a11bf48f2fa04884687ea395e0d42d75d1/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L43)
+Defined in: [graphql/types.ts:43](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L43)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [graphql/types.ts:43](https://github.com/humanprotocol/human-protoco
 
 > **paidStatusEventCount**: `string`
 
-Defined in: [graphql/types.ts:49](https://github.com/humanprotocol/human-protocol/blob/99b899a11bf48f2fa04884687ea395e0d42d75d1/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L49)
+Defined in: [graphql/types.ts:49](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L49)
 
 ***
 
@@ -56,7 +56,7 @@ Defined in: [graphql/types.ts:49](https://github.com/humanprotocol/human-protoco
 
 > **partialStatusEventCount**: `string`
 
-Defined in: [graphql/types.ts:48](https://github.com/humanprotocol/human-protocol/blob/99b899a11bf48f2fa04884687ea395e0d42d75d1/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L48)
+Defined in: [graphql/types.ts:48](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L48)
 
 ***
 
@@ -64,7 +64,7 @@ Defined in: [graphql/types.ts:48](https://github.com/humanprotocol/human-protoco
 
 > **pendingStatusEventCount**: `string`
 
-Defined in: [graphql/types.ts:46](https://github.com/humanprotocol/human-protocol/blob/99b899a11bf48f2fa04884687ea395e0d42d75d1/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L46)
+Defined in: [graphql/types.ts:46](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L46)
 
 ***
 
@@ -72,7 +72,7 @@ Defined in: [graphql/types.ts:46](https://github.com/humanprotocol/human-protoco
 
 > **storeResultsEventCount**: `string`
 
-Defined in: [graphql/types.ts:44](https://github.com/humanprotocol/human-protocol/blob/99b899a11bf48f2fa04884687ea395e0d42d75d1/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L44)
+Defined in: [graphql/types.ts:44](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L44)
 
 ***
 
@@ -80,7 +80,7 @@ Defined in: [graphql/types.ts:44](https://github.com/humanprotocol/human-protoco
 
 > **totalEscrowCount**: `string`
 
-Defined in: [graphql/types.ts:52](https://github.com/humanprotocol/human-protocol/blob/99b899a11bf48f2fa04884687ea395e0d42d75d1/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L52)
+Defined in: [graphql/types.ts:52](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L52)
 
 ***
 
@@ -88,4 +88,4 @@ Defined in: [graphql/types.ts:52](https://github.com/humanprotocol/human-protoco
 
 > **totalEventCount**: `string`
 
-Defined in: [graphql/types.ts:51](https://github.com/humanprotocol/human-protocol/blob/99b899a11bf48f2fa04884687ea395e0d42d75d1/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L51)
+Defined in: [graphql/types.ts:51](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L51)
