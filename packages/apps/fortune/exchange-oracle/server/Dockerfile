@@ -1,18 +1,35 @@
-# Base image
-FROM node:18
+FROM node:22.14-slim
+ARG APP_PATH=packages/apps/fortune/exchange-oracle/server
 
 # Create app directory
 WORKDIR /usr/src/app
 
-# Bundle app source
-COPY . .
+# Copy expected yarn dist
+COPY .yarn ./.yarn
+COPY .yarnrc.yml ./
 
-# Install app dependencies
+# Copy files for deps installation
+COPY package.json yarn.lock ./
+COPY ${APP_PATH}/package.json ./${APP_PATH}/
+
+# Some deps are referenced as "workspace:*",
+# so we need to copy and build them
+COPY packages/core ./packages/core
+COPY packages/sdk ./packages/sdk
+
 RUN yarn install
+
+# Copy base TS config that is required to build pacakges
+COPY tsconfig.base.json ./
+# Build libs
 RUN yarn build:libs
 
-# Creates a "dist" folder with the production build
-RUN yarn workspace @human-protocol/fortune-exchange-oracle-server build
+# Copy everything else
+COPY ${APP_PATH} ./${APP_PATH}
 
-# Start the server using the production build
-CMD [ "node", "packages/apps/fortune/exchange-oracle/server/dist/src/main.js" ]
+WORKDIR ./${APP_PATH}
+# Creates a "dist" folder with the production build
+RUN yarn build
+
+# Start the server using the build
+CMD [ "yarn", "start:prod" ]

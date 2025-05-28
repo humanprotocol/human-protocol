@@ -29,4 +29,7 @@ export const apiPaths = {
   enabledChains: {
     path: '/networks/operating',
   },
+  kvstore: {
+    path: '/details/kvstore',
+  },
 } as const;

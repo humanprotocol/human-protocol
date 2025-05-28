@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "scripts": {
     "clean": "tsc --build --clean && rm -rf dist",
-    "dev": "vite",
+    "start": "vite",
     "build": "tsc --build && vite build",
     "start:prod": "serve -s dist",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",

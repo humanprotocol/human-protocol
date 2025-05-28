@@ -1,9 +1,13 @@
 .shadow-icon{
   display: flex;
+  align-items: center;
   gap: 16px;
-  height: 90px;
+  height: 78px;
+
   &__icon {
-    width: 65px;
+    width: 66px;
+    height:  100%;
+    padding: 6px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -14,14 +18,12 @@
     height: 130px;
   }
   span{
-    padding-top: 20px;
     font-size: 28px;
     font-weight: 600;
   }
 
-    @media (max-width: 400px) {
+    @media (max-width: 600px) {
       span {
-        padding-top: 30px;
         font-size: 20px;
         font-weight: 500;
       }

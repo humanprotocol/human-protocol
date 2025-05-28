@@ -155,16 +155,17 @@ export const AreaChart = ({
   return (
     <Card
       sx={{
-        paddingY: { xs: 4, md: 4 },
-        paddingX: { xs: 2, md: 8 },
+        py: { xs: 4, md: 4 },
+        px: { xs: 2, md: 8 },
         boxShadow: 'none',
         borderRadius: '16px',
       }}
     >
       <Stack
-        sx={{ marginBottom: 4 }}
+        mb={4}
         direction={{ xs: 'column', md: 'row' }}
-        gap={{ xs: 6, md: 8 }}
+        alignItems="center"
+        gap={{ xs: 4, md: 8 }}
       >
         <ToggleButtons />
         <Stack direction="row" alignItems="center" gap={2}>
@@ -360,9 +361,9 @@ export const AreaChart = ({
       </ResponsiveContainer>
       <Card
         sx={{
-          paddingY: 3,
-          marginTop: 3,
-          marginLeft: { xs: 0, xl: 6 },
+          py: 3,
+          mt: 3,
+          ml: { xs: 0, xl: 6 },
           backgroundColor: colorPalette.overlay.light,
           boxShadow: 'none',
           borderRadius: '16px',

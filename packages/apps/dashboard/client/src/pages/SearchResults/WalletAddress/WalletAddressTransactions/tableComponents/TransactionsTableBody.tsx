@@ -6,6 +6,7 @@ import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import CircularProgress from '@mui/material/CircularProgress';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import AbbreviateClipboard from '@components/SearchResults/AbbreviateClipboard';
 import { colorPalette } from '@assets/styles/color-palette';
@@ -85,7 +86,7 @@ export const TransactionsTableBody: React.FC = () => {
           >
             <TableCell>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Box width={'30px'}>
+                <Box width={30}>
                   {elem.internalTransactions.length > 0 && (
                     <IconButton onClick={() => toggleRow(idx)} size="small">
                       {expandedRows[idx] ? (
@@ -109,11 +110,13 @@ export const TransactionsTableBody: React.FC = () => {
               />
             </TableCell>
             <TableCell>
-              {' '}
-              <AbbreviateClipboard
-                value={elem.receiver || elem.to}
-                link={`/search/${data.chainId}/${elem.receiver || elem.to}`}
-              />
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <ArrowForwardIcon sx={{ color: 'text.primary' }} />
+                <AbbreviateClipboard
+                  value={elem.receiver || elem.to}
+                  link={`/search/${data.chainId}/${elem.receiver || elem.to}`}
+                />
+              </Box>
             </TableCell>
             <TableCell>{elem.block}</TableCell>
             <TableCell>
@@ -140,10 +143,13 @@ export const TransactionsTableBody: React.FC = () => {
                 />
               </TableCell>
               <TableCell>
-                <AbbreviateClipboard
-                  value={internalTx.receiver || internalTx.to}
-                  link={`/search/${data.chainId}/${internalTx.receiver || internalTx.to}`}
-                />
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <ArrowForwardIcon sx={{ color: 'text.primary' }} />
+                  <AbbreviateClipboard
+                    value={elem.receiver || elem.to}
+                    link={`/search/${data.chainId}/${elem.receiver || elem.to}`}
+                  />
+                </Box>
               </TableCell>
               <TableCell></TableCell>
               <TableCell>

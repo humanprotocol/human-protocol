@@ -17,7 +17,7 @@ import {
 } from '@mui/material';
 import { colorPalette } from '@assets/styles/color-palette';
 import { useFilteredNetworks } from '@utils/hooks/use-filtered-networks';
-import { useBreakPoints } from '@utils/hooks/use-is-mobile';
+import { useIsMobile } from '@utils/hooks/use-breakpoints';
 import { NetworkIcon } from '@components/NetworkIcon';
 import { useWalletSearch } from '@utils/hooks/use-wallet-search';
 import {
@@ -40,7 +40,7 @@ const SearchBar: FC<SearchBarProps> = ({
   className = '',
   initialInputValue = '',
 }) => {
-  const { mobile } = useBreakPoints();
+  const isMobile = useIsMobile();
   const { filteredNetworks, isLoading } = useFilteredNetworks();
   const { filterParams, setChainId, setAddress } = useWalletSearch();
   const navigate = useNavigate();
@@ -102,7 +102,9 @@ const SearchBar: FC<SearchBarProps> = ({
   if (isLoading) return <CircularProgress />;
 
   const renderEmptyValue = (
-    <span style={{ color: colorPalette.sky.main }}>Network</span>
+    <Box component="span" color="text.secondary">
+      Network
+    </Box>
   );
 
   const renderSelectedValue = (
@@ -113,7 +115,7 @@ const SearchBar: FC<SearchBarProps> = ({
         }
       />
       <div>
-        {mobile.isMobile || filterParams.chainId === -1
+        {isMobile || filterParams.chainId === -1
           ? null
           : filteredNetworks.find((n) => n.id === filterParams.chainId)?.name ||
             ''}
@@ -133,7 +135,7 @@ const SearchBar: FC<SearchBarProps> = ({
         error={!!error}
         helperText={error}
         fullWidth
-        sx={muiTextFieldSx(mobile)}
+        sx={muiTextFieldSx(isMobile)}
         InputProps={{
           sx: muiTextFieldInputPropsSx(
             focus ? colorPalette.secondary.main : colorPalette.skyOpacity
@@ -146,7 +148,7 @@ const SearchBar: FC<SearchBarProps> = ({
               <MuiSelect<number>
                 value={filterParams.chainId}
                 displayEmpty
-                sx={muiSelectSx(mobile)}
+                sx={muiSelectSx()}
                 onChange={handleSelectChange}
                 renderValue={() =>
                   filterParams.chainId === -1
@@ -173,9 +175,9 @@ const SearchBar: FC<SearchBarProps> = ({
             <InputAdornment sx={endAdornmentInputAdornmentSx} position="end">
               <IconButton onClick={handleClearClick} edge="end">
                 <CloseIcon
-                  style={{
+                  sx={{
                     color: focus
-                      ? colorPalette.textSecondary.main
+                      ? colorPalette.sky.main
                       : colorPalette.primary.main,
                   }}
                 />
@@ -186,13 +188,11 @@ const SearchBar: FC<SearchBarProps> = ({
                   type="submit"
                   aria-label="search"
                   sx={{
-                    [mobile.mediaQuery]: {
-                      padding: '4px',
-                    },
+                    p: 0.5,
                   }}
                 >
                   <SearchIcon
-                    style={{
+                    sx={{
                       color: error
                         ? colorPalette.error.main
                         : colorPalette.white,

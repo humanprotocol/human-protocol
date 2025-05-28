@@ -8,7 +8,7 @@ export const AddressCell = ({
   chainId: string;
   address: string;
 }) => (
-  <Box display="flex" alignItems="center" gap="18px" height="100%">
+  <Box display="flex" alignItems="center" height="100%">
     <AbbreviateClipboard
       value={address}
       link={`/search/${chainId}/${address}`}

@@ -20,7 +20,7 @@ export function useHMTPrice() {
         successHMTPriceResponseSchema
       );
 
-      return validResponse;
+      return validResponse.hmtPrice;
     },
     queryKey: ['useHMTPrice'],
   });
