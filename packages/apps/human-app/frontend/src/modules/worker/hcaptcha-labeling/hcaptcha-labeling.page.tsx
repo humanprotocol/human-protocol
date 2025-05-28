@@ -11,6 +11,7 @@ import { Counter } from '@/shared/components/ui/counter';
 import { getErrorMessageForError } from '@/shared/errors';
 import { getTomorrowDate } from '@/shared/helpers/date';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
+import { useWorkerIdentityVerificationStatus } from '@/modules/worker/profile/hooks';
 import { useHCaptchaLabelingNotifications } from '@/modules/worker/hooks/use-hcaptcha-labeling-notifications';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { onlyDarkModeColor } from '@/shared/styles/dark-color-palette';
@@ -29,6 +30,7 @@ export function HcaptchaLabelingPage() {
   const { colorPalette, isDarkMode } = useColorMode();
   const captchaRef = useRef<HCaptcha>(null);
   const { user } = useAuthenticatedUser();
+  const { isVerificationCompleted } = useWorkerIdentityVerificationStatus();
   const { onSuccess, onError } = useHCaptchaLabelingNotifications();
   const statsColor = isDarkMode
     ? onlyDarkModeColor.additionalTextColor
@@ -79,7 +81,7 @@ export function HcaptchaLabelingPage() {
     solveHCaptchaMutation({ token });
   };
 
-  if (user.kyc_status !== 'approved') {
+  if (!isVerificationCompleted) {
     return <Navigate to={routerPaths.worker.profile} replace />;
   }
 

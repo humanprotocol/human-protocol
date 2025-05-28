@@ -3,7 +3,7 @@ import { Grid } from '@mui/material';
 import { Button } from '@/shared/components/ui/button';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
 import { useWalletConnect } from '@/shared/contexts/wallet-connect';
-import { useWorkerKycStatus } from '../hooks';
+import { useWorkerIdentityVerificationStatus } from '../hooks';
 import { DoneLabel } from './status-labels';
 import { WalletConnectDone } from './wallet-connect-done';
 import { RegisterAddressBtn } from './buttons';
@@ -11,7 +11,7 @@ import { RegisterAddressBtn } from './buttons';
 export function WalletConnectionControl() {
   const { t } = useTranslation();
   const { user } = useAuthenticatedUser();
-  const { kycApproved } = useWorkerKycStatus();
+  const { isVerificationCompleted } = useWorkerIdentityVerificationStatus();
   const { isConnected, openModal } = useWalletConnect();
 
   const { wallet_address: walletAddress } = user;
@@ -25,7 +25,7 @@ export function WalletConnectionControl() {
     );
   }
 
-  if (kycApproved && isConnected) {
+  if (isVerificationCompleted && isConnected) {
     return (
       <Grid>
         <RegisterAddressBtn />
@@ -36,7 +36,7 @@ export function WalletConnectionControl() {
 
   return (
     <Button
-      disabled={!kycApproved}
+      disabled={!isVerificationCompleted}
       fullWidth
       onClick={() => void openModal()}
       variant="contained"

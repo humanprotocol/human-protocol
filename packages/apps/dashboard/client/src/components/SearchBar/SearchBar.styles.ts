@@ -22,10 +22,7 @@ export const gridSx = {
   overflow: 'hidden',
 };
 
-export const muiSelectSx = (mobile: {
-  isMobile: boolean;
-  mediaQuery: string;
-}) => ({
+export const muiSelectSx = () => ({
   backgroundColor: `${colorPalette.white}`,
   width: 'unset',
   fontSize: '16px',
@@ -40,9 +37,6 @@ export const muiSelectSx = (mobile: {
     paddingRight: '24px',
     backgroundColor: `${colorPalette.white}`,
     border: 0,
-  },
-  [mobile.mediaQuery]: {
-    width: 'unset',
   },
 });
 
@@ -66,16 +60,11 @@ export const muiTextFieldInputPropsSx = (borderColor: string) => ({
   padding: '0 5px',
 });
 
-export const muiTextFieldSx = (mobile: {
-  isMobile: boolean;
-  mediaQuery: string;
-}) => ({
+export const muiTextFieldSx = (isMobile: boolean) => ({
   fontSize: '16px',
   '& .MuiOutlinedInput-root': {
     '& input': {
-      [mobile.mediaQuery]: {
-        padding: '12px 0px',
-      },
+      padding: isMobile ? '12px 0px' : '16px 0px',
     },
     '& fieldset': {
       border: 'none',

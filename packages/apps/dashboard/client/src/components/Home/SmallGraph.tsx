@@ -1,3 +1,5 @@
+import { Fragment } from 'react';
+
 import {
   AreaChart,
   Area,
@@ -8,15 +10,16 @@ import {
   ResponsiveContainer,
   TooltipProps,
 } from 'recharts';
-import Card from '@mui/material/Card';
-import { colorPalette } from '@assets/styles/color-palette';
 import Box from '@mui/material/Box';
-import { Typography } from '@mui/material';
+import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import ToggleButtons from '@components/DataEntry/ToggleButtons';
-import { Fragment } from 'react';
+import Typography from '@mui/material/Typography';
+
+import { colorPalette } from '@assets/styles/color-palette';
 import { formatDate } from '@helpers/formatDate';
 import { formatNumber } from '@helpers/formatNumber';
+import { useIsMobile } from '@utils/hooks/use-breakpoints';
 
 const CustomSmallChartTooltip = ({
   payload,
@@ -25,22 +28,19 @@ const CustomSmallChartTooltip = ({
   if (active) {
     return (
       <Card
+        elevation={0}
         sx={{
-          border: `2px solid ${colorPalette.fog.light}`,
+          border: `1px solid ${colorPalette.fog.light}`,
+          borderRadius: 2,
         }}
       >
-        <Box
-          sx={{
-            paddingX: 2,
-            paddingY: 1,
-          }}
-        >
+        <Box px={1} py={0}>
           {payload?.map((elem) => (
             <Fragment key={elem.name}>
-              <Typography fontWeight={500} variant="caption">
+              <Typography variant="Tooltip">
                 {formatDate(elem.payload.date, 'MMMM DD, YYYY')}
               </Typography>
-              <Typography fontWeight={500} variant="h6" component="p">
+              <Typography fontWeight={500} variant="body1">
                 {elem.value ? elem.value.toLocaleString('en-US') : ''}
               </Typography>
             </Fragment>
@@ -60,10 +60,31 @@ interface SmallGraphProps {
   title: string;
 }
 
+const GraphSettings = ({ title }: { title: string }) => (
+  <Stack
+    direction={{ sm: 'column', md: 'row' }}
+    justifyContent="end"
+    alignItems="center"
+    mt={{ xs: 1.5, md: 0 }}
+    mb={{ xs: 0, md: 2 }}
+    mr={{ xs: 0, md: 4 }}
+    gap={2}
+    flexWrap="wrap"
+  >
+    <Typography variant="body1" component="p">
+      {title}
+    </Typography>
+    <ToggleButtons />
+  </Stack>
+);
+
 const SmallGraph = ({ title, graphData }: SmallGraphProps) => {
+  const isMobile = useIsMobile();
+
   return (
     <>
-      <ResponsiveContainer height={150}>
+      {!isMobile && <GraphSettings title={title} />}
+      <ResponsiveContainer height={isMobile ? 150 : 215}>
         <AreaChart
           data={graphData}
           margin={{
@@ -74,8 +95,8 @@ const SmallGraph = ({ title, graphData }: SmallGraphProps) => {
         >
           <defs>
             <linearGradient id="value" x1="0" y1="0" x2="0" y2="1">
-              <stop offset={'90%'} stopColor="#244CB20F" stopOpacity={0.9} />
-              <stop offset={'100%'} stopColor="#B4C2E505" stopOpacity={0} />
+              <stop offset="90%" stopColor="#244CB20F" stopOpacity={0.9} />
+              <stop offset="100%" stopColor="#B4C2E505" stopOpacity={0} />
             </linearGradient>
           </defs>
           <XAxis
@@ -103,30 +124,21 @@ const SmallGraph = ({ title, graphData }: SmallGraphProps) => {
             stroke={colorPalette.fog.main}
             tickFormatter={formatNumber}
           />
-          <CartesianGrid stroke="#ccc" strokeDasharray="7" vertical={false} />
+          <CartesianGrid
+            stroke={colorPalette.fog.light}
+            strokeDasharray={1}
+            vertical={false}
+          />
           <Tooltip content={<CustomSmallChartTooltip />} />
           <Area
             type="monotone"
             dataKey="value"
-            stroke={colorPalette.primary.main}
+            stroke={colorPalette.secondary.main}
             fill="url(#value)"
           />
         </AreaChart>
       </ResponsiveContainer>
-      <Stack
-        sx={{
-          marginTop: 2,
-        }}
-        direction={{ xs: 'column', xl: 'row' }}
-        justifyContent="center"
-        alignItems="center"
-        gap={2}
-      >
-        <Typography fontWeight={400} variant="body1" component="p">
-          {title}
-        </Typography>
-        <ToggleButtons />
-      </Stack>
+      {isMobile && <GraphSettings title={title} />}
     </>
   );
 };

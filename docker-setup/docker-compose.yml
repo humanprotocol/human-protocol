@@ -1,0 +1,559 @@
+name: human-protocol-local-setup
+
+x-service-default-config:
+  restart: &default-restart unless-stopped
+  logging: &default-logging
+    options:
+      max-size: 10m
+      max-file: 3
+
+x-hardcoded-vars:
+  frontend_default_port: &frontend_default_port 3000
+  all_interfaces_ip: &all_interfaces_ip '0.0.0.0'
+  web3_env: &web3_env testnet
+  postgres_host: &postgres_host postgres
+  postgres_port: &postgres_port 5432
+  redis_host: &redis_host redis
+  redis_port: &redis_port 6379
+  minio_host: &minio_host minio
+  node_env: &node_env development
+  cvat_lb_url: &cvat_lb_url 'http://cvat-lb:8080'
+  cvat_oracle_storage_provider: &cvat_oracle_storage_provider aws
+
+x-general-env-variables:
+  # GENERAL VARS
+  subgraph_api_key: &subgraph_api_key ${SUBGRAPH_API_KEY}
+  rpc_url_polygon_amoy: &rpc_url_polygon_amoy ${RPC_URL_POLYGON_AMOY:?}
+  # POSTGRES VARS
+  postgres_user: &postgres_user ${POSTGRES_USER:-default}
+  postgres_password: &postgres_password ${POSTGRES_PASSWORD:-qwerty}
+  # MINIO VARS
+  minio_port: &minio_port ${MINIO_PORT:?}
+  minio_console_port: &minio_console_port ${MINIO_CONSOLE_PORT:-9001}
+  minio_root_user: &minio_root_user ${MINIO_ROOT_USER:-minioadmin}
+  minio_root_password: &minio_root_password ${MINIO_ROOT_PASSWORD:-minioadmin}
+  minio_services_access_key: &minio_services_access_key ${MINIO_SERVICES_ACCESS_KEY:-human-oracle}
+  minio_services_secret_key: &minio_services_secret_key ${MINIO_SERVICES_SECRET_KEY:-human-oracle-s3-secret}
+  # BUCKET NAMES
+  bucket_name_manifests: &bucket_name_manifests ${BUCKET_NAME_MANIFESTS:-manifests}
+  bucket_name_datasets: &bucket_name_datasets ${BUCKET_NAME_DATASETS:-datasets}
+  bucket_name_rep_o: &bucket_name_rep_o ${BUCKET_NAME_REPUTATION_ORACLE:-reputation-oracle}
+  bucket_name_cvat_exc_o: &bucket_name_cvat_exc_o ${BUCKET_NAME_CVAT_EXCHANGE_ORACLE:-cvat-exchange-oracle}
+  bucket_name_cvat_rec_o: &bucket_name_cvat_rec_o ${BUCKET_NAME_CVAT_RECORDING_ORACLE:-cvat-recording-oracle}
+  bucket_name_fortune: &bucket_name_fortune ${BUCKEN_NAME_FORTUNE:-fortune}
+  # OTHER
+  backend_apps_internal_port: &backend_apps_internal_port ${BACKEND_APPS_INTERNAL_PORT:?}
+  cvat_oracle_storage_endpoint: &cvat_oracle_storage_endpoint minio:${MINIO_PORT:?}
+
+x-service-env-vars-groups:
+  postgres_auth_vars: &postgres_auth_vars
+    POSTGRES_USER: *postgres_user
+    POSTGRES_PASSWORD: *postgres_password
+  redis_app_vars: &redis_app_vars
+    REDIS_HOST: *redis_host
+    REDIS_PORT: *redis_port
+  nodejs_app_vars: &nodejs_app_vars
+    NODE_ENV: *node_env
+    SUBGRAPH_API_KEY: *subgraph_api_key
+    RPC_URL_POLYGON_AMOY: *rpc_url_polygon_amoy
+  cvat_oracle_vars: &cvat_oracle_vars
+    SUBGRAPH_API_KEY: *subgraph_api_key
+    POLYGON_AMOY_RPC_API_URL: *rpc_url_polygon_amoy
+  nodejs_app_postgres_vars: &nodejs_app_postgres_vars
+    <<: *postgres_auth_vars
+    POSTGRES_HOST: *postgres_host
+    POSTGRES_PORT: *postgres_port
+    POSTGRES_SSL: 'false'
+  nodejs_app_s3_vars: &nodejs_app_s3_vars
+    S3_ENDPOINT: *minio_host
+    S3_PORT: *minio_port
+    S3_ACCESS_KEY: *minio_services_access_key
+    S3_SECRET_KEY: *minio_services_secret_key
+    S3_USE_SSL: 'false'
+  cvat_oracle_postgres_vars: &cvat_oracle_postgres_vars
+    PG_HOST: *postgres_host
+    PG_PORT: *postgres_port
+    PG_USER: *postgres_user
+    PG_PASSWORD: *postgres_password
+  cvat_oracle_storage_connection_vars: &cvat_oracle_storage_connection_vars
+    STORAGE_PROVIDER: *cvat_oracle_storage_provider
+    STORAGE_ENDPOINT_URL: *cvat_oracle_storage_endpoint
+    STORAGE_ACCESS_KEY: *minio_services_access_key
+    STORAGE_SECRET_KEY: *minio_services_secret_key
+    STORAGE_USE_SSL: 'false'
+  cvat_connection_vars: &cvat_connection_vars
+    CVAT_URL: *cvat_lb_url
+    CVAT_ADMIN: ${CVAT_ADMIN:-human-protocol}
+    CVAT_ADMIN_PASS: ${CVAT_ADMIN_PASS:-qwe123qwe123Q!}
+    CVAT_ORG_SLUG: HumanAppLocal
+
+services:
+  postgres:
+    container_name: human-postgres
+    image: postgres:16
+    restart: *default-restart
+    logging:
+      <<: *default-logging
+    networks:
+      - human_protocol
+    ports:
+      - name: instance_port
+        target: *postgres_port
+        # default 5432 is used by CVAT installation
+        published: ${POSTGRES_PORT:-5433}
+    volumes:
+      - ./initdb:/docker-entrypoint-initdb.d
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      <<: *postgres_auth_vars
+    healthcheck:
+      test: ["CMD", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  
+  redis:
+    container_name: human-redis
+    image: redis:6
+    restart: *default-restart
+    logging:
+      <<: *default-logging
+    networks:
+      - human_protocol
+    ports:
+      - name: instance_port
+        target: *redis_port
+        # default 6379 is used by CVAT installation
+        published: ${REDIS_PORT:-6380}
+    volumes:
+      - redis-data:/data
+    command: [
+      "redis-server",
+      # we don not expect a lot of writes on local
+      "--save", "60", "100",
+      "--appendonly", "yes",
+    ]
+
+  minio:
+    container_name: human-minio
+    image: minio/minio:RELEASE.2024-12-18T13-15-44Z
+    restart: *default-restart
+    logging:
+      <<: *default-logging
+    entrypoint: 'sh'
+    networks:
+      - human_protocol
+      - human_cvat_bridge
+    ports:
+      - name: instance_port
+        target: 9000
+        published: *minio_port
+      - name: console_port
+        target: 9001
+        published: *minio_console_port
+    volumes:
+      - minio-data:/data
+    environment:
+      MINIO_ROOT_USER: *minio_root_user
+      MINIO_ROOT_PASSWORD: *minio_root_password
+    command:
+      -c "minio server /data --console-address ':9001'"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+
+  minio-client:
+    container_name: human-minio-client
+    image: minio/mc:RELEASE.2024-11-21T17-21-54Z
+    depends_on:
+      minio:
+        condition: service_healthy
+    networks:
+      - human_protocol
+    environment:
+      MINIO_ROOT_USER: *minio_root_user
+      MINIO_ROOT_PASSWORD: *minio_root_password
+      SERVICES_ACCESS_KEY: *minio_services_access_key
+      SERVICES_SECRET_KEY: *minio_services_secret_key
+      BUCKET_MANIFESTS: *bucket_name_manifests
+      BUCKET_DATASETS: *bucket_name_datasets
+      BUCKET_REPUTATION_ORACLE: *bucket_name_rep_o
+      BUCKET_CVAT_EXCHANGE_ORACLE: *bucket_name_cvat_exc_o
+      BUCKET_CVAT_RECORDING_ORACLE: *bucket_name_cvat_rec_o
+      BUCKET_FORTUNE: *bucket_name_fortune
+    entrypoint: >
+      /bin/sh -c "
+        mc alias set myminio http://minio:9000 $$MINIO_ROOT_USER $$MINIO_ROOT_PASSWORD
+
+        mc admin user add myminio $$SERVICES_ACCESS_KEY $$SERVICES_SECRET_KEY
+        mc admin policy attach myminio readwrite --user=$$SERVICES_ACCESS_KEY
+
+        mc mb myminio/$$BUCKET_MANIFESTS;
+        mc anonymous set public myminio/$$BUCKET_MANIFESTS;
+
+        mc mb myminio/$$BUCKET_DATASETS;
+        mc anonymous set public myminio/$$BUCKET_DATASETS;
+
+        mc mb myminio/$$BUCKET_REPUTATION_ORACLE;
+        mc anonymous set public myminio/$$BUCKET_REPUTATION_ORACLE;
+
+        mc mb myminio/$$BUCKET_CVAT_EXCHANGE_ORACLE;
+        mc anonymous set public myminio/$$BUCKET_CVAT_EXCHANGE_ORACLE;
+
+        mc mb myminio/$$BUCKET_CVAT_RECORDING_ORACLE;
+        mc anonymous set public myminio/$$BUCKET_CVAT_RECORDING_ORACLE;
+
+        mc mb myminio/$$BUCKET_FORTUNE;
+        mc anonymous set public myminio/$$BUCKET_FORTUNE;
+      "
+
+  reputation-oracle:
+    container_name: reputation-oracle
+    image: human-protocol/reputation-oracle
+    pull_policy: build
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      minio-client:
+        condition: service_completed_successfully
+    restart: *default-restart
+    logging:
+      <<: *default-logging
+    build:
+      context: ../
+      dockerfile: packages/apps/reputation-oracle/server/Dockerfile
+    expose:
+      - *backend_apps_internal_port
+    networks:
+      - human_protocol
+    ports:
+      - name: server_port
+        target: *backend_apps_internal_port
+        published: ${REPUTATION_ORACLE_EXPOSED_PORT:?}
+    environment:
+      <<: [*nodejs_app_vars, *nodejs_app_postgres_vars, *nodejs_app_s3_vars]
+      HOST: *all_interfaces_ip
+      PORT: *backend_apps_internal_port
+      POSTGRES_DATABASE: reputation-oracle
+      S3_BUCKET: *bucket_name_rep_o
+      # It is accessed by user, not from container
+      # so put here exposed port, not internal
+      FE_URL: http://localhost:${HUMAN_APP_CLIENT_EXPOSED_PORT:?}
+      # User for KV store setup
+      SERVER_URL: http://reputation-oracle:${BACKEND_APPS_INTERNAL_PORT:?}
+
+  human-app-server:
+    container_name: human-app-server
+    image: human-protocol/human-app-server
+    pull_policy: build
+    depends_on:
+      redis:
+        condition: service_started
+    restart: *default-restart
+    logging:
+      <<: *default-logging
+    build:
+      context: ../
+      dockerfile: packages/apps/human-app/server/Dockerfile
+    expose:
+      - *backend_apps_internal_port
+    networks:
+      - human_protocol
+    ports:
+      - name: server_port
+        target: *backend_apps_internal_port
+        published: ${HUMAN_APP_SERVER_EXPOSED_PORT:?}
+    environment:
+      <<: [*nodejs_app_vars, *redis_app_vars]
+      HOST: *all_interfaces_ip
+      PORT: *backend_apps_internal_port
+      REDIS_DB: 1
+      REPUTATION_ORACLE_URL: http://reputation-oracle:${BACKEND_APPS_INTERNAL_PORT:?}
+      RPC_URL: *rpc_url_polygon_amoy
+
+  human-app-client:
+    container_name: human-app-client
+    image: human-protocol/human-app-client
+    pull_policy: build
+    depends_on:
+      human-app-server:
+        condition: service_started
+    restart: *default-restart
+    logging:
+      <<: *default-logging
+    build:
+      context: ../
+      dockerfile: packages/apps/human-app/frontend/Dockerfile
+    expose:
+      - *frontend_default_port
+    networks:
+      - human_protocol
+    ports:
+      - name: server_port
+        target: *frontend_default_port
+        published: ${HUMAN_APP_CLIENT_EXPOSED_PORT:?}
+    environment:
+      PORT: *frontend_default_port
+
+  exchange-oracle-cvat:
+    container_name: exchange-oracle-cvat
+    image: human-protocol/exchange-oracle-cvat
+    pull_policy: build
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      minio-client:
+        condition: service_completed_successfully
+      redis:
+        condition: service_started
+    restart: *default-restart
+    logging:
+      <<: *default-logging
+    build:
+      context: ../packages/examples/cvat/exchange-oracle
+      dockerfile: ./Dockerfile
+    expose:
+      - *backend_apps_internal_port
+    networks:
+      human_protocol:
+      human_cvat_bridge:
+        aliases:
+          - exchange-oracle.app
+    ports:
+      - name: server_port
+        target: *backend_apps_internal_port
+        published: ${EXCHANGE_ORACLE_CVAT_EXPOSED_PORT:?}
+    environment:
+      HOST: *all_interfaces_ip
+      PORT: *backend_apps_internal_port
+      <<: [
+        *cvat_oracle_vars,
+        *cvat_oracle_postgres_vars,
+        *redis_app_vars,
+        *cvat_oracle_storage_connection_vars,
+        *cvat_connection_vars
+      ]
+      REDIS_DB: 2
+      PG_DB: exchange-oracle-cvat
+      STORAGE_BUCKET_NAME: *bucket_name_cvat_exc_o
+      CVAT_INCOMING_WEBHOOKS_URL: "http://exchange-oracle.app:${BACKEND_APPS_INTERNAL_PORT:?}/cvat-webhook"
+      ENABLE_CUSTOM_CLOUD_HOST: yes
+      # User for KV store setup
+      SERVER_URL: http://exchange-oracle-cvat:${BACKEND_APPS_INTERNAL_PORT:?}
+
+  recording-oracle-cvat:
+    container_name: recording-oracle-cvat
+    image: human-protocol/recording-oracle-cvat
+    pull_policy: build
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      minio-client:
+        condition: service_completed_successfully
+    restart: *default-restart
+    logging:
+      <<: *default-logging
+    build:
+      context: ../packages/examples/cvat/recording-oracle
+      dockerfile: ./Dockerfile
+    expose:
+      - *backend_apps_internal_port
+    networks:
+      - human_protocol
+      - human_cvat_bridge
+    ports:
+      - name: server_port
+        target: *backend_apps_internal_port
+        published: ${RECORDING_ORACLE_CVAT_EXPOSED_PORT:?}
+    environment:
+      HOST: *all_interfaces_ip
+      PORT: *backend_apps_internal_port
+      <<: [
+        *cvat_oracle_vars,
+        *cvat_oracle_postgres_vars,
+        *cvat_oracle_storage_connection_vars,
+        *cvat_connection_vars
+      ]
+      PG_DB: recording-oracle-cvat
+      STORAGE_RESULTS_BUCKET_NAME: *bucket_name_cvat_rec_o
+      STORAGE_USE_PATH_STYLE: "true"
+      ENABLE_CUSTOM_CLOUD_HOST: "yes"
+      # User for KV store setup
+      SERVER_URL: http://recording-oracle-cvat:${BACKEND_APPS_INTERNAL_PORT:?}
+
+  job-launcher:
+    container_name: job-launcher
+    image: human-protocol/job-launcher
+    pull_policy: build
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      minio-client:
+        condition: service_completed_successfully
+    restart: *default-restart
+    logging:
+      <<: *default-logging
+    build:
+      context: ../
+      dockerfile: packages/apps/job-launcher/server/Dockerfile
+    expose:
+      - *backend_apps_internal_port
+    networks:
+      - human_protocol
+    ports:
+      - name: server_port
+        target: *backend_apps_internal_port
+        published: ${JOB_LAUNCHER_EXPOSED_PORT:?}
+    environment:
+      <<: [*nodejs_app_vars, *nodejs_app_postgres_vars, *nodejs_app_s3_vars]
+      HOST: *all_interfaces_ip
+      PORT: *backend_apps_internal_port
+      POSTGRES_DATABASE: job-launcher
+      S3_BUCKET: *bucket_name_manifests
+      FE_URL: http://localhost:${JOB_LAUNCHER_CLIENT_EXPOSED_PORT:?}
+      # User for KV store setup
+      SERVER_URL: http://job-launcher:${BACKEND_APPS_INTERNAL_PORT:?}
+
+  job-launcher-client:
+    container_name: job-launcher-client
+    image: human-protocol/job-launcher-client
+    pull_policy: build
+    depends_on:
+      job-launcher:
+        condition: service_started
+    restart: *default-restart
+    logging:
+      <<: *default-logging
+    build:
+      context: ../
+      dockerfile: packages/apps/job-launcher/client/Dockerfile
+    expose:
+      - *frontend_default_port
+    networks:
+      - human_protocol
+    ports:
+      - name: server_port
+        target: *frontend_default_port
+        published: ${JOB_LAUNCHER_CLIENT_EXPOSED_PORT:?}
+    environment:
+      PORT: *frontend_default_port
+
+  exchange-oracle-fortune:
+    container_name: exchange-oracle-fortune
+    image: human-protocol/exchange-oracle-fortune
+    pull_policy: build
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      minio-client:
+        condition: service_completed_successfully
+    restart: *default-restart
+    logging:
+      <<: *default-logging
+    build:
+      context: ../
+      dockerfile: packages/apps/fortune/exchange-oracle/server/Dockerfile
+    expose:
+      - *backend_apps_internal_port
+    networks:
+      - human_protocol
+    ports:
+      - name: server_port
+        target: *backend_apps_internal_port
+        published: ${EXCHANGE_ORACLE_FORTUNE_EXPOSED_PORT:?}
+    environment:
+      <<: [*nodejs_app_vars, *nodejs_app_postgres_vars, *nodejs_app_s3_vars]
+      HOST: *all_interfaces_ip
+      PORT: *backend_apps_internal_port
+      POSTGRES_DATABASE: exchange-oracle-fortune
+      S3_BUCKET: *bucket_name_fortune
+      # User for KV store setup
+      SERVER_URL: http://exchange-oracle-fortune:${BACKEND_APPS_INTERNAL_PORT:?}
+
+  fortune-client:
+    container_name: fortune-client
+    image: human-protocol/fortune-client
+    pull_policy: build
+    depends_on:
+      exchange-oracle-fortune:
+        condition: service_started
+    restart: *default-restart
+    logging:
+      <<: *default-logging
+    build:
+      context: ../
+      dockerfile: packages/apps/fortune/exchange-oracle/client/Dockerfile
+    expose:
+      - *frontend_default_port
+    networks:
+      - human_protocol
+    ports:
+      - name: server_port
+        target: *frontend_default_port
+        published: ${FORTUNE_CLIENT_EXPOSED_PORT:?}
+    environment:
+      PORT: *frontend_default_port
+
+  recording-oracle-fortune:
+    container_name: recording-oracle-fortune
+    image: human-protocol/recording-oracle-fortune
+    pull_policy: build
+    depends_on:
+      minio:
+        condition: service_healthy
+      minio-client:
+        condition: service_completed_successfully
+    restart: *default-restart
+    logging:
+      <<: *default-logging
+    build:
+      context: ../
+      dockerfile: packages/apps/fortune/recording-oracle/Dockerfile
+    expose:
+      - *backend_apps_internal_port
+    networks:
+      - human_protocol
+    ports:
+      - name: server_port
+        target: *backend_apps_internal_port
+        published: ${RECORDING_ORACLE_FORTUNE_EXPOSED_PORT:?}
+    environment:
+      <<: [*nodejs_app_vars, *nodejs_app_s3_vars]
+      HOST: *all_interfaces_ip
+      PORT: *backend_apps_internal_port
+      S3_BUCKET: *bucket_name_fortune
+      # User for KV store setup
+      SERVER_URL: http://recording-oracle-fortune:${BACKEND_APPS_INTERNAL_PORT:?}
+
+volumes:
+  # When init for the first time postgres requires empty directory
+  # that is exclusive to its user, so providing a separate volume
+  postgres-data:
+  redis-data:
+  minio-data:
+
+networks:
+  human_protocol:
+    name: human-protocol
+  # CVAT oracles since they need to access CVAT
+  human_cvat_bridge:
+    name: human-cvat-bridge
+    driver: bridge
+    driver_opts:
+      # Default is also 'true'
+      com.docker.network.bridge.enable_icc: 'true'
+      # Default is also 'true'
+      com.docker.network.bridge.enable_ip_masquerade: 'true'
+      com.docker.network.driver.mtu: 1500
