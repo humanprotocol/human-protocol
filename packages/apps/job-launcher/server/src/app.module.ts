@@ -54,7 +54,7 @@ import { TransformEnumInterceptor } from './common/interceptors/transform-enum.i
       /**
        * First value found takes precendece
        */
-      envFilePath: [`.env.${process.env.NODE_ENV}`, '.env'],
+      envFilePath: [`.env.${process.env.NODE_ENV}`, 'env.local', '.env'],
       validationSchema: envValidator,
     }),
     DatabaseModule,

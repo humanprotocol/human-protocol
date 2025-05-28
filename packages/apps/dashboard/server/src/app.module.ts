@@ -15,9 +15,10 @@ import { NetworksModule } from './modules/networks/networks.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: process.env.NODE_ENV
-        ? `.env.${process.env.NODE_ENV as string}`
-        : '.env',
+      /**
+       * First value found takes precendece
+       */
+      envFilePath: [`.env.${process.env.NODE_ENV}`, 'env.local', '.env'],
       isGlobal: true,
       validationSchema: Joi.object({
         HOST: Joi.string().required(),
