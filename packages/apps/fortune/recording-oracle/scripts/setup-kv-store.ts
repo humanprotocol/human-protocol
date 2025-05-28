@@ -3,7 +3,8 @@ import * as dotenv from 'dotenv';
 import { Wallet, ethers } from 'ethers';
 import * as Minio from 'minio';
 
-const isLocalEnv = process.env.NODE_ENV === 'local';
+const isLocalEnv = process.env.LOCAL === 'true';
+
 let ENV_FILE_PATH = '.env';
 if (isLocalEnv) {
   ENV_FILE_PATH += '.local';

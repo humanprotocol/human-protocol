@@ -18,7 +18,7 @@
     "migration:revert": "yarn build && typeorm-ts-node-commonjs migration:revert -d typeorm.config.ts",
     "migration:run": "yarn build && typeorm-ts-node-commonjs migration:run -d typeorm.config.ts",
     "migration:show": "yarn build && typeorm-ts-node-commonjs migration:show -d typeorm.config.ts",
-    "setup:local": "ts-node ./scripts/setup-staking.ts && NODE_ENV=local yarn setup:kvstore",
+    "setup:local": "ts-node ./scripts/setup-staking.ts && LOCAL=true yarn setup:kvstore",
     "setup:kvstore": "ts-node ./scripts/setup-kv-store.ts",
     "lint": "eslint \"{src,test}/**/*.ts\" --fix",
     "test": "jest",

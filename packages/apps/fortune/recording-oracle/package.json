@@ -18,7 +18,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
-    "setup:local": "ts-node ./scripts/setup-staking.ts && NODE_ENV=local yarn setup:kvstore",
+    "setup:local": "ts-node ./scripts/setup-staking.ts && LOCAL=true yarn setup:kvstore",
     "setup:kvstore": "ts-node ./scripts/setup-kv-store.ts",
     "generate-env-doc": "ts-node scripts/generate-env-doc.ts"
   },

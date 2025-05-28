@@ -23,7 +23,7 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "setup:local": "ts-node ./scripts/setup-staking.ts && NODE_ENV=local yarn setup:kvstore",
+    "setup:local": "ts-node ./scripts/setup-staking.ts && LOCAL=true yarn setup:kvstore",
     "setup:kvstore": "ts-node ./scripts/setup-kv-store.ts",
     "generate-env-doc": "ts-node scripts/generate-env-doc.ts"
   },
