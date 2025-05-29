@@ -73,7 +73,7 @@ import Environment from './utils/environment';
       /**
        * First value found takes precendece
        */
-      envFilePath: [`.env.${Environment.name}`, 'env.local', '.env'],
+      envFilePath: [`.env.${Environment.name}`, '.env.local', '.env'],
       validationSchema: envValidator,
     }),
     EnvConfigModule,

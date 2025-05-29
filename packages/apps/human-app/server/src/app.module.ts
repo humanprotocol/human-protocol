@@ -55,7 +55,7 @@ const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
       /**
        * First value found takes precendece
        */
-      envFilePath: [`.env.${process.env.NODE_ENV}`, 'env.local', '.env'],
+      envFilePath: [`.env.${process.env.NODE_ENV}`, '.env.local', '.env'],
       isGlobal: true,
       validationSchema: Joi.object({
         HOST: Joi.string().required(),

@@ -18,6 +18,8 @@
     "create-local": "graph create --node http://localhost:8020/ humanprotocol/localhost",
     "remove-local": "graph remove --node http://localhost:8020/ humanprotocol/localhost",
     "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5010 humanprotocol/localhost -l 0",
+    "health-local:node": "sh ./local-graph-status.sh node_health",
+    "health-local:subgraph": "SUBGRAPH_NAME=humanprotocol/localhost sh ./local-graph-status.sh subgraph_health",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write '**/*.{ts,json,graphql}'"

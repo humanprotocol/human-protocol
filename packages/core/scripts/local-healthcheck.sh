@@ -5,7 +5,8 @@ RPC_URL="http://localhost:$PORT"
 
 liveness() {
   echo "Waiting for $RPC_URL to respond with its version"
-  while true; do
+  while true
+  do
     RESPONSE_BODY=$(curl -s -X POST "$RPC_URL" -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"web3_clientVersion","params":[],"id":1}')
     RPC_VERSION=$(echo "$RESPONSE_BODY" | grep -o '"result":"[^"]*"' | awk -F'"' '{print $4}')
 
@@ -24,7 +25,8 @@ READINESS_BLOCK_NUMBER=23
 
 readiness() {
   echo "Waiting for $RPC_URL to reach the desired block #$READINESS_BLOCK_NUMBER"
-  while true; do
+  while true
+  do
     RESPONSE_BODY=$(curl -s -X POST "$RPC_URL" -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}')
     BLOCK_NUMBER_HEX=$(echo "$RESPONSE_BODY" | grep -o '"result":"[^"]*"' | awk -F'"' '{print $4}')
     BLOCK_NUMBER=$((BLOCK_NUMBER_HEX))

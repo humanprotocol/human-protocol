@@ -1,0 +1,23 @@
+.PHONY: web3-up web3-down \
+	infra-up infra-stop infra-down
+
+web3-up:
+	@docker compose -f docker-compose.dev.yml up -d blockchain-node ipfs graph-node-db graph-node
+
+web3-down:
+# also remove volumes to get the clean start after
+	@docker compose -f docker-compose.dev.yml down -v blockchain-node ipfs graph-node-db graph-node
+
+infra-up:
+	@docker compose -f docker-compose.dev.yml up -d postgres minio minio-client
+
+infra-stop:
+	@docker compose -f docker-compose.dev.yml stop postgres minio minio-client
+
+infra-down:
+# also remove volumes to get the clean start after
+	@docker compose -f docker-compose.dev.yml down -v postgres minio minio-client
+
+# catch-all and noop; to avoid warnings when using MAKECMDGOALS 
+%:
+	@:

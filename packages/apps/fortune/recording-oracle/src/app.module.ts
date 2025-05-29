@@ -36,7 +36,7 @@ import { ExceptionFilter } from './common/exceptions/exception.filter';
       /**
        * First value found takes precendece
        */
-      envFilePath: [`.env.${process.env.NODE_ENV}`, 'env.local', '.env'],
+      envFilePath: [`.env.${process.env.NODE_ENV}`, '.env.local', '.env'],
       validationSchema: envValidator,
     }),
     JobModule,
