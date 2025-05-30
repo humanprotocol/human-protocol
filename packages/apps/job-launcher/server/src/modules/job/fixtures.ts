@@ -82,7 +82,6 @@ export const createAudinoJobDto = (overrides = {}): JobAudinoDto => ({
     path: faker.system.filePath(),
   },
   labels: [{ name: faker.lorem.word() }],
-  audioDuration: faker.number.int({ min: 100, max: 1000 }),
   segmentDuration: faker.number.int({ min: 10, max: 100 }),
   requesterDescription: faker.lorem.sentence(),
   userGuide: faker.internet.url(),
