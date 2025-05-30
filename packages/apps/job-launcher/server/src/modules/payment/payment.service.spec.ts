@@ -256,10 +256,7 @@ describe('PaymentService', () => {
 
       const user = {
         id: 1,
-        paymentInfo: {
-          customerId: 'test',
-          paymentMethodId: 'test',
-        },
+        stripeCustomerId: 'cus_123',
       };
 
       const paymentIntent = {
@@ -300,10 +297,7 @@ describe('PaymentService', () => {
 
       const user = {
         id: 1,
-        paymentInfo: {
-          customerId: 'test',
-          paymentMethodId: 'test',
-        },
+        stripeCustomerId: 'cus_123',
       };
 
       const paymentIntent = {

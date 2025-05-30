@@ -1,17 +1,20 @@
 import { faker } from '@faker-js/faker';
-import { JobCvatDto, JobAudinoDto, JobCaptchaDto } from '../job/job.dto';
-import { AWSRegions, StorageProviders } from '../../common/enums/storage';
 import { ChainId } from '@human-protocol/sdk';
-import { PaymentCurrency } from '../../common/enums/payment';
+import { AuthConfigService } from '../../common/config/auth-config.service';
+import { CvatConfigService } from '../../common/config/cvat-config.service';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
 import {
   AudinoJobType,
   CvatJobType,
   EscrowFundToken,
   JobCaptchaShapeType,
 } from '../../common/enums/job';
-import { CvatConfigService } from '../../common/config/cvat-config.service';
-import { AuthConfigService } from '../../common/config/auth-config.service';
-import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { PaymentCurrency } from '../../common/enums/payment';
+import { JobAudinoDto, JobCaptchaDto, JobCvatDto } from '../job/job.dto';
+import {
+  getMockedProvider,
+  getMockedRegion,
+} from '../../../test/fixtures/storage';
 
 export const mockCvatConfigService: Omit<CvatConfigService, 'configService'> = {
   jobSize: faker.number.int({ min: 1, max: 1000 }),
@@ -34,18 +37,6 @@ export const mockWeb3ConfigService: Omit<
   hCaptchaReputationOracleURI: faker.internet.url(),
   hCaptchaRecordingOracleURI: faker.internet.url(),
 };
-
-export function getMockedProvider(): StorageProviders {
-  return faker.helpers.arrayElement(
-    Object.values(StorageProviders).filter(
-      (provider) => provider !== StorageProviders.LOCAL,
-    ),
-  );
-}
-
-export function getMockedRegion(): AWSRegions {
-  return faker.helpers.arrayElement(Object.values(AWSRegions));
-}
 
 export function createJobCvatDto(
   overrides: Partial<JobCvatDto> = {},
