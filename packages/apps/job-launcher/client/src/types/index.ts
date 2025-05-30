@@ -73,7 +73,6 @@ export type CreateAudinoJobRequest = {
   groundTruth: AudinoDataSource;
   userGuide: string;
   type: AudinoJobType;
-  audioDuration: number;
   segmentDuration: number;
 };
 
@@ -284,7 +283,6 @@ export type AudinoRequest = {
   groundTruth: AudinoDataSource;
   userGuide: string;
   accuracyTarget: number;
-  audioDuration: number;
   segmentDuration: number;
 };
 

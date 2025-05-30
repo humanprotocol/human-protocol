@@ -198,9 +198,6 @@ export class AudinoManifestDto {
   @ValidateNested()
   @Type(() => AudinoValidation)
   public validation: AudinoValidation;
-
-  @IsString()
-  public job_bounty: string;
 }
 
 export class RestrictedAudience {
