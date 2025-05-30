@@ -118,11 +118,7 @@ export class ManifestService {
         );
 
       case AudinoJobType.AUDIO_TRANSCRIPTION:
-        return this.createAudinoManifest(
-          dto as JobAudinoDto,
-          requestType,
-          fundAmount,
-        );
+        return this.createAudinoManifest(dto as JobAudinoDto, requestType);
 
       default:
         throw new ValidationError(ErrorJob.InvalidRequestType);
@@ -330,16 +326,7 @@ export class ManifestService {
   private async createAudinoManifest(
     dto: JobAudinoDto,
     requestType: AudinoJobType,
-    tokenFundAmount: number,
-  ): Promise<any> {
-    const totalSegments = Math.ceil(
-      (dto.audioDuration * 1000) / dto.segmentDuration,
-    );
-
-    const jobBounty =
-      ethers.parseUnits(tokenFundAmount.toString(), 'ether') /
-      BigInt(totalSegments);
-
+  ): Promise<AudinoManifestDto> {
     return {
       annotation: {
         description: dto.requesterDescription,
@@ -352,7 +339,6 @@ export class ManifestService {
       data: {
         data_url: generateBucketUrl(dto.data.dataset, requestType).href,
       },
-      job_bounty: ethers.formatEther(jobBounty),
       validation: {
         gt_url: generateBucketUrl(dto.groundTruth, requestType).href,
         min_quality: dto.minQuality,

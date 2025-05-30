@@ -109,18 +109,8 @@ export const AudinoJobRequestValidationSchema = Yup.object().shape({
     .moreThan(0, 'Accuracy target must be greater than 0')
     .max(100, 'Accuracy target must be less than or equal to 100'),
   qualifications: Yup.array().of(Yup.object()),
-
-  audioDuration: Yup.number()
-    .required('Audio duration is required')
-    .moreThan(0, 'Audio duration must be greater than 0')
-    .max(31536000, 'Audio duration must be less than or equal to 31536000'), // one year in seconds
   segmentDuration: Yup.number()
     .required('Segment duration is required')
     .moreThan(0, 'Segment duration must be greater than 0')
-    .when('$audioDuration', ([audioDuration], schema) => {
-      return schema.max(
-        audioDuration * 1000,
-        'Segment duration should not exceed audio duration',
-      );
-    }),
+    .max(3600, 'Segment duration must be less than or equal to 3600'), // one hour in seconds
 });
