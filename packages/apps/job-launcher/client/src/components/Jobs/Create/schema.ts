@@ -112,5 +112,5 @@ export const AudinoJobRequestValidationSchema = Yup.object().shape({
   segmentDuration: Yup.number()
     .required('Segment duration is required')
     .moreThan(0, 'Segment duration must be greater than 0')
-    .max(3600, 'Segment duration must be less than or equal to 3600'), // one hour in seconds
+    .max(3600000, 'Segment duration must be less than or equal to 3600000'), // one hour in ms
 });

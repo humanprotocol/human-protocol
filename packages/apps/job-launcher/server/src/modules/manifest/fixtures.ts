@@ -97,7 +97,7 @@ export function createJobAudinoDto(
       path: faker.system.filePath(),
     },
     labels: [{ name: faker.lorem.word() }],
-    segmentDuration: faker.number.int({ min: 10, max: 3600 }),
+    segmentDuration: faker.number.int({ min: 10, max: 3600000 }),
     requesterDescription: faker.lorem.sentence(),
     userGuide: faker.internet.url(),
     qualifications: [faker.lorem.word()],
