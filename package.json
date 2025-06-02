@@ -11,8 +11,11 @@
     "build:core": "yarn workspace @human-protocol/core build",
     "build:sdk": "yarn workspace @human-protocol/sdk build",
     "build:libs": "yarn build:core && yarn build:sdk",
-    "docker:infra-up": "make -C ./docker-setup check-env-file infra-up",
-    "docker:stop": "make -C ./docker-setup services-stop"
+    "docker:infra-up": "make -C ./docker-setup  -f Makefile.dev infra-up",
+    "docker:infra-stop": "make -C ./docker-setup -f Makefile.dev infra-stop",
+    "docker:infra-down": "make -C ./docker-setup -f Makefile.dev infra-down",
+    "docker:web3-up": "make -C ./docker-setup -f Makefile.dev web3-up",
+    "docker:web3-down": "make -C ./docker-setup -f Makefile.dev web3-down"
   },
   "workspaces": [
     "packages/**"

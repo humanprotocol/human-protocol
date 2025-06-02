@@ -52,7 +52,10 @@ const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: [`.env.${process.env.NODE_ENV}`, '.env'],
+      /**
+       * First value found takes precendece
+       */
+      envFilePath: [`.env.${process.env.NODE_ENV}`, '.env.local', '.env'],
       isGlobal: true,
       validationSchema: Joi.object({
         HOST: Joi.string().required(),

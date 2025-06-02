@@ -14,13 +14,12 @@ services:
   blockchain-node:
     build: 
       context: ../../../../
-      dockerfile: packages/examples/cvat/recording-oracle/dockerfiles/blockchain-node.Dockerfile
+      dockerfile: packages/core/Dockerfile.local
     healthcheck:
-      # Using a magic nubmer of 23 here because this is a block number when blockchain-node container is ready to use
-      test: if [ $(( $(wget -q --post-data='{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' -O- http://localhost:8545 | grep -o '"result":"[^"]*"' | awk -F'"' '{print $4}' ) )) -ge 23 ]; then exit 0; else exit 1; fi
+      test: yarn local:readiness
       interval: 15s
-      timeout: 5s
-      retries: 5
+      timeout: 30s
+      retries: 0
     networks:
       - test-network
 
@@ -46,7 +45,7 @@ services:
 
   minio-mc:
     container_name: minio-mc
-    image: minio/mc
+    image: minio/mc:RELEASE.2022-06-10T22-29-12Z
     depends_on:
       minio:
         condition: service_healthy

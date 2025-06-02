@@ -19,14 +19,14 @@ For deployment it is required to have PostgreSQL(v14.4)
 ### Run the oracle locally:
 
 ```
-docker-compose -f docker-compose.dev.yml up -d
+docker compose -f docker-compose.dev.yml up -d
 ./bin/start_dev.sh
 ```
 
 or 
 
 ```
-docker-compose -f docker-compose.dev.yml up -d
+docker compose -f docker-compose.dev.yml up -d
 ./bin/start_debug.sh
 ```
 
@@ -70,5 +70,5 @@ Available at `/docs` route
 
 To run tests
 ```
-docker-compose -f docker-compose.test.yml up --build test --attach test --exit-code-from test
+docker compose -f docker-compose.test.yml up --build test --attach test --exit-code-from test
 ```
