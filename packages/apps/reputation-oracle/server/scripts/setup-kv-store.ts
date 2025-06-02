@@ -111,6 +111,18 @@ async function setup(): Promise<void> {
 
   await setupCommonValues(kvStoreClient);
 
+  if (isLocalEnv) {
+    const { ACTIVE_ORACLE_ADDRESSES } = process.env;
+    if (ACTIVE_ORACLE_ADDRESSES) {
+      const oracleAddresses = ACTIVE_ORACLE_ADDRESSES.split(',')
+        .map((addr) => addr.trim())
+        .filter(Boolean);
+      for (const address of oracleAddresses) {
+        await kvStoreClient.set(address, 'active');
+      }
+    }
+  }
+
   const {
     S3_ENDPOINT,
     S3_PORT,
