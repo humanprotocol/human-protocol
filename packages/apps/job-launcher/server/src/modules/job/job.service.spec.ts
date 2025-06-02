@@ -1365,16 +1365,31 @@ describe('JobService', () => {
   });
 
   describe('getOracleType', () => {
-    it.each([
-      [FortuneJobType.FORTUNE, OracleType.FORTUNE],
-      [CvatJobType.IMAGE_BOXES, OracleType.CVAT],
-      [AudinoJobType.AUDIO_TRANSCRIPTION, OracleType.AUDINO],
-      [HCaptchaJobType.HCAPTCHA, OracleType.HCAPTCHA],
-    ])(
-      'should return the correct oracle type for %s job',
-      (jobType, expectedOracleType) => {
-        const oracleType = jobService.getOracleType(jobType);
-        expect(oracleType).toBe(expectedOracleType);
+    it.each(Object.values(FortuneJobType))(
+      'should return OracleType.FORTUNE for Fortune job type %s',
+      (jobType) => {
+        expect(jobService.getOracleType(jobType)).toBe(OracleType.FORTUNE);
+      },
+    );
+
+    it.each(Object.values(CvatJobType))(
+      'should return OracleType.CVAT for CVAT job type %s',
+      (jobType) => {
+        expect(jobService.getOracleType(jobType)).toBe(OracleType.CVAT);
+      },
+    );
+
+    it.each(Object.values(AudinoJobType))(
+      'should return OracleType.AUDINO for Audino job type %s',
+      (jobType) => {
+        expect(jobService.getOracleType(jobType)).toBe(OracleType.AUDINO);
+      },
+    );
+
+    it.each(Object.values(HCaptchaJobType))(
+      'should return OracleType.HCAPTCHA for HCaptcha job type %s',
+      (jobType) => {
+        expect(jobService.getOracleType(jobType)).toBe(OracleType.HCAPTCHA);
       },
     );
   });
