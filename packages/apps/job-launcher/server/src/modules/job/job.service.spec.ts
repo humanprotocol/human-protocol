@@ -15,11 +15,7 @@ import { Test } from '@nestjs/testing';
 import { ethers, Wallet, ZeroAddress } from 'ethers';
 import { createSignerMock } from '../../../test/fixtures/web3';
 import { ServerConfigService } from '../../common/config/server-config.service';
-import {
-  ErrorEscrow,
-  ErrorJob,
-  ErrorWeb3,
-} from '../../common/constants/errors';
+import { ErrorEscrow, ErrorJob } from '../../common/constants/errors';
 import {
   AudinoJobType,
   CvatJobType,
@@ -40,14 +36,14 @@ import {
   NotFoundError,
   ValidationError,
 } from '../../common/errors';
-import { mul } from '../../common/utils/decimal';
+import { div, max, mul } from '../../common/utils/decimal';
 import { getTokenDecimals } from '../../common/utils/tokens';
 import {
-  AudinoManifestDto,
-  CvatManifestDto,
-  FortuneManifestDto,
-  HCaptchaManifestDto,
-} from '../manifest/manifest.dto';
+  createMockAudinoManifest,
+  createMockCvatManifest,
+  createMockFortuneManifest,
+  createMockHcaptchaManifest,
+} from '../manifest/fixtures';
 import { ManifestService } from '../manifest/manifest.service';
 import { PaymentRepository } from '../payment/payment.repository';
 import { PaymentService } from '../payment/payment.service';
@@ -73,7 +69,6 @@ import {
   JobFortuneDto,
   JobQuickLaunchDto,
 } from './job.dto';
-import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
 import { JobService } from './job.service';
 
@@ -162,13 +157,12 @@ describe('JobService', () => {
           fortuneJobDto.escrowFundToken,
         );
 
-        const mockManifest: FortuneManifestDto = {
+        const mockManifest = createMockFortuneManifest({
           submissionsRequired: fortuneJobDto.submissionsRequired,
           requesterTitle: fortuneJobDto.requesterTitle,
           requesterDescription: fortuneJobDto.requesterDescription,
           fundAmount: fortuneJobDto.paymentAmount,
-          requestType: FortuneJobType.FORTUNE,
-        };
+        });
         mockManifestService.createManifest.mockResolvedValueOnce(mockManifest);
         const mockUrl = faker.internet.url();
         const mockHash = faker.string.uuid();
@@ -177,19 +171,26 @@ describe('JobService', () => {
           hash: mockHash,
         });
         const jobEntityMock = createJobEntity();
-        mockJobRepository.createUnique = jest
-          .fn()
-          .mockResolvedValueOnce(jobEntityMock);
+        mockJobRepository.updateOne.mockResolvedValueOnce(jobEntityMock);
         mockRateService.getRate
           .mockResolvedValueOnce(tokenToUsdRate)
           .mockResolvedValueOnce(usdToTokenRate);
+        mockedKVStoreUtils.get.mockResolvedValueOnce('1');
 
-        await jobService.createJob(
+        const result = await jobService.createJob(
           userMock,
           FortuneJobType.FORTUNE,
           fortuneJobDto,
         );
 
+        const paymentCurrencyFee = Number(
+          max(
+            div(mockServerConfigService.minimumFeeUsd, tokenToUsdRate),
+            mul(div(1, 100), fortuneJobDto.paymentAmount),
+          ).toFixed(18),
+        );
+
+        expect(result).toBe(jobEntityMock.id);
         expect(mockWeb3Service.validateChainId).toHaveBeenCalledWith(
           fortuneJobDto.chainId,
         );
@@ -228,7 +229,12 @@ describe('JobService', () => {
           manifestUrl: mockUrl,
           manifestHash: mockHash,
           requestType: FortuneJobType.FORTUNE,
-          fee: expect.any(Number),
+          fee: Number(
+            mul(
+              mul(paymentCurrencyFee, tokenToUsdRate),
+              usdToTokenRate,
+            ).toFixed(fundTokenDecimals),
+          ),
           fundAmount: fortuneJobDto.paymentAmount,
           status: JobStatus.MODERATION_PASSED,
           waitUntil: expect.any(Date),
@@ -251,13 +257,12 @@ describe('JobService', () => {
           fortuneJobDto.escrowFundToken,
         );
 
-        const mockManifest: FortuneManifestDto = {
+        const mockManifest = createMockFortuneManifest({
           submissionsRequired: fortuneJobDto.submissionsRequired,
           requesterTitle: fortuneJobDto.requesterTitle,
           requesterDescription: fortuneJobDto.requesterDescription,
           fundAmount: fortuneJobDto.paymentAmount,
-          requestType: FortuneJobType.FORTUNE,
-        };
+        });
         mockManifestService.createManifest.mockResolvedValueOnce(mockManifest);
         const mockUrl = faker.internet.url();
         const mockHash = faker.string.uuid();
@@ -266,18 +271,26 @@ describe('JobService', () => {
           hash: mockHash,
         });
         const jobEntityMock = createJobEntity();
-        mockJobRepository.createUnique = jest
-          .fn()
-          .mockResolvedValueOnce(jobEntityMock);
+        mockJobRepository.updateOne.mockResolvedValueOnce(jobEntityMock);
         mockRateService.getRate
           .mockResolvedValueOnce(tokenToUsdRate)
           .mockResolvedValueOnce(usdToTokenRate);
+        mockedKVStoreUtils.get.mockResolvedValueOnce('1');
 
-        await jobService.createJob(
+        const result = await jobService.createJob(
           userMock,
           FortuneJobType.FORTUNE,
           fortuneJobDto,
         );
+
+        const paymentCurrencyFee = Number(
+          max(
+            div(mockServerConfigService.minimumFeeUsd, tokenToUsdRate),
+            mul(div(1, 100), fortuneJobDto.paymentAmount),
+          ).toFixed(18),
+        );
+
+        expect(result).toBe(jobEntityMock.id);
 
         expect(mockWeb3Service.validateChainId).toHaveBeenCalledWith(
           fortuneJobDto.chainId,
@@ -317,7 +330,12 @@ describe('JobService', () => {
           manifestUrl: mockUrl,
           manifestHash: mockHash,
           requestType: FortuneJobType.FORTUNE,
-          fee: expect.any(Number),
+          fee: Number(
+            mul(
+              mul(paymentCurrencyFee, tokenToUsdRate),
+              usdToTokenRate,
+            ).toFixed(fundTokenDecimals),
+          ),
           fundAmount: Number(
             mul(
               mul(fortuneJobDto.paymentAmount, tokenToUsdRate),
@@ -348,13 +366,12 @@ describe('JobService', () => {
           fortuneJobDto.escrowFundToken,
         );
 
-        const mockManifest: FortuneManifestDto = {
+        const mockManifest = createMockFortuneManifest({
           submissionsRequired: fortuneJobDto.submissionsRequired,
           requesterTitle: fortuneJobDto.requesterTitle,
           requesterDescription: fortuneJobDto.requesterDescription,
           fundAmount: fortuneJobDto.paymentAmount,
-          requestType: FortuneJobType.FORTUNE,
-        };
+        });
         mockManifestService.createManifest.mockResolvedValueOnce(mockManifest);
         const mockUrl = faker.internet.url();
         const mockHash = faker.string.uuid();
@@ -363,9 +380,7 @@ describe('JobService', () => {
           hash: mockHash,
         });
         const jobEntityMock = createJobEntity();
-        mockJobRepository.createUnique = jest
-          .fn()
-          .mockResolvedValueOnce(jobEntityMock);
+        mockJobRepository.updateOne.mockResolvedValueOnce(jobEntityMock);
         mockRateService.getRate
           .mockResolvedValueOnce(tokenToUsdRate)
           .mockResolvedValueOnce(usdToTokenRate);
@@ -379,12 +394,21 @@ describe('JobService', () => {
           exchangeOracle: mockOracles.exchangeOracle,
           reputationOracle: mockOracles.reputationOracle,
         });
+        mockedKVStoreUtils.get.mockResolvedValueOnce('1');
 
-        await jobService.createJob(
+        const result = await jobService.createJob(
           userMock,
           FortuneJobType.FORTUNE,
           fortuneJobDto,
         );
+        const paymentCurrencyFee = Number(
+          max(
+            div(mockServerConfigService.minimumFeeUsd, tokenToUsdRate),
+            mul(div(1, 100), fortuneJobDto.paymentAmount),
+          ).toFixed(18),
+        );
+
+        expect(result).toBe(jobEntityMock.id);
 
         expect(mockWeb3Service.validateChainId).toHaveBeenCalledWith(
           fortuneJobDto.chainId,
@@ -423,7 +447,12 @@ describe('JobService', () => {
           manifestUrl: mockUrl,
           manifestHash: mockHash,
           requestType: FortuneJobType.FORTUNE,
-          fee: expect.any(Number),
+          fee: Number(
+            mul(
+              mul(paymentCurrencyFee, tokenToUsdRate),
+              usdToTokenRate,
+            ).toFixed(fundTokenDecimals),
+          ),
           fundAmount: fortuneJobDto.paymentAmount,
           status: JobStatus.MODERATION_PASSED,
           waitUntil: expect.any(Date),
@@ -447,14 +476,15 @@ describe('JobService', () => {
         ).rejects.toThrow(new ValidationError(ErrorJob.NotActiveCard));
       });
 
-      it('should throw an exception for invalid chain id provided', async () => {
+      it('should re-throw errors from validateChainId', async () => {
+        const randomError = new Error(faker.lorem.word());
         mockWeb3Service.validateChainId.mockImplementationOnce(() => {
-          throw new ValidationError(ErrorWeb3.InvalidChainId);
+          throw randomError;
         });
         const dto = createFortuneJobDto();
         await expect(
           jobService.createJob(createUser(), FortuneJobType.FORTUNE, dto),
-        ).rejects.toThrow(new ValidationError(ErrorWeb3.InvalidChainId));
+        ).rejects.toThrow(randomError);
       });
     });
 
@@ -466,11 +496,7 @@ describe('JobService', () => {
           cvatJobDto.escrowFundToken,
         );
 
-        const mockManifest = {
-          annotation: { description: cvatJobDto.requesterDescription },
-          fundAmount: cvatJobDto.paymentAmount,
-          requestType: CvatJobType.IMAGE_BOXES,
-        } as unknown as CvatManifestDto;
+        const mockManifest = createMockCvatManifest();
         mockManifestService.createManifest.mockResolvedValueOnce(mockManifest);
         const mockUrl = faker.internet.url();
         const mockHash = faker.string.uuid();
@@ -552,11 +578,7 @@ describe('JobService', () => {
           audinoJobDto.escrowFundToken,
         );
 
-        const mockManifest = {
-          annotation: { description: audinoJobDto.requesterDescription },
-          fundAmount: audinoJobDto.paymentAmount,
-          requestType: AudinoJobType.AUDIO_TRANSCRIPTION,
-        } as unknown as AudinoManifestDto;
+        const mockManifest = createMockAudinoManifest();
         mockManifestService.createManifest.mockResolvedValueOnce(mockManifest);
         const mockUrl = faker.internet.url();
         const mockHash = faker.string.uuid();
@@ -642,10 +664,7 @@ describe('JobService', () => {
           captchaJobDto.escrowFundToken,
         );
 
-        const mockManifest = {
-          fundAmount: captchaJobDto.paymentAmount,
-          requestType: captchaJobDto.annotations.typeOfJob,
-        } as unknown as HCaptchaManifestDto;
+        const mockManifest = createMockHcaptchaManifest();
         mockManifestService.createManifest.mockResolvedValueOnce(mockManifest);
         const mockUrl = faker.internet.url();
         const mockHash = faker.string.uuid();
@@ -808,19 +827,11 @@ describe('JobService', () => {
       });
 
       const escrowAddress = faker.finance.ethereumAddress();
-      const signer = createSignerMock() as unknown as Wallet;
-
-      mockWeb3Service.getSigner.mockReturnValueOnce(signer);
       mockedEscrowClient.build.mockResolvedValueOnce({
         createEscrow: jest.fn().mockResolvedValueOnce(escrowAddress),
       } as unknown as EscrowClient);
 
       mockWeb3Service.calculateGasPrice.mockResolvedValueOnce(1n);
-      mockJobRepository.updateOne.mockResolvedValueOnce({
-        ...jobEntity,
-        status: JobStatus.CREATED,
-        escrowAddress,
-      } as JobEntity);
 
       const result = await jobService.createEscrow(jobEntity);
 
@@ -844,8 +855,6 @@ describe('JobService', () => {
         escrowAddress: null,
       });
 
-      const signer = createSignerMock() as unknown as Wallet;
-      mockWeb3Service.getSigner.mockReturnValueOnce(signer);
       mockedEscrowClient.build.mockResolvedValueOnce({
         createEscrow: jest.fn().mockResolvedValueOnce(undefined),
       } as unknown as EscrowClient);
@@ -864,9 +873,6 @@ describe('JobService', () => {
         status: JobStatus.FUNDED,
       });
 
-      const signer = createSignerMock() as unknown as Wallet;
-      mockWeb3Service.getSigner.mockReturnValueOnce(signer);
-
       const escrowClientMock = {
         setup: jest.fn().mockResolvedValueOnce(undefined),
       };
@@ -875,10 +881,18 @@ describe('JobService', () => {
       );
 
       mockWeb3Service.calculateGasPrice.mockResolvedValueOnce(1n);
-      mockedKVStoreUtils.get
-        .mockResolvedValueOnce('1')
-        .mockResolvedValueOnce('1')
-        .mockResolvedValueOnce('1');
+      mockedKVStoreUtils.get.mockImplementation(async (_chainId, address) => {
+        switch (address) {
+          case jobEntity.reputationOracle:
+            return '1';
+          case jobEntity.recordingOracle:
+            return '2';
+          case jobEntity.exchangeOracle:
+            return '3';
+          default:
+            return '';
+        }
+      });
 
       const result = await jobService.setupEscrow(jobEntity);
 
@@ -889,12 +903,12 @@ describe('JobService', () => {
       expect(escrowClientMock.setup).toHaveBeenCalledWith(
         jobEntity.escrowAddress,
         {
-          recordingOracle: jobEntity.recordingOracle,
-          recordingOracleFee: 1n,
           reputationOracle: jobEntity.reputationOracle,
           reputationOracleFee: 1n,
+          recordingOracle: jobEntity.recordingOracle,
+          recordingOracleFee: 2n,
           exchangeOracle: jobEntity.exchangeOracle,
-          exchangeOracleFee: 1n,
+          exchangeOracleFee: 3n,
           manifestUrl: jobEntity.manifestUrl,
           manifestHash: jobEntity.manifestHash,
         },
@@ -933,10 +947,7 @@ describe('JobService', () => {
       );
 
       mockWeb3Service.calculateGasPrice.mockResolvedValueOnce(1n);
-      mockedKVStoreUtils.get
-        .mockResolvedValueOnce('1')
-        .mockResolvedValueOnce('1')
-        .mockResolvedValueOnce('1');
+      mockedKVStoreUtils.get.mockResolvedValue('1');
 
       await expect(jobService.setupEscrow(jobEntity)).rejects.toThrow(
         'Network error',
@@ -950,10 +961,7 @@ describe('JobService', () => {
         status: JobStatus.PAID,
         token: EscrowFundToken.HMT,
       });
-
-      mockWeb3Service.getSigner.mockReturnValueOnce(
-        createSignerMock() as unknown as Wallet,
-      );
+      mockedKVStoreUtils.get.mockResolvedValue('1');
       mockedEscrowClient.build.mockResolvedValueOnce({
         fund: jest.fn().mockResolvedValue(undefined),
       } as unknown as EscrowClient);
@@ -1092,7 +1100,7 @@ describe('JobService', () => {
     });
   });
 
-  describe('getJobByStatus', () => {
+  describe('getJobsByStatus', () => {
     it('should return jobs by status', async () => {
       const jobStatus = JobStatus.LAUNCHED;
       const jobEntityMock = createJobEntity({ status: jobStatus });
@@ -1317,7 +1325,7 @@ describe('JobService', () => {
   });
 
   describe('handleProcessJobFailure', () => {
-    beforeEach(() => {
+    beforeAll(() => {
       (mockServerConfigService as any).maxRetryCount = 5;
     });
 
@@ -1357,39 +1365,23 @@ describe('JobService', () => {
   });
 
   describe('getOracleType', () => {
-    it('should return the correct oracle type for Fortune job', () => {
-      const jobType = FortuneJobType.FORTUNE;
-      const oracleType = jobService.getOracleType(jobType);
-      expect(oracleType).toBe(OracleType.FORTUNE);
-    });
-
-    it('should return the correct oracle type for CVAT job', () => {
-      const jobType = CvatJobType.IMAGE_BOXES;
-      const oracleType = jobService.getOracleType(jobType);
-      expect(oracleType).toBe(OracleType.CVAT);
-    });
-
-    it('should return the correct oracle type for Audino job', () => {
-      const jobType = AudinoJobType.AUDIO_TRANSCRIPTION;
-      const oracleType = jobService.getOracleType(jobType);
-      expect(oracleType).toBe(OracleType.AUDINO);
-    });
-
-    it('should return the correct oracle type for HCaptcha job', () => {
-      const jobType = HCaptchaJobType.HCAPTCHA;
-      const oracleType = jobService.getOracleType(jobType);
-      expect(oracleType).toBe(OracleType.HCAPTCHA);
-    });
+    it.each([
+      [FortuneJobType.FORTUNE, OracleType.FORTUNE],
+      [CvatJobType.IMAGE_BOXES, OracleType.CVAT],
+      [AudinoJobType.AUDIO_TRANSCRIPTION, OracleType.AUDINO],
+      [HCaptchaJobType.HCAPTCHA, OracleType.HCAPTCHA],
+    ])(
+      'should return the correct oracle type for %s job',
+      (jobType, expectedOracleType) => {
+        const oracleType = jobService.getOracleType(jobType);
+        expect(oracleType).toBe(expectedOracleType);
+      },
+    );
   });
 
   describe('processEscrowCancellation', () => {
     it('should process escrow cancellation', async () => {
       const jobEntity = createJobEntity();
-
-      const mockedSigner = createSignerMock();
-      mockWeb3Service.getSigner.mockReturnValueOnce(
-        mockedSigner as unknown as Wallet,
-      );
       mockWeb3Service.calculateGasPrice.mockResolvedValueOnce(1n);
       mockedEscrowClient.build.mockResolvedValue({
         getStatus: jest.fn().mockResolvedValue('Active'),
@@ -1410,7 +1402,6 @@ describe('JobService', () => {
       mockJobRepository.findOneByChainIdAndEscrowAddress.mockResolvedValueOnce(
         jobEntity,
       );
-      mockJobRepository.updateOne.mockResolvedValueOnce(jobEntity);
       const reason = faker.lorem.sentence();
       await expect(
         jobService.escrowFailedWebhook({
@@ -1456,7 +1447,7 @@ describe('JobService', () => {
       ).rejects.toThrow(new ValidationError(ErrorJob.NotLaunched));
     });
 
-    it('should throw an error if event data is missing reason', async () => {
+    it('should throw an error if event data is missing', async () => {
       const jobEntity = createJobEntity({ status: JobStatus.LAUNCHED });
       mockJobRepository.findOneByChainIdAndEscrowAddress.mockResolvedValueOnce(
         jobEntity,
@@ -1499,13 +1490,9 @@ describe('JobService', () => {
         jobEntity.token as EscrowFundToken,
       );
 
-      const manifestMock = {
-        submissionsRequired: faker.number.int({ min: 1, max: 100 }),
-        requesterTitle: faker.lorem.words(),
-        requesterDescription: faker.lorem.sentence(),
+      const manifestMock = createMockFortuneManifest({
         fundAmount: jobEntity.fundAmount,
-        requestType: jobEntity.requestType,
-      } as unknown as FortuneManifestDto;
+      });
 
       const getEscrowData = {
         token: faker.finance.ethereumAddress(),
@@ -1561,13 +1548,9 @@ describe('JobService', () => {
     it('should return job details without escrow address successfully', async () => {
       const jobEntity = createJobEntity({ escrowAddress: null });
 
-      const manifestMock = {
-        submissionsRequired: faker.number.int({ min: 1, max: 100 }),
-        requesterTitle: faker.lorem.words(),
-        requesterDescription: faker.lorem.sentence(),
+      const manifestMock = createMockFortuneManifest({
         fundAmount: jobEntity.fundAmount,
-        requestType: jobEntity.requestType,
-      } as unknown as FortuneManifestDto;
+      });
 
       mockJobRepository.findOneByIdAndUserId.mockResolvedValueOnce(jobEntity);
       mockManifestService.downloadManifest.mockResolvedValueOnce(manifestMock);
@@ -1622,7 +1605,6 @@ describe('JobService', () => {
       mockJobRepository.findOneByChainIdAndEscrowAddress.mockResolvedValueOnce(
         jobEntity,
       );
-      mockJobRepository.updateOne.mockResolvedValueOnce(jobEntity);
       await expect(
         jobService.completeJob({
           chainId: ChainId.POLYGON_AMOY,
@@ -1630,6 +1612,10 @@ describe('JobService', () => {
           eventType: EventType.ESCROW_COMPLETED,
         }),
       ).resolves.toBeUndefined();
+      expect(mockJobRepository.updateOne).toHaveBeenCalledWith({
+        ...jobEntity,
+        status: JobStatus.COMPLETED,
+      });
     });
 
     it('should throw an error if job not found', async () => {
@@ -1664,12 +1650,10 @@ describe('JobService', () => {
 
   describe('isEscrowFunded', () => {
     it('should check if escrow is funded', async () => {
-      mockWeb3Service.getSigner.mockReturnValueOnce(
-        createSignerMock() as unknown as Wallet,
-      );
-
       mockedEscrowClient.build.mockResolvedValue({
-        getBalance: jest.fn().mockResolvedValue(100n),
+        getBalance: jest
+          .fn()
+          .mockResolvedValue(BigInt(faker.number.int({ min: 1, max: 1000 }))),
       } as unknown as EscrowClient);
       const result = await jobService.isEscrowFunded(
         faker.number.int(),
@@ -1679,10 +1663,6 @@ describe('JobService', () => {
     });
 
     it('should return false if escrow was not funded', async () => {
-      mockWeb3Service.getSigner.mockReturnValueOnce(
-        createSignerMock() as unknown as Wallet,
-      );
-
       mockedEscrowClient.build.mockResolvedValue({
         getBalance: jest.fn().mockResolvedValue(0n),
       } as unknown as EscrowClient);
