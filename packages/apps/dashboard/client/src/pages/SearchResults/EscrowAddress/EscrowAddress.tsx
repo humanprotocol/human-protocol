@@ -2,11 +2,11 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
-import TitleSectionWrapper from '@components/SearchResults';
-import SectionWrapper from '@components/SectionWrapper';
+import TitleSectionWrapper from '@/components/SearchResults';
+import SectionWrapper from '@/components/SectionWrapper';
 import HmtBalance from '../HmtBalance';
 
-import { AddressDetailsEscrowSchema } from '@services/api/use-address-details';
+import { AddressDetailsEscrowSchema } from '@/services/api/use-address-details';
 
 const EscrowAddress = ({
   data: {

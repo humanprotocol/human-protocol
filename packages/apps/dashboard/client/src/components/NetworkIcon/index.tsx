@@ -1,12 +1,12 @@
-import EthereumIcon from '@components/Icons/EthereumIcon';
-import BinanceSmartChainIcon from '@components/Icons/BinanceSmartChainIcon';
-import PolygonIcon from '@components/Icons/PolygonIcon';
-import MoonbeamIcon from '@components/Icons/MoonbeamIcon';
-import MoonbaseAlphaIcon from '@components/Icons/MoonbaseAlphaIcon';
-import CeloIcon from '@assets/icons/celo.svg';
-import { XLayerIcon } from '@components/Icons/XLayerIcon';
-import HumanIcon from '@components/Icons/HumanIcon';
-import { AvalancheIcon } from '@components/Icons/AvalancheIcon';
+import EthereumIcon from '@/components/Icons/EthereumIcon';
+import BinanceSmartChainIcon from '@/components/Icons/BinanceSmartChainIcon';
+import PolygonIcon from '@/components/Icons/PolygonIcon';
+import MoonbeamIcon from '@/components/Icons/MoonbeamIcon';
+import MoonbaseAlphaIcon from '@/components/Icons/MoonbaseAlphaIcon';
+import CeloIcon from '@/assets/icons/celo.svg';
+import { XLayerIcon } from '@/components/Icons/XLayerIcon';
+import HumanIcon from '@/components/Icons/HumanIcon';
+import { AvalancheIcon } from '@/components/Icons/AvalancheIcon';
 
 export const NetworkIcon = ({ chainId }: { chainId: number }) => {
   const icon = (() => {

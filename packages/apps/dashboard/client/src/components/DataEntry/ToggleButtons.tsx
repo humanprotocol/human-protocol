@@ -6,7 +6,7 @@ import {
   TIME_PERIOD_OPTIONS,
   TimePeriod,
   useGraphPageChartParams,
-} from '@utils/hooks/use-graph-page-chart-params';
+} from '@/utils/hooks/use-graph-page-chart-params';
 import dayjs from 'dayjs';
 
 export const StyledToggleButtonGroup = styled(ToggleButtonGroup)(

@@ -1,8 +1,8 @@
-import { ExchangeOracleIcon } from '@components/Icons/ExchangeOracleIcon';
-import HumanIcon from '@components/Icons/HumanIcon';
-import { JobLauncher } from '@components/Icons/JobLauncher';
-import { RecordingOracle } from '@components/Icons/RecordingOracle';
-import { ReputationOracle } from '@components/Icons/ReputationOracle';
+import { ExchangeOracleIcon } from '@/components/Icons/ExchangeOracleIcon';
+import HumanIcon from '@/components/Icons/HumanIcon';
+import { JobLauncher } from '@/components/Icons/JobLauncher';
+import { RecordingOracle } from '@/components/Icons/RecordingOracle';
+import { ReputationOracle } from '@/components/Icons/ReputationOracle';
 import { Role } from '@human-protocol/sdk';
 
 export const EntityIcon: React.FC<{ role: string }> = ({ role }) => {

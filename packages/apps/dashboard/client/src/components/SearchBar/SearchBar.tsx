@@ -15,11 +15,11 @@ import {
   Tooltip,
   CircularProgress,
 } from '@mui/material';
-import { colorPalette } from '@assets/styles/color-palette';
-import { useFilteredNetworks } from '@utils/hooks/use-filtered-networks';
-import { useIsMobile } from '@utils/hooks/use-breakpoints';
-import { NetworkIcon } from '@components/NetworkIcon';
-import { useWalletSearch } from '@utils/hooks/use-wallet-search';
+import { colorPalette } from '@/assets/styles/color-palette';
+import { useFilteredNetworks } from '@/utils/hooks/use-filtered-networks';
+import { useIsMobile } from '@/utils/hooks/use-breakpoints';
+import { NetworkIcon } from '@/components/NetworkIcon';
+import { useWalletSearch } from '@/utils/hooks/use-wallet-search';
 import {
   endAdornmentInputAdornmentSx,
   startAdornmentInputAdornmentSx,

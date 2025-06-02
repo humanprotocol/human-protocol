@@ -8,10 +8,10 @@ import TablePagination from '@mui/material/TablePagination';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 
-import { EscrowsTableBody } from '@pages/SearchResults/RoleDetails/RoleDetailsEscrows/tableComponents/EscrowsTableBody';
-import SectionWrapper from '@components/SectionWrapper';
-import { useEscrowDetailsDto } from '@utils/hooks/use-escrows-details-dto';
-import { useEscrowDetails } from '@services/api/use-escrows-details';
+import { EscrowsTableBody } from '@/pages/SearchResults/RoleDetails/RoleDetailsEscrows/tableComponents/EscrowsTableBody';
+import SectionWrapper from '@/components/SectionWrapper';
+import { useEscrowDetailsDto } from '@/utils/hooks/use-escrows-details-dto';
+import { useEscrowDetails } from '@/services/api/use-escrows-details';
 
 export const RoleDetailsEscrowsTable = ({ role }: { role: string | null }) => {
   const { data } = useEscrowDetails({ role });

@@ -9,19 +9,19 @@ import Typography from '@mui/material/Typography';
 import { Link } from 'react-router-dom';
 import styled from '@mui/material/styles/styled';
 
-import PageWrapper from '@components/PageWrapper';
-import SearchBar from '@components/SearchBar/SearchBar';
-import ShadowIcon from '@components/ShadowIcon';
+import PageWrapper from '@/components/PageWrapper';
+import SearchBar from '@/components/SearchBar/SearchBar';
+import ShadowIcon from '@/components/ShadowIcon';
 import { Leaderboard } from './Leaderboard';
-import GraphSwiper from '@components/Home/GraphSwiper';
-import HMTPrice from '@pages/Home/HMTPrice';
-import TotalNumberOfTasks from '@pages/Home/TotalNumberOfTasks';
-import Holders from '@pages/Home/Holders';
-import TotalTransactions from '@pages/Home/TotalTransactions';
-import { LeaderboardIcon } from '@components/Icons/LeaderboardIcon';
-import CustomTooltip from '@components/CustomTooltip';
+import GraphSwiper from '@/components/Home/GraphSwiper';
+import HMTPrice from '@/pages/Home/HMTPrice';
+import TotalNumberOfTasks from '@/pages/Home/TotalNumberOfTasks';
+import Holders from '@/pages/Home/Holders';
+import TotalTransactions from '@/pages/Home/TotalTransactions';
+import { LeaderboardIcon } from '@/components/Icons/LeaderboardIcon';
+import CustomTooltip from '@/components/CustomTooltip';
 
-import { useIsMobile } from '@utils/hooks/use-breakpoints';
+import { useIsMobile } from '@/utils/hooks/use-breakpoints';
 
 const CardWrapper = styled(Grid)(({ theme }) => ({
   display: 'flex',

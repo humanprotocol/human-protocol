@@ -1,4 +1,4 @@
-import { useLeaderboardDetails } from '@services/api/use-leaderboard-details';
+import { useLeaderboardDetails } from '@/services/api/use-leaderboard-details';
 import { Leaderboard as LeaderboardFeature } from '../../features/Leaderboard';
 
 export const Leaderboard = () => {

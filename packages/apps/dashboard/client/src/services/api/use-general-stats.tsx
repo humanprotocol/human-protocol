@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
 import { httpService } from '../http-service';
 import { apiPaths } from '../api-paths';
-import { validateResponse } from '@services/validate-response';
+import { validateResponse } from '@/services/validate-response';
 
 const successGeneralStatsResponseSchema = z.object({
   totalHolders: z.number(),

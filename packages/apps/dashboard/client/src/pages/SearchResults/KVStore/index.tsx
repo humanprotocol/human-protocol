@@ -7,8 +7,8 @@ import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 
-import SectionWrapper from '@components/SectionWrapper';
-import useKvstoreData from '@services/api/use-kvstore-data';
+import SectionWrapper from '@/components/SectionWrapper';
+import useKvstoreData from '@/services/api/use-kvstore-data';
 
 const KVStore = () => {
   const { data } = useKvstoreData();

@@ -12,9 +12,9 @@ import Toolbar from '@mui/material/Toolbar';
 import styled from '@mui/material/styles/styled';
 import { Link } from 'react-router-dom';
 
-import { LogoBlockIcon } from '@components/Icons/LogoBlockIcon';
-import { LogoBlockIconMobile } from '@components/Icons/LogoBlockIconMobile';
-import { env } from '@helpers/env';
+import { LogoBlockIcon } from '@/components/Icons/LogoBlockIcon';
+import { LogoBlockIconMobile } from '@/components/Icons/LogoBlockIconMobile';
+import { env } from '@/helpers/env';
 
 const NavLink = styled(MuiLink)(({ theme }) => ({
   color: theme.palette.primary.main,

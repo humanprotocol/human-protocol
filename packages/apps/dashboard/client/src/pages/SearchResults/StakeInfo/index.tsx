@@ -4,9 +4,9 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { NumericFormat } from 'react-number-format';
 
-import SectionWrapper from '@components/SectionWrapper';
+import SectionWrapper from '@/components/SectionWrapper';
 
-import { useIsMobile } from '@utils/hooks/use-breakpoints';
+import { useIsMobile } from '@/utils/hooks/use-breakpoints';
 
 type Props = {
   amountStaked?: number | null;

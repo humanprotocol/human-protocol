@@ -9,8 +9,8 @@ import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import TelegramIcon from '@mui/icons-material/Telegram';
 
-import DiscordIcon from '@components/Icons/DiscordIcon';
-import { env } from '@helpers/env';
+import DiscordIcon from '@/components/Icons/DiscordIcon';
+import { env } from '@/helpers/env';
 
 const StyledLink = styled(Link)(({ theme }) => ({
   textDecoration: 'none',

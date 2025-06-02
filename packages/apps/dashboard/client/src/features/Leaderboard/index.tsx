@@ -7,8 +7,8 @@ import { useNavigate } from 'react-router-dom';
 
 import { SelectNetwork } from './components/SelectNetwork';
 import { DataGridWrapper } from './components/DataGridWrapper';
-import { LeaderBoardData } from '@services/api/use-leaderboard-details';
-import { colorPalette } from '@assets/styles/color-palette';
+import { LeaderBoardData } from '@/services/api/use-leaderboard-details';
+import { colorPalette } from '@/assets/styles/color-palette';
 
 type Props = {
   data: LeaderBoardData | undefined;

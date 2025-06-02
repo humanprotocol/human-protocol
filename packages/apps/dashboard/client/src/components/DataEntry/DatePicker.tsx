@@ -13,7 +13,7 @@ import {
   DateValidationError,
   FieldSection,
 } from '@mui/x-date-pickers/models';
-import { colorPalette } from '@assets/styles/color-palette';
+import { colorPalette } from '@/assets/styles/color-palette';
 
 interface CustomDateFieldProps
   extends UseDateFieldProps<Dayjs, false>,

@@ -5,7 +5,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import CustomTooltip from '@components/CustomTooltip';
+import CustomTooltip from '@/components/CustomTooltip';
 
 interface ClipboardProps {
   value: string;

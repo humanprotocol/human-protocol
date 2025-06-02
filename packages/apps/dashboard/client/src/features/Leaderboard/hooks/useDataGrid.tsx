@@ -4,7 +4,7 @@ import { Box, Typography } from '@mui/material';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
 
-import CustomTooltip from '@components/CustomTooltip';
+import CustomTooltip from '@/components/CustomTooltip';
 import { RoleCell } from '../components/RoleCell';
 import { AddressCell } from '../components/AddressCell';
 import { ChainCell } from '../components/ChainCell';
@@ -12,11 +12,10 @@ import { SelectNetwork } from '../components/SelectNetwork';
 import { TextCell } from '../components/TextCell';
 import { CategoryCell } from '../components/CategoryCell';
 
-import { LeaderBoardData } from '@services/api/use-leaderboard-details';
-import { useIsMobile } from '@utils/hooks/use-breakpoints';
-import { useLeaderboardSearch } from '@utils/hooks/use-leaderboard-search';
+import { LeaderBoardData } from '@/services/api/use-leaderboard-details';
+import { useIsMobile } from '@/utils/hooks/use-breakpoints';
+import { useLeaderboardSearch } from '@/utils/hooks/use-leaderboard-search';
 
-// eslint-disable-next-line react-refresh/only-export-components
 const InfoTooltip = ({ title }: { title: string }) => (
   <CustomTooltip title={title} arrow>
     <HelpOutlineIcon

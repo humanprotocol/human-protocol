@@ -4,9 +4,9 @@ import Box from '@mui/material/Box';
 import { Grid, Typography } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
-import { colorPalette } from '@assets/styles/color-palette';
-import { formatDate } from '@helpers/formatDate';
-import { GraphPageChartDataConfigObject } from '@components/Charts/AreaChart';
+import { colorPalette } from '@/assets/styles/color-palette';
+import { formatDate } from '@/helpers/formatDate';
+import { GraphPageChartDataConfigObject } from '@/components/Charts/AreaChart';
 import { NumericFormat } from 'react-number-format';
 
 const renderTitle = (title: string) => {

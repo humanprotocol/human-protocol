@@ -1,7 +1,7 @@
 import { FC } from 'react';
 
-import { Reputation } from '@services/api/use-leaderboard-details';
-import { colorPalette } from '@assets/styles/color-palette';
+import { Reputation } from '@/services/api/use-leaderboard-details';
+import { colorPalette } from '@/assets/styles/color-palette';
 import { Box, Typography } from '@mui/material';
 
 type Props = {

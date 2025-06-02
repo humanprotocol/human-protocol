@@ -2,9 +2,9 @@ import { useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
 import { httpService } from '../http-service';
 import { apiPaths } from '../api-paths';
-import { useWalletSearch } from '@utils/hooks/use-wallet-search';
+import { useWalletSearch } from '@/utils/hooks/use-wallet-search';
 import { validateResponse } from '../validate-response';
-import { reputationSchema } from '@services/api/use-leaderboard-details';
+import { reputationSchema } from '@/services/api/use-leaderboard-details';
 import { Role } from '@human-protocol/sdk';
 
 const transformOptionalTokenAmount = (

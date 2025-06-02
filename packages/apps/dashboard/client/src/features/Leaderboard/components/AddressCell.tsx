@@ -1,4 +1,4 @@
-import AbbreviateClipboard from '@components/SearchResults/AbbreviateClipboard';
+import AbbreviateClipboard from '@/components/SearchResults/AbbreviateClipboard';
 import { Box } from '@mui/material';
 
 export const AddressCell = ({

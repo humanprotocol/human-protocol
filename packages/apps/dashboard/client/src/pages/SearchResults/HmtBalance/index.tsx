@@ -4,8 +4,8 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { NumericFormat } from 'react-number-format';
 
-import { useHMTPrice } from '@services/api/use-hmt-price';
-import { useIsMobile } from '@utils/hooks/use-breakpoints';
+import { useHMTPrice } from '@/services/api/use-hmt-price';
+import { useIsMobile } from '@/utils/hooks/use-breakpoints';
 
 type Props = {
   balance?: number | null;

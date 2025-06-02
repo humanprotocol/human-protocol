@@ -2,8 +2,8 @@ import { useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
 import { httpService } from '../http-service';
 import { apiPaths } from '../api-paths';
-import { validateResponse } from '@services/validate-response';
-import { useLeaderboardSearch } from '@utils/hooks/use-leaderboard-search';
+import { validateResponse } from '@/services/validate-response';
+import { useLeaderboardSearch } from '@/utils/hooks/use-leaderboard-search';
 
 export const reputationSchema = z.unknown().transform((value) => {
   try {
@@ -13,6 +13,7 @@ export const reputationSchema = z.unknown().transform((value) => {
 
     return knownReputation;
   } catch (error) {
+    console.error(error);
     return 'Unknown';
   }
 });

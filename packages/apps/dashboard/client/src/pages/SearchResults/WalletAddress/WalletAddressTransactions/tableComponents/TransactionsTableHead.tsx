@@ -5,7 +5,7 @@ import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 
-import CustomTooltip from '@components/CustomTooltip';
+import CustomTooltip from '@/components/CustomTooltip';
 
 const InfoTooltip = ({ title }: { title: string }) => (
   <CustomTooltip title={title}>

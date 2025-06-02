@@ -1,26 +1,26 @@
-import PageWrapper from '@components/PageWrapper';
+import PageWrapper from '@/components/PageWrapper';
 import Stack from '@mui/material/Stack';
-import ShadowIcon from '@components/ShadowIcon';
-import Clipboard from '@components/Clipboard';
+import ShadowIcon from '@/components/ShadowIcon';
+import Clipboard from '@/components/Clipboard';
 import { useEffect, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
-import EscrowAddress from '@pages/SearchResults/EscrowAddress';
-import WalletAddress from '@pages/SearchResults/WalletAddress';
-import NothingFound from '@components/NothingFound';
-import Breadcrumbs from '@components/Breadcrumbs';
-import SearchBar from '@components/SearchBar/SearchBar';
-import { useWalletSearch } from '@utils/hooks/use-wallet-search';
-import Loader from '@components/Loader';
-import { getNetwork } from '@utils/config/networks';
+import EscrowAddress from '@/pages/SearchResults/EscrowAddress';
+import WalletAddress from '@/pages/SearchResults/WalletAddress';
+import NothingFound from '@/components/NothingFound';
+import Breadcrumbs from '@/components/Breadcrumbs';
+import SearchBar from '@/components/SearchBar/SearchBar';
+import { useWalletSearch } from '@/utils/hooks/use-wallet-search';
+import Loader from '@/components/Loader';
+import { getNetwork } from '@/utils/config/networks';
 import {
   AddressDetails,
   useAddressDetails,
-} from '@services/api/use-address-details';
-import { handleErrorMessage } from '@services/handle-error-message';
-import RoleDetails from '@pages/SearchResults/RoleDetails/RoleDetails';
+} from '@/services/api/use-address-details';
+import { handleErrorMessage } from '@/services/handle-error-message';
+import RoleDetails from '@/pages/SearchResults/RoleDetails/RoleDetails';
 import { AxiosError } from 'axios';
-import { WalletIcon } from '@components/Icons/WalletIcon';
-import { EscrowAddressIcon } from '@components/Icons/EscrowAddressIcon';
+import { WalletIcon } from '@/components/Icons/WalletIcon';
+import { EscrowAddressIcon } from '@/components/Icons/EscrowAddressIcon';
 import { WalletAddressTransactionsTable } from './WalletAddress/WalletAddressTransactions/WalletAddressTransactionsTable';
 
 const renderCurrentResultType = (

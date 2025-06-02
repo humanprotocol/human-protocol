@@ -1,10 +1,10 @@
 import { Navigation } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import SmallGraph from '@components/Home/SmallGraph';
+import SmallGraph from '@/components/Home/SmallGraph';
 import 'swiper/css';
 import 'swiper/css/navigation';
-import { useGraphPageChartData } from '@services/api/use-graph-page-chart-data';
-import { useGraphPageChartParams } from '@utils/hooks/use-graph-page-chart-params';
+import { useGraphPageChartData } from '@/services/api/use-graph-page-chart-data';
+import { useGraphPageChartParams } from '@/utils/hooks/use-graph-page-chart-params';
 import { useEffect } from 'react';
 
 const GraphSwiper = () => {
@@ -13,8 +13,7 @@ const GraphSwiper = () => {
 
   useEffect(() => {
     revertToInitialParams();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [revertToInitialParams]);
 
   const transactionHistoryData = (data || []).map(
     ({ totalTransactionCount, date }) => ({

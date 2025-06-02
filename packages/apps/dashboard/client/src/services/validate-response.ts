@@ -12,7 +12,7 @@ export const validateResponse = <T extends z.ZodTypeAny>(
     console.error('Unexpected response');
     if (error instanceof ZodError) {
       error.issues.forEach((issue) => {
-        console.log(issue);
+        console.error(issue);
       });
     }
     console.error(error);
