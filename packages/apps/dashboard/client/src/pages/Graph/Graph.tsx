@@ -1,7 +1,8 @@
-import { AreaChart } from '@/components/Charts';
 import { useEffect } from 'react';
-import PageWrapper from '@/components/PageWrapper';
+
 import Breadcrumbs from '@/components/Breadcrumbs';
+import { AreaChart } from '@/components/Charts';
+import PageWrapper from '@/components/PageWrapper';
 import { useGraphPageChartParams } from '@/utils/hooks/use-graph-page-chart-params';
 
 const Graph = () => {

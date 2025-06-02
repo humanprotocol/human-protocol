@@ -1,13 +1,15 @@
+import { useState } from 'react';
+
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import { Link } from '@mui/material';
+import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import abbreviateValue from '@/helpers/abbreviateValue';
-import IconButton from '@mui/material/IconButton';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import { colorPalette } from '@/assets/styles/color-palette';
-import { Link } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+
+import { colorPalette } from '@/assets/styles/color-palette';
 import CustomTooltip from '@/components/CustomTooltip';
+import abbreviateValue from '@/helpers/abbreviateValue';
 
 interface AbbreviateClipboardProps {
   value: string;

@@ -1,14 +1,18 @@
-import Select, { SelectChangeEvent } from '@mui/material/Select';
+import { useEffect } from 'react';
+
+import Box from '@mui/material/Box';
+import CircularProgress from '@mui/material/CircularProgress';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
-import Box from '@mui/material/Box';
-import { useLeaderboardSearch } from '@/utils/hooks/use-leaderboard-search';
-import { useFilteredNetworks } from '@/utils/hooks/use-filtered-networks';
-import { useIsMobile } from '@/utils/hooks/use-breakpoints';
+import Select, { SelectChangeEvent } from '@mui/material/Select';
+
 import { NetworkIcon } from '@/components/NetworkIcon';
-import CircularProgress from '@mui/material/CircularProgress';
-import { useEffect } from 'react';
+import { useIsMobile } from '@/utils/hooks/use-breakpoints';
+import { useFilteredNetworks } from '@/utils/hooks/use-filtered-networks';
+import { useLeaderboardSearch } from '@/utils/hooks/use-leaderboard-search';
+
+
 
 export const SelectNetwork = () => {
   const {

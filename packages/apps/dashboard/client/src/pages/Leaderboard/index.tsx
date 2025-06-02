@@ -1,9 +1,10 @@
 import Breadcrumbs from '@/components/Breadcrumbs';
+import { LeaderboardIcon } from '@/components/Icons/LeaderboardIcon';
 import PageWrapper from '@/components/PageWrapper';
 import ShadowIcon from '@/components/ShadowIcon';
-import { Leaderboard } from '../../features/Leaderboard/index';
 import { useLeaderboardDetails } from '@/services/api/use-leaderboard-details';
-import { LeaderboardIcon } from '@/components/Icons/LeaderboardIcon';
+
+import { Leaderboard } from '../../features/Leaderboard/index';
 
 const LeaderBoard = () => {
   const { data, status, error } = useLeaderboardDetails();

@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
+import { z } from 'zod';
 
 import { apiPaths } from '@/services/api-paths';
 import { httpService } from '@/services/http-service';
 import { validateResponse } from '@/services/validate-response';
-import { z } from 'zod';
 import { useWalletSearch } from '@/utils/hooks/use-wallet-search';
 
 const kvstoreDataSchema = z.array(

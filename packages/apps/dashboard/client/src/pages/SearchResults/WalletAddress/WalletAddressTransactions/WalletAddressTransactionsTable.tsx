@@ -1,19 +1,18 @@
 import { useEffect } from 'react';
 
-import SimpleBar from 'simplebar-react';
 import Table from '@mui/material/Table';
 import TableContainer from '@mui/material/TableContainer';
 import TableFooter from '@mui/material/TableFooter';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
+import SimpleBar from 'simplebar-react';
 
-import { TransactionsTableHead } from '@/pages/SearchResults/WalletAddress/WalletAddressTransactions/tableComponents/TransactionsTableHead';
-import { TransactionsTableBody } from '@/pages/SearchResults/WalletAddress/WalletAddressTransactions/tableComponents/TransactionsTableBody';
 import SectionWrapper from '@/components/SectionWrapper';
-
-import { useTransactionDetailsDto } from '@/utils/hooks/use-transactions-details-dto';
+import { TransactionsTableBody } from '@/pages/SearchResults/WalletAddress/WalletAddressTransactions/tableComponents/TransactionsTableBody';
+import { TransactionsTableHead } from '@/pages/SearchResults/WalletAddress/WalletAddressTransactions/tableComponents/TransactionsTableHead';
 import { useTransactionDetails } from '@/services/api/use-transaction-details';
+import { useTransactionDetailsDto } from '@/utils/hooks/use-transactions-details-dto';
 
 export const WalletAddressTransactionsTable = () => {
   const { data } = useTransactionDetails();

@@ -1,5 +1,6 @@
-import { formatHMTDecimals } from '@/helpers/formatHMTDecimals';
 import Typography from '@mui/material/Typography';
+
+import { formatHMTDecimals } from '@/helpers/formatHMTDecimals';
 import { useHMTPrice } from '@/services/api/use-hmt-price';
 
 export const TransactionTableCellValue = ({ value }: { value: string }) => {

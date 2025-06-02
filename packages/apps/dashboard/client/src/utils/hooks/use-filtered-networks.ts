@@ -1,9 +1,11 @@
+import { useMemo } from 'react';
+
 import { useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
-import { networks as allNetworks } from '@/utils/config/networks';
-import { httpService } from '@/services/http-service';
+
 import { apiPaths } from '@/services/api-paths';
-import { useMemo } from 'react';
+import { httpService } from '@/services/http-service';
+import { networks as allNetworks } from '@/utils/config/networks';
 
 const enabledChainsSchema = z.array(z.number());
 

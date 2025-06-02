@@ -1,4 +1,5 @@
 import { Typography } from '@mui/material';
+
 import { NetworkIcon } from '@/components/NetworkIcon';
 import { getNetwork } from '@/utils/config/networks';
 

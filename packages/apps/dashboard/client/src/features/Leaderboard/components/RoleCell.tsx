@@ -1,9 +1,13 @@
-import { Box, Typography } from '@mui/material';
 import { Launch as LaunchIcon } from '@mui/icons-material';
-import { useIsMobile } from '@/utils/hooks/use-breakpoints';
+import { Box, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
-import { EntityIcon } from './EntityIcon';
+
 import { CaseConverter } from '@/utils/case-converter';
+import { useIsMobile } from '@/utils/hooks/use-breakpoints';
+
+
+import { EntityIcon } from './EntityIcon';
+
 
 const Wrapper = ({
   children,

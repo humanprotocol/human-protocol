@@ -1,3 +1,9 @@
+import { useEffect, useRef, useState } from 'react';
+
+import { Typography } from '@mui/material';
+import Card from '@mui/material/Card';
+import Stack from '@mui/material/Stack';
+import dayjs, { Dayjs } from 'dayjs';
 import {
   CartesianGrid,
   Tooltip,
@@ -7,17 +13,12 @@ import {
   Area,
   ResponsiveContainer,
 } from 'recharts';
-import CustomChartTooltip from './CustomChartTooltip';
-import { useEffect, useRef, useState } from 'react';
-import Card from '@mui/material/Card';
-import { Typography } from '@mui/material';
-import Stack from '@mui/material/Stack';
+
 import { colorPalette } from '@/assets/styles/color-palette';
 import CustomXAxisTick from '@/components/Charts/CustomXAxisTick';
+import ToggleCharts from '@/components/Charts/ToggleCharts';
 import DatePicker from '@/components/DataEntry/DatePicker';
 import ToggleButtons from '@/components/DataEntry/ToggleButtons';
-import dayjs, { Dayjs } from 'dayjs';
-import ToggleCharts from '@/components/Charts/ToggleCharts';
 import { formatNumber } from '@/helpers/formatNumber';
 import {
   GraphPageChartData,
@@ -27,6 +28,8 @@ import {
   initialAllTime,
   useGraphPageChartParams,
 } from '@/utils/hooks/use-graph-page-chart-params';
+
+import CustomChartTooltip from './CustomChartTooltip';
 
 export type GraphPageChartDataConfigObject<T> = Partial<
   Record<keyof GraphPageChartData[number], T>

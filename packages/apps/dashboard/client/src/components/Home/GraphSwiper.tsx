@@ -1,11 +1,13 @@
+import { useEffect } from 'react';
+
 import { Navigation } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
+
 import SmallGraph from '@/components/Home/SmallGraph';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import { useGraphPageChartData } from '@/services/api/use-graph-page-chart-data';
 import { useGraphPageChartParams } from '@/utils/hooks/use-graph-page-chart-params';
-import { useEffect } from 'react';
 
 const GraphSwiper = () => {
   const { data } = useGraphPageChartData();

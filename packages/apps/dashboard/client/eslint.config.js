@@ -50,25 +50,25 @@ export default [
       'react/react-in-jsx-scope': 'off',
       'react-hooks/exhaustive-deps': 'warn',
       'react-hooks/rules-of-hooks': 'error',
-      // 'import/order': [
-      //   'error',
-      //   {
-      //     'groups': ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
-      //     'pathGroups': [
-      //       {
-      //         'pattern': 'react',
-      //         'group': 'external',
-      //         'position': 'before'
-      //       }
-      //     ],
-      //     'pathGroupsExcludedImportTypes': ['react'],
-      //     'newlines-between': 'always',
-      //     'alphabetize': {
-      //       'order': 'asc',
-      //       'caseInsensitive': true
-      //     }
-      //   }
-      // ],
+      'import/order': [
+        'error',
+        {
+          'groups': ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
+          'pathGroups': [
+            {
+              'pattern': 'react',
+              'group': 'external',
+              'position': 'before'
+            }
+          ],
+          'pathGroupsExcludedImportTypes': ['react'],
+          'newlines-between': 'always',
+          'alphabetize': {
+            'order': 'asc',
+            'caseInsensitive': true
+          }
+        }
+      ],
       'import/no-duplicates': 'error',
       'import/no-unresolved': 'error',
       '@typescript-eslint/no-unused-vars': ['error', { 'argsIgnorePattern': '^_' }],

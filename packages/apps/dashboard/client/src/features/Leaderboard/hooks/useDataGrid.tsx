@@ -1,20 +1,21 @@
 import { useMemo } from 'react';
 
-import { Box, Typography } from '@mui/material';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import { Box, Typography } from '@mui/material';
 import { GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
 
 import CustomTooltip from '@/components/CustomTooltip';
-import { RoleCell } from '../components/RoleCell';
-import { AddressCell } from '../components/AddressCell';
-import { ChainCell } from '../components/ChainCell';
-import { SelectNetwork } from '../components/SelectNetwork';
-import { TextCell } from '../components/TextCell';
-import { CategoryCell } from '../components/CategoryCell';
-
 import { LeaderBoardData } from '@/services/api/use-leaderboard-details';
 import { useIsMobile } from '@/utils/hooks/use-breakpoints';
 import { useLeaderboardSearch } from '@/utils/hooks/use-leaderboard-search';
+
+import { AddressCell } from '../components/AddressCell';
+import { CategoryCell } from '../components/CategoryCell';
+import { ChainCell } from '../components/ChainCell';
+import { RoleCell } from '../components/RoleCell';
+import { SelectNetwork } from '../components/SelectNetwork';
+import { TextCell } from '../components/TextCell';
+
 
 const InfoTooltip = ({ title }: { title: string }) => (
   <CustomTooltip title={title} arrow>

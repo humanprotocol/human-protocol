@@ -1,13 +1,13 @@
 import { FC } from 'react';
 
+import GitHubIcon from '@mui/icons-material/GitHub';
+import LinkedInIcon from '@mui/icons-material/LinkedIn';
+import TelegramIcon from '@mui/icons-material/Telegram';
+import TwitterIcon from '@mui/icons-material/Twitter';
+import { IconButton, styled } from '@mui/material';
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
-import { IconButton, styled } from '@mui/material';
 import Typography from '@mui/material/Typography';
-import TwitterIcon from '@mui/icons-material/Twitter';
-import LinkedInIcon from '@mui/icons-material/LinkedIn';
-import GitHubIcon from '@mui/icons-material/GitHub';
-import TelegramIcon from '@mui/icons-material/Telegram';
 
 import DiscordIcon from '@/components/Icons/DiscordIcon';
 import { env } from '@/helpers/env';

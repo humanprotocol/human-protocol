@@ -6,17 +6,18 @@ import { NumericFormat } from 'react-number-format';
 
 import TitleSectionWrapper from '@/components/SearchResults';
 import SectionWrapper from '@/components/SectionWrapper';
+import {
+  AddressDetailsOperator,
+  AddressDetailsWallet,
+} from '@/services/api/use-address-details';
+import { useIsMobile } from '@/utils/hooks/use-breakpoints';
+
 import HmtBalance from '../HmtBalance';
 import HmtPrice from '../HmtPrice';
 import KVStore from '../KVStore';
 import ReputationScore from '../ReputationScore';
 import StakeInfo from '../StakeInfo';
 
-import {
-  AddressDetailsOperator,
-  AddressDetailsWallet,
-} from '@/services/api/use-address-details';
-import { useIsMobile } from '@/utils/hooks/use-breakpoints';
 
 type Props = {
   data: AddressDetailsWallet | AddressDetailsOperator;

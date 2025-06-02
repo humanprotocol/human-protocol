@@ -5,10 +5,11 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { useNavigate } from 'react-router-dom';
 
-import { SelectNetwork } from './components/SelectNetwork';
-import { DataGridWrapper } from './components/DataGridWrapper';
-import { LeaderBoardData } from '@/services/api/use-leaderboard-details';
 import { colorPalette } from '@/assets/styles/color-palette';
+import { LeaderBoardData } from '@/services/api/use-leaderboard-details';
+
+import { DataGridWrapper } from './components/DataGridWrapper';
+import { SelectNetwork } from './components/SelectNetwork';
 
 type Props = {
   data: LeaderBoardData | undefined;
