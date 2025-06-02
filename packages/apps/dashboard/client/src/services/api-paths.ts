@@ -1,6 +1,6 @@
 export const apiPaths = {
   hcaptchaGeneralStats: {
-    path: "/stats/hcaptcha/general",
+    path: '/stats/hcaptcha/general',
   },
   generalStats: {
     path: '/stats/general',
