@@ -1,11 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
-import { httpService } from '../http-service';
+
+import { AddressDetailsOperator } from '@/services/api/use-address-details';
+import { validateResponse } from '@/services/validate-response';
+import { useEscrowDetailsDto } from '@/utils/hooks/use-escrows-details-dto';
+import { useWalletSearch } from '@/utils/hooks/use-wallet-search';
+
 import { apiPaths } from '../api-paths';
-import { useWalletSearch } from '@utils/hooks/use-wallet-search';
-import { validateResponse } from '@services/validate-response';
-import { useEscrowDetailsDto } from '@utils/hooks/use-escrows-details-dto';
-import { AddressDetailsOperator } from '@services/api/use-address-details';
+import { httpService } from '../http-service';
 
 const escrowDetailsSuccessResponseSchema = z.object({
   chainId: z.number(),

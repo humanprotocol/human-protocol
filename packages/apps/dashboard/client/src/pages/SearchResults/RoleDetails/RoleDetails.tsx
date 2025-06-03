@@ -1,3 +1,4 @@
+import { Role } from '@human-protocol/sdk';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import Link from '@mui/material/Link';
@@ -5,25 +6,24 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { Role } from '@human-protocol/sdk';
 
-import SectionWrapper from '@components/SectionWrapper';
-import TitleSectionWrapper from '@components/SearchResults/TitleSectionWrapper';
-import { RoleDetailsEscrowsTable } from '@pages/SearchResults/RoleDetails/RoleDetailsEscrows/RoleDetailsEscrowsTable';
+import ExchangeOracleIcon from '@/assets/icons/exchange-oracle.svg';
+import JobLauncherIcon from '@/assets/icons/job-launcher.svg';
+import RecordingOracleIcon from '@/assets/icons/recording-oracle.svg';
+import ReputationOracleIcon from '@/assets/icons/reputation-oracle.svg';
+import { colorPalette } from '@/assets/styles/color-palette';
+import TitleSectionWrapper from '@/components/SearchResults/TitleSectionWrapper';
+import SectionWrapper from '@/components/SectionWrapper';
+import { env } from '@/helpers/env';
+import { RoleDetailsEscrowsTable } from '@/pages/SearchResults/RoleDetails/RoleDetailsEscrows/RoleDetailsEscrowsTable';
+import { AddressDetailsOperator } from '@/services/api/use-address-details';
+
+import HmtBalance from '../HmtBalance';
+import HmtPrice from '../HmtPrice';
 import KVStore from '../KVStore';
 import ReputationScore from '../ReputationScore';
 import StakeInfo from '../StakeInfo';
-import HmtBalance from '../HmtBalance';
-import HmtPrice from '../HmtPrice';
 
-import ReputationOracleIcon from '@assets/icons/reputation-oracle.svg';
-import ExchangeOracleIcon from '@assets/icons/exchange-oracle.svg';
-import JobLauncherIcon from '@assets/icons/job-launcher.svg';
-import RecordingOracleIcon from '@assets/icons/recording-oracle.svg';
-
-import { AddressDetailsOperator } from '@services/api/use-address-details';
-import { env } from '@helpers/env';
-import { colorPalette } from '@assets/styles/color-palette';
 
 interface RoleInfoProps {
   title: string;

@@ -1,11 +1,14 @@
+import { CSSProperties } from 'react';
+
+import { Shadows, ThemeOptions } from '@mui/material';
 import { createTheme } from '@mui/material/styles';
 import {
   PaletteColorOptions,
   PaletteColor,
 } from '@mui/material/styles/createPalette';
-import { Shadows, ThemeOptions } from '@mui/material';
-import { colorPalette } from '@assets/styles/color-palette';
-import { CSSProperties } from 'react';
+
+import { colorPalette } from '@/assets/styles/color-palette';
+
 
 declare module '@mui/material/Typography' {
   interface TypographyPropsVariantOverrides {
@@ -311,7 +314,7 @@ const theme: ThemeOptions = createTheme({
             whiteSpace: 'nowrap',
             color: colorPalette.fog.main,
             justifySelf: 'end',
-            marginBottom: `17px`,
+            marginBottom: '17px',
             position: 'relative',
             right: '-38px',
           },

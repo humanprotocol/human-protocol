@@ -1,27 +1,27 @@
 import { FC } from 'react';
 
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
-import Grid from '@mui/material/Unstable_Grid2';
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
-import Typography from '@mui/material/Typography';
-import { Link } from 'react-router-dom';
 import styled from '@mui/material/styles/styled';
+import Typography from '@mui/material/Typography';
+import Grid from '@mui/material/Unstable_Grid2';
+import { Link } from 'react-router-dom';
 
-import PageWrapper from '@components/PageWrapper';
-import SearchBar from '@components/SearchBar/SearchBar';
-import ShadowIcon from '@components/ShadowIcon';
+import CustomTooltip from '@/components/CustomTooltip';
+import GraphSwiper from '@/components/Home/GraphSwiper';
+import { LeaderboardIcon } from '@/components/Icons/LeaderboardIcon';
+import PageWrapper from '@/components/PageWrapper';
+import SearchBar from '@/components/SearchBar/SearchBar';
+import ShadowIcon from '@/components/ShadowIcon';
+import HMTPrice from '@/pages/Home/HMTPrice';
+import Holders from '@/pages/Home/Holders';
+import TotalNumberOfTasks from '@/pages/Home/TotalNumberOfTasks';
+import TotalTransactions from '@/pages/Home/TotalTransactions';
+import { useIsMobile } from '@/utils/hooks/use-breakpoints';
+
 import { Leaderboard } from './Leaderboard';
-import GraphSwiper from '@components/Home/GraphSwiper';
-import HMTPrice from '@pages/Home/HMTPrice';
-import TotalNumberOfTasks from '@pages/Home/TotalNumberOfTasks';
-import Holders from '@pages/Home/Holders';
-import TotalTransactions from '@pages/Home/TotalTransactions';
-import { LeaderboardIcon } from '@components/Icons/LeaderboardIcon';
-import CustomTooltip from '@components/CustomTooltip';
-
-import { useIsMobile } from '@utils/hooks/use-breakpoints';
 
 const CardWrapper = styled(Grid)(({ theme }) => ({
   display: 'flex',

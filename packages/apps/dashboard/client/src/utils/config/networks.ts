@@ -1,6 +1,7 @@
 import type { Chain } from 'viem/chains';
 import * as chains from 'viem/chains';
-import { env } from '@helpers/env';
+
+import { env } from '@/helpers/env';
 
 //TODO: temporal fix. Should be fetched from API. https://github.com/humanprotocol/human-protocol/issues/2855
 const ENABLED_CHAIN_IDS = env.VITE_ENABLED_CHAIN_IDS;

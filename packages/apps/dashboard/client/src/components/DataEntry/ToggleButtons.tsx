@@ -1,13 +1,14 @@
-import ToggleButton from '@mui/material/ToggleButton';
-import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material';
+import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import Typography from '@mui/material/Typography';
+import dayjs from 'dayjs';
+
 import {
   TIME_PERIOD_OPTIONS,
   TimePeriod,
   useGraphPageChartParams,
-} from '@utils/hooks/use-graph-page-chart-params';
-import dayjs from 'dayjs';
+} from '@/utils/hooks/use-graph-page-chart-params';
 
 export const StyledToggleButtonGroup = styled(ToggleButtonGroup)(
   ({ theme }) => ({

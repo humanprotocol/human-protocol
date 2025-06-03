@@ -1,5 +1,5 @@
-import type { ZodError } from 'zod';
 import type { AxiosError } from 'axios';
+import type { ZodError } from 'zod';
 
 export type ResponseError = AxiosError | Error | ZodError | null;
 

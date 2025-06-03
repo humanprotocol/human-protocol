@@ -1,5 +1,5 @@
-import MuiTableBody from '@mui/material/TableBody';
 import { Grid } from '@mui/material';
+import MuiTableBody from '@mui/material/TableBody';
 
 export const TransactionsTableBodyContainer = ({
   children,

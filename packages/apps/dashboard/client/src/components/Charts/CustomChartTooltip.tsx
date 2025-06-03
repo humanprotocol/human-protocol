@@ -1,13 +1,15 @@
-import { TooltipProps } from 'recharts';
-import Card from '@mui/material/Card';
-import Box from '@mui/material/Box';
-import { Grid, Typography } from '@mui/material';
-import Stack from '@mui/material/Stack';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
-import { colorPalette } from '@assets/styles/color-palette';
-import { formatDate } from '@helpers/formatDate';
-import { GraphPageChartDataConfigObject } from '@components/Charts/AreaChart';
+import { Grid, Typography } from '@mui/material';
+import Box from '@mui/material/Box';
+import Card from '@mui/material/Card';
+import Stack from '@mui/material/Stack';
 import { NumericFormat } from 'react-number-format';
+import { TooltipProps } from 'recharts';
+
+import { colorPalette } from '@/assets/styles/color-palette';
+import { GraphPageChartDataConfigObject } from '@/components/Charts/AreaChart';
+import { formatDate } from '@/helpers/formatDate';
+
 
 const renderTitle = (title: string) => {
   const currentTitle: GraphPageChartDataConfigObject<string> = {

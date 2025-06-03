@@ -1,7 +1,7 @@
 import Box from '@mui/material/Box/Box';
 import Typography from '@mui/material/Typography';
 
-import { colorPalette } from '@assets/styles/color-palette';
+import { colorPalette } from '@/assets/styles/color-palette';
 
 const methodAttributes: Record<
   string,

@@ -1,5 +1,9 @@
 import { Fragment } from 'react';
 
+import Box from '@mui/material/Box';
+import Card from '@mui/material/Card';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 import {
   AreaChart,
   Area,
@@ -10,16 +14,12 @@ import {
   ResponsiveContainer,
   TooltipProps,
 } from 'recharts';
-import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import Stack from '@mui/material/Stack';
-import ToggleButtons from '@components/DataEntry/ToggleButtons';
-import Typography from '@mui/material/Typography';
 
-import { colorPalette } from '@assets/styles/color-palette';
-import { formatDate } from '@helpers/formatDate';
-import { formatNumber } from '@helpers/formatNumber';
-import { useIsMobile } from '@utils/hooks/use-breakpoints';
+import { colorPalette } from '@/assets/styles/color-palette';
+import ToggleButtons from '@/components/DataEntry/ToggleButtons';
+import { formatDate } from '@/helpers/formatDate';
+import { formatNumber } from '@/helpers/formatNumber';
+import { useIsMobile } from '@/utils/hooks/use-breakpoints';
 
 const CustomSmallChartTooltip = ({
   payload,

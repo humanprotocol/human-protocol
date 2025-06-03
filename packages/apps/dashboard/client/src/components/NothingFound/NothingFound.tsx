@@ -8,7 +8,7 @@ const NothingFound: FC = () => {
     <>
       <Typography variant="h2">Nothing found :(</Typography>
       <Typography variant="body1" mt={4}>
-        We couldn't find anything within this criteria.
+        We couldn&apos;t find anything within this criteria.
         <br />
         Please search by <strong>wallet address or escrow address.</strong>
       </Typography>

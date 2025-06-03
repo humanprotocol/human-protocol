@@ -1,4 +1,4 @@
-import { colorPalette } from '@assets/styles/color-palette';
+import { colorPalette } from '@/assets/styles/color-palette';
 
 export const endAdornmentInputAdornmentSx = {
   display: 'flex',

@@ -1,8 +1,8 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 
-import { FormatNumber } from '@components/Home/FormatNumber';
-import { useGeneralStats } from '@services/api/use-general-stats';
+import { FormatNumber } from '@/components/Home/FormatNumber';
+import { useGeneralStats } from '@/services/api/use-general-stats';
 
 const Holders = () => {
   const { data, isSuccess, isPending, isError } = useGeneralStats();

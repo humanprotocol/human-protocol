@@ -1,5 +1,6 @@
-import SvgIcon, { SvgIconProps } from '@mui/material/SvgIcon';
 import { FC } from 'react';
+
+import SvgIcon, { SvgIconProps } from '@mui/material/SvgIcon';
 
 export const LeaderboardIcon: FC<SvgIconProps> = (props) => {
   return (

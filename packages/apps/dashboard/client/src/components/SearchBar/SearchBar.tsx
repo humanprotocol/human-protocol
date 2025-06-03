@@ -1,9 +1,7 @@
 import { FC, useCallback, useEffect, useState } from 'react';
-import clsx from 'clsx';
-import { useNavigate } from 'react-router-dom';
-import IconButton from '@mui/material/IconButton';
-import SearchIcon from '@mui/icons-material/Search';
+
 import CloseIcon from '@mui/icons-material/Close';
+import SearchIcon from '@mui/icons-material/Search';
 import {
   InputAdornment,
   TextField,
@@ -15,11 +13,18 @@ import {
   Tooltip,
   CircularProgress,
 } from '@mui/material';
-import { colorPalette } from '@assets/styles/color-palette';
-import { useFilteredNetworks } from '@utils/hooks/use-filtered-networks';
-import { useIsMobile } from '@utils/hooks/use-breakpoints';
-import { NetworkIcon } from '@components/NetworkIcon';
-import { useWalletSearch } from '@utils/hooks/use-wallet-search';
+import IconButton from '@mui/material/IconButton';
+import clsx from 'clsx';
+import { useNavigate } from 'react-router-dom';
+
+import { colorPalette } from '@/assets/styles/color-palette';
+import { NetworkIcon } from '@/components/NetworkIcon';
+import { useIsMobile } from '@/utils/hooks/use-breakpoints';
+import { useFilteredNetworks } from '@/utils/hooks/use-filtered-networks';
+import { useWalletSearch } from '@/utils/hooks/use-wallet-search';
+
+import { isValidEVMAddress } from '../../helpers/isValidEVMAddress';
+
 import {
   endAdornmentInputAdornmentSx,
   startAdornmentInputAdornmentSx,
@@ -29,7 +34,6 @@ import {
   muiTextFieldSx,
   gridSx,
 } from './SearchBar.styles';
-import { isValidEVMAddress } from '../../helpers/isValidEVMAddress';
 
 interface SearchBarProps {
   className?: string;

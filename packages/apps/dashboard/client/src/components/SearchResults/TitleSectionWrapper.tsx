@@ -1,12 +1,12 @@
 import { FC, PropsWithChildren } from 'react';
 
-import Stack from '@mui/material/Stack';
-import Box from '@mui/material/Box';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
-import Typography from '@mui/material/Typography';
 import { SxProps } from '@mui/material';
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 
-import CustomTooltip from '@components/CustomTooltip';
+import CustomTooltip from '@/components/CustomTooltip';
 
 type Props = {
   title: string;

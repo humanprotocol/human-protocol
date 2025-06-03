@@ -1,7 +1,8 @@
 import { FormControlLabel, FormGroup, Typography } from '@mui/material';
-import Stack from '@mui/material/Stack';
 import Checkbox from '@mui/material/Checkbox';
-import { FormatNumber } from '@components/Home/FormatNumber';
+import Stack from '@mui/material/Stack';
+
+import { FormatNumber } from '@/components/Home/FormatNumber';
 
 interface ToggleChartsProps {
   handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;

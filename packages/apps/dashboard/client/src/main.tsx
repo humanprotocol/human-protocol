@@ -1,12 +1,15 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { ThemeProvider } from '@mui/material/styles';
+
 import CssBaseline from '@mui/material/CssBaseline';
-import theme from './theme';
-import App from './App';
-import '@assets/styles/main.scss';
-import 'simplebar-react/dist/simplebar.min.css';
+import { ThemeProvider } from '@mui/material/styles';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import ReactDOM from 'react-dom/client';
+
+import App from './App';
+import theme from './theme';
+
+import '@/assets/styles/main.scss';
+import 'simplebar-react/dist/simplebar.min.css';
 
 const queryClient = new QueryClient({
   defaultOptions: {
