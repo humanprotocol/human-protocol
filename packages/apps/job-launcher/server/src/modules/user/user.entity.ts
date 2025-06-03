@@ -29,7 +29,7 @@ export class UserEntity extends BaseEntity implements IUser {
   public status: UserStatus;
 
   @Column({ type: 'varchar', nullable: true, unique: true })
-  public stripeCustomerId: string;
+  public stripeCustomerId: string | null;
 
   @OneToMany(() => JobEntity, (job) => job.user)
   public jobs: JobEntity[];
@@ -40,10 +40,10 @@ export class UserEntity extends BaseEntity implements IUser {
   @OneToOne(() => ApiKeyEntity, (apiKey) => apiKey.user, {
     nullable: true,
   })
-  public apiKey: ApiKeyEntity;
+  public apiKey: ApiKeyEntity | null;
 
   @OneToOne(() => WhitelistEntity, (whitelist) => whitelist.user, {
     nullable: true,
   })
-  public whitelist: WhitelistEntity;
+  public whitelist: WhitelistEntity | null;
 }

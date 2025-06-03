@@ -6,11 +6,11 @@ export interface IJob extends IBase {
   chainId: number;
   fee: number;
   fundAmount: number;
-  escrowAddress: string;
+  escrowAddress: string | null;
   manifestUrl: string;
   manifestHash: string;
   status: JobStatus;
-  failedReason?: string;
-  retriesCount?: number;
+  failedReason: string | null;
+  retriesCount: number;
   waitUntil: Date;
 }

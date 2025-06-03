@@ -265,10 +265,11 @@ export class CronJobService {
       for (const jobEntity of jobEntities) {
         try {
           if (
-            await this.jobService.isEscrowFunded(
+            jobEntity.escrowAddress &&
+            (await this.jobService.isEscrowFunded(
               jobEntity.chainId,
               jobEntity.escrowAddress,
-            )
+            ))
           ) {
             const { amountRefunded } =
               await this.jobService.processEscrowCancellation(jobEntity);

@@ -51,14 +51,16 @@ import {
   createJobAudinoDto,
   createJobCaptchaDto,
   createJobCvatDto,
-  getMockedProvider,
-  getMockedRegion,
   mockAuthConfigService,
   mockCvatConfigService,
   mockWeb3ConfigService,
 } from './fixtures';
 import { FortuneManifestDto } from './manifest.dto';
 import { ManifestService } from './manifest.service';
+import {
+  getMockedProvider,
+  getMockedRegion,
+} from '../../../test/fixtures/storage';
 
 describe('ManifestService', () => {
   let manifestService: ManifestService;
