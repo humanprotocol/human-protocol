@@ -6,12 +6,12 @@ import prettierPlugin from 'eslint-plugin-prettier';
 import importPlugin from 'eslint-plugin-import';
 import globals from 'globals';
 
-export default [
+export default tseslint.config(
   {
     ignores: ['dist/', 'tsconfig.json'],
   },
   eslint.configs.recommended,
-  ...tseslint.configs.recommended,
+  tseslint.configs.recommended,
   {
     files: ['**/*.ts', '**/*.tsx'],
     languageOptions: {
@@ -96,4 +96,4 @@ export default [
       ],
     },
   }
-];
+);
