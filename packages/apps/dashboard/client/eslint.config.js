@@ -8,7 +8,7 @@ import globals from 'globals';
 
 export default [
   {
-    ignores: ['dist/**', 'node_modules/**'],
+    ignores: ['dist/', 'tsconfig.json'],
   },
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
@@ -22,6 +22,7 @@ export default [
         ecmaFeatures: {
           jsx: true,
         },
+        projectService: true,
       },
       globals: {
         ...globals.browser,
