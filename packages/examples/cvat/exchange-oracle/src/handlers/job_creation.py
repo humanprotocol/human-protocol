@@ -2935,32 +2935,32 @@ class AudinoTaskBuilder:
             db_service.get_project_by_id(session, project_id, for_update=True)  # lock the row
             db_service.add_project_images(session, cvat_project.id, data_filenames)
 
-            for job_filenames in data_filenames:
-                cvat_task = cvat_api.create_audino_task(
-                    cvat_project.id,
-                    escrow_address,
-                    segment_duration=manifest.annotation.segment_duration,
-                    task_type=AudinoTaskTypes[manifest.annotation.type],
-                )
+            # for job_filenames in data_filenames:
+            cvat_task = cvat_api.create_audino_task(
+                cvat_project.id,
+                escrow_address,
+                segment_duration=manifest.annotation.segment_duration,
+                task_type=AudinoTaskTypes[manifest.annotation.type],
+            )
 
-                task_id = db_service.create_task(
-                    session, cvat_task.id, cvat_project.id, TaskStatuses[cvat_task.status]
-                )
-                db_service.get_task_by_id(session, task_id, for_update=True)  # lock the row
+            task_id = db_service.create_task(
+                session, cvat_task.id, cvat_project.id, TaskStatuses[cvat_task.status]
+            )
+            db_service.get_task_by_id(session, task_id, for_update=True)  # lock the row
 
-                # Actual task creation in CVAT takes some time, so it's done in an async process.
-                # The task is fully created once 'update:task' or 'update:job' webhook is received.
-                cvat_api.put_task_data(
-                    cvat_task.id,
-                    cloud_storage.id,
-                    filenames=[job_filenames],
-                    chunk_size=150,
-                    sort_images=False,
-                    use_cache=False,
-                    use_zip_chunks=False,
-                )
+            # Actual task creation in CVAT takes some time, so it's done in an async process.
+            # The task is fully created once 'update:task' or 'update:job' webhook is received.
+            cvat_api.put_task_data(
+                cvat_task.id,
+                cloud_storage.id,
+                filenames=data_filenames,
+                chunk_size=150,
+                sort_images=False,
+                use_cache=False,
+                use_zip_chunks=False,
+            )
 
-                db_service.create_data_upload(session, cvat_task.id)
+            db_service.create_data_upload(session, cvat_task.id)
 
 
 def is_audio(path: str) -> bool:

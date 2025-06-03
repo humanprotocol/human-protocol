@@ -1,4 +1,3 @@
-from decimal import Decimal
 from enum import Enum
 from typing import Annotated, Any, Literal
 
@@ -177,7 +176,7 @@ class TaskManifest(BaseModel):
     annotation: AnnotationInfo
     validation: ValidationInfo
 
-    job_bounty: Decimal = Field(ge=0)
+    # job_bounty: Decimal = Field(ge=0)
     "Assignment bounty, a decimal value in HMT"
 
     qualifications: list[str] = Field(default_factory=list)
