@@ -220,54 +220,59 @@ def get_data_from_subgraph(network: dict, query: str, params: dict = None):
         )
 
 
-def handle_transaction(
-    w3: Web3, tx_name: str, tx, exception: Exception, tx_options: Optional[TxParams]
-):
-    """Executes the transaction and waits for the receipt.
-
-    :param w3: Web3 instance
-    :param tx_name: Name of the transaction
-    :param tx: Transaction object
-    :param exception: Exception class to raise in case of error
-    :param tx_options: (Optional) Additional transaction parameters
-        - If provided, can include values like 'gas', 'gas_price', 'nonce', etc
-        - If 'gas' is not specified or is None, it will be estimated using tx.estimate_gas()
-
-    :return: The transaction receipt
-
-    :validate:
-        - There must be a default account
-
-    :raise exception: If the transaction fails
+def handle_error(e, exception_class):
     """
-    if not w3.eth.default_account:
-        raise exception("You must add an account to Web3 instance")
-    if not w3.middleware_onion.get("SignAndSendRawMiddlewareBuilder"):
-        raise exception(
-            "You must add SignAndSendRawMiddlewareBuilder middleware to Web3 instance"
-        )
-    try:
-        if tx_options and tx_options.get("gas") is None:
-            tx_options["gas"] = tx.estimate_gas()
-        elif tx_options is None:
-            tx_options = {"gas": tx.estimate_gas()}
-        tx_hash = tx.transact(tx_options)
-        return w3.eth.wait_for_transaction_receipt(tx_hash)
-    except ContractLogicError as e:
-        start_index = e.args[0].find("execution reverted: ") + len(
-            "execution reverted: "
-        )
-        message = e.args[0][start_index:]
-        raise exception(f"{tx_name} transaction failed: {message}")
-    except Exception as e:
-        logger.exception(f"Handle transaction error: {e}")
-        if "reverted with reason string" in e.args[0]:
-            start_index = e.args[0].find("'") + 1
-            end_index = e.args[0].rfind("'")
-            message = e.args[0][start_index:end_index]
-            raise exception(f"{tx_name} transaction failed: {message}")
-        else:
-            raise exception(f"{tx_name} transaction failed.")
+    Handles and translates errors raised during contract transactions.
+
+    This function captures exceptions (especially ContractLogicError from web3.py),
+    extracts meaningful revert reasons if present, logs unexpected errors, and raises
+    a custom exception with a clear message for SDK users.
+
+    :param e: The exception object raised during a transaction.
+    :param exception_class: The custom exception class to raise (e.g., EscrowClientError).
+
+    :raises exception_class: With a detailed error message, including contract revert reasons if available.
+
+    :example:
+        try:
+            tx_hash = contract.functions.someMethod(...).transact()
+            w3.eth.wait_for_transaction_receipt(tx_hash)
+        except Exception as e:
+            handle_error(e, EscrowClientError)
+    """
+    import re
+
+    def extract_reason(msg):
+        patterns = [
+            r"reverted with reason string '([^']+)'",
+            r"execution reverted: ([^\"']+)",
+            r"Error: VM Exception while processing transaction: reverted with reason string '([^']+)'",
+        ]
+        for pattern in patterns:
+            match = re.search(pattern, msg)
+            if match:
+                return match.group(1)
+        return msg.strip()
+
+    if isinstance(e, ContractLogicError):
+        msg = str(e)
+        msg = extract_reason(msg)
+        raise exception_class(f"Contract execution failed: {msg}")
+    else:
+        logger.exception(f"Transaction error: {e}")
+        msg = str(e)
+        # If error has a 'message' attribute or dict, try to extract it
+        if hasattr(e, "message"):
+            msg = getattr(e, "message")
+        elif (
+            hasattr(e, "args")
+            and e.args
+            and isinstance(e.args[0], dict)
+            and "message" in e.args[0]
+        ):
+            msg = e.args[0]["message"]
+        msg = extract_reason(msg)
+        raise exception_class(f"Transaction failed: {msg}")
 
 
 def validate_url(url: str) -> bool:
