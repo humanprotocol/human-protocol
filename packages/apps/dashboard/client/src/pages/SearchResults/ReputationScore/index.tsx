@@ -32,8 +32,8 @@ export const ReputationScore = ({ reputation }: Props) => {
     Low: {
       title: 'Low',
       colors: {
-        title: theme.palette.error.main,
-        border: theme.palette.error.light,
+        title: theme.palette.orange.main,
+        border: theme.palette.orange.light,
       },
     },
     Unknown: {
