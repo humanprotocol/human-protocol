@@ -5,7 +5,6 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { useNavigate } from 'react-router-dom';
 
-import { colorPalette } from '@/assets/styles/color-palette';
 import { LeaderBoardData } from '@/services/api/use-leaderboard-details';
 
 import { DataGridWrapper } from './components/DataGridWrapper';
@@ -38,7 +37,7 @@ export const Leaderboard: FC<Props> = ({
         padding="10px"
         mb={2.5}
         width="270px"
-        bgcolor={colorPalette.whiteSolid}
+        bgcolor="white.light"
       >
         <SelectNetwork />
       </Box>

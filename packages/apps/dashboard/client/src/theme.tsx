@@ -7,9 +7,6 @@ import {
   PaletteColor,
 } from '@mui/material/styles/createPalette';
 
-import { colorPalette } from '@/assets/styles/color-palette';
-
-
 declare module '@mui/material/Typography' {
   interface TypographyPropsVariantOverrides {
     ['Button Small']: true;
@@ -49,10 +46,38 @@ declare module '@mui/material/styles' {
   interface Palette {
     sky: PaletteColor;
     white: PaletteColor;
+    fog: PaletteColor;
+    ocean: PaletteColor;
+    orange: PaletteColor;
+    overlay: string;
+    link: {
+      main: string;
+      hover: string;
+      visited: string;
+    };
+    table: {
+      main: string;
+      selected: string;
+      secondary: string;
+    };
   }
   interface PaletteOptions {
     sky?: PaletteColorOptions;
     white?: PaletteColorOptions;
+    fog?: PaletteColorOptions;
+    ocean?: PaletteColorOptions;
+    orange?: PaletteColorOptions;
+    overlay?: string;
+    link?: {
+      main: string;
+      hover: string;
+      visited: string;
+    };
+    table?: {
+      main: string;
+      selected: string;
+      secondary: string;
+    };
   }
 }
 
@@ -60,6 +85,7 @@ declare module '@mui/material/Button' {
   interface ButtonPropsColorOverrides {
     sky: true;
     white: true;
+    fog: true;
   }
 }
 
@@ -67,6 +93,7 @@ declare module '@mui/material/IconButton' {
   interface IconButtonPropsColorOverrides {
     sky: true;
     white: true;
+    fog: true;
   }
 }
 
@@ -74,40 +101,79 @@ declare module '@mui/material/SvgIcon' {
   interface SvgIconPropsColorOverrides {
     sky: true;
     white: true;
+    fog: true;
   }
 }
 
 const theme: ThemeOptions = createTheme({
   palette: {
     primary: {
-      main: colorPalette.primary.main,
-      light: colorPalette.primary.light,
-    },
-    info: {
-      main: colorPalette.info.main,
-      light: colorPalette.info.light,
-      dark: colorPalette.info.dark,
+      main: '#320a8d',
+      light: '#320a8d',
     },
     secondary: {
-      main: colorPalette.secondary.main,
-      light: colorPalette.secondary.light,
+      main: '#6309ff',
+      light: '#1406B280',
+      dark: '#14062b',
     },
     text: {
-      primary: colorPalette.primary.main,
-      secondary: colorPalette.fog.main,
+      primary: '#320a8d',
+      secondary: '#858ec6',
+    },
+    info: {
+      main: '#eeeeee',
+      light: '#f5f5f5',
+      dark: '#bdbdbd',
     },
     sky: {
-      main: colorPalette.sky.main,
-      light: colorPalette.sky.light,
-      dark: colorPalette.sky.dark,
-      contrastText: colorPalette.sky.contrastText,
+      main: '#858ec6',
+      light: '#858ec6',
+      dark: '#dadef0cc',
+      contrastText: '#858ec6',
     },
     white: {
       main: '#ffffff',
-      light: '#ffffff',
+      light: '#f6f5fc',
       dark: '#f6f7fe',
-      contrastText: '#ffffff',
+      contrastText: '#f9faff',
     },
+    success: {
+      main: '#0ad397',
+      light: '#2e7d3280',
+    },
+    warning: {
+      main: '#ffb300',
+      light: '#ffd54f',
+    },
+    error: {
+      main: '#ffb300',
+      light: '#f20d5f',
+    },
+    orange: {
+      main: '#ed6c02',
+      light: '#ed6c0280',
+    },
+    ocean: {
+      main: '#304ffe',
+      light: '#8c9eff',
+      dark: '#03a9f4',
+    },
+    fog: {
+      main: '#858ec6',
+      light: '#cbcfe6',
+      dark: '#e5e7f3',
+    },
+    link: {
+      main: '#0000ee',
+      hover: '#1406b2',
+      visited: '#551a8b',
+    },
+    table: {
+      main: '#ffffff01',
+      selected: '#1406b21f',
+      secondary: '#1406b20a',
+    },
+    overlay: '#1406b20a',
   },
   typography: {
     fontFamily: 'Inter, Arial, sans-serif',
@@ -236,42 +302,42 @@ const theme: ThemeOptions = createTheme({
     },
     MuiTooltip: {
       styleOverrides: {
-        tooltip: {
-          backgroundColor: colorPalette.secondary.main,
-          color: colorPalette.whiteSolid,
-        },
-        arrow: {
-          color: colorPalette.secondary.main,
-        },
+        tooltip: ({ theme }) => ({
+          backgroundColor: theme.palette.secondary.main,
+          color: theme.palette.white.light,
+        }),
+        arrow: ({ theme }) => ({
+          color: theme.palette.secondary.main,
+        }),
       },
     },
     MuiIconButton: {
       styleOverrides: {
-        sizeMedium: {
-          color: colorPalette.primary.main,
-        },
+        sizeMedium: ({ theme }) => ({
+          color: theme.palette.primary.main,
+        }),
       },
     },
     MuiSelect: {
       styleOverrides: {
-        root: {
+        root: ({ theme }) => ({
           borderRadius: 4,
           borderWidth: 2,
-          color: colorPalette.primary.main,
+          color: theme.palette.primary.main,
           '& .MuiOutlinedInput-notchedOutline': {
-            borderColor: colorPalette.primary.main,
+            borderColor: theme.palette.primary.main,
             borderWidth: 2,
           },
           '&:hover .MuiOutlinedInput-notchedOutline': {
-            borderColor: colorPalette.primary.main,
+            borderColor: theme.palette.primary.main,
           },
           '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-            borderColor: colorPalette.primary.main,
+            borderColor: theme.palette.primary.main,
           },
           '& .MuiSvgIcon-root': {
-            color: colorPalette.primary.main,
+            color: theme.palette.primary.main,
           },
-        },
+        }),
       },
     },
     MuiTypography: {
@@ -283,9 +349,9 @@ const theme: ThemeOptions = createTheme({
     },
     MuiOutlinedInput: {
       styleOverrides: {
-        root: {
-          backgroundColor: colorPalette.white,
-        },
+        root: ({ theme }) => ({
+          backgroundColor: theme.palette.white.contrastText,
+        }),
       },
     },
     MuiMenuItem: {
@@ -307,12 +373,12 @@ const theme: ThemeOptions = createTheme({
             gridAutoFlow: 'row',
           },
         },
-        selectLabel: {
+        selectLabel: ({ theme }) => ({
           '@media (max-width: 440px)': {
             gridColumn: '2 / 3',
             gridRow: '1',
             whiteSpace: 'nowrap',
-            color: colorPalette.fog.main,
+            color: theme.palette.fog.main,
             justifySelf: 'end',
             marginBottom: '17px',
             position: 'relative',
@@ -321,7 +387,7 @@ const theme: ThemeOptions = createTheme({
           '&:focus': {
             background: 'inherit',
           },
-        },
+        }),
         input: {
           '@media (max-width: 440px)': {
             gridColumn: '3 / 3',
@@ -361,15 +427,15 @@ const theme: ThemeOptions = createTheme({
     },
     MuiLink: {
       styleOverrides: {
-        root: {
-          color: colorPalette.link,
+        root: ({ theme }) => ({
+          color: theme.palette.link.main,
           '&:hover': {
-            color: `${colorPalette.linkHover}!important`,
+            color: theme.palette.link.hover,
           },
           '&:visited': {
-            color: colorPalette.linkVisited,
+            color: theme.palette.link.visited,
           },
-        },
+        }),
       },
     },
   },

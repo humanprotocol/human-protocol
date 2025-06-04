@@ -1,5 +1,6 @@
 import { Fragment } from 'react';
 
+import { useTheme } from '@mui/material';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -15,7 +16,6 @@ import {
   TooltipProps,
 } from 'recharts';
 
-import { colorPalette } from '@/assets/styles/color-palette';
 import ToggleButtons from '@/components/DataEntry/ToggleButtons';
 import { formatDate } from '@/helpers/formatDate';
 import { formatNumber } from '@/helpers/formatNumber';
@@ -30,7 +30,8 @@ const CustomSmallChartTooltip = ({
       <Card
         elevation={0}
         sx={{
-          border: `1px solid ${colorPalette.fog.light}`,
+          border: '1px solid',
+          borderColor: 'fog.light',
           borderRadius: 2,
         }}
       >
@@ -80,6 +81,7 @@ const GraphSettings = ({ title }: { title: string }) => (
 
 const SmallGraph = ({ title, graphData }: SmallGraphProps) => {
   const isMobile = useIsMobile();
+  const theme = useTheme();
 
   return (
     <>
@@ -107,7 +109,7 @@ const SmallGraph = ({ title, graphData }: SmallGraphProps) => {
             axisLine={false}
             interval="preserveStartEnd"
             dataKey="date"
-            stroke={colorPalette.fog.main}
+            stroke={theme.palette.fog.main}
             tickFormatter={(value) => formatDate(value, 'DD MMMM')}
             tick={{ dy: 10 }}
             tickSize={0}
@@ -121,11 +123,11 @@ const SmallGraph = ({ title, graphData }: SmallGraphProps) => {
             dataKey="value"
             tick={{ dx: -10 }}
             tickSize={0}
-            stroke={colorPalette.fog.main}
+            stroke={theme.palette.fog.main}
             tickFormatter={formatNumber}
           />
           <CartesianGrid
-            stroke={colorPalette.fog.light}
+            stroke={theme.palette.fog.light}
             strokeDasharray={1}
             vertical={false}
           />
@@ -133,7 +135,7 @@ const SmallGraph = ({ title, graphData }: SmallGraphProps) => {
           <Area
             type="monotone"
             dataKey="value"
-            stroke={colorPalette.secondary.main}
+            stroke={theme.palette.secondary.main}
             fill="url(#value)"
           />
         </AreaChart>

@@ -1,7 +1,15 @@
 import Box from '@mui/material/Box/Box';
+import { useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 
-import { colorPalette } from '@/assets/styles/color-palette';
+type PaletteColorKey =
+  | 'primary'
+  | 'secondary'
+  | 'error'
+  | 'warning'
+  | 'info'
+  | 'success';
+type PaletteShadeKey = 'main' | 'light' | 'dark';
 
 const methodAttributes: Record<
   string,
@@ -9,64 +17,73 @@ const methodAttributes: Record<
 > = {
   withdraw: {
     color: {
-      text: colorPalette.error.main,
-      border: colorPalette.error.light,
+      text: 'error.main',
+      border: 'error.light',
     },
   },
   cancel: {
     color: {
-      text: colorPalette.error.main,
-      border: colorPalette.error.light,
+      text: 'error.main',
+      border: 'error.light',
     },
   },
   stake: {
     color: {
-      text: colorPalette.success.main,
-      border: colorPalette.success.light,
+      text: 'success.main',
+      border: 'success.light',
     },
   },
   unstake: {
     color: {
-      text: colorPalette.error.main,
-      border: colorPalette.error.light,
+      text: 'error.main',
+      border: 'error.light',
     },
   },
   slash: {
     color: {
-      text: colorPalette.error.main,
-      border: colorPalette.error.light,
+      text: 'error.main',
+      border: 'error.light',
     },
   },
   stakeWithdrawn: {
     color: {
-      text: colorPalette.error.main,
-      border: colorPalette.error.light,
+      text: 'error.main',
+      border: 'error.light',
     },
   },
   withdrawFees: {
     color: {
-      text: colorPalette.error.main,
-      border: colorPalette.error.light,
+      text: 'error.main',
+      border: 'error.light',
     },
   },
   approve: {
     color: {
-      text: colorPalette.warning.main,
-      border: colorPalette.warning.light,
+      text: 'warning.main',
+      border: 'warning.light',
     },
   },
   complete: {
     color: {
-      text: colorPalette.success.main,
-      border: colorPalette.success.light,
+      text: 'success.main',
+      border: 'success.light',
     },
   },
 };
 
 export const TransactionTableCellMethod = ({ method }: { method: string }) => {
+  const theme = useTheme();
   const currentStatusColors = methodAttributes[method]?.color || {
-    text: colorPalette.primary.main,
-    border: colorPalette.primary.light,
+    text: 'primary.main',
+    border: 'primary.light',
+  };
+
+  const getColorFromTheme = (colorString: string) => {
+    const [color, shade] = colorString.split('.') as [
+      PaletteColorKey,
+      PaletteShadeKey,
+    ];
+    return theme.palette[color][shade];
   };
 
   return (
@@ -75,9 +92,12 @@ export const TransactionTableCellMethod = ({ method }: { method: string }) => {
       px={1.5}
       py={1}
       borderRadius={8}
-      border={`1px solid ${currentStatusColors.border}`}
+      border={`1px solid ${getColorFromTheme(currentStatusColors.border)}`}
     >
-      <Typography textTransform="capitalize" color={currentStatusColors.text}>
+      <Typography
+        textTransform="capitalize"
+        color={getColorFromTheme(currentStatusColors.text)}
+      >
         {method}
       </Typography>
     </Box>
