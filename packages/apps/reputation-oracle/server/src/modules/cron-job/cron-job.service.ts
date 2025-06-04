@@ -152,11 +152,11 @@ export class CronJobService {
       CronJobType.ProcessPendingOutgoingWebhook,
     );
 
-    try {
-      await this.outgoingWebhookService.processPendingOutgoingWebhooks();
-    } catch (error) {
-      this.logger.error('Error processing pending outgoing webhooks', error);
-    }
+    // try {
+    //   await this.outgoingWebhookService.processPendingOutgoingWebhooks();
+    // } catch (error) {
+    //   this.logger.error('Error processing pending outgoing webhooks', error);
+    // }
 
     this.logger.info('Pending outgoing webhooks STOP');
     await this.completeCronJob(cronJob);
