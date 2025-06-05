@@ -9,35 +9,20 @@ import {
 
 declare module '@mui/material/Typography' {
   interface TypographyPropsVariantOverrides {
-    ['Button Small']: true;
-    ['Button Large']: true;
-    ['Chip']: true;
-    ['Table Header']: true;
-    ['Tooltip']: true;
-    ['H6-Mobile']: true;
+    tooltip: true;
     body3: true;
   }
 }
 
 declare module '@mui/material/styles' {
   interface TypographyVariants {
-    ['Button Small']: CSSProperties;
-    ['Button Large']: CSSProperties;
-    ['Chip']: CSSProperties;
-    ['Table Header']: CSSProperties;
-    ['Tooltip']: CSSProperties;
-    ['H6-Mobile']: CSSProperties;
+    tooltip: CSSProperties;
     body3: CSSProperties;
   }
 
   // allow configuration using `createTheme`
   interface TypographyVariantsOptions {
-    ['Button Small']?: CSSProperties;
-    ['Button Large']?: CSSProperties;
-    ['Chip']?: CSSProperties;
-    ['Table Header']?: CSSProperties;
-    ['Tooltip']?: CSSProperties;
-    ['H6-Mobile']: CSSProperties;
+    tooltip?: CSSProperties;
     body3?: CSSProperties;
   }
 }
@@ -187,8 +172,12 @@ const theme: ThemeOptions = createTheme({
     h3: {
       fontSize: 24,
       fontWeight: 600,
-      '@media (max-width:600px)': {
+      lineHeight: '150%',
+      '@media (max-width:900px)': {
         fontSize: 20,
+        fontWeight: 500,
+        lineHeight: '160%',
+        letterSpacing: '0.15px',
       },
     },
     h4: {
@@ -198,80 +187,53 @@ const theme: ThemeOptions = createTheme({
     h5: {
       fontSize: 18,
       fontWeight: 600,
+      lineHeight: '160%',
+      letterSpacing: '0.15px',
     },
     h6: {
       fontSize: 20,
       fontWeight: 500,
     },
-    'H6-Mobile': {
-      fontSize: '20px',
-      fontWeight: 500,
-      lineHeight: '32px',
-      letterSpacing: '0.15px',
-      textAlign: 'left',
-    },
     body1: {
       fontSize: 16,
       fontWeight: 400,
+      lineHeight: '150%',
+      letterSpacing: '0.15px',
     },
     body2: {
       fontSize: 14,
-      fontWeight: 500,
+      fontWeight: 400,
+      lineHeight: '20px',
+      letterSpacing: '0.17px',
     },
     body3: {
       fontSize: '12px',
       fontWeight: 400,
       lineHeight: '19.92px',
       letterSpacing: '0.4px',
-      textAlign: 'left',
-    },
-    'Button Small': {
-      fontSize: '13px',
-      fontWeight: 600,
-      lineHeight: '22px',
-      letterSpacing: '0.1px',
-      textAlign: 'left',
-    },
-    'Button Large': {
-      fontSize: '15px',
-      fontWeight: 600,
-      lineHeight: '26px',
-      letterSpacing: '0.1px',
-      textAlign: 'left',
-    },
-    Chip: {
-      fontSize: '13px',
-      fontWeight: 400,
-      lineHeight: '18px',
-      letterSpacing: '0.16px',
-      textAlign: 'left',
-    },
-    'Table Header': {
-      fontFamily: 'Roboto',
-      fontSize: '14px',
-      fontWeight: 500,
-      lineHeight: '24px',
-      letterSpacing: '0.17px',
-      textAlign: 'left',
-    },
-    Tooltip: {
-      fontSize: 10,
-      fontWeight: 500,
-      lineHeight: '14px',
     },
     subtitle1: {
-      fontSize: 12,
+      fontSize: 16,
+      fontWeight: 400,
+      lineHeight: '175%',
+      letterSpacing: '0.15px',
     },
     subtitle2: {
       fontSize: 14,
       fontWeight: 600,
       lineHeight: '21.9px',
+      letterSpacing: '0.1px',
     },
     caption: {
       fontSize: 12,
       fontWeight: 400,
       lineHeight: 5 / 3,
       letterSpacing: 0.4,
+    },
+    tooltip: {
+      fontSize: 10,
+      fontWeight: 500,
+      lineHeight: '14px',
     },
   },
   shadows: [
@@ -287,16 +249,39 @@ const theme: ThemeOptions = createTheme({
       styleOverrides: {
         root: {
           fontWeight: 600,
+          letterSpacing: '0.1px',
           textTransform: 'none',
+        },
+        sizeSmall: {
+          padding: '4px 10px',
+          fontSize: '13px',
+          lineHeight: '22px',
+        },
+        sizeMedium: {
+          padding: '6px 16px',
+          fontSize: '14px',
+          lineHeight: '24px',
+        },
+        sizeLarge: {
+          padding: '8px 22px',
+          fontSize: '15px',
+          lineHeight: '26px',
         },
       },
     },
-    MuiToolbar: {
+    MuiChip: {
       styleOverrides: {
         root: {
-          '@media (min-width:1280px)': {
-            paddingX: 56,
-          },
+          padding: '4px',
+          borderRadius: 16,
+        },
+        label: {
+          fontFamily: 'Roboto',
+          padding: '3px 6px',
+          fontSize: '13px',
+          lineHeight: '18px',
+          letterSpacing: '0.16px',
+          fontWeight: 400,
         },
       },
     },
@@ -359,6 +344,19 @@ const theme: ThemeOptions = createTheme({
         root: {
           '&:hover': {
             backgroundColor: '#1406B207',
+          },
+        },
+      },
+    },
+    MuiTableHead: {
+      styleOverrides: {
+        root: {
+          '& .MuiTableCell-root': {
+            fontFamily: 'Roboto',
+            fontSize: '14px',
+            fontWeight: 500,
+            lineHeight: '24px',
+            letterSpacing: '0.17px',
           },
         },
       },

@@ -38,7 +38,7 @@ const CustomSmallChartTooltip = ({
         <Box px={1} py={0}>
           {payload?.map((elem) => (
             <Fragment key={elem.name}>
-              <Typography variant="Tooltip">
+              <Typography variant="tooltip">
                 {formatDate(elem.payload.date, 'MMMM DD, YYYY')}
               </Typography>
               <Typography fontWeight={500} variant="body1">
@@ -68,7 +68,6 @@ const GraphSettings = ({ title }: { title: string }) => (
     alignItems="center"
     mt={{ xs: 1.5, md: 0 }}
     mb={{ xs: 0, md: 2 }}
-    mr={{ xs: 0, md: 4 }}
     gap={2}
     flexWrap="wrap"
   >

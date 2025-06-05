@@ -67,7 +67,7 @@ const Home: FC = () => {
 
   return (
     <PageWrapper violetHeader>
-      <Typography variant={isMobile ? 'H6-Mobile' : 'h3'} color="white.main">
+      <Typography variant="h3" color="white.main">
         All HUMAN activity. In one place.
       </Typography>
       <SearchBar className="home-page-search" />

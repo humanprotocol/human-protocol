@@ -35,7 +35,7 @@ const CustomChartTooltip = ({
         }}
       >
         <Box p="6px 10px">
-          <Typography variant="subtitle1" color="fog.main" fontWeight={500}>
+          <Typography variant="tooltip" color="fog.main">
             {formatDate(label, 'MMMM DD, YYYY')}
           </Typography>
           {payload?.map((elem) => (
@@ -55,7 +55,7 @@ const CustomChartTooltip = ({
                       fontSize: '12px',
                     }}
                   />
-                  <Typography fontWeight={500} variant="subtitle1">
+                  <Typography variant="tooltip">
                     {renderTitle(elem.name ?? '')}
                   </Typography>
                 </Grid>
