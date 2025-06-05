@@ -61,7 +61,7 @@ def serialize_job(
             job_type=project.job_type,
             status=api_status,
             job_description=manifest.annotation.description if manifest else None,
-            reward_amount=f"{fund_amount / len(jobs):.2f}" if len(jobs) else None,
+            reward_amount=f"{fund_amount / len(jobs)}" if len(jobs) else None,
             reward_token=(
                 service_api.DEFAULT_TOKEN
             ),  # set a value to avoid being excluded by response_model_exclude_unset=True
@@ -138,7 +138,7 @@ def serialize_assignment(
             chain_id=project.chain_id,
             job_type=project.job_type,
             status=api_status,
-            reward_amount=f"{fund_amount / len(jobs):.2f}" if len(jobs) else None,
+            reward_amount=f"{fund_amount / len(jobs)}" if len(jobs) else None,
             reward_token=(
                 service_api.DEFAULT_TOKEN
             ),  # set a value to avoid being excluded by response_model_exclude_unset=True
