@@ -1,4 +1,4 @@
-import { Box, Typography, useTheme } from '@mui/material';
+import { Chip, useTheme } from '@mui/material';
 
 type Reputation = 'High' | 'Medium' | 'Low' | 'Unknown';
 
@@ -48,11 +48,14 @@ export const ReputationScore = ({ reputation }: Props) => {
   const colors = reputationAttributes[reputation].colors;
 
   return (
-    <Box px={2} py={1} borderRadius={4} border={`1px solid ${colors.border}`}>
-      <Typography color={colors.title}>
-        {reputationAttributes[reputation].title}
-      </Typography>
-    </Box>
+    <Chip
+      label={reputationAttributes[reputation].title}
+      variant="outlined"
+      sx={{
+        borderColor: colors.border,
+        color: colors.title,
+      }}
+    />
   );
 };
 
