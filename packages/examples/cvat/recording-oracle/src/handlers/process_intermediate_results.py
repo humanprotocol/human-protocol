@@ -705,8 +705,8 @@ class AudinoDatasetComparator:
         gt_samples_filtered.sort(key=lambda ann: ann["start"])
         ds_samples_filtered.sort(key=lambda ann: ann["start"])
 
-        gt_transcriptions = " ".join([gt.get("sentence", "") for gt in gt_samples_filtered]).lower()
-        ds_transcriptions = " ".join([ds.get("sentence", "") for ds in ds_samples_filtered]).lower()
+        gt_transcriptions = " ".join([gt.get("text", "") for gt in gt_samples_filtered]).lower()
+        ds_transcriptions = " ".join([ds.get("text", "") for ds in ds_samples_filtered]).lower()
 
         wer = min(max(self.word_error_rate(gt_transcriptions, ds_transcriptions), 0.0), 1.0)
         cer = min(max(self.character_error_rate(gt_transcriptions, ds_transcriptions), 0.0), 1.0)
@@ -1090,15 +1090,15 @@ def process_intermediate_results(  # noqa: PLR0912
 
     if manifest.annotation.type == TaskTypes.audio_transcription:
         job_annotations = {}
-        for job in task.jobs:
-            job_annotations[job.cvat_id] = []
+        for job in meta.jobs:
+            job_annotations[job.job_id] = []
 
         validator = _AudinoTaskValidator(
             escrow_address=escrow_address,
             chain_id=chain_id,
             manifest=manifest,
             merged_annotations=merged_annotations,
-            meta=unchecked_jobs_meta,
+            meta=meta,
             gt_stats=gt_stats,
             job_annotations=job_annotations,
         )
