@@ -148,6 +148,9 @@ export interface ITransactionsFilter extends IPagination {
   endDate?: Date;
   fromAddress?: string;
   toAddress?: string;
+  method?: string;
+  escrow?: string;
+  receiver?: string;
 }
 
 export interface IPagination {

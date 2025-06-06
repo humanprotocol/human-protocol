@@ -33,6 +33,9 @@ def get_transactions_query(filter: TransactionFilter) -> str:
     end_block = filter.end_block
     from_address = filter.from_address
     to_address = filter.to_address
+    method = filter.method
+    escrow = filter.escrow
+    receiver = filter.receiver
 
     address_condition = (
         f"""
@@ -54,6 +57,9 @@ def get_transactions_query(filter: TransactionFilter) -> str:
             {f'{{ timestamp_lte: $endDate }},' if end_date else ''}
             {f'{{ block_gte: $startBlock }},' if start_block else ''}
             {f'{{ block_lte: $endBlock }},' if end_block else ''}
+            {f'{{ method: $method }},' if method else ''}
+            {f'{{ escrow: $escrow }},' if escrow else ''}
+            {f'{{ receiver: $receiver }}' if receiver else ''}
         ]
     }}
     """
@@ -66,6 +72,9 @@ query GetTransactions(
     $endDate: Int
     $startBlock: Int
     $endBlock: Int
+    $method: String
+    $escrow: String
+    $receiver: String
     $orderDirection: String
     $first: Int
     $skip: Int

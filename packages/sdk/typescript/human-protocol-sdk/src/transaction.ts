@@ -19,6 +19,22 @@ export class TransactionUtils {
   /**
    * This function returns the transaction data for the given hash.
    *
+   * ```ts
+   * type ITransaction = {
+   *   block: bigint;
+   *   txHash: string;
+   *   from: string;
+   *   to: string;
+   *   timestamp: bigint;
+   *   value: string;
+   *   method: string;
+   *   receiver?: string;
+   *   escrow?: string;
+   *   token?: string;
+   *   internalTransactions: InternalTransaction[];
+   * };
+   * ```
+   * 
    * @param {ChainId} chainId The chain ID.
    * @param {string} hash The transaction hash.
    * @returns {Promise<ITransaction>} Returns the transaction details.
@@ -65,6 +81,9 @@ export class TransactionUtils {
    *   chainId: ChainId; // List of chain IDs to query.
    *   fromAddress?: string; // (Optional) The address from which transactions are sent.
    *   toAddress?: string; // (Optional) The address to which transactions are sent.
+   *   method?: string; // (Optional) The method of the transaction to filter by.
+   *   escrow?: string; // (Optional) The escrow address to filter transactions.
+   *   receiver?: string; // (Optional) The receiver address to filter transactions.
    *   startDate?: Date; // (Optional) The start date to filter transactions (inclusive).
    *   endDate?: Date; // (Optional) The end date to filter transactions (inclusive).
    *   startBlock?: number; // (Optional) The start block number to filter transactions (inclusive).
@@ -77,13 +96,17 @@ export class TransactionUtils {
    *
    * ```ts
    * type ITransaction = {
-   *   block: number;
+   *   block: bigint;
    *   txHash: string;
    *   from: string;
    *   to: string;
-   *   timestamp: number;
+   *   timestamp: bigint;
    *   value: string;
    *   method: string;
+   *   receiver?: string;
+   *   escrow?: string;
+   *   token?: string;
+   *   internalTransactions: InternalTransaction[];
    * };
    * ```
    *
@@ -137,6 +160,9 @@ export class TransactionUtils {
       endDate: filter.endDate ? getUnixTimestamp(filter.endDate) : undefined,
       startBlock: filter.startBlock ? filter.startBlock : undefined,
       endBlock: filter.endBlock ? filter.endBlock : undefined,
+      method: filter.method ? filter.method : undefined,
+      escrow: filter.escrow ? filter.escrow : undefined,
+      receiver: filter.receiver ? filter.receiver : undefined,
       orderDirection: orderDirection,
       first: first,
       skip: skip,
