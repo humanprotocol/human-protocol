@@ -1,4 +1,4 @@
-import Box from '@mui/material/Box';
+import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
@@ -7,7 +7,6 @@ import SectionWrapper from '@/components/SectionWrapper';
 import { AddressDetailsEscrowSchema } from '@/services/api/use-address-details';
 
 import HmtBalance from '../HmtBalance';
-
 
 const EscrowAddress = ({
   data: {
@@ -70,18 +69,7 @@ const EscrowAddress = ({
         </TitleSectionWrapper>
 
         <TitleSectionWrapper title="Status">
-          <Box
-            sx={{
-              padding: '3px 8px',
-              borderRadius: '16px',
-              border: '1px solid',
-              borderColor: 'secondary.light',
-            }}
-          >
-            <Typography variant="Chip" color="secondary.main">
-              {status}
-            </Typography>
-          </Box>
+          <Chip label={status} variant="outlined" color="secondary" />
         </TitleSectionWrapper>
 
         <TitleSectionWrapper

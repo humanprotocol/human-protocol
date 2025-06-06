@@ -15,8 +15,6 @@ import {
 } from '@mui/x-date-pickers/models';
 import type { Dayjs } from 'dayjs';
 
-import { colorPalette } from '@/assets/styles/color-palette';
-
 interface CustomDateFieldProps
   extends UseDateFieldProps<Dayjs, false>,
     BaseSingleInputFieldProps<
@@ -43,7 +41,8 @@ const CustomDateField = ({
       aria-label={ariaLabel}
       onClick={() => setOpen((prevState) => !prevState)}
       sx={{
-        borderBottom: `1px solid ${colorPalette.primary.main}`,
+        borderBottom: '1px solid',
+        borderColor: 'primary.main',
         lineHeight: 2.5,
         '&:hover': {
           cursor: 'pointer',

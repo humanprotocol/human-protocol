@@ -1,9 +1,6 @@
-import { FC } from 'react';
+import { Chip, useTheme } from '@mui/material';
 
-import { Box, Typography } from '@mui/material';
-
-import { colorPalette } from '@/assets/styles/color-palette';
-import { Reputation } from '@/services/api/use-leaderboard-details';
+type Reputation = 'High' | 'Medium' | 'Low' | 'Unknown';
 
 type Props = {
   reputation: Reputation;
@@ -14,45 +11,51 @@ type ReputationAttributes = {
   colors: { title: string; border: string };
 };
 
-const reputationAttributes: Record<Reputation, ReputationAttributes> = {
-  High: {
-    title: 'High',
-    colors: {
-      title: colorPalette.success.main,
-      border: colorPalette.success.light,
-    },
-  },
-  Medium: {
-    title: 'Medium',
-    colors: {
-      title: colorPalette.warning.main,
-      border: colorPalette.warning.light,
-    },
-  },
-  Low: {
-    title: 'Low',
-    colors: {
-      title: colorPalette.orange.main,
-      border: colorPalette.orange.light,
-    },
-  },
-  Unknown: {
-    title: 'Coming soon',
-    colors: {
-      title: colorPalette.ocean.main,
-      border: colorPalette.ocean.light,
-    },
-  },
-};
+export const ReputationScore = ({ reputation }: Props) => {
+  const theme = useTheme();
 
-const ReputationScore: FC<Props> = ({ reputation }) => {
+  const reputationAttributes: Record<Reputation, ReputationAttributes> = {
+    High: {
+      title: 'High',
+      colors: {
+        title: theme.palette.success.main,
+        border: theme.palette.success.light,
+      },
+    },
+    Medium: {
+      title: 'Medium',
+      colors: {
+        title: theme.palette.warning.main,
+        border: theme.palette.warning.light,
+      },
+    },
+    Low: {
+      title: 'Low',
+      colors: {
+        title: theme.palette.orange.main,
+        border: theme.palette.orange.light,
+      },
+    },
+    Unknown: {
+      title: 'Coming soon',
+      colors: {
+        title: theme.palette.ocean.main,
+        border: theme.palette.ocean.light,
+      },
+    },
+  };
+
   const colors = reputationAttributes[reputation].colors;
+
   return (
-    <Box px={2} py={1} borderRadius={4} border={`1px solid ${colors.border}`}>
-      <Typography color={colors.title}>
-        {reputationAttributes[reputation].title}
-      </Typography>
-    </Box>
+    <Chip
+      label={reputationAttributes[reputation].title}
+      variant="outlined"
+      sx={{
+        borderColor: colors.border,
+        color: colors.title,
+      }}
+    />
   );
 };
 

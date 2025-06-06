@@ -11,7 +11,6 @@ import ExchangeOracleIcon from '@/assets/icons/exchange-oracle.svg';
 import JobLauncherIcon from '@/assets/icons/job-launcher.svg';
 import RecordingOracleIcon from '@/assets/icons/recording-oracle.svg';
 import ReputationOracleIcon from '@/assets/icons/reputation-oracle.svg';
-import { colorPalette } from '@/assets/styles/color-palette';
 import TitleSectionWrapper from '@/components/SearchResults/TitleSectionWrapper';
 import SectionWrapper from '@/components/SectionWrapper';
 import { env } from '@/helpers/env';
@@ -23,7 +22,6 @@ import HmtPrice from '../HmtPrice';
 import KVStore from '../KVStore';
 import ReputationScore from '../ReputationScore';
 import StakeInfo from '../StakeInfo';
-
 
 interface RoleInfoProps {
   title: string;
@@ -141,26 +139,21 @@ const RoleDetails = ({ data }: { data: AddressDetailsOperator }) => {
       <SectionWrapper>
         <Box display="flex" flexDirection="column" gap={1.5} mb={4}>
           <Typography variant="h5">Overview</Typography>
-          {env.VITE_HUMANPROTOCOL_CORE_ARCHITECTURE ? (
-            <Box
-              sx={{
-                borderRadius: 16,
-                bgcolor: colorPalette.overlay.light,
-                display: 'inline-block',
-                py: 1,
-                px: 1.5,
-                textDecoration: 'none',
-                width: 'fit-content',
-              }}
+          {env.VITE_HUMANPROTOCOL_CORE_ARCHITECTURE && (
+            <Chip
+              label="HUMAN Protocol core architecture"
+              variant="filled"
               component="a"
               href={env.VITE_HUMANPROTOCOL_CORE_ARCHITECTURE}
               target="_blank"
-            >
-              <Typography variant="Chip" color={colorPalette.ocean.main}>
-                HUMAN Protocol core architecture
-              </Typography>
-            </Box>
-          ) : null}
+              sx={{
+                bgcolor: 'overlay',
+                color: 'ocean.main',
+                cursor: 'pointer',
+                width: 'fit-content',
+              }}
+            />
+          )}
         </Box>
         <Stack gap={4}>
           <TitleSectionWrapper title="Balance">
