@@ -159,7 +159,7 @@ class TransactionFilter:
         end_block: Optional[int] = None,
         method: Optional[str] = None,
         escrow: Optional[str] = None,
-        receiver: Optional[str] = None,
+        token: Optional[str] = None,
         first: int = 10,
         skip: int = 0,
         order_direction: OrderDirection = OrderDirection.DESC,
@@ -176,7 +176,7 @@ class TransactionFilter:
         :param end_block: End block number for filtering transactions
         :param method: Method name to filter transactions
         :param escrow: Escrow address to filter transactions
-        :param receiver: Receiver address to filter transactions
+        :param token: Token address to filter transactions
         :param first: Number of items per page
         :param skip: Page number to retrieve
         :param order: Order of results, "asc" or "desc"
@@ -193,8 +193,8 @@ class TransactionFilter:
         if escrow and not Web3.is_address(escrow):
             raise ValueError(f"Invalid escrow address: {escrow}")
 
-        if receiver and not Web3.is_address(receiver):
-            raise ValueError(f"Invalid receiver address: {receiver}")
+        if token and not Web3.is_address(token):
+            raise ValueError(f"Invalid token address: {token}")
 
         if start_date and end_date and start_date > end_date:
             raise ValueError(
@@ -224,7 +224,7 @@ class TransactionFilter:
         self.end_block = end_block
         self.method = method
         self.escrow = escrow
-        self.receiver = receiver
+        self.token = token
         self.first = min(first, 1000)
         self.skip = skip
         self.order_direction = order_direction

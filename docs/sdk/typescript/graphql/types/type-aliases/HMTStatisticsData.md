@@ -6,32 +6,54 @@
 
 # Type Alias: HMTStatisticsData
 
-> **HMTStatisticsData**: `object`
+> **HMTStatisticsData** = `object`
 
-Defined in: [graphql/types.ts:33](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L33)
+Defined in: [graphql/types.ts:25](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L25)
 
-## Type declaration
+## Properties
 
 ### holders
 
 > **holders**: `string`
 
+Defined in: [graphql/types.ts:31](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L31)
+
+***
+
 ### totalApprovalEventCount
 
 > **totalApprovalEventCount**: `string`
+
+Defined in: [graphql/types.ts:28](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L28)
+
+***
 
 ### totalBulkApprovalEventCount
 
 > **totalBulkApprovalEventCount**: `string`
 
+Defined in: [graphql/types.ts:29](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L29)
+
+***
+
 ### totalBulkTransferEventCount
 
 > **totalBulkTransferEventCount**: `string`
+
+Defined in: [graphql/types.ts:27](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L27)
+
+***
 
 ### totalTransferEventCount
 
 > **totalTransferEventCount**: `string`
 
+Defined in: [graphql/types.ts:26](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L26)
+
+***
+
 ### totalValueTransfered
 
 > **totalValueTransfered**: `string`
+
+Defined in: [graphql/types.ts:30](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L30)

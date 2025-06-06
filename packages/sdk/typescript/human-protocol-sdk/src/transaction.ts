@@ -34,7 +34,7 @@ export class TransactionUtils {
    *   internalTransactions: InternalTransaction[];
    * };
    * ```
-   * 
+   *
    * @param {ChainId} chainId The chain ID.
    * @param {string} hash The transaction hash.
    * @returns {Promise<ITransaction>} Returns the transaction details.
@@ -83,7 +83,7 @@ export class TransactionUtils {
    *   toAddress?: string; // (Optional) The address to which transactions are sent.
    *   method?: string; // (Optional) The method of the transaction to filter by.
    *   escrow?: string; // (Optional) The escrow address to filter transactions.
-   *   receiver?: string; // (Optional) The receiver address to filter transactions.
+   *   token?: string; // (Optional) The token address to filter transactions.
    *   startDate?: Date; // (Optional) The start date to filter transactions (inclusive).
    *   endDate?: Date; // (Optional) The end date to filter transactions (inclusive).
    *   startBlock?: number; // (Optional) The start block number to filter transactions (inclusive).
@@ -162,7 +162,7 @@ export class TransactionUtils {
       endBlock: filter.endBlock ? filter.endBlock : undefined,
       method: filter.method ? filter.method : undefined,
       escrow: filter.escrow ? filter.escrow : undefined,
-      receiver: filter.receiver ? filter.receiver : undefined,
+      token: filter.token ? filter.token : undefined,
       orderDirection: orderDirection,
       first: first,
       skip: skip,

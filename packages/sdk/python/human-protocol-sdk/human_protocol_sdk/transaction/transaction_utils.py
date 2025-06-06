@@ -170,7 +170,7 @@ class TransactionUtils:
         """Get an array of transactions based on the specified filter parameters.
 
         :param filter: Object containing all the necessary parameters to filter
-            (chain_id, from_address, to_address, start_date, end_date, start_block, end_block, method, escrow, receiver, first, skip, order_direction)
+            (chain_id, from_address, to_address, start_date, end_date, start_block, end_block, method, escrow, token, first, skip, order_direction)
 
         :return: List of transactions
 
@@ -204,15 +204,21 @@ class TransactionUtils:
             network_data,
             query=get_transactions_query(filter),
             params={
-                "fromAddress": (filter.from_address.lower() if filter.from_address else None),
+                "fromAddress": (
+                    filter.from_address.lower() if filter.from_address else None
+                ),
                 "toAddress": (filter.to_address.lower() if filter.to_address else None),
-                "startDate": (int(filter.start_date.timestamp()) if filter.start_date else None),
-                "endDate": (int(filter.end_date.timestamp()) if filter.end_date else None),
+                "startDate": (
+                    int(filter.start_date.timestamp()) if filter.start_date else None
+                ),
+                "endDate": (
+                    int(filter.end_date.timestamp()) if filter.end_date else None
+                ),
                 "startBlock": filter.start_block if filter.start_block else None,
                 "endBlock": filter.end_block if filter.end_block else None,
                 "method": filter.method if filter.method else None,
                 "escrow": (filter.escrow.lower() if filter.escrow else None),
-                "receiver": (filter.receiver.lower() if filter.receiver else None),
+                "token": (filter.token.lower() if filter.token else None),
                 "first": filter.first,
                 "skip": filter.skip,
                 "orderDirection": filter.order_direction.value,

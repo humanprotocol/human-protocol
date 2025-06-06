@@ -6,24 +6,38 @@
 
 # Type Alias: RewardAddedEventData
 
-> **RewardAddedEventData**: `object`
+> **RewardAddedEventData** = `object`
 
-Defined in: [graphql/types.ts:76](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L76)
+Defined in: [graphql/types.ts:68](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L68)
 
-## Type declaration
+## Properties
 
 ### amount
 
 > **amount**: `string`
 
+Defined in: [graphql/types.ts:72](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L72)
+
+***
+
 ### escrowAddress
 
 > **escrowAddress**: `string`
+
+Defined in: [graphql/types.ts:69](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L69)
+
+***
 
 ### slasher
 
 > **slasher**: `string`
 
+Defined in: [graphql/types.ts:71](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L71)
+
+***
+
 ### staker
 
 > **staker**: `string`
+
+Defined in: [graphql/types.ts:70](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L70)

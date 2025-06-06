@@ -6,24 +6,38 @@
 
 # Type Alias: StatusEvent
 
-> **StatusEvent**: `object`
+> **StatusEvent** = `object`
 
-Defined in: [graphql/types.ts:158](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L158)
+Defined in: [graphql/types.ts:150](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L150)
 
-## Type declaration
+## Properties
 
 ### chainId
 
 > **chainId**: [`ChainId`](../../../enums/enumerations/ChainId.md)
 
+Defined in: [graphql/types.ts:154](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L154)
+
+***
+
 ### escrowAddress
 
 > **escrowAddress**: `string`
+
+Defined in: [graphql/types.ts:152](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L152)
+
+***
 
 ### status
 
 > **status**: `string`
 
+Defined in: [graphql/types.ts:153](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L153)
+
+***
+
 ### timestamp
 
 > **timestamp**: `number`
+
+Defined in: [graphql/types.ts:151](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L151)

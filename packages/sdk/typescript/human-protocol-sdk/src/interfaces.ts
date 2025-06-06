@@ -64,6 +64,28 @@ export interface IOperator {
   registrationInstructions?: string;
 }
 
+export interface IEscrow {
+  id: string;
+  address: string;
+  amountPaid: string;
+  balance: string;
+  count: string;
+  factoryAddress: string;
+  finalResultsUrl?: string;
+  intermediateResultsUrl?: string;
+  launcher: string;
+  manifestHash?: string;
+  manifestUrl?: string;
+  recordingOracle?: string;
+  reputationOracle?: string;
+  exchangeOracle?: string;
+  status: string;
+  token: string;
+  totalFundedAmount: string;
+  createdAt: string;
+  chainId: number;
+}
+
 export interface IEscrowsFilter extends IPagination {
   launcher?: string;
   reputationOracle?: string;
@@ -150,7 +172,7 @@ export interface ITransactionsFilter extends IPagination {
   toAddress?: string;
   method?: string;
   escrow?: string;
-  receiver?: string;
+  token?: string;
 }
 
 export interface IPagination {

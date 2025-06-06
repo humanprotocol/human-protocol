@@ -27,8 +27,17 @@ const TRANSACTION_FRAGMENT = gql`
 `;
 
 export const GET_TRANSACTIONS_QUERY = (filter: ITransactionsFilter) => {
-  const { startDate, endDate, startBlock, endBlock, fromAddress, toAddress, method, escrow, receiver } =
-    filter;
+  const {
+    startDate,
+    endDate,
+    startBlock,
+    endBlock,
+    fromAddress,
+    toAddress,
+    method,
+    escrow,
+    token,
+  } = filter;
   const addressCondition =
     fromAddress === toAddress
       ? `
@@ -50,7 +59,7 @@ export const GET_TRANSACTIONS_QUERY = (filter: ITransactionsFilter) => {
         ${endBlock ? `{block_lte: $endBlock},` : ''}
         ${method ? `{ method: $method },` : ''}
         ${escrow ? `{ escrow: $escrow },` : ''}
-        ${receiver ? `{ receiver: $receiver },` : ''}
+        ${token ? `{ token: $token },` : ''}
       ]
       }
     `;
@@ -63,6 +72,9 @@ export const GET_TRANSACTIONS_QUERY = (filter: ITransactionsFilter) => {
         $endDate: Int
         $startBlock: Int
         $endBlock: Int
+        $method: String
+        $escrow: String
+        $token: String
         $orderDirection: String
         $first: Int
         $skip: Int

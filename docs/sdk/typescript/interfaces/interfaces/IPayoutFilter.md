@@ -6,7 +6,7 @@
 
 # Interface: IPayoutFilter
 
-Defined in: [interfaces.ts:106](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L106)
+Defined in: [interfaces.ts:128](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L128)
 
 ## Extends
 
@@ -18,7 +18,7 @@ Defined in: [interfaces.ts:106](https://github.com/humanprotocol/human-protocol/
 
 > **chainId**: [`ChainId`](../../enums/enumerations/ChainId.md)
 
-Defined in: [interfaces.ts:107](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L107)
+Defined in: [interfaces.ts:129](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L129)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: [interfaces.ts:107](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **escrowAddress**: `string`
 
-Defined in: [interfaces.ts:108](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L108)
+Defined in: [interfaces.ts:130](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L130)
 
 ***
 
@@ -34,7 +34,7 @@ Defined in: [interfaces.ts:108](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **first**: `number`
 
-Defined in: [interfaces.ts:154](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L154)
+Defined in: [interfaces.ts:179](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L179)
 
 #### Inherited from
 
@@ -46,7 +46,7 @@ Defined in: [interfaces.ts:154](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **from**: `Date`
 
-Defined in: [interfaces.ts:110](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L110)
+Defined in: [interfaces.ts:132](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L132)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [interfaces.ts:110](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **orderDirection**: [`OrderDirection`](../../enums/enumerations/OrderDirection.md)
 
-Defined in: [interfaces.ts:156](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L156)
+Defined in: [interfaces.ts:181](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L181)
 
 #### Inherited from
 
@@ -66,7 +66,7 @@ Defined in: [interfaces.ts:156](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **recipient**: `string`
 
-Defined in: [interfaces.ts:109](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L109)
+Defined in: [interfaces.ts:131](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L131)
 
 ***
 
@@ -74,7 +74,7 @@ Defined in: [interfaces.ts:109](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **skip**: `number`
 
-Defined in: [interfaces.ts:155](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L155)
+Defined in: [interfaces.ts:180](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L180)
 
 #### Inherited from
 
@@ -86,4 +86,4 @@ Defined in: [interfaces.ts:155](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **to**: `Date`
 
-Defined in: [interfaces.ts:111](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L111)
+Defined in: [interfaces.ts:133](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L133)

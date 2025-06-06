@@ -6,20 +6,30 @@
 
 # Type Alias: HMTStatistics
 
-> **HMTStatistics**: `object`
+> **HMTStatistics** = `object`
 
-Defined in: [graphql/types.ts:135](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L135)
+Defined in: [graphql/types.ts:127](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L127)
 
-## Type declaration
+## Properties
 
 ### totalHolders
 
 > **totalHolders**: `number`
 
+Defined in: [graphql/types.ts:130](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L130)
+
+***
+
 ### totalTransferAmount
 
 > **totalTransferAmount**: `bigint`
 
+Defined in: [graphql/types.ts:128](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L128)
+
+***
+
 ### totalTransferCount
 
 > **totalTransferCount**: `number`
+
+Defined in: [graphql/types.ts:129](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L129)

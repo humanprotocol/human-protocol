@@ -78,6 +78,9 @@ class TestTransactionUtils(unittest.TestCase):
                     "first": 10,
                     "skip": 0,
                     "orderDirection": "desc",
+                    "escrow": None,
+                    "token": None,
+                    "method": None,
                 },
             )
             self.assertEqual(len(transactions), 2)
@@ -110,6 +113,9 @@ class TestTransactionUtils(unittest.TestCase):
                     "first": 10,
                     "skip": 0,
                     "orderDirection": "desc",
+                    "escrow": None,
+                    "token": None,
+                    "method": None,
                 },
             )
             self.assertEqual(len(transactions), 0)

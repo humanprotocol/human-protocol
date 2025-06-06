@@ -6,7 +6,7 @@
 
 # Interface: IHMTHoldersParams
 
-Defined in: [interfaces.ts:102](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L102)
+Defined in: [interfaces.ts:124](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L124)
 
 ## Extends
 
@@ -18,7 +18,7 @@ Defined in: [interfaces.ts:102](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **address**: `string`
 
-Defined in: [interfaces.ts:103](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L103)
+Defined in: [interfaces.ts:125](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L125)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: [interfaces.ts:103](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **first**: `number`
 
-Defined in: [interfaces.ts:154](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L154)
+Defined in: [interfaces.ts:179](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L179)
 
 #### Inherited from
 
@@ -38,7 +38,7 @@ Defined in: [interfaces.ts:154](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **orderDirection**: [`OrderDirection`](../../enums/enumerations/OrderDirection.md)
 
-Defined in: [interfaces.ts:156](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L156)
+Defined in: [interfaces.ts:181](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L181)
 
 #### Inherited from
 
@@ -50,7 +50,7 @@ Defined in: [interfaces.ts:156](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **skip**: `number`
 
-Defined in: [interfaces.ts:155](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L155)
+Defined in: [interfaces.ts:180](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L180)
 
 #### Inherited from
 

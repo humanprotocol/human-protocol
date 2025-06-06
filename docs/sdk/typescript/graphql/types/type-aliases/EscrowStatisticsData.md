@@ -6,48 +6,86 @@
 
 # Type Alias: EscrowStatisticsData
 
-> **EscrowStatisticsData**: `object`
+> **EscrowStatisticsData** = `object`
 
-Defined in: [graphql/types.ts:42](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L42)
+Defined in: [graphql/types.ts:34](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L34)
 
-## Type declaration
+## Properties
 
 ### bulkPayoutEventCount
 
 > **bulkPayoutEventCount**: `string`
 
+Defined in: [graphql/types.ts:37](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L37)
+
+***
+
 ### cancelledStatusEventCount
 
 > **cancelledStatusEventCount**: `string`
+
+Defined in: [graphql/types.ts:39](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L39)
+
+***
 
 ### completedStatusEventCount
 
 > **completedStatusEventCount**: `string`
 
+Defined in: [graphql/types.ts:42](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L42)
+
+***
+
 ### fundEventCount
 
 > **fundEventCount**: `string`
+
+Defined in: [graphql/types.ts:35](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L35)
+
+***
 
 ### paidStatusEventCount
 
 > **paidStatusEventCount**: `string`
 
+Defined in: [graphql/types.ts:41](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L41)
+
+***
+
 ### partialStatusEventCount
 
 > **partialStatusEventCount**: `string`
+
+Defined in: [graphql/types.ts:40](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L40)
+
+***
 
 ### pendingStatusEventCount
 
 > **pendingStatusEventCount**: `string`
 
+Defined in: [graphql/types.ts:38](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L38)
+
+***
+
 ### storeResultsEventCount
 
 > **storeResultsEventCount**: `string`
+
+Defined in: [graphql/types.ts:36](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L36)
+
+***
 
 ### totalEscrowCount
 
 > **totalEscrowCount**: `string`
 
+Defined in: [graphql/types.ts:44](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L44)
+
+***
+
 ### totalEventCount
 
 > **totalEventCount**: `string`
+
+Defined in: [graphql/types.ts:43](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L43)

@@ -35,7 +35,7 @@ def get_transactions_query(filter: TransactionFilter) -> str:
     to_address = filter.to_address
     method = filter.method
     escrow = filter.escrow
-    receiver = filter.receiver
+    token = filter.token
 
     address_condition = (
         f"""
@@ -59,7 +59,7 @@ def get_transactions_query(filter: TransactionFilter) -> str:
             {f'{{ block_lte: $endBlock }},' if end_block else ''}
             {f'{{ method: $method }},' if method else ''}
             {f'{{ escrow: $escrow }},' if escrow else ''}
-            {f'{{ receiver: $receiver }}' if receiver else ''}
+            {f'{{ token: $token }}' if token else ''}
         ]
     }}
     """
@@ -74,7 +74,7 @@ query GetTransactions(
     $endBlock: Int
     $method: String
     $escrow: String
-    $receiver: String
+    $token: String
     $orderDirection: String
     $first: Int
     $skip: Int
