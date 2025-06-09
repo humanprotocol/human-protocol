@@ -33,7 +33,7 @@ export class StripeService {
     }
   }
 
-  async createSetupIntentAndReturnSecret(customerId: string): Promise<string> {
+  async createSetupIntentAndReturnSecret(customerId: string | null): Promise<string> {
     let setupIntent: Stripe.Response<Stripe.SetupIntent>;
 
     try {
