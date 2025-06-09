@@ -15,6 +15,7 @@ import { UserEntity } from '../user/user.entity';
 import { JobRepository } from '../job/job.repository';
 import { UserRepository } from '../user/user.repository';
 import { RateModule } from '../rate/rate.module';
+import { StripeModule } from '../stripe/stripe.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { RateModule } from '../rate/rate.module';
     Web3Module,
     WhitelistModule,
     RateModule,
+    StripeModule,
     MinioModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
