@@ -47,9 +47,5 @@ dist
 *.tsbuildinfo
 hardhat-dependency-compiler
 
-#cache
+# cache
 cache
-
-#docker databases
-docker-db
-graph-node-db

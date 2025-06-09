@@ -1,11 +1,14 @@
+import { Role } from '@human-protocol/sdk';
 import { useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
-import { httpService } from '../http-service';
+
+import { reputationSchema } from '@/services/api/use-leaderboard-details';
+import { useWalletSearch } from '@/utils/hooks/use-wallet-search';
+
 import { apiPaths } from '../api-paths';
-import { useWalletSearch } from '@utils/hooks/use-wallet-search';
+import { httpService } from '../http-service';
 import { validateResponse } from '../validate-response';
-import { reputationSchema } from '@services/api/use-leaderboard-details';
-import { Role } from '@human-protocol/sdk';
+
 
 const transformOptionalTokenAmount = (
   value: string | undefined | null,

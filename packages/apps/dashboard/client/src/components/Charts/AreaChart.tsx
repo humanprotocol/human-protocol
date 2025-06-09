@@ -1,3 +1,9 @@
+import { useEffect, useRef, useState } from 'react';
+
+import { Typography, useTheme } from '@mui/material';
+import Card from '@mui/material/Card';
+import Stack from '@mui/material/Stack';
+import dayjs, { Dayjs } from 'dayjs';
 import {
   CartesianGrid,
   Tooltip,
@@ -7,26 +13,22 @@ import {
   Area,
   ResponsiveContainer,
 } from 'recharts';
-import CustomChartTooltip from './CustomChartTooltip';
-import { useEffect, useRef, useState } from 'react';
-import Card from '@mui/material/Card';
-import { Typography } from '@mui/material';
-import Stack from '@mui/material/Stack';
-import { colorPalette } from '@assets/styles/color-palette';
-import CustomXAxisTick from '@components/Charts/CustomXAxisTick';
-import DatePicker from '@components/DataEntry/DatePicker';
-import ToggleButtons from '@components/DataEntry/ToggleButtons';
-import dayjs, { Dayjs } from 'dayjs';
-import ToggleCharts from '@components/Charts/ToggleCharts';
-import { formatNumber } from '@helpers/formatNumber';
+
+import CustomXAxisTick from '@/components/Charts/CustomXAxisTick';
+import ToggleCharts from '@/components/Charts/ToggleCharts';
+import DatePicker from '@/components/DataEntry/DatePicker';
+import ToggleButtons from '@/components/DataEntry/ToggleButtons';
+import { formatNumber } from '@/helpers/formatNumber';
 import {
   GraphPageChartData,
   useGraphPageChartData,
-} from '@services/api/use-graph-page-chart-data';
+} from '@/services/api/use-graph-page-chart-data';
 import {
   initialAllTime,
   useGraphPageChartParams,
-} from '@utils/hooks/use-graph-page-chart-params';
+} from '@/utils/hooks/use-graph-page-chart-params';
+
+import CustomChartTooltip from './CustomChartTooltip';
 
 export type GraphPageChartDataConfigObject<T> = Partial<
   Record<keyof GraphPageChartData[number], T>
@@ -80,6 +82,7 @@ export const AreaChart = ({
   changeDateOnScroll?: boolean;
 }) => {
   const { data } = useGraphPageChartData();
+  const theme = useTheme();
   const chartData = data || [];
   const {
     setFromDate,
@@ -299,14 +302,14 @@ export const AreaChart = ({
             tick={{ dx: -10 }}
             tickSize={0}
             axisLine={false}
-            stroke={colorPalette.fog.main}
+            stroke={theme.palette.fog.main}
           />
           <CartesianGrid stroke="#ccc" strokeDasharray="5" vertical={false} />
           <XAxis
             axisLine={false}
             tick={<CustomXAxisTick />}
             height={50}
-            stroke={colorPalette.fog.dark}
+            stroke={theme.palette.fog.dark}
             tickSize={20}
             dataKey="date"
             tickMargin={10}
@@ -316,7 +319,7 @@ export const AreaChart = ({
             <Area
               type="monotone"
               dataKey="totalTransactionAmount"
-              stroke={colorPalette.primary.main}
+              stroke={theme.palette.primary.main}
               fillOpacity={1}
               fill="url(#colorTotalTransactionAmount)"
             />
@@ -325,7 +328,7 @@ export const AreaChart = ({
             <Area
               type="monotone"
               dataKey="totalTransactionCount"
-              stroke={colorPalette.secondary.main}
+              stroke={theme.palette.secondary.main}
               fillOpacity={1}
               fill="url(#colorTotalTransactionCount)"
             />
@@ -334,7 +337,7 @@ export const AreaChart = ({
             <Area
               type="monotone"
               dataKey="solved"
-              stroke={colorPalette.ocean.dark}
+              stroke={theme.palette.ocean.dark}
               fillOpacity={1}
               fill="url(#colorSolved)"
             />
@@ -343,7 +346,7 @@ export const AreaChart = ({
             <Area
               type="monotone"
               dataKey="dailyUniqueReceivers"
-              stroke={colorPalette.error.light}
+              stroke={theme.palette.error.light}
               fillOpacity={1}
               fill="url(#colorDailyUniqueReceivers)"
             />
@@ -352,7 +355,7 @@ export const AreaChart = ({
             <Area
               type="monotone"
               dataKey="dailyUniqueSenders"
-              stroke={colorPalette.success.main}
+              stroke={theme.palette.success.main}
               fillOpacity={1}
               fill="url(#colorDailyUniqueSenders)"
             />
@@ -364,7 +367,7 @@ export const AreaChart = ({
           py: 3,
           mt: 3,
           ml: { xs: 0, xl: 6 },
-          backgroundColor: colorPalette.overlay.light,
+          backgroundColor: theme.palette.overlay,
           boxShadow: 'none',
           borderRadius: '16px',
         }}
@@ -379,31 +382,31 @@ export const AreaChart = ({
               isAreaChart: true,
               name: 'totalTransactionAmount',
               amount: `${Number(sum.totalTransactionAmount.toFixed())}`,
-              color: colorPalette.primary.main,
+              color: theme.palette.primary.main,
             },
             {
               title: 'Transactions Count',
               name: 'totalTransactionCount',
               amount: sum.totalTransactionCount,
-              color: colorPalette.secondary.main,
+              color: theme.palette.secondary.main,
             },
             {
               title: 'Number of Tasks',
               name: 'solved',
               amount: sum.solved,
-              color: colorPalette.ocean.dark,
+              color: theme.palette.ocean.dark,
             },
             {
               title: 'Unique Receivers',
               name: 'dailyUniqueReceivers',
               amount: sum.dailyUniqueReceivers,
-              color: colorPalette.error.light,
+              color: theme.palette.error.light,
             },
             {
               title: 'Unique Senders',
               name: 'dailyUniqueSenders',
               amount: sum.dailyUniqueSenders,
-              color: colorPalette.success.main,
+              color: theme.palette.success.main,
             },
           ]}
         />

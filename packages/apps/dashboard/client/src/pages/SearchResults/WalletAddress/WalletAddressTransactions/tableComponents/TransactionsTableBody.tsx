@@ -1,23 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import TableRow from '@mui/material/TableRow';
-import TableCell from '@mui/material/TableCell';
-import MuiTableBody from '@mui/material/TableBody';
-import Box from '@mui/material/Box';
-import IconButton from '@mui/material/IconButton';
-import CircularProgress from '@mui/material/CircularProgress';
+
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
-import AbbreviateClipboard from '@components/SearchResults/AbbreviateClipboard';
-import { colorPalette } from '@assets/styles/color-palette';
+import Box from '@mui/material/Box';
+import CircularProgress from '@mui/material/CircularProgress';
+import IconButton from '@mui/material/IconButton';
+import MuiTableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableRow from '@mui/material/TableRow';
 
-import { TransactionTableCellMethod } from '@pages/SearchResults/WalletAddress/WalletAddressTransactions/cells/TransactionTableCellMethod';
-import { TransactionTableCellValue } from '@pages/SearchResults/WalletAddress/WalletAddressTransactions/cells/TransactionTableCellValue';
-import { useTransactionDetails } from '@services/api/use-transaction-details';
-import { TransactionsTableBodyContainer } from '@pages/SearchResults/WalletAddress/WalletAddressTransactions/tableComponents/TransactionsTableBodyContainer';
-import { handleErrorMessage } from '@services/handle-error-message';
-import { useWalletSearch } from '@utils/hooks/use-wallet-search';
-import { useTransactionDetailsDto } from '@utils/hooks/use-transactions-details-dto';
+import AbbreviateClipboard from '@/components/SearchResults/AbbreviateClipboard';
+import { TransactionTableCellMethod } from '@/pages/SearchResults/WalletAddress/WalletAddressTransactions/cells/TransactionTableCellMethod';
+import { TransactionTableCellValue } from '@/pages/SearchResults/WalletAddress/WalletAddressTransactions/cells/TransactionTableCellValue';
+import { TransactionsTableBodyContainer } from '@/pages/SearchResults/WalletAddress/WalletAddressTransactions/tableComponents/TransactionsTableBodyContainer';
+import { useTransactionDetails } from '@/services/api/use-transaction-details';
+import { handleErrorMessage } from '@/services/handle-error-message';
+import { useTransactionDetailsDto } from '@/utils/hooks/use-transactions-details-dto';
+import { useWalletSearch } from '@/utils/hooks/use-wallet-search';
 
 export const TransactionsTableBody: React.FC = () => {
   const { data, isPending, isError, error } = useTransactionDetails();
@@ -80,8 +80,8 @@ export const TransactionsTableBody: React.FC = () => {
             key={idx}
             sx={{
               backgroundColor: expandedRows[idx]
-                ? colorPalette.table.selected
-                : colorPalette.table.main,
+                ? 'table.selected'
+                : 'table.main',
             }}
           >
             <TableCell>
@@ -127,7 +127,7 @@ export const TransactionsTableBody: React.FC = () => {
             <TableRow
               key={`${idx}-${internalIdx}`}
               sx={{
-                backgroundColor: colorPalette.table.secondary,
+                bgcolor: 'table.secondary',
                 display: expandedRows[idx] ? 'table-row' : 'none',
                 transition: 'all 1s ease',
               }}

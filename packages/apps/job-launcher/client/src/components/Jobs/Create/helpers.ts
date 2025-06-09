@@ -101,7 +101,6 @@ export const mapAudinoFormValues = (
     userGuide: audinoRequest?.userGuide || '',
     accuracyTarget: audinoRequest?.accuracyTarget || 50,
 
-    audioDuration: audinoRequest?.audioDuration || 0,
     segmentDuration: audinoRequest?.segmentDuration || 0,
   };
 };

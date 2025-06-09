@@ -1,12 +1,11 @@
 import { Box, Typography } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 
-import Loader from '@components/Loader';
+import Loader from '@/components/Loader';
+import { LeaderBoardData } from '@/services/api/use-leaderboard-details';
+import { handleErrorMessage } from '@/services/handle-error-message';
+import { useIsMobile } from '@/utils/hooks/use-breakpoints';
 
-import { LeaderBoardData } from '@services/api/use-leaderboard-details';
-import { handleErrorMessage } from '@services/handle-error-message';
-import { useIsMobile } from '@utils/hooks/use-breakpoints';
-import { colorPalette } from '@assets/styles/color-palette';
 import useDataGrid from '../hooks/useDataGrid';
 
 export const DataGridWrapper = ({
@@ -89,7 +88,7 @@ export const DataGridWrapper = ({
             p: 2,
             overflow: 'visible !important',
             textTransform: 'uppercase',
-            bgcolor: colorPalette.whiteSolid,
+            bgcolor: 'white.light',
           },
           '& .MuiDataGrid-row--borderBottom .MuiDataGrid-withBorderColor': {
             borderColor: 'transparent',

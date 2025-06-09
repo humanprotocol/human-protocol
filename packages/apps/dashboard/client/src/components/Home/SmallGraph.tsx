@@ -1,5 +1,10 @@
 import { Fragment } from 'react';
 
+import { useTheme } from '@mui/material';
+import Box from '@mui/material/Box';
+import Card from '@mui/material/Card';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 import {
   AreaChart,
   Area,
@@ -10,16 +15,11 @@ import {
   ResponsiveContainer,
   TooltipProps,
 } from 'recharts';
-import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import Stack from '@mui/material/Stack';
-import ToggleButtons from '@components/DataEntry/ToggleButtons';
-import Typography from '@mui/material/Typography';
 
-import { colorPalette } from '@assets/styles/color-palette';
-import { formatDate } from '@helpers/formatDate';
-import { formatNumber } from '@helpers/formatNumber';
-import { useIsMobile } from '@utils/hooks/use-breakpoints';
+import ToggleButtons from '@/components/DataEntry/ToggleButtons';
+import { formatDate } from '@/helpers/formatDate';
+import { formatNumber } from '@/helpers/formatNumber';
+import { useIsMobile } from '@/utils/hooks/use-breakpoints';
 
 const CustomSmallChartTooltip = ({
   payload,
@@ -30,14 +30,15 @@ const CustomSmallChartTooltip = ({
       <Card
         elevation={0}
         sx={{
-          border: `1px solid ${colorPalette.fog.light}`,
+          border: '1px solid',
+          borderColor: 'fog.light',
           borderRadius: 2,
         }}
       >
         <Box px={1} py={0}>
           {payload?.map((elem) => (
             <Fragment key={elem.name}>
-              <Typography variant="Tooltip">
+              <Typography variant="tooltip">
                 {formatDate(elem.payload.date, 'MMMM DD, YYYY')}
               </Typography>
               <Typography fontWeight={500} variant="body1">
@@ -67,7 +68,6 @@ const GraphSettings = ({ title }: { title: string }) => (
     alignItems="center"
     mt={{ xs: 1.5, md: 0 }}
     mb={{ xs: 0, md: 2 }}
-    mr={{ xs: 0, md: 4 }}
     gap={2}
     flexWrap="wrap"
   >
@@ -80,6 +80,7 @@ const GraphSettings = ({ title }: { title: string }) => (
 
 const SmallGraph = ({ title, graphData }: SmallGraphProps) => {
   const isMobile = useIsMobile();
+  const theme = useTheme();
 
   return (
     <>
@@ -107,7 +108,7 @@ const SmallGraph = ({ title, graphData }: SmallGraphProps) => {
             axisLine={false}
             interval="preserveStartEnd"
             dataKey="date"
-            stroke={colorPalette.fog.main}
+            stroke={theme.palette.fog.main}
             tickFormatter={(value) => formatDate(value, 'DD MMMM')}
             tick={{ dy: 10 }}
             tickSize={0}
@@ -121,11 +122,11 @@ const SmallGraph = ({ title, graphData }: SmallGraphProps) => {
             dataKey="value"
             tick={{ dx: -10 }}
             tickSize={0}
-            stroke={colorPalette.fog.main}
+            stroke={theme.palette.fog.main}
             tickFormatter={formatNumber}
           />
           <CartesianGrid
-            stroke={colorPalette.fog.light}
+            stroke={theme.palette.fog.light}
             strokeDasharray={1}
             vertical={false}
           />
@@ -133,7 +134,7 @@ const SmallGraph = ({ title, graphData }: SmallGraphProps) => {
           <Area
             type="monotone"
             dataKey="value"
-            stroke={colorPalette.secondary.main}
+            stroke={theme.palette.secondary.main}
             fill="url(#value)"
           />
         </AreaChart>

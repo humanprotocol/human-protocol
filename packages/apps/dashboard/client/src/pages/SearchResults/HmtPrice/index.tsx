@@ -1,6 +1,6 @@
 import { Typography, Stack } from '@mui/material';
 
-import { useHMTPrice } from '@services/api/use-hmt-price';
+import { useHMTPrice } from '@/services/api/use-hmt-price';
 
 const HmtPrice = () => {
   const { data, isError, isPending, isSuccess } = useHMTPrice();

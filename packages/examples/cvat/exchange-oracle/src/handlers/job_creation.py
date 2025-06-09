@@ -2611,7 +2611,7 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
             tuple(map(int, (roi_cx - bbox.w / 2, roi_cy - bbox.h / 2))),
             tuple(map(int, (roi_cx + bbox.w / 2, roi_cy + bbox.h / 2))),
             self.roi_embedded_bbox_color,
-            2,  # TODO: maybe improve line thickness
+            1,
             cv2.LINE_4,
         )
 

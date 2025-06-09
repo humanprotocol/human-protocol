@@ -88,7 +88,6 @@ export const createAudinoJob = async (
     userGuide: data.userGuide,
     type: data.type,
     qualifications: data.qualifications,
-    audioDuration: Number(data.audioDuration),
     segmentDuration: Number(data.segmentDuration),
   };
 

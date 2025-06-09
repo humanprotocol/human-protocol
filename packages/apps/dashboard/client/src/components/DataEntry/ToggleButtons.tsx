@@ -1,13 +1,14 @@
-import ToggleButton from '@mui/material/ToggleButton';
-import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material';
+import Button from '@mui/material/Button';
+import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import dayjs from 'dayjs';
+
 import {
   TIME_PERIOD_OPTIONS,
   TimePeriod,
   useGraphPageChartParams,
-} from '@utils/hooks/use-graph-page-chart-params';
-import dayjs from 'dayjs';
+} from '@/utils/hooks/use-graph-page-chart-params';
 
 export const StyledToggleButtonGroup = styled(ToggleButtonGroup)(
   ({ theme }) => ({
@@ -15,6 +16,7 @@ export const StyledToggleButtonGroup = styled(ToggleButtonGroup)(
     '.MuiToggleButtonGroup-grouped': {
       border: 'none',
       borderRadius: 4,
+      minWidth: 'unset',
       width: 47,
       height: 30,
       color: theme.palette.primary.main,
@@ -42,15 +44,14 @@ const ToggleButtons = () => {
       exclusive
     >
       {TIME_PERIOD_OPTIONS.map((elem) => (
-        <ToggleButton
+        <Button
           key={elem.name}
+          size="small"
+          component={ToggleButton}
           onClick={() => setTimePeriod(elem)}
           selected={checkIfSelected(elem)}
           value={elem.name}
           sx={{
-            '.MuiTypography-root': {
-              wordBreak: 'normal',
-            },
             '&.Mui-selected': {
               backgroundColor: 'primary.main',
               color: 'white.main',
@@ -60,8 +61,8 @@ const ToggleButtons = () => {
             },
           }}
         >
-          <Typography variant="Button Small">{elem.name}</Typography>
-        </ToggleButton>
+          {elem.name}
+        </Button>
       ))}
     </StyledToggleButtonGroup>
   );

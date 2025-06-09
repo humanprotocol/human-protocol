@@ -1,0 +1,229 @@
+name: human-protocol-local-dev
+
+x-service-default-config:
+  restart: &default-restart unless-stopped
+  logging: &default-logging
+    options:
+      max-size: 10m
+      max-file: 3
+
+x-hardcoded-vars:
+  graph_db_user: &graph_db_user graph-node
+  graph_db_passwrod: &graph_db_passwrod let-me-in
+  graph_db_name: &graph_db_name graph-node
+
+x-general-env-variables:
+  postgres_user: &postgres_user ${POSTGRES_USER:-default}
+  postgres_password: &postgres_password ${POSTGRES_PASSWORD:-qwerty}
+  # MINIO VARS
+  minio_port: &minio_port ${MINIO_PORT:-9000}
+  minio_console_port: &minio_console_port ${MINIO_CONSOLE_PORT:-9001}
+  minio_root_user: &minio_root_user ${MINIO_ROOT_USER:-minioadmin}
+  minio_root_password: &minio_root_password ${MINIO_ROOT_PASSWORD:-minioadmin}
+  minio_services_access_key: &minio_services_access_key ${MINIO_SERVICES_ACCESS_KEY:-human-oracle}
+  minio_services_secret_key: &minio_services_secret_key ${MINIO_SERVICES_SECRET_KEY:-human-oracle-s3-secret}
+  # BUCKET NAMES
+  bucket_name_manifests: &bucket_name_manifests ${BUCKET_NAME_MANIFESTS:-manifests}
+  bucket_name_datasets: &bucket_name_datasets ${BUCKET_NAME_DATASETS:-datasets}
+  bucket_name_rep_o: &bucket_name_rep_o ${BUCKET_NAME_REPUTATION_ORACLE:-reputation-oracle}
+  bucket_name_fortune: &bucket_name_fortune ${BUCKEN_NAME_FORTUNE:-fortune}
+
+services:
+  blockchain-node:
+    container_name: hp-dev-blockchain-node
+    image: human-protocol/hardhat-blockchain-node
+    pull_policy: build
+    restart: *default-restart
+    logging:
+      <<: *default-logging
+    build: 
+      context: ../
+      dockerfile: packages/core/Dockerfile.local
+    healthcheck:
+      test: yarn local:readiness
+      interval: 15s
+      timeout: 30s
+      retries: 0
+    networks:
+      - human_protocol_web3
+    ports:
+      - name: node-port
+        target: 8545
+        published: ${BLOCKCHAIN_NODE_PORT:-8545}
+
+  ipfs:
+    container_name: hp-dev-ipfs
+    image: ipfs/kubo:v0.14.0
+    restart: *default-restart
+    logging:
+      <<: *default-logging
+    healthcheck:
+      test: ["CMD-SHELL", "ipfs id > /dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - human_protocol_web3
+    ports:
+      - name: ipfs-port
+        target: 5001
+        published: ${IPFS_PORT:-5010}
+    volumes:
+      - ipfs-data:/data/ipfs:Z
+
+  graph-node-db:
+    container_name: hp-dev-graph-node-db
+    image: postgres:latest
+    restart: *default-restart
+    logging:
+      <<: *default-logging
+    networks:
+      - human_protocol_web3
+    command:
+      [
+        "postgres",
+        "-cshared_preload_libraries=pg_stat_statements",
+        "-cmax_connections=200"
+      ]
+    healthcheck:
+      test: ["CMD", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - graph-node-db-data:/var/lib/postgresql/data:Z
+    environment:
+      POSTGRES_USER: *graph_db_user
+      POSTGRES_PASSWORD: *graph_db_passwrod
+      POSTGRES_DB: *graph_db_name
+      POSTGRES_INITDB_ARGS: "-E UTF8 --locale=C"
+
+  graph-node:
+    container_name: hp-dev-graph-node
+    # In case of issues on Mac M1 rebuild the image for it locally
+    # https://github.com/graphprotocol/graph-node/blob/master/docker/README.md#running-graph-node-on-an-macbook-m1
+    image: graphprotocol/graph-node
+    restart: *default-restart
+    logging:
+      <<: *default-logging
+    networks:
+      - human_protocol_web3
+    ports:
+      - '8000:8000'
+      - '8001:8001'
+      - '8020:8020'
+      - '8030:8030'
+      - '8040:8040'
+    depends_on:
+      - blockchain-node
+      - ipfs
+      - graph-node-db
+    environment:
+      postgres_host: graph-node-db
+      postgres_user: *graph_db_user
+      postgres_pass: *graph_db_passwrod
+      postgres_db: *graph_db_name
+      ipfs: ipfs:5001
+      ethereum: localhost:http://blockchain-node:8545
+      GRAPH_LOG: info
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 8000 || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  postgres:
+    container_name: hp-dev-postgres
+    image: postgres:16
+    restart: *default-restart
+    logging:
+      <<: *default-logging
+    ports:
+      - name: instance_port
+        target: 5432
+        # default 5432 is used by CVAT installation
+        published: ${POSTGRES_PORT:-5433}
+    volumes:
+      - ./initdb:/docker-entrypoint-initdb.d
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: *postgres_user
+      POSTGRES_PASSWORD: *postgres_password
+    healthcheck:
+      test: ["CMD", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    container_name: hp-dev-minio
+    image: minio/minio:RELEASE.2024-12-18T13-15-44Z
+    restart: *default-restart
+    logging:
+      <<: *default-logging
+    entrypoint: 'sh'
+    ports:
+      - name: instance_port
+        target: 9000
+        published: *minio_port
+      - name: console_port
+        target: 9001
+        published: *minio_console_port
+    volumes:
+      - minio-data:/data
+    environment:
+      MINIO_ROOT_USER: *minio_root_user
+      MINIO_ROOT_PASSWORD: *minio_root_password
+    command:
+      -c "minio server /data --console-address ':9001'"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+
+  minio-client:
+    container_name: hp-dev-minio-client
+    image: minio/mc:RELEASE.2024-11-21T17-21-54Z
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      MINIO_ROOT_USER: *minio_root_user
+      MINIO_ROOT_PASSWORD: *minio_root_password
+      SERVICES_ACCESS_KEY: *minio_services_access_key
+      SERVICES_SECRET_KEY: *minio_services_secret_key
+      BUCKET_MANIFESTS: *bucket_name_manifests
+      BUCKET_DATASETS: *bucket_name_datasets
+      BUCKET_REPUTATION_ORACLE: *bucket_name_rep_o
+      BUCKET_FORTUNE: *bucket_name_fortune
+    entrypoint: >
+      /bin/sh -c "
+        mc alias set myminio http://minio:9000 $$MINIO_ROOT_USER $$MINIO_ROOT_PASSWORD
+
+        mc admin user add myminio $$SERVICES_ACCESS_KEY $$SERVICES_SECRET_KEY
+        mc admin policy attach myminio readwrite --user=$$SERVICES_ACCESS_KEY
+
+        mc mb myminio/$$BUCKET_MANIFESTS;
+        mc anonymous set public myminio/$$BUCKET_MANIFESTS;
+
+        mc mb myminio/$$BUCKET_DATASETS;
+        mc anonymous set public myminio/$$BUCKET_DATASETS;
+
+        mc mb myminio/$$BUCKET_REPUTATION_ORACLE;
+        mc anonymous set public myminio/$$BUCKET_REPUTATION_ORACLE;
+
+        mc mb myminio/$$BUCKET_FORTUNE;
+        mc anonymous set public myminio/$$BUCKET_FORTUNE;
+      "
+
+volumes:
+  ipfs-data:
+  graph-node-db-data:
+  postgres-data:
+  minio-data:
+
+networks:
+  human_protocol_web3:
+    name: human-protocol-web3

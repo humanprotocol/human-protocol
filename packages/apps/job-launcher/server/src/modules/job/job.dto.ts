@@ -247,11 +247,6 @@ export class JobAudinoDto extends JobDto {
   @IsEnumCaseInsensitive(AudinoJobType)
   public type: AudinoJobType;
 
-  @ApiProperty({ name: 'audio_duration' })
-  @IsNumber()
-  @IsPositive()
-  public audioDuration: number;
-
   @ApiProperty({ name: 'segment_duration' })
   @IsNumber()
   @IsPositive()

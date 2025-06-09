@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ethers } from 'ethers';
 
+import { ChainId } from './enums';
 import {
   ContractExecutionError,
   EthereumError,
@@ -66,7 +67,7 @@ export const getSubgraphUrl = (networkData: NetworkData) => {
       SUBGRAPH_API_KEY_PLACEHOLDER,
       process.env.SUBGRAPH_API_KEY
     );
-  } else {
+  } else if (networkData.chainId !== ChainId.LOCALHOST) {
     // eslint-disable-next-line no-console
     console.warn(WarnSubgraphApiKeyNotProvided);
   }

@@ -19,7 +19,7 @@ COPY packages/sdk ./packages/sdk
 
 RUN yarn install
 
-# Copy base TS config that is required to build pacakges
+# Copy base TS config that is required to build packages
 COPY tsconfig.base.json ./
 # Build libs
 RUN yarn build:libs

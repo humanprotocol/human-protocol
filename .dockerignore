@@ -23,3 +23,6 @@ scripts
 .dockerignore
 **/Dockerfile*
 **/docker-compose*
+
+# Local .env files
+**/.env.local

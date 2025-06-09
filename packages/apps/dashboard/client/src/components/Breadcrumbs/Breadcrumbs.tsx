@@ -1,11 +1,10 @@
 import { FC } from 'react';
 
-import { Link as RouterLink } from 'react-router-dom';
-import Link from '@mui/material/Link';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+import Box from '@mui/material/Box';
+import Link from '@mui/material/Link';
+import Typography from '@mui/material/Typography';
+import { Link as RouterLink } from 'react-router-dom';
 
 const Breadcrumbs: FC<{ title?: string }> = ({ title }) => {
   return (

@@ -145,6 +145,7 @@ export class JobService {
     const whitelisted = await this.whitelistService.isUserWhitelisted(user.id);
     if (!whitelisted) {
       if (
+        !user.stripeCustomerId ||
         !(await this.paymentService.getDefaultPaymentMethod(
           user.stripeCustomerId,
         ))
@@ -368,7 +369,7 @@ export class JobService {
       manifestHash: jobEntity.manifestHash,
     };
 
-    await escrowClient.setup(jobEntity.escrowAddress, escrowConfig, {
+    await escrowClient.setup(jobEntity.escrowAddress!, escrowConfig, {
       gasPrice: await this.web3Service.calculateGasPrice(jobEntity.chainId),
     });
 
@@ -403,7 +404,7 @@ export class JobService {
       jobEntity.fundAmount.toString(),
       token.decimals,
     );
-    await escrowClient.fund(jobEntity.escrowAddress, weiAmount, {
+    await escrowClient.fund(jobEntity.escrowAddress!, weiAmount, {
       gasPrice: await this.web3Service.calculateGasPrice(jobEntity.chainId),
     });
 
@@ -508,7 +509,7 @@ export class JobService {
       const jobs = entities.map((job) => {
         return {
           jobId: job.id,
-          escrowAddress: job.escrowAddress,
+          escrowAddress: job.escrowAddress ?? undefined,
           network: NETWORKS[job.chainId as ChainId]!.title,
           fundAmount: job.fundAmount,
           currency: job.token as EscrowFundToken,
@@ -594,12 +595,8 @@ export class JobService {
       userId,
     );
 
-    if (!jobEntity) {
+    if (!jobEntity || !jobEntity.escrowAddress) {
       throw new NotFoundError(ErrorJob.NotFound);
-    }
-
-    if (!jobEntity.escrowAddress) {
-      throw new NotFoundError(ErrorJob.ResultNotFound);
     }
 
     if (jobEntity.requestType === FortuneJobType.FORTUNE) {
@@ -657,7 +654,7 @@ export class JobService {
     const signer = this.web3Service.getSigner(chainId);
     const escrowClient = await EscrowClient.build(signer);
 
-    const escrowStatus = await escrowClient.getStatus(escrowAddress);
+    const escrowStatus = await escrowClient.getStatus(escrowAddress!);
     if (
       escrowStatus === EscrowStatus.Complete ||
       escrowStatus === EscrowStatus.Paid ||
@@ -666,12 +663,12 @@ export class JobService {
       throw new ConflictError(ErrorEscrow.InvalidStatusCancellation);
     }
 
-    const balance = await escrowClient.getBalance(escrowAddress);
+    const balance = await escrowClient.getBalance(escrowAddress!);
     if (balance === 0n) {
       throw new ConflictError(ErrorEscrow.InvalidBalanceCancellation);
     }
 
-    return escrowClient.cancel(escrowAddress, {
+    return escrowClient.cancel(escrowAddress!, {
       gasPrice: await this.web3Service.calculateGasPrice(chainId),
     });
   }

@@ -1,16 +1,19 @@
-import TableCell from '@mui/material/TableCell';
-import MuiTableBody from '@mui/material/TableBody';
 import { useEffect } from 'react';
-import { handleErrorMessage } from '@services/handle-error-message';
-import CircularProgress from '@mui/material/CircularProgress';
-import { EscrowsTableBodyContainer } from '@pages/SearchResults/RoleDetails/RoleDetailsEscrows/tableComponents/EscrowsTableBodyContainer';
-import { useEscrowDetails } from '@services/api/use-escrows-details';
-import { AddressDetailsOperator } from '@services/api/use-address-details';
-import { useEscrowDetailsDto } from '@utils/hooks/use-escrows-details-dto';
-import { useWalletSearch } from '@utils/hooks/use-wallet-search';
-import { useNavigate } from 'react-router-dom';
+
 import { Stack, TableRow } from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
 import Link from '@mui/material/Link';
+import MuiTableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import { useNavigate } from 'react-router-dom';
+
+import { EscrowsTableBodyContainer } from '@/pages/SearchResults/RoleDetails/RoleDetailsEscrows/tableComponents/EscrowsTableBodyContainer';
+import { AddressDetailsOperator } from '@/services/api/use-address-details';
+import { useEscrowDetails } from '@/services/api/use-escrows-details';
+import { handleErrorMessage } from '@/services/handle-error-message';
+import { useEscrowDetailsDto } from '@/utils/hooks/use-escrows-details-dto';
+import { useWalletSearch } from '@/utils/hooks/use-wallet-search';
+
 
 export const EscrowsTableBody = ({
   role,

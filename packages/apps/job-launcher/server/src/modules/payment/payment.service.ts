@@ -80,7 +80,7 @@ export class PaymentService {
     // Creates a new Stripe customer if the user does not already have one.
     // It then initiates a SetupIntent to link a payment method (card) to the customer.
     let setupIntent: Stripe.Response<Stripe.SetupIntent>;
-    let customerId: string = user.stripeCustomerId;
+    let customerId = user.stripeCustomerId;
 
     if (!user.stripeCustomerId) {
       try {
@@ -101,7 +101,7 @@ export class PaymentService {
         automatic_payment_methods: {
           enabled: true,
         },
-        customer: customerId,
+        customer: customerId ?? undefined,
       });
     } catch (error) {
       this.logger.log(error.message, PaymentService.name);
@@ -162,6 +162,10 @@ export class PaymentService {
   ): Promise<string> {
     const { amount, currency, paymentMethodId } = dto;
     const amountInCents = Math.ceil(mul(amount, 100));
+
+    if (!user.stripeCustomerId) {
+      throw new NotFoundError(ErrorPayment.CustomerNotFound);
+    }
 
     const invoice = await this.createInvoice(
       user.stripeCustomerId,
@@ -453,8 +457,7 @@ export class PaymentService {
     const currency = PaymentCurrency.USD;
 
     const user = await this.userRepository.findById(job.userId);
-    if (!user) {
-      this.logger.log(ErrorPayment.CustomerNotFound, PaymentService.name);
+    if (!user || !user.stripeCustomerId) {
       throw new NotFoundError(ErrorPayment.CustomerNotFound);
     }
 
@@ -571,6 +574,7 @@ export class PaymentService {
 
     // Check if the payment method is the default one and in use for the user
     if (
+      user.stripeCustomerId &&
       paymentMethod.id ===
         (await this.getDefaultPaymentMethod(user.stripeCustomerId)) &&
       (await this.isPaymentMethodInUse(user.id))
@@ -657,6 +661,9 @@ export class PaymentService {
   }
 
   async changeDefaultPaymentMethod(user: UserEntity, cardId: string) {
+    if (!user.stripeCustomerId) {
+      throw new NotFoundError(ErrorPayment.CustomerNotFound);
+    }
     // Update the user's default payment method in Stripe
     return this.stripe.customers.update(user.stripeCustomerId, {
       invoice_settings: { default_payment_method: cardId },
@@ -705,8 +712,8 @@ export class PaymentService {
         status: payment.status,
         transaction: payment.transaction,
         createdAt: payment.createdAt.toISOString(),
-        jobId: payment.job ? payment.jobId : undefined,
-        escrowAddress: payment.job ? payment.job.escrowAddress : undefined,
+        jobId: payment.jobId ?? undefined,
+        escrowAddress: payment.job?.escrowAddress ?? undefined,
       };
     });
 

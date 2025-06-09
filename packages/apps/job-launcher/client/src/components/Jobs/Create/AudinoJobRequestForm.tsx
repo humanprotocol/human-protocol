@@ -88,7 +88,6 @@ export const AudinoJobRequestForm = () => {
     gtPath,
     userGuide,
     accuracyTarget,
-    audioDuration,
     segmentDuration,
   }: ReturnType<typeof mapAudinoFormValues>) => {
     updateJobRequest({
@@ -116,7 +115,6 @@ export const AudinoJobRequestForm = () => {
         },
         userGuide,
         accuracyTarget,
-        audioDuration,
         segmentDuration,
       },
     });
@@ -599,36 +597,6 @@ export const AudinoJobRequestForm = () => {
                 </Grid>
               </Grid>
               <Grid item container xs={12} spacing={2}>
-                <Grid item xs={12} sm={12} md={6}>
-                  <FormControl fullWidth>
-                    <TextField
-                      name="audioDuration"
-                      value={values.audioDuration}
-                      onChange={(e) =>
-                        setFieldValue('audioDuration', e.target.value)
-                      }
-                      onBlur={handleBlur}
-                      placeholder="Audio duration"
-                      label="Audio duration (seconds)"
-                      error={
-                        touched.audioDuration && Boolean(errors.audioDuration)
-                      }
-                      helperText={errors.audioDuration}
-                      InputProps={{
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <Tooltip title="This field should contain total audio duration in seconds. This value will be used later to calculate job bounty">
-                              <HelpOutlineIcon
-                                color="secondary"
-                                sx={{ cursor: 'pointer' }}
-                              />
-                            </Tooltip>
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                  </FormControl>
-                </Grid>
                 <Grid item xs={12} sm={12} md={6}>
                   <FormControl fullWidth>
                     <TextField

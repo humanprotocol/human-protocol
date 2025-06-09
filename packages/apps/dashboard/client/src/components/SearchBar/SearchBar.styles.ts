@@ -1,4 +1,4 @@
-import { colorPalette } from '@assets/styles/color-palette';
+import { Theme } from '@mui/material/styles';
 
 export const endAdornmentInputAdornmentSx = {
   display: 'flex',
@@ -7,11 +7,11 @@ export const endAdornmentInputAdornmentSx = {
   gap: '0.7rem',
 };
 
-export const startAdornmentInputAdornmentSx = {
+export const startAdornmentInputAdornmentSx = (theme: Theme) => ({
   height: '100%',
-  backgroundColor: `${colorPalette.white}`,
+  backgroundColor: theme.palette.white.contrastText,
   marginLeft: '1rem',
-};
+});
 
 export const gridSx = {
   display: 'flex',
@@ -22,8 +22,8 @@ export const gridSx = {
   overflow: 'hidden',
 };
 
-export const muiSelectSx = () => ({
-  backgroundColor: `${colorPalette.white}`,
+export const muiSelectSx = (theme: Theme) => ({
+  backgroundColor: theme.palette.white.contrastText,
   width: 'unset',
   fontSize: '16px',
   boxShadow: 'none',
@@ -35,7 +35,7 @@ export const muiSelectSx = () => ({
   '& .MuiSelect-select': {
     padding: 0,
     paddingRight: '24px',
-    backgroundColor: `${colorPalette.white}`,
+    backgroundColor: theme.palette.white.contrastText,
     border: 0,
   },
 });
@@ -46,15 +46,18 @@ export const menuItemSx = (isSelected: boolean) => ({
   backgroundColor: isSelected ? 'rgba(50, 10, 141, 0.08)' : 'inherit',
 });
 
-export const muiTextFieldInputPropsSx = (borderColor: string) => ({
+export const muiTextFieldInputPropsSx = (
+  theme: Theme,
+  borderColor: string
+) => ({
   width: '100%',
   height: '100%',
   borderRadius: '10px',
   border: `1px solid ${borderColor}`,
-  backgroundColor: `${colorPalette.white}`,
+  backgroundColor: theme.palette.white.contrastText,
   fontSize: 'inherit',
   'input::placeholder': {
-    color: `${colorPalette.sky.main}`,
+    color: theme.palette.sky.main,
     opacity: 1,
   },
   padding: '0 5px',

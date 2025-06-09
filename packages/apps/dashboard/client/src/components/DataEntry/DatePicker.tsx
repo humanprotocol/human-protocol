@@ -1,3 +1,6 @@
+import { Dispatch, SetStateAction, useState } from 'react';
+
+import Typography from '@mui/material/Typography';
 import {
   DatePickerProps,
   LocalizationProvider,
@@ -5,15 +8,12 @@ import {
 } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker as DatePickerMui } from '@mui/x-date-pickers/DatePicker';
-import type { Dayjs } from 'dayjs';
-import { Dispatch, SetStateAction, useState } from 'react';
-import Typography from '@mui/material/Typography';
 import {
   BaseSingleInputFieldProps,
   DateValidationError,
   FieldSection,
 } from '@mui/x-date-pickers/models';
-import { colorPalette } from '@assets/styles/color-palette';
+import type { Dayjs } from 'dayjs';
 
 interface CustomDateFieldProps
   extends UseDateFieldProps<Dayjs, false>,
@@ -41,7 +41,8 @@ const CustomDateField = ({
       aria-label={ariaLabel}
       onClick={() => setOpen((prevState) => !prevState)}
       sx={{
-        borderBottom: `1px solid ${colorPalette.primary.main}`,
+        borderBottom: '1px solid',
+        borderColor: 'primary.main',
         lineHeight: 2.5,
         '&:hover': {
           cursor: 'pointer',

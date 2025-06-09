@@ -1,10 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
-import { httpService } from '../http-service';
+
+import { validateResponse } from '@/services/validate-response';
+import { useTransactionDetailsDto } from '@/utils/hooks/use-transactions-details-dto';
+import { useWalletSearch } from '@/utils/hooks/use-wallet-search';
+
 import { apiPaths } from '../api-paths';
-import { useWalletSearch } from '@utils/hooks/use-wallet-search';
-import { useTransactionDetailsDto } from '@utils/hooks/use-transactions-details-dto';
-import { validateResponse } from '@services/validate-response';
+import { httpService } from '../http-service';
 
 const internalTransactionSchema = z.object({
   from: z.string(),

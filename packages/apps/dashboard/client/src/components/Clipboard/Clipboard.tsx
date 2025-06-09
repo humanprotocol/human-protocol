@@ -1,11 +1,12 @@
 import { useState } from 'react';
 
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import Card from '@mui/material/Card';
+import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import CustomTooltip from '@components/CustomTooltip';
+
+import CustomTooltip from '@/components/CustomTooltip';
 
 interface ClipboardProps {
   value: string;

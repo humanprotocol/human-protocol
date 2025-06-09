@@ -1,9 +1,7 @@
 import { FC, useCallback, useEffect, useState } from 'react';
-import clsx from 'clsx';
-import { useNavigate } from 'react-router-dom';
-import IconButton from '@mui/material/IconButton';
-import SearchIcon from '@mui/icons-material/Search';
+
 import CloseIcon from '@mui/icons-material/Close';
+import SearchIcon from '@mui/icons-material/Search';
 import {
   InputAdornment,
   TextField,
@@ -12,14 +10,21 @@ import {
   Grid,
   MenuItem,
   Box,
-  Tooltip,
   CircularProgress,
+  useTheme,
 } from '@mui/material';
-import { colorPalette } from '@assets/styles/color-palette';
-import { useFilteredNetworks } from '@utils/hooks/use-filtered-networks';
-import { useIsMobile } from '@utils/hooks/use-breakpoints';
-import { NetworkIcon } from '@components/NetworkIcon';
-import { useWalletSearch } from '@utils/hooks/use-wallet-search';
+import IconButton from '@mui/material/IconButton';
+import clsx from 'clsx';
+import { useNavigate } from 'react-router-dom';
+
+import CustomTooltip from '@/components/CustomTooltip';
+import { NetworkIcon } from '@/components/NetworkIcon';
+import { useIsMobile } from '@/utils/hooks/use-breakpoints';
+import { useFilteredNetworks } from '@/utils/hooks/use-filtered-networks';
+import { useWalletSearch } from '@/utils/hooks/use-wallet-search';
+
+import { isValidEVMAddress } from '../../helpers/isValidEVMAddress';
+
 import {
   endAdornmentInputAdornmentSx,
   startAdornmentInputAdornmentSx,
@@ -29,7 +34,6 @@ import {
   muiTextFieldSx,
   gridSx,
 } from './SearchBar.styles';
-import { isValidEVMAddress } from '../../helpers/isValidEVMAddress';
 
 interface SearchBarProps {
   className?: string;
@@ -47,6 +51,7 @@ const SearchBar: FC<SearchBarProps> = ({
   const [inputValue, setInputValue] = useState<string>(initialInputValue);
   const [error, setError] = useState<string | null>(null);
   const [focus, setFocus] = useState<boolean>(false);
+  const theme = useTheme();
 
   useEffect(() => {
     setInputValue(filterParams.address);
@@ -138,17 +143,18 @@ const SearchBar: FC<SearchBarProps> = ({
         sx={muiTextFieldSx(isMobile)}
         InputProps={{
           sx: muiTextFieldInputPropsSx(
-            focus ? colorPalette.secondary.main : colorPalette.skyOpacity
+            theme,
+            focus ? theme.palette.secondary.main : theme.palette.sky.dark
           ),
           startAdornment: (
             <InputAdornment
               position="start"
-              sx={startAdornmentInputAdornmentSx}
+              sx={startAdornmentInputAdornmentSx(theme)}
             >
               <MuiSelect<number>
                 value={filterParams.chainId}
                 displayEmpty
-                sx={muiSelectSx()}
+                sx={muiSelectSx(theme)}
                 onChange={handleSelectChange}
                 renderValue={() =>
                   filterParams.chainId === -1
@@ -176,30 +182,31 @@ const SearchBar: FC<SearchBarProps> = ({
               <IconButton onClick={handleClearClick} edge="end">
                 <CloseIcon
                   sx={{
-                    color: focus
-                      ? colorPalette.sky.main
-                      : colorPalette.primary.main,
+                    color: focus ? 'sky.main' : 'primary.main',
                   }}
                 />
               </IconButton>
-              <Tooltip title={error || ''} arrow enterTouchDelay={0}>
+              <CustomTooltip title={error || ''} arrow>
                 <IconButton
-                  className="search-button"
                   type="submit"
                   aria-label="search"
                   sx={{
+                    bgcolor: 'secondary.main',
+                    borderRadius: '8px',
                     p: 0.5,
+                    '&:hover': {
+                      bgcolor: 'primary.main',
+                    },
                   }}
                 >
                   <SearchIcon
                     sx={{
-                      color: error
-                        ? colorPalette.error.main
-                        : colorPalette.white,
+                      fontSize: '32px',
+                      color: error ? 'error.main' : 'white.main',
                     }}
                   />
                 </IconButton>
-              </Tooltip>
+              </CustomTooltip>
             </InputAdornment>
           ),
         }}
