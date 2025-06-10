@@ -905,12 +905,10 @@ export class JobService {
   }
 
   public async cancelJob(jobEntity: JobEntity): Promise<void> {
-    console.log('Cancelling job');
     const refund = await EscrowUtils.getCancellationRefund(
       jobEntity.chainId,
-      jobEntity.escrowAddress,
+      jobEntity.escrowAddress!,
     );
-    console.log(refund);
 
     if (!refund || !refund.amount) {
       throw new ConflictError(ErrorJob.NoRefundFound);

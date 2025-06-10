@@ -290,7 +290,7 @@ export class CronJobService {
             const baseWebhook = {
               escrowAddress: jobEntity.escrowAddress,
               chainId: jobEntity.chainId,
-              eventType: EventType.ESCROW_CANCELED,
+              eventType: EventType.CANCELLATION_REQUESTED,
               oracleType,
               hasSignature: true,
             };
@@ -346,7 +346,7 @@ export class CronJobService {
     try {
       const webhookEntities = await this.webhookRepository.findByStatusAndType(
         WebhookStatus.PENDING,
-        [EventType.ESCROW_CREATED, EventType.ESCROW_CANCELED],
+        [EventType.ESCROW_CREATED, EventType.CANCELLATION_REQUESTED],
       );
 
       for (const webhookEntity of webhookEntities) {

@@ -192,6 +192,9 @@ export class EscrowCompletionService {
         }
 
         escrowCompletionEntity.status = EscrowCompletionStatus.AWAITING_PAYOUTS;
+        if (escrowStatus === EscrowStatus.Cancelled) {
+          escrowCompletionEntity.status = EscrowCompletionStatus.PAID;
+        }
         await this.escrowCompletionRepository.updateOne(escrowCompletionEntity);
       } catch (error) {
         this.logger.error('Failed to process pending escrow completion', {

@@ -142,12 +142,12 @@ describe('WebhookService', () => {
       expect(jobService.createJob).toHaveBeenCalledWith(webhook);
     });
 
-    it('should handle an incoming escrow canceled webhook', async () => {
+    it('should handle an incoming cancellation request webhook', async () => {
       jest.spyOn(jobService, 'cancelJob').mockResolvedValue();
       const webhook: WebhookDto = {
         chainId,
         escrowAddress,
-        eventType: EventType.ESCROW_CANCELED,
+        eventType: EventType.CANCELLATION_REQUESTED,
       };
       expect(await webhookService.handleWebhook(webhook)).toBe(undefined);
       expect(jobService.cancelJob).toHaveBeenCalledWith(webhook);

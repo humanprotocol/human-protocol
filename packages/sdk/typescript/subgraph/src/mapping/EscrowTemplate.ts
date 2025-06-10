@@ -795,6 +795,14 @@ export function handleCancelled(event: Cancelled): void {
   const escrowEntity = Escrow.load(dataSource.address());
 
   if (escrowEntity) {
+    createTransaction(
+      event,
+      'cancelled',
+      event.transaction.from,
+      Address.fromBytes(escrowEntity.address),
+      null,
+      Address.fromBytes(escrowEntity.address)
+    );
     escrowEntity.status = 'Cancelled';
     escrowEntity.save();
     eventEntity.launcher = escrowEntity.launcher;

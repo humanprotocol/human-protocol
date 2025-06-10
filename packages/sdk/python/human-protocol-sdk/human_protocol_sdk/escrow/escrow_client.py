@@ -485,12 +485,14 @@ class EscrowClient:
         """
         if not Web3.is_address(escrow_address):
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
-        if not hash:
-            raise EscrowClientError("Invalid empty hash")
-        if not validate_url(url):
-            raise EscrowClientError(f"Invalid URL: {url}")
-        if amount <= 0:
+        if amount < 0:
             raise EscrowClientError("Amount must be positive")
+        if amount != 0:
+            if not hash:
+                raise EscrowClientError("Invalid empty hash")
+            if not validate_url(url):
+                raise EscrowClientError(f"Invalid URL: {url}")
+
         if not self.w3.eth.default_account:
             raise EscrowClientError("You must add an account to Web3 instance")
 

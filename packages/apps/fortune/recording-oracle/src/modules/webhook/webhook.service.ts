@@ -18,7 +18,7 @@ export class WebhookService {
         await this.jobService.processJobSolution(wehbook);
         break;
 
-      case EventType.ESCROW_CANCELED:
+      case EventType.CANCELLATION_REQUESTED:
         await this.jobService.cancelJob(wehbook);
         break;
 

@@ -255,6 +255,45 @@ describe('Escrow with USDT', function () {
             .storeResults(MOCK_URL, MOCK_HASH, fundAmount * 2n)
         ).to.be.revertedWith('Not enough unreserved funds');
       });
+
+      it('Should succeed if url and hash are empty and amount is 0', async function () {
+        await deployEscrow();
+        await fundEscrow();
+        await setupEscrow();
+
+        await expect(escrow.connect(trustedHandlers[0]).storeResults('', '', 0))
+          .not.to.be.reverted;
+      });
+
+      it('Should revert if url is empty and amount is not 0', async function () {
+        await deployEscrow();
+        await fundEscrow();
+        await setupEscrow();
+
+        await expect(
+          escrow.connect(trustedHandlers[0]).storeResults('', MOCK_HASH, 1)
+        ).to.be.revertedWith("URL can't be empty");
+      });
+
+      it('Should revert if hash is empty and amount is not 0', async function () {
+        await deployEscrow();
+        await fundEscrow();
+        await setupEscrow();
+
+        await expect(
+          escrow.connect(trustedHandlers[0]).storeResults(MOCK_URL, '', 1)
+        ).to.be.revertedWith("Hash can't be empty");
+      });
+
+      it('Should revert if both url and hash are empty and amount is not 0', async function () {
+        await deployEscrow();
+        await fundEscrow();
+        await setupEscrow();
+
+        await expect(
+          escrow.connect(trustedHandlers[0]).storeResults('', '', 1)
+        ).to.be.revertedWith("URL can't be empty");
+      });
     });
 
     describe('Events', function () {
@@ -342,6 +381,23 @@ describe('Escrow with USDT', function () {
         );
         expect(await escrow.remainingFunds()).to.equal(fundAmount / 2n);
         expect(await escrow.reservedFunds()).to.equal(fundAmount / 2n);
+      });
+
+      it('Should cancel the escrow if status is ToCancel, fundsToReserve is 0 and unreservedFunds is 0', async () => {
+        await deployEscrow();
+        await fundEscrow();
+        await setupEscrow();
+
+        await escrow.connect(owner).cancel();
+        expect(await escrow.status()).to.equal(Status.ToCancel);
+
+        const tx = await escrow
+          .connect(trustedHandlers[0])
+          .storeResults(MOCK_URL, MOCK_HASH, 0);
+
+        await expect(tx).to.emit(escrow, 'CancellationRefund');
+        await expect(tx).to.emit(escrow, 'Cancelled');
+        expect(await escrow.status()).to.equal(Status.Cancelled);
       });
     });
   });

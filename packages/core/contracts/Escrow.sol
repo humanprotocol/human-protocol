@@ -303,8 +303,10 @@ contract Escrow is IEscrow, ReentrancyGuard {
                 status == EscrowStatuses.ToCancel,
             'Escrow not in Pending, Partial or ToCancel status state'
         );
-        require(bytes(_url).length != 0, "URL can't be empty");
-        require(bytes(_hash).length != 0, "Hash can't be empty");
+        if (_fundsToReserve != 0) {
+            require(bytes(_url).length != 0, "URL can't be empty");
+            require(bytes(_hash).length != 0, "Hash can't be empty");
+        }
         require(
             _fundsToReserve <= remainingFunds - reservedFunds,
             'Not enough unreserved funds'
@@ -321,6 +323,10 @@ contract Escrow is IEscrow, ReentrancyGuard {
                 _safeTransfer(token, launcher, unreservedFunds);
                 emit CancellationRefund(unreservedFunds);
                 remainingFunds = reservedFunds;
+            }
+            if (remainingFunds == 0) {
+                status = EscrowStatuses.Cancelled;
+                emit Cancelled();
             }
         }
     }

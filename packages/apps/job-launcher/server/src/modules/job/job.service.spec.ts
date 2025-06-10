@@ -6,6 +6,7 @@ import { createMock } from '@golevelup/ts-jest';
 import {
   ChainId,
   EscrowClient,
+  EscrowStatus,
   EscrowUtils,
   KVStoreUtils,
   NETWORKS,
@@ -924,6 +925,7 @@ describe('JobService', () => {
         chainId: jobEntity.chainId,
         eventType: EventType.ESCROW_CREATED,
         oracleType: jobEntity.requestType,
+        oracleAddress: jobEntity.exchangeOracle,
         hasSignature: true,
         status: WebhookStatus.PENDING,
         retriesCount: 0,
@@ -1409,6 +1411,52 @@ describe('JobService', () => {
       const result = await jobService.processEscrowCancellation(jobEntity);
       expect(result).toHaveProperty('txHash');
     });
+
+    it('should throw if escrow status is not Active', async () => {
+      const jobEntity = createJobEntity();
+      mockWeb3Service.calculateGasPrice.mockResolvedValueOnce(1n);
+      mockedEscrowClient.build.mockResolvedValue({
+        getStatus: jest.fn().mockResolvedValue(EscrowStatus.Complete),
+        getBalance: jest.fn().mockResolvedValue(100n),
+        cancel: jest.fn(),
+      } as unknown as EscrowClient);
+
+      await expect(
+        jobService.processEscrowCancellation(jobEntity),
+      ).rejects.toThrow(
+        new ConflictError(ErrorEscrow.InvalidStatusCancellation),
+      );
+    });
+
+    it('should throw if escrow balance is zero', async () => {
+      const jobEntity = createJobEntity();
+      mockWeb3Service.calculateGasPrice.mockResolvedValueOnce(1n);
+      mockedEscrowClient.build.mockResolvedValue({
+        getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
+        getBalance: jest.fn().mockResolvedValue(0n),
+        cancel: jest.fn(),
+      } as unknown as EscrowClient);
+
+      await expect(
+        jobService.processEscrowCancellation(jobEntity),
+      ).rejects.toThrow(
+        new ConflictError(ErrorEscrow.InvalidBalanceCancellation),
+      );
+    });
+
+    it('should throw if cancel throws an error', async () => {
+      const jobEntity = createJobEntity();
+      mockWeb3Service.calculateGasPrice.mockResolvedValueOnce(1n);
+      mockedEscrowClient.build.mockResolvedValue({
+        getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
+        getBalance: jest.fn().mockResolvedValue(100n),
+        cancel: jest.fn().mockRejectedValue(new Error('Network error')),
+      } as unknown as EscrowClient);
+
+      await expect(
+        jobService.processEscrowCancellation(jobEntity),
+      ).rejects.toThrow('Network error');
+    });
   });
 
   describe('escrowFailedWebhook', () => {
@@ -1612,7 +1660,7 @@ describe('JobService', () => {
     });
   });
 
-  describe('completeJob', () => {
+  describe('finalizeJob', () => {
     it('should complete a job', async () => {
       const jobEntity = createJobEntity({
         status: JobStatus.LAUNCHED,
@@ -1621,7 +1669,7 @@ describe('JobService', () => {
         jobEntity,
       );
       await expect(
-        jobService.completeJob({
+        jobService.finalizeJob({
           chainId: ChainId.POLYGON_AMOY,
           escrowAddress: faker.finance.ethereumAddress(),
           eventType: EventType.ESCROW_COMPLETED,
@@ -1633,33 +1681,64 @@ describe('JobService', () => {
       });
     });
 
-    it('should throw an error if job not found', async () => {
-      mockJobRepository.findOneByChainIdAndEscrowAddress.mockResolvedValueOnce(
-        null,
-      );
-      await expect(
-        jobService.completeJob({
-          chainId: ChainId.POLYGON_AMOY,
-          escrowAddress: faker.finance.ethereumAddress(),
-          eventType: EventType.ESCROW_COMPLETED,
-        }),
-      ).rejects.toThrow(new NotFoundError(ErrorJob.NotFound));
-    });
-
-    it('should throw an error if job is not in LAUNCHED or PARTIAL status', async () => {
-      const jobEntity = createJobEntity({
-        status: JobStatus.CANCELED,
-      });
+    it('should do nothing if job is already COMPLETED', async () => {
+      const jobEntity = createJobEntity({ status: JobStatus.COMPLETED });
       mockJobRepository.findOneByChainIdAndEscrowAddress.mockResolvedValueOnce(
         jobEntity,
       );
       await expect(
-        jobService.completeJob({
+        jobService.finalizeJob({
           chainId: ChainId.POLYGON_AMOY,
           escrowAddress: faker.finance.ethereumAddress(),
           eventType: EventType.ESCROW_COMPLETED,
         }),
-      ).rejects.toThrow(new ValidationError(ErrorJob.InvalidStatusCompletion));
+      ).resolves.toBeUndefined();
+      expect(mockJobRepository.updateOne).not.toHaveBeenCalled();
+    });
+
+    it('should do nothing if job is already CANCELED', async () => {
+      const jobEntity = createJobEntity({ status: JobStatus.CANCELED });
+      mockJobRepository.findOneByChainIdAndEscrowAddress.mockResolvedValueOnce(
+        jobEntity,
+      );
+      await expect(
+        jobService.finalizeJob({
+          chainId: ChainId.POLYGON_AMOY,
+          escrowAddress: faker.finance.ethereumAddress(),
+          eventType: EventType.ESCROW_COMPLETED,
+        }),
+      ).resolves.toBeUndefined();
+      expect(mockJobRepository.updateOne).not.toHaveBeenCalled();
+    });
+
+    it('should call cancelJob if eventType is ESCROW_CANCELED and status is LAUNCHED', async () => {
+      const jobEntity = createJobEntity({ status: JobStatus.LAUNCHED });
+      mockJobRepository.findOneByChainIdAndEscrowAddress.mockResolvedValueOnce(
+        jobEntity,
+      );
+      const cancelJobSpy = jest
+        .spyOn(jobService, 'cancelJob')
+        .mockResolvedValueOnce();
+      await jobService.finalizeJob({
+        chainId: ChainId.POLYGON_AMOY,
+        escrowAddress: faker.finance.ethereumAddress(),
+        eventType: EventType.ESCROW_CANCELED,
+      });
+      expect(cancelJobSpy).toHaveBeenCalledWith(jobEntity);
+    });
+
+    it('should throw ConflictError if eventType is not ESCROW_COMPLETED or ESCROW_CANCELED', async () => {
+      const jobEntity = createJobEntity({ status: JobStatus.LAUNCHED });
+      mockJobRepository.findOneByChainIdAndEscrowAddress.mockResolvedValueOnce(
+        jobEntity,
+      );
+      await expect(
+        jobService.finalizeJob({
+          chainId: ChainId.POLYGON_AMOY,
+          escrowAddress: faker.finance.ethereumAddress(),
+          eventType: EventType.ESCROW_FAILED,
+        }),
+      ).rejects.toThrow(new ConflictError(ErrorJob.InvalidStatusCompletion));
     });
   });
 
@@ -1691,6 +1770,58 @@ describe('JobService', () => {
     it('should return false if escrowAddress is not provided', async () => {
       const result = await jobService.isEscrowFunded(faker.number.int(), '');
       expect(result).toBe(false);
+    });
+  });
+
+  describe('cancelJob', () => {
+    it('should create a refund payment and set status to CANCELED', async () => {
+      const jobEntity = createJobEntity();
+      const refundAmount = faker.number.float({ min: 1, max: 10 });
+
+      mockedEscrowUtils.getCancellationRefund.mockResolvedValueOnce({
+        amount: ethers.parseUnits(refundAmount.toString(), 18),
+        escrowAddress: jobEntity.escrowAddress!,
+      } as any);
+      mockPaymentService.createRefundPayment.mockResolvedValueOnce(undefined);
+      mockJobRepository.updateOne.mockResolvedValueOnce(jobEntity);
+
+      await jobService.cancelJob(jobEntity);
+
+      expect(EscrowUtils.getCancellationRefund).toHaveBeenCalledWith(
+        jobEntity.chainId,
+        jobEntity.escrowAddress,
+      );
+      expect(mockPaymentService.createRefundPayment).toHaveBeenCalledWith({
+        refundAmount: refundAmount,
+        refundCurrency: jobEntity.token,
+        userId: jobEntity.userId,
+        jobId: jobEntity.id,
+      });
+      expect(jobEntity.status).toBe(JobStatus.CANCELED);
+      expect(mockJobRepository.updateOne).toHaveBeenCalledWith(jobEntity);
+    });
+
+    it('should throw ConflictError if no refund is found', async () => {
+      const jobEntity = createJobEntity();
+      mockedEscrowUtils.getCancellationRefund.mockResolvedValueOnce(
+        null as any,
+      );
+
+      await expect(jobService.cancelJob(jobEntity)).rejects.toThrow(
+        new ConflictError(ErrorJob.NoRefundFound),
+      );
+    });
+
+    it('should throw ConflictError if refund.amount is empty', async () => {
+      const jobEntity = createJobEntity();
+      mockedEscrowUtils.getCancellationRefund.mockResolvedValueOnce({
+        amount: 0,
+        escrowAddress: jobEntity.escrowAddress!,
+      } as any);
+
+      await expect(jobService.cancelJob(jobEntity)).rejects.toThrow(
+        new ConflictError(ErrorJob.NoRefundFound),
+      );
     });
   });
 });

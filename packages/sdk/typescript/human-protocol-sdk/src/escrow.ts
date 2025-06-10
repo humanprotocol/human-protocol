@@ -498,20 +498,20 @@ export class EscrowClient extends BaseEthersClient {
       throw ErrorInvalidEscrowAddressProvided;
     }
 
-    if (!url) {
-      throw ErrorUrlIsEmptyString;
-    }
-
-    if (!isValidUrl(url)) {
-      throw ErrorInvalidUrl;
-    }
-
-    if (!hash) {
-      throw ErrorHashIsEmptyString;
-    }
-
     if (amount < 0n) {
       throw ErrorAmountMustBePositive;
+    }
+
+    if (amount !== 0n) {
+      if (!url) {
+        throw ErrorUrlIsEmptyString;
+      }
+      if (!isValidUrl(url)) {
+        throw ErrorInvalidUrl;
+      }
+      if (!hash) {
+        throw ErrorHashIsEmptyString;
+      }
     }
 
     if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
