@@ -11,7 +11,7 @@
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
-    "start:debug": "nest start --debug --watch",
+    "start:debug": "nest start --debug 9229 --watch --inspect-brk=0.0.0.0:9229",
     "start:prod": "node dist/src/main",
     "migration:create": "yarn build && typeorm-ts-node-commonjs migration:create",
     "migration:generate": "yarn build && typeorm-ts-node-commonjs migration:generate -p -d typeorm.config.ts",

@@ -11,7 +11,7 @@
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
-    "start:debug": "nest start --debug --watch",
+    "start:debug": "nest start --debug 9233 --watch --inspect-brk=0.0.0.0:9233",
     "start:prod": "node dist/main",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

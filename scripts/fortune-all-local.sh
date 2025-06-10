@@ -46,7 +46,7 @@ setup_oracles() {
 
 run_jl_server() {
   NODE_ENV=local yarn workspace @human-protocol/job-launcher-server migration:run
-  NODE_ENV=local yarn workspace @human-protocol/job-launcher-server start:dev
+  NODE_ENV=local yarn workspace @human-protocol/job-launcher-server start:debug
 }
 
 run_jl_client() {
@@ -55,16 +55,16 @@ run_jl_client() {
 
 run_reputation_oracle() {
 	NODE_ENV=local yarn workspace @human-protocol/reputation-oracle migration:run
-	NODE_ENV=local yarn workspace @human-protocol/reputation-oracle start:dev
+	NODE_ENV=local yarn workspace @human-protocol/reputation-oracle start:debug
 }
 
 run_fortune_exchange_oracle() {
 	NODE_ENV=local yarn workspace @human-protocol/fortune-exchange-oracle-server migration:run
-	NODE_ENV=local yarn workspace @human-protocol/fortune-exchange-oracle-server start:dev
+	NODE_ENV=local yarn workspace @human-protocol/fortune-exchange-oracle-server start:debug
 }
 
 run_fortune_recording_oracle() {
-	NODE_ENV=local yarn workspace @human-protocol/fortune-recording-oracle start:dev
+	NODE_ENV=local yarn workspace @human-protocol/fortune-recording-oracle start:debug
 }
 
 full_run() {
