@@ -34,7 +34,43 @@ describe('StripeService', () => {
     }).compile();
 
     service = module.get<StripeService>(StripeService);
-    stripeMock = new Stripe('dummy_key') as jest.Mocked<Stripe>;
+    
+    // Create a properly structured mock for Stripe
+    stripeMock = {
+      customers: {
+        create: jest.fn(),
+        update: jest.fn(),
+        retrieve: jest.fn(),
+        listPaymentMethods: jest.fn(),
+        listTaxIds: jest.fn(),
+        deleteTaxId: jest.fn(),
+        createTaxId: jest.fn(),
+      },
+      setupIntents: {
+        create: jest.fn(),
+        retrieve: jest.fn(),
+      },
+      paymentIntents: {
+        confirm: jest.fn(),
+        update: jest.fn(),
+        retrieve: jest.fn(),
+      },
+      invoices: {
+        create: jest.fn(),
+        finalizeInvoice: jest.fn(),
+      },
+      invoiceItems: {
+        create: jest.fn(),
+      },
+      paymentMethods: {
+        detach: jest.fn(),
+        retrieve: jest.fn(),
+      },
+      charges: {
+        retrieve: jest.fn(),
+      },
+    } as unknown as jest.Mocked<Stripe>;
+
     (service as any).stripe = stripeMock;
     loggerSpy = jest.spyOn(Logger.prototype, 'log');
   });
