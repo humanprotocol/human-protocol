@@ -42,7 +42,7 @@ const EVENT_DAY_DATA_FRAGMENT = gql`
     dailyEscrowCount
     dailyWorkerCount
     dailyPayoutCount
-    dailyPayoutAmount
+    dailyHMTPayoutAmount
     dailyHMTTransferCount
     dailyHMTTransferAmount
     dailyUniqueSenders

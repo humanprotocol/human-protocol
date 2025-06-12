@@ -199,7 +199,7 @@ export interface IStatusEventFilter extends IPagination {
 export interface IWorker {
   id: string;
   address: string;
-  totalAmountReceived: number;
+  totalHMTAmountReceived: number;
   payoutCount: number;
 }
 

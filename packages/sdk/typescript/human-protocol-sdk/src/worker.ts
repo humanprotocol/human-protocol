@@ -65,7 +65,7 @@ export class WorkerUtils {
    * type IWorker = {
    *   id: string;
    *   address: string;
-   *   totalAmountReceived: string;
+   *   totalHMTAmountReceived: string;
    *   payoutCount: number;
    * };
    * ```

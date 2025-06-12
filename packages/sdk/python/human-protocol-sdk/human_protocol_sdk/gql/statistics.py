@@ -41,7 +41,7 @@ fragment EventDayDataFields on EventDayData {
     dailyEscrowCount
     dailyWorkerCount
     dailyPayoutCount
-    dailyPayoutAmount
+    dailyHMTPayoutAmount
     dailyHMTTransferCount
     dailyHMTTransferAmount
     dailyUniqueSenders

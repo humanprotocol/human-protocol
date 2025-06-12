@@ -301,7 +301,7 @@ describe('HMToken', () => {
       assert.fieldEquals(
         'Worker',
         operatorAddressString,
-        'totalAmountReceived',
+        'totalHMTAmountReceived',
         '1'
       );
       assert.fieldEquals('Worker', operatorAddressString, 'payoutCount', '1');
