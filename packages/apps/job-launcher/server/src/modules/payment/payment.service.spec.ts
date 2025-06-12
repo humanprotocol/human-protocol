@@ -21,7 +21,6 @@ import {
 } from '../../../test/constants';
 import { NetworkConfigService } from '../../common/config/network-config.service';
 import { ServerConfigService } from '../../common/config/server-config.service';
-import { StripeConfigService } from '../../common/config/stripe-config.service';
 import { TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
 import {
   ErrorPayment,
@@ -29,7 +28,6 @@ import {
   ErrorSignature,
 } from '../../common/constants/errors';
 import { SortDirection } from '../../common/enums/collection';
-import { Country } from '../../common/enums/job';
 import {
   PaymentCurrency,
   PaymentSortField,
