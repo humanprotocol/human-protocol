@@ -52,6 +52,12 @@ jobs:
       - name: Build core package
         if: steps.filter_networks.outputs.continue == 'true'
         run: yarn build:core
+      - name: Generate and build Subgraph
+        if: steps.filter_networks.outputs.continue == 'true'
+        run: yarn generate && yarn build
+        working-directory: ./packages/sdk/typescript/subgraph
+        env:
+          NETWORK: ${{ matrix.network.name }}
       - name: Authenticate & Deploy
         if: steps.filter_networks.outputs.continue == 'true'
         env:
