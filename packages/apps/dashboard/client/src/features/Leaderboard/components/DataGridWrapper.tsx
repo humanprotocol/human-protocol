@@ -1,9 +1,9 @@
 import { Box, Typography } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 
-import Loader from '@/components/Loader';
 import { LeaderBoardData } from '@/services/api/use-leaderboard-details';
 import { handleErrorMessage } from '@/services/handle-error-message';
+import Loader from '@/shared/ui/Loader';
 import { useIsMobile } from '@/utils/hooks/use-breakpoints';
 
 import useDataGrid from '../hooks/useDataGrid';

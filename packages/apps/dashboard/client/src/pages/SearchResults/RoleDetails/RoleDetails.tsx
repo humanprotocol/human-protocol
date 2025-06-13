@@ -7,15 +7,12 @@ import ListItem from '@mui/material/ListItem';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
-import ExchangeOracleIcon from '@/assets/icons/exchange-oracle.svg';
-import JobLauncherIcon from '@/assets/icons/job-launcher.svg';
-import RecordingOracleIcon from '@/assets/icons/recording-oracle.svg';
-import ReputationOracleIcon from '@/assets/icons/reputation-oracle.svg';
 import TitleSectionWrapper from '@/components/SearchResults/TitleSectionWrapper';
-import SectionWrapper from '@/components/SectionWrapper';
 import { env } from '@/helpers/env';
 import { RoleDetailsEscrowsTable } from '@/pages/SearchResults/RoleDetails/RoleDetailsEscrows/RoleDetailsEscrowsTable';
 import { AddressDetailsOperator } from '@/services/api/use-address-details';
+import EntityIcon from '@/shared/ui/EntityIcon';
+import SectionWrapper from '@/shared/ui/SectionWrapper';
 
 import HmtBalance from '../HmtBalance';
 import HmtPrice from '../HmtPrice';
@@ -29,23 +26,10 @@ interface RoleInfoProps {
   role: string;
 }
 
-const renderRoleIcon = (role: string | null) => {
-  if (!role) return null;
-
-  const roleIcons = {
-    [Role.ReputationOracle]: <ReputationOracleIcon />,
-    [Role.ExchangeOracle]: <ExchangeOracleIcon />,
-    [Role.JobLauncher]: <JobLauncherIcon />,
-    [Role.RecordingOracle]: <RecordingOracleIcon />,
-  };
-
-  return roleIcons[role];
-};
-
 const RoleInformation = ({ title, points, role }: RoleInfoProps) => {
   return (
     <Stack direction="column">
-      {renderRoleIcon(role)}
+      <EntityIcon role={role} />
       <Typography variant="body2" mt={2}>
         {title}
       </Typography>

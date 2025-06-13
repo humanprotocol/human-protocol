@@ -5,11 +5,11 @@ import Typography from '@mui/material/Typography';
 import { NumericFormat } from 'react-number-format';
 
 import TitleSectionWrapper from '@/components/SearchResults';
-import SectionWrapper from '@/components/SectionWrapper';
 import {
   AddressDetailsOperator,
   AddressDetailsWallet,
 } from '@/services/api/use-address-details';
+import SectionWrapper from '@/shared/ui/SectionWrapper';
 import { useIsMobile } from '@/utils/hooks/use-breakpoints';
 
 import HmtBalance from '../HmtBalance';
@@ -17,7 +17,6 @@ import HmtPrice from '../HmtPrice';
 import KVStore from '../KVStore';
 import ReputationScore from '../ReputationScore';
 import StakeInfo from '../StakeInfo';
-
 
 type Props = {
   data: AddressDetailsWallet | AddressDetailsOperator;

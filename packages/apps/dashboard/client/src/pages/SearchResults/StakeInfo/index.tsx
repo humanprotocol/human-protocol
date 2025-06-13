@@ -4,7 +4,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { NumericFormat } from 'react-number-format';
 
-import SectionWrapper from '@/components/SectionWrapper';
+import SectionWrapper from '@/shared/ui/SectionWrapper';
 import { useIsMobile } from '@/utils/hooks/use-breakpoints';
 
 type Props = {

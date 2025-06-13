@@ -10,12 +10,12 @@ import MuiTableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
 
-import AbbreviateClipboard from '@/components/SearchResults/AbbreviateClipboard';
 import { TransactionTableCellMethod } from '@/pages/SearchResults/WalletAddress/WalletAddressTransactions/cells/TransactionTableCellMethod';
 import { TransactionTableCellValue } from '@/pages/SearchResults/WalletAddress/WalletAddressTransactions/cells/TransactionTableCellValue';
 import { TransactionsTableBodyContainer } from '@/pages/SearchResults/WalletAddress/WalletAddressTransactions/tableComponents/TransactionsTableBodyContainer';
 import { useTransactionDetails } from '@/services/api/use-transaction-details';
 import { handleErrorMessage } from '@/services/handle-error-message';
+import AbbreviateClipboard from '@/shared/ui/AbbreviateClipboard';
 import { useTransactionDetailsDto } from '@/utils/hooks/use-transactions-details-dto';
 import { useWalletSearch } from '@/utils/hooks/use-wallet-search';
 

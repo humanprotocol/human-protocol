@@ -8,9 +8,9 @@ import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 
-import SectionWrapper from '@/components/SectionWrapper';
 import { EscrowsTableBody } from '@/pages/SearchResults/RoleDetails/RoleDetailsEscrows/tableComponents/EscrowsTableBody';
 import { useEscrowDetails } from '@/services/api/use-escrows-details';
+import SectionWrapper from '@/shared/ui/SectionWrapper';
 import { useEscrowDetailsDto } from '@/utils/hooks/use-escrows-details-dto';
 
 export const RoleDetailsEscrowsTable = ({ role }: { role: string | null }) => {

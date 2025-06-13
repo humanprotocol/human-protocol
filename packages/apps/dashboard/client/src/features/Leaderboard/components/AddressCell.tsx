@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
 
-import AbbreviateClipboard from '@/components/SearchResults/AbbreviateClipboard';
+import AbbreviateClipboard from '@/shared/ui/AbbreviateClipboard';
 
 export const AddressCell = ({
   chainId,

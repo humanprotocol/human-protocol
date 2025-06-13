@@ -4,15 +4,8 @@ import Stack from '@mui/material/Stack';
 import { AxiosError } from 'axios';
 import { useLocation, useParams } from 'react-router-dom';
 
-import Breadcrumbs from '@/components/Breadcrumbs';
 import Clipboard from '@/components/Clipboard';
-import { EscrowAddressIcon } from '@/components/Icons/EscrowAddressIcon';
-import { WalletIcon } from '@/components/Icons/WalletIcon';
-import Loader from '@/components/Loader';
-import NothingFound from '@/components/NothingFound';
-import PageWrapper from '@/components/PageWrapper';
 import SearchBar from '@/components/SearchBar/SearchBar';
-import ShadowIcon from '@/components/ShadowIcon';
 import EscrowAddress from '@/pages/SearchResults/EscrowAddress';
 import RoleDetails from '@/pages/SearchResults/RoleDetails/RoleDetails';
 import WalletAddress from '@/pages/SearchResults/WalletAddress';
@@ -21,8 +14,15 @@ import {
   useAddressDetails,
 } from '@/services/api/use-address-details';
 import { handleErrorMessage } from '@/services/handle-error-message';
+import Breadcrumbs from '@/shared/ui/Breadcrumbs';
+import EscrowAddressIcon from '@/shared/ui/icons/EscrowAddressIcon';
+import WalletIcon from '@/shared/ui/icons/WalletIcon';
+import Loader from '@/shared/ui/Loader';
+import NothingFound from '@/shared/ui/NothingFound';
+import ShadowIcon from '@/shared/ui/ShadowIcon';
 import { getNetwork } from '@/utils/config/networks';
 import { useWalletSearch } from '@/utils/hooks/use-wallet-search';
+import PageWrapper from '@/widgets/page-wrapper';
 
 import { WalletAddressTransactionsTable } from './WalletAddress/WalletAddressTransactions/WalletAddressTransactionsTable';
 

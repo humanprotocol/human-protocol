@@ -17,8 +17,8 @@ import IconButton from '@mui/material/IconButton';
 import clsx from 'clsx';
 import { useNavigate } from 'react-router-dom';
 
-import CustomTooltip from '@/components/CustomTooltip';
-import { NetworkIcon } from '@/components/NetworkIcon';
+import CustomTooltip from '@/shared/ui/CustomTooltip';
+import { NetworkIcon } from '@/shared/ui/NetworkIcon';
 import { useIsMobile } from '@/utils/hooks/use-breakpoints';
 import { useFilteredNetworks } from '@/utils/hooks/use-filtered-networks';
 import { useWalletSearch } from '@/utils/hooks/use-wallet-search';

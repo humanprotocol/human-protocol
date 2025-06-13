@@ -58,8 +58,8 @@ interface CustomDatePickerProps {
   props: Omit<DatePickerProps<Dayjs>, 'open' | 'onOpen' | 'onClose'>;
 }
 
-const CustomDaterPicker = ({ props }: CustomDatePickerProps) => {
-  const [open, setOpen] = useState<boolean>(false);
+const CustomDatePicker = ({ props }: CustomDatePickerProps) => {
+  const [open, setOpen] = useState(false);
 
   return (
     <DatePickerMui
@@ -87,7 +87,7 @@ interface DatePickerPropsMui {
 const DatePicker = ({ value, onChange, customProps }: DatePickerPropsMui) => {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <CustomDaterPicker
+      <CustomDatePicker
         props={{
           label: value.format('DD MMM, YYYY'),
           value: value,

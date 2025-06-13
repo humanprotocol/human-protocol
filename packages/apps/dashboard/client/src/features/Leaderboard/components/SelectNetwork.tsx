@@ -7,12 +7,10 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 
-import { NetworkIcon } from '@/components/NetworkIcon';
+import { NetworkIcon } from '@/shared/ui/NetworkIcon';
 import { useIsMobile } from '@/utils/hooks/use-breakpoints';
 import { useFilteredNetworks } from '@/utils/hooks/use-filtered-networks';
 import { useLeaderboardSearch } from '@/utils/hooks/use-leaderboard-search';
-
-
 
 export const SelectNetwork = () => {
   const {

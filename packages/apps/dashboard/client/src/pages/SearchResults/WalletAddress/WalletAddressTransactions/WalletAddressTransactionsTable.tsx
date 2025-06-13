@@ -8,10 +8,10 @@ import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import SimpleBar from 'simplebar-react';
 
-import SectionWrapper from '@/components/SectionWrapper';
 import { TransactionsTableBody } from '@/pages/SearchResults/WalletAddress/WalletAddressTransactions/tableComponents/TransactionsTableBody';
 import { TransactionsTableHead } from '@/pages/SearchResults/WalletAddress/WalletAddressTransactions/tableComponents/TransactionsTableHead';
 import { useTransactionDetails } from '@/services/api/use-transaction-details';
+import SectionWrapper from '@/shared/ui/SectionWrapper';
 import { useTransactionDetailsDto } from '@/utils/hooks/use-transactions-details-dto';
 
 export const WalletAddressTransactionsTable = () => {

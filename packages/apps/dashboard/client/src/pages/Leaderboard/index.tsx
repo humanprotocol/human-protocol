@@ -1,8 +1,8 @@
-import Breadcrumbs from '@/components/Breadcrumbs';
-import { LeaderboardIcon } from '@/components/Icons/LeaderboardIcon';
-import PageWrapper from '@/components/PageWrapper';
-import ShadowIcon from '@/components/ShadowIcon';
 import { useLeaderboardDetails } from '@/services/api/use-leaderboard-details';
+import Breadcrumbs from '@/shared/ui/Breadcrumbs';
+import LeaderboardIcon from '@/shared/ui/icons/LeaderboardIcon';
+import ShadowIcon from '@/shared/ui/ShadowIcon';
+import PageWrapper from '@/widgets/page-wrapper';
 
 import { Leaderboard } from '../../features/Leaderboard/index';
 

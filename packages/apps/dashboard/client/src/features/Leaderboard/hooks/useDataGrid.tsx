@@ -4,8 +4,8 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { Box, Typography } from '@mui/material';
 import { GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
 
-import CustomTooltip from '@/components/CustomTooltip';
 import { LeaderBoardData } from '@/services/api/use-leaderboard-details';
+import CustomTooltip from '@/shared/ui/CustomTooltip';
 import { useIsMobile } from '@/utils/hooks/use-breakpoints';
 import { useLeaderboardSearch } from '@/utils/hooks/use-leaderboard-search';
 
@@ -15,7 +15,6 @@ import { ChainCell } from '../components/ChainCell';
 import { RoleCell } from '../components/RoleCell';
 import { SelectNetwork } from '../components/SelectNetwork';
 import { TextCell } from '../components/TextCell';
-
 
 const InfoTooltip = ({ title }: { title: string }) => (
   <CustomTooltip title={title} arrow>

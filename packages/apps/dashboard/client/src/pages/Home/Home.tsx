@@ -9,17 +9,17 @@ import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Unstable_Grid2';
 import { Link } from 'react-router-dom';
 
-import CustomTooltip from '@/components/CustomTooltip';
 import GraphSwiper from '@/components/Home/GraphSwiper';
-import { LeaderboardIcon } from '@/components/Icons/LeaderboardIcon';
-import PageWrapper from '@/components/PageWrapper';
 import SearchBar from '@/components/SearchBar/SearchBar';
-import ShadowIcon from '@/components/ShadowIcon';
 import HMTPrice from '@/pages/Home/HMTPrice';
 import Holders from '@/pages/Home/Holders';
 import TotalNumberOfTasks from '@/pages/Home/TotalNumberOfTasks';
 import TotalTransactions from '@/pages/Home/TotalTransactions';
+import CustomTooltip from '@/shared/ui/CustomTooltip';
+import LeaderboardIcon from '@/shared/ui/icons/LeaderboardIcon';
+import ShadowIcon from '@/shared/ui/ShadowIcon';
 import { useIsMobile } from '@/utils/hooks/use-breakpoints';
+import PageWrapper from '@/widgets/page-wrapper';
 
 import { Leaderboard } from './Leaderboard';
 

@@ -1,6 +1,6 @@
 import { Typography } from '@mui/material';
 
-import { NetworkIcon } from '@/components/NetworkIcon';
+import { NetworkIcon } from '@/shared/ui/NetworkIcon';
 import { getNetwork } from '@/utils/config/networks';
 
 export const ChainCell = ({ chainId }: { chainId: number }) => (

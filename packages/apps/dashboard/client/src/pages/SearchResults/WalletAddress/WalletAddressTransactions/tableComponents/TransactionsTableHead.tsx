@@ -4,7 +4,7 @@ import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 
-import CustomTooltip from '@/components/CustomTooltip';
+import CustomTooltip from '@/shared/ui/CustomTooltip';
 
 const InfoTooltip = ({ title }: { title: string }) => (
   <CustomTooltip title={title}>
