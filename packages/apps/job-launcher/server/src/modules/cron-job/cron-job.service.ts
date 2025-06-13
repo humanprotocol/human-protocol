@@ -271,14 +271,7 @@ export class CronJobService {
               jobEntity.escrowAddress,
             ))
           ) {
-            const { amountRefunded } =
-              await this.jobService.processEscrowCancellation(jobEntity);
-            await this.paymentService.createRefundPayment({
-              refundAmount: Number(ethers.formatEther(amountRefunded)),
-              refundCurrency: jobEntity.token,
-              userId: jobEntity.userId,
-              jobId: jobEntity.id,
-            });
+            await this.jobService.processEscrowCancellation(jobEntity);
           } else {
             await this.paymentService.createRefundPayment({
               refundAmount: jobEntity.fundAmount,
@@ -287,22 +280,31 @@ export class CronJobService {
               jobId: jobEntity.id,
             });
           }
-          jobEntity.status = JobStatus.CANCELED;
+          jobEntity.status = JobStatus.CANCELING;
           await this.jobRepository.updateOne(jobEntity);
 
           const oracleType = this.jobService.getOracleType(
             jobEntity.requestType,
           );
           if (oracleType !== OracleType.HCAPTCHA) {
-            const webhookEntity = new WebhookEntity();
-            Object.assign(webhookEntity, {
+            const baseWebhook = {
               escrowAddress: jobEntity.escrowAddress,
               chainId: jobEntity.chainId,
-              eventType: EventType.ESCROW_CANCELED,
+              eventType: EventType.CANCELLATION_REQUESTED,
               oracleType,
               hasSignature: true,
-            });
-            await this.webhookRepository.createUnique(webhookEntity);
+            };
+            const webhooks = [
+              Object.assign(new WebhookEntity(), {
+                ...baseWebhook,
+                oracleAddress: jobEntity.exchangeOracle,
+              }),
+              Object.assign(new WebhookEntity(), {
+                ...baseWebhook,
+                oracleAddress: jobEntity.recordingOracle,
+              }),
+            ];
+            await this.webhookRepository.createMany(webhooks);
           }
         } catch (err) {
           const errorId = uuidv4();
@@ -344,7 +346,7 @@ export class CronJobService {
     try {
       const webhookEntities = await this.webhookRepository.findByStatusAndType(
         WebhookStatus.PENDING,
-        [EventType.ESCROW_CREATED, EventType.ESCROW_CANCELED],
+        [EventType.ESCROW_CREATED, EventType.CANCELLATION_REQUESTED],
       );
 
       for (const webhookEntity of webhookEntities) {
@@ -447,7 +449,11 @@ export class CronJobService {
 
     try {
       const events = [];
-      const statuses = [EscrowStatus.Partial, EscrowStatus.Complete];
+      const statuses = [
+        EscrowStatus.Partial,
+        EscrowStatus.Complete,
+        EscrowStatus.Cancelled,
+      ];
       const from = lastCronJob?.lastSubgraphTime || undefined;
 
       for (const network of this.networkConfigService.networks) {
@@ -497,12 +503,16 @@ export class CronJobService {
         const key = `${event.chainId}-${ethers.getAddress(event.escrowAddress)}`;
         const job = jobMap.get(key);
 
-        if (
-          !job ||
-          job.status === JobStatus.TO_CANCEL ||
-          job.status === JobStatus.CANCELED
-        )
+        const eventTimestamp = new Date(event.timestamp * 1000).getTime();
+        if (eventTimestamp > latestEventTimestamp) {
+          latestEventTimestamp = eventTimestamp;
+        }
+        if (!job || job.status === JobStatus.CANCELED) continue;
+
+        if (event.status === EscrowStatus[EscrowStatus.Cancelled]) {
+          await this.jobService.cancelJob(job);
           continue;
+        }
 
         let newStatus: JobStatus | null = null;
         if (
@@ -520,10 +530,6 @@ export class CronJobService {
         if (newStatus && newStatus !== job.status) {
           job.status = newStatus;
           jobsToUpdate.push(job);
-        }
-        const eventTimestamp = new Date(event.timestamp * 1000).getTime();
-        if (eventTimestamp > latestEventTimestamp) {
-          latestEventTimestamp = eventTimestamp;
         }
       }
 

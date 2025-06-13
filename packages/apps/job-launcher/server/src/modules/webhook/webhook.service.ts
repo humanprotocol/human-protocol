@@ -1,10 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import {
-  ChainId,
-  EscrowClient,
-  KVStoreKeys,
-  KVStoreUtils,
-} from '@human-protocol/sdk';
+import { KVStoreKeys, KVStoreUtils } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
@@ -48,9 +43,14 @@ export class WebhookService {
   public async sendWebhook(webhook: WebhookEntity): Promise<void> {
     // Configure the HTTP request object.
     let config = {};
-    const webhookUrl = await this.getExchangeOracleWebhookUrl(
-      webhook.escrowAddress,
+
+    if (!webhook.oracleAddress) {
+      throw new ServerError(ErrorWebhook.InvalidOracleAddress);
+    }
+    const webhookUrl = await KVStoreUtils.get(
       webhook.chainId,
+      webhook.oracleAddress,
+      KVStoreKeys.webhookUrl,
     );
 
     // Check if the webhook URL was found.
@@ -92,33 +92,6 @@ export class WebhookService {
   }
 
   /**
-   * Get the webhook URL from the exchange oracle.
-   * @param escrowAddress - Escrow contract address.
-   * @param chainId - Chain ID.
-   * @returns {Promise<string>} - Returns the webhook URL.
-   */
-  private async getExchangeOracleWebhookUrl(
-    escrowAddress: string,
-    chainId: ChainId,
-  ): Promise<string> {
-    // Get the signer for the given chain.
-    const signer = this.web3Service.getSigner(chainId);
-
-    // Build the escrow client and get the exchange oracle address.
-    const escrowClient = await EscrowClient.build(signer);
-    const exchangeAddress =
-      await escrowClient.getExchangeOracleAddress(escrowAddress);
-
-    const exchangeOracleUrl = await KVStoreUtils.get(
-      chainId,
-      exchangeAddress,
-      KVStoreKeys.webhookUrl,
-    );
-
-    return exchangeOracleUrl;
-  }
-
-  /**
    * Handles errors that occur during webhook processing.
    * It logs the error and, based on retry count, updates the webhook status accordingly.
    * @param webhookEntity - The entity representing the webhook data.
@@ -138,7 +111,8 @@ export class WebhookService {
   public async handleWebhook(webhook: WebhookDataDto): Promise<void> {
     switch (webhook.eventType) {
       case EventType.ESCROW_COMPLETED:
-        await this.jobService.completeJob(webhook);
+      case EventType.ESCROW_CANCELED:
+        await this.jobService.finalizeJob(webhook);
         break;
 
       case EventType.ESCROW_FAILED:

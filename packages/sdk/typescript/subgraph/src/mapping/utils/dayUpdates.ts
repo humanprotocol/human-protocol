@@ -17,6 +17,7 @@ export function getEventDayData(event: ethereum.Event): EventDayData {
     eventDayData.dailyStoreResultsEventCount = ZERO_BI;
     eventDayData.dailyBulkPayoutEventCount = ZERO_BI;
     eventDayData.dailyPendingStatusEventCount = ZERO_BI;
+    eventDayData.dailyToCancelStatusEventCount = ZERO_BI;
     eventDayData.dailyCancelledStatusEventCount = ZERO_BI;
     eventDayData.dailyPartialStatusEventCount = ZERO_BI;
     eventDayData.dailyPaidStatusEventCount = ZERO_BI;

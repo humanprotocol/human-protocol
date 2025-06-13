@@ -6,26 +6,32 @@
 
 # Type Alias: ~~StorageCredentials~~
 
-> `readonly` **StorageCredentials**: `object`
+> `readonly` **StorageCredentials** = `object`
 
-Defined in: [types.ts:40](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L40)
+Defined in: [types.ts:44](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L44)
 
 AWS/GCP cloud storage access data
 
-## Type declaration
+## Deprecated
+
+StorageClient is deprecated. Use Minio.Client directly.
+
+## Properties
 
 ### ~~accessKey~~
 
 > **accessKey**: `string`
 
+Defined in: [types.ts:48](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L48)
+
 Access Key
+
+***
 
 ### ~~secretKey~~
 
 > **secretKey**: `string`
 
+Defined in: [types.ts:52](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L52)
+
 Secret Key
-
-## Deprecated
-
-StorageClient is deprecated. Use Minio.Client directly.

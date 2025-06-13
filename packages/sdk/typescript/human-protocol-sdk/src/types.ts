@@ -30,6 +30,10 @@ export enum EscrowStatus {
    * Escrow is cancelled.
    */
   Cancelled,
+  /**
+   * Escrow is cancelled.
+   */
+  ToCancel,
 }
 
 /**
@@ -140,20 +144,6 @@ export type NetworkData = {
 };
 
 /**
- * Represents the response data for an escrow cancellation.
- */
-export type EscrowCancel = {
-  /**
-   * The hash of the transaction associated with the escrow cancellation.
-   */
-  txHash: string;
-  /**
-   * The amount refunded in the escrow cancellation.
-   */
-  amountRefunded: bigint;
-};
-
-/**
  * Represents the response data for an escrow withdrawal.
  */
 export type EscrowWithdraw = {
@@ -198,3 +188,38 @@ export type Payout = {
 };
 
 export type TransactionLikeWithNonce = TransactionLike & { nonce: number };
+
+/**
+ * Represents a cancellation refund event.
+ */
+export type CancellationRefund = {
+  /**
+   * Unique identifier of the cancellation refund event.
+   */
+  id: string;
+  /**
+   * The address of the escrow associated with the cancellation refund.
+   */
+  escrowAddress: string;
+  /**
+   * The address of the receiver who received the refund.
+   */
+  receiver: string;
+  /**
+   * The amount refunded to the receiver.
+   */
+  amount: bigint;
+  /**
+   * The block number in which the cancellation refund event occurred.
+   */
+
+  block: number;
+  /**
+   * The timestamp when the cancellation refund event occurred (in UNIX format).
+   */
+  timestamp: number;
+  /**
+   * The transaction hash of the cancellation refund event.
+   */
+  txHash: string;
+};

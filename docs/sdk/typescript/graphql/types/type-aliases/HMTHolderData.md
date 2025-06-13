@@ -6,16 +6,22 @@
 
 # Type Alias: HMTHolderData
 
-> **HMTHolderData**: `object`
+> **HMTHolderData** = `object`
 
-Defined in: [graphql/types.ts:117](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L117)
+Defined in: [graphql/types.ts:117](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L117)
 
-## Type declaration
+## Properties
 
 ### address
 
 > **address**: `string`
 
+Defined in: [graphql/types.ts:118](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L118)
+
+***
+
 ### balance
 
 > **balance**: `string`
+
+Defined in: [graphql/types.ts:119](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L119)

@@ -6,9 +6,9 @@
 
 # Type Alias: TransactionLikeWithNonce
 
-> **TransactionLikeWithNonce**: `TransactionLike` & `object`
+> **TransactionLikeWithNonce** = `TransactionLike` & `object`
 
-Defined in: [types.ts:200](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L200)
+Defined in: [types.ts:190](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L190)
 
 ## Type declaration
 

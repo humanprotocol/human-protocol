@@ -1,4 +1,9 @@
-import { ChainId, EscrowClient, EscrowUtils } from '@human-protocol/sdk';
+import {
+  ChainId,
+  EscrowClient,
+  EscrowStatus,
+  EscrowUtils,
+} from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 import crypto from 'crypto';
 
@@ -52,9 +57,11 @@ export abstract class BaseEscrowResultsProcessor<TManifest extends JobManifest>
       intermediateResultsUrl,
     );
 
-    await this.assertResultsComplete(fileContent, manifest);
-
     const escrowData = await EscrowUtils.getEscrow(chainId, escrowAddress);
+
+    if (escrowData.status !== EscrowStatus[EscrowStatus.ToCancel]) {
+      await this.assertResultsComplete(fileContent, manifest);
+    }
 
     const encryptedResults = await this.pgpEncryptionService.encrypt(
       fileContent,

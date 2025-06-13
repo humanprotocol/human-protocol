@@ -9,7 +9,8 @@ interface IEscrow {
         Partial,
         Paid,
         Complete,
-        Cancelled
+        Cancelled,
+        ToCancel
     }
 
     function status() external view returns (EscrowStatuses);
@@ -33,7 +34,11 @@ interface IEscrow {
 
     function complete() external;
 
-    function storeResults(string memory _url, string memory _hash) external;
+    function storeResults(
+        string memory _url,
+        string memory _hash,
+        uint256 _amount
+    ) external;
 
     function bulkPayOut(
         address[] memory _recipients,

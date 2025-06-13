@@ -9,10 +9,12 @@ export type IncomingWebhookData = {
 
 export enum IncomingWebhookEventType {
   JOB_COMPLETED = 'job_completed',
+  JOB_CANCELED = 'job_canceled',
 }
 
 export enum OutgoingWebhookEventType {
   ESCROW_COMPLETED = 'escrow_completed',
+  ESCROW_CANCELED = 'escrow_canceled',
   ABUSE_DETECTED = 'abuse_detected',
   ABUSE_DISMISSED = 'abuse_dismissed',
 }

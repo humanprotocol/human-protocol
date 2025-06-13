@@ -39,7 +39,6 @@ import {
   MOCK_FILE_HASH,
   MOCK_FILE_URL,
   MOCK_MAX_RETRY_COUNT,
-  MOCK_TRANSACTION_HASH,
 } from '../../../test/constants';
 import { NetworkConfigService } from '../../common/config/network-config.service';
 import { ServerConfigService } from '../../common/config/server-config.service';
@@ -725,10 +724,7 @@ describe('CronJobService', () => {
 
       jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
 
-      jest.spyOn(jobService, 'processEscrowCancellation').mockResolvedValue({
-        txHash: MOCK_TRANSACTION_HASH,
-        amountRefunded: 1n,
-      });
+      jest.spyOn(jobService, 'processEscrowCancellation').mockResolvedValue();
 
       (EscrowClient.build as any).mockImplementation(() => ({
         getExchangeOracleAddress: jest
@@ -778,7 +774,7 @@ describe('CronJobService', () => {
     });
 
     it('should cancel all of the jobs with status TO_CANCEL', async () => {
-      jest.spyOn(webhookRepository, 'createUnique');
+      jest.spyOn(webhookRepository, 'createMany');
       jest.spyOn(jobService, 'isEscrowFunded').mockResolvedValue(true);
 
       const result = await service.cancelCronJob();
@@ -791,7 +787,7 @@ describe('CronJobService', () => {
       expect(jobService.processEscrowCancellation).toHaveBeenCalledWith(
         jobEntityMock2,
       );
-      expect(webhookRepository.createUnique).toHaveBeenCalledTimes(2);
+      expect(webhookRepository.createMany).toHaveBeenCalledTimes(2);
     });
 
     it('should not call process escrow cancellation when escrowAddress is not present', async () => {
@@ -840,7 +836,7 @@ describe('CronJobService', () => {
 
       expect(jobService.processEscrowCancellation).toHaveBeenCalledTimes(2);
       expect(jobEntityMock1.status).toBe(JobStatus.FAILED);
-      expect(jobEntityMock2.status).toBe(JobStatus.CANCELED);
+      expect(jobEntityMock2.status).toBe(JobStatus.CANCELING);
     });
 
     it('should complete the cron job entity on database to unlock', async () => {

@@ -7,7 +7,7 @@ jest.mock('@human-protocol/sdk', () => ({
 
 import { faker } from '@faker-js/faker/.';
 import { createMock } from '@golevelup/ts-jest';
-import { ChainId, EscrowClient, KVStoreUtils } from '@human-protocol/sdk';
+import { ChainId, KVStoreUtils } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -15,7 +15,6 @@ import { Test } from '@nestjs/testing';
 import { of, throwError } from 'rxjs';
 import {
   MOCK_ADDRESS,
-  MOCK_EXCHANGE_ORACLE_ADDRESS,
   MOCK_EXCHANGE_ORACLE_WEBHOOK_URL,
   MOCK_MAX_RETRY_COUNT,
   mockConfig,
@@ -42,7 +41,6 @@ import { WebhookService } from './webhook.service';
 describe('WebhookService', () => {
   let webhookService: WebhookService,
     webhookRepository: WebhookRepository,
-    web3Service: Web3Service,
     jobService: JobService,
     jobRepository: JobRepository,
     httpService: HttpService;
@@ -94,7 +92,6 @@ describe('WebhookService', () => {
 
     webhookService = moduleRef.get<WebhookService>(WebhookService);
     webhookRepository = moduleRef.get(WebhookRepository);
-    web3Service = moduleRef.get<Web3Service>(Web3Service);
     httpService = moduleRef.get<HttpService>(HttpService);
     jobService = moduleRef.get<JobService>(JobService);
     jobRepository = moduleRef.get<JobRepository>(JobRepository);
@@ -114,20 +111,19 @@ describe('WebhookService', () => {
       hasSignature: false,
       oracleType: OracleType.FORTUNE,
       eventType: EventType.ESCROW_CREATED,
+      oracleAddress: MOCK_ADDRESS,
     };
 
     it('should throw an error if webhook url is empty', async () => {
-      jest
-        .spyOn(webhookService as any, 'getExchangeOracleWebhookUrl')
-        .mockResolvedValue('');
+      KVStoreUtils.get = jest.fn().mockResolvedValue('');
       await expect(
         (webhookService as any).sendWebhook(webhookEntity),
       ).rejects.toThrow(new ServerError(ErrorWebhook.UrlNotFound));
     });
 
     it('should handle error if any exception is thrown', async () => {
-      jest
-        .spyOn(webhookService as any, 'getExchangeOracleWebhookUrl')
+      KVStoreUtils.get = jest
+        .fn()
         .mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
       jest.spyOn(httpService as any, 'post').mockImplementation(() => {
         return throwError(() => new Error('HTTP request failed'));
@@ -138,8 +134,8 @@ describe('WebhookService', () => {
     });
 
     it('should successfully process a fortune webhook', async () => {
-      jest
-        .spyOn(webhookService as any, 'getExchangeOracleWebhookUrl')
+      KVStoreUtils.get = jest
+        .fn()
         .mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
       jest.spyOn(httpService as any, 'post').mockImplementation(() => {
         return of({
@@ -163,8 +159,8 @@ describe('WebhookService', () => {
 
     it('should successfully process a cvat webhook', async () => {
       webhookEntity.oracleType = OracleType.CVAT;
-      jest
-        .spyOn(webhookService as any, 'getExchangeOracleWebhookUrl')
+      KVStoreUtils.get = jest
+        .fn()
         .mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
       jest.spyOn(httpService as any, 'post').mockImplementation(() => {
         return of({
@@ -189,8 +185,8 @@ describe('WebhookService', () => {
     it('should successfully process a fortune webhook with signature', async () => {
       webhookEntity.oracleType = OracleType.FORTUNE;
       webhookEntity.hasSignature = true;
-      jest
-        .spyOn(webhookService as any, 'getExchangeOracleWebhookUrl')
+      KVStoreUtils.get = jest
+        .fn()
         .mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
       jest.spyOn(httpService as any, 'post').mockImplementation(() => {
         return of({
@@ -215,8 +211,8 @@ describe('WebhookService', () => {
     it('should successfully process a cvat webhook with signature', async () => {
       webhookEntity.oracleType = OracleType.CVAT;
       webhookEntity.hasSignature = true;
-      jest
-        .spyOn(webhookService as any, 'getExchangeOracleWebhookUrl')
+      KVStoreUtils.get = jest
+        .fn()
         .mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
       jest.spyOn(httpService as any, 'post').mockImplementation(() => {
         return of({
@@ -236,35 +232,6 @@ describe('WebhookService', () => {
         },
         { headers: { [HEADER_SIGNATURE_KEY]: expect.any(String) } },
       );
-    });
-  });
-
-  describe('getExchangeOracleWebhookUrl', () => {
-    it('should get the exchange oracle webhook URL', async () => {
-      web3Service.getSigner = jest.fn().mockReturnValue({
-        ...signerMock,
-        provider: {
-          getLogs: jest.fn().mockResolvedValue([{}]),
-          getBlockNumber: jest.fn().mockResolvedValue(100),
-        },
-      });
-
-      (EscrowClient.build as any).mockImplementation(() => ({
-        getExchangeOracleAddress: jest
-          .fn()
-          .mockResolvedValue(MOCK_EXCHANGE_ORACLE_ADDRESS),
-      }));
-
-      KVStoreUtils.get = jest
-        .fn()
-        .mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
-
-      const result = await (webhookService as any).getExchangeOracleWebhookUrl(
-        MOCK_EXCHANGE_ORACLE_ADDRESS,
-        ChainId.LOCALHOST,
-      );
-
-      expect(result).toBe(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
     });
   });
 
@@ -315,11 +282,11 @@ describe('WebhookService', () => {
         eventType: EventType.ESCROW_COMPLETED,
       };
 
-      jest.spyOn(jobService, 'completeJob');
+      jest.spyOn(jobService, 'finalizeJob');
 
       expect(await webhookService.handleWebhook(webhook)).toBe(undefined);
 
-      expect(jobService.completeJob).toHaveBeenCalledWith(webhook);
+      expect(jobService.finalizeJob).toHaveBeenCalledWith(webhook);
     });
 
     it('should handle an escrow failed webhook', async () => {
@@ -372,7 +339,7 @@ describe('WebhookService', () => {
       const webhook: WebhookDataDto = {
         chainId,
         escrowAddress,
-        eventType: EventType.ESCROW_CANCELED,
+        eventType: EventType.ESCROW_CREATED,
       };
 
       await expect(webhookService.handleWebhook(webhook)).rejects.toThrow(

@@ -1,15 +1,22 @@
-import { createMock } from '@golevelup/ts-jest';
+jest.mock('@human-protocol/sdk');
+
 import { faker } from '@faker-js/faker';
+import { createMock } from '@golevelup/ts-jest';
 import { Test } from '@nestjs/testing';
-import { ethers } from 'ethers';
 import _ from 'lodash';
 
 import { StorageService } from '../../storage';
 
+import { EscrowClient } from '@human-protocol/sdk';
+import { Web3Service } from '../../web3';
+import { generateTestnetChainId } from '../../web3/fixtures';
 import { generateFortuneManifest, generateFortuneSolution } from '../fixtures';
 import { FortunePayoutsCalculator } from './fortune-payouts-calculator';
 
 const mockedStorageService = createMock<StorageService>();
+const mockedWeb3Service = createMock<Web3Service>();
+
+const mockedEscrowClient = jest.mocked(EscrowClient);
 
 describe('FortunePayoutsCalculator', () => {
   let calculator: FortunePayoutsCalculator;
@@ -22,6 +29,10 @@ describe('FortunePayoutsCalculator', () => {
           provide: StorageService,
           useValue: mockedStorageService,
         },
+        {
+          provide: Web3Service,
+          useValue: mockedWeb3Service,
+        },
       ],
     }).compile();
 
@@ -31,6 +42,17 @@ describe('FortunePayoutsCalculator', () => {
   });
 
   describe('calculate', () => {
+    const balance = BigInt(faker.number.int({ min: 1000 }).toString());
+    const mockedGetReservedFunds = jest
+      .fn()
+      .mockImplementation(async () => balance);
+
+    beforeAll(() => {
+      mockedEscrowClient.build.mockResolvedValue({
+        getReservedFunds: mockedGetReservedFunds,
+      } as unknown as EscrowClient);
+    });
+
     it('should properly calculate payouts', async () => {
       const validSolutions = [
         generateFortuneSolution(),
@@ -47,7 +69,7 @@ describe('FortunePayoutsCalculator', () => {
       const manifest = generateFortuneManifest();
 
       const payouts = await calculator.calculate({
-        chainId: faker.number.int(),
+        chainId: generateTestnetChainId(),
         escrowAddress: faker.finance.ethereumAddress(),
         finalResultsUrl: resultsUrl,
         manifest,
@@ -55,9 +77,7 @@ describe('FortunePayoutsCalculator', () => {
 
       const expectedPayouts = validSolutions.map((s) => ({
         address: s.workerAddress,
-        amount:
-          BigInt(ethers.parseUnits(manifest.fundAmount.toString(), 'ether')) /
-          BigInt(validSolutions.length),
+        amount: balance / BigInt(validSolutions.length),
       }));
 
       expect(_.sortBy(payouts, 'address')).toEqual(

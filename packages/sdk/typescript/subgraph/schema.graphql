@@ -224,6 +224,16 @@ type WithdrawEvent @entity(immutable: true) {
   amount: BigInt!
 }
 
+type CancellationRefundEvent @entity(immutable: true) {
+  id: Bytes!
+  block: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  escrowAddress: Bytes!
+  receiver: Bytes!
+  amount: BigInt!
+}
+
 # KVStore
 type KVStoreSetEvent @entity(immutable: true) {
   id: Bytes!
@@ -309,6 +319,7 @@ type EscrowStatistics @entity {
   storeResultsEventCount: BigInt!
   bulkPayoutEventCount: BigInt!
   pendingStatusEventCount: BigInt!
+  toCancelStatusEventCount: BigInt!
   cancelledStatusEventCount: BigInt!
   partialStatusEventCount: BigInt!
   paidStatusEventCount: BigInt!
@@ -324,6 +335,7 @@ type EventDayData @entity {
   dailyStoreResultsEventCount: BigInt!
   dailyBulkPayoutEventCount: BigInt!
   dailyPendingStatusEventCount: BigInt!
+  dailyToCancelStatusEventCount: BigInt!
   dailyCancelledStatusEventCount: BigInt!
   dailyPartialStatusEventCount: BigInt!
   dailyPaidStatusEventCount: BigInt!

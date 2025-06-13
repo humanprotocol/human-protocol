@@ -32,7 +32,12 @@ from typing import Dict, List, Optional
 from web3 import Web3
 
 from human_protocol_sdk.constants import NETWORKS, ChainId, Status, OrderDirection
-from human_protocol_sdk.filter import EscrowFilter, StatusEventFilter, PayoutFilter
+from human_protocol_sdk.filter import (
+    CancellationRefundFilter,
+    EscrowFilter,
+    StatusEventFilter,
+    PayoutFilter,
+)
 from human_protocol_sdk.utils import (
     get_data_from_subgraph,
 )
@@ -149,6 +154,30 @@ class Payout:
         self.recipient = recipient
         self.amount = amount
         self.created_at = created_at
+
+
+class CancellationRefund:
+    """
+    Represents a cancellation refund event.
+    """
+
+    def __init__(
+        self,
+        id: str,
+        escrow_address: str,
+        receiver: str,
+        amount: int,
+        block: int,
+        timestamp: int,
+        tx_hash: str,
+    ):
+        self.id = id
+        self.escrow_address = escrow_address
+        self.receiver = receiver
+        self.amount = amount
+        self.block = block
+        self.timestamp = timestamp
+        self.tx_hash = tx_hash
 
 
 class EscrowUtils:
@@ -453,3 +482,134 @@ class EscrowUtils:
         ]
 
         return payouts
+
+    @staticmethod
+    def get_cancellation_refunds(
+        filter: CancellationRefundFilter,
+    ) -> List[CancellationRefund]:
+        """
+        Fetch cancellation refunds from the subgraph based on the provided filter.
+
+        :param filter: Object containing all the necessary parameters to filter cancellation refunds.
+
+        :return List[CancellationRefund]: List of cancellation refunds matching the query parameters.
+
+        :raise EscrowClientError: If an unsupported chain ID or invalid addresses are provided.
+        """
+        from human_protocol_sdk.gql.escrow import get_cancellation_refunds_query
+
+        if filter.escrow_address and not Web3.is_address(filter.escrow_address):
+            raise EscrowClientError("Invalid escrow address")
+
+        if filter.receiver and not Web3.is_address(filter.receiver):
+            raise EscrowClientError("Invalid receiver address")
+
+        network = NETWORKS.get(filter.chain_id)
+        if not network:
+            raise EscrowClientError("Unsupported Chain ID")
+
+        data = get_data_from_subgraph(
+            network,
+            get_cancellation_refunds_query(filter),
+            {
+                "escrowAddress": (
+                    filter.escrow_address.lower() if filter.escrow_address else None
+                ),
+                "receiver": filter.receiver.lower() if filter.receiver else None,
+                "from": int(filter.date_from.timestamp()) if filter.date_from else None,
+                "to": int(filter.date_to.timestamp()) if filter.date_to else None,
+                "first": min(filter.first, 1000),
+                "skip": filter.skip,
+                "orderDirection": filter.order_direction.value,
+            },
+        )
+
+        if (
+            not data
+            or "data" not in data
+            or "cancellationRefundEvents" not in data["data"]
+            or not data["data"]["cancellationRefundEvents"]
+        ):
+            return []
+
+        refunds_raw = data["data"]["cancellationRefundEvents"]
+
+        refunds = [
+            CancellationRefund(
+                id=refund["id"],
+                escrow_address=refund["escrowAddress"],
+                receiver=refund["receiver"],
+                amount=int(refund["amount"]),
+                block=int(refund["block"]),
+                timestamp=int(refund["timestamp"]),
+                tx_hash=refund["txHash"],
+            )
+            for refund in refunds_raw
+        ]
+
+        return refunds
+
+    @staticmethod
+    def get_cancellation_refund(
+        chain_id: ChainId, escrow_address: str
+    ) -> CancellationRefund:
+        """
+        Returns the cancellation refund for a given escrow address.
+
+        :param chain_id: Network in which the escrow has been deployed
+        :param escrow_address: Address of the escrow
+
+        :return: CancellationRefund data or None
+
+        :raise EscrowClientError: If an unsupported chain ID or invalid address is provided.
+
+        :example:
+            .. code-block:: python
+
+                from human_protocol_sdk.constants import ChainId
+                from human_protocol_sdk.escrow import EscrowUtils
+
+                refund = EscrowUtils.get_cancellation_refund(
+                    ChainId.POLYGON_AMOY,
+                    "0x1234567890123456789012345678901234567890"
+                )
+        """
+        from human_protocol_sdk.gql.escrow import (
+            get_cancellation_refund_by_escrow_query,
+        )
+
+        if not Web3.is_address(escrow_address):
+            raise EscrowClientError("Invalid escrow address")
+
+        network = NETWORKS.get(chain_id)
+        if not network:
+            raise EscrowClientError("Unsupported Chain ID")
+
+        data = get_data_from_subgraph(
+            network,
+            get_cancellation_refund_by_escrow_query(),
+            {
+                "escrowAddress": escrow_address.lower(),
+            },
+        )
+
+        if (
+            not data
+            or "data" not in data
+            or "cancellationRefundEvents" not in data["data"]
+            or not data["data"]["cancellationRefundEvents"]
+            or len(data["data"]["cancellationRefundEvents"]) == 0
+        ):
+            return None
+
+        refund = data["data"]["cancellationRefundEvents"][0]
+
+        return CancellationRefund(
+            id=refund["id"],
+            escrow_address=refund["escrowAddress"],
+            receiver=refund["receiver"],
+            amount=int(refund["amount"]),
+            block=int(refund["block"]),
+            timestamp=int(refund["timestamp"]),
+            tx_hash=refund["txHash"],
+        )

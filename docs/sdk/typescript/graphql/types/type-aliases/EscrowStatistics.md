@@ -6,16 +6,22 @@
 
 # Type Alias: EscrowStatistics
 
-> **EscrowStatistics**: `object`
+> **EscrowStatistics** = `object`
 
-Defined in: [graphql/types.ts:92](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L92)
+Defined in: [graphql/types.ts:92](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L92)
 
-## Type declaration
+## Properties
 
 ### dailyEscrowsData
 
 > **dailyEscrowsData**: [`DailyEscrowData`](DailyEscrowData.md)[]
 
+Defined in: [graphql/types.ts:94](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L94)
+
+***
+
 ### totalEscrows
 
 > **totalEscrows**: `number`
+
+Defined in: [graphql/types.ts:93](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L93)

@@ -117,7 +117,10 @@ export class EscrowCompletionService {
         const escrowStatus = await escrowClient.getStatus(
           escrowCompletionEntity.escrowAddress,
         );
-        if (escrowStatus === EscrowStatus.Pending) {
+        if (
+          escrowStatus === EscrowStatus.Pending ||
+          escrowStatus === EscrowStatus.ToCancel
+        ) {
           const escrowData = await EscrowUtils.getEscrow(
             escrowCompletionEntity.chainId,
             escrowCompletionEntity.escrowAddress,
@@ -185,6 +188,9 @@ export class EscrowCompletionService {
         }
 
         escrowCompletionEntity.status = EscrowCompletionStatus.AWAITING_PAYOUTS;
+        if (escrowStatus === EscrowStatus.Cancelled) {
+          escrowCompletionEntity.status = EscrowCompletionStatus.PAID;
+        }
         await this.escrowCompletionRepository.updateOne(escrowCompletionEntity);
       } catch (error) {
         this.logger.error('Failed to process pending escrow completion', {
@@ -239,7 +245,10 @@ export class EscrowCompletionService {
         const webhookPayload = {
           chainId,
           escrowAddress,
-          eventType: OutgoingWebhookEventType.ESCROW_COMPLETED,
+          eventType:
+            escrowData.status === EscrowStatus[EscrowStatus.Cancelled]
+              ? OutgoingWebhookEventType.ESCROW_CANCELED
+              : OutgoingWebhookEventType.ESCROW_COMPLETED,
         };
 
         let allWebhooksCreated = true;

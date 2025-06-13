@@ -705,6 +705,34 @@ Gets the reputation oracle address of the escrow.
   )
   ```
 
+#### get_reserved_funds(escrow_address)
+
+Gets the reserved funds for a specified escrow address.
+
+* **Parameters:**
+  **escrow_address** (`str`) – Address of the escrow
+* **Return type:**
+  `Decimal`
+* **Returns:**
+  Value of the reserved funds
+* **Raises:**
+  [**EscrowClientError**](#human_protocol_sdk.escrow.escrow_client.EscrowClientError) – If an error occurs while checking the parameters
+* **Example:**
+  ```python
+  from eth_typing import URI
+  from web3 import Web3
+  from web3.providers.auto import load_provider_from_uri
+
+  from human_protocol_sdk.escrow import EscrowClient
+
+  w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+  escrow_client = EscrowClient(w3)
+
+  reserved_funds = escrow_client.get_reserved_funds(
+      "0x62dD51230A30401C455c8398d06F85e4EaB6309f"
+  )
+  ```
+
 #### get_results_url(escrow_address)
 
 Gets the results file URL.
@@ -843,7 +871,7 @@ Sets up the parameters of the escrow.
 * **Return type:**
   `None`
 
-#### store_results(escrow_address, url, hash, tx_options=None)
+#### store_results(escrow_address, url, hash, amount, tx_options=None)
 
 Stores the results URL.
 
@@ -851,6 +879,7 @@ Stores the results URL.
   * **escrow_address** (`str`) – Address of the escrow
   * **url** (`str`) – Results file URL
   * **hash** (`str`) – Results file hash
+  * **amount** (`Decimal`) – Amount to reserve for payouts
   * **tx_options** (`Optional`[`TxParams`]) – (Optional) Additional transaction parameters
 * **Return type:**
   `None`
@@ -884,7 +913,8 @@ Stores the results URL.
   escrow_client.store_results(
       "0x62dD51230A30401C455c8398d06F85e4EaB6309f",
       "http://localhost/results.json",
-      "b5dad76bf6772c0f07fd5e048f6e75a5f86ee079"
+      "b5dad76bf6772c0f07fd5e048f6e75a5f86ee079",
+      Web3.to_wei(5, 'ether')
   )
   ```
 
