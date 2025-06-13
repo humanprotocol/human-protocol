@@ -67,6 +67,6 @@ jobs:
         working-directory: ./packages/sdk/typescript/subgraph
         run: |
           yarn dlx @graphprotocol/graph-cli@0.71.2 \
-            graph auth --studio "$API_KEY"
+            auth --studio "$API_KEY"
           yarn dlx @graphprotocol/graph-cli@0.71.2 \
-            graph deploy --studio ${NETWORK} -l ${LABEL}
+            deploy --studio ${NETWORK} -l ${LABEL}
