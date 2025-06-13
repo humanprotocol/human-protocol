@@ -5,14 +5,20 @@ import {
   Controller,
   HttpCode,
   Post,
-  UsePipes,
-  ValidationPipe,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-
-import { Authorization } from '../../common/config/params-decorators';
-
-import { OperatorService } from './operator.service';
+import { JwtAuthGuard } from '../../common/guards/jwt.auth';
+import { RequestWithUser } from '../../common/interfaces/jwt';
+import {
+  DisableOperatorCommand,
+  DisableOperatorDto,
+} from './model/disable-operator.model';
+import {
+  EnableOperatorCommand,
+  EnableOperatorDto,
+} from './model/enable-operator.model';
 import {
   SignupOperatorCommand,
   SignupOperatorDto,
@@ -23,26 +29,19 @@ import {
   SigninOperatorResponse,
   SignupOperatorResponse,
 } from './model/operator-signin.model';
-import {
-  DisableOperatorCommand,
-  DisableOperatorDto,
-} from './model/disable-operator.model';
-import {
-  EnableOperatorCommand,
-  EnableOperatorDto,
-} from './model/enable-operator.model';
+import { OperatorService } from './operator.service';
 
+@ApiTags('User-Operator')
 @Controller()
 export class OperatorController {
   constructor(
     private readonly service: OperatorService,
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
-  @ApiTags('User-Operator')
+
   @Post('/auth/web3/signup')
   @HttpCode(200)
   @ApiOperation({ summary: 'Operator signup' })
-  @UsePipes(new ValidationPipe())
   async signupOperator(
     @Body() signupOperatorDto: SignupOperatorDto,
   ): Promise<SignupOperatorResponse> {
@@ -54,11 +53,9 @@ export class OperatorController {
     return this.service.signupOperator(signupOperatorCommand);
   }
 
-  @ApiTags('User-Operator')
   @Post('/auth/web3/signin')
   @HttpCode(200)
   @ApiOperation({ summary: 'Operator signin' })
-  @UsePipes(new ValidationPipe())
   async signinOperator(
     @Body() dto: SigninOperatorDto,
   ): Promise<SigninOperatorResponse> {
@@ -70,45 +67,43 @@ export class OperatorController {
     return this.service.signinOperator(command);
   }
 
-  @ApiTags('User-Operator')
   @Post('/disable-operator')
   @HttpCode(200)
   @ApiOperation({
     summary: 'Endpoint to disable an operator',
   })
   @ApiBearerAuth()
-  @UsePipes(new ValidationPipe())
+  @UseGuards(JwtAuthGuard)
   async disableOperator(
     @Body() disableOperatorDto: DisableOperatorDto,
-    @Authorization() token: string,
+    @Request() req: RequestWithUser,
   ): Promise<void> {
     const disableOperatorCommand = this.mapper.map(
       disableOperatorDto,
       DisableOperatorDto,
       DisableOperatorCommand,
     );
-    disableOperatorCommand.token = token;
+    disableOperatorCommand.token = req.token;
     await this.service.disableOperator(disableOperatorCommand);
   }
 
-  @ApiTags('User-Operator')
   @Post('/enable-operator')
   @HttpCode(200)
   @ApiOperation({
     summary: 'Endpoint to enable an operator',
   })
   @ApiBearerAuth()
-  @UsePipes(new ValidationPipe())
+  @UseGuards(JwtAuthGuard)
   async enable(
     @Body() enableOperatorDto: EnableOperatorDto,
-    @Authorization() token: string,
+    @Request() req: RequestWithUser,
   ): Promise<void> {
     const enableOperatorCommand = this.mapper.map(
       enableOperatorDto,
       EnableOperatorDto,
       EnableOperatorCommand,
     );
-    enableOperatorCommand.token = token;
+    enableOperatorCommand.token = req.token;
     await this.service.enableOperator(enableOperatorCommand);
   }
 }

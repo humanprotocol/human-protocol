@@ -1,12 +1,9 @@
-import {
-  Controller,
-  Get,
-  Query,
-  UsePipes,
-  ValidationPipe,
-} from '@nestjs/common';
+import { Mapper } from '@automapper/core';
+import { InjectMapper } from '@automapper/nestjs';
+import { Controller, Get, Query, Request, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { StatisticsService } from './statistics.service';
+import { JwtAuthGuard } from '../../common/guards/jwt.auth';
+import { RequestWithUser } from '../../common/interfaces/jwt';
 import {
   OracleStatisticsCommand,
   OracleStatisticsDto,
@@ -17,24 +14,18 @@ import {
   UserStatisticsDto,
   UserStatisticsResponse,
 } from './model/user-statistics.model';
-import {
-  Authorization,
-  JwtPayload,
-} from '../../common/config/params-decorators';
-import { InjectMapper } from '@automapper/nestjs';
-import { Mapper } from '@automapper/core';
-import { JwtUserData } from '../../common/utils/jwt-token.model';
+import { StatisticsService } from './statistics.service';
 
+@ApiTags('Statistics')
 @Controller()
 export class StatisticsController {
   constructor(
     private readonly service: StatisticsService,
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
-  @ApiTags('Statistics')
+
   @Get('/stats')
   @ApiOperation({ summary: 'General Oracle Statistics' })
-  @UsePipes(new ValidationPipe())
   public getOracleStatistics(
     @Query() dto: OracleStatisticsDto,
   ): Promise<OracleStatisticsResponse> {
@@ -50,19 +41,18 @@ export class StatisticsController {
   @Get('stats/assignment')
   @ApiOperation({ summary: 'Statistics for requesting user' })
   @ApiBearerAuth()
-  @UsePipes(new ValidationPipe())
+  @UseGuards(JwtAuthGuard)
   public getUserStatistics(
     @Query() dto: UserStatisticsDto,
-    @JwtPayload() payload: JwtUserData,
-    @Authorization() token: string,
+    @Request() req: RequestWithUser,
   ): Promise<UserStatisticsResponse> {
     const command = this.mapper.map(
       dto,
       UserStatisticsDto,
       UserStatisticsCommand,
     );
-    command.token = token;
-    command.walletAddress = payload.wallet_address;
+    command.token = req.token;
+    command.walletAddress = req.user.wallet_address;
     return this.service.getUserStats(command);
   }
 }

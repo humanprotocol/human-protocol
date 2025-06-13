@@ -1,14 +1,10 @@
-import {
-  Body,
-  Controller,
-  Post,
-  UsePipes,
-  ValidationPipe,
-} from '@nestjs/common';
-import { EmailConfirmationService } from './email-confirmation.service';
-import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
+import { InjectMapper } from '@automapper/nestjs';
+import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../../common/guards/jwt.auth';
+import { RequestWithUser } from '../../common/interfaces/jwt';
+import { EmailConfirmationService } from './email-confirmation.service';
 import {
   EmailVerificationCommand,
   EmailVerificationDto,
@@ -17,8 +13,8 @@ import {
   ResendEmailVerificationCommand,
   ResendEmailVerificationDto,
 } from './model/resend-email-verification.model';
-import { Authorization } from '../../common/config/params-decorators';
 
+@ApiTags('Email-Confirmation')
 @Controller('/email-confirmation')
 export class EmailConfirmationController {
   constructor(
@@ -26,12 +22,10 @@ export class EmailConfirmationController {
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
 
-  @ApiTags('Email-Confirmation')
   @Post('/email-verification')
   @ApiOperation({
     summary: 'Endpoint to verify the user email address',
   })
-  @UsePipes(new ValidationPipe())
   public async verifyEmail(
     @Body() emailVerificationDto: EmailVerificationDto,
   ): Promise<void> {
@@ -43,23 +37,22 @@ export class EmailConfirmationController {
     return this.service.processEmailVerification(emailVerificationCommand);
   }
 
-  @ApiTags('Email-Confirmation')
+  @UseGuards(JwtAuthGuard)
   @Post('/resend-email-verification')
   @ApiOperation({
     summary: 'Endpoint to resend the email verification link',
   })
   @ApiBearerAuth()
-  @UsePipes(new ValidationPipe())
   public async resendEmailVerification(
     @Body() resendEmailVerificationDto: ResendEmailVerificationDto,
-    @Authorization() token: string,
+    @Request() req: RequestWithUser,
   ): Promise<void> {
     const resendEmailVerificationCommand = this.mapper.map(
       resendEmailVerificationDto,
       ResendEmailVerificationDto,
       ResendEmailVerificationCommand,
     );
-    resendEmailVerificationCommand.token = token;
+    resendEmailVerificationCommand.token = req.token;
     return this.service.processResendEmailVerification(
       resendEmailVerificationCommand,
     );

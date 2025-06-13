@@ -1,3 +1,5 @@
+import { Mapper } from '@automapper/core';
+import { InjectMapper } from '@automapper/nestjs';
 import {
   Body,
   Controller,
@@ -5,27 +7,28 @@ import {
   Post,
   Put,
   Query,
-  UsePipes,
-  ValidationPipe,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { InjectMapper } from '@automapper/nestjs';
-import { Mapper } from '@automapper/core';
+import { JwtAuthGuard } from '../../common/guards/jwt.auth';
+import { RequestWithUser } from '../../common/interfaces/jwt';
 import { JobAssignmentService } from './job-assignment.service';
 import {
-  JobAssignmentDto,
   JobAssignmentCommand,
+  JobAssignmentDto,
   JobAssignmentResponse,
-  JobsFetchParamsDto,
   JobsFetchParamsCommand,
+  JobsFetchParamsDto,
   JobsFetchResponse,
-  ResignJobDto,
-  ResignJobCommand,
   RefreshJobDto,
+  ResignJobCommand,
+  ResignJobDto,
 } from './model/job-assignment.model';
-import { Authorization } from '../../common/config/params-decorators';
 
 @ApiTags('Job-Assignment')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('/assignment')
 export class JobAssignmentController {
   constructor(
@@ -37,66 +40,61 @@ export class JobAssignmentController {
   @ApiOperation({
     summary: 'Request to assign a job to a logged user',
   })
-  @ApiBearerAuth()
-  @UsePipes(new ValidationPipe())
   public async assignJob(
     @Body() jobAssignmentDto: JobAssignmentDto,
-    @Authorization() token: string,
+    @Request() req: RequestWithUser,
   ): Promise<JobAssignmentResponse> {
     const jobAssignmentCommand = this.mapper.map(
       jobAssignmentDto,
       JobAssignmentDto,
       JobAssignmentCommand,
     );
-    jobAssignmentCommand.token = token;
+    jobAssignmentCommand.token = req.token;
     return this.service.processJobAssignment(jobAssignmentCommand);
   }
 
   @Get('/job')
-  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Request to get jobs assigned to a logged user',
   })
   public async getAssignedJobs(
     @Query() jobsAssignmentParamsDto: JobsFetchParamsDto,
-    @Authorization() token: string,
+    @Request() req: RequestWithUser,
   ): Promise<JobsFetchResponse> {
     const jobsAssignmentParamsCommand = this.mapper.map(
       jobsAssignmentParamsDto,
       JobsFetchParamsDto,
       JobsFetchParamsCommand,
     );
-    jobsAssignmentParamsCommand.token = token;
+    jobsAssignmentParamsCommand.token = req.token;
 
     return this.service.processGetAssignedJobs(jobsAssignmentParamsCommand);
   }
 
   @Post('/resign-job')
-  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Request to resign from assigment',
   })
   public async resignAssigment(
     @Body() dto: ResignJobDto,
-    @Authorization() token: string,
+    @Request() req: RequestWithUser,
   ) {
     const command = this.mapper.map(dto, ResignJobDto, ResignJobCommand);
-    command.token = token;
+    command.token = req.token;
     return this.service.resignJob(command);
   }
 
   @Put('/refresh')
-  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Request to refresh assigments data',
   })
   public async refreshAssigments(
     @Body() dto: RefreshJobDto,
-    @Authorization() token: string,
+    @Request() req: RequestWithUser,
   ) {
     const command = new JobsFetchParamsCommand();
     command.oracleAddress = dto.oracle_address;
-    command.token = token;
+    command.token = req.token;
     return this.service.updateAssignmentsCache(command);
   }
 }

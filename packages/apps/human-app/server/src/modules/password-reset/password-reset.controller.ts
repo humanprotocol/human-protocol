@@ -1,13 +1,6 @@
-import {
-  Body,
-  Controller,
-  Post,
-  UsePipes,
-  ValidationPipe,
-} from '@nestjs/common';
-import { PasswordResetService } from './password-reset.service';
-import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
+import { InjectMapper } from '@automapper/nestjs';
+import { Body, Controller, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   ForgotPasswordCommand,
@@ -17,7 +10,9 @@ import {
   RestorePasswordCommand,
   RestorePasswordDto,
 } from './model/restore-password.model';
+import { PasswordResetService } from './password-reset.service';
 
+@ApiTags('Password-Reset')
 @Controller('/password-reset')
 export class PasswordResetController {
   constructor(
@@ -25,12 +20,10 @@ export class PasswordResetController {
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
 
-  @ApiTags('Password-Reset')
   @Post('/forgot-password')
   @ApiOperation({
     summary: 'Endpoint to initiate the password reset process',
   })
-  @UsePipes(new ValidationPipe())
   public async forgotPassword(
     @Body() forgotPasswordDto: ForgotPasswordDto,
   ): Promise<void> {
@@ -42,12 +35,10 @@ export class PasswordResetController {
     return await this.service.processForgotPassword(forgotPasswordCommand);
   }
 
-  @ApiTags('Password-Reset')
   @Post('/restore-password')
   @ApiOperation({
     summary: 'Endpoint to restore the user password after reset',
   })
-  @UsePipes(new ValidationPipe())
   public async restorePassword(@Body() dto: RestorePasswordDto): Promise<void> {
     const command = this.mapper.map(
       dto,

@@ -1,23 +1,22 @@
+import { Mapper } from '@automapper/core';
+import { InjectMapper } from '@automapper/nestjs';
 import {
   Controller,
   Get,
   HttpException,
   HttpStatus,
   Query,
-  UsePipes,
-  ValidationPipe,
 } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { OracleDiscoveryService } from './oracle-discovery.service';
+import { EnvironmentConfigService } from '../../common/config/environment-config.service';
 import {
+  DiscoveredOracle,
   GetOraclesCommand,
   GetOraclesQuery,
-  DiscoveredOracle,
 } from './model/oracle-discovery.model';
-import { InjectMapper } from '@automapper/nestjs';
-import { Mapper } from '@automapper/core';
-import { EnvironmentConfigService } from '../../common/config/environment-config.service';
+import { OracleDiscoveryService } from './oracle-discovery.service';
 
+@ApiTags('Oracle-Discovery')
 @Controller()
 export class OracleDiscoveryController {
   constructor(
@@ -25,14 +24,13 @@ export class OracleDiscoveryController {
     private readonly environmentConfigService: EnvironmentConfigService,
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
-  @ApiTags('Oracle-Discovery')
+
   @Get('/oracles')
   @ApiOperation({ summary: 'Oracles discovery' })
   @ApiOkResponse({
     type: Array<DiscoveredOracle>,
     description: 'List of oracles',
   })
-  @UsePipes(new ValidationPipe())
   public async getOracles(
     @Query() query: GetOraclesQuery,
   ): Promise<DiscoveredOracle[]> {

@@ -46,6 +46,7 @@ import { NDAModule } from './modules/nda/nda.module';
 import { NDAController } from './modules/nda/nda.controller';
 import { AbuseController } from './modules/abuse/abuse.controller';
 import { AbuseModule } from './modules/abuse/abuse.module';
+import { JwtHttpStrategy } from './common/guards/strategy';
 
 const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
 
@@ -146,7 +147,7 @@ const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
     AbuseController,
   ],
   exports: [HttpModule],
-  providers: [EnvironmentConfigService],
+  providers: [EnvironmentConfigService, JwtHttpStrategy],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

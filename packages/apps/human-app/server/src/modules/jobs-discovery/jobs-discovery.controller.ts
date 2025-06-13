@@ -1,9 +1,13 @@
+import { Mapper } from '@automapper/core';
+import { InjectMapper } from '@automapper/nestjs';
 import {
   Controller,
   Get,
   HttpException,
   HttpStatus,
   Query,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -11,22 +15,19 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { InjectMapper } from '@automapper/nestjs';
-import { Mapper } from '@automapper/core';
+import { EnvironmentConfigService } from '../../common/config/environment-config.service';
+import { JwtAuthGuard } from '../../common/guards/jwt.auth';
+import { RequestWithUser } from '../../common/interfaces/jwt';
 import { JobsDiscoveryService } from './jobs-discovery.service';
 import {
   JobsDiscoveryParamsCommand,
   JobsDiscoveryParamsDto,
   JobsDiscoveryResponse,
 } from './model/jobs-discovery.model';
-import {
-  Authorization,
-  JwtPayload,
-} from '../../common/config/params-decorators';
-import { JwtUserData } from '../../common/utils/jwt-token.model';
-import { EnvironmentConfigService } from '../../common/config/environment-config.service';
 
 @Controller()
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @ApiTags('Jobs-Discovery')
 export class JobsDiscoveryController {
   constructor(
@@ -36,15 +37,13 @@ export class JobsDiscoveryController {
   ) {}
 
   @Get('/jobs')
-  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Retrieve a list of jobs for given Exchange Oracle',
   })
   @ApiOkResponse({ type: JobsDiscoveryResponse, description: 'List of jobs' })
   public async getJobs(
     @Query() jobsDiscoveryParamsDto: JobsDiscoveryParamsDto,
-    @JwtPayload() jwtPayload: JwtUserData,
-    @Authorization() token: string,
+    @Request() req: RequestWithUser,
   ): Promise<JobsDiscoveryResponse> {
     if (!this.environmentConfigService.jobsDiscoveryFlag) {
       throw new HttpException(
@@ -58,8 +57,8 @@ export class JobsDiscoveryController {
         JobsDiscoveryParamsDto,
         JobsDiscoveryParamsCommand,
       );
-    jobsDiscoveryParamsCommand.token = token;
-    jobsDiscoveryParamsCommand.data.qualifications = jwtPayload.qualifications;
+    jobsDiscoveryParamsCommand.token = req.token;
+    jobsDiscoveryParamsCommand.data.qualifications = req.user.qualifications;
     return await this.service.processJobsDiscovery(jobsDiscoveryParamsCommand);
   }
 }

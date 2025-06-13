@@ -9,6 +9,7 @@ export class UiConfigurationController {
   constructor(
     private readonly environmentConfigService: EnvironmentConfigService,
   ) {}
+
   @Get('/ui-config')
   @ApiOperation({ summary: 'Retrieve UI configuration' })
   @ApiOkResponse({

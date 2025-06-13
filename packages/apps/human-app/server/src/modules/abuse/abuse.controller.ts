@@ -5,8 +5,8 @@ import {
   Controller,
   Get,
   Post,
-  UsePipes,
-  ValidationPipe,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -14,16 +14,18 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { Authorization } from '../../common/config/params-decorators';
+import { JwtAuthGuard } from '../../common/guards/jwt.auth';
+import { RequestWithUser } from '../../common/interfaces/jwt';
 import { AbuseService } from './abuse.service';
 import {
-  ReportedAbuseResponse,
   ReportAbuseCommand,
   ReportAbuseDto,
+  ReportedAbuseResponse,
 } from './model/abuse.model';
 
 @ApiBearerAuth()
 @ApiTags('Abuse')
+@UseGuards(JwtAuthGuard)
 @Controller('/abuse')
 export class AbuseController {
   constructor(
@@ -39,17 +41,16 @@ export class AbuseController {
     status: 200,
     description: 'Abuse report successfully submitted',
   })
-  @UsePipes(new ValidationPipe())
   public async reportAbuse(
     @Body() AbuseDto: ReportAbuseDto,
-    @Authorization() token: string,
+    @Request() req: RequestWithUser,
   ): Promise<void> {
     const AbuseCommand = this.mapper.map(
       AbuseDto,
       ReportAbuseDto,
       ReportAbuseCommand,
     );
-    AbuseCommand.token = token;
+    AbuseCommand.token = req.token;
     return this.service.reportAbuse(AbuseCommand);
   }
 
@@ -63,8 +64,8 @@ export class AbuseController {
     type: ReportedAbuseResponse,
   })
   public async getUserAbuseReports(
-    @Authorization() token: string,
+    @Request() req: RequestWithUser,
   ): Promise<ReportedAbuseResponse> {
-    return this.service.getUserAbuseReports(token);
+    return this.service.getUserAbuseReports(req.token);
   }
 }
