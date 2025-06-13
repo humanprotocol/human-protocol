@@ -1,7 +1,7 @@
 import { Logger } from '../types';
 
 const logger: Logger = {
-  child: jest.fn(() => logger),
+  child: () => logger,
   info: jest.fn(),
   debug: jest.fn(),
   error: jest.fn(),
