@@ -56,7 +56,7 @@ jobs:
         if: steps.filter_networks.outputs.continue == 'true'
         env:
           API_KEY:   ${{ secrets.HP_GRAPH_API_KEY }}
-          NETWORK:   ${{ matrix.network }}
+          NETWORK:   ${{ matrix.network.name }}
           LABEL:  ${{ github.event.inputs.label }}
         working-directory: ./packages/sdk/typescript/subgraph
         run: |
