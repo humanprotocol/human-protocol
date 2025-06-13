@@ -25,7 +25,6 @@
 - [IMDataEntity](type-aliases/IMDataEntity.md)
 - [KVStoreData](type-aliases/KVStoreData.md)
 - [PaymentStatistics](type-aliases/PaymentStatistics.md)
-- [PayoutData](type-aliases/PayoutData.md)
 - [RewardAddedEventData](type-aliases/RewardAddedEventData.md)
 - [StatusEvent](type-aliases/StatusEvent.md)
 - [TaskStatistics](type-aliases/TaskStatistics.md)
