@@ -34,12 +34,8 @@ export enum PaymentStatus {
   PENDING = 'pending',
   FAILED = 'failed',
   SUCCEEDED = 'succeeded',
-}
-
-export enum StripePaymentStatus {
   CANCELED = 'canceled',
   REQUIRES_PAYMENT_METHOD = 'requires_payment_method',
-  SUCCEEDED = 'succeeded',
 }
 
 export enum PaymentSortField {

@@ -6,4 +6,4 @@ import { StripeConfigService } from '../../common/config/stripe-config.service';
   providers: [StripeService, StripeConfigService],
   exports: [StripeService],
 })
-export class StripeModule {} 
+export class StripeModule {}

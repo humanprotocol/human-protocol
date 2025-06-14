@@ -16,7 +16,6 @@ import {
   PaymentSource,
   PaymentStatus,
   PaymentType,
-  StripePaymentStatus,
   VatType,
 } from '../../common/enums/payment';
 import { add, div, eq, lt, mul } from '../../common/utils/decimal';
@@ -48,7 +47,7 @@ import { JobRepository } from '../job/job.repository';
 import { RateService } from '../rate/rate.service';
 import { UserEntity } from '../user/user.entity';
 import { UserRepository } from '../user/user.repository';
-import { StripeService } from '../stripe/stripe.service';
+import { PaymentProvider } from './payment-provider.abstract';
 
 @Injectable()
 export class PaymentService {
@@ -63,25 +62,24 @@ export class PaymentService {
     private readonly jobRepository: JobRepository,
     private readonly serverConfigService: ServerConfigService,
     private readonly rateService: RateService,
-    private readonly stripeService: StripeService,
-  ) { }
+    private readonly paymentProvider: PaymentProvider,
+  ) {}
 
   public async createCustomerAndAssignCard(user: UserEntity): Promise<string> {
-    // Creates a new Stripe customer if the user does not already have one.
-    // It then initiates a SetupIntent to link a payment method (card) to the customer.
-
     let customerId = user.paymentProviderId;
 
     if (!customerId) {
-      customerId = await this.stripeService.createCustomer(user.email);
+      customerId = await this.paymentProvider.createCustomer(user.email);
     }
 
-    return await this.stripeService.createSetupIntentAndReturnSecret(customerId);
+    return await this.paymentProvider.createSetupIntent(customerId);
   }
 
-  public async confirmCard(user: UserEntity, data: CardConfirmDto): Promise<boolean> {
-    // Confirms the card setup using the Stripe SetupIntent and sets it as the default payment method if requested.
-    const setup = await this.stripeService.retrieveSetupIntent(data.setupId);
+  public async confirmCard(
+    user: UserEntity,
+    data: CardConfirmDto,
+  ): Promise<boolean> {
+    const setup = await this.paymentProvider.retrieveSetupIntent(data.setupId);
 
     if (!setup) {
       this.logger.log(ErrorPayment.SetupNotFound, PaymentService.name);
@@ -90,20 +88,17 @@ export class PaymentService {
 
     let defaultPaymentMethod: string | null = null;
     if (!user.paymentProviderId) {
-      // Assign the Stripe customer ID to the user if it does not exist yet.
       user.paymentProviderId = setup.customer as string;
       await this.userRepository.updateOne(user);
     } else {
-      // Check if the user already has a default payment method.
-      defaultPaymentMethod = await this.getDefaultPaymentMethod(user.paymentProviderId);
+      defaultPaymentMethod = await this.getDefaultPaymentMethod(
+        user.paymentProviderId,
+      );
     }
 
     if (data.defaultCard || !defaultPaymentMethod) {
-      // Update Stripe customer settings to use this payment method by default.
-      await this.stripeService.updateCustomer(user.paymentProviderId, {
-        invoice_settings: {
-          default_payment_method: setup.payment_method as string,
-        },
+      await this.paymentProvider.updateCustomer(user.paymentProviderId, {
+        default_payment_method: setup.payment_method as string,
       });
     }
 
@@ -121,14 +116,14 @@ export class PaymentService {
       throw new NotFoundError(ErrorPayment.CustomerNotFound);
     }
 
-    const invoice = await this.stripeService.createInvoice(
+    const invoice = await this.paymentProvider.createInvoice(
       user.paymentProviderId,
       amountInCents,
       currency,
       'Top up',
     );
 
-    const paymentIntent = await this.stripeService.handlePaymentIntent(
+    const paymentIntent = await this.paymentProvider.handlePaymentIntent(
       invoice.payment_intent as string,
       paymentMethodId,
       false, // on-session payment
@@ -164,8 +159,7 @@ export class PaymentService {
     userId: number,
     data: PaymentFiatConfirmDto,
   ): Promise<boolean> {
-    // Confirms a fiat payment based on the PaymentIntent ID and updates its status in the system.
-    const paymentData = await this.stripeService.retrievePaymentIntent(
+    const paymentData = await this.paymentProvider.retrievePaymentIntent(
       data.paymentId,
     );
 
@@ -189,13 +183,14 @@ export class PaymentService {
     }
 
     if (
-      paymentData?.status === StripePaymentStatus.CANCELED ||
-      paymentData?.status === StripePaymentStatus.REQUIRES_PAYMENT_METHOD
+      paymentData.status === PaymentStatus.CANCELED ||
+      paymentData.status === PaymentStatus.REQUIRES_PAYMENT_METHOD
     ) {
       paymentEntity.status = PaymentStatus.FAILED;
       await this.paymentRepository.updateOne(paymentEntity);
+
       throw new ConflictError(ErrorPayment.NotSuccess);
-    } else if (paymentData?.status !== StripePaymentStatus.SUCCEEDED) {
+    } else if (paymentData.status !== PaymentStatus.SUCCEEDED) {
       return false; // TODO: Handling other cases
     }
 
@@ -311,12 +306,10 @@ export class PaymentService {
       currency,
     );
 
-    const balance = paymentEntities.reduce(
+    return paymentEntities.reduce(
       (sum, payment) => add(sum, Number(payment.amount)),
       0,
     );
-
-    return balance;
   }
 
   public async createRefundPayment(dto: PaymentRefund) {
@@ -357,7 +350,7 @@ export class PaymentService {
     }
 
     const amountInCents = Math.ceil(mul(amount, 100));
-    const invoice = await this.stripeService.createInvoice(
+    const invoice = await this.paymentProvider.createInvoice(
       user.paymentProviderId,
       amountInCents,
       currency,
@@ -372,7 +365,7 @@ export class PaymentService {
       throw new ServerError(ErrorPayment.NotDefaultPaymentMethod);
     }
 
-    const paymentIntent = await this.stripeService.handlePaymentIntent(
+    const paymentIntent = await this.paymentProvider.handlePaymentIntent(
       invoice.payment_intent as string,
       defaultPaymentMethod,
       true, // off-session payment
@@ -437,19 +430,22 @@ export class PaymentService {
       return cards;
     }
 
-    // List all the payment methods (cards) associated with the user's Stripe account
-    const paymentMethods = await this.stripeService.listPaymentMethods(user.paymentProviderId);
+    // List all the payment methods (cards) associated with the user's account
+    const paymentMethods = await this.paymentProvider.listPaymentMethods(
+      user.paymentProviderId,
+    );
 
-    // Get the default payment method for the user
-    const defaultPaymentMethod = await this.getDefaultPaymentMethod(user.paymentProviderId);
+    const defaultPaymentMethod = await this.getDefaultPaymentMethod(
+      user.paymentProviderId,
+    );
 
     for (const paymentMethod of paymentMethods) {
       const card = new CardDto();
       card.id = paymentMethod.id;
-      card.brand = paymentMethod.card?.brand as string;
-      card.last4 = paymentMethod.card?.last4 as string;
-      card.expMonth = paymentMethod.card?.exp_month as number;
-      card.expYear = paymentMethod.card?.exp_year as number;
+      card.brand = paymentMethod.brand;
+      card.last4 = paymentMethod.last4;
+      card.expMonth = paymentMethod.expMonth;
+      card.expYear = paymentMethod.expYear;
       card.default = defaultPaymentMethod === paymentMethod.id;
       cards.push(card);
     }
@@ -458,20 +454,21 @@ export class PaymentService {
 
   async deletePaymentMethod(user: UserEntity, paymentMethodId: string) {
     // Retrieve the payment method to be detached
-    const paymentMethod = await this.stripeService.retrievePaymentMethod(paymentMethodId);
+    const paymentMethod =
+      await this.paymentProvider.retrievePaymentMethod(paymentMethodId);
 
     // Check if the payment method is the default one and in use for the user
     if (
       user.paymentProviderId &&
       paymentMethod.id ===
-      (await this.getDefaultPaymentMethod(user.paymentProviderId)) &&
+        (await this.getDefaultPaymentMethod(user.paymentProviderId)) &&
       (await this.isPaymentMethodInUse(user.id))
     ) {
       throw new ConflictError(ErrorPayment.PaymentMethodInUse);
     }
 
     // Detach the payment method from the user's account
-    return this.stripeService.detachPaymentMethod(paymentMethodId);
+    return this.paymentProvider.detachPaymentMethod(paymentMethodId);
   }
 
   async getUserBillingInfo(user: UserEntity): Promise<BillingInfoDto | null> {
@@ -479,12 +476,13 @@ export class PaymentService {
       return null;
     }
 
-    // Retrieve the customer's tax IDs and customer information
-    const taxIds = await this.stripeService.listCustomerTaxIds(
+    const taxIds = await this.paymentProvider.listCustomerTaxIds(
       user.paymentProviderId,
     );
 
-    const customer = await this.stripeService.retrieveCustomer(user.paymentProviderId);
+    const customer = await this.paymentProvider.retrieveCustomer(
+      user.paymentProviderId,
+    );
 
     const userBillingInfo = new BillingInfoDto();
     if (customer.address) {
@@ -509,19 +507,20 @@ export class PaymentService {
     if (!user.paymentProviderId) {
       throw new NotFoundError(ErrorPayment.CustomerNotFound);
     }
-    // If the VAT or VAT type has changed, update it in Stripe
-    const existingTaxIds = await this.stripeService.listCustomerTaxIds(
+
+    const existingTaxIds = await this.paymentProvider.listCustomerTaxIds(
       user.paymentProviderId,
     );
 
     // Delete any existing tax IDs before adding the new one
     for (const taxId of existingTaxIds) {
-      await this.stripeService.deleteTaxId(user.paymentProviderId, taxId.id);
+      await this.paymentProvider.deleteTaxId(user.paymentProviderId, taxId.id);
     }
 
     // Create the new VAT tax ID
     if (updateBillingInfoDto.vat && updateBillingInfoDto.vatType) {
-      await this.stripeService.createTaxId(user.paymentProviderId,
+      await this.paymentProvider.createTaxId(
+        user.paymentProviderId,
         updateBillingInfoDto.vatType,
         updateBillingInfoDto.vat,
       );
@@ -533,7 +532,7 @@ export class PaymentService {
       updateBillingInfoDto.name ||
       updateBillingInfoDto.email
     ) {
-      return this.stripeService.updateCustomer(user.paymentProviderId, {
+      return this.paymentProvider.updateCustomer(user.paymentProviderId, {
         address: {
           line1: updateBillingInfoDto.address?.line,
           city: updateBillingInfoDto.address?.city,
@@ -551,9 +550,8 @@ export class PaymentService {
       throw new NotFoundError(ErrorPayment.CustomerNotFound);
     }
 
-    // Update the user's default payment method in Stripe
-    return this.stripeService.updateCustomer(user.paymentProviderId, {
-      invoice_settings: { default_payment_method: cardId },
+    return this.paymentProvider.updateCustomer(user.paymentProviderId, {
+      default_payment_method: cardId,
     });
   }
 
@@ -562,8 +560,7 @@ export class PaymentService {
       throw new NotFoundError(ErrorPayment.CustomerNotFound);
     }
 
-    // Retrieve the customer from Stripe and return the default payment method
-    return await this.stripeService.getDefaultPaymentMethod(customerId);
+    return await this.paymentProvider.getDefaultPaymentMethod(customerId);
   }
 
   private async isPaymentMethodInUse(userId: number): Promise<boolean> {
@@ -606,15 +603,14 @@ export class PaymentService {
   }
 
   async getReceipt(paymentId: string, user: UserEntity): Promise<string> {
-    // Retrieve the payment intent using the provided payment ID
-    const paymentIntent = await this.stripeService.retrievePaymentIntent(paymentId);
+    const paymentIntent =
+      await this.paymentProvider.retrievePaymentIntent(paymentId);
 
     if (!paymentIntent || paymentIntent.customer !== user.paymentProviderId) {
       throw new NotFoundError(ErrorPayment.NotFound);
     }
 
-    // Retrieve the charge for the payment intent and ensure it has a receipt URL
-    const charge = await this.stripeService.retrieveCharge(
+    const charge = await this.paymentProvider.retrieveCharge(
       paymentIntent.latest_charge as string,
     );
 
