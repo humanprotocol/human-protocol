@@ -11,7 +11,6 @@ const InfoTooltip = ({ title }: { title: string }) => (
       fontSize="small"
       sx={{
         color: 'text.secondary',
-        //ml: 0.5,
       }}
     />
   </CustomTooltip>
