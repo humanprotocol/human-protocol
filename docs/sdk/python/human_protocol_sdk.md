@@ -114,6 +114,12 @@
       * [`TransactionData`](human_protocol_sdk.transaction.transaction_utils.md#human_protocol_sdk.transaction.transaction_utils.TransactionData)
       * [`TransactionUtils`](human_protocol_sdk.transaction.transaction_utils.md#human_protocol_sdk.transaction.transaction_utils.TransactionUtils)
       * [`TransactionUtilsError`](human_protocol_sdk.transaction.transaction_utils.md#human_protocol_sdk.transaction.transaction_utils.TransactionUtilsError)
+* [human_protocol_sdk.worker package](human_protocol_sdk.worker.md)
+  * [Submodules](human_protocol_sdk.worker.md#submodules)
+    * [human_protocol_sdk.worker.worker_utils module](human_protocol_sdk.worker.worker_utils.md)
+      * [`WorkerData`](human_protocol_sdk.worker.worker_utils.md#human_protocol_sdk.worker.worker_utils.WorkerData)
+      * [`WorkerUtils`](human_protocol_sdk.worker.worker_utils.md#human_protocol_sdk.worker.worker_utils.WorkerUtils)
+      * [`WorkerUtilsError`](human_protocol_sdk.worker.worker_utils.md#human_protocol_sdk.worker.worker_utils.WorkerUtilsError)
 
 ## Submodules
 

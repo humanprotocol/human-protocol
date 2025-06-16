@@ -9,7 +9,6 @@ import { apiPaths } from '../api-paths';
 import { httpService } from '../http-service';
 import { validateResponse } from '../validate-response';
 
-
 const transformOptionalTokenAmount = (
   value: string | undefined | null,
   ctx: z.RefinementCtx
@@ -36,7 +35,7 @@ const walletSchema = z.object({
   amountLocked: z.string().transform(transformOptionalTokenAmount),
   amountWithdrawable: z.string().transform(transformOptionalTokenAmount),
   reputation: reputationSchema,
-  totalAmountReceived: z.string().transform(transformOptionalTokenAmount),
+  totalHMTAmountReceived: z.string().transform(transformOptionalTokenAmount),
   payoutCount: z.number().or(z.string()),
 });
 

@@ -31,7 +31,7 @@ const WalletAddress: FC<Props> = ({ data }) => {
     amountWithdrawable,
   } = data;
   const isMobile = useIsMobile();
-  const isWallet = 'totalAmountReceived' in data;
+  const isWallet = 'totalHMTAmountReceived' in data;
 
   return (
     <>
@@ -58,7 +58,7 @@ const WalletAddress: FC<Props> = ({ data }) => {
               <Typography variant="body2">
                 <NumericFormat
                   displayType="text"
-                  value={(data?.totalAmountReceived || 0) * 1e18}
+                  value={(data?.totalHMTAmountReceived || 0) * 1e18}
                   thousandSeparator=","
                   decimalScale={isMobile ? 4 : 9}
                 />

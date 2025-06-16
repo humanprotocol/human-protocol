@@ -6,7 +6,7 @@ export const GET_WORKER_QUERY = gql`
     worker(id: $address) {
       id
       address
-      totalAmountReceived
+      totalHMTAmountReceived
       payoutCount
     }
   }
@@ -34,7 +34,7 @@ export const GET_WORKERS_QUERY = (filter: IWorkersFilter) => {
     ) {
       id
       address
-      totalAmountReceived
+      totalHMTAmountReceived
       payoutCount
     }
   }`;

@@ -15,13 +15,13 @@ class TestWorkerUtils(unittest.TestCase):
             mock_worker_1 = {
                 "id": "worker1",
                 "address": "0x1234567890123456789012345678901234567890",
-                "totalAmountReceived": "1000",
+                "totalHMTAmountReceived": "1000",
                 "payoutCount": 5,
             }
             mock_worker_2 = {
                 "id": "worker2",
                 "address": "0x9876543210987654321098765432109876543210",
-                "totalAmountReceived": "2000",
+                "totalHMTAmountReceived": "2000",
                 "payoutCount": 10,
             }
 
@@ -31,7 +31,7 @@ class TestWorkerUtils(unittest.TestCase):
 
             filter = WorkerFilter(
                 chain_id=ChainId.POLYGON_AMOY,
-                order_by="totalAmountReceived",
+                order_by="totalHMTAmountReceived",
                 order_direction=OrderDirection.ASC,
             )
 
@@ -44,7 +44,7 @@ class TestWorkerUtils(unittest.TestCase):
                     "address": None,
                     "first": 10,
                     "skip": 0,
-                    "orderBy": "totalAmountReceived",
+                    "orderBy": "totalHMTAmountReceived",
                     "orderDirection": "asc",
                 },
             )
@@ -91,7 +91,7 @@ class TestWorkerUtils(unittest.TestCase):
             mock_worker = {
                 "id": "worker1",
                 "address": "0x1234567890123456789012345678901234567890",
-                "totalAmountReceived": "1000",
+                "totalHMTAmountReceived": "1000",
                 "payoutCount": 5,
             }
 
