@@ -6,7 +6,7 @@ import { formatHMTDecimals } from '@/helpers/formatHMTDecimals';
 import { useHMTPrice } from '@/services/api/use-hmt-price';
 
 const InfoTooltip = ({ title }: { title: string }) => (
-  <CustomTooltip title={title}>
+  <CustomTooltip title={title} arrow>
     <HelpOutlineIcon
       fontSize="small"
       sx={{
