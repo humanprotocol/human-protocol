@@ -68,24 +68,26 @@ Retrieve the Staking interface.
 * **Returns:**
   The Staking interface of smart contract.
 
-### human_protocol_sdk.utils.handle_transaction(w3, tx_name, tx, exception, tx_options)
+### human_protocol_sdk.utils.handle_error(e, exception_class)
 
-Executes the transaction and waits for the receipt.
+Handles and translates errors raised during contract transactions.
+
+This function captures exceptions (especially ContractLogicError from web3.py),
+extracts meaningful revert reasons if present, logs unexpected errors, and raises
+a custom exception with a clear message for SDK users.
 
 * **Parameters:**
-  * **w3** (`Web3`) – Web3 instance
-  * **tx_name** (`str`) – Name of the transaction
-  * **tx** – Transaction object
-  * **exception** (`Exception`) – Exception class to raise in case of error
-  * **tx_options** (`Optional`[`TxParams`]) – (Optional) Additional transaction parameters
-    - If provided, can include values like ‘gas’, ‘gas_price’, ‘nonce’, etc
-    - If ‘gas’ is not specified or is None, it will be estimated using tx.estimate_gas()
-* **Returns:**
-  The transaction receipt
-* **Validate:**
-  - There must be a default account
+  * **e** – The exception object raised during a transaction.
+  * **exception_class** – The custom exception class to raise (e.g., EscrowClientError).
 * **Raises:**
-  **exception** – If the transaction fails
+  **exception_class** – With a detailed error message, including contract revert reasons if available.
+* **Example:**
+  try:
+  : tx_hash = contract.functions.someMethod(…).transact()
+    w3.eth.wait_for_transaction_receipt(tx_hash)
+
+  except Exception as e:
+  : handle_error(e, EscrowClientError)
 
 ### human_protocol_sdk.utils.parse_transfer_transaction(hmtoken_contract, tx_receipt)
 

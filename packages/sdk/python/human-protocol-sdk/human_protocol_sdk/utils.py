@@ -240,7 +240,6 @@ def handle_error(e, exception_class):
         except Exception as e:
             handle_error(e, EscrowClientError)
     """
-    import re
 
     def extract_reason(msg):
         patterns = [
