@@ -11,7 +11,7 @@ const InfoTooltip = ({ title }: { title: string }) => (
       fontSize="small"
       sx={{
         color: 'text.secondary',
-        ml: 0.5,
+        //ml: 0.5,
       }}
     />
   </CustomTooltip>
@@ -35,9 +35,9 @@ export const TransactionTableCellValue = ({
   }
 
   return (
-    <Typography display="flex" alignItems="center">
+    <Typography variant="body2" display="flex" alignItems="center" gap={0.5}>
       {formatHMTDecimals(value)}
-      <Typography component="span"> HMT</Typography>
+      <Typography variant="body2">HMT</Typography>
       {method === 'approve' && (
         <InfoTooltip title="Approved amount (not a transfer)" />
       )}
