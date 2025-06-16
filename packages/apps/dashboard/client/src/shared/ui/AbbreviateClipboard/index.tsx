@@ -20,6 +20,7 @@ const AbbreviateClipboard = ({ value, link }: AbbreviateClipboardProps) => {
   return (
     <Stack direction="row" gap={1}>
       <Typography
+        variant="body2"
         sx={{
           whiteSpace: 'nowrap',
           textDecoration: 'inherit',
