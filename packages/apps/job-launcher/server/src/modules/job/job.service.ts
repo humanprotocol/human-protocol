@@ -668,7 +668,7 @@ export class JobService {
       throw new ConflictError(ErrorEscrow.InvalidBalanceCancellation);
     }
 
-    return escrowClient.cancel(escrowAddress!, {
+    await escrowClient.cancel(escrowAddress!, {
       gasPrice: await this.web3Service.calculateGasPrice(chainId),
     });
   }
@@ -853,7 +853,7 @@ export class JobService {
       throw new NotFoundError(ErrorJob.NotFound);
     }
 
-    // If job status already completed or cancelled by getDetails do nothing
+    // If job status already completed or canceled by getDetails do nothing
     if (
       jobEntity.status === JobStatus.COMPLETED ||
       jobEntity.status === JobStatus.CANCELED

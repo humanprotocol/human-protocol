@@ -303,7 +303,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
                 status == EscrowStatuses.ToCancel,
             'Escrow not in Pending, Partial or ToCancel status state'
         );
-        if (_fundsToReserve != 0) {
+        if (_fundsToReserve > 0) {
             require(bytes(_url).length != 0, "URL can't be empty");
             require(bytes(_hash).length != 0, "Hash can't be empty");
         }
