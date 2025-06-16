@@ -120,7 +120,10 @@ export const TransactionsTableBody: React.FC = () => {
             </TableCell>
             <TableCell>{elem.block}</TableCell>
             <TableCell>
-              <TransactionTableCellValue value={elem.value} />
+              <TransactionTableCellValue
+                value={elem.value}
+                method={elem.method}
+              />
             </TableCell>
           </TableRow>
           {elem.internalTransactions?.map((internalTx, internalIdx) => (
@@ -153,7 +156,10 @@ export const TransactionsTableBody: React.FC = () => {
               </TableCell>
               <TableCell></TableCell>
               <TableCell>
-                <TransactionTableCellValue value={internalTx.value} />
+                <TransactionTableCellValue
+                  value={internalTx.value}
+                  method={internalTx.method}
+                />
               </TableCell>
             </TableRow>
           ))}

@@ -50,7 +50,7 @@ export const TransactionsTableHead = () => {
         <TableCell>
           <Stack direction="row" alignItems="center">
             Value
-            <InfoTooltip title="Amount of HMT transferred in the transaction" />
+            <InfoTooltip title="This column reflects transacted and approved amounts" />
           </Stack>
         </TableCell>
       </TableRow>
