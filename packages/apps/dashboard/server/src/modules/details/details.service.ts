@@ -102,8 +102,8 @@ export class DetailsService {
       amountWithdrawable: ethers.formatEther(stakingData.withdrawableAmount),
       reputation: (await this.fetchOperatorReputation(chainId, address))
         .reputation,
-      totalAmountReceived: ethers.formatEther(
-        workerData?.totalAmountReceived || 0,
+      totalHMTAmountReceived: ethers.formatEther(
+        workerData?.totalHMTAmountReceived || 0,
       ),
       payoutCount: workerData?.payoutCount || 0,
     });

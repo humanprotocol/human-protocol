@@ -8,7 +8,7 @@
 
 > **DailyPaymentData** = `object`
 
-Defined in: [graphql/types.ts:98](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L98)
+Defined in: [graphql/types.ts:98](https://github.com/humanprotocol/human-protocol/blob/9da418b6962e251427442717195921599d2815f2/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L98)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [graphql/types.ts:98](https://github.com/humanprotocol/human-protoco
 
 > **averageAmountPerWorker**: `bigint`
 
-Defined in: [graphql/types.ts:102](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L102)
+Defined in: [graphql/types.ts:102](https://github.com/humanprotocol/human-protocol/blob/9da418b6962e251427442717195921599d2815f2/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L102)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [graphql/types.ts:102](https://github.com/humanprotocol/human-protoc
 
 > **timestamp**: `Date`
 
-Defined in: [graphql/types.ts:99](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L99)
+Defined in: [graphql/types.ts:99](https://github.com/humanprotocol/human-protocol/blob/9da418b6962e251427442717195921599d2815f2/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L99)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [graphql/types.ts:99](https://github.com/humanprotocol/human-protoco
 
 > **totalAmountPaid**: `bigint`
 
-Defined in: [graphql/types.ts:100](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L100)
+Defined in: [graphql/types.ts:100](https://github.com/humanprotocol/human-protocol/blob/9da418b6962e251427442717195921599d2815f2/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L100)
 
 ***
 
@@ -40,4 +40,4 @@ Defined in: [graphql/types.ts:100](https://github.com/humanprotocol/human-protoc
 
 > **totalCount**: `number`
 
-Defined in: [graphql/types.ts:101](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L101)
+Defined in: [graphql/types.ts:101](https://github.com/humanprotocol/human-protocol/blob/9da418b6962e251427442717195921599d2815f2/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L101)
