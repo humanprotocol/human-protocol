@@ -7,7 +7,16 @@ import TableRow from '@mui/material/TableRow';
 import CustomTooltip from '@/components/CustomTooltip';
 
 const InfoTooltip = ({ title }: { title: string }) => (
-  <CustomTooltip title={title}>
+  <CustomTooltip
+    title={title}
+    slotProps={{
+      tooltip: {
+        sx: {
+          maxWidth: '320px',
+        },
+      },
+    }}
+  >
     <HelpOutlineIcon
       fontSize="small"
       sx={{

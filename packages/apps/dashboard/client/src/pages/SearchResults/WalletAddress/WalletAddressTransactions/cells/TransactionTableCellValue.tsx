@@ -36,7 +36,9 @@ export const TransactionTableCellValue = ({
   return (
     <Typography variant="body2" display="flex" alignItems="center" gap={0.5}>
       {formatHMTDecimals(value)}
-      <Typography variant="body2">HMT</Typography>
+      <Typography variant="body2" component="span">
+        HMT
+      </Typography>
       {method === 'approve' && (
         <InfoTooltip title="Approved amount (not a transfer)" />
       )}
