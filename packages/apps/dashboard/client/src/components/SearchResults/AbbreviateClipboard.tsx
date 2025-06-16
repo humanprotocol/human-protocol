@@ -7,7 +7,6 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { useNavigate } from 'react-router-dom';
 
-import { colorPalette } from '@/assets/styles/color-palette';
 import CustomTooltip from '@/components/CustomTooltip';
 import abbreviateValue from '@/helpers/abbreviateValue';
 
@@ -24,7 +23,7 @@ const AbbreviateClipboard = ({ value, link }: AbbreviateClipboardProps) => {
         sx={{
           whiteSpace: 'nowrap',
           textDecoration: 'inherit',
-          color: colorPalette.link,
+          color: 'link.main',
         }}
       >
         {link ? (
@@ -72,7 +71,7 @@ const AbbreviateClipboard = ({ value, link }: AbbreviateClipboardProps) => {
           <ContentCopyIcon
             fontSize="small"
             sx={{
-              color: colorPalette.fog.main,
+              color: 'fog.main',
             }}
           />
         </CustomTooltip>

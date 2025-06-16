@@ -2,10 +2,8 @@ import { FC } from 'react';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
 import { useNavigate } from 'react-router-dom';
 
-import { colorPalette } from '@/assets/styles/color-palette';
 import { LeaderBoardData } from '@/services/api/use-leaderboard-details';
 
 import { DataGridWrapper } from './components/DataGridWrapper';
@@ -38,29 +36,23 @@ export const Leaderboard: FC<Props> = ({
         padding="10px"
         mb={2.5}
         width="270px"
-        bgcolor={colorPalette.whiteSolid}
+        bgcolor="white.light"
       >
         <SelectNetwork />
       </Box>
       <DataGridWrapper data={data} status={status} error={error} />
       {viewAllBanner ? (
         <Button
+          size="large"
+          variant="outlined"
+          fullWidth
           sx={{
-            height: '42px',
-            border: '1px solid',
             borderColor: 'primary.main',
-            borderRadius: '4px',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
             cursor: 'pointer',
           }}
-          fullWidth
-          onClick={() => {
-            navigate('/leaderboard');
-          }}
+          onClick={() => navigate('/leaderboard')}
         >
-          <Typography variant="Button Large">View All</Typography>
+          View All
         </Button>
       ) : null}
     </Box>

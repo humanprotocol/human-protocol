@@ -6,7 +6,7 @@
 
 # Class: KVStoreClient
 
-Defined in: [kvstore.ts:99](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L99)
+Defined in: [kvstore.ts:99](https://github.com/humanprotocol/human-protocol/blob/9da418b6962e251427442717195921599d2815f2/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L99)
 
 ## Introduction
 
@@ -82,11 +82,11 @@ const kvstoreClient = await KVStoreClient.build(provider);
 
 ## Constructors
 
-### new KVStoreClient()
+### Constructor
 
-> **new KVStoreClient**(`runner`, `networkData`): [`KVStoreClient`](KVStoreClient.md)
+> **new KVStoreClient**(`runner`, `networkData`): `KVStoreClient`
 
-Defined in: [kvstore.ts:108](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L108)
+Defined in: [kvstore.ts:108](https://github.com/humanprotocol/human-protocol/blob/9da418b6962e251427442717195921599d2815f2/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L108)
 
 **KVStoreClient constructor**
 
@@ -106,11 +106,11 @@ The network information required to connect to the KVStore contract
 
 #### Returns
 
-[`KVStoreClient`](KVStoreClient.md)
+`KVStoreClient`
 
 #### Overrides
 
-[`BaseEthersClient`](../../base/classes/BaseEthersClient.md).[`constructor`](../../base/classes/BaseEthersClient.md#constructors)
+[`BaseEthersClient`](../../base/classes/BaseEthersClient.md).[`constructor`](../../base/classes/BaseEthersClient.md#constructor)
 
 ## Properties
 
@@ -118,11 +118,11 @@ The network information required to connect to the KVStore contract
 
 > **networkData**: [`NetworkData`](../../types/type-aliases/NetworkData.md)
 
-Defined in: [base.ts:12](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
+Defined in: [base.ts:12](https://github.com/humanprotocol/human-protocol/blob/9da418b6962e251427442717195921599d2815f2/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
 
 #### Inherited from
 
-[`BaseEthersClient`](../../base/classes/BaseEthersClient.md).[`networkData`](../../base/classes/BaseEthersClient.md#networkdata-1)
+[`BaseEthersClient`](../../base/classes/BaseEthersClient.md).[`networkData`](../../base/classes/BaseEthersClient.md#networkdata)
 
 ***
 
@@ -130,19 +130,19 @@ Defined in: [base.ts:12](https://github.com/humanprotocol/human-protocol/blob/1f
 
 > `protected` **runner**: `ContractRunner`
 
-Defined in: [base.ts:11](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
+Defined in: [base.ts:11](https://github.com/humanprotocol/human-protocol/blob/9da418b6962e251427442717195921599d2815f2/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
 
 #### Inherited from
 
-[`BaseEthersClient`](../../base/classes/BaseEthersClient.md).[`runner`](../../base/classes/BaseEthersClient.md#runner-1)
+[`BaseEthersClient`](../../base/classes/BaseEthersClient.md).[`runner`](../../base/classes/BaseEthersClient.md#runner)
 
 ## Methods
 
 ### set()
 
-> **set**(`key`, `value`, `txOptions`?): `Promise`\<`void`\>
+> **set**(`key`, `value`, `txOptions?`): `Promise`\<`void`\>
 
-Defined in: [kvstore.ts:171](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L171)
+Defined in: [kvstore.ts:171](https://github.com/humanprotocol/human-protocol/blob/9da418b6962e251427442717195921599d2815f2/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L171)
 
 This function sets a key-value pair associated with the address that submits the transaction.
 
@@ -194,9 +194,9 @@ await kvstoreClient.set('Role', 'RecordingOracle');
 
 ### setBulk()
 
-> **setBulk**(`keys`, `values`, `txOptions`?): `Promise`\<`void`\>
+> **setBulk**(`keys`, `values`, `txOptions?`): `Promise`\<`void`\>
 
-Defined in: [kvstore.ts:214](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L214)
+Defined in: [kvstore.ts:214](https://github.com/humanprotocol/human-protocol/blob/9da418b6962e251427442717195921599d2815f2/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L214)
 
 This function sets key-value pairs in bulk associated with the address that submits the transaction.
 
@@ -250,9 +250,9 @@ await kvstoreClient.setBulk(keys, values);
 
 ### setFileUrlAndHash()
 
-> **setFileUrlAndHash**(`url`, `urlKey`, `txOptions`?): `Promise`\<`void`\>
+> **setFileUrlAndHash**(`url`, `urlKey`, `txOptions?`): `Promise`\<`void`\>
 
-Defined in: [kvstore.ts:257](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L257)
+Defined in: [kvstore.ts:257](https://github.com/humanprotocol/human-protocol/blob/9da418b6962e251427442717195921599d2815f2/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L257)
 
 Sets a URL value for the address that submits the transaction, and its hash.
 
@@ -303,9 +303,9 @@ await kvstoreClient.setFileUrlAndHash('linkedin.com/example', 'linkedin_url');
 
 ### build()
 
-> `static` **build**(`runner`): `Promise`\<[`KVStoreClient`](KVStoreClient.md)\>
+> `static` **build**(`runner`): `Promise`\<`KVStoreClient`\>
 
-Defined in: [kvstore.ts:126](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L126)
+Defined in: [kvstore.ts:126](https://github.com/humanprotocol/human-protocol/blob/9da418b6962e251427442717195921599d2815f2/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L126)
 
 Creates an instance of KVStoreClient from a runner.
 
@@ -319,7 +319,7 @@ The Runner object to interact with the Ethereum network
 
 #### Returns
 
-`Promise`\<[`KVStoreClient`](KVStoreClient.md)\>
+`Promise`\<`KVStoreClient`\>
 
 - An instance of KVStoreClient
 

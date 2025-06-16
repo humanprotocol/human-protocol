@@ -7,10 +7,10 @@ import {
   ChainId,
   EscrowClient,
   EscrowUtils,
+  IEscrow,
   KVStoreUtils,
   NETWORKS,
 } from '@human-protocol/sdk';
-import { EscrowData } from '@human-protocol/sdk/dist/graphql';
 import { Test } from '@nestjs/testing';
 import { ethers, Wallet, ZeroAddress } from 'ethers';
 import { createSignerMock } from '../../../test/fixtures/web3';
@@ -1520,7 +1520,7 @@ describe('JobService', () => {
         exchangeOracle: jobEntity.exchangeOracle,
         recordingOracle: jobEntity.recordingOracle,
         reputationOracle: jobEntity.reputationOracle,
-      } as unknown as EscrowData;
+      } as unknown as IEscrow;
 
       mockJobRepository.findOneByIdAndUserId.mockResolvedValueOnce(jobEntity);
       mockedEscrowUtils.getEscrow.mockResolvedValueOnce(getEscrowData);

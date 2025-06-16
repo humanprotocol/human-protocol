@@ -6,24 +6,38 @@
 
 # Type Alias: DailyPaymentData
 
-> **DailyPaymentData**: `object`
+> **DailyPaymentData** = `object`
 
-Defined in: [graphql/types.ts:106](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L106)
+Defined in: [graphql/types.ts:98](https://github.com/humanprotocol/human-protocol/blob/9da418b6962e251427442717195921599d2815f2/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L98)
 
-## Type declaration
+## Properties
 
 ### averageAmountPerWorker
 
 > **averageAmountPerWorker**: `bigint`
 
+Defined in: [graphql/types.ts:102](https://github.com/humanprotocol/human-protocol/blob/9da418b6962e251427442717195921599d2815f2/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L102)
+
+***
+
 ### timestamp
 
 > **timestamp**: `Date`
+
+Defined in: [graphql/types.ts:99](https://github.com/humanprotocol/human-protocol/blob/9da418b6962e251427442717195921599d2815f2/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L99)
+
+***
 
 ### totalAmountPaid
 
 > **totalAmountPaid**: `bigint`
 
+Defined in: [graphql/types.ts:100](https://github.com/humanprotocol/human-protocol/blob/9da418b6962e251427442717195921599d2815f2/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L100)
+
+***
+
 ### totalCount
 
 > **totalCount**: `number`
+
+Defined in: [graphql/types.ts:101](https://github.com/humanprotocol/human-protocol/blob/9da418b6962e251427442717195921599d2815f2/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L101)

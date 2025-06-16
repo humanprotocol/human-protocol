@@ -10,7 +10,6 @@ import MuiTableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
 
-import { colorPalette } from '@/assets/styles/color-palette';
 import AbbreviateClipboard from '@/components/SearchResults/AbbreviateClipboard';
 import { TransactionTableCellMethod } from '@/pages/SearchResults/WalletAddress/WalletAddressTransactions/cells/TransactionTableCellMethod';
 import { TransactionTableCellValue } from '@/pages/SearchResults/WalletAddress/WalletAddressTransactions/cells/TransactionTableCellValue';
@@ -81,8 +80,8 @@ export const TransactionsTableBody: React.FC = () => {
             key={idx}
             sx={{
               backgroundColor: expandedRows[idx]
-                ? colorPalette.table.selected
-                : colorPalette.table.main,
+                ? 'table.selected'
+                : 'table.main',
             }}
           >
             <TableCell>
@@ -128,7 +127,7 @@ export const TransactionsTableBody: React.FC = () => {
             <TableRow
               key={`${idx}-${internalIdx}`}
               sx={{
-                backgroundColor: colorPalette.table.secondary,
+                bgcolor: 'table.secondary',
                 display: expandedRows[idx] ? 'table-row' : 'none',
                 transition: 'all 1s ease',
               }}

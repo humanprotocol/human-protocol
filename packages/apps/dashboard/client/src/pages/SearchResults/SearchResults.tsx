@@ -175,7 +175,7 @@ const SearchResults = () => {
   return (
     <PageWrapper className="standard-background">
       <Breadcrumbs title="Search Results" />
-      <SearchBar className="search-results-bar" />
+      <SearchBar />
       {paramsStatus === ParamsStatus.LOADING && (
         <Loader height="auto" paddingTop="2rem" />
       )}

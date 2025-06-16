@@ -6,20 +6,30 @@
 
 # Type Alias: DailyTaskData
 
-> **DailyTaskData**: `object`
+> **DailyTaskData** = `object`
 
-Defined in: [graphql/types.ts:148](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L148)
+Defined in: [graphql/types.ts:140](https://github.com/humanprotocol/human-protocol/blob/9da418b6962e251427442717195921599d2815f2/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L140)
 
-## Type declaration
+## Properties
 
 ### tasksSolved
 
 > **tasksSolved**: `number`
 
+Defined in: [graphql/types.ts:143](https://github.com/humanprotocol/human-protocol/blob/9da418b6962e251427442717195921599d2815f2/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L143)
+
+***
+
 ### tasksTotal
 
 > **tasksTotal**: `number`
 
+Defined in: [graphql/types.ts:142](https://github.com/humanprotocol/human-protocol/blob/9da418b6962e251427442717195921599d2815f2/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L142)
+
+***
+
 ### timestamp
 
 > **timestamp**: `Date`
+
+Defined in: [graphql/types.ts:141](https://github.com/humanprotocol/human-protocol/blob/9da418b6962e251427442717195921599d2815f2/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L141)

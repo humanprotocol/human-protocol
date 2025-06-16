@@ -319,12 +319,12 @@ export class StatisticsClient {
       return {
         dailyPaymentsData: eventDayDatas.map((eventDayData) => ({
           timestamp: new Date(+eventDayData.timestamp * 1000),
-          totalAmountPaid: ethers.toBigInt(eventDayData.dailyPayoutAmount),
+          totalAmountPaid: ethers.toBigInt(eventDayData.dailyHMTPayoutAmount),
           totalCount: +eventDayData.dailyPayoutCount,
           averageAmountPerWorker:
             eventDayData.dailyWorkerCount === '0'
               ? ethers.toBigInt(0)
-              : ethers.toBigInt(eventDayData.dailyPayoutAmount) /
+              : ethers.toBigInt(eventDayData.dailyHMTPayoutAmount) /
                 ethers.toBigInt(eventDayData.dailyWorkerCount),
         })),
       };

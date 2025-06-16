@@ -6,10 +6,8 @@ import Stack from '@mui/material/Stack';
 import { NumericFormat } from 'react-number-format';
 import { TooltipProps } from 'recharts';
 
-import { colorPalette } from '@/assets/styles/color-palette';
 import { GraphPageChartDataConfigObject } from '@/components/Charts/AreaChart';
 import { formatDate } from '@/helpers/formatDate';
-
 
 const renderTitle = (title: string) => {
   const currentTitle: GraphPageChartDataConfigObject<string> = {
@@ -31,20 +29,13 @@ const CustomChartTooltip = ({
     return (
       <Card
         sx={{
-          border: `1px solid ${colorPalette.fog.light}`,
+          border: '1px solid',
+          borderColor: 'fog.light',
           borderRadius: '10px',
         }}
       >
-        <Box
-          sx={{
-            padding: '6px 10px',
-          }}
-        >
-          <Typography
-            color={colorPalette.fog.main}
-            variant="subtitle1"
-            fontWeight={500}
-          >
+        <Box p="6px 10px">
+          <Typography variant="tooltip" color="fog.main">
             {formatDate(label, 'MMMM DD, YYYY')}
           </Typography>
           {payload?.map((elem) => (
@@ -64,7 +55,7 @@ const CustomChartTooltip = ({
                       fontSize: '12px',
                     }}
                   />
-                  <Typography fontWeight={500} variant="subtitle1">
+                  <Typography variant="tooltip">
                     {renderTitle(elem.name ?? '')}
                   </Typography>
                 </Grid>

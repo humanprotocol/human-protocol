@@ -11,7 +11,7 @@ type Holder @entity {
 type Worker @entity {
   id: Bytes!
   address: Bytes!
-  totalAmountReceived: BigInt!
+  totalHMTAmountReceived: BigInt!
   payoutCount: BigInt!
 }
 
@@ -332,7 +332,7 @@ type EventDayData @entity {
   dailyEscrowCount: BigInt!
   dailyWorkerCount: BigInt!
   dailyPayoutCount: BigInt!
-  dailyPayoutAmount: BigInt!
+  dailyHMTPayoutAmount: BigInt!
   dailyHMTTransferCount: BigInt!
   dailyHMTTransferAmount: BigInt!
   dailyUniqueSenders: BigInt!

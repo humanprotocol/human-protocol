@@ -34,7 +34,7 @@ export class WalletDto {
   @ApiProperty({ example: '2414.07007358932392' })
   @Transform(({ value }) => value?.toString())
   @IsString()
-  public totalAmountReceived?: string;
+  public totalHMTAmountReceived?: string;
 
   @ApiProperty({ example: 1234 })
   @IsNumber()
