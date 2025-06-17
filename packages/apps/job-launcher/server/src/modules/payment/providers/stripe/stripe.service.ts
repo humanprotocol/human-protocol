@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import Stripe from 'stripe';
 import { StripeConfigService } from '../../../../common/config/stripe-config.service';
 import { NotFoundError, ServerError } from '../../../../common/errors';
@@ -16,12 +16,12 @@ import { PaymentProvider } from '../payment-provider.abstract';
 import { AddressDto, BillingInfoDto } from '../../payment.dto';
 
 @Injectable()
-export class StripeService implements PaymentProvider {
-  protected readonly logger: Logger = new Logger(StripeService.name);
-
+export class StripeService extends PaymentProvider {
   private stripe: Stripe;
 
   constructor(private stripeConfigService: StripeConfigService) {
+    super();
+
     this.stripe = new Stripe(this.stripeConfigService.secretKey, {
       apiVersion: this.stripeConfigService.apiVersion as any,
       appInfo: {
@@ -271,7 +271,6 @@ export class StripeService implements PaymentProvider {
   ): Promise<CustomerData> {
     const params = data.default_payment_method
       ? {
-          ...data,
           invoice_settings: {
             default_payment_method: data.default_payment_method,
           },
@@ -295,11 +294,12 @@ export class StripeService implements PaymentProvider {
           }
         : undefined,
       default_payment_method: customer.invoice_settings
-        .default_payment_method as string,
+        ? (customer.invoice_settings.default_payment_method as string)
+        : undefined,
     };
   }
 
-  private async createCustomer(email: string): Promise<string> {
+  async createCustomer(email: string): Promise<string> {
     try {
       const customer = await this.stripe.customers.create({ email });
       return customer.id;
@@ -309,7 +309,7 @@ export class StripeService implements PaymentProvider {
     }
   }
 
-  private async setupCard(customerId: string | null): Promise<string> {
+  async setupCard(customerId: string | null): Promise<string> {
     let setupIntent: Stripe.Response<Stripe.SetupIntent>;
 
     try {
@@ -350,11 +350,12 @@ export class StripeService implements PaymentProvider {
           }
         : undefined,
       default_payment_method: customer.invoice_settings
-        .default_payment_method as string,
+        ? (customer.invoice_settings.default_payment_method as string)
+        : undefined,
     };
   }
 
-  private async listCustomerTaxIds(customerId: string): Promise<TaxId[]> {
+  async listCustomerTaxIds(customerId: string): Promise<TaxId[]> {
     const taxIds = await this.stripe.customers.listTaxIds(customerId);
 
     return taxIds.data.map((taxId) => ({
@@ -364,7 +365,7 @@ export class StripeService implements PaymentProvider {
     }));
   }
 
-  private async createTaxId(
+  async createTaxId(
     customerId: string,
     type: VatType,
     value: string,
@@ -380,10 +381,7 @@ export class StripeService implements PaymentProvider {
     };
   }
 
-  private async deleteTaxId(
-    customerId: string,
-    taxIdId: string,
-  ): Promise<void> {
+  async deleteTaxId(customerId: string, taxIdId: string): Promise<void> {
     await this.stripe.customers.deleteTaxId(customerId, taxIdId);
   }
 

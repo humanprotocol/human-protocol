@@ -154,13 +154,11 @@ describe('PaymentService', () => {
 
       const invoice = {
         id: 'id',
-        payment_intent: paymentIntent.id,
+        payment_id: paymentIntent.id,
       };
 
       paymentProvider.createInvoice.mockResolvedValue(invoice as any);
-      paymentProvider.createPayment.mockResolvedValue(
-        paymentIntent as any,
-      );
+      paymentProvider.createPayment.mockResolvedValue(paymentIntent as any);
 
       jest
         .spyOn(paymentRepository, 'findOneByTransaction')
@@ -209,9 +207,7 @@ describe('PaymentService', () => {
       };
 
       paymentProvider.createInvoice.mockResolvedValue(invoice as any);
-      paymentProvider.createPayment.mockResolvedValue(
-        paymentIntent as any,
-      );
+      paymentProvider.createPayment.mockResolvedValue(paymentIntent as any);
 
       findOneMock.mockResolvedValue({
         transaction: paymentIntent.client_secret,
@@ -761,8 +757,7 @@ describe('PaymentService', () => {
         client_secret: 'clientSecret123',
       };
 
-      paymentProvider.createCustomer.mockResolvedValue('cus_123');
-      paymentProvider.setupCard.mockResolvedValue(
+      paymentProvider.createCustomerWithCard.mockResolvedValue(
         paymentIntent.client_secret,
       );
 
@@ -771,8 +766,10 @@ describe('PaymentService', () => {
       );
 
       expect(result).toEqual(paymentIntent.client_secret);
-      expect(paymentProvider.createCustomer).toHaveBeenCalledWith(user.email);
-      expect(paymentProvider.setupCard).toHaveBeenCalledWith('cus_123');
+      expect(paymentProvider.createCustomerWithCard).toHaveBeenCalledWith(
+        null,
+        user.email,
+      );
     });
 
     it('should throw a bad request exception if the customer creation fails', async () => {
@@ -781,7 +778,7 @@ describe('PaymentService', () => {
         email: 'test@hmt.ai',
         paymentProviderId: undefined,
       };
-      paymentProvider.createCustomer.mockRejectedValue(
+      paymentProvider.createCustomerWithCard.mockRejectedValue(
         new ServerError(ErrorPayment.CustomerNotCreated),
       );
 
@@ -796,8 +793,7 @@ describe('PaymentService', () => {
         email: 'test@hmt.ai',
       };
 
-      paymentProvider.createCustomer.mockResolvedValue({ id: 1 } as any);
-      paymentProvider.setupCard.mockRejectedValue(
+      paymentProvider.createCustomerWithCard.mockRejectedValue(
         new ServerError(ErrorPayment.IntentNotCreated),
       );
 
@@ -812,8 +808,7 @@ describe('PaymentService', () => {
         email: 'test@hmt.ai',
       };
 
-      paymentProvider.createCustomer.mockResolvedValue(user.id.toString());
-      paymentProvider.setupCard.mockRejectedValue(
+      paymentProvider.createCustomerWithCard.mockRejectedValue(
         new ServerError(ErrorPayment.ClientSecretDoesNotExist),
       );
 
@@ -832,7 +827,7 @@ describe('PaymentService', () => {
       };
 
       const setupMock = {
-        customer: 'cus_123',
+        customer_id: 'cus_123',
         payment_method: 'pm_123',
       };
 
@@ -904,17 +899,12 @@ describe('PaymentService', () => {
 
       paymentProvider.createInvoice.mockResolvedValueOnce({
         id: invoiceId,
-        payment_intent: paymentIntent,
+        payment_id: paymentIntent,
       } as any);
-      paymentProvider.createPayment.mockResolvedValueOnce(
-        paymentIntent as any,
-      );
+      paymentProvider.createPayment.mockResolvedValueOnce(paymentIntent as any);
       paymentProvider.getDefaultPaymentMethod.mockResolvedValueOnce(
         paymentMethodId,
       );
-      paymentProvider.retrieveCustomer.mockResolvedValueOnce({
-        invoice_settings: { default_payment_method: paymentMethodId },
-      } as any);
 
       const result = await paymentService.createSlash(jobEntity as any);
 
@@ -951,9 +941,6 @@ describe('PaymentService', () => {
       paymentProvider.getDefaultPaymentMethod.mockResolvedValueOnce(
         paymentMethodId,
       );
-      paymentProvider.retrieveCustomer.mockResolvedValueOnce({
-        invoice_settings: { default_payment_method: paymentMethodId },
-      } as any);
 
       paymentProvider.createPayment.mockRejectedValue(
         new ServerError(ErrorPayment.PaymentMethodAssociationFailed),
@@ -1056,36 +1043,24 @@ describe('PaymentService', () => {
         paymentProviderId: 'cus_123',
       };
 
-      const taxIds = {
-        data: [
-          {
-            type: VatType.EU_VAT,
-            value: 'DE123456789',
-          },
-        ],
-      };
-
       const customer = {
         name: 'John Doe',
         email: 'john@example.com',
         address: {
-          country: 'DE',
-          postal_code: '12345',
+          country: 'de',
+          postalCode: '12345',
           city: 'Berlin',
-          line1: 'Street 1',
+          line: 'Street 1',
         },
       };
 
-      paymentProvider.listCustomerTaxIds.mockResolvedValue(taxIds.data as any);
-      paymentProvider.retrieveCustomer.mockResolvedValue(customer as any);
+      paymentProvider.retrieveBillingInfo.mockResolvedValue(customer as any);
 
       const result = await paymentService.getUserBillingInfo(user as any);
 
       expect(result).toEqual({
         name: 'John Doe',
         email: 'john@example.com',
-        vat: 'DE123456789',
-        vatType: VatType.EU_VAT,
         address: {
           country: 'de',
           postalCode: '12345',
@@ -1116,8 +1091,6 @@ describe('PaymentService', () => {
         },
       };
 
-      paymentProvider.listCustomerTaxIds.mockResolvedValue([] as any);
-      paymentProvider.createTaxId.mockResolvedValue({} as any);
       paymentProvider.updateCustomer.mockResolvedValue({} as any);
 
       await paymentService.updateUserBillingInfo(
@@ -1125,22 +1098,21 @@ describe('PaymentService', () => {
         updateBillingInfoDto,
       );
 
-      expect(paymentProvider.createTaxId).toHaveBeenCalledWith(
+      expect(paymentProvider.updateBillingInfo).toHaveBeenCalledWith(
         'cus_123',
-        VatType.EU_VAT,
-        'DE123456789',
-      );
-
-      expect(paymentProvider.updateCustomer).toHaveBeenCalledWith('cus_123', {
-        name: 'John Doe',
-        email: 'john@example.com',
-        address: {
-          country: 'DE',
-          postal_code: '12345',
-          city: 'Berlin',
-          line1: 'Street 1',
+        {
+          name: 'John Doe',
+          email: 'john@example.com',
+          address: {
+            country: 'DE',
+            postalCode: '12345',
+            city: 'Berlin',
+            line: 'Street 1',
+          },
+          vat: 'DE123456789',
+          vatType: VatType.EU_VAT,
         },
-      });
+      );
     });
   });
 
@@ -1305,50 +1277,24 @@ describe('PaymentService', () => {
       const paymentId = 'pi_123';
       const user = { paymentProviderId: 'cus_123' } as any;
 
-      const paymentIntent = {
-        customer: 'cus_123',
-        latest_charge: 'ch_123',
-      };
-
-      const charge = {
-        receipt_url: 'https://receipt.url',
-      };
-
-      paymentProvider.retrievePaymentIntent.mockResolvedValue(
-        paymentIntent as any,
-      );
-      paymentProvider.retrieveCharge.mockResolvedValue(charge as any);
+      paymentProvider.getReceiptUrl.mockResolvedValue('https://receipt.url');
 
       const result = await paymentService.getReceipt(paymentId, user);
 
       expect(result).toBe('https://receipt.url');
-      expect(paymentProvider.retrievePaymentIntent).toHaveBeenCalledWith(
+      expect(paymentProvider.getReceiptUrl).toHaveBeenCalledWith(
         'pi_123',
+        'cus_123',
       );
-      expect(paymentProvider.retrieveCharge).toHaveBeenCalledWith('ch_123');
     });
 
-    it('should throw a NOT_FOUND error if payment intent does not exist', async () => {
+    it('should throw a NOT_FOUND error if receipt URL is not found', async () => {
       const paymentId = 'pi_123';
       const user = { paymentProviderId: 'cus_123' } as any;
 
-      paymentProvider.retrievePaymentIntent.mockResolvedValue({} as any);
-
-      await expect(paymentService.getReceipt(paymentId, user)).rejects.toThrow(
+      paymentProvider.getReceiptUrl.mockRejectedValue(
         new NotFoundError(ErrorPayment.NotFound),
       );
-    });
-
-    it('should throw a NOT_FOUND error if charge does not exist', async () => {
-      const paymentId = 'pi_123';
-      const user = { paymentProviderId: 'cus_123' } as any;
-
-      paymentProvider.retrievePaymentIntent.mockResolvedValue({
-        customer: 'cus_123',
-        latest_charge: 'ch_123',
-      } as any);
-
-      paymentProvider.retrieveCharge.mockResolvedValue({} as any);
 
       await expect(paymentService.getReceipt(paymentId, user)).rejects.toThrow(
         new NotFoundError(ErrorPayment.NotFound),

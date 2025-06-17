@@ -6,15 +6,19 @@ import {
   PaymentMethod,
 } from '../payment.interface';
 import { BillingInfoDto } from '../payment.dto';
+import { Injectable, Logger } from '@nestjs/common';
 
-export interface PaymentProvider {
+@Injectable()
+export abstract class PaymentProvider {
+  protected readonly logger: Logger = new Logger(this.constructor.name);
+
   /**
    * Create a new customer in the payment provider system
    * @param customerId Customer ID
    * @param email Customer's email address
    * @returns Customer ID
    */
-  createCustomerWithCard(
+  abstract createCustomerWithCard(
     customerId: string | null,
     email: string,
   ): Promise<string>;
@@ -27,7 +31,7 @@ export interface PaymentProvider {
    * @param description Invoice description
    * @returns Created invoice
    */
-  createInvoice(
+  abstract createInvoice(
     customerId: string,
     amountInCents: number,
     currency: string,
@@ -41,7 +45,7 @@ export interface PaymentProvider {
    * @param offSession Whether the payment is off-session
    * @returns Updated payment intent
    */
-  createPayment(
+  abstract createPayment(
     paymentIntentId: string,
     paymentMethodId: string,
     offSession: boolean,
@@ -52,14 +56,14 @@ export interface PaymentProvider {
    * @param customerId Customer ID
    * @returns Payment method ID or null
    */
-  getDefaultPaymentMethod(customerId: string): Promise<string | null>;
+  abstract getDefaultPaymentMethod(customerId: string): Promise<string | null>;
 
   /**
    * List all payment methods for a customer
    * @param customerId Customer ID
    * @returns Array of payment methods
    */
-  listPaymentMethods(customerId: string): Promise<PaymentMethod[]>;
+  abstract listPaymentMethods(customerId: string): Promise<PaymentMethod[]>;
 
   /**
    * Update customer information
@@ -67,34 +71,42 @@ export interface PaymentProvider {
    * @param data Customer data to update
    * @returns Updated customer data
    */
-  updateCustomer(
+  abstract updateCustomer(
     customerId: string,
     data: Partial<CustomerData>,
   ): Promise<CustomerData>;
 
-  retrieveCardSetup(setupId: string): Promise<CardSetup>;
+  abstract retrieveCardSetup(setupId: string): Promise<CardSetup>;
 
   /**
    * Retrieve a payment method
    * @param paymentMethodId Payment method ID
    * @returns Payment method data
    */
-  retrievePaymentMethod(paymentMethodId: string): Promise<PaymentMethod>;
+  abstract retrievePaymentMethod(
+    paymentMethodId: string,
+  ): Promise<PaymentMethod>;
 
   /**
    * Detach a payment method from a customer
    * @param paymentMethodId Payment method ID
    * @returns Detached payment method
    */
-  detachPaymentMethod(paymentMethodId: string): Promise<PaymentMethod>;
+  abstract detachPaymentMethod(paymentMethodId: string): Promise<PaymentMethod>;
 
-  getReceiptUrl(paymentId: string, customerId: string | null): Promise<string>;
+  abstract getReceiptUrl(
+    paymentId: string,
+    customerId: string | null,
+  ): Promise<string>;
 
-  retrieveBillingInfo(
+  abstract retrieveBillingInfo(
     customerId: string | null,
   ): Promise<BillingInfoDto | null>;
 
-  updateBillingInfo(customerId: string, data: BillingInfoDto): Promise<any>;
+  abstract updateBillingInfo(
+    customerId: string,
+    data: BillingInfoDto,
+  ): Promise<any>;
 
-  retrievePaymentIntent(paymentId: string): any;
+  abstract retrievePaymentIntent(paymentId: string): any;
 }
