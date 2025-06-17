@@ -4,25 +4,20 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import { useNavigate } from 'react-router-dom';
 
-import { LeaderBoardData } from '@/services/api/use-leaderboard-details';
+import useLeaderboardDetails from '../api/useLeaderboardDetails';
 
-import { DataGridWrapper } from './components/DataGridWrapper';
-import { SelectNetwork } from './components/SelectNetwork';
+import DataGridWrapper from './DataGridWrapper';
+import SelectNetwork from './SelectNetwork';
 
 type Props = {
-  data: LeaderBoardData | undefined;
-  status: 'success' | 'error' | 'pending';
-  error: unknown;
   viewAllBanner?: boolean;
+  first?: number;
 };
 
-export const Leaderboard: FC<Props> = ({
-  data,
-  status,
-  error,
-  viewAllBanner,
-}) => {
+const Leaderboard: FC<Props> = ({ viewAllBanner, first }) => {
   const navigate = useNavigate();
+  const { data, status, error } = useLeaderboardDetails(first);
+
   return (
     <Box
       px={{ xs: 2, md: 4 }}
@@ -48,7 +43,6 @@ export const Leaderboard: FC<Props> = ({
           fullWidth
           sx={{
             borderColor: 'primary.main',
-            cursor: 'pointer',
           }}
           onClick={() => navigate('/leaderboard')}
         >
@@ -58,3 +52,5 @@ export const Leaderboard: FC<Props> = ({
     </Box>
   );
 };
+
+export default Leaderboard;

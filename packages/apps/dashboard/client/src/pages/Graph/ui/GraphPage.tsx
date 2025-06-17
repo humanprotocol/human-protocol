@@ -5,7 +5,7 @@ import Breadcrumbs from '@/shared/ui/Breadcrumbs';
 import { useGraphPageChartParams } from '@/utils/hooks/use-graph-page-chart-params';
 import PageWrapper from '@/widgets/page-wrapper';
 
-const Graph = () => {
+const GraphPage = () => {
   const { revertToInitialParams } = useGraphPageChartParams();
 
   useEffect(() => {
@@ -20,4 +20,4 @@ const Graph = () => {
   );
 };
 
-export default Graph;
+export default GraphPage;

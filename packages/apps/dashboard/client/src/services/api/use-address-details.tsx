@@ -2,7 +2,7 @@ import { Role } from '@human-protocol/sdk';
 import { useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
 
-import { reputationSchema } from '@/services/api/use-leaderboard-details';
+import { reputationSchema } from '@/features/leaderboard/model/leaderboardSchema';
 import { useWalletSearch } from '@/utils/hooks/use-wallet-search';
 
 import { apiPaths } from '../api-paths';

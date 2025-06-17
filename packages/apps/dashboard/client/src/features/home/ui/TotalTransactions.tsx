@@ -1,17 +1,18 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 
-import { useGeneralStats } from '@/services/api/use-general-stats';
 import FormatNumber from '@/shared/ui/FormatNumber';
 
-const Holders = () => {
-  const { data, isSuccess, isPending, isError } = useGeneralStats();
+import useGeneralStats from '../api/useGeneralStats';
+
+const TotalTransactions = () => {
+  const { data, isError, isPending, isSuccess } = useGeneralStats();
 
   return (
     <Box display="flex" flexDirection="column" gap={0.5}>
-      <Typography variant="body1">Holders</Typography>
+      <Typography variant="body1">Total Transactions</Typography>
       <Typography variant="h6" component="p">
-        {isSuccess && <FormatNumber value={data.totalHolders} />}
+        {isSuccess && <FormatNumber value={data.totalTransactions} />}
         {isPending && '...'}
         {isError && 'No data'}
       </Typography>
@@ -19,4 +20,4 @@ const Holders = () => {
   );
 };
 
-export default Holders;
+export default TotalTransactions;

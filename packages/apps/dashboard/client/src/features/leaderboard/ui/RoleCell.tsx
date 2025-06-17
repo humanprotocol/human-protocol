@@ -1,3 +1,5 @@
+import { FC, PropsWithChildren } from 'react';
+
 import { Launch as LaunchIcon } from '@mui/icons-material';
 import { Box, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
@@ -6,10 +8,21 @@ import EntityIcon from '@/shared/ui/EntityIcon';
 import { CaseConverter } from '@/utils/case-converter';
 import { useIsMobile } from '@/utils/hooks/use-breakpoints';
 
-const Wrapper = ({
-  children,
+type WrapperProps = {
+  websiteUrl?: string;
+};
+
+type Props = {
+  rank: number;
+  role: string;
+  websiteUrl?: string;
+  name?: string;
+};
+
+const Wrapper: FC<PropsWithChildren<WrapperProps>> = ({
   websiteUrl,
-}: React.PropsWithChildren<{ websiteUrl?: string }>) => {
+  children,
+}) => {
   return websiteUrl ? (
     <Link
       to={websiteUrl}
@@ -30,17 +43,7 @@ const Wrapper = ({
   );
 };
 
-export const RoleCell = ({
-  rank,
-  role,
-  websiteUrl,
-  name,
-}: {
-  rank: number;
-  role: string;
-  websiteUrl?: string;
-  name?: string;
-}) => {
+const RoleCell: FC<Props> = ({ rank, role, websiteUrl, name }) => {
   const isMobile = useIsMobile();
   const humanReadableRole = CaseConverter.convertSnakeToHumanReadable(role);
   const formattedName = name ? name.split(' ')[0] : null;
@@ -71,3 +74,5 @@ export const RoleCell = ({
     </Box>
   );
 };
+
+export default RoleCell;

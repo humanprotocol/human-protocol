@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
 import GraphPage from '@/pages/Graph';
 import HomePage from '@/pages/Home';
-import LeaderboardPage from '@/pages/Leaderboard';
+import LeaderboardPage from '@/pages/leaderboard';
 import SearchResultsPage from '@/pages/SearchResults';
 
 import { ROUTES } from './config/routes';

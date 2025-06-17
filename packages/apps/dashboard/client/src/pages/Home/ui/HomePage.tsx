@@ -11,17 +11,16 @@ import { Link } from 'react-router-dom';
 
 import GraphSwiper from '@/components/Home/GraphSwiper';
 import SearchBar from '@/components/SearchBar/SearchBar';
-import HMTPrice from '@/pages/Home/HMTPrice';
-import Holders from '@/pages/Home/Holders';
-import TotalNumberOfTasks from '@/pages/Home/TotalNumberOfTasks';
-import TotalTransactions from '@/pages/Home/TotalTransactions';
+import HmtPrice from '@/features/home/ui/HmtPrice';
+import Holders from '@/features/home/ui/Holders';
+import TotalNumberOfTasks from '@/features/home/ui/TotalNumberOfTasks';
+import TotalTransactions from '@/features/home/ui/TotalTransactions';
+import Leaderboard from '@/features/leaderboard';
 import CustomTooltip from '@/shared/ui/CustomTooltip';
 import LeaderboardIcon from '@/shared/ui/icons/LeaderboardIcon';
 import ShadowIcon from '@/shared/ui/ShadowIcon';
 import { useIsMobile } from '@/utils/hooks/use-breakpoints';
 import PageWrapper from '@/widgets/page-wrapper';
-
-import { Leaderboard } from './Leaderboard';
 
 const CardWrapper = styled(Grid)(({ theme }) => ({
   display: 'flex',
@@ -62,7 +61,7 @@ const renderViewChartsButton = (show: boolean) => {
   }
 };
 
-const Home: FC = () => {
+const HomePage: FC = () => {
   const isMobile = useIsMobile();
 
   return (
@@ -77,7 +76,7 @@ const Home: FC = () => {
             <Typography variant="body2">Token</Typography>
             <Box display="flex" gap={1}>
               <InfoTooltip title="Token Current Price" />
-              <HMTPrice />
+              <HmtPrice />
             </Box>
             <Divider />
             <Box display="flex" gap={1}>
@@ -127,9 +126,9 @@ const Home: FC = () => {
         title="Leaderboard"
         img={<LeaderboardIcon />}
       />
-      <Leaderboard />
+      <Leaderboard first={4} viewAllBanner />
     </PageWrapper>
   );
 };
 
-export default Home;
+export default HomePage;

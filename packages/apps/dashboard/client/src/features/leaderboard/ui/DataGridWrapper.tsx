@@ -1,22 +1,22 @@
+import { FC } from 'react';
+
 import { Box, Typography } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 
-import { LeaderBoardData } from '@/services/api/use-leaderboard-details';
 import { handleErrorMessage } from '@/services/handle-error-message';
 import Loader from '@/shared/ui/Loader';
 import { useIsMobile } from '@/utils/hooks/use-breakpoints';
 
-import useDataGrid from '../hooks/useDataGrid';
+import { LeaderboardData } from '../model/leaderboardSchema';
+import useDataGrid from '../ui/useDataGrid';
 
-export const DataGridWrapper = ({
-  data = [],
-  status,
-  error,
-}: {
-  data: LeaderBoardData | undefined;
+type Props = {
+  data: LeaderboardData | undefined;
   status: 'success' | 'error' | 'pending';
   error: unknown;
-}) => {
+};
+
+const DataGridWrapper: FC<Props> = ({ data = [], status, error }) => {
   const { columns, rows } = useDataGrid(data);
   const isMobile = useIsMobile();
 
@@ -117,3 +117,5 @@ export const DataGridWrapper = ({
     </Box>
   );
 };
+
+export default DataGridWrapper;

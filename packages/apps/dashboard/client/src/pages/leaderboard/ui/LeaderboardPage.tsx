@@ -1,14 +1,10 @@
-import { useLeaderboardDetails } from '@/services/api/use-leaderboard-details';
+import Leaderboard from '@/features/leaderboard';
 import Breadcrumbs from '@/shared/ui/Breadcrumbs';
 import LeaderboardIcon from '@/shared/ui/icons/LeaderboardIcon';
 import ShadowIcon from '@/shared/ui/ShadowIcon';
 import PageWrapper from '@/widgets/page-wrapper';
 
-import { Leaderboard } from '../../features/Leaderboard/index';
-
-const LeaderBoard = () => {
-  const { data, status, error } = useLeaderboardDetails();
-
+const LeaderboardPage = () => {
   return (
     <PageWrapper className="standard-background">
       <Breadcrumbs title="Leaderboard" />
@@ -17,9 +13,9 @@ const LeaderBoard = () => {
         title="Leaderboard"
         img={<LeaderboardIcon />}
       />
-      <Leaderboard data={data} status={status} error={error} />
+      <Leaderboard />
     </PageWrapper>
   );
 };
 
-export default LeaderBoard;
+export default LeaderboardPage;

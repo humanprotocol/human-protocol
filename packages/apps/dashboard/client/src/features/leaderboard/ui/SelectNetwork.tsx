@@ -12,7 +12,7 @@ import { useIsMobile } from '@/utils/hooks/use-breakpoints';
 import { useFilteredNetworks } from '@/utils/hooks/use-filtered-networks';
 import { useLeaderboardSearch } from '@/utils/hooks/use-leaderboard-search';
 
-export const SelectNetwork = () => {
+const SelectNetwork = () => {
   const {
     setChainId,
     filterParams: { chainId },

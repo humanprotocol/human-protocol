@@ -1,10 +1,12 @@
+import { FC } from 'react';
+
 import { Typography } from '@mui/material';
 
-interface TextCellProps {
+type TextCellProps = {
   value: string;
-}
+};
 
-export const TextCell = ({ value }: TextCellProps) => (
+const TextCell: FC<TextCellProps> = ({ value }) => (
   <Typography
     height="100%"
     variant="body1"
@@ -16,3 +18,5 @@ export const TextCell = ({ value }: TextCellProps) => (
     {value}
   </Typography>
 );
+
+export default TextCell;

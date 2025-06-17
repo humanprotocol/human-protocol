@@ -1,20 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
-import { z } from 'zod';
 
+import { apiPaths } from '@/services/api-paths';
+import { httpService } from '@/services/http-service';
 import { validateResponse } from '@/services/validate-response';
 
-import { apiPaths } from '../api-paths';
-import { httpService } from '../http-service';
+import { hcaptchaGeneralStatsResponseSchema } from '../model/hcaptchaGeneralStats';
 
-const successHcaptchaGeneralStatsResponseSchema = z.object({
-  solved: z.number(),
-});
-
-export type HcaptchaGeneralStats = z.infer<
-  typeof successHcaptchaGeneralStatsResponseSchema
->;
-
-export function useHcaptchaGeneralStats() {
+const useHcaptchaGeneralStats = () => {
   return useQuery({
     queryFn: async () => {
       const { data } = await httpService.get(
@@ -23,11 +15,13 @@ export function useHcaptchaGeneralStats() {
 
       const validResponse = validateResponse(
         data,
-        successHcaptchaGeneralStatsResponseSchema
+        hcaptchaGeneralStatsResponseSchema
       );
 
       return validResponse;
     },
     queryKey: ['useHcaptchaGeneralStats'],
   });
-}
+};
+
+export default useHcaptchaGeneralStats;

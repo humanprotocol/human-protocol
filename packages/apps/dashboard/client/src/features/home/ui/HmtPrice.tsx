@@ -1,9 +1,9 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 
-import { useHMTPrice } from '../../services/api/use-hmt-price';
+import { useHMTPrice } from '@/services/api/use-hmt-price';
 
-const HMTPrice = () => {
+const HmtPrice = () => {
   const { data, isError, isPending, isSuccess } = useHMTPrice();
 
   return (
@@ -18,4 +18,4 @@ const HMTPrice = () => {
   );
 };
 
-export default HMTPrice;
+export default HmtPrice;

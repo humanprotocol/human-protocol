@@ -4,17 +4,18 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { Box, Typography } from '@mui/material';
 import { GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
 
-import { LeaderBoardData } from '@/services/api/use-leaderboard-details';
 import CustomTooltip from '@/shared/ui/CustomTooltip';
 import { useIsMobile } from '@/utils/hooks/use-breakpoints';
 import { useLeaderboardSearch } from '@/utils/hooks/use-leaderboard-search';
 
-import { AddressCell } from '../components/AddressCell';
-import { CategoryCell } from '../components/CategoryCell';
-import { ChainCell } from '../components/ChainCell';
-import { RoleCell } from '../components/RoleCell';
-import { SelectNetwork } from '../components/SelectNetwork';
-import { TextCell } from '../components/TextCell';
+import { LeaderboardData } from '../model/leaderboardSchema';
+
+import AddressCell from './AddressCell';
+import CategoryCell from './CategoryCell';
+import ChainCell from './ChainCell';
+import RoleCell from './RoleCell';
+import SelectNetwork from './SelectNetwork';
+import TextCell from './TextCell';
 
 const InfoTooltip = ({ title }: { title: string }) => (
   <CustomTooltip title={title} arrow>
@@ -26,7 +27,7 @@ const InfoTooltip = ({ title }: { title: string }) => (
   </CustomTooltip>
 );
 
-const useDataGrid = (data: LeaderBoardData) => {
+const useDataGrid = (data: LeaderboardData) => {
   const {
     filterParams: { chainId },
   } = useLeaderboardSearch();

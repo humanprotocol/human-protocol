@@ -1,14 +1,16 @@
+import { FC } from 'react';
+
+import { ChainId } from '@human-protocol/sdk';
 import { Box } from '@mui/material';
 
 import AbbreviateClipboard from '@/shared/ui/AbbreviateClipboard';
 
-export const AddressCell = ({
-  chainId,
-  address,
-}: {
-  chainId: string;
+type Props = {
+  chainId: ChainId;
   address: string;
-}) => (
+};
+
+const AddressCell: FC<Props> = ({ chainId, address }) => (
   <Box display="flex" alignItems="center" height="100%">
     <AbbreviateClipboard
       value={address}
@@ -16,3 +18,5 @@ export const AddressCell = ({
     />
   </Box>
 );
+
+export default AddressCell;

@@ -1,9 +1,16 @@
+import { FC } from 'react';
+
+import { ChainId } from '@human-protocol/sdk';
 import { Typography } from '@mui/material';
 
 import { NetworkIcon } from '@/shared/ui/NetworkIcon';
 import { getNetwork } from '@/utils/config/networks';
 
-export const ChainCell = ({ chainId }: { chainId: number }) => (
+type Props = {
+  chainId: ChainId;
+};
+
+const ChainCell: FC<Props> = ({ chainId }) => (
   <Typography
     variant="body1"
     whiteSpace="wrap"
@@ -18,3 +25,5 @@ export const ChainCell = ({ chainId }: { chainId: number }) => (
     {getNetwork(chainId)?.name}
   </Typography>
 );
+
+export default ChainCell;

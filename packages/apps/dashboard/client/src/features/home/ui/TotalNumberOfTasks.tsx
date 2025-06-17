@@ -1,8 +1,9 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 
-import { useHcaptchaGeneralStats } from '@/services/api/use-hcaptcha-general-stats';
 import FormatNumber from '@/shared/ui/FormatNumber';
+
+import useHcaptchaGeneralStats from '../api/useHcaptchaGeneralStats';
 
 const TotalNumberOfTasks = () => {
   const { data, isError, isPending, isSuccess } = useHcaptchaGeneralStats();
