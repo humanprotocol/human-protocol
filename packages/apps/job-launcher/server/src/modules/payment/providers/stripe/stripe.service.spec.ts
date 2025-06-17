@@ -1,16 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { StripeService } from './stripe.service';
-import { StripeConfigService } from '../../common/config/stripe-config.service';
+import { StripeConfigService } from '../../../../common/config/stripe-config.service';
 import Stripe from 'stripe';
-import { ServerError } from '../../common/errors';
-import { ErrorPayment } from '../../common/constants/errors';
+import { ServerError } from '../../../../common/errors';
+import { ErrorPayment } from '../../../../common/constants/errors';
 import {
   PaymentCurrency,
   PaymentStatus,
   VatType,
-} from '../../common/enums/payment';
-import { PaymentProvider } from '../payment/payment-provider.abstract';
+} from '../../../../common/enums/payment';
+import { PaymentProvider } from '../payment-provider.abstract';
 
 jest.mock('stripe');
 

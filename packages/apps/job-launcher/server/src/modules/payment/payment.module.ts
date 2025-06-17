@@ -15,9 +15,9 @@ import { UserEntity } from '../user/user.entity';
 import { JobRepository } from '../job/job.repository';
 import { UserRepository } from '../user/user.repository';
 import { RateModule } from '../rate/rate.module';
-import { StripeModule } from '../stripe/stripe.module';
-import { StripeService } from '../stripe/stripe.service';
-import { PaymentProvider } from './payment-provider.abstract';
+import { StripeModule } from './providers/stripe/stripe.module';
+import { StripeService } from './providers/stripe/stripe.service';
+import { PaymentProvider } from './providers/payment-provider.abstract';
 
 @Module({
   imports: [

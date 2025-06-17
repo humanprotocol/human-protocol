@@ -51,7 +51,8 @@ import { GetPaymentsDto, UserBalanceDto } from './payment.dto';
 import { PaymentEntity } from './payment.entity';
 import { PaymentRepository } from './payment.repository';
 import { PaymentService } from './payment.service';
-import { PaymentIntent, PaymentProvider } from './payment-provider.abstract';
+import { PaymentProvider } from './providers/payment-provider.abstract';
+import { PaymentIntent } from './payment.interface';
 
 describe('PaymentService', () => {
   let paymentService: PaymentService;

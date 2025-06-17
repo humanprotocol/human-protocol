@@ -4,7 +4,7 @@ import { DataSource, In, LessThan, MoreThan } from 'typeorm';
 import { PaymentStatus } from '../../common/enums/payment';
 import { BaseRepository } from '../../database/base.repository';
 import { PaymentEntity } from './payment.entity';
-import { ListResult } from '../payment/payment.interface';
+import { ListResult } from './payment.interface';
 import { GetPaymentsDto } from './payment.dto';
 import { convertToDatabaseSortDirection } from '../../database/database.utils';
 

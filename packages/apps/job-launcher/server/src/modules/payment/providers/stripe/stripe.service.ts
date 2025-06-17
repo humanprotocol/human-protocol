@@ -1,18 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import Stripe from 'stripe';
-import { StripeConfigService } from '../../common/config/stripe-config.service';
-import { NotFoundError, ServerError } from '../../common/errors';
-import { ErrorPayment } from '../../common/constants/errors';
-import { VatType } from '../../common/enums/payment';
+import { StripeConfigService } from '../../../../common/config/stripe-config.service';
+import { NotFoundError, ServerError } from '../../../../common/errors';
+import { ErrorPayment } from '../../../../common/constants/errors';
+import { VatType } from '../../../../common/enums/payment';
 import {
-  PaymentProvider,
   PaymentMethod,
   CustomerData,
   TaxId,
   Invoice,
   PaymentIntent,
   SetupIntent,
-} from '../payment/payment-provider.abstract';
+} from '../../payment.interface';
+import { PaymentProvider } from '../payment-provider.abstract';
 
 @Injectable()
 export class StripeService extends PaymentProvider {

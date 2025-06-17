@@ -47,11 +47,10 @@ import { JobRepository } from '../job/job.repository';
 import { RateService } from '../rate/rate.service';
 import { UserEntity } from '../user/user.entity';
 import { UserRepository } from '../user/user.repository';
-import { PaymentProvider } from './payment-provider.abstract';
+import { PaymentProvider } from './providers/payment-provider.abstract';
 
 @Injectable()
 export class PaymentService {
-
   private readonly logger = new Logger(PaymentService.name);
 
   constructor(
