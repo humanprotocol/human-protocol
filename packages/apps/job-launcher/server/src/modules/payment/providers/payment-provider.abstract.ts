@@ -1,31 +1,23 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { VatType } from '../../../common/enums/payment';
 import {
-  Invoice,
-  PaymentIntent,
+  CardSetup,
   CustomerData,
+  Invoice,
+  PaymentData,
   PaymentMethod,
-  TaxId,
-  SetupIntent,
 } from '../payment.interface';
+import { BillingInfoDto } from '../payment.dto';
 
-@Injectable()
-export abstract class PaymentProvider {
-  protected readonly logger: Logger = new Logger(this.constructor.name);
-
+export interface PaymentProvider {
   /**
    * Create a new customer in the payment provider system
+   * @param customerId Customer ID
    * @param email Customer's email address
    * @returns Customer ID
    */
-  abstract createCustomer(email: string): Promise<string>;
-
-  /**
-   * Create a setup intent for adding a new payment method
-   * @param customerId Customer ID
-   * @returns Setup intent client secret
-   */
-  abstract createSetupIntent(customerId: string): Promise<string>;
+  createCustomerWithCard(
+    customerId: string | null,
+    email: string,
+  ): Promise<string>;
 
   /**
    * Create an invoice for a customer
@@ -35,7 +27,7 @@ export abstract class PaymentProvider {
    * @param description Invoice description
    * @returns Created invoice
    */
-  abstract createInvoice(
+  createInvoice(
     customerId: string,
     amountInCents: number,
     currency: string,
@@ -49,32 +41,25 @@ export abstract class PaymentProvider {
    * @param offSession Whether the payment is off-session
    * @returns Updated payment intent
    */
-  abstract handlePaymentIntent(
+  createPayment(
     paymentIntentId: string,
     paymentMethodId: string,
     offSession: boolean,
-  ): Promise<PaymentIntent>;
-
-  /**
-   * Retrieve a customer's information
-   * @param customerId Customer ID
-   * @returns Customer data
-   */
-  abstract retrieveCustomer(customerId: string): Promise<CustomerData>;
+  ): Promise<PaymentData>;
 
   /**
    * Get the default payment method for a customer
    * @param customerId Customer ID
    * @returns Payment method ID or null
    */
-  abstract getDefaultPaymentMethod(customerId: string): Promise<string | null>;
+  getDefaultPaymentMethod(customerId: string): Promise<string | null>;
 
   /**
    * List all payment methods for a customer
    * @param customerId Customer ID
    * @returns Array of payment methods
    */
-  abstract listPaymentMethods(customerId: string): Promise<PaymentMethod[]>;
+  listPaymentMethods(customerId: string): Promise<PaymentMethod[]>;
 
   /**
    * Update customer information
@@ -82,69 +67,34 @@ export abstract class PaymentProvider {
    * @param data Customer data to update
    * @returns Updated customer data
    */
-  abstract updateCustomer(
+  updateCustomer(
     customerId: string,
     data: Partial<CustomerData>,
   ): Promise<CustomerData>;
 
-  /**
-   * List tax IDs for a customer
-   * @param customerId Customer ID
-   * @returns Array of tax IDs
-   */
-  abstract listCustomerTaxIds(customerId: string): Promise<TaxId[]>;
-
-  /**
-   * Create a tax ID for a customer
-   * @param customerId Customer ID
-   * @param type Tax ID type
-   * @param value Tax ID value
-   * @returns Created tax ID
-   */
-  abstract createTaxId(
-    customerId: string,
-    type: VatType,
-    value: string,
-  ): Promise<TaxId>;
-
-  /**
-   * Delete a tax ID
-   * @param customerId Customer ID
-   * @param taxIdId Tax ID to delete
-   */
-  abstract deleteTaxId(customerId: string, taxIdId: string): Promise<void>;
-
-  abstract retrieveSetupIntent(setupId: string): Promise<SetupIntent>;
-
-  /**
-   * Retrieve a payment intent
-   * @param paymentIntentId Payment intent ID
-   * @returns Payment intent data
-   */
-  abstract retrievePaymentIntent(
-    paymentIntentId: string | null,
-  ): Promise<PaymentIntent>;
-
-  /**
-   * Retrieve a charge
-   * @param chargeId Charge ID
-   * @returns Charge data with receipt URL
-   */
-  abstract retrieveCharge(chargeId: string): Promise<{ receipt_url: string }>;
+  retrieveCardSetup(setupId: string): Promise<CardSetup>;
 
   /**
    * Retrieve a payment method
    * @param paymentMethodId Payment method ID
    * @returns Payment method data
    */
-  abstract retrievePaymentMethod(
-    paymentMethodId: string,
-  ): Promise<PaymentMethod>;
+  retrievePaymentMethod(paymentMethodId: string): Promise<PaymentMethod>;
 
   /**
    * Detach a payment method from a customer
    * @param paymentMethodId Payment method ID
    * @returns Detached payment method
    */
-  abstract detachPaymentMethod(paymentMethodId: string): Promise<PaymentMethod>;
+  detachPaymentMethod(paymentMethodId: string): Promise<PaymentMethod>;
+
+  getReceiptUrl(paymentId: string, customerId: string | null): Promise<string>;
+
+  retrieveBillingInfo(
+    customerId: string | null,
+  ): Promise<BillingInfoDto | null>;
+
+  updateBillingInfo(customerId: string, data: BillingInfoDto): Promise<any>;
+
+  retrievePaymentIntent(paymentId: string): any;
 }

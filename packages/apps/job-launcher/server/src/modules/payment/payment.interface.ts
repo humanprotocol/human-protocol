@@ -37,21 +37,21 @@ export interface TaxId {
 
 export interface Invoice {
   id: string;
-  payment_intent: string | null;
+  payment_id: string | null;
   status?: string;
   amount_due: number;
   currency: string;
 }
 
-export interface SetupIntent {
-  customer: string;
+export interface CardSetup {
+  customer_id: string;
   payment_method: string;
 }
 
-export interface PaymentIntent {
+export interface PaymentData {
   customer: string;
   id: string;
-  client_secret: string;
+  client_secret: string | null;
   status: string;
   amount: number;
   amount_received: number;

@@ -126,7 +126,7 @@ describe('StripeService', () => {
         .fn()
         .mockResolvedValue(mockSetupIntent);
 
-      const result = await service.createSetupIntent('cus_123');
+      const result = await service.setupCard('cus_123');
 
       expect(result).toBe('seti_secret_123');
       expect(stripeMock.setupIntents.create).toHaveBeenCalledWith({
@@ -140,7 +140,7 @@ describe('StripeService', () => {
         .fn()
         .mockResolvedValue(mockSetupIntent);
 
-      await service.createSetupIntent(null);
+      await service.setupCard(null);
 
       expect(stripeMock.setupIntents.create).toHaveBeenCalledWith({
         automatic_payment_methods: { enabled: true },
@@ -151,7 +151,7 @@ describe('StripeService', () => {
     it('should handle missing client secret', async () => {
       stripeMock.setupIntents.create = jest.fn().mockResolvedValue({});
 
-      await expect(service.createSetupIntent('cus_123')).rejects.toThrow(
+      await expect(service.setupCard('cus_123')).rejects.toThrow(
         new ServerError(ErrorPayment.ClientSecretDoesNotExist),
       );
     });
@@ -176,7 +176,7 @@ describe('StripeService', () => {
         .fn()
         .mockResolvedValue(mockPaymentIntent);
 
-      const result = await service.handlePaymentIntent(
+      const result = await service.createPayment(
         'pi_123',
         'pm_123',
         true,
@@ -197,7 +197,7 @@ describe('StripeService', () => {
         .fn()
         .mockResolvedValue(mockPaymentIntent);
 
-      const result = await service.handlePaymentIntent(
+      const result = await service.createPayment(
         'pi_123',
         'pm_123',
         false,

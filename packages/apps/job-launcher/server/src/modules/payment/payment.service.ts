@@ -16,13 +16,11 @@ import {
   PaymentSource,
   PaymentStatus,
   PaymentType,
-  VatType,
 } from '../../common/enums/payment';
 import { add, div, eq, lt, mul } from '../../common/utils/decimal';
 import { verifySignature } from '../../common/utils/signature';
 import { Web3Service } from '../web3/web3.service';
 import {
-  AddressDto,
   BillingInfoDto,
   CardConfirmDto,
   CardDto,
@@ -65,20 +63,17 @@ export class PaymentService {
   ) {}
 
   public async createCustomerAndAssignCard(user: UserEntity): Promise<string> {
-    let customerId = user.paymentProviderId;
-
-    if (!customerId) {
-      customerId = await this.paymentProvider.createCustomer(user.email);
-    }
-
-    return await this.paymentProvider.createSetupIntent(customerId);
+    return await this.paymentProvider.createCustomerWithCard(
+      user.paymentProviderId,
+      user.email,
+    );
   }
 
   public async confirmCard(
     user: UserEntity,
     data: CardConfirmDto,
   ): Promise<boolean> {
-    const setup = await this.paymentProvider.retrieveSetupIntent(data.setupId);
+    const setup = await this.paymentProvider.retrieveCardSetup(data.setupId);
 
     if (!setup) {
       this.logger.log(ErrorPayment.SetupNotFound, PaymentService.name);
@@ -87,7 +82,7 @@ export class PaymentService {
 
     let defaultPaymentMethod: string | null = null;
     if (!user.paymentProviderId) {
-      user.paymentProviderId = setup.customer as string;
+      user.paymentProviderId = setup.customer_id as string;
       await this.userRepository.updateOne(user);
     } else {
       defaultPaymentMethod = await this.getDefaultPaymentMethod(
@@ -122,8 +117,8 @@ export class PaymentService {
       'Top up',
     );
 
-    const paymentIntent = await this.paymentProvider.handlePaymentIntent(
-      invoice.payment_intent as string,
+    const paymentIntent = await this.paymentProvider.createPayment(
+      invoice.payment_id as string,
       paymentMethodId,
       false, // on-session payment
     );
@@ -186,6 +181,7 @@ export class PaymentService {
       paymentData.status === PaymentStatus.REQUIRES_PAYMENT_METHOD
     ) {
       paymentEntity.status = PaymentStatus.FAILED;
+
       await this.paymentRepository.updateOne(paymentEntity);
 
       throw new ConflictError(ErrorPayment.NotSuccess);
@@ -364,8 +360,8 @@ export class PaymentService {
       throw new ServerError(ErrorPayment.NotDefaultPaymentMethod);
     }
 
-    const paymentIntent = await this.paymentProvider.handlePaymentIntent(
-      invoice.payment_intent as string,
+    const paymentIntent = await this.paymentProvider.createPayment(
+      invoice.payment_id as string,
       defaultPaymentMethod,
       true, // off-session payment
     );
@@ -471,32 +467,9 @@ export class PaymentService {
   }
 
   async getUserBillingInfo(user: UserEntity): Promise<BillingInfoDto | null> {
-    if (!user.paymentProviderId) {
-      return null;
-    }
-
-    const taxIds = await this.paymentProvider.listCustomerTaxIds(
+    return await this.paymentProvider.retrieveBillingInfo(
       user.paymentProviderId,
     );
-
-    const customer = await this.paymentProvider.retrieveCustomer(
-      user.paymentProviderId,
-    );
-
-    const userBillingInfo = new BillingInfoDto();
-    if (customer.address) {
-      const address = new AddressDto();
-      address.country = (customer.address.country as string).toLowerCase();
-      address.postalCode = customer.address.postal_code as string;
-      address.city = customer.address.city as string;
-      address.line = customer.address.line1 as string;
-      userBillingInfo.address = address;
-    }
-    userBillingInfo.name = customer.name as string;
-    userBillingInfo.email = customer.email as string;
-    userBillingInfo.vat = taxIds[0]?.value;
-    userBillingInfo.vatType = taxIds[0]?.type as VatType;
-    return userBillingInfo;
   }
 
   async updateUserBillingInfo(
@@ -507,41 +480,10 @@ export class PaymentService {
       throw new NotFoundError(ErrorPayment.CustomerNotFound);
     }
 
-    const existingTaxIds = await this.paymentProvider.listCustomerTaxIds(
+    return await this.paymentProvider.updateBillingInfo(
       user.paymentProviderId,
+      updateBillingInfoDto,
     );
-
-    // Delete any existing tax IDs before adding the new one
-    for (const taxId of existingTaxIds) {
-      await this.paymentProvider.deleteTaxId(user.paymentProviderId, taxId.id);
-    }
-
-    // Create the new VAT tax ID
-    if (updateBillingInfoDto.vat && updateBillingInfoDto.vatType) {
-      await this.paymentProvider.createTaxId(
-        user.paymentProviderId,
-        updateBillingInfoDto.vatType,
-        updateBillingInfoDto.vat,
-      );
-    }
-
-    // If there are changes to the address, name, or email, update them
-    if (
-      updateBillingInfoDto.address ||
-      updateBillingInfoDto.name ||
-      updateBillingInfoDto.email
-    ) {
-      return this.paymentProvider.updateCustomer(user.paymentProviderId, {
-        address: {
-          line1: updateBillingInfoDto.address?.line,
-          city: updateBillingInfoDto.address?.city,
-          country: updateBillingInfoDto.address?.country,
-          postal_code: updateBillingInfoDto.address?.postalCode,
-        },
-        name: updateBillingInfoDto.name,
-        email: updateBillingInfoDto.email,
-      });
-    }
   }
 
   async changeDefaultPaymentMethod(user: UserEntity, cardId: string) {
@@ -602,22 +544,10 @@ export class PaymentService {
   }
 
   async getReceipt(paymentId: string, user: UserEntity): Promise<string> {
-    const paymentIntent =
-      await this.paymentProvider.retrievePaymentIntent(paymentId);
-
-    if (!paymentIntent || paymentIntent.customer !== user.paymentProviderId) {
-      throw new NotFoundError(ErrorPayment.NotFound);
-    }
-
-    const charge = await this.paymentProvider.retrieveCharge(
-      paymentIntent.latest_charge as string,
+    return await this.paymentProvider.getReceiptUrl(
+      paymentId,
+      user.paymentProviderId,
     );
-
-    if (!charge || !charge.receipt_url) {
-      throw new NotFoundError(ErrorPayment.NotFound);
-    }
-
-    return charge.receipt_url;
   }
 
   public async getUserBalance(userId: number): Promise<UserBalanceDto> {

@@ -52,7 +52,7 @@ import { PaymentEntity } from './payment.entity';
 import { PaymentRepository } from './payment.repository';
 import { PaymentService } from './payment.service';
 import { PaymentProvider } from './providers/payment-provider.abstract';
-import { PaymentIntent } from './payment.interface';
+import { PaymentData } from './payment.interface';
 
 describe('PaymentService', () => {
   let paymentService: PaymentService;
@@ -158,7 +158,7 @@ describe('PaymentService', () => {
       };
 
       paymentProvider.createInvoice.mockResolvedValue(invoice as any);
-      paymentProvider.handlePaymentIntent.mockResolvedValue(
+      paymentProvider.createPayment.mockResolvedValue(
         paymentIntent as any,
       );
 
@@ -179,7 +179,7 @@ describe('PaymentService', () => {
         PaymentCurrency.USD,
         'Top up',
       );
-      expect(paymentProvider.handlePaymentIntent).toHaveBeenCalledWith(
+      expect(paymentProvider.createPayment).toHaveBeenCalledWith(
         'pi_123',
         'pm_123',
         false,
@@ -209,7 +209,7 @@ describe('PaymentService', () => {
       };
 
       paymentProvider.createInvoice.mockResolvedValue(invoice as any);
-      paymentProvider.handlePaymentIntent.mockResolvedValue(
+      paymentProvider.createPayment.mockResolvedValue(
         paymentIntent as any,
       );
 
@@ -355,7 +355,7 @@ describe('PaymentService', () => {
       };
 
       paymentProvider.retrievePaymentIntent.mockResolvedValue(
-        null as unknown as PaymentIntent,
+        null as unknown as PaymentData,
       );
 
       await expect(
@@ -762,7 +762,7 @@ describe('PaymentService', () => {
       };
 
       paymentProvider.createCustomer.mockResolvedValue('cus_123');
-      paymentProvider.createSetupIntent.mockResolvedValue(
+      paymentProvider.setupCard.mockResolvedValue(
         paymentIntent.client_secret,
       );
 
@@ -772,7 +772,7 @@ describe('PaymentService', () => {
 
       expect(result).toEqual(paymentIntent.client_secret);
       expect(paymentProvider.createCustomer).toHaveBeenCalledWith(user.email);
-      expect(paymentProvider.createSetupIntent).toHaveBeenCalledWith('cus_123');
+      expect(paymentProvider.setupCard).toHaveBeenCalledWith('cus_123');
     });
 
     it('should throw a bad request exception if the customer creation fails', async () => {
@@ -797,7 +797,7 @@ describe('PaymentService', () => {
       };
 
       paymentProvider.createCustomer.mockResolvedValue({ id: 1 } as any);
-      paymentProvider.createSetupIntent.mockRejectedValue(
+      paymentProvider.setupCard.mockRejectedValue(
         new ServerError(ErrorPayment.IntentNotCreated),
       );
 
@@ -813,7 +813,7 @@ describe('PaymentService', () => {
       };
 
       paymentProvider.createCustomer.mockResolvedValue(user.id.toString());
-      paymentProvider.createSetupIntent.mockRejectedValue(
+      paymentProvider.setupCard.mockRejectedValue(
         new ServerError(ErrorPayment.ClientSecretDoesNotExist),
       );
 
@@ -836,7 +836,7 @@ describe('PaymentService', () => {
         payment_method: 'pm_123',
       };
 
-      paymentProvider.retrieveSetupIntent.mockResolvedValue(setupMock as any);
+      paymentProvider.retrieveCardSetup.mockResolvedValue(setupMock as any);
       paymentProvider.updateCustomer.mockResolvedValue(null as any);
       jest
         .spyOn(userRepository, 'updateOne')
@@ -853,7 +853,7 @@ describe('PaymentService', () => {
           paymentProviderId: 'cus_123',
         }),
       );
-      expect(paymentProvider.retrieveSetupIntent).toHaveBeenCalledWith(
+      expect(paymentProvider.retrieveCardSetup).toHaveBeenCalledWith(
         'setup_123',
       );
       expect(paymentProvider.updateCustomer).toHaveBeenCalledWith('cus_123', {
@@ -867,7 +867,7 @@ describe('PaymentService', () => {
         email: 'test@hmt.ai',
       };
 
-      paymentProvider.retrieveSetupIntent.mockResolvedValue(undefined as any);
+      paymentProvider.retrieveCardSetup.mockResolvedValue(undefined as any);
 
       await expect(
         paymentService.confirmCard(user as any, {
@@ -906,7 +906,7 @@ describe('PaymentService', () => {
         id: invoiceId,
         payment_intent: paymentIntent,
       } as any);
-      paymentProvider.handlePaymentIntent.mockResolvedValueOnce(
+      paymentProvider.createPayment.mockResolvedValueOnce(
         paymentIntent as any,
       );
       paymentProvider.getDefaultPaymentMethod.mockResolvedValueOnce(
@@ -925,7 +925,7 @@ describe('PaymentService', () => {
         PaymentCurrency.USD,
         'Slash Job Id ' + jobEntity.id,
       );
-      expect(paymentProvider.handlePaymentIntent).toHaveBeenCalledWith(
+      expect(paymentProvider.createPayment).toHaveBeenCalledWith(
         paymentIntent,
         paymentMethodId,
         true,
@@ -955,7 +955,7 @@ describe('PaymentService', () => {
         invoice_settings: { default_payment_method: paymentMethodId },
       } as any);
 
-      paymentProvider.handlePaymentIntent.mockRejectedValue(
+      paymentProvider.createPayment.mockRejectedValue(
         new ServerError(ErrorPayment.PaymentMethodAssociationFailed),
       );
 

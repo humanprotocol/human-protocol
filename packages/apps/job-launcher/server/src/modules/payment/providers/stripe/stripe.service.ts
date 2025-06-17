@@ -1,26 +1,27 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import Stripe from 'stripe';
 import { StripeConfigService } from '../../../../common/config/stripe-config.service';
 import { NotFoundError, ServerError } from '../../../../common/errors';
 import { ErrorPayment } from '../../../../common/constants/errors';
 import { VatType } from '../../../../common/enums/payment';
 import {
-  PaymentMethod,
+  CardSetup,
   CustomerData,
-  TaxId,
   Invoice,
-  PaymentIntent,
-  SetupIntent,
+  PaymentData,
+  PaymentMethod,
+  TaxId,
 } from '../../payment.interface';
 import { PaymentProvider } from '../payment-provider.abstract';
+import { AddressDto, BillingInfoDto } from '../../payment.dto';
 
 @Injectable()
-export class StripeService extends PaymentProvider {
+export class StripeService implements PaymentProvider {
+  protected readonly logger: Logger = new Logger(StripeService.name);
+
   private stripe: Stripe;
 
   constructor(private stripeConfigService: StripeConfigService) {
-    super();
-
     this.stripe = new Stripe(this.stripeConfigService.secretKey, {
       apiVersion: this.stripeConfigService.apiVersion as any,
       appInfo: {
@@ -31,38 +32,12 @@ export class StripeService extends PaymentProvider {
     });
   }
 
-  async createCustomer(email: string): Promise<string> {
-    try {
-      const customer = await this.stripe.customers.create({ email });
-      return customer.id;
-    } catch (error) {
-      this.logger.log(error.message, StripeService.name);
-      throw new ServerError(ErrorPayment.CustomerNotCreated);
-    }
-  }
-
-  async createSetupIntent(customerId: string | null): Promise<string> {
-    let setupIntent: Stripe.Response<Stripe.SetupIntent>;
-
-    try {
-      setupIntent = await this.stripe.setupIntents.create({
-        automatic_payment_methods: { enabled: true },
-        customer: customerId ?? undefined,
-      });
-    } catch (error) {
-      this.logger.log(error.message, StripeService.name);
-      throw new ServerError(ErrorPayment.CardNotAssigned);
+  async createCustomerWithCard(customerId: string | null, email: string) {
+    if (!customerId) {
+      customerId = await this.createCustomer(email);
     }
 
-    if (!setupIntent?.client_secret) {
-      this.logger.log(
-        ErrorPayment.ClientSecretDoesNotExist,
-        StripeService.name,
-      );
-      throw new ServerError(ErrorPayment.ClientSecretDoesNotExist);
-    }
-
-    return setupIntent.client_secret;
+    return await this.setupCard(customerId);
   }
 
   async createInvoice(
@@ -95,18 +70,18 @@ export class StripeService extends PaymentProvider {
 
     return {
       id: invoice.id,
-      payment_intent: invoice.payment_intent as string,
+      payment_id: invoice.payment_intent as string,
       status: invoice.status?.toString(),
       amount_due: invoice.amount_due,
       currency: invoice.currency,
-    };
+    } as Invoice;
   }
 
-  async handlePaymentIntent(
+  async createPayment(
     paymentIntentId: string,
     paymentMethodId: string,
     offSession: boolean,
-  ): Promise<PaymentIntent> {
+  ): Promise<PaymentData> {
     try {
       if (offSession) {
         await this.stripe.paymentIntents.confirm(paymentIntentId, {
@@ -122,8 +97,7 @@ export class StripeService extends PaymentProvider {
       throw new ServerError(ErrorPayment.PaymentMethodAssociationFailed);
     }
 
-    const paymentIntent =
-      await this.stripe.paymentIntents.retrieve(paymentIntentId);
+    const paymentIntent = await this.retrievePaymentIntent(paymentIntentId);
 
     if (!paymentIntent?.client_secret) {
       throw new ServerError(ErrorPayment.ClientSecretDoesNotExist);
@@ -141,16 +115,91 @@ export class StripeService extends PaymentProvider {
     };
   }
 
-  async retrievePaymentIntent(paymentIntentId: string): Promise<PaymentIntent> {
+  async getReceiptUrl(paymentId: string, customerId: string): Promise<string> {
+    const paymentIntent = await this.retrievePaymentIntent(paymentId);
+
+    if (!paymentIntent || paymentIntent.customer !== customerId) {
+      throw new NotFoundError(ErrorPayment.NotFound);
+    }
+
+    const charge = await this.retrieveCharge(
+      paymentIntent.latest_charge as string,
+    );
+
+    if (!charge || !charge.receipt_url) {
+      throw new NotFoundError(ErrorPayment.NotFound);
+    }
+
+    return charge.receipt_url;
+  }
+
+  async retrieveBillingInfo(
+    customerId: string | null,
+  ): Promise<BillingInfoDto | null> {
+    if (!customerId) {
+      return null;
+    }
+
+    const taxIds = await this.listCustomerTaxIds(customerId);
+
+    const customer = await this.retrieveCustomer(customerId);
+
+    const userBillingInfo = new BillingInfoDto();
+
+    if (customer.address) {
+      const address = new AddressDto();
+      address.country = (customer.address.country as string).toLowerCase();
+      address.postalCode = customer.address.postal_code as string;
+      address.city = customer.address.city as string;
+      address.line = customer.address.line1 as string;
+      userBillingInfo.address = address;
+    }
+
+    userBillingInfo.name = customer.name as string;
+    userBillingInfo.email = customer.email as string;
+    userBillingInfo.vat = taxIds[0]?.value;
+    userBillingInfo.vatType = taxIds[0]?.type as VatType;
+
+    return userBillingInfo;
+  }
+
+  async updateBillingInfo(
+    customerId: string,
+    data: BillingInfoDto,
+  ): Promise<any> {
+    const existingTaxIds = await this.listCustomerTaxIds(customerId);
+
+    // Delete any existing tax IDs before adding the new one
+    for (const taxId of existingTaxIds) {
+      await this.deleteTaxId(customerId, taxId.id);
+    }
+
+    // Create the new VAT tax ID
+    if (data.vat && data.vatType) {
+      await this.createTaxId(customerId, data.vatType, data.vat);
+    }
+
+    // If there are changes to the address, name, or email, update them
+    if (data.address || data.name || data.email) {
+      return this.updateCustomer(customerId, {
+        address: {
+          line1: data.address?.line,
+          city: data.address?.city,
+          country: data.address?.country,
+          postal_code: data.address?.postalCode,
+        },
+        name: data.name,
+        email: data.email,
+      });
+    }
+  }
+
+  async retrievePaymentIntent(paymentIntentId: string): Promise<PaymentData> {
     const paymentIntent =
       await this.stripe.paymentIntents.retrieve(paymentIntentId);
 
     if (!paymentIntent) {
       throw new NotFoundError(ErrorPayment.NotFound);
-    }
-
-    if (!paymentIntent.client_secret) {
-      throw new ServerError(ErrorPayment.ClientSecretDoesNotExist);
     }
 
     return {
@@ -162,27 +211,6 @@ export class StripeService extends PaymentProvider {
       amount_received: paymentIntent.amount_received,
       currency: paymentIntent.currency,
       latest_charge: paymentIntent.latest_charge as string,
-    };
-  }
-
-  async retrieveCustomer(customerId: string): Promise<CustomerData> {
-    const customer = (await this.stripe.customers.retrieve(
-      customerId,
-    )) as Stripe.Customer;
-
-    return {
-      email: customer.email!,
-      name: customer.name ?? undefined,
-      address: customer.address
-        ? {
-            line1: customer.address.line1 ?? undefined,
-            city: customer.address.city ?? undefined,
-            country: customer.address.country ?? undefined,
-            postal_code: customer.address.postal_code ?? undefined,
-          }
-        : undefined,
-      default_payment_method: customer.invoice_settings
-        .default_payment_method as string,
     };
   }
 
@@ -271,7 +299,62 @@ export class StripeService extends PaymentProvider {
     };
   }
 
-  async listCustomerTaxIds(customerId: string): Promise<TaxId[]> {
+  private async createCustomer(email: string): Promise<string> {
+    try {
+      const customer = await this.stripe.customers.create({ email });
+      return customer.id;
+    } catch (error) {
+      this.logger.log(error.message, StripeService.name);
+      throw new ServerError(ErrorPayment.CustomerNotCreated);
+    }
+  }
+
+  private async setupCard(customerId: string | null): Promise<string> {
+    let setupIntent: Stripe.Response<Stripe.SetupIntent>;
+
+    try {
+      setupIntent = await this.stripe.setupIntents.create({
+        automatic_payment_methods: { enabled: true },
+        customer: customerId ?? undefined,
+      });
+    } catch (error) {
+      this.logger.log(error.message, StripeService.name);
+      throw new ServerError(ErrorPayment.CardNotAssigned);
+    }
+
+    if (!setupIntent?.client_secret) {
+      this.logger.log(
+        ErrorPayment.ClientSecretDoesNotExist,
+        StripeService.name,
+      );
+      throw new ServerError(ErrorPayment.ClientSecretDoesNotExist);
+    }
+
+    return setupIntent.client_secret;
+  }
+
+  private async retrieveCustomer(customerId: string): Promise<CustomerData> {
+    const customer = (await this.stripe.customers.retrieve(
+      customerId,
+    )) as Stripe.Customer;
+
+    return {
+      email: customer.email!,
+      name: customer.name ?? undefined,
+      address: customer.address
+        ? {
+            line1: customer.address.line1 ?? undefined,
+            city: customer.address.city ?? undefined,
+            country: customer.address.country ?? undefined,
+            postal_code: customer.address.postal_code ?? undefined,
+          }
+        : undefined,
+      default_payment_method: customer.invoice_settings
+        .default_payment_method as string,
+    };
+  }
+
+  private async listCustomerTaxIds(customerId: string): Promise<TaxId[]> {
     const taxIds = await this.stripe.customers.listTaxIds(customerId);
 
     return taxIds.data.map((taxId) => ({
@@ -281,7 +364,7 @@ export class StripeService extends PaymentProvider {
     }));
   }
 
-  async createTaxId(
+  private async createTaxId(
     customerId: string,
     type: VatType,
     value: string,
@@ -297,20 +380,25 @@ export class StripeService extends PaymentProvider {
     };
   }
 
-  async deleteTaxId(customerId: string, taxIdId: string): Promise<void> {
+  private async deleteTaxId(
+    customerId: string,
+    taxIdId: string,
+  ): Promise<void> {
     await this.stripe.customers.deleteTaxId(customerId, taxIdId);
   }
 
-  async retrieveSetupIntent(setupIntentId: string): Promise<SetupIntent> {
+  async retrieveCardSetup(setupIntentId: string): Promise<CardSetup> {
     const setupIntent = await this.stripe.setupIntents.retrieve(setupIntentId);
 
     return {
-      customer: setupIntent.customer as string,
+      customer_id: setupIntent.customer as string,
       payment_method: setupIntent.payment_method as string,
     };
   }
 
-  async retrieveCharge(chargeId: string): Promise<{ receipt_url: string }> {
+  private async retrieveCharge(
+    chargeId: string,
+  ): Promise<{ receipt_url: string }> {
     const charge = await this.stripe.charges.retrieve(chargeId);
     if (!charge.receipt_url) {
       throw new ServerError(ErrorPayment.NotFound);
