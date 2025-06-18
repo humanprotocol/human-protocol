@@ -19,7 +19,7 @@ import {
 import ToggleButtons from '@/components/DataEntry/ToggleButtons';
 import { formatDate } from '@/helpers/formatDate';
 import { formatNumber } from '@/helpers/formatNumber';
-import { useIsMobile } from '@/utils/hooks/use-breakpoints';
+import { useIsMobile } from '@/shared/hooks/useBreakpoints';
 
 const CustomSmallChartTooltip = ({
   payload,

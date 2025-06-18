@@ -15,13 +15,16 @@ import { TransactionTableCellValue } from '@/pages/SearchResults/WalletAddress/W
 import { TransactionsTableBodyContainer } from '@/pages/SearchResults/WalletAddress/WalletAddressTransactions/tableComponents/TransactionsTableBodyContainer';
 import { useTransactionDetails } from '@/services/api/use-transaction-details';
 import { handleErrorMessage } from '@/services/handle-error-message';
+import useGlobalFiltersStore from '@/shared/store/useGlobalFiltersStore';
 import AbbreviateClipboard from '@/shared/ui/AbbreviateClipboard';
 import { useTransactionDetailsDto } from '@/utils/hooks/use-transactions-details-dto';
-import { useWalletSearch } from '@/utils/hooks/use-wallet-search';
 
 export const TransactionsTableBody: React.FC = () => {
-  const { data, isPending, isError, error } = useTransactionDetails();
-  const { filterParams } = useWalletSearch();
+  const { chainId, address } = useGlobalFiltersStore();
+  const { data, isPending, isError, error } = useTransactionDetails(
+    chainId,
+    address
+  );
   const {
     setLastPageIndex,
     setPrevPage,
@@ -37,7 +40,7 @@ export const TransactionsTableBody: React.FC = () => {
 
   useEffect(() => {
     setLastPageIndex(undefined);
-  }, [filterParams.address, filterParams.chainId, setLastPageIndex]);
+  }, [address, chainId, setLastPageIndex]);
 
   const [expandedRows, setExpandedRows] = useState<Record<number, boolean>>({});
 

@@ -4,15 +4,15 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { NumericFormat } from 'react-number-format';
 
-import { useHMTPrice } from '@/services/api/use-hmt-price';
-import { useIsMobile } from '@/utils/hooks/use-breakpoints';
+import useHmtPrice from '@/shared/api/useHmtPrice';
+import { useIsMobile } from '@/shared/hooks/useBreakpoints';
 
 type Props = {
   balance?: number | null;
 };
 
 const HmtBalance: FC<Props> = ({ balance }) => {
-  const { data, isError, isPending } = useHMTPrice();
+  const { data, isError, isPending } = useHmtPrice();
   const isMobile = useIsMobile();
 
   if (isError) {

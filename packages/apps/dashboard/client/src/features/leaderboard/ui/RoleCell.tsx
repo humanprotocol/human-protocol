@@ -4,9 +4,9 @@ import { Launch as LaunchIcon } from '@mui/icons-material';
 import { Box, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
 
+import { useIsMobile } from '@/shared/hooks/useBreakpoints';
 import EntityIcon from '@/shared/ui/EntityIcon';
 import { CaseConverter } from '@/utils/case-converter';
-import { useIsMobile } from '@/utils/hooks/use-breakpoints';
 
 type WrapperProps = {
   websiteUrl?: string;

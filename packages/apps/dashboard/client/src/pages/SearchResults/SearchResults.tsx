@@ -14,6 +14,7 @@ import {
   useAddressDetails,
 } from '@/services/api/use-address-details';
 import { handleErrorMessage } from '@/services/handle-error-message';
+import useGlobalFiltersStore from '@/shared/store/useGlobalFiltersStore';
 import Breadcrumbs from '@/shared/ui/Breadcrumbs';
 import EscrowAddressIcon from '@/shared/ui/icons/EscrowAddressIcon';
 import WalletIcon from '@/shared/ui/icons/WalletIcon';
@@ -21,7 +22,6 @@ import Loader from '@/shared/ui/Loader';
 import NothingFound from '@/shared/ui/NothingFound';
 import ShadowIcon from '@/shared/ui/ShadowIcon';
 import { getNetwork } from '@/utils/config/networks';
-import { useWalletSearch } from '@/utils/hooks/use-wallet-search';
 import PageWrapper from '@/widgets/page-wrapper';
 
 import { WalletAddressTransactionsTable } from './WalletAddress/WalletAddressTransactions/WalletAddressTransactionsTable';
@@ -76,11 +76,9 @@ const ResultError = ({ error }: { error: unknown }) => {
 };
 
 const Results = () => {
-  const { filterParams } = useWalletSearch();
-  const { data, status, error } = useAddressDetails(
-    filterParams.chainId,
-    filterParams.address
-  );
+  const { address, chainId } = useGlobalFiltersStore();
+
+  const { data, status, error } = useAddressDetails(chainId, address);
 
   if (status === 'pending' && !data) {
     return <Loader height="auto" paddingTop="2rem" />;
@@ -105,7 +103,7 @@ const Results = () => {
         gap={{ xs: 1, md: 3 }}
         alignItems={{ xs: 'stretch', md: 'center' }}
       >
-        {renderCurrentResultType(data, filterParams.address)}
+        {renderCurrentResultType(data, address)}
       </Stack>
 
       {data.operator && data.operator.role ? (
@@ -127,11 +125,7 @@ enum ParamsStatus {
 const SearchResults = () => {
   const location = useLocation();
   const { chainId: urlChainId, address: urlAddress } = useParams();
-  const {
-    setAddress,
-    setChainId,
-    filterParams: { chainId, address },
-  } = useWalletSearch();
+  const { chainId, address, setAddress, setChainId } = useGlobalFiltersStore();
 
   const [paramsStatus, setParamsStatus] = useState<ParamsStatus>(
     ParamsStatus.LOADING

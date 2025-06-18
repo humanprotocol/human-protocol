@@ -3,7 +3,6 @@ import { z } from 'zod';
 
 import { validateResponse } from '@/services/validate-response';
 import { useTransactionDetailsDto } from '@/utils/hooks/use-transactions-details-dto';
-import { useWalletSearch } from '@/utils/hooks/use-wallet-search';
 
 import { apiPaths } from '../api-paths';
 import { httpService } from '../http-service';
@@ -17,6 +16,7 @@ const internalTransactionSchema = z.object({
   escrow: z.string().nullable(),
   token: z.string().nullable(),
 });
+
 const transactionDetailsSuccessResponseSchema = z.object({
   txHash: z.string(),
   method: z.string(),
@@ -50,8 +50,7 @@ export interface PaginatedTransactionDetailsDto {
   chainId: number;
 }
 
-export function useTransactionDetails() {
-  const { filterParams } = useWalletSearch();
+export function useTransactionDetails(chainId: number, address: string) {
   const {
     params,
     pagination: { lastPageIndex, page },
@@ -59,7 +58,7 @@ export function useTransactionDetails() {
   } = useTransactionDetailsDto();
 
   const dto: PaginatedTransactionDetailsDto = {
-    chainId: filterParams.chainId,
+    chainId,
     skip: params.skip,
     first: params.first,
   };
@@ -67,7 +66,7 @@ export function useTransactionDetails() {
   return useQuery({
     queryFn: async () => {
       const { data } = await httpService.get(
-        `${apiPaths.transactionDetails.path}/${filterParams.address}`,
+        `${apiPaths.transactionDetails.path}/${address}`,
         {
           params: dto,
         }
@@ -81,7 +80,7 @@ export function useTransactionDetails() {
       // check if last page
       if (lastPageIndex === undefined) {
         const { data: lastPageCheckData } = await httpService.get(
-          `${apiPaths.transactionDetails.path}/${filterParams.address}`,
+          `${apiPaths.transactionDetails.path}/${address}`,
           {
             params: {
               ...dto,
@@ -102,6 +101,7 @@ export function useTransactionDetails() {
 
       return validResponse;
     },
-    queryKey: ['useTransactionDetails', filterParams.address, dto],
+    queryKey: ['useTransactionDetails', address, dto],
+    enabled: !!chainId && !!address,
   });
 }

@@ -9,8 +9,8 @@ import {
   AddressDetailsOperator,
   AddressDetailsWallet,
 } from '@/services/api/use-address-details';
+import { useIsMobile } from '@/shared/hooks/useBreakpoints';
 import SectionWrapper from '@/shared/ui/SectionWrapper';
-import { useIsMobile } from '@/utils/hooks/use-breakpoints';
 
 import HmtBalance from '../HmtBalance';
 import HmtPrice from '../HmtPrice';

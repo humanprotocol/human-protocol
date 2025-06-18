@@ -4,11 +4,11 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { Box, Typography } from '@mui/material';
 import { GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
 
+import { useIsMobile } from '@/shared/hooks/useBreakpoints';
 import CustomTooltip from '@/shared/ui/CustomTooltip';
-import { useIsMobile } from '@/utils/hooks/use-breakpoints';
-import { useLeaderboardSearch } from '@/utils/hooks/use-leaderboard-search';
 
 import { LeaderboardData } from '../model/leaderboardSchema';
+import useLeaderboardFiltersStore from '../store/useLeaderboardFiltersStore';
 
 import AddressCell from './AddressCell';
 import CategoryCell from './CategoryCell';
@@ -28,10 +28,7 @@ const InfoTooltip = ({ title }: { title: string }) => (
 );
 
 const useDataGrid = (data: LeaderboardData) => {
-  const {
-    filterParams: { chainId },
-  } = useLeaderboardSearch();
-
+  const { chainId } = useLeaderboardFiltersStore();
   const isMobile = useIsMobile();
 
   const formattedData = useMemo(() => {

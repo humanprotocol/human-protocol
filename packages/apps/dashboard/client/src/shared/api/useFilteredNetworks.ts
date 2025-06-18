@@ -9,7 +9,7 @@ import { networks as allNetworks } from '@/utils/config/networks';
 
 const enabledChainsSchema = z.array(z.number());
 
-export const useFilteredNetworks = () => {
+const useFilteredNetworks = () => {
   const {
     data: enabledChains,
     isLoading,
@@ -30,3 +30,5 @@ export const useFilteredNetworks = () => {
 
   return { filteredNetworks, isLoading, error };
 };
+
+export default useFilteredNetworks;

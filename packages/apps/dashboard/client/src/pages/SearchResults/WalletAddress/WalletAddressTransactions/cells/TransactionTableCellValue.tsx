@@ -2,7 +2,7 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import Typography from '@mui/material/Typography';
 
 import { formatHMTDecimals } from '@/helpers/formatHMTDecimals';
-import { useHMTPrice } from '@/services/api/use-hmt-price';
+import useHmtPrice from '@/shared/api/useHmtPrice';
 import CustomTooltip from '@/shared/ui/CustomTooltip';
 
 const InfoTooltip = ({ title }: { title: string }) => (
@@ -23,7 +23,7 @@ export const TransactionTableCellValue = ({
   value: string;
   method: string;
 }) => {
-  const { isError, isPending } = useHMTPrice();
+  const { isError, isPending } = useHmtPrice();
 
   if (isError) {
     return <span>N/A</span>;

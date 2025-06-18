@@ -10,11 +10,13 @@ import Typography from '@mui/material/Typography';
 
 import { EscrowsTableBody } from '@/pages/SearchResults/RoleDetails/RoleDetailsEscrows/tableComponents/EscrowsTableBody';
 import { useEscrowDetails } from '@/services/api/use-escrows-details';
+import useGlobalFiltersStore from '@/shared/store/useGlobalFiltersStore';
 import SectionWrapper from '@/shared/ui/SectionWrapper';
 import { useEscrowDetailsDto } from '@/utils/hooks/use-escrows-details-dto';
 
 export const RoleDetailsEscrowsTable = ({ role }: { role: string | null }) => {
-  const { data } = useEscrowDetails({ role });
+  const { chainId, address } = useGlobalFiltersStore();
+  const { data } = useEscrowDetails(role, chainId, address);
   const {
     pagination: { page, pageSize, lastPageIndex },
     setPageSize,

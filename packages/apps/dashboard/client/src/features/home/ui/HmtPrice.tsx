@@ -1,10 +1,10 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 
-import { useHMTPrice } from '@/services/api/use-hmt-price';
+import useHmtPrice from '@/shared/api/useHmtPrice';
 
 const HmtPrice = () => {
-  const { data, isError, isPending, isSuccess } = useHMTPrice();
+  const { data, isError, isPending, isSuccess } = useHmtPrice();
 
   return (
     <Box display="flex" flexDirection="column" gap={0.5}>

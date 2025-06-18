@@ -16,10 +16,10 @@ import Holders from '@/features/home/ui/Holders';
 import TotalNumberOfTasks from '@/features/home/ui/TotalNumberOfTasks';
 import TotalTransactions from '@/features/home/ui/TotalTransactions';
 import Leaderboard from '@/features/leaderboard';
+import { useIsMobile } from '@/shared/hooks/useBreakpoints';
 import CustomTooltip from '@/shared/ui/CustomTooltip';
 import LeaderboardIcon from '@/shared/ui/icons/LeaderboardIcon';
 import ShadowIcon from '@/shared/ui/ShadowIcon';
-import { useIsMobile } from '@/utils/hooks/use-breakpoints';
 import PageWrapper from '@/widgets/page-wrapper';
 
 const CardWrapper = styled(Grid)(({ theme }) => ({

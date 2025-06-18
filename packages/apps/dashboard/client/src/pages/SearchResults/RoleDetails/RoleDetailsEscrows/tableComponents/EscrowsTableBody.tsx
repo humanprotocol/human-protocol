@@ -9,16 +9,20 @@ import TableCell from '@mui/material/TableCell';
 import { EscrowsTableBodyContainer } from '@/pages/SearchResults/RoleDetails/RoleDetailsEscrows/tableComponents/EscrowsTableBodyContainer';
 import { useEscrowDetails } from '@/services/api/use-escrows-details';
 import { handleErrorMessage } from '@/services/handle-error-message';
+import useGlobalFiltersStore from '@/shared/store/useGlobalFiltersStore';
 import { useEscrowDetailsDto } from '@/utils/hooks/use-escrows-details-dto';
-import { useWalletSearch } from '@/utils/hooks/use-wallet-search';
 
 type Props = {
   role: string | null;
 };
 
 export const EscrowsTableBody: FC<Props> = ({ role }) => {
-  const { filterParams } = useWalletSearch();
-  const { data, isPending, isError, error } = useEscrowDetails({ role });
+  const { chainId, address } = useGlobalFiltersStore();
+  const { data, isPending, isError, error } = useEscrowDetails(
+    role,
+    chainId,
+    address
+  );
   const {
     setLastPageIndex,
     setPrevPage,
@@ -34,7 +38,7 @@ export const EscrowsTableBody: FC<Props> = ({ role }) => {
 
   useEffect(() => {
     setLastPageIndex(undefined);
-  }, [filterParams.address, filterParams.chainId, setLastPageIndex]);
+  }, [address, chainId, setLastPageIndex]);
 
   if (isPending) {
     return (
@@ -71,7 +75,7 @@ export const EscrowsTableBody: FC<Props> = ({ role }) => {
           >
             <Link
               target="_blank"
-              href={`/search/${filterParams.chainId}/${elem.address}`}
+              href={`/search/${chainId}/${elem.address}`}
               sx={{ textDecoration: 'unset' }}
             >
               {elem.address}

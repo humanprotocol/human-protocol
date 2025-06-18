@@ -1,9 +1,9 @@
 import { Typography, Stack } from '@mui/material';
 
-import { useHMTPrice } from '@/services/api/use-hmt-price';
+import useHmtPrice from '@/shared/api/useHmtPrice';
 
 const HmtPrice = () => {
-  const { data, isError, isPending, isSuccess } = useHMTPrice();
+  const { data, isError, isPending, isSuccess } = useHmtPrice();
 
   return (
     <Stack flexDirection="row" whiteSpace="nowrap">

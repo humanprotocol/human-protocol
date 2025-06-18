@@ -4,7 +4,6 @@ import { z } from 'zod';
 import { apiPaths } from '@/services/api-paths';
 import { httpService } from '@/services/http-service';
 import { validateResponse } from '@/services/validate-response';
-import { useWalletSearch } from '@/utils/hooks/use-wallet-search';
 
 const kvstoreDataSchema = z.array(
   z.object({
@@ -15,21 +14,20 @@ const kvstoreDataSchema = z.array(
 
 export type KvstoreData = z.infer<typeof kvstoreDataSchema>;
 
-const useKvstoreData = () => {
-  const { filterParams } = useWalletSearch();
-
+const useKvstoreData = (chainId: number, address: string) => {
   return useQuery({
-    queryKey: ['kvstoreData', filterParams.address],
+    queryKey: ['kvstoreData', address],
     queryFn: async () => {
       const { data } = await httpService.get(
-        `${apiPaths.kvstore.path}/${filterParams.address}`,
-        { params: { chain_id: filterParams.chainId || -1 } }
+        `${apiPaths.kvstore.path}/${address}`,
+        { params: { chain_id: chainId || -1 } }
       );
 
       const validResponse = validateResponse(data, kvstoreDataSchema);
 
       return validResponse;
     },
+    enabled: !!chainId && !!address,
   });
 };
 

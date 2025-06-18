@@ -5,6 +5,7 @@ import Button from '@mui/material/Button';
 import { useNavigate } from 'react-router-dom';
 
 import useLeaderboardDetails from '../api/useLeaderboardDetails';
+import useLeaderboardFiltersStore from '../store/useLeaderboardFiltersStore';
 
 import DataGridWrapper from './DataGridWrapper';
 import SelectNetwork from './SelectNetwork';
@@ -16,7 +17,8 @@ type Props = {
 
 const Leaderboard: FC<Props> = ({ viewAllBanner, first }) => {
   const navigate = useNavigate();
-  const { data, status, error } = useLeaderboardDetails(first);
+  const { chainId } = useLeaderboardFiltersStore();
+  const { data, status, error } = useLeaderboardDetails(chainId, first);
 
   return (
     <Box

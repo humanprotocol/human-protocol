@@ -4,7 +4,6 @@ import { z } from 'zod';
 import { AddressDetailsOperator } from '@/services/api/use-address-details';
 import { validateResponse } from '@/services/validate-response';
 import { useEscrowDetailsDto } from '@/utils/hooks/use-escrows-details-dto';
-import { useWalletSearch } from '@/utils/hooks/use-wallet-search';
 
 import { apiPaths } from '../api-paths';
 import { httpService } from '../http-service';
@@ -38,12 +37,11 @@ export interface PaginatedEscrowsDetailsDto {
   role: AddressDetailsOperator['role'];
 }
 
-export function useEscrowDetails({
-  role,
-}: {
-  role: AddressDetailsOperator['role'];
-}) {
-  const { filterParams } = useWalletSearch();
+export function useEscrowDetails(
+  role: string | null,
+  chainId: number,
+  address: string
+) {
   const {
     setLastPageIndex,
     pagination: { page, lastPageIndex },
@@ -51,16 +49,16 @@ export function useEscrowDetails({
   } = useEscrowDetailsDto();
 
   const dto: PaginatedEscrowsDetailsDto = {
-    chainId: filterParams.chainId,
+    chainId,
+    role,
     skip: params.skip,
     first: params.first,
-    role,
   };
 
   return useQuery({
     queryFn: async () => {
       const { data } = await httpService.get(
-        `${apiPaths.escrowDetails.path}/${filterParams.address}`,
+        `${apiPaths.escrowDetails.path}/${address}`,
         {
           params: dto,
         }
@@ -74,7 +72,7 @@ export function useEscrowDetails({
       // check if last page
       if (lastPageIndex === undefined) {
         const { data: lastPageCheckData } = await httpService.get(
-          `${apiPaths.escrowDetails.path}/${filterParams.address}`,
+          `${apiPaths.escrowDetails.path}/${address}`,
           {
             params: {
               ...dto,
@@ -95,6 +93,7 @@ export function useEscrowDetails({
 
       return validResponse;
     },
-    queryKey: ['useEscrowDetails', filterParams.address, dto],
+    queryKey: ['useEscrowDetails', address, dto],
+    enabled: !!chainId && !!address,
   });
 }

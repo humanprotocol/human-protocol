@@ -7,10 +7,12 @@ import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 
 import useKvstoreData from '@/services/api/use-kvstore-data';
+import useGlobalFiltersStore from '@/shared/store/useGlobalFiltersStore';
 import SectionWrapper from '@/shared/ui/SectionWrapper';
 
 const KVStore = () => {
-  const { data } = useKvstoreData();
+  const { chainId, address } = useGlobalFiltersStore();
+  const { data } = useKvstoreData(chainId, address);
 
   if (data?.length === 0) {
     return null;

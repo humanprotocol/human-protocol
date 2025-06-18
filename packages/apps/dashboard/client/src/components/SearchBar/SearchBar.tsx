@@ -17,11 +17,11 @@ import IconButton from '@mui/material/IconButton';
 import clsx from 'clsx';
 import { useNavigate } from 'react-router-dom';
 
+import useFilteredNetworks from '@/shared/api/useFilteredNetworks';
+import { useIsMobile } from '@/shared/hooks/useBreakpoints';
+import useGlobalFiltersStore from '@/shared/store/useGlobalFiltersStore';
 import CustomTooltip from '@/shared/ui/CustomTooltip';
 import { NetworkIcon } from '@/shared/ui/NetworkIcon';
-import { useIsMobile } from '@/utils/hooks/use-breakpoints';
-import { useFilteredNetworks } from '@/utils/hooks/use-filtered-networks';
-import { useWalletSearch } from '@/utils/hooks/use-wallet-search';
 
 import { isValidEVMAddress } from '../../helpers/isValidEVMAddress';
 
@@ -46,7 +46,7 @@ const SearchBar: FC<SearchBarProps> = ({
 }) => {
   const isMobile = useIsMobile();
   const { filteredNetworks, isLoading } = useFilteredNetworks();
-  const { filterParams, setChainId, setAddress } = useWalletSearch();
+  const { address, chainId, setChainId, setAddress } = useGlobalFiltersStore();
   const navigate = useNavigate();
   const [inputValue, setInputValue] = useState<string>(initialInputValue);
   const [error, setError] = useState<string | null>(null);
@@ -54,18 +54,14 @@ const SearchBar: FC<SearchBarProps> = ({
   const theme = useTheme();
 
   useEffect(() => {
-    setInputValue(filterParams.address);
-  }, [filterParams.address]);
+    setInputValue(address);
+  }, [address]);
 
   useEffect(() => {
-    if (
-      !isLoading &&
-      filteredNetworks.length > 0 &&
-      filterParams.chainId === -1
-    ) {
+    if (!isLoading && filteredNetworks.length > 0 && chainId === -1) {
       setChainId(filteredNetworks[0].id);
     }
-  }, [filteredNetworks, isLoading, filterParams.chainId, setChainId]);
+  }, [filteredNetworks, isLoading, chainId, setChainId]);
 
   const navigateToAddress = useCallback(() => {
     if (!isValidEVMAddress(inputValue)) {
@@ -74,8 +70,8 @@ const SearchBar: FC<SearchBarProps> = ({
     }
 
     setAddress(inputValue);
-    navigate(`/search/${filterParams.chainId}/${inputValue}`);
-  }, [inputValue, filterParams.chainId, navigate, setAddress]);
+    navigate(`/search/${chainId}/${inputValue}`);
+  }, [inputValue, chainId, navigate, setAddress]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
@@ -115,15 +111,12 @@ const SearchBar: FC<SearchBarProps> = ({
   const renderSelectedValue = (
     <Grid sx={gridSx}>
       <NetworkIcon
-        chainId={
-          filteredNetworks.find((n) => n.id === filterParams.chainId)?.id || -1
-        }
+        chainId={filteredNetworks.find((n) => n.id === chainId)?.id || -1}
       />
       <div>
-        {isMobile || filterParams.chainId === -1
+        {isMobile || chainId === -1
           ? null
-          : filteredNetworks.find((n) => n.id === filterParams.chainId)?.name ||
-            ''}
+          : filteredNetworks.find((n) => n.id === chainId)?.name || ''}
       </div>
     </Grid>
   );
@@ -152,21 +145,19 @@ const SearchBar: FC<SearchBarProps> = ({
               sx={startAdornmentInputAdornmentSx(theme)}
             >
               <MuiSelect<number>
-                value={filterParams.chainId}
+                value={chainId}
                 displayEmpty
                 sx={muiSelectSx(theme)}
                 onChange={handleSelectChange}
                 renderValue={() =>
-                  filterParams.chainId === -1
-                    ? renderEmptyValue
-                    : renderSelectedValue
+                  chainId === -1 ? renderEmptyValue : renderSelectedValue
                 }
               >
                 {filteredNetworks.map((network) => (
                   <MenuItem
                     key={network.id}
                     value={network.id}
-                    sx={menuItemSx(network.id === filterParams.chainId)}
+                    sx={menuItemSx(network.id === chainId)}
                   >
                     <Box sx={{ svg: { width: '24px', height: '24px' } }}>
                       <NetworkIcon chainId={network.id} />
