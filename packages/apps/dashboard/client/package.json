@@ -13,7 +13,8 @@
     "lint:fix": "eslint . --fix",
     "preview": "vite preview",
     "vercel-build": "yarn workspace human-protocol build:libs && yarn build",
-    "test": "exit 0"
+    "test": "exit 0",
+    "tsc": "tsc --noEmit"
   },
   "dependencies": {
     "@emotion/react": "^11.11.4",
@@ -66,6 +67,7 @@
   },
   "lint-staged": {
     "*.{ts,tsx}": [
+      "tsc --project tsconfig.json",
       "prettier --write",
       "eslint --fix"
     ]
