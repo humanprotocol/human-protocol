@@ -14,14 +14,17 @@ export abstract class PaymentProvider {
 
   /**
    * Create a new customer in the payment provider system
-   * @param customerId Customer ID
    * @param email Customer's email address
    * @returns Customer ID
    */
-  abstract createCustomerWithCard(
-    customerId: string | null,
-    email: string,
-  ): Promise<string>;
+  abstract createCustomer(email: string): Promise<string>;
+
+  /**
+   * Setup payment card in the payment provider system
+   * @param customerId Customer ID
+   * @returns Customer ID
+   */
+  abstract setupCard(customerId: string): Promise<string>;
 
   /**
    * Create an invoice for a customer

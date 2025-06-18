@@ -19,14 +19,14 @@ export interface BillingAddress {
   line1?: string;
   city?: string;
   country?: string;
-  postal_code?: string;
+  postalCode?: string;
 }
 
 export interface CustomerData {
   email: string;
   name?: string;
   address?: BillingAddress;
-  default_payment_method?: string;
+  defaultPaymentMethod?: string;
 }
 
 export interface TaxId {
@@ -37,15 +37,15 @@ export interface TaxId {
 
 export interface Invoice {
   id: string;
-  payment_id: string | null;
+  paymentId: string | null;
   status?: string;
-  amount_due: number;
+  amountDue: number;
   currency: string;
 }
 
 export interface CardSetup {
-  customer_id: string;
-  payment_method: string;
+  customerId: string;
+  paymentMethod: string;
 }
 
 export interface PaymentData {

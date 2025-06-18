@@ -154,7 +154,7 @@ describe('PaymentService', () => {
 
       const invoice = {
         id: 'id',
-        payment_id: paymentIntent.id,
+        paymentId: paymentIntent.id,
       };
 
       paymentProvider.createInvoice.mockResolvedValue(invoice as any);
@@ -753,23 +753,18 @@ describe('PaymentService', () => {
         paymentProviderId: null,
       };
 
-      const paymentIntent = {
-        client_secret: 'clientSecret123',
-      };
+      const client_secret = 'clientSecret123';
+      const customerId = 'cus_123';
 
-      paymentProvider.createCustomerWithCard.mockResolvedValue(
-        paymentIntent.client_secret,
-      );
+      paymentProvider.createCustomer.mockResolvedValue(customerId);
+      paymentProvider.setupCard.mockResolvedValue(client_secret);
 
       const result = await paymentService.createCustomerAndAssignCard(
         user as any,
       );
 
-      expect(result).toEqual(paymentIntent.client_secret);
-      expect(paymentProvider.createCustomerWithCard).toHaveBeenCalledWith(
-        null,
-        user.email,
-      );
+      expect(result).toEqual(client_secret);
+      expect(paymentProvider.createCustomer).toHaveBeenCalledWith(user.email);
     });
 
     it('should throw a bad request exception if the customer creation fails', async () => {
@@ -778,7 +773,8 @@ describe('PaymentService', () => {
         email: 'test@hmt.ai',
         paymentProviderId: undefined,
       };
-      paymentProvider.createCustomerWithCard.mockRejectedValue(
+
+      paymentProvider.createCustomer.mockRejectedValue(
         new ServerError(ErrorPayment.CustomerNotCreated),
       );
 
@@ -793,13 +789,16 @@ describe('PaymentService', () => {
         email: 'test@hmt.ai',
       };
 
-      paymentProvider.createCustomerWithCard.mockRejectedValue(
-        new ServerError(ErrorPayment.IntentNotCreated),
+      paymentProvider.createCustomer.mockResolvedValue('cus_123');
+      paymentProvider.setupCard.mockRejectedValue(
+        new ServerError(ErrorPayment.CardNotAssigned),
       );
 
       await expect(
         paymentService.createCustomerAndAssignCard(user as any),
-      ).rejects.toThrow(new ServerError(ErrorPayment.IntentNotCreated));
+      ).rejects.toThrow(new ServerError(ErrorPayment.CardNotAssigned));
+
+      expect(paymentProvider.createCustomer).toHaveBeenCalledWith(user.email);
     });
 
     it('should throw a bad request exception if the client secret does not exists', async () => {
@@ -808,7 +807,8 @@ describe('PaymentService', () => {
         email: 'test@hmt.ai',
       };
 
-      paymentProvider.createCustomerWithCard.mockRejectedValue(
+      paymentProvider.createCustomer.mockResolvedValue('cus_123');
+      paymentProvider.setupCard.mockRejectedValue(
         new ServerError(ErrorPayment.ClientSecretDoesNotExist),
       );
 
@@ -827,8 +827,8 @@ describe('PaymentService', () => {
       };
 
       const setupMock = {
-        customer_id: 'cus_123',
-        payment_method: 'pm_123',
+        customerId: 'cus_123',
+        paymentMethod: 'pm_123',
       };
 
       paymentProvider.retrieveCardSetup.mockResolvedValue(setupMock as any);
@@ -852,7 +852,7 @@ describe('PaymentService', () => {
         'setup_123',
       );
       expect(paymentProvider.updateCustomer).toHaveBeenCalledWith('cus_123', {
-        default_payment_method: 'pm_123',
+        defaultPaymentMethod: 'pm_123',
       });
     });
 
@@ -899,7 +899,7 @@ describe('PaymentService', () => {
 
       paymentProvider.createInvoice.mockResolvedValueOnce({
         id: invoiceId,
-        payment_id: paymentIntent,
+        paymentId: paymentIntent,
       } as any);
       paymentProvider.createPayment.mockResolvedValueOnce(paymentIntent as any);
       paymentProvider.getDefaultPaymentMethod.mockResolvedValueOnce(
@@ -1128,7 +1128,7 @@ describe('PaymentService', () => {
       await paymentService.changeDefaultPaymentMethod(user as any, 'pm_123');
 
       expect(paymentProvider.updateCustomer).toHaveBeenCalledWith('cus_123', {
-        default_payment_method: 'pm_123',
+        defaultPaymentMethod: 'pm_123',
       });
     });
   });

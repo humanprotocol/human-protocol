@@ -32,14 +32,6 @@ export class StripeService extends PaymentProvider {
     });
   }
 
-  async createCustomerWithCard(customerId: string | null, email: string) {
-    if (!customerId) {
-      customerId = await this.createCustomer(email);
-    }
-
-    return await this.setupCard(customerId);
-  }
-
   async createInvoice(
     customerId: string,
     amountInCents: number,
@@ -70,9 +62,9 @@ export class StripeService extends PaymentProvider {
 
     return {
       id: invoice.id,
-      payment_id: invoice.payment_intent as string,
+      paymentId: invoice.payment_intent as string,
       status: invoice.status?.toString(),
-      amount_due: invoice.amount_due,
+      amountDue: invoice.amount_due,
       currency: invoice.currency,
     } as Invoice;
   }
@@ -149,7 +141,7 @@ export class StripeService extends PaymentProvider {
     if (customer.address) {
       const address = new AddressDto();
       address.country = (customer.address.country as string).toLowerCase();
-      address.postalCode = customer.address.postal_code as string;
+      address.postalCode = customer.address.postalCode as string;
       address.city = customer.address.city as string;
       address.line = customer.address.line1 as string;
       userBillingInfo.address = address;
@@ -186,7 +178,7 @@ export class StripeService extends PaymentProvider {
           line1: data.address?.line,
           city: data.address?.city,
           country: data.address?.country,
-          postal_code: data.address?.postalCode,
+          postalCode: data.address?.postalCode,
         },
         name: data.name,
         email: data.email,
@@ -216,7 +208,7 @@ export class StripeService extends PaymentProvider {
 
   async getDefaultPaymentMethod(customerId: string): Promise<string | null> {
     const customer = await this.retrieveCustomer(customerId);
-    return customer.default_payment_method ?? null;
+    return customer.defaultPaymentMethod ?? null;
   }
 
   async listPaymentMethods(customerId: string): Promise<PaymentMethod[]> {
@@ -269,17 +261,29 @@ export class StripeService extends PaymentProvider {
     customerId: string,
     data: Partial<CustomerData>,
   ): Promise<CustomerData> {
-    const params = data.default_payment_method
+    const { email, name, address, defaultPaymentMethod } = data;
+    const { line1, city, country, postalCode } = address ?? {};
+
+    const updatePayload = defaultPaymentMethod
       ? {
           invoice_settings: {
-            default_payment_method: data.default_payment_method,
+            default_payment_method: data.defaultPaymentMethod,
           },
         }
-      : data;
+      : {
+          email,
+          name,
+          address: {
+            line1,
+            city,
+            country,
+            postal_code: postalCode,
+          },
+        };
 
     const customer = (await this.stripe.customers.update(
       customerId,
-      params,
+      updatePayload,
     )) as Stripe.Customer;
 
     return {
@@ -290,10 +294,10 @@ export class StripeService extends PaymentProvider {
             line1: customer.address.line1 ?? undefined,
             city: customer.address.city ?? undefined,
             country: customer.address.country ?? undefined,
-            postal_code: customer.address.postal_code ?? undefined,
+            postalCode: customer.address.postal_code ?? undefined,
           }
         : undefined,
-      default_payment_method: customer.invoice_settings
+      defaultPaymentMethod: customer.invoice_settings
         ? (customer.invoice_settings.default_payment_method as string)
         : undefined,
     };
@@ -346,10 +350,10 @@ export class StripeService extends PaymentProvider {
             line1: customer.address.line1 ?? undefined,
             city: customer.address.city ?? undefined,
             country: customer.address.country ?? undefined,
-            postal_code: customer.address.postal_code ?? undefined,
+            postalCode: customer.address.postal_code ?? undefined,
           }
         : undefined,
-      default_payment_method: customer.invoice_settings
+      defaultPaymentMethod: customer.invoice_settings
         ? (customer.invoice_settings.default_payment_method as string)
         : undefined,
     };
@@ -389,8 +393,8 @@ export class StripeService extends PaymentProvider {
     const setupIntent = await this.stripe.setupIntents.retrieve(setupIntentId);
 
     return {
-      customer_id: setupIntent.customer as string,
-      payment_method: setupIntent.payment_method as string,
+      customerId: setupIntent.customer as string,
+      paymentMethod: setupIntent.payment_method as string,
     };
   }
 

@@ -10,7 +10,6 @@ import {
   PaymentStatus,
   VatType,
 } from '../../../../common/enums/payment';
-import { PaymentProvider } from '../payment-provider.abstract';
 
 jest.mock('stripe');
 
@@ -82,10 +81,6 @@ describe('StripeService', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-  });
-
-  it('should implement PaymentProvider interface', () => {
-    expect(service).toBeInstanceOf(PaymentProvider);
   });
 
   describe('createCustomer', () => {
@@ -235,10 +230,10 @@ describe('StripeService', () => {
 
       expect(result).toEqual({
         id,
-        payment_id: payment_intent,
+        paymentId: payment_intent,
         status,
         currency,
-        amount_due,
+        amountDue: amount_due,
       });
     });
 
@@ -293,10 +288,16 @@ describe('StripeService', () => {
       expect(result).toEqual({
         email: mockCustomer.email,
         name: mockCustomer.name,
-        address: mockCustomer.address,
-        default_payment_method:
+        address: {
+          line1: '123 Street',
+          city: 'City',
+          country: 'US',
+          postalCode: '12345',
+        },
+        defaultPaymentMethod:
           mockCustomer.invoice_settings.default_payment_method,
       });
+
       expect(stripeMock.customers.update).toHaveBeenCalledWith(
         'cus_123',
         updateData,
@@ -405,58 +406,6 @@ describe('StripeService', () => {
         'cus_123',
         'txi_123',
       );
-    });
-  });
-
-  describe('createCustomerWithCard', () => {
-    it('should create new customer and setup card when customerId is null', async () => {
-      const mockCustomer = { id: 'cus_123' };
-      const mockSetupIntent = {
-        id: 'seti_123',
-        client_secret: 'seti_secret_123',
-      };
-
-      stripeMock.customers.create = jest.fn().mockResolvedValue(mockCustomer);
-      stripeMock.setupIntents.create = jest
-        .fn()
-        .mockResolvedValue(mockSetupIntent);
-
-      const result = await service.createCustomerWithCard(
-        null,
-        'test@example.com',
-      );
-
-      expect(result).toBe('seti_secret_123');
-      expect(stripeMock.customers.create).toHaveBeenCalledWith({
-        email: 'test@example.com',
-      });
-      expect(stripeMock.setupIntents.create).toHaveBeenCalledWith({
-        automatic_payment_methods: { enabled: true },
-        customer: 'cus_123',
-      });
-    });
-
-    it('should only setup card when customerId is provided', async () => {
-      const mockSetupIntent = {
-        id: 'seti_123',
-        client_secret: 'seti_secret_123',
-      };
-
-      stripeMock.setupIntents.create = jest
-        .fn()
-        .mockResolvedValue(mockSetupIntent);
-
-      const result = await service.createCustomerWithCard(
-        'cus_123',
-        'test@example.com',
-      );
-
-      expect(result).toBe('seti_secret_123');
-      expect(stripeMock.customers.create).not.toHaveBeenCalled();
-      expect(stripeMock.setupIntents.create).toHaveBeenCalledWith({
-        automatic_payment_methods: { enabled: true },
-        customer: 'cus_123',
-      });
     });
   });
 

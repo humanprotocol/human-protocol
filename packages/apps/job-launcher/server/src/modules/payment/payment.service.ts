@@ -63,10 +63,13 @@ export class PaymentService {
   ) {}
 
   public async createCustomerAndAssignCard(user: UserEntity): Promise<string> {
-    return await this.paymentProvider.createCustomerWithCard(
-      user.paymentProviderId,
-      user.email,
-    );
+    let customerId = user.paymentProviderId;
+
+    if (!customerId) {
+      customerId = await this.paymentProvider.createCustomer(user.email);
+    }
+
+    return await this.paymentProvider.setupCard(customerId);
   }
 
   public async confirmCard(
@@ -82,7 +85,7 @@ export class PaymentService {
 
     let defaultPaymentMethod: string | null = null;
     if (!user.paymentProviderId) {
-      user.paymentProviderId = setup.customer_id as string;
+      user.paymentProviderId = setup.customerId as string;
       await this.userRepository.updateOne(user);
     } else {
       defaultPaymentMethod = await this.getDefaultPaymentMethod(
@@ -92,7 +95,7 @@ export class PaymentService {
 
     if (data.defaultCard || !defaultPaymentMethod) {
       await this.paymentProvider.updateCustomer(user.paymentProviderId, {
-        default_payment_method: setup.payment_method as string,
+        defaultPaymentMethod: setup.paymentMethod as string,
       });
     }
 
@@ -118,7 +121,7 @@ export class PaymentService {
     );
 
     const paymentIntent = await this.paymentProvider.createPayment(
-      invoice.payment_id as string,
+      invoice.paymentId as string,
       paymentMethodId,
       false, // on-session payment
     );
@@ -361,7 +364,7 @@ export class PaymentService {
     }
 
     const paymentIntent = await this.paymentProvider.createPayment(
-      invoice.payment_id as string,
+      invoice.paymentId as string,
       defaultPaymentMethod,
       true, // off-session payment
     );
@@ -492,7 +495,7 @@ export class PaymentService {
     }
 
     return this.paymentProvider.updateCustomer(user.paymentProviderId, {
-      default_payment_method: cardId,
+      defaultPaymentMethod: cardId,
     });
   }
 
