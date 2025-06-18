@@ -13,7 +13,7 @@ import { useEscrowDetailsDto } from '@/utils/hooks/use-escrows-details-dto';
 import { useWalletSearch } from '@/utils/hooks/use-wallet-search';
 
 type Props = {
-  role: string;
+  role: string | null;
 };
 
 export const EscrowsTableBody: FC<Props> = ({ role }) => {
