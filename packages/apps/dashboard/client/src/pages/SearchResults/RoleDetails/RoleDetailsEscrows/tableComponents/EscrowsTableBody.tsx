@@ -1,26 +1,22 @@
-import { useEffect } from 'react';
+import { FC, useEffect } from 'react';
 
-import { Stack, TableRow } from '@mui/material';
+import { TableRow } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 import Link from '@mui/material/Link';
 import MuiTableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
-import { useNavigate } from 'react-router-dom';
 
 import { EscrowsTableBodyContainer } from '@/pages/SearchResults/RoleDetails/RoleDetailsEscrows/tableComponents/EscrowsTableBodyContainer';
-import { AddressDetailsOperator } from '@/services/api/use-address-details';
 import { useEscrowDetails } from '@/services/api/use-escrows-details';
 import { handleErrorMessage } from '@/services/handle-error-message';
 import { useEscrowDetailsDto } from '@/utils/hooks/use-escrows-details-dto';
 import { useWalletSearch } from '@/utils/hooks/use-wallet-search';
 
+type Props = {
+  role: string;
+};
 
-export const EscrowsTableBody = ({
-  role,
-}: {
-  role: AddressDetailsOperator['role'];
-}) => {
-  const navigate = useNavigate();
+export const EscrowsTableBody: FC<Props> = ({ role }) => {
   const { filterParams } = useWalletSearch();
   const { data, isPending, isError, error } = useEscrowDetails({ role });
   const {
@@ -73,28 +69,13 @@ export const EscrowsTableBody = ({
               padding: '0 0 24px 0',
             }}
           >
-            <Stack
-              sx={{
-                ':hover': {
-                  cursor: 'pointer',
-                },
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                navigate(`/search/${filterParams.chainId}/${elem.address}`);
-              }}
+            <Link
+              target="_blank"
+              href={`/search/${filterParams.chainId}/${elem.address}`}
+              sx={{ textDecoration: 'unset' }}
             >
-              <Link
-                target="_blank"
-                href={`/search/${filterParams.chainId}/${elem.address}`}
-                style={{
-                  textDecoration: 'unset',
-                }}
-              >
-                {elem.address}
-              </Link>
-            </Stack>
+              {elem.address}
+            </Link>
           </TableCell>
         </TableRow>
       ))}

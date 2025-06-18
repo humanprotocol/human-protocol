@@ -3,7 +3,6 @@ import { useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
 
 import { reputationSchema } from '@/features/leaderboard/model/leaderboardSchema';
-import { useWalletSearch } from '@/utils/hooks/use-wallet-search';
 
 import { apiPaths } from '../api-paths';
 import { httpService } from '../http-service';
@@ -109,15 +108,12 @@ const addressDetailsResponseSchema = z.object({
 
 export type AddressDetails = z.infer<typeof addressDetailsResponseSchema>;
 
-export function useAddressDetails() {
-  const { filterParams } = useWalletSearch();
-
+export function useAddressDetails(chainId: number, address: string) {
   return useQuery({
     queryFn: async () => {
-      const address = filterParams.address || '0x0';
       const { data } = await httpService.get(
         `${apiPaths.addressDetails.path}/${address}`,
-        { params: { chainId: filterParams.chainId || -1 } }
+        { params: { chainId: chainId || -1 } }
       );
 
       const validResponse = validateResponse(
@@ -127,6 +123,7 @@ export function useAddressDetails() {
 
       return validResponse;
     },
-    queryKey: ['useAddressDetails', filterParams.address, filterParams.chainId],
+    queryKey: ['useAddressDetails', address, chainId],
+    enabled: !!chainId && !!address,
   });
 }

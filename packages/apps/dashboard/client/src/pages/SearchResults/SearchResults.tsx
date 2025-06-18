@@ -76,8 +76,11 @@ const ResultError = ({ error }: { error: unknown }) => {
 };
 
 const Results = () => {
-  const { data, status, error } = useAddressDetails();
   const { filterParams } = useWalletSearch();
+  const { data, status, error } = useAddressDetails(
+    filterParams.chainId,
+    filterParams.address
+  );
 
   if (status === 'pending' && !data) {
     return <Loader height="auto" paddingTop="2rem" />;
