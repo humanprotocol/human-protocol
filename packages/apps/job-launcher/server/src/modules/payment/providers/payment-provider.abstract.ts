@@ -42,13 +42,13 @@ export abstract class PaymentProvider {
   ): Promise<Invoice>;
 
   /**
-   * Handle a payment intent (confirm, update, etc.)
+   * Assign a payment method and confirm the payment intent
    * @param paymentIntentId Payment intent ID
    * @param paymentMethodId Payment method ID
    * @param offSession Whether the payment is off-session
    * @returns Updated payment intent
    */
-  abstract createPayment(
+  abstract assignPaymentMethod(
     paymentIntentId: string,
     paymentMethodId: string,
     offSession: boolean,

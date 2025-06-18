@@ -3,7 +3,11 @@ import Stripe from 'stripe';
 import { StripeConfigService } from '../../../../common/config/stripe-config.service';
 import { NotFoundError, ServerError } from '../../../../common/errors';
 import { ErrorPayment } from '../../../../common/constants/errors';
-import { VatType } from '../../../../common/enums/payment';
+import {
+  PaymentStatus,
+  StripePaymentStatus,
+  VatType,
+} from '../../../../common/enums/payment';
 import {
   CardSetup,
   CustomerData,
@@ -30,6 +34,40 @@ export class StripeService extends PaymentProvider {
         url: this.stripeConfigService.appInfoURL,
       },
     });
+  }
+
+  async createCustomer(email: string): Promise<string> {
+    try {
+      const customer = await this.stripe.customers.create({ email });
+      return customer.id;
+    } catch (error) {
+      this.logger.log(error.message, StripeService.name);
+      throw new ServerError(ErrorPayment.CustomerNotCreated);
+    }
+  }
+
+  async setupCard(customerId: string | null): Promise<string> {
+    let setupIntent: Stripe.Response<Stripe.SetupIntent>;
+
+    try {
+      setupIntent = await this.stripe.setupIntents.create({
+        automatic_payment_methods: { enabled: true },
+        customer: customerId ?? undefined,
+      });
+    } catch (error) {
+      this.logger.log(error.message, StripeService.name);
+      throw new ServerError(ErrorPayment.CardNotAssigned);
+    }
+
+    if (!setupIntent?.client_secret) {
+      this.logger.log(
+        ErrorPayment.ClientSecretDoesNotExist,
+        StripeService.name,
+      );
+      throw new ServerError(ErrorPayment.ClientSecretDoesNotExist);
+    }
+
+    return setupIntent.client_secret;
   }
 
   async createInvoice(
@@ -69,7 +107,7 @@ export class StripeService extends PaymentProvider {
     } as Invoice;
   }
 
-  async createPayment(
+  async assignPaymentMethod(
     paymentIntentId: string,
     paymentMethodId: string,
     offSession: boolean,
@@ -91,20 +129,11 @@ export class StripeService extends PaymentProvider {
 
     const paymentIntent = await this.retrievePaymentIntent(paymentIntentId);
 
-    if (!paymentIntent?.client_secret) {
+    if (!paymentIntent?.clientSecret) {
       throw new ServerError(ErrorPayment.ClientSecretDoesNotExist);
     }
 
-    return {
-      id: paymentIntent.id,
-      customer: paymentIntent.customer as string,
-      client_secret: paymentIntent.client_secret,
-      status: paymentIntent.status,
-      amount: paymentIntent.amount,
-      amount_received: paymentIntent.amount_received,
-      currency: paymentIntent.currency,
-      latest_charge: paymentIntent.latest_charge as string,
-    };
+    return paymentIntent;
   }
 
   async getReceiptUrl(paymentId: string, customerId: string): Promise<string> {
@@ -115,7 +144,7 @@ export class StripeService extends PaymentProvider {
     }
 
     const charge = await this.retrieveCharge(
-      paymentIntent.latest_charge as string,
+      paymentIntent.latestCharge as string,
     );
 
     if (!charge || !charge.receipt_url) {
@@ -194,15 +223,27 @@ export class StripeService extends PaymentProvider {
       throw new NotFoundError(ErrorPayment.NotFound);
     }
 
+    let status: PaymentStatus | null;
+    if (
+      paymentIntent.status === StripePaymentStatus.CANCELED ||
+      paymentIntent?.status === StripePaymentStatus.REQUIRES_PAYMENT_METHOD
+    ) {
+      status = PaymentStatus.FAILED;
+    } else if (paymentIntent?.status !== StripePaymentStatus.SUCCEEDED) {
+      status = null; // handle other statuses
+    } else {
+      status = PaymentStatus.SUCCEEDED;
+    }
+
     return {
       id: paymentIntent.id,
       customer: paymentIntent.customer as string,
-      client_secret: paymentIntent.client_secret,
-      status: paymentIntent.status,
+      clientSecret: paymentIntent.client_secret,
+      status,
       amount: paymentIntent.amount,
-      amount_received: paymentIntent.amount_received,
+      amountReceived: paymentIntent.amount_received,
       currency: paymentIntent.currency,
-      latest_charge: paymentIntent.latest_charge as string,
+      latestCharge: paymentIntent.latest_charge as string,
     };
   }
 
@@ -303,40 +344,6 @@ export class StripeService extends PaymentProvider {
     };
   }
 
-  async createCustomer(email: string): Promise<string> {
-    try {
-      const customer = await this.stripe.customers.create({ email });
-      return customer.id;
-    } catch (error) {
-      this.logger.log(error.message, StripeService.name);
-      throw new ServerError(ErrorPayment.CustomerNotCreated);
-    }
-  }
-
-  async setupCard(customerId: string | null): Promise<string> {
-    let setupIntent: Stripe.Response<Stripe.SetupIntent>;
-
-    try {
-      setupIntent = await this.stripe.setupIntents.create({
-        automatic_payment_methods: { enabled: true },
-        customer: customerId ?? undefined,
-      });
-    } catch (error) {
-      this.logger.log(error.message, StripeService.name);
-      throw new ServerError(ErrorPayment.CardNotAssigned);
-    }
-
-    if (!setupIntent?.client_secret) {
-      this.logger.log(
-        ErrorPayment.ClientSecretDoesNotExist,
-        StripeService.name,
-      );
-      throw new ServerError(ErrorPayment.ClientSecretDoesNotExist);
-    }
-
-    return setupIntent.client_secret;
-  }
-
   private async retrieveCustomer(customerId: string): Promise<CustomerData> {
     const customer = (await this.stripe.customers.retrieve(
       customerId,
@@ -359,7 +366,7 @@ export class StripeService extends PaymentProvider {
     };
   }
 
-  async listCustomerTaxIds(customerId: string): Promise<TaxId[]> {
+  private async listCustomerTaxIds(customerId: string): Promise<TaxId[]> {
     const taxIds = await this.stripe.customers.listTaxIds(customerId);
 
     return taxIds.data.map((taxId) => ({
@@ -369,7 +376,7 @@ export class StripeService extends PaymentProvider {
     }));
   }
 
-  async createTaxId(
+  private async createTaxId(
     customerId: string,
     type: VatType,
     value: string,
@@ -385,7 +392,10 @@ export class StripeService extends PaymentProvider {
     };
   }
 
-  async deleteTaxId(customerId: string, taxIdId: string): Promise<void> {
+  private async deleteTaxId(
+    customerId: string,
+    taxIdId: string,
+  ): Promise<void> {
     await this.stripe.customers.deleteTaxId(customerId, taxIdId);
   }
 

@@ -1,5 +1,5 @@
 import { PaymentEntity } from './payment.entity';
-import { VatType } from '../../common/enums/payment';
+import { PaymentStatus, VatType } from '../../common/enums/payment';
 
 export interface ListResult {
   entities: PaymentEntity[];
@@ -51,10 +51,10 @@ export interface CardSetup {
 export interface PaymentData {
   customer: string;
   id: string;
-  client_secret: string | null;
-  status: string;
+  clientSecret: string | null;
+  status: PaymentStatus | null;
   amount: number;
-  amount_received: number;
+  amountReceived: number;
   currency: string;
-  latest_charge: string;
+  latestCharge: string;
 }

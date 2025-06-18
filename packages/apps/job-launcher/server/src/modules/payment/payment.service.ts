@@ -120,7 +120,7 @@ export class PaymentService {
       'Top up',
     );
 
-    const paymentIntent = await this.paymentProvider.createPayment(
+    const paymentIntent = await this.paymentProvider.assignPaymentMethod(
       invoice.paymentId as string,
       paymentMethodId,
       false, // on-session payment
@@ -149,7 +149,7 @@ export class PaymentService {
 
     await this.paymentRepository.createUnique(newPaymentEntity);
 
-    return paymentIntent.client_secret!;
+    return paymentIntent.clientSecret!;
   }
 
   public async confirmFiatPayment(
@@ -179,14 +179,9 @@ export class PaymentService {
       throw new NotFoundError(ErrorPayment.NotFound);
     }
 
-    if (
-      paymentData.status === PaymentStatus.CANCELED ||
-      paymentData.status === PaymentStatus.REQUIRES_PAYMENT_METHOD
-    ) {
+    if (paymentData.status === PaymentStatus.FAILED) {
       paymentEntity.status = PaymentStatus.FAILED;
-
       await this.paymentRepository.updateOne(paymentEntity);
-
       throw new ConflictError(ErrorPayment.NotSuccess);
     } else if (paymentData.status !== PaymentStatus.SUCCEEDED) {
       return false; // TODO: Handling other cases
@@ -363,7 +358,7 @@ export class PaymentService {
       throw new ServerError(ErrorPayment.NotDefaultPaymentMethod);
     }
 
-    const paymentIntent = await this.paymentProvider.createPayment(
+    const paymentIntent = await this.paymentProvider.assignPaymentMethod(
       invoice.paymentId as string,
       defaultPaymentMethod,
       true, // off-session payment

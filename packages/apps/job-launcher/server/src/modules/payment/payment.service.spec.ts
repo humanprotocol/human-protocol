@@ -52,7 +52,7 @@ import { PaymentEntity } from './payment.entity';
 import { PaymentRepository } from './payment.repository';
 import { PaymentService } from './payment.service';
 import { PaymentProvider } from './providers/payment-provider.abstract';
-import { PaymentData } from './payment.interface';
+import { Invoice, PaymentData } from './payment.interface';
 
 describe('PaymentService', () => {
   let paymentService: PaymentService;
@@ -149,16 +149,18 @@ describe('PaymentService', () => {
 
       const paymentIntent = {
         id: 'pi_123',
-        client_secret: 'clientSecret123',
-      };
+        clientSecret: 'clientSecret123',
+      } as PaymentData;
 
       const invoice = {
         id: 'id',
         paymentId: paymentIntent.id,
-      };
+      } as Invoice;
 
       paymentProvider.createInvoice.mockResolvedValue(invoice as any);
-      paymentProvider.createPayment.mockResolvedValue(paymentIntent as any);
+      paymentProvider.assignPaymentMethod.mockResolvedValue(
+        paymentIntent as any,
+      );
 
       jest
         .spyOn(paymentRepository, 'findOneByTransaction')
@@ -170,14 +172,14 @@ describe('PaymentService', () => {
 
       const result = await paymentService.createFiatPayment(user as any, dto);
 
-      expect(result).toEqual(paymentIntent.client_secret);
+      expect(result).toEqual(paymentIntent.clientSecret);
       expect(paymentProvider.createInvoice).toHaveBeenCalledWith(
         'cus_123',
         10000,
         PaymentCurrency.USD,
         'Top up',
       );
-      expect(paymentProvider.createPayment).toHaveBeenCalledWith(
+      expect(paymentProvider.assignPaymentMethod).toHaveBeenCalledWith(
         'pi_123',
         'pm_123',
         false,
@@ -207,7 +209,9 @@ describe('PaymentService', () => {
       };
 
       paymentProvider.createInvoice.mockResolvedValue(invoice as any);
-      paymentProvider.createPayment.mockResolvedValue(paymentIntent as any);
+      paymentProvider.assignPaymentMethod.mockResolvedValue(
+        paymentIntent as any,
+      );
 
       findOneMock.mockResolvedValue({
         transaction: paymentIntent.client_secret,
@@ -291,7 +295,7 @@ describe('PaymentService', () => {
       };
 
       const paymentData = {
-        status: PaymentStatus.REQUIRES_PAYMENT_METHOD,
+        status: PaymentStatus.FAILED,
         amount: 100,
         amount_received: 0,
         currency: PaymentCurrency.USD,
@@ -901,7 +905,9 @@ describe('PaymentService', () => {
         id: invoiceId,
         paymentId: paymentIntent,
       } as any);
-      paymentProvider.createPayment.mockResolvedValueOnce(paymentIntent as any);
+      paymentProvider.assignPaymentMethod.mockResolvedValueOnce(
+        paymentIntent as any,
+      );
       paymentProvider.getDefaultPaymentMethod.mockResolvedValueOnce(
         paymentMethodId,
       );
@@ -915,7 +921,7 @@ describe('PaymentService', () => {
         PaymentCurrency.USD,
         'Slash Job Id ' + jobEntity.id,
       );
-      expect(paymentProvider.createPayment).toHaveBeenCalledWith(
+      expect(paymentProvider.assignPaymentMethod).toHaveBeenCalledWith(
         paymentIntent,
         paymentMethodId,
         true,
@@ -942,7 +948,7 @@ describe('PaymentService', () => {
         paymentMethodId,
       );
 
-      paymentProvider.createPayment.mockRejectedValue(
+      paymentProvider.assignPaymentMethod.mockRejectedValue(
         new ServerError(ErrorPayment.PaymentMethodAssociationFailed),
       );
 
