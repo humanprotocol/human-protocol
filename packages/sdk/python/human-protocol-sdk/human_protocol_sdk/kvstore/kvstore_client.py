@@ -57,10 +57,11 @@ from typing import List, Optional
 
 import requests
 
-from human_protocol_sdk.constants import NETWORKS, ChainId, KVStoreKeys
+from human_protocol_sdk.constants import NETWORKS, ChainId
+from human_protocol_sdk.decorators import requires_signer
 from human_protocol_sdk.utils import (
     get_kvstore_interface,
-    handle_transaction,
+    handle_error,
     validate_url,
 )
 from web3 import Web3
@@ -116,6 +117,7 @@ class KVStoreClient:
         )
         self.gas_limit = gas_limit
 
+    @requires_signer
     def set(self, key: str, value: str, tx_options: Optional[TxParams] = None) -> None:
         """
         Sets the value of a key-value pair in the contract.
@@ -155,14 +157,15 @@ class KVStoreClient:
         if not key:
             raise KVStoreClientError("Key cannot be empty")
 
-        handle_transaction(
-            self.w3,
-            "Set",
-            self.kvstore_contract.functions.set(key, value),
-            KVStoreClientError,
-            tx_options,
-        )
+        try:
+            tx_hash = self.kvstore_contract.functions.set(key, value).transact(
+                tx_options or {}
+            )
+            self.w3.eth.wait_for_transaction_receipt(tx_hash)
+        except Exception as e:
+            handle_error(e, KVStoreClientError)
 
+    @requires_signer
     def set_bulk(
         self, keys: List[str], values: List[str], tx_options: Optional[TxParams] = None
     ) -> None:
@@ -211,14 +214,15 @@ class KVStoreClient:
         if len(keys) != len(values):
             raise KVStoreClientError("Arrays must have the same length")
 
-        handle_transaction(
-            self.w3,
-            "Set Bulk",
-            self.kvstore_contract.functions.setBulk(keys, values),
-            KVStoreClientError,
-            tx_options,
-        )
+        try:
+            tx_hash = self.kvstore_contract.functions.setBulk(keys, values).transact(
+                tx_options or {}
+            )
+            self.w3.eth.wait_for_transaction_receipt(tx_hash)
+        except Exception as e:
+            handle_error(e, KVStoreClientError)
 
+    @requires_signer
     def set_file_url_and_hash(
         self,
         url: str,
@@ -268,13 +272,10 @@ class KVStoreClient:
 
         content = requests.get(url).text
         content_hash = self.w3.keccak(text=content).hex()
-
-        handle_transaction(
-            self.w3,
-            "Set Bulk",
-            self.kvstore_contract.functions.setBulk(
+        try:
+            tx_hash = self.kvstore_contract.functions.setBulk(
                 [key, key + "_hash"], [url, content_hash]
-            ),
-            KVStoreClientError,
-            tx_options,
-        )
+            ).transact(tx_options or {})
+            self.w3.eth.wait_for_transaction_receipt(tx_hash)
+        except Exception as e:
+            handle_error(e, KVStoreClientError)
