@@ -9,7 +9,7 @@
     "clean": "tsc --build --clean && rm -rf dist",
     "start": "vite",
     "build": "tsc --build && vite build",
-    "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
+    "lint": "tsc --noEmit --skipLibCheck && eslint . --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint . --fix",
     "preview": "vite preview",
     "vercel-build": "yarn workspace human-protocol build:libs && yarn build",
