@@ -67,7 +67,6 @@
   },
   "lint-staged": {
     "*.{ts,tsx}": [
-      "tsc --project tsconfig.json",
       "prettier --write",
       "eslint --fix"
     ]

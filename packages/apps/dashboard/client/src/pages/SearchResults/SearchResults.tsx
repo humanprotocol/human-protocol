@@ -9,9 +9,8 @@ import SearchBar from '@/components/SearchBar/SearchBar';
 import EscrowAddress from '@/pages/SearchResults/EscrowAddress';
 import RoleDetails from '@/pages/SearchResults/RoleDetails/RoleDetails';
 import WalletAddress from '@/pages/SearchResults/WalletAddress';
-import {
+import useAddressDetails, {
   AddressDetails,
-  useAddressDetails,
 } from '@/services/api/use-address-details';
 import { handleErrorMessage } from '@/services/handle-error-message';
 import useGlobalFiltersStore from '@/shared/store/useGlobalFiltersStore';
@@ -77,7 +76,6 @@ const ResultError = ({ error }: { error: unknown }) => {
 
 const Results = () => {
   const { address, chainId } = useGlobalFiltersStore();
-
   const { data, status, error } = useAddressDetails(chainId, address);
 
   if (status === 'pending' && !data) {

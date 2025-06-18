@@ -108,7 +108,7 @@ const addressDetailsResponseSchema = z.object({
 
 export type AddressDetails = z.infer<typeof addressDetailsResponseSchema>;
 
-export function useAddressDetails(chainId: number, address: string) {
+const useAddressDetails = (chainId: number, address: string) => {
   return useQuery({
     queryFn: async () => {
       const { data } = await httpService.get(
@@ -126,4 +126,6 @@ export function useAddressDetails(chainId: number, address: string) {
     queryKey: ['useAddressDetails', address, chainId],
     enabled: !!chainId && !!address,
   });
-}
+};
+
+export default useAddressDetails;

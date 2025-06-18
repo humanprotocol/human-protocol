@@ -1,4 +1,4 @@
-yarn dlx lint-staged
+yarn dlx lint-staged & yarn workspace @human-protocol/dashboard-client tsc --noEmit --skipLibCheck
 
 # Format python file changes
 cd packages/sdk/python/human-protocol-sdk
