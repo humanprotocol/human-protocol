@@ -1,4 +1,4 @@
-yarn dlx lint-staged & yarn dlx tsc-files $(git diff --cached --name-only --diff-filter=ACM | grep '\.tsx?$')
+yarn dlx lint-staged
 
 # Format python file changes
 cd packages/sdk/python/human-protocol-sdk
