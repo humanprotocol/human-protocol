@@ -7,7 +7,16 @@ import TableRow from '@mui/material/TableRow';
 import CustomTooltip from '@/shared/ui/CustomTooltip';
 
 const InfoTooltip = ({ title }: { title: string }) => (
-  <CustomTooltip title={title}>
+  <CustomTooltip
+    title={title}
+    slotProps={{
+      tooltip: {
+        sx: {
+          maxWidth: '320px',
+        },
+      },
+    }}
+  >
     <HelpOutlineIcon
       fontSize="small"
       sx={{
@@ -50,7 +59,7 @@ export const TransactionsTableHead = () => {
         <TableCell>
           <Stack direction="row" alignItems="center">
             Value
-            <InfoTooltip title="Amount of HMT transferred in the transaction" />
+            <InfoTooltip title="This column reflects transacted and approved amounts" />
           </Stack>
         </TableCell>
       </TableRow>
