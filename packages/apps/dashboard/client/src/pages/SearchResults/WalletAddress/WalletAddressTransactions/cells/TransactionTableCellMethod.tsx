@@ -1,6 +1,5 @@
-import Box from '@mui/material/Box/Box';
+import Chip from '@mui/material/Chip';
 import { useTheme } from '@mui/material/styles';
-import Typography from '@mui/material/Typography';
 
 type PaletteColorKey =
   | 'primary'
@@ -87,19 +86,14 @@ export const TransactionTableCellMethod = ({ method }: { method: string }) => {
   };
 
   return (
-    <Box
-      display="inline-flex"
-      px={1.5}
-      py={1}
-      borderRadius={8}
-      border={`1px solid ${getColorFromTheme(currentStatusColors.border)}`}
-    >
-      <Typography
-        textTransform="capitalize"
-        color={getColorFromTheme(currentStatusColors.text)}
-      >
-        {method}
-      </Typography>
-    </Box>
+    <Chip
+      label={method}
+      variant="outlined"
+      sx={{
+        borderColor: getColorFromTheme(currentStatusColors.border),
+        color: getColorFromTheme(currentStatusColors.text),
+        textTransform: 'capitalize',
+      }}
+    />
   );
 };
