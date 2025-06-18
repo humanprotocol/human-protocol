@@ -14,6 +14,13 @@ import {
   StripePaymentStatus,
   VatType,
 } from '../../../../common/enums/payment';
+import {
+  createMockPaymentIntent,
+  createMockCustomer,
+  createMockPaymentMethod,
+  createMockSetupIntent,
+  createMockInvoice,
+} from '../../fixtures';
 
 describe('StripeService', () => {
   let service: StripeService;
@@ -111,12 +118,7 @@ describe('StripeService', () => {
   });
 
   describe('setupCard', () => {
-    const mockSetupIntent = {
-      id: 'seti_123',
-      client_secret: 'seti_secret_123',
-      customer: 'cus_123',
-      payment_method: 'pm_123',
-    };
+    const mockSetupIntent = createMockSetupIntent();
 
     it('should create setup intent successfully', async () => {
       stripeMock.setupIntents.create = jest
@@ -125,7 +127,7 @@ describe('StripeService', () => {
 
       const result = await service.setupCard('cus_123');
 
-      expect(result).toBe('seti_secret_123');
+      expect(result).toBe(mockSetupIntent.client_secret);
       expect(stripeMock.setupIntents.create).toHaveBeenCalledWith({
         automatic_payment_methods: { enabled: true },
         customer: 'cus_123',
@@ -155,16 +157,7 @@ describe('StripeService', () => {
   });
 
   describe('assignPaymentMethod', () => {
-    const mockPaymentIntent = {
-      id: 'pi_123',
-      client_secret: 'pi_secret_123',
-      status: StripePaymentStatus.REQUIRES_PAYMENT_METHOD,
-      amount: 1000,
-      amount_received: 1000,
-      currency: PaymentCurrency.USD,
-      customer: 'cus_123',
-      latest_charge: 'ch_123',
-    } as Stripe.PaymentIntent;
+    const mockPaymentIntent = createMockPaymentIntent();
 
     it('should assign off-session payment method', async () => {
       stripeMock.paymentIntents.confirm = jest
@@ -185,14 +178,14 @@ describe('StripeService', () => {
         off_session: true,
       });
       expect(result).toEqual({
-        id: 'pi_123',
-        clientSecret: 'pi_secret_123',
+        id: mockPaymentIntent.id,
+        clientSecret: mockPaymentIntent.client_secret,
         status: PaymentStatus.FAILED,
-        amount: 1000,
-        amountReceived: 1000,
-        currency: PaymentCurrency.USD,
-        customer: 'cus_123',
-        latestCharge: 'ch_123',
+        amount: mockPaymentIntent.amount,
+        amountReceived: mockPaymentIntent.amount_received,
+        currency: mockPaymentIntent.currency,
+        customer: mockPaymentIntent.customer,
+        latestCharge: mockPaymentIntent.latest_charge,
       } as PaymentData);
     });
 
@@ -214,26 +207,20 @@ describe('StripeService', () => {
         payment_method: 'pm_123',
       });
       expect(result).toEqual({
-        id: 'pi_123',
-        clientSecret: 'pi_secret_123',
+        id: mockPaymentIntent.id,
+        clientSecret: mockPaymentIntent.client_secret,
         status: PaymentStatus.FAILED,
-        amount: 1000,
-        amountReceived: 1000,
-        currency: PaymentCurrency.USD,
-        customer: 'cus_123',
-        latestCharge: 'ch_123',
+        amount: mockPaymentIntent.amount,
+        amountReceived: mockPaymentIntent.amount_received,
+        currency: mockPaymentIntent.currency,
+        customer: mockPaymentIntent.customer,
+        latestCharge: mockPaymentIntent.latest_charge,
       } as PaymentData);
     });
   });
 
   describe('createInvoice', () => {
-    const mockInvoice = {
-      id: 'inv_123',
-      payment_intent: 'pi_123',
-      status: 'draft',
-      amount_due: 1000,
-      currency: PaymentCurrency.USD,
-    };
+    const mockInvoice = createMockInvoice();
 
     it('should create invoice successfully', async () => {
       stripeMock.invoices.create = jest
@@ -286,22 +273,260 @@ describe('StripeService', () => {
     });
   });
 
+  describe('retrievePaymentIntent', () => {
+    it('should retrieve payment intent successfully', async () => {
+      const mockPaymentIntent = createMockPaymentIntent({
+        status: StripePaymentStatus.SUCCEEDED,
+        amount_received: 1000,
+      });
+
+      stripeMock.paymentIntents.retrieve = jest
+        .fn()
+        .mockResolvedValue(mockPaymentIntent);
+
+      const result = await service.retrievePaymentIntent('pi_123');
+
+      expect(result).toEqual({
+        id: mockPaymentIntent.id,
+        clientSecret: mockPaymentIntent.client_secret,
+        status: PaymentStatus.SUCCEEDED,
+        amount: mockPaymentIntent.amount,
+        amountReceived: mockPaymentIntent.amount_received,
+        currency: mockPaymentIntent.currency,
+        customer: mockPaymentIntent.customer,
+        latestCharge: mockPaymentIntent.latest_charge,
+      } as PaymentData);
+      expect(stripeMock.paymentIntents.retrieve).toHaveBeenCalledWith('pi_123');
+    });
+
+    it('should handle different payment statuses', async () => {
+      const statuses = [
+        {
+          stripe: StripePaymentStatus.REQUIRES_PAYMENT_METHOD,
+          expected: PaymentStatus.FAILED,
+        },
+        {
+          stripe: StripePaymentStatus.SUCCEEDED,
+          expected: PaymentStatus.SUCCEEDED,
+        },
+        {
+          stripe: StripePaymentStatus.CANCELED,
+          expected: PaymentStatus.FAILED,
+        },
+      ];
+
+      for (const { stripe, expected } of statuses) {
+        const mockPaymentIntent = createMockPaymentIntent({ status: stripe });
+        stripeMock.paymentIntents.retrieve = jest
+          .fn()
+          .mockResolvedValue(mockPaymentIntent);
+
+        const result = await service.retrievePaymentIntent('pi_123');
+
+        expect(result.status).toBe(expected);
+      }
+    });
+
+    it('should handle missing client secret', async () => {
+      const mockPaymentIntent = createMockPaymentIntent({
+        client_secret: null,
+      });
+      stripeMock.paymentIntents.retrieve = jest
+        .fn()
+        .mockResolvedValue(mockPaymentIntent);
+
+      const result = await service.retrievePaymentIntent('pi_123');
+
+      expect(result.clientSecret).toBeNull();
+    });
+  });
+
+  describe('getDefaultPaymentMethod', () => {
+    it('should return default payment method ID when available', async () => {
+      const mockCustomer = createMockCustomer();
+      (mockCustomer as any).invoice_settings = {
+        default_payment_method: 'pm_default_123',
+      };
+
+      stripeMock.customers.retrieve = jest.fn().mockResolvedValue(mockCustomer);
+
+      const result = await service.getDefaultPaymentMethod('cus_123');
+
+      expect(result).toBe('pm_default_123');
+      expect(stripeMock.customers.retrieve).toHaveBeenCalledWith('cus_123');
+    });
+
+    it('should return null when no default payment method', async () => {
+      const mockCustomer = createMockCustomer();
+      (mockCustomer as any).invoice_settings = {
+        default_payment_method: null,
+      };
+
+      stripeMock.customers.retrieve = jest.fn().mockResolvedValue(mockCustomer);
+
+      const result = await service.getDefaultPaymentMethod('cus_123');
+
+      expect(result).toBeNull();
+    });
+
+    it('should return null when customer has no invoice settings', async () => {
+      const mockCustomer = createMockCustomer();
+      (mockCustomer as any).invoice_settings = undefined;
+
+      stripeMock.customers.retrieve = jest.fn().mockResolvedValue(mockCustomer);
+
+      const result = await service.getDefaultPaymentMethod('cus_123');
+
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('listPaymentMethods', () => {
+    it('should return list of payment methods', async () => {
+      const mockCustomer = createMockCustomer();
+
+      const mockPaymentMethods = [
+        createMockPaymentMethod(),
+        createMockPaymentMethod(),
+      ];
+
+      mockPaymentMethods[0].id = 'pm_1';
+      mockPaymentMethods[0].card = {
+        brand: 'visa',
+        last4: '4242',
+        exp_month: 12,
+        exp_year: 2024,
+      };
+      mockPaymentMethods[1].id = 'pm_2';
+      mockPaymentMethods[1].card = {
+        brand: 'mastercard',
+        last4: '5555',
+        exp_month: 6,
+        exp_year: 2025,
+      };
+
+      stripeMock.customers.listPaymentMethods = jest
+        .fn()
+        .mockResolvedValue({ data: mockPaymentMethods });
+      stripeMock.customers.retrieve = jest.fn().mockResolvedValue(mockCustomer);
+
+      const result = await service.listPaymentMethods('cus_123');
+
+      expect(result).toEqual([
+        {
+          id: 'pm_1',
+          brand: 'visa',
+          last4: '4242',
+          expMonth: 12,
+          expYear: 2024,
+          default: false,
+        },
+        {
+          id: 'pm_2',
+          brand: 'mastercard',
+          last4: '5555',
+          expMonth: 6,
+          expYear: 2025,
+          default: false,
+        },
+      ]);
+      expect(stripeMock.customers.listPaymentMethods).toHaveBeenCalledWith(
+        'cus_123',
+        { type: 'card', limit: 100 },
+      );
+    });
+
+    it('should return empty array when no payment methods', async () => {
+      const mockCustomer = createMockCustomer();
+
+      stripeMock.customers.listPaymentMethods = jest
+        .fn()
+        .mockResolvedValue({ data: [] });
+
+      stripeMock.customers.retrieve = jest.fn().mockResolvedValue(mockCustomer);
+
+      const result = await service.listPaymentMethods('cus_123');
+
+      expect(result).toEqual([]);
+    });
+
+    it('should handle payment methods without card details', async () => {
+      const mockCustomer = createMockCustomer();
+
+      const mockPaymentMethods = [createMockPaymentMethod()];
+      (mockPaymentMethods[0] as any).card = null;
+
+      stripeMock.customers.listPaymentMethods = jest
+        .fn()
+        .mockResolvedValue({ data: mockPaymentMethods });
+      stripeMock.customers.retrieve = jest.fn().mockResolvedValue(mockCustomer);
+
+      const result = await service.listPaymentMethods('cus_123');
+
+      expect(result[0]).toEqual({
+        id: mockPaymentMethods[0].id,
+        brand: undefined,
+        last4: undefined,
+        expMonth: undefined,
+        expYear: undefined,
+        default: false,
+      });
+    });
+  });
+
+  describe('retrieveCardSetup', () => {
+    it('should retrieve card setup successfully', async () => {
+      const mockSetupIntent = createMockSetupIntent();
+
+      stripeMock.setupIntents.retrieve = jest
+        .fn()
+        .mockResolvedValue(mockSetupIntent);
+
+      const result = await service.retrieveCardSetup('seti_123');
+
+      expect(result).toEqual({
+        customerId: mockSetupIntent.customer,
+        paymentMethod: mockSetupIntent.payment_method,
+      });
+      expect(stripeMock.setupIntents.retrieve).toHaveBeenCalledWith('seti_123');
+    });
+
+    it('should handle setup intent without customer', async () => {
+      const mockSetupIntent = createMockSetupIntent();
+      (mockSetupIntent as any).customer = null;
+
+      stripeMock.setupIntents.retrieve = jest
+        .fn()
+        .mockResolvedValue(mockSetupIntent);
+
+      const result = await service.retrieveCardSetup('seti_123');
+
+      expect(result).toEqual({
+        customerId: null,
+        paymentMethod: mockSetupIntent.payment_method,
+      });
+    });
+
+    it('should handle setup intent without payment method', async () => {
+      const mockSetupIntent = createMockSetupIntent();
+      (mockSetupIntent as any).payment_method = null;
+
+      stripeMock.setupIntents.retrieve = jest
+        .fn()
+        .mockResolvedValue(mockSetupIntent);
+
+      const result = await service.retrieveCardSetup('seti_123');
+
+      expect(result).toEqual({
+        customerId: mockSetupIntent.customer,
+        paymentMethod: null,
+      });
+    });
+  });
+
   describe('updateCustomer', () => {
     it('should update customer successfully', async () => {
-      const mockCustomer = {
-        id: 'cus_123',
-        name: 'Updated Name',
-        email: 'test@example.com',
-        address: {
-          line1: '123 Street',
-          city: 'City',
-          country: 'US',
-          postal_code: '12345',
-        },
-        invoice_settings: {
-          default_payment_method: 'pm_123',
-        },
-      };
+      const mockCustomer = createMockCustomer();
       stripeMock.customers.update = jest.fn().mockResolvedValue(mockCustomer);
 
       const updateData = {
@@ -314,14 +539,16 @@ describe('StripeService', () => {
 
       const result = await service.updateCustomer('cus_123', updateData);
 
+      const { line1, city, country, postal_code } = mockCustomer.address;
+
       expect(result).toEqual({
         email: mockCustomer.email,
         name: mockCustomer.name,
         address: {
-          line1: '123 Street',
-          city: 'City',
-          country: 'US',
-          postalCode: '12345',
+          line1,
+          city,
+          country,
+          postalCode: postal_code,
         },
         defaultPaymentMethod:
           mockCustomer.invoice_settings.default_payment_method,
@@ -336,15 +563,7 @@ describe('StripeService', () => {
 
   describe('retrievePaymentMethod', () => {
     it('should retrieve payment method successfully', async () => {
-      const mockPaymentMethod = {
-        id: 'pm_123',
-        card: {
-          brand: 'visa',
-          last4: '4242',
-          exp_month: 12,
-          exp_year: 2024,
-        },
-      };
+      const mockPaymentMethod = createMockPaymentMethod();
 
       stripeMock.paymentMethods.retrieve = jest
         .fn()
@@ -353,11 +572,11 @@ describe('StripeService', () => {
       const result = await service.retrievePaymentMethod('pm_123');
 
       expect(result).toEqual({
-        id: 'pm_123',
-        brand: 'visa',
-        last4: '4242',
-        expMonth: 12,
-        expYear: 2024,
+        id: mockPaymentMethod.id,
+        brand: mockPaymentMethod.card.brand,
+        last4: mockPaymentMethod.card.last4,
+        expMonth: mockPaymentMethod.card.exp_month,
+        expYear: mockPaymentMethod.card.exp_year,
         default: false,
       });
       expect(stripeMock.paymentMethods.retrieve).toHaveBeenCalledWith('pm_123');
@@ -366,15 +585,7 @@ describe('StripeService', () => {
 
   describe('detachPaymentMethod', () => {
     it('should detach payment method successfully', async () => {
-      const mockPaymentMethod = {
-        id: 'pm_123',
-        card: {
-          brand: 'visa',
-          last4: '4242',
-          exp_month: 12,
-          exp_year: 2024,
-        },
-      };
+      const mockPaymentMethod = createMockPaymentMethod();
 
       stripeMock.paymentMethods.detach = jest
         .fn()
@@ -383,11 +594,11 @@ describe('StripeService', () => {
       const result = await service.detachPaymentMethod('pm_123');
 
       expect(result).toEqual({
-        id: 'pm_123',
-        brand: 'visa',
-        last4: '4242',
-        expMonth: 12,
-        expYear: 2024,
+        id: mockPaymentMethod.id,
+        brand: mockPaymentMethod.card.brand,
+        last4: mockPaymentMethod.card.last4,
+        expMonth: mockPaymentMethod.card.exp_month,
+        expYear: mockPaymentMethod.card.exp_year,
         default: false,
       });
       expect(stripeMock.paymentMethods.detach).toHaveBeenCalledWith('pm_123');
@@ -396,11 +607,10 @@ describe('StripeService', () => {
 
   describe('getReceiptUrl', () => {
     it('should return receipt URL for valid payment', async () => {
-      const mockPaymentIntent = {
-        id: 'pi_123',
+      const mockPaymentIntent = createMockPaymentIntent({
         customer: 'cus_123',
         latest_charge: 'ch_123',
-      };
+      });
       const mockCharge = {
         receipt_url: 'https://receipt.example.com',
       };
@@ -426,11 +636,10 @@ describe('StripeService', () => {
     });
 
     it('should throw NotFoundError when customer ID does not match', async () => {
-      const mockPaymentIntent = {
-        id: 'pi_123',
+      const mockPaymentIntent = createMockPaymentIntent({
         customer: 'cus_456',
         latest_charge: 'ch_123',
-      };
+      });
 
       stripeMock.paymentIntents.retrieve = jest
         .fn()
@@ -442,11 +651,10 @@ describe('StripeService', () => {
     });
 
     it('should throw NotFoundError when receipt URL is missing', async () => {
-      const mockPaymentIntent = {
-        id: 'pi_123',
+      const mockPaymentIntent = createMockPaymentIntent({
         customer: 'cus_123',
         latest_charge: 'ch_123',
-      };
+      });
       const mockCharge = {
         receipt_url: null,
       };
@@ -469,18 +677,7 @@ describe('StripeService', () => {
     });
 
     it('should return complete billing info when all data is available', async () => {
-      const mockCustomer = {
-        id: 'cus_123',
-        name: 'John Doe',
-        email: 'john@example.com',
-        address: {
-          line1: '123 Main St',
-          city: 'New York',
-          country: 'US',
-          postal_code: '10001',
-        },
-      };
-
+      const mockCustomer = createMockCustomer();
       const mockTaxIds = [
         {
           id: 'txi_123',
@@ -497,13 +694,13 @@ describe('StripeService', () => {
       const result = await service.retrieveBillingInfo('cus_123');
 
       expect(result).toEqual({
-        name: 'John Doe',
-        email: 'john@example.com',
+        name: mockCustomer.name,
+        email: mockCustomer.email,
         address: {
-          line: '123 Main St',
-          city: 'New York',
-          country: 'us',
-          postalCode: '10001',
+          line: mockCustomer.address.line1,
+          city: mockCustomer.address.city,
+          country: mockCustomer.address.country.toLowerCase(),
+          postalCode: mockCustomer.address.postal_code,
         },
         vat: 'DE123456789',
         vatType: VatType.EU_VAT,
@@ -511,11 +708,9 @@ describe('StripeService', () => {
     });
 
     it('should return partial billing info when some data is missing', async () => {
-      const mockCustomer = {
-        id: 'cus_123',
-        name: 'John Doe',
-        email: 'john@example.com',
-      };
+      const mockCustomer = createMockCustomer({
+        address: undefined,
+      });
 
       stripeMock.customers.retrieve = jest.fn().mockResolvedValue(mockCustomer);
       stripeMock.customers.listTaxIds = jest
@@ -525,8 +720,8 @@ describe('StripeService', () => {
       const result = await service.retrieveBillingInfo('cus_123');
 
       expect(result).toEqual({
-        name: 'John Doe',
-        email: 'john@example.com',
+        name: mockCustomer.name,
+        email: mockCustomer.email,
         address: undefined,
         vat: undefined,
         vatType: undefined,
@@ -544,17 +739,7 @@ describe('StripeService', () => {
         },
       ];
 
-      const mockUpdatedCustomer = {
-        id: 'cus_123',
-        name: 'John Doe',
-        email: 'john@example.com',
-        address: {
-          line1: '123 Main St',
-          city: 'New York',
-          country: 'US',
-          postal_code: '10001',
-        },
-      };
+      const mockUpdatedCustomer = createMockCustomer();
 
       stripeMock.customers.listTaxIds = jest
         .fn()
@@ -613,11 +798,7 @@ describe('StripeService', () => {
         },
       ];
 
-      const mockUpdatedCustomer = {
-        id: 'cus_123',
-        name: 'John Doe',
-        email: 'john@example.com',
-      };
+      const mockUpdatedCustomer = createMockCustomer();
 
       stripeMock.customers.listTaxIds = jest
         .fn()
