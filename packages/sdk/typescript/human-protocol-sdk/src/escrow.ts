@@ -52,6 +52,7 @@ import {
   StatusEvent,
 } from './graphql';
 import {
+  IEscrow,
   IEscrowConfig,
   IEscrowsFilter,
   IPayoutFilter,
@@ -1633,7 +1634,7 @@ export class EscrowUtils {
    * ```
    *
    * ```ts
-   * type EscrowData = {
+   * interface IEscrow {
    *   id: string;
    *   address: string;
    *   amountPaid: string;
@@ -1658,7 +1659,7 @@ export class EscrowUtils {
    *
    *
    * @param {IEscrowsFilter} filter Filter parameters.
-   * @returns {EscrowData[]} List of escrows that match the filter.
+   * @returns {IEscrow[]} List of escrows that match the filter.
    *
    * **Code example**
    *
@@ -1671,12 +1672,10 @@ export class EscrowUtils {
    *   to: new Date(2023, 5, 8),
    *   chainId: ChainId.POLYGON_AMOY
    * };
-   * const escrowDatas = await EscrowUtils.getEscrows(filters);
+   * const escrows = await EscrowUtils.getEscrows(filters);
    * ```
    */
-  public static async getEscrows(
-    filter: IEscrowsFilter
-  ): Promise<EscrowData[]> {
+  public static async getEscrows(filter: IEscrowsFilter): Promise<IEscrow[]> {
     if (filter.launcher && !ethers.isAddress(filter.launcher)) {
       throw ErrorInvalidAddress;
     }
@@ -1756,7 +1755,7 @@ export class EscrowUtils {
    * ```
    *
    * ```ts
-   * type EscrowData = {
+   * interface IEscrow {
    *   id: string;
    *   address: string;
    *   amountPaid: string;
@@ -1782,20 +1781,20 @@ export class EscrowUtils {
    *
    * @param {ChainId} chainId Network in which the escrow has been deployed
    * @param {string} escrowAddress Address of the escrow
-   * @returns {EscrowData} Escrow data
+   * @returns {IEscrow} Escrow data
    *
    * **Code example**
    *
    * ```ts
    * import { ChainId, EscrowUtils } from '@human-protocol/sdk';
    *
-   * const escrowData = new EscrowUtils.getEscrow(ChainId.POLYGON_AMOY, "0x1234567890123456789012345678901234567890");
+   * const escrow = new EscrowUtils.getEscrow(ChainId.POLYGON_AMOY, "0x1234567890123456789012345678901234567890");
    * ```
    */
   public static async getEscrow(
     chainId: ChainId,
     escrowAddress: string
-  ): Promise<EscrowData> {
+  ): Promise<IEscrow> {
     const networkData = NETWORKS[chainId];
 
     if (!networkData) {

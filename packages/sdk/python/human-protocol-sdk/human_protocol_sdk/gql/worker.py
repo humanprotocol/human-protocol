@@ -4,7 +4,7 @@ worker_fragment = """
 fragment WorkerFields on Worker {
     id
     address
-    totalAmountReceived
+    totalHMTAmountReceived
     payoutCount
 }
 """

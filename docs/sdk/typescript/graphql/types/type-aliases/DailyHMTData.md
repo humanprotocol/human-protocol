@@ -8,7 +8,7 @@
 
 > **DailyHMTData** = `object`
 
-Defined in: [graphql/types.ts:127](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L127)
+Defined in: [graphql/types.ts:119](https://github.com/humanprotocol/human-protocol/blob/47f5da5838a126d0f0ff22cdaa7719befd2657b4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L119)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [graphql/types.ts:127](https://github.com/humanprotocol/human-protoc
 
 > **dailyUniqueReceivers**: `number`
 
-Defined in: [graphql/types.ts:132](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L132)
+Defined in: [graphql/types.ts:124](https://github.com/humanprotocol/human-protocol/blob/47f5da5838a126d0f0ff22cdaa7719befd2657b4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L124)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [graphql/types.ts:132](https://github.com/humanprotocol/human-protoc
 
 > **dailyUniqueSenders**: `number`
 
-Defined in: [graphql/types.ts:131](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L131)
+Defined in: [graphql/types.ts:123](https://github.com/humanprotocol/human-protocol/blob/47f5da5838a126d0f0ff22cdaa7719befd2657b4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L123)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [graphql/types.ts:131](https://github.com/humanprotocol/human-protoc
 
 > **timestamp**: `Date`
 
-Defined in: [graphql/types.ts:128](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L128)
+Defined in: [graphql/types.ts:120](https://github.com/humanprotocol/human-protocol/blob/47f5da5838a126d0f0ff22cdaa7719befd2657b4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L120)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [graphql/types.ts:128](https://github.com/humanprotocol/human-protoc
 
 > **totalTransactionAmount**: `bigint`
 
-Defined in: [graphql/types.ts:129](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L129)
+Defined in: [graphql/types.ts:121](https://github.com/humanprotocol/human-protocol/blob/47f5da5838a126d0f0ff22cdaa7719befd2657b4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L121)
 
 ***
 
@@ -48,4 +48,4 @@ Defined in: [graphql/types.ts:129](https://github.com/humanprotocol/human-protoc
 
 > **totalTransactionCount**: `number`
 
-Defined in: [graphql/types.ts:130](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L130)
+Defined in: [graphql/types.ts:122](https://github.com/humanprotocol/human-protocol/blob/47f5da5838a126d0f0ff22cdaa7719befd2657b4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L122)

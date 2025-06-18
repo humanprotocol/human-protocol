@@ -122,13 +122,13 @@ Initializes a filter for status events.
   * **skip** (`int`) – Optional number of events to skip. Default is 0.
   * **order_direction** ([`OrderDirection`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.OrderDirection)) – Optional order direction. Default is DESC.
 
-### *class* human_protocol_sdk.filter.TransactionFilter(chain_id, from_address=None, to_address=None, start_date=None, end_date=None, start_block=None, end_block=None, first=10, skip=0, order_direction=OrderDirection.DESC)
+### *class* human_protocol_sdk.filter.TransactionFilter(chain_id, from_address=None, to_address=None, start_date=None, end_date=None, start_block=None, end_block=None, method=None, escrow=None, token=None, first=10, skip=0, order_direction=OrderDirection.DESC)
 
 Bases: `object`
 
 A class used to filter transactions.
 
-#### \_\_init_\_(chain_id, from_address=None, to_address=None, start_date=None, end_date=None, start_block=None, end_block=None, first=10, skip=0, order_direction=OrderDirection.DESC)
+#### \_\_init_\_(chain_id, from_address=None, to_address=None, start_date=None, end_date=None, start_block=None, end_block=None, method=None, escrow=None, token=None, first=10, skip=0, order_direction=OrderDirection.DESC)
 
 Initializes a TransactionsFilter instance.
 
@@ -140,6 +140,9 @@ Initializes a TransactionsFilter instance.
   * **end_date** (`Optional`[`datetime`]) – End date for filtering transactions
   * **start_block** (`Optional`[`int`]) – Start block number for filtering transactions
   * **end_block** (`Optional`[`int`]) – End block number for filtering transactions
+  * **method** (`Optional`[`str`]) – Method name to filter transactions
+  * **escrow** (`Optional`[`str`]) – Escrow address to filter transactions
+  * **token** (`Optional`[`str`]) – Token address to filter transactions
   * **first** (`int`) – Number of items per page
   * **skip** (`int`) – Page number to retrieve
   * **order** – Order of results, “asc” or “desc”

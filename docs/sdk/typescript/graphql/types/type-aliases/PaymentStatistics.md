@@ -8,7 +8,7 @@
 
 > **PaymentStatistics** = `object`
 
-Defined in: [graphql/types.ts:113](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L113)
+Defined in: [graphql/types.ts:105](https://github.com/humanprotocol/human-protocol/blob/47f5da5838a126d0f0ff22cdaa7719befd2657b4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L105)
 
 ## Properties
 
@@ -16,4 +16,4 @@ Defined in: [graphql/types.ts:113](https://github.com/humanprotocol/human-protoc
 
 > **dailyPaymentsData**: [`DailyPaymentData`](DailyPaymentData.md)[]
 
-Defined in: [graphql/types.ts:114](https://github.com/humanprotocol/human-protocol/blob/36a82d86df8ff0c729bd9c2ab3a0bb0641086da4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L114)
+Defined in: [graphql/types.ts:106](https://github.com/humanprotocol/human-protocol/blob/47f5da5838a126d0f0ff22cdaa7719befd2657b4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L106)

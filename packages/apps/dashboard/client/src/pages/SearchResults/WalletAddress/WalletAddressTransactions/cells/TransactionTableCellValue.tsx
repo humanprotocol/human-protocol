@@ -1,9 +1,28 @@
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import Typography from '@mui/material/Typography';
 
+import CustomTooltip from '@/components/CustomTooltip';
 import { formatHMTDecimals } from '@/helpers/formatHMTDecimals';
 import { useHMTPrice } from '@/services/api/use-hmt-price';
 
-export const TransactionTableCellValue = ({ value }: { value: string }) => {
+const InfoTooltip = ({ title }: { title: string }) => (
+  <CustomTooltip title={title} arrow>
+    <HelpOutlineIcon
+      fontSize="small"
+      sx={{
+        color: 'text.secondary',
+      }}
+    />
+  </CustomTooltip>
+);
+
+export const TransactionTableCellValue = ({
+  value,
+  method,
+}: {
+  value: string;
+  method: string;
+}) => {
   const { isError, isPending } = useHMTPrice();
 
   if (isError) {
@@ -15,9 +34,14 @@ export const TransactionTableCellValue = ({ value }: { value: string }) => {
   }
 
   return (
-    <Typography>
+    <Typography variant="body2" display="flex" alignItems="center" gap={0.5}>
       {formatHMTDecimals(value)}
-      <Typography component="span"> HMT</Typography>
+      <Typography variant="body2" component="span">
+        HMT
+      </Typography>
+      {method === 'approve' && (
+        <InfoTooltip title="Approved amount (not a transfer)" />
+      )}
     </Typography>
   );
 };

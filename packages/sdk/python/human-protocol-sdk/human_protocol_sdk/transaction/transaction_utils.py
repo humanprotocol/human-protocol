@@ -170,6 +170,7 @@ class TransactionUtils:
         """Get an array of transactions based on the specified filter parameters.
 
         :param filter: Object containing all the necessary parameters to filter
+            (chain_id, from_address, to_address, start_date, end_date, start_block, end_block, method, escrow, token, first, skip, order_direction)
 
         :return: List of transactions
 
@@ -185,6 +186,8 @@ class TransactionUtils:
                             chain_id=ChainId.POLYGON_AMOY,
                             from_address="0x1234567890123456789012345678901234567890",
                             to_address="0x0987654321098765432109876543210987654321",
+                            method="transfer",
+                            escrow="0x0987654321098765432109876543210987654321",
                             start_date=datetime.datetime(2023, 5, 8),
                             end_date=datetime.datetime(2023, 6, 8),
                         )
@@ -213,6 +216,9 @@ class TransactionUtils:
                 ),
                 "startBlock": filter.start_block if filter.start_block else None,
                 "endBlock": filter.end_block if filter.end_block else None,
+                "method": filter.method if filter.method else None,
+                "escrow": (filter.escrow.lower() if filter.escrow else None),
+                "token": (filter.token.lower() if filter.token else None),
                 "first": filter.first,
                 "skip": filter.skip,
                 "orderDirection": filter.order_direction.value,

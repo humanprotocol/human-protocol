@@ -238,7 +238,7 @@ export function handleTransfer(event: Transfer): void {
 
     // Update worker, and create payout object
     const worker = createOrLoadWorker(event.params._to);
-    worker.totalAmountReceived = worker.totalAmountReceived.plus(
+    worker.totalHMTAmountReceived = worker.totalHMTAmountReceived.plus(
       event.params._value
     );
     worker.payoutCount = worker.payoutCount.plus(ONE_BI);
@@ -254,7 +254,7 @@ export function handleTransfer(event: Transfer): void {
 
     // Update worker and payout day data
     eventDayData.dailyPayoutCount = eventDayData.dailyPayoutCount.plus(ONE_BI);
-    eventDayData.dailyPayoutAmount = eventDayData.dailyPayoutAmount.plus(
+    eventDayData.dailyHMTPayoutAmount = eventDayData.dailyHMTPayoutAmount.plus(
       event.params._value
     );
 
