@@ -1,9 +1,9 @@
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import Typography from '@mui/material/Typography';
 
-import CustomTooltip from '@/components/CustomTooltip';
 import { formatHMTDecimals } from '@/helpers/formatHMTDecimals';
 import { useHMTPrice } from '@/services/api/use-hmt-price';
+import CustomTooltip from '@/shared/ui/CustomTooltip';
 
 const InfoTooltip = ({ title }: { title: string }) => (
   <CustomTooltip title={title} arrow>
