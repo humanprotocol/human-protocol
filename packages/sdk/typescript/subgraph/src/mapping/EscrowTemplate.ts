@@ -1,6 +1,7 @@
 import {
   BulkTransfer,
   BulkTransferV2,
+  BulkTransferV3,
   Cancelled,
   Completed,
   Escrow as EscrowContract,
@@ -315,7 +316,7 @@ export function handleIntermediateStorage(event: IntermediateStorage): void {
 // Create BulkPayoutEvent entity
 function createBulkPayoutEvent(
   event: ethereum.Event,
-  txId: BigInt,
+  payoutId: string,
   recipientsLength: number
 ): void {
   const eventEntity = new BulkPayoutEvent(toEventId(event));
@@ -324,7 +325,7 @@ function createBulkPayoutEvent(
   eventEntity.txHash = event.transaction.hash;
   eventEntity.escrowAddress = event.address;
   eventEntity.sender = event.transaction.from;
-  eventEntity.bulkPayoutTxId = txId;
+  eventEntity.payoutId = payoutId;
   eventEntity.bulkCount = BigInt.fromI32(<i32>recipientsLength);
   eventEntity.save();
 }
@@ -412,7 +413,7 @@ export function handleBulkTransfer(event: BulkTransfer): void {
   // Create BulkPayoutEvent entity
   createBulkPayoutEvent(
     event,
-    event.params._txId,
+    event.params._txId.toString(),
     event.params._recipients.length
   );
 
@@ -453,19 +454,22 @@ export function handleBulkTransfer(event: BulkTransfer): void {
   }
 }
 
-export function handleBulkTransferV2(event: BulkTransferV2): void {
+function handleBulkTransferCommon(
+  event: ethereum.Event,
+  payoutId: string,
+  recipients: Address[],
+  amounts: BigInt[],
+  isPartial: boolean,
+  finalResultsUrl: string
+): void {
   // Create BulkPayoutEvent entity
-  createBulkPayoutEvent(
-    event,
-    event.params._txId,
-    event.params._recipients.length
-  );
+  createBulkPayoutEvent(event, payoutId, recipients.length);
 
   // Update escrow statistics
-  updateEscrowStatisticsForBulkTransfer(event.params._isPartial);
+  updateEscrowStatisticsForBulkTransfer(isPartial);
 
   // Update event day data
-  updateEventDayDataForBulkTransfer(event, event.params._isPartial);
+  updateEventDayDataForBulkTransfer(event, isPartial);
 
   // Update escrow entity
   const escrowEntity = Escrow.load(dataSource.address());
@@ -483,9 +487,9 @@ export function handleBulkTransferV2(event: BulkTransferV2): void {
 
     // If the escrow is non-HMT, track the balance data
     if (Address.fromBytes(escrowEntity.token) != HMT_ADDRESS) {
-      for (let i = 0; i < event.params._recipients.length; i++) {
-        const recipient = event.params._recipients[i];
-        const amount = event.params._amounts[i];
+      for (let i = 0; i < recipients.length; i++) {
+        const recipient = recipients[i];
+        const amount = amounts[i];
 
         escrowEntity.amountPaid = escrowEntity.amountPaid.plus(amount);
         escrowEntity.balance = escrowEntity.balance.minus(amount);
@@ -543,11 +547,7 @@ export function handleBulkTransferV2(event: BulkTransferV2): void {
     }
 
     // Assign finalResultsUrl directly from the event
-    updateEscrowEntityForBulkTransfer(
-      escrowEntity,
-      event.params._isPartial,
-      event.params.finalResultsUrl
-    );
+    updateEscrowEntityForBulkTransfer(escrowEntity, isPartial, finalResultsUrl);
 
     // Create and save EscrowStatusEvent entity
     createAndSaveStatusEventForBulkTransfer(
@@ -556,6 +556,28 @@ export function handleBulkTransferV2(event: BulkTransferV2): void {
       escrowEntity
     );
   }
+}
+
+export function handleBulkTransferV2(event: BulkTransferV2): void {
+  handleBulkTransferCommon(
+    event,
+    event.params._txId.toString(),
+    event.params._recipients,
+    event.params._amounts,
+    event.params._isPartial,
+    event.params.finalResultsUrl
+  );
+}
+
+export function handleBulkTransferV3(event: BulkTransferV3): void {
+  handleBulkTransferCommon(
+    event,
+    event.params._payoutId,
+    event.params._recipients,
+    event.params._amounts,
+    event.params._isPartial,
+    event.params._finalResultsUrl
+  );
 }
 
 export function handleCompleted(event: Completed): void {
@@ -586,6 +608,22 @@ export function handleCompleted(event: Completed): void {
   // Update escrow entity
   const escrowEntity = Escrow.load(dataSource.address());
   if (escrowEntity) {
+    if (escrowEntity.balance && escrowEntity.balance.gt(ZERO_BI)) {
+      const internalTransaction = new InternalTransaction(
+        event.transaction.hash.concatI32(event.logIndex.toI32())
+      );
+      internalTransaction.from = escrowEntity.address;
+      internalTransaction.to = escrowEntity.launcher;
+      internalTransaction.value = escrowEntity.balance;
+      internalTransaction.transaction = event.transaction.hash;
+      internalTransaction.method = 'transfer';
+      internalTransaction.escrow = escrowEntity.address;
+      internalTransaction.token = escrowEntity.token;
+      internalTransaction.save();
+
+      escrowEntity.balance = ZERO_BI;
+    }
+
     escrowEntity.status = 'Complete';
     escrowEntity.save();
     eventEntity.launcher = escrowEntity.launcher;

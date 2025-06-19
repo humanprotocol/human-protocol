@@ -45,6 +45,13 @@ contract Escrow is IEscrow, ReentrancyGuard {
         bool _isPartial,
         string finalResultsUrl
     );
+    event BulkTransferV3(
+        string _payoutId,
+        address[] _recipients,
+        uint256[] _amounts,
+        bool _isPartial,
+        string _finalResultsUrl
+    );
     event Cancelled();
     event Completed();
     event Fund(uint256 _amount);
@@ -81,6 +88,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
 
     uint256 public remainingFunds;
     uint256 public reservedFunds;
+    mapping(string => bool) private payouts;
 
     /**
      * @dev Constructor to initialize the escrow contract.
@@ -335,18 +343,18 @@ contract Escrow is IEscrow, ReentrancyGuard {
      * @dev Performs bulk payout to multiple recipients with oracle fees deducted.
      * @param _recipients Array of recipient addresses.
      * @param _amounts Array of amounts to be paid to each recipient.
-     * @param _url URL storing results as transaction details.
-     * @param _hash Hash of the results.
-     * @param _txId Transaction ID.
-     * @param forceComplete Boolean indicating if remaining balance should be transferred to the launcher.
+     * @param _url URL storing results as transaction details
+     * @param _hash Hash of the results
+     * @param _payoutId Unique ID to identify the payout
+     * @param _forceComplete Boolean parameter indicating if remaining balance should be transferred to the escrow creator
      */
     function bulkPayOut(
         address[] memory _recipients,
         uint256[] memory _amounts,
         string memory _url,
         string memory _hash,
-        uint256 _txId,
-        bool forceComplete
+        string memory _payoutId,
+        bool _forceComplete
     )
         public
         override
@@ -356,6 +364,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
         notExpired
         nonReentrant
     {
+        require(!payouts[_payoutId], 'Payout id already exists');
         require(
             _recipients.length == _amounts.length,
             "Amount of recipients and values don't match"
@@ -384,6 +393,10 @@ contract Escrow is IEscrow, ReentrancyGuard {
         uint256 totalReputationOracleFee = 0;
         uint256 totalRecordingOracleFee = 0;
         uint256 totalExchangeOracleFee = 0;
+        uint256[] memory netAmounts = new uint256[](_recipients.length + 3);
+        address[] memory eventRecipients = new address[](
+            _recipients.length + 3
+        );
 
         for (uint256 i = 0; i < _recipients.length; i++) {
             uint256 amount = _amounts[i];
@@ -406,29 +419,42 @@ contract Escrow is IEscrow, ReentrancyGuard {
                     recordingOracleFee -
                     exchangeOracleFee
             );
+            eventRecipients[i] = _recipients[i];
+            netAmounts[i] =
+                amount -
+                reputationOracleFee -
+                recordingOracleFee -
+                exchangeOracleFee;
         }
 
         // Transfer oracle fees
         if (reputationOracleFeePercentage > 0) {
             _safeTransfer(token, reputationOracle, totalReputationOracleFee);
+            eventRecipients[_recipients.length] = reputationOracle;
+            netAmounts[_recipients.length] = totalReputationOracleFee;
         }
         if (recordingOracleFeePercentage > 0) {
             _safeTransfer(token, recordingOracle, totalRecordingOracleFee);
+            eventRecipients[_recipients.length + 1] = recordingOracle;
+            netAmounts[_recipients.length + 1] = totalRecordingOracleFee;
         }
         if (exchangeOracleFeePercentage > 0) {
             _safeTransfer(token, exchangeOracle, totalExchangeOracleFee);
+            eventRecipients[_recipients.length + 2] = exchangeOracle;
+            netAmounts[_recipients.length + 2] = totalExchangeOracleFee;
         }
         remainingFunds -= totalBulkAmount;
         reservedFunds -= totalBulkAmount;
 
         finalResultsUrl = _url;
         finalResultsHash = _hash;
+        payouts[_payoutId] = true;
 
-        if (remainingFunds == 0 || forceComplete) {
-            emit BulkTransferV2(
-                _txId,
-                _recipients,
-                _amounts,
+        if (remainingFunds == 0 || _forceComplete) {
+            emit BulkTransferV3(
+                _payoutId,
+                eventRecipients,
+                netAmounts,
                 false,
                 finalResultsUrl
             );
@@ -437,10 +463,10 @@ contract Escrow is IEscrow, ReentrancyGuard {
             if (status != EscrowStatuses.ToCancel) {
                 status = EscrowStatuses.Partial;
             }
-            emit BulkTransferV2(
-                _txId,
-                _recipients,
-                _amounts,
+            emit BulkTransferV3(
+                _payoutId,
+                eventRecipients,
+                netAmounts,
                 true,
                 finalResultsUrl
             );
@@ -451,18 +477,18 @@ contract Escrow is IEscrow, ReentrancyGuard {
      * @dev Overloaded function to perform bulk payout with default forceComplete set to false.
      * @param _recipients Array of recipient addresses.
      * @param _amounts Array of amounts to be paid to each recipient.
-     * @param _url URL storing results as transaction details.
-     * @param _hash Hash of the results.
-     * @param _txId Transaction ID.
+     * @param _url URL storing results as transaction details
+     * @param _hash Hash of the results
+     * @param _payoutId Unique ID to identify the payout
      */
     function bulkPayOut(
         address[] memory _recipients,
         uint256[] memory _amounts,
         string memory _url,
         string memory _hash,
-        uint256 _txId
+        string memory _payoutId
     ) external {
-        bulkPayOut(_recipients, _amounts, _url, _hash, _txId, false);
+        bulkPayOut(_recipients, _amounts, _url, _hash, _payoutId, false);
     }
 
     /**

@@ -864,7 +864,7 @@ class TestEscrowClient(unittest.TestCase):
         amounts = [100]
         final_results_url = "https://www.example.com/result"
         final_results_hash = "test"
-        txId = 1
+        payout_id = "1"
 
         with patch(
             "human_protocol_sdk.escrow.escrow_client.handle_transaction"
@@ -875,12 +875,12 @@ class TestEscrowClient(unittest.TestCase):
                 amounts,
                 final_results_url,
                 final_results_hash,
-                txId,
+                payout_id,
             )
 
             self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
             mock_contract.functions.bulkPayOut.assert_called_once_with(
-                recipients, amounts, final_results_url, final_results_hash, txId
+                recipients, amounts, final_results_url, final_results_hash, payout_id
             )
             mock_function.assert_called_once_with(
                 self.w3,
@@ -900,7 +900,7 @@ class TestEscrowClient(unittest.TestCase):
         amounts = [100]
         final_results_url = "https://www.example.com/result"
         final_results_hash = "test"
-        txId = 1
+        payout_id = "1"
 
         with patch(
             "human_protocol_sdk.escrow.escrow_client.handle_transaction"
@@ -911,13 +911,18 @@ class TestEscrowClient(unittest.TestCase):
                 amounts,
                 final_results_url,
                 final_results_hash,
-                txId,
+                payout_id,
                 True,
             )
 
             self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
             mock_contract.functions.bulkPayOut.assert_called_once_with(
-                recipients, amounts, final_results_url, final_results_hash, txId, True
+                recipients,
+                amounts,
+                final_results_url,
+                final_results_hash,
+                payout_id,
+                True,
             )
             mock_function.assert_called_once_with(
                 self.w3,
@@ -933,7 +938,7 @@ class TestEscrowClient(unittest.TestCase):
         amounts = [100]
         final_results_url = "https://www.example.com/result"
         final_results_hash = "test"
-        txId = 1
+        payout_id = "1"
 
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.bulk_payout(
@@ -942,7 +947,7 @@ class TestEscrowClient(unittest.TestCase):
                 amounts,
                 final_results_url,
                 final_results_hash,
-                txId,
+                payout_id,
             )
         self.assertEqual(f"Invalid escrow address: invalid_address", str(cm.exception))
 
@@ -953,7 +958,7 @@ class TestEscrowClient(unittest.TestCase):
                 amounts,
                 final_results_url,
                 final_results_hash,
-                txId,
+                payout_id,
             )
         self.assertEqual(
             "Invalid recipient address: invalid_address", str(cm.exception)
@@ -965,7 +970,7 @@ class TestEscrowClient(unittest.TestCase):
         amounts = [100, 200]
         final_results_url = "https://www.example.com/result"
         final_results_hash = "test"
-        txId = 1
+        payout_id = "1"
 
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.bulk_payout(
@@ -974,7 +979,7 @@ class TestEscrowClient(unittest.TestCase):
                 amounts,
                 final_results_url,
                 final_results_hash,
-                txId,
+                payout_id,
             )
         self.assertEqual("Arrays must have same length", str(cm.exception))
 
@@ -984,7 +989,7 @@ class TestEscrowClient(unittest.TestCase):
         amounts = []
         final_results_url = "https://www.example.com/result"
         final_results_hash = "test"
-        txId = 1
+        payout_id = "1"
 
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.bulk_payout(
@@ -993,7 +998,7 @@ class TestEscrowClient(unittest.TestCase):
                 amounts,
                 final_results_url,
                 final_results_hash,
-                txId,
+                payout_id,
             )
         self.assertEqual("Arrays must have any value", str(cm.exception))
 
@@ -1003,7 +1008,7 @@ class TestEscrowClient(unittest.TestCase):
         amounts = [100] * 100
         final_results_url = "https://www.example.com/result"
         final_results_hash = "test"
-        txId = 1
+        payout_id = "1"
 
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.bulk_payout(
@@ -1012,7 +1017,7 @@ class TestEscrowClient(unittest.TestCase):
                 amounts,
                 final_results_url,
                 final_results_hash,
-                txId,
+                payout_id,
             )
         self.assertEqual("Too many recipients", str(cm.exception))
 
@@ -1021,7 +1026,7 @@ class TestEscrowClient(unittest.TestCase):
         recipients = ["0x1234567890123456789012345678901234567890"]
         final_results_url = "https://www.example.com/result"
         final_results_hash = "test"
-        txId = 1
+        payout_id = "1"
 
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.bulk_payout(
@@ -1030,7 +1035,7 @@ class TestEscrowClient(unittest.TestCase):
                 [0],
                 final_results_url,
                 final_results_hash,
-                txId,
+                payout_id,
             )
         self.assertEqual("Amounts cannot be empty", str(cm.exception))
 
@@ -1039,7 +1044,7 @@ class TestEscrowClient(unittest.TestCase):
         recipients = ["0x1234567890123456789012345678901234567890"]
         final_results_url = "https://www.example.com/result"
         final_results_hash = "test"
-        txId = 1
+        payout_id = "1"
 
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.bulk_payout(
@@ -1048,7 +1053,7 @@ class TestEscrowClient(unittest.TestCase):
                 [-10],
                 final_results_url,
                 final_results_hash,
-                txId,
+                payout_id,
             )
         self.assertEqual("Amounts cannot be negative", str(cm.exception))
 
@@ -1058,7 +1063,7 @@ class TestEscrowClient(unittest.TestCase):
         amounts = [100]
         final_results_url = "https://www.example.com/result"
         final_results_hash = "test"
-        txId = 1
+        payout_id = "1"
         self.escrow.get_balance = MagicMock(return_value=50)
 
         with self.assertRaises(EscrowClientError) as cm:
@@ -1068,7 +1073,7 @@ class TestEscrowClient(unittest.TestCase):
                 amounts,
                 final_results_url,
                 final_results_hash,
-                txId,
+                payout_id,
             )
         self.assertEqual(
             "Escrow does not have enough balance. Current balance: 50. Amounts: 100",
@@ -1081,7 +1086,7 @@ class TestEscrowClient(unittest.TestCase):
         amounts = [100]
         final_results_url = "invalid_url"
         final_results_hash = "test"
-        txId = 1
+        payout_id = "1"
         self.escrow.get_balance = MagicMock(return_value=100)
 
         with self.assertRaises(EscrowClientError) as cm:
@@ -1091,7 +1096,7 @@ class TestEscrowClient(unittest.TestCase):
                 amounts,
                 final_results_url,
                 final_results_hash,
-                txId,
+                payout_id,
             )
         self.assertEqual(
             f"Invalid final results URL: {final_results_url}", str(cm.exception)
@@ -1103,7 +1108,7 @@ class TestEscrowClient(unittest.TestCase):
         amounts = [100]
         final_results_url = "https://www.example.com/result"
         final_results_hash = ""
-        txId = 1
+        payout_id = "1"
         self.escrow.get_balance = MagicMock(return_value=100)
 
         with self.assertRaises(EscrowClientError) as cm:
@@ -1113,7 +1118,7 @@ class TestEscrowClient(unittest.TestCase):
                 amounts,
                 final_results_url,
                 final_results_hash,
-                txId,
+                payout_id,
             )
         self.assertEqual("Invalid empty final results hash", str(cm.exception))
 
@@ -1130,7 +1135,7 @@ class TestEscrowClient(unittest.TestCase):
         amounts = [100]
         final_results_url = "https://www.example.com/result"
         final_results_hash = "test"
-        txId = 1
+        payout_id = "1"
         escrowClient.get_balance = MagicMock(return_value=100)
 
         with self.assertRaises(EscrowClientError) as cm:
@@ -1140,7 +1145,7 @@ class TestEscrowClient(unittest.TestCase):
                 amounts,
                 final_results_url,
                 final_results_hash,
-                txId,
+                payout_id,
             )
         self.assertEqual("You must add an account to Web3 instance", str(cm.exception))
 
@@ -1152,7 +1157,7 @@ class TestEscrowClient(unittest.TestCase):
         amounts = [100]
         final_results_url = "https://www.example.com/result"
         final_results_hash = "test"
-        txId = 1
+        payout_id = "1"
 
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.bulk_payout(
@@ -1161,7 +1166,7 @@ class TestEscrowClient(unittest.TestCase):
                 amounts,
                 final_results_url,
                 final_results_hash,
-                txId,
+                payout_id,
             )
         self.assertEqual(
             "Escrow address is not provided by the factory", str(cm.exception)
@@ -1180,7 +1185,7 @@ class TestEscrowClient(unittest.TestCase):
         amounts = [100]
         final_results_url = "https://www.example.com/result"
         final_results_hash = "test"
-        txId = 1
+        payout_id = "1"
 
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.bulk_payout(
@@ -1189,7 +1194,7 @@ class TestEscrowClient(unittest.TestCase):
                 amounts,
                 final_results_url,
                 final_results_hash,
-                txId,
+                payout_id,
             )
         self.assertEqual(
             "Bulk Payout transaction failed: Bulk value too high", str(cm.exception)
@@ -1208,7 +1213,7 @@ class TestEscrowClient(unittest.TestCase):
         amounts = [100]
         final_results_url = "https://www.example.com/result"
         final_results_hash = "test"
-        txId = 1
+        payout_id = "1"
 
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.bulk_payout(
@@ -1217,7 +1222,7 @@ class TestEscrowClient(unittest.TestCase):
                 amounts,
                 final_results_url,
                 final_results_hash,
-                txId,
+                payout_id,
             )
         self.assertEqual(
             "Bulk Payout transaction failed: Invalid status", str(cm.exception)
@@ -1236,7 +1241,7 @@ class TestEscrowClient(unittest.TestCase):
         amounts = [100]
         final_results_url = "https://www.example.com/result"
         final_results_hash = "test"
-        txId = 1
+        payout_id = "1"
 
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.bulk_payout(
@@ -1245,7 +1250,7 @@ class TestEscrowClient(unittest.TestCase):
                 amounts,
                 final_results_url,
                 final_results_hash,
-                txId,
+                payout_id,
             )
         self.assertEqual(
             "Bulk Payout transaction failed: Address calling not trusted",
@@ -1262,7 +1267,7 @@ class TestEscrowClient(unittest.TestCase):
         amounts = [100]
         final_results_url = "https://www.example.com/result"
         final_results_hash = "test"
-        txId = 1
+        payout_id = "1"
         tx_options = {"gas": 50000}
 
         with patch(
@@ -1274,14 +1279,14 @@ class TestEscrowClient(unittest.TestCase):
                 amounts,
                 final_results_url,
                 final_results_hash,
-                txId,
+                payout_id,
                 False,
                 tx_options,
             )
 
             self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
             mock_contract.functions.bulkPayOut.assert_called_once_with(
-                recipients, amounts, final_results_url, final_results_hash, txId
+                recipients, amounts, final_results_url, final_results_hash, payout_id
             )
             mock_function.assert_called_once_with(
                 self.w3,
@@ -1309,7 +1314,7 @@ class TestEscrowClient(unittest.TestCase):
         amounts = [100]
         final_results_url = "https://www.example.com/result"
         final_results_hash = "test"
-        txId = 1
+        payout_id = "1"
 
         result = self.escrow.create_bulk_payout_transaction(
             escrow_address,
@@ -1317,7 +1322,7 @@ class TestEscrowClient(unittest.TestCase):
             amounts,
             final_results_url,
             final_results_hash,
-            txId,
+            payout_id,
         )
 
         self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
@@ -1326,7 +1331,7 @@ class TestEscrowClient(unittest.TestCase):
             amounts,
             final_results_url,
             final_results_hash,
-            txId,
+            payout_id,
             False,
         )
         mock_contract.functions.bulkPayOut.return_value.build_transaction.assert_called_once()
@@ -1342,7 +1347,7 @@ class TestEscrowClient(unittest.TestCase):
         amounts = [100]
         final_results_url = "https://www.example.com/result"
         final_results_hash = "test"
-        txId = 1
+        payout_id = "1"
 
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.create_bulk_payout_transaction(
@@ -1351,7 +1356,7 @@ class TestEscrowClient(unittest.TestCase):
                 amounts,
                 final_results_url,
                 final_results_hash,
-                txId,
+                payout_id,
             )
         self.assertEqual(
             f"Invalid escrow address: {invalid_escrow_address}", str(cm.exception)
@@ -1363,7 +1368,7 @@ class TestEscrowClient(unittest.TestCase):
         amounts = [100]
         final_results_url = "https://www.example.com/result"
         final_results_hash = "test"
-        txId = 1
+        payout_id = "1"
 
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.create_bulk_payout_transaction(
@@ -1372,7 +1377,7 @@ class TestEscrowClient(unittest.TestCase):
                 amounts,
                 final_results_url,
                 final_results_hash,
-                txId,
+                payout_id,
             )
         self.assertEqual("Arrays must have any value", str(cm.exception))
 
@@ -1382,7 +1387,7 @@ class TestEscrowClient(unittest.TestCase):
         amounts = [100, 200]
         final_results_url = "https://www.example.com/result"
         final_results_hash = "test"
-        txId = 1
+        payout_id = "1"
 
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.create_bulk_payout_transaction(
@@ -1391,7 +1396,7 @@ class TestEscrowClient(unittest.TestCase):
                 amounts,
                 final_results_url,
                 final_results_hash,
-                txId,
+                payout_id,
             )
         self.assertEqual("Arrays must have same length", str(cm.exception))
 
@@ -1401,7 +1406,7 @@ class TestEscrowClient(unittest.TestCase):
         amounts = [200]
         final_results_url = "https://www.example.com/result"
         final_results_hash = "test"
-        txId = 1
+        payout_id = "1"
 
         self.escrow.get_balance = MagicMock(return_value=100)
 
@@ -1412,7 +1417,7 @@ class TestEscrowClient(unittest.TestCase):
                 amounts,
                 final_results_url,
                 final_results_hash,
-                txId,
+                payout_id,
             )
         self.assertEqual(
             "Escrow does not have enough balance. Current balance: 100. Amounts: 200",
@@ -1425,7 +1430,7 @@ class TestEscrowClient(unittest.TestCase):
         amounts = [100]
         final_results_url = "invalid_url"
         final_results_hash = "test"
-        txId = 1
+        payout_id = "1"
         self.escrow.get_balance = MagicMock(return_value=100)
 
         with self.assertRaises(EscrowClientError) as cm:
@@ -1435,7 +1440,7 @@ class TestEscrowClient(unittest.TestCase):
                 amounts,
                 final_results_url,
                 final_results_hash,
-                txId,
+                payout_id,
             )
         self.assertEqual(
             f"Invalid final results URL: {final_results_url}", str(cm.exception)
@@ -1447,7 +1452,7 @@ class TestEscrowClient(unittest.TestCase):
         amounts = [100]
         final_results_url = "https://www.example.com/result"
         final_results_hash = ""
-        txId = 1
+        payout_id = "1"
         self.escrow.get_balance = MagicMock(return_value=100)
 
         with self.assertRaises(EscrowClientError) as cm:
@@ -1457,7 +1462,7 @@ class TestEscrowClient(unittest.TestCase):
                 amounts,
                 final_results_url,
                 final_results_hash,
-                txId,
+                payout_id,
             )
         self.assertEqual("Invalid empty final results hash", str(cm.exception))
 

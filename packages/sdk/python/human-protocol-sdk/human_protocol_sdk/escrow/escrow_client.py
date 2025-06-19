@@ -563,7 +563,7 @@ class EscrowClient:
         amounts: List[Decimal],
         final_results_url: str,
         final_results_hash: str,
-        txId: Decimal,
+        payout_id: str,
         force_complete: Optional[bool] = False,
         tx_options: Optional[TxParams] = None,
     ) -> None:
@@ -575,7 +575,7 @@ class EscrowClient:
         :param amounts: Array of amounts the recipients will receive
         :param final_results_url: Final results file URL
         :param final_results_hash: Final results file hash
-        :param txId: Serial number of the bulks
+        :param payout_id: Payout ID for the transaction
         :param force_complete: (Optional) Indicates if remaining balance should be transferred to the escrow creator
         :param tx_options: (Optional) Additional transaction parameters
 
@@ -640,7 +640,7 @@ class EscrowClient:
                     amounts,
                     final_results_url,
                     final_results_hash,
-                    txId,
+                    payout_id,
                     force_complete,
                 ),
                 EscrowClientError,
@@ -651,7 +651,11 @@ class EscrowClient:
                 self.w3,
                 "Bulk Payout",
                 self._get_escrow_contract(escrow_address).functions.bulkPayOut(
-                    recipients, amounts, final_results_url, final_results_hash, txId
+                    recipients,
+                    amounts,
+                    final_results_url,
+                    final_results_hash,
+                    payout_id,
                 ),
                 EscrowClientError,
                 tx_options,
@@ -664,7 +668,7 @@ class EscrowClient:
         amounts: List[Decimal],
         final_results_url: str,
         final_results_hash: str,
-        txId: Decimal,
+        payout_id: str,
         force_complete: Optional[bool] = False,
         tx_options: Optional[TxParams] = None,
     ) -> TxParams:
@@ -676,7 +680,8 @@ class EscrowClient:
         :param amounts: Array of amounts the recipients will receive
         :param final_results_url: Final results file URL
         :param final_results_hash: Final results file hash
-        :param txId: Serial number of the bulks
+        :param payout_id: Payout ID for the transaction
+        :param force_complete: (Optional) Indicates if remaining balance should be transferred to the escrow
         :param tx_options: (Optional) Additional transaction parameters
 
         :return: A dictionary containing the prepared transaction
@@ -751,7 +756,7 @@ class EscrowClient:
                 amounts,
                 final_results_url,
                 final_results_hash,
-                txId,
+                payout_id,
                 force_complete,
             )
             .build_transaction(tx_options or {})

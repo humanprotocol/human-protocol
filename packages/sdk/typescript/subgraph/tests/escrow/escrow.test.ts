@@ -882,7 +882,7 @@ describe('Escrow', () => {
       escrowAddressString
     );
     assert.fieldEquals('BulkPayoutEvent', id1, 'sender', operatorAddressString);
-    assert.fieldEquals('BulkPayoutEvent', id1, 'bulkPayoutTxId', '1');
+    assert.fieldEquals('BulkPayoutEvent', id1, 'payoutId', '1');
     assert.fieldEquals('BulkPayoutEvent', id1, 'bulkCount', '2');
 
     // EscrowStatusEvent
@@ -966,7 +966,7 @@ describe('Escrow', () => {
       escrowAddressString
     );
     assert.fieldEquals('BulkPayoutEvent', id2, 'sender', operatorAddressString);
-    assert.fieldEquals('BulkPayoutEvent', id2, 'bulkPayoutTxId', '3');
+    assert.fieldEquals('BulkPayoutEvent', id2, 'payoutId', '3');
     assert.fieldEquals('BulkPayoutEvent', id2, 'bulkCount', '4');
 
     // EscrowStatusEvent
@@ -1091,7 +1091,7 @@ describe('Escrow', () => {
       escrowAddressString
     );
     assert.fieldEquals('BulkPayoutEvent', id1, 'sender', operatorAddressString);
-    assert.fieldEquals('BulkPayoutEvent', id1, 'bulkPayoutTxId', '1');
+    assert.fieldEquals('BulkPayoutEvent', id1, 'payoutId', '1');
     assert.fieldEquals('BulkPayoutEvent', id1, 'bulkCount', '2');
 
     // EscrowStatusEvent
@@ -1177,7 +1177,7 @@ describe('Escrow', () => {
       escrowAddressString
     );
     assert.fieldEquals('BulkPayoutEvent', id2, 'sender', operatorAddressString);
-    assert.fieldEquals('BulkPayoutEvent', id2, 'bulkPayoutTxId', '3');
+    assert.fieldEquals('BulkPayoutEvent', id2, 'payoutId', '3');
     assert.fieldEquals('BulkPayoutEvent', id2, 'bulkCount', '4');
 
     // EscrowStatusEvent
@@ -1448,6 +1448,12 @@ describe('Escrow', () => {
   });
 
   test('Should properly handle Completed event', () => {
+    const escrow = Escrow.load(escrowAddress);
+    if (escrow) {
+      escrow.balance = BigInt.fromI32(1234);
+      escrow.save();
+    }
+
     const newCompleted = createCompletedEvent(
       operatorAddress,
       BigInt.fromI32(12)
@@ -1528,6 +1534,46 @@ describe('Escrow', () => {
       'to',
       escrowAddressString
     );
+
+    // InternalTransaction
+    const internalTxId = newCompleted.transaction.hash
+      .concatI32(newCompleted.logIndex.toI32())
+      .toHex();
+
+    assert.fieldEquals(
+      'InternalTransaction',
+      internalTxId,
+      'from',
+      escrowAddressString
+    );
+    assert.fieldEquals(
+      'InternalTransaction',
+      internalTxId,
+      'to',
+      launcherAddressString
+    );
+    assert.fieldEquals('InternalTransaction', internalTxId, 'value', '1234');
+    assert.fieldEquals(
+      'InternalTransaction',
+      internalTxId,
+      'method',
+      'transfer'
+    );
+    assert.fieldEquals(
+      'InternalTransaction',
+      internalTxId,
+      'escrow',
+      escrowAddressString
+    );
+    assert.fieldEquals(
+      'InternalTransaction',
+      internalTxId,
+      'transaction',
+      newCompleted.transaction.hash.toHex()
+    );
+
+    // Escrow balance should be 0 after completion
+    assert.fieldEquals('Escrow', escrowAddress.toHex(), 'balance', '0');
   });
 
   test('Should properly handle Withdraw event', () => {

@@ -121,7 +121,7 @@ Adds an array of addresses to the trusted handlers list.
   )
   ```
 
-#### bulk_payout(escrow_address, recipients, amounts, final_results_url, final_results_hash, txId, force_complete=False, tx_options=None)
+#### bulk_payout(escrow_address, recipients, amounts, final_results_url, final_results_hash, payout_id, force_complete=False, tx_options=None)
 
 Pays out the amounts specified to the workers and sets the URL of the final results file.
 
@@ -131,7 +131,7 @@ Pays out the amounts specified to the workers and sets the URL of the final resu
   * **amounts** (`List`[`Decimal`]) – Array of amounts the recipients will receive
   * **final_results_url** (`str`) – Final results file URL
   * **final_results_hash** (`str`) – Final results file hash
-  * **txId** (`Decimal`) – Serial number of the bulks
+  * **payout_id** (`str`) – Payout ID for the transaction
   * **force_complete** (`Optional`[`bool`]) – (Optional) Indicates if remaining balance should be transferred to the escrow creator
   * **tx_options** (`Optional`[`TxParams`]) – (Optional) Additional transaction parameters
 * **Return type:**
@@ -268,7 +268,7 @@ Sets the status of an escrow to completed.
   escrow_client.complete("0x62dD51230A30401C455c8398d06F85e4EaB6309f")
   ```
 
-#### create_bulk_payout_transaction(escrow_address, recipients, amounts, final_results_url, final_results_hash, txId, force_complete=False, tx_options=None)
+#### create_bulk_payout_transaction(escrow_address, recipients, amounts, final_results_url, final_results_hash, payout_id, force_complete=False, tx_options=None)
 
 Creates a prepared transaction for bulk payout without signing or sending it.
 
@@ -278,7 +278,8 @@ Creates a prepared transaction for bulk payout without signing or sending it.
   * **amounts** (`List`[`Decimal`]) – Array of amounts the recipients will receive
   * **final_results_url** (`str`) – Final results file URL
   * **final_results_hash** (`str`) – Final results file hash
-  * **txId** (`Decimal`) – Serial number of the bulks
+  * **payout_id** (`str`) – Payout ID for the transaction
+  * **force_complete** (`Optional`[`bool`]) – (Optional) Indicates if remaining balance should be transferred to the escrow
   * **tx_options** (`Optional`[`TxParams`]) – (Optional) Additional transaction parameters
 * **Return type:**
   `TxParams`
