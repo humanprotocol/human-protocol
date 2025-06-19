@@ -1,19 +1,10 @@
 import { faker } from '@faker-js/faker';
 import {
   PaymentCurrency,
-  PaymentStatus,
   StripePaymentStatus,
   VatType,
-} from '../../common/enums/payment';
-import {
-  CardSetup,
-  CustomerData,
-  Invoice,
-  PaymentData,
-  PaymentMethod,
-  TaxId,
-} from './payment.interface';
-import { AddressDto, BillingInfoDto } from './payment.dto';
+} from '../../../../common/enums/payment';
+import { AddressDto, BillingInfoDto } from '../../payment.dto';
 
 export const createMockSetupIntent = () => ({
   id: faker.string.alphanumeric(24),
@@ -92,74 +83,6 @@ export const createMockTaxId = (overrides: Partial<any> = {}) => ({
   type: faker.helpers.arrayElement(Object.values(VatType)),
   value: faker.string.alphanumeric(10),
   created: faker.number.int(),
-  ...overrides,
-});
-
-// Fixtures for our internal interfaces
-export const createMockPaymentData = (
-  overrides: Partial<PaymentData> = {},
-): PaymentData => ({
-  id: faker.string.alphanumeric(24),
-  clientSecret: faker.string.alphanumeric(32),
-  status: PaymentStatus.FAILED,
-  amount: faker.number.int({ min: 1000, max: 100000 }),
-  amountReceived: 0,
-  currency: PaymentCurrency.USD,
-  customer: faker.string.alphanumeric(24),
-  latestCharge: faker.string.alphanumeric(24),
-  ...overrides,
-});
-
-export const createMockPaymentMethodData = (
-  overrides: Partial<PaymentMethod> = {},
-): PaymentMethod => ({
-  id: faker.string.alphanumeric(24),
-  brand: faker.helpers.arrayElement(['visa', 'mastercard', 'amex']),
-  last4: faker.string.numeric(4),
-  expMonth: faker.number.int({ min: 1, max: 12 }),
-  expYear: faker.number.int({ min: 2024, max: 2030 }),
-  default: false,
-  ...overrides,
-});
-
-export const createMockCardSetup = (
-  overrides: Partial<CardSetup> = {},
-): CardSetup => ({
-  customerId: faker.string.alphanumeric(24),
-  paymentMethod: faker.string.alphanumeric(24),
-  ...overrides,
-});
-
-export const createMockInvoiceData = (
-  overrides: Partial<Invoice> = {},
-): Invoice => ({
-  id: faker.string.alphanumeric(24),
-  paymentId: faker.string.alphanumeric(24),
-  status: 'draft',
-  amountDue: faker.number.int({ min: 1000, max: 100000 }),
-  currency: PaymentCurrency.USD,
-  ...overrides,
-});
-
-export const createMockCustomerData = (
-  overrides: Partial<CustomerData> = {},
-): CustomerData => ({
-  email: faker.internet.email(),
-  name: faker.person.fullName(),
-  address: {
-    line1: faker.location.streetAddress(),
-    city: faker.location.city(),
-    country: faker.location.countryCode(),
-    postalCode: faker.location.zipCode(),
-  },
-  defaultPaymentMethod: faker.string.alphanumeric(24),
-  ...overrides,
-});
-
-export const createMockTaxIdData = (overrides: Partial<TaxId> = {}): TaxId => ({
-  id: faker.string.alphanumeric(24),
-  type: faker.helpers.arrayElement(Object.values(VatType)),
-  value: faker.string.alphanumeric(10),
   ...overrides,
 });
 

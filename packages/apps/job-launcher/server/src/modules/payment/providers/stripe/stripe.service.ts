@@ -104,7 +104,7 @@ export class StripeService extends PaymentProvider {
       status: invoice.status?.toString(),
       amountDue: invoice.amount_due,
       currency: invoice.currency,
-    } as Invoice;
+    };
   }
 
   async assignPaymentMethod(
@@ -288,13 +288,17 @@ export class StripeService extends PaymentProvider {
     const paymentMethod =
       await this.stripe.paymentMethods.retrieve(paymentMethodId);
 
+    const defaultPaymentMethod = await this.getDefaultPaymentMethod(
+      paymentMethod.customer as string,
+    );
+
     return {
       id: paymentMethod.id,
       brand: paymentMethod.card?.brand as string,
       last4: paymentMethod.card?.last4 as string,
       expMonth: paymentMethod.card?.exp_month as number,
       expYear: paymentMethod.card?.exp_year as number,
-      default: false, // We don't know if it's default without customer context
+      default: defaultPaymentMethod === paymentMethod.id,
     };
   }
 

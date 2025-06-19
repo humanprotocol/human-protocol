@@ -453,8 +453,7 @@ export class PaymentService {
     // Check if the payment method is the default one and in use for the user
     if (
       user.paymentProviderId &&
-      paymentMethod.id ===
-        (await this.getDefaultPaymentMethod(user.paymentProviderId)) &&
+      paymentMethod.default &&
       (await this.isPaymentMethodInUse(user.id))
     ) {
       throw new ConflictError(ErrorPayment.PaymentMethodInUse);

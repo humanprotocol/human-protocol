@@ -1030,6 +1030,7 @@ describe('PaymentService', () => {
 
       paymentProvider.retrievePaymentMethod.mockResolvedValue({
         id: 'pm_123',
+        default: true,
       } as any);
       paymentProvider.getDefaultPaymentMethod.mockResolvedValue('pm_123');
       jest
