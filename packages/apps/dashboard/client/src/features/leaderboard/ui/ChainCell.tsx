@@ -4,7 +4,7 @@ import { ChainId } from '@human-protocol/sdk';
 import { Typography } from '@mui/material';
 
 import { NetworkIcon } from '@/shared/ui/NetworkIcon';
-import { getNetwork } from '@/utils/config/networks';
+import { getNetwork } from '@/utils/networks';
 
 type Props = {
   chainId: ChainId;

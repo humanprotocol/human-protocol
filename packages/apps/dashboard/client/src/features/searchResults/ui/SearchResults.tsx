@@ -10,7 +10,7 @@ import EscrowAddressIcon from '@/shared/ui/icons/EscrowAddressIcon';
 import WalletIcon from '@/shared/ui/icons/WalletIcon';
 import Loader from '@/shared/ui/Loader';
 import ShadowIcon from '@/shared/ui/ShadowIcon';
-import { getNetwork } from '@/utils/config/networks';
+import { getNetwork } from '@/utils/networks';
 
 import useAddressDetails from '../api/useAddressDetails';
 import { AddressDetails } from '../model/addressDetailsSchema';

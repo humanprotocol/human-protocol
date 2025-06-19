@@ -5,7 +5,7 @@ import { z } from 'zod';
 
 import { apiPaths } from '@/services/api-paths';
 import { httpService } from '@/services/http-service';
-import { networks as allNetworks } from '@/utils/config/networks';
+import { networks as allNetworks } from '@/utils/networks';
 
 const enabledChainsSchema = z.array(z.number());
 
