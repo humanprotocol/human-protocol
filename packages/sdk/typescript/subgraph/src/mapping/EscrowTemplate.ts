@@ -647,10 +647,12 @@ export function handleCompleted(event: Completed): void {
       null,
       Address.fromBytes(escrowEntity.address)
     );
-    if (escrowEntity.balance && escrowEntity.balance.gt(ZERO_BI)) {
-      const internalTransaction = new InternalTransaction(
-        event.transaction.hash.concatI32(event.logIndex.toI32())
-      );
+    if (
+      escrowEntity.balance &&
+      escrowEntity.balance.gt(ZERO_BI) &&
+      escrowEntity.token != HMT_ADDRESS
+    ) {
+      const internalTransaction = new InternalTransaction(toEventId(event));
       internalTransaction.from = escrowEntity.address;
       internalTransaction.to = escrowEntity.launcher;
       internalTransaction.value = escrowEntity.balance;
