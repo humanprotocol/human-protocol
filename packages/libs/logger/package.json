@@ -1,0 +1,39 @@
+{
+  "name": "@human-protocol/logger",
+  "version": "1.0.0",
+  "description": "Unified logging package for Human Protocol services and oracles",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint \"src/**/*.ts\" --fix"
+  },
+  "dependencies": {
+    "pino": "^9.6.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "@types/node": "^22.10.5",
+    "jest": "^29.7.0",
+    "pino-pretty": "^13.0.0",
+    "ts-jest": "^29.2.5",
+    "typescript": "^5.6.3"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "^10.0.0"
+  },
+  "files": [
+    "dist/**/*"
+  ],
+  "keywords": [
+    "logging",
+    "pino",
+    "nestjs",
+    "human-protocol"
+  ],
+  "author": "Human Protocol",
+  "license": "MIT"
+}
