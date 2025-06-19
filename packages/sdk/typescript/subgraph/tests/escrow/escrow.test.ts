@@ -1534,46 +1534,6 @@ describe('Escrow', () => {
       'to',
       escrowAddressString
     );
-
-    // InternalTransaction
-    const internalTxId = newCompleted.transaction.hash
-      .concatI32(newCompleted.logIndex.toI32())
-      .toHex();
-
-    assert.fieldEquals(
-      'InternalTransaction',
-      internalTxId,
-      'from',
-      escrowAddressString
-    );
-    assert.fieldEquals(
-      'InternalTransaction',
-      internalTxId,
-      'to',
-      launcherAddressString
-    );
-    assert.fieldEquals('InternalTransaction', internalTxId, 'value', '1234');
-    assert.fieldEquals(
-      'InternalTransaction',
-      internalTxId,
-      'method',
-      'transfer'
-    );
-    assert.fieldEquals(
-      'InternalTransaction',
-      internalTxId,
-      'escrow',
-      escrowAddressString
-    );
-    assert.fieldEquals(
-      'InternalTransaction',
-      internalTxId,
-      'transaction',
-      newCompleted.transaction.hash.toHex()
-    );
-
-    // Escrow balance should be 0 after completion
-    assert.fieldEquals('Escrow', escrowAddress.toHex(), 'balance', '0');
   });
 
   test('Should properly handle Withdraw event', () => {

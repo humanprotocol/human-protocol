@@ -608,22 +608,6 @@ export function handleCompleted(event: Completed): void {
   // Update escrow entity
   const escrowEntity = Escrow.load(dataSource.address());
   if (escrowEntity) {
-    if (escrowEntity.balance && escrowEntity.balance.gt(ZERO_BI)) {
-      const internalTransaction = new InternalTransaction(
-        event.transaction.hash.concatI32(event.logIndex.toI32())
-      );
-      internalTransaction.from = escrowEntity.address;
-      internalTransaction.to = escrowEntity.launcher;
-      internalTransaction.value = escrowEntity.balance;
-      internalTransaction.transaction = event.transaction.hash;
-      internalTransaction.method = 'transfer';
-      internalTransaction.escrow = escrowEntity.address;
-      internalTransaction.token = escrowEntity.token;
-      internalTransaction.save();
-
-      escrowEntity.balance = ZERO_BI;
-    }
-
     escrowEntity.status = 'Complete';
     escrowEntity.save();
     eventEntity.launcher = escrowEntity.launcher;
