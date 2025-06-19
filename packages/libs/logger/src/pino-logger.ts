@@ -60,4 +60,4 @@ export function createLogger(
   });
 
   return new WrappedPino(pinoLogger, { ...bindings, name });
-} 
+}

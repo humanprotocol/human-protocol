@@ -1,4 +1,4 @@
-import { createLogger, WrappedPino } from './pino-logger';
+import { createLogger } from './pino-logger';
 import NestLogger from './nest-logger';
 import { LogLevel } from './types';
 

@@ -110,4 +110,4 @@ abstract class LoggerWrapper implements Logger {
   protected abstract callLogger(level: LogLevel, log: LogRecord): void;
 }
 
-export default LoggerWrapper; 
+export default LoggerWrapper;

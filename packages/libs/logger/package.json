@@ -11,6 +11,10 @@
     "test:watch": "jest --watch",
     "lint": "eslint \"src/**/*.ts\" --fix"
   },
+  "repository": {
+    "url": "https://github.com/humanprotocol/human-protocol.git",
+    "directory": "packages/libs/logger"
+  },
   "dependencies": {
     "pino": "^9.6.0"
   },

@@ -90,4 +90,4 @@ class NestLogger implements LoggerService {
   }
 }
 
-export default NestLogger; 
+export default NestLogger;
