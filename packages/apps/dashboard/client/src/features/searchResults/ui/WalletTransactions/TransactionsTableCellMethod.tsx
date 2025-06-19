@@ -70,7 +70,7 @@ const methodAttributes: Record<
   },
 };
 
-export const TransactionTableCellMethod = ({ method }: { method: string }) => {
+const TransactionsTableCellMethod = ({ method }: { method: string }) => {
   const theme = useTheme();
   const currentStatusColors = methodAttributes[method]?.color || {
     text: 'primary.main',
@@ -97,3 +97,5 @@ export const TransactionTableCellMethod = ({ method }: { method: string }) => {
     />
   );
 };
+
+export default TransactionsTableCellMethod;

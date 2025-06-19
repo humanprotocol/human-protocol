@@ -27,7 +27,7 @@ const InfoTooltip = ({ title }: { title: string }) => (
   </CustomTooltip>
 );
 
-export const TransactionsTableHead = () => {
+const TransactionsTableHead = () => {
   return (
     <TableHead
       sx={{
@@ -66,3 +66,5 @@ export const TransactionsTableHead = () => {
     </TableHead>
   );
 };
+
+export default TransactionsTableHead;

@@ -2,10 +2,10 @@ import { FC } from 'react';
 
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
+import SearchResultsPage from '@/pages/_searchResults';
 import GraphPage from '@/pages/graph';
 import HomePage from '@/pages/home';
 import LeaderboardPage from '@/pages/leaderboard';
-import SearchResultsPage from '@/pages/SearchResults';
 
 import { ROUTES } from './config/routes';
 

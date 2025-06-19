@@ -1,11 +1,9 @@
+import { FC, PropsWithChildren } from 'react';
+
 import { Grid } from '@mui/material';
 import MuiTableBody from '@mui/material/TableBody';
 
-export const EscrowsTableBodyContainer = ({
-  children,
-}: {
-  children: JSX.Element;
-}) => {
+const EscrowsTableBodyContainer: FC<PropsWithChildren> = ({ children }) => {
   return (
     <MuiTableBody sx={{ position: 'relative', height: ' 40vh' }}>
       <Grid
@@ -26,3 +24,5 @@ export const EscrowsTableBodyContainer = ({
     </MuiTableBody>
   );
 };
+
+export default EscrowsTableBodyContainer;

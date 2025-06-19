@@ -17,9 +17,10 @@ import ReputationScore from '@/features/searchResults/ui/ReputationScore';
 import StakeInfo from '@/features/searchResults/ui/StakeInfo';
 import TitleSectionWrapper from '@/features/searchResults/ui/TitleSectionWrapper';
 import { env } from '@/helpers/env';
-import { RoleDetailsEscrowsTable } from '@/pages/SearchResults/RoleDetails/RoleDetailsEscrows/RoleDetailsEscrowsTable';
 import EntityIcon from '@/shared/ui/EntityIcon';
 import SectionWrapper from '@/shared/ui/SectionWrapper';
+
+import EscrowsTable from './OperatorEscrows/EscrowsTable';
 
 type RoleInfoProps = {
   title: string;
@@ -105,7 +106,7 @@ const renderRoleDetailsInfo = (role: string | null) => {
   );
 };
 
-const RoleDetails = ({ data }: { data: AddressDetailsOperator }) => {
+const OperatorAddress = ({ data }: { data: AddressDetailsOperator }) => {
   const {
     balance,
     role,
@@ -206,8 +207,8 @@ const RoleDetails = ({ data }: { data: AddressDetailsOperator }) => {
         amountWithdrawable={amountWithdrawable}
       />
       <KVStore />
-      <RoleDetailsEscrowsTable role={role} />
+      <EscrowsTable role={role} />
     </>
   );
 };
-export default RoleDetails;
+export default OperatorAddress;

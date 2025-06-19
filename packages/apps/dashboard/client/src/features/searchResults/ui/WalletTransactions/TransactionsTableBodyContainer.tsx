@@ -1,10 +1,10 @@
+import { FC, PropsWithChildren } from 'react';
+
 import { Grid } from '@mui/material';
 import MuiTableBody from '@mui/material/TableBody';
 
-export const TransactionsTableBodyContainer = ({
+const TransactionsTableBodyContainer: FC<PropsWithChildren> = ({
   children,
-}: {
-  children: JSX.Element;
 }) => {
   return (
     <MuiTableBody sx={{ position: 'relative', height: ' 40vh' }}>
@@ -26,3 +26,5 @@ export const TransactionsTableBodyContainer = ({
     </MuiTableBody>
   );
 };
+
+export default TransactionsTableBodyContainer;

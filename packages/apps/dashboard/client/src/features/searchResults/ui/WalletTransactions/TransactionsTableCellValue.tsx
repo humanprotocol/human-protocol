@@ -16,7 +16,7 @@ const InfoTooltip = ({ title }: { title: string }) => (
   </CustomTooltip>
 );
 
-export const TransactionTableCellValue = ({
+const TransactionsTableCellValue = ({
   value,
   method,
 }: {
@@ -45,3 +45,5 @@ export const TransactionTableCellValue = ({
     </Typography>
   );
 };
+
+export default TransactionsTableCellValue;

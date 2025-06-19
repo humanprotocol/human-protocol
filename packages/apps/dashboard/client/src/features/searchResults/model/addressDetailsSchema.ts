@@ -64,7 +64,7 @@ const escrowSchema = z.object({
   finalResultsUrl: z.string().nullable(),
 });
 
-export type AddressDetailsEscrowSchema = z.infer<typeof escrowSchema>;
+export type AddressDetailsEscrow = z.infer<typeof escrowSchema>;
 
 const operatorSchema = z.object({
   chainId: z.number(),

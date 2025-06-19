@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { FC, useState } from 'react';
 
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
@@ -10,38 +10,21 @@ import MuiTableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
 
-import { TransactionTableCellMethod } from '@/pages/SearchResults/WalletAddress/WalletAddressTransactions/cells/TransactionTableCellMethod';
-import { TransactionTableCellValue } from '@/pages/SearchResults/WalletAddress/WalletAddressTransactions/cells/TransactionTableCellValue';
-import { TransactionsTableBodyContainer } from '@/pages/SearchResults/WalletAddress/WalletAddressTransactions/tableComponents/TransactionsTableBodyContainer';
-import { useTransactionDetails } from '@/services/api/use-transaction-details';
+import { PaginatedTransactionDetails } from '@/features/searchResults/model/transactionDetailsSchema';
 import { handleErrorMessage } from '@/services/handle-error-message';
-import useGlobalFiltersStore from '@/shared/store/useGlobalFiltersStore';
 import AbbreviateClipboard from '@/shared/ui/AbbreviateClipboard';
-import { useTransactionDetailsDto } from '@/utils/hooks/use-transactions-details-dto';
 
-export const TransactionsTableBody: React.FC = () => {
-  const { chainId, address } = useGlobalFiltersStore();
-  const { data, isPending, isError, error } = useTransactionDetails(
-    chainId,
-    address
-  );
-  const {
-    setLastPageIndex,
-    setPrevPage,
-    pagination: { page },
-  } = useTransactionDetailsDto();
+import TransactionsTableBodyContainer from './TransactionsTableBodyContainer';
+import TransactionsTableCellMethod from './TransactionsTableCellMethod';
+import TransactionsTableCellValue from './TransactionsTableCellValue';
 
-  useEffect(() => {
-    if (data?.results.length === 0) {
-      setLastPageIndex(page);
-      setPrevPage();
-    }
-  }, [data?.results, page, setLastPageIndex, setPrevPage]);
+type Props = {
+  data: PaginatedTransactionDetails | undefined;
+  isLoading: boolean;
+  error: Error | null;
+};
 
-  useEffect(() => {
-    setLastPageIndex(undefined);
-  }, [address, chainId, setLastPageIndex]);
-
+const TransactionsTableBody: FC<Props> = ({ data, isLoading, error }) => {
   const [expandedRows, setExpandedRows] = useState<Record<number, boolean>>({});
 
   const toggleRow = (idx: number) => {
@@ -51,7 +34,7 @@ export const TransactionsTableBody: React.FC = () => {
     }));
   };
 
-  if (isPending) {
+  if (isLoading) {
     return (
       <TransactionsTableBodyContainer>
         <CircularProgress />
@@ -59,7 +42,7 @@ export const TransactionsTableBody: React.FC = () => {
     );
   }
 
-  if (isError) {
+  if (error) {
     return (
       <TransactionsTableBodyContainer>
         <div>{handleErrorMessage(error)}</div>
@@ -67,7 +50,7 @@ export const TransactionsTableBody: React.FC = () => {
     );
   }
 
-  if (!data.results.length) {
+  if (!data?.results.length) {
     return (
       <TransactionsTableBodyContainer>
         <div>No data</div>
@@ -104,7 +87,7 @@ export const TransactionsTableBody: React.FC = () => {
               </Box>
             </TableCell>
             <TableCell>
-              <TransactionTableCellMethod method={elem.method} />
+              <TransactionsTableCellMethod method={elem.method} />
             </TableCell>
             <TableCell>
               <AbbreviateClipboard
@@ -123,7 +106,7 @@ export const TransactionsTableBody: React.FC = () => {
             </TableCell>
             <TableCell>{elem.block}</TableCell>
             <TableCell>
-              <TransactionTableCellValue
+              <TransactionsTableCellValue
                 value={elem.value}
                 method={elem.method}
               />
@@ -140,7 +123,7 @@ export const TransactionsTableBody: React.FC = () => {
             >
               <TableCell></TableCell>
               <TableCell>
-                <TransactionTableCellMethod method={internalTx.method} />
+                <TransactionsTableCellMethod method={internalTx.method} />
               </TableCell>
               <TableCell>
                 <AbbreviateClipboard
@@ -159,7 +142,7 @@ export const TransactionsTableBody: React.FC = () => {
               </TableCell>
               <TableCell></TableCell>
               <TableCell>
-                <TransactionTableCellValue
+                <TransactionsTableCellValue
                   value={internalTx.value}
                   method={internalTx.method}
                 />
@@ -171,3 +154,5 @@ export const TransactionsTableBody: React.FC = () => {
     </MuiTableBody>
   );
 };
+
+export default TransactionsTableBody;

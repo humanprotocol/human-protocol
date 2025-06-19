@@ -1,4 +1,4 @@
-import { FC, useEffect } from 'react';
+import { FC } from 'react';
 
 import { TableRow } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -6,41 +6,22 @@ import Link from '@mui/material/Link';
 import MuiTableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 
-import { EscrowsTableBodyContainer } from '@/pages/SearchResults/RoleDetails/RoleDetailsEscrows/tableComponents/EscrowsTableBodyContainer';
-import { useEscrowDetails } from '@/services/api/use-escrows-details';
+import { PaginatedEscrowDetails } from '@/features/searchResults/model/escrowDetailsSchema';
 import { handleErrorMessage } from '@/services/handle-error-message';
 import useGlobalFiltersStore from '@/shared/store/useGlobalFiltersStore';
-import { useEscrowDetailsDto } from '@/utils/hooks/use-escrows-details-dto';
+
+import EscrowsTableBodyContainer from './EscrowsTableBodyContainer';
 
 type Props = {
-  role: string | null;
+  data: PaginatedEscrowDetails | undefined;
+  isLoading: boolean;
+  error: Error | null;
 };
 
-export const EscrowsTableBody: FC<Props> = ({ role }) => {
-  const { chainId, address } = useGlobalFiltersStore();
-  const { data, isPending, isError, error } = useEscrowDetails(
-    role,
-    chainId,
-    address
-  );
-  const {
-    setLastPageIndex,
-    setPrevPage,
-    pagination: { page },
-  } = useEscrowDetailsDto();
+const EscrowsTableBody: FC<Props> = ({ data, isLoading, error }) => {
+  const { chainId } = useGlobalFiltersStore();
 
-  useEffect(() => {
-    if (data?.results.length === 0) {
-      setLastPageIndex(page);
-      setPrevPage();
-    }
-  }, [data?.results, page, setLastPageIndex, setPrevPage]);
-
-  useEffect(() => {
-    setLastPageIndex(undefined);
-  }, [address, chainId, setLastPageIndex]);
-
-  if (isPending) {
+  if (isLoading) {
     return (
       <EscrowsTableBodyContainer>
         <CircularProgress />
@@ -48,7 +29,7 @@ export const EscrowsTableBody: FC<Props> = ({ role }) => {
     );
   }
 
-  if (isError) {
+  if (error) {
     return (
       <EscrowsTableBodyContainer>
         <div>{handleErrorMessage(error)}</div>
@@ -56,7 +37,7 @@ export const EscrowsTableBody: FC<Props> = ({ role }) => {
     );
   }
 
-  if (!data.results.length) {
+  if (!data?.results.length) {
     return (
       <EscrowsTableBodyContainer>
         <div>No escrows launched yet</div>
@@ -86,3 +67,5 @@ export const EscrowsTableBody: FC<Props> = ({ role }) => {
     </MuiTableBody>
   );
 };
+
+export default EscrowsTableBody;

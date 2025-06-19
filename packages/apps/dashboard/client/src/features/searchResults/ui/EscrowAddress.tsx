@@ -4,13 +4,13 @@ import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
-import { AddressDetailsEscrowSchema } from '@/features/searchResults/model/addressDetailsSchema';
+import { AddressDetailsEscrow } from '@/features/searchResults/model/addressDetailsSchema';
 import HmtBalance from '@/features/searchResults/ui/HmtBalance';
 import TitleSectionWrapper from '@/features/searchResults/ui/TitleSectionWrapper';
 import SectionWrapper from '@/shared/ui/SectionWrapper';
 
 type Props = {
-  data: AddressDetailsEscrowSchema;
+  data: AddressDetailsEscrow;
 };
 
 const EscrowAddress: FC<Props> = ({ data }) => {

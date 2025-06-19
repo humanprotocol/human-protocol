@@ -4,10 +4,6 @@ import { Stack } from '@mui/material';
 import { AxiosError } from 'axios';
 import { useLocation, useParams } from 'react-router-dom';
 
-import EscrowAddress from '@/pages/SearchResults/EscrowAddress';
-import RoleDetails from '@/pages/SearchResults/RoleDetails/RoleDetails';
-import WalletAddress from '@/pages/SearchResults/WalletAddress';
-import { WalletAddressTransactionsTable } from '@/pages/SearchResults/WalletAddress/WalletAddressTransactions/WalletAddressTransactionsTable';
 import { handleErrorMessage } from '@/services/handle-error-message';
 import useGlobalFiltersStore from '@/shared/store/useGlobalFiltersStore';
 import EscrowAddressIcon from '@/shared/ui/icons/EscrowAddressIcon';
@@ -20,7 +16,11 @@ import useAddressDetails from '../api/useAddressDetails';
 import { AddressDetails } from '../model/addressDetailsSchema';
 
 import Clipboard from './Clipboard';
+import EscrowAddress from './EscrowAddress';
 import NothingFound from './NothingFound';
+import OperatorAddress from './OperatorAddress';
+import WalletAddress from './WalletAddress';
+import WalletTransactionsTable from './WalletTransactionsTable';
 
 enum ParamsStatus {
   LOADING = 'loading',
@@ -158,11 +158,11 @@ const SearchResults = () => {
       </Stack>
 
       {data.operator && data.operator.role ? (
-        <RoleDetails data={data.operator} />
+        <OperatorAddress data={data.operator} />
       ) : null}
       {walletData ? <WalletAddress data={walletData} /> : null}
       {data.escrow && <EscrowAddress data={data.escrow} />}
-      {showTransactions && <WalletAddressTransactionsTable />}
+      {showTransactions && <WalletTransactionsTable />}
     </>
   );
 };

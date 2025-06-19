@@ -12,5 +12,4 @@ const SearchResultsPage = () => {
     </PageWrapper>
   );
 };
-
 export default SearchResultsPage;
