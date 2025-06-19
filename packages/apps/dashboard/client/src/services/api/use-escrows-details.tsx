@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
 
-import { AddressDetailsOperator } from '@/services/api/use-address-details';
+import { AddressDetailsOperator } from '@/features/searchResults/model/addressDetailsSchema';
 import { validateResponse } from '@/services/validate-response';
 import { useEscrowDetailsDto } from '@/utils/hooks/use-escrows-details-dto';
 

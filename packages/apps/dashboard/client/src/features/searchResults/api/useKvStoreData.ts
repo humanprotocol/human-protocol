@@ -1,18 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import { z } from 'zod';
 
 import { apiPaths } from '@/services/api-paths';
 import { httpService } from '@/services/http-service';
 import { validateResponse } from '@/services/validate-response';
 
-const kvstoreDataSchema = z.array(
-  z.object({
-    key: z.string(),
-    value: z.string(),
-  })
-);
-
-export type KvstoreData = z.infer<typeof kvstoreDataSchema>;
+import { kvstoreDataSchema } from '../model/kvStoreDataSchema';
 
 const useKvstoreData = (chainId: number, address: string) => {
   return useQuery({

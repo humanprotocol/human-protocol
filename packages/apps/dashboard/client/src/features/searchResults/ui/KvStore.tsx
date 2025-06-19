@@ -6,9 +6,10 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 
-import useKvstoreData from '@/services/api/use-kvstore-data';
 import useGlobalFiltersStore from '@/shared/store/useGlobalFiltersStore';
 import SectionWrapper from '@/shared/ui/SectionWrapper';
+
+import useKvstoreData from '../api/useKvStoreData';
 
 const KVStore = () => {
   const { chainId, address } = useGlobalFiltersStore();

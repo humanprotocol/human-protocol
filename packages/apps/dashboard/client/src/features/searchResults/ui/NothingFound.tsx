@@ -1,9 +1,7 @@
-import { FC } from 'react';
-
 import Link from '@mui/material/Link';
 import Typography from '@mui/material/Typography';
 
-const NothingFound: FC = () => {
+const NothingFound = () => {
   return (
     <>
       <Typography variant="h2">Nothing found :(</Typography>

@@ -1,3 +1,5 @@
+import { FC } from 'react';
+
 import { Role } from '@human-protocol/sdk';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
@@ -7,26 +9,25 @@ import ListItem from '@mui/material/ListItem';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
-import TitleSectionWrapper from '@/components/SearchResults/TitleSectionWrapper';
+import { AddressDetailsOperator } from '@/features/searchResults/model/addressDetailsSchema';
+import HmtBalance from '@/features/searchResults/ui/HmtBalance';
+import HmtPrice from '@/features/searchResults/ui/HmtPrice';
+import KVStore from '@/features/searchResults/ui/KvStore';
+import ReputationScore from '@/features/searchResults/ui/ReputationScore';
+import StakeInfo from '@/features/searchResults/ui/StakeInfo';
+import TitleSectionWrapper from '@/features/searchResults/ui/TitleSectionWrapper';
 import { env } from '@/helpers/env';
 import { RoleDetailsEscrowsTable } from '@/pages/SearchResults/RoleDetails/RoleDetailsEscrows/RoleDetailsEscrowsTable';
-import { AddressDetailsOperator } from '@/services/api/use-address-details';
 import EntityIcon from '@/shared/ui/EntityIcon';
 import SectionWrapper from '@/shared/ui/SectionWrapper';
 
-import HmtBalance from '../HmtBalance';
-import HmtPrice from '../HmtPrice';
-import KVStore from '../KVStore';
-import ReputationScore from '../ReputationScore';
-import StakeInfo from '../StakeInfo';
-
-interface RoleInfoProps {
+type RoleInfoProps = {
   title: string;
   points: string[];
   role: string;
-}
+};
 
-const RoleInformation = ({ title, points, role }: RoleInfoProps) => {
+const RoleInformation: FC<RoleInfoProps> = ({ title, points, role }) => {
   return (
     <Stack direction="column">
       <EntityIcon role={role} />

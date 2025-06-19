@@ -4,19 +4,18 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { NumericFormat } from 'react-number-format';
 
-import TitleSectionWrapper from '@/components/SearchResults';
 import {
   AddressDetailsOperator,
   AddressDetailsWallet,
-} from '@/services/api/use-address-details';
+} from '@/features/searchResults/model/addressDetailsSchema';
+import HmtBalance from '@/features/searchResults/ui/HmtBalance';
+import HmtPrice from '@/features/searchResults/ui/HmtPrice';
+import KVStore from '@/features/searchResults/ui/KvStore';
+import ReputationScore from '@/features/searchResults/ui/ReputationScore';
+import StakeInfo from '@/features/searchResults/ui/StakeInfo';
+import TitleSectionWrapper from '@/features/searchResults/ui/TitleSectionWrapper';
 import { useIsMobile } from '@/shared/hooks/useBreakpoints';
 import SectionWrapper from '@/shared/ui/SectionWrapper';
-
-import HmtBalance from '../HmtBalance';
-import HmtPrice from '../HmtPrice';
-import KVStore from '../KVStore';
-import ReputationScore from '../ReputationScore';
-import StakeInfo from '../StakeInfo';
 
 type Props = {
   data: AddressDetailsWallet | AddressDetailsOperator;

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { FC, useState } from 'react';
 
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import Card from '@mui/material/Card';
@@ -8,11 +8,11 @@ import Typography from '@mui/material/Typography';
 
 import CustomTooltip from '@/shared/ui/CustomTooltip';
 
-interface ClipboardProps {
+type ClipboardProps = {
   value: string;
-}
+};
 
-const Clipboard = ({ value }: ClipboardProps) => {
+const Clipboard: FC<ClipboardProps> = ({ value }) => {
   const [tooltipOpen, setTooltipOpen] = useState(false);
 
   return (

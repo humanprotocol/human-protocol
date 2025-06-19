@@ -11,7 +11,7 @@ type ReputationAttributes = {
   colors: { title: string; border: string };
 };
 
-export const ReputationScore = ({ reputation }: Props) => {
+const ReputationScore = ({ reputation }: Props) => {
   const theme = useTheme();
 
   const reputationAttributes: Record<Reputation, ReputationAttributes> = {

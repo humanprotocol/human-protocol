@@ -1,15 +1,20 @@
+import { FC } from 'react';
+
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
-import TitleSectionWrapper from '@/components/SearchResults';
-import { AddressDetailsEscrowSchema } from '@/services/api/use-address-details';
+import { AddressDetailsEscrowSchema } from '@/features/searchResults/model/addressDetailsSchema';
+import HmtBalance from '@/features/searchResults/ui/HmtBalance';
+import TitleSectionWrapper from '@/features/searchResults/ui/TitleSectionWrapper';
 import SectionWrapper from '@/shared/ui/SectionWrapper';
 
-import HmtBalance from '../HmtBalance';
+type Props = {
+  data: AddressDetailsEscrowSchema;
+};
 
-const EscrowAddress = ({
-  data: {
+const EscrowAddress: FC<Props> = ({ data }) => {
+  const {
     token,
     balance,
     factoryAddress,
@@ -20,10 +25,7 @@ const EscrowAddress = ({
     exchangeOracle,
     recordingOracle,
     reputationOracle,
-  },
-}: {
-  data: AddressDetailsEscrowSchema;
-}) => {
+  } = data;
   return (
     <SectionWrapper>
       <Stack gap={4}>

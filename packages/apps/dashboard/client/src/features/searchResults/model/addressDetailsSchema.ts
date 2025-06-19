@@ -1,12 +1,7 @@
 import { Role } from '@human-protocol/sdk';
-import { useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
 
 import { reputationSchema } from '@/features/leaderboard/model/leaderboardSchema';
-
-import { apiPaths } from '../api-paths';
-import { httpService } from '../http-service';
-import { validateResponse } from '../validate-response';
 
 const transformOptionalTokenAmount = (
   value: string | undefined | null,
@@ -100,32 +95,10 @@ const operatorSchema = z.object({
 
 export type AddressDetailsOperator = z.infer<typeof operatorSchema>;
 
-const addressDetailsResponseSchema = z.object({
+export const addressDetailsResponseSchema = z.object({
   wallet: z.optional(walletSchema),
   escrow: z.optional(escrowSchema),
   operator: z.optional(operatorSchema),
 });
 
 export type AddressDetails = z.infer<typeof addressDetailsResponseSchema>;
-
-const useAddressDetails = (chainId: number, address: string) => {
-  return useQuery({
-    queryFn: async () => {
-      const { data } = await httpService.get(
-        `${apiPaths.addressDetails.path}/${address}`,
-        { params: { chainId: chainId || -1 } }
-      );
-
-      const validResponse = validateResponse(
-        data,
-        addressDetailsResponseSchema
-      );
-
-      return validResponse;
-    },
-    queryKey: ['useAddressDetails', address, chainId],
-    enabled: !!chainId && !!address,
-  });
-};
-
-export default useAddressDetails;

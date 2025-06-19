@@ -10,7 +10,6 @@ import Grid from '@mui/material/Unstable_Grid2';
 import { Link } from 'react-router-dom';
 
 import GraphSwiper from '@/components/Home/GraphSwiper';
-import SearchBar from '@/components/SearchBar/SearchBar';
 import HmtPrice from '@/features/home/ui/HmtPrice';
 import Holders from '@/features/home/ui/Holders';
 import TotalNumberOfTasks from '@/features/home/ui/TotalNumberOfTasks';
@@ -19,6 +18,7 @@ import Leaderboard from '@/features/leaderboard';
 import { useIsMobile } from '@/shared/hooks/useBreakpoints';
 import CustomTooltip from '@/shared/ui/CustomTooltip';
 import LeaderboardIcon from '@/shared/ui/icons/LeaderboardIcon';
+import SearchBar from '@/shared/ui/SearchBar';
 import ShadowIcon from '@/shared/ui/ShadowIcon';
 import PageWrapper from '@/widgets/page-wrapper';
 

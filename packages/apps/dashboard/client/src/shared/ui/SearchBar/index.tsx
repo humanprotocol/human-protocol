@@ -17,13 +17,12 @@ import IconButton from '@mui/material/IconButton';
 import clsx from 'clsx';
 import { useNavigate } from 'react-router-dom';
 
+import { isValidEVMAddress } from '@/helpers/isValidEVMAddress';
 import useFilteredNetworks from '@/shared/api/useFilteredNetworks';
 import { useIsMobile } from '@/shared/hooks/useBreakpoints';
 import useGlobalFiltersStore from '@/shared/store/useGlobalFiltersStore';
 import CustomTooltip from '@/shared/ui/CustomTooltip';
 import { NetworkIcon } from '@/shared/ui/NetworkIcon';
-
-import { isValidEVMAddress } from '../../helpers/isValidEVMAddress';
 
 import {
   endAdornmentInputAdornmentSx,
@@ -33,12 +32,12 @@ import {
   muiTextFieldInputPropsSx,
   muiTextFieldSx,
   gridSx,
-} from './SearchBar.styles';
+} from './styles';
 
-interface SearchBarProps {
+type SearchBarProps = {
   className?: string;
   initialInputValue?: string;
-}
+};
 
 const SearchBar: FC<SearchBarProps> = ({
   className = '',
