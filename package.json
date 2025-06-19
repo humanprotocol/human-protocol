@@ -8,9 +8,11 @@
   "scripts": {
     "clean": "yarn workspaces foreach --all -p run clean",
     "lint": "yarn workspaces foreach --all -p run lint",
+    "test": "yarn workspaces foreach --all -p run test",
     "build:core": "yarn workspace @human-protocol/core build",
     "build:sdk": "yarn workspace @human-protocol/sdk build",
-    "build:libs": "yarn build:core && yarn build:sdk",
+    "build:logger": "yarn workspace @human-protocol/logger build",
+    "build:libs": "yarn build:core && yarn build:sdk && yarn build:logger",
     "docker:infra-up": "make -C ./docker-setup  -f Makefile.dev infra-up",
     "docker:infra-stop": "make -C ./docker-setup -f Makefile.dev infra-stop",
     "docker:infra-down": "make -C ./docker-setup -f Makefile.dev infra-down",

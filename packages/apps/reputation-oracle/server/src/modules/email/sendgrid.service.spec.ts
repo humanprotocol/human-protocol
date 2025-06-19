@@ -1,11 +1,12 @@
-jest.mock('../../logger');
+jest.mock('@human-protocol/logger');
+jest.mock('@human-protocol/sdk');
 
 import { faker } from '@faker-js/faker';
 import { Test, TestingModule } from '@nestjs/testing';
 import { MailService } from '@sendgrid/mail';
 
 import { EmailConfigService } from '../../config';
-import logger from '../../logger';
+import logger from '@human-protocol/logger';
 import Environment from '../../utils/environment';
 import { EmailAction } from './constants';
 import {

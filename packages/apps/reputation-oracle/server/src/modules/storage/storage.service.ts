@@ -3,7 +3,7 @@ import * as Minio from 'minio';
 
 import { ContentType } from '../../common/enums';
 import { S3ConfigService } from '../../config';
-import logger from '../../logger';
+import logger from '@human-protocol/logger';
 import * as httpUtils from '../../utils/http';
 
 import { PgpEncryptionService } from '../encryption';

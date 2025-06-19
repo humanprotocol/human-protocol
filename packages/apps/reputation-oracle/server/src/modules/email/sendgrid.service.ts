@@ -2,10 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { MailService } from '@sendgrid/mail';
 
 import { EmailConfigService } from '../../config';
-import logger from '../../logger';
 import Environment from '../../utils/environment';
 import { EmailAction, SENDGRID_API_KEY_REGEX } from './constants';
 import { EmailService } from './email.service';
+
+import logger from '@human-protocol/logger';
 
 export const SENDGRID_TEMPLATES = {
   signup: 'd-ca99cc7410aa4e6dab3e6042d5ecb9a3',

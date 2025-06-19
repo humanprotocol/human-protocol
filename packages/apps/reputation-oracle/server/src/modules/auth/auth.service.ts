@@ -9,7 +9,7 @@ import {
   ServerConfigService,
   Web3ConfigService,
 } from '../../config';
-import logger from '../../logger';
+import logger from '@human-protocol/logger';
 import * as httpUtils from '../../utils/http';
 import * as securityUtils from '../../utils/security';
 import * as web3Utils from '../../utils/web3';

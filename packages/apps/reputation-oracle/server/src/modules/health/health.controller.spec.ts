@@ -7,7 +7,7 @@ import {
   TerminusModule,
   TypeOrmHealthIndicator,
 } from '@nestjs/terminus';
-import { nestLoggerOverride } from '../../logger';
+import { nestLoggerOverride } from '@human-protocol/logger';
 import { ServerConfigService } from '../../config';
 import { HealthController } from './health.controller';
 

@@ -13,7 +13,7 @@ import { calculateExponentialBackoffMs } from '../../utils/backoff';
 import { transformKeysFromCamelToSnake } from '../../utils/case-converters';
 import { formatAxiosError } from '../../utils/http';
 import { signMessage } from '../../utils/web3';
-import logger from '../../logger';
+import logger from '@human-protocol/logger';
 
 import { OutgoingWebhookStatus } from './types';
 import { OutgoingWebhookEntity } from './webhook-outgoing.entity';

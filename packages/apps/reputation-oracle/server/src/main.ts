@@ -9,7 +9,7 @@ import { IncomingMessage, ServerResponse } from 'http';
 
 import { AppModule } from './app.module';
 import { ServerConfigService } from './config';
-import logger, { nestLoggerOverride } from './logger';
+import logger, { nestLoggerOverride } from '@human-protocol/logger';
 
 function rawBodyMiddleware(
   req: any,

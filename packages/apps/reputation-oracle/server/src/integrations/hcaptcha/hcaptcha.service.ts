@@ -4,7 +4,7 @@ import { ethers } from 'ethers';
 import { firstValueFrom } from 'rxjs';
 
 import { HCaptchaConfigService } from '../../config';
-import logger from '../../logger';
+import logger from '@human-protocol/logger';
 
 import {
   GetLabelerQueryParams,
