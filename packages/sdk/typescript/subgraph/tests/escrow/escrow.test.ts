@@ -1448,12 +1448,6 @@ describe('Escrow', () => {
   });
 
   test('Should properly handle Completed event', () => {
-    const escrow = Escrow.load(escrowAddress);
-    if (escrow) {
-      escrow.balance = BigInt.fromI32(1234);
-      escrow.save();
-    }
-
     const newCompleted = createCompletedEvent(
       operatorAddress,
       BigInt.fromI32(12)
