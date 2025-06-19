@@ -1400,16 +1400,26 @@ describe('JobService', () => {
     it('should process escrow cancellation', async () => {
       const jobEntity = createJobEntity();
       mockWeb3Service.calculateGasPrice.mockResolvedValueOnce(1n);
+
+      const getStatusMock = jest.fn().mockResolvedValue('Active');
+      const getBalanceMock = jest.fn().mockResolvedValue(100n);
+      const cancelMock = jest
+        .fn()
+        .mockResolvedValue({ txHash: '0x', amountRefunded: 100n });
+
       mockedEscrowClient.build.mockResolvedValue({
-        getStatus: jest.fn().mockResolvedValue('Active'),
-        getBalance: jest.fn().mockResolvedValue(100n),
-        cancel: jest
-          .fn()
-          .mockResolvedValue({ txHash: '0x', amountRefunded: 100n }),
+        getStatus: getStatusMock,
+        getBalance: getBalanceMock,
+        cancel: cancelMock,
       } as unknown as EscrowClient);
 
       const result = await jobService.processEscrowCancellation(jobEntity);
-      expect(result).toHaveProperty('txHash');
+      expect(result).toBe(undefined);
+      expect(mockWeb3Service.getSigner).toHaveBeenCalledWith(jobEntity.chainId);
+
+      expect(getStatusMock).toHaveBeenCalled();
+      expect(getBalanceMock).toHaveBeenCalled();
+      expect(cancelMock).toHaveBeenCalled();
     });
 
     it('should throw if escrow status is not Active', async () => {
