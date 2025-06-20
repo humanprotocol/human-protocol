@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 
 import { Typography, useTheme } from '@mui/material';
 import Card from '@mui/material/Card';
@@ -14,34 +14,35 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-import CustomXAxisTick from '@/components/Charts/CustomXAxisTick';
-import ToggleCharts from '@/components/Charts/ToggleCharts';
-import DatePicker from '@/components/DataEntry/DatePicker';
-import ToggleButtons from '@/components/DataEntry/ToggleButtons';
 import { formatNumber } from '@/helpers/formatNumber';
-import {
-  GraphPageChartData,
-  useGraphPageChartData,
-} from '@/services/api/use-graph-page-chart-data';
-import {
+import DatePicker from '@/shared/ui/DatePicker';
+
+import useChartData, { ChartData } from '../api/useChartData';
+import useChartParamsStore, {
   initialAllTime,
-  useGraphPageChartParams,
-} from '@/utils/hooks/use-graph-page-chart-params';
+} from '../store/useChartParamsStore';
 
-import CustomChartTooltip from './CustomChartTooltip';
+import ChartTooltip from './ChartTooltip';
+import CustomXAxisTick from './CustomXAxisTick';
+import ToggleButtons from './ToggleButtons';
+import ToggleCharts from './ToggleCharts';
 
-export type GraphPageChartDataConfigObject<T> = Partial<
-  Record<keyof GraphPageChartData[number], T>
+export type ChartDataConfigObject<T> = Partial<
+  Record<keyof ChartData[number], T>
 >;
 
-const CHECKED_CHARTS_DEFAULT_STATE: GraphPageChartDataConfigObject<boolean> = {
+type AreaChartProps = {
+  changeDateOnScroll?: boolean;
+};
+
+const CHECKED_CHARTS_DEFAULT_STATE: ChartDataConfigObject<boolean> = {
   totalTransactionAmount: true,
   totalTransactionCount: true,
   solved: true,
   dailyUniqueReceivers: true,
   dailyUniqueSenders: true,
 };
-const HOVERED_CHARTS_DEFAULT_STATE: GraphPageChartDataConfigObject<boolean> = {
+const HOVERED_CHARTS_DEFAULT_STATE: ChartDataConfigObject<boolean> = {
   totalTransactionAmount: false,
   totalTransactionCount: false,
   solved: false,
@@ -50,12 +51,12 @@ const HOVERED_CHARTS_DEFAULT_STATE: GraphPageChartDataConfigObject<boolean> = {
 };
 
 type SumOfNumericChartDataProperties = Record<
-  keyof Omit<GraphPageChartData[number], 'date' | 'served'>,
+  keyof Omit<ChartData[number], 'date' | 'served'>,
   number
 >;
 
 const sumNumericProperties = (
-  chartData: GraphPageChartData
+  chartData: ChartData
 ): SumOfNumericChartDataProperties => {
   return chartData.reduce(
     (acc, chartEntry) => {
@@ -76,20 +77,16 @@ const sumNumericProperties = (
   );
 };
 
-export const AreaChart = ({
-  changeDateOnScroll = false,
-}: {
-  changeDateOnScroll?: boolean;
-}) => {
-  const { data } = useGraphPageChartData();
-  const theme = useTheme();
-  const chartData = data || [];
+const AreaChart: FC<AreaChartProps> = ({ changeDateOnScroll = false }) => {
   const {
     setFromDate,
     setToDate,
     clearTimePeriod,
     dateRangeParams: { from, to },
-  } = useGraphPageChartParams();
+  } = useChartParamsStore();
+  const { data } = useChartData(from, to);
+  const theme = useTheme();
+  const chartData = data || [];
   const sum = sumNumericProperties(chartData);
   const [checkedCharts, setCheckedCharts] = useState(
     CHECKED_CHARTS_DEFAULT_STATE
@@ -314,7 +311,7 @@ export const AreaChart = ({
             dataKey="date"
             tickMargin={10}
           />
-          <Tooltip content={<CustomChartTooltip />} />
+          <Tooltip content={<ChartTooltip />} />
           {checkedCharts.totalTransactionAmount && (
             <Area
               type="monotone"
@@ -414,3 +411,5 @@ export const AreaChart = ({
     </Card>
   );
 };
+
+export default AreaChart;

@@ -1,17 +1,22 @@
-import { useEffect } from 'react';
+import { FC, useEffect } from 'react';
 
 import { Navigation } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
-import SmallGraph from '@/components/Home/SmallGraph';
 import 'swiper/css';
 import 'swiper/css/navigation';
-import { useGraphPageChartData } from '@/services/api/use-graph-page-chart-data';
-import { useGraphPageChartParams } from '@/utils/hooks/use-graph-page-chart-params';
 
-const GraphSwiper = () => {
-  const { data } = useGraphPageChartData();
-  const { revertToInitialParams } = useGraphPageChartParams();
+import useChartData from '../api/useChartData';
+import useChartParamsStore from '../store/useChartParamsStore';
+
+import SmallGraph from './SmallGraph';
+
+const GraphSwiper: FC = () => {
+  const {
+    revertToInitialParams,
+    dateRangeParams: { from, to },
+  } = useChartParamsStore();
+  const { data } = useChartData(from, to);
 
   useEffect(() => {
     revertToInitialParams();

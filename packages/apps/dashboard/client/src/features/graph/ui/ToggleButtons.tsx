@@ -4,11 +4,10 @@ import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import dayjs from 'dayjs';
 
-import {
+import useChartParamsStore, {
   TIME_PERIOD_OPTIONS,
   TimePeriod,
-  useGraphPageChartParams,
-} from '@/utils/hooks/use-graph-page-chart-params';
+} from '../store/useChartParamsStore';
 
 export const StyledToggleButtonGroup = styled(ToggleButtonGroup)(
   ({ theme }) => ({
@@ -26,7 +25,7 @@ export const StyledToggleButtonGroup = styled(ToggleButtonGroup)(
 
 const ToggleButtons = () => {
   const { setTimePeriod, selectedTimePeriod, dateRangeParams } =
-    useGraphPageChartParams();
+    useChartParamsStore();
 
   const checkIfSelected = (element: TimePeriod) => {
     if (element.name !== 'ALL') {

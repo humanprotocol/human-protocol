@@ -1,12 +1,12 @@
 import { useEffect } from 'react';
 
-import { AreaChart } from '@/components/Charts';
+import AreaChart from '@/features/graph';
+import useChartParamsStore from '@/features/graph/store/useChartParamsStore';
 import Breadcrumbs from '@/shared/ui/Breadcrumbs';
-import { useGraphPageChartParams } from '@/utils/hooks/use-graph-page-chart-params';
 import PageWrapper from '@/widgets/page-wrapper';
 
 const Graph = () => {
-  const { revertToInitialParams } = useGraphPageChartParams();
+  const { revertToInitialParams } = useChartParamsStore();
 
   useEffect(() => {
     revertToInitialParams();

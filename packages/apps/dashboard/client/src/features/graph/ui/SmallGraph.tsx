@@ -1,4 +1,4 @@
-import { Fragment } from 'react';
+import { FC, Fragment } from 'react';
 
 import { useTheme } from '@mui/material';
 import Box from '@mui/material/Box';
@@ -16,50 +16,49 @@ import {
   TooltipProps,
 } from 'recharts';
 
-import ToggleButtons from '@/components/DataEntry/ToggleButtons';
+import ToggleButtons from '@/features/graph/ui/ToggleButtons';
 import { formatDate } from '@/helpers/formatDate';
 import { formatNumber } from '@/helpers/formatNumber';
 import { useIsMobile } from '@/shared/hooks/useBreakpoints';
 
-const CustomSmallChartTooltip = ({
+const CustomSmallChartTooltip: FC<TooltipProps<number, string>> = ({
   payload,
   active,
-}: TooltipProps<number, string>) => {
-  if (active) {
-    return (
-      <Card
-        elevation={0}
-        sx={{
-          border: '1px solid',
-          borderColor: 'fog.light',
-          borderRadius: 2,
-        }}
-      >
-        <Box px={1} py={0}>
-          {payload?.map((elem) => (
-            <Fragment key={elem.name}>
-              <Typography variant="tooltip">
-                {formatDate(elem.payload.date, 'MMMM DD, YYYY')}
-              </Typography>
-              <Typography fontWeight={500} variant="body1">
-                {elem.value ? elem.value.toLocaleString('en-US') : ''}
-              </Typography>
-            </Fragment>
-          ))}
-        </Box>
-      </Card>
-    );
-  }
-  return null;
+}) => {
+  if (!active) return null;
+
+  return (
+    <Card
+      elevation={0}
+      sx={{
+        border: '1px solid',
+        borderColor: 'fog.light',
+        borderRadius: 2,
+      }}
+    >
+      <Box px={1} py={0}>
+        {payload?.map((elem) => (
+          <Fragment key={elem.name}>
+            <Typography variant="tooltip">
+              {formatDate(elem.payload.date, 'MMMM DD, YYYY')}
+            </Typography>
+            <Typography fontWeight={500} variant="body1">
+              {elem.value ? elem.value.toLocaleString('en-US') : ''}
+            </Typography>
+          </Fragment>
+        ))}
+      </Box>
+    </Card>
+  );
 };
 
-interface SmallGraphProps {
+type SmallGraphProps = {
   graphData: {
     date: string;
     value: number;
   }[];
   title: string;
-}
+};
 
 const GraphSettings = ({ title }: { title: string }) => (
   <Stack
@@ -78,7 +77,7 @@ const GraphSettings = ({ title }: { title: string }) => (
   </Stack>
 );
 
-const SmallGraph = ({ title, graphData }: SmallGraphProps) => {
+const SmallGraph: FC<SmallGraphProps> = ({ title, graphData }) => {
   const isMobile = useIsMobile();
   const theme = useTheme();
 

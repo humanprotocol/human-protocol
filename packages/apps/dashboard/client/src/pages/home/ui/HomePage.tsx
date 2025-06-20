@@ -9,7 +9,7 @@ import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Unstable_Grid2';
 import { Link } from 'react-router-dom';
 
-import GraphSwiper from '@/components/Home/GraphSwiper';
+import GraphSwiper from '@/features/graph/ui/GraphSwiper';
 import HmtPrice from '@/features/home/ui/HmtPrice';
 import Holders from '@/features/home/ui/Holders';
 import TotalNumberOfTasks from '@/features/home/ui/TotalNumberOfTasks';

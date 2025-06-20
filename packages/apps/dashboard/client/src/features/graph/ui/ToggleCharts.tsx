@@ -1,3 +1,5 @@
+import { FC } from 'react';
+
 import { FormControlLabel, FormGroup, Typography } from '@mui/material';
 import Checkbox from '@mui/material/Checkbox';
 import Stack from '@mui/material/Stack';
@@ -17,12 +19,12 @@ interface ToggleChartsProps {
   }[];
 }
 
-const ToggleCharts = ({
+const ToggleCharts: FC<ToggleChartsProps> = ({
   handleChange,
   chartOptions,
   onMouseLeave,
   onMouseEnter,
-}: ToggleChartsProps) => {
+}) => {
   return (
     <FormGroup
       sx={{

@@ -58,7 +58,7 @@ const INITIAL_RANGE_PARAMS = {
   to: dayjs(),
 };
 
-export const useGraphPageChartParams = create<GraphPageChartParams>((set) => ({
+const useChartParamsStore = create<GraphPageChartParams>((set) => ({
   dateRangeParams: INITIAL_RANGE_PARAMS,
   selectedTimePeriod: '1W',
   setFromDate: (fromDate: Dayjs | null) => {
@@ -116,3 +116,5 @@ export const useGraphPageChartParams = create<GraphPageChartParams>((set) => ({
     }));
   },
 }));
+
+export default useChartParamsStore;
