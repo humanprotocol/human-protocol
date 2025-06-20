@@ -2,7 +2,7 @@ import { useTheme } from '@mui/material';
 // @ts-expect-error -- import error, but this type work property
 import { ContentRenderer } from 'recharts';
 
-import { formatDate } from '@/helpers/formatDate';
+import formatDate from '../lib/formatDate';
 
 const CustomXAxisTick = ({ x, y, payload }: ContentRenderer<string>) => {
   const theme = useTheme();

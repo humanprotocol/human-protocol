@@ -7,7 +7,7 @@ import MuiTableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 
 import { PaginatedEscrowDetails } from '@/features/searchResults/model/escrowDetailsSchema';
-import { handleErrorMessage } from '@/services/handle-error-message';
+import handleErrorMessage from '@/shared/lib/handleErrorMessage';
 import useGlobalFiltersStore from '@/shared/store/useGlobalFiltersStore';
 
 import EscrowsTableBodyContainer from './EscrowsTableBodyContainer';

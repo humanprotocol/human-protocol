@@ -1,4 +1,4 @@
-export const formatNumber = (number: number) => {
+const formatNumber = (number: number) => {
   if (number >= 1000000) {
     return `${(number / 1000000).toFixed()} M`;
   }
@@ -9,3 +9,5 @@ export const formatNumber = (number: number) => {
 
   return `${number.toString()}`;
 };
+
+export default formatNumber;

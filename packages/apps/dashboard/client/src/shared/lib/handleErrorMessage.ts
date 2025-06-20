@@ -1,7 +1,7 @@
 import { AxiosError } from 'axios';
 import { ZodError } from 'zod';
 
-export function handleErrorMessage(unknownError: unknown): string {
+const handleErrorMessage = (unknownError: unknown): string => {
   if (unknownError instanceof AxiosError) {
     return unknownError.message;
   }
@@ -15,4 +15,6 @@ export function handleErrorMessage(unknownError: unknown): string {
   }
 
   return 'Something went wrong';
-}
+};
+
+export default handleErrorMessage;

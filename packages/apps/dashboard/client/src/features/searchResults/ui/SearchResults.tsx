@@ -4,13 +4,13 @@ import { Stack } from '@mui/material';
 import { AxiosError } from 'axios';
 import { useLocation, useParams } from 'react-router-dom';
 
-import { handleErrorMessage } from '@/services/handle-error-message';
+import handleErrorMessage from '@/shared/lib/handleErrorMessage';
+import { getNetwork } from '@/shared/lib/networks';
 import useGlobalFiltersStore from '@/shared/store/useGlobalFiltersStore';
 import EscrowAddressIcon from '@/shared/ui/icons/EscrowAddressIcon';
 import WalletIcon from '@/shared/ui/icons/WalletIcon';
 import Loader from '@/shared/ui/Loader';
 import ShadowIcon from '@/shared/ui/ShadowIcon';
-import { getNetwork } from '@/utils/networks';
 
 import useAddressDetails from '../api/useAddressDetails';
 import { AddressDetails } from '../model/addressDetailsSchema';

@@ -1,6 +1,6 @@
 import { ZodError, type z } from 'zod';
 
-export const validateResponse = <T extends z.ZodTypeAny>(
+const validateResponse = <T extends z.ZodTypeAny>(
   object: unknown,
   zodObject: T
 ): z.infer<T> => {
@@ -19,3 +19,5 @@ export const validateResponse = <T extends z.ZodTypeAny>(
     throw error;
   }
 };
+
+export default validateResponse;

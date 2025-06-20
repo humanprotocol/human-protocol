@@ -14,10 +14,10 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-import { formatNumber } from '@/helpers/formatNumber';
 import DatePicker from '@/shared/ui/DatePicker';
 
 import useChartData, { ChartData } from '../api/useChartData';
+import formatNumber from '../lib/formatNumber';
 import useChartParamsStore, {
   initialAllTime,
 } from '../store/useChartParamsStore';

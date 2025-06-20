@@ -3,8 +3,8 @@ import { FC } from 'react';
 import { Box, Typography } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 
-import { handleErrorMessage } from '@/services/handle-error-message';
 import { useIsMobile } from '@/shared/hooks/useBreakpoints';
+import handleErrorMessage from '@/shared/lib/handleErrorMessage';
 import Loader from '@/shared/ui/Loader';
 
 import { LeaderboardData } from '../model/leaderboardSchema';

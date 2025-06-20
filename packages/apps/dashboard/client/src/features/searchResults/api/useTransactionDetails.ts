@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { apiPaths } from '@/services/api-paths';
-import { httpService } from '@/services/http-service';
-import { validateResponse } from '@/services/validate-response';
+import apiPaths from '@/shared/api/apiPaths';
+import httpClient from '@/shared/api/httpClient';
+import validateResponse from '@/shared/lib/validateResponse';
 
 import { paginatedTransactionDetailsSchema } from '../model/transactionDetailsSchema';
 
@@ -34,7 +34,7 @@ const useTransactionDetails = ({
 
   return useQuery({
     queryFn: async () => {
-      const { data } = await httpService.get(
+      const { data } = await httpClient.get(
         `${apiPaths.transactionDetails.path}/${address}`,
         {
           params: dto,
@@ -48,7 +48,7 @@ const useTransactionDetails = ({
 
       // check if last page
       if (lastPageIndex === undefined) {
-        const { data: lastPageCheckData } = await httpService.get(
+        const { data: lastPageCheckData } = await httpClient.get(
           `${apiPaths.transactionDetails.path}/${address}`,
           {
             params: {

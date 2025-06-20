@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { apiPaths } from '@/services/api-paths';
-import { httpService } from '@/services/http-service';
-import { validateResponse } from '@/services/validate-response';
+import apiPaths from '@/shared/api/apiPaths';
+import httpClient from '@/shared/api/httpClient';
+import validateResponse from '@/shared/lib/validateResponse';
 
 import { leaderboardResponseSchema } from '../model/leaderboardSchema';
 
@@ -13,7 +13,7 @@ const useLeaderboardDetails = (chainId: number, first?: number) => {
         return [];
       }
 
-      const { data } = await httpService.get(apiPaths.leaderboardDetails.path, {
+      const { data } = await httpClient.get(apiPaths.leaderboardDetails.path, {
         params: { chainId, first },
       });
 

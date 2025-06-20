@@ -1,4 +1,4 @@
-export const apiPaths = {
+const apiPaths = {
   hcaptchaGeneralStats: {
     path: '/stats/hcaptcha/general',
   },
@@ -33,3 +33,5 @@ export const apiPaths = {
     path: '/details/kvstore',
   },
 } as const;
+
+export default apiPaths;

@@ -1,15 +1,15 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { apiPaths } from '@/services/api-paths';
-import { httpService } from '@/services/http-service';
-import { validateResponse } from '@/services/validate-response';
+import apiPaths from '@/shared/api/apiPaths';
+import httpClient from '@/shared/api/httpClient';
+import validateResponse from '@/shared/lib/validateResponse';
 
 import { addressDetailsResponseSchema } from '../model/addressDetailsSchema';
 
 const useAddressDetails = (chainId: number, address: string) => {
   return useQuery({
     queryFn: async () => {
-      const { data } = await httpService.get(
+      const { data } = await httpClient.get(
         `${apiPaths.addressDetails.path}/${address}`,
         { params: { chainId: chainId || -1 } }
       );

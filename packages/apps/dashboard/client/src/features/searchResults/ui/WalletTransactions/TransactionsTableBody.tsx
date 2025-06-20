@@ -11,7 +11,7 @@ import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
 
 import { PaginatedTransactionDetails } from '@/features/searchResults/model/transactionDetailsSchema';
-import { handleErrorMessage } from '@/services/handle-error-message';
+import handleErrorMessage from '@/shared/lib/handleErrorMessage';
 import AbbreviateClipboard from '@/shared/ui/AbbreviateClipboard';
 
 import TransactionsTableBodyContainer from './TransactionsTableBodyContainer';

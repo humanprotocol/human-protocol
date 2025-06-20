@@ -7,7 +7,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { useNavigate } from 'react-router-dom';
 
-import abbreviateValue from '@/helpers/abbreviateValue';
+import abbreviateAddress from '@/shared/lib/abbreviateAddress';
 import CustomTooltip from '@/shared/ui/CustomTooltip';
 
 interface AbbreviateClipboardProps {
@@ -49,11 +49,11 @@ const AbbreviateClipboard = ({ value, link }: AbbreviateClipboardProps) => {
                 },
               }}
             >
-              {abbreviateValue(value)}
+              {abbreviateAddress(value)}
             </Link>
           </span>
         ) : (
-          <>{abbreviateValue(value)}</>
+          <>{abbreviateAddress(value)}</>
         )}
       </Typography>
       <IconButton

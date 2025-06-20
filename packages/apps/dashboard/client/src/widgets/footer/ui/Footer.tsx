@@ -9,7 +9,7 @@ import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import Typography from '@mui/material/Typography';
 
-import { env } from '@/helpers/env';
+import { env } from '@/shared/lib/env';
 import DiscordIcon from '@/shared/ui/icons/DiscordIcon';
 
 const StyledLink = styled(Link)(({ theme }) => ({

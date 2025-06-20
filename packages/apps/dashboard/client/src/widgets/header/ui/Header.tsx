@@ -12,7 +12,7 @@ import styled from '@mui/material/styles/styled';
 import Toolbar from '@mui/material/Toolbar';
 import { Link } from 'react-router-dom';
 
-import { env } from '@/helpers/env';
+import { env } from '@/shared/lib/env';
 import LogoBlockIcon from '@/shared/ui/icons/LogoBlockIcon';
 import LogoBlockIconMobile from '@/shared/ui/icons/LogoBlockIconMobile';
 

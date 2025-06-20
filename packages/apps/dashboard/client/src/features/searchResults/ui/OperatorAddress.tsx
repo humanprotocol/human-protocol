@@ -16,7 +16,7 @@ import KVStore from '@/features/searchResults/ui/KvStore';
 import ReputationScore from '@/features/searchResults/ui/ReputationScore';
 import StakeInfo from '@/features/searchResults/ui/StakeInfo';
 import TitleSectionWrapper from '@/features/searchResults/ui/TitleSectionWrapper';
-import { env } from '@/helpers/env';
+import { env } from '@/shared/lib/env';
 import EntityIcon from '@/shared/ui/EntityIcon';
 import SectionWrapper from '@/shared/ui/SectionWrapper';
 

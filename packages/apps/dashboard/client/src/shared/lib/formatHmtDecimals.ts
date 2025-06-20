@@ -1,6 +1,6 @@
 import { formatEther } from 'ethers';
 
-export const formatHMTDecimals = (value: string) => {
+const formatHmtDecimals = (value: string) => {
   const formattedValue = Number(formatEther(value));
 
   if (Number.isInteger(formattedValue)) {
@@ -22,3 +22,5 @@ export const formatHMTDecimals = (value: string) => {
     ? formattedValue.toFixed(4)
     : formattedValue.toString();
 };
+
+export default formatHmtDecimals;

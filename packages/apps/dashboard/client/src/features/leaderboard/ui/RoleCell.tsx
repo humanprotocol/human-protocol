@@ -5,8 +5,8 @@ import { Box, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
 
 import { useIsMobile } from '@/shared/hooks/useBreakpoints';
+import convertSnakeToHumanReadable from '@/shared/lib/convertSnakeToHumanReadable';
 import EntityIcon from '@/shared/ui/EntityIcon';
-import { CaseConverter } from '@/utils/case-converter';
 
 type WrapperProps = {
   websiteUrl?: string;
@@ -45,7 +45,7 @@ const Wrapper: FC<PropsWithChildren<WrapperProps>> = ({
 
 const RoleCell: FC<Props> = ({ rank, role, websiteUrl, name }) => {
   const isMobile = useIsMobile();
-  const humanReadableRole = CaseConverter.convertSnakeToHumanReadable(role);
+  const humanReadableRole = convertSnakeToHumanReadable(role);
   const formattedName = name ? name.split(' ')[0] : null;
 
   return (

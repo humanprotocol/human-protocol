@@ -1,8 +1,8 @@
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import Typography from '@mui/material/Typography';
 
-import { formatHMTDecimals } from '@/helpers/formatHMTDecimals';
 import useHmtPrice from '@/shared/api/useHmtPrice';
+import formatHmtDecimals from '@/shared/lib/formatHmtDecimals';
 import CustomTooltip from '@/shared/ui/CustomTooltip';
 
 const InfoTooltip = ({ title }: { title: string }) => (
@@ -35,7 +35,7 @@ const TransactionsTableCellValue = ({
 
   return (
     <Typography variant="body2" display="flex" alignItems="center" gap={0.5}>
-      {formatHMTDecimals(value)}
+      {formatHmtDecimals(value)}
       <Typography variant="body2" component="span">
         HMT
       </Typography>

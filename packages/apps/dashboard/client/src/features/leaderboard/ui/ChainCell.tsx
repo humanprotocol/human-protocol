@@ -3,8 +3,8 @@ import { FC } from 'react';
 import { ChainId } from '@human-protocol/sdk';
 import { Typography } from '@mui/material';
 
+import { getNetwork } from '@/shared/lib/networks';
 import { NetworkIcon } from '@/shared/ui/NetworkIcon';
-import { getNetwork } from '@/utils/networks';
 
 type Props = {
   chainId: ChainId;

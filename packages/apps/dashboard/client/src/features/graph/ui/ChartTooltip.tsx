@@ -8,7 +8,7 @@ import Stack from '@mui/material/Stack';
 import { NumericFormat } from 'react-number-format';
 import { TooltipProps } from 'recharts';
 
-import { formatDate } from '@/helpers/formatDate';
+import formatDate from '../lib/formatDate';
 
 import { ChartDataConfigObject } from './AreaChart';
 

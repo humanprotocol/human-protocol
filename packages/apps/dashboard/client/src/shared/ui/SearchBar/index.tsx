@@ -17,9 +17,9 @@ import IconButton from '@mui/material/IconButton';
 import clsx from 'clsx';
 import { useNavigate } from 'react-router-dom';
 
-import { isValidEVMAddress } from '@/helpers/isValidEVMAddress';
 import useFilteredNetworks from '@/shared/api/useFilteredNetworks';
 import { useIsMobile } from '@/shared/hooks/useBreakpoints';
+import isValidEvmAddress from '@/shared/lib/isValidEvmAddress';
 import useGlobalFiltersStore from '@/shared/store/useGlobalFiltersStore';
 import CustomTooltip from '@/shared/ui/CustomTooltip';
 import { NetworkIcon } from '@/shared/ui/NetworkIcon';
@@ -63,7 +63,7 @@ const SearchBar: FC<SearchBarProps> = ({
   }, [filteredNetworks, isLoading, chainId, setChainId]);
 
   const navigateToAddress = useCallback(() => {
-    if (!isValidEVMAddress(inputValue)) {
+    if (!isValidEvmAddress(inputValue)) {
       setError('Invalid EVM address.');
       return;
     }
@@ -76,7 +76,7 @@ const SearchBar: FC<SearchBarProps> = ({
     const value = event.target.value;
     setInputValue(value);
 
-    if (isValidEVMAddress(value)) {
+    if (isValidEvmAddress(value)) {
       setError(null);
     } else if (value.length > 0) {
       setError('Invalid EVM address. Must start with 0x and be 42 characters.');
