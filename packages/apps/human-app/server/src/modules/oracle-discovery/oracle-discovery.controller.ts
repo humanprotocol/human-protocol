@@ -58,6 +58,9 @@ export class OracleDiscoveryController {
     const isAudinoAvailableForUser =
       jwtPayload.qualifications.includes('audino');
 
+    /**
+     * TODO: remove filtering logic when Audino available for everyone
+     */
     return oracles.filter((oracle) => {
       const isAudinoOracle = oracle.jobTypes.includes('audio_transcription');
 
