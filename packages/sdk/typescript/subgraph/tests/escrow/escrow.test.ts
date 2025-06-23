@@ -882,7 +882,7 @@ describe('Escrow', () => {
       escrowAddressString
     );
     assert.fieldEquals('BulkPayoutEvent', id1, 'sender', operatorAddressString);
-    assert.fieldEquals('BulkPayoutEvent', id1, 'bulkPayoutTxId', '1');
+    assert.fieldEquals('BulkPayoutEvent', id1, 'payoutId', '1');
     assert.fieldEquals('BulkPayoutEvent', id1, 'bulkCount', '2');
 
     // EscrowStatusEvent
@@ -966,7 +966,7 @@ describe('Escrow', () => {
       escrowAddressString
     );
     assert.fieldEquals('BulkPayoutEvent', id2, 'sender', operatorAddressString);
-    assert.fieldEquals('BulkPayoutEvent', id2, 'bulkPayoutTxId', '3');
+    assert.fieldEquals('BulkPayoutEvent', id2, 'payoutId', '3');
     assert.fieldEquals('BulkPayoutEvent', id2, 'bulkCount', '4');
 
     // EscrowStatusEvent
@@ -1091,7 +1091,7 @@ describe('Escrow', () => {
       escrowAddressString
     );
     assert.fieldEquals('BulkPayoutEvent', id1, 'sender', operatorAddressString);
-    assert.fieldEquals('BulkPayoutEvent', id1, 'bulkPayoutTxId', '1');
+    assert.fieldEquals('BulkPayoutEvent', id1, 'payoutId', '1');
     assert.fieldEquals('BulkPayoutEvent', id1, 'bulkCount', '2');
 
     // EscrowStatusEvent
@@ -1177,7 +1177,7 @@ describe('Escrow', () => {
       escrowAddressString
     );
     assert.fieldEquals('BulkPayoutEvent', id2, 'sender', operatorAddressString);
-    assert.fieldEquals('BulkPayoutEvent', id2, 'bulkPayoutTxId', '3');
+    assert.fieldEquals('BulkPayoutEvent', id2, 'payoutId', '3');
     assert.fieldEquals('BulkPayoutEvent', id2, 'bulkCount', '4');
 
     // EscrowStatusEvent

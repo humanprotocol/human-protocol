@@ -44,7 +44,7 @@ import {
 import { CancellationRefund, EscrowStatus } from '../src/types';
 import {
   DEFAULT_GAS_PAYER_PRIVKEY,
-  DEFAULT_TX_ID,
+  DEFAULT_PAYOUT_ID,
   FAKE_ADDRESS,
   FAKE_AMOUNT,
   FAKE_HASH,
@@ -87,13 +87,13 @@ describe('EscrowClient', () => {
       fund: vi.fn(),
       storeResults: vi.fn(),
       complete: vi.fn(),
-      'bulkPayOut(address[],uint256[],string,string,uint256)': Object.assign(
+      'bulkPayOut(address[],uint256[],string,string,string)': Object.assign(
         vi.fn(),
         {
           populateTransaction: vi.fn(),
         }
       ),
-      'bulkPayOut(address[],uint256[],string,string,uint256,bool)':
+      'bulkPayOut(address[],uint256[],string,string,string,bool)':
         Object.assign(vi.fn(), {
           populateTransaction: vi.fn(),
         }),
@@ -1161,7 +1161,7 @@ describe('EscrowClient', () => {
       const bulkPayOutSpy = vi
         .spyOn(
           escrowClient.escrowContract,
-          'bulkPayOut(address[],uint256[],string,string,uint256)'
+          'bulkPayOut(address[],uint256[],string,string,string)'
         )
         .mockImplementation(() => ({
           wait: vi.fn().mockResolvedValue(true),
@@ -1173,7 +1173,7 @@ describe('EscrowClient', () => {
         amounts,
         finalResultsUrl,
         finalResultsHash,
-        DEFAULT_TX_ID
+        DEFAULT_PAYOUT_ID
       );
 
       expect(bulkPayOutSpy).toHaveBeenCalledWith(
@@ -1181,7 +1181,7 @@ describe('EscrowClient', () => {
         amounts,
         finalResultsUrl,
         finalResultsHash,
-        DEFAULT_TX_ID,
+        DEFAULT_PAYOUT_ID,
         {}
       );
     });
@@ -1198,7 +1198,7 @@ describe('EscrowClient', () => {
       const bulkPayOutSpy = vi
         .spyOn(
           escrowClient.escrowContract,
-          'bulkPayOut(address[],uint256[],string,string,uint256,bool)'
+          'bulkPayOut(address[],uint256[],string,string,string,bool)'
         )
         .mockImplementation(() => ({
           wait: vi.fn().mockResolvedValue(true),
@@ -1210,7 +1210,7 @@ describe('EscrowClient', () => {
         amounts,
         finalResultsUrl,
         finalResultsHash,
-        DEFAULT_TX_ID,
+        DEFAULT_PAYOUT_ID,
         true
       );
 
@@ -1219,7 +1219,7 @@ describe('EscrowClient', () => {
         amounts,
         finalResultsUrl,
         finalResultsHash,
-        DEFAULT_TX_ID,
+        DEFAULT_PAYOUT_ID,
         true,
         {}
       );
@@ -1238,7 +1238,7 @@ describe('EscrowClient', () => {
       const bulkPayOutSpy = vi
         .spyOn(
           escrowClient.escrowContract,
-          'bulkPayOut(address[],uint256[],string,string,uint256)'
+          'bulkPayOut(address[],uint256[],string,string,string)'
         )
         .mockImplementation(() => ({
           wait: vi.fn().mockResolvedValue(true),
@@ -1251,7 +1251,7 @@ describe('EscrowClient', () => {
         amounts,
         finalResultsUrl,
         finalResultsHash,
-        DEFAULT_TX_ID,
+        DEFAULT_PAYOUT_ID,
         false,
         txOptions
       );
@@ -1261,7 +1261,7 @@ describe('EscrowClient', () => {
         amounts,
         finalResultsUrl,
         finalResultsHash,
-        DEFAULT_TX_ID,
+        DEFAULT_PAYOUT_ID,
         txOptions
       );
     });
@@ -1513,7 +1513,7 @@ describe('EscrowClient', () => {
       const encodedMethodData = '0xbulkPayOut-call-encoded-data';
 
       escrowClient.escrowContract[
-        'bulkPayOut(address[],uint256[],string,string,uint256,bool)'
+        'bulkPayOut(address[],uint256[],string,string,string,bool)'
       ].populateTransaction.mockResolvedValueOnce({
         from: signerAddress,
         to: escrowAddress,
@@ -1529,7 +1529,7 @@ describe('EscrowClient', () => {
         amounts,
         finalResultsUrl,
         finalResultsHash,
-        DEFAULT_TX_ID,
+        DEFAULT_PAYOUT_ID,
         false
       );
 
@@ -1551,7 +1551,7 @@ describe('EscrowClient', () => {
       const encodedMethodData = '0xbulkPayOut-call-encoded-data';
 
       escrowClient.escrowContract[
-        'bulkPayOut(address[],uint256[],string,string,uint256,bool)'
+        'bulkPayOut(address[],uint256[],string,string,string,bool)'
       ].populateTransaction.mockResolvedValueOnce({
         from: signerAddress,
         to: escrowAddress,
@@ -1567,7 +1567,7 @@ describe('EscrowClient', () => {
         amounts,
         finalResultsUrl,
         finalResultsHash,
-        DEFAULT_TX_ID,
+        DEFAULT_PAYOUT_ID,
         false,
         {
           nonce,

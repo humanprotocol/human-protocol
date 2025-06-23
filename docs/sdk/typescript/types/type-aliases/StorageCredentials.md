@@ -8,7 +8,7 @@
 
 > `readonly` **StorageCredentials** = `object`
 
-Defined in: [types.ts:44](https://github.com/humanprotocol/human-protocol/blob/47f5da5838a126d0f0ff22cdaa7719befd2657b4/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L44)
+Defined in: [types.ts:44](https://github.com/humanprotocol/human-protocol/blob/890e8aa80cd5bbbfe3a95428dff3a4f25dbb5c8b/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L44)
 
 AWS/GCP cloud storage access data
 
@@ -22,7 +22,7 @@ StorageClient is deprecated. Use Minio.Client directly.
 
 > **accessKey**: `string`
 
-Defined in: [types.ts:48](https://github.com/humanprotocol/human-protocol/blob/47f5da5838a126d0f0ff22cdaa7719befd2657b4/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L48)
+Defined in: [types.ts:48](https://github.com/humanprotocol/human-protocol/blob/890e8aa80cd5bbbfe3a95428dff3a4f25dbb5c8b/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L48)
 
 Access Key
 
@@ -32,6 +32,6 @@ Access Key
 
 > **secretKey**: `string`
 
-Defined in: [types.ts:52](https://github.com/humanprotocol/human-protocol/blob/47f5da5838a126d0f0ff22cdaa7719befd2657b4/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L52)
+Defined in: [types.ts:52](https://github.com/humanprotocol/human-protocol/blob/890e8aa80cd5bbbfe3a95428dff3a4f25dbb5c8b/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L52)
 
 Secret Key

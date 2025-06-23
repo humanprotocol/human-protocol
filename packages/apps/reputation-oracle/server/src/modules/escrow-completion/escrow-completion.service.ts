@@ -1,6 +1,6 @@
 import {
-  ESCROW_BULK_PAYOUT_MAX_ITEMS,
   ChainId,
+  ESCROW_BULK_PAYOUT_MAX_ITEMS,
   EscrowClient,
   EscrowStatus,
   EscrowUtils,
@@ -15,9 +15,9 @@ import stringify from 'json-stable-stringify';
 import _ from 'lodash';
 
 import { BACKOFF_INTERVAL_SECONDS } from '../../common/constants';
-import { isDuplicatedError } from '../../database';
 import { JobManifest, JobRequestType } from '../../common/types';
 import { ServerConfigService } from '../../config';
+import { isDuplicatedError } from '../../database';
 import logger from '../../logger';
 import { calculateExponentialBackoffMs } from '../../utils/backoff';
 import * as manifestUtils from '../../utils/manifest';
@@ -25,27 +25,28 @@ import * as manifestUtils from '../../utils/manifest';
 import { ReputationService } from '../reputation';
 import { StorageService } from '../storage';
 import { Web3Service } from '../web3';
-import { OutgoingWebhookService } from '../webhook/webhook-outgoing.service';
 import { OutgoingWebhookEventType } from '../webhook/types';
+import { OutgoingWebhookService } from '../webhook/webhook-outgoing.service';
 
-import { DEFAULT_BULK_PAYOUT_TX_ID, EscrowCompletionStatus } from './constants';
-import { EscrowCompletionRepository } from './escrow-completion.repository';
+import { v4 as uuidv4 } from 'uuid';
+import { EscrowCompletionStatus } from './constants';
 import { EscrowCompletionEntity } from './escrow-completion.entity';
+import { EscrowCompletionRepository } from './escrow-completion.repository';
 import { EscrowPayoutsBatchEntity } from './escrow-payouts-batch.entity';
 import { EscrowPayoutsBatchRepository } from './escrow-payouts-batch.repository';
+import {
+  AudinoPayoutsCalculator,
+  CalculatedPayout,
+  CvatPayoutsCalculator,
+  EscrowPayoutsCalculator,
+  FortunePayoutsCalculator,
+} from './payouts-calculation';
 import {
   AudinoResultsProcessor,
   CvatResultsProcessor,
   EscrowResultsProcessor,
   FortuneResultsProcessor,
 } from './results-processing';
-import {
-  AudinoPayoutsCalculator,
-  CvatPayoutsCalculator,
-  FortunePayoutsCalculator,
-  EscrowPayoutsCalculator,
-  CalculatedPayout,
-} from './payouts-calculation';
 
 @Injectable()
 export class EscrowCompletionService {
@@ -412,7 +413,7 @@ export class EscrowCompletionService {
       Array.from(recipientToAmountMap.values()),
       escrowCompletionEntity.finalResultsUrl as string,
       escrowCompletionEntity.finalResultsHash as string,
-      DEFAULT_BULK_PAYOUT_TX_ID,
+      uuidv4(),
       false,
       {
         gasPrice: await this.web3Service.calculateGasPrice(

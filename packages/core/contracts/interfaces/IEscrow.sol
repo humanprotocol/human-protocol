@@ -45,8 +45,8 @@ interface IEscrow {
         uint256[] memory _amounts,
         string memory _url,
         string memory _hash,
-        uint256 _txId,
-        bool forceComplete
+        string memory _payoutId,
+        bool _forceComplete
     ) external;
 
     function bulkPayOut(
@@ -54,6 +54,6 @@ interface IEscrow {
         uint256[] memory _amounts,
         string memory _url,
         string memory _hash,
-        uint256 _txId
+        string memory _payoutId
     ) external;
 }
