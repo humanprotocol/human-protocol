@@ -1,6 +1,6 @@
 import { Storage } from '@google-cloud/storage';
 import { ImageAnnotatorClient, protos } from '@google-cloud/vision';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import NodeCache from 'node-cache';
 import { SlackConfigService } from '../../common/config/slack-config.service';
 import { VisionConfigService } from '../../common/config/vision-config.service';
@@ -31,10 +31,13 @@ import { ContentModerationRequestEntity } from './content-moderation-request.ent
 import { ContentModerationRequestRepository } from './content-moderation-request.repository';
 import { ModerationResultDto } from './content-moderation.dto';
 import { IContentModeratorService } from './content-moderation.interface';
+import Logger from '@human-protocol/logger';
 
 @Injectable()
 export class GCVContentModerationService implements IContentModeratorService {
-  private readonly logger = new Logger(GCVContentModerationService.name);
+  private readonly logger = Logger.child({
+    context: GCVContentModerationService.name,
+  });
 
   private visionClient: ImageAnnotatorClient;
   private storage: Storage;
@@ -327,7 +330,7 @@ export class GCVContentModerationService implements IContentModeratorService {
       const [operation] =
         await this.visionClient.asyncBatchAnnotateImages(requestPayload);
       const [filesResponse] = await operation.promise();
-      this.logger.log(
+      this.logger.info(
         `Output written to GCS: ${filesResponse?.outputConfig?.gcsDestination?.uri}`,
       );
     } catch (error) {

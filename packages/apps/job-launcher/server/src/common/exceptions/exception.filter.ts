@@ -3,7 +3,6 @@ import {
   Catch,
   ExceptionFilter as IExceptionFilter,
   HttpStatus,
-  Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import {
@@ -15,10 +14,13 @@ import {
   ServerError,
   DatabaseError,
 } from '../errors';
+import Logger from '@human-protocol/logger';
 
 @Catch()
 export class ExceptionFilter implements IExceptionFilter {
-  private logger = new Logger(ExceptionFilter.name);
+  private logger = Logger.child({
+    context: ExceptionFilter.name,
+  });
 
   private getStatus(exception: any): number {
     if (exception instanceof ValidationError) {

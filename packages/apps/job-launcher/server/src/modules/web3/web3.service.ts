@@ -1,15 +1,19 @@
 import { ChainId, OperatorUtils, Role } from '@human-protocol/sdk';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Wallet, ethers } from 'ethers';
 import { NetworkConfigService } from '../../common/config/network-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ErrorWeb3 } from '../../common/constants/errors';
 import { ConflictError, ValidationError } from '../../common/errors';
 import { AvailableOraclesDto, OracleDataDto } from './web3.dto';
+import Logger from '@human-protocol/logger';
 
 @Injectable()
 export class Web3Service {
-  public readonly logger = new Logger(Web3Service.name);
+  public readonly logger = Logger.child({
+    context: Web3Service.name,
+  });
+
   private signers: { [key: number]: Wallet } = {};
   public readonly signerAddress: string;
 

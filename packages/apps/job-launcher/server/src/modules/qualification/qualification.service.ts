@@ -1,16 +1,19 @@
 import { ChainId, KVStoreKeys, KVStoreUtils } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ErrorQualification, ErrorWeb3 } from '../../common/constants/errors';
 import { ServerError } from '../../common/errors';
 import { Web3Service } from '../web3/web3.service';
 import { QualificationDto } from './qualification.dto';
+import Logger from '@human-protocol/logger';
 
 @Injectable()
 export class QualificationService {
-  private readonly logger = new Logger(QualificationService.name);
+  private readonly logger = Logger.child({
+    context: QualificationService.name,
+  });
 
   constructor(
     private httpService: HttpService,

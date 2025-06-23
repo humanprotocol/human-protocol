@@ -1,18 +1,16 @@
 import { EscrowUtils } from '@human-protocol/sdk';
-import {
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-  Logger,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { HEADER_SIGNATURE_KEY } from '../constants';
 import { Role } from '../enums/role';
 import { AuthError } from '../errors';
 import { verifySignature } from '../utils/signature';
+import Logger from '@human-protocol/logger';
 
 @Injectable()
 export class SignatureAuthGuard implements CanActivate {
-  private readonly logger = new Logger(SignatureAuthGuard.name);
+  private readonly logger = Logger.child({
+    context: SignatureAuthGuard.name,
+  });
 
   constructor(private role: Role[]) {}
 

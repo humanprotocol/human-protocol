@@ -1,4 +1,4 @@
-import { Module, Logger } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 
 import { TypeOrmLoggerService } from './typeorm-logger.service';
 

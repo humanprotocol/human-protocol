@@ -8,7 +8,6 @@ import {
 import {
   ValidationError as ClassValidationError,
   Injectable,
-  Logger,
 } from '@nestjs/common';
 import { validate } from 'class-validator';
 import { ethers } from 'ethers';
@@ -71,10 +70,14 @@ import {
   ManifestDto,
   RestrictedAudience,
 } from './manifest.dto';
+import Logger from '@human-protocol/logger';
 
 @Injectable()
 export class ManifestService {
-  public readonly logger = new Logger(ManifestService.name);
+  public readonly logger = Logger.child({
+    context: ManifestService.name,
+  });
+
   public readonly storageParams: StorageParams;
   public readonly bucket: string;
 

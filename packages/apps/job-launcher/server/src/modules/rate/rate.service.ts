@@ -1,5 +1,5 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { COINGECKO_API_URL } from '../../common/constants';
@@ -7,10 +7,14 @@ import { ErrorCurrency } from '../../common/constants/errors';
 import { CoingeckoTokenId } from '../../common/constants/payment';
 import { EscrowFundToken } from '../../common/enums/job';
 import { NotFoundError } from '../../common/errors';
+import Logger from '@human-protocol/logger';
 
 @Injectable()
 export class RateService {
-  public readonly logger = new Logger(RateService.name);
+  public readonly logger = Logger.child({
+    context: RateService.name,
+  });
+
   private cache: Map<string, { rate: number; timestamp: number }>;
 
   constructor(
