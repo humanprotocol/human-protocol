@@ -58,7 +58,7 @@ export type EventDayData = {
   dailyEscrowCount: string;
   dailyWorkerCount: string;
   dailyPayoutCount: string;
-  dailyPayoutAmount: string;
+  dailyHMTPayoutAmount: string;
   dailyHMTTransferCount: string;
   dailyHMTTransferAmount: string;
   dailyUniqueSenders: string;

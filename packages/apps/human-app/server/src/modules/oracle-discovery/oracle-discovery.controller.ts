@@ -6,10 +6,11 @@ import {
   HttpException,
   HttpStatus,
   Query,
+  Request,
 } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
-import { Public } from '../../common/decorators';
+import { RequestWithUser } from '../../common/interfaces/jwt';
 import {
   DiscoveredOracle,
   GetOraclesCommand,
@@ -18,7 +19,6 @@ import {
 import { OracleDiscoveryService } from './oracle-discovery.service';
 
 @ApiTags('Oracle-Discovery')
-@Public()
 @Controller()
 export class OracleDiscoveryController {
   constructor(
@@ -34,6 +34,7 @@ export class OracleDiscoveryController {
     description: 'List of oracles',
   })
   public async getOracles(
+    @Request() req: RequestWithUser,
     @Query() query: GetOraclesQuery,
   ): Promise<DiscoveredOracle[]> {
     if (!this.environmentConfigService.jobsDiscoveryFlag) {
@@ -43,6 +44,23 @@ export class OracleDiscoveryController {
       );
     }
     const command = this.mapper.map(query, GetOraclesQuery, GetOraclesCommand);
-    return await this.oracleDiscoveryService.getOracles(command);
+    const oracles = await this.oracleDiscoveryService.getOracles(command);
+
+    const isAudinoAvailableForUser = (req?.user?.qualifications ?? []).includes(
+      'audino',
+    );
+
+    /**
+     * TODO: remove filtering logic when Audino available for everyone
+     */
+    return oracles.filter((oracle) => {
+      const isAudinoOracle = oracle.jobTypes.includes('audio_transcription');
+
+      if (isAudinoOracle) {
+        return isAudinoAvailableForUser;
+      } else {
+        return true;
+      }
+    });
   }
 }

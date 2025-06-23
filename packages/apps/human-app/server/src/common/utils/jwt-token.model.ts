@@ -9,4 +9,6 @@ export class JwtUserData {
   status: string;
   @AutoMap()
   reputation_network: string;
+  @AutoMap()
+  qualifications?: string[];
 }

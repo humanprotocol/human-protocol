@@ -63,11 +63,12 @@ from web3.middleware import ExtraDataToPOAMiddleware
 from web3.types import TxParams
 
 from human_protocol_sdk.constants import ChainId, NETWORKS
+from human_protocol_sdk.decorators import requires_signer
 from human_protocol_sdk.utils import (
     get_erc20_interface,
     get_factory_interface,
     get_staking_interface,
-    handle_transaction,
+    handle_error,
 )
 
 LOG = logging.getLogger("human_protocol_sdk.staking")
@@ -130,6 +131,7 @@ class StakingClient:
             address=self.network["staking_address"], abi=staking_interface["abi"]
         )
 
+    @requires_signer
     def approve_stake(
         self, amount: Decimal, tx_options: Optional[TxParams] = None
     ) -> None:
@@ -173,17 +175,15 @@ class StakingClient:
 
         if amount <= 0:
             raise StakingClientError("Amount to approve must be greater than 0")
-
-        handle_transaction(
-            self.w3,
-            "Approve stake",
-            self.hmtoken_contract.functions.approve(
+        try:
+            tx_hash = self.hmtoken_contract.functions.approve(
                 self.network["staking_address"], amount
-            ),
-            StakingClientError,
-            tx_options,
-        )
+            ).transact(tx_options or {})
+            self.w3.eth.wait_for_transaction_receipt(tx_hash)
+        except Exception as e:
+            handle_error(e, StakingClientError)
 
+    @requires_signer
     def stake(self, amount: Decimal, tx_options: Optional[TxParams] = None) -> None:
         """Stakes HMT token.
 
@@ -228,15 +228,15 @@ class StakingClient:
 
         if amount <= 0:
             raise StakingClientError("Amount to stake must be greater than 0")
+        try:
+            tx_hash = self.staking_contract.functions.stake(amount).transact(
+                tx_options or {}
+            )
+            self.w3.eth.wait_for_transaction_receipt(tx_hash)
+        except Exception as e:
+            handle_error(e, StakingClientError)
 
-        handle_transaction(
-            self.w3,
-            "Stake HMT",
-            self.staking_contract.functions.stake(amount),
-            StakingClientError,
-            tx_options,
-        )
-
+    @requires_signer
     def unstake(self, amount: Decimal, tx_options: Optional[TxParams] = None) -> None:
         """Unstakes HMT token.
 
@@ -279,15 +279,15 @@ class StakingClient:
 
         if amount <= 0:
             raise StakingClientError("Amount to unstake must be greater than 0")
+        try:
+            tx_hash = self.staking_contract.functions.unstake(amount).transact(
+                tx_options or {}
+            )
+            self.w3.eth.wait_for_transaction_receipt(tx_hash)
+        except Exception as e:
+            handle_error(e, StakingClientError)
 
-        handle_transaction(
-            self.w3,
-            "Unstake HMT",
-            self.staking_contract.functions.unstake(amount),
-            StakingClientError,
-            tx_options,
-        )
-
+    @requires_signer
     def withdraw(self, tx_options: Optional[TxParams] = None) -> None:
         """Withdraws HMT token.
 
@@ -325,14 +325,15 @@ class StakingClient:
                 staking_client.withdraw()
         """
 
-        handle_transaction(
-            self.w3,
-            "Withdraw HMT",
-            self.staking_contract.functions.withdraw(),
-            StakingClientError,
-            tx_options,
-        )
+        try:
+            tx_hash = self.staking_contract.functions.withdraw().transact(
+                tx_options or {}
+            )
+            self.w3.eth.wait_for_transaction_receipt(tx_hash)
+        except Exception as e:
+            handle_error(e, StakingClientError)
 
+    @requires_signer
     def slash(
         self,
         slasher: str,
@@ -391,19 +392,15 @@ class StakingClient:
 
         if amount <= 0:
             raise StakingClientError("Amount to slash must be greater than 0")
-
         if not self._is_valid_escrow(escrow_address):
             raise StakingClientError(f"Invalid escrow address: {escrow_address}")
-
-        handle_transaction(
-            self.w3,
-            "Slash HMT",
-            self.staking_contract.functions.slash(
+        try:
+            tx_hash = self.staking_contract.functions.slash(
                 slasher, staker, escrow_address, amount
-            ),
-            StakingClientError,
-            tx_options,
-        )
+            ).transact(tx_options or {})
+            self.w3.eth.wait_for_transaction_receipt(tx_hash)
+        except Exception as e:
+            handle_error(e, StakingClientError)
 
     def get_staker_info(self, staker_address: str) -> dict:
         """Retrieves comprehensive staking information for a staker.

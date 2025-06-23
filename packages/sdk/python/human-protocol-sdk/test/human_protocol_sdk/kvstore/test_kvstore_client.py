@@ -1,11 +1,11 @@
 import unittest
 
-from human_protocol_sdk.constants import NETWORKS
 from test.human_protocol_sdk.utils import DEFAULT_GAS_PAYER_PRIV
 from unittest.mock import MagicMock, PropertyMock, patch
 
 from human_protocol_sdk.kvstore import KVStoreClient, KVStoreClientError
-from human_protocol_sdk.constants import ChainId
+from human_protocol_sdk.constants import ChainId, NETWORKS
+from human_protocol_sdk.decorators import RequiresSignerError
 from web3 import Web3
 from web3.providers.rpc import HTTPProvider
 from web3.middleware import SignAndSendRawMiddlewareBuilder
@@ -66,24 +66,22 @@ class TestKVStoreClient(unittest.TestCase):
         self.assertEqual(f"Invalid Web3 Instance", str(cm.exception))
 
     def test_set(self):
-        mock_function = MagicMock()
-        self.kvstore.kvstore_contract.functions.set = mock_function
+        mock_set = MagicMock()
+        mock_set.transact.return_value = "tx_hash"
+        self.kvstore.kvstore_contract.functions.set = MagicMock(return_value=mock_set)
+        self.kvstore.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": []}
+        )
         key = "key"
         value = "value"
 
-        with patch(
-            "human_protocol_sdk.kvstore.kvstore_client.handle_transaction"
-        ) as mock_handle_transaction:
-            self.kvstore.set(key, value)
+        self.kvstore.set(key, value)
 
-            mock_function.assert_called_once_with(key, value)
-            mock_handle_transaction.assert_called_once_with(
-                self.w3,
-                "Set",
-                mock_function.return_value,
-                KVStoreClientError,
-                None,
-            )
+        self.kvstore.kvstore_contract.functions.set.assert_called_once_with(key, value)
+        mock_set.transact.assert_called_once_with({})
+        self.kvstore.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
+            "tx_hash"
+        )
 
     def test_set_empty_key(self):
         key = ""
@@ -102,50 +100,50 @@ class TestKVStoreClient(unittest.TestCase):
 
         key = "key"
         value = "value"
-        with self.assertRaises(KVStoreClientError) as cm:
+        with self.assertRaises(RequiresSignerError) as cm:
             kvstore.set(key, value)
         self.assertEqual("You must add an account to Web3 instance", str(cm.exception))
 
     def test_set_with_tx_options(self):
-        mock_function = MagicMock()
-        self.kvstore.kvstore_contract.functions.set = mock_function
+        mock_set = MagicMock()
+        mock_set.transact.return_value = "tx_hash"
+        self.kvstore.kvstore_contract.functions.set = MagicMock(return_value=mock_set)
+        self.kvstore.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": []}
+        )
         key = "key"
         value = "value"
         tx_options = {"gas": 50000}
 
-        with patch(
-            "human_protocol_sdk.kvstore.kvstore_client.handle_transaction"
-        ) as mock_handle_transaction:
-            self.kvstore.set(key, value, tx_options)
+        self.kvstore.set(key, value, tx_options)
 
-            mock_function.assert_called_once_with(key, value)
-            mock_handle_transaction.assert_called_once_with(
-                self.w3,
-                "Set",
-                mock_function.return_value,
-                KVStoreClientError,
-                tx_options,
-            )
+        self.kvstore.kvstore_contract.functions.set.assert_called_once_with(key, value)
+        mock_set.transact.assert_called_once_with(tx_options)
+        self.kvstore.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
+            "tx_hash"
+        )
 
     def test_set_bulk(self):
-        mock_function = MagicMock()
-        self.kvstore.kvstore_contract.functions.setBulk = mock_function
+        mock_set_bulk = MagicMock()
+        mock_set_bulk.transact.return_value = "tx_hash"
+        self.kvstore.kvstore_contract.functions.setBulk = MagicMock(
+            return_value=mock_set_bulk
+        )
+        self.kvstore.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": []}
+        )
         keys = ["key1", "key2", "key3"]
         values = ["value1", "value2", "value3"]
 
-        with patch(
-            "human_protocol_sdk.kvstore.kvstore_client.handle_transaction"
-        ) as mock_handle_transaction:
-            self.kvstore.set_bulk(keys, values)
+        self.kvstore.set_bulk(keys, values)
 
-            mock_function.assert_called_once_with(keys, values)
-            mock_handle_transaction.assert_called_once_with(
-                self.w3,
-                "Set Bulk",
-                mock_function.return_value,
-                KVStoreClientError,
-                None,
-            )
+        self.kvstore.kvstore_contract.functions.setBulk.assert_called_once_with(
+            keys, values
+        )
+        mock_set_bulk.transact.assert_called_once_with({})
+        self.kvstore.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
+            "tx_hash"
+        )
 
     def test_set_bulk_empty_key(self):
         keys = ["key1", "", "key3"]
@@ -178,92 +176,87 @@ class TestKVStoreClient(unittest.TestCase):
 
         keys = ["key1", "key2", "key3"]
         values = ["value1", "", "value3"]
-        with self.assertRaises(KVStoreClientError) as cm:
+        with self.assertRaises(RequiresSignerError) as cm:
             kvstore.set_bulk(keys, values)
         self.assertEqual("You must add an account to Web3 instance", str(cm.exception))
 
     def test_set_bulk_with_tx_options(self):
-        mock_function = MagicMock()
-        self.kvstore.kvstore_contract.functions.setBulk = mock_function
+        mock_set_bulk = MagicMock()
+        mock_set_bulk.transact.return_value = "tx_hash"
+        self.kvstore.kvstore_contract.functions.setBulk = MagicMock(
+            return_value=mock_set_bulk
+        )
+        self.kvstore.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": []}
+        )
         keys = ["key1", "key2", "key3"]
         values = ["value1", "value2", "value3"]
         tx_options = {"gas": 50000}
 
-        with patch(
-            "human_protocol_sdk.kvstore.kvstore_client.handle_transaction"
-        ) as mock_handle_transaction:
-            self.kvstore.set_bulk(keys, values, tx_options)
+        self.kvstore.set_bulk(keys, values, tx_options)
 
-            mock_function.assert_called_once_with(keys, values)
-            mock_handle_transaction.assert_called_once_with(
-                self.w3,
-                "Set Bulk",
-                mock_function.return_value,
-                KVStoreClientError,
-                tx_options,
-            )
+        self.kvstore.kvstore_contract.functions.setBulk.assert_called_once_with(
+            keys, values
+        )
+        mock_set_bulk.transact.assert_called_once_with(tx_options)
+        self.kvstore.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
+            "tx_hash"
+        )
 
     def test_set_file_url_and_hash(self):
-        mock_function = MagicMock()
-        self.kvstore.kvstore_contract.functions.setBulk = mock_function
-
         url = "https://example.com"
         content = "example"
         content_hash = self.w3.keccak(text=content).hex()
 
-        with (
-            patch(
-                "human_protocol_sdk.kvstore.kvstore_client.handle_transaction"
-            ) as mock_handle_transaction,
-            patch("requests.get") as mock_get,
-        ):
+        mock_set_bulk = MagicMock()
+        mock_set_bulk.transact.return_value = "tx_hash"
+        self.kvstore.kvstore_contract.functions.setBulk = MagicMock(
+            return_value=mock_set_bulk
+        )
+        self.kvstore.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": []}
+        )
+
+        with patch("requests.get") as mock_get:
             mock_response = mock_get.return_value
             mock_response.text = content
 
             self.kvstore.set_file_url_and_hash(url)
 
-            mock_function.assert_called_once_with(
+            self.kvstore.kvstore_contract.functions.setBulk.assert_called_once_with(
                 ["url", "url_hash"], [url, content_hash]
             )
-
-            mock_handle_transaction.assert_called_once_with(
-                self.w3,
-                "Set Bulk",
-                mock_function.return_value,
-                KVStoreClientError,
-                None,
+            mock_set_bulk.transact.assert_called_once_with({})
+            self.kvstore.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
+                "tx_hash"
             )
 
     def test_set_file_url_and_hash_with_key(self):
-        mock_function = MagicMock()
-        self.kvstore.kvstore_contract.functions.setBulk = mock_function
-
         url = "https://example.com"
         content = "example"
         content_hash = self.w3.keccak(text=content).hex()
 
-        with (
-            patch(
-                "human_protocol_sdk.kvstore.kvstore_client.handle_transaction"
-            ) as mock_handle_transaction,
-            patch("requests.get") as mock_get,
-        ):
+        mock_set_bulk = MagicMock()
+        mock_set_bulk.transact.return_value = "tx_hash"
+        self.kvstore.kvstore_contract.functions.setBulk = MagicMock(
+            return_value=mock_set_bulk
+        )
+        self.kvstore.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": []}
+        )
+
+        with patch("requests.get") as mock_get:
             mock_response = mock_get.return_value
             mock_response.text = content
 
             self.kvstore.set_file_url_and_hash(url, "linkedin_url")
 
-            mock_function.assert_called_once_with(
+            self.kvstore.kvstore_contract.functions.setBulk.assert_called_once_with(
                 ["linkedin_url", "linkedin_url_hash"], [url, content_hash]
             )
 
-            mock_handle_transaction.assert_called_once_with(
-                self.w3,
-                "Set Bulk",
-                mock_function.return_value,
-                KVStoreClientError,
-                None,
-            )
+            mock_set_bulk.transact.assert_called_once_with({})
+            self.kvstore.w3.eth.wait_for_transaction_receipt.assert_called_once_with
 
     def test_set_file_url_and_hash_invalid_url(self):
         invalid_url = "example.com"
@@ -280,40 +273,37 @@ class TestKVStoreClient(unittest.TestCase):
         kvstore = KVStoreClient(w3)
 
         url = "https://example.com"
-        with self.assertRaises(KVStoreClientError) as cm:
+        with self.assertRaises(RequiresSignerError) as cm:
             kvstore.set_file_url_and_hash(url)
         self.assertEqual("You must add an account to Web3 instance", str(cm.exception))
 
     def test_set_file_url_and_hash_with_tx_options(self):
-        mock_function = MagicMock()
-        self.kvstore.kvstore_contract.functions.setBulk = mock_function
-
         url = "https://example.com"
         content = "example"
         content_hash = self.w3.keccak(text=content).hex()
         tx_options = {"gas": 50000}
 
-        with (
-            patch(
-                "human_protocol_sdk.kvstore.kvstore_client.handle_transaction"
-            ) as mock_handle_transaction,
-            patch("requests.get") as mock_get,
-        ):
+        mock_set_bulk = MagicMock()
+        mock_set_bulk.transact.return_value = "tx_hash"
+        self.kvstore.kvstore_contract.functions.setBulk = MagicMock(
+            return_value=mock_set_bulk
+        )
+        self.kvstore.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": []}
+        )
+
+        with patch("requests.get") as mock_get:
             mock_response = mock_get.return_value
             mock_response.text = content
 
             self.kvstore.set_file_url_and_hash(url, tx_options=tx_options)
 
-            mock_function.assert_called_once_with(
+            self.kvstore.kvstore_contract.functions.setBulk.assert_called_once_with(
                 ["url", "url_hash"], [url, content_hash]
             )
-
-            mock_handle_transaction.assert_called_once_with(
-                self.w3,
-                "Set Bulk",
-                mock_function.return_value,
-                KVStoreClientError,
-                tx_options,
+            mock_set_bulk.transact.assert_called_once_with(tx_options)
+            self.kvstore.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
+                "tx_hash"
             )
 
 

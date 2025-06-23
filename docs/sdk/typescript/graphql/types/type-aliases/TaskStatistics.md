@@ -8,7 +8,7 @@
 
 > **TaskStatistics** = `object`
 
-Defined in: [graphql/types.ts:146](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L146)
+Defined in: [graphql/types.ts:146](https://github.com/humanprotocol/human-protocol/blob/9da418b6962e251427442717195921599d2815f2/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L146)
 
 ## Properties
 
@@ -16,4 +16,4 @@ Defined in: [graphql/types.ts:146](https://github.com/humanprotocol/human-protoc
 
 > **dailyTasksData**: [`DailyTaskData`](DailyTaskData.md)[]
 
-Defined in: [graphql/types.ts:147](https://github.com/humanprotocol/human-protocol/blob/a3c69981844e7ed43743f2459713fe069fcbb283/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L147)
+Defined in: [graphql/types.ts:147](https://github.com/humanprotocol/human-protocol/blob/9da418b6962e251427442717195921599d2815f2/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L147)

@@ -63,8 +63,10 @@ describe('OracleDiscoveryController', () => {
       const dtoFixture = {
         selected_job_types: ['job-type-1', 'job-type-2'],
       } as GetOraclesQuery;
-      const result: DiscoveredOracle[] =
-        await controller.getOracles(dtoFixture);
+      const result: DiscoveredOracle[] = await controller.getOracles(
+        { qualifications: [] } as any,
+        dtoFixture,
+      );
       const expectedResponse = generateOracleDiscoveryResponseBody();
       expect(serviceMock.getOracles).toHaveBeenCalled();
       expect(result).toEqual(expectedResponse);
@@ -77,7 +79,9 @@ describe('OracleDiscoveryController', () => {
 
       (configServiceMock as any).jobsDiscoveryFlag = false;
 
-      await expect(controller.getOracles(dtoFixture)).rejects.toThrow(
+      await expect(
+        controller.getOracles({ qualifications: [] } as any, dtoFixture),
+      ).rejects.toThrow(
         new HttpException(
           'Oracles discovery is disabled',
           HttpStatus.FORBIDDEN,

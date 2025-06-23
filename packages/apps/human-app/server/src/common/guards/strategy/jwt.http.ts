@@ -45,6 +45,7 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
       status: string;
       wallet_address: string;
       reputation_network: string;
+      qualifications?: string[];
     },
   ): Promise<JwtUserData> {
     if (!payload.user_id) {
@@ -53,9 +54,10 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
 
     return {
       user_id: payload.user_id,
-      status: payload.status,
       wallet_address: payload.wallet_address,
+      status: payload.status,
       reputation_network: payload.reputation_network,
+      qualifications: payload.qualifications,
     };
   }
 }

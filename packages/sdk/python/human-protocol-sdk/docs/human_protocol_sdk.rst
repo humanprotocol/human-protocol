@@ -21,6 +21,7 @@ Subpackages
    human_protocol_sdk.statistics
    human_protocol_sdk.storage
    human_protocol_sdk.transaction
+   human_protocol_sdk.worker
 
 Submodules
 ----------
