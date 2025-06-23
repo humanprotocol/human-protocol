@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { Wallet, ethers } from 'ethers';
 import { Web3Env } from '../../common/enums/web3';
 import {
@@ -10,11 +10,16 @@ import { ErrorWeb3 } from '../../common/constant/errors';
 import { ChainId } from '@human-protocol/sdk';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { NetworkConfigService } from '../../common/config/network-config.service';
+import Logger from '@human-protocol/logger';
 
 @Injectable()
 export class Web3Service {
+  public readonly logger = Logger.child({
+    context: Web3Service.name,
+  });
+
   private signers: { [key: number]: Wallet } = {};
-  public readonly logger = new Logger(Web3Service.name);
+
   public readonly signerAddress: string;
   public readonly currentWeb3Env: string;
 
@@ -43,7 +48,7 @@ export class Web3Service {
   public validateChainId(chainId: number): void {
     const validChainIds = this.getValidChains();
     if (!validChainIds.includes(chainId)) {
-      this.logger.log(ErrorWeb3.InvalidChainId, Web3Service.name);
+      this.logger.info(ErrorWeb3.InvalidChainId);
       throw new BadRequestException(ErrorWeb3.InvalidChainId);
     }
   }
