@@ -12,7 +12,7 @@ export class JwtUserData {
   @AutoMap()
   reputation_network: string;
   @AutoMap()
-  qualifications?: string[];
+  qualifications: string[];
   @AutoMap()
   site_key: string;
   @AutoMap()
