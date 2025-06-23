@@ -35,7 +35,7 @@ export class FortunePayoutsCalculator implements EscrowPayoutsCalculator {
       .map((item) => item.workerAddress);
 
     const payoutAmount =
-      BigInt(ethers.parseUnits(manifest.fundAmount.toString(), 'ether')) /
+      ethers.parseUnits(manifest.fundAmount.toString(), 18) /
       BigInt(recipients.length);
 
     return recipients.map((recipient) => ({

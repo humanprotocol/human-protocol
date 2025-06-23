@@ -1,9 +1,8 @@
-import { EscrowClient } from '@human-protocol/sdk';
+import { EscrowClient, EscrowUtils } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
-import { ethers } from 'ethers';
 import type { OverrideProperties } from 'type-fest';
 
-import { AUDINO_RESULTS_ANNOTATIONS_FILENAME } from '../../../common/constants';
+import { AUDINO_VALIDATION_META_FILENAME } from '../../../common/constants';
 import { AudinoAnnotationMeta, AudinoManifest } from '../../../common/types';
 
 import { StorageService } from '../../storage';
@@ -28,7 +27,6 @@ export class AudinoPayoutsCalculator implements EscrowPayoutsCalculator {
   ) {}
 
   async calculate({
-    manifest,
     chainId,
     escrowAddress,
   }: CalculateAudinoPayoutsInput): Promise<CalculatedPayout[]> {
@@ -40,24 +38,23 @@ export class AudinoPayoutsCalculator implements EscrowPayoutsCalculator {
 
     const annotations =
       await this.storageService.downloadJsonLikeData<AudinoAnnotationMeta>(
-        `${intermediateResultsUrl}/${AUDINO_RESULTS_ANNOTATIONS_FILENAME}`,
+        `${intermediateResultsUrl}/${AUDINO_VALIDATION_META_FILENAME}`,
       );
 
     if (annotations.jobs.length === 0 || annotations.results.length === 0) {
       throw new Error('Invalid annotation meta');
     }
 
-    const jobBountyValue = ethers.parseUnits(manifest.job_bounty, 18);
-    const workersBounties = new Map<string, typeof jobBountyValue>();
+    const escrowData = await EscrowUtils.getEscrow(chainId, escrowAddress);
+    const jobBountyValue =
+      BigInt(escrowData.totalFundedAmount) / BigInt(annotations.jobs.length);
 
+    const workersBounties = new Map<string, bigint>();
     for (const job of annotations.jobs) {
       const jobFinalResult = annotations.results.find(
         (result) => result.id === job.final_result_id,
       );
-      if (
-        jobFinalResult
-        // && jobFinalResult.annotation_quality >= manifest.validation.min_quality
-      ) {
+      if (jobFinalResult) {
         const workerAddress = jobFinalResult.annotator_wallet_address;
 
         const currentWorkerBounty = workersBounties.get(workerAddress) || 0n;

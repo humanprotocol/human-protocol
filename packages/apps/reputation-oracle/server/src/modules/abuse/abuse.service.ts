@@ -65,7 +65,7 @@ export class AbuseService {
       data.slasher,
       data.staker,
       data.escrowAddress,
-      BigInt(ethers.parseUnits(data.amount.toString(), 'ether')),
+      BigInt(ethers.parseUnits(data.amount.toString(), 18)),
     );
   }
 
