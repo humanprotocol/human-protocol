@@ -1599,4 +1599,60 @@ describe('PaymentService', () => {
       ).rejects.toThrow(new ServerError(ErrorPayment.NotEnoughFunds));
     });
   });
+
+  describe('getPaymentsByJobId', () => {
+    it('should return payments filtered by jobId and type', async () => {
+      const jobId = 123;
+      const type = PaymentType.REFUND;
+      const mockPayments = [
+        {
+          id: 1,
+          jobId,
+          type,
+          amount: 100,
+          currency: PaymentCurrency.USD,
+          status: PaymentStatus.SUCCEEDED,
+          createdAt: new Date(),
+        } as PaymentEntity,
+        {
+          id: 2,
+          jobId,
+          type,
+          amount: 50,
+          currency: PaymentCurrency.USD,
+          status: PaymentStatus.SUCCEEDED,
+          createdAt: new Date(),
+        } as PaymentEntity,
+      ];
+
+      jest
+        .spyOn(paymentRepository, 'findByJobIdAndType')
+        .mockResolvedValueOnce(mockPayments);
+
+      const result = await paymentService.getPaymentsByJobId(jobId, type);
+
+      expect(paymentRepository.findByJobIdAndType).toHaveBeenCalledWith(
+        jobId,
+        type,
+      );
+      expect(result).toEqual(mockPayments);
+    });
+
+    it('should return an empty array if no payments are found', async () => {
+      const jobId = 456;
+      const type = PaymentType.SLASH;
+
+      jest
+        .spyOn(paymentRepository, 'findByJobIdAndType')
+        .mockResolvedValueOnce([]);
+
+      const result = await paymentService.getPaymentsByJobId(jobId, type);
+
+      expect(paymentRepository.findByJobIdAndType).toHaveBeenCalledWith(
+        jobId,
+        type,
+      );
+      expect(result).toEqual([]);
+    });
+  });
 });

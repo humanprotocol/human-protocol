@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { KVStoreKeys, KVStoreUtils } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
@@ -14,7 +14,6 @@ import { formatAxiosError } from '../../common/utils/http';
 import { signMessage } from '../../common/utils/signature';
 import { JobRepository } from '../job/job.repository';
 import { JobService } from '../job/job.service';
-import { Web3Service } from '../web3/web3.service';
 import { WebhookDataDto } from './webhook.dto';
 import { WebhookEntity } from './webhook.entity';
 import { WebhookRepository } from './webhook.repository';
@@ -24,8 +23,6 @@ export class WebhookService {
   private readonly logger = new Logger(WebhookService.name);
 
   constructor(
-    @Inject(Web3Service)
-    private readonly web3Service: Web3Service,
     private readonly webhookRepository: WebhookRepository,
     private readonly jobService: JobService,
     private readonly jobRepository: JobRepository,

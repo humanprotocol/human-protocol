@@ -287,24 +287,7 @@ export class CronJobService {
             jobEntity.requestType,
           );
           if (oracleType !== OracleType.HCAPTCHA) {
-            const baseWebhook = {
-              escrowAddress: jobEntity.escrowAddress,
-              chainId: jobEntity.chainId,
-              eventType: EventType.CANCELLATION_REQUESTED,
-              oracleType,
-              hasSignature: true,
-            };
-            const webhooks = [
-              Object.assign(new WebhookEntity(), {
-                ...baseWebhook,
-                oracleAddress: jobEntity.exchangeOracle,
-              }),
-              Object.assign(new WebhookEntity(), {
-                ...baseWebhook,
-                oracleAddress: jobEntity.recordingOracle,
-              }),
-            ];
-            await this.webhookRepository.createMany(webhooks);
+            await this.createCancellationWebhooks(jobEntity, oracleType);
           }
         } catch (err) {
           const errorId = uuidv4();
@@ -402,16 +385,26 @@ export class CronJobService {
           }
           if (
             jobEntity.escrowAddress &&
+            jobEntity.status !== JobStatus.CANCELING &&
             jobEntity.status !== JobStatus.CANCELED
           ) {
             await this.jobService.processEscrowCancellation(jobEntity);
           }
 
-          if (jobEntity.status !== JobStatus.CANCELED) {
-            jobEntity.status = JobStatus.CANCELED;
+          if (
+            jobEntity.status !== JobStatus.CANCELING &&
+            jobEntity.status !== JobStatus.CANCELED
+          ) {
+            jobEntity.status = JobStatus.CANCELING;
             await this.jobRepository.updateOne(jobEntity);
           }
           await this.paymentService.createSlash(jobEntity);
+          const oracleType = this.jobService.getOracleType(
+            jobEntity.requestType,
+          );
+          if (oracleType !== OracleType.HCAPTCHA) {
+            await this.createCancellationWebhooks(jobEntity, oracleType);
+          }
         } catch (err) {
           this.logger.error(
             `Error slashing escrow (address: ${webhookEntity.escrowAddress}, chainId: ${webhookEntity.chainId}: ${err.message}`,
@@ -547,5 +540,29 @@ export class CronJobService {
 
     this.logger.log('Update jobs STOP');
     await this.completeCronJob(cronJob);
+  }
+
+  private async createCancellationWebhooks(
+    jobEntity: JobEntity,
+    oracleType: OracleType,
+  ) {
+    const baseWebhook = {
+      escrowAddress: jobEntity.escrowAddress,
+      chainId: jobEntity.chainId,
+      eventType: EventType.CANCELLATION_REQUESTED,
+      oracleType,
+      hasSignature: true,
+    };
+    const webhooks = [
+      Object.assign(new WebhookEntity(), {
+        ...baseWebhook,
+        oracleAddress: jobEntity.exchangeOracle,
+      }),
+      Object.assign(new WebhookEntity(), {
+        ...baseWebhook,
+        oracleAddress: jobEntity.recordingOracle,
+      }),
+    ];
+    await this.webhookRepository.createMany(webhooks);
   }
 }

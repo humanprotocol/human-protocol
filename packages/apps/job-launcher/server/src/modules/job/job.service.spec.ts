@@ -26,7 +26,7 @@ import {
   JobStatus,
   JobStatusFilter,
 } from '../../common/enums/job';
-import { PaymentCurrency } from '../../common/enums/payment';
+import { PaymentCurrency, PaymentType } from '../../common/enums/payment';
 import {
   EventType,
   OracleType,
@@ -1788,6 +1788,7 @@ describe('JobService', () => {
       const jobEntity = createJobEntity();
       const refundAmount = faker.number.float({ min: 1, max: 10 });
 
+      mockPaymentService.getPaymentsByJobId.mockResolvedValueOnce([]);
       mockedEscrowUtils.getCancellationRefund.mockResolvedValueOnce({
         amount: ethers.parseUnits(refundAmount.toString(), 18),
         escrowAddress: jobEntity.escrowAddress!,
@@ -1797,6 +1798,10 @@ describe('JobService', () => {
 
       await jobService.cancelJob(jobEntity);
 
+      expect(mockPaymentService.getPaymentsByJobId).toHaveBeenCalledWith(
+        jobEntity.id,
+        PaymentType.SLASH,
+      );
       expect(EscrowUtils.getCancellationRefund).toHaveBeenCalledWith(
         jobEntity.chainId,
         jobEntity.escrowAddress,
@@ -1811,8 +1816,33 @@ describe('JobService', () => {
       expect(mockJobRepository.updateOne).toHaveBeenCalledWith(jobEntity);
     });
 
+    it('should NOT create a refund if SLASH payment exists, but still set status to CANCELED', async () => {
+      const jobEntity = createJobEntity();
+      mockPaymentService.getPaymentsByJobId.mockResolvedValueOnce([
+        {
+          id: faker.number.int(),
+          jobId: jobEntity.id,
+          type: PaymentType.SLASH,
+          amount: 10,
+          status: 'SUCCEEDED',
+          createdAt: new Date(),
+        } as any,
+      ]);
+      await jobService.cancelJob(jobEntity);
+
+      expect(mockPaymentService.getPaymentsByJobId).toHaveBeenCalledWith(
+        jobEntity.id,
+        PaymentType.SLASH,
+      );
+      expect(EscrowUtils.getCancellationRefund).not.toHaveBeenCalled();
+      expect(mockPaymentService.createRefundPayment).not.toHaveBeenCalled();
+      expect(jobEntity.status).toBe(JobStatus.CANCELED);
+      expect(mockJobRepository.updateOne).toHaveBeenCalledWith(jobEntity);
+    });
+
     it('should throw ConflictError if no refund is found', async () => {
       const jobEntity = createJobEntity();
+      mockPaymentService.getPaymentsByJobId.mockResolvedValueOnce([]);
       mockedEscrowUtils.getCancellationRefund.mockResolvedValueOnce(
         null as any,
       );
@@ -1824,6 +1854,7 @@ describe('JobService', () => {
 
     it('should throw ConflictError if refund.amount is empty', async () => {
       const jobEntity = createJobEntity();
+      mockPaymentService.getPaymentsByJobId.mockResolvedValueOnce([]);
       mockedEscrowUtils.getCancellationRefund.mockResolvedValueOnce({
         amount: 0,
         escrowAddress: jobEntity.escrowAddress!,

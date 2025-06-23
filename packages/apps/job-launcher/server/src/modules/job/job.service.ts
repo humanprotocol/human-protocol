@@ -34,7 +34,7 @@ import {
   JobRequestType,
   JobStatus,
 } from '../../common/enums/job';
-import { FiatCurrency } from '../../common/enums/payment';
+import { FiatCurrency, PaymentType } from '../../common/enums/payment';
 import { EventType, OracleType } from '../../common/enums/webhook';
 import {
   ConflictError,
@@ -905,21 +905,27 @@ export class JobService {
   }
 
   public async cancelJob(jobEntity: JobEntity): Promise<void> {
-    const refund = await EscrowUtils.getCancellationRefund(
-      jobEntity.chainId,
-      jobEntity.escrowAddress!,
+    const slash = await this.paymentService.getPaymentsByJobId(
+      jobEntity.id,
+      PaymentType.SLASH,
     );
+    if (!slash?.length) {
+      const refund = await EscrowUtils.getCancellationRefund(
+        jobEntity.chainId,
+        jobEntity.escrowAddress!,
+      );
 
-    if (!refund || !refund.amount) {
-      throw new ConflictError(ErrorJob.NoRefundFound);
+      if (!refund || !refund.amount) {
+        throw new ConflictError(ErrorJob.NoRefundFound);
+      }
+
+      await this.paymentService.createRefundPayment({
+        refundAmount: Number(ethers.formatEther(refund.amount)),
+        refundCurrency: jobEntity.token,
+        userId: jobEntity.userId,
+        jobId: jobEntity.id,
+      });
     }
-
-    await this.paymentService.createRefundPayment({
-      refundAmount: Number(ethers.formatEther(refund.amount)),
-      refundCurrency: jobEntity.token,
-      userId: jobEntity.userId,
-      jobId: jobEntity.id,
-    });
 
     jobEntity.status = JobStatus.CANCELED;
     await this.jobRepository.updateOne(jobEntity);

@@ -32,7 +32,6 @@ import {
 import { ServerError, ValidationError } from '../../common/errors';
 import { JobRepository } from '../job/job.repository';
 import { JobService } from '../job/job.service';
-import { Web3Service } from '../web3/web3.service';
 import { WebhookDataDto } from './webhook.dto';
 import { WebhookEntity } from './webhook.entity';
 import { WebhookRepository } from './webhook.repository';
@@ -44,11 +43,6 @@ describe('WebhookService', () => {
     jobService: JobService,
     jobRepository: JobRepository,
     httpService: HttpService;
-
-  const signerMock = {
-    address: MOCK_ADDRESS,
-    getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
-  };
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -68,12 +62,6 @@ describe('WebhookService', () => {
         WebhookService,
         ServerConfigService,
         Web3ConfigService,
-        {
-          provide: Web3Service,
-          useValue: {
-            getSigner: jest.fn().mockReturnValue(signerMock),
-          },
-        },
         {
           provide: WebhookRepository,
           useValue: createMock<WebhookRepository>(),

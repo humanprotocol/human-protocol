@@ -1273,7 +1273,7 @@ describe('CronJobService', () => {
 
       expect(jobRepository.updateOne).toHaveBeenCalledWith({
         ...jobEntity,
-        status: JobStatus.CANCELED,
+        status: JobStatus.CANCELING,
       });
       expect(webhookRepository.updateOne).toHaveBeenCalledWith({
         ...webhookEntity,
