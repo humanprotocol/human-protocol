@@ -3,9 +3,11 @@ import { ConfigModule } from '@nestjs/config';
 import * as _ from 'lodash';
 import { RedisConfigService } from './redis-config.service';
 import { redisStore } from 'cache-manager-redis-yet';
-import { Logger } from '@nestjs/common';
+import Logger from '@human-protocol/logger';
 
-const logger = new Logger('CacheFactoryRedisStore');
+const logger = Logger.child({
+  context: 'CacheFactoryRedisStore',
+});
 
 const throttledRedisErrorLog = _.throttle((error) => {
   logger.error('Redis client network error', error);

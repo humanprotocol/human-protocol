@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ChainId, NETWORKS, StatisticsClient } from '@human-protocol/sdk';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 
@@ -9,10 +9,14 @@ import {
 } from '../../common/config/env-config.service';
 import { OPERATING_NETWORKS_CACHE_KEY } from '../../common/config/redis-config.service';
 import { NetworkConfigService } from '../../common/config/network-config.service';
+import Logger from '@human-protocol/logger';
 
 @Injectable()
 export class NetworksService {
-  private readonly logger = new Logger(NetworksService.name);
+  private readonly logger = Logger.child({
+    context: NetworksService.name,
+  });
+
   constructor(
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private readonly envConfigService: EnvironmentConfigService,

@@ -1,11 +1,15 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException  } from '@nestjs/common';
 import * as Minio from 'minio';
 import { S3ConfigService } from '../../common/config/s3-config.service';
 import { Readable } from 'stream';
+import Logger from '@human-protocol/logger';
 
 @Injectable()
 export class StorageService {
-  private readonly logger = new Logger(StorageService.name);
+  private readonly logger = Logger.child({
+    context: StorageService.name,
+  });
+
   public readonly minioClient: Minio.Client;
 
   constructor(private s3ConfigService: S3ConfigService) {
@@ -52,7 +56,7 @@ export class StorageService {
         });
       });
     } catch (e) {
-      this.logger.log(e);
+      this.logger.info(e);
       return [];
     }
   }
