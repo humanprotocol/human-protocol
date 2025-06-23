@@ -1,4 +1,4 @@
-import { HttpException, Inject, Injectable, Logger } from '@nestjs/common';
+import { HttpException, Inject, Injectable } from '@nestjs/common';
 import {
   VerifyTokenCommand,
   VerifyTokenApiResponse,
@@ -20,10 +20,14 @@ import { HCaptchaStatisticsGateway } from '../../integrations/h-captcha-labeling
 import { ReputationOracleGateway } from '../../integrations/reputation-oracle/reputation-oracle.gateway';
 import { HCaptchaVerifyGateway } from '../../integrations/h-captcha-labeling/h-captcha-verify.gateway';
 import { DAILY_HMT_SPENT_CACHE_KEY } from '../../common/constants/cache';
+import Logger from '@human-protocol/logger';
 
 @Injectable()
 export class HCaptchaService {
-  private readonly logger = new Logger(HCaptchaService.name);
+  private readonly logger = Logger.child({
+    context: HCaptchaService.name,
+  });
+
   constructor(
     private configService: EnvironmentConfigService,
     private hCaptchaLabelingGateway: HCaptchaStatisticsGateway,
@@ -43,6 +47,7 @@ export class HCaptchaService {
     this.logger.error(errorMessage);
     throw new HttpException(errorMessage, 400);
   }
+
   private createHCaptchaVerificationErrorMessage(
     response: VerifyTokenApiResponse | undefined,
   ): string {
@@ -59,6 +64,7 @@ export class HCaptchaService {
     }
     return message;
   }
+
   async enableLabeling(
     command: EnableLabelingCommand,
   ): Promise<EnableLabelingResponse> {
@@ -97,6 +103,7 @@ export class HCaptchaService {
     );
     return stats;
   }
+
   private checkIfHcaptchaSitekeyPresent(siteKey: string) {
     if (!siteKey) {
       throw new HttpException('Labeling is not enabled for this account', 400);

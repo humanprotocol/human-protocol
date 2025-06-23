@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CronJob } from 'cron';
 import { ExchangeOracleGateway } from '../../integrations/exchange-oracle/exchange-oracle.gateway';
 import { ReputationOracleGateway } from '../../integrations/reputation-oracle/reputation-oracle.gateway';
@@ -17,6 +17,7 @@ import {
 } from '../../common/enums/global-common';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { JobsDiscoveryService } from '../jobs-discovery/jobs-discovery.service';
+import Logger from '@human-protocol/logger';
 
 function assertJobsDiscoveryResponseItemsFormat(
   items: JobsDiscoveryResponse['results'],
@@ -41,7 +42,10 @@ function assertJobsDiscoveryResponseItemsFormat(
 
 @Injectable()
 export class CronJobService {
-  private readonly logger = new Logger(CronJobService.name);
+  private readonly logger = Logger.child({
+    context: CronJobService.name,
+  });
+
   constructor(
     private readonly reputationOracleGateway: ReputationOracleGateway,
     private readonly exchangeOracleGateway: ExchangeOracleGateway,
@@ -65,7 +69,7 @@ export class CronJobService {
   }
 
   async updateJobsListCron() {
-    this.logger.log('CRON START');
+    this.logger.info('CRON START');
 
     const oracles = await this.oracleDiscoveryService.discoverOracles();
 
@@ -80,7 +84,7 @@ export class CronJobService {
 
       for (const oracle of oracles) {
         if (oracle.executionsToSkip > 0) {
-          this.logger.log(
+          this.logger.info(
             `Skipping execution for oracle: ${oracle.address}. Remaining skips: ${oracle.executionsToSkip}`,
           );
 
@@ -100,7 +104,7 @@ export class CronJobService {
       this.logger.error(e);
     }
 
-    this.logger.log('CRON END');
+    this.logger.info('CRON END');
   }
 
   async updateJobsListCache(oracle: DiscoveredOracle, token: string) {

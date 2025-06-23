@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import {
   GatewayConfig,
   GatewayEndpointConfig,
@@ -19,11 +19,16 @@ import {
 } from '../../modules/h-captcha/model/verify-token.model';
 import { HCaptchaLabelingVerifyEndpoints } from '../../common/enums/reputation-oracle-endpoints';
 import { toCleanObjParams } from '../../common/utils/gateway-common.utils';
+import Logger from '@human-protocol/logger';
 
 Injectable();
 export class HCaptchaVerifyGateway {
+  private readonly logger = Logger.child({
+    context: HCaptchaVerifyGateway.name,
+  });
+
   private readonly gatewayConfig: GatewayConfig;
-  private readonly logger = new Logger(HCaptchaVerifyGateway.name);
+
   constructor(
     private httpService: HttpService,
     gatewayConfigService: GatewayConfigService,

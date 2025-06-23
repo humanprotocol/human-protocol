@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { ChainId, IOperator, OperatorUtils, Role } from '@human-protocol/sdk';
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import {
@@ -9,10 +9,13 @@ import {
 } from './model/oracle-discovery.model';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
 import { KvStoreGateway } from '../../integrations/kv-store/kv-store.gateway';
+import Logger from '@human-protocol/logger';
 
 @Injectable()
 export class OracleDiscoveryService {
-  logger = new Logger(OracleDiscoveryService.name);
+  logger = Logger.child({
+    context: OracleDiscoveryService.name,
+  });
 
   constructor(
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
