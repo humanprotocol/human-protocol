@@ -173,7 +173,7 @@ export class PaymentService {
       !paymentEntity ||
       paymentEntity.userId !== userId ||
       paymentEntity.status !== PaymentStatus.PENDING ||
-      !eq(paymentEntity.amount, div(paymentData.amount_received, 100)) ||
+      !eq(paymentEntity.amount, div(paymentData.amountReceived, 100)) ||
       paymentEntity.currency !== paymentData.currency
     ) {
       throw new NotFoundError(ErrorPayment.NotFound);

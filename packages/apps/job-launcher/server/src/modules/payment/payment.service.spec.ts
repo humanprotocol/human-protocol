@@ -245,7 +245,7 @@ describe('PaymentService', () => {
       const paymentData = {
         status: PaymentStatus.SUCCEEDED,
         amount: 100,
-        amount_received: 100,
+        amountReceived: 100,
         currency: PaymentCurrency.USD,
       };
 
@@ -297,7 +297,7 @@ describe('PaymentService', () => {
       const paymentData = {
         status: PaymentStatus.FAILED,
         amount: 100,
-        amount_received: 0,
+        amountReceived: 0,
         currency: PaymentCurrency.USD,
       };
 
@@ -327,7 +327,7 @@ describe('PaymentService', () => {
       const paymentData = {
         status: 'unknown_status',
         amount: 100,
-        amount_received: 0,
+        amountReceived: 0,
         currency: PaymentCurrency.USD,
       };
 

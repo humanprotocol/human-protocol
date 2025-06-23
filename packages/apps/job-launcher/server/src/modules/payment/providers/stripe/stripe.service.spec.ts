@@ -4,15 +4,14 @@ import { faker } from '@faker-js/faker';
 import { PaymentData } from '../../payment.interface';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
-import { StripeService } from './stripe.service';
-import { StripeConfigService } from '../../../../common/config/stripe-config.service';
+import { StripePaymentStatus, StripeService } from './stripe.service';
+import { PaymentProviderConfigService } from '../../../../common/config/payment-provider-config.service';
 import Stripe from 'stripe';
 import { NotFoundError, ServerError } from '../../../../common/errors';
 import { ErrorPayment } from '../../../../common/constants/errors';
 import {
   PaymentCurrency,
   PaymentStatus,
-  StripePaymentStatus,
   VatType,
 } from '../../../../common/enums/payment';
 import {
@@ -44,7 +43,7 @@ describe('StripeService', () => {
       providers: [
         StripeService,
         {
-          provide: StripeConfigService,
+          provide: PaymentProviderConfigService,
           useValue: mockStripeConfigService,
         },
       ],

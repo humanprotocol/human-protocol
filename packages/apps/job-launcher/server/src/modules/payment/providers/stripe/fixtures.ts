@@ -1,10 +1,7 @@
 import { faker } from '@faker-js/faker';
-import {
-  PaymentCurrency,
-  StripePaymentStatus,
-  VatType,
-} from '../../../../common/enums/payment';
+import { PaymentCurrency, VatType } from '../../../../common/enums/payment';
 import { AddressDto, BillingInfoDto } from '../../payment.dto';
+import { StripePaymentStatus } from './stripe.service';
 
 export const createMockSetupIntent = () => ({
   id: faker.string.alphanumeric(24),

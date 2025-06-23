@@ -1,13 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import Stripe from 'stripe';
-import { StripeConfigService } from '../../../../common/config/stripe-config.service';
+import { PaymentProviderConfigService } from '../../../../common/config/payment-provider-config.service';
 import { NotFoundError, ServerError } from '../../../../common/errors';
 import { ErrorPayment } from '../../../../common/constants/errors';
-import {
-  PaymentStatus,
-  StripePaymentStatus,
-  VatType,
-} from '../../../../common/enums/payment';
+import { PaymentStatus, VatType } from '../../../../common/enums/payment';
 import {
   CardSetup,
   CustomerData,
@@ -19,11 +15,17 @@ import {
 import { PaymentProvider } from '../payment-provider.abstract';
 import { AddressDto, BillingInfoDto } from '../../payment.dto';
 
+export enum StripePaymentStatus {
+  CANCELED = 'canceled',
+  REQUIRES_PAYMENT_METHOD = 'requires_payment_method',
+  SUCCEEDED = 'succeeded',
+}
+
 @Injectable()
 export class StripeService extends PaymentProvider {
   private stripe: Stripe;
 
-  constructor(private stripeConfigService: StripeConfigService) {
+  constructor(private stripeConfigService: PaymentProviderConfigService) {
     super();
 
     this.stripe = new Stripe(this.stripeConfigService.secretKey, {
@@ -187,10 +189,9 @@ export class StripeService extends PaymentProvider {
   async updateBillingInfo(
     customerId: string,
     data: BillingInfoDto,
-  ): Promise<any> {
+  ): Promise<CustomerData> {
     const existingTaxIds = await this.listCustomerTaxIds(customerId);
 
-    // Delete any existing tax IDs before adding the new one
     for (const taxId of existingTaxIds) {
       await this.deleteTaxId(customerId, taxId.id);
     }
@@ -213,6 +214,8 @@ export class StripeService extends PaymentProvider {
         email: data.email,
       });
     }
+
+    return this.retrieveCustomer(customerId);
   }
 
   async retrievePaymentIntent(paymentIntentId: string): Promise<PaymentData> {
@@ -326,10 +329,10 @@ export class StripeService extends PaymentProvider {
           },
         };
 
-    const customer = (await this.stripe.customers.update(
+    const customer = await this.stripe.customers.update(
       customerId,
       updatePayload,
-    )) as Stripe.Customer;
+    );
 
     return {
       email: customer.email!,

@@ -109,7 +109,7 @@ export abstract class PaymentProvider {
   abstract updateBillingInfo(
     customerId: string,
     data: BillingInfoDto,
-  ): Promise<any>;
+  ): Promise<CustomerData>;
 
-  abstract retrievePaymentIntent(paymentId: string): any;
+  abstract retrievePaymentIntent(paymentId: string): Promise<PaymentData>;
 }
