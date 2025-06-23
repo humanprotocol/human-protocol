@@ -37,4 +37,4 @@ export type LoggerOptions = {
   disabled?: boolean;
   service?: string;
   environment?: string;
-}; 
+};

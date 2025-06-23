@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException  } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import * as Minio from 'minio';
 import { S3ConfigService } from '../../common/config/s3-config.service';
 import { Readable } from 'stream';

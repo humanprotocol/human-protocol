@@ -41,12 +41,12 @@ const defaultLogger = createLogger(
   {
     environment: Environment.envName,
     service: 'human-protocol',
-  },
+  }
 );
 
 // Create NestJS logger override
 export const nestLoggerOverride = new NestLogger(
-  defaultLogger.child({ name: 'NestLogger' }),
+  defaultLogger.child({ name: 'NestLogger' })
 );
 
 // Export the default logger as the main export
