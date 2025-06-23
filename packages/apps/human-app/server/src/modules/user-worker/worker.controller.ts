@@ -2,6 +2,7 @@ import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
 import { Body, Controller, Get, Post, Request } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Public } from '../../common/decorators';
 import { RequestWithUser } from '../../common/interfaces/jwt';
 import {
   RegistrationInExchangeOracleCommand,
@@ -28,6 +29,7 @@ export class WorkerController {
 
   @Post('/auth/signup')
   @ApiOperation({ summary: 'Worker signup' })
+  @Public()
   public signupWorker(@Body() signupWorkerDto: SignupWorkerDto): Promise<void> {
     const signupWorkerCommand = this.mapper.map(
       signupWorkerDto,
@@ -39,6 +41,7 @@ export class WorkerController {
 
   @Post('/auth/signin')
   @ApiOperation({ summary: 'Worker signin' })
+  @Public()
   public signinWorker(
     @Body() signinWorkerDto: SigninWorkerDto,
   ): Promise<SigninWorkerResponse> {

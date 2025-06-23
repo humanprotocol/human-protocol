@@ -6,17 +6,7 @@ export class JwtUserData {
   @AutoMap()
   wallet_address: string;
   @AutoMap()
-  email: string;
-  @AutoMap()
-  kyc_status: 'approved' | 'none';
+  status: string;
   @AutoMap()
   reputation_network: string;
-  @AutoMap()
-  qualifications?: string[];
-  @AutoMap()
-  site_key: string;
-  @AutoMap()
-  iat: number;
-  @AutoMap()
-  exp: number;
 }

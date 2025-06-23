@@ -42,32 +42,20 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
     @Req() _request: any,
     payload: {
       user_id: string;
-      email: string;
+      status: string;
       wallet_address: string;
-      kyc_status: string;
       reputation_network: string;
-      qualifications?: string[];
-      site_key: string;
-      iat: number;
-      exp: number;
     },
   ): Promise<JwtUserData> {
-    console.log('JWT payload in validate:', payload);
-
-    if (!payload.email) {
-      throw new UnauthorizedException('Invalid token: missing email');
+    if (!payload.user_id) {
+      throw new UnauthorizedException('Invalid token: missing user id');
     }
 
     return {
       user_id: payload.user_id,
+      status: payload.status,
       wallet_address: payload.wallet_address,
-      email: payload.email,
-      kyc_status: payload.kyc_status === 'approved' ? 'approved' : 'none',
       reputation_network: payload.reputation_network,
-      qualifications: payload.qualifications,
-      site_key: payload.site_key,
-      iat: payload.iat,
-      exp: payload.exp,
     };
   }
 }

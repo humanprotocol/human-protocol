@@ -2,6 +2,7 @@ import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
 import { Body, Controller, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Public } from '../../common/decorators';
 import {
   PrepareSignatureCommand,
   PrepareSignatureDto,
@@ -10,6 +11,7 @@ import {
 import { PrepareSignatureService } from './prepare-signature.service';
 
 @ApiTags('Prepare-Signature')
+@Public()
 @Controller('/prepare-signature')
 export class PrepareSignatureController {
   constructor(

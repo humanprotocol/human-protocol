@@ -1,23 +1,13 @@
 import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  Post,
-  Request,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Post, Request } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../common/guards/jwt.auth';
 import { RequestWithUser } from '../../common/interfaces/jwt';
 import { GetNDACommand, SignNDACommand, SignNDADto } from './model/nda.model';
 import { NDAService } from './nda.service';
 
 @Controller('/nda')
 @ApiTags('NDA')
-@UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class NDAController {
   @InjectMapper() private readonly mapper: Mapper;

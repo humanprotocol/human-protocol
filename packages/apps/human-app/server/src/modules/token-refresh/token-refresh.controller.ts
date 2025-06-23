@@ -2,6 +2,7 @@ import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
 import { Body, Controller, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Public } from '../../common/decorators';
 import {
   TokenRefreshCommand,
   TokenRefreshDto,
@@ -10,6 +11,7 @@ import {
 import { TokenRefreshService } from './token-refresh.service';
 
 @ApiTags('Refresh-Token')
+@Public()
 @Controller()
 export class TokenRefreshController {
   constructor(

@@ -1,8 +1,7 @@
 import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
-import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Request } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../common/guards/jwt.auth';
 import { RequestWithUser } from '../../common/interfaces/jwt';
 import {
   RegisterAddressCommand,
@@ -13,7 +12,6 @@ import { RegisterAddressService } from './register-address.service';
 
 @ApiTags('Register Address')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
 @Controller('/user/register-address')
 export class RegisterAddressController {
   @InjectMapper() private readonly mapper: Mapper;

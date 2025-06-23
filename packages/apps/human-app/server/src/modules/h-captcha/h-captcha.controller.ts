@@ -1,15 +1,7 @@
 import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
-import {
-  Body,
-  Controller,
-  Get,
-  Post,
-  Request,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Post, Request } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../common/guards/jwt.auth';
 import { RequestWithUser } from '../../common/interfaces/jwt';
 import { JwtUserData } from '../../common/utils/jwt-token.model';
 import { HCaptchaService } from './h-captcha.service';
@@ -30,7 +22,6 @@ import {
 
 @ApiTags('h-captcha')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
 @Controller('/labeling/h-captcha')
 export class HCaptchaController {
   constructor(

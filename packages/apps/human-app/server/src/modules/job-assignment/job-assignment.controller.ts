@@ -8,10 +8,8 @@ import {
   Put,
   Query,
   Request,
-  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../common/guards/jwt.auth';
 import { RequestWithUser } from '../../common/interfaces/jwt';
 import { JobAssignmentService } from './job-assignment.service';
 import {
@@ -28,7 +26,6 @@ import {
 
 @ApiTags('Job-Assignment')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
 @Controller('/assignment')
 export class JobAssignmentController {
   constructor(

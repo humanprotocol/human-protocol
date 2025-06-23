@@ -1,20 +1,12 @@
 import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
-import {
-  Body,
-  Controller,
-  Get,
-  Post,
-  Request,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Post, Request } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../common/guards/jwt.auth';
 import { RequestWithUser } from '../../common/interfaces/jwt';
 import { AbuseService } from './abuse.service';
 import {
@@ -25,7 +17,6 @@ import {
 
 @ApiBearerAuth()
 @ApiTags('Abuse')
-@UseGuards(JwtAuthGuard)
 @Controller('/abuse')
 export class AbuseController {
   constructor(

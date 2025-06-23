@@ -1,8 +1,8 @@
 import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
-import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Request } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../common/guards/jwt.auth';
+import { Public } from '../../common/decorators';
 import { RequestWithUser } from '../../common/interfaces/jwt';
 import { EmailConfirmationService } from './email-confirmation.service';
 import {
@@ -22,10 +22,11 @@ export class EmailConfirmationController {
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
 
-  @Post('/email-verification')
   @ApiOperation({
     summary: 'Endpoint to verify the user email address',
   })
+  @Public()
+  @Post('/email-verification')
   public async verifyEmail(
     @Body() emailVerificationDto: EmailVerificationDto,
   ): Promise<void> {
@@ -37,7 +38,6 @@ export class EmailConfirmationController {
     return this.service.processEmailVerification(emailVerificationCommand);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Post('/resend-email-verification')
   @ApiOperation({
     summary: 'Endpoint to resend the email verification link',

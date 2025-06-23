@@ -1,13 +1,11 @@
-import { Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Request } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../common/guards/jwt.auth';
 import { RequestWithUser } from '../../common/interfaces/jwt';
 import { KycProcedureService } from './kyc-procedure.service';
 import { KycProcedureStartResponse } from './model/kyc-start.model';
 
 @ApiTags('Kyc-Procedure')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
 @Controller('/kyc')
 export class KycProcedureController {
   constructor(private readonly service: KycProcedureService) {}

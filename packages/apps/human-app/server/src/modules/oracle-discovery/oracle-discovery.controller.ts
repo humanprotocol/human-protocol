@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
+import { Public } from '../../common/decorators';
 import {
   DiscoveredOracle,
   GetOraclesCommand,
@@ -17,6 +18,7 @@ import {
 import { OracleDiscoveryService } from './oracle-discovery.service';
 
 @ApiTags('Oracle-Discovery')
+@Public()
 @Controller()
 export class OracleDiscoveryController {
   constructor(

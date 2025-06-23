@@ -7,7 +7,6 @@ import {
   HttpStatus,
   Query,
   Request,
-  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -16,7 +15,6 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
-import { JwtAuthGuard } from '../../common/guards/jwt.auth';
 import { RequestWithUser } from '../../common/interfaces/jwt';
 import { JobsDiscoveryService } from './jobs-discovery.service';
 import {
@@ -27,7 +25,6 @@ import {
 
 @Controller()
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
 @ApiTags('Jobs-Discovery')
 export class JobsDiscoveryController {
   constructor(

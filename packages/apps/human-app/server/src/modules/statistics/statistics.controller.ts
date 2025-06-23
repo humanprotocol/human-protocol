@@ -1,8 +1,7 @@
 import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
-import { Controller, Get, Query, Request, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, Request } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../common/guards/jwt.auth';
 import { RequestWithUser } from '../../common/interfaces/jwt';
 import {
   OracleStatisticsCommand,
@@ -15,6 +14,7 @@ import {
   UserStatisticsResponse,
 } from './model/user-statistics.model';
 import { StatisticsService } from './statistics.service';
+import { Public } from '../../common/decorators';
 
 @ApiTags('Statistics')
 @Controller()
@@ -24,8 +24,9 @@ export class StatisticsController {
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
 
-  @Get('/stats')
   @ApiOperation({ summary: 'General Oracle Statistics' })
+  @Public()
+  @Get('/stats')
   public getOracleStatistics(
     @Query() dto: OracleStatisticsDto,
   ): Promise<OracleStatisticsResponse> {
@@ -38,10 +39,9 @@ export class StatisticsController {
   }
 
   @ApiTags('Statistics')
-  @Get('stats/assignment')
   @ApiOperation({ summary: 'Statistics for requesting user' })
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @Get('stats/assignment')
   public getUserStatistics(
     @Query() dto: UserStatisticsDto,
     @Request() req: RequestWithUser,

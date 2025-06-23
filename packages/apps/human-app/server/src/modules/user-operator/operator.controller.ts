@@ -1,15 +1,8 @@
 import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
-import {
-  Body,
-  Controller,
-  HttpCode,
-  Post,
-  Request,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, HttpCode, Post, Request } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../common/guards/jwt.auth';
+import { Public } from '../../common/decorators';
 import { RequestWithUser } from '../../common/interfaces/jwt';
 import {
   DisableOperatorCommand,
@@ -42,6 +35,7 @@ export class OperatorController {
   @Post('/auth/web3/signup')
   @HttpCode(200)
   @ApiOperation({ summary: 'Operator signup' })
+  @Public()
   async signupOperator(
     @Body() signupOperatorDto: SignupOperatorDto,
   ): Promise<SignupOperatorResponse> {
@@ -56,6 +50,7 @@ export class OperatorController {
   @Post('/auth/web3/signin')
   @HttpCode(200)
   @ApiOperation({ summary: 'Operator signin' })
+  @Public()
   async signinOperator(
     @Body() dto: SigninOperatorDto,
   ): Promise<SigninOperatorResponse> {
@@ -73,7 +68,6 @@ export class OperatorController {
     summary: 'Endpoint to disable an operator',
   })
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   async disableOperator(
     @Body() disableOperatorDto: DisableOperatorDto,
     @Request() req: RequestWithUser,
@@ -93,7 +87,6 @@ export class OperatorController {
     summary: 'Endpoint to enable an operator',
   })
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   async enable(
     @Body() enableOperatorDto: EnableOperatorDto,
     @Request() req: RequestWithUser,

@@ -2,6 +2,7 @@ import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
 import { Body, Controller, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Public } from '../../common/decorators';
 import {
   ForgotPasswordCommand,
   ForgotPasswordDto,
@@ -13,6 +14,7 @@ import {
 import { PasswordResetService } from './password-reset.service';
 
 @ApiTags('Password-Reset')
+@Public()
 @Controller('/password-reset')
 export class PasswordResetController {
   constructor(
