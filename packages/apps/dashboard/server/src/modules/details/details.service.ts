@@ -443,7 +443,6 @@ export class DetailsService {
       decimals: number;
       symbol: string;
     }>(tokenCacheKey);
-    console.log(data);
     if (!data) {
       const erc20Contract = HMToken__factory.connect(tokenAddress, provider);
       const [decimals, symbol] = await Promise.all([
