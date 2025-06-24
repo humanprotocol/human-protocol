@@ -32,14 +32,7 @@ type UniqueReceiver @entity {
 type Operator @entity {
   id: Bytes!
   address: Bytes!
-  amountStaked: BigInt!
-  amountLocked: BigInt!
-  lockedUntilTimestamp: BigInt!
-  amountWithdrawn: BigInt!
-  amountSlashed: BigInt!
-  reward: BigInt!
   amountJobsProcessed: BigInt!
-
   role: String
   fee: BigInt
   publicKey: String
@@ -246,6 +239,18 @@ type KVStore @entity {
 }
 
 # Staking
+type Staker @entity(immutable: true) {
+  id: Bytes!
+  address: Bytes! # address
+  stakedAmount: BigInt!
+  lockedAmount: BigInt!
+  rewardedAmount: BigInt!
+  withdrawnAmount: BigInt!
+  slashedAmount: BigInt!
+  lockedUntilTimestamp: BigInt!
+  lastDepositTimestamp: BigInt!
+}
+
 type StakeDepositedEvent @entity(immutable: true) {
   id: Bytes!
   block: BigInt!
@@ -337,11 +342,6 @@ type EventDayData @entity {
   dailyHMTTransferAmount: BigInt!
   dailyUniqueSenders: BigInt!
   dailyUniqueReceivers: BigInt!
-}
-
-type OperatorStatistics @entity {
-  id: Bytes!
-  operators: BigInt!
 }
 
 type Transaction @entity {
