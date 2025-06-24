@@ -15,9 +15,27 @@ type Props = {
   data: AddressDetailsEscrow;
 };
 
+const renderTokenAmount = (
+  amount: number | null | undefined,
+  tokenSymbol: string | null | undefined
+) => {
+  return (
+    <Stack direction="row" whiteSpace="nowrap">
+      <Typography variant="body2">{amount}</Typography>
+      <Typography
+        component="span"
+        variant="body2"
+        ml={0.5}
+        color="text.secondary"
+      >
+        {tokenSymbol}
+      </Typography>
+    </Stack>
+  );
+};
+
 const EscrowAddress: FC<Props> = ({ data }) => {
   const {
-    token,
     balance,
     factoryAddress,
     totalFundedAmount,
@@ -27,16 +45,22 @@ const EscrowAddress: FC<Props> = ({ data }) => {
     exchangeOracle,
     recordingOracle,
     reputationOracle,
+    tokenSymbol,
   } = data;
+  const isHmt = tokenSymbol === 'HMT';
   return (
     <SectionWrapper>
       <Stack gap={4}>
         <TitleSectionWrapper title="Token">
-          <Typography variant="body2">{token}</Typography>
+          <Typography variant="body2">{tokenSymbol}</Typography>
         </TitleSectionWrapper>
         {balance !== undefined && balance !== null ? (
           <TitleSectionWrapper title="Balance">
-            <HmtBalance balance={balance} />
+            {isHmt ? (
+              <HmtBalance balance={balance} />
+            ) : (
+              renderTokenAmount(balance, tokenSymbol)
+            )}
           </TitleSectionWrapper>
         ) : null}
         <TitleSectionWrapper
@@ -46,30 +70,10 @@ const EscrowAddress: FC<Props> = ({ data }) => {
           <Typography variant="body2">{factoryAddress}</Typography>
         </TitleSectionWrapper>
         <TitleSectionWrapper title="Total Funded Amount">
-          <Stack direction="row" whiteSpace="nowrap">
-            <Typography variant="body2">{totalFundedAmount}</Typography>
-            <Typography
-              component="span"
-              variant="body2"
-              ml={0.5}
-              color="text.secondary"
-            >
-              HMT
-            </Typography>
-          </Stack>
+          {renderTokenAmount(totalFundedAmount, tokenSymbol)}
         </TitleSectionWrapper>
         <TitleSectionWrapper title="Paid Amount">
-          <Stack direction="row" whiteSpace="nowrap">
-            <Typography variant="body2">{amountPaid}</Typography>
-            <Typography
-              component="span"
-              variant="body2"
-              ml={0.5}
-              color="text.secondary"
-            >
-              HMT
-            </Typography>
-          </Stack>
+          {renderTokenAmount(amountPaid, tokenSymbol)}
         </TitleSectionWrapper>
 
         <TitleSectionWrapper title="Status">

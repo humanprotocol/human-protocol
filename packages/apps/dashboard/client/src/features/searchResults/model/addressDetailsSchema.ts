@@ -35,6 +35,20 @@ const walletSchema = z.object({
 
 export type AddressDetailsWallet = z.infer<typeof walletSchema>;
 
+const transformEscrowAddressTokenAmount = (
+  value: string | undefined | null
+) => {
+  if (value === undefined || value === null) return value;
+
+  const _value = Number(value);
+
+  if (_value >= 1000) {
+    return Math.round(_value);
+  } else {
+    return parseFloat(_value.toFixed(3));
+  }
+};
+
 const escrowSchema = z.object({
   chainId: z.number().optional().nullable(),
   address: z.string().optional().nullable(),
@@ -42,19 +56,19 @@ const escrowSchema = z.object({
     .string()
     .optional()
     .nullable()
-    .transform(transformOptionalTokenAmount),
+    .transform(transformEscrowAddressTokenAmount),
   token: z.string().optional().nullable(),
   factoryAddress: z.string().optional().nullable(),
   totalFundedAmount: z
     .string()
     .optional()
     .nullable()
-    .transform(transformOptionalTokenAmount),
+    .transform(transformEscrowAddressTokenAmount),
   amountPaid: z
     .string()
     .optional()
     .nullable()
-    .transform(transformOptionalTokenAmount),
+    .transform(transformEscrowAddressTokenAmount),
   status: z.string().optional().nullable(),
   manifest: z.string().optional().nullable(),
   launcher: z.string().optional().nullable(),
@@ -62,6 +76,8 @@ const escrowSchema = z.object({
   recordingOracle: z.string().optional().nullable(),
   reputationOracle: z.string().optional().nullable(),
   finalResultsUrl: z.string().nullable(),
+  tokenSymbol: z.string().optional().nullable(),
+  tokenDecimals: z.number().optional().nullable(),
 });
 
 export type AddressDetailsEscrow = z.infer<typeof escrowSchema>;
