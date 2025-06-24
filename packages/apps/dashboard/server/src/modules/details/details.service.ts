@@ -48,18 +48,39 @@ export class DetailsService {
     chainId: ChainId,
     address: string,
   ): Promise<WalletDto | EscrowDto | OperatorDto> {
-    const escrowData = await EscrowUtils.getEscrow(chainId, address);
-    if (escrowData) {
-      const escrowDto: EscrowDto = plainToInstance(EscrowDto, escrowData, {
-        excludeExtraneousValues: true,
-      });
-      return escrowDto;
-    }
     const network = this.networkConfig.networks.find(
       (network) => network.chainId === chainId,
     );
     if (!network) throw new BadRequestException('Invalid chainId provided');
     const provider = new ethers.JsonRpcProvider(network.rpcUrl);
+
+    const escrowData = await EscrowUtils.getEscrow(chainId, address);
+    if (escrowData) {
+      const escrowDto: EscrowDto = plainToInstance(EscrowDto, escrowData, {
+        excludeExtraneousValues: true,
+      });
+
+      const erc20Contract = HMToken__factory.connect(
+        escrowData.token,
+        provider,
+      );
+      const [decimals, symbol] = await Promise.all([
+        erc20Contract.decimals(),
+        erc20Contract.symbol(),
+      ]);
+      escrowDto.balance = ethers.formatUnits(escrowData.balance, decimals);
+      escrowDto.totalFundedAmount = ethers.formatUnits(
+        escrowData.totalFundedAmount,
+        decimals,
+      );
+      escrowDto.amountPaid = ethers.formatUnits(
+        escrowData.amountPaid,
+        decimals,
+      );
+      escrowDto.tokenSymbol = symbol;
+      escrowDto.tokenDecimals = Number(decimals);
+      return escrowDto;
+    }
     const stakingClient = await StakingClient.build(provider);
     const stakingData = await stakingClient.getStakerInfo(address);
 
@@ -111,7 +132,10 @@ export class DetailsService {
     return walletDto;
   }
 
-  private async getHmtBalance(chainId: ChainId, hmtAddress: string) {
+  private async getHmtBalance(
+    chainId: ChainId,
+    hmtAddress: string,
+  ): Promise<string> {
     const network = this.networkConfig.networks.find(
       (network) => network.chainId === chainId,
     );
