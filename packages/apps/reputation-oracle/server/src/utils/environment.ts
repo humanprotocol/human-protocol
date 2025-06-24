@@ -1,4 +1,5 @@
 enum EnvironmentName {
+  LOCAL = 'local',
   DEVELOPMENT = 'development',
   TEST = 'test',
   STAGING = 'staging',
@@ -10,9 +11,11 @@ class Environment {
     process.env.NODE_ENV || EnvironmentName.DEVELOPMENT;
 
   static isDevelopment(): boolean {
-    return [EnvironmentName.DEVELOPMENT, EnvironmentName.TEST].includes(
-      Environment.name as EnvironmentName,
-    );
+    return [
+      EnvironmentName.DEVELOPMENT,
+      EnvironmentName.TEST,
+      EnvironmentName.LOCAL,
+    ].includes(Environment.name as EnvironmentName);
   }
 
   static isTest(): boolean {

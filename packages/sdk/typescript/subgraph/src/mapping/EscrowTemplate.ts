@@ -75,7 +75,7 @@ export function createOrLoadWorker(address: Address): Worker {
   if (!worker) {
     worker = new Worker(address);
     worker.address = address;
-    worker.totalAmountReceived = ZERO_BI;
+    worker.totalHMTAmountReceived = ZERO_BI;
     worker.payoutCount = ZERO_BI;
   }
 
@@ -465,7 +465,18 @@ export function handleBulkTransferV2(event: BulkTransferV2): void {
 
   // Update escrow entity
   const escrowEntity = Escrow.load(dataSource.address());
-  if (escrowEntity !== null) {
+  if (escrowEntity) {
+    const transaction = createTransaction(
+      event,
+      'bulkTransfer',
+      event.transaction.from,
+      Address.fromBytes(escrowEntity.address),
+      null,
+      Address.fromBytes(escrowEntity.address),
+      null,
+      Address.fromBytes(escrowEntity.token)
+    );
+
     // If the escrow is non-HMT, track the balance data
     if (Address.fromBytes(escrowEntity.token) != HMT_ADDRESS) {
       for (let i = 0; i < event.params._recipients.length; i++) {
@@ -477,7 +488,6 @@ export function handleBulkTransferV2(event: BulkTransferV2): void {
 
         // Update worker, and create payout object
         const worker = createOrLoadWorker(recipient);
-        worker.totalAmountReceived = worker.totalAmountReceived.plus(amount);
         worker.payoutCount = worker.payoutCount.plus(ONE_BI);
         worker.save();
 
@@ -493,8 +503,6 @@ export function handleBulkTransferV2(event: BulkTransferV2): void {
         const eventDayData = getEventDayData(event);
         eventDayData.dailyPayoutCount =
           eventDayData.dailyPayoutCount.plus(ONE_BI);
-        eventDayData.dailyPayoutAmount =
-          eventDayData.dailyPayoutAmount.plus(amount);
 
         const eventDayId = toEventDayId(event);
         const dailyWorkerId = Bytes.fromI32(eventDayId.toI32()).concat(
@@ -513,34 +521,18 @@ export function handleBulkTransferV2(event: BulkTransferV2): void {
             eventDayData.dailyWorkerCount.plus(ONE_BI);
         }
 
-        const transaction = createTransaction(
-          event,
-          'bulkTransfer',
-          event.transaction.from,
-          Address.fromBytes(escrowEntity.address),
-          null,
-          Address.fromBytes(escrowEntity.address),
-          null,
-          Address.fromBytes(escrowEntity.token)
+        const internalTransaction = new InternalTransaction(
+          event.transaction.hash
+            .concatI32(i)
+            .concatI32(event.block.timestamp.toI32())
         );
-
-        // Create a transfer per recipient and amount
-        for (let i = 0; i < event.params._recipients.length; i++) {
-          const recipient = event.params._recipients[i];
-          const amount = event.params._amounts[i];
-          const internalTransaction = new InternalTransaction(
-            event.transaction.hash
-              .concatI32(i)
-              .concatI32(event.block.timestamp.toI32())
-          );
-          internalTransaction.from = Address.fromBytes(escrowEntity.address);
-          internalTransaction.to = recipient;
-          internalTransaction.value = amount;
-          internalTransaction.transaction = transaction.id;
-          internalTransaction.method = 'transfer';
-          internalTransaction.escrow = Address.fromBytes(escrowEntity.address);
-          internalTransaction.save();
-        }
+        internalTransaction.from = Address.fromBytes(escrowEntity.address);
+        internalTransaction.to = recipient;
+        internalTransaction.value = amount;
+        internalTransaction.transaction = transaction.id;
+        internalTransaction.method = 'transfer';
+        internalTransaction.escrow = Address.fromBytes(escrowEntity.address);
+        internalTransaction.save();
 
         eventDayData.save();
       }

@@ -114,6 +114,12 @@
       * [`TransactionData`](human_protocol_sdk.transaction.transaction_utils.md#human_protocol_sdk.transaction.transaction_utils.TransactionData)
       * [`TransactionUtils`](human_protocol_sdk.transaction.transaction_utils.md#human_protocol_sdk.transaction.transaction_utils.TransactionUtils)
       * [`TransactionUtilsError`](human_protocol_sdk.transaction.transaction_utils.md#human_protocol_sdk.transaction.transaction_utils.TransactionUtilsError)
+* [human_protocol_sdk.worker package](human_protocol_sdk.worker.md)
+  * [Submodules](human_protocol_sdk.worker.md#submodules)
+    * [human_protocol_sdk.worker.worker_utils module](human_protocol_sdk.worker.worker_utils.md)
+      * [`WorkerData`](human_protocol_sdk.worker.worker_utils.md#human_protocol_sdk.worker.worker_utils.WorkerData)
+      * [`WorkerUtils`](human_protocol_sdk.worker.worker_utils.md#human_protocol_sdk.worker.worker_utils.WorkerUtils)
+      * [`WorkerUtilsError`](human_protocol_sdk.worker.worker_utils.md#human_protocol_sdk.worker.worker_utils.WorkerUtilsError)
 
 ## Submodules
 
@@ -194,7 +200,7 @@
   * [`get_hmt_balance()`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.get_hmt_balance)
   * [`get_kvstore_interface()`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.get_kvstore_interface)
   * [`get_staking_interface()`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.get_staking_interface)
-  * [`handle_transaction()`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.handle_transaction)
+  * [`handle_error()`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.handle_error)
   * [`parse_transfer_transaction()`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.parse_transfer_transaction)
   * [`validate_url()`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.validate_url)
   * [`with_retry()`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.with_retry)

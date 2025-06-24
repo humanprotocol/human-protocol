@@ -33,9 +33,10 @@ import { ExceptionFilter } from './common/exceptions/exception.filter';
   ],
   imports: [
     ConfigModule.forRoot({
-      envFilePath: process.env.NODE_ENV
-        ? `.env.${process.env.NODE_ENV as string}`
-        : '.env',
+      /**
+       * First value found takes precendece
+       */
+      envFilePath: [`.env.${process.env.NODE_ENV}`, '.env.local', '.env'],
       validationSchema: envValidator,
     }),
     JobModule,

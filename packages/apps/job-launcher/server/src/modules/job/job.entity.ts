@@ -11,20 +11,20 @@ import { ContentModerationRequestEntity } from '../content-moderation/content-mo
 @Entity({ schema: NS, name: 'jobs' })
 @Index(['chainId', 'escrowAddress'], { unique: true })
 export class JobEntity extends BaseEntity implements IJob {
-  @Column({ type: 'int', nullable: true })
+  @Column({ type: 'int' })
   public chainId: number;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ type: 'varchar' })
   public reputationOracle: string;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ type: 'varchar' })
   public exchangeOracle: string;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ type: 'varchar' })
   public recordingOracle: string;
 
   @Column({ type: 'varchar', nullable: true })
-  public escrowAddress: string;
+  public escrowAddress: string | null;
 
   @Column({ type: 'decimal', precision: 30, scale: 18 })
   public fee: number;
@@ -42,7 +42,7 @@ export class JobEntity extends BaseEntity implements IJob {
   public manifestHash: string;
 
   @Column({ type: 'varchar', nullable: true })
-  public failedReason: string;
+  public failedReason: string | null;
 
   @Column({
     type: 'enum',

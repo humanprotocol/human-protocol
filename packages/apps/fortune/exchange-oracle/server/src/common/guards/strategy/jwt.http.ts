@@ -14,6 +14,11 @@ import { AuthError, ValidationError } from '../../errors';
 
 @Injectable()
 export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
+  // In-memory cache for public keys with expiration
+  private publicKeyCache: Map<string, { value: string; expires: number }> =
+    new Map();
+  private cacheTTL = 24 * 60 * 60 * 1000; // 1 day
+
   constructor(private readonly web3Service: Web3Service) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -26,15 +31,31 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
         try {
           const payload = jwt.decode(rawJwtToken);
           const chainId = this.web3Service.getValidChains()[0];
-          const signer = this.web3Service.getSigner(chainId);
+          const address = (payload as any).reputation_network;
+          const cacheKey = `${chainId}-${address}`;
 
-          const url = await this.getFileUrlAndVerifyHash(
-            signer,
-            chainId,
-            (payload as any).reputation_network,
-            JWT_KVSTORE_KEY,
-          );
-          const publicKey = await StorageClient.downloadFileFromUrl(url);
+          const cached = this.publicKeyCache.get(cacheKey);
+
+          let publicKey: string | undefined;
+          if (cached && cached.expires > Date.now()) {
+            publicKey = cached.value;
+          } else {
+            const signer = this.web3Service.getSigner(chainId);
+            const url = await this.getFileUrlAndVerifyHash(
+              signer,
+              chainId,
+              address,
+              JWT_KVSTORE_KEY,
+            );
+            publicKey = (await StorageClient.downloadFileFromUrl(
+              url,
+            )) as string;
+
+            this.publicKeyCache.set(cacheKey, {
+              value: publicKey,
+              expires: Date.now() + this.cacheTTL,
+            });
+          }
 
           done(null, publicKey);
         } catch (error) {

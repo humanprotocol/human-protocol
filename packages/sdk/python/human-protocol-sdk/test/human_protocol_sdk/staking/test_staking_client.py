@@ -74,24 +74,24 @@ class TestStakingClient(unittest.TestCase):
         self.assertEqual(f"Invalid Web3 Instance", str(cm.exception))
 
     def test_approve_stake(self):
-        mock_function = MagicMock()
-        self.staking_client.hmtoken_contract.functions.approve = mock_function
+        mock_approve = MagicMock()
+        mock_approve.transact.return_value = "tx_hash"
+        self.staking_client.hmtoken_contract.functions.approve = MagicMock(
+            return_value=mock_approve
+        )
+        self.staking_client.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": []}
+        )
 
-        with patch(
-            "human_protocol_sdk.staking.staking_client.handle_transaction"
-        ) as mock_handle_transaction:
-            self.staking_client.approve_stake(100)
+        self.staking_client.approve_stake(100)
 
-            mock_handle_transaction.assert_called_once_with(
-                self.w3,
-                "Approve stake",
-                mock_function.return_value,
-                StakingClientError,
-                None,
-            )
-            mock_function.assert_called_once_with(
-                NETWORKS[ChainId.LOCALHOST]["staking_address"], 100
-            )
+        self.staking_client.hmtoken_contract.functions.approve.assert_called_once_with(
+            NETWORKS[ChainId.LOCALHOST]["staking_address"], 100
+        )
+        mock_approve.transact.assert_called_once_with({})
+        self.staking_client.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
+            "tx_hash"
+        )
 
     def test_approve_stake_invalid_amount(self):
         with self.assertRaises(StakingClientError) as cm:
@@ -99,43 +99,45 @@ class TestStakingClient(unittest.TestCase):
         self.assertEqual("Amount to approve must be greater than 0", str(cm.exception))
 
     def test_approve_stake_with_tx_options(self):
-        mock_function = MagicMock()
-        self.staking_client.hmtoken_contract.functions.approve = mock_function
+        mock_approve = MagicMock()
+        mock_approve.transact.return_value = "tx_hash"
+        self.staking_client.hmtoken_contract.functions.approve = MagicMock(
+            return_value=mock_approve
+        )
+        self.staking_client.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": []}
+        )
         tx_options = {"gas": 50000}
 
-        with patch(
-            "human_protocol_sdk.staking.staking_client.handle_transaction"
-        ) as mock_handle_transaction:
-            self.staking_client.approve_stake(100, tx_options)
+        self.staking_client.approve_stake(100, tx_options)
 
-            mock_handle_transaction.assert_called_once_with(
-                self.w3,
-                "Approve stake",
-                mock_function.return_value,
-                StakingClientError,
-                tx_options,
-            )
-            mock_function.assert_called_once_with(
-                NETWORKS[ChainId.LOCALHOST]["staking_address"], 100
-            )
+        self.staking_client.hmtoken_contract.functions.approve.assert_called_once_with(
+            NETWORKS[ChainId.LOCALHOST]["staking_address"], 100
+        )
+        mock_approve.transact.assert_called_once_with(tx_options)
+        self.staking_client.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
+            "tx_hash"
+        )
 
     def test_stake(self):
-        mock_function = MagicMock()
-        self.staking_client.staking_contract.functions.stake = mock_function
+        mock_stake = MagicMock()
+        mock_stake.transact.return_value = "tx_hash"
+        self.staking_client.staking_contract.functions.stake = MagicMock(
+            return_value=mock_stake
+        )
+        self.staking_client.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": []}
+        )
 
-        with patch(
-            "human_protocol_sdk.staking.staking_client.handle_transaction"
-        ) as mock_handle_transaction:
-            self.staking_client.stake(100)
+        self.staking_client.stake(100)
 
-            mock_handle_transaction.assert_called_once_with(
-                self.w3,
-                "Stake HMT",
-                mock_function.return_value,
-                StakingClientError,
-                None,
-            )
-            mock_function.assert_called_once_with(100)
+        self.staking_client.staking_contract.functions.stake.assert_called_once_with(
+            100
+        )
+        mock_stake.transact.assert_called_once_with({})
+        self.staking_client.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
+            "tx_hash"
+        )
 
     def test_stake_invalid_amount(self):
         with self.assertRaises(StakingClientError) as cm:
@@ -143,41 +145,45 @@ class TestStakingClient(unittest.TestCase):
         self.assertEqual("Amount to stake must be greater than 0", str(cm.exception))
 
     def test_stake_with_tx_options(self):
-        mock_function = MagicMock()
-        self.staking_client.staking_contract.functions.stake = mock_function
+        mock_stake = MagicMock()
+        mock_stake.transact.return_value = "tx_hash"
+        self.staking_client.staking_contract.functions.stake = MagicMock(
+            return_value=mock_stake
+        )
+        self.staking_client.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": []}
+        )
         tx_options = {"gas": 50000}
 
-        with patch(
-            "human_protocol_sdk.staking.staking_client.handle_transaction"
-        ) as mock_handle_transaction:
-            self.staking_client.stake(100, tx_options)
+        self.staking_client.stake(100, tx_options)
 
-            mock_handle_transaction.assert_called_once_with(
-                self.w3,
-                "Stake HMT",
-                mock_function.return_value,
-                StakingClientError,
-                tx_options,
-            )
-            mock_function.assert_called_once_with(100)
+        self.staking_client.staking_contract.functions.stake.assert_called_once_with(
+            100
+        )
+        mock_stake.transact.assert_called_once_with(tx_options)
+        self.staking_client.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
+            "tx_hash"
+        )
 
     def test_unstake(self):
-        mock_function = MagicMock()
-        self.staking_client.staking_contract.functions.unstake = mock_function
+        mock_unstake = MagicMock()
+        mock_unstake.transact.return_value = "tx_hash"
+        self.staking_client.staking_contract.functions.unstake = MagicMock(
+            return_value=mock_unstake
+        )
+        self.staking_client.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": []}
+        )
 
-        with patch(
-            "human_protocol_sdk.staking.staking_client.handle_transaction"
-        ) as mock_handle_transaction:
-            self.staking_client.unstake(100)
+        self.staking_client.unstake(100)
 
-            mock_handle_transaction.assert_called_once_with(
-                self.w3,
-                "Unstake HMT",
-                mock_function.return_value,
-                StakingClientError,
-                None,
-            )
-        mock_function.assert_called_once_with(100)
+        self.staking_client.staking_contract.functions.unstake.assert_called_once_with(
+            100
+        )
+        mock_unstake.transact.assert_called_once_with({})
+        self.staking_client.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
+            "tx_hash"
+        )
 
     def test_unstake_invalid_amount(self):
         with self.assertRaises(StakingClientError) as cm:
@@ -185,60 +191,62 @@ class TestStakingClient(unittest.TestCase):
         self.assertEqual("Amount to unstake must be greater than 0", str(cm.exception))
 
     def test_unstake_with_tx_options(self):
-        mock_function = MagicMock()
-        self.staking_client.staking_contract.functions.unstake = mock_function
+        mock_unstake = MagicMock()
+        mock_unstake.transact.return_value = "tx_hash"
+        self.staking_client.staking_contract.functions.unstake = MagicMock(
+            return_value=mock_unstake
+        )
+        self.staking_client.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": []}
+        )
         tx_options = {"gas": 50000}
 
-        with patch(
-            "human_protocol_sdk.staking.staking_client.handle_transaction"
-        ) as mock_handle_transaction:
-            self.staking_client.unstake(100, tx_options)
+        self.staking_client.unstake(100, tx_options)
 
-            mock_handle_transaction.assert_called_once_with(
-                self.w3,
-                "Unstake HMT",
-                mock_function.return_value,
-                StakingClientError,
-                tx_options,
-            )
-        mock_function.assert_called_once_with(100)
+        self.staking_client.staking_contract.functions.unstake.assert_called_once_with(
+            100
+        )
+        mock_unstake.transact.assert_called_once_with(tx_options)
+        self.staking_client.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
+            "tx_hash"
+        )
 
     def test_withdraw(self):
-        mock_function = MagicMock()
-        self.staking_client.staking_contract.functions.withdraw = mock_function
+        mock_withdraw = MagicMock()
+        mock_withdraw.transact.return_value = "tx_hash"
+        self.staking_client.staking_contract.functions.withdraw = MagicMock(
+            return_value=mock_withdraw
+        )
+        self.staking_client.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": []}
+        )
 
-        with patch(
-            "human_protocol_sdk.staking.staking_client.handle_transaction"
-        ) as mock_handle_transaction:
-            self.staking_client.withdraw()
+        self.staking_client.withdraw()
 
-            mock_handle_transaction.assert_called_once_with(
-                self.w3,
-                "Withdraw HMT",
-                mock_function.return_value,
-                StakingClientError,
-                None,
-            )
-            mock_function.assert_called_once()
+        self.staking_client.staking_contract.functions.withdraw.assert_called_once_with()
+        mock_withdraw.transact.assert_called_once_with({})
+        self.staking_client.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
+            "tx_hash"
+        )
 
     def test_withdraw_with_tx_options(self):
-        mock_function = MagicMock()
-        self.staking_client.staking_contract.functions.withdraw = mock_function
+        mock_withdraw = MagicMock()
+        mock_withdraw.transact.return_value = "tx_hash"
+        self.staking_client.staking_contract.functions.withdraw = MagicMock(
+            return_value=mock_withdraw
+        )
+        self.staking_client.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": []}
+        )
         tx_options = {"gas": 50000}
 
-        with patch(
-            "human_protocol_sdk.staking.staking_client.handle_transaction"
-        ) as mock_handle_transaction:
-            self.staking_client.withdraw(tx_options)
+        self.staking_client.withdraw(tx_options)
 
-            mock_handle_transaction.assert_called_once_with(
-                self.w3,
-                "Withdraw HMT",
-                mock_function.return_value,
-                StakingClientError,
-                tx_options,
-            )
-            mock_function.assert_called_once()
+        self.staking_client.staking_contract.functions.withdraw.assert_called_once_with()
+        mock_withdraw.transact.assert_called_once_with(tx_options)
+        self.staking_client.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
+            "tx_hash"
+        )
 
     def test_slash(self):
         slasher = "SLASHER"
@@ -246,27 +254,29 @@ class TestStakingClient(unittest.TestCase):
         escrow_address = "escrow1"
         self.staking_client._is_valid_escrow = MagicMock(return_value=True)
 
-        mock_function = MagicMock()
-        self.staking_client.staking_contract.functions.slash = mock_function
+        mock_slash = MagicMock()
+        mock_slash.transact.return_value = "tx_hash"
+        self.staking_client.staking_contract.functions.slash = MagicMock(
+            return_value=mock_slash
+        )
+        self.staking_client.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": []}
+        )
 
-        with patch(
-            "human_protocol_sdk.staking.staking_client.handle_transaction"
-        ) as mock_handle_transaction:
-            self.staking_client.slash(
-                slasher=slasher,
-                staker=staker,
-                escrow_address=escrow_address,
-                amount=50,
-            )
+        self.staking_client.slash(
+            slasher=slasher,
+            staker=staker,
+            escrow_address=escrow_address,
+            amount=50,
+        )
 
-            mock_handle_transaction.assert_called_once_with(
-                self.w3,
-                "Slash HMT",
-                mock_function.return_value,
-                StakingClientError,
-                None,
-            )
-            mock_function.assert_called_once_with(slasher, staker, escrow_address, 50)
+        self.staking_client.staking_contract.functions.slash.assert_called_once_with(
+            slasher, staker, escrow_address, 50
+        )
+        mock_slash.transact.assert_called_once_with({})
+        self.staking_client.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
+            "tx_hash"
+        )
 
     def test_slash_invalid_amount(self):
         slasher = "SLASHER"
@@ -298,29 +308,31 @@ class TestStakingClient(unittest.TestCase):
         escrow_address = "escrow1"
         self.staking_client._is_valid_escrow = MagicMock(return_value=True)
 
-        mock_function = MagicMock()
-        self.staking_client.staking_contract.functions.slash = mock_function
+        mock_slash = MagicMock()
+        mock_slash.transact.return_value = "tx_hash"
+        self.staking_client.staking_contract.functions.slash = MagicMock(
+            return_value=mock_slash
+        )
+        self.staking_client.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": []}
+        )
         tx_options = {"gas": 50000}
 
-        with patch(
-            "human_protocol_sdk.staking.staking_client.handle_transaction"
-        ) as mock_handle_transaction:
-            self.staking_client.slash(
-                slasher=slasher,
-                staker=staker,
-                escrow_address=escrow_address,
-                amount=50,
-                tx_options=tx_options,
-            )
+        self.staking_client.slash(
+            slasher=slasher,
+            staker=staker,
+            escrow_address=escrow_address,
+            amount=50,
+            tx_options=tx_options,
+        )
 
-            mock_handle_transaction.assert_called_once_with(
-                self.w3,
-                "Slash HMT",
-                mock_function.return_value,
-                StakingClientError,
-                tx_options,
-            )
-            mock_function.assert_called_once_with(slasher, staker, escrow_address, 50)
+        self.staking_client.staking_contract.functions.slash.assert_called_once_with(
+            slasher, staker, escrow_address, 50
+        )
+        mock_slash.transact.assert_called_once_with(tx_options)
+        self.staking_client.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
+            "tx_hash"
+        )
 
     def test_get_staker_info(self):
         staker_address = "0x1234567890123456789012345678901234567890"

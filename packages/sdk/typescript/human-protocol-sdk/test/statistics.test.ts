@@ -172,7 +172,7 @@ describe('StatisticsClient', () => {
           {
             timestamp: 1,
             dailyPayoutCount: '4',
-            dailyPayoutAmount: '100',
+            dailyHMTPayoutAmount: '100',
             dailyWorkerCount: '4',
           },
         ],

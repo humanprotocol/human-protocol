@@ -6,17 +6,17 @@
 
 # Class: TransactionUtils
 
-Defined in: [transaction.ts:18](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L18)
+Defined in: [transaction.ts:18](https://github.com/humanprotocol/human-protocol/blob/9da418b6962e251427442717195921599d2815f2/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L18)
 
 ## Constructors
 
-### new TransactionUtils()
+### Constructor
 
-> **new TransactionUtils**(): [`TransactionUtils`](TransactionUtils.md)
+> **new TransactionUtils**(): `TransactionUtils`
 
 #### Returns
 
-[`TransactionUtils`](TransactionUtils.md)
+`TransactionUtils`
 
 ## Methods
 
@@ -24,9 +24,25 @@ Defined in: [transaction.ts:18](https://github.com/humanprotocol/human-protocol/
 
 > `static` **getTransaction**(`chainId`, `hash`): `Promise`\<[`ITransaction`](../../interfaces/interfaces/ITransaction.md)\>
 
-Defined in: [transaction.ts:34](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L34)
+Defined in: [transaction.ts:50](https://github.com/humanprotocol/human-protocol/blob/9da418b6962e251427442717195921599d2815f2/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L50)
 
 This function returns the transaction data for the given hash.
+
+```ts
+type ITransaction = {
+  block: bigint;
+  txHash: string;
+  from: string;
+  to: string;
+  timestamp: bigint;
+  value: string;
+  method: string;
+  receiver?: string;
+  escrow?: string;
+  token?: string;
+  internalTransactions: InternalTransaction[];
+};
+```
 
 #### Parameters
 
@@ -62,7 +78,7 @@ const transaction = await TransactionUtils.getTransaction(ChainId.POLYGON, '0x62
 
 > `static` **getTransactions**(`filter`): `Promise`\<[`ITransaction`](../../interfaces/interfaces/ITransaction.md)[]\>
 
-Defined in: [transaction.ts:109](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L109)
+Defined in: [transaction.ts:132](https://github.com/humanprotocol/human-protocol/blob/9da418b6962e251427442717195921599d2815f2/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L132)
 
 This function returns all transaction details based on the provided filter.
 
@@ -75,6 +91,9 @@ interface ITransactionsFilter {
   chainId: ChainId; // List of chain IDs to query.
   fromAddress?: string; // (Optional) The address from which transactions are sent.
   toAddress?: string; // (Optional) The address to which transactions are sent.
+  method?: string; // (Optional) The method of the transaction to filter by.
+  escrow?: string; // (Optional) The escrow address to filter transactions.
+  token?: string; // (Optional) The token address to filter transactions.
   startDate?: Date; // (Optional) The start date to filter transactions (inclusive).
   endDate?: Date; // (Optional) The end date to filter transactions (inclusive).
   startBlock?: number; // (Optional) The start block number to filter transactions (inclusive).
@@ -87,13 +106,17 @@ interface ITransactionsFilter {
 
 ```ts
 type ITransaction = {
-  block: number;
+  block: bigint;
   txHash: string;
   from: string;
   to: string;
-  timestamp: number;
+  timestamp: bigint;
   value: string;
   method: string;
+  receiver?: string;
+  escrow?: string;
+  token?: string;
+  internalTransactions: InternalTransaction[];
 };
 ```
 

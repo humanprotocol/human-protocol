@@ -1,0 +1,44 @@
+.page-wrapper {
+  display: flex;
+  flex-direction: column;
+	margin: 0 56px;
+	padding: 0;
+  min-height: 100dvh;
+
+	@media (max-width: 1280px) {
+		margin: 0 24px;
+	}
+
+	.container {
+		margin: auto;
+		padding: 30px 80px 100px;
+
+		@media (max-width: 1200px) {
+			padding: 24px 16px;
+		}
+	}
+
+	@media (max-width: 600px) {
+		margin: 0;
+	}
+}
+
+.violet-header {
+	z-index: 10;
+	border-radius: 20px;
+	background-size: 100% 100%;
+	background: linear-gradient(to bottom, $primary 252px, $maWhite 0px);
+
+  @media (max-width: 900px) {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+	@media (max-width: 600px) {
+		border-radius: 0;
+	}
+}
+
+.standard-background {
+	background-color: $maWhite;
+}

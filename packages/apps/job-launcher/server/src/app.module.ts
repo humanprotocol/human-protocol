@@ -51,9 +51,10 @@ import { TransformEnumInterceptor } from './common/interceptors/transform-enum.i
   imports: [
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
-      envFilePath: process.env.NODE_ENV
-        ? `.env.${process.env.NODE_ENV as string}`
-        : '.env',
+      /**
+       * First value found takes precendece
+       */
+      envFilePath: [`.env.${process.env.NODE_ENV}`, '.env.local', '.env'],
       validationSchema: envValidator,
     }),
     DatabaseModule,

@@ -120,6 +120,9 @@ describe('TransactionUtils', () => {
           endDate: undefined,
           startBlock: undefined,
           endBlock: undefined,
+          method: undefined,
+          escrow: undefined,
+          receiver: undefined,
           orderDirection: OrderDirection.DESC,
           first: 10,
           skip: 0,
@@ -152,6 +155,9 @@ describe('TransactionUtils', () => {
           endDate: Math.floor(filter.endDate!.getTime() / 1000),
           startBlock: undefined,
           endBlock: undefined,
+          method: undefined,
+          escrow: undefined,
+          receiver: undefined,
           orderDirection: OrderDirection.DESC,
           first: 10,
           skip: 0,
@@ -183,12 +189,117 @@ describe('TransactionUtils', () => {
           endDate: undefined,
           startBlock: undefined,
           endBlock: undefined,
+          method: undefined,
+          escrow: undefined,
+          receiver: undefined,
           orderDirection: OrderDirection.DESC,
           first: 10,
           skip: 0,
         }
       );
       expect(result).toEqual([mockTransaction, mockTransaction]);
+    });
+
+    test('should return an array of transactions filtered by method', async () => {
+      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
+        transactions: [mockTransaction],
+      });
+      const filter: ITransactionsFilter = {
+        chainId: ChainId.LOCALHOST,
+        method: 'transfer',
+        first: 10,
+        skip: 0,
+      };
+
+      const result = await TransactionUtils.getTransactions(filter);
+
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
+        expect.anything(),
+        {
+          fromAddress: undefined,
+          toAddress: undefined,
+          startDate: undefined,
+          endDate: undefined,
+          startBlock: undefined,
+          endBlock: undefined,
+          method: 'transfer',
+          escrow: undefined,
+          receiver: undefined,
+          orderDirection: OrderDirection.DESC,
+          first: 10,
+          skip: 0,
+        }
+      );
+      expect(result).toEqual([mockTransaction]);
+    });
+
+    test('should return an array of transactions filtered by escrow', async () => {
+      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
+        transactions: [mockTransaction],
+      });
+      const filter: ITransactionsFilter = {
+        chainId: ChainId.LOCALHOST,
+        escrow: '0x1234567890123456789012345678901234567890',
+        first: 10,
+        skip: 0,
+      };
+
+      const result = await TransactionUtils.getTransactions(filter);
+
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
+        expect.anything(),
+        {
+          fromAddress: undefined,
+          toAddress: undefined,
+          startDate: undefined,
+          endDate: undefined,
+          startBlock: undefined,
+          endBlock: undefined,
+          method: undefined,
+          escrow: '0x1234567890123456789012345678901234567890',
+          receiver: undefined,
+          orderDirection: OrderDirection.DESC,
+          first: 10,
+          skip: 0,
+        }
+      );
+      expect(result).toEqual([mockTransaction]);
+    });
+
+    test('should return an array of transactions filtered by token', async () => {
+      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
+        transactions: [mockTransaction],
+      });
+      const filter: ITransactionsFilter = {
+        chainId: ChainId.LOCALHOST,
+        token: '0x1234567890123456789012345678901234567890',
+        first: 10,
+        skip: 0,
+      };
+
+      const result = await TransactionUtils.getTransactions(filter);
+
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
+        expect.anything(),
+        {
+          fromAddress: undefined,
+          toAddress: undefined,
+          startDate: undefined,
+          endDate: undefined,
+          startBlock: undefined,
+          endBlock: undefined,
+          method: undefined,
+          escrow: undefined,
+          token: '0x1234567890123456789012345678901234567890',
+          orderDirection: OrderDirection.DESC,
+          first: 10,
+          skip: 0,
+        }
+      );
+      expect(result).toEqual([mockTransaction]);
     });
 
     test('should throw an error if both date and block filters are used', async () => {
@@ -242,6 +353,9 @@ describe('TransactionUtils', () => {
           endDate: undefined,
           startBlock: undefined,
           endBlock: undefined,
+          method: undefined,
+          escrow: undefined,
+          receiver: undefined,
           orderDirection: OrderDirection.DESC,
           first: 10,
           skip: 10,
@@ -272,6 +386,9 @@ describe('TransactionUtils', () => {
           endDate: undefined,
           startBlock: undefined,
           endBlock: undefined,
+          method: undefined,
+          escrow: undefined,
+          receiver: undefined,
           orderDirection: OrderDirection.DESC,
           first: 1000,
           skip: 10,
@@ -305,6 +422,9 @@ describe('TransactionUtils', () => {
           endDate: Math.floor(filter.endDate!.getTime() / 1000),
           startBlock: undefined,
           endBlock: undefined,
+          method: undefined,
+          escrow: undefined,
+          receiver: undefined,
           orderDirection: OrderDirection.DESC,
           first: 5,
           skip: 5,

@@ -1,16 +1,11 @@
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
-import { type WorkerProfileStatus } from '../types';
+import { type WorkerItentityVerificationStatus } from '../types';
 
-export function useWorkerKycStatus(): WorkerProfileStatus {
+export function useWorkerIdentityVerificationStatus(): WorkerItentityVerificationStatus {
   const { user } = useAuthenticatedUser();
 
-  const kycApproved = user.kyc_status === 'approved';
-  const kycDeclined = user.kyc_status === 'declined';
-  const kycToComplete = !(kycApproved || kycDeclined);
-
   return {
-    kycApproved,
-    kycDeclined,
-    kycToComplete,
+    isVerificationCompleted: user.kyc_status === 'approved',
+    status: user.kyc_status ?? 'none',
   };
 }

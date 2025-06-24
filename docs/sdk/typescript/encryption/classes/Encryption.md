@@ -6,7 +6,7 @@
 
 # Class: Encryption
 
-Defined in: [encryption.ts:58](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L58)
+Defined in: [encryption.ts:58](https://github.com/humanprotocol/human-protocol/blob/9da418b6962e251427442717195921599d2815f2/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L58)
 
 ## Introduction
 
@@ -49,11 +49,11 @@ const encryption = await Encryption.build(privateKey, passphrase);
 
 ## Constructors
 
-### new Encryption()
+### Constructor
 
-> **new Encryption**(`privateKey`): [`Encryption`](Encryption.md)
+> **new Encryption**(`privateKey`): `Encryption`
 
-Defined in: [encryption.ts:66](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L66)
+Defined in: [encryption.ts:66](https://github.com/humanprotocol/human-protocol/blob/9da418b6962e251427442717195921599d2815f2/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L66)
 
 Constructor for the Encryption class.
 
@@ -67,15 +67,15 @@ The private key.
 
 #### Returns
 
-[`Encryption`](Encryption.md)
+`Encryption`
 
 ## Methods
 
 ### decrypt()
 
-> **decrypt**(`message`, `publicKey`?): `Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
+> **decrypt**(`message`, `publicKey?`): `Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
 
-Defined in: [encryption.ts:194](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L194)
+Defined in: [encryption.ts:194](https://github.com/humanprotocol/human-protocol/blob/9da418b6962e251427442717195921599d2815f2/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L194)
 
 This function decrypts messages using the private key. In addition, the public key can be added for signature verification.
 
@@ -129,7 +129,7 @@ const resultMessage = await encryption.decrypt('message');
 
 > **sign**(`message`): `Promise`\<`string`\>
 
-Defined in: [encryption.ts:251](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L251)
+Defined in: [encryption.ts:251](https://github.com/humanprotocol/human-protocol/blob/9da418b6962e251427442717195921599d2815f2/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L251)
 
 This function signs a message using the private key used to initialize the client.
 
@@ -165,7 +165,7 @@ const resultMessage = await encryption.sign('message');
 
 > **signAndEncrypt**(`message`, `publicKeys`): `Promise`\<`string`\>
 
-Defined in: [encryption.ts:142](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L142)
+Defined in: [encryption.ts:142](https://github.com/humanprotocol/human-protocol/blob/9da418b6962e251427442717195921599d2815f2/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L142)
 
 This function signs and encrypts a message using the private key used to initialize the client and the specified public keys.
 
@@ -230,9 +230,9 @@ const resultMessage = await encryption.signAndEncrypt('message', publicKeys);
 
 ### build()
 
-> `static` **build**(`privateKeyArmored`, `passphrase`?): `Promise`\<[`Encryption`](Encryption.md)\>
+> `static` **build**(`privateKeyArmored`, `passphrase?`): `Promise`\<`Encryption`\>
 
-Defined in: [encryption.ts:77](https://github.com/humanprotocol/human-protocol/blob/1fed10bebf38e474662f3001345d050ccf6fda2f/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L77)
+Defined in: [encryption.ts:77](https://github.com/humanprotocol/human-protocol/blob/9da418b6962e251427442717195921599d2815f2/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L77)
 
 Builds an Encryption instance by decrypting the private key from an encrypted private key and passphrase.
 
@@ -252,6 +252,6 @@ Optional: The passphrase for the private key.
 
 #### Returns
 
-`Promise`\<[`Encryption`](Encryption.md)\>
+`Promise`\<`Encryption`\>
 
 - The Encryption instance.

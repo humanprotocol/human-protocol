@@ -4,6 +4,7 @@
 .husky
 audits
 docs
+docker-setup
 scripts
 **/node_modules
 **/build
@@ -22,3 +23,6 @@ scripts
 .dockerignore
 **/Dockerfile*
 **/docker-compose*
+
+# Local .env files
+**/.env.local

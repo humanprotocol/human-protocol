@@ -1,0 +1,24 @@
+.search {
+  position: relative;
+  width: 920px;
+  max-width: 100%;
+  border: 1px solid;
+  border-color: $skyOpacity;
+  border-radius: 13px;
+
+  #search-bar{
+    width: 100%;
+    border-radius: 8px;
+    line-height: 24px;
+
+    &:focus, &:focus-visible {
+      border-color: $secondary;
+      outline: none;
+    }
+    &:-webkit-autofill {
+      -webkit-text-fill-color: $primary;
+      box-shadow: 0 0 0px 1000px $white inset;
+    }
+    
+  }
+}

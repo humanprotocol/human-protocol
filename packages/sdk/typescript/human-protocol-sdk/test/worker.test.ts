@@ -22,7 +22,7 @@ describe('WorkerUtils', () => {
     const mockWorker: IWorker = {
       id: workerAddress,
       address: workerAddress,
-      totalAmountReceived: 1000,
+      totalHMTAmountReceived: 1000,
       payoutCount: 10,
     };
 
@@ -89,13 +89,13 @@ describe('WorkerUtils', () => {
       {
         id: '0x1234567890abcdef1234567890abcdef12345678',
         address: '0x1234567890abcdef1234567890abcdef12345678',
-        totalAmountReceived: 1000,
+        totalHMTAmountReceived: 1000,
         payoutCount: 10,
       },
       {
         id: '0xabcdefabcdefabcdefabcdefabcdefabcdef',
         address: '0xabcdefabcdefabcdefabcdefabcdefabcdef',
-        totalAmountReceived: 2000,
+        totalHMTAmountReceived: 2000,
         payoutCount: 20,
       },
     ];
@@ -109,7 +109,7 @@ describe('WorkerUtils', () => {
         chainId: ChainId.LOCALHOST,
         first: 10,
         skip: 0,
-        orderBy: 'totalAmountReceived',
+        orderBy: 'totalHMTAmountReceived',
         orderDirection: OrderDirection.ASC,
       };
 
@@ -122,7 +122,7 @@ describe('WorkerUtils', () => {
           address: undefined,
           first: 10,
           skip: 0,
-          orderBy: 'totalAmountReceived',
+          orderBy: 'totalHMTAmountReceived',
           orderDirection: 'asc',
         }
       );

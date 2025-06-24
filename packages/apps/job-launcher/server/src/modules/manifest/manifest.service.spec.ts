@@ -8,7 +8,6 @@ import { faker } from '@faker-js/faker';
 import { createMock } from '@golevelup/ts-jest';
 import { Encryption } from '@human-protocol/sdk';
 import { Test } from '@nestjs/testing';
-import { ethers } from 'ethers';
 import { AuthConfigService } from '../../common/config/auth-config.service';
 import { CvatConfigService } from '../../common/config/cvat-config.service';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
@@ -52,14 +51,16 @@ import {
   createJobAudinoDto,
   createJobCaptchaDto,
   createJobCvatDto,
-  getMockedProvider,
-  getMockedRegion,
   mockAuthConfigService,
   mockCvatConfigService,
   mockWeb3ConfigService,
 } from './fixtures';
 import { FortuneManifestDto } from './manifest.dto';
 import { ManifestService } from './manifest.service';
+import {
+  getMockedProvider,
+  getMockedRegion,
+} from '../../../test/fixtures/storage';
 
 describe('ManifestService', () => {
   let manifestService: ManifestService;
@@ -314,13 +315,6 @@ describe('ManifestService', () => {
           mockTokenFundDecimals,
         );
 
-        const totalSegments = Math.ceil(
-          (mockDto.audioDuration * 1000) / mockDto.segmentDuration,
-        );
-        const jobBounty =
-          ethers.parseUnits(mockTokenFundAmount.toString(), 'ether') /
-          BigInt(totalSegments);
-
         expect(result).toEqual({
           annotation: {
             description: mockDto.requesterDescription,
@@ -334,7 +328,6 @@ describe('ManifestService', () => {
             data_url: generateBucketUrl(mockDto.data.dataset, mockRequestType)
               .href,
           },
-          job_bounty: ethers.formatEther(jobBounty),
           validation: {
             gt_url: generateBucketUrl(mockDto.groundTruth, mockRequestType)
               .href,

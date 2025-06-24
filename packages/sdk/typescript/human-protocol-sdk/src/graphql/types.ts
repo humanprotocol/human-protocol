@@ -22,14 +22,6 @@ export type EscrowData = {
   chainId: number;
 };
 
-export type PayoutData = {
-  id: string;
-  escrowAddress: string;
-  recipient: string;
-  amount: string;
-  createdAt: string;
-};
-
 export type HMTStatisticsData = {
   totalTransferEventCount: string;
   totalBulkTransferEventCount: string;
@@ -66,7 +58,7 @@ export type EventDayData = {
   dailyEscrowCount: string;
   dailyWorkerCount: string;
   dailyPayoutCount: string;
-  dailyPayoutAmount: string;
+  dailyHMTPayoutAmount: string;
   dailyHMTTransferCount: string;
   dailyHMTTransferAmount: string;
   dailyUniqueSenders: string;

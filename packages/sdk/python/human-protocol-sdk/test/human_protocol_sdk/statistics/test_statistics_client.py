@@ -153,7 +153,7 @@ class TestStatisticsClient(unittest.TestCase):
                             {
                                 "timestamp": 1,
                                 "dailyPayoutCount": "4",
-                                "dailyPayoutAmount": "100",
+                                "dailyHMTPayoutAmount": "100",
                                 "dailyWorkerCount": "4",
                             },
                         ],

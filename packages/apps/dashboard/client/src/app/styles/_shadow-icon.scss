@@ -1,0 +1,31 @@
+.shadow-icon{
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 78px;
+
+  &__icon {
+    width: 66px;
+    height:  100%;
+    padding: 6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  img, svg {
+    transform: translateY(17%);
+    width: 130px;
+    height: 130px;
+  }
+  span{
+    font-size: 28px;
+    font-weight: 600;
+  }
+
+    @media (max-width: 600px) {
+      span {
+        font-size: 20px;
+        font-weight: 500;
+      }
+    }
+}

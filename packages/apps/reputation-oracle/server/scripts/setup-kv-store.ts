@@ -1,20 +1,44 @@
-import 'dotenv/config';
 import { KVStoreClient, KVStoreKeys, Role } from '@human-protocol/sdk';
+import * as dotenv from 'dotenv';
 import { Wallet, ethers } from 'ethers';
 import * as Minio from 'minio';
 
-async function setupCommonValues(kvStoreClient: KVStoreClient): Promise<void> {
-  const { SUPPORTED_JOB_TYPES = '', SERVER_URL = '', FEE = '' } = process.env;
+const isLocalEnv = process.env.LOCAL === 'true';
 
-  if (!SUPPORTED_JOB_TYPES || SUPPORTED_JOB_TYPES.split(',').length === 0) {
+let ENV_FILE_PATH = '.env';
+if (isLocalEnv) {
+  ENV_FILE_PATH += '.local';
+}
+dotenv.config({ path: ENV_FILE_PATH });
+
+const RPC_URL = isLocalEnv
+  ? process.env.RPC_URL_LOCALHOST
+  : process.env.RPC_URL_POLYGON_AMOY;
+
+const DEFAULT_SUPPORTED_JOB_TYPES =
+  'fortune,image_boxes,image_boxes_from_points,image_points,image_polygons,image_skeletons_from_boxes';
+const ROLE = Role.ReputationOracle;
+
+async function setupCommonValues(kvStoreClient: KVStoreClient): Promise<void> {
+  const {
+    SUPPORTED_JOB_TYPES = DEFAULT_SUPPORTED_JOB_TYPES,
+    SERVER_URL,
+    HOST,
+    PORT,
+    FEE = '1',
+  } = process.env;
+
+  if (SUPPORTED_JOB_TYPES.split(',').length === 0) {
     throw new Error('SUPPORTED_JOB_TYPES should be comma-separated list');
   }
+
+  const serverUrl = SERVER_URL || `http://${HOST}:${PORT}`;
   try {
-    new URL(SERVER_URL || '');
+    new URL(serverUrl);
   } catch (noop) {
     throw new Error('Invalid SERVER_URL');
   }
-  let url = SERVER_URL.endsWith('/') ? SERVER_URL.slice(0, -1) : SERVER_URL;
+  let url = serverUrl.endsWith('/') ? serverUrl.slice(0, -1) : serverUrl;
   if (!url.startsWith('http')) {
     url = `http://${url}`;
   }
@@ -32,13 +56,7 @@ async function setupCommonValues(kvStoreClient: KVStoreClient): Promise<void> {
       KVStoreKeys.webhookUrl,
       KVStoreKeys.jobTypes,
     ],
-    [
-      Role.ReputationOracle,
-      `${fee}`,
-      url,
-      `${url}/webhook`,
-      SUPPORTED_JOB_TYPES,
-    ],
+    [ROLE, fee.toString(), url, `${url}/webhook`, SUPPORTED_JOB_TYPES],
   );
 }
 
@@ -77,12 +95,13 @@ async function setupPublicKeyFile(
 }
 
 async function setup(): Promise<void> {
-  const { WEB3_PRIVATE_KEY, RPC_URL } = process.env;
-  if (!WEB3_PRIVATE_KEY) {
-    throw new Error('Private key is empty');
-  }
   if (!RPC_URL) {
     throw new Error('RPC url is empty');
+  }
+
+  const { WEB3_PRIVATE_KEY } = process.env;
+  if (!WEB3_PRIVATE_KEY) {
+    throw new Error('Private key is empty');
   }
 
   const provider = new ethers.JsonRpcProvider(RPC_URL);
@@ -91,6 +110,18 @@ async function setup(): Promise<void> {
   const kvStoreClient = await KVStoreClient.build(wallet);
 
   await setupCommonValues(kvStoreClient);
+
+  if (isLocalEnv) {
+    const { ACTIVE_ORACLE_ADDRESSES } = process.env;
+    if (ACTIVE_ORACLE_ADDRESSES) {
+      const oracleAddresses = ACTIVE_ORACLE_ADDRESSES.split(',')
+        .map((addr) => addr.trim())
+        .filter(Boolean);
+      for (const address of oracleAddresses) {
+        await kvStoreClient.set(address, 'active');
+      }
+    }
+  }
 
   const {
     S3_ENDPOINT,
@@ -108,34 +139,36 @@ async function setup(): Promise<void> {
   ) {
     throw new Error('Missing S3 config value');
   }
-  if (!S3_ACCESS_KEY || !S3_SECRET_KEY) {
-    throw new Error('S3 key is missing');
-  }
-  if (!S3_BUCKET) {
-    throw new Error('S3 bucket is missing');
-  }
 
-  const s3Endpoint = S3_ENDPOINT || 'localhost';
-  const s3Port = S3_PORT || '9000';
+  const s3Endpoint = S3_ENDPOINT as string;
+  const s3Port = S3_PORT as string;
+  const s3AccessKey = S3_ACCESS_KEY as string;
+  const s3SecretKey = S3_SECRET_KEY as string;
+  const s3Bucket = S3_BUCKET as string;
+
   const minioClient = new Minio.Client({
     endPoint: s3Endpoint,
     port: parseInt(s3Port, 10),
     useSSL: S3_USE_SSL === 'true',
-    accessKey: S3_ACCESS_KEY,
-    secretKey: S3_SECRET_KEY,
+    accessKey: s3AccessKey,
+    secretKey: s3SecretKey,
   });
 
-  const { PGP_ENCRYPT, PGP_PUBLIC_KEY } = process.env;
-  if (PGP_ENCRYPT && PGP_ENCRYPT === 'true') {
+  const {
+    PGP_ENCRYPT,
+    PGP_PUBLIC_KEY,
+    PGP_PUBLIC_KEY_FILE = 'pgp-public-key',
+  } = process.env;
+  if (PGP_ENCRYPT === 'true') {
     if (!PGP_PUBLIC_KEY) {
       throw new Error('PGP public key is empty');
     }
     await setupPublicKeyFile(kvStoreClient, minioClient, {
       s3Endpoint,
       s3Port,
-      s3Bucket: S3_BUCKET,
+      s3Bucket,
       publicKey: PGP_PUBLIC_KEY,
-      keyName: 'pgp-public-key',
+      keyName: PGP_PUBLIC_KEY_FILE,
       kvKey: KVStoreKeys.publicKey,
     });
   }
@@ -147,7 +180,7 @@ async function setup(): Promise<void> {
   await setupPublicKeyFile(kvStoreClient, minioClient, {
     s3Endpoint,
     s3Port,
-    s3Bucket: S3_BUCKET,
+    s3Bucket,
     publicKey: JWT_PUBLIC_KEY,
     keyName: 'jwt-public-key',
     kvKey: 'jwt_public_key',
@@ -159,7 +192,7 @@ async function setup(): Promise<void> {
     await setup();
     process.exit(0);
   } catch (error) {
-    console.error('Failed to setup KV', error);
+    console.error('Failed to setup KV.', error);
     process.exit(1);
   }
 })();

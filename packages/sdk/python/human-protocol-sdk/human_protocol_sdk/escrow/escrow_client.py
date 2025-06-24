@@ -66,7 +66,7 @@ from human_protocol_sdk.utils import (
     get_escrow_interface,
     get_factory_interface,
     get_erc20_interface,
-    handle_transaction,
+    handle_error,
 )
 from web3 import Web3, contract
 from web3 import eth
@@ -75,6 +75,7 @@ from web3.types import TxParams
 from eth_utils import abi
 
 from human_protocol_sdk.utils import validate_url
+from human_protocol_sdk.decorators import requires_signer
 
 LOG = logging.getLogger("human_protocol_sdk.escrow")
 
@@ -211,6 +212,7 @@ class EscrowClient:
             address=self.network["factory_address"], abi=factory_interface["abi"]
         )
 
+    @requires_signer
     def create_escrow(
         self,
         token_address: str,
@@ -272,24 +274,24 @@ class EscrowClient:
             if not Web3.is_address(handler):
                 raise EscrowClientError(f"Invalid handler address: {handler}")
 
-        transaction_receipt = handle_transaction(
-            self.w3,
-            "Create Escrow",
-            self.factory_contract.functions.createEscrow(
+        try:
+            tx_hash = self.factory_contract.functions.createEscrow(
                 token_address, trusted_handlers, job_requester_id
-            ),
-            EscrowClientError,
-            tx_options,
-        )
-        return next(
-            (
-                self.factory_contract.events.LaunchedV2().process_log(log)
-                for log in transaction_receipt["logs"]
-                if log["address"] == self.network["factory_address"]
-            ),
-            None,
-        ).args.escrow
+            ).transact(tx_options or {})
+            receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash)
+            event = next(
+                (
+                    self.factory_contract.events.LaunchedV2().process_log(log)
+                    for log in receipt["logs"]
+                    if log["address"] == self.network["factory_address"]
+                ),
+                None,
+            )
+            return event.args.escrow if event else None
+        except Exception as e:
+            handle_error(e, EscrowClientError)
 
+    @requires_signer
     def setup(
         self,
         escrow_address: str,
@@ -350,23 +352,26 @@ class EscrowClient:
         if not Web3.is_address(escrow_address):
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
 
-        handle_transaction(
-            self.w3,
-            "Setup",
-            self._get_escrow_contract(escrow_address).functions.setup(
-                escrow_config.reputation_oracle_address,
-                escrow_config.recording_oracle_address,
-                escrow_config.exchange_oracle_address,
-                escrow_config.reputation_oracle_fee,
-                escrow_config.recording_oracle_fee,
-                escrow_config.exchange_oracle_fee,
-                escrow_config.manifest_url,
-                escrow_config.hash,
-            ),
-            EscrowClientError,
-            tx_options,
-        )
+        try:
+            tx_hash = (
+                self._get_escrow_contract(escrow_address)
+                .functions.setup(
+                    escrow_config.reputation_oracle_address,
+                    escrow_config.recording_oracle_address,
+                    escrow_config.exchange_oracle_address,
+                    escrow_config.reputation_oracle_fee,
+                    escrow_config.recording_oracle_fee,
+                    escrow_config.exchange_oracle_fee,
+                    escrow_config.manifest_url,
+                    escrow_config.hash,
+                )
+                .transact(tx_options or {})
+            )
+            self.w3.eth.wait_for_transaction_receipt(tx_hash)
+        except Exception as e:
+            handle_error(e, EscrowClientError)
 
+    @requires_signer
     def fund(
         self,
         escrow_address: str,
@@ -419,18 +424,18 @@ class EscrowClient:
             raise EscrowClientError("Amount must be positive")
 
         token_address = self.get_token_address(escrow_address)
-
         erc20_interface = get_erc20_interface()
         token_contract = self.w3.eth.contract(token_address, abi=erc20_interface["abi"])
 
-        handle_transaction(
-            self.w3,
-            "Fund",
-            token_contract.functions.transfer(escrow_address, amount),
-            EscrowClientError,
-            tx_options,
-        )
+        try:
+            tx_hash = token_contract.functions.transfer(
+                escrow_address, amount
+            ).transact(tx_options or {})
+            self.w3.eth.wait_for_transaction_receipt(tx_hash)
+        except Exception as e:
+            handle_error(e, EscrowClientError)
 
+    @requires_signer
     def store_results(
         self,
         escrow_address: str,
@@ -486,17 +491,18 @@ class EscrowClient:
             raise EscrowClientError("Invalid empty hash")
         if not validate_url(url):
             raise EscrowClientError(f"Invalid URL: {url}")
-        if not self.w3.eth.default_account:
-            raise EscrowClientError("You must add an account to Web3 instance")
 
-        handle_transaction(
-            self.w3,
-            "Store Results",
-            self._get_escrow_contract(escrow_address).functions.storeResults(url, hash),
-            EscrowClientError,
-            tx_options,
-        )
+        try:
+            tx_hash = (
+                self._get_escrow_contract(escrow_address)
+                .functions.storeResults(url, hash)
+                .transact(tx_options or {})
+            )
+            self.w3.eth.wait_for_transaction_receipt(tx_hash)
+        except Exception as e:
+            handle_error(e, EscrowClientError)
 
+    @requires_signer
     def complete(
         self, escrow_address: str, tx_options: Optional[TxParams] = None
     ) -> None:
@@ -539,14 +545,17 @@ class EscrowClient:
         if not Web3.is_address(escrow_address):
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
 
-        handle_transaction(
-            self.w3,
-            "Complete",
-            self._get_escrow_contract(escrow_address).functions.complete(),
-            EscrowClientError,
-            tx_options,
-        )
+        try:
+            tx_hash = (
+                self._get_escrow_contract(escrow_address)
+                .functions.complete()
+                .transact(tx_options or {})
+            )
+            self.w3.eth.wait_for_transaction_receipt(tx_hash)
+        except Exception as e:
+            handle_error(e, EscrowClientError)
 
+    @requires_signer
     def bulk_payout(
         self,
         escrow_address: str,
@@ -621,11 +630,8 @@ class EscrowClient:
         self.ensure_correct_bulk_payout_input(
             escrow_address, recipients, amounts, final_results_url, final_results_hash
         )
-
-        if force_complete:
-            handle_transaction(
-                self.w3,
-                "Bulk Payout",
+        try:
+            contract_func = (
                 self._get_escrow_contract(escrow_address).functions.bulkPayOut(
                     recipients,
                     amounts,
@@ -633,20 +639,16 @@ class EscrowClient:
                     final_results_hash,
                     txId,
                     force_complete,
-                ),
-                EscrowClientError,
-                tx_options,
-            )
-        else:
-            handle_transaction(
-                self.w3,
-                "Bulk Payout",
-                self._get_escrow_contract(escrow_address).functions.bulkPayOut(
+                )
+                if force_complete
+                else self._get_escrow_contract(escrow_address).functions.bulkPayOut(
                     recipients, amounts, final_results_url, final_results_hash, txId
-                ),
-                EscrowClientError,
-                tx_options,
+                )
             )
+            tx_hash = contract_func.transact(tx_options or {})
+            self.w3.eth.wait_for_transaction_receipt(tx_hash)
+        except Exception as e:
+            handle_error(e, EscrowClientError)
 
     def create_bulk_payout_transaction(
         self,
@@ -818,6 +820,7 @@ class EscrowClient:
         if not final_results_hash:
             raise EscrowClientError("Invalid empty final results hash")
 
+    @requires_signer
     def cancel(
         self, escrow_address: str, tx_options: Optional[TxParams] = None
     ) -> EscrowCancel:
@@ -866,41 +869,42 @@ class EscrowClient:
         if not Web3.is_address(escrow_address):
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
 
-        transaction_receipt = handle_transaction(
-            self.w3,
-            "Cancel",
-            self._get_escrow_contract(escrow_address).functions.cancel(),
-            EscrowClientError,
-            tx_options,
-        )
+        try:
+            tx_hash = (
+                self._get_escrow_contract(escrow_address)
+                .functions.cancel()
+                .transact(tx_options or {})
+            )
+            receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash)
 
-        amount_transferred = None
-        token_address = self.get_token_address(escrow_address)
+            amount_transferred = None
+            token_address = self.get_token_address(escrow_address)
+            erc20_interface = get_erc20_interface()
+            token_contract = self.w3.eth.contract(
+                token_address, abi=erc20_interface["abi"]
+            )
 
-        erc20_interface = get_erc20_interface()
-        token_contract = self.w3.eth.contract(token_address, abi=erc20_interface["abi"])
+            for log in receipt["logs"]:
+                if log["address"] == token_address:
+                    processed_log = token_contract.events.Transfer().process_log(log)
+                    if (
+                        processed_log["event"] == "Transfer"
+                        and processed_log["args"]["from"] == escrow_address
+                    ):
+                        amount_transferred = processed_log["args"]["value"]
+                        break
 
-        for log in transaction_receipt["logs"]:
-            if log["address"] == token_address:
-                processed_log = token_contract.events.Transfer().process_log(log)
+            if amount_transferred is None:
+                raise EscrowClientError("Transfer Event Not Found in Transaction Logs")
 
-                if (
-                    processed_log["event"] == "Transfer"
-                    and processed_log["args"]["from"] == escrow_address
-                ):
-                    amount_transferred = processed_log["args"]["value"]
-                    break
+            return EscrowCancel(
+                tx_hash=receipt["transactionHash"].hex(),
+                amount_refunded=amount_transferred,
+            )
+        except Exception as e:
+            handle_error(e, EscrowClientError)
 
-        if amount_transferred is None:
-            raise EscrowClientError("Transfer Event Not Found in Transaction Logs")
-
-        escrow_cancel_data = EscrowCancel(
-            tx_hash=transaction_receipt["transactionHash"].hex(),
-            amount_refunded=amount_transferred,
-        )
-
-        return escrow_cancel_data
-
+    @requires_signer
     def add_trusted_handlers(
         self,
         escrow_address: str,
@@ -957,16 +961,17 @@ class EscrowClient:
             if not Web3.is_address(handler):
                 raise EscrowClientError(f"Invalid handler address: {handler}")
 
-        handle_transaction(
-            self.w3,
-            "Add Trusted Handlers",
-            self._get_escrow_contract(escrow_address).functions.addTrustedHandlers(
-                handlers
-            ),
-            EscrowClientError,
-            tx_options,
-        )
+        try:
+            tx_hash = (
+                self._get_escrow_contract(escrow_address)
+                .functions.addTrustedHandlers(handlers)
+                .transact(tx_options or {})
+            )
+            self.w3.eth.wait_for_transaction_receipt(tx_hash)
+        except Exception as e:
+            handle_error(e, EscrowClientError)
 
+    @requires_signer
     def withdraw(
         self,
         escrow_address: str,
@@ -1024,40 +1029,40 @@ class EscrowClient:
         if not Web3.is_address(token_address):
             raise EscrowClientError(f"Invalid token address: {token_address}")
 
-        transaction_receipt = handle_transaction(
-            self.w3,
-            "Withdraw",
-            self._get_escrow_contract(escrow_address).functions.withdraw(token_address),
-            EscrowClientError,
-            tx_options,
-        )
+        try:
+            tx_hash = (
+                self._get_escrow_contract(escrow_address)
+                .functions.withdraw(token_address)
+                .transact(tx_options or {})
+            )
+            receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash)
 
-        amount_transferred = None
+            amount_transferred = None
+            erc20_interface = get_erc20_interface()
+            token_contract = self.w3.eth.contract(
+                token_address, abi=erc20_interface["abi"]
+            )
 
-        erc20_interface = get_erc20_interface()
-        token_contract = self.w3.eth.contract(token_address, abi=erc20_interface["abi"])
+            for log in receipt["logs"]:
+                if log["address"] == token_address:
+                    processed_log = token_contract.events.Transfer().process_log(log)
+                    if (
+                        processed_log["event"] == "Transfer"
+                        and processed_log["args"]["from"] == escrow_address
+                    ):
+                        amount_transferred = processed_log["args"]["value"]
+                        break
 
-        for log in transaction_receipt["logs"]:
-            if log["address"] == token_address:
-                processed_log = token_contract.events.Transfer().process_log(log)
+            if amount_transferred is None:
+                raise EscrowClientError("Transfer Event Not Found in Transaction Logs")
 
-                if (
-                    processed_log["event"] == "Transfer"
-                    and processed_log["args"]["from"] == escrow_address
-                ):
-                    amount_transferred = processed_log["args"]["value"]
-                    break
-
-        if amount_transferred is None:
-            raise EscrowClientError("Transfer Event Not Found in Transaction Logs")
-
-        escrow_withdraw_data = EscrowWithdraw(
-            tx_hash=transaction_receipt["transactionHash"].hex(),
-            token_address=token_address,
-            amount_withdrawn=amount_transferred,
-        )
-
-        return escrow_withdraw_data
+            return EscrowWithdraw(
+                tx_hash=receipt["transactionHash"].hex(),
+                token_address=token_address,
+                amount_withdrawn=amount_transferred,
+            )
+        except Exception as e:
+            handle_error(e, EscrowClientError)
 
     def get_balance(self, escrow_address: str) -> Decimal:
         """

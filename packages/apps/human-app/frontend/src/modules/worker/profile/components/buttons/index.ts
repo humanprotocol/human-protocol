@@ -1,2 +1,2 @@
-export * from './start-kyc-btn';
+export * from './start-idv-btn';
 export * from './register-address-btn';
