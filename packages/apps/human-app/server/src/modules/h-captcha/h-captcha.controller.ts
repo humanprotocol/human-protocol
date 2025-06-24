@@ -46,6 +46,9 @@ export class HCaptchaController {
     @Body() dto: VerifyTokenDto,
     @Request() req: RequestWithUser,
   ): Promise<VerifyTokenResponse> {
+    if (!req.user.site_key) {
+      throw new Error('Missing site key');
+    }
     const command = this.mapper.map(req.user, JwtUserData, VerifyTokenCommand);
     command.response = dto.token;
     command.jwtToken = req.token;
@@ -57,6 +60,9 @@ export class HCaptchaController {
   public async getDailyHmtSpent(
     @Request() req: RequestWithUser,
   ): Promise<DailyHmtSpentResponse> {
+    if (!req.user.site_key) {
+      throw new Error('Missing site key');
+    }
     const command = this.mapper.map(
       req.user,
       JwtUserData,
@@ -70,6 +76,9 @@ export class HCaptchaController {
   public async getUserStats(
     @Request() req: RequestWithUser,
   ): Promise<UserStatsResponse> {
+    if (!req.user.email || !req.user.site_key) {
+      throw new Error('Missing email or site key');
+    }
     const command = this.mapper.map(req.user, JwtUserData, UserStatsCommand);
     return this.service.getUserStats(command);
   }

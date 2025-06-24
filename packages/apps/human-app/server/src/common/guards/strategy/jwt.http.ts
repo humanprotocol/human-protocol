@@ -46,6 +46,8 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
       wallet_address: string;
       reputation_network: string;
       qualifications?: string[];
+      site_key?: string;
+      email?: string;
     },
   ): Promise<JwtUserData> {
     if (!payload.user_id) {
@@ -58,6 +60,8 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
       status: payload.status,
       reputation_network: payload.reputation_network,
       qualifications: payload.qualifications,
+      site_key: payload.site_key,
+      email: payload.email,
     };
   }
 }
