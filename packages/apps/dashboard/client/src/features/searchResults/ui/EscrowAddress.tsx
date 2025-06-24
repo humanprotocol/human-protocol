@@ -10,28 +10,10 @@ import { AddressDetailsEscrow } from '../model/addressDetailsSchema';
 
 import HmtBalance from './HmtBalance';
 import TitleSectionWrapper from './TitleSectionWrapper';
+import TokenAmount from './TokenAmount';
 
 type Props = {
   data: AddressDetailsEscrow;
-};
-
-const renderTokenAmount = (
-  amount: string | null | undefined,
-  tokenSymbol: string | null | undefined
-) => {
-  return (
-    <Stack direction="row" whiteSpace="nowrap">
-      <Typography variant="body2">{Number(amount)}</Typography>
-      <Typography
-        component="span"
-        variant="body2"
-        ml={0.5}
-        color="text.secondary"
-      >
-        {tokenSymbol}
-      </Typography>
-    </Stack>
-  );
 };
 
 const EscrowAddress: FC<Props> = ({ data }) => {
@@ -59,7 +41,11 @@ const EscrowAddress: FC<Props> = ({ data }) => {
             {isHmt ? (
               <HmtBalance balance={balance} />
             ) : (
-              renderTokenAmount(balance, tokenSymbol)
+              <TokenAmount
+                amount={balance}
+                tokenSymbol={tokenSymbol}
+                alreadyParsed
+              />
             )}
           </TitleSectionWrapper>
         ) : null}
@@ -70,10 +56,18 @@ const EscrowAddress: FC<Props> = ({ data }) => {
           <Typography variant="body2">{factoryAddress}</Typography>
         </TitleSectionWrapper>
         <TitleSectionWrapper title="Total Funded Amount">
-          {renderTokenAmount(totalFundedAmount, tokenSymbol)}
+          <TokenAmount
+            amount={totalFundedAmount}
+            tokenSymbol={tokenSymbol}
+            alreadyParsed
+          />
         </TitleSectionWrapper>
         <TitleSectionWrapper title="Paid Amount">
-          {renderTokenAmount(amountPaid, tokenSymbol)}
+          <TokenAmount
+            amount={amountPaid}
+            tokenSymbol={tokenSymbol}
+            alreadyParsed
+          />
         </TitleSectionWrapper>
 
         <TitleSectionWrapper title="Status">
