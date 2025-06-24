@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
 
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
-import { Box, Typography } from '@mui/material';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 import { GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
 
 import { useIsMobile } from '@/shared/hooks/useBreakpoints';

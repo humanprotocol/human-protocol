@@ -10,9 +10,10 @@ import MuiTableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
 
-import { PaginatedTransactionDetails } from '@/features/searchResults/model/transactionDetailsSchema';
 import handleErrorMessage from '@/shared/lib/handleErrorMessage';
 import AbbreviateClipboard from '@/shared/ui/AbbreviateClipboard';
+
+import { PaginatedTransactionDetails } from '../../model/transactionDetailsSchema';
 
 import TransactionsTableBodyContainer from './TransactionsTableBodyContainer';
 import TransactionsTableCellMethod from './TransactionsTableCellMethod';

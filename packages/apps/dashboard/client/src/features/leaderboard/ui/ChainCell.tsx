@@ -1,7 +1,7 @@
 import { FC } from 'react';
 
 import { ChainId } from '@human-protocol/sdk';
-import { Typography } from '@mui/material';
+import Typography from '@mui/material/Typography';
 
 import { getNetwork } from '@/shared/lib/networks';
 import { NetworkIcon } from '@/shared/ui/NetworkIcon';

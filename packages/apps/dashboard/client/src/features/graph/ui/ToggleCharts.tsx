@@ -4,7 +4,7 @@ import { FormControlLabel, FormGroup, Typography } from '@mui/material';
 import Checkbox from '@mui/material/Checkbox';
 import Stack from '@mui/material/Stack';
 
-import FormatNumber from '@/shared/ui/FormatNumber';
+import FormattedNumber from '@/shared/ui/FormattedNumber';
 
 interface ToggleChartsProps {
   handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -64,7 +64,7 @@ const ToggleCharts: FC<ToggleChartsProps> = ({
               <>
                 <Typography variant="subtitle2">{elem.title}</Typography>
                 <Typography variant="h4" component="p">
-                  {elem.amount ? <FormatNumber value={elem.amount} /> : 0}
+                  {elem.amount ? <FormattedNumber value={elem.amount} /> : 0}
                   {elem.name === 'totalTransactionAmount' &&
                     elem.isAreaChart && (
                       <Typography

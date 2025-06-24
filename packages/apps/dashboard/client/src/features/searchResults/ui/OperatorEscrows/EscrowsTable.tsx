@@ -7,11 +7,12 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 
-import useEscrowDetails from '@/features/searchResults/api/useEscrowDetails';
-import usePagination from '@/features/searchResults/hooks/usePagination';
-import TablePagination from '@/features/searchResults/ui/TablePagination';
 import useGlobalFiltersStore from '@/shared/store/useGlobalFiltersStore';
 import SectionWrapper from '@/shared/ui/SectionWrapper';
+
+import useEscrowDetails from '../../api/useEscrowDetails';
+import usePagination from '../../hooks/usePagination';
+import TablePagination from '../TablePagination';
 
 import EscrowsTableBody from './EscrowsTableBody';
 

@@ -1,6 +1,6 @@
 import { FC } from 'react';
 
-import { Typography } from '@mui/material';
+import Typography from '@mui/material/Typography';
 
 type TextCellProps = {
   value: string;

@@ -2,9 +2,9 @@ import { FC } from 'react';
 
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { NumericFormat } from 'react-number-format';
 
 import { useIsMobile } from '@/shared/hooks/useBreakpoints';
+import FormattedNumber from '@/shared/ui/FormattedNumber';
 import SectionWrapper from '@/shared/ui/SectionWrapper';
 
 type Props = {
@@ -17,10 +17,8 @@ const renderAmount = (amount: number | null | undefined, isMobile: boolean) => {
   return (
     <Stack direction="row" whiteSpace="nowrap">
       <Typography variant="body2">
-        <NumericFormat
-          displayType="text"
+        <FormattedNumber
           value={(amount || 0) * 1e18}
-          thousandSeparator=","
           decimalScale={isMobile ? 4 : 9}
         />
       </Typography>

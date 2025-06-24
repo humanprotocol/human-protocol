@@ -3,9 +3,10 @@ import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
 
-import apiPaths from '@/shared/api/apiPaths';
-import httpClient from '@/shared/api/httpClient';
 import { networks as allNetworks } from '@/shared/lib/networks';
+
+import apiPaths from './apiPaths';
+import httpClient from './httpClient';
 
 const enabledChainsSchema = z.array(z.number());
 

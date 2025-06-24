@@ -1,6 +1,7 @@
 import { FC } from 'react';
 
-import { Chip, Box } from '@mui/material';
+import Box from '@mui/material/Box';
+import Chip from '@mui/material/Chip';
 
 type CategoryCellProps = {
   value?: string;

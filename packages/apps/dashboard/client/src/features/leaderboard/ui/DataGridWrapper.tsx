@@ -1,6 +1,7 @@
 import { FC } from 'react';
 
-import { Box, Typography } from '@mui/material';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 import { DataGrid } from '@mui/x-data-grid';
 
 import { useIsMobile } from '@/shared/hooks/useBreakpoints';

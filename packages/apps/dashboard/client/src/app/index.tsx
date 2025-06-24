@@ -5,7 +5,7 @@ import ReactDOM from 'react-dom/client';
 
 import AppRoutes from './AppRoutes';
 import ThemeProvider from './providers/ThemeProvider';
-import '@/app/styles/main.scss';
+import './styles/main.scss';
 import 'simplebar-react/dist/simplebar.min.css';
 
 const queryClient = new QueryClient({

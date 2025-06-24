@@ -9,18 +9,19 @@ import ListItem from '@mui/material/ListItem';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
-import { AddressDetailsOperator } from '@/features/searchResults/model/addressDetailsSchema';
-import HmtBalance from '@/features/searchResults/ui/HmtBalance';
-import HmtPrice from '@/features/searchResults/ui/HmtPrice';
-import KVStore from '@/features/searchResults/ui/KvStore';
-import ReputationScore from '@/features/searchResults/ui/ReputationScore';
-import StakeInfo from '@/features/searchResults/ui/StakeInfo';
-import TitleSectionWrapper from '@/features/searchResults/ui/TitleSectionWrapper';
 import { env } from '@/shared/lib/env';
 import EntityIcon from '@/shared/ui/EntityIcon';
 import SectionWrapper from '@/shared/ui/SectionWrapper';
 
+import { AddressDetailsOperator } from '../model/addressDetailsSchema';
+
+import HmtBalance from './HmtBalance';
+import HmtPrice from './HmtPrice';
+import KVStore from './KvStore';
 import EscrowsTable from './OperatorEscrows/EscrowsTable';
+import ReputationScore from './ReputationScore';
+import StakeInfo from './StakeInfo';
+import TitleSectionWrapper from './TitleSectionWrapper';
 
 type RoleInfoProps = {
   title: string;

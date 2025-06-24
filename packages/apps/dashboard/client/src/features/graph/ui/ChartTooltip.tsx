@@ -5,8 +5,9 @@ import { Grid, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
-import { NumericFormat } from 'react-number-format';
 import { TooltipProps } from 'recharts';
+
+import FormattedNumber from '@/shared/ui/FormattedNumber';
 
 import formatDate from '../lib/formatDate';
 
@@ -70,11 +71,7 @@ const ChartTooltip: FC<TooltipProps<number, string>> = ({
                 textAlign="start"
                 variant="subtitle2"
               >
-                <NumericFormat
-                  displayType="text"
-                  value={elem.value}
-                  decimalScale={2}
-                />{' '}
+                <FormattedNumber value={elem.value} decimalScale={2} />{' '}
                 {elem.name === 'totalTransactionAmount' ? 'HMT' : ''}
               </Typography>
             </Grid>

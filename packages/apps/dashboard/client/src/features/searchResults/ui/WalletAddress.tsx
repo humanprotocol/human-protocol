@@ -2,20 +2,22 @@ import { FC } from 'react';
 
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { NumericFormat } from 'react-number-format';
+
+import { useIsMobile } from '@/shared/hooks/useBreakpoints';
+import FormattedNumber from '@/shared/ui/FormattedNumber';
+import SectionWrapper from '@/shared/ui/SectionWrapper';
 
 import {
   AddressDetailsOperator,
   AddressDetailsWallet,
-} from '@/features/searchResults/model/addressDetailsSchema';
-import HmtBalance from '@/features/searchResults/ui/HmtBalance';
-import HmtPrice from '@/features/searchResults/ui/HmtPrice';
-import KVStore from '@/features/searchResults/ui/KvStore';
-import ReputationScore from '@/features/searchResults/ui/ReputationScore';
-import StakeInfo from '@/features/searchResults/ui/StakeInfo';
-import TitleSectionWrapper from '@/features/searchResults/ui/TitleSectionWrapper';
-import { useIsMobile } from '@/shared/hooks/useBreakpoints';
-import SectionWrapper from '@/shared/ui/SectionWrapper';
+} from '../model/addressDetailsSchema';
+
+import HmtBalance from './HmtBalance';
+import HmtPrice from './HmtPrice';
+import KVStore from './KvStore';
+import ReputationScore from './ReputationScore';
+import StakeInfo from './StakeInfo';
+import TitleSectionWrapper from './TitleSectionWrapper';
 
 type Props = {
   data: AddressDetailsWallet | AddressDetailsOperator;
@@ -55,10 +57,8 @@ const WalletAddress: FC<Props> = ({ data }) => {
               tooltip="Total amount earned by participating in jobs"
             >
               <Typography variant="body2">
-                <NumericFormat
-                  displayType="text"
+                <FormattedNumber
                   value={(data?.totalHMTAmountReceived || 0) * 1e18}
-                  thousandSeparator=","
                   decimalScale={isMobile ? 4 : 9}
                 />
               </Typography>

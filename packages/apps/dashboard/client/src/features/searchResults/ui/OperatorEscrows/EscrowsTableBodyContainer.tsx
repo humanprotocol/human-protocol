@@ -1,6 +1,6 @@
 import { FC, PropsWithChildren } from 'react';
 
-import { Grid } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import MuiTableBody from '@mui/material/TableBody';
 
 const EscrowsTableBodyContainer: FC<PropsWithChildren> = ({ children }) => {

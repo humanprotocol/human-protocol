@@ -1,7 +1,8 @@
 import { FC, PropsWithChildren } from 'react';
 
 import { Launch as LaunchIcon } from '@mui/icons-material';
-import { Box, Typography } from '@mui/material';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 import { Link } from 'react-router-dom';
 
 import { useIsMobile } from '@/shared/hooks/useBreakpoints';

@@ -16,11 +16,12 @@ import {
   TooltipProps,
 } from 'recharts';
 
-import ToggleButtons from '@/features/graph/ui/ToggleButtons';
 import { useIsMobile } from '@/shared/hooks/useBreakpoints';
 
 import formatDate from '../lib/formatDate';
 import formatNumber from '../lib/formatNumber';
+
+import ToggleButtons from './ToggleButtons';
 
 const CustomSmallChartTooltip: FC<TooltipProps<number, string>> = ({
   payload,

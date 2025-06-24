@@ -2,10 +2,10 @@ import { FC } from 'react';
 
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { NumericFormat } from 'react-number-format';
 
 import useHmtPrice from '@/shared/api/useHmtPrice';
 import { useIsMobile } from '@/shared/hooks/useBreakpoints';
+import FormattedNumber from '@/shared/ui/FormattedNumber';
 
 type Props = {
   balance?: number | null;
@@ -30,12 +30,7 @@ const HmtBalance: FC<Props> = ({ balance }) => {
   return (
     <Stack flexDirection="row" whiteSpace="nowrap">
       <Typography variant="body2">
-        <NumericFormat
-          displayType="text"
-          value={_balance}
-          thousandSeparator=","
-          decimalScale={isMobile ? 4 : 9}
-        />
+        <FormattedNumber value={_balance} decimalScale={isMobile ? 4 : 9} />
       </Typography>
       <Typography
         component="span"

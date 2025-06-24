@@ -5,12 +5,13 @@ import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import SimpleBar from 'simplebar-react';
 
-import useTransactionDetails from '@/features/searchResults/api/useTransactionDetails';
-import usePagination from '@/features/searchResults/hooks/usePagination';
-import TablePagination from '@/features/searchResults/ui/TablePagination';
 import useGlobalFiltersStore from '@/shared/store/useGlobalFiltersStore';
 import SectionWrapper from '@/shared/ui/SectionWrapper';
 
+import useTransactionDetails from '../api/useTransactionDetails';
+import usePagination from '../hooks/usePagination';
+
+import TablePagination from './TablePagination';
 import TransactionsTableBody from './WalletTransactions/TransactionsTableBody';
 import TransactionsTableHead from './WalletTransactions/TransactionsTableHead';
 
