@@ -93,7 +93,7 @@ describe('Escrow', () => {
 
     const escrow = new Escrow(escrowAddress);
     escrow.address = escrowAddress;
-    escrow.token = Address.zero();
+    escrow.token = tokenAddress;
     escrow.factoryAddress = Address.zero();
     escrow.launcher = launcherAddress;
     escrow.canceler = launcherAddress;
@@ -1318,7 +1318,10 @@ describe('Escrow', () => {
   });
 
   test('Should properly handle Completed event', () => {
-    const newCompleted = createCompletedEvent(operatorAddress);
+    const newCompleted = createCompletedEvent(
+      operatorAddress,
+      BigInt.fromI32(12)
+    );
 
     handleCompleted(newCompleted);
 
@@ -1395,6 +1398,140 @@ describe('Escrow', () => {
       'to',
       escrowAddressString
     );
+
+    // InternalTransaction
+    const internalTxId = toEventId(newCompleted).toHex();
+    assert.notInStore('InternalTransaction', internalTxId);
+
+    // Escrow balance should be 0 after completion
+    assert.fieldEquals('Escrow', escrowAddress.toHex(), 'balance', '0');
+  });
+
+  test('Should properly handle Completed event and create InternalTransaction if escrow has balance', () => {
+    const escrow = Escrow.load(escrowAddress);
+    if (escrow) {
+      escrow.balance = BigInt.fromI32(1234);
+      escrow.save();
+    }
+
+    const newCompleted = createCompletedEvent(
+      operatorAddress,
+      BigInt.fromI32(13)
+    );
+
+    handleCompleted(newCompleted);
+
+    const id = toEventId(newCompleted).toHex();
+
+    // EscrowStatusEvent
+    assert.fieldEquals(
+      'EscrowStatusEvent',
+      id,
+      'block',
+      newCompleted.block.number.toString()
+    );
+    assert.fieldEquals(
+      'EscrowStatusEvent',
+      id,
+      'timestamp',
+      newCompleted.block.timestamp.toString()
+    );
+    assert.fieldEquals(
+      'EscrowStatusEvent',
+      id,
+      'txHash',
+      newCompleted.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'EscrowStatusEvent',
+      id,
+      'escrowAddress',
+      escrowAddressString
+    );
+    assert.fieldEquals(
+      'EscrowStatusEvent',
+      id,
+      'sender',
+      operatorAddressString
+    );
+    assert.fieldEquals('EscrowStatusEvent', id, 'status', 'Complete');
+    assert.fieldEquals(
+      'EscrowStatusEvent',
+      id,
+      'launcher',
+      launcherAddressString
+    );
+
+    // Escrow
+    assert.fieldEquals('Escrow', escrowAddress.toHex(), 'status', 'Complete');
+    assert.fieldEquals(
+      'Transaction',
+      newCompleted.transaction.hash.toHex(),
+      'txHash',
+      newCompleted.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      newCompleted.transaction.hash.toHex(),
+      'method',
+      'complete'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      newCompleted.transaction.hash.toHex(),
+      'block',
+      newCompleted.block.number.toString()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      newCompleted.transaction.hash.toHex(),
+      'from',
+      newCompleted.transaction.from.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      newCompleted.transaction.hash.toHex(),
+      'to',
+      escrowAddressString
+    );
+
+    // InternalTransaction
+    const internalTxId = toEventId(newCompleted).toHex();
+
+    assert.fieldEquals(
+      'InternalTransaction',
+      internalTxId,
+      'from',
+      escrowAddressString
+    );
+    assert.fieldEquals(
+      'InternalTransaction',
+      internalTxId,
+      'to',
+      launcherAddressString
+    );
+    assert.fieldEquals('InternalTransaction', internalTxId, 'value', '1234');
+    assert.fieldEquals(
+      'InternalTransaction',
+      internalTxId,
+      'method',
+      'transfer'
+    );
+    assert.fieldEquals(
+      'InternalTransaction',
+      internalTxId,
+      'escrow',
+      escrowAddressString
+    );
+    assert.fieldEquals(
+      'InternalTransaction',
+      internalTxId,
+      'transaction',
+      newCompleted.transaction.hash.toHex()
+    );
+
+    // Escrow balance should be 0 after completion
+    assert.fieldEquals('Escrow', escrowAddress.toHex(), 'balance', '0');
   });
 
   test('Should properly handle Withdraw event', () => {
@@ -1680,8 +1817,14 @@ describe('Escrow', () => {
     });
 
     test('Should properly calculate completed event in statstics', () => {
-      const newCompleted1 = createCompletedEvent(operatorAddress);
-      const newCompleted2 = createCompletedEvent(operatorAddress);
+      const newCompleted1 = createCompletedEvent(
+        operatorAddress,
+        BigInt.fromI32(12)
+      );
+      const newCompleted2 = createCompletedEvent(
+        operatorAddress,
+        BigInt.fromI32(13)
+      );
 
       handleCompleted(newCompleted1);
       handleCompleted(newCompleted2);

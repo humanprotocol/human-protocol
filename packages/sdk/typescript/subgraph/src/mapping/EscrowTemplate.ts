@@ -639,11 +639,7 @@ export function handleCompleted(event: Completed): void {
   // Update escrow entity
   const escrowEntity = Escrow.load(dataSource.address());
   if (escrowEntity) {
-    escrowEntity.status = 'Complete';
-    escrowEntity.save();
-    eventEntity.launcher = escrowEntity.launcher;
-
-    createTransaction(
+    const transaction = createTransaction(
       event,
       'complete',
       event.transaction.from,
@@ -651,6 +647,26 @@ export function handleCompleted(event: Completed): void {
       null,
       Address.fromBytes(escrowEntity.address)
     );
+    if (
+      escrowEntity.balance &&
+      escrowEntity.balance.gt(ZERO_BI) &&
+      escrowEntity.token != HMT_ADDRESS
+    ) {
+      const internalTransaction = new InternalTransaction(toEventId(event));
+      internalTransaction.from = escrowEntity.address;
+      internalTransaction.to = escrowEntity.launcher;
+      internalTransaction.value = escrowEntity.balance;
+      internalTransaction.transaction = transaction.id;
+      internalTransaction.method = 'transfer';
+      internalTransaction.escrow = escrowEntity.address;
+      internalTransaction.token = escrowEntity.token;
+      internalTransaction.save();
+
+      escrowEntity.balance = ZERO_BI;
+    }
+    escrowEntity.status = 'Complete';
+    escrowEntity.save();
+    eventEntity.launcher = escrowEntity.launcher;
   }
   eventEntity.save();
 }
