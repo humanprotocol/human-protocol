@@ -8,7 +8,7 @@ import { useIsMobile } from '@/shared/hooks/useBreakpoints';
 import FormattedNumber from '@/shared/ui/FormattedNumber';
 
 type Props = {
-  balance?: number | null;
+  balance?: number | string | null;
 };
 
 const HmtBalance: FC<Props> = ({ balance }) => {

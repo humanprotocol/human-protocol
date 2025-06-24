@@ -16,12 +16,12 @@ type Props = {
 };
 
 const renderTokenAmount = (
-  amount: number | null | undefined,
+  amount: string | null | undefined,
   tokenSymbol: string | null | undefined
 ) => {
   return (
     <Stack direction="row" whiteSpace="nowrap">
-      <Typography variant="body2">{amount}</Typography>
+      <Typography variant="body2">{Number(amount)}</Typography>
       <Typography
         component="span"
         variant="body2"
