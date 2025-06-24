@@ -1,4 +1,4 @@
-yarn dlx lint-staged
+yarn dlx lint-staged && yarn workspaces foreach --all -p run typecheck
 
 # Format python file changes
 cd packages/sdk/python/human-protocol-sdk
