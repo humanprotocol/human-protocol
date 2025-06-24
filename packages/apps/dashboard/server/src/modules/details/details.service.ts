@@ -1,5 +1,11 @@
 import { plainToInstance } from 'class-transformer';
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  Inject,
+} from '@nestjs/common';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import {
   ChainId,
   EscrowUtils,
@@ -39,6 +45,7 @@ import { KVStoreDataDto } from './dto/details-response.dto';
 export class DetailsService {
   private readonly logger = new Logger(DetailsService.name);
   constructor(
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     private readonly configService: EnvironmentConfigService,
     private readonly httpService: HttpService,
     private readonly networkConfig: NetworkConfigService,
@@ -60,14 +67,12 @@ export class DetailsService {
         excludeExtraneousValues: true,
       });
 
-      const erc20Contract = HMToken__factory.connect(
+      const { decimals, symbol } = await this.getTokenData(
+        chainId,
         escrowData.token,
         provider,
       );
-      const [decimals, symbol] = await Promise.all([
-        erc20Contract.decimals(),
-        erc20Contract.symbol(),
-      ]);
+
       escrowDto.balance = ethers.formatUnits(escrowData.balance, decimals);
       escrowDto.totalFundedAmount = ethers.formatUnits(
         escrowData.totalFundedAmount,
@@ -78,7 +83,7 @@ export class DetailsService {
         decimals,
       );
       escrowDto.tokenSymbol = symbol;
-      escrowDto.tokenDecimals = Number(decimals);
+      escrowDto.tokenDecimals = decimals;
       return escrowDto;
     }
     const stakingClient = await StakingClient.build(provider);
@@ -425,6 +430,28 @@ export class DetailsService {
       });
     });
 
+    return data;
+  }
+
+  private async getTokenData(
+    chainId: ChainId,
+    tokenAddress: string,
+    provider: ethers.JsonRpcProvider,
+  ): Promise<{ decimals: number; symbol: string }> {
+    const tokenCacheKey = `token:${chainId}:${tokenAddress.toLowerCase()}`;
+    let data = await this.cacheManager.get<{
+      decimals: number;
+      symbol: string;
+    }>(tokenCacheKey);
+    if (!data) {
+      const erc20Contract = HMToken__factory.connect(tokenAddress, provider);
+      const [decimals, symbol] = await Promise.all([
+        erc20Contract.decimals(),
+        erc20Contract.symbol(),
+      ]);
+      data = { decimals: Number(decimals), symbol };
+      await this.cacheManager.set(tokenCacheKey, data);
+    }
     return data;
   }
 }
