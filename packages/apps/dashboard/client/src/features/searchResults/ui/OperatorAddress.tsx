@@ -9,7 +9,7 @@ import ListItem from '@mui/material/ListItem';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
-import { env } from '@/shared/lib/env';
+import { env } from '@/shared/config/env';
 import EntityIcon from '@/shared/ui/EntityIcon';
 import SectionWrapper from '@/shared/ui/SectionWrapper';
 

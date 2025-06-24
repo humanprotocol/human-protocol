@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import { env } from '@/shared/lib/env';
+import { env } from '@/shared/config/env';
 
 const httpClient = axios.create({
   baseURL: env.VITE_API_URL,
