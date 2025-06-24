@@ -1,6 +1,6 @@
 import { ChainId } from '@human-protocol/sdk';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEthereumAddress, IsString } from 'class-validator';
+import { IsEthereumAddress, IsString, IsOptional } from 'class-validator';
 
 import { IsChainId } from '../../common/validators';
 import { AbuseStatus } from './constants';
@@ -13,6 +13,15 @@ export class ReportAbuseDto {
   @ApiProperty({ name: 'escrow_address' })
   @IsEthereumAddress()
   escrowAddress: string;
+
+  @ApiProperty({
+    name: 'reason',
+    required: false,
+    description: 'Reason for the abuse report',
+  })
+  @IsOptional()
+  @IsString()
+  reason?: string;
 }
 
 export class AbuseResponseDto {
@@ -27,6 +36,9 @@ export class AbuseResponseDto {
 
   @ApiProperty({ description: 'Current status of the abuse report' })
   status: AbuseStatus;
+
+  @ApiProperty({ description: 'Reason for the abuse report', required: false })
+  reason?: string | null;
 }
 
 export class SlackInteractionDto {
