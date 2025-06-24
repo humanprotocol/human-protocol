@@ -1,34 +1,41 @@
-# Changelog
+# CHANGELOG
 
-### Added
+## Changelog
 
-### Changed
+#### Added
 
-### Deprecated
+#### Changed
 
-### Removed
+* Rename payout stats to HMT payout stats. Other tokens stats cannot be tracked.
+* Align python SDK with TS sdk.
 
-### Fixed
+#### Deprecated
 
-### Security
+#### Removed
 
-# How to upgrade
+#### Fixed
 
-## Typescript
+* Subgraph fixes for bulkpayout information.
 
-### yarn
+#### Security
+
+## How to upgrade
+
+### Typescript
+
+#### yarn
 
 ```
 yarn upgrade @human-protocol/sdk
 ```
 
-### npm
+#### npm
 
 ```
 npm update @human-protocol/sdk
 ```
 
-## Python
+### Python
 
 ```
 pip install --upgrade human-protocol-sdk
