@@ -4,7 +4,7 @@ export type ReportAbuseInput = {
   userId: number;
   chainId: ChainId;
   escrowAddress: string;
-  reason?: string;
+  reason: string;
 };
 
 export type SlackInteractionBase = {

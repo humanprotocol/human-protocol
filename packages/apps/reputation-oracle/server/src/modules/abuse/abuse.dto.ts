@@ -21,13 +21,12 @@ export class ReportAbuseDto {
 
   @ApiProperty({
     name: 'reason',
-    required: false,
+    required: true,
     description: 'Reason for the abuse report',
   })
-  @IsOptional()
   @IsString()
   @MaxLength(1000)
-  reason?: string;
+  reason: string;
 }
 
 export class AbuseResponseDto {
@@ -43,8 +42,8 @@ export class AbuseResponseDto {
   @ApiProperty({ description: 'Current status of the abuse report' })
   status: AbuseStatus;
 
-  @ApiProperty({ description: 'Reason for the abuse report', required: false })
-  reason?: string | null;
+  @ApiProperty({ description: 'Reason for the abuse report', required: true })
+  reason: string;
 }
 
 export class SlackInteractionDto {

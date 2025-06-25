@@ -3,8 +3,8 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsEthereumAddress,
+  IsNotEmpty,
   IsNumber,
-  IsOptional,
   IsString,
 } from 'class-validator';
 
@@ -19,10 +19,10 @@ export class ReportAbuseDto {
   @ApiProperty()
   chain_id: number;
   @AutoMap()
-  @IsOptional()
   @IsString()
-  @ApiProperty({ required: false, description: 'Reason for the abuse report' })
-  reason?: string;
+  @IsNotEmpty()
+  @ApiProperty({ required: true, description: 'Reason for the abuse report' })
+  reason: string;
 }
 
 export class ReportAbuseParams {
@@ -31,8 +31,9 @@ export class ReportAbuseParams {
   @AutoMap()
   escrowAddress: string;
   @AutoMap()
-  reason?: string;
+  reason: string;
 }
+
 export class ReportAbuseCommand {
   @AutoMap()
   data: ReportAbuseParams;
@@ -46,7 +47,7 @@ export class ReportAbuseData {
   @AutoMap()
   chain_id: number;
   @AutoMap()
-  reason?: string;
+  reason: string;
 }
 
 export class ReportedAbuseItem {
@@ -54,7 +55,7 @@ export class ReportedAbuseItem {
   escrowAddress: string;
   chainId: number;
   status: string;
-  reason?: string;
+  reason: string;
 }
 
 export class ReportedAbuseResponse {
