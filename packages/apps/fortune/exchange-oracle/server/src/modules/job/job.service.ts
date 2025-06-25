@@ -9,7 +9,7 @@ import {
   EscrowClient,
   StorageClient,
 } from '@human-protocol/sdk';
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { ErrorAssignment, ErrorJob } from '../../common/constant/errors';
 import { SortDirection } from '../../common/enums/collection';
@@ -39,10 +39,13 @@ import { WebhookRepository } from '../webhook/webhook.repository';
 import { GetJobsDto, JobDto, ManifestDto } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
+import Logger from '@human-protocol/logger';
 
 @Injectable()
 export class JobService {
-  public readonly logger = new Logger(JobService.name);
+  public readonly logger = Logger.child({
+    context: JobService.name,
+  });
 
   constructor(
     private readonly pgpConfigService: PGPConfigService,
@@ -63,7 +66,7 @@ export class JobService {
     );
 
     if (jobEntity) {
-      this.logger.log(ErrorJob.AlreadyExists, JobService.name);
+      this.logger.info(ErrorJob.AlreadyExists);
       throw new ConflictError(ErrorJob.AlreadyExists);
     }
 

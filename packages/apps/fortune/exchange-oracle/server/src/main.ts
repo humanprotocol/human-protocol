@@ -7,10 +7,15 @@ import { useContainer } from 'class-validator';
 import { AppModule } from './app.module';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { ServerConfigService } from './common/config/server-config.service';
+import { createServiceLogger, nestLoggerOverride } from '@human-protocol/logger';
+
+// Create service-specific logger
+const logger = createServiceLogger('fortune-exchange-oracle');
 
 async function bootstrap() {
   const app = await NestFactory.create<INestApplication>(AppModule, {
     cors: true,
+    logger: nestLoggerOverride,
   });
 
   const configService: ConfigService = app.get(ConfigService);
@@ -51,7 +56,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
   await app.listen(port, host, async () => {
-    console.info(`API server is running on http://${host}:${port}`);
+    logger.info(`API server is running on http://${host}:${port}`);
   });
 }
 

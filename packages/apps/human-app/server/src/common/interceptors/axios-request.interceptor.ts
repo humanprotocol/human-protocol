@@ -1,9 +1,13 @@
 import axios from 'axios';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import Logger from '@human-protocol/logger';
+
 // This interceptor injection is guarded via IS_AXIOS_REQUEST_LOGGING_ENABLED environment variable.
 @Injectable()
 export class AxiosRequestInterceptor {
-  private readonly logger = new Logger(AxiosRequestInterceptor.name);
+  private readonly logger = Logger.child({
+    context: AxiosRequestInterceptor.name,
+  });
 
   constructor() {
     this.initializeRequestInterceptor();

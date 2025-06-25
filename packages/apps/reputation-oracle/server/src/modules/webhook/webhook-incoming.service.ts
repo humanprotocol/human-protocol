@@ -5,7 +5,7 @@ import { isDuplicatedError } from '../../database';
 import { ServerConfigService } from '../../config';
 import { EscrowCompletionService } from '../escrow-completion';
 import { calculateExponentialBackoffMs } from '../../utils/backoff';
-import logger from '../../logger';
+import logger from '@human-protocol/logger';
 
 import { IncomingWebhookData, IncomingWebhookStatus } from './types';
 import { IncomingWebhookEntity } from './webhook-incoming.entity';

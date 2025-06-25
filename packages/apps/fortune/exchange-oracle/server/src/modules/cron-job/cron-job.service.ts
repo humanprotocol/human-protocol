@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 import { Cron } from '@nestjs/schedule';
 import { ErrorCronJob } from '../../common/constant/errors';
@@ -8,10 +8,13 @@ import { WebhookRepository } from '../webhook/webhook.repository';
 import { WebhookService } from '../webhook/webhook.service';
 import { CronJobEntity } from './cron-job.entity';
 import { CronJobRepository } from './cron-job.repository';
+import Logger from '@human-protocol/logger';
 
 @Injectable()
 export class CronJobService {
-  private readonly logger = new Logger(CronJobService.name);
+  private readonly logger = Logger.child({
+    context: CronJobService.name,
+  });
 
   constructor(
     private readonly cronJobRepository: CronJobRepository,
@@ -39,7 +42,7 @@ export class CronJobService {
       return false;
     }
 
-    this.logger.log('Previous cron job is not completed yet');
+    this.logger.info('Previous cron job is not completed yet');
     return true;
   }
 
@@ -69,7 +72,7 @@ export class CronJobService {
       return;
     }
 
-    this.logger.log('Pending webhooks START');
+    this.logger.info('Pending webhooks START');
     const cronJob = await this.startCronJob(CronJobType.ProcessPendingWebhook);
 
     try {
@@ -92,7 +95,7 @@ export class CronJobService {
       this.logger.error(e);
     }
 
-    this.logger.log('Pending webhooks STOP');
+    this.logger.info('Pending webhooks STOP');
     await this.completeCronJob(cronJob);
   }
 }

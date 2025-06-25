@@ -3,7 +3,7 @@ import {
   HMToken,
   HMToken__factory,
 } from '@human-protocol/core/typechain-types';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ethers, formatUnits } from 'ethers';
 import Stripe from 'stripe';
 import { NetworkConfigService } from '../../common/config/network-config.service';
@@ -40,6 +40,7 @@ import {
 } from './payment.dto';
 import { PaymentEntity } from './payment.entity';
 import { PaymentRepository } from './payment.repository';
+import Logger from '@human-protocol/logger';
 
 import { TOKEN_ADDRESSES } from '../../common/constants/tokens';
 import { EscrowFundToken } from '../../common/enums/job';
@@ -53,7 +54,10 @@ import { UserRepository } from '../user/user.repository';
 
 @Injectable()
 export class PaymentService {
-  private readonly logger = new Logger(PaymentService.name);
+  private readonly logger = Logger.child({
+    context: PaymentService.name,
+  });
+
   private stripe: Stripe;
 
   constructor(
@@ -91,7 +95,7 @@ export class PaymentService {
           })
         ).id;
       } catch (error) {
-        this.logger.log(error.message, PaymentService.name);
+        this.logger.error(error.message, PaymentService.name);
         throw new ServerError(ErrorPayment.CustomerNotCreated);
       }
     }
@@ -104,13 +108,13 @@ export class PaymentService {
         customer: customerId ?? undefined,
       });
     } catch (error) {
-      this.logger.log(error.message, PaymentService.name);
+      this.logger.error(error.message, PaymentService.name);
       throw new ServerError(ErrorPayment.CardNotAssigned);
     }
 
     // Ensure the SetupIntent contains a client secret for completing the card setup process.
     if (!setupIntent?.client_secret) {
-      this.logger.log(
+      this.logger.error(
         ErrorPayment.ClientSecretDoesNotExist,
         PaymentService.name,
       );
@@ -128,7 +132,7 @@ export class PaymentService {
     const setup = await this.stripe.setupIntents.retrieve(data.setupId);
 
     if (!setup) {
-      this.logger.log(ErrorPayment.SetupNotFound, PaymentService.name);
+      this.logger.error(ErrorPayment.SetupNotFound, PaymentService.name);
       throw new NotFoundError(ErrorPayment.SetupNotFound);
     }
 

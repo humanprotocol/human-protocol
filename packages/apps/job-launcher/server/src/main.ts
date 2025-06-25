@@ -8,12 +8,17 @@ import { useContainer } from 'class-validator';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { ServerConfigService } from './common/config/server-config.service';
+import { createServiceLogger, nestLoggerOverride } from '@human-protocol/logger';
+
+// Create service-specific logger
+const logger = createServiceLogger('job-launcher');
 
 async function bootstrap() {
   const app = await NestFactory.create<INestApplication>(AppModule, {
     cors: {
       exposedHeaders: ['Content-Disposition'],
     },
+    logger: nestLoggerOverride,
   });
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
@@ -38,7 +43,7 @@ async function bootstrap() {
   const port = serverConfigService.port;
 
   await app.listen(port, host, async () => {
-    console.info(`API server is running on http://${host}:${port}`);
+    logger.info(`API server is running on http://${host}:${port}`);
   });
 }
 

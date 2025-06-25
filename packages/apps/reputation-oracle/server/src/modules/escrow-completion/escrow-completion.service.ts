@@ -18,7 +18,7 @@ import { BACKOFF_INTERVAL_SECONDS } from '../../common/constants';
 import { isDuplicatedError } from '../../database';
 import { JobManifest, JobRequestType } from '../../common/types';
 import { ServerConfigService } from '../../config';
-import logger from '../../logger';
+import logger from '@human-protocol/logger';
 import { calculateExponentialBackoffMs } from '../../utils/backoff';
 import * as manifestUtils from '../../utils/manifest';
 

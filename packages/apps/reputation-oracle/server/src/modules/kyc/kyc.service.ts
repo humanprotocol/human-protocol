@@ -4,7 +4,7 @@ import { AxiosError } from 'axios';
 import { catchError, firstValueFrom } from 'rxjs';
 
 import { KycConfigService, Web3ConfigService } from '../../config';
-import logger from '../../logger';
+import logger from '@human-protocol/logger';
 import * as httpUtils from '../../utils/http';
 import { UserNotFoundError, UserRepository } from '../user';
 import { Web3Service } from '../web3';

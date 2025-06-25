@@ -3,12 +3,14 @@ import {
   createParamDecorator,
   ExecutionContext,
   UnauthorizedException,
-  Logger,
 } from '@nestjs/common';
 import { jwtDecode } from 'jwt-decode';
 import { JwtUserData } from '../utils/jwt-token.model';
+import Logger from '@human-protocol/logger';
 
-const logger = new Logger('JwtPayloadDecorator');
+const logger = Logger.child({
+  context: 'JwtPayloadDecorator',
+});
 
 export const Authorization = createParamDecorator(
   (_data: unknown, ctx: ExecutionContext) => {

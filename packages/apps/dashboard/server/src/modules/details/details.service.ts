@@ -1,5 +1,5 @@
 import { plainToInstance } from 'class-transformer';
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import {
   ChainId,
   EscrowUtils,
@@ -34,10 +34,14 @@ import {
 } from '../../common/constants/operator';
 import { GetOperatorsPaginationOptions } from 'src/common/types';
 import { KVStoreDataDto } from './dto/details-response.dto';
+import Logger from '@human-protocol/logger';
 
 @Injectable()
 export class DetailsService {
-  private readonly logger = new Logger(DetailsService.name);
+  private readonly logger = Logger.child({
+    context: DetailsService.name,
+  });
+
   constructor(
     private readonly configService: EnvironmentConfigService,
     private readonly httpService: HttpService,

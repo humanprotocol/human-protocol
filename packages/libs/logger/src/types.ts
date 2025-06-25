@@ -35,4 +35,6 @@ export type LoggerOptions = {
   pretty?: boolean;
   level?: `${LogLevel}`;
   disabled?: boolean;
+  service?: string;
+  environment?: string;
 };

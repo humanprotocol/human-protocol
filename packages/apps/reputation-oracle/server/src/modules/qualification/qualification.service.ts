@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { v4 as uuidV4 } from 'uuid';
 
 import { ServerConfigService } from '../../config';
-import logger from '../../logger';
+import logger from '@human-protocol/logger';
 import { UserRepository, UserStatus } from '../user';
 
 import { QualificationEntity } from './qualification.entity';

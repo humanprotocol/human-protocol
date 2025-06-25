@@ -1,13 +1,17 @@
-import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
+import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import { E_TIMEOUT, Mutex, MutexInterface, withTimeout } from 'async-mutex';
 import { ServerError } from '../../common/errors';
+import Logger from '@human-protocol/logger';
 
 @Injectable()
 export class MutexManagerService implements OnModuleDestroy {
   private mutexes: WeakMap<object, MutexInterface> = new WeakMap();
   private mutexTimeouts: Map<object, NodeJS.Timeout> = new Map();
   private mutexTimeoutDuration = 120000; // 2 minutes
-  public readonly logger = new Logger(MutexManagerService.name);
+
+  public readonly logger = Logger.child({
+    context: MutexManagerService.name,
+  });
 
   private getMutex(key: object, timeout: number): MutexInterface {
     if (!this.mutexes.has(key)) {
@@ -46,16 +50,18 @@ export class MutexManagerService implements OnModuleDestroy {
   ): Promise<T> {
     const mutex = this.getMutex(key, timeout);
     try {
-      this.logger.log(
+      this.logger.info(
         `Attempting to acquire lock for ${(key as any).id as string}...`,
       );
       const result = await mutex.runExclusive(async () => {
-        this.logger.log(
+        this.logger.info(
           `Lock acquired for ${(key as any).id as string}, executing function...`,
         );
-        this.logger.log(
+
+        this.logger.info(
           `Function executed for ${(key as any).id as string}, lock released.`,
         );
+
         return await callback();
       });
       return result;

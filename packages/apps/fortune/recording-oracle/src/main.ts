@@ -8,10 +8,18 @@ import { INestApplication } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { ServerConfigService } from './common/config/server-config.service';
 import { ConfigService } from '@nestjs/config';
+import {
+  createServiceLogger,
+  nestLoggerOverride,
+} from '@human-protocol/logger';
+
+// Create service-specific logger
+const logger = createServiceLogger('fortune-recording-oracle');
 
 async function bootstrap() {
   const app = await NestFactory.create<INestApplication>(AppModule, {
     cors: true,
+    logger: nestLoggerOverride,
   });
 
   const configService: ConfigService = app.get(ConfigService);
@@ -44,7 +52,7 @@ async function bootstrap() {
 
   await app.listen(port, host, async () => {
     // eslint-disable-next-line no-console
-    console.info(`API server is running on http://${host}:${port}`);
+    logger.info(`API server is running on http://${host}:${port}`);
   });
 }
 

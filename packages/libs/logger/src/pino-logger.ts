@@ -12,7 +12,7 @@ import {
 export class WrappedPino extends LoggerWrapper {
   constructor(
     private readonly pinoLogger: pino.Logger,
-    bindings?: LogMeta,
+    bindings?: LogMeta
   ) {
     super(bindings);
   }
@@ -37,7 +37,7 @@ const pinoLogLevelFormatter = (label: string) => ({ level: label });
 
 export function createLogger(
   { name, level, pretty, disabled }: LoggerOptions,
-  bindings: LogMeta = {},
+  bindings: LogMeta = {}
 ): WrappedPino {
   const pinoLogger = pino({
     base: null,

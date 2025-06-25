@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { DatabaseError, isDuplicatedError } from '../../database';
-import logger from '../../logger';
+import logger from '@human-protocol/logger';
 import { transformKeysFromCamelToSnake } from '../../utils/case-converters';
 
 @Catch()
