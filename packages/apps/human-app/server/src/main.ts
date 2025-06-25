@@ -7,7 +7,10 @@ import { EnvironmentConfigService } from './common/config/environment-config.ser
 import { GlobalExceptionsFilter } from './common/filter/global-exceptions.filter';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
-import Logger, { nestLoggerOverride } from '@human-protocol/logger';
+import { createServiceLogger, nestLoggerOverride } from '@human-protocol/logger';
+
+// Create service-specific logger
+const Logger = createServiceLogger('human-app');
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {

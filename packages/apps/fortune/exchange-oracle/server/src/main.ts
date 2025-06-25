@@ -7,7 +7,10 @@ import { useContainer } from 'class-validator';
 import { AppModule } from './app.module';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { ServerConfigService } from './common/config/server-config.service';
-import logger, { nestLoggerOverride } from '@human-protocol/logger';
+import { createServiceLogger, nestLoggerOverride } from '@human-protocol/logger';
+
+// Create service-specific logger
+const logger = createServiceLogger('fortune-exchange-oracle');
 
 async function bootstrap() {
   const app = await NestFactory.create<INestApplication>(AppModule, {
