@@ -8,7 +8,10 @@ import { INestApplication } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { ServerConfigService } from './common/config/server-config.service';
 import { ConfigService } from '@nestjs/config';
-import { createServiceLogger, nestLoggerOverride } from '@human-protocol/logger';
+import {
+  createServiceLogger,
+  nestLoggerOverride,
+} from '@human-protocol/logger';
 
 // Create service-specific logger
 const logger = createServiceLogger('fortune-recording-oracle');
