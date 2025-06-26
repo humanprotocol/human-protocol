@@ -1,34 +1,38 @@
-# Changelog
+# changelog
 
-### Added
+## Changelog
 
-### Changed
+#### Added
 
-### Deprecated
+#### Changed
 
-### Removed
+#### Deprecated
 
-### Fixed
+#### Removed
 
-### Security
+#### Fixed
 
-# How to upgrade
+* `@human-protocol/core` dependency version
 
-## Typescript
+#### Security
 
-### yarn
+## How to upgrade
+
+### Typescript
+
+#### yarn
 
 ```
 yarn upgrade @human-protocol/sdk
 ```
 
-### npm
+#### npm
 
 ```
 npm update @human-protocol/sdk
 ```
 
-## Python
+### Python
 
 ```
 pip install --upgrade human-protocol-sdk
