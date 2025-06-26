@@ -3853,7 +3853,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@human-protocol/core@workspace:*, @human-protocol/core@workspace:packages/core":
+"@human-protocol/core@workspace:*, @human-protocol/core@workspace:packages/core, @human-protocol/core@workspace:x":
   version: 0.0.0-use.local
   resolution: "@human-protocol/core@workspace:packages/core"
   dependencies:
@@ -4508,7 +4508,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@human-protocol/sdk@workspace:packages/sdk/typescript/human-protocol-sdk"
   dependencies:
-    "@human-protocol/core": "workspace:*"
+    "@human-protocol/core": "workspace:x"
     axios: "npm:^1.4.0"
     eslint: "npm:^8.55.0"
     ethers: "npm:~6.13.5"
