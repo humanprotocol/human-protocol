@@ -136,8 +136,8 @@ const TransactionsTableBody: FC<Props> = ({ data, isLoading, error }) => {
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <ArrowForwardIcon sx={{ color: 'text.primary' }} />
                   <AbbreviateClipboard
-                    value={elem.receiver || elem.to}
-                    link={`/search/${data.chainId}/${elem.receiver || elem.to}`}
+                    value={internalTx.receiver || internalTx.to}
+                    link={`/search/${data.chainId}/${internalTx.receiver || internalTx.to}`}
                   />
                 </Box>
               </TableCell>
