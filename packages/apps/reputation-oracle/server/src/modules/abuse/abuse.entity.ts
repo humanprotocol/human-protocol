@@ -31,6 +31,9 @@ export class AbuseEntity extends BaseEntity {
   @Column({ type: 'decimal', precision: 30, scale: 18, nullable: true })
   amount: number | null;
 
+  @Column({ type: 'text' })
+  reason: string;
+
   @JoinColumn()
   @ManyToOne('UserEntity', { nullable: false, onDelete: 'CASCADE' })
   user?: UserEntity;

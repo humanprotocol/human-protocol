@@ -73,17 +73,20 @@ describe('AbuseService', () => {
   describe('reportAbuse', () => {
     it('should create a new abuse entity', async () => {
       const userId = faker.number.int();
+      const reason = faker.lorem.sentence();
 
       await abuseService.reportAbuse({
         escrowAddress,
         chainId,
         userId,
+        reason,
       });
 
       expect(mockAbuseRepository.createUnique).toHaveBeenCalledWith({
         escrowAddress: escrowAddress,
         chainId: chainId,
         userId: userId,
+        reason: reason,
         retriesCount: 0,
         status: AbuseStatus.PENDING,
         waitUntil: expect.any(Date),
