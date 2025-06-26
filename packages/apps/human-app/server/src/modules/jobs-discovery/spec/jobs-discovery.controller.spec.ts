@@ -1,22 +1,21 @@
-import { JobsDiscoveryService } from '../jobs-discovery.service';
-import { JobsDiscoveryController } from '../jobs-discovery.controller';
+import { classes } from '@automapper/classes';
+import { AutomapperModule } from '@automapper/nestjs';
+import { ChainId } from '@human-protocol/sdk';
+import { HttpService } from '@nestjs/axios';
+import { HttpException, HttpStatus } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
-import { jobsDiscoveryServiceMock } from './jobs-discovery.service.mock';
+import { CommonConfigModule } from '../../../common/config/common-config.module';
+import { EnvironmentConfigService } from '../../../common/config/environment-config.service';
+import { JobsDiscoveryController } from '../jobs-discovery.controller';
+import { JobsDiscoveryProfile } from '../jobs-discovery.mapper.profile';
+import { JobsDiscoveryService } from '../jobs-discovery.service';
 import {
-  jobsDiscoveryParamsCommandFixture,
   dtoFixture,
-  jobDiscoveryToken,
+  jobsDiscoveryParamsCommandFixture,
   responseFixture,
 } from './jobs-discovery.fixtures';
-import { AutomapperModule } from '@automapper/nestjs';
-import { classes } from '@automapper/classes';
-import { JobsDiscoveryProfile } from '../jobs-discovery.mapper.profile';
-import { HttpService } from '@nestjs/axios';
-import { CommonConfigModule } from '../../../common/config/common-config.module';
-import { ConfigModule } from '@nestjs/config';
-import { EnvironmentConfigService } from '../../../common/config/environment-config.service';
-import { HttpException, HttpStatus } from '@nestjs/common';
-import { ChainId } from '@human-protocol/sdk';
+import { jobsDiscoveryServiceMock } from './jobs-discovery.service.mock';
 
 describe('JobsDiscoveryController', () => {
   let controller: JobsDiscoveryController;
@@ -73,11 +72,10 @@ describe('JobsDiscoveryController', () => {
     it('should call service processJobsDiscovery method with proper fields set', async () => {
       const dto = dtoFixture;
       const command = jobsDiscoveryParamsCommandFixture;
-      await controller.getJobs(
-        dto,
-        { qualifications: [] } as any,
-        jobDiscoveryToken,
-      );
+      await controller.getJobs(dto, {
+        user: { qualifications: [] },
+        token: command.token,
+      } as any);
       command.data.qualifications = [];
       expect(jobsDiscoveryService.processJobsDiscovery).toHaveBeenCalledWith(
         command,
@@ -88,11 +86,7 @@ describe('JobsDiscoveryController', () => {
       const dto = dtoFixture;
       (configServiceMock as any).jobsDiscoveryFlag = false;
       await expect(
-        controller.getJobs(
-          dto,
-          { qualifications: [] } as any,
-          jobDiscoveryToken,
-        ),
+        controller.getJobs(dto, { user: { qualifications: [] } } as any),
       ).rejects.toThrow(
         new HttpException('Jobs discovery is disabled', HttpStatus.FORBIDDEN),
       );

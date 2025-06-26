@@ -19,13 +19,12 @@ import {
   EnableLabelingCommand,
   EnableLabelingResponse,
 } from '../model/enable-labeling.model';
+const STATUS = 'active';
 const EMAIL = 'some_email@example.com';
 const ID = 'jwt_token_id';
 const H_CAPTCHA_SITE_KEY = 'some_h_captcha_site_key';
 const TOKEN_TO_VERIFY = 'some_hcaptcha_token';
 const REPUTATION_NETWORK = 'some_reputation_network_address';
-const IAT = 2137;
-const EXP = 7312;
 const POLYGON_WALLET_ADDR = '0xAf6E2cB084314Fbe50228e697d2B1b8553DDEd25';
 const DAILY_HMT_SPENT = 100;
 const SOLVED = 10;
@@ -73,11 +72,10 @@ export const jwtUserDataFixture: JwtUserData = {
   user_id: ID,
   wallet_address: POLYGON_WALLET_ADDR,
   email: EMAIL,
-  kyc_status: 'approved',
+  status: STATUS,
+  qualifications: [],
   site_key: H_CAPTCHA_SITE_KEY,
   reputation_network: REPUTATION_NETWORK,
-  iat: IAT,
-  exp: EXP,
 };
 
 export const hCaptchaUserStatsCommandFixture: UserStatsCommand = {

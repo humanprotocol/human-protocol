@@ -72,11 +72,11 @@ export class DiscoveredOracle implements IOperator {
   @ApiPropertyOptional({ description: 'Website of the operator' })
   website?: string;
 
-  @ApiPropertyOptional({ description: 'URL of the oracle operator' })
+  @ApiProperty({ description: 'URL of the oracle operator' })
   url: string;
 
-  @ApiPropertyOptional({ description: 'Role of the oracle operator' })
-  role?: string;
+  @ApiProperty({ description: 'Role of the oracle operator' })
+  role: string;
 
   @ApiPropertyOptional({
     type: [String],
@@ -98,8 +98,8 @@ export class DiscoveredOracle implements IOperator {
   })
   reputationNetworks?: string[];
 
-  @ApiPropertyOptional({ description: 'Name of the operator' })
-  name?: string;
+  @ApiProperty({ description: 'Name of the operator' })
+  name: string;
 
   @ApiPropertyOptional({ description: 'Category of the operator' })
   category?: string;

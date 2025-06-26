@@ -12,7 +12,6 @@ import { ConflictException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { ethers } from 'ethers';
-import Stripe from 'stripe';
 import {
   MOCK_ADDRESS,
   MOCK_PAYMENT_ID,
@@ -22,7 +21,6 @@ import {
 } from '../../../test/constants';
 import { NetworkConfigService } from '../../common/config/network-config.service';
 import { ServerConfigService } from '../../common/config/server-config.service';
-import { StripeConfigService } from '../../common/config/stripe-config.service';
 import { TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
 import {
   ErrorPayment,
@@ -30,14 +28,12 @@ import {
   ErrorSignature,
 } from '../../common/constants/errors';
 import { SortDirection } from '../../common/enums/collection';
-import { Country } from '../../common/enums/job';
 import {
   PaymentCurrency,
   PaymentSortField,
   PaymentSource,
   PaymentStatus,
   PaymentType,
-  StripePaymentStatus,
   VatType,
 } from '../../common/enums/payment';
 import {
@@ -55,13 +51,15 @@ import { GetPaymentsDto, UserBalanceDto } from './payment.dto';
 import { PaymentEntity } from './payment.entity';
 import { PaymentRepository } from './payment.repository';
 import { PaymentService } from './payment.service';
+import { PaymentProvider } from './providers/payment-provider.abstract';
+import { Invoice, PaymentData } from './payment.interface';
 
 describe('PaymentService', () => {
-  let stripe: Stripe;
   let paymentService: PaymentService;
-  let paymentRepository: PaymentRepository;
-  let userRepository: UserRepository;
-  let rateService: RateService;
+  let paymentProvider: jest.Mocked<PaymentProvider>;
+  let paymentRepository: jest.Mocked<PaymentRepository>;
+  let userRepository: jest.Mocked<UserRepository>;
+  let rateService: jest.Mocked<RateService>;
 
   const signerMock = {
     address: MOCK_ADDRESS,
@@ -71,6 +69,7 @@ describe('PaymentService', () => {
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
+        PaymentService,
         {
           provide: ConfigService,
           useValue: {
@@ -83,8 +82,6 @@ describe('PaymentService', () => {
             }),
           },
         },
-        PaymentService,
-        StripeConfigService,
         {
           provide: PaymentRepository,
           useValue: createMock<PaymentRepository>(),
@@ -111,82 +108,31 @@ describe('PaymentService', () => {
             getRate: jest.fn().mockResolvedValue(1),
           },
         },
+        {
+          provide: PaymentProvider,
+          useValue: createMock<PaymentProvider>(),
+        },
         NetworkConfigService,
         ServerConfigService,
       ],
     }).compile();
 
     paymentService = moduleRef.get<PaymentService>(PaymentService);
+    paymentProvider = moduleRef.get(PaymentProvider);
     paymentRepository = moduleRef.get(PaymentRepository);
     userRepository = moduleRef.get(UserRepository);
     rateService = moduleRef.get(RateService);
-
-    stripe = {
-      customers: {
-        create: jest.fn(),
-        update: jest.fn(),
-        listPaymentMethods: jest.fn(),
-        listTaxIds: jest.fn(),
-        createTaxId: jest.fn(),
-        retrieve: jest.fn(),
-      },
-      paymentIntents: {
-        create: jest.fn(),
-        retrieve: jest.fn(),
-        update: jest.fn(),
-        confirm: jest.fn(),
-      },
-      setupIntents: {
-        create: jest.fn(),
-        retrieve: jest.fn(),
-      },
-      paymentMethods: {
-        retrieve: jest.fn(),
-        detach: jest.fn(),
-      },
-      charges: {
-        retrieve: jest.fn(),
-      },
-      invoices: {
-        create: jest.fn(),
-        finalizeInvoice: jest.fn(),
-      },
-      invoiceItems: {
-        create: jest.fn(),
-      },
-    } as any;
-
-    paymentService['stripe'] = stripe;
   });
 
   describe('createFiatPayment', () => {
-    let createInvoiceMock: any,
-      createInvoiceItemMock: any,
-      finalizeInvoiceMock: any,
-      retrievePaymentIntentMock: any,
-      updatePaymentIntentMock: any,
-      findOneMock: any;
+    let findOneMock: any;
 
     beforeEach(() => {
       findOneMock = jest.spyOn(paymentRepository, 'findOneByTransaction');
-      createInvoiceMock = jest.spyOn(stripe.invoices, 'create');
-      createInvoiceItemMock = jest.spyOn(stripe.invoiceItems, 'create');
-      finalizeInvoiceMock = jest.spyOn(stripe.invoices, 'finalizeInvoice');
-      retrievePaymentIntentMock = jest.spyOn(stripe.paymentIntents, 'retrieve');
-      updatePaymentIntentMock = jest.spyOn(stripe.paymentIntents, 'update');
     });
 
     afterEach(() => {
-      expect(createInvoiceMock).toHaveBeenCalledTimes(1);
-      expect(createInvoiceItemMock).toHaveBeenCalledTimes(1);
-      expect(finalizeInvoiceMock).toHaveBeenCalledTimes(1);
-      expect(retrievePaymentIntentMock).toHaveBeenCalledTimes(1);
-      expect(updatePaymentIntentMock).toHaveBeenCalledTimes(1);
-      createInvoiceMock.mockRestore();
-      createInvoiceItemMock.mockRestore();
-      finalizeInvoiceMock.mockRestore();
-      retrievePaymentIntentMock.mockRestore();
-      updatePaymentIntentMock.mockRestore();
+      jest.restoreAllMocks();
     });
 
     it('should create a fiat payment successfully', async () => {
@@ -198,56 +144,49 @@ describe('PaymentService', () => {
 
       const user = {
         id: 1,
-        stripeCustomerId: 'cus_123',
+        paymentProviderId: 'cus_123',
       };
 
       const paymentIntent = {
         id: 'pi_123',
-        client_secret: 'clientSecret123',
-      };
+        clientSecret: 'clientSecret123',
+      } as PaymentData;
 
       const invoice = {
         id: 'id',
-        payment_intent: paymentIntent.id,
-      };
+        paymentId: paymentIntent.id,
+      } as Invoice;
 
-      createInvoiceMock.mockResolvedValue(invoice as any);
-      finalizeInvoiceMock.mockResolvedValue(invoice as any);
-      retrievePaymentIntentMock.mockResolvedValue(paymentIntent as any);
-      jest
-        .spyOn(stripe.paymentIntents, 'retrieve')
-        .mockResolvedValue(paymentIntent as any);
+      paymentProvider.createInvoice.mockResolvedValue(invoice as any);
+      paymentProvider.assignPaymentMethod.mockResolvedValue(
+        paymentIntent as any,
+      );
+
       jest
         .spyOn(paymentRepository, 'findOneByTransaction')
         .mockResolvedValue(null);
+
       jest
         .spyOn(paymentRepository, 'createUnique')
         .mockResolvedValue(undefined as any);
 
       const result = await paymentService.createFiatPayment(user as any, dto);
 
-      expect(result).toEqual(paymentIntent.client_secret);
-      expect(stripe.invoices.create).toHaveBeenCalledWith({
-        currency: PaymentCurrency.USD,
-        customer: 'cus_123',
-        auto_advance: false,
-        payment_settings: {
-          payment_method_types: ['card'],
-        },
-      });
-      expect(stripe.invoiceItems.create).toHaveBeenCalledWith({
-        customer: 'cus_123',
-        amount: 10000,
-        invoice: invoice.id,
-        description: 'Top up',
-      });
-      expect(stripe.paymentIntents.update).toHaveBeenCalledWith('pi_123', {
-        payment_method: 'pm_123',
-      });
+      expect(result).toEqual(paymentIntent.clientSecret);
+      expect(paymentProvider.createInvoice).toHaveBeenCalledWith(
+        'cus_123',
+        10000,
+        PaymentCurrency.USD,
+        'Top up',
+      );
+      expect(paymentProvider.assignPaymentMethod).toHaveBeenCalledWith(
+        'pi_123',
+        'pm_123',
+        false,
+      );
     });
 
     it('should throw a bad request exception if transaction already exist', async () => {
-      0;
       const dto = {
         amount: 100,
         currency: PaymentCurrency.USD,
@@ -256,7 +195,7 @@ describe('PaymentService', () => {
 
       const user = {
         id: 1,
-        stripeCustomerId: 'cus_123',
+        paymentProviderId: 'cus_123',
       };
 
       const paymentIntent = {
@@ -269,12 +208,10 @@ describe('PaymentService', () => {
         payment_intent: paymentIntent.id,
       };
 
-      createInvoiceMock.mockResolvedValue(invoice as any);
-      finalizeInvoiceMock.mockResolvedValue(invoice as any);
-      retrievePaymentIntentMock.mockResolvedValue(paymentIntent as any);
-      jest
-        .spyOn(stripe.paymentIntents, 'retrieve')
-        .mockResolvedValue(paymentIntent as any);
+      paymentProvider.createInvoice.mockResolvedValue(invoice as any);
+      paymentProvider.assignPaymentMethod.mockResolvedValue(
+        paymentIntent as any,
+      );
 
       findOneMock.mockResolvedValue({
         transaction: paymentIntent.client_secret,
@@ -286,45 +223,13 @@ describe('PaymentService', () => {
         new ConflictError(ErrorPayment.TransactionAlreadyExists),
       );
     });
-
-    it('should throw a bad request exception if the invoice creation fails', async () => {
-      0;
-      const dto = {
-        amount: 100,
-        currency: PaymentCurrency.USD,
-        paymentMethodId: 'pm_123',
-      };
-
-      const user = {
-        id: 1,
-        stripeCustomerId: 'cus_123',
-      };
-
-      const paymentIntent = {
-        id: 'pi_123',
-      };
-
-      const invoice = {
-        id: 'id',
-        payment_intent: paymentIntent.id,
-      };
-
-      createInvoiceMock.mockResolvedValue(invoice as any);
-      finalizeInvoiceMock.mockResolvedValue(invoice as any);
-      retrievePaymentIntentMock.mockResolvedValue(paymentIntent as any);
-
-      await expect(
-        paymentService.createFiatPayment(user as any, dto),
-      ).rejects.toThrow(new ServerError(ErrorPayment.ClientSecretDoesNotExist));
-    });
   });
 
   describe('confirmFiatPayment', () => {
-    let retrievePaymentIntentMock: any, findOneMock: any;
+    let findOneMock: any;
 
     beforeEach(() => {
       findOneMock = jest.spyOn(paymentRepository, 'findOneByTransaction');
-      retrievePaymentIntentMock = jest.spyOn(stripe.paymentIntents, 'retrieve');
     });
 
     afterEach(() => {
@@ -338,13 +243,15 @@ describe('PaymentService', () => {
       };
 
       const paymentData = {
-        status: StripePaymentStatus.SUCCEEDED,
+        status: PaymentStatus.SUCCEEDED,
         amount: 100,
-        amount_received: 100,
+        amountReceived: 100,
         currency: PaymentCurrency.USD,
       };
 
-      retrievePaymentIntentMock.mockResolvedValue(paymentData);
+      paymentProvider.retrievePaymentIntent.mockResolvedValue(
+        paymentData as any,
+      );
 
       const paymentEntity: Partial<PaymentEntity> = {
         userId: userId,
@@ -357,50 +264,46 @@ describe('PaymentService', () => {
       const result = await paymentService.confirmFiatPayment(userId, dto);
 
       expect(result).toBe(true);
+      expect(paymentProvider.retrievePaymentIntent).toHaveBeenCalledWith(
+        MOCK_PAYMENT_ID,
+      );
+      expect(paymentRepository.updateOne).toHaveBeenCalledWith({
+        userId,
+        amount: 1,
+        currency: PaymentCurrency.USD,
+        status: PaymentStatus.SUCCEEDED,
+      });
     });
 
-    it('should handle payment cancellation', async () => {
+    it('should throw a not found exception if payment not found', async () => {
       const userId = 1;
       const dto = {
         paymentId: MOCK_PAYMENT_ID,
       };
 
-      const paymentData = {
-        status: StripePaymentStatus.CANCELED,
-        amount: 100,
-        amount_received: 0,
-        currency: PaymentCurrency.USD,
-      };
-
-      retrievePaymentIntentMock.mockResolvedValue(paymentData);
-
-      const paymentEntity: Partial<PaymentEntity> = {
-        userId: userId,
-        status: PaymentStatus.PENDING,
-        amount: 0,
-        currency: PaymentCurrency.USD,
-      };
-      findOneMock.mockResolvedValue(paymentEntity);
+      findOneMock.mockResolvedValue(null);
 
       await expect(
         paymentService.confirmFiatPayment(userId, dto),
-      ).rejects.toThrow(new ConflictError(ErrorPayment.NotSuccess));
+      ).rejects.toThrow(new NotFoundError(ErrorPayment.NotFound));
     });
 
-    it('should handle payment requiring a payment method', async () => {
+    it('should throw a conflict exception if payment status is not pending', async () => {
       const userId = 1;
       const dto = {
         paymentId: MOCK_PAYMENT_ID,
       };
 
       const paymentData = {
-        status: StripePaymentStatus.REQUIRES_PAYMENT_METHOD,
+        status: PaymentStatus.FAILED,
         amount: 100,
-        amount_received: 0,
+        amountReceived: 0,
         currency: PaymentCurrency.USD,
       };
 
-      retrievePaymentIntentMock.mockResolvedValue(paymentData);
+      paymentProvider.retrievePaymentIntent.mockResolvedValue(
+        paymentData as any,
+      );
 
       const paymentEntity: Partial<PaymentEntity> = {
         userId: userId,
@@ -424,11 +327,13 @@ describe('PaymentService', () => {
       const paymentData = {
         status: 'unknown_status',
         amount: 100,
-        amount_received: 0,
+        amountReceived: 0,
         currency: PaymentCurrency.USD,
       };
 
-      retrievePaymentIntentMock.mockResolvedValue(paymentData);
+      paymentProvider.retrievePaymentIntent.mockResolvedValue(
+        paymentData as any,
+      );
 
       const paymentEntity: Partial<PaymentEntity> = {
         userId: userId,
@@ -449,7 +354,9 @@ describe('PaymentService', () => {
         paymentId: MOCK_PAYMENT_ID,
       };
 
-      retrievePaymentIntentMock.mockResolvedValue(null);
+      paymentProvider.retrievePaymentIntent.mockResolvedValue(
+        null as unknown as PaymentData,
+      );
 
       await expect(
         paymentService.confirmFiatPayment(userId, dto),
@@ -847,41 +754,33 @@ describe('PaymentService', () => {
       const user = {
         id: 1,
         email: 'test@hmt.ai',
-        stripeCustomerId: null,
+        paymentProviderId: null,
       };
 
-      const paymentIntent = {
-        client_secret: 'clientSecret123',
-      };
+      const client_secret = 'clientSecret123';
+      const customerId = 'cus_123';
 
-      jest
-        .spyOn(stripe.customers, 'create')
-        .mockResolvedValue({ id: 'cus_123' } as any);
-      jest
-        .spyOn(stripe.setupIntents, 'create')
-        .mockResolvedValue(paymentIntent as any);
+      paymentProvider.createCustomer.mockResolvedValue(customerId);
+      paymentProvider.setupCard.mockResolvedValue(client_secret);
 
       const result = await paymentService.createCustomerAndAssignCard(
         user as any,
       );
 
-      expect(result).toEqual(paymentIntent.client_secret);
-      expect(stripe.customers.create).toHaveBeenCalledWith({
-        email: user.email,
-      });
-      expect(stripe.setupIntents.create).toHaveBeenCalledWith({
-        automatic_payment_methods: { enabled: true },
-        customer: 'cus_123',
-      });
+      expect(result).toEqual(client_secret);
+      expect(paymentProvider.createCustomer).toHaveBeenCalledWith(user.email);
     });
 
     it('should throw a bad request exception if the customer creation fails', async () => {
       const user = {
         id: 1,
         email: 'test@hmt.ai',
-        stripeCustomerId: undefined,
+        paymentProviderId: undefined,
       };
-      jest.spyOn(stripe.customers, 'create').mockRejectedValue(new Error());
+
+      paymentProvider.createCustomer.mockRejectedValue(
+        new ServerError(ErrorPayment.CustomerNotCreated),
+      );
 
       await expect(
         paymentService.createCustomerAndAssignCard(user as any),
@@ -894,15 +793,16 @@ describe('PaymentService', () => {
         email: 'test@hmt.ai',
       };
 
-      jest
-        .spyOn(stripe.customers, 'create')
-        .mockResolvedValue({ id: 1 } as any);
-
-      jest.spyOn(stripe.setupIntents, 'create').mockRejectedValue(new Error());
+      paymentProvider.createCustomer.mockResolvedValue('cus_123');
+      paymentProvider.setupCard.mockRejectedValue(
+        new ServerError(ErrorPayment.CardNotAssigned),
+      );
 
       await expect(
         paymentService.createCustomerAndAssignCard(user as any),
-      ).rejects.toThrow(ErrorPayment.CardNotAssigned);
+      ).rejects.toThrow(new ServerError(ErrorPayment.CardNotAssigned));
+
+      expect(paymentProvider.createCustomer).toHaveBeenCalledWith(user.email);
     });
 
     it('should throw a bad request exception if the client secret does not exists', async () => {
@@ -911,36 +811,32 @@ describe('PaymentService', () => {
         email: 'test@hmt.ai',
       };
 
-      jest
-        .spyOn(stripe.customers, 'create')
-        .mockResolvedValue({ id: 1 } as any);
-      jest
-        .spyOn(stripe.setupIntents, 'create')
-        .mockResolvedValue(undefined as any);
+      paymentProvider.createCustomer.mockResolvedValue('cus_123');
+      paymentProvider.setupCard.mockRejectedValue(
+        new ServerError(ErrorPayment.ClientSecretDoesNotExist),
+      );
 
       await expect(
         paymentService.createCustomerAndAssignCard(user as any),
-      ).rejects.toThrow(ErrorPayment.ClientSecretDoesNotExist);
+      ).rejects.toThrow(new ServerError(ErrorPayment.ClientSecretDoesNotExist));
     });
   });
 
   describe('confirmCard', () => {
-    it('should confirm a card and update user stripeCustomerId successfully', async () => {
+    it('should confirm a card and update user paymentProviderId successfully', async () => {
       const user = {
         id: 1,
         email: 'test@hmt.ai',
-        stripeCustomerId: null,
+        paymentProviderId: null,
       };
 
       const setupMock = {
-        customer: 'cus_123',
-        payment_method: 'pm_123',
+        customerId: 'cus_123',
+        paymentMethod: 'pm_123',
       };
 
-      jest
-        .spyOn(stripe.setupIntents, 'retrieve')
-        .mockResolvedValue(setupMock as any);
-      jest.spyOn(stripe.customers, 'update').mockResolvedValue(null as any);
+      paymentProvider.retrieveCardSetup.mockResolvedValue(setupMock as any);
+      paymentProvider.updateCustomer.mockResolvedValue(null as any);
       jest
         .spyOn(userRepository, 'updateOne')
         .mockResolvedValue(undefined as any);
@@ -953,14 +849,14 @@ describe('PaymentService', () => {
       expect(result).toBeTruthy();
       expect(userRepository.updateOne).toHaveBeenCalledWith(
         expect.objectContaining({
-          stripeCustomerId: 'cus_123',
+          paymentProviderId: 'cus_123',
         }),
       );
-      expect(stripe.setupIntents.retrieve).toHaveBeenCalledWith('setup_123');
-      expect(stripe.customers.update).toHaveBeenCalledWith('cus_123', {
-        invoice_settings: {
-          default_payment_method: 'pm_123',
-        },
+      expect(paymentProvider.retrieveCardSetup).toHaveBeenCalledWith(
+        'setup_123',
+      );
+      expect(paymentProvider.updateCustomer).toHaveBeenCalledWith('cus_123', {
+        defaultPaymentMethod: 'pm_123',
       });
     });
 
@@ -970,16 +866,14 @@ describe('PaymentService', () => {
         email: 'test@hmt.ai',
       };
 
-      jest
-        .spyOn(stripe.setupIntents, 'retrieve')
-        .mockResolvedValue(undefined as any);
+      paymentProvider.retrieveCardSetup.mockResolvedValue(undefined as any);
 
       await expect(
         paymentService.confirmCard(user as any, {
           setupId: '1',
           defaultCard: false,
         }),
-      ).rejects.toThrow(ErrorPayment.SetupNotFound);
+      ).rejects.toThrow(new ServerError(ErrorPayment.SetupNotFound));
     });
   });
 
@@ -987,7 +881,7 @@ describe('PaymentService', () => {
     const user = {
       id: faker.number.int(),
       email: faker.internet.email(),
-      stripeCustomerId: faker.word.sample(),
+      paymentProviderId: faker.word.sample(),
     };
 
     const jobEntity = {
@@ -1004,53 +898,34 @@ describe('PaymentService', () => {
     const invoiceId = faker.word.sample();
     const paymentMethodId = faker.word.sample();
 
-    it('should charge user credit card and create slash payments successfully', async () => {
+    it('should create slash successfully', async () => {
       jest.spyOn(userRepository, 'findById').mockResolvedValueOnce(user as any);
-      jest
-        .spyOn(stripe.paymentIntents, 'retrieve')
-        .mockResolvedValueOnce(paymentIntent as any);
-      jest
-        .spyOn(stripe.paymentIntents, 'confirm')
-        .mockResolvedValueOnce(paymentIntent as any);
-      jest
-        .spyOn(stripe.invoices, 'create')
-        .mockResolvedValueOnce({ id: invoiceId } as any);
-      jest
-        .spyOn(stripe.invoiceItems, 'create')
-        .mockResolvedValueOnce({} as any);
-      jest
-        .spyOn(stripe.invoices, 'finalizeInvoice')
-        .mockResolvedValueOnce({ payment_intent: paymentIntent.id } as any);
-      jest.spyOn(stripe.customers, 'retrieve').mockResolvedValueOnce({
-        invoice_settings: { default_payment_method: paymentMethodId },
+
+      paymentProvider.createInvoice.mockResolvedValueOnce({
+        id: invoiceId,
+        paymentId: paymentIntent,
       } as any);
+      paymentProvider.assignPaymentMethod.mockResolvedValueOnce(
+        paymentIntent as any,
+      );
+      paymentProvider.getDefaultPaymentMethod.mockResolvedValueOnce(
+        paymentMethodId,
+      );
 
       const result = await paymentService.createSlash(jobEntity as any);
 
       expect(result).toBe(undefined);
-      expect(stripe.invoices.create).toHaveBeenCalledWith({
-        customer: user.stripeCustomerId,
-        currency: PaymentCurrency.USD,
-        auto_advance: false,
-        payment_settings: {
-          payment_method_types: ['card'],
-        },
-      });
-      expect(stripe.invoiceItems.create).toHaveBeenCalledWith({
-        customer: user.stripeCustomerId,
-        amount: expect.any(Number),
-        invoice: invoiceId,
-        description: 'Slash Job Id ' + jobEntity.id,
-      });
-      expect(stripe.invoices.finalizeInvoice).toHaveBeenCalledWith(invoiceId);
-      expect(stripe.paymentIntents.confirm).toHaveBeenCalledWith(
-        paymentIntent.id,
-        {
-          payment_method: paymentMethodId,
-          off_session: true,
-        },
+      expect(paymentProvider.createInvoice).toHaveBeenCalledWith(
+        user.paymentProviderId,
+        expect.any(Number),
+        PaymentCurrency.USD,
+        'Slash Job Id ' + jobEntity.id,
       );
-      expect(paymentRepository.createUnique).toHaveBeenCalledTimes(2);
+      expect(paymentProvider.assignPaymentMethod).toHaveBeenCalledWith(
+        paymentIntent,
+        paymentMethodId,
+        true,
+      );
     });
 
     it('should fail if user does not have payment info', async () => {
@@ -1065,25 +940,23 @@ describe('PaymentService', () => {
 
     it('should fail if stripe create payment intent fails', async () => {
       jest.spyOn(userRepository, 'findById').mockResolvedValueOnce(user as any);
-      jest
-        .spyOn(stripe.invoices, 'create')
-        .mockResolvedValueOnce({ id: invoiceId } as any);
-      jest
-        .spyOn(stripe.invoiceItems, 'create')
-        .mockResolvedValueOnce({} as any);
-      jest
-        .spyOn(stripe.invoices, 'finalizeInvoice')
-        .mockResolvedValueOnce({ payment_intent: paymentIntent.id } as any);
-      jest.spyOn(stripe.customers, 'retrieve').mockResolvedValueOnce({
-        invoice_settings: { default_payment_method: paymentMethodId },
+
+      paymentProvider.createInvoice.mockResolvedValueOnce({
+        id: invoiceId,
       } as any);
-      jest
-        .spyOn(stripe.paymentIntents, 'confirm')
-        .mockRejectedValue(new Error());
+      paymentProvider.getDefaultPaymentMethod.mockResolvedValueOnce(
+        paymentMethodId,
+      );
+
+      paymentProvider.assignPaymentMethod.mockRejectedValue(
+        new ServerError(ErrorPayment.PaymentMethodAssociationFailed),
+      );
 
       await expect(
         paymentService.createSlash(jobEntity as any),
-      ).rejects.toThrow(ErrorPayment.PaymentMethodAssociationFailed);
+      ).rejects.toThrow(
+        new ServerError(ErrorPayment.PaymentMethodAssociationFailed),
+      );
     });
   });
 
@@ -1091,22 +964,22 @@ describe('PaymentService', () => {
     it('should list user payment methods successfully', async () => {
       const user = {
         id: 1,
-        stripeCustomerId: 'cus_123',
+        paymentProviderId: 'cus_123',
       };
 
-      const paymentMethods = {
-        data: [
-          { id: 'pm_123', card: { brand: 'visa', last4: '4242' } },
-          { id: 'pm_456', card: { brand: 'mastercard', last4: '5555' } },
-        ],
-      };
+      const paymentMethods = [
+        {
+          id: 'pm_123',
+          brand: 'visa',
+          last4: '4242',
+        },
+        { id: 'pm_456', brand: 'mastercard', last4: '5555' },
+      ];
 
-      jest
-        .spyOn(stripe.customers, 'listPaymentMethods')
-        .mockResolvedValueOnce(paymentMethods as any);
-      jest
-        .spyOn(paymentService as any, 'getDefaultPaymentMethod')
-        .mockResolvedValueOnce('pm_123');
+      paymentProvider.listPaymentMethods.mockResolvedValue(
+        paymentMethods as any,
+      );
+      paymentProvider.getDefaultPaymentMethod.mockResolvedValue('pm_123');
 
       const result = await paymentService.listUserPaymentMethods(user as any);
 
@@ -1130,37 +1003,36 @@ describe('PaymentService', () => {
     it('should delete a payment method successfully', async () => {
       const user = {
         id: 1,
-        stripeCustomerId: 'cus_123',
+        paymentProviderId: 'cus_123',
       };
 
-      jest
-        .spyOn(stripe.paymentMethods, 'retrieve')
-        .mockResolvedValue({ id: 'pm_123' } as any);
-      jest
-        .spyOn(paymentService as any, 'getDefaultPaymentMethod')
-        .mockResolvedValue('pm_456');
+      paymentProvider.retrievePaymentMethod.mockResolvedValue({
+        id: 'pm_123',
+      } as any);
+      paymentProvider.getDefaultPaymentMethod.mockResolvedValue('pm_456');
       jest
         .spyOn(paymentService as any, 'isPaymentMethodInUse')
         .mockResolvedValue(false);
-      jest.spyOn(stripe.paymentMethods, 'detach').mockResolvedValue({} as any);
+      paymentProvider.detachPaymentMethod.mockResolvedValue({} as any);
 
       await paymentService.deletePaymentMethod(user as any, 'pm_123');
 
-      expect(stripe.paymentMethods.detach).toHaveBeenCalledWith('pm_123');
+      expect(paymentProvider.detachPaymentMethod).toHaveBeenCalledWith(
+        'pm_123',
+      );
     });
 
     it('should throw an error when trying to delete the default payment method in use', async () => {
       const user = {
         id: 1,
-        stripeCustomerId: 'cus_123',
+        paymentProviderId: 'cus_123',
       };
 
-      jest
-        .spyOn(stripe.paymentMethods, 'retrieve')
-        .mockResolvedValue({ id: 'pm_123' } as any);
-      jest
-        .spyOn(paymentService as any, 'getDefaultPaymentMethod')
-        .mockResolvedValue('pm_123');
+      paymentProvider.retrievePaymentMethod.mockResolvedValue({
+        id: 'pm_123',
+        default: true,
+      } as any);
+      paymentProvider.getDefaultPaymentMethod.mockResolvedValue('pm_123');
       jest
         .spyOn(paymentService as any, 'isPaymentMethodInUse')
         .mockResolvedValue(true);
@@ -1175,40 +1047,29 @@ describe('PaymentService', () => {
     it('should get user billing info successfully', async () => {
       const user = {
         id: 1,
-        stripeCustomerId: 'cus_123',
-      };
-
-      const taxIds = {
-        data: [{ type: VatType.EU_VAT, value: 'DE123456789' }],
+        paymentProviderId: 'cus_123',
       };
 
       const customer = {
         name: 'John Doe',
         email: 'john@example.com',
         address: {
-          country: Country.DE,
-          postal_code: '12345',
+          country: 'de',
+          postalCode: '12345',
           city: 'Berlin',
-          line1: 'Street 1',
+          line: 'Street 1',
         },
       };
 
-      jest
-        .spyOn(stripe.customers, 'listTaxIds')
-        .mockResolvedValue(taxIds as any);
-      jest
-        .spyOn(stripe.customers, 'retrieve')
-        .mockResolvedValue(customer as any);
+      paymentProvider.retrieveBillingInfo.mockResolvedValue(customer as any);
 
       const result = await paymentService.getUserBillingInfo(user as any);
 
       expect(result).toEqual({
         name: 'John Doe',
         email: 'john@example.com',
-        vat: 'DE123456789',
-        vatType: VatType.EU_VAT,
         address: {
-          country: Country.DE,
+          country: 'de',
           postalCode: '12345',
           city: 'Berlin',
           line: 'Street 1',
@@ -1221,7 +1082,7 @@ describe('PaymentService', () => {
     it('should update user billing info successfully', async () => {
       const user = {
         id: 1,
-        stripeCustomerId: 'cus_123',
+        paymentProviderId: 'cus_123',
       };
 
       const updateBillingInfoDto = {
@@ -1237,31 +1098,28 @@ describe('PaymentService', () => {
         },
       };
 
-      jest
-        .spyOn(stripe.customers, 'listTaxIds')
-        .mockResolvedValue({ data: [] } as any);
-      jest.spyOn(stripe.customers, 'createTaxId').mockResolvedValue({} as any);
-      jest.spyOn(stripe.customers, 'update').mockResolvedValue({} as any);
+      paymentProvider.updateCustomer.mockResolvedValue({} as any);
 
       await paymentService.updateUserBillingInfo(
         user as any,
         updateBillingInfoDto,
       );
 
-      expect(stripe.customers.createTaxId).toHaveBeenCalledWith('cus_123', {
-        type: VatType.EU_VAT,
-        value: 'DE123456789',
-      });
-      expect(stripe.customers.update).toHaveBeenCalledWith('cus_123', {
-        name: 'John Doe',
-        email: 'john@example.com',
-        address: {
-          country: 'DE',
-          postal_code: '12345',
-          city: 'Berlin',
-          line1: 'Street 1',
+      expect(paymentProvider.updateBillingInfo).toHaveBeenCalledWith(
+        'cus_123',
+        {
+          name: 'John Doe',
+          email: 'john@example.com',
+          address: {
+            country: 'DE',
+            postalCode: '12345',
+            city: 'Berlin',
+            line: 'Street 1',
+          },
+          vat: 'DE123456789',
+          vatType: VatType.EU_VAT,
         },
-      });
+      );
     });
   });
 
@@ -1269,15 +1127,15 @@ describe('PaymentService', () => {
     it('should change the default payment method successfully', async () => {
       const user = {
         id: 1,
-        stripeCustomerId: 'cus_123',
+        paymentProviderId: 'cus_123',
       };
 
-      jest.spyOn(stripe.customers, 'update').mockResolvedValue({} as any);
+      paymentProvider.updateCustomer.mockResolvedValue({} as any);
 
       await paymentService.changeDefaultPaymentMethod(user as any, 'pm_123');
 
-      expect(stripe.customers.update).toHaveBeenCalledWith('cus_123', {
-        invoice_settings: { default_payment_method: 'pm_123' },
+      expect(paymentProvider.updateCustomer).toHaveBeenCalledWith('cus_123', {
+        defaultPaymentMethod: 'pm_123',
       });
     });
   });
@@ -1422,58 +1280,28 @@ describe('PaymentService', () => {
   });
 
   describe('getReceipt', () => {
-    let retrievePaymentIntentMock: jest.SpyInstance;
-    let retrieveChargeMock: jest.SpyInstance;
-
-    beforeEach(() => {
-      retrievePaymentIntentMock = jest.spyOn(stripe.paymentIntents, 'retrieve');
-      retrieveChargeMock = jest.spyOn(stripe.charges, 'retrieve');
-    });
-
-    afterEach(() => {
-      jest.restoreAllMocks();
-    });
-
-    it('should return the receipt URL if payment intent and charge exist', async () => {
+    it('should get receipt successfully', async () => {
       const paymentId = 'pi_123';
-      const user = { stripeCustomerId: 'cus_123' } as any;
+      const user = { paymentProviderId: 'cus_123' } as any;
 
-      retrievePaymentIntentMock.mockResolvedValue({
-        customer: 'cus_123',
-        latest_charge: 'ch_123',
-      } as any);
-
-      retrieveChargeMock.mockResolvedValue({
-        receipt_url: 'https://receipt.url',
-      } as any);
+      paymentProvider.getReceiptUrl.mockResolvedValue('https://receipt.url');
 
       const result = await paymentService.getReceipt(paymentId, user);
-      expect(result).toEqual('https://receipt.url');
-      expect(retrievePaymentIntentMock).toHaveBeenCalledWith(paymentId);
-      expect(retrieveChargeMock).toHaveBeenCalledWith('ch_123');
-    });
 
-    it('should throw a NOT_FOUND error if payment intent does not exist', async () => {
-      const paymentId = 'pi_123';
-      const user = { stripeCustomerId: 'cus_123' } as any;
-
-      retrievePaymentIntentMock.mockResolvedValue(null);
-
-      await expect(paymentService.getReceipt(paymentId, user)).rejects.toThrow(
-        new NotFoundError(ErrorPayment.NotFound),
+      expect(result).toBe('https://receipt.url');
+      expect(paymentProvider.getReceiptUrl).toHaveBeenCalledWith(
+        'pi_123',
+        'cus_123',
       );
     });
 
-    it('should throw a NOT_FOUND error if charge does not exist', async () => {
+    it('should throw a NOT_FOUND error if receipt URL is not found', async () => {
       const paymentId = 'pi_123';
-      const user = { stripeCustomerId: 'cus_123' } as any;
+      const user = { paymentProviderId: 'cus_123' } as any;
 
-      retrievePaymentIntentMock.mockResolvedValue({
-        customer: 'cus_123',
-        latest_charge: 'ch_123',
-      } as any);
-
-      retrieveChargeMock.mockResolvedValue(null);
+      paymentProvider.getReceiptUrl.mockRejectedValue(
+        new NotFoundError(ErrorPayment.NotFound),
+      );
 
       await expect(paymentService.getReceipt(paymentId, user)).rejects.toThrow(
         new NotFoundError(ErrorPayment.NotFound),

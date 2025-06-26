@@ -1,5 +1,5 @@
 import { Expose } from 'class-transformer';
-import { IsEnum, IsString, IsUrl } from 'class-validator';
+import { IsEnum, IsNumber, IsString, IsUrl } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { ChainId } from '@human-protocol/sdk';
 
@@ -73,6 +73,16 @@ export class EscrowDto {
   @IsUrl()
   @Expose()
   public finalResultsUrl?: string;
+
+  @ApiProperty({ example: 'HMT' })
+  @IsString()
+  @Expose()
+  public tokenSymbol: string;
+
+  @ApiProperty({ example: 18 })
+  @IsNumber()
+  @Expose()
+  public tokenDecimals: number;
 }
 
 export class EscrowPaginationDto {
