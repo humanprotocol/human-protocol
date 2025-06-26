@@ -38,23 +38,11 @@ export type AddressDetailsWallet = z.infer<typeof walletSchema>;
 const escrowSchema = z.object({
   chainId: z.number().optional().nullable(),
   address: z.string().optional().nullable(),
-  balance: z
-    .string()
-    .optional()
-    .nullable()
-    .transform(transformOptionalTokenAmount),
+  balance: z.string().optional().nullable(),
   token: z.string().optional().nullable(),
   factoryAddress: z.string().optional().nullable(),
-  totalFundedAmount: z
-    .string()
-    .optional()
-    .nullable()
-    .transform(transformOptionalTokenAmount),
-  amountPaid: z
-    .string()
-    .optional()
-    .nullable()
-    .transform(transformOptionalTokenAmount),
+  totalFundedAmount: z.string().optional().nullable(),
+  amountPaid: z.string().optional().nullable(),
   status: z.string().optional().nullable(),
   manifest: z.string().optional().nullable(),
   launcher: z.string().optional().nullable(),
@@ -62,6 +50,8 @@ const escrowSchema = z.object({
   recordingOracle: z.string().optional().nullable(),
   reputationOracle: z.string().optional().nullable(),
   finalResultsUrl: z.string().nullable(),
+  tokenSymbol: z.string().optional().nullable(),
+  tokenDecimals: z.number().optional().nullable(),
 });
 
 export type AddressDetailsEscrow = z.infer<typeof escrowSchema>;
