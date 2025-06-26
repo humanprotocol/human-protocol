@@ -4,16 +4,15 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
 import useHmtPrice from '@/shared/api/useHmtPrice';
-import { useIsMobile } from '@/shared/hooks/useBreakpoints';
-import FormattedNumber from '@/shared/ui/FormattedNumber';
+
+import TokenAmount from './TokenAmount';
 
 type Props = {
-  balance?: number | null;
+  balance?: number | string | null;
 };
 
 const HmtBalance: FC<Props> = ({ balance }) => {
   const { data, isError, isPending } = useHmtPrice();
-  const isMobile = useIsMobile();
 
   if (isError) {
     return <span>N/A</span>;
@@ -29,16 +28,9 @@ const HmtBalance: FC<Props> = ({ balance }) => {
 
   return (
     <Stack flexDirection="row" whiteSpace="nowrap">
-      <Typography variant="body2">
-        <FormattedNumber value={_balance} decimalScale={isMobile ? 4 : 9} />
-      </Typography>
-      <Typography
-        component="span"
-        variant="body2"
-        ml={0.5}
-        color="text.secondary"
-      >
-        {`HMT($${balanceInDollars})`}
+      <TokenAmount amount={_balance} alreadyParsed />
+      <Typography component="span" variant="body2" color="text.secondary">
+        {`($${balanceInDollars})`}
       </Typography>
     </Stack>
   );

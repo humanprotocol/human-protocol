@@ -9,7 +9,7 @@ export const createUser = (overrides: Partial<UserEntity> = {}): UserEntity => {
   user.password = faker.internet.password();
   user.type = faker.helpers.arrayElement(Object.values(UserType));
   user.status = faker.helpers.arrayElement(Object.values(UserStatus));
-  user.stripeCustomerId = faker.string.uuid();
+  user.paymentProviderId = faker.string.uuid();
   user.jobs = [];
   user.payments = [];
   user.apiKey = null;

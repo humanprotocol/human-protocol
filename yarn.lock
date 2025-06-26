@@ -2166,6 +2166,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/runtime@npm:^7.27.6":
+  version: 7.27.6
+  resolution: "@babel/runtime@npm:7.27.6"
+  checksum: 10c0/89726be83f356f511dcdb74d3ea4d873a5f0cf0017d4530cb53aa27380c01ca102d573eff8b8b77815e624b1f8c24e7f0311834ad4fb632c90a770fda00bd4c8
+  languageName: node
+  linkType: hard
+
 "@babel/template@npm:^7.27.1, @babel/template@npm:^7.3.3":
   version: 7.27.2
   resolution: "@babel/template@npm:7.27.2"
@@ -3906,7 +3913,7 @@ __metadata:
     "@mui/material": "npm:^5.15.18"
     "@mui/styled-engine-sc": "npm:6.4.0"
     "@mui/system": "npm:^5.15.14"
-    "@mui/x-data-grid": "npm:^7.23.2"
+    "@mui/x-data-grid": "npm:^8.5.2"
     "@mui/x-date-pickers": "npm:^7.23.6"
     "@tanstack/react-query": "npm:^5.67.2"
     "@types/react": "npm:^18.2.66"
@@ -3932,7 +3939,7 @@ __metadata:
     react-number-format: "npm:^5.4.3"
     react-router-dom: "npm:^6.23.1"
     recharts: "npm:^2.13.0-alpha.4"
-    sass: "npm:^1.85.0"
+    sass: "npm:^1.89.2"
     simplebar-react: "npm:^3.2.5"
     styled-components: "npm:^6.1.11"
     swiper: "npm:^11.1.3"
@@ -4053,7 +4060,7 @@ __metadata:
     "@mui/material": "npm:^5.16.7"
     "@tanstack/query-sync-storage-persister": "npm:^5.68.0"
     "@tanstack/react-query": "npm:^5.67.2"
-    "@tanstack/react-query-persist-client": "npm:^5.67.2"
+    "@tanstack/react-query-persist-client": "npm:^5.80.7"
     "@types/react": "npm:^18.3.12"
     "@types/react-dom": "npm:^18.3.0"
     "@types/react-router-dom": "npm:^5.3.3"
@@ -4314,7 +4321,7 @@ __metadata:
     "@stripe/stripe-js": "npm:^4.2.0"
     "@tanstack/query-sync-storage-persister": "npm:^5.68.0"
     "@tanstack/react-query": "npm:^5.67.2"
-    "@tanstack/react-query-persist-client": "npm:^5.67.2"
+    "@tanstack/react-query-persist-client": "npm:^5.80.7"
     "@types/file-saver": "npm:^2.0.7"
     "@types/react": "npm:^18.3.12"
     "@types/react-dom": "npm:^18.2.25"
@@ -4536,7 +4543,7 @@ __metadata:
     "@mui/material": "npm:^5.16.7"
     "@tanstack/query-sync-storage-persister": "npm:^5.68.0"
     "@tanstack/react-query": "npm:^5.67.2"
-    "@tanstack/react-query-persist-client": "npm:^5.67.2"
+    "@tanstack/react-query-persist-client": "npm:^5.80.7"
     "@types/react": "npm:^18.3.12"
     "@types/react-dom": "npm:^18.3.0"
     "@types/react-router-dom": "npm:^5.3.3"
@@ -4552,7 +4559,7 @@ __metadata:
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
     react-router-dom: "npm:^6.24.1"
-    sass: "npm:^1.85.0"
+    sass: "npm:^1.89.2"
     serve: "npm:^14.2.4"
     typescript: "npm:^5.6.3"
     viem: "npm:2.x"
@@ -5802,6 +5809,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@mui/types@npm:^7.4.3":
+  version: 7.4.3
+  resolution: "@mui/types@npm:7.4.3"
+  dependencies:
+    "@babel/runtime": "npm:^7.27.1"
+  peerDependencies:
+    "@types/react": ^17.0.0 || ^18.0.0 || ^19.0.0
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+  checksum: 10c0/8078ed0c63211377af4cf244e0b8a94d15748253139a330f6c7b983b755a57fa89bdba5d8b9ca4c30944b1567115eab3cbb9b9869c14489b0ad3249e858c9fa1
+  languageName: node
+  linkType: hard
+
 "@mui/types@npm:~7.2.15":
   version: 7.2.24
   resolution: "@mui/types@npm:7.2.24"
@@ -5854,17 +5875,36 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/x-data-grid@npm:^7.23.2":
-  version: 7.29.2
-  resolution: "@mui/x-data-grid@npm:7.29.2"
+"@mui/utils@npm:^7.1.1":
+  version: 7.1.1
+  resolution: "@mui/utils@npm:7.1.1"
   dependencies:
-    "@babel/runtime": "npm:^7.25.7"
-    "@mui/utils": "npm:^5.16.6 || ^6.0.0 || ^7.0.0"
-    "@mui/x-internals": "npm:7.29.0"
+    "@babel/runtime": "npm:^7.27.1"
+    "@mui/types": "npm:^7.4.3"
+    "@types/prop-types": "npm:^15.7.14"
     clsx: "npm:^2.1.1"
     prop-types: "npm:^15.8.1"
-    reselect: "npm:^5.1.1"
-    use-sync-external-store: "npm:^1.0.0"
+    react-is: "npm:^19.1.0"
+  peerDependencies:
+    "@types/react": ^17.0.0 || ^18.0.0 || ^19.0.0
+    react: ^17.0.0 || ^18.0.0 || ^19.0.0
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+  checksum: 10c0/d2563c4be785a94d55d32df7e51be530bb56a21ffbf4d1ca084c51a8b598ad7ee6d8bb30dd4171691c3b669eea6d8da07280aedd8d96fc539cfd0e0e5b9a48a1
+  languageName: node
+  linkType: hard
+
+"@mui/x-data-grid@npm:^8.5.2":
+  version: 8.5.2
+  resolution: "@mui/x-data-grid@npm:8.5.2"
+  dependencies:
+    "@babel/runtime": "npm:^7.27.6"
+    "@mui/utils": "npm:^7.1.1"
+    "@mui/x-internals": "npm:8.5.2"
+    clsx: "npm:^2.1.1"
+    prop-types: "npm:^15.8.1"
+    use-sync-external-store: "npm:^1.5.0"
   peerDependencies:
     "@emotion/react": ^11.9.0
     "@emotion/styled": ^11.8.1
@@ -5877,7 +5917,7 @@ __metadata:
       optional: true
     "@emotion/styled":
       optional: true
-  checksum: 10c0/6898abe0733f6fc1a5f41c2cd41037988fc2466ffaf2ce0d31cd22054b696e81d48aa788305cb4e7f54c757f6fee2ad8568d8b042954d65cbb23f70317c28861
+  checksum: 10c0/deb5e7e1f9391b92d85acdb39eb1bc0fd85cbad748be839b132b62dedd3fcce5aae1919b4630a76f156ebcbd8402114feff97b6cc118f484883d722d31976b47
   languageName: node
   linkType: hard
 
@@ -5938,6 +5978,20 @@ __metadata:
   peerDependencies:
     react: ^17.0.0 || ^18.0.0 || ^19.0.0
   checksum: 10c0/adb4358ef0e29f6f57622b50ff479e9d225078761b4c82546343e2976ccb55eed687e122c37874c76a170f4ec2ea6e82f89bf8b9c0ef3b5cb35b32d026761fba
+  languageName: node
+  linkType: hard
+
+"@mui/x-internals@npm:8.5.2":
+  version: 8.5.2
+  resolution: "@mui/x-internals@npm:8.5.2"
+  dependencies:
+    "@babel/runtime": "npm:^7.27.6"
+    "@mui/utils": "npm:^7.1.1"
+    reselect: "npm:^5.1.1"
+  peerDependencies:
+    "@mui/system": ^5.15.14 || ^6.0.0 || ^7.0.0
+    react: ^17.0.0 || ^18.0.0 || ^19.0.0
+  checksum: 10c0/03d2105d82624b0064c618a6bfc289c124f7fd8bff2f11fe5ceb9504514fb4cf59be906b5649b3537f21b86c54dbcbf4406e55d529a8a399d9fbc510f3bd2bf9
   languageName: node
   linkType: hard
 
@@ -9164,6 +9218,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/query-core@npm:5.80.7":
+  version: 5.80.7
+  resolution: "@tanstack/query-core@npm:5.80.7"
+  checksum: 10c0/bd96393e1a94aebc4d10da05e03de89ddce09d7266d0fcff2785480c544425d732f9fb03ecb93c96520980f57655f143452b9701f9bcb620cd07a04077018583
+  languageName: node
+  linkType: hard
+
 "@tanstack/query-devtools@npm:5.74.7":
   version: 5.74.7
   resolution: "@tanstack/query-devtools@npm:5.74.7"
@@ -9177,6 +9238,15 @@ __metadata:
   dependencies:
     "@tanstack/query-core": "npm:5.75.5"
   checksum: 10c0/0ba0b820d93dbcb92fafdbcb91febd4ff6e73b52e79db2b1623cbe66775d3199fca7a3a9e2893b819f5cd0eaa827891ff6aa3b599b4654855e17b2d197428cc1
+  languageName: node
+  linkType: hard
+
+"@tanstack/query-persist-client-core@npm:5.80.7":
+  version: 5.80.7
+  resolution: "@tanstack/query-persist-client-core@npm:5.80.7"
+  dependencies:
+    "@tanstack/query-core": "npm:5.80.7"
+  checksum: 10c0/fb2d51a0d5d85d05b38b73504aa5de1320698b2e88819d579cba247e356faef1b6b1279fddce9ef5baf35ffd4bf6b3fec6e167a38709fed9e3a22aa96eacf6a2
   languageName: node
   linkType: hard
 
@@ -9202,15 +9272,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/react-query-persist-client@npm:^5.67.2":
-  version: 5.75.5
-  resolution: "@tanstack/react-query-persist-client@npm:5.75.5"
+"@tanstack/react-query-persist-client@npm:^5.80.7":
+  version: 5.80.7
+  resolution: "@tanstack/react-query-persist-client@npm:5.80.7"
   dependencies:
-    "@tanstack/query-persist-client-core": "npm:5.75.5"
+    "@tanstack/query-persist-client-core": "npm:5.80.7"
   peerDependencies:
-    "@tanstack/react-query": ^5.75.5
+    "@tanstack/react-query": ^5.80.7
     react: ^18 || ^19
-  checksum: 10c0/1fe684b70f756c667f1bccd827d9124e68c1335008aae8e14dfa9cd32c4a03ce0a72b761c55885033e4e889b3f6b1df0217c1f37662ecd85b3ad839c79b365af
+  checksum: 10c0/5159256a9afb2aae46e336d5a38f2d1f89c5e5f384f731853575a5d8216165d60731348bac5857bd75233779a0efbfdafb80bca15dd5c6eecd92dce4c2d6e9f9
   languageName: node
   linkType: hard
 
@@ -25499,9 +25569,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sass@npm:^1.85.0":
-  version: 1.87.0
-  resolution: "sass@npm:1.87.0"
+"sass@npm:^1.89.2":
+  version: 1.89.2
+  resolution: "sass@npm:1.89.2"
   dependencies:
     "@parcel/watcher": "npm:^2.4.1"
     chokidar: "npm:^4.0.0"
@@ -25512,7 +25582,7 @@ __metadata:
       optional: true
   bin:
     sass: sass.js
-  checksum: 10c0/bd245faf14e4783dc547765350cf05817edaac0d6d6f6e4da8ab751f3eb3cc3873afd563c0ce416a24aa6c9c4e9023b05096447fc006660a01f76adffb54fbc6
+  checksum: 10c0/752ccc7581b0c6395f63918116c20924e99943a86d79e94f5c4a0d41b1e981fe1f0ecd1ee82fff21496f81dbc91f68fb35a498166562ec8ec53e7aad7c3dbd9d
   languageName: node
   linkType: hard
 
@@ -28378,7 +28448,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"use-sync-external-store@npm:^1.0.0, use-sync-external-store@npm:^1.2.2, use-sync-external-store@npm:^1.4.0":
+"use-sync-external-store@npm:^1.2.2, use-sync-external-store@npm:^1.4.0, use-sync-external-store@npm:^1.5.0":
   version: 1.5.0
   resolution: "use-sync-external-store@npm:1.5.0"
   peerDependencies:
