@@ -237,8 +237,16 @@ export function createCancelledEvent(sender: Address): Cancelled {
   return newCancelledEvent;
 }
 
-export function createCompletedEvent(sender: Address): Completed {
+export function createCompletedEvent(
+  sender: Address,
+  timestamp: BigInt
+): Completed {
   const newCompletedEvent = changetype<Completed>(newMockEvent());
+  newCompletedEvent.transaction.hash = generateUniqueHash(
+    sender.toString(),
+    timestamp,
+    newCompletedEvent.transaction.nonce
+  );
 
   newCompletedEvent.transaction.from = sender;
 

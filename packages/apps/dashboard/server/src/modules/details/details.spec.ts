@@ -13,6 +13,7 @@ import {
   OrderDirection,
 } from '@human-protocol/sdk';
 import { OperatorsOrderBy } from '../../common/enums/operator';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -55,6 +56,13 @@ describe('DetailsService', () => {
             getAvailableNetworks: jest
               .fn()
               .mockResolvedValue([ChainId.MAINNET]),
+          },
+        },
+        {
+          provide: CACHE_MANAGER,
+          useValue: {
+            get: jest.fn(),
+            set: jest.fn(),
           },
         },
         Logger,

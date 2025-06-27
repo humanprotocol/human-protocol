@@ -16,6 +16,7 @@ import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
 import { StatisticsProfile } from '../statistics.mapper.profile';
 import { jwtUserDataFixture } from '../../h-captcha/spec/h-captcha.fixtures';
+import { RequestWithUser } from '../../../common/interfaces/jwt';
 
 describe('StatisticsController', () => {
   let controller: StatisticsController;
@@ -63,11 +64,10 @@ describe('StatisticsController', () => {
       const dto: UserStatisticsDto = {
         oracle_address: statisticsExchangeOracleAddress,
       };
-      const result = await controller.getUserStatistics(
-        dto,
-        jwtUserDataFixture,
-        statisticsToken,
-      );
+      const result = await controller.getUserStatistics(dto, {
+        user: jwtUserDataFixture,
+        token: statisticsToken,
+      } as RequestWithUser);
 
       expect(statisticsServiceMock.getUserStats).toHaveBeenCalledWith(
         generalUserStatsCommandFixture,

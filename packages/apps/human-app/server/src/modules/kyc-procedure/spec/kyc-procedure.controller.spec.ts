@@ -1,8 +1,9 @@
+import { expect, it, jest } from '@jest/globals';
+import { Test, TestingModule } from '@nestjs/testing';
+import { RequestWithUser } from '../../../common/interfaces/jwt';
 import { KycProcedureController } from '../kyc-procedure.controller';
 import { KycProcedureService } from '../kyc-procedure.service';
-import { Test, TestingModule } from '@nestjs/testing';
 import { serviceMock } from './kyc-procedure.service.mock';
-import { expect, it, jest } from '@jest/globals';
 
 describe('KycProcedureController', () => {
   let controller: KycProcedureController;
@@ -30,12 +31,12 @@ describe('KycProcedureController', () => {
       service,
       'processStartKycProcedure',
     );
-    await controller.startKycProcedure('token');
+    await controller.startKycProcedure({ token: 'token' } as RequestWithUser);
     expect(startKycProcedureSpy).toHaveBeenCalledWith('token');
   });
   it('should call processKycOnChain method of KycProcedureService', async () => {
     const kycService = jest.spyOn(service, 'processKycOnChain');
-    await controller.onChainKyc('token');
+    await controller.onChainKyc({ token: 'token' } as RequestWithUser);
     expect(kycService).toHaveBeenCalledWith('token');
   });
 });

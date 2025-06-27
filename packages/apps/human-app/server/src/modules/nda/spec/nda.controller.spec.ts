@@ -1,16 +1,17 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
+import { AutomapperModule } from '@automapper/nestjs';
+import { Test, TestingModule } from '@nestjs/testing';
 
+import { RequestWithUser } from '../../../common/interfaces/jwt';
 import { NDAController } from '../nda.controller';
+import { SignNDAProfile } from '../nda.mapper.profile';
 import { NDAService } from '../nda.service';
-import { ndaServiceMock } from './nda.service.mock';
 import {
   NDA_TOKEN,
   signNDACommandFixture,
   signNDADtoFixture,
 } from './nda.fixtures';
-import { SignNDAProfile } from '../nda.mapper.profile';
+import { ndaServiceMock } from './nda.service.mock';
 
 describe('NDAController', () => {
   let controller: NDAController;
@@ -40,13 +41,13 @@ describe('NDAController', () => {
     it('should call service signNDA method with proper fields set', async () => {
       const dto = signNDADtoFixture;
       const command = signNDACommandFixture;
-      await controller.signNDA(dto, NDA_TOKEN);
+      await controller.signNDA(dto, { token: NDA_TOKEN } as RequestWithUser);
       expect(ndaServiceMock.signNDA).toHaveBeenCalledWith(command);
     });
 
     it('should call service getLatestNDA method with proper fields set', async () => {
       const token = NDA_TOKEN;
-      await controller.getLatestNDA(token);
+      await controller.getLatestNDA({ token: NDA_TOKEN } as RequestWithUser);
       expect(ndaServiceMock.getLatestNDA).toHaveBeenCalledWith({ token });
     });
   });

@@ -1,5 +1,11 @@
 import { plainToInstance } from 'class-transformer';
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  Inject,
+} from '@nestjs/common';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import {
   ChainId,
   EscrowUtils,
@@ -39,6 +45,7 @@ import { KVStoreDataDto } from './dto/details-response.dto';
 export class DetailsService {
   private readonly logger = new Logger(DetailsService.name);
   constructor(
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     private readonly configService: EnvironmentConfigService,
     private readonly httpService: HttpService,
     private readonly networkConfig: NetworkConfigService,
@@ -48,18 +55,37 @@ export class DetailsService {
     chainId: ChainId,
     address: string,
   ): Promise<WalletDto | EscrowDto | OperatorDto> {
-    const escrowData = await EscrowUtils.getEscrow(chainId, address);
-    if (escrowData) {
-      const escrowDto: EscrowDto = plainToInstance(EscrowDto, escrowData, {
-        excludeExtraneousValues: true,
-      });
-      return escrowDto;
-    }
     const network = this.networkConfig.networks.find(
       (network) => network.chainId === chainId,
     );
     if (!network) throw new BadRequestException('Invalid chainId provided');
     const provider = new ethers.JsonRpcProvider(network.rpcUrl);
+
+    const escrowData = await EscrowUtils.getEscrow(chainId, address);
+    if (escrowData) {
+      const escrowDto: EscrowDto = plainToInstance(EscrowDto, escrowData, {
+        excludeExtraneousValues: true,
+      });
+
+      const { decimals, symbol } = await this.getTokenData(
+        chainId,
+        escrowData.token,
+        provider,
+      );
+
+      escrowDto.balance = ethers.formatUnits(escrowData.balance, decimals);
+      escrowDto.totalFundedAmount = ethers.formatUnits(
+        escrowData.totalFundedAmount,
+        decimals,
+      );
+      escrowDto.amountPaid = ethers.formatUnits(
+        escrowData.amountPaid,
+        decimals,
+      );
+      escrowDto.tokenSymbol = symbol;
+      escrowDto.tokenDecimals = decimals;
+      return escrowDto;
+    }
     const stakingClient = await StakingClient.build(provider);
     const stakingData = await stakingClient.getStakerInfo(address);
 
@@ -111,7 +137,10 @@ export class DetailsService {
     return walletDto;
   }
 
-  private async getHmtBalance(chainId: ChainId, hmtAddress: string) {
+  private async getHmtBalance(
+    chainId: ChainId,
+    hmtAddress: string,
+  ): Promise<string> {
     const network = this.networkConfig.networks.find(
       (network) => network.chainId === chainId,
     );
@@ -401,6 +430,28 @@ export class DetailsService {
       });
     });
 
+    return data;
+  }
+
+  private async getTokenData(
+    chainId: ChainId,
+    tokenAddress: string,
+    provider: ethers.JsonRpcProvider,
+  ): Promise<{ decimals: number; symbol: string }> {
+    const tokenCacheKey = `token:${chainId}:${tokenAddress.toLowerCase()}`;
+    let data = await this.cacheManager.get<{
+      decimals: number;
+      symbol: string;
+    }>(tokenCacheKey);
+    if (!data) {
+      const erc20Contract = HMToken__factory.connect(tokenAddress, provider);
+      const [decimals, symbol] = await Promise.all([
+        erc20Contract.decimals(),
+        erc20Contract.symbol(),
+      ]);
+      data = { decimals: Number(decimals), symbol };
+      await this.cacheManager.set(tokenCacheKey, data);
+    }
     return data;
   }
 }

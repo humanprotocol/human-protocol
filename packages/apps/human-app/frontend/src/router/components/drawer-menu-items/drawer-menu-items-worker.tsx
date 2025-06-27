@@ -41,5 +41,5 @@ export const workerDrawerBottomMenuItems: MenuItem[] = [
       }
     },
   },
-  <DarkModeSwitch key={crypto.randomUUID()} />,
+  <DarkModeSwitch key="dark-mode-switch" />,
 ];

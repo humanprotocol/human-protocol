@@ -112,7 +112,6 @@ function processConfigFiles() {
           'common-config.module.ts',
           'gateway-config.service.ts',
           'gateway-config.types.ts',
-          'params-decorators.ts',
           'spec',
         ].includes(file),
     );

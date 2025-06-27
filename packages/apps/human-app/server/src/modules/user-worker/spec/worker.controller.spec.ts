@@ -1,17 +1,18 @@
-import { WorkerController } from '../worker.controller';
-import { WorkerService } from '../worker.service';
+import { classes } from '@automapper/classes';
+import { AutomapperModule } from '@automapper/nestjs';
+import { Test, TestingModule } from '@nestjs/testing';
+import { RequestWithUser } from '../../../common/interfaces/jwt';
 import {
   RegistrationInExchangeOracleDto,
   SignupWorkerCommand,
   SignupWorkerDto,
 } from '../model/worker-registration.model';
-import { Test, TestingModule } from '@nestjs/testing';
-import { AutomapperModule } from '@automapper/nestjs';
-import { classes } from '@automapper/classes';
-import { WorkerProfile } from '../worker.mapper.profile';
-import { workerServiceMock } from './worker.service.mock';
 import { SigninWorkerDto } from '../model/worker-signin.model';
+import { WorkerController } from '../worker.controller';
+import { WorkerProfile } from '../worker.mapper.profile';
+import { WorkerService } from '../worker.service';
 import { workerToken } from './worker.fixtures';
+import { workerServiceMock } from './worker.service.mock';
 
 describe('WorkerController', () => {
   let controller: WorkerController;
@@ -79,7 +80,9 @@ describe('WorkerController', () => {
         oracle_address: '0x34df642',
         h_captcha_token: 'h_captcha_token',
       };
-      await controller.createRegistrationInExchangeOracle(dto, workerToken);
+      await controller.createRegistrationInExchangeOracle(dto, {
+        token: workerToken,
+      } as RequestWithUser);
       const expectedCommand = {
         oracleAddress: dto.oracle_address,
         hCaptchaToken: dto.h_captcha_token,

@@ -52,11 +52,7 @@ export const WalletConnectContext = createContext<
   | null
 >(null);
 
-export function WalletConnectProvider({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+function AppKitWrapper({ children }: { children: React.ReactNode }) {
   const [initializing, setInitializing] = useState(true);
   const web3ProviderMutation = useWeb3Provider();
   const { open } = useAppKit();
@@ -70,7 +66,7 @@ export function WalletConnectProvider({
     ) {
       setInitializing(false);
     }
-  }, [web3ProviderMutation]);
+  }, [web3ProviderMutation.status]);
 
   const openModal = useCallback(async () => {
     await open();
@@ -123,10 +119,20 @@ export function WalletConnectProvider({
   ]);
 
   return (
+    <WalletConnectContext.Provider value={contextValue}>
+      {children}
+    </WalletConnectContext.Provider>
+  );
+}
+
+export function WalletConnectProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
     <WagmiProvider config={wagmiAdapter.wagmiConfig}>
-      <WalletConnectContext.Provider value={contextValue}>
-        {children}
-      </WalletConnectContext.Provider>
+      <AppKitWrapper>{children}</AppKitWrapper>
     </WagmiProvider>
   );
 }

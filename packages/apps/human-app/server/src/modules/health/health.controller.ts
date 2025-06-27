@@ -10,10 +10,12 @@ import {
 } from '@nestjs/terminus';
 
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
+import { Public } from '../../common/decorators';
 import { PingResponseDto } from './dto/ping-response.dto';
 import { CacheManagerHealthIndicator } from './indicators/cache-manager.health';
 
 @ApiTags('Health')
+@Public()
 @Controller('health')
 export class HealthController {
   constructor(

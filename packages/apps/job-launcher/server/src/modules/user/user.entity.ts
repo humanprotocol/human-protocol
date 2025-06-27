@@ -29,7 +29,7 @@ export class UserEntity extends BaseEntity implements IUser {
   public status: UserStatus;
 
   @Column({ type: 'varchar', nullable: true, unique: true })
-  public stripeCustomerId: string | null;
+  public paymentProviderId: string | null;
 
   @OneToMany(() => JobEntity, (job) => job.user)
   public jobs: JobEntity[];

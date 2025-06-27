@@ -9,7 +9,7 @@ import { NetworkConfigService } from './network-config.service';
 import { PGPConfigService } from './pgp-config.service';
 import { S3ConfigService } from './s3-config.service';
 import { SendgridConfigService } from './sendgrid-config.service';
-import { StripeConfigService } from './stripe-config.service';
+import { PaymentProviderConfigService } from './payment-provider-config.service';
 import { Web3ConfigService } from './web3-config.service';
 import { SlackConfigService } from './slack-config.service';
 import { VisionConfigService } from './vision-config.service';
@@ -23,7 +23,7 @@ import { VisionConfigService } from './vision-config.service';
     DatabaseConfigService,
     Web3ConfigService,
     S3ConfigService,
-    StripeConfigService,
+    PaymentProviderConfigService,
     SendgridConfigService,
     CvatConfigService,
     PGPConfigService,
@@ -38,7 +38,7 @@ import { VisionConfigService } from './vision-config.service';
     DatabaseConfigService,
     Web3ConfigService,
     S3ConfigService,
-    StripeConfigService,
+    PaymentProviderConfigService,
     SendgridConfigService,
     CvatConfigService,
     PGPConfigService,

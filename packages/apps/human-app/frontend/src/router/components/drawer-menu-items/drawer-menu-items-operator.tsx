@@ -25,5 +25,5 @@ export const operatorDrawerBottomMenuItems: MenuItem[] = [
       }
     },
   },
-  <DarkModeSwitch key={crypto.randomUUID()} />,
+  <DarkModeSwitch key="dark-mode-switch" />,
 ];

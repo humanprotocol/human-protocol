@@ -469,7 +469,7 @@ describe('JobService', () => {
         const fortuneJobDto: JobFortuneDto = createFortuneJobDto();
         await expect(
           jobService.createJob(
-            createUser({ stripeCustomerId: null }),
+            createUser({ paymentProviderId: null }),
             FortuneJobType.FORTUNE,
             fortuneJobDto,
           ),

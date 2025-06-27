@@ -1,7 +1,11 @@
-import { JobAssignmentService } from '../job-assignment.service';
-import { JobAssignmentController } from '../job-assignment.controller';
+import { classes } from '@automapper/classes';
+import { AutomapperModule } from '@automapper/nestjs';
+import { HttpService } from '@nestjs/axios';
 import { Test, TestingModule } from '@nestjs/testing';
-import { jobAssignmentServiceMock } from './job-assignment.service.mock';
+import { RequestWithUser } from '../../../common/interfaces/jwt';
+import { JobAssignmentController } from '../job-assignment.controller';
+import { JobAssignmentProfile } from '../job-assignment.mapper.profile';
+import { JobAssignmentService } from '../job-assignment.service';
 import {
   JobAssignmentCommand,
   JobAssignmentDto,
@@ -10,21 +14,18 @@ import {
   RefreshJobDto,
 } from '../model/job-assignment.model';
 import {
-  jobAssignmentDtoFixture,
-  jobAssignmentCommandFixture,
-  jobAssignmentResponseFixture,
-  jobsFetchParamsDtoFixture,
-  jobsFetchParamsCommandFixture,
-  jobsFetchResponseFixture,
-  jobAssignmentToken,
-  refreshJobDtoFixture,
   EXCHANGE_ORACLE_ADDRESS,
+  jobAssignmentCommandFixture,
+  jobAssignmentDtoFixture,
+  jobAssignmentResponseFixture,
+  jobAssignmentToken,
+  jobsFetchParamsCommandFixture,
+  jobsFetchParamsDtoFixture,
+  jobsFetchResponseFixture,
+  refreshJobDtoFixture,
   TOKEN,
 } from './job-assignment.fixtures';
-import { AutomapperModule } from '@automapper/nestjs';
-import { classes } from '@automapper/classes';
-import { JobAssignmentProfile } from '../job-assignment.mapper.profile';
-import { HttpService } from '@nestjs/axios';
+import { jobAssignmentServiceMock } from './job-assignment.service.mock';
 
 const httpServiceMock = {
   request: jest.fn().mockImplementation((options) => {
@@ -74,7 +75,9 @@ describe('JobAssignmentController', () => {
     it('should call service processJobAssignment method with proper fields set', async () => {
       const dto: JobAssignmentDto = jobAssignmentDtoFixture;
       const command: JobAssignmentCommand = jobAssignmentCommandFixture;
-      await controller.assignJob(dto, jobAssignmentToken);
+      await controller.assignJob(dto, {
+        token: jobAssignmentToken,
+      } as RequestWithUser);
       expect(jobAssignmentService.processJobAssignment).toHaveBeenCalledWith(
         command,
       );
@@ -83,7 +86,9 @@ describe('JobAssignmentController', () => {
     it('should return the result of service processJobAssignment method', async () => {
       const dto: JobAssignmentDto = jobAssignmentDtoFixture;
       const command: JobAssignmentCommand = jobAssignmentCommandFixture;
-      const result = await controller.assignJob(dto, jobAssignmentToken);
+      const result = await controller.assignJob(dto, {
+        token: jobAssignmentToken,
+      } as RequestWithUser);
       expect(result).toEqual(
         jobAssignmentServiceMock.processJobAssignment(command),
       );
@@ -92,7 +97,9 @@ describe('JobAssignmentController', () => {
     it('should call service processGetAssignedJobs method with proper fields set', async () => {
       const dto: JobsFetchParamsDto = jobsFetchParamsDtoFixture;
       const command: JobsFetchParamsCommand = jobsFetchParamsCommandFixture;
-      await controller.getAssignedJobs(dto, jobAssignmentToken);
+      await controller.getAssignedJobs(dto, {
+        token: jobAssignmentToken,
+      } as RequestWithUser);
       expect(jobAssignmentService.processGetAssignedJobs).toHaveBeenCalledWith(
         command,
       );
@@ -100,7 +107,9 @@ describe('JobAssignmentController', () => {
 
     it('should call service refreshAssigments method with proper fields set', async () => {
       const dto: RefreshJobDto = refreshJobDtoFixture;
-      await controller.refreshAssigments(dto, jobAssignmentToken);
+      await controller.refreshAssigments(dto, {
+        token: jobAssignmentToken,
+      } as RequestWithUser);
       expect(jobAssignmentService.updateAssignmentsCache).toHaveBeenCalledWith({
         oracleAddress: EXCHANGE_ORACLE_ADDRESS,
         token: TOKEN,

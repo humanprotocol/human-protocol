@@ -3,16 +3,15 @@ import { useColorMode } from '@/shared/contexts/color-mode';
 
 interface ChipProps {
   label: string | React.ReactElement;
-  key?: string;
   backgroundColor?: string;
 }
+
 export function Chip({ label, backgroundColor }: Readonly<ChipProps>) {
   const { colorPalette } = useColorMode();
 
   return (
     <Box
       component="span"
-      key={crypto.randomUUID()}
       sx={{
         backgroundColor: backgroundColor ?? colorPalette.chip.main,
         width: 'fit-content',

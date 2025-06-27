@@ -10,6 +10,7 @@ import { AddressDetailsEscrow } from '../model/addressDetailsSchema';
 
 import HmtBalance from './HmtBalance';
 import TitleSectionWrapper from './TitleSectionWrapper';
+import TokenAmount from './TokenAmount';
 
 type Props = {
   data: AddressDetailsEscrow;
@@ -17,7 +18,6 @@ type Props = {
 
 const EscrowAddress: FC<Props> = ({ data }) => {
   const {
-    token,
     balance,
     factoryAddress,
     totalFundedAmount,
@@ -27,16 +27,26 @@ const EscrowAddress: FC<Props> = ({ data }) => {
     exchangeOracle,
     recordingOracle,
     reputationOracle,
+    tokenSymbol,
   } = data;
+  const isHmt = tokenSymbol === 'HMT';
   return (
     <SectionWrapper>
       <Stack gap={4}>
         <TitleSectionWrapper title="Token">
-          <Typography variant="body2">{token}</Typography>
+          <Typography variant="body2">{tokenSymbol}</Typography>
         </TitleSectionWrapper>
         {balance !== undefined && balance !== null ? (
           <TitleSectionWrapper title="Balance">
-            <HmtBalance balance={balance} />
+            {isHmt ? (
+              <HmtBalance balance={balance} />
+            ) : (
+              <TokenAmount
+                amount={balance}
+                tokenSymbol={tokenSymbol}
+                alreadyParsed
+              />
+            )}
           </TitleSectionWrapper>
         ) : null}
         <TitleSectionWrapper
@@ -46,30 +56,18 @@ const EscrowAddress: FC<Props> = ({ data }) => {
           <Typography variant="body2">{factoryAddress}</Typography>
         </TitleSectionWrapper>
         <TitleSectionWrapper title="Total Funded Amount">
-          <Stack direction="row" whiteSpace="nowrap">
-            <Typography variant="body2">{totalFundedAmount}</Typography>
-            <Typography
-              component="span"
-              variant="body2"
-              ml={0.5}
-              color="text.secondary"
-            >
-              HMT
-            </Typography>
-          </Stack>
+          <TokenAmount
+            amount={totalFundedAmount}
+            tokenSymbol={tokenSymbol}
+            alreadyParsed
+          />
         </TitleSectionWrapper>
         <TitleSectionWrapper title="Paid Amount">
-          <Stack direction="row" whiteSpace="nowrap">
-            <Typography variant="body2">{amountPaid}</Typography>
-            <Typography
-              component="span"
-              variant="body2"
-              ml={0.5}
-              color="text.secondary"
-            >
-              HMT
-            </Typography>
-          </Stack>
+          <TokenAmount
+            amount={amountPaid}
+            tokenSymbol={tokenSymbol}
+            alreadyParsed
+          />
         </TitleSectionWrapper>
 
         <TitleSectionWrapper title="Status">

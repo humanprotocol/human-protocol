@@ -1,10 +1,19 @@
-import { HttpException, Inject, Injectable } from '@nestjs/common';
-import { EnvironmentConfigService } from '../../common/config/environment-config.service';
-import { ethers } from 'ethers';
-import { ChainId, KVStoreKeys, KVStoreUtils } from '@human-protocol/sdk';
+import {
+  ChainId,
+  KVStoreKeys,
+  KVStoreUtils,
+  StorageClient,
+} from '@human-protocol/sdk';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { HttpException, Inject, Injectable } from '@nestjs/common';
 import { Cache } from 'cache-manager';
-import { ORACLE_URL_CACHE_KEY } from '../../common/constants/cache';
+import { ethers } from 'ethers';
+import { EnvironmentConfigService } from '../../common/config/environment-config.service';
+import { JWT_KVSTORE_KEY } from '../../common/constants';
+import {
+  ORACLE_URL_CACHE_KEY,
+  REPUTATION_ORACLE_PUBLIC_KEY,
+} from '../../common/constants/cache';
 
 @Injectable()
 export class KvStoreGateway {
@@ -86,6 +95,47 @@ export class KvStoreGateway {
       );
 
       return jobTypes;
+    }
+  }
+
+  async getReputationOraclePublicKey(
+    chainId: ChainId,
+    address: string,
+  ): Promise<string> {
+    const key = `${REPUTATION_ORACLE_PUBLIC_KEY}:${chainId}:${address}`;
+    const cachedData: string | undefined = await this.cacheManager.get(key);
+    if (cachedData) {
+      return cachedData;
+    }
+
+    let publicKey: string;
+    try {
+      const url = await KVStoreUtils.getFileUrlAndVerifyHash(
+        chainId,
+        address,
+        JWT_KVSTORE_KEY,
+      );
+      publicKey = (await StorageClient.downloadFileFromUrl(url)) as string;
+    } catch (e) {
+      if (e.toString().includes('Error: Invalid address')) {
+        throw new HttpException(
+          `Unable to retrieve public key from address: ${address}`,
+          400,
+        );
+      } else {
+        throw new Error(`Error while fetching public key from kv-store: ${e}`);
+      }
+    }
+
+    if (!publicKey || publicKey === '') {
+      throw new HttpException(
+        `Unable to retrieve public key from address: ${address}`,
+        400,
+      );
+    } else {
+      // Guardar en caché sin TTL (persistente)
+      await this.cacheManager.set(key, publicKey, 0);
+      return publicKey;
     }
   }
 }

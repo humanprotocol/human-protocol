@@ -14,6 +14,7 @@ import {
   verifyTokenCommandFixture,
   verifyTokenDtoFixture,
 } from './h-captcha.fixtures';
+import { RequestWithUser } from '../../../common/interfaces/jwt';
 
 describe('HCaptchaController', () => {
   let controller: HCaptchaController;
@@ -41,7 +42,7 @@ describe('HCaptchaController', () => {
     expect(controller).toBeDefined();
   });
   it('should call getUserStats with proper arguments', async () => {
-    const dto = jwtUserDataFixture;
+    const dto = { user: jwtUserDataFixture } as RequestWithUser;
     const command = hCaptchaUserStatsCommandFixture;
     await controller.getUserStats(dto);
     expect(service.getUserStats).toHaveBeenCalledWith(command);
@@ -49,14 +50,20 @@ describe('HCaptchaController', () => {
 
   it('should call verifyToken with proper arguments', async () => {
     const dto = verifyTokenDtoFixture;
-    const jwtPayload = jwtUserDataFixture;
+    const jwtPayload = {
+      user: jwtUserDataFixture,
+      token: JWT_TOKEN,
+    } as RequestWithUser;
     const command = verifyTokenCommandFixture;
-    await controller.verifyToken(dto, jwtPayload, JWT_TOKEN);
+    await controller.verifyToken(dto, jwtPayload);
     expect(service.verifyToken).toHaveBeenCalledWith(command);
   });
 
   it('should call getDailyHmtSpent with proper arguments', async () => {
-    const dto = jwtUserDataFixture;
+    const dto = {
+      user: jwtUserDataFixture,
+      token: JWT_TOKEN,
+    } as RequestWithUser;
     const command = dailyHmtSpentCommandFixture;
     await controller.getDailyHmtSpent(dto);
     expect(service.getDailyHmtSpent).toHaveBeenCalledWith(command);
@@ -64,7 +71,9 @@ describe('HCaptchaController', () => {
 
   it('should call enableLabeling with proper arguments', async () => {
     const command = enableLabelingCommandFixture;
-    await controller.enableLabeling(JWT_TOKEN);
+    await controller.enableLabeling({
+      token: JWT_TOKEN,
+    } as RequestWithUser);
     expect(service.enableLabeling).toHaveBeenCalledWith(command);
   });
 });

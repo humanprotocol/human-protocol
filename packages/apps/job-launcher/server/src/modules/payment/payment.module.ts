@@ -15,6 +15,8 @@ import { UserEntity } from '../user/user.entity';
 import { JobRepository } from '../job/job.repository';
 import { UserRepository } from '../user/user.repository';
 import { RateModule } from '../rate/rate.module';
+import { StripeService } from './providers/stripe/stripe.service';
+import { PaymentProvider } from './providers/payment-provider.abstract';
 
 @Module({
   imports: [
@@ -39,7 +41,16 @@ import { RateModule } from '../rate/rate.module';
     }),
   ],
   controllers: [PaymentController],
-  providers: [PaymentService, PaymentRepository, JobRepository, UserRepository],
+  providers: [
+    PaymentService,
+    PaymentRepository,
+    JobRepository,
+    UserRepository,
+    {
+      provide: PaymentProvider,
+      useClass: StripeService,
+    },
+  ],
   exports: [PaymentService, PaymentRepository],
 })
 export class PaymentModule {}

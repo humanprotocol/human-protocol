@@ -12,6 +12,7 @@ import {
   registerAddressResponseFixture,
 } from './register-address.fixtures';
 import { RegisterAddressProfile } from '../register-address.mapper.profile';
+import { RequestWithUser } from '../../../common/interfaces/jwt';
 
 describe('RegisterAddressController', () => {
   let controller: RegisterAddressController;
@@ -58,7 +59,9 @@ describe('RegisterAddressController', () => {
     it('should call service registerBlockchainAddress method with proper fields set', async () => {
       const dto = registerAddressDtoFixture;
       const command = registerAddressCommandFixture;
-      await controller.registerAddress(dto, REGISTER_ADDRESS_TOKEN);
+      await controller.registerAddress(dto, {
+        token: REGISTER_ADDRESS_TOKEN,
+      } as RequestWithUser);
       expect(service.registerBlockchainAddress).toHaveBeenCalledWith(command);
     });
   });
