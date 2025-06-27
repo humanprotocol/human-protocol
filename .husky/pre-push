@@ -2,4 +2,9 @@
 . "$(dirname -- "$0")/_/husky.sh"
 
 echo "Running typecheck before push..."
-yarn workspaces foreach --all -p run typecheck 
+
+if ! yarn workspaces foreach --all -p run typecheck 2>&1; then
+  echo ""
+  echo "Typecheck failed! Please fix the errors above before pushing."
+  exit 1
+fi
