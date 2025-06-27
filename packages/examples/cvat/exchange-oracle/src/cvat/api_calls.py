@@ -289,6 +289,18 @@ def get_project_annotations(
             raise
 
 
+def get_project_labels(cvat_project_id: int) -> list[models.Label]:
+    logger = logging.getLogger("app")
+    with get_api_client() as api_client:
+        try:
+            (labels, _) = api_client.labels_api.list(project_id=cvat_project_id)
+            return labels["results"]
+
+        except exceptions.ApiException as e:
+            logger.exception(f"Exception when calling labels_api.list: {e}\n")
+            raise
+
+
 def create_cvat_webhook(project_id: int) -> models.WebhookRead:
     logger = logging.getLogger("app")
     with get_api_client() as api_client:
@@ -651,6 +663,50 @@ def clear_job_annotations(job_id: int) -> None:
             raise
 
 
+def create_gt_job(task_id: int, frame_count: int):
+    logger = logging.getLogger("app")
+    with get_api_client() as api_client:
+        job_write_request = models.JobWriteRequest(
+            type="ground_truth",
+            task_id=task_id,
+            frame_count=frame_count,
+            frame_selection_method="random_uniform",
+        )
+        try:
+            thread = api_client.jobs_api.create(job_write_request, _async_call=True)
+            return 
+
+        except exceptions.ApiException as e:
+            logger.exception(f"Exception when calling jobs_api.create: {e}\n")
+            raise
+
+
+def get_gt_job_create_status(cvat_id: int) -> tuple[UploadStatus | None, str]:
+    logger = logging.getLogger("app")
+
+    with get_api_client() as api_client:
+        try:
+            (status, _) = api_client.tasks_api.retrieve_gt_status(cvat_id)
+            return UploadStatus(status.state.value), status.message
+        except exceptions.ApiException as e:
+            if e.status == 404:
+                return None, e.body
+
+            logger.exception(f"Exception when calling ProjectsApi.list(): {e}\n")
+            raise
+
+def create_gt_job_annotations(job_id: int, shapes) -> None:
+    logger = logging.getLogger("app")
+    with get_api_client() as api_client:
+        try:
+            patched_labeled_data_request = models.PatchedLabeledDataRequest(shapes=shapes)
+            (_, response) = api_client.jobs_api.partial_update_annotations("create", job_id, patched_labeled_data_request = patched_labeled_data_request)
+            return
+        except exceptions.ApiException as e:
+            logger.exception(f"Exception when calling jobs_api.create_annotations: {e}\n")
+            raise
+
+
 def get_gt_job(task_id: int) -> models.JobRead:
     logger = logging.getLogger("app")
 
@@ -759,23 +815,32 @@ def get_quality_control_settings(task_id: int) -> models.QualitySettings:
 def update_quality_control_settings(
     settings_id: int,
     *,
-    target_metric_threshold: float,
-    target_metric: str = "accuracy",
-    max_validations_per_job: int = Config.cvat_config.max_validation_checks,
-    iou_threshold: float = Config.cvat_config.iou_threshold,
+    target_metric_threshold: float | None = None,
+    target_metric: str | None = None,
+    max_validations_per_job: int | None = None,
+    iou_threshold: float | None = None,
     oks_sigma: float | None = None,
     point_size_base: str | None = None,
     empty_is_annotated: bool | None = None,
+    cer_threshold: float | None = None,
+    wer_threshold: float | None = None,
 ) -> None:
     logger = logging.getLogger("app")
 
-    params = {
-        "max_validations_per_job": max_validations_per_job,
-        "target_metric": target_metric,
-        "target_metric_threshold": target_metric_threshold,
-        "iou_threshold": iou_threshold,
-        "low_overlap_threshold": iou_threshold,  # used only for warnings
-    }
+    params = {}
+
+    if max_validations_per_job is not None:
+        params["max_validations_per_job"] = max_validations_per_job
+    
+    if target_metric is not None:
+        params["target_metric"] = target_metric
+    
+    if target_metric_threshold is not None:
+        params["target_metric_threshold"] = target_metric_threshold
+    
+    if iou_threshold is not None:
+        params["iou_threshold"] = iou_threshold
+        params["low_overlap_threshold"] = iou_threshold 
 
     if oks_sigma is not None:
         params["oks_sigma"] = oks_sigma
@@ -785,6 +850,12 @@ def update_quality_control_settings(
 
     if empty_is_annotated is not None:
         params["empty_is_annotated"] = empty_is_annotated
+
+    if cer_threshold is not None:
+        params["cer_threshold"] = cer_threshold
+    
+    if wer_threshold is not None:
+        params["wer_threshold"] = wer_threshold
 
     with get_api_client() as api_client:
         try:

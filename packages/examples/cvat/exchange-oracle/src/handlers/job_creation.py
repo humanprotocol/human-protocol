@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import math
 import os
 import random
@@ -18,7 +19,7 @@ import cv2
 import datumaro as dm
 import numpy as np
 from datumaro.util import filter_dict, take_by
-from datumaro.util.annotation_util import BboxCoords, bbox_iou
+from datumaro.util.annotation_util import BboxCoords, Shape, bbox_iou
 from datumaro.util.image import IMAGE_EXTENSIONS, decode_image, encode_image
 
 import src.core.tasks.boxes_from_points as boxes_from_points_task
@@ -2860,6 +2861,116 @@ class AudinoTaskBuilder:
                 file_data,
             )
 
+    def _setup_quality_settings(self, task_id: int, **overrides) -> None:
+        settings = cvat_api.get_quality_control_settings(task_id)
+
+        values = {
+            "cer_threshold": self.manifest.validation.min_quality,
+            "wer_threshold": self.manifest.validation.min_quality,
+        }
+        values.update(**overrides)
+        cvat_api.update_quality_control_settings(settings.id, **values)
+
+    def _wait_task_creation(self, task_id: int) -> cvat_api.UploadStatus:
+        while True:
+            task_status, _ = cvat_api.get_task_upload_status(task_id)
+            if task_status not in [cvat_api.UploadStatus.STARTED, cvat_api.UploadStatus.QUEUED]:
+                return task_status
+
+            sleep(Config.cvat_config.task_creation_check_interval)
+
+    def _wait_gt_job_creation(self, task_id: int) -> cvat_api.UploadStatus:
+        while True:
+            gt_job_status, _ = cvat_api.get_gt_job_create_status(task_id)
+            if gt_job_status not in [cvat_api.UploadStatus.STARTED, cvat_api.UploadStatus.QUEUED]:
+                return gt_job_status
+
+            sleep(Config.cvat_config.gt_job_creation_check_interval)
+
+    def _setup_gt_job_for_audino_task(self, task_id, gt_file_data: bytes):
+        task_status = self._wait_task_creation(task_id)
+        if task_status != cvat_api.UploadStatus.FINISHED:
+            raise RuntimeError(
+                f"Task creation with Jobs for ID {task_id} did not finish successfully. "
+                f"Current status: {task_status}"
+            )
+            
+        cvat_task = cvat_api.get_task(task_id)
+
+        cvat_api.create_gt_job(task_id, cvat_task.size // 10)
+
+        gt_job_status = self._wait_gt_job_creation(task_id)
+        if gt_job_status != cvat_api.UploadStatus.FINISHED:
+            raise RuntimeError(
+                f"GT job creation for task {task_id} did not finish successfully. "
+                f"Current status: {gt_job_status}"
+            )
+        
+        gt_job = cvat_api.get_gt_job(task_id)
+        labels = cvat_api.get_project_labels(cvat_task.project_id)
+        
+        gt_annotations = json.loads(gt_file_data)["annotations"]
+
+        label_name_to_id_map = {}
+        attribute_name_to_spec_id_map = {}
+        shapes = []
+        
+        for label_data in labels:
+            label_name_to_id_map[label_data['name']] = label_data['id']
+            for attr_data in label_data.get('attributes', []):
+                attribute_name_to_spec_id_map[attr_data['name']] = attr_data['id']
+
+        def get_label_id_from_name(label_name: str) -> int:
+            label_id = label_name_to_id_map.get(label_name)
+            if label_id is None:
+                raise ValueError(f"Label '{label_name}' not found in project labels. Available labels: {list(label_name_to_id_map.keys())}")
+            return label_id
+
+        def get_attribute_spec_id_from_name(attribute_name: str) -> int:
+            spec_id = attribute_name_to_spec_id_map.get(attribute_name)
+            if spec_id is None:
+                raise ValueError(f"Attribute spec '{attribute_name}' not found in project attributes. Available attributes: {list(attribute_name_to_spec_id_map.keys())}")
+            return spec_id
+
+        for annotation in gt_annotations:
+            transformed_item = {}
+            transformed_item['job'] = gt_job.id
+            transformed_item['frame'] = annotation.get('frame', 0)
+            transformed_item['transcript'] = annotation.get('text', '')
+            transformed_item['gender'] = annotation.get('gender', '')
+            transformed_item['age'] = annotation.get('age', '')
+            transformed_item['locale'] = annotation.get('locale', '')
+            transformed_item['accent'] = annotation.get('accent', '')
+            transformed_item['emotion'] = annotation.get('emotion', '')
+
+            # Map 'label' name to 'label_id'
+            transformed_item['label_id'] = get_label_id_from_name(annotation['label'])
+
+            # ShapeSerializer Fields
+            transformed_item['type'] = 'rectangle'
+            transformed_item['points'] = [
+                float(annotation['start']),
+                float(annotation['start']),
+                float(annotation['end']),
+                float(annotation['end']),
+            ]
+            transformed_item['attributes'] = []
+            # attr_name = annotation.get('attribute_1_name')
+            # attr_value = annotation.get('attribute_1_value')
+
+            # if attr_name and attr_value is not None:
+            #     # Map attribute name to spec_id using the prepared map
+            #     attr_spec_id = get_attribute_spec_id_from_name(attr_name)
+            #     transformed_item['attributes'].append({
+            #         "spec_id": attr_spec_id,
+            #         "value": str(attr_value)
+            #     })
+
+            shapes.append(transformed_item)
+
+        cvat_api.create_gt_job_annotations(gt_job.id, shapes)
+        cvat_api.finish_gt_job(gt_job.id)
+
     @classmethod
     def _make_cloud_storage_client(cls, bucket_info: BucketAccessInfo) -> StorageClient:
         return cloud_service.make_client(bucket_info)
@@ -2959,6 +3070,10 @@ class AudinoTaskBuilder:
                 use_cache=False,
                 use_zip_chunks=False,
             )
+
+            # Create gt job for the task
+            self._setup_gt_job_for_audino_task(cvat_task.id, gt_file_data)
+            self._setup_quality_settings(cvat_task.id)
 
             db_service.create_data_upload(session, cvat_task.id)
 

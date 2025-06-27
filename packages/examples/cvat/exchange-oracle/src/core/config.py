@@ -166,6 +166,7 @@ class CvatConfig:
     image_quality = int(getenv("CVAT_IMAGE_QUALITY", 70))
     max_jobs_per_task = int(getenv("CVAT_MAX_JOBS_PER_TASK", 1000))
     task_creation_check_interval = int(getenv("CVAT_TASK_CREATION_CHECK_INTERVAL", 5))
+    gt_job_creation_check_interval = int(getenv("CVAT_GT_JOB_CREATION_CHECK_INTERVAL", 5))
 
     export_timeout = int(getenv("CVAT_EXPORT_TIMEOUT", 5 * 60))
     "Timeout, in seconds, for annotations or dataset export waiting"
