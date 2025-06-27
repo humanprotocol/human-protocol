@@ -5,5 +5,3 @@ if ! yarn workspaces foreach --all -p run typecheck; then
   echo "Typecheck failed! Please fix the errors above before pushing."
   exit 1
 fi
-
-echo "Typecheck passed! Ready to push."
