@@ -8,7 +8,7 @@
     "artifacts/@openzeppelin/**/[^.]*.json",
     "artifacts/contracts/**/[^.]*.json",
     "typechain-types/**/*.ts",
-    "dist/typechain-types"
+    "dist/typechain-types/**"
   ],
   "scripts": {
     "clean": "yarn clean:compile && yarn clean:build",
