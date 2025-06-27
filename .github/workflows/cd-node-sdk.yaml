@@ -23,14 +23,14 @@ jobs:
         run: yarn install --immutable
       - name: Build core package
         run: yarn build:core
-      - name: Change Node.js SDK version
+      - name: Change Node.js SDK version from release tag
         uses: jossef/action-set-json-field@v2
         if: ${{ github.event_name != 'workflow_dispatch' }}
         with:
           file: ./packages/sdk/typescript/human-protocol-sdk/package.json
           field: version
           value: ${{ github.event.release.tag_name }}
-      - name: Change Node.js SDK version
+      - name: Change Node.js SDK version from workflow input
         uses: jossef/action-set-json-field@v2
         if: ${{ github.event_name == 'workflow_dispatch' }}
         with:
@@ -38,11 +38,8 @@ jobs:
           field: version
           value: ${{ github.event.inputs.release_version }}
       - name: Build SDK package
-        run: yarn build
-        working-directory: ./packages/sdk/typescript/human-protocol-sdk
-      - uses: JS-DevTools/npm-publish@v3
-        name: Publish
-        with:
-          package: ./packages/sdk/typescript/human-protocol-sdk/package.json
-          access: public
-          token: ${{ secrets.NPM_TOKEN }}
+        run: yarn workspace @human-protocol/sdk build
+      - name: Publish package
+        run: yarn workspace @human-protocol/sdk npm publish --access public
+        env:
+          YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
