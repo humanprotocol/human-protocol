@@ -1,6 +1,3 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
 echo "Running typecheck before push..."
 
 if ! yarn workspaces foreach --all -p run typecheck; then
