@@ -96,6 +96,7 @@ const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
         CACHE_TTL_DAILY_HMT_SPENT: Joi.number(),
         CACHE_TTL_HCAPTCHA_USER_STATS: Joi.number(),
         CACHE_TTL_ORACLE_DISCOVERY: Joi.number(),
+        CACHE_TTL_ORACLE_AVAILABLE_JOBS: Joi.number(),
         JOB_ASSIGNMENTS_DATA_RETENTION_DAYS: Joi.number(),
         CACHE_TTL_EXCHANGE_ORACLE_URL: Joi.number(),
         CACHE_TTL_EXCHANGE_ORACLE_REGISTRATION_NEEDED: Joi.number(),
