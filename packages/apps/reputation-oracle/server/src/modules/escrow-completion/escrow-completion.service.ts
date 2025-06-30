@@ -7,7 +7,6 @@ import {
   OperatorUtils,
 } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
-import { ModuleRef } from '@nestjs/core';
 
 import crypto from 'crypto';
 import { ethers } from 'ethers';
@@ -61,7 +60,12 @@ export class EscrowCompletionService {
     private readonly storageService: StorageService,
     private readonly outgoingWebhookService: OutgoingWebhookService,
     private readonly reputationService: ReputationService,
-    private readonly moduleRef: ModuleRef,
+    private readonly audinoResultsProcessor: AudinoResultsProcessor,
+    private readonly cvatResultsProcessor: CvatResultsProcessor,
+    private readonly fortuneResultsProcessor: FortuneResultsProcessor,
+    private readonly audinoPayoutsCalculator: AudinoPayoutsCalculator,
+    private readonly cvatPayoutsCalculator: CvatPayoutsCalculator,
+    private readonly fortunePayoutsCalculator: FortunePayoutsCalculator,
   ) {}
 
   async createEscrowCompletion(
@@ -437,15 +441,15 @@ export class EscrowCompletionService {
     jobRequestType: JobRequestType,
   ): EscrowResultsProcessor {
     if (manifestUtils.isFortuneJobType(jobRequestType)) {
-      return this.moduleRef.get(FortuneResultsProcessor);
+      return this.fortuneResultsProcessor;
     }
 
     if (manifestUtils.isCvatJobType(jobRequestType)) {
-      return this.moduleRef.get(CvatResultsProcessor);
+      return this.cvatResultsProcessor;
     }
 
     if (manifestUtils.isAudinoJobType(jobRequestType)) {
-      return this.moduleRef.get(AudinoResultsProcessor);
+      return this.audinoResultsProcessor;
     }
 
     throw new Error(
@@ -457,15 +461,15 @@ export class EscrowCompletionService {
     jobRequestType: JobRequestType,
   ): EscrowPayoutsCalculator {
     if (manifestUtils.isFortuneJobType(jobRequestType)) {
-      return this.moduleRef.get(FortunePayoutsCalculator);
+      return this.fortunePayoutsCalculator;
     }
 
     if (manifestUtils.isCvatJobType(jobRequestType)) {
-      return this.moduleRef.get(CvatPayoutsCalculator);
+      return this.cvatPayoutsCalculator;
     }
 
     if (manifestUtils.isAudinoJobType(jobRequestType)) {
-      return this.moduleRef.get(AudinoPayoutsCalculator);
+      return this.audinoPayoutsCalculator;
     }
 
     throw new Error(
