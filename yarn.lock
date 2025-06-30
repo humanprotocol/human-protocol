@@ -4017,7 +4017,7 @@ __metadata:
     "@mui/icons-material": "npm:^7.0.1"
     "@mui/material": "npm:^5.16.7"
     "@types/react": "npm:^18.3.12"
-    dotenv: "npm:^16.3.2"
+    dotenv: "npm:^17.0.0"
     eslint: "npm:^8.55.0"
     eslint-config-react-app: "npm:^7.0.1"
     eslint-import-resolver-typescript: "npm:^3.7.0"
@@ -4131,7 +4131,7 @@ __metadata:
     body-parser: "npm:^1.20.3"
     class-transformer: "npm:^0.5.1"
     class-validator: "npm:0.14.1"
-    dotenv: "npm:^16.3.2"
+    dotenv: "npm:^17.0.0"
     eslint: "npm:^8.55.0"
     eslint-config-prettier: "npm:^9.1.0"
     eslint-plugin-prettier: "npm:^5.2.1"
@@ -4177,7 +4177,7 @@ __metadata:
     body-parser: "npm:^1.20.2"
     class-transformer: "npm:^0.5.1"
     class-validator: "npm:0.14.1"
-    dotenv: "npm:^16.3.2"
+    dotenv: "npm:^17.0.0"
     eslint: "npm:^8.55.0"
     helmet: "npm:^7.1.0"
     jest: "npm:^29.7.0"
@@ -4416,7 +4416,7 @@ __metadata:
     class-transformer: "npm:^0.5.1"
     class-validator: "npm:0.14.1"
     decimal.js: "npm:^10.4.3"
-    dotenv: "npm:^16.3.2"
+    dotenv: "npm:^17.0.0"
     eslint: "npm:^8.55.0"
     eslint-config-prettier: "npm:^9.1.0"
     eslint-plugin-prettier: "npm:^5.2.1"
@@ -4489,7 +4489,7 @@ __metadata:
     body-parser: "npm:^1.20.3"
     class-transformer: "npm:^0.5.1"
     class-validator: "npm:^0.14.1"
-    dotenv: "npm:^16.3.2"
+    dotenv: "npm:^17.0.0"
     eslint: "npm:^8.55.0"
     eslint-config-prettier: "npm:^9.1.0"
     eslint-plugin-prettier: "npm:^5.2.1"
@@ -16028,10 +16028,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dotenv@npm:^16.3.2, dotenv@npm:^16.4.5, dotenv@npm:^16.4.7, dotenv@npm:^16.5.0":
+"dotenv@npm:^16.4.5, dotenv@npm:^16.4.7":
   version: 16.5.0
   resolution: "dotenv@npm:16.5.0"
   checksum: 10c0/5bc94c919fbd955bf0ba44d33922a1e93d1078e64a1db5c30faeded1d996e7a83c55332cb8ea4fae5a9ca4d0be44cbceb95c5811e70f9f095298df09d1997dd9
+  languageName: node
+  linkType: hard
+
+"dotenv@npm:^17.0.0":
+  version: 17.0.0
+  resolution: "dotenv@npm:17.0.0"
+  checksum: 10c0/961c9841529f691efb0547cf20b62c952b40e195ef23a254e6b3cd2487bd529b29e194ffcb1f97d4e6a0d9c2df9a6555464f2491da10e725c7bc40855c7b45af
   languageName: node
   linkType: hard
 
@@ -18430,7 +18437,7 @@ __metadata:
     "@nestjs/common": "npm:^10.2.7"
     "@types/xml2js": "npm:^0.4.14"
     axios: "npm:^1.7.2"
-    dotenv: "npm:^16.5.0"
+    dotenv: "npm:^17.0.0"
     eslint: "npm:^8.55.0"
     jest: "npm:^29.7.0"
     typescript: "npm:^5.8.3"

@@ -53,7 +53,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "0.14.1",
     "decimal.js": "^10.4.3",
-    "dotenv": "^16.3.2",
+    "dotenv": "^17.0.0",
     "helmet": "^7.1.0",
     "joi": "^17.13.3",
     "json-stable-stringify": "^1.2.1",
