@@ -46,6 +46,10 @@ export class OracleDiscoveryController {
     const command = this.mapper.map(query, GetOraclesQuery, GetOraclesCommand);
     const oracles = await this.oracleDiscoveryService.getOracles(command);
 
+    if (process.env.NODE_ENV !== 'production') {
+      return oracles;
+    }
+
     const isAudinoAvailableForUser = (req?.user?.qualifications ?? []).includes(
       'audino',
     );
