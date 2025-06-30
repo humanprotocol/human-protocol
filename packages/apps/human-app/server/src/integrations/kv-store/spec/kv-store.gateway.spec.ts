@@ -1,19 +1,12 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { KvStoreGateway } from '../kv-store.gateway';
-import { ChainId, KVStoreKeys, KVStoreUtils } from '@human-protocol/sdk';
-import { EnvironmentConfigService } from '../../../common/config/environment-config.service';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
-import { ORACLE_URL_CACHE_KEY } from '../../../common/constants/cache';
-
-const EXPECTED_URL = 'https://example.com';
 jest.mock('@human-protocol/sdk', () => {
   const actualSdk = jest.requireActual('@human-protocol/sdk');
+  const mockedSdk = jest.createMockFromModule<
+    typeof import('@human-protocol/sdk')
+  >('@human-protocol/sdk');
+
   return {
     ...actualSdk,
-    KVStoreUtils: {
-      get: jest.fn().mockResolvedValue('https://example.com'),
-    },
+    KVStoreUtils: mockedSdk.KVStoreUtils,
   };
 });
 
@@ -26,6 +19,7 @@ jest.mock('ethers', () => {
       }),
     },
   };
+
   return {
     ...actualEthers,
     ethers: {
@@ -35,10 +29,23 @@ jest.mock('ethers', () => {
   };
 });
 
+import { ChainId, KVStoreKeys, KVStoreUtils } from '@human-protocol/sdk';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Test, TestingModule } from '@nestjs/testing';
+
+import { Cache } from 'cache-manager';
+
+import { KvStoreGateway } from '../kv-store.gateway';
+import { EnvironmentConfigService } from '../../../common/config/environment-config.service';
+import { ORACLE_URL_CACHE_KEY } from '../../../common/constants/cache';
+
+const EXPECTED_URL = 'https://example.com';
+
+const mockedKvStoreUtils = jest.mocked(KVStoreUtils);
+
 describe('KvStoreGateway', () => {
   let service: KvStoreGateway;
   let configService: EnvironmentConfigService;
-  let mockKVStoreUtils: any;
   let cacheManager: Cache & { get: jest.Mock; set: jest.Mock };
 
   beforeEach(async () => {
@@ -47,9 +54,6 @@ describe('KvStoreGateway', () => {
       cacheTtlExchangeOracleUrl: 2137,
     } as any;
 
-    mockKVStoreUtils = {
-      get: jest.fn(),
-    };
     const cacheManagerMock = {
       get: jest.fn(),
       set: jest.fn(),
@@ -62,35 +66,35 @@ describe('KvStoreGateway', () => {
           useValue: configService,
         },
         {
-          provide: KVStoreUtils,
-          useValue: mockKVStoreUtils,
-        },
-        {
           provide: CACHE_MANAGER,
           useValue: cacheManagerMock,
         },
       ],
     }).compile();
+
     cacheManager = module.get(CACHE_MANAGER);
     configService = module.get(EnvironmentConfigService);
     service = module.get<KvStoreGateway>(KvStoreGateway);
   });
 
   afterEach(async () => {
-    jest.restoreAllMocks();
     jest.clearAllMocks();
   });
+
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
+
   describe('getExchangeOracleUrlByAddress', () => {
     it('should get data from kvStoreUtils, if not cached', async () => {
       const testAddress = 'testAddress';
       const cacheKey = `${ORACLE_URL_CACHE_KEY}:${testAddress}`;
-      const expectedData = EXPECTED_URL;
-      mockKVStoreUtils.get.mockResolvedValue(expectedData);
+      const expectedUrl = EXPECTED_URL;
+      mockedKvStoreUtils.get.mockResolvedValue(expectedUrl + '/');
       cacheManager.get.mockResolvedValue(undefined);
+
       const result = await service.getExchangeOracleUrlByAddress(testAddress);
+
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
         ChainId.LOCALHOST,
         testAddress,
@@ -99,17 +103,19 @@ describe('KvStoreGateway', () => {
 
       expect(cacheManager.set).toHaveBeenCalledWith(
         cacheKey,
-        expectedData,
+        expectedUrl,
         configService.cacheTtlExchangeOracleUrl,
       );
       expect(cacheManager.get).toHaveBeenCalledWith(cacheKey);
-      expect(result).toBe(expectedData);
+      expect(result).toBe(expectedUrl);
     });
+
     it('should get data from cache, if available', async () => {
       const testAddress = 'testAddress';
       const cacheKey = `${ORACLE_URL_CACHE_KEY}:${testAddress}`;
       const expectedData = EXPECTED_URL;
       cacheManager.get.mockResolvedValue(expectedData);
+
       const result = await service.getExchangeOracleUrlByAddress(testAddress);
 
       expect(KVStoreUtils.get).not.toHaveBeenCalled();
