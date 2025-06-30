@@ -1,30 +1,24 @@
+import { Mapper } from '@automapper/core';
+import { InjectMapper } from '@automapper/nestjs';
 import {
   Controller,
   Get,
   HttpException,
   HttpStatus,
   Query,
-  UsePipes,
-  ValidationPipe,
+  Request,
 } from '@nestjs/common';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { EnvironmentConfigService } from '../../common/config/environment-config.service';
+import { RequestWithUser } from '../../common/interfaces/jwt';
 import {
-  ApiBearerAuth,
-  ApiOkResponse,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
-import { OracleDiscoveryService } from './oracle-discovery.service';
-import {
+  DiscoveredOracle,
   GetOraclesCommand,
   GetOraclesQuery,
-  DiscoveredOracle,
 } from './model/oracle-discovery.model';
-import { InjectMapper } from '@automapper/nestjs';
-import { Mapper } from '@automapper/core';
-import { EnvironmentConfigService } from '../../common/config/environment-config.service';
-import { JwtPayload } from '../../common/config/params-decorators';
-import { JwtUserData } from '../../common/utils/jwt-token.model';
+import { OracleDiscoveryService } from './oracle-discovery.service';
 
+@ApiTags('Oracle-Discovery')
 @Controller()
 export class OracleDiscoveryController {
   constructor(
@@ -33,17 +27,14 @@ export class OracleDiscoveryController {
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
 
-  @ApiTags('Oracle-Discovery')
-  @ApiBearerAuth()
   @Get('/oracles')
   @ApiOperation({ summary: 'Oracles discovery' })
   @ApiOkResponse({
     type: Array<DiscoveredOracle>,
     description: 'List of oracles',
   })
-  @UsePipes(new ValidationPipe())
   public async getOracles(
-    @JwtPayload() jwtPayload: JwtUserData,
+    @Request() req: RequestWithUser,
     @Query() query: GetOraclesQuery,
   ): Promise<DiscoveredOracle[]> {
     if (!this.environmentConfigService.jobsDiscoveryFlag) {
@@ -55,8 +46,13 @@ export class OracleDiscoveryController {
     const command = this.mapper.map(query, GetOraclesQuery, GetOraclesCommand);
     const oracles = await this.oracleDiscoveryService.getOracles(command);
 
-    const isAudinoAvailableForUser =
-      jwtPayload.qualifications.includes('audino');
+    if (process.env.NODE_ENV !== 'production') {
+      return oracles;
+    }
+
+    const isAudinoAvailableForUser = (req?.user?.qualifications ?? []).includes(
+      'audino',
+    );
 
     /**
      * TODO: remove filtering logic when Audino available for everyone
