@@ -10,12 +10,6 @@ export interface IOperator {
   id: string;
   chainId: ChainId;
   address: string;
-  amountStaked: bigint;
-  amountLocked: bigint;
-  lockedUntilTimestamp: bigint;
-  amountWithdrawn: bigint;
-  amountSlashed: bigint;
-  reward: bigint;
   amountJobsProcessed: bigint;
   role?: string;
   fee?: bigint;
@@ -207,4 +201,31 @@ export interface IWorkersFilter extends IPagination {
   chainId: ChainId;
   address?: string;
   orderBy?: string;
+}
+
+export interface IStaker {
+  address: string;
+  stakedAmount: bigint;
+  lockedAmount: bigint;
+  lockedUntil: bigint;
+  withdrawableAmount: bigint;
+  slashedAmount: bigint;
+}
+
+export interface IStakersFilter extends IPagination {
+  chainId: ChainId;
+  minStakedAmount?: string;
+  maxStakedAmount?: string;
+  minLockedAmount?: string;
+  maxLockedAmount?: string;
+  minWithdrawnAmount?: string;
+  maxWithdrawnAmount?: string;
+  minSlashedAmount?: string;
+  maxSlashedAmount?: string;
+  orderBy?:
+    | 'stakedAmount'
+    | 'lockedAmount'
+    | 'withdrawnAmount'
+    | 'slashedAmount'
+    | 'lastDepositTimestamp';
 }

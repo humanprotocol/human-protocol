@@ -5,12 +5,6 @@ const LEADER_FRAGMENT = gql`
   fragment OperatorFields on Operator {
     id
     address
-    amountStaked
-    amountLocked
-    lockedUntilTimestamp
-    amountWithdrawn
-    amountSlashed
-    reward
     amountJobsProcessed
     role
     fee

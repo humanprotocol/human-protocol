@@ -8,6 +8,7 @@ from human_protocol_sdk.filter import (
     PayoutFilter,
     StatisticsFilter,
     WorkerFilter,
+    StakersFilter,
 )
 from human_protocol_sdk.statistics import (
     StatisticsClient,
@@ -15,6 +16,7 @@ from human_protocol_sdk.statistics import (
 )
 from human_protocol_sdk.operator import OperatorUtils, OperatorFilter
 from human_protocol_sdk.agreement import agreement
+from human_protocol_sdk.staking.staking_utils import StakingUtils
 
 
 def get_escrow_statistics(statistics_client: StatisticsClient):
@@ -176,6 +178,23 @@ def agreement_example():
     print(agreement_report)
 
 
+def get_stakers_example():
+    stakers = StakingUtils.get_stakers(
+        StakersFilter(
+            chain_id=ChainId.POLYGON_AMOY,
+            order_by="lastDepositTimestamp",
+            order_direction=OrderDirection.ASC,
+        )
+    )
+    print("Filtered stakers:", len(stakers))
+
+    if stakers:
+        staker = StakingUtils.get_staker(ChainId.LOCALHOST, stakers[0].address)
+        print("Staker info:", staker.address)
+    else:
+        print("No stakers found.")
+
+
 if __name__ == "__main__":
     statistics_client = StatisticsClient()
 
@@ -195,3 +214,4 @@ if __name__ == "__main__":
 
     agreement_example()
     get_workers()
+    get_stakers_example()

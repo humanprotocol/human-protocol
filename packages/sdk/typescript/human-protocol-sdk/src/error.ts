@@ -171,6 +171,11 @@ export const ErrorProviderDoesNotExist = new Error('Provider does not exist');
 export const ErrorUnsupportedChainID = new Error('Unsupported chain ID');
 
 /**
+ * @constant {Error} - Staker not found.
+ */
+export const ErrorStakerNotFound = new Error('Staker not found');
+
+/**
  * @constant {Error} - Sending a transaction requires a signer.
  */
 export const ErrorSigner = new Error('Signer required');

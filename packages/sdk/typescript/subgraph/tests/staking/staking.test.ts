@@ -9,14 +9,13 @@ import {
   dataSourceMock,
 } from 'matchstick-as/assembly';
 
-import { Escrow } from '../../generated/schema';
+import { Escrow, Staker } from '../../generated/schema';
 import {
   handleStakeDeposited,
   handleStakeLocked,
   handleStakeSlashed,
   handleStakeWithdrawn,
   handleFeeWithdrawn,
-  STATISTICS_ENTITY_ID,
   TOKEN_ADDRESS,
 } from '../../src/mapping/Staking';
 import { toEventId } from '../../src/mapping/utils/event';
@@ -28,6 +27,8 @@ import {
   createStakeSlashedEvent,
   createStakeWithdrawnEvent,
 } from './fixtures';
+import { createOrLoadOperator } from '../../src/mapping/KVStore';
+import { log } from 'matchstick-as/assembly/log';
 
 const stakingAddressString = '0xa16081f360e3847006db660bae1c6d1b2e17ffaa';
 const escrow1AddressString = '0xD979105297fB0eee83F7433fC09279cb5B94fFC7';
@@ -147,25 +148,17 @@ describe('Staking', () => {
     );
     assert.fieldEquals('StakeDepositedEvent', id2, 'amount', '200');
 
-    // Operator statistics
-    assert.fieldEquals(
-      'OperatorStatistics',
-      STATISTICS_ENTITY_ID.toHex(),
-      'operators',
-      '2'
-    );
-
     // Operator
     assert.fieldEquals(
-      'Operator',
+      'Staker',
       data1.params.staker.toHex(),
-      'amountStaked',
+      'stakedAmount',
       '100'
     );
     assert.fieldEquals(
-      'Operator',
+      'Staker',
       data2.params.staker.toHex(),
-      'amountStaked',
+      'stakedAmount',
       '200'
     );
 
@@ -206,6 +199,14 @@ describe('Staking', () => {
       'token',
       TOKEN_ADDRESS.toHexString()
     );
+
+    assert.fieldEquals(
+      'Staker',
+      data1.params.staker.toHex(),
+      'address',
+      data1.params.staker.toHex()
+    );
+    assert.notInStore('Operator', data1.params.staker.toHex());
   });
 
   test('Should properly index StakeLocked events', () => {
@@ -284,48 +285,40 @@ describe('Staking', () => {
     assert.fieldEquals('StakeLockedEvent', id2, 'amount', '100');
     assert.fieldEquals('StakeLockedEvent', id2, 'lockedUntilTimestamp', '31');
 
-    // Operator statistics
-    assert.fieldEquals(
-      'OperatorStatistics',
-      STATISTICS_ENTITY_ID.toHex(),
-      'operators',
-      '2'
-    );
-
     // Operator
     assert.fieldEquals(
-      'Operator',
+      'Staker',
       data1.params.staker.toHex(),
-      'amountStaked',
+      'stakedAmount',
       '100'
     );
     assert.fieldEquals(
-      'Operator',
+      'Staker',
       data1.params.staker.toHex(),
-      'amountLocked',
+      'lockedAmount',
       '50'
     );
     assert.fieldEquals(
-      'Operator',
+      'Staker',
       data1.params.staker.toHex(),
       'lockedUntilTimestamp',
       '30'
     );
 
     assert.fieldEquals(
-      'Operator',
+      'Staker',
       data2.params.staker.toHex(),
-      'amountStaked',
+      'stakedAmount',
       '200'
     );
     assert.fieldEquals(
-      'Operator',
+      'Staker',
       data2.params.staker.toHex(),
-      'amountLocked',
+      'lockedAmount',
       '100'
     );
     assert.fieldEquals(
-      'Operator',
+      'Staker',
       data2.params.staker.toHex(),
       'lockedUntilTimestamp',
       '31'
@@ -442,62 +435,54 @@ describe('Staking', () => {
     );
     assert.fieldEquals('StakeWithdrawnEvent', id2, 'amount', '100');
 
-    // Operator statistics
-    assert.fieldEquals(
-      'OperatorStatistics',
-      STATISTICS_ENTITY_ID.toHex(),
-      'operators',
-      '2'
-    );
-
     // Operator
     assert.fieldEquals(
-      'Operator',
+      'Staker',
       data1.params.staker.toHex(),
-      'amountStaked',
+      'stakedAmount',
       '70'
     );
     assert.fieldEquals(
-      'Operator',
+      'Staker',
       data1.params.staker.toHex(),
-      'amountLocked',
+      'lockedAmount',
       '20'
     );
     assert.fieldEquals(
-      'Operator',
+      'Staker',
       data1.params.staker.toHex(),
       'lockedUntilTimestamp',
       '30'
     );
     assert.fieldEquals(
-      'Operator',
+      'Staker',
       data1.params.staker.toHex(),
-      'amountWithdrawn',
+      'withdrawnAmount',
       '30'
     );
 
     assert.fieldEquals(
-      'Operator',
+      'Staker',
       data2.params.staker.toHex(),
-      'amountStaked',
+      'stakedAmount',
       '100'
     );
     assert.fieldEquals(
-      'Operator',
+      'Staker',
       data2.params.staker.toHex(),
-      'amountLocked',
+      'lockedAmount',
       '0'
     );
     assert.fieldEquals(
-      'Operator',
+      'Staker',
       data2.params.staker.toHex(),
       'lockedUntilTimestamp',
       '0'
     );
     assert.fieldEquals(
-      'Operator',
+      'Staker',
       data2.params.staker.toHex(),
-      'amountWithdrawn',
+      'withdrawnAmount',
       '100'
     );
 
@@ -640,74 +625,66 @@ describe('Staking', () => {
       data2.params.slashRequester.toHex()
     );
 
-    // Operator statistics
-    assert.fieldEquals(
-      'OperatorStatistics',
-      STATISTICS_ENTITY_ID.toHex(),
-      'operators',
-      '2'
-    );
-
     // Operator
     assert.fieldEquals(
-      'Operator',
+      'Staker',
       data1.params.staker.toHex(),
-      'amountStaked',
+      'stakedAmount',
       '60'
     );
     assert.fieldEquals(
-      'Operator',
+      'Staker',
       data1.params.staker.toHex(),
-      'amountLocked',
+      'lockedAmount',
       '20'
     );
     assert.fieldEquals(
-      'Operator',
+      'Staker',
       data1.params.staker.toHex(),
       'lockedUntilTimestamp',
       '30'
     );
     assert.fieldEquals(
-      'Operator',
+      'Staker',
       data1.params.staker.toHex(),
-      'amountWithdrawn',
+      'withdrawnAmount',
       '30'
     );
     assert.fieldEquals(
-      'Operator',
+      'Staker',
       data1.params.staker.toHex(),
-      'amountSlashed',
+      'slashedAmount',
       '10'
     );
 
     assert.fieldEquals(
-      'Operator',
+      'Staker',
       data2.params.staker.toHex(),
-      'amountStaked',
+      'stakedAmount',
       '90'
     );
     assert.fieldEquals(
-      'Operator',
+      'Staker',
       data2.params.staker.toHex(),
-      'amountLocked',
+      'lockedAmount',
       '0'
     );
     assert.fieldEquals(
-      'Operator',
+      'Staker',
       data2.params.staker.toHex(),
       'lockedUntilTimestamp',
       '0'
     );
     assert.fieldEquals(
-      'Operator',
+      'Staker',
       data2.params.staker.toHex(),
-      'amountWithdrawn',
+      'withdrawnAmount',
       '100'
     );
     assert.fieldEquals(
-      'Operator',
+      'Staker',
       data2.params.staker.toHex(),
-      'amountSlashed',
+      'slashedAmount',
       '10'
     );
 
@@ -797,6 +774,25 @@ describe('Staking', () => {
       data.transaction.hash.toHex(),
       'token',
       TOKEN_ADDRESS.toHexString()
+    );
+  });
+
+  test('Should associate Staker with Operator if Operator exists before staking', () => {
+    const stakerAddress = '0xD979105297fB0eee83F7433fC09279cb5B94fFC8';
+    const data = createStakeDepositedEvent(
+      stakerAddress,
+      100,
+      BigInt.fromI32(12)
+    );
+    createOrLoadOperator(Address.fromString(stakerAddress));
+
+    handleStakeDeposited(data);
+
+    assert.fieldEquals(
+      'Staker',
+      data.params.staker.toHex(),
+      'operator',
+      data.params.staker.toHex()
     );
   });
 });
