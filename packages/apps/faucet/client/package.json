@@ -17,7 +17,7 @@
   },
   "devDependencies": {
     "@types/react": "^18.3.12",
-    "dotenv": "^16.3.2",
+    "dotenv": "^17.0.0",
     "eslint": "^8.55.0",
     "eslint-config-react-app": "^7.0.1",
     "eslint-import-resolver-typescript": "^3.7.0",
