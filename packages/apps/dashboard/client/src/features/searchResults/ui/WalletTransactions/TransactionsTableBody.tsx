@@ -75,7 +75,11 @@ const TransactionsTableBody: FC<Props> = ({ data, isLoading, error }) => {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Box width={30}>
                   {elem.internalTransactions.length > 0 && (
-                    <IconButton onClick={() => toggleRow(idx)} size="small">
+                    <IconButton
+                      aria-label="Toggle row"
+                      onClick={() => toggleRow(idx)}
+                      size="small"
+                    >
                       {expandedRows[idx] ? (
                         <RemoveCircleIcon fontSize="medium" />
                       ) : (

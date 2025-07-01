@@ -53,7 +53,7 @@ const Header: FC = () => {
           height: { xs: 62, md: 82 },
         }}
       >
-        <Link to="/">
+        <Link to="/" aria-label="Home">
           <LogoBlockIcon sx={{ display: { xs: 'none', md: 'block' } }} />
           <LogoBlockIconMobile sx={{ display: { xs: 'block', md: 'none' } }} />
         </Link>
