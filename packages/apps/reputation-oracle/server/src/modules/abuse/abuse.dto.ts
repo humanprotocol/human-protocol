@@ -1,11 +1,6 @@
 import { ChainId } from '@human-protocol/sdk';
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsEthereumAddress,
-  IsString,
-  IsOptional,
-  MaxLength,
-} from 'class-validator';
+import { IsEthereumAddress, IsString, MaxLength } from 'class-validator';
 
 import { IsChainId } from '../../common/validators';
 import { AbuseStatus } from './constants';
