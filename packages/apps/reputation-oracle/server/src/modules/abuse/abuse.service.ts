@@ -42,6 +42,7 @@ export class AbuseService {
     abuseEntity.escrowAddress = data.escrowAddress;
     abuseEntity.chainId = data.chainId;
     abuseEntity.userId = data.userId;
+    abuseEntity.reason = data.reason;
     abuseEntity.status = AbuseStatus.PENDING;
     abuseEntity.retriesCount = 0;
     abuseEntity.waitUntil = new Date();
