@@ -24,6 +24,15 @@ export default defineConfig({
     commonjsOptions: {
       include: [/core/, /human-protocol-sdk/, /node_modules/],
     },
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+        unused: true,
+        dead_code: true,
+      },
+    },
   },
   server: {
     port: 3004,

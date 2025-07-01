@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { Stack } from '@mui/material';
+import Stack from '@mui/material/Stack';
 import { AxiosError } from 'axios';
 import { useLocation, useParams } from 'react-router-dom';
 

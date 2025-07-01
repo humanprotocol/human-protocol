@@ -1,4 +1,5 @@
-import { Chip, useTheme } from '@mui/material';
+import Chip from '@mui/material/Chip';
+import useTheme from '@mui/material/styles/useTheme';
 
 type Reputation = 'High' | 'Medium' | 'Low' | 'Unknown';
 

@@ -1,6 +1,6 @@
 import { FC, useEffect } from 'react';
 
-import { TablePagination as MuiTablePagination } from '@mui/material';
+import MuiTablePagination from '@mui/material/TablePagination';
 
 import useGlobalFiltersStore from '@/shared/store/useGlobalFiltersStore';
 

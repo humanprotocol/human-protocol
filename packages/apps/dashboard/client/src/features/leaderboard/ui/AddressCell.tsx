@@ -1,6 +1,6 @@
 import { FC } from 'react';
 
-import { ChainId } from '@human-protocol/sdk';
+import { ChainId } from '@human-protocol/sdk/src/enums';
 import Box from '@mui/material/Box';
 
 import AbbreviateClipboard from '@/shared/ui/AbbreviateClipboard';

@@ -1,4 +1,4 @@
-import { ChainId } from '@human-protocol/sdk';
+import { ChainId } from '@human-protocol/sdk/src/enums';
 
 import BinanceSmartChainIcon from '@/shared/ui/icons/BinanceSmartChainIcon';
 import EthereumIcon from '@/shared/ui/icons/EthereumIcon';

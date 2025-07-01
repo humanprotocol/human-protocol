@@ -1,4 +1,4 @@
-import { Tooltip, TooltipProps } from '@mui/material';
+import Tooltip, { TooltipProps } from '@mui/material/Tooltip';
 
 const CustomTooltip = (props: TooltipProps) => {
   return <Tooltip enterTouchDelay={0} {...props} />;

@@ -1,4 +1,4 @@
-import { useTheme } from '@mui/material';
+import useTheme from '@mui/material/styles/useTheme';
 // @ts-expect-error -- import error, but this type work property
 import { ContentRenderer } from 'recharts';
 

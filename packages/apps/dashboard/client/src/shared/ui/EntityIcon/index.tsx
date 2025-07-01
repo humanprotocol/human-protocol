@@ -1,4 +1,4 @@
-import { Role } from '@human-protocol/sdk';
+import { Role } from '@human-protocol/sdk/src/constants';
 
 import ExchangeOracleIcon from '@/shared/ui/icons/ExchangeOracleIcon';
 import HumanIcon from '@/shared/ui/icons/HumanIcon';

@@ -1,6 +1,6 @@
 import { FC, PropsWithChildren } from 'react';
 
-import { Launch as LaunchIcon } from '@mui/icons-material';
+import LaunchIcon from '@mui/icons-material/Launch';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { Link } from 'react-router-dom';

@@ -1,10 +1,10 @@
 import { FC } from 'react';
 
-import { TableRow } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 import Link from '@mui/material/Link';
 import MuiTableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
+import TableRow from '@mui/material/TableRow';
 
 import handleErrorMessage from '@/shared/lib/handleErrorMessage';
 import useGlobalFiltersStore from '@/shared/store/useGlobalFiltersStore';

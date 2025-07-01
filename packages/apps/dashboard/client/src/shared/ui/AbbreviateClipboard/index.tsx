@@ -1,8 +1,8 @@
 import { useState } from 'react';
 
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import { Link } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
+import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { useNavigate } from 'react-router-dom';

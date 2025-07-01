@@ -1,8 +1,9 @@
 import { FC, useEffect, useRef, useState } from 'react';
 
-import { Typography, useTheme } from '@mui/material';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
+import useTheme from '@mui/material/styles/useTheme';
+import Typography from '@mui/material/Typography';
 import dayjs, { Dayjs } from 'dayjs';
 import {
   CartesianGrid,
