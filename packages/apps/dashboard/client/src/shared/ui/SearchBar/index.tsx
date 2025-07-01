@@ -172,7 +172,11 @@ const SearchBar: FC = () => {
           ),
           endAdornment: inputValue && (
             <InputAdornment sx={endAdornmentInputAdornmentSx} position="end">
-              <IconButton onClick={handleClearClick} edge="end">
+              <IconButton
+                aria-label="Clear search"
+                onClick={handleClearClick}
+                edge="end"
+              >
                 <CloseIcon
                   sx={{
                     color: focus ? 'sky.main' : 'primary.main',

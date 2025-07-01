@@ -43,6 +43,7 @@ const Clipboard: FC<ClipboardProps> = ({ value }) => {
         </Typography>
 
         <IconButton
+          aria-label="Copy to clipboard"
           onClick={() => {
             navigator.clipboard.writeText(value);
             setTooltipOpen(true);

@@ -57,6 +57,7 @@ const AbbreviateClipboard = ({ value, link }: AbbreviateClipboardProps) => {
         )}
       </Typography>
       <IconButton
+        aria-label="Copy to clipboard"
         onClick={() => {
           navigator.clipboard.writeText(value);
           setTooltipOpen(true);
