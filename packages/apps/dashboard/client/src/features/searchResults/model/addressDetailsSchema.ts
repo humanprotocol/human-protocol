@@ -1,4 +1,4 @@
-import { Role } from '@human-protocol/sdk';
+import { Role } from '@human-protocol/sdk/src/constants';
 import { z } from 'zod';
 
 import { reputationSchema } from '@/features/leaderboard/model/leaderboardSchema';

@@ -1,10 +1,11 @@
 import { FC } from 'react';
 
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
-import { Grid, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
+import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 import { TooltipProps } from 'recharts';
 
 import FormattedNumber from '@/shared/ui/FormattedNumber';

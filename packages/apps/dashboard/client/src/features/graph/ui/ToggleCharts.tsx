@@ -1,8 +1,10 @@
 import { FC } from 'react';
 
-import { FormControlLabel, FormGroup, Typography } from '@mui/material';
 import Checkbox from '@mui/material/Checkbox';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import FormGroup from '@mui/material/FormGroup';
 import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 
 import FormattedNumber from '@/shared/ui/FormattedNumber';
 

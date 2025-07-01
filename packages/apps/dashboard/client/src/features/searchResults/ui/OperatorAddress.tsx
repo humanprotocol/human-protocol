@@ -1,6 +1,6 @@
 import { FC } from 'react';
 
-import { Role } from '@human-protocol/sdk';
+import { Role } from '@human-protocol/sdk/src/constants';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import Link from '@mui/material/Link';

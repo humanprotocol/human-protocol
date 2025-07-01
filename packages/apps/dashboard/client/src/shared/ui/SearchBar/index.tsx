@@ -2,21 +2,18 @@ import { FC, useCallback, useEffect, useState } from 'react';
 
 import CloseIcon from '@mui/icons-material/Close';
 import SearchIcon from '@mui/icons-material/Search';
-import {
-  InputAdornment,
-  TextField,
-  Select as MuiSelect,
-  SelectChangeEvent,
-  Grid,
-  MenuItem,
-  Box,
-  CircularProgress,
-  useTheme,
-} from '@mui/material';
+import Box from '@mui/material/Box';
+import CircularProgress from '@mui/material/CircularProgress';
+import Grid from '@mui/material/Grid';
 import IconButton from '@mui/material/IconButton';
-import clsx from 'clsx';
-import { useNavigate } from 'react-router-dom';
+import InputAdornment from '@mui/material/InputAdornment';
+import MenuItem from '@mui/material/MenuItem';
+import MuiSelect, { SelectChangeEvent } from '@mui/material/Select';
+import useTheme from '@mui/material/styles/useTheme';
+import TextField from '@mui/material/TextField';
+import { useLocation, useNavigate } from 'react-router-dom';
 
+import { ROUTES } from '@/app/config/routes';
 import useFilteredNetworks from '@/shared/api/useFilteredNetworks';
 import { useIsMobile } from '@/shared/hooks/useBreakpoints';
 import isValidEvmAddress from '@/shared/lib/isValidEvmAddress';
@@ -34,23 +31,16 @@ import {
   gridSx,
 } from './styles';
 
-type SearchBarProps = {
-  className?: string;
-  initialInputValue?: string;
-};
-
-const SearchBar: FC<SearchBarProps> = ({
-  className = '',
-  initialInputValue = '',
-}) => {
-  const isMobile = useIsMobile();
+const SearchBar: FC = () => {
+  const [inputValue, setInputValue] = useState('');
+  const [error, setError] = useState('');
+  const [focus, setFocus] = useState(false);
   const { filteredNetworks, isLoading } = useFilteredNetworks();
   const { address, chainId, setChainId, setAddress } = useGlobalFiltersStore();
   const navigate = useNavigate();
-  const [inputValue, setInputValue] = useState<string>(initialInputValue);
-  const [error, setError] = useState<string | null>(null);
-  const [focus, setFocus] = useState<boolean>(false);
+  const isMobile = useIsMobile();
   const theme = useTheme();
+  const location = useLocation();
 
   useEffect(() => {
     setInputValue(address);
@@ -77,11 +67,11 @@ const SearchBar: FC<SearchBarProps> = ({
     setInputValue(value);
 
     if (isValidEvmAddress(value)) {
-      setError(null);
+      setError('');
     } else if (value.length > 0) {
       setError('Invalid EVM address. Must start with 0x and be 42 characters.');
     } else {
-      setError(null);
+      setError('');
     }
   };
 
@@ -91,7 +81,7 @@ const SearchBar: FC<SearchBarProps> = ({
 
   const handleClearClick = () => {
     setInputValue('');
-    setError(null);
+    setError('');
   };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -99,7 +89,20 @@ const SearchBar: FC<SearchBarProps> = ({
     navigateToAddress();
   };
 
-  if (isLoading) return <CircularProgress />;
+  if (isLoading) {
+    const color =
+      location.pathname === ROUTES.HOME ? 'white.main' : 'primary.main';
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="60px"
+      >
+        <CircularProgress sx={{ color }} />
+      </Box>
+    );
+  }
 
   const renderEmptyValue = (
     <Box component="span" color="text.secondary">
@@ -121,7 +124,7 @@ const SearchBar: FC<SearchBarProps> = ({
   );
 
   return (
-    <form className={clsx(`search ${className}`)} onSubmit={handleSubmit}>
+    <form className="search" onSubmit={handleSubmit}>
       <TextField
         id="search-bar"
         placeholder="Search by Wallet/Escrow"

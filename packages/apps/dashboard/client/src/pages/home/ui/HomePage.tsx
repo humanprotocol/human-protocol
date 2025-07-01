@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, lazy } from 'react';
 
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import Box from '@mui/material/Box';
@@ -14,13 +14,14 @@ import HmtPrice from '@/features/home/ui/HmtPrice';
 import Holders from '@/features/home/ui/Holders';
 import TotalNumberOfTasks from '@/features/home/ui/TotalNumberOfTasks';
 import TotalTransactions from '@/features/home/ui/TotalTransactions';
-import Leaderboard from '@/features/leaderboard';
 import { useIsMobile } from '@/shared/hooks/useBreakpoints';
 import CustomTooltip from '@/shared/ui/CustomTooltip';
 import LeaderboardIcon from '@/shared/ui/icons/LeaderboardIcon';
 import SearchBar from '@/shared/ui/SearchBar';
 import ShadowIcon from '@/shared/ui/ShadowIcon';
 import PageWrapper from '@/widgets/page-wrapper';
+
+const Leaderboard = lazy(() => import('@/features/leaderboard'));
 
 const CardWrapper = styled(Grid)(({ theme }) => ({
   display: 'flex',
@@ -66,10 +67,10 @@ const HomePage: FC = () => {
 
   return (
     <PageWrapper violetHeader>
-      <Typography variant="h3" color="white.main">
+      <Typography variant="h3" color="white.main" mb={3}>
         All HUMAN activity. In one place.
       </Typography>
-      <SearchBar className="home-page-search" />
+      <SearchBar />
       <Grid container mt={{ xs: 6, md: 8 }} columnSpacing={3} rowSpacing={3}>
         <Grid xs={12} md={3}>
           <CardWrapper flexDirection="column" gap={3}>
