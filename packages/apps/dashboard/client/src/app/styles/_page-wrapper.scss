@@ -12,9 +12,14 @@
 	.container {
 		margin: auto;
 		padding: 30px 80px 100px;
+		min-height: calc(100vh - 82px);
 
 		@media (max-width: 1200px) {
 			padding: 24px 16px;
+		}
+
+		@media (max-width: 900px) {
+			min-height: calc(100vh - 62px);
 		}
 	}
 
