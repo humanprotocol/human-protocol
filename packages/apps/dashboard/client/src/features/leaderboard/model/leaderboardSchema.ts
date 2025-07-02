@@ -3,13 +3,13 @@ import { z } from 'zod';
 export const reputationSchema = z.unknown().transform((value) => {
   try {
     const knownReputation = z
-      .union([z.literal('Low'), z.literal('Medium'), z.literal('High')])
+      .union([z.literal('low'), z.literal('medium'), z.literal('high')])
       .parse(value);
 
     return knownReputation;
   } catch (error) {
     console.error(error);
-    return 'Unknown';
+    return 'unknown';
   }
 });
 
