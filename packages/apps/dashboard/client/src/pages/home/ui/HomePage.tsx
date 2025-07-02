@@ -28,7 +28,7 @@ const CardWrapper = styled(Grid)(({ theme }) => ({
   borderRadius: '16px',
   padding: '24px 32px',
   [theme.breakpoints.up('md')]: {
-    height: 300,
+    height: '100%',
   },
   [theme.breakpoints.down('md')]: {
     height: 'auto',
