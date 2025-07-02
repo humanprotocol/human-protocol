@@ -1,7 +1,7 @@
 import Chip from '@mui/material/Chip';
 import useTheme from '@mui/material/styles/useTheme';
 
-import { Reputation } from '@/features/leaderboard/model/leaderboardSchema';
+import { Reputation } from '@/shared/model/reputationSchema';
 
 type Props = {
   reputation: Reputation;
