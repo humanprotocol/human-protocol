@@ -30,7 +30,7 @@ async function fetchActiveProposalFn() {
   const logs = await contract.queryFilter(
     filter,
     env.VITE_NETWORK === 'mainnet'
-      ? 68058296
+      ? 73480200
       : (await provider.getBlockNumber()) - 10000,
     'latest'
   );
