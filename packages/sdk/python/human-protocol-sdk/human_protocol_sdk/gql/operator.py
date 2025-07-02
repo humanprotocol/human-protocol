@@ -6,12 +6,6 @@ operator_fragment = """
 fragment OperatorFields on Operator {
     id
     address
-    amountStaked
-    amountLocked
-    lockedUntilTimestamp
-    amountWithdrawn
-    amountSlashed
-    reward
     amountJobsProcessed
     role
     fee
@@ -27,6 +21,14 @@ fragment OperatorFields on Operator {
     }
     name
     category
+    staker {
+      stakedAmount
+      lockedAmount
+      withdrawnAmount
+      slashedAmount
+      lockedUntilTimestamp
+      lastDepositTimestamp
+    }
 }
 """
 
@@ -43,7 +45,6 @@ query GetOperators(
 ) {{
     operators(
       where: {{
-        {amount_staked_clause}
         {roles_clause}
       }},
       orderBy: $orderBy
@@ -57,9 +58,6 @@ query GetOperators(
 {operator_fragment}
 """.format(
         operator_fragment=operator_fragment,
-        amount_staked_clause=(
-            "amountStaked_gte: $minAmountStaked" if filter.min_amount_staked else ""
-        ),
         roles_clause="role_in: $roles" if filter.roles else "",
     )
 

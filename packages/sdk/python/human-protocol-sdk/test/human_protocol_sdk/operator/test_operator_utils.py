@@ -27,12 +27,6 @@ class TestOperatorUtils(unittest.TestCase):
                             {
                                 "id": DEFAULT_GAS_PAYER,
                                 "address": DEFAULT_GAS_PAYER,
-                                "amountStaked": "100",
-                                "amountLocked": "25",
-                                "lockedUntilTimestamp": "0",
-                                "amountWithdrawn": "25",
-                                "amountSlashed": "25",
-                                "reward": "25",
                                 "amountJobsProcessed": "25",
                                 "role": "role",
                                 "fee": None,
@@ -46,6 +40,14 @@ class TestOperatorUtils(unittest.TestCase):
                                 "reputationNetworks": [{"address": "0x01"}],
                                 "name": "Alice",
                                 "category": "machine_learning",
+                                "staker": {
+                                    "stakedAmount": "100",
+                                    "lockedAmount": "25",
+                                    "withdrawnAmount": "25",
+                                    "slashedAmount": "25",
+                                    "lockedUntilTimestamp": "0",
+                                    "lastDepositTimestamp": "0",
+                                },
                             }
                         ],
                     }
@@ -75,7 +77,7 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(operators[0].locked_until_timestamp, 0)
             self.assertEqual(operators[0].amount_withdrawn, 25)
             self.assertEqual(operators[0].amount_slashed, 25)
-            self.assertEqual(operators[0].reward, 25)
+            self.assertEqual(operators[0].last_deposit_timestamp, 0)
             self.assertEqual(operators[0].amount_jobs_processed, 25)
             self.assertEqual(operators[0].role, "role")
             self.assertEqual(operators[0].fee, None)
@@ -104,12 +106,6 @@ class TestOperatorUtils(unittest.TestCase):
                             {
                                 "id": DEFAULT_GAS_PAYER,
                                 "address": DEFAULT_GAS_PAYER,
-                                "amountStaked": "100",
-                                "amountLocked": "25",
-                                "lockedUntilTimestamp": "0",
-                                "amountWithdrawn": "25",
-                                "amountSlashed": "25",
-                                "reward": "25",
                                 "amountJobsProcessed": "25",
                                 "role": "role",
                                 "fee": None,
@@ -121,6 +117,14 @@ class TestOperatorUtils(unittest.TestCase):
                                 "reputationNetworks": [{"address": "0x01"}],
                                 "name": "Alice",
                                 "category": "machine_learning",
+                                "staker": {
+                                    "stakedAmount": "100",
+                                    "lockedAmount": "25",
+                                    "withdrawnAmount": "25",
+                                    "slashedAmount": "25",
+                                    "lockedUntilTimestamp": "0",
+                                    "lastDepositTimestamp": "0",
+                                },
                             }
                         ],
                     }
@@ -150,7 +154,7 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(operators[0].locked_until_timestamp, 0)
             self.assertEqual(operators[0].amount_withdrawn, 25)
             self.assertEqual(operators[0].amount_slashed, 25)
-            self.assertEqual(operators[0].reward, 25)
+            self.assertEqual(operators[0].last_deposit_timestamp, 0)
             self.assertEqual(operators[0].amount_jobs_processed, 25)
             self.assertEqual(operators[0].role, "role")
             self.assertEqual(operators[0].fee, None)
@@ -179,12 +183,6 @@ class TestOperatorUtils(unittest.TestCase):
                             {
                                 "id": DEFAULT_GAS_PAYER,
                                 "address": DEFAULT_GAS_PAYER,
-                                "amountStaked": "100",
-                                "amountLocked": "25",
-                                "lockedUntilTimestamp": "0",
-                                "amountWithdrawn": "25",
-                                "amountSlashed": "25",
-                                "reward": "25",
                                 "amountJobsProcessed": "25",
                                 "role": "role",
                                 "fee": None,
@@ -196,6 +194,14 @@ class TestOperatorUtils(unittest.TestCase):
                                 "reputationNetworks": [{"address": "0x01"}],
                                 "name": "Alice",
                                 "category": "machine_learning",
+                                "staker": {
+                                    "stakedAmount": "100",
+                                    "lockedAmount": "25",
+                                    "withdrawnAmount": "25",
+                                    "slashedAmount": "25",
+                                    "lockedUntilTimestamp": "0",
+                                    "lastDepositTimestamp": "0",
+                                },
                             }
                         ],
                     }
@@ -225,7 +231,7 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(operators[0].locked_until_timestamp, 0)
             self.assertEqual(operators[0].amount_withdrawn, 25)
             self.assertEqual(operators[0].amount_slashed, 25)
-            self.assertEqual(operators[0].reward, 25)
+            self.assertEqual(operators[0].last_deposit_timestamp, 0)
             self.assertEqual(operators[0].amount_jobs_processed, 25)
             self.assertEqual(operators[0].role, "role")
             self.assertEqual(operators[0].fee, None)
@@ -286,12 +292,6 @@ class TestOperatorUtils(unittest.TestCase):
                         "operator": {
                             "id": staker_address,
                             "address": staker_address,
-                            "amountStaked": "100",
-                            "amountLocked": "25",
-                            "lockedUntilTimestamp": "0",
-                            "amountWithdrawn": "25",
-                            "amountSlashed": "25",
-                            "reward": "25",
                             "amountJobsProcessed": "25",
                             "role": "role",
                             "fee": None,
@@ -305,6 +305,14 @@ class TestOperatorUtils(unittest.TestCase):
                             "reputationNetworks": [{"address": "0x01"}],
                             "name": "Alice",
                             "category": "machine_learning",
+                            "staker": {
+                                "stakedAmount": "100",
+                                "lockedAmount": "25",
+                                "withdrawnAmount": "25",
+                                "slashedAmount": "25",
+                                "lockedUntilTimestamp": "0",
+                                "lastDepositTimestamp": "0",
+                            },
                         }
                     }
                 }
@@ -326,7 +334,7 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(operator.locked_until_timestamp, 0)
             self.assertEqual(operator.amount_withdrawn, 25)
             self.assertEqual(operator.amount_slashed, 25)
-            self.assertEqual(operator.reward, 25)
+            self.assertEqual(operator.last_deposit_timestamp, 0)
             self.assertEqual(operator.amount_jobs_processed, 25)
             self.assertEqual(operator.role, "role")
             self.assertEqual(operator.fee, None)
@@ -355,12 +363,6 @@ class TestOperatorUtils(unittest.TestCase):
                         "operator": {
                             "id": staker_address,
                             "address": staker_address,
-                            "amountStaked": "100",
-                            "amountLocked": "25",
-                            "lockedUntilTimestamp": "0",
-                            "amountWithdrawn": "25",
-                            "amountSlashed": "25",
-                            "reward": "25",
                             "amountJobsProcessed": "25",
                             "role": "role",
                             "fee": None,
@@ -372,6 +374,14 @@ class TestOperatorUtils(unittest.TestCase):
                             "reputationNetworks": [{"address": "0x01"}],
                             "name": "Alice",
                             "category": "machine_learning",
+                            "staker": {
+                                "stakedAmount": "100",
+                                "lockedAmount": "25",
+                                "withdrawnAmount": "25",
+                                "slashedAmount": "25",
+                                "lockedUntilTimestamp": "0",
+                                "lastDepositTimestamp": "0",
+                            },
                         }
                     }
                 }
@@ -393,7 +403,7 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(operator.locked_until_timestamp, 0)
             self.assertEqual(operator.amount_withdrawn, 25)
             self.assertEqual(operator.amount_slashed, 25)
-            self.assertEqual(operator.reward, 25)
+            self.assertEqual(operator.last_deposit_timestamp, 0)
             self.assertEqual(operator.amount_jobs_processed, 25)
             self.assertEqual(operator.role, "role")
             self.assertEqual(operator.fee, None)
@@ -422,12 +432,6 @@ class TestOperatorUtils(unittest.TestCase):
                         "operator": {
                             "id": staker_address,
                             "address": staker_address,
-                            "amountStaked": "100",
-                            "amountLocked": "25",
-                            "lockedUntilTimestamp": "0",
-                            "amountWithdrawn": "25",
-                            "amountSlashed": "25",
-                            "reward": "25",
                             "amountJobsProcessed": "25",
                             "role": "role",
                             "fee": None,
@@ -439,6 +443,14 @@ class TestOperatorUtils(unittest.TestCase):
                             "reputationNetworks": [{"address": "0x01"}],
                             "name": "Alice",
                             "category": "machine_learning",
+                            "staker": {
+                                "stakedAmount": "100",
+                                "lockedAmount": "25",
+                                "withdrawnAmount": "25",
+                                "slashedAmount": "25",
+                                "lockedUntilTimestamp": "0",
+                                "lastDepositTimestamp": "0",
+                            },
                         }
                     }
                 }
@@ -460,7 +472,7 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(operator.locked_until_timestamp, 0)
             self.assertEqual(operator.amount_withdrawn, 25)
             self.assertEqual(operator.amount_slashed, 25)
-            self.assertEqual(operator.reward, 25)
+            self.assertEqual(operator.last_deposit_timestamp, 0)
             self.assertEqual(operator.amount_jobs_processed, 25)
             self.assertEqual(operator.role, "role")
             self.assertEqual(operator.fee, None)

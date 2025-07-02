@@ -10,6 +10,12 @@ export interface IOperator {
   id: string;
   chainId: ChainId;
   address: string;
+  amountStaked: bigint;
+  amountLocked: bigint;
+  lockedUntilTimestamp: bigint;
+  amountWithdrawn: bigint;
+  amountSlashed: bigint;
+  lastDepositTimestamp: bigint;
   amountJobsProcessed: bigint;
   role?: string;
   fee?: bigint;
@@ -26,9 +32,28 @@ export interface IOperator {
 }
 
 export interface IOperatorSubgraph
-  extends Omit<IOperator, 'jobTypes' | 'reputationNetworks' | 'chainId'> {
+  extends Omit<
+    IOperator,
+    | 'jobTypes'
+    | 'reputationNetworks'
+    | 'chainId'
+    | 'amountStaked'
+    | 'amountLocked'
+    | 'lockedUntilTimestamp'
+    | 'amountWithdrawn'
+    | 'amountSlashed'
+    | 'lastDepositTimestamp'
+  > {
   jobTypes?: string;
   reputationNetworks?: { address: string }[];
+  staker?: {
+    stakedAmount: bigint;
+    lockedAmount: bigint;
+    lockedUntilTimestamp: bigint;
+    withdrawnAmount: bigint;
+    slashedAmount: bigint;
+    lastDepositTimestamp: bigint;
+  };
 }
 
 export interface IOperatorsFilter extends IPagination {
@@ -47,15 +72,6 @@ export interface IReputationNetwork {
 export interface IReputationNetworkSubgraph
   extends Omit<IReputationNetwork, 'operators'> {
   operators: IOperatorSubgraph[];
-}
-
-export interface IOperator {
-  address: string;
-  role?: string;
-  url?: string;
-  jobTypes?: string[];
-  registrationNeeded?: boolean;
-  registrationInstructions?: string;
 }
 
 export interface IEscrow {

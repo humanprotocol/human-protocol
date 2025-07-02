@@ -18,6 +18,14 @@ const LEADER_FRAGMENT = gql`
     reputationNetworks
     name
     category
+    staker {
+      stakedAmount
+      lockedAmount
+      withdrawnAmount
+      slashedAmount
+      lockedUntilTimestamp
+      lastDepositTimestamp
+    }
   }
 `;
 

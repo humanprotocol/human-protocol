@@ -94,7 +94,7 @@ class OperatorData:
         locked_until_timestamp: int,
         amount_withdrawn: int,
         amount_slashed: int,
-        reward: int,
+        last_deposit_timestamp: int,
         amount_jobs_processed: int,
         role: Optional[str] = None,
         fee: Optional[int] = None,
@@ -120,7 +120,7 @@ class OperatorData:
         :param locked_until_timestamp: Locked until timestamp
         :param amount_withdrawn: Amount withdrawn
         :param amount_slashed: Amount slashed
-        :param reward: Reward
+        :param last_deposit_timestamp: Last deposit timestamp
         :param amount_jobs_processed: Amount of jobs launched
         :param role: Role
         :param fee: Fee
@@ -144,7 +144,7 @@ class OperatorData:
         self.locked_until_timestamp = locked_until_timestamp
         self.amount_withdrawn = amount_withdrawn
         self.amount_slashed = amount_slashed
-        self.reward = reward
+        self.last_deposit_timestamp = last_deposit_timestamp
         self.amount_jobs_processed = amount_jobs_processed
         self.role = role
         self.fee = fee
@@ -235,14 +235,7 @@ class OperatorUtils:
         operators_raw = operators_data["data"]["operators"]
 
         for operator in operators_raw:
-            job_types = []
             reputation_networks = []
-
-            if isinstance(operator.get("jobTypes"), str):
-                job_types = operator["jobTypes"].split(",")
-            elif isinstance(operator.get("jobTypes"), list):
-                job_types = operator["jobTypes"]
-
             if operator.get("reputationNetworks") and isinstance(
                 operator.get("reputationNetworks"), list
             ):
@@ -250,17 +243,18 @@ class OperatorUtils:
                     network["address"] for network in operator["reputationNetworks"]
                 ]
 
+            staker = operator.get("staker", {})
             operators.append(
                 OperatorData(
                     chain_id=filter.chain_id,
                     id=operator.get("id", ""),
                     address=operator.get("address", ""),
-                    amount_staked=int(operator.get("amountStaked", 0)),
-                    amount_locked=int(operator.get("amountLocked", 0)),
-                    locked_until_timestamp=int(operator.get("lockedUntilTimestamp", 0)),
-                    amount_withdrawn=int(operator.get("amountWithdrawn", 0)),
-                    amount_slashed=int(operator.get("amountSlashed", 0)),
-                    reward=int(operator.get("reward", 0)),
+                    amount_staked=int(staker.get("stakedAmount", 0)),
+                    amount_locked=int(staker.get("lockedAmount", 0)),
+                    locked_until_timestamp=int(staker.get("lockedUntilTimestamp", 0)),
+                    amount_withdrawn=int(staker.get("withdrawnAmount", 0)),
+                    amount_slashed=int(staker.get("slashedAmount", 0)),
+                    last_deposit_timestamp=int(staker.get("lastDepositTimestamp", 0)),
                     amount_jobs_processed=int(operator.get("amountJobsProcessed", 0)),
                     role=operator.get("role", None),
                     fee=int(operator.get("fee")) if operator.get("fee", None) else None,
@@ -339,14 +333,7 @@ class OperatorUtils:
             return None
 
         operator = operator_data["data"]["operator"]
-
-        job_types = []
         reputation_networks = []
-
-        if isinstance(operator.get("jobTypes"), str):
-            job_types = operator["jobTypes"].split(",")
-        elif isinstance(operator.get("jobTypes"), list):
-            job_types = operator["jobTypes"]
 
         if operator.get("reputationNetworks") and isinstance(
             operator.get("reputationNetworks"), list
@@ -355,16 +342,17 @@ class OperatorUtils:
                 network["address"] for network in operator["reputationNetworks"]
             ]
 
+        staker = operator.get("staker", {})
         return OperatorData(
             chain_id=chain_id,
             id=operator.get("id", ""),
             address=operator.get("address", ""),
-            amount_staked=int(operator.get("amountStaked", 0)),
-            amount_locked=int(operator.get("amountLocked", 0)),
-            locked_until_timestamp=int(operator.get("lockedUntilTimestamp", 0)),
-            amount_withdrawn=int(operator.get("amountWithdrawn", 0)),
-            amount_slashed=int(operator.get("amountSlashed", 0)),
-            reward=int(operator.get("reward", 0)),
+            amount_staked=int(staker.get("stakedAmount", 0)),
+            amount_locked=int(staker.get("lockedAmount", 0)),
+            locked_until_timestamp=int(staker.get("lockedUntilTimestamp", 0)),
+            amount_withdrawn=int(staker.get("withdrawnAmount", 0)),
+            amount_slashed=int(staker.get("slashedAmount", 0)),
+            last_deposit_timestamp=int(staker.get("lastDepositTimestamp", 0)),
             amount_jobs_processed=int(operator.get("amountJobsProcessed", 0)),
             role=operator.get("role", None),
             fee=int(operator.get("fee")) if operator.get("fee", None) else None,
@@ -445,12 +433,14 @@ class OperatorUtils:
                 chain_id=chain_id,
                 id=operator.get("id", ""),
                 address=operator.get("address", ""),
-                amount_staked=int(operator.get("amountStaked", 0)),
-                amount_locked=int(operator.get("amountLocked", 0)),
-                locked_until_timestamp=int(operator.get("lockedUntilTimestamp", 0)),
-                amount_withdrawn=int(operator.get("amountWithdrawn", 0)),
-                amount_slashed=int(operator.get("amountSlashed", 0)),
-                reward=int(operator.get("reward", 0)),
+                amount_staked=int(
+                    (staker := operator.get("staker") or {}).get("stakedAmount", 0)
+                ),
+                amount_locked=int(staker.get("lockedAmount", 0)),
+                locked_until_timestamp=int(staker.get("lockedUntilTimestamp", 0)),
+                amount_withdrawn=int(staker.get("withdrawnAmount", 0)),
+                amount_slashed=int(staker.get("slashedAmount", 0)),
+                last_deposit_timestamp=int(staker.get("lastDepositTimestamp", 0)),
                 amount_jobs_processed=int(operator.get("amountJobsProcessed", 0)),
                 role=operator.get("role", None),
                 fee=int(operator.get("fee")) if operator.get("fee", None) else None,

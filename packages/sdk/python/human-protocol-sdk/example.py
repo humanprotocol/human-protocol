@@ -133,14 +133,15 @@ def get_operators():
         OperatorFilter(chain_id=ChainId.POLYGON_AMOY)
     )
     print(operators)
+    print(vars(operators[0]))
     print(OperatorUtils.get_operator(ChainId.POLYGON_AMOY, operators[0].address))
     print(
         OperatorUtils.get_operators(
-            OperatorFilter(chain_id=ChainId.POLYGON_AMOY, roles="Job Launcher")
+            OperatorFilter(chain_id=ChainId.POLYGON_AMOY, roles="job_launcher")
         )
     )
     operators = OperatorUtils.get_operators(
-        OperatorFilter(chain_id=ChainId.POLYGON_AMOY, roles=["Job Launcher"])
+        OperatorFilter(chain_id=ChainId.POLYGON_AMOY, roles=["job_launcher"])
     )
     print(len(operators))
 
@@ -148,7 +149,7 @@ def get_operators():
         OperatorFilter(
             chain_id=ChainId.POLYGON_AMOY,
             min_amount_staked=1,
-            roles=["Job Launcher", "Reputation Oracle"],
+            roles=["job_launcher", "reputation_oracle"],
         )
     )
     print(len(operators))
@@ -200,18 +201,18 @@ if __name__ == "__main__":
 
     # Run single example while testing, and remove comments before commit
 
-    get_escrows()
+    # get_escrows()
     get_operators()
-    get_payouts()
+    # get_payouts()
 
-    statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
-    get_hmt_holders(statistics_client)
-    get_escrow_statistics(statistics_client)
-    get_hmt_statistics(statistics_client)
-    get_payment_statistics(statistics_client)
-    get_worker_statistics(statistics_client)
-    get_hmt_daily_data(statistics_client)
+    # statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
+    # get_hmt_holders(statistics_client)
+    # get_escrow_statistics(statistics_client)
+    # get_hmt_statistics(statistics_client)
+    # get_payment_statistics(statistics_client)
+    # get_worker_statistics(statistics_client)
+    # get_hmt_daily_data(statistics_client)
 
-    agreement_example()
-    get_workers()
-    get_stakers_example()
+    # agreement_example()
+    # get_workers()
+    # get_stakers_example()

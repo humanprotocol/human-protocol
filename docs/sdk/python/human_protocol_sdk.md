@@ -169,6 +169,8 @@
   * [`FilterError`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.FilterError)
   * [`PayoutFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.PayoutFilter)
     * [`PayoutFilter.__init__()`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.PayoutFilter.__init__)
+  * [`StakersFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.StakersFilter)
+    * [`StakersFilter.__init__()`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.StakersFilter.__init__)
   * [`StatisticsFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.StatisticsFilter)
     * [`StatisticsFilter.__init__()`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.StatisticsFilter.__init__)
   * [`StatusEventFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.StatusEventFilter)
