@@ -262,6 +262,18 @@ class _BoxesFromPointsTaskProcessor(_TaskProcessor):
             ).elements[0]
             old_x, old_y = old_point.points[:2]
 
+            roi_anns = [
+                roi_ann.wrap(
+                    id=roi_info.point_id,
+                    attributes={
+                        **roi_sample.attributes,
+                        boxes_from_points_task.OUTPUT_OBJECT_ID_ATTR: roi_info.point_id,
+                    },
+                )
+                for roi_ann in roi_sample.annotations
+                if isinstance(roi_ann, dm.Bbox)
+            ]
+
             merged_sample.annotations.extend(
                 annotation_utils.shift_ann(
                     roi_ann,
@@ -270,8 +282,7 @@ class _BoxesFromPointsTaskProcessor(_TaskProcessor):
                     img_w=image_w,
                     img_h=image_h,
                 )
-                for roi_ann in roi_sample.annotations
-                if isinstance(roi_ann, dm.Bbox)
+                for roi_ann in roi_anns
             )
 
         return merged_sample_dataset
@@ -456,6 +467,7 @@ class _SkeletonsFromBoxesTaskProcessor(_TaskProcessor):
                     ],
                     label=self.bbox_label_to_merged[old_bbox.label],
                     id=old_bbox.id,
+                    attributes={skeletons_from_boxes_task.OUTPUT_OBJECT_ID_ATTR: old_bbox.id},
                 )
                 skeleton_sample.annotations.append(merged_skeleton)
 

@@ -8,6 +8,8 @@ import datumaro as dm
 from attrs import frozen
 from datumaro.util import dump_json, parse_json
 
+from src.core.tasks.roi_based import OUTPUT_OBJECT_ID_ATTR
+
 BboxPointMapping = dict[int, int]
 
 
@@ -90,3 +92,14 @@ class TaskMetaSerializer:
 
     def parse_roi_filenames(self, roi_filenames_data: bytes) -> RoiFilenames:
         return {int(k): v for k, v in parse_json(roi_filenames_data).items()}
+
+
+__all__ = [
+    "OUTPUT_OBJECT_ID_ATTR",
+    "BboxPointMapping",
+    "RoiInfo",
+    "RoiInfos",
+    "RoiFilenames",
+    "TaskMetaLayout",
+    "TaskMetaSerializer",
+]
