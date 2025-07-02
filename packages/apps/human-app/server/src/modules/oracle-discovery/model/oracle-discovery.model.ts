@@ -13,7 +13,7 @@ type DiscoveredOracleCreateProps = {
   lockedUntilTimestamp: bigint;
   amountWithdrawn: bigint;
   amountSlashed: bigint;
-  reward: bigint;
+  lastDepositTimestamp: bigint;
   amountJobsProcessed: bigint;
   role?: string;
   fee?: bigint;
@@ -54,8 +54,8 @@ export class DiscoveredOracle implements IOperator {
   @ApiProperty({ description: 'Total amount slashed from the operator' })
   amountSlashed: bigint;
 
-  @ApiProperty({ description: 'Total reward earned by the operator' })
-  reward: bigint;
+  @ApiProperty({ description: 'Last deposit timestamp' })
+  lastDepositTimestamp: bigint;
 
   @ApiProperty({ description: 'Number of jobs processed by the operator' })
   amountJobsProcessed: bigint;

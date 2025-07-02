@@ -21,7 +21,7 @@ export const response1: DiscoveredOracle = {
   lockedUntilTimestamp: BigInt(0),
   amountWithdrawn: BigInt(0),
   amountSlashed: BigInt(0),
-  reward: BigInt(0),
+  lastDepositTimestamp: BigInt(0),
   amountJobsProcessed: BigInt(0),
 };
 
@@ -42,7 +42,7 @@ export const response2: DiscoveredOracle = {
   lockedUntilTimestamp: BigInt(0),
   amountWithdrawn: BigInt(0),
   amountSlashed: BigInt(0),
-  reward: BigInt(0),
+  lastDepositTimestamp: BigInt(0),
   amountJobsProcessed: BigInt(0),
 };
 
@@ -63,7 +63,7 @@ export const response3: DiscoveredOracle = {
   lockedUntilTimestamp: BigInt(0),
   amountWithdrawn: BigInt(0),
   amountSlashed: BigInt(0),
-  reward: BigInt(0),
+  lastDepositTimestamp: BigInt(0),
   amountJobsProcessed: BigInt(0),
 };
 
@@ -84,7 +84,7 @@ export const response4: DiscoveredOracle = {
   lockedUntilTimestamp: BigInt(0),
   amountWithdrawn: BigInt(0),
   amountSlashed: BigInt(0),
-  reward: BigInt(0),
+  lastDepositTimestamp: BigInt(0),
   amountJobsProcessed: BigInt(0),
 };
 
