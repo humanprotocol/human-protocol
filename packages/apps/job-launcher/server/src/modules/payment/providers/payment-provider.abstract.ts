@@ -6,11 +6,14 @@ import {
   PaymentMethod,
 } from '../payment.interface';
 import { BillingInfoDto } from '../payment.dto';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import Logger from '@human-protocol/logger';
 
 @Injectable()
 export abstract class PaymentProvider {
-  protected readonly logger: Logger = new Logger(this.constructor.name);
+  protected readonly logger = Logger.child({
+    context: PaymentProvider.name,
+  });
 
   /**
    * Create a new customer in the payment provider system
