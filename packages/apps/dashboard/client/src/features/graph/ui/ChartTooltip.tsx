@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import Box from '@mui/material/Box';
@@ -6,13 +6,13 @@ import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { TooltipProps } from 'recharts';
+import type { TooltipProps } from 'recharts';
 
 import FormattedNumber from '@/shared/ui/FormattedNumber';
 
 import formatDate from '../lib/formatDate';
 
-import { ChartDataConfigObject } from './AreaChart';
+import type { ChartDataConfigObject } from './AreaChart';
 
 const renderTitle = (title: string) => {
   const currentTitle: ChartDataConfigObject<string> = {

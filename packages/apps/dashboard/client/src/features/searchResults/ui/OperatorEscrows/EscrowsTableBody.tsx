@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import CircularProgress from '@mui/material/CircularProgress';
 import Link from '@mui/material/Link';
@@ -9,7 +9,7 @@ import TableRow from '@mui/material/TableRow';
 import handleErrorMessage from '@/shared/lib/handleErrorMessage';
 import useGlobalFiltersStore from '@/shared/store/useGlobalFiltersStore';
 
-import { PaginatedEscrowDetails } from '../../model/escrowDetailsSchema';
+import type { PaginatedEscrowDetails } from '../../model/escrowDetailsSchema';
 
 import EscrowsTableBodyContainer from './EscrowsTableBodyContainer';
 

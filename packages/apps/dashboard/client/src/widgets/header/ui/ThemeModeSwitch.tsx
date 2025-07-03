@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import IconButton from '@mui/material/IconButton';
 import useTheme from '@mui/material/styles/useTheme';

@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { type FC, useState } from 'react';
 
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import Card from '@mui/material/Card';

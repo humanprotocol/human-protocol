@@ -1,4 +1,4 @@
-import { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 
 import LaunchIcon from '@mui/icons-material/Launch';
 import Box from '@mui/material/Box';
