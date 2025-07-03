@@ -121,7 +121,7 @@ export function MyJobsListMobile() {
         {allPages.map((d) => {
           return (
             <Paper
-              key={crypto.randomUUID()}
+              key={d.escrow_address}
               sx={{
                 px: '16px',
                 py: '32px',

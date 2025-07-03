@@ -1,0 +1,7 @@
+echo "Running typecheck before push..."
+
+if ! yarn workspaces foreach --all -p run typecheck; then
+  echo ""
+  echo "Typecheck failed! Please fix the errors above before pushing."
+  exit 1
+fi

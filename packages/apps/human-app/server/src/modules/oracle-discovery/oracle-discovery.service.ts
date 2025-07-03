@@ -93,6 +93,7 @@ export class OracleDiscoveryService {
             new DiscoveredOracle({
               id: exchangeOracle.id,
               address: exchangeOracle.address,
+              name: exchangeOracle.name,
               role: exchangeOracle.role,
               url: exchangeOracle.url,
               jobTypes: exchangeOracle.jobTypes,
@@ -131,7 +132,7 @@ export class OracleDiscoveryService {
     operator: IOperator,
     possibleJobTypes: string[],
   ): operator is DiscoveredOracle {
-    if (!operator.url) {
+    if (!operator.url || !operator.name || !operator.role) {
       return false;
     }
 

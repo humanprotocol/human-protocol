@@ -151,9 +151,9 @@ export class JobService {
     const whitelisted = await this.whitelistService.isUserWhitelisted(user.id);
     if (!whitelisted) {
       if (
-        !user.stripeCustomerId ||
+        !user.paymentProviderId ||
         !(await this.paymentService.getDefaultPaymentMethod(
-          user.stripeCustomerId,
+          user.paymentProviderId,
         ))
       )
         throw new ValidationError(ErrorJob.NotActiveCard);

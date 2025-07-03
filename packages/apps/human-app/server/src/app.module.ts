@@ -1,51 +1,54 @@
-import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { ConfigModule } from '@nestjs/config';
-import { HttpModule } from '@nestjs/axios';
-import { WorkerModule } from './modules/user-worker/worker.module';
-import { ReputationOracleModule } from './integrations/reputation-oracle/reputation-oracle.module';
-import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
-import { OperatorModule } from './modules/user-operator/operator.module';
-import { OperatorController } from './modules/user-operator/operator.controller';
-import { WorkerController } from './modules/user-worker/worker.controller';
-import { CommonConfigModule } from './common/config/common-config.module';
-import { CacheFactoryConfig } from './common/config/cache-factory.config';
-import { CacheModule } from '@nestjs/cache-manager';
-import { OracleDiscoveryController } from './modules/oracle-discovery/oracle-discovery.controller';
-import { OracleDiscoveryModule } from './modules/oracle-discovery/oracle-discovery.module';
-import { JobsDiscoveryModule } from './modules/jobs-discovery/jobs-discovery.module';
-import { JobsDiscoveryController } from './modules/jobs-discovery/jobs-discovery.controller';
-import { JobAssignmentController } from './modules/job-assignment/job-assignment.controller';
-import { JobAssignmentModule } from './modules/job-assignment/job-assignment.module';
-import { StatisticsModule } from './modules/statistics/statistics.module';
-import { StatisticsController } from './modules/statistics/statistics.controller';
-import { ExchangeOracleModule } from './integrations/exchange-oracle/exchange-oracle.module';
-import { KvStoreModule } from './integrations/kv-store/kv-store.module';
-import { EmailConfirmationModule } from './modules/email-confirmation/email-confirmation.module';
-import { PasswordResetModule } from './modules/password-reset/password-reset.module';
-import { KycProcedureModule } from './modules/kyc-procedure/kyc-procedure.module';
-import { PrepareSignatureModule } from './modules/prepare-signature/prepare-signature.module';
-import { HCaptchaModule } from './modules/h-captcha/h-captcha.module';
-import { HCaptchaLabelingModule } from './integrations/h-captcha-labeling/h-captcha-labeling.module';
-import { HCaptchaController } from './modules/h-captcha/h-captcha.controller';
-import { EscrowUtilsModule } from './integrations/escrow/escrow-utils.module';
-import Joi from 'joi';
+import { AutomapperModule } from '@automapper/nestjs';
 import { ChainId } from '@human-protocol/sdk';
-import { RegisterAddressController } from './modules/register-address/register-address.controller';
-import { RegisterAddressModule } from './modules/register-address/register-address.module';
-import { InterceptorModule } from './common/interceptors/interceptor.module';
-import { TokenRefreshModule } from './modules/token-refresh/token-refresh.module';
-import { TokenRefreshController } from './modules/token-refresh/token-refresh.controller';
-import { CronJobModule } from './modules/cron-job/cron-job.module';
+import { HttpModule } from '@nestjs/axios';
+import { CacheModule } from '@nestjs/cache-manager';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
+import Joi from 'joi';
+import { AppController } from './app.controller';
+import { CacheFactoryConfig } from './common/config/cache-factory.config';
+import { CommonConfigModule } from './common/config/common-config.module';
 import { EnvironmentConfigService } from './common/config/environment-config.service';
+import { JwtAuthGuard } from './common/guards/jwt.auth';
+import { JwtHttpStrategy } from './common/guards/strategy';
+import { InterceptorModule } from './common/interceptors/interceptor.module';
 import { ForbidUnauthorizedHostMiddleware } from './common/middleware/host-check.middleware';
-import { HealthModule } from './modules/health/health.module';
-import { UiConfigurationModule } from './modules/ui-configuration/ui-configuration.module';
-import { NDAModule } from './modules/nda/nda.module';
-import { NDAController } from './modules/nda/nda.controller';
+import { EscrowUtilsModule } from './integrations/escrow/escrow-utils.module';
+import { ExchangeOracleModule } from './integrations/exchange-oracle/exchange-oracle.module';
+import { HCaptchaLabelingModule } from './integrations/h-captcha-labeling/h-captcha-labeling.module';
+import { KvStoreModule } from './integrations/kv-store/kv-store.module';
+import { ReputationOracleModule } from './integrations/reputation-oracle/reputation-oracle.module';
 import { AbuseController } from './modules/abuse/abuse.controller';
 import { AbuseModule } from './modules/abuse/abuse.module';
+import { CronJobModule } from './modules/cron-job/cron-job.module';
+import { EmailConfirmationModule } from './modules/email-confirmation/email-confirmation.module';
+import { HCaptchaController } from './modules/h-captcha/h-captcha.controller';
+import { HCaptchaModule } from './modules/h-captcha/h-captcha.module';
+import { HealthModule } from './modules/health/health.module';
+import { JobAssignmentController } from './modules/job-assignment/job-assignment.controller';
+import { JobAssignmentModule } from './modules/job-assignment/job-assignment.module';
+import { JobsDiscoveryController } from './modules/jobs-discovery/jobs-discovery.controller';
+import { JobsDiscoveryModule } from './modules/jobs-discovery/jobs-discovery.module';
+import { KycProcedureModule } from './modules/kyc-procedure/kyc-procedure.module';
+import { NDAController } from './modules/nda/nda.controller';
+import { NDAModule } from './modules/nda/nda.module';
+import { OracleDiscoveryController } from './modules/oracle-discovery/oracle-discovery.controller';
+import { OracleDiscoveryModule } from './modules/oracle-discovery/oracle-discovery.module';
+import { PasswordResetModule } from './modules/password-reset/password-reset.module';
+import { PrepareSignatureModule } from './modules/prepare-signature/prepare-signature.module';
+import { RegisterAddressController } from './modules/register-address/register-address.controller';
+import { RegisterAddressModule } from './modules/register-address/register-address.module';
+import { StatisticsController } from './modules/statistics/statistics.controller';
+import { StatisticsModule } from './modules/statistics/statistics.module';
+import { TokenRefreshController } from './modules/token-refresh/token-refresh.controller';
+import { TokenRefreshModule } from './modules/token-refresh/token-refresh.module';
+import { UiConfigurationModule } from './modules/ui-configuration/ui-configuration.module';
+import { OperatorController } from './modules/user-operator/operator.controller';
+import { OperatorModule } from './modules/user-operator/operator.module';
+import { WorkerController } from './modules/user-worker/worker.controller';
+import { WorkerModule } from './modules/user-worker/worker.module';
 
 const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
 
@@ -93,6 +96,7 @@ const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
         CACHE_TTL_DAILY_HMT_SPENT: Joi.number(),
         CACHE_TTL_HCAPTCHA_USER_STATS: Joi.number(),
         CACHE_TTL_ORACLE_DISCOVERY: Joi.number(),
+        CACHE_TTL_ORACLE_AVAILABLE_JOBS: Joi.number(),
         JOB_ASSIGNMENTS_DATA_RETENTION_DAYS: Joi.number(),
         CACHE_TTL_EXCHANGE_ORACLE_URL: Joi.number(),
         CACHE_TTL_EXCHANGE_ORACLE_REGISTRATION_NEEDED: Joi.number(),
@@ -146,7 +150,14 @@ const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
     AbuseController,
   ],
   exports: [HttpModule],
-  providers: [EnvironmentConfigService],
+  providers: [
+    EnvironmentConfigService,
+    JwtHttpStrategy,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

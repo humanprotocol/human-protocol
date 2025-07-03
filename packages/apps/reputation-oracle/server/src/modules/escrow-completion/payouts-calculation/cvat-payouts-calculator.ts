@@ -48,7 +48,7 @@ export class CvatPayoutsCalculator implements EscrowPayoutsCalculator {
     }
 
     const jobBountyValue = ethers.parseUnits(manifest.job_bounty, 18);
-    const workersBounties = new Map<string, typeof jobBountyValue>();
+    const workersBounties = new Map<string, bigint>();
 
     for (const job of annotations.jobs) {
       const jobFinalResult = annotations.results.find(

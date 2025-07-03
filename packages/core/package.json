@@ -1,14 +1,14 @@
 {
   "name": "@human-protocol/core",
   "description": "Human Protocol Core Smart Contracts",
-  "version": "1.0.45",
+  "version": "4.1.3",
   "files": [
     "contracts/**/*.sol",
     "abis/**/*.json",
     "artifacts/@openzeppelin/**/[^.]*.json",
     "artifacts/contracts/**/[^.]*.json",
     "typechain-types/**/*.ts",
-    "dist/typechain-types"
+    "dist/typechain-types/**"
   ],
   "scripts": {
     "clean": "yarn clean:compile && yarn clean:build",

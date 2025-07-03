@@ -42,6 +42,7 @@ export class AbuseService {
     abuseEntity.escrowAddress = data.escrowAddress;
     abuseEntity.chainId = data.chainId;
     abuseEntity.userId = data.userId;
+    abuseEntity.reason = data.reason;
     abuseEntity.status = AbuseStatus.PENDING;
     abuseEntity.retriesCount = 0;
     abuseEntity.waitUntil = new Date();
@@ -65,7 +66,7 @@ export class AbuseService {
       data.slasher,
       data.staker,
       data.escrowAddress,
-      BigInt(ethers.parseUnits(data.amount.toString(), 'ether')),
+      BigInt(ethers.parseUnits(data.amount.toString(), 18)),
     );
   }
 

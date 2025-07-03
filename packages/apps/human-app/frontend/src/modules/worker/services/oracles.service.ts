@@ -11,6 +11,7 @@ const OracleSchema = z.object({
   address: z.string(),
   chainId: z.number(),
   role: z.string(),
+  name: z.string(),
   url: z.string(),
   jobTypes: z.array(z.string()),
   registrationNeeded: z.boolean().optional().nullable(),
@@ -22,21 +23,6 @@ type OracleBase = z.infer<typeof OracleSchema>;
 export type Oracle = OracleBase & {
   name: string;
 };
-
-const OracleNameToUrls = {
-  CVAT: [
-    'https://stg-exchange-oracle.humanprotocol.org',
-    'https://exchange-oracle.humanprotocol.org',
-  ],
-  Fortune: ['https://stg-fortune-exchange-oracle-server.humanprotocol.org'],
-} as const;
-
-const oracleUrlToNameMap = new Map<string, string>();
-for (const [oracleName, oracleUrls] of Object.entries(OracleNameToUrls)) {
-  for (const oracleUrl of oracleUrls) {
-    oracleUrlToNameMap.set(oracleUrl, oracleName);
-  }
-}
 
 const isTestnet = env.VITE_NETWORK === 'testnet';
 
@@ -80,7 +66,7 @@ async function getOracles(selectedJobTypes: string[]) {
         oracles = oracles.concat(
           results.map((oracle: OracleBase) => ({
             ...oracle,
-            name: oracleUrlToNameMap.get(oracle.url) ?? '',
+            name: oracle.name ? oracle.name.split(' ')[0] : '',
           }))
         );
       }

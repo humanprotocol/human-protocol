@@ -19,6 +19,7 @@ export function generateAbuseEntity(
     status: AbuseStatus.PENDING,
     decision: null,
     amount: null,
+    reason: faker.lorem.sentence(),
     waitUntil: faker.date.future(),
     createdAt: faker.date.recent(),
     updatedAt: new Date(),
