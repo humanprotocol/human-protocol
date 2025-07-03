@@ -6,7 +6,7 @@ import dayjs from 'dayjs';
 
 import useChartParamsStore, {
   TIME_PERIOD_OPTIONS,
-  TimePeriod,
+  type TimePeriod,
 } from '../store/useChartParamsStore';
 
 export const StyledToggleButtonGroup = styled(ToggleButtonGroup)(

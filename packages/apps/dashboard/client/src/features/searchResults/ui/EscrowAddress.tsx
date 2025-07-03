@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
@@ -6,7 +6,7 @@ import Typography from '@mui/material/Typography';
 
 import SectionWrapper from '@/shared/ui/SectionWrapper';
 
-import { AddressDetailsEscrow } from '../model/addressDetailsSchema';
+import type { AddressDetailsEscrow } from '../model/addressDetailsSchema';
 
 import HmtBalance from './HmtBalance';
 import TitleSectionWrapper from './TitleSectionWrapper';

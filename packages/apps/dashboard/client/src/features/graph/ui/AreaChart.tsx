@@ -1,10 +1,10 @@
-import { FC, useEffect, useRef, useState } from 'react';
+import { type FC, useEffect, useRef, useState } from 'react';
 
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import useTheme from '@mui/material/styles/useTheme';
 import Typography from '@mui/material/Typography';
-import dayjs, { Dayjs } from 'dayjs';
+import dayjs, { type Dayjs } from 'dayjs';
 import {
   CartesianGrid,
   Tooltip,
@@ -17,7 +17,7 @@ import {
 
 import DatePicker from '@/shared/ui/DatePicker';
 
-import useChartData, { ChartData } from '../api/useChartData';
+import useChartData, { type ChartData } from '../api/useChartData';
 import formatNumber from '../lib/formatNumber';
 import useChartParamsStore, {
   initialAllTime,
