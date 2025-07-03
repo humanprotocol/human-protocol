@@ -4,9 +4,11 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 import { AppModule } from './app.module';
 import { EnvironmentConfigService } from './common/config/env-config.service';
-import { createServiceLogger, nestLoggerOverride } from '@human-protocol/logger';
+import {
+  createServiceLogger,
+  nestLoggerOverride,
+} from '@human-protocol/logger';
 
-// Create service-specific logger
 const logger = createServiceLogger('dashboard');
 
 async function bootstrap() {

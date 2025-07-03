@@ -60,7 +60,7 @@ export function createServiceLogger(
   options: Partial<LoggerOptions> = {}
 ): typeof defaultLogger {
   const isDevelopment = Environment.isDevelopment();
-  
+
   return createLogger(
     {
       name: `${serviceName}Logger`,

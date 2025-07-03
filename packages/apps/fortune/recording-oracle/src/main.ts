@@ -13,7 +13,6 @@ import {
   nestLoggerOverride,
 } from '@human-protocol/logger';
 
-// Create service-specific logger
 const logger = createServiceLogger('fortune-recording-oracle');
 
 async function bootstrap() {

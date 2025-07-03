@@ -9,7 +9,6 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { createServiceLogger, nestLoggerOverride } from '@human-protocol/logger';
 
-// Create service-specific logger
 const Logger = createServiceLogger('human-app');
 
 async function bootstrap() {

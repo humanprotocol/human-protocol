@@ -9,7 +9,6 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { ServerConfigService } from './common/config/server-config.service';
 import { createServiceLogger, nestLoggerOverride } from '@human-protocol/logger';
 
-// Create service-specific logger
 const logger = createServiceLogger('fortune-exchange-oracle');
 
 async function bootstrap() {
