@@ -30,7 +30,6 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
           );
           done(null, pubKey);
         } catch (error) {
-          console.error(error);
           done(error);
         }
       },

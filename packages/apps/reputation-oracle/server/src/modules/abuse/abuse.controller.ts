@@ -55,6 +55,7 @@ export class AbuseController {
       escrowAddress: data.escrowAddress,
       chainId: data.chainId,
       userId: request.user.id,
+      reason: data.reason,
     });
   }
 
@@ -82,6 +83,7 @@ export class AbuseController {
         escrowAddress: abuseEntity.escrowAddress,
         chainId: abuseEntity.chainId,
         status: abuseEntity.status,
+        reason: abuseEntity.reason,
       };
     });
   }

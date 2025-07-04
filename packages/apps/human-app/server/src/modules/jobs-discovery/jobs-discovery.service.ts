@@ -124,6 +124,11 @@ export class JobsDiscoveryService {
     jobs: DiscoveredJob[],
   ): Promise<void> {
     const cacheKey = JobsDiscoveryService.makeCacheKeyForOracle(oracleAddress);
-    await this.cacheManager.set(cacheKey, jobs);
+
+    await this.cacheManager.set(
+      cacheKey,
+      jobs,
+      this.configService.cacheTtlOracleAvailableJobs,
+    );
   }
 }

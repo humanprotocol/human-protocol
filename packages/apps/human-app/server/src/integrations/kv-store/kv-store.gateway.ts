@@ -27,13 +27,13 @@ export class KvStoreGateway {
     if (cachedData) {
       return cachedData;
     }
-    let fetchedData: string;
+    let oracleUrl: string;
     try {
       const runner = new ethers.JsonRpcProvider(this.configService.rpcUrl);
       const network = await runner.provider?.getNetwork();
       const chainId: ChainId = Number(network?.chainId);
 
-      fetchedData = await KVStoreUtils.get(chainId, address, KVStoreKeys.url);
+      oracleUrl = await KVStoreUtils.get(chainId, address, KVStoreKeys.url);
     } catch (e) {
       if (e.toString().includes('Error: Invalid address')) {
         throw new HttpException(
@@ -46,19 +46,23 @@ export class KvStoreGateway {
         );
       }
     }
-    if (!fetchedData || fetchedData === '') {
+
+    if (!oracleUrl || oracleUrl === '') {
       throw new HttpException(
         `Unable to retrieve URL from address: ${address}`,
         400,
       );
-    } else {
-      await this.cacheManager.set(
-        key,
-        fetchedData,
-        this.configService.cacheTtlExchangeOracleUrl,
-      );
-      return fetchedData;
     }
+
+    oracleUrl = oracleUrl.replace(/\/$/, '');
+
+    await this.cacheManager.set(
+      key,
+      oracleUrl,
+      this.configService.cacheTtlExchangeOracleUrl,
+    );
+
+    return oracleUrl;
   }
 
   async getJobTypesByAddress(
