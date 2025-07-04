@@ -356,3 +356,35 @@ class WorkerFilter:
         self.order_direction = order_direction
         self.first = min(max(first, 1), 1000)
         self.skip = max(skip, 0)
+
+
+class StakersFilter:
+    def __init__(
+        self,
+        chain_id: ChainId,
+        min_staked_amount: Optional[str] = None,
+        max_staked_amount: Optional[str] = None,
+        min_locked_amount: Optional[str] = None,
+        max_locked_amount: Optional[str] = None,
+        min_withdrawn_amount: Optional[str] = None,
+        max_withdrawn_amount: Optional[str] = None,
+        min_slashed_amount: Optional[str] = None,
+        max_slashed_amount: Optional[str] = None,
+        order_by: Optional[str] = "lastDepositTimestamp",
+        order_direction: OrderDirection = OrderDirection.DESC,
+        first: Optional[int] = 10,
+        skip: Optional[int] = 0,
+    ):
+        self.chain_id = chain_id
+        self.min_staked_amount = min_staked_amount
+        self.max_staked_amount = max_staked_amount
+        self.min_locked_amount = min_locked_amount
+        self.max_locked_amount = max_locked_amount
+        self.min_withdrawn_amount = min_withdrawn_amount
+        self.max_withdrawn_amount = max_withdrawn_amount
+        self.min_slashed_amount = min_slashed_amount
+        self.max_slashed_amount = max_slashed_amount
+        self.order_by = order_by
+        self.order_direction = order_direction
+        self.first = first
+        self.skip = skip
