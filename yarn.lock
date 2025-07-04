@@ -4139,7 +4139,7 @@ __metadata:
     jest: "npm:29.7.0"
     joi: "npm:^17.13.3"
     jsonwebtoken: "npm:^9.0.2"
-    minio: "npm:7.1.3"
+    minio: "npm:8.0.5"
     passport: "npm:^0.7.0"
     passport-jwt: "npm:^4.0.1"
     pg: "npm:8.13.1"
@@ -4182,7 +4182,7 @@ __metadata:
     helmet: "npm:^7.1.0"
     jest: "npm:^29.7.0"
     joi: "npm:^17.13.3"
-    minio: "npm:7.1.3"
+    minio: "npm:8.0.5"
     prettier: "npm:^3.4.2"
     reflect-metadata: "npm:^0.2.2"
     rxjs: "npm:^7.2.0"
@@ -4429,7 +4429,7 @@ __metadata:
     jest: "npm:29.7.0"
     joi: "npm:^17.13.3"
     json-stable-stringify: "npm:^1.2.1"
-    minio: "npm:7.1.3"
+    minio: "npm:8.0.5"
     nestjs-minio-client: "npm:^2.2.0"
     node-cache: "npm:^5.1.2"
     passport: "npm:^0.7.0"
@@ -4504,7 +4504,7 @@ __metadata:
     joi: "npm:^17.13.3"
     json-stable-stringify: "npm:^1.2.1"
     lodash: "npm:^4.17.21"
-    minio: "npm:7.1.3"
+    minio: "npm:8.0.5"
     nock: "npm:^14.0.3"
     passport: "npm:^0.7.0"
     passport-jwt: "npm:^4.0.1"
@@ -4539,7 +4539,7 @@ __metadata:
     graphql: "npm:^16.8.1"
     graphql-request: "npm:^6.1.0"
     graphql-tag: "npm:^2.12.6"
-    minio: "npm:7.1.3"
+    minio: "npm:8.0.5"
     openpgp: "npm:^5.11.2"
     prettier: "npm:^3.4.2"
     secp256k1: "npm:^5.0.1"
@@ -13941,6 +13941,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"buffer-crc32@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "buffer-crc32@npm:1.0.0"
+  checksum: 10c0/8b86e161cee4bb48d5fa622cbae4c18f25e4857e5203b89e23de59e627ab26beb82d9d7999f2b8de02580165f61f83f997beaf02980cdf06affd175b651921ab
+  languageName: node
+  linkType: hard
+
 "buffer-equal-constant-time@npm:^1.0.1":
   version: 1.0.1
   resolution: "buffer-equal-constant-time@npm:1.0.1"
@@ -22568,7 +22575,29 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minio@npm:7.1.3, minio@npm:^7.1.3":
+"minio@npm:8.0.5":
+  version: 8.0.5
+  resolution: "minio@npm:8.0.5"
+  dependencies:
+    async: "npm:^3.2.4"
+    block-stream2: "npm:^2.1.0"
+    browser-or-node: "npm:^2.1.1"
+    buffer-crc32: "npm:^1.0.0"
+    eventemitter3: "npm:^5.0.1"
+    fast-xml-parser: "npm:^4.4.1"
+    ipaddr.js: "npm:^2.0.1"
+    lodash: "npm:^4.17.21"
+    mime-types: "npm:^2.1.35"
+    query-string: "npm:^7.1.3"
+    stream-json: "npm:^1.8.0"
+    through2: "npm:^4.0.2"
+    web-encoding: "npm:^1.1.5"
+    xml2js: "npm:^0.5.0 || ^0.6.2"
+  checksum: 10c0/e9f024c6514df1e0e54e522df5f92bdb985d036f8c3ef240e338a6a5f700681a0e5bae032933d8fbe5db5b3307912f487a88c54f927a381a54143e3e7271b4d3
+  languageName: node
+  linkType: hard
+
+"minio@npm:^7.1.3":
   version: 7.1.3
   resolution: "minio@npm:7.1.3"
   dependencies:
@@ -27007,6 +27036,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"stream-chain@npm:^2.2.5":
+  version: 2.2.5
+  resolution: "stream-chain@npm:2.2.5"
+  checksum: 10c0/c512f50190d7c92d688fa64e7af540c51b661f9c2b775fc72bca38ea9bca515c64c22c2197b1be463741daacbaaa2dde8a8ea24ebda46f08391224f15249121a
+  languageName: node
+  linkType: hard
+
 "stream-events@npm:^1.0.5":
   version: 1.0.5
   resolution: "stream-events@npm:1.0.5"
@@ -27025,6 +27061,15 @@ __metadata:
     readable-stream: "npm:^3.6.0"
     xtend: "npm:^4.0.2"
   checksum: 10c0/f128fb8076d60cd548f229554b6a1a70c08a04b7b2afd4dbe7811d20f27f7d4112562eb8bce86d72a8691df3b50573228afcf1271e55e81f981536c67498bc41
+  languageName: node
+  linkType: hard
+
+"stream-json@npm:^1.8.0":
+  version: 1.9.1
+  resolution: "stream-json@npm:1.9.1"
+  dependencies:
+    stream-chain: "npm:^2.2.5"
+  checksum: 10c0/0521e5cb3fb6b0e2561d715975e891bd81fa77d0239c8d0b1756846392bc3c7cdd7f1ddb0fe7ed77e6fdef58daab9e665d3b39f7d677bd0859e65a2bff59b92c
   languageName: node
   linkType: hard
 
@@ -30300,7 +30345,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"xml2js@npm:^0.6.2":
+"xml2js@npm:^0.5.0 || ^0.6.2, xml2js@npm:^0.6.2":
   version: 0.6.2
   resolution: "xml2js@npm:0.6.2"
   dependencies:
