@@ -177,6 +177,12 @@ class ValidationConfig:
     value small enough for faster convergence rate of the annotation process.
     """
 
+    enable_gt_bans = to_bool(getenv("ENABLE_GT_BANS", "1"))
+    """
+    Whether to allow automatic GT bans for bad images or not. By default, bans are allowed.
+    This can raise escrow annotation chances at the cost of reduced quality threshold.
+    """
+
     unverifiable_assignments_threshold = float(getenv("UNVERIFIABLE_ASSIGNMENTS_THRESHOLD", "0.1"))
     """
     Deprecated. Not expected to happen in practice, kept only as a safety fallback rule.
