@@ -11,7 +11,6 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-
 import {
   ApiBearerAuth,
   ApiBody,
@@ -19,6 +18,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { ErrorAuth } from '../../common/constants/errors';
 import { Public } from '../../common/decorators';
 import { ValidationError } from '../../common/errors';
@@ -143,6 +143,7 @@ export class AuthJwtController {
 
   @Public()
   @HttpCode(204)
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
   @Post('/forgot-password')
   @ApiOperation({
     summary: 'Forgot Password',
@@ -161,7 +162,11 @@ export class AuthJwtController {
     status: 404,
     description: 'Not Found. Could not find the requested content.',
   })
-  public async forgotPassword(@Body() data: ForgotPasswordDto): Promise<void> {
+  public async forgotPassword(
+    @Body() data: ForgotPasswordDto,
+    @Ip() ip: string,
+  ): Promise<void> {
+    console.log('IP:', ip);
     await this.authService.forgotPassword(data);
   }
 
