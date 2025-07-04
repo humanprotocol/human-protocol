@@ -2,7 +2,7 @@ import { HttpService } from '@nestjs/axios';
 import { View, ViewsOpenResponse } from '@slack/web-api';
 import { IncomingWebhookSendArguments } from '@slack/webhook';
 import { firstValueFrom } from 'rxjs';
-import logger from '../../logger';
+import logger from '@human-protocol/logger';
 import * as httpUtils from '../../utils/http';
 
 export class SlackBotApp {

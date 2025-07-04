@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import {
   ErrorContentModeration,
@@ -30,10 +30,13 @@ import { WebhookRepository } from '../webhook/webhook.repository';
 import { WebhookService } from '../webhook/webhook.service';
 import { CronJobEntity } from './cron-job.entity';
 import { CronJobRepository } from './cron-job.repository';
+import Logger from '@human-protocol/logger';
 
 @Injectable()
 export class CronJobService {
-  private readonly logger = new Logger(CronJobService.name);
+  private readonly logger = Logger.child({
+    context: CronJobService.name,
+  });
 
   constructor(
     private readonly cronJobRepository: CronJobRepository,
@@ -67,7 +70,7 @@ export class CronJobService {
       return false;
     }
 
-    this.logger.log('Previous cron job is not completed yet');
+    this.logger.info('Previous cron job is not completed yet');
     return true;
   }
 
@@ -132,7 +135,7 @@ export class CronJobService {
       return;
     }
 
-    this.logger.log('Create escrow START');
+    this.logger.info('Create escrow START');
     const cronJob = await this.startCronJob(CronJobType.CreateEscrow);
 
     try {
@@ -158,7 +161,7 @@ export class CronJobService {
       this.logger.error(e);
     }
 
-    this.logger.log('Create escrow STOP');
+    this.logger.info('Create escrow STOP');
     await this.completeCronJob(cronJob);
   }
 
@@ -172,7 +175,7 @@ export class CronJobService {
       return;
     }
 
-    this.logger.log('Setup escrow START');
+    this.logger.info('Setup escrow START');
     const cronJob = await this.startCronJob(CronJobType.SetupEscrow);
 
     try {
@@ -199,7 +202,7 @@ export class CronJobService {
       this.logger.error(e);
     }
 
-    this.logger.log('Setup escrow STOP');
+    this.logger.info('Setup escrow STOP');
     await this.completeCronJob(cronJob);
   }
 
@@ -213,7 +216,7 @@ export class CronJobService {
       return;
     }
 
-    this.logger.log('Fund escrow START');
+    this.logger.info('Fund escrow START');
     const cronJob = await this.startCronJob(CronJobType.FundEscrow);
 
     try {
@@ -240,7 +243,7 @@ export class CronJobService {
       this.logger.error(e);
     }
 
-    this.logger.log('Fund escrow STOP');
+    this.logger.info('Fund escrow STOP');
     await this.completeCronJob(cronJob);
   }
 
@@ -254,7 +257,7 @@ export class CronJobService {
       return;
     }
 
-    this.logger.log('Cancel jobs START');
+    this.logger.info('Cancel jobs START');
     const cronJob = await this.startCronJob(CronJobType.CancelEscrow);
 
     try {
@@ -320,7 +323,7 @@ export class CronJobService {
       this.logger.error(e);
     }
     await this.completeCronJob(cronJob);
-    this.logger.log('Cancel jobs STOP');
+    this.logger.info('Cancel jobs STOP');
     return true;
   }
 
@@ -338,7 +341,7 @@ export class CronJobService {
       return;
     }
 
-    this.logger.log('Pending webhooks START');
+    this.logger.info('Pending webhooks START');
     const cronJob = await this.startCronJob(CronJobType.ProcessPendingWebhook);
 
     try {
@@ -362,7 +365,7 @@ export class CronJobService {
       this.logger.error(e);
     }
 
-    this.logger.log('Pending webhooks STOP');
+    this.logger.info('Pending webhooks STOP');
     await this.completeCronJob(cronJob);
   }
 
@@ -378,7 +381,7 @@ export class CronJobService {
       return;
     }
 
-    this.logger.log('Abuse START');
+    this.logger.info('Abuse START');
     const cronJob = await this.startCronJob(CronJobType.Abuse);
 
     try {
@@ -395,7 +398,7 @@ export class CronJobService {
               webhookEntity.escrowAddress,
             );
           if (!jobEntity) {
-            this.logger.log(ErrorJob.NotFound, JobService.name);
+            this.logger.info(ErrorJob.NotFound, { context: JobService.name });
             throw new NotFoundError(ErrorJob.NotFound);
           }
           if (
@@ -424,7 +427,7 @@ export class CronJobService {
       this.logger.error(e);
     }
 
-    this.logger.log('Abuse STOP');
+    this.logger.info('Abuse STOP');
     await this.completeCronJob(cronJob);
   }
 
@@ -442,7 +445,7 @@ export class CronJobService {
       return;
     }
 
-    this.logger.log('Update jobs START');
+    this.logger.info('Update jobs START');
     const cronJob = await this.startCronJob(CronJobType.SyncJobStatuses);
 
     try {
@@ -469,7 +472,7 @@ export class CronJobService {
         } while (eventsBatch.length === 100);
       }
       if (events.length === 0) {
-        this.logger.log('No events to process');
+        this.logger.info('No events to process');
         await this.completeCronJob(cronJob);
         return;
       }
@@ -539,7 +542,7 @@ export class CronJobService {
       this.logger.error(e);
     }
 
-    this.logger.log('Update jobs STOP');
+    this.logger.info('Update jobs STOP');
     await this.completeCronJob(cronJob);
   }
 }

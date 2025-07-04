@@ -1,4 +1,4 @@
-import { Logger, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 
@@ -25,7 +25,7 @@ import { AssignmentEntity } from '../assignment/assignment.entity';
     AssignmentModule,
   ],
   controllers: [WebhookController],
-  providers: [Logger, WebhookService, WebhookRepository, AssignmentRepository],
+  providers: [WebhookService, WebhookRepository, AssignmentRepository],
   exports: [WebhookService],
 })
 export class WebhookModule {}

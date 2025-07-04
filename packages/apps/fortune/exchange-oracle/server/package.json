@@ -28,6 +28,7 @@
     "generate-env-doc": "ts-node scripts/generate-env-doc.ts"
   },
   "dependencies": {
+    "@human-protocol/logger": "workspace:*",
     "@human-protocol/sdk": "workspace:*",
     "@nestjs/axios": "^3.1.2",
     "@nestjs/common": "^10.2.7",

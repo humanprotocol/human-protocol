@@ -3,7 +3,7 @@ import {
   HMToken,
   HMToken__factory,
 } from '@human-protocol/core/typechain-types';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ethers, formatUnits } from 'ethers';
 import { NetworkConfigService } from '../../common/config/network-config.service';
 import { ServerConfigService } from '../../common/config/server-config.service';
@@ -35,6 +35,7 @@ import {
 } from './payment.dto';
 import { PaymentEntity } from './payment.entity';
 import { PaymentRepository } from './payment.repository';
+import Logger from '@human-protocol/logger';
 
 import { TOKEN_ADDRESSES } from '../../common/constants/tokens';
 import { EscrowFundToken } from '../../common/enums/job';
@@ -49,7 +50,9 @@ import { PaymentProvider } from './providers/payment-provider.abstract';
 
 @Injectable()
 export class PaymentService {
-  private readonly logger = new Logger(PaymentService.name);
+  private readonly logger = Logger.child({
+    context: PaymentService.name,
+  });
 
   constructor(
     private readonly networkConfigService: NetworkConfigService,
@@ -79,7 +82,7 @@ export class PaymentService {
     const setup = await this.paymentProvider.retrieveCardSetup(data.setupId);
 
     if (!setup) {
-      this.logger.log(ErrorPayment.SetupNotFound, PaymentService.name);
+      this.logger.error(ErrorPayment.SetupNotFound, PaymentService.name);
       throw new NotFoundError(ErrorPayment.SetupNotFound);
     }
 

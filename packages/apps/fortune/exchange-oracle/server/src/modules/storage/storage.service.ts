@@ -6,16 +6,21 @@ import {
   KVStoreUtils,
   StorageClient,
 } from '@human-protocol/sdk';
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import * as Minio from 'minio';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { S3ConfigService } from '../../common/config/s3-config.service';
 import { NotFoundError, ServerError } from '../../common/errors';
 import { ISolution } from '../../common/interfaces/job';
 import { Web3Service } from '../web3/web3.service';
+import Logger from '@human-protocol/logger';
 
 @Injectable()
 export class StorageService {
+  private readonly logger = Logger.child({
+    context: StorageService.name,
+  });
+
   public readonly minioClient: Minio.Client;
 
   constructor(
@@ -32,6 +37,7 @@ export class StorageService {
       useSSL: this.s3ConfigService.useSSL,
     });
   }
+
   public getJobUrl(escrowAddress: string, chainId: ChainId): string {
     return `${this.s3ConfigService.useSSL ? 'https' : 'http'}://${
       this.s3ConfigService.endpoint
@@ -102,7 +108,8 @@ export class StorageService {
           recordingOraclePublicKey,
         ]);
       } catch (e) {
-        Logger.error(e);
+        this.logger.error('Encryption error', e);
+
         throw new ServerError('Encryption error');
       }
     }
@@ -120,7 +127,8 @@ export class StorageService {
 
       return this.getJobUrl(escrowAddress, chainId);
     } catch (e) {
-      Logger.error(e);
+      this.logger.error('File not uploaded', e);
+
       throw new ServerError('File not uploaded');
     }
   }

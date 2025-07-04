@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 
-import logger from '../../logger';
+import logger from '@human-protocol/logger';
 import { NDAError } from './nda.error';
 
 @Catch(NDAError)

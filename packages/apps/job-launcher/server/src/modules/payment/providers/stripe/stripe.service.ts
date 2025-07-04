@@ -43,7 +43,7 @@ export class StripeService extends PaymentProvider {
       const customer = await this.stripe.customers.create({ email });
       return customer.id;
     } catch (error) {
-      this.logger.log(error.message, StripeService.name);
+      this.logger.error(error.message, StripeService.name);
       throw new ServerError(ErrorPayment.CustomerNotCreated);
     }
   }
@@ -57,12 +57,12 @@ export class StripeService extends PaymentProvider {
         customer: customerId ?? undefined,
       });
     } catch (error) {
-      this.logger.log(error.message, StripeService.name);
+      this.logger.error(error.message, StripeService.name);
       throw new ServerError(ErrorPayment.CardNotAssigned);
     }
 
     if (!setupIntent?.client_secret) {
-      this.logger.log(
+      this.logger.error(
         ErrorPayment.ClientSecretDoesNotExist,
         StripeService.name,
       );

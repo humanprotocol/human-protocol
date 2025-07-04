@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 
-import logger from '../../logger';
+import logger from '@human-protocol/logger';
 
 import { AbuseService } from '../abuse';
 import { TokenRepository } from '../auth';

@@ -1,11 +1,13 @@
-import { Logger } from '@nestjs/common';
 import axios from 'axios';
+import Logger from '@human-protocol/logger';
 
 export async function sendSlackNotification(
   webhookUrl: string,
   message: string,
 ): Promise<boolean> {
-  const logger = new Logger('Slack');
+  const logger = Logger.child({
+    context: 'Slack',
+  });
 
   const payload = {
     text: message,
@@ -17,7 +19,7 @@ export async function sendSlackNotification(
 
   try {
     await axios.post(webhookUrl, payload);
-    logger.log('Slack notification sent:', payload);
+    logger.info('Slack notification sent:', payload);
     return true;
   } catch (e) {
     logger.error('Error sending Slack notification:', e);

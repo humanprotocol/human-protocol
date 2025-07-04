@@ -7,7 +7,7 @@ import {
 import { Injectable, OnModuleInit } from '@nestjs/common';
 
 import { PGPConfigService } from '../../config';
-import logger from '../../logger';
+import logger from '@human-protocol/logger';
 
 import { Web3Service } from '../web3';
 

@@ -9,7 +9,12 @@ import { IncomingMessage, ServerResponse } from 'http';
 
 import { AppModule } from './app.module';
 import { ServerConfigService } from './config';
-import logger, { nestLoggerOverride } from './logger';
+import {
+  createServiceLogger,
+  nestLoggerOverride,
+} from '@human-protocol/logger';
+
+const logger = createServiceLogger('reputation-oracle');
 
 function rawBodyMiddleware(
   req: any,

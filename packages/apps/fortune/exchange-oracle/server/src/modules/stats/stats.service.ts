@@ -1,12 +1,16 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { JobRepository } from '../job/job.repository';
 import { AssignmentRepository } from '../assignment/assignment.repository';
 import { AssignmentStatsDto, OracleStatsDto } from './stats.dto';
 import { JobStatus } from '../../common/enums/job';
+import Logger from '@human-protocol/logger';
 
 @Injectable()
 export class StatsService {
-  public readonly logger = new Logger(StatsService.name);
+  public readonly logger = Logger.child({
+    context: StatsService.name,
+  });
+
   constructor(
     private jobRepository: JobRepository,
     private assignmentRepository: AssignmentRepository,
@@ -32,6 +36,7 @@ export class StatsService {
       ),
     });
   }
+
   async getAssignmentStats(workerAddress: string): Promise<AssignmentStatsDto> {
     return new AssignmentStatsDto({
       assignmentsTotal:

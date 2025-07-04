@@ -1,5 +1,5 @@
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
 import { Cache } from 'cache-manager';
 import { decode } from 'jsonwebtoken';
@@ -21,10 +21,13 @@ import {
   paginateAndSortResults,
 } from '../../common/utils/pagination.utils';
 import { JOB_ASSIGNMENT_CACHE_KEY } from '../../common/constants/cache';
+import Logger from '@human-protocol/logger';
 
 @Injectable()
 export class JobAssignmentService {
-  logger = new Logger(JobAssignmentService.name);
+  logger = Logger.child({
+    context: JobAssignmentService.name,
+  });
 
   constructor(
     private readonly configService: EnvironmentConfigService,

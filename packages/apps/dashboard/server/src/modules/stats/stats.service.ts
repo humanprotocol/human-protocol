@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
 import dayjs from 'dayjs';
@@ -25,10 +25,14 @@ import { StorageService } from '../storage/storage.service';
 import { CronJob } from 'cron';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { NetworksService } from '../networks/networks.service';
+import Logger from '@human-protocol/logger';
 
 @Injectable()
 export class StatsService implements OnModuleInit {
-  private readonly logger = new Logger(StatsService.name);
+  private readonly logger = Logger.child({
+    context: StatsService.name,
+  });
+
   constructor(
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private readonly redisConfigService: RedisConfigService,
@@ -75,7 +79,7 @@ export class StatsService implements OnModuleInit {
   }
 
   private async fetchHistoricalHcaptchaStats(): Promise<void> {
-    this.logger.log('Fetching historical hCaptcha stats.');
+    this.logger.info('Fetching historical hCaptcha stats.');
     let startDate = dayjs(HCAPTCHA_STATS_API_START_DATE);
     const currentDate = dayjs();
     const dates = [];
@@ -132,7 +136,7 @@ export class StatsService implements OnModuleInit {
   }
 
   async fetchTodayHcaptchaStats() {
-    this.logger.log('Fetching hCaptcha stats for today.');
+    this.logger.info('Fetching hCaptcha stats for today.');
     const today = dayjs().format('YYYY-MM-DD');
     const from = today;
     const to = today;
@@ -188,7 +192,7 @@ export class StatsService implements OnModuleInit {
 
   @Cron('*/15 * * * *')
   async fetchHmtGeneralStats() {
-    this.logger.log('Fetching HMT general stats across multiple networks.');
+    this.logger.info('Fetching HMT general stats across multiple networks.');
     const aggregatedStats: HmtGeneralStatsDto = {
       totalHolders: 0,
       totalTransactions: 0,

@@ -25,6 +25,7 @@
     "@automapper/classes": "^8.8.1",
     "@automapper/core": "^8.8.1",
     "@automapper/nestjs": "^8.8.1",
+    "@human-protocol/logger": "workspace:*",
     "@human-protocol/sdk": "workspace:*",
     "@nestjs/axios": "^3.1.2",
     "@nestjs/cache-manager": "^2.2.1",

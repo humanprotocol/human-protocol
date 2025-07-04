@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { AxiosRequestConfig } from 'axios';
 import { lastValueFrom } from 'rxjs';
 import {
@@ -38,10 +38,13 @@ import {
   RegistrationInExchangeOracleCommand,
   RegistrationInExchangeOracleData,
 } from '../../modules/user-worker/model/worker-registration.model';
+import Logger from '@human-protocol/logger';
 
 @Injectable()
 export class ExchangeOracleGateway {
-  logger = new Logger(ExchangeOracleGateway.name);
+  logger = Logger.child({
+    context: ExchangeOracleGateway.name,
+  });
 
   constructor(
     private httpService: HttpService,

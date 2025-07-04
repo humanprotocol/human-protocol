@@ -9,11 +9,11 @@ import {
   NETWORKS,
   StorageParams,
 } from '@human-protocol/sdk';
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import {
-  ValidationError as ClassValidationError,
   validate,
+  ValidationError as ClassValidationError,
 } from 'class-validator';
 import { ethers } from 'ethers';
 import { ServerConfigService } from '../../common/config/server-config.service';
@@ -76,12 +76,17 @@ import {
 import { JobEntity } from './job.entity';
 import { EscrowAction } from './job.interface';
 import { JobRepository } from './job.repository';
+import Logger from '@human-protocol/logger';
+
 @Injectable()
 export class JobService {
-  public readonly logger = new Logger(JobService.name);
+  public readonly logger = Logger.child({
+    context: JobService.name,
+  });
   public readonly storageParams: StorageParams;
   public readonly bucket: string;
   private cronJobRepository: CronJobRepository;
+
   constructor(
     @Inject(Web3Service)
     private readonly web3Service: Web3Service,
@@ -583,9 +588,8 @@ export class JobService {
       }
 
       if (allFortuneValidationErrors.length > 0) {
-        this.logger.log(
+        this.logger.info(
           ErrorJob.ResultValidationFailed,
-          JobService.name,
           allFortuneValidationErrors,
         );
         throw new ValidationError(ErrorJob.ResultValidationFailed);
