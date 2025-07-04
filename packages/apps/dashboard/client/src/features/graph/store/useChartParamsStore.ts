@@ -1,4 +1,4 @@
-import dayjs, { Dayjs } from 'dayjs';
+import dayjs, { type Dayjs } from 'dayjs';
 import { create } from 'zustand';
 
 const MINIMAL_DATE_FOR_DATE_PICKER = '2021-04-06';

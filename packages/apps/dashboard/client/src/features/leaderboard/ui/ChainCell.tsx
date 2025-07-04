@@ -1,6 +1,6 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 
-import { ChainId } from '@human-protocol/sdk';
+import type { ChainId } from '@human-protocol/sdk/src/enums';
 import Typography from '@mui/material/Typography';
 
 import { getNetwork } from '@/shared/lib/networks';

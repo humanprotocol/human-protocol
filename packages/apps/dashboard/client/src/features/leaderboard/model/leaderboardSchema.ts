@@ -1,19 +1,6 @@
 import { z } from 'zod';
 
-export const reputationSchema = z.unknown().transform((value) => {
-  try {
-    const knownReputation = z
-      .union([z.literal('Low'), z.literal('Medium'), z.literal('High')])
-      .parse(value);
-
-    return knownReputation;
-  } catch (error) {
-    console.error(error);
-    return 'Unknown';
-  }
-});
-
-export type Reputation = z.infer<typeof reputationSchema>;
+import { reputationSchema } from '@/shared/model/reputationSchema';
 
 const leaderboardEntity = z.object({
   address: z.string(),

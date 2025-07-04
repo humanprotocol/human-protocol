@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { type FC, useState } from 'react';
 
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
@@ -13,7 +13,7 @@ import TableRow from '@mui/material/TableRow';
 import handleErrorMessage from '@/shared/lib/handleErrorMessage';
 import AbbreviateClipboard from '@/shared/ui/AbbreviateClipboard';
 
-import { PaginatedTransactionDetails } from '../../model/transactionDetailsSchema';
+import type { PaginatedTransactionDetails } from '../../model/transactionDetailsSchema';
 
 import TransactionsTableBodyContainer from './TransactionsTableBodyContainer';
 import TransactionsTableCellMethod from './TransactionsTableCellMethod';
@@ -75,7 +75,11 @@ const TransactionsTableBody: FC<Props> = ({ data, isLoading, error }) => {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Box width={30}>
                   {elem.internalTransactions.length > 0 && (
-                    <IconButton onClick={() => toggleRow(idx)} size="small">
+                    <IconButton
+                      aria-label="Toggle row"
+                      onClick={() => toggleRow(idx)}
+                      size="small"
+                    >
                       {expandedRows[idx] ? (
                         <RemoveCircleIcon fontSize="medium" />
                       ) : (

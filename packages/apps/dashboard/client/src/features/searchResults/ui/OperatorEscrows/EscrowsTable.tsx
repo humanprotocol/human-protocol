@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import Table from '@mui/material/Table';
 import TableContainer from '@mui/material/TableContainer';

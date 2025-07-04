@@ -1,9 +1,9 @@
-import { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
-import { SxProps } from '@mui/material';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
+import type { SxProps } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 
 import CustomTooltip from '@/shared/ui/CustomTooltip';

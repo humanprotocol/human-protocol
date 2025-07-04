@@ -5,7 +5,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
+import Select, { type SelectChangeEvent } from '@mui/material/Select';
 
 import useFilteredNetworks from '@/shared/api/useFilteredNetworks';
 import { useIsMobile } from '@/shared/hooks/useBreakpoints';

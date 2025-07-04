@@ -1,11 +1,11 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
 import SectionWrapper from '@/shared/ui/SectionWrapper';
 
-import {
+import type {
   AddressDetailsOperator,
   AddressDetailsWallet,
 } from '../model/addressDetailsSchema';
