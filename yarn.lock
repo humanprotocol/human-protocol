@@ -4451,6 +4451,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@human-protocol/logger@workspace:packages/libs/logger":
+  version: 0.0.0-use.local
+  resolution: "@human-protocol/logger@workspace:packages/libs/logger"
+  dependencies:
+    typescript: "npm:^5.8.3"
+  languageName: unknown
+  linkType: soft
+
 "@human-protocol/reputation-oracle@workspace:packages/apps/reputation-oracle/server":
   version: 0.0.0-use.local
   resolution: "@human-protocol/reputation-oracle@workspace:packages/apps/reputation-oracle/server"

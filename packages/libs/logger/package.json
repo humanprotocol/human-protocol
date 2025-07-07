@@ -1,0 +1,32 @@
+{
+  "name": "@human-protocol/logger",
+  "version": "1.0.0",
+  "description": "Unified logging package for Human Protocol",
+  "type": "commonjs",
+  "main": "dist/index.ts",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/**/*"
+  ],
+  "scripts": {
+    "clean": "tsc --build --clean && rm -rf ./dist",
+    "build": "tsc --build"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/humanprotocol/human-protocol.git",
+    "directory": "packages/libs/logger"
+  },
+  "keywords": [
+    "human-protocol",
+    "logger"
+  ],
+  "license": "MIT",
+  "packageManager": "yarn@4.9.1"
+}
