@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Unified logging package for HUMAN Protocol",
   "type": "commonjs",
-  "main": "dist/index.ts",
+  "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist/**/*"
