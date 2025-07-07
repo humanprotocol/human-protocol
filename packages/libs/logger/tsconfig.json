@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "incremental": true,
     "target": "es2022",
     "lib": ["ES2022"],
     "module": "node18",
