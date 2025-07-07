@@ -104,17 +104,10 @@ async function refreshJobs(data: RefreshJobsBody) {
   }
 }
 
-async function reportAbuse(data: ReportAbuseBody) {
-  try {
-    await authorizedHumanAppApiClient.post(apiPaths.reportAbuse, {
-      body: { ...data },
-    });
-  } catch (error: unknown) {
-    if (error instanceof ApiClientError) {
-      throw error;
-    }
-    throw new Error('Failed to report abuse');
-  }
+function reportAbuse(data: ReportAbuseBody) {
+  return authorizedHumanAppApiClient.post(apiPaths.reportAbuse, {
+    body: { ...data },
+  });
 }
 
 export {
