@@ -1,0 +1,23 @@
+name: Logger NPM publish
+
+on:
+  workflow_dispatch:
+
+jobs:
+  logger-publish:
+    name: Logger NPM Publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+      - name: Install dependencies
+        run: yarn install --immutable
+      - name: Build logger package
+        run: yarn build:logger
+      - name: Publish package
+        run: yarn workspace @human-protocol/logger npm publish --access public
+        env:
+          YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
