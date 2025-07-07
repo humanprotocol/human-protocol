@@ -4476,7 +4476,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@human-protocol/logger@workspace:packages/libs/logger":
+"@human-protocol/logger@workspace:*, @human-protocol/logger@workspace:packages/libs/logger":
   version: 0.0.0-use.local
   resolution: "@human-protocol/logger@workspace:packages/libs/logger"
   dependencies:
@@ -4505,6 +4505,7 @@ __metadata:
     "@faker-js/faker": "npm:^9.4.0"
     "@golevelup/ts-jest": "npm:^0.6.1"
     "@human-protocol/core": "workspace:*"
+    "@human-protocol/logger": "workspace:*"
     "@human-protocol/sdk": "workspace:*"
     "@nestjs/axios": "npm:^3.1.3"
     "@nestjs/cli": "npm:^10.3.2"
@@ -4556,8 +4557,6 @@ __metadata:
     passport: "npm:^0.7.0"
     passport-jwt: "npm:^4.0.1"
     pg: "npm:8.13.1"
-    pino: "npm:^9.6.0"
-    pino-pretty: "npm:^13.0.0"
     prettier: "npm:^3.4.2"
     reflect-metadata: "npm:^0.2.2"
     rxjs: "npm:^7.2.0"
@@ -25051,27 +25050,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pino@npm:^9.6.0":
-  version: 9.6.0
-  resolution: "pino@npm:9.6.0"
-  dependencies:
-    atomic-sleep: "npm:^1.0.0"
-    fast-redact: "npm:^3.1.1"
-    on-exit-leak-free: "npm:^2.1.0"
-    pino-abstract-transport: "npm:^2.0.0"
-    pino-std-serializers: "npm:^7.0.0"
-    process-warning: "npm:^4.0.0"
-    quick-format-unescaped: "npm:^4.0.3"
-    real-require: "npm:^0.2.0"
-    safe-stable-stringify: "npm:^2.3.1"
-    sonic-boom: "npm:^4.0.1"
-    thread-stream: "npm:^3.0.0"
-  bin:
-    pino: bin.js
-  checksum: 10c0/bcd1e9d9b301bea13b95689ca9ad7105ae9451928fb6c0b67b3e58c5fe37cea1d40665f3d6641e3da00be0bbc17b89031e67abbc8ea6aac6164f399309fd78e7
-  languageName: node
-  linkType: hard
-
 "pino@npm:^9.7.0":
   version: 9.7.0
   resolution: "pino@npm:9.7.0"
@@ -25362,13 +25340,6 @@ __metadata:
   version: 1.0.0
   resolution: "process-warning@npm:1.0.0"
   checksum: 10c0/43ec4229d64eb5c58340c8aacade49eb5f6fd513eae54140abf365929ca20987f0a35c5868125e2b583cad4de8cd257beb5667d9cc539d9190a7a4c3014adf22
-  languageName: node
-  linkType: hard
-
-"process-warning@npm:^4.0.0":
-  version: 4.0.1
-  resolution: "process-warning@npm:4.0.1"
-  checksum: 10c0/577a268b9fd5c3d9f6dbb4348220099391d830905642845d591e7ee8b1e45043d98b7b9826a3c1379bdd1686cdfe0f6cf349cb812affc5853b662e6a9896579e
   languageName: node
   linkType: hard
 

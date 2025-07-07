@@ -1,6 +1,6 @@
-import { createLogger } from './pino-logger';
-import NestLogger from './nest-logger';
-import { LogLevel } from './types';
+import { createLogger, NestLogger, LogLevel } from '@human-protocol/logger';
+
+import { SERVICE_NAME } from '../common/constants';
 import Environment from '../utils/environment';
 
 const isDevelopment = Environment.isDevelopment();
@@ -14,7 +14,7 @@ const defaultLogger = createLogger(
   },
   {
     environment: Environment.name,
-    service: 'reputation-oracle',
+    service: SERVICE_NAME,
   },
 );
 
