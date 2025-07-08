@@ -681,7 +681,7 @@ class EscrowClient:
         :param final_results_url: Final results file URL
         :param final_results_hash: Final results file hash
         :param payout_id: Payout ID for the transaction
-        :param force_complete: (Optional) Indicates if remaining balance should be transferred to the escrow
+        :param force_complete: (Optional) Indicates if remaining balance should be transferred to the escrow creator
         :param tx_options: (Optional) Additional transaction parameters
 
         :return: A dictionary containing the prepared transaction

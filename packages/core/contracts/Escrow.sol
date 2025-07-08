@@ -411,20 +411,14 @@ contract Escrow is IEscrow, ReentrancyGuard {
             totalRecordingOracleFee += recordingOracleFee;
             totalExchangeOracleFee += exchangeOracleFee;
 
-            _safeTransfer(
-                token,
-                _recipients[i],
-                amount -
-                    reputationOracleFee -
-                    recordingOracleFee -
-                    exchangeOracleFee
-            );
-            eventRecipients[i] = _recipients[i];
             netAmounts[i] =
                 amount -
                 reputationOracleFee -
                 recordingOracleFee -
                 exchangeOracleFee;
+            eventRecipients[i] = _recipients[i];
+
+            _safeTransfer(token, _recipients[i], netAmounts[i]);
         }
 
         // Transfer oracle fees

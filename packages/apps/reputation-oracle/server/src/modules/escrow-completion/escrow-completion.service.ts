@@ -413,7 +413,7 @@ export class EscrowCompletionService {
       Array.from(recipientToAmountMap.values()),
       escrowCompletionEntity.finalResultsUrl as string,
       escrowCompletionEntity.finalResultsHash as string,
-      uuidv4(),
+      uuidv4(), // TODO obtain it from intermediate results
       false,
       {
         gasPrice: await this.web3Service.calculateGasPrice(
