@@ -5,7 +5,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
-import React from 'react';
+import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 
@@ -16,7 +16,6 @@ import {
   SnackbarProvider,
   WagmiProvider,
 } from './providers';
-import reportWebVitals from './reportWebVitals';
 import { store } from './state';
 import { fetchUserBalanceAsync, signIn } from './state/auth/reducer';
 import theme from './theme';
@@ -41,7 +40,7 @@ loadStripe(publishableKey).then((stripePromise) => {
   }
 
   root.render(
-    <React.StrictMode>
+    <StrictMode>
       <Provider store={store}>
         <WagmiProvider>
           <QueryClientProvider>
@@ -61,13 +60,8 @@ loadStripe(publishableKey).then((stripePromise) => {
           </QueryClientProvider>
         </WagmiProvider>
       </Provider>
-    </React.StrictMode>,
+    </StrictMode>,
   );
 });
 
 const root = createRoot(document.getElementById('root') as HTMLElement);
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
