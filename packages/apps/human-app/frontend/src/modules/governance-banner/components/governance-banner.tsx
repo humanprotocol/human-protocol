@@ -1,10 +1,9 @@
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import { Grid, Link as MuiLink, Typography } from '@mui/material';
+import { Box, Grid, Link as MuiLink, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { env } from '@/shared/env';
 import { useColorMode } from '@/shared/contexts/color-mode';
-import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { useWorkerIdentityVerificationStatus } from '@/modules/worker/profile/hooks';
 import { useActiveProposalQuery } from '../hooks/use-active-proposal-query';
 
@@ -13,8 +12,8 @@ export function GovernanceBanner() {
   const { data, isLoading, isError } = useActiveProposalQuery();
   const { isVerificationCompleted } = useWorkerIdentityVerificationStatus();
   const { colorPalette } = useColorMode();
+  const { text, background } = colorPalette.banner;
   const [timeRemaining, setTimeRemaining] = useState('00:00:00');
-  const isMobile = useIsMobile('lg');
 
   useEffect(() => {
     if (!data?.deadline) return;
@@ -55,52 +54,41 @@ export function GovernanceBanner() {
   return (
     <Grid
       container
-      alignItems="center"
-      sx={{
-        backgroundColor: colorPalette.banner.background.primary,
-        color: colorPalette.banner.text.secondary,
-        borderRadius: '8px',
-        padding: '16px',
-        gap: '16px',
-        mt: -8,
-      }}
-      direction={isMobile ? 'column' : 'row'}
+      alignItems={{ xs: 'flex-start', sm: 'center' }}
+      justifyContent={{ xs: 'flex-start', sm: 'space-between' }}
+      bgcolor={background.primary}
+      color={text.secondary}
+      borderRadius="8px"
+      p={2}
+      gap={2}
+      mt={{ xs: 0, md: -8 }}
     >
       {/* Left side: Countdown & "X votes" */}
       <Grid
         item
         xs={12}
         sm="auto"
-        sx={{ display: 'flex', alignItems: 'center' }}
+        display="flex"
+        alignItems="center"
+        flexWrap={{ xs: 'wrap', sm: 'nowrap' }}
+        gap={{ xs: 2, md: 0 }}
       >
-        <AccessTimeIcon sx={{ mr: 1 }} />
-        <Typography
-          variant="body2"
-          sx={{
-            color: colorPalette.banner.text.secondary,
-          }}
-        >
-          {t('governance.timeToReveal', 'Time to reveal vote')}:
-        </Typography>
-
-        <Typography
-          variant="body1"
-          sx={{
-            ml: 1,
-            color: colorPalette.banner.text.primary,
-          }}
-        >
-          {timeRemaining}
-        </Typography>
+        <Box display="flex" alignItems="center">
+          <AccessTimeIcon sx={{ mr: 1 }} />
+          <Typography variant="body2" color={text.secondary}>
+            {t('governance.timeToReveal', 'Time to reveal vote')}:
+          </Typography>
+          <Typography variant="body1" ml={1} color={text.primary}>
+            {timeRemaining}
+          </Typography>
+        </Box>
         <Typography
           variant="body1"
-          sx={{
-            ml: 8,
-            color: colorPalette.banner.text.primary,
-            backgroundColor: colorPalette.banner.background.secondary,
-            borderRadius: '8px',
-            padding: '4px 8px',
-          }}
+          ml={{ xs: 0, md: 8 }}
+          color={text.primary}
+          bgcolor={background.secondary}
+          borderRadius="8px"
+          padding="4px 8px"
         >
           {totalVotes} {t('governance.votes', 'votes')}
         </Typography>
@@ -111,22 +99,16 @@ export function GovernanceBanner() {
         item
         xs={12}
         sm
-        sx={{
-          display: 'flex',
-          justifyContent: isMobile ? 'flex-start' : 'flex-end',
-          mt: isMobile ? 2 : 0,
-          mr: isMobile ? 0 : 2,
-        }}
+        display="flex"
+        justifyContent={{ xs: 'flex-start', sm: 'flex-end' }}
       >
         <MuiLink
           href={env.VITE_GOVERNANCE_URL}
           underline="none"
           target="_blank"
           rel="noopener noreferrer"
-          sx={{
-            fontWeight: 500,
-            color: colorPalette.banner.text.secondary,
-          }}
+          color={text.secondary}
+          fontWeight={500}
         >
           {t('governance.moreDetails', 'More details')} &rarr;
         </MuiLink>
