@@ -4,17 +4,18 @@ import * as jobsService from '../../services/jobs.service';
 import type { ReportAbuseBody } from '../../types';
 
 interface ReportAbuseMutationOptions {
-  onSuccess?: (status: number) => void;
-  onError?: (status: number, message: string) => void;
+  onError?: (status: number) => void;
 }
 
-export function useReportAbuseMutation(options?: ReportAbuseMutationOptions) {
+export function useReportAbuseMutation({
+  onError,
+}: ReportAbuseMutationOptions) {
   return useMutation({
     mutationFn: (data: ReportAbuseBody) => jobsService.reportAbuse(data),
     mutationKey: ['reportAbuse'],
     onError: (error) => {
       if (error instanceof ApiClientError) {
-        options?.onError?.(error.status, error.message);
+        onError?.(error.status);
       }
     },
   });

@@ -14,7 +14,7 @@ interface MoreButtonProps {
   isDisabled: boolean;
 }
 
-export function MoreButton({ job, isDisabled }: Readonly<MoreButtonProps>) {
+export function MoreButton({ job, isDisabled }: MoreButtonProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const { address: oracleAddress } = useParams<{ address: string }>();
   const { mutate: rejectTaskMutation } = useResignJobMutation();
@@ -54,14 +54,15 @@ export function MoreButton({ job, isDisabled }: Readonly<MoreButtonProps>) {
           width: { xs: '48px', md: '30px' },
           height: { xs: '48px', md: '30px' },
           p: 1,
-          border: isMobile ? '1px solid #858EC6' : 'none',
+          border: isMobile ? '1px solid #858ec6' : 'none',
           borderRadius: '4px',
+          color: '#858ec6',
         }}
         onClick={(e) => {
           !isDisabled && setAnchorEl(e.currentTarget);
         }}
       >
-        <MoreHorizIcon sx={{ color: '#858EC6' }} />
+        <MoreHorizIcon />
       </Button>
       <Popover
         open={isOpen}
@@ -79,8 +80,9 @@ export function MoreButton({ job, isDisabled }: Readonly<MoreButtonProps>) {
         }}
         slotProps={{
           paper: {
+            elevation: 8,
             sx: {
-              mt: isMobile ? 0 : 1,
+              mt: isMobile ? -1 : 1,
             },
           },
         }}

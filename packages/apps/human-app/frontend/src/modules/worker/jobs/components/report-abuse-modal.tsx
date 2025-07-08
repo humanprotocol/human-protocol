@@ -51,7 +51,7 @@ export function ReportAbuseModal({
   escrowAddress,
   chainId,
   close,
-}: Readonly<ReportAbuseModalProps>) {
+}: ReportAbuseModalProps) {
   const [reason, setReason] = useState('');
   const [error, setError] = useState('');
   const isMobile = useIsMobile();
@@ -72,11 +72,12 @@ export function ReportAbuseModal({
   });
 
   const handleReportAbuse = () => {
-    reportAbuseMutation({
-      escrow_address: escrowAddress,
-      chain_id: chainId,
-      reason: reason.trim(),
-    });
+    reason.trim().length > 0 &&
+      reportAbuseMutation({
+        escrow_address: escrowAddress,
+        chain_id: chainId,
+        reason: reason.trim(),
+      });
   };
 
   return (
