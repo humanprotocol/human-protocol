@@ -1,5 +1,8 @@
 name: Logger NPM publish
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
 
