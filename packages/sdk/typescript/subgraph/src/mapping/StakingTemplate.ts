@@ -7,57 +7,42 @@ import {
 } from '../../generated/Staking/Staking';
 import {
   Operator,
-  OperatorStatistics,
   StakeDepositedEvent,
   StakeLockedEvent,
+  Staker,
   StakeSlashedEvent,
   StakeWithdrawnEvent,
 } from '../../generated/schema';
 import { Address, dataSource } from '@graphprotocol/graph-ts';
-import { ONE_BI, ZERO_BI } from './utils/number';
+import { ZERO_BI } from './utils/number';
 import { toEventId } from './utils/event';
 import { createTransaction } from './utils/transaction';
-import { toBytes } from './utils/string';
 
 // eslint-disable-next-line prettier/prettier
 export const TOKEN_ADDRESS = Address.fromString('{{ HMToken.address }}');
-export const STATISTICS_ENTITY_ID = toBytes('operator-statistics-id');
 
-function constructStatsEntity(): OperatorStatistics {
-  const entity = new OperatorStatistics(STATISTICS_ENTITY_ID);
+export function createOrLoadStaker(address: Address): Staker {
+  let staker = Staker.load(address);
 
-  entity.operators = ZERO_BI;
+  if (!staker) {
+    staker = new Staker(address);
 
-  return entity;
-}
+    staker.address = address;
+    staker.stakedAmount = ZERO_BI;
+    staker.lockedAmount = ZERO_BI;
+    staker.withdrawnAmount = ZERO_BI;
+    staker.slashedAmount = ZERO_BI;
+    staker.lockedUntilTimestamp = ZERO_BI;
+    staker.lastDepositTimestamp = ZERO_BI;
 
-export function createOrLoadOperatorStatistics(): OperatorStatistics {
-  let statsEntity = OperatorStatistics.load(STATISTICS_ENTITY_ID);
-
-  if (!statsEntity) {
-    statsEntity = constructStatsEntity();
+    const operator = Operator.load(address);
+    if (operator) {
+      staker.operator = operator.id;
+    }
+    staker.save();
   }
 
-  return statsEntity;
-}
-
-export function createOrLoadOperator(address: Address): Operator {
-  let operator = Operator.load(address);
-
-  if (!operator) {
-    operator = new Operator(address);
-
-    operator.address = address;
-    operator.amountStaked = ZERO_BI;
-    operator.amountLocked = ZERO_BI;
-    operator.lockedUntilTimestamp = ZERO_BI;
-    operator.amountSlashed = ZERO_BI;
-    operator.amountWithdrawn = ZERO_BI;
-    operator.reward = ZERO_BI;
-    operator.amountJobsProcessed = ZERO_BI;
-  }
-
-  return operator;
+  return staker;
 }
 
 export function handleStakeDeposited(event: StakeDeposited): void {
@@ -80,23 +65,13 @@ export function handleStakeDeposited(event: StakeDeposited): void {
   eventEntity.amount = event.params.tokens;
   eventEntity.save();
 
-  // Update operator
-  const operator = createOrLoadOperator(event.params.staker);
+  // Update staker
+  const staker = createOrLoadStaker(event.params.staker);
 
-  // Increase operator count for new operator
-  if (
-    operator.amountStaked.equals(ZERO_BI) &&
-    operator.amountLocked.equals(ZERO_BI) &&
-    operator.amountWithdrawn.equals(ZERO_BI)
-  ) {
-    // Update Operator Statistics
-    const statsEntity = createOrLoadOperatorStatistics();
-    statsEntity.operators = statsEntity.operators.plus(ONE_BI);
-    statsEntity.save();
-  }
+  staker.stakedAmount = staker.stakedAmount.plus(eventEntity.amount);
+  staker.lastDepositTimestamp = event.block.timestamp;
 
-  operator.amountStaked = operator.amountStaked.plus(eventEntity.amount);
-  operator.save();
+  staker.save();
 }
 
 export function handleStakeLocked(event: StakeLocked): void {
@@ -120,11 +95,11 @@ export function handleStakeLocked(event: StakeLocked): void {
   eventEntity.lockedUntilTimestamp = event.params.until;
   eventEntity.save();
 
-  // Update operator
-  const operator = createOrLoadOperator(event.params.staker);
-  operator.amountLocked = eventEntity.amount;
-  operator.lockedUntilTimestamp = eventEntity.lockedUntilTimestamp;
-  operator.save();
+  // Update staker
+  const staker = createOrLoadStaker(event.params.staker);
+  staker.lockedAmount = eventEntity.amount;
+  staker.lockedUntilTimestamp = eventEntity.lockedUntilTimestamp;
+  staker.save();
 }
 
 export function handleStakeWithdrawn(event: StakeWithdrawn): void {
@@ -147,15 +122,15 @@ export function handleStakeWithdrawn(event: StakeWithdrawn): void {
   eventEntity.amount = event.params.tokens;
   eventEntity.save();
 
-  // Update operator
-  const operator = createOrLoadOperator(event.params.staker);
-  operator.amountLocked = operator.amountLocked.minus(eventEntity.amount);
-  if (operator.amountLocked.equals(ZERO_BI)) {
-    operator.lockedUntilTimestamp = ZERO_BI;
+  // Update staker
+  const staker = createOrLoadStaker(event.params.staker);
+  staker.lockedAmount = staker.lockedAmount.minus(eventEntity.amount);
+  if (staker.lockedAmount.equals(ZERO_BI)) {
+    staker.lockedUntilTimestamp = ZERO_BI;
   }
-  operator.amountStaked = operator.amountStaked.minus(eventEntity.amount);
-  operator.amountWithdrawn = operator.amountWithdrawn.plus(eventEntity.amount);
-  operator.save();
+  staker.stakedAmount = staker.stakedAmount.minus(eventEntity.amount);
+  staker.withdrawnAmount = staker.withdrawnAmount.plus(eventEntity.amount);
+  staker.save();
 }
 
 export function handleStakeSlashed(event: StakeSlashed): void {
@@ -180,11 +155,11 @@ export function handleStakeSlashed(event: StakeSlashed): void {
   eventEntity.slashRequester = event.params.slashRequester;
   eventEntity.save();
 
-  // Update operator
-  const operator = createOrLoadOperator(event.params.staker);
-  operator.amountSlashed = operator.amountSlashed.plus(eventEntity.amount);
-  operator.amountStaked = operator.amountStaked.minus(eventEntity.amount);
-  operator.save();
+  // Update staker
+  const staker = createOrLoadStaker(event.params.staker);
+  staker.slashedAmount = staker.slashedAmount.plus(eventEntity.amount);
+  staker.stakedAmount = staker.stakedAmount.minus(eventEntity.amount);
+  staker.save();
 }
 
 export function handleFeeWithdrawn(event: FeeWithdrawn): void {

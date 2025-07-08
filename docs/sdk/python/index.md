@@ -56,6 +56,7 @@ pip install human-protocol-sdk[agreement]
       * [`EscrowFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.EscrowFilter)
       * [`FilterError`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.FilterError)
       * [`PayoutFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.PayoutFilter)
+      * [`StakersFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.StakersFilter)
       * [`StatisticsFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.StatisticsFilter)
       * [`StatusEventFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.StatusEventFilter)
       * [`TransactionFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.TransactionFilter)

@@ -15,7 +15,7 @@ export interface IOperator {
   lockedUntilTimestamp: bigint;
   amountWithdrawn: bigint;
   amountSlashed: bigint;
-  reward: bigint;
+  lastDepositTimestamp: bigint;
   amountJobsProcessed: bigint;
   role?: string;
   fee?: bigint;
@@ -32,9 +32,28 @@ export interface IOperator {
 }
 
 export interface IOperatorSubgraph
-  extends Omit<IOperator, 'jobTypes' | 'reputationNetworks' | 'chainId'> {
+  extends Omit<
+    IOperator,
+    | 'jobTypes'
+    | 'reputationNetworks'
+    | 'chainId'
+    | 'amountStaked'
+    | 'amountLocked'
+    | 'lockedUntilTimestamp'
+    | 'amountWithdrawn'
+    | 'amountSlashed'
+    | 'lastDepositTimestamp'
+  > {
   jobTypes?: string;
   reputationNetworks?: { address: string }[];
+  staker?: {
+    stakedAmount: bigint;
+    lockedAmount: bigint;
+    lockedUntilTimestamp: bigint;
+    withdrawnAmount: bigint;
+    slashedAmount: bigint;
+    lastDepositTimestamp: bigint;
+  };
 }
 
 export interface IOperatorsFilter extends IPagination {
@@ -53,15 +72,6 @@ export interface IReputationNetwork {
 export interface IReputationNetworkSubgraph
   extends Omit<IReputationNetwork, 'operators'> {
   operators: IOperatorSubgraph[];
-}
-
-export interface IOperator {
-  address: string;
-  role?: string;
-  url?: string;
-  jobTypes?: string[];
-  registrationNeeded?: boolean;
-  registrationInstructions?: string;
 }
 
 export interface IEscrow {
@@ -207,4 +217,31 @@ export interface IWorkersFilter extends IPagination {
   chainId: ChainId;
   address?: string;
   orderBy?: string;
+}
+
+export interface IStaker {
+  address: string;
+  stakedAmount: bigint;
+  lockedAmount: bigint;
+  lockedUntil: bigint;
+  withdrawableAmount: bigint;
+  slashedAmount: bigint;
+}
+
+export interface IStakersFilter extends IPagination {
+  chainId: ChainId;
+  minStakedAmount?: string;
+  maxStakedAmount?: string;
+  minLockedAmount?: string;
+  maxLockedAmount?: string;
+  minWithdrawnAmount?: string;
+  maxWithdrawnAmount?: string;
+  minSlashedAmount?: string;
+  maxSlashedAmount?: string;
+  orderBy?:
+    | 'stakedAmount'
+    | 'lockedAmount'
+    | 'withdrawnAmount'
+    | 'slashedAmount'
+    | 'lastDepositTimestamp';
 }

@@ -102,7 +102,7 @@ export class OracleDiscoveryService {
               amountWithdrawn: exchangeOracle.amountWithdrawn,
               amountSlashed: exchangeOracle.amountSlashed,
               amountJobsProcessed: exchangeOracle.amountJobsProcessed,
-              reward: exchangeOracle.reward,
+              lastDepositTimestamp: exchangeOracle.lastDepositTimestamp,
               lockedUntilTimestamp: exchangeOracle.lockedUntilTimestamp,
             }),
           );

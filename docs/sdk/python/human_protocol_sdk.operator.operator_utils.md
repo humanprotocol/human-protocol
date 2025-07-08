@@ -17,11 +17,11 @@ print(
 
 ## Module
 
-### *class* human_protocol_sdk.operator.operator_utils.OperatorData(chain_id, id, address, amount_staked, amount_locked, locked_until_timestamp, amount_withdrawn, amount_slashed, reward, amount_jobs_processed, role=None, fee=None, public_key=None, webhook_url=None, website=None, url=None, job_types=None, registration_needed=None, registration_instructions=None, reputation_networks=None, name=None, category=None)
+### *class* human_protocol_sdk.operator.operator_utils.OperatorData(chain_id, id, address, amount_staked, amount_locked, locked_until_timestamp, amount_withdrawn, amount_slashed, last_deposit_timestamp, amount_jobs_processed, role=None, fee=None, public_key=None, webhook_url=None, website=None, url=None, job_types=None, registration_needed=None, registration_instructions=None, reputation_networks=None, name=None, category=None)
 
 Bases: `object`
 
-#### \_\_init_\_(chain_id, id, address, amount_staked, amount_locked, locked_until_timestamp, amount_withdrawn, amount_slashed, reward, amount_jobs_processed, role=None, fee=None, public_key=None, webhook_url=None, website=None, url=None, job_types=None, registration_needed=None, registration_instructions=None, reputation_networks=None, name=None, category=None)
+#### \_\_init_\_(chain_id, id, address, amount_staked, amount_locked, locked_until_timestamp, amount_withdrawn, amount_slashed, last_deposit_timestamp, amount_jobs_processed, role=None, fee=None, public_key=None, webhook_url=None, website=None, url=None, job_types=None, registration_needed=None, registration_instructions=None, reputation_networks=None, name=None, category=None)
 
 Initializes a OperatorData instance.
 
@@ -34,7 +34,7 @@ Initializes a OperatorData instance.
   * **locked_until_timestamp** (`int`) – Locked until timestamp
   * **amount_withdrawn** (`int`) – Amount withdrawn
   * **amount_slashed** (`int`) – Amount slashed
-  * **reward** (`int`) – Reward
+  * **last_deposit_timestamp** (`int`) – Last deposit timestamp
   * **amount_jobs_processed** (`int`) – Amount of jobs launched
   * **role** (`Optional`[`str`]) – Role
   * **fee** (`Optional`[`int`]) – Fee

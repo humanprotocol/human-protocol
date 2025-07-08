@@ -5,12 +5,6 @@ const LEADER_FRAGMENT = gql`
   fragment OperatorFields on Operator {
     id
     address
-    amountStaked
-    amountLocked
-    lockedUntilTimestamp
-    amountWithdrawn
-    amountSlashed
-    reward
     amountJobsProcessed
     role
     fee
@@ -24,6 +18,14 @@ const LEADER_FRAGMENT = gql`
     reputationNetworks
     name
     category
+    staker {
+      stakedAmount
+      lockedAmount
+      withdrawnAmount
+      slashedAmount
+      lockedUntilTimestamp
+      lastDepositTimestamp
+    }
   }
 `;
 
