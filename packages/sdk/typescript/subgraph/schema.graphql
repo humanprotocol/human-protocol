@@ -192,10 +192,9 @@ type BulkPayoutEvent @entity(immutable: true) {
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
-
-  escrowAddress: Bytes! # address
-  sender: Bytes! # address
-  bulkPayoutTxId: BigInt!
+  escrowAddress: Bytes!
+  sender: Bytes!
+  payoutId: String!
   bulkCount: BigInt!
 }
 
