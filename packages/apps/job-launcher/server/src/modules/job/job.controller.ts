@@ -203,10 +203,6 @@ export class JobController {
     @Body() data: JobAudinoDto,
     @Request() req: RequestWithUser,
   ): Promise<number> {
-    if (this.web3ConfigService.env === Web3Env.MAINNET) {
-      throw new ForbiddenError('Disabled');
-    }
-
     return await this.mutexManagerService.runExclusive(
       { id: `user${req.user.id}` },
       MUTEX_TIMEOUT,
