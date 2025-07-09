@@ -3925,7 +3925,7 @@ __metadata:
     "@mui/material": "npm:^7.2.0"
     "@mui/styled-engine-sc": "npm:7.2.0"
     "@mui/system": "npm:^7.2.0"
-    "@mui/x-data-grid": "npm:^8.5.2"
+    "@mui/x-data-grid": "npm:^8.7.0"
     "@mui/x-date-pickers": "npm:^7.23.6"
     "@tanstack/react-query": "npm:^5.67.2"
     "@types/react": "npm:^18.2.66"
@@ -6079,13 +6079,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/x-data-grid@npm:^8.5.2":
-  version: 8.5.2
-  resolution: "@mui/x-data-grid@npm:8.5.2"
+"@mui/x-data-grid@npm:^8.7.0":
+  version: 8.7.0
+  resolution: "@mui/x-data-grid@npm:8.7.0"
   dependencies:
     "@babel/runtime": "npm:^7.27.6"
     "@mui/utils": "npm:^7.1.1"
-    "@mui/x-internals": "npm:8.5.2"
+    "@mui/x-internals": "npm:8.7.0"
     clsx: "npm:^2.1.1"
     prop-types: "npm:^15.8.1"
     use-sync-external-store: "npm:^1.5.0"
@@ -6101,7 +6101,7 @@ __metadata:
       optional: true
     "@emotion/styled":
       optional: true
-  checksum: 10c0/deb5e7e1f9391b92d85acdb39eb1bc0fd85cbad748be839b132b62dedd3fcce5aae1919b4630a76f156ebcbd8402114feff97b6cc118f484883d722d31976b47
+  checksum: 10c0/cb77a88b336a4809dcec2e1f0252700eb8467913eb19adea32b6c65c0a0f3ac68311d82f4f83f8ef6269d2e90ddd83518c378cfcb8f1a45dfc7d59fd2a749fe9
   languageName: node
   linkType: hard
 
@@ -6165,9 +6165,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/x-internals@npm:8.5.2":
-  version: 8.5.2
-  resolution: "@mui/x-internals@npm:8.5.2"
+"@mui/x-internals@npm:8.7.0":
+  version: 8.7.0
+  resolution: "@mui/x-internals@npm:8.7.0"
   dependencies:
     "@babel/runtime": "npm:^7.27.6"
     "@mui/utils": "npm:^7.1.1"
@@ -6175,7 +6175,7 @@ __metadata:
   peerDependencies:
     "@mui/system": ^5.15.14 || ^6.0.0 || ^7.0.0
     react: ^17.0.0 || ^18.0.0 || ^19.0.0
-  checksum: 10c0/03d2105d82624b0064c618a6bfc289c124f7fd8bff2f11fe5ceb9504514fb4cf59be906b5649b3537f21b86c54dbcbf4406e55d529a8a399d9fbc510f3bd2bf9
+  checksum: 10c0/c3fab5603a046db85f739195576de4581cf9afed7c6b299322b6745ad9336534afb1e62e8fa9fc5a37e1e9eee942b51c7bccf2ccecf591efa27650a513071eed
   languageName: node
   linkType: hard
 
