@@ -1,30 +1,19 @@
 import { Dispatch, SetStateAction, useState } from 'react';
 
 import Typography from '@mui/material/Typography';
+import type { DatePickerProps } from '@mui/x-date-pickers';
 import {
-  DatePickerProps,
-  LocalizationProvider,
-  UseDateFieldProps,
-} from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { DatePicker as DatePickerMui } from '@mui/x-date-pickers/DatePicker';
-import {
-  BaseSingleInputFieldProps,
-  DateValidationError,
-  FieldSection,
-} from '@mui/x-date-pickers/models';
+  DatePicker as DatePickerMui,
+  type DatePickerFieldProps,
+} from '@mui/x-date-pickers/DatePicker';
 import type { Dayjs } from 'dayjs';
 
-interface CustomDateFieldProps
-  extends UseDateFieldProps<Dayjs, false>,
-    BaseSingleInputFieldProps<
-      Dayjs | null,
-      Dayjs,
-      FieldSection,
-      false,
-      DateValidationError
-    > {
+interface CustomDateFieldProps extends DatePickerFieldProps {
   setOpen: Dispatch<SetStateAction<boolean>>;
+  label: string;
+  id: string;
+  InputProps: { ref?: React.Ref<HTMLElement> };
+  inputProps: { 'aria-label'?: string };
 }
 
 const CustomDateField = ({
@@ -55,7 +44,7 @@ const CustomDateField = ({
 };
 
 interface CustomDatePickerProps {
-  props: Omit<DatePickerProps<Dayjs>, 'open' | 'onOpen' | 'onClose'>;
+  props: Omit<DatePickerProps<false>, 'open' | 'onOpen' | 'onClose'>;
 }
 
 const CustomDatePicker = ({ props }: CustomDatePickerProps) => {
@@ -86,16 +75,14 @@ interface DatePickerPropsMui {
 
 const DatePicker = ({ value, onChange, customProps }: DatePickerPropsMui) => {
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <CustomDatePicker
-        props={{
-          label: value.format('DD MMM, YYYY'),
-          value: value,
-          onChange: onChange,
-          ...customProps,
-        }}
-      />
-    </LocalizationProvider>
+    <CustomDatePicker
+      props={{
+        label: value.format('DD MMM, YYYY'),
+        value: value,
+        onChange: onChange,
+        ...customProps,
+      }}
+    />
   );
 };
 
