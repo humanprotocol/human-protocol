@@ -1,6 +1,13 @@
 /* eslint-disable camelcase */
 import { useState } from 'react';
-import { Box, Button, Stack, Typography, TextField } from '@mui/material';
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Stack,
+  Typography,
+  TextField,
+} from '@mui/material';
 import ErrorIcon from '@mui/icons-material/Error';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
@@ -61,6 +68,7 @@ export function ReportAbuseModal({
     isSuccess,
     isError,
     isIdle,
+    isPending,
   } = useReportAbuseMutation({
     onError: (status) => {
       if (status === 422) {
@@ -89,6 +97,7 @@ export function ReportAbuseModal({
       <Typography variant="h4" mb={2}>
         Report Abuse
       </Typography>
+      {isPending && <CircularProgress size={40} sx={{ mx: 'auto' }} />}
       {isError && <ErrorState error={error} onClose={close} />}
       {isSuccess && <SuccessState onClose={close} />}
       {isIdle && (
