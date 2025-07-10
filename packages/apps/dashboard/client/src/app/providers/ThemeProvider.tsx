@@ -9,7 +9,7 @@ import {
 
 import type { PaletteMode } from '@mui/material';
 import CssBaseline from '@mui/material/CssBaseline';
-import MuiThemeProvider from '@mui/material/styles/ThemeProvider';
+import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 
 import { createAppTheme } from '@/shared/ui/theme';
 

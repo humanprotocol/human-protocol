@@ -1,5 +1,5 @@
 import Button from '@mui/material/Button';
-import styled from '@mui/material/styles/styled';
+import { styled } from '@mui/material/styles';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import dayjs from 'dayjs';

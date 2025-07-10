@@ -7,7 +7,7 @@ import TwitterIcon from '@mui/icons-material/Twitter';
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
-import styled from '@mui/material/styles/styled';
+import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 
 import { env } from '@/shared/config/env';

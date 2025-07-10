@@ -1,5 +1,5 @@
 import Chip from '@mui/material/Chip';
-import useTheme from '@mui/material/styles/useTheme';
+import { useTheme } from '@mui/material/styles';
 
 import type { Reputation } from '@/shared/model/reputationSchema';
 
