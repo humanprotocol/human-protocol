@@ -6,7 +6,7 @@ import {
   KVStoreUtils,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
@@ -23,10 +23,11 @@ import { Web3Service } from '../web3/web3.service';
 import { WebhookDataDto } from './webhook.dto';
 import { WebhookEntity } from './webhook.entity';
 import { WebhookRepository } from './webhook.repository';
+import logger from '../../logger';
 
 @Injectable()
 export class WebhookService {
-  private readonly logger = new Logger(WebhookService.name);
+  private readonly logger = logger.child({ context: WebhookService.name });
 
   constructor(
     @Inject(Web3Service)
@@ -85,6 +86,7 @@ export class WebhookService {
     } catch (error) {
       const formattedError = formatAxiosError(error);
       this.logger.error('Webhook not sent', {
+        webhookId: webhook.id,
         error: formattedError,
       });
       throw new Error(formattedError.message);

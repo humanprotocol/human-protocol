@@ -1,15 +1,16 @@
 import { ChainId, OperatorUtils, Role } from '@human-protocol/sdk';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Wallet, ethers } from 'ethers';
 import { NetworkConfigService } from '../../common/config/network-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ErrorWeb3 } from '../../common/constants/errors';
 import { ConflictError, ValidationError } from '../../common/errors';
 import { AvailableOraclesDto, OracleDataDto } from './web3.dto';
+import logger from '../../logger';
 
 @Injectable()
 export class Web3Service {
-  public readonly logger = new Logger(Web3Service.name);
+  private readonly logger = logger.child({ context: Web3Service.name });
   private signers: { [key: number]: Wallet } = {};
   public readonly signerAddress: string;
 
@@ -95,7 +96,12 @@ export class Web3Service {
 
       return filteredOracles;
     } catch (error) {
-      this.logger.error(`Error processing chainId ${chainId}:`, error);
+      this.logger.error('Error processing chainId', {
+        chainId,
+        jobType,
+        address,
+        error,
+      });
     }
     return [];
   }
@@ -139,9 +145,10 @@ export class Web3Service {
     );
 
     if (!operator || !operator.reputationNetworks) {
-      this.logger.error(
-        `Operator or reputation networks not found for chain ${chainId}.`,
-      );
+      this.logger.error('Operator or reputation networks not found for chain', {
+        chainId,
+        jobType,
+      });
       return [];
     }
 
@@ -158,10 +165,12 @@ export class Web3Service {
             ? networkOperator.address
             : null;
         } catch (error) {
-          this.logger.error(
-            `Failed to fetch operator for address ${address} on chain ${chainId}:`,
+          this.logger.error('Failed to fetch operator for address', {
+            chainId,
+            address,
+            jobType,
             error,
-          );
+          });
           return null;
         }
       }),

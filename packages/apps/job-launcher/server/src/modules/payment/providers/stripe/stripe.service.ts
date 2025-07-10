@@ -14,6 +14,7 @@ import {
 } from '../../payment.interface';
 import { PaymentProvider } from '../payment-provider.abstract';
 import { AddressDto, BillingInfoDto } from '../../payment.dto';
+import logger from '../../../../logger';
 
 export enum StripePaymentStatus {
   CANCELED = 'canceled',
@@ -23,6 +24,7 @@ export enum StripePaymentStatus {
 
 @Injectable()
 export class StripeService extends PaymentProvider {
+  private readonly logger = logger.child({ context: StripeService.name });
   private stripe: Stripe;
 
   constructor(private stripeConfigService: PaymentProviderConfigService) {
@@ -43,7 +45,7 @@ export class StripeService extends PaymentProvider {
       const customer = await this.stripe.customers.create({ email });
       return customer.id;
     } catch (error) {
-      this.logger.log(error.message, StripeService.name);
+      this.logger.error('Error while creating stripe customer', error);
       throw new ServerError(ErrorPayment.CustomerNotCreated);
     }
   }
@@ -57,15 +59,17 @@ export class StripeService extends PaymentProvider {
         customer: customerId ?? undefined,
       });
     } catch (error) {
-      this.logger.log(error.message, StripeService.name);
+      this.logger.error('Error while setting up card', {
+        customerId,
+        error,
+      });
       throw new ServerError(ErrorPayment.CardNotAssigned);
     }
 
     if (!setupIntent?.client_secret) {
-      this.logger.log(
-        ErrorPayment.ClientSecretDoesNotExist,
-        StripeService.name,
-      );
+      this.logger.error('ErrorPayment.ClientSecretDoesNotExist', {
+        customerId,
+      });
       throw new ServerError(ErrorPayment.ClientSecretDoesNotExist);
     }
 
@@ -335,7 +339,7 @@ export class StripeService extends PaymentProvider {
     );
 
     return {
-      email: customer.email!,
+      email: customer.email as string,
       name: customer.name ?? undefined,
       address: customer.address
         ? {
@@ -357,7 +361,7 @@ export class StripeService extends PaymentProvider {
     )) as Stripe.Customer;
 
     return {
-      email: customer.email!,
+      email: customer.email as string,
       name: customer.name ?? undefined,
       address: customer.address
         ? {
