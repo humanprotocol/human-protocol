@@ -42,7 +42,7 @@ jobs:
       - name: Install dependencies
         run: yarn --immutable
       - name: Build core package
-        run: yarn build:core
+        run: yarn workspace @human-protocol/core build
       - name: Networks list
         id: networks
         run: |
