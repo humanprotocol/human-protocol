@@ -166,8 +166,7 @@ export class AuthJwtController {
     @Body() data: ForgotPasswordDto,
     @Ip() ip: string,
   ): Promise<void> {
-    console.log('IP:', ip);
-    await this.authService.forgotPassword(data);
+    await this.authService.forgotPassword(data, ip);
   }
 
   @Public()
