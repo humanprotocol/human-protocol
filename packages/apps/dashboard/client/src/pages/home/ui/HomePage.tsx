@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import Box from '@mui/material/Box';
@@ -28,7 +28,7 @@ const CardWrapper = styled(Grid)(({ theme }) => ({
   borderRadius: '16px',
   padding: '24px 32px',
   [theme.breakpoints.up('md')]: {
-    height: 300,
+    height: '100%',
   },
   [theme.breakpoints.down('md')]: {
     height: 'auto',
@@ -66,10 +66,10 @@ const HomePage: FC = () => {
 
   return (
     <PageWrapper violetHeader>
-      <Typography variant="h3" color="white.main">
+      <Typography variant="h3" color="white.main" mb={3}>
         All HUMAN activity. In one place.
       </Typography>
-      <SearchBar className="home-page-search" />
+      <SearchBar />
       <Grid container mt={{ xs: 6, md: 8 }} columnSpacing={3} rowSpacing={3}>
         <Grid size={{ xs: 12, md: 3 }}>
           <CardWrapper flexDirection="column" gap={3}>

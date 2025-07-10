@@ -1,6 +1,6 @@
-import { useTheme } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 // @ts-expect-error -- import error, but this type work property
-import { ContentRenderer } from 'recharts';
+import type { ContentRenderer } from 'recharts';
 
 import formatDate from '../lib/formatDate';
 

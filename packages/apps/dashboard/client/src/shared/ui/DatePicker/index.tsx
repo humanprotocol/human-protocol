@@ -1,5 +1,5 @@
 import Typography from '@mui/material/Typography';
-import { usePickerContext, DatePickerProps } from '@mui/x-date-pickers';
+import { type DatePickerProps, usePickerContext } from '@mui/x-date-pickers';
 import { DatePicker as MuiDatePicker } from '@mui/x-date-pickers/DatePicker';
 import type { Dayjs } from 'dayjs';
 

@@ -1,6 +1,6 @@
-import { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 
-import { Launch as LaunchIcon } from '@mui/icons-material';
+import LaunchIcon from '@mui/icons-material/Launch';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { Link } from 'react-router-dom';
@@ -59,13 +59,16 @@ const RoleCell: FC<Props> = ({ rank, role, websiteUrl, name }) => {
           <EntityIcon role={role} />
           <Box display="flex" flexDirection="column" gap={4 / 8}>
             <Box display="flex" alignItems="center" gap={12 / 8}>
-              <Typography variant={isMobile ? 'subtitle2' : 'h6'}>
+              <Typography variant={isMobile ? 'subtitle2' : 'h6'} component="p">
                 {formattedName ?? humanReadableRole}
               </Typography>
               {websiteUrl ? <LaunchIcon fontSize="small" /> : null}
             </Box>
             {name && role ? (
-              <Typography variant={isMobile ? 'body3' : 'subtitle2'}>
+              <Typography
+                variant={isMobile ? 'body3' : 'subtitle2'}
+                component="p"
+              >
                 {humanReadableRole}
               </Typography>
             ) : null}

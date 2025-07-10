@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { type FC, useState } from 'react';
 
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import Card from '@mui/material/Card';
@@ -43,6 +43,7 @@ const Clipboard: FC<ClipboardProps> = ({ value }) => {
         </Typography>
 
         <IconButton
+          aria-label="Copy to clipboard"
           onClick={() => {
             navigator.clipboard.writeText(value);
             setTooltipOpen(true);
