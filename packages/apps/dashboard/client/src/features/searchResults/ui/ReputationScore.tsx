@@ -1,6 +1,7 @@
-import { Chip, useTheme } from '@mui/material';
+import Chip from '@mui/material/Chip';
+import useTheme from '@mui/material/styles/useTheme';
 
-type Reputation = 'High' | 'Medium' | 'Low' | 'Unknown';
+import type { Reputation } from '@/shared/model/reputationSchema';
 
 type Props = {
   reputation: Reputation;
@@ -15,28 +16,28 @@ const ReputationScore = ({ reputation }: Props) => {
   const theme = useTheme();
 
   const reputationAttributes: Record<Reputation, ReputationAttributes> = {
-    High: {
+    high: {
       title: 'High',
       colors: {
         title: theme.palette.success.main,
         border: theme.palette.success.light,
       },
     },
-    Medium: {
+    medium: {
       title: 'Medium',
       colors: {
         title: theme.palette.warning.main,
         border: theme.palette.warning.light,
       },
     },
-    Low: {
+    low: {
       title: 'Low',
       colors: {
         title: theme.palette.orange.main,
         border: theme.palette.orange.light,
       },
     },
-    Unknown: {
+    unknown: {
       title: 'Coming soon',
       colors: {
         title: theme.palette.ocean.main,

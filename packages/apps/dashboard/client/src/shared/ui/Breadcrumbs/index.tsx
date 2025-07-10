@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import Box from '@mui/material/Box';

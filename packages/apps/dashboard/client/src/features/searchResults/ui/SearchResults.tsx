@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { Stack } from '@mui/material';
+import Stack from '@mui/material/Stack';
 import { AxiosError } from 'axios';
 import { useLocation, useParams } from 'react-router-dom';
 
@@ -13,7 +13,7 @@ import Loader from '@/shared/ui/Loader';
 import ShadowIcon from '@/shared/ui/ShadowIcon';
 
 import useAddressDetails from '../api/useAddressDetails';
-import { AddressDetails } from '../model/addressDetailsSchema';
+import type { AddressDetails } from '../model/addressDetailsSchema';
 
 import Clipboard from './Clipboard';
 import EscrowAddress from './EscrowAddress';
