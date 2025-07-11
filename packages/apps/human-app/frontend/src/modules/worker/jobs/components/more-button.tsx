@@ -94,7 +94,7 @@ export function MoreButton({ job, isDisabled }: MoreButtonProps) {
             {t('worker.reportAbuse.cancel')}
           </ListItemButton>
           <ListItemButton onClick={handleOpenReportAbuseModal}>
-            {t('worker.reportAbuse.report')}
+            {t('worker.reportAbuse.reportAbuse')}
           </ListItemButton>
         </MenuList>
       </Popover>
