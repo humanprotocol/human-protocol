@@ -20,7 +20,7 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
       - name: Build core package
-        run: yarn build:core
+        run: yarn workspace @human-protocol/core build
       - name: Generate manifest for Polygon for tests
         run: NETWORK=polygon yarn workspace @human-protocol/subgraph generate 
       - name: Run subgraph test

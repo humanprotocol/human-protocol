@@ -1,4 +1,4 @@
-import { Logger, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 
@@ -21,7 +21,7 @@ import { JobRepository } from '../job/job.repository';
     HttpModule,
   ],
   controllers: [WebhookController],
-  providers: [Logger, WebhookService, WebhookRepository, JobRepository],
+  providers: [WebhookService, WebhookRepository, JobRepository],
   exports: [WebhookService],
 })
 export class WebhookModule {}

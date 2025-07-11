@@ -30,9 +30,14 @@ export interface Logger {
   child: (bindings: ChildBindings) => Logger;
 }
 
-export type LoggerOptions = {
+export type LoggerFactoryOptions = {
   name?: string;
   pretty?: boolean;
   level?: `${LogLevel}`;
   disabled?: boolean;
 };
+
+export type LoggerFactory = (
+  optins: LoggerFactoryOptions,
+  bindings?: LogMeta,
+) => Logger;

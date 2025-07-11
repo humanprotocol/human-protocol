@@ -31,6 +31,7 @@
     "@human-protocol/sdk": "*",
     "@mui/icons-material": "^7.0.1",
     "@mui/material": "^5.16.7",
+    "@mui/x-data-grid": "^8.7.0",
     "@tanstack/query-sync-storage-persister": "^5.68.0",
     "@tanstack/react-query": "^5.67.2",
     "@tanstack/react-query-persist-client": "^5.80.7",

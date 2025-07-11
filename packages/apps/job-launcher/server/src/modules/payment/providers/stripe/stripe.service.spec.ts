@@ -3,7 +3,6 @@ jest.mock('stripe');
 import { faker } from '@faker-js/faker';
 import { PaymentData } from '../../payment.interface';
 import { Test, TestingModule } from '@nestjs/testing';
-import { Logger } from '@nestjs/common';
 import { StripePaymentStatus, StripeService } from './stripe.service';
 import { PaymentProviderConfigService } from '../../../../common/config/payment-provider-config.service';
 import Stripe from 'stripe';
@@ -28,7 +27,6 @@ import {
 describe('StripeService', () => {
   let service: StripeService;
   let stripeMock: jest.Mocked<Stripe>;
-  let loggerSpy: jest.SpyInstance;
 
   const mockStripeConfigService = {
     secretKey: 'test_key',
@@ -88,7 +86,6 @@ describe('StripeService', () => {
     } as unknown as jest.Mocked<Stripe>;
 
     (service as any).stripe = stripeMock;
-    loggerSpy = jest.spyOn(Logger.prototype, 'log');
   });
 
   afterEach(() => {
@@ -121,7 +118,6 @@ describe('StripeService', () => {
       await expect(service.createCustomer(email)).rejects.toThrow(
         new ServerError(ErrorPayment.CustomerNotCreated),
       );
-      expect(loggerSpy).toHaveBeenCalled();
     });
   });
 

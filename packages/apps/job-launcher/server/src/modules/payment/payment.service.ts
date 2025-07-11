@@ -3,7 +3,7 @@ import {
   HMToken,
   HMToken__factory,
 } from '@human-protocol/core/typechain-types';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ethers, formatUnits } from 'ethers';
 import { NetworkConfigService } from '../../common/config/network-config.service';
 import { ServerConfigService } from '../../common/config/server-config.service';
@@ -46,10 +46,11 @@ import { RateService } from '../rate/rate.service';
 import { UserEntity } from '../user/user.entity';
 import { UserRepository } from '../user/user.repository';
 import { PaymentProvider } from './providers/payment-provider.abstract';
+import logger from '../../logger';
 
 @Injectable()
 export class PaymentService {
-  private readonly logger = new Logger(PaymentService.name);
+  private readonly logger = logger.child({ context: PaymentService.name });
 
   constructor(
     private readonly networkConfigService: NetworkConfigService,
@@ -79,7 +80,10 @@ export class PaymentService {
     const setup = await this.paymentProvider.retrieveCardSetup(data.setupId);
 
     if (!setup) {
-      this.logger.log(ErrorPayment.SetupNotFound, PaymentService.name);
+      this.logger.error(ErrorPayment.SetupNotFound, {
+        userId: user.id,
+        setupId: data.setupId,
+      });
       throw new NotFoundError(ErrorPayment.SetupNotFound);
     }
 
@@ -222,9 +226,14 @@ export class PaymentService {
       throw new ServerError(ErrorPayment.InvalidTransactionData);
     }
 
-    if ((await transaction.confirmations()) < TX_CONFIRMATION_TRESHOLD) {
+    const nConfirmations = await transaction.confirmations();
+    if (nConfirmations < TX_CONFIRMATION_TRESHOLD) {
       this.logger.error(
-        `Transaction has ${transaction.confirmations} confirmations instead of ${TX_CONFIRMATION_TRESHOLD}`,
+        'Number of confirmations for transaction is less than threshold',
+        {
+          nConfirmations,
+          threshold: TX_CONFIRMATION_TRESHOLD,
+        },
       );
       throw new ConflictError(
         ErrorPayment.TransactionHasNotEnoughAmountOfConfirmations,

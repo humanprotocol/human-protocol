@@ -10,11 +10,11 @@ import validateResponse from '@/shared/lib/validateResponse';
 
 import {
   hcaptchaDailyStatsSchema,
-  HcaptchaDailyStats,
+  type HcaptchaDailyStats,
 } from '../model/hcaptchaDailyStatsSchema';
 import {
   hmtDailyStatsSchema,
-  HMTDailyStats,
+  type HMTDailyStats,
 } from '../model/hmtDailyStatsSchema';
 
 export type ChartData = (HMTDailyStats & Omit<HcaptchaDailyStats, 'date'>)[];

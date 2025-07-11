@@ -1,4 +1,4 @@
-import { Logger, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 
@@ -35,7 +35,6 @@ import { ManifestModule } from '../manifest/manifest.module';
   ],
   controllers: [JobController],
   providers: [
-    Logger,
     JobService,
     JobRepository,
     WebhookRepository,

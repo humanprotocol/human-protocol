@@ -1,6 +1,6 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 
-import SvgIcon, { SvgIconProps } from '@mui/material/SvgIcon';
+import SvgIcon, { type SvgIconProps } from '@mui/material/SvgIcon';
 
 const LightModeIcon: FC<SvgIconProps> = (props) => {
   return (

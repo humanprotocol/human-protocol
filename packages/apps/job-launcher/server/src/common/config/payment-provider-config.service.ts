@@ -26,23 +26,23 @@ export class PaymentProviderConfigService {
 
   /**
    * The name of the application interacting with the payment providers API.
-   * Default: 'Fortune'
+   * Default: 'Job Launcher Server'
    */
   get appName(): string {
     return this.configService.get<string>(
       'PAYMENT_PROVIDER_APP_NAME',
-      'Fortune',
+      'Job Launcher Server',
     );
   }
 
   /**
    * The version of the application interacting with the payment providers API.
-   * Default: '0.0.1'
+   * Default: '1.0.0'
    */
   get appVersion(): string {
     return this.configService.get<string>(
       'PAYMENT_PROVIDER_APP_VERSION',
-      '0.0.1',
+      '1.0.0',
     );
   }
 

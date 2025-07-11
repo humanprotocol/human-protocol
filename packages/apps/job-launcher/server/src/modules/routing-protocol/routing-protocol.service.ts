@@ -1,5 +1,5 @@
 import { ChainId, Role } from '@human-protocol/sdk';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { NetworkConfigService } from '../../common/config/network-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ErrorRoutingProtocol } from '../../common/constants/errors';
@@ -26,7 +26,6 @@ type OracleValue<T> = {
 
 @Injectable()
 export class RoutingProtocolService {
-  public readonly logger = new Logger(RoutingProtocolService.name);
   private readonly chains: ChainId[];
   private readonly reputationOracles: string[];
   private readonly chainPriorityOrder: number[];

@@ -10,7 +10,6 @@ import { TypeOrmLoggerModule, TypeOrmLoggerService } from './typeorm';
 import { JobEntity } from '../modules/job/job.entity';
 import { ContentModerationRequestEntity } from '../modules/content-moderation/content-moderation-request.entity';
 import { PaymentEntity } from '../modules/payment/payment.entity';
-import { ServerConfigService } from '../common/config/server-config.service';
 import { DatabaseConfigService } from '../common/config/database-config.service';
 import { ApiKeyEntity } from '../modules/auth/apikey.entity';
 import { WebhookEntity } from '../modules/webhook/webhook.entity';
@@ -22,15 +21,10 @@ import { WhitelistEntity } from '../modules/whitelist/whitelist.entity';
   imports: [
     TypeOrmModule.forRootAsync({
       imports: [TypeOrmLoggerModule],
-      inject: [
-        TypeOrmLoggerService,
-        DatabaseConfigService,
-        ServerConfigService,
-      ],
+      inject: [TypeOrmLoggerService, DatabaseConfigService],
       useFactory: (
         typeOrmLoggerService: TypeOrmLoggerService,
         databaseConfigService: DatabaseConfigService,
-        serverConfigService: ServerConfigService,
       ) => {
         const loggerOptions = databaseConfigService.logging?.split(', ');
         typeOrmLoggerService.setOptions(
@@ -72,7 +66,6 @@ import { WhitelistEntity } from '../modules/whitelist/whitelist.entity';
           username: databaseConfigService.user,
           password: databaseConfigService.password,
           database: databaseConfigService.database,
-          keepConnectionAlive: serverConfigService.nodeEnv === 'test',
           migrationsRun: false,
           ssl: databaseConfigService.ssl,
         };

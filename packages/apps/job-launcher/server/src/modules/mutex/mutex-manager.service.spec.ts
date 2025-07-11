@@ -22,7 +22,7 @@ describe('MutexManagerService', () => {
     let task1Executed = false;
     let task2Executed = false;
 
-    const userId = { id: 'user1' };
+    const userId = 'user1';
 
     const task1 = service.runExclusive(userId, timeout, async () => {
       await new Promise((resolve) => setTimeout(resolve, 100)); // Simulate async work
@@ -41,7 +41,7 @@ describe('MutexManagerService', () => {
   });
 
   it('should timeout if lock is not acquired in time', async () => {
-    const userId = { id: 'user2' };
+    const userId = 'user2';
 
     // Simulate a long async work to hold the lock
     service.runExclusive(userId, timeout, async () => {
@@ -53,6 +53,6 @@ describe('MutexManagerService', () => {
       service.runExclusive(userId, timeout, async () => {
         await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate async work
       }),
-    ).rejects.toThrow('Function execution timed out for user2');
+    ).rejects.toThrow('Function execution timed out for key');
   });
 });

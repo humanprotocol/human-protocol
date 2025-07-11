@@ -9,6 +9,7 @@ scripts
 **/node_modules
 **/build
 **/dist
+**/tsconfig.tsbuildinfo
 
 # Core package artifacts
 # Hardhat files

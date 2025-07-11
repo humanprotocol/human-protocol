@@ -1,14 +1,18 @@
-import { LoggerService } from '@nestjs/common';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import type { LoggerService } from '@nestjs/common';
+
 import { Logger, LogLevel, LogMeta } from './types';
 
 class NestLogger implements LoggerService {
   constructor(private readonly loggerInstance: Logger) {}
 
   log(message: any, ...optionalParams: any[]) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     this.callLogger(LogLevel.INFO, message, ...optionalParams);
   }
 
   warn(message: any, ...optionalParams: any[]) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     this.callLogger(LogLevel.WARN, message, ...optionalParams);
   }
 
@@ -47,6 +51,7 @@ class NestLogger implements LoggerService {
       }
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     this.callLogger(LogLevel.ERROR, _message, ..._optionalParams);
   }
 

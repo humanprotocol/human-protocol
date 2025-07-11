@@ -19,6 +19,6 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
       - name: Build core package
-        run: yarn build:core
+        run: yarn workspace @human-protocol/core build
       - name: Run Node.js SDK test
         run: yarn workspace @human-protocol/sdk test

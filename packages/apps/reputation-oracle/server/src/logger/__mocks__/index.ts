@@ -1,4 +1,4 @@
-import { Logger } from '../types';
+import type { Logger } from '@human-protocol/logger';
 
 const logger: Logger = {
   child: () => logger,

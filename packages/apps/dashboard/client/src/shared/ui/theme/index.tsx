@@ -1,11 +1,11 @@
-import { CSSProperties } from 'react';
+import type { CSSProperties } from 'react';
 
-import { Shadows } from '@mui/material';
-import { createTheme } from '@mui/material/styles';
 import {
-  PaletteColorOptions,
-  PaletteColor,
-} from '@mui/material/styles/createPalette';
+  createTheme,
+  type PaletteColorOptions,
+  type PaletteColor,
+  type Shadows,
+} from '@mui/material/styles';
 
 import { lightPalette, darkPalette } from './palette';
 

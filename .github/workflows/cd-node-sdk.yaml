@@ -22,7 +22,7 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
       - name: Build core package
-        run: yarn build:core
+        run: yarn workspace @human-protocol/core build
       - name: Change Node.js SDK version from release tag
         uses: jossef/action-set-json-field@v2
         if: ${{ github.event_name != 'workflow_dispatch' }}

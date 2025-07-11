@@ -1078,7 +1078,7 @@ describe('CronJobService', () => {
     });
   });
 
-  describe('syncJobStuses Cron Job', () => {
+  describe('syncJobStatuses Cron Job', () => {
     let cronJobEntityMock: Partial<CronJobEntity>;
     let jobEntityMock: Partial<JobEntity>;
     let escrowEventMock: Partial<StatusEvent>;
@@ -1129,7 +1129,7 @@ describe('CronJobService', () => {
 
       const startCronJobMock = jest.spyOn(service, 'startCronJob');
 
-      await service.syncJobStuses();
+      await service.syncJobStatuses();
 
       expect(startCronJobMock).not.toHaveBeenCalled();
     });
@@ -1139,7 +1139,7 @@ describe('CronJobService', () => {
         .spyOn(service, 'startCronJob')
         .mockResolvedValueOnce(cronJobEntityMock as any);
 
-      await service.syncJobStuses();
+      await service.syncJobStatuses();
 
       expect(service.startCronJob).toHaveBeenCalledWith(
         CronJobType.SyncJobStatuses,
@@ -1151,7 +1151,7 @@ describe('CronJobService', () => {
         .spyOn(jobRepository, 'findManyByChainIdsAndEscrowAddresses')
         .mockResolvedValueOnce([jobEntityMock as any]);
 
-      await service.syncJobStuses();
+      await service.syncJobStatuses();
 
       expect(EscrowUtils.getStatusEvents).toHaveBeenCalled();
       expect(
@@ -1174,9 +1174,13 @@ describe('CronJobService', () => {
         .spyOn(EscrowUtils, 'getStatusEvents')
         .mockRejectedValue(new Error('Test error'));
 
-      await service.syncJobStuses();
+      await service.syncJobStatuses();
 
-      expect(loggerErrorSpy).toHaveBeenCalledWith(expect.any(Error));
+      expect(loggerErrorSpy).toHaveBeenCalledWith(
+        'Error in syncJobStatuses cron job',
+        expect.any(Error),
+      );
+      loggerErrorSpy.mockRestore();
     });
 
     it('should complete the cron job entity to unlock', async () => {
@@ -1184,7 +1188,7 @@ describe('CronJobService', () => {
         .spyOn(service, 'completeCronJob')
         .mockResolvedValueOnce(cronJobEntityMock as any);
 
-      await service.syncJobStuses();
+      await service.syncJobStatuses();
 
       expect(service.completeCronJob).toHaveBeenCalledWith(
         cronJobEntityMock as any,

@@ -1,5 +1,5 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { COINGECKO_API_URL } from '../../common/constants';
@@ -7,10 +7,11 @@ import { ErrorCurrency } from '../../common/constants/errors';
 import { CoingeckoTokenId } from '../../common/constants/payment';
 import { EscrowFundToken } from '../../common/enums/job';
 import { NotFoundError } from '../../common/errors';
+import logger from '../../logger';
 
 @Injectable()
 export class RateService {
-  public readonly logger = new Logger(RateService.name);
+  private readonly logger = logger.child({ context: RateService.name });
   private cache: Map<string, { rate: number; timestamp: number }>;
 
   constructor(
@@ -76,7 +77,11 @@ export class RateService {
 
       return finalRate;
     } catch (error) {
-      this.logger.error(error);
+      this.logger.error('Error while getting rate', {
+        from,
+        to,
+        error,
+      });
       throw new NotFoundError(ErrorCurrency.PairNotFound);
     }
   }

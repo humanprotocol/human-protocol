@@ -51,7 +51,7 @@ jobs:
         run: yarn install --immutable
       - name: Build core package
         if: steps.filter_networks.outputs.continue == 'true'
-        run: yarn build:core
+        run: yarn workspace @human-protocol/core build
       - name: Generate and build Subgraph
         if: steps.filter_networks.outputs.continue == 'true'
         run: yarn generate && yarn build
