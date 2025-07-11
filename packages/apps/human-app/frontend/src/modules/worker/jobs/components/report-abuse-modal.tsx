@@ -9,7 +9,7 @@ import {
   TextField,
 } from '@mui/material';
 import ErrorIcon from '@mui/icons-material/Error';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import SuccessIcon from '@mui/icons-material/CheckCircle';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { colorPalette } from '@/shared/styles/color-palette';
 import { useReportAbuseMutation } from '../available-jobs/hooks/use-report-abuse';
@@ -20,36 +20,51 @@ interface ReportAbuseModalProps {
   close: () => void;
 }
 
-function ErrorState({
-  error,
-  onClose,
-}: {
-  error: string;
-  onClose: () => void;
-}) {
+const ABUSE_ERROR = 'Abuse has already been reported';
+
+function ErrorState({ error }: { error: string }) {
+  const isAbuseError = error === ABUSE_ERROR;
   const errorColor = colorPalette.error.main;
   return (
-    <Stack justifyContent="center" alignItems="center" gap={3}>
+    <Stack alignItems="center" textAlign="center" gap={2} my={5}>
       <ErrorIcon sx={{ color: errorColor, width: 40, height: 40 }} />
-      <Typography color={errorColor} variant="body2">
-        {error}
-      </Typography>
-      <Button variant="outlined" fullWidth onClick={onClose}>
-        Close
-      </Button>
+      {isAbuseError ? (
+        <>
+          <Typography
+            component="p"
+            variant="h5"
+            fontWeight={700}
+            color={errorColor}
+          >
+            Report Already Submitted
+          </Typography>
+          <Typography variant="body1" color={errorColor}>
+            This case of abuse has already been reported. Our team is currently
+            reviewing it.
+          </Typography>
+        </>
+      ) : (
+        <Typography variant="body1" color={errorColor}>
+          Something went wrong.
+        </Typography>
+      )}
     </Stack>
   );
 }
 
-function SuccessState({ onClose }: { onClose: () => void }) {
+function SuccessState() {
   return (
-    <Stack justifyContent="center" alignItems="center" gap={3}>
-      <CheckCircleIcon
+    <Stack alignItems="center" textAlign="center" gap={2} my={5}>
+      <SuccessIcon
         sx={{ color: colorPalette.success.main, width: 40, height: 40 }}
       />
-      <Button variant="outlined" fullWidth onClick={onClose}>
-        Close
-      </Button>
+      <Typography component="p" variant="h5" fontWeight={700}>
+        Thank you!
+      </Typography>
+      <Typography variant="body1">
+        Your issue has been successfully reported. Our team has received the
+        details and will review them shortly.
+      </Typography>
     </Stack>
   );
 }
@@ -72,12 +87,14 @@ export function ReportAbuseModal({
   } = useReportAbuseMutation({
     onError: (status) => {
       if (status === 422) {
-        setError('Abuse has already been reported');
+        setError(ABUSE_ERROR);
       } else {
         setError('Something went wrong');
       }
     },
   });
+
+  const isIdleOrLoading = isIdle || isPending;
 
   const handleReportAbuse = () => {
     reason.trim().length > 0 &&
@@ -93,50 +110,54 @@ export function ReportAbuseModal({
       px={{ xs: 1, md: 5 }}
       pt={{ xs: 0, md: 3.5 }}
       pb={{ xs: 1.5, md: 5.5 }}
+      alignItems="center"
     >
       <Typography variant="h4" mb={2}>
         Report Abuse
       </Typography>
-      {isPending && <CircularProgress size={40} sx={{ mx: 'auto' }} />}
-      {isError && <ErrorState error={error} onClose={close} />}
-      {isSuccess && <SuccessState onClose={close} />}
-      {isIdle && (
-        <>
-          <Typography variant={isMobile ? 'body2' : 'body1'}>
-            Notice something inappropriate or incorrect? Let us know if this
-            task contains harmful, offensive, or misleading content. Your report
-            reviewed confidentially.
-          </Typography>
-          <TextField
-            fullWidth
-            multiline
-            rows={3}
-            label="Reason"
-            value={reason}
-            sx={{
-              my: { xs: 4, md: 5 },
-            }}
-            onChange={(e) => {
-              setReason(e.target.value);
-            }}
-          />
-          <Box display="flex" gap={2}>
-            <Button fullWidth onClick={close} variant="outlined">
-              Cancel
-            </Button>
-            <Button
-              fullWidth
-              onClick={() => {
-                handleReportAbuse();
-              }}
-              variant="contained"
-              disabled={!reason.trim()}
-            >
-              {isMobile ? 'Report' : 'Report Abuse'}
-            </Button>
-          </Box>
-        </>
+      {isIdleOrLoading && (
+        <Typography variant={isMobile ? 'body2' : 'body1'} textAlign="center">
+          Notice something inappropriate or incorrect? Let us know if this task
+          contains harmful, offensive, or misleading content. Your report will
+          be reviewed confidentially.
+        </Typography>
       )}
+      {isPending && <CircularProgress size={40} sx={{ mx: 'auto', my: 7 }} />}
+      {isError && <ErrorState error={error} />}
+      {isSuccess && <SuccessState />}
+      <TextField
+        fullWidth
+        multiline
+        rows={3}
+        label="Reason"
+        value={reason}
+        sx={{
+          display: isIdle ? 'flex' : 'none',
+          my: { xs: 4, md: 5 },
+        }}
+        onChange={(e) => {
+          setReason(e.target.value);
+        }}
+      />
+      <Box display="flex" gap={2} width="100%">
+        <Button
+          fullWidth
+          onClick={close}
+          variant="outlined"
+          disabled={isPending}
+        >
+          {isIdleOrLoading ? 'Cancel' : 'Close'}
+        </Button>
+        <Button
+          fullWidth
+          onClick={handleReportAbuse}
+          variant="contained"
+          disabled={!reason.trim() || isPending}
+          sx={{ display: isIdleOrLoading ? 'flex' : 'none' }}
+        >
+          {isMobile ? 'Report' : 'Report Abuse'}
+        </Button>
+      </Box>
     </Stack>
   );
 }
