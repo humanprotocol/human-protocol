@@ -10,6 +10,7 @@ import {
 } from '@mui/material';
 import ErrorIcon from '@mui/icons-material/Error';
 import SuccessIcon from '@mui/icons-material/CheckCircle';
+import { useTranslation } from 'react-i18next';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { colorPalette } from '@/shared/styles/color-palette';
 import { useReportAbuseMutation } from '../available-jobs/hooks/use-report-abuse';
@@ -23,8 +24,11 @@ interface ReportAbuseModalProps {
 const ABUSE_ERROR = 'Abuse has already been reported';
 
 function ErrorState({ error }: { error: string }) {
+  const { t } = useTranslation();
+
   const isAbuseError = error === ABUSE_ERROR;
   const errorColor = colorPalette.error.main;
+
   return (
     <Stack alignItems="center" textAlign="center" gap={2} my={5}>
       <ErrorIcon sx={{ color: errorColor, width: 40, height: 40 }} />
@@ -36,16 +40,15 @@ function ErrorState({ error }: { error: string }) {
             fontWeight={700}
             color={errorColor}
           >
-            Report Already Submitted
+            {t('worker.reportAbuse.modalErrorHeader')}
           </Typography>
           <Typography variant="body1" color={errorColor}>
-            This case of abuse has already been reported. Our team is currently
-            reviewing it.
+            {t('worker.reportAbuse.modalErrorParagraph')}
           </Typography>
         </>
       ) : (
         <Typography variant="body1" color={errorColor}>
-          Something went wrong.
+          {t('worker.reportAbuse.modalUnknownError')}
         </Typography>
       )}
     </Stack>
@@ -53,17 +56,17 @@ function ErrorState({ error }: { error: string }) {
 }
 
 function SuccessState() {
+  const { t } = useTranslation();
   return (
     <Stack alignItems="center" textAlign="center" gap={2} my={5}>
       <SuccessIcon
         sx={{ color: colorPalette.success.main, width: 40, height: 40 }}
       />
       <Typography component="p" variant="h5" fontWeight={700}>
-        Thank you!
+        {t('worker.reportAbuse.modalSuccessHeader')}
       </Typography>
       <Typography variant="body1">
-        Your issue has been successfully reported. Our team has received the
-        details and will review them shortly.
+        {t('worker.reportAbuse.modalSuccessParagraph')}
       </Typography>
     </Stack>
   );
@@ -77,6 +80,7 @@ export function ReportAbuseModal({
   const [reason, setReason] = useState('');
   const [error, setError] = useState('');
   const isMobile = useIsMobile();
+  const { t } = useTranslation();
 
   const {
     mutate: reportAbuseMutation,
@@ -113,13 +117,11 @@ export function ReportAbuseModal({
       alignItems="center"
     >
       <Typography variant="h4" mb={2}>
-        Report Abuse
+        {t('worker.reportAbuse.modalHeader')}
       </Typography>
       {isIdleOrLoading && (
         <Typography variant={isMobile ? 'body2' : 'body1'} textAlign="center">
-          Notice something inappropriate or incorrect? Let us know if this task
-          contains harmful, offensive, or misleading content. Your report will
-          be reviewed confidentially.
+          {t('worker.reportAbuse.modalParagraph')}
         </Typography>
       )}
       {isPending && <CircularProgress size={40} sx={{ mx: 'auto', my: 7 }} />}
@@ -129,7 +131,7 @@ export function ReportAbuseModal({
         fullWidth
         multiline
         rows={3}
-        label="Reason"
+        label={t('worker.reportAbuse.modalReason')}
         value={reason}
         sx={{
           display: isIdle ? 'flex' : 'none',
@@ -146,7 +148,9 @@ export function ReportAbuseModal({
           variant="outlined"
           disabled={isPending}
         >
-          {isIdleOrLoading ? 'Cancel' : 'Close'}
+          {isIdleOrLoading
+            ? t('worker.reportAbuse.cancel')
+            : t('worker.reportAbuse.close')}
         </Button>
         <Button
           fullWidth
@@ -155,7 +159,9 @@ export function ReportAbuseModal({
           disabled={!reason.trim() || isPending}
           sx={{ display: isIdleOrLoading ? 'flex' : 'none' }}
         >
-          {isMobile ? 'Report' : 'Report Abuse'}
+          {isMobile
+            ? t('worker.reportAbuse.report')
+            : t('worker.reportAbuse.reportAbuse')}
         </Button>
       </Box>
     </Stack>

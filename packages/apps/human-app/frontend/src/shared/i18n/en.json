@@ -303,6 +303,20 @@
     },
     "registerAddress": {
       "success": "The address has been successfully registered."
+    },
+    "reportAbuse": {
+      "modalHeader": "Report Abuse",
+      "modalParagraph": "Notice something inappropriate or incorrect? Let us know if this task contains harmful, offensive, or misleading content. Your report will be reviewed confidentially.",
+      "modalReason": "Reason",
+      "cancel": "Cancel",
+      "close": "Close",
+      "report": "Report",
+      "reportAbuse": "Report Abuse",
+      "modalSuccessHeader": "Thank you!",
+      "modalSuccessParagraph": "Your issue has been successfully reported. Our team has received the details and will review them shortly.",
+      "modalErrorHeader": "Report Already Submitted",
+      "modalErrorParagraph": "This case of abuse has already been reported. Our team is currently reviewing it.",
+      "modalUnknownError": "Something went wrong."
     }
   },
   "operator": {

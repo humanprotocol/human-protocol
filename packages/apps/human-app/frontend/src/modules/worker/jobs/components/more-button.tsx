@@ -3,6 +3,7 @@ import { useState } from 'react';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import { Button, MenuList, ListItemButton, Popover } from '@mui/material';
 import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useModal } from '@/shared/contexts/modal-context';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { useResignJobMutation } from '../my-jobs/hooks';
@@ -20,6 +21,7 @@ export function MoreButton({ job, isDisabled }: MoreButtonProps) {
   const { mutate: rejectTaskMutation } = useResignJobMutation();
   const { openModal, closeModal } = useModal();
   const isMobile = useIsMobile();
+  const { t } = useTranslation();
 
   const isOpen = Boolean(anchorEl);
 
@@ -88,9 +90,11 @@ export function MoreButton({ job, isDisabled }: MoreButtonProps) {
         }}
       >
         <MenuList>
-          <ListItemButton onClick={handleCancelTask}>Cancel</ListItemButton>
+          <ListItemButton onClick={handleCancelTask}>
+            {t('worker.reportAbuse.cancel')}
+          </ListItemButton>
           <ListItemButton onClick={handleOpenReportAbuseModal}>
-            Report Abuse
+            {t('worker.reportAbuse.report')}
           </ListItemButton>
         </MenuList>
       </Popover>
