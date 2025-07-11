@@ -3,9 +3,9 @@ import {
   Catch,
   ExceptionFilter as IExceptionFilter,
   HttpStatus,
-  Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+
 import {
   ValidationError,
   AuthError,
@@ -15,10 +15,11 @@ import {
   ServerError,
   DatabaseError,
 } from '../errors';
+import logger from '../../logger';
 
 @Catch()
 export class ExceptionFilter implements IExceptionFilter {
-  private logger = new Logger(ExceptionFilter.name);
+  private readonly logger = logger.child({ context: ExceptionFilter.name });
 
   private getStatus(exception: any): number {
     if (exception instanceof ValidationError) {
@@ -49,10 +50,7 @@ export class ExceptionFilter implements IExceptionFilter {
     const status = this.getStatus(exception);
     const message = exception.message || 'Internal server error';
 
-    this.logger.error(
-      `Exception caught: ${message}`,
-      exception.stack || 'No stack trace available',
-    );
+    this.logger.error('Unhandled exception', exception);
 
     response.status(status).json({
       statusCode: status,

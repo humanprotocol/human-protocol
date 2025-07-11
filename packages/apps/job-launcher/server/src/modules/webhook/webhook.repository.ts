@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 import { BaseRepository } from '../../database/base.repository';
 import { DataSource, In, LessThanOrEqual } from 'typeorm';
@@ -8,10 +8,9 @@ import { WebhookEntity } from './webhook.entity';
 
 @Injectable()
 export class WebhookRepository extends BaseRepository<WebhookEntity> {
-  private readonly logger = new Logger(WebhookRepository.name);
   constructor(
-    private dataSource: DataSource,
-    public readonly serverConfigService: ServerConfigService,
+    dataSource: DataSource,
+    readonly serverConfigService: ServerConfigService,
   ) {
     super(WebhookEntity, dataSource);
   }

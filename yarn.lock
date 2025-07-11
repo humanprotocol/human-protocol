@@ -4410,6 +4410,7 @@ __metadata:
     "@golevelup/ts-jest": "npm:^0.6.1"
     "@google-cloud/storage": "npm:^7.15.0"
     "@google-cloud/vision": "npm:^4.3.2"
+    "@human-protocol/logger": "workspace:*"
     "@human-protocol/sdk": "workspace:*"
     "@nestjs/axios": "npm:^3.1.2"
     "@nestjs/cli": "npm:^10.3.2"
