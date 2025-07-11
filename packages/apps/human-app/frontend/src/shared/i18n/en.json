@@ -314,8 +314,8 @@
       "reportAbuse": "Report Abuse",
       "modalSuccessHeader": "Thank you!",
       "modalSuccessParagraph": "Your issue has been successfully reported. Our team has received the details and will review them shortly.",
-      "modalErrorHeader": "Report Already Submitted",
-      "modalErrorParagraph": "This case of abuse has already been reported. Our team is currently reviewing it.",
+      "modalHeaderAlreadyReportedError": "Report Already Submitted",
+      "modalParagraphAlreadyReportedError": "This case of abuse has already been reported. Our team is currently reviewing it.",
       "modalUnknownError": "Something went wrong."
     }
   },

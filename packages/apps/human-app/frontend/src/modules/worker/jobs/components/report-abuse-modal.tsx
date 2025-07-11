@@ -40,10 +40,10 @@ function ErrorState({ error }: { error: string }) {
             fontWeight={700}
             color={errorColor}
           >
-            {t('worker.reportAbuse.modalErrorHeader')}
+            {t('worker.reportAbuse.modalHeaderAlreadyReportedError')}
           </Typography>
           <Typography variant="body1" color={errorColor}>
-            {t('worker.reportAbuse.modalErrorParagraph')}
+            {t('worker.reportAbuse.modalParagraphAlreadyReportedError')}
           </Typography>
         </>
       ) : (
