@@ -92,6 +92,7 @@ import {
 import {
   ReportAbuseCommand,
   ReportAbuseData,
+  ReportAbuseParams,
   ReportedAbuseResponse,
 } from '../../modules/abuse/model/abuse.model';
 
@@ -421,7 +422,11 @@ export class ReputationOracleGateway {
   }
 
   async sendAbuseReport(command: ReportAbuseCommand) {
-    const data = this.mapper.map(command, ReportAbuseCommand, ReportAbuseData);
+    const data = this.mapper.map(
+      command.data,
+      ReportAbuseParams,
+      ReportAbuseData,
+    );
     const options = this.getEndpointOptions(
       ReputationOracleEndpoints.REPORT_ABUSE,
       data,

@@ -12,6 +12,11 @@ export function GlobalModal() {
       open={open}
       onClose={closeModal}
       onTransitionExited={onTransitionExited}
+      PaperProps={{
+        sx: {
+          flex: 1,
+        },
+      }}
     >
       <ModalHeader
         closeButton={{

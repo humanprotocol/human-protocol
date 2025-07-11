@@ -135,7 +135,14 @@ export const getColumnsDefinition = ({
     size: 100,
     enableSorting: true,
     Cell: (props) => (
-      <Grid sx={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+      <Grid
+        sx={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+          alignItems: 'center',
+          gap: 2,
+        }}
+      >
         <MyJobsTableActions job={props.row.original} />
       </Grid>
     ),

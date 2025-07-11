@@ -1,11 +1,9 @@
-/* eslint-disable camelcase -- ...*/
-import { Link, useParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { TableButton } from '@/shared/components/ui/table-button';
-import { useResignJobMutation } from '../my-jobs/hooks';
 import { MyJobStatus } from '../types';
 import { type MyJob } from '../schemas';
-import { RejectButton } from './reject-button';
+import { MoreButton } from './more-button';
 
 interface MyJobsTableRejectActionProps {
   job: MyJob;
@@ -15,10 +13,7 @@ export function MyJobsTableActions({
   job,
 }: Readonly<MyJobsTableRejectActionProps>) {
   const { t } = useTranslation();
-  const { mutate: rejectTaskMutation, isPending: isRejectPending } =
-    useResignJobMutation();
-  const { address: oracleAddress } = useParams<{ address: string }>();
-  const buttonDisabled = job.status !== MyJobStatus.ACTIVE || isRejectPending;
+  const isDisabled = job.status !== MyJobStatus.ACTIVE;
 
   if (!job.url) {
     return null;
@@ -28,24 +23,19 @@ export function MyJobsTableActions({
     <>
       <TableButton
         component={Link}
-        disabled={buttonDisabled}
+        disabled={isDisabled}
         fullWidth
         target="_blank"
         to={job.url}
-        sx={{ maxWidth: { xs: 'unset', sm: '160px' } }}
+        sx={{
+          height: { xs: '48px', md: '30px' },
+          maxWidth: { xs: 'unset', sm: '160px' },
+          flex: { xs: 1, md: 'unset' },
+        }}
       >
         {t('worker.jobs.solve')}
       </TableButton>
-      <RejectButton
-        disabled={buttonDisabled}
-        loading={isRejectPending}
-        onClick={() => {
-          rejectTaskMutation({
-            oracle_address: oracleAddress ?? '',
-            assignment_id: job.assignment_id,
-          });
-        }}
-      />
+      <MoreButton job={job} isDisabled={isDisabled} />
     </>
   );
 }

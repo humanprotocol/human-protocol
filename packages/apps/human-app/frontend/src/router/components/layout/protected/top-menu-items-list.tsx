@@ -13,7 +13,6 @@ import { colorPalette } from '@/shared/styles/color-palette';
 import { onlyDarkModeColor } from '@/shared/styles/dark-color-palette';
 import { isDrawerItem } from '../helpers';
 import { type DrawerItem, type MenuItem } from './drawer-navigation';
-import { NAVBAR_PADDING } from './navbar';
 
 interface MenuItemListProps {
   handleItemClick: (item: DrawerItem) => void;
@@ -38,12 +37,7 @@ export function TopMenuItemsList({
         if (!isDrawerItem(item)) {
           return (
             <ListItem key={`list-item-${item.key}`}>
-              <Stack
-                direction="row"
-                sx={{
-                  ml: isMobile ? '28px' : NAVBAR_PADDING,
-                }}
-              >
+              <Stack direction="row" ml={{ xs: 7, md: 2 }}>
                 {item}
               </Stack>
             </ListItem>

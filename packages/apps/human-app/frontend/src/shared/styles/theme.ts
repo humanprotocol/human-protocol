@@ -32,6 +32,13 @@ export const theme: ThemeOptions = {
         },
       },
     },
+    MuiListItemButton: {
+      styleOverrides: {
+        root: {
+          fontFamily: 'Roboto',
+        },
+      },
+    },
     MuiCheckbox: {
       styleOverrides: {
         root: {
