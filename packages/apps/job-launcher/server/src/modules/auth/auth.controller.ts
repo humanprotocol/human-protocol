@@ -4,7 +4,6 @@ import {
   Controller,
   HttpCode,
   Ip,
-  Logger,
   Post,
   Req,
   Request,
@@ -39,6 +38,8 @@ import { AuthService } from './auth.service';
 import { TokenType } from './token.entity';
 import { TokenRepository } from './token.repository';
 
+import logger from '../../logger';
+
 @ApiTags('Auth')
 @ApiResponse({
   status: 400,
@@ -58,7 +59,7 @@ import { TokenRepository } from './token.repository';
 })
 @Controller('/auth')
 export class AuthJwtController {
-  private readonly logger = new Logger(AuthJwtController.name);
+  private readonly logger = logger.child({ context: AuthJwtController.name });
 
   constructor(
     private readonly authService: AuthService,
@@ -249,11 +250,8 @@ export class AuthJwtController {
     try {
       const apiKey = await this.authService.createOrUpdateAPIKey(req.user);
       return { apiKey };
-    } catch (e) {
-      this.logger.log(
-        e.message,
-        `${AuthJwtController.name} - ${ErrorAuth.ApiKeyCouldNotBeCreatedOrUpdated}`,
-      );
+    } catch (error) {
+      this.logger.error(ErrorAuth.ApiKeyCouldNotBeCreatedOrUpdated, error);
       throw new ValidationError(ErrorAuth.ApiKeyCouldNotBeCreatedOrUpdated);
     }
   }

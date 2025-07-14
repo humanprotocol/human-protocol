@@ -22,7 +22,7 @@ jobs:
       - name: Install dependencies
         run: yarn install
       - name: Build core package
-        run: yarn build:core
+        run: yarn workspace @human-protocol/core build
       - name: Set up Python
         uses: actions/setup-python@v5
         with:

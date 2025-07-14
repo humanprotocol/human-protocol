@@ -13,6 +13,7 @@ import { JwtAuthGuard } from './common/guards';
 import { SnakeCaseInterceptor } from './common/interceptors/snake-case';
 import { TransformEnumInterceptor } from './common/interceptors/transform-enum.interceptor';
 import { HttpValidationPipe } from './common/pipes';
+import Environment from './common/utils/environment';
 import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { CronJobModule } from './modules/cron-job/cron-job.module';
@@ -67,7 +68,7 @@ import { WebhookModule } from './modules/webhook/webhook.module';
       /**
        * First value found takes precendece
        */
-      envFilePath: [`.env.${process.env.NODE_ENV}`, '.env.local', '.env'],
+      envFilePath: [`.env.${Environment.name}`, '.env.local', '.env'],
       validationSchema: envValidator,
     }),
     DatabaseModule,

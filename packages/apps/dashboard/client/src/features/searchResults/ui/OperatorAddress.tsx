@@ -1,6 +1,6 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 
-import { Role } from '@human-protocol/sdk';
+import { Role } from '@human-protocol/sdk/src/constants';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import Link from '@mui/material/Link';
@@ -13,7 +13,7 @@ import { env } from '@/shared/config/env';
 import EntityIcon from '@/shared/ui/EntityIcon';
 import SectionWrapper from '@/shared/ui/SectionWrapper';
 
-import { AddressDetailsOperator } from '../model/addressDetailsSchema';
+import type { AddressDetailsOperator } from '../model/addressDetailsSchema';
 
 import HmtBalance from './HmtBalance';
 import HmtPrice from './HmtPrice';

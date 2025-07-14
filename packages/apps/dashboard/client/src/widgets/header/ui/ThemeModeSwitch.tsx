@@ -1,6 +1,7 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 
-import { IconButton, useTheme } from '@mui/material';
+import IconButton from '@mui/material/IconButton';
+import { useTheme } from '@mui/material/styles';
 
 import DarkModeIcon from '@/shared/ui/icons/DarkModeIcon';
 import LightModeIcon from '@/shared/ui/icons/LightModeIcon';

@@ -16,6 +16,7 @@ COPY ${APP_PATH}/package.json ./${APP_PATH}/
 # so we need to copy and build them
 COPY packages/core ./packages/core
 COPY packages/sdk ./packages/sdk
+COPY packages/libs ./packages/libs
 
 RUN yarn install
 

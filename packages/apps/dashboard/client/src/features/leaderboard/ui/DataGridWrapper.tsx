@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -8,7 +8,7 @@ import { useIsMobile } from '@/shared/hooks/useBreakpoints';
 import handleErrorMessage from '@/shared/lib/handleErrorMessage';
 import Loader from '@/shared/ui/Loader';
 
-import { LeaderboardData } from '../model/leaderboardSchema';
+import type { LeaderboardData } from '../model/leaderboardSchema';
 import useDataGrid from '../ui/useDataGrid';
 
 type Props = {

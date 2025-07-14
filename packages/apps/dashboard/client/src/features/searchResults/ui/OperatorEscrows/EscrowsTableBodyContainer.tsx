@@ -1,4 +1,4 @@
-import { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 
 import Grid from '@mui/material/Grid';
 import MuiTableBody from '@mui/material/TableBody';

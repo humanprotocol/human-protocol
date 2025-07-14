@@ -1,16 +1,19 @@
 import { ChainId, KVStoreKeys, KVStoreUtils } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ErrorQualification, ErrorWeb3 } from '../../common/constants/errors';
 import { ServerError } from '../../common/errors';
 import { Web3Service } from '../web3/web3.service';
 import { QualificationDto } from './qualification.dto';
+import logger from '../../logger';
 
 @Injectable()
 export class QualificationService {
-  private readonly logger = new Logger(QualificationService.name);
+  private readonly logger = logger.child({
+    context: QualificationService.name,
+  });
 
   constructor(
     private httpService: HttpService,
@@ -46,7 +49,8 @@ export class QualificationService {
       return data;
     } catch (error) {
       this.logger.error(
-        `Error fetching qualifications from reputation oracle: ${error}`,
+        'Error fetching qualifications from reputation oracle',
+        error,
       );
       throw new ServerError(ErrorQualification.FailedToFetchQualifications);
     }

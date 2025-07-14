@@ -1,12 +1,12 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
-import styled from '@mui/material/styles/styled';
+import Grid from '@mui/material/Grid';
+import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import Grid from '@mui/material/Unstable_Grid2';
 import { Link } from 'react-router-dom';
 
 import GraphSwiper from '@/features/graph/ui/GraphSwiper';
@@ -28,7 +28,7 @@ const CardWrapper = styled(Grid)(({ theme }) => ({
   borderRadius: '16px',
   padding: '24px 32px',
   [theme.breakpoints.up('md')]: {
-    height: 300,
+    height: '100%',
   },
   [theme.breakpoints.down('md')]: {
     height: 'auto',
@@ -66,12 +66,12 @@ const HomePage: FC = () => {
 
   return (
     <PageWrapper violetHeader>
-      <Typography variant="h3" color="white.main">
+      <Typography variant="h3" color="white.main" mb={3}>
         All HUMAN activity. In one place.
       </Typography>
-      <SearchBar className="home-page-search" />
+      <SearchBar />
       <Grid container mt={{ xs: 6, md: 8 }} columnSpacing={3} rowSpacing={3}>
-        <Grid xs={12} md={3}>
+        <Grid size={{ xs: 12, md: 3 }}>
           <CardWrapper flexDirection="column" gap={3}>
             <Typography variant="body2">Token</Typography>
             <Box display="flex" gap={1}>
@@ -85,7 +85,7 @@ const HomePage: FC = () => {
             </Box>
           </CardWrapper>
         </Grid>
-        <Grid xs={12} md={9}>
+        <Grid size={{ xs: 12, md: 9 }}>
           <CardWrapper gap={4} flexDirection={{ xs: 'column', md: 'row' }}>
             <Box
               display="flex"
