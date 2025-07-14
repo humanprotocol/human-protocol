@@ -20,18 +20,15 @@ async function main() {
   );
 
   const proposal = await getProposal();
-
-  const transactionResponse = await governanceContract.cancel(
+  const transactionResponse = await governanceContract.queue(
     proposal.targets,
     proposal.values,
     proposal.calldatas,
     proposal.descriptionHash
   );
 
-  console.log(transactionResponse);
-
   await transactionResponse.wait();
-  console.log('Proposal queued:');
+  console.log('Proposal queued:', transactionResponse.hash);
 }
 
 main()
