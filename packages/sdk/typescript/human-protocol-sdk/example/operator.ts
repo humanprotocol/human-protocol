@@ -5,12 +5,12 @@ import { IOperatorsFilter } from '../src/interfaces';
 import { OperatorUtils } from '../src/operator';
 
 export const getOperators = async () => {
-  if (!NETWORKS[ChainId.LOCALHOST]) {
+  if (!NETWORKS[ChainId.POLYGON_AMOY]) {
     return;
   }
 
   const filter: IOperatorsFilter = {
-    chainId: ChainId.LOCALHOST,
+    chainId: ChainId.POLYGON_AMOY,
   };
 
   const operators = await OperatorUtils.getOperators(filter);
@@ -18,14 +18,14 @@ export const getOperators = async () => {
   console.log('Operators:', operators);
 
   const operator = await OperatorUtils.getOperator(
-    ChainId.LOCALHOST,
+    ChainId.POLYGON_AMOY,
     operators[0].address
   );
 
   console.log('First operator: ', operator);
 
   const reputationOracles = await OperatorUtils.getOperators({
-    chainId: ChainId.LOCALHOST,
+    chainId: ChainId.POLYGON_AMOY,
     roles: ['ReputationOracle'],
   });
 

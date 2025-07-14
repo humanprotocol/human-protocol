@@ -232,7 +232,6 @@ function mapOperator(operator: IOperatorSubgraph, chainId: ChainId): IOperator {
     lockedUntilTimestamp: BigInt(staker?.lockedUntilTimestamp || 0),
     amountWithdrawn: BigInt(staker?.withdrawnAmount || 0),
     amountSlashed: BigInt(staker?.slashedAmount || 0),
-    lastDepositTimestamp: BigInt(staker?.lastDepositTimestamp || 0),
     amountJobsProcessed: BigInt(operator.amountJobsProcessed || 0),
     role: operator.role,
     fee: operator.fee ? BigInt(operator.fee) : undefined,

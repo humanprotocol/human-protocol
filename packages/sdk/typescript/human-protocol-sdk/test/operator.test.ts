@@ -55,7 +55,6 @@ describe('OperatorUtils', () => {
         lockedUntilTimestamp: ethers.toBigInt(0),
         withdrawnAmount: ethers.parseEther('25'),
         slashedAmount: ethers.parseEther('25'),
-        lastDepositTimestamp: ethers.toBigInt(0),
       },
     };
 
@@ -74,7 +73,6 @@ describe('OperatorUtils', () => {
       lockedUntilTimestamp: ethers.toBigInt(0),
       amountWithdrawn: ethers.parseEther('25'),
       amountSlashed: ethers.parseEther('25'),
-      lastDepositTimestamp: ethers.toBigInt(0),
     };
   });
 

@@ -15,7 +15,6 @@ export interface IOperator {
   lockedUntilTimestamp: bigint;
   amountWithdrawn: bigint;
   amountSlashed: bigint;
-  lastDepositTimestamp: bigint;
   amountJobsProcessed: bigint;
   role?: string;
   fee?: bigint;

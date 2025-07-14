@@ -94,7 +94,6 @@ class OperatorData:
         locked_until_timestamp: int,
         amount_withdrawn: int,
         amount_slashed: int,
-        last_deposit_timestamp: int,
         amount_jobs_processed: int,
         role: Optional[str] = None,
         fee: Optional[int] = None,
@@ -120,7 +119,6 @@ class OperatorData:
         :param locked_until_timestamp: Locked until timestamp
         :param amount_withdrawn: Amount withdrawn
         :param amount_slashed: Amount slashed
-        :param last_deposit_timestamp: Last deposit timestamp
         :param amount_jobs_processed: Amount of jobs launched
         :param role: Role
         :param fee: Fee
@@ -144,7 +142,6 @@ class OperatorData:
         self.locked_until_timestamp = locked_until_timestamp
         self.amount_withdrawn = amount_withdrawn
         self.amount_slashed = amount_slashed
-        self.last_deposit_timestamp = last_deposit_timestamp
         self.amount_jobs_processed = amount_jobs_processed
         self.role = role
         self.fee = fee
@@ -254,7 +251,6 @@ class OperatorUtils:
                     locked_until_timestamp=int(staker.get("lockedUntilTimestamp", 0)),
                     amount_withdrawn=int(staker.get("withdrawnAmount", 0)),
                     amount_slashed=int(staker.get("slashedAmount", 0)),
-                    last_deposit_timestamp=int(staker.get("lastDepositTimestamp", 0)),
                     amount_jobs_processed=int(operator.get("amountJobsProcessed", 0)),
                     role=operator.get("role", None),
                     fee=int(operator.get("fee")) if operator.get("fee", None) else None,
@@ -352,7 +348,6 @@ class OperatorUtils:
             locked_until_timestamp=int(staker.get("lockedUntilTimestamp", 0)),
             amount_withdrawn=int(staker.get("withdrawnAmount", 0)),
             amount_slashed=int(staker.get("slashedAmount", 0)),
-            last_deposit_timestamp=int(staker.get("lastDepositTimestamp", 0)),
             amount_jobs_processed=int(operator.get("amountJobsProcessed", 0)),
             role=operator.get("role", None),
             fee=int(operator.get("fee")) if operator.get("fee", None) else None,
@@ -440,7 +435,6 @@ class OperatorUtils:
                 locked_until_timestamp=int(staker.get("lockedUntilTimestamp", 0)),
                 amount_withdrawn=int(staker.get("withdrawnAmount", 0)),
                 amount_slashed=int(staker.get("slashedAmount", 0)),
-                last_deposit_timestamp=int(staker.get("lastDepositTimestamp", 0)),
                 amount_jobs_processed=int(operator.get("amountJobsProcessed", 0)),
                 role=operator.get("role", None),
                 fee=int(operator.get("fee")) if operator.get("fee", None) else None,

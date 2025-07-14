@@ -201,18 +201,18 @@ if __name__ == "__main__":
 
     # Run single example while testing, and remove comments before commit
 
-    # get_escrows()
+    get_escrows()
     get_operators()
-    # get_payouts()
+    get_payouts()
 
-    # statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
-    # get_hmt_holders(statistics_client)
-    # get_escrow_statistics(statistics_client)
-    # get_hmt_statistics(statistics_client)
-    # get_payment_statistics(statistics_client)
-    # get_worker_statistics(statistics_client)
-    # get_hmt_daily_data(statistics_client)
+    statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
+    get_hmt_holders(statistics_client)
+    get_escrow_statistics(statistics_client)
+    get_hmt_statistics(statistics_client)
+    get_payment_statistics(statistics_client)
+    get_worker_statistics(statistics_client)
+    get_hmt_daily_data(statistics_client)
 
-    # agreement_example()
-    # get_workers()
-    # get_stakers_example()
+    agreement_example()
+    get_workers()
+    get_stakers_example()

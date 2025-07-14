@@ -28,7 +28,6 @@ import {
   createStakeWithdrawnEvent,
 } from './fixtures';
 import { createOrLoadOperator } from '../../src/mapping/KVStore';
-import { log } from 'matchstick-as/assembly/log';
 
 const stakingAddressString = '0xa16081f360e3847006db660bae1c6d1b2e17ffaa';
 const escrow1AddressString = '0xD979105297fB0eee83F7433fC09279cb5B94fFC7';
