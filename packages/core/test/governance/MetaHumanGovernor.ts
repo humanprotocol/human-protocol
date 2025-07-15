@@ -6,27 +6,37 @@ import {
   VHMToken,
   HMToken,
   TimelockController,
+  DAOSpokeContract,
   WormholeMock,
-} from '../typechain-types';
+} from '../../typechain-types';
 import {
   createMockUserWithVotingPower,
+  createBasicProposal,
   mineNBlocks,
+  createMessageWithPayload,
+  collectVotesFromSpoke,
+  callReceiveMessageWithWormholeMock,
+  updateVotingDelay,
   signProposal,
   SECONDS_PER_BLOCK,
-  createBasicProposalOnHub,
-  updateVotingDelayOnHub,
 } from './GovernanceUtils';
 
-describe('MetaHumanGovernorHubOnly', function () {
+describe('MetaHumanGovernor', function () {
   let owner: Signer;
   let user1: Signer;
   let wormholeMockForGovernor: WormholeMock;
+  let wormholeMockForDaoSpoke: WormholeMock;
   let proposers: string[];
   const executors: string[] = [ethers.ZeroAddress];
   let governor: MetaHumanGovernor;
   let voteToken: VHMToken;
   let token: HMToken;
   let timelockController: TimelockController;
+  let daoSpoke: DAOSpokeContract;
+  let newDAOSpoke: DAOSpokeContract;
+
+  const spokeChainId = 6;
+  const hubChainId = 5;
 
   this.beforeEach(async () => {
     [owner, user1] = await ethers.getSigners();
@@ -93,6 +103,44 @@ describe('MetaHumanGovernorHubOnly', function () {
       4
     )) as MetaHumanGovernor;
 
+    // Set Governor on worm hole mock
+    await wormholeMockForGovernor.setReceiver(await governor.getAddress());
+
+    // Deploy WormholeMock for DaoSpoke
+    wormholeMockForDaoSpoke = await WormholeMock.deploy();
+
+    // Send 1 ether to wormholeMockForDaoSpoke
+    await owner.sendTransaction({
+      to: await wormholeMockForDaoSpoke.getAddress(),
+      value: ethers.parseEther('1'),
+    });
+
+    // Deploy DAOSpokeContract
+    const DAOSpokeContract = await ethers.getContractFactory(
+      'contracts/governance/DAOSpokeContract.sol:DAOSpokeContract'
+    );
+    daoSpoke = (await DAOSpokeContract.deploy(
+      ethers.zeroPadBytes(await governor.getAddress(), 32),
+      hubChainId, // hubChainId
+      voteToken.getAddress(),
+      SECONDS_PER_BLOCK, // voting period
+      spokeChainId, // spokeChainId
+      await wormholeMockForDaoSpoke.getAddress(),
+      owner.getAddress() // admin address
+    )) as DAOSpokeContract;
+
+    // Set DAOSpokeContract on worm hole mock
+    await wormholeMockForDaoSpoke.setReceiver(await daoSpoke.getAddress());
+
+    // Update DAO Spoke contracts on Governor
+    const spokeContracts = [
+      {
+        contractAddress: ethers.zeroPadBytes(await daoSpoke.getAddress(), 32),
+        chainId: spokeChainId,
+      },
+    ];
+    await governor.updateSpokeContracts(spokeContracts);
+
     // Grant proposer role on timelock controller
     await timelockController.grantRole(
       ethers.id('PROPOSER_ROLE'),
@@ -103,6 +151,173 @@ describe('MetaHumanGovernorHubOnly', function () {
       ethers.id('TIMELOCK_ADMIN_ROLE'),
       await owner.getAddress()
     );
+  });
+
+  it('Should update spoke contracts correctly', async function () {
+    // Deploy new Spoke
+    const DAOSpokeContract = await ethers.getContractFactory(
+      'contracts/governance/DAOSpokeContract.sol:DAOSpokeContract'
+    );
+
+    newDAOSpoke = (await DAOSpokeContract.deploy(
+      ethers.zeroPadBytes(await governor.getAddress(), 32),
+      5,
+      await voteToken.getAddress(),
+      12,
+      6,
+      '0x0591C25ebd0580E0d4F27A82Fc2e24E7489CB5e0',
+      await owner.getAddress() // admin address
+    )) as DAOSpokeContract;
+
+    const spokeContractsX = [
+      {
+        contractAddress: ethers.zeroPadBytes(
+          await newDAOSpoke.getAddress(),
+          32
+        ),
+        chainId: 6,
+      },
+    ];
+
+    await expect(governor.updateSpokeContracts(spokeContractsX)).to.emit(
+      governor,
+      'SpokesUpdated'
+    );
+
+    const updated = await governor.spokeContractsMapping(
+      ethers.zeroPadBytes(await newDAOSpoke.getAddress(), 32),
+      6
+    );
+    expect(updated).to.be.true;
+  });
+
+  it('Should revert when updating spoke contracts with duplicates', async function () {
+    const DAOSpokeContract = await ethers.getContractFactory(
+      'contracts/governance/DAOSpokeContract.sol:DAOSpokeContract'
+    );
+
+    const newDAOSpoke = (await DAOSpokeContract.deploy(
+      ethers.zeroPadBytes(await governor.getAddress(), 32),
+      5,
+      voteToken.getAddress(),
+      12,
+      6,
+      '0x0591C25ebd0580E0d4F27A82Fc2e24E7489CB5e0',
+      owner.getAddress()
+    )) as DAOSpokeContract;
+
+    const spokeContracts = [
+      {
+        contractAddress: ethers.zeroPadBytes(
+          await newDAOSpoke.getAddress(),
+          32
+        ),
+        chainId: 6,
+      },
+      {
+        contractAddress: ethers.zeroPadBytes(
+          await newDAOSpoke.getAddress(),
+          32
+        ),
+        chainId: 6,
+      },
+    ];
+    await expect(
+      governor.updateSpokeContracts(spokeContracts)
+    ).to.be.revertedWith('Duplicates are not allowed');
+  });
+
+  it('Should update spoke contracts with unique entries successfully', async function () {
+    const DAOSpokeContract = await ethers.getContractFactory(
+      'contracts/governance/DAOSpokeContract.sol:DAOSpokeContract'
+    );
+    const newlyDeployedSpoke = await DAOSpokeContract.deploy(
+      ethers.zeroPadBytes(await governor.getAddress(), 32),
+      5,
+      await voteToken.getAddress(),
+      12,
+      6,
+      '0x0591C25ebd0580E0d4F27A82Fc2e24E7489CB5e0',
+      await owner.getAddress()
+    );
+
+    const spokeContracts = [
+      {
+        contractAddress: ethers.zeroPadBytes(
+          await newlyDeployedSpoke.getAddress(),
+          32
+        ),
+        chainId: 6,
+      },
+      {
+        contractAddress: ethers.zeroPadBytes(
+          await newlyDeployedSpoke.getAddress(),
+          32
+        ),
+        chainId: 7,
+      },
+    ];
+
+    await governor.updateSpokeContracts(spokeContracts);
+
+    const updated1 = await governor.spokeContractsMapping(
+      ethers.zeroPadBytes(await newlyDeployedSpoke.getAddress(), 32),
+      6
+    );
+    expect(updated1).to.be.true;
+
+    const updated2 = await governor.spokeContractsMapping(
+      ethers.zeroPadBytes(await newlyDeployedSpoke.getAddress(), 32),
+      7
+    );
+    expect(updated2).to.be.true;
+  });
+
+  it('cannot update spoke contracts after transferring ownership', async function () {
+    const DAOSpokeContract = await ethers.getContractFactory(
+      'contracts/governance/DAOSpokeContract.sol:DAOSpokeContract'
+    );
+    const newlyDeployedSpoke = (await DAOSpokeContract.deploy(
+      ethers.zeroPadBytes(await governor.getAddress(), 32),
+      5,
+      await voteToken.getAddress(),
+      12,
+      6,
+      '0x0591C25ebd0580E0d4F27A82Fc2e24E7489CB5e0',
+      await owner.getAddress()
+    )) as DAOSpokeContract;
+    const spokeChainId = 6;
+
+    const spokeContracts = [
+      {
+        contractAddress: ethers.zeroPadBytes(
+          await newlyDeployedSpoke.getAddress(),
+          32
+        ),
+        chainId: spokeChainId,
+      },
+    ];
+
+    // Transfer ownership to the timelockController
+    await governor
+      .connect(owner)
+      .transferOwnership(await timelockController.getAddress());
+
+    await expect(
+      governor.connect(owner).updateSpokeContracts(spokeContracts)
+    ).to.be.revertedWithCustomError(governor, 'OwnableUnauthorizedAccount');
+  });
+
+  it('Should create a grant proposal', async function () {
+    const proposalId = await createBasicProposal(
+      daoSpoke,
+      wormholeMockForDaoSpoke,
+      voteToken,
+      governor,
+      owner
+    );
+
+    expect(proposalId).to.not.be.null;
   });
 
   it('Should create a cross-chain grant proposal successfully', async function () {
@@ -132,10 +347,44 @@ describe('MetaHumanGovernorHubOnly', function () {
     await expect(tx.wait()).to.not.be.reverted;
   });
 
+  it('Should allow cross-chain propose when spokes are empty', async function () {
+    await governor.updateSpokeContracts([]);
+
+    const encodedCall = voteToken.interface.encodeFunctionData('transfer', [
+      await owner.getAddress(),
+      50,
+    ]);
+    const targets = [voteToken.getAddress()];
+    const values: BigNumberish[] = [0];
+    const calldatas = [encodedCall];
+
+    const tx = await governor.crossChainPropose(
+      targets,
+      values,
+      calldatas,
+      'Sample proposal with empty spokes',
+      {
+        value: 100,
+      }
+    );
+    const receipt = await tx.wait();
+
+    if (!receipt) {
+      throw new Error('No receipt');
+    }
+    expect(receipt.status).to.equal(
+      1,
+      'The transaction should be successful even when spokes are empty'
+    );
+    await expect(tx.wait()).to.not.be.reverted;
+  });
+
   it('Should allow voting on a proposal', async function () {
     await createMockUserWithVotingPower(voteToken, user1);
 
-    const proposalId = await createBasicProposalOnHub(
+    const proposalId = await createBasicProposal(
+      daoSpoke,
+      wormholeMockForDaoSpoke,
       voteToken,
       governor,
       owner
@@ -150,6 +399,8 @@ describe('MetaHumanGovernorHubOnly', function () {
     const { againstVotes, forVotes, abstainVotes } =
       await governor.proposalVotes(proposalId);
 
+    await daoSpoke.connect(user1).castVote(proposalId, 1);
+
     expect(againstVotes).to.equal(0);
     expect(forVotes).to.equal(ethers.parseEther('1'));
     expect(abstainVotes).to.equal(0);
@@ -160,10 +411,19 @@ describe('MetaHumanGovernorHubOnly', function () {
     await createMockUserWithVotingPower(voteToken, user1);
 
     // Update voting delay to 2
-    await updateVotingDelayOnHub(voteToken, governor, 2, user1);
+    await updateVotingDelay(
+      daoSpoke,
+      voteToken,
+      governor,
+      wormholeMockForGovernor,
+      2,
+      user1
+    );
 
     // create proposal
-    const proposalId = await createBasicProposalOnHub(
+    const proposalId = await createBasicProposal(
+      daoSpoke,
+      wormholeMockForDaoSpoke,
       voteToken,
       governor,
       owner
@@ -179,7 +439,9 @@ describe('MetaHumanGovernorHubOnly', function () {
 
   it('Should allow voting against', async function () {
     await createMockUserWithVotingPower(voteToken, user1);
-    const proposalId = await createBasicProposalOnHub(
+    const proposalId = await createBasicProposal(
+      daoSpoke,
+      wormholeMockForDaoSpoke,
       voteToken,
       governor,
       owner
@@ -197,7 +459,9 @@ describe('MetaHumanGovernorHubOnly', function () {
 
   it('Should allow voting abstain', async function () {
     await createMockUserWithVotingPower(voteToken, user1);
-    const proposalId = await createBasicProposalOnHub(
+    const proposalId = await createBasicProposal(
+      daoSpoke,
+      wormholeMockForDaoSpoke,
       voteToken,
       governor,
       owner
@@ -214,7 +478,9 @@ describe('MetaHumanGovernorHubOnly', function () {
 
   it('Should revert when voting with invalid option', async function () {
     await createMockUserWithVotingPower(voteToken, user1);
-    const proposalId = await createBasicProposalOnHub(
+    const proposalId = await createBasicProposal(
+      daoSpoke,
+      wormholeMockForDaoSpoke,
       voteToken,
       governor,
       owner
@@ -230,7 +496,9 @@ describe('MetaHumanGovernorHubOnly', function () {
 
   it('Should revert when vote already cast', async function () {
     await createMockUserWithVotingPower(voteToken, user1);
-    const proposalId = await createBasicProposalOnHub(
+    const proposalId = await createBasicProposal(
+      daoSpoke,
+      wormholeMockForDaoSpoke,
       voteToken,
       governor,
       owner
@@ -250,7 +518,9 @@ describe('MetaHumanGovernorHubOnly', function () {
 
   it('Should not count vote when vote not cast', async function () {
     await createMockUserWithVotingPower(voteToken, user1);
-    const proposalId = await createBasicProposalOnHub(
+    const proposalId = await createBasicProposal(
+      daoSpoke,
+      wormholeMockForDaoSpoke,
       voteToken,
       governor,
       owner
@@ -265,7 +535,9 @@ describe('MetaHumanGovernorHubOnly', function () {
 
   it('Should count vote when vote cast', async function () {
     await createMockUserWithVotingPower(voteToken, user1);
-    const proposalId = await createBasicProposalOnHub(
+    const proposalId = await createBasicProposal(
+      daoSpoke,
+      wormholeMockForDaoSpoke,
       voteToken,
       governor,
       owner
@@ -278,6 +550,55 @@ describe('MetaHumanGovernorHubOnly', function () {
       await user1.getAddress()
     );
     expect(hasVoted).to.be.true;
+  });
+
+  it('Should test cross chain vote on proposal successfully', async function () {
+    await mineNBlocks(1);
+    const proposalId = await createBasicProposal(
+      daoSpoke,
+      wormholeMockForDaoSpoke,
+      voteToken,
+      governor,
+      owner
+    );
+    const user1Address = await user1.getAddress();
+    await voteToken.transfer(user1Address, ethers.parseEther('1'));
+    await voteToken.connect(user1).delegate(user1Address);
+    await mineNBlocks(10);
+
+    // // vote collection message
+    const defaultAbiCoder = new ethers.AbiCoder();
+
+    const message = defaultAbiCoder.encode(
+      ['uint16', 'uint256', 'uint256', 'uint256', 'uint256'],
+      [0, proposalId, ethers.parseEther('1'), 0, 0]
+    );
+
+    const payload = defaultAbiCoder.encode(
+      ['address', 'uint256', 'address', 'bytes'],
+      [
+        await governor.getAddress(),
+        spokeChainId,
+        await daoSpoke.getAddress(),
+        message,
+      ]
+    );
+
+    await callReceiveMessageWithWormholeMock(
+      wormholeMockForGovernor,
+      await createMessageWithPayload(
+        payload,
+        spokeChainId,
+        await daoSpoke.getAddress()
+      )
+    );
+
+    //assert votes
+    const { againstVotes, forVotes, abstainVotes } =
+      await governor.proposalVotes(proposalId);
+    expect(againstVotes).to.equal(0);
+    expect(forVotes).to.equal(ethers.parseEther('1'));
+    expect(abstainVotes).to.equal(0);
   });
 
   it('Should execute proposal successfully', async function () {
@@ -331,6 +652,12 @@ describe('MetaHumanGovernorHubOnly', function () {
     // wait for voting block to end
     await mineNBlocks(50410);
     await governor.requestCollections(proposalId, { value: 100 });
+    await collectVotesFromSpoke(
+      daoSpoke,
+      wormholeMockForGovernor,
+      proposalId,
+      governor
+    );
 
     await governor.queue(targets, values, calldatas, ethers.id('test1'));
     // vm.warp(block.timestamp + 10) ??
@@ -458,7 +785,7 @@ describe('MetaHumanGovernorHubOnly', function () {
 
     await expect(
       governor.execute(targets, values, calldatas, ethers.id('test1'))
-    ).to.be.reverted;
+    ).to.be.revertedWithCustomError(governor, 'CollectionPhaseUnfinished');
   });
 
   it('Should get voting delay', async function () {
@@ -487,7 +814,9 @@ describe('MetaHumanGovernorHubOnly', function () {
   });
 
   it('Should get Proposal State', async function () {
-    const proposalId = await createBasicProposalOnHub(
+    const proposalId = await createBasicProposal(
+      daoSpoke,
+      wormholeMockForDaoSpoke,
       voteToken,
       governor,
       owner
@@ -500,7 +829,9 @@ describe('MetaHumanGovernorHubOnly', function () {
   });
 
   it('Should get proposal state when not succeeded', async function () {
-    const proposalId = await createBasicProposalOnHub(
+    const proposalId = await createBasicProposal(
+      daoSpoke,
+      wormholeMockForDaoSpoke,
       voteToken,
       governor,
       owner
@@ -514,7 +845,9 @@ describe('MetaHumanGovernorHubOnly', function () {
   });
 
   it('Should get proposal state when collection not finished', async function () {
-    const proposalId = await createBasicProposalOnHub(
+    const proposalId = await createBasicProposal(
+      daoSpoke,
+      wormholeMockForDaoSpoke,
       voteToken,
       governor,
       owner
@@ -537,7 +870,9 @@ describe('MetaHumanGovernorHubOnly', function () {
   it('Should get proposal state when defeated and collection finished', async function () {
     await createMockUserWithVotingPower(voteToken, user1);
 
-    const proposalId = await createBasicProposalOnHub(
+    const proposalId = await createBasicProposal(
+      daoSpoke,
+      wormholeMockForDaoSpoke,
       voteToken,
       governor,
       owner
@@ -551,6 +886,12 @@ describe('MetaHumanGovernorHubOnly', function () {
     await mineNBlocks(50410);
 
     await governor.requestCollections(proposalId, { value: 100 });
+    await collectVotesFromSpoke(
+      daoSpoke,
+      wormholeMockForGovernor,
+      proposalId,
+      governor
+    );
 
     const state = await governor.state(proposalId);
     const expectedState = 3;
@@ -568,8 +909,184 @@ describe('MetaHumanGovernorHubOnly', function () {
     expect(supportsInterface).to.be.true;
   });
 
+  it('Should revert to receive message when sender is not spoke contract', async function () {
+    const defaultAbiCoder = new ethers.AbiCoder();
+
+    const message = defaultAbiCoder.encode(
+      ['uint16', 'uint256', 'uint256', 'uint256', 'uint256'],
+      [
+        0,
+        1,
+        ethers.parseEther('1'),
+        ethers.parseEther('2'),
+        ethers.parseEther('3'),
+      ]
+    );
+
+    const payload = defaultAbiCoder.encode(
+      ['address', 'uint256', 'address', 'bytes'],
+      [
+        await governor.getAddress(),
+        spokeChainId,
+        await daoSpoke.getAddress(),
+        message,
+      ]
+    );
+
+    await expect(
+      callReceiveMessageWithWormholeMock(
+        wormholeMockForGovernor,
+        await createMessageWithPayload(
+          payload,
+          spokeChainId,
+          await wormholeMockForDaoSpoke.getAddress()
+        )
+      )
+    ).to.be.revertedWithCustomError(governor, 'OnlyMessagesFromSpokeReceived');
+  });
+
+  it('Should receive message', async function () {
+    const proposalId = await createBasicProposal(
+      daoSpoke,
+      wormholeMockForDaoSpoke,
+      voteToken,
+      governor,
+      owner
+    );
+
+    const defaultAbiCoder = new ethers.AbiCoder();
+    const message = defaultAbiCoder.encode(
+      ['uint16', 'uint256', 'uint256', 'uint256', 'uint256'],
+      [
+        0,
+        proposalId,
+        ethers.parseEther('1'),
+        ethers.parseEther('2'),
+        ethers.parseEther('3'),
+      ]
+    );
+
+    const payload = defaultAbiCoder.encode(
+      ['address', 'uint256', 'address', 'bytes'],
+      [
+        await governor.getAddress(),
+        hubChainId,
+        await daoSpoke.getAddress(),
+        message,
+      ]
+    );
+
+    await callReceiveMessageWithWormholeMock(
+      wormholeMockForGovernor,
+      await createMessageWithPayload(
+        payload,
+        spokeChainId,
+        await daoSpoke.getAddress()
+      )
+    );
+  });
+
+  it('Should revert to receive message when message is already received', async function () {
+    const proposalId = await createBasicProposal(
+      daoSpoke,
+      wormholeMockForDaoSpoke,
+      voteToken,
+      governor,
+      owner
+    );
+
+    const defaultAbiCoder = new ethers.AbiCoder();
+
+    const message = defaultAbiCoder.encode(
+      ['uint16', 'uint256', 'uint256', 'uint256', 'uint256'],
+      [
+        0,
+        proposalId,
+        ethers.parseEther('1'),
+        ethers.parseEther('2'),
+        ethers.parseEther('3'),
+      ]
+    );
+
+    const payload = defaultAbiCoder.encode(
+      ['address', 'uint256', 'address', 'bytes'],
+      [
+        await governor.getAddress(),
+        hubChainId,
+        await daoSpoke.getAddress(),
+        message,
+      ]
+    );
+
+    await callReceiveMessageWithWormholeMock(
+      wormholeMockForGovernor,
+      await createMessageWithPayload(
+        payload,
+        spokeChainId,
+        await daoSpoke.getAddress()
+      )
+    );
+
+    await expect(
+      callReceiveMessageWithWormholeMock(
+        wormholeMockForGovernor,
+        await createMessageWithPayload(
+          payload,
+          spokeChainId,
+          await daoSpoke.getAddress()
+        )
+      )
+    ).to.be.revertedWithCustomError(governor, 'MessageAlreadyProcessed');
+  });
+
+  it('should reverts to receive message when intended recipient is not different', async function () {
+    const proposalId = await createBasicProposal(
+      daoSpoke,
+      wormholeMockForDaoSpoke,
+      voteToken,
+      governor,
+      owner
+    );
+
+    const defaultAbiCoder = new ethers.AbiCoder();
+
+    const message = defaultAbiCoder.encode(
+      ['uint16', 'uint256', 'uint256', 'uint256', 'uint256'],
+      [
+        0,
+        proposalId,
+        ethers.parseEther('1'),
+        ethers.parseEther('2'),
+        ethers.parseEther('3'),
+      ]
+    );
+
+    const payload = defaultAbiCoder.encode(
+      ['address', 'uint256', 'address', 'bytes'],
+      [
+        await owner.getAddress(),
+        hubChainId,
+        await daoSpoke.getAddress(),
+        message,
+      ]
+    );
+
+    await expect(
+      callReceiveMessageWithWormholeMock(
+        wormholeMockForGovernor,
+        await createMessageWithPayload(
+          payload,
+          spokeChainId,
+          await daoSpoke.getAddress()
+        )
+      )
+    ).to.be.revertedWithCustomError(governor, 'InvalidIntendedRecipient');
+  });
+
   it('Should finish collection phase', async function () {
-    const proposalId = await createBasicProposalOnHub(
+    const proposalId = await createBasicProposal(
+      daoSpoke,
+      wormholeMockForDaoSpoke,
       voteToken,
       governor,
       owner
@@ -578,13 +1095,21 @@ describe('MetaHumanGovernorHubOnly', function () {
     await mineNBlocks(50410);
 
     await governor.requestCollections(proposalId, { value: 100 });
+    await collectVotesFromSpoke(
+      daoSpoke,
+      wormholeMockForGovernor,
+      proposalId,
+      governor
+    );
 
     const collectionFinished = await governor.collectionFinished(proposalId);
     expect(collectionFinished).to.be.true;
   });
 
   it('Should request collections', async function () {
-    const proposalId = await createBasicProposalOnHub(
+    const proposalId = await createBasicProposal(
+      daoSpoke,
+      wormholeMockForDaoSpoke,
       voteToken,
       governor,
       owner
@@ -595,7 +1120,9 @@ describe('MetaHumanGovernorHubOnly', function () {
   });
 
   it('Should fails to request collections when voting period is not over', async function () {
-    const proposalId = await createBasicProposalOnHub(
+    const proposalId = await createBasicProposal(
+      daoSpoke,
+      wormholeMockForDaoSpoke,
       voteToken,
       governor,
       owner
@@ -610,7 +1137,9 @@ describe('MetaHumanGovernorHubOnly', function () {
   });
 
   it('Should fails to request collections when collection already started', async function () {
-    const proposalId = await createBasicProposalOnHub(
+    const proposalId = await createBasicProposal(
+      daoSpoke,
+      wormholeMockForDaoSpoke,
       voteToken,
       governor,
       owner
@@ -629,7 +1158,9 @@ describe('MetaHumanGovernorHubOnly', function () {
   it('Should vote on proposal with reason', async function () {
     await createMockUserWithVotingPower(voteToken, user1);
 
-    const proposalId = await createBasicProposalOnHub(
+    const proposalId = await createBasicProposal(
+      daoSpoke,
+      wormholeMockForDaoSpoke,
       voteToken,
       governor,
       owner
@@ -646,6 +1177,8 @@ describe('MetaHumanGovernorHubOnly', function () {
     const { againstVotes, forVotes, abstainVotes } =
       await governor.proposalVotes(proposalId);
 
+    await daoSpoke.connect(user1).castVote(proposalId, 1);
+
     expect(againstVotes).to.equal(0);
     expect(forVotes).to.equal(ethers.parseEther('1'));
     expect(abstainVotes).to.equal(0);
@@ -654,7 +1187,9 @@ describe('MetaHumanGovernorHubOnly', function () {
   it('Should vote on proposal with reason and parameters', async function () {
     await createMockUserWithVotingPower(voteToken, user1);
 
-    const proposalId = await createBasicProposalOnHub(
+    const proposalId = await createBasicProposal(
+      daoSpoke,
+      wormholeMockForDaoSpoke,
       voteToken,
       governor,
       owner
@@ -676,6 +1211,8 @@ describe('MetaHumanGovernorHubOnly', function () {
     const { againstVotes, forVotes, abstainVotes } =
       await governor.proposalVotes(proposalId);
 
+    await daoSpoke.connect(user1).castVote(proposalId, 1);
+
     expect(againstVotes).to.equal(0);
     expect(forVotes).to.equal(ethers.parseEther('1'));
     expect(abstainVotes).to.equal(0);
@@ -684,9 +1221,18 @@ describe('MetaHumanGovernorHubOnly', function () {
   it('Should revert when voting on a non-active proposal with reason and params', async function () {
     await createMockUserWithVotingPower(voteToken, user1);
 
-    await updateVotingDelayOnHub(voteToken, governor, 2, user1);
+    await updateVotingDelay(
+      daoSpoke,
+      voteToken,
+      governor,
+      wormholeMockForGovernor,
+      2,
+      user1
+    );
 
-    const proposalId = await createBasicProposalOnHub(
+    const proposalId = await createBasicProposal(
+      daoSpoke,
+      wormholeMockForDaoSpoke,
       voteToken,
       governor,
       owner
@@ -709,7 +1255,9 @@ describe('MetaHumanGovernorHubOnly', function () {
   it('Should vote on proposal by signature', async function () {
     await createMockUserWithVotingPower(voteToken, user1);
 
-    const proposalId = await createBasicProposalOnHub(
+    const proposalId = await createBasicProposal(
+      daoSpoke,
+      wormholeMockForDaoSpoke,
       voteToken,
       governor,
       owner
@@ -738,6 +1286,8 @@ describe('MetaHumanGovernorHubOnly', function () {
     const { againstVotes, forVotes, abstainVotes } =
       await governor.proposalVotes(proposalId);
 
+    await daoSpoke.connect(user1).castVote(proposalId, 1);
+
     expect(againstVotes).to.equal(0);
     expect(forVotes).to.equal(ethers.parseEther('1'));
     expect(abstainVotes).to.equal(0);
@@ -746,7 +1296,9 @@ describe('MetaHumanGovernorHubOnly', function () {
   it('Should fail to vote on proposal by signature when not active', async function () {
     await createMockUserWithVotingPower(voteToken, user1);
 
-    const proposalId = await createBasicProposalOnHub(
+    const proposalId = await createBasicProposal(
+      daoSpoke,
+      wormholeMockForDaoSpoke,
       voteToken,
       governor,
       owner

@@ -2,7 +2,7 @@ import { anyValue } from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import { assert, expect } from 'chai';
 import { EventLog, Signer } from 'ethers';
 import { ethers, upgrades } from 'hardhat';
-import { EscrowFactory, HMToken, Staking } from '../typechain-types';
+import { EscrowFactory, HMToken, Staking } from '../../typechain-types';
 
 describe('EscrowFactory', function () {
   let owner: Signer,
