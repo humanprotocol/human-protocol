@@ -72,6 +72,7 @@ export function createTransaction(
     Address.fromBytes(transaction.to) == to
   ) {
     transaction.method = method;
+    transaction.from = from;
     transaction.value = value !== null ? value : BigInt.fromI32(0);
     transaction.token = token;
     transaction.escrow = escrow;
