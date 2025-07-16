@@ -1,6 +1,15 @@
 /* eslint-disable camelcase */
 import React, { useEffect, useState } from 'react';
-import { Box, Grid, Paper, Stack, Tab, Tabs, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Grid,
+  Paper,
+  Stack,
+  Tab,
+  Tabs,
+  Typography,
+} from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { TableQueryContextProvider } from '@/shared/components/ui/table/table-query-context';
@@ -20,6 +29,38 @@ function generateTabA11yProps(index: number) {
     id: `tab-${index.toString()}`,
     'aria-controls': `jobs-tabpanel-${index.toString()}`,
   };
+}
+
+function CvatSurveyBanner({ isDarkMode }: { isDarkMode: boolean }) {
+  return (
+    <Box
+      display="inline-flex"
+      alignItems={{ xs: 'stretch', sm: 'center' }}
+      flexDirection={{ xs: 'column', sm: 'row' }}
+      justifyContent="space-between"
+      mb={3}
+      p={2}
+      gap={2}
+      bgcolor={isDarkMode ? '#CDC7FF14' : '#1406B20A'}
+    >
+      <Typography variant="body2">
+        Help us improve by completing our user experience survey
+      </Typography>
+      <Button
+        size="small"
+        variant="contained"
+        color="secondary"
+        onClick={() => {
+          window.open(
+            'https://docs.google.com/forms/d/e/1FAIpQLSfo961dPlJnFj5Lh5VBZ-4sOHM6hG9HEoLsI1ferftUhE9zcw/viewform',
+            '_blank'
+          );
+        }}
+      >
+        Survey
+      </Button>
+    </Box>
+  );
 }
 
 export function JobsPage() {
@@ -60,6 +101,8 @@ export function JobsPage() {
     ({ address }) => address === oracle_address
   )?.name;
 
+  const isCVAT = oracleName === 'CVAT';
+
   if (isPending) {
     return <PageCardLoader />;
   }
@@ -81,15 +124,18 @@ export function JobsPage() {
           }}
         >
           {!isError && (
-            <Box
-              sx={{
-                padding: '8px 42px',
-                backgroundColor: isDarkMode ? '#CDC7FF14' : '#1406B20A',
-                display: 'inline-block',
-              }}
-            >
-              <Typography variant="h6">{oracleName}</Typography>
-            </Box>
+            <>
+              {isCVAT && <CvatSurveyBanner isDarkMode={isDarkMode} />}
+              <Box
+                sx={{
+                  padding: '8px 42px',
+                  backgroundColor: isDarkMode ? '#CDC7FF14' : '#1406B20A',
+                  display: 'inline-block',
+                }}
+              >
+                <Typography variant="h6">{oracleName}</Typography>
+              </Box>
+            </>
           )}
           <Stack>
             <TableQueryContextProvider>
