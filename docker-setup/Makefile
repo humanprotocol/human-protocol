@@ -2,6 +2,7 @@
 	infra-up infra-stop \
 	build-services services-up services-stop
 
+export COMPOSE_BAKE=false
 DOCKER_PARALLEL ?= 4
 
 check-env-file:
