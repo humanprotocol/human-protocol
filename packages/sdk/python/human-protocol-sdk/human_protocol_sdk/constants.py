@@ -37,7 +37,7 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/ethereum/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmUe2Zpp9uZmYRLsgiEJQA87CCna4ZaRGUiQ7cU1f58dVV"
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmSxVvFd4STZkR9gwfuJ76YUpYGcWcBJ6Sm3kqBJHFdUw2"
         ),
         "hmt_address": "0xd1ba9BAC957322D6e8c07a160a3A8dA11A0d2867",
         "factory_address": "0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a",
@@ -53,7 +53,7 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/sepolia/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmbPBqzyRt3zAtF6BtY52P8wn7Gc3qdjWuKLHdargK8WZp"
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmP3Ma4hZ6ZBxNTL2ip2BCkB33vMgRKRLpw74KcwZShzvk"
         ),
         "hmt_address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
         "factory_address": "0x5987A5558d961ee674efe4A8c8eB7B1b5495D3bf",
@@ -69,7 +69,7 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/bsc/version/latest"
         ),
         "subgraph_url_api_key": (
-            "hthttps://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmYP2yo1NGNWGf585uwyRifERv6ZJbJqse3q9Xv1izrR5D"
+            "hthttps://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmW54Mzx63QNVdvk2V9kRaoHicfeJFuDSt7xSGDHpZg9AW"
         ),
         "hmt_address": "0x711Fd6ab6d65A98904522d4e3586F492B989c527",
         "factory_address": "0x92FD968AcBd521c232f5fB8c33b342923cC72714",
@@ -85,7 +85,7 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/bsc-testnet/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmekNGfmcY6trj3m471kQLWg3YSKM7UaRJ3Ef3MBxWfu6o"
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmWaq9orii1Xkw9uCVJ7akDnjY2fuewBRU5LiUKT12XVui"
         ),
         "hmt_address": "0xE3D74BBFa45B4bCa69FF28891fBE392f4B4d4e4d",
         "factory_address": "0x2bfA592DBDaF434DDcbb893B1916120d181DAD18",
@@ -103,7 +103,7 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/polygon/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmTv69h7rW9SMSfLJN4WHzMA4qYttX2GzzfM5Drey4mCRp"
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmVmsQCdB3dGjt9tKG2Y96PRsHUCgGPK8oWtyVw8HMypTc"
         ),
         "hmt_address": "0xc748B2A084F8eFc47E086ccdDD9b7e67aEb571BF",
         "factory_address": "0xBDBfD2cC708199C5640C6ECdf3B0F4A4C67AdfcB",
@@ -121,7 +121,7 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/amoy/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmUe97VzETuP1zQ6oD2trtu9RvSxpRSUrv4uhF1y5dzQDN"
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmPD243cnyp6ApUT2zpsNLKmtM75RLHNwUGT7NRTDds7QN"
         ),
         "hmt_address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
         "factory_address": "0xAFf5a986A530ff839d49325A5dF69F96627E8D29",
@@ -137,7 +137,7 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/amoy/version/aurora-testnet"
         ),
         "subgraph_url_api_key": (
-            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/"
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmVQuank2mwaZg3mcLUH15QEP8KaVS4NNsRaWxnq5mRWoo"
         ),
         "hmt_address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
         "factory_address": "0xbA537fEF2442cD48f60686FE1Bbbe40F964a7940",
