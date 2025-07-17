@@ -115,8 +115,6 @@ app.post('/faucet', async (request: Request, response: Response) => {
       message: 'Testnet ETH request fail. Please try again!',
     });
   ipAddress = ipAddress.replace(/\./g, '_');
-  console.log('IP after replace:', ipAddress);
-  console.log(blockList.keys());
 
   // check ip address availability
   if (blockList.has(ipAddress)) {
