@@ -28,6 +28,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, '..', 'client', 'build')));
 const port = process.env.APP_PORT;
 
+app.set('trust proxy', 1);
+
 // set up rate limiter: maximum of five requests per second
 app.use(
   RateLimit({
