@@ -127,17 +127,17 @@ export class JobController {
       throw new ForbiddenError('Disabled');
     }
 
-    return await this.mutexManagerService.runExclusive(
-      `user${req.user.id}`,
-      MUTEX_TIMEOUT,
-      async () => {
-        return await this.jobService.createJob(
-          req.user,
-          FortuneJobType.FORTUNE,
-          data,
-        );
-      },
+    // return await this.mutexManagerService.runExclusive(
+    //   `user${req.user.id}`,
+    //   MUTEX_TIMEOUT,
+    //   async () => {
+    return await this.jobService.createJob(
+      req.user,
+      FortuneJobType.FORTUNE,
+      data,
     );
+    //   },
+    // );
   }
 
   @ApiOperation({
