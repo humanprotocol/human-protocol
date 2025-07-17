@@ -156,11 +156,13 @@ export class JobService {
       )
         throw new ValidationError(ErrorJob.NotActiveCard);
     }
-
+    console.log(
+      `Creating job for user ${user.id} on chain ${chainId} with request type ${requestType}`,
+    );
     const feePercentage = Number(
       await this.getOracleFee(this.web3Service.getOperatorAddress(), chainId),
     );
-
+    console.log(`Fee percentage for operator: ${feePercentage}%`);
     const paymentCurrencyRate = await this.rateService.getRate(
       dto.paymentCurrency,
       FiatCurrency.USD,
@@ -211,11 +213,12 @@ export class JobService {
 
     // Select oracles
     if (!reputationOracle || !exchangeOracle || !recordingOracle) {
+      console.log(`Selecting oracles for request type ${requestType}`);
       const selectedOracles = await this.routingProtocolService.selectOracles(
         chainId,
         requestType,
       );
-
+      console.log(`Selected oracles: ${JSON.stringify(selectedOracles)}`);
       exchangeOracle = exchangeOracle || selectedOracles.exchangeOracle;
       recordingOracle = recordingOracle || selectedOracles.recordingOracle;
       reputationOracle = reputationOracle || selectedOracles.reputationOracle;
