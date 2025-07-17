@@ -46,6 +46,7 @@ export const envValidator = Joi.object({
   RPC_URL_POLYGON_AMOY: Joi.string(),
   RPC_URL_BSC_MAINNET: Joi.string(),
   RPC_URL_BSC_TESTNET: Joi.string(),
+  RPC_URL_AURORA_TESTNET: Joi.string(),
   RPC_URL_MOONBEAM: Joi.string(),
   RPC_URL_XLAYER_TESTNET: Joi.string(),
   RPC_URL_XLAYER: Joi.string(),

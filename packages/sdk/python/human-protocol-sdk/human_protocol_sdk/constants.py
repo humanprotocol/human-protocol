@@ -11,6 +11,7 @@ class ChainId(Enum):
     BSC_TESTNET = 97
     POLYGON = 137
     POLYGON_AMOY = 80002
+    AURORA_TESTNET = 1313161555
     LOCALHOST = 1338
 
 
@@ -126,6 +127,22 @@ NETWORKS = {
         "factory_address": "0xAFf5a986A530ff839d49325A5dF69F96627E8D29",
         "staking_address": "0xffE496683F842a923110415b7278ded3F265f2C5",
         "kvstore_address": "0x724AeFC243EdacCA27EAB86D3ec5a76Af4436Fc7",
+        "old_subgraph_url": "",
+        "old_factory_address": "",
+    },
+    ChainId.AURORA_TESTNET: {
+        "title": "Aurora Testnet",
+        "scan_url": "https://testnet.aurorascan.dev",
+        "subgraph_url": (
+            "https://api.studio.thegraph.com/query/74256/amoy/version/aurora-testnet"
+        ),
+        "subgraph_url_api_key": (
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/"
+        ),
+        "hmt_address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
+        "factory_address": "0xbA537fEF2442cD48f60686FE1Bbbe40F964a7940",
+        "staking_address": "0x7457d26a3C70Bd71F7557C773b303c1dB82BBB68",
+        "kvstore_address": "0xD6D347ba6987519B4e42EcED43dF98eFf5465a23",
         "old_subgraph_url": "",
         "old_factory_address": "",
     },
