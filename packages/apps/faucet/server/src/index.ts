@@ -35,6 +35,7 @@ app.use(
     max: 5,
   })
 );
+app.set('trust proxy', true);
 
 // init cache
 const blockList = new NodeCache();
@@ -106,7 +107,15 @@ app.post('/faucet', async (request: Request, response: Response) => {
     });
 
   // extract ip
-  let ipAddress = request.ip || request.socket.remoteAddress;
+  let ipAddress = request.ip;
+  console.log(
+    'IP:',
+    ipAddress,
+    'X-Forwarded-For:',
+    request.headers['x-forwarded-for'],
+    'All headers:',
+    request.headers
+  );
   if (!ipAddress)
     return response.status(200).json({
       status: false,
