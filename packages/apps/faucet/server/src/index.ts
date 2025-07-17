@@ -35,7 +35,6 @@ app.use(
     max: 5,
   })
 );
-app.set('trust proxy', true);
 
 // init cache
 const blockList = new NodeCache();
@@ -108,20 +107,14 @@ app.post('/faucet', async (request: Request, response: Response) => {
 
   // extract ip
   let ipAddress = request.ip;
-  console.log(
-    'IP:',
-    ipAddress,
-    'X-Forwarded-For:',
-    request.headers['x-forwarded-for'],
-    'All headers:',
-    request.headers
-  );
   if (!ipAddress)
     return response.status(200).json({
       status: false,
       message: 'Testnet ETH request fail. Please try again!',
     });
   ipAddress = ipAddress.replace(/\./g, '_');
+  console.log('IP after replace:', ipAddress);
+  console.log(blockList.keys());
 
   // check ip address availability
   if (blockList.has(ipAddress)) {
