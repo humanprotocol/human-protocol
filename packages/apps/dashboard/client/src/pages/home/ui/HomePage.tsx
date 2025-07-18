@@ -65,7 +65,7 @@ const HomePage: FC = () => {
   const isMobile = useIsMobile();
 
   return (
-    <PageWrapper violetHeader>
+    <PageWrapper violetHeader errorBanner>
       <Typography variant="h3" color="white.main">
         All HUMAN activity. In one place.
       </Typography>

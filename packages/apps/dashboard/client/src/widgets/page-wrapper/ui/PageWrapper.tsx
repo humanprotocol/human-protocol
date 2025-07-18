@@ -5,14 +5,18 @@ import clsx from 'clsx';
 import Footer from '@/widgets/footer';
 import Header from '@/widgets/header';
 
+import ErrorBanner from './ErrorBanner';
+
 const PageWrapper: FC<
   PropsWithChildren<{
     violetHeader?: boolean;
     className?: string;
+    errorBanner?: boolean;
   }>
-> = ({ children, violetHeader, className }) => {
+> = ({ children, violetHeader, className, errorBanner }) => {
   return (
     <div className="page-wrapper">
+      {errorBanner && <ErrorBanner />}
       <Header />
       <div
         className={clsx(className, {
