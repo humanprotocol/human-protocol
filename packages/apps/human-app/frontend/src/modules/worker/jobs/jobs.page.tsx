@@ -33,6 +33,7 @@ function CvatErrorBanner({ isDarkMode }: { isDarkMode: boolean }) {
       mt={2}
       p={2}
       gap={1}
+      textAlign={{ xs: 'center', sm: 'unset' }}
       bgcolor={isDarkMode ? '#CDC7FF14' : '#1406B20A'}
     >
       <ErrorIcon />
