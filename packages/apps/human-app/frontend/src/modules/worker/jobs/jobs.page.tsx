@@ -1,6 +1,7 @@
 /* eslint-disable camelcase */
 import React, { useEffect, useState } from 'react';
 import { Box, Grid, Paper, Stack, Tab, Tabs, Typography } from '@mui/material';
+import ErrorIcon from '@mui/icons-material/Error';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { TableQueryContextProvider } from '@/shared/components/ui/table/table-query-context';
@@ -20,6 +21,27 @@ function generateTabA11yProps(index: number) {
     id: `tab-${index.toString()}`,
     'aria-controls': `jobs-tabpanel-${index.toString()}`,
   };
+}
+
+function CvatErrorBanner({ isDarkMode }: { isDarkMode: boolean }) {
+  return (
+    <Box
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      flexDirection={{ xs: 'column', sm: 'row' }}
+      mt={2}
+      p={2}
+      gap={1}
+      bgcolor={isDarkMode ? '#CDC7FF14' : '#1406B20A'}
+    >
+      <ErrorIcon />
+      <Typography variant="body1">
+        We know what went down and we are fixing it - We will update via our
+        status page
+      </Typography>
+    </Box>
+  );
 }
 
 export function JobsPage() {
@@ -60,6 +82,8 @@ export function JobsPage() {
     ({ address }) => address === oracle_address
   )?.name;
 
+  const isCVAT = oracleName === 'CVAT';
+
   if (isPending) {
     return <PageCardLoader />;
   }
@@ -91,7 +115,8 @@ export function JobsPage() {
               <Typography variant="h6">{oracleName}</Typography>
             </Box>
           )}
-          <Stack>
+          {isCVAT && <CvatErrorBanner isDarkMode={isDarkMode} />}
+          <Stack display={isCVAT ? 'none' : 'block'}>
             <TableQueryContextProvider>
               <Box sx={{ width: '100%' }}>
                 <Box
