@@ -1,6 +1,6 @@
 import { Storage } from '@google-cloud/storage';
 import { ImageAnnotatorClient, protos } from '@google-cloud/vision';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import NodeCache from 'node-cache';
 import { SlackConfigService } from '../../common/config/slack-config.service';
 import { VisionConfigService } from '../../common/config/vision-config.service';
@@ -31,10 +31,13 @@ import { ContentModerationRequestEntity } from './content-moderation-request.ent
 import { ContentModerationRequestRepository } from './content-moderation-request.repository';
 import { ModerationResultDto } from './content-moderation.dto';
 import { IContentModeratorService } from './content-moderation.interface';
+import logger from '../../logger';
 
 @Injectable()
 export class GCVContentModerationService implements IContentModeratorService {
-  private readonly logger = new Logger(GCVContentModerationService.name);
+  private readonly logger = logger.child({
+    context: GCVContentModerationService.name,
+  });
 
   private visionClient: ImageAnnotatorClient;
   private storage: Storage;
@@ -153,11 +156,12 @@ export class GCVContentModerationService implements IContentModeratorService {
         jobEntity.status = JobStatus.UNDER_MODERATION;
         await this.jobRepository.updateOne(jobEntity);
       }
-    } catch (err) {
-      this.logger.error(
-        `Error creating requests for job ${jobEntity.id}: ${err.message}`,
-      );
-      throw err;
+    } catch (error) {
+      this.logger.error('Error creating requests for job', {
+        error,
+        jobId: jobEntity.id,
+      });
+      throw error;
     }
   }
 
@@ -176,10 +180,13 @@ export class GCVContentModerationService implements IContentModeratorService {
         requests.map(async (requestEntity) => {
           try {
             await this.processSingleRequest(requestEntity);
-          } catch (err) {
-            this.logger.error(
-              `Error processing request ${requestEntity.id} (job ${jobEntity.id}): ${err.message}`,
-            );
+          } catch (error) {
+            this.logger.error('Error processing moderation request', {
+              moderationRequestId: requestEntity.id,
+              jobId: jobEntity.id,
+              error,
+            });
+
             requestEntity.status = ContentModerationRequestStatus.FAILED;
             await this.contentModerationRequestRepository.updateOne(
               requestEntity,
@@ -187,11 +194,13 @@ export class GCVContentModerationService implements IContentModeratorService {
           }
         }),
       );
-    } catch (err) {
-      this.logger.error(
-        `Error processing requests for job ${jobEntity.id}: ${err.message}`,
-      );
-      throw err;
+    } catch (error) {
+      this.logger.error('Error processing moderation requests', {
+        error,
+        jobId: jobEntity.id,
+      });
+
+      throw error;
     }
   }
 
@@ -211,10 +220,13 @@ export class GCVContentModerationService implements IContentModeratorService {
         requests.map(async (requestEntity) => {
           try {
             await this.parseSingleRequest(requestEntity);
-          } catch (err) {
-            this.logger.error(
-              `Error parsing request ${requestEntity.id} for job ${jobEntity.id}: ${err.message}`,
-            );
+          } catch (error) {
+            this.logger.error('Error parsing moderation request', {
+              moderationRequestId: requestEntity.id,
+              jobId: jobEntity.id,
+              error,
+            });
+
             requestEntity.status = ContentModerationRequestStatus.FAILED;
             await this.contentModerationRequestRepository.updateOne(
               requestEntity,
@@ -222,11 +234,12 @@ export class GCVContentModerationService implements IContentModeratorService {
           }
         }),
       );
-    } catch (err) {
-      this.logger.error(
-        `Error parsing results for job ${jobEntity.id}: ${err.message}`,
-      );
-      throw err;
+    } catch (error) {
+      this.logger.error('Error parsing moderation results', {
+        jobId: jobEntity.id,
+        error,
+      });
+      throw error;
     }
   }
 
@@ -266,9 +279,12 @@ export class GCVContentModerationService implements IContentModeratorService {
         jobEntity.status = JobStatus.POSSIBLE_ABUSE_IN_REVIEW;
         await this.jobRepository.updateOne(jobEntity);
       }
-    } catch (err) {
-      this.logger.error(`Error finalizing job ${jobEntity.id}: ${err.message}`);
-      throw err;
+    } catch (error) {
+      this.logger.error('Error finalizing moderation job', {
+        jobId: jobEntity.id,
+        error,
+      });
+      throw error;
     }
   }
 
@@ -327,11 +343,11 @@ export class GCVContentModerationService implements IContentModeratorService {
       const [operation] =
         await this.visionClient.asyncBatchAnnotateImages(requestPayload);
       const [filesResponse] = await operation.promise();
-      this.logger.log(
-        `Output written to GCS: ${filesResponse?.outputConfig?.gcsDestination?.uri}`,
-      );
+      this.logger.debug('Output written to GCS', {
+        url: filesResponse?.outputConfig?.gcsDestination?.uri,
+      });
     } catch (error) {
-      this.logger.error('Error analyzing images:', error);
+      this.logger.error('Error analyzing images', error);
       throw new Error(ErrorContentModeration.ContentModerationFailed);
     }
   }
@@ -389,11 +405,11 @@ export class GCVContentModerationService implements IContentModeratorService {
         }
       }
       return this.categorizeModerationResults(allResponses);
-    } catch (err) {
-      if (err.message === ErrorContentModeration.NoResultsFound) {
-        throw err;
+    } catch (error) {
+      if (error.message === ErrorContentModeration.NoResultsFound) {
+        throw error;
       }
-      this.logger.error('Error collecting moderation results:', err);
+      this.logger.error('Error collecting moderation results', error);
       throw new Error(ErrorContentModeration.ResultsParsingFailed);
     }
   }

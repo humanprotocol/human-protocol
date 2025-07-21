@@ -1,3 +1,4 @@
+import { Injectable } from '@nestjs/common';
 import {
   CardSetup,
   CustomerData,
@@ -6,12 +7,9 @@ import {
   PaymentMethod,
 } from '../payment.interface';
 import { BillingInfoDto } from '../payment.dto';
-import { Injectable, Logger } from '@nestjs/common';
 
 @Injectable()
 export abstract class PaymentProvider {
-  protected readonly logger: Logger = new Logger(this.constructor.name);
-
   /**
    * Create a new customer in the payment provider system
    * @param email Customer's email address

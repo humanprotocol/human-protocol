@@ -1,11 +1,12 @@
 import pino from 'pino';
+
 import LoggerWrapper from './abstract-logger';
 import {
   ChildBindings,
   LogMeta,
   Logger,
   LogLevel,
-  LoggerOptions,
+  LoggerFactory,
   LogRecord,
 } from './types';
 
@@ -35,13 +36,13 @@ export class WrappedPino extends LoggerWrapper {
 
 const pinoLogLevelFormatter = (label: string) => ({ level: label });
 
-export function createLogger(
-  { name, level, pretty, disabled }: LoggerOptions,
+export const createPinoLogger: LoggerFactory = (
+  { name, level, pretty, disabled },
   bindings: LogMeta = {},
-): WrappedPino {
+) => {
   const pinoLogger = pino({
     base: null,
-    level: level || LogLevel.INFO,
+    level: level || LogLevel.DEBUG,
     enabled: disabled !== true,
     timestamp: false,
     formatters: {
@@ -60,4 +61,4 @@ export function createLogger(
   });
 
   return new WrappedPino(pinoLogger, { ...bindings, name });
-}
+};

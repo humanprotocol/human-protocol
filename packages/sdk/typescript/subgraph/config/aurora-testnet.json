@@ -1,0 +1,29 @@
+{
+  "network": "aurora-testnet",
+  "description": "HUMAN subgraph on Aurora Testnet",
+  "EscrowFactory": {
+    "address": "0xbA537fEF2442cD48f60686FE1Bbbe40F964a7940",
+    "startBlock": 201537646,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/EscrowFactory.json"
+  },
+  "HMToken": {
+    "address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
+    "startBlock": 201536119,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/HMToken.json",
+    "totalSupply": "1000000000000000000000000000",
+    "contractDeployer": "0xF3D9a0ba9FA14273C515e519DFD0826Ff87d5164"
+  },
+  "Escrow": {
+    "abi": "../../../../node_modules/@human-protocol/core/abis/Escrow.json"
+  },
+  "KVStore": {
+    "address": "0xD6D347ba6987519B4e42EcED43dF98eFf5465a23",
+    "startBlock": 201537661,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/KVStore.json"
+  },
+  "Staking": {
+    "address": "0x7457d26a3C70Bd71F7557C773b303c1dB82BBB68",
+    "startBlock": 201537602,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/Staking.json"
+  }
+}

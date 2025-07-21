@@ -1,44 +1,15 @@
-import { Dispatch, SetStateAction, useState } from 'react';
-
 import Typography from '@mui/material/Typography';
-import {
-  DatePickerProps,
-  LocalizationProvider,
-  UseDateFieldProps,
-} from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { DatePicker as DatePickerMui } from '@mui/x-date-pickers/DatePicker';
-import {
-  BaseSingleInputFieldProps,
-  DateValidationError,
-  FieldSection,
-} from '@mui/x-date-pickers/models';
+import { type DatePickerProps, usePickerContext } from '@mui/x-date-pickers';
+import { DatePicker as MuiDatePicker } from '@mui/x-date-pickers/DatePicker';
 import type { Dayjs } from 'dayjs';
 
-interface CustomDateFieldProps
-  extends UseDateFieldProps<Dayjs, false>,
-    BaseSingleInputFieldProps<
-      Dayjs | null,
-      Dayjs,
-      FieldSection,
-      false,
-      DateValidationError
-    > {
-  setOpen: Dispatch<SetStateAction<boolean>>;
-}
+const CustomDateField = () => {
+  const { triggerRef, setOpen, label } = usePickerContext();
 
-const CustomDateField = ({
-  setOpen,
-  label,
-  id,
-  InputProps: { ref } = {},
-  inputProps: { 'aria-label': ariaLabel } = {},
-}: CustomDateFieldProps) => {
   return (
     <Typography
-      id={id}
-      ref={ref}
-      aria-label={ariaLabel}
+      ref={triggerRef}
+      aria-label="Select date"
       onClick={() => setOpen((prevState) => !prevState)}
       sx={{
         borderBottom: '1px solid',
@@ -54,48 +25,26 @@ const CustomDateField = ({
   );
 };
 
-interface CustomDatePickerProps {
-  props: Omit<DatePickerProps<Dayjs>, 'open' | 'onOpen' | 'onClose'>;
-}
+type MuiDatePickerProps = {
+  value: Dayjs;
+  onChange: (value: Dayjs | null) => void;
+  customProps?: DatePickerProps;
+};
 
-const CustomDatePicker = ({ props }: CustomDatePickerProps) => {
-  const [open, setOpen] = useState(false);
-
+const DatePicker = ({ value, onChange, customProps }: MuiDatePickerProps) => {
   return (
-    <DatePickerMui
-      {...props}
-      slots={{ ...props.slots, field: CustomDateField }}
-      slotProps={{ ...props.slotProps, field: { setOpen } as never }}
-      open={open}
-      onClose={() => setOpen(false)}
-      onOpen={() => setOpen(true)}
+    <MuiDatePicker
+      label={value.format('DD MMM, YYYY')}
+      value={value}
+      onChange={onChange}
+      slots={{ field: CustomDateField }}
       sx={{
         '& .StaticDatePicker-calendarContainer .DayPicker-Day': {
           fontSize: 14,
         },
       }}
+      {...customProps}
     />
-  );
-};
-
-interface DatePickerPropsMui {
-  value: Dayjs;
-  onChange: (value: Dayjs | null) => void;
-  customProps?: Omit<CustomDatePickerProps, 'value' | 'onChange'>['props'];
-}
-
-const DatePicker = ({ value, onChange, customProps }: DatePickerPropsMui) => {
-  return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <CustomDatePicker
-        props={{
-          label: value.format('DD MMM, YYYY'),
-          value: value,
-          onChange: onChange,
-          ...customProps,
-        }}
-      />
-    </LocalizationProvider>
   );
 };
 

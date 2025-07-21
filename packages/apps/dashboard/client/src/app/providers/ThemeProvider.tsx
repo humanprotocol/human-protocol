@@ -1,17 +1,15 @@
 import {
-  FC,
-  PropsWithChildren,
+  type FC,
+  type PropsWithChildren,
   useCallback,
   useEffect,
   useMemo,
   useState,
 } from 'react';
 
-import {
-  CssBaseline,
-  PaletteMode,
-  ThemeProvider as MuiThemeProvider,
-} from '@mui/material';
+import type { PaletteMode } from '@mui/material';
+import CssBaseline from '@mui/material/CssBaseline';
+import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 
 import { createAppTheme } from '@/shared/ui/theme';
 

@@ -3,12 +3,12 @@ import { useMemo } from 'react';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import { GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
+import type { GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
 
 import { useIsMobile } from '@/shared/hooks/useBreakpoints';
 import CustomTooltip from '@/shared/ui/CustomTooltip';
 
-import { LeaderboardData } from '../model/leaderboardSchema';
+import type { LeaderboardData } from '../model/leaderboardSchema';
 import useLeaderboardFiltersStore from '../store/useLeaderboardFiltersStore';
 
 import AddressCell from './AddressCell';

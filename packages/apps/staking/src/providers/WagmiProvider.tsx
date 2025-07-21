@@ -13,12 +13,7 @@ const chainIdToChainMap: Record<number, any> = {
   [wagmiChains.bscTestnet.id]: wagmiChains.bscTestnet,
   [wagmiChains.polygon.id]: wagmiChains.polygon,
   [wagmiChains.polygonAmoy.id]: wagmiChains.polygonAmoy,
-  [wagmiChains.moonbeam.id]: wagmiChains.moonbeam,
-  [wagmiChains.moonbaseAlpha.id]: wagmiChains.moonbaseAlpha,
-  [wagmiChains.avalanche.id]: wagmiChains.avalanche,
-  [wagmiChains.avalancheFuji.id]: wagmiChains.avalancheFuji,
-  [wagmiChains.xLayer.id]: wagmiChains.xLayer,
-  [wagmiChains.xLayerTestnet.id]: wagmiChains.xLayerTestnet,
+  [wagmiChains.auroraTestnet.id]: wagmiChains.auroraTestnet,
   [LOCALHOST.id]: LOCALHOST,
 };
 

@@ -1,19 +1,19 @@
-import { FC, Fragment } from 'react';
+import { type FC, Fragment } from 'react';
 
-import { useTheme } from '@mui/material';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
+import { useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import {
-  AreaChart,
   Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  type TooltipProps,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  TooltipProps,
 } from 'recharts';
 
 import { useIsMobile } from '@/shared/hooks/useBreakpoints';

@@ -1,12 +1,13 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import GitHubIcon from '@mui/icons-material/GitHub';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import TelegramIcon from '@mui/icons-material/Telegram';
 import TwitterIcon from '@mui/icons-material/Twitter';
-import { IconButton, styled } from '@mui/material';
 import Box from '@mui/material/Box';
+import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
+import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 
 import { env } from '@/shared/config/env';

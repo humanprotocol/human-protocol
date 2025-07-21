@@ -211,7 +211,7 @@ yarn upgrade:proxy --network [NETWORK_NAME]
 5. Verify the contract runing the following line:
 
 ```bash
-yarn dlx hardhat verify --network [NETWORK_NAME] [CONTRACT_ADDRESS]
+npx hardhat verify --network [NETWORK_NAME] [CONTRACT_ADDRESS]
 ```
 
 ## Documentation

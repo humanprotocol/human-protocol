@@ -1,3 +1,4 @@
+export const SERVICE_NAME = 'reputation-oracle';
 export const DATABASE_SCHEMA_NAME = 'hmt';
 export const JWT_STRATEGY_NAME = 'jwt-http';
 
