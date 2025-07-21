@@ -10,6 +10,7 @@ export const supportedChainIdsByNetwork = {
     ChainId.POLYGON_AMOY,
     ChainId.BSC_TESTNET,
     ChainId.SEPOLIA,
+    ChainId.AURORA_TESTNET,
   ],
   [Web3Network.LOCAL]: [ChainId.LOCALHOST],
 } as const;

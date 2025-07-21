@@ -26,11 +26,6 @@
     "startBlock": 7062708,
     "abi": "../../../../node_modules/@human-protocol/core/abis/Staking.json"
   },
-  "RewardPool": {
-    "address": "0xAFf5a986A530ff839d49325A5dF69F96627E8D29",
-    "startBlock": 5716239,
-    "abi": "../../../../node_modules/@human-protocol/core/abis/RewardPool.json"
-  },
   "LegacyEscrow": {
     "abi": "../../../../node_modules/@human-protocol/core/abis/legacy/Escrow.json"
   }

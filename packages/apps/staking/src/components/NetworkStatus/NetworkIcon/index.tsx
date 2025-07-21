@@ -5,6 +5,7 @@ import MoonbeamIcon from './Icons/MoonbeamIcon';
 import MoonbaseAlphaIcon from './Icons/MoonbaseAlphaIcon';
 import { XLayerIcon } from './Icons/XLayerIcon';
 import { AvalancheIcon } from './Icons/AvalancheIcon';
+import AuroraIcon from './Icons/AuroraIcon';
 
 export const NetworkIcon = ({ chainId }: { chainId?: number }) => {
   const icon = (() => {
@@ -31,6 +32,8 @@ export const NetworkIcon = ({ chainId }: { chainId?: number }) => {
       case 43113:
       case 43114:
         return <AvalancheIcon />;
+      case 1313161555:
+        return <AuroraIcon />;
       default:
         return <PolygonIcon />;
     }
