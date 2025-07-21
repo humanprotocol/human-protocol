@@ -4176,7 +4176,7 @@ __metadata:
     ts-jest: "npm:29.2.5"
     ts-node: "npm:^10.9.2"
     tsconfig-paths: "npm:4.2.0"
-    typeorm: "npm:^0.3.23"
+    typeorm: "npm:^0.3.25"
     typeorm-naming-strategies: "npm:^4.1.0"
     typescript: "npm:^5.6.3"
   languageName: unknown
@@ -4469,7 +4469,7 @@ __metadata:
     ts-jest: "npm:29.2.5"
     ts-node: "npm:^10.9.2"
     tsconfig-paths: "npm:4.2.0"
-    typeorm: "npm:^0.3.17"
+    typeorm: "npm:^0.3.25"
     typeorm-naming-strategies: "npm:^4.1.0"
     typescript: "npm:^5.6.3"
     zxcvbn: "npm:^4.4.2"
@@ -4566,7 +4566,7 @@ __metadata:
     ts-node: "npm:^10.9.2"
     tsconfig-paths: "npm:4.2.0"
     type-fest: "npm:^4.37.0"
-    typeorm: "npm:^0.3.16"
+    typeorm: "npm:^0.3.25"
     typeorm-naming-strategies: "npm:^4.1.0"
     typescript: "npm:^5.6.3"
     uuid: "npm:^11.1.0"
@@ -16220,7 +16220,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dedent@npm:^1.0.0":
+"dedent@npm:^1.0.0, dedent@npm:^1.6.0":
   version: 1.6.0
   resolution: "dedent@npm:1.6.0"
   peerDependencies:
@@ -29260,9 +29260,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typeorm@npm:^0.3.16, typeorm@npm:^0.3.17, typeorm@npm:^0.3.23":
-  version: 0.3.23
-  resolution: "typeorm@npm:0.3.23"
+"typeorm@npm:^0.3.25":
+  version: 0.3.25
+  resolution: "typeorm@npm:0.3.25"
   dependencies:
     "@sqltools/formatter": "npm:^1.2.5"
     ansis: "npm:^3.17.0"
@@ -29270,6 +29270,7 @@ __metadata:
     buffer: "npm:^6.0.3"
     dayjs: "npm:^1.11.13"
     debug: "npm:^4.4.0"
+    dedent: "npm:^1.6.0"
     dotenv: "npm:^16.4.7"
     glob: "npm:^10.4.5"
     sha.js: "npm:^2.4.11"
@@ -29335,7 +29336,7 @@ __metadata:
     typeorm: cli.js
     typeorm-ts-node-commonjs: cli-ts-node-commonjs.js
     typeorm-ts-node-esm: cli-ts-node-esm.js
-  checksum: 10c0/a1443355aab8250d467fe4f689f1ae1614ad3af645a1565019bbc9fb710e784d4c27ad12d824baed4d4972e0566262dea0c0cb6ecc4a4fedc3dab7795fd453a8
+  checksum: 10c0/f0b52e451003713aba83a96bce5ee942c7f3ae236ee2e241b7872a19a3e3ac7ac24c91f3c279606678838c360de3c25a8156239b047f7980b0ba2b7ba6f73152
   languageName: node
   linkType: hard
 
