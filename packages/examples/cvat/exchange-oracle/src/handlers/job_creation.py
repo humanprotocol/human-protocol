@@ -166,10 +166,6 @@ class _TaskBuilderBase(metaclass=ABCMeta):
     def _job_val_frames_count(self) -> int:
         return self.manifest.validation.val_size
 
-    @property
-    def _task_chunk_size(self) -> int:
-        return self._task_segment_size + self._job_val_frames_count
-
     def __enter__(self):
         return self
 
@@ -434,7 +430,6 @@ class SimpleTaskBuilder(_TaskBuilderBase):
                     cvat_task.id,
                     cloud_storage.id,
                     filenames=data_subset,
-                    chunk_size=self._task_chunk_size,
                     validation_params={
                         "gt_filenames": gt_filenames,  # include whole GT dataset into each task
                         "gt_frames_per_job_count": self._job_val_frames_count,
@@ -1614,7 +1609,6 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
                     cvat_task.id,
                     cvat_cloud_storage.id,
                     filenames=filenames,
-                    chunk_size=self._task_chunk_size,
                     validation_params={
                         "gt_filenames": gt_filenames,
                         "gt_frames_per_job_count": self._job_val_frames_count,
@@ -2942,7 +2936,6 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
                             cvat_task.id,
                             cvat_cloud_storage.id,
                             filenames=point_label_filenames + gt_point_label_filenames,
-                            chunk_size=self._task_chunk_size,
                             validation_params={
                                 "gt_filenames": gt_point_label_filenames,
                                 "gt_frames_per_job_count": self._job_val_frames_count,
