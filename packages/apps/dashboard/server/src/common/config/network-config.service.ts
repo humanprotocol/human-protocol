@@ -63,7 +63,7 @@ export class NetworkConfigService {
         },
       }),
       ...(this.configService.get<string>('RPC_URL_AURORA_TESTNET') && {
-        bsctest: {
+        auroratest: {
           chainId: ChainId.AURORA_TESTNET,
           rpcUrl: this.configService.get<string>('RPC_URL_AURORA_TESTNET'),
         },
