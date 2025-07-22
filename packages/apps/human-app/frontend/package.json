@@ -20,6 +20,7 @@
     "@emotion/styled": "^11.11.0",
     "@faker-js/faker": "^9.7.0",
     "@fontsource/inter": "^5.0.17",
+    "@fontsource/roboto": "^5.2.6",
     "@hcaptcha/react-hcaptcha": "^0.3.6",
     "@hookform/resolvers": "^5.0.1",
     "@human-protocol/sdk": "workspace:*",

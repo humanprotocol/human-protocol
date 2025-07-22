@@ -52,3 +52,9 @@ export interface AssignJobBody {
 export interface RefreshJobsBody {
   oracle_address: string;
 }
+
+export interface ReportAbuseBody {
+  escrow_address: string;
+  chain_id: number;
+  reason: string;
+}
