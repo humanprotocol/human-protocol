@@ -39,6 +39,8 @@ export class ReportAbuseCommand {
   data: ReportAbuseParams;
   @AutoMap()
   token: string;
+  @AutoMap()
+  reason: string;
 }
 
 export class ReportAbuseData {
