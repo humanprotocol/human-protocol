@@ -28,6 +28,7 @@ export const reportAbuseParamsFixture: ReportAbuseParams = {
 export const reportAbuseCommandFixture: ReportAbuseCommand = {
   data: reportAbuseParamsFixture,
   token: TOKEN,
+  reason: REASON,
 };
 
 export const reportedAbuseItemFixture: ReportedAbuseItem = {
