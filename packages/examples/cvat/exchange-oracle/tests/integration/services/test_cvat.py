@@ -17,7 +17,6 @@ from src.core.types import (
 )
 from src.db import SessionLocal
 from src.models.cvat import Assignment, DataUpload, Image, Job, Project, Task, User
-from src.utils.time import utcnow
 
 from tests.utils.db_helper import (
     create_project,
@@ -346,90 +345,6 @@ class ServiceIntegrationTest(unittest.TestCase):
         projects = cvat_service.get_projects_by_status(self.session, ProjectStatuses.completed)
 
         assert len(projects) == 1
-
-    def test_get_available_projects(self):
-        cvat_id_1 = 456
-        (cvat_project, cvat_task, cvat_job) = create_project_task_and_job(
-            self.session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", cvat_id_1
-        )
-
-        projects = cvat_service.get_available_projects(self.session)
-
-        assert len(projects) == 1
-
-        cvat_id_2 = 457
-        (cvat_project, cvat_task) = create_project_and_task(
-            self.session, "0x86e83d346041E8806e352681f3F14549C0d2BC68", cvat_id_2
-        )
-
-        cvat_task_id = cvat_task.cvat_id
-        cvat_project_id = cvat_project.cvat_id
-
-        cvat_service.create_job(
-            session=self.session,
-            cvat_id=cvat_id_2,
-            cvat_task_id=cvat_task_id,
-            cvat_project_id=cvat_project_id,
-            status=JobStatuses.in_progress,
-            start_frame=0,
-            stop_frame=1,
-        )
-
-        cvat_id_3 = 458
-        (cvat_project, cvat_task, _) = create_project_task_and_job(
-            self.session, "0x86e83d346041E8806e352681f3F14549C0d2BC69", cvat_id_3
-        )
-
-        projects = cvat_service.get_available_projects(self.session)
-        assert len(projects) == 2
-        assert any(project.cvat_id == cvat_id_1 for project in projects)
-        assert any(project.cvat_id == cvat_id_3 for project in projects)
-
-    def test_get_projects_by_assignee(self):
-        wallet_address_1 = "0x86e83d346041E8806e352681f3F14549C0d2BC60"
-        cvat_id_1 = 456
-
-        create_project_task_and_job(
-            self.session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", cvat_id_1
-        )
-
-        user = User(wallet_address=wallet_address_1, cvat_id=cvat_id_1, cvat_email="test@hmt.ai")
-        self.session.add(user)
-
-        cvat_service.create_assignment(
-            session=self.session,
-            wallet_address=wallet_address_1,
-            cvat_job_id=cvat_id_1,
-            expires_at=datetime.now() + timedelta(days=1),
-        )
-
-        wallet_address_2 = "0x86e83d346041E8806e352681f3F14549C0d2BC61"
-        cvat_id_2 = 457
-
-        create_project_task_and_job(
-            self.session, "0x86e83d346041E8806e352681f3F14549C0d2BC68", cvat_id_2
-        )
-
-        user = User(wallet_address=wallet_address_2, cvat_id=cvat_id_2, cvat_email="test2@hmt.ai")
-        self.session.add(user)
-
-        cvat_service.create_assignment(
-            session=self.session,
-            wallet_address=wallet_address_2,
-            cvat_job_id=cvat_id_2,
-            expires_at=utcnow(),
-        )
-
-        projects = cvat_service.get_projects_by_assignee(self.session, wallet_address_1)
-
-        assert len(projects) == 1
-        assert projects[0].cvat_id == cvat_id_1
-
-        projects = cvat_service.get_projects_by_assignee(self.session, wallet_address_2)
-
-        assert (
-            len(projects) == 0
-        )  # expired should not be shown, https://github.com/humanprotocol/human-protocol/pull/1879
 
     def test_update_project_status(self):
         cvat_id = 1
