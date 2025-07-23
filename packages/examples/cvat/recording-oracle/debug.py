@@ -90,6 +90,8 @@ def _mock_webhook_signature_checking(_: Logger) -> Generator[None, None, None]:
     - from exchange oracle -
       signed with Config.localhost.exchange_oracle_address
       or with signature "exchange_oracle<number>"
+
+    <number> is optional.
     """
 
     from src.chain.escrow import (
