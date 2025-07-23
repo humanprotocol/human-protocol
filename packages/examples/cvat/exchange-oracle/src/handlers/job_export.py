@@ -130,7 +130,7 @@ class _TaskProcessor:
         return dm.Dataset.import_from(dataset_dir, self.input_format)
 
     def _export_dataset(self, dataset: dm.Dataset, output_dir: str):
-        dataset.export(output_dir, self.output_format, save_images=False)
+        dataset.export(output_dir, self.output_format, save_media=False)
 
     def _process_dataset(
         self, dataset: dm.Dataset, *, ann_descriptor: FileDescriptor

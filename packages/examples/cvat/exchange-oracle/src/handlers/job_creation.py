@@ -230,7 +230,7 @@ class _TaskBuilderBase(metaclass=ABCMeta):
 
         with TemporaryDirectory() as tmp_dir:
             export_dir = Path(tmp_dir) / "export"
-            gt_dataset.export(save_dir=str(export_dir), save_images=False, format=dm_export_format)
+            gt_dataset.export(save_dir=str(export_dir), save_media=False, format=dm_export_format)
 
             annotations_archive_path = Path(tmp_dir) / "annotations.zip"
             with annotations_archive_path.open("wb") as annotations_archive:
