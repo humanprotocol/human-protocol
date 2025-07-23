@@ -123,6 +123,7 @@ ignore = [
     "ANN001",  # |
     "ANN003",  # |
     "ARG001",  # |
+    "FBT001",  # Allow bool-annotated positional args in functions
     "SLF001",  # Allow private attrs access
     "PLR2004", # Allow magic values
     "S",       # security

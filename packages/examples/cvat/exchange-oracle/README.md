@@ -18,14 +18,14 @@ For deployment it is required to have PostgreSQL(v14.4)
 
 ### Run the oracle locally:
 
-```
+```sh
 docker compose -f docker-compose.dev.yml up -d
 ./bin/start_dev.sh
 ```
 
 or 
 
-```
+```sh
 docker compose -f docker-compose.dev.yml up -d
 ./bin/start_debug.sh
 ```
@@ -48,17 +48,17 @@ Example: [Alembic env file](https://github.com/humanprotocol/human-protocol/blob
 
 
 Adding new migration:
-```
+```sh
 alembic revision --autogenerate -m "your-migration-name"
 ```
 
 Upgrade:
-```
+```sh
 alembic upgrade head
 ```
 
 Downgrade:
-```
+```sh
 alembic downgrade -{number of migrations}
 ```
 
@@ -72,7 +72,7 @@ Available at `/docs` route
 ### Tests
 
 To run tests
-```
-docker compose -f docker-compose.test.yml up --build test --attach test --exit-code-from test && \
-   docker compose -f docker-compose.test.yml down
+```sh
+docker compose -p "test" -f docker-compose.test.yml up --build test --attach test --exit-code-from test; \
+   docker compose -p "test" -f docker-compose.test.yml down
 ```
