@@ -1,5 +1,7 @@
 import datetime
+import inspect
 import json
+import uuid
 from collections.abc import Generator
 from contextlib import ExitStack, contextmanager
 from logging import Logger
@@ -7,8 +9,6 @@ from pathlib import Path, PurePosixPath
 from typing import Any
 from unittest import mock
 
-import inspect
-import uuid
 import uvicorn
 from httpx import URL
 
@@ -31,9 +31,7 @@ def _mock_cvat_cloud_storage_params(logger: Logger) -> Generator[None, None, Non
     def patched_make_cvat_cloud_storage_params(bucket_info: BucketAccessInfo) -> dict:
         original_host_url = bucket_info.host_url
 
-        if Config.development_config.cvat_in_docker and (
-            "localhost" in original_host_url or "127.0.0.1" in original_host_url
-        ):
+        if Config.development_config.cvat_in_docker:
             bucket_info.host_url = str(
                 URL(original_host_url).copy_with(
                     host=Config.development_config.exchange_oracle_host
@@ -155,10 +153,10 @@ def _mock_webhook_signature_checking(_: Logger) -> Generator[None, None, None]:
             escrow_address,
             chain_id,
             type: OracleWebhookTypes,
-            signature = None,
-            event_type = None,
-            event_data = None,
-            event = None,
+            signature=None,
+            event_type=None,
+            event_data=None,
+            event=None,
         ):
             if signature in OracleWebhookTypes:
                 signature = f"{type.value}-{utcnow().isoformat(sep='T')}-{uuid.uuid4()}"
@@ -177,7 +175,7 @@ def _mock_webhook_signature_checking(_: Logger) -> Generator[None, None, None]:
             "src.endpoints.webhook.validate_oracle_webhook_signature",
             patched_validate_oracle_webhook_signature,
         ),
-        mock.patch("src.services.webhook.inbox", PatchedInbox())
+        mock.patch("src.services.webhook.inbox", PatchedInbox()),
     ):
         yield
 
@@ -269,6 +267,7 @@ def apply_local_development_patches() -> Generator[None, None, None]:
         logger.warning("DEV: Local development patches applied.")
 
         yield
+
 
 if __name__ == "__main__":
     with ExitStack() as es:

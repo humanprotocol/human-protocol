@@ -1,11 +1,11 @@
 import datetime
+import inspect
+import uuid
 from collections.abc import Generator
 from contextlib import ExitStack, contextmanager
 from logging import Logger
 from pathlib import PurePosixPath
 from unittest import mock
-import inspect
-import uuid
 
 import uvicorn
 
@@ -127,10 +127,10 @@ def _mock_webhook_signature_checking(_: Logger) -> Generator[None, None, None]:
             escrow_address,
             chain_id,
             type: OracleWebhookTypes,
-            signature = None,
-            event_type = None,
-            event_data = None,
-            event = None,
+            signature=None,
+            event_type=None,
+            event_data=None,
+            event=None,
         ):
             if signature in OracleWebhookTypes:
                 signature = f"{type.value}-{utcnow().isoformat(sep='T')}-{uuid.uuid4()}"
@@ -149,7 +149,7 @@ def _mock_webhook_signature_checking(_: Logger) -> Generator[None, None, None]:
             "src.endpoints.webhook.validate_oracle_webhook_signature",
             patched_validate_oracle_webhook_signature,
         ),
-        mock.patch("src.services.webhook.inbox", PatchedInbox())
+        mock.patch("src.services.webhook.inbox", PatchedInbox()),
     ):
         yield
 
