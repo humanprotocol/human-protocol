@@ -1786,19 +1786,33 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
             for node_label in skeleton_label.nodes:
                 manifest_labels.add((node_label, skeleton_label.name))
 
-        if gt_labels - manifest_labels:
+        if manifest_labels - gt_labels:
             raise DatasetValidationError(
-                "GT labels do not match job labels. Unknown labels: {}".format(
+                "Could not find GT for labels {}".format(
                     format_sequence(
                         [
                             label_name if not parent_name else f"{parent_name}.{label_name}"
-                            for label_name, parent_name in gt_labels - manifest_labels
+                            for label_name, parent_name in manifest_labels - gt_labels
                         ]
                     ),
                 )
             )
 
-        # Reorder labels to match the manifest
+        # It should not be an issue that there are some extra GT labels - they should
+        # just be skipped.
+        if gt_labels - manifest_labels:
+            self.logger.info(
+                "Skipping unknown GT labels: {}".format(
+                    format_sequence(
+                        [
+                            label_name if not parent_name else f"{parent_name}.{label_name}"
+                            for label_name, parent_name in gt_labels - manifest_labels
+                        ]
+                    )
+                )
+            )
+
+        # Reorder and filter labels to match the manifest
         self._input_gt_dataset.transform(
             ProjectLabels, dst_labels=[label.name for label in self.manifest.annotation.labels]
         )
