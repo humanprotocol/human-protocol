@@ -34,6 +34,12 @@ class TaskStatuses(str, Enum, metaclass=BetterEnumMeta):
 class JobStatuses(str, Enum, metaclass=BetterEnumMeta):
     new = "new"
     in_progress = "in progress"
+    completed = "completed"
+
+
+class CvatJobStatuses(str, Enum, metaclass=BetterEnumMeta):
+    new = "new"
+    in_progress = "in progress"
     rejected = "rejected"
     completed = "completed"
 
