@@ -4,10 +4,11 @@ import src.cvat.api_calls as cvat_api
 import src.models.cvat as models
 import src.services.cvat as cvat_service
 from src import db
-from src.core.types import AssignmentStatuses, CvatEventTypes, JobStatuses, ProjectStatuses
+from src.core.types import AssignmentStatuses, JobStatuses, ProjectStatuses
 from src.db import SessionLocal
 from src.db import errors as db_errors
 from src.log import ROOT_LOGGER_NAME
+from src.schemas.cvat import CvatWebhook
 from src.utils.logging import get_function_logger
 
 module_logger_name = f"{ROOT_LOGGER_NAME}.cron.handler"
@@ -167,11 +168,11 @@ def handle_create_job_event(payload: dict) -> None:
         )
 
 
-def cvat_webhook_handler(cvat_webhook: dict) -> None:
+def cvat_webhook_handler(cvat_webhook: CvatWebhook) -> None:
     match cvat_webhook.event:
-        case CvatEventTypes.update_job.value:
+        case cvat_api.WebhookEventType.update_job.value:
             handle_update_job_event(cvat_webhook)
-        case CvatEventTypes.create_job.value:
+        case cvat_api.WebhookEventType.create_job.value:
             handle_create_job_event(cvat_webhook)
-        case CvatEventTypes.ping.value:
+        case cvat_api.WebhookEventType.ping.value:
             pass

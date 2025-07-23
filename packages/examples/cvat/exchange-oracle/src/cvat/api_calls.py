@@ -38,6 +38,26 @@ class RequestStatus(str, Enum, metaclass=BetterEnumMeta):
     FAILED = "Failed"
 
 
+class JobStatus(str, Enum, metaclass=BetterEnumMeta):
+    new = "new"
+    in_progress = "in progress"
+    rejected = "rejected"
+    completed = "completed"
+
+
+class LabelType(str, Enum, metaclass=BetterEnumMeta):
+    tag = "tag"
+    points = "points"
+    rectangle = "rectangle"
+    polygon = "polygon"
+
+
+class WebhookEventType(str, Enum, metaclass=BetterEnumMeta):
+    update_job = "update:job"
+    create_job = "create:job"
+    ping = "ping"
+
+
 def _request_annotations(endpoint: Endpoint, cvat_id: int, format_name: str) -> str:
     """
     Requests annotations export.
