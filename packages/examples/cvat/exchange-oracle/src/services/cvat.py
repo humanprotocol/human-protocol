@@ -12,6 +12,7 @@ from typing import Any, NamedTuple
 from sqlalchemy import delete, func, literal, select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
+from sqlalchemy.sql.functions import coalesce
 
 from src.core.types import (
     AssignmentStatuses,
@@ -761,7 +762,7 @@ def get_free_job(
     for_update: bool | ForUpdateParams = False,
 ) -> Job | None:
     """
-    Returns the first available job that wasn't previously assigned to that user_walled_address.
+    Returns the first available job that wasn't previously assigned to that user_wallet_address.
     """
     return (
         _maybe_for_update(session.query(Job), enable=for_update)
@@ -772,14 +773,7 @@ def get_free_job(
                 & (Project.status == ProjectStatuses.annotation)
             ),
             Job.status == JobStatuses.new,
-            ~Job.assignments.any(
-                (
-                    (Assignment.status == AssignmentStatuses.created.value)
-                    & (Assignment.completed_at == None)
-                    & (utcnow() < Assignment.expires_at)
-                )
-                | (Assignment.user_wallet_address == user_wallet_address),
-            ),
+            ~Job.assignments.any(Assignment.user_wallet_address == user_wallet_address),
         )
         .first()
     )
@@ -881,13 +875,28 @@ def get_unprocessed_expired_assignments(
     )
 
 
+def get_unprocessed_cancelled_assignments(
+    session: Session, *, limit: int = 10, for_update: bool | ForUpdateParams = False
+) -> list[Assignment]:
+    return (
+        _maybe_for_update(session.query(Assignment), enable=for_update)
+        .where(
+            (Assignment.job.has(Job.status == JobStatuses.in_progress.value))
+            & (Assignment.status == AssignmentStatuses.canceled.value)
+        )
+        .limit(limit)
+        .all()
+    )
+
+
 def get_active_assignments(
     session: Session, *, limit: int = 10, for_update: bool | ForUpdateParams = False
 ) -> list[Assignment]:
     return (
         _maybe_for_update(session.query(Assignment), enable=for_update)
         .where(
-            (Assignment.status == AssignmentStatuses.created.value)
+            (Assignment.job.has(Job.status == JobStatuses.in_progress.value))
+            & (Assignment.status == AssignmentStatuses.created.value)
             & (Assignment.completed_at == None)
             & (Assignment.expires_at <= utcnow())
         )
@@ -1020,7 +1029,14 @@ def touch(
     if time is None:
         time = utcnow()
 
-    session.execute(update(cls).where(cls.id.in_(ids)).values({cls.updated_at: time}))
+    session.execute(
+        update(cls)
+        .where(
+            cls.id.in_(ids),
+            coalesce(cls.updated_at, datetime.min) < time,
+        )
+        .values({cls.updated_at: time})
+    )
 
     if touch_parents:
         touch_parent_objects(session, cls, ids, time=time)
@@ -1033,6 +1049,9 @@ def touch_parent_objects(
     *,
     time: datetime | None = None,
 ):
+    if time is None:
+        time = utcnow()
+
     while issubclass(cls, ChildOf):
         parent_cls = cls.parent_cls
         foreign_key_column = next(iter(cls.parent.property.local_columns))
@@ -1044,7 +1063,8 @@ def touch_parent_objects(
                     select(foreign_key_column)
                     .where(cls.id.in_(ids))
                     .where(foreign_key_column.is_not(None))
-                )
+                ),
+                coalesce(parent_cls.updated_at, datetime.min) < time,
             )
             .values({parent_cls.updated_at: time})
             .returning(parent_cls.id)
