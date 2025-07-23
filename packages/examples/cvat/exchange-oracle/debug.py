@@ -270,31 +270,7 @@ def apply_local_development_patches() -> Generator[None, None, None]:
 
         yield
 
-
-def run_server():
-    uvicorn.run(
-        app="src:app",
-        host="0.0.0.0",  # noqa: S104
-        port=int(Config.port),
-        workers=Config.workers_amount,
-    )
-
-
-# def fix_escrow():
-#     from src.handlers.job_fixing import entrypoint
-
-#     return entrypoint()
-
-
-import sys
-from argparse import ArgumentParser
-
-
-def main(args: list[str] | None = None) -> int:
-    parser = ArgumentParser()
-    parser.add_argument("-e", "--entrypoint", default=run_server)
-    parsed_args = parser.parse_args(args)
-
+if __name__ == "__main__":
     with ExitStack() as es:
         is_dev = Config.environment == "development"
         if is_dev:
@@ -303,10 +279,9 @@ def main(args: list[str] | None = None) -> int:
         Config.validate()
         register_in_kvstore()
 
-        parsed_args.entrypoint()
-
-    return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main(sys.argv[1:]))
+        uvicorn.run(
+            app="src:app",
+            host="0.0.0.0",  # noqa: S104
+            port=int(Config.port),
+            workers=Config.workers_amount,
+        )
