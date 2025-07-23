@@ -23,6 +23,8 @@ export const useStake = () => {
   );
   const [stakingData, setStakingData] = useState<StakerInfo | null>(null);
   const [tokenBalance, setTokenBalance] = useState<number>(0);
+  const [browserProvider, setBrowserProvider] =
+    useState<ethers.BrowserProvider | null>(null);
 
   useEffect(() => {
     const initStakingClient = async () => {
@@ -33,6 +35,7 @@ export const useStake = () => {
           const provider = new ethers.BrowserProvider(
             eeip193Provider as Eip1193Provider
           );
+          setBrowserProvider(provider);
           const signer = await provider.getSigner();
 
           const client = await StakingClient.build(signer);
@@ -102,6 +105,8 @@ export const useStake = () => {
   };
 
   const handleStake = async (amount: string) => {
+    if (!browserProvider) return;
+
     try {
       checkSupportedChain();
       if (stakingClient && amount) {
@@ -109,11 +114,7 @@ export const useStake = () => {
         await stakingClient.approveStake(weiAmount);
         await stakingClient.stake(weiAmount);
         await fetchStakingData(stakingClient);
-        await fetchTokenBalance(
-          new ethers.BrowserProvider(window.ethereum),
-          address!,
-          chainId
-        );
+        await fetchTokenBalance(browserProvider, address!, chainId);
         openSnackbar('Stake successful', 'success');
       }
     } catch (error) {
@@ -123,17 +124,15 @@ export const useStake = () => {
   };
 
   const handleUnstake = async (amount: string) => {
+    if (!browserProvider) return;
+
     try {
       checkSupportedChain();
       if (stakingClient && amount) {
         const weiAmount = ethers.parseUnits(amount, 'ether');
         await stakingClient.unstake(weiAmount);
         await fetchStakingData(stakingClient);
-        await fetchTokenBalance(
-          new ethers.BrowserProvider(window.ethereum),
-          address!,
-          chainId
-        );
+        await fetchTokenBalance(browserProvider, address!, chainId);
         openSnackbar('Unstake successful', 'success');
       }
     } catch (error) {
@@ -143,16 +142,14 @@ export const useStake = () => {
   };
 
   const handleWithdraw = async () => {
+    if (!browserProvider) return;
+
     try {
       checkSupportedChain();
       if (stakingClient) {
         await stakingClient.withdraw();
         await fetchStakingData(stakingClient);
-        await fetchTokenBalance(
-          new ethers.BrowserProvider(window.ethereum),
-          address!,
-          chainId
-        );
+        await fetchTokenBalance(browserProvider, address!, chainId);
         openSnackbar('Withdraw successful', 'success');
       }
     } catch (error) {
