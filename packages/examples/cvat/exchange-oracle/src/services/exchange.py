@@ -23,7 +23,7 @@ def create_assignment(escrow_address: str, chain_id: Networks, wallet_address: s
         user = get_or_404(
             cvat_service.get_user_by_id(session, wallet_address, for_update=True),
             wallet_address,
-            "user",
+            object_type_name="user",
         )
 
         if cvat_service.has_active_user_assignments(
@@ -43,7 +43,7 @@ def create_assignment(escrow_address: str, chain_id: Networks, wallet_address: s
                 session, escrow_address, status_in=[ProjectStatuses.annotation]
             ),
             escrow_address,
-            "job",
+            object_type_name="job",
         )
 
         unassigned_job = cvat_service.get_free_job(
@@ -91,7 +91,9 @@ class NoAccessError(Exception):
 async def resign_assignment(assignment_id: str, wallet_address: str) -> None:
     with SessionLocal.begin() as session:
         assignments = cvat_service.get_assignments_by_id(session, [assignment_id], for_update=True)
-        assignment = get_or_404(next(iter(assignments), None), assignment_id, "assignment")
+        assignment = get_or_404(
+            next(iter(assignments), None), assignment_id, object_type_name="assignment"
+        )
 
         # Can only resign from an active assignment in a job
         # TODO: maybe optimize to a single DB request
