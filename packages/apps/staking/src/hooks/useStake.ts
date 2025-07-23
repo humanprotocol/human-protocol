@@ -109,12 +109,12 @@ export const useStake = () => {
 
     try {
       checkSupportedChain();
-      if (stakingClient && amount) {
+      if (stakingClient && amount && address) {
         const weiAmount = ethers.parseUnits(amount, 'ether');
         await stakingClient.approveStake(weiAmount);
         await stakingClient.stake(weiAmount);
         await fetchStakingData(stakingClient);
-        await fetchTokenBalance(browserProvider, address!, chainId);
+        await fetchTokenBalance(browserProvider, address, chainId);
         openSnackbar('Stake successful', 'success');
       }
     } catch (error) {
@@ -128,11 +128,11 @@ export const useStake = () => {
 
     try {
       checkSupportedChain();
-      if (stakingClient && amount) {
+      if (stakingClient && amount && address) {
         const weiAmount = ethers.parseUnits(amount, 'ether');
         await stakingClient.unstake(weiAmount);
         await fetchStakingData(stakingClient);
-        await fetchTokenBalance(browserProvider, address!, chainId);
+        await fetchTokenBalance(browserProvider, address, chainId);
         openSnackbar('Unstake successful', 'success');
       }
     } catch (error) {
@@ -146,10 +146,10 @@ export const useStake = () => {
 
     try {
       checkSupportedChain();
-      if (stakingClient) {
+      if (stakingClient && address) {
         await stakingClient.withdraw();
         await fetchStakingData(stakingClient);
-        await fetchTokenBalance(browserProvider, address!, chainId);
+        await fetchTokenBalance(browserProvider, address, chainId);
         openSnackbar('Withdraw successful', 'success');
       }
     } catch (error) {
