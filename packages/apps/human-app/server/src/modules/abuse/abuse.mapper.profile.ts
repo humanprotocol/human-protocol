@@ -11,6 +11,7 @@ import { AutomapperProfile, InjectMapper } from '@automapper/nestjs';
 import { Injectable } from '@nestjs/common';
 import {
   ReportAbuseCommand,
+  ReportAbuseData,
   ReportAbuseDto,
   ReportAbuseParams,
 } from './model/abuse.model';
@@ -43,6 +44,15 @@ export class AbuseProfile extends AutomapperProfile {
         namingConventions({
           source: new SnakeCaseNamingConvention(),
           destination: new CamelCaseNamingConvention(),
+        }),
+      );
+      createMap(
+        mapper,
+        ReportAbuseParams,
+        ReportAbuseData,
+        namingConventions({
+          source: new CamelCaseNamingConvention(),
+          destination: new SnakeCaseNamingConvention(),
         }),
       );
     };
