@@ -321,7 +321,7 @@ export class EscrowClient extends BaseEthersClient {
       recordingOracleFee,
       reputationOracleFee,
       exchangeOracleFee,
-      manifestUrl,
+      manifest,
       manifestHash,
     } = escrowConfig;
 
@@ -353,12 +353,8 @@ export class EscrowClient extends BaseEthersClient {
       throw ErrorTotalFeeMustBeLessThanHundred;
     }
 
-    if (!manifestUrl) {
+    if (!manifest) {
       throw ErrorUrlIsEmptyString;
-    }
-
-    if (!isValidUrl(manifestUrl)) {
-      throw ErrorInvalidUrl;
     }
 
     if (!manifestHash) {
@@ -380,7 +376,7 @@ export class EscrowClient extends BaseEthersClient {
           reputationOracleFee,
           recordingOracleFee,
           exchangeOracleFee,
-          manifestUrl,
+          manifest,
           manifestHash,
           txOptions
         )
@@ -1153,7 +1149,7 @@ export class EscrowClient extends BaseEthersClient {
   }
 
   /**
-   * This function returns the manifest file URL.
+   * This function returns the manifest. Could be a URL or a JSON string.
    *
    * @param {string} escrowAddress Address of the escrow.
    * @returns {Promise<string>} Url of the manifest.
@@ -1172,7 +1168,7 @@ export class EscrowClient extends BaseEthersClient {
    * const manifestUrl = await escrowClient.getManifestUrl('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
    * ```
    */
-  async getManifestUrl(escrowAddress: string): Promise<string> {
+  async getManifest(escrowAddress: string): Promise<string> {
     if (!ethers.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }
