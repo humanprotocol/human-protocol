@@ -329,46 +329,6 @@ def create_escrow_validations(session: Session, *, limit: int = 100) -> list[tup
     return session.execute(insert_stmt).all()
 
 
-def get_available_projects(session: Session, *, limit: int = 10) -> list[Project]:
-    return (
-        session.query(Project)
-        .where(
-            (Project.status == ProjectStatuses.annotation.value)
-            & Project.jobs.any(
-                (Job.status == JobStatuses.new)
-                & ~Job.assignments.any(Assignment.status == AssignmentStatuses.created.value)
-            )
-        )
-        .distinct()
-        .limit(limit)
-        .all()
-    )
-
-
-def get_projects_by_assignee(
-    session: Session,
-    wallet_address: str | None = None,
-    *,
-    limit: int = 10,
-    for_update: bool | ForUpdateParams = False,
-) -> list[Project]:
-    return (
-        _maybe_for_update(session.query(Project), enable=for_update)
-        .where(
-            Project.jobs.any(
-                Job.assignments.any(
-                    (Assignment.user_wallet_address == wallet_address)
-                    & (Assignment.status == AssignmentStatuses.created)
-                    & (utcnow() < Assignment.expires_at)
-                )
-            )
-        )
-        .distinct()
-        .limit(limit)
-        .all()
-    )
-
-
 def update_project_status(session: Session, project_id: str, status: ProjectStatuses) -> None:
     upd = update(Project).where(Project.id == project_id).values(status=status.value)
     session.execute(upd)
