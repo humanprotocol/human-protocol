@@ -359,7 +359,7 @@ def put_task_data(
     task_id: int,
     cloudstorage_id: int,
     *,
-    chunk_size: int,
+    chunk_size: int | None = None,
     filenames: list[str] | None = None,
     sort_images: bool | None = None,
     validation_params: dict[str, str | float | list[str]] | None = None,
@@ -404,8 +404,10 @@ def put_task_data(
                 else models.SortingMethod("predefined")
             )
 
+        if chunk_size is not None:
+            kwargs["chunk_size"] = chunk_size
+
         data_request = models.DataRequest(
-            chunk_size=chunk_size,
             cloud_storage_id=cloudstorage_id,
             image_quality=Config.cvat_config.image_quality,
             use_cache=True,
@@ -414,7 +416,7 @@ def put_task_data(
             **kwargs,
         )
         try:
-            (_, response) = api_client.tasks_api.create_data(task_id, data_request=data_request)
+            api_client.tasks_api.create_data(task_id, data_request=data_request)
             return
 
         except exceptions.ApiException as e:

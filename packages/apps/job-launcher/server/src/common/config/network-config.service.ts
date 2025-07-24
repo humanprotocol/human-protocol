@@ -68,6 +68,15 @@ export class NetworkConfigService {
           rpcUrl: this.configService.get<string>('RPC_URL_BSC_TESTNET'),
         },
       }),
+      ...(this.configService.get<string>('RPC_URL_AURORA_TESTNET') && {
+        auroratest: {
+          chainId: ChainId.AURORA_TESTNET,
+          /**
+           * The RPC URL for the AURORA Testnet network.
+           */
+          rpcUrl: this.configService.get<string>('RPC_URL_AURORA_TESTNET'),
+        },
+      }),
       ...(this.configService.get<string>('RPC_URL_LOCALHOST') && {
         localhost: {
           chainId: ChainId.LOCALHOST,
