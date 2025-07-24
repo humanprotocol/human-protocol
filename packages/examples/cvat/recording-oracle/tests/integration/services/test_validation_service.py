@@ -103,7 +103,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         assert vrs[0] == vr
 
 
-class TestManifestChange:
+class ManifestChangeTest:
     def test_can_handle_lowered_quality_requirements_in_manifest(self, session: Session):
         escrow_address = ESCROW_ADDRESS
         chain_id = Networks.localhost
@@ -282,7 +282,7 @@ class TestManifestChange:
         )
 
 
-class TestValidationLogic:
+class ValidationLogicTest:
     @pytest.mark.parametrize("seed", range(25))
     def test_can_change_bad_honeypots_in_jobs(self, session: Session, seed: int):
         escrow_address = ESCROW_ADDRESS
@@ -1134,7 +1134,7 @@ class TestValidationLogic:
             mock_update_task_validation_layout.assert_not_called()
 
 
-class TestAnnotationMerging:
+class AnnotationMergingTest:
     def test_can_prepare_final_results_in_validated_escrow(self, session: Session):
         escrow_address = ESCROW_ADDRESS
         chain_id = Networks.localhost.value
