@@ -33,7 +33,7 @@ import src.services.cvat as db_service
 from src.chain.escrow import get_escrow_manifest
 from src.core.config import Config
 from src.core.storage import compose_data_bucket_filename, compose_data_bucket_prefix
-from src.core.types import CvatLabelTypes, TaskStatuses, TaskTypes
+from src.core.types import TaskStatuses, TaskTypes
 from src.db import SessionLocal
 from src.log import ROOT_LOGGER_NAME
 from src.models.cvat import Project
@@ -54,12 +54,12 @@ if TYPE_CHECKING:
 module_logger = f"{ROOT_LOGGER_NAME}.cron.cvat"
 
 LABEL_TYPE_MAPPING = {
-    TaskTypes.image_label_binary: CvatLabelTypes.tag,
-    TaskTypes.image_points: CvatLabelTypes.points,
-    TaskTypes.image_boxes: CvatLabelTypes.rectangle,
-    TaskTypes.image_polygons: CvatLabelTypes.polygon,
-    TaskTypes.image_boxes_from_points: CvatLabelTypes.rectangle,
-    TaskTypes.image_skeletons_from_boxes: CvatLabelTypes.points,
+    TaskTypes.image_label_binary: cvat_api.LabelType.tag,
+    TaskTypes.image_points: cvat_api.LabelType.points,
+    TaskTypes.image_boxes: cvat_api.LabelType.rectangle,
+    TaskTypes.image_polygons: cvat_api.LabelType.polygon,
+    TaskTypes.image_boxes_from_points: cvat_api.LabelType.rectangle,
+    TaskTypes.image_skeletons_from_boxes: cvat_api.LabelType.points,
 }
 
 DM_DATASET_FORMAT_MAPPING = {
