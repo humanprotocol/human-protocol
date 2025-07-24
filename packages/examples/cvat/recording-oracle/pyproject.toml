@@ -26,7 +26,7 @@ hexbytes = ">=1.2.0" # required for to_0x_hex() function
 starlette = ">=0.40.0" # avoid the vulnerability with multipart/form-data
 cvat-sdk = "2.37.0"
 cryptography = "<44.0.0" # human-protocol-sdk -> pgpy dep requires cryptography < 45
-human-protocol-sdk = "^4.0.3"
+human-protocol-sdk = "^4.1.4"
 
 [tool.poetry.group.dev.dependencies]
 hypothesis = "^6.82.6"
