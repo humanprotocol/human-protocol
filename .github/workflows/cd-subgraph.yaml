@@ -22,6 +22,7 @@ jobs:
           - name: ethereum
           - name: polygon
           - name: sepolia
+          - name: aurora-testnet
       fail-fast: true
       max-parallel: 3
     steps:

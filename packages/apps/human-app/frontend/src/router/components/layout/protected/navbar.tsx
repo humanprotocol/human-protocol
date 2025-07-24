@@ -9,8 +9,6 @@ import { useIsHCaptchaLabelingPage } from '@/shared/hooks/use-is-hcaptcha-labeli
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { useHandleMainNavIconClick } from '@/shared/hooks/use-handle-main-nav-icon-click';
 
-export const NAVBAR_PADDING = '16px';
-
 interface NavbarProps {
   open: boolean;
   setOpen: (open: boolean) => void;
@@ -74,8 +72,8 @@ export function Navbar({
         backgroundColor: colorPalette.backgroundColor,
         display: { xs: 'flex', md: 'none' },
         width: '100%',
-        px: isMobile ? NAVBAR_PADDING : 0,
-        py: isMobile ? '32px' : 0,
+        px: isMobile ? 4 : 0,
+        py: isMobile ? 3 : 0,
         zIndex: '130',
         position: open ? 'sticky' : 'relative',
         top: open ? '0' : 'unset',

@@ -13,7 +13,6 @@ import { colorPalette } from '@/shared/styles/color-palette';
 import { onlyDarkModeColor } from '@/shared/styles/dark-color-palette';
 import { isDrawerItem } from '../helpers';
 import { type MenuItem, type DrawerItem } from './drawer-navigation';
-import { NAVBAR_PADDING } from './navbar';
 
 interface MenuItemListProps {
   handleItemClick: (item: DrawerItem) => void;
@@ -37,7 +36,7 @@ export function BottomMenuItemsList({
                 direction="row"
                 sx={{
                   width: '100%',
-                  mx: isMobile ? '28px' : NAVBAR_PADDING,
+                  mx: isMobile ? 7 : 2,
                 }}
               >
                 {item}

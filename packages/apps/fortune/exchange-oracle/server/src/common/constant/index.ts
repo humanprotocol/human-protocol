@@ -10,6 +10,7 @@ export const TESTNET_CHAIN_IDS = [
   ChainId.POLYGON_AMOY,
   ChainId.BSC_TESTNET,
   ChainId.SEPOLIA,
+  ChainId.AURORA_TESTNET,
 ];
 export const MAINNET_CHAIN_IDS = [ChainId.POLYGON, ChainId.BSC_MAINNET];
 
