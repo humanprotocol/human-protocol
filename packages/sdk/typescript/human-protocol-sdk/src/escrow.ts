@@ -1165,7 +1165,7 @@ export class EscrowClient extends BaseEthersClient {
    * const provider = new providers.JsonRpcProvider(rpcUrl);
    * const escrowClient = await EscrowClient.build(provider);
    *
-   * const manifestUrl = await escrowClient.getManifestUrl('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
+   * const manifestUrl = await escrowClient.getManifest('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
    * ```
    */
   async getManifest(escrowAddress: string): Promise<string> {

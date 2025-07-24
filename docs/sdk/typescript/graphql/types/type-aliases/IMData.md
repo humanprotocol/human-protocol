@@ -8,4 +8,4 @@
 
 > **IMData** = `Record`\<`string`, [`IMDataEntity`](IMDataEntity.md)\>
 
-Defined in: [graphql/types.ts:138](https://github.com/humanprotocol/human-protocol/blob/9da418b6962e251427442717195921599d2815f2/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L138)
+Defined in: [graphql/types.ts:138](https://github.com/humanprotocol/human-protocol/blob/4f9f4810c9c1a654191936e19a0b74f958029c9b/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L138)

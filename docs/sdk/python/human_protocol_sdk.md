@@ -125,6 +125,7 @@
 
 * [human_protocol_sdk.constants module](human_protocol_sdk.constants.md)
   * [`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)
+    * [`ChainId.AURORA_TESTNET`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId.AURORA_TESTNET)
     * [`ChainId.BSC_MAINNET`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId.BSC_MAINNET)
     * [`ChainId.BSC_TESTNET`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId.BSC_TESTNET)
     * [`ChainId.LOCALHOST`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId.LOCALHOST)
