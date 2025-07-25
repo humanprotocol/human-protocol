@@ -1,9 +1,11 @@
+from contextlib import suppress
 from datetime import timedelta
 
 import src.cvat.api_calls as cvat_api
 import src.services.cvat as cvat_service
-from src.core.types import Networks, ProjectStatuses, TaskTypes
+from src.core.types import JobStatuses, Networks, ProjectStatuses, TaskTypes
 from src.db import SessionLocal
+from src.db.utils import ForUpdateParams
 from src.models.cvat import Job
 from src.utils.assignments import get_default_assignment_timeout
 from src.utils.requests import get_or_404
@@ -23,7 +25,7 @@ def create_assignment(escrow_address: str, chain_id: Networks, wallet_address: s
         user = get_or_404(
             cvat_service.get_user_by_id(session, wallet_address, for_update=True),
             wallet_address,
-            "user",
+            object_type_name="user",
         )
 
         if cvat_service.has_active_user_assignments(
@@ -43,7 +45,7 @@ def create_assignment(escrow_address: str, chain_id: Networks, wallet_address: s
                 session, escrow_address, status_in=[ProjectStatuses.annotation]
             ),
             escrow_address,
-            "job",
+            object_type_name="job",
         )
 
         unassigned_job = cvat_service.get_free_job(
@@ -51,7 +53,7 @@ def create_assignment(escrow_address: str, chain_id: Networks, wallet_address: s
             escrow_address=escrow_address,
             chain_id=chain_id.value,
             user_wallet_address=wallet_address,
-            for_update=True,
+            for_update=ForUpdateParams(skip_locked=True),
             # lock the job to be able to make a rollback if CVAT requests fail
             # can potentially be optimized to make less DB requests
             # and rely only on assignment expiration
@@ -73,6 +75,7 @@ def create_assignment(escrow_address: str, chain_id: Networks, wallet_address: s
             ),
         )
 
+        cvat_service.update_job_status(session, unassigned_job.id, status=JobStatuses.in_progress)
         cvat_service.touch(session, Job, [unassigned_job.id])
 
         with cvat_api.api_client_context(cvat_api.get_api_client()):
@@ -91,7 +94,9 @@ class NoAccessError(Exception):
 async def resign_assignment(assignment_id: str, wallet_address: str) -> None:
     with SessionLocal.begin() as session:
         assignments = cvat_service.get_assignments_by_id(session, [assignment_id], for_update=True)
-        assignment = get_or_404(next(iter(assignments), None), assignment_id, "assignment")
+        assignment = get_or_404(
+            next(iter(assignments), None), assignment_id, object_type_name="assignment"
+        )
 
         # Can only resign from an active assignment in a job
         # TODO: maybe optimize to a single DB request
@@ -103,12 +108,20 @@ async def resign_assignment(assignment_id: str, wallet_address: str) -> None:
             raise NoAccessError
 
         last_job_assignment = cvat_service.get_latest_assignment_by_cvat_job_id(
-            session, assignment.cvat_job_id, for_update=True
+            session,
+            assignment.cvat_job_id,
+            for_update=ForUpdateParams(skip_locked=True),
         )
-        if assignment.id != last_job_assignment.id:
+        if not last_job_assignment or assignment.id != last_job_assignment.id:
             raise NoAccessError
 
         cvat_service.cancel_assignment(session, assignment_id)
 
-        job = assignment.job
-        cvat_service.touch(session, Job, [job.id])  # project|task rows are locked for update
+        # Try to update the status, but don't insist
+        with suppress(cvat_api.exceptions.ApiException):
+            cvat_api.update_job_assignee(assignment.cvat_job_id, assignee_id=None)
+
+            # Update the job only if assignee was unset
+            cvat_service.update_job_status(session, assignment.job.id, status=JobStatuses.new)
+
+        cvat_service.touch(session, Job, [assignment.job.id])

@@ -35,7 +35,7 @@ starlette = ">=0.40.0" # avoid the vulnerability with multipart/form-data
 cryptography = "<44.0.0" # human-protocol-sdk -> pgpy dep requires cryptography < 45
 aiocache = {extras = ["msgpack", "redis"], version = "^0.12.3"}  # convenient api for redis (async)
 cachelib = "^0.13.0" # convenient api for redis (sync)
-human-protocol-sdk = "^4.0.3"
+human-protocol-sdk = "^4.1.4"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -134,6 +134,7 @@ ignore = [
     "ANN001",  # |
     "ANN003",  # |
     "ARG001",  # |
+    "FBT001",  # Allow bool-annotated positional args in functions
     "SLF001",  # Allow private attrs access
     "PLR2004", # Allow magic values
     "S",       # security

@@ -181,7 +181,7 @@ export function MyJobsListMobile() {
                     sx={{
                       display: 'flex',
                       justifyContent: 'flex-end',
-                      gap: '1rem',
+                      gap: 1,
                       width: '100%',
                     }}
                   >

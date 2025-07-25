@@ -1,4 +1,6 @@
 import datetime
+import inspect
+import uuid
 from collections.abc import Generator
 from contextlib import ExitStack, contextmanager
 from logging import Logger
@@ -12,6 +14,7 @@ from src.core.config import Config
 from src.services import cloud
 from src.services.cloud import BucketAccessInfo
 from src.utils.logging import format_sequence, get_function_logger
+from src.utils.time import utcnow
 
 
 @contextmanager
@@ -87,6 +90,8 @@ def _mock_webhook_signature_checking(_: Logger) -> Generator[None, None, None]:
     - from exchange oracle -
       signed with Config.localhost.exchange_oracle_address
       or with signature "exchange_oracle<number>"
+
+    <number> is optional.
     """
 
     from src.chain.escrow import (
@@ -109,6 +114,33 @@ def _mock_webhook_signature_checking(_: Logger) -> Generator[None, None, None]:
         d[Config.localhost.exchange_oracle_address.lower()] = OracleWebhookTypes.exchange_oracle
         return d
 
+    from src.services.webhook import inbox as original_inbox
+
+    class PatchedInbox:
+        def __init__(self):
+            pass
+
+        def __getattr__(self, name: str):
+            return getattr(original_inbox, name)
+
+        def create_webhook(
+            self,
+            session,
+            escrow_address,
+            chain_id,
+            type: OracleWebhookTypes,
+            signature=None,
+            event_type=None,
+            event_data=None,
+            event=None,
+        ):
+            if signature in OracleWebhookTypes:
+                signature = f"{type.value}-{utcnow().isoformat(sep='T')}-{uuid.uuid4()}"
+
+            _orig_params = inspect.signature(original_inbox.create_webhook).parameters
+            _args = {k: v for k, v in locals().items() if k in _orig_params}
+            return original_inbox.create_webhook(**_args)
+
     with (
         mock.patch("src.schemas.webhook.validate_address", lambda x: x),
         mock.patch(
@@ -119,6 +151,7 @@ def _mock_webhook_signature_checking(_: Logger) -> Generator[None, None, None]:
             "src.endpoints.webhook.validate_oracle_webhook_signature",
             patched_validate_oracle_webhook_signature,
         ),
+        mock.patch("src.services.webhook.inbox", PatchedInbox()),
     ):
         yield
 

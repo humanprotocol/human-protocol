@@ -4,13 +4,17 @@ WORKDIR /app
 
 RUN apt-get update -y && \
     apt-get install -y jq ffmpeg libsm6 libxext6 && \
-    pip install --no-cache poetry
+    rm -rf /var/lib/apt/lists/*
+
+RUN pip install --no-cache poetry
 
 COPY pyproject.toml poetry.lock ./
 
-RUN poetry config virtualenvs.create false \
-    && poetry install --no-interaction --no-ansi --no-root \
-    && poetry cache clear pypi --all
+RUN --mount=type=cache,target=/root/.cache \
+    poetry config virtualenvs.create false && \
+    poetry install --no-interaction --no-ansi --no-root
+
+RUN python -m pip uninstall -y poetry pip
 
 COPY . .
 
