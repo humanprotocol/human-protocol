@@ -10,13 +10,12 @@ export const getEscrows = async () => {
   }
 
   const escrows = await EscrowUtils.getEscrows({
-    status: EscrowStatus.Pending,
-    from: new Date(2023, 4, 8),
-    to: new Date(2023, 5, 8),
+    status: [EscrowStatus.Pending, EscrowStatus.Complete],
     chainId: ChainId.POLYGON_AMOY,
+    first: 1000,
   });
 
-  console.log('Pending escrows:', escrows);
+  console.log('Pending escrows:', escrows.length);
 };
 
 (async () => {

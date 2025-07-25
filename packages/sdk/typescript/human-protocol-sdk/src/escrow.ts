@@ -1688,6 +1688,25 @@ export class EscrowUtils {
       throw ErrorUnsupportedChainID;
     }
 
+    let statusFilter;
+    if (filter.status !== undefined) {
+      if (Array.isArray(filter.status)) {
+        statusFilter = filter.status
+          .map(
+            (status) =>
+              Object.entries(EscrowStatus).find(
+                ([, value]) => value === status
+              )?.[0]
+          )
+          .filter(Boolean);
+      } else {
+        statusFilter = [
+          Object.entries(EscrowStatus).find(
+            ([, value]) => value === filter.status
+          )?.[0],
+        ].filter(Boolean);
+      }
+    }
     const { escrows } = await gqlFetch<{ escrows: EscrowData[] }>(
       getSubgraphUrl(networkData),
       GET_ESCROWS_QUERY(filter),
@@ -1697,12 +1716,7 @@ export class EscrowUtils {
         reputationOracle: filter.reputationOracle?.toLowerCase(),
         recordingOracle: filter.recordingOracle?.toLowerCase(),
         exchangeOracle: filter.exchangeOracle?.toLowerCase(),
-        status:
-          filter.status !== undefined
-            ? Object.entries(EscrowStatus).find(
-                ([, value]) => value === filter.status
-              )?.[0]
-            : undefined,
+        status: statusFilter,
         from: filter.from ? getUnixTimestamp(filter.from) : undefined,
         to: filter.to ? getUnixTimestamp(filter.to) : undefined,
         orderDirection: orderDirection,

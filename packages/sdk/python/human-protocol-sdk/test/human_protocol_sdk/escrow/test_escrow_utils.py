@@ -35,7 +35,7 @@ class TestEscrowUtils(unittest.TestCase):
                 "intermediateResultsUrl": "https://example.com",
                 "launcher": "0x1234567890123456789012345678901234567891",
                 "manifestHash": "0x1234567890123456789012345678901234567891",
-                "manifestUrl": "https://example.com",
+                "manifest": "https://example.com",
                 "recordingOracle": "0x1234567890123456789012345678901234567891",
                 "reputationOracle": "0x1234567890123456789012345678901234567891",
                 "exchangeOracle": "0x1234567890123456789012345678901234567891",
@@ -69,7 +69,7 @@ class TestEscrowUtils(unittest.TestCase):
                     "recordingOracle": None,
                     "exchangeOracle": None,
                     "jobRequesterId": "1",
-                    "status": "Pending",
+                    "status": ["Pending"],
                     "from": 1683811973,
                     "to": 1683812007,
                     "first": 10,
@@ -104,6 +104,83 @@ class TestEscrowUtils(unittest.TestCase):
             self.assertEqual(len(filtered), 1)
             self.assertEqual(filtered[0].chain_id, ChainId.POLYGON_AMOY)
 
+    def test_get_escrows_with_status_array(self):
+        """Test get_escrows with an array of statuses, similar to the TypeScript test."""
+        with patch(
+            "human_protocol_sdk.escrow.escrow_utils.get_data_from_subgraph"
+        ) as mock_function:
+            mock_escrow_1 = {
+                "id": "0x1234567890123456789012345678901234567891",
+                "address": "0x1234567890123456789012345678901234567891",
+                "amountPaid": "1000000000000000000",
+                "balance": "1000000000000000000",
+                "count": "1",
+                "factoryAddress": "0x1234567890123456789012345678901234567890",
+                "finalResultsUrl": "https://example.com",
+                "intermediateResultsUrl": "https://example.com",
+                "launcher": "0x1234567890123456789012345678901234567891",
+                "manifestHash": "0x1234567890123456789012345678901234567891",
+                "manifest": "https://example.com",
+                "recordingOracle": "0x1234567890123456789012345678901234567891",
+                "reputationOracle": "0x1234567890123456789012345678901234567891",
+                "exchangeOracle": "0x1234567890123456789012345678901234567891",
+                "status": "Pending",
+                "token": "0x1234567890123456789012345678901234567891",
+                "totalFundedAmount": "1000000000000000000",
+            }
+            mock_escrow_2 = {
+                "id": "0x1234567890123456789012345678901234567891",
+                "address": "0x1234567890123456789012345678901234567891",
+                "amountPaid": "1000000000000000000",
+                "balance": "1000000000000000000",
+                "count": "1",
+                "factoryAddress": "0x1234567890123456789012345678901234567890",
+                "finalResultsUrl": "https://example.com",
+                "intermediateResultsUrl": "https://example.com",
+                "launcher": "0x1234567890123456789012345678901234567891",
+                "manifestHash": "0x1234567890123456789012345678901234567891",
+                "manifest": "https://example.com",
+                "recordingOracle": "0x1234567890123456789012345678901234567891",
+                "reputationOracle": "0x1234567890123456789012345678901234567891",
+                "exchangeOracle": "0x1234567890123456789012345678901234567891",
+                "status": "Complete",
+                "token": "0x1234567890123456789012345678901234567891",
+                "totalFundedAmount": "1000000000000000000",
+            }
+
+            def side_effect(subgraph_url, query, params):
+                if subgraph_url == NETWORKS[ChainId.POLYGON_AMOY]:
+                    return {"data": {"escrows": [mock_escrow_1, mock_escrow_2]}}
+
+            mock_function.side_effect = side_effect
+
+            filter = EscrowFilter(
+                chain_id=ChainId.POLYGON_AMOY,
+                status=[Status.Pending, Status.Complete],
+            )
+            filtered = EscrowUtils.get_escrows(filter)
+
+            mock_function.assert_called_with(
+                NETWORKS[ChainId.POLYGON_AMOY],
+                query=get_escrows_query(filter),
+                params={
+                    "launcher": None,
+                    "reputationOracle": None,
+                    "recordingOracle": None,
+                    "exchangeOracle": None,
+                    "jobRequesterId": None,
+                    "status": ["Pending", "Complete"],
+                    "from": None,
+                    "to": None,
+                    "first": 10,
+                    "skip": 0,
+                    "orderDirection": "desc",
+                },
+            )
+            self.assertEqual(len(filtered), 2)
+            self.assertEqual(filtered[0].address, mock_escrow_1["address"])
+            self.assertEqual(filtered[1].address, mock_escrow_2["address"])
+
     def test_get_escrow(self):
         with patch(
             "human_protocol_sdk.escrow.escrow_utils.get_data_from_subgraph"
@@ -119,7 +196,7 @@ class TestEscrowUtils(unittest.TestCase):
                 "intermediateResultsUrl": "https://example.com",
                 "launcher": "0x1234567890123456789012345678901234567891",
                 "manifestHash": "0x1234567890123456789012345678901234567891",
-                "manifestUrl": "https://example.com",
+                "manifest": "https://example.com",
                 "recordingOracle": "0x1234567890123456789012345678901234567891",
                 "reputationOracle": "0x1234567890123456789012345678901234567891",
                 "exchangeOracle": "0x1234567890123456789012345678901234567891",

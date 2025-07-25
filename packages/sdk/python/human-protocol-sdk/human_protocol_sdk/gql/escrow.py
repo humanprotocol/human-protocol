@@ -27,6 +27,11 @@ fragment EscrowFields on Escrow {
 
 
 def get_escrows_query(filter: EscrowFilter):
+    use_statuses = (
+        filter.statuses
+        if hasattr(filter, "statuses") and filter.statuses is not None
+        else ([filter.status] if filter.status else None)
+    )
     return """
 query GetEscrows(
     $launcher: String
@@ -34,7 +39,7 @@ query GetEscrows(
     $recordingOracle: String
     $exchangeOracle: String
     $jobRequesterId: String
-    $status: String
+    $status: [String!]
     $from: Int
     $to: Int
     $orderDirection: String
@@ -76,7 +81,7 @@ query GetEscrows(
         job_requester_clause=(
             "jobRequesterId: $jobRequesterId" if filter.job_requester_id else ""
         ),
-        status_clause="status: $status" if filter.status else "",
+        status_clause="status_in: $status" if use_statuses else "",
         from_clause="createdAt_gte: $from" if filter.date_from else "",
         to_clause="createdAt_lte: $to" if filter.date_to else "",
     )
