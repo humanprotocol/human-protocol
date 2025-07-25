@@ -302,7 +302,7 @@ export class EscrowClient extends BaseEthersClient {
    *    recordingOracleFee: BigInt('10'),
    *    reputationOracleFee: BigInt('10'),
    *    exchangeOracleFee: BigInt('10'),
-   *    manifestUrl: 'http://localhost/manifest.json',
+   *    manifest: 'http://localhost/manifest.json',
    *    manifestHash: 'b5dad76bf6772c0f07fd5e048f6e75a5f86ee079',
    * };
    * await escrowClient.setup(escrowAddress, escrowConfig);
@@ -1165,7 +1165,7 @@ export class EscrowClient extends BaseEthersClient {
    * const provider = new providers.JsonRpcProvider(rpcUrl);
    * const escrowClient = await EscrowClient.build(provider);
    *
-   * const manifestUrl = await escrowClient.getManifest('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
+   * const manifest = await escrowClient.getManifest('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
    * ```
    */
   async getManifest(escrowAddress: string): Promise<string> {
@@ -1627,7 +1627,7 @@ export class EscrowUtils {
    *   intermediateResultsUrl?: string;
    *   launcher: string;
    *   manifestHash?: string;
-   *   manifestUrl?: string;
+   *   manifest?: string;
    *   recordingOracle?: string;
    *   reputationOracle?: string;
    *   exchangeOracle?: string;
@@ -1748,7 +1748,7 @@ export class EscrowUtils {
    *   intermediateResultsUrl?: string;
    *   launcher: string;
    *   manifestHash?: string;
-   *   manifestUrl?: string;
+   *   manifest?: string;
    *   recordingOracle?: string;
    *   reputationOracle?: string;
    *   exchangeOracle?: string;

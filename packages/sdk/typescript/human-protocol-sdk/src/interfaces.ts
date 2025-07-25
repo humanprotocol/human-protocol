@@ -75,7 +75,7 @@ export interface IEscrow {
   intermediateResultsUrl?: string;
   launcher: string;
   manifestHash?: string;
-  manifestUrl?: string;
+  manifest?: string;
   recordingOracle?: string;
   reputationOracle?: string;
   exchangeOracle?: string;
