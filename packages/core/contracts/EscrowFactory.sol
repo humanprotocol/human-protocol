@@ -18,6 +18,7 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
     address public lastEscrow;
     address public staking;
     uint256 public minimumStake;
+    address public admin;
 
     event Launched(address token, address escrow);
     event LaunchedV2(address token, address escrow, string jobRequesterId);
@@ -43,34 +44,29 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
      * @dev Creates a new Escrow contract.
      *
      * @param token Token address to be associated with the Escrow contract.
-     * @param trustedHandlers Array of addresses that will serve as the trusted handlers for the Escrow.
      * @param jobRequesterId String identifier for the job requester, used for tracking purposes.
      *
      * @return The address of the newly created Escrow contract.
      */
     function createEscrow(
         address token,
-        address[] memory trustedHandlers,
         string memory jobRequesterId
     ) external returns (address) {
         uint256 availableStake = IStaking(staking).getAvailableStake(
             msg.sender
         );
-        require(
-            availableStake >= minimumStake,
-            'Insufficient stake to create an escrow.'
-        );
+        require(availableStake >= minimumStake, 'Insufficient stake');
 
         Escrow escrow = new Escrow(
             token,
             msg.sender,
-            payable(msg.sender),
-            STANDARD_DURATION,
-            trustedHandlers
+            admin != address(0) ? admin : msg.sender,
+            STANDARD_DURATION
         );
         counter++;
         escrowCounters[address(escrow)] = counter;
         lastEscrow = address(escrow);
+
         emit LaunchedV2(token, lastEscrow, jobRequesterId);
         return lastEscrow;
     }
@@ -107,6 +103,15 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
         emit SetMinumumStake(minimumStake);
     }
 
+    /**
+     * @dev Set the admin address.
+     * @param _admin Admin address
+     */
+    function setAdmin(address _admin) external onlyOwner {
+        require(_admin != address(0), ERROR_ZERO_ADDRESS);
+        admin = _admin;
+    }
+
     function _authorizeUpgrade(address) internal override onlyOwner {}
 
     /**
@@ -114,5 +119,5 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
      * variables without shifting down storage in the inheritance chain.
      * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
      */
-    uint256[45] private __gap;
+    uint256[44] private __gap;
 }

@@ -14,8 +14,6 @@ interface IEscrow {
 
     function status() external view returns (EscrowStatuses);
 
-    function addTrustedHandlers(address[] memory _handlers) external;
-
     function setup(
         address _reputationOracle,
         address _recordingOracle,
@@ -23,8 +21,8 @@ interface IEscrow {
         uint8 _reputationOracleFeePercentage,
         uint8 _recordingOracleFeePercentage,
         uint8 _exchangeOracleFeePercentage,
-        string memory _url,
-        string memory _hash
+        string calldata _url,
+        string calldata _hash
     ) external;
 
     function cancel() external returns (bool);
@@ -33,22 +31,22 @@ interface IEscrow {
 
     function complete() external;
 
-    function storeResults(string memory _url, string memory _hash) external;
+    function storeResults(string calldata _url, string calldata _hash) external;
 
     function bulkPayOut(
-        address[] memory _recipients,
-        uint256[] memory _amounts,
-        string memory _url,
-        string memory _hash,
+        address[] calldata _recipients,
+        uint256[] calldata _amounts,
+        string calldata _url,
+        string calldata _hash,
         uint256 _txId,
         bool forceComplete
     ) external;
 
     function bulkPayOut(
-        address[] memory _recipients,
-        uint256[] memory _amounts,
-        string memory _url,
-        string memory _hash,
+        address[] calldata _recipients,
+        uint256[] calldata _amounts,
+        string calldata _url,
+        string calldata _hash,
         uint256 _txId
     ) external;
 }
