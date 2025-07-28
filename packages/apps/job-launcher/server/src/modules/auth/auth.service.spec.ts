@@ -330,7 +330,10 @@ describe('AuthService', () => {
     it('should throw NotFoundError if user is not found', () => {
       findByEmailMock.mockResolvedValue(null);
       expect(
-        authService.forgotPassword({ email: 'user@example.com' }),
+        authService.forgotPassword({
+          email: 'user@example.com',
+          hCaptchaToken: 'token',
+        }),
       ).rejects.toThrow(new NotFoundError(ErrorUser.NotFound));
     });
 
@@ -338,13 +341,19 @@ describe('AuthService', () => {
       userEntity.status = UserStatus.INACTIVE;
       findByEmailMock.mockResolvedValue(userEntity);
       expect(
-        authService.forgotPassword({ email: 'user@example.com' }),
+        authService.forgotPassword({
+          email: 'user@example.com',
+          hCaptchaToken: 'token',
+        }),
       ).rejects.toThrow(new ForbiddenError(ErrorUser.UserNotActive));
     });
 
     it('should remove existing token if it exists', async () => {
       findTokenMock.mockResolvedValue(tokenEntity);
-      await authService.forgotPassword({ email: 'user@example.com' });
+      await authService.forgotPassword({
+        email: 'user@example.com',
+        hCaptchaToken: 'token',
+      });
 
       expect(tokenRepository.deleteOne).toHaveBeenCalled();
     });
@@ -353,7 +362,7 @@ describe('AuthService', () => {
       sendGridService.sendEmail = jest.fn();
       const email = 'user@example.com';
 
-      await authService.forgotPassword({ email });
+      await authService.forgotPassword({ email, hCaptchaToken: 'token' });
 
       expect(sendGridService.sendEmail).toHaveBeenCalledWith(
         expect.objectContaining({
