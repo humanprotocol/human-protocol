@@ -35,7 +35,7 @@ class TestEscrowUtils(unittest.TestCase):
                 "intermediateResultsUrl": "https://example.com",
                 "launcher": "0x1234567890123456789012345678901234567891",
                 "manifestHash": "0x1234567890123456789012345678901234567891",
-                "manifest": "https://example.com",
+                "manifestUrl": "https://example.com",
                 "recordingOracle": "0x1234567890123456789012345678901234567891",
                 "reputationOracle": "0x1234567890123456789012345678901234567891",
                 "exchangeOracle": "0x1234567890123456789012345678901234567891",
