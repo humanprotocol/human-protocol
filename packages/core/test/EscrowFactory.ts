@@ -1,56 +1,31 @@
 import { anyValue } from '@nomicfoundation/hardhat-chai-matchers/withArgs';
-import { assert, expect } from 'chai';
-import { EventLog, Signer } from 'ethers';
+import { expect } from 'chai';
+import { EventLog, Signer, ZeroAddress } from 'ethers';
 import { ethers, upgrades } from 'hardhat';
 import { EscrowFactory, HMToken, Staking } from '../typechain-types';
+import { faker } from '@faker-js/faker';
+
+let owner: Signer, launcher: Signer, admin: Signer;
+
+let token: HMToken, escrowFactory: EscrowFactory, staking: Staking;
+let stakingAddress: string, tokenAddress: string;
+
+const MINIMUM_STAKE = ethers.parseEther('10');
+const LOCK_PERIOD = 2;
+const FEE_PERCENTAGE = 5;
+
+const FIXTURE_REQUESTER_ID = faker.string.alphanumeric(10);
+const FIXTURE_STAKE_AMOUNT = ethers.parseEther('10');
+
+async function stake(staker: Signer, amount: bigint = FIXTURE_STAKE_AMOUNT) {
+  await token.connect(staker).approve(stakingAddress, amount);
+  await staking.connect(staker).stake(amount);
+}
 
 describe('EscrowFactory', function () {
-  let owner: Signer,
-    operator: Signer,
-    reputationOracle: Signer,
-    recordingOracle: Signer,
-    trustedHandlers: string[];
+  before(async () => {
+    [owner, launcher, admin] = await ethers.getSigners();
 
-  let token: HMToken, escrowFactory: EscrowFactory, staking: Staking;
-
-  const jobRequesterId = 'job-requester-id';
-  const minimumStake = 5;
-  const lockPeriod = 2;
-  const feePercentage = 2;
-
-  const stakeAmount = 10;
-
-  async function createEscrow() {
-    const result = await (
-      await escrowFactory
-        .connect(operator)
-        .createEscrow(await token.getAddress(), trustedHandlers, jobRequesterId)
-    ).wait();
-    const event = (
-      result?.logs?.find(({ topics }) =>
-        topics.includes(ethers.id('LaunchedV2(address,address,string)'))
-      ) as EventLog
-    )?.args;
-
-    return event;
-  }
-
-  async function stakeAndCreateEscrow(staking: Staking) {
-    await staking.connect(operator).stake(stakeAmount);
-
-    return await createEscrow();
-  }
-
-  this.beforeAll(async () => {
-    [owner, operator, reputationOracle, recordingOracle] =
-      await ethers.getSigners();
-
-    trustedHandlers = [
-      await reputationOracle.getAddress(),
-      await recordingOracle.getAddress(),
-    ];
-
-    // Deploy HMToken Contract
     const HMToken = await ethers.getContractFactory(
       'contracts/HMToken.sol:HMToken'
     );
@@ -60,255 +35,220 @@ describe('EscrowFactory', function () {
       18,
       'HMT'
     )) as HMToken;
+    tokenAddress = await token.getAddress();
 
-    // Send HMT tokens to the operator
-    await token.connect(owner).transfer(await operator.getAddress(), 1000);
-  });
+    await token
+      .connect(owner)
+      .transfer(await launcher.getAddress(), ethers.parseEther('100000'));
 
-  this.beforeEach(async () => {
-    // Deploy Staking Contract
     const Staking = await ethers.getContractFactory('Staking');
     staking = await Staking.deploy(
       await token.getAddress(),
-      minimumStake,
-      lockPeriod,
-      feePercentage
+      MINIMUM_STAKE,
+      LOCK_PERIOD,
+      FEE_PERCENTAGE
     );
+    stakingAddress = await staking.getAddress();
 
-    // Approve spend HMT tokens staking contract
-    await token.connect(operator).approve(await staking.getAddress(), 1000);
+    await token.connect(launcher).approve(await staking.getAddress(), 1000);
 
-    // Deploy Escrow Factory Contract
     const EscrowFactory = await ethers.getContractFactory(
       'contracts/EscrowFactory.sol:EscrowFactory'
     );
 
     escrowFactory = (await upgrades.deployProxy(
       EscrowFactory,
-      [await staking.getAddress(), minimumStake],
+      [await staking.getAddress(), MINIMUM_STAKE],
       { kind: 'uups', initializer: 'initialize' }
     )) as unknown as EscrowFactory;
   });
 
   describe('deployment', () => {
-    it('Should set the right counter', async () => {
-      const initialCounter = await escrowFactory.counter();
-      expect(initialCounter.toString()).to.equal('0');
+    describe('reverts', () => {
+      it('reverts when staking address is zero address', async () => {
+        const EscrowFactory = await ethers.getContractFactory(
+          'contracts/EscrowFactory.sol:EscrowFactory'
+        );
+
+        await expect(
+          upgrades.deployProxy(EscrowFactory, [ZeroAddress, MINIMUM_STAKE], {
+            kind: 'uups',
+            initializer: 'initialize',
+          }) as unknown as EscrowFactory
+        ).revertedWith('Zero Address');
+      });
+    });
+
+    describe('succeeds', () => {
+      it('factory deployed successfully', async () => {
+        const EscrowFactory = await ethers.getContractFactory(
+          'contracts/EscrowFactory.sol:EscrowFactory'
+        );
+
+        const escrowFactory = (await upgrades.deployProxy(
+          EscrowFactory,
+          [stakingAddress, MINIMUM_STAKE],
+          {
+            kind: 'uups',
+            initializer: 'initialize',
+          }
+        )) as unknown as EscrowFactory;
+
+        expect(await escrowFactory.minimumStake()).to.equal(MINIMUM_STAKE);
+      });
     });
   });
 
-  it('Operator should not be able to create an escrow without meeting minimum stake', async () => {
-    await expect(
-      escrowFactory
-        .connect(operator)
-        .createEscrow(
-          await token.getAddress(),
-          [await reputationOracle.getAddress()],
-          jobRequesterId
-        )
-    ).to.be.revertedWith('Insufficient stake to create an escrow.');
-  });
+  describe('setStakingAddress()', () => {
+    describe('reverts', () => {
+      it('reverts when staking address is zero address', async () => {
+        await expect(
+          escrowFactory.connect(owner).setStakingAddress(ZeroAddress)
+        ).to.be.revertedWith('Zero Address');
+      });
 
-  it('Operator should be able to create an escrow after meeting minimum stake', async () => {
-    const event = await stakeAndCreateEscrow(staking);
-
-    expect(event?.token).to.equal(
-      await token.getAddress(),
-      'token address is correct'
-    );
-    expect(event?.escrow).to.not.be.null;
-  });
-
-  it('Should emit an event on launched', async function () {
-    await staking.connect(operator).stake(stakeAmount);
-
-    await expect(
-      escrowFactory
-        .connect(operator)
-        .createEscrow(await token.getAddress(), trustedHandlers, jobRequesterId)
-    )
-      .to.emit(escrowFactory, 'LaunchedV2')
-      .withArgs(await token.getAddress(), anyValue, jobRequesterId);
-  });
-
-  it('Owner should be able to set minimumStake', async () => {
-    await escrowFactory.connect(owner).setMinimumStake(15);
-    const minimumStake = await escrowFactory.minimumStake();
-    expect(minimumStake).to.equal(15, 'Minimum stake updated correctly');
-  });
-
-  it('Owner should be able to modify staking address', async () => {
-    const Staking = await ethers.getContractFactory('Staking');
-    const newStaking = await Staking.deploy(
-      await token.getAddress(),
-      minimumStake,
-      lockPeriod,
-      feePercentage
-    );
-    await escrowFactory
-      .connect(owner)
-      .setStakingAddress(await newStaking.getAddress());
-    const newStakingAddress = await escrowFactory.staking();
-    expect(newStakingAddress).to.equal(
-      await newStaking.getAddress(),
-      'Staking address updated correctly'
-    );
-    expect(newStakingAddress).not.to.equal(
-      await staking.getAddress(),
-      'Staking address is different to the previous one'
-    );
-  });
-
-  it('Operator should not create escrow if new minimumStake is not met', async () => {
-    await escrowFactory.connect(owner).setMinimumStake(15);
-    await staking.connect(operator).stake(stakeAmount);
-
-    await expect(
-      escrowFactory
-        .connect(operator)
-        .createEscrow(
-          await token.getAddress(),
-          [await reputationOracle.getAddress()],
-          jobRequesterId
-        )
-    ).to.be.revertedWith('Insufficient stake to create an escrow.');
-  });
-
-  it('Operator should be able to create escrow after staking more to meet new minimum', async () => {
-    await escrowFactory.connect(owner).setMinimumStake(15);
-    await staking.connect(operator).stake(20);
-
-    const event = await createEscrow();
-
-    expect(event?.token).to.equal(
-      await token.getAddress(),
-      'token address is correct'
-    );
-    expect(event?.escrow).to.not.be.null;
-  });
-
-  it('Should find the newly created escrow from deployed escrow', async () => {
-    await stakeAndCreateEscrow(staking);
-    const escrowAddress = await escrowFactory.lastEscrow();
-
-    const result = await escrowFactory
-      .connect(operator)
-      .hasEscrow(escrowAddress);
-    expect(result).to.equal(true);
-  });
-
-  it('Operator should be able to create another escrow after unstaking some of the stakes', async () => {
-    await stakeAndCreateEscrow(staking);
-
-    staking.connect(operator).unstake(2);
-
-    const event = await createEscrow();
-
-    expect(event?.token).to.equal(
-      await token.getAddress(),
-      'token address is correct'
-    );
-    expect(event?.escrow).to.not.be.null;
-  });
-
-  it('Operator should not be able to create an escrow after unstaking all of the stakes', async () => {
-    await stakeAndCreateEscrow(staking);
-
-    staking.connect(operator).unstake(stakeAmount);
-
-    await expect(
-      escrowFactory
-        .connect(operator)
-        .createEscrow(
-          await token.getAddress(),
-          [await reputationOracle.getAddress()],
-          jobRequesterId
-        )
-    ).to.be.revertedWith('Insufficient stake to create an escrow.');
-  });
-
-  it('Should find the newly created escrow from deployed escrow', async () => {
-    await stakeAndCreateEscrow(staking);
-    const escrowAddress = await escrowFactory.lastEscrow();
-
-    const result = await escrowFactory
-      .connect(operator)
-      .hasEscrow(escrowAddress);
-    expect(result).to.equal(true);
-  });
-
-  describe('proxy implementation', function () {
-    it('Should reject non-owner upgrades', async () => {
-      const EscrowFactoryV0 = await ethers.getContractFactory(
-        'EscrowFactoryV0',
-        operator
-      );
-
-      await expect(
-        upgrades.upgradeProxy(await escrowFactory.getAddress(), EscrowFactoryV0)
-      ).to.be.revertedWith('Ownable: caller is not the owner');
+      it('reverts when caller is not the owner', async () => {
+        await expect(
+          escrowFactory.connect(launcher).setStakingAddress(stakingAddress)
+        ).to.be.revertedWith('Ownable: caller is not the owner');
+      });
     });
 
-    it('Owner should upgrade correctly', async () => {
-      const EscrowFactoryV0 =
-        await ethers.getContractFactory('EscrowFactoryV0');
-      const oldImplementationAddress =
-        await upgrades.erc1967.getImplementationAddress(
-          await escrowFactory.getAddress()
+    describe('succeeds', () => {
+      it('staking address set successfully', async () => {
+        const Staking = await ethers.getContractFactory('Staking');
+        const newStaking = await Staking.deploy(
+          await token.getAddress(),
+          MINIMUM_STAKE,
+          LOCK_PERIOD,
+          FEE_PERCENTAGE
         );
-
-      await upgrades.upgradeProxy(
-        await escrowFactory.getAddress(),
-        EscrowFactoryV0
-      );
-
-      expect(
-        await upgrades.erc1967.getImplementationAddress(
-          await escrowFactory.getAddress()
+        const newStakingAddress = await newStaking.getAddress();
+        await expect(
+          escrowFactory.connect(owner).setStakingAddress(newStakingAddress)
         )
-      ).to.not.be.equal(oldImplementationAddress);
+          .to.emit(escrowFactory, 'SetStakingAddress')
+          .withArgs(newStakingAddress);
 
-      const event = await stakeAndCreateEscrow(staking);
+        expect(await escrowFactory.staking()).to.equal(newStakingAddress);
+        stakingAddress = newStakingAddress;
+        staking = newStaking;
+      });
+    });
+  });
 
-      expect(event?.token).to.equal(
-        await token.getAddress(),
-        'token address is correct'
-      );
-      expect(event?.escrow).to.not.be.null;
+  describe('setMinimumStake()', () => {
+    describe('reverts', () => {
+      it('reverts when minimum stake is zero', async () => {
+        await expect(
+          escrowFactory.connect(owner).setMinimumStake(0)
+        ).to.be.revertedWith('Must be a positive number');
+      });
 
-      try {
-        escrowFactory.hasEscrow(owner.getAddress());
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (error: any) {
-        assert(
-          error.message === 'newEscrowFactory.hasEscrow is not a function'
-        );
-      }
+      it('reverts when caller is not the owner', async () => {
+        await expect(
+          escrowFactory.connect(launcher).setMinimumStake(0)
+        ).to.be.revertedWith('Ownable: caller is not the owner');
+      });
     });
 
-    it('Should have the same storage', async () => {
-      await stakeAndCreateEscrow(staking);
+    describe('succeeds', () => {
+      it('minimum stake set successfully', async () => {
+        const newMinimumStake = ethers.parseEther('5');
+        await expect(
+          escrowFactory.connect(owner).setMinimumStake(newMinimumStake)
+        )
+          .to.emit(escrowFactory, 'SetMinumumStake')
+          .withArgs(newMinimumStake);
 
-      const oldLastEscrow = await escrowFactory.lastEscrow();
-      const oldImplementationAddress =
-        await upgrades.erc1967.getImplementationAddress(
-          await escrowFactory.getAddress()
+        expect(await escrowFactory.minimumStake()).to.equal(newMinimumStake);
+      });
+    });
+  });
+
+  describe('setAdmin()', () => {
+    describe('reverts', () => {
+      it('reverts when admin address is zero address', async () => {
+        await expect(
+          escrowFactory.connect(owner).setAdmin(ZeroAddress)
+        ).to.be.revertedWith('Zero Address');
+      });
+
+      it('reverts when caller is not the owner', async () => {
+        await expect(
+          escrowFactory.connect(launcher).setAdmin(await admin.getAddress())
+        ).to.be.revertedWith('Ownable: caller is not the owner');
+      });
+    });
+
+    describe('succeeds', () => {
+      it('new admin set successfully', async () => {
+        const adminAddress = await admin.getAddress();
+
+        await escrowFactory.connect(owner).setAdmin(adminAddress);
+
+        expect(await escrowFactory.admin()).to.equal(adminAddress);
+      });
+    });
+  });
+
+  describe('createEscrow()', () => {
+    describe('reverts', () => {
+      it('reverts when launcher has insufficient stake', async () => {
+        await expect(
+          escrowFactory
+            .connect(launcher)
+            .createEscrow(tokenAddress, FIXTURE_REQUESTER_ID)
+        ).to.be.revertedWith('Insufficient stake');
+      });
+
+      it('reverts when admin address is not set yet', async () => {
+        await stake(launcher);
+        const EscrowFactory = await ethers.getContractFactory(
+          'contracts/EscrowFactory.sol:EscrowFactory'
         );
 
-      const EscrowFactoryV0 =
-        await ethers.getContractFactory('EscrowFactoryV0');
-      await upgrades.upgradeProxy(
-        await escrowFactory.getAddress(),
-        EscrowFactoryV0
-      );
+        const escrowFactory = (await upgrades.deployProxy(
+          EscrowFactory,
+          [stakingAddress, MINIMUM_STAKE],
+          {
+            kind: 'uups',
+            initializer: 'initialize',
+          }
+        )) as unknown as EscrowFactory;
 
-      expect(
-        await upgrades.erc1967.getImplementationAddress(
-          await escrowFactory.getAddress()
-        )
-      ).to.not.be.equal(oldImplementationAddress);
+        await expect(
+          escrowFactory
+            .connect(launcher)
+            .createEscrow(tokenAddress, FIXTURE_REQUESTER_ID)
+        ).to.be.revertedWith('Zero Address');
+      });
+    });
 
-      expect(await escrowFactory.lastEscrow()).to.equal(oldLastEscrow);
+    describe('succeeds', () => {
+      it('creates an escrow successfully', async () => {
+        await stake(launcher);
+
+        const tx = await escrowFactory
+          .connect(launcher)
+          .createEscrow(tokenAddress, FIXTURE_REQUESTER_ID);
+
+        await expect(tx)
+          .to.emit(escrowFactory, 'LaunchedV2')
+          .withArgs(tokenAddress, anyValue, FIXTURE_REQUESTER_ID);
+
+        const receipt = await tx.wait();
+        const event = (
+          receipt?.logs?.find(({ topics }) =>
+            topics.includes(ethers.id('LaunchedV2(address,address,string)'))
+          ) as EventLog
+        )?.args;
+
+        expect(event).to.not.be.undefined;
+        const escrowAddress = event[1];
+        expect(await escrowFactory.hasEscrow(escrowAddress)).to.be.true;
+        expect(await escrowFactory.lastEscrow()).to.equal(escrowAddress);
+      });
     });
   });
 });
