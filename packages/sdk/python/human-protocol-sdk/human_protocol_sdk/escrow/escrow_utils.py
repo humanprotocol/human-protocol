@@ -190,6 +190,13 @@ class EscrowUtils:
 
         escrows = []
 
+        statuses = None
+        if filter.status:
+            if isinstance(filter.status, list):
+                statuses = [s.name for s in filter.status]
+            else:
+                statuses = [filter.status.name]
+
         escrows_data = get_data_from_subgraph(
             network,
             query=get_escrows_query(filter),
@@ -207,7 +214,7 @@ class EscrowUtils:
                     filter.exchange_oracle.lower() if filter.exchange_oracle else None
                 ),
                 "jobRequesterId": filter.job_requester_id,
-                "status": filter.status.name if filter.status else None,
+                "status": statuses,
                 "from": (
                     int(filter.date_from.timestamp()) if filter.date_from else None
                 ),

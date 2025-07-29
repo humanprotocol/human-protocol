@@ -1,5 +1,5 @@
 import { ChainId, IKVStore, KVStoreClient } from '@human-protocol/sdk';
-import { ethers } from 'ethers';
+import { Eip1193Provider, ethers } from 'ethers';
 import { useEffect, useState } from 'react';
 import { useAccount, useWalletClient } from 'wagmi';
 import { SUPPORTED_CHAIN_IDS } from '../constants/chains';
@@ -8,7 +8,7 @@ import { parseErrorMessage } from '../utils/string';
 import { getKVStoreData } from '../services/dashboard';
 
 export const useKVStore = () => {
-  const { address, chainId } = useAccount();
+  const { address, chainId, connector } = useAccount();
   const { data: walletClient } = useWalletClient();
   const { showError, openSnackbar } = useSnackbar();
 
@@ -36,9 +36,12 @@ export const useKVStore = () => {
   useEffect(() => {
     const initStakingClient = async () => {
       try {
-        if (walletClient && address) {
+        if (walletClient && address && connector) {
           checkSupportedChain();
-          const provider = new ethers.BrowserProvider(window.ethereum);
+          const eeip193Provider = await connector?.getProvider();
+          const provider = new ethers.BrowserProvider(
+            eeip193Provider as Eip1193Provider
+          );
           const signer = await provider.getSigner();
 
           const client = await KVStoreClient.build(signer);
@@ -53,7 +56,7 @@ export const useKVStore = () => {
 
     initStakingClient();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [walletClient, address, chainId]);
+  }, [walletClient, address, chainId, connector]);
 
   const checkSupportedChain = () => {
     const isSupportedChain = SUPPORTED_CHAIN_IDS.includes(chainId as ChainId);
