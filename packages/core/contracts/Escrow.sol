@@ -201,6 +201,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
             _amount = getTokenBalance(_token);
         }
 
+        require(_amount > 0, 'No funds');
         IERC20(_token).safeTransfer(msg.sender, _amount);
 
         emit Withdraw(_token, _amount);

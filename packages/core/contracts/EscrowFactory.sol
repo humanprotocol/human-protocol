@@ -11,7 +11,7 @@ import './Escrow.sol';
 contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
     // all Escrows will have this duration.
     uint256 constant STANDARD_DURATION = 8640000;
-    string constant ERROR_ZERO_ADDRESS = 'EscrowFactory: Zero Address';
+    string constant ERROR_ZERO_ADDRESS = 'Zero Address';
 
     uint256 public counter;
     mapping(address => uint256) public escrowCounters;
@@ -56,13 +56,9 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
             msg.sender
         );
         require(availableStake >= minimumStake, 'Insufficient stake');
+        require(admin != address(0), ERROR_ZERO_ADDRESS);
 
-        Escrow escrow = new Escrow(
-            token,
-            msg.sender,
-            admin != address(0) ? admin : msg.sender,
-            STANDARD_DURATION
-        );
+        Escrow escrow = new Escrow(token, msg.sender, admin, STANDARD_DURATION);
         counter++;
         escrowCounters[address(escrow)] = counter;
         lastEscrow = address(escrow);
