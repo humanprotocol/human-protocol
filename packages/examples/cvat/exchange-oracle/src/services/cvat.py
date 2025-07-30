@@ -779,6 +779,7 @@ def get_jobs_by_escrow_address(
                 (Project.escrow_address == escrow_address) & (Project.chain_id == chain_id)
             )
         )
+        .order_by(Job.cvat_id)
         .all()
     )
 

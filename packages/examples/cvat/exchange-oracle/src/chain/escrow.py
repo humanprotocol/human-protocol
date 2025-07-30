@@ -67,6 +67,9 @@ def get_escrow_manifest(chain_id: int, escrow_address: str) -> dict:
         set_callback=partial(download_manifest, chain_id, escrow_address),
     )
 
+def get_escrow_fund_amount(chain_id: int, escrow_address: str):
+    escrow = get_escrow(chain_id, escrow_address)
+    return float(escrow.total_funded_amount / 1e18)
 
 def get_available_webhook_types(
     chain_id: int, escrow_address: str

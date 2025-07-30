@@ -5,7 +5,7 @@ from human_protocol_sdk.storage import StorageFileNotFoundError
 from sqlalchemy.orm import Session
 
 import src.services.cvat as cvat_service
-from src.chain.escrow import get_escrow_manifest
+from src.chain.escrow import get_escrow_manifest, get_escrow_fund_amount
 from src.core.manifest import TaskManifest
 from src.core.types import AssignmentStatuses, ProjectStatuses
 from src.db import SessionLocal
@@ -44,6 +44,7 @@ def serialize_job(
                 )
 
         jobs = cvat_service.get_jobs_by_cvat_project_id(session, project.cvat_id)
+        fund_amount = get_escrow_fund_amount(project.chain_id, project.escrow_address)
 
         if project.status == ProjectStatuses.canceled:
             api_status = service_api.JobStatuses.canceled
@@ -60,7 +61,7 @@ def serialize_job(
             job_type=project.job_type,
             status=api_status,
             job_description=manifest.annotation.description if manifest else None,
-            reward_amount=str(manifest.job_bounty / len(jobs)) if (manifest and len(jobs)) else None,
+            reward_amount=f"{fund_amount / len(jobs)}" if len(jobs) else None,
             reward_token=(
                 service_api.DEFAULT_TOKEN
             ),  # set a value to avoid being excluded by response_model_exclude_unset=True
@@ -113,6 +114,9 @@ def serialize_assignment(
                     get_escrow_manifest(project.chain_id, project.escrow_address)
                 )
 
+        jobs = cvat_service.get_jobs_by_cvat_project_id(session, project.cvat_id)
+        fund_amount = get_escrow_fund_amount(project.chain_id, project.escrow_address)
+
         assignment_status_mapping = {
             AssignmentStatuses.created: service_api.AssignmentStatuses.active,
             AssignmentStatuses.completed: service_api.AssignmentStatuses.completed,
@@ -134,7 +138,7 @@ def serialize_assignment(
             chain_id=project.chain_id,
             job_type=project.job_type,
             status=api_status,
-            reward_amount=str(manifest.job_bounty) if manifest else None,
+            reward_amount=f"{fund_amount / len(jobs)}" if len(jobs) else None,
             reward_token=(
                 service_api.DEFAULT_TOKEN
             ),  # set a value to avoid being excluded by response_model_exclude_unset=True

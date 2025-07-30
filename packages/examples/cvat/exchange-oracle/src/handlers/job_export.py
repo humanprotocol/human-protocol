@@ -54,8 +54,6 @@ def prepare_annotation_metafile(
     Prepares a task/project annotation descriptor file with annotator mapping.
     """
 
-    sorted(jobs, key=lambda job: job.cvat_id)
-
     if jobs:
         task = cvat_api.get_task(jobs[0].cvat_task_id)
         job_to_audio_index: dict[int, int] = {}
@@ -80,7 +78,7 @@ def prepare_annotation_metafile(
                 job_duration_without_overlap.append(0.0)
 
         jobs_start_time: dict[int, float] = {}
-        audio_job_counters: dict[int, int] = defaultdict(int)
+        audio_job_counters: list[int] = [0] * len(task.audio_total_duration)
         for job in jobs:
             job_id = job.cvat_id
             audio_index = job_to_audio_index.get(job_id)
