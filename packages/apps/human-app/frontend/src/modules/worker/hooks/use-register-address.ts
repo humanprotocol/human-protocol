@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { t } from 'i18next';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
 import { useAccessTokenRefresh } from '@/api/hooks/use-access-token-refresh';
@@ -14,7 +14,6 @@ interface RegisterAddressCallbacks {
 }
 
 function useRegisterAddressMutation(callbacks?: RegisterAddressCallbacks) {
-  const queryClient = useQueryClient();
   const { user, updateUserData } = useAuthenticatedUser();
   const { refreshAccessTokenAsync } = useAccessTokenRefresh();
   const { address, chainId, signMessage } = useWalletConnect();
@@ -49,14 +48,12 @@ function useRegisterAddressMutation(callbacks?: RegisterAddressCallbacks) {
     if (callbacks?.onSuccess) {
       await callbacks.onSuccess();
     }
-    await queryClient.invalidateQueries();
   };
 
   const onError = async (error: ResponseError) => {
     if (callbacks?.onError) {
       await callbacks.onError(error);
     }
-    await queryClient.invalidateQueries();
   };
 
   return useMutation({

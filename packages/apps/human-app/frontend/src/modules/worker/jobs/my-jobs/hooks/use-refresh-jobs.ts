@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import * as jobsService from '../../services/jobs.service';
 import { type RefreshJobsBody } from '../../types';
 
@@ -9,21 +9,17 @@ export function useRefreshJobsMutation(callbacks?: {
   onSuccess?: () => Promise<void>;
   onError?: (error: unknown) => Promise<void>;
 }) {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (data: RefreshJobsBody) => jobsService.refreshJobs(data),
-    onSuccess: async () => {
+    onSuccess: () => {
       if (callbacks?.onSuccess) {
         void callbacks.onSuccess();
       }
-      await queryClient.invalidateQueries();
     },
-    onError: async (error) => {
+    onError: (error) => {
       if (callbacks?.onError) {
         void callbacks.onError(error);
       }
-      await queryClient.invalidateQueries();
     },
   });
 }
