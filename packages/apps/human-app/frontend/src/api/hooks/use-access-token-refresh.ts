@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
 import { browserAuthProvider } from '@/shared/contexts/browser-auth-provider';
@@ -8,7 +8,6 @@ import { routerPaths } from '@/router/router-paths';
 import { authService } from '../authorized-http-api-client';
 
 export function useAccessTokenRefresh() {
-  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { signOut: web2SignOut, user: web2User } = useAuth();
 
@@ -40,12 +39,6 @@ export function useAccessTokenRefresh() {
           },
         });
       }
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries();
-    },
-    onError: async () => {
-      await queryClient.invalidateQueries();
     },
     scope: {
       id: 'refresh-access-token',
