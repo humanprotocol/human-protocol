@@ -91,9 +91,13 @@ async function setupEscrow(
 
 async function storeResults(
   url: string = FIXTURE_URL,
-  hash: string = FIXTURE_HASH
+  hash: string = FIXTURE_HASH,
+  reserveAmount = 0,
+  signer: Signer = recordingOracle
 ) {
-  await escrow.connect(recordingOracle).storeResults(url, hash);
+  await escrow
+    .connect(signer)
+    ['storeResults(string,string,uint256)'](url, hash, reserveAmount);
 }
 
 describe('Escrow', function () {
@@ -403,36 +407,28 @@ describe('Escrow', function () {
 
       it('reverts when called by unauthorised address', async () => {
         await expect(
-          escrow.connect(external).storeResults(FIXTURE_URL, FIXTURE_HASH)
+          storeResults(FIXTURE_URL, FIXTURE_HASH, 0, external)
         ).to.be.revertedWith('Unauthorised');
         await expect(
-          escrow.connect(launcher).storeResults(FIXTURE_URL, FIXTURE_HASH)
+          storeResults(FIXTURE_URL, FIXTURE_HASH, 0, launcher)
         ).to.be.revertedWith('Unauthorised');
         await expect(
-          escrow
-            .connect(reputationOracle)
-            .storeResults(FIXTURE_URL, FIXTURE_HASH)
+          storeResults(FIXTURE_URL, FIXTURE_HASH, 0, reputationOracle)
         ).to.be.revertedWith('Unauthorised');
         await expect(
-          escrow.connect(exchangeOracle).storeResults(FIXTURE_URL, FIXTURE_HASH)
+          storeResults(FIXTURE_URL, FIXTURE_HASH, 0, exchangeOracle)
         ).to.be.revertedWith('Unauthorised');
       });
     });
     describe('succeeds', () => {
       it('Recording oracle: stores results successfully', async () => {
-        await expect(
-          escrow
-            .connect(recordingOracle)
-            .storeResults(FIXTURE_URL, FIXTURE_HASH)
-        )
+        await expect(storeResults())
           .to.emit(escrow, 'IntermediateStorage')
           .withArgs(FIXTURE_URL, FIXTURE_HASH);
       });
 
       it('Admin: stores results successfully', async () => {
-        await expect(
-          escrow.connect(admin).storeResults(FIXTURE_URL, FIXTURE_HASH)
-        )
+        await expect(storeResults(FIXTURE_URL, FIXTURE_HASH, 0, admin))
           .to.emit(escrow, 'IntermediateStorage')
           .withArgs(FIXTURE_URL, FIXTURE_HASH);
       });
