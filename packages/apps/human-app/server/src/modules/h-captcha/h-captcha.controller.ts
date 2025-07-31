@@ -1,6 +1,6 @@
 import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
-import { Body, Controller, Get, Post, Request } from '@nestjs/common';
+import { Body, Controller, Get, Header, Post, Request } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { RequestWithUser } from '../../common/interfaces/jwt';
 import { JwtUserData } from '../../common/utils/jwt-token.model';
@@ -29,8 +29,8 @@ export class HCaptchaController {
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
 
-  @Post('/enable')
   @ApiOperation({ summary: 'Enables h-captcha labeling' })
+  @Post('/enable')
   public async enableLabeling(
     @Request() req: RequestWithUser,
   ): Promise<EnableLabelingResponse> {
@@ -40,8 +40,8 @@ export class HCaptchaController {
     return this.service.enableLabeling(command);
   }
 
-  @Post('/verify')
   @ApiOperation({ summary: 'Sends solution for verification' })
+  @Post('/verify')
   public async verifyToken(
     @Body() dto: VerifyTokenDto,
     @Request() req: RequestWithUser,
@@ -55,8 +55,9 @@ export class HCaptchaController {
     return await this.service.verifyToken(command);
   }
 
-  @Get('/daily-hmt-spent')
   @ApiOperation({ summary: 'Gets global daily HMT spent' })
+  @Header('Cache-Control', 'public, max-age=60')
+  @Get('/daily-hmt-spent')
   public async getDailyHmtSpent(
     @Request() req: RequestWithUser,
   ): Promise<DailyHmtSpentResponse> {
@@ -71,8 +72,9 @@ export class HCaptchaController {
     return this.service.getDailyHmtSpent(command);
   }
 
-  @Get('/user-stats')
   @ApiOperation({ summary: 'Gets stats per user' })
+  @Header('Cache-Control', 'public, max-age=60')
+  @Get('/user-stats')
   public async getUserStats(
     @Request() req: RequestWithUser,
   ): Promise<UserStatsResponse> {

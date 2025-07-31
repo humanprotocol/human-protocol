@@ -17,13 +17,12 @@ export function useRefreshJobsMutation(callbacks?: {
       if (callbacks?.onSuccess) {
         void callbacks.onSuccess();
       }
-      await queryClient.invalidateQueries();
+      await queryClient.invalidateQueries({ queryKey: ['fetchMyJobs'] });
     },
-    onError: async (error) => {
+    onError: (error) => {
       if (callbacks?.onError) {
         void callbacks.onError(error);
       }
-      await queryClient.invalidateQueries();
     },
   });
 }
