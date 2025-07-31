@@ -3,6 +3,7 @@ import { InjectMapper } from '@automapper/nestjs';
 import {
   Controller,
   Get,
+  Header,
   HttpException,
   HttpStatus,
   Query,
@@ -27,12 +28,13 @@ export class OracleDiscoveryController {
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
 
-  @Get('/oracles')
   @ApiOperation({ summary: 'Oracles discovery' })
   @ApiOkResponse({
     type: Array<DiscoveredOracle>,
     description: 'List of oracles',
   })
+  @Header('Cache-Control', 'public, max-age=60')
+  @Get('/oracles')
   public async getOracles(
     @Request() req: RequestWithUser,
     @Query() query: GetOraclesQuery,

@@ -5,14 +5,16 @@ import type {
 } from '@/shared/types/browser-auth-provider';
 import { type AuthTokensSuccessResponse } from '../schemas';
 
-const accessTokenKey = btoa('access_token');
-const refreshTokenKey = btoa('refresh_token');
-const authTypeKey = btoa('auth_type');
-const userDataKey = btoa('extendable_user_data');
+const accessTokenKey = 'ro_access_token';
+const refreshTokenKey = 'ro_refresh_token';
+const authTypeKey = 'ro_auth_type';
+const userDataKey = 'ro_extendable_user_data';
 
 const browserAuthProvider: BrowserAuthProvider = {
   isAuthenticated: false,
   authType: 'web2',
+  signOutSubscription: undefined,
+
   signIn(
     { access_token, refresh_token }: AuthTokensSuccessResponse,
     authType,
@@ -20,14 +22,15 @@ const browserAuthProvider: BrowserAuthProvider = {
   ) {
     browserAuthProvider.isAuthenticated = true;
     browserAuthProvider.authType = authType;
-    localStorage.setItem(accessTokenKey, btoa(access_token));
-    localStorage.setItem(refreshTokenKey, btoa(refresh_token));
-    localStorage.setItem(authTypeKey, btoa(authType));
+    localStorage.setItem(accessTokenKey, access_token);
+    localStorage.setItem(refreshTokenKey, refresh_token);
+    localStorage.setItem(authTypeKey, authType);
 
     if (signOutSubscription) {
       this.signOutSubscription = signOutSubscription;
     }
   },
+
   signOut(args) {
     browserAuthProvider.isAuthenticated = false;
     localStorage.removeItem(accessTokenKey);
@@ -44,37 +47,41 @@ const browserAuthProvider: BrowserAuthProvider = {
       this.signOutSubscription = undefined;
     }
   },
-  signOutSubscription: undefined,
+
   getAccessToken() {
-    const result = localStorage.getItem(accessTokenKey);
+    const accessToken = localStorage.getItem(accessTokenKey);
 
-    if (!result) {
+    if (!accessToken) {
       return null;
     }
 
-    return atob(result);
+    return accessToken;
   },
+
   getRefreshToken() {
-    const result = localStorage.getItem(refreshTokenKey);
+    const refreshToken = localStorage.getItem(refreshTokenKey);
 
-    if (!result) {
+    if (!refreshToken) {
       return null;
     }
 
-    return atob(result);
+    return refreshToken;
   },
+
   getAuthType(): AuthType | null {
-    const result = localStorage.getItem(authTypeKey);
+    const authType = localStorage.getItem(authTypeKey);
 
-    if (!result) {
+    if (!authType) {
       return null;
     }
 
-    return atob(result) as AuthType;
+    return authType as AuthType;
   },
+
   setUserData(userData) {
-    localStorage.setItem(userDataKey, btoa(JSON.stringify(userData)));
+    localStorage.setItem(userDataKey, JSON.stringify(userData));
   },
+
   getUserData() {
     const userData = localStorage.getItem(userDataKey);
 
@@ -84,7 +91,7 @@ const browserAuthProvider: BrowserAuthProvider = {
 
     try {
       return {
-        data: JSON.parse(atob(userData)) as unknown,
+        data: JSON.parse(userData) as unknown,
       };
     } catch (error) {
       return { data: {} as unknown };
