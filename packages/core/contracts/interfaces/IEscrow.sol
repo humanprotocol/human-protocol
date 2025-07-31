@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.0;
 
 interface IEscrow {
@@ -9,7 +8,8 @@ interface IEscrow {
         Partial,
         Paid,
         Complete,
-        Cancelled
+        Cancelled,
+        ToCancel
     }
 
     function status() external view returns (EscrowStatuses);
@@ -33,6 +33,12 @@ interface IEscrow {
 
     function storeResults(string calldata _url, string calldata _hash) external;
 
+    function storeResults(
+        string calldata _url,
+        string calldata _hash,
+        uint256 _fundsToReserve
+    ) external;
+
     function bulkPayOut(
         address[] calldata _recipients,
         uint256[] calldata _amounts,
@@ -48,5 +54,14 @@ interface IEscrow {
         string calldata _url,
         string calldata _hash,
         uint256 _txId
+    ) external;
+
+    function bulkPayOut(
+        address[] calldata _recipients,
+        uint256[] calldata _amounts,
+        string calldata _url,
+        string calldata _hash,
+        string calldata _payoutId,
+        bool forceComplete
     ) external;
 }

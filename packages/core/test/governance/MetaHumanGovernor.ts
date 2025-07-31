@@ -8,7 +8,7 @@ import {
   TimelockController,
   DAOSpokeContract,
   WormholeMock,
-} from '../typechain-types';
+} from '../../typechain-types';
 import {
   createMockUserWithVotingPower,
   createBasicProposal,
