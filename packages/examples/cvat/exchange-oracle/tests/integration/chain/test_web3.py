@@ -56,7 +56,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             rpc_api = "	https://testnet.aurora.dev"
             private_key = DEFAULT_GAS_PAYER_PRIV
 
-        with patch("src.chain.web3.Config.polygon_amoy", AuroraTestnetConfig):
+        with patch("src.chain.web3.Config.aurora_testnet", AuroraTestnetConfig):
             w3 = get_web3(ChainId.AURORA_TESTNET.value)
         assert isinstance(w3, Web3)
         assert w3.eth.default_account == DEFAULT_GAS_PAYER
