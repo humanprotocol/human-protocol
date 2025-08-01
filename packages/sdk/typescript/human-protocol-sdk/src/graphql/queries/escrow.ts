@@ -14,7 +14,7 @@ const ESCROW_FRAGMENT = gql`
     jobRequesterId
     launcher
     manifestHash
-    manifestUrl
+    manifest
     recordingOracle
     reputationOracle
     exchangeOracle
