@@ -22,13 +22,11 @@ const HmtBalance: FC<Props> = ({ balance }) => {
     return <span>...</span>;
   }
 
-  const _balance =
-    Number(balance) < 1 ? Number(balance) * 1e18 : Number(balance);
-  const balanceInDollars = balance ? (_balance * data).toFixed(2) : 0;
+  const balanceInDollars = balance ? (+balance * data).toFixed(2) : 0;
 
   return (
     <Stack flexDirection="row" whiteSpace="nowrap">
-      <TokenAmount amount={_balance} alreadyParsed />
+      <TokenAmount amount={balance} />
       <Typography component="span" variant="body2" color="text.secondary">
         {`($${balanceInDollars})`}
       </Typography>
