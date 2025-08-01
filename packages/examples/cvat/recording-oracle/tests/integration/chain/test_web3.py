@@ -49,6 +49,18 @@ class ServiceIntegrationTest(unittest.TestCase):
         assert w3.eth.default_account == DEFAULT_GAS_PAYER
         assert w3.manager._provider.endpoint_uri == PolygonAmoyConfig.rpc_api
 
+    def test_get_web3_aurora_testnet(self):
+        class AuroraTestnetConfig:
+            chain_id = 1313161555
+            rpc_api = "	https://testnet.aurora.dev"
+            private_key = DEFAULT_GAS_PAYER_PRIV
+
+        with patch("src.chain.web3.Config.aurora_testnet", AuroraTestnetConfig):
+            w3 = get_web3(ChainId.AURORA_TESTNET.value)
+        assert isinstance(w3, Web3)
+        assert w3.eth.default_account == DEFAULT_GAS_PAYER
+        assert w3.manager._provider.endpoint_uri == AuroraTestnetConfig.rpc_api
+
     def test_get_web3_localhost(self):
         w3 = get_web3(ChainId.LOCALHOST.value)
         assert isinstance(w3, Web3)
@@ -81,6 +93,18 @@ class ServiceIntegrationTest(unittest.TestCase):
         ):
             mock_function.return_value = self.w3
             signed_message, _ = sign_message(ChainId.POLYGON_AMOY.value, "message")
+        assert signed_message == SIGNATURE
+
+    def test_sign_message_aurora_testnet(self):
+        with (
+            patch("src.chain.web3.get_web3") as mock_function,
+            patch(
+                "src.chain.web3.Config.aurora_testnet.private_key",
+                DEFAULT_GAS_PAYER_PRIV,
+            ),
+        ):
+            mock_function.return_value = self.w3
+            signed_message, _ = sign_message(ChainId.AURORA_TESTNET.value, "message")
         assert signed_message == SIGNATURE
 
     def test_sign_message_invalid_chain_id(self):

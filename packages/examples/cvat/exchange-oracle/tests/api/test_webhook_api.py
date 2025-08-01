@@ -116,7 +116,7 @@ def test_incoming_webhook_400_invalid_chain_id(client: TestClient) -> None:
         "errors": [
             {
                 "field": "chain_id",
-                "message": "Input should be 137, 80002 or 1338",
+                "message": "Input should be 137, 80002, 1313161555 or 1338",
             }
         ]
     }

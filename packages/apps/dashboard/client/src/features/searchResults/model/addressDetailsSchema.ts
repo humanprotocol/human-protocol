@@ -3,33 +3,15 @@ import { z } from 'zod';
 
 import { reputationSchema } from '@/shared/model/reputationSchema';
 
-const transformOptionalTokenAmount = (
-  value: string | undefined | null,
-  ctx: z.RefinementCtx
-) => {
-  if (value === undefined || value === null) return value;
-
-  const valueAsNumber = Number(value);
-
-  if (Number.isNaN(valueAsNumber)) {
-    ctx.addIssue({
-      path: ['amountStaked'],
-      code: z.ZodIssueCode.custom,
-    });
-  }
-
-  return valueAsNumber / 10 ** 18;
-};
-
 const walletSchema = z.object({
   chainId: z.number(),
   address: z.string(),
-  balance: z.string().transform(transformOptionalTokenAmount),
-  amountStaked: z.string().transform(transformOptionalTokenAmount),
-  amountLocked: z.string().transform(transformOptionalTokenAmount),
-  amountWithdrawable: z.string().transform(transformOptionalTokenAmount),
+  balance: z.string(),
+  amountStaked: z.string(),
+  amountLocked: z.string(),
+  amountWithdrawable: z.string(),
   reputation: reputationSchema,
-  totalHMTAmountReceived: z.string().transform(transformOptionalTokenAmount),
+  totalHMTAmountReceived: z.string(),
   payoutCount: z.number().or(z.string()),
 });
 
@@ -59,7 +41,7 @@ export type AddressDetailsEscrow = z.infer<typeof escrowSchema>;
 const operatorSchema = z.object({
   chainId: z.number(),
   address: z.string(),
-  balance: z.string().transform(transformOptionalTokenAmount),
+  balance: z.string(),
   role: z
     .enum([
       Role.JobLauncher,
@@ -68,12 +50,9 @@ const operatorSchema = z.object({
       Role.ReputationOracle,
     ])
     .nullable(),
-  amountStaked: z.string().optional().transform(transformOptionalTokenAmount),
-  amountLocked: z.string().optional().transform(transformOptionalTokenAmount),
-  amountWithdrawable: z
-    .string()
-    .optional()
-    .transform(transformOptionalTokenAmount),
+  amountStaked: z.string().optional(),
+  amountLocked: z.string().optional(),
+  amountWithdrawable: z.string().optional(),
   lockedUntilTimestamp: z.string().optional(),
   reputation: reputationSchema,
   fee: z.number(),

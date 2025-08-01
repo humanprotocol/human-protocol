@@ -11,7 +11,7 @@ greet_router = APIRouter()
 
 @greet_router.get("/", description="Endpoint describing the API", response_model=MetaResponse)
 def meta_route() -> MetaResponse:
-    networks = [Config.polygon_mainnet, Config.polygon_amoy]
+    networks = [Config.polygon_mainnet, Config.polygon_amoy, Config.aurora_testnet]
 
     networks_info = [
         {
