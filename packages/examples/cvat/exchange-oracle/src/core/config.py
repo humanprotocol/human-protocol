@@ -95,6 +95,7 @@ class PolygonAmoyConfig(_NetworkConfig):
     private_key = getenv("POLYGON_AMOY_PRIVATE_KEY")
     addr = getenv("POLYGON_AMOY_ADDR")
 
+
 class AuroraTestnetConfig(_NetworkConfig):
     chain_id = 1313161555
     rpc_api = getenv("AURORA_TESTNET_RPC_API_URL")

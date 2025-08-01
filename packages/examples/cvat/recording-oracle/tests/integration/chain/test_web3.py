@@ -48,7 +48,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         assert isinstance(w3, Web3)
         assert w3.eth.default_account == DEFAULT_GAS_PAYER
         assert w3.manager._provider.endpoint_uri == PolygonAmoyConfig.rpc_api
-    
+
     def test_get_web3_aurora_testnet(self):
         class AuroraTestnetConfig:
             chain_id = 1313161555
@@ -59,7 +59,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             w3 = get_web3(ChainId.AURORA_TESTNET.value)
         assert isinstance(w3, Web3)
         assert w3.eth.default_account == DEFAULT_GAS_PAYER
-        assert w3.manager._provider.endpoint_uri == AuroraTestnetConfig.rpc_api  
+        assert w3.manager._provider.endpoint_uri == AuroraTestnetConfig.rpc_api
 
     def test_get_web3_localhost(self):
         w3 = get_web3(ChainId.LOCALHOST.value)

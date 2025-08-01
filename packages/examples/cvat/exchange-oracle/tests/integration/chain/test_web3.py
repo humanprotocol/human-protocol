@@ -60,7 +60,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             w3 = get_web3(ChainId.AURORA_TESTNET.value)
         assert isinstance(w3, Web3)
         assert w3.eth.default_account == DEFAULT_GAS_PAYER
-        assert w3.manager._provider.endpoint_uri == AuroraTestnetConfig.rpc_api    
+        assert w3.manager._provider.endpoint_uri == AuroraTestnetConfig.rpc_api
 
     def test_get_web3_localhost(self):
         w3 = get_web3(ChainId.LOCALHOST.value)
@@ -101,7 +101,9 @@ class ServiceIntegrationTest(unittest.TestCase):
                 DEFAULT_GAS_PAYER_PRIV,
             ):
                 mock_function.return_value = self.w3
-                signature, serialized_message = sign_message(ChainId.AURORA_TESTNET.value, "message")
+                signature, serialized_message = sign_message(
+                    ChainId.AURORA_TESTNET.value, "message"
+                )
             assert signature == SIGNATURE
             assert serialized_message == json.dumps("message")
 
