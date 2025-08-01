@@ -4,7 +4,6 @@ import { ethers } from 'hardhat';
 import { Signer, ZeroAddress } from 'ethers';
 import { Escrow, HMToken } from '../typechain-types';
 import { faker } from '@faker-js/faker';
-import { S } from '@faker-js/faker/dist/airline-BUL6NtOJ';
 
 const BULK_MAX_COUNT = 100;
 const STANDARD_DURATION = 100;
