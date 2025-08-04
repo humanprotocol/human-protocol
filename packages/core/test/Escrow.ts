@@ -441,6 +441,14 @@ describe('Escrow', function () {
           )
         ).to.be.revertedWith('Unauthorised');
       });
+
+      it('reverts with DEPRECATED_SIGNATURE', async () => {
+        await expect(
+          escrow
+            .connect(recordingOracle)
+            ['storeResults(string,string)'](FIXTURE_URL, FIXTURE_HASH)
+        ).to.be.revertedWith('DEPRECATED_SIGNATURE');
+      });
     });
     describe('succeeds', () => {
       it('Recording oracle: stores results successfully', async () => {
@@ -835,6 +843,16 @@ describe('Escrow', function () {
               'bulkPayOut(address[],uint256[],string,string,string,bool)'
             ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000', false)
         ).to.be.revertedWith('Not enough funds');
+      });
+
+      it('reverts with DEPRECATED_SIGNATURE', async () => {
+        await expect(
+          escrow
+            .connect(recordingOracle)
+            [
+              'bulkPayOut(address[],uint256[],string,string,uint256,bool)'
+            ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '1', false)
+        ).to.be.revertedWith('DEPRECATED_SIGNATURE');
       });
     });
 

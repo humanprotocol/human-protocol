@@ -258,7 +258,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
         string calldata _url,
         string calldata _hash
     ) external override adminOrRecordingOracle notExpired {
-        require(false, 'Forbidden');
+        require(false, 'DEPRECATED_SIGNATURE');
     }
 
     /**
@@ -323,7 +323,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
         uint256 _txId,
         bool forceComplete
     ) external override {
-        require(false, 'Forbidden');
+        require(false, 'DEPRECATED_SIGNATURE');
     }
 
     /**

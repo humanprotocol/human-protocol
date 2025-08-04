@@ -570,7 +570,7 @@ export class EscrowClient extends BaseEthersClient {
         ).wait();
       }
     } catch (e) {
-      if (!isBigInt && e.reason === 'Forbidden') {
+      if (!isBigInt && e.reason === 'DEPRECATED_SIGNATURE') {
         throw ErrorStoreResultsVersion;
       }
       // eslint-disable-next-line no-console
@@ -780,7 +780,7 @@ export class EscrowClient extends BaseEthersClient {
         ).wait();
       }
     } catch (e) {
-      if (!idIsString && e.reason === 'Forbidden') {
+      if (!idIsString && e.reason === 'DEPRECATED_SIGNATURE') {
         throw ErrorBulkPayOutVersion;
       }
       // eslint-disable-next-line no-console
