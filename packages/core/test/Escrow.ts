@@ -556,7 +556,24 @@ describe('Escrow', function () {
         );
       });
 
-      it('Admin: cancels escrow succesfully', async () => {
+      it('Launcher: cancels escrow succesfully when escrow is expired', async () => {
+        await deployEscrow(tokenAddress, launcherAddress, adminAddress, 3);
+        await fundEscrow();
+        await setupEscrow();
+        const launcherBalance = await token.balanceOf(launcherAddress);
+        await expect(escrow.connect(launcher).cancel()).to.emit(
+          escrow,
+          'CancellationRequested'
+        );
+        expect(await escrow.status()).to.equal(Status.Cancelled);
+
+        expect(await token.balanceOf(escrow.getAddress())).to.equal(0);
+        expect(await token.balanceOf(launcherAddress)).to.equal(
+          launcherBalance + FIXTURE_FUND_AMOUNT
+        );
+      });
+
+      it('Admin: requests escrow cancellation succesfully', async () => {
         const balance = await token.balanceOf(escrow.getAddress());
         const launcherBalance = await token.balanceOf(launcherAddress);
         await expect(escrow.connect(admin).cancel()).to.emit(
@@ -568,6 +585,23 @@ describe('Escrow', function () {
         expect(await token.balanceOf(escrow.getAddress())).to.equal(balance);
         expect(await token.balanceOf(launcherAddress)).to.equal(
           launcherBalance
+        );
+      });
+
+      it('Admin: cancels escrow succesfully when escrow is expired', async () => {
+        await deployEscrow(tokenAddress, launcherAddress, adminAddress, 3);
+        await fundEscrow();
+        await setupEscrow();
+        const launcherBalance = await token.balanceOf(launcherAddress);
+        await expect(escrow.connect(admin).cancel()).to.emit(
+          escrow,
+          'CancellationRequested'
+        );
+        expect(await escrow.status()).to.equal(Status.Cancelled);
+
+        expect(await token.balanceOf(escrow.getAddress())).to.equal(0);
+        expect(await token.balanceOf(launcherAddress)).to.equal(
+          launcherBalance + FIXTURE_FUND_AMOUNT
         );
       });
     });
