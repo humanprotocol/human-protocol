@@ -203,5 +203,6 @@
   * [`get_staking_interface()`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.get_staking_interface)
   * [`handle_error()`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.handle_error)
   * [`parse_transfer_transaction()`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.parse_transfer_transaction)
+  * [`validate_json()`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.validate_json)
   * [`validate_url()`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.validate_url)
   * [`with_retry()`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.with_retry)

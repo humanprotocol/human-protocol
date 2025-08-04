@@ -67,6 +67,7 @@ from human_protocol_sdk.utils import (
     get_factory_interface,
     get_erc20_interface,
     handle_error,
+    validate_json,
 )
 from web3 import Web3, contract
 from web3 import eth
@@ -161,7 +162,7 @@ class EscrowConfig:
             raise EscrowClientError("Fee must be between 0 and 100")
         if recording_oracle_fee + reputation_oracle_fee + exchange_oracle_fee > 100:
             raise EscrowClientError("Total fee must be less than 100")
-        if not manifest:
+        if not validate_url(manifest) and not validate_json(manifest):
             raise EscrowClientError("Invalid empty manifest")
         if not hash:
             raise EscrowClientError("Invalid empty manifest hash")

@@ -83,7 +83,7 @@ class EscrowData:
         :param final_results_url: URL for final results.
         :param intermediate_results_url: URL for intermediate results.
         :param manifest_hash: Manifest hash.
-        :param manifest: Manifest data (JSON).
+        :param manifest: Manifest data (JSON/URL).
         :param recording_oracle: Recording Oracle address.
         :param reputation_oracle: Reputation Oracle address.
         :param exchange_oracle: Exchange Oracle address.

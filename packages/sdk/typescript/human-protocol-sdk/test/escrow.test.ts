@@ -31,7 +31,7 @@ import {
   ErrorTooManyRecipients,
   ErrorTotalFeeMustBeLessThanHundred,
   ErrorUnsupportedChainID,
-  ErrorUrlIsEmptyString,
+  ErrorInvalidManifest,
   InvalidEthereumAddressError,
 } from '../src/error';
 import { EscrowClient, EscrowUtils } from '../src/escrow';
@@ -479,7 +479,7 @@ describe('EscrowClient', () => {
 
       await expect(
         escrowClient.setup(ethers.ZeroAddress, escrowConfig)
-      ).rejects.toThrow(ErrorUrlIsEmptyString);
+      ).rejects.toThrow(ErrorInvalidManifest);
     });
 
     test('should accept manifest as a JSON string', async () => {
@@ -760,7 +760,7 @@ describe('EscrowClient', () => {
 
       await expect(
         escrowClient.storeResults(escrowAddress, url, hash)
-      ).rejects.toThrow(ErrorUrlIsEmptyString);
+      ).rejects.toThrow(ErrorInvalidUrl);
     });
 
     test('should throw an error if results url is invalid url', async () => {
@@ -1064,7 +1064,7 @@ describe('EscrowClient', () => {
           finalResultsUrl,
           finalResultsHash
         )
-      ).rejects.toThrow(ErrorUrlIsEmptyString);
+      ).rejects.toThrow(ErrorInvalidUrl);
     });
 
     test('should throw an error if final results url is an invalid url', async () => {
@@ -1385,7 +1385,7 @@ describe('EscrowClient', () => {
           finalResultsUrl,
           finalResultsHash
         )
-      ).rejects.toThrow(ErrorUrlIsEmptyString);
+      ).rejects.toThrow(ErrorInvalidUrl);
     });
 
     test('should throw an error if final results url is an invalid url', async () => {

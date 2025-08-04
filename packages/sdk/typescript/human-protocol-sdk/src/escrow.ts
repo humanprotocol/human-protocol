@@ -24,6 +24,7 @@ import {
   ErrorInvalidAddress,
   ErrorInvalidEscrowAddressProvided,
   ErrorInvalidExchangeOracleAddressProvided,
+  ErrorInvalidManifest,
   ErrorInvalidRecordingOracleAddressProvided,
   ErrorInvalidReputationOracleAddressProvided,
   ErrorInvalidTokenAddress,
@@ -37,7 +38,6 @@ import {
   ErrorTotalFeeMustBeLessThanHundred,
   ErrorTransferEventNotFoundInTransactionLogs,
   ErrorUnsupportedChainID,
-  ErrorUrlIsEmptyString,
   InvalidEthereumAddressError,
 } from './error';
 import {
@@ -66,6 +66,7 @@ import {
 import {
   getSubgraphUrl,
   getUnixTimestamp,
+  isValidJson,
   isValidUrl,
   throwError,
 } from './utils';
@@ -353,8 +354,9 @@ export class EscrowClient extends BaseEthersClient {
       throw ErrorTotalFeeMustBeLessThanHundred;
     }
 
-    if (!manifest) {
-      throw ErrorUrlIsEmptyString;
+    const isManifestValid = isValidUrl(manifest) || isValidJson(manifest);
+    if (!isManifestValid) {
+      throw ErrorInvalidManifest;
     }
 
     if (!manifestHash) {
@@ -491,7 +493,7 @@ export class EscrowClient extends BaseEthersClient {
     }
 
     if (!url) {
-      throw ErrorUrlIsEmptyString;
+      throw ErrorInvalidUrl;
     }
 
     if (!isValidUrl(url)) {
@@ -1039,7 +1041,7 @@ export class EscrowClient extends BaseEthersClient {
     });
 
     if (!finalResultsUrl) {
-      throw ErrorUrlIsEmptyString;
+      throw ErrorInvalidUrl;
     }
 
     if (!isValidUrl(finalResultsUrl)) {
