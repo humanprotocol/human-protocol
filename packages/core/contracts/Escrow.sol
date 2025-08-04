@@ -354,7 +354,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
         require(!payouts[payoutId], 'payoutId already exists');
         require(_recipients.length == _amounts.length, 'Length mismatch');
         require(_amounts.length > 0, 'Empty amounts');
-        require(_recipients.length < BULK_MAX_COUNT, 'Too many recipients');
+        require(_recipients.length <= BULK_MAX_COUNT, 'Too many recipients');
         require(
             bytes(_url).length != 0 && bytes(_hash).length != 0,
             'Empty url/hash'
