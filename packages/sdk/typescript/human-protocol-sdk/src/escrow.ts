@@ -530,9 +530,9 @@ export class EscrowClient extends BaseEthersClient {
   ): Promise<void> {
     const escrowContract = this.getEscrowContract(escrowAddress);
 
-    const isBigInt = typeof a === 'bigint';
-    const fundsToReserve = isBigInt ? (a as bigint) : undefined;
-    const txOptions = (isBigInt ? b : a) || {};
+    const hasFundsToReserveParam = typeof a === 'bigint';
+    const fundsToReserve = hasFundsToReserveParam ? (a as bigint) : undefined;
+    const txOptions = (hasFundsToReserveParam ? b : a) || {};
 
     if (!ethers.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
@@ -570,7 +570,7 @@ export class EscrowClient extends BaseEthersClient {
         ).wait();
       }
     } catch (e) {
-      if (!isBigInt && e.reason === 'DEPRECATED_SIGNATURE') {
+      if (!hasFundsToReserveParam && e.reason === 'DEPRECATED_SIGNATURE') {
         throw ErrorStoreResultsVersion;
       }
       // eslint-disable-next-line no-console
