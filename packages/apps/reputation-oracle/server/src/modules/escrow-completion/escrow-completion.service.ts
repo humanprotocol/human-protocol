@@ -128,7 +128,7 @@ export class EscrowCompletionService {
           );
           const manifest =
             await this.storageService.downloadJsonLikeData<JobManifest>(
-              escrowData.manifestUrl as string,
+              escrowData.manifest as string,
             );
           const jobRequestType = manifestUtils.getJobRequestType(manifest);
 
