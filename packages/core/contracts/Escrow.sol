@@ -192,6 +192,10 @@ contract Escrow is IEscrow, ReentrancyGuard {
     {
         status = EscrowStatuses.ToCancel;
         emit CancellationRequested();
+        if (duration <= block.timestamp) {
+            _finalize();
+        }
+
         return true;
     }
 
