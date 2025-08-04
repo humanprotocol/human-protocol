@@ -637,53 +637,6 @@ export class EscrowClient extends BaseEthersClient {
    * @param {string} finalResultsUrl Final results file URL.
    * @param {string} finalResultsHash Final results file hash.
    * @param {number} txId Transaction ID.
-   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
-   * @returns Returns void if successful. Throws error if any.
-   *
-   *
-   * **Code example**
-   *
-   * > Only Reputation Oracle or admin can call it.
-   *
-   * ```ts
-   * import { ethers, Wallet, providers } from 'ethers';
-   * import { EscrowClient } from '@human-protocol/sdk';
-   *
-   * const rpcUrl = 'YOUR_RPC_URL';
-   * const privateKey = 'YOUR_PRIVATE_KEY';
-   *
-   * const provider = new providers.JsonRpcProvider(rpcUrl);
-   * const signer = new Wallet(privateKey, provider);
-   * const escrowClient = await EscrowClient.build(signer);
-   *
-   * const recipients = ['0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'];
-   * const amounts = [ethers.parseUnits(5, 'ether'), ethers.parseUnits(10, 'ether')];
-   * const resultsUrl = 'http://localhost/results.json';
-   * const resultsHash = 'b5dad76bf6772c0f07fd5e048f6e75a5f86ee079';
-   * const txId = 1;
-   *
-   * await escrowClient.bulkPayOut('0x62dD51230A30401C455c8398d06F85e4EaB6309f', recipients, amounts, resultsUrl, resultsHash, txId);
-   * ```
-   */
-  async bulkPayOut(
-    escrowAddress: string,
-    recipients: string[],
-    amounts: bigint[],
-    finalResultsUrl: string,
-    finalResultsHash: string,
-    txId: number,
-    txOptions?: Overrides
-  ): Promise<void>;
-
-  /**
-   * This function pays out the amounts specified to the workers and sets the URL of the final results file.
-   *
-   * @param {string} escrowAddress Escrow address to payout.
-   * @param {string[]} recipients Array of recipient addresses.
-   * @param {bigint[]} amounts Array of amounts the recipients will receive.
-   * @param {string} finalResultsUrl Final results file URL.
-   * @param {string} finalResultsHash Final results file hash.
-   * @param {number} txId Transaction ID.
    * @param {boolean} forceComplete Indicates if remaining balance should be transferred to the escrow creator (optional, defaults to false).
    * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @returns Returns void if successful. Throws error if any.
@@ -782,8 +735,8 @@ export class EscrowClient extends BaseEthersClient {
     finalResultsUrl: string,
     finalResultsHash: string,
     id: number | string,
-    forceOrTx?: boolean | Overrides,
-    optTxOptions?: Overrides
+    forceComplete: boolean,
+    txOptions: Overrides
   ): Promise<void> {
     await this.ensureCorrectBulkPayoutInput(
       escrowAddress,
@@ -795,10 +748,6 @@ export class EscrowClient extends BaseEthersClient {
 
     const escrowContract = this.getEscrowContract(escrowAddress);
     const idIsString = typeof id === 'string';
-    const isForceComplete = typeof forceOrTx === 'boolean';
-    const forceComplete: boolean = isForceComplete ? forceOrTx : false;
-    const txOptions: Overrides =
-      (isForceComplete ? optTxOptions : forceOrTx) || {};
 
     try {
       if (idIsString) {
@@ -815,7 +764,7 @@ export class EscrowClient extends BaseEthersClient {
             txOptions
           )
         ).wait();
-      } else if (forceComplete) {
+      } else {
         await (
           await escrowContract[
             'bulkPayOut(address[],uint256[],string,string,uint256,bool)'
@@ -829,22 +778,9 @@ export class EscrowClient extends BaseEthersClient {
             txOptions
           )
         ).wait();
-      } else {
-        await (
-          await escrowContract[
-            'bulkPayOut(address[],uint256[],string,string,uint256)'
-          ](
-            recipients,
-            amounts,
-            finalResultsUrl,
-            finalResultsHash,
-            id,
-            txOptions
-          )
-        ).wait();
       }
     } catch (e) {
-      if ((!idIsString || !isForceComplete) && e.reason === 'Forbidden') {
+      if (!idIsString && e.reason === 'Forbidden') {
         throw ErrorBulkPayOutVersion;
       }
       // eslint-disable-next-line no-console

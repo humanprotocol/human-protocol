@@ -327,24 +327,6 @@ contract Escrow is IEscrow, ReentrancyGuard {
     }
 
     /**
-     * @dev Overloaded function to perform bulk payout with default forceComplete set to false.
-     * @param _recipients Array of recipient addresses.
-     * @param _amounts Array of amounts to be transferred to each recipient.
-     * @param _url URL of the final results.
-     * @param _hash Hash of the final results.
-     * @param _txId Transaction ID for tracking.
-     */
-    function bulkPayOut(
-        address[] calldata _recipients,
-        uint256[] calldata _amounts,
-        string calldata _url,
-        string calldata _hash,
-        uint256 _txId
-    ) external override {
-        require(false, 'Forbidden');
-    }
-
-    /**
      * @dev Bulk payout to multiple recipients.
      * @param _recipients Array of recipient addresses.
      * @param _amounts Array of amounts to be transferred to each recipient.
@@ -369,15 +351,10 @@ contract Escrow is IEscrow, ReentrancyGuard {
         nonReentrant
     {
         bytes32 payoutId = keccak256(bytes(_payoutId));
-        require(!payouts[payoutId], 'Payout id already exists');
+        require(!payouts[payoutId], 'payoutId already exists');
         require(_recipients.length == _amounts.length, 'Length mismatch');
         require(_amounts.length > 0, 'Empty amounts');
         require(_recipients.length < BULK_MAX_COUNT, 'Too many recipients');
-        require(
-            status != EscrowStatuses.Complete &&
-                status != EscrowStatuses.Cancelled,
-            'Invalid status'
-        );
         require(
             bytes(_url).length != 0 && bytes(_hash).length != 0,
             'Empty url/hash'
@@ -392,7 +369,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
                 ++i;
             }
         }
-        require(totalBulkAmount <= reservedFunds, 'Not enough reserved funds');
+        require(totalBulkAmount <= reservedFunds, 'Not enough funds');
 
         uint256 totalReputationOracleFee = 0;
         uint256 totalRecordingOracleFee = 0;

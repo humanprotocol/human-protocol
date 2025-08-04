@@ -10,6 +10,7 @@ const STANDARD_DURATION = 100;
 
 const FIXTURE_URL = faker.internet.url();
 const FIXTURE_HASH = faker.string.alphanumeric(10);
+const FIXTURE_FUND_AMOUNT = ethers.parseEther('100');
 
 enum Status {
   Launched = 0,
@@ -18,6 +19,7 @@ enum Status {
   Paid = 3,
   Complete = 4,
   Cancelled = 5,
+  ToCancel = 6,
 }
 
 let owner: Signer;
@@ -62,7 +64,7 @@ async function fundEscrow(
   amount?: bigint,
   fundToken: HMToken = token
 ): Promise<bigint> {
-  const value = amount ?? ethers.parseEther('100');
+  const value = amount ?? FIXTURE_FUND_AMOUNT;
   await fundToken.connect(owner).transfer(await escrow.getAddress(), value);
   return value;
 }
@@ -74,7 +76,7 @@ async function setupEscrow(
   url: string = FIXTURE_URL,
   hash: string = FIXTURE_HASH
 ) {
-  await escrow
+  return await escrow
     .connect(launcher)
     .setup(
       reputationOracleAddress,
@@ -91,10 +93,10 @@ async function setupEscrow(
 async function storeResults(
   url: string = FIXTURE_URL,
   hash: string = FIXTURE_HASH,
-  reserveAmount = 0,
+  reserveAmount = ethers.parseEther('0'),
   signer: Signer = recordingOracle
 ) {
-  await escrow
+  return await escrow
     .connect(signer)
     ['storeResults(string,string,uint256)'](url, hash, reserveAmount);
 }
@@ -384,52 +386,111 @@ describe('Escrow', function () {
       await setupEscrow();
     });
     describe('reverts', () => {
-      it('reverts outside Pending/Partial', async () => {
+      it('reverts outside Pending/Partial/ToCancel', async () => {
         await escrow.connect(launcher).cancel();
-        expect(await escrow.status()).to.equal(Status.Cancelled);
+        expect(await escrow.status()).to.equal(Status.ToCancel);
+        await storeResults(); //Set cancelled status
         await expect(
           storeResults(FIXTURE_URL, FIXTURE_HASH)
         ).to.be.revertedWith('Invalid status');
       });
 
       it('reverts with Empty URL', async () => {
-        await expect(storeResults('', FIXTURE_HASH)).to.be.revertedWith(
-          'Empty URL'
-        );
+        await expect(
+          storeResults('', FIXTURE_HASH, FIXTURE_FUND_AMOUNT)
+        ).to.be.revertedWith('Empty URL');
       });
 
       it('reverts with Empty hash', async () => {
-        await expect(storeResults(FIXTURE_URL, '')).to.be.revertedWith(
-          'Empty hash'
-        );
+        await expect(
+          storeResults(FIXTURE_URL, '', FIXTURE_FUND_AMOUNT)
+        ).to.be.revertedWith('Empty hash');
       });
 
       it('reverts when called by unauthorised address', async () => {
         await expect(
-          storeResults(FIXTURE_URL, FIXTURE_HASH, 0, external)
+          storeResults(
+            FIXTURE_URL,
+            FIXTURE_HASH,
+            ethers.parseEther('0'),
+            external
+          )
         ).to.be.revertedWith('Unauthorised');
         await expect(
-          storeResults(FIXTURE_URL, FIXTURE_HASH, 0, launcher)
+          storeResults(
+            FIXTURE_URL,
+            FIXTURE_HASH,
+            ethers.parseEther('0'),
+            launcher
+          )
         ).to.be.revertedWith('Unauthorised');
         await expect(
-          storeResults(FIXTURE_URL, FIXTURE_HASH, 0, reputationOracle)
+          storeResults(
+            FIXTURE_URL,
+            FIXTURE_HASH,
+            ethers.parseEther('0'),
+            reputationOracle
+          )
         ).to.be.revertedWith('Unauthorised');
         await expect(
-          storeResults(FIXTURE_URL, FIXTURE_HASH, 0, exchangeOracle)
+          storeResults(
+            FIXTURE_URL,
+            FIXTURE_HASH,
+            ethers.parseEther('0'),
+            exchangeOracle
+          )
         ).to.be.revertedWith('Unauthorised');
       });
     });
     describe('succeeds', () => {
       it('Recording oracle: stores results successfully', async () => {
+        await expect(
+          storeResults(FIXTURE_URL, FIXTURE_HASH, FIXTURE_FUND_AMOUNT)
+        )
+          .to.emit(escrow, 'IntermediateStorage')
+          .withArgs(FIXTURE_URL, FIXTURE_HASH);
+        expect(await escrow.intermediateResultsUrl()).to.equal(FIXTURE_URL);
+        expect(await escrow.reservedFunds()).to.equal(FIXTURE_FUND_AMOUNT);
+      });
+
+      it('Recording oracle: stores results successfully and cancels the escrow', async () => {
+        const launcherInitialBalance = await token.balanceOf(launcher);
+        await escrow.connect(launcher).cancel();
         await expect(storeResults())
           .to.emit(escrow, 'IntermediateStorage')
           .withArgs(FIXTURE_URL, FIXTURE_HASH);
+        expect(await escrow.intermediateResultsUrl()).to.equal(FIXTURE_URL);
+        expect(await escrow.status()).to.equal(Status.Cancelled);
+        expect(await escrow.remainingFunds()).to.equal(ethers.parseEther('0'));
+        expect(await token.balanceOf(launcher)).to.equal(
+          launcherInitialBalance + FIXTURE_FUND_AMOUNT
+        );
       });
 
       it('Admin: stores results successfully', async () => {
-        await expect(storeResults(FIXTURE_URL, FIXTURE_HASH, 0, admin))
+        await expect(
+          storeResults(FIXTURE_URL, FIXTURE_HASH, FIXTURE_FUND_AMOUNT, admin)
+        )
           .to.emit(escrow, 'IntermediateStorage')
           .withArgs(FIXTURE_URL, FIXTURE_HASH);
+        expect(await escrow.intermediateResultsUrl()).to.equal(FIXTURE_URL);
+        expect(await escrow.reservedFunds()).to.equal(FIXTURE_FUND_AMOUNT);
+      });
+
+      it('Admin: stores results successfully and cancels the escrow', async () => {
+        const launcherInitialBalance = await token.balanceOf(launcher);
+        await escrow.connect(launcher).cancel();
+        await expect(
+          storeResults(FIXTURE_URL, FIXTURE_HASH, ethers.parseEther('0'), admin)
+        )
+          .to.emit(escrow, 'IntermediateStorage')
+          .withArgs(FIXTURE_URL, FIXTURE_HASH);
+        expect(await escrow.intermediateResultsUrl()).to.equal(FIXTURE_URL);
+        expect(await escrow.status()).to.equal(Status.Cancelled);
+        expect(await escrow.remainingFunds()).to.equal(ethers.parseEther('0'));
+        expect(await token.balanceOf(launcher)).to.equal(
+          launcherInitialBalance + FIXTURE_FUND_AMOUNT
+        );
       });
     });
   });
@@ -459,12 +520,12 @@ describe('Escrow', function () {
 
       it('reverts when escrow has no funds (complete or cancelled)', async function () {
         const balance = await token.balanceOf(escrow.getAddress());
+        await storeResults(FIXTURE_URL, FIXTURE_HASH, balance);
         await escrow
           .connect(admin)
           [
-            'bulkPayOut(address[],uint256[],string,string,uint256)'
-          ]([externalAddress], [balance], FIXTURE_URL, FIXTURE_HASH, '000');
-        escrow.connect(admin).complete();
+            'bulkPayOut(address[],uint256[],string,string,string,bool)'
+          ]([externalAddress], [balance], FIXTURE_URL, FIXTURE_HASH, '000', false);
         await expect(escrow.connect(launcher).cancel()).to.be.revertedWith(
           'No funds'
         );
@@ -472,31 +533,33 @@ describe('Escrow', function () {
     });
 
     describe('Succeeds', async function () {
-      it('Launcher: cancels escrow succesfully', async () => {
+      it('Launcher: requests escrow cancellation succesfully', async () => {
+        const balance = await token.balanceOf(escrow.getAddress());
         const launcherBalance = await token.balanceOf(launcherAddress);
         await expect(escrow.connect(launcher).cancel()).to.emit(
           escrow,
-          'Cancelled'
+          'CancellationRequested'
         );
-        expect(await escrow.status()).to.equal(Status.Cancelled);
+        expect(await escrow.status()).to.equal(Status.ToCancel);
 
-        expect(await token.balanceOf(escrow.getAddress())).to.equal('0');
+        expect(await token.balanceOf(escrow.getAddress())).to.equal(balance);
         expect(await token.balanceOf(launcherAddress)).to.equal(
-          launcherBalance + ethers.parseEther('100')
+          launcherBalance
         );
       });
 
       it('Admin: cancels escrow succesfully', async () => {
+        const balance = await token.balanceOf(escrow.getAddress());
         const launcherBalance = await token.balanceOf(launcherAddress);
         await expect(escrow.connect(admin).cancel()).to.emit(
           escrow,
-          'Cancelled'
+          'CancellationRequested'
         );
-        expect(await escrow.status()).to.equal(Status.Cancelled);
+        expect(await escrow.status()).to.equal(Status.ToCancel);
 
-        expect(await token.balanceOf(escrow.getAddress())).to.equal('0');
+        expect(await token.balanceOf(escrow.getAddress())).to.equal(balance);
         expect(await token.balanceOf(launcherAddress)).to.equal(
-          launcherBalance + ethers.parseEther('100')
+          launcherBalance
         );
       });
     });
@@ -589,6 +652,7 @@ describe('Escrow', function () {
   describe('bulkPayOut()', () => {
     const recipients: string[] = [];
     const amounts: bigint[] = [];
+    let totalAmount: bigint;
     before(async () => {
       recipients.push(await restAccounts[0].getAddress());
       recipients.push(await restAccounts[1].getAddress());
@@ -596,6 +660,7 @@ describe('Escrow', function () {
       amounts.push(ethers.parseEther('10'));
       amounts.push(ethers.parseEther('20'));
       amounts.push(ethers.parseEther('30'));
+      totalAmount = amounts.reduce((acc, val) => acc + val, 0n);
     });
     beforeEach(async () => {
       await deployEscrow();
@@ -609,40 +674,41 @@ describe('Escrow', function () {
           escrow
             .connect(external)
             [
-              'bulkPayOut(address[],uint256[],string,string,uint256)'
-            ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000')
+              'bulkPayOut(address[],uint256[],string,string,string,bool)'
+            ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000', false)
         ).to.be.revertedWith('Unauthorised');
         await expect(
           escrow
             .connect(exchangeOracle)
             [
-              'bulkPayOut(address[],uint256[],string,string,uint256)'
-            ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000')
+              'bulkPayOut(address[],uint256[],string,string,string,bool)'
+            ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000', false)
         ).to.be.revertedWith('Unauthorised');
         await expect(
           escrow
             .connect(recordingOracle)
             [
-              'bulkPayOut(address[],uint256[],string,string,uint256)'
-            ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000')
+              'bulkPayOut(address[],uint256[],string,string,string,bool)'
+            ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000', false)
         ).to.be.revertedWith('Unauthorised');
         await expect(
           escrow
             .connect(launcher)
             [
-              'bulkPayOut(address[],uint256[],string,string,uint256)'
-            ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000')
+              'bulkPayOut(address[],uint256[],string,string,string,bool)'
+            ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000', false)
         ).to.be.revertedWith('Unauthorised');
       });
 
-      it('reverts when has no funds', async function () {
-        escrow.connect(launcher).cancel();
+      it('reverts when broke', async function () {
+        await escrow.connect(launcher).cancel();
+        await storeResults();
         await expect(
           escrow
             .connect(reputationOracle)
             [
-              'bulkPayOut(address[],uint256[],string,string,uint256)'
-            ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000')
+              'bulkPayOut(address[],uint256[],string,string,string,bool)'
+            ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000', false)
         ).to.be.revertedWith('No funds');
       });
 
@@ -654,9 +720,25 @@ describe('Escrow', function () {
           escrow
             .connect(reputationOracle)
             [
-              'bulkPayOut(address[],uint256[],string,string,uint256)'
-            ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000')
+              'bulkPayOut(address[],uint256[],string,string,string,bool)'
+            ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000', false)
         ).to.be.revertedWith('Expired');
+      });
+
+      it('reverts when payoutId exists', async function () {
+        await storeResults(FIXTURE_URL, FIXTURE_HASH, FIXTURE_FUND_AMOUNT);
+        await escrow
+          .connect(reputationOracle)
+          [
+            'bulkPayOut(address[],uint256[],string,string,string,bool)'
+          ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000', false);
+        await expect(
+          escrow
+            .connect(reputationOracle)
+            [
+              'bulkPayOut(address[],uint256[],string,string,string,bool)'
+            ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000', false)
+        ).to.be.revertedWith('payoutId already exists');
       });
 
       it('reverts when recipients length don not match amounts length', async function () {
@@ -671,8 +753,8 @@ describe('Escrow', function () {
           escrow
             .connect(reputationOracle)
             [
-              'bulkPayOut(address[],uint256[],string,string,uint256)'
-            ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000')
+              'bulkPayOut(address[],uint256[],string,string,string,bool)'
+            ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000', false)
         ).to.be.revertedWith('Length mismatch');
       });
 
@@ -684,8 +766,8 @@ describe('Escrow', function () {
           escrow
             .connect(reputationOracle)
             [
-              'bulkPayOut(address[],uint256[],string,string,uint256)'
-            ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000')
+              'bulkPayOut(address[],uint256[],string,string,string,bool)'
+            ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000', false)
         ).to.be.revertedWith('Empty amounts');
       });
 
@@ -700,8 +782,8 @@ describe('Escrow', function () {
           escrow
             .connect(reputationOracle)
             [
-              'bulkPayOut(address[],uint256[],string,string,uint256)'
-            ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000')
+              'bulkPayOut(address[],uint256[],string,string,string,bool)'
+            ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000', false)
         ).to.be.revertedWith('Too many recipients');
       });
 
@@ -710,8 +792,8 @@ describe('Escrow', function () {
           escrow
             .connect(reputationOracle)
             [
-              'bulkPayOut(address[],uint256[],string,string,uint256)'
-            ](recipients, amounts, '', FIXTURE_HASH, '000')
+              'bulkPayOut(address[],uint256[],string,string,string,bool)'
+            ](recipients, amounts, '', FIXTURE_HASH, '000', false)
         ).to.be.revertedWith('Empty url/hash');
       });
 
@@ -720,8 +802,8 @@ describe('Escrow', function () {
           escrow
             .connect(reputationOracle)
             [
-              'bulkPayOut(address[],uint256[],string,string,uint256)'
-            ](recipients, amounts, FIXTURE_URL, '', '000')
+              'bulkPayOut(address[],uint256[],string,string,string,bool)'
+            ](recipients, amounts, FIXTURE_URL, '', '000', false)
         ).to.be.revertedWith('Empty url/hash');
       });
 
@@ -735,23 +817,23 @@ describe('Escrow', function () {
           escrow
             .connect(reputationOracle)
             [
-              'bulkPayOut(address[],uint256[],string,string,uint256)'
-            ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000')
+              'bulkPayOut(address[],uint256[],string,string,string,bool)'
+            ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000', false)
         ).to.be.revertedWith('Zero amount');
       });
 
-      it('reverts when the sum of amounts > balance', async function () {
+      it('reverts when the sum of amounts > reservedFunds', async function () {
         const amounts = [
-          ethers.parseEther('100'),
-          ethers.parseEther('100'),
-          ethers.parseEther('100'),
+          FIXTURE_FUND_AMOUNT,
+          FIXTURE_FUND_AMOUNT,
+          FIXTURE_FUND_AMOUNT,
         ];
         await expect(
           escrow
             .connect(reputationOracle)
             [
-              'bulkPayOut(address[],uint256[],string,string,uint256)'
-            ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000')
+              'bulkPayOut(address[],uint256[],string,string,string,bool)'
+            ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000', false)
         ).to.be.revertedWith('Not enough funds');
       });
     });
@@ -769,11 +851,13 @@ describe('Escrow', function () {
             exchangeOracleAddress,
           ].map(async (oracle) => token.connect(owner).balanceOf(oracle))
         );
+
+        await storeResults(FIXTURE_URL, FIXTURE_HASH, totalAmount);
         await escrow
           .connect(reputationOracle)
           [
-            'bulkPayOut(address[],uint256[],string,string,uint256)'
-          ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000');
+            'bulkPayOut(address[],uint256[],string,string,string,bool)'
+          ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000', false);
 
         const finalBalances = await Promise.all(
           recipients.map((r) => token.balanceOf(r))
@@ -786,11 +870,7 @@ describe('Escrow', function () {
           ].map(async (oracle) => token.connect(owner).balanceOf(oracle))
         );
 
-        const totalPayout = amounts.reduce(
-          (acc, amount) => acc + BigInt(amount),
-          0n
-        );
-        const oracleExpectedFee = (totalPayout * 3n) / 100n; // 3% fee
+        const oracleExpectedFee = (totalAmount * 3n) / 100n; // 3% fee
 
         recipients.forEach((_, index) => {
           const expectedAmount = (BigInt(amounts[index]) * 91n) / 100n; // 91% after all 3 oracle fees
@@ -827,11 +907,19 @@ describe('Escrow', function () {
             exchangeOracleAddress,
           ].map(async (oracle) => token.connect(owner).balanceOf(oracle))
         );
+
+        const totalPayout = amounts.reduce(
+          (acc, amount) => acc + BigInt(amount),
+          0n
+        );
+
+        await storeResults(FIXTURE_URL, FIXTURE_HASH, totalPayout);
+
         await escrow
           .connect(reputationOracle)
           [
-            'bulkPayOut(address[],uint256[],string,string,uint256)'
-          ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000');
+            'bulkPayOut(address[],uint256[],string,string,string,bool)'
+          ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000', false);
 
         const finalBalances = await Promise.all(
           recipients.map((r) => token.balanceOf(r))
@@ -844,10 +932,6 @@ describe('Escrow', function () {
           ].map(async (oracle) => token.connect(owner).balanceOf(oracle))
         );
 
-        const totalPayout = amounts.reduce(
-          (acc, amount) => acc + BigInt(amount),
-          0n
-        );
         const oracleExpectedFee = (totalPayout * 3n) / 100n; // 3% fee
 
         recipients.forEach((_, index) => {
@@ -881,10 +965,13 @@ describe('Escrow', function () {
           ].map(async (oracle) => token.connect(owner).balanceOf(oracle))
         );
         const launcherInitialBalance = await token.balanceOf(launcherAddress);
+
+        await storeResults(FIXTURE_URL, FIXTURE_HASH, totalAmount);
+
         await escrow
           .connect(reputationOracle)
           [
-            'bulkPayOut(address[],uint256[],string,string,uint256,bool)'
+            'bulkPayOut(address[],uint256[],string,string,string,bool)'
           ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000', true);
 
         const finalBalances = await Promise.all(
@@ -898,11 +985,7 @@ describe('Escrow', function () {
           ].map(async (oracle) => token.connect(owner).balanceOf(oracle))
         );
 
-        const totalPayout = amounts.reduce(
-          (acc, amount) => acc + BigInt(amount),
-          0n
-        );
-        const oracleExpectedFee = (totalPayout * 3n) / 100n; // 3% fee
+        const oracleExpectedFee = (totalAmount * 3n) / 100n; // 3% fee
 
         recipients.forEach((_, index) => {
           const expectedAmount = (BigInt(amounts[index]) * 91n) / 100n; // 91% after all 3 oracle fees
@@ -924,8 +1007,62 @@ describe('Escrow', function () {
 
         const launcherFinalBalance = await token.balanceOf(launcherAddress);
         expect(launcherFinalBalance).to.equal(
-          launcherInitialBalance + (ethers.parseEther('100') - totalPayout)
+          launcherInitialBalance + (FIXTURE_FUND_AMOUNT - totalAmount)
         );
+      });
+
+      it('Reputation oracle: executes partial pay out and cancels successfully', async function () {
+        const initialBalances = await Promise.all(
+          recipients.map((r) => token.balanceOf(r))
+        );
+
+        const initialOracleBalances = await Promise.all(
+          [
+            recordingOracleAddress,
+            reputationOracleAddress,
+            exchangeOracleAddress,
+          ].map(async (oracle) => token.connect(owner).balanceOf(oracle))
+        );
+
+        await escrow.connect(launcher).cancel();
+
+        await storeResults(FIXTURE_URL, FIXTURE_HASH, totalAmount);
+        await escrow
+          .connect(reputationOracle)
+          [
+            'bulkPayOut(address[],uint256[],string,string,string,bool)'
+          ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000', false);
+
+        const finalBalances = await Promise.all(
+          recipients.map((r) => token.balanceOf(r))
+        );
+        const finalOracleBalances = await Promise.all(
+          [
+            recordingOracleAddress,
+            reputationOracleAddress,
+            exchangeOracleAddress,
+          ].map(async (oracle) => token.connect(owner).balanceOf(oracle))
+        );
+
+        const oracleExpectedFee = (totalAmount * 3n) / 100n; // 3% fee
+
+        recipients.forEach((_, index) => {
+          const expectedAmount = (BigInt(amounts[index]) * 91n) / 100n; // 91% after all 3 oracle fees
+          expect(
+            (finalBalances[index] - initialBalances[index]).toString()
+          ).to.equal(expectedAmount.toString());
+        });
+
+        initialOracleBalances.forEach((initialBalance, index) => {
+          expect(
+            (finalOracleBalances[index] - initialBalance).toString()
+          ).to.equal(oracleExpectedFee.toString());
+        });
+
+        expect(await escrow.remainingFunds()).to.equal(
+          await escrow.getBalance()
+        );
+        expect(await escrow.status()).to.equal(Status.Cancelled);
       });
 
       it('Admin: executes partial pay out successfully', async function () {
@@ -940,11 +1077,14 @@ describe('Escrow', function () {
             exchangeOracleAddress,
           ].map(async (oracle) => token.connect(owner).balanceOf(oracle))
         );
+
+        await storeResults(FIXTURE_URL, FIXTURE_HASH, totalAmount);
+
         await escrow
           .connect(admin)
           [
-            'bulkPayOut(address[],uint256[],string,string,uint256)'
-          ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000');
+            'bulkPayOut(address[],uint256[],string,string,string,bool)'
+          ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000', false);
 
         const finalBalances = await Promise.all(
           recipients.map((r) => token.balanceOf(r))
@@ -957,11 +1097,7 @@ describe('Escrow', function () {
           ].map(async (oracle) => token.connect(owner).balanceOf(oracle))
         );
 
-        const totalPayout = amounts.reduce(
-          (acc, amount) => acc + BigInt(amount),
-          0n
-        );
-        const oracleExpectedFee = (totalPayout * 3n) / 100n; // 3% fee
+        const oracleExpectedFee = (totalAmount * 3n) / 100n; // 3% fee
 
         recipients.forEach((_, index) => {
           const expectedAmount = (BigInt(amounts[index]) * 91n) / 100n; // 91% after all 3 oracle fees
@@ -998,11 +1134,19 @@ describe('Escrow', function () {
             exchangeOracleAddress,
           ].map(async (oracle) => token.connect(owner).balanceOf(oracle))
         );
+
+        const totalPayout = amounts.reduce(
+          (acc, amount) => acc + BigInt(amount),
+          0n
+        );
+
+        await storeResults(FIXTURE_URL, FIXTURE_HASH, totalPayout);
+
         await escrow
           .connect(admin)
           [
-            'bulkPayOut(address[],uint256[],string,string,uint256)'
-          ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000');
+            'bulkPayOut(address[],uint256[],string,string,string,bool)'
+          ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000', false);
 
         const finalBalances = await Promise.all(
           recipients.map((r) => token.balanceOf(r))
@@ -1015,10 +1159,6 @@ describe('Escrow', function () {
           ].map(async (oracle) => token.connect(owner).balanceOf(oracle))
         );
 
-        const totalPayout = amounts.reduce(
-          (acc, amount) => acc + BigInt(amount),
-          0n
-        );
         const oracleExpectedFee = (totalPayout * 3n) / 100n; // 3% fee
 
         recipients.forEach((_, index) => {
@@ -1052,10 +1192,13 @@ describe('Escrow', function () {
           ].map(async (oracle) => token.connect(owner).balanceOf(oracle))
         );
         const launcherInitialBalance = await token.balanceOf(launcherAddress);
+
+        await storeResults(FIXTURE_URL, FIXTURE_HASH, totalAmount);
+
         await escrow
           .connect(admin)
           [
-            'bulkPayOut(address[],uint256[],string,string,uint256,bool)'
+            'bulkPayOut(address[],uint256[],string,string,string,bool)'
           ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000', true);
 
         const finalBalances = await Promise.all(
@@ -1069,11 +1212,7 @@ describe('Escrow', function () {
           ].map(async (oracle) => token.connect(owner).balanceOf(oracle))
         );
 
-        const totalPayout = amounts.reduce(
-          (acc, amount) => acc + BigInt(amount),
-          0n
-        );
-        const oracleExpectedFee = (totalPayout * 3n) / 100n; // 3% fee
+        const oracleExpectedFee = (totalAmount * 3n) / 100n; // 3% fee
 
         recipients.forEach((_, index) => {
           const expectedAmount = (BigInt(amounts[index]) * 91n) / 100n; // 91% after all 3 oracle fees
@@ -1095,8 +1234,62 @@ describe('Escrow', function () {
 
         const launcherFinalBalance = await token.balanceOf(launcherAddress);
         expect(launcherFinalBalance).to.equal(
-          launcherInitialBalance + (ethers.parseEther('100') - totalPayout)
+          launcherInitialBalance + (FIXTURE_FUND_AMOUNT - totalAmount)
         );
+      });
+
+      it('Admin: executes partial pay out and cancels successfully', async function () {
+        const initialBalances = await Promise.all(
+          recipients.map((r) => token.balanceOf(r))
+        );
+
+        const initialOracleBalances = await Promise.all(
+          [
+            recordingOracleAddress,
+            reputationOracleAddress,
+            exchangeOracleAddress,
+          ].map(async (oracle) => token.connect(owner).balanceOf(oracle))
+        );
+
+        await escrow.connect(launcher).cancel();
+
+        await storeResults(FIXTURE_URL, FIXTURE_HASH, totalAmount);
+        await escrow
+          .connect(admin)
+          [
+            'bulkPayOut(address[],uint256[],string,string,string,bool)'
+          ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000', false);
+
+        const finalBalances = await Promise.all(
+          recipients.map((r) => token.balanceOf(r))
+        );
+        const finalOracleBalances = await Promise.all(
+          [
+            recordingOracleAddress,
+            reputationOracleAddress,
+            exchangeOracleAddress,
+          ].map(async (oracle) => token.connect(owner).balanceOf(oracle))
+        );
+
+        const oracleExpectedFee = (totalAmount * 3n) / 100n; // 3% fee
+
+        recipients.forEach((_, index) => {
+          const expectedAmount = (BigInt(amounts[index]) * 91n) / 100n; // 91% after all 3 oracle fees
+          expect(
+            (finalBalances[index] - initialBalances[index]).toString()
+          ).to.equal(expectedAmount.toString());
+        });
+
+        initialOracleBalances.forEach((initialBalance, index) => {
+          expect(
+            (finalOracleBalances[index] - initialBalance).toString()
+          ).to.equal(oracleExpectedFee.toString());
+        });
+
+        expect(await escrow.remainingFunds()).to.equal(
+          await escrow.getBalance()
+        );
+        expect(await escrow.status()).to.equal(Status.Cancelled);
       });
     });
   });
@@ -1137,10 +1330,11 @@ describe('Escrow', function () {
         const initialLauncherBalance = await token.balanceOf(launcherAddress);
         const initialEscrowBalance = await token.balanceOf(escrow.getAddress());
 
+        await storeResults(FIXTURE_URL, FIXTURE_HASH, amounts[0]);
         await escrow
           .connect(reputationOracle)
           [
-            'bulkPayOut(address[],uint256[],string,string,uint256,bool)'
+            'bulkPayOut(address[],uint256[],string,string,string,bool)'
           ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000', false);
 
         await expect(escrow.connect(reputationOracle).complete()).to.emit(
@@ -1164,11 +1358,11 @@ describe('Escrow', function () {
 
         const initialLauncherBalance = await token.balanceOf(launcherAddress);
         const initialEscrowBalance = await token.balanceOf(escrow.getAddress());
-
+        await storeResults(FIXTURE_URL, FIXTURE_HASH, amounts[0]);
         await escrow
           .connect(reputationOracle)
           [
-            'bulkPayOut(address[],uint256[],string,string,uint256,bool)'
+            'bulkPayOut(address[],uint256[],string,string,string,bool)'
           ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000', false);
 
         await expect(escrow.connect(reputationOracle).complete()).to.emit(

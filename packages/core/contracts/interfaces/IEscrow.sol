@@ -53,14 +53,6 @@ interface IEscrow {
         uint256[] calldata _amounts,
         string calldata _url,
         string calldata _hash,
-        uint256 _txId
-    ) external;
-
-    function bulkPayOut(
-        address[] calldata _recipients,
-        uint256[] calldata _amounts,
-        string calldata _url,
-        string calldata _hash,
         string calldata _payoutId,
         bool forceComplete
     ) external;
