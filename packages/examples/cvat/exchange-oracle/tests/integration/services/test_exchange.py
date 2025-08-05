@@ -76,7 +76,13 @@ class ServiceIntegrationTest(unittest.TestCase):
                 serialize_job(cvat_project)
 
     def test_create_assignment(self):
-        cvat_project_1, _, cvat_job_1 = create_project_task_and_job(self.session, ESCROW_ADDRESS, 1)
+        cvat_project, cvat_task, cvat_job = create_project_task_and_job(
+            self.session, ESCROW_ADDRESS, 1
+        )
+        initial_job_updated_at = cvat_job.updated_at
+        initial_task_updated_at = cvat_task.updated_at
+        initial_project_updated_at = cvat_project.updated_at
+
         user_address = WALLET_ADDRESS1
         user = User(
             wallet_address=user_address,
@@ -84,18 +90,28 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_id=1,
         )
         self.session.add(user)
+
         self.session.commit()
 
         with patch("src.services.exchange.cvat_api"):
             assignment_id = create_assignment(
-                cvat_project_1.escrow_address, Networks(cvat_project_1.chain_id), user_address
+                cvat_project.escrow_address, Networks(cvat_project.chain_id), user_address
             )
 
-            assignment = self.session.query(Assignment).filter_by(id=assignment_id).first()
+        assignment = self.session.query(Assignment).filter_by(id=assignment_id).first()
 
-            assert assignment.cvat_job_id == cvat_job_1.cvat_id
-            assert assignment.user_wallet_address == user_address
-            assert assignment.status == AssignmentStatuses.created
+        assert assignment.cvat_job_id == cvat_job.cvat_id
+        assert assignment.user_wallet_address == user_address
+        assert assignment.status == AssignmentStatuses.created
+
+        self.session.refresh(cvat_job)
+        assert cvat_job.updated_at != initial_job_updated_at
+
+        self.session.refresh(cvat_task)
+        assert cvat_task.updated_at != initial_task_updated_at
+
+        self.session.refresh(cvat_project)
+        assert cvat_project.updated_at != initial_project_updated_at
 
     def test_create_assignment_many_jobs_1_completed(self):
         cvat_project, _, cvat_job_1 = create_project_task_and_job(self.session, ESCROW_ADDRESS, 1)
@@ -163,6 +179,10 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_create_assignment_unfinished_assignment(self):
         _, _, cvat_job = create_project_task_and_job(self.session, ESCROW_ADDRESS, 1)
+
+        cvat_job.status = JobStatuses.in_progress
+        self.session.add(cvat_job)
+
         user_address = WALLET_ADDRESS1
         user = User(
             wallet_address=user_address,
@@ -265,6 +285,9 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_create_assignment_no_available_jobs_active_foreign_assignment(self):
         cvat_project, _, cvat_job_1 = create_project_task_and_job(self.session, ESCROW_ADDRESS, 1)
+
+        cvat_job_1.status = JobStatuses.in_progress
+        self.session.add(cvat_job_1)
 
         user_address1 = WALLET_ADDRESS1
         user1 = User(

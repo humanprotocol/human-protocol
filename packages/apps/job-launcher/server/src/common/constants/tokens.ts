@@ -49,6 +49,13 @@ export const TOKEN_ADDRESSES: {
     },
     // [EscrowFundToken.USDC]: { address: '0x41e94eb019c0762f9bfcf9fb1e58725bfb0e7582', decimals: 6 },
   },
+  [ChainId.AURORA_TESTNET]: {
+    [EscrowFundToken.HMT]: {
+      address: NETWORKS[ChainId.AURORA_TESTNET]!.hmtAddress,
+      decimals: 18,
+    },
+    // [EscrowFundToken.USDC]: { address: '0x41e94eb019c0762f9bfcf9fb1e58725bfb0e7582', decimals: 6 },
+  },
   [ChainId.LOCALHOST]: {
     [EscrowFundToken.HMT]: {
       address: NETWORKS[ChainId.LOCALHOST]!.hmtAddress,

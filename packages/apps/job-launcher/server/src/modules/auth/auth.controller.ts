@@ -4,14 +4,12 @@ import {
   Controller,
   HttpCode,
   Ip,
-  Logger,
   Post,
   Req,
   Request,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-
 import {
   ApiBearerAuth,
   ApiBody,
@@ -19,6 +17,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { ErrorAuth } from '../../common/constants/errors';
 import { Public } from '../../common/decorators';
 import { ValidationError } from '../../common/errors';
@@ -39,6 +38,8 @@ import { AuthService } from './auth.service';
 import { TokenType } from './token.entity';
 import { TokenRepository } from './token.repository';
 
+import logger from '../../logger';
+
 @ApiTags('Auth')
 @ApiResponse({
   status: 400,
@@ -58,7 +59,7 @@ import { TokenRepository } from './token.repository';
 })
 @Controller('/auth')
 export class AuthJwtController {
-  private readonly logger = new Logger(AuthJwtController.name);
+  private readonly logger = logger.child({ context: AuthJwtController.name });
 
   constructor(
     private readonly authService: AuthService,
@@ -143,6 +144,7 @@ export class AuthJwtController {
 
   @Public()
   @HttpCode(204)
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
   @Post('/forgot-password')
   @ApiOperation({
     summary: 'Forgot Password',
@@ -161,8 +163,11 @@ export class AuthJwtController {
     status: 404,
     description: 'Not Found. Could not find the requested content.',
   })
-  public async forgotPassword(@Body() data: ForgotPasswordDto): Promise<void> {
-    await this.authService.forgotPassword(data);
+  public async forgotPassword(
+    @Body() data: ForgotPasswordDto,
+    @Ip() ip: string,
+  ): Promise<void> {
+    await this.authService.forgotPassword(data, ip);
   }
 
   @Public()
@@ -245,11 +250,8 @@ export class AuthJwtController {
     try {
       const apiKey = await this.authService.createOrUpdateAPIKey(req.user);
       return { apiKey };
-    } catch (e) {
-      this.logger.log(
-        e.message,
-        `${AuthJwtController.name} - ${ErrorAuth.ApiKeyCouldNotBeCreatedOrUpdated}`,
-      );
+    } catch (error) {
+      this.logger.error(ErrorAuth.ApiKeyCouldNotBeCreatedOrUpdated, error);
       throw new ValidationError(ErrorAuth.ApiKeyCouldNotBeCreatedOrUpdated);
     }
   }

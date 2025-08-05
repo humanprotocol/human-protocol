@@ -114,61 +114,12 @@ const config: HardhatUserConfig = {
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
       timeout: 2000000,
     },
-    moonbeam: {
-      chainId: 1284,
+    auroraTestnet: {
+      chainId: 1313161555,
+      url: process.env.ETH_AURORA_TESTNET_URL || '',
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
       timeout: 2000000,
-      url: process.env.ETH_MOONBEAM_URL || '',
-      accounts:
-        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
-    },
-    moonbaseAlpha: {
-      chainId: 1287,
-      timeout: 2000000,
-      url: process.env.ETH_MOONBASE_ALPHA_URL || '',
-      accounts:
-        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
-    },
-    avalancheFujiTestnet: {
-      chainId: 43113,
-      timeout: 2000000,
-      url: process.env.ETH_FUJI_URL || '',
-      accounts:
-        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
-    },
-    avalanche: {
-      chainId: 43114,
-      timeout: 2000000,
-      url: process.env.ETH_AVALANCHE_URL || '',
-      accounts:
-        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
-    },
-    alfajores: {
-      chainId: 44787,
-      timeout: 2000000,
-      url: process.env.ETH_CELO_ALFAJORES_URL || '',
-      accounts:
-        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
-    },
-    celo: {
-      chainId: 42220,
-      timeout: 2000000,
-      url: process.env.ETH_CELO_URL || '',
-      accounts:
-        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
-    },
-    xlayer: {
-      chainId: 196,
-      timeout: 20000000,
-      url: process.env.ETH_XLAYER_URL || '',
-      accounts:
-        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
-    },
-    xlayerTestnet: {
-      chainId: 195,
-      timeout: 20000000,
-      url: process.env.ETH_XLAYER_TESTNET_URL || '',
-      accounts:
-        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
   },
   gasReporter: {
@@ -220,32 +171,15 @@ const config: HardhatUserConfig = {
       polygonAmoy: process.env.POLYGONSCAN_API_KEY || '',
       bsc: process.env.BSC_API_KEY || '',
       bscTestnet: process.env.BSC_API_KEY || '',
-      moonbeam: process.env.MOONSCAN_API_KEY || '',
-      moonbaseAlpha: process.env.MOONSCAN_API_KEY || '',
-      avalancheFujiTestnet: process.env.AVALANCHE_API_KEY || '',
-      avalanche: process.env.AVALANCHE_API_KEY || '',
-      alfajores: process.env.CELOSCAN_API_KEY || '',
-      celo: process.env.CELOSCAN_API_KEY || '',
-      xlayer: process.env.OKLINK_API_KEY || '',
-      xlayerTestnet: process.env.OKLINK_API_KEY || '',
+      auroraTestnet: 'empty',
     },
     customChains: [
       {
-        network: 'xlayer',
-        chainId: 196,
+        network: 'auroraTestnet',
+        chainId: 1313161555,
         urls: {
-          apiURL:
-            'https://www.oklink.com/api/v5/explorer/contract/verify-source-code-plugin/XLAYER',
-          browserURL: 'https://www.oklink.com/xlayer',
-        },
-      },
-      {
-        network: 'xlayerTestnet',
-        chainId: 195,
-        urls: {
-          apiURL:
-            'https://www.oklink.com/api/v5/explorer/contract/verify-source-code-plugin/XLAYER_TESTNET',
-          browserURL: 'https://www.oklink.com/xlayer-test',
+          apiURL: 'https://explorer.testnet.aurora.dev/api',
+          browserURL: 'http://explorer.testnet.aurora.dev',
         },
       },
     ],

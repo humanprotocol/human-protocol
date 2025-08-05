@@ -32,6 +32,16 @@ def get_web3(chain_id: Networks):
             )
             w3.eth.default_account = gas_payer.address
             return w3
+        case Config.aurora_testnet.chain_id:
+            w3 = Web3(HTTPProvider(Config.aurora_testnet.rpc_api))
+            gas_payer = w3.eth.account.from_key(Config.aurora_testnet.private_key)
+            w3.middleware_onion.inject(
+                SignAndSendRawMiddlewareBuilder.build(Config.aurora_testnet.private_key),
+                "SignAndSendRawMiddlewareBuilder",
+                layer=0,
+            )
+            w3.eth.default_account = gas_payer.address
+            return w3
         case Config.localhost.chain_id:
             w3 = Web3(HTTPProvider(Config.localhost.rpc_api))
             gas_payer = w3.eth.account.from_key(Config.localhost.private_key)
@@ -58,6 +68,8 @@ def sign_message(chain_id: Networks, message) -> tuple:
             private_key = Config.polygon_mainnet.private_key
         case Config.polygon_amoy.chain_id:
             private_key = Config.polygon_amoy.private_key
+        case Config.aurora_testnet.chain_id:
+            private_key = Config.aurora_testnet.private_key
         case Config.localhost.chain_id:
             private_key = Config.localhost.private_key
         case _:

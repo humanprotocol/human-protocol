@@ -92,7 +92,7 @@ export interface IEscrowsFilter extends IPagination {
   recordingOracle?: string;
   exchangeOracle?: string;
   jobRequesterId?: string;
-  status?: EscrowStatus;
+  status?: EscrowStatus | EscrowStatus[];
   from?: Date;
   to?: Date;
   chainId: ChainId;

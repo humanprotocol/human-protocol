@@ -19,7 +19,7 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
       - name: Build logger package
-        run: yarn build:logger
+        run: yarn workspace @human-protocol/logger build
       - name: Publish package
         run: yarn workspace @human-protocol/logger npm publish --access public
         env:

@@ -25,10 +25,5 @@
     "address": "0xffE496683F842a923110415b7278ded3F265f2C5",
     "startBlock": 14983952,
     "abi": "../../../../node_modules/@human-protocol/core/abis/Staking.json"
-  },
-  "RewardPool": {
-    "address": "0xd866bCEFf6D0F77E1c3EAE28230AE6C79b03fDa7",
-    "startBlock": 5773007,
-    "abi": "../../../../node_modules/@human-protocol/core/abis/RewardPool.json"
   }
 }

@@ -181,7 +181,23 @@ export class AuthService {
     return { accessToken, refreshToken: newRefreshTokenEntity.uuid };
   }
 
-  public async forgotPassword(data: ForgotPasswordDto): Promise<void> {
+  public async forgotPassword(
+    data: ForgotPasswordDto,
+    ip?: string,
+  ): Promise<void> {
+    if (
+      !(
+        await verifyToken(
+          this.authConfigService.hcaptchaProtectionUrl,
+          this.authConfigService.hCaptchaSiteKey,
+          this.authConfigService.hCaptchaSecret,
+          data.hCaptchaToken,
+          ip,
+        )
+      ).success
+    ) {
+      throw new ForbiddenError(ErrorAuth.InvalidCaptchaToken);
+    }
     const userEntity = await this.userRepository.findByEmail(data.email);
 
     if (!userEntity) {

@@ -1,5 +1,7 @@
 import datetime
+import inspect
 import json
+import uuid
 from collections.abc import Generator
 from contextlib import ExitStack, contextmanager
 from logging import Logger
@@ -14,9 +16,10 @@ from src.chain.kvstore import register_in_kvstore
 from src.core.config import Config
 from src.db import SessionLocal
 from src.services import cloud
-from src.services import cvat as cvat_service
+from src.services import cvat as cvat_db_service
 from src.services.cloud import BucketAccessInfo
 from src.utils.logging import format_sequence, get_function_logger
+from src.utils.time import utcnow
 
 
 @contextmanager
@@ -110,6 +113,8 @@ def _mock_webhook_signature_checking(_: Logger) -> Generator[None, None, None]:
     - from reputation oracle -
       encoded with Config.localhost.reputation_oracle_address wallet address
       or signature "reputation_oracle<number>"
+
+    <number> is optional in all cases.
     """
 
     from src.chain.escrow import (
@@ -133,6 +138,33 @@ def _mock_webhook_signature_checking(_: Logger) -> Generator[None, None, None]:
         d[Config.localhost.reputation_oracle_address.lower()] = OracleWebhookTypes.reputation_oracle
         return d
 
+    from src.services.webhook import inbox as original_inbox
+
+    class PatchedInbox:
+        def __init__(self):
+            pass
+
+        def __getattr__(self, name: str):
+            return getattr(original_inbox, name)
+
+        def create_webhook(
+            self,
+            session,
+            escrow_address,
+            chain_id,
+            type: OracleWebhookTypes,
+            signature=None,
+            event_type=None,
+            event_data=None,
+            event=None,
+        ):
+            if signature in OracleWebhookTypes:
+                signature = f"{type.value}-{utcnow().isoformat(sep='T')}-{uuid.uuid4()}"
+
+            _orig_params = inspect.signature(original_inbox.create_webhook).parameters
+            _args = {k: v for k, v in locals().items() if k in _orig_params}
+            return original_inbox.create_webhook(**_args)
+
     with (
         mock.patch("src.schemas.webhook.validate_address", lambda x: x),
         mock.patch(
@@ -143,6 +175,7 @@ def _mock_webhook_signature_checking(_: Logger) -> Generator[None, None, None]:
             "src.endpoints.webhook.validate_oracle_webhook_signature",
             patched_validate_oracle_webhook_signature,
         ),
+        mock.patch("src.services.webhook.inbox", PatchedInbox()),
     ):
         yield
 
@@ -165,7 +198,7 @@ def _mock_endpoint_auth(logger: Logger) -> Generator[None, None, None]:
 
             if (user_wallet := token_data.get("wallet_address")) and not token_data.get("email"):
                 with SessionLocal.begin() as session:
-                    user = cvat_service.get_user_by_id(session, user_wallet)
+                    user = cvat_db_service.get_user_by_id(session, user_wallet)
                     if not user:
                         raise Exception(f"Could not find user with wallet address '{user_wallet}'")
 

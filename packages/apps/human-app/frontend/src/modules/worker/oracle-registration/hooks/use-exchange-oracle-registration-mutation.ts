@@ -9,10 +9,9 @@ export function useExchangeOracleRegistrationMutation() {
     mutationFn: async (data: RegistrationInExchangeOracleDto) =>
       oracleRegistrationService.registerInExchangeOracle(data),
     onSuccess: async () => {
-      await queryClient.invalidateQueries();
-    },
-    onError: async () => {
-      await queryClient.invalidateQueries();
+      await queryClient.invalidateQueries({
+        queryKey: ['getRegistrationDataInOracles'],
+      });
     },
   });
 }

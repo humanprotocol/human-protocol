@@ -9,8 +9,8 @@ V = TypeVar("V")
 def get_or_404(
     obj: T | None,
     object_id: V,
-    object_type_name: str,
     *,
+    object_type_name: str,
     reason: str | None = None,
 ) -> T:
     if obj is None:

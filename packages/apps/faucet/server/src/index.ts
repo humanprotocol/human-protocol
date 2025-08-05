@@ -28,6 +28,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, '..', 'client', 'build')));
 const port = process.env.APP_PORT;
 
+app.set('trust proxy', 1);
+
 // set up rate limiter: maximum of five requests per second
 app.use(
   RateLimit({
@@ -106,7 +108,7 @@ app.post('/faucet', async (request: Request, response: Response) => {
     });
 
   // extract ip
-  let ipAddress = request.ip || request.socket.remoteAddress;
+  let ipAddress = request.ip;
   if (!ipAddress)
     return response.status(200).json({
       status: false,

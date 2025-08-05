@@ -30,7 +30,7 @@ class EscrowFilter:
         recording_oracle: Optional[str] = None,
         exchange_oracle: Optional[str] = None,
         job_requester_id: Optional[str] = None,
-        status: Optional[Status] = None,
+        status: Optional[Status | List[Status]] = None,
         date_from: Optional[datetime] = None,
         date_to: Optional[datetime] = None,
         first: int = 10,
