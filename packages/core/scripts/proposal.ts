@@ -14,6 +14,10 @@ export const getProposal = async () => {
     throw new Error('One or more required environment variables are missing.');
   }
 
+  // Keep the following commented code as a reference for how to encode a contract
+  // function call within a governance proposal, useful for future proposals that
+  // need to call contract methods through governance
+
   // const deployerSigner = new ethers.Wallet(deployerPrivateKey, ethers.provider);
   // const governanceContract = await ethers.getContractAt(
   //   'MetaHumanGovernor',

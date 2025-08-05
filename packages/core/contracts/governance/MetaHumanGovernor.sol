@@ -136,7 +136,7 @@ contract MetaHumanGovernor is
      */
     function receiveWormholeMessages(
         bytes calldata payload,
-        bytes[] calldata, // additionalVaas
+        bytes[] calldata additionalVaas, // additionalVaas
         bytes32 sourceAddress, // address that called 'sendPayloadToEvm' (HelloWormhole contract address)
         uint16 sourceChain,
         bytes32 deliveryHash // this can be stored in a mapping deliveryHash => bool to prevent duplicate deliveries
