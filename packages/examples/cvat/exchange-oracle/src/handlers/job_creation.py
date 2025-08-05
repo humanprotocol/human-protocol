@@ -478,7 +478,9 @@ class PointsTaskBuilder(SimpleTaskBuilder):
                 sample_points.extend(bbox_center.points)
 
             # Join points into a single annotation for compatibility with CVAT capabilities
-            updated_anns = [dm.Points(sample_points, label=label_id)]
+            updated_anns = []
+            if sample_points:
+                updated_anns.append(dm.Points(sample_points, label=label_id))
 
             updated_gt_dataset.put(gt_sample.wrap(annotations=updated_anns))
 
