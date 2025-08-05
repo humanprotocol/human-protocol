@@ -58,7 +58,6 @@ import { ServerConfigService } from '../common/config/server-config.service';
           username: databaseConfigService.user,
           password: databaseConfigService.password,
           database: databaseConfigService.database,
-          keepConnectionAlive: serverConfigService.nodeEnv === 'test',
           migrationsRun: false,
           ssl: databaseConfigService.ssl,
         };

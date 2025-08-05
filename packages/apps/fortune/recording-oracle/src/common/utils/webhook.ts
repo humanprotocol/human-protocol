@@ -1,6 +1,7 @@
 import { HttpService } from '@nestjs/axios';
-import { Logger } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
+
+import logger from '../../logger';
 import { WebhookDto } from '../../modules/webhook/webhook.dto';
 import { HEADER_SIGNATURE_KEY } from '../constants';
 import { CaseConverter } from './case-converter';
@@ -9,7 +10,6 @@ import { formatAxiosError } from './http';
 
 export async function sendWebhook(
   httpService: HttpService,
-  logger: Logger,
   webhookUrl: string,
   webhookBody: WebhookDto,
   privateKey: string,
@@ -25,6 +25,7 @@ export async function sendWebhook(
   } catch (error: any) {
     const formattedError = formatAxiosError(error);
     logger.error('Webhook not sent', {
+      webhookUrl,
       error: formattedError,
     });
     throw new Error(formattedError.message);
