@@ -36,10 +36,11 @@ export class ExceptionFilter implements IExceptionFilter {
       return HttpStatus.UNPROCESSABLE_ENTITY;
     } else if (exception instanceof DatabaseError) {
       return HttpStatus.UNPROCESSABLE_ENTITY;
-    } else if (exception.statusCode) {
-      return exception.statusCode;
     }
-    return HttpStatus.INTERNAL_SERVER_ERROR;
+
+    const exceptionStatusCode = exception.statusCode || exception.status;
+
+    return exceptionStatusCode || HttpStatus.INTERNAL_SERVER_ERROR;
   }
 
   catch(exception: any, host: ArgumentsHost) {
