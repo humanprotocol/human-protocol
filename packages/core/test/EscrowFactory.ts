@@ -201,28 +201,6 @@ describe('EscrowFactory', function () {
             .createEscrow(tokenAddress, FIXTURE_REQUESTER_ID)
         ).to.be.revertedWith('Insufficient stake');
       });
-
-      it('reverts when admin address is not set yet', async () => {
-        await stake(launcher);
-        const EscrowFactory = await ethers.getContractFactory(
-          'contracts/EscrowFactory.sol:EscrowFactory'
-        );
-
-        const escrowFactory = (await upgrades.deployProxy(
-          EscrowFactory,
-          [stakingAddress, MINIMUM_STAKE],
-          {
-            kind: 'uups',
-            initializer: 'initialize',
-          }
-        )) as unknown as EscrowFactory;
-
-        await expect(
-          escrowFactory
-            .connect(launcher)
-            .createEscrow(tokenAddress, FIXTURE_REQUESTER_ID)
-        ).to.be.revertedWith('Zero Address');
-      });
     });
 
     describe('succeeds', () => {

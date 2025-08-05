@@ -339,7 +339,6 @@ class TestEscrowClient(unittest.TestCase):
         escrow_address = "0x1234567890123456789012345678901234567890"
         token_address = "0x1234567890123456789012345678901234567890"
         job_requester_id = "job-requester"
-        trusted_handlers = [self.w3.eth.default_account]
 
         mock_create = MagicMock()
         mock_create.transact.return_value = "tx_hash"
@@ -358,12 +357,10 @@ class TestEscrowClient(unittest.TestCase):
             return_value={"logs": [{"address": self.escrow.network["factory_address"]}]}
         )
 
-        result = self.escrow.create_escrow(
-            token_address, trusted_handlers, job_requester_id
-        )
+        result = self.escrow.create_escrow(token_address, job_requester_id)
 
         self.escrow.factory_contract.functions.createEscrow.assert_called_once_with(
-            token_address, trusted_handlers, job_requester_id
+            token_address, job_requester_id
         )
         mock_create.transact.assert_called_once_with({})
         self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
@@ -373,23 +370,11 @@ class TestEscrowClient(unittest.TestCase):
 
     def test_create_escrow_invalid_token(self):
         token_address = "invalid_address"
-        trusted_handlers = [self.w3.eth.default_account]
         job_requester_id = "job-requester"
 
         with self.assertRaises(EscrowClientError) as cm:
-            self.escrow.create_escrow(token_address, trusted_handlers, job_requester_id)
+            self.escrow.create_escrow(token_address, job_requester_id)
         self.assertEqual(f"Invalid token address: {token_address}", str(cm.exception))
-
-    def test_create_escrow_invalid_handler(self):
-        token_address = "0x1234567890123456789012345678901234567890"
-        trusted_handlers = ["invalid_address"]
-        job_requester_id = "job-requester"
-
-        with self.assertRaises(EscrowClientError) as cm:
-            self.escrow.create_escrow(token_address, trusted_handlers, job_requester_id)
-        self.assertEqual(
-            f"Invalid handler address: {trusted_handlers[0]}", str(cm.exception)
-        )
 
     def test_create_escrow_without_account(self):
         mock_provider = MagicMock(spec=HTTPProvider)
@@ -400,12 +385,9 @@ class TestEscrowClient(unittest.TestCase):
         escrowClient = EscrowClient(w3)
 
         token_address = "0x1234567890123456789012345678901234567890"
-        trusted_handlers = ["0x1234567890123456789012345678901234567890"]
         job_requester_id = "job-requester"
         with self.assertRaises(RequiresSignerError) as cm:
-            escrowClient.create_escrow(
-                token_address, trusted_handlers, job_requester_id
-            )
+            escrowClient.create_escrow(token_address, job_requester_id)
         self.assertEqual("You must add an account to Web3 instance", str(cm.exception))
 
     def test_create_escrow_with_tx_options(self):
@@ -414,7 +396,6 @@ class TestEscrowClient(unittest.TestCase):
         escrow_address = "0x1234567890123456789012345678901234567890"
         token_address = "0x1234567890123456789012345678901234567890"
         job_requester_id = "job-requester"
-        trusted_handlers = [self.w3.eth.default_account]
         tx_options = {"gas": 50000}
 
         mock_create = MagicMock()
@@ -434,12 +415,10 @@ class TestEscrowClient(unittest.TestCase):
             return_value={"logs": [{"address": self.escrow.network["factory_address"]}]}
         )
 
-        result = self.escrow.create_escrow(
-            token_address, trusted_handlers, job_requester_id, tx_options
-        )
+        result = self.escrow.create_escrow(token_address, job_requester_id, tx_options)
 
         self.escrow.factory_contract.functions.createEscrow.assert_called_once_with(
-            token_address, trusted_handlers, job_requester_id
+            token_address, job_requester_id
         )
         mock_create.transact.assert_called_once_with(tx_options)
         self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
@@ -815,7 +794,7 @@ class TestEscrowClient(unittest.TestCase):
         hash = "test"
         tx_options = {"gas": 50000}
 
-        self.escrow.store_results(escrow_address, url, hash, tx_options)
+        self.escrow.store_results(escrow_address, url, hash, tx_options=tx_options)
 
         self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
         mock_contract.functions.storeResults.assert_called_once_with(url, hash)
@@ -825,41 +804,6 @@ class TestEscrowClient(unittest.TestCase):
         )
 
     def test_bulk_payout(self):
-        mock_contract = MagicMock()
-        mock_bulk = MagicMock()
-        mock_bulk.transact.return_value = "tx_hash"
-        mock_contract.functions.bulkPayOut = MagicMock(return_value=mock_bulk)
-        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
-        self.escrow.get_balance = MagicMock(return_value=100)
-        self.escrow.w3.eth.wait_for_transaction_receipt = MagicMock(
-            return_value={"logs": []}
-        )
-        escrow_address = "0x1234567890123456789012345678901234567890"
-        recipients = ["0x1234567890123456789012345678901234567890"]
-        amounts = [100]
-        final_results_url = "https://www.example.com/result"
-        final_results_hash = "test"
-        txId = 1
-
-        self.escrow.bulk_payout(
-            escrow_address,
-            recipients,
-            amounts,
-            final_results_url,
-            final_results_hash,
-            txId,
-        )
-
-        self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
-        mock_contract.functions.bulkPayOut.assert_called_once_with(
-            recipients, amounts, final_results_url, final_results_hash, txId
-        )
-        mock_bulk.transact.assert_called_once_with({})
-        self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
-            "tx_hash"
-        )
-
-    def test_bulk_payout_with_force_complete(self):
         mock_contract = MagicMock()
         mock_bulk = MagicMock()
         mock_bulk.transact.return_value = "tx_hash"
@@ -911,6 +855,7 @@ class TestEscrowClient(unittest.TestCase):
                 final_results_url,
                 final_results_hash,
                 txId,
+                False,
             )
         self.assertEqual(f"Invalid escrow address: invalid_address", str(cm.exception))
 
@@ -922,6 +867,7 @@ class TestEscrowClient(unittest.TestCase):
                 final_results_url,
                 final_results_hash,
                 txId,
+                False,
             )
         self.assertEqual(
             "Invalid recipient address: invalid_address", str(cm.exception)
@@ -943,6 +889,7 @@ class TestEscrowClient(unittest.TestCase):
                 final_results_url,
                 final_results_hash,
                 txId,
+                False,
             )
         self.assertEqual("Arrays must have same length", str(cm.exception))
 
@@ -962,6 +909,7 @@ class TestEscrowClient(unittest.TestCase):
                 final_results_url,
                 final_results_hash,
                 txId,
+                False,
             )
         self.assertEqual("Arrays must have any value", str(cm.exception))
 
@@ -981,6 +929,7 @@ class TestEscrowClient(unittest.TestCase):
                 final_results_url,
                 final_results_hash,
                 txId,
+                False,
             )
         self.assertEqual("Too many recipients", str(cm.exception))
 
@@ -999,6 +948,7 @@ class TestEscrowClient(unittest.TestCase):
                 final_results_url,
                 final_results_hash,
                 txId,
+                False,
             )
         self.assertEqual("Amounts cannot be empty", str(cm.exception))
 
@@ -1017,6 +967,7 @@ class TestEscrowClient(unittest.TestCase):
                 final_results_url,
                 final_results_hash,
                 txId,
+                False,
             )
         self.assertEqual("Amounts cannot be negative", str(cm.exception))
 
@@ -1037,6 +988,7 @@ class TestEscrowClient(unittest.TestCase):
                 final_results_url,
                 final_results_hash,
                 txId,
+                False,
             )
         self.assertEqual(
             "Escrow does not have enough balance. Current balance: 50. Amounts: 100",
@@ -1060,6 +1012,7 @@ class TestEscrowClient(unittest.TestCase):
                 final_results_url,
                 final_results_hash,
                 txId,
+                False,
             )
         self.assertEqual(
             f"Invalid final results URL: {final_results_url}", str(cm.exception)
@@ -1082,6 +1035,7 @@ class TestEscrowClient(unittest.TestCase):
                 final_results_url,
                 final_results_hash,
                 txId,
+                False,
             )
         self.assertEqual("Invalid empty final results hash", str(cm.exception))
 
@@ -1109,6 +1063,7 @@ class TestEscrowClient(unittest.TestCase):
                 final_results_url,
                 final_results_hash,
                 txId,
+                False,
             )
         self.assertEqual("You must add an account to Web3 instance", str(cm.exception))
 
@@ -1137,12 +1092,18 @@ class TestEscrowClient(unittest.TestCase):
             final_results_url,
             final_results_hash,
             txId,
+            False,
             tx_options=tx_options,
         )
 
         self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
         mock_contract.functions.bulkPayOut.assert_called_once_with(
-            recipients, amounts, final_results_url, final_results_hash, txId
+            recipients,
+            amounts,
+            final_results_url,
+            final_results_hash,
+            txId,
+            False,
         )
         mock_bulk.transact.assert_called_once_with(tx_options)
         self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
@@ -1539,111 +1500,6 @@ class TestEscrowClient(unittest.TestCase):
         )
         self.assertEqual(result.amountRefunded, amount_refunded)
         self.assertEqual(result.txHash, receipt["transactionHash"].hex())
-
-    def test_add_trusted_handlers(self):
-        mock_contract = MagicMock()
-        mock_add = MagicMock()
-        mock_add.transact.return_value = "tx_hash"
-        mock_contract.functions.addTrustedHandlers = MagicMock(return_value=mock_add)
-        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
-        self.escrow.w3.eth.wait_for_transaction_receipt = MagicMock(
-            return_value={"logs": []}
-        )
-        escrow_address = "0x1234567890123456789012345678901234567890"
-        handlers = [
-            "0x1234567890123456789012345678901234567891",
-            "0x1234567890123456789012345678901234567892",
-        ]
-
-        self.escrow.add_trusted_handlers(escrow_address, handlers)
-
-        self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
-        mock_contract.functions.addTrustedHandlers.assert_called_once_with(handlers)
-        mock_add.transact.assert_called_once_with({})
-        self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
-            "tx_hash"
-        )
-
-    def test_add_trusted_handlers_invalid_address(self):
-        escrow_address = "0x1234567890123456789012345678901234567890"
-        handlers = [
-            "0x1234567890123456789012345678901234567891",
-            "0x1234567890123456789012345678901234567892",
-        ]
-
-        with self.assertRaises(EscrowClientError) as cm:
-            self.escrow.add_trusted_handlers("invalid_address", handlers)
-        self.assertEqual(f"Invalid escrow address: invalid_address", str(cm.exception))
-
-        with self.assertRaises(EscrowClientError) as cm:
-            self.escrow.add_trusted_handlers(
-                escrow_address,
-                ["invalid_address", "0x1234567890123456789012345678901234567892"],
-            )
-        self.assertEqual(f"Invalid handler address: invalid_address", str(cm.exception))
-
-    def test_add_trusted_handlers_without_account(self):
-        mock_provider = MagicMock(spec=HTTPProvider)
-        w3 = Web3(mock_provider)
-        mock_chain_id = ChainId.LOCALHOST.value
-        type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
-
-        escrowClient = EscrowClient(w3)
-
-        escrow_address = "0x1234567890123456789012345678901234567890"
-        handlers = [
-            "0x1234567890123456789012345678901234567891",
-            "0x1234567890123456789012345678901234567892",
-        ]
-
-        with self.assertRaises(RequiresSignerError) as cm:
-            escrowClient.add_trusted_handlers(escrow_address, handlers)
-        self.assertEqual("You must add an account to Web3 instance", str(cm.exception))
-
-    def test_add_trusted_handlers_invalid_caller(self):
-        mock_contract = MagicMock()
-        mock_contract.functions.addTrustedHandlers = MagicMock()
-        mock_contract.functions.addTrustedHandlers.return_value.transact.side_effect = Exception(
-            "Error: VM Exception while processing transaction: reverted with reason string 'Address calling not trusted'."
-        )
-        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
-        escrow_address = "0x1234567890123456789012345678901234567890"
-        handlers = [
-            "0x1234567890123456789012345678901234567891",
-            "0x1234567890123456789012345678901234567892",
-        ]
-
-        with self.assertRaises(EscrowClientError) as cm:
-            self.escrow.add_trusted_handlers(escrow_address, handlers)
-        self.assertEqual(
-            "Transaction failed: Address calling not trusted",
-            str(cm.exception),
-        )
-
-    def test_add_trusted_handlers_with_tx_options(self):
-        mock_contract = MagicMock()
-        mock_add = MagicMock()
-        mock_add.transact.return_value = "tx_hash"
-        mock_contract.functions.addTrustedHandlers = MagicMock(return_value=mock_add)
-        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
-        self.escrow.w3.eth.wait_for_transaction_receipt = MagicMock(
-            return_value={"logs": []}
-        )
-        escrow_address = "0x1234567890123456789012345678901234567890"
-        handlers = [
-            "0x1234567890123456789012345678901234567891",
-            "0x1234567890123456789012345678901234567892",
-        ]
-        tx_options = {"gas": 50000}
-
-        self.escrow.add_trusted_handlers(escrow_address, handlers, tx_options)
-
-        self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
-        mock_contract.functions.addTrustedHandlers.assert_called_once_with(handlers)
-        mock_add.transact.assert_called_once_with(tx_options)
-        self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
-            "tx_hash"
-        )
 
     def test_withdraw(self):
         escrow_address = "0x1234567890123456789012345678901234567890"

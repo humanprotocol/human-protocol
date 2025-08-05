@@ -460,7 +460,7 @@ export class EscrowClient extends BaseEthersClient {
    *
    * **Code example**
    *
-   * > Only Recording Oracle or a trusted handler can call it.
+   * > Only Recording Oracle or admin can call it.
    *
    * ```ts
    * import { ethers, Wallet, providers } from 'ethers';
@@ -497,7 +497,7 @@ export class EscrowClient extends BaseEthersClient {
    *
    * **Code example**
    *
-   * > Only Recording Oracle or a trusted handler can call it.
+   * > Only Recording Oracle or admin can call it.
    *
    * ```ts
    * import { ethers, Wallet, providers } from 'ethers';
