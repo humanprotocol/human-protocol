@@ -1,13 +1,16 @@
-import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { HttpService } from '@nestjs/axios';
-import { lastValueFrom } from 'rxjs';
-import dayjs from 'dayjs';
-import { Cron } from '@nestjs/schedule';
-import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { NETWORKS, StatisticsClient } from '@human-protocol/sdk';
+import { DailyHMTData } from '@human-protocol/sdk/dist/graphql';
+import { HttpService } from '@nestjs/axios';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
+import { Cron, SchedulerRegistry } from '@nestjs/schedule';
+import { CronJob } from 'cron';
+import dayjs from 'dayjs';
+import { lastValueFrom } from 'rxjs';
 import {
   EnvironmentConfigService,
   HCAPTCHA_STATS_API_START_DATE,
+  HCAPTCHA_STATS_START_DATE,
   HMT_STATS_START_DATE,
 } from '../../common/config/env-config.service';
 import {
@@ -15,20 +18,23 @@ import {
   HMT_PREFIX,
   RedisConfigService,
 } from '../../common/config/redis-config.service';
-import { HCAPTCHA_STATS_START_DATE } from '../../common/config/env-config.service';
+import logger from '../../logger';
+import { NetworksService } from '../networks/networks.service';
+import { StorageService } from '../storage/storage.service';
 import { HcaptchaDailyStats, HcaptchaStats } from './dto/hcaptcha.dto';
 import { HmtGeneralStatsDto } from './dto/hmt-general-stats.dto';
-import { DailyHMTData } from '@human-protocol/sdk/dist/graphql';
-import { CachedHMTData } from './stats.interface';
 import { HmtDailyStatsData } from './dto/hmt.dto';
-import { StorageService } from '../storage/storage.service';
-import { CronJob } from 'cron';
-import { SchedulerRegistry } from '@nestjs/schedule';
-import { NetworksService } from '../networks/networks.service';
+import { CachedHMTData } from './stats.interface';
+
+type HcaptchaDailyStat = {
+  solved: number;
+  served?: number;
+};
 
 @Injectable()
 export class StatsService implements OnModuleInit {
-  private readonly logger = new Logger(StatsService.name);
+  private readonly logger = logger.child({ context: StatsService.name });
+
   constructor(
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private readonly redisConfigService: RedisConfigService,
@@ -36,7 +42,7 @@ export class StatsService implements OnModuleInit {
     private readonly envConfigService: EnvironmentConfigService,
     private readonly httpService: HttpService,
     private readonly storageService: StorageService,
-    private schedulerRegistry: SchedulerRegistry,
+    private readonly schedulerRegistry: SchedulerRegistry,
   ) {
     if (this.envConfigService.hCaptchaStatsEnabled === true) {
       const job = new CronJob('*/15 * * * *', () => {
@@ -75,8 +81,12 @@ export class StatsService implements OnModuleInit {
   }
 
   private async fetchHistoricalHcaptchaStats(): Promise<void> {
-    this.logger.log('Fetching historical hCaptcha stats.');
     let startDate = dayjs(HCAPTCHA_STATS_API_START_DATE);
+
+    this.logger.info('Fetching historical hCaptcha stats', {
+      startDate,
+    });
+
     const currentDate = dayjs();
     const dates = [];
 
@@ -89,9 +99,17 @@ export class StatsService implements OnModuleInit {
       startDate = startDate.add(1, 'month');
     }
 
-    const results = await this.storageService.downloadFile(
-      this.envConfigService.hCaptchaStatsFile,
-    );
+    let hCaptchaStats: HcaptchaDailyStat[][];
+
+    try {
+      const statsFile = await this.storageService.downloadFile(
+        this.envConfigService.hCaptchaStatsFile,
+      );
+      hCaptchaStats = JSON.parse(statsFile.toString());
+    } catch (error) {
+      this.logger.error('Error while getting hCaptcha stats file', error);
+      hCaptchaStats = [];
+    }
 
     for (const range of dates) {
       const { data } = await lastValueFrom(
@@ -103,11 +121,11 @@ export class StatsService implements OnModuleInit {
           },
         }),
       );
-      results.push(data);
+      hCaptchaStats.push(data);
     }
 
-    for (const monthData of results) {
-      for (const [date, value] of Object.entries<any>(monthData)) {
+    for (const monthData of hCaptchaStats) {
+      for (const [date, value] of Object.entries(monthData)) {
         const multiplier = date <= '2022-11-30' ? 18 : 9;
         if (value.served) delete value.served;
         value.solved *= multiplier;
@@ -132,10 +150,11 @@ export class StatsService implements OnModuleInit {
   }
 
   async fetchTodayHcaptchaStats() {
-    this.logger.log('Fetching hCaptcha stats for today.');
     const today = dayjs().format('YYYY-MM-DD');
     const from = today;
     const to = today;
+
+    this.logger.info('Fetching hCaptcha stats for today', { from, to });
 
     const { data } = await lastValueFrom(
       this.httpService.get(this.envConfigService.hCaptchaStatsSource, {
@@ -188,7 +207,8 @@ export class StatsService implements OnModuleInit {
 
   @Cron('*/15 * * * *')
   async fetchHmtGeneralStats() {
-    this.logger.log('Fetching HMT general stats across multiple networks.');
+    this.logger.info('Fetching HMT general stats across multiple networks');
+
     const aggregatedStats: HmtGeneralStatsDto = {
       totalHolders: 0,
       totalTransactions: 0,
