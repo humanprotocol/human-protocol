@@ -4002,7 +4002,7 @@ __metadata:
   resolution: "@human-protocol/dashboard-server@workspace:packages/apps/dashboard/server"
   dependencies:
     "@human-protocol/core": "workspace:*"
-    "@human-protocol/logger": "workspace:^"
+    "@human-protocol/logger": "workspace:*"
     "@human-protocol/sdk": "workspace:*"
     "@nestjs/axios": "npm:^3.1.2"
     "@nestjs/cache-manager": "npm:^2.2.2"
@@ -4488,7 +4488,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@human-protocol/logger@workspace:*, @human-protocol/logger@workspace:^, @human-protocol/logger@workspace:packages/libs/logger":
+"@human-protocol/logger@workspace:*, @human-protocol/logger@workspace:packages/libs/logger":
   version: 0.0.0-use.local
   resolution: "@human-protocol/logger@workspace:packages/libs/logger"
   dependencies:
