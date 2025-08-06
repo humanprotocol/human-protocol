@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { KVStoreClient, KVStoreKeys, Role } from '@human-protocol/sdk';
 import * as dotenv from 'dotenv';
 import { Wallet, ethers } from 'ethers';

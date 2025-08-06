@@ -4134,6 +4134,7 @@ __metadata:
   resolution: "@human-protocol/fortune-exchange-oracle-server@workspace:packages/apps/fortune/exchange-oracle/server"
   dependencies:
     "@golevelup/ts-jest": "npm:^0.6.1"
+    "@human-protocol/logger": "workspace:*"
     "@human-protocol/sdk": "workspace:*"
     "@nestjs/axios": "npm:^3.1.2"
     "@nestjs/cli": "npm:^10.3.2"
@@ -4193,6 +4194,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@human-protocol/fortune-recording-oracle@workspace:packages/apps/fortune/recording-oracle"
   dependencies:
+    "@human-protocol/logger": "workspace:*"
     "@human-protocol/sdk": "workspace:*"
     "@nestjs/axios": "npm:^3.1.2"
     "@nestjs/cli": "npm:^10.3.2"
