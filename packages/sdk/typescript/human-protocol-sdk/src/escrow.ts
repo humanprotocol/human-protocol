@@ -674,7 +674,7 @@ export class EscrowClient extends BaseEthersClient {
     finalResultsHash: string,
     txId: number,
     forceComplete: boolean,
-    txOptions?: Overrides
+    txOptions: Overrides
   ): Promise<void>;
 
   /**
@@ -724,7 +724,7 @@ export class EscrowClient extends BaseEthersClient {
     finalResultsHash: string,
     payoutId: string,
     forceComplete: boolean,
-    txOptions?: Overrides
+    txOptions: Overrides
   ): Promise<void>;
 
   @requiresSigner
@@ -736,7 +736,7 @@ export class EscrowClient extends BaseEthersClient {
     finalResultsHash: string,
     id: number | string,
     forceComplete: boolean,
-    txOptions: Overrides
+    txOptions: Overrides = {}
   ): Promise<void> {
     await this.ensureCorrectBulkPayoutInput(
       escrowAddress,
