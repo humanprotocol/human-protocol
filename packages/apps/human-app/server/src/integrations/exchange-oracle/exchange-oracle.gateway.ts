@@ -61,14 +61,13 @@ export class ExchangeOracleGateway {
       const response = await lastValueFrom(this.httpService.request(options));
       return response.data as T;
     } catch (error) {
-      const formattedError = httpUtils.formatAxiosError(error);
       this.logger.error('Error while executing exchange oracle API call', {
         url: options.url,
         method: options.method,
         data: options.data,
-        error: formattedError,
+        error: httpUtils.formatAxiosError(error),
       });
-      throw formattedError;
+      throw error;
     }
   }
 

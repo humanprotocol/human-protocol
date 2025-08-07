@@ -22,6 +22,7 @@ describe('ExceptionFilter', () => {
     }));
     mockGetResponse = jest.fn().mockImplementation(() => ({
       status: mockStatus,
+      removeHeader: jest.fn(),
     }));
     mockHttpArgumentsHost = jest.fn().mockImplementation(() => ({
       getResponse: mockGetResponse,

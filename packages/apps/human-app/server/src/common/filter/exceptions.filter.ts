@@ -6,6 +6,8 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import logger from '../../logger';
+import { AxiosError } from 'axios';
+import * as httpUtils from '../utils/http';
 
 @Catch()
 export class ExceptionFilter implements IExceptionFilter {
@@ -26,7 +28,11 @@ export class ExceptionFilter implements IExceptionFilter {
       message =
         exception.response.data?.message || exception.response.statusText;
     } else {
-      this.logger.error('Unhandled exception', exception);
+      let formattedError = exception;
+      if (exception instanceof AxiosError) {
+        formattedError = httpUtils.formatAxiosError(exception);
+      }
+      this.logger.error('Unhandled exception', formattedError);
     }
 
     if (typeof status !== 'number' || status < 100 || status >= 600) {
@@ -36,6 +42,8 @@ export class ExceptionFilter implements IExceptionFilter {
       status = HttpStatus.INTERNAL_SERVER_ERROR;
       message = 'Internal Server Error';
     }
+
+    response.removeHeader('Cache-Control');
 
     response.status(status).json(message);
   }
