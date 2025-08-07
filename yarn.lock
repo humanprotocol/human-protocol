@@ -4303,6 +4303,7 @@ __metadata:
     "@automapper/classes": "npm:^8.8.1"
     "@automapper/core": "npm:^8.8.1"
     "@automapper/nestjs": "npm:^8.8.1"
+    "@human-protocol/logger": "workspace:*"
     "@human-protocol/sdk": "workspace:*"
     "@nestjs/axios": "npm:^3.1.2"
     "@nestjs/cache-manager": "npm:^2.2.1"

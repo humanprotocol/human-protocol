@@ -3,18 +3,25 @@ import { AutomapperModule } from '@automapper/nestjs';
 import { ChainId } from '@human-protocol/sdk';
 import { HttpModule } from '@nestjs/axios';
 import { CacheModule } from '@nestjs/cache-manager';
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import {
+  ClassSerializerInterceptor,
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+} from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import Joi from 'joi';
 import { AppController } from './app.controller';
 import { CacheFactoryConfig } from './common/config/cache-factory.config';
 import { CommonConfigModule } from './common/config/common-config.module';
 import { EnvironmentConfigService } from './common/config/environment-config.service';
+import { ExceptionFilter } from './common/filter/exceptions.filter';
 import { JwtAuthGuard } from './common/guards/jwt.auth';
 import { JwtHttpStrategy } from './common/guards/strategy';
 import { InterceptorModule } from './common/interceptors/interceptor.module';
 import { ForbidUnauthorizedHostMiddleware } from './common/middleware/host-check.middleware';
+import Environment from './common/utils/environment';
 import { EscrowUtilsModule } from './integrations/escrow/escrow-utils.module';
 import { ExchangeOracleModule } from './integrations/exchange-oracle/exchange-oracle.module';
 import { HCaptchaLabelingModule } from './integrations/h-captcha-labeling/h-captcha-labeling.module';
@@ -58,7 +65,7 @@ const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
       /**
        * First value found takes precendece
        */
-      envFilePath: [`.env.${process.env.NODE_ENV}`, '.env.local', '.env'],
+      envFilePath: [`.env.${Environment.name}`, '.env.local', '.env'],
       isGlobal: true,
       validationSchema: Joi.object({
         HOST: Joi.string().required(),
@@ -156,6 +163,14 @@ const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ClassSerializerInterceptor,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: ExceptionFilter,
     },
   ],
 })

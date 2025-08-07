@@ -18,6 +18,7 @@ import {
   GetOraclesQuery,
 } from './model/oracle-discovery.model';
 import { OracleDiscoveryService } from './oracle-discovery.service';
+import Environment from '../../common/utils/environment';
 
 @ApiTags('Oracle-Discovery')
 @Controller()
@@ -48,7 +49,7 @@ export class OracleDiscoveryController {
     const command = this.mapper.map(query, GetOraclesQuery, GetOraclesCommand);
     const oracles = await this.oracleDiscoveryService.getOracles(command);
 
-    if (process.env.NODE_ENV !== 'production') {
+    if (!Environment.isProduction()) {
       return oracles;
     }
 

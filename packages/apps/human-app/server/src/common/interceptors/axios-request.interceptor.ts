@@ -1,9 +1,14 @@
+import { Injectable } from '@nestjs/common';
 import axios from 'axios';
-import { Injectable, Logger } from '@nestjs/common';
+import * as httpUtils from '../../common/utils/http';
+import logger from '../../logger';
+
 // This interceptor injection is guarded via IS_AXIOS_REQUEST_LOGGING_ENABLED environment variable.
 @Injectable()
 export class AxiosRequestInterceptor {
-  private readonly logger = new Logger(AxiosRequestInterceptor.name);
+  private readonly logger = logger.child({
+    context: AxiosRequestInterceptor.name,
+  });
 
   constructor() {
     this.initializeRequestInterceptor();
@@ -12,23 +17,20 @@ export class AxiosRequestInterceptor {
   private initializeRequestInterceptor() {
     axios.interceptors.request.use(
       (config) => {
-        const { url, method, params, data, headers } = config;
-        const message = JSON.stringify(
-          {
-            request_url: url,
-            method: method,
-            params: params ?? {},
-            body: data ?? {},
-            headers: headers ?? {},
-          },
-          null,
-          2,
-        );
-        this.logger.debug(`Outgoing request:\n${message}`);
+        const { url, method, params, data } = config;
+
+        this.logger.debug('Outgoing request info', {
+          url,
+          method,
+          params,
+          data,
+        });
         return config;
       },
       (error) => {
-        this.logger.error(`Request error: ${error.message}`);
+        this.logger.error('Request error', {
+          error: httpUtils.formatAxiosError(error),
+        });
         return Promise.reject(error);
       },
     );
@@ -36,7 +38,9 @@ export class AxiosRequestInterceptor {
     axios.interceptors.response.use(
       (response) => response,
       (error) => {
-        this.logger.error(`Response error: ${error.message}`);
+        this.logger.error('Response error', {
+          error: httpUtils.formatAxiosError(error),
+        });
         return Promise.reject(error);
       },
     );
