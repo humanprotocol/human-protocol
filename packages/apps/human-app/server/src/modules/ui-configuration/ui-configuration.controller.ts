@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Header } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
 import { Public } from '../../common/decorators';
@@ -12,12 +12,13 @@ export class UiConfigurationController {
     private readonly environmentConfigService: EnvironmentConfigService,
   ) {}
 
-  @Get('/ui-config')
   @ApiOperation({ summary: 'Retrieve UI configuration' })
   @ApiOkResponse({
     type: UiConfigResponseDto,
     description: 'UI Configuration object',
   })
+  @Header('Cache-Control', 'public, max-age=3600')
+  @Get('/ui-config')
   public async getConfig(): Promise<UiConfigResponseDto> {
     return {
       chainIdsEnabled: this.environmentConfigService.chainIdsEnabled,

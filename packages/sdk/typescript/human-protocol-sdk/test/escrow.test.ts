@@ -2705,6 +2705,48 @@ describe('EscrowUtils', () => {
       );
     });
 
+    test('should successfully getEscrows for the filter with status array', async () => {
+      const escrows = [
+        {
+          id: '1',
+          address: '0x0',
+          amountPaid: '3',
+          balance: '0',
+          count: '1',
+          jobRequesterId: '1',
+          factoryAddress: '0x0',
+          launcher: '0x0',
+          status: 'Pending',
+          token: '0x0',
+          totalFundedAmount: '3',
+        },
+        {
+          id: '2',
+          address: '0x0',
+          amountPaid: '3',
+          balance: '0',
+          count: '1',
+          jobRequesterId: '1',
+          factoryAddress: '0x0',
+          launcher: '0x0',
+          status: 'Complete',
+          token: '0x0',
+          totalFundedAmount: '3',
+        },
+      ];
+      const gqlFetchSpy = vi
+        .spyOn(gqlFetch, 'default')
+        .mockResolvedValue({ escrows });
+
+      const result = await EscrowUtils.getEscrows({
+        chainId: ChainId.POLYGON_AMOY,
+        status: [EscrowStatus.Pending, EscrowStatus.Complete],
+      });
+
+      expect(result).toEqual(escrows);
+      expect(gqlFetchSpy).toHaveBeenCalled();
+    });
+
     test('should successfully getEscrows for the filter', async () => {
       const escrows = [
         {

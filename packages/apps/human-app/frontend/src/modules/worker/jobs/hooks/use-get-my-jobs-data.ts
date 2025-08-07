@@ -21,7 +21,7 @@ export function useGetMyJobsData() {
   };
 
   return useQuery({
-    queryKey: ['myJobs', queryParams],
+    queryKey: ['fetchMyJobs', queryParams],
     queryFn: async ({ signal }) =>
       jobsService.fetchMyJobs({ queryParams, signal }),
   });

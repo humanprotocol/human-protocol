@@ -1,4 +1,5 @@
 import {
+  ForgotPasswordRequest,
   ResetPasswordRequest,
   SignInRequest,
   SignUpRequest,
@@ -24,8 +25,8 @@ export const signOut = async (refreshToken: string) => {
   return data;
 };
 
-export const forgotPassword = async (email: string) => {
-  await api.post('/auth/forgot-password', { email });
+export const forgotPassword = async (body: ForgotPasswordRequest) => {
+  await api.post('/auth/forgot-password', body);
 };
 
 export const resetPassword = async (body: ResetPasswordRequest) => {

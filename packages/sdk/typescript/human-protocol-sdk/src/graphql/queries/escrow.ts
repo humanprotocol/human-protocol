@@ -53,7 +53,7 @@ export const GET_ESCROWS_QUERY = (filter: IEscrowsFilter) => {
       ${reputationOracle ? `reputationOracle: $reputationOracle,` : ''}
       ${recordingOracle ? `recordingOracle: $recordingOracle,` : ''}
       ${exchangeOracle ? `exchangeOracle: $exchangeOracle,` : ''}
-      ${status !== undefined ? `status: $status,` : ''}
+      ${status !== undefined ? `status_in: $status,` : ''}
       ${from ? `createdAt_gte: $from,` : ''}
       ${to ? `createdAt_lte: $to,` : ''}
     }
@@ -66,7 +66,7 @@ export const GET_ESCROWS_QUERY = (filter: IEscrowsFilter) => {
       $reputationOracle: String
       $recordingOracle: String
       $exchangeOracle: String
-      $status: String
+      $status: [String!]
       $from: Int
       $to: Int
       $orderDirection: String

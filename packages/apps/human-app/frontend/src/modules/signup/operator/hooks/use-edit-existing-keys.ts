@@ -1,8 +1,4 @@
-import {
-  useMutation,
-  useMutationState,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { useMutation, useMutationState } from '@tanstack/react-query';
 import last from 'lodash/last';
 import { useNavigate } from 'react-router-dom';
 import type { JsonRpcSigner } from 'ethers';
@@ -50,7 +46,7 @@ export function useEditExistingKeysMutation() {
     chainId,
     web3ProviderMutation: { data: web3Data },
   } = useConnectedWallet();
-  const queryClient = useQueryClient();
+
   const navigate = useNavigate();
 
   return useMutation({
@@ -60,12 +56,8 @@ export function useEditExistingKeysMutation() {
         chainId,
         signer: web3Data?.signer,
       }),
-    onSuccess: async () => {
+    onSuccess: () => {
       navigate(routerPaths.operator.editExistingKeysSuccess);
-      await queryClient.invalidateQueries();
-    },
-    onError: async () => {
-      await queryClient.invalidateQueries();
     },
     mutationKey: ['editKeys', address],
   });

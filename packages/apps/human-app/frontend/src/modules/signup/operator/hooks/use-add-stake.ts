@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { ethers } from 'ethers';
 import { stakingStake } from '@/modules/smart-contracts/Staking/staking-stake';
@@ -62,7 +62,6 @@ export function useAddStake() {
   } = useConnectedWallet();
   const { data: HMTDecimals } = useHMTokenDecimals();
 
-  const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   return useMutation({
@@ -75,12 +74,8 @@ export function useAddStake() {
         chainId,
         decimals: HMTDecimals,
       }),
-    onSuccess: async () => {
+    onSuccess: () => {
       navigate(routerPaths.operator.addKeys);
-      await queryClient.invalidateQueries();
-    },
-    onError: async () => {
-      await queryClient.invalidateQueries();
     },
     mutationKey: ['addStake', address],
   });

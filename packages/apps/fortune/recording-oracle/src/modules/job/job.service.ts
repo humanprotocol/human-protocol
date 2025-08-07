@@ -5,9 +5,11 @@ import {
   KVStoreUtils,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
 import * as Minio from 'minio';
+
+import logger from '../../logger';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ErrorJob } from '../../common/constants/errors';
 import { JobRequestType, SolutionError } from '../../common/enums/job';
@@ -26,8 +28,8 @@ import {
 
 @Injectable()
 export class JobService {
-  public readonly logger = new Logger(JobService.name);
-  public readonly minioClient: Minio.Client;
+  private readonly logger = logger.child({ context: JobService.name });
+  readonly minioClient: Minio.Client;
 
   constructor(
     private web3ConfigService: Web3ConfigService,
@@ -86,16 +88,23 @@ export class JobService {
   }
 
   async processJobSolution(webhook: WebhookDto): Promise<string> {
+    const logger = this.logger.child({
+      action: 'processJobSolution',
+      chainId: webhook.chainId,
+      escrowAddress: webhook.escrowAddress,
+    });
     const signer = this.web3Service.getSigner(webhook.chainId);
     const escrowClient = await EscrowClient.build(signer);
 
     const recordingOracleAddress = await escrowClient.getRecordingOracleAddress(
       webhook.escrowAddress,
     );
-    if (
-      ethers.getAddress(recordingOracleAddress) !== (await signer.getAddress())
-    ) {
-      this.logger.log(ErrorJob.AddressMismatches, JobService.name);
+    const signerAddress = await signer.getAddress();
+    if (ethers.getAddress(recordingOracleAddress) !== signerAddress) {
+      logger.error(ErrorJob.AddressMismatches, {
+        recordingOracleAddress,
+        signerAddress,
+      });
       throw new ValidationError(ErrorJob.AddressMismatches);
     }
 
@@ -104,7 +113,9 @@ export class JobService {
       escrowStatus !== EscrowStatus.Pending &&
       escrowStatus !== EscrowStatus.Partial
     ) {
-      this.logger.log(ErrorJob.InvalidStatus, JobService.name);
+      logger.error(ErrorJob.InvalidStatus, {
+        escrowStatus,
+      });
       throw new ConflictError(ErrorJob.InvalidStatus);
     }
 
@@ -113,12 +124,17 @@ export class JobService {
       await this.storageService.download(manifestUrl);
 
     if (!submissionsRequired || !requestType) {
-      this.logger.log(ErrorJob.InvalidManifest, JobService.name);
+      logger.error(ErrorJob.InvalidManifest, {
+        submissionsRequired,
+        requestType,
+      });
       throw new ValidationError(ErrorJob.InvalidManifest);
     }
 
     if (requestType !== JobRequestType.FORTUNE) {
-      this.logger.log(ErrorJob.InvalidJobType, JobService.name);
+      logger.error(ErrorJob.InvalidJobType, {
+        requestType,
+      });
       throw new ValidationError(ErrorJob.InvalidJobType);
     }
 
@@ -133,10 +149,10 @@ export class JobService {
     }
 
     if (existingJobSolutions.length >= submissionsRequired) {
-      this.logger.log(
-        ErrorJob.AllSolutionsHaveAlreadyBeenSent,
-        JobService.name,
-      );
+      logger.warn(ErrorJob.AllSolutionsHaveAlreadyBeenSent, {
+        submissionsRequired,
+        nExistingJobSolutions: existingJobSolutions.length,
+      });
       throw new ConflictError(ErrorJob.AllSolutionsHaveAlreadyBeenSent);
     }
 
@@ -187,7 +203,6 @@ export class JobService {
       if (reputationOracleWebhook) {
         await sendWebhook(
           this.httpService,
-          this.logger,
           reputationOracleWebhook,
           {
             chainId: webhook.chainId,
@@ -230,7 +245,6 @@ export class JobService {
 
         await sendWebhook(
           this.httpService,
-          this.logger,
           exchangeOracleURL,
           webhookBody,
           this.web3ConfigService.privateKey,

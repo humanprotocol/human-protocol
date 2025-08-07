@@ -9,21 +9,16 @@ import FormattedNumber from '@/shared/ui/FormattedNumber';
 type Props = {
   amount: number | string | null | undefined;
   tokenSymbol?: string | null | undefined;
-  alreadyParsed?: boolean;
 };
 
-const TokenAmount: FC<Props> = ({
-  amount,
-  tokenSymbol = 'HMT',
-  alreadyParsed = false,
-}) => {
+const TokenAmount: FC<Props> = ({ amount, tokenSymbol = 'HMT' }) => {
   const isMobile = useIsMobile();
 
   return (
     <Stack direction="row" whiteSpace="nowrap">
       <Typography variant="body2">
         <FormattedNumber
-          value={(Number(amount) || 0) * (alreadyParsed ? 1 : 1e18)}
+          value={Number(amount) || 0}
           decimalScale={isMobile ? 4 : 9}
         />
       </Typography>

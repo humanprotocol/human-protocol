@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { t } from 'i18next';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
 import { useAccessTokenRefresh } from '@/api/hooks/use-access-token-refresh';
@@ -9,12 +9,11 @@ import { PrepareSignatureType } from '@/shared/services/signature.service';
 import * as profileService from '../profile/services/profile.service';
 
 interface RegisterAddressCallbacks {
-  onSuccess?: () => void | Promise<void>;
-  onError?: (error: ResponseError) => void | Promise<void>;
+  onSuccess: () => void | Promise<void>;
+  onError: (error: ResponseError) => void | Promise<void>;
 }
 
-function useRegisterAddressMutation(callbacks?: RegisterAddressCallbacks) {
-  const queryClient = useQueryClient();
+function useRegisterAddressMutation(callbacks: RegisterAddressCallbacks) {
   const { user, updateUserData } = useAuthenticatedUser();
   const { refreshAccessTokenAsync } = useAccessTokenRefresh();
   const { address, chainId, signMessage } = useWalletConnect();
@@ -45,29 +44,19 @@ function useRegisterAddressMutation(callbacks?: RegisterAddressCallbacks) {
     });
   };
 
-  const onSuccess = async () => {
-    if (callbacks?.onSuccess) {
-      await callbacks.onSuccess();
-    }
-    await queryClient.invalidateQueries();
-  };
-
-  const onError = async (error: ResponseError) => {
-    if (callbacks?.onError) {
-      await callbacks.onError(error);
-    }
-    await queryClient.invalidateQueries();
-  };
-
   return useMutation({
     mutationFn,
-    onSuccess,
-    onError,
+    onSuccess: async () => {
+      await callbacks.onSuccess();
+    },
+    onError: async (error: ResponseError) => {
+      await callbacks.onError(error);
+    },
     mutationKey: [user.wallet_address],
   });
 }
 
-export function useRegisterAddress(callbacks?: RegisterAddressCallbacks) {
+export function useRegisterAddress(callbacks: RegisterAddressCallbacks) {
   const mutation = useRegisterAddressMutation(callbacks);
 
   return {
