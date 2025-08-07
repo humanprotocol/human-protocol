@@ -45,7 +45,7 @@ export class DetailsController {
     type: OperatorDto,
     isArray: true,
   })
-  public async operators(
+  async operators(
     @Query() query: OperatorsPaginationDto,
   ): Promise<OperatorDto[]> {
     return this.detailsService.getOperators(query.chainId, {
@@ -67,7 +67,7 @@ export class DetailsController {
     description: 'Details retrieved successfully',
     type: DetailsResponseDto,
   })
-  public async details(
+  async details(
     @Param('address', AddressValidationPipe) address: string,
     @Query('chainId') chainId: ChainId,
   ): Promise<DetailsResponseDto> {
@@ -104,7 +104,7 @@ export class DetailsController {
     description: 'Transactions retrieved successfully',
     type: DetailsPaginationResponseDto,
   })
-  public async transactions(
+  async transactions(
     @Param('address', AddressValidationPipe) address: string,
     @Query() query: DetailsTransactionsPaginationDto,
   ): Promise<DetailsPaginationResponseDto> {
@@ -138,7 +138,7 @@ export class DetailsController {
     description: 'Escrows retrieved successfully',
     type: DetailsPaginationResponseDto,
   })
-  public async escrows(
+  async escrows(
     @Param('address', AddressValidationPipe) address: string,
     @Query() query: DetailsEscrowsPaginationDto,
   ): Promise<DetailsPaginationResponseDto> {
@@ -174,7 +174,7 @@ export class DetailsController {
     type: KVStoreDataDto,
     isArray: true,
   })
-  public async KVStore(
+  async KVStore(
     @Param('address', AddressValidationPipe) address: string,
     @Query('chain_id') chainId: ChainId,
   ): Promise<KVStoreDataDto[]> {

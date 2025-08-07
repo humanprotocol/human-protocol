@@ -4,13 +4,11 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 import { AppModule } from './app.module';
 import { EnvironmentConfigService } from './common/config/env-config.service';
+import logger, { nestLoggerOverride } from './logger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    logger:
-      process.env.NODE_ENV === 'development'
-        ? ['log', 'debug', 'error', 'verbose', 'warn']
-        : ['log', 'error', 'warn'],
+    logger: nestLoggerOverride,
   });
 
   const configService: ConfigService = app.get(ConfigService);
@@ -35,7 +33,7 @@ async function bootstrap() {
   const port = envConfigService.port;
 
   await app.listen(port, host, async () => {
-    console.info(`Dashboard server is running on http://${host}:${port}`);
+    logger.info(`Dashboard server is running on http://${host}:${port}`);
   });
 }
 bootstrap();
