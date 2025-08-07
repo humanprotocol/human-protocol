@@ -37,7 +37,7 @@ export class JobAssignmentController {
   @ApiOperation({
     summary: 'Request to assign a job to a logged user',
   })
-  public async assignJob(
+  async assignJob(
     @Body() jobAssignmentDto: JobAssignmentDto,
     @Request() req: RequestWithUser,
   ): Promise<JobAssignmentResponse> {
@@ -54,7 +54,7 @@ export class JobAssignmentController {
   @ApiOperation({
     summary: 'Request to get jobs assigned to a logged user',
   })
-  public async getAssignedJobs(
+  async getAssignedJobs(
     @Query() jobsAssignmentParamsDto: JobsFetchParamsDto,
     @Request() req: RequestWithUser,
   ): Promise<JobsFetchResponse> {
@@ -72,7 +72,7 @@ export class JobAssignmentController {
   @ApiOperation({
     summary: 'Request to resign from assigment',
   })
-  public async resignAssigment(
+  async resignAssigment(
     @Body() dto: ResignJobDto,
     @Request() req: RequestWithUser,
   ) {
@@ -85,7 +85,7 @@ export class JobAssignmentController {
   @ApiOperation({
     summary: 'Request to refresh assigments data',
   })
-  public async refreshAssigments(
+  async refreshAssigments(
     @Body() dto: RefreshJobDto,
     @Request() req: RequestWithUser,
   ) {

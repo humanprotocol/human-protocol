@@ -1,5 +1,5 @@
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
 import { Cache } from 'cache-manager';
 import { decode } from 'jsonwebtoken';
@@ -21,16 +21,19 @@ import {
   paginateAndSortResults,
 } from '../../common/utils/pagination.utils';
 import { JOB_ASSIGNMENT_CACHE_KEY } from '../../common/constants/cache';
+import logger from '../../logger';
 
 @Injectable()
 export class JobAssignmentService {
-  logger = new Logger(JobAssignmentService.name);
+  private readonly logger = logger.child({
+    context: JobAssignmentService.name,
+  });
 
   constructor(
     private readonly configService: EnvironmentConfigService,
     private readonly exchangeOracleGateway: ExchangeOracleGateway,
     private readonly escrowUtilsGateway: EscrowUtilsGateway,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
   private getEvmAddressFromToken(token: string): string {
@@ -66,12 +69,7 @@ export class JobAssignmentService {
       );
     assignmentsParamsCommand.token = command.token;
 
-    this.updateAssignmentsCache(assignmentsParamsCommand).catch((error) => {
-      this.logger.error(
-        `Failed to update assignments cache after processing assignment: ${error.message}`,
-        error.stack,
-      );
-    });
+    void this.updateAssignmentsCache(assignmentsParamsCommand);
 
     return response;
   }
@@ -84,12 +82,7 @@ export class JobAssignmentService {
     assignmentsParamsCommand.oracleAddress = command.oracleAddress;
     assignmentsParamsCommand.token = command.token;
 
-    this.updateAssignmentsCache(assignmentsParamsCommand).catch((error) => {
-      this.logger.error(
-        `Failed to update assignments cache after processing resignment: ${error.message}`,
-        error.stack,
-      );
-    });
+    void this.updateAssignmentsCache(assignmentsParamsCommand);
 
     return response;
   }
@@ -162,41 +155,50 @@ export class JobAssignmentService {
     });
   }
 
-  public async updateAssignmentsCache(
-    command: JobsFetchParamsCommand,
-  ): Promise<void> {
+  async updateAssignmentsCache(command: JobsFetchParamsCommand): Promise<void> {
     const evmAddress = this.getEvmAddressFromToken(command.token);
-    const cacheRetentionDate = this.getCacheRetentionDate();
-    const cacheKey = this.makeJobAssignmentCacheKey(
-      evmAddress,
-      command.oracleAddress,
-    );
 
-    const cachedAssignments =
-      (await this.cacheManager.get<JobsFetchResponseItem[]>(cacheKey)) || [];
+    try {
+      const cacheRetentionDate = this.getCacheRetentionDate();
+      const cacheKey = this.makeJobAssignmentCacheKey(
+        evmAddress,
+        command.oracleAddress,
+      );
 
-    const cachedAssignmentsToRetain = [];
-    let latestUpdatedAt = cacheRetentionDate;
-    for (const jobAssignment of cachedAssignments) {
-      if (jobAssignment.updated_at > cacheRetentionDate) {
-        cachedAssignmentsToRetain.push(jobAssignment);
+      const cachedAssignments =
+        (await this.cacheManager.get<JobsFetchResponseItem[]>(cacheKey)) || [];
+
+      const cachedAssignmentsToRetain = [];
+      let latestUpdatedAt = cacheRetentionDate;
+      for (const jobAssignment of cachedAssignments) {
+        if (jobAssignment.updated_at > cacheRetentionDate) {
+          cachedAssignmentsToRetain.push(jobAssignment);
+        }
+
+        if (jobAssignment.updated_at > latestUpdatedAt) {
+          latestUpdatedAt = jobAssignment.updated_at;
+        }
       }
 
-      if (jobAssignment.updated_at > latestUpdatedAt) {
-        latestUpdatedAt = jobAssignment.updated_at;
-      }
+      if (!command.data) command.data = new JobsFetchParams();
+      command.data.updatedAfter = latestUpdatedAt;
+
+      const fetchedAssignments = await this.fetchAllAssignedJobs(command);
+
+      const mergedData = this.mergeAssignments(
+        cachedAssignmentsToRetain,
+        fetchedAssignments,
+      );
+      await this.cacheManager.set(cacheKey, mergedData);
+    } catch (error) {
+      this.logger.error('Failed to update assignments cache', {
+        chainId: command.data.chainId,
+        oracleAddress: command.oracleAddress,
+        escrowAddress: command.data.escrowAddress,
+        userAddress: evmAddress,
+        error,
+      });
     }
-
-    if (!command.data) command.data = new JobsFetchParams();
-    command.data.updatedAfter = latestUpdatedAt;
-
-    const fetchedAssignments = await this.fetchAllAssignedJobs(command);
-
-    const mergedData = this.mergeAssignments(
-      cachedAssignmentsToRetain,
-      fetchedAssignments,
-    );
-    await this.cacheManager.set(cacheKey, mergedData);
   }
 
   private async fetchAllAssignedJobs(

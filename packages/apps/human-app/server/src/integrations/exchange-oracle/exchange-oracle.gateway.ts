@@ -1,15 +1,13 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Mapper } from '@automapper/core';
+import { InjectMapper } from '@automapper/nestjs';
+import { HttpService } from '@nestjs/axios';
+import { Injectable } from '@nestjs/common';
 import { AxiosRequestConfig } from 'axios';
 import { lastValueFrom } from 'rxjs';
-import {
-  UserStatisticsCommand,
-  UserStatisticsResponse,
-} from '../../modules/statistics/model/user-statistics.model';
-import { HttpService } from '@nestjs/axios';
-import {
-  OracleStatisticsCommand,
-  OracleStatisticsResponse,
-} from '../../modules/statistics/model/oracle-statistics.model';
+import { HttpMethod } from '../../common/enums/http-method';
+import { toCleanObjParams } from '../../common/utils/gateway-common.utils';
+import * as httpUtils from '../../common/utils/http';
+import logger from '../../logger';
 import {
   JobAssignmentCommand,
   JobAssignmentData,
@@ -28,38 +26,49 @@ import {
   JobsDiscoveryParamsData,
   JobsDiscoveryResponse,
 } from '../../modules/jobs-discovery/model/jobs-discovery.model';
-import { Mapper } from '@automapper/core';
-import { InjectMapper } from '@automapper/nestjs';
-import { HttpMethod } from '../../common/enums/http-method';
-import { toCleanObjParams } from '../../common/utils/gateway-common.utils';
-import { KvStoreGateway } from '../kv-store/kv-store.gateway';
-import { EscrowUtilsGateway } from '../escrow/escrow-utils-gateway.service';
+import {
+  OracleStatisticsCommand,
+  OracleStatisticsResponse,
+} from '../../modules/statistics/model/oracle-statistics.model';
+import {
+  UserStatisticsCommand,
+  UserStatisticsResponse,
+} from '../../modules/statistics/model/user-statistics.model';
 import {
   RegistrationInExchangeOracleCommand,
   RegistrationInExchangeOracleData,
 } from '../../modules/user-worker/model/worker-registration.model';
+import { EscrowUtilsGateway } from '../escrow/escrow-utils-gateway.service';
+import { KvStoreGateway } from '../kv-store/kv-store.gateway';
 
 @Injectable()
 export class ExchangeOracleGateway {
-  logger = new Logger(ExchangeOracleGateway.name);
+  private readonly logger = logger.child({
+    context: ExchangeOracleGateway.name,
+  });
 
   constructor(
-    private httpService: HttpService,
-    private kvStoreGateway: KvStoreGateway,
+    private readonly httpService: HttpService,
+    private readonly kvStoreGateway: KvStoreGateway,
     private readonly escrowUtilsGateway: EscrowUtilsGateway,
     @InjectMapper() private mapper: Mapper,
   ) {}
+
   private async callExternalHttpUtilRequest<T>(
     options: AxiosRequestConfig,
   ): Promise<T> {
     try {
       const response = await lastValueFrom(this.httpService.request(options));
       return response.data as T;
-    } catch (e) {
-      this.logger.error(
-        `Error, while executing exchange oracle API call to ${options.url}, error details: ${e.message}`,
-      );
-      throw e;
+    } catch (error) {
+      const formattedError = httpUtils.formatAxiosError(error);
+      this.logger.error('Error while executing exchange oracle API call', {
+        url: options.url,
+        method: options.method,
+        data: options.data,
+        error: formattedError,
+      });
+      throw formattedError;
     }
   }
 

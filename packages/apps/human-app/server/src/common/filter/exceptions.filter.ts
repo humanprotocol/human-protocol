@@ -1,20 +1,19 @@
 import {
   ArgumentsHost,
   Catch,
-  ExceptionFilter,
+  ExceptionFilter as IExceptionFilter,
   HttpException,
   HttpStatus,
-  Logger,
 } from '@nestjs/common';
+import logger from '../../logger';
 
 @Catch()
-export class GlobalExceptionsFilter implements ExceptionFilter {
-  private readonly logger = new Logger(GlobalExceptionsFilter.name);
+export class ExceptionFilter implements IExceptionFilter {
+  private readonly logger = logger.child({ context: ExceptionFilter.name });
 
   catch(exception: any, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
-    const request = ctx.getRequest();
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let message: any = 'Internal Server Error';
@@ -27,22 +26,16 @@ export class GlobalExceptionsFilter implements ExceptionFilter {
       message =
         exception.response.data?.message || exception.response.statusText;
     } else {
-      this.logger.error(
-        `Exception without status code: ${JSON.stringify(exception)}`,
-        exception.stack,
-      );
+      this.logger.error('Unhandled exception', exception);
     }
 
     if (typeof status !== 'number' || status < 100 || status >= 600) {
-      this.logger.error(`Invalid status code: ${status}, defaulting to 500.`);
+      this.logger.error('Invalid status code in exception filter', {
+        status,
+      });
       status = HttpStatus.INTERNAL_SERVER_ERROR;
       message = 'Internal Server Error';
     }
-
-    this.logger.error(
-      `HTTP Status: ${status} | Error Message: ${JSON.stringify(message)} | Request URL: ${request?.url}`,
-      exception.stack,
-    );
 
     response.status(status).json(message);
   }

@@ -1,6 +1,14 @@
 import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
-import { Body, Controller, Get, Header, Post, Request } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Header,
+  Post,
+  Request,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { RequestWithUser } from '../../common/interfaces/jwt';
 import { JwtUserData } from '../../common/utils/jwt-token.model';
@@ -47,7 +55,7 @@ export class HCaptchaController {
     @Request() req: RequestWithUser,
   ): Promise<VerifyTokenResponse> {
     if (!req.user.site_key) {
-      throw new Error('Missing site key');
+      throw new BadRequestException('Labeling is not set up');
     }
     const command = this.mapper.map(req.user, JwtUserData, VerifyTokenCommand);
     command.response = dto.token;
@@ -62,7 +70,7 @@ export class HCaptchaController {
     @Request() req: RequestWithUser,
   ): Promise<DailyHmtSpentResponse> {
     if (!req.user.site_key) {
-      throw new Error('Missing site key');
+      throw new BadRequestException('Labeling is not set up');
     }
     const command = this.mapper.map(
       req.user,
@@ -79,7 +87,7 @@ export class HCaptchaController {
     @Request() req: RequestWithUser,
   ): Promise<UserStatsResponse> {
     if (!req.user.email || !req.user.site_key) {
-      throw new Error('Missing email or site key');
+      throw new BadRequestException('Labeling is not set up');
     }
     const command = this.mapper.map(req.user, JwtUserData, UserStatsCommand);
     return this.service.getUserStats(command);
