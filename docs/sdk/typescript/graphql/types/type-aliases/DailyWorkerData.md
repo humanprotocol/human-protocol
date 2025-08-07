@@ -8,7 +8,7 @@
 
 > **DailyWorkerData** = `object`
 
-Defined in: [graphql/types.ts:89](https://github.com/humanprotocol/human-protocol/blob/366f3dd978e17e96d3d7afc31ded53e6bfcb7710/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L89)
+Defined in: [graphql/types.ts:89](https://github.com/humanprotocol/human-protocol/blob/5b6e90353814741f056deb2914334a3c4fbc279d/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L89)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [graphql/types.ts:89](https://github.com/humanprotocol/human-protoco
 
 > **activeWorkers**: `number`
 
-Defined in: [graphql/types.ts:91](https://github.com/humanprotocol/human-protocol/blob/366f3dd978e17e96d3d7afc31ded53e6bfcb7710/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L91)
+Defined in: [graphql/types.ts:91](https://github.com/humanprotocol/human-protocol/blob/5b6e90353814741f056deb2914334a3c4fbc279d/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L91)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: [graphql/types.ts:91](https://github.com/humanprotocol/human-protoco
 
 > **timestamp**: `Date`
 
-Defined in: [graphql/types.ts:90](https://github.com/humanprotocol/human-protocol/blob/366f3dd978e17e96d3d7afc31ded53e6bfcb7710/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L90)
+Defined in: [graphql/types.ts:90](https://github.com/humanprotocol/human-protocol/blob/5b6e90353814741f056deb2914334a3c4fbc279d/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L90)
