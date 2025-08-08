@@ -1,11 +1,7 @@
 import { EscrowUtils } from '@human-protocol/sdk';
-import {
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-  Logger,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+
 import { AssignmentRepository } from '../../modules/assignment/assignment.repository';
 import { HEADER_SIGNATURE_KEY } from '../constant';
 import { ErrorAssignment, ErrorSignature } from '../constant/errors';
@@ -15,9 +11,8 @@ import { verifySignature } from '../utils/signature';
 
 @Injectable()
 export class SignatureAuthGuard implements CanActivate {
-  private readonly logger = new Logger(SignatureAuthGuard.name);
   constructor(
-    private reflector: Reflector,
+    private readonly reflector: Reflector,
     private readonly assignmentRepository: AssignmentRepository,
   ) {}
 
@@ -59,15 +54,18 @@ export class SignatureAuthGuard implements CanActivate {
         oracleAdresses.push(escrowData.reputationOracle!);
       }
     }
+
+    let isVerified = false;
     try {
-      const isVerified = verifySignature(data, signature, oracleAdresses);
-      if (isVerified) {
-        return true;
-      }
-    } catch (error) {
-      this.logger.error(error);
+      isVerified = verifySignature(data, signature, oracleAdresses);
+    } catch {
+      // noop
     }
 
-    throw new AuthError('Unauthorized');
+    if (!isVerified) {
+      throw new AuthError('Unauthorized');
+    }
+
+    return true;
   }
 }

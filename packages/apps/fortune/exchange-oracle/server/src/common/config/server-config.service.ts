@@ -6,14 +6,6 @@ export class ServerConfigService {
   constructor(private configService: ConfigService) {}
 
   /**
-   * The environment in which the server is running (e.g., 'development', 'production').
-   * Default: 'development'
-   */
-  get nodeEnv(): string {
-    return this.configService.get<string>('NODE_ENV', 'development');
-  }
-
-  /**
    * The hostname or IP address on which the server will run.
    * Default: 'localhost'
    */

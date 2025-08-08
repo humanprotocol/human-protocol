@@ -72,6 +72,16 @@ async function getOracles(selectedJobTypes: string[]) {
       }
     }
 
+    const oracleAddresses = new Set<string>();
+    oracles = oracles.filter(({ address: oracleAddress }) => {
+      if (oracleAddresses.has(oracleAddress)) {
+        return false;
+      }
+
+      oracleAddresses.add(oracleAddress);
+      return true;
+    });
+
     return oracles;
   } catch (error) {
     if (error instanceof ApiClientError) {

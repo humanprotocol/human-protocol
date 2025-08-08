@@ -20,14 +20,16 @@ import { GatewayEndpoints } from '../../common/config/gateway-config.types';
 @Injectable()
 export class HCaptchaStatisticsGateway {
   private readonly gatewayConfig: GatewayConfig;
+
   constructor(
-    private httpService: HttpService,
+    private readonly httpService: HttpService,
     gatewayConfigService: GatewayConfigService,
   ) {
     this.gatewayConfig = gatewayConfigService.getConfig(
       ExternalApiName.HCAPTCHA_LABELING_STATS,
     );
   }
+
   private getEndpointOptions(
     endpointName: GatewayEndpoints,
     data?: RequestDataType,
@@ -49,12 +51,14 @@ export class HCaptchaStatisticsGateway {
       data: data,
     } as AxiosRequestConfig;
   }
+
   private async handleRequestToHCaptchaLabelingApi<T>(
     options: AxiosRequestConfig,
   ): Promise<T> {
     const response = await lastValueFrom(this.httpService.request(options));
     return response.data;
   }
+
   async fetchDailyHmtSpent() {
     const options = this.getEndpointOptions(
       HCaptchaLabelingStatsEndpoints.DAILY_HMT_SPENT,

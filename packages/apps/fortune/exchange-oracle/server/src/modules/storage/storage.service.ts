@@ -6,8 +6,10 @@ import {
   KVStoreUtils,
   StorageClient,
 } from '@human-protocol/sdk';
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import * as Minio from 'minio';
+
+import logger from '../../logger';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { S3ConfigService } from '../../common/config/s3-config.service';
 import { NotFoundError, ServerError } from '../../common/errors';
@@ -16,7 +18,8 @@ import { Web3Service } from '../web3/web3.service';
 
 @Injectable()
 export class StorageService {
-  public readonly minioClient: Minio.Client;
+  private readonly logger = logger.child({ context: StorageService.name });
+  readonly minioClient: Minio.Client;
 
   constructor(
     @Inject(Web3Service)
@@ -101,8 +104,13 @@ export class StorageService {
           exchangeOraclePublickKey,
           recordingOraclePublicKey,
         ]);
-      } catch (e) {
-        Logger.error(e);
+      } catch (error) {
+        this.logger.error('Failed to encrypt job solutions', {
+          chainId,
+          escrowAddress,
+          error,
+        });
+
         throw new ServerError('Encryption error');
       }
     }
@@ -119,8 +127,12 @@ export class StorageService {
       );
 
       return this.getJobUrl(escrowAddress, chainId);
-    } catch (e) {
-      Logger.error(e);
+    } catch (error) {
+      this.logger.error('Failed to upload job solutions', {
+        chainId,
+        escrowAddress,
+        error,
+      });
       throw new ServerError('File not uploaded');
     }
   }

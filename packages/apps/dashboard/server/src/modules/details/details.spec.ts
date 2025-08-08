@@ -1,19 +1,18 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { DetailsService } from './details.service';
-import { HttpService } from '@nestjs/axios';
-import { EnvironmentConfigService } from '../../common/config/env-config.service';
-import { NetworkConfigService } from '../../common/config/network-config.service';
-import { Logger } from '@nestjs/common';
-import { of, throwError } from 'rxjs';
 import {
   ChainId,
   IOperator,
-  OperatorUtils,
   KVStoreUtils,
+  OperatorUtils,
   OrderDirection,
 } from '@human-protocol/sdk';
-import { OperatorsOrderBy } from '../../common/enums/operator';
+import { HttpService } from '@nestjs/axios';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Test, TestingModule } from '@nestjs/testing';
+import { of, throwError } from 'rxjs';
+import { EnvironmentConfigService } from '../../common/config/env-config.service';
+import { NetworkConfigService } from '../../common/config/network-config.service';
+import { OperatorsOrderBy } from '../../common/enums/operator';
+import { DetailsService } from './details.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -65,7 +64,6 @@ describe('DetailsService', () => {
             set: jest.fn(),
           },
         },
-        Logger,
       ],
     }).compile();
 

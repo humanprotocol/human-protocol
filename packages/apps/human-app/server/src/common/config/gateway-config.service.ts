@@ -18,6 +18,7 @@ export class GatewayConfigService {
   JSON_HEADER = {
     'Content-Type': 'application/json',
   };
+
   constructor(private envConfig: EnvironmentConfigService) {}
 
   private getGatewaysConfig(): Gateways {
@@ -181,6 +182,7 @@ export class GatewayConfigService {
       },
     };
   }
+
   getConfig(gateway: ExternalApiName): GatewayConfig {
     return this.getGatewaysConfig().gateways[gateway];
   }

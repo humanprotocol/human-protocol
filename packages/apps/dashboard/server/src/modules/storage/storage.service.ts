@@ -1,12 +1,13 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import * as Minio from 'minio';
 import { S3ConfigService } from '../../common/config/s3-config.service';
-import { Readable } from 'stream';
+import logger from '../../logger';
 
 @Injectable()
 export class StorageService {
-  private readonly logger = new Logger(StorageService.name);
-  public readonly minioClient: Minio.Client;
+  private readonly logger = logger.child({ context: StorageService.name });
+
+  readonly minioClient: Minio.Client;
 
   constructor(private s3ConfigService: S3ConfigService) {
     this.minioClient = new Minio.Client({
@@ -18,7 +19,7 @@ export class StorageService {
     });
   }
 
-  public async downloadFile(key: string): Promise<any> {
+  async downloadFile(key: string): Promise<Buffer> {
     try {
       const isBucketExists = await this.minioClient.bucketExists(
         this.s3ConfigService.bucket,
@@ -27,33 +28,24 @@ export class StorageService {
         throw new NotFoundException('Bucket not found');
       }
 
-      const response: Readable = await this.minioClient.getObject(
+      const fileStream = await this.minioClient.getObject(
         this.s3ConfigService.bucket,
         key,
       );
 
-      const chunks: any[] = [];
-      return new Promise((resolve, reject) => {
-        response.on('data', (chunk) => {
-          chunks.push(chunk);
-        });
+      const chunks: Buffer[] = [];
+      for await (const chunk of fileStream) {
+        chunks.push(Buffer.from(chunk));
+      }
 
-        response.on('end', () => {
-          const fileContent = Buffer.concat(chunks).toString();
-          try {
-            resolve(JSON.parse(fileContent || ''));
-          } catch (error) {
-            reject(new Error('Error parsing JSON'));
-          }
-        });
-
-        response.on('error', (err) => {
-          reject(err);
-        });
+      return Buffer.concat(chunks);
+    } catch (error) {
+      const message = 'Failed to download file';
+      this.logger.error(message, {
+        key,
+        error,
       });
-    } catch (e) {
-      this.logger.log(e);
-      return [];
+      throw new Error(message);
     }
   }
 }

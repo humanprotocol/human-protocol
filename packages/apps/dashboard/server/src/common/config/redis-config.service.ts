@@ -13,13 +13,20 @@ export const HMT_PREFIX = 'hmt-';
 
 @Injectable()
 export class RedisConfigService {
-  constructor(private configService: ConfigService) {}
+  constructor(private readonly configService: ConfigService) {}
+
   get redisHost(): string {
     return this.configService.get<string>('REDIS_HOST', DEFAULT_REDIS_HOST);
   }
+
   get redisPort(): number {
     return this.configService.get<number>('REDIS_PORT', DEFAULT_REDIS_PORT);
   }
+
+  get redisDbNumber(): number {
+    return this.configService.get<number>('REDIS_DB', 0);
+  }
+
   get cacheHmtPriceTTL(): number {
     return (
       this.configService.get<number>(
@@ -28,6 +35,7 @@ export class RedisConfigService {
       ) * 1000
     );
   }
+
   get cacheHmtGeneralStatsTTL(): number {
     return (
       this.configService.get<number>(
@@ -36,12 +44,14 @@ export class RedisConfigService {
       ) * 1000
     );
   }
+
   get hmtPriceCacheKey(): string {
     return this.configService.get<string>(
       'HMT_PRICE_CACHE_KEY',
       DEFAULT_HMT_PRICE_CACHE_KEY,
     );
   }
+
   get hmtGeneralStatsCacheKey(): string {
     return this.configService.get<string>(
       'HMT_GENERAL_STATS_CACHE_KEY',

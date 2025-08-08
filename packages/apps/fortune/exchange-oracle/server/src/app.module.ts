@@ -19,6 +19,7 @@ import { UserModule } from './modules/user/user.module';
 import { Web3Module } from './modules/web3/web3.module';
 import { WebhookModule } from './modules/webhook/webhook.module';
 import { HttpValidationPipe } from './common/pipes';
+import Environment from './common/utils/environment';
 
 @Module({
   providers: [
@@ -54,7 +55,7 @@ import { HttpValidationPipe } from './common/pipes';
       /**
        * First value found takes precendece
        */
-      envFilePath: [`.env.${process.env.NODE_ENV}`, '.env.local', '.env'],
+      envFilePath: [`.env.${Environment.name}`, '.env.local', '.env'],
       validationSchema: envValidator,
     }),
     DatabaseModule,

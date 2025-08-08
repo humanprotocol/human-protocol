@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { JobRepository } from '../job/job.repository';
 import { AssignmentRepository } from '../assignment/assignment.repository';
 import { AssignmentStatsDto, OracleStatsDto } from './stats.dto';
@@ -6,7 +6,6 @@ import { JobStatus } from '../../common/enums/job';
 
 @Injectable()
 export class StatsService {
-  public readonly logger = new Logger(StatsService.name);
   constructor(
     private jobRepository: JobRepository,
     private assignmentRepository: AssignmentRepository,

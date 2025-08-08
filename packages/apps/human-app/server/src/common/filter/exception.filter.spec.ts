@@ -1,9 +1,9 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { GlobalExceptionsFilter } from './global-exceptions.filter';
+import { ExceptionFilter } from './exceptions.filter';
 import { Test, TestingModule } from '@nestjs/testing';
 
-describe('GlobalExceptionsFilter', () => {
-  let filter: GlobalExceptionsFilter;
+describe('ExceptionFilter', () => {
+  let filter: ExceptionFilter;
   let mockJson: jest.Mock;
   let mockStatus: jest.Mock;
   let mockGetResponse: jest.Mock;
@@ -13,15 +13,16 @@ describe('GlobalExceptionsFilter', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
     const module: TestingModule = await Test.createTestingModule({
-      providers: [GlobalExceptionsFilter],
+      providers: [ExceptionFilter],
     }).compile();
-    filter = module.get<GlobalExceptionsFilter>(GlobalExceptionsFilter);
+    filter = module.get<ExceptionFilter>(ExceptionFilter);
     mockJson = jest.fn();
     mockStatus = jest.fn().mockImplementation(() => ({
       json: mockJson,
     }));
     mockGetResponse = jest.fn().mockImplementation(() => ({
       status: mockStatus,
+      removeHeader: jest.fn(),
     }));
     mockHttpArgumentsHost = jest.fn().mockImplementation(() => ({
       getResponse: mockGetResponse,

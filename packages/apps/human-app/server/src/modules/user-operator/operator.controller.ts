@@ -32,10 +32,10 @@ export class OperatorController {
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
 
-  @Post('/auth/web3/signup')
-  @HttpCode(200)
   @ApiOperation({ summary: 'Operator signup' })
   @Public()
+  @HttpCode(200)
+  @Post('/auth/web3/signup')
   async signupOperator(
     @Body() signupOperatorDto: SignupOperatorDto,
   ): Promise<SignupOperatorResponse> {
@@ -47,10 +47,10 @@ export class OperatorController {
     return this.service.signupOperator(signupOperatorCommand);
   }
 
-  @Post('/auth/web3/signin')
-  @HttpCode(200)
   @ApiOperation({ summary: 'Operator signin' })
   @Public()
+  @HttpCode(200)
+  @Post('/auth/web3/signin')
   async signinOperator(
     @Body() dto: SigninOperatorDto,
   ): Promise<SigninOperatorResponse> {
@@ -62,12 +62,12 @@ export class OperatorController {
     return this.service.signinOperator(command);
   }
 
-  @Post('/disable-operator')
-  @HttpCode(200)
   @ApiOperation({
     summary: 'Endpoint to disable an operator',
   })
   @ApiBearerAuth()
+  @HttpCode(200)
+  @Post('/disable-operator')
   async disableOperator(
     @Body() disableOperatorDto: DisableOperatorDto,
     @Request() req: RequestWithUser,
@@ -81,12 +81,12 @@ export class OperatorController {
     await this.service.disableOperator(disableOperatorCommand);
   }
 
-  @Post('/enable-operator')
-  @HttpCode(200)
   @ApiOperation({
     summary: 'Endpoint to enable an operator',
   })
   @ApiBearerAuth()
+  @HttpCode(200)
+  @Post('/enable-operator')
   async enable(
     @Body() enableOperatorDto: EnableOperatorDto,
     @Request() req: RequestWithUser,

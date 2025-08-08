@@ -1,6 +1,6 @@
 import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
-import { Body, Controller, Get, Post, Request } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Post, Request } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -24,7 +24,6 @@ export class AbuseController {
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
 
-  @Post('/report')
   @ApiOperation({
     summary: 'Report an identified abuse',
   })
@@ -32,7 +31,9 @@ export class AbuseController {
     status: 200,
     description: 'Abuse report successfully submitted',
   })
-  public async reportAbuse(
+  @HttpCode(200)
+  @Post('/report')
+  async reportAbuse(
     @Body() AbuseDto: ReportAbuseDto,
     @Request() req: RequestWithUser,
   ): Promise<void> {
@@ -45,7 +46,6 @@ export class AbuseController {
     return this.service.reportAbuse(AbuseCommand);
   }
 
-  @Get('/reports')
   @ApiOperation({
     summary: 'Retrieve all abuse entities created by the authenticated user',
   })
@@ -54,7 +54,8 @@ export class AbuseController {
     description: 'List of abuse reports',
     type: ReportedAbuseResponse,
   })
-  public async getUserAbuseReports(
+  @Get('/reports')
+  async getUserAbuseReports(
     @Request() req: RequestWithUser,
   ): Promise<ReportedAbuseResponse> {
     return this.service.getUserAbuseReports(req.token);

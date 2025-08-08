@@ -58,6 +58,8 @@ export class ExceptionFilter implements IExceptionFilter {
       this.logger.error('Unhandled exception', exception);
     }
 
+    response.removeHeader('Cache-Control');
+
     response.status(status).json(
       Object.assign(
         {

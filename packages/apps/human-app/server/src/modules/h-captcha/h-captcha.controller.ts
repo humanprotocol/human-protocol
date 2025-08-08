@@ -1,6 +1,15 @@
 import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
-import { Body, Controller, Get, Header, Post, Request } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Header,
+  HttpCode,
+  Post,
+  Request,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { RequestWithUser } from '../../common/interfaces/jwt';
 import { JwtUserData } from '../../common/utils/jwt-token.model';
@@ -30,8 +39,9 @@ export class HCaptchaController {
   ) {}
 
   @ApiOperation({ summary: 'Enables h-captcha labeling' })
+  @HttpCode(200)
   @Post('/enable')
-  public async enableLabeling(
+  async enableLabeling(
     @Request() req: RequestWithUser,
   ): Promise<EnableLabelingResponse> {
     const command = {
@@ -41,13 +51,14 @@ export class HCaptchaController {
   }
 
   @ApiOperation({ summary: 'Sends solution for verification' })
+  @HttpCode(200)
   @Post('/verify')
-  public async verifyToken(
+  async verifyToken(
     @Body() dto: VerifyTokenDto,
     @Request() req: RequestWithUser,
   ): Promise<VerifyTokenResponse> {
     if (!req.user.site_key) {
-      throw new Error('Missing site key');
+      throw new BadRequestException('Labeling is not set up');
     }
     const command = this.mapper.map(req.user, JwtUserData, VerifyTokenCommand);
     command.response = dto.token;
@@ -56,13 +67,13 @@ export class HCaptchaController {
   }
 
   @ApiOperation({ summary: 'Gets global daily HMT spent' })
-  @Header('Cache-Control', 'public, max-age=60')
+  @Header('Cache-Control', 'private, max-age=60')
   @Get('/daily-hmt-spent')
-  public async getDailyHmtSpent(
+  async getDailyHmtSpent(
     @Request() req: RequestWithUser,
   ): Promise<DailyHmtSpentResponse> {
     if (!req.user.site_key) {
-      throw new Error('Missing site key');
+      throw new BadRequestException('Labeling is not set up');
     }
     const command = this.mapper.map(
       req.user,
@@ -73,13 +84,13 @@ export class HCaptchaController {
   }
 
   @ApiOperation({ summary: 'Gets stats per user' })
-  @Header('Cache-Control', 'public, max-age=60')
+  @Header('Cache-Control', 'private, max-age=60')
   @Get('/user-stats')
-  public async getUserStats(
+  async getUserStats(
     @Request() req: RequestWithUser,
   ): Promise<UserStatsResponse> {
     if (!req.user.email || !req.user.site_key) {
-      throw new Error('Missing email or site key');
+      throw new BadRequestException('Labeling is not set up');
     }
     const command = this.mapper.map(req.user, JwtUserData, UserStatsCommand);
     return this.service.getUserStats(command);

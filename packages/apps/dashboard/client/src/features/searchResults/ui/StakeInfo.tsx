@@ -8,9 +8,9 @@ import SectionWrapper from '@/shared/ui/SectionWrapper';
 import TokenAmount from './TokenAmount';
 
 type Props = {
-  amountStaked?: number | null;
-  amountLocked?: number | null;
-  amountWithdrawable?: number | null;
+  amountStaked?: string | number | null;
+  amountLocked?: string | number | null;
+  amountWithdrawable?: string | number | null;
 };
 
 const StakeInfo: FC<Props> = ({
@@ -26,7 +26,7 @@ const StakeInfo: FC<Props> = ({
         Stake Info
       </Typography>
       <Stack gap={4}>
-        {Number.isFinite(amountStaked) && (
+        {Number.isFinite(Number(amountStaked)) && (
           <Stack gap={{ xs: 1, md: 0 }} direction={{ sm: 'column', md: 'row' }}>
             <Typography variant="subtitle2" width={300}>
               Staked Tokens
@@ -34,7 +34,7 @@ const StakeInfo: FC<Props> = ({
             <TokenAmount amount={amountStaked} />
           </Stack>
         )}
-        {Number.isFinite(amountLocked) && (
+        {Number.isFinite(Number(amountLocked)) && (
           <Stack gap={{ xs: 1, md: 0 }} direction={{ sm: 'column', md: 'row' }}>
             <Typography variant="subtitle2" width={300}>
               Locked Tokens
@@ -42,7 +42,7 @@ const StakeInfo: FC<Props> = ({
             <TokenAmount amount={amountLocked} />
           </Stack>
         )}
-        {Number.isFinite(amountWithdrawable) && (
+        {Number.isFinite(Number(amountWithdrawable)) && (
           <Stack gap={{ xs: 1, md: 0 }} direction={{ sm: 'column', md: 'row' }}>
             <Typography variant="subtitle2" width={300}>
               Withdrawable Tokens

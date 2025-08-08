@@ -1,6 +1,6 @@
 import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, HttpCode, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Public } from '../../common/decorators';
 import {
@@ -19,9 +19,10 @@ export class TokenRefreshController {
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
 
-  @Post('/auth/refresh')
   @ApiOperation({ summary: 'Refresh token' })
-  public refreshToken(
+  @HttpCode(200)
+  @Post('/auth/refresh')
+  async refreshToken(
     @Body() dto: TokenRefreshDto,
   ): Promise<TokenRefreshResponse> {
     const command = this.mapper.map(dto, TokenRefreshDto, TokenRefreshCommand);

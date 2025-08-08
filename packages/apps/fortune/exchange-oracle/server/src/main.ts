@@ -1,16 +1,18 @@
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { json, urlencoded } from 'body-parser';
 import { useContainer } from 'class-validator';
 
-import { AppModule } from './app.module';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { ServerConfigService } from './common/config/server-config.service';
+import logger, { nestLoggerOverride } from './logger';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create<INestApplication>(AppModule, {
     cors: true,
+    logger: nestLoggerOverride,
   });
 
   const configService: ConfigService = app.get(ConfigService);
@@ -18,21 +20,6 @@ async function bootstrap() {
 
   const host = serverConfigService.host;
   const port = serverConfigService.port;
-
-  // app.enableCors({
-  //   origin:
-  //     process.env.NODE_ENV === 'development' ||
-  //     process.env.NODE_ENV === 'staging'
-  //       ? [
-  //           `http://localhost:${port}`,
-  //           `http://127.0.0.1:${port}`,
-  //           `http://0.0.0.0:${port}`,
-  //           `http://${host}:${port}`,
-  //         ]
-  //       : [`http://${host}:${port}`],
-  //   credentials: true,
-  //   exposedHeaders: ['Content-Disposition'],
-  // });
 
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
@@ -51,7 +38,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
   await app.listen(port, host, async () => {
-    console.info(`API server is running on http://${host}:${port}`);
+    logger.info(`API server is running on http://${host}:${port}`);
   });
 }
 

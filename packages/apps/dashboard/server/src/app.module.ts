@@ -1,16 +1,17 @@
 import { CacheModule } from '@nestjs/cache-manager';
+import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
-import { Module } from '@nestjs/common';
 
 import * as Joi from 'joi';
 
 import { AppController } from './app.controller';
 import { CacheFactoryConfig } from './common/config/cache-factory.config';
 import { CommonConfigModule } from './common/config/config.module';
+import Environment from './common/utils/environment';
 import { DetailsModule } from './modules/details/details.module';
-import { StatsModule } from './modules/stats/stats.module';
 import { NetworksModule } from './modules/networks/networks.module';
+import { StatsModule } from './modules/stats/stats.module';
 
 @Module({
   imports: [
@@ -18,13 +19,14 @@ import { NetworksModule } from './modules/networks/networks.module';
       /**
        * First value found takes precendece
        */
-      envFilePath: [`.env.${process.env.NODE_ENV}`, '.env.local', '.env'],
+      envFilePath: [`.env.${Environment.name}`, '.env.local', '.env'],
       isGlobal: true,
       validationSchema: Joi.object({
         HOST: Joi.string().required(),
         PORT: Joi.number().port().default(3000),
         REDIS_HOST: Joi.string(),
         REDIS_PORT: Joi.number(),
+        REDIS_DB: Joi.number(),
         SUBGRAPH_API_KEY: Joi.string(),
         HCAPTCHA_API_KEY: Joi.string().required(),
         CACHE_HMT_PRICE_TTL: Joi.number(),

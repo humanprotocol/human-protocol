@@ -4,8 +4,8 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
   Post,
-  Put,
   Query,
   Request,
 } from '@nestjs/common';
@@ -33,11 +33,12 @@ export class JobAssignmentController {
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
 
-  @Post('/job')
   @ApiOperation({
     summary: 'Request to assign a job to a logged user',
   })
-  public async assignJob(
+  @HttpCode(200)
+  @Post('/job')
+  async assignJob(
     @Body() jobAssignmentDto: JobAssignmentDto,
     @Request() req: RequestWithUser,
   ): Promise<JobAssignmentResponse> {
@@ -50,11 +51,11 @@ export class JobAssignmentController {
     return this.service.processJobAssignment(jobAssignmentCommand);
   }
 
-  @Get('/job')
   @ApiOperation({
     summary: 'Request to get jobs assigned to a logged user',
   })
-  public async getAssignedJobs(
+  @Get('/job')
+  async getAssignedJobs(
     @Query() jobsAssignmentParamsDto: JobsFetchParamsDto,
     @Request() req: RequestWithUser,
   ): Promise<JobsFetchResponse> {
@@ -68,11 +69,12 @@ export class JobAssignmentController {
     return this.service.processGetAssignedJobs(jobsAssignmentParamsCommand);
   }
 
-  @Post('/resign-job')
   @ApiOperation({
     summary: 'Request to resign from assigment',
   })
-  public async resignAssigment(
+  @HttpCode(200)
+  @Post('/resign-job')
+  async resignAssigment(
     @Body() dto: ResignJobDto,
     @Request() req: RequestWithUser,
   ) {
@@ -81,11 +83,12 @@ export class JobAssignmentController {
     return this.service.resignJob(command);
   }
 
-  @Put('/refresh')
   @ApiOperation({
     summary: 'Request to refresh assigments data',
   })
-  public async refreshAssigments(
+  @HttpCode(200)
+  @Post('/refresh')
+  async refreshAssigments(
     @Body() dto: RefreshJobDto,
     @Request() req: RequestWithUser,
   ) {

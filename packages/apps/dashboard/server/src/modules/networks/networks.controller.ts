@@ -2,6 +2,7 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   Controller,
   Get,
+  Header,
   HttpCode,
   UsePipes,
   ValidationPipe,
@@ -15,8 +16,6 @@ import { ChainId } from '@human-protocol/sdk';
 export class NetworksController {
   constructor(private readonly networksService: NetworksService) {}
 
-  @Get('/operating')
-  @HttpCode(200)
   @ApiOperation({
     summary: 'Get recently used networks',
     description: 'Endpoint to return networks filtered by recent activity.',
@@ -26,7 +25,10 @@ export class NetworksController {
     description: 'Networks retrieved successfully',
     type: Array<ChainId>,
   })
-  public async getOperatingNetworks(): Promise<ChainId[]> {
+  @Header('Cache-Control', 'public, max-age=3600')
+  @HttpCode(200)
+  @Get('/operating')
+  async getOperatingNetworks(): Promise<ChainId[]> {
     return this.networksService.getOperatingNetworks();
   }
 }

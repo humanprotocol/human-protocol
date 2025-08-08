@@ -1,38 +1,41 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
+import { Injectable } from '@nestjs/common';
+import { AxiosRequestConfig } from 'axios';
+import { lastValueFrom } from 'rxjs';
+import { GatewayConfigService } from '../../common/config/gateway-config.service';
+import { GatewayEndpoints } from '../../common/config/gateway-config.types';
+import { ExternalApiName } from '../../common/enums/external-api-name';
+import { HCaptchaLabelingVerifyEndpoints } from '../../common/enums/reputation-oracle-endpoints';
 import {
   GatewayConfig,
   GatewayEndpointConfig,
 } from '../../common/interfaces/endpoint.interface';
-import { HttpService } from '@nestjs/axios';
-import { GatewayConfigService } from '../../common/config/gateway-config.service';
-import { InjectMapper } from '@automapper/nestjs';
-import { Mapper } from '@automapper/core';
-import { ExternalApiName } from '../../common/enums/external-api-name';
-import { GatewayEndpoints } from '../../common/config/gateway-config.types';
-import { RequestDataType } from '../reputation-oracle/reputation-oracle.interface';
-import { AxiosRequestConfig } from 'axios';
-import { lastValueFrom } from 'rxjs';
+import { toCleanObjParams } from '../../common/utils/gateway-common.utils';
+import logger from '../../logger';
+import * as errorUtils from '../../common/utils/error';
 import {
   VerifyTokenApiResponse,
   VerifyTokenCommand,
   VerifyTokenParams,
 } from '../../modules/h-captcha/model/verify-token.model';
-import { HCaptchaLabelingVerifyEndpoints } from '../../common/enums/reputation-oracle-endpoints';
-import { toCleanObjParams } from '../../common/utils/gateway-common.utils';
+import { RequestDataType } from '../reputation-oracle/reputation-oracle.interface';
 
-Injectable();
+@Injectable()
 export class HCaptchaVerifyGateway {
   private readonly gatewayConfig: GatewayConfig;
-  private readonly logger = new Logger(HCaptchaVerifyGateway.name);
+  private readonly logger = logger.child({
+    context: HCaptchaVerifyGateway.name,
+  });
+
   constructor(
-    private httpService: HttpService,
+    private readonly httpService: HttpService,
     gatewayConfigService: GatewayConfigService,
-    @InjectMapper() private readonly mapper: Mapper,
   ) {
     this.gatewayConfig = gatewayConfigService.getConfig(
       ExternalApiName.HCAPTCHA_LABELING_VERIFY,
     );
   }
+
   private getEndpointOptions(
     endpointName: GatewayEndpoints,
     data?: RequestDataType,
@@ -54,12 +57,7 @@ export class HCaptchaVerifyGateway {
       data: data,
     } as AxiosRequestConfig;
   }
-  private async handleRequestToHCaptchaLabelingApi<T>(
-    options: AxiosRequestConfig,
-  ): Promise<T> {
-    const response = await lastValueFrom(this.httpService.request(options));
-    return response.data;
-  }
+
   async sendTokenToVerify(
     command: VerifyTokenCommand,
   ): Promise<VerifyTokenApiResponse | undefined> {
@@ -75,11 +73,15 @@ export class HCaptchaVerifyGateway {
         secret: command.secret,
       } as VerifyTokenParams;
       options.params = toCleanObjParams(params, options.params);
-      return this.handleRequestToHCaptchaLabelingApi<VerifyTokenApiResponse>(
-        options,
+
+      const response = await lastValueFrom(
+        this.httpService.request<VerifyTokenApiResponse>(options),
       );
-    } catch (e) {
-      this.logger.error('Error: ', e);
+      return response.data;
+    } catch (error) {
+      this.logger.error('Error while sending hCaptcha token for verification', {
+        error: errorUtils.formatError(error),
+      });
     }
   }
 }

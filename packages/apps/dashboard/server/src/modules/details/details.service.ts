@@ -1,49 +1,47 @@
-import { plainToInstance } from 'class-transformer';
-import {
-  BadRequestException,
-  Injectable,
-  Logger,
-  Inject,
-} from '@nestjs/common';
-import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import {
   ChainId,
   EscrowUtils,
-  TransactionUtils,
-  OperatorUtils,
   IEscrowsFilter,
-  Role,
-  NETWORKS,
-  OrderDirection,
-  KVStoreUtils,
   IOperatorsFilter,
+  KVStoreUtils,
+  NETWORKS,
+  OperatorUtils,
+  OrderDirection,
+  Role,
   StakingClient,
+  TransactionUtils,
   WorkerUtils,
 } from '@human-protocol/sdk';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 
-import { WalletDto } from './dto/wallet.dto';
-import { EscrowDto, EscrowPaginationDto } from './dto/escrow.dto';
-import { OperatorDto } from './dto/operator.dto';
-import { TransactionPaginationDto } from './dto/transaction.dto';
-import { EnvironmentConfigService } from '../../common/config/env-config.service';
-import { HttpService } from '@nestjs/axios';
-import { firstValueFrom } from 'rxjs';
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
+import { HttpService } from '@nestjs/axios';
 import { ethers } from 'ethers';
+import { firstValueFrom } from 'rxjs';
+import { GetOperatorsPaginationOptions } from '../../common/types';
+import { EnvironmentConfigService } from '../../common/config/env-config.service';
 import { NetworkConfigService } from '../../common/config/network-config.service';
-import { OperatorsOrderBy } from '../../common/enums/operator';
-import { ReputationLevel } from '../../common/enums/reputation';
 import {
   MAX_LEADERS_COUNT,
   MIN_AMOUNT_STAKED,
   REPUTATION_PLACEHOLDER,
 } from '../../common/constants/operator';
-import { GetOperatorsPaginationOptions } from 'src/common/types';
+import * as httpUtils from '../../common/utils/http';
+import { OperatorsOrderBy } from '../../common/enums/operator';
+import { ReputationLevel } from '../../common/enums/reputation';
+import logger from '../../logger';
 import { KVStoreDataDto } from './dto/details-response.dto';
+import { EscrowDto, EscrowPaginationDto } from './dto/escrow.dto';
+import { OperatorDto } from './dto/operator.dto';
+import { TransactionPaginationDto } from './dto/transaction.dto';
+import { WalletDto } from './dto/wallet.dto';
 
 @Injectable()
 export class DetailsService {
-  private readonly logger = new Logger(DetailsService.name);
+  private readonly logger = logger.child({ context: DetailsService.name });
+
   constructor(
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     private readonly configService: EnvironmentConfigService,
@@ -328,7 +326,12 @@ export class DetailsService {
       }
       return { address, reputation };
     } catch (error) {
-      this.logger.error('Error fetching reputation:', error);
+      this.logger.error('Error fetching operator reputation', {
+        chainId,
+        address,
+        role,
+        error: httpUtils.formatAxiosError(error),
+      });
       return { address, reputation: REPUTATION_PLACEHOLDER };
     }
   }
@@ -364,10 +367,12 @@ export class DetailsService {
       );
       return response.data;
     } catch (error) {
-      this.logger.error(
-        `Error fetching reputations for chain id ${chainId}`,
-        error,
-      );
+      this.logger.error('Error fetching reputations for chain', {
+        chainId,
+        orderBy,
+        orderDirection,
+        error: httpUtils.formatAxiosError(error),
+      });
       return [];
     }
   }

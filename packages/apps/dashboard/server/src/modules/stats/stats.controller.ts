@@ -1,5 +1,5 @@
 import { ApiOperation, ApiResponse, ApiTags, ApiQuery } from '@nestjs/swagger';
-import { Controller, Get, HttpCode, Query } from '@nestjs/common';
+import { Controller, Get, Header, HttpCode, Query } from '@nestjs/common';
 
 import { StatsService } from './stats.service';
 import { HmtPriceDto } from './dto/hmt-price.dto';
@@ -16,8 +16,6 @@ import { HmtGeneralStatsDto } from './dto/hmt-general-stats.dto';
 export class StatsController {
   constructor(private readonly statsService: StatsService) {}
 
-  @Get('/hmt-price')
-  @HttpCode(200)
   @ApiOperation({
     summary: 'Get current HMT price',
     description: 'Endpoint to return a current HMT price.',
@@ -27,13 +25,14 @@ export class StatsController {
     description: 'Price retrieved successfully',
     type: HmtPriceDto,
   })
-  public async hmtPrice(): Promise<HmtPriceDto> {
+  @Header('Cache-Control', 'public, max-age=60')
+  @Get('/hmt-price')
+  @HttpCode(200)
+  async hmtPrice(): Promise<HmtPriceDto> {
     const hmtPrice = await this.statsService.hmtPrice();
     return { hmtPrice };
   }
 
-  @Get('/hcaptcha/daily')
-  @HttpCode(200)
   @ApiOperation({
     summary: 'Get Hcaptcha stats',
     description: 'Endpoint to return Hcaptcha stats.',
@@ -55,7 +54,10 @@ export class StatsController {
     description: 'Stats retrieved successfully',
     type: HcaptchaDailyStatsResponseDto,
   })
-  public async hcaptchaDailyStats(
+  @Header('Cache-Control', 'public, max-age=600')
+  @HttpCode(200)
+  @Get('/hcaptcha/daily')
+  async hcaptchaDailyStats(
     @Query('from', DateValidationPipe) from: string,
     @Query('to', DateValidationPipe) to: string,
   ): Promise<HcaptchaDailyStatsResponseDto> {
@@ -63,8 +65,6 @@ export class StatsController {
     return { from, to, results };
   }
 
-  @Get('/hcaptcha/general')
-  @HttpCode(200)
   @ApiOperation({
     summary: 'Get Hcaptcha general stats',
     description: 'Endpoint to return Hcaptcha general stats.',
@@ -74,14 +74,15 @@ export class StatsController {
     description: 'Stats retrieved successfully',
     type: HcaptchaStats,
   })
-  public async hcaptchaGeneralStats(): Promise<HcaptchaStats> {
+  @Header('Cache-Control', 'public, max-age=600')
+  @HttpCode(200)
+  @Get('/hcaptcha/general')
+  async hcaptchaGeneralStats(): Promise<HcaptchaStats> {
     const result: HcaptchaStats =
       await this.statsService.hCaptchaGeneralStats();
     return result;
   }
 
-  @Get('/general')
-  @HttpCode(200)
   @ApiOperation({
     summary: 'Get HMT general stats',
     description: 'Endpoint to return HMT general stats.',
@@ -91,14 +92,15 @@ export class StatsController {
     description: 'General stats retrieved successfully',
     type: HmtGeneralStatsDto,
   })
-  public async hmtGeneral(): Promise<HmtGeneralStatsDto> {
+  @Header('Cache-Control', 'public, max-age=600')
+  @HttpCode(200)
+  @Get('/general')
+  async hmtGeneral(): Promise<HmtGeneralStatsDto> {
     const results: HmtGeneralStatsDto =
       await this.statsService.hmtGeneralStats();
     return results;
   }
 
-  @Get('/hmt/daily')
-  @HttpCode(200)
   @ApiOperation({
     summary: 'Get HMT stats',
     description: 'Endpoint to return HMT stats.',
@@ -120,7 +122,10 @@ export class StatsController {
     description: 'Stats retrieved successfully',
     type: HmtDailyStatsResponseDto,
   })
-  public async hmtDailyStats(
+  @Header('Cache-Control', 'public, max-age=600')
+  @HttpCode(200)
+  @Get('/hmt/daily')
+  async hmtDailyStats(
     @Query('from', DateValidationPipe) from: string,
     @Query('to', DateValidationPipe) to: string,
   ): Promise<HmtDailyStatsResponseDto> {

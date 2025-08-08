@@ -1,14 +1,16 @@
 import { CacheModuleAsyncOptions } from '@nestjs/common/cache';
 import { ConfigModule } from '@nestjs/config';
-import * as _ from 'lodash';
-import { RedisConfigService } from './redis-config.service';
 import { redisStore } from 'cache-manager-redis-yet';
-import { Logger } from '@nestjs/common';
+import * as _ from 'lodash';
 
-const logger = new Logger('CacheFactoryRedisStore');
+import logger from '../../logger';
+import { RedisConfigService } from './redis-config.service';
 
 const throttledRedisErrorLog = _.throttle((error) => {
-  logger.error('Redis client network error', error);
+  logger.error('Redis client network error', {
+    context: 'CacheFactoryRedisStore',
+    error,
+  });
 }, 1000 * 5);
 
 export const CacheFactoryConfig: CacheModuleAsyncOptions = {
@@ -20,6 +22,7 @@ export const CacheFactoryConfig: CacheModuleAsyncOptions = {
         host: configService.redisHost,
         port: configService.redisPort,
       },
+      database: configService.redisDbNumber,
       disableOfflineQueue: true,
     });
 

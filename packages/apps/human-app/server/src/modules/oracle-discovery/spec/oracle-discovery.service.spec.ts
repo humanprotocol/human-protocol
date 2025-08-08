@@ -180,8 +180,11 @@ describe('OracleDiscoveryService', () => {
 
     expect(result).toEqual(errorResponse);
     expect(loggerErrorSpy).toHaveBeenCalledWith(
-      `Failed to discover oracles for chain '${ChainId.POLYGON_AMOY}':`,
-      error,
+      'Failed to discover oracles for chain',
+      {
+        chainId: ChainId.POLYGON_AMOY,
+        error,
+      },
     );
   });
 
