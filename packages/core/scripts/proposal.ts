@@ -14,22 +14,27 @@ export const getProposal = async () => {
     throw new Error('One or more required environment variables are missing.');
   }
 
-  const deployerSigner = new ethers.Wallet(deployerPrivateKey, ethers.provider);
-  const governanceContract = await ethers.getContractAt(
-    'MetaHumanGovernor',
-    governorAddress,
-    deployerSigner
-  );
+  // Keep the following commented code as a reference for how to encode a contract
+  // function call within a governance proposal, useful for future proposals that
+  // need to call contract methods through governance
 
-  const encodedCall = governanceContract.interface.encodeFunctionData(
-    'setVotingPeriod',
-    [86400]
-  );
+  // const deployerSigner = new ethers.Wallet(deployerPrivateKey, ethers.provider);
+  // const governanceContract = await ethers.getContractAt(
+  //   'MetaHumanGovernor',
+  //   governorAddress,
+  //   deployerSigner
+  // );
+
+  // const encodedCall = governanceContract.interface.encodeFunctionData(
+  //   'setVotingPeriod',
+  //   [3600]
+  // );
 
   // Proposal data
-  const targets = [governorAddress];
+  const targets = [ethers.ZeroAddress];
   const values = [0];
-  const calldatas = [encodedCall];
+  // const calldatas = [encodedCall];
+  const calldatas = ['0x'];
 
   // Example inputs (replace with actual values)
   const descriptionHash = ethers.id(description);

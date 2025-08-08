@@ -26,11 +26,11 @@ async function main() {
     proposal.values,
     proposal.calldatas,
     proposal.description,
-    { value: ethers.parseEther('0.01') }
+    { value: ethers.parseEther('0.015') }
   );
 
   await transactionResponse.wait();
-  console.log('Proposal created:');
+  console.log('Proposal created:', transactionResponse.hash);
 }
 
 main()
