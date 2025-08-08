@@ -4325,7 +4325,6 @@ __metadata:
     "@types/node": "npm:22.10.5"
     "@types/passport": "npm:^0"
     "@types/passport-jwt": "npm:^4.0.1"
-    "@types/supertest": "npm:^2.0.15"
     "@typescript-eslint/eslint-plugin": "npm:^5.0.0"
     "@typescript-eslint/parser": "npm:^5.0.0"
     axios: "npm:^1.7.2"
@@ -4349,7 +4348,6 @@ __metadata:
     reflect-metadata: "npm:^0.2.2"
     rxjs: "npm:^7.2.0"
     source-map-support: "npm:^0.5.20"
-    supertest: "npm:^7.0.0"
     ts-jest: "npm:29.2.5"
     ts-node: "npm:^10.9.2"
     tsconfig-paths: "npm:4.2.0"
@@ -10779,7 +10777,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/supertest@npm:^2.0.11, @types/supertest@npm:^2.0.15":
+"@types/supertest@npm:^2.0.11":
   version: 2.0.16
   resolution: "@types/supertest@npm:2.0.16"
   dependencies:

@@ -1,6 +1,6 @@
 import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, HttpCode, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Public } from '../../common/decorators';
 import {
@@ -22,11 +22,12 @@ export class PasswordResetController {
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
 
-  @Post('/forgot-password')
   @ApiOperation({
     summary: 'Endpoint to initiate the password reset process',
   })
-  public async forgotPassword(
+  @HttpCode(200)
+  @Post('/forgot-password')
+  async forgotPassword(
     @Body() forgotPasswordDto: ForgotPasswordDto,
   ): Promise<void> {
     const forgotPasswordCommand = this.mapper.map(
@@ -37,11 +38,12 @@ export class PasswordResetController {
     return await this.service.processForgotPassword(forgotPasswordCommand);
   }
 
-  @Post('/restore-password')
   @ApiOperation({
     summary: 'Endpoint to restore the user password after reset',
   })
-  public async restorePassword(@Body() dto: RestorePasswordDto): Promise<void> {
+  @HttpCode(200)
+  @Post('/restore-password')
+  async restorePassword(@Body() dto: RestorePasswordDto): Promise<void> {
     const command = this.mapper.map(
       dto,
       RestorePasswordDto,
