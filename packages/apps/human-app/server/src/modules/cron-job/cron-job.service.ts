@@ -1,11 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { SchedulerRegistry } from '@nestjs/schedule';
+import { AxiosError } from 'axios';
 import { CronJob } from 'cron';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
 import {
   JobDiscoveryFieldName,
   JobStatus,
 } from '../../common/enums/global-common';
+import * as errorUtils from '../../common/utils/error';
 import { ExchangeOracleGateway } from '../../integrations/exchange-oracle/exchange-oracle.gateway';
 import { ReputationOracleGateway } from '../../integrations/reputation-oracle/reputation-oracle.gateway';
 import logger from '../../logger';
@@ -101,7 +103,11 @@ export class CronJobService {
         );
       }
     } catch (error) {
-      this.logger.error('Error in update jobs list job', error);
+      let formattedError = error;
+      if (error instanceof AxiosError) {
+        formattedError = errorUtils.formatError(error);
+      }
+      this.logger.error('Error in update jobs list job', formattedError);
     }
 
     this.logger.info('Update jobs list END');
@@ -156,10 +162,14 @@ export class CronJobService {
 
       await this.jobsDiscoveryService.setCachedJobs(oracle.address, allResults);
     } catch (error) {
+      let formattedError = error;
+      if (error instanceof AxiosError) {
+        formattedError = errorUtils.formatError(error);
+      }
       this.logger.error('Error while updating jobs list for oracle', {
         chainId: oracle.chainId,
         address: oracle.address,
-        error,
+        error: formattedError,
       });
       await this.handleJobListError(oracle);
     }

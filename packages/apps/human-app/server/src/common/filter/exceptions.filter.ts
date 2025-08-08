@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import logger from '../../logger';
 import { AxiosError } from 'axios';
-import * as httpUtils from '../utils/http';
+import * as errorUtils from '../utils/error';
 
 @Catch()
 export class ExceptionFilter implements IExceptionFilter {
@@ -30,7 +30,7 @@ export class ExceptionFilter implements IExceptionFilter {
     } else {
       let formattedError = exception;
       if (exception instanceof AxiosError) {
-        formattedError = httpUtils.formatAxiosError(exception);
+        formattedError = errorUtils.formatError(exception);
       }
       this.logger.error('Unhandled exception', formattedError);
     }

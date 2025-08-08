@@ -6,7 +6,7 @@ import { AxiosRequestConfig } from 'axios';
 import { lastValueFrom } from 'rxjs';
 import { HttpMethod } from '../../common/enums/http-method';
 import { toCleanObjParams } from '../../common/utils/gateway-common.utils';
-import * as httpUtils from '../../common/utils/http';
+import * as errorUtils from '../../common/utils/error';
 import logger from '../../logger';
 import {
   JobAssignmentCommand,
@@ -65,7 +65,7 @@ export class ExchangeOracleGateway {
         url: options.url,
         method: options.method,
         data: options.data,
-        error: httpUtils.formatAxiosError(error),
+        error: errorUtils.formatError(error),
       });
       throw error;
     }

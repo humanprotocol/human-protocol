@@ -12,7 +12,7 @@ import {
 } from '../../common/interfaces/endpoint.interface';
 import { toCleanObjParams } from '../../common/utils/gateway-common.utils';
 import logger from '../../logger';
-import * as httpUtils from '../../common/utils/http';
+import * as errorUtils from '../../common/utils/error';
 import {
   VerifyTokenApiResponse,
   VerifyTokenCommand,
@@ -80,7 +80,7 @@ export class HCaptchaVerifyGateway {
       return response.data;
     } catch (error) {
       this.logger.error('Error while sending hCaptcha token for verification', {
-        error: httpUtils.formatAxiosError(error),
+        error: errorUtils.formatError(error),
       });
     }
   }
