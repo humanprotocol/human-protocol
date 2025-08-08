@@ -311,7 +311,9 @@ describe('EscrowCompletionService', () => {
       mockGetEscrowStatus.mockResolvedValue(EscrowStatus.Pending);
 
       const manifestUrl = faker.internet.url();
-      mockedEscrowUtils.getEscrow.mockResolvedValueOnce({ manifestUrl } as any);
+      mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
+        manifest: manifestUrl,
+      } as any);
 
       const fortuneManifest = generateFortuneManifest();
       mockStorageService.downloadJsonLikeData.mockResolvedValueOnce(

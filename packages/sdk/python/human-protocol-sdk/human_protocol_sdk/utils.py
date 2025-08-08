@@ -307,3 +307,15 @@ def validate_url(url: str) -> bool:
         return URL(url)
 
     return True
+
+
+def validate_json(data: str) -> bool:
+    """Validates if the given string is a valid JSON.
+    :param data: String to validate
+    :return: True if the string is a valid JSON, False otherwise
+    """
+    try:
+        json.loads(data)
+        return True
+    except (ValueError, TypeError):
+        return False

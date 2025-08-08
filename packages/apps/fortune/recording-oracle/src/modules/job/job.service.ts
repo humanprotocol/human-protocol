@@ -119,9 +119,7 @@ export class JobService {
       throw new ConflictError(ErrorJob.InvalidStatus);
     }
 
-    const manifestUrl = await escrowClient.getManifestUrl(
-      webhook.escrowAddress,
-    );
+    const manifestUrl = await escrowClient.getManifest(webhook.escrowAddress);
     const { submissionsRequired, requestType }: IManifest =
       await this.storageService.download(manifestUrl);
 

@@ -101,6 +101,14 @@ Parse a transfer transaction receipt.
 * **Returns:**
   A tuple indicating if HMT was transferred and the transaction balance
 
+### human_protocol_sdk.utils.validate_json(data)
+
+Validates if the given string is a valid JSON.
+:type data: `str`
+:param data: String to validate
+:rtype: `bool`
+:return: True if the string is a valid JSON, False otherwise
+
 ### human_protocol_sdk.utils.validate_url(url)
 
 Validates the given URL.

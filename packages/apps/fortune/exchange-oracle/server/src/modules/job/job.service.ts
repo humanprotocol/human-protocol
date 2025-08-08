@@ -78,7 +78,7 @@ export class JobService {
 
     const newJobEntity = new JobEntity();
     newJobEntity.escrowAddress = escrowAddress;
-    newJobEntity.manifestUrl = await escrowClient.getManifestUrl(escrowAddress);
+    newJobEntity.manifestUrl = await escrowClient.getManifest(escrowAddress);
     newJobEntity.chainId = chainId;
     newJobEntity.rewardToken = await tokenContract.symbol();
     newJobEntity.status = JobStatus.ACTIVE;

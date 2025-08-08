@@ -67,6 +67,7 @@ from human_protocol_sdk.utils import (
     get_factory_interface,
     get_erc20_interface,
     handle_error,
+    validate_json,
 )
 from web3 import Web3, contract
 from web3 import eth
@@ -127,7 +128,7 @@ class EscrowConfig:
         recording_oracle_fee: Decimal,
         reputation_oracle_fee: Decimal,
         exchange_oracle_fee: Decimal,
-        manifest_url: str,
+        manifest: str,
         hash: str,
     ):
         """
@@ -137,7 +138,7 @@ class EscrowConfig:
         :param reputation_oracle_address: Address of the Reputation Oracle
         :param recording_oracle_fee: Fee percentage of the Recording Oracle
         :param reputation_oracle_fee: Fee percentage of the Reputation Oracle
-        :param manifest_url: Manifest file url
+        :param manifest: Manifest data (can be a URL or JSON string)
         :param hash: Manifest file hash
         """
         if not Web3.is_address(recording_oracle_address):
@@ -161,8 +162,8 @@ class EscrowConfig:
             raise EscrowClientError("Fee must be between 0 and 100")
         if recording_oracle_fee + reputation_oracle_fee + exchange_oracle_fee > 100:
             raise EscrowClientError("Total fee must be less than 100")
-        if not validate_url(manifest_url):
-            raise EscrowClientError(f"Invalid manifest URL: {manifest_url}")
+        if not validate_url(manifest) and not validate_json(manifest):
+            raise EscrowClientError("Invalid empty manifest")
         if not hash:
             raise EscrowClientError("Invalid empty manifest hash")
 
@@ -172,7 +173,7 @@ class EscrowConfig:
         self.recording_oracle_fee = recording_oracle_fee
         self.reputation_oracle_fee = reputation_oracle_fee
         self.exchange_oracle_fee = exchange_oracle_fee
-        self.manifest_url = manifest_url
+        self.manifest = manifest
         self.hash = hash
 
 
@@ -362,7 +363,7 @@ class EscrowClient:
                     escrow_config.reputation_oracle_fee,
                     escrow_config.recording_oracle_fee,
                     escrow_config.exchange_oracle_fee,
-                    escrow_config.manifest_url,
+                    escrow_config.manifest,
                     escrow_config.hash,
                 )
                 .transact(tx_options or {})
@@ -1138,13 +1139,13 @@ class EscrowClient:
 
         return self._get_escrow_contract(escrow_address).functions.manifestHash().call()
 
-    def get_manifest_url(self, escrow_address: str) -> str:
+    def get_manifest(self, escrow_address: str) -> str:
         """
-        Gets the manifest file URL.
+        Gets the manifest data (can be a URL or JSON string).
 
         :param escrow_address: Address of the escrow
 
-        :return str: Manifest file url
+        :return str: Manifest data
 
         :raise EscrowClientError: If an error occurs while checking the parameters
 
@@ -1160,7 +1161,7 @@ class EscrowClient:
                 w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
                 escrow_client = EscrowClient(w3)
 
-                url = escrow_client.get_manifest_url(
+                manifest = escrow_client.get_manifest(
                     "0x62dD51230A30401C455c8398d06F85e4EaB6309f"
                 )
         """
