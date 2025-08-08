@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
-import * as httpUtils from '../../common/utils/http';
+import * as errorUtils from '../utils/error';
 import logger from '../../logger';
 
 // This interceptor injection is guarded via IS_AXIOS_REQUEST_LOGGING_ENABLED environment variable.
@@ -29,7 +29,7 @@ export class AxiosRequestInterceptor {
       },
       (error) => {
         this.logger.error('Request error', {
-          error: httpUtils.formatAxiosError(error),
+          error: errorUtils.formatError(error),
         });
         return Promise.reject(error);
       },
@@ -39,7 +39,7 @@ export class AxiosRequestInterceptor {
       (response) => response,
       (error) => {
         this.logger.error('Response error', {
-          error: httpUtils.formatAxiosError(error),
+          error: errorUtils.formatError(error),
         });
         return Promise.reject(error);
       },
