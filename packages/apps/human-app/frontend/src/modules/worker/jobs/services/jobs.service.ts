@@ -93,7 +93,7 @@ async function resignJob(data: RejectTaskBody) {
 
 async function refreshJobs(data: RefreshJobsBody) {
   try {
-    await authorizedHumanAppApiClient.put(apiPaths.refreshJobs, {
+    await authorizedHumanAppApiClient.post(apiPaths.refreshJobs, {
       body: { ...data },
     });
   } catch (error: unknown) {

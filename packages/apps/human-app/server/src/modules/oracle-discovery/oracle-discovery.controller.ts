@@ -34,7 +34,7 @@ export class OracleDiscoveryController {
     type: Array<DiscoveredOracle>,
     description: 'List of oracles',
   })
-  @Header('Cache-Control', 'public, max-age=60')
+  @Header('Cache-Control', 'private, max-age=60')
   @Get('/oracles')
   public async getOracles(
     @Request() req: RequestWithUser,

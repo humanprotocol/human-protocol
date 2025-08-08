@@ -136,7 +136,7 @@ describe('ReputationOracleGateway', () => {
     it('should successfully call the reputation oracle worker signup endpoint', async () => {
       nock('https://example.com')
         .post('/auth/signup', expectedData)
-        .reply(201, '');
+        .reply(200, '');
 
       httpServiceMock.request.mockReturnValue(of({}));
 
@@ -189,7 +189,7 @@ describe('ReputationOracleGateway', () => {
     it('should successfully call the reputation oracle exchange oracle registration endpoint', async () => {
       nock('https://example.com')
         .post('/user/exchange-oracle-registration', expectedData)
-        .reply(201, '');
+        .reply(200, '');
 
       httpServiceMock.request.mockReturnValue(of({}));
 
@@ -297,7 +297,7 @@ describe('ReputationOracleGateway', () => {
 
       nock('https://expample.com')
         .post('/auth/web3/signup', expectedData)
-        .reply(201, '');
+        .reply(200, '');
 
       httpServiceMock.request.mockReturnValue(of({}));
 
@@ -323,7 +323,7 @@ describe('ReputationOracleGateway', () => {
     it('should successfully call the reputation oracle worker signin endpoint', async () => {
       nock('https://example.com')
         .post('/auth/signin', expectedData)
-        .reply(201, '');
+        .reply(200, '');
 
       httpServiceMock.request.mockReturnValue(of({}));
 
@@ -376,7 +376,7 @@ describe('ReputationOracleGateway', () => {
 
       nock('https://example.com')
         .post('/email-confirmation/email-verification', { ...data })
-        .reply(201, '');
+        .reply(200, '');
 
       httpServiceMock.request.mockReturnValue(of({}));
 
@@ -430,7 +430,7 @@ describe('ReputationOracleGateway', () => {
         .post('/auth/resend-email-verification', {
           ...data,
         })
-        .reply(201, '');
+        .reply(200, '');
 
       httpServiceMock.request.mockReturnValue(of({}));
 
@@ -488,7 +488,7 @@ describe('ReputationOracleGateway', () => {
         .post('/auth/forgot-password', {
           ...data,
         })
-        .reply(201, '');
+        .reply(200, '');
 
       httpServiceMock.request.mockReturnValue(of({}));
 
@@ -539,7 +539,7 @@ describe('ReputationOracleGateway', () => {
         .post('/auth/restore-password', {
           ...data,
         })
-        .reply(201, '');
+        .reply(200, '');
 
       httpServiceMock.request.mockReturnValue(of({}));
 
@@ -647,7 +647,7 @@ describe('ReputationOracleGateway', () => {
         .post('/user/disable-operator', {
           ...data,
         })
-        .reply(201, '');
+        .reply(200, '');
 
       httpServiceMock.request.mockReturnValue(of({}));
 
@@ -703,7 +703,7 @@ describe('ReputationOracleGateway', () => {
 
   describe('sendKycProcedureStart', () => {
     it('should successfully call the reputation oracle endpoint', async () => {
-      nock('https://example.com').post('/kyc/start', {}).reply(201, '');
+      nock('https://example.com').post('/kyc/start', {}).reply(200, '');
       httpServiceMock.request.mockReturnValue(of({}));
       await expect(
         service.sendKycProcedureStart('token'),
@@ -749,7 +749,7 @@ describe('ReputationOracleGateway', () => {
 
       nock('https://example.com')
         .post('/labeler/register', {})
-        .reply(201, enableLabelingResponseFixture);
+        .reply(200, enableLabelingResponseFixture);
 
       httpServiceMock.request.mockReturnValue(of({}));
 
@@ -832,7 +832,7 @@ describe('ReputationOracleGateway', () => {
         .post('/auth/refresh', {
           ...data,
         })
-        .reply(201, '');
+        .reply(200, '');
 
       httpServiceMock.request.mockReturnValue(of({}));
 
