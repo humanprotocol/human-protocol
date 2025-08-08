@@ -4,6 +4,7 @@ import { HttpService } from '@nestjs/axios';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { Cron, SchedulerRegistry } from '@nestjs/schedule';
+import { AxiosError } from 'axios';
 import { CronJob } from 'cron';
 import dayjs from 'dayjs';
 import { lastValueFrom } from 'rxjs';
@@ -18,6 +19,7 @@ import {
   HMT_PREFIX,
   RedisConfigService,
 } from '../../common/config/redis-config.service';
+import * as httpUtils from '../../common/utils/http';
 import logger from '../../logger';
 import { NetworksService } from '../networks/networks.service';
 import { StorageService } from '../storage/storage.service';
@@ -144,9 +146,13 @@ export class StatsService implements OnModuleInit {
         }
       }
     } catch (error) {
+      let formattedError = error;
+      if (error instanceof AxiosError) {
+        formattedError = httpUtils.formatAxiosError(error);
+      }
       this.logger.error('Failed to fetch historical hCaptcha stats', {
         startDate,
-        error,
+        error: formattedError,
       });
     }
   }
@@ -214,10 +220,15 @@ export class StatsService implements OnModuleInit {
         aggregatedStats,
       );
     } catch (error) {
+      let formattedError = error;
+      if (error instanceof AxiosError) {
+        formattedError = httpUtils.formatAxiosError(error);
+      }
       this.logger.error('Failed to fetch todays hCaptcha stats', {
         today,
         from,
         to,
+        error: formattedError,
       });
     }
   }
@@ -245,7 +256,11 @@ export class StatsService implements OnModuleInit {
         aggregatedStats,
       );
     } catch (error) {
-      this.logger.error('Failed to fetch HMT general stats', error);
+      let formattedError = error;
+      if (error instanceof AxiosError) {
+        formattedError = httpUtils.formatAxiosError(error);
+      }
+      this.logger.error('Failed to fetch HMT general stats', formattedError);
     }
   }
 
@@ -358,9 +373,14 @@ export class StatsService implements OnModuleInit {
         await this.cacheManager.set(monthlyCacheKey, stats);
       }
     } catch (error) {
+      let formattedError = error;
+      if (error instanceof AxiosError) {
+        formattedError = httpUtils.formatAxiosError(error);
+      }
       this.logger.error('Failed to fetch HMT daily status', {
         from,
         to,
+        error: formattedError,
       });
     }
   }
