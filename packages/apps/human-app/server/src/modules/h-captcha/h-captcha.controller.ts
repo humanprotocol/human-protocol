@@ -64,7 +64,7 @@ export class HCaptchaController {
   }
 
   @ApiOperation({ summary: 'Gets global daily HMT spent' })
-  @Header('Cache-Control', 'public, max-age=60')
+  @Header('Cache-Control', 'private, max-age=60')
   @Get('/daily-hmt-spent')
   public async getDailyHmtSpent(
     @Request() req: RequestWithUser,
@@ -81,7 +81,7 @@ export class HCaptchaController {
   }
 
   @ApiOperation({ summary: 'Gets stats per user' })
-  @Header('Cache-Control', 'public, max-age=60')
+  @Header('Cache-Control', 'private, max-age=60')
   @Get('/user-stats')
   public async getUserStats(
     @Request() req: RequestWithUser,
