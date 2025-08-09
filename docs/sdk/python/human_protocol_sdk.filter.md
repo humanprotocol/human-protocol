@@ -17,7 +17,7 @@ Initializes a EscrowFilter instance.
   * **recording_oracle** (`Optional`[`str`]) – Recording oracle address
   * **exchange_oracle** (`Optional`[`str`]) – Exchange oracle address
   * **job_requester_id** (`Optional`[`str`]) – Job requester id
-  * **status** (`Optional`[[`Status`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.Status)]) – Escrow status
+  * **status** (`Union`[[`Status`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.Status), `List`[[`Status`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.Status)], `None`]) – Escrow status
   * **date_from** (`Optional`[`datetime`]) – Created from date
   * **date_to** (`Optional`[`datetime`]) – Created to date
   * **first** (`int`) – Number of items per page

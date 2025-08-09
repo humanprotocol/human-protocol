@@ -8,7 +8,6 @@ import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/utils/ReentrancyGuard.sol';
 
 import './interfaces/HMTokenInterface.sol';
-import './interfaces/IEscrow.sol';
 import './interfaces/IStaking.sol';
 import './libs/Stakes.sol';
 

@@ -74,8 +74,6 @@ Initializes a Escrow instance.
 * **Parameters:**
   **web3** (`Web3`) – The Web3 object
 
-#### add_trusted_handlers(\*args, \*\*kwargs)
-
 #### bulk_payout(\*args, \*\*kwargs)
 
 #### cancel(\*args, \*\*kwargs)
