@@ -54,7 +54,7 @@
     "viem": "^2.31.4",
     "vite-plugin-svgr": "^4.2.0",
     "wagmi": "^2.15.6",
-    "zod": "^3.22.4",
+    "zod": "^4.0.17",
     "zustand": "^4.5.0"
   },
   "devDependencies": {
