@@ -11,7 +11,7 @@ jobs:
     name: CVAT Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: CVAT Recording Oracle tests
         working-directory: ./packages/examples/cvat/recording-oracle
         run: docker compose -f docker-compose.test.yml up --attach test --exit-code-from test
