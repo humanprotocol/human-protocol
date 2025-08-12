@@ -214,3 +214,4 @@ a4M5ieM80J/k+DaMAmHMsTjwAqQGBWTeqe7w6aHgRvU=
 -----END PGP MESSAGE-----`;
 
 export const DEFAULT_TX_ID = 1;
+export const DEFAULT_PAYOUT_ID = 'test';

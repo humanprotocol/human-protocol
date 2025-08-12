@@ -356,3 +356,50 @@ class WorkerFilter:
         self.order_direction = order_direction
         self.first = min(max(first, 1), 1000)
         self.skip = max(skip, 0)
+
+
+class CancellationRefundFilter:
+    """
+    A class used to filter cancellation refunds.
+    """
+
+    def __init__(
+        self,
+        chain_id: ChainId,
+        escrow_address: str = None,
+        receiver: str = None,
+        date_from: datetime = None,
+        date_to: datetime = None,
+        first: int = 10,
+        skip: int = 0,
+        order_direction: OrderDirection = OrderDirection.DESC,
+    ):
+        """
+        Initializes a CancellationRefundFilter instance.
+        :param chain_id: Chain ID to request data
+        :param escrow_address: Address of the escrow to filter by
+        :param receiver: Address of the receiver to filter by
+        :param date_from: Start date for filtering
+        :param date_to: End date for filtering
+        :param first: Number of items per page
+        :param skip: Number of items to skip (for pagination)
+        :param order_direction: Order direction of results, "asc" or "desc"
+        """
+        if chain_id.value not in set(chain_id.value for chain_id in ChainId):
+            raise FilterError(f"Invalid ChainId")
+        if escrow_address and not Web3.is_address(escrow_address):
+            raise FilterError(f"Invalid escrow address: {escrow_address}")
+        if receiver and not Web3.is_address(receiver):
+            raise FilterError(f"Invalid receiver address: {receiver}")
+        if date_from and date_to and date_from > date_to:
+            raise FilterError(
+                f"Invalid dates: {date_from} must be earlier than {date_to}"
+            )
+        self.chain_id = chain_id
+        self.escrow_address = escrow_address
+        self.receiver = receiver
+        self.date_from = date_from
+        self.date_to = date_to
+        self.first = first
+        self.skip = skip
+        self.order_direction = order_direction

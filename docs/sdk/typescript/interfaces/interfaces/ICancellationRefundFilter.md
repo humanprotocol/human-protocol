@@ -2,11 +2,11 @@
 
 ***
 
-[@human-protocol/sdk](../../modules.md) / [interfaces](../README.md) / IPayoutFilter
+[@human-protocol/sdk](../../modules.md) / [interfaces](../README.md) / ICancellationRefundFilter
 
-# Interface: IPayoutFilter
+# Interface: ICancellationRefundFilter
 
-Defined in: [interfaces.ts:128](https://github.com/humanprotocol/human-protocol/blob/379b646116ffe55830ec173c1cf6576fc209b99f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L128)
+Defined in: [interfaces.ts:212](https://github.com/humanprotocol/human-protocol/blob/379b646116ffe55830ec173c1cf6576fc209b99f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L212)
 
 ## Extends
 
@@ -18,7 +18,7 @@ Defined in: [interfaces.ts:128](https://github.com/humanprotocol/human-protocol/
 
 > **chainId**: [`ChainId`](../../enums/enumerations/ChainId.md)
 
-Defined in: [interfaces.ts:129](https://github.com/humanprotocol/human-protocol/blob/379b646116ffe55830ec173c1cf6576fc209b99f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L129)
+Defined in: [interfaces.ts:213](https://github.com/humanprotocol/human-protocol/blob/379b646116ffe55830ec173c1cf6576fc209b99f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L213)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: [interfaces.ts:129](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **escrowAddress**: `string`
 
-Defined in: [interfaces.ts:130](https://github.com/humanprotocol/human-protocol/blob/379b646116ffe55830ec173c1cf6576fc209b99f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L130)
+Defined in: [interfaces.ts:214](https://github.com/humanprotocol/human-protocol/blob/379b646116ffe55830ec173c1cf6576fc209b99f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L214)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [interfaces.ts:179](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **from**: `Date`
 
-Defined in: [interfaces.ts:132](https://github.com/humanprotocol/human-protocol/blob/379b646116ffe55830ec173c1cf6576fc209b99f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L132)
+Defined in: [interfaces.ts:216](https://github.com/humanprotocol/human-protocol/blob/379b646116ffe55830ec173c1cf6576fc209b99f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L216)
 
 ***
 
@@ -62,11 +62,11 @@ Defined in: [interfaces.ts:181](https://github.com/humanprotocol/human-protocol/
 
 ***
 
-### recipient?
+### receiver?
 
-> `optional` **recipient**: `string`
+> `optional` **receiver**: `string`
 
-Defined in: [interfaces.ts:131](https://github.com/humanprotocol/human-protocol/blob/379b646116ffe55830ec173c1cf6576fc209b99f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L131)
+Defined in: [interfaces.ts:215](https://github.com/humanprotocol/human-protocol/blob/379b646116ffe55830ec173c1cf6576fc209b99f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L215)
 
 ***
 
@@ -86,4 +86,4 @@ Defined in: [interfaces.ts:180](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **to**: `Date`
 
-Defined in: [interfaces.ts:133](https://github.com/humanprotocol/human-protocol/blob/379b646116ffe55830ec173c1cf6576fc209b99f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L133)
+Defined in: [interfaces.ts:217](https://github.com/humanprotocol/human-protocol/blob/379b646116ffe55830ec173c1cf6576fc209b99f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L217)

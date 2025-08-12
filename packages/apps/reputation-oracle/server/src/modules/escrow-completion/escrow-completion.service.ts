@@ -9,6 +9,7 @@ import {
 import { Injectable } from '@nestjs/common';
 
 import crypto from 'crypto';
+import { v4 as uuidv4 } from 'uuid';
 import { ethers } from 'ethers';
 import stringify from 'json-stable-stringify';
 import _ from 'lodash';
@@ -27,7 +28,7 @@ import { Web3Service } from '../web3';
 import { OutgoingWebhookService } from '../webhook/webhook-outgoing.service';
 import { OutgoingWebhookEventType } from '../webhook/types';
 
-import { DEFAULT_BULK_PAYOUT_TX_ID, EscrowCompletionStatus } from './constants';
+import { EscrowCompletionStatus } from './constants';
 import { EscrowCompletionRepository } from './escrow-completion.repository';
 import { EscrowCompletionEntity } from './escrow-completion.entity';
 import { EscrowPayoutsBatchEntity } from './escrow-payouts-batch.entity';
@@ -121,7 +122,10 @@ export class EscrowCompletionService {
         const escrowStatus = await escrowClient.getStatus(
           escrowCompletionEntity.escrowAddress,
         );
-        if (escrowStatus === EscrowStatus.Pending) {
+        if (
+          escrowStatus === EscrowStatus.Pending ||
+          escrowStatus === EscrowStatus.ToCancel
+        ) {
           const escrowData = await EscrowUtils.getEscrow(
             escrowCompletionEntity.chainId,
             escrowCompletionEntity.escrowAddress,
@@ -189,6 +193,9 @@ export class EscrowCompletionService {
         }
 
         escrowCompletionEntity.status = EscrowCompletionStatus.AWAITING_PAYOUTS;
+        if (escrowStatus === EscrowStatus.Cancelled) {
+          escrowCompletionEntity.status = EscrowCompletionStatus.PAID;
+        }
         await this.escrowCompletionRepository.updateOne(escrowCompletionEntity);
       } catch (error) {
         this.logger.error('Failed to process pending escrow completion', {
@@ -243,7 +250,10 @@ export class EscrowCompletionService {
         const webhookPayload = {
           chainId,
           escrowAddress,
-          eventType: OutgoingWebhookEventType.ESCROW_COMPLETED,
+          eventType:
+            escrowData.status === EscrowStatus[EscrowStatus.Cancelled]
+              ? OutgoingWebhookEventType.ESCROW_CANCELED
+              : OutgoingWebhookEventType.ESCROW_COMPLETED,
         };
 
         let allWebhooksCreated = true;
@@ -407,7 +417,7 @@ export class EscrowCompletionService {
       Array.from(recipientToAmountMap.values()),
       escrowCompletionEntity.finalResultsUrl as string,
       escrowCompletionEntity.finalResultsHash as string,
-      DEFAULT_BULK_PAYOUT_TX_ID,
+      uuidv4(), // TODO obtain it from intermediate results
       false,
       {
         gasPrice: await this.web3Service.calculateGasPrice(

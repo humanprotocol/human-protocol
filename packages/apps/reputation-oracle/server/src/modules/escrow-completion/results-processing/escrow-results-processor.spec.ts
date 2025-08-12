@@ -1,15 +1,15 @@
 jest.mock('@human-protocol/sdk');
 
-import { createMock } from '@golevelup/ts-jest';
 import { faker } from '@faker-js/faker';
-import { EscrowClient, EscrowUtils } from '@human-protocol/sdk';
+import { createMock } from '@golevelup/ts-jest';
+import { EscrowClient, EscrowStatus, EscrowUtils } from '@human-protocol/sdk';
 import { Test } from '@nestjs/testing';
 import * as crypto from 'crypto';
 
 import { PgpEncryptionService } from '../../encryption';
 import { StorageService } from '../../storage';
-import { generateTestnetChainId } from '../../web3/fixtures';
 import { Web3Service } from '../../web3';
+import { generateTestnetChainId } from '../../web3/fixtures';
 
 import { BaseEscrowResultsProcessor } from './escrow-results-processor';
 
@@ -73,6 +73,10 @@ describe('BaseEscrowResultsProcessor', () => {
     it('should fail if downloaded results not complete', async () => {
       const testError = new Error(`Error: ${faker.string.ulid()}`);
 
+      mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
+        status: EscrowStatus[EscrowStatus.Launched],
+      } as any);
+
       processor.assertResultsComplete.mockRejectedValueOnce(testError);
 
       await expect(
@@ -114,6 +118,7 @@ describe('BaseEscrowResultsProcessor', () => {
       const jobLauncherAddress = faker.finance.ethereumAddress();
       mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
         launcher: jobLauncherAddress,
+        status: EscrowStatus[EscrowStatus.Launched],
       } as any);
 
       const encryptedResult = faker.string.ulid();
@@ -146,6 +151,90 @@ describe('BaseEscrowResultsProcessor', () => {
       expect(mockedGetIntermediateResultsUrl).toHaveBeenCalledWith(
         escrowAddress,
       );
+      expect(processor.constructIntermediateResultsUrl).toHaveBeenCalledWith(
+        baseResultsUrl,
+      );
+      expect(mockedStorageService.downloadFile).toHaveBeenCalledWith(
+        resultsUrl,
+      );
+      expect(mockedEscrowUtils.getEscrow).toHaveBeenCalledWith(
+        chainId,
+        escrowAddress,
+      );
+
+      expect(mockedPgpEncryptionService.encrypt).toHaveBeenCalledTimes(1);
+      expect(mockedPgpEncryptionService.encrypt).toHaveBeenCalledWith(
+        resultsFileContent,
+        chainId,
+        [jobLauncherAddress],
+      );
+
+      expect(processor.getFinalResultsFileName).toHaveBeenCalledTimes(1);
+      expect(processor.getFinalResultsFileName).toHaveBeenCalledWith(
+        encryptedResultHash,
+      );
+
+      expect(mockedStorageService.uploadData).toHaveBeenCalledTimes(1);
+      expect(mockedStorageService.uploadData).toHaveBeenCalledWith(
+        encryptedResult,
+        storedResultsFileName,
+        'text/plain',
+      );
+    });
+    it('should NOT call assertResultsComplete if status is ToCancel', async () => {
+      /** ARRANGE */
+      const chainId = generateTestnetChainId();
+      const escrowAddress = faker.finance.ethereumAddress();
+
+      const baseResultsUrl = faker.internet.url();
+      mockedGetIntermediateResultsUrl.mockResolvedValueOnce(baseResultsUrl);
+
+      const resultsUrl = `${baseResultsUrl}/${faker.system.fileName()}`;
+      processor.constructIntermediateResultsUrl.mockReturnValueOnce(resultsUrl);
+
+      const jobResult = faker.number.int();
+      const resultsFileContent = Buffer.from(jobResult.toString());
+      mockedStorageService.downloadFile.mockResolvedValueOnce(
+        resultsFileContent,
+      );
+
+      const jobLauncherAddress = faker.finance.ethereumAddress();
+      mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
+        launcher: jobLauncherAddress,
+        status: EscrowStatus[EscrowStatus.ToCancel],
+      } as any);
+
+      const encryptedResult = faker.string.ulid();
+      mockedPgpEncryptionService.encrypt.mockResolvedValueOnce(encryptedResult);
+
+      const encryptedResultHash = crypto
+        .createHash('sha256')
+        .update(encryptedResult)
+        .digest('hex');
+      const storedResultsFileName = `${encryptedResultHash}.${faker.system.fileExt()}`;
+      processor.getFinalResultsFileName.mockReturnValueOnce(
+        storedResultsFileName,
+      );
+
+      const storedResultsUrl = faker.internet.url();
+      mockedStorageService.uploadData.mockResolvedValueOnce(storedResultsUrl);
+
+      /** ACT */
+      const manifest = { resultToAssert: jobResult };
+      const storedResultMeta = await processor.storeResults(
+        chainId,
+        escrowAddress,
+        manifest,
+      );
+
+      /** ASSERT */
+      expect(storedResultMeta.url).toBe(storedResultsUrl);
+      expect(storedResultMeta.hash).toBe(encryptedResultHash);
+
+      expect(mockedGetIntermediateResultsUrl).toHaveBeenCalledWith(
+        escrowAddress,
+      );
+      expect(processor.assertResultsComplete).not.toHaveBeenCalled();
       expect(processor.constructIntermediateResultsUrl).toHaveBeenCalledWith(
         baseResultsUrl,
       );

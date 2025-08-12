@@ -8,6 +8,7 @@
 
 ## Interfaces
 
+- [ICancellationRefundFilter](interfaces/ICancellationRefundFilter.md)
 - [IEscrow](interfaces/IEscrow.md)
 - [IEscrowConfig](interfaces/IEscrowConfig.md)
 - [IEscrowsFilter](interfaces/IEscrowsFilter.md)
