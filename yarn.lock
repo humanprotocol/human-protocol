@@ -4522,7 +4522,6 @@ __metadata:
     "@nestjs/platform-express": "npm:^10.3.10"
     "@nestjs/schedule": "npm:^4.0.1"
     "@nestjs/schematics": "npm:^11.0.2"
-    "@nestjs/serve-static": "npm:^4.0.2"
     "@nestjs/swagger": "npm:^7.4.2"
     "@nestjs/terminus": "npm:^11.0.0"
     "@nestjs/testing": "npm:^10.4.6"
@@ -6577,7 +6576,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nestjs/serve-static@npm:^4.0.1, @nestjs/serve-static@npm:^4.0.2":
+"@nestjs/serve-static@npm:^4.0.1":
   version: 4.0.2
   resolution: "@nestjs/serve-static@npm:4.0.2"
   dependencies:

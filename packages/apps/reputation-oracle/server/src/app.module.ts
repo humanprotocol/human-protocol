@@ -2,8 +2,6 @@ import { ClassSerializerInterceptor, Module } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { join } from 'path';
 
 import { AppController } from './app.controller';
 import { JwtAuthGuard } from './common/guards';
@@ -62,13 +60,6 @@ import Environment from './utils/environment';
   ],
   imports: [
     ScheduleModule.forRoot(),
-    ServeStaticModule.forRoot({
-      rootPath: join(
-        __dirname,
-        '../../../../../../',
-        'node_modules/swagger-ui-dist',
-      ),
-    }),
     ConfigModule.forRoot({
       /**
        * First value found takes precendece
