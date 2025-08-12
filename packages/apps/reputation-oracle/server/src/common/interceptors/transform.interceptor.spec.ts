@@ -7,7 +7,7 @@ import {
   createCallHandlerMock,
   createExecutionContextMock,
   ExecutionContextMock,
-} from '../../../test/mock-creators/nest';
+} from '~/test/mock-creators/nest';
 
 describe('TransformInterceptor', () => {
   describe('intercept', () => {

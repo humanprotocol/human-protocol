@@ -10,11 +10,14 @@ import {
 } from '@human-protocol/sdk';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import { DatabaseError, DatabaseErrorMessages } from '../../database';
-import { ServerConfigService } from '../../config';
-import { generateTestnetChainId } from '../web3/fixtures';
-import { Web3Service } from '../web3';
-import { OutgoingWebhookEventType, OutgoingWebhookService } from '../webhook';
+import { DatabaseError, DatabaseErrorMessages } from '@/database';
+import { ServerConfigService } from '@/config';
+import { generateTestnetChainId } from '@/modules/web3/fixtures';
+import { Web3Service } from '@/modules/web3';
+import {
+  OutgoingWebhookEventType,
+  OutgoingWebhookService,
+} from '@/modules/webhook';
 
 import { AbuseRepository } from './abuse.repository';
 import { AbuseService } from './abuse.service';

@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { MailService } from '@sendgrid/mail';
 
-import { EmailConfigService } from '../../config';
-import logger from '../../logger';
-import Environment from '../../utils/environment';
+import { EmailConfigService } from '@/config';
+import logger from '@/logger';
+import Environment from '@/utils/environment';
 import { EmailAction, SENDGRID_API_KEY_REGEX } from './constants';
 import { EmailService } from './email.service';
 

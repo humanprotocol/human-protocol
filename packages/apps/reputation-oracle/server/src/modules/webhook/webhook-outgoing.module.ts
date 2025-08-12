@@ -1,7 +1,7 @@
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 
-import { Web3Module } from '../web3';
+import { Web3Module } from '@/modules/web3';
 
 import { OutgoingWebhookRepository } from './webhook-outgoing.repository';
 import { OutgoingWebhookService } from './webhook-outgoing.service';

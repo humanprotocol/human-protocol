@@ -1,9 +1,6 @@
 import { faker } from '@faker-js/faker';
-import {
-  Web3ConfigService,
-  Web3Network,
-} from '../../../config/web3-config.service';
-import { generateEthWallet } from '../../../../test/fixtures/web3';
+import { Web3ConfigService, Web3Network } from '@/config';
+import { generateEthWallet } from '~/test/fixtures/web3';
 
 import { supportedChainIdsByNetwork } from '../web3.service';
 

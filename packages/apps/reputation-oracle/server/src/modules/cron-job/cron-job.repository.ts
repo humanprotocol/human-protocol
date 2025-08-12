@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 
-import { BaseRepository } from '../../database';
+import { BaseRepository } from '@/database';
 
 import { CronJobType } from './constants';
 import { CronJobEntity } from './cron-job.entity';

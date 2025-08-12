@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
-import { UserNotFoundError, UserRepository } from '../user';
-import { NDAConfigService } from '../../config';
+import { UserNotFoundError, UserRepository } from '@/modules/user';
+import { NDAConfigService } from '@/config';
 import { NDASignatureDto } from './nda.dto';
 import { NDAError, NDAErrorMessage } from './nda.error';
 

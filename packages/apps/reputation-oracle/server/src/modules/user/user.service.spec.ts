@@ -5,17 +5,17 @@ import { createMock } from '@golevelup/ts-jest';
 import { KVStoreClient, KVStoreUtils } from '@human-protocol/sdk';
 import { Test } from '@nestjs/testing';
 
-import { generateEthWallet } from '../../../test/fixtures/web3';
+import { generateEthWallet } from '~/test/fixtures/web3';
 
-import { SignatureType } from '../../common/enums';
-import { Web3ConfigService } from '../../config';
-import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
-import * as web3Utils from '../../utils/web3';
+import { SignatureType } from '@/common/enums';
+import { Web3ConfigService } from '@/config';
+import { HCaptchaService } from '@/integrations/hcaptcha/hcaptcha.service';
+import * as web3Utils from '@/utils/web3';
 
-import { KycStatus } from '../kyc/constants';
-import { generateKycEntity } from '../kyc/fixtures';
-import { mockWeb3ConfigService } from '../web3/fixtures';
-import { Web3Service } from '../web3/web3.service';
+import { KycStatus } from '@/modules/kyc';
+import { generateKycEntity } from '@/modules/kyc/fixtures';
+import { mockWeb3ConfigService } from '@/modules/web3/fixtures';
+import { Web3Service } from '@/modules/web3';
 
 import {
   generateSiteKeyEntity,

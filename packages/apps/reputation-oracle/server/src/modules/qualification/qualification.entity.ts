@@ -1,7 +1,7 @@
 import { Column, Entity, Index, OneToMany } from 'typeorm';
 
-import { DATABASE_SCHEMA_NAME } from '../../common/constants';
-import { BaseEntity } from '../../database';
+import { DATABASE_SCHEMA_NAME } from '@/common/constants';
+import { BaseEntity } from '@/database';
 import type { UserQualificationEntity } from './user-qualification.entity';
 
 @Entity({ schema: DATABASE_SCHEMA_NAME, name: 'qualifications' })

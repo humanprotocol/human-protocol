@@ -1,10 +1,10 @@
 import { faker } from '@faker-js/faker';
 import { SetNonNullable } from 'type-fest';
 
-import { generateEthWallet } from '../../../../test/fixtures/web3';
+import { generateEthWallet } from '~/test/fixtures/web3';
 
-import * as securityUtils from '../../../utils/security';
-import * as web3Utils from '../../../utils/web3';
+import * as securityUtils from '@/utils/security';
+import * as web3Utils from '@/utils/web3';
 
 import { OperatorUserEntity, Web2UserEntity } from '../types';
 import { Role, UserStatus } from '../user.entity';

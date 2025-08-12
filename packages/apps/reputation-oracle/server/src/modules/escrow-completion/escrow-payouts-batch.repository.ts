@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { BaseRepository } from '../../database';
+import { BaseRepository } from '@/database';
 import { DataSource } from 'typeorm';
 import { EscrowPayoutsBatchEntity } from './escrow-payouts-batch.entity';
 

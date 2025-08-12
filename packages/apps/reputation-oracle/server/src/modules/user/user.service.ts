@@ -1,13 +1,13 @@
 import { KVStoreClient, KVStoreUtils } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 
-import { SignatureType } from '../../common/enums';
-import { Web3ConfigService } from '../../config';
-import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
-import * as web3Utils from '../../utils/web3';
+import { SignatureType } from '@/common/enums';
+import { Web3ConfigService } from '@/config';
+import { HCaptchaService } from '@/integrations/hcaptcha/hcaptcha.service';
+import * as web3Utils from '@/utils/web3';
 
-import { KycStatus } from '../kyc/constants';
-import { Web3Service } from '../web3/web3.service';
+import { KycStatus } from '@/modules/kyc';
+import { Web3Service } from '@/modules/web3';
 
 import { SiteKeyEntity, SiteKeyType } from './site-key.entity';
 import { SiteKeyRepository } from './site-key.repository';

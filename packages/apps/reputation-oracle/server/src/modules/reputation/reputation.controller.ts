@@ -1,8 +1,8 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
-import { Public } from '../../common/decorators';
-import { SortDirection } from '../../common/enums';
+import { Public } from '@/common/decorators';
+import { SortDirection } from '@/common/enums';
 
 import { MAX_REPUTATION_ITEMS_PER_PAGE, ReputationOrderBy } from './constants';
 import {

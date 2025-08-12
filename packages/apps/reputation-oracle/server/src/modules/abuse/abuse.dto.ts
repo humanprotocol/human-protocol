@@ -2,7 +2,7 @@ import { ChainId } from '@human-protocol/sdk';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEthereumAddress, IsString, MaxLength } from 'class-validator';
 
-import { IsChainId } from '../../common/validators';
+import { IsChainId } from '@/common/validators';
 import { AbuseStatus } from './constants';
 
 export class ReportAbuseDto {

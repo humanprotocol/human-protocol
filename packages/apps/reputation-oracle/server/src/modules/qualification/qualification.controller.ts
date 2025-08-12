@@ -17,9 +17,9 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
-import { Public, Roles } from '../../common/decorators';
-import { RolesAuthGuard } from '../../common/guards';
-import { UserRole } from '../user';
+import { Public, Roles } from '@/common/decorators';
+import { RolesAuthGuard } from '@/common/guards';
+import { UserRole } from '@/modules/user';
 import {
   AssignQualificationDto,
   CreateQualificationDto,

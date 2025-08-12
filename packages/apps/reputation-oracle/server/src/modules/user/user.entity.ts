@@ -1,11 +1,11 @@
 import { Exclude } from 'class-transformer';
 import { Column, Entity, OneToMany, OneToOne } from 'typeorm';
 
-import { DATABASE_SCHEMA_NAME } from '../../common/constants';
-import { BaseEntity } from '../../database';
+import { DATABASE_SCHEMA_NAME } from '@/common/constants';
+import { BaseEntity } from '@/database';
 
-import type { KycEntity } from '../kyc/kyc.entity';
-import type { UserQualificationEntity } from '../qualification/user-qualification.entity';
+import type { KycEntity } from '@/modules/kyc';
+import type { UserQualificationEntity } from '@/modules/qualification';
 
 import type { SiteKeyEntity } from './site-key.entity';
 

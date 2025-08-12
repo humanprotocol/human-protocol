@@ -5,7 +5,7 @@ import {
   createHttpServiceMock,
   createHttpServiceRequestError,
   createHttpServiceResponse,
-} from '../../../test/mock-creators/nest';
+} from '~/test/mock-creators/nest';
 
 const mockHttpService = createHttpServiceMock();
 

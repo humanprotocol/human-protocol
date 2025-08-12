@@ -2,9 +2,9 @@ import { createMock } from '@golevelup/ts-jest';
 import { faker } from '@faker-js/faker';
 import { Test } from '@nestjs/testing';
 
-import { PgpEncryptionService } from '../../encryption';
-import { StorageService } from '../../storage';
-import { Web3Service } from '../../web3';
+import { PgpEncryptionService } from '@/modules/encryption';
+import { StorageService } from '@/modules/storage';
+import { Web3Service } from '@/modules/web3';
 
 import { BaseEscrowResultsProcessor } from './escrow-results-processor';
 import { CvatResultsProcessor } from './cvat-results-processor';

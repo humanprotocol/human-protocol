@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import * as CaseConverter from '../../utils/case-converters';
+import * as CaseConverter from '@/utils/case-converters';
 
 @Injectable()
 export class TransformInterceptor implements NestInterceptor {

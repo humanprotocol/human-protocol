@@ -1,5 +1,5 @@
 export { SiteKeyRepository } from './site-key.repository';
-export { SiteKeyType } from './site-key.entity';
+export { SiteKeyType, SiteKeyEntity } from './site-key.entity';
 export type * from './types';
 export { UserEntity, UserStatus, Role as UserRole } from './user.entity';
 export { UserNotFoundError } from './user.error';

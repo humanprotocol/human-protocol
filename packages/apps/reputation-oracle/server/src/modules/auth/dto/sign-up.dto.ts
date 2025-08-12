@@ -5,8 +5,8 @@ import {
   IsLowercasedEmail,
   IsLowercasedEnum,
   IsValidWeb3Signature,
-} from '../../../common/validators';
-import { UserRole } from '../../user';
+} from '@/common/validators';
+import { UserRole } from '@/modules/user';
 import { ValidPassword } from './password.dto';
 
 export class Web2SignUpDto {

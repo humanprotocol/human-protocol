@@ -2,8 +2,8 @@ import { HttpService } from '@nestjs/axios';
 import { View, ViewsOpenResponse } from '@slack/web-api';
 import { IncomingWebhookSendArguments } from '@slack/webhook';
 import { firstValueFrom } from 'rxjs';
-import logger from '../../logger';
-import * as httpUtils from '../../utils/http';
+import logger from '@/logger';
+import * as httpUtils from '@/utils/http';
 
 export class SlackBotApp {
   private readonly logger = logger.child({ context: SlackBotApp.name });

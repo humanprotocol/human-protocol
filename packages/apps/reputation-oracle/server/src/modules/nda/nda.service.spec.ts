@@ -2,9 +2,9 @@ import { createMock } from '@golevelup/ts-jest';
 import { faker } from '@faker-js/faker';
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { NDAConfigService } from '../../config';
-import { generateWorkerUser } from '../user/fixtures';
-import { UserRepository } from '../user';
+import { NDAConfigService } from '@/config';
+import { generateWorkerUser } from '@/modules/user/fixtures';
+import { UserRepository } from '@/modules/user';
 
 import { NDASignatureDto } from './nda.dto';
 import { NDAError, NDAErrorMessage } from './nda.error';

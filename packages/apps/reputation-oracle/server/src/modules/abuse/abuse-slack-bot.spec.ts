@@ -2,8 +2,8 @@ import { faker } from '@faker-js/faker';
 import { Test } from '@nestjs/testing';
 import { HttpService } from '@nestjs/axios';
 
-import { createHttpServiceMock } from '../../../test/mock-creators/nest';
-import { SlackConfigService } from '../../config';
+import { createHttpServiceMock } from '~/test/mock-creators/nest';
+import { SlackConfigService } from '@/config';
 
 import { AbuseSlackBot } from './abuse-slack-bot';
 import { AbuseDecision } from './constants';

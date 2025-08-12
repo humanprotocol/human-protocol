@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 
-import { generateTestnetChainId } from '../../web3/fixtures';
+import { generateTestnetChainId } from '@/modules/web3/fixtures';
 
 import { ReputationEntityType } from '../constants';
 import { ReputationEntity } from '../reputation.entity';

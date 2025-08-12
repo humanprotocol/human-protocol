@@ -6,8 +6,8 @@ import {
   HttpStatus,
   Injectable,
 } from '@nestjs/common';
-import { verifySignature } from '../../utils/web3';
-import { HEADER_SIGNATURE_KEY } from '../constants';
+import { verifySignature } from '@/utils/web3';
+import { HEADER_SIGNATURE_KEY } from '@/common/constants';
 
 export enum AuthSignatureRole {
   JOB_LAUNCHER = 'job_launcher',

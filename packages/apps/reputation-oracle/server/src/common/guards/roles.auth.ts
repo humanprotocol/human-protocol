@@ -6,7 +6,7 @@ import {
   HttpException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Roles } from '../decorators';
+import { Roles } from '@/common/decorators';
 
 @Injectable()
 export class RolesAuthGuard implements CanActivate {

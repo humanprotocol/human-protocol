@@ -1,5 +1,5 @@
 import { ChainId } from '@human-protocol/sdk';
-import { JobManifest } from '../../../common/types';
+import { JobManifest } from '@/common/types';
 
 export type CalculatedPayout = {
   address: string;

@@ -8,12 +8,12 @@ import stringify from 'json-stable-stringify';
 import {
   createHttpServiceMock,
   createHttpServiceResponse,
-} from '../../../test/mock-creators/nest';
-import { HEADER_SIGNATURE_KEY } from '../../common/constants';
-import { ServerConfigService, Web3ConfigService } from '../../config';
-import { transformKeysFromCamelToSnake } from '../../utils/case-converters';
-import { signMessage } from '../../utils/web3';
-import { mockWeb3ConfigService } from '../web3/fixtures';
+} from '~/test/mock-creators/nest';
+import { HEADER_SIGNATURE_KEY } from '@/common/constants';
+import { ServerConfigService, Web3ConfigService } from '@/config';
+import { transformKeysFromCamelToSnake } from '@/utils/case-converters';
+import { signMessage } from '@/utils/web3';
+import { mockWeb3ConfigService } from '@/modules/web3/fixtures';
 import {
   generateOutgoingWebhookPayload,
   generateOutgoingWebhook,

@@ -6,9 +6,9 @@ import {
   JWT_STRATEGY_NAME,
   LOGOUT_PATH,
   RESEND_EMAIL_VERIFICATION_PATH,
-} from '../../common/constants';
-import { UserRole, UserStatus } from '../user';
-import { AuthConfigService } from '../../config';
+} from '@/common/constants';
+import { UserRole, UserStatus } from '@/modules/user';
+import { AuthConfigService } from '@/config';
 
 @Injectable()
 export class JwtHttpStrategy extends PassportStrategy(

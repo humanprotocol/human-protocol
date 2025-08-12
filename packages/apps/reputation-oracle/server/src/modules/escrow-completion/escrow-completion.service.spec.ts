@@ -22,16 +22,16 @@ import * as crypto from 'crypto';
 import stringify from 'json-stable-stringify';
 import _ from 'lodash';
 
-import { createSignerMock, type SignerMock } from '../../../test/fixtures/web3';
+import { createSignerMock, type SignerMock } from '~/test/fixtures/web3';
 
-import { CvatJobType, FortuneJobType } from '../../common/enums';
-import { ServerConfigService } from '../../config';
+import { CvatJobType, FortuneJobType } from '@/common/enums';
+import { ServerConfigService } from '@/config';
 
-import { ReputationService } from '../reputation';
-import { StorageService } from '../storage';
-import { OutgoingWebhookService } from '../webhook';
-import { WalletWithProvider, Web3Service } from '../web3';
-import { generateTestnetChainId } from '../web3/fixtures';
+import { ReputationService } from '@/modules/reputation';
+import { StorageService } from '@/modules/storage';
+import { OutgoingWebhookService } from '@/modules/webhook';
+import { WalletWithProvider, Web3Service } from '@/modules/web3';
+import { generateTestnetChainId } from '@/modules/web3/fixtures';
 
 import { EscrowCompletionStatus } from './constants';
 import {

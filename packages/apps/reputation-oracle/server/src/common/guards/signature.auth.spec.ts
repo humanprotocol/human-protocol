@@ -4,13 +4,13 @@ import { faker } from '@faker-js/faker';
 import { EscrowUtils } from '@human-protocol/sdk';
 import { ExecutionContext, HttpException, HttpStatus } from '@nestjs/common';
 
-import { generateEthWallet } from '../../../test/fixtures/web3';
+import { generateEthWallet } from '~/test/fixtures/web3';
 import {
   createExecutionContextMock,
   ExecutionContextMock,
-} from '../../../test/mock-creators/nest';
-import { generateTestnetChainId } from '../../modules/web3/fixtures';
-import { signMessage } from '../../utils/web3';
+} from '~/test/mock-creators/nest';
+import { generateTestnetChainId } from '@/modules/web3/fixtures';
+import { signMessage } from '@/utils/web3';
 
 import { AuthSignatureRole, SignatureAuthGuard } from './signature.auth';
 

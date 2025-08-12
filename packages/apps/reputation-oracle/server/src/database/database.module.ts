@@ -3,20 +3,25 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { LoggerOptions } from 'typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 
-import { ReputationEntity } from '../modules/reputation/reputation.entity';
-import { TokenEntity } from '../modules/auth/token.entity';
-import { UserEntity } from '../modules/user/user.entity';
-import { KycEntity } from '../modules/kyc/kyc.entity';
-import { CronJobEntity } from '../modules/cron-job/cron-job.entity';
-import { DatabaseConfigService } from '../config';
-import { SiteKeyEntity } from '../modules/user/site-key.entity';
-import { QualificationEntity } from '../modules/qualification/qualification.entity';
-import { UserQualificationEntity } from '../modules/qualification/user-qualification.entity';
-import { IncomingWebhookEntity } from '../modules/webhook/webhook-incoming.entity';
-import { OutgoingWebhookEntity } from '../modules/webhook/webhook-outgoing.entity';
-import { EscrowCompletionEntity } from '../modules/escrow-completion/escrow-completion.entity';
-import { EscrowPayoutsBatchEntity } from '../modules/escrow-completion/escrow-payouts-batch.entity';
-import { AbuseEntity } from '../modules/abuse/abuse.entity';
+import { DatabaseConfigService } from '@/config';
+import { ReputationEntity } from '@/modules/reputation';
+import { TokenEntity } from '@/modules/auth';
+import { UserEntity, SiteKeyEntity } from '@/modules/user';
+import { KycEntity } from '@/modules/kyc';
+import { CronJobEntity } from '@/modules/cron-job';
+import {
+  QualificationEntity,
+  UserQualificationEntity,
+} from '@/modules/qualification';
+import {
+  IncomingWebhookEntity,
+  OutgoingWebhookEntity,
+} from '@/modules/webhook';
+import {
+  EscrowCompletionEntity,
+  EscrowPayoutsBatchEntity,
+} from '@/modules/escrow-completion';
+import { AbuseEntity } from '@/modules/abuse';
 
 import { TypeOrmLoggerModule, TypeOrmLoggerService } from './typeorm';
 

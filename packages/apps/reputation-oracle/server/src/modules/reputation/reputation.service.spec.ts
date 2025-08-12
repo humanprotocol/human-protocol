@@ -5,13 +5,13 @@ import { faker } from '@faker-js/faker';
 import { EscrowClient } from '@human-protocol/sdk';
 import { Test } from '@nestjs/testing';
 
-import { ReputationConfigService, Web3ConfigService } from '../../config';
+import { ReputationConfigService, Web3ConfigService } from '@/config';
 
 import {
   generateTestnetChainId,
   mockWeb3ConfigService,
-} from '../web3/fixtures';
-import { Web3Service } from '../web3';
+} from '@/modules/web3/fixtures';
+import { Web3Service } from '@/modules/web3';
 
 import {
   generateRandomScorePoints,

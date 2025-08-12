@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
 import type { OverrideProperties } from 'type-fest';
 
-import { FortuneFinalResult, FortuneManifest } from '../../../common/types';
+import { FortuneFinalResult, FortuneManifest } from '@/common/types';
 
-import { StorageService } from '../../storage';
+import { StorageService } from '@/modules/storage';
 
 import {
   CalclulatePayoutsInput,

@@ -2,8 +2,8 @@ import { ChainId } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 import { DataSource, FindManyOptions, In } from 'typeorm';
 
-import { SortDirection } from '../../common/enums';
-import { BaseRepository } from '../../database';
+import { SortDirection } from '@/common/enums';
+import { BaseRepository } from '@/database';
 
 import { ReputationEntityType, ReputationOrderBy } from './constants';
 import { ReputationEntity } from './reputation.entity';

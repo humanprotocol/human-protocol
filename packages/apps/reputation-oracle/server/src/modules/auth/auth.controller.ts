@@ -19,9 +19,9 @@ import {
   Headers,
 } from '@nestjs/common';
 
-import { Public } from '../../common/decorators';
-import type { RequestWithUser } from '../../common/types';
-import { HCaptchaGuard } from '../../integrations/hcaptcha/hcaptcha.guard';
+import { Public } from '@/common/decorators';
+import type { RequestWithUser } from '@/common/types';
+import { HCaptchaGuard } from '@/integrations/hcaptcha/hcaptcha.guard';
 
 import { AuthService } from './auth.service';
 import { AuthControllerErrorsFilter } from './auth.error-filter';

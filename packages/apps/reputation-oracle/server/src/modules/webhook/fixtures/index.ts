@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker';
 import * as crypto from 'crypto';
 import stringify from 'json-stable-stringify';
 
-import { generateTestnetChainId } from '../../web3/fixtures';
+import { generateTestnetChainId } from '@/modules/web3/fixtures';
 import {
   IncomingWebhookStatus,
   OutgoingWebhookEventType,

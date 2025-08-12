@@ -2,19 +2,19 @@ import { KVStoreKeys, KVStoreUtils, Role } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
-import { SignatureType } from '../../common/enums';
+import { SignatureType } from '@/common/enums';
 import {
   AuthConfigService,
   NDAConfigService,
   ServerConfigService,
   Web3ConfigService,
-} from '../../config';
-import logger from '../../logger';
-import * as httpUtils from '../../utils/http';
-import * as securityUtils from '../../utils/security';
-import * as web3Utils from '../../utils/web3';
+} from '@/config';
+import logger from '@/logger';
+import * as httpUtils from '@/utils/http';
+import * as securityUtils from '@/utils/security';
+import * as web3Utils from '@/utils/web3';
 
-import { EmailAction, EmailService } from '../email';
+import { EmailAction, EmailService } from '@/modules/email';
 import {
   OperatorStatus,
   SiteKeyRepository,
@@ -26,7 +26,7 @@ import {
   UserStatus,
   type OperatorUserEntity,
   type Web2UserEntity,
-} from '../user';
+} from '@/modules/user';
 
 import {
   AuthError,

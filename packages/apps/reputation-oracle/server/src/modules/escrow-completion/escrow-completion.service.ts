@@ -13,19 +13,21 @@ import { ethers } from 'ethers';
 import stringify from 'json-stable-stringify';
 import _ from 'lodash';
 
-import { BACKOFF_INTERVAL_SECONDS } from '../../common/constants';
-import { isDuplicatedError } from '../../database';
-import { JobManifest, JobRequestType } from '../../common/types';
-import { ServerConfigService } from '../../config';
-import logger from '../../logger';
-import { calculateExponentialBackoffMs } from '../../utils/backoff';
-import * as manifestUtils from '../../utils/manifest';
+import { BACKOFF_INTERVAL_SECONDS } from '@/common/constants';
+import { isDuplicatedError } from '@/database';
+import { JobManifest, JobRequestType } from '@/common/types';
+import { ServerConfigService } from '@/config';
+import logger from '@/logger';
+import { calculateExponentialBackoffMs } from '@/utils/backoff';
+import * as manifestUtils from '@/utils/manifest';
 
-import { ReputationService } from '../reputation';
-import { StorageService } from '../storage';
-import { Web3Service } from '../web3';
-import { OutgoingWebhookService } from '../webhook/webhook-outgoing.service';
-import { OutgoingWebhookEventType } from '../webhook/types';
+import { ReputationService } from '@/modules/reputation';
+import { StorageService } from '@/modules/storage';
+import { Web3Service } from '@/modules/web3';
+import {
+  OutgoingWebhookService,
+  OutgoingWebhookEventType,
+} from '@/modules/webhook';
 
 import { DEFAULT_BULK_PAYOUT_TX_ID, EscrowCompletionStatus } from './constants';
 import { EscrowCompletionRepository } from './escrow-completion.repository';

@@ -5,11 +5,11 @@ import { faker } from '@faker-js/faker';
 import { Test } from '@nestjs/testing';
 import { Client as MinioClient } from 'minio';
 
-import { ContentType } from '../../common/enums';
-import { S3ConfigService } from '../../config';
-import * as httpUtils from '../../utils/http';
+import { ContentType } from '@/common/enums';
+import { S3ConfigService } from '@/config';
+import * as httpUtils from '@/utils/http';
 
-import { PgpEncryptionService } from '../encryption';
+import { PgpEncryptionService } from '@/modules/encryption';
 
 import { MinioErrorCodes } from './minio.constants';
 import { StorageService } from './storage.service';

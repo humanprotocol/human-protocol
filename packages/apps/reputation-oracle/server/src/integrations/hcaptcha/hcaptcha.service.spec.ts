@@ -4,14 +4,14 @@ import { Test } from '@nestjs/testing';
 import { ethers } from 'ethers';
 
 import { HCaptchaService } from './hcaptcha.service';
-import { HCaptchaConfigService } from '../../config';
+import { HCaptchaConfigService } from '@/config';
 
 import {
   createHttpServiceMock,
   createHttpServiceRequestError,
   createHttpServiceResponse,
-} from '../../../test/mock-creators/nest';
-import { generateEthWallet } from '../../../test/fixtures/web3';
+} from '~/test/mock-creators/nest';
+import { generateEthWallet } from '~/test/fixtures/web3';
 
 import { mockHCaptchaConfigService } from './fixtures';
 import { LabelerData, SiteverifyResponse } from './types';

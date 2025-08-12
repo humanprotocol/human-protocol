@@ -17,8 +17,8 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
-import { Public } from '../../common/decorators';
-import type { RequestWithUser } from '../../common/types';
+import { Public } from '@/common/decorators';
+import type { RequestWithUser } from '@/common/types';
 import {
   StartSessionResponseDto,
   KycSignedAddressDto,

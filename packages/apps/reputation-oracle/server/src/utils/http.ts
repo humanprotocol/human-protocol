@@ -1,7 +1,7 @@
 import axios, { AxiosError } from 'axios';
 import { Readable } from 'stream';
 
-import { BaseError } from '../common/errors/base';
+import { BaseError } from '@/common/errors/base';
 
 export function formatAxiosError(error: AxiosError) {
   return {

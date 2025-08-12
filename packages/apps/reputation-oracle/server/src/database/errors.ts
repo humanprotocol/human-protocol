@@ -1,4 +1,4 @@
-import { BaseError } from '../common/errors/base';
+import { BaseError } from '@/common/errors/base';
 
 enum PostgresErrorCodes {
   Duplicated = '23505',

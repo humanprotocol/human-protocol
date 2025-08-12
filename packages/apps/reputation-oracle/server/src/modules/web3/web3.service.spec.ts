@@ -3,7 +3,7 @@ import { faker } from '@faker-js/faker';
 import { Test } from '@nestjs/testing';
 import { FeeData, JsonRpcProvider, Provider } from 'ethers';
 
-import { Web3ConfigService } from '../../config';
+import { Web3ConfigService } from '@/config';
 
 import { Web3Service } from './web3.service';
 import type { WalletWithProvider } from './types';

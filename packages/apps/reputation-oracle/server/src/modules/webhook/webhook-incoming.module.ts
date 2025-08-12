@@ -1,7 +1,7 @@
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 
-import { EscrowCompletionModule } from '../escrow-completion';
+import { EscrowCompletionModule } from '@/modules/escrow-completion';
 
 import { WebhookController } from './webhook.controller';
 import { IncomingWebhookRepository } from './webhook-incoming.repository';

@@ -1,12 +1,12 @@
-jest.mock('../../logger');
+jest.mock('@/logger');
 
 import { faker } from '@faker-js/faker';
 import { Test, TestingModule } from '@nestjs/testing';
 import { MailService } from '@sendgrid/mail';
 
-import { EmailConfigService } from '../../config';
-import logger from '../../logger';
-import Environment from '../../utils/environment';
+import { EmailConfigService } from '@/config';
+import logger from '@/logger';
+import Environment from '@/utils/environment';
 import { EmailAction } from './constants';
 import {
   getTemplateId,

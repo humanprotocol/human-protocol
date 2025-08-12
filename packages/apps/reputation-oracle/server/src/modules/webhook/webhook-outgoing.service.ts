@@ -7,13 +7,13 @@ import { firstValueFrom } from 'rxjs';
 import {
   BACKOFF_INTERVAL_SECONDS,
   HEADER_SIGNATURE_KEY,
-} from '../../common/constants';
-import { ServerConfigService, Web3ConfigService } from '../../config';
-import { calculateExponentialBackoffMs } from '../../utils/backoff';
-import { transformKeysFromCamelToSnake } from '../../utils/case-converters';
-import { formatAxiosError } from '../../utils/http';
-import { signMessage } from '../../utils/web3';
-import logger from '../../logger';
+} from '@/common/constants';
+import { ServerConfigService, Web3ConfigService } from '@/config';
+import { calculateExponentialBackoffMs } from '@/utils/backoff';
+import { transformKeysFromCamelToSnake } from '@/utils/case-converters';
+import { formatAxiosError } from '@/utils/http';
+import { signMessage } from '@/utils/web3';
+import logger from '@/logger';
 
 import { OutgoingWebhookStatus } from './types';
 import { OutgoingWebhookEntity } from './webhook-outgoing.entity';
