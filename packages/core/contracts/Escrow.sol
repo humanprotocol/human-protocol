@@ -433,13 +433,8 @@ contract Escrow is IEscrow, ReentrancyGuard {
         finalResultsHash = _hash;
         payouts[payoutId] = true;
 
-        bool isPartial = true;
-        if (remainingFunds == 0 || forceComplete) {
-            isPartial = false;
-            _finalize();
-        } else if (status != EscrowStatuses.ToCancel) {
-            status = EscrowStatuses.Partial;
-        }
+        bool shouldFinalize = remainingFunds == 0 || forceComplete;
+        bool isPartial = !shouldFinalize;
 
         emit BulkTransferV3(
             payoutId,
@@ -448,6 +443,12 @@ contract Escrow is IEscrow, ReentrancyGuard {
             isPartial,
             _url
         );
+
+        if (shouldFinalize) {
+            _finalize();
+        } else if (status != EscrowStatuses.ToCancel) {
+            status = EscrowStatuses.Partial;
+        }
     }
 
     modifier adminOrLauncher() {

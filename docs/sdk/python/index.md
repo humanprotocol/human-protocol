@@ -53,6 +53,7 @@ pip install human-protocol-sdk[agreement]
       * [`Role`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.Role)
       * [`Status`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.Status)
     * [human_protocol_sdk.filter module](human_protocol_sdk.filter.md)
+      * [`CancellationRefundFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.CancellationRefundFilter)
       * [`EscrowFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.EscrowFilter)
       * [`FilterError`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.FilterError)
       * [`PayoutFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.PayoutFilter)

@@ -10,7 +10,9 @@ import {
 import { ChainId } from '@human-protocol/sdk';
 
 @Entity({ schema: NS, name: 'webhook' })
-@Index(['chainId', 'escrowAddress', 'eventType'], { unique: true })
+@Index(['chainId', 'escrowAddress', 'eventType', 'oracleAddress'], {
+  unique: true,
+})
 export class WebhookEntity extends BaseEntity {
   @Column({ type: 'int' })
   public chainId: ChainId;
@@ -44,4 +46,7 @@ export class WebhookEntity extends BaseEntity {
     enum: WebhookStatus,
   })
   public status: WebhookStatus = WebhookStatus.PENDING;
+
+  @Column({ type: 'varchar', nullable: true })
+  public oracleAddress?: string;
 }

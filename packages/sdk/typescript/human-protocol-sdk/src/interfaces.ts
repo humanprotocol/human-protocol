@@ -208,3 +208,11 @@ export interface IWorkersFilter extends IPagination {
   address?: string;
   orderBy?: string;
 }
+
+export interface ICancellationRefundFilter extends IPagination {
+  chainId: ChainId;
+  escrowAddress?: string;
+  receiver?: string;
+  from?: Date;
+  to?: Date;
+}
