@@ -20,7 +20,7 @@ import {
 } from '@nestjs/common';
 
 import { Public } from '../../common/decorators';
-import { RequestWithUser } from '../../common/types';
+import type { RequestWithUser } from '../../common/types';
 import { HCaptchaGuard } from '../../integrations/hcaptcha/hcaptcha.guard';
 
 import { AuthService } from './auth.service';

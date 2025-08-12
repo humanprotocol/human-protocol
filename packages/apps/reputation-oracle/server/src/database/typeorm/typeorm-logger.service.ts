@@ -3,7 +3,7 @@ import {
   Logger as TypeOrmLogger,
   LoggerOptions as TypeOrmLoggerOptions,
 } from 'typeorm';
-import { Inject, Injectable, Logger, LoggerService } from '@nestjs/common';
+import { Inject, Injectable, Logger, type LoggerService } from '@nestjs/common';
 
 @Injectable()
 export class TypeOrmLoggerService implements TypeOrmLogger {
