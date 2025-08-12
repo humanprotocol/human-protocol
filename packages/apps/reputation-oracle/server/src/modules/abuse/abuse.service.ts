@@ -194,7 +194,7 @@ export class AbuseService {
           abuseId: abuseEntity.id,
           chainId: abuseEntity.chainId,
           escrowAddress: abuseEntity.escrowAddress,
-          manifestUrl: escrow.manifestUrl as string,
+          manifestUrl: escrow.manifest as string,
         });
         abuseEntity.status = AbuseStatus.NOTIFIED;
         await this.abuseRepository.updateOne(abuseEntity);
