@@ -8,8 +8,8 @@ import {
   LOGOUT_PATH,
   RESEND_EMAIL_VERIFICATION_PATH,
 } from '@/common/constants';
+import { UserRole, UserStatus } from '@/common/enums';
 import { AuthConfigService } from '@/config';
-import { UserRole, UserStatus } from '@/modules/user';
 
 @Injectable()
 export class JwtHttpStrategy extends PassportStrategy(

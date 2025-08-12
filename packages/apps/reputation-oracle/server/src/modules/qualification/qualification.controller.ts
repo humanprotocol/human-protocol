@@ -18,8 +18,8 @@ import {
 } from '@nestjs/swagger';
 
 import { Public, Roles } from '@/common/decorators';
+import { UserRole } from '@/common/enums';
 import { RolesAuthGuard } from '@/common/guards';
-import { UserRole } from '@/modules/user';
 
 import {
   AssignQualificationDto,

@@ -1,12 +1,12 @@
 import { faker } from '@faker-js/faker';
 import { SetNonNullable } from 'type-fest';
 
+import { UserRole, UserStatus } from '@/common/enums';
 import * as securityUtils from '@/utils/security';
 import * as web3Utils from '@/utils/web3';
 import { generateEthWallet } from '~/test/fixtures/web3';
 
 import { OperatorUserEntity, Web2UserEntity } from '../types';
-import { Role, UserStatus } from '../user.entity';
 
 type Web2UserWithAddress = SetNonNullable<Web2UserEntity, 'evmAddress'>;
 
@@ -30,7 +30,7 @@ export function generateWorkerUser<T extends GenerateUserOptions>(
     email: faker.internet.email(),
     password: passwordHash,
     ndaSignedUrl: null,
-    role: Role.WORKER,
+    role: UserRole.WORKER,
     evmAddress: null,
     status: options?.status || UserStatus.ACTIVE,
     createdAt: faker.date.recent(),
@@ -57,7 +57,7 @@ export function generateOperator(
 ): OperatorUserEntity {
   const user: OperatorUserEntity = {
     id: faker.number.int(),
-    role: Role.OPERATOR,
+    role: UserRole.OPERATOR,
     evmAddress: generateEthWallet(options?.privateKey).address.toLowerCase(),
     status: options?.status || UserStatus.ACTIVE,
     nonce: web3Utils.generateNonce(),

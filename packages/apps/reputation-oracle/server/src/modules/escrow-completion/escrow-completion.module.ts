@@ -3,7 +3,9 @@ import { Module } from '@nestjs/common';
 import { ReputationModule } from '@/modules/reputation';
 import { StorageModule } from '@/modules/storage';
 import { Web3Module } from '@/modules/web3';
-// Using direct import instead of using index.ts due to the circular dependency
+/**
+ * Import webhook-related items directly to avoid circular dependency
+ */
 import { OutgoingWebhookModule } from '@/modules/webhook/webhook-outgoing.module';
 
 import { EscrowCompletionRepository } from './escrow-completion.repository';

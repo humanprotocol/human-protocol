@@ -21,10 +21,11 @@ import logger from '@/logger';
 import { ReputationService } from '@/modules/reputation';
 import { StorageService } from '@/modules/storage';
 import { Web3Service } from '@/modules/web3';
-import {
-  OutgoingWebhookService,
-  OutgoingWebhookEventType,
-} from '@/modules/webhook';
+/**
+ * Import webhook-related items directly to avoid circular dependency
+ */
+import { OutgoingWebhookEventType } from '@/modules/webhook/types';
+import { OutgoingWebhookService } from '@/modules/webhook/webhook-outgoing.service';
 import { calculateExponentialBackoffMs } from '@/utils/backoff';
 import * as manifestUtils from '@/utils/manifest';
 

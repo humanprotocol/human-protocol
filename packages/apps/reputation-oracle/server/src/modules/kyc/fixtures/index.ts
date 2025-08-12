@@ -1,8 +1,8 @@
 import { faker } from '@faker-js/faker';
 
+import { KycStatus } from '@/common/enums';
 import { KycConfigService } from '@/config';
 
-import { KycStatus } from '../constants';
 import { KycEntity } from '../kyc.entity';
 
 export const mockKycConfigService: Omit<KycConfigService, 'configService'> = {

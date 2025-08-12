@@ -7,7 +7,7 @@ import { JwtModule, JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
 import { omit } from 'lodash';
 
-import { SignatureType } from '@/common/enums';
+import { SignatureType, UserStatus, UserRole } from '@/common/enums';
 import {
   AuthConfigService,
   NDAConfigService,
@@ -16,13 +16,7 @@ import {
 } from '@/config';
 import { EmailAction, EmailService } from '@/modules/email';
 import { SiteKeyRepository } from '@/modules/user';
-import {
-  UserStatus,
-  UserRole,
-  UserEntity,
-  UserRepository,
-  UserService,
-} from '@/modules/user';
+import { UserEntity, UserRepository, UserService } from '@/modules/user';
 import { generateOperator, generateWorkerUser } from '@/modules/user/fixtures';
 import { mockWeb3ConfigService } from '@/modules/web3/fixtures';
 import * as secutiryUtils from '@/utils/security';

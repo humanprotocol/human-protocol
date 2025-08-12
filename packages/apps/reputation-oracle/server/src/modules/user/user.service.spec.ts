@@ -6,9 +6,9 @@ import { KVStoreClient, KVStoreUtils } from '@human-protocol/sdk';
 import { Test } from '@nestjs/testing';
 
 import { SignatureType } from '@/common/enums';
+import { UserRole, KycStatus } from '@/common/enums';
 import { Web3ConfigService } from '@/config';
 import { HCaptchaService } from '@/integrations/hcaptcha/hcaptcha.service';
-import { KycStatus } from '@/modules/kyc';
 import { generateKycEntity } from '@/modules/kyc/fixtures';
 import { Web3Service } from '@/modules/web3';
 import { mockWeb3ConfigService } from '@/modules/web3/fixtures';
@@ -22,7 +22,6 @@ import {
 } from './fixtures';
 import { SiteKeyType } from './site-key.entity';
 import { SiteKeyRepository } from './site-key.repository';
-import { Role } from './user.entity';
 import {
   DuplicatedWalletAddressError,
   InvalidWeb3SignatureError,
@@ -79,9 +78,9 @@ describe('UserService', () => {
 
   describe('isWeb2UserRole', () => {
     it.each(
-      Object.values(Role).map((role) => ({
+      Object.values(UserRole).map((role) => ({
         role,
-        result: role === Role.OPERATOR ? false : true,
+        result: role === UserRole.OPERATOR ? false : true,
       })),
     )('should return "$result" for "$role" role', ({ role, result }) => {
       expect(UserService.isWeb2UserRole(role)).toBe(result);
@@ -96,7 +95,7 @@ describe('UserService', () => {
 
     it('should throw if not worker user', async () => {
       const user = generateWorkerUser();
-      user.role = Role.ADMIN;
+      user.role = UserRole.ADMIN;
 
       mockUserRepository.findOneById.mockResolvedValueOnce(user);
 

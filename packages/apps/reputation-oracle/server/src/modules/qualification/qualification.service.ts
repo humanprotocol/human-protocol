@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { v4 as uuidV4 } from 'uuid';
 
+import { UserStatus } from '@/common/enums';
 import { ServerConfigService } from '@/config';
 import logger from '@/logger';
-import { UserRepository, UserStatus } from '@/modules/user';
+import { UserRepository } from '@/modules/user';
 
 import { QualificationEntity } from './qualification.entity';
 import {

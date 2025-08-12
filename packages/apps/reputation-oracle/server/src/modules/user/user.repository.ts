@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource, FindManyOptions, In } from 'typeorm';
 
+import { UserRole } from '@/common/enums';
 import { BaseRepository } from '@/database';
 
-import { Role, UserEntity } from './user.entity';
+import { UserEntity } from './user.entity';
 
 type FindOptions = {
   relations?: FindManyOptions<UserEntity>['relations'];
@@ -63,7 +64,7 @@ export class UserRepository extends BaseRepository<UserEntity> {
 
     return this.find({
       where: {
-        role: Role.WORKER,
+        role: UserRole.WORKER,
         evmAddress: In(lowercasedAddresses),
       },
     });

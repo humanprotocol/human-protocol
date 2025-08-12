@@ -4,6 +4,7 @@ import { HttpService } from '@nestjs/axios';
 import { Test } from '@nestjs/testing';
 import { ethers } from 'ethers';
 
+import { KycStatus } from '@/common/enums';
 import { KycConfigService, Web3ConfigService } from '@/config';
 import { UserRepository } from '@/modules/user';
 import { generateWorkerUser } from '@/modules/user/fixtures';
@@ -15,7 +16,6 @@ import {
   createHttpServiceResponse,
 } from '~/test/mock-creators/nest';
 
-import { KycStatus } from './constants';
 import { generateKycEntity, mockKycConfigService } from './fixtures';
 import { UpdateKycStatusDto } from './kyc.dto';
 import { KycEntity } from './kyc.entity';
