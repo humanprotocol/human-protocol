@@ -17,7 +17,7 @@ export class FortuneResultsProcessor extends BaseEscrowResultsProcessor<FortuneM
     let intermediateResults: FortuneFinalResult[];
     try {
       intermediateResults = JSON.parse(resultsFileContent.toString());
-    } catch (_error) {
+    } catch {
       throw new Error('Failed to parse results data');
     }
 

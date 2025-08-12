@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 import {
   ESCROW_BULK_PAYOUT_MAX_ITEMS,
   ChainId,
@@ -7,20 +9,15 @@ import {
   OperatorUtils,
 } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
-
-import crypto from 'crypto';
 import { ethers } from 'ethers';
 import stringify from 'json-stable-stringify';
 import _ from 'lodash';
 
 import { BACKOFF_INTERVAL_SECONDS } from '@/common/constants';
-import { isDuplicatedError } from '@/database';
 import { JobManifest, JobRequestType } from '@/common/types';
 import { ServerConfigService } from '@/config';
+import { isDuplicatedError } from '@/database';
 import logger from '@/logger';
-import { calculateExponentialBackoffMs } from '@/utils/backoff';
-import * as manifestUtils from '@/utils/manifest';
-
 import { ReputationService } from '@/modules/reputation';
 import { StorageService } from '@/modules/storage';
 import { Web3Service } from '@/modules/web3';
@@ -28,18 +25,14 @@ import {
   OutgoingWebhookService,
   OutgoingWebhookEventType,
 } from '@/modules/webhook';
+import { calculateExponentialBackoffMs } from '@/utils/backoff';
+import * as manifestUtils from '@/utils/manifest';
 
 import { DEFAULT_BULK_PAYOUT_TX_ID, EscrowCompletionStatus } from './constants';
-import { EscrowCompletionRepository } from './escrow-completion.repository';
 import { EscrowCompletionEntity } from './escrow-completion.entity';
+import { EscrowCompletionRepository } from './escrow-completion.repository';
 import { EscrowPayoutsBatchEntity } from './escrow-payouts-batch.entity';
 import { EscrowPayoutsBatchRepository } from './escrow-payouts-batch.repository';
-import {
-  AudinoResultsProcessor,
-  CvatResultsProcessor,
-  EscrowResultsProcessor,
-  FortuneResultsProcessor,
-} from './results-processing';
 import {
   AudinoPayoutsCalculator,
   CvatPayoutsCalculator,
@@ -47,6 +40,12 @@ import {
   EscrowPayoutsCalculator,
   CalculatedPayout,
 } from './payouts-calculation';
+import {
+  AudinoResultsProcessor,
+  CvatResultsProcessor,
+  EscrowResultsProcessor,
+  FortuneResultsProcessor,
+} from './results-processing';
 
 @Injectable()
 export class EscrowCompletionService {

@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 
 import { BACKOFF_INTERVAL_SECONDS } from '@/common/constants';
-import { isDuplicatedError } from '@/database';
 import { ServerConfigService } from '@/config';
+import { isDuplicatedError } from '@/database';
+import logger from '@/logger';
 import { EscrowCompletionService } from '@/modules/escrow-completion';
 import { calculateExponentialBackoffMs } from '@/utils/backoff';
-import logger from '@/logger';
 
 import { IncomingWebhookData, IncomingWebhookStatus } from './types';
 import { IncomingWebhookEntity } from './webhook-incoming.entity';

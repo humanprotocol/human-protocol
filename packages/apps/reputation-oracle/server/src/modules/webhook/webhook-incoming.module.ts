@@ -3,9 +3,9 @@ import { Module } from '@nestjs/common';
 
 import { EscrowCompletionModule } from '@/modules/escrow-completion';
 
-import { WebhookController } from './webhook.controller';
 import { IncomingWebhookRepository } from './webhook-incoming.repository';
 import { IncomingWebhookService } from './webhook-incoming.service';
+import { WebhookController } from './webhook.controller';
 
 @Module({
   imports: [HttpModule, EscrowCompletionModule],

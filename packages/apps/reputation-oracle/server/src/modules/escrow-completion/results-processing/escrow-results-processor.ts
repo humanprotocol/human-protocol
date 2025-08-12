@@ -1,10 +1,10 @@
+import crypto from 'crypto';
+
 import { ChainId, EscrowClient, EscrowUtils } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
-import crypto from 'crypto';
 
 import { ContentType } from '@/common/enums';
 import { JobManifest } from '@/common/types';
-
 import { PgpEncryptionService } from '@/modules/encryption';
 import { StorageService } from '@/modules/storage';
 import { Web3Service } from '@/modules/web3';

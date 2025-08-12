@@ -1,5 +1,6 @@
-import axios, { AxiosError } from 'axios';
 import { Readable } from 'stream';
+
+import axios, { AxiosError } from 'axios';
 
 import { BaseError } from '@/common/errors/base';
 
@@ -30,7 +31,7 @@ function isValidUrl(maybeUrl: string, protocols?: string[]): boolean {
     }
 
     return true;
-  } catch (_error) {
+  } catch {
     return false;
   }
 }

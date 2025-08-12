@@ -4,7 +4,6 @@ import type { OverrideProperties } from 'type-fest';
 
 import { AUDINO_VALIDATION_META_FILENAME } from '@/common/constants';
 import { AudinoAnnotationMeta, AudinoManifest } from '@/common/types';
-
 import { StorageService } from '@/modules/storage';
 import { Web3Service } from '@/modules/web3';
 

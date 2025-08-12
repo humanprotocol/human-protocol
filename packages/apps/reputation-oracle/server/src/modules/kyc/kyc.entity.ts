@@ -2,9 +2,9 @@ import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 
 import { DATABASE_SCHEMA_NAME } from '@/common/constants';
 import { BaseEntity } from '@/database';
-import { KycStatus } from './constants';
-
 import type { UserEntity } from '@/modules/user';
+
+import { KycStatus } from './constants';
 
 @Entity({ schema: DATABASE_SCHEMA_NAME, name: 'kycs' })
 export class KycEntity extends BaseEntity {

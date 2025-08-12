@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DataSource, FindManyOptions, LessThan } from 'typeorm';
 
 import { BaseRepository } from '@/database';
+
 import { TokenEntity, TokenType } from './token.entity';
 
 type FindOptions = {

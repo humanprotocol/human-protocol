@@ -1,19 +1,21 @@
+import * as crypto from 'crypto';
+
 import { faker } from '@faker-js/faker';
 import { createMock } from '@golevelup/ts-jest';
 import { HttpService } from '@nestjs/axios';
 import { Test } from '@nestjs/testing';
-import * as crypto from 'crypto';
 import stringify from 'json-stable-stringify';
 
+import { HEADER_SIGNATURE_KEY } from '@/common/constants';
+import { ServerConfigService, Web3ConfigService } from '@/config';
+import { mockWeb3ConfigService } from '@/modules/web3/fixtures';
+import { transformKeysFromCamelToSnake } from '@/utils/case-converters';
+import { signMessage } from '@/utils/web3';
 import {
   createHttpServiceMock,
   createHttpServiceResponse,
 } from '~/test/mock-creators/nest';
-import { HEADER_SIGNATURE_KEY } from '@/common/constants';
-import { ServerConfigService, Web3ConfigService } from '@/config';
-import { transformKeysFromCamelToSnake } from '@/utils/case-converters';
-import { signMessage } from '@/utils/web3';
-import { mockWeb3ConfigService } from '@/modules/web3/fixtures';
+
 import {
   generateOutgoingWebhookPayload,
   generateOutgoingWebhook,

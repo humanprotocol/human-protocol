@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 
 import { BaseRepository } from '@/database';
+
 import { UserQualificationEntity } from './user-qualification.entity';
 
 @Injectable()

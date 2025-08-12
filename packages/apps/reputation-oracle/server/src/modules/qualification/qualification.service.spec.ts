@@ -3,11 +3,11 @@ import { createMock } from '@golevelup/ts-jest';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 
-import { generateFutureDate } from '~/test/fixtures/date';
-import { generateEthWallet } from '~/test/fixtures/web3';
 import { ServerConfigService } from '@/config';
 import { UserStatus, UserRepository } from '@/modules/user';
 import { generateWorkerUser } from '@/modules/user/fixtures';
+import { generateFutureDate } from '~/test/fixtures/date';
+import { generateEthWallet } from '~/test/fixtures/web3';
 
 import { QualificationEntity } from './qualification.entity';
 import {

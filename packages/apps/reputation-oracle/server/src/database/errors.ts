@@ -10,7 +10,7 @@ export enum DatabaseErrorMessages {
   DUPLICATED = 'Entity duplication error',
 }
 
-export function handleDbError(error: any): DatabaseError {
+export function handleDbError(error: Error & { code: unknown }): DatabaseError {
   if (error.code === PostgresErrorCodes.Duplicated) {
     return new DatabaseError(DatabaseErrorMessages.DUPLICATED);
   }

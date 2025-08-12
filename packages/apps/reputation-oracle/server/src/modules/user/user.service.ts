@@ -4,10 +4,9 @@ import { Injectable } from '@nestjs/common';
 import { SignatureType } from '@/common/enums';
 import { Web3ConfigService } from '@/config';
 import { HCaptchaService } from '@/integrations/hcaptcha/hcaptcha.service';
-import * as web3Utils from '@/utils/web3';
-
 import { KycStatus } from '@/modules/kyc';
 import { Web3Service } from '@/modules/web3';
+import * as web3Utils from '@/utils/web3';
 
 import { SiteKeyEntity, SiteKeyType } from './site-key.entity';
 import { SiteKeyRepository } from './site-key.repository';
@@ -213,7 +212,9 @@ export class UserService {
         signer.address,
         operatorUser.evmAddress,
       );
-    } catch {}
+    } catch {
+      // noop
+    }
 
     if (status === OperatorStatus.ACTIVE) {
       throw new UserError(

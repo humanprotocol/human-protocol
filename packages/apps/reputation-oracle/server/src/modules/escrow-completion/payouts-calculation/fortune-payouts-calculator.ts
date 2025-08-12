@@ -3,7 +3,6 @@ import { ethers } from 'ethers';
 import type { OverrideProperties } from 'type-fest';
 
 import { FortuneFinalResult, FortuneManifest } from '@/common/types';
-
 import { StorageService } from '@/modules/storage';
 
 import {

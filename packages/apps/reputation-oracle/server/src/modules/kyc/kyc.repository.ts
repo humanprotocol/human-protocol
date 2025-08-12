@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 
 import { BaseRepository } from '@/database';
+
 import { KycEntity } from './kyc.entity';
 
 @Injectable()

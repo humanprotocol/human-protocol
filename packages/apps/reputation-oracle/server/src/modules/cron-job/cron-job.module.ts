@@ -8,8 +8,8 @@ import {
   OutgoingWebhookModule,
 } from '@/modules/webhook';
 
-import { CronJobService } from './cron-job.service';
 import { CronJobRepository } from './cron-job.repository';
+import { CronJobService } from './cron-job.service';
 
 @Module({
   imports: [

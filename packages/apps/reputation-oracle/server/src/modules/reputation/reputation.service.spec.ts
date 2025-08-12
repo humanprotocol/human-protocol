@@ -1,26 +1,25 @@
 jest.mock('@human-protocol/sdk');
 
-import { createMock } from '@golevelup/ts-jest';
 import { faker } from '@faker-js/faker';
+import { createMock } from '@golevelup/ts-jest';
 import { EscrowClient } from '@human-protocol/sdk';
 import { Test } from '@nestjs/testing';
 
 import { ReputationConfigService, Web3ConfigService } from '@/config';
-
+import { Web3Service } from '@/modules/web3';
 import {
   generateTestnetChainId,
   mockWeb3ConfigService,
 } from '@/modules/web3/fixtures';
-import { Web3Service } from '@/modules/web3';
 
+import { ReputationEntityType } from './constants';
 import {
   generateRandomScorePoints,
   generateReputationEntity,
   generateReputationEntityType,
 } from './fixtures';
-import { ReputationService } from './reputation.service';
 import { ReputationRepository } from './reputation.repository';
-import { ReputationEntityType } from './constants';
+import { ReputationService } from './reputation.service';
 
 const mockReputationRepository = createMock<ReputationRepository>();
 

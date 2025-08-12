@@ -7,6 +7,7 @@ import {
 import { Request, Response } from 'express';
 
 import logger from '@/logger';
+
 import { KycError } from './kyc.error';
 
 @Catch(KycError)

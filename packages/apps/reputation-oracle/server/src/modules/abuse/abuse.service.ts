@@ -6,8 +6,9 @@ import {
 } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
-import { isDuplicatedError } from '@/database';
+
 import { ServerConfigService } from '@/config';
+import { isDuplicatedError } from '@/database';
 import logger from '@/logger';
 import { Web3Service } from '@/modules/web3';
 import {
@@ -15,16 +16,17 @@ import {
   OutgoingWebhookService,
 } from '@/modules/webhook';
 
+import { AbuseSlackBot } from './abuse-slack-bot';
 import { AbuseEntity } from './abuse.entity';
 import { AbuseRepository } from './abuse.repository';
 import { AbuseDecision, AbuseStatus } from './constants';
 import {
+  AbuseReportModalPrivateMetadata,
   isInteractiveMessage,
   isViewSubmission,
   ReportAbuseInput,
   SlackInteraction,
 } from './types';
-import { AbuseSlackBot } from './abuse-slack-bot';
 
 @Injectable()
 export class AbuseService {
@@ -116,7 +118,10 @@ export class AbuseService {
       });
       return '';
     } else if (isViewSubmission(data)) {
-      const privateMetadata = JSON.parse(data.view.private_metadata);
+      const privateMetadata = JSON.parse(
+        data.view.private_metadata,
+      ) as AbuseReportModalPrivateMetadata;
+
       const responseUrl = privateMetadata.responseUrl;
       abuseEntity.decision = AbuseDecision.ACCEPTED;
       abuseEntity.amount = data.view.state.values.quantity_input.quantity.value;

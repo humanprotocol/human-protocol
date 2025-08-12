@@ -4,6 +4,7 @@ import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 import { DATABASE_SCHEMA_NAME } from '@/common/constants';
 import { BaseEntity } from '@/database';
 import type { UserEntity } from '@/modules/user';
+
 import { AbuseDecision, AbuseStatus } from './constants';
 
 @Entity({ schema: DATABASE_SCHEMA_NAME, name: 'abuses' })

@@ -10,10 +10,6 @@ import {
   Web3ConfigService,
 } from '@/config';
 import logger from '@/logger';
-import * as httpUtils from '@/utils/http';
-import * as securityUtils from '@/utils/security';
-import * as web3Utils from '@/utils/web3';
-
 import { EmailAction, EmailService } from '@/modules/email';
 import {
   OperatorStatus,
@@ -27,6 +23,9 @@ import {
   type OperatorUserEntity,
   type Web2UserEntity,
 } from '@/modules/user';
+import * as httpUtils from '@/utils/http';
+import * as securityUtils from '@/utils/security';
+import * as web3Utils from '@/utils/web3';
 
 import {
   AuthError,
@@ -115,7 +114,9 @@ export class AuthService {
     let role = '';
     try {
       role = await KVStoreUtils.get(chainId, address, KVStoreKeys.role);
-    } catch (noop) {}
+    } catch {
+      // noop
+    }
 
     // We need to exclude ReputationOracle role
     const isValidRole = [
@@ -131,7 +132,9 @@ export class AuthService {
     let fee = '';
     try {
       fee = await KVStoreUtils.get(chainId, address, KVStoreKeys.fee);
-    } catch (noop) {}
+    } catch {
+      // noop
+    }
     if (!fee) {
       throw new InvalidOperatorFeeError(fee);
     }
@@ -139,7 +142,9 @@ export class AuthService {
     let url = '';
     try {
       url = await KVStoreUtils.get(chainId, address, KVStoreKeys.url);
-    } catch (noop) {}
+    } catch {
+      // noop
+    }
     if (!url || !httpUtils.isValidHttpUrl(url)) {
       throw new InvalidOperatorUrlError(url);
     }
@@ -276,7 +281,9 @@ export class AuthService {
         this.web3ConfigService.operatorAddress,
         userEntity.evmAddress,
       )) as OperatorStatus;
-    } catch (noop) {}
+    } catch {
+      // noop
+    }
 
     const jwtPayload = {
       status: userEntity.status,

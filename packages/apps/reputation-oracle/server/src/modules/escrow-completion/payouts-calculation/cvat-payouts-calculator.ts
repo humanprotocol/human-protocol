@@ -5,7 +5,6 @@ import type { OverrideProperties } from 'type-fest';
 
 import { CVAT_VALIDATION_META_FILENAME } from '@/common/constants';
 import { CvatAnnotationMeta, CvatManifest } from '@/common/types';
-
 import { StorageService } from '@/modules/storage';
 import { Web3Service } from '@/modules/web3';
 

@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 
 import { HCaptchaModule } from '@/integrations/hcaptcha';
-
 import { Web3Module } from '@/modules/web3';
 
 import { SiteKeyRepository } from './site-key.repository';

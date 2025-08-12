@@ -2,8 +2,9 @@ import { Column, Entity, ManyToOne, Index } from 'typeorm';
 
 import { DATABASE_SCHEMA_NAME } from '@/common/constants';
 import { BaseEntity } from '@/database';
-import type { QualificationEntity } from './qualification.entity';
 import type { UserEntity } from '@/modules/user';
+
+import type { QualificationEntity } from './qualification.entity';
 
 @Entity({ schema: DATABASE_SCHEMA_NAME, name: 'user_qualifications' })
 @Index(['user', 'qualification'], { unique: true })

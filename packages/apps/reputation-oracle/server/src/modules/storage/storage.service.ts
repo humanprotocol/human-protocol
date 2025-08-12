@@ -4,9 +4,8 @@ import * as Minio from 'minio';
 import { ContentType } from '@/common/enums';
 import { S3ConfigService } from '@/config';
 import logger from '@/logger';
-import * as httpUtils from '@/utils/http';
-
 import { PgpEncryptionService } from '@/modules/encryption';
+import * as httpUtils from '@/utils/http';
 
 import { MinioErrorCodes } from './minio.constants';
 

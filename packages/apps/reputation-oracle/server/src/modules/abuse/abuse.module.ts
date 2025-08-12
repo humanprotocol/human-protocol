@@ -1,5 +1,5 @@
-import { Module } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
+import { Module } from '@nestjs/common';
 
 import { Web3Module } from '@/modules/web3';
 import { OutgoingWebhookModule } from '@/modules/webhook';

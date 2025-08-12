@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 
 import logger from '@/logger';
-
 import { AbuseService } from '@/modules/abuse';
 import { TokenRepository } from '@/modules/auth';
 import { EscrowCompletionService } from '@/modules/escrow-completion';

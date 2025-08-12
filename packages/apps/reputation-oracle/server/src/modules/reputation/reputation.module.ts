@@ -3,9 +3,9 @@ import { Module } from '@nestjs/common';
 
 import { Web3Module } from '@/modules/web3';
 
-import { ReputationService } from './reputation.service';
-import { ReputationRepository } from './reputation.repository';
 import { ReputationController } from './reputation.controller';
+import { ReputationRepository } from './reputation.repository';
+import { ReputationService } from './reputation.service';
 
 @Module({
   imports: [HttpModule, Web3Module],

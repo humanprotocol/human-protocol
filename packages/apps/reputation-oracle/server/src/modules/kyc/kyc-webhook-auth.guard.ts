@@ -1,3 +1,5 @@
+import { createHmac } from 'crypto';
+
 import {
   Injectable,
   CanActivate,
@@ -5,7 +7,6 @@ import {
   HttpStatus,
   HttpException,
 } from '@nestjs/common';
-import { createHmac } from 'crypto';
 import { Request } from 'express';
 
 import { KycConfigService } from '@/config';

@@ -1,12 +1,4 @@
 import {
-  ApiOperation,
-  ApiResponse,
-  ApiTags,
-  ApiBody,
-  ApiBearerAuth,
-  ApiHeader,
-} from '@nestjs/swagger';
-import {
   Body,
   ClassSerializerInterceptor,
   Controller,
@@ -18,13 +10,21 @@ import {
   HttpCode,
   Headers,
 } from '@nestjs/common';
+import {
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+  ApiBody,
+  ApiBearerAuth,
+  ApiHeader,
+} from '@nestjs/swagger';
 
 import { Public } from '@/common/decorators';
 import type { RequestWithUser } from '@/common/types';
 import { HCaptchaGuard } from '@/integrations/hcaptcha/hcaptcha.guard';
 
-import { AuthService } from './auth.service';
 import { AuthControllerErrorsFilter } from './auth.error-filter';
+import { AuthService } from './auth.service';
 import { HEADER_M2M_AUTH } from './constants';
 import {
   ForgotPasswordDto,
@@ -39,8 +39,8 @@ import {
   Web3SignUpDto,
   SuccessM2mAuthDto,
 } from './dto';
-import { TokenRepository } from './token.repository';
 import { TokenType } from './token.entity';
+import { TokenRepository } from './token.repository';
 
 @ApiTags('Auth')
 @Controller('/auth')

@@ -2,6 +2,7 @@ import { Column, Entity, Index } from 'typeorm';
 
 import { DATABASE_SCHEMA_NAME } from '@/common/constants';
 import { BaseEntity } from '@/database';
+
 import { IncomingWebhookStatus } from './types';
 
 @Entity({ schema: DATABASE_SCHEMA_NAME, name: 'webhook_incoming' })

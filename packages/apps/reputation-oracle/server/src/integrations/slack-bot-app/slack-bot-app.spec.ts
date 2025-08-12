@@ -1,11 +1,14 @@
-import { HttpService } from '@nestjs/axios';
-import { SlackBotApp } from './slack-bot-app';
 import { faker } from '@faker-js/faker';
+import { HttpService } from '@nestjs/axios';
+import type { View } from '@slack/web-api';
+
 import {
   createHttpServiceMock,
   createHttpServiceRequestError,
   createHttpServiceResponse,
 } from '~/test/mock-creators/nest';
+
+import { SlackBotApp } from './slack-bot-app';
 
 const mockHttpService = createHttpServiceMock();
 
@@ -62,9 +65,10 @@ describe('SlackBotApp', () => {
       );
 
       const triggerId = faker.word.sample();
-      const modalView: any = {
+      const modalView: View = {
         type: 'modal',
         title: { type: 'plain_text', text: 'Test' },
+        blocks: [],
       };
 
       await expect(
@@ -95,9 +99,10 @@ describe('SlackBotApp', () => {
       );
 
       const triggerId = faker.word.sample();
-      const modalView: any = {
+      const modalView: View = {
         type: 'modal',
         title: { type: 'plain_text', text: 'Test' },
+        blocks: [],
       };
 
       await expect(slackBotApp.openModal(triggerId, modalView)).rejects.toThrow(

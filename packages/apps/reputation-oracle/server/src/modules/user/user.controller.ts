@@ -1,11 +1,4 @@
 import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiResponse,
-  ApiTags,
-  ApiBody,
-} from '@nestjs/swagger';
-import {
   Body,
   Controller,
   HttpCode,
@@ -16,6 +9,13 @@ import {
   Get,
   UseFilters,
 } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+  ApiBody,
+} from '@nestjs/swagger';
 
 import { Public } from '@/common/decorators';
 import { SignatureType } from '@/common/enums';

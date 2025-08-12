@@ -5,9 +5,9 @@ import { catchError, firstValueFrom } from 'rxjs';
 
 import { KycConfigService, Web3ConfigService } from '@/config';
 import logger from '@/logger';
-import * as httpUtils from '@/utils/http';
 import { UserNotFoundError, UserRepository } from '@/modules/user';
 import { Web3Service } from '@/modules/web3';
+import * as httpUtils from '@/utils/http';
 
 import { KycStatus } from './constants';
 import { KycSignedAddressDto, UpdateKycStatusDto } from './kyc.dto';

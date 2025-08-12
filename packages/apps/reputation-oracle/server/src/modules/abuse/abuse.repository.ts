@@ -9,6 +9,7 @@ import {
 
 import { ServerConfigService } from '@/config';
 import { BaseRepository } from '@/database';
+
 import { AbuseEntity } from './abuse.entity';
 import { AbuseStatus } from './constants';
 

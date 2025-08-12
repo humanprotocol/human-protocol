@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { BaseRepository } from '@/database';
 import { DataSource } from 'typeorm';
+
+import { BaseRepository } from '@/database';
+
 import { EscrowPayoutsBatchEntity } from './escrow-payouts-batch.entity';
 
 @Injectable()

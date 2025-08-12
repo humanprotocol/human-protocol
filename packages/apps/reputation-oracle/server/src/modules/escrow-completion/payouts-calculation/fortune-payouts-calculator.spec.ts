@@ -1,5 +1,5 @@
-import { createMock } from '@golevelup/ts-jest';
 import { faker } from '@faker-js/faker';
+import { createMock } from '@golevelup/ts-jest';
 import { Test } from '@nestjs/testing';
 import { ethers } from 'ethers';
 import _ from 'lodash';

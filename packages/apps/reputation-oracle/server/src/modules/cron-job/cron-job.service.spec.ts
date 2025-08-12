@@ -281,6 +281,7 @@ describe('CronJobService', () => {
       it('should skip processing if a cron job is already running', async () => {
         spyOnIsCronJobRunning.mockResolvedValueOnce(true);
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await (service as any)[method]();
 
         expect(spyOnIsCronJobRunning).toHaveBeenCalledTimes(1);
@@ -294,6 +295,7 @@ describe('CronJobService', () => {
         spyOnIsCronJobRunning.mockResolvedValueOnce(false);
         spyOnStartCronJob.mockResolvedValueOnce(cronJob);
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await (service as any)[method]();
 
         expect(service.startCronJob).toHaveBeenCalledTimes(1);
@@ -311,6 +313,7 @@ describe('CronJobService', () => {
 
         processorMock.mockRejectedValueOnce(new Error(faker.lorem.sentence()));
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await (service as any)[method]();
 
         expect(service.completeCronJob).toHaveBeenCalledTimes(1);

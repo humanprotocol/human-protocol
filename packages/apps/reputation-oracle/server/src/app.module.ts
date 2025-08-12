@@ -1,31 +1,29 @@
 import { ClassSerializerInterceptor, Module } from '@nestjs/common';
-import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
 
 import { AppController } from './app.controller';
-import { JwtAuthGuard } from './common/guards';
 import { ExceptionFilter } from './common/filters/exception.filter';
+import { JwtAuthGuard } from './common/guards';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { HttpValidationPipe } from './common/pipes';
 import { envValidator, EnvConfigModule } from './config';
 import { DatabaseModule } from './database';
-
 import { AbuseModule } from './modules/abuse';
 import { AuthModule } from './modules/auth';
 import { CronJobModule } from './modules/cron-job';
 import { EscrowCompletionModule } from './modules/escrow-completion';
 import { HealthModule } from './modules/health';
-import {
-  IncomingWebhookModule,
-  OutgoingWebhookModule,
-} from './modules/webhook';
 import { KycModule } from './modules/kyc';
 import { NDAModule } from './modules/nda';
 import { QualificationModule } from './modules/qualification';
 import { ReputationModule } from './modules/reputation';
 import { UserModule } from './modules/user';
-
+import {
+  IncomingWebhookModule,
+  OutgoingWebhookModule,
+} from './modules/webhook';
 import Environment from './utils/environment';
 
 @Module({

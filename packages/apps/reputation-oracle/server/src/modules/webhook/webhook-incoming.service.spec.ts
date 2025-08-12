@@ -2,8 +2,8 @@ import { faker } from '@faker-js/faker';
 import { createMock } from '@golevelup/ts-jest';
 import { Test } from '@nestjs/testing';
 
-import { DatabaseError, DatabaseErrorMessages } from '@/database';
 import { ServerConfigService } from '@/config';
+import { DatabaseError, DatabaseErrorMessages } from '@/database';
 import { EscrowCompletionService } from '@/modules/escrow-completion';
 import { generateTestnetChainId } from '@/modules/web3/fixtures';
 

@@ -1,14 +1,16 @@
 import { faker } from '@faker-js/faker';
 import { ServiceUnavailableException } from '@nestjs/common';
-import { Test } from '@nestjs/testing';
 import {
   HealthIndicatorResult,
   HealthIndicatorStatus,
   TerminusModule,
   TypeOrmHealthIndicator,
 } from '@nestjs/terminus';
-import { nestLoggerOverride } from '@/logger';
+import { Test } from '@nestjs/testing';
+
 import { ServerConfigService } from '@/config';
+import { nestLoggerOverride } from '@/logger';
+
 import { HealthController } from './health.controller';
 
 const mockServerConfigService = {

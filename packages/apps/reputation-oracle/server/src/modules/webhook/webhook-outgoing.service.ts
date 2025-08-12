@@ -1,6 +1,8 @@
+import * as crypto from 'crypto';
+
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
-import * as crypto from 'crypto';
+import { AxiosError } from 'axios';
 import stringify from 'json-stable-stringify';
 import { firstValueFrom } from 'rxjs';
 
@@ -9,11 +11,11 @@ import {
   HEADER_SIGNATURE_KEY,
 } from '@/common/constants';
 import { ServerConfigService, Web3ConfigService } from '@/config';
+import logger from '@/logger';
 import { calculateExponentialBackoffMs } from '@/utils/backoff';
 import { transformKeysFromCamelToSnake } from '@/utils/case-converters';
-import { formatAxiosError } from '@/utils/http';
+import * as httpUtils from '@/utils/http';
 import { signMessage } from '@/utils/web3';
-import logger from '@/logger';
 
 import { OutgoingWebhookStatus } from './types';
 import { OutgoingWebhookEntity } from './webhook-outgoing.entity';
@@ -85,12 +87,16 @@ export class OutgoingWebhookService {
         }),
       );
     } catch (error) {
-      const formattedError = formatAxiosError(error);
-      this.logger.error('Webhook not sent', {
+      let formattedError = error;
+      if (error instanceof AxiosError) {
+        formattedError = httpUtils.formatAxiosError(error);
+      }
+      const message = 'Webhook not sent';
+      this.logger.error(message, {
         error: formattedError,
         hash: outgoingWebhook.hash,
       });
-      throw new Error(formattedError.message);
+      throw new Error(message);
     }
   }
 

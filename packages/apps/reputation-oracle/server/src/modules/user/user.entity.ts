@@ -3,7 +3,6 @@ import { Column, Entity, OneToMany, OneToOne } from 'typeorm';
 
 import { DATABASE_SCHEMA_NAME } from '@/common/constants';
 import { BaseEntity } from '@/database';
-
 import type { KycEntity } from '@/modules/kyc';
 import type { UserQualificationEntity } from '@/modules/qualification';
 

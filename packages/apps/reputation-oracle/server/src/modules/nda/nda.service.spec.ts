@@ -1,15 +1,15 @@
-import { createMock } from '@golevelup/ts-jest';
 import { faker } from '@faker-js/faker';
+import { createMock } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { NDAConfigService } from '@/config';
-import { generateWorkerUser } from '@/modules/user/fixtures';
 import { UserRepository } from '@/modules/user';
+import { generateWorkerUser } from '@/modules/user/fixtures';
 
+import { mockNdaConfigService } from './fixtures';
 import { NDASignatureDto } from './nda.dto';
 import { NDAError, NDAErrorMessage } from './nda.error';
 import { NDAService } from './nda.service';
-import { mockNdaConfigService } from './fixtures';
 
 const mockUserRepository = createMock<UserRepository>();
 

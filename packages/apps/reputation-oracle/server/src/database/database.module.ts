@@ -4,24 +4,24 @@ import { LoggerOptions } from 'typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 
 import { DatabaseConfigService } from '@/config';
-import { ReputationEntity } from '@/modules/reputation';
+import { AbuseEntity } from '@/modules/abuse';
 import { TokenEntity } from '@/modules/auth';
-import { UserEntity, SiteKeyEntity } from '@/modules/user';
-import { KycEntity } from '@/modules/kyc';
 import { CronJobEntity } from '@/modules/cron-job';
-import {
-  QualificationEntity,
-  UserQualificationEntity,
-} from '@/modules/qualification';
-import {
-  IncomingWebhookEntity,
-  OutgoingWebhookEntity,
-} from '@/modules/webhook';
 import {
   EscrowCompletionEntity,
   EscrowPayoutsBatchEntity,
 } from '@/modules/escrow-completion';
-import { AbuseEntity } from '@/modules/abuse';
+import { KycEntity } from '@/modules/kyc';
+import {
+  QualificationEntity,
+  UserQualificationEntity,
+} from '@/modules/qualification';
+import { ReputationEntity } from '@/modules/reputation';
+import { UserEntity, SiteKeyEntity } from '@/modules/user';
+import {
+  IncomingWebhookEntity,
+  OutgoingWebhookEntity,
+} from '@/modules/webhook';
 
 import { TypeOrmLoggerModule, TypeOrmLoggerService } from './typeorm';
 

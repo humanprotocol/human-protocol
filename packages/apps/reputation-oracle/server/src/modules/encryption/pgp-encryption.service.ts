@@ -8,7 +8,6 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 
 import { PGPConfigService } from '@/config';
 import logger from '@/logger';
-
 import { Web3Service } from '@/modules/web3';
 
 @Injectable()

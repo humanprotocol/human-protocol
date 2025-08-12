@@ -1,5 +1,4 @@
 import { ChainId } from '@human-protocol/sdk';
-
 import type { Provider, Wallet } from 'ethers';
 
 export type Chain = {

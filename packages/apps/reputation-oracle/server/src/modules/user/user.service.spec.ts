@@ -5,25 +5,23 @@ import { createMock } from '@golevelup/ts-jest';
 import { KVStoreClient, KVStoreUtils } from '@human-protocol/sdk';
 import { Test } from '@nestjs/testing';
 
-import { generateEthWallet } from '~/test/fixtures/web3';
-
 import { SignatureType } from '@/common/enums';
 import { Web3ConfigService } from '@/config';
 import { HCaptchaService } from '@/integrations/hcaptcha/hcaptcha.service';
-import * as web3Utils from '@/utils/web3';
-
 import { KycStatus } from '@/modules/kyc';
 import { generateKycEntity } from '@/modules/kyc/fixtures';
-import { mockWeb3ConfigService } from '@/modules/web3/fixtures';
 import { Web3Service } from '@/modules/web3';
+import { mockWeb3ConfigService } from '@/modules/web3/fixtures';
+import * as web3Utils from '@/utils/web3';
+import { generateEthWallet } from '~/test/fixtures/web3';
 
 import {
   generateSiteKeyEntity,
   generateOperator,
   generateWorkerUser,
 } from './fixtures';
-import { SiteKeyRepository } from './site-key.repository';
 import { SiteKeyType } from './site-key.entity';
+import { SiteKeyRepository } from './site-key.repository';
 import { Role } from './user.entity';
 import {
   DuplicatedWalletAddressError,

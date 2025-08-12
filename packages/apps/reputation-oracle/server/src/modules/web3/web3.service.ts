@@ -1,7 +1,9 @@
 import { ChainId } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 import { Wallet, ethers } from 'ethers';
+
 import { Web3ConfigService, Web3Network } from '@/config';
+
 import type { Chain, WalletWithProvider } from './types';
 
 export const supportedChainIdsByNetwork = {
