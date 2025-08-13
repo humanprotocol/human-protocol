@@ -1,6 +1,7 @@
 import { DataSource, EntityTarget, ObjectLiteral, Repository } from 'typeorm';
-import { DatabaseError, handleDbError } from './errors';
+
 import { BaseEntity } from './base.entity';
+import { DatabaseError, handleDbError } from './errors';
 
 export class BaseRepository<
   T extends BaseEntity & ObjectLiteral,
@@ -17,6 +18,7 @@ export class BaseRepository<
 
       await this.insert(item);
     } catch (error) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       throw handleDbError(error);
     }
     return item;
@@ -27,6 +29,7 @@ export class BaseRepository<
       item.updatedAt = new Date();
       await this.save(item);
     } catch (error) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       throw handleDbError(error);
     }
     return item;
@@ -50,6 +53,7 @@ export class BaseRepository<
 
       return result.affected > 0;
     } catch (error) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       throw handleDbError(error);
     }
   }
@@ -58,6 +62,7 @@ export class BaseRepository<
     try {
       await this.remove(item);
     } catch (error) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       throw handleDbError(error);
     }
   }

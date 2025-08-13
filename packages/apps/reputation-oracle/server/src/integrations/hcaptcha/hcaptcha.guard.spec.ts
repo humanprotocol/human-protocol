@@ -4,7 +4,7 @@ import { ExecutionContext, HttpException, HttpStatus } from '@nestjs/common';
 import {
   createExecutionContextMock,
   ExecutionContextMock,
-} from '../../../test/mock-creators/nest';
+} from '~/test/mock-creators/nest';
 
 import { HCaptchaGuard } from './hcaptcha.guard';
 import { HCaptchaService } from './hcaptcha.service';

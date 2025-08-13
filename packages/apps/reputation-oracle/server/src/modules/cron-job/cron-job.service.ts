@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 
-import logger from '../../logger';
-
-import { AbuseService } from '../abuse';
-import { TokenRepository } from '../auth';
-import { EscrowCompletionService } from '../escrow-completion';
-import { IncomingWebhookService, OutgoingWebhookService } from '../webhook';
+import logger from '@/logger';
+import { AbuseService } from '@/modules/abuse';
+import { TokenRepository } from '@/modules/auth';
+import { EscrowCompletionService } from '@/modules/escrow-completion';
+import {
+  IncomingWebhookService,
+  OutgoingWebhookService,
+} from '@/modules/webhook';
 
 import { CronJobType } from './constants';
 import { CronJobEntity } from './cron-job.entity';

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
-import { CVAT_RESULTS_ANNOTATIONS_FILENAME } from '../../../common/constants';
-import { CvatManifest } from '../../../common/types';
+import { CVAT_RESULTS_ANNOTATIONS_FILENAME } from '@/common/constants';
+import { CvatManifest } from '@/common/types';
 
 import { BaseEscrowResultsProcessor } from './escrow-results-processor';
 

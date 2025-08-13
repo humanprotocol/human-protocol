@@ -1,7 +1,7 @@
 import { Column, Entity, Index, ManyToOne } from 'typeorm';
 
-import { BaseEntity } from '../../database';
-import { DATABASE_SCHEMA_NAME } from '../../common/constants';
+import { DATABASE_SCHEMA_NAME } from '@/common/constants';
+import { BaseEntity } from '@/database';
 
 import type { EscrowCompletionEntity } from './escrow-completion.entity';
 

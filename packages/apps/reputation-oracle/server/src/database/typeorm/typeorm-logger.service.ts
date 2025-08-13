@@ -1,9 +1,10 @@
 import * as util from 'util';
+
+import { Inject, Injectable, Logger, type LoggerService } from '@nestjs/common';
 import {
   Logger as TypeOrmLogger,
   LoggerOptions as TypeOrmLoggerOptions,
 } from 'typeorm';
-import { Inject, Injectable, Logger, LoggerService } from '@nestjs/common';
 
 @Injectable()
 export class TypeOrmLoggerService implements TypeOrmLogger {
@@ -15,7 +16,7 @@ export class TypeOrmLoggerService implements TypeOrmLogger {
     this.options = options;
   }
 
-  logQuery(query: string, parameters?: any[]): void {
+  logQuery(query: string, parameters?: unknown[]): void {
     if (
       this.options === 'all' ||
       this.options === true ||
@@ -28,7 +29,7 @@ export class TypeOrmLoggerService implements TypeOrmLogger {
     }
   }
 
-  logQueryError(error: string, query: string, parameters?: any[]): void {
+  logQueryError(error: string, query: string, parameters?: unknown[]): void {
     if (
       this.options === 'all' ||
       this.options === true ||
@@ -42,7 +43,7 @@ export class TypeOrmLoggerService implements TypeOrmLogger {
     }
   }
 
-  logQuerySlow(time: number, query: string, parameters?: any[]): void {
+  logQuerySlow(time: number, query: string, parameters?: unknown[]): void {
     this.loggerService.log(
       `query is slow: ${query} ${this.stringifyParams(parameters)}`,
       'TypeOrm',
@@ -89,7 +90,7 @@ export class TypeOrmLoggerService implements TypeOrmLogger {
     }
   }
 
-  protected stringifyParams(parameters: any[] = []): string {
+  protected stringifyParams(parameters: unknown[] = []): string {
     return parameters.length
       ? ` -- PARAMETERS: ${util.inspect(parameters)}`
       : '';

@@ -6,15 +6,16 @@ import {
   HttpException,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { DatabaseError, isDuplicatedError } from '../../database';
-import logger from '../../logger';
-import { transformKeysFromCamelToSnake } from '../../utils/case-converters';
+
+import { DatabaseError, isDuplicatedError } from '@/database';
+import logger from '@/logger';
+import { transformKeysFromCamelToSnake } from '@/utils/case-converters';
 
 @Catch()
 export class ExceptionFilter implements IExceptionFilter {
   private readonly logger = logger.child({ context: ExceptionFilter.name });
 
-  catch(exception: any, host: ArgumentsHost) {
+  catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();

@@ -1,8 +1,8 @@
-import { Module } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
+import { Module } from '@nestjs/common';
 
-import { Web3Module } from '../web3';
-import { OutgoingWebhookModule } from '../webhook';
+import { Web3Module } from '@/modules/web3';
+import { OutgoingWebhookModule } from '@/modules/webhook';
 
 import { AbuseSlackAuthGuard } from './abuse-slack-auth.guard';
 import { AbuseSlackBot } from './abuse-slack-bot';

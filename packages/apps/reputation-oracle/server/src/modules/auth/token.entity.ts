@@ -7,9 +7,9 @@ import {
   ManyToOne,
 } from 'typeorm';
 
-import type { UserEntity } from '../user';
-import { DATABASE_SCHEMA_NAME } from '../../common/constants';
-import { BaseEntity } from '../../database';
+import { DATABASE_SCHEMA_NAME } from '@/common/constants';
+import { BaseEntity } from '@/database';
+import type { UserEntity } from '@/modules/user';
 
 export enum TokenType {
   EMAIL = 'email',

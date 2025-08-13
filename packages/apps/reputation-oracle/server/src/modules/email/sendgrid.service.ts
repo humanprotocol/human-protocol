@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { MailService } from '@sendgrid/mail';
 
-import { EmailConfigService } from '../../config';
-import logger from '../../logger';
-import Environment from '../../utils/environment';
+import { EmailConfigService } from '@/config';
+import logger from '@/logger';
+import Environment from '@/utils/environment';
+
 import { EmailAction, SENDGRID_API_KEY_REGEX } from './constants';
 import { EmailService } from './email.service';
 
@@ -46,7 +47,7 @@ export class SendgridEmailService extends EmailService {
   async sendEmail(
     to: string,
     action: EmailAction,
-    payload?: Record<string, any>,
+    payload?: Record<string, unknown>,
   ): Promise<void> {
     if (Environment.isDevelopment()) {
       /**

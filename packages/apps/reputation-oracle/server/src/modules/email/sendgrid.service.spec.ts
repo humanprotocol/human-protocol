@@ -1,12 +1,14 @@
-jest.mock('../../logger');
+jest.mock('@/logger');
 
 import { faker } from '@faker-js/faker';
+import { createMock } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { MailService } from '@sendgrid/mail';
 
-import { EmailConfigService } from '../../config';
-import logger from '../../logger';
-import Environment from '../../utils/environment';
+import { EmailConfigService } from '@/config';
+import logger from '@/logger';
+import Environment from '@/utils/environment';
+
 import { EmailAction } from './constants';
 import {
   getTemplateId,
@@ -15,12 +17,9 @@ import {
   SERVICE_NAME,
 } from './sendgrid.service';
 
-const mockMailService = {
-  setApiKey: jest.fn(),
-  send: jest.fn(),
-};
+const mockMailService = createMock<MailService>();
 
-const mockEmailConfigService = {
+const mockEmailConfigService: Omit<EmailConfigService, 'configService'> = {
   apiKey: `SG.${faker.string.alphanumeric(22)}.${faker.string.alphanumeric(43)}`,
   from: faker.internet.email(),
   fromName: faker.string.alpha(),
@@ -52,8 +51,8 @@ describe('SendgridEmailService', () => {
   describe('Initialization', () => {
     it('should initialize and set API key in staging/production mode', () => {
       new SendgridEmailService(
-        mockMailService as any,
-        mockEmailConfigService as any,
+        mockMailService,
+        mockEmailConfigService as EmailConfigService,
       );
       expect(mockMailService.setApiKey).toHaveBeenCalledWith(
         mockEmailConfigService.apiKey,
@@ -68,8 +67,8 @@ describe('SendgridEmailService', () => {
       expect(
         () =>
           new SendgridEmailService(
-            mockMailService as any,
-            invalidConfig as any,
+            mockMailService,
+            invalidConfig as EmailConfigService,
           ),
       ).toThrow('Invalid SendGrid API key');
     });

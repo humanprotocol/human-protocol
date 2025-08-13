@@ -29,8 +29,8 @@ export default new DataSource({
   ssl: process.env.POSTGRES_SSL?.toLowerCase() === 'true',
   synchronize: false,
   migrationsRun: true,
-  migrations: ['dist/src/database/migrations/*{.ts,.js}'],
+  migrations: ['src/database/migrations/*.ts'],
   migrationsTableName: 'migrations_typeorm',
   namingStrategy: new SnakeNamingStrategy(),
-  entities: ['dist/src/**/*.entity{.ts,.js}'],
+  entities: ['src/modules/**/*.entity.ts'],
 });

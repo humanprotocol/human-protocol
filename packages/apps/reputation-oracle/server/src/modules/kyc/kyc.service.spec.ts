@@ -4,24 +4,24 @@ import { HttpService } from '@nestjs/axios';
 import { Test } from '@nestjs/testing';
 import { ethers } from 'ethers';
 
-import { generateEthWallet } from '../../../test/fixtures/web3';
+import { KycStatus } from '@/common/enums';
+import { KycConfigService, Web3ConfigService } from '@/config';
+import { UserRepository } from '@/modules/user';
+import { generateWorkerUser } from '@/modules/user/fixtures';
+import { Web3Service } from '@/modules/web3';
+import { mockWeb3ConfigService } from '@/modules/web3/fixtures';
+import { generateEthWallet } from '~/test/fixtures/web3';
 import {
   createHttpServiceMock,
   createHttpServiceResponse,
-} from '../../../test/mock-creators/nest';
-import { KycConfigService, Web3ConfigService } from '../../config';
-import { KycStatus } from '../kyc/constants';
-import { UserRepository } from '../user';
-import { generateWorkerUser } from '../user/fixtures';
-import { mockWeb3ConfigService } from '../web3/fixtures';
-import { Web3Service } from '../web3';
+} from '~/test/mock-creators/nest';
 
+import { generateKycEntity, mockKycConfigService } from './fixtures';
 import { UpdateKycStatusDto } from './kyc.dto';
 import { KycEntity } from './kyc.entity';
 import { KycError, KycErrorMessage } from './kyc.error';
 import { KycRepository } from './kyc.repository';
 import { KycService } from './kyc.service';
-import { generateKycEntity, mockKycConfigService } from './fixtures';
 
 const mockHttpService = createHttpServiceMock();
 
@@ -220,7 +220,7 @@ describe('Kyc Service', () => {
       mockKycRepository.findOneBySessionId.mockResolvedValueOnce(mockKycEntity);
 
       mockKycUpdate.verification.document.country = null;
-      expect(kycService.updateKycStatus(mockKycUpdate)).rejects.toThrow(
+      await expect(kycService.updateKycStatus(mockKycUpdate)).rejects.toThrow(
         new KycError(
           KycErrorMessage.COUNTRY_NOT_SET,
           mockKycEntity.userId as number,

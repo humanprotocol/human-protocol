@@ -1,5 +1,5 @@
-import { AudinoJobType, CvatJobType, FortuneJobType } from '../common/enums';
-import { JobManifest, JobRequestType } from '../common/types';
+import { AudinoJobType, CvatJobType, FortuneJobType } from '@/common/enums';
+import { JobManifest, JobRequestType } from '@/common/types';
 
 const fortuneJobTypes = Object.values(FortuneJobType);
 

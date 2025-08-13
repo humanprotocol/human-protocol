@@ -1,7 +1,7 @@
 import { createLogger, NestLogger, LogLevel } from '@human-protocol/logger';
 
-import { SERVICE_NAME } from '../common/constants';
-import Environment from '../utils/environment';
+import { SERVICE_NAME } from '@/common/constants';
+import Environment from '@/utils/environment';
 
 const isDevelopment = Environment.isDevelopment();
 

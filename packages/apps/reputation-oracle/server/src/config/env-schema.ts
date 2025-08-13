@@ -1,4 +1,5 @@
 import * as Joi from 'joi';
+
 import { Web3Network } from './web3-config.service';
 
 export const envValidator = Joi.object({

@@ -4,9 +4,11 @@ import { Injectable } from '@nestjs/common';
 import { View } from '@slack/web-api';
 import { IncomingWebhookSendArguments } from '@slack/webhook';
 
-import { SlackConfigService } from '../../config';
-import { SlackBotApp } from '../../integrations/slack-bot-app';
+import { SlackConfigService } from '@/config';
+import { SlackBotApp } from '@/integrations/slack-bot-app';
+
 import { AbuseDecision } from './constants';
+import { AbuseReportModalPrivateMetadata } from './types';
 
 @Injectable()
 export class AbuseSlackBot extends SlackBotApp {
@@ -79,11 +81,15 @@ export class AbuseSlackBot extends SlackBotApp {
     triggerId: string;
     responseUrl: string;
   }): Promise<void> {
+    const privateMetadata: AbuseReportModalPrivateMetadata = {
+      responseUrl: data.responseUrl,
+    };
+
     const modalView: View = {
       type: 'modal',
       callback_id: `${data.abuseId}`,
       title: { type: 'plain_text', text: 'Confirm slash' },
-      private_metadata: JSON.stringify({ responseUrl: data.responseUrl }),
+      private_metadata: JSON.stringify(privateMetadata),
       blocks: [
         {
           type: 'section',
