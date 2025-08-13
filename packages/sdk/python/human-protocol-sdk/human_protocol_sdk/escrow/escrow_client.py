@@ -1059,7 +1059,7 @@ class EscrowClient:
             return EscrowWithdraw(
                 tx_hash=receipt["transactionHash"].hex(),
                 token_address=token_address,
-                amount_withdrawn=amount_transferred,
+                withdrawn_amount=amount_transferred,
             )
         except Exception as e:
             handle_error(e, EscrowClientError)
