@@ -14,6 +14,7 @@ const defaultLogger = createLogger(
   {
     environment: Environment.name,
     service: 'human-app',
+    version: Environment.version,
   },
 );
 

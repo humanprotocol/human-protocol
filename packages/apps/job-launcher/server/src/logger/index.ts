@@ -14,6 +14,7 @@ const defaultLogger = createLogger(
   {
     environment: Environment.name,
     service: 'job-launcher',
+    version: Environment.version,
   },
 );
 

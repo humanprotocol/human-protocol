@@ -14,6 +14,7 @@ const defaultLogger = createLogger(
   {
     environment: Environment.name,
     service: 'fortune-recording-oracle',
+    version: Environment.version,
   },
 );
 

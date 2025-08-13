@@ -15,6 +15,7 @@ const defaultLogger = createLogger(
   {
     environment: Environment.name,
     service: SERVICE_NAME,
+    version: Environment.version,
   },
 );
 

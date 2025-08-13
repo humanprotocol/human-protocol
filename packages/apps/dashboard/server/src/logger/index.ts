@@ -14,6 +14,7 @@ const defaultLogger = createLogger(
   {
     environment: Environment.name,
     service: 'human-protocol-dashboard',
+    version: Environment.version,
   },
 );
 

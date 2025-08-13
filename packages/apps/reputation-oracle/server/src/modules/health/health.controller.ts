@@ -9,7 +9,6 @@ import {
 } from '@nestjs/terminus';
 
 import { Public } from '@/common/decorators';
-import { ServerConfigService } from '@/config';
 import Environment from '@/utils/environment';
 
 import { PingResponseDto } from './dto/ping-response.dto';
@@ -19,7 +18,6 @@ import { PingResponseDto } from './dto/ping-response.dto';
 @Controller('health')
 export class HealthController {
   constructor(
-    private readonly serverConfigService: ServerConfigService,
     private readonly health: HealthCheckService,
     private readonly db: TypeOrmHealthIndicator,
   ) {}
@@ -42,7 +40,7 @@ export class HealthController {
   async ping(): Promise<PingResponseDto> {
     return {
       nodeEnv: Environment.name,
-      gitHash: this.serverConfigService.gitHash,
+      version: Environment.version,
     };
   }
 

@@ -37,10 +37,6 @@ export class EnvironmentConfigService {
     return this.configService.getOrThrow<number>('PORT');
   }
 
-  get gitHash(): string {
-    return this.configService.get<string>('GIT_HASH', '');
-  }
-
   /**
    * The URL of the reputation oracle service.
    * Required
