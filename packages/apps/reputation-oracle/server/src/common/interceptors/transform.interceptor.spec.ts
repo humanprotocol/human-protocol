@@ -1,13 +1,15 @@
 import { faker } from '@faker-js/faker';
 import { ExecutionContext, StreamableFile } from '@nestjs/common';
 import { firstValueFrom, of } from 'rxjs';
-import { TransformInterceptor } from './transform.interceptor';
+
 import {
   CallHandlerMock,
   createCallHandlerMock,
   createExecutionContextMock,
   ExecutionContextMock,
-} from '../../../test/mock-creators/nest';
+} from '~/test/mock-creators/nest';
+
+import { TransformInterceptor } from './transform.interceptor';
 
 describe('TransformInterceptor', () => {
   describe('intercept', () => {

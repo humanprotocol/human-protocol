@@ -1,11 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEthereumAddress, IsOptional, IsString } from 'class-validator';
 
-import { SignatureType } from '../../common/enums';
-import {
-  IsLowercasedEnum,
-  IsValidWeb3Signature,
-} from '../../common/validators';
+import { SignatureType } from '@/common/enums';
+import { IsLowercasedEnum, IsValidWeb3Signature } from '@/common/validators';
 
 export class RegisterLabelerResponseDto {
   @ApiProperty({ name: 'site_key' })

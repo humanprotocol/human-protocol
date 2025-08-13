@@ -1,17 +1,16 @@
 jest.mock('@human-protocol/sdk');
 
-import { createMock } from '@golevelup/ts-jest';
 import { faker } from '@faker-js/faker';
+import { createMock } from '@golevelup/ts-jest';
 import { EscrowClient } from '@human-protocol/sdk';
 import { Test } from '@nestjs/testing';
 import { ethers } from 'ethers';
 import _ from 'lodash';
 
-import { CvatAnnotationMeta } from '../../../common/types';
-
-import { StorageService } from '../../storage';
-import { generateTestnetChainId } from '../../web3/fixtures';
-import { Web3Service } from '../../web3';
+import { CvatAnnotationMeta } from '@/common/types';
+import { StorageService } from '@/modules/storage';
+import { Web3Service } from '@/modules/web3';
+import { generateTestnetChainId } from '@/modules/web3/fixtures';
 
 import { CvatPayoutsCalculator } from './cvat-payouts-calculator';
 import { generateCvatManifest } from '../fixtures';

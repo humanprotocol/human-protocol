@@ -1,4 +1,6 @@
-import { createDefaultPreset } from 'ts-jest';
+import { createDefaultPreset, pathsToModuleNameMapper } from 'ts-jest';
+
+import { compilerOptions } from './tsconfig.json';
 
 process.env['GIT_HASH'] = 'test_value_hardcoded_in_jest_config';
 
@@ -6,15 +8,12 @@ const jestTsPreset = createDefaultPreset({});
 
 module.exports = {
   ...jestTsPreset,
-  coverageDirectory: '../coverage',
-  collectCoverageFrom: ['**/*.(t|j)s'],
   moduleFileExtensions: ['js', 'json', 'ts'],
-  rootDir: 'src',
+  roots: ['<rootDir>/src'],
   testEnvironment: 'node',
   testRegex: '.*\\.spec\\.ts$',
-  moduleNameMapper: {
-    '^uuid$': require.resolve('uuid'),
-    '^typeorm$': require.resolve('typeorm'),
-  },
+  modulePaths: [compilerOptions.baseUrl],
+
+  moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths),
   clearMocks: true,
 };

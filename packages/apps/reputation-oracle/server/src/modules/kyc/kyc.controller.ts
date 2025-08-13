@@ -17,8 +17,10 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
-import { Public } from '../../common/decorators';
-import { RequestWithUser } from '../../common/types';
+import { Public } from '@/common/decorators';
+import type { RequestWithUser } from '@/common/types';
+
+import { KycWebhookAuthGuard } from './kyc-webhook-auth.guard';
 import {
   StartSessionResponseDto,
   KycSignedAddressDto,
@@ -26,7 +28,6 @@ import {
 } from './kyc.dto';
 import { KycErrorFilter } from './kyc.error-filter';
 import { KycService } from './kyc.service';
-import { KycWebhookAuthGuard } from './kyc-webhook-auth.guard';
 
 @ApiTags('KYC')
 @Controller('/kyc')

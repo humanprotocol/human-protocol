@@ -6,14 +6,21 @@ import {
   HttpStatus,
   Injectable,
 } from '@nestjs/common';
-import { verifySignature } from '../../utils/web3';
-import { HEADER_SIGNATURE_KEY } from '../constants';
+
+import { HEADER_SIGNATURE_KEY } from '@/common/constants';
+import { verifySignature } from '@/utils/web3';
 
 export enum AuthSignatureRole {
   JOB_LAUNCHER = 'job_launcher',
   EXCHANGE_ORACLE = 'exchange',
   RECORDING_ORACLE = 'recording',
 }
+
+type SignedRequestData = {
+  chain_id?: number;
+  escrow_address?: string;
+  [x: string]: unknown;
+};
 
 @Injectable()
 export class SignatureAuthGuard implements CanActivate {
@@ -30,8 +37,16 @@ export class SignatureAuthGuard implements CanActivate {
   public async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
 
-    const data = request.body;
-    const signature = request.headers[HEADER_SIGNATURE_KEY];
+    const data = request.body as SignedRequestData;
+    if (!data.chain_id || !data.escrow_address) {
+      throw new HttpException('Invalid payload', HttpStatus.BAD_REQUEST);
+    }
+
+    const signature: string | undefined = request.headers[HEADER_SIGNATURE_KEY];
+    if (!signature) {
+      throw new HttpException('Missing signature', HttpStatus.BAD_REQUEST);
+    }
+
     const oracleAdresses: string[] = [];
     const escrowData = await EscrowUtils.getEscrow(
       data.chain_id,

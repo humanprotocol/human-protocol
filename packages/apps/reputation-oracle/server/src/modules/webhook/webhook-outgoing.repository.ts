@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource, LessThanOrEqual } from 'typeorm';
 
-import { ServerConfigService } from '../../config';
-import { BaseRepository } from '../../database';
+import { ServerConfigService } from '@/config';
+import { BaseRepository } from '@/database';
+
 import { OutgoingWebhookStatus } from './types';
 import { OutgoingWebhookEntity } from './webhook-outgoing.entity';
 

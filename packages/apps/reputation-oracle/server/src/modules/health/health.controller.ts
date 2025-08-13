@@ -7,9 +7,11 @@ import {
   HealthIndicatorResult,
   TypeOrmHealthIndicator,
 } from '@nestjs/terminus';
-import { Public } from '../../common/decorators';
-import { ServerConfigService } from '../../config';
-import Environment from '../../utils/environment';
+
+import { Public } from '@/common/decorators';
+import { ServerConfigService } from '@/config';
+import Environment from '@/utils/environment';
+
 import { PingResponseDto } from './dto/ping-response.dto';
 
 @Public()

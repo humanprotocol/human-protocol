@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
 
-import { FortuneJobType } from '../../../common/enums';
-import { FortuneFinalResult, FortuneManifest } from '../../../common/types';
+import { FortuneJobType } from '@/common/enums';
+import { FortuneFinalResult, FortuneManifest } from '@/common/types';
 
 export function generateFortuneManifest(): FortuneManifest {
   return {

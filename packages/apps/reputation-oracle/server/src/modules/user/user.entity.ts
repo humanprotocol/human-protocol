@@ -1,25 +1,13 @@
 import { Exclude } from 'class-transformer';
 import { Column, Entity, OneToMany, OneToOne } from 'typeorm';
 
-import { DATABASE_SCHEMA_NAME } from '../../common/constants';
-import { BaseEntity } from '../../database';
-
-import type { KycEntity } from '../kyc/kyc.entity';
-import type { UserQualificationEntity } from '../qualification/user-qualification.entity';
+import { DATABASE_SCHEMA_NAME } from '@/common/constants';
+import { UserRole, UserStatus } from '@/common/enums';
+import { BaseEntity } from '@/database';
+import type { KycEntity } from '@/modules/kyc';
+import type { UserQualificationEntity } from '@/modules/qualification';
 
 import type { SiteKeyEntity } from './site-key.entity';
-
-export enum UserStatus {
-  ACTIVE = 'active',
-  PENDING = 'pending',
-  INACTIVE = 'inactive',
-}
-
-export enum Role {
-  OPERATOR = 'operator',
-  WORKER = 'worker',
-  ADMIN = 'admin',
-}
 
 @Entity({ schema: DATABASE_SCHEMA_NAME, name: 'users' })
 export class UserEntity extends BaseEntity {
@@ -39,9 +27,9 @@ export class UserEntity extends BaseEntity {
 
   @Column({
     type: 'enum',
-    enum: Role,
+    enum: UserRole,
   })
-  role: Role;
+  role: UserRole;
 
   @Column({
     type: 'varchar',

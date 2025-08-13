@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsUUID } from 'class-validator';
 
-import { IsLowercasedEmail } from '../../../common/validators';
+import { IsLowercasedEmail } from '@/common/validators';
 
 export class ResendVerificationEmailDto {
   @ApiProperty()

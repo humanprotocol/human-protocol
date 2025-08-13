@@ -1,18 +1,20 @@
+import { IncomingMessage, ServerResponse } from 'http';
+
 import { INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { json, urlencoded } from 'body-parser';
 import { useContainer } from 'class-validator';
+import type { Request } from 'express';
 import helmet from 'helmet';
-import { IncomingMessage, ServerResponse } from 'http';
 
 import { AppModule } from './app.module';
 import { ServerConfigService } from './config';
 import logger, { nestLoggerOverride } from './logger';
 
 function rawBodyMiddleware(
-  req: any,
+  req: Request & { rawBody?: string },
   _res: ServerResponse<IncomingMessage>,
   buf: Buffer<ArrayBufferLike>,
 ): void {

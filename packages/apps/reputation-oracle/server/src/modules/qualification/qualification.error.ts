@@ -1,4 +1,4 @@
-import { BaseError } from '../../common/errors/base';
+import { BaseError } from '@/common/errors/base';
 
 export enum QualificationErrorMessage {
   INVALID_EXPIRATION_TIME = 'Qualification should be valid till at least %minExpirationDate%',

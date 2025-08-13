@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { FortuneFinalResult, FortuneManifest } from '../../../common/types';
+import { FortuneFinalResult, FortuneManifest } from '@/common/types';
 
 import { BaseEscrowResultsProcessor } from './escrow-results-processor';
 
@@ -17,7 +17,7 @@ export class FortuneResultsProcessor extends BaseEscrowResultsProcessor<FortuneM
     let intermediateResults: FortuneFinalResult[];
     try {
       intermediateResults = JSON.parse(resultsFileContent.toString());
-    } catch (_error) {
+    } catch {
       throw new Error('Failed to parse results data');
     }
 

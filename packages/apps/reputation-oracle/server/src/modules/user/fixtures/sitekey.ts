@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 
-import { generateEthWallet } from '../../../../test/fixtures/web3';
+import { generateEthWallet } from '~/test/fixtures/web3';
 
 import { SiteKeyEntity, SiteKeyType } from '../site-key.entity';
 

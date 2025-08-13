@@ -1,5 +1,6 @@
 import { Reflector } from '@nestjs/core';
-import { UserRole } from '../../modules/user';
+
+import { UserRole } from '@/common/enums';
 
 /**
  * Decorator for HTTP endpoints to bypass JWT auth guard

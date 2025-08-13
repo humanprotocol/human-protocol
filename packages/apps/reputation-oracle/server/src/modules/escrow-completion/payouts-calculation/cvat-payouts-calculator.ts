@@ -3,11 +3,10 @@ import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
 import type { OverrideProperties } from 'type-fest';
 
-import { CVAT_VALIDATION_META_FILENAME } from '../../../common/constants';
-import { CvatAnnotationMeta, CvatManifest } from '../../../common/types';
-
-import { StorageService } from '../../storage';
-import { Web3Service } from '../../web3';
+import { CVAT_VALIDATION_META_FILENAME } from '@/common/constants';
+import { CvatAnnotationMeta, CvatManifest } from '@/common/types';
+import { StorageService } from '@/modules/storage';
+import { Web3Service } from '@/modules/web3';
 
 import {
   CalclulatePayoutsInput,
