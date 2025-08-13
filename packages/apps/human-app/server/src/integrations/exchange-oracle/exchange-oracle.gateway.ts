@@ -2,7 +2,7 @@ import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
-import { AxiosRequestConfig } from 'axios';
+import { AxiosError, AxiosRequestConfig } from 'axios';
 import { lastValueFrom } from 'rxjs';
 import { HttpMethod } from '../../common/enums/http-method';
 import { toCleanObjParams } from '../../common/utils/gateway-common.utils';
@@ -61,12 +61,18 @@ export class ExchangeOracleGateway {
       const response = await lastValueFrom(this.httpService.request(options));
       return response.data as T;
     } catch (error) {
-      this.logger.error('Error while executing exchange oracle API call', {
-        url: options.url,
-        method: options.method,
-        data: options.data,
-        error: errorUtils.formatError(error),
-      });
+      if (
+        error instanceof AxiosError &&
+        error.response?.status &&
+        error.response.status >= 500
+      ) {
+        this.logger.error('Error while executing exchange oracle API call', {
+          url: options.url,
+          method: options.method,
+          data: options.data,
+          error: errorUtils.formatError(error),
+        });
+      }
       throw error;
     }
   }
