@@ -60,7 +60,7 @@ class TestOperatorUtils(unittest.TestCase):
                 NETWORKS[ChainId.POLYGON],
                 query=get_operators_query(filter),
                 params={
-                    "minAmountStaked": filter.min_amount_staked,
+                    "minStakedAmount": filter.min_staked_amount,
                     "roles": filter.roles,
                     "orderBy": filter.order_by,
                     "orderDirection": filter.order_direction.value,
@@ -72,11 +72,11 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(len(operators), 1)
             self.assertEqual(operators[0].id, DEFAULT_GAS_PAYER)
             self.assertEqual(operators[0].address, DEFAULT_GAS_PAYER)
-            self.assertEqual(operators[0].amount_staked, 100)
-            self.assertEqual(operators[0].amount_locked, 25)
+            self.assertEqual(operators[0].staked_amount, 100)
+            self.assertEqual(operators[0].locked_amount, 25)
             self.assertEqual(operators[0].locked_until_timestamp, 0)
-            self.assertEqual(operators[0].amount_withdrawn, 25)
-            self.assertEqual(operators[0].amount_slashed, 25)
+            self.assertEqual(operators[0].withdrawn_amount, 25)
+            self.assertEqual(operators[0].slashed_amount, 25)
             self.assertEqual(operators[0].amount_jobs_processed, 25)
             self.assertEqual(operators[0].role, "role")
             self.assertEqual(operators[0].fee, None)
@@ -136,7 +136,7 @@ class TestOperatorUtils(unittest.TestCase):
                 NETWORKS[ChainId.POLYGON],
                 query=get_operators_query(filter),
                 params={
-                    "minAmountStaked": filter.min_amount_staked,
+                    "minStakedAmount": filter.min_staked_amount,
                     "roles": filter.roles,
                     "orderBy": filter.order_by,
                     "orderDirection": filter.order_direction.value,
@@ -148,11 +148,11 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(len(operators), 1)
             self.assertEqual(operators[0].id, DEFAULT_GAS_PAYER)
             self.assertEqual(operators[0].address, DEFAULT_GAS_PAYER)
-            self.assertEqual(operators[0].amount_staked, 100)
-            self.assertEqual(operators[0].amount_locked, 25)
+            self.assertEqual(operators[0].staked_amount, 100)
+            self.assertEqual(operators[0].locked_amount, 25)
             self.assertEqual(operators[0].locked_until_timestamp, 0)
-            self.assertEqual(operators[0].amount_withdrawn, 25)
-            self.assertEqual(operators[0].amount_slashed, 25)
+            self.assertEqual(operators[0].withdrawn_amount, 25)
+            self.assertEqual(operators[0].slashed_amount, 25)
             self.assertEqual(operators[0].amount_jobs_processed, 25)
             self.assertEqual(operators[0].role, "role")
             self.assertEqual(operators[0].fee, None)
@@ -212,7 +212,7 @@ class TestOperatorUtils(unittest.TestCase):
                 NETWORKS[ChainId.POLYGON],
                 query=get_operators_query(filter),
                 params={
-                    "minAmountStaked": filter.min_amount_staked,
+                    "minStakedAmount": filter.min_staked_amount,
                     "roles": filter.roles,
                     "orderBy": filter.order_by,
                     "orderDirection": filter.order_direction.value,
@@ -224,11 +224,11 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(len(operators), 1)
             self.assertEqual(operators[0].id, DEFAULT_GAS_PAYER)
             self.assertEqual(operators[0].address, DEFAULT_GAS_PAYER)
-            self.assertEqual(operators[0].amount_staked, 100)
-            self.assertEqual(operators[0].amount_locked, 25)
+            self.assertEqual(operators[0].staked_amount, 100)
+            self.assertEqual(operators[0].locked_amount, 25)
             self.assertEqual(operators[0].locked_until_timestamp, 0)
-            self.assertEqual(operators[0].amount_withdrawn, 25)
-            self.assertEqual(operators[0].amount_slashed, 25)
+            self.assertEqual(operators[0].withdrawn_amount, 25)
+            self.assertEqual(operators[0].slashed_amount, 25)
             self.assertEqual(operators[0].amount_jobs_processed, 25)
             self.assertEqual(operators[0].role, "role")
             self.assertEqual(operators[0].fee, None)
@@ -264,7 +264,7 @@ class TestOperatorUtils(unittest.TestCase):
                 NETWORKS[ChainId.POLYGON],
                 query=get_operators_query(filter),
                 params={
-                    "minAmountStaked": filter.min_amount_staked,
+                    "minStakedAmount": filter.min_staked_amount,
                     "roles": filter.roles,
                     "orderBy": filter.order_by,
                     "orderDirection": filter.order_direction.value,
@@ -326,11 +326,11 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertNotEqual(operator, None)
             self.assertEqual(operator.id, staker_address)
             self.assertEqual(operator.address, staker_address)
-            self.assertEqual(operator.amount_staked, 100)
-            self.assertEqual(operator.amount_locked, 25)
+            self.assertEqual(operator.staked_amount, 100)
+            self.assertEqual(operator.locked_amount, 25)
             self.assertEqual(operator.locked_until_timestamp, 0)
-            self.assertEqual(operator.amount_withdrawn, 25)
-            self.assertEqual(operator.amount_slashed, 25)
+            self.assertEqual(operator.withdrawn_amount, 25)
+            self.assertEqual(operator.slashed_amount, 25)
             self.assertEqual(operator.amount_jobs_processed, 25)
             self.assertEqual(operator.role, "role")
             self.assertEqual(operator.fee, None)
@@ -394,11 +394,11 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertNotEqual(operator, None)
             self.assertEqual(operator.id, staker_address)
             self.assertEqual(operator.address, staker_address)
-            self.assertEqual(operator.amount_staked, 100)
-            self.assertEqual(operator.amount_locked, 25)
+            self.assertEqual(operator.staked_amount, 100)
+            self.assertEqual(operator.locked_amount, 25)
             self.assertEqual(operator.locked_until_timestamp, 0)
-            self.assertEqual(operator.amount_withdrawn, 25)
-            self.assertEqual(operator.amount_slashed, 25)
+            self.assertEqual(operator.withdrawn_amount, 25)
+            self.assertEqual(operator.slashed_amount, 25)
             self.assertEqual(operator.amount_jobs_processed, 25)
             self.assertEqual(operator.role, "role")
             self.assertEqual(operator.fee, None)
@@ -462,11 +462,11 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertNotEqual(operator, None)
             self.assertEqual(operator.id, staker_address)
             self.assertEqual(operator.address, staker_address)
-            self.assertEqual(operator.amount_staked, 100)
-            self.assertEqual(operator.amount_locked, 25)
+            self.assertEqual(operator.staked_amount, 100)
+            self.assertEqual(operator.locked_amount, 25)
             self.assertEqual(operator.locked_until_timestamp, 0)
-            self.assertEqual(operator.amount_withdrawn, 25)
-            self.assertEqual(operator.amount_slashed, 25)
+            self.assertEqual(operator.withdrawn_amount, 25)
+            self.assertEqual(operator.slashed_amount, 25)
             self.assertEqual(operator.amount_jobs_processed, 25)
             self.assertEqual(operator.role, "role")
             self.assertEqual(operator.fee, None)

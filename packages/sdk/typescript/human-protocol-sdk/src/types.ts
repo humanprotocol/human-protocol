@@ -168,7 +168,7 @@ export type EscrowWithdraw = {
   /**
    * The amount withdrawn from the escrow.
    */
-  amountWithdrawn: bigint;
+  withdrawnAmount: bigint;
 };
 
 /**

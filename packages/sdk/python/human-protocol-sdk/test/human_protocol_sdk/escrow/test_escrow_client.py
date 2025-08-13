@@ -1679,8 +1679,8 @@ class TestEscrowClient(unittest.TestCase):
         self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
-        self.assertEqual(result.amountWithdrawn, amount_withdrawn)
-        self.assertEqual(result.tokenAddress, token_address)
+        self.assertEqual(result.withdrawn_amount, amount_withdrawn)
+        self.assertEqual(result.token_address, token_address)
         self.assertEqual(result.txHash, receipt["transactionHash"].hex())
 
     def test_withdraw_invalid_escrow_address(self):
@@ -1783,8 +1783,8 @@ class TestEscrowClient(unittest.TestCase):
         self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
-        self.assertEqual(result.amountWithdrawn, amount_withdrawn)
-        self.assertEqual(result.tokenAddress, token_address)
+        self.assertEqual(result.withdrawn_amount, amount_withdrawn)
+        self.assertEqual(result.token_address, token_address)
         self.assertEqual(result.txHash, receipt["transactionHash"].hex())
 
     def test_get_balance(self):

@@ -1833,12 +1833,12 @@ describe('EscrowClient', () => {
     });
 
     test('should successfully withdraw from escrow', async () => {
-      const amountWithdrawn = 1n;
+      const withdrawnAmount = 1n;
 
       const log = {
         address: ethers.ZeroAddress,
         name: 'Transfer',
-        args: [ethers.ZeroAddress, ethers.ZeroAddress, amountWithdrawn],
+        args: [ethers.ZeroAddress, ethers.ZeroAddress, withdrawnAmount],
       };
       mockTx.wait.mockResolvedValueOnce({
         hash: FAKE_HASH,
@@ -1861,7 +1861,7 @@ describe('EscrowClient', () => {
       const result = await escrowClient.withdraw(escrowAddress, tokenAddress);
 
       expect(result).toStrictEqual({
-        amountWithdrawn,
+        withdrawnAmount,
         tokenAddress,
         txHash: FAKE_HASH,
       });
@@ -1937,12 +1937,12 @@ describe('EscrowClient', () => {
 
     test('should successfully withdraw from escrow with transaction options', async () => {
       const escrowAddress = ethers.ZeroAddress;
-      const amountWithdrawn = 1n;
+      const withdrawnAmount = 1n;
 
       const log = {
         address: ethers.ZeroAddress,
         name: 'Transfer',
-        args: [ethers.ZeroAddress, ethers.ZeroAddress, amountWithdrawn],
+        args: [ethers.ZeroAddress, ethers.ZeroAddress, withdrawnAmount],
       };
       mockTx.wait.mockResolvedValueOnce({
         hash: FAKE_HASH,
@@ -1970,7 +1970,7 @@ describe('EscrowClient', () => {
       );
 
       expect(result).toStrictEqual({
-        amountWithdrawn,
+        withdrawnAmount,
         tokenAddress,
         txHash: FAKE_HASH,
       });

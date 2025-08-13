@@ -1,6 +1,6 @@
 from human_protocol_sdk.filter import StakersFilter
 
-STAKER_FRAGMENT = """
+staker_fragment = """
 fragment StakerFields on Staker {
     id
     address
@@ -60,7 +60,7 @@ query GetStakers(
         ...StakerFields
     }}
 }}
-{STAKER_FRAGMENT}
+{staker_fragment}
 """
 
 
@@ -71,5 +71,5 @@ query GetStaker($id: String!) {{
         ...StakerFields
     }}
 }}
-{STAKER_FRAGMENT}
+{staker_fragment}
 """

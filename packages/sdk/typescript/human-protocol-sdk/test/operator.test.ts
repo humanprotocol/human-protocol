@@ -55,6 +55,7 @@ describe('OperatorUtils', () => {
         lockedUntilTimestamp: ethers.toBigInt(0),
         withdrawnAmount: ethers.parseEther('25'),
         slashedAmount: ethers.parseEther('25'),
+        lastDepositTimestamp: ethers.toBigInt(0),
       },
     };
 
@@ -68,11 +69,11 @@ describe('OperatorUtils', () => {
       jobTypes: ['type1', 'type2'],
       reputationNetworks: ['0x01'],
       chainId: ChainId.LOCALHOST,
-      amountStaked: ethers.parseEther('100'),
-      amountLocked: ethers.parseEther('25'),
+      stakedAmount: ethers.parseEther('100'),
+      lockedAmount: ethers.parseEther('25'),
       lockedUntilTimestamp: ethers.toBigInt(0),
-      amountWithdrawn: ethers.parseEther('25'),
-      amountSlashed: ethers.parseEther('25'),
+      withdrawnAmount: ethers.parseEther('25'),
+      slashedAmount: ethers.parseEther('25'),
     };
   });
 
@@ -198,7 +199,7 @@ describe('OperatorUtils', () => {
         NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
         GET_LEADERS_QUERY(filter),
         {
-          minAmountStaked: filter?.minAmountStaked,
+          minStakedAmount: filter?.minStakedAmount,
           roles: filter?.roles,
           orderBy: filter?.orderBy,
           orderDirection: OrderDirection.DESC,
@@ -226,7 +227,7 @@ describe('OperatorUtils', () => {
         NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
         GET_LEADERS_QUERY(filter),
         {
-          minAmountStaked: filter?.minAmountStaked,
+          minStakedAmount: filter?.minStakedAmount,
           roles: filter?.roles,
           orderBy: filter?.orderBy,
           orderDirection: OrderDirection.DESC,
@@ -254,7 +255,7 @@ describe('OperatorUtils', () => {
         NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
         GET_LEADERS_QUERY(filter),
         {
-          minAmountStaked: filter?.minAmountStaked,
+          minStakedAmount: filter?.minStakedAmount,
           roles: filter?.roles,
           orderBy: filter?.orderBy,
           orderDirection: OrderDirection.DESC,
@@ -280,7 +281,7 @@ describe('OperatorUtils', () => {
         NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
         GET_LEADERS_QUERY(filter),
         {
-          minAmountStaked: filter?.minAmountStaked,
+          minStakedAmount: filter?.minStakedAmount,
           roles: filter?.roles,
           orderBy: filter?.orderBy,
           orderDirection: OrderDirection.DESC,
@@ -308,7 +309,7 @@ describe('OperatorUtils', () => {
         NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
         GET_LEADERS_QUERY(filter),
         {
-          minAmountStaked: filter?.minAmountStaked,
+          minStakedAmount: filter?.minStakedAmount,
           roles: filter?.roles,
           orderBy: filter?.orderBy,
           orderDirection: OrderDirection.DESC,
@@ -339,7 +340,7 @@ describe('OperatorUtils', () => {
         NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
         GET_LEADERS_QUERY(filter),
         {
-          minAmountStaked: filter?.minAmountStaked,
+          minStakedAmount: filter?.minStakedAmount,
           roles: filter?.roles,
           orderBy: filter?.orderBy,
           orderDirection: OrderDirection.DESC,

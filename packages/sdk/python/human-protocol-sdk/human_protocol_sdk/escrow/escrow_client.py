@@ -93,17 +93,17 @@ class EscrowCancel:
 
 
 class EscrowWithdraw:
-    def __init__(self, tx_hash: str, token_address: str, amount_withdrawn: any):
+    def __init__(self, tx_hash: str, token_address: str, withdrawn_amount: any):
         """
         Represents the result of an escrow cancellation transaction.
 
         :param tx_hash: The hash of the transaction associated with the escrow withdrawal.
         :param token_address: The address of the token used for the withdrawal.
-        :param amount_withdrawn: The amount withdrawn from the escrow.
+        :param withdrawn_amount: The amount withdrawn from the escrow.
         """
         self.txHash = tx_hash
-        self.tokenAddress = token_address
-        self.amountWithdrawn = amount_withdrawn
+        self.token_address = token_address
+        self.withdrawn_amount = withdrawn_amount
 
 
 class EscrowClientError(Exception):

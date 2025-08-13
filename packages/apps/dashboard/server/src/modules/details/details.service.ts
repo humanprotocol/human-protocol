@@ -29,7 +29,7 @@ import { OperatorsOrderBy } from '../../common/enums/operator';
 import { ReputationLevel } from '../../common/enums/reputation';
 import {
   MAX_LEADERS_COUNT,
-  MIN_AMOUNT_STAKED,
+  MIN_STAKED_AMOUNT,
   REPUTATION_PLACEHOLDER,
 } from '../../common/constants/operator';
 import { GetOperatorsPaginationOptions } from 'src/common/types';
@@ -75,9 +75,9 @@ export class DetailsService {
 
       operatorDto.chainId = chainId;
       operatorDto.balance = await this.getHmtBalance(chainId, address);
-      operatorDto.amountStaked = ethers.formatEther(stakingData.stakedAmount);
-      operatorDto.amountLocked = ethers.formatEther(stakingData.lockedAmount);
-      operatorDto.amountWithdrawable = ethers.formatEther(
+      operatorDto.stakedAmount = ethers.formatEther(stakingData.stakedAmount);
+      operatorDto.lockedAmount = ethers.formatEther(stakingData.lockedAmount);
+      operatorDto.withdrawableAmount = ethers.formatEther(
         stakingData.withdrawableAmount,
       );
 
@@ -97,9 +97,9 @@ export class DetailsService {
       chainId,
       address,
       balance: await this.getHmtBalance(chainId, address),
-      amountStaked: ethers.formatEther(stakingData.stakedAmount),
-      amountLocked: ethers.formatEther(stakingData.lockedAmount),
-      amountWithdrawable: ethers.formatEther(stakingData.withdrawableAmount),
+      stakedAmount: ethers.formatEther(stakingData.stakedAmount),
+      lockedAmount: ethers.formatEther(stakingData.lockedAmount),
+      withdrawableAmount: ethers.formatEther(stakingData.withdrawableAmount),
       reputation: (await this.fetchOperatorReputation(chainId, address))
         .reputation,
       totalHMTAmountReceived: ethers.formatEther(
@@ -245,7 +245,7 @@ export class DetailsService {
   ): IOperatorsFilter {
     const operatorsFilter: IOperatorsFilter = {
       chainId,
-      minAmountStaked: MIN_AMOUNT_STAKED,
+      minStakedAmount: MIN_STAKED_AMOUNT,
       roles: [
         Role.JobLauncher,
         Role.ExchangeOracle,

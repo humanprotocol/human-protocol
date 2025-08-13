@@ -1,6 +1,6 @@
 export enum OperatorsOrderBy {
   ROLE = 'role',
-  AMOUNT_STAKED = 'amountStaked',
+  STAKED_AMOUNT = 'staked_amount',
   REPUTATION = 'reputation',
   FEE = 'fee',
 }

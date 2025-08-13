@@ -126,9 +126,9 @@ const RoleDetails = ({ data }: { data: AddressDetailsOperator }) => {
     role,
     reputation,
     amountJobsProcessed,
-    amountStaked,
-    amountLocked,
-    amountWithdrawable,
+    stakedAmount,
+    lockedAmount,
+    withdrawableAmount,
     url,
     fee,
     jobTypes,
@@ -216,9 +216,9 @@ const RoleDetails = ({ data }: { data: AddressDetailsOperator }) => {
       </SectionWrapper>
 
       <StakeInfo
-        amountStaked={amountStaked}
-        amountLocked={amountLocked}
-        amountWithdrawable={amountWithdrawable}
+        stakedAmount={stakedAmount}
+        lockedAmount={lockedAmount}
+        withdrawableAmount={withdrawableAmount}
       />
       <KVStore />
       <RoleDetailsEscrowsTable role={role} />

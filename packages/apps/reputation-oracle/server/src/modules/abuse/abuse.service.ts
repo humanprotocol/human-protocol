@@ -100,7 +100,7 @@ export class AbuseService {
       );
       const maxAmount = Number(
         (await OperatorUtils.getOperator(abuseEntity.chainId, escrow.launcher))
-          .amountStaked,
+          .stakedAmount,
       );
       await this.abuseSlackBot.triggerAbuseReportModal({
         abuseId: abuseEntity.id,

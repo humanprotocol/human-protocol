@@ -9,7 +9,7 @@ import {
   dataSourceMock,
 } from 'matchstick-as/assembly';
 
-import { Escrow, Staker } from '../../generated/schema';
+import { Escrow } from '../../generated/schema';
 import {
   handleStakeDeposited,
   handleStakeLocked,

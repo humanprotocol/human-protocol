@@ -8,9 +8,9 @@ import SectionWrapper from '@/components/SectionWrapper';
 import { useIsMobile } from '@/utils/hooks/use-breakpoints';
 
 type Props = {
-  amountStaked?: number | null;
-  amountLocked?: number | null;
-  amountWithdrawable?: number | null;
+  stakedAmount?: number | null;
+  lockedAmount?: number | null;
+  withdrawableAmount?: number | null;
 };
 
 const renderAmount = (amount: number | null | undefined, isMobile: boolean) => {
@@ -37,12 +37,12 @@ const renderAmount = (amount: number | null | undefined, isMobile: boolean) => {
 };
 
 const StakeInfo: FC<Props> = ({
-  amountStaked,
-  amountLocked,
-  amountWithdrawable,
+  stakedAmount,
+  lockedAmount,
+  withdrawableAmount,
 }) => {
   const isMobile = useIsMobile();
-  if (!amountStaked && !amountLocked && !amountWithdrawable) return null;
+  if (!stakedAmount && !lockedAmount && !withdrawableAmount) return null;
 
   return (
     <SectionWrapper>
@@ -50,28 +50,28 @@ const StakeInfo: FC<Props> = ({
         Stake Info
       </Typography>
       <Stack gap={4}>
-        {Number.isFinite(amountStaked) && (
+        {Number.isFinite(stakedAmount) && (
           <Stack gap={{ xs: 1, md: 0 }} direction={{ sm: 'column', md: 'row' }}>
             <Typography variant="subtitle2" width={300}>
               Staked Tokens
             </Typography>
-            {renderAmount(amountStaked, isMobile)}
+            {renderAmount(stakedAmount, isMobile)}
           </Stack>
         )}
-        {Number.isFinite(amountLocked) && (
+        {Number.isFinite(lockedAmount) && (
           <Stack gap={{ xs: 1, md: 0 }} direction={{ sm: 'column', md: 'row' }}>
             <Typography variant="subtitle2" width={300}>
               Locked Tokens
             </Typography>
-            {renderAmount(amountLocked, isMobile)}
+            {renderAmount(lockedAmount, isMobile)}
           </Stack>
         )}
-        {Number.isFinite(amountWithdrawable) && (
+        {Number.isFinite(withdrawableAmount) && (
           <Stack gap={{ xs: 1, md: 0 }} direction={{ sm: 'column', md: 'row' }}>
             <Typography variant="subtitle2" width={300}>
               Withdrawable Tokens
             </Typography>
-            {renderAmount(amountWithdrawable, isMobile)}
+            {renderAmount(withdrawableAmount, isMobile)}
           </Stack>
         )}
       </Stack>

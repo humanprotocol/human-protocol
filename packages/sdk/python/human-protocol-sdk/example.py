@@ -148,7 +148,7 @@ def get_operators():
     operators = OperatorUtils.get_operators(
         OperatorFilter(
             chain_id=ChainId.POLYGON_AMOY,
-            min_amount_staked=1,
+            min_staked_amount=1,
             roles=["job_launcher", "reputation_oracle"],
         )
     )

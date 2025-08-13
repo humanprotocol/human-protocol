@@ -103,7 +103,7 @@ export class OperatorUtils {
     const { operators } = await gqlFetch<{
       operators: IOperatorSubgraph[];
     }>(getSubgraphUrl(networkData), GET_LEADERS_QUERY(filter), {
-      minAmountStaked: filter?.minAmountStaked,
+      minStakedAmount: filter?.minStakedAmount,
       roles: filter?.roles,
       orderBy: filter?.orderBy,
       orderDirection: orderDirection,
@@ -227,11 +227,11 @@ function mapOperator(operator: IOperatorSubgraph, chainId: ChainId): IOperator {
     id: operator.id,
     chainId,
     address: operator.address,
-    amountStaked: BigInt(staker?.stakedAmount || 0),
-    amountLocked: BigInt(staker?.lockedAmount || 0),
+    stakedAmount: BigInt(staker?.stakedAmount || 0),
+    lockedAmount: BigInt(staker?.lockedAmount || 0),
     lockedUntilTimestamp: BigInt(staker?.lockedUntilTimestamp || 0),
-    amountWithdrawn: BigInt(staker?.withdrawnAmount || 0),
-    amountSlashed: BigInt(staker?.slashedAmount || 0),
+    withdrawnAmount: BigInt(staker?.withdrawnAmount || 0),
+    slashedAmount: BigInt(staker?.slashedAmount || 0),
     amountJobsProcessed: BigInt(operator.amountJobsProcessed || 0),
     role: operator.role,
     fee: operator.fee ? BigInt(operator.fee) : undefined,

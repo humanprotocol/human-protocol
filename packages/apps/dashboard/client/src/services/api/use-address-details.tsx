@@ -19,7 +19,7 @@ const transformOptionalTokenAmount = (
 
   if (Number.isNaN(valueAsNumber)) {
     ctx.addIssue({
-      path: ['amountStaked'],
+      path: ['stakedAmount'],
       code: z.ZodIssueCode.custom,
     });
   }
@@ -31,9 +31,9 @@ const walletSchema = z.object({
   chainId: z.number(),
   address: z.string(),
   balance: z.string().transform(transformOptionalTokenAmount),
-  amountStaked: z.string().transform(transformOptionalTokenAmount),
-  amountLocked: z.string().transform(transformOptionalTokenAmount),
-  amountWithdrawable: z.string().transform(transformOptionalTokenAmount),
+  stakedAmount: z.string().transform(transformOptionalTokenAmount),
+  lockedAmount: z.string().transform(transformOptionalTokenAmount),
+  withdrawableAmount: z.string().transform(transformOptionalTokenAmount),
   reputation: reputationSchema,
   totalHMTAmountReceived: z.string().transform(transformOptionalTokenAmount),
   payoutCount: z.number().or(z.string()),
@@ -56,7 +56,7 @@ const escrowSchema = z.object({
     .optional()
     .nullable()
     .transform(transformOptionalTokenAmount),
-  amountPaid: z
+  paidAmount: z
     .string()
     .optional()
     .nullable()
@@ -84,9 +84,9 @@ const operatorSchema = z.object({
       Role.ReputationOracle,
     ])
     .nullable(),
-  amountStaked: z.string().optional().transform(transformOptionalTokenAmount),
-  amountLocked: z.string().optional().transform(transformOptionalTokenAmount),
-  amountWithdrawable: z
+  stakedAmount: z.string().optional().transform(transformOptionalTokenAmount),
+  lockedAmount: z.string().optional().transform(transformOptionalTokenAmount),
+  withdrawableAmount: z
     .string()
     .optional()
     .transform(transformOptionalTokenAmount),

@@ -36,7 +36,7 @@ fragment OperatorFields on Operator {
 def get_operators_query(filter: OperatorFilter):
     return """
 query GetOperators(
-    $minAmountStaked: Int,
+    $minStakedAmount: Int,
     $roles: [String!]
     $orderBy: String
     $orderDirection: String

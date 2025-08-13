@@ -16,7 +16,6 @@ import { RoleCell } from '../components/RoleCell';
 import { SelectNetwork } from '../components/SelectNetwork';
 import { TextCell } from '../components/TextCell';
 
-
 const InfoTooltip = ({ title }: { title: string }) => (
   <CustomTooltip title={title} arrow>
     <HelpOutlineIcon
@@ -85,7 +84,7 @@ const useDataGrid = (data: LeaderBoardData) => {
         ),
       },
       {
-        field: 'amountStaked',
+        field: 'stakedAmount',
         sortable: false,
         flex: 1,
         minWidth: isMobile ? 130 : 260,

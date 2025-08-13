@@ -30,18 +30,18 @@ const LEADER_FRAGMENT = gql`
 `;
 
 export const GET_LEADERS_QUERY = (filter: IOperatorsFilter) => {
-  const { roles, minAmountStaked } = filter;
+  const { roles, minStakedAmount } = filter;
 
   const WHERE_CLAUSE = `
     where: {
-      ${minAmountStaked ? `amountStaked_gte: $minAmountStaked` : ''}
+      ${minStakedAmount ? `stakedAmount_gte: $minStakedAmount` : ''}
       ${roles ? `role_in: $roles` : ''}
     }
   `;
 
   return gql`
     query getOperators(
-      $minAmountStaked: Int,
+      $minStakedAmount: Int,
       $roles: [String!]
       $first: Int
       $skip: Int
