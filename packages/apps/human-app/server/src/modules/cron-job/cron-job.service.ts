@@ -1,22 +1,25 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { SchedulerRegistry } from '@nestjs/schedule';
+import { AxiosError } from 'axios';
 import { CronJob } from 'cron';
+import { EnvironmentConfigService } from '../../common/config/environment-config.service';
+import {
+  JobDiscoveryFieldName,
+  JobStatus,
+} from '../../common/enums/global-common';
+import * as errorUtils from '../../common/utils/error';
 import { ExchangeOracleGateway } from '../../integrations/exchange-oracle/exchange-oracle.gateway';
 import { ReputationOracleGateway } from '../../integrations/reputation-oracle/reputation-oracle.gateway';
+import logger from '../../logger';
+import { JobsDiscoveryService } from '../jobs-discovery/jobs-discovery.service';
 import {
   DiscoveredJob,
   JobsDiscoveryParams,
   JobsDiscoveryParamsCommand,
   JobsDiscoveryResponse,
 } from '../jobs-discovery/model/jobs-discovery.model';
-import { EnvironmentConfigService } from '../../common/config/environment-config.service';
-import { OracleDiscoveryService } from '../oracle-discovery/oracle-discovery.service';
 import { DiscoveredOracle } from '../oracle-discovery/model/oracle-discovery.model';
-import {
-  JobDiscoveryFieldName,
-  JobStatus,
-} from '../../common/enums/global-common';
-import { SchedulerRegistry } from '@nestjs/schedule';
-import { JobsDiscoveryService } from '../jobs-discovery/jobs-discovery.service';
+import { OracleDiscoveryService } from '../oracle-discovery/oracle-discovery.service';
 
 function assertJobsDiscoveryResponseItemsFormat(
   items: JobsDiscoveryResponse['results'],
@@ -41,7 +44,8 @@ function assertJobsDiscoveryResponseItemsFormat(
 
 @Injectable()
 export class CronJobService {
-  private readonly logger = new Logger(CronJobService.name);
+  private readonly logger = logger.child({ context: CronJobService.name });
+
   constructor(
     private readonly reputationOracleGateway: ReputationOracleGateway,
     private readonly exchangeOracleGateway: ExchangeOracleGateway,
@@ -65,7 +69,7 @@ export class CronJobService {
   }
 
   async updateJobsListCron() {
-    this.logger.log('CRON START');
+    this.logger.info('Update jobs list START');
 
     const oracles = await this.oracleDiscoveryService.discoverOracles();
 
@@ -80,9 +84,11 @@ export class CronJobService {
 
       for (const oracle of oracles) {
         if (oracle.executionsToSkip > 0) {
-          this.logger.log(
-            `Skipping execution for oracle: ${oracle.address}. Remaining skips: ${oracle.executionsToSkip}`,
-          );
+          this.logger.info('Skipping jobs list update for oracle', {
+            chainId: oracle.chainId,
+            address: oracle.address,
+            executionsToSkip: oracle.executionsToSkip,
+          });
 
           await this.oracleDiscoveryService.updateOracleInCache({
             ...oracle,
@@ -96,11 +102,15 @@ export class CronJobService {
           'Bearer ' + response.access_token,
         );
       }
-    } catch (e) {
-      this.logger.error(e);
+    } catch (error) {
+      let formattedError = error;
+      if (error instanceof AxiosError) {
+        formattedError = errorUtils.formatError(error);
+      }
+      this.logger.error('Error in update jobs list job', formattedError);
     }
 
-    this.logger.log('CRON END');
+    this.logger.info('Update jobs list END');
   }
 
   async updateJobsListCache(oracle: DiscoveredOracle, token: string) {
@@ -151,8 +161,16 @@ export class CronJobService {
       });
 
       await this.jobsDiscoveryService.setCachedJobs(oracle.address, allResults);
-    } catch (e) {
-      this.logger.error(e);
+    } catch (error) {
+      let formattedError = error;
+      if (error instanceof AxiosError) {
+        formattedError = errorUtils.formatError(error);
+      }
+      this.logger.error('Error while updating jobs list for oracle', {
+        chainId: oracle.chainId,
+        address: oracle.address,
+        error: formattedError,
+      });
       await this.handleJobListError(oracle);
     }
   }

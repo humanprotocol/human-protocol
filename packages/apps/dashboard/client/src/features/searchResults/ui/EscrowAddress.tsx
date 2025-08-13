@@ -41,11 +41,7 @@ const EscrowAddress: FC<Props> = ({ data }) => {
             {isHmt ? (
               <HmtBalance balance={balance} />
             ) : (
-              <TokenAmount
-                amount={balance}
-                tokenSymbol={tokenSymbol}
-                alreadyParsed
-              />
+              <TokenAmount amount={balance} tokenSymbol={tokenSymbol} />
             )}
           </TitleSectionWrapper>
         ) : null}
@@ -56,18 +52,10 @@ const EscrowAddress: FC<Props> = ({ data }) => {
           <Typography variant="body2">{factoryAddress}</Typography>
         </TitleSectionWrapper>
         <TitleSectionWrapper title="Total Funded Amount">
-          <TokenAmount
-            amount={totalFundedAmount}
-            tokenSymbol={tokenSymbol}
-            alreadyParsed
-          />
+          <TokenAmount amount={totalFundedAmount} tokenSymbol={tokenSymbol} />
         </TitleSectionWrapper>
         <TitleSectionWrapper title="Paid Amount">
-          <TokenAmount
-            amount={amountPaid}
-            tokenSymbol={tokenSymbol}
-            alreadyParsed
-          />
+          <TokenAmount amount={amountPaid} tokenSymbol={tokenSymbol} />
         </TitleSectionWrapper>
 
         <TitleSectionWrapper title="Status">

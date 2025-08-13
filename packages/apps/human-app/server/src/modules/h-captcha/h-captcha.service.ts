@@ -1,9 +1,12 @@
-import { HttpException, Inject, Injectable, Logger } from '@nestjs/common';
-import {
-  VerifyTokenCommand,
-  VerifyTokenApiResponse,
-  VerifyTokenResponse,
-} from './model/verify-token.model';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { HttpException, Inject, Injectable } from '@nestjs/common';
+import { Cache } from 'cache-manager';
+import { EnvironmentConfigService } from '../../common/config/environment-config.service';
+import { DAILY_HMT_SPENT_CACHE_KEY } from '../../common/constants/cache';
+import { HCaptchaStatisticsGateway } from '../../integrations/h-captcha-labeling/h-captcha-statistics.gateway';
+import { HCaptchaVerifyGateway } from '../../integrations/h-captcha-labeling/h-captcha-verify.gateway';
+import { ReputationOracleGateway } from '../../integrations/reputation-oracle/reputation-oracle.gateway';
+import logger from '../../logger';
 import {
   DailyHmtSpentCommand,
   DailyHmtSpentResponse,
@@ -12,53 +15,41 @@ import {
   EnableLabelingCommand,
   EnableLabelingResponse,
 } from './model/enable-labeling.model';
-import { EnvironmentConfigService } from '../../common/config/environment-config.service';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { UserStatsCommand, UserStatsResponse } from './model/user-stats.model';
-import { Cache } from 'cache-manager';
-import { HCaptchaStatisticsGateway } from '../../integrations/h-captcha-labeling/h-captcha-statistics.gateway';
-import { ReputationOracleGateway } from '../../integrations/reputation-oracle/reputation-oracle.gateway';
-import { HCaptchaVerifyGateway } from '../../integrations/h-captcha-labeling/h-captcha-verify.gateway';
-import { DAILY_HMT_SPENT_CACHE_KEY } from '../../common/constants/cache';
+import {
+  VerifyTokenCommand,
+  VerifyTokenResponse,
+} from './model/verify-token.model';
 
 @Injectable()
 export class HCaptchaService {
-  private readonly logger = new Logger(HCaptchaService.name);
+  private readonly logger = logger.child({ context: HCaptchaService.name });
+
   constructor(
-    private configService: EnvironmentConfigService,
-    private hCaptchaLabelingGateway: HCaptchaStatisticsGateway,
-    private hCaptchaVerifyGateway: HCaptchaVerifyGateway,
-    private reputationOracleGateway: ReputationOracleGateway,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private readonly configService: EnvironmentConfigService,
+    private readonly hCaptchaLabelingGateway: HCaptchaStatisticsGateway,
+    private readonly hCaptchaVerifyGateway: HCaptchaVerifyGateway,
+    private readonly reputationOracleGateway: ReputationOracleGateway,
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
   async verifyToken(command: VerifyTokenCommand): Promise<VerifyTokenResponse> {
     this.checkIfHcaptchaSitekeyPresent(command.sitekey);
-    const response =
-      await this.hCaptchaVerifyGateway.sendTokenToVerify(command);
-    if (response && response.success) {
+
+    const result = await this.hCaptchaVerifyGateway.sendTokenToVerify(command);
+    if (result?.success) {
       return new VerifyTokenResponse('CAPTCHA was verified successfully');
     }
-    const errorMessage = this.createHCaptchaVerificationErrorMessage(response);
-    this.logger.error(errorMessage);
-    throw new HttpException(errorMessage, 400);
+
+    const message = 'Failed to verify hCaptcha token';
+    this.logger.error(message, {
+      success: result?.success,
+      errorCodes: result?.['error-codes'],
+    });
+
+    throw new HttpException(message, 400);
   }
-  private createHCaptchaVerificationErrorMessage(
-    response: VerifyTokenApiResponse | undefined,
-  ): string {
-    let message = 'Failed to verify h-captcha token. ';
-    if (response) {
-      const errorCodes: any = response['error-codes'];
-      if (errorCodes && Array.isArray(errorCodes)) {
-        message += `Error: ${errorCodes}`;
-      } else {
-        message += `"error-codes" array is undefined. Response data: ${JSON.stringify(response)}`;
-      }
-    } else {
-      message += 'Failed to process request';
-    }
-    return message;
-  }
+
   async enableLabeling(
     command: EnableLabelingCommand,
   ): Promise<EnableLabelingResponse> {
@@ -69,9 +60,11 @@ export class HCaptchaService {
     command: DailyHmtSpentCommand,
   ): Promise<DailyHmtSpentResponse> {
     this.checkIfHcaptchaSitekeyPresent(command.siteKey);
+
     let dailyHmtSpent = await this.cacheManager.get<DailyHmtSpentResponse>(
       DAILY_HMT_SPENT_CACHE_KEY,
     );
+
     if (!dailyHmtSpent) {
       dailyHmtSpent = await this.hCaptchaLabelingGateway.fetchDailyHmtSpent();
       await this.cacheManager.set(
@@ -80,23 +73,28 @@ export class HCaptchaService {
         this.configService.cacheTtlDailyHmtSpent,
       );
     }
+
     return dailyHmtSpent;
   }
 
   async getUserStats(command: UserStatsCommand): Promise<UserStatsResponse> {
     this.checkIfHcaptchaSitekeyPresent(command.siteKey);
+
     let stats = await this.cacheManager.get<UserStatsResponse>(command.email);
     if (stats) {
       return stats;
     }
+
     stats = await this.hCaptchaLabelingGateway.fetchUserStats(command.email);
     await this.cacheManager.set(
       command.email,
       stats,
       this.configService.cacheTtlHCaptchaUserStats,
     );
+
     return stats;
   }
+
   private checkIfHcaptchaSitekeyPresent(siteKey: string) {
     if (!siteKey) {
       throw new HttpException('Labeling is not enabled for this account', 400);

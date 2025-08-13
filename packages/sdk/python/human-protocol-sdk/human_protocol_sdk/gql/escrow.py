@@ -14,7 +14,7 @@ fragment EscrowFields on Escrow {
     launcher
     jobRequesterId
     manifestHash
-    manifestUrl
+    manifest
     recordingOracle
     reputationOracle
     exchangeOracle

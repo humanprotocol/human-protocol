@@ -27,7 +27,7 @@ import {
   unsuccessfulVerifyTokenApiResponseWithErrorCodesFixture,
   unsuccessfulVerifyTokenApiResponseWithoutErrorCodesFixture,
   unsuccessfulVerifyTokenApiResponseWithUndefinedErrorCodesFixture,
-  errorMessagesFixture,
+  errorMessageFixture,
 } from './h-captcha.fixtures';
 import {
   hCaptchaStatisticsGatewayMock,
@@ -116,14 +116,13 @@ describe('HCaptchaService', () => {
       const command: VerifyTokenCommand = verifyTokenCommandFixture;
       const apiResponse: VerifyTokenApiResponse =
         unsuccessfulVerifyTokenApiResponseWithErrorCodesFixture;
-      const errorMessage = errorMessagesFixture.withErrorCodes;
 
       jest
         .spyOn(hCaptchaVerifyGateway, 'sendTokenToVerify')
         .mockResolvedValue(apiResponse);
 
       await expect(service.verifyToken(command)).rejects.toThrowError(
-        errorMessage,
+        errorMessageFixture,
       );
     });
 
@@ -131,14 +130,13 @@ describe('HCaptchaService', () => {
       const command: VerifyTokenCommand = verifyTokenCommandFixture;
       const apiResponse: VerifyTokenApiResponse =
         unsuccessfulVerifyTokenApiResponseWithoutErrorCodesFixture;
-      const errorMessage = errorMessagesFixture.withUndefinedErrorCodes;
 
       jest
         .spyOn(hCaptchaVerifyGateway, 'sendTokenToVerify')
         .mockResolvedValue(apiResponse);
 
       await expect(service.verifyToken(command)).rejects.toThrowError(
-        errorMessage,
+        errorMessageFixture,
       );
     });
 
@@ -146,14 +144,13 @@ describe('HCaptchaService', () => {
       const command: VerifyTokenCommand = verifyTokenCommandFixture;
       const apiResponse: VerifyTokenApiResponse =
         unsuccessfulVerifyTokenApiResponseWithUndefinedErrorCodesFixture;
-      const errorMessage = errorMessagesFixture.withUndefinedErrorCodes;
 
       jest
         .spyOn(hCaptchaVerifyGateway, 'sendTokenToVerify')
         .mockResolvedValue(apiResponse);
 
-      await expect(service.verifyToken(command)).rejects.toThrowError(
-        errorMessage,
+      await expect(service.verifyToken(command)).rejects.toThrow(
+        errorMessageFixture,
       );
     });
   });

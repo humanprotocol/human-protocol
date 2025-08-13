@@ -71,6 +71,13 @@ class PolygonAmoyConfig(_NetworkConfig):
     addr = getenv("POLYGON_AMOY_ADDR")
 
 
+class AuroraTestnetConfig(_NetworkConfig):
+    chain_id = 1313161555
+    rpc_api = getenv("AURORA_TESTNET_RPC_API_URL")
+    private_key = getenv("AURORA_TESTNET_PRIVATE_KEY")
+    addr = getenv("AURORA_TESTNET_ADDR")
+
+
 class LocalhostConfig(_NetworkConfig):
     chain_id = 1338
     rpc_api = getenv("LOCALHOST_RPC_API_URL", "http://blockchain-node:8545")
@@ -254,6 +261,7 @@ class Config:
 
     polygon_mainnet = PolygonMainnetConfig
     polygon_amoy = PolygonAmoyConfig
+    aurora_testnet = AuroraTestnetConfig
     localhost = LocalhostConfig
 
     postgres_config = Postgres

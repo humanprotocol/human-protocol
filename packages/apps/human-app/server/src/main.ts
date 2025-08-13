@@ -1,20 +1,18 @@
-import { NestFactory, Reflector } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { ConfigService } from '@nestjs/config';
-import {
-  ClassSerializerInterceptor,
-  Logger,
-  ValidationPipe,
-} from '@nestjs/common';
-import { EnvironmentConfigService } from './common/config/environment-config.service';
-import { GlobalExceptionsFilter } from './common/filter/global-exceptions.filter';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Cache } from 'cache-manager';
+import { AppModule } from './app.module';
+import { EnvironmentConfigService } from './common/config/environment-config.service';
+import logger, { nestLoggerOverride } from './logger';
 
 async function bootstrap() {
-  const logger = new Logger(bootstrap.name);
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    logger: nestLoggerOverride,
+  });
 
   const configService: ConfigService = app.get(ConfigService);
   const envConfigService = new EnvironmentConfigService(configService);
@@ -40,12 +38,11 @@ async function bootstrap() {
     const cacheManager: Cache = app.get<Cache>(CACHE_MANAGER);
     await cacheManager.reset();
   }
-  app.useGlobalFilters(new GlobalExceptionsFilter());
-  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
   await app.listen(port, host, async () => {
-    logger.log(`Human APP server is running on http://${host}:${port}`);
+    logger.info(`Human APP server is running on http://${host}:${port}`);
   });
 }
 bootstrap();
