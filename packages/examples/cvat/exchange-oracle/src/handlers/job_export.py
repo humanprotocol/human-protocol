@@ -1,6 +1,7 @@
 import io
 import os
 import zipfile
+import math
 from collections import defaultdict
 from collections.abc import Sequence
 from dataclasses import dataclass
@@ -59,7 +60,7 @@ def prepare_annotation_metafile(
         job_to_audio_index: dict[int, int] = {}
         current_job_index_in_sorted_jobs = 0
         for audio_idx, num_jobs_for_audio in enumerate(task.total_jobs_count):
-            for _ in range(num_jobs_for_audio):
+            for _ in range(int(num_jobs_for_audio)):
                 if current_job_index_in_sorted_jobs < len(jobs):
                     job_id = jobs[current_job_index_in_sorted_jobs].cvat_id
                     job_to_audio_index[job_id] = audio_idx
@@ -73,7 +74,8 @@ def prepare_annotation_metafile(
                 frames_per_ms = frame_count / duration_ms
                 overlap_ms = task.overlap / frames_per_ms if frames_per_ms > 0 else 0
                 effective_segment_duration = task.segment_duration - overlap_ms
-                job_duration_without_overlap.append(effective_segment_duration / 1000.0)
+                effective_segment_duration_second = effective_segment_duration / 1000.0
+                job_duration_without_overlap.append(math.floor(effective_segment_duration_second * 1000) / 1000)
             else:
                 job_duration_without_overlap.append(0.0)
 

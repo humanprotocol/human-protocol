@@ -3024,7 +3024,7 @@ class AudinoTaskBuilder:
             #     escrow_address,
             #     total_jobs,
             # )
-            db_service.create_escrow_creation(
+            escrow_creation_id = db_service.create_escrow_creation(
                 session, escrow_address=escrow_address, chain_id=chain_id, total_jobs=1
             )
 
@@ -3071,11 +3071,12 @@ class AudinoTaskBuilder:
                 use_zip_chunks=False,
             )
 
-            # Create gt job for the task
-            self._setup_gt_job_for_audino_task(cvat_task.id, gt_file_data)
-            self._setup_quality_settings(cvat_task.id)
 
             db_service.create_data_upload(session, cvat_task.id)
+
+        # Create gt job for the task
+        self._setup_gt_job_for_audino_task(cvat_task.id, gt_file_data)
+        self._setup_quality_settings(cvat_task.id)
 
 
 def is_audio(path: str) -> bool:
@@ -3123,7 +3124,7 @@ def _make_cvat_cloud_storage_params(bucket_info: BucketAccessInfo) -> dict:
         # "bucket_host": bucket_info.host_url.replace(
         #     # TODO: remove mock
         #     "127.0.0.1",
-        #     "172.18.0.1",
+        #     "172.19.0.1",
         # )
     }
 
