@@ -13,11 +13,11 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/src/main",
-    "migration:create": "yarn build && typeorm-ts-node-commonjs migration:create",
-    "migration:generate": "yarn build && typeorm-ts-node-commonjs migration:generate -p -d typeorm.config.ts",
-    "migration:revert": "yarn build && typeorm-ts-node-commonjs migration:revert -d typeorm.config.ts",
-    "migration:run": "yarn build && typeorm-ts-node-commonjs migration:run -d typeorm.config.ts",
-    "migration:show": "yarn build && typeorm-ts-node-commonjs migration:show -d typeorm.config.ts",
+    "migration:create": "yarn typeorm migration:create",
+    "migration:generate": "yarn typeorm migration:generate -p -d typeorm.config.ts",
+    "migration:revert": "yarn typeorm migration:revert -d typeorm.config.ts",
+    "migration:run": "yarn typeorm migration:run -d typeorm.config.ts",
+    "migration:show": "yarn typeorm migration:show -d typeorm.config.ts",
     "setup:local": "ts-node ./scripts/setup-staking.ts && LOCAL=true yarn setup:kvstore",
     "setup:kvstore": "ts-node ./scripts/setup-kv-store.ts",
     "lint": "eslint \"{src,test}/**/*.ts\" --fix",
@@ -25,7 +25,8 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "generate-env-doc": "ts-node scripts/generate-env-doc.ts"
+    "generate-env-doc": "ts-node scripts/generate-env-doc.ts",
+    "typeorm": "typeorm-ts-node-commonjs"
   },
   "dependencies": {
     "@google-cloud/storage": "^7.15.0",
