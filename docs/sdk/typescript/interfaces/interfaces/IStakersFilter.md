@@ -6,7 +6,7 @@
 
 # Interface: IStakersFilter
 
-Defined in: [interfaces.ts:231](https://github.com/humanprotocol/human-protocol/blob/88e4c1f607516180a13d25af6568a51a409bcb1d/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L231)
+Defined in: [interfaces.ts:231](https://github.com/humanprotocol/human-protocol/blob/1734b59e7e953d1f62f13e75c8f7b7ab4bddec76/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L231)
 
 ## Extends
 
@@ -18,7 +18,7 @@ Defined in: [interfaces.ts:231](https://github.com/humanprotocol/human-protocol/
 
 > **chainId**: [`ChainId`](../../enums/enumerations/ChainId.md)
 
-Defined in: [interfaces.ts:232](https://github.com/humanprotocol/human-protocol/blob/88e4c1f607516180a13d25af6568a51a409bcb1d/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L232)
+Defined in: [interfaces.ts:232](https://github.com/humanprotocol/human-protocol/blob/1734b59e7e953d1f62f13e75c8f7b7ab4bddec76/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L232)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: [interfaces.ts:232](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **first**: `number`
 
-Defined in: [interfaces.ts:189](https://github.com/humanprotocol/human-protocol/blob/88e4c1f607516180a13d25af6568a51a409bcb1d/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L189)
+Defined in: [interfaces.ts:189](https://github.com/humanprotocol/human-protocol/blob/1734b59e7e953d1f62f13e75c8f7b7ab4bddec76/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L189)
 
 #### Inherited from
 
@@ -38,7 +38,7 @@ Defined in: [interfaces.ts:189](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **maxLockedAmount**: `string`
 
-Defined in: [interfaces.ts:236](https://github.com/humanprotocol/human-protocol/blob/88e4c1f607516180a13d25af6568a51a409bcb1d/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L236)
+Defined in: [interfaces.ts:236](https://github.com/humanprotocol/human-protocol/blob/1734b59e7e953d1f62f13e75c8f7b7ab4bddec76/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L236)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [interfaces.ts:236](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **maxSlashedAmount**: `string`
 
-Defined in: [interfaces.ts:240](https://github.com/humanprotocol/human-protocol/blob/88e4c1f607516180a13d25af6568a51a409bcb1d/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L240)
+Defined in: [interfaces.ts:240](https://github.com/humanprotocol/human-protocol/blob/1734b59e7e953d1f62f13e75c8f7b7ab4bddec76/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L240)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [interfaces.ts:240](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **maxStakedAmount**: `string`
 
-Defined in: [interfaces.ts:234](https://github.com/humanprotocol/human-protocol/blob/88e4c1f607516180a13d25af6568a51a409bcb1d/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L234)
+Defined in: [interfaces.ts:234](https://github.com/humanprotocol/human-protocol/blob/1734b59e7e953d1f62f13e75c8f7b7ab4bddec76/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L234)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [interfaces.ts:234](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **maxWithdrawnAmount**: `string`
 
-Defined in: [interfaces.ts:238](https://github.com/humanprotocol/human-protocol/blob/88e4c1f607516180a13d25af6568a51a409bcb1d/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L238)
+Defined in: [interfaces.ts:238](https://github.com/humanprotocol/human-protocol/blob/1734b59e7e953d1f62f13e75c8f7b7ab4bddec76/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L238)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [interfaces.ts:238](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **minLockedAmount**: `string`
 
-Defined in: [interfaces.ts:235](https://github.com/humanprotocol/human-protocol/blob/88e4c1f607516180a13d25af6568a51a409bcb1d/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L235)
+Defined in: [interfaces.ts:235](https://github.com/humanprotocol/human-protocol/blob/1734b59e7e953d1f62f13e75c8f7b7ab4bddec76/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L235)
 
 ***
 
@@ -78,7 +78,7 @@ Defined in: [interfaces.ts:235](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **minSlashedAmount**: `string`
 
-Defined in: [interfaces.ts:239](https://github.com/humanprotocol/human-protocol/blob/88e4c1f607516180a13d25af6568a51a409bcb1d/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L239)
+Defined in: [interfaces.ts:239](https://github.com/humanprotocol/human-protocol/blob/1734b59e7e953d1f62f13e75c8f7b7ab4bddec76/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L239)
 
 ***
 
@@ -86,7 +86,7 @@ Defined in: [interfaces.ts:239](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **minStakedAmount**: `string`
 
-Defined in: [interfaces.ts:233](https://github.com/humanprotocol/human-protocol/blob/88e4c1f607516180a13d25af6568a51a409bcb1d/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L233)
+Defined in: [interfaces.ts:233](https://github.com/humanprotocol/human-protocol/blob/1734b59e7e953d1f62f13e75c8f7b7ab4bddec76/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L233)
 
 ***
 
@@ -94,15 +94,15 @@ Defined in: [interfaces.ts:233](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **minWithdrawnAmount**: `string`
 
-Defined in: [interfaces.ts:237](https://github.com/humanprotocol/human-protocol/blob/88e4c1f607516180a13d25af6568a51a409bcb1d/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L237)
+Defined in: [interfaces.ts:237](https://github.com/humanprotocol/human-protocol/blob/1734b59e7e953d1f62f13e75c8f7b7ab4bddec76/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L237)
 
 ***
 
 ### orderBy?
 
-> `optional` **orderBy**: `"lastDepositTimestamp"` \| `"stakedAmount"` \| `"lockedAmount"` \| `"withdrawnAmount"` \| `"slashedAmount"`
+> `optional` **orderBy**: `"stakedAmount"` \| `"lockedAmount"` \| `"withdrawnAmount"` \| `"slashedAmount"` \| `"lastDepositTimestamp"`
 
-Defined in: [interfaces.ts:241](https://github.com/humanprotocol/human-protocol/blob/88e4c1f607516180a13d25af6568a51a409bcb1d/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L241)
+Defined in: [interfaces.ts:241](https://github.com/humanprotocol/human-protocol/blob/1734b59e7e953d1f62f13e75c8f7b7ab4bddec76/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L241)
 
 ***
 
@@ -110,7 +110,7 @@ Defined in: [interfaces.ts:241](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **orderDirection**: [`OrderDirection`](../../enums/enumerations/OrderDirection.md)
 
-Defined in: [interfaces.ts:191](https://github.com/humanprotocol/human-protocol/blob/88e4c1f607516180a13d25af6568a51a409bcb1d/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L191)
+Defined in: [interfaces.ts:191](https://github.com/humanprotocol/human-protocol/blob/1734b59e7e953d1f62f13e75c8f7b7ab4bddec76/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L191)
 
 #### Inherited from
 
@@ -122,7 +122,7 @@ Defined in: [interfaces.ts:191](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **skip**: `number`
 
-Defined in: [interfaces.ts:190](https://github.com/humanprotocol/human-protocol/blob/88e4c1f607516180a13d25af6568a51a409bcb1d/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L190)
+Defined in: [interfaces.ts:190](https://github.com/humanprotocol/human-protocol/blob/1734b59e7e953d1f62f13e75c8f7b7ab4bddec76/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L190)
 
 #### Inherited from
 

@@ -45,7 +45,8 @@ query GetOperators(
 ) {{
     operators(
       where: {{
-        {roles_clause}
+    {min_staked_amount_clause}
+    {roles_clause}
       }},
       orderBy: $orderBy
       orderDirection: $orderDirection
@@ -58,6 +59,11 @@ query GetOperators(
 {operator_fragment}
 """.format(
         operator_fragment=operator_fragment,
+        min_staked_amount_clause=(
+            "staker_: { stakedAmount_gte: $minStakedAmount }"
+            if filter.min_staked_amount is not None
+            else ""
+        ),
         roles_clause="role_in: $roles" if filter.roles else "",
     )
 

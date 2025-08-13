@@ -77,7 +77,7 @@ export class DetailsService {
       operatorDto.balance = await this.getHmtBalance(chainId, address);
       operatorDto.stakedAmount = ethers.formatEther(stakingData.stakedAmount);
       operatorDto.lockedAmount = ethers.formatEther(stakingData.lockedAmount);
-      operatorDto.withdrawableAmount = ethers.formatEther(
+      operatorDto.withdrawnAmount = ethers.formatEther(
         stakingData.withdrawableAmount,
       );
 

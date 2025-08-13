@@ -34,7 +34,7 @@ export const GET_LEADERS_QUERY = (filter: IOperatorsFilter) => {
 
   const WHERE_CLAUSE = `
     where: {
-      ${minStakedAmount ? `stakedAmount_gte: $minStakedAmount` : ''}
+      ${minStakedAmount ? `staker_: { stakedAmount_gte: $minStakedAmount }` : ''}
       ${roles ? `role_in: $roles` : ''}
     }
   `;

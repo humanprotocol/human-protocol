@@ -94,6 +94,15 @@ export class OperatorUtils {
       filter.skip !== undefined && filter.skip >= 0 ? filter.skip : 0;
     const orderDirection = filter.orderDirection || OrderDirection.DESC;
 
+    let orderBy = filter.orderBy;
+    if (filter.orderBy === 'stakedAmount') orderBy = 'staker__stakedAmount';
+    else if (filter.orderBy === 'lockedAmount')
+      orderBy = 'staker__lockedAmount';
+    else if (filter.orderBy === 'withdrawnAmount')
+      orderBy = 'staker__withdrawnAmount';
+    else if (filter.orderBy === 'slashedAmount')
+      orderBy = 'staker__slashedAmount';
+
     const networkData = NETWORKS[filter.chainId];
 
     if (!networkData) {
@@ -105,7 +114,7 @@ export class OperatorUtils {
     }>(getSubgraphUrl(networkData), GET_LEADERS_QUERY(filter), {
       minStakedAmount: filter?.minStakedAmount,
       roles: filter?.roles,
-      orderBy: filter?.orderBy,
+      orderBy: orderBy,
       orderDirection: orderDirection,
       first: first,
       skip: skip,

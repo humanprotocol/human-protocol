@@ -8,7 +8,7 @@
 
 > **DailyTaskData** = `object`
 
-Defined in: [graphql/types.ts:140](https://github.com/humanprotocol/human-protocol/blob/88e4c1f607516180a13d25af6568a51a409bcb1d/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L140)
+Defined in: [graphql/types.ts:140](https://github.com/humanprotocol/human-protocol/blob/1734b59e7e953d1f62f13e75c8f7b7ab4bddec76/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L140)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [graphql/types.ts:140](https://github.com/humanprotocol/human-protoc
 
 > **tasksSolved**: `number`
 
-Defined in: [graphql/types.ts:143](https://github.com/humanprotocol/human-protocol/blob/88e4c1f607516180a13d25af6568a51a409bcb1d/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L143)
+Defined in: [graphql/types.ts:143](https://github.com/humanprotocol/human-protocol/blob/1734b59e7e953d1f62f13e75c8f7b7ab4bddec76/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L143)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [graphql/types.ts:143](https://github.com/humanprotocol/human-protoc
 
 > **tasksTotal**: `number`
 
-Defined in: [graphql/types.ts:142](https://github.com/humanprotocol/human-protocol/blob/88e4c1f607516180a13d25af6568a51a409bcb1d/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L142)
+Defined in: [graphql/types.ts:142](https://github.com/humanprotocol/human-protocol/blob/1734b59e7e953d1f62f13e75c8f7b7ab4bddec76/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L142)
 
 ***
 
@@ -32,4 +32,4 @@ Defined in: [graphql/types.ts:142](https://github.com/humanprotocol/human-protoc
 
 > **timestamp**: `Date`
 
-Defined in: [graphql/types.ts:141](https://github.com/humanprotocol/human-protocol/blob/88e4c1f607516180a13d25af6568a51a409bcb1d/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L141)
+Defined in: [graphql/types.ts:141](https://github.com/humanprotocol/human-protocol/blob/1734b59e7e953d1f62f13e75c8f7b7ab4bddec76/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L141)

@@ -48,7 +48,7 @@ export class OperatorDto {
   @Transform(({ value }) => value?.toString())
   @IsString()
   @Expose()
-  public withdrawableAmount: string;
+  public withdrawnAmount: string;
 
   @ApiProperty({ example: 'High' })
   @Transform(({ value }) => value?.toString())
@@ -84,6 +84,7 @@ export class OperatorDto {
   public website?: string;
 
   @ApiProperty({ example: 1 })
+  @Transform(({ value }) => Number(value))
   @IsNumber()
   @Expose()
   public amountJobsProcessed: number;

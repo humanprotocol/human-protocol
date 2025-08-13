@@ -17,11 +17,11 @@ print(
 
 ## Module
 
-### *class* human_protocol_sdk.operator.operator_utils.OperatorData(chain_id, id, address, amount_staked, amount_locked, locked_until_timestamp, amount_withdrawn, amount_slashed, last_deposit_timestamp, amount_jobs_processed, role=None, fee=None, public_key=None, webhook_url=None, website=None, url=None, job_types=None, registration_needed=None, registration_instructions=None, reputation_networks=None, name=None, category=None)
+### *class* human_protocol_sdk.operator.operator_utils.OperatorData(chain_id, id, address, staked_amount, locked_amount, locked_until_timestamp, withdrawn_amount, slashed_amount, amount_jobs_processed, role=None, fee=None, public_key=None, webhook_url=None, website=None, url=None, job_types=None, registration_needed=None, registration_instructions=None, reputation_networks=None, name=None, category=None)
 
 Bases: `object`
 
-#### \_\_init_\_(chain_id, id, address, amount_staked, amount_locked, locked_until_timestamp, amount_withdrawn, amount_slashed, last_deposit_timestamp, amount_jobs_processed, role=None, fee=None, public_key=None, webhook_url=None, website=None, url=None, job_types=None, registration_needed=None, registration_instructions=None, reputation_networks=None, name=None, category=None)
+#### \_\_init_\_(chain_id, id, address, staked_amount, locked_amount, locked_until_timestamp, withdrawn_amount, slashed_amount, amount_jobs_processed, role=None, fee=None, public_key=None, webhook_url=None, website=None, url=None, job_types=None, registration_needed=None, registration_instructions=None, reputation_networks=None, name=None, category=None)
 
 Initializes a OperatorData instance.
 
@@ -29,12 +29,11 @@ Initializes a OperatorData instance.
   * **chain_id** ([`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)) – Chain Identifier
   * **id** (`str`) – Identifier
   * **address** (`str`) – Address
-  * **amount_staked** (`int`) – Amount staked
-  * **amount_locked** (`int`) – Amount locked
+  * **staked_amount** (`int`) – Amount staked
+  * **locked_amount** (`int`) – Amount locked
   * **locked_until_timestamp** (`int`) – Locked until timestamp
-  * **amount_withdrawn** (`int`) – Amount withdrawn
-  * **amount_slashed** (`int`) – Amount slashed
-  * **last_deposit_timestamp** (`int`) – Last deposit timestamp
+  * **withdrawn_amount** (`int`) – Amount withdrawn
+  * **slashed_amount** (`int`) – Amount slashed
   * **amount_jobs_processed** (`int`) – Amount of jobs launched
   * **role** (`Optional`[`str`]) – Role
   * **fee** (`Optional`[`int`]) – Fee
@@ -49,20 +48,20 @@ Initializes a OperatorData instance.
   * **name** (`Optional`[`str`]) – Name
   * **category** (`Optional`[`str`]) – Category
 
-### *class* human_protocol_sdk.operator.operator_utils.OperatorFilter(chain_id, roles=[], min_amount_staked=None, order_by=None, order_direction=OrderDirection.DESC, first=10, skip=0)
+### *class* human_protocol_sdk.operator.operator_utils.OperatorFilter(chain_id, roles=[], min_staked_amount=None, order_by=None, order_direction=OrderDirection.DESC, first=10, skip=0)
 
 Bases: `object`
 
 A class used to filter operators.
 
-#### \_\_init_\_(chain_id, roles=[], min_amount_staked=None, order_by=None, order_direction=OrderDirection.DESC, first=10, skip=0)
+#### \_\_init_\_(chain_id, roles=[], min_staked_amount=None, order_by=None, order_direction=OrderDirection.DESC, first=10, skip=0)
 
 Initializes a OperatorFilter instance.
 
 * **Parameters:**
   * **chain_id** ([`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)) – Chain ID to request data
   * **roles** (`Optional`[`str`]) – Roles to filter by
-  * **min_amount_staked** (`Optional`[`int`]) – Minimum amount staked to filter by
+  * **min_staked_amount** (`Optional`[`int`]) – Minimum amount staked to filter by
   * **order_by** (`Optional`[`str`]) – Property to order by, e.g., “role”
   * **order_direction** ([`OrderDirection`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.OrderDirection)) – Order direction of results, “asc” or “desc”
   * **first** (`int`) – Number of items per page
