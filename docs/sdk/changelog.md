@@ -1,34 +1,41 @@
-# Changelog
+# changelog
 
-### Added
+## Changelog
 
-### Changed
+#### Added
 
-### Deprecated
+#### Changed
 
-### Removed
+* allow `manifest` to be a JSON string
+* `EscrowClient.setup` now accepts `manifest` instead of `manifestUrl`
+* `EscrowClient.getManifestUrl` -> `EscrowClient.getManifest`
+* `manifestUrl` -> `manifest` in `IEscrow`
 
-### Fixed
+#### Deprecated
 
-### Security
+#### Removed
 
-# How to upgrade
+#### Fixed
 
-## Typescript
+#### Security
 
-### yarn
+## How to upgrade
+
+### Typescript
+
+#### yarn
 
 ```
 yarn upgrade @human-protocol/sdk
 ```
 
-### npm
+#### npm
 
 ```
 npm update @human-protocol/sdk
 ```
 
-## Python
+### Python
 
 ```
 pip install --upgrade human-protocol-sdk
