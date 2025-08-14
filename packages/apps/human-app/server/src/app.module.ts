@@ -42,6 +42,8 @@ import { KycProcedureModule } from './modules/kyc-procedure/kyc-procedure.module
 import { NDAController } from './modules/nda/nda.controller';
 import { NDAModule } from './modules/nda/nda.module';
 import { OracleDiscoveryController } from './modules/oracle-discovery/oracle-discovery.controller';
+import { GovernanceModule } from './modules/governance/governance.module';
+import { GovernanceController } from './modules/governance/governance.controller';
 import { OracleDiscoveryModule } from './modules/oracle-discovery/oracle-discovery.module';
 import { PasswordResetModule } from './modules/password-reset/password-reset.module';
 import { PrepareSignatureModule } from './modules/prepare-signature/prepare-signature.module';
@@ -76,6 +78,8 @@ const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
         REDIS_HOST: Joi.string().required(),
         REDIS_DB: Joi.number(),
         RPC_URL: Joi.string().required(),
+        GOVERNANCE_RPC_URL: Joi.string(),
+        GOVERNOR_ADDRESS: Joi.string().required(),
         HCAPTCHA_LABELING_STATS_API_URL: Joi.string().required(),
         HCAPTCHA_LABELING_VERIFY_API_URL: Joi.string().required(),
         HCAPTCHA_LABELING_API_KEY: Joi.string().required(),
@@ -108,6 +112,7 @@ const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
         CACHE_TTL_EXCHANGE_ORACLE_URL: Joi.number(),
         CACHE_TTL_EXCHANGE_ORACLE_REGISTRATION_NEEDED: Joi.number(),
         MAX_EXECUTIONS_TO_SKIP: Joi.number(),
+        CACHE_TTL_GOVERNANCE_SNAPSHOT: Joi.number(),
         FEATURE_FLAG_JOBS_DISCOVERY: JOI_BOOLEAN_STRING_SCHEMA,
       }),
     }),
@@ -141,6 +146,7 @@ const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
     UiConfigurationModule,
     NDAModule,
     AbuseModule,
+    GovernanceModule,
   ],
   controllers: [
     AppController,
@@ -155,6 +161,7 @@ const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
     TokenRefreshController,
     NDAController,
     AbuseController,
+    GovernanceController,
   ],
   exports: [HttpModule],
   providers: [
