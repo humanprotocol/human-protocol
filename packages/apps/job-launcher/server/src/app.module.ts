@@ -2,9 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
-import { ServeStaticModule } from '@nestjs/serve-static';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import { join } from 'path';
 import { AppController } from './app.controller';
 import { EnvConfigModule } from './common/config/config.module';
 import { envValidator } from './common/config/env-schema';
@@ -82,13 +80,6 @@ import { WebhookModule } from './modules/webhook/webhook.module';
     WebhookModule,
     StatisticModule,
     QualificationModule,
-    ServeStaticModule.forRoot({
-      rootPath: join(
-        __dirname,
-        '../../../../../../',
-        'node_modules/swagger-ui-dist',
-      ),
-    }),
     CronJobModule,
     EnvConfigModule,
   ],

@@ -69,7 +69,7 @@ export class CronJobService {
   }
 
   async updateJobsListCron() {
-    this.logger.info('Update jobs list START');
+    this.logger.debug('Update jobs list START');
 
     const oracles = await this.oracleDiscoveryService.discoverOracles();
 
@@ -110,7 +110,7 @@ export class CronJobService {
       this.logger.error('Error in update jobs list job', formattedError);
     }
 
-    this.logger.info('Update jobs list END');
+    this.logger.debug('Update jobs list END');
   }
 
   async updateJobsListCache(oracle: DiscoveredOracle, token: string) {

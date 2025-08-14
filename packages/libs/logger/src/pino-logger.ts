@@ -42,7 +42,7 @@ export const createPinoLogger: LoggerFactory = (
 ) => {
   const pinoLogger = pino({
     base: null,
-    level: level || LogLevel.DEBUG,
+    level,
     enabled: disabled !== true,
     timestamp: false,
     formatters: {

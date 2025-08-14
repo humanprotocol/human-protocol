@@ -41,3 +41,8 @@ export type LoggerFactory = (
   optins: LoggerFactoryOptions,
   bindings?: LogMeta,
 ) => Logger;
+
+const LOG_LEVELS = Object.values(LogLevel);
+export function isLogLevel(value: unknown): value is LogLevel {
+  return LOG_LEVELS.includes(value as LogLevel);
+}
