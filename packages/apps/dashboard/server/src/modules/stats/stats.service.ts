@@ -85,7 +85,7 @@ export class StatsService implements OnModuleInit {
   private async fetchHistoricalHcaptchaStats(): Promise<void> {
     let startDate = dayjs(HCAPTCHA_STATS_API_START_DATE);
 
-    this.logger.info('Fetching historical hCaptcha stats', {
+    this.logger.debug('Fetching historical hCaptcha stats', {
       startDate,
     });
 
@@ -169,7 +169,7 @@ export class StatsService implements OnModuleInit {
     const from = today;
     const to = today;
 
-    this.logger.info('Fetching hCaptcha stats for today', { from, to });
+    this.logger.debug('Fetching hCaptcha stats for today', { from, to });
 
     try {
       const { data } = await lastValueFrom(
@@ -235,7 +235,7 @@ export class StatsService implements OnModuleInit {
 
   @Cron('*/15 * * * *')
   async fetchHmtGeneralStats() {
-    this.logger.info('Fetching HMT general stats across multiple networks');
+    this.logger.debug('Fetching HMT general stats across multiple networks');
 
     try {
       const aggregatedStats: HmtGeneralStatsDto = {

@@ -67,7 +67,7 @@ export class CronJobService {
       return false;
     }
 
-    this.logger.info('Previous cron job is not completed yet');
+    this.logger.warn('Previous cron job is not completed yet');
     return true;
   }
 
@@ -131,7 +131,7 @@ export class CronJobService {
       return;
     }
 
-    this.logger.info('Create escrow START');
+    this.logger.debug('Create escrow START');
     const cronJob = await this.startCronJob(CronJobType.CreateEscrow);
 
     try {
@@ -156,7 +156,7 @@ export class CronJobService {
       this.logger.error('Error in createEscrow cron job', error);
     }
 
-    this.logger.info('Create escrow STOP');
+    this.logger.debug('Create escrow STOP');
     await this.completeCronJob(cronJob);
   }
 
@@ -170,7 +170,7 @@ export class CronJobService {
       return;
     }
 
-    this.logger.info('Setup escrow START');
+    this.logger.debug('Setup escrow START');
     const cronJob = await this.startCronJob(CronJobType.SetupEscrow);
 
     try {
@@ -196,7 +196,7 @@ export class CronJobService {
       this.logger.error('Error in setupEscrow cron job', error);
     }
 
-    this.logger.info('Setup escrow STOP');
+    this.logger.debug('Setup escrow STOP');
     await this.completeCronJob(cronJob);
   }
 
@@ -210,7 +210,7 @@ export class CronJobService {
       return;
     }
 
-    this.logger.info('Fund escrow START');
+    this.logger.debug('Fund escrow START');
     const cronJob = await this.startCronJob(CronJobType.FundEscrow);
 
     try {
@@ -236,7 +236,7 @@ export class CronJobService {
       this.logger.error('Error in fundEscrow cron job', error);
     }
 
-    this.logger.info('Fund escrow STOP');
+    this.logger.debug('Fund escrow STOP');
     await this.completeCronJob(cronJob);
   }
 
@@ -250,7 +250,7 @@ export class CronJobService {
       return;
     }
 
-    this.logger.info('Cancel jobs START');
+    this.logger.debug('Cancel jobs START');
     const cronJob = await this.startCronJob(CronJobType.CancelEscrow);
 
     try {
@@ -315,7 +315,7 @@ export class CronJobService {
       this.logger.error('Error in cancelEscrow cron job', error);
     }
     await this.completeCronJob(cronJob);
-    this.logger.info('Cancel jobs STOP');
+    this.logger.debug('Cancel jobs STOP');
     return true;
   }
 
@@ -333,7 +333,7 @@ export class CronJobService {
       return;
     }
 
-    this.logger.info('Pending webhooks START');
+    this.logger.debug('Pending webhooks START');
     const cronJob = await this.startCronJob(CronJobType.ProcessPendingWebhook);
 
     try {
@@ -360,7 +360,7 @@ export class CronJobService {
       this.logger.error('Error in processPendingWebhooks cron job', error);
     }
 
-    this.logger.info('Pending webhooks STOP');
+    this.logger.debug('Pending webhooks STOP');
     await this.completeCronJob(cronJob);
   }
 
@@ -376,7 +376,7 @@ export class CronJobService {
       return;
     }
 
-    this.logger.info('Abuse START');
+    this.logger.debug('Abuse START');
     const cronJob = await this.startCronJob(CronJobType.Abuse);
 
     try {
@@ -426,7 +426,7 @@ export class CronJobService {
       this.logger.error('Error in processAbuse cron job', error);
     }
 
-    this.logger.info('Abuse STOP');
+    this.logger.debug('Abuse STOP');
     await this.completeCronJob(cronJob);
   }
 
@@ -444,7 +444,7 @@ export class CronJobService {
       return;
     }
 
-    this.logger.info('Update jobs START');
+    this.logger.debug('Update jobs START');
     const cronJob = await this.startCronJob(CronJobType.SyncJobStatuses);
 
     try {
@@ -541,7 +541,7 @@ export class CronJobService {
       this.logger.error('Error in syncJobStatuses cron job', error);
     }
 
-    this.logger.info('Update jobs STOP');
+    this.logger.debug('Update jobs STOP');
     await this.completeCronJob(cronJob);
   }
 }

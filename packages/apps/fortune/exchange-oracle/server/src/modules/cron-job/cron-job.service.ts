@@ -73,7 +73,7 @@ export class CronJobService {
       return;
     }
 
-    this.logger.info('Pending webhooks START');
+    this.logger.debug('Pending webhooks START');
     const cronJob = await this.startCronJob(CronJobType.ProcessPendingWebhook);
 
     try {
@@ -99,7 +99,7 @@ export class CronJobService {
       this.logger.error('Error processing pending webhooks', error);
     }
 
-    this.logger.info('Pending webhooks STOP');
+    this.logger.debug('Pending webhooks STOP');
 
     await this.completeCronJob(cronJob);
   }
