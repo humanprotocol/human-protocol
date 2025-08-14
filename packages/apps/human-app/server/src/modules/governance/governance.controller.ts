@@ -12,7 +12,6 @@ export class GovernanceController {
   @Get('/governance/active-proposals')
   @ApiOperation({ summary: 'Get active governance proposals' })
   @ApiOkResponse({ type: ActiveProposalResponse, isArray: true })
-  @Public()
   public async getActiveProposals(): Promise<ActiveProposalResponse[]> {
     return this.governanceService.getActiveProposals();
   }
