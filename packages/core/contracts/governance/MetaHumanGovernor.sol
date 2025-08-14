@@ -89,77 +89,47 @@ contract MetaHumanGovernor is
         secondsPerBlock = _secondsPerBlock;
     }
 
-    /**
-     * @dev Allows the magistrate address to withdraw all funds from the contract
-     */
-    function withdrawFunds() public onlyMagistrate {
-        payable(msg.sender).sendValue(address(this).balance);
-    }
-
     function cancel(
         address[] memory targets,
         uint256[] memory values,
         bytes[] memory calldatas,
         bytes32 descriptionHash
-    ) public virtual override(Governor) returns (uint256) {
-        // First, perform the original cancellation logic.
-        uint256 proposalId = super.cancel(
+    ) public override(Governor) returns (uint256) {
+        uint256 proposalId = hashProposal(
             targets,
             values,
             calldatas,
             descriptionHash
         );
 
-        //Notify all spoke chains about the cancellation
-        _notifySpokeChainsOfCancellation(proposalId);
+        if (spokeContractsSnapshots[proposalId].length > 0) {
+            revert('Please use crossChainCancel for proposals with spokes.');
+        }
 
-        return proposalId;
+        return super.cancel(targets, values, calldatas, descriptionHash);
     }
 
-    function _notifySpokeChainsOfCancellation(uint256 proposalId) internal {
-        uint256 spokeContractsLength = spokeContractsSnapshots[proposalId]
-            .length;
-        for (uint16 i = 0; i < spokeContractsLength; i++) {
-            bytes memory message = abi.encode(
-                2, // "2" is an inused function selector indicating cancellation
-                proposalId
-            );
-
-            bytes memory payload = abi.encode(
-                spokeContractsSnapshots[proposalId][i].contractAddress,
-                spokeContractsSnapshots[proposalId][i].chainId,
-                bytes32(uint256(uint160(address(this)))),
-                message
-            );
-
-            uint256 cost = quoteCrossChainMessage(
-                spokeContractsSnapshots[proposalId][i].chainId,
-                0
-            );
-
-            // Send cancellation message
-            wormholeRelayer.sendPayloadToEvm{value: cost}(
-                spokeContractsSnapshots[proposalId][i].chainId,
-                address(
-                    uint160(
-                        uint256(
-                            spokeContractsSnapshots[proposalId][i]
-                                .contractAddress
-                        )
-                    )
-                ),
-                payload,
-                0,
-                GAS_LIMIT
-            );
-        }
+    function crossChainCancel(
+        address[] calldata targets,
+        uint256[] calldata values,
+        bytes[] calldata calldatas,
+        bytes32 descriptionHash
+    ) external payable returns (uint256) {
+        uint256 proposalId = super.cancel(
+            targets,
+            values,
+            calldatas,
+            descriptionHash
+        );
+        bytes memory message = abi.encode(uint16(2), proposalId); // selector 2 = cancel
+        _sendCrossChainMessageToSpokes(proposalId, message, address(this), 2);
+        return proposalId;
     }
 
     /**
      * @dev Receives messages from the Wormhole protocol's relay mechanism and processes them accordingly.
      *  This function is intended to be called only by the designated Wormhole relayer.
      *  @param payload The payload of the received message.
-     *  @param additionalVaas An array of additional data (not used in this function).
      *  @param sourceAddress The address that initiated the message transmission (HelloWormhole contract address).
      *  @param sourceChain The chain ID of the source contract.
      *  @param deliveryHash A unique hash representing the delivery of the message to prevent duplicate processing.
@@ -183,18 +153,12 @@ contract MetaHumanGovernor is
             address intendedRecipient, //chainId
             ,
             ,
-            //sender
             bytes memory decodedMessage
         ) = abi.decode(payload, (address, uint16, address, bytes));
 
         if (intendedRecipient != address(this)) {
             revert InvalidIntendedRecipient();
         }
-
-        // require(
-        //     intendedRecipient == address(this),
-        //     'Message is not addressed for this contract'
-        // );
 
         processedMessages[deliveryHash] = true;
         // Gets a function selector option
@@ -305,48 +269,8 @@ contract MetaHumanGovernor is
             _finishCollectionPhase(proposalId);
         }
 
-        // Get a price of sending the message back to hub
-        uint256 sendMessageToHubCost = quoteCrossChainMessage(chainId, 0);
-
-        // Sends an empty message to each of the aggregators.
-        // If they receive a message, it is their cue to send data back
-        for (uint16 i = 1; i <= spokeContractsLength; ++i) {
-            // Using "1" as the function selector
-            bytes memory message = abi.encode(1, proposalId);
-
-            uint16 spokeChainId = spokeContractsSnapshots[proposalId][i - 1]
-                .chainId;
-            address spokeAddress = address(
-                uint160(
-                    uint256(
-                        spokeContractsSnapshots[proposalId][i - 1]
-                            .contractAddress
-                    )
-                )
-            );
-
-            bytes memory payload = abi.encode(
-                spokeAddress,
-                spokeChainId,
-                msg.sender,
-                message
-            );
-
-            uint256 cost = quoteCrossChainMessage(
-                spokeChainId,
-                sendMessageToHubCost
-            );
-
-            wormholeRelayer.sendPayloadToEvm{value: cost}(
-                spokeChainId,
-                spokeAddress,
-                payload,
-                sendMessageToHubCost, // send value to enable the spoke to send back vote result
-                GAS_LIMIT,
-                spokeChainId,
-                spokeAddress
-            );
-        }
+        bytes memory message = abi.encode(uint16(1), proposalId); // selector 1 = requestCollections
+        _sendCrossChainMessageToSpokes(proposalId, message, msg.sender, 1);
     }
 
     /**
@@ -377,59 +301,72 @@ contract MetaHumanGovernor is
         uint256 voteStartTimestamp = proposalSnapshot(proposalId);
         uint256 voteEndTimestamp = proposalDeadline(proposalId);
 
-        // Sends the proposal to all of the other spoke contracts
-        if (spokeContractsSnapshots[proposalId].length > 0) {
-            // Iterate over every spoke contract and send a message
-            uint256 spokeContractsLength = spokeContractsSnapshots[proposalId]
-                .length;
-            for (uint16 i = 1; i <= spokeContractsLength; ++i) {
-                bytes memory message = abi.encode(
-                    0, // Function selector "0" for destination contract
-                    proposalId,
-                    block.timestamp, // proposal creation timestamp
-                    voteStartTimestamp, //vote start timestamp
-                    voteEndTimestamp //vote end timestamp
-                );
-
-                uint16 spokeChainId = spokeContractsSnapshots[proposalId][i - 1]
-                    .chainId;
-                address spokeAddress = address(
-                    uint160(
-                        uint256(
-                            spokeContractsSnapshots[proposalId][i - 1]
-                                .contractAddress
-                        )
-                    )
-                );
-
-                bytes memory payload = abi.encode(
-                    spokeAddress,
-                    spokeChainId,
-                    bytes32(uint256(uint160(address(this)))),
-                    message
-                );
-
-                uint256 cost = quoteCrossChainMessage(spokeChainId, 0);
-
-                wormholeRelayer.sendPayloadToEvm{value: cost}(
-                    spokeChainId,
-                    spokeAddress,
-                    payload,
-                    0, // no receiver value needed
-                    GAS_LIMIT,
-                    spokeChainId,
-                    spokeAddress
-                );
-            }
-        }
+        bytes memory message = abi.encode(
+            uint16(0), // selector 0 = propose
+            proposalId,
+            block.timestamp,
+            voteStartTimestamp,
+            voteEndTimestamp
+        );
+        _sendCrossChainMessageToSpokes(proposalId, message, address(this), 0);
         return proposalId;
+    }
+
+    /**
+     * @dev Internal function to send a cross-chain message to all spoke contracts for a given proposal.
+     * @param proposalId The ID of the proposal.
+     * @param message The encoded message to send.
+     * @param sender The address to set as msg.sender in the payload (for requestCollections, otherwise address(this)).
+     * @param selector The function selector (0: propose, 1: requestCollections, 2: cancel).
+     */
+    function _sendCrossChainMessageToSpokes(
+        uint256 proposalId,
+        bytes memory message,
+        address sender,
+        uint16 selector
+    ) internal {
+        uint256 spokeContractsLength = spokeContractsSnapshots[proposalId]
+            .length;
+        uint256 sendMessageToHubCost = _quoteCrossChainMessage(chainId, 0);
+        bool isRequestCollectionsMessage = (selector == 1);
+        for (uint16 i = 1; i <= spokeContractsLength; ++i) {
+            uint16 spokeChainId = spokeContractsSnapshots[proposalId][i - 1]
+                .chainId;
+            address spokeAddress = address(
+                uint160(
+                    uint256(
+                        spokeContractsSnapshots[proposalId][i - 1]
+                            .contractAddress
+                    )
+                )
+            );
+            bytes memory payload = abi.encode(
+                spokeAddress,
+                spokeChainId,
+                sender,
+                message
+            );
+            uint256 cost = _quoteCrossChainMessage(
+                spokeChainId,
+                isRequestCollectionsMessage ? sendMessageToHubCost : 0
+            );
+            wormholeRelayer.sendPayloadToEvm{value: cost}(
+                spokeChainId,
+                spokeAddress,
+                payload,
+                isRequestCollectionsMessage ? sendMessageToHubCost : 0,
+                GAS_LIMIT,
+                spokeChainId,
+                magistrate()
+            );
+        }
     }
 
     /**
      * @dev Retrieves the quote for cross chain message delivery.
      *  @return cost Price, in units of current chain currency, that the delivery provider charges to perform the relay
      */
-    function quoteCrossChainMessage(
+    function _quoteCrossChainMessage(
         uint16 targetChain,
         uint256 valueToSend
     ) internal view returns (uint256 cost) {
@@ -470,18 +407,18 @@ contract MetaHumanGovernor is
 
     /**
      * @dev Retrieves the quorum required for voting.
-     *  @param blockNumber The block number to calculate the quorum for.
+     *  @param snapshotTime The timestamp (snapshot) at which to calculate the quorum
      *  @return The required quorum percentage.
      */
     function quorum(
-        uint256 blockNumber
+        uint256 snapshotTime
     )
         public
         view
         override(Governor, GovernorVotesQuorumFraction)
         returns (uint256)
     {
-        return super.quorum(blockNumber);
+        return super.quorum(snapshotTime);
     }
 
     /**
