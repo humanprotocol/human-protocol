@@ -2,7 +2,6 @@ import { Controller, Get } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { GovernanceService } from './governance.service';
 import { ActiveProposalResponse } from './model/governance.model';
-import { Public } from 'src/common/decorators';
 
 @ApiTags('Governance')
 @Controller()
