@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class ActiveProposalResponse {
+export class ProposalResponse {
   @ApiProperty()
   proposalId: string;
 
@@ -13,6 +13,9 @@ export class ActiveProposalResponse {
   @ApiProperty()
   abstainVotes: number;
 
-  @ApiProperty({ description: 'Deadline timestamp (seconds)' })
-  deadline: number;
+  @ApiProperty({ description: 'Voting start timestamp (seconds)' })
+  voteStart: number;
+
+  @ApiProperty({ description: 'Voting end timestamp (seconds)' })
+  voteEnd: number;
 }
