@@ -36,7 +36,8 @@ describe('HealthController', () => {
 
   it('/ping should return proper info', async () => {
     await expect(healthController.ping()).resolves.toEqual({
-      gitHash: 'test_value_hardcoded_in_jest_config',
+      node_env: 'test',
+      version: 'test_value_hardcoded_in_jest_config',
     });
   });
 
