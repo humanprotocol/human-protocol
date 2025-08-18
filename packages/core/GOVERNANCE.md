@@ -148,11 +148,13 @@ yarn spoke:selfdelegate:vote --network <spokeNetwork>
    - On Hub, use standard OZ Governor voting flows (e.g., cast votes via a UI or script if enabled).
    - On each Spoke, call `castVote(proposalId, support)` where support = 0 (Against), 1 (For), 2 (Abstain). Window is enforced by timestamps provided by Hub.
 
-3. Collect Spoke tallies (Hub): after the main voting period ends, call on Hub:
+3. Collect Spoke tallies (Hub): after the main voting period ends, anyone can call on Hub:
 
    - `requestCollections(proposalId)` (payable): triggers Spokes to send results back via Wormhole. This repository does not include a ready-made script; use Hardhat console or a block explorer to call it. Ensure enough ETH to cover relayer quotes.
 
 4. Queue (Hub): once `state(proposalId)` is `Succeeded`, queue in Timelock:
+
+   - Queue is used to schedule an approved proposal in the Timelock after voting succeeds. It sets an ETA (after the timelock delay) when the proposal can be executed.
 
    ```bash
    npx hardhat run scripts/queue-proposal.ts --network <hubNetwork>
