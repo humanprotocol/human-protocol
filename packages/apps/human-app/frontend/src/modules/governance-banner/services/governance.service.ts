@@ -19,7 +19,7 @@ export async function fetchProposal(): Promise<ProposalResponse | null> {
   );
   if (!Array.isArray(list) || list.length === 0) return null;
 
-  const now = Math.floor(Date.now() / 1000);
+  const now = Date.now();
   const activeProposals = list.filter(
     (p) => p.voteStart <= now && now < p.voteEnd
   );

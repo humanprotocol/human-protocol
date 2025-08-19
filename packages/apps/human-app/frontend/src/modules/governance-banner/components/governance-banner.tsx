@@ -6,6 +6,7 @@ import { env } from '@/shared/env';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { useWorkerIdentityVerificationStatus } from '@/modules/worker/profile/hooks';
 import { useProposalQuery } from '../hooks/use-proposal-query';
+import { formatCountdown, getProposalStatus } from '../../../shared/utils/time';
 
 export function GovernanceBanner() {
   const { t } = useTranslation();
@@ -21,22 +22,10 @@ export function GovernanceBanner() {
 
     const timer = setInterval(() => {
       const now = Date.now();
-      const target = now < voteStart ? voteStart : voteEnd;
+      const currentStatus = getProposalStatus(voteStart, voteEnd, now);
+      const target = currentStatus === 'pending' ? voteStart : voteEnd;
       const diff = target - now;
-
-      if (diff <= 0) {
-        setTimeRemaining('00:00:00');
-      } else {
-        const hours = Math.floor(diff / (1000 * 60 * 60));
-        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-        const hh = hours.toString().padStart(2, '0');
-        const mm = minutes.toString().padStart(2, '0');
-        const ss = seconds.toString().padStart(2, '0');
-
-        setTimeRemaining(`${hh}:${mm}:${ss}`);
-      }
+      setTimeRemaining(formatCountdown(diff));
     }, 1000);
 
     return () => {
@@ -48,14 +37,9 @@ export function GovernanceBanner() {
     return null;
   }
 
-  const now = Date.now();
-  const isPending = now < data.voteStart;
-  const isActive = data.voteStart <= now && now < data.voteEnd;
+  const status = getProposalStatus(data.voteStart, data.voteEnd);
 
-  const forVotes = isActive ? data.forVotes : 0;
-  const againstVotes = isActive ? data.againstVotes : 0;
-  const abstainVotes = isActive ? data.abstainVotes : 0;
-  const totalVotes = forVotes + againstVotes + abstainVotes;
+  const totalVotes = data.forVotes + data.againstVotes + data.abstainVotes;
 
   return (
     <Grid
@@ -82,7 +66,7 @@ export function GovernanceBanner() {
         <Box display="flex" alignItems="center">
           <AccessTimeIcon sx={{ mr: 1 }} />
           <Typography variant="body2" color={text.secondary}>
-            {isPending
+            {status === 'pending'
               ? t('governance.timeToStart', 'Voting starts in')
               : t('governance.timeToReveal', 'Time to reveal vote')}
             :
@@ -91,7 +75,7 @@ export function GovernanceBanner() {
             {timeRemaining}
           </Typography>
         </Box>
-        {isActive && (
+        {status === 'active' && (
           <Typography
             variant="body1"
             ml={{ xs: 0, md: 8 }}
