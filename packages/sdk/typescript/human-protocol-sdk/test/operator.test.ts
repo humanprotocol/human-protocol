@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ethers } from 'ethers';
 import * as gqlFetch from 'graphql-request';
-import { beforeEach, beforeAll, describe, expect, test, vi } from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { NETWORKS, Role } from '../src/constants';
 import { ChainId, OrderDirection } from '../src/enums';
 import {
@@ -30,12 +30,12 @@ vi.mock('graphql-request', () => {
 
 describe('OperatorUtils', () => {
   let mockOperatorSubgraph: IOperatorSubgraph;
-  let mockOperator: IOperator;
+  let operator: IOperator;
 
   const stakerAddress = ethers.ZeroAddress;
   const invalidAddress = 'InvalidAddress';
 
-  beforeAll(() => {
+  beforeEach(() => {
     mockOperatorSubgraph = {
       id: stakerAddress,
       address: stakerAddress,
@@ -59,7 +59,7 @@ describe('OperatorUtils', () => {
       },
     };
 
-    mockOperator = {
+    operator = {
       id: stakerAddress,
       address: stakerAddress,
       amountJobsProcessed: ethers.parseEther('25'),
@@ -95,7 +95,7 @@ describe('OperatorUtils', () => {
           address: stakerAddress,
         }
       );
-      expect(result).toEqual(mockOperator);
+      expect(result).toEqual(operator);
     });
 
     test('should return staker information when jobTypes is undefined', async () => {
@@ -117,12 +117,11 @@ describe('OperatorUtils', () => {
           address: stakerAddress,
         }
       );
-      expect(result).toEqual({ ...mockOperator, jobTypes: [] });
+      expect(result).toEqual({ ...operator, jobTypes: [] });
     });
 
     test('should return staker information when jobTypes is array', async () => {
       mockOperatorSubgraph.jobTypes = ['type1', 'type2', 'type3'] as any;
-      mockOperator.jobTypes = ['type1', 'type2', 'type3'] as any;
 
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
         operator: mockOperatorSubgraph,
@@ -141,7 +140,7 @@ describe('OperatorUtils', () => {
         }
       );
       expect(result).toEqual({
-        ...mockOperator,
+        ...operator,
         jobTypes: ['type1', 'type2', 'type3'],
       });
     });
@@ -207,7 +206,7 @@ describe('OperatorUtils', () => {
           skip: 0,
         }
       );
-      expect(result).toEqual([mockOperator, mockOperator]);
+      expect(result).toEqual([operator, operator]);
     });
 
     test('should apply default values when first is negative', async () => {
@@ -235,7 +234,7 @@ describe('OperatorUtils', () => {
           skip: 0,
         }
       );
-      expect(result).toEqual([mockOperator]);
+      expect(result).toEqual([operator]);
     });
 
     test('should apply default values when skip is negative', async () => {
@@ -263,7 +262,7 @@ describe('OperatorUtils', () => {
           skip: 0, // Default value
         }
       );
-      expect(result).toEqual([mockOperator]);
+      expect(result).toEqual([operator]);
     });
 
     test('should apply default values when first and skip are undefined', async () => {
@@ -289,12 +288,12 @@ describe('OperatorUtils', () => {
           skip: 0, // Default value
         }
       );
-      expect(result).toEqual([mockOperator]);
+      expect(result).toEqual([operator]);
     });
 
     test('should return an array of stakers when jobTypes is undefined', async () => {
       mockOperatorSubgraph.jobTypes = undefined;
-      mockOperator.jobTypes = [];
+      operator.jobTypes = [];
 
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
         operators: [mockOperatorSubgraph, mockOperatorSubgraph],
@@ -318,12 +317,12 @@ describe('OperatorUtils', () => {
         }
       );
 
-      expect(result).toEqual([mockOperator, mockOperator]);
+      expect(result).toEqual([operator, operator]);
     });
 
     test('should return an array of stakers when jobTypes is array', async () => {
       mockOperatorSubgraph.jobTypes = ['type1', 'type2', 'type3'] as any;
-      mockOperator.jobTypes = ['type1', 'type2', 'type3'] as any;
+      operator.jobTypes = ['type1', 'type2', 'type3'] as any;
 
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
         operators: [mockOperatorSubgraph, mockOperatorSubgraph],
@@ -348,7 +347,7 @@ describe('OperatorUtils', () => {
           skip: 0,
         }
       );
-      expect(result).toEqual([mockOperator, mockOperator]);
+      expect(result).toEqual([operator, operator]);
     });
 
     test('should throw an error if gql fetch fails', async () => {
@@ -409,7 +408,7 @@ describe('OperatorUtils', () => {
           role: undefined,
         }
       );
-      expect(result).toEqual([mockOperator]);
+      expect(result).toEqual([operator]);
     });
 
     test('should return empty data ', async () => {
@@ -435,7 +434,7 @@ describe('OperatorUtils', () => {
 
     test('should return reputation network operators when jobTypes is undefined', async () => {
       mockOperatorSubgraph.jobTypes = undefined;
-      mockOperator.jobTypes = [];
+      operator.jobTypes = [];
 
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
         reputationNetwork: mockReputationNetwork,
@@ -454,12 +453,12 @@ describe('OperatorUtils', () => {
           role: undefined,
         }
       );
-      expect(result).toEqual([mockOperator]);
+      expect(result).toEqual([operator]);
     });
 
     test('should return reputation network operators when jobTypes is array', async () => {
       mockOperatorSubgraph.jobTypes = ['type1', 'type2', 'type3'] as any;
-      mockOperator.jobTypes = ['type1', 'type2', 'type3'];
+      operator.jobTypes = ['type1', 'type2', 'type3'];
 
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
         reputationNetwork: mockReputationNetwork,
@@ -478,7 +477,7 @@ describe('OperatorUtils', () => {
           role: undefined,
         }
       );
-      expect(result).toEqual([mockOperator]);
+      expect(result).toEqual([operator]);
     });
 
     test('should throw an error if gql fetch fails', async () => {

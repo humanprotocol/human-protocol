@@ -565,20 +565,16 @@ describe('StakingUtils', () => {
   const stakerAddress = '0x1234567890123456789012345678901234567890';
   const invalidAddress = 'InvalidAddress';
 
-  const mockStaker: IStaker = {
-    address: stakerAddress,
-    stakedAmount: 1000n,
-    lockedAmount: 100n,
-    lockedUntil: 1234567890n,
-    withdrawableAmount: 900n,
-    slashedAmount: 0n,
-  };
-
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
   describe('getStaker', () => {
+    const mockStaker: IStaker = {
+      address: stakerAddress,
+      stakedAmount: 1000n,
+      lockedAmount: 100n,
+      lockedUntil: 1234567890n,
+      withdrawableAmount: 900n,
+      slashedAmount: 0n,
+    };
+
     test('should return staker information', async () => {
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
         staker: mockStaker,
