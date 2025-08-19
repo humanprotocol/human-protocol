@@ -13,9 +13,9 @@ export class ProposalResponse {
   @ApiProperty()
   abstainVotes: number;
 
-  @ApiProperty({ description: 'Voting start timestamp (seconds)' })
+  @ApiProperty({ description: 'Voting start timestamp' })
   voteStart: number;
 
-  @ApiProperty({ description: 'Voting end timestamp (seconds)' })
+  @ApiProperty({ description: 'Voting end timestamp' })
   voteEnd: number;
 }

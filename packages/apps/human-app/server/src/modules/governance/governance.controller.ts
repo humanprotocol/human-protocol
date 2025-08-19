@@ -1,4 +1,4 @@
-import { Controller, Get, HttpCode } from '@nestjs/common';
+import { Controller, Get, HttpCode, Header } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOkResponse,
@@ -17,6 +17,7 @@ export class GovernanceController {
   @ApiOperation({ summary: 'Get pending and active governance proposals' })
   @ApiOkResponse({ type: ProposalResponse, isArray: true })
   @HttpCode(200)
+  @Header('Cache-Control', 'private, max-age=60')
   @Get('/proposals')
   public async getProposals(): Promise<ProposalResponse[]> {
     return this.governanceService.getProposals();

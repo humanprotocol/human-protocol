@@ -7,5 +7,4 @@ export const WORKER_STATISTICS_CACHE_KEY = 'statistics:worker';
 export const REPUTATION_ORACLE_PUBLIC_KEY = 'reputation:pubkey';
 export const GOVERNANCE_LAST_SCANNED_BLOCK = 'governance:last-block';
 export const GOVERNANCE_PROPOSAL_IDS = 'governance:proposal-ids';
-export const GOVERNANCE_PROPOSAL_SNAPSHOT = 'governance:proposal';
 export const GOVERNANCE_PROPOSAL_META = 'governance:proposal-meta';

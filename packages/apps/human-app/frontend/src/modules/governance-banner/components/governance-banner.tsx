@@ -18,19 +18,18 @@ export function GovernanceBanner() {
   useEffect(() => {
     if (!data) return;
     const { voteStart, voteEnd } = data;
-    if (!voteStart || !voteEnd) return;
 
     const timer = setInterval(() => {
-      const now = Math.floor(Date.now() / 1000);
+      const now = Date.now();
       const target = now < voteStart ? voteStart : voteEnd;
       const diff = target - now;
 
       if (diff <= 0) {
         setTimeRemaining('00:00:00');
       } else {
-        const hours = Math.floor(diff / 3600);
-        const minutes = Math.floor((diff % 3600) / 60);
-        const seconds = diff % 60;
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
         const hh = hours.toString().padStart(2, '0');
         const mm = minutes.toString().padStart(2, '0');
@@ -49,7 +48,7 @@ export function GovernanceBanner() {
     return null;
   }
 
-  const now = Math.floor(Date.now() / 1000);
+  const now = Date.now();
   const isPending = now < data.voteStart;
   const isActive = data.voteStart <= now && now < data.voteEnd;
 

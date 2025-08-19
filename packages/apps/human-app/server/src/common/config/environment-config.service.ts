@@ -16,7 +16,6 @@ const DEFAULT_CACHE_TTL_EXCHANGE_ORACLE_URL = 24 * 60 * 60;
 const DEFAULT_MAX_EXECUTIONS_TO_SKIP = 32;
 const DEFAULT_CACHE_TTL_JOB_TYPES = 24 * 60 * 60;
 const DEFAULT_CACHE_TTL_EXCHANGE_ORACLE_REGISTRATION_NEEDED = 24 * 60 * 60;
-const DEFAULT_CACHE_TTL_GOVERNANCE_SNAPSHOT = 60;
 
 @Injectable()
 export class EnvironmentConfigService {
@@ -277,19 +276,6 @@ export class EnvironmentConfigService {
       this.configService.get<number>(
         'CACHE_TTL_EXCHANGE_ORACLE_REGISTRATION_NEEDED',
         DEFAULT_CACHE_TTL_EXCHANGE_ORACLE_REGISTRATION_NEEDED,
-      ) * 1000
-    );
-  }
-
-  /**
-   * The cache time-to-live (TTL) for governance vote/deadline snapshot per proposal.
-   * Default: 30 seconds
-   */
-  get cacheTtlGovernanceSnapshot(): number {
-    return (
-      this.configService.get<number>(
-        'CACHE_TTL_GOVERNANCE_SNAPSHOT',
-        DEFAULT_CACHE_TTL_GOVERNANCE_SNAPSHOT,
       ) * 1000
     );
   }
