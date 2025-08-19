@@ -112,7 +112,6 @@ const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
         CACHE_TTL_EXCHANGE_ORACLE_URL: Joi.number(),
         CACHE_TTL_EXCHANGE_ORACLE_REGISTRATION_NEEDED: Joi.number(),
         MAX_EXECUTIONS_TO_SKIP: Joi.number(),
-        CACHE_TTL_GOVERNANCE_SNAPSHOT: Joi.number(),
         FEATURE_FLAG_JOBS_DISCOVERY: JOI_BOOLEAN_STRING_SCHEMA,
       }),
     }),
