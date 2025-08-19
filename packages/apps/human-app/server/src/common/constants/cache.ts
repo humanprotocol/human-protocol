@@ -5,6 +5,3 @@ export const DAILY_HMT_SPENT_CACHE_KEY = 'daily:hmt-spent';
 export const ORACLE_STATISTICS_CACHE_KEY = 'statistics:oracle';
 export const WORKER_STATISTICS_CACHE_KEY = 'statistics:worker';
 export const REPUTATION_ORACLE_PUBLIC_KEY = 'reputation:pubkey';
-export const GOVERNANCE_LAST_SCANNED_BLOCK = 'governance:last-block';
-export const GOVERNANCE_PROPOSAL_IDS = 'governance:proposal-ids';
-export const GOVERNANCE_PROPOSAL_META = 'governance:proposal-meta';
