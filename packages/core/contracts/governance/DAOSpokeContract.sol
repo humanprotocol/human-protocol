@@ -85,13 +85,6 @@ contract DAOSpokeContract is IWormholeReceiver, Magistrate {
         hubContractChainId = _hubContractChainId;
     }
 
-    /**
-     * @dev Allows the magistrate address to withdraw all funds from the contract
-     */
-    function withdrawFunds() public onlyMagistrate {
-        payable(msg.sender).sendValue(address(this).balance);
-    }
-
     function hasVoted(
         uint256 proposalId,
         address account
@@ -199,14 +192,14 @@ contract DAOSpokeContract is IWormholeReceiver, Magistrate {
      * @dev Receives messages from the Wormhole protocol's relay mechanism and processes them accordingly.
      *  This function is intended to be called only by the designated Wormhole relayer.
      *  @param payload The payload of the received message.
-     *  @param sourceAddress The address that initiated the message transmission (HelloWormhole contract address).
+     *  @param sourceAddress The address that initiated the message transmission (Hub contract address).
      *  @param sourceChain The chain ID of the source contract.
      *  @param deliveryHash A unique hash representing the delivery of the message to prevent duplicate processing.
      */
     function receiveWormholeMessages(
         bytes memory payload,
         bytes[] memory, // additionalVaas
-        bytes32 sourceAddress, // address that called 'sendPayloadToEvm' (HelloWormhole contract address)
+        bytes32 sourceAddress, // address that called 'sendPayloadToEvm' (Hub contract address)
         uint16 sourceChain,
         bytes32 deliveryHash // this can be stored in a mapping deliveryHash => bool to prevent duplicate deliveries
     ) public payable override {
@@ -296,7 +289,7 @@ contract DAOSpokeContract is IWormholeReceiver, Magistrate {
                 0, // no receiver value needed
                 GAS_LIMIT,
                 hubContractChainId,
-                address(uint160(uint256(hubContractAddress)))
+                magistrate()
             );
         }
     }
@@ -336,7 +329,7 @@ contract DAOSpokeContract is IWormholeReceiver, Magistrate {
             0, // no receiver value needed
             GAS_LIMIT,
             hubContractChainId,
-            address(uint160(uint256(hubContractAddress)))
+            magistrate()
         );
     }
 

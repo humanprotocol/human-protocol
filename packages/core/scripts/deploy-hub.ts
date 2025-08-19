@@ -24,12 +24,16 @@ async function main() {
   }
 
   // vHMT Deployment
-  const VHMToken = await ethers.getContractFactory(
-    'contracts/governance/vhm-token/VHMToken.sol:VHMToken'
-  );
-  const VHMTokenContract = await VHMToken.deploy(hmtTokenAddress);
-  await VHMTokenContract.waitForDeployment();
-  console.log('VHMToken deployed to:', await VHMTokenContract.getAddress());
+  // const VHMToken = await ethers.getContractFactory(
+  //   'contracts/governance/vhm-token/VHMToken.sol:VHMToken'
+  // );
+  // const VHMTokenContract = await VHMToken.deploy(hmtTokenAddress);
+  // await VHMTokenContract.waitForDeployment();
+  // console.log('VHMToken deployed to:', await VHMTokenContract.getAddress());
+  const vhmTokenAddress = process.env.VHM_TOKEN_ADDRESS || '';
+  if (!vhmTokenAddress) {
+    throw new Error('VHM Token Address is missing');
+  }
 
   //DeployHUB
   const chainId = process.env.HUB_WORMHOLE_CHAIN_ID;
@@ -68,7 +72,7 @@ async function main() {
     'contracts/governance/MetaHumanGovernor.sol:MetaHumanGovernor'
   );
   const metaHumanGovernorContract = await MetaHumanGovernor.deploy(
-    VHMTokenContract.getAddress(),
+    vhmTokenAddress,
     TimelockControllerContract.getAddress(),
     [],
     chainId,

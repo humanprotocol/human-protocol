@@ -526,55 +526,6 @@ describe('DAOSpokeContract', function () {
     });
   });
 
-  describe('withdraw', () => {
-    it('should withdraw as magistrate', async () => {
-      await createProposalOnSpoke(
-        daoSpoke,
-        wormholeMockForDaoSpoke,
-        1,
-        await governor.getAddress()
-      );
-
-      const contractBalanceBefore = await ethers.provider.getBalance(
-        await daoSpoke.getAddress()
-      );
-      const ownerBalanceBefore = await ethers.provider.getBalance(
-        await owner.getAddress()
-      );
-
-      const txReceipt = await daoSpoke.connect(owner).withdrawFunds();
-      const tx = await txReceipt.wait();
-
-      if (!tx) {
-        throw new Error('Failed to fetch the transaction receipt');
-      }
-
-      const contractBalanceAfter = await ethers.provider.getBalance(
-        await daoSpoke.getAddress()
-      );
-      const ownerBalanceAfter = await ethers.provider.getBalance(
-        await owner.getAddress()
-      );
-
-      expect(contractBalanceAfter).to.equal(0);
-      expect(ownerBalanceAfter - ownerBalanceBefore).to.equal(
-        contractBalanceBefore - tx.gasUsed * tx.gasPrice
-      );
-    });
-
-    it('should revert when not magistrate', async () => {
-      await createProposalOnSpoke(
-        daoSpoke,
-        wormholeMockForDaoSpoke,
-        1,
-        await governor.getAddress()
-      );
-
-      await expect(daoSpoke.connect(user1).withdrawFunds()).to.be.revertedWith(
-        'Magistrate: caller is not the magistrate'
-      );
-    });
-  });
   describe('sendVoteResultToHub', async () => {
     it('should revert when not finished', async () => {
       const proposalId = await createProposalOnSpoke(
