@@ -6,40 +6,49 @@ import { env } from '@/shared/env';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { useWorkerIdentityVerificationStatus } from '@/modules/worker/profile/hooks';
 import { useProposalQuery } from '../hooks/use-proposal-query';
-import { formatCountdown, getProposalStatus } from '../../../shared/utils/time';
+import { formatCountdown } from '../../../shared/utils/time';
+import { type ProposalResponse } from '../services/governance.service';
 
+export type ProposalStatus = 'pending' | 'active';
+
+function getProposalStatus(proposal: ProposalResponse): ProposalStatus {
+  const now = Date.now();
+  const { voteStart, voteEnd } = proposal;
+  if (voteStart <= now && now < voteEnd) return 'active';
+  return 'pending';
+}
 export function GovernanceBanner() {
   const { t } = useTranslation();
-  const { data, isLoading, isError } = useProposalQuery();
+  const { data: proposal, isLoading, isError } = useProposalQuery();
   const { isVerificationCompleted } = useWorkerIdentityVerificationStatus();
   const { colorPalette } = useColorMode();
   const { text, background } = colorPalette.banner;
   const [timeRemaining, setTimeRemaining] = useState('00:00:00');
 
   useEffect(() => {
-    if (!data) return;
-    const { voteStart, voteEnd } = data;
+    if (!proposal) return;
+    const { voteStart, voteEnd } = proposal;
 
     const timer = setInterval(() => {
-      const now = Date.now();
-      const currentStatus = getProposalStatus(voteStart, voteEnd, now);
-      const target = currentStatus === 'pending' ? voteStart : voteEnd;
-      const diff = target - now;
-      setTimeRemaining(formatCountdown(diff));
+      const currentStatus = getProposalStatus(proposal);
+      setTimeRemaining(
+        formatCountdown(currentStatus === 'pending' ? voteStart : voteEnd)
+      );
     }, 1000);
 
     return () => {
       clearInterval(timer);
     };
-  }, [data]);
+  }, [proposal]);
 
-  if (!isVerificationCompleted || isLoading || isError || !data) {
+  if (!isVerificationCompleted || isLoading || isError || !proposal) {
     return null;
   }
 
-  const status = getProposalStatus(data.voteStart, data.voteEnd);
+  const status = getProposalStatus(proposal);
 
-  const totalVotes = data.forVotes + data.againstVotes + data.abstainVotes;
+  const totalVotes =
+    proposal.forVotes + proposal.againstVotes + proposal.abstainVotes;
 
   return (
     <Grid

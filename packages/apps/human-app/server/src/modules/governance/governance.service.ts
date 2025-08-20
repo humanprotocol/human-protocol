@@ -3,9 +3,9 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { ethers } from 'ethers';
+import _ from 'lodash';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
 import { ProposalState } from '../../common/enums/proposal';
-import { generateCacheKey } from '../../common/utils/cache';
 import { ProposalResponse } from './model/governance.model';
 
 const N_BLOCKS_LOOKBACK = 100000;
@@ -35,15 +35,8 @@ export class GovernanceService {
     );
 
     const currentBlock = await provider.getBlockNumber();
-    const lastScannedBlockKey = generateCacheKey(
-      this.configService.governorAddress,
-      'last-scanned-block',
-    );
-    const proposalListKey = generateCacheKey(
-      this.configService.governorAddress,
-      'proposal',
-      'list',
-    );
+    const lastScannedBlockKey = this.generateCacheKey('last-scanned-block');
+    const proposalListKey = this.generateCacheKey('proposal', 'list');
 
     const cachedLastScannedBlock =
       (await this.cacheManager.get<number>(lastScannedBlockKey)) ?? 0;
@@ -64,20 +57,12 @@ export class GovernanceService {
       const cachedList =
         (await this.cacheManager.get<Proposal[]>(proposalListKey)) || [];
 
-      proposalList = [...cachedList, ...newProposals].reduce<Proposal[]>(
-        (acc, p) => {
-          if (!acc.some((x) => x.proposalId === p.proposalId)) {
-            acc.push(p);
-          }
-          return acc;
-        },
-        [],
-      );
+      proposalList = _.uniqBy([...cachedList, ...newProposals], 'proposalId');
     } catch (err) {
       this.logger.warn(
         'getProposalCreatedEvents failed, falling back to cached list',
         {
-          error: (err as Error)?.message || err,
+          error: err,
         },
       );
       proposalList =
@@ -172,10 +157,19 @@ export class GovernanceService {
         };
         proposals.push(proposal);
       } catch (err) {
-        this.logger.warn('Failed to parse ProposalCreated log', err);
+        this.logger.warn('Failed to parse ProposalCreated log', {
+          error: err,
+          log,
+        });
       }
     }
 
     return proposals;
+  }
+
+  private generateCacheKey(...parts: (string | number)[]): string {
+    return ['governance', this.configService.governorAddress, ...parts]
+      .map(String)
+      .join(':');
   }
 }

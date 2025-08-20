@@ -1,15 +1,6 @@
-export type ProposalStatus = 'pending' | 'active';
-
-export function getProposalStatus(
-  voteStartMs: number,
-  voteEndMs: number,
-  now: number = Date.now()
-): ProposalStatus {
-  if (voteStartMs <= now && now < voteEndMs) return 'active';
-  return 'pending';
-}
-
-export function formatCountdown(diffMs: number): string {
+export function formatCountdown(targetMs: number): string {
+  const now = Date.now();
+  const diffMs = targetMs - now;
   if (diffMs <= 0) return '00:00:00';
   const totalSeconds = Math.floor(diffMs / 1000);
   const hours = Math.floor(totalSeconds / 3600);
