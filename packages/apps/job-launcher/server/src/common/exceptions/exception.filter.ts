@@ -52,7 +52,10 @@ export class ExceptionFilter implements IExceptionFilter {
     const message = exception.message || 'Internal server error';
 
     if (status === HttpStatus.INTERNAL_SERVER_ERROR) {
-      this.logger.error('Unhandled exception', exception);
+      this.logger.error('Unhandled exception', {
+        error: exception,
+        path: request.url,
+      });
     }
 
     response.removeHeader('Cache-Control');
