@@ -4411,7 +4411,7 @@ __metadata:
     axios: "npm:^1.1.3"
     copy-to-clipboard: "npm:^3.3.3"
     dayjs: "npm:^1.11.12"
-    decimal.js: "npm:^10.5.0"
+    decimal.js: "npm:^10.6.0"
     eslint: "npm:^8.55.0"
     eslint-config-react-app: "npm:^7.0.1"
     eslint-import-resolver-typescript: "npm:^3.7.0"
@@ -4483,7 +4483,7 @@ __metadata:
     body-parser: "npm:^1.20.3"
     class-transformer: "npm:^0.5.1"
     class-validator: "npm:0.14.1"
-    decimal.js: "npm:^10.4.3"
+    decimal.js: "npm:^10.6.0"
     dotenv: "npm:^17.0.0"
     eslint: "npm:^8.55.0"
     eslint-config-prettier: "npm:^9.1.0"
@@ -16295,10 +16295,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"decimal.js@npm:^10.4.3, decimal.js@npm:^10.5.0":
+"decimal.js@npm:^10.4.3":
   version: 10.5.0
   resolution: "decimal.js@npm:10.5.0"
   checksum: 10c0/785c35279df32762143914668df35948920b6c1c259b933e0519a69b7003fc0a5ed2a766b1e1dda02574450c566b21738a45f15e274b47c2ac02072c0d1f3ac3
+  languageName: node
+  linkType: hard
+
+"decimal.js@npm:^10.6.0":
+  version: 10.6.0
+  resolution: "decimal.js@npm:10.6.0"
+  checksum: 10c0/07d69fbcc54167a340d2d97de95f546f9ff1f69d2b45a02fd7a5292412df3cd9eb7e23065e532a318f5474a2e1bccf8392fdf0443ef467f97f3bf8cb0477e5aa
   languageName: node
   linkType: hard
 
