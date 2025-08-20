@@ -1,15 +1,13 @@
 import { createMock } from '@golevelup/ts-jest';
-import { Test, TestingModule } from '@nestjs/testing';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
-import { Logger } from '@nestjs/common';
-import { StatisticsClient } from '@human-protocol/sdk';
-import { EnvironmentConfigService } from '../../common/config/env-config.service';
-import { ChainId, NETWORKS } from '@human-protocol/sdk';
+import { ChainId, NETWORKS, StatisticsClient } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ConfigService } from '@nestjs/config';
-import { NetworksService } from './networks.service';
+import { Test, TestingModule } from '@nestjs/testing';
+import { Cache } from 'cache-manager';
+import { EnvironmentConfigService } from '../../common/config/env-config.service';
 import { NetworkConfigService } from '../../common/config/network-config.service';
+import { NetworksService } from './networks.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -24,6 +22,7 @@ describe('NetworksService', () => {
     process.env.RPC_URL_POLYGON = 'https://testrpc.com';
     process.env.RPC_URL_BSC_MAINNET = 'https://testrpc.com';
     process.env.RPC_URL_ETHEREUM = 'https://testrpc.com';
+    process.env.RPC_URL_AURORA_TESTNET = 'https://testrpc.com';
     process.env.WEB3_ENV = 'mainnet';
   });
 
@@ -48,7 +47,6 @@ describe('NetworksService', () => {
         },
         NetworkConfigService,
         ConfigService,
-        Logger,
       ],
     }).compile();
 

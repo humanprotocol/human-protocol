@@ -1,5 +1,7 @@
 import { Escrow__factory } from '@human-protocol/core/typechain-types';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+
+import logger from '../../logger';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { ErrorAssignment, ErrorJob } from '../../common/constant/errors';
 import { AssignmentStatus, JobStatus, JobType } from '../../common/enums/job';
@@ -23,7 +25,7 @@ import { AssignmentRepository } from './assignment.repository';
 
 @Injectable()
 export class AssignmentService {
-  private readonly logger = new Logger(AssignmentService.name);
+  private readonly logger = logger.child({ context: AssignmentService.name });
 
   constructor(
     private readonly assignmentRepository: AssignmentRepository,
@@ -43,16 +45,15 @@ export class AssignmentService {
     );
 
     if (!jobEntity) {
-      this.logger.log(ErrorAssignment.JobNotFound, AssignmentService.name);
       throw new ServerError(ErrorAssignment.JobNotFound);
     } else if (jobEntity.status !== JobStatus.ACTIVE) {
-      this.logger.log(ErrorJob.InvalidStatus, AssignmentService.name);
       throw new ConflictError(ErrorJob.InvalidStatus);
     } else if (jobEntity.reputationNetwork !== jwtUser.reputationNetwork) {
-      this.logger.log(
-        ErrorAssignment.ReputationNetworkMismatch,
-        AssignmentService.name,
-      );
+      this.logger.warn(ErrorAssignment.ReputationNetworkMismatch, {
+        chainId: data.chainId,
+        escrowAddress: data.escrowAddress,
+        jobEntityId: jobEntity.id,
+      });
       throw new ValidationError(ErrorAssignment.ReputationNetworkMismatch);
     }
 
@@ -66,7 +67,6 @@ export class AssignmentService {
       assignmentEntity &&
       assignmentEntity.status !== AssignmentStatus.CANCELED
     ) {
-      this.logger.log(ErrorAssignment.AlreadyExists, AssignmentService.name);
       throw new ConflictError(ErrorAssignment.AlreadyExists);
     }
 
@@ -90,7 +90,6 @@ export class AssignmentService {
     }
 
     if (currentAssignments >= manifest.submissionsRequired) {
-      this.logger.log(ErrorAssignment.FullyAssigned, AssignmentService.name);
       throw new ValidationError(ErrorAssignment.FullyAssigned);
     }
 
@@ -98,7 +97,6 @@ export class AssignmentService {
     const escrow = Escrow__factory.connect(data.escrowAddress, signer);
     const expirationDate = new Date(Number(await escrow.duration()) * 1000);
     if (expirationDate < new Date()) {
-      this.logger.log(ErrorAssignment.ExpiredEscrow, AssignmentService.name);
       throw new ValidationError(ErrorAssignment.ExpiredEscrow);
     }
 

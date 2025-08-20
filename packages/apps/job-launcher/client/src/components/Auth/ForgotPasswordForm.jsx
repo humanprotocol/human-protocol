@@ -26,7 +26,11 @@ export const ForgotPasswordForm = () => {
   const handleForgotPassword = async ({ email }) => {
     setIsLoading(true);
     try {
-      await authService.forgotPassword(email);
+      const hCaptchaToken = await captchaRef.current.getResponse();
+      await authService.forgotPassword({
+        email,
+        hCaptchaToken,
+      });
       setIsSuccess(true);
     } catch (err) {
       showError(err);

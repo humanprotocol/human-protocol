@@ -1,9 +1,5 @@
 import { z } from 'zod';
-import {
-  type MutationKey,
-  useMutation,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { type MutationKey, useMutation } from '@tanstack/react-query';
 import * as jobsService from '../../services/jobs.service';
 import { type AssignJobBody } from '../../types';
 
@@ -16,16 +12,12 @@ export function useAssignJobMutation(
   },
   mutationKey?: MutationKey
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (data: AssignJobBody) => jobsService.assignJob(data),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries();
+    onSuccess: () => {
       callbacks?.onSuccess();
     },
-    onError: async (error) => {
-      await queryClient.invalidateQueries();
+    onError: (error) => {
       callbacks?.onError(error);
     },
     mutationKey,

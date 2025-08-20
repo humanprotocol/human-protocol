@@ -6,7 +6,7 @@
 
 # Class: EscrowUtils
 
-Defined in: [escrow.ts:1566](https://github.com/humanprotocol/human-protocol/blob/1734b59e7e953d1f62f13e75c8f7b7ab4bddec76/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1566)
+Defined in: [escrow.ts:1564](https://github.com/humanprotocol/human-protocol/blob/379201f0dcf9e31baefdeaf8c2865002114c8394/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1564)
 
 ## Introduction
 
@@ -54,7 +54,7 @@ const escrowAddresses = new EscrowUtils.getEscrows({
 
 > `static` **getEscrow**(`chainId`, `escrowAddress`): `Promise`\<[`IEscrow`](../../interfaces/interfaces/IEscrow.md)\>
 
-Defined in: [escrow.ts:1779](https://github.com/humanprotocol/human-protocol/blob/1734b59e7e953d1f62f13e75c8f7b7ab4bddec76/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1779)
+Defined in: [escrow.ts:1777](https://github.com/humanprotocol/human-protocol/blob/379201f0dcf9e31baefdeaf8c2865002114c8394/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1777)
 
 This function returns the escrow data for a given address.
 
@@ -88,7 +88,7 @@ interface IEscrow {
   intermediateResultsUrl?: string;
   launcher: string;
   manifestHash?: string;
-  manifestUrl?: string;
+  manifest?: string;
   recordingOracle?: string;
   reputationOracle?: string;
   exchangeOracle?: string;
@@ -133,7 +133,7 @@ const escrow = new EscrowUtils.getEscrow(ChainId.POLYGON_AMOY, "0x12345678901234
 
 > `static` **getEscrows**(`filter`): `Promise`\<[`IEscrow`](../../interfaces/interfaces/IEscrow.md)[]\>
 
-Defined in: [escrow.ts:1663](https://github.com/humanprotocol/human-protocol/blob/1734b59e7e953d1f62f13e75c8f7b7ab4bddec76/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1663)
+Defined in: [escrow.ts:1661](https://github.com/humanprotocol/human-protocol/blob/379201f0dcf9e31baefdeaf8c2865002114c8394/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1661)
 
 This function returns an array of escrows based on the specified filter parameters.
 
@@ -200,7 +200,7 @@ interface IEscrow {
   intermediateResultsUrl?: string;
   launcher: string;
   manifestHash?: string;
-  manifestUrl?: string;
+  manifest?: string;
   recordingOracle?: string;
   reputationOracle?: string;
   exchangeOracle?: string;
@@ -245,7 +245,7 @@ const escrows = await EscrowUtils.getEscrows(filters);
 
 > `static` **getPayouts**(`filter`): `Promise`\<[`Payout`](../../types/type-aliases/Payout.md)[]\>
 
-Defined in: [escrow.ts:1949](https://github.com/humanprotocol/human-protocol/blob/1734b59e7e953d1f62f13e75c8f7b7ab4bddec76/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1949)
+Defined in: [escrow.ts:1947](https://github.com/humanprotocol/human-protocol/blob/379201f0dcf9e31baefdeaf8c2865002114c8394/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1947)
 
 This function returns the payouts for a given set of networks.
 
@@ -289,7 +289,7 @@ console.log(payouts);
 
 > `static` **getStatusEvents**(`filter`): `Promise`\<[`StatusEvent`](../../graphql/types/type-aliases/StatusEvent.md)[]\>
 
-Defined in: [escrow.ts:1858](https://github.com/humanprotocol/human-protocol/blob/1734b59e7e953d1f62f13e75c8f7b7ab4bddec76/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1858)
+Defined in: [escrow.ts:1856](https://github.com/humanprotocol/human-protocol/blob/379201f0dcf9e31baefdeaf8c2865002114c8394/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1856)
 
 This function returns the status events for a given set of networks within an optional date range.
 

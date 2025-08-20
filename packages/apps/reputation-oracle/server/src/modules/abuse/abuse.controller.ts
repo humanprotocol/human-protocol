@@ -15,17 +15,18 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
-import { Public } from '../../common/decorators';
-import { RequestWithUser } from '../../common/types';
+import { Public } from '@/common/decorators';
+import type { RequestWithUser } from '@/common/types';
 
+import { AbuseSlackAuthGuard } from './abuse-slack-auth.guard';
 import {
   AbuseResponseDto,
   ReportAbuseDto,
   SlackInteractionDto,
 } from './abuse.dto';
-import { AbuseService } from './abuse.service';
 import { AbuseRepository } from './abuse.repository';
-import { AbuseSlackAuthGuard } from './abuse-slack-auth.guard';
+import { AbuseService } from './abuse.service';
+import type { SlackInteraction } from './types';
 
 @ApiTags('Abuse')
 @Controller('/abuse')
@@ -55,6 +56,7 @@ export class AbuseController {
       escrowAddress: data.escrowAddress,
       chainId: data.chainId,
       userId: request.user.id,
+      reason: data.reason,
     });
   }
 
@@ -82,6 +84,7 @@ export class AbuseController {
         escrowAddress: abuseEntity.escrowAddress,
         chainId: abuseEntity.chainId,
         status: abuseEntity.status,
+        reason: abuseEntity.reason,
       };
     });
   }
@@ -102,6 +105,8 @@ export class AbuseController {
   async receiveInteractions(
     @Body() data: SlackInteractionDto,
   ): Promise<string> {
-    return this.abuseService.processSlackInteraction(JSON.parse(data.payload));
+    return this.abuseService.processSlackInteraction(
+      JSON.parse(data.payload) as SlackInteraction,
+    );
   }
 }

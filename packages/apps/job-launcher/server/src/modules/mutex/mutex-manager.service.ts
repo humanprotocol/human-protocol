@@ -1,15 +1,16 @@
-import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
+import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import { E_TIMEOUT, Mutex, MutexInterface, withTimeout } from 'async-mutex';
-import { ServerError } from '../../common/errors';
+import { BaseError, ServerError } from '../../common/errors';
+import logger from '../../logger';
 
 @Injectable()
 export class MutexManagerService implements OnModuleDestroy {
-  private mutexes: WeakMap<object, MutexInterface> = new WeakMap();
-  private mutexTimeouts: Map<object, NodeJS.Timeout> = new Map();
+  private mutexes: Map<string, MutexInterface> = new Map();
+  private mutexTimeouts: Map<string, NodeJS.Timeout> = new Map();
   private mutexTimeoutDuration = 120000; // 2 minutes
-  public readonly logger = new Logger(MutexManagerService.name);
+  private readonly logger = logger.child({ context: MutexManagerService.name });
 
-  private getMutex(key: object, timeout: number): MutexInterface {
+  private getMutex(key: string, timeout: number): MutexInterface {
     if (!this.mutexes.has(key)) {
       const mutex: MutexInterface = withTimeout(
         new Mutex(),
@@ -23,7 +24,7 @@ export class MutexManagerService implements OnModuleDestroy {
     return this.mutexes.get(key)!;
   }
 
-  private scheduleMutexCleanup(key: object): void {
+  private scheduleMutexCleanup(key: string): void {
     if (this.mutexTimeouts.has(key)) {
       clearTimeout(this.mutexTimeouts.get(key));
     }
@@ -34,47 +35,48 @@ export class MutexManagerService implements OnModuleDestroy {
     this.mutexTimeouts.set(key, timeout);
   }
 
-  private cleanupMutex(key: object): void {
+  private cleanupMutex(key: string): void {
     this.mutexes.delete(key);
     this.mutexTimeouts.delete(key);
   }
 
   async runExclusive<T>(
-    key: object,
+    key: string,
     timeout: number,
     callback: () => Promise<T>,
   ): Promise<T> {
     const mutex = this.getMutex(key, timeout);
     try {
-      this.logger.log(
-        `Attempting to acquire lock for ${(key as any).id as string}...`,
-      );
+      this.logger.debug('Attempting to acquire lock for key', {
+        key,
+      });
+
       const result = await mutex.runExclusive(async () => {
-        this.logger.log(
-          `Lock acquired for ${(key as any).id as string}, executing function...`,
-        );
-        this.logger.log(
-          `Function executed for ${(key as any).id as string}, lock released.`,
-        );
+        this.logger.debug('`Lock acquired for key', {
+          key,
+        });
         return await callback();
       });
+
+      this.logger.debug('Function executed for key, lock released', {
+        key,
+      });
+
       return result;
-    } catch (e) {
-      if (e === E_TIMEOUT) {
-        this.logger.error(
-          `Function execution timed out for ${(key as any).id as string}`,
-        );
-        throw new Error(
-          `Function execution timed out for ${(key as any).id as string}`,
-        );
+    } catch (error) {
+      if (error === E_TIMEOUT) {
+        const errorMessage = 'Function execution timed out for key';
+        this.logger.error(errorMessage, { key });
+        throw new ServerError(errorMessage);
       }
-      this.logger.error(
-        `Function execution failed for ${(key as any).id as string}`,
-        e,
-      );
-      throw new ServerError(
-        `Function execution failed for ${(key as any).id as string}`,
-      );
+
+      if (error instanceof BaseError) {
+        throw error;
+      }
+
+      const errorMessage = 'Function execution failed for key';
+      this.logger.error(errorMessage, { key, error });
+      throw new ServerError(errorMessage);
     }
   }
 

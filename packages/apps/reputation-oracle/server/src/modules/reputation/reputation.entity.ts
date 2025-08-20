@@ -1,7 +1,7 @@
 import { Column, Entity, Index } from 'typeorm';
 
-import { DATABASE_SCHEMA_NAME } from '../../common/constants';
-import { BaseEntity } from '../../database';
+import { DATABASE_SCHEMA_NAME } from '@/common/constants';
+import { BaseEntity } from '@/database';
 
 import { ReputationEntityType } from './constants';
 

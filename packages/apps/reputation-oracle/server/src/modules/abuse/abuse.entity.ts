@@ -1,9 +1,10 @@
 import { ChainId } from '@human-protocol/sdk';
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 
-import { DATABASE_SCHEMA_NAME } from '../../common/constants';
-import { BaseEntity } from '../../database';
-import type { UserEntity } from '../user';
+import { DATABASE_SCHEMA_NAME } from '@/common/constants';
+import { BaseEntity } from '@/database';
+import type { UserEntity } from '@/modules/user';
+
 import { AbuseDecision, AbuseStatus } from './constants';
 
 @Entity({ schema: DATABASE_SCHEMA_NAME, name: 'abuses' })
@@ -30,6 +31,9 @@ export class AbuseEntity extends BaseEntity {
 
   @Column({ type: 'decimal', precision: 30, scale: 18, nullable: true })
   amount: number | null;
+
+  @Column({ type: 'text' })
+  reason: string;
 
   @JoinColumn()
   @ManyToOne('UserEntity', { nullable: false, onDelete: 'CASCADE' })

@@ -211,12 +211,16 @@ yarn upgrade:proxy --network [NETWORK_NAME]
 5. Verify the contract runing the following line:
 
 ```bash
-yarn dlx hardhat verify --network [NETWORK_NAME] [CONTRACT_ADDRESS]
+npx hardhat verify --network [NETWORK_NAME] [CONTRACT_ADDRESS]
 ```
 
 ## Documentation
 
 For detailed information about core, please refer to the [Human Protocol Tech Docs](https://human-protocol.gitbook.io/hub/human-tech-docs/architecture/components/smart-contracts).
+
+### Governance
+
+For the cross-chain Governance system (Hub + Spokes), deployment, and proposal lifecycle, see the root-level [GOVERNANCE.md](./GOVERNANCE.md). The in-source, detailed reference lives at [`contracts/governance/README.md`](contracts/governance/README.md).
 
 ## License
 

@@ -4,7 +4,7 @@ import {
   Injectable,
   ValidationError,
   ValidationPipe,
-  ValidationPipeOptions,
+  type ValidationPipeOptions,
 } from '@nestjs/common';
 
 @Injectable()

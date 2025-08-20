@@ -6,7 +6,10 @@ import {
   HttpException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Roles } from '../decorators';
+
+import { Roles } from '@/common/decorators';
+import type { UserRole } from '@/common/enums';
+import type { RequestWithUser } from '@/common/types';
 
 @Injectable()
 export class RolesAuthGuard implements CanActivate {
@@ -28,9 +31,9 @@ export class RolesAuthGuard implements CanActivate {
       );
     }
 
-    const { user } = context.switchToHttp().getRequest();
+    const { user } = context.switchToHttp().getRequest() as RequestWithUser;
 
-    if (allowedRoles.includes(user.role)) {
+    if (allowedRoles.includes(user.role as UserRole)) {
       return true;
     }
 

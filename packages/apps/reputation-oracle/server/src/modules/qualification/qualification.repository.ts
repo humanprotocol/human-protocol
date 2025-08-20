@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource, FindManyOptions, IsNull, MoreThan } from 'typeorm';
 
-import { BaseRepository } from '../../database';
+import { BaseRepository } from '@/database';
+
 import { QualificationEntity } from './qualification.entity';
 
 type FindOptions = {

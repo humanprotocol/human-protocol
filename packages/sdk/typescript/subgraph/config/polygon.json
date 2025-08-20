@@ -26,11 +26,6 @@
     "startBlock": 50567977,
     "abi": "../../../../node_modules/@human-protocol/core/abis/KVStore.json"
   },
-  "RewardPool": {
-    "address": "0x1371057BAec59944B924A7963F2EeCF43ff94CE4",
-    "startBlock": 43404740,
-    "abi": "../../../../node_modules/@human-protocol/core/abis/RewardPool.json"
-  },
   "LegacyEscrowFactory": {
     "address": "0x45eBc3eAE6DA485097054ae10BA1A0f8e8c7f794",
     "startBlock": 25426566,

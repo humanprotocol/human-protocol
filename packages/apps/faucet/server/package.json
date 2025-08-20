@@ -25,12 +25,12 @@
     "web3": "^4.12.1"
   },
   "devDependencies": {
-    "@types/cors": "^2.8.17",
+    "@types/cors": "^2.8.19",
     "@types/express": "^4.17.14",
     "@types/node": "^22.15.16",
     "concurrently": "^9.1.2",
     "eslint": "^8.55.0",
-    "hardhat": "^2.24.0",
+    "hardhat": "^2.26.0",
     "jest": "^29.7.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"

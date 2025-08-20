@@ -17,6 +17,11 @@ export type SignUpResponse = {
   refreshToken: string;
 };
 
+export type ForgotPasswordRequest = {
+  email: string;
+  hCaptchaToken: string;
+};
+
 export type ResetPasswordRequest = {
   password: string;
   token: string;

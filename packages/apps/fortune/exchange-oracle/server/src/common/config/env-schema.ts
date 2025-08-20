@@ -2,7 +2,6 @@ import * as Joi from 'joi';
 
 export const envValidator = Joi.object({
   // General
-  NODE_ENV: Joi.string(),
   HOST: Joi.string(),
   PORT: Joi.string(),
   FE_URL: Joi.string(),
@@ -22,9 +21,8 @@ export const envValidator = Joi.object({
   RPC_URL_BSC: Joi.string(),
   RPC_URL_POLYGON_AMOY: Joi.string(),
   RPC_URL_SEPOLIA: Joi.string(),
-  RPC_URL_MOONBEAM: Joi.string(),
   RPC_URL_BSC_TESTNET: Joi.string(),
-  RPC_URL_XLAYER: Joi.string(),
+  RPC_URL_AURORA_TESTNET: Joi.string(),
   RPC_URL_LOCALHOST: Joi.string(),
   // S3
   S3_ENDPOINT: Joi.string(),

@@ -1,4 +1,5 @@
 import * as Joi from 'joi';
+
 import { Web3Network } from './web3-config.service';
 
 export const envValidator = Joi.object({
@@ -52,6 +53,7 @@ export const envValidator = Joi.object({
   RPC_URL_POLYGON_AMOY: Joi.string().uri({ scheme: ['http', 'https'] }),
   RPC_URL_BSC_MAINNET: Joi.string().uri({ scheme: ['http', 'https'] }),
   RPC_URL_BSC_TESTNET: Joi.string().uri({ scheme: ['http', 'https'] }),
+  RPC_URL_AURORA_TESTNET: Joi.string().uri({ scheme: ['http', 'https'] }),
   RPC_URL_MOONBEAM: Joi.string().uri({ scheme: ['http', 'https'] }),
   RPC_URL_XLAYER_TESTNET: Joi.string().uri({ scheme: ['http', 'https'] }),
   RPC_URL_XLAYER: Joi.string().uri({ scheme: ['http', 'https'] }),

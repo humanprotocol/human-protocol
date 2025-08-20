@@ -469,7 +469,7 @@ describe('JobService', () => {
         const fortuneJobDto: JobFortuneDto = createFortuneJobDto();
         await expect(
           jobService.createJob(
-            createUser({ stripeCustomerId: null }),
+            createUser({ paymentProviderId: null }),
             FortuneJobType.FORTUNE,
             fortuneJobDto,
           ),
@@ -909,7 +909,7 @@ describe('JobService', () => {
           recordingOracleFee: 2n,
           exchangeOracle: jobEntity.exchangeOracle,
           exchangeOracleFee: 3n,
-          manifestUrl: jobEntity.manifestUrl,
+          manifest: jobEntity.manifestUrl,
           manifestHash: jobEntity.manifestHash,
         },
         { gasPrice: 1n },

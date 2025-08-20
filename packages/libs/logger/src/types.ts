@@ -1,0 +1,48 @@
+export enum LogLevel {
+  DEBUG = 'debug',
+  INFO = 'info',
+  WARN = 'warn',
+  ERROR = 'error',
+}
+
+export type LogMeta = Record<string, unknown>;
+
+export type LogRecord = {
+  logger?: string;
+  level: `${LogLevel}`;
+  message: string;
+  timestamp: number;
+} & LogMeta;
+
+type LogFn = {
+  (message: string, meta?: LogMeta): void;
+  (message: string, error: Error): void;
+  (message: string, errorOrMeta?: unknown): void;
+};
+
+export type ChildBindings = { name?: string } & LogMeta;
+
+export interface Logger {
+  debug: LogFn;
+  info: LogFn;
+  warn: LogFn;
+  error: LogFn;
+  child: (bindings: ChildBindings) => Logger;
+}
+
+export type LoggerFactoryOptions = {
+  name?: string;
+  pretty?: boolean;
+  level?: `${LogLevel}`;
+  disabled?: boolean;
+};
+
+export type LoggerFactory = (
+  optins: LoggerFactoryOptions,
+  bindings?: LogMeta,
+) => Logger;
+
+const LOG_LEVELS = Object.values(LogLevel);
+export function isLogLevel(value: unknown): value is LogLevel {
+  return LOG_LEVELS.includes(value as LogLevel);
+}

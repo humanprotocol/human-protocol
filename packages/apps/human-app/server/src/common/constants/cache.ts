@@ -4,3 +4,4 @@ export const ORACLE_URL_CACHE_KEY = 'oracle:url';
 export const DAILY_HMT_SPENT_CACHE_KEY = 'daily:hmt-spent';
 export const ORACLE_STATISTICS_CACHE_KEY = 'statistics:oracle';
 export const WORKER_STATISTICS_CACHE_KEY = 'statistics:worker';
+export const REPUTATION_ORACLE_PUBLIC_KEY = 'reputation:pubkey';

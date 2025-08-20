@@ -52,7 +52,7 @@ export function Select({
             }
           >
             {options.map((elem) => (
-              <MenuItem key={crypto.randomUUID().toString()} value={elem.value}>
+              <MenuItem key={elem.value} value={elem.value}>
                 {elem.name}
               </MenuItem>
             ))}

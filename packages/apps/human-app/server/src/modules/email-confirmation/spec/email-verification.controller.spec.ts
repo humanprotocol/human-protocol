@@ -17,6 +17,7 @@ import {
   emailVerificationCommandFixture,
   emailVerificationDtoFixture,
 } from './email-verification.fixtures';
+import { RequestWithUser } from '../../../common/interfaces/jwt';
 
 describe('EmailConfirmationController', () => {
   let controller: EmailConfirmationController;
@@ -62,7 +63,9 @@ describe('EmailConfirmationController', () => {
     it('should call the processResendEmailVerification method of the service with the correct arguments', async () => {
       const dto = resendEmailVerificationDtoFixture;
       const command = resendEmailVerificationCommandFixture;
-      await controller.resendEmailVerification(dto, emailVerificationToken);
+      await controller.resendEmailVerification(dto, {
+        token: emailVerificationToken,
+      } as RequestWithUser);
       expect(service.processResendEmailVerification).toHaveBeenCalledWith(
         command,
       );

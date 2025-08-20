@@ -3,8 +3,8 @@ import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
 import { firstValueFrom } from 'rxjs';
 
-import { HCaptchaConfigService } from '../../config';
-import logger from '../../logger';
+import { HCaptchaConfigService } from '@/config';
+import logger from '@/logger';
 
 import {
   GetLabelerQueryParams,

@@ -1,23 +1,26 @@
-import _ from 'lodash';
 import { ChainId, IOperator, OperatorUtils, Role } from '@human-protocol/sdk';
-import { Inject, Injectable, Logger } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Inject, Injectable } from '@nestjs/common';
 import { Cache } from 'cache-manager';
+import _ from 'lodash';
+import { EnvironmentConfigService } from '../../common/config/environment-config.service';
+import { KvStoreGateway } from '../../integrations/kv-store/kv-store.gateway';
+import logger from '../../logger';
 import {
   DiscoveredOracle,
   GetOraclesCommand,
 } from './model/oracle-discovery.model';
-import { EnvironmentConfigService } from '../../common/config/environment-config.service';
-import { KvStoreGateway } from '../../integrations/kv-store/kv-store.gateway';
 
 @Injectable()
 export class OracleDiscoveryService {
-  logger = new Logger(OracleDiscoveryService.name);
+  private readonly logger = logger.child({
+    context: OracleDiscoveryService.name,
+  });
 
   constructor(
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
-    private configService: EnvironmentConfigService,
-    private kvStoreGateway: KvStoreGateway,
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
+    private readonly configService: EnvironmentConfigService,
+    private readonly kvStoreGateway: KvStoreGateway,
   ) {}
 
   async getOracles(command: GetOraclesCommand): Promise<DiscoveredOracle[]> {
@@ -117,10 +120,10 @@ export class OracleDiscoveryService {
 
       return discoveredOracles;
     } catch (error) {
-      this.logger.error(
-        `Failed to discover oracles for chain '${chainId}':`,
+      this.logger.error('Failed to discover oracles for chain', {
+        chainId,
         error,
-      );
+      });
       return [];
     }
   }

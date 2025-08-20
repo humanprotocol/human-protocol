@@ -9,6 +9,7 @@ from attrs import frozen
 from datumaro.util import dump_json, parse_json
 
 from src.core.config import Config
+from src.core.tasks.roi_based import OUTPUT_OBJECT_ID_ATTR
 
 DEFAULT_ASSIGNMENT_SIZE_MULTIPLIER = Config.core_config.skeleton_assignment_size_mult
 
@@ -133,3 +134,15 @@ class TaskMetaSerializer:
             (v["skeleton_label"], v["point_label"]): v["job_point_label"]
             for v in parse_json(point_labels_data)
         }
+
+
+__all__ = [
+    "OUTPUT_OBJECT_ID_ATTR",
+    "SkeletonBboxMapping",
+    "RoiInfo",
+    "RoiInfos",
+    "RoiFilenames",
+    "PointLabelsMapping",
+    "TaskMetaLayout",
+    "TaskMetaSerializer",
+]

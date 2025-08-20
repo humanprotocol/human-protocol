@@ -1,9 +1,10 @@
+import { Readable } from 'stream';
+
 import { faker } from '@faker-js/faker';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import nock from 'nock';
 
 import * as httpUtils from './http';
-import { Readable } from 'stream';
 
 describe('HTTP utilities', () => {
   describe('formatAxiosError', () => {
@@ -23,7 +24,9 @@ describe('HTTP utilities', () => {
       const EXPECTED_CAUSE = 'synthetic';
       thrownError.cause = EXPECTED_CAUSE;
 
-      const formattedError = httpUtils.formatAxiosError(thrownError);
+      const formattedError = httpUtils.formatAxiosError(
+        thrownError as AxiosError,
+      );
       const ERROR_NAME = 'CanceledError';
       const EXPECTED_MESSAGE = 'canceled';
 

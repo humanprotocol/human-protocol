@@ -111,7 +111,7 @@ describe('JobController', () => {
       expect(result).toBe(1);
 
       expect(mockMutexManagerService.runExclusive).toHaveBeenCalledWith(
-        { id: `user${mockRequest.user.id}` },
+        `user${mockRequest.user.id}`,
         MUTEX_TIMEOUT,
         expect.any(Function),
       );
@@ -176,7 +176,7 @@ describe('JobController', () => {
       ).rejects.toThrow('Unauthorized');
 
       expect(mockMutexManagerService.runExclusive).toHaveBeenCalledWith(
-        { id: `user${mockRequest.user.id}` },
+        `user${mockRequest.user.id}`,
         MUTEX_TIMEOUT,
         expect.any(Function),
       );
@@ -206,7 +206,7 @@ describe('JobController', () => {
 
       expect(result).toBe(1);
       expect(mockMutexManagerService.runExclusive).toHaveBeenCalledWith(
-        { id: `user${mockRequest.user.id}` },
+        `user${mockRequest.user.id}`,
         expect.any(Number),
         expect.any(Function),
       );
@@ -227,7 +227,7 @@ describe('JobController', () => {
       ).rejects.toThrow(UnauthorizedException);
 
       expect(mockMutexManagerService.runExclusive).toHaveBeenCalledWith(
-        { id: `user${mockRequest.user.id}` },
+        `user${mockRequest.user.id}`,
         expect.any(Number),
         expect.any(Function),
       );
@@ -244,7 +244,7 @@ describe('JobController', () => {
       ).rejects.toThrow(ConflictException);
 
       expect(mockMutexManagerService.runExclusive).toHaveBeenCalledWith(
-        { id: `user${mockRequest.user.id}` },
+        `user${mockRequest.user.id}`,
         expect.any(Number),
         expect.any(Function),
       );
@@ -261,7 +261,7 @@ describe('JobController', () => {
       ).rejects.toThrow(BadRequestException);
 
       expect(mockMutexManagerService.runExclusive).toHaveBeenCalledWith(
-        { id: `user${mockRequest.user.id}` },
+        `user${mockRequest.user.id}`,
         expect.any(Number),
         expect.any(Function),
       );
@@ -310,7 +310,7 @@ describe('JobController', () => {
 
       expect(result).toBe(1);
       expect(mockMutexManagerService.runExclusive).toHaveBeenCalledWith(
-        { id: `user${mockRequest.user.id}` },
+        `user${mockRequest.user.id}`,
         expect.any(Number),
         expect.any(Function),
       );
@@ -331,7 +331,7 @@ describe('JobController', () => {
       ).rejects.toThrow(UnauthorizedException);
 
       expect(mockMutexManagerService.runExclusive).toHaveBeenCalledWith(
-        { id: `user${mockRequest.user.id}` },
+        `user${mockRequest.user.id}`,
         expect.any(Number),
         expect.any(Function),
       );
@@ -348,7 +348,7 @@ describe('JobController', () => {
       ).rejects.toThrow(ConflictException);
 
       expect(mockMutexManagerService.runExclusive).toHaveBeenCalledWith(
-        { id: `user${mockRequest.user.id}` },
+        `user${mockRequest.user.id}`,
         expect.any(Number),
         expect.any(Function),
       );
@@ -365,7 +365,7 @@ describe('JobController', () => {
       ).rejects.toThrow(BadRequestException);
 
       expect(mockMutexManagerService.runExclusive).toHaveBeenCalledWith(
-        { id: `user${mockRequest.user.id}` },
+        `user${mockRequest.user.id}`,
         expect.any(Number),
         expect.any(Function),
       );

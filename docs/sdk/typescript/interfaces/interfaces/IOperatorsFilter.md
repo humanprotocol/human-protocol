@@ -6,7 +6,7 @@
 
 # Interface: IOperatorsFilter
 
-Defined in: [interfaces.ts:59](https://github.com/humanprotocol/human-protocol/blob/1734b59e7e953d1f62f13e75c8f7b7ab4bddec76/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L59)
+Defined in: [interfaces.ts:59](https://github.com/humanprotocol/human-protocol/blob/379201f0dcf9e31baefdeaf8c2865002114c8394/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L59)
 
 ## Extends
 
@@ -18,7 +18,7 @@ Defined in: [interfaces.ts:59](https://github.com/humanprotocol/human-protocol/b
 
 > **chainId**: [`ChainId`](../../enums/enumerations/ChainId.md)
 
-Defined in: [interfaces.ts:60](https://github.com/humanprotocol/human-protocol/blob/1734b59e7e953d1f62f13e75c8f7b7ab4bddec76/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L60)
+Defined in: [interfaces.ts:60](https://github.com/humanprotocol/human-protocol/blob/379201f0dcf9e31baefdeaf8c2865002114c8394/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L60)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: [interfaces.ts:60](https://github.com/humanprotocol/human-protocol/b
 
 > `optional` **first**: `number`
 
-Defined in: [interfaces.ts:189](https://github.com/humanprotocol/human-protocol/blob/1734b59e7e953d1f62f13e75c8f7b7ab4bddec76/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L189)
+Defined in: [interfaces.ts:189](https://github.com/humanprotocol/human-protocol/blob/379201f0dcf9e31baefdeaf8c2865002114c8394/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L189)
 
 #### Inherited from
 
@@ -38,7 +38,7 @@ Defined in: [interfaces.ts:189](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **minStakedAmount**: `number`
 
-Defined in: [interfaces.ts:62](https://github.com/humanprotocol/human-protocol/blob/1734b59e7e953d1f62f13e75c8f7b7ab4bddec76/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L62)
+Defined in: [interfaces.ts:62](https://github.com/humanprotocol/human-protocol/blob/379201f0dcf9e31baefdeaf8c2865002114c8394/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L62)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [interfaces.ts:62](https://github.com/humanprotocol/human-protocol/b
 
 > `optional` **orderBy**: `string`
 
-Defined in: [interfaces.ts:63](https://github.com/humanprotocol/human-protocol/blob/1734b59e7e953d1f62f13e75c8f7b7ab4bddec76/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L63)
+Defined in: [interfaces.ts:63](https://github.com/humanprotocol/human-protocol/blob/379201f0dcf9e31baefdeaf8c2865002114c8394/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L63)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [interfaces.ts:63](https://github.com/humanprotocol/human-protocol/b
 
 > `optional` **orderDirection**: [`OrderDirection`](../../enums/enumerations/OrderDirection.md)
 
-Defined in: [interfaces.ts:191](https://github.com/humanprotocol/human-protocol/blob/1734b59e7e953d1f62f13e75c8f7b7ab4bddec76/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L191)
+Defined in: [interfaces.ts:191](https://github.com/humanprotocol/human-protocol/blob/379201f0dcf9e31baefdeaf8c2865002114c8394/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L191)
 
 #### Inherited from
 
@@ -66,7 +66,7 @@ Defined in: [interfaces.ts:191](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **roles**: `string`[]
 
-Defined in: [interfaces.ts:61](https://github.com/humanprotocol/human-protocol/blob/1734b59e7e953d1f62f13e75c8f7b7ab4bddec76/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L61)
+Defined in: [interfaces.ts:61](https://github.com/humanprotocol/human-protocol/blob/379201f0dcf9e31baefdeaf8c2865002114c8394/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L61)
 
 ***
 
@@ -74,7 +74,7 @@ Defined in: [interfaces.ts:61](https://github.com/humanprotocol/human-protocol/b
 
 > `optional` **skip**: `number`
 
-Defined in: [interfaces.ts:190](https://github.com/humanprotocol/human-protocol/blob/1734b59e7e953d1f62f13e75c8f7b7ab4bddec76/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L190)
+Defined in: [interfaces.ts:190](https://github.com/humanprotocol/human-protocol/blob/379201f0dcf9e31baefdeaf8c2865002114c8394/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L190)
 
 #### Inherited from
 

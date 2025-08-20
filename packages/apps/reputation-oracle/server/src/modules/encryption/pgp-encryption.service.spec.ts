@@ -14,12 +14,12 @@ import { faker } from '@faker-js/faker';
 import { Encryption, EncryptionUtils, KVStoreUtils } from '@human-protocol/sdk';
 import { Test } from '@nestjs/testing';
 
-import { PGPConfigService, Web3ConfigService } from '../../config';
+import { PGPConfigService, Web3ConfigService } from '@/config';
+import { Web3Service } from '@/modules/web3';
 import {
   generateTestnetChainId,
   mockWeb3ConfigService,
-} from '../web3/fixtures';
-import { Web3Service } from '../web3';
+} from '@/modules/web3/fixtures';
 
 import { PgpEncryptionService } from './pgp-encryption.service';
 
@@ -113,10 +113,12 @@ describe('PgpEncryptionService', () => {
 
       beforeAll(() => {
         originalConfigValue = mockPgpConfigService.encrypt;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (mockPgpConfigService as any).encrypt = false;
       });
 
       afterAll(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (mockPgpConfigService as any).encrypt = originalConfigValue;
       });
 
@@ -141,10 +143,12 @@ describe('PgpEncryptionService', () => {
 
       beforeAll(() => {
         originalConfigValue = mockPgpConfigService.encrypt;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (mockPgpConfigService as any).encrypt = true;
       });
 
       afterAll(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (mockPgpConfigService as any).encrypt = originalConfigValue;
       });
 

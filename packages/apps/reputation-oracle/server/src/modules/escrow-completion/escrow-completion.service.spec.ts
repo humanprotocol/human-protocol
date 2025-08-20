@@ -9,49 +9,50 @@ jest.mock('@human-protocol/sdk', () => {
   };
 });
 
+import * as crypto from 'crypto';
+
 import { faker } from '@faker-js/faker';
 import { createMock } from '@golevelup/ts-jest';
 import {
   EscrowClient,
   EscrowStatus,
   EscrowUtils,
+  IEscrow,
+  IOperator,
   OperatorUtils,
 } from '@human-protocol/sdk';
 import { Test } from '@nestjs/testing';
-import * as crypto from 'crypto';
 import stringify from 'json-stable-stringify';
 import _ from 'lodash';
 
-import { createSignerMock, type SignerMock } from '../../../test/fixtures/web3';
-
-import { CvatJobType, FortuneJobType } from '../../common/enums';
-import { ServerConfigService } from '../../config';
-
-import { ReputationService } from '../reputation';
-import { StorageService } from '../storage';
-import { OutgoingWebhookService } from '../webhook';
-import { WalletWithProvider, Web3Service } from '../web3';
-import { generateTestnetChainId } from '../web3/fixtures';
+import { CvatJobType, FortuneJobType } from '@/common/enums';
+import { ServerConfigService } from '@/config';
+import { ReputationService } from '@/modules/reputation';
+import { StorageService } from '@/modules/storage';
+import { WalletWithProvider, Web3Service } from '@/modules/web3';
+import { generateTestnetChainId } from '@/modules/web3/fixtures';
+import { OutgoingWebhookService } from '@/modules/webhook';
+import { createSignerMock, type SignerMock } from '~/test/fixtures/web3';
 
 import { EscrowCompletionStatus } from './constants';
+import { EscrowCompletionRepository } from './escrow-completion.repository';
+import { EscrowCompletionService } from './escrow-completion.service';
+import { EscrowPayoutsBatchRepository } from './escrow-payouts-batch.repository';
+import { generateFortuneManifest } from './fixtures';
 import {
   generateEscrowCompletion,
   generateEscrowPayoutsBatch,
 } from './fixtures/escrow-completion';
-import { EscrowCompletionService } from './escrow-completion.service';
-import { EscrowCompletionRepository } from './escrow-completion.repository';
-import { EscrowPayoutsBatchRepository } from './escrow-payouts-batch.repository';
-import {
-  AudinoResultsProcessor,
-  CvatResultsProcessor,
-  FortuneResultsProcessor,
-} from './results-processing';
 import {
   AudinoPayoutsCalculator,
   CvatPayoutsCalculator,
   FortunePayoutsCalculator,
 } from './payouts-calculation';
-import { generateFortuneManifest } from './fixtures';
+import {
+  AudinoResultsProcessor,
+  CvatResultsProcessor,
+  FortuneResultsProcessor,
+} from './results-processing';
 
 const mockServerConfigService = {
   maxRetryCount: faker.number.int({ min: 2, max: 5 }),
@@ -175,6 +176,7 @@ describe('EscrowCompletionService', () => {
 
     beforeAll(() => {
       spyOnCreateEscrowPayoutsBatch = jest
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .spyOn(service as any, 'createEscrowPayoutsBatch')
         .mockImplementation();
     });
@@ -311,7 +313,9 @@ describe('EscrowCompletionService', () => {
       mockGetEscrowStatus.mockResolvedValue(EscrowStatus.Pending);
 
       const manifestUrl = faker.internet.url();
-      mockedEscrowUtils.getEscrow.mockResolvedValueOnce({ manifestUrl } as any);
+      mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
+        manifest: manifestUrl,
+      } as unknown as IEscrow);
 
       const fortuneManifest = generateFortuneManifest();
       mockStorageService.downloadJsonLikeData.mockResolvedValueOnce(
@@ -392,7 +396,9 @@ describe('EscrowCompletionService', () => {
         },
       ]);
       mockGetEscrowStatus.mockResolvedValue(EscrowStatus.Pending);
-      mockedEscrowUtils.getEscrow.mockResolvedValueOnce({} as any);
+      mockedEscrowUtils.getEscrow.mockResolvedValueOnce(
+        {} as unknown as IEscrow,
+      );
       mockStorageService.downloadJsonLikeData.mockResolvedValueOnce(
         generateFortuneManifest(),
       );
@@ -486,6 +492,7 @@ describe('EscrowCompletionService', () => {
 
     beforeAll(() => {
       spyOnProcessPayoutsBatch = jest
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .spyOn(service as any, 'processPayoutsBatch')
         .mockImplementation();
     });
@@ -729,6 +736,7 @@ describe('EscrowCompletionService', () => {
       const payoutsBatch = generateEscrowPayoutsBatch();
 
       const testError = new Error('Synthetic error');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (testError as any).code = 'NONCE_EXPIRED';
 
       mockedSigner.sendTransaction.mockRejectedValueOnce(testError);
@@ -821,7 +829,7 @@ describe('EscrowCompletionService', () => {
       mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
         launcher: launcherAddress,
         exchangeOracle: exchangeOracleAddress,
-      } as any);
+      } as unknown as IEscrow);
     });
 
     describe('handle failures', () => {
@@ -919,7 +927,7 @@ describe('EscrowCompletionService', () => {
         mockGetEscrowStatus.mockResolvedValueOnce(EscrowStatus.Paid);
         mockedOperatorUtils.getOperator.mockResolvedValue({
           webhookUrl: '',
-        } as any);
+        } as IOperator);
 
         await service.processPaidEscrows();
 
@@ -946,7 +954,7 @@ describe('EscrowCompletionService', () => {
         mockGetEscrowStatus.mockResolvedValueOnce(EscrowStatus.Paid);
         mockedOperatorUtils.getOperator.mockResolvedValue({
           webhookUrl: faker.internet.url(),
-        } as any);
+        } as IOperator);
         mockOutgoingWebhookService.createOutgoingWebhook.mockRejectedValueOnce(
           testError,
         );
@@ -998,7 +1006,7 @@ describe('EscrowCompletionService', () => {
                 webhookUrl = faker.internet.url();
                 break;
             }
-            return { webhookUrl } as any;
+            return { webhookUrl } as IOperator;
           },
         );
 
@@ -1062,7 +1070,7 @@ describe('EscrowCompletionService', () => {
 
         mockedOperatorUtils.getOperator.mockResolvedValue({
           webhookUrl: faker.internet.url(),
-        } as any);
+        } as IOperator);
 
         await service.processPaidEscrows();
 

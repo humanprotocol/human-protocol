@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
 
-import { CvatJobType } from '../../../common/enums';
-import { CvatManifest } from '../../../common/types';
+import { CvatJobType } from '@/common/enums';
+import { CvatManifest } from '@/common/types';
 
 export function generateCvatManifest(): CvatManifest {
   return {

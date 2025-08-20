@@ -1155,13 +1155,13 @@ files = [
 
 [[package]]
 name = "distlib"
-version = "0.3.8"
+version = "0.4.0"
 description = "Distribution utilities"
 optional = false
 python-versions = "*"
 files = [
-    {file = "distlib-0.3.8-py2.py3-none-any.whl", hash = "sha256:034db59a0b96f8ca18035f36290806a9a6e6bd9d1ff91e45a7f172eb17e51784"},
-    {file = "distlib-0.3.8.tar.gz", hash = "sha256:1530ea13e350031b6312d8580ddb6b27a104275a31106523b8f123787f494f64"},
+    {file = "distlib-0.4.0-py2.py3-none-any.whl", hash = "sha256:9659f7d87e46584a30b5780e43ac7a2143098441670ff0a49d5f9034c54a6c16"},
+    {file = "distlib-0.4.0.tar.gz", hash = "sha256:feec40075be03a04501a973d81f633735b4b69f98b05450592310c0f401a4e0d"},
 ]
 
 [[package]]
@@ -2128,13 +2128,13 @@ socks = ["socksio (==1.*)"]
 
 [[package]]
 name = "human-protocol-sdk"
-version = "4.0.3"
+version = "4.1.4"
 description = "A python library to launch escrow contracts to the HUMAN network."
 optional = false
 python-versions = "*"
 files = [
-    {file = "human_protocol_sdk-4.0.3-py3-none-any.whl", hash = "sha256:a289ed30b5bc0d2268b0a05301461e13cbd698245a851ccc821ab6f9aa5cf9e4"},
-    {file = "human_protocol_sdk-4.0.3.tar.gz", hash = "sha256:0f8511b188792561080c5fc96a801eca84c7ef8f64409d88882fdf53a87d505a"},
+    {file = "human_protocol_sdk-4.1.4-py3-none-any.whl", hash = "sha256:c0dbaaf332a8e130d7378f36876a719bef595febffcc012a76af63ce9b2ed1a1"},
+    {file = "human_protocol_sdk-4.1.4.tar.gz", hash = "sha256:9fb7b9886a7585e0ca5a8a4c390cc0f657b0e1ccdafa5504472deb1431e4438c"},
 ]
 
 [package.dependencies]
@@ -5047,4 +5047,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10,<3.13"
-content-hash = "8bf7f09b99af5cd8b02a36fc0a1b5ad4af28d5d17d7c0275afa38edb281c3cfc"
+content-hash = "d967b19857b177bfc7a31a6a92eba46c8d26bf9fa5d6958fd71985395876c440"

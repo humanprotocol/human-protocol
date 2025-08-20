@@ -6,7 +6,7 @@
 
 # Enumeration: OperatorCategory
 
-Defined in: [enums.ts:17](https://github.com/humanprotocol/human-protocol/blob/1734b59e7e953d1f62f13e75c8f7b7ab4bddec76/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L17)
+Defined in: [enums.ts:18](https://github.com/humanprotocol/human-protocol/blob/379201f0dcf9e31baefdeaf8c2865002114c8394/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L18)
 
 ## Enumeration Members
 
@@ -14,7 +14,7 @@ Defined in: [enums.ts:17](https://github.com/humanprotocol/human-protocol/blob/1
 
 > **MACHINE\_LEARNING**: `"machine_learning"`
 
-Defined in: [enums.ts:18](https://github.com/humanprotocol/human-protocol/blob/1734b59e7e953d1f62f13e75c8f7b7ab4bddec76/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L18)
+Defined in: [enums.ts:19](https://github.com/humanprotocol/human-protocol/blob/379201f0dcf9e31baefdeaf8c2865002114c8394/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L19)
 
 ***
 
@@ -22,4 +22,4 @@ Defined in: [enums.ts:18](https://github.com/humanprotocol/human-protocol/blob/1
 
 > **MARKET\_MAKING**: `"market_making"`
 
-Defined in: [enums.ts:19](https://github.com/humanprotocol/human-protocol/blob/1734b59e7e953d1f62f13e75c8f7b7ab4bddec76/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L19)
+Defined in: [enums.ts:20](https://github.com/humanprotocol/human-protocol/blob/379201f0dcf9e31baefdeaf8c2865002114c8394/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L20)

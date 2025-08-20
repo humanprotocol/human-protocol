@@ -10,10 +10,13 @@ import {
 } from '@nestjs/terminus';
 
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
+import { Public } from '../../common/decorators';
+import Environment from '../../common/utils/environment';
 import { PingResponseDto } from './dto/ping-response.dto';
 import { CacheManagerHealthIndicator } from './indicators/cache-manager.health';
 
 @ApiTags('Health')
+@Public()
 @Controller('health')
 export class HealthController {
   constructor(
@@ -40,7 +43,8 @@ export class HealthController {
   @Get('/ping')
   async ping(): Promise<PingResponseDto> {
     return {
-      gitHash: this.environmentConfigService.gitHash,
+      node_env: Environment.name,
+      version: Environment.version,
     };
   }
 

@@ -303,6 +303,20 @@
     },
     "registerAddress": {
       "success": "The address has been successfully registered."
+    },
+    "reportAbuse": {
+      "modalHeader": "Report Abuse",
+      "modalParagraph": "Notice something inappropriate or incorrect? Let us know if this task contains harmful, offensive, or misleading content. Your report will be reviewed confidentially.",
+      "modalReason": "Reason",
+      "cancel": "Cancel",
+      "close": "Close",
+      "report": "Report",
+      "reportAbuse": "Report Abuse",
+      "modalSuccessHeader": "Thank you!",
+      "modalSuccessParagraph": "Your issue has been successfully reported. Our team has received the details and will review them shortly.",
+      "modalHeaderAlreadyReportedError": "Report Already Submitted",
+      "modalParagraphAlreadyReportedError": "This case of abuse has already been reported. Our team is currently reviewing it.",
+      "modalUnknownError": "Something went wrong."
     }
   },
   "operator": {
@@ -421,6 +435,7 @@
     "image_boxes": "Bounding Boxes",
     "image_boxes_from_points": "Bounding Boxes from Points",
     "image_skeletons_from_boxes": "Skeletons from Bounding Boxes",
-    "image_polygons": "Polygons"
+    "image_polygons": "Polygons",
+    "audio_transcription": "Audio Transcription"
   }
 }

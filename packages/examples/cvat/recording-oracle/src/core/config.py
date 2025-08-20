@@ -71,6 +71,13 @@ class PolygonAmoyConfig(_NetworkConfig):
     addr = getenv("POLYGON_AMOY_ADDR")
 
 
+class AuroraTestnetConfig(_NetworkConfig):
+    chain_id = 1313161555
+    rpc_api = getenv("AURORA_TESTNET_RPC_API_URL")
+    private_key = getenv("AURORA_TESTNET_PRIVATE_KEY")
+    addr = getenv("AURORA_TESTNET_ADDR")
+
+
 class LocalhostConfig(_NetworkConfig):
     chain_id = 1338
     rpc_api = getenv("LOCALHOST_RPC_API_URL", "http://blockchain-node:8545")
@@ -177,6 +184,12 @@ class ValidationConfig:
     value small enough for faster convergence rate of the annotation process.
     """
 
+    enable_gt_bans = to_bool(getenv("ENABLE_GT_BANS", "1"))
+    """
+    Whether to allow automatic GT bans for bad images or not. By default, bans are allowed.
+    This can raise escrow annotation chances at the cost of reduced quality threshold.
+    """
+
     unverifiable_assignments_threshold = float(getenv("UNVERIFIABLE_ASSIGNMENTS_THRESHOLD", "0.1"))
     """
     Deprecated. Not expected to happen in practice, kept only as a safety fallback rule.
@@ -248,6 +261,7 @@ class Config:
 
     polygon_mainnet = PolygonMainnetConfig
     polygon_amoy = PolygonAmoyConfig
+    aurora_testnet = AuroraTestnetConfig
     localhost = LocalhostConfig
 
     postgres_config = Postgres

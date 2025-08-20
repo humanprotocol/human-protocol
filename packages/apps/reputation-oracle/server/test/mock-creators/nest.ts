@@ -1,6 +1,6 @@
 import { HttpService } from '@nestjs/axios';
-import { AxiosResponse } from 'axios';
 import { CallHandler, ExecutionContext } from '@nestjs/common';
+import { AxiosResponse } from 'axios';
 import { of, throwError } from 'rxjs';
 
 class MockClassOfExecutionContext {}

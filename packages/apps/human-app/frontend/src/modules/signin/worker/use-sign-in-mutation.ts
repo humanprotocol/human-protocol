@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { routerPaths } from '@/router/router-paths';
 import { env } from '@/shared/env';
@@ -13,18 +13,13 @@ function signInMutationFn(data: SignInDto) {
 }
 
 export function useSignInMutation() {
-  const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   return useMutation({
     mutationFn: signInMutationFn,
-    onSuccess: async () => {
+    onSuccess: () => {
       navigate(routerPaths.worker.profile);
       window.location.reload();
-      await queryClient.invalidateQueries();
-    },
-    onError: async () => {
-      await queryClient.invalidateQueries();
     },
   });
 }

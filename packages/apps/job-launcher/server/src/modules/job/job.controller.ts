@@ -84,7 +84,7 @@ export class JobController {
     @Request() req: RequestWithUser,
   ): Promise<number> {
     return await this.mutexManagerService.runExclusive(
-      { id: `user${req.user.id}` },
+      `user${req.user.id}`,
       MUTEX_TIMEOUT,
       async () => {
         return await this.jobService.createJob(
@@ -128,7 +128,7 @@ export class JobController {
     }
 
     return await this.mutexManagerService.runExclusive(
-      { id: `user${req.user.id}` },
+      `user${req.user.id}`,
       MUTEX_TIMEOUT,
       async () => {
         return await this.jobService.createJob(
@@ -168,7 +168,7 @@ export class JobController {
     @Request() req: RequestWithUser,
   ): Promise<number> {
     return await this.mutexManagerService.runExclusive(
-      { id: `user${req.user.id}` },
+      `user${req.user.id}`,
       MUTEX_TIMEOUT,
       async () => {
         return await this.jobService.createJob(req.user, data.type, data);
@@ -203,12 +203,8 @@ export class JobController {
     @Body() data: JobAudinoDto,
     @Request() req: RequestWithUser,
   ): Promise<number> {
-    if (this.web3ConfigService.env === Web3Env.MAINNET) {
-      throw new ForbiddenError('Disabled');
-    }
-
     return await this.mutexManagerService.runExclusive(
-      { id: `user${req.user.id}` },
+      `user${req.user.id}`,
       MUTEX_TIMEOUT,
       async () => {
         return await this.jobService.createJob(req.user, data.type, data);
@@ -247,7 +243,7 @@ export class JobController {
   //     'Hcaptcha jobs disabled temporally',
   //   );
   //   return await this.mutexManagerService.runExclusive(
-  //     { id: `user${req.user.id}` },
+  //     `user${req.user.id}`,
   //     MUTEX_TIMEOUT,
   //     async () => {
   //       return await this.jobService.createJob(
@@ -352,7 +348,7 @@ export class JobController {
     @Request() req: RequestWithUser,
   ): Promise<void> {
     await this.mutexManagerService.runExclusive(
-      { id: `user${req.user.id}` },
+      `user${req.user.id}`,
       MUTEX_TIMEOUT,
       async () => {
         return await this.jobService.requestToCancelJobByAddress(
@@ -391,7 +387,7 @@ export class JobController {
     @Request() req: RequestWithUser,
   ): Promise<void> {
     await this.mutexManagerService.runExclusive(
-      { id: `user${req.user.id}` },
+      `user${req.user.id}`,
       MUTEX_TIMEOUT,
       async () => {
         return await this.jobService.requestToCancelJobById(

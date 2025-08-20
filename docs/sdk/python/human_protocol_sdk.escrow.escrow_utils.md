@@ -22,11 +22,11 @@ print(
 
 ## Module
 
-### *class* human_protocol_sdk.escrow.escrow_utils.EscrowData(chain_id, id, address, amount_paid, balance, count, factory_address, launcher, status, token, total_funded_amount, created_at, final_results_url=None, intermediate_results_url=None, manifest_hash=None, manifest_url=None, recording_oracle=None, reputation_oracle=None, exchange_oracle=None)
+### *class* human_protocol_sdk.escrow.escrow_utils.EscrowData(chain_id, id, address, amount_paid, balance, count, factory_address, launcher, status, token, total_funded_amount, created_at, final_results_url=None, intermediate_results_url=None, manifest_hash=None, manifest=None, recording_oracle=None, reputation_oracle=None, exchange_oracle=None)
 
 Bases: `object`
 
-#### \_\_init_\_(chain_id, id, address, amount_paid, balance, count, factory_address, launcher, status, token, total_funded_amount, created_at, final_results_url=None, intermediate_results_url=None, manifest_hash=None, manifest_url=None, recording_oracle=None, reputation_oracle=None, exchange_oracle=None)
+#### \_\_init_\_(chain_id, id, address, amount_paid, balance, count, factory_address, launcher, status, token, total_funded_amount, created_at, final_results_url=None, intermediate_results_url=None, manifest_hash=None, manifest=None, recording_oracle=None, reputation_oracle=None, exchange_oracle=None)
 
 Initializes an EscrowData instance.
 
@@ -46,7 +46,7 @@ Initializes an EscrowData instance.
   * **final_results_url** (`Optional`[`str`]) – URL for final results.
   * **intermediate_results_url** (`Optional`[`str`]) – URL for intermediate results.
   * **manifest_hash** (`Optional`[`str`]) – Manifest hash.
-  * **manifest_url** (`Optional`[`str`]) – Manifest URL.
+  * **manifest** (`Optional`[`str`]) – Manifest data (JSON/URL).
   * **recording_oracle** (`Optional`[`str`]) – Recording Oracle address.
   * **reputation_oracle** (`Optional`[`str`]) – Reputation Oracle address.
   * **exchange_oracle** (`Optional`[`str`]) – Exchange Oracle address.

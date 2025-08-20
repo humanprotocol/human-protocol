@@ -1,6 +1,7 @@
-import { Injectable, Logger } from '@nestjs/common';
-
+import { Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
+
+import logger from '../../logger';
 import { ErrorCronJob } from '../../common/constant/errors';
 import { CronJobType } from '../../common/enums/cron-job';
 import { WebhookStatus } from '../../common/enums/webhook';
@@ -11,7 +12,7 @@ import { CronJobRepository } from './cron-job.repository';
 
 @Injectable()
 export class CronJobService {
-  private readonly logger = new Logger(CronJobService.name);
+  private readonly logger = logger.child({ context: CronJobService.name });
 
   constructor(
     private readonly cronJobRepository: CronJobRepository,
@@ -19,7 +20,7 @@ export class CronJobService {
     private readonly webhookRepository: WebhookRepository,
   ) {}
 
-  public async startCronJob(cronJobType: CronJobType): Promise<CronJobEntity> {
+  async startCronJob(cronJobType: CronJobType): Promise<CronJobEntity> {
     const cronJob = await this.cronJobRepository.findOneByType(cronJobType);
 
     if (!cronJob) {
@@ -32,14 +33,15 @@ export class CronJobService {
     return this.cronJobRepository.updateOne(cronJob);
   }
 
-  public async isCronJobRunning(cronJobType: CronJobType): Promise<boolean> {
+  async isCronJobRunning(cronJobType: CronJobType): Promise<boolean> {
     const lastCronJob = await this.cronJobRepository.findOneByType(cronJobType);
 
     if (!lastCronJob || lastCronJob.completedAt) {
       return false;
     }
 
-    this.logger.log('Previous cron job is not completed yet');
+    this.logger.warn('Previous cron job is not completed yet', { cronJobType });
+
     return true;
   }
 
@@ -47,7 +49,9 @@ export class CronJobService {
     cronJobEntity: CronJobEntity,
   ): Promise<CronJobEntity> {
     if (cronJobEntity.completedAt) {
-      this.logger.error(ErrorCronJob.Completed, CronJobService.name);
+      this.logger.error(ErrorCronJob.Completed, {
+        cronJobType: cronJobEntity.cronJobType,
+      });
       throw new Error(ErrorCronJob.Completed);
     }
 
@@ -69,7 +73,7 @@ export class CronJobService {
       return;
     }
 
-    this.logger.log('Pending webhooks START');
+    this.logger.debug('Pending webhooks START');
     const cronJob = await this.startCronJob(CronJobType.ProcessPendingWebhook);
 
     try {
@@ -80,19 +84,23 @@ export class CronJobService {
       for (const webhookEntity of webhookEntities) {
         try {
           await this.webhookService.sendWebhook(webhookEntity);
-        } catch (err) {
-          this.logger.error(`Error sending webhook: ${err.message}`);
+        } catch (error) {
+          this.logger.error('Error sending webhook', {
+            error,
+            webhookId: webhookEntity.id,
+          });
           await this.webhookService.handleWebhookError(webhookEntity);
           continue;
         }
         webhookEntity.status = WebhookStatus.COMPLETED;
         await this.webhookRepository.updateOne(webhookEntity);
       }
-    } catch (e) {
-      this.logger.error(e);
+    } catch (error) {
+      this.logger.error('Error processing pending webhooks', error);
     }
 
-    this.logger.log('Pending webhooks STOP');
+    this.logger.debug('Pending webhooks STOP');
+
     await this.completeCronJob(cronJob);
   }
 }

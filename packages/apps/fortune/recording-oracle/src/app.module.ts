@@ -11,6 +11,7 @@ import { envValidator } from './common/config/env-schema';
 import { EnvConfigModule } from './common/config/config.module';
 import { TransformEnumInterceptor } from './common/interceptors/transform-enum.interceptor';
 import { ExceptionFilter } from './common/exceptions/exception.filter';
+import Environment from './common/utils/environment';
 
 @Module({
   providers: [
@@ -36,7 +37,7 @@ import { ExceptionFilter } from './common/exceptions/exception.filter';
       /**
        * First value found takes precendece
        */
-      envFilePath: [`.env.${process.env.NODE_ENV}`, '.env.local', '.env'],
+      envFilePath: [`.env.${Environment.name}`, '.env.local', '.env'],
       validationSchema: envValidator,
     }),
     JobModule,

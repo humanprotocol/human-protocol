@@ -85,7 +85,7 @@ export interface IEscrow {
   intermediateResultsUrl?: string;
   launcher: string;
   manifestHash?: string;
-  manifestUrl?: string;
+  manifest?: string;
   recordingOracle?: string;
   reputationOracle?: string;
   exchangeOracle?: string;
@@ -102,7 +102,7 @@ export interface IEscrowsFilter extends IPagination {
   recordingOracle?: string;
   exchangeOracle?: string;
   jobRequesterId?: string;
-  status?: EscrowStatus;
+  status?: EscrowStatus | EscrowStatus[];
   from?: Date;
   to?: Date;
   chainId: ChainId;
@@ -115,7 +115,7 @@ export interface IEscrowConfig {
   recordingOracleFee: bigint;
   reputationOracleFee: bigint;
   exchangeOracleFee: bigint;
-  manifestUrl: string;
+  manifest: string;
   manifestHash: string;
 }
 

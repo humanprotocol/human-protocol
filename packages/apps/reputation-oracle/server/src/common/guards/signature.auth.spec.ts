@@ -1,16 +1,16 @@
 jest.mock('@human-protocol/sdk');
 
 import { faker } from '@faker-js/faker';
-import { EscrowUtils } from '@human-protocol/sdk';
+import { EscrowUtils, IEscrow } from '@human-protocol/sdk';
 import { ExecutionContext, HttpException, HttpStatus } from '@nestjs/common';
 
-import { generateEthWallet } from '../../../test/fixtures/web3';
+import { generateTestnetChainId } from '@/modules/web3/fixtures';
+import { signMessage } from '@/utils/web3';
+import { generateEthWallet } from '~/test/fixtures/web3';
 import {
   createExecutionContextMock,
   ExecutionContextMock,
-} from '../../../test/mock-creators/nest';
-import { generateTestnetChainId } from '../../modules/web3/fixtures';
-import { signMessage } from '../../utils/web3';
+} from '~/test/mock-creators/nest';
 
 import { AuthSignatureRole, SignatureAuthGuard } from './signature.auth';
 
@@ -67,7 +67,7 @@ describe('SignatureAuthGuard', () => {
 
         mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
           [name]: address,
-        } as any);
+        } as unknown as IEscrow);
 
         const signature = await signMessage(body, privateKey);
 
@@ -98,7 +98,7 @@ describe('SignatureAuthGuard', () => {
 
       mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
         launcher: address,
-      } as any);
+      } as unknown as IEscrow);
 
       const signature = await signMessage(
         {
@@ -138,7 +138,7 @@ describe('SignatureAuthGuard', () => {
       mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
         launcher: address,
         exchangeOracle: address,
-      } as any);
+      } as unknown as IEscrow);
 
       const signature = await signMessage(body, privateKey);
 
@@ -176,7 +176,7 @@ describe('SignatureAuthGuard', () => {
         launcher: '',
         exchangeOracle: '',
         recordingOracle: '',
-      } as any);
+      } as unknown as IEscrow);
 
       const signature = await signMessage(body, privateKey);
 

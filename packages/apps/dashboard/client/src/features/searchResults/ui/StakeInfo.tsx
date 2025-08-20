@@ -1,0 +1,58 @@
+import type { FC } from 'react';
+
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+
+import SectionWrapper from '@/shared/ui/SectionWrapper';
+
+import TokenAmount from './TokenAmount';
+
+type Props = {
+  stakedAmount?: string | number | null;
+  lockedAmount?: string | number | null;
+  withdrawableAmount?: string | number | null;
+};
+
+const StakeInfo: FC<Props> = ({
+  stakedAmount,
+  lockedAmount,
+  withdrawableAmount,
+}) => {
+  if (!stakedAmount && !lockedAmount && !withdrawableAmount) return null;
+
+  return (
+    <SectionWrapper>
+      <Typography variant="h5" mb={4}>
+        Stake Info
+      </Typography>
+      <Stack gap={4}>
+        {Number.isFinite(Number(stakedAmount)) && (
+          <Stack gap={{ xs: 1, md: 0 }} direction={{ sm: 'column', md: 'row' }}>
+            <Typography variant="subtitle2" width={300}>
+              Staked Tokens
+            </Typography>
+            <TokenAmount amount={stakedAmount} />
+          </Stack>
+        )}
+        {Number.isFinite(Number(lockedAmount)) && (
+          <Stack gap={{ xs: 1, md: 0 }} direction={{ sm: 'column', md: 'row' }}>
+            <Typography variant="subtitle2" width={300}>
+              Locked Tokens
+            </Typography>
+            <TokenAmount amount={lockedAmount} />
+          </Stack>
+        )}
+        {Number.isFinite(Number(withdrawableAmount)) && (
+          <Stack gap={{ xs: 1, md: 0 }} direction={{ sm: 'column', md: 'row' }}>
+            <Typography variant="subtitle2" width={300}>
+              Withdrawable Tokens
+            </Typography>
+            <TokenAmount amount={withdrawableAmount} />
+          </Stack>
+        )}
+      </Stack>
+    </SectionWrapper>
+  );
+};
+
+export default StakeInfo;

@@ -1,44 +1,49 @@
-import { plainToInstance } from 'class-transformer';
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import {
   ChainId,
   EscrowUtils,
-  TransactionUtils,
-  OperatorUtils,
   IEscrowsFilter,
-  Role,
-  NETWORKS,
-  OrderDirection,
-  KVStoreUtils,
   IOperatorsFilter,
+  KVStoreUtils,
+  NETWORKS,
+  OperatorUtils,
+  OrderDirection,
+  Role,
   StakingClient,
+  TransactionUtils,
   WorkerUtils,
 } from '@human-protocol/sdk';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 
-import { WalletDto } from './dto/wallet.dto';
-import { EscrowDto, EscrowPaginationDto } from './dto/escrow.dto';
-import { OperatorDto } from './dto/operator.dto';
-import { TransactionPaginationDto } from './dto/transaction.dto';
-import { EnvironmentConfigService } from '../../common/config/env-config.service';
-import { HttpService } from '@nestjs/axios';
-import { firstValueFrom } from 'rxjs';
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
+import { HttpService } from '@nestjs/axios';
 import { ethers } from 'ethers';
+import { firstValueFrom } from 'rxjs';
+import { GetOperatorsPaginationOptions } from '../../common/types';
+import { EnvironmentConfigService } from '../../common/config/env-config.service';
 import { NetworkConfigService } from '../../common/config/network-config.service';
-import { OperatorsOrderBy } from '../../common/enums/operator';
-import { ReputationLevel } from '../../common/enums/reputation';
 import {
   MAX_LEADERS_COUNT,
   MIN_STAKED_AMOUNT,
   REPUTATION_PLACEHOLDER,
 } from '../../common/constants/operator';
-import { GetOperatorsPaginationOptions } from 'src/common/types';
+import * as httpUtils from '../../common/utils/http';
+import { OperatorsOrderBy } from '../../common/enums/operator';
+import { ReputationLevel } from '../../common/enums/reputation';
+import logger from '../../logger';
 import { KVStoreDataDto } from './dto/details-response.dto';
+import { EscrowDto, EscrowPaginationDto } from './dto/escrow.dto';
+import { OperatorDto } from './dto/operator.dto';
+import { TransactionPaginationDto } from './dto/transaction.dto';
+import { WalletDto } from './dto/wallet.dto';
 
 @Injectable()
 export class DetailsService {
-  private readonly logger = new Logger(DetailsService.name);
+  private readonly logger = logger.child({ context: DetailsService.name });
+
   constructor(
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     private readonly configService: EnvironmentConfigService,
     private readonly httpService: HttpService,
     private readonly networkConfig: NetworkConfigService,
@@ -48,18 +53,37 @@ export class DetailsService {
     chainId: ChainId,
     address: string,
   ): Promise<WalletDto | EscrowDto | OperatorDto> {
-    const escrowData = await EscrowUtils.getEscrow(chainId, address);
-    if (escrowData) {
-      const escrowDto: EscrowDto = plainToInstance(EscrowDto, escrowData, {
-        excludeExtraneousValues: true,
-      });
-      return escrowDto;
-    }
     const network = this.networkConfig.networks.find(
       (network) => network.chainId === chainId,
     );
     if (!network) throw new BadRequestException('Invalid chainId provided');
     const provider = new ethers.JsonRpcProvider(network.rpcUrl);
+
+    const escrowData = await EscrowUtils.getEscrow(chainId, address);
+    if (escrowData) {
+      const escrowDto: EscrowDto = plainToInstance(EscrowDto, escrowData, {
+        excludeExtraneousValues: true,
+      });
+
+      const { decimals, symbol } = await this.getTokenData(
+        chainId,
+        escrowData.token,
+        provider,
+      );
+
+      escrowDto.balance = ethers.formatUnits(escrowData.balance, decimals);
+      escrowDto.totalFundedAmount = ethers.formatUnits(
+        escrowData.totalFundedAmount,
+        decimals,
+      );
+      escrowDto.amountPaid = ethers.formatUnits(
+        escrowData.amountPaid,
+        decimals,
+      );
+      escrowDto.tokenSymbol = symbol;
+      escrowDto.tokenDecimals = decimals;
+      return escrowDto;
+    }
     const stakingClient = await StakingClient.build(provider);
     const stakingData = await stakingClient.getStakerInfo(address);
 
@@ -111,7 +135,10 @@ export class DetailsService {
     return walletDto;
   }
 
-  private async getHmtBalance(chainId: ChainId, hmtAddress: string) {
+  private async getHmtBalance(
+    chainId: ChainId,
+    hmtAddress: string,
+  ): Promise<string> {
     const network = this.networkConfig.networks.find(
       (network) => network.chainId === chainId,
     );
@@ -299,7 +326,12 @@ export class DetailsService {
       }
       return { address, reputation };
     } catch (error) {
-      this.logger.error('Error fetching reputation:', error);
+      this.logger.error('Error fetching operator reputation', {
+        chainId,
+        address,
+        role,
+        error: httpUtils.formatAxiosError(error),
+      });
       return { address, reputation: REPUTATION_PLACEHOLDER };
     }
   }
@@ -335,10 +367,12 @@ export class DetailsService {
       );
       return response.data;
     } catch (error) {
-      this.logger.error(
-        `Error fetching reputations for chain id ${chainId}`,
-        error,
-      );
+      this.logger.error('Error fetching reputations for chain', {
+        chainId,
+        orderBy,
+        orderDirection,
+        error: httpUtils.formatAxiosError(error),
+      });
       return [];
     }
   }
@@ -401,6 +435,28 @@ export class DetailsService {
       });
     });
 
+    return data;
+  }
+
+  private async getTokenData(
+    chainId: ChainId,
+    tokenAddress: string,
+    provider: ethers.JsonRpcProvider,
+  ): Promise<{ decimals: number; symbol: string }> {
+    const tokenCacheKey = `token:${chainId}:${tokenAddress.toLowerCase()}`;
+    let data = await this.cacheManager.get<{
+      decimals: number;
+      symbol: string;
+    }>(tokenCacheKey);
+    if (!data) {
+      const erc20Contract = HMToken__factory.connect(tokenAddress, provider);
+      const [decimals, symbol] = await Promise.all([
+        erc20Contract.decimals(),
+        erc20Contract.symbol(),
+      ]);
+      data = { decimals: Number(decimals), symbol };
+      await this.cacheManager.set(tokenCacheKey, data);
+    }
     return data;
   }
 }

@@ -1,5 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
+import { Injectable } from '@nestjs/common';
 import {
   ErrorContentModeration,
   ErrorCronJob,
@@ -30,10 +29,11 @@ import { WebhookRepository } from '../webhook/webhook.repository';
 import { WebhookService } from '../webhook/webhook.service';
 import { CronJobEntity } from './cron-job.entity';
 import { CronJobRepository } from './cron-job.repository';
+import logger from '../../logger';
 
 @Injectable()
 export class CronJobService {
-  private readonly logger = new Logger(CronJobService.name);
+  private readonly logger = logger.child({ context: CronJobService.name });
 
   constructor(
     private readonly cronJobRepository: CronJobRepository,
@@ -67,7 +67,7 @@ export class CronJobService {
       return false;
     }
 
-    this.logger.log('Previous cron job is not completed yet');
+    this.logger.warn('Previous cron job is not completed yet');
     return true;
   }
 
@@ -102,21 +102,20 @@ export class CronJobService {
         jobs.map(async (jobEntity) => {
           try {
             await this.contentModerationService.moderateJob(jobEntity);
-          } catch (err) {
-            const errorId = uuidv4();
-            const failedReason = `${ErrorContentModeration.ResultsParsingFailed} (Error ID: ${errorId})`;
-            this.logger.error(
-              `Error parse job moderation results job. Error ID: ${errorId}, Job ID: ${jobEntity.id}, Reason: ${failedReason}, Message: ${err.message}`,
-            );
+          } catch (error) {
+            this.logger.error('Error parse job moderation results job', {
+              jobId: jobEntity.id,
+              error,
+            });
             await this.jobService.handleProcessJobFailure(
               jobEntity,
-              failedReason,
+              ErrorContentModeration.ResultsParsingFailed,
             );
           }
         }),
       );
-    } catch (err) {
-      this.logger.error(`Error in moderateContentCronJob: ${err.message}`);
+    } catch (error) {
+      this.logger.error('Error in moderateContentCronJob', error);
     }
 
     await this.completeCronJob(cronJobEntity);
@@ -132,7 +131,7 @@ export class CronJobService {
       return;
     }
 
-    this.logger.log('Create escrow START');
+    this.logger.debug('Create escrow START');
     const cronJob = await this.startCronJob(CronJobType.CreateEscrow);
 
     try {
@@ -142,23 +141,22 @@ export class CronJobService {
       for (const jobEntity of jobEntities) {
         try {
           await this.jobService.createEscrow(jobEntity);
-        } catch (err) {
-          const errorId = uuidv4();
-          const failedReason = `${ErrorEscrow.NotCreated} (Error ID: ${errorId})`;
-          this.logger.error(
-            `Error creating escrow. Error ID: ${errorId}, Job ID: ${jobEntity.id}, Reason: ${failedReason}, Message: ${err.message}`,
-          );
+        } catch (error) {
+          this.logger.error('Error in moderateContentCronJob', {
+            jobId: jobEntity.id,
+            error,
+          });
           await this.jobService.handleProcessJobFailure(
             jobEntity,
-            failedReason,
+            ErrorEscrow.NotCreated,
           );
         }
       }
-    } catch (e) {
-      this.logger.error(e);
+    } catch (error) {
+      this.logger.error('Error in createEscrow cron job', error);
     }
 
-    this.logger.log('Create escrow STOP');
+    this.logger.debug('Create escrow STOP');
     await this.completeCronJob(cronJob);
   }
 
@@ -172,7 +170,7 @@ export class CronJobService {
       return;
     }
 
-    this.logger.log('Setup escrow START');
+    this.logger.debug('Setup escrow START');
     const cronJob = await this.startCronJob(CronJobType.SetupEscrow);
 
     try {
@@ -183,23 +181,22 @@ export class CronJobService {
       for (const jobEntity of jobEntities) {
         try {
           await this.jobService.setupEscrow(jobEntity);
-        } catch (err) {
-          const errorId = uuidv4();
-          const failedReason = `${ErrorEscrow.NotSetup} (Error ID: ${errorId})`;
-          this.logger.error(
-            `Error setting up escrow. Error ID: ${errorId}, Job ID: ${jobEntity.id}, Reason: ${failedReason}, Message: ${err.message}`,
-          );
+        } catch (error) {
+          this.logger.error('Error setting up escrow', {
+            jobId: jobEntity.id,
+            error,
+          });
           await this.jobService.handleProcessJobFailure(
             jobEntity,
-            failedReason,
+            ErrorEscrow.NotSetup,
           );
         }
       }
-    } catch (e) {
-      this.logger.error(e);
+    } catch (error) {
+      this.logger.error('Error in setupEscrow cron job', error);
     }
 
-    this.logger.log('Setup escrow STOP');
+    this.logger.debug('Setup escrow STOP');
     await this.completeCronJob(cronJob);
   }
 
@@ -213,7 +210,7 @@ export class CronJobService {
       return;
     }
 
-    this.logger.log('Fund escrow START');
+    this.logger.debug('Fund escrow START');
     const cronJob = await this.startCronJob(CronJobType.FundEscrow);
 
     try {
@@ -224,23 +221,22 @@ export class CronJobService {
       for (const jobEntity of jobEntities) {
         try {
           await this.jobService.fundEscrow(jobEntity);
-        } catch (err) {
-          const errorId = uuidv4();
-          const failedReason = `${ErrorEscrow.NotFunded} (Error ID: ${errorId})`;
-          this.logger.error(
-            `Error funding escrow. Error ID: ${errorId}, Job ID: ${jobEntity.id}, Reason: ${failedReason}, Message: ${err.message}`,
-          );
+        } catch (error) {
+          this.logger.error('Error funding escrow', {
+            jobId: jobEntity.id,
+            error,
+          });
           await this.jobService.handleProcessJobFailure(
             jobEntity,
-            failedReason,
+            ErrorEscrow.NotFunded,
           );
         }
       }
-    } catch (e) {
-      this.logger.error(e);
+    } catch (error) {
+      this.logger.error('Error in fundEscrow cron job', error);
     }
 
-    this.logger.log('Fund escrow STOP');
+    this.logger.debug('Fund escrow STOP');
     await this.completeCronJob(cronJob);
   }
 
@@ -254,7 +250,7 @@ export class CronJobService {
       return;
     }
 
-    this.logger.log('Cancel jobs START');
+    this.logger.debug('Cancel jobs START');
     const cronJob = await this.startCronJob(CronJobType.CancelEscrow);
 
     try {
@@ -304,23 +300,22 @@ export class CronJobService {
             });
             await this.webhookRepository.createUnique(webhookEntity);
           }
-        } catch (err) {
-          const errorId = uuidv4();
-          const failedReason = `${ErrorEscrow.NotCanceled} (Error ID: ${errorId})`;
-          this.logger.error(
-            `Error canceling escrow. Error ID: ${errorId}, Job ID: ${jobEntity.id}, Reason: ${failedReason}, Message: ${err.message}`,
-          );
+        } catch (error) {
+          this.logger.error('Error canceling escrow', {
+            jobId: jobEntity.id,
+            error,
+          });
           await this.jobService.handleProcessJobFailure(
             jobEntity,
-            failedReason,
+            ErrorEscrow.NotCanceled,
           );
         }
       }
-    } catch (e) {
-      this.logger.error(e);
+    } catch (error) {
+      this.logger.error('Error in cancelEscrow cron job', error);
     }
     await this.completeCronJob(cronJob);
-    this.logger.log('Cancel jobs STOP');
+    this.logger.debug('Cancel jobs STOP');
     return true;
   }
 
@@ -338,7 +333,7 @@ export class CronJobService {
       return;
     }
 
-    this.logger.log('Pending webhooks START');
+    this.logger.debug('Pending webhooks START');
     const cronJob = await this.startCronJob(CronJobType.ProcessPendingWebhook);
 
     try {
@@ -350,19 +345,22 @@ export class CronJobService {
       for (const webhookEntity of webhookEntities) {
         try {
           await this.webhookService.sendWebhook(webhookEntity);
-        } catch (err) {
-          this.logger.error(`Error sending webhook: ${err.message}`);
+        } catch (error) {
+          this.logger.error('Error sending webhook', {
+            webhookId: webhookEntity.id,
+            error,
+          });
           await this.webhookService.handleWebhookError(webhookEntity);
           continue;
         }
         webhookEntity.status = WebhookStatus.COMPLETED;
         await this.webhookRepository.updateOne(webhookEntity);
       }
-    } catch (e) {
-      this.logger.error(e);
+    } catch (error) {
+      this.logger.error('Error in processPendingWebhooks cron job', error);
     }
 
-    this.logger.log('Pending webhooks STOP');
+    this.logger.debug('Pending webhooks STOP');
     await this.completeCronJob(cronJob);
   }
 
@@ -378,7 +376,7 @@ export class CronJobService {
       return;
     }
 
-    this.logger.log('Abuse START');
+    this.logger.debug('Abuse START');
     const cronJob = await this.startCronJob(CronJobType.Abuse);
 
     try {
@@ -395,7 +393,9 @@ export class CronJobService {
               webhookEntity.escrowAddress,
             );
           if (!jobEntity) {
-            this.logger.log(ErrorJob.NotFound, JobService.name);
+            this.logger.error('Job not found for webhook', {
+              webhookId: webhookEntity.id,
+            });
             throw new NotFoundError(ErrorJob.NotFound);
           }
           if (
@@ -410,21 +410,23 @@ export class CronJobService {
             await this.jobRepository.updateOne(jobEntity);
           }
           await this.paymentService.createSlash(jobEntity);
-        } catch (err) {
-          this.logger.error(
-            `Error slashing escrow (address: ${webhookEntity.escrowAddress}, chainId: ${webhookEntity.chainId}: ${err.message}`,
-          );
+        } catch (error) {
+          this.logger.error('Error slashing escrow', {
+            escrowAddress: webhookEntity.escrowAddress,
+            chainId: webhookEntity.chainId,
+            error,
+          });
           await this.webhookService.handleWebhookError(webhookEntity);
           continue;
         }
         webhookEntity.status = WebhookStatus.COMPLETED;
         await this.webhookRepository.updateOne(webhookEntity);
       }
-    } catch (e) {
-      this.logger.error(e);
+    } catch (error) {
+      this.logger.error('Error in processAbuse cron job', error);
     }
 
-    this.logger.log('Abuse STOP');
+    this.logger.debug('Abuse STOP');
     await this.completeCronJob(cronJob);
   }
 
@@ -433,7 +435,7 @@ export class CronJobService {
    * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
    */
   @Cron('30 */2 * * * *')
-  public async syncJobStuses(): Promise<void> {
+  public async syncJobStatuses(): Promise<void> {
     const lastCronJob = await this.cronJobRepository.findOneByType(
       CronJobType.SyncJobStatuses,
     );
@@ -442,7 +444,7 @@ export class CronJobService {
       return;
     }
 
-    this.logger.log('Update jobs START');
+    this.logger.debug('Update jobs START');
     const cronJob = await this.startCronJob(CronJobType.SyncJobStatuses);
 
     try {
@@ -469,7 +471,7 @@ export class CronJobService {
         } while (eventsBatch.length === 100);
       }
       if (events.length === 0) {
-        this.logger.log('No events to process');
+        this.logger.info('No events to process for syncJobStatuses cron job');
         await this.completeCronJob(cronJob);
         return;
       }
@@ -535,11 +537,11 @@ export class CronJobService {
         cronJob.lastSubgraphTime = new Date(latestEventTimestamp + 1000); // Add one sec to avoid getting the last processed event
         await this.cronJobRepository.save(cronJob);
       }
-    } catch (e) {
-      this.logger.error(e);
+    } catch (error) {
+      this.logger.error('Error in syncJobStatuses cron job', error);
     }
 
-    this.logger.log('Update jobs STOP');
+    this.logger.debug('Update jobs STOP');
     await this.completeCronJob(cronJob);
   }
 }

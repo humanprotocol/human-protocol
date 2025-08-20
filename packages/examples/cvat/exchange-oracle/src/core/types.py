@@ -7,13 +7,8 @@ from src.utils.enums import BetterEnumMeta
 class Networks(int, Enum, metaclass=BetterEnumMeta):
     polygon_mainnet = Config.polygon_mainnet.chain_id
     polygon_amoy = Config.polygon_amoy.chain_id
+    aurora_testnet = Config.aurora_testnet.chain_id
     localhost = Config.localhost.chain_id
-
-
-class CvatEventTypes(str, Enum, metaclass=BetterEnumMeta):
-    update_job = "update:job"
-    create_job = "create:job"
-    ping = "ping"
 
 
 class ProjectStatuses(str, Enum, metaclass=BetterEnumMeta):
@@ -34,7 +29,6 @@ class TaskStatuses(str, Enum, metaclass=BetterEnumMeta):
 class JobStatuses(str, Enum, metaclass=BetterEnumMeta):
     new = "new"
     in_progress = "in progress"
-    rejected = "rejected"
     completed = "completed"
 
 
@@ -45,13 +39,6 @@ class TaskTypes(str, Enum, metaclass=BetterEnumMeta):
     image_boxes_from_points = "image_boxes_from_points"
     image_skeletons_from_boxes = "image_skeletons_from_boxes"
     image_polygons = "image_polygons"
-
-
-class CvatLabelTypes(str, Enum, metaclass=BetterEnumMeta):
-    tag = "tag"
-    points = "points"
-    rectangle = "rectangle"
-    polygon = "polygon"
 
 
 class OracleWebhookTypes(str, Enum, metaclass=BetterEnumMeta):

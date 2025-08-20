@@ -318,6 +318,34 @@ Gets the job launcher address of the escrow.
   )
   ```
 
+#### get_manifest(escrow_address)
+
+Gets the manifest data (can be a URL or JSON string).
+
+* **Parameters:**
+  **escrow_address** (`str`) – Address of the escrow
+* **Return str:**
+  Manifest data
+* **Raises:**
+  [**EscrowClientError**](#human_protocol_sdk.escrow.escrow_client.EscrowClientError) – If an error occurs while checking the parameters
+* **Example:**
+  ```python
+  from eth_typing import URI
+  from web3 import Web3
+  from web3.providers.auto import load_provider_from_uri
+
+  from human_protocol_sdk.escrow import EscrowClient
+
+  w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+  escrow_client = EscrowClient(w3)
+
+  manifest = escrow_client.get_manifest(
+      "0x62dD51230A30401C455c8398d06F85e4EaB6309f"
+  )
+  ```
+* **Return type:**
+  `str`
+
 #### get_manifest_hash(escrow_address)
 
 Gets the manifest file hash.
@@ -345,34 +373,6 @@ Gets the manifest file hash.
       "0x62dD51230A30401C455c8398d06F85e4EaB6309f"
   )
   ```
-
-#### get_manifest_url(escrow_address)
-
-Gets the manifest file URL.
-
-* **Parameters:**
-  **escrow_address** (`str`) – Address of the escrow
-* **Return str:**
-  Manifest file url
-* **Raises:**
-  [**EscrowClientError**](#human_protocol_sdk.escrow.escrow_client.EscrowClientError) – If an error occurs while checking the parameters
-* **Example:**
-  ```python
-  from eth_typing import URI
-  from web3 import Web3
-  from web3.providers.auto import load_provider_from_uri
-
-  from human_protocol_sdk.escrow import EscrowClient
-
-  w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
-  escrow_client = EscrowClient(w3)
-
-  url = escrow_client.get_manifest_url(
-      "0x62dD51230A30401C455c8398d06F85e4EaB6309f"
-  )
-  ```
-* **Return type:**
-  `str`
 
 #### get_recording_oracle_address(escrow_address)
 
@@ -526,13 +526,13 @@ Bases: `Exception`
 
 Raises when some error happens when interacting with escrow.
 
-### *class* human_protocol_sdk.escrow.escrow_client.EscrowConfig(recording_oracle_address, reputation_oracle_address, exchange_oracle_address, recording_oracle_fee, reputation_oracle_fee, exchange_oracle_fee, manifest_url, hash)
+### *class* human_protocol_sdk.escrow.escrow_client.EscrowConfig(recording_oracle_address, reputation_oracle_address, exchange_oracle_address, recording_oracle_fee, reputation_oracle_fee, exchange_oracle_fee, manifest, hash)
 
 Bases: `object`
 
 A class used to manage escrow parameters.
 
-#### \_\_init_\_(recording_oracle_address, reputation_oracle_address, exchange_oracle_address, recording_oracle_fee, reputation_oracle_fee, exchange_oracle_fee, manifest_url, hash)
+#### \_\_init_\_(recording_oracle_address, reputation_oracle_address, exchange_oracle_address, recording_oracle_fee, reputation_oracle_fee, exchange_oracle_fee, manifest, hash)
 
 Initializes a Escrow instance.
 
@@ -541,7 +541,7 @@ Initializes a Escrow instance.
   * **reputation_oracle_address** (`str`) – Address of the Reputation Oracle
   * **recording_oracle_fee** (`Decimal`) – Fee percentage of the Recording Oracle
   * **reputation_oracle_fee** (`Decimal`) – Fee percentage of the Reputation Oracle
-  * **manifest_url** (`str`) – Manifest file url
+  * **manifest** (`str`) – Manifest data (can be a URL or JSON string)
   * **hash** (`str`) – Manifest file hash
 
 ### *class* human_protocol_sdk.escrow.escrow_client.EscrowWithdraw(tx_hash, token_address, withdrawn_amount)

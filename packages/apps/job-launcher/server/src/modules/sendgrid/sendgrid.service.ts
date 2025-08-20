@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { MailDataRequired, MailService } from '@sendgrid/mail';
 import { SendgridConfigService } from '../../common/config/sendgrid-config.service';
 import {
@@ -7,10 +7,11 @@ import {
 } from '../../common/constants';
 import { ErrorSendGrid } from '../../common/constants/errors';
 import { ConflictError, ServerError } from '../../common/errors';
+import logger from '../../logger';
 
 @Injectable()
 export class SendGridService {
-  private readonly logger = new Logger(SendGridService.name);
+  private readonly logger = logger.child({ context: SendGridService.name });
 
   private readonly defaultFromEmail: string;
   private readonly defaultFromName: string;
@@ -44,7 +45,7 @@ export class SendGridService {
   }: Partial<MailDataRequired>): Promise<void> {
     try {
       if (this.sendgridConfigService.apiKey === SENDGRID_API_KEY_DISABLED) {
-        this.logger.debug(personalizations);
+        this.logger.debug('Sending email in dev mode', { personalizations });
         return;
       }
 
@@ -54,10 +55,12 @@ export class SendGridService {
         personalizations,
         ...emailData,
       });
-      this.logger.log('Email sent successfully');
       return;
     } catch (error) {
-      this.logger.error(error, SendGridService.name);
+      this.logger.error('Error while sending email', {
+        error,
+        templateId,
+      });
       throw new ServerError(ErrorSendGrid.EmailNotSent);
     }
   }

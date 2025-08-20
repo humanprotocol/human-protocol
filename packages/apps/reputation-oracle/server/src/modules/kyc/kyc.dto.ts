@@ -8,7 +8,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-import { KycStatus } from './constants';
+import { KycStatus } from '@/common/enums';
 
 export class StartSessionResponseDto {
   @ApiProperty()

@@ -2,7 +2,6 @@ import * as Joi from 'joi';
 
 export const envValidator = Joi.object({
   // General
-  NODE_ENV: Joi.string(),
   HOST: Joi.string(),
   PORT: Joi.string(),
   FE_URL: Joi.string(),
@@ -47,6 +46,7 @@ export const envValidator = Joi.object({
   RPC_URL_POLYGON_AMOY: Joi.string(),
   RPC_URL_BSC_MAINNET: Joi.string(),
   RPC_URL_BSC_TESTNET: Joi.string(),
+  RPC_URL_AURORA_TESTNET: Joi.string(),
   RPC_URL_MOONBEAM: Joi.string(),
   RPC_URL_XLAYER_TESTNET: Joi.string(),
   RPC_URL_XLAYER: Joi.string(),
@@ -59,11 +59,11 @@ export const envValidator = Joi.object({
   S3_BUCKET: Joi.string(),
   S3_USE_SSL: Joi.string(),
   // Stripe
-  STRIPE_SECRET_KEY: Joi.string().required(),
-  STRIPE_API_VERSION: Joi.string(),
-  STRIPE_APP_NAME: Joi.string(),
-  STRIPE_APP_VERSION: Joi.string(),
-  STRIPE_APP_INFO_URL: Joi.string(),
+  PAYMENT_PROVIDER_SECRET_KEY: Joi.string().required(),
+  PAYMENT_PROVIDER_API_VERSION: Joi.string(),
+  PAYMENT_PROVIDER_APP_NAME: Joi.string(),
+  PAYMENT_PROVIDER_APP_VERSION: Joi.string(),
+  PAYMENT_PROVIDER_APP_INFO_URL: Joi.string(),
   // SendGrid
   SENDGRID_API_KEY: Joi.string().required(),
   SENDGRID_FROM_EMAIL: Joi.string(),

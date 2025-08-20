@@ -9,7 +9,7 @@ import {
   NETWORKS,
   StorageParams,
 } from '@human-protocol/sdk';
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import {
   ValidationError as ClassValidationError,
@@ -76,12 +76,15 @@ import {
 import { JobEntity } from './job.entity';
 import { EscrowAction } from './job.interface';
 import { JobRepository } from './job.repository';
+import logger from '../../logger';
+
 @Injectable()
 export class JobService {
-  public readonly logger = new Logger(JobService.name);
+  private readonly logger = logger.child({ context: JobService.name });
   public readonly storageParams: StorageParams;
   public readonly bucket: string;
   private cronJobRepository: CronJobRepository;
+
   constructor(
     @Inject(Web3Service)
     private readonly web3Service: Web3Service,
@@ -146,9 +149,9 @@ export class JobService {
     const whitelisted = await this.whitelistService.isUserWhitelisted(user.id);
     if (!whitelisted) {
       if (
-        !user.stripeCustomerId ||
+        !user.paymentProviderId ||
         !(await this.paymentService.getDefaultPaymentMethod(
-          user.stripeCustomerId,
+          user.paymentProviderId,
         ))
       )
         throw new ValidationError(ErrorJob.NotActiveCard);
@@ -366,7 +369,7 @@ export class JobService {
         jobEntity.exchangeOracle,
         jobEntity.chainId,
       ),
-      manifestUrl: jobEntity.manifestUrl,
+      manifest: jobEntity.manifestUrl,
       manifestHash: jobEntity.manifestHash,
     };
 
@@ -583,11 +586,10 @@ export class JobService {
       }
 
       if (allFortuneValidationErrors.length > 0) {
-        this.logger.log(
-          ErrorJob.ResultValidationFailed,
-          JobService.name,
-          allFortuneValidationErrors,
-        );
+        this.logger.error(ErrorJob.ResultValidationFailed, {
+          jobId: jobEntity.id,
+          validationErrors: allFortuneValidationErrors,
+        });
         throw new ValidationError(ErrorJob.ResultValidationFailed);
       }
       return data;

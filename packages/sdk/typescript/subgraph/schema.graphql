@@ -76,7 +76,7 @@ type Escrow @entity(immutable: false) {
   totalFundedAmount: BigInt!
   amountPaid: BigInt!
   status: String! # string
-  manifestUrl: String # string
+  manifest: String # string
   manifestHash: String # string
   reputationOracle: Bytes # address
   recordingOracle: Bytes # address

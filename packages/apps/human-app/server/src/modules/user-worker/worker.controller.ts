@@ -1,19 +1,13 @@
 import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
-import {
-  Body,
-  Controller,
-  Get,
-  Post,
-  UsePipes,
-  ValidationPipe,
-} from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Post, Request } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Authorization } from '../../common/config/params-decorators';
+import { Public } from '../../common/decorators';
+import { RequestWithUser } from '../../common/interfaces/jwt';
 import {
-  RegistrationInExchangeOracleResponse,
   RegistrationInExchangeOracleCommand,
   RegistrationInExchangeOracleDto,
+  RegistrationInExchangeOracleResponse,
   RegistrationInExchangeOraclesResponse,
   SignupWorkerCommand,
   SignupWorkerDto,
@@ -32,10 +26,12 @@ export class WorkerController {
     private readonly service: WorkerService,
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
-  @Post('/auth/signup')
+
   @ApiOperation({ summary: 'Worker signup' })
-  @UsePipes(new ValidationPipe())
-  public signupWorker(@Body() signupWorkerDto: SignupWorkerDto): Promise<void> {
+  @Public()
+  @HttpCode(200)
+  @Post('/auth/signup')
+  async signupWorker(@Body() signupWorkerDto: SignupWorkerDto): Promise<void> {
     const signupWorkerCommand = this.mapper.map(
       signupWorkerDto,
       SignupWorkerDto,
@@ -44,10 +40,11 @@ export class WorkerController {
     return this.service.signupWorker(signupWorkerCommand);
   }
 
-  @Post('/auth/signin')
   @ApiOperation({ summary: 'Worker signin' })
-  @UsePipes(new ValidationPipe())
-  public signinWorker(
+  @Public()
+  @HttpCode(200)
+  @Post('/auth/signin')
+  async signinWorker(
     @Body() signinWorkerDto: SigninWorkerDto,
   ): Promise<SigninWorkerResponse> {
     const signinWorkerCommand = this.mapper.map(
@@ -58,33 +55,34 @@ export class WorkerController {
     return this.service.signinWorker(signinWorkerCommand);
   }
 
-  @ApiBearerAuth()
-  @Post('/exchange-oracle-registration')
   @ApiOperation({ summary: 'Registers a worker in Exchange Oracle' })
-  @UsePipes(new ValidationPipe())
-  public createRegistrationInExchangeOracle(
+  @ApiBearerAuth()
+  @HttpCode(200)
+  @Post('/exchange-oracle-registration')
+  async createRegistrationInExchangeOracle(
     @Body() registrationInExchangeOracleDto: RegistrationInExchangeOracleDto,
-    @Authorization() token: string,
+
+    @Request() req: RequestWithUser,
   ): Promise<RegistrationInExchangeOracleResponse> {
     const registrationInExchangeOracle = this.mapper.map(
       registrationInExchangeOracleDto,
       RegistrationInExchangeOracleDto,
       RegistrationInExchangeOracleCommand,
     );
-    registrationInExchangeOracle.token = token;
+    registrationInExchangeOracle.token = req.token;
 
     return this.service.registrationInExchangeOracle(
       registrationInExchangeOracle,
     );
   }
 
-  @ApiBearerAuth()
-  @Get('/exchange-oracle-registration')
   @ApiOperation({ summary: 'Retrieves oracles registered by the worker' })
-  @UsePipes(new ValidationPipe())
-  public getRegistrationInExchangeOracles(
-    @Authorization() token: string,
+  @ApiBearerAuth()
+  @HttpCode(200)
+  @Get('/exchange-oracle-registration')
+  async getRegistrationInExchangeOracles(
+    @Request() req: RequestWithUser,
   ): Promise<RegistrationInExchangeOraclesResponse> {
-    return this.service.getRegistrationInExchangeOracles(token);
+    return this.service.getRegistrationInExchangeOracles(req.token);
   }
 }

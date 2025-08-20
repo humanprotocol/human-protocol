@@ -1,18 +1,16 @@
 import { KVStoreClient, KVStoreUtils } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 
-import { SignatureType } from '../../common/enums';
-import { Web3ConfigService } from '../../config';
-import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
-import * as web3Utils from '../../utils/web3';
-
-import { KycStatus } from '../kyc/constants';
-import { Web3Service } from '../web3/web3.service';
+import { SignatureType } from '@/common/enums';
+import { KycStatus, UserRole } from '@/common/enums';
+import { Web3ConfigService } from '@/config';
+import { HCaptchaService } from '@/integrations/hcaptcha/hcaptcha.service';
+import { Web3Service } from '@/modules/web3';
+import * as web3Utils from '@/utils/web3';
 
 import { SiteKeyEntity, SiteKeyType } from './site-key.entity';
 import { SiteKeyRepository } from './site-key.repository';
 import { OperatorUserEntity, Web2UserEntity } from './types';
-import { Role as UserRole } from './user.entity';
 import {
   DuplicatedWalletAddressError,
   InvalidWeb3SignatureError,
@@ -213,7 +211,9 @@ export class UserService {
         signer.address,
         operatorUser.evmAddress,
       );
-    } catch {}
+    } catch {
+      // noop
+    }
 
     if (status === OperatorStatus.ACTIVE) {
       throw new UserError(

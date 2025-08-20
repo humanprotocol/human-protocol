@@ -49,8 +49,23 @@ def track_assignments(logger: logging.Logger) -> None:
     Tracks assignments:
     1. Checks time for each active assignment
     2. If an assignment is timed out, expires it
-    3. If a project or task state is not "annotation", cancels assignments
+    3. If an assignment is canceled, resets it
+    4. If a project or task state is not "annotation", cancels assignments
     """
+
+    def _reset_job_after_assignment(session: Session, assignment: cvat_models.Assignment):
+        latest_assignment = cvat_service.get_latest_assignment_by_cvat_job_id(
+            session, assignment.cvat_job_id
+        )
+        if latest_assignment.id == assignment.id:
+            # Avoid un-assigning if it's not the latest assignment
+
+            cvat_api.update_job_assignee(
+                assignment.cvat_job_id, assignee_id=None
+            )  # note that calling it in a loop can take too much time
+
+            cvat_service.update_job_status(session, assignment.job.id, status=JobStatuses.new)
+
     with SessionLocal.begin() as session:
         assignments = cvat_service.get_unprocessed_expired_assignments(
             session,
@@ -67,17 +82,27 @@ def track_assignments(logger: logging.Logger) -> None:
                 )
             )
 
-            latest_assignment = cvat_service.get_latest_assignment_by_cvat_job_id(
-                session, assignment.cvat_job_id
-            )
-            if latest_assignment.id == assignment.id:
-                # Avoid un-assigning if it's not the latest assignment
-
-                cvat_api.update_job_assignee(
-                    assignment.cvat_job_id, assignee_id=None
-                )  # note that calling it in a loop can take too much time
-
             cvat_service.expire_assignment(session, assignment.id)
+            _reset_job_after_assignment(session, assignment)
+
+        cvat_service.touch(session, cvat_models.Job, [a.job.id for a in assignments])
+
+    with SessionLocal.begin() as session:
+        assignments = cvat_service.get_unprocessed_cancelled_assignments(
+            session,
+            limit=CronConfig.track_assignments_chunk_size,
+            for_update=ForUpdateParams(skip_locked=True),
+        )
+
+        for assignment in assignments:
+            logger.info(
+                "Finalizing the canceled assignment {} (user {}, job id {})".format(
+                    assignment.id,
+                    assignment.user_wallet_address,
+                    assignment.cvat_job_id,
+                )
+            )
+            _reset_job_after_assignment(session, assignment)
 
         cvat_service.touch(session, cvat_models.Job, [a.job.id for a in assignments])
 
@@ -99,17 +124,8 @@ def track_assignments(logger: logging.Logger) -> None:
                     )
                 )
 
-                latest_assignment = cvat_service.get_latest_assignment_by_cvat_job_id(
-                    session, assignment.cvat_job_id
-                )
-                if latest_assignment.id == assignment.id:
-                    # Avoid un-assigning if it's not the latest assignment
-
-                    cvat_api.update_job_assignee(
-                        assignment.cvat_job_id, assignee_id=None
-                    )  # note that calling it in a loop can take too much time
-
                 cvat_service.cancel_assignment(session, assignment.id)
+                _reset_job_after_assignment(session, assignment)
 
         cvat_service.touch(session, cvat_models.Job, [a.job.id for a in assignments])
 

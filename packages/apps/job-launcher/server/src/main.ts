@@ -1,4 +1,3 @@
-import { INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 
@@ -8,15 +7,19 @@ import { useContainer } from 'class-validator';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { ServerConfigService } from './common/config/server-config.service';
+import logger, { nestLoggerOverride } from './logger';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
-  const app = await NestFactory.create<INestApplication>(AppModule, {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     cors: {
       exposedHeaders: ['Content-Disposition'],
     },
+    logger: nestLoggerOverride,
   });
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
+  app.set('trust proxy', 2);
   app.use(json({ limit: '5mb' }));
   app.use(urlencoded({ limit: '5mb', extended: true }));
 
@@ -38,7 +41,7 @@ async function bootstrap() {
   const port = serverConfigService.port;
 
   await app.listen(port, host, async () => {
-    console.info(`API server is running on http://${host}:${port}`);
+    logger.info(`API server is running on http://${host}:${port}`);
   });
 }
 

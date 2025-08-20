@@ -6,6 +6,7 @@ const DEFAULT_CACHE_TTL_HCAPTCHA_USER_STATS = 12 * 60 * 60;
 const DEFAULT_CACHE_TTL_ORACLE_STATS = 12 * 60 * 60;
 const DEFAULT_CACHE_TTL_USER_STATS = 15 * 60;
 const DEFAULT_CACHE_TTL_ORACLE_DISCOVERY = 24 * 60 * 60;
+const DEFAULT_CACHE_TTL_ORACLE_AVAILABLE_JOBS = 2 * 60;
 const DEFAULT_JOB_ASSIGNMENTS_DATA_RETENTION_DAYS = 45;
 const DEFAULT_CACHE_TTL_DAILY_HMT_SPENT = 24 * 60 * 60;
 const DEFAULT_CORS_ALLOWED_ORIGIN = 'http://localhost:5173';
@@ -34,10 +35,6 @@ export class EnvironmentConfigService {
    */
   get port(): number {
     return this.configService.getOrThrow<number>('PORT');
-  }
-
-  get gitHash(): string {
-    return this.configService.get<string>('GIT_HASH', '');
   }
 
   /**
@@ -160,6 +157,19 @@ export class EnvironmentConfigService {
       this.configService.get<number>(
         'CACHE_TTL_ORACLE_DISCOVERY',
         DEFAULT_CACHE_TTL_ORACLE_DISCOVERY,
+      ) * 1000
+    );
+  }
+
+  /**
+   * The cache time-to-live (TTL) for oracle's available jobs.
+   * Default: 2 minutes
+   */
+  get cacheTtlOracleAvailableJobs(): number {
+    return (
+      this.configService.get<number>(
+        'CACHE_TTL_ORACLE_AVAILABLE_JOBS',
+        DEFAULT_CACHE_TTL_ORACLE_AVAILABLE_JOBS,
       ) * 1000
     );
   }

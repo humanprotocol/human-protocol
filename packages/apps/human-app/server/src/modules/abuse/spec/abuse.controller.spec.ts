@@ -12,6 +12,7 @@ import {
   TOKEN,
 } from './abuse.fixtures';
 import { AbuseProfile } from '../abuse.mapper.profile';
+import { RequestWithUser } from '../../../common/interfaces/jwt';
 
 describe('AbuseController', () => {
   let controller: AbuseController;
@@ -42,7 +43,9 @@ describe('AbuseController', () => {
       const dto = reportAbuseDtoFixture;
       const command = reportAbuseCommandFixture;
 
-      await controller.reportAbuse(dto, TOKEN);
+      await controller.reportAbuse(dto, {
+        token: TOKEN,
+      } as RequestWithUser);
 
       expect(abuseServiceMock.reportAbuse).toHaveBeenCalledWith(command);
     });
@@ -56,7 +59,9 @@ describe('AbuseController', () => {
         reportedAbuseResponseFixture,
       );
 
-      const result = await controller.getUserAbuseReports(token);
+      const result = await controller.getUserAbuseReports({
+        token: TOKEN,
+      } as RequestWithUser);
 
       expect(abuseServiceMock.getUserAbuseReports).toHaveBeenCalledWith(token);
       expect(result).toEqual(reportedAbuseResponseFixture);

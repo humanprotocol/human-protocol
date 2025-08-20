@@ -10,6 +10,7 @@ import {
   type RefreshJobsBody,
   type RejectTaskBody,
   type AvailableJobsSuccessResponse,
+  type ReportAbuseBody,
 } from '../types';
 
 const apiPaths = {
@@ -19,6 +20,7 @@ const apiPaths = {
   resignJob: '/assignment/resign-job',
   refreshJobs: '/assignment/refresh',
   uiConfig: '/ui-config',
+  reportAbuse: '/abuse/report',
 };
 
 async function fetchAvailableJobs(args: JobsBody) {
@@ -91,7 +93,7 @@ async function resignJob(data: RejectTaskBody) {
 
 async function refreshJobs(data: RefreshJobsBody) {
   try {
-    await authorizedHumanAppApiClient.put(apiPaths.refreshJobs, {
+    await authorizedHumanAppApiClient.post(apiPaths.refreshJobs, {
       body: { ...data },
     });
   } catch (error: unknown) {
@@ -102,4 +104,17 @@ async function refreshJobs(data: RefreshJobsBody) {
   }
 }
 
-export { fetchAvailableJobs, fetchMyJobs, assignJob, resignJob, refreshJobs };
+function reportAbuse(data: ReportAbuseBody) {
+  return authorizedHumanAppApiClient.post(apiPaths.reportAbuse, {
+    body: { ...data },
+  });
+}
+
+export {
+  fetchAvailableJobs,
+  fetchMyJobs,
+  assignJob,
+  resignJob,
+  refreshJobs,
+  reportAbuse,
+};

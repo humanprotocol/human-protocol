@@ -1,20 +1,17 @@
-import {
-  Body,
-  Controller,
-  Post,
-  UsePipes,
-  ValidationPipe,
-} from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
-import { TokenRefreshService } from './token-refresh.service';
+import { InjectMapper } from '@automapper/nestjs';
+import { Body, Controller, HttpCode, Post } from '@nestjs/common';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Public } from '../../common/decorators';
 import {
   TokenRefreshCommand,
   TokenRefreshDto,
+  TokenRefreshResponse,
 } from './model/token-refresh.model';
-import { TokenRefreshResponse } from './model/token-refresh.model';
+import { TokenRefreshService } from './token-refresh.service';
 
+@ApiTags('Refresh-Token')
+@Public()
 @Controller()
 export class TokenRefreshController {
   constructor(
@@ -22,11 +19,10 @@ export class TokenRefreshController {
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
 
-  @ApiTags('Refresh-Token')
-  @Post('/auth/refresh')
   @ApiOperation({ summary: 'Refresh token' })
-  @UsePipes(new ValidationPipe())
-  public refreshToken(
+  @HttpCode(200)
+  @Post('/auth/refresh')
+  async refreshToken(
     @Body() dto: TokenRefreshDto,
   ): Promise<TokenRefreshResponse> {
     const command = this.mapper.map(dto, TokenRefreshDto, TokenRefreshCommand);

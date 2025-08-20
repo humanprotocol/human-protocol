@@ -1,4 +1,3 @@
-import unittest
 import uuid
 from datetime import datetime, timedelta
 
@@ -19,6 +18,7 @@ from src.db import SessionLocal
 from src.models.cvat import Assignment, DataUpload, Image, Job, Project, Task, User
 from src.utils.time import utcnow
 
+from tests.utils.constants import WALLET_ADDRESS1, WALLET_ADDRESS2
 from tests.utils.db_helper import (
     create_project,
     create_project_and_task,
@@ -26,12 +26,18 @@ from tests.utils.db_helper import (
 )
 
 
-class ServiceIntegrationTest(unittest.TestCase):
+class ServiceIntegrationTest:
+    @pytest.fixture(autouse=True)
     def setUp(self):
         self.session = SessionLocal()
 
-    def tearDown(self):
-        self.session.close()
+        try:
+            self.session.begin()
+
+            yield
+        finally:
+            self.session.rollback()
+            self.session.close()
 
     def test_create_project(self):
         cvat_id = 1
@@ -347,89 +353,126 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         assert len(projects) == 1
 
-    def test_get_available_projects(self):
-        cvat_id_1 = 456
+    def test_can_get_free_job_if_exists(self):
+        escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
+
         (cvat_project, cvat_task, cvat_job) = create_project_task_and_job(
-            self.session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", cvat_id_1
+            self.session, escrow_address, cvat_id=1
         )
+        chain_id = cvat_project.chain_id
 
-        projects = cvat_service.get_available_projects(self.session)
-
-        assert len(projects) == 1
-
-        cvat_id_2 = 457
-        (cvat_project, cvat_task) = create_project_and_task(
-            self.session, "0x86e83d346041E8806e352681f3F14549C0d2BC68", cvat_id_2
-        )
-
-        cvat_task_id = cvat_task.cvat_id
-        cvat_project_id = cvat_project.cvat_id
-
-        cvat_service.create_job(
-            session=self.session,
-            cvat_id=cvat_id_2,
-            cvat_task_id=cvat_task_id,
-            cvat_project_id=cvat_project_id,
-            status=JobStatuses.in_progress,
-            start_frame=0,
-            stop_frame=1,
-        )
-
-        cvat_id_3 = 458
-        (cvat_project, cvat_task, _) = create_project_task_and_job(
-            self.session, "0x86e83d346041E8806e352681f3F14549C0d2BC69", cvat_id_3
-        )
-
-        projects = cvat_service.get_available_projects(self.session)
-        assert len(projects) == 2
-        assert any(project.cvat_id == cvat_id_1 for project in projects)
-        assert any(project.cvat_id == cvat_id_3 for project in projects)
-
-    def test_get_projects_by_assignee(self):
-        wallet_address_1 = "0x86e83d346041E8806e352681f3F14549C0d2BC60"
-        cvat_id_1 = 456
-
-        create_project_task_and_job(
-            self.session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", cvat_id_1
-        )
-
-        user = User(wallet_address=wallet_address_1, cvat_id=cvat_id_1, cvat_email="test@hmt.ai")
+        user = User(wallet_address=WALLET_ADDRESS1, cvat_email="test1@hmt.ai", cvat_id=1)
         self.session.add(user)
 
-        cvat_service.create_assignment(
-            session=self.session,
-            wallet_address=wallet_address_1,
-            cvat_job_id=cvat_id_1,
-            expires_at=datetime.now() + timedelta(days=1),
+        self.session.commit()
+
+        free_job = cvat_service.get_free_job(
+            self.session, escrow_address, chain_id, user_wallet_address=WALLET_ADDRESS1
         )
+        assert free_job.id == cvat_job.id
 
-        wallet_address_2 = "0x86e83d346041E8806e352681f3F14549C0d2BC61"
-        cvat_id_2 = 457
+    def test_cannot_get_free_job_if_all_completed_and_not_project_checked_yet(self):
+        escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
 
-        create_project_task_and_job(
-            self.session, "0x86e83d346041E8806e352681f3F14549C0d2BC68", cvat_id_2
+        (cvat_project, cvat_task, cvat_job) = create_project_task_and_job(
+            self.session, escrow_address, cvat_id=1
         )
+        chain_id = cvat_project.chain_id
 
-        user = User(wallet_address=wallet_address_2, cvat_id=cvat_id_2, cvat_email="test2@hmt.ai")
-        self.session.add(user)
+        cvat_job.status = JobStatuses.completed.value
+        cvat_job.updated_at = utcnow()
+        self.session.add(cvat_job)
 
-        cvat_service.create_assignment(
-            session=self.session,
-            wallet_address=wallet_address_2,
-            cvat_job_id=cvat_id_2,
-            expires_at=utcnow(),
+        user1 = User(wallet_address=WALLET_ADDRESS1, cvat_email="test1@hmt.ai", cvat_id=1)
+        self.session.add(user1)
+
+        user2 = User(wallet_address=WALLET_ADDRESS2, cvat_email="test2@hmt.ai", cvat_id=2)
+        self.session.add(user2)
+
+        assignment = Assignment(
+            id=str(uuid.uuid4()),
+            user_wallet_address=WALLET_ADDRESS2,
+            cvat_job_id=cvat_job.cvat_id,
+            expires_at=utcnow() + timedelta(days=1),
+            completed_at=utcnow(),
+            status=AssignmentStatuses.completed.value,
         )
+        self.session.add(assignment)
 
-        projects = cvat_service.get_projects_by_assignee(self.session, wallet_address_1)
+        self.session.commit()
 
-        assert len(projects) == 1
-        assert projects[0].cvat_id == cvat_id_1
+        free_job = cvat_service.get_free_job(
+            self.session, escrow_address, chain_id, user_wallet_address=WALLET_ADDRESS1
+        )
+        assert free_job is None
 
-        projects = cvat_service.get_projects_by_assignee(self.session, wallet_address_2)
+    @pytest.mark.parametrize("previous_assignment_status", AssignmentStatuses)
+    def test_cannot_get_free_job_if_was_assigned_to_this_user(
+        self, previous_assignment_status: AssignmentStatuses
+    ):
+        escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
 
-        assert (
-            len(projects) == 0
-        )  # expired should not be shown, https://github.com/humanprotocol/human-protocol/pull/1879
+        (cvat_project, _, cvat_job) = create_project_task_and_job(
+            self.session, escrow_address, cvat_id=1
+        )
+        chain_id = cvat_project.chain_id
+
+        user1 = User(wallet_address=WALLET_ADDRESS1, cvat_email="test1@hmt.ai", cvat_id=1)
+        self.session.add(user1)
+
+        user2 = User(wallet_address=WALLET_ADDRESS2, cvat_email="test2@hmt.ai", cvat_id=2)
+        self.session.add(user2)
+
+        assignment = Assignment(
+            id=str(uuid.uuid4()),
+            user_wallet_address=WALLET_ADDRESS1,
+            cvat_job_id=cvat_job.cvat_id,
+            expires_at=utcnow() + timedelta(days=1),
+            status=previous_assignment_status.value,
+        )
+        if previous_assignment_status == AssignmentStatuses.completed:
+            assignment.completed_at = utcnow()
+        self.session.add(assignment)
+
+        self.session.commit()
+
+        free_job = cvat_service.get_free_job(
+            self.session, escrow_address, chain_id, user_wallet_address=WALLET_ADDRESS1
+        )
+        assert free_job is None
+
+    def test_cannot_get_free_job_if_assigned_to_other_user(self):
+        escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
+
+        (cvat_project, _, cvat_job) = create_project_task_and_job(
+            self.session, escrow_address, cvat_id=1
+        )
+        chain_id = cvat_project.chain_id
+
+        cvat_job.status = JobStatuses.in_progress
+        self.session.add(cvat_job)
+
+        user1 = User(wallet_address=WALLET_ADDRESS1, cvat_email="test1@hmt.ai", cvat_id=1)
+        self.session.add(user1)
+
+        user2 = User(wallet_address=WALLET_ADDRESS2, cvat_email="test2@hmt.ai", cvat_id=2)
+        self.session.add(user2)
+
+        assignment = Assignment(
+            id=str(uuid.uuid4()),
+            user_wallet_address=WALLET_ADDRESS2,
+            cvat_job_id=cvat_job.cvat_id,
+            expires_at=utcnow() + timedelta(days=1),
+            status=AssignmentStatuses.created.value,
+        )
+        self.session.add(assignment)
+
+        self.session.commit()
+
+        free_job = cvat_service.get_free_job(
+            self.session, escrow_address, chain_id, user_wallet_address=WALLET_ADDRESS1
+        )
+        assert free_job is None
 
     def test_update_project_status(self):
         cvat_id = 1
@@ -1300,7 +1343,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             session=self.session,
             wallet_address=wallet_address,
             cvat_job_id=cvat_job.cvat_id,
-            expires_at=datetime.now(),
+            expires_at=utcnow(),
         )
 
         assignment_count = self.session.query(Assignment).count()
@@ -1322,7 +1365,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             session=self.session,
             wallet_address="invalid_address",
             cvat_job_id=cvat_job.cvat_id,
-            expires_at=datetime.now(),
+            expires_at=utcnow(),
         )
         with pytest.raises(IntegrityError):
             self.session.commit()
@@ -1340,7 +1383,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             session=self.session,
             wallet_address=wallet_address,
             cvat_job_id=0,
-            expires_at=datetime.now(),
+            expires_at=utcnow(),
         )
         with pytest.raises(IntegrityError):
             self.session.commit()
@@ -1368,13 +1411,13 @@ class ServiceIntegrationTest(unittest.TestCase):
             session=self.session,
             wallet_address=wallet_address_1,
             cvat_job_id=cvat_job.cvat_id,
-            expires_at=datetime.now(),
+            expires_at=utcnow(),
         )
         assignment_2 = cvat_service.create_assignment(
             session=self.session,
             wallet_address=wallet_address_2,
             cvat_job_id=cvat_job.cvat_id,
-            expires_at=datetime.now(),
+            expires_at=utcnow(),
         )
         self.session.commit()
 
@@ -1414,14 +1457,14 @@ class ServiceIntegrationTest(unittest.TestCase):
             id=str(uuid.uuid4()),
             user_wallet_address=wallet_address_1,
             cvat_job_id=cvat_job.cvat_id,
-            expires_at=datetime.now(),
-            created_at=datetime.now() - timedelta(days=1),
+            expires_at=utcnow(),
+            created_at=utcnow() - timedelta(days=1),
         )
         assignment_2 = Assignment(
             id=str(uuid.uuid4()),
             user_wallet_address=wallet_address_2,
             cvat_job_id=cvat_job.cvat_id,
-            expires_at=datetime.now(),
+            expires_at=utcnow(),
         )
         self.session.add(assignment)
         self.session.add(assignment_2)
@@ -1457,13 +1500,13 @@ class ServiceIntegrationTest(unittest.TestCase):
             id=str(uuid.uuid4()),
             user_wallet_address=wallet_address_1,
             cvat_job_id=cvat_job.cvat_id,
-            expires_at=datetime.now() + timedelta(days=1),
+            expires_at=utcnow() + timedelta(days=1),
         )
         assignment_2 = Assignment(
             id=str(uuid.uuid4()),
             user_wallet_address=wallet_address_2,
             cvat_job_id=cvat_job.cvat_id,
-            expires_at=datetime.now() - timedelta(days=1),
+            expires_at=utcnow() - timedelta(days=1),
         )
         self.session.add(assignment)
         self.session.add(assignment_2)
@@ -1491,7 +1534,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             id=str(uuid.uuid4()),
             user_wallet_address=wallet_address_1,
             cvat_job_id=cvat_job.cvat_id,
-            expires_at=datetime.now() + timedelta(days=1),
+            expires_at=utcnow() + timedelta(days=1),
         )
         self.session.add(assignment)
         self.session.commit()
@@ -1521,7 +1564,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             id=str(uuid.uuid4()),
             user_wallet_address=wallet_address_1,
             cvat_job_id=cvat_job.cvat_id,
-            expires_at=datetime.now() + timedelta(days=1),
+            expires_at=utcnow() + timedelta(days=1),
         )
         self.session.add(assignment)
         self.session.commit()
@@ -1549,7 +1592,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             id=str(uuid.uuid4()),
             user_wallet_address=wallet_address_1,
             cvat_job_id=cvat_job.cvat_id,
-            expires_at=datetime.now() + timedelta(days=1),
+            expires_at=utcnow() + timedelta(days=1),
         )
         self.session.add(assignment)
         self.session.commit()
@@ -1577,11 +1620,11 @@ class ServiceIntegrationTest(unittest.TestCase):
             id=str(uuid.uuid4()),
             user_wallet_address=wallet_address_1,
             cvat_job_id=cvat_job.cvat_id,
-            expires_at=datetime.now() + timedelta(days=1),
+            expires_at=utcnow() + timedelta(days=1),
         )
         self.session.add(assignment)
         self.session.commit()
-        completed_date = datetime.now() + timedelta(days=1)
+        completed_date = utcnow() + timedelta(days=1)
         cvat_service.complete_assignment(self.session, assignment.id, completed_date)
 
         db_assignment = self.session.query(Assignment).filter_by(id=assignment.id).first()
@@ -1613,13 +1656,13 @@ class ServiceIntegrationTest(unittest.TestCase):
             id=str(uuid.uuid4()),
             user_wallet_address=wallet_address_1,
             cvat_job_id=cvat_job.cvat_id,
-            expires_at=datetime.now(),
+            expires_at=utcnow(),
         )
         assignment_2 = Assignment(
             id=str(uuid.uuid4()),
             user_wallet_address=wallet_address_2,
             cvat_job_id=cvat_job.cvat_id,
-            expires_at=datetime.now(),
+            expires_at=utcnow(),
         )
         self.session.add(assignment)
         self.session.add(assignment_2)

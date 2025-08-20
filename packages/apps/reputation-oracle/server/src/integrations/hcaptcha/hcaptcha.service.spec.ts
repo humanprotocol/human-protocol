@@ -3,17 +3,16 @@ import { HttpService } from '@nestjs/axios';
 import { Test } from '@nestjs/testing';
 import { ethers } from 'ethers';
 
-import { HCaptchaService } from './hcaptcha.service';
-import { HCaptchaConfigService } from '../../config';
-
+import { HCaptchaConfigService } from '@/config';
+import { generateEthWallet } from '~/test/fixtures/web3';
 import {
   createHttpServiceMock,
   createHttpServiceRequestError,
   createHttpServiceResponse,
-} from '../../../test/mock-creators/nest';
-import { generateEthWallet } from '../../../test/fixtures/web3';
+} from '~/test/mock-creators/nest';
 
 import { mockHCaptchaConfigService } from './fixtures';
+import { HCaptchaService } from './hcaptcha.service';
 import { LabelerData, SiteverifyResponse } from './types';
 
 const mockHttpService = createHttpServiceMock();

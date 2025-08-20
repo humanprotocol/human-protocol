@@ -207,9 +207,9 @@ export const ErrorManifestFileDoesNotExist = new Error(
 export const ErrorInvalidUrl = new Error('Invalid URL string');
 
 /**
- * @constant {Error} - URL is an empty string.
+ * @constant {Error} - Invalid manifest.
  */
-export const ErrorUrlIsEmptyString = new Error('URL is an empty string');
+export const ErrorInvalidManifest = new Error('Invalid manifest');
 
 /**
  * @constant {Error} - List of handlers cannot be empty.

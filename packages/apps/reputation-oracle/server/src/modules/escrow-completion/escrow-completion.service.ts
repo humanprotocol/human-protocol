@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 import {
   ESCROW_BULK_PAYOUT_MAX_ITEMS,
   ChainId,
@@ -7,38 +9,31 @@ import {
   OperatorUtils,
 } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
-import { ModuleRef } from '@nestjs/core';
-
-import crypto from 'crypto';
 import { ethers } from 'ethers';
 import stringify from 'json-stable-stringify';
 import _ from 'lodash';
 
-import { BACKOFF_INTERVAL_SECONDS } from '../../common/constants';
-import { isDuplicatedError } from '../../database';
-import { JobManifest, JobRequestType } from '../../common/types';
-import { ServerConfigService } from '../../config';
-import logger from '../../logger';
-import { calculateExponentialBackoffMs } from '../../utils/backoff';
-import * as manifestUtils from '../../utils/manifest';
-
-import { ReputationService } from '../reputation';
-import { StorageService } from '../storage';
-import { Web3Service } from '../web3';
-import { OutgoingWebhookService } from '../webhook/webhook-outgoing.service';
-import { OutgoingWebhookEventType } from '../webhook/types';
+import { BACKOFF_INTERVAL_SECONDS } from '@/common/constants';
+import { JobManifest, JobRequestType } from '@/common/types';
+import { ServerConfigService } from '@/config';
+import { isDuplicatedError } from '@/database';
+import logger from '@/logger';
+import { ReputationService } from '@/modules/reputation';
+import { StorageService } from '@/modules/storage';
+import { Web3Service } from '@/modules/web3';
+/**
+ * Import webhook-related items directly to avoid circular dependency
+ */
+import { OutgoingWebhookEventType } from '@/modules/webhook/types';
+import { OutgoingWebhookService } from '@/modules/webhook/webhook-outgoing.service';
+import { calculateExponentialBackoffMs } from '@/utils/backoff';
+import * as manifestUtils from '@/utils/manifest';
 
 import { DEFAULT_BULK_PAYOUT_TX_ID, EscrowCompletionStatus } from './constants';
-import { EscrowCompletionRepository } from './escrow-completion.repository';
 import { EscrowCompletionEntity } from './escrow-completion.entity';
+import { EscrowCompletionRepository } from './escrow-completion.repository';
 import { EscrowPayoutsBatchEntity } from './escrow-payouts-batch.entity';
 import { EscrowPayoutsBatchRepository } from './escrow-payouts-batch.repository';
-import {
-  AudinoResultsProcessor,
-  CvatResultsProcessor,
-  EscrowResultsProcessor,
-  FortuneResultsProcessor,
-} from './results-processing';
 import {
   AudinoPayoutsCalculator,
   CvatPayoutsCalculator,
@@ -46,6 +41,12 @@ import {
   EscrowPayoutsCalculator,
   CalculatedPayout,
 } from './payouts-calculation';
+import {
+  AudinoResultsProcessor,
+  CvatResultsProcessor,
+  EscrowResultsProcessor,
+  FortuneResultsProcessor,
+} from './results-processing';
 
 @Injectable()
 export class EscrowCompletionService {
@@ -61,7 +62,12 @@ export class EscrowCompletionService {
     private readonly storageService: StorageService,
     private readonly outgoingWebhookService: OutgoingWebhookService,
     private readonly reputationService: ReputationService,
-    private readonly moduleRef: ModuleRef,
+    private readonly audinoResultsProcessor: AudinoResultsProcessor,
+    private readonly cvatResultsProcessor: CvatResultsProcessor,
+    private readonly fortuneResultsProcessor: FortuneResultsProcessor,
+    private readonly audinoPayoutsCalculator: AudinoPayoutsCalculator,
+    private readonly cvatPayoutsCalculator: CvatPayoutsCalculator,
+    private readonly fortunePayoutsCalculator: FortunePayoutsCalculator,
   ) {}
 
   async createEscrowCompletion(
@@ -124,7 +130,7 @@ export class EscrowCompletionService {
           );
           const manifest =
             await this.storageService.downloadJsonLikeData<JobManifest>(
-              escrowData.manifestUrl as string,
+              escrowData.manifest as string,
             );
           const jobRequestType = manifestUtils.getJobRequestType(manifest);
 
@@ -437,15 +443,15 @@ export class EscrowCompletionService {
     jobRequestType: JobRequestType,
   ): EscrowResultsProcessor {
     if (manifestUtils.isFortuneJobType(jobRequestType)) {
-      return this.moduleRef.get(FortuneResultsProcessor);
+      return this.fortuneResultsProcessor;
     }
 
     if (manifestUtils.isCvatJobType(jobRequestType)) {
-      return this.moduleRef.get(CvatResultsProcessor);
+      return this.cvatResultsProcessor;
     }
 
     if (manifestUtils.isAudinoJobType(jobRequestType)) {
-      return this.moduleRef.get(AudinoResultsProcessor);
+      return this.audinoResultsProcessor;
     }
 
     throw new Error(
@@ -457,15 +463,15 @@ export class EscrowCompletionService {
     jobRequestType: JobRequestType,
   ): EscrowPayoutsCalculator {
     if (manifestUtils.isFortuneJobType(jobRequestType)) {
-      return this.moduleRef.get(FortunePayoutsCalculator);
+      return this.fortunePayoutsCalculator;
     }
 
     if (manifestUtils.isCvatJobType(jobRequestType)) {
-      return this.moduleRef.get(CvatPayoutsCalculator);
+      return this.cvatPayoutsCalculator;
     }
 
     if (manifestUtils.isAudinoJobType(jobRequestType)) {
-      return this.moduleRef.get(AudinoPayoutsCalculator);
+      return this.audinoPayoutsCalculator;
     }
 
     throw new Error(

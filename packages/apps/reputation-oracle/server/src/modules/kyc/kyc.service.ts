@@ -3,13 +3,13 @@ import { Injectable } from '@nestjs/common';
 import { AxiosError } from 'axios';
 import { catchError, firstValueFrom } from 'rxjs';
 
-import { KycConfigService, Web3ConfigService } from '../../config';
-import logger from '../../logger';
-import * as httpUtils from '../../utils/http';
-import { UserNotFoundError, UserRepository } from '../user';
-import { Web3Service } from '../web3';
+import { KycStatus } from '@/common/enums';
+import { KycConfigService, Web3ConfigService } from '@/config';
+import logger from '@/logger';
+import { UserNotFoundError, UserRepository } from '@/modules/user';
+import { Web3Service } from '@/modules/web3';
+import * as httpUtils from '@/utils/http';
 
-import { KycStatus } from './constants';
 import { KycSignedAddressDto, UpdateKycStatusDto } from './kyc.dto';
 import { KycEntity } from './kyc.entity';
 import { KycErrorMessage, KycError } from './kyc.error';
