@@ -4032,7 +4032,7 @@ __metadata:
     use-debounce: "npm:^10.0.2"
     vite: "npm:^6.2.4"
     vite-plugin-node-polyfills: "npm:^0.23.0"
-    zod: "npm:^3.23.8"
+    zod: "npm:~3.24.4"
     zustand: "npm:^4.5.4"
   languageName: unknown
   linkType: soft
@@ -4327,7 +4327,7 @@ __metadata:
     vite-plugin-svgr: "npm:^4.2.0"
     vitest: "npm:^3.1.1"
     wagmi: "npm:^2.15.6"
-    zod: "npm:^3.22.4"
+    zod: "npm:~3.24.4"
     zustand: "npm:^4.5.0"
   languageName: unknown
   linkType: soft
@@ -30427,10 +30427,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zod@npm:^3.21.4, zod@npm:^3.22.4, zod@npm:^3.23.8":
+"zod@npm:^3.21.4":
   version: 3.25.76
   resolution: "zod@npm:3.25.76"
   checksum: 10c0/5718ec35e3c40b600316c5b4c5e4976f7fee68151bc8f8d90ec18a469be9571f072e1bbaace10f1e85cf8892ea12d90821b200e980ab46916a6166a4260a983c
+  languageName: node
+  linkType: hard
+
+"zod@npm:~3.24.4":
+  version: 3.24.4
+  resolution: "zod@npm:3.24.4"
+  checksum: 10c0/ab3112f017562180a41a0f83d870b333677f7d6b77f106696c56894567051b91154714a088149d8387a4f50806a2520efcb666f108cd384a35c236a191186d91
   languageName: node
   linkType: hard
 
