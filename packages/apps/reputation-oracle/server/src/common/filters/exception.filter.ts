@@ -56,7 +56,10 @@ export class ExceptionFilter implements IExceptionFilter {
         );
       }
     } else {
-      this.logger.error('Unhandled exception', exception);
+      this.logger.error('Unhandled exception', {
+        error: exception,
+        path: request.url,
+      });
     }
 
     response.removeHeader('Cache-Control');

@@ -16,6 +16,7 @@ export class ExceptionFilter implements IExceptionFilter {
   catch(exception: any, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
+    const request = ctx.getRequest();
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let message: any = 'Internal Server Error';
@@ -31,12 +32,17 @@ export class ExceptionFilter implements IExceptionFilter {
       let formattedError = exception;
       if (exception instanceof AxiosError) {
         formattedError = errorUtils.formatError(exception);
+        formattedError.outgoingRequestUrl = exception.config?.url;
       }
-      this.logger.error('Unhandled exception', formattedError);
+      this.logger.error('Unhandled exception', {
+        error: formattedError,
+        path: request.url,
+      });
     }
 
     if (typeof status !== 'number' || status < 100 || status >= 600) {
       this.logger.error('Invalid status code in exception filter', {
+        path: request.url,
         status,
       });
       status = HttpStatus.INTERNAL_SERVER_ERROR;
