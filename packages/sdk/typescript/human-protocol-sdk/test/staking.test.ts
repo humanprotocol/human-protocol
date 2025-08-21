@@ -292,7 +292,6 @@ describe('StakingClient', () => {
 
   describe('withdraw', () => {
     test('should call the withdraw method with the correct parameters', async () => {
-      mockStakingContract.withdraw.mockResolvedValueOnce();
       const withdrawSpy = vi
         .spyOn(mockStakingContract, 'withdraw')
         .mockImplementation(() => ({
@@ -307,7 +306,6 @@ describe('StakingClient', () => {
       expect(withdrawSpy).toHaveBeenCalledTimes(1);
     });
     test('should call the withdraw method with transaction options', async () => {
-      mockStakingContract.withdraw.mockResolvedValueOnce();
       const withdrawSpy = vi
         .spyOn(mockStakingContract, 'withdraw')
         .mockImplementation(() => ({
