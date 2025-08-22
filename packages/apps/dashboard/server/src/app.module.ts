@@ -1,6 +1,7 @@
 import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { APP_FILTER } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
 
 import * as Joi from 'joi';
@@ -8,12 +9,19 @@ import * as Joi from 'joi';
 import { AppController } from './app.controller';
 import { CacheFactoryConfig } from './common/config/cache-factory.config';
 import { CommonConfigModule } from './common/config/config.module';
+import { ExceptionFilter } from './common/filters/exception.filter';
 import Environment from './common/utils/environment';
 import { DetailsModule } from './modules/details/details.module';
 import { NetworksModule } from './modules/networks/networks.module';
 import { StatsModule } from './modules/stats/stats.module';
 
 @Module({
+  providers: [
+    {
+      provide: APP_FILTER,
+      useClass: ExceptionFilter,
+    },
+  ],
   imports: [
     ConfigModule.forRoot({
       /**
