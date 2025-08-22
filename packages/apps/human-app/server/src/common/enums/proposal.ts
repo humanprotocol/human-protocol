@@ -1,0 +1,10 @@
+export enum ProposalState {
+  PENDING,
+  ACTIVE,
+  CANCELED,
+  DEFEATED,
+  SUCCEEDED,
+  QUEUED,
+  EXPIRED,
+  EXECUTED,
+}
