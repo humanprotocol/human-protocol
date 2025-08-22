@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { EscrowUtilsGateway } from '../escrow-utils-gateway.service';
 import { EscrowUtils, ChainId } from '@human-protocol/sdk';
-import { NotFoundException } from '@nestjs/common';
 
 jest.mock('@human-protocol/sdk', () => {
   return {
@@ -61,7 +60,7 @@ describe('EscrowUtilsGateway', () => {
           ChainId.POLYGON_AMOY,
           escrowAddress,
         ),
-      ).rejects.toThrow(new NotFoundException('Exchange Oracle not found'));
+      ).rejects.toThrow(new Error('Escrow is missing exchange oracle address'));
     });
   });
 });
