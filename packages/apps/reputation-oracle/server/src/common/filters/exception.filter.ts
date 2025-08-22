@@ -36,22 +36,12 @@ export class ExceptionFilter implements IExceptionFilter {
       const exceptionResponse = exception.getResponse();
       if (typeof exceptionResponse === 'string') {
         responseBody.message = exceptionResponse;
-      } else if (
-        'error' in exceptionResponse &&
-        exceptionResponse.error === exception.message
-      ) {
-        /**
-         * This is the case for "sugar" exception classes
-         * (e.g. UnauthorizedException) that have custom message
-         */
-        responseBody.message = exceptionResponse.error;
       } else {
-        /**
-         * Exception filters called after interceptors,
-         * so it's just a safety belt
-         */
         Object.assign(
           responseBody,
+          {
+            message: exception.message,
+          },
           transformKeysFromCamelToSnake(exceptionResponse),
         );
       }
