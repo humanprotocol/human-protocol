@@ -1,6 +1,7 @@
+import * as dotenv from 'dotenv';
 import { DataSource } from 'typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
-import * as dotenv from 'dotenv';
+
 import Environment from './src/utils/environment';
 
 dotenv.config({

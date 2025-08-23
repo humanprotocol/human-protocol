@@ -60,33 +60,10 @@ export class OperatorUtils {
     });
 
     if (!operator) {
-      return (operator as IOperator) || null;
+      return null as any;
     }
 
-    let jobTypes: string[] = [];
-    let reputationNetworks: string[] = [];
-
-    if (typeof operator.jobTypes === 'string') {
-      jobTypes = operator.jobTypes.split(',');
-    } else if (Array.isArray(operator.jobTypes)) {
-      jobTypes = operator.jobTypes;
-    }
-
-    if (
-      operator.reputationNetworks &&
-      Array.isArray(operator.reputationNetworks)
-    ) {
-      reputationNetworks = operator.reputationNetworks.map(
-        (network) => network.address
-      );
-    }
-
-    return {
-      ...operator,
-      jobTypes,
-      reputationNetworks,
-      chainId,
-    };
+    return mapOperator(operator, chainId);
   }
 
   /**
@@ -109,8 +86,6 @@ export class OperatorUtils {
   public static async getOperators(
     filter: IOperatorsFilter
   ): Promise<IOperator[]> {
-    let operators_data: IOperator[] = [];
-
     const first =
       filter.first !== undefined && filter.first > 0
         ? Math.min(filter.first, 1000)
@@ -118,6 +93,15 @@ export class OperatorUtils {
     const skip =
       filter.skip !== undefined && filter.skip >= 0 ? filter.skip : 0;
     const orderDirection = filter.orderDirection || OrderDirection.DESC;
+
+    let orderBy = filter.orderBy;
+    if (filter.orderBy === 'stakedAmount') orderBy = 'staker__stakedAmount';
+    else if (filter.orderBy === 'lockedAmount')
+      orderBy = 'staker__lockedAmount';
+    else if (filter.orderBy === 'withdrawnAmount')
+      orderBy = 'staker__withdrawnAmount';
+    else if (filter.orderBy === 'slashedAmount')
+      orderBy = 'staker__slashedAmount';
 
     const networkData = NETWORKS[filter.chainId];
 
@@ -128,9 +112,9 @@ export class OperatorUtils {
     const { operators } = await gqlFetch<{
       operators: IOperatorSubgraph[];
     }>(getSubgraphUrl(networkData), GET_LEADERS_QUERY(filter), {
-      minAmountStaked: filter?.minAmountStaked,
+      minStakedAmount: filter?.minStakedAmount,
       roles: filter?.roles,
-      orderBy: filter?.orderBy,
+      orderBy: orderBy,
       orderDirection: orderDirection,
       first: first,
       skip: skip,
@@ -140,35 +124,7 @@ export class OperatorUtils {
       return [];
     }
 
-    operators_data = operators_data.concat(
-      operators.map((operator) => {
-        let jobTypes: string[] = [];
-        let reputationNetworks: string[] = [];
-
-        if (typeof operator.jobTypes === 'string') {
-          jobTypes = operator.jobTypes.split(',');
-        } else if (Array.isArray(operator.jobTypes)) {
-          jobTypes = operator.jobTypes;
-        }
-
-        if (
-          operator.reputationNetworks &&
-          Array.isArray(operator.reputationNetworks)
-        ) {
-          reputationNetworks = operator.reputationNetworks.map(
-            (network) => network.address
-          );
-        }
-
-        return {
-          ...operator,
-          jobTypes,
-          reputationNetworks,
-          chainId: filter.chainId,
-        };
-      })
-    );
-    return operators_data;
+    return operators.map((operator) => mapOperator(operator, filter.chainId));
   }
 
   /**
@@ -206,24 +162,9 @@ export class OperatorUtils {
 
     if (!reputationNetwork) return [];
 
-    return reputationNetwork.operators.map((operator) => {
-      let jobTypes: string[] = [];
-
-      if (typeof operator.jobTypes === 'string') {
-        jobTypes = operator.jobTypes.split(',');
-      } else if (Array.isArray(operator.jobTypes)) {
-        jobTypes = operator.jobTypes;
-      }
-
-      return {
-        chainId,
-        ...operator,
-        jobTypes,
-        reputationNetworks: operator.reputationNetworks?.map(
-          (network) => network.address
-        ),
-      };
-    });
+    return reputationNetwork.operators.map((operator) =>
+      mapOperator(operator, chainId)
+    );
   }
 
   /**
@@ -269,4 +210,49 @@ export class OperatorUtils {
       };
     });
   }
+}
+
+function mapOperator(operator: IOperatorSubgraph, chainId: ChainId): IOperator {
+  const staker = operator?.staker;
+  let jobTypes: string[] = [];
+  let reputationNetworks: string[] = [];
+
+  if (typeof operator.jobTypes === 'string') {
+    jobTypes = operator.jobTypes.split(',');
+  } else if (Array.isArray(operator.jobTypes)) {
+    jobTypes = operator.jobTypes;
+  }
+
+  if (
+    operator.reputationNetworks &&
+    Array.isArray(operator.reputationNetworks)
+  ) {
+    reputationNetworks = operator.reputationNetworks.map(
+      (network) => network.address
+    );
+  }
+
+  return {
+    id: operator.id,
+    chainId,
+    address: operator.address,
+    stakedAmount: BigInt(staker?.stakedAmount || 0),
+    lockedAmount: BigInt(staker?.lockedAmount || 0),
+    lockedUntilTimestamp: BigInt(staker?.lockedUntilTimestamp || 0),
+    withdrawnAmount: BigInt(staker?.withdrawnAmount || 0),
+    slashedAmount: BigInt(staker?.slashedAmount || 0),
+    amountJobsProcessed: BigInt(operator.amountJobsProcessed || 0),
+    role: operator.role,
+    fee: operator.fee ? BigInt(operator.fee) : undefined,
+    publicKey: operator.publicKey,
+    webhookUrl: operator.webhookUrl,
+    website: operator.website,
+    url: operator.url,
+    jobTypes,
+    registrationNeeded: operator.registrationNeeded,
+    registrationInstructions: operator.registrationInstructions,
+    reputationNetworks,
+    name: operator.name,
+    category: operator.category,
+  };
 }

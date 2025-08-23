@@ -12,13 +12,32 @@ import {
   Operator,
   OperatorURL,
   ReputationNetwork,
+  Staker,
 } from '../../generated/schema';
-import { createOrLoadOperator } from './Staking';
 import { isValidEthAddress } from './utils/ethAdrress';
 import { toEventId } from './utils/event';
 import { toBytes } from './utils/string';
 import { createTransaction } from './utils/transaction';
 import { store } from '@graphprotocol/graph-ts';
+import { ZERO_BI } from './utils/number';
+
+export function createOrLoadOperator(address: Address): Operator {
+  let operator = Operator.load(address);
+  if (!operator) {
+    operator = new Operator(address);
+    operator.address = address;
+    operator.amountJobsProcessed = ZERO_BI;
+
+    const staker = Staker.load(address);
+    if (staker) {
+      staker.operator = operator.id;
+      staker.save();
+    }
+    operator.save();
+  }
+
+  return operator;
+}
 
 export function createOrLoadOperatorURL(
   operator: Operator,
@@ -120,9 +139,9 @@ export function handleDataSaved(event: DataSaved): void {
         event.params.sender
       );
 
-      const operator = createOrLoadOperator(ethAddress);
+      const targetOperator = createOrLoadOperator(ethAddress);
 
-      let reputationNetworks = operator.reputationNetworks;
+      let reputationNetworks = targetOperator.reputationNetworks;
       if (reputationNetworks === null) {
         reputationNetworks = [];
       }
@@ -139,9 +158,8 @@ export function handleDataSaved(event: DataSaved): void {
         reputationNetworks = filteredNetworks;
       }
 
-      operator.reputationNetworks = reputationNetworks;
-
-      operator.save();
+      targetOperator.reputationNetworks = reputationNetworks;
+      targetOperator.save();
     } else if (key == 'registration_needed') {
       operator.registrationNeeded = event.params.value.toLowerCase() == 'true';
     } else if (key == 'registration_instructions') {
