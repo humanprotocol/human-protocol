@@ -23,6 +23,7 @@ export enum ErrorJob {
   DataNotExist = 'Data does not exist',
   ImageConsistency = 'Ground Truth images not found in dataset',
   CancelWhileProcessing = 'Your job is being processed and cannot be canceled at this moment. Please, wait a few seconds and try again.',
+  NoRefundFound = 'No refund found for this escrow',
 }
 
 /**
@@ -51,6 +52,7 @@ export enum ErrorWebhook {
   UrlNotFound = 'Webhook URL not found',
   NotCreated = 'Webhook has not been created',
   InvalidEscrow = 'Invalid escrow data provided',
+  InvalidOracleAddress = 'Invalid oracle address',
 }
 
 /**

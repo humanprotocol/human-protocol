@@ -4,6 +4,7 @@ export enum EventType {
   ESCROW_COMPLETED = 'escrow_completed',
   ESCROW_FAILED = 'escrow_failed',
   ABUSE_DETECTED = 'abuse_detected',
+  CANCELLATION_REQUESTED = 'cancellation_requested',
 }
 
 export enum OracleType {

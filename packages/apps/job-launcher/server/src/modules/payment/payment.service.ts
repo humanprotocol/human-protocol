@@ -572,4 +572,11 @@ export class PaymentService {
       totalUsdAmount: totalUSDAmount,
     };
   }
+
+  public async getJobPayments(
+    jobId: number,
+    type?: string,
+  ): Promise<PaymentEntity[]> {
+    return this.paymentRepository.findByJobIdAndType(jobId, type);
+  }
 }

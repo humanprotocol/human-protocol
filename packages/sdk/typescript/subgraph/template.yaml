@@ -198,6 +198,12 @@ templates:
           handler: handleBulkTransfer
         - event: BulkTransferV2(indexed uint256,address[],uint256[],bool,string)
           handler: handleBulkTransferV2
+        - event: BulkTransferV3(indexed bytes32,address[],uint256[],bool,string)
+          handler: handleBulkTransferV3
+        - event: CancellationRequested()
+          handler: handleCancellationRequested
+        - event: CancellationRefund(uint256)
+          handler: handleCancellationRefund
         - event: Cancelled()
           handler: handleCancelled
         - event: Completed()

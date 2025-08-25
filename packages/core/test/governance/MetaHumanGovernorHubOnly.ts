@@ -7,7 +7,7 @@ import {
   HMToken,
   TimelockController,
   WormholeMock,
-} from '../typechain-types';
+} from '../../typechain-types';
 import {
   createMockUserWithVotingPower,
   mineNBlocks,

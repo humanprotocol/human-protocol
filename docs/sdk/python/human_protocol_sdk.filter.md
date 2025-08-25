@@ -1,5 +1,31 @@
 # human_protocol_sdk.filter module
 
+### *class* human_protocol_sdk.filter.CancellationRefundFilter(chain_id, escrow_address=None, receiver=None, date_from=None, date_to=None, first=10, skip=0, order_direction=OrderDirection.DESC)
+
+Bases: `object`
+
+A class used to filter cancellation refunds.
+
+#### \_\_init_\_(chain_id, escrow_address=None, receiver=None, date_from=None, date_to=None, first=10, skip=0, order_direction=OrderDirection.DESC)
+
+Initializes a CancellationRefundFilter instance.
+:type chain_id: [`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)
+:param chain_id: Chain ID to request data
+:type escrow_address: `Optional`[`str`]
+:param escrow_address: Address of the escrow to filter by
+:type receiver: `Optional`[`str`]
+:param receiver: Address of the receiver to filter by
+:type date_from: `Optional`[`datetime`]
+:param date_from: Start date for filtering
+:type date_to: `Optional`[`datetime`]
+:param date_to: End date for filtering
+:type first: `int`
+:param first: Number of items per page
+:type skip: `int`
+:param skip: Number of items to skip (for pagination)
+:type order_direction: [`OrderDirection`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.OrderDirection)
+:param order_direction: Order direction of results, “asc” or “desc”
+
 ### *class* human_protocol_sdk.filter.EscrowFilter(chain_id, launcher=None, reputation_oracle=None, recording_oracle=None, exchange_oracle=None, job_requester_id=None, status=None, date_from=None, date_to=None, first=10, skip=0, order_direction=OrderDirection.DESC)
 
 Bases: `object`
