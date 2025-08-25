@@ -38,7 +38,7 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
         require(_staking != address(0), ERROR_ZERO_ADDRESS);
         _setStakingAddress(_staking);
         _setMinimumStake(_minimumStake);
-        _setFactoryAdmin(msg.sender);
+        _setEscrowAdmin(msg.sender);
     }
 
     /**
@@ -105,10 +105,10 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
      * @param _admin Admin address
      */
     function setAdmin(address _admin) external onlyOwner {
-        _setFactoryAdmin(_admin);
+        _setEscrowAdmin(_admin);
     }
 
-    function _setFactoryAdmin(address _admin) private {
+    function _setEscrowAdmin(address _admin) private {
         require(_admin != address(0), ERROR_ZERO_ADDRESS);
         admin = _admin;
     }
