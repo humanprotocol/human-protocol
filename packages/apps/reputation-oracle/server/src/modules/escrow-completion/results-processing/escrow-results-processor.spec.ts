@@ -78,7 +78,7 @@ describe('BaseEscrowResultsProcessor', () => {
 
       mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
         status: EscrowStatus[EscrowStatus.Launched],
-      } as any);
+      } as unknown as IEscrow);
 
       processor.assertResultsComplete.mockRejectedValueOnce(testError);
 
@@ -205,7 +205,7 @@ describe('BaseEscrowResultsProcessor', () => {
       mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
         launcher: jobLauncherAddress,
         status: EscrowStatus[EscrowStatus.ToCancel],
-      } as any);
+      } as unknown as IEscrow);
 
       const encryptedResult = faker.string.ulid();
       mockedPgpEncryptionService.encrypt.mockResolvedValueOnce(encryptedResult);
@@ -223,7 +223,7 @@ describe('BaseEscrowResultsProcessor', () => {
       mockedStorageService.uploadData.mockResolvedValueOnce(storedResultsUrl);
 
       /** ACT */
-      const manifest = { resultToAssert: jobResult };
+      const manifest = { resultToAssert: jobResult } as unknown as JobManifest;
       const storedResultMeta = await processor.storeResults(
         chainId,
         escrowAddress,

@@ -286,13 +286,13 @@ export class JobService {
     if (
       ethers.getAddress(recordingOracleAddress) !== (await signer.getAddress())
     ) {
-      this.logger.log(ErrorJob.AddressMismatches, JobService.name);
+      this.logger.error(ErrorJob.AddressMismatches, JobService.name);
       throw new ValidationError(ErrorJob.AddressMismatches);
     }
 
     const escrowStatus = await escrowClient.getStatus(webhook.escrowAddress);
     if (escrowStatus !== EscrowStatus.ToCancel) {
-      this.logger.log(ErrorJob.InvalidStatus, JobService.name);
+      this.logger.error(ErrorJob.InvalidStatus, JobService.name);
       throw new ConflictError(ErrorJob.InvalidStatus);
     }
 
@@ -325,7 +325,6 @@ export class JobService {
     if (reputationOracleWebhook) {
       await sendWebhook(
         this.httpService,
-        this.logger,
         reputationOracleWebhook,
         {
           chainId: webhook.chainId,
