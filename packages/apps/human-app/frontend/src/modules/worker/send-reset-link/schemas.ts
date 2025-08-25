@@ -3,16 +3,15 @@ import { z } from 'zod';
 
 const sendResetLinkEmailDtoSchema = z.object({
   email: z
-    .string()
-    .min(1, t('worker.sendResetLinkForm.noEmailError'))
-    .email(t('worker.sendResetLinkForm.invalidEmailError')),
+    .email(t('worker.sendResetLinkForm.invalidEmailError'))
+    .min(1, t('worker.sendResetLinkForm.noEmailError')),
 });
 
 type SendResetLinkEmail = z.infer<typeof sendResetLinkEmailDtoSchema>;
 
 export const sendResetLinkHcaptchaDtoSchema = z.object({
   // eslint-disable-next-line camelcase
-  h_captcha_token: z.string().min(1, t('validation.captcha')).default('token'),
+  h_captcha_token: z.string().min(1, t('validation.captcha')).prefault('token'),
 });
 
 export type SendResetLinkHcaptcha = z.infer<
