@@ -2,7 +2,7 @@
 import { ZodError, z } from 'zod';
 
 const envSchema = z.object({
-  VITE_API_URL: z.string().default('/api'),
+  VITE_API_URL: z.string().prefault('/api'),
   VITE_PRIVACY_POLICY_URL: z.string(),
   VITE_TERMS_OF_SERVICE_URL: z.string(),
   VITE_HUMAN_PROTOCOL_URL: z.string(),
@@ -40,7 +40,7 @@ const envSchema = z.object({
   }),
   VITE_FEATURE_FLAG_JOBS_DISCOVERY: z
     .string()
-    .default('false')
+    .prefault('false')
     .transform((value) => value === 'true'),
 });
 

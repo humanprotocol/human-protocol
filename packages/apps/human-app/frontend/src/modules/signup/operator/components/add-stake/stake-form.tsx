@@ -26,7 +26,7 @@ export function StakeForm({
 }>) {
   const addStakeMutation = useAddStake();
 
-  const methods = useForm({
+  const methods = useForm<AddStakeCallArguments>({
     defaultValues: {
       // Since we deal with numbers that may have huge decimal extensions,
       // we are using strings as a safer solution

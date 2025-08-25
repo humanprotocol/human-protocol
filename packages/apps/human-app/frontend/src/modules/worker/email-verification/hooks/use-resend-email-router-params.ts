@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { useLocationState } from '@/modules/worker/hooks/use-location-state';
 
 export const routerStateSchema = z.object({
-  email: z.string().email(),
+  email: z.email(),
   resendOnMount: z.boolean().optional(),
 });
 

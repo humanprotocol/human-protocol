@@ -10,7 +10,7 @@ const registrationInExchangeOracleDtoSchema = z.object({
       (address) => ethers.isAddress(address),
       t('validation.invalidOracleAddress')
     ),
-  h_captcha_token: z.string().min(1, t('validation.captcha')).default('token'),
+  h_captcha_token: z.string().min(1, t('validation.captcha')).prefault('token'),
 });
 
 export type RegistrationInExchangeOracleDto = z.infer<

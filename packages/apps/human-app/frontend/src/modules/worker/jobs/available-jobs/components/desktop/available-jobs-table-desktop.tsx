@@ -6,6 +6,7 @@ import { t } from 'i18next';
 import { useEffect, useMemo } from 'react';
 import { createTableDarkMode } from '@/shared/styles/create-table-dark-mode';
 import { useColorMode } from '@/shared/contexts/color-mode';
+import { type AvailableJob } from '@/modules/worker/jobs/types';
 import { useJobsFilterStore } from '../../../hooks';
 import { EscrowAddressSearchForm } from '../../../components';
 import { useGetAvailableJobsData } from '../../hooks/use-get-available-jobs-data';
@@ -33,10 +34,10 @@ export function AvailableJobsTableDesktop({
   });
   const columns = useGetAvailableJobsColumns(chainIdsEnabled);
 
-  const memoizedTableDataResults = useMemo(
-    () => tableData?.results ?? [],
-    [tableData?.results]
-  );
+  const memoizedTableDataResults = useMemo(() => {
+    const results = tableData?.results ?? [];
+    return results as AvailableJob[];
+  }, [tableData?.results]);
 
   useEffect(() => {
     return () => {
