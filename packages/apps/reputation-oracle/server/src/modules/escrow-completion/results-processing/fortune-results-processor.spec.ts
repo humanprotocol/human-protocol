@@ -1,12 +1,11 @@
-import { createMock } from '@golevelup/ts-jest';
 import { faker } from '@faker-js/faker';
+import { createMock } from '@golevelup/ts-jest';
 import { Test } from '@nestjs/testing';
 
-import { FortuneFinalResult } from '../../../common/types';
-
-import { PgpEncryptionService } from '../../encryption';
-import { StorageService } from '../../storage';
-import { Web3Service } from '../../web3';
+import { FortuneFinalResult } from '@/common/types';
+import { PgpEncryptionService } from '@/modules/encryption';
+import { StorageService } from '@/modules/storage';
+import { Web3Service } from '@/modules/web3';
 
 import { generateFortuneManifest, generateFortuneSolution } from '../fixtures';
 import { BaseEscrowResultsProcessor } from './escrow-results-processor';

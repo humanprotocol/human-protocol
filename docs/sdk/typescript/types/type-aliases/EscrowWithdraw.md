@@ -8,7 +8,7 @@
 
 > **EscrowWithdraw** = `object`
 
-Defined in: [types.ts:149](https://github.com/humanprotocol/human-protocol/blob/379b646116ffe55830ec173c1cf6576fc209b99f/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L149)
+Defined in: [types.ts:149](https://github.com/humanprotocol/human-protocol/blob/35282ccf869d69c95ced3874bd6bde870ac54d48/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L149)
 
 Represents the response data for an escrow withdrawal.
 
@@ -18,7 +18,7 @@ Represents the response data for an escrow withdrawal.
 
 > **amountWithdrawn**: `bigint`
 
-Defined in: [types.ts:161](https://github.com/humanprotocol/human-protocol/blob/379b646116ffe55830ec173c1cf6576fc209b99f/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L161)
+Defined in: [types.ts:161](https://github.com/humanprotocol/human-protocol/blob/35282ccf869d69c95ced3874bd6bde870ac54d48/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L161)
 
 The amount withdrawn from the escrow.
 
@@ -28,7 +28,7 @@ The amount withdrawn from the escrow.
 
 > **tokenAddress**: `string`
 
-Defined in: [types.ts:157](https://github.com/humanprotocol/human-protocol/blob/379b646116ffe55830ec173c1cf6576fc209b99f/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L157)
+Defined in: [types.ts:157](https://github.com/humanprotocol/human-protocol/blob/35282ccf869d69c95ced3874bd6bde870ac54d48/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L157)
 
 The address of the token used for the withdrawal.
 
@@ -38,6 +38,6 @@ The address of the token used for the withdrawal.
 
 > **txHash**: `string`
 
-Defined in: [types.ts:153](https://github.com/humanprotocol/human-protocol/blob/379b646116ffe55830ec173c1cf6576fc209b99f/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L153)
+Defined in: [types.ts:153](https://github.com/humanprotocol/human-protocol/blob/35282ccf869d69c95ced3874bd6bde870ac54d48/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L153)
 
 The hash of the transaction associated with the escrow withdrawal.

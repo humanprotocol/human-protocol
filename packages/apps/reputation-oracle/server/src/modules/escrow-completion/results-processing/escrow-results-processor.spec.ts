@@ -1,19 +1,22 @@
 jest.mock('@human-protocol/sdk');
 
+import * as crypto from 'crypto';
+
 import { faker } from '@faker-js/faker';
 import { createMock } from '@golevelup/ts-jest';
 import { EscrowClient, EscrowStatus, EscrowUtils } from '@human-protocol/sdk';
+import { IEscrow } from '@human-protocol/sdk';
 import { Test } from '@nestjs/testing';
-import * as crypto from 'crypto';
 
+import { JobManifest } from '@/common/types';
+
+import { BaseEscrowResultsProcessor } from './escrow-results-processor';
 import { PgpEncryptionService } from '../../encryption';
 import { StorageService } from '../../storage';
 import { Web3Service } from '../../web3';
 import { generateTestnetChainId } from '../../web3/fixtures';
 
-import { BaseEscrowResultsProcessor } from './escrow-results-processor';
-
-class TestEscrowResultsProcessor extends BaseEscrowResultsProcessor<any> {
+class TestEscrowResultsProcessor extends BaseEscrowResultsProcessor<JobManifest> {
   override constructIntermediateResultsUrl = jest.fn();
 
   override assertResultsComplete = jest.fn();
@@ -83,7 +86,7 @@ describe('BaseEscrowResultsProcessor', () => {
         processor.storeResults(
           faker.number.int(),
           faker.finance.ethereumAddress(),
-          {},
+          {} as unknown as JobManifest,
         ),
       ).rejects.toThrow(testError);
     });
@@ -119,7 +122,7 @@ describe('BaseEscrowResultsProcessor', () => {
       mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
         launcher: jobLauncherAddress,
         status: EscrowStatus[EscrowStatus.Launched],
-      } as any);
+      } as unknown as IEscrow);
 
       const encryptedResult = faker.string.ulid();
       mockedPgpEncryptionService.encrypt.mockResolvedValueOnce(encryptedResult);
@@ -137,7 +140,7 @@ describe('BaseEscrowResultsProcessor', () => {
       mockedStorageService.uploadData.mockResolvedValueOnce(storedResultsUrl);
 
       /** ACT */
-      const manifest = { resultToAssert: jobResult };
+      const manifest = { resultToAssert: jobResult } as unknown as JobManifest;
       const storedResultMeta = await processor.storeResults(
         chainId,
         escrowAddress,

@@ -1,6 +1,6 @@
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import { E_TIMEOUT, Mutex, MutexInterface, withTimeout } from 'async-mutex';
-import { ServerError } from '../../common/errors';
+import { BaseError, ServerError } from '../../common/errors';
 import logger from '../../logger';
 
 @Injectable()
@@ -63,14 +63,19 @@ export class MutexManagerService implements OnModuleDestroy {
       });
 
       return result;
-    } catch (e) {
-      if (e === E_TIMEOUT) {
+    } catch (error) {
+      if (error === E_TIMEOUT) {
         const errorMessage = 'Function execution timed out for key';
         this.logger.error(errorMessage, { key });
-        throw new Error(errorMessage);
+        throw new ServerError(errorMessage);
       }
+
+      if (error instanceof BaseError) {
+        throw error;
+      }
+
       const errorMessage = 'Function execution failed for key';
-      this.logger.error(errorMessage, { key });
+      this.logger.error(errorMessage, { key, error });
       throw new ServerError(errorMessage);
     }
   }

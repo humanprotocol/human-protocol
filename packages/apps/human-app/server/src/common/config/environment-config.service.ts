@@ -37,10 +37,6 @@ export class EnvironmentConfigService {
     return this.configService.getOrThrow<number>('PORT');
   }
 
-  get gitHash(): string {
-    return this.configService.get<string>('GIT_HASH', '');
-  }
-
   /**
    * The URL of the reputation oracle service.
    * Required
@@ -195,6 +191,21 @@ export class EnvironmentConfigService {
    */
   get rpcUrl(): string {
     return this.configService.getOrThrow<string>('RPC_URL');
+  }
+
+  /**
+   * RPC URL for the governance hub (optional). If not provided, falls back to RPC_URL.
+   */
+  get governanceRpcUrl(): string {
+    return this.configService.get<string>('GOVERNANCE_RPC_URL') || this.rpcUrl;
+  }
+
+  /**
+   * Governor contract address used for governance queries.
+   * Required
+   */
+  get governorAddress(): string {
+    return this.configService.getOrThrow<string>('GOVERNOR_ADDRESS');
   }
 
   /**

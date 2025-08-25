@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 import {
   ESCROW_BULK_PAYOUT_MAX_ITEMS,
   ChainId,
@@ -7,38 +9,32 @@ import {
   OperatorUtils,
 } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
-
-import crypto from 'crypto';
-import { v4 as uuidv4 } from 'uuid';
 import { ethers } from 'ethers';
 import stringify from 'json-stable-stringify';
 import _ from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
 
-import { BACKOFF_INTERVAL_SECONDS } from '../../common/constants';
-import { isDuplicatedError } from '../../database';
-import { JobManifest, JobRequestType } from '../../common/types';
-import { ServerConfigService } from '../../config';
-import logger from '../../logger';
-import { calculateExponentialBackoffMs } from '../../utils/backoff';
-import * as manifestUtils from '../../utils/manifest';
-
-import { ReputationService } from '../reputation';
-import { StorageService } from '../storage';
-import { Web3Service } from '../web3';
-import { OutgoingWebhookService } from '../webhook/webhook-outgoing.service';
-import { OutgoingWebhookEventType } from '../webhook/types';
+import { BACKOFF_INTERVAL_SECONDS } from '@/common/constants';
+import { JobManifest, JobRequestType } from '@/common/types';
+import { ServerConfigService } from '@/config';
+import { isDuplicatedError } from '@/database';
+import logger from '@/logger';
+import { ReputationService } from '@/modules/reputation';
+import { StorageService } from '@/modules/storage';
+import { Web3Service } from '@/modules/web3';
+/**
+ * Import webhook-related items directly to avoid circular dependency
+ */
+import { OutgoingWebhookEventType } from '@/modules/webhook/types';
+import { OutgoingWebhookService } from '@/modules/webhook/webhook-outgoing.service';
+import { calculateExponentialBackoffMs } from '@/utils/backoff';
+import * as manifestUtils from '@/utils/manifest';
 
 import { EscrowCompletionStatus } from './constants';
-import { EscrowCompletionRepository } from './escrow-completion.repository';
 import { EscrowCompletionEntity } from './escrow-completion.entity';
+import { EscrowCompletionRepository } from './escrow-completion.repository';
 import { EscrowPayoutsBatchEntity } from './escrow-payouts-batch.entity';
 import { EscrowPayoutsBatchRepository } from './escrow-payouts-batch.repository';
-import {
-  AudinoResultsProcessor,
-  CvatResultsProcessor,
-  EscrowResultsProcessor,
-  FortuneResultsProcessor,
-} from './results-processing';
 import {
   AudinoPayoutsCalculator,
   CvatPayoutsCalculator,
@@ -46,6 +42,12 @@ import {
   EscrowPayoutsCalculator,
   CalculatedPayout,
 } from './payouts-calculation';
+import {
+  AudinoResultsProcessor,
+  CvatResultsProcessor,
+  EscrowResultsProcessor,
+  FortuneResultsProcessor,
+} from './results-processing';
 
 @Injectable()
 export class EscrowCompletionService {
@@ -132,7 +134,7 @@ export class EscrowCompletionService {
           );
           const manifest =
             await this.storageService.downloadJsonLikeData<JobManifest>(
-              escrowData.manifestUrl as string,
+              escrowData.manifest as string,
             );
           const jobRequestType = manifestUtils.getJobRequestType(manifest);
 

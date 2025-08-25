@@ -64,7 +64,7 @@ class EscrowData:
         final_results_url: Optional[str] = None,
         intermediate_results_url: Optional[str] = None,
         manifest_hash: Optional[str] = None,
-        manifest_url: Optional[str] = None,
+        manifest: Optional[str] = None,
         recording_oracle: Optional[str] = None,
         reputation_oracle: Optional[str] = None,
         exchange_oracle: Optional[str] = None,
@@ -87,7 +87,7 @@ class EscrowData:
         :param final_results_url: URL for final results.
         :param intermediate_results_url: URL for intermediate results.
         :param manifest_hash: Manifest hash.
-        :param manifest_url: Manifest URL.
+        :param manifest: Manifest data (JSON/URL).
         :param recording_oracle: Recording Oracle address.
         :param reputation_oracle: Reputation Oracle address.
         :param exchange_oracle: Exchange Oracle address.
@@ -103,7 +103,7 @@ class EscrowData:
         self.intermediate_results_url = intermediate_results_url
         self.launcher = launcher
         self.manifest_hash = manifest_hash
-        self.manifest_url = manifest_url
+        self.manifest = manifest
         self.recording_oracle = recording_oracle
         self.reputation_oracle = reputation_oracle
         self.exchange_oracle = exchange_oracle
@@ -289,7 +289,7 @@ class EscrowUtils:
                     final_results_url=escrow.get("finalResultsUrl", None),
                     intermediate_results_url=escrow.get("intermediateResultsUrl", None),
                     manifest_hash=escrow.get("manifestHash", None),
-                    manifest_url=escrow.get("manifestUrl", None),
+                    manifest=escrow.get("manifest", None),
                     recording_oracle=escrow.get("recordingOracle", None),
                     reputation_oracle=escrow.get("reputationOracle", None),
                     exchange_oracle=escrow.get("exchangeOracle", None),
@@ -371,7 +371,7 @@ class EscrowUtils:
             final_results_url=escrow.get("finalResultsUrl", None),
             intermediate_results_url=escrow.get("intermediateResultsUrl", None),
             manifest_hash=escrow.get("manifestHash", None),
-            manifest_url=escrow.get("manifestUrl", None),
+            manifest=escrow.get("manifest", None),
             recording_oracle=escrow.get("recordingOracle", None),
             reputation_oracle=escrow.get("reputationOracle", None),
             exchange_oracle=escrow.get("exchangeOracle", None),

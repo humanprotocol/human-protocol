@@ -203,7 +203,7 @@ describe('Escrow', () => {
 
     // Escrow
     assert.fieldEquals('Escrow', escrowAddress.toHex(), 'status', 'Pending');
-    assert.fieldEquals('Escrow', escrowAddress.toHex(), 'manifestUrl', URL);
+    assert.fieldEquals('Escrow', escrowAddress.toHex(), 'manifest', URL);
     assert.fieldEquals('Escrow', escrowAddress.toHex(), 'manifestHash', HASH);
     assert.fieldEquals(
       'Escrow',
@@ -338,7 +338,7 @@ describe('Escrow', () => {
 
     // Escrow
     assert.fieldEquals('Escrow', escrowAddress.toHex(), 'status', 'Pending');
-    assert.fieldEquals('Escrow', escrowAddress.toHex(), 'manifestUrl', URL);
+    assert.fieldEquals('Escrow', escrowAddress.toHex(), 'manifest', URL);
     assert.fieldEquals('Escrow', escrowAddress.toHex(), 'manifestHash', HASH);
     assert.fieldEquals(
       'Escrow',
@@ -490,7 +490,7 @@ describe('Escrow', () => {
 
     // Escrow
     assert.fieldEquals('Escrow', escrowAddress.toHex(), 'status', 'Pending');
-    assert.fieldEquals('Escrow', escrowAddress.toHex(), 'manifestUrl', URL);
+    assert.fieldEquals('Escrow', escrowAddress.toHex(), 'manifest', URL);
     assert.fieldEquals('Escrow', escrowAddress.toHex(), 'manifestHash', HASH);
     assert.fieldEquals(
       'Escrow',
@@ -700,7 +700,7 @@ describe('Escrow', () => {
 
     // Escrow
     assert.fieldEquals('Escrow', escrowAddress.toHex(), 'status', 'Pending');
-    assert.fieldEquals('Escrow', escrowAddress.toHex(), 'manifestUrl', URL);
+    assert.fieldEquals('Escrow', escrowAddress.toHex(), 'manifest', URL);
     assert.fieldEquals('Escrow', escrowAddress.toHex(), 'manifestHash', HASH);
     assert.fieldEquals(
       'Escrow',

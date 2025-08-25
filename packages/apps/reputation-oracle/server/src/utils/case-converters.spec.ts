@@ -1,4 +1,5 @@
 import { faker } from '@faker-js/faker';
+
 import * as CaseConverter from './case-converters';
 
 describe('Case converting utilities', () => {

@@ -75,7 +75,7 @@ class TestEscrowClient(unittest.TestCase):
         recording_oracle_fee = 10
         reputation_oracle_fee = 10
         exchange_oracle_fee = 10
-        manifest_url = "https://www.example.com/result"
+        manifest = "https://www.example.com/result"
         hash = "test"
 
         escrow_config = EscrowConfig(
@@ -85,7 +85,7 @@ class TestEscrowClient(unittest.TestCase):
             recording_oracle_fee,
             reputation_oracle_fee,
             exchange_oracle_fee,
-            manifest_url,
+            manifest,
             hash,
         )
 
@@ -99,8 +99,30 @@ class TestEscrowClient(unittest.TestCase):
         self.assertEqual(escrow_config.recording_oracle_fee, recording_oracle_fee)
         self.assertEqual(escrow_config.reputation_oracle_fee, reputation_oracle_fee)
         self.assertEqual(escrow_config.exchange_oracle_fee, exchange_oracle_fee)
-        self.assertEqual(escrow_config.manifest_url, manifest_url)
+        self.assertEqual(escrow_config.manifest, manifest)
         self.assertEqual(escrow_config.hash, hash)
+
+    def test_escrow_config_valid_params_with_json_manifest(self):
+        recording_oracle_address = "0x1234567890123456789012345678901234567890"
+        reputation_oracle_address = "0x1234567890123456789012345678901234567890"
+        exchange_oracle_address = "0x1234567890123456789012345678901234567890"
+        recording_oracle_fee = 10
+        reputation_oracle_fee = 10
+        exchange_oracle_fee = 10
+        manifest = '{"foo": "bar"}'
+        hash = "test"
+
+        escrow_config = EscrowConfig(
+            recording_oracle_address,
+            reputation_oracle_address,
+            exchange_oracle_address,
+            recording_oracle_fee,
+            reputation_oracle_fee,
+            exchange_oracle_fee,
+            manifest,
+            hash,
+        )
+        self.assertEqual(escrow_config.manifest, manifest)
 
     def test_escrow_config_valid_params_with_docker_network_url(self):
         recording_oracle_address = "0x1234567890123456789012345678901234567890"
@@ -109,7 +131,7 @@ class TestEscrowClient(unittest.TestCase):
         recording_oracle_fee = 10
         reputation_oracle_fee = 10
         exchange_oracle_fee = 10
-        manifest_url = "http://test:6000"
+        manifest = "http://test:6000"
         hash = "test"
 
         escrow_config = EscrowConfig(
@@ -119,7 +141,7 @@ class TestEscrowClient(unittest.TestCase):
             recording_oracle_fee,
             reputation_oracle_fee,
             exchange_oracle_fee,
-            manifest_url,
+            manifest,
             hash,
         )
 
@@ -133,7 +155,7 @@ class TestEscrowClient(unittest.TestCase):
         self.assertEqual(escrow_config.recording_oracle_fee, recording_oracle_fee)
         self.assertEqual(escrow_config.reputation_oracle_fee, reputation_oracle_fee)
         self.assertEqual(escrow_config.exchange_oracle_fee, exchange_oracle_fee)
-        self.assertEqual(escrow_config.manifest_url, manifest_url)
+        self.assertEqual(escrow_config.manifest, manifest)
         self.assertEqual(escrow_config.hash, hash)
 
     def test_escrow_config_invalid_address(self):
@@ -289,14 +311,14 @@ class TestEscrowClient(unittest.TestCase):
             )
         self.assertEqual("Total fee must be less than 100", str(cm.exception))
 
-    def test_escrow_config_invalid_url(self):
+    def test_escrow_config_invalid_manifest(self):
         recording_oracle_address = "0x1234567890123456789012345678901234567890"
         reputation_oracle_address = "0x1234567890123456789012345678901234567890"
         exchange_oracle_address = "0x1234567890123456789012345678901234567890"
         recording_oracle_fee = 10
         reputation_oracle_fee = 10
         exchange_oracle_fee = 10
-        manifest_url = "test"
+        manifest = ""
         hash = "test"
 
         with self.assertRaises(EscrowClientError) as cm:
@@ -307,10 +329,10 @@ class TestEscrowClient(unittest.TestCase):
                 recording_oracle_fee,
                 reputation_oracle_fee,
                 exchange_oracle_fee,
-                manifest_url,
+                manifest,
                 hash,
             )
-        self.assertEqual(f"Invalid manifest URL: {manifest_url}", str(cm.exception))
+        self.assertEqual("Invalid empty manifest", str(cm.exception))
 
     def test_escrow_config_invalid_hash(self):
         recording_oracle_address = "0x1234567890123456789012345678901234567890"
@@ -457,7 +479,7 @@ class TestEscrowClient(unittest.TestCase):
             escrow_config.reputation_oracle_fee,
             escrow_config.recording_oracle_fee,
             escrow_config.exchange_oracle_fee,
-            escrow_config.manifest_url,
+            escrow_config.manifest,
             escrow_config.hash,
         )
         mock_setup.transact.assert_called_once_with({})
@@ -478,6 +500,32 @@ class TestEscrowClient(unittest.TestCase):
             "test",
         )
 
+        with self.assertRaises(EscrowClientError) as cm:
+            self.escrow.setup(escrow_address, escrow_config)
+        self.assertEqual(f"Invalid escrow address: {escrow_address}", str(cm.exception))
+
+    def test_get_manifest(self):
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        manifest = '{"foo": "bar"}'
+        mock_contract = MagicMock()
+        mock_contract.functions.manifest.return_value.call.return_value = manifest
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
+        result = self.escrow.get_manifest(escrow_address)
+        self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
+        mock_contract.functions.manifest.assert_called_once_with()
+        mock_contract.functions.manifest.return_value.call.assert_called_once_with()
+        self.assertEqual(result, manifest)
+
+        escrow_config = EscrowConfig(
+            "0x1234567890123456789012345678901234567890",
+            "0x1234567890123456789012345678901234567890",
+            "0x1234567890123456789012345678901234567890",
+            10,
+            10,
+            10,
+            "https://www.example.com/result",
+            "test",
+        )
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.setup(escrow_address, escrow_config)
         self.assertEqual(f"Invalid escrow address: {escrow_address}", str(cm.exception))
@@ -588,7 +636,7 @@ class TestEscrowClient(unittest.TestCase):
             escrow_config.reputation_oracle_fee,
             escrow_config.recording_oracle_fee,
             escrow_config.exchange_oracle_fee,
-            escrow_config.manifest_url,
+            escrow_config.manifest,
             escrow_config.hash,
         )
         mock_setup.transact.assert_called_once_with(tx_options)
@@ -1727,7 +1775,7 @@ class TestEscrowClient(unittest.TestCase):
             self.escrow.get_manifest_hash("invalid_address")
         self.assertEqual(f"Invalid escrow address: invalid_address", str(cm.exception))
 
-    def test_get_manifest_url(self):
+    def test_get_manifest(self):
         mock_contract = MagicMock()
         mock_contract.functions.manifestUrl = MagicMock()
         mock_contract.functions.manifestUrl.return_value.call.return_value = (
@@ -1736,18 +1784,18 @@ class TestEscrowClient(unittest.TestCase):
         self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
         escrow_address = "0x1234567890123456789012345678901234567890"
 
-        result = self.escrow.get_manifest_url(escrow_address)
+        result = self.escrow.get_manifest(escrow_address)
 
         self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
         mock_contract.functions.manifestUrl.assert_called_once_with()
         self.assertEqual(result, "mock_value")
 
-    def test_get_manifest_url_invalid_address(self):
+    def test_get_manifest_invalid_address(self):
         with self.assertRaises(EscrowClientError) as cm:
-            self.escrow.get_manifest_url("invalid_address")
+            self.escrow.get_manifest("invalid_address")
         self.assertEqual(f"Invalid escrow address: invalid_address", str(cm.exception))
 
-    def test_get_manifest_url_without_account(self):
+    def test_get_manifest_without_account(self):
         mock_provider = MagicMock(spec=HTTPProvider)
         w3 = Web3(mock_provider)
         mock_chain_id = ChainId.LOCALHOST.value
@@ -1762,16 +1810,16 @@ class TestEscrowClient(unittest.TestCase):
         escrowClient._get_escrow_contract = MagicMock(return_value=mock_contract)
         escrow_address = "0x1234567890123456789012345678901234567890"
 
-        result = escrowClient.get_manifest_url(escrow_address)
+        result = escrowClient.get_manifest(escrow_address)
 
         escrowClient._get_escrow_contract.assert_called_once_with(escrow_address)
         mock_contract.functions.manifestUrl.assert_called_once_with()
         self.assertEqual(result, "mock_value")
 
-    def test_get_manifest_url_invalid_escrow(self):
+    def test_get_manifest_invalid_escrow(self):
         self.escrow.factory_contract.functions.hasEscrow = MagicMock(return_value=False)
         with self.assertRaises(EscrowClientError) as cm:
-            self.escrow.get_manifest_url("0x1234567890123456789012345678901234567890")
+            self.escrow.get_manifest("0x1234567890123456789012345678901234567890")
         self.assertEqual(
             "Escrow address is not provided by the factory", str(cm.exception)
         )

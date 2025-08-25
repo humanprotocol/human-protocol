@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 
-import { UserModule } from '../user';
+import { UserModule } from '@/modules/user';
+
 import { QualificationController } from './qualification.controller';
 import { QualificationRepository } from './qualification.repository';
 import { QualificationService } from './qualification.service';

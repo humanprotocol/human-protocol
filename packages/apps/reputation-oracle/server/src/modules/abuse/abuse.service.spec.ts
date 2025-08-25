@@ -4,23 +4,29 @@ import { faker } from '@faker-js/faker';
 import { createMock } from '@golevelup/ts-jest';
 import {
   EscrowUtils,
+  IEscrow,
   IOperator,
   OperatorUtils,
   StakingClient,
 } from '@human-protocol/sdk';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import { DatabaseError, DatabaseErrorMessages } from '../../database';
-import { ServerConfigService } from '../../config';
-import { generateTestnetChainId } from '../web3/fixtures';
-import { Web3Service } from '../web3';
-import { OutgoingWebhookEventType, OutgoingWebhookService } from '../webhook';
 
+import { ServerConfigService } from '@/config';
+import { DatabaseError, DatabaseErrorMessages } from '@/database';
+import { Web3Service } from '@/modules/web3';
+import { generateTestnetChainId } from '@/modules/web3/fixtures';
+import {
+  OutgoingWebhookEventType,
+  OutgoingWebhookService,
+} from '@/modules/webhook';
+
+import { AbuseSlackBot } from './abuse-slack-bot';
 import { AbuseRepository } from './abuse.repository';
 import { AbuseService } from './abuse.service';
-import { AbuseSlackBot } from './abuse-slack-bot';
 import { AbuseDecision, AbuseStatus } from './constants';
 import { generateAbuseEntity } from './fixtures';
+import { SlackInteraction } from './types';
 
 const fakeAddress = faker.finance.ethereumAddress();
 
@@ -100,7 +106,6 @@ describe('AbuseService', () => {
 
       const dto = {
         callback_id: abuseEntity.id,
-        chainId,
         type: 'interactive_message',
         actions: [{ value: AbuseDecision.ACCEPTED }],
         trigger_id: faker.string.uuid(),
@@ -110,13 +115,15 @@ describe('AbuseService', () => {
       mockAbuseRepository.findOneById.mockResolvedValueOnce(abuseEntity);
       mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
         launcher: fakeAddress,
-      } as any);
+      } as unknown as IEscrow);
       const amount = faker.number.int();
       mockedOperatorUtils.getOperator.mockResolvedValueOnce({
         amountStaked: BigInt(amount),
       } as IOperator);
 
-      await abuseService.processSlackInteraction(dto as any);
+      await abuseService.processSlackInteraction(
+        dto as unknown as SlackInteraction,
+      );
 
       expect(mockAbuseSlackBot.triggerAbuseReportModal).toHaveBeenCalledTimes(
         1,
@@ -152,7 +159,9 @@ describe('AbuseService', () => {
 
       mockAbuseRepository.findOneById.mockResolvedValueOnce(abuseEntity);
 
-      await abuseService.processSlackInteraction(dto as any);
+      await abuseService.processSlackInteraction(
+        dto as unknown as SlackInteraction,
+      );
 
       expect(mockAbuseSlackBot.updateMessage).toHaveBeenCalledTimes(1);
       expect(mockAbuseSlackBot.updateMessage).toHaveBeenCalledWith(
@@ -179,7 +188,9 @@ describe('AbuseService', () => {
 
       mockAbuseRepository.findOneById.mockResolvedValueOnce(abuseEntity);
 
-      await abuseService.processSlackInteraction(dto as any);
+      await abuseService.processSlackInteraction(
+        dto as unknown as SlackInteraction,
+      );
 
       expect(mockAbuseRepository.updateOne).toHaveBeenCalledWith({
         ...abuseEntity,
@@ -199,7 +210,9 @@ describe('AbuseService', () => {
       mockAbuseRepository.findOneById.mockResolvedValueOnce(null);
 
       await expect(
-        abuseService.processSlackInteraction(dto as any),
+        abuseService.processSlackInteraction(
+          dto as unknown as SlackInteraction,
+        ),
       ).rejects.toThrow('Abuse entity not found');
     });
 
@@ -213,7 +226,9 @@ describe('AbuseService', () => {
       mockAbuseRepository.findOneById.mockResolvedValueOnce(null);
 
       await expect(
-        abuseService.processSlackInteraction(dto as any),
+        abuseService.processSlackInteraction(
+          dto as unknown as SlackInteraction,
+        ),
       ).rejects.toThrow(
         'Callback ID is missing from the Slack interaction data',
       );
@@ -230,10 +245,10 @@ describe('AbuseService', () => {
       mockedEscrowUtils.getEscrow
         .mockResolvedValueOnce({
           exchangeOracle: fakeAddress,
-        } as any)
+        } as unknown as IEscrow)
         .mockResolvedValueOnce({
           exchangeOracle: fakeAddress,
-        } as any);
+        } as unknown as IEscrow);
       mockedOperatorUtils.getOperator
         .mockResolvedValueOnce({
           webhookUrl: webhookUrl1,
@@ -264,7 +279,7 @@ describe('AbuseService', () => {
 
       mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
         exchangeOracle: fakeAddress,
-      } as any);
+      } as unknown as IEscrow);
       mockedOperatorUtils.getOperator.mockResolvedValueOnce({
         webhookUrl: webhookUrl1,
       } as IOperator);
@@ -293,7 +308,7 @@ describe('AbuseService', () => {
       );
       mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
         exchangeOracle: fakeAddress,
-      } as any);
+      } as unknown as IEscrow);
       mockedOperatorUtils.getOperator.mockResolvedValueOnce({
         webhookUrl: webhookUrl1,
       } as IOperator);
@@ -320,10 +335,10 @@ describe('AbuseService', () => {
       mockedEscrowUtils.getEscrow
         .mockResolvedValueOnce({
           exchangeOracle: fakeAddress,
-        } as any)
+        } as unknown as IEscrow)
         .mockResolvedValueOnce({
           exchangeOracle: fakeAddress,
-        } as any);
+        } as unknown as IEscrow);
       mockedOperatorUtils.getOperator
         .mockResolvedValueOnce({
           webhookUrl: webhookUrl1,
@@ -392,7 +407,7 @@ describe('AbuseService', () => {
       } as unknown as StakingClient);
       mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
         launcher: fakeAddress,
-      } as any);
+      } as unknown as IEscrow);
       mockedOperatorUtils.getOperator.mockResolvedValueOnce({
         webhookUrl: webhookUrl1,
       } as IOperator);
@@ -436,7 +451,7 @@ describe('AbuseService', () => {
       );
       mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
         exchangeOracle: fakeAddress,
-      } as any);
+      } as unknown as IEscrow);
       mockedOperatorUtils.getOperator.mockResolvedValueOnce({
         webhookUrl: webhookUrl1,
       } as IOperator);

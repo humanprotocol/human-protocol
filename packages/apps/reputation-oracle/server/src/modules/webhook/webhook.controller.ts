@@ -1,5 +1,4 @@
 import { Body, Controller, HttpCode, Post, UseGuards } from '@nestjs/common';
-
 import {
   ApiBody,
   ApiHeader,
@@ -8,9 +7,9 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
-import { HEADER_SIGNATURE_KEY } from '../../common/constants';
-import { Public } from '../../common/decorators';
-import { AuthSignatureRole, SignatureAuthGuard } from '../../common/guards';
+import { HEADER_SIGNATURE_KEY } from '@/common/constants';
+import { Public } from '@/common/decorators';
+import { AuthSignatureRole, SignatureAuthGuard } from '@/common/guards';
 
 import { IncomingWebhookService } from './webhook-incoming.service';
 import { IncomingWebhookDto } from './webhook.dto';

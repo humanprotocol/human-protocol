@@ -1,4 +1,5 @@
 import { faker } from '@faker-js/faker';
+
 import { calculateExponentialBackoffMs } from './backoff';
 
 describe('Backoff utilities', () => {

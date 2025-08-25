@@ -133,14 +133,7 @@ export const dailyHmtSpentResponseFixture: DailyHmtSpentResponse = {
   spend: DAILY_HMT_SPENT,
 };
 
-export const errorMessagesFixture = {
-  withErrorCodes:
-    'Failed to verify h-captcha token. Error: invalid-input-response,timeout-or-duplicate',
-  withoutErrorCodes:
-    'Failed to verify h-captcha token. "error-codes" array is undefined. Response data: {}',
-  withUndefinedErrorCodes:
-    'Failed to verify h-captcha token. "error-codes" array is undefined. Response data: {"success":false}',
-};
+export const errorMessageFixture = 'Failed to verify hCaptcha token';
 export const dropoffDataFixture = {
   ...DROPOFF_DATA_1,
   ...DROPOFF_DATA_2,

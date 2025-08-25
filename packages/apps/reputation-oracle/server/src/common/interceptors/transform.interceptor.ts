@@ -7,11 +7,12 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import * as CaseConverter from '../../utils/case-converters';
+
+import * as CaseConverter from '@/utils/case-converters';
 
 @Injectable()
 export class TransformInterceptor implements NestInterceptor {
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const request = context.switchToHttp().getRequest();
 
     if (request.body) {

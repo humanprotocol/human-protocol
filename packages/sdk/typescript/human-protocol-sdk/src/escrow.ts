@@ -25,6 +25,7 @@ import {
   ErrorInvalidAddress,
   ErrorInvalidEscrowAddressProvided,
   ErrorInvalidExchangeOracleAddressProvided,
+  ErrorInvalidManifest,
   ErrorInvalidRecordingOracleAddressProvided,
   ErrorInvalidReputationOracleAddressProvided,
   ErrorInvalidTokenAddress,
@@ -38,7 +39,6 @@ import {
   ErrorTotalFeeMustBeLessThanHundred,
   ErrorTransferEventNotFoundInTransactionLogs,
   ErrorUnsupportedChainID,
-  ErrorUrlIsEmptyString,
   InvalidEthereumAddressError,
   WarnVersionMismatch,
 } from './error';
@@ -70,6 +70,7 @@ import {
 import {
   getSubgraphUrl,
   getUnixTimestamp,
+  isValidJson,
   isValidUrl,
   throwError,
 } from './utils';
@@ -296,7 +297,7 @@ export class EscrowClient extends BaseEthersClient {
    *    recordingOracleFee: BigInt('10'),
    *    reputationOracleFee: BigInt('10'),
    *    exchangeOracleFee: BigInt('10'),
-   *    manifestUrl: 'http://localhost/manifest.json',
+   *    manifest: 'http://localhost/manifest.json',
    *    manifestHash: 'b5dad76bf6772c0f07fd5e048f6e75a5f86ee079',
    * };
    * await escrowClient.setup(escrowAddress, escrowConfig);
@@ -315,7 +316,7 @@ export class EscrowClient extends BaseEthersClient {
       recordingOracleFee,
       reputationOracleFee,
       exchangeOracleFee,
-      manifestUrl,
+      manifest,
       manifestHash,
     } = escrowConfig;
 
@@ -347,12 +348,9 @@ export class EscrowClient extends BaseEthersClient {
       throw ErrorTotalFeeMustBeLessThanHundred;
     }
 
-    if (!manifestUrl) {
-      throw ErrorUrlIsEmptyString;
-    }
-
-    if (!isValidUrl(manifestUrl)) {
-      throw ErrorInvalidUrl;
+    const isManifestValid = isValidUrl(manifest) || isValidJson(manifest);
+    if (!isManifestValid) {
+      throw ErrorInvalidManifest;
     }
 
     if (!manifestHash) {
@@ -374,7 +372,7 @@ export class EscrowClient extends BaseEthersClient {
           reputationOracleFee,
           recordingOracleFee,
           exchangeOracleFee,
-          manifestUrl,
+          manifest,
           manifestHash,
           txOptions
         )
@@ -540,7 +538,7 @@ export class EscrowClient extends BaseEthersClient {
       throw ErrorInvalidEscrowAddressProvided;
     }
     if (!url) {
-      throw ErrorUrlIsEmptyString;
+      throw ErrorInvalidUrl;
     }
     if (!isValidUrl(url)) {
       throw ErrorInvalidUrl;
@@ -1069,7 +1067,7 @@ export class EscrowClient extends BaseEthersClient {
     });
 
     if (!finalResultsUrl) {
-      throw ErrorUrlIsEmptyString;
+      throw ErrorInvalidUrl;
     }
 
     if (!isValidUrl(finalResultsUrl)) {
@@ -1216,7 +1214,7 @@ export class EscrowClient extends BaseEthersClient {
   }
 
   /**
-   * This function returns the manifest file URL.
+   * This function returns the manifest. Could be a URL or a JSON string.
    *
    * @param {string} escrowAddress Address of the escrow.
    * @returns {Promise<string>} Url of the manifest.
@@ -1232,10 +1230,10 @@ export class EscrowClient extends BaseEthersClient {
    * const provider = new providers.JsonRpcProvider(rpcUrl);
    * const escrowClient = await EscrowClient.build(provider);
    *
-   * const manifestUrl = await escrowClient.getManifestUrl('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
+   * const manifest = await escrowClient.getManifest('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
    * ```
    */
-  async getManifestUrl(escrowAddress: string): Promise<string> {
+  async getManifest(escrowAddress: string): Promise<string> {
     if (!ethers.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }
@@ -1694,7 +1692,7 @@ export class EscrowUtils {
    *   intermediateResultsUrl?: string;
    *   launcher: string;
    *   manifestHash?: string;
-   *   manifestUrl?: string;
+   *   manifest?: string;
    *   recordingOracle?: string;
    *   reputationOracle?: string;
    *   exchangeOracle?: string;
@@ -1815,7 +1813,7 @@ export class EscrowUtils {
    *   intermediateResultsUrl?: string;
    *   launcher: string;
    *   manifestHash?: string;
-   *   manifestUrl?: string;
+   *   manifest?: string;
    *   recordingOracle?: string;
    *   reputationOracle?: string;
    *   exchangeOracle?: string;

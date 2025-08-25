@@ -6,7 +6,7 @@
 
 # Interface: IWorkersFilter
 
-Defined in: [interfaces.ts:206](https://github.com/humanprotocol/human-protocol/blob/379b646116ffe55830ec173c1cf6576fc209b99f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L206)
+Defined in: [interfaces.ts:206](https://github.com/humanprotocol/human-protocol/blob/35282ccf869d69c95ced3874bd6bde870ac54d48/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L206)
 
 ## Extends
 
@@ -18,7 +18,7 @@ Defined in: [interfaces.ts:206](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **address**: `string`
 
-Defined in: [interfaces.ts:208](https://github.com/humanprotocol/human-protocol/blob/379b646116ffe55830ec173c1cf6576fc209b99f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L208)
+Defined in: [interfaces.ts:208](https://github.com/humanprotocol/human-protocol/blob/35282ccf869d69c95ced3874bd6bde870ac54d48/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L208)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: [interfaces.ts:208](https://github.com/humanprotocol/human-protocol/
 
 > **chainId**: [`ChainId`](../../enums/enumerations/ChainId.md)
 
-Defined in: [interfaces.ts:207](https://github.com/humanprotocol/human-protocol/blob/379b646116ffe55830ec173c1cf6576fc209b99f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L207)
+Defined in: [interfaces.ts:207](https://github.com/humanprotocol/human-protocol/blob/35282ccf869d69c95ced3874bd6bde870ac54d48/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L207)
 
 ***
 
@@ -34,7 +34,7 @@ Defined in: [interfaces.ts:207](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **first**: `number`
 
-Defined in: [interfaces.ts:179](https://github.com/humanprotocol/human-protocol/blob/379b646116ffe55830ec173c1cf6576fc209b99f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L179)
+Defined in: [interfaces.ts:179](https://github.com/humanprotocol/human-protocol/blob/35282ccf869d69c95ced3874bd6bde870ac54d48/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L179)
 
 #### Inherited from
 
@@ -46,7 +46,7 @@ Defined in: [interfaces.ts:179](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **orderBy**: `string`
 
-Defined in: [interfaces.ts:209](https://github.com/humanprotocol/human-protocol/blob/379b646116ffe55830ec173c1cf6576fc209b99f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L209)
+Defined in: [interfaces.ts:209](https://github.com/humanprotocol/human-protocol/blob/35282ccf869d69c95ced3874bd6bde870ac54d48/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L209)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [interfaces.ts:209](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **orderDirection**: [`OrderDirection`](../../enums/enumerations/OrderDirection.md)
 
-Defined in: [interfaces.ts:181](https://github.com/humanprotocol/human-protocol/blob/379b646116ffe55830ec173c1cf6576fc209b99f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L181)
+Defined in: [interfaces.ts:181](https://github.com/humanprotocol/human-protocol/blob/35282ccf869d69c95ced3874bd6bde870ac54d48/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L181)
 
 #### Inherited from
 
@@ -66,7 +66,7 @@ Defined in: [interfaces.ts:181](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **skip**: `number`
 
-Defined in: [interfaces.ts:180](https://github.com/humanprotocol/human-protocol/blob/379b646116ffe55830ec173c1cf6576fc209b99f/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L180)
+Defined in: [interfaces.ts:180](https://github.com/humanprotocol/human-protocol/blob/35282ccf869d69c95ced3874bd6bde870ac54d48/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L180)
 
 #### Inherited from
 

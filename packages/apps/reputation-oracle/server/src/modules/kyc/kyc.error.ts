@@ -1,4 +1,4 @@
-import { BaseError } from '../../common/errors/base';
+import { BaseError } from '@/common/errors/base';
 
 export enum KycErrorMessage {
   NOT_FOUND = 'KYC session not found',

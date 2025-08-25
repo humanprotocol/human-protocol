@@ -223,7 +223,14 @@ describe('CronJobService', () => {
 
       await service.updateJobsListCache(oracle, token);
 
-      expect(loggerErrorSpy).toHaveBeenCalledWith(error);
+      expect(loggerErrorSpy).toHaveBeenCalledWith(
+        'Error while updating jobs list for oracle',
+        {
+          chainId: oracle.chainId,
+          address: oracle.address,
+          error,
+        },
+      );
       expect(handleJobListErrorSpy).toHaveBeenCalledWith(oracle);
     });
 

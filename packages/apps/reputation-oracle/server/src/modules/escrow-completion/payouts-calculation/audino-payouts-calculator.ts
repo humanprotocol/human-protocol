@@ -2,11 +2,10 @@ import { EscrowClient, EscrowUtils } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 import type { OverrideProperties } from 'type-fest';
 
-import { AUDINO_VALIDATION_META_FILENAME } from '../../../common/constants';
-import { AudinoAnnotationMeta, AudinoManifest } from '../../../common/types';
-
-import { StorageService } from '../../storage';
-import { Web3Service } from '../../web3';
+import { AUDINO_VALIDATION_META_FILENAME } from '@/common/constants';
+import { AudinoAnnotationMeta, AudinoManifest } from '@/common/types';
+import { StorageService } from '@/modules/storage';
+import { Web3Service } from '@/modules/web3';
 
 import {
   CalclulatePayoutsInput,

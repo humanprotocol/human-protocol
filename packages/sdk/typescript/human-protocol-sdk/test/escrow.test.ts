@@ -32,7 +32,7 @@ import {
   ErrorTooManyRecipients,
   ErrorTotalFeeMustBeLessThanHundred,
   ErrorUnsupportedChainID,
-  ErrorUrlIsEmptyString,
+  ErrorInvalidManifest,
   InvalidEthereumAddressError,
 } from '../src/error';
 import { EscrowClient, EscrowUtils } from '../src/escrow';
@@ -293,7 +293,7 @@ describe('EscrowClient', () => {
         recordingOracleFee: 10n,
         reputationOracleFee: 10n,
         exchangeOracleFee: 10n,
-        manifestUrl: VALID_URL,
+        manifest: VALID_URL,
         hash: FAKE_HASH,
       };
 
@@ -310,7 +310,7 @@ describe('EscrowClient', () => {
         recordingOracleFee: 10n,
         reputationOracleFee: 10n,
         exchangeOracleFee: 10n,
-        manifestUrl: VALID_URL,
+        manifest: VALID_URL,
         hash: FAKE_HASH,
       };
 
@@ -327,7 +327,7 @@ describe('EscrowClient', () => {
         recordingOracleFee: 10n,
         reputationOracleFee: 10n,
         exchangeOracleFee: 10n,
-        manifestUrl: VALID_URL,
+        manifest: VALID_URL,
         hash: FAKE_HASH,
       };
 
@@ -344,7 +344,7 @@ describe('EscrowClient', () => {
         recordingOracleFee: 10n,
         reputationOracleFee: 10n,
         exchangeOracleFee: 10n,
-        manifestUrl: VALID_URL,
+        manifest: VALID_URL,
         hash: FAKE_HASH,
       };
 
@@ -361,7 +361,7 @@ describe('EscrowClient', () => {
         recordingOracleFee: 10n,
         reputationOracleFee: 10n,
         exchangeOracleFee: 10n,
-        manifestUrl: VALID_URL,
+        manifest: VALID_URL,
         manifestHash: FAKE_HASH,
       };
 
@@ -380,7 +380,7 @@ describe('EscrowClient', () => {
         recordingOracleFee: 0n,
         reputationOracleFee: 10n,
         exchangeOracleFee: 10n,
-        manifestUrl: VALID_URL,
+        manifest: VALID_URL,
         hash: FAKE_HASH,
       };
 
@@ -399,7 +399,7 @@ describe('EscrowClient', () => {
         recordingOracleFee: 10n,
         reputationOracleFee: 0n,
         exchangeOracleFee: 10n,
-        manifestUrl: VALID_URL,
+        manifest: VALID_URL,
         hash: FAKE_HASH,
       };
 
@@ -418,7 +418,7 @@ describe('EscrowClient', () => {
         recordingOracleFee: 10n,
         reputationOracleFee: 10n,
         exchangeOracleFee: 0n,
-        manifestUrl: VALID_URL,
+        manifest: VALID_URL,
         hash: FAKE_HASH,
       };
 
@@ -437,7 +437,7 @@ describe('EscrowClient', () => {
         recordingOracleFee: 40n,
         reputationOracleFee: 40n,
         exchangeOracleFee: 40n,
-        manifestUrl: VALID_URL,
+        manifest: VALID_URL,
         hash: FAKE_HASH,
       };
 
@@ -448,7 +448,7 @@ describe('EscrowClient', () => {
       ).rejects.toThrow(ErrorTotalFeeMustBeLessThanHundred);
     });
 
-    test('should throw an error if manifestUrl is an empty string', async () => {
+    test('should throw an error if manifest is an empty string', async () => {
       const escrowConfig = {
         recordingOracle: ethers.ZeroAddress,
         reputationOracle: ethers.ZeroAddress,
@@ -456,18 +456,18 @@ describe('EscrowClient', () => {
         recordingOracleFee: 10n,
         reputationOracleFee: 10n,
         exchangeOracleFee: 10n,
-        manifestUrl: '',
-        hash: FAKE_HASH,
+        manifest: '',
+        manifestHash: FAKE_HASH,
       };
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
 
       await expect(
         escrowClient.setup(ethers.ZeroAddress, escrowConfig)
-      ).rejects.toThrow(ErrorUrlIsEmptyString);
+      ).rejects.toThrow(ErrorInvalidManifest);
     });
 
-    test('should throw an error if manifestUrl is an invalid url', async () => {
+    test('should accept manifest as a JSON string', async () => {
       const escrowConfig = {
         recordingOracle: ethers.ZeroAddress,
         reputationOracle: ethers.ZeroAddress,
@@ -475,15 +475,30 @@ describe('EscrowClient', () => {
         recordingOracleFee: 10n,
         reputationOracleFee: 10n,
         exchangeOracleFee: 10n,
-        manifestUrl: FAKE_URL,
-        hash: FAKE_HASH,
+        manifest: '{"foo":"bar"}',
+        manifestHash: FAKE_HASH,
       };
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      const setupSpy = vi
+        .spyOn(escrowClient.escrowContract, 'setup')
+        .mockImplementation(() => ({
+          wait: vi.fn().mockResolvedValue(true),
+        }));
 
-      await expect(
-        escrowClient.setup(ethers.ZeroAddress, escrowConfig)
-      ).rejects.toThrow(ErrorInvalidUrl);
+      await escrowClient.setup(ethers.ZeroAddress, escrowConfig);
+
+      expect(setupSpy).toHaveBeenCalledWith(
+        ethers.ZeroAddress,
+        ethers.ZeroAddress,
+        ethers.ZeroAddress,
+        10n,
+        10n,
+        10n,
+        '{"foo":"bar"}',
+        FAKE_HASH,
+        {}
+      );
     });
 
     test('should throw an error if hash is an empty string', async () => {
@@ -494,7 +509,7 @@ describe('EscrowClient', () => {
         recordingOracleFee: 10n,
         reputationOracleFee: 10n,
         exchangeOracleFee: 10n,
-        manifestUrl: VALID_URL,
+        manifest: VALID_URL,
         hash: '',
       };
 
@@ -513,7 +528,7 @@ describe('EscrowClient', () => {
         recordingOracleFee: 10n,
         reputationOracleFee: 10n,
         exchangeOracleFee: 10n,
-        manifestUrl: VALID_URL,
+        manifest: VALID_URL,
         manifestHash: FAKE_HASH,
       };
 
@@ -547,7 +562,7 @@ describe('EscrowClient', () => {
         recordingOracleFee: 10n,
         reputationOracleFee: 10n,
         exchangeOracleFee: 10n,
-        manifestUrl: VALID_URL,
+        manifest: VALID_URL,
         manifestHash: FAKE_HASH,
       };
 
@@ -579,7 +594,7 @@ describe('EscrowClient', () => {
         recordingOracleFee: 10n,
         reputationOracleFee: 10n,
         exchangeOracleFee: 10n,
-        manifestUrl: VALID_URL,
+        manifest: VALID_URL,
         manifestHash: FAKE_HASH,
       };
 
@@ -730,7 +745,7 @@ describe('EscrowClient', () => {
 
       await expect(
         escrowClient.storeResults(escrowAddress, url, hash)
-      ).rejects.toThrow(ErrorUrlIsEmptyString);
+      ).rejects.toThrow(ErrorInvalidUrl);
     });
 
     test('should throw an error if results url is invalid url', async () => {
@@ -1086,7 +1101,7 @@ describe('EscrowClient', () => {
           finalResultsUrl,
           finalResultsHash
         )
-      ).rejects.toThrow(ErrorUrlIsEmptyString);
+      ).rejects.toThrow(ErrorInvalidUrl);
     });
 
     test('should throw an error if final results url is an invalid url', async () => {
@@ -1519,7 +1534,7 @@ describe('EscrowClient', () => {
           finalResultsUrl,
           finalResultsHash
         )
-      ).rejects.toThrow(ErrorUrlIsEmptyString);
+      ).rejects.toThrow(ErrorInvalidUrl);
     });
 
     test('should throw an error if final results url is an invalid url', async () => {
@@ -2100,11 +2115,11 @@ describe('EscrowClient', () => {
     });
   });
 
-  describe('getManifestUrl', () => {
+  describe('getManifest', () => {
     test('should throw an error if escrowAddress is an invalid address', async () => {
       const escrowAddress = FAKE_ADDRESS;
 
-      await expect(escrowClient.getManifestUrl(escrowAddress)).rejects.toThrow(
+      await expect(escrowClient.getManifest(escrowAddress)).rejects.toThrow(
         ErrorInvalidEscrowAddressProvided
       );
     });
@@ -2114,7 +2129,7 @@ describe('EscrowClient', () => {
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(false);
 
-      await expect(escrowClient.getManifestUrl(escrowAddress)).rejects.toThrow(
+      await expect(escrowClient.getManifest(escrowAddress)).rejects.toThrow(
         ErrorEscrowAddressIsNotProvidedByFactory
       );
     });
@@ -2126,10 +2141,21 @@ describe('EscrowClient', () => {
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
       escrowClient.escrowContract.manifestUrl.mockReturnValue(url);
 
-      const manifestUrl = await escrowClient.getManifestUrl(escrowAddress);
+      const manifestUrl = await escrowClient.getManifest(escrowAddress);
 
       expect(manifestUrl).toEqual(url);
       expect(escrowClient.escrowContract.manifestUrl).toHaveBeenCalledWith();
+    });
+
+    test('should return the manifest string', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+      const manifestString = '{"foo":"bar"}';
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.manifestUrl = vi
+        .fn()
+        .mockReturnValue(manifestString);
+      const result = await escrowClient.getManifest(escrowAddress);
+      expect(result).toBe(manifestString);
     });
 
     test('should throw an error if getManifestUrl fails', async () => {
@@ -2140,9 +2166,7 @@ describe('EscrowClient', () => {
         new Error()
       );
 
-      await expect(
-        escrowClient.getManifestUrl(escrowAddress)
-      ).rejects.toThrow();
+      await expect(escrowClient.getManifest(escrowAddress)).rejects.toThrow();
 
       expect(escrowClient.escrowContract.manifestUrl).toHaveBeenCalledWith();
     });

@@ -190,9 +190,7 @@ describe('JobService', () => {
       const escrowClient = {
         getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
         getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
-        getManifestUrl: jest
-          .fn()
-          .mockResolvedValue('http://example.com/manifest'),
+        getManifest: jest.fn().mockResolvedValue('http://example.com/manifest'),
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
       StorageClient.downloadFileFromUrl = jest
@@ -220,9 +218,7 @@ describe('JobService', () => {
       const escrowClient = {
         getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
         getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
-        getManifestUrl: jest
-          .fn()
-          .mockResolvedValue('http://example.com/manifest'),
+        getManifest: jest.fn().mockResolvedValue('http://example.com/manifest'),
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
       StorageClient.downloadFileFromUrl = jest
@@ -254,9 +250,7 @@ describe('JobService', () => {
       const escrowClient = {
         getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
         getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
-        getManifestUrl: jest
-          .fn()
-          .mockResolvedValue('http://example.com/manifest'),
+        getManifest: jest.fn().mockResolvedValue('http://example.com/manifest'),
         getIntermediateResultsUrl: jest
           .fn()
           .mockResolvedValue('http://example.com/results'),
@@ -320,9 +314,7 @@ describe('JobService', () => {
         getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
         getReputationOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
         getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
-        getManifestUrl: jest
-          .fn()
-          .mockResolvedValue('http://example.com/manifest'),
+        getManifest: jest.fn().mockResolvedValue('http://example.com/manifest'),
         getIntermediateResultsUrl: jest
           .fn()
           .mockResolvedValue('http://example.com/results'),
@@ -379,9 +371,7 @@ describe('JobService', () => {
         getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
         getReputationOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
         getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
-        getManifestUrl: jest
-          .fn()
-          .mockResolvedValue('http://example.com/manifest'),
+        getManifest: jest.fn().mockResolvedValue('http://example.com/manifest'),
         getIntermediateResultsUrl: jest.fn().mockResolvedValue(''),
         storeResults: jest.fn().mockResolvedValue(true),
         getTokenAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
@@ -436,9 +426,7 @@ describe('JobService', () => {
         getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
         getReputationOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
         getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
-        getManifestUrl: jest
-          .fn()
-          .mockResolvedValue('http://example.com/manifest'),
+        getManifest: jest.fn().mockResolvedValue('http://example.com/manifest'),
         getIntermediateResultsUrl: jest
           .fn()
           .mockResolvedValue('http://existing-solutions'),
@@ -517,9 +505,7 @@ describe('JobService', () => {
       getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       getReputationOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
-      getManifestUrl: jest
-        .fn()
-        .mockResolvedValue('http://example.com/manifest'),
+      getManifest: jest.fn().mockResolvedValue('http://example.com/manifest'),
       getIntermediateResultsUrl: jest
         .fn()
         .mockResolvedValue('http://existing-solutions'),
@@ -610,9 +596,7 @@ describe('JobService', () => {
       getExchangeOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       getReputationOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
-      getManifestUrl: jest
-        .fn()
-        .mockResolvedValue('http://example.com/manifest'),
+      getManifest: jest.fn().mockResolvedValue('http://example.com/manifest'),
       getIntermediateResultsUrl: jest
         .fn()
         .mockResolvedValue('http://existing-solutions'),
@@ -695,9 +679,7 @@ describe('JobService', () => {
       getExchangeOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       getReputationOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
-      getManifestUrl: jest
-        .fn()
-        .mockResolvedValue('http://example.com/manifest'),
+      getManifest: jest.fn().mockResolvedValue('http://example.com/manifest'),
       getIntermediateResultsUrl: jest
         .fn()
         .mockResolvedValue('http://existing-solutions'),

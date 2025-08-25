@@ -6,6 +6,7 @@ import {
   HttpException,
 } from '@nestjs/common';
 import { Request } from 'express';
+
 import { HCaptchaService } from './hcaptcha.service';
 
 @Injectable()
@@ -20,7 +21,7 @@ export class HCaptchaGuard implements CanActivate {
      * Guards called before interceptors,
      * so we need to access body params as is
      */
-    const hCaptchaToken = body['h_captcha_token'];
+    const hCaptchaToken: string = body['h_captcha_token'];
     if (!hCaptchaToken) {
       throw new HttpException(
         'hCaptcha token not provided',

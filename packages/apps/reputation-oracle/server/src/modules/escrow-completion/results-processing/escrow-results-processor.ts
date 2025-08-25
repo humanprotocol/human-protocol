@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 import {
   ChainId,
   EscrowClient,
@@ -5,14 +7,12 @@ import {
   EscrowUtils,
 } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
-import crypto from 'crypto';
 
-import { ContentType } from '../../../common/enums';
-import { JobManifest } from '../../../common/types';
-
-import { PgpEncryptionService } from '../../encryption';
-import { StorageService } from '../../storage';
-import { Web3Service } from '../../web3';
+import { ContentType } from '@/common/enums';
+import { JobManifest } from '@/common/types';
+import { PgpEncryptionService } from '@/modules/encryption';
+import { StorageService } from '@/modules/storage';
+import { Web3Service } from '@/modules/web3';
 
 type EscrowFinalResultsDetails = {
   url: string;

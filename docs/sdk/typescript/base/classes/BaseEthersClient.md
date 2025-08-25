@@ -6,7 +6,7 @@
 
 # Class: `abstract` BaseEthersClient
 
-Defined in: [base.ts:10](https://github.com/humanprotocol/human-protocol/blob/379b646116ffe55830ec173c1cf6576fc209b99f/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L10)
+Defined in: [base.ts:10](https://github.com/humanprotocol/human-protocol/blob/35282ccf869d69c95ced3874bd6bde870ac54d48/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L10)
 
 ## Introduction
 
@@ -24,7 +24,7 @@ This class is used as a base class for other clients making on-chain calls.
 
 > **new BaseEthersClient**(`runner`, `networkData`): `BaseEthersClient`
 
-Defined in: [base.ts:20](https://github.com/humanprotocol/human-protocol/blob/379b646116ffe55830ec173c1cf6576fc209b99f/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L20)
+Defined in: [base.ts:20](https://github.com/humanprotocol/human-protocol/blob/35282ccf869d69c95ced3874bd6bde870ac54d48/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L20)
 
 **BaseClient constructor**
 
@@ -52,7 +52,7 @@ The network information required to connect to the contracts
 
 > **networkData**: [`NetworkData`](../../types/type-aliases/NetworkData.md)
 
-Defined in: [base.ts:12](https://github.com/humanprotocol/human-protocol/blob/379b646116ffe55830ec173c1cf6576fc209b99f/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
+Defined in: [base.ts:12](https://github.com/humanprotocol/human-protocol/blob/35282ccf869d69c95ced3874bd6bde870ac54d48/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
 
 ***
 
@@ -60,4 +60,4 @@ Defined in: [base.ts:12](https://github.com/humanprotocol/human-protocol/blob/37
 
 > `protected` **runner**: `ContractRunner`
 
-Defined in: [base.ts:11](https://github.com/humanprotocol/human-protocol/blob/379b646116ffe55830ec173c1cf6576fc209b99f/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
+Defined in: [base.ts:11](https://github.com/humanprotocol/human-protocol/blob/35282ccf869d69c95ced3874bd6bde870ac54d48/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)

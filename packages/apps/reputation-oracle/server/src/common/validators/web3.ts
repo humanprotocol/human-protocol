@@ -16,7 +16,7 @@ export function IsValidWeb3Signature(validationOptions?: ValidationOptions) {
       propertyName: propertyName,
       options: validationOptions,
       validator: {
-        validate(value: any) {
+        validate(value: unknown) {
           if (typeof value !== 'string') {
             return false;
           }

@@ -910,7 +910,7 @@ describe('JobService', () => {
           recordingOracleFee: 2n,
           exchangeOracle: jobEntity.exchangeOracle,
           exchangeOracleFee: 3n,
-          manifestUrl: jobEntity.manifestUrl,
+          manifest: jobEntity.manifestUrl,
           manifestHash: jobEntity.manifestHash,
         },
         { gasPrice: 1n },

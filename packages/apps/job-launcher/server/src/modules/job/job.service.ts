@@ -335,7 +335,7 @@ export class JobService {
         jobEntity.exchangeOracle,
         jobEntity.chainId,
       ),
-      manifestUrl: jobEntity.manifestUrl,
+      manifest: jobEntity.manifestUrl,
       manifestHash: jobEntity.manifestHash,
     };
 

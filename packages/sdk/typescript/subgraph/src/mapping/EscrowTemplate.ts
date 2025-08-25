@@ -140,13 +140,13 @@ function createCommonEntitiesForPending(
 function updateEscrowEntityForPending(
   escrowEntity: Escrow,
   escrowStatusEvent: EscrowStatusEvent,
-  manifestUrl: string,
+  manifest: string,
   manifestHash: string,
   reputationOracle: Address | null = null,
   recordingOracle: Address | null = null,
   exchangeOracle: Address | null = null
 ): void {
-  escrowEntity.manifestUrl = manifestUrl;
+  escrowEntity.manifest = manifest;
   escrowEntity.manifestHash = manifestHash;
   escrowEntity.status = 'Pending';
 
