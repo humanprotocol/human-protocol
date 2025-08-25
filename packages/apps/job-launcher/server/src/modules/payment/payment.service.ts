@@ -573,7 +573,7 @@ export class PaymentService {
     };
   }
 
-  public async getPaymentsByJobId(
+  public async getJobPayments(
     jobId: number,
     type?: string,
   ): Promise<PaymentEntity[]> {

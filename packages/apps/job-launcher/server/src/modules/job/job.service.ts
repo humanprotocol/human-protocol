@@ -635,8 +635,7 @@ export class JobService {
     if (balance === 0n) {
       throw new ConflictError(ErrorEscrow.InvalidBalanceCancellation);
     }
-    console.log('balance', balance);
-    console.log('escrowAddress', escrowAddress);
+
     await escrowClient.cancel(escrowAddress!, {
       gasPrice: await this.web3Service.calculateGasPrice(chainId),
     });
@@ -874,7 +873,7 @@ export class JobService {
   }
 
   public async cancelJob(jobEntity: JobEntity): Promise<void> {
-    const slash = await this.paymentService.getPaymentsByJobId(
+    const slash = await this.paymentService.getJobPayments(
       jobEntity.id,
       PaymentType.SLASH,
     );

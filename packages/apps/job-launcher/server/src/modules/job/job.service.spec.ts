@@ -949,7 +949,7 @@ describe('JobService', () => {
       );
 
       mockWeb3Service.calculateGasPrice.mockResolvedValueOnce(1n);
-      mockedKVStoreUtils.get.mockResolvedValue('1');
+      mockedKVStoreUtils.get.mockResolvedValueOnce('1');
 
       await expect(jobService.setupEscrow(jobEntity)).rejects.toThrow(
         'Network error',
@@ -963,9 +963,9 @@ describe('JobService', () => {
         status: JobStatus.PAID,
         token: EscrowFundToken.HMT,
       });
-      mockedKVStoreUtils.get.mockResolvedValue('1');
+      mockedKVStoreUtils.get.mockResolvedValueOnce('1');
       mockedEscrowClient.build.mockResolvedValueOnce({
-        fund: jest.fn().mockResolvedValue(undefined),
+        fund: jest.fn().mockResolvedValueOnce(undefined),
       } as unknown as EscrowClient);
 
       mockWeb3Service.calculateGasPrice.mockResolvedValueOnce(1n);
@@ -994,7 +994,7 @@ describe('JobService', () => {
         createSignerMock() as unknown as Wallet,
       );
       mockedEscrowClient.build.mockResolvedValueOnce({
-        fund: jest.fn().mockRejectedValue(new Error('Network error')),
+        fund: jest.fn().mockRejectedValueOnce(new Error('Network error')),
       } as unknown as EscrowClient);
 
       mockWeb3Service.calculateGasPrice.mockResolvedValueOnce(1n);
@@ -1274,7 +1274,7 @@ describe('JobService', () => {
       ];
 
       (EscrowClient.build as any).mockImplementation(() => ({
-        getResultsUrl: jest.fn().mockResolvedValue(url),
+        getResultsUrl: jest.fn().mockResolvedValueOnce(url),
       }));
       mockStorageService.downloadJsonLikeData.mockResolvedValueOnce(
         fortuneResult,
@@ -1400,13 +1400,13 @@ describe('JobService', () => {
     it('should process escrow cancellation', async () => {
       const jobEntity = createJobEntity();
       mockWeb3Service.calculateGasPrice.mockResolvedValueOnce(1n);
-      const getStatusMock = jest.fn().mockResolvedValue('Active');
-      const getBalanceMock = jest.fn().mockResolvedValue(100n);
+      const getStatusMock = jest.fn().mockResolvedValueOnce('Active');
+      const getBalanceMock = jest.fn().mockResolvedValueOnce(100n);
       const cancelMock = jest
         .fn()
-        .mockResolvedValue({ txHash: '0x', amountRefunded: 100n });
+        .mockResolvedValueOnce({ txHash: '0x', amountRefunded: 100n });
 
-      mockedEscrowClient.build.mockResolvedValue({
+      mockedEscrowClient.build.mockResolvedValueOnce({
         getStatus: getStatusMock,
         getBalance: getBalanceMock,
         cancel: cancelMock,
@@ -1424,9 +1424,9 @@ describe('JobService', () => {
     it('should throw if escrow status is not Active', async () => {
       const jobEntity = createJobEntity();
       mockWeb3Service.calculateGasPrice.mockResolvedValueOnce(1n);
-      mockedEscrowClient.build.mockResolvedValue({
-        getStatus: jest.fn().mockResolvedValue(EscrowStatus.Complete),
-        getBalance: jest.fn().mockResolvedValue(100n),
+      mockedEscrowClient.build.mockResolvedValueOnce({
+        getStatus: jest.fn().mockResolvedValueOnce(EscrowStatus.Complete),
+        getBalance: jest.fn().mockResolvedValueOnce(100n),
         cancel: jest.fn(),
       } as unknown as EscrowClient);
 
@@ -1440,9 +1440,9 @@ describe('JobService', () => {
     it('should throw if escrow balance is zero', async () => {
       const jobEntity = createJobEntity();
       mockWeb3Service.calculateGasPrice.mockResolvedValueOnce(1n);
-      mockedEscrowClient.build.mockResolvedValue({
-        getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
-        getBalance: jest.fn().mockResolvedValue(0n),
+      mockedEscrowClient.build.mockResolvedValueOnce({
+        getStatus: jest.fn().mockResolvedValueOnce(EscrowStatus.Pending),
+        getBalance: jest.fn().mockResolvedValueOnce(0n),
         cancel: jest.fn(),
       } as unknown as EscrowClient);
 
@@ -1456,10 +1456,10 @@ describe('JobService', () => {
     it('should throw if cancel throws an error', async () => {
       const jobEntity = createJobEntity();
       mockWeb3Service.calculateGasPrice.mockResolvedValueOnce(1n);
-      mockedEscrowClient.build.mockResolvedValue({
-        getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
-        getBalance: jest.fn().mockResolvedValue(100n),
-        cancel: jest.fn().mockRejectedValue(new Error('Network error')),
+      mockedEscrowClient.build.mockResolvedValueOnce({
+        getStatus: jest.fn().mockResolvedValueOnce(EscrowStatus.Pending),
+        getBalance: jest.fn().mockResolvedValueOnce(100n),
+        cancel: jest.fn().mockRejectedValueOnce(new Error('Network error')),
       } as unknown as EscrowClient);
 
       await expect(
@@ -1753,10 +1753,12 @@ describe('JobService', () => {
 
   describe('isEscrowFunded', () => {
     it('should check if escrow is funded', async () => {
-      mockedEscrowClient.build.mockResolvedValue({
+      mockedEscrowClient.build.mockResolvedValueOnce({
         getBalance: jest
           .fn()
-          .mockResolvedValue(BigInt(faker.number.int({ min: 1, max: 1000 }))),
+          .mockResolvedValueOnce(
+            BigInt(faker.number.int({ min: 1, max: 1000 })),
+          ),
       } as unknown as EscrowClient);
       const result = await jobService.isEscrowFunded(
         faker.number.int(),
@@ -1766,8 +1768,8 @@ describe('JobService', () => {
     });
 
     it('should return false if escrow was not funded', async () => {
-      mockedEscrowClient.build.mockResolvedValue({
-        getBalance: jest.fn().mockResolvedValue(0n),
+      mockedEscrowClient.build.mockResolvedValueOnce({
+        getBalance: jest.fn().mockResolvedValueOnce(0n),
       } as unknown as EscrowClient);
       const result = await jobService.isEscrowFunded(
         faker.number.int(),
@@ -1787,7 +1789,7 @@ describe('JobService', () => {
       const jobEntity = createJobEntity();
       const refundAmount = faker.number.float({ min: 1, max: 10 });
 
-      mockPaymentService.getPaymentsByJobId.mockResolvedValueOnce([]);
+      mockPaymentService.getJobPayments.mockResolvedValueOnce([]);
       mockedEscrowUtils.getCancellationRefund.mockResolvedValueOnce({
         amount: ethers.parseUnits(refundAmount.toString(), 18),
         escrowAddress: jobEntity.escrowAddress!,
@@ -1797,7 +1799,7 @@ describe('JobService', () => {
 
       await jobService.cancelJob(jobEntity);
 
-      expect(mockPaymentService.getPaymentsByJobId).toHaveBeenCalledWith(
+      expect(mockPaymentService.getJobPayments).toHaveBeenCalledWith(
         jobEntity.id,
         PaymentType.SLASH,
       );
@@ -1817,7 +1819,7 @@ describe('JobService', () => {
 
     it('should NOT create a refund if SLASH payment exists, but still set status to CANCELED', async () => {
       const jobEntity = createJobEntity();
-      mockPaymentService.getPaymentsByJobId.mockResolvedValueOnce([
+      mockPaymentService.getJobPayments.mockResolvedValueOnce([
         {
           id: faker.number.int(),
           jobId: jobEntity.id,
@@ -1829,7 +1831,7 @@ describe('JobService', () => {
       ]);
       await jobService.cancelJob(jobEntity);
 
-      expect(mockPaymentService.getPaymentsByJobId).toHaveBeenCalledWith(
+      expect(mockPaymentService.getJobPayments).toHaveBeenCalledWith(
         jobEntity.id,
         PaymentType.SLASH,
       );
@@ -1841,7 +1843,7 @@ describe('JobService', () => {
 
     it('should throw ConflictError if no refund is found', async () => {
       const jobEntity = createJobEntity();
-      mockPaymentService.getPaymentsByJobId.mockResolvedValueOnce([]);
+      mockPaymentService.getJobPayments.mockResolvedValueOnce([]);
       mockedEscrowUtils.getCancellationRefund.mockResolvedValueOnce(
         null as any,
       );
@@ -1853,7 +1855,7 @@ describe('JobService', () => {
 
     it('should throw ConflictError if refund.amount is empty', async () => {
       const jobEntity = createJobEntity();
-      mockPaymentService.getPaymentsByJobId.mockResolvedValueOnce([]);
+      mockPaymentService.getJobPayments.mockResolvedValueOnce([]);
       mockedEscrowUtils.getCancellationRefund.mockResolvedValueOnce({
         amount: 0,
         escrowAddress: jobEntity.escrowAddress!,

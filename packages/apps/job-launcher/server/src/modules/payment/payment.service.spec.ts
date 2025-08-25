@@ -1428,25 +1428,25 @@ describe('PaymentService', () => {
     });
   });
 
-  describe('getPaymentsByJobId', () => {
+  describe('getJobPayments', () => {
     it('should return payments filtered by jobId and type', async () => {
-      const jobId = 123;
+      const jobId = faker.number.int();
       const type = PaymentType.REFUND;
       const mockPayments = [
         {
-          id: 1,
+          id: faker.number.int(),
           jobId,
           type,
-          amount: 100,
+          amount: faker.number.int({ min: 1, max: 1000 }),
           currency: PaymentCurrency.USD,
           status: PaymentStatus.SUCCEEDED,
           createdAt: new Date(),
         } as PaymentEntity,
         {
-          id: 2,
+          id: faker.number.int(),
           jobId,
           type,
-          amount: 50,
+          amount: faker.number.int({ min: 1, max: 1000 }),
           currency: PaymentCurrency.USD,
           status: PaymentStatus.SUCCEEDED,
           createdAt: new Date(),
@@ -1457,7 +1457,7 @@ describe('PaymentService', () => {
         .spyOn(paymentRepository, 'findByJobIdAndType')
         .mockResolvedValueOnce(mockPayments);
 
-      const result = await paymentService.getPaymentsByJobId(jobId, type);
+      const result = await paymentService.getJobPayments(jobId, type);
 
       expect(paymentRepository.findByJobIdAndType).toHaveBeenCalledWith(
         jobId,
@@ -1467,14 +1467,14 @@ describe('PaymentService', () => {
     });
 
     it('should return an empty array if no payments are found', async () => {
-      const jobId = 456;
+      const jobId = faker.number.int();
       const type = PaymentType.SLASH;
 
       jest
         .spyOn(paymentRepository, 'findByJobIdAndType')
         .mockResolvedValueOnce([]);
 
-      const result = await paymentService.getPaymentsByJobId(jobId, type);
+      const result = await paymentService.getJobPayments(jobId, type);
 
       expect(paymentRepository.findByJobIdAndType).toHaveBeenCalledWith(
         jobId,

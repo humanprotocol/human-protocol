@@ -1,10 +1,3 @@
-jest.mock('@human-protocol/sdk', () => ({
-  ...jest.requireActual('@human-protocol/sdk'),
-  EscrowClient: {
-    build: jest.fn(),
-  },
-}));
-
 import { faker } from '@faker-js/faker/.';
 import { createMock } from '@golevelup/ts-jest';
 import { ChainId, KVStoreUtils } from '@human-protocol/sdk';
@@ -103,7 +96,7 @@ describe('WebhookService', () => {
     };
 
     it('should throw an error if webhook url is empty', async () => {
-      KVStoreUtils.get = jest.fn().mockResolvedValue('');
+      KVStoreUtils.get = jest.fn().mockResolvedValueOnce('');
       await expect(
         (webhookService as any).sendWebhook(webhookEntity),
       ).rejects.toThrow(new ServerError(ErrorWebhook.UrlNotFound));
@@ -112,7 +105,7 @@ describe('WebhookService', () => {
     it('should handle error if any exception is thrown', async () => {
       KVStoreUtils.get = jest
         .fn()
-        .mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
+        .mockResolvedValueOnce(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
       jest.spyOn(httpService as any, 'post').mockImplementation(() => {
         return throwError(() => new Error('HTTP request failed'));
       });
@@ -124,7 +117,7 @@ describe('WebhookService', () => {
     it('should successfully process a fortune webhook', async () => {
       KVStoreUtils.get = jest
         .fn()
-        .mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
+        .mockResolvedValueOnce(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
       jest.spyOn(httpService as any, 'post').mockImplementation(() => {
         return of({
           status: HttpStatus.CREATED,
@@ -149,7 +142,7 @@ describe('WebhookService', () => {
       webhookEntity.oracleType = OracleType.CVAT;
       KVStoreUtils.get = jest
         .fn()
-        .mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
+        .mockResolvedValueOnce(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
       jest.spyOn(httpService as any, 'post').mockImplementation(() => {
         return of({
           status: HttpStatus.CREATED,
@@ -175,7 +168,7 @@ describe('WebhookService', () => {
       webhookEntity.hasSignature = true;
       KVStoreUtils.get = jest
         .fn()
-        .mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
+        .mockResolvedValueOnce(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
       jest.spyOn(httpService as any, 'post').mockImplementation(() => {
         return of({
           status: HttpStatus.CREATED,
@@ -201,7 +194,7 @@ describe('WebhookService', () => {
       webhookEntity.hasSignature = true;
       KVStoreUtils.get = jest
         .fn()
-        .mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
+        .mockResolvedValueOnce(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
       jest.spyOn(httpService as any, 'post').mockImplementation(() => {
         return of({
           status: HttpStatus.CREATED,
