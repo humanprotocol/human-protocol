@@ -5,26 +5,23 @@ import { createMock } from '@golevelup/ts-jest';
 import { KVStoreClient, KVStoreUtils } from '@human-protocol/sdk';
 import { Test } from '@nestjs/testing';
 
-import { generateEthWallet } from '../../../test/fixtures/web3';
-
-import { SignatureType } from '../../common/enums';
-import { Web3ConfigService } from '../../config';
-import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
-import * as web3Utils from '../../utils/web3';
-
-import { KycStatus } from '../kyc/constants';
-import { generateKycEntity } from '../kyc/fixtures';
-import { mockWeb3ConfigService } from '../web3/fixtures';
-import { Web3Service } from '../web3/web3.service';
+import { SignatureType } from '@/common/enums';
+import { UserRole, KycStatus } from '@/common/enums';
+import { Web3ConfigService } from '@/config';
+import { HCaptchaService } from '@/integrations/hcaptcha/hcaptcha.service';
+import { generateKycEntity } from '@/modules/kyc/fixtures';
+import { Web3Service } from '@/modules/web3';
+import { mockWeb3ConfigService } from '@/modules/web3/fixtures';
+import * as web3Utils from '@/utils/web3';
+import { generateEthWallet } from '~/test/fixtures/web3';
 
 import {
   generateSiteKeyEntity,
   generateOperator,
   generateWorkerUser,
 } from './fixtures';
-import { SiteKeyRepository } from './site-key.repository';
 import { SiteKeyType } from './site-key.entity';
-import { Role } from './user.entity';
+import { SiteKeyRepository } from './site-key.repository';
 import {
   DuplicatedWalletAddressError,
   InvalidWeb3SignatureError,
@@ -81,9 +78,9 @@ describe('UserService', () => {
 
   describe('isWeb2UserRole', () => {
     it.each(
-      Object.values(Role).map((role) => ({
+      Object.values(UserRole).map((role) => ({
         role,
-        result: role === Role.OPERATOR ? false : true,
+        result: role === UserRole.OPERATOR ? false : true,
       })),
     )('should return "$result" for "$role" role', ({ role, result }) => {
       expect(UserService.isWeb2UserRole(role)).toBe(result);
@@ -98,7 +95,7 @@ describe('UserService', () => {
 
     it('should throw if not worker user', async () => {
       const user = generateWorkerUser();
-      user.role = Role.ADMIN;
+      user.role = UserRole.ADMIN;
 
       mockUserRepository.findOneById.mockResolvedValueOnce(user);
 

@@ -30,7 +30,6 @@ const envSchema = z.object({
     return iconsArray;
   }),
   VITE_NETWORK: z.enum(['mainnet', 'testnet']),
-  VITE_GOVERNOR_ADDRESS: z.string(),
   VITE_GOVERNANCE_URL: z.string(),
   VITE_H_CAPTCHA_ORACLE_ANNOTATION_TOOL: z.string(),
   VITE_H_CAPTCHA_ORACLE_ROLE: z.string(),

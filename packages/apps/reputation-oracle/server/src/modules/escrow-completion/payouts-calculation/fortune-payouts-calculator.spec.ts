@@ -1,10 +1,10 @@
-import { createMock } from '@golevelup/ts-jest';
 import { faker } from '@faker-js/faker';
+import { createMock } from '@golevelup/ts-jest';
 import { Test } from '@nestjs/testing';
 import { ethers } from 'ethers';
 import _ from 'lodash';
 
-import { StorageService } from '../../storage';
+import { StorageService } from '@/modules/storage';
 
 import { generateFortuneManifest, generateFortuneSolution } from '../fixtures';
 import { FortunePayoutsCalculator } from './fortune-payouts-calculator';

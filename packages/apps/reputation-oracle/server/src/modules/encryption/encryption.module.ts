@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 
-import { Web3Module } from '../web3';
+import { Web3Module } from '@/modules/web3';
 
 import { PgpEncryptionService } from './pgp-encryption.service';
 

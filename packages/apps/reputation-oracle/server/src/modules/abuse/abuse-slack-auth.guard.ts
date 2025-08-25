@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
-import { SlackAuthGuard } from '../../common/guards/slack.auth';
-import { SlackConfigService } from '../../config/slack-config.service';
+import { SlackAuthGuard } from '@/common/guards/slack.auth';
+import { SlackConfigService } from '@/config';
 
 @Injectable()
 export class AbuseSlackAuthGuard extends SlackAuthGuard {

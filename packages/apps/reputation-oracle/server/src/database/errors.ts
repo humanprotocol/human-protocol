@@ -1,4 +1,4 @@
-import { BaseError } from '../common/errors/base';
+import { BaseError } from '@/common/errors/base';
 
 enum PostgresErrorCodes {
   Duplicated = '23505',
@@ -10,7 +10,7 @@ export enum DatabaseErrorMessages {
   DUPLICATED = 'Entity duplication error',
 }
 
-export function handleDbError(error: any): DatabaseError {
+export function handleDbError(error: Error & { code: unknown }): DatabaseError {
   if (error.code === PostgresErrorCodes.Duplicated) {
     return new DatabaseError(DatabaseErrorMessages.DUPLICATED);
   }

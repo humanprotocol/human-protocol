@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { MailService } from '@sendgrid/mail';
 
-import { SendgridEmailService } from './sendgrid.service';
 import { EmailService } from './email.service';
+import { SendgridEmailService } from './sendgrid.service';
 
 @Module({
   providers: [

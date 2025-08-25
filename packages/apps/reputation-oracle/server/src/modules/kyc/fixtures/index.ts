@@ -1,8 +1,9 @@
 import { faker } from '@faker-js/faker';
 
-import { KycConfigService } from '../../../config';
+import { KycStatus } from '@/common/enums';
+import { KycConfigService } from '@/config';
+
 import { KycEntity } from '../kyc.entity';
-import { KycStatus } from '../constants';
 
 export const mockKycConfigService: Omit<KycConfigService, 'configService'> = {
   apiPrivateKey: faker.string.alphanumeric(),

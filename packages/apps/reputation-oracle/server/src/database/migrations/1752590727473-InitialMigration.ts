@@ -1,5 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
-import { DATABASE_SCHEMA_NAME } from '../../common/constants';
+
+import { DATABASE_SCHEMA_NAME } from '@/common/constants';
 
 export class InitialMigration1752590727473 implements MigrationInterface {
   name = 'InitialMigration1752590727473';

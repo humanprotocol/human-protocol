@@ -55,6 +55,21 @@ export const isValidUrl = (url: string) => {
 };
 
 /**
+ * **Check if a string is a valid JSON.*
+ *
+ * @param {string} input
+ * @returns {boolean}
+ */
+export const isValidJson = (input: string): boolean => {
+  try {
+    JSON.parse(input);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+/**
  * **Get the subgraph URL.*
  *
  * @param {NetworkData} networkData

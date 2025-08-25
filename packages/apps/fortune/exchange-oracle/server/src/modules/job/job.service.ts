@@ -9,7 +9,8 @@ import {
   EscrowClient,
   StorageClient,
 } from '@human-protocol/sdk';
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+
 import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { ErrorAssignment, ErrorJob } from '../../common/constant/errors';
 import { SortDirection } from '../../common/enums/collection';
@@ -42,8 +43,6 @@ import { JobRepository } from './job.repository';
 
 @Injectable()
 export class JobService {
-  public readonly logger = new Logger(JobService.name);
-
   constructor(
     private readonly pgpConfigService: PGPConfigService,
     public readonly jobRepository: JobRepository,
@@ -63,7 +62,6 @@ export class JobService {
     );
 
     if (jobEntity) {
-      this.logger.log(ErrorJob.AlreadyExists, JobService.name);
       throw new ConflictError(ErrorJob.AlreadyExists);
     }
 
@@ -80,7 +78,7 @@ export class JobService {
 
     const newJobEntity = new JobEntity();
     newJobEntity.escrowAddress = escrowAddress;
-    newJobEntity.manifestUrl = await escrowClient.getManifestUrl(escrowAddress);
+    newJobEntity.manifestUrl = await escrowClient.getManifest(escrowAddress);
     newJobEntity.chainId = chainId;
     newJobEntity.rewardToken = await tokenContract.symbol();
     newJobEntity.status = JobStatus.ACTIVE;

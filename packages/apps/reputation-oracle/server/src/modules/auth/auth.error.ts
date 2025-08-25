@@ -1,4 +1,4 @@
-import { BaseError } from '../../common/errors/base';
+import { BaseError } from '@/common/errors/base';
 
 export enum AuthErrorMessage {
   INVALID_CREDENTIALS = 'Invalid email or password',

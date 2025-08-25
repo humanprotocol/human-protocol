@@ -3,8 +3,8 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsEthereumAddress, IsOptional, Max, Min } from 'class-validator';
 
-import { SortDirection } from '../../common/enums';
-import { IsChainId, IsLowercasedEnum } from '../../common/validators';
+import { SortDirection } from '@/common/enums';
+import { IsChainId, IsLowercasedEnum } from '@/common/validators';
 
 import {
   MAX_REPUTATION_ITEMS_PER_PAGE,

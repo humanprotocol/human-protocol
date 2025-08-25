@@ -53,7 +53,7 @@ export function IsPassword(
   constraints: Partial<IPasswordConstraints> = {},
   validationOptions?: ValidationOptions,
 ) {
-  return (object: Record<string, any>, propertyName: string): void => {
+  return (object: Record<string, unknown>, propertyName: string): void => {
     registerDecorator({
       name: 'isPassword',
       target: object.constructor,

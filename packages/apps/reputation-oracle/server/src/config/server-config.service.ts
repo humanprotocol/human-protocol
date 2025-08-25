@@ -5,10 +5,6 @@ import { ConfigService } from '@nestjs/config';
 export class ServerConfigService {
   constructor(private configService: ConfigService) {}
 
-  get gitHash(): string {
-    return this.configService.get('GIT_HASH', '');
-  }
-
   /**
    * The hostname or IP address on which the server will run.
    * Default: 'localhost'

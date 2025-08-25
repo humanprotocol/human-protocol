@@ -6,22 +6,27 @@ import {
 } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
-import { isDuplicatedError } from '../../database';
-import { ServerConfigService } from '../../config';
-import logger from '../../logger';
-import { Web3Service } from '../web3';
-import { OutgoingWebhookEventType, OutgoingWebhookService } from '../webhook';
 
+import { ServerConfigService } from '@/config';
+import { isDuplicatedError } from '@/database';
+import logger from '@/logger';
+import { Web3Service } from '@/modules/web3';
+import {
+  OutgoingWebhookEventType,
+  OutgoingWebhookService,
+} from '@/modules/webhook';
+
+import { AbuseSlackBot } from './abuse-slack-bot';
 import { AbuseEntity } from './abuse.entity';
 import { AbuseRepository } from './abuse.repository';
 import { AbuseDecision, AbuseStatus } from './constants';
 import {
+  AbuseReportModalPrivateMetadata,
   isInteractiveMessage,
   isViewSubmission,
   ReportAbuseInput,
   SlackInteraction,
 } from './types';
-import { AbuseSlackBot } from './abuse-slack-bot';
 
 @Injectable()
 export class AbuseService {
@@ -113,7 +118,10 @@ export class AbuseService {
       });
       return '';
     } else if (isViewSubmission(data)) {
-      const privateMetadata = JSON.parse(data.view.private_metadata);
+      const privateMetadata = JSON.parse(
+        data.view.private_metadata,
+      ) as AbuseReportModalPrivateMetadata;
+
       const responseUrl = privateMetadata.responseUrl;
       abuseEntity.decision = AbuseDecision.ACCEPTED;
       abuseEntity.amount = data.view.state.values.quantity_input.quantity.value;
@@ -194,7 +202,7 @@ export class AbuseService {
           abuseId: abuseEntity.id,
           chainId: abuseEntity.chainId,
           escrowAddress: abuseEntity.escrowAddress,
-          manifestUrl: escrow.manifestUrl as string,
+          manifestUrl: escrow.manifest as string,
         });
         abuseEntity.status = AbuseStatus.NOTIFIED;
         await this.abuseRepository.updateOne(abuseEntity);

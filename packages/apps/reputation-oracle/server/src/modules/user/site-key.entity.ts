@@ -1,7 +1,7 @@
 import { Entity, Column, JoinColumn, ManyToOne, Unique } from 'typeorm';
 
-import { DATABASE_SCHEMA_NAME } from '../../common/constants';
-import { BaseEntity } from '../../database';
+import { DATABASE_SCHEMA_NAME } from '@/common/constants';
+import { BaseEntity } from '@/database';
 
 import type { UserEntity } from './user.entity';
 

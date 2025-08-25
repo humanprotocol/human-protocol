@@ -1,4 +1,4 @@
-import { AudinoJobType, CvatJobType, FortuneJobType } from '../enums';
+import { AudinoJobType, CvatJobType, FortuneJobType } from '@/common/enums';
 
 export type FortuneManifest = {
   submissionsRequired: number;

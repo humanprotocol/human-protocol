@@ -1,6 +1,6 @@
 import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
-import { Body, Controller, Post, Request } from '@nestjs/common';
+import { Body, Controller, HttpCode, Post, Request } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { RequestWithUser } from '../../common/interfaces/jwt';
 import {
@@ -23,11 +23,12 @@ export class RegisterAddressController {
     this.mapper = mapper;
   }
 
-  @Post('/')
   @ApiOperation({
     summary: 'Register Blockchain Address',
   })
-  public async registerAddress(
+  @HttpCode(200)
+  @Post('/')
+  async registerAddress(
     @Body() dto: RegisterAddressDto,
     @Request() req: RequestWithUser,
   ): Promise<RegisterAddressResponse> {

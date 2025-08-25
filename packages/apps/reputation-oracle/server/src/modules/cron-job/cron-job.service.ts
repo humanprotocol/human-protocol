@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 
-import logger from '../../logger';
-
-import { AbuseService } from '../abuse';
-import { TokenRepository } from '../auth';
-import { EscrowCompletionService } from '../escrow-completion';
-import { IncomingWebhookService, OutgoingWebhookService } from '../webhook';
+import logger from '@/logger';
+import { AbuseService } from '@/modules/abuse';
+import { TokenRepository } from '@/modules/auth';
+import { EscrowCompletionService } from '@/modules/escrow-completion';
+import {
+  IncomingWebhookService,
+  OutgoingWebhookService,
+} from '@/modules/webhook';
 
 import { CronJobType } from './constants';
 import { CronJobEntity } from './cron-job.entity';
@@ -53,7 +55,7 @@ export class CronJobService {
       return false;
     }
 
-    this.logger.info('Previous cron job is not completed yet', { cronJobType });
+    this.logger.warn('Previous cron job is not completed yet', { cronJobType });
 
     return true;
   }
@@ -73,7 +75,7 @@ export class CronJobService {
       return;
     }
 
-    this.logger.info('Pending incoming webhooks START');
+    this.logger.debug('Pending incoming webhooks START');
     const cronJob = await this.startCronJob(
       CronJobType.ProcessPendingIncomingWebhook,
     );
@@ -84,7 +86,7 @@ export class CronJobService {
       this.logger.error('Error processing pending incoming webhooks', error);
     }
 
-    this.logger.info('Pending incoming webhooks STOP');
+    this.logger.debug('Pending incoming webhooks STOP');
     await this.completeCronJob(cronJob);
   }
 
@@ -98,7 +100,7 @@ export class CronJobService {
       return;
     }
 
-    this.logger.info('Pending escrow completion tracking START');
+    this.logger.debug('Pending escrow completion tracking START');
     const cronJob = await this.startCronJob(
       CronJobType.ProcessPendingEscrowCompletionTracking,
     );
@@ -109,7 +111,7 @@ export class CronJobService {
       this.logger.error('Error processing pending escrow completion', error);
     }
 
-    this.logger.info('Pending escrow completion tracking STOP');
+    this.logger.debug('Pending escrow completion tracking STOP');
     await this.completeCronJob(cronJob);
   }
 
@@ -123,7 +125,7 @@ export class CronJobService {
       return;
     }
 
-    this.logger.info('Paid escrow completion tracking START');
+    this.logger.debug('Paid escrow completion tracking START');
     const cronJob = await this.startCronJob(
       CronJobType.ProcessPaidEscrowCompletionTracking,
     );
@@ -134,7 +136,7 @@ export class CronJobService {
       this.logger.error('Error processing paid escrow completion', error);
     }
 
-    this.logger.info('Paid escrow completion tracking STOP');
+    this.logger.debug('Paid escrow completion tracking STOP');
     await this.completeCronJob(cronJob);
   }
 
@@ -147,7 +149,7 @@ export class CronJobService {
       return;
     }
 
-    this.logger.info('Pending outgoing webhooks START');
+    this.logger.debug('Pending outgoing webhooks START');
     const cronJob = await this.startCronJob(
       CronJobType.ProcessPendingOutgoingWebhook,
     );
@@ -158,7 +160,7 @@ export class CronJobService {
       this.logger.error('Error processing pending outgoing webhooks', error);
     }
 
-    this.logger.info('Pending outgoing webhooks STOP');
+    this.logger.debug('Pending outgoing webhooks STOP');
     await this.completeCronJob(cronJob);
   }
 
@@ -172,7 +174,7 @@ export class CronJobService {
       return;
     }
 
-    this.logger.info('Awaiting payouts processing START');
+    this.logger.debug('Awaiting payouts processing START');
     const cronJob = await this.startCronJob(
       CronJobType.ProcessAwaitingEscrowPayouts,
     );
@@ -183,7 +185,7 @@ export class CronJobService {
       this.logger.error('Error processing awaiting payouts', error);
     }
 
-    this.logger.info('Awaiting payouts processing STOP');
+    this.logger.debug('Awaiting payouts processing STOP');
     await this.completeCronJob(cronJob);
   }
 
@@ -197,7 +199,7 @@ export class CronJobService {
       return;
     }
 
-    this.logger.info('Process Abuse START');
+    this.logger.debug('Process Abuse START');
     const cronJob = await this.startCronJob(CronJobType.ProcessRequestedAbuse);
 
     try {
@@ -206,7 +208,7 @@ export class CronJobService {
       this.logger.error('Error processing abuse requests', e);
     }
 
-    this.logger.info('Process Abuse STOP');
+    this.logger.debug('Process Abuse STOP');
     await this.completeCronJob(cronJob);
   }
 
@@ -220,7 +222,7 @@ export class CronJobService {
       return;
     }
 
-    this.logger.info('Process classified abuses START');
+    this.logger.debug('Process classified abuses START');
     const cronJob = await this.startCronJob(CronJobType.ProcessClassifiedAbuse);
 
     try {
@@ -229,7 +231,7 @@ export class CronJobService {
       this.logger.error('Error processing classified abuse requests', e);
     }
 
-    this.logger.info('Process classified abuses STOP');
+    this.logger.debug('Process classified abuses STOP');
     await this.completeCronJob(cronJob);
   }
 
@@ -243,7 +245,7 @@ export class CronJobService {
       return;
     }
 
-    this.logger.info('Delete expired DB records START');
+    this.logger.debug('Delete expired DB records START');
     const cronJob = await this.startCronJob(CronJobType.DeleteExpiredDbRecords);
 
     try {
@@ -252,7 +254,7 @@ export class CronJobService {
       this.logger.error('Error deleting expired DB records', e);
     }
 
-    this.logger.info('Delete expired DB records STOP');
+    this.logger.debug('Delete expired DB records STOP');
     await this.completeCronJob(cronJob);
   }
 }

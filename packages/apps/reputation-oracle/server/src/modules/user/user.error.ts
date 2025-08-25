@@ -1,4 +1,4 @@
-import { BaseError } from '../../common/errors/base';
+import { BaseError } from '@/common/errors/base';
 
 export enum UserErrorMessage {
   INVALID_ROLE = 'Invalid user role',

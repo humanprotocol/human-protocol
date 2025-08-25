@@ -3,18 +3,25 @@ import { AutomapperModule } from '@automapper/nestjs';
 import { ChainId } from '@human-protocol/sdk';
 import { HttpModule } from '@nestjs/axios';
 import { CacheModule } from '@nestjs/cache-manager';
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import {
+  ClassSerializerInterceptor,
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+} from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import Joi from 'joi';
 import { AppController } from './app.controller';
 import { CacheFactoryConfig } from './common/config/cache-factory.config';
 import { CommonConfigModule } from './common/config/common-config.module';
 import { EnvironmentConfigService } from './common/config/environment-config.service';
+import { ExceptionFilter } from './common/filter/exceptions.filter';
 import { JwtAuthGuard } from './common/guards/jwt.auth';
 import { JwtHttpStrategy } from './common/guards/strategy';
 import { InterceptorModule } from './common/interceptors/interceptor.module';
 import { ForbidUnauthorizedHostMiddleware } from './common/middleware/host-check.middleware';
+import Environment from './common/utils/environment';
 import { EscrowUtilsModule } from './integrations/escrow/escrow-utils.module';
 import { ExchangeOracleModule } from './integrations/exchange-oracle/exchange-oracle.module';
 import { HCaptchaLabelingModule } from './integrations/h-captcha-labeling/h-captcha-labeling.module';
@@ -35,6 +42,8 @@ import { KycProcedureModule } from './modules/kyc-procedure/kyc-procedure.module
 import { NDAController } from './modules/nda/nda.controller';
 import { NDAModule } from './modules/nda/nda.module';
 import { OracleDiscoveryController } from './modules/oracle-discovery/oracle-discovery.controller';
+import { GovernanceModule } from './modules/governance/governance.module';
+import { GovernanceController } from './modules/governance/governance.controller';
 import { OracleDiscoveryModule } from './modules/oracle-discovery/oracle-discovery.module';
 import { PasswordResetModule } from './modules/password-reset/password-reset.module';
 import { PrepareSignatureModule } from './modules/prepare-signature/prepare-signature.module';
@@ -58,7 +67,7 @@ const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
       /**
        * First value found takes precendece
        */
-      envFilePath: [`.env.${process.env.NODE_ENV}`, '.env.local', '.env'],
+      envFilePath: [`.env.${Environment.name}`, '.env.local', '.env'],
       isGlobal: true,
       validationSchema: Joi.object({
         HOST: Joi.string().required(),
@@ -69,6 +78,8 @@ const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
         REDIS_HOST: Joi.string().required(),
         REDIS_DB: Joi.number(),
         RPC_URL: Joi.string().required(),
+        GOVERNANCE_RPC_URL: Joi.string(),
+        GOVERNOR_ADDRESS: Joi.string().required(),
         HCAPTCHA_LABELING_STATS_API_URL: Joi.string().required(),
         HCAPTCHA_LABELING_VERIFY_API_URL: Joi.string().required(),
         HCAPTCHA_LABELING_API_KEY: Joi.string().required(),
@@ -134,6 +145,7 @@ const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
     UiConfigurationModule,
     NDAModule,
     AbuseModule,
+    GovernanceModule,
   ],
   controllers: [
     AppController,
@@ -148,6 +160,7 @@ const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
     TokenRefreshController,
     NDAController,
     AbuseController,
+    GovernanceController,
   ],
   exports: [HttpModule],
   providers: [
@@ -156,6 +169,14 @@ const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ClassSerializerInterceptor,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: ExceptionFilter,
     },
   ],
 })

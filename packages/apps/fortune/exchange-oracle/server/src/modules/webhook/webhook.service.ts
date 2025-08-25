@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { ChainId, EscrowClient, OperatorUtils } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
+
+import logger from '../../logger';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { HEADER_SIGNATURE_KEY } from '../../common/constant';
@@ -21,16 +23,16 @@ import { WebhookRepository } from './webhook.repository';
 
 @Injectable()
 export class WebhookService {
-  private readonly logger = new Logger(WebhookService.name);
+  private readonly logger = logger.child({ context: WebhookService.name });
 
   constructor(
     private readonly webhookRepository: WebhookRepository,
     private readonly jobService: JobService,
-    public readonly web3ConfigService: Web3ConfigService,
-    public readonly serverConfigService: ServerConfigService,
-    public readonly httpService: HttpService,
-    public readonly web3Service: Web3Service,
-    public readonly storageService: StorageService,
+    private readonly web3ConfigService: Web3ConfigService,
+    private readonly serverConfigService: ServerConfigService,
+    private readonly httpService: HttpService,
+    private readonly web3Service: Web3Service,
+    private readonly storageService: StorageService,
   ) {}
 
   public async handleWebhook(webhook: WebhookDto): Promise<void> {
@@ -124,6 +126,7 @@ export class WebhookService {
     } catch (error) {
       const formattedError = formatAxiosError(error);
       this.logger.error('Webhook not sent', {
+        webhookId: webhook.id,
         error: formattedError,
       });
       throw new Error(formattedError.message);

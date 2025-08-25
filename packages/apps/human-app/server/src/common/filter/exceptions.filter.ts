@@ -1,15 +1,17 @@
 import {
   ArgumentsHost,
   Catch,
-  ExceptionFilter,
+  ExceptionFilter as IExceptionFilter,
   HttpException,
   HttpStatus,
-  Logger,
 } from '@nestjs/common';
+import logger from '../../logger';
+import { AxiosError } from 'axios';
+import * as errorUtils from '../utils/error';
 
 @Catch()
-export class GlobalExceptionsFilter implements ExceptionFilter {
-  private readonly logger = new Logger(GlobalExceptionsFilter.name);
+export class ExceptionFilter implements IExceptionFilter {
+  private readonly logger = logger.child({ context: ExceptionFilter.name });
 
   catch(exception: any, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
@@ -27,22 +29,27 @@ export class GlobalExceptionsFilter implements ExceptionFilter {
       message =
         exception.response.data?.message || exception.response.statusText;
     } else {
-      this.logger.error(
-        `Exception without status code: ${JSON.stringify(exception)}`,
-        exception.stack,
-      );
+      let formattedError = exception;
+      if (exception instanceof AxiosError) {
+        formattedError = errorUtils.formatError(exception);
+        formattedError.outgoingRequestUrl = exception.config?.url;
+      }
+      this.logger.error('Unhandled exception', {
+        error: formattedError,
+        path: request.url,
+      });
     }
 
     if (typeof status !== 'number' || status < 100 || status >= 600) {
-      this.logger.error(`Invalid status code: ${status}, defaulting to 500.`);
+      this.logger.error('Invalid status code in exception filter', {
+        path: request.url,
+        status,
+      });
       status = HttpStatus.INTERNAL_SERVER_ERROR;
       message = 'Internal Server Error';
     }
 
-    this.logger.error(
-      `HTTP Status: ${status} | Error Message: ${JSON.stringify(message)} | Request URL: ${request?.url}`,
-      exception.stack,
-    );
+    response.removeHeader('Cache-Control');
 
     response.status(status).json(message);
   }

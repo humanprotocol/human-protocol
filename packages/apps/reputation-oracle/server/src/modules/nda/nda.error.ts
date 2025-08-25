@@ -1,4 +1,4 @@
-import { BaseError } from '../../common/errors/base';
+import { BaseError } from '@/common/errors/base';
 
 export enum NDAErrorMessage {
   INVALID_NDA = 'Invalid NDA URL',

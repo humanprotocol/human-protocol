@@ -82,3 +82,7 @@ export function isViewSubmission(
 ): data is ViewSubmission {
   return data.type === 'view_submission';
 }
+
+export type AbuseReportModalPrivateMetadata = {
+  responseUrl: string;
+};

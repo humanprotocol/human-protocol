@@ -1,13 +1,17 @@
-import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { HttpService } from '@nestjs/axios';
-import { lastValueFrom } from 'rxjs';
-import dayjs from 'dayjs';
-import { Cron } from '@nestjs/schedule';
-import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { NETWORKS, StatisticsClient } from '@human-protocol/sdk';
+import { DailyHMTData } from '@human-protocol/sdk/dist/graphql';
+import { HttpService } from '@nestjs/axios';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
+import { Cron, SchedulerRegistry } from '@nestjs/schedule';
+import { AxiosError } from 'axios';
+import { CronJob } from 'cron';
+import dayjs from 'dayjs';
+import { lastValueFrom } from 'rxjs';
 import {
   EnvironmentConfigService,
   HCAPTCHA_STATS_API_START_DATE,
+  HCAPTCHA_STATS_START_DATE,
   HMT_STATS_START_DATE,
 } from '../../common/config/env-config.service';
 import {
@@ -15,28 +19,32 @@ import {
   HMT_PREFIX,
   RedisConfigService,
 } from '../../common/config/redis-config.service';
-import { HCAPTCHA_STATS_START_DATE } from '../../common/config/env-config.service';
+import * as httpUtils from '../../common/utils/http';
+import logger from '../../logger';
+import { NetworksService } from '../networks/networks.service';
+import { StorageService } from '../storage/storage.service';
 import { HcaptchaDailyStats, HcaptchaStats } from './dto/hcaptcha.dto';
 import { HmtGeneralStatsDto } from './dto/hmt-general-stats.dto';
-import { DailyHMTData } from '@human-protocol/sdk/dist/graphql';
-import { CachedHMTData } from './stats.interface';
 import { HmtDailyStatsData } from './dto/hmt.dto';
-import { StorageService } from '../storage/storage.service';
-import { CronJob } from 'cron';
-import { SchedulerRegistry } from '@nestjs/schedule';
-import { NetworksService } from '../networks/networks.service';
+import { CachedHMTData } from './stats.interface';
+
+type HcaptchaDailyStat = {
+  solved: number;
+  served?: number;
+};
 
 @Injectable()
 export class StatsService implements OnModuleInit {
-  private readonly logger = new Logger(StatsService.name);
+  private readonly logger = logger.child({ context: StatsService.name });
+
   constructor(
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     private readonly redisConfigService: RedisConfigService,
     private readonly networksService: NetworksService,
     private readonly envConfigService: EnvironmentConfigService,
     private readonly httpService: HttpService,
     private readonly storageService: StorageService,
-    private schedulerRegistry: SchedulerRegistry,
+    private readonly schedulerRegistry: SchedulerRegistry,
   ) {
     if (this.envConfigService.hCaptchaStatsEnabled === true) {
       const job = new CronJob('*/15 * * * *', () => {
@@ -75,52 +83,77 @@ export class StatsService implements OnModuleInit {
   }
 
   private async fetchHistoricalHcaptchaStats(): Promise<void> {
-    this.logger.log('Fetching historical hCaptcha stats.');
     let startDate = dayjs(HCAPTCHA_STATS_API_START_DATE);
-    const currentDate = dayjs();
-    const dates = [];
 
-    while (startDate <= currentDate) {
-      const from = startDate.startOf('month').format('YYYY-MM-DD');
-      const to = startDate.endOf('month').format('YYYY-MM-DD');
+    this.logger.debug('Fetching historical hCaptcha stats', {
+      startDate,
+    });
 
-      dates.push({ from, to });
+    try {
+      const currentDate = dayjs();
+      const dates = [];
 
-      startDate = startDate.add(1, 'month');
-    }
+      while (startDate <= currentDate) {
+        const from = startDate.startOf('month').format('YYYY-MM-DD');
+        const to = startDate.endOf('month').format('YYYY-MM-DD');
 
-    const results = await this.storageService.downloadFile(
-      this.envConfigService.hCaptchaStatsFile,
-    );
+        dates.push({ from, to });
 
-    for (const range of dates) {
-      const { data } = await lastValueFrom(
-        this.httpService.get(this.envConfigService.hCaptchaStatsSource, {
-          params: {
-            start_date: range.from,
-            end_date: range.to,
-            api_key: this.envConfigService.hCaptchaApiKey,
-          },
-        }),
-      );
-      results.push(data);
-    }
+        startDate = startDate.add(1, 'month');
+      }
 
-    for (const monthData of results) {
-      for (const [date, value] of Object.entries<any>(monthData)) {
-        const multiplier = date <= '2022-11-30' ? 18 : 9;
-        if (value.served) delete value.served;
-        value.solved *= multiplier;
-        if (date !== 'total') {
-          await this.cacheManager.set(`${HCAPTCHA_PREFIX}${date}`, value);
-        } else {
-          const dates = Object.keys(monthData).filter((key) => key !== 'total');
-          if (dates.length > 0) {
-            const month = dayjs(dates[0]).format('YYYY-MM');
-            await this.cacheManager.set(`${HCAPTCHA_PREFIX}${month}`, value);
+      let hCaptchaStats: HcaptchaDailyStat[][];
+
+      try {
+        const statsFile = await this.storageService.downloadFile(
+          this.envConfigService.hCaptchaStatsFile,
+        );
+        hCaptchaStats = JSON.parse(statsFile.toString());
+      } catch (error) {
+        this.logger.error('Error while getting hCaptcha stats file', error);
+        hCaptchaStats = [];
+      }
+
+      for (const range of dates) {
+        const { data } = await lastValueFrom(
+          this.httpService.get(this.envConfigService.hCaptchaStatsSource, {
+            params: {
+              start_date: range.from,
+              end_date: range.to,
+              api_key: this.envConfigService.hCaptchaApiKey,
+            },
+          }),
+        );
+        hCaptchaStats.push(data);
+      }
+
+      for (const monthData of hCaptchaStats) {
+        for (const [date, value] of Object.entries(monthData)) {
+          const multiplier = date <= '2022-11-30' ? 18 : 9;
+          if (value.served) delete value.served;
+          value.solved *= multiplier;
+          if (date !== 'total') {
+            await this.cacheManager.set(`${HCAPTCHA_PREFIX}${date}`, value);
+          } else {
+            const dates = Object.keys(monthData).filter(
+              (key) => key !== 'total',
+            );
+            if (dates.length > 0) {
+              const month = dayjs(dates[0]).format('YYYY-MM');
+              await this.cacheManager.set(`${HCAPTCHA_PREFIX}${month}`, value);
+            }
           }
         }
       }
+    } catch (error) {
+      let formattedError = error;
+      if (error instanceof AxiosError) {
+        formattedError = httpUtils.formatAxiosError(error);
+      }
+      this.logger.error('Failed to fetch historical hCaptcha stats', {
+        startDate,
+        error: formattedError,
+      });
     }
   }
 
@@ -132,79 +165,103 @@ export class StatsService implements OnModuleInit {
   }
 
   async fetchTodayHcaptchaStats() {
-    this.logger.log('Fetching hCaptcha stats for today.');
     const today = dayjs().format('YYYY-MM-DD');
     const from = today;
     const to = today;
 
-    const { data } = await lastValueFrom(
-      this.httpService.get(this.envConfigService.hCaptchaStatsSource, {
-        params: {
-          start_date: from,
-          end_date: to,
-          api_key: this.envConfigService.hCaptchaApiKey,
-        },
-      }),
-    );
+    this.logger.debug('Fetching hCaptcha stats for today', { from, to });
 
-    const multiplier = today <= '2022-11-30' ? 18 : 9;
-    const stats = data[today];
-    if (stats) {
-      if (stats.served) delete stats.served;
-      stats.solved *= multiplier;
-      await this.cacheManager.set(`${HCAPTCHA_PREFIX}${today}`, stats);
+    try {
+      const { data } = await lastValueFrom(
+        this.httpService.get(this.envConfigService.hCaptchaStatsSource, {
+          params: {
+            start_date: from,
+            end_date: to,
+            api_key: this.envConfigService.hCaptchaApiKey,
+          },
+        }),
+      );
+
+      const multiplier = today <= '2022-11-30' ? 18 : 9;
+      const stats = data[today];
+      if (stats) {
+        if (stats.served) delete stats.served;
+        stats.solved *= multiplier;
+        await this.cacheManager.set(`${HCAPTCHA_PREFIX}${today}`, stats);
+      }
+
+      const currentMonth = dayjs().format('YYYY-MM');
+      const daysInMonth = dayjs().daysInMonth();
+
+      const dates = Array.from(
+        { length: daysInMonth },
+        (_, i) => `${currentMonth}-${String(i + 1).padStart(2, '0')}`,
+      );
+
+      const aggregatedStats = await Promise.all(
+        dates.map(async (date) => {
+          const dailyStats: HcaptchaDailyStats = await this.cacheManager.get(
+            `${HCAPTCHA_PREFIX}${date}`,
+          );
+          return dailyStats || { solved: 0 };
+        }),
+      ).then((statsArray) =>
+        statsArray.reduce(
+          (acc, stats) => {
+            acc.solved += stats.solved;
+            return acc;
+          },
+          { solved: 0 },
+        ),
+      );
+
+      await this.cacheManager.set(
+        `${HCAPTCHA_PREFIX}${currentMonth}`,
+        aggregatedStats,
+      );
+    } catch (error) {
+      let formattedError = error;
+      if (error instanceof AxiosError) {
+        formattedError = httpUtils.formatAxiosError(error);
+      }
+      this.logger.error('Failed to fetch todays hCaptcha stats', {
+        today,
+        from,
+        to,
+        error: formattedError,
+      });
     }
-
-    const currentMonth = dayjs().format('YYYY-MM');
-    const daysInMonth = dayjs().daysInMonth();
-
-    const dates = Array.from(
-      { length: daysInMonth },
-      (_, i) => `${currentMonth}-${String(i + 1).padStart(2, '0')}`,
-    );
-
-    const aggregatedStats = await Promise.all(
-      dates.map(async (date) => {
-        const dailyStats: HcaptchaDailyStats = await this.cacheManager.get(
-          `${HCAPTCHA_PREFIX}${date}`,
-        );
-        return dailyStats || { solved: 0 };
-      }),
-    ).then((statsArray) =>
-      statsArray.reduce(
-        (acc, stats) => {
-          acc.solved += stats.solved;
-          return acc;
-        },
-        { solved: 0 },
-      ),
-    );
-
-    await this.cacheManager.set(
-      `${HCAPTCHA_PREFIX}${currentMonth}`,
-      aggregatedStats,
-    );
   }
 
   @Cron('*/15 * * * *')
   async fetchHmtGeneralStats() {
-    this.logger.log('Fetching HMT general stats across multiple networks.');
-    const aggregatedStats: HmtGeneralStatsDto = {
-      totalHolders: 0,
-      totalTransactions: 0,
-    };
-    const operatingNetworks = await this.networksService.getOperatingNetworks();
-    for (const network of operatingNetworks) {
-      const statisticsClient = new StatisticsClient(NETWORKS[network]);
-      const generalStats = await statisticsClient.getHMTStatistics();
-      aggregatedStats.totalHolders += generalStats.totalHolders;
-      aggregatedStats.totalTransactions += generalStats.totalTransferCount;
-    }
+    this.logger.debug('Fetching HMT general stats across multiple networks');
 
-    await this.cacheManager.set(
-      this.redisConfigService.hmtGeneralStatsCacheKey,
-      aggregatedStats,
-    );
+    try {
+      const aggregatedStats: HmtGeneralStatsDto = {
+        totalHolders: 0,
+        totalTransactions: 0,
+      };
+      const operatingNetworks =
+        await this.networksService.getOperatingNetworks();
+      for (const network of operatingNetworks) {
+        const statisticsClient = new StatisticsClient(NETWORKS[network]);
+        const generalStats = await statisticsClient.getHMTStatistics();
+        aggregatedStats.totalHolders += generalStats.totalHolders;
+        aggregatedStats.totalTransactions += generalStats.totalTransferCount;
+      }
+
+      await this.cacheManager.set(
+        this.redisConfigService.hmtGeneralStatsCacheKey,
+        aggregatedStats,
+      );
+    } catch (error) {
+      let formattedError = error;
+      if (error instanceof AxiosError) {
+        formattedError = httpUtils.formatAxiosError(error);
+      }
+      this.logger.error('Failed to fetch HMT general stats', formattedError);
+    }
   }
 
   private async isHmtDailyStatsFetched(): Promise<boolean> {
@@ -228,92 +285,107 @@ export class StatsService implements OnModuleInit {
   private async fetchAndCacheHmtDailyStats(date: string) {
     const from = new Date(date);
     const to = new Date(dayjs().format('YYYY-MM-DD'));
-    const dailyData: Record<string, CachedHMTData> = {};
-    const monthlyData: Record<string, CachedHMTData> = {};
 
-    const operatingNetworks = await this.networksService.getOperatingNetworks();
+    try {
+      const dailyData: Record<string, CachedHMTData> = {};
+      const monthlyData: Record<string, CachedHMTData> = {};
 
-    // Fetch daily data for each network
-    await Promise.all(
-      operatingNetworks.map(async (network) => {
-        const statisticsClient = new StatisticsClient(NETWORKS[network]);
-        let skip = 0;
-        let fetchedRecords: DailyHMTData[] = [];
+      const operatingNetworks =
+        await this.networksService.getOperatingNetworks();
 
-        do {
-          fetchedRecords = await statisticsClient.getHMTDailyData({
-            from,
-            to,
-            first: 1000, // Max subgraph query size
-            skip,
-          });
+      // Fetch daily data for each network
+      await Promise.all(
+        operatingNetworks.map(async (network) => {
+          const statisticsClient = new StatisticsClient(NETWORKS[network]);
+          let skip = 0;
+          let fetchedRecords: DailyHMTData[] = [];
 
-          for (const record of fetchedRecords) {
-            const dailyCacheKey = `${HMT_PREFIX}${
-              record.timestamp.toISOString().split('T')[0]
-            }`;
+          do {
+            fetchedRecords = await statisticsClient.getHMTDailyData({
+              from,
+              to,
+              first: 1000, // Max subgraph query size
+              skip,
+            });
 
-            // Sum daily values
-            if (!dailyData[dailyCacheKey]) {
-              dailyData[dailyCacheKey] = {
-                totalTransactionAmount: '0',
-                totalTransactionCount: 0,
-                dailyUniqueSenders: 0,
-                dailyUniqueReceivers: 0,
-              };
+            for (const record of fetchedRecords) {
+              const dailyCacheKey = `${HMT_PREFIX}${
+                record.timestamp.toISOString().split('T')[0]
+              }`;
+
+              // Sum daily values
+              if (!dailyData[dailyCacheKey]) {
+                dailyData[dailyCacheKey] = {
+                  totalTransactionAmount: '0',
+                  totalTransactionCount: 0,
+                  dailyUniqueSenders: 0,
+                  dailyUniqueReceivers: 0,
+                };
+              }
+
+              dailyData[dailyCacheKey].totalTransactionAmount = (
+                BigInt(dailyData[dailyCacheKey].totalTransactionAmount) +
+                BigInt(record.totalTransactionAmount)
+              ).toString();
+              dailyData[dailyCacheKey].totalTransactionCount +=
+                record.totalTransactionCount;
+              dailyData[dailyCacheKey].dailyUniqueSenders +=
+                record.dailyUniqueSenders;
+              dailyData[dailyCacheKey].dailyUniqueReceivers +=
+                record.dailyUniqueReceivers;
+
+              // Sum monthly values
+              const month = dayjs(record.timestamp).format('YYYY-MM');
+              if (!monthlyData[month]) {
+                monthlyData[month] = {
+                  totalTransactionAmount: '0',
+                  totalTransactionCount: 0,
+                  dailyUniqueSenders: 0,
+                  dailyUniqueReceivers: 0,
+                };
+              }
+
+              monthlyData[month].totalTransactionAmount = (
+                BigInt(monthlyData[month].totalTransactionAmount) +
+                BigInt(record.totalTransactionAmount)
+              ).toString();
+              monthlyData[month].totalTransactionCount +=
+                record.totalTransactionCount;
+              monthlyData[month].dailyUniqueSenders +=
+                record.dailyUniqueSenders;
+              monthlyData[month].dailyUniqueReceivers +=
+                record.dailyUniqueReceivers;
             }
 
-            dailyData[dailyCacheKey].totalTransactionAmount = (
-              BigInt(dailyData[dailyCacheKey].totalTransactionAmount) +
-              BigInt(record.totalTransactionAmount)
-            ).toString();
-            dailyData[dailyCacheKey].totalTransactionCount +=
-              record.totalTransactionCount;
-            dailyData[dailyCacheKey].dailyUniqueSenders +=
-              record.dailyUniqueSenders;
-            dailyData[dailyCacheKey].dailyUniqueReceivers +=
-              record.dailyUniqueReceivers;
+            skip += 1000;
+          } while (fetchedRecords.length === 1000);
+        }),
+      );
 
-            // Sum monthly values
-            const month = dayjs(record.timestamp).format('YYYY-MM');
-            if (!monthlyData[month]) {
-              monthlyData[month] = {
-                totalTransactionAmount: '0',
-                totalTransactionCount: 0,
-                dailyUniqueSenders: 0,
-                dailyUniqueReceivers: 0,
-              };
-            }
+      // Store daily records
+      for (const [dailyCacheKey, stats] of Object.entries(dailyData)) {
+        await this.cacheManager.set(dailyCacheKey, stats);
+      }
 
-            monthlyData[month].totalTransactionAmount = (
-              BigInt(monthlyData[month].totalTransactionAmount) +
-              BigInt(record.totalTransactionAmount)
-            ).toString();
-            monthlyData[month].totalTransactionCount +=
-              record.totalTransactionCount;
-            monthlyData[month].dailyUniqueSenders += record.dailyUniqueSenders;
-            monthlyData[month].dailyUniqueReceivers +=
-              record.dailyUniqueReceivers;
-          }
-
-          skip += 1000;
-        } while (fetchedRecords.length === 1000);
-      }),
-    );
-
-    // Store daily records
-    for (const [dailyCacheKey, stats] of Object.entries(dailyData)) {
-      await this.cacheManager.set(dailyCacheKey, stats);
-    }
-
-    // Store monthly records
-    for (const [month, stats] of Object.entries(monthlyData)) {
-      const monthlyCacheKey = `${HMT_PREFIX}${month}`;
-      await this.cacheManager.set(monthlyCacheKey, stats);
+      // Store monthly records
+      for (const [month, stats] of Object.entries(monthlyData)) {
+        const monthlyCacheKey = `${HMT_PREFIX}${month}`;
+        await this.cacheManager.set(monthlyCacheKey, stats);
+      }
+    } catch (error) {
+      let formattedError = error;
+      if (error instanceof AxiosError) {
+        formattedError = httpUtils.formatAxiosError(error);
+      }
+      this.logger.error('Failed to fetch HMT daily status', {
+        from,
+        to,
+        error: formattedError,
+      });
     }
   }
 
-  public async hmtPrice(): Promise<number> {
+  async hmtPrice(): Promise<number> {
     const cachedHmtPrice: number = await this.cacheManager.get<number>(
       this.redisConfigService.hmtPriceCacheKey,
     );
@@ -364,10 +436,7 @@ export class StatsService implements OnModuleInit {
     return hmtPrice;
   }
 
-  public async hCaptchaStats(
-    from: string,
-    to: string,
-  ): Promise<HcaptchaDailyStats[]> {
+  async hCaptchaStats(from: string, to: string): Promise<HcaptchaDailyStats[]> {
     let startDate = dayjs(from);
     const endDate = dayjs(to);
     const dates = [];
@@ -392,7 +461,7 @@ export class StatsService implements OnModuleInit {
     return stats.filter(Boolean);
   }
 
-  public async hCaptchaGeneralStats(): Promise<HcaptchaStats> {
+  async hCaptchaGeneralStats(): Promise<HcaptchaStats> {
     let startDate = dayjs(HCAPTCHA_STATS_START_DATE);
     const currentDate = dayjs();
     const dates = [];
@@ -424,7 +493,7 @@ export class StatsService implements OnModuleInit {
     return aggregatedStats;
   }
 
-  public async hmtGeneralStats(): Promise<HmtGeneralStatsDto> {
+  async hmtGeneralStats(): Promise<HmtGeneralStatsDto> {
     const data = await this.cacheManager.get<HmtGeneralStatsDto>(
       this.redisConfigService.hmtGeneralStatsCacheKey,
     );
@@ -432,10 +501,7 @@ export class StatsService implements OnModuleInit {
     return data;
   }
 
-  public async hmtDailyStats(
-    from: string,
-    to: string,
-  ): Promise<HmtDailyStatsData[]> {
+  async hmtDailyStats(from: string, to: string): Promise<HmtDailyStatsData[]> {
     let startDate = dayjs(from);
     const endDate = dayjs(to);
     const dates = [];

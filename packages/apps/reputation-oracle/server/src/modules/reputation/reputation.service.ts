@@ -1,11 +1,10 @@
-import { Injectable } from '@nestjs/common';
 import { ChainId, EscrowClient } from '@human-protocol/sdk';
+import { Injectable } from '@nestjs/common';
 
-import { SortDirection } from '../../common/enums';
-import { isDuplicatedError } from '../../database';
-import { ReputationConfigService, Web3ConfigService } from '../../config';
-
-import { Web3Service } from '../web3';
+import { SortDirection } from '@/common/enums';
+import { ReputationConfigService, Web3ConfigService } from '@/config';
+import { isDuplicatedError } from '@/database';
+import { Web3Service } from '@/modules/web3';
 
 import {
   INITIAL_REPUTATION,

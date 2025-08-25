@@ -147,7 +147,7 @@ describe('JobService', () => {
     beforeAll(async () => {
       jest.spyOn(jobRepository, 'createUnique');
       (EscrowClient.build as any).mockImplementation(() => ({
-        getManifestUrl: jest.fn().mockResolvedValue(MOCK_MANIFEST_URL),
+        getManifest: jest.fn().mockResolvedValue(MOCK_MANIFEST_URL),
         getReputationOracleAddress: jest
           .fn()
           .mockResolvedValue(reputationNetwork),

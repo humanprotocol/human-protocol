@@ -7,28 +7,23 @@ import { JwtModule, JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
 import { omit } from 'lodash';
 
-import { generateES256Keys } from '../../../test/fixtures/crypto';
-import { generateEthWallet } from '../../../test/fixtures/web3';
-import { SignatureType } from '../../common/enums';
+import { SignatureType, UserStatus, UserRole } from '@/common/enums';
 import {
   AuthConfigService,
   NDAConfigService,
   ServerConfigService,
   Web3ConfigService,
-} from '../../config';
-import * as secutiryUtils from '../../utils/security';
-import { SiteKeyRepository } from '../user';
-import * as web3Utils from '../../utils/web3';
-import { EmailAction, EmailService } from '../email';
-import {
-  UserStatus,
-  UserRole,
-  UserEntity,
-  UserRepository,
-  UserService,
-} from '../user';
-import { generateOperator, generateWorkerUser } from '../user/fixtures';
-import { mockWeb3ConfigService } from '../web3/fixtures';
+} from '@/config';
+import { EmailAction, EmailService } from '@/modules/email';
+import { SiteKeyRepository } from '@/modules/user';
+import { UserEntity, UserRepository, UserService } from '@/modules/user';
+import { generateOperator, generateWorkerUser } from '@/modules/user/fixtures';
+import { mockWeb3ConfigService } from '@/modules/web3/fixtures';
+import * as secutiryUtils from '@/utils/security';
+import * as web3Utils from '@/utils/web3';
+import { generateES256Keys } from '~/test/fixtures/crypto';
+import { generateEthWallet } from '~/test/fixtures/web3';
+
 import * as AuthErrors from './auth.error';
 import { AuthService } from './auth.service';
 import { TokenEntity, TokenType } from './token.entity';

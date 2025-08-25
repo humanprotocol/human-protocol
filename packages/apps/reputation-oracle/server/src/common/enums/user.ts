@@ -7,3 +7,15 @@ export enum KycStatus {
   EXPIRED = 'expired',
   ABANDONED = 'abandoned',
 }
+
+export enum UserStatus {
+  ACTIVE = 'active',
+  PENDING = 'pending',
+  INACTIVE = 'inactive',
+}
+
+export enum UserRole {
+  OPERATOR = 'operator',
+  WORKER = 'worker',
+  ADMIN = 'admin',
+}

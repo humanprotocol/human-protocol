@@ -36,10 +36,11 @@ export class ExceptionFilter implements IExceptionFilter {
       return HttpStatus.UNPROCESSABLE_ENTITY;
     } else if (exception instanceof DatabaseError) {
       return HttpStatus.UNPROCESSABLE_ENTITY;
-    } else if (exception.statusCode) {
-      return exception.statusCode;
     }
-    return HttpStatus.INTERNAL_SERVER_ERROR;
+
+    const exceptionStatusCode = exception.statusCode || exception.status;
+
+    return exceptionStatusCode || HttpStatus.INTERNAL_SERVER_ERROR;
   }
 
   catch(exception: any, host: ArgumentsHost) {
@@ -50,7 +51,14 @@ export class ExceptionFilter implements IExceptionFilter {
     const status = this.getStatus(exception);
     const message = exception.message || 'Internal server error';
 
-    this.logger.error('Unhandled exception', exception);
+    if (status === HttpStatus.INTERNAL_SERVER_ERROR) {
+      this.logger.error('Unhandled exception', {
+        error: exception,
+        path: request.url,
+      });
+    }
+
+    response.removeHeader('Cache-Control');
 
     response.status(status).json({
       statusCode: status,
