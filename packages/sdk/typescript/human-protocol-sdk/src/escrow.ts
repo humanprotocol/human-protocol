@@ -961,7 +961,7 @@ export class EscrowClient extends BaseEthersClient {
    * const amounts = [ethers.parseUnits(5, 'ether'), ethers.parseUnits(10, 'ether')];
    * const resultsUrl = 'http://localhost/results.json';
    * const resultsHash = 'b5dad76bf6772c0f07fd5e048f6e75a5f86ee079';
-   * const payoutId = 1;
+   * const payoutId = '372f6916-fe34-4711-b6e3-274f682047de';
    *
    * const rawTransaction = await escrowClient.createBulkPayoutTransaction('0x62dD51230A30401C455c8398d06F85e4EaB6309f', recipients, amounts, resultsUrl, resultsHash, txId);
    * console.log('Raw transaction:', rawTransaction);
