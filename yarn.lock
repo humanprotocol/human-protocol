@@ -3909,7 +3909,7 @@ __metadata:
   resolution: "@human-protocol/core@workspace:packages/core"
   dependencies:
     "@nomicfoundation/hardhat-chai-matchers": "npm:^2.0.7"
-    "@nomicfoundation/hardhat-ethers": "npm:^3.0.5"
+    "@nomicfoundation/hardhat-ethers": "npm:^3.1.0"
     "@nomicfoundation/hardhat-network-helpers": "npm:^1.0.12"
     "@nomicfoundation/hardhat-toolbox": "npm:^4.0.0"
     "@nomicfoundation/hardhat-verify": "npm:^2.0.11"
@@ -7010,7 +7010,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nomicfoundation/hardhat-ethers@npm:^3.0.0, @nomicfoundation/hardhat-ethers@npm:^3.0.5":
+"@nomicfoundation/hardhat-ethers@npm:^3.0.0":
   version: 3.0.8
   resolution: "@nomicfoundation/hardhat-ethers@npm:3.0.8"
   dependencies:
@@ -7020,6 +7020,19 @@ __metadata:
     ethers: ^6.1.0
     hardhat: ^2.0.0
   checksum: 10c0/478b5d9607e7fc50377bec45ecebbf74240719c76aa08c81052d2a2174eee6f422db8cfd3f13fd17a080d8ff1046fac50dfffa3a2e57c9e3ed466932239e4af2
+  languageName: node
+  linkType: hard
+
+"@nomicfoundation/hardhat-ethers@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "@nomicfoundation/hardhat-ethers@npm:3.1.0"
+  dependencies:
+    debug: "npm:^4.1.1"
+    lodash.isequal: "npm:^4.5.0"
+  peerDependencies:
+    ethers: ^6.14.0
+    hardhat: ^2.26.0
+  checksum: 10c0/66c5c9f9dd56f1cea25f5c9890f99251fd3179090bb0ad3f73fc1184e4a8ceaba544b5165d3f67e500cf0047d1550350e80df10e28cbabae3d61a659826163ae
   languageName: node
   linkType: hard
 
