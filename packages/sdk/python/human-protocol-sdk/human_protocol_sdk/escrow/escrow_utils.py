@@ -26,12 +26,11 @@ Module
 
 from datetime import datetime
 import logging
-import os
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 from web3 import Web3
 
-from human_protocol_sdk.constants import NETWORKS, ChainId, Status, OrderDirection
+from human_protocol_sdk.constants import NETWORKS, ChainId
 from human_protocol_sdk.filter import (
     CancellationRefundFilter,
     EscrowFilter,
@@ -511,7 +510,7 @@ class EscrowUtils:
 
         :raise EscrowClientError: If an unsupported chain ID or invalid addresses are provided.
         """
-        from human_protocol_sdk.gql.escrow import get_cancellation_refunds_query
+        from human_protocol_sdk.gql.cancel import get_cancellation_refunds_query
 
         if filter.escrow_address and not Web3.is_address(filter.escrow_address):
             raise EscrowClientError("Invalid escrow address")
@@ -589,7 +588,7 @@ class EscrowUtils:
                     "0x1234567890123456789012345678901234567890"
                 )
         """
-        from human_protocol_sdk.gql.escrow import (
+        from human_protocol_sdk.gql.cancel import (
             get_cancellation_refund_by_escrow_query,
         )
 

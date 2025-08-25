@@ -52,7 +52,6 @@ Module
 """
 
 import logging
-import os
 from typing import Optional, List, Union
 from decimal import Decimal
 
@@ -69,10 +68,8 @@ from human_protocol_sdk.utils import (
     handle_error,
 )
 from web3 import Web3, contract
-from web3 import eth
 from web3.middleware import ExtraDataToPOAMiddleware
 from web3.types import TxParams
-from eth_utils import abi
 
 from human_protocol_sdk.utils import validate_url
 from human_protocol_sdk.decorators import requires_signer
@@ -498,6 +495,15 @@ class EscrowClient:
                 )
             self.w3.eth.wait_for_transaction_receipt(tx_hash)
         except Exception as e:
+            error_text = str(e) or ""
+            if "DEPRECATED_SIGNATURE" in error_text and funds_to_reserve is None:
+                raise EscrowClientError(
+                    "Invalid store_results parameters for the contract version of the specified escrow address"
+                ) from e
+
+            LOG.warning(
+                "There may be a mismatch between the parameters passed and the expected parameters of the escrow contract version"
+            )
             handle_error(e, EscrowClientError)
 
     @requires_signer
@@ -652,6 +658,15 @@ class EscrowClient:
                 ).transact(tx_options or {})
             self.w3.eth.wait_for_transaction_receipt(tx_hash)
         except Exception as e:
+            error_text = str(e) or ""
+            if "DEPRECATED_SIGNATURE" in error_text and not isinstance(payout_id, str):
+                raise EscrowClientError(
+                    "Invalid bulk_payout parameters for the contract version of the specified escrow address"
+                ) from e
+
+            LOG.warning(
+                "There may be a mismatch between the parameters passed and the expected parameters of the escrow contract version"
+            )
             handle_error(e, EscrowClientError)
 
     def create_bulk_payout_transaction(
