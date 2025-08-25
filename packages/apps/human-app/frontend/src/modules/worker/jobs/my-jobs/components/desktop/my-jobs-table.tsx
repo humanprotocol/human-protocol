@@ -6,6 +6,7 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from 'material-react-table';
+import { type MyJob } from '@/modules/worker/jobs/schemas';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { createTableDarkMode } from '@/shared/styles/create-table-dark-mode';
 import { EscrowAddressSearchForm } from '../../../components';
@@ -27,10 +28,10 @@ export function MyJobsTable({ chainIdsEnabled }: Readonly<MyJobsTableProps>) {
   } = useMyJobsFilterStore();
   const { data: tableData, status: tableStatus } = useGetMyJobsData();
 
-  const memoizedTableDataResults = useMemo(
-    () => tableData?.results ?? [],
-    [tableData?.results]
-  );
+  const memoizedTableDataResults = useMemo(() => {
+    const results = tableData?.results ?? [];
+    return results as MyJob[];
+  }, [tableData?.results]);
 
   const { mutate: refreshTasksMutation, isPending: isRefreshTasksPending } =
     useRefreshJobsMutation();

@@ -3,8 +3,8 @@ import { z } from 'zod';
 
 export const signUpDtoSchema = z
   .object({
-    email: z.string().email(t('validation.invalidEmail')),
-    hCaptchaToken: z.string().min(1, t('validation.captcha')).default('token'),
+    email: z.email(t('validation.invalidEmail')),
+    hCaptchaToken: z.string().min(1, t('validation.captcha')).prefault('token'),
   })
   .and(
     z
