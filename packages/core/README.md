@@ -218,6 +218,10 @@ npx hardhat verify --network [NETWORK_NAME] [CONTRACT_ADDRESS]
 
 For detailed information about core, please refer to the [Human Protocol Tech Docs](https://human-protocol.gitbook.io/hub/human-tech-docs/architecture/components/smart-contracts).
 
+### Governance
+
+For the cross-chain Governance system (Hub + Spokes), deployment, and proposal lifecycle, see the root-level [GOVERNANCE.md](./GOVERNANCE.md). The in-source, detailed reference lives at [`contracts/governance/README.md`](contracts/governance/README.md).
+
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](https://github.com/humanprotocol/human-protocol/blob/main/LICENSE) file for details.

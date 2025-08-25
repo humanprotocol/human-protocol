@@ -4332,6 +4332,7 @@ __metadata:
     "@automapper/classes": "npm:^8.8.1"
     "@automapper/core": "npm:^8.8.1"
     "@automapper/nestjs": "npm:^8.8.1"
+    "@human-protocol/core": "workspace:*"
     "@human-protocol/logger": "workspace:*"
     "@human-protocol/sdk": "workspace:*"
     "@nestjs/axios": "npm:^3.1.2"
@@ -4364,7 +4365,7 @@ __metadata:
     eslint: "npm:^8.55.0"
     eslint-config-prettier: "npm:^9.1.0"
     eslint-plugin-prettier: "npm:^5.2.1"
-    ethers: "npm:^6.13.5"
+    ethers: "npm:~6.13.5"
     jest: "npm:29.7.0"
     joi: "npm:^17.13.3"
     jsonwebtoken: "npm:^9.0.2"
@@ -4411,7 +4412,7 @@ __metadata:
     axios: "npm:^1.1.3"
     copy-to-clipboard: "npm:^3.3.3"
     dayjs: "npm:^1.11.12"
-    decimal.js: "npm:^10.5.0"
+    decimal.js: "npm:^10.6.0"
     eslint: "npm:^8.55.0"
     eslint-config-react-app: "npm:^7.0.1"
     eslint-import-resolver-typescript: "npm:^3.7.0"
@@ -4461,7 +4462,6 @@ __metadata:
     "@nestjs/platform-express": "npm:^10.3.10"
     "@nestjs/schedule": "npm:^4.0.1"
     "@nestjs/schematics": "npm:^11.0.2"
-    "@nestjs/serve-static": "npm:^4.0.1"
     "@nestjs/swagger": "npm:^7.4.2"
     "@nestjs/terminus": "npm:^11.0.0"
     "@nestjs/testing": "npm:^10.4.6"
@@ -4484,7 +4484,7 @@ __metadata:
     body-parser: "npm:^1.20.3"
     class-transformer: "npm:^0.5.1"
     class-validator: "npm:0.14.1"
-    decimal.js: "npm:^10.4.3"
+    decimal.js: "npm:^10.6.0"
     dotenv: "npm:^17.0.0"
     eslint: "npm:^8.55.0"
     eslint-config-prettier: "npm:^9.1.0"
@@ -6608,28 +6608,6 @@ __metadata:
   peerDependencies:
     typescript: ">=4.8.2"
   checksum: 10c0/53973edb5ea508aae25e7f6c2444f42ce285599f3eadc6734e6140680986e244c4aa750bebd02c5881fa3d9d6d93d772bcd2602590a79b55aa2ac81068b8952d
-  languageName: node
-  linkType: hard
-
-"@nestjs/serve-static@npm:^4.0.1":
-  version: 4.0.2
-  resolution: "@nestjs/serve-static@npm:4.0.2"
-  dependencies:
-    path-to-regexp: "npm:0.2.5"
-  peerDependencies:
-    "@fastify/static": ^6.5.0 || ^7.0.0
-    "@nestjs/common": ^9.0.0 || ^10.0.0
-    "@nestjs/core": ^9.0.0 || ^10.0.0
-    express: ^4.18.1
-    fastify: ^4.7.0
-  peerDependenciesMeta:
-    "@fastify/static":
-      optional: true
-    express:
-      optional: true
-    fastify:
-      optional: true
-  checksum: 10c0/e8dcf277a35a9ac3a82379ff14b8db0df9bd033f95f254d87d0a4cad9ed5bff6c6b8d9366295e38465d1f06679f5c3cca5efbf94ff52b936d26bde238199ab89
   languageName: node
   linkType: hard
 
@@ -16318,10 +16296,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"decimal.js@npm:^10.4.3, decimal.js@npm:^10.5.0":
+"decimal.js@npm:^10.4.3":
   version: 10.5.0
   resolution: "decimal.js@npm:10.5.0"
   checksum: 10c0/785c35279df32762143914668df35948920b6c1c259b933e0519a69b7003fc0a5ed2a766b1e1dda02574450c566b21738a45f15e274b47c2ac02072c0d1f3ac3
+  languageName: node
+  linkType: hard
+
+"decimal.js@npm:^10.6.0":
+  version: 10.6.0
+  resolution: "decimal.js@npm:10.6.0"
+  checksum: 10c0/07d69fbcc54167a340d2d97de95f546f9ff1f69d2b45a02fd7a5292412df3cd9eb7e23065e532a318f5474a2e1bccf8392fdf0443ef467f97f3bf8cb0477e5aa
   languageName: node
   linkType: hard
 
@@ -25118,13 +25103,6 @@ __metadata:
   version: 0.1.12
   resolution: "path-to-regexp@npm:0.1.12"
   checksum: 10c0/1c6ff10ca169b773f3bba943bbc6a07182e332464704572962d277b900aeee81ac6aa5d060ff9e01149636c30b1f63af6e69dd7786ba6e0ddb39d4dee1f0645b
-  languageName: node
-  linkType: hard
-
-"path-to-regexp@npm:0.2.5":
-  version: 0.2.5
-  resolution: "path-to-regexp@npm:0.2.5"
-  checksum: 10c0/947ffdd583390408a4814dcb921226fba363110a8245d22bd11c2bb1db323ad76b2e879f6dadc02bcf8c9c925b1556d5405c01a466dd28a93d84af5f62c51b79
   languageName: node
   linkType: hard
 

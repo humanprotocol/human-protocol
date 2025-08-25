@@ -7,9 +7,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 
-import { DatabaseError, isDuplicatedError } from '@/database';
-import logger from '@/logger';
-import { transformKeysFromCamelToSnake } from '@/utils/case-converters';
+import logger from '../../logger';
 
 @Catch()
 export class ExceptionFilter implements IExceptionFilter {
@@ -25,13 +23,7 @@ export class ExceptionFilter implements IExceptionFilter {
       message: 'Internal server error',
     };
 
-    if (exception instanceof DatabaseError) {
-      if (isDuplicatedError(exception)) {
-        status = HttpStatus.UNPROCESSABLE_ENTITY;
-        responseBody.message = 'Unprocessable entity';
-      }
-      this.logger.error('Database error', exception);
-    } else if (exception instanceof HttpException) {
+    if (exception instanceof HttpException) {
       status = exception.getStatus();
       const exceptionResponse = exception.getResponse();
       if (typeof exceptionResponse === 'string') {
@@ -42,7 +34,7 @@ export class ExceptionFilter implements IExceptionFilter {
           {
             message: exception.message,
           },
-          transformKeysFromCamelToSnake(exceptionResponse),
+          exceptionResponse,
         );
       }
     } else {
@@ -57,7 +49,7 @@ export class ExceptionFilter implements IExceptionFilter {
     response.status(status).json(
       Object.assign(
         {
-          status_code: status,
+          statusCode: status,
           path: request.url,
           timestamp: new Date().toISOString(),
         },

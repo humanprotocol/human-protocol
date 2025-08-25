@@ -1,4 +1,3 @@
-import { faker } from '@faker-js/faker';
 import { ServiceUnavailableException } from '@nestjs/common';
 import {
   HealthIndicatorResult,
@@ -8,14 +7,9 @@ import {
 } from '@nestjs/terminus';
 import { Test } from '@nestjs/testing';
 
-import { ServerConfigService } from '@/config';
 import { nestLoggerOverride } from '@/logger';
 
 import { HealthController } from './health.controller';
-
-const mockServerConfigService = {
-  gitHash: faker.git.commitSha(),
-};
 
 const mockTypeOrmPingCheck = jest.fn();
 
@@ -39,10 +33,6 @@ describe('HealthController', () => {
       controllers: [HealthController],
       providers: [
         {
-          provide: ServerConfigService,
-          useValue: mockServerConfigService,
-        },
-        {
           provide: TypeOrmHealthIndicator,
           useValue: {
             pingCheck: mockTypeOrmPingCheck,
@@ -64,8 +54,8 @@ describe('HealthController', () => {
 
   it('/ping should return proper info', async () => {
     await expect(healthController.ping()).resolves.toEqual({
-      gitHash: mockServerConfigService.gitHash,
       nodeEnv: 'test',
+      version: 'test_value_hardcoded_in_jest_config',
     });
   });
 

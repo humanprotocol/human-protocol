@@ -24,14 +24,18 @@ async function main() {
   );
 
   const spokeContracts = spokeAddresses.map((address, index) => ({
-    contractAddress: ethers.zeroPadBytes(address, 32),
+    contractAddress: ethers.zeroPadValue(address, 32),
     chainId: spokeChainIds[index],
   }));
 
   console.log('Updating spoke contracts...');
   // can only be called by the governor
-  await governanceContract.updateSpokeContracts(spokeContracts);
-  console.log('Spoke contracts updated successfully.');
+  const transaction =
+    await governanceContract.updateSpokeContracts(spokeContracts);
+  console.log(
+    'Spoke contracts updated successfully. TxHash:',
+    transaction.hash
+  );
 }
 
 main().catch((error) => {

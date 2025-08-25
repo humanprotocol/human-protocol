@@ -10,6 +10,8 @@ class Environment {
   static readonly name: string =
     process.env.NODE_ENV || EnvironmentName.DEVELOPMENT;
 
+  static readonly version: string = process.env.GIT_HASH || 'n/a';
+
   static isDevelopment(): boolean {
     return [
       EnvironmentName.DEVELOPMENT,
