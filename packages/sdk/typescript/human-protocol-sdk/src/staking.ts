@@ -207,7 +207,7 @@ export class StakingClient extends BaseEthersClient {
         await this.tokenContract.approve(
           await this.stakingContract.getAddress(),
           amount,
-          txOptions
+          this.applyTxDefaults(txOptions)
         )
       ).wait();
       return;
@@ -254,7 +254,12 @@ export class StakingClient extends BaseEthersClient {
     }
 
     try {
-      await (await this.stakingContract.stake(amount, txOptions)).wait();
+      await (
+        await this.stakingContract.stake(
+          amount,
+          this.applyTxDefaults(txOptions)
+        )
+      ).wait();
       return;
     } catch (e) {
       return throwError(e);
@@ -301,7 +306,12 @@ export class StakingClient extends BaseEthersClient {
     }
 
     try {
-      await (await this.stakingContract.unstake(amount, txOptions)).wait();
+      await (
+        await this.stakingContract.unstake(
+          amount,
+          this.applyTxDefaults(txOptions)
+        )
+      ).wait();
       return;
     } catch (e) {
       return throwError(e);
@@ -335,7 +345,9 @@ export class StakingClient extends BaseEthersClient {
   @requiresSigner
   public async withdraw(txOptions: Overrides = {}): Promise<void> {
     try {
-      await (await this.stakingContract.withdraw(txOptions)).wait();
+      await (
+        await this.stakingContract.withdraw(this.applyTxDefaults(txOptions))
+      ).wait();
       return;
     } catch (e) {
       return throwError(e);
@@ -402,7 +414,7 @@ export class StakingClient extends BaseEthersClient {
           staker,
           escrowAddress,
           amount,
-          txOptions
+          this.applyTxDefaults(txOptions)
         )
       ).wait();
 
@@ -439,6 +451,7 @@ export class StakingClient extends BaseEthersClient {
 
     try {
       const stakerInfo = await this.stakingContract.stakes(stakerAddress);
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const currentBlock = await this.runner.provider!.getBlockNumber();
 
       const tokensWithdrawable =
