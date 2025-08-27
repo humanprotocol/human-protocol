@@ -26,6 +26,13 @@ export class GovernanceService {
   ) {}
 
   public async getProposals(): Promise<ProposalResponse[]> {
+    const endpointCacheKey = this.generateCacheKey('endpoint', 'proposals');
+    const cached =
+      await this.cacheManager.get<ProposalResponse[]>(endpointCacheKey);
+    if (cached) {
+      return cached;
+    }
+
     const provider = new ethers.JsonRpcProvider(
       this.configService.governanceRpcUrl,
     );
@@ -130,6 +137,12 @@ export class GovernanceService {
 
     await this.cacheManager.set(proposalListKey, keptProposalList);
     await this.cacheManager.set(lastScannedBlockKey, currentBlock);
+
+    await this.cacheManager.set(
+      endpointCacheKey,
+      proposals,
+      this.configService.cacheTtlProposals,
+    );
 
     return proposals;
   }

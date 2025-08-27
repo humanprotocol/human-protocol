@@ -16,6 +16,7 @@ const DEFAULT_CACHE_TTL_EXCHANGE_ORACLE_URL = 24 * 60 * 60;
 const DEFAULT_MAX_EXECUTIONS_TO_SKIP = 32;
 const DEFAULT_CACHE_TTL_JOB_TYPES = 24 * 60 * 60;
 const DEFAULT_CACHE_TTL_EXCHANGE_ORACLE_REGISTRATION_NEEDED = 24 * 60 * 60;
+const DEFAULT_CACHE_TTL_PROPOSALS = 5 * 60;
 
 @Injectable()
 export class EnvironmentConfigService {
@@ -206,6 +207,19 @@ export class EnvironmentConfigService {
    */
   get governorAddress(): string {
     return this.configService.getOrThrow<string>('GOVERNOR_ADDRESS');
+  }
+
+  /**
+   * The cache time-to-live (TTL) for proposals data.
+   * Default: 5 minutes
+   */
+  get cacheTtlProposals(): number {
+    return (
+      this.configService.get<number>(
+        'CACHE_TTL_PROPOSALS',
+        DEFAULT_CACHE_TTL_PROPOSALS,
+      ) * 1000
+    );
   }
 
   /**
