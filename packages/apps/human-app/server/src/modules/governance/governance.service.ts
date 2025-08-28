@@ -1,11 +1,12 @@
 import { MetaHumanGovernor__factory } from '@human-protocol/core/typechain-types';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { ethers } from 'ethers';
 import _ from 'lodash';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
 import { ProposalState } from '../../common/enums/proposal';
+import logger from '../../logger';
 import { ProposalResponse } from './model/governance.model';
 
 const N_BLOCKS_LOOKBACK = 100000;
@@ -16,7 +17,7 @@ type Block = {
 };
 @Injectable()
 export class GovernanceService {
-  private readonly logger = new Logger(GovernanceService.name);
+  private readonly logger = logger.child({ context: GovernanceService.name });
 
   constructor(
     private readonly configService: EnvironmentConfigService,
@@ -52,10 +53,10 @@ export class GovernanceService {
       this.logger.error('No latest block from RPC');
       throw new Error('Blockchain node unavailable');
     }
-
+    const cachedLastScannedBlockNumber = cachedLastScannedBlock?.number ?? 0;
     const fromBlock =
-      (cachedLastScannedBlock?.number ?? 0) > 0
-        ? (cachedLastScannedBlock?.number ?? 0) + 1
+      cachedLastScannedBlockNumber > 0
+        ? cachedLastScannedBlockNumber + 1
         : currentBlock.number - N_BLOCKS_LOOKBACK;
 
     let allProposals: ProposalResponse[] = [];
@@ -63,7 +64,7 @@ export class GovernanceService {
       const newProposals = await this.getProposalCreatedEvents(
         contract,
         fromBlock,
-        currentBlock.number ?? 0,
+        currentBlock.number,
       );
 
       allProposals = _.uniqBy(
