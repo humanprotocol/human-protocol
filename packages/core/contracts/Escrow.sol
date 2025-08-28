@@ -198,11 +198,10 @@ contract Escrow is IEscrow, ReentrancyGuard {
     /**
      * @dev Withdraws excess funds from the escrow for a specific token.
      * @param _token Address of the token to withdraw.
-     * @return bool indicating success of the withdrawal.
      */
     function withdraw(
         address _token
-    ) external override adminOrLauncher nonReentrant returns (bool) {
+    ) external override adminOrLauncher nonReentrant {
         uint256 amount;
         if (_token == token) {
             uint256 balance = getBalance();
@@ -216,7 +215,6 @@ contract Escrow is IEscrow, ReentrancyGuard {
         IERC20(_token).safeTransfer(msg.sender, amount);
 
         emit Withdraw(_token, amount);
-        return true;
     }
 
     /**

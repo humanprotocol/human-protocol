@@ -16,15 +16,6 @@ const mockedStorageService = createMock<StorageService>();
 const mockedWeb3Service = createMock<Web3Service>();
 const mockedEscrowClient = jest.mocked(EscrowClient);
 
-const normalize = (list: { address: string; amount: bigint }[]) =>
-  _.sortBy(
-    list.map((p) => ({
-      address: p.address.toLowerCase(),
-      amount: p.amount.toString(),
-    })),
-    'address',
-  );
-
 describe('FortunePayoutsCalculator', () => {
   let calculator: FortunePayoutsCalculator;
 
@@ -49,25 +40,16 @@ describe('FortunePayoutsCalculator', () => {
   });
 
   describe('calculate', () => {
-    const balance = BigInt(
-      faker.number.int({ min: 1000, multipleOf: 2 }).toString(),
-    );
-    const jobLauncherAddress = faker.finance.ethereumAddress();
-
+    const balance = BigInt(faker.number.int({ min: 1000 }).toString());
     const mockedGetReservedFunds = jest
       .fn()
       .mockImplementation(async () => balance);
-    const mockedGetJobLauncherAddress = jest
-      .fn()
-      .mockImplementation(async () => jobLauncherAddress);
 
     beforeAll(() => {
       mockedEscrowClient.build.mockResolvedValue({
         getReservedFunds: mockedGetReservedFunds,
-        getJobLauncherAddress: mockedGetJobLauncherAddress,
       } as unknown as EscrowClient);
     });
-
     it('should properly calculate payouts', async () => {
       const validSolutions = [
         generateFortuneSolution(),
@@ -95,44 +77,9 @@ describe('FortunePayoutsCalculator', () => {
         amount: balance / BigInt(validSolutions.length),
       }));
 
-      expect(normalize(payouts)).toEqual(normalize(expectedPayouts));
-
-      expect(mockedStorageService.downloadJsonLikeData).toHaveBeenCalledWith(
-        resultsUrl,
+      expect(_.sortBy(payouts, 'address')).toEqual(
+        _.sortBy(expectedPayouts, 'address'),
       );
-    });
-
-    it('should calculate payouts with remainder (rest added as extra payout entry)', async () => {
-      const resultsUrl = faker.internet.url();
-      const validSolutions = [
-        generateFortuneSolution(),
-        generateFortuneSolution(),
-        generateFortuneSolution(),
-      ];
-
-      mockedStorageService.downloadJsonLikeData.mockResolvedValueOnce(
-        validSolutions,
-      );
-
-      const payouts = await calculator.calculate({
-        chainId: generateTestnetChainId(),
-        escrowAddress: faker.finance.ethereumAddress(),
-        finalResultsUrl: resultsUrl,
-        manifest: generateFortuneManifest(),
-      });
-
-      const expectedPayouts = [
-        ...validSolutions.map((s) => ({
-          address: s.workerAddress,
-          amount: balance / BigInt(validSolutions.length),
-        })),
-        {
-          address: jobLauncherAddress,
-          amount: balance % BigInt(validSolutions.length),
-        },
-      ];
-
-      expect(normalize(payouts)).toEqual(normalize(expectedPayouts));
 
       expect(mockedStorageService.downloadJsonLikeData).toHaveBeenCalledWith(
         resultsUrl,

@@ -40,22 +40,11 @@ export class FortunePayoutsCalculator implements EscrowPayoutsCalculator {
       .map((item) => item.workerAddress);
 
     const reservedFunds = await escrowClient.getReservedFunds(escrowAddress);
-    const recipientsAmount = BigInt(recipients.length);
-    const payoutAmount = reservedFunds / recipientsAmount;
-    const rest = reservedFunds % recipientsAmount;
+    const payoutAmount = reservedFunds / BigInt(recipients.length);
 
-    const payouts: CalculatedPayout[] = recipients.map((recipient) => ({
+    return recipients.map((recipient) => ({
       address: recipient,
       amount: payoutAmount,
     }));
-
-    // If division leaves a rest (due to truncation), the remaining amount
-    // is sent to the job launcher so that no funds are stuck.
-    if (rest > 0n) {
-      const launcher = await escrowClient.getJobLauncherAddress(escrowAddress);
-      payouts.push({ address: launcher, amount: rest });
-    }
-
-    return payouts;
   }
 }

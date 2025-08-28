@@ -387,7 +387,7 @@ describe('Escrow', function () {
     });
     describe('reverts', () => {
       it('reverts outside Pending/Partial/ToCancel', async () => {
-        await escrow.connect(launcher).cancel();
+        await escrow.connect(launcher).requestCancellation();
         expect(await escrow.status()).to.equal(Status.ToCancel);
         await storeResults(); //Set cancelled status
         await expect(
@@ -463,7 +463,7 @@ describe('Escrow', function () {
 
       it('Recording oracle: stores results successfully and cancels the escrow', async () => {
         const launcherInitialBalance = await token.balanceOf(launcher);
-        await escrow.connect(launcher).cancel();
+        await escrow.connect(launcher).requestCancellation();
         await expect(storeResults())
           .to.emit(escrow, 'IntermediateStorage')
           .withArgs(FIXTURE_URL, FIXTURE_HASH);
@@ -487,7 +487,7 @@ describe('Escrow', function () {
 
       it('Admin: stores results successfully and cancels the escrow', async () => {
         const launcherInitialBalance = await token.balanceOf(launcher);
-        await escrow.connect(launcher).cancel();
+        await escrow.connect(launcher).requestCancellation();
         await expect(
           storeResults(FIXTURE_URL, FIXTURE_HASH, ethers.parseEther('0'), admin)
         )
@@ -503,7 +503,7 @@ describe('Escrow', function () {
     });
   });
 
-  describe('cancel()', () => {
+  describe('requestCancellation()', () => {
     beforeEach(async () => {
       await deployEscrow();
       await fundEscrow();
@@ -512,17 +512,17 @@ describe('Escrow', function () {
 
     describe('reverts', function () {
       it('reverts when called by unauthorised address', async function () {
-        await expect(escrow.connect(external).cancel()).to.be.revertedWith(
-          'Unauthorised'
-        );
         await expect(
-          escrow.connect(recordingOracle).cancel()
+          escrow.connect(external).requestCancellation()
         ).to.be.revertedWith('Unauthorised');
         await expect(
-          escrow.connect(exchangeOracle).cancel()
+          escrow.connect(recordingOracle).requestCancellation()
         ).to.be.revertedWith('Unauthorised');
         await expect(
-          escrow.connect(reputationOracle).cancel()
+          escrow.connect(exchangeOracle).requestCancellation()
+        ).to.be.revertedWith('Unauthorised');
+        await expect(
+          escrow.connect(reputationOracle).requestCancellation()
         ).to.be.revertedWith('Unauthorised');
       });
 
@@ -534,9 +534,9 @@ describe('Escrow', function () {
           [
             'bulkPayOut(address[],uint256[],string,string,string,bool)'
           ]([externalAddress], [balance], FIXTURE_URL, FIXTURE_HASH, '000', false);
-        await expect(escrow.connect(launcher).cancel()).to.be.revertedWith(
-          'No funds'
-        );
+        await expect(
+          escrow.connect(launcher).requestCancellation()
+        ).to.be.revertedWith('No funds');
       });
     });
 
@@ -544,7 +544,7 @@ describe('Escrow', function () {
       it('Launcher: requests escrow cancellation succesfully', async () => {
         const balance = await token.balanceOf(escrow.getAddress());
         const launcherBalance = await token.balanceOf(launcherAddress);
-        await expect(escrow.connect(launcher).cancel()).to.emit(
+        await expect(escrow.connect(launcher).requestCancellation()).to.emit(
           escrow,
           'CancellationRequested'
         );
@@ -561,7 +561,7 @@ describe('Escrow', function () {
         await fundEscrow();
         await setupEscrow();
         const launcherBalance = await token.balanceOf(launcherAddress);
-        await expect(escrow.connect(launcher).cancel()).to.emit(
+        await expect(escrow.connect(launcher).requestCancellation()).to.emit(
           escrow,
           'CancellationRequested'
         );
@@ -576,7 +576,7 @@ describe('Escrow', function () {
       it('Admin: requests escrow cancellation succesfully', async () => {
         const balance = await token.balanceOf(escrow.getAddress());
         const launcherBalance = await token.balanceOf(launcherAddress);
-        await expect(escrow.connect(admin).cancel()).to.emit(
+        await expect(escrow.connect(admin).requestCancellation()).to.emit(
           escrow,
           'CancellationRequested'
         );
@@ -593,7 +593,7 @@ describe('Escrow', function () {
         await fundEscrow();
         await setupEscrow();
         const launcherBalance = await token.balanceOf(launcherAddress);
-        await expect(escrow.connect(admin).cancel()).to.emit(
+        await expect(escrow.connect(admin).requestCancellation()).to.emit(
           escrow,
           'CancellationRequested'
         );
@@ -743,7 +743,7 @@ describe('Escrow', function () {
       });
 
       it('reverts when broke', async function () {
-        await escrow.connect(launcher).cancel();
+        await escrow.connect(launcher).requestCancellation();
         await storeResults();
         await expect(
           escrow
@@ -1076,7 +1076,7 @@ describe('Escrow', function () {
           ].map(async (oracle) => token.connect(owner).balanceOf(oracle))
         );
 
-        await escrow.connect(launcher).cancel();
+        await escrow.connect(launcher).requestCancellation();
 
         await storeResults(FIXTURE_URL, FIXTURE_HASH, totalAmount);
         await escrow
@@ -1303,7 +1303,7 @@ describe('Escrow', function () {
           ].map(async (oracle) => token.connect(owner).balanceOf(oracle))
         );
 
-        await escrow.connect(launcher).cancel();
+        await escrow.connect(launcher).requestCancellation();
 
         await storeResults(FIXTURE_URL, FIXTURE_HASH, totalAmount);
         await escrow
@@ -1430,6 +1430,189 @@ describe('Escrow', function () {
         expect(finalLauncherBalance - initialLauncherBalance).to.equal(
           initialEscrowBalance - amounts[0]
         );
+      });
+    });
+
+    describe('cancel()', () => {
+      beforeEach(async () => {
+        await deployEscrow();
+        await fundEscrow();
+        await setupEscrow();
+      });
+
+      describe('reverts', function () {
+        it('reverts when called by unauthorised address', async function () {
+          await escrow.connect(launcher).requestCancellation();
+
+          await expect(escrow.connect(external).cancel()).to.be.revertedWith(
+            'Unauthorised'
+          );
+          await expect(
+            escrow.connect(recordingOracle).cancel()
+          ).to.be.revertedWith('Unauthorised');
+          await expect(
+            escrow.connect(exchangeOracle).cancel()
+          ).to.be.revertedWith('Unauthorised');
+          await expect(escrow.connect(launcher).cancel()).to.be.revertedWith(
+            'Unauthorised'
+          );
+        });
+
+        it('reverts when the status is not ToCancel', async function () {
+          await expect(
+            escrow.connect(reputationOracle).cancel()
+          ).to.be.revertedWith('Invalid status');
+        });
+      });
+
+      describe('Succeeds', async function () {
+        beforeEach(async () => {
+          await escrow.connect(launcher).requestCancellation();
+        });
+
+        it('Reputation oracle: cancels the escrow succesfully', async () => {
+          const initialLauncherBalance = await token.balanceOf(launcherAddress);
+          const initialEscrowBalance = await token.balanceOf(
+            escrow.getAddress()
+          );
+
+          await expect(escrow.connect(reputationOracle).cancel()).to.emit(
+            escrow,
+            'Cancelled'
+          );
+          expect(await escrow.status()).to.equal(Status.Cancelled);
+
+          expect(await escrow.remainingFunds()).to.equal('0');
+
+          const finalLauncherBalance = await token.balanceOf(launcherAddress);
+
+          expect(finalLauncherBalance - initialLauncherBalance).to.equal(
+            initialEscrowBalance
+          );
+        });
+
+        it('Admin: cancels the escrow succesfully', async () => {
+          const initialLauncherBalance = await token.balanceOf(launcherAddress);
+          const initialEscrowBalance = await token.balanceOf(
+            escrow.getAddress()
+          );
+
+          await expect(escrow.connect(admin).cancel()).to.emit(
+            escrow,
+            'Cancelled'
+          );
+          expect(await escrow.status()).to.equal(Status.Cancelled);
+
+          expect(await escrow.remainingFunds()).to.equal('0');
+
+          const finalLauncherBalance = await token.balanceOf(launcherAddress);
+
+          expect(finalLauncherBalance - initialLauncherBalance).to.equal(
+            initialEscrowBalance
+          );
+        });
+
+        it('Reputation oracle: cancels the escrow succesfully after storeResults', async () => {
+          const initialLauncherBalance = await token.balanceOf(launcherAddress);
+          const initialEscrowBalance = await token.balanceOf(
+            escrow.getAddress()
+          );
+
+          await storeResults(FIXTURE_URL, FIXTURE_HASH, initialEscrowBalance);
+
+          await expect(escrow.connect(reputationOracle).cancel()).to.emit(
+            escrow,
+            'Cancelled'
+          );
+          expect(await escrow.status()).to.equal(Status.Cancelled);
+
+          expect(await escrow.remainingFunds()).to.equal('0');
+
+          const finalLauncherBalance = await token.balanceOf(launcherAddress);
+
+          expect(finalLauncherBalance - initialLauncherBalance).to.equal(
+            initialEscrowBalance
+          );
+        });
+
+        it('Admin: cancels the escrow succesfully after storeResults', async () => {
+          const initialLauncherBalance = await token.balanceOf(launcherAddress);
+          const initialEscrowBalance = await token.balanceOf(
+            escrow.getAddress()
+          );
+
+          await storeResults(FIXTURE_URL, FIXTURE_HASH, initialEscrowBalance);
+
+          await expect(escrow.connect(admin).cancel()).to.emit(
+            escrow,
+            'Cancelled'
+          );
+          expect(await escrow.status()).to.equal(Status.Cancelled);
+
+          expect(await escrow.remainingFunds()).to.equal('0');
+
+          const finalLauncherBalance = await token.balanceOf(launcherAddress);
+
+          expect(finalLauncherBalance - initialLauncherBalance).to.equal(
+            initialEscrowBalance
+          );
+        });
+
+        it('Reputation oracle: cancels the escrow succesfully after payouts', async () => {
+          const initialLauncherBalance = await token.balanceOf(launcherAddress);
+          const initialEscrowBalance = await token.balanceOf(
+            escrow.getAddress()
+          );
+
+          await storeResults(FIXTURE_URL, FIXTURE_HASH, initialEscrowBalance);
+          await escrow
+            .connect(admin)
+            [
+              'bulkPayOut(address[],uint256[],string,string,string,bool)'
+            ]([externalAddress], [initialEscrowBalance / 2n], FIXTURE_URL, FIXTURE_HASH, '000', false);
+
+          await expect(escrow.connect(reputationOracle).cancel()).to.emit(
+            escrow,
+            'Cancelled'
+          );
+          expect(await escrow.status()).to.equal(Status.Cancelled);
+
+          expect(await escrow.remainingFunds()).to.equal('0');
+
+          const finalLauncherBalance = await token.balanceOf(launcherAddress);
+
+          expect(finalLauncherBalance - initialLauncherBalance).to.equal(
+            initialEscrowBalance / 2n
+          );
+        });
+
+        it('Admin: cancels the escrow succesfully after payouts', async () => {
+          const initialLauncherBalance = await token.balanceOf(launcherAddress);
+          const initialEscrowBalance = await token.balanceOf(
+            escrow.getAddress()
+          );
+
+          await storeResults(FIXTURE_URL, FIXTURE_HASH, initialEscrowBalance);
+          await escrow
+            .connect(admin)
+            [
+              'bulkPayOut(address[],uint256[],string,string,string,bool)'
+            ]([externalAddress], [initialEscrowBalance / 2n], FIXTURE_URL, FIXTURE_HASH, '000', false);
+
+          await expect(escrow.connect(admin).cancel()).to.emit(
+            escrow,
+            'Cancelled'
+          );
+          expect(await escrow.status()).to.equal(Status.Cancelled);
+
+          expect(await escrow.remainingFunds()).to.equal('0');
+
+          const finalLauncherBalance = await token.balanceOf(launcherAddress);
+
+          expect(finalLauncherBalance - initialLauncherBalance).to.equal(
+            initialEscrowBalance / 2n
+          );
+        });
       });
     });
   });

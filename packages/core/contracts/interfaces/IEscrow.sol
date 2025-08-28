@@ -27,7 +27,7 @@ interface IEscrow {
 
     function requestCancellation() external;
 
-    function withdraw(address _token) external returns (bool);
+    function withdraw(address _token) external;
 
     function complete() external;
 
