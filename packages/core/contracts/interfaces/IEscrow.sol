@@ -25,11 +25,13 @@ interface IEscrow {
         string calldata _hash
     ) external;
 
-    function cancel() external returns (bool);
+    function requestCancellation() external;
 
     function withdraw(address _token) external returns (bool);
 
     function complete() external;
+
+    function cancel() external;
 
     function storeResults(string calldata _url, string calldata _hash) external;
 

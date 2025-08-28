@@ -179,24 +179,20 @@ contract Escrow is IEscrow, ReentrancyGuard {
     }
 
     /**
-     * @dev Cancels the escrow and transfers remaining funds to the canceler.
-     * @return bool indicating success of the cancellation.
+     * @dev Initiates a cancellation request. If expired, it finalizes immediately.
      */
-    function cancel()
-        public
+    function requestCancellation()
+        external
         override
         adminOrLauncher
         notBroke
         nonReentrant
-        returns (bool)
     {
         status = EscrowStatuses.ToCancel;
         emit CancellationRequested();
         if (duration <= block.timestamp) {
             _finalize();
         }
-
-        return true;
     }
 
     /**
@@ -206,7 +202,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
      */
     function withdraw(
         address _token
-    ) public override adminOrLauncher nonReentrant returns (bool) {
+    ) external override adminOrLauncher nonReentrant returns (bool) {
         uint256 amount;
         if (_token == token) {
             uint256 balance = getBalance();
@@ -224,7 +220,15 @@ contract Escrow is IEscrow, ReentrancyGuard {
     }
 
     /**
-     * @dev Completes the escrow, transferring remaining funds to the launcher.
+     * @dev Finalizes a previously requested cancellation and transfers the remaining funds to the launcher.
+     */
+    function cancel() external override notExpired adminOrReputationOracle {
+        require(status == EscrowStatuses.ToCancel, 'Invalid status');
+        _finalize();
+    }
+
+    /**
+     * @dev Completes the escrow and transfers the remaining funds to the launcher.
      */
     function complete() external override notExpired adminOrReputationOracle {
         require(
