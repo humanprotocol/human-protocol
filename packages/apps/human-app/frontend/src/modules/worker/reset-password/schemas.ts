@@ -15,7 +15,7 @@ export const resetPasswordDtoSchema = z
     h_captcha_token: z
       .string()
       .min(1, t('validation.captcha'))
-      .default('token'),
+      .prefault('token'),
   })
   .refine(({ password, confirmPassword }) => confirmPassword === password, {
     message: t('validation.passwordMismatch'),
