@@ -245,3 +245,10 @@ export interface IStakersFilter extends IPagination {
     | 'slashedAmount'
     | 'lastDepositTimestamp';
 }
+export interface ICancellationRefundFilter extends IPagination {
+  chainId: ChainId;
+  escrowAddress?: string;
+  receiver?: string;
+  from?: Date;
+  to?: Date;
+}

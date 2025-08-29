@@ -8,7 +8,7 @@
 
 > **EscrowWithdraw** = `object`
 
-Defined in: [types.ts:159](https://github.com/humanprotocol/human-protocol/blob/379201f0dcf9e31baefdeaf8c2865002114c8394/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L159)
+Defined in: [types.ts:149](https://github.com/humanprotocol/human-protocol/blob/4dad01e5a92c46a45d83aec7fcaea2d2e541271c/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L149)
 
 Represents the response data for an escrow withdrawal.
 
@@ -18,7 +18,7 @@ Represents the response data for an escrow withdrawal.
 
 > **tokenAddress**: `string`
 
-Defined in: [types.ts:167](https://github.com/humanprotocol/human-protocol/blob/379201f0dcf9e31baefdeaf8c2865002114c8394/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L167)
+Defined in: [types.ts:157](https://github.com/humanprotocol/human-protocol/blob/4dad01e5a92c46a45d83aec7fcaea2d2e541271c/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L157)
 
 The address of the token used for the withdrawal.
 
@@ -28,7 +28,7 @@ The address of the token used for the withdrawal.
 
 > **txHash**: `string`
 
-Defined in: [types.ts:163](https://github.com/humanprotocol/human-protocol/blob/379201f0dcf9e31baefdeaf8c2865002114c8394/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L163)
+Defined in: [types.ts:153](https://github.com/humanprotocol/human-protocol/blob/4dad01e5a92c46a45d83aec7fcaea2d2e541271c/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L153)
 
 The hash of the transaction associated with the escrow withdrawal.
 
@@ -38,6 +38,6 @@ The hash of the transaction associated with the escrow withdrawal.
 
 > **withdrawnAmount**: `bigint`
 
-Defined in: [types.ts:171](https://github.com/humanprotocol/human-protocol/blob/379201f0dcf9e31baefdeaf8c2865002114c8394/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L171)
+Defined in: [types.ts:161](https://github.com/humanprotocol/human-protocol/blob/4dad01e5a92c46a45d83aec7fcaea2d2e541271c/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L161)
 
 The amount withdrawn from the escrow.

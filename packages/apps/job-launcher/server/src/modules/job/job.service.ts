@@ -27,14 +27,13 @@ import { TOKEN_ADDRESSES } from '../../common/constants/tokens';
 import { CronJobType } from '../../common/enums/cron-job';
 import {
   AudinoJobType,
-  CvatJobType,
   EscrowFundToken,
   FortuneJobType,
   HCaptchaJobType,
   JobRequestType,
   JobStatus,
 } from '../../common/enums/job';
-import { FiatCurrency } from '../../common/enums/payment';
+import { FiatCurrency, PaymentType } from '../../common/enums/payment';
 import { EventType, OracleType } from '../../common/enums/webhook';
 import {
   ConflictError,
@@ -46,6 +45,7 @@ import { PageDto } from '../../common/pagination/pagination.dto';
 import { parseUrl } from '../../common/utils';
 import { add, div, max, mul } from '../../common/utils/decimal';
 import { getTokenDecimals } from '../../common/utils/tokens';
+import logger from '../../logger';
 import { CronJobRepository } from '../cron-job/cron-job.repository';
 import {
   CvatManifestDto,
@@ -66,7 +66,6 @@ import { WebhookRepository } from '../webhook/webhook.repository';
 import { WhitelistService } from '../whitelist/whitelist.service';
 import {
   CreateJob,
-  EscrowCancelDto,
   FortuneFinalResultDto,
   GetJobsDto,
   JobDetailsDto,
@@ -74,9 +73,7 @@ import {
   JobQuickLaunchDto,
 } from './job.dto';
 import { JobEntity } from './job.entity';
-import { EscrowAction } from './job.interface';
 import { JobRepository } from './job.repository';
-import logger from '../../logger';
 
 @Injectable()
 export class JobService {
@@ -106,33 +103,6 @@ export class JobService {
       strict: false,
     });
   }
-
-  private createEscrowSpecificActions: Record<JobRequestType, EscrowAction> = {
-    [HCaptchaJobType.HCAPTCHA]: {
-      getTrustedHandlers: () => [],
-    },
-    [FortuneJobType.FORTUNE]: {
-      getTrustedHandlers: () => [],
-    },
-    [CvatJobType.IMAGE_POLYGONS]: {
-      getTrustedHandlers: () => [],
-    },
-    [CvatJobType.IMAGE_BOXES]: {
-      getTrustedHandlers: () => [],
-    },
-    [CvatJobType.IMAGE_POINTS]: {
-      getTrustedHandlers: () => [],
-    },
-    [CvatJobType.IMAGE_BOXES_FROM_POINTS]: {
-      getTrustedHandlers: () => [],
-    },
-    [CvatJobType.IMAGE_SKELETONS_FROM_BOXES]: {
-      getTrustedHandlers: () => [],
-    },
-    [AudinoJobType.AUDIO_TRANSCRIPTION]: {
-      getTrustedHandlers: () => [],
-    },
-  };
 
   public async createJob(
     user: UserEntity,
@@ -319,9 +289,6 @@ export class JobService {
   }
 
   public async createEscrow(jobEntity: JobEntity): Promise<JobEntity> {
-    const { getTrustedHandlers } =
-      this.createEscrowSpecificActions[jobEntity.requestType];
-
     const signer = this.web3Service.getSigner(jobEntity.chainId);
 
     const escrowClient = await EscrowClient.build(signer);
@@ -330,7 +297,6 @@ export class JobService {
       (TOKEN_ADDRESSES[jobEntity.chainId as ChainId] ?? {})[
         jobEntity.token as EscrowFundToken
       ]!.address,
-      getTrustedHandlers(),
       jobEntity.userId.toString(),
       {
         gasPrice: await this.web3Service.calculateGasPrice(jobEntity.chainId),
@@ -388,6 +354,7 @@ export class JobService {
       eventType: EventType.ESCROW_CREATED,
       oracleType: oracleType,
       hasSignature: oracleType !== OracleType.HCAPTCHA ? true : false,
+      oracleAddress: jobEntity.exchangeOracle,
     });
     await this.webhookRepository.createUnique(webhookEntity);
 
@@ -465,7 +432,7 @@ export class JobService {
       throw new ConflictError(ErrorJob.InvalidStatusCancellation);
     }
 
-    let status = JobStatus.CANCELED;
+    let status = JobStatus.TO_CANCEL;
     switch (jobEntity.status) {
       case JobStatus.PAID:
         if (await this.isCronJobRunning(CronJobType.CreateEscrow)) {
@@ -482,22 +449,10 @@ export class JobService {
           status = JobStatus.FAILED;
         }
         break;
-      default:
-        status = JobStatus.TO_CANCEL;
-        break;
     }
 
     if (status === JobStatus.FAILED) {
       throw new ConflictError(ErrorJob.CancelWhileProcessing);
-    }
-
-    if (status === JobStatus.CANCELED) {
-      await this.paymentService.createRefundPayment({
-        refundAmount: jobEntity.fundAmount,
-        refundCurrency: jobEntity.token,
-        userId: jobEntity.userId,
-        jobId: jobEntity.id,
-      });
     }
 
     jobEntity.status = status;
@@ -662,11 +617,8 @@ export class JobService {
     }
   }
 
-  public async processEscrowCancellation(
-    jobEntity: JobEntity,
-  ): Promise<EscrowCancelDto> {
+  public async processEscrowCancellation(jobEntity: JobEntity): Promise<void> {
     const { chainId, escrowAddress } = jobEntity;
-
     const signer = this.web3Service.getSigner(chainId);
     const escrowClient = await EscrowClient.build(signer);
 
@@ -684,7 +636,7 @@ export class JobService {
       throw new ConflictError(ErrorEscrow.InvalidBalanceCancellation);
     }
 
-    return escrowClient.cancel(escrowAddress!, {
+    await escrowClient.requestCancellation(escrowAddress!, {
       gasPrice: await this.web3Service.calculateGasPrice(chainId),
     });
   }
@@ -859,7 +811,7 @@ export class JobService {
     return BigInt(feeValue ? feeValue : 1);
   }
 
-  public async completeJob(dto: WebhookDataDto): Promise<void> {
+  public async finalizeJob(dto: WebhookDataDto): Promise<void> {
     const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
       dto.chainId,
       dto.escrowAddress,
@@ -869,19 +821,40 @@ export class JobService {
       throw new NotFoundError(ErrorJob.NotFound);
     }
 
-    // If job status already completed by getDetails do nothing
-    if (jobEntity.status === JobStatus.COMPLETED) {
+    // If job status already completed or canceled by getDetails do nothing
+    if (
+      jobEntity.status === JobStatus.COMPLETED ||
+      jobEntity.status === JobStatus.CANCELED
+    ) {
       return;
     }
+
     if (
       jobEntity.status !== JobStatus.LAUNCHED &&
-      jobEntity.status !== JobStatus.PARTIAL
+      jobEntity.status !== JobStatus.PARTIAL &&
+      jobEntity.status !== JobStatus.CANCELING
     ) {
       throw new ConflictError(ErrorJob.InvalidStatusCompletion);
     }
 
-    jobEntity.status = JobStatus.COMPLETED;
-    await this.jobRepository.updateOne(jobEntity);
+    // Finalize job based on event type
+    if (
+      dto.eventType === EventType.ESCROW_COMPLETED &&
+      (jobEntity.status === JobStatus.LAUNCHED ||
+        jobEntity.status === JobStatus.PARTIAL)
+    ) {
+      jobEntity.status = JobStatus.COMPLETED;
+      await this.jobRepository.updateOne(jobEntity);
+    } else if (
+      dto.eventType === EventType.ESCROW_CANCELED &&
+      (jobEntity.status === JobStatus.LAUNCHED ||
+        jobEntity.status === JobStatus.PARTIAL ||
+        jobEntity.status === JobStatus.CANCELING)
+    ) {
+      this.cancelJob(jobEntity);
+    } else {
+      throw new ConflictError(ErrorJob.InvalidStatusCompletion);
+    }
   }
 
   public async isEscrowFunded(
@@ -897,5 +870,32 @@ export class JobService {
     }
 
     return false;
+  }
+
+  public async cancelJob(jobEntity: JobEntity): Promise<void> {
+    const slash = await this.paymentService.getJobPayments(
+      jobEntity.id,
+      PaymentType.SLASH,
+    );
+    if (!slash?.length) {
+      const refund = await EscrowUtils.getCancellationRefund(
+        jobEntity.chainId,
+        jobEntity.escrowAddress!,
+      );
+
+      if (!refund || !refund.amount) {
+        throw new ConflictError(ErrorJob.NoRefundFound);
+      }
+
+      await this.paymentService.createRefundPayment({
+        refundAmount: Number(ethers.formatEther(refund.amount)),
+        refundCurrency: jobEntity.token,
+        userId: jobEntity.userId,
+        jobId: jobEntity.id,
+      });
+    }
+
+    jobEntity.status = JobStatus.CANCELED;
+    await this.jobRepository.updateOne(jobEntity);
   }
 }

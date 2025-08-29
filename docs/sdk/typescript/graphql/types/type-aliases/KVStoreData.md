@@ -8,7 +8,7 @@
 
 > **KVStoreData** = `object`
 
-Defined in: [graphql/types.ts:157](https://github.com/humanprotocol/human-protocol/blob/379201f0dcf9e31baefdeaf8c2865002114c8394/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L157)
+Defined in: [graphql/types.ts:157](https://github.com/humanprotocol/human-protocol/blob/4dad01e5a92c46a45d83aec7fcaea2d2e541271c/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L157)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [graphql/types.ts:157](https://github.com/humanprotocol/human-protoc
 
 > **address**: `string`
 
-Defined in: [graphql/types.ts:159](https://github.com/humanprotocol/human-protocol/blob/379201f0dcf9e31baefdeaf8c2865002114c8394/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L159)
+Defined in: [graphql/types.ts:159](https://github.com/humanprotocol/human-protocol/blob/4dad01e5a92c46a45d83aec7fcaea2d2e541271c/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L159)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [graphql/types.ts:159](https://github.com/humanprotocol/human-protoc
 
 > **block**: `number`
 
-Defined in: [graphql/types.ts:163](https://github.com/humanprotocol/human-protocol/blob/379201f0dcf9e31baefdeaf8c2865002114c8394/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L163)
+Defined in: [graphql/types.ts:163](https://github.com/humanprotocol/human-protocol/blob/4dad01e5a92c46a45d83aec7fcaea2d2e541271c/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L163)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [graphql/types.ts:163](https://github.com/humanprotocol/human-protoc
 
 > **id**: `string`
 
-Defined in: [graphql/types.ts:158](https://github.com/humanprotocol/human-protocol/blob/379201f0dcf9e31baefdeaf8c2865002114c8394/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L158)
+Defined in: [graphql/types.ts:158](https://github.com/humanprotocol/human-protocol/blob/4dad01e5a92c46a45d83aec7fcaea2d2e541271c/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L158)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [graphql/types.ts:158](https://github.com/humanprotocol/human-protoc
 
 > **key**: `string`
 
-Defined in: [graphql/types.ts:160](https://github.com/humanprotocol/human-protocol/blob/379201f0dcf9e31baefdeaf8c2865002114c8394/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L160)
+Defined in: [graphql/types.ts:160](https://github.com/humanprotocol/human-protocol/blob/4dad01e5a92c46a45d83aec7fcaea2d2e541271c/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L160)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [graphql/types.ts:160](https://github.com/humanprotocol/human-protoc
 
 > **timestamp**: `Date`
 
-Defined in: [graphql/types.ts:162](https://github.com/humanprotocol/human-protocol/blob/379201f0dcf9e31baefdeaf8c2865002114c8394/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L162)
+Defined in: [graphql/types.ts:162](https://github.com/humanprotocol/human-protocol/blob/4dad01e5a92c46a45d83aec7fcaea2d2e541271c/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L162)
 
 ***
 
@@ -56,4 +56,4 @@ Defined in: [graphql/types.ts:162](https://github.com/humanprotocol/human-protoc
 
 > **value**: `string`
 
-Defined in: [graphql/types.ts:161](https://github.com/humanprotocol/human-protocol/blob/379201f0dcf9e31baefdeaf8c2865002114c8394/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L161)
+Defined in: [graphql/types.ts:161](https://github.com/humanprotocol/human-protocol/blob/4dad01e5a92c46a45d83aec7fcaea2d2e541271c/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L161)

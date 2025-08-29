@@ -8,7 +8,7 @@
 
 > `readonly` **UploadFile** = `object`
 
-Defined in: [types.ts:77](https://github.com/humanprotocol/human-protocol/blob/379201f0dcf9e31baefdeaf8c2865002114c8394/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L77)
+Defined in: [types.ts:81](https://github.com/humanprotocol/human-protocol/blob/4dad01e5a92c46a45d83aec7fcaea2d2e541271c/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L81)
 
 Upload file data
 
@@ -18,7 +18,7 @@ Upload file data
 
 > **hash**: `string`
 
-Defined in: [types.ts:89](https://github.com/humanprotocol/human-protocol/blob/379201f0dcf9e31baefdeaf8c2865002114c8394/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L89)
+Defined in: [types.ts:93](https://github.com/humanprotocol/human-protocol/blob/4dad01e5a92c46a45d83aec7fcaea2d2e541271c/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L93)
 
 Hash of uploaded object key
 
@@ -28,7 +28,7 @@ Hash of uploaded object key
 
 > **key**: `string`
 
-Defined in: [types.ts:81](https://github.com/humanprotocol/human-protocol/blob/379201f0dcf9e31baefdeaf8c2865002114c8394/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L81)
+Defined in: [types.ts:85](https://github.com/humanprotocol/human-protocol/blob/4dad01e5a92c46a45d83aec7fcaea2d2e541271c/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L85)
 
 Uploaded object key
 
@@ -38,6 +38,6 @@ Uploaded object key
 
 > **url**: `string`
 
-Defined in: [types.ts:85](https://github.com/humanprotocol/human-protocol/blob/379201f0dcf9e31baefdeaf8c2865002114c8394/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L85)
+Defined in: [types.ts:89](https://github.com/humanprotocol/human-protocol/blob/4dad01e5a92c46a45d83aec7fcaea2d2e541271c/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L89)
 
 Uploaded object URL

@@ -18,6 +18,7 @@ import { ChainId, OrderDirection } from './enums';
 import {
   ErrorAmountMustBeGreaterThanZero,
   ErrorAmountsCannotBeEmptyArray,
+  ErrorBulkPayOutVersion,
   ErrorEscrowAddressIsNotProvidedByFactory,
   ErrorEscrowDoesNotHaveEnoughBalance,
   ErrorHashIsEmptyString,
@@ -30,18 +31,21 @@ import {
   ErrorInvalidTokenAddress,
   ErrorInvalidUrl,
   ErrorLaunchedEventIsNotEmitted,
-  ErrorListOfHandlersCannotBeEmpty,
   ErrorProviderDoesNotExist,
   ErrorRecipientAndAmountsMustBeSameLength,
   ErrorRecipientCannotBeEmptyArray,
+  ErrorStoreResultsVersion,
   ErrorTooManyRecipients,
   ErrorTotalFeeMustBeLessThanHundred,
   ErrorTransferEventNotFoundInTransactionLogs,
   ErrorUnsupportedChainID,
   InvalidEthereumAddressError,
+  WarnVersionMismatch,
 } from './error';
 import {
   EscrowData,
+  GET_CANCELLATION_REFUNDS_QUERY,
+  GET_CANCELLATION_REFUND_BY_ADDRESS_QUERY,
   GET_ESCROWS_QUERY,
   GET_ESCROW_BY_ADDRESS_QUERY,
   GET_PAYOUTS_QUERY,
@@ -56,12 +60,12 @@ import {
   IStatusEventFilter,
 } from './interfaces';
 import {
-  EscrowCancel,
   EscrowStatus,
   EscrowWithdraw,
   NetworkData,
   TransactionLikeWithNonce,
   Payout,
+  CancellationRefund,
 } from './types';
 import {
   getSubgraphUrl,
@@ -201,7 +205,6 @@ export class EscrowClient extends BaseEthersClient {
    * This function creates an escrow contract that uses the token passed to pay oracle fees and reward workers.
    *
    * @param {string} tokenAddress Token address to use for payouts.
-   * @param {string[]} trustedHandlers Array of addresses that can perform actions on the contract.
    * @param {string} jobRequesterId Job Requester Id
    * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @returns {Promise<string>} Returns the address of the escrow created.
@@ -223,15 +226,13 @@ export class EscrowClient extends BaseEthersClient {
    * const escrowClient = await EscrowClient.build(signer);
    *
    * const tokenAddress = '0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4';
-   * const trustedHandlers = ['0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'];
    * const jobRequesterId = "job-requester-id";
-   * const escrowAddress = await escrowClient.createEscrow(tokenAddress, trustedHandlers, jobRequesterId);
+   * const escrowAddress = await escrowClient.createEscrow(tokenAddress, jobRequesterId);
    * ```
    */
   @requiresSigner
   public async createEscrow(
     tokenAddress: string,
-    trustedHandlers: string[],
     jobRequesterId: string,
     txOptions: Overrides = {}
   ): Promise<string> {
@@ -239,17 +240,10 @@ export class EscrowClient extends BaseEthersClient {
       throw ErrorInvalidTokenAddress;
     }
 
-    trustedHandlers.forEach((trustedHandler) => {
-      if (!ethers.isAddress(trustedHandler)) {
-        throw new InvalidEthereumAddressError(trustedHandler);
-      }
-    });
-
     try {
       const result = await (
         await this.escrowFactoryContract.createEscrow(
           tokenAddress,
-          trustedHandlers,
           jobRequesterId,
           txOptions
         )
@@ -282,7 +276,7 @@ export class EscrowClient extends BaseEthersClient {
    *
    * **Code example**
    *
-   * > Only Job Launcher or a trusted handler can call it.
+   * > Only Job Launcher or admin can call it.
    *
    * ```ts
    * import { Wallet, providers } from 'ethers';
@@ -459,13 +453,51 @@ export class EscrowClient extends BaseEthersClient {
    * @param {string} escrowAddress Address of the escrow.
    * @param {string} url Results file URL.
    * @param {string} hash Results file hash.
+   * @param {bigint} fundsToReserve Funds to reserve for payouts
    * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @returns Returns void if successful. Throws error if any.
    *
    *
    * **Code example**
    *
-   * > Only Recording Oracle or a trusted handler can call it.
+   * > Only Recording Oracle or admin can call it.
+   *
+   * ```ts
+   * import { ethers, Wallet, providers } from 'ethers';
+   * import { EscrowClient } from '@human-protocol/sdk';
+   *
+   * const rpcUrl = 'YOUR_RPC_URL';
+   * const privateKey = 'YOUR_PRIVATE_KEY';
+   *
+   * const provider = new providers.JsonRpcProvider(rpcUrl);
+   * const signer = new Wallet(privateKey, provider);
+   * const escrowClient = await EscrowClient.build(signer);
+   *
+   * await escrowClient.storeResults('0x62dD51230A30401C455c8398d06F85e4EaB6309f', 'http://localhost/results.json', 'b5dad76bf6772c0f07fd5e048f6e75a5f86ee079', ethers.parseEther('10'));
+   * ```
+   */
+
+  async storeResults(
+    escrowAddress: string,
+    url: string,
+    hash: string,
+    fundsToReserve: bigint,
+    txOptions?: Overrides
+  ): Promise<void>;
+
+  /**
+   * This function stores the results URL and hash.
+   *
+   * @param {string} escrowAddress Address of the escrow.
+   * @param {string} url Results file URL.
+   * @param {string} hash Results file hash.
+   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
+   * @returns Returns void if successful. Throws error if any.
+   *
+   *
+   * **Code example**
+   *
+   * > Only Recording Oracle or admin can call it.
    *
    * ```ts
    * import { ethers, Wallet, providers } from 'ethers';
@@ -481,40 +513,68 @@ export class EscrowClient extends BaseEthersClient {
    * await escrowClient.storeResults('0x62dD51230A30401C455c8398d06F85e4EaB6309f', 'http://localhost/results.json', 'b5dad76bf6772c0f07fd5e048f6e75a5f86ee079');
    * ```
    */
+  async storeResults(
+    escrowAddress: string,
+    url: string,
+    hash: string,
+    txOptions?: Overrides
+  ): Promise<void>;
+
   @requiresSigner
   async storeResults(
     escrowAddress: string,
     url: string,
     hash: string,
-    txOptions: Overrides = {}
+    a?: bigint | Overrides,
+    b?: Overrides
   ): Promise<void> {
+    const escrowContract = this.getEscrowContract(escrowAddress);
+
+    const hasFundsToReserveParam = typeof a === 'bigint';
+    const fundsToReserve = hasFundsToReserveParam ? (a as bigint) : undefined;
+    const txOptions = (hasFundsToReserveParam ? b : a) || {};
+
     if (!ethers.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }
-
     if (!url) {
       throw ErrorInvalidUrl;
     }
-
     if (!isValidUrl(url)) {
       throw ErrorInvalidUrl;
     }
-
     if (!hash) {
       throw ErrorHashIsEmptyString;
     }
-
     if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
       throw ErrorEscrowAddressIsNotProvidedByFactory;
     }
 
     try {
-      const escrowContract = this.getEscrowContract(escrowAddress);
-
-      await (await escrowContract.storeResults(url, hash, txOptions)).wait();
-
-      return;
+      if (fundsToReserve !== undefined) {
+        await (
+          await escrowContract['storeResults(string,string,uint256)'](
+            url,
+            hash,
+            fundsToReserve,
+            txOptions
+          )
+        ).wait();
+      } else {
+        await (
+          await escrowContract['storeResults(string,string)'](
+            url,
+            hash,
+            txOptions
+          )
+        ).wait();
+      }
     } catch (e) {
+      if (!hasFundsToReserveParam && e.reason === 'DEPRECATED_SIGNATURE') {
+        throw ErrorStoreResultsVersion;
+      }
+      // eslint-disable-next-line no-console
+      console.warn(WarnVersionMismatch);
       return throwError(e);
     }
   }
@@ -529,7 +589,7 @@ export class EscrowClient extends BaseEthersClient {
    *
    * **Code example**
    *
-   * > Only Recording Oracle or a trusted handler can call it.
+   * > Only Recording Oracle or admin can call it.
    *
    * ```ts
    * import { Wallet, providers } from 'ethers';
@@ -584,7 +644,7 @@ export class EscrowClient extends BaseEthersClient {
    *
    * **Code example**
    *
-   * > Only Reputation Oracle or a trusted handler can call it.
+   * > Only Reputation Oracle or admin can call it.
    *
    * ```ts
    * import { ethers, Wallet, providers } from 'ethers';
@@ -603,10 +663,9 @@ export class EscrowClient extends BaseEthersClient {
    * const resultsHash = 'b5dad76bf6772c0f07fd5e048f6e75a5f86ee079';
    * const txId = 1;
    *
-   * await escrowClient.bulkPayOut('0x62dD51230A30401C455c8398d06F85e4EaB6309f', recipients, amounts, resultsUrl, resultsHash, txId);
+   * await escrowClient.bulkPayOut('0x62dD51230A30401C455c8398d06F85e4EaB6309f', recipients, amounts, resultsUrl, resultsHash, txId, true);
    * ```
    */
-  @requiresSigner
   async bulkPayOut(
     escrowAddress: string,
     recipients: string[],
@@ -614,7 +673,69 @@ export class EscrowClient extends BaseEthersClient {
     finalResultsUrl: string,
     finalResultsHash: string,
     txId: number,
-    forceComplete = false,
+    forceComplete: boolean,
+    txOptions: Overrides
+  ): Promise<void>;
+
+  /**
+   * This function pays out the amounts specified to the workers and sets the URL of the final results file.
+   *
+   * @param {string} escrowAddress Escrow address to payout.
+   * @param {string[]} recipients Array of recipient addresses.
+   * @param {bigint[]} amounts Array of amounts the recipients will receive.
+   * @param {string} finalResultsUrl Final results file URL.
+   * @param {string} finalResultsHash Final results file hash.
+   * @param {string} payoutId Payout ID.
+   * @param {boolean} forceComplete Indicates if remaining balance should be transferred to the escrow creator (optional, defaults to false).
+   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
+   * @returns Returns void if successful. Throws error if any.
+   *
+   *
+   * **Code example**
+   *
+   * > Only Reputation Oracle or admin can call it.
+   *
+   * ```ts
+   * import { ethers, Wallet, providers } from 'ethers';
+   * import { EscrowClient } from '@human-protocol/sdk';
+   * import { v4 as uuidV4 } from 'uuid';
+   *
+   * const rpcUrl = 'YOUR_RPC_URL';
+   * const privateKey = 'YOUR_PRIVATE_KEY';
+   *
+   * const provider = new providers.JsonRpcProvider(rpcUrl);
+   * const signer = new Wallet(privateKey, provider);
+   * const escrowClient = await EscrowClient.build(signer);
+   *
+   * const recipients = ['0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'];
+   * const amounts = [ethers.parseUnits(5, 'ether'), ethers.parseUnits(10, 'ether')];
+   * const resultsUrl = 'http://localhost/results.json';
+   * const resultsHash = 'b5dad76bf6772c0f07fd5e048f6e75a5f86ee079';
+   * const payoutId = uuidV4();
+   *
+   * await escrowClient.bulkPayOut('0x62dD51230A30401C455c8398d06F85e4EaB6309f', recipients, amounts, resultsUrl, resultsHash, payoutId, true);
+   * ```
+   */
+  async bulkPayOut(
+    escrowAddress: string,
+    recipients: string[],
+    amounts: bigint[],
+    finalResultsUrl: string,
+    finalResultsHash: string,
+    payoutId: string,
+    forceComplete: boolean,
+    txOptions: Overrides
+  ): Promise<void>;
+
+  @requiresSigner
+  async bulkPayOut(
+    escrowAddress: string,
+    recipients: string[],
+    amounts: bigint[],
+    finalResultsUrl: string,
+    finalResultsHash: string,
+    id: number | string,
+    forceComplete: boolean,
     txOptions: Overrides = {}
   ): Promise<void> {
     await this.ensureCorrectBulkPayoutInput(
@@ -625,9 +746,25 @@ export class EscrowClient extends BaseEthersClient {
       finalResultsHash
     );
 
+    const escrowContract = this.getEscrowContract(escrowAddress);
+    const idIsString = typeof id === 'string';
+
     try {
-      const escrowContract = this.getEscrowContract(escrowAddress);
-      if (forceComplete) {
+      if (idIsString) {
+        await (
+          await escrowContract[
+            'bulkPayOut(address[],uint256[],string,string,string,bool)'
+          ](
+            recipients,
+            amounts,
+            finalResultsUrl,
+            finalResultsHash,
+            id,
+            forceComplete,
+            txOptions
+          )
+        ).wait();
+      } else {
         await (
           await escrowContract[
             'bulkPayOut(address[],uint256[],string,string,uint256,bool)'
@@ -636,27 +773,18 @@ export class EscrowClient extends BaseEthersClient {
             amounts,
             finalResultsUrl,
             finalResultsHash,
-            txId,
+            id,
             forceComplete,
             txOptions
           )
         ).wait();
-      } else {
-        await (
-          await escrowContract[
-            'bulkPayOut(address[],uint256[],string,string,uint256)'
-          ](
-            recipients,
-            amounts,
-            finalResultsUrl,
-            finalResultsHash,
-            txId,
-            txOptions
-          )
-        ).wait();
       }
-      return;
     } catch (e) {
+      if (!idIsString && e.reason === 'DEPRECATED_SIGNATURE') {
+        throw ErrorBulkPayOutVersion;
+      }
+      // eslint-disable-next-line no-console
+      console.warn(WarnVersionMismatch);
       return throwError(e);
     }
   }
@@ -666,12 +794,11 @@ export class EscrowClient extends BaseEthersClient {
    *
    * @param {string} escrowAddress Address of the escrow to cancel.
    * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
-   * @returns {EscrowCancel} Returns the escrow cancellation data including transaction hash and refunded amount. Throws error if any.
    *
    *
    * **Code example**
    *
-   * > Only Job Launcher or a trusted handler can call it.
+   * > Only Job Launcher or admin can call it.
    *
    * ```ts
    * import { ethers, Wallet, providers } from 'ethers';
@@ -691,7 +818,7 @@ export class EscrowClient extends BaseEthersClient {
   async cancel(
     escrowAddress: string,
     txOptions: Overrides = {}
-  ): Promise<EscrowCancel> {
+  ): Promise<void> {
     if (!ethers.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }
@@ -702,61 +829,22 @@ export class EscrowClient extends BaseEthersClient {
 
     try {
       const escrowContract = this.getEscrowContract(escrowAddress);
-
-      const transactionReceipt = await (
-        await escrowContract.cancel(txOptions)
-      ).wait();
-
-      let amountTransferred: bigint | undefined = undefined;
-      const tokenAddress = await escrowContract.token();
-
-      const tokenContract: HMToken = HMToken__factory.connect(
-        tokenAddress,
-        this.runner
-      );
-      if (transactionReceipt)
-        for (const log of transactionReceipt.logs) {
-          if (log.address === tokenAddress) {
-            const parsedLog = tokenContract.interface.parseLog({
-              topics: log.topics as string[],
-              data: log.data,
-            });
-
-            const from = parsedLog?.args[0];
-            if (parsedLog?.name === 'Transfer' && from === escrowAddress) {
-              amountTransferred = parsedLog?.args[2];
-              break;
-            }
-          }
-        }
-
-      if (amountTransferred === undefined) {
-        throw ErrorTransferEventNotFoundInTransactionLogs;
-      }
-
-      const escrowCancelData: EscrowCancel = {
-        txHash: transactionReceipt?.hash || '',
-        amountRefunded: amountTransferred,
-      };
-
-      return escrowCancelData;
+      await (await escrowContract.cancel(txOptions)).wait();
     } catch (e) {
       return throwError(e);
     }
   }
 
   /**
-   * This function adds an array of addresses to the trusted handlers list.
+   * This function requests the cancellation of the specified escrow (moves status to ToCancel or finalizes if expired).
    *
-   * @param {string} escrowAddress Address of the escrow.
-   * @param {string[]} trustedHandlers Array of addresses of trusted handlers to add.
+   * @param {string} escrowAddress Address of the escrow to request cancellation.
    * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @returns Returns void if successful. Throws error if any.
    *
-   *
    * **Code example**
    *
-   * > Only Job Launcher or trusted handler can call it.
+   * > Only Job Launcher or admin can call it.
    *
    * ```ts
    * import { Wallet, providers } from 'ethers';
@@ -769,29 +857,17 @@ export class EscrowClient extends BaseEthersClient {
    * const signer = new Wallet(privateKey, provider);
    * const escrowClient = await EscrowClient.build(signer);
    *
-   * const trustedHandlers = ['0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'];
-   * await escrowClient.addTrustedHandlers('0x62dD51230A30401C455c8398d06F85e4EaB6309f', trustedHandlers);
+   * await escrowClient.requestCancellation('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
    * ```
    */
   @requiresSigner
-  async addTrustedHandlers(
+  async requestCancellation(
     escrowAddress: string,
-    trustedHandlers: string[],
     txOptions: Overrides = {}
   ): Promise<void> {
     if (!ethers.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }
-
-    if (trustedHandlers.length === 0) {
-      throw ErrorListOfHandlersCannotBeEmpty;
-    }
-
-    trustedHandlers.forEach((trustedHandler) => {
-      if (!ethers.isAddress(trustedHandler)) {
-        throw new InvalidEthereumAddressError(trustedHandler);
-      }
-    });
 
     if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
       throw ErrorEscrowAddressIsNotProvidedByFactory;
@@ -799,11 +875,7 @@ export class EscrowClient extends BaseEthersClient {
 
     try {
       const escrowContract = this.getEscrowContract(escrowAddress);
-
-      await (
-        await escrowContract.addTrustedHandlers(trustedHandlers, txOptions)
-      ).wait();
-      return;
+      await (await escrowContract.requestCancellation(txOptions)).wait();
     } catch (e) {
       return throwError(e);
     }
@@ -820,7 +892,7 @@ export class EscrowClient extends BaseEthersClient {
    *
    * **Code example**
    *
-   * > Only Job Launcher or a trusted handler can call it.
+   * > Only Job Launcher or admin can call it.
    *
    * ```ts
    * import { ethers, Wallet, providers } from 'ethers';
@@ -909,14 +981,14 @@ export class EscrowClient extends BaseEthersClient {
    * @param {bigint[]} amounts Array of amounts the recipients will receive.
    * @param {string} finalResultsUrl Final results file URL.
    * @param {string} finalResultsHash Final results file hash.
-   * @param {number} txId Transaction ID.
+   * @param {string} payoutId Payout ID to identify the payout.
    * @param {boolean} forceComplete Indicates if remaining balance should be transferred to the escrow creator (optional, defaults to false).
    * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @returns Returns object with raw transaction and signed transaction hash
    *
    * **Code example**
    *
-   * > Only Reputation Oracle or a trusted handler can call it.
+   * > Only Reputation Oracle or admin can call it.
    *
    * ```ts
    * import { ethers, Wallet, providers } from 'ethers';
@@ -933,7 +1005,7 @@ export class EscrowClient extends BaseEthersClient {
    * const amounts = [ethers.parseUnits(5, 'ether'), ethers.parseUnits(10, 'ether')];
    * const resultsUrl = 'http://localhost/results.json';
    * const resultsHash = 'b5dad76bf6772c0f07fd5e048f6e75a5f86ee079';
-   * const txId = 1;
+   * const payoutId = '372f6916-fe34-4711-b6e3-274f682047de';
    *
    * const rawTransaction = await escrowClient.createBulkPayoutTransaction('0x62dD51230A30401C455c8398d06F85e4EaB6309f', recipients, amounts, resultsUrl, resultsHash, txId);
    * console.log('Raw transaction:', rawTransaction);
@@ -949,7 +1021,7 @@ export class EscrowClient extends BaseEthersClient {
     amounts: bigint[],
     finalResultsUrl: string,
     finalResultsHash: string,
-    txId: number,
+    payoutId: string,
     forceComplete = false,
     txOptions: Overrides = {}
   ): Promise<TransactionLikeWithNonce> {
@@ -966,13 +1038,13 @@ export class EscrowClient extends BaseEthersClient {
       const escrowContract = this.getEscrowContract(escrowAddress);
 
       const populatedTransaction = await escrowContract[
-        'bulkPayOut(address[],uint256[],string,string,uint256,bool)'
+        'bulkPayOut(address[],uint256[],string,string,string,bool)'
       ].populateTransaction(
         recipients,
         amounts,
         finalResultsUrl,
         finalResultsHash,
-        txId,
+        payoutId,
         forceComplete,
         txOptions
       );
@@ -1107,6 +1179,43 @@ export class EscrowClient extends BaseEthersClient {
       }
 
       return await escrowContract.getBalance();
+    } catch (e) {
+      return throwError(e);
+    }
+  }
+
+  /**
+   * This function returns the reserved funds for a specified escrow address.
+   *
+   * @param {string} escrowAddress Address of the escrow.
+   * @returns {Promise<bigint>} Reserved funds of the escrow in the token used to fund it.
+   *
+   * **Code example**
+   *
+   * ```ts
+   * import { providers } from 'ethers';
+   * import { EscrowClient } from '@human-protocol/sdk';
+   *
+   * const rpcUrl = 'YOUR_RPC_URL';
+   *
+   * const provider = new providers.JsonRpcProvider(rpcUrl);
+   * const escrowClient = await EscrowClient.build(provider);
+   *
+   * const reservedFunds = await escrowClient.getReservedFunds('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
+   * ```
+   */
+  async getReservedFunds(escrowAddress: string): Promise<bigint> {
+    if (!ethers.isAddress(escrowAddress)) {
+      throw ErrorInvalidEscrowAddressProvided;
+    }
+
+    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
+      throw ErrorEscrowAddressIsNotProvidedByFactory;
+    }
+
+    try {
+      const escrowContract = this.getEscrowContract(escrowAddress);
+      return await escrowContract.reservedFunds();
     } catch (e) {
       return throwError(e);
     }
@@ -1976,5 +2085,159 @@ export class EscrowUtils {
     );
 
     return payouts || [];
+  }
+
+  /**
+   * This function returns the cancellation refunds for a given set of networks.
+   *
+   * > This uses Subgraph
+   *
+   * **Input parameters**
+   *
+   * ```ts
+   * enum ChainId {
+   *  ALL = -1,
+   *  MAINNET = 1,
+   *  SEPOLIA = 11155111,
+   *  BSC_MAINNET = 56,
+   *  BSC_TESTNET = 97,
+   *  POLYGON = 137,
+   *  POLYGON_AMOY = 80002,
+   *  LOCALHOST = 1338,
+   * }
+   * ```
+   *
+   * ```ts
+   * type CancellationRefund = {
+   *   id: string;
+   *   escrowAddress: string;
+   *   receiver: string;
+   *   amount: bigint;
+   *   block: number;
+   *   timestamp: number;
+   *   txHash: string;
+   * };
+   * ```
+   *
+   *
+   * @param {Object} filter Filter parameters.
+   * @returns {Promise<CancellationRefund[]>} List of cancellation refunds matching the filters.
+   *
+   * **Code example**
+   *
+   * ```ts
+   * import { ChainId, EscrowUtils } from '@human-protocol/sdk';
+   *
+   * const cancellationRefunds = await EscrowUtils.getCancellationRefunds({
+   *    chainId: ChainId.POLYGON_AMOY,
+   *    escrowAddress: '0x1234567890123456789012345678901234567890',
+   * });
+   * console.log(cancellationRefunds);
+   * ```
+   */
+  public static async getCancellationRefunds(filter: {
+    chainId: ChainId;
+    escrowAddress?: string;
+    receiver?: string;
+    from?: Date;
+    to?: Date;
+    first?: number;
+    skip?: number;
+    orderDirection?: OrderDirection;
+  }): Promise<CancellationRefund[]> {
+    const networkData = NETWORKS[filter.chainId];
+    if (!networkData) throw ErrorUnsupportedChainID;
+    if (filter.escrowAddress && !ethers.isAddress(filter.escrowAddress)) {
+      throw ErrorInvalidEscrowAddressProvided;
+    }
+    if (filter.receiver && !ethers.isAddress(filter.receiver)) {
+      throw ErrorInvalidAddress;
+    }
+
+    const first =
+      filter.first !== undefined ? Math.min(filter.first, 1000) : 10;
+    const skip = filter.skip || 0;
+    const orderDirection = filter.orderDirection || OrderDirection.DESC;
+
+    const { cancellationRefundEvents } = await gqlFetch<{
+      cancellationRefundEvents: CancellationRefund[];
+    }>(getSubgraphUrl(networkData), GET_CANCELLATION_REFUNDS_QUERY(filter), {
+      escrowAddress: filter.escrowAddress?.toLowerCase(),
+      receiver: filter.receiver?.toLowerCase(),
+      from: filter.from ? getUnixTimestamp(filter.from) : undefined,
+      to: filter.to ? getUnixTimestamp(filter.to) : undefined,
+      first,
+      skip,
+      orderDirection,
+    });
+
+    return cancellationRefundEvents || [];
+  }
+
+  /**
+   * This function returns the cancellation refund for a given escrow address.
+   *
+   * > This uses Subgraph
+   *
+   * **Input parameters**
+   *
+   * ```ts
+   * enum ChainId {
+   *  ALL = -1,
+   *  MAINNET = 1,
+   *  SEPOLIA = 11155111,
+   *  BSC_MAINNET = 56,
+   *  BSC_TESTNET = 97,
+   *  POLYGON = 137,
+   *  POLYGON_AMOY = 80002,
+   *  LOCALHOST = 1338,
+   * }
+   * ```
+   *
+   * ```ts
+   * type CancellationRefund = {
+   *   id: string;
+   *   escrowAddress: string;
+   *   receiver: string;
+   *   amount: bigint;
+   *   block: number;
+   *   timestamp: number;
+   *   txHash: string;
+   * };
+   * ```
+   *
+   *
+   * @param {ChainId} chainId Network in which the escrow has been deployed
+   * @param {string} escrowAddress Address of the escrow
+   * @returns {Promise<CancellationRefund>} Cancellation refund data
+   *
+   * **Code example**
+   *
+   * ```ts
+   * import { ChainId, EscrowUtils } from '@human-protocol/sdk';
+   *
+   * const cancellationRefund = await EscrowUtils.getCancellationRefund(ChainId.POLYGON_AMOY, "0x1234567890123456789012345678901234567890");
+   * ```
+   */
+  public static async getCancellationRefund(
+    chainId: ChainId,
+    escrowAddress: string
+  ): Promise<CancellationRefund> {
+    const networkData = NETWORKS[chainId];
+    if (!networkData) throw ErrorUnsupportedChainID;
+
+    if (!ethers.isAddress(escrowAddress)) {
+      throw ErrorInvalidEscrowAddressProvided;
+    }
+
+    const { cancellationRefundEvents } = await gqlFetch<{
+      cancellationRefundEvents: any;
+    }>(
+      getSubgraphUrl(networkData),
+      GET_CANCELLATION_REFUND_BY_ADDRESS_QUERY(),
+      { escrowAddress: escrowAddress.toLowerCase() }
+    );
+
+    return cancellationRefundEvents?.[0] || null;
   }
 }

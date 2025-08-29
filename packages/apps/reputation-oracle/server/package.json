@@ -54,7 +54,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "dotenv": "^17.0.0",
-    "ethers": "~6.13.5",
+    "ethers": "~6.15.0",
     "helmet": "^7.1.0",
     "joi": "^17.13.3",
     "json-stable-stringify": "^1.2.1",
@@ -72,7 +72,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
-    "@faker-js/faker": "^9.4.0",
+    "@faker-js/faker": "^9.8.0",
     "@golevelup/ts-jest": "^0.6.1",
     "@nestjs/cli": "^10.3.2",
     "@nestjs/schematics": "^11.0.2",

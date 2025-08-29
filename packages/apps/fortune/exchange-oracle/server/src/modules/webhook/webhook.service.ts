@@ -45,7 +45,7 @@ export class WebhookService {
         await this.jobService.completeJob(webhook);
         break;
 
-      case EventType.ESCROW_CANCELED:
+      case EventType.CANCELLATION_REQUESTED:
         await this.jobService.cancelJob(webhook);
         break;
 
@@ -60,6 +60,9 @@ export class WebhookService {
       case EventType.ABUSE_DISMISSED:
         await this.jobService.resumeJob(webhook);
         break;
+
+      case EventType.ESCROW_CANCELED:
+        return;
 
       default:
         throw new ValidationError(

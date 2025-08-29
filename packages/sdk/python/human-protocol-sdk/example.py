@@ -6,6 +6,7 @@ from human_protocol_sdk.worker import WorkerUtils
 from human_protocol_sdk.filter import (
     EscrowFilter,
     PayoutFilter,
+    CancellationRefundFilter,
     StatisticsFilter,
     WorkerFilter,
     StakersFilter,
@@ -107,6 +108,52 @@ def get_payouts():
         )
 
 
+def get_cancellation_refunds():
+    # List recent cancellation refunds
+    filter = CancellationRefundFilter(
+        chain_id=ChainId.POLYGON_AMOY,
+        first=5,
+        skip=0,
+        order_direction=OrderDirection.ASC,
+    )
+
+    refunds = EscrowUtils.get_cancellation_refunds(filter)
+    for refund in refunds:
+        print(
+            "Refund ID:",
+            refund.id,
+            "Escrow:",
+            refund.escrow_address,
+            "Amount:",
+            refund.amount,
+            "Receiver:",
+            refund.receiver,
+            "Tx:",
+            refund.tx_hash,
+        )
+
+    # Fetch a single cancellation refund by escrow address if available
+    if refunds:
+        single = EscrowUtils.get_cancellation_refund(
+            ChainId.POLYGON_AMOY, refunds[0].escrow_address
+        )
+        if single:
+            print(
+                "Single refund:",
+                single.id,
+                "Escrow:",
+                single.escrow_address,
+                "Amount:",
+                single.amount,
+                "Receiver:",
+                single.receiver,
+                "Tx:",
+                single.tx_hash,
+            )
+        else:
+            print("No single refund found for escrow", refunds[0].escrow_address)
+
+
 def get_escrows():
     print(
         EscrowUtils.get_escrows(
@@ -204,6 +251,7 @@ if __name__ == "__main__":
     get_escrows()
     get_operators()
     get_payouts()
+    get_cancellation_refunds()
 
     statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
     get_hmt_holders(statistics_client)
