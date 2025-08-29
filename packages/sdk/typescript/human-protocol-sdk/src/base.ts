@@ -1,5 +1,7 @@
-import { ContractRunner } from 'ethers';
+import { ContractRunner, Overrides } from 'ethers';
 import { NetworkData } from './types';
+import { ChainId } from './enums';
+import { DEFAULT_AURORA_GAS_PRICE } from './constants';
 
 /**
  * ## Introduction
@@ -20,5 +22,20 @@ export abstract class BaseEthersClient {
   constructor(runner: ContractRunner, networkData: NetworkData) {
     this.networkData = networkData;
     this.runner = runner;
+  }
+
+  /**
+   * Internal helper to enrich transaction overrides with network specific defaults
+   * (e.g. fixed gas price for Aurora networks) while preserving user provided
+   * fee parameters.
+   */
+  protected applyTxDefaults(txOptions: Overrides = {}): Overrides {
+    if (
+      this.networkData.chainId === ChainId.AURORA_TESTNET &&
+      txOptions.gasPrice === undefined
+    ) {
+      return { ...txOptions, gasPrice: DEFAULT_AURORA_GAS_PRICE };
+    }
+    return txOptions;
   }
 }

@@ -1,3 +1,4 @@
+import { ethers } from 'ethers';
 import { ChainId } from './enums';
 import { NetworkData } from './types';
 
@@ -10,6 +11,8 @@ export const DEFAULT_REGION = 'eu';
 export const DEFAULT_PORT = 9000;
 
 export const DEFAULT_USE_SSL = false;
+
+export const DEFAULT_AURORA_GAS_PRICE = ethers.parseUnits('0.07', 'gwei');
 
 export enum HttpStatus {
   OK = 200,

@@ -251,7 +251,7 @@ export class EscrowClient extends BaseEthersClient {
           tokenAddress,
           trustedHandlers,
           jobRequesterId,
-          txOptions
+          this.applyTxDefaults(txOptions)
         )
       ).wait();
 
@@ -380,7 +380,7 @@ export class EscrowClient extends BaseEthersClient {
           exchangeOracleFee,
           manifest,
           manifestHash,
-          txOptions
+          this.applyTxDefaults(txOptions)
         )
       ).wait();
 
@@ -444,7 +444,11 @@ export class EscrowClient extends BaseEthersClient {
         this.runner
       );
       await (
-        await tokenContract.transfer(escrowAddress, amount, txOptions)
+        await tokenContract.transfer(
+          escrowAddress,
+          amount,
+          this.applyTxDefaults(txOptions)
+        )
       ).wait();
 
       return;
@@ -511,7 +515,13 @@ export class EscrowClient extends BaseEthersClient {
     try {
       const escrowContract = this.getEscrowContract(escrowAddress);
 
-      await (await escrowContract.storeResults(url, hash, txOptions)).wait();
+      await (
+        await escrowContract.storeResults(
+          url,
+          hash,
+          this.applyTxDefaults(txOptions)
+        )
+      ).wait();
 
       return;
     } catch (e) {
@@ -561,7 +571,9 @@ export class EscrowClient extends BaseEthersClient {
     try {
       const escrowContract = this.getEscrowContract(escrowAddress);
 
-      await (await escrowContract.complete(txOptions)).wait();
+      await (
+        await escrowContract.complete(this.applyTxDefaults(txOptions))
+      ).wait();
       return;
     } catch (e) {
       return throwError(e);
@@ -638,7 +650,7 @@ export class EscrowClient extends BaseEthersClient {
             finalResultsHash,
             txId,
             forceComplete,
-            txOptions
+            this.applyTxDefaults(txOptions)
           )
         ).wait();
       } else {
@@ -651,7 +663,7 @@ export class EscrowClient extends BaseEthersClient {
             finalResultsUrl,
             finalResultsHash,
             txId,
-            txOptions
+            this.applyTxDefaults(txOptions)
           )
         ).wait();
       }
@@ -704,7 +716,7 @@ export class EscrowClient extends BaseEthersClient {
       const escrowContract = this.getEscrowContract(escrowAddress);
 
       const transactionReceipt = await (
-        await escrowContract.cancel(txOptions)
+        await escrowContract.cancel(this.applyTxDefaults(txOptions))
       ).wait();
 
       let amountTransferred: bigint | undefined = undefined;
@@ -801,7 +813,10 @@ export class EscrowClient extends BaseEthersClient {
       const escrowContract = this.getEscrowContract(escrowAddress);
 
       await (
-        await escrowContract.addTrustedHandlers(trustedHandlers, txOptions)
+        await escrowContract.addTrustedHandlers(
+          trustedHandlers,
+          this.applyTxDefaults(txOptions)
+        )
       ).wait();
       return;
     } catch (e) {
@@ -861,7 +876,10 @@ export class EscrowClient extends BaseEthersClient {
       const escrowContract = this.getEscrowContract(escrowAddress);
 
       const transactionReceipt = await (
-        await escrowContract.withdraw(tokenAddress, txOptions)
+        await escrowContract.withdraw(
+          tokenAddress,
+          this.applyTxDefaults(txOptions)
+        )
       ).wait();
 
       let amountTransferred: bigint | undefined = undefined;
@@ -953,6 +971,7 @@ export class EscrowClient extends BaseEthersClient {
     forceComplete = false,
     txOptions: Overrides = {}
   ): Promise<TransactionLikeWithNonce> {
+    txOptions = this.applyTxDefaults(txOptions);
     await this.ensureCorrectBulkPayoutInput(
       escrowAddress,
       recipients,
