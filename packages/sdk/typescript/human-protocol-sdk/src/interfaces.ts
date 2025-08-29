@@ -226,6 +226,7 @@ export interface IStaker {
   lockedUntil: bigint;
   withdrawableAmount: bigint;
   slashedAmount: bigint;
+  lastDepositTimestamp: bigint;
 }
 
 export interface IStakersFilter extends IPagination {

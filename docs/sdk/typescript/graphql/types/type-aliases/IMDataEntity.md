@@ -8,7 +8,7 @@
 
 > **IMDataEntity** = `object`
 
-Defined in: [graphql/types.ts:133](https://github.com/humanprotocol/human-protocol/blob/4dad01e5a92c46a45d83aec7fcaea2d2e541271c/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L133)
+Defined in: [graphql/types.ts:133](https://github.com/humanprotocol/human-protocol/blob/d67d122403122f60659ce3c7e533ed3853fb3730/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L133)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [graphql/types.ts:133](https://github.com/humanprotocol/human-protoc
 
 > **served**: `number`
 
-Defined in: [graphql/types.ts:134](https://github.com/humanprotocol/human-protocol/blob/4dad01e5a92c46a45d83aec7fcaea2d2e541271c/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L134)
+Defined in: [graphql/types.ts:134](https://github.com/humanprotocol/human-protocol/blob/d67d122403122f60659ce3c7e533ed3853fb3730/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L134)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: [graphql/types.ts:134](https://github.com/humanprotocol/human-protoc
 
 > **solved**: `number`
 
-Defined in: [graphql/types.ts:135](https://github.com/humanprotocol/human-protocol/blob/4dad01e5a92c46a45d83aec7fcaea2d2e541271c/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L135)
+Defined in: [graphql/types.ts:135](https://github.com/humanprotocol/human-protocol/blob/d67d122403122f60659ce3c7e533ed3853fb3730/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L135)

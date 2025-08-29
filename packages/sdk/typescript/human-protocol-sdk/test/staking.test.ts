@@ -571,6 +571,7 @@ describe('StakingUtils', () => {
       lockedUntil: 1234567890n,
       withdrawableAmount: 900n,
       slashedAmount: 0n,
+      lastDepositTimestamp: 1234567890n,
     };
 
     test('should return staker information', async () => {
@@ -628,6 +629,7 @@ describe('StakingUtils', () => {
         lockedUntil: 1234567890n,
         withdrawableAmount: 900n,
         slashedAmount: 0n,
+        lastDepositTimestamp: 1234567890n,
       },
       {
         address: '0x0987654321098765432109876543210987654321',
@@ -636,6 +638,7 @@ describe('StakingUtils', () => {
         lockedUntil: 1234567891n,
         withdrawableAmount: 1800n,
         slashedAmount: 0n,
+        lastDepositTimestamp: 1234567890n,
       },
     ];
 
