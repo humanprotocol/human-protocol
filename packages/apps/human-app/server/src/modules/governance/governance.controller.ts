@@ -17,7 +17,7 @@ export class GovernanceController {
   @ApiOperation({ summary: 'Get pending and active governance proposals' })
   @ApiOkResponse({ type: ProposalResponse, isArray: true })
   @HttpCode(200)
-  @Header('Cache-Control', 'private, max-age=60')
+  @Header('Cache-Control', 'private, max-age=300')
   @Get('/proposals')
   public async getProposals(): Promise<ProposalResponse[]> {
     return this.governanceService.getProposals();

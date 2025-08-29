@@ -1,24 +1,23 @@
 import { MetaHumanGovernor__factory } from '@human-protocol/core/typechain-types';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { ethers } from 'ethers';
 import _ from 'lodash';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
 import { ProposalState } from '../../common/enums/proposal';
+import logger from '../../logger';
 import { ProposalResponse } from './model/governance.model';
 
 const N_BLOCKS_LOOKBACK = 100000;
 
-type Proposal = {
-  proposalId: string;
-  voteStart: number;
-  voteEnd: number;
+type Block = {
+  timestamp: number;
+  number: number;
 };
-
 @Injectable()
 export class GovernanceService {
-  private readonly logger = new Logger(GovernanceService.name);
+  private readonly logger = logger.child({ context: GovernanceService.name });
 
   constructor(
     private readonly configService: EnvironmentConfigService,
@@ -26,6 +25,21 @@ export class GovernanceService {
   ) {}
 
   public async getProposals(): Promise<ProposalResponse[]> {
+    const lastScannedBlockKey = this.generateCacheKey('last-scanned-block');
+    const proposalListKey = this.generateCacheKey('proposal', 'list');
+    const cachedLastScannedBlock =
+      await this.cacheManager.get<Block>(lastScannedBlockKey);
+    const cachedProposals =
+      (await this.cacheManager.get<ProposalResponse[]>(proposalListKey)) ?? [];
+
+    if (
+      cachedLastScannedBlock &&
+      Date.now() - cachedLastScannedBlock.timestamp * 1000 <
+        this.configService.cacheTtlProposals
+    ) {
+      return cachedProposals;
+    }
+
     const provider = new ethers.JsonRpcProvider(
       this.configService.governanceRpcUrl,
     );
@@ -34,48 +48,37 @@ export class GovernanceService {
       provider,
     );
 
-    const currentBlock = await provider.getBlockNumber();
-    const lastScannedBlockKey = this.generateCacheKey('last-scanned-block');
-    const proposalListKey = this.generateCacheKey('proposal', 'list');
-
-    const cachedLastScannedBlock =
-      (await this.cacheManager.get<number>(lastScannedBlockKey)) ?? 0;
-
+    const currentBlock = await provider.getBlock('latest');
+    if (!currentBlock) {
+      this.logger.error('No latest block from RPC');
+      throw new Error('Blockchain node unavailable');
+    }
+    const cachedLastScannedBlockNumber = cachedLastScannedBlock?.number ?? 0;
     const fromBlock =
-      cachedLastScannedBlock > 0
-        ? cachedLastScannedBlock + 1
-        : Math.max(0, currentBlock - N_BLOCKS_LOOKBACK);
+      cachedLastScannedBlockNumber > 0
+        ? cachedLastScannedBlockNumber + 1
+        : currentBlock.number - N_BLOCKS_LOOKBACK;
 
-    let proposalList: Proposal[] = [];
+    let allProposals: ProposalResponse[] = [];
     try {
       const newProposals = await this.getProposalCreatedEvents(
         contract,
         fromBlock,
-        currentBlock,
+        currentBlock.number,
       );
 
-      const cachedList =
-        (await this.cacheManager.get<Proposal[]>(proposalListKey)) || [];
-
-      proposalList = _.uniqBy([...cachedList, ...newProposals], 'proposalId');
+      allProposals = _.uniqBy(
+        [...cachedProposals, ...newProposals],
+        'proposalId',
+      );
     } catch (err) {
-      this.logger.warn(
-        'getProposalCreatedEvents failed, falling back to cached list',
-        {
-          error: err,
-        },
-      );
-      proposalList =
-        (await this.cacheManager.get<Proposal[]>(proposalListKey)) || [];
+      this.logger.warn('getProposalCreatedEvents failed; using previous kept', {
+        error: err,
+      });
     }
 
-    const proposals: ProposalResponse[] = [];
-    const keptProposalList: typeof proposalList = [];
-
-    for (const proposal of proposalList) {
-      const voteStartMs = (proposal.voteStart ?? 0) * 1000;
-      const voteEndMs = (proposal.voteEnd ?? 0) * 1000;
-
+    const finalProposals: ProposalResponse[] = [];
+    for (const proposal of allProposals) {
       let state: ProposalState;
       try {
         state = Number(
@@ -93,11 +96,6 @@ export class GovernanceService {
         continue;
       }
 
-      keptProposalList.push(proposal);
-
-      let forVotes = 0;
-      let againstVotes = 0;
-      let abstainVotes = 0;
       if (state === ProposalState.ACTIVE) {
         try {
           const votes = (await contract.proposalVotes(proposal.proposalId)) as [
@@ -106,9 +104,9 @@ export class GovernanceService {
             ethers.BigNumberish,
           ];
           const [againstBn, forBn, abstainBn] = votes;
-          forVotes = Number(ethers.formatEther(forBn));
-          againstVotes = Number(ethers.formatEther(againstBn));
-          abstainVotes = Number(ethers.formatEther(abstainBn));
+          proposal.forVotes = Number(ethers.formatEther(forBn));
+          proposal.againstVotes = Number(ethers.formatEther(againstBn));
+          proposal.abstainVotes = Number(ethers.formatEther(abstainBn));
         } catch (err) {
           this.logger.warn('Failed to fetch votes for proposal', {
             error: err,
@@ -118,31 +116,27 @@ export class GovernanceService {
         }
       }
 
-      proposals.push({
-        proposalId: proposal.proposalId,
-        forVotes,
-        againstVotes,
-        abstainVotes,
-        voteStart: voteStartMs,
-        voteEnd: voteEndMs,
-      });
+      finalProposals.push(proposal);
     }
 
-    await this.cacheManager.set(proposalListKey, keptProposalList);
-    await this.cacheManager.set(lastScannedBlockKey, currentBlock);
+    await this.cacheManager.set(proposalListKey, finalProposals);
+    await this.cacheManager.set(lastScannedBlockKey, {
+      number: currentBlock.number,
+      timestamp: currentBlock.timestamp,
+    });
 
-    return proposals;
+    return finalProposals;
   }
 
   private async getProposalCreatedEvents(
     contract: ReturnType<typeof MetaHumanGovernor__factory.connect>,
     fromBlock: number,
     toBlock: number,
-  ): Promise<Proposal[]> {
+  ): Promise<ProposalResponse[]> {
     const filter = contract.filters.ProposalCreated();
     const logs = await contract.queryFilter(filter, fromBlock, toBlock);
 
-    const proposals: Proposal[] = [];
+    const proposals: ProposalResponse[] = [];
     for (const log of logs) {
       try {
         const parsed = contract.interface.parseLog(log);
@@ -150,10 +144,13 @@ export class GovernanceService {
           parsed?.args.proposalId as ethers.BigNumberish
         ).toString();
 
-        const proposal: Proposal = {
+        const proposal: ProposalResponse = {
           proposalId,
-          voteStart: Number(parsed?.args?.voteStart),
-          voteEnd: Number(parsed?.args?.voteEnd),
+          voteStart: Number(parsed?.args?.voteStart) * 1000,
+          voteEnd: Number(parsed?.args?.voteEnd) * 1000,
+          forVotes: 0,
+          againstVotes: 0,
+          abstainVotes: 0,
         };
         proposals.push(proposal);
       } catch (err) {
