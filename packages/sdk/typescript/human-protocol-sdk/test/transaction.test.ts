@@ -1,5 +1,12 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
+vi.mock('graphql-request', () => {
+  return {
+    default: vi.fn(),
+  };
+});
+
 import * as gqlFetch from 'graphql-request';
 import { describe, expect, test, vi } from 'vitest';
 import { NETWORKS } from '../src/constants';
@@ -11,12 +18,6 @@ import {
 import { GET_TRANSACTION_QUERY } from '../src/graphql/queries/transaction';
 import { ITransaction, ITransactionsFilter } from '../src/interfaces';
 import { TransactionUtils } from '../src/transaction';
-
-vi.mock('graphql-request', () => {
-  return {
-    default: vi.fn(),
-  };
-});
 
 describe('TransactionUtils', () => {
   describe('getTransaction', () => {

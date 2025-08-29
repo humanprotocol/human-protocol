@@ -306,6 +306,67 @@ class TestKVStoreClient(unittest.TestCase):
                 "tx_hash"
             )
 
+    def test_get(self):
+        mock_function = MagicMock()
+        mock_function.return_value.call.return_value = "mock_value"
+        self.kvstore.kvstore_contract.functions.get = mock_function
+        address = Web3.to_checksum_address("0x1234567890123456789012345678901234567890")
+        key = "key"
+
+        result = self.kvstore.get(address, key)
+
+        mock_function.assert_called_once_with(address, key)
+        mock_function.return_value.call.assert_called_once_with()
+        self.assertEqual(result, "mock_value")
+
+    def test_get_empty_key(self):
+        address = Web3.to_checksum_address("0x1234567890123456789012345678901234567890")
+        key = ""
+        with self.assertRaises(KVStoreClientError) as cm:
+            self.kvstore.get(address, key)
+        self.assertEqual("Key cannot be empty", str(cm.exception))
+
+    def test_get_invalid_address(self):
+        address = "invalid_address"
+        key = "key"
+        with self.assertRaises(KVStoreClientError) as cm:
+            self.kvstore.get(address, key)
+        self.assertEqual("Invalid address: invalid_address", str(cm.exception))
+
+    def test_get_empty_value(self):
+        mock_function = MagicMock()
+        mock_function.return_value.call.return_value = ""
+        self.kvstore.kvstore_contract.functions.get = mock_function
+        address = Web3.to_checksum_address("0x1234567890123456789012345678901234567890")
+        key = "key"
+
+        result = self.kvstore.get(address, key)
+
+        mock_function.assert_called_once_with(address, key)
+        mock_function.return_value.call.assert_called_once_with()
+        self.assertEqual(result, "")
+
+    def test_get_without_account(self):
+        mock_provider = MagicMock(spec=HTTPProvider)
+        w3 = Web3(mock_provider)
+        mock_chain_id = ChainId.LOCALHOST.value
+        type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
+
+        kvstore = KVStoreClient(w3)
+
+        mock_function = MagicMock()
+        mock_function.return_value.call.return_value = "mock_value"
+        kvstore.kvstore_contract.functions.get = mock_function
+
+        address = Web3.to_checksum_address("0x1234567890123456789012345678901234567890")
+        key = "key"
+
+        result = kvstore.get(address, key)
+
+        mock_function.assert_called_once_with(address, key)
+        mock_function.return_value.call.assert_called_once_with()
+        self.assertEqual(result, "mock_value")
+
 
 if __name__ == "__main__":
     unittest.main(exit=True)

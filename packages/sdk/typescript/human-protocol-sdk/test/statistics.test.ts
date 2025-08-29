@@ -1,4 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
+vi.mock('graphql-request', () => ({
+  default: vi.fn(),
+}));
+
 import { ethers } from 'ethers';
 import * as gqlFetch from 'graphql-request';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
@@ -10,12 +15,6 @@ import {
   GET_EVENT_DAY_DATA_QUERY,
   GET_HOLDERS_QUERY,
 } from '../src/graphql/queries';
-
-vi.mock('axios');
-
-vi.mock('graphql-request', () => ({
-  default: vi.fn(),
-}));
 
 describe('StatisticsClient', () => {
   let statisticsClient: any;

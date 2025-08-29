@@ -1,3 +1,27 @@
+// Create a Minio.Client mock
+vi.mock('minio', () => {
+  class Client {
+    getObject = vi.fn().mockImplementation(() => {
+      const read = () => {
+        return JSON.stringify({ key: STORAGE_TEST_FILE_VALUE });
+      };
+      return Promise.resolve({ read });
+    }); // getObject mock
+    putObject = vi.fn(); // putObject mock
+    bucketExists = vi.fn().mockImplementation((bucketName) => {
+      // Add conditional logic here based on the test scenario
+      if (bucketName === STORAGE_FAKE_BUCKET) {
+        return Promise.resolve(false); // Return false for fake scenario
+      } else {
+        return Promise.resolve(true); // Return true for other scenarios
+      }
+    });
+  }
+
+  // Return Minio.Client mock
+  return { Client };
+});
+
 import { describe, test, expect, vi, beforeAll } from 'vitest';
 import axios from 'axios';
 import crypto from 'crypto';
@@ -25,33 +49,6 @@ import {
   STORAGE_TEST_FILE_VALUE_2,
   STORAGE_TEST_SECRET_KEY,
 } from './utils/constants';
-
-// Create a Minio.Client mock for the tests
-vi.mock('minio', () => {
-  // Define a constructor for the Minio.Client mock
-  class Client {
-    getObject = vi.fn().mockImplementation(() => {
-      const read = () => {
-        return JSON.stringify({ key: STORAGE_TEST_FILE_VALUE });
-      };
-      return Promise.resolve({ read });
-    }); // getObject mock
-    putObject = vi.fn(); // putObject mock
-    bucketExists = vi.fn().mockImplementation((bucketName) => {
-      // Add conditional logic here based on the test scenario
-      if (bucketName === STORAGE_FAKE_BUCKET) {
-        return Promise.resolve(false); // Return false for fake scenario
-      } else {
-        return Promise.resolve(true); // Return true for other scenarios
-      }
-    });
-  }
-
-  // Return Minio.Client mock
-  return { Client };
-});
-
-vi.mock('axios');
 
 describe('Storage tests', () => {
   describe('Client initialization', () => {
