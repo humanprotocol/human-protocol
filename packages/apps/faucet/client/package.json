@@ -8,8 +8,8 @@
     "@human-protocol/sdk": "workspace:*",
     "@mui/icons-material": "^7.0.1",
     "@mui/material": "^5.16.7",
-    "react": "^18.2.0",
-    "react-dom": "^19.1.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "react-loading-skeleton": "^3.3.1",
     "react-router-dom": "^6.4.3",
     "serve": "^14.2.4",
@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
     "dotenv": "^17.0.0",
     "eslint": "^8.55.0",
     "eslint-config-react-app": "^7.0.1",

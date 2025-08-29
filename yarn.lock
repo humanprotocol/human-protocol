@@ -3993,8 +3993,8 @@ __metadata:
     "@mui/x-data-grid": "npm:^8.7.0"
     "@mui/x-date-pickers": "npm:^8.7.0"
     "@tanstack/react-query": "npm:^5.67.2"
-    "@types/react": "npm:^18.2.66"
-    "@types/react-dom": "npm:^19.1.9"
+    "@types/react": "npm:^18.3.12"
+    "@types/react-dom": "npm:^18.3.1"
     "@types/react-router-dom": "npm:^5.3.3"
     "@types/recharts": "npm:^1.8.29"
     "@typescript-eslint/eslint-plugin": "npm:^7.2.0"
@@ -4011,8 +4011,8 @@ __metadata:
     eslint-plugin-react-refresh: "npm:^0.4.11"
     globals: "npm:^16.2.0"
     prettier: "npm:^3.4.2"
-    react: "npm:^18.2.0"
-    react-dom: "npm:^19.1.1"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
     react-number-format: "npm:^5.4.3"
     react-router-dom: "npm:^6.23.1"
     recharts: "npm:^2.13.0-alpha.4"
@@ -4081,6 +4081,7 @@ __metadata:
     "@mui/icons-material": "npm:^7.0.1"
     "@mui/material": "npm:^5.16.7"
     "@types/react": "npm:^18.3.12"
+    "@types/react-dom": "npm:^18.3.1"
     dotenv: "npm:^17.0.0"
     eslint: "npm:^8.55.0"
     eslint-config-react-app: "npm:^7.0.1"
@@ -4089,8 +4090,8 @@ __metadata:
     eslint-plugin-react: "npm:^7.34.3"
     eslint-plugin-react-hooks: "npm:^5.1.0"
     prettier: "npm:^3.4.2"
-    react: "npm:^18.2.0"
-    react-dom: "npm:^19.1.1"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
     react-loading-skeleton: "npm:^3.3.1"
     react-router-dom: "npm:^6.4.3"
     serve: "npm:^14.2.4"
@@ -4138,7 +4139,7 @@ __metadata:
     "@tanstack/react-query": "npm:^5.67.2"
     "@tanstack/react-query-persist-client": "npm:^5.80.7"
     "@types/react": "npm:^18.3.12"
-    "@types/react-dom": "npm:^19.1.9"
+    "@types/react-dom": "npm:^18.3.1"
     "@types/react-router-dom": "npm:^5.3.3"
     "@typescript-eslint/eslint-plugin": "npm:^7.13.1"
     "@typescript-eslint/parser": "npm:^7.13.1"
@@ -4150,7 +4151,7 @@ __metadata:
     ethers: "npm:^6.15.0"
     prettier: "npm:^3.4.2"
     react: "npm:^18.3.1"
-    react-dom: "npm:^19.1.1"
+    react-dom: "npm:^18.3.1"
     react-router-dom: "npm:^6.24.1"
     serve: "npm:^14.2.4"
     typescript: "npm:^5.6.3"
@@ -4282,7 +4283,7 @@ __metadata:
     "@types/node": "npm:^22.10.5"
     "@types/prop-types": "npm:^15"
     "@types/react": "npm:^18.3.12"
-    "@types/react-dom": "npm:^19.1.9"
+    "@types/react-dom": "npm:^18.3.1"
     "@typescript-eslint/eslint-plugin": "npm:^6.20.0"
     "@typescript-eslint/parser": "npm:^6.20.0"
     "@vercel/style-guide": "npm:^6.0.0"
@@ -4306,8 +4307,8 @@ __metadata:
     prettier: "npm:^3.4.2"
     prop-types: "npm:^15.8.1"
     query-string: "npm:^9.0.0"
-    react: "npm:^18.2.0"
-    react-dom: "npm:^19.1.1"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
     react-hook-form: "npm:^7.62.0"
     react-i18next: "npm:^15.1.0"
     react-imask: "npm:^7.4.0"
@@ -4406,7 +4407,7 @@ __metadata:
     "@tanstack/react-query-persist-client": "npm:^5.80.7"
     "@types/file-saver": "npm:^2.0.7"
     "@types/react": "npm:^18.3.12"
-    "@types/react-dom": "npm:^19.1.9"
+    "@types/react-dom": "npm:^18.3.1"
     "@types/xml2js": "npm:^0.4.14"
     "@vitejs/plugin-react": "npm:^4.2.1"
     axios: "npm:^1.1.3"
@@ -4424,8 +4425,8 @@ __metadata:
     formik: "npm:^2.4.2"
     jwt-decode: "npm:^4.0.0"
     prettier: "npm:^3.4.2"
-    react: "npm:^18.2.0"
-    react-dom: "npm:^19.1.1"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
     react-redux: "npm:^9.1.0"
     react-router-dom: "npm:^6.14.1"
     recharts: "npm:^2.7.2"
@@ -4646,7 +4647,7 @@ __metadata:
     "@tanstack/react-query": "npm:^5.67.2"
     "@tanstack/react-query-persist-client": "npm:^5.80.7"
     "@types/react": "npm:^18.3.12"
-    "@types/react-dom": "npm:^19.1.9"
+    "@types/react-dom": "npm:^18.3.1"
     "@types/react-router-dom": "npm:^5.3.3"
     "@typescript-eslint/eslint-plugin": "npm:^7.13.1"
     "@typescript-eslint/parser": "npm:^7.13.1"
@@ -4658,7 +4659,7 @@ __metadata:
     ethers: "npm:^6.15.0"
     prettier: "npm:^3.4.2"
     react: "npm:^18.3.1"
-    react-dom: "npm:^19.1.1"
+    react-dom: "npm:^18.3.1"
     react-router-dom: "npm:^6.24.1"
     sass: "npm:^1.89.2"
     serve: "npm:^14.2.4"
@@ -10621,12 +10622,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-dom@npm:^19.1.9":
-  version: 19.1.9
-  resolution: "@types/react-dom@npm:19.1.9"
+"@types/react-dom@npm:^18.3.1":
+  version: 18.3.7
+  resolution: "@types/react-dom@npm:18.3.7"
   peerDependencies:
-    "@types/react": ^19.0.0
-  checksum: 10c0/34c8dda86c1590b3ef0e7ecd38f9663a66ba2dd69113ba74fb0adc36b83bbfb8c94c1487a2505282a5f7e5e000d2ebf36f4c0fd41b3b672f5178fd1d4f1f8f58
+    "@types/react": ^18.0.0
+  checksum: 10c0/8bd309e2c3d1604a28a736a24f96cbadf6c05d5288cfef8883b74f4054c961b6b3a5e997fd5686e492be903c8f3380dba5ec017eff3906b1256529cd2d39603e
   languageName: node
   linkType: hard
 
@@ -10669,7 +10670,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:^18.2.66, @types/react@npm:^18.3.12":
+"@types/react@npm:^18.3.12":
   version: 18.3.21
   resolution: "@types/react@npm:18.3.21"
   dependencies:
@@ -26096,14 +26097,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dom@npm:^19.1.1":
-  version: 19.1.1
-  resolution: "react-dom@npm:19.1.1"
+"react-dom@npm:^18.3.1":
+  version: 18.3.1
+  resolution: "react-dom@npm:18.3.1"
   dependencies:
-    scheduler: "npm:^0.26.0"
+    loose-envify: "npm:^1.1.0"
+    scheduler: "npm:^0.23.2"
   peerDependencies:
-    react: ^19.1.1
-  checksum: 10c0/8c91198510521299c56e4e8d5e3a4508b2734fb5e52f29eeac33811de64e76fe586ad32c32182e2e84e070d98df67125da346c3360013357228172dbcd20bcdd
+    react: ^18.3.1
+  checksum: 10c0/a752496c1941f958f2e8ac56239172296fcddce1365ce45222d04a1947e0cc5547df3e8447f855a81d6d39f008d7c32eab43db3712077f09e3f67c4874973e85
   languageName: node
   linkType: hard
 
@@ -26284,7 +26286,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react@npm:^18.2.0, react@npm:^18.3.1":
+"react@npm:^18.3.1":
   version: 18.3.1
   resolution: "react@npm:18.3.1"
   dependencies:
@@ -27176,10 +27178,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"scheduler@npm:^0.26.0":
-  version: 0.26.0
-  resolution: "scheduler@npm:0.26.0"
-  checksum: 10c0/5b8d5bfddaae3513410eda54f2268e98a376a429931921a81b5c3a2873aab7ca4d775a8caac5498f8cbc7d0daeab947cf923dbd8e215d61671f9f4e392d34356
+"scheduler@npm:^0.23.2":
+  version: 0.23.2
+  resolution: "scheduler@npm:0.23.2"
+  dependencies:
+    loose-envify: "npm:^1.1.0"
+  checksum: 10c0/26383305e249651d4c58e6705d5f8425f153211aef95f15161c151f7b8de885f24751b377e4a0b3dd42cce09aad3f87a61dab7636859c0d89b7daf1a1e2a5c78
   languageName: node
   linkType: hard
 
