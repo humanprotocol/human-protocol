@@ -1402,14 +1402,14 @@ describe('JobService', () => {
       mockWeb3Service.calculateGasPrice.mockResolvedValueOnce(1n);
       const getStatusMock = jest.fn().mockResolvedValueOnce('Active');
       const getBalanceMock = jest.fn().mockResolvedValueOnce(100n);
-      const cancelMock = jest
+      const requestCancellationMock = jest
         .fn()
         .mockResolvedValueOnce({ txHash: '0x', amountRefunded: 100n });
 
       mockedEscrowClient.build.mockResolvedValueOnce({
         getStatus: getStatusMock,
         getBalance: getBalanceMock,
-        cancel: cancelMock,
+        requestCancellation: requestCancellationMock,
       } as unknown as EscrowClient);
 
       const result = await jobService.processEscrowCancellation(jobEntity);
@@ -1418,7 +1418,7 @@ describe('JobService', () => {
 
       expect(getStatusMock).toHaveBeenCalled();
       expect(getBalanceMock).toHaveBeenCalled();
-      expect(cancelMock).toHaveBeenCalled();
+      expect(requestCancellationMock).toHaveBeenCalled();
     });
 
     it('should throw if escrow status is not Active', async () => {
@@ -1427,7 +1427,7 @@ describe('JobService', () => {
       mockedEscrowClient.build.mockResolvedValueOnce({
         getStatus: jest.fn().mockResolvedValueOnce(EscrowStatus.Complete),
         getBalance: jest.fn().mockResolvedValueOnce(100n),
-        cancel: jest.fn(),
+        requestCancellation: jest.fn(),
       } as unknown as EscrowClient);
 
       await expect(
@@ -1443,7 +1443,7 @@ describe('JobService', () => {
       mockedEscrowClient.build.mockResolvedValueOnce({
         getStatus: jest.fn().mockResolvedValueOnce(EscrowStatus.Pending),
         getBalance: jest.fn().mockResolvedValueOnce(0n),
-        cancel: jest.fn(),
+        requestCancellation: jest.fn(),
       } as unknown as EscrowClient);
 
       await expect(
@@ -1459,7 +1459,9 @@ describe('JobService', () => {
       mockedEscrowClient.build.mockResolvedValueOnce({
         getStatus: jest.fn().mockResolvedValueOnce(EscrowStatus.Pending),
         getBalance: jest.fn().mockResolvedValueOnce(100n),
-        cancel: jest.fn().mockRejectedValueOnce(new Error('Network error')),
+        requestCancellation: jest
+          .fn()
+          .mockRejectedValueOnce(new Error('Network error')),
       } as unknown as EscrowClient);
 
       await expect(

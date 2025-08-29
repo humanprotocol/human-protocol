@@ -1421,10 +1421,91 @@ class TestEscrowClient(unittest.TestCase):
             "tx_hash"
         )
 
+    def test_request_cancellation(self):
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        mock_contract = MagicMock()
+        mock_request = MagicMock()
+        mock_request.transact.return_value = "tx_hash"
+        mock_contract.functions.requestCancellation = MagicMock(
+            return_value=mock_request
+        )
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
+        self.escrow.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": []}
+        )
+
+        result = self.escrow.request_cancellation(escrow_address)
+
+        self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
+        mock_contract.functions.requestCancellation.assert_called_once_with()
+        mock_request.transact.assert_called_once_with({})
+        self.assertIsNone(result)
+
+    def test_request_cancellation_invalid_address(self):
+        escrow_address = "invalid_address"
+        with self.assertRaises(EscrowClientError) as cm:
+            self.escrow.request_cancellation(escrow_address)
+        self.assertEqual(f"Invalid escrow address: {escrow_address}", str(cm.exception))
+
+    def test_request_cancellation_without_account(self):
+        mock_provider = MagicMock(spec=HTTPProvider)
+        w3 = Web3(mock_provider)
+        mock_chain_id = ChainId.LOCALHOST.value
+        type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
+        escrow_client = EscrowClient(w3)
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        with self.assertRaises(RequiresSignerError):
+            escrow_client.request_cancellation(escrow_address)
+
+    def test_request_cancellation_invalid_status(self):
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        mock_contract = MagicMock()
+        mock_request = MagicMock()
+        mock_request.transact.side_effect = Exception(
+            "Error: VM Exception while processing transaction: reverted with reason string 'Invalid status'"
+        )
+        mock_contract.functions.requestCancellation = MagicMock(
+            return_value=mock_request
+        )
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
+        with self.assertRaises(EscrowClientError) as cm:
+            self.escrow.request_cancellation(escrow_address)
+        self.assertEqual("Transaction failed: Invalid status", str(cm.exception))
+
+    def test_request_cancellation_invalid_caller(self):
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        mock_contract = MagicMock()
+        mock_request = MagicMock()
+        mock_request.transact.side_effect = Exception(
+            "Error: VM Exception while processing transaction: reverted with reason string 'Unauthorised'"
+        )
+        mock_contract.functions.requestCancellation = MagicMock(
+            return_value=mock_request
+        )
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
+        with self.assertRaises(EscrowClientError) as cm:
+            self.escrow.request_cancellation(escrow_address)
+        self.assertEqual("Transaction failed: Unauthorised", str(cm.exception))
+
+    def test_request_cancellation_with_tx_options(self):
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        mock_contract = MagicMock()
+        mock_request = MagicMock()
+        mock_request.transact.return_value = "tx_hash"
+        mock_contract.functions.requestCancellation = MagicMock(
+            return_value=mock_request
+        )
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
+        self.escrow.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": []}
+        )
+        tx_options = {"gas": 50000}
+        result = self.escrow.request_cancellation(escrow_address, tx_options)
+        mock_request.transact.assert_called_once_with(tx_options)
+        self.assertIsNone(result)
+
     def test_cancel(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
-        token_address = "0x1234567890123456789012345678901234567891"
-        amount_refunded = 123
 
         # Mock contract and cancel function
         mock_contract = MagicMock()
@@ -1432,32 +1513,19 @@ class TestEscrowClient(unittest.TestCase):
         mock_cancel.transact.return_value = "tx_hash"
         mock_contract.functions.cancel = MagicMock(return_value=mock_cancel)
         self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
-        self.escrow.get_token_address = MagicMock(return_value=token_address)
-
-        # Mock token contract and Transfer event
-        token_contract = MagicMock()
-        token_contract.events.Transfer().process_log.return_value = {
-            "event": "Transfer",
-            "args": {"from": escrow_address, "value": amount_refunded},
-        }
-        self.escrow.w3.eth.contract = MagicMock(return_value=token_contract)
-
-        # Mock receipt with logs
-        receipt = {"transactionHash": b"tx_hash", "logs": [{"address": token_address}]}
         self.escrow.w3.eth.wait_for_transaction_receipt = MagicMock(
-            return_value=receipt
+            return_value={"logs": []}
         )
 
         result = self.escrow.cancel(escrow_address)
 
+        self.assertIsNone(result)
         self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
         mock_contract.functions.cancel.assert_called_once_with()
         mock_cancel.transact.assert_called_once_with({})
         self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
-        self.assertEqual(result.amountRefunded, amount_refunded)
-        self.assertEqual(result.txHash, receipt["transactionHash"].hex())
 
     def test_cancel_invalid_address(self):
         escrow_address = "invalid_address"
@@ -1512,8 +1580,6 @@ class TestEscrowClient(unittest.TestCase):
 
     def test_cancel_with_tx_options(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
-        token_address = "0x1234567890123456789012345678901234567891"
-        amount_refunded = 123
         tx_options = {"gas": 50000}
 
         # Mock contract and cancel function
@@ -1522,32 +1588,19 @@ class TestEscrowClient(unittest.TestCase):
         mock_cancel.transact.return_value = "tx_hash"
         mock_contract.functions.cancel = MagicMock(return_value=mock_cancel)
         self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
-        self.escrow.get_token_address = MagicMock(return_value=token_address)
-
-        # Mock token contract and Transfer event
-        token_contract = MagicMock()
-        token_contract.events.Transfer().process_log.return_value = {
-            "event": "Transfer",
-            "args": {"from": escrow_address, "value": amount_refunded},
-        }
-        self.escrow.w3.eth.contract = MagicMock(return_value=token_contract)
-
-        # Mock receipt with logs
-        receipt = {"transactionHash": b"tx_hash", "logs": [{"address": token_address}]}
         self.escrow.w3.eth.wait_for_transaction_receipt = MagicMock(
-            return_value=receipt
+            return_value={"logs": []}
         )
 
         result = self.escrow.cancel(escrow_address, tx_options)
 
+        self.assertIsNone(result)
         self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
         mock_contract.functions.cancel.assert_called_once_with()
         mock_cancel.transact.assert_called_once_with(tx_options)
         self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
-        self.assertEqual(result.amountRefunded, amount_refunded)
-        self.assertEqual(result.txHash, receipt["transactionHash"].hex())
 
     def test_withdraw(self):
         escrow_address = "0x1234567890123456789012345678901234567890"

@@ -32,6 +32,7 @@ obtain information from both the contracts and subgraph.
     * [`EscrowClient.get_results_url()`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_results_url)
     * [`EscrowClient.get_status()`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_status)
     * [`EscrowClient.get_token_address()`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_token_address)
+    * [`EscrowClient.request_cancellation()`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowClient.request_cancellation)
     * [`EscrowClient.setup()`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowClient.setup)
     * [`EscrowClient.store_results()`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowClient.store_results)
     * [`EscrowClient.withdraw()`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowClient.withdraw)

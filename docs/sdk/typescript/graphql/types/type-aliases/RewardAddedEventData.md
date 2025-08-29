@@ -8,7 +8,7 @@
 
 > **RewardAddedEventData** = `object`
 
-Defined in: [graphql/types.ts:68](https://github.com/humanprotocol/human-protocol/blob/35282ccf869d69c95ced3874bd6bde870ac54d48/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L68)
+Defined in: [graphql/types.ts:68](https://github.com/humanprotocol/human-protocol/blob/4856a3f52f40cebc5467b639c48c93c09d17622b/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L68)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [graphql/types.ts:68](https://github.com/humanprotocol/human-protoco
 
 > **amount**: `string`
 
-Defined in: [graphql/types.ts:72](https://github.com/humanprotocol/human-protocol/blob/35282ccf869d69c95ced3874bd6bde870ac54d48/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L72)
+Defined in: [graphql/types.ts:72](https://github.com/humanprotocol/human-protocol/blob/4856a3f52f40cebc5467b639c48c93c09d17622b/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L72)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [graphql/types.ts:72](https://github.com/humanprotocol/human-protoco
 
 > **escrowAddress**: `string`
 
-Defined in: [graphql/types.ts:69](https://github.com/humanprotocol/human-protocol/blob/35282ccf869d69c95ced3874bd6bde870ac54d48/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L69)
+Defined in: [graphql/types.ts:69](https://github.com/humanprotocol/human-protocol/blob/4856a3f52f40cebc5467b639c48c93c09d17622b/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L69)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [graphql/types.ts:69](https://github.com/humanprotocol/human-protoco
 
 > **slasher**: `string`
 
-Defined in: [graphql/types.ts:71](https://github.com/humanprotocol/human-protocol/blob/35282ccf869d69c95ced3874bd6bde870ac54d48/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L71)
+Defined in: [graphql/types.ts:71](https://github.com/humanprotocol/human-protocol/blob/4856a3f52f40cebc5467b639c48c93c09d17622b/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L71)
 
 ***
 
@@ -40,4 +40,4 @@ Defined in: [graphql/types.ts:71](https://github.com/humanprotocol/human-protoco
 
 > **staker**: `string`
 
-Defined in: [graphql/types.ts:70](https://github.com/humanprotocol/human-protocol/blob/35282ccf869d69c95ced3874bd6bde870ac54d48/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L70)
+Defined in: [graphql/types.ts:70](https://github.com/humanprotocol/human-protocol/blob/4856a3f52f40cebc5467b639c48c93c09d17622b/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L70)

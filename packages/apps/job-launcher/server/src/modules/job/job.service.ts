@@ -636,7 +636,7 @@ export class JobService {
       throw new ConflictError(ErrorEscrow.InvalidBalanceCancellation);
     }
 
-    await escrowClient.cancel(escrowAddress!, {
+    await escrowClient.requestCancellation(escrowAddress!, {
       gasPrice: await this.web3Service.calculateGasPrice(chainId),
     });
   }

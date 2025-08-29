@@ -8,7 +8,7 @@
 
 > **HMTHolder** = `object`
 
-Defined in: [graphql/types.ts:114](https://github.com/humanprotocol/human-protocol/blob/35282ccf869d69c95ced3874bd6bde870ac54d48/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L114)
+Defined in: [graphql/types.ts:114](https://github.com/humanprotocol/human-protocol/blob/4856a3f52f40cebc5467b639c48c93c09d17622b/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L114)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [graphql/types.ts:114](https://github.com/humanprotocol/human-protoc
 
 > **address**: `string`
 
-Defined in: [graphql/types.ts:115](https://github.com/humanprotocol/human-protocol/blob/35282ccf869d69c95ced3874bd6bde870ac54d48/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L115)
+Defined in: [graphql/types.ts:115](https://github.com/humanprotocol/human-protocol/blob/4856a3f52f40cebc5467b639c48c93c09d17622b/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L115)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: [graphql/types.ts:115](https://github.com/humanprotocol/human-protoc
 
 > **balance**: `bigint`
 
-Defined in: [graphql/types.ts:116](https://github.com/humanprotocol/human-protocol/blob/35282ccf869d69c95ced3874bd6bde870ac54d48/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L116)
+Defined in: [graphql/types.ts:116](https://github.com/humanprotocol/human-protocol/blob/4856a3f52f40cebc5467b639c48c93c09d17622b/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L116)

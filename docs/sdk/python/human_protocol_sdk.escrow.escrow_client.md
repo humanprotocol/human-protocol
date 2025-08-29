@@ -540,6 +540,8 @@ Gets the address of the token used to fund the escrow.
   )
   ```
 
+#### request_cancellation(\*args, \*\*kwargs)
+
 #### setup(\*args, \*\*kwargs)
 
 #### store_results(\*args, \*\*kwargs)

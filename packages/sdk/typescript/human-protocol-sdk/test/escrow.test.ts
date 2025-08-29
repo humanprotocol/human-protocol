@@ -94,6 +94,7 @@ describe('EscrowClient', () => {
         }),
       'bulkPayOut(address[],uint256[],string,string,uint256,bool)': vi.fn(),
       cancel: vi.fn(),
+      requestCancellation: vi.fn(),
       withdraw: vi.fn(),
       getBalance: vi.fn(),
       remainingFunds: vi.fn(),
@@ -1774,6 +1775,79 @@ describe('EscrowClient', () => {
       expect(escrowClient.escrowContract.cancel).toHaveBeenCalledWith(
         txOptions
       );
+    });
+  });
+
+  describe('requestCancellation', () => {
+    test('should throw an error if escrowAddress is an invalid address', async () => {
+      const invalidAddress = FAKE_ADDRESS;
+
+      await expect(
+        escrowClient.requestCancellation(invalidAddress)
+      ).rejects.toThrow(ErrorInvalidEscrowAddressProvided);
+    });
+
+    test('should throw an error if hasEscrow returns false', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(false);
+
+      await expect(
+        escrowClient.requestCancellation(escrowAddress)
+      ).rejects.toThrow(ErrorEscrowAddressIsNotProvidedByFactory);
+    });
+
+    test('should successfully request cancellation', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.requestCancellation.mockResolvedValueOnce(
+        mockTx
+      );
+
+      const result = await escrowClient.requestCancellation(escrowAddress);
+
+      expect(result).toBe(undefined);
+      expect(
+        escrowClient.escrowContract.requestCancellation
+      ).toHaveBeenCalledWith({});
+    });
+
+    test('should throw an error if the requestCancellation fails', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.requestCancellation.mockRejectedValueOnce(
+        new Error()
+      );
+
+      await expect(
+        escrowClient.requestCancellation(escrowAddress)
+      ).rejects.toThrow();
+
+      expect(
+        escrowClient.escrowContract.requestCancellation
+      ).toHaveBeenCalledWith({});
+    });
+
+    test('should successfully request cancellation with transaction options', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.requestCancellation.mockResolvedValueOnce(
+        mockTx
+      );
+      const txOptions: Overrides = { gasLimit: 45000 };
+
+      const result = await escrowClient.requestCancellation(
+        escrowAddress,
+        txOptions
+      );
+
+      expect(result).toBe(undefined);
+      expect(
+        escrowClient.escrowContract.requestCancellation
+      ).toHaveBeenCalledWith(txOptions);
     });
   });
 

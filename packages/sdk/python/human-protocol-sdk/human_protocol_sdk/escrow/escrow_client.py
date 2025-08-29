@@ -841,6 +841,56 @@ class EscrowClient:
             raise EscrowClientError("Invalid empty final results hash")
 
     @requires_signer
+    def request_cancellation(
+        self, escrow_address: str, tx_options: Optional[TxParams] = None
+    ) -> None:
+        """Requests the cancellation of the specified escrow (moves status to ToCancel or finalizes if expired).
+
+        :param escrow_address: Address of the escrow to request cancellation
+        :param tx_options: (Optional) Additional transaction parameters
+
+        :example:
+            .. code-block:: python
+
+                from eth_typing import URI
+                from web3 import Web3
+                from web3.middleware import SignAndSendRawMiddlewareBuilder
+                from web3.providers.auto import load_provider_from_uri
+
+                from human_protocol_sdk.escrow import EscrowClient
+
+                def get_w3_with_priv_key(priv_key: str):
+                    w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                    gas_payer = w3.eth.account.from_key(priv_key)
+                    w3.eth.default_account = gas_payer.address
+                    w3.middleware_onion.inject(
+                        SignAndSendRawMiddlewareBuilder.build(priv_key),
+                        'SignAndSendRawMiddlewareBuilder',
+                        layer=0,
+                    )
+                    return (w3, gas_payer)
+
+                (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
+                escrow_client = EscrowClient(w3)
+
+                escrow_client.request_cancellation(
+                    "0x62dD51230A30401C455c8398d06F85e4EaB6309f"
+                )
+        """
+        if not Web3.is_address(escrow_address):
+            raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
+
+        try:
+            tx_hash = (
+                self._get_escrow_contract(escrow_address)
+                .functions.requestCancellation()
+                .transact(tx_options or {})
+            )
+            self.w3.eth.wait_for_transaction_receipt(tx_hash)
+        except Exception as e:
+            handle_error(e, EscrowClientError)
+
+    @requires_signer
     def cancel(
         self, escrow_address: str, tx_options: Optional[TxParams] = None
     ) -> EscrowCancel:
@@ -895,32 +945,7 @@ class EscrowClient:
                 .functions.cancel()
                 .transact(tx_options or {})
             )
-            receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash)
-
-            amount_transferred = None
-            token_address = self.get_token_address(escrow_address)
-            erc20_interface = get_erc20_interface()
-            token_contract = self.w3.eth.contract(
-                token_address, abi=erc20_interface["abi"]
-            )
-
-            for log in receipt["logs"]:
-                if log["address"] == token_address:
-                    processed_log = token_contract.events.Transfer().process_log(log)
-                    if (
-                        processed_log["event"] == "Transfer"
-                        and processed_log["args"]["from"] == escrow_address
-                    ):
-                        amount_transferred = processed_log["args"]["value"]
-                        break
-
-            if amount_transferred is None:
-                raise EscrowClientError("Transfer Event Not Found in Transaction Logs")
-
-            return EscrowCancel(
-                tx_hash=receipt["transactionHash"].hex(),
-                amount_refunded=amount_transferred,
-            )
+            self.w3.eth.wait_for_transaction_receipt(tx_hash)
         except Exception as e:
             handle_error(e, EscrowClientError)
 
