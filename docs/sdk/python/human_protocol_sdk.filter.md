@@ -76,6 +76,12 @@ Initializes a filter for payouts.
   * **skip** (`int`) – Optional number of payouts to skip. Default is 0.
   * **order_direction** ([`OrderDirection`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.OrderDirection)) – Optional order direction. Default is DESC.
 
+### *class* human_protocol_sdk.filter.StakersFilter(chain_id, min_staked_amount=None, max_staked_amount=None, min_locked_amount=None, max_locked_amount=None, min_withdrawn_amount=None, max_withdrawn_amount=None, min_slashed_amount=None, max_slashed_amount=None, order_by='lastDepositTimestamp', order_direction=OrderDirection.DESC, first=10, skip=0)
+
+Bases: `object`
+
+#### \_\_init_\_(chain_id, min_staked_amount=None, max_staked_amount=None, min_locked_amount=None, max_locked_amount=None, min_withdrawn_amount=None, max_withdrawn_amount=None, min_slashed_amount=None, max_slashed_amount=None, order_by='lastDepositTimestamp', order_direction=OrderDirection.DESC, first=10, skip=0)
+
 ### *class* human_protocol_sdk.filter.StatisticsFilter(date_from=None, date_to=None, first=10, skip=0, order_direction=OrderDirection.ASC)
 
 Bases: `object`

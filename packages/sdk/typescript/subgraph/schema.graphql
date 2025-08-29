@@ -32,14 +32,7 @@ type UniqueReceiver @entity(immutable: false) {
 type Operator @entity(immutable: false) {
   id: Bytes!
   address: Bytes!
-  amountStaked: BigInt!
-  amountLocked: BigInt!
-  lockedUntilTimestamp: BigInt!
-  amountWithdrawn: BigInt!
-  amountSlashed: BigInt!
-  reward: BigInt!
   amountJobsProcessed: BigInt!
-
   role: String
   fee: BigInt
   publicKey: String
@@ -54,6 +47,8 @@ type Operator @entity(immutable: false) {
 
   name: String
   category: String
+
+  staker: Staker @derivedFrom(field: "operator")
 }
 
 type OperatorURL @entity(immutable: false) {
@@ -255,6 +250,19 @@ type KVStore @entity(immutable: false) {
 }
 
 # Staking
+type Staker @entity(immutable: false) {
+  id: Bytes!
+  address: Bytes! # address
+  stakedAmount: BigInt!
+  lockedAmount: BigInt!
+  withdrawnAmount: BigInt!
+  slashedAmount: BigInt!
+  lockedUntilTimestamp: BigInt!
+  lastDepositTimestamp: BigInt!
+
+  operator: Operator
+}
+
 type StakeDepositedEvent @entity(immutable: true) {
   id: Bytes!
   block: BigInt!
@@ -348,11 +356,6 @@ type EventDayData @entity(immutable: false) {
   dailyHMTTransferAmount: BigInt!
   dailyUniqueSenders: BigInt!
   dailyUniqueReceivers: BigInt!
-}
-
-type OperatorStatistics @entity(immutable: false) {
-  id: Bytes!
-  operators: BigInt!
 }
 
 type Transaction @entity(immutable: false) {

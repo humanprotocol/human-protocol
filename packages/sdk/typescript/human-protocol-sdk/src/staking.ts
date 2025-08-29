@@ -7,10 +7,11 @@ import {
   Staking__factory,
 } from '@human-protocol/core/typechain-types';
 import { ContractRunner, Overrides, ethers } from 'ethers';
+import gqlFetch from 'graphql-request';
 import { BaseEthersClient } from './base';
 import { NETWORKS } from './constants';
 import { requiresSigner } from './decorators';
-import { ChainId } from './enums';
+import { ChainId, OrderDirection } from './enums';
 import {
   ErrorEscrowAddressIsNotProvidedByFactory,
   ErrorInvalidEscrowAddressProvided,
@@ -19,11 +20,16 @@ import {
   ErrorInvalidStakingValueSign,
   ErrorInvalidStakingValueType,
   ErrorProviderDoesNotExist,
+  ErrorStakerNotFound,
   ErrorUnsupportedChainID,
 } from './error';
+import { IStaker, IStakersFilter, StakerInfo } from './interfaces';
 import { NetworkData } from './types';
-import { throwError } from './utils';
-import { StakerInfo } from './interfaces';
+import { getSubgraphUrl, throwError } from './utils';
+import {
+  GET_STAKER_BY_ADDRESS_QUERY,
+  GET_STAKERS_QUERY,
+} from './graphql/queries/staking';
 
 /**
  * ## Introduction
@@ -439,6 +445,7 @@ export class StakingClient extends BaseEthersClient {
 
     try {
       const stakerInfo = await this.stakingContract.stakes(stakerAddress);
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const currentBlock = await this.runner.provider!.getBlockNumber();
 
       const tokensWithdrawable =
@@ -463,5 +470,101 @@ export class StakingClient extends BaseEthersClient {
     } catch (error) {
       return throwError(error);
     }
+  }
+}
+
+/**
+ * Utility class for Staking-related subgraph queries.
+ */
+export class StakingUtils {
+  /**
+   * Gets staking info for a staker from the subgraph.
+   *
+   * @param {ChainId} chainId Network in which the staking contract is deployed
+   * @param {string} stakerAddress Address of the staker
+   * @returns {Promise<IStaker>} Staker info from subgraph
+   */
+  public static async getStaker(
+    chainId: ChainId,
+    stakerAddress: string
+  ): Promise<IStaker> {
+    if (!ethers.isAddress(stakerAddress)) {
+      throw ErrorInvalidStakerAddressProvided;
+    }
+
+    const networkData: NetworkData | undefined = NETWORKS[chainId];
+    if (!networkData) {
+      throw ErrorUnsupportedChainID;
+    }
+
+    const { staker } = await gqlFetch<{ staker: IStaker }>(
+      getSubgraphUrl(networkData),
+      GET_STAKER_BY_ADDRESS_QUERY,
+      { id: stakerAddress.toLowerCase() }
+    );
+
+    if (!staker) {
+      throw ErrorStakerNotFound;
+    }
+
+    return staker;
+  }
+
+  /**
+   * Gets all stakers from the subgraph with filters, pagination and ordering.
+   *
+   * @returns {Promise<IStaker[]>} Array of stakers
+   */
+  public static async getStakers(filter: IStakersFilter): Promise<IStaker[]> {
+    const first =
+      filter.first !== undefined ? Math.min(filter.first, 1000) : 10;
+    const skip = filter.skip || 0;
+    const orderDirection = filter.orderDirection || OrderDirection.DESC;
+    const orderBy = filter.orderBy || 'lastDepositTimestamp';
+
+    const networkData = NETWORKS[filter.chainId];
+    if (!networkData) {
+      throw ErrorUnsupportedChainID;
+    }
+
+    const { stakers } = await gqlFetch<{ stakers: IStaker[] }>(
+      getSubgraphUrl(networkData),
+      GET_STAKERS_QUERY(filter),
+      {
+        minStakedAmount: filter.minStakedAmount
+          ? filter.minStakedAmount
+          : undefined,
+        maxStakedAmount: filter.maxStakedAmount
+          ? filter.maxStakedAmount
+          : undefined,
+        minLockedAmount: filter.minLockedAmount
+          ? filter.minLockedAmount
+          : undefined,
+        maxLockedAmount: filter.maxLockedAmount
+          ? filter.maxLockedAmount
+          : undefined,
+        minWithdrawnAmount: filter.minWithdrawnAmount
+          ? filter.minWithdrawnAmount
+          : undefined,
+        maxWithdrawnAmount: filter.maxWithdrawnAmount
+          ? filter.maxWithdrawnAmount
+          : undefined,
+        minSlashedAmount: filter.minSlashedAmount
+          ? filter.minSlashedAmount
+          : undefined,
+        maxSlashedAmount: filter.maxSlashedAmount
+          ? filter.maxSlashedAmount
+          : undefined,
+        orderBy: orderBy,
+        orderDirection: orderDirection,
+        first: first,
+        skip: skip,
+      }
+    );
+    if (!stakers) {
+      return [];
+    }
+
+    return stakers;
   }
 }

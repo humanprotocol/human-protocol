@@ -8,7 +8,7 @@
 
 > **Payout** = `object`
 
-Defined in: [types.ts:167](https://github.com/humanprotocol/human-protocol/blob/4856a3f52f40cebc5467b639c48c93c09d17622b/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L167)
+Defined in: [types.ts:167](https://github.com/humanprotocol/human-protocol/blob/4dad01e5a92c46a45d83aec7fcaea2d2e541271c/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L167)
 
 Represents a payout from an escrow.
 
@@ -18,7 +18,7 @@ Represents a payout from an escrow.
 
 > **amount**: `bigint`
 
-Defined in: [types.ts:183](https://github.com/humanprotocol/human-protocol/blob/4856a3f52f40cebc5467b639c48c93c09d17622b/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L183)
+Defined in: [types.ts:183](https://github.com/humanprotocol/human-protocol/blob/4dad01e5a92c46a45d83aec7fcaea2d2e541271c/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L183)
 
 The amount paid to the recipient.
 
@@ -28,7 +28,7 @@ The amount paid to the recipient.
 
 > **createdAt**: `number`
 
-Defined in: [types.ts:187](https://github.com/humanprotocol/human-protocol/blob/4856a3f52f40cebc5467b639c48c93c09d17622b/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L187)
+Defined in: [types.ts:187](https://github.com/humanprotocol/human-protocol/blob/4dad01e5a92c46a45d83aec7fcaea2d2e541271c/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L187)
 
 The timestamp when the payout was created (in UNIX format).
 
@@ -38,7 +38,7 @@ The timestamp when the payout was created (in UNIX format).
 
 > **escrowAddress**: `string`
 
-Defined in: [types.ts:175](https://github.com/humanprotocol/human-protocol/blob/4856a3f52f40cebc5467b639c48c93c09d17622b/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L175)
+Defined in: [types.ts:175](https://github.com/humanprotocol/human-protocol/blob/4dad01e5a92c46a45d83aec7fcaea2d2e541271c/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L175)
 
 The address of the escrow associated with the payout.
 
@@ -48,7 +48,7 @@ The address of the escrow associated with the payout.
 
 > **id**: `string`
 
-Defined in: [types.ts:171](https://github.com/humanprotocol/human-protocol/blob/4856a3f52f40cebc5467b639c48c93c09d17622b/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L171)
+Defined in: [types.ts:171](https://github.com/humanprotocol/human-protocol/blob/4dad01e5a92c46a45d83aec7fcaea2d2e541271c/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L171)
 
 Unique identifier of the payout.
 
@@ -58,6 +58,6 @@ Unique identifier of the payout.
 
 > **recipient**: `string`
 
-Defined in: [types.ts:179](https://github.com/humanprotocol/human-protocol/blob/4856a3f52f40cebc5467b639c48c93c09d17622b/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L179)
+Defined in: [types.ts:179](https://github.com/humanprotocol/human-protocol/blob/4dad01e5a92c46a45d83aec7fcaea2d2e541271c/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L179)
 
 The address of the recipient who received the payout.

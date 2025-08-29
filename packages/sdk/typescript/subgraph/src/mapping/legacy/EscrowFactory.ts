@@ -4,7 +4,7 @@ import { LegacyEscrow as EscrowTemplate } from '../../../generated/templates';
 import { ONE_BI, ZERO_BI } from '../utils/number';
 import { getEventDayData } from '../utils/dayUpdates';
 import { createOrLoadEscrowStatistics } from '../Escrow';
-import { createOrLoadOperator } from '../Staking';
+import { createOrLoadOperator } from '../KVStore';
 import { createTransaction } from '../utils/transaction';
 import { dataSource } from '@graphprotocol/graph-ts';
 

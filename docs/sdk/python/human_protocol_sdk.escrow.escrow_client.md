@@ -572,15 +572,15 @@ Initializes a Escrow instance.
   * **manifest** (`str`) – Manifest data (can be a URL or JSON string)
   * **hash** (`str`) – Manifest file hash
 
-### *class* human_protocol_sdk.escrow.escrow_client.EscrowWithdraw(tx_hash, token_address, amount_withdrawn)
+### *class* human_protocol_sdk.escrow.escrow_client.EscrowWithdraw(tx_hash, token_address, withdrawn_amount)
 
 Bases: `object`
 
-#### \_\_init_\_(tx_hash, token_address, amount_withdrawn)
+#### \_\_init_\_(tx_hash, token_address, withdrawn_amount)
 
 Represents the result of an escrow cancellation transaction.
 
 * **Parameters:**
   * **tx_hash** (`str`) – The hash of the transaction associated with the escrow withdrawal.
   * **token_address** (`str`) – The address of the token used for the withdrawal.
-  * **amount_withdrawn** (`any`) – The amount withdrawn from the escrow.
+  * **withdrawn_amount** (`any`) – The amount withdrawn from the escrow.

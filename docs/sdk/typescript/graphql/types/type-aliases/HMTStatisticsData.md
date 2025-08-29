@@ -8,7 +8,7 @@
 
 > **HMTStatisticsData** = `object`
 
-Defined in: [graphql/types.ts:25](https://github.com/humanprotocol/human-protocol/blob/4856a3f52f40cebc5467b639c48c93c09d17622b/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L25)
+Defined in: [graphql/types.ts:25](https://github.com/humanprotocol/human-protocol/blob/4dad01e5a92c46a45d83aec7fcaea2d2e541271c/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L25)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [graphql/types.ts:25](https://github.com/humanprotocol/human-protoco
 
 > **holders**: `string`
 
-Defined in: [graphql/types.ts:31](https://github.com/humanprotocol/human-protocol/blob/4856a3f52f40cebc5467b639c48c93c09d17622b/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L31)
+Defined in: [graphql/types.ts:31](https://github.com/humanprotocol/human-protocol/blob/4dad01e5a92c46a45d83aec7fcaea2d2e541271c/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L31)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [graphql/types.ts:31](https://github.com/humanprotocol/human-protoco
 
 > **totalApprovalEventCount**: `string`
 
-Defined in: [graphql/types.ts:28](https://github.com/humanprotocol/human-protocol/blob/4856a3f52f40cebc5467b639c48c93c09d17622b/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L28)
+Defined in: [graphql/types.ts:28](https://github.com/humanprotocol/human-protocol/blob/4dad01e5a92c46a45d83aec7fcaea2d2e541271c/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L28)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [graphql/types.ts:28](https://github.com/humanprotocol/human-protoco
 
 > **totalBulkApprovalEventCount**: `string`
 
-Defined in: [graphql/types.ts:29](https://github.com/humanprotocol/human-protocol/blob/4856a3f52f40cebc5467b639c48c93c09d17622b/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L29)
+Defined in: [graphql/types.ts:29](https://github.com/humanprotocol/human-protocol/blob/4dad01e5a92c46a45d83aec7fcaea2d2e541271c/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L29)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [graphql/types.ts:29](https://github.com/humanprotocol/human-protoco
 
 > **totalBulkTransferEventCount**: `string`
 
-Defined in: [graphql/types.ts:27](https://github.com/humanprotocol/human-protocol/blob/4856a3f52f40cebc5467b639c48c93c09d17622b/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L27)
+Defined in: [graphql/types.ts:27](https://github.com/humanprotocol/human-protocol/blob/4dad01e5a92c46a45d83aec7fcaea2d2e541271c/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L27)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [graphql/types.ts:27](https://github.com/humanprotocol/human-protoco
 
 > **totalTransferEventCount**: `string`
 
-Defined in: [graphql/types.ts:26](https://github.com/humanprotocol/human-protocol/blob/4856a3f52f40cebc5467b639c48c93c09d17622b/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L26)
+Defined in: [graphql/types.ts:26](https://github.com/humanprotocol/human-protocol/blob/4dad01e5a92c46a45d83aec7fcaea2d2e541271c/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L26)
 
 ***
 
@@ -56,4 +56,4 @@ Defined in: [graphql/types.ts:26](https://github.com/humanprotocol/human-protoco
 
 > **totalValueTransfered**: `string`
 
-Defined in: [graphql/types.ts:30](https://github.com/humanprotocol/human-protocol/blob/4856a3f52f40cebc5467b639c48c93c09d17622b/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L30)
+Defined in: [graphql/types.ts:30](https://github.com/humanprotocol/human-protocol/blob/4dad01e5a92c46a45d83aec7fcaea2d2e541271c/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L30)

@@ -8,12 +8,12 @@ type DiscoveredOracleCreateProps = {
   id: string;
   address: string;
   chainId: ChainId;
-  amountStaked: bigint;
-  amountLocked: bigint;
+  stakedAmount: bigint;
+  lockedAmount: bigint;
   lockedUntilTimestamp: bigint;
-  amountWithdrawn: bigint;
-  amountSlashed: bigint;
-  reward: bigint;
+  withdrawnAmount: bigint;
+  slashedAmount: bigint;
+  lastDepositTimestamp: bigint;
   amountJobsProcessed: bigint;
   role?: string;
   fee?: bigint;
@@ -40,22 +40,22 @@ export class DiscoveredOracle implements IOperator {
   chainId: ChainId;
 
   @ApiProperty({ description: 'Amount staked by the operator' })
-  amountStaked: bigint;
+  stakedAmount: bigint;
 
   @ApiProperty({ description: 'Amount currently locked by the operator' })
-  amountLocked: bigint;
+  lockedAmount: bigint;
 
   @ApiProperty({ description: 'Timestamp until funds are locked' })
   lockedUntilTimestamp: bigint;
 
   @ApiProperty({ description: 'Total amount withdrawn by the operator' })
-  amountWithdrawn: bigint;
+  withdrawnAmount: bigint;
 
   @ApiProperty({ description: 'Total amount slashed from the operator' })
-  amountSlashed: bigint;
+  slashedAmount: bigint;
 
-  @ApiProperty({ description: 'Total reward earned by the operator' })
-  reward: bigint;
+  @ApiProperty({ description: 'Last deposit timestamp' })
+  lastDepositTimestamp: bigint;
 
   @ApiProperty({ description: 'Number of jobs processed by the operator' })
   amountJobsProcessed: bigint;

@@ -965,7 +965,7 @@ export class EscrowClient extends BaseEthersClient {
       const escrowWithdrawData: EscrowWithdraw = {
         txHash: transactionReceipt?.hash || '',
         tokenAddress,
-        amountWithdrawn: amountTransferred,
+        withdrawnAmount: amountTransferred,
       };
 
       return escrowWithdrawData;

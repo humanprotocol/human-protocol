@@ -6,7 +6,7 @@
 
 # Class: Encryption
 
-Defined in: [encryption.ts:58](https://github.com/humanprotocol/human-protocol/blob/4856a3f52f40cebc5467b639c48c93c09d17622b/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L58)
+Defined in: [encryption.ts:58](https://github.com/humanprotocol/human-protocol/blob/4dad01e5a92c46a45d83aec7fcaea2d2e541271c/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L58)
 
 ## Introduction
 
@@ -53,7 +53,7 @@ const encryption = await Encryption.build(privateKey, passphrase);
 
 > **new Encryption**(`privateKey`): `Encryption`
 
-Defined in: [encryption.ts:66](https://github.com/humanprotocol/human-protocol/blob/4856a3f52f40cebc5467b639c48c93c09d17622b/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L66)
+Defined in: [encryption.ts:66](https://github.com/humanprotocol/human-protocol/blob/4dad01e5a92c46a45d83aec7fcaea2d2e541271c/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L66)
 
 Constructor for the Encryption class.
 
@@ -75,7 +75,7 @@ The private key.
 
 > **decrypt**(`message`, `publicKey?`): `Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
 
-Defined in: [encryption.ts:194](https://github.com/humanprotocol/human-protocol/blob/4856a3f52f40cebc5467b639c48c93c09d17622b/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L194)
+Defined in: [encryption.ts:194](https://github.com/humanprotocol/human-protocol/blob/4dad01e5a92c46a45d83aec7fcaea2d2e541271c/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L194)
 
 This function decrypts messages using the private key. In addition, the public key can be added for signature verification.
 
@@ -129,7 +129,7 @@ const resultMessage = await encryption.decrypt('message');
 
 > **sign**(`message`): `Promise`\<`string`\>
 
-Defined in: [encryption.ts:251](https://github.com/humanprotocol/human-protocol/blob/4856a3f52f40cebc5467b639c48c93c09d17622b/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L251)
+Defined in: [encryption.ts:251](https://github.com/humanprotocol/human-protocol/blob/4dad01e5a92c46a45d83aec7fcaea2d2e541271c/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L251)
 
 This function signs a message using the private key used to initialize the client.
 
@@ -165,7 +165,7 @@ const resultMessage = await encryption.sign('message');
 
 > **signAndEncrypt**(`message`, `publicKeys`): `Promise`\<`string`\>
 
-Defined in: [encryption.ts:142](https://github.com/humanprotocol/human-protocol/blob/4856a3f52f40cebc5467b639c48c93c09d17622b/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L142)
+Defined in: [encryption.ts:142](https://github.com/humanprotocol/human-protocol/blob/4dad01e5a92c46a45d83aec7fcaea2d2e541271c/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L142)
 
 This function signs and encrypts a message using the private key used to initialize the client and the specified public keys.
 
@@ -232,7 +232,7 @@ const resultMessage = await encryption.signAndEncrypt('message', publicKeys);
 
 > `static` **build**(`privateKeyArmored`, `passphrase?`): `Promise`\<`Encryption`\>
 
-Defined in: [encryption.ts:77](https://github.com/humanprotocol/human-protocol/blob/4856a3f52f40cebc5467b639c48c93c09d17622b/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L77)
+Defined in: [encryption.ts:77](https://github.com/humanprotocol/human-protocol/blob/4dad01e5a92c46a45d83aec7fcaea2d2e541271c/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L77)
 
 Builds an Encryption instance by decrypting the private key from an encrypted private key and passphrase.
 

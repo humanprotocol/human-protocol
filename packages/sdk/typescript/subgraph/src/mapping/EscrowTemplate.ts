@@ -40,7 +40,7 @@ import { toEventDayId, toEventId } from './utils/event';
 import { getEventDayData } from './utils/dayUpdates';
 import { createTransaction } from './utils/transaction';
 import { toBytes } from './utils/string';
-import { createOrLoadOperator } from './Staking';
+import { createOrLoadOperator } from './KVStore';
 
 // eslint-disable-next-line prettier/prettier
 export const HMT_ADDRESS = Address.fromString('{{ HMToken.address }}');
