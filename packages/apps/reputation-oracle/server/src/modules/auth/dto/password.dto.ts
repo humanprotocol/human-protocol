@@ -1,6 +1,6 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, MinLength } from 'class-validator';
+import { IsString, IsUUID, MinLength } from 'class-validator';
 
 import { IsLowercasedEmail } from '@/common/validators';
 
@@ -29,7 +29,7 @@ export class RestorePasswordDto {
   password: string;
 
   @ApiProperty()
-  @IsString()
+  @IsUUID()
   token: string;
 
   @ApiProperty({ name: 'h_captcha_token' })
