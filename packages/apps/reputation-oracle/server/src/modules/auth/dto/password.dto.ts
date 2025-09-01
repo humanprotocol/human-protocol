@@ -1,17 +1,7 @@
-import { applyDecorators } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsUUID, MinLength } from 'class-validator';
+import { IsString, IsUUID } from 'class-validator';
 
-import { IsLowercasedEmail } from '@/common/validators';
-
-export function ValidPassword() {
-  return applyDecorators(
-    IsString(),
-    MinLength(8, {
-      message: 'Password must be at least 8 characters long.',
-    }),
-  );
-}
+import { IsLowercasedEmail, IsValidPassword } from '@/common/validators';
 
 export class ForgotPasswordDto {
   @ApiProperty()
@@ -25,7 +15,7 @@ export class ForgotPasswordDto {
 
 export class RestorePasswordDto {
   @ApiProperty()
-  @ValidPassword()
+  @IsValidPassword()
   password: string;
 
   @ApiProperty()

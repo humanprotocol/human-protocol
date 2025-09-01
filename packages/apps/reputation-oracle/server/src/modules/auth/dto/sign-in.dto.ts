@@ -1,7 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEthereumAddress, IsOptional, IsString } from 'class-validator';
 
-import { IsLowercasedEmail, IsValidWeb3Signature } from '@/common/validators';
+import {
+  IsLowercasedEmail,
+  IsValidPassword,
+  IsValidWeb3Signature,
+} from '@/common/validators';
 
 export class Web2SignInDto {
   @ApiProperty()
@@ -9,7 +13,7 @@ export class Web2SignInDto {
   email: string;
 
   @ApiProperty()
-  @IsString()
+  @IsValidPassword()
   password: string;
 
   @ApiPropertyOptional({ name: 'h_captcha_token' })
