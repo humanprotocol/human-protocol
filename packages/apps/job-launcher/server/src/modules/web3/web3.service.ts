@@ -91,7 +91,7 @@ export class Web3Service {
         chainId,
         address,
       );
-      console.log('Received oracles:', receivedOracles);
+
       const filteredOracles = this.filterOracles(receivedOracles, jobType);
 
       return filteredOracles;

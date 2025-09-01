@@ -185,7 +185,7 @@ export class RoutingProtocolService {
       jobType,
       reputationOracle,
     );
-    console.log('Available oracles:', availableOracles);
+
     const exchangeOracle = this.selectOracleFromAvailable(
       availableOracles,
       Role.ExchangeOracle,
