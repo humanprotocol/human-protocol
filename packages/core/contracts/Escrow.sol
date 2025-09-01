@@ -73,6 +73,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
     string public manifestUrl;
     string public manifestHash;
     string public intermediateResultsUrl;
+    string public intermediateResultsHash;
     string public finalResultsUrl;
     string public finalResultsHash;
 
@@ -294,6 +295,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
         );
 
         intermediateResultsUrl = _url;
+        intermediateResultsHash = _hash;
         reservedFunds += _fundsToReserve;
 
         emit IntermediateStorage(_url, _hash);

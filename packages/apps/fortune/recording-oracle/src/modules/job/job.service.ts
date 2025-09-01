@@ -299,13 +299,13 @@ export class JobService {
     const intermediateResultsURL = await escrowClient.getIntermediateResultsUrl(
       webhook.escrowAddress,
     );
-    const hash =
-      intermediateResultsURL.split('/').pop()?.replace('.json', '') ?? '';
+    const intermediateResultsHash =
+      await escrowClient.getIntermediateResultsHash(webhook.escrowAddress);
 
     await escrowClient.storeResults(
       webhook.escrowAddress,
       intermediateResultsURL,
-      hash,
+      intermediateResultsHash,
       0n,
     );
 

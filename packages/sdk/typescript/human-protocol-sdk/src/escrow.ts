@@ -533,19 +533,21 @@ export class EscrowClient extends BaseEthersClient {
     const hasFundsToReserveParam = typeof a === 'bigint';
     const fundsToReserve = hasFundsToReserveParam ? (a as bigint) : undefined;
     const txOptions = (hasFundsToReserveParam ? b : a) || {};
+    // When fundsToReserve is provided and is 0, allow empty URL.
+    // In this situation not solutions might have been provided so the escrow can be straight cancelled.
+    const allowEmptyUrl = hasFundsToReserveParam && fundsToReserve === 0n;
 
     if (!ethers.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }
-    if (!url) {
+    if (!allowEmptyUrl && !isValidUrl(url)) {
       throw ErrorInvalidUrl;
     }
-    if (!isValidUrl(url)) {
-      throw ErrorInvalidUrl;
-    }
-    if (!hash) {
+
+    if (!hash && !allowEmptyUrl) {
       throw ErrorHashIsEmptyString;
     }
+
     if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
       throw ErrorEscrowAddressIsNotProvidedByFactory;
     }
@@ -1368,6 +1370,44 @@ export class EscrowClient extends BaseEthersClient {
       const escrowContract = this.getEscrowContract(escrowAddress);
 
       return escrowContract.intermediateResultsUrl();
+    } catch (e) {
+      return throwError(e);
+    }
+  }
+
+  /**
+   * This function returns the intermediate results hash.
+   *
+   * @param {string} escrowAddress Address of the escrow.
+   * @returns {Promise<string>} Hash of the intermediate results file content.
+   *
+   * **Code example**
+   *
+   * ```ts
+   * import { providers } from 'ethers';
+   * import { EscrowClient } from '@human-protocol/sdk';
+   *
+   * const rpcUrl = 'YOUR_RPC_URL';
+   *
+   * const provider = new providers.JsonRpcProvider(rpcUrl);
+   * const escrowClient = await EscrowClient.build(provider);
+   *
+   * const intermediateResultsHash = await escrowClient.getIntermediateResultsHash('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
+   * ```
+   */
+  async getIntermediateResultsHash(escrowAddress: string): Promise<string> {
+    if (!ethers.isAddress(escrowAddress)) {
+      throw ErrorInvalidEscrowAddressProvided;
+    }
+
+    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
+      throw ErrorEscrowAddressIsNotProvidedByFactory;
+    }
+
+    try {
+      const escrowContract = this.getEscrowContract(escrowAddress);
+
+      return escrowContract.intermediateResultsHash();
     } catch (e) {
       return throwError(e);
     }

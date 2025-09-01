@@ -112,6 +112,7 @@ describe('EscrowClient', () => {
       reputationOracle: vi.fn(),
       exchangeOracle: vi.fn(),
       intermediateResultsUrl: vi.fn(),
+      intermediateResultsHash: vi.fn(),
       launcher: vi.fn(),
       escrowFactory: vi.fn(),
     };
@@ -862,6 +863,27 @@ describe('EscrowClient', () => {
         hash,
         fundsToReserve,
         txOptions
+      );
+    });
+
+    test('should successfully store results with fundsToReserve=0 and empty url and hash', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+      const fundsToReserve = 0n;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      const storeResultsWithFundsSpy = vi.fn().mockImplementation(() => ({
+        wait: vi.fn().mockResolvedValue(true),
+      }));
+      escrowClient.escrowContract['storeResults(string,string,uint256)'] =
+        storeResultsWithFundsSpy;
+
+      await escrowClient.storeResults(escrowAddress, '', '', fundsToReserve);
+
+      expect(storeResultsWithFundsSpy).toHaveBeenCalledWith(
+        '',
+        '',
+        fundsToReserve,
+        {}
       );
     });
 
@@ -2165,7 +2187,7 @@ describe('EscrowClient', () => {
       const hash = FAKE_HASH;
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
-      escrowClient.escrowContract.manifestHash.mockReturnValue(hash);
+      escrowClient.escrowContract.manifestHash.mockReturnValueOnce(hash);
 
       const manifestHash = await escrowClient.getManifestHash(escrowAddress);
 
@@ -2176,7 +2198,7 @@ describe('EscrowClient', () => {
     test('should throw an error if getManifestHash fails', async () => {
       const escrowAddress = ethers.ZeroAddress;
 
-      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValueOnce(true);
       escrowClient.escrowContract.manifestHash.mockRejectedValueOnce(
         new Error()
       );
@@ -2345,6 +2367,61 @@ describe('EscrowClient', () => {
 
       expect(
         escrowClient.escrowContract.intermediateResultsUrl
+      ).toHaveBeenCalledWith();
+    });
+  });
+
+  describe('getIntermediateResultsHash', () => {
+    test('should throw an error if escrowAddress is an invalid address', async () => {
+      const escrowAddress = FAKE_ADDRESS;
+
+      await expect(
+        escrowClient.getIntermediateResultsHash(escrowAddress)
+      ).rejects.toThrow(ErrorInvalidEscrowAddressProvided);
+    });
+
+    test('should throw an error if hasEscrow returns false', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(false);
+
+      await expect(
+        escrowClient.getIntermediateResultsHash(escrowAddress)
+      ).rejects.toThrow(ErrorEscrowAddressIsNotProvidedByFactory);
+    });
+
+    test('should successfully getIntermediateResultsHash', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+      const hash = FAKE_HASH;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValueOnce(true);
+      escrowClient.escrowContract.intermediateResultsHash.mockReturnValueOnce(
+        hash
+      );
+
+      const intermediateResultsHash =
+        await escrowClient.getIntermediateResultsHash(escrowAddress);
+
+      expect(intermediateResultsHash).toEqual(hash);
+      expect(
+        escrowClient.escrowContract.intermediateResultsHash
+      ).toHaveBeenCalledWith();
+    });
+
+    test('should throw an error if getIntermediateResultsHash fails', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValueOnce(true);
+      escrowClient.escrowContract.intermediateResultsHash.mockRejectedValueOnce(
+        new Error()
+      );
+
+      await expect(
+        escrowClient.getIntermediateResultsHash(escrowAddress)
+      ).rejects.toThrow();
+
+      expect(
+        escrowClient.escrowContract.intermediateResultsHash
       ).toHaveBeenCalledWith();
     });
   });
