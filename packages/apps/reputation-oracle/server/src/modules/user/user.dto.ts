@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEthereumAddress, IsOptional, IsString } from 'class-validator';
+import { IsEthereumAddress, IsString } from 'class-validator';
 
 import { SignatureType } from '@/common/enums';
 import { IsLowercasedEnum, IsValidWeb3Signature } from '@/common/validators';
@@ -31,25 +31,6 @@ export class DisableOperatorDto {
   signature: string;
 }
 
-export class SignatureBodyDto {
-  @ApiProperty()
-  @IsEthereumAddress()
-  from: string;
-
-  @ApiProperty()
-  @IsEthereumAddress()
-  to: string;
-
-  @ApiProperty()
-  @IsString()
-  contents: string;
-
-  @ApiProperty()
-  @IsOptional()
-  @IsString()
-  nonce?: string | undefined;
-}
-
 export class PrepareSignatureDto {
   @ApiProperty()
   @IsEthereumAddress()
@@ -60,6 +41,20 @@ export class PrepareSignatureDto {
   })
   @IsLowercasedEnum(SignatureType)
   type: SignatureType;
+}
+
+export class PreparedSignatureResponseDto {
+  @ApiProperty()
+  from: string;
+
+  @ApiProperty()
+  to: string;
+
+  @ApiProperty()
+  contents: string;
+
+  @ApiProperty()
+  nonce?: string | undefined;
 }
 
 export class RegistrationInExchangeOracleDto {
