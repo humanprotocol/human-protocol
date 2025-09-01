@@ -17,6 +17,7 @@ import {
   OracleIndex,
   OracleOrder,
 } from './routing-protocol.interface';
+import { OracleDataDto } from '../web3/web3.dto';
 
 type OracleValue<T> = {
   [reputationOracle: string]: {
@@ -112,7 +113,7 @@ export class RoutingProtocolService {
   }
 
   public selectOracleFromAvailable(
-    availableOracles: any[],
+    availableOracles: OracleDataDto[],
     oracleType: string,
     chainId: ChainId,
     reputationOracle: string,
@@ -124,7 +125,11 @@ export class RoutingProtocolService {
 
     if (!oraclesOfType.length) return '';
 
-    const latestOraclesHash = hashString(JSON.stringify(availableOracles));
+    const latestOraclesHash = hashString(
+      JSON.stringify(availableOracles, (_, value) =>
+        typeof value === 'bigint' ? value.toString() : value,
+      ),
+    );
 
     if (
       !this.oracleOrder[chainId][reputationOracle][oracleType][jobType] ||
