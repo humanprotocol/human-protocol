@@ -1,6 +1,5 @@
 {
   "name": "@human-protocol/sdk",
-  "private": false,
   "description": "Human Protocol SDK",
   "version": "4.2.0",
   "files": [
@@ -39,7 +38,7 @@
     ]
   },
   "dependencies": {
-    "@human-protocol/core": "workspace:x",
+    "@human-protocol/core": "workspace:*",
     "axios": "^1.4.0",
     "ethers": "~6.15.0",
     "graphql": "^16.8.1",

@@ -1,6 +1,5 @@
 {
   "name": "@human-protocol/core",
-  "private": false,
   "description": "Human Protocol Core Smart Contracts",
   "version": "4.2.0",
   "files": [
