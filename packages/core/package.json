@@ -37,7 +37,7 @@
     "format": "yarn format:contracts && yarn format:scripts",
     "clean:build": "tsc --build --clean && rm -rf dist",
     "build": "yarn compile && yarn clean:build && tsc --build",
-    "prepublish": "yarn build"
+    "prepack": "yarn build"
   },
   "repository": {
     "type": "git",
