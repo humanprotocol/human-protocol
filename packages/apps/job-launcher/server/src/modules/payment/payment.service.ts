@@ -241,7 +241,7 @@ export class PaymentService {
     }
 
     const signer = this.web3Service.getSigner(dto.chainId);
-    const tokenAddress = transaction.logs[0].address;
+    const tokenAddress = transaction.logs[0].address.toLowerCase();
 
     const tokenContract: HMToken = HMToken__factory.connect(
       tokenAddress,
@@ -262,9 +262,10 @@ export class PaymentService {
     const tokenId = (await tokenContract.symbol()).toLowerCase();
     const token = TOKEN_ADDRESSES[dto.chainId]?.[tokenId as EscrowFundToken];
 
-    console.log(token?.address, tokenAddress, CoingeckoTokenId[tokenId]);
-
-    if (token?.address !== tokenAddress || !CoingeckoTokenId[tokenId]) {
+    if (
+      token?.address?.toLowerCase() !== tokenAddress ||
+      !CoingeckoTokenId[tokenId]
+    ) {
       throw new ConflictError(ErrorPayment.UnsupportedToken);
     }
 
