@@ -262,6 +262,8 @@ export class PaymentService {
     const tokenId = (await tokenContract.symbol()).toLowerCase();
     const token = TOKEN_ADDRESSES[dto.chainId]?.[tokenId as EscrowFundToken];
 
+    console.log(token?.address, tokenAddress, CoingeckoTokenId[tokenId]);
+
     if (token?.address !== tokenAddress || !CoingeckoTokenId[tokenId]) {
       throw new ConflictError(ErrorPayment.UnsupportedToken);
     }
