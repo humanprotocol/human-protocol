@@ -1,5 +1,6 @@
 {
   "name": "@human-protocol/sdk",
+  "private": false,
   "description": "Human Protocol SDK",
   "version": "4.1.3",
   "files": [
