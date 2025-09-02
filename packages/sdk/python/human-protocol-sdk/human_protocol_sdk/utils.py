@@ -338,11 +338,8 @@ def apply_tx_defaults(w3: Web3, tx_options: Optional[TxParams]) -> TxParams:
     :return: Mutated tx options with enforced defaults
     """
     opts: TxParams = dict(tx_options) if tx_options else {}
-    try:
-        if w3.eth.chain_id == ChainId.AURORA_TESTNET.value:
-            opts["gasPrice"] = DEFAULT_AURORA_GAS_PRICE
-            opts.pop("maxFeePerGas", None)
-            opts.pop("maxPriorityFeePerGas", None)
-    except Exception:
-        pass
+    if w3.eth.chain_id == ChainId.AURORA_TESTNET.value:
+        opts["gasPrice"] = DEFAULT_AURORA_GAS_PRICE
+        opts.pop("maxFeePerGas", None)
+        opts.pop("maxPriorityFeePerGas", None)
     return opts
