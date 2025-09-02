@@ -22,6 +22,7 @@ obtain information from both the contracts and subgraph.
     * [`EscrowClient.get_balance()`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_balance)
     * [`EscrowClient.get_exchange_oracle_address()`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_exchange_oracle_address)
     * [`EscrowClient.get_factory_address()`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_factory_address)
+    * [`EscrowClient.get_intermediate_results_hash()`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_intermediate_results_hash)
     * [`EscrowClient.get_intermediate_results_url()`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_intermediate_results_url)
     * [`EscrowClient.get_job_launcher_address()`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_job_launcher_address)
     * [`EscrowClient.get_manifest()`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_manifest)

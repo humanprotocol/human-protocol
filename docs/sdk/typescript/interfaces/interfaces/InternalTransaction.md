@@ -6,7 +6,7 @@
 
 # Interface: InternalTransaction
 
-Defined in: [interfaces.ts:151](https://github.com/humanprotocol/human-protocol/blob/d67d122403122f60659ce3c7e533ed3853fb3730/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L151)
+Defined in: [interfaces.ts:151](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L151)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [interfaces.ts:151](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **escrow**: `string`
 
-Defined in: [interfaces.ts:157](https://github.com/humanprotocol/human-protocol/blob/d67d122403122f60659ce3c7e533ed3853fb3730/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L157)
+Defined in: [interfaces.ts:157](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L157)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [interfaces.ts:157](https://github.com/humanprotocol/human-protocol/
 
 > **from**: `string`
 
-Defined in: [interfaces.ts:152](https://github.com/humanprotocol/human-protocol/blob/d67d122403122f60659ce3c7e533ed3853fb3730/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L152)
+Defined in: [interfaces.ts:152](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L152)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [interfaces.ts:152](https://github.com/humanprotocol/human-protocol/
 
 > **method**: `string`
 
-Defined in: [interfaces.ts:155](https://github.com/humanprotocol/human-protocol/blob/d67d122403122f60659ce3c7e533ed3853fb3730/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L155)
+Defined in: [interfaces.ts:155](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L155)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [interfaces.ts:155](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **receiver**: `string`
 
-Defined in: [interfaces.ts:156](https://github.com/humanprotocol/human-protocol/blob/d67d122403122f60659ce3c7e533ed3853fb3730/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L156)
+Defined in: [interfaces.ts:156](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L156)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [interfaces.ts:156](https://github.com/humanprotocol/human-protocol/
 
 > **to**: `string`
 
-Defined in: [interfaces.ts:153](https://github.com/humanprotocol/human-protocol/blob/d67d122403122f60659ce3c7e533ed3853fb3730/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L153)
+Defined in: [interfaces.ts:153](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L153)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [interfaces.ts:153](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **token**: `string`
 
-Defined in: [interfaces.ts:158](https://github.com/humanprotocol/human-protocol/blob/d67d122403122f60659ce3c7e533ed3853fb3730/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L158)
+Defined in: [interfaces.ts:158](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L158)
 
 ***
 
@@ -62,4 +62,4 @@ Defined in: [interfaces.ts:158](https://github.com/humanprotocol/human-protocol/
 
 > **value**: `string`
 
-Defined in: [interfaces.ts:154](https://github.com/humanprotocol/human-protocol/blob/d67d122403122f60659ce3c7e533ed3853fb3730/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L154)
+Defined in: [interfaces.ts:154](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L154)

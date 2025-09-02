@@ -477,12 +477,17 @@ class EscrowClient:
         if not Web3.is_address(escrow_address):
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
 
-        if not url:
-            raise EscrowClientError("URL is empty")
-        if not validate_url(url):
-            raise EscrowClientError(f"Invalid URL: {url}")
-        if not hash:
-            raise EscrowClientError("Invalid empty hash")
+        if funds_to_reserve is not None and funds_to_reserve < 0:
+            raise EscrowClientError("Amount must be positive")
+
+        allow_empty = funds_to_reserve is not None and funds_to_reserve == 0
+        if not allow_empty:
+            if funds_to_reserve is None and not url:
+                raise EscrowClientError("URL is empty")
+            if not validate_url(url):
+                raise EscrowClientError(f"Invalid URL: {url}")
+            if not hash:
+                raise EscrowClientError("Invalid empty hash")
 
         contract = self._get_escrow_contract(escrow_address)
         try:
@@ -1249,6 +1254,42 @@ class EscrowClient:
         return (
             self._get_escrow_contract(escrow_address)
             .functions.intermediateResultsUrl()
+            .call()
+        )
+
+    def get_intermediate_results_hash(self, escrow_address: str) -> str:
+        """
+        Gets the intermediate results file hash.
+
+        :param escrow_address: Address of the escrow
+
+        :return: Intermediate results file hash
+
+        :raise EscrowClientError: If an error occurs while checking the parameters
+
+        :example:
+            .. code-block:: python
+
+                from eth_typing import URI
+                from web3 import Web3
+                from web3.providers.auto import load_provider_from_uri
+
+                from human_protocol_sdk.escrow import EscrowClient
+
+                w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                escrow_client = EscrowClient(w3)
+
+                hash = escrow_client.get_intermediate_results_hash(
+                    "0x62dD51230A30401C455c8398d06F85e4EaB6309f"
+                )
+        """
+
+        if not Web3.is_address(escrow_address):
+            raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
+
+        return (
+            self._get_escrow_contract(escrow_address)
+            .functions.intermediateResultsHash()
             .call()
         )
 

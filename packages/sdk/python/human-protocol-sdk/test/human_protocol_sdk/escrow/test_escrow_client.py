@@ -851,6 +851,78 @@ class TestEscrowClient(unittest.TestCase):
             "tx_hash"
         )
 
+    def test_store_results_with_funds_to_reserve_positive(self):
+        mock_contract = MagicMock()
+        mock_store = MagicMock()
+        mock_store.transact.return_value = "tx_hash"
+        mock_contract.functions.storeResults = MagicMock(return_value=mock_store)
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
+        self.escrow.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": []}
+        )
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        url = "https://www.example.com/result"
+        hash = "hash"
+        funds_to_reserve = 10
+
+        self.escrow.store_results(
+            escrow_address, url, hash, funds_to_reserve=funds_to_reserve
+        )
+
+        self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
+        mock_contract.functions.storeResults.assert_called_once_with(
+            url, hash, funds_to_reserve
+        )
+        mock_store.transact.assert_called_once_with({})
+
+    def test_store_results_with_funds_to_reserve_zero_allows_empty(self):
+        mock_contract = MagicMock()
+        mock_store = MagicMock()
+        mock_store.transact.return_value = "tx_hash"
+        mock_contract.functions.storeResults = MagicMock(return_value=mock_store)
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
+        self.escrow.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": []}
+        )
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        # Intentionally empty / invalid url & hash should PASS when funds_to_reserve == 0
+        url = ""  # empty
+        hash = ""  # empty
+        funds_to_reserve = 0
+
+        # Should not raise
+        self.escrow.store_results(
+            escrow_address, url, hash, funds_to_reserve=funds_to_reserve
+        )
+
+        mock_contract.functions.storeResults.assert_called_once_with(
+            url, hash, funds_to_reserve
+        )
+
+    def test_store_results_with_funds_to_reserve_positive_invalid_url(self):
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        url = "invalid_url"
+        hash = "hash"
+        with self.assertRaises(EscrowClientError) as cm:
+            self.escrow.store_results(escrow_address, url, hash, funds_to_reserve=1)
+        self.assertEqual(f"Invalid URL: {url}", str(cm.exception))
+
+    def test_store_results_with_funds_to_reserve_positive_empty_hash(self):
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        url = "https://www.example.com/result"
+        hash = ""
+        with self.assertRaises(EscrowClientError) as cm:
+            self.escrow.store_results(escrow_address, url, hash, funds_to_reserve=1)
+        self.assertEqual("Invalid empty hash", str(cm.exception))
+
+    def test_store_results_with_negative_funds_to_reserve(self):
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        url = "https://www.example.com/result"
+        hash = "hash"
+        with self.assertRaises(EscrowClientError) as cm:
+            self.escrow.store_results(escrow_address, url, hash, funds_to_reserve=-1)
+        self.assertEqual("Amount must be positive", str(cm.exception))
+
     def test_bulk_payout(self):
         mock_contract = MagicMock()
         mock_bulk = MagicMock()
@@ -1971,6 +2043,55 @@ class TestEscrowClient(unittest.TestCase):
         self.escrow.factory_contract.functions.hasEscrow = MagicMock(return_value=False)
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.get_intermediate_results_url(
+                "0x1234567890123456789012345678901234567890"
+            )
+        self.assertEqual(
+            "Escrow address is not provided by the factory", str(cm.exception)
+        )
+
+    def test_get_intermediate_results_hash(self):
+        mock_contract = MagicMock()
+        mock_contract.functions.intermediateResultsHash = MagicMock()
+        mock_contract.functions.intermediateResultsHash.return_value.call.return_value = (
+            "mock_hash"
+        )
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
+        escrow_address = "0x1234567890123456789012345678901234567890"
+
+        result = self.escrow.get_intermediate_results_hash(escrow_address)
+        self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
+        mock_contract.functions.intermediateResultsHash.assert_called_once_with()
+        self.assertEqual(result, "mock_hash")
+
+    def test_get_intermediate_results_hash_invalid_address(self):
+        with self.assertRaises(EscrowClientError) as cm:
+            self.escrow.get_intermediate_results_hash("invalid_address")
+        self.assertEqual(f"Invalid escrow address: invalid_address", str(cm.exception))
+
+    def test_get_intermediate_results_hash_without_account(self):
+        mock_provider = MagicMock(spec=HTTPProvider)
+        w3 = Web3(mock_provider)
+        mock_chain_id = ChainId.LOCALHOST.value
+        type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
+
+        escrowClient = EscrowClient(w3)
+        mock_contract = MagicMock()
+        mock_contract.functions.intermediateResultsHash = MagicMock()
+        mock_contract.functions.intermediateResultsHash.return_value.call.return_value = (
+            "mock_hash"
+        )
+        escrowClient._get_escrow_contract = MagicMock(return_value=mock_contract)
+        escrow_address = "0x1234567890123456789012345678901234567890"
+
+        result = escrowClient.get_intermediate_results_hash(escrow_address)
+        escrowClient._get_escrow_contract.assert_called_once_with(escrow_address)
+        mock_contract.functions.intermediateResultsHash.assert_called_once_with()
+        self.assertEqual(result, "mock_hash")
+
+    def test_get_intermediate_results_hash_invalid_escrow(self):
+        self.escrow.factory_contract.functions.hasEscrow = MagicMock(return_value=False)
+        with self.assertRaises(EscrowClientError) as cm:
+            self.escrow.get_intermediate_results_hash(
                 "0x1234567890123456789012345678901234567890"
             )
         self.assertEqual(
