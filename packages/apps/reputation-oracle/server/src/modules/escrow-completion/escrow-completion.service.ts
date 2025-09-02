@@ -227,22 +227,36 @@ export class EscrowCompletionService {
         const signer = this.web3Service.getSigner(chainId);
         const escrowClient = await EscrowClient.build(signer);
 
-        const escrowStatus = await escrowClient.getStatus(escrowAddress);
-        if ([EscrowStatus.Partial, EscrowStatus.Paid].includes(escrowStatus)) {
-          await escrowClient.complete(escrowAddress, {
-            gasPrice: await this.web3Service.calculateGasPrice(chainId),
-          });
+        const escrowData = await EscrowUtils.getEscrow(chainId, escrowAddress);
+
+        let escrowStatus = await escrowClient.getStatus(escrowAddress);
+        if (
+          [
+            EscrowStatus.Partial,
+            EscrowStatus.Paid,
+            EscrowStatus.ToCancel,
+          ].includes(escrowStatus)
+        ) {
+          const gasPrice = await this.web3Service.calculateGasPrice(chainId);
+
+          if (escrowStatus === EscrowStatus.ToCancel) {
+            await escrowClient.cancel(escrowAddress, { gasPrice });
+            escrowStatus = EscrowStatus.Cancelled;
+          } else {
+            await escrowClient.complete(escrowAddress, { gasPrice });
+            escrowStatus = EscrowStatus.Complete;
+          }
 
           /**
            * This operation can fail and lost, so it's "at most once"
            */
           await this.reputationService.assessEscrowParties(
             chainId,
-            escrowAddress,
+            escrowData.launcher,
+            escrowData.exchangeOracle!,
+            escrowData.recordingOracle!,
           );
         }
-
-        const escrowData = await EscrowUtils.getEscrow(chainId, escrowAddress);
 
         const oracleAddresses: string[] = [
           escrowData.launcher as string,
