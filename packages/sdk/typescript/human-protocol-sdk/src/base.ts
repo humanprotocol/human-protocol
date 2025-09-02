@@ -25,16 +25,21 @@ export abstract class BaseEthersClient {
   }
 
   /**
-   * Internal helper to enrich transaction overrides with network specific defaults
-   * (e.g. fixed gas price for Aurora networks) while preserving user provided
-   * fee parameters.
+   * Internal helper to enrich transaction overrides with network specific defaults.
+   *
+   * Aurora networks use a fixed gas price. We always override any user provided
+   * gasPrice with the canonical DEFAULT_AURORA_GAS_PRICE to avoid mismatches
+   * or tx failures due to an unexpected value. For other networks the user
+   * supplied fee parameters are left untouched.
    */
   protected applyTxDefaults(txOptions: Overrides = {}): Overrides {
-    if (
-      this.networkData.chainId === ChainId.AURORA_TESTNET &&
-      txOptions.gasPrice === undefined
-    ) {
-      return { ...txOptions, gasPrice: DEFAULT_AURORA_GAS_PRICE };
+    if (this.networkData.chainId === ChainId.AURORA_TESTNET) {
+      return {
+        ...txOptions,
+        gasPrice: DEFAULT_AURORA_GAS_PRICE,
+        maxFeePerGas: undefined,
+        maxPriorityFeePerGas: undefined,
+      } as Overrides;
     }
     return txOptions;
   }
