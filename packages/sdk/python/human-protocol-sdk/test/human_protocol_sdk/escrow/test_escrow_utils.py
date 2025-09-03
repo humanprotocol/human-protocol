@@ -12,6 +12,7 @@ from human_protocol_sdk.escrow import (
     EscrowUtils,
 )
 from human_protocol_sdk.filter import (
+    CancellationRefundFilter,
     EscrowFilter,
     FilterError,
     StatusEventFilter,
@@ -249,13 +250,6 @@ class TestEscrowUtils(unittest.TestCase):
                 },
             )
             self.assertEqual(escrow, None)
-
-    def test_get_escrow_invalid_chain_id(self):
-        with self.assertRaises(ValueError) as cm:
-            EscrowUtils.get_escrow(
-                ChainId(123), "0x1234567890123456789012345678901234567890"
-            )
-        self.assertEqual("123 is not a valid ChainId", str(cm.exception))
 
     def test_get_escrow_invalid_address_launcher(self):
         with self.assertRaises(EscrowClientError) as cm:
@@ -510,6 +504,141 @@ class TestEscrowUtils(unittest.TestCase):
             self.assertEqual(result[1].id, "2")
             self.assertEqual(result[0].amount, 1000000000000000000)
             self.assertEqual(result[1].amount, 2000000000000000000)
+
+    def test_get_cancellation_refunds(self):
+        from human_protocol_sdk.escrow.escrow_utils import CancellationRefundFilter
+
+        with patch(
+            "human_protocol_sdk.escrow.escrow_utils.get_data_from_subgraph"
+        ) as mock_function:
+            mock_refund = {
+                "id": "1",
+                "escrowAddress": "0x1234567890123456789012345678901234567890",
+                "receiver": "0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef",
+                "amount": "1000000000000000000",
+                "block": "123456",
+                "timestamp": "1672531200",
+                "txHash": "0xhash1",
+            }
+
+            def side_effect(subgraph_url, query, params):
+                if subgraph_url == NETWORKS[ChainId.POLYGON_AMOY]:
+                    return {"data": {"cancellationRefundEvents": [mock_refund]}}
+
+            mock_function.side_effect = side_effect
+
+            filter = CancellationRefundFilter(
+                chain_id=ChainId.POLYGON_AMOY,
+                escrow_address="0x1234567890123456789012345678901234567890",
+                date_from=datetime.fromtimestamp(1672531200),
+                date_to=datetime.fromtimestamp(1672531300),
+                first=10,
+                skip=0,
+                order_direction=OrderDirection.DESC,
+            )
+            refunds = EscrowUtils.get_cancellation_refunds(filter)
+
+            mock_function.assert_called_once()
+            self.assertEqual(len(refunds), 1)
+            self.assertEqual(refunds[0].id, mock_refund["id"])
+            self.assertEqual(refunds[0].escrow_address, mock_refund["escrowAddress"])
+            self.assertEqual(refunds[0].receiver, mock_refund["receiver"])
+            self.assertEqual(refunds[0].amount, int(mock_refund["amount"]))
+            self.assertEqual(refunds[0].block, int(mock_refund["block"]))
+            self.assertEqual(refunds[0].timestamp, int(mock_refund["timestamp"]))
+            self.assertEqual(refunds[0].tx_hash, mock_refund["txHash"])
+
+    def test_get_cancellation_refunds_invalid_escrow_address(self):
+        with self.assertRaises(FilterError) as context:
+            CancellationRefundFilter(
+                chain_id=ChainId.POLYGON_AMOY, escrow_address="invalid_address"
+            )
+        self.assertEqual(
+            str(context.exception), "Invalid escrow address: invalid_address"
+        )
+
+    def test_get_cancellation_refunds_invalid_receiver(self):
+        with self.assertRaises(FilterError) as context:
+            CancellationRefundFilter(
+                chain_id=ChainId.POLYGON_AMOY, receiver="invalid_address"
+            )
+        self.assertEqual(
+            str(context.exception), "Invalid receiver address: invalid_address"
+        )
+
+    def test_get_cancellation_refunds_invalid_dates(self):
+        with self.assertRaises(FilterError) as context:
+            CancellationRefundFilter(
+                chain_id=ChainId.POLYGON_AMOY,
+                date_from=datetime(2023, 6, 8),
+                date_to=datetime(2023, 5, 8),
+            )
+        self.assertTrue("must be earlier than" in str(context.exception))
+
+    def test_get_cancellation_refunds_no_data(self):
+        from human_protocol_sdk.escrow.escrow_utils import CancellationRefundFilter
+
+        with patch(
+            "human_protocol_sdk.escrow.escrow_utils.get_data_from_subgraph"
+        ) as mock_function:
+            mock_function.return_value = {"data": {"cancellationRefundEvents": []}}
+
+            filter = CancellationRefundFilter(chain_id=ChainId.POLYGON_AMOY)
+            refunds = EscrowUtils.get_cancellation_refunds(filter)
+
+            self.assertEqual(len(refunds), 0)
+
+    def test_get_cancellation_refund(self):
+        with patch(
+            "human_protocol_sdk.escrow.escrow_utils.get_data_from_subgraph"
+        ) as mock_function:
+            mock_refund = {
+                "id": "1",
+                "escrowAddress": "0x1234567890123456789012345678901234567890",
+                "receiver": "0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef",
+                "amount": "1000000000000000000",
+                "block": "123456",
+                "timestamp": "1672531200",
+                "txHash": "0xhash1",
+            }
+
+            mock_function.return_value = {
+                "data": {
+                    "cancellationRefundEvents": [mock_refund],
+                }
+            }
+
+            refund = EscrowUtils.get_cancellation_refund(
+                ChainId.POLYGON_AMOY,
+                "0x1234567890123456789012345678901234567890",
+            )
+
+            mock_function.assert_called_once()
+            self.assertIsNotNone(refund)
+            self.assertEqual(refund.id, mock_refund["id"])
+            self.assertEqual(refund.escrow_address, mock_refund["escrowAddress"])
+            self.assertEqual(refund.receiver, mock_refund["receiver"])
+            self.assertEqual(refund.amount, int(mock_refund["amount"]))
+            self.assertEqual(refund.block, int(mock_refund["block"]))
+            self.assertEqual(refund.timestamp, int(mock_refund["timestamp"]))
+            self.assertEqual(refund.tx_hash, mock_refund["txHash"])
+
+    def test_get_cancellation_refund_no_data(self):
+        with patch(
+            "human_protocol_sdk.escrow.escrow_utils.get_data_from_subgraph"
+        ) as mock_function:
+            mock_function.return_value = {"data": {"cancellationRefundEvents": []}}
+
+            refund = EscrowUtils.get_cancellation_refund(
+                ChainId.POLYGON_AMOY,
+                "0x1234567890123456789012345678901234567890",
+            )
+            self.assertIsNone(refund)
+
+    def test_get_cancellation_refund_invalid_address(self):
+        with self.assertRaises(EscrowClientError) as cm:
+            EscrowUtils.get_cancellation_refund(ChainId.POLYGON_AMOY, "invalid_address")
+        self.assertEqual("Invalid escrow address", str(cm.exception))
 
 
 if __name__ == "__main__":
