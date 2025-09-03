@@ -1,13 +1,12 @@
 name: Publish packages
 
 permissions:
-  contents: read
+  contents: write # needed to push tags
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
   publish:
@@ -22,6 +21,10 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
       - name: Publish packages
-        run: yarn publish
+        run: yarn workspaces foreach --all --no-private -pt npm publish --tolerate-republish --json | tee publish.log
         env:
           YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Tag published packages
+        run: node scripts/tag-published-packages.mjs publish.log
+      - name: Push created tags
+        run: git push origin --tags

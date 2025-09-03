@@ -50,6 +50,8 @@ dist
 hardhat-dependency-compiler
 package.tgz
 
-# cache
+# Cache
 cache
 
+# Ignore developer-only local files
+.local

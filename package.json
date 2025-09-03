@@ -13,8 +13,7 @@
     "docker:infra-stop": "make -C ./docker-setup -f Makefile.dev infra-stop",
     "docker:infra-down": "make -C ./docker-setup -f Makefile.dev infra-down",
     "docker:web3-up": "make -C ./docker-setup -f Makefile.dev web3-up",
-    "docker:web3-down": "make -C ./docker-setup -f Makefile.dev web3-down",
-    "publish": "yarn workspaces foreach --all --no-private -pt npm publish --tolerate-republish"
+    "docker:web3-down": "make -C ./docker-setup -f Makefile.dev web3-down"
   },
   "workspaces": [
     "packages/**"
