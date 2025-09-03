@@ -159,7 +159,7 @@ export class RoutingProtocolService {
     exchangeOracle: string;
     recordingOracle: string;
   }> {
-    if (Object.values(HCaptchaJobType).includes(jobType as HCaptchaJobType)) {
+    if (jobType === HCaptchaJobType.HCAPTCHA) {
       return {
         reputationOracle: this.web3ConfigService.hCaptchaOracleAddress,
         exchangeOracle: this.web3ConfigService.hCaptchaOracleAddress,

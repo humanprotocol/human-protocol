@@ -48,6 +48,7 @@ import { add, div, max, mul } from '../../common/utils/decimal';
 import { getTokenDecimals } from '../../common/utils/tokens';
 import { CronJobRepository } from '../cron-job/cron-job.repository';
 import {
+  AudinoManifestDto,
   CvatManifestDto,
   FortuneManifestDto,
   HCaptchaManifestDto,
@@ -654,11 +655,9 @@ export class JobService {
   };
 
   public getOracleType(requestType: JobRequestType): OracleType {
-    if (Object.values(FortuneJobType).includes(requestType as FortuneJobType)) {
+    if (requestType === FortuneJobType.FORTUNE) {
       return OracleType.FORTUNE;
-    } else if (
-      Object.values(HCaptchaJobType).includes(requestType as HCaptchaJobType)
-    ) {
+    } else if (requestType === HCaptchaJobType.HCAPTCHA) {
       return OracleType.HCAPTCHA;
     } else if (
       Object.values(AudinoJobType).includes(requestType as AudinoJobType)
@@ -798,6 +797,22 @@ export class JobService {
         ...(manifest.qualifications &&
           manifest.qualifications?.length > 0 && {
             qualifications: manifest.qualifications,
+          }),
+      };
+    }
+    if (
+      Object.values(AudinoJobType).includes(
+        jobEntity.requestType as AudinoJobType,
+      )
+    ) {
+      const manifest = manifestData as AudinoManifestDto;
+      specificManifestDetails = {
+        requestType: manifest.annotation?.type,
+        submissionsRequired: manifest.annotation?.segment_duration,
+        description: manifest.annotation?.description,
+        ...(manifest.annotation?.qualifications &&
+          manifest.annotation?.qualifications?.length > 0 && {
+            qualifications: manifest.annotation?.qualifications,
           }),
       };
     } else {
