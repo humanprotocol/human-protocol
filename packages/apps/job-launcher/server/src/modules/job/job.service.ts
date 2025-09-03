@@ -307,6 +307,7 @@ export class JobService {
       (
         [
           AudinoJobType.AUDIO_TRANSCRIPTION,
+          AudinoJobType.AUDIO_ATTRIBUTE_ANNOTATION,
           FortuneJobType.FORTUNE,
           HCaptchaJobType.HCAPTCHA,
         ] as JobRequestType[]
