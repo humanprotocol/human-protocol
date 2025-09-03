@@ -5,7 +5,6 @@ import {
   StorageProviders,
   GCSRegions,
   AWSRegions,
-  AudinoJobType,
 } from '../../../types';
 
 export const mapCvatFormValues = (
@@ -76,7 +75,7 @@ export const mapAudinoFormValues = (
   const { audinoRequest } = jobRequest;
 
   return {
-    type: audinoRequest?.type || AudinoJobType.AUDIO_TRANSCRIPTION,
+    type: audinoRequest?.type,
     labels: audinoRequest?.labels?.map((label) => label.name) || [],
     description: audinoRequest?.description || '',
     qualifications: audinoRequest?.qualifications

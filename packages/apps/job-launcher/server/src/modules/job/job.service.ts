@@ -132,6 +132,9 @@ export class JobService {
     [AudinoJobType.AUDIO_TRANSCRIPTION]: {
       getTrustedHandlers: () => [],
     },
+    [AudinoJobType.AUDIO_ATTRIBUTE_ANNOTATION]: {
+      getTrustedHandlers: () => [],
+    },
   };
 
   public async createJob(
@@ -651,15 +654,22 @@ export class JobService {
   };
 
   public getOracleType(requestType: JobRequestType): OracleType {
-    if (requestType === FortuneJobType.FORTUNE) {
+    if (Object.values(FortuneJobType).includes(requestType as FortuneJobType)) {
       return OracleType.FORTUNE;
-    } else if (requestType === HCaptchaJobType.HCAPTCHA) {
+    } else if (
+      Object.values(HCaptchaJobType).includes(requestType as HCaptchaJobType)
+    ) {
       return OracleType.HCAPTCHA;
-    } else if (requestType === AudinoJobType.AUDIO_TRANSCRIPTION) {
+    } else if (
+      Object.values(AudinoJobType).includes(requestType as AudinoJobType)
+    ) {
       return OracleType.AUDINO;
-    } else {
+    } else if (
+      Object.values(CvatJobType).includes(requestType as CvatJobType)
+    ) {
       return OracleType.CVAT;
     }
+    throw new ConflictError(ErrorJob.InvalidRequestType);
   }
 
   public async processEscrowCancellation(

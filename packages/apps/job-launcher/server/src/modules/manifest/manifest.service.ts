@@ -116,6 +116,7 @@ export class ManifestService {
         );
 
       case AudinoJobType.AUDIO_TRANSCRIPTION:
+      case AudinoJobType.AUDIO_ATTRIBUTE_ANNOTATION:
         return this.createAudinoManifest(dto as JobAudinoDto, requestType);
 
       default:
