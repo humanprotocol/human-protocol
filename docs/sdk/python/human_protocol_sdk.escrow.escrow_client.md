@@ -74,15 +74,13 @@ Initializes a Escrow instance.
 * **Parameters:**
   **web3** (`Web3`) – The Web3 object
 
-#### add_trusted_handlers(\*args, \*\*kwargs)
-
 #### bulk_payout(\*args, \*\*kwargs)
 
 #### cancel(\*args, \*\*kwargs)
 
 #### complete(\*args, \*\*kwargs)
 
-#### create_bulk_payout_transaction(escrow_address, recipients, amounts, final_results_url, final_results_hash, txId, force_complete=False, tx_options=None)
+#### create_bulk_payout_transaction(escrow_address, recipients, amounts, final_results_url, final_results_hash, payoutId, force_complete=False, tx_options=None)
 
 Creates a prepared transaction for bulk payout without signing or sending it.
 
@@ -92,7 +90,7 @@ Creates a prepared transaction for bulk payout without signing or sending it.
   * **amounts** (`List`[`Decimal`]) – Array of amounts the recipients will receive
   * **final_results_url** (`str`) – Final results file URL
   * **final_results_hash** (`str`) – Final results file hash
-  * **txId** (`Decimal`) – Serial number of the bulks
+  * **payoutId** (`str`) – Unique identifier for the payout
   * **tx_options** (`Optional`[`TxParams`]) – (Optional) Additional transaction parameters
 * **Return type:**
   `TxParams`
@@ -258,6 +256,34 @@ Gets the escrow factory address of the escrow.
   escrow_client = EscrowClient(w3)
 
   escrow_factory = escrow_client.get_factory_address(
+      "0x62dD51230A30401C455c8398d06F85e4EaB6309f"
+  )
+  ```
+
+#### get_intermediate_results_hash(escrow_address)
+
+Gets the intermediate results file hash.
+
+* **Parameters:**
+  **escrow_address** (`str`) – Address of the escrow
+* **Return type:**
+  `str`
+* **Returns:**
+  Intermediate results file hash
+* **Raises:**
+  [**EscrowClientError**](#human_protocol_sdk.escrow.escrow_client.EscrowClientError) – If an error occurs while checking the parameters
+* **Example:**
+  ```python
+  from eth_typing import URI
+  from web3 import Web3
+  from web3.providers.auto import load_provider_from_uri
+
+  from human_protocol_sdk.escrow import EscrowClient
+
+  w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+  escrow_client = EscrowClient(w3)
+
+  hash = escrow_client.get_intermediate_results_hash(
       "0x62dD51230A30401C455c8398d06F85e4EaB6309f"
   )
   ```
@@ -430,6 +456,34 @@ Gets the reputation oracle address of the escrow.
   )
   ```
 
+#### get_reserved_funds(escrow_address)
+
+Gets the reserved funds for a specified escrow address.
+
+* **Parameters:**
+  **escrow_address** (`str`) – Address of the escrow
+* **Return type:**
+  `Decimal`
+* **Returns:**
+  Value of the reserved funds
+* **Raises:**
+  [**EscrowClientError**](#human_protocol_sdk.escrow.escrow_client.EscrowClientError) – If an error occurs while checking the parameters
+* **Example:**
+  ```python
+  from eth_typing import URI
+  from web3 import Web3
+  from web3.providers.auto import load_provider_from_uri
+
+  from human_protocol_sdk.escrow import EscrowClient
+
+  w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+  escrow_client = EscrowClient(w3)
+
+  reserved_funds = escrow_client.get_reserved_funds(
+      "0x62dD51230A30401C455c8398d06F85e4EaB6309f"
+  )
+  ```
+
 #### get_results_url(escrow_address)
 
 Gets the results file URL.
@@ -514,6 +568,8 @@ Gets the address of the token used to fund the escrow.
   )
   ```
 
+#### request_cancellation(\*args, \*\*kwargs)
+
 #### setup(\*args, \*\*kwargs)
 
 #### store_results(\*args, \*\*kwargs)
@@ -544,15 +600,15 @@ Initializes a Escrow instance.
   * **manifest** (`str`) – Manifest data (can be a URL or JSON string)
   * **hash** (`str`) – Manifest file hash
 
-### *class* human_protocol_sdk.escrow.escrow_client.EscrowWithdraw(tx_hash, token_address, amount_withdrawn)
+### *class* human_protocol_sdk.escrow.escrow_client.EscrowWithdraw(tx_hash, token_address, withdrawn_amount)
 
 Bases: `object`
 
-#### \_\_init_\_(tx_hash, token_address, amount_withdrawn)
+#### \_\_init_\_(tx_hash, token_address, withdrawn_amount)
 
 Represents the result of an escrow cancellation transaction.
 
 * **Parameters:**
   * **tx_hash** (`str`) – The hash of the transaction associated with the escrow withdrawal.
   * **token_address** (`str`) – The address of the token used for the withdrawal.
-  * **amount_withdrawn** (`any`) – The amount withdrawn from the escrow.
+  * **withdrawn_amount** (`any`) – The amount withdrawn from the escrow.

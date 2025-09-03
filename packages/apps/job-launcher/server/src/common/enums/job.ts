@@ -10,6 +10,7 @@ export enum JobStatus {
   COMPLETED = 'completed',
   FAILED = 'failed',
   TO_CANCEL = 'to_cancel',
+  CANCELING = 'canceling',
   CANCELED = 'canceled',
 }
 

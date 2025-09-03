@@ -12,7 +12,7 @@
 
 ## Type Aliases
 
-- [EscrowCancel](type-aliases/EscrowCancel.md)
+- [CancellationRefund](type-aliases/CancellationRefund.md)
 - [EscrowWithdraw](type-aliases/EscrowWithdraw.md)
 - [NetworkData](type-aliases/NetworkData.md)
 - [Payout](type-aliases/Payout.md)

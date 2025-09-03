@@ -118,7 +118,7 @@ describe('AbuseService', () => {
       } as unknown as IEscrow);
       const amount = faker.number.int();
       mockedOperatorUtils.getOperator.mockResolvedValueOnce({
-        amountStaked: BigInt(amount),
+        stakedAmount: BigInt(amount),
       } as IOperator);
 
       await abuseService.processSlackInteraction(
