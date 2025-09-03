@@ -706,6 +706,7 @@ describe('CronJobService', () => {
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
         retriesCount: 0,
+        requestType: FortuneJobType.FORTUNE,
       };
 
       jobEntityMock2 = {
@@ -717,6 +718,7 @@ describe('CronJobService', () => {
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
         retriesCount: 0,
+        requestType: CvatJobType.IMAGE_POINTS,
       };
 
       findJobMock = jest

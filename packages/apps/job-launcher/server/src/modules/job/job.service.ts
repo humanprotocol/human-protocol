@@ -48,6 +48,7 @@ import { add, div, max, mul } from '../../common/utils/decimal';
 import { getTokenDecimals } from '../../common/utils/tokens';
 import { CronJobRepository } from '../cron-job/cron-job.repository';
 import {
+  AudinoManifestDto,
   CvatManifestDto,
   FortuneManifestDto,
   HCaptchaManifestDto,
@@ -130,6 +131,9 @@ export class JobService {
       getTrustedHandlers: () => [],
     },
     [AudinoJobType.AUDIO_TRANSCRIPTION]: {
+      getTrustedHandlers: () => [],
+    },
+    [AudinoJobType.AUDIO_ATTRIBUTE_ANNOTATION]: {
       getTrustedHandlers: () => [],
     },
   };
@@ -303,6 +307,7 @@ export class JobService {
       (
         [
           AudinoJobType.AUDIO_TRANSCRIPTION,
+          AudinoJobType.AUDIO_ATTRIBUTE_ANNOTATION,
           FortuneJobType.FORTUNE,
           HCaptchaJobType.HCAPTCHA,
         ] as JobRequestType[]
@@ -655,11 +660,16 @@ export class JobService {
       return OracleType.FORTUNE;
     } else if (requestType === HCaptchaJobType.HCAPTCHA) {
       return OracleType.HCAPTCHA;
-    } else if (requestType === AudinoJobType.AUDIO_TRANSCRIPTION) {
+    } else if (
+      Object.values(AudinoJobType).includes(requestType as AudinoJobType)
+    ) {
       return OracleType.AUDINO;
-    } else {
+    } else if (
+      Object.values(CvatJobType).includes(requestType as CvatJobType)
+    ) {
       return OracleType.CVAT;
     }
+    throw new ConflictError(ErrorJob.InvalidRequestType);
   }
 
   public async processEscrowCancellation(
@@ -788,6 +798,21 @@ export class JobService {
         ...(manifest.qualifications &&
           manifest.qualifications?.length > 0 && {
             qualifications: manifest.qualifications,
+          }),
+      };
+    } else if (
+      Object.values(AudinoJobType).includes(
+        jobEntity.requestType as AudinoJobType,
+      )
+    ) {
+      const manifest = manifestData as AudinoManifestDto;
+      specificManifestDetails = {
+        requestType: manifest.annotation?.type,
+        submissionsRequired: manifest.annotation?.segment_duration,
+        description: manifest.annotation?.description,
+        ...(manifest.annotation?.qualifications &&
+          manifest.annotation?.qualifications?.length > 0 && {
+            qualifications: manifest.annotation?.qualifications,
           }),
       };
     } else {

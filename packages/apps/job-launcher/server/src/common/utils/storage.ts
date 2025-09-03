@@ -24,6 +24,7 @@ export function generateBucketUrl(
         CvatJobType.IMAGE_BOXES_FROM_POINTS,
         CvatJobType.IMAGE_SKELETONS_FROM_BOXES,
         AudinoJobType.AUDIO_TRANSCRIPTION,
+        AudinoJobType.AUDIO_ATTRIBUTE_ANNOTATION,
       ] as JobRequestType[]
     ).includes(jobType) &&
     storageData.provider != StorageProviders.AWS &&
