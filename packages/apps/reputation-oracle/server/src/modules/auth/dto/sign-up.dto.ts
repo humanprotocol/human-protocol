@@ -5,10 +5,9 @@ import { UserRole } from '@/common/enums';
 import {
   IsLowercasedEmail,
   IsLowercasedEnum,
+  IsValidPassword,
   IsValidWeb3Signature,
 } from '@/common/validators';
-
-import { ValidPassword } from './password.dto';
 
 export class Web2SignUpDto {
   @ApiProperty()
@@ -16,7 +15,7 @@ export class Web2SignUpDto {
   email: string;
 
   @ApiProperty()
-  @ValidPassword()
+  @IsValidPassword()
   password: string;
 
   @ApiProperty({ name: 'h_captcha_token' })

@@ -3942,13 +3942,13 @@ __metadata:
   resolution: "@human-protocol/core@workspace:packages/core"
   dependencies:
     "@nomicfoundation/hardhat-chai-matchers": "npm:^2.0.7"
-    "@nomicfoundation/hardhat-ethers": "npm:^3.0.5"
+    "@nomicfoundation/hardhat-ethers": "npm:^3.1.0"
     "@nomicfoundation/hardhat-network-helpers": "npm:^1.0.12"
     "@nomicfoundation/hardhat-toolbox": "npm:^4.0.0"
     "@nomicfoundation/hardhat-verify": "npm:^2.0.11"
     "@openzeppelin/contracts": "npm:5.0.2"
     "@openzeppelin/contracts-upgradeable": "npm:^4.9.2"
-    "@openzeppelin/hardhat-upgrades": "npm:^3.3.0"
+    "@openzeppelin/hardhat-upgrades": "npm:^3.9.1"
     "@tenderly/hardhat-tenderly": "npm:^2.0.1"
     "@typechain/ethers-v6": "npm:^0.5.1"
     "@typechain/hardhat": "npm:^9.1.0"
@@ -3958,7 +3958,7 @@ __metadata:
     chai: "npm:^4.5.0"
     concurrently: "npm:^9.1.2"
     eslint: "npm:^8.55.0"
-    ethers: "npm:~6.13.5"
+    ethers: "npm:~6.15.0"
     hardhat: "npm:^2.26.0"
     hardhat-abi-exporter: "npm:^2.10.1"
     hardhat-contract-sizer: "npm:^2.6.1"
@@ -3974,7 +3974,7 @@ __metadata:
     typescript: "npm:^5.8.3"
     xdeployer: "npm:3.1.6"
   peerDependencies:
-    ethers: ~6.13.5
+    ethers: ~6.15.0
   languageName: unknown
   linkType: soft
 
@@ -3993,8 +3993,8 @@ __metadata:
     "@mui/x-data-grid": "npm:^8.7.0"
     "@mui/x-date-pickers": "npm:^8.7.0"
     "@tanstack/react-query": "npm:^5.67.2"
-    "@types/react": "npm:^18.2.66"
-    "@types/react-dom": "npm:^18.2.22"
+    "@types/react": "npm:^18.3.12"
+    "@types/react-dom": "npm:^18.3.1"
     "@types/react-router-dom": "npm:^5.3.3"
     "@types/recharts": "npm:^1.8.29"
     "@typescript-eslint/eslint-plugin": "npm:^7.2.0"
@@ -4011,8 +4011,8 @@ __metadata:
     eslint-plugin-react-refresh: "npm:^0.4.11"
     globals: "npm:^16.2.0"
     prettier: "npm:^3.4.2"
-    react: "npm:^18.2.0"
-    react-dom: "npm:^18.2.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
     react-number-format: "npm:^5.4.3"
     react-router-dom: "npm:^6.23.1"
     recharts: "npm:^2.13.0-alpha.4"
@@ -4059,7 +4059,7 @@ __metadata:
     eslint: "npm:^8.0.1"
     eslint-config-prettier: "npm:^9.1.0"
     eslint-plugin-prettier: "npm:^5.2.1"
-    ethers: "npm:~6.13.5"
+    ethers: "npm:~6.15.0"
     jest: "npm:29.5.0"
     lodash: "npm:^4.17.21"
     prettier: "npm:^3.4.2"
@@ -4081,6 +4081,7 @@ __metadata:
     "@mui/icons-material": "npm:^7.0.1"
     "@mui/material": "npm:^5.16.7"
     "@types/react": "npm:^18.3.12"
+    "@types/react-dom": "npm:^18.3.1"
     dotenv: "npm:^17.0.0"
     eslint: "npm:^8.55.0"
     eslint-config-react-app: "npm:^7.0.1"
@@ -4089,8 +4090,8 @@ __metadata:
     eslint-plugin-react: "npm:^7.34.3"
     eslint-plugin-react-hooks: "npm:^5.1.0"
     prettier: "npm:^3.4.2"
-    react: "npm:^18.2.0"
-    react-dom: "npm:^18.2.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
     react-loading-skeleton: "npm:^3.3.1"
     react-router-dom: "npm:^6.4.3"
     serve: "npm:^14.2.4"
@@ -4138,7 +4139,7 @@ __metadata:
     "@tanstack/react-query": "npm:^5.67.2"
     "@tanstack/react-query-persist-client": "npm:^5.80.7"
     "@types/react": "npm:^18.3.12"
-    "@types/react-dom": "npm:^18.3.0"
+    "@types/react-dom": "npm:^18.3.1"
     "@types/react-router-dom": "npm:^5.3.3"
     "@typescript-eslint/eslint-plugin": "npm:^7.13.1"
     "@typescript-eslint/parser": "npm:^7.13.1"
@@ -4147,7 +4148,7 @@ __metadata:
     eslint: "npm:^8.57.0"
     eslint-plugin-react-hooks: "npm:^5.1.0"
     eslint-plugin-react-refresh: "npm:^0.4.11"
-    ethers: "npm:^6.13.5"
+    ethers: "npm:^6.15.0"
     prettier: "npm:^3.4.2"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
@@ -4199,7 +4200,7 @@ __metadata:
     eslint: "npm:^8.55.0"
     eslint-config-prettier: "npm:^9.1.0"
     eslint-plugin-prettier: "npm:^5.2.1"
-    ethers: "npm:~6.13.5"
+    ethers: "npm:~6.15.0"
     jest: "npm:29.7.0"
     joi: "npm:^17.13.3"
     jsonwebtoken: "npm:^9.0.2"
@@ -4282,7 +4283,7 @@ __metadata:
     "@types/node": "npm:^22.10.5"
     "@types/prop-types": "npm:^15"
     "@types/react": "npm:^18.3.12"
-    "@types/react-dom": "npm:^18.2.17"
+    "@types/react-dom": "npm:^18.3.1"
     "@typescript-eslint/eslint-plugin": "npm:^6.20.0"
     "@typescript-eslint/parser": "npm:^6.20.0"
     "@vercel/style-guide": "npm:^6.0.0"
@@ -4293,7 +4294,7 @@ __metadata:
     eslint-config-prettier: "npm:^9.1.0"
     eslint-plugin-prettier: "npm:^5.2.1"
     eslint-plugin-react-refresh: "npm:^0.4.11"
-    ethers: "npm:^6.13.5"
+    ethers: "npm:^6.15.0"
     husky: "npm:^9.1.6"
     i18next: "npm:^23.8.2"
     jsdom: "npm:^25.0.1"
@@ -4306,9 +4307,9 @@ __metadata:
     prettier: "npm:^3.4.2"
     prop-types: "npm:^15.8.1"
     query-string: "npm:^9.0.0"
-    react: "npm:^18.2.0"
-    react-dom: "npm:^18.2.0"
-    react-hook-form: "npm:^7.55.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    react-hook-form: "npm:^7.62.0"
     react-i18next: "npm:^15.1.0"
     react-imask: "npm:^7.4.0"
     react-number-format: "npm:^5.4.3"
@@ -4365,7 +4366,7 @@ __metadata:
     eslint: "npm:^8.55.0"
     eslint-config-prettier: "npm:^9.1.0"
     eslint-plugin-prettier: "npm:^5.2.1"
-    ethers: "npm:~6.13.5"
+    ethers: "npm:^6.15.0"
     jest: "npm:29.7.0"
     joi: "npm:^17.13.3"
     jsonwebtoken: "npm:^9.0.2"
@@ -4406,7 +4407,7 @@ __metadata:
     "@tanstack/react-query-persist-client": "npm:^5.80.7"
     "@types/file-saver": "npm:^2.0.7"
     "@types/react": "npm:^18.3.12"
-    "@types/react-dom": "npm:^18.2.25"
+    "@types/react-dom": "npm:^18.3.1"
     "@types/xml2js": "npm:^0.4.14"
     "@vitejs/plugin-react": "npm:^4.2.1"
     axios: "npm:^1.1.3"
@@ -4419,13 +4420,13 @@ __metadata:
     eslint-plugin-import: "npm:^2.29.0"
     eslint-plugin-react: "npm:^7.34.3"
     eslint-plugin-react-hooks: "npm:^5.1.0"
-    ethers: "npm:^6.13.5"
+    ethers: "npm:^6.15.0"
     file-saver: "npm:^2.0.5"
     formik: "npm:^2.4.2"
     jwt-decode: "npm:^4.0.0"
     prettier: "npm:^3.4.2"
-    react: "npm:^18.2.0"
-    react-dom: "npm:^18.2.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
     react-redux: "npm:^9.1.0"
     react-router-dom: "npm:^6.14.1"
     recharts: "npm:^2.7.2"
@@ -4583,7 +4584,7 @@ __metadata:
     eslint-import-resolver-typescript: "npm:^4.4.4"
     eslint-plugin-import: "npm:^2.32.0"
     eslint-plugin-prettier: "npm:^5.5.4"
-    ethers: "npm:~6.13.5"
+    ethers: "npm:~6.15.0"
     globals: "npm:^16.3.0"
     helmet: "npm:^7.1.0"
     jest: "npm:29.7.0"
@@ -4618,7 +4619,7 @@ __metadata:
     "@human-protocol/core": "workspace:x"
     axios: "npm:^1.4.0"
     eslint: "npm:^8.55.0"
-    ethers: "npm:~6.13.5"
+    ethers: "npm:~6.15.0"
     graphql: "npm:^16.8.1"
     graphql-request: "npm:^6.1.0"
     graphql-tag: "npm:^2.12.6"
@@ -4646,7 +4647,7 @@ __metadata:
     "@tanstack/react-query": "npm:^5.67.2"
     "@tanstack/react-query-persist-client": "npm:^5.80.7"
     "@types/react": "npm:^18.3.12"
-    "@types/react-dom": "npm:^18.3.0"
+    "@types/react-dom": "npm:^18.3.1"
     "@types/react-router-dom": "npm:^5.3.3"
     "@typescript-eslint/eslint-plugin": "npm:^7.13.1"
     "@typescript-eslint/parser": "npm:^7.13.1"
@@ -4655,7 +4656,7 @@ __metadata:
     eslint: "npm:^8.57.0"
     eslint-plugin-react-hooks: "npm:^5.1.0"
     eslint-plugin-react-refresh: "npm:^0.4.11"
-    ethers: "npm:^6.13.5"
+    ethers: "npm:^6.15.0"
     prettier: "npm:^3.4.2"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
@@ -4679,7 +4680,7 @@ __metadata:
     "@graphql-eslint/eslint-plugin": "npm:^3.19.1"
     "@human-protocol/core": "workspace:*"
     eslint: "npm:^8.55.0"
-    ethers: "npm:~6.13.5"
+    ethers: "npm:~6.15.0"
     graphql: "npm:^16.6.0"
     matchstick-as: "npm:^0.6.0"
     mustache: "npm:^4.2.0"
@@ -7028,7 +7029,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nomicfoundation/hardhat-ethers@npm:^3.0.0, @nomicfoundation/hardhat-ethers@npm:^3.0.5":
+"@nomicfoundation/hardhat-ethers@npm:^3.0.0":
   version: 3.0.8
   resolution: "@nomicfoundation/hardhat-ethers@npm:3.0.8"
   dependencies:
@@ -7038,6 +7039,19 @@ __metadata:
     ethers: ^6.1.0
     hardhat: ^2.0.0
   checksum: 10c0/478b5d9607e7fc50377bec45ecebbf74240719c76aa08c81052d2a2174eee6f422db8cfd3f13fd17a080d8ff1046fac50dfffa3a2e57c9e3ed466932239e4af2
+  languageName: node
+  linkType: hard
+
+"@nomicfoundation/hardhat-ethers@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "@nomicfoundation/hardhat-ethers@npm:3.1.0"
+  dependencies:
+    debug: "npm:^4.1.1"
+    lodash.isequal: "npm:^4.5.0"
+  peerDependencies:
+    ethers: ^6.14.0
+    hardhat: ^2.26.0
+  checksum: 10c0/66c5c9f9dd56f1cea25f5c9890f99251fd3179090bb0ad3f73fc1184e4a8ceaba544b5165d3f67e500cf0047d1550350e80df10e28cbabae3d61a659826163ae
   languageName: node
   linkType: hard
 
@@ -7475,6 +7489,33 @@ __metadata:
   bin:
     migrate-oz-cli-project: dist/scripts/migrate-oz-cli-project.js
   checksum: 10c0/14b09af024ee42f6f43b775952b88d8c113b750df3c3c5dea17732e7dc2a4ca7cb3b69dd450403a8d6ca39d5e3ea7b25a4569469f9f2cc94a4bb2273ff2b9f70
+  languageName: node
+  linkType: hard
+
+"@openzeppelin/hardhat-upgrades@npm:^3.9.1":
+  version: 3.9.1
+  resolution: "@openzeppelin/hardhat-upgrades@npm:3.9.1"
+  dependencies:
+    "@openzeppelin/defender-sdk-base-client": "npm:^2.1.0"
+    "@openzeppelin/defender-sdk-deploy-client": "npm:^2.1.0"
+    "@openzeppelin/defender-sdk-network-client": "npm:^2.1.0"
+    "@openzeppelin/upgrades-core": "npm:^1.41.0"
+    chalk: "npm:^4.1.0"
+    debug: "npm:^4.1.1"
+    ethereumjs-util: "npm:^7.1.5"
+    proper-lockfile: "npm:^4.1.1"
+    undici: "npm:^6.11.1"
+  peerDependencies:
+    "@nomicfoundation/hardhat-ethers": ^3.0.6
+    "@nomicfoundation/hardhat-verify": ^2.0.14
+    ethers: ^6.6.0
+    hardhat: ^2.24.1
+  peerDependenciesMeta:
+    "@nomicfoundation/hardhat-verify":
+      optional: true
+  bin:
+    migrate-oz-cli-project: dist/scripts/migrate-oz-cli-project.js
+  checksum: 10c0/6b453bd1af116bc785f040661fe4e51403a9ab82d76e894346336b66f85dbd0d46751639bf325cef6ce030d41442551e92b8925429fff86fce900cd3d655028d
   languageName: node
   linkType: hard
 
@@ -10608,7 +10649,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-dom@npm:^18.2.17, @types/react-dom@npm:^18.2.22, @types/react-dom@npm:^18.2.25, @types/react-dom@npm:^18.3.0":
+"@types/react-dom@npm:^18.3.1":
   version: 18.3.7
   resolution: "@types/react-dom@npm:18.3.7"
   peerDependencies:
@@ -10656,7 +10697,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:^18.2.66, @types/react@npm:^18.3.12":
+"@types/react@npm:^18.3.12":
   version: 18.3.21
   resolution: "@types/react@npm:18.3.21"
   dependencies:
@@ -18457,7 +18498,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ethers@npm:^6.13.5, ethers@npm:^6.7.0, ethers@npm:^6.8.1":
+"ethers@npm:^6.15.0, ethers@npm:~6.15.0":
+  version: 6.15.0
+  resolution: "ethers@npm:6.15.0"
+  dependencies:
+    "@adraffy/ens-normalize": "npm:1.10.1"
+    "@noble/curves": "npm:1.2.0"
+    "@noble/hashes": "npm:1.3.2"
+    "@types/node": "npm:22.7.5"
+    aes-js: "npm:4.0.0-beta.5"
+    tslib: "npm:2.7.0"
+    ws: "npm:8.17.1"
+  checksum: 10c0/0a4581b662fe46a889a524d3aba43dc6f0ac59b3ae08dce678ee4b5799aab4906109ab24684c9644deedfc9d6e79b59faccecbeda9b6b7ceb085724d596a49e9
+  languageName: node
+  linkType: hard
+
+"ethers@npm:^6.7.0, ethers@npm:^6.8.1":
   version: 6.14.0
   resolution: "ethers@npm:6.14.0"
   dependencies:
@@ -18469,21 +18525,6 @@ __metadata:
     tslib: "npm:2.7.0"
     ws: "npm:8.17.1"
   checksum: 10c0/7da443719a21c0b071dbd7d47e50faa8fcacc746e2b5487a394992215457903b1d187279e7134b48414d2626d0dbbf58b20c3bb8d246c359aa0a7453b608d582
-  languageName: node
-  linkType: hard
-
-"ethers@npm:~6.13.5":
-  version: 6.13.7
-  resolution: "ethers@npm:6.13.7"
-  dependencies:
-    "@adraffy/ens-normalize": "npm:1.10.1"
-    "@noble/curves": "npm:1.2.0"
-    "@noble/hashes": "npm:1.3.2"
-    "@types/node": "npm:22.7.5"
-    aes-js: "npm:4.0.0-beta.5"
-    tslib: "npm:2.7.0"
-    ws: "npm:8.17.1"
-  checksum: 10c0/bb693e8714c6082ee2c1d2af8a209bbc10d83ca4a686de368e169bf1dc804e926be58280c4bdaf0c2e9a4d021317f0db694ecfa4040381728ca46d45427db2a7
   languageName: node
   linkType: hard
 
@@ -26083,7 +26124,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dom@npm:^18.2.0, react-dom@npm:^18.3.1":
+"react-dom@npm:^18.3.1":
   version: 18.3.1
   resolution: "react-dom@npm:18.3.1"
   dependencies:
@@ -26102,12 +26143,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-hook-form@npm:^7.55.0":
-  version: 7.56.2
-  resolution: "react-hook-form@npm:7.56.2"
+"react-hook-form@npm:^7.62.0":
+  version: 7.62.0
+  resolution: "react-hook-form@npm:7.62.0"
   peerDependencies:
     react: ^16.8.0 || ^17 || ^18 || ^19
-  checksum: 10c0/9eeca7525c5c0b1356670e7cc77687298c7280a31c99bca396596124371467c310cad22f2c10efd9c75b4570d07740ee1c6ad481d59c1b725c7600767f0a35af
+  checksum: 10c0/451a25a2ddf07be14f690d2ad3f2f970e0b933fd059ef141c6da9e19d0566d739e9d5cc9c482e3533f3fd01d97e658b896a01ce45a1259ad7b0d4638ba0112c6
   languageName: node
   linkType: hard
 
@@ -26272,7 +26313,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react@npm:^18.2.0, react@npm:^18.3.1":
+"react@npm:^18.3.1":
   version: 18.3.1
   resolution: "react@npm:18.3.1"
   dependencies:

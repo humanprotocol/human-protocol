@@ -1392,6 +1392,13 @@ describe('JobService', () => {
         expect(jobService.getOracleType(jobType)).toBe(OracleType.HCAPTCHA);
       },
     );
+
+    it('should throw an error for unsupported job type', () => {
+      const unsupportedJobType = 'UNSUPPORTED_JOB_TYPE' as any;
+      expect(() => jobService.getOracleType(unsupportedJobType)).toThrow(
+        new ConflictError(ErrorJob.InvalidRequestType),
+      );
+    });
   });
 
   describe('processEscrowCancellation', () => {

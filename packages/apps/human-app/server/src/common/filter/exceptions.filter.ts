@@ -24,18 +24,27 @@ export class ExceptionFilter implements IExceptionFilter {
     if (exception instanceof HttpException) {
       status = exception.getStatus();
       message = exception.getResponse();
-    } else if (exception.response) {
-      status = exception.response.status;
-      message =
-        exception.response.data?.message || exception.response.statusText;
-    } else {
-      let formattedError = exception;
-      if (exception instanceof AxiosError) {
-        formattedError = errorUtils.formatError(exception);
-        formattedError.outgoingRequestUrl = exception.config?.url;
+    } else if (exception instanceof AxiosError) {
+      /**
+       * All requests we made to external services are supposed to be made by axios,
+       * and we either proxy response code or act as a "bad gateway" if sending fails.
+       */
+      status = exception.response?.status || HttpStatus.BAD_GATEWAY;
+      if (status >= 200 && status < 400) {
+        /**
+         * In case some 3rd party that we are using (e.g. graphql client)
+         * throws with such status code (their API schema can be literally anything)
+         */
+        this.logger.warn('Unexpected http status in exception response', {
+          status,
+          error: errorUtils.formatError(exception),
+          path: request.url,
+        });
       }
+      message = exception.response?.data?.message || 'Bad gateway';
+    } else {
       this.logger.error('Unhandled exception', {
-        error: formattedError,
+        error: errorUtils.formatError(exception),
         path: request.url,
       });
     }

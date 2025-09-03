@@ -1,6 +1,13 @@
 import { applyDecorators } from '@nestjs/common';
 import { Transform } from 'class-transformer';
-import { IsEmail, IsEnum, ValidationOptions } from 'class-validator';
+import {
+  IsEmail,
+  IsEnum,
+  IsString,
+  MaxLength,
+  MinLength,
+  ValidationOptions,
+} from 'class-validator';
 
 export * from './password';
 export * from './web3';
@@ -28,6 +35,18 @@ export function IsLowercasedEnum(
         return value.map((v: string) => v.toLowerCase());
       }
       return value.toLowerCase();
+    }),
+  );
+}
+
+export function IsValidPassword() {
+  return applyDecorators(
+    IsString(),
+    MinLength(8, {
+      message: 'Password must be at least 8 characters long.',
+    }),
+    MaxLength(128, {
+      message: 'Password must be at most 128 characters',
     }),
   );
 }
