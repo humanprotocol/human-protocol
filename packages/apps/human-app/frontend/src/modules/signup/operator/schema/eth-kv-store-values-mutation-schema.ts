@@ -51,8 +51,11 @@ export const setEthKVStoreValuesMutationSchema = (
           fieldsValidations[typedKey].parse(newData[typedKey]);
         } catch (error) {
           if (error instanceof ZodError) {
-            error.issues[0].path = [typedKey];
-            ctx.addIssue(error.issues[0]);
+            const issue = error.issues[0];
+            ctx.addIssue({
+              ...issue,
+              path: [typedKey],
+            });
           }
         }
       }
@@ -107,7 +110,6 @@ export const getEditEthKVStoreValuesMutationSchema = (
     }
   ) as z.ZodType<
     EditEthKVStoreValuesMutationData,
-    z.ZodTypeDef,
     GetEthKVStoreValuesSuccessResponse
   >;
 };

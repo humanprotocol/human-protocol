@@ -16,7 +16,7 @@ export function useResendEmail() {
     mutate: resendEmailVerificationMutation,
     reset: resendEmailVerificationMutationReset,
   } = useResendEmailVerificationWorkerMutation();
-  const methods = useForm<ResendEmailVerificationDto>({
+  const methods = useForm({
     defaultValues: {
       h_captcha_token: 'token',
     },
