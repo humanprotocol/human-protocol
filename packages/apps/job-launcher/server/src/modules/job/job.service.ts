@@ -750,8 +750,7 @@ export class JobService {
             qualifications: manifest.qualifications,
           }),
       };
-    }
-    if (
+    } else if (
       Object.values(AudinoJobType).includes(
         jobEntity.requestType as AudinoJobType,
       )
