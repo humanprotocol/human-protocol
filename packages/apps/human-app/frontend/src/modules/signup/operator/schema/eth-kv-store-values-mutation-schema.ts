@@ -16,7 +16,10 @@ const fieldsValidations = {
   [EthKVStoreKeys.JobTypes]: z.array(z.enum(JobType)).min(1),
   [EthKVStoreKeys.Fee]: z.coerce
     .number({
-      error: (issue) => (issue.input === undefined ? undefined : undefined),
+      error: (issue) =>
+        issue.input === undefined
+          ? t('validation.required')
+          : t('validation.notANumber'),
     })
     .min(0, t('validation.feeValidationError'))
     .max(100, t('validation.feeValidationError'))
