@@ -164,7 +164,7 @@ export class RoutingProtocolService {
     exchangeOracle: string;
     recordingOracle: string;
   }> {
-    if (jobType === HCaptchaJobType.HCAPTCHA) {
+    if (Object.values(HCaptchaJobType).includes(jobType as HCaptchaJobType)) {
       return {
         reputationOracle: this.web3ConfigService.hCaptchaOracleAddress,
         exchangeOracle: this.web3ConfigService.hCaptchaOracleAddress,
@@ -176,7 +176,9 @@ export class RoutingProtocolService {
         exchangeOracle: this.web3ConfigService.cvatExchangeOracleAddress,
         recordingOracle: this.web3ConfigService.cvatRecordingOracleAddress,
       };
-    } else if (jobType === AudinoJobType.AUDIO_TRANSCRIPTION) {
+    } else if (
+      Object.values(AudinoJobType).includes(jobType as AudinoJobType)
+    ) {
       return {
         reputationOracle: this.web3ConfigService.reputationOracleAddress,
         exchangeOracle: this.web3ConfigService.audinoExchangeOracleAddress,
