@@ -13,7 +13,7 @@
     "build": "yarn clean && tsc --build",
     "lint": "eslint \"src/**/*.ts\" --fix",
     "format": "prettier --write \"src/**/*.ts\"",
-    "prepack": "yarn build"
+    "prepack": "[ \"${SKIP_PREPACK:-}\" = \"true\" ] && exit 0 || yarn build"
   },
   "dependencies": {
     "pino": "^9.7.0",

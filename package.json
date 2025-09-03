@@ -8,7 +8,7 @@
   "scripts": {
     "clean": "yarn workspaces foreach --all -p run clean",
     "lint": "yarn workspaces foreach --all -p run lint",
-    "build:libs": "yarn workspaces foreach -Rpt --from '{@human-protocol/sdk,packages/libs/*}' run build",
+    "build:libs": "yarn workspaces foreach --all --no-private -pt run build",
     "docker:infra-up": "make -C ./docker-setup  -f Makefile.dev infra-up",
     "docker:infra-stop": "make -C ./docker-setup -f Makefile.dev infra-stop",
     "docker:infra-down": "make -C ./docker-setup -f Makefile.dev infra-down",

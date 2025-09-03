@@ -20,9 +20,17 @@ jobs:
           cache: yarn
       - name: Install dependencies
         run: yarn install --immutable
+      # If there is no new version for dependency package (e.g. core)
+      # then `prepack` is not called for it during publish step
+      # and it's not built. As a result dependant package (e.g. sdk)
+      # don't have its dependency and can't be build as well,
+      # so we have to build all deps in their topological order first.
+      - name: Build packages
+        run: yarn workspaces foreach --all --no-private -pt run build
       - name: Publish packages
         run: yarn workspaces foreach --all --no-private -pt npm publish --tolerate-republish --json | tee publish.log
         env:
+          SKIP_PREPACK: true
           YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Tag published packages
         run: node scripts/tag-published-packages.mjs publish.log

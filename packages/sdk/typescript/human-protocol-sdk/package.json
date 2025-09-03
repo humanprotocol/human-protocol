@@ -17,7 +17,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write '**/*.{ts,json}'",
-    "prepack": "yarn build"
+    "prepack": "[ \"${SKIP_PREPACK:-}\" = \"true\" ] && exit 0 || yarn build"
   },
   "repository": {
     "url": "https://github.com/humanprotocol/human-protocol.git",
