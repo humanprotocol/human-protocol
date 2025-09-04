@@ -53,7 +53,7 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/sepolia/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmURrhnEXimGnRzjeN3B4VMmioUeBHUBg4WJ7KZzJ7em8g"
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmVYn12ZqBeZf9J9orq9RYV1C9iQ9uyWWF5vsWFJiKR68e"
         ),
         "hmt_address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
         "factory_address": "0x5987A5558d961ee674efe4A8c8eB7B1b5495D3bf",
@@ -85,7 +85,7 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/bsc-testnet/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmZHqbiyAAwrmqsVJLhTEdejVGYJpXfJAkJXUw7C2VV1TD"
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmfRiMaGaL224Z5ii4JAJjfyT64KysYM9gFFWbkDW9QwK1"
         ),
         "hmt_address": "0xE3D74BBFa45B4bCa69FF28891fBE392f4B4d4e4d",
         "factory_address": "0x2bfA592DBDaF434DDcbb893B1916120d181DAD18",
@@ -121,7 +121,7 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/amoy/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmeeE9bVkat1mkbQg1R6SXLuLadXxoNCY5b7CEQkmu6cQi"
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmRHsvZo2wW2Y3fDHz6xsHd6wBQyacbzKmFfNYQ8Zy3KLy"
         ),
         "hmt_address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
         "factory_address": "0xAFf5a986A530ff839d49325A5dF69F96627E8D29",
@@ -137,7 +137,7 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/amoy/version/aurora-testnet"
         ),
         "subgraph_url_api_key": (
-            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmQiLaFKusXLzKrpZvQDg7vETLhdfPgzWJN3Uxp3bE9K9W"
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmVHYvjbsgAroR9EMgqqGTQ7aKPRFMVekY6evU6mFPUU7J"
         ),
         "hmt_address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
         "factory_address": "0xbA537fEF2442cD48f60686FE1Bbbe40F964a7940",

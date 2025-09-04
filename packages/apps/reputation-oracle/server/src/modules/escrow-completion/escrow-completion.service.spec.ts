@@ -285,7 +285,6 @@ describe('EscrowCompletionService', () => {
       mockGetEscrowStatus.mockResolvedValue(
         faker.helpers.arrayElement([
           EscrowStatus.Launched,
-          EscrowStatus.Cancelled,
           EscrowStatus.Complete,
           EscrowStatus.Paid,
           EscrowStatus.Partial,

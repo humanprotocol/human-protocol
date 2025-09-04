@@ -1,15 +1,16 @@
+import { Address, BigInt, ethereum } from '@graphprotocol/graph-ts';
 import { newMockEvent } from 'matchstick-as/assembly/index';
-import { ethereum, BigInt, Address } from '@graphprotocol/graph-ts';
-
 import {
-  IntermediateStorage,
-  Pending,
   BulkTransfer,
+  BulkTransferV2,
+  CancellationRefund,
+  CancellationRequested,
   Cancelled,
   Completed,
   Fund,
+  IntermediateStorage,
+  Pending,
   PendingV2,
-  BulkTransferV2,
   Withdraw,
 } from '../../generated/templates/Escrow/Escrow';
 import { generateUniqueHash } from '../../tests/utils';
@@ -17,12 +18,13 @@ import { generateUniqueHash } from '../../tests/utils';
 export function createPendingEvent(
   sender: Address,
   manifest: string,
-  hash: string
+  hash: string,
+  timestamp: BigInt
 ): Pending {
   const newPendingEvent = changetype<Pending>(newMockEvent());
   newPendingEvent.transaction.hash = generateUniqueHash(
     sender.toString(),
-    newPendingEvent.transaction.nonce,
+    timestamp,
     newPendingEvent.transaction.nonce
   );
 
@@ -51,12 +53,13 @@ export function createPendingV2Event(
   hash: string,
   reputationOracleAddress: Address,
   recordingOracleAddress: Address,
-  exchangeOracleAddress: Address
+  exchangeOracleAddress: Address,
+  timestamp: BigInt
 ): PendingV2 {
   const newPendingEvent = changetype<PendingV2>(newMockEvent());
   newPendingEvent.transaction.hash = generateUniqueHash(
     sender.toString(),
-    newPendingEvent.transaction.nonce,
+    timestamp,
     newPendingEvent.transaction.nonce
   );
 
@@ -97,13 +100,14 @@ export function createPendingV2Event(
 export function createISEvent(
   sender: Address,
   url: string,
-  hash: string
+  hash: string,
+  timestamp: BigInt
 ): IntermediateStorage {
   const newIntermediateStorageEvent =
     changetype<IntermediateStorage>(newMockEvent());
   newIntermediateStorageEvent.transaction.hash = generateUniqueHash(
     sender.toString(),
-    newIntermediateStorageEvent.transaction.nonce,
+    timestamp,
     newIntermediateStorageEvent.transaction.nonce
   );
 
@@ -112,11 +116,11 @@ export function createISEvent(
   newIntermediateStorageEvent.parameters = [];
 
   const urlParam = new ethereum.EventParam(
-    '_url',
+    'url',
     ethereum.Value.fromString(url)
   );
   const hashParam = new ethereum.EventParam(
-    '_hash',
+    'hash',
     ethereum.Value.fromString(hash)
   );
 
@@ -147,19 +151,19 @@ export function createBulkTransferEvent(
   newBTEvent.parameters = [];
 
   const txIdParam = new ethereum.EventParam(
-    '_txId',
+    'txId',
     ethereum.Value.fromI32(txId)
   );
   const recipientsParam = new ethereum.EventParam(
-    '_recipients',
+    'recipients',
     ethereum.Value.fromAddressArray(recipients)
   );
   const amountsParam = new ethereum.EventParam(
-    '_amounts',
+    'amounts',
     ethereum.Value.fromI32Array(amounts)
   );
   const isPartialParam = new ethereum.EventParam(
-    '_isPartial',
+    'isPartial',
     ethereum.Value.fromBoolean(isPartial)
   );
 
@@ -193,23 +197,23 @@ export function createBulkTransferV2Event(
   newBTEvent.parameters = [];
 
   const txIdParam = new ethereum.EventParam(
-    '_txId',
+    'txId',
     ethereum.Value.fromI32(txId)
   );
   const recipientsParam = new ethereum.EventParam(
-    '_recipients',
+    'recipients',
     ethereum.Value.fromAddressArray(recipients)
   );
   const amountsParam = new ethereum.EventParam(
-    '_amounts',
+    'amounts',
     ethereum.Value.fromI32Array(amounts)
   );
   const isPartialParam = new ethereum.EventParam(
-    '_isPartial',
+    'isPartial',
     ethereum.Value.fromBoolean(isPartial)
   );
   const finalResultsUrlParam = new ethereum.EventParam(
-    '_finalResultsUrl',
+    'finalResultsUrl',
     ethereum.Value.fromString(finalResultsUrl)
   );
 
@@ -274,7 +278,7 @@ export function createFundEvent(
   newFundEvent.parameters = [];
 
   const amountParam = new ethereum.EventParam(
-    '_amount',
+    'amount',
     ethereum.Value.fromI32(amount)
   );
 
@@ -303,12 +307,12 @@ export function createWithdrawEvent(
   newWithdrawEvent.parameters = [];
 
   const tokenParam = new ethereum.EventParam(
-    '_token',
+    'token',
     ethereum.Value.fromAddress(token)
   );
 
   const amountParam = new ethereum.EventParam(
-    '_amount',
+    'amount',
     ethereum.Value.fromI32(amount)
   );
 
@@ -316,4 +320,45 @@ export function createWithdrawEvent(
   newWithdrawEvent.parameters.push(amountParam);
 
   return newWithdrawEvent;
+}
+
+export function createCancellationRequestedEvent(
+  sender: Address,
+  timestamp: BigInt
+): CancellationRequested {
+  const event = changetype<CancellationRequested>(newMockEvent());
+  event.transaction.hash = generateUniqueHash(
+    sender.toString(),
+    timestamp,
+    event.transaction.nonce
+  );
+  event.transaction.from = sender;
+  event.parameters = [];
+  return event;
+}
+
+export function createCancellationRefundEvent(
+  escrowAddress: Address,
+  sender: Address,
+  amount: i32,
+  timestamp: BigInt
+): CancellationRefund {
+  const event = changetype<CancellationRefund>(newMockEvent());
+  event.address = escrowAddress;
+  event.transaction.from = sender;
+  event.transaction.hash = generateUniqueHash(
+    sender.toString(),
+    timestamp,
+    event.transaction.nonce
+  );
+
+  event.parameters = [];
+
+  const amountParam = new ethereum.EventParam(
+    'amount',
+    ethereum.Value.fromI32(amount)
+  );
+
+  event.parameters.push(amountParam);
+  return event;
 }

@@ -6,7 +6,7 @@
 
 # Interface: IWorker
 
-Defined in: [interfaces.ts:199](https://github.com/humanprotocol/human-protocol/blob/5b6e90353814741f056deb2914334a3c4fbc279d/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L199)
+Defined in: [interfaces.ts:209](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L209)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [interfaces.ts:199](https://github.com/humanprotocol/human-protocol/
 
 > **address**: `string`
 
-Defined in: [interfaces.ts:201](https://github.com/humanprotocol/human-protocol/blob/5b6e90353814741f056deb2914334a3c4fbc279d/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L201)
+Defined in: [interfaces.ts:211](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L211)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [interfaces.ts:201](https://github.com/humanprotocol/human-protocol/
 
 > **id**: `string`
 
-Defined in: [interfaces.ts:200](https://github.com/humanprotocol/human-protocol/blob/5b6e90353814741f056deb2914334a3c4fbc279d/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L200)
+Defined in: [interfaces.ts:210](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L210)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [interfaces.ts:200](https://github.com/humanprotocol/human-protocol/
 
 > **payoutCount**: `number`
 
-Defined in: [interfaces.ts:203](https://github.com/humanprotocol/human-protocol/blob/5b6e90353814741f056deb2914334a3c4fbc279d/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L203)
+Defined in: [interfaces.ts:213](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L213)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [interfaces.ts:203](https://github.com/humanprotocol/human-protocol/
 
 > **totalHMTAmountReceived**: `number`
 
-Defined in: [interfaces.ts:202](https://github.com/humanprotocol/human-protocol/blob/5b6e90353814741f056deb2914334a3c4fbc279d/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L202)
+Defined in: [interfaces.ts:212](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L212)
