@@ -186,9 +186,13 @@ contract Escrow is IEscrow, ReentrancyGuard {
         external
         override
         adminOrLauncher
-        notBroke
         nonReentrant
     {
+        require(
+            remainingFunds != 0 || status == EscrowStatuses.Launched,
+            'Invalid status'
+        );
+
         EscrowStatuses previousStatus = status;
         status = EscrowStatuses.ToCancel;
         emit CancellationRequested();
@@ -362,15 +366,9 @@ contract Escrow is IEscrow, ReentrancyGuard {
         string calldata _hash,
         string calldata _payoutId,
         bool forceComplete
-    )
-        external
-        override
-        adminOrReputationOracle
-        notBroke
-        notExpired
-        nonReentrant
-    {
+    ) external override adminOrReputationOracle notExpired nonReentrant {
         bytes32 payoutId = keccak256(bytes(_payoutId));
+        require(remainingFunds != 0, 'No funds');
         require(!payouts[payoutId], 'payoutId already exists');
         require(_recipients.length == _amounts.length, 'Length mismatch');
         require(_amounts.length > 0, 'Empty amounts');
@@ -484,11 +482,6 @@ contract Escrow is IEscrow, ReentrancyGuard {
             msg.sender == admin || msg.sender == recordingOracle,
             'Unauthorised'
         );
-        _;
-    }
-
-    modifier notBroke() {
-        require(remainingFunds != 0, 'No funds');
         _;
     }
 

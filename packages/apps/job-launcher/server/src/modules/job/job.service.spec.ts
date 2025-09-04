@@ -1401,14 +1401,12 @@ describe('JobService', () => {
       const jobEntity = createJobEntity();
       mockWeb3Service.calculateGasPrice.mockResolvedValueOnce(1n);
       const getStatusMock = jest.fn().mockResolvedValueOnce('Active');
-      const getBalanceMock = jest.fn().mockResolvedValueOnce(100n);
       const requestCancellationMock = jest
         .fn()
         .mockResolvedValueOnce({ txHash: '0x', amountRefunded: 100n });
 
       mockedEscrowClient.build.mockResolvedValueOnce({
         getStatus: getStatusMock,
-        getBalance: getBalanceMock,
         requestCancellation: requestCancellationMock,
       } as unknown as EscrowClient);
 
@@ -1417,7 +1415,6 @@ describe('JobService', () => {
       expect(mockWeb3Service.getSigner).toHaveBeenCalledWith(jobEntity.chainId);
 
       expect(getStatusMock).toHaveBeenCalled();
-      expect(getBalanceMock).toHaveBeenCalled();
       expect(requestCancellationMock).toHaveBeenCalled();
     });
 
@@ -1426,7 +1423,6 @@ describe('JobService', () => {
       mockWeb3Service.calculateGasPrice.mockResolvedValueOnce(1n);
       mockedEscrowClient.build.mockResolvedValueOnce({
         getStatus: jest.fn().mockResolvedValueOnce(EscrowStatus.Complete),
-        getBalance: jest.fn().mockResolvedValueOnce(100n),
         requestCancellation: jest.fn(),
       } as unknown as EscrowClient);
 
@@ -1437,28 +1433,11 @@ describe('JobService', () => {
       );
     });
 
-    it('should throw if escrow balance is zero', async () => {
-      const jobEntity = createJobEntity();
-      mockWeb3Service.calculateGasPrice.mockResolvedValueOnce(1n);
-      mockedEscrowClient.build.mockResolvedValueOnce({
-        getStatus: jest.fn().mockResolvedValueOnce(EscrowStatus.Pending),
-        getBalance: jest.fn().mockResolvedValueOnce(0n),
-        requestCancellation: jest.fn(),
-      } as unknown as EscrowClient);
-
-      await expect(
-        jobService.processEscrowCancellation(jobEntity),
-      ).rejects.toThrow(
-        new ConflictError(ErrorEscrow.InvalidBalanceCancellation),
-      );
-    });
-
     it('should throw if cancel throws an error', async () => {
       const jobEntity = createJobEntity();
       mockWeb3Service.calculateGasPrice.mockResolvedValueOnce(1n);
       mockedEscrowClient.build.mockResolvedValueOnce({
         getStatus: jest.fn().mockResolvedValueOnce(EscrowStatus.Pending),
-        getBalance: jest.fn().mockResolvedValueOnce(100n),
         requestCancellation: jest
           .fn()
           .mockRejectedValueOnce(new Error('Network error')),
@@ -1750,39 +1729,6 @@ describe('JobService', () => {
           eventType: EventType.ESCROW_FAILED,
         }),
       ).rejects.toThrow(new ConflictError(ErrorJob.InvalidStatusCompletion));
-    });
-  });
-
-  describe('isEscrowFunded', () => {
-    it('should check if escrow is funded', async () => {
-      mockedEscrowClient.build.mockResolvedValueOnce({
-        getBalance: jest
-          .fn()
-          .mockResolvedValueOnce(
-            BigInt(faker.number.int({ min: 1, max: 1000 })),
-          ),
-      } as unknown as EscrowClient);
-      const result = await jobService.isEscrowFunded(
-        faker.number.int(),
-        faker.finance.ethereumAddress(),
-      );
-      expect(result).toBe(true);
-    });
-
-    it('should return false if escrow was not funded', async () => {
-      mockedEscrowClient.build.mockResolvedValueOnce({
-        getBalance: jest.fn().mockResolvedValueOnce(0n),
-      } as unknown as EscrowClient);
-      const result = await jobService.isEscrowFunded(
-        faker.number.int(),
-        faker.finance.ethereumAddress(),
-      );
-      expect(result).toBe(false);
-    });
-
-    it('should return false if escrowAddress is not provided', async () => {
-      const result = await jobService.isEscrowFunded(faker.number.int(), '');
-      expect(result).toBe(false);
     });
   });
 

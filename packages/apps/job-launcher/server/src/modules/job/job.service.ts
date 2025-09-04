@@ -440,12 +440,12 @@ export class JobService {
         }
         break;
       case JobStatus.CREATED:
-        if (await this.isCronJobRunning(CronJobType.SetupEscrow)) {
+        if (await this.isCronJobRunning(CronJobType.FundEscrow)) {
           status = JobStatus.FAILED;
         }
         break;
       case JobStatus.FUNDED:
-        if (await this.isCronJobRunning(CronJobType.FundEscrow)) {
+        if (await this.isCronJobRunning(CronJobType.SetupEscrow)) {
           status = JobStatus.FAILED;
         }
         break;
@@ -629,11 +629,6 @@ export class JobService {
       escrowStatus === EscrowStatus.Cancelled
     ) {
       throw new ConflictError(ErrorEscrow.InvalidStatusCancellation);
-    }
-
-    const balance = await escrowClient.getBalance(escrowAddress!);
-    if (balance === 0n) {
-      throw new ConflictError(ErrorEscrow.InvalidBalanceCancellation);
     }
 
     await escrowClient.requestCancellation(escrowAddress!, {
@@ -855,21 +850,6 @@ export class JobService {
     } else {
       throw new ConflictError(ErrorJob.InvalidStatusCompletion);
     }
-  }
-
-  public async isEscrowFunded(
-    chainId: ChainId,
-    escrowAddress: string,
-  ): Promise<boolean> {
-    if (escrowAddress) {
-      const signer = this.web3Service.getSigner(chainId);
-      const escrowClient = await EscrowClient.build(signer);
-      const balance = await escrowClient.getBalance(escrowAddress);
-
-      return balance !== 0n;
-    }
-
-    return false;
   }
 
   public async cancelJob(jobEntity: JobEntity): Promise<void> {

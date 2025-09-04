@@ -536,7 +536,7 @@ describe('Escrow', function () {
           ]([externalAddress], [balance], FIXTURE_URL, FIXTURE_HASH, '000', false);
         await expect(
           escrow.connect(launcher).requestCancellation()
-        ).to.be.revertedWith('No funds');
+        ).to.be.revertedWith('Invalid status');
       });
     });
 
@@ -599,6 +599,31 @@ describe('Escrow', function () {
         );
         expect(await escrow.status()).to.equal(Status.Cancelled);
 
+        expect(await token.balanceOf(escrow.getAddress())).to.equal(0);
+        expect(await token.balanceOf(launcherAddress)).to.equal(
+          launcherBalance + FIXTURE_FUND_AMOUNT
+        );
+      });
+
+      it('Admin: cancels escrow succesfully when escrow has no funds but status is Launched', async function () {
+        await deployEscrow(tokenAddress, launcherAddress, adminAddress, 3);
+        await expect(escrow.connect(admin).requestCancellation()).to.emit(
+          escrow,
+          'CancellationRequested'
+        );
+        expect(await escrow.status()).to.equal(Status.Cancelled);
+        expect(await token.balanceOf(escrow.getAddress())).to.equal(0);
+      });
+
+      it('Admin: cancels escrow succesfully when escrow has funds and status is Launched', async function () {
+        await deployEscrow(tokenAddress, launcherAddress, adminAddress, 3);
+        await fundEscrow();
+        const launcherBalance = await token.balanceOf(launcherAddress);
+        await expect(escrow.connect(admin).requestCancellation()).to.emit(
+          escrow,
+          'CancellationRequested'
+        );
+        expect(await escrow.status()).to.equal(Status.Cancelled);
         expect(await token.balanceOf(escrow.getAddress())).to.equal(0);
         expect(await token.balanceOf(launcherAddress)).to.equal(
           launcherBalance + FIXTURE_FUND_AMOUNT

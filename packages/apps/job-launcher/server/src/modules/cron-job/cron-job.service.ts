@@ -7,7 +7,7 @@ import {
 } from '../../common/constants/errors';
 import { CronJobType } from '../../common/enums/cron-job';
 
-import { EscrowStatus, EscrowUtils } from '@human-protocol/sdk';
+import { EscrowClient, EscrowStatus, EscrowUtils } from '@human-protocol/sdk';
 import { Cron } from '@nestjs/schedule';
 import { ethers } from 'ethers';
 import { NetworkConfigService } from '../../common/config/network-config.service';
@@ -260,22 +260,33 @@ export class CronJobService {
 
       for (const jobEntity of jobEntities) {
         try {
-          if (
-            jobEntity.escrowAddress &&
-            (await this.jobService.isEscrowFunded(
-              jobEntity.chainId,
-              jobEntity.escrowAddress,
-            ))
-          ) {
+          let escrowStatus: EscrowStatus | null = null;
+          if (jobEntity.escrowAddress) {
+            const signer = this.web3Service.getSigner(jobEntity.chainId);
+            const escrowClient = await EscrowClient.build(signer);
+
             await this.jobService.processEscrowCancellation(jobEntity);
-          } else {
+
+            escrowStatus = await escrowClient.getStatus(
+              jobEntity.escrowAddress,
+            );
+          }
+          if (
+            !jobEntity.escrowAddress ||
+            escrowStatus === EscrowStatus.Cancelled
+          ) {
             await this.paymentService.createRefundPayment({
               refundAmount: jobEntity.fundAmount,
               refundCurrency: jobEntity.token,
               userId: jobEntity.userId,
               jobId: jobEntity.id,
             });
+
+            jobEntity.status = JobStatus.CANCELED;
+            await this.jobRepository.updateOne(jobEntity);
+            continue;
           }
+
           jobEntity.status = JobStatus.CANCELING;
           await this.jobRepository.updateOne(jobEntity);
 
