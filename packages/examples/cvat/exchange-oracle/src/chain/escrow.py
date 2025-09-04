@@ -79,6 +79,7 @@ def get_available_webhook_types(
         (escrow.reputation_oracle or "").lower(): OracleWebhookTypes.reputation_oracle,
     }
 
+
 def get_escrow_fund_token_symbol(chain_id: int, escrow_address: str) -> str:
     escrow = get_escrow(chain_id, escrow_address)
 
@@ -86,5 +87,5 @@ def get_escrow_fund_token_symbol(chain_id: int, escrow_address: str) -> str:
     return cache.get_or_set_token_symbol(
         chain_id=chain_id,
         token_address=escrow.token,
-        set_callback=partial(get_token_symbol, chain_id, escrow.token)
+        set_callback=partial(get_token_symbol, chain_id, escrow.token),
     )

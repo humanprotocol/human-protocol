@@ -9,13 +9,16 @@ from web3.providers.rpc import HTTPProvider
 from src.core.config import Config
 from src.core.types import Networks
 
-symbol_abi = [{
-    "constant": True,
-    "inputs": [],
-    "name": "symbol",
-    "outputs": [{"name": "", "type": "string"}],
-    "type": "function",
-}] # ABI for fetching token symbol
+symbol_abi = [
+    {
+        "constant": True,
+        "inputs": [],
+        "name": "symbol",
+        "outputs": [{"name": "", "type": "string"}],
+        "type": "function",
+    }
+]  # ABI for fetching token symbol
+
 
 def get_web3(chain_id: int | Networks):
     match chain_id:
@@ -84,4 +87,3 @@ def get_token_symbol(chain_id: int, token_address: str) -> str:
     w3 = get_web3(chain_id)
     contract = w3.eth.contract(address=w3.to_checksum_address(token_address), abi=symbol_abi)
     return contract.functions.symbol().call()
-
