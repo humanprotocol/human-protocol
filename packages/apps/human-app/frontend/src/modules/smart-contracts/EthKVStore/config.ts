@@ -14,6 +14,7 @@ export enum JobType {
   SKELETONS_FROM_BOUNDING_BOXES = 'image_skeletons_from_boxes',
   POLYGONS = 'image_polygons',
   AUDIO_TRANSCRIPTION = 'audio_transcription',
+  AUDIO_ATTRIBUTE_ANNOTATION = 'audio_attribute_annotation',
 }
 
 export const EthKVStoreKeys = {
