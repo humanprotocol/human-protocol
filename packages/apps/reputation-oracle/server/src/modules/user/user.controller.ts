@@ -28,7 +28,7 @@ import {
   DisableOperatorDto,
   PrepareSignatureDto,
   RegisterAddressRequestDto,
-  SignatureBodyDto,
+  PreparedSignatureResponseDto,
   RegisterLabelerResponseDto,
   EnableOperatorDto,
   RegistrationInExchangeOracleDto,
@@ -146,14 +146,14 @@ export class UserController {
   @ApiResponse({
     status: 200,
     description: 'Typed structured data object generated successfully',
-    type: SignatureBodyDto,
+    type: PreparedSignatureResponseDto,
   })
   @Public()
   @Post('/prepare-signature')
   @HttpCode(200)
   async prepareSignature(
     @Body() data: PrepareSignatureDto,
-  ): Promise<SignatureBodyDto> {
+  ): Promise<PreparedSignatureResponseDto> {
     let nonce: string | undefined;
     if (data.type === SignatureType.SIGNIN) {
       const user = await this.userService.findOperatorUser(data.address);

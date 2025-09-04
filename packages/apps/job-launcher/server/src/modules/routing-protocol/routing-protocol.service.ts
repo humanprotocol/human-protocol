@@ -176,7 +176,9 @@ export class RoutingProtocolService {
         exchangeOracle: this.web3ConfigService.cvatExchangeOracleAddress,
         recordingOracle: this.web3ConfigService.cvatRecordingOracleAddress,
       };
-    } else if (jobType === AudinoJobType.AUDIO_TRANSCRIPTION) {
+    } else if (
+      Object.values(AudinoJobType).includes(jobType as AudinoJobType)
+    ) {
       return {
         reputationOracle: this.web3ConfigService.reputationOracleAddress,
         exchangeOracle: this.web3ConfigService.audinoExchangeOracleAddress,

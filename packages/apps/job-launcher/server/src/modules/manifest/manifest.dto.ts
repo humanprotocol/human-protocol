@@ -1,6 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
-  Equals,
   IsArray,
   IsEthereumAddress,
   IsNotEmpty,
@@ -160,8 +159,8 @@ class AudinoAnnotation {
   @IsUrl()
   public user_guide: string;
 
-  @Equals(AudinoJobType.AUDIO_TRANSCRIPTION)
-  public type: AudinoJobType.AUDIO_TRANSCRIPTION;
+  @IsEnumCaseInsensitive(AudinoJobType)
+  public type: AudinoJobType;
 
   @IsNumber()
   @IsPositive()

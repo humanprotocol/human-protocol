@@ -178,6 +178,9 @@ export const AudinoJobRequestForm = () => {
                     <MenuItem value={AudinoJobType.AUDIO_TRANSCRIPTION}>
                       Audio transcription
                     </MenuItem>
+                    <MenuItem value={AudinoJobType.AUDIO_ATTRIBUTE_ANNOTATION}>
+                      Audio attribute annotation
+                    </MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
