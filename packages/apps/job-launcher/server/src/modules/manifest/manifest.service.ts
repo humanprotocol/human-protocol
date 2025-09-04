@@ -116,6 +116,7 @@ export class ManifestService {
         );
 
       case AudinoJobType.AUDIO_TRANSCRIPTION:
+      case AudinoJobType.AUDIO_ATTRIBUTE_ANNOTATION:
         return this.createAudinoManifest(dto as JobAudinoDto, requestType);
 
       default:
@@ -612,7 +613,9 @@ export class ManifestService {
     } else if (requestType === HCaptchaJobType.HCAPTCHA) {
       return;
       dtoCheck = new HCaptchaManifestDto();
-    } else if (requestType === AudinoJobType.AUDIO_TRANSCRIPTION) {
+    } else if (
+      Object.values(AudinoJobType).includes(requestType as AudinoJobType)
+    ) {
       dtoCheck = new AudinoManifestDto();
     } else {
       dtoCheck = new CvatManifestDto();

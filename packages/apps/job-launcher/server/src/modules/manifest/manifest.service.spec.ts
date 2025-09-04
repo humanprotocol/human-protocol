@@ -302,9 +302,43 @@ describe('ManifestService', () => {
     });
 
     describe('createAudinoManifest', () => {
-      it('should create an Audino manifest successfully', async () => {
-        const mockDto = createJobAudinoDto(); // Use the helper function
+      it('should create an Audino manifest for audio transcription successfully', async () => {
+        const mockDto = createJobAudinoDto();
         const mockRequestType = AudinoJobType.AUDIO_TRANSCRIPTION;
+        const mockTokenFundAmount = faker.number.int({ min: 1, max: 1000 });
+        const mockTokenFundDecimals = faker.number.int({ min: 1, max: 18 });
+
+        const result = await manifestService.createManifest(
+          mockDto as any,
+          mockRequestType,
+          mockTokenFundAmount,
+          mockTokenFundDecimals,
+        );
+
+        expect(result).toEqual({
+          annotation: {
+            description: mockDto.requesterDescription,
+            labels: mockDto.labels,
+            qualifications: mockDto.qualifications || [],
+            type: mockRequestType,
+            user_guide: mockDto.userGuide,
+            segment_duration: mockDto.segmentDuration,
+          },
+          data: {
+            data_url: generateBucketUrl(mockDto.data.dataset, mockRequestType)
+              .href,
+          },
+          validation: {
+            gt_url: generateBucketUrl(mockDto.groundTruth, mockRequestType)
+              .href,
+            min_quality: mockDto.minQuality,
+          },
+        });
+      });
+
+      it('should create an Audino manifest for audio attribute annotation successfully', async () => {
+        const mockDto = createJobAudinoDto();
+        const mockRequestType = AudinoJobType.AUDIO_ATTRIBUTE_ANNOTATION;
         const mockTokenFundAmount = faker.number.int({ min: 1, max: 1000 });
         const mockTokenFundDecimals = faker.number.int({ min: 1, max: 18 });
 

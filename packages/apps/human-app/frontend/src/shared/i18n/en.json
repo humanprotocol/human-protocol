@@ -436,6 +436,7 @@
     "image_boxes_from_points": "Bounding Boxes from Points",
     "image_skeletons_from_boxes": "Skeletons from Bounding Boxes",
     "image_polygons": "Polygons",
-    "audio_transcription": "Audio Transcription"
+    "audio_transcription": "Audio Transcription",
+    "audio_attribute_annotation": "Audio Attribute Annotation"
   }
 }
