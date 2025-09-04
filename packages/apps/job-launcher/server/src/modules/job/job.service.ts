@@ -27,6 +27,7 @@ import { TOKEN_ADDRESSES } from '../../common/constants/tokens';
 import { CronJobType } from '../../common/enums/cron-job';
 import {
   AudinoJobType,
+  CvatJobType,
   EscrowFundToken,
   FortuneJobType,
   HCaptchaJobType,
