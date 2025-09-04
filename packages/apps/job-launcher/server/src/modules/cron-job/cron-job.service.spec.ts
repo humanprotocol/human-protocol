@@ -1262,6 +1262,7 @@ describe('CronJobService', () => {
         chainId: ChainId.LOCALHOST,
         escrowAddress: webhookEntity.escrowAddress,
         status: JobStatus.PAID,
+        requestType: FortuneJobType.FORTUNE,
       };
 
       const cronJobEntityMock = {
