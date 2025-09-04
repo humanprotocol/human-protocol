@@ -9,51 +9,36 @@ from web3.providers.rpc import HTTPProvider
 from src.core.config import Config
 from src.core.types import Networks
 
+symbol_abi = [{
+    "constant": True,
+    "inputs": [],
+    "name": "symbol",
+    "outputs": [{"name": "", "type": "string"}],
+    "type": "function",
+}] # ABI for fetching token symbol
 
-def get_web3(chain_id: Networks):
+def get_web3(chain_id: int | Networks):
     match chain_id:
-        case Config.polygon_mainnet.chain_id:
-            w3 = Web3(HTTPProvider(Config.polygon_mainnet.rpc_api))
-            gas_payer = w3.eth.account.from_key(Config.polygon_mainnet.private_key)
-            w3.middleware_onion.inject(
-                SignAndSendRawMiddlewareBuilder.build(Config.polygon_mainnet.private_key),
-                "SignAndSendRawMiddlewareBuilder",
-                layer=0,
-            )
-            w3.eth.default_account = gas_payer.address
-            return w3
-        case Config.polygon_amoy.chain_id:
-            w3 = Web3(HTTPProvider(Config.polygon_amoy.rpc_api))
-            gas_payer = w3.eth.account.from_key(Config.polygon_amoy.private_key)
-            w3.middleware_onion.inject(
-                SignAndSendRawMiddlewareBuilder.build(Config.polygon_amoy.private_key),
-                "SignAndSendRawMiddlewareBuilder",
-                layer=0,
-            )
-            w3.eth.default_account = gas_payer.address
-            return w3
-        case Config.aurora_testnet.chain_id:
-            w3 = Web3(HTTPProvider(Config.aurora_testnet.rpc_api))
-            gas_payer = w3.eth.account.from_key(Config.aurora_testnet.private_key)
-            w3.middleware_onion.inject(
-                SignAndSendRawMiddlewareBuilder.build(Config.aurora_testnet.private_key),
-                "SignAndSendRawMiddlewareBuilder",
-                layer=0,
-            )
-            w3.eth.default_account = gas_payer.address
-            return w3
-        case Config.localhost.chain_id:
-            w3 = Web3(HTTPProvider(Config.localhost.rpc_api))
-            gas_payer = w3.eth.account.from_key(Config.localhost.private_key)
-            w3.middleware_onion.inject(
-                SignAndSendRawMiddlewareBuilder.build(Config.localhost.private_key),
-                "SignAndSendRawMiddlewareBuilder",
-                layer=0,
-            )
-            w3.eth.default_account = gas_payer.address
-            return w3
+        case Networks.polygon_mainnet:
+            network = Config.polygon_mainnet
+        case Networks.polygon_amoy:
+            network = Config.polygon_amoy
+        case Networks.aurora_testnet:
+            network = Config.aurora_testnet
+        case Networks.localhost:
+            network = Config.localhost
         case _:
             raise ValueError(f"{chain_id} is not in available list of networks.")
+
+    w3 = Web3(HTTPProvider(network.rpc_api))
+    gas_payer = w3.eth.account.from_key(network.private_key)
+    w3.middleware_onion.inject(
+        SignAndSendRawMiddlewareBuilder.build(network.private_key),
+        "SignAndSendRawMiddlewareBuilder",
+        layer=0,
+    )
+    w3.eth.default_account = gas_payer.address
+    return w3
 
 
 def serialize_message(message: Any) -> str:
@@ -93,3 +78,10 @@ def validate_address(escrow_address: str) -> str:
     if not Web3.is_address(escrow_address):
         raise ValueError(f"{escrow_address} is not a correct Web3 address")
     return Web3.to_checksum_address(escrow_address)
+
+
+def get_token_symbol(chain_id: int, token_address: str) -> str:
+    w3 = get_web3(chain_id)
+    contract = w3.eth.contract(address=w3.to_checksum_address(token_address), abi=symbol_abi)
+    return contract.functions.symbol().call()
+

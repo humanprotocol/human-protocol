@@ -84,8 +84,8 @@ class Cache:
         return get_cache()
 
     @staticmethod
-    def _make_key(escrow_address: str, chain_id: int) -> str:
-        return f"{escrow_address}@{chain_id}"
+    def _make_key(address: str, chain_id: int) -> str:
+        return f"{address}@{chain_id}"
 
     def _get_or_set(self, key: str, set_callback, *, ttl: int | None = None):
         cache = self._get_cache()
@@ -104,4 +104,11 @@ class Cache:
     ) -> dict:
         kwargs.setdefault("ttl", Config.features.manifest_cache_ttl)
         key = self._make_key(escrow_address, chain_id)
+        return self._get_or_set(key, set_callback=set_callback, **kwargs)
+
+    def get_or_set_token_symbol(
+        self, chain_id: int, token_address: str, *, set_callback: Callable[[], str], **kwargs
+    ) -> str:
+        kwargs.setdefault("ttl", Config.features.token_symbol_ttl)
+        key = self._make_key(token_address, chain_id)
         return self._get_or_set(key, set_callback=set_callback, **kwargs)
