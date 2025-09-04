@@ -12,4 +12,5 @@ export enum CvatJobType {
 
 export enum AudinoJobType {
   AUDIO_TRANSCRIPTION = 'audio_transcription',
+  AUDIO_ATTRIBUTE_ANNOTATION = 'audio_attribute_annotation',
 }
