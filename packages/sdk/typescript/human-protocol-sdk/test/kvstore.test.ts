@@ -1,4 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
+global.fetch = vi.fn().mockResolvedValue({
+  text: () => Promise.resolve('example'),
+});
+
+vi.mock('graphql-request', () => {
+  return {
+    default: vi.fn(),
+  };
+});
+
 import { Overrides, ethers } from 'ethers';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { NETWORKS } from '../src/constants';
@@ -22,37 +33,6 @@ import {
   GET_KVSTORE_BY_ADDRESS_QUERY,
 } from '../src/graphql/queries/kvstore';
 import { KVStore__factory } from '@human-protocol/core/typechain-types';
-
-global.fetch = vi.fn().mockResolvedValue({
-  text: () => Promise.resolve('example'),
-});
-
-vi.mock('graphql-request', () => {
-  return {
-    default: vi.fn(),
-  };
-});
-vi.mock('ethers', async () => {
-  const actualEthers = (await vi.importActual<typeof ethers>(
-    'ethers'
-  )) as typeof ethers;
-
-  const mockProvider = {
-    provider: {
-      getNetwork: vi.fn().mockResolvedValue({
-        chainId: 1338,
-      }),
-    },
-  };
-
-  return {
-    ...actualEthers,
-    ethers: {
-      ...actualEthers.ethers,
-      JsonRpcProvider: vi.fn(() => mockProvider),
-    },
-  };
-});
 
 describe('KVStoreClient', () => {
   let mockProvider: any,
@@ -367,6 +347,67 @@ describe('KVStoreClient', () => {
         ['key1', 'key2'],
         ['value1', 'value2'],
         txOptions
+      );
+    });
+  });
+
+  describe('get', () => {
+    test('should throw an error if key is empty', async () => {
+      await expect(
+        kvStoreClient.get('0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71', '')
+      ).rejects.toThrow(ErrorKVStoreEmptyKey);
+    });
+
+    test('should throw an error if address is not valid', async () => {
+      await expect(
+        kvStoreClient.get('invalid_address', 'key1')
+      ).rejects.toThrow(ErrorInvalidAddress);
+    });
+
+    test('should return empty string if both address and key are valid and address does not set any value', async () => {
+      const getSpy = vi.spyOn(kvStoreClient, 'get').mockResolvedValue('');
+      const result = await kvStoreClient.get(
+        '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
+        'key1'
+      );
+      expect(result).toBe('');
+      expect(getSpy).toHaveBeenCalledWith(
+        '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
+        'key1'
+      );
+    });
+
+    test('should return value if both address and key are valid and address set a value', async () => {
+      mockKVStoreContract.get.mockResolvedValue('value1');
+
+      const getSpy = vi.spyOn(kvStoreClient, 'get');
+      const result = await kvStoreClient.get(
+        '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
+        'key1'
+      );
+      expect(result).toBe('value1');
+      expect(getSpy).toHaveBeenCalledWith(
+        '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
+        'key1'
+      );
+      expect(mockKVStoreContract.get).toHaveBeenCalledWith(
+        '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
+        'key1'
+      );
+    });
+
+    test('should throw an error if a network error occurs', async () => {
+      mockKVStoreContract.get.mockRejectedValue(
+        new Error('could not detect network')
+      );
+
+      await expect(
+        kvStoreClient.get('0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71', 'key1')
+      ).rejects.toThrow(Error('Failed to get value: could not detect network'));
+
+      expect(mockKVStoreContract.get).toHaveBeenCalledWith(
+        '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
+        'key1'
       );
     });
   });
