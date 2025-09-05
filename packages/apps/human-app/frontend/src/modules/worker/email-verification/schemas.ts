@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 export const resendEmailVerificationHcaptchaSchema = z.object({
   // eslint-disable-next-line camelcase
-  h_captcha_token: z.string().min(1, t('validation.captcha')),
+  h_captcha_token: z.string().min(1, t('validation.captcha')).prefault('token'),
 });
 
 export type ResendEmailVerificationDto = z.infer<
