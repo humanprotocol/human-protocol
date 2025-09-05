@@ -22,7 +22,7 @@
     "@fontsource/inter": "^5.0.17",
     "@fontsource/roboto": "^5.2.6",
     "@hcaptcha/react-hcaptcha": "^0.3.6",
-    "@hookform/resolvers": "^5.0.1",
+    "@hookform/resolvers": "^5.1.0",
     "@human-protocol/sdk": "workspace:*",
     "@mui/icons-material": "^7.0.1",
     "@mui/material": "^5.16.7",
@@ -54,7 +54,7 @@
     "viem": "^2.31.4",
     "vite-plugin-svgr": "^4.2.0",
     "wagmi": "^2.15.6",
-    "zod": "^3.22.4",
+    "zod": "^4.0.17",
     "zustand": "^4.5.0"
   },
   "devDependencies": {

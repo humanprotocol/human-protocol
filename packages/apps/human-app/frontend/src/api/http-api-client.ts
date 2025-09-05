@@ -94,12 +94,11 @@ export class HttpApiClient {
     if (successSchema) {
       try {
         // Zod defaulty type is any, but parsing will return the correct type
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-        return successSchema.parse(responseBody);
+        return successSchema.parse(responseBody) as T;
       } catch (error) {
         if (error instanceof ZodError) {
           // eslint-disable-next-line no-console
-          console.error('Response parsing error: ', error.errors);
+          console.error('Response parsing error: ', error.issues);
           throw new Error('Response schema validation error.');
         }
 

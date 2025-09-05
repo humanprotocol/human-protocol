@@ -29,7 +29,8 @@
     "publicKeyLengthError": "Public key must be exactly 128 characters long",
     "publicKeyHexadecimalStringError": "Public key must be a valid hexadecimal string",
     "urlValidationError": "Invalid URL",
-    "feeValidationError": "Fee value must be an integer between 0 and 100"
+    "feeValidationError": "Fee value must be an integer between 0 and 100",
+    "notANumber": "Not a number"
   },
   "errors": {
     "errorWithMessage": "Error with message: {{message}}",
