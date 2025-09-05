@@ -1,11 +1,7 @@
 import { z } from 'zod';
 import { t } from 'i18next';
 
-type AmountValidation = z.ZodEffects<
-  z.ZodEffects<z.ZodString, string, string>,
-  string,
-  string
->;
+type AmountValidation = z.ZodType<string>;
 
 type AmountField = z.infer<AmountValidation>;
 

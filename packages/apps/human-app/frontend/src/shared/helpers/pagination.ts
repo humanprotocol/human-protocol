@@ -1,10 +1,7 @@
 /* eslint-disable camelcase -- ...*/
 import { z } from 'zod';
 
-export const createPaginationSchema = <T>(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- keep zod automatic inferring
-  resultsSchema: z.ZodType<T, any, any>
-) =>
+export const createPaginationSchema = <T>(resultsSchema: z.ZodType<T>) =>
   z.object({
     page: z.number(),
     page_size: z.number(),

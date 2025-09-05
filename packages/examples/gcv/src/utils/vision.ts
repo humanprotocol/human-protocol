@@ -37,7 +37,7 @@ export class VisionModeration {
         .map(
           (
             response: protos.google.cloud.vision.v1.IAnnotateImageResponse,
-            index: number
+            index: number,
           ) => {
             const safeSearch = response.safeSearchAnnotation;
             if (safeSearch) {
@@ -53,11 +53,11 @@ export class VisionModeration {
               };
             } else {
               console.error(
-                `No safeSearchAnnotation found for the image: ${imageUrls[index]}`
+                `No safeSearchAnnotation found for the image: ${imageUrls[index]}`,
               );
               return null;
             }
-          }
+          },
         )
         .filter((result: any) => result !== null);
     } catch (error) {
@@ -79,7 +79,7 @@ export class VisionModeration {
    * Process all images in a dataset for moderation.
    */
   public async processDataset(
-    storageData: StorageDataDto
+    storageData: StorageDataDto,
   ): Promise<{ containsAbuse: string; abuseResultsFile: string }> {
     const resultsJsonPath = './results.json';
     let containsAbuse = false;
@@ -89,7 +89,7 @@ export class VisionModeration {
       const objectKeys = await listObjectsInBucket(bucketUrl);
       const imageUrls = objectKeys.map(
         (objectKey) =>
-          `${bucketUrl.protocol}//${bucketUrl.host}${bucketUrl.pathname}/${objectKey}`
+          `${bucketUrl.protocol}//${bucketUrl.host}${bucketUrl.pathname}/${objectKey}`,
       );
 
       const moderationResults =
@@ -104,7 +104,7 @@ export class VisionModeration {
             result.moderationResult.racy === 'VERY_LIKELY' ||
             result.moderationResult.violence === 'VERY_LIKELY' ||
             result.moderationResult.spoof === 'VERY_LIKELY' ||
-            result.moderationResult.medical === 'VERY_LIKELY'
+            result.moderationResult.medical === 'VERY_LIKELY',
         );
 
         console.log('Processing completed. Results saved to results.json.');

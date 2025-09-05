@@ -13,13 +13,17 @@ const fieldsValidations = {
   [EthKVStoreKeys.Url]: urlDomainSchema,
   [EthKVStoreKeys.WebhookUrl]: urlDomainSchema,
   [EthKVStoreKeys.Role]: z.enum(OPERATOR_ROLES),
-  [EthKVStoreKeys.JobTypes]: z.array(z.nativeEnum(JobType)).min(1),
+  [EthKVStoreKeys.JobTypes]: z.array(z.enum(JobType)).min(1),
   [EthKVStoreKeys.Fee]: z.coerce
-    // eslint-disable-next-line camelcase
-    .number({ invalid_type_error: t('validation.required') })
+    .number({
+      error: (issue) =>
+        issue.input === undefined
+          ? t('validation.required')
+          : t('validation.notANumber'),
+    })
     .min(0, t('validation.feeValidationError'))
     .max(100, t('validation.feeValidationError'))
-    .step(1, t('validation.feeValidationError')),
+    .multipleOf(1, t('validation.feeValidationError')),
 };
 
 export const editEthKVStoreValuesMutationSchema = z.object({
@@ -50,8 +54,11 @@ export const setEthKVStoreValuesMutationSchema = (
           fieldsValidations[typedKey].parse(newData[typedKey]);
         } catch (error) {
           if (error instanceof ZodError) {
-            error.issues[0].path = [typedKey];
-            ctx.addIssue(error.issues[0]);
+            const issue = error.issues[0];
+            ctx.addIssue({
+              ...issue,
+              path: [typedKey],
+            });
           }
         }
       }
@@ -106,7 +113,6 @@ export const getEditEthKVStoreValuesMutationSchema = (
     }
   ) as z.ZodType<
     EditEthKVStoreValuesMutationData,
-    z.ZodTypeDef,
     GetEthKVStoreValuesSuccessResponse
   >;
 };

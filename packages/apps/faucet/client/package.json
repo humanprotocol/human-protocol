@@ -4,6 +4,19 @@
   "version": "1.0.0",
   "description": "Human Protocol Faucet",
   "license": "MIT",
+  "scripts": {
+    "clean": "rm -rf dist",
+    "lint": "eslint '**/*.{ts,tsx}'",
+    "start": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start-prod": "serve -s dist",
+    "format:prettier": "prettier --write '**/*.{ts,tsx}'",
+    "format:lint": "eslint --fix '**/*.{ts,tsx}'",
+    "format": "yarn format:prettier && yarn format:lint",
+    "vercel-build": "yarn workspace human-protocol build:libs && yarn build",
+    "test": "exit 0"
+  },
   "dependencies": {
     "@human-protocol/sdk": "workspace:*",
     "@mui/icons-material": "^7.0.1",
@@ -29,19 +42,6 @@
     "typescript": "^5.8.3",
     "vite": "^6.2.4",
     "vite-plugin-node-polyfills": "^0.23.0"
-  },
-  "scripts": {
-    "clean": "rm -rf dist",
-    "lint": "eslint '**/*.{ts,tsx}'",
-    "start": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "start-prod": "serve -s dist",
-    "format:prettier": "prettier --write '**/*.{ts,tsx}'",
-    "format:lint": "eslint --fix '**/*.{ts,tsx}'",
-    "format": "yarn format:prettier && yarn format:lint",
-    "vercel-build": "yarn workspace human-protocol build:libs && yarn build",
-    "test": "exit 0"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
