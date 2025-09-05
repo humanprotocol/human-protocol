@@ -639,9 +639,26 @@ export class JobService {
       throw new ConflictError(ErrorEscrow.InvalidStatusCancellation);
     }
 
-    await escrowClient.requestCancellation(escrowAddress!, {
-      gasPrice: await this.web3Service.calculateGasPrice(chainId),
-    });
+    // Attempt requestCancellation; on any error attempt direct cancel once.
+    // TODO: Remove try-catch when requestCancellation is fully supported by all escrows
+    try {
+      await (escrowClient as any).requestCancellation(escrowAddress!, {
+        gasPrice: await this.web3Service.calculateGasPrice(chainId),
+      });
+    } catch (error: any) {
+      this.logger.warn(
+        'requestCancellation failed, attempting cancel fallback',
+        {
+          jobId: jobEntity.id,
+          chainId,
+          escrowAddress,
+          error,
+        },
+      );
+      await (escrowClient as any).cancel(escrowAddress!, {
+        gasPrice: await this.web3Service.calculateGasPrice(chainId),
+      });
+    }
   }
 
   public async escrowFailedWebhook(dto: WebhookDataDto): Promise<void> {
@@ -706,6 +723,7 @@ export class JobService {
     const fundTokenDecimals = getTokenDecimals(
       chainId,
       jobEntity.token as EscrowFundToken,
+      18,
     );
 
     const baseManifestDetails = {
