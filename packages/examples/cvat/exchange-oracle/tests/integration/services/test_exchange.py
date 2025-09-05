@@ -15,7 +15,7 @@ from src.models.cvat import Assignment, User
 from src.schemas import exchange as service_api
 from src.services.exchange import create_assignment
 
-from tests.utils.constants import ESCROW_ADDRESS, WALLET_ADDRESS1, WALLET_ADDRESS2
+from tests.utils.constants import ESCROW_ADDRESS, HMT_SYMBOL, WALLET_ADDRESS1, WALLET_ADDRESS2
 from tests.utils.db_helper import (
     create_job,
     create_project,
@@ -41,9 +41,13 @@ class ServiceIntegrationTest(unittest.TestCase):
         with (
             open("tests/utils/manifest.json") as data,
             patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
+            patch(
+                "src.endpoints.serializers.get_escrow_fund_token_symbol"
+            ) as mock_get_escrow_fund_token_symbol,
         ):
             manifest = json.load(data)
             mock_get_manifest.return_value = manifest
+            mock_get_escrow_fund_token_symbol.return_value = "HMT"
             data = serialize_job(cvat_project)
 
         assert data.escrow_address == escrow_address
@@ -52,7 +56,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         assert isinstance(data.reward_amount, str)
         assert data.reward_amount == manifest["job_bounty"]
         assert isinstance(data.reward_token, str)
-        assert data.reward_token == service_api.DEFAULT_TOKEN
+        assert data.reward_token == HMT_SYMBOL
         assert data.job_type == cvat_project.job_type
         assert data.status == service_api.JobStatuses.active
         assert data.chain_id == cvat_project.chain_id

@@ -7,8 +7,6 @@ from strenum import StrEnum  # added in python 3.11
 from src.core.types import Networks, TaskTypes
 from src.utils.enums import BetterEnumMeta
 
-DEFAULT_TOKEN = "HMT"  # noqa: S105 (it's  not a credential)
-
 
 class JobStatuses(StrEnum, metaclass=BetterEnumMeta):
     active = "active"
@@ -23,7 +21,7 @@ class JobResponse(BaseModel):
     status: JobStatuses
     job_description: str | None = None
     reward_amount: str | None = None
-    reward_token: str | None = DEFAULT_TOKEN
+    reward_token: str | None = None
     created_at: datetime | None = None
     updated_at: datetime | None = None
     qualifications: list[str] = Field(default_factory=list)
@@ -60,7 +58,7 @@ class AssignmentResponse(BaseModel):
     url: str | None
     status: AssignmentStatuses
     reward_amount: str | None = None
-    reward_token: str | None = DEFAULT_TOKEN
+    reward_token: str | None = None
     created_at: datetime
     updated_at: datetime
     expires_at: datetime
