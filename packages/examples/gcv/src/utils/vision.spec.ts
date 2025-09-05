@@ -23,7 +23,7 @@ describe('VisionModeration', () => {
     visionModeration = new VisionModeration(
       'test-project-id',
       'test-private-key',
-      'test-client-email'
+      'test-client-email',
     );
   });
 
@@ -123,7 +123,7 @@ describe('VisionModeration', () => {
 
       expect(fs.writeFileSync).toHaveBeenCalledWith(
         jsonFilePath,
-        JSON.stringify(results, null, 2)
+        JSON.stringify(results, null, 2),
       );
     });
   });
@@ -169,7 +169,7 @@ describe('VisionModeration', () => {
       expect(listObjectsInBucket).toHaveBeenCalledWith(mockBucketUrl);
       expect(visionModeration.saveResultsToJson).toHaveBeenCalledWith(
         mockModerationResults,
-        './results.json'
+        './results.json',
       );
       expect(result).toEqual({
         containsAbuse: 'true',
@@ -211,7 +211,7 @@ describe('VisionModeration', () => {
 
     it('should throw an error if processing fails', async () => {
       (listObjectsInBucket as jest.Mock).mockRejectedValue(
-        new Error('Error listing objects')
+        new Error('Error listing objects'),
       );
 
       const storageData: StorageDataDto = {
@@ -222,7 +222,7 @@ describe('VisionModeration', () => {
       };
 
       await expect(
-        visionModeration.processDataset(storageData)
+        visionModeration.processDataset(storageData),
       ).rejects.toThrow(ErrorCommon.ErrorProcessingDataset);
     });
   });

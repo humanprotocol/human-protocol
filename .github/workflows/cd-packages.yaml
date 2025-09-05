@@ -1,0 +1,38 @@
+name: Publish packages
+
+permissions:
+  contents: write # needed to push tags
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  publish:
+    name: Publish packages to NPM
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+      - name: Install dependencies
+        run: yarn install --immutable
+      # If there is no new version for dependency package (e.g. core)
+      # then `prepack` is not called for it during publish step
+      # and it's not built. As a result dependant package (e.g. sdk)
+      # don't have its dependency and can't be build as well,
+      # so we have to build all deps in their topological order first.
+      - name: Build packages
+        run: yarn workspaces foreach --all --no-private -pt run build
+      - name: Publish packages
+        run: yarn workspaces foreach --all --no-private -pt npm publish --tolerate-republish --json | tee publish.log
+        env:
+          SKIP_PREPACK: true
+          YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Tag published packages
+        run: node scripts/tag-published-packages.mjs publish.log
+      - name: Push created tags
+        run: git push origin --tags

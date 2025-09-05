@@ -20,7 +20,7 @@ describe('Storage Utils', () => {
       };
       const result = generateBucketUrl(storageData);
       expect(result.toString()).toBe(
-        'https://my-bucket.s3.us-east-1.amazonaws.com/my/path'
+        'https://my-bucket.s3.us-east-1.amazonaws.com/my/path',
       );
     });
 
@@ -33,7 +33,7 @@ describe('Storage Utils', () => {
       };
       const result = generateBucketUrl(storageData);
       expect(result.toString()).toBe(
-        'https://my-bucket.storage.googleapis.com/'
+        'https://my-bucket.storage.googleapis.com/',
       );
     });
 
@@ -48,7 +48,7 @@ describe('Storage Utils', () => {
       };
       const result = generateBucketUrl(storageData);
       expect(result.toString()).toBe(
-        'http://localhost:9000/my-local-bucket/path/to/file'
+        'http://localhost:9000/my-local-bucket/path/to/file',
       );
     });
 
@@ -60,7 +60,7 @@ describe('Storage Utils', () => {
         path: '',
       };
       expect(() => generateBucketUrl(storageData)).toThrow(
-        ErrorBucket.InvalidProvider
+        ErrorBucket.InvalidProvider,
       );
     });
 
@@ -72,7 +72,7 @@ describe('Storage Utils', () => {
         path: '',
       };
       expect(() => generateBucketUrl(storageData)).toThrow(
-        ErrorBucket.EmptyBucket
+        ErrorBucket.EmptyBucket,
       );
     });
 
@@ -84,7 +84,7 @@ describe('Storage Utils', () => {
         path: '',
       };
       expect(() => generateBucketUrl(storageData)).toThrow(
-        ErrorBucket.EmptyRegion
+        ErrorBucket.EmptyRegion,
       );
     });
 
@@ -96,7 +96,7 @@ describe('Storage Utils', () => {
         path: '',
       };
       expect(() => generateBucketUrl(storageData)).toThrow(
-        ErrorBucket.InvalidRegion
+        ErrorBucket.InvalidRegion,
       );
     });
   });
@@ -127,7 +127,7 @@ describe('Storage Utils', () => {
       (axios.get as jest.Mock).mockRejectedValue(new Error('Network Error'));
 
       await expect(listObjectsInBucket(mockUrl)).rejects.toThrow(
-        'Network Error'
+        'Network Error',
       );
     });
 

@@ -29,19 +29,19 @@ export function generateBucketUrl(storageData: StorageDataDto): URL {
           storageData.region
         }.amazonaws.com${
           storageData.path ? `/${storageData.path.replace(/\/$/, '')}` : ''
-        }`
+        }`,
       );
     case StorageProviders.GCS:
       return new URL(
         `https://${storageData.bucketName}.storage.googleapis.com${
           storageData.path ? `/${storageData.path}` : ''
-        }`
+        }`,
       );
     case StorageProviders.LOCAL:
       return new URL(
         `http://${process.env.S3_ENDPOINT}:${process.env.S3_PORT}/${storageData.bucketName}${
           storageData.path ? `/${storageData.path}` : ''
-        }`
+        }`,
       );
     default:
       throw new Error(ErrorBucket.InvalidProvider);
@@ -65,7 +65,7 @@ export async function listObjectsInBucket(url: URL): Promise<string[]> {
           requestOptions += `?list-type=2${
             nextContinuationToken
               ? `&continuation-token=${encodeURIComponent(
-                  nextContinuationToken
+                  nextContinuationToken,
                 )}`
               : ''
           }${url.pathname ? `&prefix=${url.pathname.replace(/^\//, '')}` : ''}`;
@@ -73,7 +73,7 @@ export async function listObjectsInBucket(url: URL): Promise<string[]> {
           requestOptions += `${url.pathname ? `${url.pathname.replace(/^\//, '')}` : ''}?list-type=2${
             nextContinuationToken
               ? `&continuation-token=${encodeURIComponent(
-                  nextContinuationToken
+                  nextContinuationToken,
                 )}`
               : ''
           }`;
@@ -92,7 +92,7 @@ export async function listObjectsInBucket(url: URL): Promise<string[]> {
               : undefined;
 
             const objectKeys = result.ListBucketResult.Contents?.map(
-              (item: any) => item.Key
+              (item: any) => item.Key,
             );
 
             objects = objects.concat(objectKeys?.flat());
