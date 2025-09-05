@@ -7,7 +7,7 @@ export function getTokenDecimals(
   symbol: EscrowFundToken,
   defaultDecimals = 6,
 ): number {
-  return Math.min(
+  return Math.max(
     TOKEN_ADDRESSES[chainId]?.[symbol]?.decimals ?? defaultDecimals,
     defaultDecimals,
   );
