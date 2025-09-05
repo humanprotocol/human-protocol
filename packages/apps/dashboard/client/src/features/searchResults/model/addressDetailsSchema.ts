@@ -55,11 +55,11 @@ const operatorSchema = z.object({
   withdrawableAmount: z.string().optional(),
   lockedUntilTimestamp: z.string().optional(),
   reputation: reputationSchema,
-  fee: z.number(),
+  fee: z.number().optional().nullable(),
   jobTypes: z.array(z.string()).optional().nullable(),
   url: z.string().optional().nullable(),
   reward: z.string().optional(),
-  amountJobsProcessed: z.string(),
+  amountJobsProcessed: z.number(),
 });
 
 export type AddressDetailsOperator = z.infer<typeof operatorSchema>;

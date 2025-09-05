@@ -1441,7 +1441,7 @@ describe('JobService', () => {
     });
 
     // TODO: Re-enable when cancellation is removed from processEscrowCancellation
-    // it('should throw if cancel throws an error', async () => {
+    // it('should throw if requestCancellation throws an error', async () => {
     //   const jobEntity = createJobEntity();
     //   mockWeb3Service.calculateGasPrice.mockResolvedValueOnce(1n);
     //   mockedEscrowClient.build.mockResolvedValueOnce({
