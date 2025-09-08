@@ -242,7 +242,7 @@ class FeaturesConfig:
     manifest_cache_ttl = int(getenv("MANIFEST_CACHE_TTL", str(2 * 24 * 60 * 60)))
     "TTL for cached manifests"
 
-    token_symbol_ttl = int(getenv("MANIFEST_CACHE_TTL", str(2 * 24 * 60 * 60)))
+    token_symbol_ttl = int(getenv("TOKEN_SYMBOL_CACHE_TTL", str(2 * 24 * 60 * 60)))
     "TTL for cached token symbols"
 
     max_data_storage_connections = int(getenv("MAX_DATA_STORAGE_CONNECTIONS", 5))
