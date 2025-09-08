@@ -16,13 +16,12 @@ export const response1: DiscoveredOracle = {
   executionsToSkip: 0,
   registrationNeeded: true,
   registrationInstructions: 'https://instructions.com',
-  stakedAmount: BigInt(0),
-  lockedAmount: BigInt(0),
-  lockedUntilTimestamp: BigInt(0),
-  withdrawnAmount: BigInt(0),
-  slashedAmount: BigInt(0),
-  lastDepositTimestamp: BigInt(0),
-  amountJobsProcessed: BigInt(0),
+  stakedAmount: '0',
+  lockedAmount: '0',
+  lockedUntilTimestamp: '0',
+  withdrawnAmount: '0',
+  slashedAmount: '0',
+  amountJobsProcessed: '0',
 };
 
 export const response2: DiscoveredOracle = {
@@ -37,13 +36,12 @@ export const response2: DiscoveredOracle = {
   executionsToSkip: 0,
   registrationNeeded: false,
   registrationInstructions: undefined,
-  stakedAmount: BigInt(0),
-  lockedAmount: BigInt(0),
-  lockedUntilTimestamp: BigInt(0),
-  withdrawnAmount: BigInt(0),
-  slashedAmount: BigInt(0),
-  lastDepositTimestamp: BigInt(0),
-  amountJobsProcessed: BigInt(0),
+  stakedAmount: '0',
+  lockedAmount: '0',
+  lockedUntilTimestamp: '0',
+  withdrawnAmount: '0',
+  slashedAmount: '0',
+  amountJobsProcessed: '0',
 };
 
 export const response3: DiscoveredOracle = {
@@ -58,13 +56,12 @@ export const response3: DiscoveredOracle = {
   executionsToSkip: 0,
   registrationNeeded: false,
   registrationInstructions: undefined,
-  stakedAmount: BigInt(0),
-  lockedAmount: BigInt(0),
-  lockedUntilTimestamp: BigInt(0),
-  withdrawnAmount: BigInt(0),
-  slashedAmount: BigInt(0),
-  lastDepositTimestamp: BigInt(0),
-  amountJobsProcessed: BigInt(0),
+  stakedAmount: '0',
+  lockedAmount: '0',
+  lockedUntilTimestamp: '0',
+  withdrawnAmount: '0',
+  slashedAmount: '0',
+  amountJobsProcessed: '0',
 };
 
 export const response4: DiscoveredOracle = {
@@ -79,13 +76,12 @@ export const response4: DiscoveredOracle = {
   executionsToSkip: 0,
   registrationNeeded: false,
   registrationInstructions: undefined,
-  stakedAmount: BigInt(0),
-  lockedAmount: BigInt(0),
-  lockedUntilTimestamp: BigInt(0),
-  withdrawnAmount: BigInt(0),
-  slashedAmount: BigInt(0),
-  lastDepositTimestamp: BigInt(0),
-  amountJobsProcessed: BigInt(0),
+  stakedAmount: '0',
+  lockedAmount: '0',
+  lockedUntilTimestamp: '0',
+  withdrawnAmount: '0',
+  slashedAmount: '0',
+  amountJobsProcessed: '0',
 };
 
 export function generateGetReputationNetworkOperatorsResponseByChainId(
