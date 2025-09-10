@@ -1,4 +1,5 @@
 import logging
+from contextlib import suppress
 
 from sqlalchemy.orm import Session
 
@@ -74,18 +75,26 @@ def track_assignments(logger: logging.Logger) -> None:
         )
 
         for assignment in assignments:
-            logger.info(
-                "Expiring the unfinished assignment {} (user {}, job id {})".format(
-                    assignment.id,
-                    assignment.user_wallet_address,
-                    assignment.cvat_job_id,
+            with (
+                session.begin_nested(),
+                suppress(db_errors.LockNotAvailable),
+            ):
+                cvat_service.get_jobs_by_cvat_id(
+                    session,
+                    cvat_ids=[assignment.cvat_job_id],
+                    for_update=ForUpdateParams(nowait=True),
                 )
-            )
 
-            cvat_service.expire_assignment(session, assignment.id)
-            _reset_job_after_assignment(session, assignment)
+                logger.info(
+                    "Expiring the unfinished assignment {} (user {}, job id {})".format(
+                        assignment.id,
+                        assignment.user_wallet_address,
+                        assignment.cvat_job_id,
+                    )
+                )
 
-        cvat_service.touch(session, cvat_models.Job, [a.job.id for a in assignments])
+                cvat_service.expire_assignment(session, assignment.id)
+                _reset_job_after_assignment(session, assignment)
 
     with SessionLocal.begin() as session:
         assignments = cvat_service.get_unprocessed_cancelled_assignments(
@@ -95,16 +104,24 @@ def track_assignments(logger: logging.Logger) -> None:
         )
 
         for assignment in assignments:
-            logger.info(
-                "Finalizing the canceled assignment {} (user {}, job id {})".format(
-                    assignment.id,
-                    assignment.user_wallet_address,
-                    assignment.cvat_job_id,
+            with (
+                session.begin_nested(),
+                suppress(db_errors.LockNotAvailable),
+            ):
+                cvat_service.get_jobs_by_cvat_id(
+                    session,
+                    cvat_ids=[assignment.cvat_job_id],
+                    for_update=ForUpdateParams(nowait=True),
                 )
-            )
-            _reset_job_after_assignment(session, assignment)
 
-        cvat_service.touch(session, cvat_models.Job, [a.job.id for a in assignments])
+                logger.info(
+                    "Finalizing the canceled assignment {} (user {}, job id {})".format(
+                        assignment.id,
+                        assignment.user_wallet_address,
+                        assignment.cvat_job_id,
+                    )
+                )
+                _reset_job_after_assignment(session, assignment)
 
     with SessionLocal.begin() as session:
         assignments = cvat_service.get_active_assignments(
@@ -115,19 +132,27 @@ def track_assignments(logger: logging.Logger) -> None:
 
         for assignment in assignments:
             if assignment.job.project.status != ProjectStatuses.annotation:
-                logger.warning(
-                    "Canceling the unfinished assignment {} (user {}, job id {}) - "
-                    "the project state is not annotation".format(
-                        assignment.id,
-                        assignment.user_wallet_address,
-                        assignment.cvat_job_id,
+                with (
+                    session.begin_nested(),
+                    suppress(db_errors.LockNotAvailable),
+                ):
+                    cvat_service.get_jobs_by_cvat_id(
+                        session,
+                        cvat_ids=[assignment.cvat_job_id],
+                        for_update=ForUpdateParams(nowait=True),
                     )
-                )
 
-                cvat_service.cancel_assignment(session, assignment.id)
-                _reset_job_after_assignment(session, assignment)
+                    logger.warning(
+                        "Canceling the unfinished assignment {} (user {}, job id {}) - "
+                        "the project state is not annotation".format(
+                            assignment.id,
+                            assignment.user_wallet_address,
+                            assignment.cvat_job_id,
+                        )
+                    )
 
-        cvat_service.touch(session, cvat_models.Job, [a.job.id for a in assignments])
+                    cvat_service.cancel_assignment(session, assignment.id)
+                    _reset_job_after_assignment(session, assignment)
 
 
 @cron_job
