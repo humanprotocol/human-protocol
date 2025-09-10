@@ -16,12 +16,7 @@ export const hcaptchaUserStatsResponseSchema = z.object({
   }),
   served: z.number(),
   solved: z.number(),
-  verified: z.number(),
   currentDateStats: z.object({
-    billing_units: z.number(),
-    bypass: z.number(),
-    served: z.number(),
     solved: z.number(),
   }),
-  currentEarningsStats: z.number(),
 });
