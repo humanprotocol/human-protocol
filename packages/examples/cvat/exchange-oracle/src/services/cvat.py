@@ -5,17 +5,20 @@ Functions in this module are grouped by various categories, look for separators 
 import itertools
 import uuid
 from collections.abc import Iterable, Sequence
-from datetime import datetime
+from datetime import datetime, timedelta
 from itertools import islice
 from typing import Any, NamedTuple
 
+from attrs import define
 from sqlalchemy import delete, func, literal, select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.functions import coalesce
 
+from src.core.config import Config
 from src.core.types import (
     AssignmentStatuses,
+    CvatWebhookStatuses,
     EscrowValidationStatuses,
     JobStatuses,
     ProjectStatuses,
@@ -28,6 +31,7 @@ from src.db.utils import ForUpdateParams
 from src.db.utils import maybe_for_update as _maybe_for_update
 from src.models.cvat import (
     Assignment,
+    CvatWebhook,
     DataUpload,
     EscrowCreation,
     EscrowValidation,
@@ -869,6 +873,11 @@ def get_unprocessed_expired_assignments(
             (Assignment.status == AssignmentStatuses.created.value)
             & (Assignment.completed_at == None)
             & (Assignment.expires_at <= utcnow())
+            & (
+                ~Assignment.job.has(
+                    Job.cvat_webhooks.any(CvatWebhook.status == CvatWebhookStatuses.pending)
+                )
+            )
         )
         .limit(limit)
         .all()
@@ -883,6 +892,11 @@ def get_unprocessed_cancelled_assignments(
         .where(
             (Assignment.job.has(Job.status == JobStatuses.in_progress.value))
             & (Assignment.status == AssignmentStatuses.canceled.value)
+            & (
+                ~Assignment.job.has(
+                    Job.cvat_webhooks.any(CvatWebhook.status == CvatWebhookStatuses.pending)
+                )
+            )
         )
         .limit(limit)
         .all()
@@ -1117,3 +1131,89 @@ def touch_final_assignments(
 
     if touch_parents:
         touch_parent_objects(session, Assignment, ids.scalars().all(), time=time)
+
+
+@define
+class CvatWebhookQueue:
+    def create_webhook(
+        self,
+        session: Session,
+        *,
+        event_type: str,
+        event_data: dict,
+        cvat_project_id: int,
+        cvat_task_id: int | None = None,
+        cvat_job_id: int | None = None,
+    ) -> str | None:
+        """
+        Creates a webhook in a database. If the same delivery already exists, returns None.
+        """
+        webhook_id = str(uuid.uuid4())
+        webhook = CvatWebhook(
+            id=webhook_id,
+            event_type=event_type,
+            event_data=event_data,
+            cvat_project_id=cvat_project_id,
+            cvat_task_id=cvat_task_id,
+            cvat_job_id=cvat_job_id,
+        )
+        session.add(webhook)
+
+        return webhook_id
+
+    def get_pending_webhooks(
+        self,
+        session: Session,
+        *,
+        event_type_in: Sequence[str] | None = None,
+        event_type_not_in: Sequence[str] | None = None,
+        limit: int = 10,
+        for_update: bool | ForUpdateParams = False,
+    ) -> list[CvatWebhook]:
+        assert not (
+            event_type_in and event_type_not_in
+        ), f"{event_type_in} and {event_type_not_in} cannot be used together"
+
+        return (
+            _maybe_for_update(session.query(CvatWebhook), enable=for_update)
+            .where(
+                CvatWebhook.status == CvatWebhookStatuses.pending.value,
+                CvatWebhook.wait_until <= utcnow(),
+                *([CvatWebhook.event_type.in_(event_type_in)] if event_type_in else []),
+                *([CvatWebhook.event_type.not_in(event_type_not_in)] if event_type_not_in else []),
+            )
+            .limit(limit)
+            .all()
+        )
+
+    def update_webhook_status(
+        self, session: Session, webhook_id: str, status: CvatWebhookStatuses
+    ) -> None:
+        upd = update(CvatWebhook).where(CvatWebhook.id == webhook_id).values(status=status.value)
+        session.execute(upd)
+
+    def handle_webhook_success(self, session: Session, webhook_id: str) -> None:
+        upd = (
+            update(CvatWebhook)
+            .where(CvatWebhook.id == webhook_id)
+            .values(
+                attempts=CvatWebhook.attempts + 1,
+                status=CvatWebhookStatuses.completed,
+            )
+        )
+        session.execute(upd)
+
+    def handle_webhook_fail(self, session: Session, webhook_id: str) -> None:
+        upd = (
+            update(CvatWebhook)
+            .where(CvatWebhook.id == webhook_id)
+            .values(
+                attempts=CvatWebhook.attempts + 1,
+                # no automatic failures by max attempts for CVAT webhooks
+                wait_until=utcnow() + timedelta(seconds=Config.webhook_delay_if_failed),
+            )
+        )
+        session.execute(upd)
+
+
+incoming_webhooks = CvatWebhookQueue()

@@ -16,7 +16,29 @@ from src.db import SessionLocal
 from src.db import errors as db_errors
 from src.db.utils import ForUpdateParams
 from src.handlers.completed_escrows import handle_escrows_validations
+from src.handlers.cvat_events import cvat_webhook_handler
 from src.utils.logging import format_sequence
+
+
+@cron_job
+def process_incoming_cvat_webhooks(logger: logging.Logger, session: Session) -> None:
+    webhooks = cvat_service.incoming_webhooks.get_pending_webhooks(
+        session=session,
+        limit=CronConfig.process_cvat_webhooks_chunk_size,
+        for_update=ForUpdateParams(skip_locked=True),
+    )
+
+    for webhook in webhooks:
+        try:
+            with session.begin_nested():
+                cvat_webhook_handler(webhook, session)
+                cvat_service.incoming_webhooks.handle_webhook_success(
+                    session, webhook_id=webhook.id
+                )
+        except Exception as e:
+            with session.begin_nested():
+                logger.exception(e)
+                cvat_service.incoming_webhooks.handle_webhook_fail(session, webhook_id=webhook.id)
 
 
 @cron_job
