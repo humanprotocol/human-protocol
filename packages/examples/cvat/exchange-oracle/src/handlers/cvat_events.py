@@ -6,6 +6,7 @@ import src.models.cvat as models
 import src.services.cvat as cvat_service
 from src.core.types import AssignmentStatuses, JobStatuses
 from src.db import SessionLocal
+from sqlalchemy.exc import IntegrityError
 from src.db.utils import ForUpdateParams
 from src.log import ROOT_LOGGER_NAME
 from src.schemas.cvat import CvatWebhook
@@ -120,17 +121,28 @@ def handle_update_job_event_request(payload: CvatWebhook) -> None:
         # We're only interested in state updates
         return
 
-    with SessionLocal.begin() as session:
-        cvat_service.incoming_webhooks.create_webhook(
-            session,
-            cvat_project_id=payload.job["project_id"],  # all oracle jobs have project
-            cvat_task_id=payload.job["task_id"],
-            cvat_job_id=payload.job["id"],
-            event_type=payload.event,
-            event_data=payload.model_dump_json(indent=None),
-        )
-
-    # TODO: handle unknown job, task and project ids
+    try:
+        with SessionLocal.begin() as session:
+            cvat_service.incoming_webhooks.create_webhook(
+                session,
+                cvat_project_id=payload.job["project_id"],  # all oracle jobs have project
+                cvat_task_id=payload.job["task_id"],
+                cvat_job_id=payload.job["id"],
+                event_type=payload.event,
+                event_data=payload.model_dump_json(indent=None),
+            )
+    except IntegrityError as e:
+        if "is not present in table" in str(e.orig):
+            logger = get_function_logger(module_logger_name)
+            logger.warning(
+                f"Received a webhook event '{payload.event}' for "
+                f"project_id={payload.job['project_id']} "
+                f"task_id={payload.job['task_id']} "
+                f"job_id={payload.job['id']}. "
+                "The corresponding object doesn't exist in the DB, ignoring"
+            )
+        else:
+            raise
 
 
 def cvat_webhook_request_handler(cvat_webhook: CvatWebhook) -> None:
