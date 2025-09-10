@@ -1,6 +1,7 @@
 import {
   Address,
   BigInt,
+  Bytes,
   DataSourceContext,
   ethereum,
 } from '@graphprotocol/graph-ts';
@@ -20,6 +21,7 @@ import {
   STATISTICS_ENTITY_ID,
   handleBulkTransfer,
   handleBulkTransferV2,
+  handleBulkTransferV3,
   handleCancellationRefund,
   handleCancellationRequested,
   handleCancelled,
@@ -35,6 +37,7 @@ import { ZERO_BI } from '../../src/mapping/utils/number';
 import {
   createBulkTransferEvent,
   createBulkTransferV2Event,
+  createBulkTransferV3Event,
   createCancellationRefundEvent,
   createCancellationRequestedEvent,
   createCancelledEvent,
@@ -1054,7 +1057,7 @@ describe('Escrow', () => {
     const bulk1 = createBulkTransferV2Event(
       operatorAddress,
       1,
-      [workerAddress, workerAddress],
+      [workerAddress, worker2Address],
       [1, 1],
       true,
       'test.com',
@@ -1136,85 +1139,172 @@ describe('Escrow', () => {
     // Escrow
     assert.fieldEquals('Escrow', escrowAddress.toHex(), 'status', 'Partial');
     assert.fieldEquals('Escrow', escrowAddress.toHex(), 'balance', '98');
+    assert.fieldEquals(
+      'Escrow',
+      escrowAddress.toHex(),
+      'finalResultsUrl',
+      'test.com'
+    );
 
-    // Bulk 2
-    const bulk2 = createBulkTransferV2Event(
+    assert.fieldEquals(
+      'Transaction',
+      bulk1.transaction.hash.toHex(),
+      'txHash',
+      bulk1.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      bulk1.transaction.hash.toHex(),
+      'method',
+      'bulkTransfer'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      bulk1.transaction.hash.toHex(),
+      'block',
+      bulk1.block.number.toString()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      bulk1.transaction.hash.toHex(),
+      'from',
+      bulk1.transaction.from.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      bulk1.transaction.hash.toHex(),
+      'to',
+      escrowAddressString
+    );
+
+    assert.fieldEquals(
+      'Transaction',
+      bulk1.transaction.hash.toHex(),
+      'txHash',
+      bulk1.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      bulk1.transaction.hash.toHex(),
+      'method',
+      'bulkTransfer'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      bulk1.transaction.hash.toHex(),
+      'block',
+      bulk1.block.number.toString()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      bulk1.transaction.hash.toHex(),
+      'from',
+      bulk1.transaction.from.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      bulk1.transaction.hash.toHex(),
+      'to',
+      escrowAddressString
+    );
+
+    // Payout
+    const payoutId = bulk1.transaction.hash.concat(workerAddress).toHex();
+    assert.fieldEquals(
+      'Payout',
+      payoutId,
+      'escrowAddress',
+      escrowAddressString
+    );
+    assert.fieldEquals('Payout', payoutId, 'recipient', workerAddressString);
+    assert.fieldEquals('Payout', payoutId, 'amount', '1');
+  });
+
+  test('Should properly handle BulkTransferV3 events', () => {
+    // Bulk 1
+    const bulk1 = createBulkTransferV3Event(
       operatorAddress,
-      3,
-      [workerAddress, workerAddress, workerAddress, worker2Address],
-      [1, 1, 1, 95],
+      Bytes.fromHexString('test-1'),
+      [workerAddress, worker2Address],
+      [49, 49],
       false,
       'test.com',
       BigInt.fromI32(9)
     );
 
-    handleBulkTransferV2(bulk2);
+    handleBulkTransferV3(bulk1);
 
-    const id2 = toEventId(bulk2).toHex();
+    const id1 = toEventId(bulk1).toHex();
 
+    // BulkPayoutEvent
     assert.fieldEquals(
       'BulkPayoutEvent',
-      id2,
+      id1,
       'block',
-      bulk2.block.number.toString()
+      bulk1.block.number.toString()
     );
     assert.fieldEquals(
       'BulkPayoutEvent',
-      id2,
+      id1,
       'timestamp',
-      bulk2.block.timestamp.toString()
+      bulk1.block.timestamp.toString()
     );
     assert.fieldEquals(
       'BulkPayoutEvent',
-      id2,
+      id1,
       'txHash',
-      bulk2.transaction.hash.toHex()
+      bulk1.transaction.hash.toHex()
     );
     assert.fieldEquals(
       'BulkPayoutEvent',
-      id2,
+      id1,
       'escrowAddress',
       escrowAddressString
     );
-    assert.fieldEquals('BulkPayoutEvent', id2, 'sender', operatorAddressString);
-    assert.fieldEquals('BulkPayoutEvent', id2, 'payoutId', '3');
-    assert.fieldEquals('BulkPayoutEvent', id2, 'bulkCount', '4');
+    assert.fieldEquals('BulkPayoutEvent', id1, 'sender', operatorAddressString);
+    assert.fieldEquals(
+      'BulkPayoutEvent',
+      id1,
+      'payoutId',
+      Bytes.fromHexString('test-1').toHex()
+    );
+    assert.fieldEquals('BulkPayoutEvent', id1, 'bulkCount', '2');
 
     // EscrowStatusEvent
     assert.fieldEquals(
       'EscrowStatusEvent',
-      id2,
+      id1,
       'block',
-      bulk2.block.number.toString()
+      bulk1.block.number.toString()
     );
     assert.fieldEquals(
       'EscrowStatusEvent',
-      id2,
+      id1,
       'timestamp',
-      bulk2.block.timestamp.toString()
+      bulk1.block.timestamp.toString()
     );
     assert.fieldEquals(
       'EscrowStatusEvent',
-      id2,
+      id1,
       'txHash',
-      bulk2.transaction.hash.toHex()
+      bulk1.transaction.hash.toHex()
     );
     assert.fieldEquals(
       'EscrowStatusEvent',
-      id2,
+      id1,
       'escrowAddress',
       escrowAddressString
     );
     assert.fieldEquals(
       'EscrowStatusEvent',
-      id2,
+      id1,
       'sender',
       operatorAddressString
     );
-    assert.fieldEquals('EscrowStatusEvent', id2, 'status', 'Paid');
+    assert.fieldEquals('EscrowStatusEvent', id1, 'status', 'Paid');
     assert.fieldEquals(
       'EscrowStatusEvent',
-      id2,
+      id1,
       'launcher',
       launcherAddressString
     );
@@ -1259,6 +1349,17 @@ describe('Escrow', () => {
       'to',
       escrowAddressString
     );
+
+    // Payout
+    const payoutId = bulk1.transaction.hash.concat(workerAddress).toHex();
+    assert.fieldEquals(
+      'Payout',
+      payoutId,
+      'escrowAddress',
+      escrowAddressString
+    );
+    assert.fieldEquals('Payout', payoutId, 'recipient', workerAddressString);
+    assert.fieldEquals('Payout', payoutId, 'amount', '49');
   });
 
   test('Should properly handle CancellationRequested event', () => {
@@ -1316,7 +1417,7 @@ describe('Escrow', () => {
       'Transaction',
       cancellationRequested.transaction.hash.toHex(),
       'method',
-      'cancel'
+      'requestCancellation'
     );
     assert.fieldEquals(
       'Transaction',

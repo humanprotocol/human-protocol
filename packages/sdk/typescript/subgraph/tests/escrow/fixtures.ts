@@ -1,8 +1,9 @@
-import { Address, BigInt, ethereum } from '@graphprotocol/graph-ts';
+import { Address, BigInt, Bytes, ethereum } from '@graphprotocol/graph-ts';
 import { newMockEvent } from 'matchstick-as/assembly/index';
 import {
   BulkTransfer,
   BulkTransferV2,
+  BulkTransferV3,
   CancellationRefund,
   CancellationRequested,
   Cancelled,
@@ -218,6 +219,57 @@ export function createBulkTransferV2Event(
   );
 
   newBTEvent.parameters.push(txIdParam);
+  newBTEvent.parameters.push(recipientsParam);
+  newBTEvent.parameters.push(amountsParam);
+  newBTEvent.parameters.push(isPartialParam);
+  newBTEvent.parameters.push(finalResultsUrlParam);
+
+  return newBTEvent;
+}
+
+export function createBulkTransferV3Event(
+  sender: Address,
+  payoutId: Bytes,
+  recipients: Address[],
+  amounts: i32[],
+  isPartial: boolean,
+  finalResultsUrl: string,
+  timestamp: BigInt
+): BulkTransferV3 {
+  const newBTEvent = changetype<BulkTransferV3>(newMockEvent());
+  newBTEvent.transaction.hash = generateUniqueHash(
+    sender.toString(),
+    timestamp,
+    newBTEvent.transaction.nonce
+  );
+
+  newBTEvent.block.timestamp = timestamp;
+  newBTEvent.transaction.from = sender;
+
+  newBTEvent.parameters = [];
+
+  const payoutIdParam = new ethereum.EventParam(
+    'payoutId',
+    ethereum.Value.fromBytes(payoutId)
+  );
+  const recipientsParam = new ethereum.EventParam(
+    'recipients',
+    ethereum.Value.fromAddressArray(recipients)
+  );
+  const amountsParam = new ethereum.EventParam(
+    'amounts',
+    ethereum.Value.fromI32Array(amounts)
+  );
+  const isPartialParam = new ethereum.EventParam(
+    'isPartial',
+    ethereum.Value.fromBoolean(isPartial)
+  );
+  const finalResultsUrlParam = new ethereum.EventParam(
+    'finalResultsUrl',
+    ethereum.Value.fromString(finalResultsUrl)
+  );
+
+  newBTEvent.parameters.push(payoutIdParam);
   newBTEvent.parameters.push(recipientsParam);
   newBTEvent.parameters.push(amountsParam);
   newBTEvent.parameters.push(isPartialParam);

@@ -485,50 +485,49 @@ function handleBulkTransferCommon(
       Address.fromBytes(escrowEntity.token)
     );
 
-    // If the escrow is non-HMT, track the balance data
-    if (Address.fromBytes(escrowEntity.token) != HMT_ADDRESS) {
-      for (let i = 0; i < recipients.length; i++) {
-        const recipient = recipients[i];
-        const amount = amounts[i];
+    for (let i = 0; i < recipients.length; i++) {
+      const recipient = recipients[i];
+      const amount = amounts[i];
 
-        escrowEntity.amountPaid = escrowEntity.amountPaid.plus(amount);
-        escrowEntity.balance = escrowEntity.balance.minus(amount);
+      escrowEntity.amountPaid = escrowEntity.amountPaid.plus(amount);
+      escrowEntity.balance = escrowEntity.balance.minus(amount);
 
-        // Update worker, and create payout object
-        const worker = createOrLoadWorker(recipient);
-        worker.payoutCount = worker.payoutCount.plus(ONE_BI);
-        worker.save();
+      // Update worker, and create payout object
+      const worker = createOrLoadWorker(recipient);
+      worker.payoutCount = worker.payoutCount.plus(ONE_BI);
+      worker.save();
 
-        const payoutId = event.transaction.hash.concat(recipient);
-        const payment = new Payout(payoutId);
-        payment.escrowAddress = event.address;
-        payment.recipient = recipient;
-        payment.amount = amount;
-        payment.createdAt = event.block.timestamp;
-        payment.save();
+      const payoutId = event.transaction.hash.concat(recipient);
+      const payment = new Payout(payoutId);
+      payment.escrowAddress = event.address;
+      payment.recipient = recipient;
+      payment.amount = amount;
+      payment.createdAt = event.block.timestamp;
+      payment.save();
 
-        // Update event day data and daily worker
-        const eventDayData = getEventDayData(event);
-        eventDayData.dailyPayoutCount =
-          eventDayData.dailyPayoutCount.plus(ONE_BI);
+      // Update event day data and daily worker
+      const eventDayData = getEventDayData(event);
+      eventDayData.dailyPayoutCount =
+        eventDayData.dailyPayoutCount.plus(ONE_BI);
 
-        const eventDayId = toEventDayId(event);
-        const dailyWorkerId = Bytes.fromI32(eventDayId.toI32()).concat(
-          recipient
-        );
+      const eventDayId = toEventDayId(event);
+      const dailyWorkerId = Bytes.fromI32(eventDayId.toI32()).concat(recipient);
 
-        let dailyWorker = DailyWorker.load(dailyWorkerId);
-        if (!dailyWorker) {
-          dailyWorker = new DailyWorker(dailyWorkerId);
-          dailyWorker.timestamp = eventDayId;
-          dailyWorker.address = recipient;
-          dailyWorker.escrowAddress = event.address;
-          dailyWorker.save();
+      let dailyWorker = DailyWorker.load(dailyWorkerId);
+      if (!dailyWorker) {
+        dailyWorker = new DailyWorker(dailyWorkerId);
+        dailyWorker.timestamp = eventDayId;
+        dailyWorker.address = recipient;
+        dailyWorker.escrowAddress = event.address;
+        dailyWorker.save();
 
-          eventDayData.dailyWorkerCount =
-            eventDayData.dailyWorkerCount.plus(ONE_BI);
-        }
+        eventDayData.dailyWorkerCount =
+          eventDayData.dailyWorkerCount.plus(ONE_BI);
+      }
+      eventDayData.save();
 
+      // If the escrow is non-HMT, create the internal transaction
+      if (Address.fromBytes(escrowEntity.token) != HMT_ADDRESS) {
         const internalTransaction = new InternalTransaction(
           event.transaction.hash
             .concatI32(i)
@@ -541,8 +540,6 @@ function handleBulkTransferCommon(
         internalTransaction.method = 'transfer';
         internalTransaction.escrow = Address.fromBytes(escrowEntity.address);
         internalTransaction.save();
-
-        eventDayData.save();
       }
     }
 
@@ -611,7 +608,7 @@ export function handleCancelled(event: Cancelled): void {
   if (escrowEntity) {
     createTransaction(
       event,
-      'cancelled',
+      'cancel',
       event.transaction.from,
       Address.fromBytes(escrowEntity.address),
       null,
@@ -789,7 +786,7 @@ export function handleCancellationRequested(
   if (escrowEntity) {
     createTransaction(
       event,
-      'cancel',
+      'requestCancellation',
       event.transaction.from,
       Address.fromBytes(escrowEntity.address),
       null,
@@ -827,8 +824,9 @@ export function handleCancellationRefund(event: CancellationRefund): void {
     internalTransaction.method = 'transfer';
     internalTransaction.token = Address.fromBytes(escrowEntity.token);
     internalTransaction.save();
-    escrowEntity.balance = ZERO_BI;
   }
+  escrowEntity.balance = escrowEntity.balance.minus(event.params.amount);
+  escrowEntity.save();
 
   const entity = new CancellationRefundEvent(toEventId(event));
   entity.block = event.block.number;
