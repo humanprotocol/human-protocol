@@ -11,8 +11,6 @@ export const dailyHmtSpentResponseSchema = z.object({
 
 export const hcaptchaUserStatsResponseSchema = z.object({
   balance: z.object({
-    available: z.number(),
-    estimated: z.number(),
     recent: z.number(),
     total: z.number(),
   }),
