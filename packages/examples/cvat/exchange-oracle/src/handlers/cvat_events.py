@@ -1,4 +1,5 @@
 from dateutil.parser import parse as parse_aware_datetime
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 import src.cvat.api_calls as cvat_api
@@ -6,7 +7,6 @@ import src.models.cvat as models
 import src.services.cvat as cvat_service
 from src.core.types import AssignmentStatuses, JobStatuses
 from src.db import SessionLocal
-from sqlalchemy.exc import IntegrityError
 from src.db.utils import ForUpdateParams
 from src.log import ROOT_LOGGER_NAME
 from src.schemas.cvat import CvatWebhook
