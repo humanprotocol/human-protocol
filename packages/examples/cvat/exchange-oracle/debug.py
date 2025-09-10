@@ -98,7 +98,11 @@ def _mock_get_manifests_from_minio(logger: Logger) -> Generator[None, None, None
         logger.info(f"DEV: Using local manifest '{manifest_file}' for escrow '{escrow_address}'")
         return escrow
 
-    with mock.patch.object(EscrowUtils, "get_escrow", patched_get_escrow):
+    with (
+        mock.patch.object(EscrowUtils, "get_escrow", patched_get_escrow),
+        mock.patch("src.chain.escrow.get_token_symbol", return_value="HMT"),
+        mock.patch("src.chain.web3.get_token_symbol", return_value="HMT"),
+    ):
         yield
 
 
