@@ -54,7 +54,6 @@ class LabelType(str, Enum, metaclass=BetterEnumMeta):
 
 class WebhookEventType(str, Enum, metaclass=BetterEnumMeta):
     update_job = "update:job"
-    create_job = "create:job"
     ping = "ping"
 
 
@@ -324,8 +323,7 @@ def create_cvat_webhook(project_id: int) -> models.WebhookRead:
             # enable_ssl=True,
             project_id=project_id,
             events=[
-                models.EventsEnum("update:job"),
-                models.EventsEnum("create:job"),
+                models.EventsEnum(WebhookEventType.update_job.value),
             ],
         )  # WebhookWriteRequest
         try:
