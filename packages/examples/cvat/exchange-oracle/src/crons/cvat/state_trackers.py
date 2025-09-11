@@ -18,6 +18,7 @@ from src.db.utils import ForUpdateParams
 from src.handlers.completed_escrows import handle_escrows_validations
 from src.handlers.cvat_events import cvat_webhook_handler
 from src.utils.logging import format_sequence
+from src.utils.time import utcnow
 
 
 @cron_job
@@ -76,18 +77,49 @@ def track_assignments(logger: logging.Logger) -> None:
     4. If a project or task state is not "annotation", cancels assignments
     """
 
+    def _try_complete_assignment(
+        session: Session,
+        assignment: cvat_models.Assignment,
+    ) -> bool:
+        """
+        Checks if we haven't received a notification, but the job might have been completed.
+
+        Returns: assignment completed
+        """
+
+        latest_assignment = cvat_service.get_latest_assignment_by_cvat_job_id(
+            session, assignment.cvat_job_id
+        )
+        if not latest_assignment or latest_assignment.id != assignment.id:
+            return False
+
+        try:
+            cvat_job = cvat_api.get_job(assignment.cvat_job_id)
+        except cvat_api.exceptions.NotFoundException:
+            return False
+
+        if cvat_job.state != cvat_api.JobStatus.completed:
+            return False
+
+        if latest_assignment.user.cvat_id != cvat_job.assignee.id:
+            return False
+
+        logger.info(f"Found completed job #{assignment.cvat_job_id}. Completing the assignment")
+        cvat_service.complete_assignment(session, assignment.id, completed_at=utcnow())
+        cvat_api.update_job_assignee(assignment.cvat_job_id, assignee_id=None)
+        cvat_service.update_job_status(session, assignment.job.id, status=JobStatuses.completed)
+        return True
+
     def _reset_job_after_assignment(session: Session, assignment: cvat_models.Assignment):
         latest_assignment = cvat_service.get_latest_assignment_by_cvat_job_id(
             session, assignment.cvat_job_id
         )
-        if latest_assignment.id == assignment.id:
+        if latest_assignment.id != assignment.id:
             # Avoid un-assigning if it's not the latest assignment
+            return
 
-            cvat_api.update_job_assignee(
-                assignment.cvat_job_id, assignee_id=None
-            )  # note that calling it in a loop can take too much time
-
-            cvat_service.update_job_status(session, assignment.job.id, status=JobStatuses.new)
+        cvat_api.update_job_assignee(assignment.cvat_job_id, assignee_id=None)
+        cvat_service.update_job_status(session, assignment.job.id, status=JobStatuses.new)
 
     with SessionLocal.begin() as session:
         assignments = cvat_service.get_unprocessed_expired_assignments(
@@ -107,16 +139,17 @@ def track_assignments(logger: logging.Logger) -> None:
                     for_update=ForUpdateParams(nowait=True),
                 )
 
-                logger.info(
-                    "Expiring the unfinished assignment {} (user {}, job id {})".format(
-                        assignment.id,
-                        assignment.user_wallet_address,
-                        assignment.cvat_job_id,
+                if not _try_complete_assignment(session, assignment):
+                    logger.info(
+                        "Expiring the unfinished assignment {} (user {}, job id {})".format(
+                            assignment.id,
+                            assignment.user_wallet_address,
+                            assignment.cvat_job_id,
+                        )
                     )
-                )
 
-                cvat_service.expire_assignment(session, assignment.id)
-                _reset_job_after_assignment(session, assignment)
+                    cvat_service.expire_assignment(session, assignment.id)
+                    _reset_job_after_assignment(session, assignment)
 
     with SessionLocal.begin() as session:
         assignments = cvat_service.get_unprocessed_cancelled_assignments(

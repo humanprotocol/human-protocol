@@ -67,37 +67,34 @@ def handle_update_job_event(payload: CvatWebhook, session: Session) -> None:
             f"Received job #{job.cvat_id} status update: {new_cvat_status.value}. "
             "No matching assignment or the assignment is too old, ignoring the update"
         )
-    elif matching_assignment.is_finished:
-        if matching_assignment.status == AssignmentStatuses.created:
+    elif matching_assignment.status != AssignmentStatuses.created:
+        logger.info(
+            f"Received job #{job.cvat_id} status update: {new_cvat_status.value}. "
+            "Assignment is already finished, ignoring the update"
+        )
+    elif (
+        new_cvat_status == cvat_api.JobStatus.completed
+        and matching_assignment.id == latest_assignment.id
+    ):
+        # Check that the webhook was issued before the assignment expiration
+        if webhook_time < matching_assignment.expires_at:
+            logger.info(
+                f"Received job #{job.cvat_id} status update: {new_cvat_status.value}. "
+                "Completing the assignment"
+            )
+            cvat_service.complete_assignment(
+                session, matching_assignment.id, completed_at=webhook_time
+            )
+            cvat_api.update_job_assignee(job.cvat_id, assignee_id=None)
+            cvat_service.update_job_status(session, job.id, status=JobStatuses.completed)
+        else:
             logger.warning(
                 f"Received job #{job.cvat_id} status update: {new_cvat_status.value}. "
                 "Assignment is expired, rejecting the update"
             )
             cvat_service.expire_assignment(session, matching_assignment.id)
-
-            if matching_assignment.id == latest_assignment.id:
-                cvat_api.update_job_assignee(job.cvat_id, assignee_id=None)
-                cvat_service.update_job_status(session, job.id, status=JobStatuses.new)
-
-            cvat_service.touch(session, models.Job, [job.id])
-        else:
-            logger.info(
-                f"Received job #{job.cvat_id} status update: {new_cvat_status.value}. "
-                "Assignment is already finished, ignoring the update"
-            )
-    elif (
-        new_cvat_status == cvat_api.JobStatus.completed
-        and matching_assignment.id == latest_assignment.id
-        and matching_assignment.is_finished == False
-    ):
-        logger.info(
-            f"Received job #{job.cvat_id} status update: {new_cvat_status.value}. "
-            "Completing the assignment"
-        )
-        cvat_service.complete_assignment(session, matching_assignment.id, completed_at=webhook_time)
-        cvat_api.update_job_assignee(job.cvat_id, assignee_id=None)
-        cvat_service.update_job_status(session, job.id, status=JobStatuses.completed)
-        cvat_service.touch(session, models.Job, [job.id])
+            cvat_api.update_job_assignee(job.cvat_id, assignee_id=None)
+            cvat_service.update_job_status(session, job.id, status=JobStatuses.new)
     else:
         logger.info(
             f"Received job #{job.cvat_id} status update: {new_cvat_status.value}. "

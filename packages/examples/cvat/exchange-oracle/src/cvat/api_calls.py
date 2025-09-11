@@ -861,3 +861,14 @@ def remove_user_from_org(user_id: int):
         except exceptions.ApiException as e:
             logger.exception(f"Exception when calling remove_user_from_org: {e}\n")
             raise
+
+
+def get_job(job_id: int) -> models.JobRead:
+    logger = logging.getLogger("app")
+
+    with get_api_client() as api_client:
+        try:
+            return api_client.jobs_api.retrieve(job_id)[0]
+        except exceptions.ApiException as e:
+            logger.exception(f"Exception when calling get_job: {e}\n")
+            raise
