@@ -1,9 +1,11 @@
+from typing import Any
+
 from dateutil.parser import parse as parse_aware_datetime
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 import src.cvat.api_calls as cvat_api
-import src.models.cvat as models
+import src.models.cvat as cvat_models
 import src.services.cvat as cvat_service
 from src.core.types import AssignmentStatuses, JobStatuses
 from src.db import SessionLocal
@@ -15,15 +17,15 @@ from src.utils.logging import get_function_logger
 module_logger_name = f"{ROOT_LOGGER_NAME}.cron.handler"
 
 
-def handle_update_job_event(payload: CvatWebhook, session: Session) -> None:
+def handle_update_job_event(payload: dict[str, Any], session: Session) -> None:
     logger = get_function_logger(module_logger_name)
 
-    if "state" not in payload.before_update:
+    if "state" not in payload.get("before_update", {}):
         return
 
-    new_cvat_status = cvat_api.JobStatus(payload.job["state"])
+    new_cvat_status = cvat_api.JobStatus(payload["job"]["state"])
 
-    job_id = payload.job["id"]
+    job_id = payload["job"]["id"]
     jobs = cvat_service.get_jobs_by_cvat_id(session, [job_id], for_update=True)
     if not jobs:
         logger.warning(f"Received a job update webhook for an unknown job id {job_id}, ignoring ")
@@ -49,8 +51,8 @@ def handle_update_job_event(payload: CvatWebhook, session: Session) -> None:
         )
         return
 
-    webhook_time = parse_aware_datetime(payload.job["updated_date"])
-    webhook_assignee_id = (payload.job["assignee"] or {}).get("id")
+    webhook_time = parse_aware_datetime(payload["job"]["updated_date"])
+    webhook_assignee_id = (payload["job"]["assignee"] or {}).get("id")
 
     matching_assignment = next(
         (
@@ -96,7 +98,7 @@ def handle_update_job_event(payload: CvatWebhook, session: Session) -> None:
             cvat_api.update_job_assignee(job.cvat_id, assignee_id=None)
             cvat_service.update_job_status(session, job.id, status=JobStatuses.new)
 
-        cvat_service.touch(session, models.Job, [job.id])
+        cvat_service.touch(session, cvat_models.Job, [job.id])
     else:
         logger.info(
             f"Received job #{job.cvat_id} status update: {new_cvat_status.value}. "
@@ -104,19 +106,18 @@ def handle_update_job_event(payload: CvatWebhook, session: Session) -> None:
         )
 
 
-def cvat_webhook_handler(cvat_webhook: models.CvatWebhook, session: Session) -> None:
-    parsed_webhook = CvatWebhook.model_validate_json(cvat_webhook.event_data)
+def cvat_webhook_handler(cvat_webhook: cvat_models.CvatWebhook, session: Session) -> None:
     match cvat_webhook.event_type:
         case cvat_api.WebhookEventType.update_job.value:
-            handle_update_job_event(parsed_webhook, session)
+            handle_update_job_event(cvat_webhook.event_data, session)
 
 
 def handle_update_job_event_request(payload: CvatWebhook) -> None:
-    if payload.job["type"] != "annotation":
+    if payload.job.get("type") != "annotation":
         # We're not interested in any other job types so far
         return
 
-    if "state" not in payload.before_update:
+    if "state" not in (payload.before_update or {}):
         # We're only interested in state updates
         return
 
@@ -128,7 +129,7 @@ def handle_update_job_event_request(payload: CvatWebhook) -> None:
                 cvat_task_id=payload.job["task_id"],
                 cvat_job_id=payload.job["id"],
                 event_type=payload.event,
-                event_data=payload.model_dump_json(indent=None),
+                event_data=payload.model_dump(),
             )
     except IntegrityError as e:
         if "is not present in table" in str(e.orig):

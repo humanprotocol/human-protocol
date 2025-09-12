@@ -1140,7 +1140,7 @@ class CvatWebhookQueue:
         session: Session,
         *,
         event_type: str,
-        event_data: dict,
+        event_data: dict[str, Any],
         cvat_project_id: int,
         cvat_task_id: int | None = None,
         cvat_job_id: int | None = None,
@@ -1185,12 +1185,6 @@ class CvatWebhookQueue:
             .limit(limit)
             .all()
         )
-
-    def update_webhook_status(
-        self, session: Session, webhook_id: str, status: CvatWebhookStatuses
-    ) -> None:
-        upd = update(CvatWebhook).where(CvatWebhook.id == webhook_id).values(status=status.value)
-        session.execute(upd)
 
     def handle_webhook_success(self, session: Session, webhook_id: str) -> None:
         upd = (
