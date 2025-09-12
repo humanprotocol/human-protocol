@@ -140,6 +140,10 @@ class CronConfig:
     )
 
     process_cvat_webhooks_workers = int(getenv("PROCESS_CVAT_WEBHOOKS_WORKERS", 10))
+    """
+    The maximum number of parallel workers. Workers are added lazily, if the existing workers
+    can't finish in time.
+    """
     process_cvat_webhooks_int = int(getenv("PROCESS_CVAT_WEBHOOKS_INT", 5))
     process_cvat_webhooks_chunk_size = int(getenv("PROCESS_CVAT_WEBHOOKS_CHUNK_SIZE", 10))
 

@@ -95,6 +95,8 @@ def handle_update_job_event(payload: CvatWebhook, session: Session) -> None:
             cvat_service.expire_assignment(session, matching_assignment.id)
             cvat_api.update_job_assignee(job.cvat_id, assignee_id=None)
             cvat_service.update_job_status(session, job.id, status=JobStatuses.new)
+
+        cvat_service.touch(session, models.Job, [job.id])
     else:
         logger.info(
             f"Received job #{job.cvat_id} status update: {new_cvat_status.value}. "

@@ -61,7 +61,6 @@ def setup_cron_jobs(app: FastAPI) -> None:
         scheduler.add_job(
             process_incoming_cvat_webhooks,
             trigger="interval",
-            jitter=max(1, Config.cron_config.process_cvat_webhooks_int // 2),
             seconds=Config.cron_config.process_cvat_webhooks_int,
             max_instances=Config.cron_config.process_cvat_webhooks_workers,
         )

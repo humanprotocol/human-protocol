@@ -101,13 +101,14 @@ def track_assignments(logger: logging.Logger) -> None:
         if cvat_job.state != cvat_api.JobStatus.completed:
             return False
 
-        if latest_assignment.user.cvat_id != cvat_job.assignee.id:
+        if not cvat_job.assignee or cvat_job.assignee.id != latest_assignment.user.cvat_id:
             return False
 
         logger.info(f"Found completed job #{assignment.cvat_job_id}. Completing the assignment")
         cvat_service.complete_assignment(session, assignment.id, completed_at=utcnow())
         cvat_api.update_job_assignee(assignment.cvat_job_id, assignee_id=None)
         cvat_service.update_job_status(session, assignment.job.id, status=JobStatuses.completed)
+        cvat_service.touch(session, cvat_models.Job, [assignment.job.id])
         return True
 
     def _reset_job_after_assignment(session: Session, assignment: cvat_models.Assignment):
@@ -120,6 +121,7 @@ def track_assignments(logger: logging.Logger) -> None:
 
         cvat_api.update_job_assignee(assignment.cvat_job_id, assignee_id=None)
         cvat_service.update_job_status(session, assignment.job.id, status=JobStatuses.new)
+        cvat_service.touch(session, cvat_models.Job, [assignment.job.id])
 
     with SessionLocal.begin() as session:
         assignments = cvat_service.get_unprocessed_expired_assignments(
