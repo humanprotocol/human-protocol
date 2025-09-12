@@ -12,8 +12,7 @@ if [ "$CURRENT_BRANCH" = "main" ]; then
   ALWAYS_UPDATE=true
 else
   if ! git show-ref --verify --quiet refs/remotes/origin/main; then
-    echo "origin/main does not exist. Please run: git fetch origin main"
-    exit 1
+    git fetch origin main
   fi
 
   MERGE_BASE="$(git merge-base "$CURRENT_BRANCH" origin/main || true)"
