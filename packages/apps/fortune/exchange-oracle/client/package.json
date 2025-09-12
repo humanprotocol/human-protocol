@@ -12,7 +12,8 @@
     "start:prod": "serve -s dist",
     "format:prettier": "prettier --write \"**/*.{ts,tsx,js,jsx}\"",
     "format:lint": "eslint --fix \"**/*.{ts,tsx,js,jsx}\"",
-    "format": "yarn format:prettier && yarn format:lint"
+    "format": "yarn format:prettier && yarn format:lint",
+    "cd:preinstall": "sh ../../../../../scripts/preinstall.sh"
   },
   "browserslist": {
     "production": [

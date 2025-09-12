@@ -7,7 +7,6 @@
   "license": "MIT",
   "scripts": {
     "clean": "yarn workspaces foreach --all -p run clean",
-    "cd:preinstall": "sh ./scripts/cd-preinstall.sh",
     "lint": "yarn workspaces foreach --all -p run lint",
     "build:libs": "yarn workspaces foreach --all --no-private -pt run build",
     "docker:infra-up": "make -C ./docker-setup  -f Makefile.dev infra-up",

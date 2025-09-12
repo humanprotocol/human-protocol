@@ -50,7 +50,8 @@
     "format:prettier": "prettier --write \"**/*.{ts,tsx,js,jsx}\"",
     "format:lint": "eslint --fix \"**/*.{ts,tsx,js,jsx}\"",
     "format": "yarn format:prettier && yarn format:lint",
-    "vercel-build": "yarn workspace human-protocol build:libs && yarn build"
+    "vercel-build": "yarn workspace human-protocol build:libs && yarn build",
+    "cd:preinstall": "sh ../../../../scripts/preinstall.sh"
   },
   "browserslist": {
     "production": [

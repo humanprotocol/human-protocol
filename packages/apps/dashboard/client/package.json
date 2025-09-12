@@ -14,7 +14,8 @@
     "preview": "vite preview",
     "vercel-build": "yarn workspace human-protocol build:libs && yarn build",
     "test": "exit 0",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "cd:preinstall": "sh ../../../../scripts/preinstall.sh"
   },
   "dependencies": {
     "@emotion/react": "^11.11.4",

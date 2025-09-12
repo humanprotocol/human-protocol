@@ -26,7 +26,8 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "generate-env-doc": "ts-node scripts/generate-env-doc.ts",
-    "typeorm": "typeorm-ts-node-commonjs"
+    "typeorm": "typeorm-ts-node-commonjs",
+    "cd:preinstall": "sh ../../../../scripts/preinstall.sh"
   },
   "dependencies": {
     "@google-cloud/storage": "^7.15.0",
