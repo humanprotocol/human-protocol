@@ -28,7 +28,7 @@
     ]
   },
   "dependencies": {
-    "@human-protocol/sdk": "*",
+    "@human-protocol/sdk": "workspace:*",
     "@mui/icons-material": "^7.0.1",
     "@mui/material": "^5.16.7",
     "@mui/x-data-grid": "^8.7.0",
