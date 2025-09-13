@@ -9,7 +9,6 @@ from datetime import datetime, timedelta
 from itertools import islice
 from typing import Any, NamedTuple
 
-from attrs import define
 from sqlalchemy import delete, func, literal, select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
@@ -1133,7 +1132,19 @@ def touch_final_assignments(
         touch_parent_objects(session, Assignment, ids.scalars().all(), time=time)
 
 
-@define
+# Webhooks
+
+
+def clear_escrow_webhooks(session: Session, escrow_address: str, chain_id: int):
+    session.execute(
+        delete(CvatWebhook).where(
+            CvatWebhook.project.has(
+                (Project.escrow_address == escrow_address) & (Project.chain_id == chain_id)
+            )
+        )
+    )
+
+
 class CvatWebhookQueue:
     def create_webhook(
         self,
@@ -1142,11 +1153,11 @@ class CvatWebhookQueue:
         event_type: str,
         event_data: dict[str, Any],
         cvat_project_id: int,
-        cvat_task_id: int | None = None,
-        cvat_job_id: int | None = None,
-    ) -> str | None:
+        cvat_task_id: int,
+        cvat_job_id: int,
+    ) -> str:
         """
-        Creates a webhook in a database. If the same delivery already exists, returns None.
+        Creates a webhook in a database.
         """
         webhook_id = str(uuid.uuid4())
         webhook = CvatWebhook(

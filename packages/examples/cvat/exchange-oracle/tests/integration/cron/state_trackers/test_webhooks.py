@@ -8,6 +8,7 @@ from src.core.types import (
     AssignmentStatuses,
     CvatWebhookStatuses,
     JobStatuses,
+    ProjectStatuses,
 )
 from src.crons.cvat.state_trackers import process_incoming_cvat_webhooks
 from src.models.cvat import Assignment, CvatWebhook, Job, User
@@ -267,4 +268,48 @@ class CvatWebhookHandlingTest:
         self.session.commit()
 
         assert self.session.get(Job, cvat_job.id).status == JobStatuses.completed
+        assert self.session.get(CvatWebhook, webhook_id).status == CvatWebhookStatuses.completed
+
+    def test_can_ignore_update_for_project_in_non_annotation_status(self):
+        cvat_project, cvat_task, cvat_job = create_project_task_and_job(
+            self.session, ESCROW_ADDRESS, 1
+        )
+        cvat_project.status = ProjectStatuses.deleted
+        cvat_job.status = JobStatuses.in_progress
+        self.session.add(cvat_job)
+
+        assignment = Assignment(
+            id=str(uuid.uuid4()),
+            user_wallet_address=WALLET_ADDRESS2,
+            cvat_job_id=cvat_job.cvat_id,
+            created_at=datetime.now() - timedelta(hours=1),
+            expires_at=datetime.now() + timedelta(hours=1),
+            status=AssignmentStatuses.created,
+        )
+        self.session.add(assignment)
+
+        webhook_id = cvat_service.incoming_webhooks.create_webhook(
+            self.session,
+            event_type="update:job",
+            event_data={
+                "before_update": {
+                    "state": "in_progress",
+                },
+                "job": {
+                    "id": cvat_job.cvat_id,
+                    "assignee": {"id": self.user2.cvat_id},
+                    "state": "completed",
+                    "updated_date": datetime.now().isoformat() + "Z",
+                },
+            },
+            cvat_project_id=cvat_project.cvat_id,
+            cvat_task_id=cvat_task.cvat_id,
+            cvat_job_id=cvat_job.cvat_id,
+        )
+        self.session.commit()
+
+        process_incoming_cvat_webhooks()
+        self.session.commit()
+
+        assert self.session.get(Job, cvat_job.id).status == JobStatuses.in_progress
         assert self.session.get(CvatWebhook, webhook_id).status == CvatWebhookStatuses.completed

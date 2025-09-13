@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 import src.cvat.api_calls as cvat_api
 import src.models.cvat as cvat_models
 import src.services.cvat as cvat_service
-from src.core.types import AssignmentStatuses, JobStatuses
+from src.core.types import AssignmentStatuses, JobStatuses, ProjectStatuses
 from src.db import SessionLocal
 from src.db.utils import ForUpdateParams
 from src.log import ROOT_LOGGER_NAME
@@ -28,7 +28,7 @@ def handle_update_job_event(payload: dict[str, Any], session: Session) -> None:
     job_id = payload["job"]["id"]
     jobs = cvat_service.get_jobs_by_cvat_id(session, [job_id], for_update=True)
     if not jobs:
-        logger.warning(f"Received a job update webhook for an unknown job id {job_id}, ignoring ")
+        logger.warning(f"Received a job update webhook for an unknown job id {job_id}, ignoring")
         return
 
     job = jobs[0]
@@ -36,7 +36,14 @@ def handle_update_job_event(payload: dict[str, Any], session: Session) -> None:
     if job.status != JobStatuses.in_progress:
         logger.warning(
             f"Received a job update webhook for a job id {job_id} "
-            f"in the status {job.status}, ignoring "
+            f"in the status {job.status}, ignoring"
+        )
+        return
+
+    if job.project.status != ProjectStatuses.annotation:
+        logger.warning(
+            f"Received a job update webhook for a job id {job_id} "
+            f"with the project in status {job.project.status}, ignoring"
         )
         return
 

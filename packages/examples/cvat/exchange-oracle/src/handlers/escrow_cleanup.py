@@ -87,6 +87,9 @@ def _cleanup_db(session: Session, escrow_address: str, chain_id: int) -> None:
     cvat_db_service.remove_escrow_images(
         session=session, escrow_address=escrow_address, chain_id=chain_id
     )
+    cvat_db_service.clear_escrow_webhooks(
+        session=session, escrow_address=escrow_address, chain_id=chain_id
+    )
 
 
 def cleanup_escrow(
