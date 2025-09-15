@@ -12,6 +12,7 @@ if [ "$CURRENT_BRANCH" = "main" ]; then
   ALWAYS_UPDATE=true
 else
   if ! git show-ref --verify --quiet refs/remotes/origin/main; then
+    git status
     git fetch origin main
   fi
 
