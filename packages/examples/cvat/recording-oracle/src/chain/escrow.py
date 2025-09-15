@@ -2,7 +2,7 @@ import json
 
 from human_protocol_sdk.constants import ChainId, Status
 from human_protocol_sdk.encryption import Encryption, EncryptionUtils
-from human_protocol_sdk.escrow import EscrowClient, EscrowData, EscrowUtils
+from human_protocol_sdk.escrow import EscrowData, EscrowUtils, EscrowClient
 from human_protocol_sdk.storage import StorageUtils
 
 from src.chain.web3 import get_web3
@@ -14,6 +14,14 @@ def get_escrow(chain_id: int, escrow_address: str) -> EscrowData:
     escrow = EscrowUtils.get_escrow(ChainId(chain_id), escrow_address)
     if not escrow:
         raise Exception(f"Can't find escrow {escrow_address}")
+
+    # The returned value can contain invalid oracle addresses, replace them with correct ones
+    w3 = get_web3(chain_id)
+    escrow_client = EscrowClient(w3)
+    escrow.launcher = escrow_client.get_job_launcher_address()
+    escrow.exchange_oracle = escrow_client.get_exchange_oracle_address()
+    escrow.recording_oracle = escrow_client.get_recording_oracle_address()
+    escrow.reputation_oracle = escrow_client.get_reputation_oracle_address()
 
     return escrow
 

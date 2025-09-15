@@ -1,6 +1,5 @@
-from human_protocol_sdk.constants import ChainId, KVStoreKeys
+from human_protocol_sdk.constants import KVStoreKeys
 from human_protocol_sdk.kvstore import KVStoreClient, KVStoreClientError, KVStoreUtils
-from human_protocol_sdk.operator import OperatorUtils
 
 from src.chain.escrow import get_escrow
 from src.chain.web3 import get_web3
@@ -13,7 +12,10 @@ def get_exchange_oracle_url(chain_id: int, escrow_address: str) -> str:
 
     escrow = get_escrow(chain_id, escrow_address)
 
-    return OperatorUtils.get_operator(ChainId(chain_id), escrow.exchange_oracle).webhook_url
+    # Subgraph can return invalid values, use KVStore itself
+    w3 = get_web3(chain_id)
+    kvstore_client = KVStoreClient(w3)
+    return kvstore_client.get(escrow.exchange_oracle, 'webhook_url')
 
 
 def get_reputation_oracle_url(chain_id: int, escrow_address: str) -> str:
@@ -22,7 +24,10 @@ def get_reputation_oracle_url(chain_id: int, escrow_address: str) -> str:
 
     escrow = get_escrow(chain_id, escrow_address)
 
-    return OperatorUtils.get_operator(ChainId(chain_id), escrow.reputation_oracle).webhook_url
+    # Subgraph can return invalid values, use KVStore itself
+    w3 = get_web3(chain_id)
+    kvstore_client = KVStoreClient(w3)
+    return kvstore_client.get(escrow.reputation_oracle, 'webhook_url')
 
 
 def register_in_kvstore() -> None:
