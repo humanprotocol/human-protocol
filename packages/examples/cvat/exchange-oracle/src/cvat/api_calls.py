@@ -54,7 +54,6 @@ class LabelType(str, Enum, metaclass=BetterEnumMeta):
 
 class WebhookEventType(str, Enum, metaclass=BetterEnumMeta):
     update_job = "update:job"
-    create_job = "create:job"
     ping = "ping"
 
 
@@ -324,8 +323,7 @@ def create_cvat_webhook(project_id: int) -> models.WebhookRead:
             # enable_ssl=True,
             project_id=project_id,
             events=[
-                models.EventsEnum("update:job"),
-                models.EventsEnum("create:job"),
+                models.EventsEnum(WebhookEventType.update_job.value),
             ],
         )  # WebhookWriteRequest
         try:
@@ -862,4 +860,15 @@ def remove_user_from_org(user_id: int):
                 api_client.memberships_api.destroy(page.results[0].id)
         except exceptions.ApiException as e:
             logger.exception(f"Exception when calling remove_user_from_org: {e}\n")
+            raise
+
+
+def get_job(job_id: int) -> models.JobRead:
+    logger = logging.getLogger("app")
+
+    with get_api_client() as api_client:
+        try:
+            return api_client.jobs_api.retrieve(job_id)[0]
+        except exceptions.ApiException as e:
+            logger.exception(f"Exception when calling get_job: {e}\n")
             raise

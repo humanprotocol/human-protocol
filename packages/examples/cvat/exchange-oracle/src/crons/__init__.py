@@ -3,6 +3,7 @@ from fastapi import FastAPI
 
 from src.core.config import Config
 from src.crons.cvat.state_trackers import (
+    process_incoming_cvat_webhooks,
     track_assignments,
     track_completed_escrows,
     track_completed_projects,
@@ -56,6 +57,12 @@ def setup_cron_jobs(app: FastAPI) -> None:
             process_incoming_reputation_oracle_webhooks,
             "interval",
             seconds=Config.cron_config.process_reputation_oracle_webhooks_int,
+        )
+        scheduler.add_job(
+            process_incoming_cvat_webhooks,
+            trigger="interval",
+            seconds=Config.cron_config.process_cvat_webhooks_int,
+            max_instances=Config.cron_config.process_cvat_webhooks_workers,
         )
         scheduler.add_job(
             track_completed_projects,

@@ -15,10 +15,20 @@ from src.core.types import (
     TaskTypes,
 )
 from src.db import SessionLocal
-from src.models.cvat import Assignment, DataUpload, Image, Job, Project, Task, User
+from src.models.cvat import (
+    Assignment,
+    CvatWebhook,
+    CvatWebhookStatuses,
+    DataUpload,
+    Image,
+    Job,
+    Project,
+    Task,
+    User,
+)
 from src.utils.time import utcnow
 
-from tests.utils.constants import WALLET_ADDRESS1, WALLET_ADDRESS2
+from tests.utils.constants import ESCROW_ADDRESS, WALLET_ADDRESS1, WALLET_ADDRESS2
 from tests.utils.db_helper import (
     create_project,
     create_project_and_task,
@@ -1518,6 +1528,56 @@ class ServiceIntegrationTest:
         assert assignments[0].id != assignment.id
         assert assignments[0].user_wallet_address == wallet_address_2
 
+    def test_get_unprocessed_expired_assignments_skips_jobs_with_pending_webhooks(self):
+        cvat_project, cvat_task, cvat_job = create_project_task_and_job(
+            self.session, ESCROW_ADDRESS, 1
+        )
+
+        wallet_address_1 = WALLET_ADDRESS1
+        user = User(
+            wallet_address=wallet_address_1,
+            cvat_email="test@hmt.ai",
+            cvat_id=1,
+        )
+        self.session.add(user)
+
+        wallet_address_2 = WALLET_ADDRESS2
+        user = User(
+            wallet_address=wallet_address_2,
+            cvat_email="test2@hmt.ai",
+            cvat_id=2,
+        )
+        self.session.add(user)
+
+        assignment = Assignment(
+            id=str(uuid.uuid4()),
+            user_wallet_address=wallet_address_1,
+            cvat_job_id=cvat_job.cvat_id,
+            expires_at=utcnow() + timedelta(days=1),
+        )
+        self.session.add(assignment)
+
+        assignment_2 = Assignment(
+            id=str(uuid.uuid4()),
+            user_wallet_address=wallet_address_2,
+            cvat_job_id=cvat_job.cvat_id,
+            expires_at=utcnow() - timedelta(days=1),
+        )
+        self.session.add(assignment_2)
+        self.session.commit()
+
+        cvat_service.incoming_webhooks.create_webhook(
+            self.session,
+            event_type="update:job",
+            event_data={},
+            cvat_project_id=cvat_project.cvat_id,
+            cvat_task_id=cvat_task.cvat_id,
+            cvat_job_id=cvat_job.cvat_id,
+        )
+
+        assignments = cvat_service.get_unprocessed_expired_assignments(self.session)
+        assert not assignments
+
     def test_update_assignment(self):
         (_, _, cvat_job) = create_project_task_and_job(
             self.session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", 1
@@ -1730,3 +1790,97 @@ class ServiceIntegrationTest:
         images = cvat_service.get_project_images(self.session, 2)
 
         assert len(images) == 0
+
+    def test_can_enqueue_webhook(self):
+        cvat_project, cvat_task, cvat_job = create_project_task_and_job(
+            self.session, ESCROW_ADDRESS, 1
+        )
+
+        webhook_id = cvat_service.incoming_webhooks.create_webhook(
+            self.session,
+            event_type="update:job",
+            event_data={},
+            cvat_project_id=cvat_project.cvat_id,
+            cvat_task_id=cvat_task.cvat_id,
+            cvat_job_id=cvat_job.cvat_id,
+        )
+        self.session.commit()
+
+        webhook = self.session.get(CvatWebhook, webhook_id)
+        assert webhook.status == CvatWebhookStatuses.pending
+
+    def test_cannot_enqueue_webhook_for_unknown_project(self):
+        cvat_project, cvat_task, cvat_job = create_project_task_and_job(
+            self.session, ESCROW_ADDRESS, 1
+        )
+
+        cvat_service.incoming_webhooks.create_webhook(
+            self.session,
+            event_type="update:job",
+            event_data={},
+            cvat_project_id=cvat_project.cvat_id + 100,
+            cvat_task_id=cvat_task.cvat_id,
+            cvat_job_id=cvat_job.cvat_id,
+        )
+
+        with pytest.raises(IntegrityError):
+            self.session.commit()
+
+    def test_can_get_pending_webhooks(self):
+        cvat_project, cvat_task, cvat_job = create_project_task_and_job(
+            self.session, ESCROW_ADDRESS, 1
+        )
+
+        webhook_id = cvat_service.incoming_webhooks.create_webhook(
+            self.session,
+            event_type="update:job",
+            event_data={},
+            cvat_project_id=cvat_project.cvat_id,
+            cvat_task_id=cvat_task.cvat_id,
+            cvat_job_id=cvat_job.cvat_id,
+        )
+        self.session.commit()
+
+        webhooks = cvat_service.incoming_webhooks.get_pending_webhooks(self.session)
+        assert len(webhooks) == 1
+        assert webhooks[0].id == webhook_id
+
+    def test_can_complete_webhook(self):
+        cvat_project, cvat_task, cvat_job = create_project_task_and_job(
+            self.session, ESCROW_ADDRESS, 1
+        )
+
+        webhook_id = cvat_service.incoming_webhooks.create_webhook(
+            self.session,
+            event_type="update:job",
+            event_data={},
+            cvat_project_id=cvat_project.cvat_id,
+            cvat_task_id=cvat_task.cvat_id,
+            cvat_job_id=cvat_job.cvat_id,
+        )
+        self.session.commit()
+
+        cvat_service.incoming_webhooks.handle_webhook_success(self.session, webhook_id)
+        webhook: CvatWebhook = self.session.get(CvatWebhook, webhook_id)
+        assert webhook.attempts == 1
+        assert webhook.status == CvatWebhookStatuses.completed
+
+    def test_can_fail_webhook(self):
+        cvat_project, cvat_task, cvat_job = create_project_task_and_job(
+            self.session, ESCROW_ADDRESS, 1
+        )
+
+        webhook_id = cvat_service.incoming_webhooks.create_webhook(
+            self.session,
+            event_type="update:job",
+            event_data={},
+            cvat_project_id=cvat_project.cvat_id,
+            cvat_task_id=cvat_task.cvat_id,
+            cvat_job_id=cvat_job.cvat_id,
+        )
+        self.session.commit()
+
+        cvat_service.incoming_webhooks.handle_webhook_fail(self.session, webhook_id)
+        webhook: CvatWebhook = self.session.get(CvatWebhook, webhook_id)
+        assert webhook.attempts == 1
+        assert webhook.status == CvatWebhookStatuses.pending

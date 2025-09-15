@@ -126,27 +126,42 @@ class CronConfig:
     process_job_launcher_webhooks_chunk_size = int(
         getenv("PROCESS_JOB_LAUNCHER_WEBHOOKS_CHUNK_SIZE", 5)
     )
+
     process_recording_oracle_webhooks_int = int(getenv("PROCESS_RECORDING_ORACLE_WEBHOOKS_INT", 30))
     process_recording_oracle_webhooks_chunk_size = int(
         getenv("PROCESS_RECORDING_ORACLE_WEBHOOKS_CHUNK_SIZE", 5)
     )
+
     process_reputation_oracle_webhooks_chunk_size = int(
         getenv("PROCESS_REPUTATION_ORACLE_WEBHOOKS_CHUNK_SIZE", 5)
     )
     process_reputation_oracle_webhooks_int = int(
         getenv("PROCESS_REPUTATION_ORACLE_WEBHOOKS_INT", 5)
     )
+
+    process_cvat_webhooks_workers = int(getenv("PROCESS_CVAT_WEBHOOKS_WORKERS", 10))
+    """
+    The maximum number of parallel workers. Workers are added lazily, if the existing workers
+    can't finish in time.
+    """
+    process_cvat_webhooks_int = int(getenv("PROCESS_CVAT_WEBHOOKS_INT", 5))
+    process_cvat_webhooks_chunk_size = int(getenv("PROCESS_CVAT_WEBHOOKS_CHUNK_SIZE", 10))
+
     track_completed_projects_int = int(getenv("TRACK_COMPLETED_PROJECTS_INT", 30))
     track_completed_tasks_int = int(getenv("TRACK_COMPLETED_TASKS_INT", 30))
+
     track_creating_tasks_int = int(getenv("TRACK_CREATING_TASKS_INT", 300))
     track_creating_tasks_chunk_size = getenv("TRACK_CREATING_TASKS_CHUNK_SIZE", 5)
+
     track_assignments_int = int(getenv("TRACK_ASSIGNMENTS_INT", 5))
     track_assignments_chunk_size = int(getenv("TRACK_ASSIGNMENTS_CHUNK_SIZE", 10))
 
     track_completed_escrows_int = int(getenv("TRACK_COMPLETED_ESCROWS_INT", 60))
     track_completed_escrows_chunk_size = int(getenv("TRACK_COMPLETED_ESCROWS_CHUNK_SIZE", 100))
+
     track_escrow_validations_int = int(getenv("TRACK_ESCROW_VALIDATIONS_INT", 60))
     track_escrow_validations_chunk_size = int(getenv("TRACK_ESCROW_VALIDATIONS_CHUNK_SIZE", 1))
+
     track_completed_escrows_max_downloading_retries = int(
         getenv("TRACK_COMPLETED_ESCROWS_MAX_DOWNLOADING_RETRIES", 10)
     )
