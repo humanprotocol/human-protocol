@@ -119,8 +119,8 @@ class Cache:
         return self._get_or_set(key, set_callback=set_callback, **kwargs)
 
     def get_or_set_escrow(
-        self, chain_id: int, token_address: str, *, set_callback: Callable[[], str], **kwargs
+        self, chain_id: int, escrow_address: str, *, set_callback: Callable[[], str], **kwargs
     ) -> str:
         kwargs.setdefault("ttl", Config.features.escrow_cache_ttl)
-        key = self._make_key(token_address, chain_id)
+        key = self._make_key(escrow_address, chain_id)
         return self._get_or_set(key, set_callback=set_callback, **kwargs)

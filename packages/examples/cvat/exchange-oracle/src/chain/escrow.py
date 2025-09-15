@@ -29,12 +29,20 @@ def download_escrow(chain_id: int, escrow_address: str) -> EscrowData:
 
 
 def get_escrow(chain_id: int, escrow_address: str, *, force_refresh: bool = False) -> EscrowData:
+    def _serialize(escrow: EscrowData) -> dict:
+        return escrow.__dict__
+
+    def _deserialize(escrow_data: dict) -> EscrowData:
+        return EscrowData(**escrow_data)
+
     cache = Cache()
-    return cache.get_or_set_escrow(
+    value = cache.get_or_set_escrow(
         chain_id=chain_id,
-        set_callback=partial(download_escrow, chain_id, escrow_address),
+        escrow_address=escrow_address,
+        set_callback=lambda: _serialize(download_escrow(chain_id, escrow_address)),
         force_refresh=force_refresh,
     )
+    return _deserialize(value)
 
 
 def validate_escrow(
