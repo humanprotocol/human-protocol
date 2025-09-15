@@ -3,21 +3,38 @@ from functools import partial
 
 from human_protocol_sdk.constants import ChainId, Status
 from human_protocol_sdk.encryption import Encryption, EncryptionUtils
-from human_protocol_sdk.escrow import EscrowData, EscrowUtils
+from human_protocol_sdk.escrow import EscrowClient, EscrowData, EscrowUtils
 from human_protocol_sdk.storage import StorageUtils
 
-from src.chain.web3 import get_token_symbol
+from src.chain.web3 import get_token_symbol, get_web3
 from src.core.config import Config
 from src.core.types import OracleWebhookTypes
 from src.services.cache import Cache
 
 
-def get_escrow(chain_id: int, escrow_address: str) -> EscrowData:
+def download_escrow(chain_id: int, escrow_address: str) -> EscrowData:
     escrow = EscrowUtils.get_escrow(ChainId(chain_id), escrow_address)
     if not escrow:
         raise Exception(f"Can't find escrow {escrow_address}")
 
+    # The returned value can contain invalid oracle addresses, replace them with correct ones
+    w3 = get_web3(chain_id)
+    escrow_client = EscrowClient(w3)
+    escrow.launcher = escrow_client.get_job_launcher_address()
+    escrow.exchange_oracle = escrow_client.get_exchange_oracle_address()
+    escrow.recording_oracle = escrow_client.get_recording_oracle_address()
+    escrow.reputation_oracle = escrow_client.get_reputation_oracle_address()
+
     return escrow
+
+
+def get_escrow(chain_id: int, escrow_address: str, *, force_refresh: bool = False) -> EscrowData:
+    cache = Cache()
+    return cache.get_or_set_escrow(
+        chain_id=chain_id,
+        set_callback=partial(download_escrow, chain_id, escrow_address),
+        force_refresh=force_refresh,
+    )
 
 
 def validate_escrow(
@@ -26,12 +43,13 @@ def validate_escrow(
     *,
     accepted_states: list[Status] | None = None,
     allow_no_funds: bool = False,
+    force_refresh: bool = False,
 ) -> None:
     if accepted_states is None:
         accepted_states = [Status.Pending]
     assert accepted_states
 
-    escrow = get_escrow(chain_id, escrow_address)
+    escrow = get_escrow(chain_id, escrow_address, force_refresh=force_refresh)
 
     status = Status[escrow.status]
     if status not in accepted_states:

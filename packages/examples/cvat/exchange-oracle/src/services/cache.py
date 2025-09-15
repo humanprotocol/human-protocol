@@ -87,11 +87,16 @@ class Cache:
     def _make_key(address: str, chain_id: int) -> str:
         return f"{address}@{chain_id}"
 
-    def _get_or_set(self, key: str, set_callback, *, ttl: int | None = None):
+    def _get_or_set(
+        self, key: str, set_callback, *, ttl: int | None = None, force_refresh: bool = False
+    ):
         cache = self._get_cache()
-        item = cache.get(key)
 
-        if not item:
+        item = None
+        if not force_refresh:
+            item = cache.get(key)
+
+        if not item or force_refresh:
             item = set_callback()
             success = cache.set(key, item, timeout=ttl)
             if not success:
@@ -110,5 +115,12 @@ class Cache:
         self, chain_id: int, token_address: str, *, set_callback: Callable[[], str], **kwargs
     ) -> str:
         kwargs.setdefault("ttl", Config.features.token_symbol_ttl)
+        key = self._make_key(token_address, chain_id)
+        return self._get_or_set(key, set_callback=set_callback, **kwargs)
+
+    def get_or_set_escrow(
+        self, chain_id: int, token_address: str, *, set_callback: Callable[[], str], **kwargs
+    ) -> str:
+        kwargs.setdefault("ttl", Config.features.escrow_cache_ttl)
         key = self._make_key(token_address, chain_id)
         return self._get_or_set(key, set_callback=set_callback, **kwargs)
