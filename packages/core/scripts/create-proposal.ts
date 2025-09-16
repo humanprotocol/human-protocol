@@ -26,7 +26,7 @@ async function main() {
     proposal.values,
     proposal.calldatas,
     proposal.description,
-    { value: ethers.parseEther('0.015') }
+    { value: ethers.parseEther('0.025') }
   );
 
   await transactionResponse.wait();
