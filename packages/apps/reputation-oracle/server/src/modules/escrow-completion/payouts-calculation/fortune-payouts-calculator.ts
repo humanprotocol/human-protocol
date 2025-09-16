@@ -1,9 +1,11 @@
+import { EscrowClient } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
 import type { OverrideProperties } from 'type-fest';
 
 import { FortuneFinalResult, FortuneManifest } from '@/common/types';
 import { StorageService } from '@/modules/storage';
+import { Web3Service } from '@/modules/web3';
 
 import {
   CalclulatePayoutsInput,
@@ -18,10 +20,15 @@ type CalculateFortunePayoutsInput = OverrideProperties<
 
 @Injectable()
 export class FortunePayoutsCalculator implements EscrowPayoutsCalculator {
-  constructor(private readonly storageService: StorageService) {}
+  constructor(
+    private readonly storageService: StorageService,
+    private readonly web3Service: Web3Service,
+  ) {}
 
   async calculate({
     manifest,
+    chainId,
+    escrowAddress,
     finalResultsUrl,
   }: CalculateFortunePayoutsInput): Promise<CalculatedPayout[]> {
     const finalResults =
@@ -33,8 +40,15 @@ export class FortunePayoutsCalculator implements EscrowPayoutsCalculator {
       .filter((result) => !result.error)
       .map((item) => item.workerAddress);
 
+    const signer = this.web3Service.getSigner(chainId);
+    const escrowClient = await EscrowClient.build(signer);
+    const tokenAddress = await escrowClient.getTokenAddress(escrowAddress);
+    const tokenDecimals = await this.web3Service.getTokenDecimals(
+      chainId,
+      tokenAddress,
+    );
     const payoutAmount =
-      ethers.parseUnits(manifest.fundAmount.toString(), 18) /
+      ethers.parseUnits(manifest.fundAmount.toString(), tokenDecimals) /
       BigInt(recipients.length);
 
     return recipients.map((recipient) => ({
