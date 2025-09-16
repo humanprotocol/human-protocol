@@ -260,9 +260,6 @@ class FeaturesConfig:
     token_symbol_ttl = int(getenv("TOKEN_SYMBOL_CACHE_TTL", str(2 * 24 * 60 * 60)))
     "TTL for cached token symbols, in seconds"
 
-    escrow_cache_ttl = int(getenv("ESCROW_CACHE_TTL", str(5 * 60)))
-    "TTL for cached escrow data, in seconds"
-
     max_data_storage_connections = int(getenv("MAX_DATA_STORAGE_CONNECTIONS", 5))
     "Max parallel data storage connections in 1 client (job creation, ...)"
 

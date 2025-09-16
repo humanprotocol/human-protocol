@@ -69,7 +69,6 @@ def handle_job_launcher_event(webhook: Webhook, *, db_session: Session, logger: 
                     webhook.chain_id,
                     webhook.escrow_address,
                     allow_no_funds=True,
-                    force_refresh=True,
                 )
 
                 if cvat_db_service.get_project_by_escrow_address(
@@ -109,7 +108,6 @@ def handle_job_launcher_event(webhook: Webhook, *, db_session: Session, logger: 
                 webhook.chain_id,
                 webhook.escrow_address,
                 accepted_states=[EscrowStatus.Pending, EscrowStatus.Cancelled],
-                force_refresh=True,
             )
 
             projects = cvat_db_service.get_projects_by_escrow_address(
