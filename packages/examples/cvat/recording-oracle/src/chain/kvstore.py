@@ -15,7 +15,7 @@ def get_exchange_oracle_url(chain_id: int, escrow_address: str) -> str:
     # Subgraph can return invalid values, use KVStore itself
     w3 = get_web3(chain_id)
     kvstore_client = KVStoreClient(w3)
-    return kvstore_client.get(escrow.exchange_oracle, 'webhook_url')
+    return kvstore_client.get(escrow.exchange_oracle, "webhook_url")
 
 
 def get_reputation_oracle_url(chain_id: int, escrow_address: str) -> str:
@@ -27,7 +27,7 @@ def get_reputation_oracle_url(chain_id: int, escrow_address: str) -> str:
     # Subgraph can return invalid values, use KVStore itself
     w3 = get_web3(chain_id)
     kvstore_client = KVStoreClient(w3)
-    return kvstore_client.get(escrow.reputation_oracle, 'webhook_url')
+    return kvstore_client.get(escrow.reputation_oracle, "webhook_url")
 
 
 def register_in_kvstore() -> None:
