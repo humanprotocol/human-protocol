@@ -3,7 +3,7 @@ import unittest
 import uuid
 from unittest.mock import MagicMock, Mock, call, patch
 
-from human_protocol_sdk.constants import ChainId, Status
+from human_protocol_sdk.constants import Status
 from sqlalchemy.sql import select
 
 from src.core.storage import compose_data_bucket_prefix, compose_results_bucket_prefix
@@ -30,7 +30,7 @@ from src.services import cvat as cvat_service
 from src.services.cloud import StorageClient
 from src.services.webhook import OracleWebhookDirectionTags
 
-from tests.utils.constants import DEFAULT_MANIFEST_URL, ESCROW_ADDRESS, JOB_LAUNCHER_ADDRESS
+from tests.utils.constants import DEFAULT_MANIFEST_URL, ESCROW_ADDRESS
 from tests.utils.dataset_helpers import build_gt_dataset
 from tests.utils.db_helper import create_project_task_and_job
 
@@ -629,17 +629,14 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         self.session.add(webhook)
         self.session.commit()
+
         with (
-            patch("src.chain.kvstore.get_escrow") as mock_escrow,
-            patch("src.chain.kvstore.OperatorUtils.get_operator") as mock_operator,
+            patch(
+                "src.crons.webhooks.job_launcher.get_job_launcher_url",
+                return_value=DEFAULT_MANIFEST_URL,
+            ),
             patch("httpx.Client.post") as mock_httpx_post,
         ):
-            w3 = Mock()
-            w3.eth.chain_id = ChainId.LOCALHOST.value
-            mock_escrow_data = Mock()
-            mock_escrow_data.launcher = JOB_LAUNCHER_ADDRESS
-            mock_escrow.return_value = mock_escrow_data
-            mock_operator.return_value = MagicMock(webhook_url=DEFAULT_MANIFEST_URL)
             mock_response = MagicMock()
             mock_response.raise_for_status.return_value = None
             mock_httpx_post.return_value = mock_response
