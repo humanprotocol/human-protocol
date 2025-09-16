@@ -71,6 +71,16 @@ export class Web3Service {
     return supportedChains;
   }
 
+  private getRpcUrl(chainId: number): string {
+    const chain = this.supportedChains.find((c) => c.id === chainId);
+
+    if (chain) {
+      return chain.rpcUrl;
+    }
+
+    throw new Error(`No RPC URL for provided chain id: ${chainId}`);
+  }
+
   getSigner(chainId: number): WalletWithProvider {
     const signer = this.signersByChainId[chainId];
 
@@ -90,5 +100,21 @@ export class Web3Service {
     }
 
     throw new Error(`No gas price data for chain id: ${chainId}`);
+  }
+
+  async getTokenDecimals(
+    chainId: number,
+    tokenAddress: string,
+  ): Promise<number> {
+    const provider = new ethers.JsonRpcProvider(this.getRpcUrl(chainId));
+    const erc20Abi = ['function decimals() view returns (uint8)'];
+    const contract = new ethers.Contract(tokenAddress, erc20Abi, provider);
+
+    try {
+      const decimals: number = await contract.decimals();
+      return decimals;
+    } catch (noop) {
+      throw new Error('Failed to fetch token decimals');
+    }
   }
 }

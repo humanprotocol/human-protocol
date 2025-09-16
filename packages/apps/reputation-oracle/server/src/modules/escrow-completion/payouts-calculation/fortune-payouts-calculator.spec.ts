@@ -37,6 +37,13 @@ describe('FortunePayoutsCalculator', () => {
     calculator = moduleRef.get<FortunePayoutsCalculator>(
       FortunePayoutsCalculator,
     );
+
+    const mockedGetTokenAddress = jest.fn().mockImplementation(async () => {
+      return faker.finance.ethereumAddress();
+    });
+    mockedEscrowClient.build.mockResolvedValue({
+      getTokenAddress: mockedGetTokenAddress,
+    } as unknown as EscrowClient);
   });
 
   describe('calculate', () => {
@@ -64,6 +71,9 @@ describe('FortunePayoutsCalculator', () => {
       mockedStorageService.downloadJsonLikeData.mockResolvedValueOnce(results);
       const resultsUrl = faker.internet.url();
       const manifest = generateFortuneManifest();
+
+      const tokenDecimals = faker.number.int({ min: 6, max: 18 });
+      mockedWeb3Service.getTokenDecimals.mockResolvedValueOnce(tokenDecimals);
 
       const payouts = await calculator.calculate({
         chainId: generateTestnetChainId(),

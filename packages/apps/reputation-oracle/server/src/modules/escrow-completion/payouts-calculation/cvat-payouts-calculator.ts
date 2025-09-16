@@ -46,7 +46,15 @@ export class CvatPayoutsCalculator implements EscrowPayoutsCalculator {
       throw new Error('Invalid annotation meta');
     }
 
-    const jobBountyValue = ethers.parseUnits(manifest.job_bounty, 18);
+    const tokenAddress = await escrowClient.getTokenAddress(escrowAddress);
+    const tokenDecimals = await this.web3Service.getTokenDecimals(
+      chainId,
+      tokenAddress,
+    );
+    const jobBountyValue = ethers.parseUnits(
+      manifest.job_bounty,
+      tokenDecimals,
+    );
     const workersBounties = new Map<string, bigint>();
 
     for (const job of annotations.jobs) {

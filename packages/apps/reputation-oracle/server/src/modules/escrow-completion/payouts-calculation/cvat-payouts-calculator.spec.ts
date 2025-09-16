@@ -48,10 +48,14 @@ describe('CvatPayoutsCalculator', () => {
     const mockedGetIntermediateResultsUrl = jest
       .fn()
       .mockImplementation(async () => faker.internet.url());
+    const mockedGetTokenAddress = jest.fn().mockImplementation(async () => {
+      return faker.finance.ethereumAddress();
+    });
 
     beforeAll(() => {
       mockedEscrowClient.build.mockResolvedValue({
         getIntermediateResultsUrl: mockedGetIntermediateResultsUrl,
+        getTokenAddress: mockedGetTokenAddress,
       } as unknown as EscrowClient);
     });
 
@@ -87,6 +91,7 @@ describe('CvatPayoutsCalculator', () => {
       ];
 
       const jobsPerAnnotator = faker.number.int({ min: 1, max: 3 });
+      const tokenDecimals = faker.number.int({ min: 6, max: 18 });
 
       const annotationsMeta: CvatAnnotationMeta = {
         jobs: Array.from(
@@ -125,6 +130,7 @@ describe('CvatPayoutsCalculator', () => {
       mockedStorageService.downloadJsonLikeData.mockResolvedValueOnce(
         annotationsMeta,
       );
+      mockedWeb3Service.getTokenDecimals.mockResolvedValueOnce(tokenDecimals);
 
       const manifest = generateCvatManifest();
 
@@ -136,7 +142,8 @@ describe('CvatPayoutsCalculator', () => {
       });
 
       const expectedAmountPerAnnotator =
-        BigInt(jobsPerAnnotator) * ethers.parseUnits(manifest.job_bounty, 18);
+        BigInt(jobsPerAnnotator) *
+        ethers.parseUnits(manifest.job_bounty, tokenDecimals);
 
       const expectedPayouts = annotators.map((address) => ({
         address,
