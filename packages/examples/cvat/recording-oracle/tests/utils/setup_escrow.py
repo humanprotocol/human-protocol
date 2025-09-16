@@ -43,7 +43,7 @@ def setup_escrow(web3: Web3, escrow_address: str):
             recording_oracle_fee=RECORDING_ORACLE_FEE,
             reputation_oracle_address=REPUTATION_ORACLE_ADDRESS,
             reputation_oracle_fee=REPUTATION_ORACLE_FEE,
-            manifest_url=DEFAULT_MANIFEST_URL,
+            manifest=DEFAULT_MANIFEST_URL,
             hash=DEFAULT_HASH,
         ),
     )

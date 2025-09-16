@@ -43,7 +43,7 @@ class ServiceIntegrationTest:
             token=TOKEN_ADDRESS,
             total_funded_amount=1000,
             created_at="",
-            manifest_url=DEFAULT_MANIFEST_URL,
+            manifest=DEFAULT_MANIFEST_URL,
             exchange_oracle=EXCHANGE_ORACLE_ADDRESS,
             reputation_oracle=REPUTATION_ORACLE_ADDRESS,
         )

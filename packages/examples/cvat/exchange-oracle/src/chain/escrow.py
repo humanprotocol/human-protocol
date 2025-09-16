@@ -48,7 +48,7 @@ def validate_escrow(
 def download_manifest(chain_id: int, escrow_address: str) -> dict:
     escrow = get_escrow(chain_id, escrow_address)
 
-    manifest_content = StorageUtils.download_file_from_url(escrow.manifest_url).decode("utf-8")
+    manifest_content = StorageUtils.download_file_from_url(escrow.manifest).decode("utf-8")
 
     if EncryptionUtils.is_encrypted(manifest_content):
         encryption = Encryption(
