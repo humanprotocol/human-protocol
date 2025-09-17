@@ -140,7 +140,12 @@ async def list_jobs(
     if status:
         match status:
             case JobStatuses.active:
-                query = query.filter(cvat_service.Project.status == ProjectStatuses.annotation)
+                query = query.filter(
+                    cvat_service.Project.status == ProjectStatuses.annotation,
+                    cvat_service.Project.jobs.any(
+                        cvat_service.Job.status == cvat_service.JobStatuses.new
+                    ),
+                )
             case JobStatuses.canceled:
                 query = query.filter(
                     cvat_service.Project.status == cvat_service.ProjectStatuses.canceled

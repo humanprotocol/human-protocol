@@ -1,9 +1,8 @@
 import unittest
 import uuid
 from datetime import timedelta
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock, patch
 
-from human_protocol_sdk.constants import ChainId
 from sqlalchemy.sql import select
 
 from src.core.types import (
@@ -30,7 +29,7 @@ from src.models.webhook import Webhook
 from src.services.webhook import OracleWebhookDirectionTags
 from src.utils.time import utcnow
 
-from tests.utils.constants import DEFAULT_MANIFEST_URL, RECORDING_ORACLE_ADDRESS
+from tests.utils.constants import DEFAULT_MANIFEST_URL
 from tests.utils.db_helper import create_project_task_and_job
 
 escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
@@ -437,17 +436,14 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         self.session.add(webhook)
         self.session.commit()
+
         with (
-            patch("src.chain.kvstore.get_escrow") as mock_escrow,
-            patch("src.chain.kvstore.OperatorUtils.get_operator") as mock_operator,
+            patch(
+                "src.crons.webhooks.recording_oracle.get_recording_oracle_url",
+                return_value=DEFAULT_MANIFEST_URL,
+            ),
             patch("httpx.Client.post") as mock_httpx_post,
         ):
-            w3 = Mock()
-            w3.eth.chain_id = ChainId.LOCALHOST.value
-            mock_escrow_data = Mock()
-            mock_escrow_data.recording_oracle = RECORDING_ORACLE_ADDRESS
-            mock_escrow.return_value = mock_escrow_data
-            mock_operator.return_value = MagicMock(webhook_url=DEFAULT_MANIFEST_URL)
             mock_response = MagicMock()
             mock_response.raise_for_status.return_value = None
             mock_httpx_post.return_value = mock_response

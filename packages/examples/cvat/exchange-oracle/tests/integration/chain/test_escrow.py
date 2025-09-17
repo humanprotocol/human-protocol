@@ -15,7 +15,6 @@ from src.chain.escrow import (
 from src.core.types import OracleWebhookTypes
 
 from tests.utils.constants import (
-    DEFAULT_MANIFEST_URL,
     ESCROW_ADDRESS,
     EXCHANGE_ORACLE_ADDRESS,
     FACTORY_ADDRESS,
@@ -48,7 +47,6 @@ class ServiceIntegrationTest(unittest.TestCase):
             token=TOKEN_ADDRESS,
             total_funded_amount=1000,
             created_at="",
-            manifest_url=DEFAULT_MANIFEST_URL,
             recording_oracle=RECORDING_ORACLE_ADDRESS,
             exchange_oracle=EXCHANGE_ORACLE_ADDRESS,
             reputation_oracle=REPUTATION_ORACLE_ADDRESS,
