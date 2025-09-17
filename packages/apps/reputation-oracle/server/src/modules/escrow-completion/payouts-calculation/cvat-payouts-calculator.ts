@@ -51,7 +51,7 @@ export class CvatPayoutsCalculator implements EscrowPayoutsCalculator {
       chainId,
       tokenAddress,
     );
-    const jobBountyValue = ethers.parseUnits(
+    const jobBountyValue = this.parseJobBounty(
       manifest.job_bounty,
       tokenDecimals,
     );
@@ -83,5 +83,18 @@ export class CvatPayoutsCalculator implements EscrowPayoutsCalculator {
         amount: bountyAmount,
       }),
     );
+  }
+
+  private parseJobBounty(jobBounty: string, tokenDecimals: bigint): bigint {
+    const parts = jobBounty.split('.');
+    if (parts.length > 1) {
+      const decimalsInBounty = parts[1].length;
+      if (decimalsInBounty > tokenDecimals) {
+        throw new Error(
+          `Job bounty value ${jobBounty} exceeds maximum token decimals (${tokenDecimals}).`,
+        );
+      }
+    }
+    return ethers.parseUnits(jobBounty, tokenDecimals);
   }
 }
