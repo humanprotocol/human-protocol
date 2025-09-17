@@ -37,6 +37,10 @@ class AuthorizationData(BaseModel):
     email: str
 
 
+class AssignmentAuthorizationData(AuthorizationData):
+    qualifications: list[str]
+
+
 AuthDataT = TypeVar("AuthDataT", bound=AuthorizationData)
 
 

@@ -18,6 +18,7 @@ from src.core.types import ProjectStatuses, TaskTypes
 from src.db import SessionLocal
 from src.db import engine as db_engine
 from src.endpoints.authentication import (
+    AssignmentAuthorizationData,
     AuthorizationData,
     AuthorizationParam,
     JobListAuthorizationData,
@@ -395,13 +396,17 @@ async def list_assignments(
     description="Start an assignment within the task for the annotator",
 )
 async def create_assignment(
-    data: AssignmentRequest, token: Annotated[AuthorizationData, AuthorizationParam]
+    data: AssignmentRequest,
+    token: Annotated[
+        AssignmentAuthorizationData, make_auth_dependency(AssignmentAuthorizationData)
+    ],
 ) -> AssignmentResponse:
     try:
         assignment_id = oracle_service.create_assignment(
             escrow_address=data.escrow_address,
             chain_id=data.chain_id,
             wallet_address=token.wallet_address,
+            qualifications=token.qualifications,
         )
     except oracle_service.UserHasUnfinishedAssignmentError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from e

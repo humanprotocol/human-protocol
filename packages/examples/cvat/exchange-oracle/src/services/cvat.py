@@ -973,7 +973,7 @@ def get_user_assignments_in_cvat_projects(
 
 def has_active_user_assignments(
     session: Session,
-    wallet_address: int,
+    wallet_address: str,
     escrow_address: str,
     chain_id: int,
 ) -> bool:
