@@ -411,6 +411,9 @@ async def create_assignment(
     except oracle_service.UserHasUnfinishedAssignmentError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from e
 
+    except oracle_service.UserQualificationError as e:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e)) from e
+
     if not assignment_id:
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
