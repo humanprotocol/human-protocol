@@ -15,5 +15,6 @@
     "val_size": 2,
     "gt_url": "https://test.storage.googleapis.com"
   },
-  "job_bounty": "5.001123929619726"
+  "job_bounty": "5.001123929619726",
+  "qualifications": []
 }

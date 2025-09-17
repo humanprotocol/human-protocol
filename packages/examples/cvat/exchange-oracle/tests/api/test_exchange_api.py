@@ -57,11 +57,13 @@ def generate_jwt_token(
     *,
     wallet_address: str | None = None,
     email: str = cvat_email,
+    qualifications: list[str] = [],
     private_key: str = PRIVATE_KEY,
 ) -> str:
     data = {
         **({"wallet_address": wallet_address} if wallet_address else {"role": "human_app"}),
         "email": email,
+        "qualifications": qualifications,
     }
 
     return jwt.encode(data, private_key, algorithm="ES256")
@@ -871,14 +873,16 @@ def test_can_create_assignment_200(client: TestClient, session: Session) -> None
 
     with (
         open("tests/utils/manifest.json") as data,
-        patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
+        patch("src.endpoints.serializers.get_escrow_manifest") as mock_serializer_get_manifest,
+        patch("src.services.exchange.get_escrow_manifest") as mock_exchange_get_manifest,
         patch(
             "src.endpoints.serializers.get_escrow_fund_token_symbol"
         ) as mock_get_escrow_fund_token_symbol,
         patch("src.services.exchange.cvat_api") as cvat_api,
     ):
         manifest = json.load(data)
-        mock_get_manifest.return_value = manifest
+        mock_serializer_get_manifest.return_value = manifest
+        mock_exchange_get_manifest.return_value = manifest
         mock_get_escrow_fund_token_symbol.return_value = "HMT"
 
         assert {cvat_project.updated_at, cvat_task.updated_at, cvat_job.updated_at} == {None}
@@ -972,17 +976,23 @@ def test_cannot_create_assignment_400_when_has_unfinished_assignments(
 
     session.commit()
 
-    response = client.post(
-        "/assignment",
-        headers=get_auth_header(),
-        json={
-            "escrow_address": cvat_project.escrow_address,
-            "chain_id": cvat_project.chain_id,
-        },
-    )
+    with (
+        open("tests/utils/manifest.json") as data,
+        patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
+    ):
+        manifest = json.load(data)
+        mock_get_manifest.return_value = manifest
+        response = client.post(
+            "/assignment",
+            headers=get_auth_header(),
+            json={
+                "escrow_address": cvat_project.escrow_address,
+                "chain_id": cvat_project.chain_id,
+            },
+        )
 
-    assert response.status_code == 400
-    assert "There are unfinished assignments in this escrow" in response.text
+        assert response.status_code == 400
+        assert "There are unfinished assignments in this escrow" in response.text
 
 
 def test_can_list_assignments_200(client: TestClient, session: Session) -> None:
@@ -1501,14 +1511,16 @@ def test_can_list_jobs_200_check_updated_at(client: TestClient, session: Session
 
     with (
         open("tests/utils/manifest.json") as data,
-        patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
+        patch("src.endpoints.serializers.get_escrow_manifest") as mock_serializer_get_manifest,
+        patch("src.services.exchange.get_escrow_manifest") as mock_exchange_get_manifest,
         patch(
             "src.endpoints.serializers.get_escrow_fund_token_symbol"
         ) as mock_get_escrow_fund_token_symbol,
         patch("src.services.exchange.cvat_api"),
     ):
         manifest = json.load(data)
-        mock_get_manifest.return_value = manifest
+        mock_serializer_get_manifest.return_value = manifest
+        mock_exchange_get_manifest.return_value = manifest
         mock_get_escrow_fund_token_symbol.return_value = "HMT"
 
         # create assignment in each job
