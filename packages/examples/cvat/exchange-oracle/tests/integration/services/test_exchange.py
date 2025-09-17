@@ -100,7 +100,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         with (
             open("tests/utils/manifest.json") as data,
             patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
-            patch("src.services.exchange.cvat_api"), 
+            patch("src.services.exchange.cvat_api"),
         ):
             manifest = json.load(data)
             mock_get_manifest.return_value = manifest
@@ -155,7 +155,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         with (
             open("tests/utils/manifest.json") as data,
             patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
-            patch("src.services.exchange.cvat_api"), 
+            patch("src.services.exchange.cvat_api"),
         ):
             manifest = json.load(data)
             mock_get_manifest.return_value = manifest
@@ -178,7 +178,7 @@ class ServiceIntegrationTest(unittest.TestCase):
                 cvat_project_1.escrow_address,
                 Networks(cvat_project_1.chain_id),
                 "invalid_address",
-                []
+                [],
             )
 
     def test_create_assignment_invalid_project(self):
@@ -241,13 +241,16 @@ class ServiceIntegrationTest(unittest.TestCase):
         with (
             open("tests/utils/manifest.json") as data,
             patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
-            patch("src.services.exchange.cvat_api"), 
+            patch("src.services.exchange.cvat_api"),
         ):
             manifest = json.load(data)
             manifest["qualifications"] = ["test", "test2"]
             mock_get_manifest.return_value = manifest
             assignment_id = create_assignment(
-                cvat_project.escrow_address, Networks(cvat_project.chain_id), user_address, ["test", "test2", "test3"]
+                cvat_project.escrow_address,
+                Networks(cvat_project.chain_id),
+                user_address,
+                ["test", "test2", "test3"],
             )
 
         assignment = self.session.query(Assignment).filter_by(id=assignment_id).first()
@@ -291,12 +294,12 @@ class ServiceIntegrationTest(unittest.TestCase):
         with (
             open("tests/utils/manifest.json") as data,
             patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
-            patch("src.services.exchange.cvat_api"), 
+            patch("src.services.exchange.cvat_api"),
         ):
             manifest = json.load(data)
             mock_get_manifest.return_value = manifest
             with pytest.raises(Exception, match="unfinished assignment"):
-                create_assignment(ESCROW_ADDRESS, Networks.localhost, user_address, [])            
+                create_assignment(ESCROW_ADDRESS, Networks.localhost, user_address, [])
 
     def test_create_assignment_has_expired_assignment_and_available_jobs(self):
         escrow_address = ESCROW_ADDRESS
@@ -329,11 +332,13 @@ class ServiceIntegrationTest(unittest.TestCase):
         with (
             open("tests/utils/manifest.json") as data,
             patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
-            patch("src.services.exchange.cvat_api"), 
+            patch("src.services.exchange.cvat_api"),
         ):
             manifest = json.load(data)
             mock_get_manifest.return_value = manifest
-            new_assignment_id = create_assignment(escrow_address, Networks.localhost, user_address, [])
+            new_assignment_id = create_assignment(
+                escrow_address, Networks.localhost, user_address, []
+            )
 
         new_assignment = self.session.query(Assignment).filter_by(id=new_assignment_id).first()
         assert new_assignment.cvat_job_id == cvat_job2.cvat_id  # job1 was attempted already
@@ -377,7 +382,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         with (
             open("tests/utils/manifest.json") as data,
             patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
-            patch("src.services.exchange.cvat_api"), 
+            patch("src.services.exchange.cvat_api"),
         ):
             manifest = json.load(data)
             mock_get_manifest.return_value = manifest
@@ -422,7 +427,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         with (
             open("tests/utils/manifest.json") as data,
             patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
-            patch("src.services.exchange.cvat_api"), 
+            patch("src.services.exchange.cvat_api"),
         ):
             manifest = json.load(data)
             mock_get_manifest.return_value = manifest
@@ -460,7 +465,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         with (
             open("tests/utils/manifest.json") as data,
             patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
-            patch("src.services.exchange.cvat_api"), 
+            patch("src.services.exchange.cvat_api"),
         ):
             manifest = json.load(data)
             mock_get_manifest.return_value = manifest
@@ -507,7 +512,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         with (
             open("tests/utils/manifest.json") as data,
             patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
-            patch("src.services.exchange.cvat_api"), 
+            patch("src.services.exchange.cvat_api"),
         ):
             manifest = json.load(data)
             mock_get_manifest.return_value = manifest
@@ -515,7 +520,7 @@ class ServiceIntegrationTest(unittest.TestCase):
                 cvat_project_1.escrow_address,
                 Networks(cvat_project_1.chain_id),
                 new_user.wallet_address,
-                []
+                [],
             )
 
         assignment = self.session.get(Assignment, assignment_id)

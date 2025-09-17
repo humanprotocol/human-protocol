@@ -57,9 +57,11 @@ def generate_jwt_token(
     *,
     wallet_address: str | None = None,
     email: str = cvat_email,
-    qualifications: list[str] = [],
+    qualifications: list[str] | None = None,
     private_key: str = PRIVATE_KEY,
 ) -> str:
+    if qualifications is None:
+        qualifications = []
     data = {
         **({"wallet_address": wallet_address} if wallet_address else {"role": "human_app"}),
         "email": email,
