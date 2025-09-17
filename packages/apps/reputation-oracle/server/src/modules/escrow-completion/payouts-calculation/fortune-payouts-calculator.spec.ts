@@ -63,7 +63,7 @@ describe('FortunePayoutsCalculator', () => {
       const resultsUrl = faker.internet.url();
       const manifest = generateFortuneManifest();
 
-      const tokenDecimals = faker.number.int({ min: 6, max: 18 });
+      const tokenDecimals = BigInt(faker.number.int({ min: 6, max: 18 }));
       mockedWeb3Service.getTokenDecimals.mockResolvedValueOnce(tokenDecimals);
 
       const payouts = await calculator.calculate({

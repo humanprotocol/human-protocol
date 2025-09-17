@@ -1,3 +1,4 @@
+import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import { ChainId } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 import { Wallet, ethers } from 'ethers';
@@ -71,16 +72,6 @@ export class Web3Service {
     return supportedChains;
   }
 
-  private getRpcUrl(chainId: number): string {
-    const chain = this.supportedChains.find((c) => c.id === chainId);
-
-    if (chain) {
-      return chain.rpcUrl;
-    }
-
-    throw new Error(`No RPC URL for provided chain id: ${chainId}`);
-  }
-
   getSigner(chainId: number): WalletWithProvider {
     const signer = this.signersByChainId[chainId];
 
@@ -105,13 +96,11 @@ export class Web3Service {
   async getTokenDecimals(
     chainId: number,
     tokenAddress: string,
-  ): Promise<number> {
-    const provider = new ethers.JsonRpcProvider(this.getRpcUrl(chainId));
-    const erc20Abi = ['function decimals() view returns (uint8)'];
-    const contract = new ethers.Contract(tokenAddress, erc20Abi, provider);
-
+  ): Promise<bigint> {
+    const signer = this.getSigner(chainId);
+    const tokenContract = HMToken__factory.connect(tokenAddress, signer);
     try {
-      const decimals: number = await contract.decimals();
+      const decimals = await tokenContract.decimals();
       return decimals;
     } catch (noop) {
       throw new Error('Failed to fetch token decimals');

@@ -91,7 +91,7 @@ describe('CvatPayoutsCalculator', () => {
       ];
 
       const jobsPerAnnotator = faker.number.int({ min: 1, max: 3 });
-      const tokenDecimals = faker.number.int({ min: 6, max: 18 });
+      const tokenDecimals = BigInt(faker.number.int({ min: 6, max: 18 }));
 
       const annotationsMeta: CvatAnnotationMeta = {
         jobs: Array.from(
