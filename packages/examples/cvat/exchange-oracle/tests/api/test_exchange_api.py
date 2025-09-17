@@ -588,6 +588,66 @@ def test_can_list_jobs_200_with_filters(client: TestClient, session: Session):
                 )
 
 
+def test_can_list_jobs_200_can_show_only_active_jobs_with_free_assignments(
+    client: TestClient, session: Session
+):
+    session.begin()
+
+    user = User(
+        wallet_address=WALLET_ADDRESS1,
+        cvat_email=cvat_email,
+        cvat_id=1,
+    )
+    session.add(user)
+
+    cvat_project1, _, _ = create_project_task_and_job(
+        session, "0x86e83d346041E8806e352681f3F14549C0d2001", 1
+    )
+    cvat_project1.status = ProjectStatuses.annotation
+    session.add(cvat_project1)
+
+    cvat_project2, _, cvat_job2 = create_project_task_and_job(
+        session, "0x86e83d346041E8806e352681f3F14549C0d2002", 2
+    )
+    cvat_project2.status = ProjectStatuses.annotation
+    cvat_job2.status = JobStatuses.in_progress
+    session.add(cvat_project2)
+    session.add(cvat_job2)
+
+    assignment = Assignment(
+        id=str(uuid.uuid4()),
+        user_wallet_address=user.wallet_address,
+        cvat_job_id=cvat_job2.cvat_id,
+        status=AssignmentStatuses.created,
+        created_at=utcnow() - timedelta(hours=1),
+        expires_at=utcnow() + timedelta(hours=1),
+    )
+    session.add(assignment)
+
+    session.commit()
+
+    with (
+        open("tests/utils/manifest.json") as data,
+        patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
+        patch(
+            "src.endpoints.serializers.get_escrow_fund_token_symbol"
+        ) as mock_get_escrow_fund_token_symbol,
+    ):
+        manifest = json.load(data)
+        mock_get_manifest.return_value = manifest
+        mock_get_escrow_fund_token_symbol.return_value = "HMT"
+
+        response = client.get(
+            "/job",
+            headers=get_auth_header(token=generate_jwt_token()),
+            params={"status": APIJobStatuses.active.value},
+        )
+
+        assert response.status_code == 200
+        paginated_result = response.json()
+        assert paginated_result["total_results"] == 1
+
+
 def test_can_list_jobs_200_check_values(client: TestClient, session: Session) -> None:
     session.begin()
     user = User(
