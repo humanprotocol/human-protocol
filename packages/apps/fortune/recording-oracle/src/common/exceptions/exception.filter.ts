@@ -57,11 +57,15 @@ export class ExceptionFilter implements IExceptionFilter {
 
     response.removeHeader('Cache-Control');
 
-    response.status(status).json({
+    const payload: any = {
       status_code: status,
       timestamp: new Date().toISOString(),
       message: message,
       path: request.url,
-    });
+    };
+    if (exception instanceof ValidationError && exception.errors?.length) {
+      payload.validation_errors = exception.errors;
+    }
+    response.status(status).json(payload);
   }
 }
