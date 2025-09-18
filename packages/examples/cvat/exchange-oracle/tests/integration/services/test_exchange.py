@@ -97,9 +97,15 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         self.session.commit()
 
-        with patch("src.services.exchange.cvat_api"):
+        with (
+            open("tests/utils/manifest.json") as data,
+            patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
+            patch("src.services.exchange.cvat_api"),
+        ):
+            manifest = json.load(data)
+            mock_get_manifest.return_value = manifest
             assignment_id = create_assignment(
-                cvat_project.escrow_address, Networks(cvat_project.chain_id), user_address
+                cvat_project.escrow_address, Networks(cvat_project.chain_id), user_address, []
             )
 
         assignment = self.session.query(Assignment).filter_by(id=assignment_id).first()
@@ -146,9 +152,15 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         self.session.commit()
 
-        with patch("src.services.exchange.cvat_api"):
+        with (
+            open("tests/utils/manifest.json") as data,
+            patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
+            patch("src.services.exchange.cvat_api"),
+        ):
+            manifest = json.load(data)
+            mock_get_manifest.return_value = manifest
             assignment_id = create_assignment(
-                cvat_project.escrow_address, Networks(cvat_project.chain_id), user_address
+                cvat_project.escrow_address, Networks(cvat_project.chain_id), user_address, []
             )
 
         assignment = self.session.query(Assignment).filter_by(id=assignment_id).first()
@@ -166,6 +178,7 @@ class ServiceIntegrationTest(unittest.TestCase):
                 cvat_project_1.escrow_address,
                 Networks(cvat_project_1.chain_id),
                 "invalid_address",
+                [],
             )
 
     def test_create_assignment_invalid_project(self):
@@ -178,8 +191,82 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.add(user)
         self.session.commit()
 
-        with pytest.raises(HTTPException, match="Can't find job"):
-            create_assignment("1", Networks.localhost, user_address)
+        with (
+            open("tests/utils/manifest.json") as data,
+            patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
+        ):
+            manifest = json.load(data)
+            mock_get_manifest.return_value = manifest
+            with pytest.raises(HTTPException, match="Can't find job"):
+                create_assignment("1", Networks.localhost, user_address, [])
+
+    def test_create_assignment_no_required_qualifications(self):
+        user_address = WALLET_ADDRESS1
+        user = User(
+            wallet_address=user_address,
+            cvat_email="test@hmt.ai",
+            cvat_id=1,
+        )
+        self.session.add(user)
+        self.session.commit()
+
+        with (
+            open("tests/utils/manifest.json") as data,
+            patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
+        ):
+            manifest = json.load(data)
+            manifest["qualifications"] = ["random_qualification"]
+            mock_get_manifest.return_value = manifest
+            with pytest.raises(Exception, match="User doesn't have required qualifications."):
+                create_assignment(ESCROW_ADDRESS, Networks.localhost, user_address, [])
+
+    def test_create_assignment_with_required_qualifications(self):
+        cvat_project, cvat_task, cvat_job = create_project_task_and_job(
+            self.session, ESCROW_ADDRESS, 1
+        )
+        initial_job_updated_at = cvat_job.updated_at
+        initial_task_updated_at = cvat_task.updated_at
+        initial_project_updated_at = cvat_project.updated_at
+
+        user_address = WALLET_ADDRESS1
+        user = User(
+            wallet_address=user_address,
+            cvat_email="test@hmt.ai",
+            cvat_id=1,
+        )
+        self.session.add(user)
+
+        self.session.commit()
+
+        with (
+            open("tests/utils/manifest.json") as data,
+            patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
+            patch("src.services.exchange.cvat_api"),
+        ):
+            manifest = json.load(data)
+            manifest["qualifications"] = ["test", "test2"]
+            mock_get_manifest.return_value = manifest
+            assignment_id = create_assignment(
+                cvat_project.escrow_address,
+                Networks(cvat_project.chain_id),
+                user_address,
+                ["test", "test2", "test3"],
+            )
+
+        assignment = self.session.query(Assignment).filter_by(id=assignment_id).first()
+
+        assert assignment.cvat_job_id == cvat_job.cvat_id
+        assert assignment.user_wallet_address == user_address
+        assert assignment.status == AssignmentStatuses.created
+
+        self.session.refresh(cvat_job)
+        assert cvat_job.updated_at != initial_job_updated_at
+
+        self.session.refresh(cvat_task)
+        assert cvat_task.updated_at != initial_task_updated_at
+
+        self.session.refresh(cvat_project)
+        assert cvat_project.updated_at != initial_project_updated_at
 
     def test_create_assignment_unfinished_assignment(self):
         _, _, cvat_job = create_project_task_and_job(self.session, ESCROW_ADDRESS, 1)
@@ -205,10 +292,14 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         with (
+            open("tests/utils/manifest.json") as data,
+            patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
             patch("src.services.exchange.cvat_api"),
-            pytest.raises(Exception, match="unfinished assignment"),
         ):
-            create_assignment(ESCROW_ADDRESS, Networks.localhost, user_address)
+            manifest = json.load(data)
+            mock_get_manifest.return_value = manifest
+            with pytest.raises(Exception, match="unfinished assignment"):
+                create_assignment(ESCROW_ADDRESS, Networks.localhost, user_address, [])
 
     def test_create_assignment_has_expired_assignment_and_available_jobs(self):
         escrow_address = ESCROW_ADDRESS
@@ -238,8 +329,16 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         self.session.commit()
 
-        with patch("src.services.exchange.cvat_api"):
-            new_assignment_id = create_assignment(escrow_address, Networks.localhost, user_address)
+        with (
+            open("tests/utils/manifest.json") as data,
+            patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
+            patch("src.services.exchange.cvat_api"),
+        ):
+            manifest = json.load(data)
+            mock_get_manifest.return_value = manifest
+            new_assignment_id = create_assignment(
+                escrow_address, Networks.localhost, user_address, []
+            )
 
         new_assignment = self.session.query(Assignment).filter_by(id=new_assignment_id).first()
         assert new_assignment.cvat_job_id == cvat_job2.cvat_id  # job1 was attempted already
@@ -280,9 +379,15 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         self.session.commit()
 
-        with patch("src.services.exchange.cvat_api"):
+        with (
+            open("tests/utils/manifest.json") as data,
+            patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
+            patch("src.services.exchange.cvat_api"),
+        ):
+            manifest = json.load(data)
+            mock_get_manifest.return_value = manifest
             assignment_id = create_assignment(
-                cvat_project.escrow_address, Networks(cvat_project.chain_id), user_address2
+                cvat_project.escrow_address, Networks(cvat_project.chain_id), user_address2, []
             )
 
         assert assignment_id == None
@@ -319,9 +424,15 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         self.session.commit()
 
-        with patch("src.services.exchange.cvat_api"):
+        with (
+            open("tests/utils/manifest.json") as data,
+            patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
+            patch("src.services.exchange.cvat_api"),
+        ):
+            manifest = json.load(data)
+            mock_get_manifest.return_value = manifest
             assignment_id = create_assignment(
-                cvat_project.escrow_address, Networks(cvat_project.chain_id), user_address2
+                cvat_project.escrow_address, Networks(cvat_project.chain_id), user_address2, []
             )
 
         assert assignment_id == None
@@ -351,11 +462,18 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         self.session.commit()
 
-        with patch("src.services.exchange.cvat_api"):
+        with (
+            open("tests/utils/manifest.json") as data,
+            patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
+            patch("src.services.exchange.cvat_api"),
+        ):
+            manifest = json.load(data)
+            mock_get_manifest.return_value = manifest
             assignment_id = create_assignment(
                 cvat_project_1.escrow_address,
                 Networks(cvat_project_1.chain_id),
                 user.wallet_address,
+                [],
             )
 
         assert assignment_id is None
@@ -391,11 +509,18 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         self.session.commit()
 
-        with patch("src.services.exchange.cvat_api"):
+        with (
+            open("tests/utils/manifest.json") as data,
+            patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
+            patch("src.services.exchange.cvat_api"),
+        ):
+            manifest = json.load(data)
+            mock_get_manifest.return_value = manifest
             assignment_id = create_assignment(
                 cvat_project_1.escrow_address,
                 Networks(cvat_project_1.chain_id),
                 new_user.wallet_address,
+                [],
             )
 
         assignment = self.session.get(Assignment, assignment_id)

@@ -3,11 +3,12 @@ from datetime import timedelta
 
 import src.cvat.api_calls as cvat_api
 import src.services.cvat as cvat_service
+from src.chain.escrow import get_escrow_manifest
 from src.core.types import JobStatuses, Networks, ProjectStatuses, TaskTypes
 from src.db import SessionLocal
 from src.db.utils import ForUpdateParams
 from src.models.cvat import Job
-from src.utils.assignments import get_default_assignment_timeout
+from src.utils.assignments import get_default_assignment_timeout, parse_manifest
 from src.utils.requests import get_or_404
 from src.utils.time import utcnow
 
@@ -20,13 +21,25 @@ class UserHasUnfinishedAssignmentError(Exception):
         )
 
 
-def create_assignment(escrow_address: str, chain_id: Networks, wallet_address: str) -> str | None:
+class UserQualificationError(Exception):
+    def __str__(self) -> str:
+        return "User doesn't have required qualifications."
+
+
+def create_assignment(
+    escrow_address: str, chain_id: Networks, wallet_address: str, qualifications: list[str]
+) -> str | None:
     with SessionLocal.begin() as session:
         user = get_or_404(
             cvat_service.get_user_by_id(session, wallet_address, for_update=True),
             wallet_address,
             object_type_name="user",
         )
+
+        manifest = parse_manifest(get_escrow_manifest(chain_id, escrow_address))
+
+        if not all(q in qualifications for q in manifest.qualifications):
+            raise UserQualificationError
 
         if cvat_service.has_active_user_assignments(
             session,
