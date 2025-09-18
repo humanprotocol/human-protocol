@@ -84,14 +84,14 @@ describe('CvatPayoutsCalculator', () => {
       );
     });
 
-    it('throws if manifest.job_bounty has more decimals than the token supports', async () => {
+    it('should properly calculate workers bounties trimming the decimals', async () => {
       const annotators = [
         faker.finance.ethereumAddress(),
         faker.finance.ethereumAddress(),
       ];
 
       const jobsPerAnnotator = faker.number.int({ min: 1, max: 3 });
-      const tokenDecimals = BigInt(faker.number.int({ min: 6, max: 18 }));
+      const tokenDecimals = BigInt(6);
 
       const annotationsMeta: CvatAnnotationMeta = {
         jobs: Array.from(
@@ -132,25 +132,32 @@ describe('CvatPayoutsCalculator', () => {
       );
       mockedWeb3Service.getTokenDecimals.mockResolvedValueOnce(tokenDecimals);
 
-      const mockedJobBounty = faker.finance.amount({
-        min: 1,
-        max: 10,
-        dec: Number(tokenDecimals + 1n),
-      });
+      const mockedJobBounty = '0.123456789'; // more decimals than token has
       const manifest = {
         ...generateCvatManifest(),
         job_bounty: mockedJobBounty,
       };
 
-      await expect(
-        calculator.calculate({
-          chainId,
-          escrowAddress,
-          manifest,
-          finalResultsUrl: faker.internet.url(),
-        }),
-      ).rejects.toThrow(
-        `Job bounty value ${manifest.job_bounty} exceeds maximum token decimals (${tokenDecimals}).`,
+      const payouts = await calculator.calculate({
+        chainId,
+        escrowAddress,
+        manifest,
+        finalResultsUrl: faker.internet.url(),
+      });
+
+      const trimmedBounty = '0.123456';
+
+      const expectedAmountPerAnnotator =
+        BigInt(jobsPerAnnotator) *
+        ethers.parseUnits(trimmedBounty, tokenDecimals);
+
+      const expectedPayouts = annotators.map((address) => ({
+        address,
+        amount: expectedAmountPerAnnotator,
+      }));
+
+      expect(_.sortBy(payouts, 'address')).toEqual(
+        _.sortBy(expectedPayouts, 'address'),
       );
     });
 

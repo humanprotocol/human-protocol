@@ -53,7 +53,7 @@ export class CvatPayoutsCalculator implements EscrowPayoutsCalculator {
     );
     const jobBountyValue = this.parseJobBounty(
       manifest.job_bounty,
-      tokenDecimals,
+      Number(tokenDecimals),
     );
     const workersBounties = new Map<string, bigint>();
 
@@ -85,13 +85,17 @@ export class CvatPayoutsCalculator implements EscrowPayoutsCalculator {
     );
   }
 
-  private parseJobBounty(jobBounty: string, tokenDecimals: bigint): bigint {
+  private parseJobBounty(jobBounty: string, tokenDecimals: number): bigint {
     const parts = jobBounty.split('.');
     if (parts.length > 1) {
       const decimalsInBounty = parts[1].length;
       if (decimalsInBounty > tokenDecimals) {
-        throw new Error(
-          `Job bounty value ${jobBounty} exceeds maximum token decimals (${tokenDecimals}).`,
+        if (tokenDecimals === 0) {
+          return ethers.parseUnits(parts[0], tokenDecimals);
+        }
+        return ethers.parseUnits(
+          `${parts[0]}.${parts[1].slice(0, tokenDecimals)}`,
+          tokenDecimals,
         );
       }
     }
