@@ -6,7 +6,11 @@
 
 # Enumeration: ChainId
 
+<<<<<<< HEAD
 Defined in: [enums.ts:1](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L1)
+=======
+Defined in: [enums.ts:1](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L1)
+>>>>>>> develop
 
 ## Enumeration Members
 
@@ -14,7 +18,11 @@ Defined in: [enums.ts:1](https://github.com/humanprotocol/human-protocol/blob/da
 
 > **ALL**: `-1`
 
+<<<<<<< HEAD
 Defined in: [enums.ts:2](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L2)
+=======
+Defined in: [enums.ts:2](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L2)
+>>>>>>> develop
 
 ***
 
@@ -22,7 +30,11 @@ Defined in: [enums.ts:2](https://github.com/humanprotocol/human-protocol/blob/da
 
 > **AURORA\_TESTNET**: `1313161555`
 
+<<<<<<< HEAD
 Defined in: [enums.ts:9](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L9)
+=======
+Defined in: [enums.ts:9](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L9)
+>>>>>>> develop
 
 ***
 
@@ -30,7 +42,11 @@ Defined in: [enums.ts:9](https://github.com/humanprotocol/human-protocol/blob/da
 
 > **BSC\_MAINNET**: `56`
 
+<<<<<<< HEAD
 Defined in: [enums.ts:5](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L5)
+=======
+Defined in: [enums.ts:5](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L5)
+>>>>>>> develop
 
 ***
 
@@ -38,7 +54,11 @@ Defined in: [enums.ts:5](https://github.com/humanprotocol/human-protocol/blob/da
 
 > **BSC\_TESTNET**: `97`
 
+<<<<<<< HEAD
 Defined in: [enums.ts:6](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L6)
+=======
+Defined in: [enums.ts:6](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L6)
+>>>>>>> develop
 
 ***
 
@@ -46,7 +66,11 @@ Defined in: [enums.ts:6](https://github.com/humanprotocol/human-protocol/blob/da
 
 > **LOCALHOST**: `1338`
 
+<<<<<<< HEAD
 Defined in: [enums.ts:10](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L10)
+=======
+Defined in: [enums.ts:10](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L10)
+>>>>>>> develop
 
 ***
 
@@ -54,7 +78,11 @@ Defined in: [enums.ts:10](https://github.com/humanprotocol/human-protocol/blob/d
 
 > **MAINNET**: `1`
 
+<<<<<<< HEAD
 Defined in: [enums.ts:3](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L3)
+=======
+Defined in: [enums.ts:3](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L3)
+>>>>>>> develop
 
 ***
 
@@ -62,7 +90,11 @@ Defined in: [enums.ts:3](https://github.com/humanprotocol/human-protocol/blob/da
 
 > **POLYGON**: `137`
 
+<<<<<<< HEAD
 Defined in: [enums.ts:7](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L7)
+=======
+Defined in: [enums.ts:7](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L7)
+>>>>>>> develop
 
 ***
 
@@ -70,7 +102,11 @@ Defined in: [enums.ts:7](https://github.com/humanprotocol/human-protocol/blob/da
 
 > **POLYGON\_AMOY**: `80002`
 
+<<<<<<< HEAD
 Defined in: [enums.ts:8](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L8)
+=======
+Defined in: [enums.ts:8](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L8)
+>>>>>>> develop
 
 ***
 
@@ -78,4 +114,8 @@ Defined in: [enums.ts:8](https://github.com/humanprotocol/human-protocol/blob/da
 
 > **SEPOLIA**: `11155111`
 
+<<<<<<< HEAD
 Defined in: [enums.ts:4](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L4)
+=======
+Defined in: [enums.ts:4](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L4)
+>>>>>>> develop

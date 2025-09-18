@@ -1,12 +1,13 @@
 # pylint: disable=too-few-public-methods
 from __future__ import annotations
 
-from sqlalchemy import Column, DateTime, Enum, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy import JSON, Column, DateTime, Enum, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, relationship
 from sqlalchemy.sql import func
 
 from src.core.types import (
     AssignmentStatuses,
+    CvatWebhookStatuses,
     EscrowValidationStatuses,
     JobStatuses,
     Networks,
@@ -44,6 +45,12 @@ class Project(BaseUUID):
     )
 
     jobs: Mapped[list[Job]] = relationship(
+        back_populates="project",
+        cascade="all, delete",
+        passive_deletes=True,
+    )
+
+    cvat_webhooks: Mapped[list[CvatWebhook]] = relationship(
         back_populates="project",
         cascade="all, delete",
         passive_deletes=True,
@@ -100,6 +107,11 @@ class Task(ChildOf[Project]):
     )
     data_upload: Mapped[DataUpload] = relationship(
         back_populates="task", cascade="all, delete", passive_deletes=True
+    )
+    cvat_webhooks: Mapped[list[CvatWebhook]] = relationship(
+        back_populates="task",
+        cascade="all, delete",
+        passive_deletes=True,
     )
 
     def __repr__(self) -> str:
@@ -198,6 +210,11 @@ class Job(ChildOf[Task]):
         passive_deletes=True,
         order_by="desc(Assignment.created_at)",
     )
+    cvat_webhooks: Mapped[list[CvatWebhook]] = relationship(
+        back_populates="job",
+        cascade="all, delete",
+        passive_deletes=True,
+    )
 
     @property
     def latest_assignment(self) -> Assignment | None:
@@ -275,3 +292,39 @@ class Image(BaseUUID):
         return (
             f"Image. id={self.id} cvat_project_id={self.cvat_project_id} filename={self.filename}"
         )
+
+
+class CvatWebhook(BaseUUID):
+    __tablename__ = "cvat_webhooks"
+    cvat_project_id = Column(
+        Integer,
+        ForeignKey("projects.cvat_id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    cvat_task_id = Column(
+        Integer, ForeignKey("tasks.cvat_id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    cvat_job_id = Column(
+        Integer, ForeignKey("jobs.cvat_id", ondelete="CASCADE"), nullable=False, index=True
+    )
+
+    status = Column(
+        String,
+        Enum(CvatWebhookStatuses),
+        server_default=CvatWebhookStatuses.pending.value,
+    )
+    attempts = Column(Integer, server_default="0")
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    wait_until = Column(DateTime(timezone=True), server_default=func.now(), default=utcnow)
+
+    event_type = Column(String, nullable=False)
+    event_data = Column(JSON, nullable=True, server_default=None)
+
+    project: Mapped[Project] = relationship(back_populates="cvat_webhooks")
+    task: Mapped[Task] = relationship(back_populates="cvat_webhooks")
+    job: Mapped[Job] = relationship(back_populates="cvat_webhooks")
+
+    def __repr__(self) -> str:
+        return f"CvatWebhook. id={self.id} type={self.event_type}"

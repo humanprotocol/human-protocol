@@ -32,6 +32,7 @@ async function main() {
   // can only be called by the governor
   const transaction =
     await governanceContract.updateSpokeContracts(spokeContracts);
+  await transaction.wait();
   console.log(
     'Spoke contracts updated successfully. TxHash:',
     transaction.hash

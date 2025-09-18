@@ -126,27 +126,42 @@ class CronConfig:
     process_job_launcher_webhooks_chunk_size = int(
         getenv("PROCESS_JOB_LAUNCHER_WEBHOOKS_CHUNK_SIZE", 5)
     )
+
     process_recording_oracle_webhooks_int = int(getenv("PROCESS_RECORDING_ORACLE_WEBHOOKS_INT", 30))
     process_recording_oracle_webhooks_chunk_size = int(
         getenv("PROCESS_RECORDING_ORACLE_WEBHOOKS_CHUNK_SIZE", 5)
     )
+
     process_reputation_oracle_webhooks_chunk_size = int(
         getenv("PROCESS_REPUTATION_ORACLE_WEBHOOKS_CHUNK_SIZE", 5)
     )
     process_reputation_oracle_webhooks_int = int(
         getenv("PROCESS_REPUTATION_ORACLE_WEBHOOKS_INT", 5)
     )
+
+    process_cvat_webhooks_workers = int(getenv("PROCESS_CVAT_WEBHOOKS_WORKERS", 10))
+    """
+    The maximum number of parallel workers. Workers are added lazily, if the existing workers
+    can't finish in time.
+    """
+    process_cvat_webhooks_int = int(getenv("PROCESS_CVAT_WEBHOOKS_INT", 5))
+    process_cvat_webhooks_chunk_size = int(getenv("PROCESS_CVAT_WEBHOOKS_CHUNK_SIZE", 10))
+
     track_completed_projects_int = int(getenv("TRACK_COMPLETED_PROJECTS_INT", 30))
     track_completed_tasks_int = int(getenv("TRACK_COMPLETED_TASKS_INT", 30))
+
     track_creating_tasks_int = int(getenv("TRACK_CREATING_TASKS_INT", 300))
     track_creating_tasks_chunk_size = getenv("TRACK_CREATING_TASKS_CHUNK_SIZE", 5)
+
     track_assignments_int = int(getenv("TRACK_ASSIGNMENTS_INT", 5))
     track_assignments_chunk_size = int(getenv("TRACK_ASSIGNMENTS_CHUNK_SIZE", 10))
 
     track_completed_escrows_int = int(getenv("TRACK_COMPLETED_ESCROWS_INT", 60))
     track_completed_escrows_chunk_size = int(getenv("TRACK_COMPLETED_ESCROWS_CHUNK_SIZE", 100))
+
     track_escrow_validations_int = int(getenv("TRACK_ESCROW_VALIDATIONS_INT", 60))
     track_escrow_validations_chunk_size = int(getenv("TRACK_ESCROW_VALIDATIONS_CHUNK_SIZE", 1))
+
     track_completed_escrows_max_downloading_retries = int(
         getenv("TRACK_COMPLETED_ESCROWS_MAX_DOWNLOADING_RETRIES", 10)
     )
@@ -240,7 +255,10 @@ class FeaturesConfig:
     "Allow to profile specific requests"
 
     manifest_cache_ttl = int(getenv("MANIFEST_CACHE_TTL", str(2 * 24 * 60 * 60)))
-    "TTL for cached manifests"
+    "TTL for cached manifests, in seconds"
+
+    token_symbol_ttl = int(getenv("TOKEN_SYMBOL_CACHE_TTL", str(2 * 24 * 60 * 60)))
+    "TTL for cached token symbols, in seconds"
 
     max_data_storage_connections = int(getenv("MAX_DATA_STORAGE_CONNECTIONS", 5))
     "Max parallel data storage connections in 1 client (job creation, ...)"

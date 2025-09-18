@@ -75,6 +75,12 @@ class OracleWebhookStatuses(str, Enum, metaclass=BetterEnumMeta):
     failed = "failed"
 
 
+class CvatWebhookStatuses(str, Enum, metaclass=BetterEnumMeta):
+    pending = "pending"
+    completed = "completed"
+    failed = "failed"
+
+
 class AssignmentStatuses(str, Enum, metaclass=BetterEnumMeta):
     """
     State changes:

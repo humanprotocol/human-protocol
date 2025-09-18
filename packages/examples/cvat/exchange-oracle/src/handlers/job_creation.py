@@ -383,7 +383,7 @@ class SimpleTaskBuilder(_TaskBuilderBase):
             user_guide=manifest.annotation.user_guide,
         )
 
-        # Setup webhooks for a project (update:task, update:job)
+        # Setup webhooks for the project
         cvat_webhook = cvat_api.create_cvat_webhook(cvat_project.id)
 
         with SessionLocal.begin() as session:
@@ -1545,7 +1545,7 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
             user_guide=self.manifest.annotation.user_guide,
         )
 
-        # Setup webhooks for a project (update:task, update:job)
+        # Setup webhooks for the project
         cvat_webhook = cvat_api.create_cvat_webhook(cvat_project.id)
 
         with SessionLocal.begin() as session:
@@ -2907,7 +2907,7 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
                         # TODO: improve guide handling - split for different points
                     )
 
-                    # Setup webhooks for a project (update:task, update:job)
+                    # Setup webhooks for the project
                     cvat_webhook = cvat_api.create_cvat_webhook(cvat_project.id)
 
                     project_id = db_service.create_project(

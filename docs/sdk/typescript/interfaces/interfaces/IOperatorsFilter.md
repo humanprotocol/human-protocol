@@ -6,7 +6,11 @@
 
 # Interface: IOperatorsFilter
 
+<<<<<<< HEAD
 Defined in: [interfaces.ts:59](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L59)
+=======
+Defined in: [interfaces.ts:40](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L40)
+>>>>>>> develop
 
 ## Extends
 
@@ -18,7 +22,11 @@ Defined in: [interfaces.ts:59](https://github.com/humanprotocol/human-protocol/b
 
 > **chainId**: [`ChainId`](../../enums/enumerations/ChainId.md)
 
+<<<<<<< HEAD
 Defined in: [interfaces.ts:60](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L60)
+=======
+Defined in: [interfaces.ts:41](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L41)
+>>>>>>> develop
 
 ***
 
@@ -26,7 +34,11 @@ Defined in: [interfaces.ts:60](https://github.com/humanprotocol/human-protocol/b
 
 > `optional` **first**: `number`
 
+<<<<<<< HEAD
 Defined in: [interfaces.ts:189](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L189)
+=======
+Defined in: [interfaces.ts:179](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L179)
+>>>>>>> develop
 
 #### Inherited from
 
@@ -38,7 +50,11 @@ Defined in: [interfaces.ts:189](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **minStakedAmount**: `number`
 
+<<<<<<< HEAD
 Defined in: [interfaces.ts:62](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L62)
+=======
+Defined in: [interfaces.ts:43](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L43)
+>>>>>>> develop
 
 ***
 
@@ -46,7 +62,11 @@ Defined in: [interfaces.ts:62](https://github.com/humanprotocol/human-protocol/b
 
 > `optional` **orderBy**: `string`
 
+<<<<<<< HEAD
 Defined in: [interfaces.ts:63](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L63)
+=======
+Defined in: [interfaces.ts:44](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L44)
+>>>>>>> develop
 
 ***
 
@@ -54,7 +74,11 @@ Defined in: [interfaces.ts:63](https://github.com/humanprotocol/human-protocol/b
 
 > `optional` **orderDirection**: [`OrderDirection`](../../enums/enumerations/OrderDirection.md)
 
+<<<<<<< HEAD
 Defined in: [interfaces.ts:191](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L191)
+=======
+Defined in: [interfaces.ts:181](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L181)
+>>>>>>> develop
 
 #### Inherited from
 
@@ -66,7 +90,11 @@ Defined in: [interfaces.ts:191](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **roles**: `string`[]
 
+<<<<<<< HEAD
 Defined in: [interfaces.ts:61](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L61)
+=======
+Defined in: [interfaces.ts:42](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L42)
+>>>>>>> develop
 
 ***
 
@@ -74,7 +102,11 @@ Defined in: [interfaces.ts:61](https://github.com/humanprotocol/human-protocol/b
 
 > `optional` **skip**: `number`
 
+<<<<<<< HEAD
 Defined in: [interfaces.ts:190](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L190)
+=======
+Defined in: [interfaces.ts:180](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L180)
+>>>>>>> develop
 
 #### Inherited from
 

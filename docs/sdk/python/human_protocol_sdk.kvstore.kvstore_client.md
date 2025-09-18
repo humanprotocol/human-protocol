@@ -63,6 +63,17 @@ Initializes a KVStore instance.
   * **web3** (`Web3`) – The Web3 object
   * **gas_limit** (`Optional`[`int`]) – (Optional) Gas limit for transactions
 
+#### get(address, key)
+
+Gets the value of a key-value pair in the contract.
+:type address: `str`
+:param address: The Ethereum address associated with the key-value pair
+:type key: `str`
+:param key: The key of the key-value pair to get
+:rtype: `str`
+:return: The value of the key-value pair if it exists
+:example:
+
 #### set(\*args, \*\*kwargs)
 
 #### set_bulk(\*args, \*\*kwargs)

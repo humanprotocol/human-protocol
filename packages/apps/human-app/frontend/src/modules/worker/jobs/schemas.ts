@@ -10,7 +10,7 @@ const myJobSchema = z.object({
   job_type: z.string(),
   status: z.string().transform((value) => {
     try {
-      return z.nativeEnum(MyJobStatus).parse(value.toUpperCase());
+      return z.enum(MyJobStatus).parse(value.toUpperCase());
     } catch (error) {
       return UNKNOWN_JOB_STATUS;
     }

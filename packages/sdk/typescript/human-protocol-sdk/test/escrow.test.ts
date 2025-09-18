@@ -1,4 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
+vi.mock('graphql-request', () => {
+  return {
+    default: vi.fn(),
+  };
+});
+
 import {
   ERC20__factory,
   EscrowFactory__factory,
@@ -51,12 +58,6 @@ import {
   FAKE_URL,
   VALID_URL,
 } from './utils/constants';
-
-vi.mock('graphql-request', () => {
-  return {
-    default: vi.fn(),
-  };
-});
 
 describe('EscrowClient', () => {
   let escrowClient: any,

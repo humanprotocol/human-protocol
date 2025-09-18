@@ -46,7 +46,15 @@ export class CvatPayoutsCalculator implements EscrowPayoutsCalculator {
       throw new Error('Invalid annotation meta');
     }
 
-    const jobBountyValue = ethers.parseUnits(manifest.job_bounty, 18);
+    const tokenAddress = await escrowClient.getTokenAddress(escrowAddress);
+    const tokenDecimals = await this.web3Service.getTokenDecimals(
+      chainId,
+      tokenAddress,
+    );
+    const jobBountyValue = this.parseJobBounty(
+      manifest.job_bounty,
+      Number(tokenDecimals),
+    );
     const workersBounties = new Map<string, bigint>();
 
     for (const job of annotations.jobs) {
@@ -75,5 +83,22 @@ export class CvatPayoutsCalculator implements EscrowPayoutsCalculator {
         amount: bountyAmount,
       }),
     );
+  }
+
+  private parseJobBounty(jobBounty: string, tokenDecimals: number): bigint {
+    const parts = jobBounty.split('.');
+    if (parts.length > 1) {
+      const decimalsInBounty = parts[1].length;
+      if (decimalsInBounty > tokenDecimals) {
+        if (tokenDecimals === 0) {
+          return ethers.parseUnits(parts[0], tokenDecimals);
+        }
+        return ethers.parseUnits(
+          `${parts[0]}.${parts[1].slice(0, tokenDecimals)}`,
+          tokenDecimals,
+        );
+      }
+    }
+    return ethers.parseUnits(jobBounty, tokenDecimals);
   }
 }

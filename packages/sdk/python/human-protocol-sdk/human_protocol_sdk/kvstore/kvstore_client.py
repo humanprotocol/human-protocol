@@ -63,6 +63,7 @@ from human_protocol_sdk.utils import (
     get_kvstore_interface,
     handle_error,
     validate_url,
+    apply_tx_defaults,
 )
 from web3 import Web3
 from web3.middleware import ExtraDataToPOAMiddleware
@@ -159,7 +160,7 @@ class KVStoreClient:
 
         try:
             tx_hash = self.kvstore_contract.functions.set(key, value).transact(
-                tx_options or {}
+                apply_tx_defaults(self.w3, tx_options)
             )
             self.w3.eth.wait_for_transaction_receipt(tx_hash)
         except Exception as e:
@@ -216,7 +217,7 @@ class KVStoreClient:
 
         try:
             tx_hash = self.kvstore_contract.functions.setBulk(keys, values).transact(
-                tx_options or {}
+                apply_tx_defaults(self.w3, tx_options)
             )
             self.w3.eth.wait_for_transaction_receipt(tx_hash)
         except Exception as e:
@@ -275,7 +276,32 @@ class KVStoreClient:
         try:
             tx_hash = self.kvstore_contract.functions.setBulk(
                 [key, key + "_hash"], [url, content_hash]
-            ).transact(tx_options or {})
+            ).transact(apply_tx_defaults(self.w3, tx_options))
             self.w3.eth.wait_for_transaction_receipt(tx_hash)
+        except Exception as e:
+            handle_error(e, KVStoreClientError)
+
+    def get(self, address: str, key: str) -> str:
+        """Gets the value of a key-value pair in the contract.
+        :param address: The Ethereum address associated with the key-value pair
+        :param key: The key of the key-value pair to get
+        :return: The value of the key-value pair if it exists
+        :example:
+            .. code-block:: python
+                from eth_typing import URI
+                from web3 import Web3
+                from web3.providers.auto import load_provider_from_uri
+                from human_protocol_sdk.kvstore import KVStoreClient
+                w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                kvstore_client = KVStoreClient(w3)
+                role = kvstore_client.get('0x62dD51230A30401C455c8398d06F85e4EaB6309f', 'Role')
+        """
+
+        if not key:
+            raise KVStoreClientError("Key cannot be empty")
+        if not Web3.is_address(address):
+            raise KVStoreClientError(f"Invalid address: {address}")
+        try:
+            return self.kvstore_contract.functions.get(address, key).call()
         except Exception as e:
             handle_error(e, KVStoreClientError)

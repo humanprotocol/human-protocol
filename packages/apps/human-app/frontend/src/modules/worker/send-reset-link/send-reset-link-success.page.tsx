@@ -26,7 +26,7 @@ export function SendResetLinkWorkerSuccessPage() {
   const { t } = useTranslation();
   const { field: email } = useLocationState({
     keyInStorage: 'email',
-    schema: z.string().email(),
+    schema: z.email(),
   });
   const { mutate, error, isError, isPending, reset } =
     useSendResetLinkMutation();

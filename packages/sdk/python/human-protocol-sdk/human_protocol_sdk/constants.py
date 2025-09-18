@@ -1,5 +1,6 @@
 from enum import Enum
 import os
+from web3 import Web3
 
 
 class ChainId(Enum):
@@ -159,6 +160,8 @@ NETWORKS = {
         "old_factory_address": "",
     },
 }
+
+DEFAULT_AURORA_GAS_PRICE = Web3.to_wei(0.07, "gwei")
 
 
 SUBGRAPH_API_KEY_PLACEHOLDER = "[SUBGRAPH_API_KEY]"

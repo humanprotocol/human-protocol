@@ -1,15 +1,17 @@
 import { EscrowClient } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
+import { ethers } from 'ethers';
 import type { OverrideProperties } from 'type-fest';
+
+import { FortuneFinalResult, FortuneManifest } from '@/common/types';
+import { StorageService } from '@/modules/storage';
+import { Web3Service } from '@/modules/web3';
 
 import {
   CalclulatePayoutsInput,
   CalculatedPayout,
   EscrowPayoutsCalculator,
 } from './types';
-import { FortuneFinalResult, FortuneManifest } from '../../../common/types';
-import { StorageService } from '../../storage';
-import { Web3Service } from '../../web3';
 
 type CalculateFortunePayoutsInput = OverrideProperties<
   CalclulatePayoutsInput,
@@ -40,7 +42,14 @@ export class FortunePayoutsCalculator implements EscrowPayoutsCalculator {
       .map((item) => item.workerAddress);
 
     const reservedFunds = await escrowClient.getReservedFunds(escrowAddress);
-    const payoutAmount = reservedFunds / BigInt(recipients.length);
+    const tokenAddress = await escrowClient.getTokenAddress(escrowAddress);
+    const tokenDecimals = await this.web3Service.getTokenDecimals(
+      chainId,
+      tokenAddress,
+    );
+    const payoutAmount =
+      ethers.parseUnits(reservedFunds, tokenDecimals) /
+      BigInt(recipients.length);
 
     return recipients.map((recipient) => ({
       address: recipient,

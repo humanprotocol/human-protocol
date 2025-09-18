@@ -175,7 +175,9 @@ export class KVStoreClient extends BaseEthersClient {
   ): Promise<void> {
     if (key === '') throw ErrorKVStoreEmptyKey;
     try {
-      await (await this.contract.set(key, value, txOptions)).wait();
+      await (
+        await this.contract.set(key, value, this.applyTxDefaults(txOptions))
+      ).wait();
     } catch (e) {
       if (e instanceof Error) throw Error(`Failed to set value: ${e.message}`);
     }
@@ -220,7 +222,13 @@ export class KVStoreClient extends BaseEthersClient {
     if (keys.includes('')) throw ErrorKVStoreEmptyKey;
 
     try {
-      await (await this.contract.setBulk(keys, values, txOptions)).wait();
+      await (
+        await this.contract.setBulk(
+          keys,
+          values,
+          this.applyTxDefaults(txOptions)
+        )
+      ).wait();
     } catch (e) {
       if (e instanceof Error)
         throw Error(`Failed to set bulk values: ${e.message}`);
@@ -273,12 +281,48 @@ export class KVStoreClient extends BaseEthersClient {
         await this.contract.setBulk(
           [urlKey, hashKey],
           [url, contentHash],
-          txOptions
+          this.applyTxDefaults(txOptions)
         )
       ).wait();
     } catch (e) {
       if (e instanceof Error)
         throw Error(`Failed to set URL and hash: ${e.message}`);
+    }
+  }
+  /**
+   * Gets the value of a key-value pair in the contract.
+   *
+   * @param {string} address Address from which to get the key value.
+   * @param {string} key Key to obtain the value.
+   * @returns {string} Value of the key.
+   *
+   *
+   * **Code example**
+   *
+   * > Need to have available stake.
+   *
+   * ```ts
+   * import { providers } from 'ethers';
+   * import { KVStoreClient } from '@human-protocol/sdk';
+   *
+   * const rpcUrl = 'YOUR_RPC_URL';
+   *
+   * const provider = new providers.JsonRpcProvider(rpcUrl);
+   * const kvstoreClient = await KVStoreClient.build(provider);
+   *
+   * const value = await kvstoreClient.get('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', 'Role');
+   * ```
+   */
+  public async get(address: string, key: string): Promise<string> {
+    if (key === '') throw ErrorKVStoreEmptyKey;
+    if (!ethers.isAddress(address)) throw ErrorInvalidAddress;
+
+    try {
+      const result = await this.contract?.get(address, key);
+      return result;
+    } catch (e) {
+      if (e instanceof Error) throw Error(`Failed to get value: ${e.message}`);
+      return e;
     }
   }
 }

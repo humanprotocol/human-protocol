@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Header, Request
 
-from src.handlers.cvat_events import cvat_webhook_handler
+from src.handlers.cvat_events import cvat_webhook_request_handler
 from src.schemas.cvat import CvatWebhook
 from src.validators.signature import validate_cvat_signature
 
@@ -16,4 +16,4 @@ async def receive_cvat_webhook(
     x_signature_256: Annotated[str, Header()],
 ):
     await validate_cvat_signature(request, x_signature_256)
-    cvat_webhook_handler(cvat_webhook)
+    cvat_webhook_request_handler(cvat_webhook)

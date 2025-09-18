@@ -57,11 +57,15 @@ def generate_jwt_token(
     *,
     wallet_address: str | None = None,
     email: str = cvat_email,
+    qualifications: list[str] | None = None,
     private_key: str = PRIVATE_KEY,
 ) -> str:
+    if qualifications is None:
+        qualifications = []
     data = {
         **({"wallet_address": wallet_address} if wallet_address else {"role": "human_app"}),
         "email": email,
+        "qualifications": qualifications,
     }
 
     return jwt.encode(data, private_key, algorithm="ES256")
@@ -172,9 +176,13 @@ def test_can_list_jobs_200_with_address_and_pagination(
     with (
         open("tests/utils/manifest.json") as data,
         patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
+        patch(
+            "src.endpoints.serializers.get_escrow_fund_token_symbol"
+        ) as mock_get_escrow_fund_token_symbol,
     ):
         manifest = json.load(data)
         mock_get_manifest.return_value = manifest
+        mock_get_escrow_fund_token_symbol.return_value = "HMT"
 
         # check default pagination parameters
         response = client.get(
@@ -233,9 +241,13 @@ def test_can_list_jobs_200_without_escrows_in_hidden_states(
     with (
         open("tests/utils/manifest.json") as data,
         patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
+        patch(
+            "src.endpoints.serializers.get_escrow_fund_token_symbol"
+        ) as mock_get_escrow_fund_token_symbol,
     ):
         manifest = json.load(data)
         mock_get_manifest.return_value = manifest
+        mock_get_escrow_fund_token_symbol.return_value = "HMT"
 
         response = client.get(
             "/job",
@@ -287,9 +299,13 @@ def test_can_list_jobs_200_with_only_one_entry_per_escrow_address_if_several_pro
     with (
         open("tests/utils/manifest.json") as data,
         patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
+        patch(
+            "src.endpoints.serializers.get_escrow_fund_token_symbol"
+        ) as mock_get_escrow_fund_token_symbol,
     ):
         manifest = json.load(data)
         mock_get_manifest.return_value = manifest
+        mock_get_escrow_fund_token_symbol.return_value = "HMT"
 
         response = client.get(
             "/job",
@@ -323,9 +339,13 @@ def test_can_list_jobs_200_with_fields(client: TestClient, session: Session) -> 
     with (
         open("tests/utils/manifest.json") as data,
         patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
+        patch(
+            "src.endpoints.serializers.get_escrow_fund_token_symbol"
+        ) as mock_get_escrow_fund_token_symbol,
     ):
         manifest = json.load(data)
         mock_get_manifest.return_value = manifest
+        mock_get_escrow_fund_token_symbol.return_value = "HMT"
 
         required_fields = {
             "escrow_address",
@@ -402,9 +422,13 @@ def test_can_list_jobs_200_with_sorting(client: TestClient, session: Session) ->
     with (
         open("tests/utils/manifest.json") as data,
         patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
+        patch(
+            "src.endpoints.serializers.get_escrow_fund_token_symbol"
+        ) as mock_get_escrow_fund_token_symbol,
     ):
         manifest = json.load(data)
         mock_get_manifest.return_value = manifest
+        mock_get_escrow_fund_token_symbol.return_value = "HMT"
 
         for sort_field, case_converter in product(
             (
@@ -518,9 +542,13 @@ def test_can_list_jobs_200_with_filters(client: TestClient, session: Session):
     with (
         open("tests/utils/manifest.json") as data,
         patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
+        patch(
+            "src.endpoints.serializers.get_escrow_fund_token_symbol"
+        ) as mock_get_escrow_fund_token_symbol,
     ):
         manifest = json.load(data)
         mock_get_manifest.return_value = manifest
+        mock_get_escrow_fund_token_symbol.return_value = "HMT"
 
         for filter_key, filter_values in {
             "status": (
@@ -564,6 +592,66 @@ def test_can_list_jobs_200_with_filters(client: TestClient, session: Session):
                 )
 
 
+def test_can_list_jobs_200_can_show_only_active_jobs_with_free_assignments(
+    client: TestClient, session: Session
+):
+    session.begin()
+
+    user = User(
+        wallet_address=WALLET_ADDRESS1,
+        cvat_email=cvat_email,
+        cvat_id=1,
+    )
+    session.add(user)
+
+    cvat_project1, _, _ = create_project_task_and_job(
+        session, "0x86e83d346041E8806e352681f3F14549C0d2001", 1
+    )
+    cvat_project1.status = ProjectStatuses.annotation
+    session.add(cvat_project1)
+
+    cvat_project2, _, cvat_job2 = create_project_task_and_job(
+        session, "0x86e83d346041E8806e352681f3F14549C0d2002", 2
+    )
+    cvat_project2.status = ProjectStatuses.annotation
+    cvat_job2.status = JobStatuses.in_progress
+    session.add(cvat_project2)
+    session.add(cvat_job2)
+
+    assignment = Assignment(
+        id=str(uuid.uuid4()),
+        user_wallet_address=user.wallet_address,
+        cvat_job_id=cvat_job2.cvat_id,
+        status=AssignmentStatuses.created,
+        created_at=utcnow() - timedelta(hours=1),
+        expires_at=utcnow() + timedelta(hours=1),
+    )
+    session.add(assignment)
+
+    session.commit()
+
+    with (
+        open("tests/utils/manifest.json") as data,
+        patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
+        patch(
+            "src.endpoints.serializers.get_escrow_fund_token_symbol"
+        ) as mock_get_escrow_fund_token_symbol,
+    ):
+        manifest = json.load(data)
+        mock_get_manifest.return_value = manifest
+        mock_get_escrow_fund_token_symbol.return_value = "HMT"
+
+        response = client.get(
+            "/job",
+            headers=get_auth_header(token=generate_jwt_token()),
+            params={"status": APIJobStatuses.active.value},
+        )
+
+        assert response.status_code == 200
+        paginated_result = response.json()
+        assert paginated_result["total_results"] == 1
+
+
 def test_can_list_jobs_200_check_values(client: TestClient, session: Session) -> None:
     session.begin()
     user = User(
@@ -594,9 +682,13 @@ def test_can_list_jobs_200_check_values(client: TestClient, session: Session) ->
     with (
         open("tests/utils/manifest.json") as data,
         patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
+        patch(
+            "src.endpoints.serializers.get_escrow_fund_token_symbol"
+        ) as mock_get_escrow_fund_token_symbol,
     ):
         manifest = json.load(data)
         mock_get_manifest.return_value = manifest
+        mock_get_escrow_fund_token_symbol.return_value = "HMT"
 
         response = client.get(
             "/job",
@@ -649,9 +741,13 @@ def test_can_list_jobs_200_without_address(client: TestClient, session: Session)
     with (
         open("tests/utils/manifest.json") as data,
         patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
+        patch(
+            "src.endpoints.serializers.get_escrow_fund_token_symbol"
+        ) as mock_get_escrow_fund_token_symbol,
     ):
         manifest = json.load(data)
         mock_get_manifest.return_value = manifest
+        mock_get_escrow_fund_token_symbol.return_value = "HMT"
 
         response = client.get(
             "/job",
@@ -779,11 +875,17 @@ def test_can_create_assignment_200(client: TestClient, session: Session) -> None
 
     with (
         open("tests/utils/manifest.json") as data,
-        patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
+        patch("src.endpoints.serializers.get_escrow_manifest") as mock_serializer_get_manifest,
+        patch("src.services.exchange.get_escrow_manifest") as mock_exchange_get_manifest,
+        patch(
+            "src.endpoints.serializers.get_escrow_fund_token_symbol"
+        ) as mock_get_escrow_fund_token_symbol,
         patch("src.services.exchange.cvat_api") as cvat_api,
     ):
         manifest = json.load(data)
-        mock_get_manifest.return_value = manifest
+        mock_serializer_get_manifest.return_value = manifest
+        mock_exchange_get_manifest.return_value = manifest
+        mock_get_escrow_fund_token_symbol.return_value = "HMT"
 
         assert {cvat_project.updated_at, cvat_task.updated_at, cvat_job.updated_at} == {None}
         response = client.post(
@@ -876,17 +978,23 @@ def test_cannot_create_assignment_400_when_has_unfinished_assignments(
 
     session.commit()
 
-    response = client.post(
-        "/assignment",
-        headers=get_auth_header(),
-        json={
-            "escrow_address": cvat_project.escrow_address,
-            "chain_id": cvat_project.chain_id,
-        },
-    )
+    with (
+        open("tests/utils/manifest.json") as data,
+        patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
+    ):
+        manifest = json.load(data)
+        mock_get_manifest.return_value = manifest
+        response = client.post(
+            "/assignment",
+            headers=get_auth_header(),
+            json={
+                "escrow_address": cvat_project.escrow_address,
+                "chain_id": cvat_project.chain_id,
+            },
+        )
 
-    assert response.status_code == 400
-    assert "There are unfinished assignments in this escrow" in response.text
+        assert response.status_code == 400
+        assert "There are unfinished assignments in this escrow" in response.text
 
 
 def test_can_list_assignments_200(client: TestClient, session: Session) -> None:
@@ -968,9 +1076,13 @@ def test_can_list_assignments_200(client: TestClient, session: Session) -> None:
     with (
         open("tests/utils/manifest.json") as data,
         patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
+        patch(
+            "src.endpoints.serializers.get_escrow_fund_token_symbol"
+        ) as mock_get_escrow_fund_token_symbol,
     ):
         manifest = json.load(data)
         mock_get_manifest.return_value = manifest
+        mock_get_escrow_fund_token_symbol.return_value = "HMT"
 
         for filter_key, filter_values in {
             "status": (
@@ -1045,9 +1157,13 @@ def test_can_list_assignments_200_with_sorting(client: TestClient, session: Sess
     with (
         open("tests/utils/manifest.json") as data,
         patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
+        patch(
+            "src.endpoints.serializers.get_escrow_fund_token_symbol"
+        ) as mock_get_escrow_fund_token_symbol,
     ):
         manifest = json.load(data)
         mock_get_manifest.return_value = manifest
+        mock_get_escrow_fund_token_symbol.return_value = "HMT"
 
         for sort_field, case_converter in product(
             (
@@ -1397,11 +1513,17 @@ def test_can_list_jobs_200_check_updated_at(client: TestClient, session: Session
 
     with (
         open("tests/utils/manifest.json") as data,
-        patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
+        patch("src.endpoints.serializers.get_escrow_manifest") as mock_serializer_get_manifest,
+        patch("src.services.exchange.get_escrow_manifest") as mock_exchange_get_manifest,
+        patch(
+            "src.endpoints.serializers.get_escrow_fund_token_symbol"
+        ) as mock_get_escrow_fund_token_symbol,
         patch("src.services.exchange.cvat_api"),
     ):
         manifest = json.load(data)
-        mock_get_manifest.return_value = manifest
+        mock_serializer_get_manifest.return_value = manifest
+        mock_exchange_get_manifest.return_value = manifest
+        mock_get_escrow_fund_token_symbol.return_value = "HMT"
 
         # create assignment in each job
         for i in range(jobs_count):

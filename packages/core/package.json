@@ -1,7 +1,7 @@
 {
   "name": "@human-protocol/core",
   "description": "Human Protocol Core Smart Contracts",
-  "version": "4.1.3",
+  "version": "4.2.1",
   "files": [
     "contracts/**/*.sol",
     "abis/**/*.json",
@@ -37,7 +37,7 @@
     "format": "yarn format:contracts && yarn format:scripts",
     "clean:build": "tsc --build --clean && rm -rf dist",
     "build": "yarn compile && yarn clean:build && tsc --build",
-    "prepublish": "yarn build"
+    "prepack": "[ \"${SKIP_PREPACK:-}\" = \"true\" ] && exit 0 || yarn build"
   },
   "repository": {
     "type": "git",

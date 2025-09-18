@@ -1,2 +1,4 @@
 *.test.tsx.snap
 .vercel
+dist
+node_modules

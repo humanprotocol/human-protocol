@@ -11,7 +11,7 @@ const web3userDataSchema = z.object({
   user_id: z.number(),
   wallet_address: z.string(),
   reputation_network: z.string(),
-  operator_status: z.nativeEnum(OperatorStatus),
+  operator_status: z.enum(OperatorStatus),
   exp: z.number(),
   status: z.literal('active'),
 });

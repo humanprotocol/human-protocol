@@ -5,7 +5,7 @@ from human_protocol_sdk.storage import StorageFileNotFoundError
 from sqlalchemy.orm import Session
 
 import src.services.cvat as cvat_service
-from src.chain.escrow import get_escrow_manifest
+from src.chain.escrow import get_escrow_fund_token_symbol, get_escrow_manifest
 from src.core.manifest import TaskManifest
 from src.core.types import AssignmentStatuses, ProjectStatuses
 from src.db import SessionLocal
@@ -52,6 +52,7 @@ def serialize_job(
         else:
             raise AssertionError(f"Unexpected project status '{project.status}'")
 
+        reward_token = get_escrow_fund_token_symbol(project.chain_id, project.escrow_address)
         return service_api.JobResponse(
             escrow_address=project.escrow_address,
             chain_id=project.chain_id,
@@ -59,9 +60,7 @@ def serialize_job(
             status=api_status,
             job_description=manifest.annotation.description if manifest else None,
             reward_amount=str(manifest.job_bounty) if manifest else None,
-            reward_token=(
-                service_api.DEFAULT_TOKEN
-            ),  # set a value to avoid being excluded by response_model_exclude_unset=True
+            reward_token=reward_token,
             created_at=project.created_at,
             updated_at=project.updated_at,
             qualifications=manifest.qualifications,
@@ -126,6 +125,8 @@ def serialize_assignment(
         else:
             api_status = assignment_status_mapping[assignment.status]
 
+        reward_token = get_escrow_fund_token_symbol(project.chain_id, project.escrow_address)
+
         return service_api.AssignmentResponse(
             assignment_id=assignment.id,
             escrow_address=project.escrow_address,
@@ -133,9 +134,7 @@ def serialize_assignment(
             job_type=project.job_type,
             status=api_status,
             reward_amount=str(manifest.job_bounty) if manifest else None,
-            reward_token=(
-                service_api.DEFAULT_TOKEN
-            ),  # set a value to avoid being excluded by response_model_exclude_unset=True
+            reward_token=reward_token,
             url=compose_assignment_url(
                 task_id=assignment.job.cvat_task_id,
                 job_id=assignment.cvat_job_id,

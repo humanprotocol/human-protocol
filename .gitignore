@@ -43,11 +43,15 @@ yarn-error.log*
 # OS
 .DS_Store
 
+# Artifacts
 build
 dist
 *.tsbuildinfo
 hardhat-dependency-compiler
+package.tgz
 
-# cache
+# Cache
 cache
 
+# Ignore developer-only local files
+.local

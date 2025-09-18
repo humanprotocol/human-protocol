@@ -4,11 +4,13 @@ import { faker } from '@faker-js/faker';
 import { createMock } from '@golevelup/ts-jest';
 import { EscrowClient } from '@human-protocol/sdk';
 import { Test } from '@nestjs/testing';
+import { ethers } from 'ethers';
 import _ from 'lodash';
 
-import { StorageService } from '../../storage';
-import { Web3Service } from '../../web3';
-import { generateTestnetChainId } from '../../web3/fixtures';
+import { StorageService } from '@/modules/storage';
+import { Web3Service } from '@/modules/web3';
+import { generateTestnetChainId } from '@/modules/web3/fixtures';
+
 import { generateFortuneManifest, generateFortuneSolution } from '../fixtures';
 import { FortunePayoutsCalculator } from './fortune-payouts-calculator';
 
@@ -37,6 +39,13 @@ describe('FortunePayoutsCalculator', () => {
     calculator = moduleRef.get<FortunePayoutsCalculator>(
       FortunePayoutsCalculator,
     );
+
+    const mockedGetTokenAddress = jest.fn().mockImplementation(async () => {
+      return faker.finance.ethereumAddress();
+    });
+    mockedEscrowClient.build.mockResolvedValue({
+      getTokenAddress: mockedGetTokenAddress,
+    } as unknown as EscrowClient);
   });
 
   describe('calculate', () => {
@@ -65,6 +74,9 @@ describe('FortunePayoutsCalculator', () => {
       const resultsUrl = faker.internet.url();
       const manifest = generateFortuneManifest();
 
+      const tokenDecimals = BigInt(faker.number.int({ min: 6, max: 18 }));
+      mockedWeb3Service.getTokenDecimals.mockResolvedValueOnce(tokenDecimals);
+
       const payouts = await calculator.calculate({
         chainId: generateTestnetChainId(),
         escrowAddress: faker.finance.ethereumAddress(),
@@ -74,7 +86,10 @@ describe('FortunePayoutsCalculator', () => {
 
       const expectedPayouts = validSolutions.map((s) => ({
         address: s.workerAddress,
-        amount: balance / BigInt(validSolutions.length),
+        amount:
+          BigInt(
+            ethers.parseUnits(manifest.fundAmount.toString(), tokenDecimals),
+          ) / BigInt(validSolutions.length),
       }));
 
       expect(_.sortBy(payouts, 'address')).toEqual(

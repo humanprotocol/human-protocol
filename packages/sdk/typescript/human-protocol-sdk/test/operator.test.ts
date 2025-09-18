@@ -1,4 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
+vi.mock('graphql-request', () => {
+  return {
+    default: vi.fn(),
+  };
+});
+
 import { ethers } from 'ethers';
 import * as gqlFetch from 'graphql-request';
 import { describe, expect, test, vi } from 'vitest';
