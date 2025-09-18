@@ -1,3 +1,4 @@
+import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import { ChainId } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 import { Wallet, ethers } from 'ethers';
@@ -90,5 +91,19 @@ export class Web3Service {
     }
 
     throw new Error(`No gas price data for chain id: ${chainId}`);
+  }
+
+  async getTokenDecimals(
+    chainId: number,
+    tokenAddress: string,
+  ): Promise<bigint> {
+    const signer = this.getSigner(chainId);
+    const tokenContract = HMToken__factory.connect(tokenAddress, signer);
+    try {
+      const decimals = await tokenContract.decimals();
+      return decimals;
+    } catch (noop) {
+      throw new Error('Failed to fetch token decimals');
+    }
   }
 }

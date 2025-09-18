@@ -48,10 +48,14 @@ describe('CvatPayoutsCalculator', () => {
     const mockedGetIntermediateResultsUrl = jest
       .fn()
       .mockImplementation(async () => faker.internet.url());
+    const mockedGetTokenAddress = jest.fn().mockImplementation(async () => {
+      return faker.finance.ethereumAddress();
+    });
 
     beforeAll(() => {
       mockedEscrowClient.build.mockResolvedValue({
         getIntermediateResultsUrl: mockedGetIntermediateResultsUrl,
+        getTokenAddress: mockedGetTokenAddress,
       } as unknown as EscrowClient);
     });
 
@@ -80,13 +84,14 @@ describe('CvatPayoutsCalculator', () => {
       );
     });
 
-    it('should properly calculate workers bounties', async () => {
+    it('should properly calculate workers bounties trimming the decimals', async () => {
       const annotators = [
         faker.finance.ethereumAddress(),
         faker.finance.ethereumAddress(),
       ];
 
       const jobsPerAnnotator = faker.number.int({ min: 1, max: 3 });
+      const tokenDecimals = BigInt(6);
 
       const annotationsMeta: CvatAnnotationMeta = {
         jobs: Array.from(
@@ -125,6 +130,84 @@ describe('CvatPayoutsCalculator', () => {
       mockedStorageService.downloadJsonLikeData.mockResolvedValueOnce(
         annotationsMeta,
       );
+      mockedWeb3Service.getTokenDecimals.mockResolvedValueOnce(tokenDecimals);
+
+      const mockedJobBounty = '0.123456789'; // more decimals than token has
+      const manifest = {
+        ...generateCvatManifest(),
+        job_bounty: mockedJobBounty,
+      };
+
+      const payouts = await calculator.calculate({
+        chainId,
+        escrowAddress,
+        manifest,
+        finalResultsUrl: faker.internet.url(),
+      });
+
+      const trimmedBounty = '0.123456';
+
+      const expectedAmountPerAnnotator =
+        BigInt(jobsPerAnnotator) *
+        ethers.parseUnits(trimmedBounty, tokenDecimals);
+
+      const expectedPayouts = annotators.map((address) => ({
+        address,
+        amount: expectedAmountPerAnnotator,
+      }));
+
+      expect(_.sortBy(payouts, 'address')).toEqual(
+        _.sortBy(expectedPayouts, 'address'),
+      );
+    });
+
+    it('should properly calculate workers bounties', async () => {
+      const annotators = [
+        faker.finance.ethereumAddress(),
+        faker.finance.ethereumAddress(),
+      ];
+
+      const jobsPerAnnotator = faker.number.int({ min: 1, max: 3 });
+      const tokenDecimals = BigInt(faker.number.int({ min: 6, max: 18 }));
+
+      const annotationsMeta: CvatAnnotationMeta = {
+        jobs: Array.from(
+          { length: jobsPerAnnotator * annotators.length },
+          (_v, index: number) => ({
+            job_id: index,
+            final_result_id: faker.number.int(),
+          }),
+        ),
+        results: [],
+      };
+      for (const job of annotationsMeta.jobs) {
+        const annotatorIndex = job.job_id % annotators.length;
+
+        annotationsMeta.results.push({
+          id: job.final_result_id,
+          job_id: job.job_id,
+          annotator_wallet_address: annotators[annotatorIndex],
+          annotation_quality: faker.number.float(),
+        });
+      }
+
+      // imitate weird case: job w/o result
+      annotationsMeta.jobs.push({
+        job_id: faker.number.int(),
+        final_result_id: faker.number.int(),
+      });
+      // imitate weird case: result w/o job
+      annotationsMeta.results.push({
+        id: faker.number.int(),
+        job_id: faker.number.int(),
+        annotator_wallet_address: faker.helpers.arrayElement(annotators),
+        annotation_quality: faker.number.float(),
+      });
+
+      mockedStorageService.downloadJsonLikeData.mockResolvedValueOnce(
+        annotationsMeta,
+      );
+      mockedWeb3Service.getTokenDecimals.mockResolvedValueOnce(tokenDecimals);
 
       const manifest = generateCvatManifest();
 
@@ -136,7 +219,8 @@ describe('CvatPayoutsCalculator', () => {
       });
 
       const expectedAmountPerAnnotator =
-        BigInt(jobsPerAnnotator) * ethers.parseUnits(manifest.job_bounty, 18);
+        BigInt(jobsPerAnnotator) *
+        ethers.parseUnits(manifest.job_bounty, tokenDecimals);
 
       const expectedPayouts = annotators.map((address) => ({
         address,
