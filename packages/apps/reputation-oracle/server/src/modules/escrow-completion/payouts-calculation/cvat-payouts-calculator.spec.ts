@@ -84,6 +84,76 @@ describe('CvatPayoutsCalculator', () => {
       );
     });
 
+    it('throws if manifest.job_bounty has more decimals than the token supports', async () => {
+      const annotators = [
+        faker.finance.ethereumAddress(),
+        faker.finance.ethereumAddress(),
+      ];
+
+      const jobsPerAnnotator = faker.number.int({ min: 1, max: 3 });
+      const tokenDecimals = BigInt(faker.number.int({ min: 6, max: 18 }));
+
+      const annotationsMeta: CvatAnnotationMeta = {
+        jobs: Array.from(
+          { length: jobsPerAnnotator * annotators.length },
+          (_v, index: number) => ({
+            job_id: index,
+            final_result_id: faker.number.int(),
+          }),
+        ),
+        results: [],
+      };
+      for (const job of annotationsMeta.jobs) {
+        const annotatorIndex = job.job_id % annotators.length;
+
+        annotationsMeta.results.push({
+          id: job.final_result_id,
+          job_id: job.job_id,
+          annotator_wallet_address: annotators[annotatorIndex],
+          annotation_quality: faker.number.float(),
+        });
+      }
+
+      // imitate weird case: job w/o result
+      annotationsMeta.jobs.push({
+        job_id: faker.number.int(),
+        final_result_id: faker.number.int(),
+      });
+      // imitate weird case: result w/o job
+      annotationsMeta.results.push({
+        id: faker.number.int(),
+        job_id: faker.number.int(),
+        annotator_wallet_address: faker.helpers.arrayElement(annotators),
+        annotation_quality: faker.number.float(),
+      });
+
+      mockedStorageService.downloadJsonLikeData.mockResolvedValueOnce(
+        annotationsMeta,
+      );
+      mockedWeb3Service.getTokenDecimals.mockResolvedValueOnce(tokenDecimals);
+
+      const mockedJobBounty = faker.finance.amount({
+        min: 1,
+        max: 10,
+        dec: Number(tokenDecimals + 1n),
+      });
+      const manifest = {
+        ...generateCvatManifest(),
+        job_bounty: mockedJobBounty,
+      };
+
+      await expect(
+        calculator.calculate({
+          chainId,
+          escrowAddress,
+          manifest,
+          finalResultsUrl: faker.internet.url(),
+        }),
+      ).rejects.toThrow(
+        `Job bounty value ${manifest.job_bounty} exceeds maximum token decimals (${tokenDecimals}).`,
+      );
+    });
+
     it('should properly calculate workers bounties', async () => {
       const annotators = [
         faker.finance.ethereumAddress(),
