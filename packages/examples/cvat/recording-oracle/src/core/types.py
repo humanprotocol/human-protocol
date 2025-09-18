@@ -20,13 +20,13 @@ class TaskTypes(str, Enum, metaclass=BetterEnumMeta):
     image_skeletons_from_boxes = "image_skeletons_from_boxes"
 
 
-class OracleWebhookTypes(str, Enum):
+class OracleWebhookTypes(str, Enum, metaclass=BetterEnumMeta):
     exchange_oracle = "exchange_oracle"
     recording_oracle = "recording_oracle"
     reputation_oracle = "reputation_oracle"
 
 
-class OracleWebhookStatuses(str, Enum):
+class OracleWebhookStatuses(str, Enum, metaclass=BetterEnumMeta):
     pending = "pending"
     completed = "completed"
     failed = "failed"

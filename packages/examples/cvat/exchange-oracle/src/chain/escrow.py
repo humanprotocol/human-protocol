@@ -6,6 +6,7 @@ from human_protocol_sdk.encryption import Encryption, EncryptionUtils
 from human_protocol_sdk.escrow import EscrowData, EscrowUtils
 from human_protocol_sdk.storage import StorageUtils
 
+from src.chain.web3 import get_token_symbol
 from src.core.config import Config
 from src.core.types import OracleWebhookTypes
 from src.services.cache import Cache
@@ -47,7 +48,7 @@ def validate_escrow(
 def download_manifest(chain_id: int, escrow_address: str) -> dict:
     escrow = get_escrow(chain_id, escrow_address)
 
-    manifest_content = StorageUtils.download_file_from_url(escrow.manifest_url).decode("utf-8")
+    manifest_content = StorageUtils.download_file_from_url(escrow.manifest).decode("utf-8")
 
     if EncryptionUtils.is_encrypted(manifest_content):
         encryption = Encryption(
@@ -77,3 +78,14 @@ def get_available_webhook_types(
         (escrow.recording_oracle or "").lower(): OracleWebhookTypes.recording_oracle,
         (escrow.reputation_oracle or "").lower(): OracleWebhookTypes.reputation_oracle,
     }
+
+
+def get_escrow_fund_token_symbol(chain_id: int, escrow_address: str) -> str:
+    escrow = get_escrow(chain_id, escrow_address)
+
+    cache = Cache()
+    return cache.get_or_set_token_symbol(
+        chain_id=chain_id,
+        token_address=escrow.token,
+        set_callback=partial(get_token_symbol, chain_id, escrow.token),
+    )

@@ -1,4 +1,5 @@
 import logging
+from contextlib import suppress
 
 from sqlalchemy.orm import Session
 
@@ -15,7 +16,30 @@ from src.db import SessionLocal
 from src.db import errors as db_errors
 from src.db.utils import ForUpdateParams
 from src.handlers.completed_escrows import handle_escrows_validations
+from src.handlers.cvat_events import cvat_webhook_handler
 from src.utils.logging import format_sequence
+from src.utils.time import utcnow
+
+
+@cron_job
+def process_incoming_cvat_webhooks(logger: logging.Logger, session: Session) -> None:
+    webhooks = cvat_service.incoming_webhooks.get_pending_webhooks(
+        session=session,
+        limit=CronConfig.process_cvat_webhooks_chunk_size,
+        for_update=ForUpdateParams(skip_locked=True),
+    )
+
+    for webhook in webhooks:
+        try:
+            with session.begin_nested():
+                cvat_webhook_handler(webhook, session)
+                cvat_service.incoming_webhooks.handle_webhook_success(
+                    session, webhook_id=webhook.id
+                )
+        except Exception as e:
+            with session.begin_nested():
+                logger.exception(e)
+                cvat_service.incoming_webhooks.handle_webhook_fail(session, webhook_id=webhook.id)
 
 
 @cron_job
@@ -53,18 +77,51 @@ def track_assignments(logger: logging.Logger) -> None:
     4. If a project or task state is not "annotation", cancels assignments
     """
 
+    def _try_complete_assignment(
+        session: Session,
+        assignment: cvat_models.Assignment,
+    ) -> bool:
+        """
+        Checks if we haven't received a notification, but the job might have been completed.
+
+        Returns: assignment completed
+        """
+
+        latest_assignment = cvat_service.get_latest_assignment_by_cvat_job_id(
+            session, assignment.cvat_job_id
+        )
+        if not latest_assignment or latest_assignment.id != assignment.id:
+            return False
+
+        try:
+            cvat_job = cvat_api.get_job(assignment.cvat_job_id)
+        except cvat_api.exceptions.NotFoundException:
+            return False
+
+        if cvat_job.state != cvat_api.JobStatus.completed:
+            return False
+
+        if not cvat_job.assignee or cvat_job.assignee.id != latest_assignment.user.cvat_id:
+            return False
+
+        logger.info(f"Found completed job #{assignment.cvat_job_id}. Completing the assignment")
+        cvat_service.complete_assignment(session, assignment.id, completed_at=utcnow())
+        cvat_api.update_job_assignee(assignment.cvat_job_id, assignee_id=None)
+        cvat_service.update_job_status(session, assignment.job.id, status=JobStatuses.completed)
+        cvat_service.touch(session, cvat_models.Job, [assignment.job.id])
+        return True
+
     def _reset_job_after_assignment(session: Session, assignment: cvat_models.Assignment):
         latest_assignment = cvat_service.get_latest_assignment_by_cvat_job_id(
             session, assignment.cvat_job_id
         )
-        if latest_assignment.id == assignment.id:
+        if latest_assignment.id != assignment.id:
             # Avoid un-assigning if it's not the latest assignment
+            return
 
-            cvat_api.update_job_assignee(
-                assignment.cvat_job_id, assignee_id=None
-            )  # note that calling it in a loop can take too much time
-
-            cvat_service.update_job_status(session, assignment.job.id, status=JobStatuses.new)
+        cvat_api.update_job_assignee(assignment.cvat_job_id, assignee_id=None)
+        cvat_service.update_job_status(session, assignment.job.id, status=JobStatuses.new)
+        cvat_service.touch(session, cvat_models.Job, [assignment.job.id])
 
     with SessionLocal.begin() as session:
         assignments = cvat_service.get_unprocessed_expired_assignments(
@@ -74,18 +131,27 @@ def track_assignments(logger: logging.Logger) -> None:
         )
 
         for assignment in assignments:
-            logger.info(
-                "Expiring the unfinished assignment {} (user {}, job id {})".format(
-                    assignment.id,
-                    assignment.user_wallet_address,
-                    assignment.cvat_job_id,
+            with (
+                session.begin_nested(),
+                suppress(db_errors.LockNotAvailable),
+            ):
+                cvat_service.get_jobs_by_cvat_id(
+                    session,
+                    cvat_ids=[assignment.cvat_job_id],
+                    for_update=ForUpdateParams(nowait=True),
                 )
-            )
 
-            cvat_service.expire_assignment(session, assignment.id)
-            _reset_job_after_assignment(session, assignment)
+                if not _try_complete_assignment(session, assignment):
+                    logger.info(
+                        "Expiring the unfinished assignment {} (user {}, job id {})".format(
+                            assignment.id,
+                            assignment.user_wallet_address,
+                            assignment.cvat_job_id,
+                        )
+                    )
 
-        cvat_service.touch(session, cvat_models.Job, [a.job.id for a in assignments])
+                    cvat_service.expire_assignment(session, assignment.id)
+                    _reset_job_after_assignment(session, assignment)
 
     with SessionLocal.begin() as session:
         assignments = cvat_service.get_unprocessed_cancelled_assignments(
@@ -95,16 +161,24 @@ def track_assignments(logger: logging.Logger) -> None:
         )
 
         for assignment in assignments:
-            logger.info(
-                "Finalizing the canceled assignment {} (user {}, job id {})".format(
-                    assignment.id,
-                    assignment.user_wallet_address,
-                    assignment.cvat_job_id,
+            with (
+                session.begin_nested(),
+                suppress(db_errors.LockNotAvailable),
+            ):
+                cvat_service.get_jobs_by_cvat_id(
+                    session,
+                    cvat_ids=[assignment.cvat_job_id],
+                    for_update=ForUpdateParams(nowait=True),
                 )
-            )
-            _reset_job_after_assignment(session, assignment)
 
-        cvat_service.touch(session, cvat_models.Job, [a.job.id for a in assignments])
+                logger.info(
+                    "Finalizing the canceled assignment {} (user {}, job id {})".format(
+                        assignment.id,
+                        assignment.user_wallet_address,
+                        assignment.cvat_job_id,
+                    )
+                )
+                _reset_job_after_assignment(session, assignment)
 
     with SessionLocal.begin() as session:
         assignments = cvat_service.get_active_assignments(
@@ -115,19 +189,27 @@ def track_assignments(logger: logging.Logger) -> None:
 
         for assignment in assignments:
             if assignment.job.project.status != ProjectStatuses.annotation:
-                logger.warning(
-                    "Canceling the unfinished assignment {} (user {}, job id {}) - "
-                    "the project state is not annotation".format(
-                        assignment.id,
-                        assignment.user_wallet_address,
-                        assignment.cvat_job_id,
+                with (
+                    session.begin_nested(),
+                    suppress(db_errors.LockNotAvailable),
+                ):
+                    cvat_service.get_jobs_by_cvat_id(
+                        session,
+                        cvat_ids=[assignment.cvat_job_id],
+                        for_update=ForUpdateParams(nowait=True),
                     )
-                )
 
-                cvat_service.cancel_assignment(session, assignment.id)
-                _reset_job_after_assignment(session, assignment)
+                    logger.warning(
+                        "Canceling the unfinished assignment {} (user {}, job id {}) - "
+                        "the project state is not annotation".format(
+                            assignment.id,
+                            assignment.user_wallet_address,
+                            assignment.cvat_job_id,
+                        )
+                    )
 
-        cvat_service.touch(session, cvat_models.Job, [a.job.id for a in assignments])
+                    cvat_service.cancel_assignment(session, assignment.id)
+                    _reset_job_after_assignment(session, assignment)
 
 
 @cron_job

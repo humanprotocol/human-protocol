@@ -1,5 +1,4 @@
-import unittest
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 from human_protocol_sdk.constants import ChainId, Status
@@ -20,14 +19,16 @@ from tests.utils.constants import (
     FACTORY_ADDRESS,
     JOB_LAUNCHER_ADDRESS,
     RECORDING_ORACLE_ADDRESS,
+    REPUTATION_ORACLE_ADDRESS,
     TOKEN_ADDRESS,
 )
 
 escrow_address = ESCROW_ADDRESS
 
 
-class ServiceIntegrationTest(unittest.TestCase):
-    def setUp(self):
+class ServiceIntegrationTest:
+    @pytest.fixture(autouse=True)
+    def setup(self):
         self.w3 = Mock()
         self.w3.eth.chain_id = ChainId.LOCALHOST.value
         self.escrow_data = EscrowData(
@@ -43,59 +44,30 @@ class ServiceIntegrationTest(unittest.TestCase):
             token=TOKEN_ADDRESS,
             total_funded_amount=1000,
             created_at="",
-            manifest_url=DEFAULT_MANIFEST_URL,
             recording_oracle=RECORDING_ORACLE_ADDRESS,
+            reputation_oracle=REPUTATION_ORACLE_ADDRESS,
         )
 
-    def test_get_job_launcher_url(self):
+    @pytest.mark.parametrize(
+        "get_url", [get_reputation_oracle_url, get_job_launcher_url, get_recording_oracle_url]
+    )
+    def test_get_oracle_url(self, get_url):
         with (
             patch("src.chain.kvstore.get_escrow") as mock_escrow,
-            patch("src.chain.kvstore.OperatorUtils.get_operator") as mock_operator,
+            patch("src.chain.kvstore.get_web3", return_value=self.w3),
+            patch("src.chain.kvstore.KVStoreClient.get") as mock_kvstore_get,
         ):
             mock_escrow.return_value = self.escrow_data
-            mock_operator.return_value = MagicMock(webhook_url=DEFAULT_MANIFEST_URL)
-            recording_url = get_job_launcher_url(self.w3.eth.chain_id, escrow_address)
-            assert recording_url == DEFAULT_MANIFEST_URL
+            mock_kvstore_get.return_value = DEFAULT_MANIFEST_URL
+            actual_url = get_url(self.w3.eth.chain_id, escrow_address)
+            assert actual_url == DEFAULT_MANIFEST_URL
 
-    def test_get_job_launcher_url_invalid_escrow(self):
+    @pytest.mark.parametrize(
+        "get_url", [get_reputation_oracle_url, get_job_launcher_url, get_recording_oracle_url]
+    )
+    def test_get_oracle_url_invalid_escrow(self, get_url):
         with pytest.raises(EscrowClientError, match="Invalid escrow address: invalid_address"):
-            get_job_launcher_url(self.w3.eth.chain_id, "invalid_address")
-
-    def test_get_job_launcher_url_invalid_recording_address(self):
-        with (
-            patch("src.chain.kvstore.get_escrow") as mock_escrow,
-            patch("src.chain.kvstore.OperatorUtils.get_operator") as mock_operator,
-        ):
-            mock_escrow.return_value = self.escrow_data
-            mock_operator.return_value = MagicMock(webhook_url="")
-            recording_url = get_job_launcher_url(self.w3.eth.chain_id, escrow_address)
-            assert recording_url == ""
-
-    def test_get_recording_oracle_url(self):
-        with (
-            patch("src.chain.kvstore.get_escrow") as mock_escrow,
-            patch("src.chain.kvstore.OperatorUtils.get_operator") as mock_operator,
-        ):
-            self.escrow_data.recording_oracle = RECORDING_ORACLE_ADDRESS
-            mock_escrow.return_value = self.escrow_data
-            mock_operator.return_value = MagicMock(webhook_url=DEFAULT_MANIFEST_URL)
-            recording_url = get_recording_oracle_url(self.w3.eth.chain_id, escrow_address)
-            assert recording_url == DEFAULT_MANIFEST_URL
-
-    def test_get_recording_oracle_url_invalid_escrow(self):
-        with pytest.raises(EscrowClientError, match="Invalid escrow address: invalid_address"):
-            get_recording_oracle_url(self.w3.eth.chain_id, "invalid_address")
-
-    def test_get_recording_oracle_url_invalid_recording_address(self):
-        with (
-            patch("src.chain.kvstore.get_escrow") as mock_escrow,
-            patch("src.chain.kvstore.OperatorUtils.get_operator") as mock_operator,
-        ):
-            self.escrow_data.recording_oracle = RECORDING_ORACLE_ADDRESS
-            mock_escrow.return_value = self.escrow_data
-            mock_operator.return_value = MagicMock(webhook_url="")
-            recording_url = get_recording_oracle_url(self.w3.eth.chain_id, escrow_address)
-            assert recording_url == ""
+            get_url(self.w3.eth.chain_id, "invalid_address")
 
     def test_store_public_key(self):
         PGP_PUBLIC_KEY_URL_1 = "http://pgp-public-key-url-1"
@@ -199,25 +171,3 @@ class ServiceIntegrationTest(unittest.TestCase):
                     )
                     == PGP_PUBLIC_KEY_URL_2
                 )
-
-    def test_get_reputation_oracle_url_config_url(self):
-        with patch(
-            "src.chain.kvstore.Config.localhost.reputation_oracle_url", DEFAULT_MANIFEST_URL
-        ):
-            reputation_url = get_reputation_oracle_url(self.w3.eth.chain_id, escrow_address)
-            assert reputation_url == DEFAULT_MANIFEST_URL
-
-    def test_get_reputation_oracle_url_from_escrow(self):
-        with (
-            patch("src.chain.kvstore.get_escrow") as mock_escrow,
-            patch("src.chain.kvstore.OperatorUtils.get_operator") as mock_operator,
-            patch("src.chain.kvstore.Config.localhost.reputation_oracle_url", None),
-        ):
-            mock_escrow.return_value = self.escrow_data
-            mock_operator.return_value = MagicMock(webhook_url=DEFAULT_MANIFEST_URL)
-            reputation_url = get_reputation_oracle_url(self.w3.eth.chain_id, escrow_address)
-            assert reputation_url == DEFAULT_MANIFEST_URL
-
-    def test_get_reputation_oracle_url_invalid_escrow(self):
-        with pytest.raises(EscrowClientError, match="Invalid escrow address: invalid address"):
-            get_reputation_oracle_url(self.w3.eth.chain_id, "invalid address")

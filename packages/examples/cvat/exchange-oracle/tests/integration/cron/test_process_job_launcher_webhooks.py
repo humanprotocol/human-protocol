@@ -3,13 +3,14 @@ import unittest
 import uuid
 from unittest.mock import MagicMock, Mock, call, patch
 
-from human_protocol_sdk.constants import ChainId, Status
+from human_protocol_sdk.constants import Status
 from sqlalchemy.sql import select
 
 from src.core.storage import compose_data_bucket_prefix, compose_results_bucket_prefix
 from src.core.types import (
     ExchangeOracleEventTypes,
     JobLauncherEventTypes,
+    JobStatuses,
     Networks,
     OracleWebhookStatuses,
     OracleWebhookTypes,
@@ -23,15 +24,17 @@ from src.crons.webhooks.job_launcher import (
 )
 from src.cvat.api_calls import RequestStatus
 from src.db import SessionLocal
-from src.models.cvat import EscrowCreation, Image, Project
+from src.models.cvat import CvatWebhook, EscrowCreation, Image, Project
 from src.models.webhook import Webhook
+from src.services import cvat as cvat_service
 from src.services.cloud import StorageClient
 from src.services.webhook import OracleWebhookDirectionTags
 
-from tests.utils.constants import DEFAULT_MANIFEST_URL, JOB_LAUNCHER_ADDRESS
+from tests.utils.constants import DEFAULT_MANIFEST_URL, ESCROW_ADDRESS
 from tests.utils.dataset_helpers import build_gt_dataset
+from tests.utils.db_helper import create_project_task_and_job
 
-escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
+escrow_address = ESCROW_ADDRESS
 chain_id = Networks.localhost.value
 
 
@@ -288,17 +291,12 @@ class ServiceIntegrationTest(unittest.TestCase):
         assert db_project is None
 
     def test_process_incoming_job_launcher_webhooks_escrow_canceled_type(self):
-        project_id = str(uuid.uuid4())
-        cvat_project = Project(
-            id=project_id,
-            cvat_id=1,
-            cvat_cloudstorage_id=1,
-            status=ProjectStatuses.completed.value,
-            job_type=TaskTypes.image_label_binary.value,
-            escrow_address=escrow_address,
-            chain_id=Networks.localhost.value,
-            bucket_url="https://test.storage.googleapis.com/",
+        cvat_project, cvat_task, cvat_job = create_project_task_and_job(
+            self.session, escrow_address, 1
         )
+        cvat_project.status = ProjectStatuses.annotation
+        cvat_task.status = TaskStatuses.annotation
+        cvat_job.status = JobStatuses.in_progress
         self.session.add(cvat_project)
 
         project_images = [
@@ -311,19 +309,28 @@ class ServiceIntegrationTest(unittest.TestCase):
         ]
         self.session.add_all(project_images)
 
-        webhok_id = str(uuid.uuid4())
+        webhook_id = str(uuid.uuid4())
         webhook = Webhook(
-            id=webhok_id,
+            id=webhook_id,
             signature="signature",
             escrow_address=escrow_address,
             chain_id=chain_id,
-            type=OracleWebhookTypes.job_launcher.value,
-            status=OracleWebhookStatuses.pending.value,
-            event_type=JobLauncherEventTypes.escrow_canceled.value,
+            type=OracleWebhookTypes.job_launcher,
+            status=OracleWebhookStatuses.pending,
+            event_type=JobLauncherEventTypes.escrow_canceled,
             direction=OracleWebhookDirectionTags.incoming,
         )
 
         self.session.add(webhook)
+
+        cvat_service.incoming_webhooks.create_webhook(
+            self.session,
+            event_type="update:job",
+            event_data={},
+            cvat_project_id=cvat_project.cvat_id,
+            cvat_task_id=cvat_task.cvat_id,
+            cvat_job_id=cvat_job.cvat_id,
+        )
         self.session.commit()
 
         from src.services.cvat import remove_escrow_images as original_remove_escrow_images
@@ -344,20 +351,28 @@ class ServiceIntegrationTest(unittest.TestCase):
             mock_escrow.return_value = mock_escrow_data
 
             process_incoming_job_launcher_webhooks()
+            self.session.commit()
 
-        updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
-        )
+        updated_webhook = self.session.get(Webhook, webhook_id)
 
-        assert updated_webhook.status == OracleWebhookStatuses.completed.value
+        assert updated_webhook.status == OracleWebhookStatuses.completed
         assert updated_webhook.attempts == 1
+
         db_project = (
             self.session.query(Project)
             .filter_by(escrow_address=escrow_address, chain_id=chain_id)
             .first()
         )
+        assert db_project.status == ProjectStatuses.canceled
 
-        assert db_project.status == ProjectStatuses.canceled.value
+        db_cvat_webhooks = self.session.execute(
+            select(CvatWebhook).where(
+                CvatWebhook.project.has(
+                    (Project.escrow_address == escrow_address) & (Project.chain_id == chain_id)
+                )
+            )
+        ).all()
+        assert not db_cvat_webhooks
 
         assert mock_storage_client.remove_files.mock_calls == [
             call(prefix=compose_data_bucket_prefix(escrow_address, chain_id)),
@@ -614,17 +629,14 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         self.session.add(webhook)
         self.session.commit()
+
         with (
-            patch("src.chain.kvstore.get_escrow") as mock_escrow,
-            patch("src.chain.kvstore.OperatorUtils.get_operator") as mock_operator,
+            patch(
+                "src.crons.webhooks.job_launcher.get_job_launcher_url",
+                return_value=DEFAULT_MANIFEST_URL,
+            ),
             patch("httpx.Client.post") as mock_httpx_post,
         ):
-            w3 = Mock()
-            w3.eth.chain_id = ChainId.LOCALHOST.value
-            mock_escrow_data = Mock()
-            mock_escrow_data.launcher = JOB_LAUNCHER_ADDRESS
-            mock_escrow.return_value = mock_escrow_data
-            mock_operator.return_value = MagicMock(webhook_url=DEFAULT_MANIFEST_URL)
             mock_response = MagicMock()
             mock_response.raise_for_status.return_value = None
             mock_httpx_post.return_value = mock_response
