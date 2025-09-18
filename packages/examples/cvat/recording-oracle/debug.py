@@ -45,7 +45,7 @@ def _mock_get_manifests_from_minio(logger: Logger) -> Generator[None, None, None
         elif len(candidate_files) != 1:
             raise Exception(
                 "Can't select local manifest to be used for escrow '{}'"
-                " - several manifests math: {}".format(
+                " - several manifests match: {}".format(
                     escrow_address, format_sequence(candidate_files)
                 )
             )
