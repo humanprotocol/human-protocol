@@ -86,6 +86,37 @@ describe('BaseEscrowResultsProcessor', () => {
       ).rejects.toThrow(testError);
     });
 
+    it('should throw if escrow is not found', async () => {
+      const chainId = generateTestnetChainId();
+      const escrowAddress = faker.finance.ethereumAddress();
+
+      const baseResultsUrl = faker.internet.url();
+      mockedGetIntermediateResultsUrl.mockResolvedValueOnce(baseResultsUrl);
+
+      const resultsUrl = `${baseResultsUrl}/${faker.system.fileName()}`;
+      processor.constructIntermediateResultsUrl.mockReturnValueOnce(resultsUrl);
+
+      const resultsFileContent = Buffer.from(faker.lorem.sentence());
+      mockedStorageService.downloadFile.mockResolvedValueOnce(
+        resultsFileContent,
+      );
+
+      processor.assertResultsComplete.mockResolvedValueOnce(undefined);
+
+      mockedEscrowUtils.getEscrow.mockResolvedValueOnce(
+        null as unknown as IEscrow,
+      );
+
+      await expect(
+        processor.storeResults(chainId, escrowAddress, {} as JobManifest),
+      ).rejects.toThrow('Escrow not found');
+
+      expect(mockedGetIntermediateResultsUrl).toHaveBeenCalledWith(
+        escrowAddress,
+      );
+      expect(mockedStorageService.uploadData).toHaveBeenCalledTimes(0);
+    });
+
     it('should store results as per workflow', async () => {
       /** ARRANGE */
       const chainId = generateTestnetChainId();
