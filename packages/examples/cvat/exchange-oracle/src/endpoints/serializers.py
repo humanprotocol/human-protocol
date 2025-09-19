@@ -63,7 +63,7 @@ def serialize_job(
             reward_token=reward_token,
             created_at=project.created_at,
             updated_at=project.updated_at,
-            qualifications=manifest.qualifications,
+            qualifications=manifest.annotation.qualifications,
         )
 
 
