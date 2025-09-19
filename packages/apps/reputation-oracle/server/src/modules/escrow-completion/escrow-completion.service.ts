@@ -128,6 +128,10 @@ export class EscrowCompletionService {
             escrowCompletionEntity.chainId,
             escrowCompletionEntity.escrowAddress,
           );
+          if (!escrowData) {
+            throw new Error('Escrow data is missing');
+          }
+
           const manifest =
             await this.storageService.downloadJsonLikeData<JobManifest>(
               escrowData.manifest as string,
@@ -236,6 +240,10 @@ export class EscrowCompletionService {
         }
 
         const escrowData = await EscrowUtils.getEscrow(chainId, escrowAddress);
+        if (!escrowData) {
+          throw new Error('Escrow data is missing');
+        }
+        console.log(escrowData);
 
         const oracleAddresses: string[] = [
           escrowData.launcher as string,

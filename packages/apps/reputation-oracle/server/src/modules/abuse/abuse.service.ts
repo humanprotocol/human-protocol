@@ -104,15 +104,23 @@ export class AbuseService {
         abuseEntity.chainId,
         abuseEntity.escrowAddress,
       );
-      const maxAmount = Number(
-        (await OperatorUtils.getOperator(abuseEntity.chainId, escrow.launcher))
-          .amountStaked,
+      if (!escrow) {
+        this.logger.error('Escrow data not found', { abuseId });
+        throw new Error(`Escrow data is missing. Abuse id: ${abuseId}`);
+      }
+      const operator = await OperatorUtils.getOperator(
+        abuseEntity.chainId,
+        escrow.launcher,
       );
+      if (!operator) {
+        this.logger.error('Operator data not found', { abuseId });
+        throw new Error(`Operator data is missing. Abuse id: ${abuseId}`);
+      }
       await this.abuseSlackBot.triggerAbuseReportModal({
         abuseId: abuseEntity.id,
         escrowAddress: abuseEntity.escrowAddress,
         chainId: abuseEntity.chainId,
-        maxAmount: maxAmount,
+        maxAmount: Number(operator.amountStaked),
         triggerId: data.trigger_id,
         responseUrl: data.response_url,
       });
@@ -168,12 +176,20 @@ export class AbuseService {
           abuseEntity.chainId,
           abuseEntity.escrowAddress,
         );
-        const webhookUrl = (
-          await OperatorUtils.getOperator(
-            abuseEntity.chainId,
-            escrow.exchangeOracle as string,
-          )
-        ).webhookUrl as string;
+        if (!escrow) {
+          throw new Error(
+            `Escrow data is missing. Abuse id: ${abuseEntity.id}`,
+          );
+        }
+        const operator = await OperatorUtils.getOperator(
+          abuseEntity.chainId,
+          escrow.exchangeOracle as string,
+        );
+        if (!operator || !operator.webhookUrl) {
+          throw new Error(
+            `Operator data is missing. Abuse id: ${abuseEntity.id}`,
+          );
+        }
 
         const webhookPayload = {
           chainId: abuseEntity.chainId,
@@ -184,7 +200,7 @@ export class AbuseService {
         try {
           await this.outgoingWebhookService.createOutgoingWebhook(
             webhookPayload,
-            webhookUrl,
+            operator.webhookUrl,
           );
         } catch (error) {
           if (!isDuplicatedError(error)) {
@@ -207,7 +223,7 @@ export class AbuseService {
         abuseEntity.status = AbuseStatus.NOTIFIED;
         await this.abuseRepository.updateOne(abuseEntity);
       } catch (err) {
-        this.logger.error(`Error sending abuse: ${err.message}`);
+        this.logger.error(`Error sending abuse`, { err });
         await this.handleAbuseError(abuseEntity);
       }
     }
@@ -225,18 +241,30 @@ export class AbuseService {
           abuseEntity.chainId,
           abuseEntity.escrowAddress,
         );
+        if (!escrow) {
+          throw new Error(
+            `Escrow data is missing. Abuse id: ${abuseEntity.id}`,
+          );
+        }
 
         if (abuseEntity.decision === AbuseDecision.ACCEPTED) {
           await this.slashAccount({
             slasher: abuseEntity?.user?.evmAddress as string,
             staker: escrow.launcher,
-            chainId: abuseEntity.chainId,
-            escrowAddress: abuseEntity.escrowAddress,
+            chainId: chainId,
+            escrowAddress: escrowAddress,
             amount: Number(abuseEntity.amount),
           });
-          const webhookUrl = (
-            await OperatorUtils.getOperator(chainId, escrow.launcher)
-          ).webhookUrl as string;
+          const operator = await OperatorUtils.getOperator(
+            chainId,
+            escrow.launcher,
+          );
+          if (!operator || !operator.webhookUrl) {
+            throw new Error(
+              `Operator data is missing. Abuse id: ${abuseEntity.id}`,
+            );
+          }
+
           const webhookPayload = {
             chainId,
             escrowAddress,
@@ -246,7 +274,7 @@ export class AbuseService {
           try {
             await this.outgoingWebhookService.createOutgoingWebhook(
               webhookPayload,
-              webhookUrl,
+              operator.webhookUrl,
             );
           } catch (error) {
             if (!isDuplicatedError(error)) {
@@ -268,17 +296,20 @@ export class AbuseService {
             escrowAddress: escrowAddress,
             eventType: OutgoingWebhookEventType.ABUSE_DISMISSED,
           };
-          const webhookUrl = (
-            await OperatorUtils.getOperator(
-              chainId,
-              escrow.exchangeOracle as string,
-            )
-          ).webhookUrl as string;
+          const operator = await OperatorUtils.getOperator(
+            chainId,
+            escrow.exchangeOracle as string,
+          );
+          if (!operator || !operator.webhookUrl) {
+            throw new Error(
+              `Operator data is missing. Abuse id: ${abuseEntity.id}`,
+            );
+          }
 
           try {
             await this.outgoingWebhookService.createOutgoingWebhook(
               webhookPayload,
-              webhookUrl,
+              operator.webhookUrl,
             );
           } catch (error) {
             if (!isDuplicatedError(error)) {

@@ -13,7 +13,7 @@ export class WorkerUtils {
    *
    * @param {ChainId} chainId The chain ID.
    * @param {string} address The worker address.
-   * @returns {Promise<IWorker>} Returns the worker details.
+   * @returns {Promise<IWorker | null>} - Returns the worker details or null if not found.
    *
    * **Code example**
    *

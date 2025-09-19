@@ -10,7 +10,7 @@ import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { HEADER_SIGNATURE_KEY } from '../../common/constant';
 import { ErrorWebhook } from '../../common/constant/errors';
 import { EventType, WebhookStatus } from '../../common/enums/webhook';
-import { ValidationError } from '../../common/errors';
+import { NotFoundError, ValidationError } from '../../common/errors';
 import { CaseConverter } from '../../common/utils/case-converter';
 import { formatAxiosError } from '../../common/utils/http';
 import { signMessage } from '../../common/utils/signature';
@@ -178,6 +178,9 @@ export class WebhookService {
         throw new ValidationError('Invalid outgoing event type');
     }
     const oracle = await OperatorUtils.getOperator(chainId, oracleAddress);
+    if (!oracle) {
+      throw new NotFoundError('Oracle not found');
+    }
     const oracleWebhookUrl = oracle.webhookUrl;
 
     return oracleWebhookUrl;

@@ -1783,7 +1783,7 @@ export class EscrowUtils {
    *
    * @param {ChainId} chainId Network in which the escrow has been deployed
    * @param {string} escrowAddress Address of the escrow
-   * @returns {IEscrow} Escrow data
+   * @returns {Promise<IEscrow | null>} - Escrow data or null if not found.
    *
    * **Code example**
    *
@@ -1796,7 +1796,7 @@ export class EscrowUtils {
   public static async getEscrow(
     chainId: ChainId,
     escrowAddress: string
-  ): Promise<IEscrow> {
+  ): Promise<IEscrow | null> {
     const networkData = NETWORKS[chainId];
 
     if (!networkData) {

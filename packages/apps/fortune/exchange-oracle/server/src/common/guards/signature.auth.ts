@@ -42,16 +42,25 @@ export class SignatureAuthGuard implements CanActivate {
         data.escrow_address,
       );
 
-      if (roles.includes(AuthSignatureRole.JobLauncher)) {
+      if (
+        roles.includes(AuthSignatureRole.JobLauncher) &&
+        escrowData?.launcher?.length
+      ) {
         oracleAdresses.push(escrowData.launcher);
       }
 
-      if (roles.includes(AuthSignatureRole.Recording)) {
-        oracleAdresses.push(escrowData.recordingOracle!);
+      if (
+        roles.includes(AuthSignatureRole.Recording) &&
+        escrowData?.recordingOracle?.length
+      ) {
+        oracleAdresses.push(escrowData.recordingOracle);
       }
 
-      if (roles.includes(AuthSignatureRole.Reputation)) {
-        oracleAdresses.push(escrowData.reputationOracle!);
+      if (
+        roles.includes(AuthSignatureRole.Reputation) &&
+        escrowData?.reputationOracle?.length
+      ) {
+        oracleAdresses.push(escrowData.reputationOracle);
       }
     }
 

@@ -6,7 +6,7 @@
 
 # Interface: IKVStore
 
-Defined in: [interfaces.ts:136](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L136)
+Defined in: [interfaces.ts:136](https://github.com/humanprotocol/human-protocol/blob/e2535128eb5f5be411c1a30e3ae041b00d889adf/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L136)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [interfaces.ts:136](https://github.com/humanprotocol/human-protocol/
 
 > **key**: `string`
 
-Defined in: [interfaces.ts:137](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L137)
+Defined in: [interfaces.ts:137](https://github.com/humanprotocol/human-protocol/blob/e2535128eb5f5be411c1a30e3ae041b00d889adf/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L137)
 
 ***
 
@@ -22,4 +22,4 @@ Defined in: [interfaces.ts:137](https://github.com/humanprotocol/human-protocol/
 
 > **value**: `string`
 
-Defined in: [interfaces.ts:138](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L138)
+Defined in: [interfaces.ts:138](https://github.com/humanprotocol/human-protocol/blob/e2535128eb5f5be411c1a30e3ae041b00d889adf/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L138)

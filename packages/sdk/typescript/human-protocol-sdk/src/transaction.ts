@@ -37,7 +37,7 @@ export class TransactionUtils {
    *
    * @param {ChainId} chainId The chain ID.
    * @param {string} hash The transaction hash.
-   * @returns {Promise<ITransaction>} Returns the transaction details.
+   * @returns {Promise<ITransaction | null>} - Returns the transaction details or null if not found.
    *
    * **Code example**
    *
@@ -50,7 +50,7 @@ export class TransactionUtils {
   public static async getTransaction(
     chainId: ChainId,
     hash: string
-  ): Promise<ITransaction> {
+  ): Promise<ITransaction | null> {
     if (!ethers.isHexString(hash)) {
       throw ErrorInvalidHashProvided;
     }

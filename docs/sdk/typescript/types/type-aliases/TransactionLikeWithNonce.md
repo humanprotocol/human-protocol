@@ -8,7 +8,7 @@
 
 > **TransactionLikeWithNonce** = `TransactionLike` & `object`
 
-Defined in: [types.ts:200](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L200)
+Defined in: [types.ts:200](https://github.com/humanprotocol/human-protocol/blob/e2535128eb5f5be411c1a30e3ae041b00d889adf/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L200)
 
 ## Type declaration
 
