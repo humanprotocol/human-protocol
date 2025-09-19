@@ -32,14 +32,20 @@ def _mock_get_manifests_from_minio(logger: Logger) -> Generator[None, None, None
         logger.debug(f"DEV: Local manifests: {format_sequence(minio_manifests)}")
 
         candidate_files = [
-            fn for fn in minio_manifests if PurePosixPath(fn).name == f"{escrow_address}.json"
+            fn
+            for fn in minio_manifests
+            if (
+                "/" in escrow_address
+                and fn == f"{escrow_address}.json"
+                or PurePosixPath(fn).name == f"{escrow_address}.json"
+            )
         ]
         if not candidate_files:
             return original_get_escrow(ChainId(chain_id), escrow_address)
         if len(candidate_files) != 1:
             raise Exception(
                 f"Can't select local manifest to be used for escrow '{escrow_address}'"
-                f" - several manifests math: {format_sequence(candidate_files)}"
+                f" - several manifests match: {format_sequence(candidate_files)}"
             )
 
         manifest_file = candidate_files[0]
@@ -56,7 +62,7 @@ def _mock_get_manifests_from_minio(logger: Logger) -> Generator[None, None, None
             token="HMT",  # noqa: S106
             total_funded_amount=10,
             created_at=datetime.datetime(2023, 1, 1, tzinfo=datetime.timezone.utc),
-            manifest_url=(f"http://{Config.storage_config.endpoint_url}/manifests/{manifest_file}"),
+            manifest=(f"http://{Config.storage_config.endpoint_url}/manifests/{manifest_file}"),
         )
 
         logger.info(f"DEV: Using local manifest '{manifest_file}' for escrow '{escrow_address}'")

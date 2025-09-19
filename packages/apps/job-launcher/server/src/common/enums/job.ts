@@ -455,5 +455,6 @@ export enum WorkerBrowser {
 export enum EscrowFundToken {
   HMT = 'hmt',
   USDT = 'usdt',
+  USDT0 = 'usdt0',
   USDC = 'usdc',
 }

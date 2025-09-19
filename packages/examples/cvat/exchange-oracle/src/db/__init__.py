@@ -1,6 +1,5 @@
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, Any, ClassVar, Generic, TypeVar
-from uuid import uuid4
 
 import sqlalchemy
 from psycopg2.errors import Error

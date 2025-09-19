@@ -49,7 +49,7 @@ export const TOKEN_ADDRESSES: {
       address: NETWORKS[ChainId.POLYGON]!.hmtAddress,
       decimals: 18,
     },
-    [EscrowFundToken.USDT]: {
+    [EscrowFundToken.USDT0]: {
       address: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
       decimals: 6,
     },

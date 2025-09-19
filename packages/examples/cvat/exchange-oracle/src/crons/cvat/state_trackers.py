@@ -1,5 +1,4 @@
 import logging
-from contextlib import suppress
 
 from sqlalchemy.orm import Session
 
@@ -31,7 +30,7 @@ def process_incoming_cvat_webhooks(logger: logging.Logger, session: Session) -> 
 
     for webhook in webhooks:
         try:
-            with session.begin_nested():
+            with session.begin_nested(), db.suppress(db_errors.LockNotAvailable):
                 cvat_webhook_handler(webhook, session)
                 cvat_service.incoming_webhooks.handle_webhook_success(
                     session, webhook_id=webhook.id
@@ -131,10 +130,7 @@ def track_assignments(logger: logging.Logger) -> None:
         )
 
         for assignment in assignments:
-            with (
-                session.begin_nested(),
-                suppress(db_errors.LockNotAvailable),
-            ):
+            with session.begin_nested(), db.suppress(db_errors.LockNotAvailable):
                 cvat_service.get_jobs_by_cvat_id(
                     session,
                     cvat_ids=[assignment.cvat_job_id],
@@ -161,10 +157,7 @@ def track_assignments(logger: logging.Logger) -> None:
         )
 
         for assignment in assignments:
-            with (
-                session.begin_nested(),
-                suppress(db_errors.LockNotAvailable),
-            ):
+            with session.begin_nested(), db.suppress(db_errors.LockNotAvailable):
                 cvat_service.get_jobs_by_cvat_id(
                     session,
                     cvat_ids=[assignment.cvat_job_id],
@@ -189,10 +182,7 @@ def track_assignments(logger: logging.Logger) -> None:
 
         for assignment in assignments:
             if assignment.job.project.status != ProjectStatuses.annotation:
-                with (
-                    session.begin_nested(),
-                    suppress(db_errors.LockNotAvailable),
-                ):
+                with session.begin_nested(), db.suppress(db_errors.LockNotAvailable):
                     cvat_service.get_jobs_by_cvat_id(
                         session,
                         cvat_ids=[assignment.cvat_job_id],
