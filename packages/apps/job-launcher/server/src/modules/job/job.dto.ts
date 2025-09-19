@@ -57,6 +57,7 @@ export class JobDto {
 
   @ApiPropertyOptional({
     type: String,
+    name: 'reputation_oracle',
     description: 'Address of the reputation oracle',
   })
   @IsEthereumAddress()
@@ -65,6 +66,7 @@ export class JobDto {
 
   @ApiPropertyOptional({
     type: String,
+    name: 'exchange_oracle',
     description: 'Address of the exchange oracle',
   })
   @IsEthereumAddress()
@@ -73,6 +75,7 @@ export class JobDto {
 
   @ApiPropertyOptional({
     type: String,
+    name: 'recording_oracle',
     description: 'Address of the recording oracle',
   })
   @IsEthereumAddress()
@@ -154,16 +157,22 @@ export class StorageDataDto {
 export class CvatDataDto {
   @ApiProperty()
   @IsObject()
+  @ValidateNested()
+  @Type(() => StorageDataDto)
   public dataset: StorageDataDto;
 
   @ApiPropertyOptional()
   @IsObject()
   @IsOptional()
+  @ValidateNested()
+  @Type(() => StorageDataDto)
   public points?: StorageDataDto;
 
   @ApiPropertyOptional()
   @IsObject()
   @IsOptional()
+  @ValidateNested()
+  @Type(() => StorageDataDto)
   public boxes?: StorageDataDto;
 }
 
@@ -175,11 +184,15 @@ export class JobCvatDto extends JobDto {
 
   @ApiProperty()
   @IsObject()
+  @ValidateNested()
+  @Type(() => CvatDataDto)
   public data: CvatDataDto;
 
   @ApiProperty({ type: [Label] })
   @IsArray()
   @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(() => Label)
   public labels: Label[];
 
   @ApiProperty({ name: 'min_quality' })
@@ -190,6 +203,8 @@ export class JobCvatDto extends JobDto {
 
   @ApiProperty({ name: 'ground_truth' })
   @IsObject()
+  @ValidateNested()
+  @Type(() => StorageDataDto)
   public groundTruth: StorageDataDto;
 
   @ApiProperty({ name: 'user_guide' })
@@ -211,6 +226,8 @@ class AudinoLabel {
 class AudinoDataDto {
   @ApiProperty()
   @IsObject()
+  @ValidateNested()
+  @Type(() => StorageDataDto)
   public dataset: StorageDataDto;
 }
 
@@ -222,6 +239,8 @@ export class JobAudinoDto extends JobDto {
 
   @ApiProperty()
   @IsObject()
+  @ValidateNested()
+  @Type(() => AudinoDataDto)
   public data: AudinoDataDto;
 
   @ApiProperty({ type: [AudinoLabel] })
@@ -328,10 +347,14 @@ class CommonDetails {
 export class JobDetailsDto {
   @ApiProperty({ description: 'Details of the job' })
   @IsNotEmpty()
+  @ValidateNested()
+  @Type(() => CommonDetails)
   public details: CommonDetails;
 
   @ApiProperty({ description: 'Manifest details' })
   @IsNotEmpty()
+  @ValidateNested()
+  @Type(() => ManifestDetails)
   public manifest: ManifestDetails;
 }
 
@@ -475,6 +498,8 @@ class JobCaptchaAnnotationsDto {
 export class JobCaptchaDto extends JobDto {
   @ApiProperty()
   @IsObject()
+  @ValidateNested()
+  @Type(() => StorageDataDto)
   data: StorageDataDto;
 
   @ApiProperty({ name: 'accuracy_target' })
