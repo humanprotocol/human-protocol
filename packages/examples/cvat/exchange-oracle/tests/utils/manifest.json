@@ -8,13 +8,13 @@
     "user_guide": "https://test.storage.googleapis.com",
     "type": "image_boxes",
     "job_size": 10,
-    "max_time": 300
+    "max_time": 300,
+    "qualifications": []
   },
   "validation": {
     "min_quality": 0.8,
     "val_size": 2,
     "gt_url": "https://test.storage.googleapis.com"
   },
-  "job_bounty": "5.001123929619726",
-  "qualifications": []
+  "job_bounty": "5.001123929619726"
 }

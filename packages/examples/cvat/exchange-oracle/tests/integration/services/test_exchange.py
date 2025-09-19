@@ -215,7 +215,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
         ):
             manifest = json.load(data)
-            manifest["qualifications"] = ["random_qualification"]
+            manifest["annotation"]["qualifications"] = ["random_qualification"]
             mock_get_manifest.return_value = manifest
             with pytest.raises(Exception, match="User doesn't have required qualifications."):
                 create_assignment(ESCROW_ADDRESS, Networks.localhost, user_address, [])
@@ -244,7 +244,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             patch("src.services.exchange.cvat_api"),
         ):
             manifest = json.load(data)
-            manifest["qualifications"] = ["test", "test2"]
+            manifest["annotation"]["qualifications"] = ["test", "test2"]
             mock_get_manifest.return_value = manifest
             assignment_id = create_assignment(
                 cvat_project.escrow_address,
