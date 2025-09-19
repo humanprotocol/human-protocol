@@ -38,7 +38,7 @@ def create_assignment(
 
         manifest = parse_manifest(get_escrow_manifest(chain_id, escrow_address))
 
-        if not all(q in qualifications for q in manifest.qualifications):
+        if not all(q in qualifications for q in manifest.annotation.qualifications):
             raise UserQualificationError
 
         if cvat_service.has_active_user_assignments(
