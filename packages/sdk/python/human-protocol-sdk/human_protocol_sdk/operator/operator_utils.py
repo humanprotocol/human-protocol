@@ -48,7 +48,7 @@ class OperatorFilter:
         self,
         chain_id: ChainId,
         roles: Optional[str] = [],
-        min_amount_staked: int = None,
+        min_staked_amount: int = None,
         order_by: Optional[str] = None,
         order_direction: OrderDirection = OrderDirection.DESC,
         first: int = 10,
@@ -59,7 +59,7 @@ class OperatorFilter:
 
         :param chain_id: Chain ID to request data
         :param roles: Roles to filter by
-        :param min_amount_staked: Minimum amount staked to filter by
+        :param min_staked_amount: Minimum amount staked to filter by
         :param order_by: Property to order by, e.g., "role"
         :param order_direction: Order direction of results, "asc" or "desc"
         :param first: Number of items per page
@@ -76,7 +76,7 @@ class OperatorFilter:
 
         self.chain_id = chain_id
         self.roles = roles
-        self.min_amount_staked = min_amount_staked
+        self.min_staked_amount = min_staked_amount
         self.order_by = order_by
         self.order_direction = order_direction
         self.first = min(max(first, 1), 1000)
@@ -89,12 +89,11 @@ class OperatorData:
         chain_id: ChainId,
         id: str,
         address: str,
-        amount_staked: int,
-        amount_locked: int,
+        staked_amount: int,
+        locked_amount: int,
         locked_until_timestamp: int,
-        amount_withdrawn: int,
-        amount_slashed: int,
-        reward: int,
+        withdrawn_amount: int,
+        slashed_amount: int,
         amount_jobs_processed: int,
         role: Optional[str] = None,
         fee: Optional[int] = None,
@@ -115,12 +114,11 @@ class OperatorData:
         :param chain_id: Chain Identifier
         :param id: Identifier
         :param address: Address
-        :param amount_staked: Amount staked
-        :param amount_locked: Amount locked
+        :param staked_amount: Amount staked
+        :param locked_amount: Amount locked
         :param locked_until_timestamp: Locked until timestamp
-        :param amount_withdrawn: Amount withdrawn
-        :param amount_slashed: Amount slashed
-        :param reward: Reward
+        :param withdrawn_amount: Amount withdrawn
+        :param slashed_amount: Amount slashed
         :param amount_jobs_processed: Amount of jobs launched
         :param role: Role
         :param fee: Fee
@@ -139,12 +137,11 @@ class OperatorData:
         self.chain_id = chain_id
         self.id = id
         self.address = address
-        self.amount_staked = amount_staked
-        self.amount_locked = amount_locked
+        self.staked_amount = staked_amount
+        self.locked_amount = locked_amount
         self.locked_until_timestamp = locked_until_timestamp
-        self.amount_withdrawn = amount_withdrawn
-        self.amount_slashed = amount_slashed
-        self.reward = reward
+        self.withdrawn_amount = withdrawn_amount
+        self.slashed_amount = slashed_amount
         self.amount_jobs_processed = amount_jobs_processed
         self.role = role
         self.fee = fee
@@ -215,7 +212,7 @@ class OperatorUtils:
             network,
             query=get_operators_query(filter),
             params={
-                "minAmountStaked": filter.min_amount_staked,
+                "minStakedAmount": filter.min_staked_amount,
                 "roles": filter.roles,
                 "orderBy": filter.order_by,
                 "orderDirection": filter.order_direction.value,
@@ -235,14 +232,7 @@ class OperatorUtils:
         operators_raw = operators_data["data"]["operators"]
 
         for operator in operators_raw:
-            job_types = []
             reputation_networks = []
-
-            if isinstance(operator.get("jobTypes"), str):
-                job_types = operator["jobTypes"].split(",")
-            elif isinstance(operator.get("jobTypes"), list):
-                job_types = operator["jobTypes"]
-
             if operator.get("reputationNetworks") and isinstance(
                 operator.get("reputationNetworks"), list
             ):
@@ -250,17 +240,17 @@ class OperatorUtils:
                     network["address"] for network in operator["reputationNetworks"]
                 ]
 
+            staker = operator.get("staker", {})
             operators.append(
                 OperatorData(
                     chain_id=filter.chain_id,
                     id=operator.get("id", ""),
                     address=operator.get("address", ""),
-                    amount_staked=int(operator.get("amountStaked", 0)),
-                    amount_locked=int(operator.get("amountLocked", 0)),
-                    locked_until_timestamp=int(operator.get("lockedUntilTimestamp", 0)),
-                    amount_withdrawn=int(operator.get("amountWithdrawn", 0)),
-                    amount_slashed=int(operator.get("amountSlashed", 0)),
-                    reward=int(operator.get("reward", 0)),
+                    staked_amount=int(staker.get("stakedAmount", 0)),
+                    locked_amount=int(staker.get("lockedAmount", 0)),
+                    locked_until_timestamp=int(staker.get("lockedUntilTimestamp", 0)),
+                    withdrawn_amount=int(staker.get("withdrawnAmount", 0)),
+                    slashed_amount=int(staker.get("slashedAmount", 0)),
                     amount_jobs_processed=int(operator.get("amountJobsProcessed", 0)),
                     role=operator.get("role", None),
                     fee=int(operator.get("fee")) if operator.get("fee", None) else None,
@@ -339,14 +329,7 @@ class OperatorUtils:
             return None
 
         operator = operator_data["data"]["operator"]
-
-        job_types = []
         reputation_networks = []
-
-        if isinstance(operator.get("jobTypes"), str):
-            job_types = operator["jobTypes"].split(",")
-        elif isinstance(operator.get("jobTypes"), list):
-            job_types = operator["jobTypes"]
 
         if operator.get("reputationNetworks") and isinstance(
             operator.get("reputationNetworks"), list
@@ -355,16 +338,16 @@ class OperatorUtils:
                 network["address"] for network in operator["reputationNetworks"]
             ]
 
+        staker = operator.get("staker", {})
         return OperatorData(
             chain_id=chain_id,
             id=operator.get("id", ""),
             address=operator.get("address", ""),
-            amount_staked=int(operator.get("amountStaked", 0)),
-            amount_locked=int(operator.get("amountLocked", 0)),
-            locked_until_timestamp=int(operator.get("lockedUntilTimestamp", 0)),
-            amount_withdrawn=int(operator.get("amountWithdrawn", 0)),
-            amount_slashed=int(operator.get("amountSlashed", 0)),
-            reward=int(operator.get("reward", 0)),
+            staked_amount=int(staker.get("stakedAmount", 0)),
+            locked_amount=int(staker.get("lockedAmount", 0)),
+            locked_until_timestamp=int(staker.get("lockedUntilTimestamp", 0)),
+            withdrawn_amount=int(staker.get("withdrawnAmount", 0)),
+            slashed_amount=int(staker.get("slashedAmount", 0)),
             amount_jobs_processed=int(operator.get("amountJobsProcessed", 0)),
             role=operator.get("role", None),
             fee=int(operator.get("fee")) if operator.get("fee", None) else None,
@@ -445,12 +428,13 @@ class OperatorUtils:
                 chain_id=chain_id,
                 id=operator.get("id", ""),
                 address=operator.get("address", ""),
-                amount_staked=int(operator.get("amountStaked", 0)),
-                amount_locked=int(operator.get("amountLocked", 0)),
-                locked_until_timestamp=int(operator.get("lockedUntilTimestamp", 0)),
-                amount_withdrawn=int(operator.get("amountWithdrawn", 0)),
-                amount_slashed=int(operator.get("amountSlashed", 0)),
-                reward=int(operator.get("reward", 0)),
+                staked_amount=int(
+                    (staker := operator.get("staker") or {}).get("stakedAmount", 0)
+                ),
+                locked_amount=int(staker.get("lockedAmount", 0)),
+                locked_until_timestamp=int(staker.get("lockedUntilTimestamp", 0)),
+                withdrawn_amount=int(staker.get("withdrawnAmount", 0)),
+                slashed_amount=int(staker.get("slashedAmount", 0)),
                 amount_jobs_processed=int(operator.get("amountJobsProcessed", 0)),
                 role=operator.get("role", None),
                 fee=int(operator.get("fee")) if operator.get("fee", None) else None,

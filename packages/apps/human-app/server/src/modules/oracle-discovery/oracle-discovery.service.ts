@@ -95,17 +95,16 @@ export class OracleDiscoveryService {
               address: exchangeOracle.address,
               name: exchangeOracle.name,
               role: exchangeOracle.role,
-              url: exchangeOracle.url,
-              jobTypes: exchangeOracle.jobTypes,
+              url: exchangeOracle.url as string,
+              jobTypes: exchangeOracle.jobTypes as string[],
               registrationNeeded: exchangeOracle.registrationNeeded,
               registrationInstructions: exchangeOracle.registrationInstructions,
               chainId,
-              amountStaked: exchangeOracle.amountStaked,
-              amountLocked: exchangeOracle.amountLocked,
-              amountWithdrawn: exchangeOracle.amountWithdrawn,
-              amountSlashed: exchangeOracle.amountSlashed,
+              stakedAmount: exchangeOracle.stakedAmount,
+              lockedAmount: exchangeOracle.lockedAmount,
+              withdrawnAmount: exchangeOracle.withdrawnAmount,
+              slashedAmount: exchangeOracle.slashedAmount,
               amountJobsProcessed: exchangeOracle.amountJobsProcessed,
-              reward: exchangeOracle.reward,
               lockedUntilTimestamp: exchangeOracle.lockedUntilTimestamp,
             }),
           );
@@ -131,7 +130,7 @@ export class OracleDiscoveryService {
   static checkExpectationsOfDiscoveredOracle(
     operator: IOperator,
     possibleJobTypes: string[],
-  ): operator is DiscoveredOracle {
+  ): boolean {
     if (!operator.url || !operator.name || !operator.role) {
       return false;
     }

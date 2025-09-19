@@ -4,3 +4,5 @@ obtain staking information from both the contracts and subgraph.
 """
 
 from .staking_client import StakingClient, StakingClientError
+
+from .staking_utils import StakerData, StakingUtils, StakingUtilsError

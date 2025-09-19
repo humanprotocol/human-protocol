@@ -1,4 +1,4 @@
-import { ChainId, EscrowClient } from '@human-protocol/sdk';
+import { ChainId } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 
 import { SortDirection } from '@/common/enums';
@@ -181,18 +181,10 @@ export class ReputationService {
 
   async assessEscrowParties(
     chainId: ChainId,
-    escrowAddress: string,
+    jobLauncherAddress: string,
+    exchangeOracleAddress: string,
+    recordingOracleAddress: string,
   ): Promise<void> {
-    const signer = this.web3Service.getSigner(chainId);
-    const escrowClient = await EscrowClient.build(signer);
-
-    const [jobLauncherAddress, exchangeOracleAddress, recordingOracleAddress] =
-      await Promise.all([
-        escrowClient.getJobLauncherAddress(escrowAddress),
-        escrowClient.getExchangeOracleAddress(escrowAddress),
-        escrowClient.getRecordingOracleAddress(escrowAddress),
-      ]);
-
     const reputationTypeToAddress = new Map([
       [ReputationEntityType.JOB_LAUNCHER, jobLauncherAddress],
       [ReputationEntityType.EXCHANGE_ORACLE, exchangeOracleAddress],

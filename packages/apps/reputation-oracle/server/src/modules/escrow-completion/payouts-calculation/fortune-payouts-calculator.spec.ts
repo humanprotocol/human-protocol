@@ -9,6 +9,7 @@ import _ from 'lodash';
 
 import { StorageService } from '@/modules/storage';
 import { Web3Service } from '@/modules/web3';
+import { generateTestnetChainId } from '@/modules/web3/fixtures';
 
 import { generateFortuneManifest, generateFortuneSolution } from '../fixtures';
 import { FortunePayoutsCalculator } from './fortune-payouts-calculator';
@@ -48,6 +49,16 @@ describe('FortunePayoutsCalculator', () => {
   });
 
   describe('calculate', () => {
+    const balance = BigInt(faker.number.int({ min: 1000 }).toString());
+    const mockedGetReservedFunds = jest
+      .fn()
+      .mockImplementation(async () => balance);
+
+    beforeAll(() => {
+      mockedEscrowClient.build.mockResolvedValue({
+        getReservedFunds: mockedGetReservedFunds,
+      } as unknown as EscrowClient);
+    });
     it('should properly calculate payouts', async () => {
       const validSolutions = [
         generateFortuneSolution(),
@@ -67,7 +78,7 @@ describe('FortunePayoutsCalculator', () => {
       mockedWeb3Service.getTokenDecimals.mockResolvedValueOnce(tokenDecimals);
 
       const payouts = await calculator.calculate({
-        chainId: faker.number.int(),
+        chainId: generateTestnetChainId(),
         escrowAddress: faker.finance.ethereumAddress(),
         finalResultsUrl: resultsUrl,
         manifest,

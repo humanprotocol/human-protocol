@@ -2,44 +2,37 @@
 #                    Entities                    #
 ##################################################
 
-type Holder @entity {
+type Holder @entity(immutable: false) {
   id: Bytes!
   address: Bytes! # address
   balance: BigInt!
 }
 
-type Worker @entity {
+type Worker @entity(immutable: false) {
   id: Bytes!
   address: Bytes!
   totalHMTAmountReceived: BigInt!
   payoutCount: BigInt!
 }
 
-type UniqueSender @entity {
+type UniqueSender @entity(immutable: false) {
   id: Bytes!
   address: Bytes!
   transferCount: BigInt!
   timestamp: BigInt!
 }
 
-type UniqueReceiver @entity {
+type UniqueReceiver @entity(immutable: false) {
   id: Bytes!
   address: Bytes!
   receiveCount: BigInt!
   timestamp: BigInt!
 }
 
-type Operator @entity {
+type Operator @entity(immutable: false) {
   id: Bytes!
   address: Bytes!
-  amountStaked: BigInt!
-  amountLocked: BigInt!
-  lockedUntilTimestamp: BigInt!
-  amountWithdrawn: BigInt!
-  amountSlashed: BigInt!
-  reward: BigInt!
   amountJobsProcessed: BigInt!
-
   role: String
   fee: BigInt
   publicKey: String
@@ -54,22 +47,24 @@ type Operator @entity {
 
   name: String
   category: String
+
+  staker: Staker @derivedFrom(field: "operator")
 }
 
-type OperatorURL @entity {
+type OperatorURL @entity(immutable: false) {
   id: Bytes!
   key: String
   url: String
   operator: Operator!
 }
 
-type ReputationNetwork @entity {
+type ReputationNetwork @entity(immutable: false) {
   id: Bytes!
   address: Bytes!
   operators: [Operator!]! @derivedFrom(field: "reputationNetworks")
 }
 
-type Escrow @entity {
+type Escrow @entity(immutable: false) {
   id: Bytes!
   address: Bytes! # address
   token: Bytes! # address
@@ -192,10 +187,9 @@ type BulkPayoutEvent @entity(immutable: true) {
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
-
-  escrowAddress: Bytes! # address
-  sender: Bytes! # address
-  bulkPayoutTxId: BigInt!
+  escrowAddress: Bytes!
+  sender: Bytes!
+  payoutId: String!
   bulkCount: BigInt!
 }
 
@@ -224,6 +218,16 @@ type WithdrawEvent @entity(immutable: true) {
   amount: BigInt!
 }
 
+type CancellationRefundEvent @entity(immutable: true) {
+  id: Bytes!
+  block: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  escrowAddress: Bytes!
+  receiver: Bytes!
+  amount: BigInt!
+}
+
 # KVStore
 type KVStoreSetEvent @entity(immutable: true) {
   id: Bytes!
@@ -236,7 +240,7 @@ type KVStoreSetEvent @entity(immutable: true) {
   value: String!
 }
 
-type KVStore @entity {
+type KVStore @entity(immutable: false) {
   id: Bytes!
   block: BigInt!
   timestamp: BigInt!
@@ -246,6 +250,19 @@ type KVStore @entity {
 }
 
 # Staking
+type Staker @entity(immutable: false) {
+  id: Bytes!
+  address: Bytes! # address
+  stakedAmount: BigInt!
+  lockedAmount: BigInt!
+  withdrawnAmount: BigInt!
+  slashedAmount: BigInt!
+  lockedUntilTimestamp: BigInt!
+  lastDepositTimestamp: BigInt!
+
+  operator: Operator
+}
+
 type StakeDepositedEvent @entity(immutable: true) {
   id: Bytes!
   block: BigInt!
@@ -293,7 +310,7 @@ type StakeSlashedEvent @entity(immutable: true) {
 #                   Statistics                   #
 ##################################################
 
-type HMTokenStatistics @entity {
+type HMTokenStatistics @entity(immutable: false) {
   id: Bytes!
   totalTransferEventCount: BigInt!
   totalBulkTransferEventCount: BigInt!
@@ -303,12 +320,13 @@ type HMTokenStatistics @entity {
   holders: BigInt!
 }
 
-type EscrowStatistics @entity {
+type EscrowStatistics @entity(immutable: false) {
   id: Bytes!
   fundEventCount: BigInt!
   storeResultsEventCount: BigInt!
   bulkPayoutEventCount: BigInt!
   pendingStatusEventCount: BigInt!
+  toCancelStatusEventCount: BigInt!
   cancelledStatusEventCount: BigInt!
   partialStatusEventCount: BigInt!
   paidStatusEventCount: BigInt!
@@ -317,13 +335,14 @@ type EscrowStatistics @entity {
   totalEscrowCount: BigInt!
 }
 
-type EventDayData @entity {
+type EventDayData @entity(immutable: false) {
   id: Bytes!
   timestamp: Int!
   dailyFundEventCount: BigInt!
   dailyStoreResultsEventCount: BigInt!
   dailyBulkPayoutEventCount: BigInt!
   dailyPendingStatusEventCount: BigInt!
+  dailyToCancelStatusEventCount: BigInt!
   dailyCancelledStatusEventCount: BigInt!
   dailyPartialStatusEventCount: BigInt!
   dailyPaidStatusEventCount: BigInt!
@@ -339,12 +358,7 @@ type EventDayData @entity {
   dailyUniqueReceivers: BigInt!
 }
 
-type OperatorStatistics @entity {
-  id: Bytes!
-  operators: BigInt!
-}
-
-type Transaction @entity {
+type Transaction @entity(immutable: false) {
   id: Bytes!
   block: BigInt!
   timestamp: BigInt!
@@ -360,7 +374,7 @@ type Transaction @entity {
     @derivedFrom(field: "transaction")
 }
 
-type InternalTransaction @entity {
+type InternalTransaction @entity(immutable: false) {
   id: Bytes!
   from: Bytes!
   to: Bytes!

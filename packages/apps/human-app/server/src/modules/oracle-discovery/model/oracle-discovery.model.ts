@@ -1,4 +1,4 @@
-import { ChainId, IOperator } from '@human-protocol/sdk';
+import { ChainId } from '@human-protocol/sdk';
 import { AutoMap } from '@automapper/classes';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsArray, IsOptional } from 'class-validator';
@@ -8,12 +8,11 @@ type DiscoveredOracleCreateProps = {
   id: string;
   address: string;
   chainId: ChainId;
-  amountStaked: bigint;
-  amountLocked: bigint;
+  stakedAmount: bigint;
+  lockedAmount: bigint;
   lockedUntilTimestamp: bigint;
-  amountWithdrawn: bigint;
-  amountSlashed: bigint;
-  reward: bigint;
+  withdrawnAmount: bigint;
+  slashedAmount: bigint;
   amountJobsProcessed: bigint;
   role?: string;
   fee?: bigint;
@@ -29,7 +28,7 @@ type DiscoveredOracleCreateProps = {
   category?: string;
 };
 
-export class DiscoveredOracle implements IOperator {
+export class DiscoveredOracle {
   @ApiProperty({ description: 'Unique identifier of the oracle operator' })
   id: string;
 
@@ -40,25 +39,22 @@ export class DiscoveredOracle implements IOperator {
   chainId: ChainId;
 
   @ApiProperty({ description: 'Amount staked by the operator' })
-  amountStaked: bigint;
+  stakedAmount: string;
 
   @ApiProperty({ description: 'Amount currently locked by the operator' })
-  amountLocked: bigint;
+  lockedAmount: string;
 
   @ApiProperty({ description: 'Timestamp until funds are locked' })
-  lockedUntilTimestamp: bigint;
+  lockedUntilTimestamp: string;
 
   @ApiProperty({ description: 'Total amount withdrawn by the operator' })
-  amountWithdrawn: bigint;
+  withdrawnAmount: string;
 
   @ApiProperty({ description: 'Total amount slashed from the operator' })
-  amountSlashed: bigint;
-
-  @ApiProperty({ description: 'Total reward earned by the operator' })
-  reward: bigint;
+  slashedAmount: string;
 
   @ApiProperty({ description: 'Number of jobs processed by the operator' })
-  amountJobsProcessed: bigint;
+  amountJobsProcessed: string;
 
   @ApiPropertyOptional({ description: 'Fee charged by the operator' })
   fee?: bigint;
@@ -113,6 +109,12 @@ export class DiscoveredOracle implements IOperator {
   constructor(props: DiscoveredOracleCreateProps) {
     Object.assign(this, props);
     this.registrationNeeded = props.registrationNeeded || false;
+    this.stakedAmount = this.stakedAmount.toString();
+    this.lockedAmount = this.lockedAmount.toString();
+    this.withdrawnAmount = this.withdrawnAmount.toString();
+    this.slashedAmount = this.slashedAmount.toString();
+    this.amountJobsProcessed = this.amountJobsProcessed.toString();
+    this.lockedUntilTimestamp = this.lockedUntilTimestamp.toString();
   }
 }
 

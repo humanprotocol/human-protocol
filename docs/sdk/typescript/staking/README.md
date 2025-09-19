@@ -9,3 +9,4 @@
 ## Classes
 
 - [StakingClient](classes/StakingClient.md)
+- [StakingUtils](classes/StakingUtils.md)

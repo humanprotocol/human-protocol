@@ -98,6 +98,8 @@ describe('Staking', function () {
       { kind: 'uups', initializer: 'initialize' }
     )) as unknown as EscrowFactory;
 
+    await escrowFactory.setAdmin(await owner.getAddress());
+
     // Topup staking address
     await token.connect(owner).transfer(await staking.getAddress(), 1000);
 
@@ -242,11 +244,7 @@ describe('Staking', function () {
       const result = await (
         await escrowFactory
           .connect(operator)
-          .createEscrow(
-            await token.getAddress(),
-            [await validator.getAddress()],
-            jobRequesterId
-          )
+          .createEscrow(await token.getAddress(), jobRequesterId)
       ).wait();
       const event = (
         result?.logs?.find(({ topics }) =>
@@ -421,11 +419,7 @@ describe('Staking', function () {
       const result = await (
         await escrowFactory
           .connect(operator)
-          .createEscrow(
-            await token.getAddress(),
-            [await validator.getAddress()],
-            jobRequesterId
-          )
+          .createEscrow(await token.getAddress(), jobRequesterId)
       ).wait();
       const event = (
         result?.logs?.find(({ topics }) =>
@@ -599,11 +593,7 @@ describe('Staking', function () {
       const result = await (
         await escrowFactory
           .connect(operator)
-          .createEscrow(
-            await token.getAddress(),
-            [await validator.getAddress()],
-            jobRequesterId
-          )
+          .createEscrow(await token.getAddress(), jobRequesterId)
       ).wait();
       const event = (
         result?.logs?.find(({ topics }) =>
