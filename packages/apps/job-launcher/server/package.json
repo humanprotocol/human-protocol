@@ -55,7 +55,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "0.14.1",
     "decimal.js": "^10.6.0",
-    "dotenv": "^17.0.0",
+    "dotenv": "^17.2.2",
     "helmet": "^7.1.0",
     "joi": "^17.13.3",
     "json-stable-stringify": "^1.2.1",

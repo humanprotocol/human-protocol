@@ -12,8 +12,8 @@ jobs:
   dependency-review:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.1.1
+      - uses: actions/checkout@v5
       - name: Dependency Review
-        uses: actions/dependency-review-action@v4.7.2
+        uses: actions/dependency-review-action@v4.7.3
         with:
           show-openssf-scorecard: false
