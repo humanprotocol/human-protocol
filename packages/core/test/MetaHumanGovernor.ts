@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { ethers } from 'hardhat';
+import { ethers, upgrades } from 'hardhat';
 import { Signer, BigNumberish } from 'ethers';
 import {
   MetaHumanGovernor,
@@ -89,20 +89,23 @@ describe('MetaHumanGovernor', function () {
     const MetaHumanContract = await ethers.getContractFactory(
       'contracts/governance/MetaHumanGovernor.sol:MetaHumanGovernor'
     );
-    governor = (await MetaHumanContract.deploy(
-      voteToken.getAddress(),
-      timelockController.getAddress(),
-      [],
-      0,
-      await wormholeMockForGovernor.getAddress(),
-      owner.getAddress(),
-      SECONDS_PER_BLOCK,
-      SECONDS_PER_BLOCK * 1,
-      SECONDS_PER_BLOCK * 300,
-      0,
-      4
+    governor = (await upgrades.deployProxy(
+      MetaHumanContract,
+      [
+        await voteToken.getAddress(),
+        await timelockController.getAddress(),
+        [],
+        0,
+        await wormholeMockForGovernor.getAddress(),
+        await owner.getAddress(),
+        SECONDS_PER_BLOCK,
+        SECONDS_PER_BLOCK * 1,
+        SECONDS_PER_BLOCK * 300,
+        0,
+        4,
+      ],
+      { initializer: 'initialize' }
     )) as MetaHumanGovernor;
-
     // Set Governor on worm hole mock
     await wormholeMockForGovernor.setReceiver(await governor.getAddress());
 
@@ -121,14 +124,13 @@ describe('MetaHumanGovernor', function () {
     );
     daoSpoke = (await DAOSpokeContract.deploy(
       ethers.zeroPadBytes(await governor.getAddress(), 32),
-      hubChainId, // hubChainId
-      voteToken.getAddress(),
-      SECONDS_PER_BLOCK, // voting period
-      spokeChainId, // spokeChainId
+      hubChainId,
+      await voteToken.getAddress(),
+      SECONDS_PER_BLOCK,
+      spokeChainId,
       await wormholeMockForDaoSpoke.getAddress(),
-      owner.getAddress() // admin address
+      await owner.getAddress()
     )) as DAOSpokeContract;
-
     // Set DAOSpokeContract on worm hole mock
     await wormholeMockForDaoSpoke.setReceiver(await daoSpoke.getAddress());
 
@@ -166,7 +168,7 @@ describe('MetaHumanGovernor', function () {
       12,
       6,
       '0x0591C25ebd0580E0d4F27A82Fc2e24E7489CB5e0',
-      await owner.getAddress() // admin address
+      await owner.getAddress()
     )) as DAOSpokeContract;
 
     const spokeContractsX = [
@@ -305,7 +307,7 @@ describe('MetaHumanGovernor', function () {
 
     await expect(
       governor.connect(owner).updateSpokeContracts(spokeContracts)
-    ).to.be.revertedWithCustomError(governor, 'OwnableUnauthorizedAccount');
+    ).to.be.revertedWith('Ownable: caller is not the owner');
   });
 
   it('Should create a grant proposal', async function () {
@@ -431,10 +433,7 @@ describe('MetaHumanGovernor', function () {
 
     await expect(
       governor.connect(user1).castVote(proposalId, 1)
-    ).to.be.revertedWithCustomError(
-      governor,
-      'GovernorUnexpectedProposalState'
-    );
+    ).to.be.revertedWith('Governor: vote not currently active');
   });
 
   it('Should allow voting against', async function () {
@@ -1246,10 +1245,7 @@ describe('MetaHumanGovernor', function () {
       governor
         .connect(user1)
         .castVoteWithReasonAndParams(proposalId, 1, 'test reason', params)
-    ).to.be.revertedWithCustomError(
-      governor,
-      'GovernorUnexpectedProposalState'
-    );
+    ).to.be.revertedWith('Governor: vote not currently active');
   });
 
   it('Should vote on proposal by signature', async function () {
@@ -1265,22 +1261,15 @@ describe('MetaHumanGovernor', function () {
 
     // create signature
     const support = 1;
-    const user1Address = await user1.getAddress();
-    const signature = await signProposal(
-      proposalId,
-      governor,
-      support,
-      user1Address,
-      0,
-      user1
-    );
+    const signature = await signProposal(proposalId, governor, support, user1);
 
     // wait for next block
     await mineNBlocks(2);
     // cast vote with sig
+    const sig1 = ethers.Signature.from(signature);
     await governor
       .connect(user1)
-      .castVoteBySig(proposalId, support, user1Address, signature);
+      .castVoteBySig(proposalId, support, sig1.v, sig1.r, sig1.s);
 
     //assert votes
     const { againstVotes, forVotes, abstainVotes } =
@@ -1306,25 +1295,15 @@ describe('MetaHumanGovernor', function () {
 
     // create signature
     const support = 1;
-    const user1Address = await user1.getAddress();
-    const signature = await signProposal(
-      proposalId,
-      governor,
-      support,
-      user1Address,
-      0,
-      user1
-    );
+    const signature = await signProposal(proposalId, governor, support, user1);
 
     // cast vote with sig
+    const sig2 = ethers.Signature.from(signature);
     await expect(
       governor
         .connect(user1)
-        .castVoteBySig(proposalId, support, await user1.getAddress(), signature)
-    ).to.be.revertedWithCustomError(
-      governor,
-      'GovernorUnexpectedProposalState'
-    );
+        .castVoteBySig(proposalId, support, sig2.v, sig2.r, sig2.s)
+    ).to.be.revertedWith('Governor: vote not currently active');
   });
 
   it('Should revert when creating proposal with propose', async function () {
@@ -1339,7 +1318,7 @@ describe('MetaHumanGovernor', function () {
 
     await expect(
       governor.propose(targets, values, calldatas, 'test')
-    ).to.be.revertedWith('Please use crossChainPropose instead.');
+    ).to.be.revertedWithCustomError(governor, 'UseCrossChainPropose');
   });
 
   it('Should return magistrate', async function () {
@@ -1358,5 +1337,54 @@ describe('MetaHumanGovernor', function () {
     await expect(
       governor.transferMagistrate(ethers.ZeroAddress)
     ).to.be.revertedWith('Magistrate: new magistrate is the zero address');
+  });
+
+  it('Should revert withdraw with ZeroBalance when empty', async function () {
+    await expect(governor.withdraw()).to.be.revertedWithCustomError(
+      governor,
+      'ZeroBalance'
+    );
+  });
+
+  it('Should revert withdraw when caller is not magistrate', async function () {
+    await owner.sendTransaction({
+      to: await governor.getAddress(),
+      value: ethers.parseEther('0.1'),
+    });
+    await expect(governor.connect(user1).withdraw()).to.be.revertedWith(
+      'Magistrate: caller is not the magistrate'
+    );
+  });
+
+  it('Should allow magistrate to withdraw full balance', async function () {
+    const amount = ethers.parseEther('0.2');
+    await owner.sendTransaction({
+      to: await governor.getAddress(),
+      value: amount,
+    });
+
+    const balanceBefore = await ethers.provider.getBalance(
+      await owner.getAddress()
+    );
+    const contractBefore = await ethers.provider.getBalance(
+      await governor.getAddress()
+    );
+    expect(contractBefore).to.equal(amount);
+
+    const tx = await governor.withdraw();
+    const receipt = await tx.wait();
+    expect(receipt?.status).to.equal(1);
+
+    const contractAfter = await ethers.provider.getBalance(
+      await governor.getAddress()
+    );
+    expect(contractAfter).to.equal(0n);
+
+    const balanceAfter = await ethers.provider.getBalance(
+      await owner.getAddress()
+    );
+    expect(balanceAfter).to.be.greaterThan(
+      balanceBefore - ethers.parseEther('0.001')
+    );
   });
 });

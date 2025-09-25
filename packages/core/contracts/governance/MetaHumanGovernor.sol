@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-import '@openzeppelin/contracts/governance/Governor.sol';
-import '@openzeppelin/contracts/governance/extensions/GovernorSettings.sol';
-import '@openzeppelin/contracts/governance/extensions/GovernorVotes.sol';
-import '@openzeppelin/contracts/governance/extensions/GovernorVotesQuorumFraction.sol';
-import '@openzeppelin/contracts/governance/extensions/GovernorTimelockControl.sol';
-import '@openzeppelin/contracts/utils/Address.sol';
+import '@openzeppelin/contracts-upgradeable/governance/GovernorUpgradeable.sol';
+import '@openzeppelin/contracts-upgradeable/governance/IGovernorUpgradeable.sol';
+import '@openzeppelin/contracts-upgradeable/governance/extensions/GovernorSettingsUpgradeable.sol';
+import '@openzeppelin/contracts-upgradeable/governance/extensions/GovernorVotesUpgradeable.sol';
+import '@openzeppelin/contracts-upgradeable/governance/extensions/GovernorVotesQuorumFractionUpgradeable.sol';
+import '@openzeppelin/contracts-upgradeable/governance/extensions/GovernorTimelockControlUpgradeable.sol';
 import './CrossChainGovernorCountingSimple.sol';
-import './DAOSpokeContract.sol';
 import './wormhole/IWormholeRelayer.sol';
 import './wormhole/IWormholeReceiver.sol';
 import './magistrate/Magistrate.sol';
@@ -22,17 +21,15 @@ import './magistrate/Magistrate.sol';
  *   For more details check out [OpenZeppelin's documentation](https://docs.openzeppelin.com/contracts/4.x/api/governance#governor).
  */
 contract MetaHumanGovernor is
-    Governor,
-    GovernorSettings,
+    GovernorUpgradeable,
+    GovernorSettingsUpgradeable,
     CrossChainGovernorCountingSimple,
-    GovernorVotes,
-    GovernorVotesQuorumFraction,
-    GovernorTimelockControl,
+    GovernorVotesUpgradeable,
+    GovernorVotesQuorumFractionUpgradeable,
+    GovernorTimelockControlUpgradeable,
     Magistrate,
     IWormholeReceiver
 {
-    using Address for address payable;
-
     error MessageAlreadyProcessed();
     error OnlyRelayerAllowed();
     error InvalidIntendedRecipient();
@@ -41,15 +38,21 @@ contract MetaHumanGovernor is
     error RequestAfterVotePeriodOver();
     error CollectionPhaseAlreadyStarted();
     error OnlyMessagesFromSpokeReceived();
+    error UseCrossChainCancel();
+    error UseCrossChainPropose();
+    error ProposalNotSuccessful();
+    error ZeroBalance();
 
-    IWormholeRelayer public immutable wormholeRelayer;
+    IWormholeRelayer public wormholeRelayer;
     uint256 internal constant GAS_LIMIT = 500_000;
-    uint256 public immutable secondsPerBlock;
-    uint16 public immutable chainId;
+    uint256 public secondsPerBlock;
+    uint16 public chainId;
 
     mapping(bytes32 => bool) public processedMessages;
     mapping(uint256 => bool) public collectionStarted;
     mapping(uint256 => bool) public collectionFinished;
+
+    uint256[50] private __gap;
 
     /**
      * @dev Contract constructor.
@@ -59,9 +62,9 @@ contract MetaHumanGovernor is
      *  @param _chainId The chain ID of the current contract.
      *  @param _wormholeRelayerAddress The address of the wormhole automatic relayer contract used for cross-chain communication
      */
-    constructor(
-        IVotes _token,
-        TimelockController _timelock,
+    function initialize(
+        IVotesUpgradeable _token,
+        TimelockControllerUpgradeable _timelock,
         CrossChainAddress[] memory _spokeContracts,
         uint16 _chainId,
         address _wormholeRelayerAddress,
@@ -71,19 +74,19 @@ contract MetaHumanGovernor is
         uint32 _votingPeriodInSeconds,
         uint256 _proposalThreshold,
         uint256 _quorumFraction
-    )
-        Governor('MetaHumanGovernor')
-        GovernorSettings(
+    ) public initializer {
+        __Governor_init('MetaHumanGovernor');
+        __GovernorSettings_init(
             _votingDelayInSeconds,
             _votingPeriodInSeconds,
             _proposalThreshold
-        )
-        GovernorVotes(_token)
-        GovernorVotesQuorumFraction(_quorumFraction)
-        GovernorTimelockControl(_timelock)
-        CrossChainGovernorCountingSimple(_spokeContracts)
-        Magistrate(_magistrateAddress)
-    {
+        );
+        __CrossChainGovernorCountingSimple_init(_spokeContracts);
+        __GovernorVotes_init(_token);
+        __GovernorVotesQuorumFraction_init(_quorumFraction);
+        __GovernorTimelockControl_init(_timelock);
+        __Magistrate_init(_magistrateAddress);
+
         chainId = _chainId;
         wormholeRelayer = IWormholeRelayer(_wormholeRelayerAddress);
         secondsPerBlock = _secondsPerBlock;
@@ -94,7 +97,11 @@ contract MetaHumanGovernor is
         uint256[] memory values,
         bytes[] memory calldatas,
         bytes32 descriptionHash
-    ) public override(Governor) returns (uint256) {
+    )
+        public
+        override(GovernorUpgradeable, IGovernorUpgradeable)
+        returns (uint256)
+    {
         uint256 proposalId = hashProposal(
             targets,
             values,
@@ -103,7 +110,7 @@ contract MetaHumanGovernor is
         );
 
         if (spokeContractsSnapshots[proposalId].length > 0) {
-            revert('Please use crossChainCancel for proposals with spokes.');
+            revert UseCrossChainCancel();
         }
 
         return super.cancel(targets, values, calldatas, descriptionHash);
@@ -122,7 +129,7 @@ contract MetaHumanGovernor is
             descriptionHash
         );
         bytes memory message = abi.encode(uint16(2), proposalId); // selector 2 = cancel
-        _sendCrossChainMessageToSpokes(proposalId, message, address(this), 2);
+        _sendCrossChainMessageToSpokes(proposalId, message, address(this));
         return proposalId;
     }
 
@@ -136,7 +143,7 @@ contract MetaHumanGovernor is
      */
     function receiveWormholeMessages(
         bytes calldata payload,
-        bytes[] calldata additionalVaas, // additionalVaas
+        bytes[] calldata, // additionalVaas
         bytes32 sourceAddress, // address that called 'sendPayloadToEvm' (HelloWormhole contract address)
         uint16 sourceChain,
         bytes32 deliveryHash // this can be stored in a mapping deliveryHash => bool to prevent duplicate deliveries
@@ -204,13 +211,6 @@ contract MetaHumanGovernor is
             revert OnlyMessagesFromSpokeReceived();
         }
 
-        require(
-            spokeContractsMappingSnapshots[_proposalId][emitterAddress][
-                emitterChainId
-            ],
-            'Only messages from the spoke contracts can be received!'
-        );
-
         // As long as the received data isn't already initialized...
         if (
             spokeVotes[_proposalId][emitterAddress][emitterChainId].initialized
@@ -234,13 +234,12 @@ contract MetaHumanGovernor is
         bool phaseFinished = true;
         uint256 spokeContractsLength = spokeContractsSnapshots[proposalId]
             .length;
-        for (uint16 i = 1; i <= spokeContractsLength && phaseFinished; ++i) {
+        for (uint16 i = 0; i < spokeContractsLength && phaseFinished; ++i) {
             phaseFinished =
                 phaseFinished &&
                 spokeVotes[proposalId][
-                    spokeContractsSnapshots[proposalId][i - 1].contractAddress
-                ][spokeContractsSnapshots[proposalId][i - 1].chainId]
-                    .initialized;
+                    spokeContractsSnapshots[proposalId][i].contractAddress
+                ][spokeContractsSnapshots[proposalId][i].chainId].initialized;
         }
 
         collectionFinished[proposalId] = phaseFinished;
@@ -250,7 +249,7 @@ contract MetaHumanGovernor is
      * @dev Requests the voting data from all of the spoke chains.
      *  @param proposalId The ID of the proposal.
      */
-    function requestCollections(uint256 proposalId) public payable {
+    function requestCollections(uint256 proposalId) external payable {
         if (block.timestamp < proposalDeadline(proposalId)) {
             revert RequestAfterVotePeriodOver();
         }
@@ -270,7 +269,7 @@ contract MetaHumanGovernor is
         }
 
         bytes memory message = abi.encode(uint16(1), proposalId); // selector 1 = requestCollections
-        _sendCrossChainMessageToSpokes(proposalId, message, msg.sender, 1);
+        _sendCrossChainMessageToSpokes(proposalId, message, msg.sender);
     }
 
     /**
@@ -308,7 +307,7 @@ contract MetaHumanGovernor is
             voteStartTimestamp,
             voteEndTimestamp
         );
-        _sendCrossChainMessageToSpokes(proposalId, message, address(this), 0);
+        _sendCrossChainMessageToSpokes(proposalId, message, address(this));
         return proposalId;
     }
 
@@ -317,26 +316,21 @@ contract MetaHumanGovernor is
      * @param proposalId The ID of the proposal.
      * @param message The encoded message to send.
      * @param sender The address to set as msg.sender in the payload (for requestCollections, otherwise address(this)).
-     * @param selector The function selector (0: propose, 1: requestCollections, 2: cancel).
      */
     function _sendCrossChainMessageToSpokes(
         uint256 proposalId,
         bytes memory message,
-        address sender,
-        uint16 selector
+        address sender
     ) internal {
         uint256 spokeContractsLength = spokeContractsSnapshots[proposalId]
             .length;
-        uint256 sendMessageToHubCost = _quoteCrossChainMessage(chainId, 0);
-        bool isRequestCollectionsMessage = (selector == 1);
-        for (uint16 i = 1; i <= spokeContractsLength; ++i) {
-            uint16 spokeChainId = spokeContractsSnapshots[proposalId][i - 1]
+        for (uint16 i = 0; i < spokeContractsLength; ++i) {
+            uint16 spokeChainId = spokeContractsSnapshots[proposalId][i]
                 .chainId;
             address spokeAddress = address(
                 uint160(
                     uint256(
-                        spokeContractsSnapshots[proposalId][i - 1]
-                            .contractAddress
+                        spokeContractsSnapshots[proposalId][i].contractAddress
                     )
                 )
             );
@@ -346,15 +340,12 @@ contract MetaHumanGovernor is
                 sender,
                 message
             );
-            uint256 cost = _quoteCrossChainMessage(
-                spokeChainId,
-                isRequestCollectionsMessage ? sendMessageToHubCost : 0
-            );
+            uint256 cost = _quoteCrossChainMessage(spokeChainId, 0);
             wormholeRelayer.sendPayloadToEvm{value: cost}(
                 spokeChainId,
                 spokeAddress,
                 payload,
-                isRequestCollectionsMessage ? sendMessageToHubCost : 0,
+                0,
                 GAS_LIMIT,
                 spokeChainId,
                 magistrate()
@@ -386,7 +377,7 @@ contract MetaHumanGovernor is
     function votingDelay()
         public
         view
-        override(Governor, GovernorSettings)
+        override(IGovernorUpgradeable, GovernorSettingsUpgradeable)
         returns (uint256)
     {
         return super.votingDelay(); // Ensure this returns time in seconds
@@ -399,7 +390,7 @@ contract MetaHumanGovernor is
     function votingPeriod()
         public
         view
-        override(Governor, GovernorSettings)
+        override(IGovernorUpgradeable, GovernorSettingsUpgradeable)
         returns (uint256)
     {
         return super.votingPeriod(); // Ensure this returns time in seconds
@@ -415,7 +406,7 @@ contract MetaHumanGovernor is
     )
         public
         view
-        override(Governor, GovernorVotesQuorumFraction)
+        override(IGovernorUpgradeable, GovernorVotesQuorumFractionUpgradeable)
         returns (uint256)
     {
         return super.quorum(snapshotTime);
@@ -432,7 +423,7 @@ contract MetaHumanGovernor is
     )
         public
         view
-        override(Governor, GovernorTimelockControl)
+        override(GovernorUpgradeable, GovernorTimelockControlUpgradeable)
         returns (ProposalState)
     {
         return super.state(proposalId);
@@ -446,8 +437,13 @@ contract MetaHumanGovernor is
         uint256[] memory,
         bytes[] memory,
         string memory
-    ) public pure override(Governor) returns (uint256) {
-        revert('Please use crossChainPropose instead.');
+    )
+        public
+        pure
+        override(GovernorUpgradeable, IGovernorUpgradeable)
+        returns (uint256)
+    {
+        revert UseCrossChainPropose();
     }
 
     /**
@@ -457,34 +453,10 @@ contract MetaHumanGovernor is
     function proposalThreshold()
         public
         view
-        override(Governor, GovernorSettings)
+        override(GovernorUpgradeable, GovernorSettingsUpgradeable)
         returns (uint256)
     {
         return super.proposalThreshold();
-    }
-
-    /**
-     * @dev Function to queue a proposal to the timelock.
-     */
-    function queue(
-        address[] memory targets,
-        uint256[] memory values,
-        bytes[] memory calldatas,
-        bytes32 descriptionHash
-    ) public virtual override returns (uint256) {
-        uint256 proposalId = hashProposal(
-            targets,
-            values,
-            calldatas,
-            descriptionHash
-        );
-
-        require(
-            state(proposalId) == ProposalState.Succeeded,
-            'Governor: proposal not successful'
-        );
-
-        return super.queue(targets, values, calldatas, descriptionHash);
     }
 
     /**
@@ -500,7 +472,11 @@ contract MetaHumanGovernor is
         uint256[] memory values,
         bytes[] memory calldatas,
         bytes32 descriptionHash
-    ) internal override(Governor, GovernorTimelockControl) returns (uint256) {
+    )
+        internal
+        override(GovernorUpgradeable, GovernorTimelockControlUpgradeable)
+        returns (uint256)
+    {
         return super._cancel(targets, values, calldatas, descriptionHash);
     }
 
@@ -511,49 +487,29 @@ contract MetaHumanGovernor is
     function _executor()
         internal
         view
-        override(Governor, GovernorTimelockControl)
+        override(GovernorUpgradeable, GovernorTimelockControlUpgradeable)
         returns (address)
     {
         return super._executor();
     }
 
-    function _queueOperations(
+    function _execute(
         uint256 proposalId,
         address[] memory targets,
         uint256[] memory values,
         bytes[] memory calldatas,
         bytes32 descriptionHash
-    ) internal override(Governor, GovernorTimelockControl) returns (uint48) {
-        return
-            super._queueOperations(
-                proposalId,
-                targets,
-                values,
-                calldatas,
-                descriptionHash
-            );
-    }
-
-    function _executeOperations(
-        uint256 proposalId,
-        address[] memory targets,
-        uint256[] memory values,
-        bytes[] memory calldatas,
-        bytes32 descriptionHash
-    ) internal override(Governor, GovernorTimelockControl) {
+    )
+        internal
+        override(GovernorUpgradeable, GovernorTimelockControlUpgradeable)
+    {
         _finishCollectionPhase(proposalId);
 
         if (!collectionFinished[proposalId]) {
             revert CollectionPhaseUnfinished();
         }
 
-        super._executeOperations(
-            proposalId,
-            targets,
-            values,
-            calldatas,
-            descriptionHash
-        );
+        super._execute(proposalId, targets, values, calldatas, descriptionHash);
     }
 
     /**
@@ -563,19 +519,26 @@ contract MetaHumanGovernor is
      */
     function supportsInterface(
         bytes4 interfaceId
-    ) public view override(Governor) returns (bool) {
-        return super.supportsInterface(interfaceId);
-    }
-
-    function proposalNeedsQueuing(
-        uint256 proposalId
     )
         public
         view
-        virtual
-        override(Governor, GovernorTimelockControl)
+        override(GovernorUpgradeable, GovernorTimelockControlUpgradeable)
         returns (bool)
     {
-        return super.proposalNeedsQueuing(proposalId);
+        return super.supportsInterface(interfaceId);
     }
+
+    /**
+     * @dev Withdraws the contract's balance to the magistrate address.
+     * Can only be called by the magistrate.
+     */
+    function withdraw() external onlyMagistrate {
+        uint256 balance = address(this).balance;
+        if (balance == 0) {
+            revert ZeroBalance();
+        }
+        payable(msg.sender).transfer(balance);
+    }
+
+    receive() external payable override(GovernorUpgradeable) {}
 }

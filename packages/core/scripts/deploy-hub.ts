@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { ethers } from 'hardhat';
+import { ethers, upgrades } from 'hardhat';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -71,25 +71,29 @@ async function main() {
   const MetaHumanGovernor = await ethers.getContractFactory(
     'contracts/governance/MetaHumanGovernor.sol:MetaHumanGovernor'
   );
-  const metaHumanGovernorContract = await MetaHumanGovernor.deploy(
-    vhmTokenAddress,
-    TimelockControllerContract.getAddress(),
-    [],
-    chainId,
-    hubAutomaticRelayerAddress,
-    magistrateAddress,
-    hubSecondsPerBlock,
-    votingDelay,
-    votingPeriod,
-    proposalThreshold,
-    quorumFraction
+  const metaHumanGovernorContract = await upgrades.deployProxy(
+    MetaHumanGovernor,
+    [
+      vhmTokenAddress,
+      await TimelockControllerContract.getAddress(),
+      [],
+      chainId,
+      hubAutomaticRelayerAddress,
+      magistrateAddress,
+      hubSecondsPerBlock,
+      votingDelay,
+      votingPeriod,
+      proposalThreshold,
+      quorumFraction,
+    ],
+    { initializer: 'initialize' }
   );
-
   await metaHumanGovernorContract.waitForDeployment();
-  console.log(
-    'Governor deployed to:',
-    await metaHumanGovernorContract.getAddress()
-  );
+  const proxyAddress = await metaHumanGovernorContract.getAddress();
+  const implementationAddress =
+    await upgrades.erc1967.getImplementationAddress(proxyAddress);
+  console.log('Governor Proxy deployed at:', proxyAddress);
+  console.log('Governor Implementation at:', implementationAddress);
 }
 
 main().catch((error) => {

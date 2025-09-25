@@ -1,15 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-import '@openzeppelin/contracts/governance/Governor.sol';
-import '@openzeppelin/contracts/access/Ownable.sol';
+import '@openzeppelin/contracts-upgradeable/governance/GovernorUpgradeable.sol';
+import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
+import '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
 
 /**
  * @title CrossChainGovernorCountingSimple
  *   @dev CrossChainGovernorCountingSimple is an abstract contract that provides counting and vote functionality for a cross-chain governor.
  *   It extends the Governor and Ownable contracts.
  */
-abstract contract CrossChainGovernorCountingSimple is Governor, Ownable {
+abstract contract CrossChainGovernorCountingSimple is
+    Initializable,
+    GovernorUpgradeable,
+    OwnableUpgradeable
+{
     mapping(bytes32 => mapping(uint16 => bool)) public spokeContractsMapping;
     CrossChainAddress[] public spokeContracts;
     mapping(uint256 => mapping(bytes32 => mapping(uint16 => bool)))
@@ -49,9 +54,16 @@ abstract contract CrossChainGovernorCountingSimple is Governor, Ownable {
 
     event SpokesUpdated(CrossChainAddress[] indexed spokes);
 
-    constructor(
+    function __CrossChainGovernorCountingSimple_init(
         CrossChainAddress[] memory _spokeContracts
-    ) Ownable(msg.sender) {
+    ) internal onlyInitializing {
+        __Ownable_init();
+        __CrossChainGovernorCountingSimple_init_unchained(_spokeContracts);
+    }
+
+    function __CrossChainGovernorCountingSimple_init_unchained(
+        CrossChainAddress[] memory _spokeContracts
+    ) internal onlyInitializing {
         updateSpokeContracts(_spokeContracts);
     }
 

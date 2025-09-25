@@ -52,8 +52,12 @@ const config: HardhatUserConfig = {
           viaIR: true,
           optimizer: {
             enabled: true,
-            runs: 10,
+            runs: 1,
           },
+          metadata: {
+            bytecodeHash: 'none',
+          },
+          evmVersion: 'paris',
         },
       },
     ],
@@ -130,7 +134,7 @@ const config: HardhatUserConfig = {
     alphaSort: true,
     runOnCompile: true,
     disambiguatePaths: false,
-    strict: true,
+    strict: false,
     only: [],
     except: [],
   },
@@ -164,15 +168,7 @@ const config: HardhatUserConfig = {
     },
   ],
   etherscan: {
-    apiKey: {
-      mainnet: process.env.ETHERSCAN_API_KEY || '',
-      sepolia: process.env.ETHERSCAN_API_KEY || '',
-      polygon: process.env.POLYGONSCAN_API_KEY || '',
-      polygonAmoy: process.env.POLYGONSCAN_API_KEY || '',
-      bsc: process.env.BSC_API_KEY || '',
-      bscTestnet: process.env.BSC_API_KEY || '',
-      auroraTestnet: 'empty',
-    },
+    apiKey: process.env.ETHERSCAN_API_KEY || '',
     customChains: [
       {
         network: 'auroraTestnet',
