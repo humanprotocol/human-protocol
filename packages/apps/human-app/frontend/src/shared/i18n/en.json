@@ -439,5 +439,13 @@
     "image_polygons": "Polygons",
     "audio_transcription": "Audio Transcription",
     "audio_attribute_annotation": "Audio Attribute Annotation"
+  },
+  "thirstyfiModal": {
+    "title": "Add additional information",
+    "walletAddress": "Wallet address",
+    "apiKey": "API key",
+    "submitBtn": "Submit",
+    "walletAddressError": "Wallet address must be exactly 42 characters",
+    "walletAddressRegexError": "Wallet address must start with 0x"
   }
 }

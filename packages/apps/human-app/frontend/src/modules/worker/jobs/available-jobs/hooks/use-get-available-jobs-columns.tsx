@@ -3,6 +3,7 @@ import type { MRT_ColumnDef } from 'material-react-table';
 import { t } from 'i18next';
 import { Grid } from '@mui/material';
 import { useMemo } from 'react';
+import { useParams } from 'react-router-dom';
 import { getNetworkName } from '@/modules/smart-contracts/get-network-name';
 import { Chip } from '@/shared/components/ui/chip';
 import { TableButton } from '@/shared/components/ui/table-button';
@@ -17,13 +18,18 @@ import {
 } from '../components';
 import { type AvailableJob } from '../../types';
 import { useAssignJobMutation } from './use-assign-job';
+import { useAddThirstyfiInfoModal } from './use-add-thirstyfi-info-modal';
 
 const COL_SIZE = 100;
 const COL_SIZE_LG = 200;
+const THIRSTYFI_ADDRESS = '0x5C08438d7d18734c5ee42ECAf81FB1D6A922A9cC';
 
 export const useGetAvailableJobsColumns = (
   chainIdsEnabled: number[]
 ): MRT_ColumnDef<AvailableJob>[] => {
+  const { openModal } = useAddThirstyfiInfoModal();
+  const { address: oracleAddress } = useParams<{ address: string }>();
+
   return useMemo(
     () => [
       {
@@ -122,15 +128,17 @@ export const useGetAvailableJobsColumns = (
             [`assignJob-${escrow_address}`]
           );
 
+          const isThirstyfi = oracleAddress === THIRSTYFI_ADDRESS;
+
           return (
             <Grid sx={{ display: 'flex', justifyContent: 'flex-end' }}>
               <TableButton
+                sx={{ width: '94px' }}
                 loading={isPending}
                 onClick={() => {
-                  assignJobMutation({ escrow_address, chain_id });
-                }}
-                sx={{
-                  width: '94px',
+                  isThirstyfi
+                    ? openModal({ escrow_address, chain_id })
+                    : assignJobMutation({ escrow_address, chain_id });
                 }}
               >
                 {t('worker.jobs.selectJob')}
@@ -140,6 +148,6 @@ export const useGetAvailableJobsColumns = (
         },
       },
     ],
-    [chainIdsEnabled]
+    [chainIdsEnabled, openModal, oracleAddress]
   );
 };
