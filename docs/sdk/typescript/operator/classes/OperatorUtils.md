@@ -6,7 +6,7 @@
 
 # Class: OperatorUtils
 
-Defined in: [operator.ts:27](https://github.com/humanprotocol/human-protocol/blob/e2535128eb5f5be411c1a30e3ae041b00d889adf/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L27)
+Defined in: [operator.ts:27](https://github.com/humanprotocol/human-protocol/blob/57c781c4208fceea534a5c18b81692eb57100170/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L27)
 
 ## Constructors
 
@@ -24,7 +24,7 @@ Defined in: [operator.ts:27](https://github.com/humanprotocol/human-protocol/blo
 
 > `static` **getOperator**(`chainId`, `address`): `Promise`\<`null` \| [`IOperator`](../../interfaces/interfaces/IOperator.md)\>
 
-Defined in: [operator.ts:43](https://github.com/humanprotocol/human-protocol/blob/e2535128eb5f5be411c1a30e3ae041b00d889adf/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L43)
+Defined in: [operator.ts:43](https://github.com/humanprotocol/human-protocol/blob/57c781c4208fceea534a5c18b81692eb57100170/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L43)
 
 This function returns the operator data for the given address.
 
@@ -62,7 +62,7 @@ const operator = await OperatorUtils.getOperator(ChainId.POLYGON_AMOY, '0x62dD51
 
 > `static` **getOperators**(`filter`): `Promise`\<[`IOperator`](../../interfaces/interfaces/IOperator.md)[]\>
 
-Defined in: [operator.ts:109](https://github.com/humanprotocol/human-protocol/blob/e2535128eb5f5be411c1a30e3ae041b00d889adf/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L109)
+Defined in: [operator.ts:109](https://github.com/humanprotocol/human-protocol/blob/57c781c4208fceea534a5c18b81692eb57100170/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L109)
 
 This function returns all the operator details of the protocol.
 
@@ -97,7 +97,7 @@ const operators = await OperatorUtils.getOperators(filter);
 
 > `static` **getReputationNetworkOperators**(`chainId`, `address`, `role?`): `Promise`\<[`IOperator`](../../interfaces/interfaces/IOperator.md)[]\>
 
-Defined in: [operator.ts:190](https://github.com/humanprotocol/human-protocol/blob/e2535128eb5f5be411c1a30e3ae041b00d889adf/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L190)
+Defined in: [operator.ts:190](https://github.com/humanprotocol/human-protocol/blob/57c781c4208fceea534a5c18b81692eb57100170/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L190)
 
 Retrieves the reputation network operators of the specified address.
 
@@ -141,7 +141,7 @@ const operators = await OperatorUtils.getReputationNetworkOperators(ChainId.POLY
 
 > `static` **getRewards**(`chainId`, `slasherAddress`): `Promise`\<[`IReward`](../../interfaces/interfaces/IReward.md)[]\>
 
-Defined in: [operator.ts:244](https://github.com/humanprotocol/human-protocol/blob/e2535128eb5f5be411c1a30e3ae041b00d889adf/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L244)
+Defined in: [operator.ts:244](https://github.com/humanprotocol/human-protocol/blob/57c781c4208fceea534a5c18b81692eb57100170/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L244)
 
 This function returns information about the rewards for a given slasher address.
 

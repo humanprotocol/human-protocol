@@ -204,9 +204,7 @@ describe('SignatureAuthGuard', () => {
     it('should throw bad request when escrow data is missing', async () => {
       const guard = new SignatureAuthGuard([AuthSignatureRole.JOB_LAUNCHER]);
 
-      mockedEscrowUtils.getEscrow.mockResolvedValueOnce(
-        null as unknown as IEscrow,
-      );
+      mockedEscrowUtils.getEscrow.mockResolvedValueOnce(null);
 
       const { privateKey } = generateEthWallet();
       const signature = await signMessage(body, privateKey);

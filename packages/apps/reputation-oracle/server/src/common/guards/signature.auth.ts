@@ -56,21 +56,18 @@ export class SignatureAuthGuard implements CanActivate {
       throw new HttpException('Escrow not found', HttpStatus.BAD_REQUEST);
     }
 
-    if (
-      this.authorizedSignerRoles.includes(AuthSignatureRole.JOB_LAUNCHER) &&
-      escrowData?.launcher?.length
-    ) {
+    if (this.authorizedSignerRoles.includes(AuthSignatureRole.JOB_LAUNCHER)) {
       oracleAdresses.push(escrowData.launcher);
     }
     if (
       this.authorizedSignerRoles.includes(AuthSignatureRole.EXCHANGE_ORACLE) &&
-      escrowData?.exchangeOracle?.length
+      escrowData.exchangeOracle
     ) {
       oracleAdresses.push(escrowData.exchangeOracle);
     }
     if (
       this.authorizedSignerRoles.includes(AuthSignatureRole.RECORDING_ORACLE) &&
-      escrowData?.recordingOracle?.length
+      escrowData.recordingOracle
     ) {
       oracleAdresses.push(escrowData.recordingOracle);
     }
