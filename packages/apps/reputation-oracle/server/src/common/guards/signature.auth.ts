@@ -52,6 +52,10 @@ export class SignatureAuthGuard implements CanActivate {
       data.chain_id,
       data.escrow_address,
     );
+    if (!escrowData) {
+      throw new HttpException('Escrow not found', HttpStatus.BAD_REQUEST);
+    }
+
     if (
       this.authorizedSignerRoles.includes(AuthSignatureRole.JOB_LAUNCHER) &&
       escrowData?.launcher?.length

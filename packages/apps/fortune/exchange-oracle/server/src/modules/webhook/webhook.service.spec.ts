@@ -321,7 +321,7 @@ describe('WebhookService', () => {
           ChainId.LOCALHOST,
           EventType.ESCROW_FAILED,
         ),
-      ).rejects.toThrow(NotFoundError);
+      ).rejects.toThrow(new NotFoundError('Oracle not found'));
     });
   });
 

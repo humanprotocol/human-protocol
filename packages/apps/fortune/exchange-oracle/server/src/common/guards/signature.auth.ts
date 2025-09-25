@@ -4,9 +4,13 @@ import { Reflector } from '@nestjs/core';
 
 import { AssignmentRepository } from '../../modules/assignment/assignment.repository';
 import { HEADER_SIGNATURE_KEY } from '../constant';
-import { ErrorAssignment, ErrorSignature } from '../constant/errors';
+import {
+  ErrorAssignment,
+  ErrorEscrow,
+  ErrorSignature,
+} from '../constant/errors';
 import { AuthSignatureRole } from '../enums/role';
-import { AuthError, NotFoundError } from '../errors';
+import { AuthError, ValidationError } from '../errors';
 import { verifySignature } from '../utils/signature';
 
 @Injectable()
@@ -34,31 +38,31 @@ export class SignatureAuthGuard implements CanActivate {
       if (assignment) {
         oracleAdresses.push(assignment.workerAddress);
       } else {
-        throw new NotFoundError(ErrorAssignment.NotFound);
+        throw new ValidationError(ErrorAssignment.NotFound);
       }
     } else {
       const escrowData = await EscrowUtils.getEscrow(
         data.chain_id,
         data.escrow_address,
       );
+      if (!escrowData) {
+        throw new ValidationError(ErrorEscrow.NotFound);
+      }
 
-      if (
-        roles.includes(AuthSignatureRole.JobLauncher) &&
-        escrowData?.launcher?.length
-      ) {
+      if (roles.includes(AuthSignatureRole.JobLauncher)) {
         oracleAdresses.push(escrowData.launcher);
       }
 
       if (
         roles.includes(AuthSignatureRole.Recording) &&
-        escrowData?.recordingOracle?.length
+        escrowData.recordingOracle
       ) {
         oracleAdresses.push(escrowData.recordingOracle);
       }
 
       if (
         roles.includes(AuthSignatureRole.Reputation) &&
-        escrowData?.reputationOracle?.length
+        escrowData.reputationOracle
       ) {
         oracleAdresses.push(escrowData.reputationOracle);
       }

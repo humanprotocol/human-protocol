@@ -246,9 +246,7 @@ describe('AbuseService', () => {
       };
 
       mockAbuseRepository.findOneById.mockResolvedValueOnce(abuseEntity);
-      mockedEscrowUtils.getEscrow.mockResolvedValueOnce(
-        null as unknown as IEscrow,
-      );
+      mockedEscrowUtils.getEscrow.mockResolvedValueOnce(null);
 
       await expect(
         abuseService.processSlackInteraction(
@@ -272,9 +270,7 @@ describe('AbuseService', () => {
       mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
         launcher: fakeAddress,
       } as unknown as IEscrow);
-      mockedOperatorUtils.getOperator.mockResolvedValueOnce(
-        null as unknown as IOperator,
-      );
+      mockedOperatorUtils.getOperator.mockResolvedValueOnce(null);
 
       await expect(
         abuseService.processSlackInteraction(
@@ -444,9 +440,7 @@ describe('AbuseService', () => {
       const abuseEntity = generateAbuseEntity({ retriesCount: 0 });
       mockAbuseRepository.findToClassify.mockResolvedValueOnce([abuseEntity]);
 
-      mockedEscrowUtils.getEscrow.mockResolvedValueOnce(
-        null as unknown as IEscrow,
-      );
+      mockedEscrowUtils.getEscrow.mockResolvedValueOnce(null);
 
       await abuseService.processAbuseRequests();
 
@@ -464,9 +458,7 @@ describe('AbuseService', () => {
       mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
         exchangeOracle: fakeAddress,
       } as unknown as IEscrow);
-      mockedOperatorUtils.getOperator.mockResolvedValueOnce(
-        null as unknown as IOperator,
-      );
+      mockedOperatorUtils.getOperator.mockResolvedValueOnce(null);
 
       await abuseService.processAbuseRequests();
 
@@ -570,9 +562,7 @@ describe('AbuseService', () => {
       });
 
       mockAbuseRepository.findClassified.mockResolvedValueOnce([abuseEntity]);
-      mockedEscrowUtils.getEscrow.mockResolvedValueOnce(
-        null as unknown as IEscrow,
-      );
+      mockedEscrowUtils.getEscrow.mockResolvedValueOnce(null);
 
       await abuseService.processClassifiedAbuses();
 
@@ -593,9 +583,7 @@ describe('AbuseService', () => {
       mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
         exchangeOracle: fakeAddress,
       } as unknown as IEscrow);
-      mockedOperatorUtils.getOperator.mockResolvedValueOnce(
-        null as unknown as IOperator,
-      );
+      mockedOperatorUtils.getOperator.mockResolvedValueOnce(null);
 
       await abuseService.processClassifiedAbuses();
 

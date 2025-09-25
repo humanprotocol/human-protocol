@@ -177,18 +177,17 @@ export class AbuseService {
           abuseEntity.escrowAddress,
         );
         if (!escrow) {
-          throw new Error(
-            `Escrow data is missing. Abuse id: ${abuseEntity.id}`,
-          );
+          throw new Error('Escrow data is missing');
         }
         const operator = await OperatorUtils.getOperator(
           abuseEntity.chainId,
           escrow.exchangeOracle as string,
         );
-        if (!operator || !operator.webhookUrl) {
-          throw new Error(
-            `Operator data is missing. Abuse id: ${abuseEntity.id}`,
-          );
+        if (!operator) {
+          throw new Error('Operator data is missing');
+        }
+        if (!operator.webhookUrl) {
+          throw new Error('Operator webhook URL is missing');
         }
 
         const webhookPayload = {
@@ -223,7 +222,10 @@ export class AbuseService {
         abuseEntity.status = AbuseStatus.NOTIFIED;
         await this.abuseRepository.updateOne(abuseEntity);
       } catch (err) {
-        this.logger.error(`Error sending abuse`, { err });
+        this.logger.error(`Error sending abuse`, {
+          error: err,
+          abuseId: abuseEntity.id,
+        });
         await this.handleAbuseError(abuseEntity);
       }
     }
@@ -242,9 +244,7 @@ export class AbuseService {
           abuseEntity.escrowAddress,
         );
         if (!escrow) {
-          throw new Error(
-            `Escrow data is missing. Abuse id: ${abuseEntity.id}`,
-          );
+          throw new Error('Escrow data is missing');
         }
 
         if (abuseEntity.decision === AbuseDecision.ACCEPTED) {
@@ -259,10 +259,11 @@ export class AbuseService {
             chainId,
             escrow.launcher,
           );
-          if (!operator || !operator.webhookUrl) {
-            throw new Error(
-              `Operator data is missing. Abuse id: ${abuseEntity.id}`,
-            );
+          if (!operator) {
+            throw new Error('Operator data is missing');
+          }
+          if (!operator.webhookUrl) {
+            throw new Error('Operator webhook URL is missing');
           }
 
           const webhookPayload = {
@@ -300,10 +301,11 @@ export class AbuseService {
             chainId,
             escrow.exchangeOracle as string,
           );
-          if (!operator || !operator.webhookUrl) {
-            throw new Error(
-              `Operator data is missing. Abuse id: ${abuseEntity.id}`,
-            );
+          if (!operator) {
+            throw new Error('Operator data is missing');
+          }
+          if (!operator.webhookUrl) {
+            throw new Error('Operator webhook URL is missing');
           }
 
           try {
@@ -328,8 +330,11 @@ export class AbuseService {
         }
         abuseEntity.status = AbuseStatus.COMPLETED;
         await this.abuseRepository.updateOne(abuseEntity);
-      } catch (err) {
-        this.logger.error(`Error sending abuse: ${err.message}`);
+      } catch (error) {
+        this.logger.error('Error sending abuse', {
+          error: error,
+          abuseId: abuseEntity.id,
+        });
         await this.handleAbuseError(abuseEntity);
       }
     }

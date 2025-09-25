@@ -200,5 +200,37 @@ describe('SignatureAuthGuard', () => {
       expect(thrownError.message).toBe('Invalid web3 signature');
       expect(thrownError.status).toBe(HttpStatus.UNAUTHORIZED);
     });
+
+    it('should throw bad request when escrow data is missing', async () => {
+      const guard = new SignatureAuthGuard([AuthSignatureRole.JOB_LAUNCHER]);
+
+      mockedEscrowUtils.getEscrow.mockResolvedValueOnce(
+        null as unknown as IEscrow,
+      );
+
+      const { privateKey } = generateEthWallet();
+      const signature = await signMessage(body, privateKey);
+
+      const request = {
+        headers: {
+          'human-signature': signature,
+        },
+        body,
+      };
+      executionContextMock.__getRequest.mockReturnValueOnce(request);
+
+      let thrownError: unknown;
+      try {
+        await guard.canActivate(
+          executionContextMock as unknown as ExecutionContext,
+        );
+      } catch (error) {
+        thrownError = error;
+      }
+      expect(thrownError).toBeInstanceOf(HttpException);
+      const httpError = thrownError as HttpException;
+      expect(httpError.message).toBe('Escrow not found');
+      expect(httpError.getStatus()).toBe(HttpStatus.BAD_REQUEST);
+    });
   });
 });

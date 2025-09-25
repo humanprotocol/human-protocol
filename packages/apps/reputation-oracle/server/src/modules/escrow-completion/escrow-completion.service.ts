@@ -243,7 +243,6 @@ export class EscrowCompletionService {
         if (!escrowData) {
           throw new Error('Escrow data is missing');
         }
-        console.log(escrowData);
 
         const oracleAddresses: string[] = [
           escrowData.launcher as string,

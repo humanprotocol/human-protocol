@@ -1131,9 +1131,7 @@ describe('EscrowCompletionService', () => {
       ]);
 
       mockGetEscrowStatus.mockResolvedValueOnce(EscrowStatus.Paid);
-      mockedEscrowUtils.getEscrow.mockResolvedValueOnce(
-        null as unknown as IEscrow,
-      );
+      mockedEscrowUtils.getEscrow.mockResolvedValueOnce(null);
 
       await service.processPaidEscrows();
 
@@ -1165,9 +1163,7 @@ describe('EscrowCompletionService', () => {
         exchangeOracle,
       } as unknown as IEscrow);
 
-      mockedOperatorUtils.getOperator.mockResolvedValueOnce(
-        null as unknown as IOperator,
-      );
+      mockedOperatorUtils.getOperator.mockResolvedValueOnce(null);
 
       await service.processPaidEscrows();
 

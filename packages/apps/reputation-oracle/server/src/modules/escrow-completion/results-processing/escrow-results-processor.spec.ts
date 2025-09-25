@@ -103,9 +103,7 @@ describe('BaseEscrowResultsProcessor', () => {
 
       processor.assertResultsComplete.mockResolvedValueOnce(undefined);
 
-      mockedEscrowUtils.getEscrow.mockResolvedValueOnce(
-        null as unknown as IEscrow,
-      );
+      mockedEscrowUtils.getEscrow.mockResolvedValueOnce(null);
 
       await expect(
         processor.storeResults(chainId, escrowAddress, {} as JobManifest),
