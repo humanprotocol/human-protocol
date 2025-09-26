@@ -8,7 +8,7 @@ interface AddThirstyfiInfoModalProps {
 }
 
 export function useAddThirstyfiInfoModal() {
-  const { openModal } = useModal();
+  const { openModal, closeModal } = useModal();
 
   return {
     openModal: ({ escrow_address, chain_id }: AddThirstyfiInfoModalProps) => {
@@ -17,6 +17,7 @@ export function useAddThirstyfiInfoModal() {
           <ThirstyfiInfoModal
             escrow_address={escrow_address}
             chain_id={chain_id}
+            onClose={closeModal}
           />
         ),
       });

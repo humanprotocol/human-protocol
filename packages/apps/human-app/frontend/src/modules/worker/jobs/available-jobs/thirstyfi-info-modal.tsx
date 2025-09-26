@@ -5,6 +5,8 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { useTranslation } from 'react-i18next';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useQueryClient } from '@tanstack/react-query';
+import Link from '@mui/material/Link';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/data-entry/input';
 import { useJobsNotifications } from '../hooks';
@@ -13,17 +15,21 @@ import { useAssignJobMutation } from './hooks/use-assign-job';
 interface ThirstyfiInfoModalProps {
   escrow_address: string;
   chain_id: number;
+  onClose?: () => void;
 }
 
 export function ThirstyfiInfoModal({
   escrow_address,
   chain_id,
+  onClose,
 }: ThirstyfiInfoModalProps) {
   const { t } = useTranslation();
+
   const methods = useForm({
     defaultValues: {
       wallet_address: '',
       api_key: '',
+      api_secret: '',
     },
     resolver: zodResolver(
       z.object({
@@ -33,20 +39,36 @@ export function ThirstyfiInfoModal({
           .length(42, t('thirstyfiModal.walletAddressError'))
           .regex(/^0x/, t('thirstyfiModal.walletAddressRegexError')),
         api_key: z.string().trim().min(1, t('validation.required')),
+        api_secret: z.string().trim().min(1, t('validation.required')),
       })
     ),
   });
+
   const { onJobAssignmentError, onJobAssignmentSuccess } =
     useJobsNotifications();
+  const queryClient = useQueryClient();
+
   const { mutate: assignJobMutation, isPending } = useAssignJobMutation(
     {
-      onSuccess: onJobAssignmentSuccess,
+      onSuccess: () => {
+        onJobAssignmentSuccess();
+        void queryClient
+          .invalidateQueries({ queryKey: ['availableJobs'] })
+          .then(() => {
+            methods.reset();
+            onClose?.();
+          });
+      },
       onError: onJobAssignmentError,
     },
     [`assignJob-${escrow_address}`]
   );
 
-  const onSubmit = (data: { wallet_address: string; api_key: string }) => {
+  const onSubmit = (data: {
+    wallet_address: string;
+    api_key: string;
+    api_secret: string;
+  }) => {
     assignJobMutation({ escrow_address, chain_id, ...data });
   };
 
@@ -61,12 +83,53 @@ export function ThirstyfiInfoModal({
           <Typography variant="h4" textAlign="center">
             {t('thirstyfiModal.title')}
           </Typography>
-          <Input
-            fullWidth
-            label={t('thirstyfiModal.walletAddress')}
-            name="wallet_address"
-          />
-          <Input fullWidth label={t('thirstyfiModal.apiKey')} name="api_key" />
+          <Typography variant="h6" textAlign="center">
+            {t('thirstyfiModal.tutorialText')}
+            <Link
+              href={t('thirstyfiModal.tutorialLink')}
+              target="_blank"
+              rel="noopener noreferrer"
+              underline="hover"
+            >
+              {t('thirstyfiModal.tutorialLink')}
+            </Link>
+          </Typography>
+          <Stack gap={0.5}>
+            <Input
+              fullWidth
+              label={t('thirstyfiModal.walletAddress')}
+              name="wallet_address"
+            />
+            <Typography variant="caption" color="text.secondary">
+              {t('thirstyfiModal.walletAddressHelp', {
+                defaultValue: t('thirstyfiModal.walletAddressTooltip'),
+              })}
+            </Typography>
+          </Stack>
+          <Stack gap={0.5}>
+            <Input
+              fullWidth
+              label={t('thirstyfiModal.apiKey')}
+              name="api_key"
+            />
+            <Typography variant="caption" color="text.secondary">
+              {t('thirstyfiModal.apiKeyHelp', {
+                defaultValue: t('thirstyfiModal.apiKeyTooltip'),
+              })}
+            </Typography>
+          </Stack>
+          <Stack gap={0.5}>
+            <Input
+              fullWidth
+              label={t('thirstyfiModal.apiSecret')}
+              name="api_secret"
+            />
+            <Typography variant="caption" color="text.secondary">
+              {t('thirstyfiModal.apiSecretHelp', {
+                defaultValue: t('thirstyfiModal.apiSecretTooltip'),
+              })}
+            </Typography>
+          </Stack>
           <Button variant="contained" type="submit" loading={isPending}>
             {t('thirstyfiModal.submitBtn')}
           </Button>

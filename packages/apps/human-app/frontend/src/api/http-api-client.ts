@@ -72,7 +72,6 @@ export class HttpApiClient {
       method,
       headers: {
         'content-type': 'application/json',
-        'ngrok-skip-browser-warning': 'true',
         ...lowercasedHeaders,
       },
       body: body ? JSON.stringify(body) : undefined,
