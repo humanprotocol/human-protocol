@@ -23,17 +23,17 @@ export class JobAssignmentDto {
   @AutoMap()
   @IsOptional()
   @IsString()
-  @ApiPropertyOptional({ description: 'Optional wallet address for Thirstify' })
+  @ApiPropertyOptional({ description: 'Optional wallet address for Thirstyfi' })
   wallet_address?: string;
   @AutoMap()
   @IsOptional()
   @IsString()
-  @ApiPropertyOptional({ description: 'Optional api_key for Thirstify' })
+  @ApiPropertyOptional({ description: 'Optional api_key for Thirstyfi' })
   api_key?: string;
   @AutoMap()
   @IsOptional()
   @IsString()
-  @ApiPropertyOptional({ description: 'Optional api_secret for Thirstify' })
+  @ApiPropertyOptional({ description: 'Optional api_secret for Thirstyfi' })
   api_secret?: string;
   @AutoMap()
   @IsNumber()
