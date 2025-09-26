@@ -443,8 +443,9 @@
   },
   "thirstyfiModal": {
     "title": "This information is required to participate in this task",
-    "tutorialText": "Before filling out the form below, please go to see the tutorial at: ",
-    "tutorialLink": "https://thirsty.fi",
+    "tutorialText1": "Before filling out the form below, please checkout ",
+    "tutorialText2": " for instructions.",
+    "tutorialLink": "thirsty.fi",
     "walletAddress": "Wallet address",
     "walletAddressTooltip": "Your EVM wallet address on Polygon network. Used to receive the rewards.",
     "apiKey": "API key",

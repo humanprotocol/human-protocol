@@ -87,15 +87,15 @@ export function ThirstyfiInfoModal({
             {t('thirstyfiModal.title')}
           </Typography>
           <Typography variant="h6" textAlign="center">
-            {t('thirstyfiModal.tutorialText')}
+            {t('thirstyfiModal.tutorialText1')}
             <Link
-              href={t('thirstyfiModal.tutorialLink')}
+              href="https://thirsty.fi"
               target="_blank"
               rel="noopener noreferrer"
-              underline="hover"
             >
               {t('thirstyfiModal.tutorialLink')}
             </Link>
+            {t('thirstyfiModal.tutorialText2')}
           </Typography>
           <Stack gap={0.5}>
             <Input
