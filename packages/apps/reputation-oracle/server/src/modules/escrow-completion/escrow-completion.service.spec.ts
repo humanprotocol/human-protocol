@@ -444,6 +444,30 @@ describe('EscrowCompletionService', () => {
         }),
       );
     });
+
+    it('should handle missing escrow data during pending processing and mark as failed when out of retries', async () => {
+      const pendingRecord = generateEscrowCompletion(
+        EscrowCompletionStatus.PENDING,
+      );
+      pendingRecord.retriesCount = mockServerConfigService.maxRetryCount;
+      mockEscrowCompletionRepository.findByStatus.mockResolvedValueOnce([
+        {
+          ...pendingRecord,
+        },
+      ]);
+
+      mockGetEscrowStatus.mockResolvedValue(EscrowStatus.Pending);
+      mockedEscrowUtils.getEscrow.mockResolvedValueOnce(null);
+
+      await service.processPendingRecords();
+
+      expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledTimes(1);
+      expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledWith({
+        ...pendingRecord,
+        failureDetail: 'Error message: Escrow data is missing',
+        status: 'failed',
+      });
+    });
   });
 
   describe('createEscrowPayoutsBatch', () => {
@@ -825,11 +849,6 @@ describe('EscrowCompletionService', () => {
 
       launcherAddress = faker.finance.ethereumAddress();
       exchangeOracleAddress = faker.finance.ethereumAddress();
-
-      mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
-        launcher: launcherAddress,
-        exchangeOracle: exchangeOracleAddress,
-      } as unknown as IEscrow);
     });
 
     describe('handle failures', () => {
@@ -837,6 +856,10 @@ describe('EscrowCompletionService', () => {
 
       beforeEach(() => {
         mockGetEscrowStatus.mockRejectedValue(testError);
+        mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
+          launcher: launcherAddress,
+          exchangeOracle: exchangeOracleAddress,
+        } as unknown as IEscrow);
       });
 
       it('should process multiple items and handle failure for each', async () => {
@@ -977,6 +1000,10 @@ describe('EscrowCompletionService', () => {
     it.each([EscrowStatus.Partial, EscrowStatus.Paid])(
       'should properly complete escrow with status "%s"',
       async (escrowStatus) => {
+        mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
+          launcher: launcherAddress,
+          exchangeOracle: exchangeOracleAddress,
+        } as unknown as IEscrow);
         mockGetEscrowStatus.mockResolvedValueOnce(escrowStatus);
         const mockGasPrice = faker.number.bigInt();
         mockWeb3Service.calculateGasPrice.mockResolvedValueOnce(mockGasPrice);
@@ -1057,6 +1084,10 @@ describe('EscrowCompletionService', () => {
     ])(
       'should not comlete escrow if its status is not partial or paid [%#]',
       async (escrowStatus) => {
+        mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
+          launcher: launcherAddress,
+          exchangeOracle: exchangeOracleAddress,
+        } as unknown as IEscrow);
         mockGetEscrowStatus.mockResolvedValueOnce(escrowStatus);
 
         const paidPayoutsRecord = generateEscrowCompletion(
@@ -1087,6 +1118,62 @@ describe('EscrowCompletionService', () => {
         );
       },
     );
+
+    it('should handle missing escrow data in paid processing and mark as failed when out of retries', async () => {
+      const paidPayoutsRecord = generateEscrowCompletion(
+        EscrowCompletionStatus.PAID,
+      );
+      paidPayoutsRecord.retriesCount = mockServerConfigService.maxRetryCount;
+      mockEscrowCompletionRepository.findByStatus.mockResolvedValueOnce([
+        {
+          ...paidPayoutsRecord,
+        },
+      ]);
+
+      mockGetEscrowStatus.mockResolvedValueOnce(EscrowStatus.Paid);
+      mockedEscrowUtils.getEscrow.mockResolvedValueOnce(null);
+
+      await service.processPaidEscrows();
+
+      expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledTimes(1);
+      expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledWith({
+        ...paidPayoutsRecord,
+        failureDetail: 'Error message: Escrow data is missing',
+        status: 'failed',
+      });
+    });
+
+    it('should handle missing operator data in paid processing and mark as failed when out of retries', async () => {
+      const paidPayoutsRecord = generateEscrowCompletion(
+        EscrowCompletionStatus.PAID,
+      );
+      paidPayoutsRecord.retriesCount = mockServerConfigService.maxRetryCount;
+      mockEscrowCompletionRepository.findByStatus.mockResolvedValueOnce([
+        {
+          ...paidPayoutsRecord,
+        },
+      ]);
+
+      mockGetEscrowStatus.mockResolvedValueOnce(EscrowStatus.Paid);
+
+      const launcher = faker.finance.ethereumAddress();
+      const exchangeOracle = faker.finance.ethereumAddress();
+      mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
+        launcher,
+        exchangeOracle,
+      } as unknown as IEscrow);
+
+      mockedOperatorUtils.getOperator.mockResolvedValueOnce(null);
+
+      await service.processPaidEscrows();
+
+      expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledTimes(1);
+      expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledWith({
+        ...paidPayoutsRecord,
+        failureDetail: 'Error message: Oracle data is missing',
+        status: 'failed',
+      });
+    });
   });
 
   describe('getEscrowResultsProcessor', () => {
