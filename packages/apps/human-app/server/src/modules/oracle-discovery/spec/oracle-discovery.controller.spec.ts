@@ -6,9 +6,9 @@ import { OracleDiscoveryService } from '../oracle-discovery.service';
 import { oracleDiscoveryServiceMock } from './oracle-discovery.service.mock';
 import {
   GetOraclesQuery,
-  DiscoveredOracle,
+  // DiscoveredOracle,
 } from '../model/oracle-discovery.model';
-import { generateOracleDiscoveryResponseBody } from './oracle-discovery.fixture';
+// import { generateOracleDiscoveryResponseBody } from './oracle-discovery.fixture';
 import { OracleDiscoveryProfile } from '../oracle-discovery.mapper.profile';
 import { EnvironmentConfigService } from '../../../common/config/environment-config.service';
 import { CommonConfigModule } from '../../../common/config/common-config.module';
@@ -18,7 +18,7 @@ import { ChainId } from '@human-protocol/sdk';
 
 describe('OracleDiscoveryController', () => {
   let controller: OracleDiscoveryController;
-  let serviceMock: OracleDiscoveryService;
+  // let serviceMock: OracleDiscoveryService;
   const configServiceMock: Partial<EnvironmentConfigService> = {
     cacheTtlOracleDiscovery: 600,
     chainIdsEnabled: [ChainId.POLYGON, ChainId.MAINNET],
@@ -51,7 +51,7 @@ describe('OracleDiscoveryController', () => {
     controller = module.get<OracleDiscoveryController>(
       OracleDiscoveryController,
     );
-    serviceMock = module.get<OracleDiscoveryService>(OracleDiscoveryService);
+    // serviceMock = module.get<OracleDiscoveryService>(OracleDiscoveryService);
   });
 
   it('should be defined', () => {
