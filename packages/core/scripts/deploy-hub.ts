@@ -55,19 +55,25 @@ async function main() {
   const quorumFraction = process.env.QUORUM_FRACTION
     ? parseInt(process.env.QUORUM_FRACTION)
     : 0;
-  const TimelockController =
-    await ethers.getContractFactory('TimelockController');
-  const TimelockControllerContract = await TimelockController.deploy(
-    1,
-    [],
-    [],
-    await deployer.getAddress()
-  );
-  await TimelockControllerContract.waitForDeployment();
-  console.log(
-    'TimelockController Address:',
-    await TimelockControllerContract.getAddress()
-  );
+
+  const existingTimelockAddress =
+    process.env.HUB_TIMELOCK_CONTROLLER_ADDRESS || '';
+  let timelockAddress = existingTimelockAddress;
+  if (timelockAddress) {
+    console.log('Using existing TimelockController Address:', timelockAddress);
+  } else {
+    const TimelockController =
+      await ethers.getContractFactory('TimelockController');
+    const TimelockControllerContract = await TimelockController.deploy(
+      1,
+      [],
+      [],
+      await deployer.getAddress()
+    );
+    await TimelockControllerContract.waitForDeployment();
+    timelockAddress = await TimelockControllerContract.getAddress();
+    console.log('TimelockController Address:', timelockAddress);
+  }
   const MetaHumanGovernor = await ethers.getContractFactory(
     'contracts/governance/MetaHumanGovernor.sol:MetaHumanGovernor'
   );
@@ -75,7 +81,7 @@ async function main() {
     MetaHumanGovernor,
     [
       vhmTokenAddress,
-      await TimelockControllerContract.getAddress(),
+      timelockAddress,
       [],
       chainId,
       hubAutomaticRelayerAddress,
