@@ -29,9 +29,10 @@ export function ThirstyfiInfoModal({
       z.object({
         wallet_address: z
           .string()
+          .trim()
           .length(42, t('thirstyfiModal.walletAddressError'))
           .regex(/^0x/, t('thirstyfiModal.walletAddressRegexError')),
-        api_key: z.string().min(1, t('validation.required')),
+        api_key: z.string().trim().min(1, t('validation.required')),
       })
     ),
   });
