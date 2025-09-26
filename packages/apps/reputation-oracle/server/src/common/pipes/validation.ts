@@ -7,6 +7,8 @@ import {
   type ValidationPipeOptions,
 } from '@nestjs/common';
 
+import { camelToSnake } from '../../utils/case-converters';
+
 @Injectable()
 export class HttpValidationPipe extends ValidationPipe {
   constructor(options?: ValidationPipeOptions) {
@@ -24,30 +26,21 @@ export class HttpValidationPipe extends ValidationPipe {
     });
   }
 
-  private formatErrorsSnakeCase(
-    errors: ValidationError[],
-    parentPath?: string,
-  ): string[] {
-    const out: string[] = [];
-    for (const err of errors) {
-      const currentProp = err.property
-        ? err.property.replace(/([A-Z])/g, '_$1').toLowerCase()
-        : '';
-      const path = [parentPath, currentProp].filter(Boolean).join('.');
+  private formatErrorsSnakeCase(errors: ValidationError[]): string[] {
+    const rawMessages = this.flattenValidationErrors(errors);
+    return rawMessages.map((msg) => {
+      const firstSpace = msg.indexOf(' ');
+      if (firstSpace === -1) return msg;
 
-      if (err.constraints) {
-        for (const msg of Object.values(err.constraints)) {
-          const adjusted = err.property
-            ? msg.replace(new RegExp(`^${err.property}\\s+`, 'i'), '')
-            : msg;
-          out.push(path ? `${path} ${adjusted}` : adjusted);
-        }
-      }
+      const rawPath = msg.slice(0, firstSpace);
+      const rest = msg.slice(firstSpace + 1);
 
-      if (err.children && err.children.length) {
-        out.push(...this.formatErrorsSnakeCase(err.children, path));
-      }
-    }
-    return out;
+      const transformedPath = rawPath
+        .split('.')
+        .map((segment) => segment.replace(/^[A-Za-z0-9_]+/, camelToSnake))
+        .join('.');
+
+      return `${transformedPath} ${rest}`;
+    });
   }
 }
