@@ -87,7 +87,7 @@ export class JobsDiscoveryController {
                 escrow_address: 'thirstyfi-task',
                 job_type: 'thirstyfi',
                 job_description: 'Check job description at https://thirsty.fi',
-                reward_amount: '10',
+                reward_amount: '5 - 50',
                 reward_token: 'USDT',
                 status: JobStatus.ACTIVE,
                 created_at: new Date().toISOString(),

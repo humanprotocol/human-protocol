@@ -75,7 +75,7 @@ export class JobAssignmentController {
           chain_id: ChainId.POLYGON,
           job_type: 'thirstyfi',
           status: 'ACTIVE',
-          reward_amount: '10',
+          reward_amount: '5 - 50',
           reward_token: 'USDT',
           created_at: new Date().toISOString(),
           expires_at: process.env.THIRSTYFI_TASK_EXPIRATION_DATE ?? '',
@@ -134,7 +134,7 @@ export class JobAssignmentController {
                 assignment_id: data.id,
                 escrow_address: 'thirstyfi-task',
                 job_type: 'thirstyfi',
-                reward_amount: '10',
+                reward_amount: '5 - 50',
                 reward_token: 'USDT',
                 status:
                   data.status === 'pending'
