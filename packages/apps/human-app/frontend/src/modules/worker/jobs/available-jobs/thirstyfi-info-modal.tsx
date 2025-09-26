@@ -9,6 +9,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import Link from '@mui/material/Link';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/data-entry/input';
+import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { useJobsNotifications } from '../hooks';
 import { useAssignJobMutation } from './hooks/use-assign-job';
 
@@ -24,6 +25,7 @@ export function ThirstyfiInfoModal({
   onClose,
 }: ThirstyfiInfoModalProps) {
   const { t } = useTranslation();
+  const isMobile = useIsMobile();
 
   const methods = useForm({
     defaultValues: {
@@ -51,13 +53,14 @@ export function ThirstyfiInfoModal({
   const { mutate: assignJobMutation, isPending } = useAssignJobMutation(
     {
       onSuccess: () => {
+        const queryKey = isMobile
+          ? ['availableJobsInfinite']
+          : ['availableJobs'];
         onJobAssignmentSuccess();
-        void queryClient
-          .invalidateQueries({ queryKey: ['availableJobs'] })
-          .then(() => {
-            methods.reset();
-            onClose?.();
-          });
+        void queryClient.invalidateQueries({ queryKey }).then(() => {
+          methods.reset();
+          onClose?.();
+        });
       },
       onError: onJobAssignmentError,
     },
