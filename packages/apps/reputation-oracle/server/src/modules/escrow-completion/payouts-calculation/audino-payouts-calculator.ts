@@ -1,4 +1,4 @@
-import { EscrowClient, EscrowUtils } from '@human-protocol/sdk';
+import { EscrowClient } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 import type { OverrideProperties } from 'type-fest';
 
@@ -43,10 +43,8 @@ export class AudinoPayoutsCalculator implements EscrowPayoutsCalculator {
     if (annotations.jobs.length === 0 || annotations.results.length === 0) {
       throw new Error('Invalid annotation meta');
     }
-
-    const escrowData = await EscrowUtils.getEscrow(chainId, escrowAddress);
-    const jobBountyValue =
-      BigInt(escrowData.totalFundedAmount) / BigInt(annotations.jobs.length);
+    const reservedFunds = await escrowClient.getReservedFunds(escrowAddress);
+    const jobBountyValue = reservedFunds / BigInt(annotations.jobs.length);
 
     const workersBounties = new Map<string, bigint>();
     for (const job of annotations.jobs) {
