@@ -1,11 +1,11 @@
 import {
   Injectable,
-  ValidationError as ValidError,
   ValidationPipe,
   ValidationPipeOptions,
+  ValidationError as ValidError,
 } from '@nestjs/common';
 import { ValidationError } from '../errors';
-import { CaseConverter } from '../utils/case-converter';
+import { camelToSnake } from '../utils/case-converter';
 
 @Injectable()
 export class HttpValidationPipe extends ValidationPipe {
@@ -34,9 +34,7 @@ export class HttpValidationPipe extends ValidationPipe {
 
       const transformedPath = rawPath
         .split('.')
-        .map((segment) =>
-          segment.replace(/^[A-Za-z0-9_]+/, CaseConverter.transformToSnakeCase),
-        )
+        .map((segment) => segment.replace(/^[A-Za-z0-9_]+/, camelToSnake))
         .join('.');
 
       return `${transformedPath} ${rest}`;

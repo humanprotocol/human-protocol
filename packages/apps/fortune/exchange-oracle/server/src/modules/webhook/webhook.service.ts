@@ -11,7 +11,7 @@ import { HEADER_SIGNATURE_KEY } from '../../common/constant';
 import { ErrorWebhook } from '../../common/constant/errors';
 import { EventType, WebhookStatus } from '../../common/enums/webhook';
 import { ValidationError } from '../../common/errors';
-import { CaseConverter } from '../../common/utils/case-converter';
+import { transformKeysFromCamelToSnake } from '../../common/utils/case-converter';
 import { formatAxiosError } from '../../common/utils/http';
 import { signMessage } from '../../common/utils/signature';
 import { JobService } from '../job/job.service';
@@ -107,7 +107,7 @@ export class WebhookService {
         reason: webhook.failureDetail,
       };
     }
-    const transformedWebhook = CaseConverter.transformToSnakeCase(webhookData);
+    const transformedWebhook: any = transformKeysFromCamelToSnake(webhookData);
 
     const signedBody = await signMessage(
       transformedWebhook,

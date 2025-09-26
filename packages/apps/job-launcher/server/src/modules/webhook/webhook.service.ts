@@ -14,7 +14,7 @@ import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { ErrorWebhook } from '../../common/constants/errors';
 import { EventType, WebhookStatus } from '../../common/enums/webhook';
 import { ServerError, ValidationError } from '../../common/errors';
-import { CaseConverter } from '../../common/utils/case-converter';
+import { transformKeysFromCamelToSnake } from '../../common/utils/case-converter';
 import { formatAxiosError } from '../../common/utils/http';
 import { signMessage } from '../../common/utils/signature';
 import { JobRepository } from '../job/job.repository';
@@ -60,7 +60,7 @@ export class WebhookService {
     }
 
     // Build the webhook data object based on the oracle type.
-    const webhookData = CaseConverter.transformToSnakeCase({
+    const webhookData: any = transformKeysFromCamelToSnake({
       escrowAddress: webhook.escrowAddress,
       chainId: webhook.chainId,
       eventType: webhook.eventType,
