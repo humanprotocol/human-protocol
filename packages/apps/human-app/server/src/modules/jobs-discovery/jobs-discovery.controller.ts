@@ -22,6 +22,9 @@ import {
   JobsDiscoveryParamsDto,
   JobsDiscoveryResponse,
 } from './model/jobs-discovery.model';
+import { ChainId } from '@human-protocol/sdk';
+import { JobStatus } from '../../common/enums/global-common';
+import axios from 'axios';
 
 @Controller()
 @ApiBearerAuth()
@@ -48,6 +51,53 @@ export class JobsDiscoveryController {
         HttpStatus.FORBIDDEN,
       );
     }
+    // TODO: temporar - THIRSTYFI
+    if (
+      jobsDiscoveryParamsDto.oracle_address ===
+      process.env.THIRSTYFI_ORACLE_ADDRESS
+    ) {
+      let data: any;
+      if (new Date(process.env.THIRSTYFI_TASK_EXPIRATION_DATE!) >= new Date()) {
+        const response = await axios.get<any>(
+          `${process.env.THIRSTIFY_EXO}/participant`,
+          {
+            params: { email: req.user.email },
+            headers: { Authorization: `Bearer ${process.env.THIRSTIFY_TOKEN}` },
+          },
+        );
+        data = response.data;
+      }
+
+      return (data?.id ?? 0 > 0)
+        ? {
+            page: 0,
+            page_size: 1,
+            total_pages: 1,
+            total_results: 0,
+            results: [],
+          }
+        : {
+            page: 0,
+            page_size: 1,
+            total_pages: 1,
+            total_results: 1,
+            results: [
+              {
+                chain_id: ChainId.POLYGON,
+                escrow_address: 'thirstyfi-task',
+                job_type: 'thirstyfi',
+                job_description: 'Check job description at https://thirsty.fi',
+                reward_amount: '5 - 50',
+                reward_token: 'USDT',
+                status: JobStatus.ACTIVE,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+                qualifications: [],
+              },
+            ],
+          };
+    }
+
     const jobsDiscoveryParamsCommand: JobsDiscoveryParamsCommand =
       this.mapper.map(
         jobsDiscoveryParamsDto,
