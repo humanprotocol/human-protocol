@@ -14,13 +14,21 @@ export function RewardAmount({
   if (!(reward_amount !== undefined && reward_token)) {
     return '';
   }
-  const hasDecimals =
-    Number(reward_amount) - Math.floor(Number(reward_amount)) !== 0;
+  const parsedReward = Number(reward_amount);
+  const isNumeric = Number.isFinite(parsedReward);
+  if (!isNumeric) {
+    return (
+      <Typography color={color} variant="body2">
+        {`${reward_amount} ${reward_token}`}
+      </Typography>
+    );
+  }
+  const hasDecimals = parsedReward - Math.floor(parsedReward) !== 0;
   if (hasDecimals) {
     return (
       <Tooltip title={`${reward_amount} ${reward_token}`}>
         <Typography color={color} variant="body2">
-          {`${Number(reward_amount).toFixed(2)} ${reward_token}`}
+          {`${parsedReward.toFixed(2)} ${reward_token}`}
         </Typography>
       </Tooltip>
     );

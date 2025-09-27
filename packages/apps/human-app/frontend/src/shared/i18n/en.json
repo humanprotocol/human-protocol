@@ -438,6 +438,22 @@
     "image_skeletons_from_boxes": "Skeletons from Bounding Boxes",
     "image_polygons": "Polygons",
     "audio_transcription": "Audio Transcription",
-    "audio_attribute_annotation": "Audio Attribute Annotation"
+    "audio_attribute_annotation": "Audio Attribute Annotation",
+    "thirstyfi": "ThirstyFi"
+  },
+  "thirstyfiModal": {
+    "title": "This information is required to participate in this task",
+    "tutorialText1": "Before filling out the form below, please checkout ",
+    "tutorialText2": " for instructions.",
+    "tutorialLink": "thirsty.fi",
+    "walletAddress": "Wallet address",
+    "walletAddressTooltip": "Your EVM wallet address on Polygon network. Used to receive the rewards.",
+    "apiKey": "API key",
+    "apiKeyTooltip": "Your exchange API key (read account details is enough). Stored encrypted and only used server-side to fetch your balance.",
+    "apiSecret": "API secret",
+    "apiSecretTooltip": "Your exchange API secret. Stored encrypted and only used server-side to fetch your balance.",
+    "submitBtn": "Submit",
+    "walletAddressError": "Wallet address must be exactly 42 characters",
+    "walletAddressRegexError": "Wallet address must start with 0x"
   }
 }

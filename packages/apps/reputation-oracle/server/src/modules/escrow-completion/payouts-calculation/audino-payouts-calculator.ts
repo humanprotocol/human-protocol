@@ -45,6 +45,9 @@ export class AudinoPayoutsCalculator implements EscrowPayoutsCalculator {
     }
 
     const escrowData = await EscrowUtils.getEscrow(chainId, escrowAddress);
+    if (!escrowData) {
+      throw new Error('Escrow not found');
+    }
     const jobBountyValue =
       BigInt(escrowData.totalFundedAmount) / BigInt(annotations.jobs.length);
 

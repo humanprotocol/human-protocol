@@ -24,6 +24,7 @@ import { JobRepository } from '../job/job.repository';
 import { JobService } from '../job/job.service';
 import { StorageService } from '../storage/storage.service';
 import { Web3Service } from '../web3/web3.service';
+import { NotFoundError } from '../../common/errors';
 import { WebhookDto } from './webhook.dto';
 import { WebhookEntity } from './webhook.entity';
 import { WebhookRepository } from './webhook.repository';
@@ -305,6 +306,22 @@ describe('WebhookService', () => {
           EventType.ESCROW_CREATED,
         ),
       ).rejects.toThrowError('Invalid outgoing event type');
+    });
+
+    it('should throw NotFoundError if operator is not found', async () => {
+      (EscrowClient.build as any).mockImplementation(() => ({
+        getJobLauncherAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+      }));
+
+      (OperatorUtils.getOperator as any).mockResolvedValue(null);
+
+      await expect(
+        (webhookService as any).getOracleWebhookUrl(
+          JOB_LAUNCHER_WEBHOOK_URL,
+          ChainId.LOCALHOST,
+          EventType.ESCROW_FAILED,
+        ),
+      ).rejects.toThrow(new NotFoundError('Oracle not found'));
     });
   });
 

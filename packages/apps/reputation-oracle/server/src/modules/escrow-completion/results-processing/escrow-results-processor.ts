@@ -55,6 +55,9 @@ export abstract class BaseEscrowResultsProcessor<TManifest extends JobManifest>
     await this.assertResultsComplete(fileContent, manifest);
 
     const escrowData = await EscrowUtils.getEscrow(chainId, escrowAddress);
+    if (!escrowData) {
+      throw new Error('Escrow not found');
+    }
 
     const encryptedResults = await this.pgpEncryptionService.encrypt(
       fileContent,

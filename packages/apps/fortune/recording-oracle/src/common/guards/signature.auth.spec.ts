@@ -4,7 +4,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { MOCK_ADDRESS } from '../../../test/constants';
 import { HEADER_SIGNATURE_KEY } from '../constants';
 import { Role } from '../enums/role';
-import { AuthError } from '../errors';
+import { AuthError, ValidationError } from '../errors';
 import { verifySignature } from '../utils/signature';
 import { SignatureAuthGuard } from './signature.auth';
 
@@ -91,6 +91,26 @@ describe('SignatureAuthGuard', () => {
       await expect(guard.canActivate(context as any)).rejects.toThrow(
         AuthError,
       );
+    });
+
+    it("should throw ValidationError('Escrow not found') when escrow data is missing", async () => {
+      (EscrowUtils.getEscrow as jest.Mock).mockResolvedValueOnce(null);
+
+      mockRequest.headers[HEADER_SIGNATURE_KEY] = 'validSignature';
+      mockRequest.body = {
+        escrow_address: MOCK_ADDRESS,
+        chain_id: ChainId.LOCALHOST,
+      };
+
+      let thrownError: any;
+      try {
+        await guard.canActivate(context as any);
+      } catch (error) {
+        thrownError = error;
+      }
+
+      expect(thrownError).toBeInstanceOf(ValidationError);
+      expect(thrownError.message).toBe('Escrow not found');
     });
   });
 });
