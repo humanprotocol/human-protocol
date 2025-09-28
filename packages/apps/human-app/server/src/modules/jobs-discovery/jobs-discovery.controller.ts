@@ -86,7 +86,7 @@ export class JobsDiscoveryController {
                 chain_id: ChainId.POLYGON,
                 escrow_address: 'thirstyfi-task',
                 job_type: 'thirstyfi',
-                job_description: 'Check job description at https://thirsty.fi/blog',
+                job_description: 'Check job description at https://thirsty.fi/blog/campaign-human-protocol',
                 reward_amount: '5 - 50',
                 reward_token: 'USDT',
                 status: JobStatus.ACTIVE,

@@ -89,7 +89,7 @@ export function ThirstyfiInfoModal({
           <Typography variant="h6" textAlign="center">
             {t('thirstyfiModal.tutorialText1')}
             <Link
-              href="https://thirsty.fi/blog"
+              href="https://thirsty.fi/blog/campaign-human-protocol"
               target="_blank"
               rel="noopener noreferrer"
             >
