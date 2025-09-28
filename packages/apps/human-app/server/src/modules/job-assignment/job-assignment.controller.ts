@@ -142,7 +142,7 @@ export class JobAssignmentController {
                     : JobStatus.COMPLETED,
                 created_at: new Date().toISOString(),
                 expires_at: process.env.THIRSTYFI_TASK_EXPIRATION_DATE,
-                url: 'https://thirsty.fi/blog/campaign-human-protocol',
+                url: 'https://thirsty.fi/blog',
               } as any,
             ],
           };
