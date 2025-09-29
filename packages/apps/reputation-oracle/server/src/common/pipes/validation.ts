@@ -7,7 +7,7 @@ import {
   type ValidationPipeOptions,
 } from '@nestjs/common';
 
-import { camelToSnake } from '../../utils/case-converters';
+import { camelToSnake } from '@/utils/case-converters';
 
 @Injectable()
 export class HttpValidationPipe extends ValidationPipe {
@@ -27,20 +27,12 @@ export class HttpValidationPipe extends ValidationPipe {
   }
 
   private formatErrorsSnakeCase(errors: ValidationError[]): string[] {
-    const rawMessages = this.flattenValidationErrors(errors);
-    return rawMessages.map((msg) => {
-      const firstSpace = msg.indexOf(' ');
-      if (firstSpace === -1) return msg;
-
-      const rawPath = msg.slice(0, firstSpace);
-      const rest = msg.slice(firstSpace + 1);
-
-      const transformedPath = rawPath
-        .split('.')
-        .map((segment) => segment.replace(/^[A-Za-z0-9_]+/, camelToSnake))
-        .join('.');
-
-      return `${transformedPath} ${rest}`;
-    });
+    return errors
+      .flatMap((error) => this.mapChildrenToValidationErrors(error))
+      .flatMap((error) =>
+        Object.values(error.constraints || {}).map((msg) =>
+          msg.replace(error.property, camelToSnake(error.property)),
+        ),
+      );
   }
 }
