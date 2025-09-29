@@ -115,7 +115,7 @@ export class JobAssignmentController {
           headers: { Authorization: `Bearer ${process.env.THIRSTIFY_TOKEN}` },
         },
       );
-      return Number(data.id) <= 0
+      return Number(data?.id ?? 0) <= 0
         ? {
             page: 0,
             page_size: 1,
