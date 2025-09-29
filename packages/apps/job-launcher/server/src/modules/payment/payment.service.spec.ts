@@ -1317,6 +1317,7 @@ describe('PaymentService', () => {
           { currency: PaymentCurrency.USD, amount: 100 },
           { currency: PaymentCurrency.HMT, amount: 50 },
           { currency: PaymentCurrency.USDT, amount: 0 },
+          { currency: PaymentCurrency.USDT0, amount: 0 },
           { currency: PaymentCurrency.USDC, amount: 0 },
         ],
         totalUsdAmount: 150,
@@ -1336,8 +1337,8 @@ describe('PaymentService', () => {
       const balance = await paymentService.getUserBalance(userId);
 
       expect(balance).toEqual(expectedBalance);
-      expect(paymentService.getUserBalanceByCurrency).toHaveBeenCalledTimes(4);
-      expect(paymentService.convertToUSD).toHaveBeenCalledTimes(4);
+      expect(paymentService.getUserBalanceByCurrency).toHaveBeenCalledTimes(5);
+      expect(paymentService.convertToUSD).toHaveBeenCalledTimes(5);
     });
 
     it('should return zero balance for new users', async () => {
@@ -1347,6 +1348,7 @@ describe('PaymentService', () => {
           { currency: PaymentCurrency.USD, amount: 0 },
           { currency: PaymentCurrency.HMT, amount: 0 },
           { currency: PaymentCurrency.USDT, amount: 0 },
+          { currency: PaymentCurrency.USDT0, amount: 0 },
           { currency: PaymentCurrency.USDC, amount: 0 },
         ],
         totalUsdAmount: 0,
@@ -1366,8 +1368,8 @@ describe('PaymentService', () => {
       const balance = await paymentService.getUserBalance(userId);
 
       expect(balance).toEqual(expectedBalance);
-      expect(paymentService.getUserBalanceByCurrency).toHaveBeenCalledTimes(4);
-      expect(paymentService.convertToUSD).toHaveBeenCalledTimes(4);
+      expect(paymentService.getUserBalanceByCurrency).toHaveBeenCalledTimes(5);
+      expect(paymentService.convertToUSD).toHaveBeenCalledTimes(5);
     });
   });
 

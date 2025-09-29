@@ -233,6 +233,51 @@ describe('AbuseService', () => {
         'Callback ID is missing from the Slack interaction data',
       );
     });
+
+    it('should throw if escrow is missing on ACCEPTED interactive_message', async () => {
+      const abuseEntity = generateAbuseEntity({ status: AbuseStatus.NOTIFIED });
+
+      const dto = {
+        callback_id: abuseEntity.id,
+        type: 'interactive_message',
+        actions: [{ value: AbuseDecision.ACCEPTED }],
+        trigger_id: faker.string.uuid(),
+        response_url: faker.internet.url(),
+      };
+
+      mockAbuseRepository.findOneById.mockResolvedValueOnce(abuseEntity);
+      mockedEscrowUtils.getEscrow.mockResolvedValueOnce(null);
+
+      await expect(
+        abuseService.processSlackInteraction(
+          dto as unknown as SlackInteraction,
+        ),
+      ).rejects.toThrow('Escrow data is missing');
+    });
+
+    it('should throw if operator is missing on ACCEPTED interactive_message', async () => {
+      const abuseEntity = generateAbuseEntity({ status: AbuseStatus.NOTIFIED });
+
+      const dto = {
+        callback_id: abuseEntity.id,
+        type: 'interactive_message',
+        actions: [{ value: AbuseDecision.ACCEPTED }],
+        trigger_id: faker.string.uuid(),
+        response_url: faker.internet.url(),
+      };
+
+      mockAbuseRepository.findOneById.mockResolvedValueOnce(abuseEntity);
+      mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
+        launcher: fakeAddress,
+      } as unknown as IEscrow);
+      mockedOperatorUtils.getOperator.mockResolvedValueOnce(null);
+
+      await expect(
+        abuseService.processSlackInteraction(
+          dto as unknown as SlackInteraction,
+        ),
+      ).rejects.toThrow('Operator data is missing');
+    });
   });
 
   describe('processAbuseRequests', () => {
@@ -390,6 +435,39 @@ describe('AbuseService', () => {
       expect(mockAbuseSlackBot.sendAbuseNotification).not.toHaveBeenCalled();
       expect(mockAbuseRepository.updateOne).not.toHaveBeenCalled();
     });
+
+    it('should increment retries when escrow data is missing', async () => {
+      const abuseEntity = generateAbuseEntity({ retriesCount: 0 });
+      mockAbuseRepository.findToClassify.mockResolvedValueOnce([abuseEntity]);
+
+      mockedEscrowUtils.getEscrow.mockResolvedValueOnce(null);
+
+      await abuseService.processAbuseRequests();
+
+      expect(mockAbuseRepository.findToClassify).toHaveBeenCalledTimes(1);
+      expect(mockAbuseRepository.updateOne).toHaveBeenCalledWith({
+        ...abuseEntity,
+        retriesCount: 1,
+      });
+    });
+
+    it('should increment retries when operator data is missing', async () => {
+      const abuseEntity = generateAbuseEntity({ retriesCount: 0 });
+      mockAbuseRepository.findToClassify.mockResolvedValueOnce([abuseEntity]);
+
+      mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
+        exchangeOracle: fakeAddress,
+      } as unknown as IEscrow);
+      mockedOperatorUtils.getOperator.mockResolvedValueOnce(null);
+
+      await abuseService.processAbuseRequests();
+
+      expect(mockAbuseRepository.findToClassify).toHaveBeenCalledTimes(1);
+      expect(mockAbuseRepository.updateOne).toHaveBeenCalledWith({
+        ...abuseEntity,
+        retriesCount: 1,
+      });
+    });
   });
 
   describe('processClassifiedAbuses', () => {
@@ -475,6 +553,45 @@ describe('AbuseService', () => {
         mockOutgoingWebhookService.createOutgoingWebhook,
       ).not.toHaveBeenCalled();
       expect(mockAbuseRepository.updateOne).not.toHaveBeenCalled();
+    });
+
+    it('should increment retries when escrow is missing (ACCEPTED)', async () => {
+      const abuseEntity = generateAbuseEntity({
+        retriesCount: 0,
+        decision: AbuseDecision.ACCEPTED,
+      });
+
+      mockAbuseRepository.findClassified.mockResolvedValueOnce([abuseEntity]);
+      mockedEscrowUtils.getEscrow.mockResolvedValueOnce(null);
+
+      await abuseService.processClassifiedAbuses();
+
+      expect(mockAbuseRepository.findClassified).toHaveBeenCalledTimes(1);
+      expect(mockAbuseRepository.updateOne).toHaveBeenCalledWith({
+        ...abuseEntity,
+        retriesCount: 1,
+      });
+    });
+
+    it('should increment retries when operator is missing (REJECTED)', async () => {
+      const abuseEntity = generateAbuseEntity({
+        retriesCount: 0,
+        decision: AbuseDecision.REJECTED,
+      });
+
+      mockAbuseRepository.findClassified.mockResolvedValueOnce([abuseEntity]);
+      mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
+        exchangeOracle: fakeAddress,
+      } as unknown as IEscrow);
+      mockedOperatorUtils.getOperator.mockResolvedValueOnce(null);
+
+      await abuseService.processClassifiedAbuses();
+
+      expect(mockAbuseRepository.findClassified).toHaveBeenCalledTimes(1);
+      expect(mockAbuseRepository.updateOne).toHaveBeenCalledWith({
+        ...abuseEntity,
+        retriesCount: 1,
+      });
     });
   });
 });

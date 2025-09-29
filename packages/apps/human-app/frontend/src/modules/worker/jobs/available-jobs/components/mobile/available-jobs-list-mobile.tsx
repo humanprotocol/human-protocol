@@ -72,7 +72,9 @@ export function AvailableJobsListMobile() {
                     sx={{
                       textOverflow: 'ellipsis',
                       overflow: 'hidden',
-                      whiteSpace: 'wrap',
+                      whiteSpace: 'normal',
+                      wordBreak: 'break-word',
+                      overflowWrap: 'anywhere',
                     }}
                     variant="subtitle1"
                   >

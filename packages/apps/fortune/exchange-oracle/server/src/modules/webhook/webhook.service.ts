@@ -4,16 +4,16 @@ import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 
-import logger from '../../logger';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { HEADER_SIGNATURE_KEY } from '../../common/constant';
 import { ErrorWebhook } from '../../common/constant/errors';
 import { EventType, WebhookStatus } from '../../common/enums/webhook';
-import { ValidationError } from '../../common/errors';
+import { NotFoundError, ValidationError } from '../../common/errors';
 import { transformKeysFromCamelToSnake } from '../../common/utils/case-converter';
 import { formatAxiosError } from '../../common/utils/http';
 import { signMessage } from '../../common/utils/signature';
+import logger from '../../logger';
 import { JobService } from '../job/job.service';
 import { StorageService } from '../storage/storage.service';
 import { Web3Service } from '../web3/web3.service';
@@ -178,6 +178,9 @@ export class WebhookService {
         throw new ValidationError('Invalid outgoing event type');
     }
     const oracle = await OperatorUtils.getOperator(chainId, oracleAddress);
+    if (!oracle) {
+      throw new NotFoundError('Oracle not found');
+    }
     const oracleWebhookUrl = oracle.webhookUrl;
 
     return oracleWebhookUrl;

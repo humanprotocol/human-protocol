@@ -5,9 +5,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AssignmentRepository } from '../../modules/assignment/assignment.repository';
 import { HEADER_SIGNATURE_KEY } from '../constant';
 import { AuthSignatureRole } from '../enums/role';
-import { AuthError, NotFoundError } from '../errors';
+import { AuthError, ValidationError } from '../errors';
 import { verifySignature } from '../utils/signature';
 import { SignatureAuthGuard } from './signature.auth';
+import { ErrorAssignment, ErrorEscrow } from '../constant/errors';
 
 jest.mock('../utils/signature');
 jest.mock('@human-protocol/sdk', () => ({
@@ -127,7 +128,9 @@ describe('SignatureAuthGuard', () => {
       (verifySignature as jest.Mock).mockReturnValue(true);
       assignmentRepository.findOneById.mockResolvedValue(null);
 
-      await expect(guard.canActivate(context)).rejects.toThrow(NotFoundError);
+      const resultPromise = guard.canActivate(context);
+      await expect(resultPromise).rejects.toBeInstanceOf(ValidationError);
+      await expect(resultPromise).rejects.toThrow(ErrorAssignment.NotFound);
     });
 
     it('should handle multiple roles and verify signature', async () => {
@@ -156,6 +159,24 @@ describe('SignatureAuthGuard', () => {
         '0x123',
       );
       expect(assignmentRepository.findOneById).toHaveBeenCalledWith('1');
+    });
+
+    it('should throw ValidationError when escrow data is missing', async () => {
+      reflector.get = jest
+        .fn()
+        .mockReturnValue([AuthSignatureRole.JobLauncher]);
+
+      (EscrowUtils.getEscrow as jest.Mock).mockResolvedValueOnce(null);
+
+      mockRequest.headers[HEADER_SIGNATURE_KEY] = 'validSignature';
+      mockRequest.body = {
+        escrow_address: '0x123',
+        chain_id: ChainId.LOCALHOST,
+      };
+
+      const resultPromise = guard.canActivate(context);
+      await expect(resultPromise).rejects.toBeInstanceOf(ValidationError);
+      await expect(resultPromise).rejects.toThrow(ErrorEscrow.NotFound);
     });
   });
 });
