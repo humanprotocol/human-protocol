@@ -47,14 +47,10 @@ export const throwError = (e: any) => {
  * @returns
  */
 export const isValidUrl = (url: string): boolean => {
-  if (typeof url !== 'string' || url.trim() === '') return false;
-
-  const localhostRegex = /^https?:\/\/localhost(?::\d{1,5})?(?:\/|$)/i;
-  if (localhostRegex.test(url)) return true;
-
   return isURL(url, {
     require_protocol: true,
     protocols: ['http', 'https'],
+    require_tld: false,
   });
 };
 

@@ -103,6 +103,9 @@ describe('StorageService', () => {
       faker.internet.url({ protocol: 'https' }),
       `http://${faker.internet.ipv4()}`,
       `${faker.internet.url({ protocol: 'http' })}:${faker.internet.port()}`,
+      'http://localhost:3000',
+      'http://minio:9000',
+      'http://job-launcher-server:5000',
     ])('should return true for valid http url [%#]', (url) => {
       expect(StorageService.isValidUrl(url)).toBe(true);
     });

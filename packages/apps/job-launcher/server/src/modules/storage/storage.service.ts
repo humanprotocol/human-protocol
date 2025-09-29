@@ -29,14 +29,10 @@ export class StorageService {
   }
 
   public static isValidUrl(maybeUrl: string): boolean {
-    if (typeof maybeUrl !== 'string' || maybeUrl.trim() === '') return false;
-
-    const localhostRegex = /^https?:\/\/localhost(?::\d{1,5})?(?:\/|$)/i;
-    if (localhostRegex.test(maybeUrl)) return true;
-
     return isURL(maybeUrl, {
       require_protocol: true,
       protocols: ['http', 'https'],
+      require_tld: false,
     });
   }
 

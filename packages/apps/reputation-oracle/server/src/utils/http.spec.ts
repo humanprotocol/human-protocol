@@ -60,6 +60,9 @@ describe('HTTP utilities', () => {
       faker.internet.url({ protocol: 'https' }),
       `http://${faker.internet.ipv4()}`,
       `${faker.internet.url({ protocol: 'http' })}:${faker.internet.port()}`,
+      'http://localhost:3000',
+      'http://minio:9000',
+      'http://reputation-oracle:5000',
     ])('should return true for valid http url [%#]', (url) => {
       expect(httpUtils.isValidHttpUrl(url)).toBe(true);
     });
