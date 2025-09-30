@@ -3,6 +3,7 @@ import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import axios from 'axios';
 import stringify from 'json-stable-stringify';
 import * as Minio from 'minio';
+import { isURL } from 'validator';
 import { S3ConfigService } from '../../common/config/s3-config.service';
 import { ErrorBucket, ErrorStorage } from '../../common/constants/errors';
 import { ContentType, Extension } from '../../common/enums/storage';
@@ -28,12 +29,11 @@ export class StorageService {
   }
 
   public static isValidUrl(maybeUrl: string): boolean {
-    try {
-      const url = new URL(maybeUrl);
-      return ['http:', 'https:'].includes(url.protocol);
-    } catch (_error) {
-      return false;
-    }
+    return isURL(maybeUrl, {
+      require_protocol: true,
+      protocols: ['http', 'https'],
+      require_tld: false,
+    });
   }
 
   public static async downloadFileFromUrl(url: string): Promise<Buffer> {
