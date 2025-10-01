@@ -930,11 +930,13 @@ describe('Escrow', function () {
         );
 
         await storeResults(FIXTURE_URL, FIXTURE_HASH, totalAmount);
-        await escrow
-          .connect(reputationOracle)
-          [
-            'bulkPayOut(address[],uint256[],string,string,string,bool)'
-          ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000', false);
+        await expect(
+          escrow
+            .connect(reputationOracle)
+            [
+              'bulkPayOut(address[],uint256[],string,string,string,bool)'
+            ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000', false)
+        ).to.emit(escrow, 'BulkTransferV3');
 
         const finalBalances = await Promise.all(
           recipients.map((r) => token.balanceOf(r))
@@ -992,11 +994,13 @@ describe('Escrow', function () {
 
         await storeResults(FIXTURE_URL, FIXTURE_HASH, totalPayout);
 
-        await escrow
-          .connect(reputationOracle)
-          [
-            'bulkPayOut(address[],uint256[],string,string,string,bool)'
-          ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000', false);
+        await expect(
+          escrow
+            .connect(reputationOracle)
+            [
+              'bulkPayOut(address[],uint256[],string,string,string,bool)'
+            ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000', false)
+        ).to.emit(escrow, 'BulkTransferV3');
 
         const finalBalances = await Promise.all(
           recipients.map((r) => token.balanceOf(r))
@@ -1045,11 +1049,13 @@ describe('Escrow', function () {
 
         await storeResults(FIXTURE_URL, FIXTURE_HASH, totalAmount);
 
-        await escrow
-          .connect(reputationOracle)
-          [
-            'bulkPayOut(address[],uint256[],string,string,string,bool)'
-          ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000', true);
+        await expect(
+          escrow
+            .connect(reputationOracle)
+            [
+              'bulkPayOut(address[],uint256[],string,string,string,bool)'
+            ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000', true)
+        ).to.emit(escrow, 'BulkTransferV3');
 
         const finalBalances = await Promise.all(
           recipients.map((r) => token.balanceOf(r))
@@ -1104,11 +1110,13 @@ describe('Escrow', function () {
         await escrow.connect(launcher).requestCancellation();
 
         await storeResults(FIXTURE_URL, FIXTURE_HASH, totalAmount);
-        await escrow
-          .connect(reputationOracle)
-          [
-            'bulkPayOut(address[],uint256[],string,string,string,bool)'
-          ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000', false);
+        await expect(
+          escrow
+            .connect(reputationOracle)
+            [
+              'bulkPayOut(address[],uint256[],string,string,string,bool)'
+            ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000', false)
+        ).to.emit(escrow, 'BulkTransferV3');
 
         const finalBalances = await Promise.all(
           recipients.map((r) => token.balanceOf(r))
@@ -1157,11 +1165,13 @@ describe('Escrow', function () {
 
         await storeResults(FIXTURE_URL, FIXTURE_HASH, totalAmount);
 
-        await escrow
-          .connect(admin)
-          [
-            'bulkPayOut(address[],uint256[],string,string,string,bool)'
-          ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000', false);
+        await expect(
+          escrow
+            .connect(admin)
+            [
+              'bulkPayOut(address[],uint256[],string,string,string,bool)'
+            ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000', false)
+        ).to.emit(escrow, 'BulkTransferV3');
 
         const finalBalances = await Promise.all(
           recipients.map((r) => token.balanceOf(r))
@@ -1219,11 +1229,13 @@ describe('Escrow', function () {
 
         await storeResults(FIXTURE_URL, FIXTURE_HASH, totalPayout);
 
-        await escrow
-          .connect(admin)
-          [
-            'bulkPayOut(address[],uint256[],string,string,string,bool)'
-          ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000', false);
+        await expect(
+          escrow
+            .connect(admin)
+            [
+              'bulkPayOut(address[],uint256[],string,string,string,bool)'
+            ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000', false)
+        ).to.emit(escrow, 'BulkTransferV3');
 
         const finalBalances = await Promise.all(
           recipients.map((r) => token.balanceOf(r))
@@ -1272,11 +1284,13 @@ describe('Escrow', function () {
 
         await storeResults(FIXTURE_URL, FIXTURE_HASH, totalAmount);
 
-        await escrow
-          .connect(admin)
-          [
-            'bulkPayOut(address[],uint256[],string,string,string,bool)'
-          ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000', true);
+        await expect(
+          escrow
+            .connect(admin)
+            [
+              'bulkPayOut(address[],uint256[],string,string,string,bool)'
+            ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000', true)
+        ).to.emit(escrow, 'BulkTransferV3');
 
         const finalBalances = await Promise.all(
           recipients.map((r) => token.balanceOf(r))
@@ -1331,11 +1345,13 @@ describe('Escrow', function () {
         await escrow.connect(launcher).requestCancellation();
 
         await storeResults(FIXTURE_URL, FIXTURE_HASH, totalAmount);
-        await escrow
-          .connect(admin)
-          [
-            'bulkPayOut(address[],uint256[],string,string,string,bool)'
-          ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000', false);
+        await expect(
+          escrow
+            .connect(admin)
+            [
+              'bulkPayOut(address[],uint256[],string,string,string,bool)'
+            ](recipients, amounts, FIXTURE_URL, FIXTURE_HASH, '000', false)
+        ).to.emit(escrow, 'BulkTransferV3');
 
         const finalBalances = await Promise.all(
           recipients.map((r) => token.balanceOf(r))

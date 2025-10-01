@@ -27,6 +27,7 @@ import {
   DailyWorker,
   InternalTransaction,
   WithdrawEvent,
+  Operator,
 } from '../../generated/schema';
 import {
   Address,
@@ -153,14 +154,26 @@ function updateEscrowEntityForPending(
   // Update oracles if provided
   if (reputationOracle) {
     escrowEntity.reputationOracle = reputationOracle;
+    const reputationOracleEntity = Operator.load(reputationOracle);
+    if (reputationOracleEntity) {
+      escrowEntity.reputationOracleFee = reputationOracleEntity.fee;
+    }
   }
 
   if (recordingOracle) {
     escrowEntity.recordingOracle = recordingOracle;
+    const recordingOracleEntity = Operator.load(recordingOracle);
+    if (recordingOracleEntity) {
+      escrowEntity.recordingOracleFee = recordingOracleEntity.fee;
+    }
   }
 
   if (exchangeOracle) {
     escrowEntity.exchangeOracle = exchangeOracle;
+    const exchangeOracleEntity = Operator.load(exchangeOracle);
+    if (exchangeOracleEntity) {
+      escrowEntity.exchangeOracleFee = exchangeOracleEntity.fee;
+    }
   }
 
   escrowEntity.save();
@@ -280,6 +293,7 @@ export function handleIntermediateStorage(event: IntermediateStorage): void {
   eventEntity.escrowAddress = event.address;
   eventEntity.sender = event.transaction.from;
   eventEntity.intermediateResultsUrl = event.params.url;
+  eventEntity.intermediateResultsHash = event.params.hash;
   eventEntity.save();
 
   // Updates escrow statistics
@@ -301,6 +315,7 @@ export function handleIntermediateStorage(event: IntermediateStorage): void {
   const escrowEntity = Escrow.load(dataSource.address());
   if (escrowEntity) {
     escrowEntity.intermediateResultsUrl = event.params.url;
+    escrowEntity.intermediateResultsHash = event.params.hash;
     escrowEntity.save();
     createTransaction(
       event,
@@ -398,12 +413,17 @@ function createAndSaveStatusEventForBulkTransfer(
 function updateEscrowEntityForBulkTransfer(
   escrowEntity: Escrow,
   isPartial: boolean,
-  finalResultsUrl: string | null
+  finalResultsUrl: string | null,
+  finalResultsHash: string | null
 ): void {
   escrowEntity.status = isPartial ? 'Partial' : 'Paid';
 
   if (finalResultsUrl) {
     escrowEntity.finalResultsUrl = finalResultsUrl;
+  }
+
+  if (finalResultsHash) {
+    escrowEntity.finalResultsHash = finalResultsHash;
   }
 
   escrowEntity.save();
@@ -433,7 +453,8 @@ export function handleBulkTransfer(event: BulkTransfer): void {
     updateEscrowEntityForBulkTransfer(
       escrowEntity,
       event.params.isPartial,
-      !finalResultsUrl.reverted ? finalResultsUrl.value : null
+      !finalResultsUrl.reverted ? finalResultsUrl.value : null,
+      null
     );
 
     // Create and save EscrowStatusEvent entity
@@ -460,7 +481,8 @@ function handleBulkTransferCommon(
   recipients: Address[],
   amounts: BigInt[],
   isPartial: boolean,
-  finalResultsUrl: string
+  finalResultsUrl: string,
+  finalResultsHash: string | null
 ): void {
   // Create BulkPayoutEvent entity
   createBulkPayoutEvent(event, payoutId, recipients.length);
@@ -544,7 +566,12 @@ function handleBulkTransferCommon(
     }
 
     // Assign finalResultsUrl directly from the event
-    updateEscrowEntityForBulkTransfer(escrowEntity, isPartial, finalResultsUrl);
+    updateEscrowEntityForBulkTransfer(
+      escrowEntity,
+      isPartial,
+      finalResultsUrl,
+      finalResultsHash
+    );
 
     // Create and save EscrowStatusEvent entity
     createAndSaveStatusEventForBulkTransfer(
@@ -562,7 +589,8 @@ export function handleBulkTransferV2(event: BulkTransferV2): void {
     event.params.recipients,
     event.params.amounts,
     event.params.isPartial,
-    event.params.finalResultsUrl
+    event.params.finalResultsUrl,
+    null
   );
 }
 
@@ -573,7 +601,8 @@ export function handleBulkTransferV3(event: BulkTransferV3): void {
     event.params.recipients,
     event.params.amounts,
     event.params.isPartial,
-    event.params.finalResultsUrl
+    event.params.finalResultsUrl,
+    event.params.finalResultsHash
   );
 }
 

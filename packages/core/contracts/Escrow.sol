@@ -46,7 +46,8 @@ contract Escrow is IEscrow, ReentrancyGuard {
         address[] recipients,
         uint256[] amounts,
         bool isPartial,
-        string finalResultsUrl
+        string finalResultsUrl,
+        string finalResultsHash
     );
     event Cancelled();
     event Completed();
@@ -380,9 +381,8 @@ contract Escrow is IEscrow, ReentrancyGuard {
 
         uint256 totalBulkAmount;
         for (uint256 i; i < _recipients.length; ) {
-            uint256 amount = _amounts[i];
-            require(amount > 0, 'Zero amount');
-            totalBulkAmount += amount;
+            require(_amounts[i] > 0, 'Zero amount');
+            totalBulkAmount += _amounts[i];
             unchecked {
                 ++i;
             }
@@ -399,20 +399,19 @@ contract Escrow is IEscrow, ReentrancyGuard {
         IERC20 erc20 = IERC20(token);
 
         for (uint256 i; i < _recipients.length; ) {
-            uint256 amount = _amounts[i];
             uint256 reputationOracleFee = (reputationOracleFeePercentage *
-                amount) / 100;
+                _amounts[i]) / 100;
             uint256 recordingOracleFee = (recordingOracleFeePercentage *
-                amount) / 100;
-            uint256 exchangeOracleFee = (exchangeOracleFeePercentage * amount) /
-                100;
+                _amounts[i]) / 100;
+            uint256 exchangeOracleFee = (exchangeOracleFeePercentage *
+                _amounts[i]) / 100;
 
             totalReputationOracleFee += reputationOracleFee;
             totalRecordingOracleFee += recordingOracleFee;
             totalExchangeOracleFee += exchangeOracleFee;
 
             netAmounts[i] =
-                amount -
+                _amounts[i] -
                 reputationOracleFee -
                 recordingOracleFee -
                 exchangeOracleFee;
@@ -454,7 +453,8 @@ contract Escrow is IEscrow, ReentrancyGuard {
             eventRecipients,
             netAmounts,
             isPartial,
-            _url
+            _url,
+            _hash
         );
 
         if (!isPartial) {

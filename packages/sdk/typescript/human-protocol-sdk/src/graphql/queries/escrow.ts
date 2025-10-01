@@ -9,8 +9,10 @@ const ESCROW_FRAGMENT = gql`
     count
     factoryAddress
     finalResultsUrl
+    finalResultsHash
     id
     intermediateResultsUrl
+    intermediateResultsHash
     jobRequesterId
     launcher
     manifestHash
@@ -18,6 +20,9 @@ const ESCROW_FRAGMENT = gql`
     recordingOracle
     reputationOracle
     exchangeOracle
+    recordingOracleFee
+    reputationOracleFee
+    exchangeOracleFee
     status
     token
     totalFundedAmount

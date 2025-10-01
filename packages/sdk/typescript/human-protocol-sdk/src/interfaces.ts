@@ -82,13 +82,18 @@ export interface IEscrow {
   count: string;
   factoryAddress: string;
   finalResultsUrl?: string;
+  finalResultsHash?: string;
   intermediateResultsUrl?: string;
+  intermediateResultsHash?: string;
   launcher: string;
   manifestHash?: string;
   manifest?: string;
   recordingOracle?: string;
   reputationOracle?: string;
   exchangeOracle?: string;
+  recordingOracleFee?: string;
+  reputationOracleFee?: string;
+  exchangeOracleFee?: string;
   status: string;
   token: string;
   totalFundedAmount: string;
