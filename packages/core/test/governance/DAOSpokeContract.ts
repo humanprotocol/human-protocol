@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { ethers } from 'hardhat';
+import { ethers, upgrades } from 'hardhat';
 import { Signer } from 'ethers';
 import {
   MetaHumanGovernor,
@@ -64,12 +64,12 @@ describe('DAOSpokeContract', function () {
     proposers = [await owner.getAddress()];
     const TimelockController =
       await ethers.getContractFactory('TimelockController');
-    timelockController = await TimelockController.deploy(
+    timelockController = (await TimelockController.deploy(
       1,
       proposers,
       executors,
-      owner.getAddress()
-    );
+      await owner.getAddress()
+    )) as TimelockController;
     await timelockController.waitForDeployment();
 
     const WormholeMock = await ethers.getContractFactory('WormholeMock');
@@ -87,18 +87,22 @@ describe('DAOSpokeContract', function () {
     const MetaHumanContract = await ethers.getContractFactory(
       'contracts/governance/MetaHumanGovernor.sol:MetaHumanGovernor'
     );
-    governor = (await MetaHumanContract.deploy(
-      voteToken.getAddress(),
-      timelockController.getAddress(),
-      [],
-      0,
-      await wormholeMockForGovernor.getAddress(),
-      owner.getAddress(),
-      SECONDS_PER_BLOCK,
-      SECONDS_PER_BLOCK * 1,
-      SECONDS_PER_BLOCK * 20 * 15,
-      0,
-      4
+    governor = (await upgrades.deployProxy(
+      MetaHumanContract,
+      [
+        await voteToken.getAddress(),
+        await timelockController.getAddress(),
+        [],
+        0,
+        await wormholeMockForGovernor.getAddress(),
+        await owner.getAddress(),
+        SECONDS_PER_BLOCK,
+        SECONDS_PER_BLOCK * 1,
+        SECONDS_PER_BLOCK * 20 * 15,
+        0,
+        4,
+      ],
+      { initializer: 'initialize' }
     )) as MetaHumanGovernor;
 
     // Set Governor on worm hole mock
@@ -120,11 +124,11 @@ describe('DAOSpokeContract', function () {
     daoSpoke = (await DAOSpokeContract.deploy(
       ethers.zeroPadBytes(await governor.getAddress(), 32),
       5, // hubChainId
-      voteToken.getAddress(),
+      await voteToken.getAddress(),
       SECONDS_PER_BLOCK, // voting period
       6, // spokeChainId
       await wormholeMockForDaoSpoke.getAddress(),
-      owner.getAddress() // admin address
+      await owner.getAddress() // admin address
     )) as DAOSpokeContract;
 
     // Set DAOSpokeContract on worm hole mock
@@ -270,9 +274,9 @@ describe('DAOSpokeContract', function () {
 
       await mineNBlocks(3);
 
-      await expect(
-        daoSpoke.connect(user1).castVote(proposalId, 3)
-      ).to.be.revertedWith('DAOSpokeContract: invalid value for enum VoteType');
+      await expect(daoSpoke.connect(user1).castVote(proposalId, 3))
+        .to.be.revertedWithCustomError(daoSpoke, 'InvalidVoteType')
+        .withArgs(3);
     });
 
     it('should revert when vote is finished', async () => {
@@ -294,15 +298,15 @@ describe('DAOSpokeContract', function () {
 
       await expect(
         daoSpoke.connect(user1).castVote(proposalId, 0)
-      ).to.be.revertedWith('DAOSpokeContract: vote finished');
+      ).to.be.revertedWithCustomError(daoSpoke, 'VoteFinished');
     });
 
     it('should revert when proposal does not exist', async () => {
       await createMockUserWithVotingPower(voteToken, user1);
 
-      await expect(daoSpoke.connect(user1).castVote(1, 0)).to.be.revertedWith(
-        'DAOSpokeContract: not a started vote'
-      );
+      await expect(
+        daoSpoke.connect(user1).castVote(1, 0)
+      ).to.be.revertedWithCustomError(daoSpoke, 'NotStartedVote');
     });
 
     it('should revert when the vote was already cast', async () => {
@@ -321,7 +325,7 @@ describe('DAOSpokeContract', function () {
 
       await expect(
         daoSpoke.connect(user1).castVote(proposalId, 0)
-      ).to.be.revertedWith('DAOSpokeContract: vote already cast');
+      ).to.be.revertedWithCustomError(daoSpoke, 'VoteAlreadyCast');
     });
   });
 
@@ -337,9 +341,7 @@ describe('DAOSpokeContract', function () {
 
       await expect(
         callReceiveMessageWithWormholeMock(wormholeMockForDaoSpoke, mockPayload)
-      ).to.be.revertedWith(
-        'Only messages from the hub contract can be received!'
-      );
+      ).to.be.revertedWithCustomError(daoSpoke, 'OnlyMessagesFromHub');
     });
 
     it('should revert when contract is not intended recipient', async () => {
@@ -351,7 +353,7 @@ describe('DAOSpokeContract', function () {
 
       await expect(
         callReceiveMessageWithWormholeMock(wormholeMockForDaoSpoke, mockPayload)
-      ).to.be.revertedWith('Message is not addressed for this contract');
+      ).to.be.revertedWithCustomError(daoSpoke, 'InvalidIntendedRecipient');
     });
 
     it('should revert when proposal id is not unique', async () => {
@@ -367,7 +369,7 @@ describe('DAOSpokeContract', function () {
       );
       await expect(
         callReceiveMessageWithWormholeMock(wormholeMockForDaoSpoke, mockPayload)
-      ).to.be.revertedWith('Message already processed');
+      ).to.be.revertedWithCustomError(daoSpoke, 'MessageAlreadyProcessed');
     });
 
     it('should process message when proposal start before block timestamp', async () => {
@@ -535,9 +537,9 @@ describe('DAOSpokeContract', function () {
         await governor.getAddress()
       );
 
-      await expect(daoSpoke.sendVoteResultToHub(proposalId)).to.be.revertedWith(
-        'DAOSpokeContract: vote is not finished'
-      );
+      await expect(
+        daoSpoke.sendVoteResultToHub(proposalId)
+      ).to.be.revertedWithCustomError(daoSpoke, 'VoteNotFinished');
     });
 
     it('should revert when the caller is not the magistrate', async () => {

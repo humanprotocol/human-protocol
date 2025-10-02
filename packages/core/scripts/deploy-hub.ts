@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { ethers } from 'hardhat';
+import { ethers, upgrades } from 'hardhat';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -55,41 +55,51 @@ async function main() {
   const quorumFraction = process.env.QUORUM_FRACTION
     ? parseInt(process.env.QUORUM_FRACTION)
     : 0;
-  const TimelockController =
-    await ethers.getContractFactory('TimelockController');
-  const TimelockControllerContract = await TimelockController.deploy(
-    1,
-    [],
-    [],
-    await deployer.getAddress()
-  );
-  await TimelockControllerContract.waitForDeployment();
-  console.log(
-    'TimelockController Address:',
-    await TimelockControllerContract.getAddress()
-  );
+
+  const existingTimelockAddress =
+    process.env.HUB_TIMELOCK_CONTROLLER_ADDRESS || '';
+  let timelockAddress = existingTimelockAddress;
+  if (timelockAddress) {
+    console.log('Using existing TimelockController Address:', timelockAddress);
+  } else {
+    const TimelockController =
+      await ethers.getContractFactory('TimelockController');
+    const TimelockControllerContract = await TimelockController.deploy(
+      1,
+      [],
+      [],
+      await deployer.getAddress()
+    );
+    await TimelockControllerContract.waitForDeployment();
+    timelockAddress = await TimelockControllerContract.getAddress();
+    console.log('TimelockController Address:', timelockAddress);
+  }
   const MetaHumanGovernor = await ethers.getContractFactory(
     'contracts/governance/MetaHumanGovernor.sol:MetaHumanGovernor'
   );
-  const metaHumanGovernorContract = await MetaHumanGovernor.deploy(
-    vhmTokenAddress,
-    TimelockControllerContract.getAddress(),
-    [],
-    chainId,
-    hubAutomaticRelayerAddress,
-    magistrateAddress,
-    hubSecondsPerBlock,
-    votingDelay,
-    votingPeriod,
-    proposalThreshold,
-    quorumFraction
+  const metaHumanGovernorContract = await upgrades.deployProxy(
+    MetaHumanGovernor,
+    [
+      vhmTokenAddress,
+      timelockAddress,
+      [],
+      chainId,
+      hubAutomaticRelayerAddress,
+      magistrateAddress,
+      hubSecondsPerBlock,
+      votingDelay,
+      votingPeriod,
+      proposalThreshold,
+      quorumFraction,
+    ],
+    { initializer: 'initialize' }
   );
-
   await metaHumanGovernorContract.waitForDeployment();
-  console.log(
-    'Governor deployed to:',
-    await metaHumanGovernorContract.getAddress()
-  );
+  const proxyAddress = await metaHumanGovernorContract.getAddress();
+  const implementationAddress =
+    await upgrades.erc1967.getImplementationAddress(proxyAddress);
+  console.log('Governor Proxy deployed at:', proxyAddress);
+  console.log('Governor Implementation at:', implementationAddress);
 }
 
 main().catch((error) => {

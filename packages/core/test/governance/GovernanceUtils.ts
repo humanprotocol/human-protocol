@@ -257,8 +257,6 @@ export async function signProposalWithReasonAndParams(
   proposalId: string,
   governor: MetaHumanGovernor,
   support: number,
-  voter: string,
-  nonce: number,
   reason: string,
   params: string,
   signer: Signer
@@ -271,7 +269,7 @@ export async function signProposalWithReasonAndParams(
       verifyingContract: await governor.getAddress(),
     },
     {
-      Ballot: [
+      ExtendedBallot: [
         {
           name: 'proposalId',
           type: 'uint256',
@@ -281,28 +279,18 @@ export async function signProposalWithReasonAndParams(
           type: 'uint8',
         },
         {
-          name: 'voter',
-          type: 'address',
-        },
-        {
-          name: 'nonce',
-          type: 'uint256',
-        },
-        {
           name: 'reason',
-          type: 'bytes32',
+          type: 'string',
         },
         {
           name: 'params',
-          type: 'bytes32',
+          type: 'bytes',
         },
       ],
     },
     {
       proposalId,
       support,
-      voter,
-      nonce,
       reason,
       params,
     }
@@ -313,8 +301,6 @@ export async function signProposal(
   proposalId: string,
   governor: MetaHumanGovernor,
   support: number,
-  voter: string,
-  nonce: number,
   signer: Signer
 ): Promise<string> {
   return await signer.signTypedData(
@@ -334,21 +320,11 @@ export async function signProposal(
           name: 'support',
           type: 'uint8',
         },
-        {
-          name: 'voter',
-          type: 'address',
-        },
-        {
-          name: 'nonce',
-          type: 'uint256',
-        },
       ],
     },
     {
       proposalId,
       support,
-      voter,
-      nonce,
     }
   );
 }

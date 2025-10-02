@@ -24,6 +24,7 @@
     "deploy:local": "yarn deploy --network localhost",
     "deploy:proxy": "hardhat run scripts/deploy-proxies.ts",
     "upgrade:proxy": "hardhat run scripts/upgrade-proxies.ts",
+    "upgrade:governor": "hardhat run scripts/upgrade-governor.ts",
     "deploy:hub": "hardhat run scripts/deploy-hub.ts",
     "deploy:spokes": "hardhat run scripts/deploy-spokes.ts",
     "update:spokes": "hardhat run scripts/update-spokes.ts",
