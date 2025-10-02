@@ -2,13 +2,14 @@
 
 pragma solidity ^0.8.0;
 
-import '@openzeppelin/contracts/utils/Context.sol';
+import '@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol';
+import '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
 
 /**
  * @dev This contract is based on OpenZeppelin's access/Ownable.sol contract.
  * The only thing changed is the removal of `renounceOwnership()` function and name of the variables.
  */
-abstract contract Magistrate is Context {
+abstract contract Magistrate is Initializable, ContextUpgradeable {
     address private _magistrate;
 
     event MagistrateChanged(
@@ -17,9 +18,16 @@ abstract contract Magistrate is Context {
     );
 
     /**
-     * @dev Initializes the contract setting the provided address as the initial magistrate.
+     * @dev Initializer to set the initial magistrate. Must be called during proxy initialization.
      */
-    constructor(address magistrate_) {
+    function __Magistrate_init(address magistrate_) internal onlyInitializing {
+        __Context_init();
+        __Magistrate_init_unchained(magistrate_);
+    }
+
+    function __Magistrate_init_unchained(
+        address magistrate_
+    ) internal onlyInitializing {
         _transferMagistrate(magistrate_);
     }
 

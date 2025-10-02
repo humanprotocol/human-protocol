@@ -17,6 +17,20 @@ import './magistrate/Magistrate.sol';
  */
 contract DAOSpokeContract is IWormholeReceiver, Magistrate {
     using Address for address payable;
+    error NotStartedVote();
+    error VoteFinished();
+    error VoteNotActive();
+    error VoteAlreadyCast();
+    error InvalidVoteType(uint8 support);
+    error OnlyRelayerAllowed();
+    error OnlyMessagesFromHub();
+    error MessageAlreadyProcessed();
+    error InvalidIntendedRecipient();
+    error ProposalIdMustBeUnique();
+    error VoteNotFinished();
+    error RelaySendFailed();
+    error ZeroBalance();
+
     bytes32 public immutable hubContractAddress;
     uint16 public immutable hubContractChainId;
     IVotes public immutable token;
@@ -67,6 +81,7 @@ contract DAOSpokeContract is IWormholeReceiver, Magistrate {
      *   @param _targetSecondsPerBlock The target number of seconds per block for block estimation.
      *   @param _chainId The chain ID of the current contract.
      *   @param _wormholeRelayerAddress The address of the wormhole automatic relayer contract used for cross-chain communication.
+     *   @param _magistrateAddress The initial magistrate address.
      */
     constructor(
         bytes32 _hubContractAddress,
@@ -76,7 +91,8 @@ contract DAOSpokeContract is IWormholeReceiver, Magistrate {
         uint16 _chainId,
         address _wormholeRelayerAddress,
         address _magistrateAddress
-    ) Magistrate(_magistrateAddress) {
+    ) {
+        _transferMagistrate(_magistrateAddress);
         token = _token;
         targetSecondsPerBlock = _targetSecondsPerBlock;
         chainId = _chainId;
@@ -112,13 +128,12 @@ contract DAOSpokeContract is IWormholeReceiver, Magistrate {
         uint8 support
     ) public virtual returns (uint256) {
         RemoteProposal storage proposal = proposals[proposalId];
-        require(isProposal(proposalId), 'DAOSpokeContract: not a started vote');
-        require(!proposal.voteFinished, 'DAOSpokeContract: vote finished');
-        require(
-            block.timestamp >= proposal.localVoteStart &&
-                block.timestamp < proposal.localVoteEnd,
-            'DAOSpokeContract: vote not currently active'
-        );
+        if (!isProposal(proposalId)) revert NotStartedVote();
+        if (proposal.voteFinished) revert VoteFinished();
+        if (
+            !(block.timestamp >= proposal.localVoteStart &&
+                block.timestamp < proposal.localVoteEnd)
+        ) revert VoteNotActive();
 
         uint256 weight = token.getPastVotes(
             msg.sender,
@@ -146,10 +161,7 @@ contract DAOSpokeContract is IWormholeReceiver, Magistrate {
     ) internal virtual {
         ProposalVote storage proposalVote = proposalVotes[proposalId];
 
-        require(
-            !proposalVote.hasVoted[account],
-            'DAOSpokeContract: vote already cast'
-        );
+        if (proposalVote.hasVoted[account]) revert VoteAlreadyCast();
         proposalVote.hasVoted[account] = true;
 
         if (support == uint8(VoteType.Against)) {
@@ -159,7 +171,7 @@ contract DAOSpokeContract is IWormholeReceiver, Magistrate {
         } else if (support == uint8(VoteType.Abstain)) {
             proposalVote.abstainVotes += weight;
         } else {
-            revert('DAOSpokeContract: invalid value for enum VoteType');
+            revert InvalidVoteType(support);
         }
     }
 
@@ -189,6 +201,45 @@ contract DAOSpokeContract is IWormholeReceiver, Magistrate {
     }
 
     /**
+     * @dev Sends the vote result of a proposal to the hub contract.
+     *  @param proposalId The ID of the proposal.
+     *  @return A boolean indicating whether the message was sent successfully.
+     */
+    function _sendVoteResultToHub(uint256 proposalId) internal returns (bool) {
+        ProposalVote storage votes = proposalVotes[proposalId];
+        bytes memory messageToSend = abi.encode(
+            0,
+            proposalId,
+            votes.forVotes,
+            votes.againstVotes,
+            votes.abstainVotes
+        );
+        bytes memory payloadToSend = abi.encode(
+            hubContractAddress,
+            hubContractChainId,
+            msg.sender,
+            messageToSend
+        );
+
+        uint256 cost = quoteCrossChainMessage(hubContractChainId);
+        try
+            wormholeRelayer.sendPayloadToEvm{value: cost}(
+                hubContractChainId,
+                address(uint160(uint256(hubContractAddress))),
+                payloadToSend,
+                0,
+                GAS_LIMIT,
+                hubContractChainId,
+                magistrate()
+            )
+        {
+            return true;
+        } catch {
+            return false;
+        }
+    }
+
+    /**
      * @dev Receives messages from the Wormhole protocol's relay mechanism and processes them accordingly.
      *  This function is intended to be called only by the designated Wormhole relayer.
      *  @param payload The payload of the received message.
@@ -199,19 +250,18 @@ contract DAOSpokeContract is IWormholeReceiver, Magistrate {
     function receiveWormholeMessages(
         bytes memory payload,
         bytes[] memory, // additionalVaas
-        bytes32 sourceAddress, // address that called 'sendPayloadToEvm' (Hub contract address)
+        bytes32 sourceAddress,
         uint16 sourceChain,
-        bytes32 deliveryHash // this can be stored in a mapping deliveryHash => bool to prevent duplicate deliveries
+        bytes32 deliveryHash
     ) public payable override {
-        require(msg.sender == address(wormholeRelayer), 'Only relayer allowed');
+        if (msg.sender != address(wormholeRelayer)) revert OnlyRelayerAllowed();
 
-        require(
-            hubContractAddress == sourceAddress &&
-                hubContractChainId == sourceChain,
-            'Only messages from the hub contract can be received!'
-        );
+        if (
+            !(hubContractAddress == sourceAddress &&
+                hubContractChainId == sourceChain)
+        ) revert OnlyMessagesFromHub();
 
-        require(!processedMessages[deliveryHash], 'Message already processed');
+        if (processedMessages[deliveryHash]) revert MessageAlreadyProcessed();
 
         (
             address intendedRecipient, //chainId //sender
@@ -220,10 +270,8 @@ contract DAOSpokeContract is IWormholeReceiver, Magistrate {
             bytes memory decodedMessage
         ) = abi.decode(payload, (address, uint16, address, bytes));
 
-        require(
-            intendedRecipient == address(this),
-            'Message is not addressed for this contract'
-        );
+        if (intendedRecipient != address(this))
+            revert InvalidIntendedRecipient();
 
         processedMessages[deliveryHash] = true;
 
@@ -245,7 +293,7 @@ contract DAOSpokeContract is IWormholeReceiver, Magistrate {
                     decodedMessage,
                     (uint16, uint256, uint256, uint256, uint256)
                 );
-            require(!isProposal(proposalId), 'Proposal ID must be unique.');
+            if (isProposal(proposalId)) revert ProposalIdMustBeUnique();
 
             proposals[proposalId] = RemoteProposal(
                 proposalCreationTimestamp,
@@ -255,82 +303,34 @@ contract DAOSpokeContract is IWormholeReceiver, Magistrate {
                 false
             );
         } else if (option == 1) {
-            // Send vote results back to the hub chain
             (, uint256 proposalId) = abi.decode(
                 decodedMessage,
                 (uint16, uint256)
             );
-            ProposalVote storage votes = proposalVotes[proposalId];
-            bytes memory messageToSend = abi.encode(
-                0,
-                proposalId,
-                votes.forVotes,
-                votes.againstVotes,
-                votes.abstainVotes
-            );
-            bytes memory payloadToSend = abi.encode(
-                hubContractAddress,
-                hubContractChainId,
-                msg.sender,
-                messageToSend
-            );
-
-            // Send a message to other contracts
-            // Cost of requesting a message to be sent to
-            // chain 'targetChain' with a gasLimit of 'GAS_LIMIT'
-            uint256 cost = quoteCrossChainMessage(hubContractChainId);
 
             proposals[proposalId].voteFinished = true;
 
-            wormholeRelayer.sendPayloadToEvm{value: cost}(
-                hubContractChainId,
-                address(uint160(uint256(hubContractAddress))),
-                payloadToSend,
-                0, // no receiver value needed
-                GAS_LIMIT,
-                hubContractChainId,
-                magistrate()
-            );
+            _sendVoteResultToHub(proposalId);
         }
     }
 
     function sendVoteResultToHub(
         uint256 proposalId
     ) public payable onlyMagistrate {
-        require(
-            proposals[proposalId].voteFinished,
-            'DAOSpokeContract: vote is not finished'
-        );
+        if (!proposals[proposalId].voteFinished) revert VoteNotFinished();
 
-        ProposalVote storage votes = proposalVotes[proposalId];
-        bytes memory messageToSend = abi.encode(
-            0,
-            proposalId,
-            votes.forVotes,
-            votes.againstVotes,
-            votes.abstainVotes
-        );
-        bytes memory payloadToSend = abi.encode(
-            hubContractAddress,
-            hubContractChainId,
-            msg.sender,
-            messageToSend
-        );
+        bool ok = _sendVoteResultToHub(proposalId);
+        if (!ok) revert RelaySendFailed();
+    }
 
-        // Send a message to other contracts
-        // Cost of requesting a message to be sent to
-        // chain 'targetChain' with a gasLimit of 'GAS_LIMIT'
-        uint256 cost = quoteCrossChainMessage(hubContractChainId);
-
-        wormholeRelayer.sendPayloadToEvm{value: cost}(
-            hubContractChainId,
-            address(uint160(uint256(hubContractAddress))),
-            payloadToSend,
-            0, // no receiver value needed
-            GAS_LIMIT,
-            hubContractChainId,
-            magistrate()
-        );
+    /**
+     * @dev Withdraws the contract's balance to the magistrate address.
+     * Can only be called by the magistrate.
+     */
+    function withdraw() external onlyMagistrate {
+        uint256 balance = address(this).balance;
+        if (balance == 0) revert ZeroBalance();
+        payable(msg.sender).sendValue(balance);
     }
 
     /**
@@ -346,4 +346,6 @@ contract DAOSpokeContract is IWormholeReceiver, Magistrate {
             GAS_LIMIT
         );
     }
+
+    receive() external payable {}
 }
