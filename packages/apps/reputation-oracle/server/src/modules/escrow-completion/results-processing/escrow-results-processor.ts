@@ -58,6 +58,9 @@ export abstract class BaseEscrowResultsProcessor<TManifest extends JobManifest>
     );
 
     const escrowData = await EscrowUtils.getEscrow(chainId, escrowAddress);
+    if (!escrowData) {
+      throw new Error('Escrow not found');
+    }
 
     if (escrowData.status !== EscrowStatus[EscrowStatus.ToCancel]) {
       await this.assertResultsComplete(fileContent, manifest);

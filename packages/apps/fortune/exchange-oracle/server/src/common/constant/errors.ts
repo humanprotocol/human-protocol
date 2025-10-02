@@ -57,6 +57,13 @@ export enum ErrorJob {
 }
 
 /**
+ * Represents error messages associated with escrows.
+ */
+export enum ErrorEscrow {
+  NotFound = 'Escrow not found',
+}
+
+/**
  * Represents error messages associated with signatures.
  */
 export enum ErrorSignature {

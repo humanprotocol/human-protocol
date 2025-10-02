@@ -38,6 +38,7 @@ import { ContentType } from '../../common/enums/storage';
 import { ServerError, ValidationError } from '../../common/errors';
 import { hashString } from '../../common/utils';
 import { StorageService } from './storage.service';
+import { faker } from '@faker-js/faker/.';
 
 describe('StorageService', () => {
   let storageService: StorageService;
@@ -79,6 +80,35 @@ describe('StorageService', () => {
     }).compile();
 
     storageService = moduleRef.get<StorageService>(StorageService);
+  });
+
+  describe('isValidUrl', () => {
+    it.each([
+      '',
+      faker.string.alphanumeric(),
+      faker.internet.domainName(),
+      faker.internet.protocol(),
+      faker.internet.ipv4(),
+      // invalid port
+      `${faker.internet.url({ appendSlash: false })}:${faker.lorem.word({ length: 4 })}`,
+      `http://[${faker.internet.domainName()}]/`,
+      'https://white space.test/',
+      `ftp://${faker.internet.domainName()}`,
+    ])('should return false for invalid http url [%#]', (url) => {
+      expect(StorageService.isValidUrl(url)).toBe(false);
+    });
+
+    it.each([
+      faker.internet.url({ protocol: 'http' }),
+      faker.internet.url({ protocol: 'https' }),
+      `http://${faker.internet.ipv4()}`,
+      `${faker.internet.url({ protocol: 'http' })}:${faker.internet.port()}`,
+      'http://localhost:3000',
+      'http://minio:9000',
+      'http://job-launcher-server:5000',
+    ])('should return true for valid http url [%#]', (url) => {
+      expect(StorageService.isValidUrl(url)).toBe(true);
+    });
   });
 
   describe('downloadFileFromUrl', () => {

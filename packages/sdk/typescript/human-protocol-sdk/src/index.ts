@@ -14,6 +14,18 @@ export * from './enums';
 export * from './interfaces';
 
 export {
+  EthereumError,
+  InvalidArgumentError,
+  ReplacementUnderpriced,
+  NumericFault,
+  NonceExpired,
+  TransactionReplaced,
+  ContractExecutionError,
+  InvalidEthereumAddressError,
+  InvalidKeyError,
+} from './error';
+
+export {
   StakingClient,
   StorageClient,
   KVStoreClient,

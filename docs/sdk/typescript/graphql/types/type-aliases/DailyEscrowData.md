@@ -8,7 +8,7 @@
 
 > **DailyEscrowData** = `object`
 
-Defined in: [graphql/types.ts:80](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L80)
+Defined in: [graphql/types.ts:80](https://github.com/humanprotocol/human-protocol/blob/111a3dfb8ed775487998fa7cc407fdc884e7a927/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L80)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [graphql/types.ts:80](https://github.com/humanprotocol/human-protoco
 
 > **escrowsCancelled**: `number`
 
-Defined in: [graphql/types.ts:86](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L86)
+Defined in: [graphql/types.ts:86](https://github.com/humanprotocol/human-protocol/blob/111a3dfb8ed775487998fa7cc407fdc884e7a927/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L86)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [graphql/types.ts:86](https://github.com/humanprotocol/human-protoco
 
 > **escrowsPaid**: `number`
 
-Defined in: [graphql/types.ts:85](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L85)
+Defined in: [graphql/types.ts:85](https://github.com/humanprotocol/human-protocol/blob/111a3dfb8ed775487998fa7cc407fdc884e7a927/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L85)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [graphql/types.ts:85](https://github.com/humanprotocol/human-protoco
 
 > **escrowsPending**: `number`
 
-Defined in: [graphql/types.ts:83](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L83)
+Defined in: [graphql/types.ts:83](https://github.com/humanprotocol/human-protocol/blob/111a3dfb8ed775487998fa7cc407fdc884e7a927/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L83)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [graphql/types.ts:83](https://github.com/humanprotocol/human-protoco
 
 > **escrowsSolved**: `number`
 
-Defined in: [graphql/types.ts:84](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L84)
+Defined in: [graphql/types.ts:84](https://github.com/humanprotocol/human-protocol/blob/111a3dfb8ed775487998fa7cc407fdc884e7a927/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L84)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [graphql/types.ts:84](https://github.com/humanprotocol/human-protoco
 
 > **escrowsTotal**: `number`
 
-Defined in: [graphql/types.ts:82](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L82)
+Defined in: [graphql/types.ts:82](https://github.com/humanprotocol/human-protocol/blob/111a3dfb8ed775487998fa7cc407fdc884e7a927/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L82)
 
 ***
 
@@ -56,4 +56,4 @@ Defined in: [graphql/types.ts:82](https://github.com/humanprotocol/human-protoco
 
 > **timestamp**: `Date`
 
-Defined in: [graphql/types.ts:81](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L81)
+Defined in: [graphql/types.ts:81](https://github.com/humanprotocol/human-protocol/blob/111a3dfb8ed775487998fa7cc407fdc884e7a927/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L81)

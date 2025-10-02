@@ -1,6 +1,7 @@
 import { Readable } from 'stream';
 
 import axios, { AxiosError } from 'axios';
+import { isURL } from 'validator';
 
 import { BaseError } from '@/common/errors/base';
 
@@ -22,22 +23,12 @@ class FileDownloadError extends BaseError {
   }
 }
 
-function isValidUrl(maybeUrl: string, protocols?: string[]): boolean {
-  try {
-    const url = new URL(maybeUrl);
-
-    if (protocols?.length) {
-      return protocols.includes(url.protocol.replace(':', ''));
-    }
-
-    return true;
-  } catch {
-    return false;
-  }
-}
-
 export function isValidHttpUrl(maybeUrl: string): boolean {
-  return isValidUrl(maybeUrl, ['http', 'https']);
+  return isURL(maybeUrl, {
+    require_protocol: true,
+    protocols: ['http', 'https'],
+    require_tld: false,
+  });
 }
 
 type DownloadFileOptions = {

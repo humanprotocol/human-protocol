@@ -69,7 +69,7 @@ describe('HCaptchaGuard', () => {
         thrownError = error;
       }
       expect(thrownError).toBeInstanceOf(HttpException);
-      expect(thrownError.message).toBe('hCaptcha token not provided');
+      expect(thrownError.message).toBe('h_captcha_token not provided');
       expect(thrownError.status).toBe(HttpStatus.BAD_REQUEST);
     });
 
@@ -91,7 +91,7 @@ describe('HCaptchaGuard', () => {
         thrownError = error;
       }
       expect(thrownError).toBeInstanceOf(HttpException);
-      expect(thrownError.message).toBe('Invalid hCaptcha token');
+      expect(thrownError.message).toBe('Invalid h_captcha_token');
       expect(thrownError.status).toBe(HttpStatus.BAD_REQUEST);
     });
   });

@@ -30,7 +30,7 @@ export class OperatorUtils {
    *
    * @param {ChainId} chainId Network in which the operator is deployed
    * @param {string} address Operator address.
-   * @returns {Promise<IOperator>} Returns the operator details.
+   * @returns {Promise<IOperator | null>} - Returns the operator details or null if not found.
    *
    * **Code example**
    *
@@ -43,7 +43,7 @@ export class OperatorUtils {
   public static async getOperator(
     chainId: ChainId,
     address: string
-  ): Promise<IOperator> {
+  ): Promise<IOperator | null> {
     if (!ethers.isAddress(address)) {
       throw ErrorInvalidStakerAddressProvided;
     }
@@ -60,7 +60,7 @@ export class OperatorUtils {
     });
 
     if (!operator) {
-      return null as any;
+      return null;
     }
 
     return mapOperator(operator, chainId);

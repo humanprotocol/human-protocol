@@ -35,7 +35,9 @@ export function MyJobsTableActions({
       >
         {t('worker.jobs.solve')}
       </TableButton>
-      <MoreButton job={job} isDisabled={isDisabled} />
+      {job.escrow_address !== 'thirstyfi-task' && (
+        <MoreButton job={job} isDisabled={isDisabled} />
+      )}
     </>
   );
 }

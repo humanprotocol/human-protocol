@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ethers } from 'ethers';
 
+import { isURL } from 'validator';
+import { SUBGRAPH_API_KEY_PLACEHOLDER } from './constants';
 import { ChainId } from './enums';
 import {
   ContractExecutionError,
@@ -13,7 +15,6 @@ import {
   WarnSubgraphApiKeyNotProvided,
 } from './error';
 import { NetworkData } from './types';
-import { SUBGRAPH_API_KEY_PLACEHOLDER } from './constants';
 
 /**
  * **Handle and throw the error.*
@@ -45,13 +46,12 @@ export const throwError = (e: any) => {
  * @param {string} url
  * @returns
  */
-export const isValidUrl = (url: string) => {
-  try {
-    new URL(url);
-    return true;
-  } catch (err) {
-    return false;
-  }
+export const isValidUrl = (url: string): boolean => {
+  return isURL(url, {
+    require_protocol: true,
+    protocols: ['http', 'https'],
+    require_tld: false,
+  });
 };
 
 /**

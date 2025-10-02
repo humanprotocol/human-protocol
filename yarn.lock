@@ -4272,7 +4272,7 @@ __metadata:
     react-router-dom: "npm:^6.23.1"
     recharts: "npm:^2.13.0-alpha.4"
     sass: "npm:^1.89.2"
-    simplebar-react: "npm:^3.2.5"
+    simplebar-react: "npm:^3.3.2"
     styled-components: "npm:^6.1.11"
     swiper: "npm:^11.1.3"
     typescript: "npm:^5.6.3"
@@ -4766,6 +4766,7 @@ __metadata:
     typeorm: "npm:^0.3.25"
     typeorm-naming-strategies: "npm:^4.1.0"
     typescript: "npm:^5.6.3"
+    validator: "npm:^13.12.0"
     zxcvbn: "npm:^4.4.2"
   languageName: unknown
   linkType: soft
@@ -4863,6 +4864,7 @@ __metadata:
     typescript: "npm:^5.9.2"
     typescript-eslint: "npm:^8.39.1"
     uuid: "npm:^11.1.0"
+    validator: "npm:^13.12.0"
     zxcvbn: "npm:^4.4.2"
   languageName: unknown
   linkType: soft
@@ -4886,6 +4888,7 @@ __metadata:
     typedoc: "npm:^0.28.7"
     typedoc-plugin-markdown: "npm:^4.2.3"
     typescript: "npm:^5.8.3"
+    validator: "npm:^13.12.0"
     vitest: "npm:^3.0.9"
   languageName: unknown
   linkType: soft
@@ -26895,7 +26898,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"simplebar-react@npm:^3.2.5":
+"simplebar-react@npm:^3.3.2":
   version: 3.3.2
   resolution: "simplebar-react@npm:3.3.2"
   dependencies:
@@ -29486,7 +29489,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"validator@npm:^13.9.0":
+"validator@npm:^13.12.0, validator@npm:^13.9.0":
   version: 13.15.15
   resolution: "validator@npm:13.15.15"
   checksum: 10c0/f5349d1fbb9cc36f9f6c5dab1880764ddad1d0d2b084e2a71e5964f7de1635d20e406611559df9a3db24828ce775cbee5e3b6dd52f0d555a61939ed7ea5990bd

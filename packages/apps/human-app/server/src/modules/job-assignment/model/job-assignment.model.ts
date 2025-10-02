@@ -19,6 +19,22 @@ export class JobAssignmentDto {
   @IsString()
   @ApiProperty()
   escrow_address: string;
+  // TODO: temporal - THIRSTYFI
+  @AutoMap()
+  @IsOptional()
+  @IsString()
+  @ApiPropertyOptional({ description: 'Optional wallet address for Thirstyfi' })
+  wallet_address?: string;
+  @AutoMap()
+  @IsOptional()
+  @IsString()
+  @ApiPropertyOptional({ description: 'Optional api_key for Thirstyfi' })
+  api_key?: string;
+  @AutoMap()
+  @IsOptional()
+  @IsString()
+  @ApiPropertyOptional({ description: 'Optional api_secret for Thirstyfi' })
+  api_secret?: string;
   @AutoMap()
   @IsNumber()
   @Type(() => Number)
