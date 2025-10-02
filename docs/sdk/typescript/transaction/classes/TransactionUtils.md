@@ -6,11 +6,7 @@
 
 # Class: TransactionUtils
 
-<<<<<<< HEAD
-Defined in: [transaction.ts:18](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L18)
-=======
-Defined in: [transaction.ts:18](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L18)
->>>>>>> develop
+Defined in: [transaction.ts:18](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L18)
 
 ## Constructors
 
@@ -28,11 +24,7 @@ Defined in: [transaction.ts:18](https://github.com/humanprotocol/human-protocol/
 
 > `static` **getTransaction**(`chainId`, `hash`): `Promise`\<[`ITransaction`](../../interfaces/interfaces/ITransaction.md)\>
 
-<<<<<<< HEAD
-Defined in: [transaction.ts:50](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L50)
-=======
-Defined in: [transaction.ts:50](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L50)
->>>>>>> develop
+Defined in: [transaction.ts:50](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L50)
 
 This function returns the transaction data for the given hash.
 
@@ -86,11 +78,7 @@ const transaction = await TransactionUtils.getTransaction(ChainId.POLYGON, '0x62
 
 > `static` **getTransactions**(`filter`): `Promise`\<[`ITransaction`](../../interfaces/interfaces/ITransaction.md)[]\>
 
-<<<<<<< HEAD
-Defined in: [transaction.ts:132](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L132)
-=======
-Defined in: [transaction.ts:132](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L132)
->>>>>>> develop
+Defined in: [transaction.ts:132](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L132)
 
 This function returns all transaction details based on the provided filter.
 

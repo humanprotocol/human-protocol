@@ -158,7 +158,10 @@ def get_escrows():
     print(
         EscrowUtils.get_escrows(
             EscrowFilter(
-                chain_id=ChainId.LOCALHOST,
+                chain_id=ChainId.POLYGON_AMOY,
+                status=Status.Pending,
+                date_from=datetime.datetime(2023, 5, 8),
+                date_to=datetime.datetime(2023, 6, 8),
             )
         )
     )
@@ -166,7 +169,7 @@ def get_escrows():
     print(
         (
             EscrowUtils.get_escrow(
-                ChainId.LOCALHOST, "0xf9ec66feeafb850d85b88142a7305f55e0532959"
+                ChainId.POLYGON_AMOY, "0xf9ec66feeafb850d85b88142a7305f55e0532959"
             )
         )
     )
@@ -246,18 +249,18 @@ if __name__ == "__main__":
     # Run single example while testing, and remove comments before commit
 
     get_escrows()
-    # get_operators()
-    # get_payouts()
-    # get_cancellation_refunds()
+    get_operators()
+    get_payouts()
+    get_cancellation_refunds()
 
-    # statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
-    # get_hmt_holders(statistics_client)
-    # get_escrow_statistics(statistics_client)
-    # get_hmt_statistics(statistics_client)
-    # get_payment_statistics(statistics_client)
-    # get_worker_statistics(statistics_client)
-    # get_hmt_daily_data(statistics_client)
+    statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
+    get_hmt_holders(statistics_client)
+    get_escrow_statistics(statistics_client)
+    get_hmt_statistics(statistics_client)
+    get_payment_statistics(statistics_client)
+    get_worker_statistics(statistics_client)
+    get_hmt_daily_data(statistics_client)
 
-    # agreement_example()
-    # get_workers()
-    # get_stakers_example()
+    agreement_example()
+    get_workers()
+    get_stakers_example()

@@ -6,11 +6,7 @@
 
 # Class: EscrowUtils
 
-<<<<<<< HEAD
-Defined in: [escrow.ts:1713](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1713)
-=======
-Defined in: [escrow.ts:1564](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1564)
->>>>>>> develop
+Defined in: [escrow.ts:1729](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1729)
 
 ## Introduction
 
@@ -58,7 +54,7 @@ const escrowAddresses = new EscrowUtils.getEscrows({
 
 > `static` **getCancellationRefund**(`chainId`, `escrowAddress`): `Promise`\<[`CancellationRefund`](../../types/type-aliases/CancellationRefund.md)\>
 
-Defined in: [escrow.ts:2262](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L2262)
+Defined in: [escrow.ts:2278](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L2278)
 
 This function returns the cancellation refund for a given escrow address.
 
@@ -125,7 +121,7 @@ const cancellationRefund = await EscrowUtils.getCancellationRefund(ChainId.POLYG
 
 > `static` **getCancellationRefunds**(`filter`): `Promise`\<[`CancellationRefund`](../../types/type-aliases/CancellationRefund.md)[]\>
 
-Defined in: [escrow.ts:2178](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L2178)
+Defined in: [escrow.ts:2194](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L2194)
 
 This function returns the cancellation refunds for a given set of networks.
 
@@ -220,11 +216,7 @@ console.log(cancellationRefunds);
 
 > `static` **getEscrow**(`chainId`, `escrowAddress`): `Promise`\<[`IEscrow`](../../interfaces/interfaces/IEscrow.md)\>
 
-<<<<<<< HEAD
-Defined in: [escrow.ts:1926](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1926)
-=======
-Defined in: [escrow.ts:1777](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1777)
->>>>>>> develop
+Defined in: [escrow.ts:1942](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1942)
 
 This function returns the escrow data for a given address.
 
@@ -303,11 +295,7 @@ const escrow = new EscrowUtils.getEscrow(ChainId.POLYGON_AMOY, "0x12345678901234
 
 > `static` **getEscrows**(`filter`): `Promise`\<[`IEscrow`](../../interfaces/interfaces/IEscrow.md)[]\>
 
-<<<<<<< HEAD
-Defined in: [escrow.ts:1810](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1810)
-=======
-Defined in: [escrow.ts:1661](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1661)
->>>>>>> develop
+Defined in: [escrow.ts:1826](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1826)
 
 This function returns an array of escrows based on the specified filter parameters.
 
@@ -419,11 +407,7 @@ const escrows = await EscrowUtils.getEscrows(filters);
 
 > `static` **getPayouts**(`filter`): `Promise`\<[`Payout`](../../types/type-aliases/Payout.md)[]\>
 
-<<<<<<< HEAD
-Defined in: [escrow.ts:2096](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L2096)
-=======
-Defined in: [escrow.ts:1947](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1947)
->>>>>>> develop
+Defined in: [escrow.ts:2112](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L2112)
 
 This function returns the payouts for a given set of networks.
 
@@ -467,11 +451,7 @@ console.log(payouts);
 
 > `static` **getStatusEvents**(`filter`): `Promise`\<[`StatusEvent`](../../graphql/types/type-aliases/StatusEvent.md)[]\>
 
-<<<<<<< HEAD
-Defined in: [escrow.ts:2005](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L2005)
-=======
-Defined in: [escrow.ts:1856](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1856)
->>>>>>> develop
+Defined in: [escrow.ts:2021](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L2021)
 
 This function returns the status events for a given set of networks within an optional date range.
 

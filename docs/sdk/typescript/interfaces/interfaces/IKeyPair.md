@@ -6,11 +6,7 @@
 
 # Interface: IKeyPair
 
-<<<<<<< HEAD
-Defined in: [interfaces.ts:122](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L122)
-=======
-Defined in: [interfaces.ts:112](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L112)
->>>>>>> develop
+Defined in: [interfaces.ts:127](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L127)
 
 ## Properties
 
@@ -18,11 +14,7 @@ Defined in: [interfaces.ts:112](https://github.com/humanprotocol/human-protocol/
 
 > **passphrase**: `string`
 
-<<<<<<< HEAD
-Defined in: [interfaces.ts:125](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L125)
-=======
-Defined in: [interfaces.ts:115](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L115)
->>>>>>> develop
+Defined in: [interfaces.ts:130](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L130)
 
 ***
 
@@ -30,11 +22,7 @@ Defined in: [interfaces.ts:115](https://github.com/humanprotocol/human-protocol/
 
 > **privateKey**: `string`
 
-<<<<<<< HEAD
-Defined in: [interfaces.ts:123](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L123)
-=======
-Defined in: [interfaces.ts:113](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L113)
->>>>>>> develop
+Defined in: [interfaces.ts:128](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L128)
 
 ***
 
@@ -42,11 +30,7 @@ Defined in: [interfaces.ts:113](https://github.com/humanprotocol/human-protocol/
 
 > **publicKey**: `string`
 
-<<<<<<< HEAD
-Defined in: [interfaces.ts:124](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L124)
-=======
-Defined in: [interfaces.ts:114](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L114)
->>>>>>> develop
+Defined in: [interfaces.ts:129](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L129)
 
 ***
 
@@ -54,8 +38,4 @@ Defined in: [interfaces.ts:114](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **revocationCertificate**: `string`
 
-<<<<<<< HEAD
-Defined in: [interfaces.ts:126](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L126)
-=======
-Defined in: [interfaces.ts:116](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L116)
->>>>>>> develop
+Defined in: [interfaces.ts:131](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L131)
