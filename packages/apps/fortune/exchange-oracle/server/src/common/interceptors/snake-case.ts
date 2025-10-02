@@ -6,7 +6,10 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { CaseConverter } from '../utils/case-converter';
+import {
+  transformKeysFromCamelToSnake,
+  transformKeysFromSnakeToCamel,
+} from '../utils/case-converter';
 
 @Injectable()
 export class SnakeCaseInterceptor implements NestInterceptor {
@@ -14,15 +17,15 @@ export class SnakeCaseInterceptor implements NestInterceptor {
     const request = context.switchToHttp().getRequest();
 
     if (request.body) {
-      request.body = CaseConverter.transformToCamelCase(request.body);
+      request.body = transformKeysFromSnakeToCamel(request.body);
     }
 
     if (request.query) {
-      request.query = CaseConverter.transformToCamelCase(request.query);
+      request.query = transformKeysFromSnakeToCamel(request.query);
     }
 
     return next
       .handle()
-      .pipe(map((data) => CaseConverter.transformToSnakeCase(data)));
+      .pipe(map((data) => transformKeysFromCamelToSnake(data)));
   }
 }

@@ -12,7 +12,7 @@ export class IsValidRoleConstraint implements ValidatorConstraintInterface {
   }
 
   defaultMessage() {
-    return `Role must be one of the following values: ${Object.values(
+    return `role must be one of the following values: ${Object.values(
       Role,
     ).join(', ')}`;
   }

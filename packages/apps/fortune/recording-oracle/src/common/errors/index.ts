@@ -9,8 +9,10 @@ export class BaseError extends Error {
 }
 
 export class ValidationError extends BaseError {
-  constructor(message: string, stack?: string) {
+  public errors?: string[];
+  constructor(message: string, stack?: string, errors?: string[]) {
     super(message, stack);
+    this.errors = errors;
   }
 }
 
