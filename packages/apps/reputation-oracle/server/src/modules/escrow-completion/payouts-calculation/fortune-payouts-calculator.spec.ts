@@ -4,8 +4,6 @@ import { faker } from '@faker-js/faker';
 import { createMock } from '@golevelup/ts-jest';
 import { EscrowClient } from '@human-protocol/sdk';
 import { Test } from '@nestjs/testing';
-import { ethers } from 'ethers';
-import _ from 'lodash';
 
 import { StorageService } from '@/modules/storage';
 import { Web3Service } from '@/modules/web3';
@@ -86,15 +84,18 @@ describe('FortunePayoutsCalculator', () => {
 
       const expectedPayouts = validSolutions.map((s) => ({
         address: s.workerAddress,
-        amount:
-          BigInt(
-            ethers.parseUnits(manifest.fundAmount.toString(), tokenDecimals),
-          ) / BigInt(validSolutions.length),
+        amount: balance / BigInt(validSolutions.length),
       }));
 
-      expect(_.sortBy(payouts, 'address')).toEqual(
-        _.sortBy(expectedPayouts, 'address'),
-      );
+      const normalize = (arr: { address: string; amount: bigint }[]) =>
+        arr
+          .map((p) => ({
+            address: p.address.toLowerCase(),
+            amount: p.amount.toString(),
+          }))
+          .sort((a, b) => a.address.localeCompare(b.address));
+
+      expect(normalize(payouts)).toEqual(normalize(expectedPayouts));
 
       expect(mockedStorageService.downloadJsonLikeData).toHaveBeenCalledWith(
         resultsUrl,
