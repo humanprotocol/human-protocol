@@ -103,3 +103,5 @@ Enum for escrow statuses.
 #### Partial *= 2*
 
 #### Pending *= 1*
+
+#### ToCancel *= 6*

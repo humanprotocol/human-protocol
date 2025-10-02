@@ -176,6 +176,7 @@ class Status(Enum):
     Paid = 3
     Complete = 4
     Cancelled = 5
+    ToCancel = 6
 
 
 class Role(Enum):
