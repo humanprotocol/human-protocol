@@ -8,11 +8,7 @@
 
 > **HMTHolderData** = `object`
 
-<<<<<<< HEAD
-Defined in: [graphql/types.ts:109](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L109)
-=======
-Defined in: [graphql/types.ts:109](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L109)
->>>>>>> develop
+Defined in: [graphql/types.ts:114](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L114)
 
 ## Properties
 
@@ -20,11 +16,7 @@ Defined in: [graphql/types.ts:109](https://github.com/humanprotocol/human-protoc
 
 > **address**: `string`
 
-<<<<<<< HEAD
-Defined in: [graphql/types.ts:110](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L110)
-=======
-Defined in: [graphql/types.ts:110](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L110)
->>>>>>> develop
+Defined in: [graphql/types.ts:115](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L115)
 
 ***
 
@@ -32,8 +24,4 @@ Defined in: [graphql/types.ts:110](https://github.com/humanprotocol/human-protoc
 
 > **balance**: `string`
 
-<<<<<<< HEAD
-Defined in: [graphql/types.ts:111](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L111)
-=======
-Defined in: [graphql/types.ts:111](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L111)
->>>>>>> develop
+Defined in: [graphql/types.ts:116](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L116)

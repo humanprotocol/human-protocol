@@ -62,12 +62,17 @@ class EscrowData:
         total_funded_amount: int,
         created_at: datetime,
         final_results_url: Optional[str] = None,
+        final_results_hash: Optional[str] = None,
         intermediate_results_url: Optional[str] = None,
+        intermediate_results_hash: Optional[str] = None,
         manifest_hash: Optional[str] = None,
         manifest: Optional[str] = None,
         recording_oracle: Optional[str] = None,
         reputation_oracle: Optional[str] = None,
         exchange_oracle: Optional[str] = None,
+        recording_oracle_fee: Optional[int] = None,
+        reputation_oracle_fee: Optional[int] = None,
+        exchange_oracle_fee: Optional[int] = None,
     ):
         """
         Initializes an EscrowData instance.
@@ -85,12 +90,17 @@ class EscrowData:
         :param total_funded_amount: Total funded amount
         :param created_at: Creation date
         :param final_results_url: URL for final results.
+        :param final_results_hash: Hash for final results.
         :param intermediate_results_url: URL for intermediate results.
+        :param intermediate_results_hash: Hash for intermediate results.
         :param manifest_hash: Manifest hash.
         :param manifest: Manifest data (JSON/URL).
         :param recording_oracle: Recording Oracle address.
         :param reputation_oracle: Reputation Oracle address.
         :param exchange_oracle: Exchange Oracle address.
+        :param recording_oracle_fee: Fee for the Recording Oracle.
+        :param reputation_oracle_fee: Fee for the Reputation Oracle.
+        :param exchange_oracle_fee: Fee for the Exchange Oracle.
         """
 
         self.id = id
@@ -100,13 +110,18 @@ class EscrowData:
         self.count = count
         self.factory_address = factory_address
         self.final_results_url = final_results_url
+        self.final_results_hash = final_results_hash
         self.intermediate_results_url = intermediate_results_url
+        self.intermediate_results_hash = intermediate_results_hash
         self.launcher = launcher
         self.manifest_hash = manifest_hash
         self.manifest = manifest
         self.recording_oracle = recording_oracle
         self.reputation_oracle = reputation_oracle
         self.exchange_oracle = exchange_oracle
+        self.recording_oracle_fee = recording_oracle_fee
+        self.reputation_oracle_fee = reputation_oracle_fee
+        self.exchange_oracle_fee = exchange_oracle_fee
         self.status = status
         self.token = token
         self.total_funded_amount = total_funded_amount
@@ -287,12 +302,31 @@ class EscrowUtils:
                     total_funded_amount=int(escrow.get("totalFundedAmount", 0)),
                     created_at=datetime.fromtimestamp(int(escrow.get("createdAt", 0))),
                     final_results_url=escrow.get("finalResultsUrl", None),
+                    final_results_hash=escrow.get("finalResultsHash", None),
                     intermediate_results_url=escrow.get("intermediateResultsUrl", None),
+                    intermediate_results_hash=escrow.get(
+                        "intermediateResultsHash", None
+                    ),
                     manifest_hash=escrow.get("manifestHash", None),
                     manifest=escrow.get("manifest", None),
                     recording_oracle=escrow.get("recordingOracle", None),
                     reputation_oracle=escrow.get("reputationOracle", None),
                     exchange_oracle=escrow.get("exchangeOracle", None),
+                    recording_oracle_fee=(
+                        int(escrow.get("recordingOracleFee"))
+                        if escrow.get("recordingOracleFee", None) not in (None, "")
+                        else None
+                    ),
+                    reputation_oracle_fee=(
+                        int(escrow.get("reputationOracleFee"))
+                        if escrow.get("reputationOracleFee", None) not in (None, "")
+                        else None
+                    ),
+                    exchange_oracle_fee=(
+                        int(escrow.get("exchangeOracleFee"))
+                        if escrow.get("exchangeOracleFee", None) not in (None, "")
+                        else None
+                    ),
                 )
                 for escrow in escrows_raw
             ]
@@ -369,12 +403,29 @@ class EscrowUtils:
             total_funded_amount=int(escrow.get("totalFundedAmount", 0)),
             created_at=datetime.fromtimestamp(int(escrow.get("createdAt", 0))),
             final_results_url=escrow.get("finalResultsUrl", None),
+            final_results_hash=escrow.get("finalResultsHash", None),
             intermediate_results_url=escrow.get("intermediateResultsUrl", None),
+            intermediate_results_hash=escrow.get("intermediateResultsHash", None),
             manifest_hash=escrow.get("manifestHash", None),
             manifest=escrow.get("manifest", None),
             recording_oracle=escrow.get("recordingOracle", None),
             reputation_oracle=escrow.get("reputationOracle", None),
             exchange_oracle=escrow.get("exchangeOracle", None),
+            recording_oracle_fee=(
+                int(escrow.get("recordingOracleFee"))
+                if escrow.get("recordingOracleFee", None) not in (None, "")
+                else None
+            ),
+            reputation_oracle_fee=(
+                int(escrow.get("reputationOracleFee"))
+                if escrow.get("reputationOracleFee", None) not in (None, "")
+                else None
+            ),
+            exchange_oracle_fee=(
+                int(escrow.get("exchangeOracleFee"))
+                if escrow.get("exchangeOracleFee", None) not in (None, "")
+                else None
+            ),
         )
 
     @staticmethod

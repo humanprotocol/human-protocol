@@ -8,11 +8,7 @@
 
 > **DailyTaskData** = `object`
 
-<<<<<<< HEAD
-Defined in: [graphql/types.ts:140](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L140)
-=======
-Defined in: [graphql/types.ts:140](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L140)
->>>>>>> develop
+Defined in: [graphql/types.ts:145](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L145)
 
 ## Properties
 
@@ -20,11 +16,7 @@ Defined in: [graphql/types.ts:140](https://github.com/humanprotocol/human-protoc
 
 > **tasksSolved**: `number`
 
-<<<<<<< HEAD
-Defined in: [graphql/types.ts:143](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L143)
-=======
-Defined in: [graphql/types.ts:143](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L143)
->>>>>>> develop
+Defined in: [graphql/types.ts:148](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L148)
 
 ***
 
@@ -32,11 +24,7 @@ Defined in: [graphql/types.ts:143](https://github.com/humanprotocol/human-protoc
 
 > **tasksTotal**: `number`
 
-<<<<<<< HEAD
-Defined in: [graphql/types.ts:142](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L142)
-=======
-Defined in: [graphql/types.ts:142](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L142)
->>>>>>> develop
+Defined in: [graphql/types.ts:147](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L147)
 
 ***
 
@@ -44,8 +32,4 @@ Defined in: [graphql/types.ts:142](https://github.com/humanprotocol/human-protoc
 
 > **timestamp**: `Date`
 
-<<<<<<< HEAD
-Defined in: [graphql/types.ts:141](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L141)
-=======
-Defined in: [graphql/types.ts:141](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L141)
->>>>>>> develop
+Defined in: [graphql/types.ts:146](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L146)

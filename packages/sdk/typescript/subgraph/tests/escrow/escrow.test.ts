@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
   Address,
   BigInt,
   Bytes,
   DataSourceContext,
   ethereum,
+  store,
 } from '@graphprotocol/graph-ts';
 import {
   afterAll,
@@ -16,7 +18,7 @@ import {
   describe,
   test,
 } from 'matchstick-as/assembly';
-import { Escrow } from '../../generated/schema';
+import { Escrow, Operator } from '../../generated/schema';
 import {
   STATISTICS_ENTITY_ID,
   handleBulkTransfer,
@@ -111,6 +113,24 @@ describe('Escrow', () => {
     escrow.createdAt = ZERO_BI;
 
     escrow.save();
+
+    const reputationOperator = new Operator(reputationOracleAddress);
+    reputationOperator.address = reputationOracleAddress;
+    reputationOperator.amountJobsProcessed = ZERO_BI;
+    reputationOperator.fee = BigInt.fromI32(11);
+    reputationOperator.save();
+
+    const recordingOperator = new Operator(recordingOracleAddress);
+    recordingOperator.address = recordingOracleAddress;
+    recordingOperator.amountJobsProcessed = ZERO_BI;
+    recordingOperator.fee = BigInt.fromI32(22);
+    recordingOperator.save();
+
+    const exchangeOperator = new Operator(exchangeOracleAddress);
+    exchangeOperator.address = exchangeOracleAddress;
+    exchangeOperator.amountJobsProcessed = ZERO_BI;
+    exchangeOperator.fee = BigInt.fromI32(33);
+    exchangeOperator.save();
   });
 
   afterAll(() => {
@@ -220,6 +240,22 @@ describe('Escrow', () => {
       'recordingOracle',
       recordingOracleAddressString
     );
+    assert.fieldEquals(
+      'Escrow',
+      escrowAddress.toHex(),
+      'reputationOracleFee',
+      '11'
+    );
+    assert.fieldEquals(
+      'Escrow',
+      escrowAddress.toHex(),
+      'recordingOracleFee',
+      '22'
+    );
+    const escrowRaw = store.get('Escrow', escrowAddress.toHex());
+    assert.assertTrue(escrowRaw != null);
+    assert.assertTrue(escrowRaw!.get('exchangeOracleFee') == null);
+
     assert.fieldEquals(
       'Transaction',
       newPending1.transaction.hash.toHex(),
@@ -349,13 +385,27 @@ describe('Escrow', () => {
       'reputationOracle',
       reputationOracleAddressString
     );
-
     assert.fieldEquals(
       'Escrow',
       escrowAddress.toHex(),
       'recordingOracle',
       recordingOracleAddressString
     );
+    assert.fieldEquals(
+      'Escrow',
+      escrowAddress.toHex(),
+      'reputationOracleFee',
+      '11'
+    );
+    assert.fieldEquals(
+      'Escrow',
+      escrowAddress.toHex(),
+      'recordingOracleFee',
+      '22'
+    );
+    const escrowRaw = store.get('Escrow', escrowAddress.toHex());
+    assert.assertTrue(escrowRaw != null);
+    assert.assertTrue(escrowRaw!.get('exchangeOracleFee') == null);
 
     assert.fieldEquals(
       'Transaction',
@@ -513,6 +563,25 @@ describe('Escrow', () => {
       'exchangeOracle',
       exchangeOracleAddressString
     );
+    assert.fieldEquals(
+      'Escrow',
+      escrowAddress.toHex(),
+      'reputationOracleFee',
+      '11'
+    );
+    assert.fieldEquals(
+      'Escrow',
+      escrowAddress.toHex(),
+      'recordingOracleFee',
+      '22'
+    );
+    assert.fieldEquals(
+      'Escrow',
+      escrowAddress.toHex(),
+      'exchangeOracleFee',
+      '33'
+    );
+
     assert.fieldEquals(
       'Transaction',
       newPending1.transaction.hash.toHex(),
@@ -711,12 +780,29 @@ describe('Escrow', () => {
       'reputationOracle',
       reputationOracleAddressString
     );
-
     assert.fieldEquals(
       'Escrow',
       escrowAddress.toHex(),
       'recordingOracle',
       recordingOracleAddressString
+    );
+    assert.fieldEquals(
+      'Escrow',
+      escrowAddress.toHex(),
+      'reputationOracleFee',
+      '11'
+    );
+    assert.fieldEquals(
+      'Escrow',
+      escrowAddress.toHex(),
+      'recordingOracleFee',
+      '22'
+    );
+    assert.fieldEquals(
+      'Escrow',
+      escrowAddress.toHex(),
+      'exchangeOracleFee',
+      '33'
     );
 
     assert.fieldEquals(
@@ -775,12 +861,8 @@ describe('Escrow', () => {
 
   test('should properly handle IntermediateStorage event', () => {
     const URL = 'test.com';
-    const newIS = createISEvent(
-      workerAddress,
-      URL,
-      'is_hash_1',
-      BigInt.fromI32(6)
-    );
+    const HASH = 'is_hash_1';
+    const newIS = createISEvent(workerAddress, URL, HASH, BigInt.fromI32(6));
     handleIntermediateStorage(newIS);
 
     const id = toEventId(newIS).toHex();
@@ -812,6 +894,13 @@ describe('Escrow', () => {
     );
     assert.fieldEquals('StoreResultsEvent', id, 'sender', workerAddressString);
     assert.fieldEquals('StoreResultsEvent', id, 'intermediateResultsUrl', URL);
+    assert.fieldEquals(
+      'StoreResultsEvent',
+      id,
+      'intermediateResultsHash',
+      HASH
+    );
+
     assert.fieldEquals(
       'Transaction',
       newIS.transaction.hash.toHex(),
@@ -1229,6 +1318,7 @@ describe('Escrow', () => {
       [49, 49],
       false,
       'test.com',
+      'test-hash',
       BigInt.fromI32(9)
     );
 
@@ -1316,6 +1406,12 @@ describe('Escrow', () => {
       escrowAddress.toHex(),
       'finalResultsUrl',
       'test.com'
+    );
+    assert.fieldEquals(
+      'Escrow',
+      escrowAddress.toHex(),
+      'finalResultsHash',
+      'test-hash'
     );
     assert.fieldEquals('Escrow', escrowAddress.toHex(), 'balance', '0');
 

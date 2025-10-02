@@ -234,6 +234,7 @@ export function createBulkTransferV3Event(
   amounts: i32[],
   isPartial: boolean,
   finalResultsUrl: string,
+  finalResultsHash: string,
   timestamp: BigInt
 ): BulkTransferV3 {
   const newBTEvent = changetype<BulkTransferV3>(newMockEvent());
@@ -268,12 +269,17 @@ export function createBulkTransferV3Event(
     'finalResultsUrl',
     ethereum.Value.fromString(finalResultsUrl)
   );
+  const finalResultsHashParam = new ethereum.EventParam(
+    'finalResultsHash',
+    ethereum.Value.fromString(finalResultsHash)
+  );
 
   newBTEvent.parameters.push(payoutIdParam);
   newBTEvent.parameters.push(recipientsParam);
   newBTEvent.parameters.push(amountsParam);
   newBTEvent.parameters.push(isPartialParam);
   newBTEvent.parameters.push(finalResultsUrlParam);
+  newBTEvent.parameters.push(finalResultsHashParam);
 
   return newBTEvent;
 }

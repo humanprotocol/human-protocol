@@ -8,11 +8,7 @@
 
 > **EscrowStatistics** = `object`
 
-<<<<<<< HEAD
-Defined in: [graphql/types.ts:84](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L84)
-=======
-Defined in: [graphql/types.ts:84](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L84)
->>>>>>> develop
+Defined in: [graphql/types.ts:89](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L89)
 
 ## Properties
 
@@ -20,11 +16,7 @@ Defined in: [graphql/types.ts:84](https://github.com/humanprotocol/human-protoco
 
 > **dailyEscrowsData**: [`DailyEscrowData`](DailyEscrowData.md)[]
 
-<<<<<<< HEAD
-Defined in: [graphql/types.ts:86](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L86)
-=======
-Defined in: [graphql/types.ts:86](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L86)
->>>>>>> develop
+Defined in: [graphql/types.ts:91](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L91)
 
 ***
 
@@ -32,8 +24,4 @@ Defined in: [graphql/types.ts:86](https://github.com/humanprotocol/human-protoco
 
 > **totalEscrows**: `number`
 
-<<<<<<< HEAD
-Defined in: [graphql/types.ts:85](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L85)
-=======
-Defined in: [graphql/types.ts:85](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L85)
->>>>>>> develop
+Defined in: [graphql/types.ts:90](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L90)

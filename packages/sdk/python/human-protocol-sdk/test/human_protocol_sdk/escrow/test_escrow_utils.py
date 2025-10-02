@@ -33,16 +33,22 @@ class TestEscrowUtils(unittest.TestCase):
                 "count": "1",
                 "factoryAddress": "0x1234567890123456789012345678901234567890",
                 "finalResultsUrl": "https://example.com",
+                "finalResultsHash": "0x1234567890123456789012345678901234567891",
                 "intermediateResultsUrl": "https://example.com",
+                "intermediateResultsHash": "0x1234567890123456789012345678901234567891",
                 "launcher": "0x1234567890123456789012345678901234567891",
                 "manifestHash": "0x1234567890123456789012345678901234567891",
                 "manifest": "https://example.com",
                 "recordingOracle": "0x1234567890123456789012345678901234567891",
                 "reputationOracle": "0x1234567890123456789012345678901234567891",
                 "exchangeOracle": "0x1234567890123456789012345678901234567891",
+                "recordingOracleFee": "1000000000000000000",
+                "reputationOracleFee": "1000000000000000000",
+                "exchangeOracleFee": "1000000000000000000",
                 "status": "Pending",
                 "token": "0x1234567890123456789012345678901234567891",
                 "totalFundedAmount": "1000000000000000000",
+                "createdAt": "1683811973",
             }
 
             def side_effect(subgraph_url, query, params):
@@ -80,6 +86,53 @@ class TestEscrowUtils(unittest.TestCase):
             )
             self.assertEqual(len(filtered), 1)
             self.assertEqual(filtered[0].address, mock_escrow["address"])
+            self.assertEqual(filtered[0].id, mock_escrow["id"])
+            self.assertEqual(filtered[0].amount_paid, int(mock_escrow["amountPaid"]))
+            self.assertEqual(filtered[0].balance, int(mock_escrow["balance"]))
+            self.assertEqual(filtered[0].count, int(mock_escrow["count"]))
+            self.assertEqual(filtered[0].factory_address, mock_escrow["factoryAddress"])
+            self.assertEqual(
+                filtered[0].final_results_url, mock_escrow["finalResultsUrl"]
+            )
+            self.assertEqual(
+                filtered[0].final_results_hash, mock_escrow["finalResultsHash"]
+            )
+            self.assertEqual(
+                filtered[0].intermediate_results_url,
+                mock_escrow["intermediateResultsUrl"],
+            )
+            self.assertEqual(
+                filtered[0].intermediate_results_hash,
+                mock_escrow["intermediateResultsHash"],
+            )
+            self.assertEqual(filtered[0].launcher, mock_escrow["launcher"])
+            self.assertEqual(filtered[0].manifest_hash, mock_escrow["manifestHash"])
+            self.assertEqual(filtered[0].manifest, mock_escrow["manifest"])
+            self.assertEqual(
+                filtered[0].recording_oracle, mock_escrow["recordingOracle"]
+            )
+            self.assertEqual(
+                filtered[0].reputation_oracle, mock_escrow["reputationOracle"]
+            )
+            self.assertEqual(filtered[0].exchange_oracle, mock_escrow["exchangeOracle"])
+            self.assertEqual(
+                filtered[0].recording_oracle_fee, int(mock_escrow["recordingOracleFee"])
+            )
+            self.assertEqual(
+                filtered[0].reputation_oracle_fee,
+                int(mock_escrow["reputationOracleFee"]),
+            )
+            self.assertEqual(
+                filtered[0].exchange_oracle_fee, int(mock_escrow["exchangeOracleFee"])
+            )
+            self.assertEqual(filtered[0].status, mock_escrow["status"])
+            self.assertEqual(filtered[0].token, mock_escrow["token"])
+            self.assertEqual(
+                filtered[0].total_funded_amount, int(mock_escrow["totalFundedAmount"])
+            )
+            self.assertEqual(
+                int(filtered[0].created_at.timestamp()), int(mock_escrow["createdAt"])
+            )
 
             filter = EscrowFilter(chain_id=ChainId.POLYGON_AMOY)
 
@@ -194,16 +247,22 @@ class TestEscrowUtils(unittest.TestCase):
                 "count": "1",
                 "factoryAddress": "0x1234567890123456789012345678901234567890",
                 "finalResultsUrl": "https://example.com",
+                "finalResultsHash": "0x1234567890123456789012345678901234567891",
                 "intermediateResultsUrl": "https://example.com",
+                "intermediateResultsHash": "0x1234567890123456789012345678901234567891",
                 "launcher": "0x1234567890123456789012345678901234567891",
                 "manifestHash": "0x1234567890123456789012345678901234567891",
                 "manifest": "https://example.com",
                 "recordingOracle": "0x1234567890123456789012345678901234567891",
                 "reputationOracle": "0x1234567890123456789012345678901234567891",
                 "exchangeOracle": "0x1234567890123456789012345678901234567891",
+                "recordingOracleFee": "1000000000000000000",
+                "reputationOracleFee": "1000000000000000000",
+                "exchangeOracleFee": "1000000000000000000",
                 "status": "Pending",
                 "token": "0x1234567890123456789012345678901234567891",
                 "totalFundedAmount": "1000000000000000000",
+                "createdAt": "1683813973",
             }
 
             mock_function.return_value = {
@@ -227,6 +286,40 @@ class TestEscrowUtils(unittest.TestCase):
             self.assertEqual(escrow.chain_id, ChainId.POLYGON_AMOY)
             self.assertEqual(escrow.address, mock_escrow["address"])
             self.assertEqual(escrow.amount_paid, int(mock_escrow["amountPaid"]))
+            self.assertEqual(escrow.balance, int(mock_escrow["balance"]))
+            self.assertEqual(escrow.count, int(mock_escrow["count"]))
+            self.assertEqual(escrow.factory_address, mock_escrow["factoryAddress"])
+            self.assertEqual(escrow.final_results_url, mock_escrow["finalResultsUrl"])
+            self.assertEqual(escrow.final_results_hash, mock_escrow["finalResultsHash"])
+            self.assertEqual(
+                escrow.intermediate_results_url, mock_escrow["intermediateResultsUrl"]
+            )
+            self.assertEqual(
+                escrow.intermediate_results_hash, mock_escrow["intermediateResultsHash"]
+            )
+            self.assertEqual(escrow.launcher, mock_escrow["launcher"])
+            self.assertEqual(escrow.manifest_hash, mock_escrow["manifestHash"])
+            self.assertEqual(escrow.manifest, mock_escrow["manifest"])
+            self.assertEqual(escrow.recording_oracle, mock_escrow["recordingOracle"])
+            self.assertEqual(escrow.reputation_oracle, mock_escrow["reputationOracle"])
+            self.assertEqual(escrow.exchange_oracle, mock_escrow["exchangeOracle"])
+            self.assertEqual(
+                escrow.recording_oracle_fee, int(mock_escrow["recordingOracleFee"])
+            )
+            self.assertEqual(
+                escrow.reputation_oracle_fee, int(mock_escrow["reputationOracleFee"])
+            )
+            self.assertEqual(
+                escrow.exchange_oracle_fee, int(mock_escrow["exchangeOracleFee"])
+            )
+            self.assertEqual(escrow.status, mock_escrow["status"])
+            self.assertEqual(escrow.token, mock_escrow["token"])
+            self.assertEqual(
+                escrow.total_funded_amount, int(mock_escrow["totalFundedAmount"])
+            )
+            self.assertEqual(
+                int(escrow.created_at.timestamp()), int(mock_escrow["createdAt"])
+            )
 
     def test_get_escrow_empty_data(self):
         with patch(

@@ -8,11 +8,7 @@
 
 > **NetworkData** = `object`
 
-<<<<<<< HEAD
-Defined in: [types.ts:99](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L99)
-=======
-Defined in: [types.ts:95](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L95)
->>>>>>> develop
+Defined in: [types.ts:99](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L99)
 
 Network data
 
@@ -22,11 +18,7 @@ Network data
 
 > **chainId**: `number`
 
-<<<<<<< HEAD
-Defined in: [types.ts:103](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L103)
-=======
-Defined in: [types.ts:99](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L99)
->>>>>>> develop
+Defined in: [types.ts:103](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L103)
 
 Network chain id
 
@@ -36,11 +28,7 @@ Network chain id
 
 > **factoryAddress**: `string`
 
-<<<<<<< HEAD
-Defined in: [types.ts:119](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L119)
-=======
-Defined in: [types.ts:115](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L115)
->>>>>>> develop
+Defined in: [types.ts:119](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L119)
 
 Escrow Factory contract address
 
@@ -50,11 +38,7 @@ Escrow Factory contract address
 
 > **hmtAddress**: `string`
 
-<<<<<<< HEAD
-Defined in: [types.ts:115](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L115)
-=======
-Defined in: [types.ts:111](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L111)
->>>>>>> develop
+Defined in: [types.ts:115](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L115)
 
 HMT Token contract address
 
@@ -64,11 +48,7 @@ HMT Token contract address
 
 > **kvstoreAddress**: `string`
 
-<<<<<<< HEAD
-Defined in: [types.ts:127](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L127)
-=======
-Defined in: [types.ts:123](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L123)
->>>>>>> develop
+Defined in: [types.ts:127](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L127)
 
 KVStore contract address
 
@@ -78,11 +58,7 @@ KVStore contract address
 
 > **oldFactoryAddress**: `string`
 
-<<<<<<< HEAD
-Defined in: [types.ts:143](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L143)
-=======
-Defined in: [types.ts:139](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L139)
->>>>>>> develop
+Defined in: [types.ts:143](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L143)
 
 Old Escrow Factory contract address
 
@@ -92,11 +68,7 @@ Old Escrow Factory contract address
 
 > **oldSubgraphUrl**: `string`
 
-<<<<<<< HEAD
-Defined in: [types.ts:139](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L139)
-=======
-Defined in: [types.ts:135](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L135)
->>>>>>> develop
+Defined in: [types.ts:139](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L139)
 
 Old subgraph URL
 
@@ -106,11 +78,7 @@ Old subgraph URL
 
 > **scanUrl**: `string`
 
-<<<<<<< HEAD
-Defined in: [types.ts:111](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L111)
-=======
-Defined in: [types.ts:107](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L107)
->>>>>>> develop
+Defined in: [types.ts:111](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L111)
 
 Network scanner URL
 
@@ -120,11 +88,7 @@ Network scanner URL
 
 > **stakingAddress**: `string`
 
-<<<<<<< HEAD
-Defined in: [types.ts:123](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L123)
-=======
-Defined in: [types.ts:119](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L119)
->>>>>>> develop
+Defined in: [types.ts:123](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L123)
 
 Staking contract address
 
@@ -134,11 +98,7 @@ Staking contract address
 
 > **subgraphUrl**: `string`
 
-<<<<<<< HEAD
-Defined in: [types.ts:131](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L131)
-=======
-Defined in: [types.ts:127](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L127)
->>>>>>> develop
+Defined in: [types.ts:131](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L131)
 
 Subgraph URL
 
@@ -148,11 +108,7 @@ Subgraph URL
 
 > **subgraphUrlApiKey**: `string`
 
-<<<<<<< HEAD
-Defined in: [types.ts:135](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L135)
-=======
-Defined in: [types.ts:131](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L131)
->>>>>>> develop
+Defined in: [types.ts:135](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L135)
 
 Subgraph URL API key
 
@@ -162,10 +118,6 @@ Subgraph URL API key
 
 > **title**: `string`
 
-<<<<<<< HEAD
-Defined in: [types.ts:107](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L107)
-=======
-Defined in: [types.ts:103](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L103)
->>>>>>> develop
+Defined in: [types.ts:107](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L107)
 
 Network title

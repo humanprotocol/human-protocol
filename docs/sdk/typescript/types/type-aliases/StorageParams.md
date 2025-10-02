@@ -8,11 +8,7 @@
 
 > **StorageParams** = `object`
 
-<<<<<<< HEAD
-Defined in: [types.ts:58](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L58)
-=======
-Defined in: [types.ts:54](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L54)
->>>>>>> develop
+Defined in: [types.ts:58](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L58)
 
 ## Deprecated
 
@@ -24,11 +20,7 @@ StorageClient is deprecated. Use Minio.Client directly.
 
 > **endPoint**: `string`
 
-<<<<<<< HEAD
-Defined in: [types.ts:62](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L62)
-=======
-Defined in: [types.ts:58](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L58)
->>>>>>> develop
+Defined in: [types.ts:62](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L62)
 
 Request endPoint
 
@@ -38,11 +30,7 @@ Request endPoint
 
 > `optional` **port**: `number`
 
-<<<<<<< HEAD
-Defined in: [types.ts:74](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L74)
-=======
-Defined in: [types.ts:70](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L70)
->>>>>>> develop
+Defined in: [types.ts:74](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L74)
 
 TCP/IP port number. Default value set to 80 for HTTP and 443 for HTTPs
 
@@ -52,11 +40,7 @@ TCP/IP port number. Default value set to 80 for HTTP and 443 for HTTPs
 
 > `optional` **region**: `string`
 
-<<<<<<< HEAD
-Defined in: [types.ts:70](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L70)
-=======
-Defined in: [types.ts:66](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L66)
->>>>>>> develop
+Defined in: [types.ts:70](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L70)
 
 Region
 
@@ -66,10 +50,6 @@ Region
 
 > **useSSL**: `boolean`
 
-<<<<<<< HEAD
-Defined in: [types.ts:66](https://github.com/humanprotocol/human-protocol/blob/daa33ac30e8a8fd3dd7bbd077ced2e0ab16f7bab/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L66)
-=======
-Defined in: [types.ts:62](https://github.com/humanprotocol/human-protocol/blob/8c6afbe01e352b593635124b575731df11c509c7/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L62)
->>>>>>> develop
+Defined in: [types.ts:66](https://github.com/humanprotocol/human-protocol/blob/8551ddf36370251a82fddadc0d28c34592acebaf/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L66)
 
 Enable secure (HTTPS) access. Default value set to false

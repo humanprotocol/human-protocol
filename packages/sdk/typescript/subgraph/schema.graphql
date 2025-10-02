@@ -81,8 +81,13 @@ type Escrow @entity(immutable: false) {
   reputationOracle: Bytes # address
   recordingOracle: Bytes # address
   exchangeOracle: Bytes # address
+  reputationOracleFee: BigInt
+  recordingOracleFee: BigInt
+  exchangeOracleFee: BigInt
   intermediateResultsUrl: String # string
+  intermediateResultsHash: String # string
   finalResultsUrl: String # string
+  finalResultsHash: String # string
   jobRequesterId: String # string
   createdAt: BigInt!
 }
@@ -180,6 +185,7 @@ type StoreResultsEvent @entity(immutable: true) {
   escrowAddress: Bytes! # address
   sender: Bytes! # address
   intermediateResultsUrl: String! # string
+  intermediateResultsHash: String! # string
 }
 
 type BulkPayoutEvent @entity(immutable: true) {
@@ -357,6 +363,10 @@ type EventDayData @entity(immutable: false) {
   dailyUniqueSenders: BigInt!
   dailyUniqueReceivers: BigInt!
 }
+
+##################################################
+#                 Transactions                   #
+##################################################
 
 type Transaction @entity(immutable: false) {
   id: Bytes!

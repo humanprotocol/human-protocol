@@ -39,11 +39,11 @@ Represents a cancellation refund event.
 
 #### \_\_init_\_(id, escrow_address, receiver, amount, block, timestamp, tx_hash)
 
-### *class* human_protocol_sdk.escrow.escrow_utils.EscrowData(chain_id, id, address, amount_paid, balance, count, factory_address, launcher, status, token, total_funded_amount, created_at, final_results_url=None, intermediate_results_url=None, manifest_hash=None, manifest=None, recording_oracle=None, reputation_oracle=None, exchange_oracle=None)
+### *class* human_protocol_sdk.escrow.escrow_utils.EscrowData(chain_id, id, address, amount_paid, balance, count, factory_address, launcher, status, token, total_funded_amount, created_at, final_results_url=None, final_results_hash=None, intermediate_results_url=None, intermediate_results_hash=None, manifest_hash=None, manifest=None, recording_oracle=None, reputation_oracle=None, exchange_oracle=None, recording_oracle_fee=None, reputation_oracle_fee=None, exchange_oracle_fee=None)
 
 Bases: `object`
 
-#### \_\_init_\_(chain_id, id, address, amount_paid, balance, count, factory_address, launcher, status, token, total_funded_amount, created_at, final_results_url=None, intermediate_results_url=None, manifest_hash=None, manifest=None, recording_oracle=None, reputation_oracle=None, exchange_oracle=None)
+#### \_\_init_\_(chain_id, id, address, amount_paid, balance, count, factory_address, launcher, status, token, total_funded_amount, created_at, final_results_url=None, final_results_hash=None, intermediate_results_url=None, intermediate_results_hash=None, manifest_hash=None, manifest=None, recording_oracle=None, reputation_oracle=None, exchange_oracle=None, recording_oracle_fee=None, reputation_oracle_fee=None, exchange_oracle_fee=None)
 
 Initializes an EscrowData instance.
 
@@ -61,12 +61,17 @@ Initializes an EscrowData instance.
   * **total_funded_amount** (`int`) – Total funded amount
   * **created_at** (`datetime`) – Creation date
   * **final_results_url** (`Optional`[`str`]) – URL for final results.
+  * **final_results_hash** (`Optional`[`str`]) – Hash for final results.
   * **intermediate_results_url** (`Optional`[`str`]) – URL for intermediate results.
+  * **intermediate_results_hash** (`Optional`[`str`]) – Hash for intermediate results.
   * **manifest_hash** (`Optional`[`str`]) – Manifest hash.
   * **manifest** (`Optional`[`str`]) – Manifest data (JSON/URL).
   * **recording_oracle** (`Optional`[`str`]) – Recording Oracle address.
   * **reputation_oracle** (`Optional`[`str`]) – Reputation Oracle address.
   * **exchange_oracle** (`Optional`[`str`]) – Exchange Oracle address.
+  * **recording_oracle_fee** (`Optional`[`int`]) – Fee for the Recording Oracle.
+  * **reputation_oracle_fee** (`Optional`[`int`]) – Fee for the Reputation Oracle.
+  * **exchange_oracle_fee** (`Optional`[`int`]) – Fee for the Exchange Oracle.
 
 ### *class* human_protocol_sdk.escrow.escrow_utils.EscrowUtils
 

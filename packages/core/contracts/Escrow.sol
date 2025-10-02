@@ -8,6 +8,12 @@ import '@openzeppelin/contracts/utils/ReentrancyGuard.sol';
 
 import './interfaces/IEscrow.sol';
 
+struct Fees {
+    uint256 reputation;
+    uint256 recording;
+    uint256 exchange;
+}
+
 /**
  * @title Escrow Contract
  * @dev This contract manages the lifecycle of an escrow, including funding,
@@ -46,7 +52,8 @@ contract Escrow is IEscrow, ReentrancyGuard {
         address[] recipients,
         uint256[] amounts,
         bool isPartial,
-        string finalResultsUrl
+        string finalResultsUrl,
+        string finalResultsHash
     );
     event Cancelled();
     event Completed();
@@ -330,6 +337,20 @@ contract Escrow is IEscrow, ReentrancyGuard {
         }
     }
 
+    function _calculateTotalBulkAmount(
+        uint256[] calldata amounts
+    ) internal pure returns (uint256 total) {
+        uint256 len = amounts.length;
+        for (uint256 i; i < len; ) {
+            uint256 amount = amounts[i];
+            require(amount > 0, 'Zero amount');
+            total += amount;
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
     /**
      * @dev Bulk payout to multiple recipients.
      * @param _recipients Array of recipient addresses.
@@ -378,27 +399,17 @@ contract Escrow is IEscrow, ReentrancyGuard {
             'Empty url/hash'
         );
 
-        uint256 totalBulkAmount;
-        for (uint256 i; i < _recipients.length; ) {
-            uint256 amount = _amounts[i];
-            require(amount > 0, 'Zero amount');
-            totalBulkAmount += amount;
-            unchecked {
-                ++i;
-            }
-        }
+        uint256 totalBulkAmount = _calculateTotalBulkAmount(_amounts);
         require(totalBulkAmount <= reservedFunds, 'Not enough funds');
 
-        uint256 totalReputationOracleFee = 0;
-        uint256 totalRecordingOracleFee = 0;
-        uint256 totalExchangeOracleFee = 0;
-        uint256[] memory netAmounts = new uint256[](_recipients.length + 3);
-        address[] memory eventRecipients = new address[](
-            _recipients.length + 3
-        );
-        IERC20 erc20 = IERC20(token);
+        uint256 length = _recipients.length;
+        uint256[] memory netAmounts = new uint256[](length + 3);
+        address[] memory eventRecipients = new address[](length + 3);
 
-        for (uint256 i; i < _recipients.length; ) {
+        IERC20 erc20 = IERC20(token);
+        Fees memory fees;
+
+        for (uint256 i; i < length; ) {
             uint256 amount = _amounts[i];
             uint256 reputationOracleFee = (reputationOracleFeePercentage *
                 amount) / 100;
@@ -407,37 +418,47 @@ contract Escrow is IEscrow, ReentrancyGuard {
             uint256 exchangeOracleFee = (exchangeOracleFeePercentage * amount) /
                 100;
 
-            totalReputationOracleFee += reputationOracleFee;
-            totalRecordingOracleFee += recordingOracleFee;
-            totalExchangeOracleFee += exchangeOracleFee;
+            fees.reputation += reputationOracleFee;
+            fees.recording += recordingOracleFee;
+            fees.exchange += exchangeOracleFee;
 
-            netAmounts[i] =
-                amount -
+            uint256 net = amount -
                 reputationOracleFee -
                 recordingOracleFee -
                 exchangeOracleFee;
-            eventRecipients[i] = _recipients[i];
+            netAmounts[i] = net;
+            address to = _recipients[i];
+            eventRecipients[i] = to;
 
-            erc20.safeTransfer(_recipients[i], netAmounts[i]);
+            erc20.safeTransfer(to, net);
             unchecked {
                 ++i;
             }
         }
 
         if (reputationOracleFeePercentage > 0) {
-            erc20.safeTransfer(reputationOracle, totalReputationOracleFee);
-            eventRecipients[_recipients.length] = reputationOracle;
-            netAmounts[_recipients.length] = totalReputationOracleFee;
+            erc20.safeTransfer(reputationOracle, fees.reputation);
+            eventRecipients[length] = reputationOracle;
+            netAmounts[length] = fees.reputation;
+            unchecked {
+                ++length;
+            }
         }
         if (recordingOracleFeePercentage > 0) {
-            erc20.safeTransfer(recordingOracle, totalRecordingOracleFee);
-            eventRecipients[_recipients.length + 1] = recordingOracle;
-            netAmounts[_recipients.length + 1] = totalRecordingOracleFee;
+            erc20.safeTransfer(recordingOracle, fees.recording);
+            eventRecipients[length] = recordingOracle;
+            netAmounts[length] = fees.recording;
+            unchecked {
+                ++length;
+            }
         }
         if (exchangeOracleFeePercentage > 0) {
-            erc20.safeTransfer(exchangeOracle, totalExchangeOracleFee);
-            eventRecipients[_recipients.length + 2] = exchangeOracle;
-            netAmounts[_recipients.length + 2] = totalExchangeOracleFee;
+            erc20.safeTransfer(exchangeOracle, fees.exchange);
+            eventRecipients[length] = exchangeOracle;
+            netAmounts[length] = fees.exchange;
+            unchecked {
+                ++length;
+            }
         }
 
         remainingFunds -= totalBulkAmount;
@@ -454,7 +475,8 @@ contract Escrow is IEscrow, ReentrancyGuard {
             eventRecipients,
             netAmounts,
             isPartial,
-            _url
+            _url,
+            _hash
         );
 
         if (!isPartial) {
