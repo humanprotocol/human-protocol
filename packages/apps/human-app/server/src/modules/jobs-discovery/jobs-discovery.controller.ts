@@ -34,7 +34,7 @@ export class JobsDiscoveryController {
     private readonly service: JobsDiscoveryService,
     private readonly environmentConfigService: EnvironmentConfigService,
     @InjectMapper() private readonly mapper: Mapper,
-  ) {}
+  ) { }
 
   @Get('/jobs')
   @ApiOperation({
@@ -58,9 +58,7 @@ export class JobsDiscoveryController {
     ) {
       let data: any;
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      if (
-        !(new Date(process.env.THIRSTYFI_TASK_EXPIRATION_DATE!) < new Date())
-      ) {
+      if (new Date(process.env.THIRSTYFI_TASK_EXPIRATION_DATE!) >= new Date()) {
         const response = await axios.get<any>(
           `${process.env.THIRSTIFY_EXO}/participant`,
           {
@@ -69,17 +67,16 @@ export class JobsDiscoveryController {
           },
         );
         data = response.data;
-      }
 
-      return (data?.id ?? 0 > 0)
-        ? {
+        return (data?.id ?? 0 > 0)
+          ? {
             page: 0,
             page_size: 1,
             total_pages: 1,
             total_results: 0,
             results: [],
           }
-        : {
+          : {
             page: 0,
             page_size: 1,
             total_pages: 1,
@@ -99,6 +96,15 @@ export class JobsDiscoveryController {
               },
             ],
           };
+      }
+
+      return {
+        page: 0,
+        page_size: 1,
+        total_pages: 1,
+        total_results: 0,
+        results: [],
+      };
     }
 
     const jobsDiscoveryParamsCommand: JobsDiscoveryParamsCommand =
