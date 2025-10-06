@@ -51,7 +51,7 @@
     "vitest": "^3.0.9"
   },
   "devDependencies": {
-    "eslint": "^8.55.0",
+    "eslint": "^9.37.0",
     "prettier": "^3.4.2",
     "ts-node": "^10.9.2",
     "typedoc": "^0.28.7",

@@ -70,7 +70,7 @@
     "@types/node": "^22.15.16",
     "chai": "^4.5.0",
     "concurrently": "^9.1.2",
-    "eslint": "^8.55.0",
+    "eslint": "^9.37.0",
     "ethers": "~6.15.0",
     "hardhat": "^2.26.0",
     "hardhat-abi-exporter": "^2.10.1",
