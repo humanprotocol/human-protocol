@@ -6,7 +6,7 @@
 
 # Interface: StakerInfo
 
-Defined in: [interfaces.ts:184](https://github.com/humanprotocol/human-protocol/blob/57c781c4208fceea534a5c18b81692eb57100170/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L184)
+Defined in: [interfaces.ts:199](https://github.com/humanprotocol/human-protocol/blob/111a3dfb8ed775487998fa7cc407fdc884e7a927/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L199)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [interfaces.ts:184](https://github.com/humanprotocol/human-protocol/
 
 > **lockedAmount**: `bigint`
 
-Defined in: [interfaces.ts:186](https://github.com/humanprotocol/human-protocol/blob/57c781c4208fceea534a5c18b81692eb57100170/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L186)
+Defined in: [interfaces.ts:201](https://github.com/humanprotocol/human-protocol/blob/111a3dfb8ed775487998fa7cc407fdc884e7a927/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L201)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [interfaces.ts:186](https://github.com/humanprotocol/human-protocol/
 
 > **lockedUntil**: `bigint`
 
-Defined in: [interfaces.ts:187](https://github.com/humanprotocol/human-protocol/blob/57c781c4208fceea534a5c18b81692eb57100170/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L187)
+Defined in: [interfaces.ts:202](https://github.com/humanprotocol/human-protocol/blob/111a3dfb8ed775487998fa7cc407fdc884e7a927/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L202)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [interfaces.ts:187](https://github.com/humanprotocol/human-protocol/
 
 > **stakedAmount**: `bigint`
 
-Defined in: [interfaces.ts:185](https://github.com/humanprotocol/human-protocol/blob/57c781c4208fceea534a5c18b81692eb57100170/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L185)
+Defined in: [interfaces.ts:200](https://github.com/humanprotocol/human-protocol/blob/111a3dfb8ed775487998fa7cc407fdc884e7a927/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L200)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [interfaces.ts:185](https://github.com/humanprotocol/human-protocol/
 
 > **withdrawableAmount**: `bigint`
 
-Defined in: [interfaces.ts:188](https://github.com/humanprotocol/human-protocol/blob/57c781c4208fceea534a5c18b81692eb57100170/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L188)
+Defined in: [interfaces.ts:203](https://github.com/humanprotocol/human-protocol/blob/111a3dfb8ed775487998fa7cc407fdc884e7a927/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L203)

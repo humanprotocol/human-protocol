@@ -10,13 +10,14 @@ import { ethers } from 'ethers';
 import * as gqlFetch from 'graphql-request';
 import { describe, expect, test, vi } from 'vitest';
 import { NETWORKS, Role } from '../src/constants';
+import { ChainId, OrderDirection } from '../src/enums';
 import {
   ErrorInvalidSlasherAddressProvided,
   ErrorInvalidStakerAddressProvided,
 } from '../src/error';
 import {
-  GET_LEADERS_QUERY,
   GET_LEADER_QUERY,
+  GET_LEADERS_QUERY,
   GET_REPUTATION_NETWORK_QUERY,
 } from '../src/graphql/queries/operator';
 import {
@@ -27,41 +28,57 @@ import {
   IReward,
 } from '../src/interfaces';
 import { OperatorUtils } from '../src/operator';
-import { ChainId, OrderDirection } from '../src/enums';
+
+vi.mock('graphql-request', () => {
+  return {
+    default: vi.fn(),
+  };
+});
+
+const stakerAddress = ethers.ZeroAddress;
+const invalidAddress = 'InvalidAddress';
 
 describe('OperatorUtils', () => {
-  describe('getOperator', () => {
-    const stakerAddress = ethers.ZeroAddress;
-    const invalidAddress = 'InvalidAddress';
-
-    const mockOperatorSubgraph: IOperatorSubgraph = {
-      id: stakerAddress,
-      address: stakerAddress,
-      amountStaked: ethers.parseEther('100'),
-      amountLocked: ethers.parseEther('25'),
+  const mockOperatorSubgraph: IOperatorSubgraph = {
+    id: stakerAddress,
+    address: stakerAddress,
+    amountJobsProcessed: ethers.parseEther('25'),
+    jobTypes: ['type1', 'type2'],
+    registrationNeeded: true,
+    registrationInstructions: 'www.google.com',
+    website: 'www.google.com',
+    reputationNetworks: [
+      {
+        address: '0x01',
+      },
+    ],
+    staker: {
+      stakedAmount: ethers.parseEther('100'),
+      lockedAmount: ethers.parseEther('25'),
       lockedUntilTimestamp: ethers.toBigInt(0),
-      amountWithdrawn: ethers.parseEther('25'),
-      amountSlashed: ethers.parseEther('25'),
-      reward: ethers.parseEther('25'),
-      amountJobsProcessed: ethers.parseEther('25'),
-      jobTypes: 'type1,type2',
-      registrationNeeded: true,
-      registrationInstructions: 'www.google.com',
-      website: 'www.google.com',
-      reputationNetworks: [
-        {
-          address: '0x01',
-        },
-      ],
-    };
+      withdrawnAmount: ethers.parseEther('25'),
+      slashedAmount: ethers.parseEther('25'),
+      lastDepositTimestamp: ethers.toBigInt(0),
+    },
+  };
+  const operator: IOperator = {
+    id: stakerAddress,
+    address: stakerAddress,
+    amountJobsProcessed: ethers.parseEther('25'),
+    registrationNeeded: true,
+    registrationInstructions: 'www.google.com',
+    website: 'www.google.com',
+    jobTypes: ['type1', 'type2'],
+    reputationNetworks: ['0x01'],
+    chainId: ChainId.LOCALHOST,
+    stakedAmount: ethers.parseEther('100'),
+    lockedAmount: ethers.parseEther('25'),
+    lockedUntilTimestamp: ethers.toBigInt(0),
+    withdrawnAmount: ethers.parseEther('25'),
+    slashedAmount: ethers.parseEther('25'),
+  };
 
-    const mockOperator: IOperator = {
-      ...mockOperatorSubgraph,
-      jobTypes: ['type1', 'type2'],
-      reputationNetworks: ['0x01'],
-      chainId: ChainId.LOCALHOST,
-    };
-
+  describe('getOperator', () => {
     test('should return staker information', async () => {
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
         operator: mockOperatorSubgraph,
@@ -79,20 +96,12 @@ describe('OperatorUtils', () => {
           address: stakerAddress,
         }
       );
-      expect(result).toEqual(mockOperator);
+      expect(result).toEqual(operator);
     });
 
     test('should return staker information when jobTypes is undefined', async () => {
-      mockOperatorSubgraph.jobTypes = undefined;
-      const mockOperator: IOperator = {
-        ...mockOperatorSubgraph,
-        jobTypes: [],
-        reputationNetworks: ['0x01'],
-        chainId: ChainId.LOCALHOST,
-      };
-
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
-        operator: mockOperatorSubgraph,
+        operator: { ...mockOperatorSubgraph, jobTypes: undefined },
       });
 
       const result = await OperatorUtils.getOperator(
@@ -107,20 +116,12 @@ describe('OperatorUtils', () => {
           address: stakerAddress,
         }
       );
-      expect(result).toEqual(mockOperator);
+      expect(result).toEqual({ ...operator, jobTypes: [] });
     });
 
-    test('should return staker information when jobTypes is array', async () => {
-      mockOperatorSubgraph.jobTypes = ['type1', 'type2', 'type3'] as any;
-      const mockOperator: IOperator = {
-        ...mockOperatorSubgraph,
-        jobTypes: ['type1', 'type2', 'type3'],
-        reputationNetworks: ['0x01'],
-        chainId: ChainId.LOCALHOST,
-      };
-
+    test('should return staker information when jobTypes is a string', async () => {
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
-        operator: mockOperatorSubgraph,
+        operator: { ...mockOperatorSubgraph, jobTypes: 'type1,type2,type3' },
       });
 
       const result = await OperatorUtils.getOperator(
@@ -135,7 +136,10 @@ describe('OperatorUtils', () => {
           address: stakerAddress,
         }
       );
-      expect(result).toEqual(mockOperator);
+      expect(result).toEqual({
+        ...operator,
+        jobTypes: ['type1', 'type2', 'type3'],
+      });
     });
 
     test('should throw an error for an invalid staker address', async () => {
@@ -177,38 +181,6 @@ describe('OperatorUtils', () => {
   });
 
   describe('getOperators', () => {
-    const stakerAddress = ethers.ZeroAddress;
-
-    const mockOperatorSubgraph: IOperatorSubgraph = {
-      id: stakerAddress,
-      address: stakerAddress,
-      amountStaked: ethers.parseEther('100'),
-      amountLocked: ethers.parseEther('25'),
-      lockedUntilTimestamp: ethers.toBigInt(0),
-      amountWithdrawn: ethers.parseEther('25'),
-      amountSlashed: ethers.parseEther('25'),
-      reward: ethers.parseEther('25'),
-      amountJobsProcessed: ethers.parseEther('25'),
-      jobTypes: 'type1,type2',
-      registrationNeeded: true,
-      registrationInstructions: 'www.google.com',
-      website: 'www.google.com',
-      reputationNetworks: [
-        {
-          address: '0x01',
-        },
-      ],
-      name: 'Alice',
-      category: 'machine_learning',
-    };
-
-    const mockOperator: IOperator = {
-      ...mockOperatorSubgraph,
-      jobTypes: ['type1', 'type2'],
-      reputationNetworks: ['0x01'],
-      chainId: ChainId.LOCALHOST,
-    };
-
     test('should return an array of stakers', async () => {
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
         operators: [mockOperatorSubgraph, mockOperatorSubgraph],
@@ -223,7 +195,7 @@ describe('OperatorUtils', () => {
         NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
         GET_LEADERS_QUERY(filter),
         {
-          minAmountStaked: filter?.minAmountStaked,
+          minStakedAmount: filter?.minStakedAmount,
           roles: filter?.roles,
           orderBy: filter?.orderBy,
           orderDirection: OrderDirection.DESC,
@@ -231,7 +203,7 @@ describe('OperatorUtils', () => {
           skip: 0,
         }
       );
-      expect(result).toEqual([mockOperator, mockOperator]);
+      expect(result).toEqual([operator, operator]);
     });
 
     test('should apply default values when first is negative', async () => {
@@ -251,7 +223,7 @@ describe('OperatorUtils', () => {
         NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
         GET_LEADERS_QUERY(filter),
         {
-          minAmountStaked: filter?.minAmountStaked,
+          minStakedAmount: filter?.minStakedAmount,
           roles: filter?.roles,
           orderBy: filter?.orderBy,
           orderDirection: OrderDirection.DESC,
@@ -259,7 +231,7 @@ describe('OperatorUtils', () => {
           skip: 0,
         }
       );
-      expect(result).toEqual([mockOperator]);
+      expect(result).toEqual([operator]);
     });
 
     test('should apply default values when skip is negative', async () => {
@@ -279,7 +251,7 @@ describe('OperatorUtils', () => {
         NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
         GET_LEADERS_QUERY(filter),
         {
-          minAmountStaked: filter?.minAmountStaked,
+          minStakedAmount: filter?.minStakedAmount,
           roles: filter?.roles,
           orderBy: filter?.orderBy,
           orderDirection: OrderDirection.DESC,
@@ -287,7 +259,7 @@ describe('OperatorUtils', () => {
           skip: 0, // Default value
         }
       );
-      expect(result).toEqual([mockOperator]);
+      expect(result).toEqual([operator]);
     });
 
     test('should apply default values when first and skip are undefined', async () => {
@@ -305,7 +277,7 @@ describe('OperatorUtils', () => {
         NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
         GET_LEADERS_QUERY(filter),
         {
-          minAmountStaked: filter?.minAmountStaked,
+          minStakedAmount: filter?.minStakedAmount,
           roles: filter?.roles,
           orderBy: filter?.orderBy,
           orderDirection: OrderDirection.DESC,
@@ -313,20 +285,48 @@ describe('OperatorUtils', () => {
           skip: 0, // Default value
         }
       );
-      expect(result).toEqual([mockOperator]);
+      expect(result).toEqual([operator]);
+    });
+
+    test('should return an array of stakers when jobTypes is a string', async () => {
+      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
+        operators: [
+          { ...mockOperatorSubgraph, jobTypes: 'type1,type2,type3' },
+          { ...mockOperatorSubgraph, jobTypes: 'type1,type2,type3' },
+        ],
+      });
+
+      const filter: IOperatorsFilter = {
+        chainId: ChainId.LOCALHOST,
+        roles: [Role.ExchangeOracle],
+      };
+
+      const result = await OperatorUtils.getOperators(filter);
+
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
+        GET_LEADERS_QUERY(filter),
+        {
+          minStakedAmount: filter?.minStakedAmount,
+          roles: filter?.roles,
+          orderBy: filter?.orderBy,
+          orderDirection: OrderDirection.DESC,
+          first: 10,
+          skip: 0,
+        }
+      );
+      expect(result).toEqual([
+        { ...operator, jobTypes: ['type1', 'type2', 'type3'] },
+        { ...operator, jobTypes: ['type1', 'type2', 'type3'] },
+      ]);
     });
 
     test('should return an array of stakers when jobTypes is undefined', async () => {
-      mockOperatorSubgraph.jobTypes = undefined;
-      const mockOperator: IOperator = {
-        ...mockOperatorSubgraph,
-        jobTypes: [],
-        reputationNetworks: ['0x01'],
-        chainId: ChainId.LOCALHOST,
-      };
-
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
-        operators: [mockOperatorSubgraph, mockOperatorSubgraph],
+        operators: [
+          { ...mockOperatorSubgraph, jobTypes: undefined },
+          { ...mockOperatorSubgraph, jobTypes: undefined },
+        ],
       });
       const filter: IOperatorsFilter = {
         chainId: ChainId.LOCALHOST,
@@ -338,7 +338,7 @@ describe('OperatorUtils', () => {
         NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
         GET_LEADERS_QUERY(filter),
         {
-          minAmountStaked: filter?.minAmountStaked,
+          minStakedAmount: filter?.minStakedAmount,
           roles: filter?.roles,
           orderBy: filter?.orderBy,
           orderDirection: OrderDirection.DESC,
@@ -347,42 +347,10 @@ describe('OperatorUtils', () => {
         }
       );
 
-      expect(result).toEqual([mockOperator, mockOperator]);
-    });
-
-    test('should return an array of stakers when jobTypes is array', async () => {
-      mockOperatorSubgraph.jobTypes = ['type1', 'type2', 'type3'] as any;
-      const mockOperator: IOperator = {
-        ...mockOperatorSubgraph,
-        jobTypes: ['type1', 'type2', 'type3'],
-        reputationNetworks: ['0x01'],
-        chainId: ChainId.LOCALHOST,
-      };
-
-      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
-        operators: [mockOperatorSubgraph, mockOperatorSubgraph],
-      });
-
-      const filter: IOperatorsFilter = {
-        chainId: ChainId.LOCALHOST,
-        roles: [Role.ExchangeOracle],
-      };
-
-      const result = await OperatorUtils.getOperators(filter);
-
-      expect(gqlFetchSpy).toHaveBeenCalledWith(
-        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
-        GET_LEADERS_QUERY(filter),
-        {
-          minAmountStaked: filter?.minAmountStaked,
-          roles: filter?.roles,
-          orderBy: filter?.orderBy,
-          orderDirection: OrderDirection.DESC,
-          first: 10,
-          skip: 0,
-        }
-      );
-      expect(result).toEqual([mockOperator, mockOperator]);
+      expect(result).toEqual([
+        { ...operator, jobTypes: [] },
+        { ...operator, jobTypes: [] },
+      ]);
     });
 
     test('should throw an error if gql fetch fails', async () => {
@@ -415,30 +383,6 @@ describe('OperatorUtils', () => {
   });
 
   describe('getReputationNetworkOperators', () => {
-    const stakerAddress = ethers.ZeroAddress;
-    const mockOperatorSubgraph: IOperatorSubgraph = {
-      address: '0x0000000000000000000000000000000000000001',
-      role: Role.JobLauncher,
-      url: 'www.google.com',
-      jobTypes: 'type1,type2',
-      registrationNeeded: true,
-      registrationInstructions: 'www.google.com',
-      reputationNetworks: [{ address: stakerAddress }],
-      id: '',
-      amountStaked: 0n,
-      amountLocked: 0n,
-      lockedUntilTimestamp: 0n,
-      amountWithdrawn: 0n,
-      amountSlashed: 0n,
-      reward: 0n,
-      amountJobsProcessed: 0n,
-    };
-    const mockOperator: IOperator = {
-      ...mockOperatorSubgraph,
-      jobTypes: ['type1', 'type2'],
-      chainId: ChainId.LOCALHOST,
-      reputationNetworks: [stakerAddress],
-    };
     const mockReputationNetwork: IReputationNetworkSubgraph = {
       id: stakerAddress,
       address: stakerAddress,
@@ -463,7 +407,7 @@ describe('OperatorUtils', () => {
           role: undefined,
         }
       );
-      expect(result).toEqual([mockOperator]);
+      expect(result).toEqual([operator]);
     });
 
     test('should return empty data ', async () => {
@@ -488,16 +432,11 @@ describe('OperatorUtils', () => {
     });
 
     test('should return reputation network operators when jobTypes is undefined', async () => {
-      mockOperatorSubgraph.jobTypes = undefined;
-      const mockOperator: IOperator = {
-        ...mockOperatorSubgraph,
-        jobTypes: [],
-        chainId: ChainId.LOCALHOST,
-        reputationNetworks: [stakerAddress],
-      };
-
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
-        reputationNetwork: mockReputationNetwork,
+        reputationNetwork: {
+          ...mockReputationNetwork,
+          operators: [{ ...mockOperatorSubgraph, jobTypes: undefined }],
+        },
       });
 
       const result = await OperatorUtils.getReputationNetworkOperators(
@@ -513,27 +452,23 @@ describe('OperatorUtils', () => {
           role: undefined,
         }
       );
-      expect(result).toEqual([mockOperator]);
+      expect(result).toEqual([{ ...operator, jobTypes: [] }]);
     });
 
-    test('should return reputation network operators when jobTypes is array', async () => {
-      mockOperatorSubgraph.jobTypes = ['type1', 'type2', 'type3'] as any;
-      const mockOperator: IOperator = {
-        ...mockOperatorSubgraph,
-        jobTypes: ['type1', 'type2', 'type3'],
-        chainId: ChainId.LOCALHOST,
-        reputationNetworks: [stakerAddress],
-      };
-
+    test('should return reputation network operators when jobTypes is a string', async () => {
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
-        reputationNetwork: mockReputationNetwork,
+        reputationNetwork: {
+          ...mockReputationNetwork,
+          operators: [
+            { ...mockOperatorSubgraph, jobTypes: 'type1,type2,type3' },
+          ],
+        },
       });
 
       const result = await OperatorUtils.getReputationNetworkOperators(
         ChainId.LOCALHOST,
         stakerAddress
       );
-
       expect(gqlFetchSpy).toHaveBeenCalledWith(
         NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
         GET_REPUTATION_NETWORK_QUERY(),
@@ -542,7 +477,9 @@ describe('OperatorUtils', () => {
           role: undefined,
         }
       );
-      expect(result).toEqual([mockOperator]);
+      expect(result).toEqual([
+        { ...operator, jobTypes: ['type1', 'type2', 'type3'] },
+      ]);
     });
 
     test('should throw an error if gql fetch fails', async () => {

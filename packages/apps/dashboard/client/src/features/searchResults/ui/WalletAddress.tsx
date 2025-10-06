@@ -25,10 +25,10 @@ type Props = {
 const WalletAddress: FC<Props> = ({ data }) => {
   const {
     balance,
-    amountStaked,
-    amountLocked,
+    stakedAmount,
+    lockedAmount,
     reputation,
-    amountWithdrawable,
+    withdrawableAmount,
   } = data;
   const isWallet = 'totalHMTAmountReceived' in data;
 
@@ -60,9 +60,9 @@ const WalletAddress: FC<Props> = ({ data }) => {
         </Stack>
       </SectionWrapper>
       <StakeInfo
-        amountStaked={amountStaked}
-        amountLocked={amountLocked}
-        amountWithdrawable={amountWithdrawable}
+        stakedAmount={stakedAmount}
+        lockedAmount={lockedAmount}
+        withdrawableAmount={withdrawableAmount}
       />
       <KVStore />
     </>

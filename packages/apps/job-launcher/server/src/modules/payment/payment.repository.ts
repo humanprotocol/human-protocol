@@ -23,6 +23,15 @@ export class PaymentRepository extends BaseRepository<PaymentEntity> {
     return this.findOne({ where: whereOptions });
   }
 
+  public async findByJobIdAndType(
+    jobId: number,
+    type?: string,
+  ): Promise<PaymentEntity[]> {
+    const where: any = { jobId };
+    if (type) where.type = type;
+    return this.find({ where });
+  }
+
   public async getUserBalancePayments(
     userId: number,
     currency?: string,

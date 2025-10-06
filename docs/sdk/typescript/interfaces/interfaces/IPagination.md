@@ -6,7 +6,7 @@
 
 # Interface: IPagination
 
-Defined in: [interfaces.ts:178](https://github.com/humanprotocol/human-protocol/blob/57c781c4208fceea534a5c18b81692eb57100170/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L178)
+Defined in: [interfaces.ts:193](https://github.com/humanprotocol/human-protocol/blob/111a3dfb8ed775487998fa7cc407fdc884e7a927/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L193)
 
 ## Extended by
 
@@ -18,6 +18,8 @@ Defined in: [interfaces.ts:178](https://github.com/humanprotocol/human-protocol/
 - [`ITransactionsFilter`](ITransactionsFilter.md)
 - [`IStatusEventFilter`](IStatusEventFilter.md)
 - [`IWorkersFilter`](IWorkersFilter.md)
+- [`IStakersFilter`](IStakersFilter.md)
+- [`ICancellationRefundFilter`](ICancellationRefundFilter.md)
 
 ## Properties
 
@@ -25,7 +27,7 @@ Defined in: [interfaces.ts:178](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **first**: `number`
 
-Defined in: [interfaces.ts:179](https://github.com/humanprotocol/human-protocol/blob/57c781c4208fceea534a5c18b81692eb57100170/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L179)
+Defined in: [interfaces.ts:194](https://github.com/humanprotocol/human-protocol/blob/111a3dfb8ed775487998fa7cc407fdc884e7a927/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L194)
 
 ***
 
@@ -33,7 +35,7 @@ Defined in: [interfaces.ts:179](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **orderDirection**: [`OrderDirection`](../../enums/enumerations/OrderDirection.md)
 
-Defined in: [interfaces.ts:181](https://github.com/humanprotocol/human-protocol/blob/57c781c4208fceea534a5c18b81692eb57100170/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L181)
+Defined in: [interfaces.ts:196](https://github.com/humanprotocol/human-protocol/blob/111a3dfb8ed775487998fa7cc407fdc884e7a927/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L196)
 
 ***
 
@@ -41,4 +43,4 @@ Defined in: [interfaces.ts:181](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **skip**: `number`
 
-Defined in: [interfaces.ts:180](https://github.com/humanprotocol/human-protocol/blob/57c781c4208fceea534a5c18b81692eb57100170/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L180)
+Defined in: [interfaces.ts:195](https://github.com/humanprotocol/human-protocol/blob/111a3dfb8ed775487998fa7cc407fdc884e7a927/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L195)

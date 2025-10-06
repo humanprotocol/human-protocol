@@ -10,12 +10,11 @@ export interface IOperator {
   id: string;
   chainId: ChainId;
   address: string;
-  amountStaked: bigint;
-  amountLocked: bigint;
+  stakedAmount: bigint;
+  lockedAmount: bigint;
   lockedUntilTimestamp: bigint;
-  amountWithdrawn: bigint;
-  amountSlashed: bigint;
-  reward: bigint;
+  withdrawnAmount: bigint;
+  slashedAmount: bigint;
   amountJobsProcessed: bigint;
   role?: string;
   fee?: bigint;
@@ -31,16 +30,36 @@ export interface IOperator {
   category?: string;
 }
 
-export interface IOperatorSubgraph
-  extends Omit<IOperator, 'jobTypes' | 'reputationNetworks' | 'chainId'> {
-  jobTypes?: string;
+export interface IOperatorSubgraph {
+  id: string;
+  address: string;
+  amountJobsProcessed: bigint;
+  role?: string;
+  fee?: bigint;
+  publicKey?: string;
+  webhookUrl?: string;
+  website?: string;
+  url?: string;
+  registrationNeeded?: boolean;
+  registrationInstructions?: string;
+  name?: string;
+  category?: string;
+  jobTypes?: string | string[];
   reputationNetworks?: { address: string }[];
+  staker?: {
+    stakedAmount: bigint;
+    lockedAmount: bigint;
+    lockedUntilTimestamp: bigint;
+    withdrawnAmount: bigint;
+    slashedAmount: bigint;
+    lastDepositTimestamp: bigint;
+  };
 }
 
 export interface IOperatorsFilter extends IPagination {
   chainId: ChainId;
   roles?: string[];
-  minAmountStaked?: number;
+  minStakedAmount?: number;
   orderBy?: string;
 }
 
@@ -55,15 +74,6 @@ export interface IReputationNetworkSubgraph
   operators: IOperatorSubgraph[];
 }
 
-export interface IOperator {
-  address: string;
-  role?: string;
-  url?: string;
-  jobTypes?: string[];
-  registrationNeeded?: boolean;
-  registrationInstructions?: string;
-}
-
 export interface IEscrow {
   id: string;
   address: string;
@@ -72,13 +82,18 @@ export interface IEscrow {
   count: string;
   factoryAddress: string;
   finalResultsUrl?: string;
+  finalResultsHash?: string;
   intermediateResultsUrl?: string;
+  intermediateResultsHash?: string;
   launcher: string;
   manifestHash?: string;
   manifest?: string;
   recordingOracle?: string;
   reputationOracle?: string;
   exchangeOracle?: string;
+  recordingOracleFee?: string;
+  reputationOracleFee?: string;
+  exchangeOracleFee?: string;
   status: string;
   token: string;
   totalFundedAmount: string;
@@ -207,4 +222,39 @@ export interface IWorkersFilter extends IPagination {
   chainId: ChainId;
   address?: string;
   orderBy?: string;
+}
+
+export interface IStaker {
+  address: string;
+  stakedAmount: bigint;
+  lockedAmount: bigint;
+  lockedUntil: bigint;
+  withdrawableAmount: bigint;
+  slashedAmount: bigint;
+  lastDepositTimestamp: bigint;
+}
+
+export interface IStakersFilter extends IPagination {
+  chainId: ChainId;
+  minStakedAmount?: string;
+  maxStakedAmount?: string;
+  minLockedAmount?: string;
+  maxLockedAmount?: string;
+  minWithdrawnAmount?: string;
+  maxWithdrawnAmount?: string;
+  minSlashedAmount?: string;
+  maxSlashedAmount?: string;
+  orderBy?:
+    | 'stakedAmount'
+    | 'lockedAmount'
+    | 'withdrawnAmount'
+    | 'slashedAmount'
+    | 'lastDepositTimestamp';
+}
+export interface ICancellationRefundFilter extends IPagination {
+  chainId: ChainId;
+  escrowAddress?: string;
+  receiver?: string;
+  from?: Date;
+  to?: Date;
 }

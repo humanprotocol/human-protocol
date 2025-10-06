@@ -63,4 +63,17 @@ export class BaseRepository<T extends ObjectLiteral> extends Repository<T> {
       await queryRunner.release();
     }
   }
+
+  async createMany(items: T[]): Promise<T[]> {
+    try {
+      await this.insert(items);
+    } catch (error) {
+      if (error instanceof QueryFailedError) {
+        throw handleQueryFailedError(error);
+      } else {
+        throw error;
+      }
+    }
+    return items;
+  }
 }

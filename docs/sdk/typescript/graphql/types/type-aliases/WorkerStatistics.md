@@ -8,7 +8,7 @@
 
 > **WorkerStatistics** = `object`
 
-Defined in: [graphql/types.ts:94](https://github.com/humanprotocol/human-protocol/blob/57c781c4208fceea534a5c18b81692eb57100170/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L94)
+Defined in: [graphql/types.ts:99](https://github.com/humanprotocol/human-protocol/blob/111a3dfb8ed775487998fa7cc407fdc884e7a927/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L99)
 
 ## Properties
 
@@ -16,4 +16,4 @@ Defined in: [graphql/types.ts:94](https://github.com/humanprotocol/human-protoco
 
 > **dailyWorkersData**: [`DailyWorkerData`](DailyWorkerData.md)[]
 
-Defined in: [graphql/types.ts:95](https://github.com/humanprotocol/human-protocol/blob/57c781c4208fceea534a5c18b81692eb57100170/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L95)
+Defined in: [graphql/types.ts:100](https://github.com/humanprotocol/human-protocol/blob/111a3dfb8ed775487998fa7cc407fdc884e7a927/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L100)

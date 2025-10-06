@@ -350,9 +350,13 @@ describe('ReputationService', () => {
       } as unknown as EscrowClient);
 
       const chainId = generateTestnetChainId();
-      const escrowAddress = faker.finance.ethereumAddress();
 
-      await service.assessEscrowParties(chainId, escrowAddress);
+      await service.assessEscrowParties(
+        chainId,
+        jobLauncherAddress,
+        exchangeOracleAddress,
+        recordingOracleAddress,
+      );
 
       expect(spyOnIncreaseReputation).toHaveBeenCalledTimes(4);
       expect(spyOnIncreaseReputation).toHaveBeenCalledWith(

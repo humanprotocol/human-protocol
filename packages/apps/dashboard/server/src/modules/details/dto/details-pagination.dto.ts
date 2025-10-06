@@ -23,12 +23,12 @@ export class OperatorsPaginationDto {
 
   @ApiPropertyOptional({
     enum: OperatorsOrderBy,
-    default: OperatorsOrderBy.AMOUNT_STAKED,
+    default: OperatorsOrderBy.STAKED_AMOUNT,
   })
   @IsEnum(OperatorsOrderBy)
   @IsIn(Object.values(OperatorsOrderBy))
   @IsOptional()
-  public orderBy?: OperatorsOrderBy = OperatorsOrderBy.AMOUNT_STAKED;
+  public orderBy?: OperatorsOrderBy = OperatorsOrderBy.STAKED_AMOUNT;
 
   @ApiPropertyOptional({
     enum: OrderDirection,

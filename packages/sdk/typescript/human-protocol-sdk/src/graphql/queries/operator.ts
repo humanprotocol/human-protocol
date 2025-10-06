@@ -5,12 +5,6 @@ const LEADER_FRAGMENT = gql`
   fragment OperatorFields on Operator {
     id
     address
-    amountStaked
-    amountLocked
-    lockedUntilTimestamp
-    amountWithdrawn
-    amountSlashed
-    reward
     amountJobsProcessed
     role
     fee
@@ -24,22 +18,30 @@ const LEADER_FRAGMENT = gql`
     reputationNetworks
     name
     category
+    staker {
+      stakedAmount
+      lockedAmount
+      withdrawnAmount
+      slashedAmount
+      lockedUntilTimestamp
+      lastDepositTimestamp
+    }
   }
 `;
 
 export const GET_LEADERS_QUERY = (filter: IOperatorsFilter) => {
-  const { roles, minAmountStaked } = filter;
+  const { roles, minStakedAmount } = filter;
 
   const WHERE_CLAUSE = `
     where: {
-      ${minAmountStaked ? `amountStaked_gte: $minAmountStaked` : ''}
+      ${minStakedAmount ? `staker_: { stakedAmount_gte: $minStakedAmount }` : ''}
       ${roles ? `role_in: $roles` : ''}
     }
   `;
 
   return gql`
     query getOperators(
-      $minAmountStaked: Int,
+      $minStakedAmount: Int,
       $roles: [String!]
       $first: Int
       $skip: Int

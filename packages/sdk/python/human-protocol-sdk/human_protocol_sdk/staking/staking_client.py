@@ -282,7 +282,7 @@ class StakingClient:
             raise StakingClientError("Amount to unstake must be greater than 0")
         try:
             tx_hash = self.staking_contract.functions.unstake(amount).transact(
-                tx_options or {}
+                apply_tx_defaults(self.w3, tx_options)
             )
             self.w3.eth.wait_for_transaction_receipt(tx_hash)
         except Exception as e:
@@ -328,7 +328,7 @@ class StakingClient:
 
         try:
             tx_hash = self.staking_contract.functions.withdraw().transact(
-                tx_options or {}
+                apply_tx_defaults(self.w3, tx_options)
             )
             self.w3.eth.wait_for_transaction_receipt(tx_hash)
         except Exception as e:
@@ -398,7 +398,7 @@ class StakingClient:
         try:
             tx_hash = self.staking_contract.functions.slash(
                 slasher, staker, escrow_address, amount
-            ).transact(tx_options or {})
+            ).transact(apply_tx_defaults(self.w3, tx_options))
             self.w3.eth.wait_for_transaction_receipt(tx_hash)
         except Exception as e:
             handle_error(e, StakingClientError)
