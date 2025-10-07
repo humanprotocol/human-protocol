@@ -33,6 +33,6 @@ pip install human-protocol-sdk
 
 - Content is imported from the repository at release time.
 
-## Changelock
+## Changelog
 
 - [CHANGELOG](changelog.md) — release notes and changes.

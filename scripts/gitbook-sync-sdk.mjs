@@ -12,7 +12,7 @@ const {
   GITBOOK_SITE_ID,
   GIT_REF,
   SPACE_VISIBILITY = "public",
-  SPACE_ICON_URL = "https://firebasestorage.googleapis.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FULrmzCkJk7WEl6FnhbTZ%2Ficon%2FvYf8cnyycn97DBMRLNJr%2Fhp-sdk-docs-logo.png?alt=media&token=24fd7851-0806-4528-b912-e714c43e5152",
+  SPACE_ICON_URL = "https://firebasestorage.googleapis.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FULrmzCkJk7WEl6FnhbTZ%2Ficon%2FvYf8cnyycn97DBMRLNJr%2Fhp-sdk-docs-logo.png?alt=media",
   REPO_URL = "https://github.com/humanprotocol/human-protocol",
   GITBOOK_API_BASE = "https://api.gitbook.com/v1",
   MAKE_DEFAULT = "false",
