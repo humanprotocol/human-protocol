@@ -11,10 +11,11 @@ export const TOKEN_ADDRESSES: {
   };
 } = {
   [ChainId.MAINNET]: {
-    [EscrowFundToken.HMT]: {
-      address: NETWORKS[ChainId.MAINNET]!.hmtAddress,
-      decimals: 18,
-    },
+    // Disable HMT
+    // [EscrowFundToken.HMT]: {
+    //   address: NETWORKS[ChainId.MAINNET]!.hmtAddress,
+    //   decimals: 18,
+    // },
     [EscrowFundToken.USDT]: {
       address: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
       decimals: 6,
@@ -39,16 +40,18 @@ export const TOKEN_ADDRESSES: {
     },
   },
   [ChainId.BSC_MAINNET]: {
-    [EscrowFundToken.HMT]: {
-      address: NETWORKS[ChainId.BSC_MAINNET]!.hmtAddress,
-      decimals: 18,
-    },
+    // Disable HMT
+    // [EscrowFundToken.HMT]: {
+    //   address: NETWORKS[ChainId.BSC_MAINNET]!.hmtAddress,
+    //   decimals: 18,
+    // },
   },
   [ChainId.POLYGON]: {
-    [EscrowFundToken.HMT]: {
-      address: NETWORKS[ChainId.POLYGON]!.hmtAddress,
-      decimals: 18,
-    },
+    // Disable HMT
+    // [EscrowFundToken.HMT]: {
+    //   address: NETWORKS[ChainId.POLYGON]!.hmtAddress,
+    //   decimals: 18,
+    // },
     [EscrowFundToken.USDT0]: {
       address: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
       decimals: 6,
@@ -79,10 +82,6 @@ export const TOKEN_ADDRESSES: {
       address: NETWORKS[ChainId.LOCALHOST]!.hmtAddress,
       decimals: 18,
     },
-    // [EscrowFundToken.USDC]: {
-    //   address: '0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f',
-    //   decimals: 6,
-    // },
   },
   [ChainId.BSC_TESTNET]: {
     [EscrowFundToken.HMT]: {
