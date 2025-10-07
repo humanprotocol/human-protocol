@@ -2966,7 +2966,7 @@ describe('EscrowUtils', () => {
 
       const result = await EscrowUtils.getEscrow(chainId, ethers.ZeroAddress);
 
-      expect(result).toEqual(escrow);
+      expect(result).toEqual({ ...escrow, chainId });
       expect(gqlFetchSpy).toHaveBeenCalledWith(
         NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
         GET_ESCROW_BY_ADDRESS_QUERY(),

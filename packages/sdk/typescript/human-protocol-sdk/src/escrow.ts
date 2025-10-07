@@ -1812,6 +1812,7 @@ export class EscrowUtils {
       GET_ESCROW_BY_ADDRESS_QUERY(),
       { escrowAddress: escrowAddress.toLowerCase() }
     );
+    escrow.chainId = networkData.chainId;
 
     return escrow || null;
   }
