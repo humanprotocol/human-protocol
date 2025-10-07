@@ -51,7 +51,12 @@ import {
   ErrorCronJob,
 } from '../../common/constants/errors';
 import { CronJobType } from '../../common/enums/cron-job';
-import { CvatJobType, FortuneJobType, JobStatus } from '../../common/enums/job';
+import {
+  CvatJobType,
+  EscrowFundToken,
+  FortuneJobType,
+  JobStatus,
+} from '../../common/enums/job';
 import { WebhookStatus } from '../../common/enums/webhook';
 import { ConflictError } from '../../common/errors';
 import { ContentModerationRequestRepository } from '../content-moderation/content-moderation-request.repository';
@@ -700,6 +705,7 @@ describe('CronJobService', () => {
       jobEntityMock1 = {
         status: JobStatus.TO_CANCEL,
         fundAmount: 100,
+        token: EscrowFundToken.HMT,
         userId: 1,
         id: 1,
         manifestUrl: MOCK_FILE_URL,
@@ -712,11 +718,12 @@ describe('CronJobService', () => {
       jobEntityMock2 = {
         status: JobStatus.TO_CANCEL,
         fundAmount: 100,
+        token: EscrowFundToken.USDC,
         userId: 1,
         id: 2,
         manifestUrl: MOCK_FILE_URL,
         escrowAddress: MOCK_ADDRESS,
-        chainId: ChainId.LOCALHOST,
+        chainId: ChainId.POLYGON,
         retriesCount: 0,
         requestType: CvatJobType.IMAGE_POINTS,
       };
