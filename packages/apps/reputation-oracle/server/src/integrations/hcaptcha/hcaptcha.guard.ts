@@ -24,14 +24,17 @@ export class HCaptchaGuard implements CanActivate {
     const hCaptchaToken: string = body['h_captcha_token'];
     if (!hCaptchaToken) {
       throw new HttpException(
-        'hCaptcha token not provided',
+        'h_captcha_token not provided',
         HttpStatus.BAD_REQUEST,
       );
     }
 
     const isTokenValid = await this.hCaptchaService.verifyToken(hCaptchaToken);
     if (!isTokenValid) {
-      throw new HttpException('Invalid hCaptcha token', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        'Invalid h_captcha_token',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     return true;

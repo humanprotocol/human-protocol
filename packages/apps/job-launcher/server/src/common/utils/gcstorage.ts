@@ -1,3 +1,4 @@
+import { isURL } from 'validator';
 import { GS_PROTOCOL } from '../constants';
 import { ErrorBucket } from '../constants/errors';
 
@@ -89,8 +90,15 @@ export function isGCSBucketUrl(url: string): boolean {
 export function isValidUrl(maybeUrl: string): boolean {
   try {
     const url = new URL(maybeUrl);
-    return ['http:', 'https:', 'gs:'].includes(url.protocol);
-  } catch (_error) {
+    if (url.protocol === 'gs:') {
+      return true;
+    } else {
+      return isURL(maybeUrl, {
+        require_protocol: true,
+        protocols: ['http', 'https'],
+      });
+    }
+  } catch {
     return false;
   }
 }

@@ -203,7 +203,7 @@ describe('Storage tests', () => {
         .createHash('sha1')
         .update(JSON.stringify(file))
         .digest('hex');
-      const url = `http://${DEFAULT_PUBLIC_BUCKET}/${hash}.json`;
+      const url = `http://${DEFAULT_ENDPOINT}:${DEFAULT_PORT}/${DEFAULT_PUBLIC_BUCKET}/${hash}.json`;
 
       const result = await StorageClient.downloadFileFromUrl(url);
       expect(result).toEqual(file);
@@ -216,7 +216,7 @@ describe('Storage tests', () => {
         .createHash('sha1')
         .update(JSON.stringify(file))
         .digest('hex');
-      const url = `http://${DEFAULT_PUBLIC_BUCKET}/${hash}.json`;
+      const url = `http://${DEFAULT_ENDPOINT}:${DEFAULT_PORT}/${DEFAULT_PUBLIC_BUCKET}/${hash}.json`;
 
       vi.spyOn(StorageClient, 'downloadFileFromUrl').mockImplementation(() => {
         throw ErrorStorageFileNotFound;

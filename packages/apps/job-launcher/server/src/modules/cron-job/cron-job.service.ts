@@ -4,14 +4,15 @@ import {
   ErrorCronJob,
   ErrorEscrow,
   ErrorJob,
+  ErrorPayment,
 } from '../../common/constants/errors';
 import { CronJobType } from '../../common/enums/cron-job';
 
-import { EscrowStatus, EscrowUtils } from '@human-protocol/sdk';
+import { ChainId, EscrowStatus, EscrowUtils } from '@human-protocol/sdk';
 import { Cron } from '@nestjs/schedule';
 import { ethers } from 'ethers';
 import { NetworkConfigService } from '../../common/config/network-config.service';
-import { JobStatus } from '../../common/enums/job';
+import { EscrowFundToken, JobStatus } from '../../common/enums/job';
 import {
   EventType,
   OracleType,
@@ -30,6 +31,7 @@ import { WebhookService } from '../webhook/webhook.service';
 import { CronJobEntity } from './cron-job.entity';
 import { CronJobRepository } from './cron-job.repository';
 import logger from '../../logger';
+import { TOKEN_ADDRESSES } from '../../common/constants/tokens';
 
 @Injectable()
 export class CronJobService {
@@ -269,8 +271,18 @@ export class CronJobService {
           ) {
             const { amountRefunded } =
               await this.jobService.processEscrowCancellation(jobEntity);
+            const token = (TOKEN_ADDRESSES[jobEntity.chainId as ChainId] ?? {})[
+              jobEntity.token as EscrowFundToken
+            ];
+
+            if (!token) {
+              throw new Error(ErrorPayment.UnsupportedToken);
+            }
+
             await this.paymentService.createRefundPayment({
-              refundAmount: Number(ethers.formatEther(amountRefunded)),
+              refundAmount: Number(
+                ethers.formatUnits(amountRefunded, token.decimals),
+              ),
               refundCurrency: jobEntity.token,
               userId: jobEntity.userId,
               jobId: jobEntity.id,

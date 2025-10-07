@@ -4,8 +4,7 @@ import {
   IsEmail,
   IsEnum,
   IsString,
-  MaxLength,
-  MinLength,
+  Length,
   ValidationOptions,
 } from 'class-validator';
 
@@ -40,13 +39,5 @@ export function IsLowercasedEnum(
 }
 
 export function IsValidPassword() {
-  return applyDecorators(
-    IsString(),
-    MinLength(8, {
-      message: 'Password must be at least 8 characters long.',
-    }),
-    MaxLength(128, {
-      message: 'Password must be at most 128 characters',
-    }),
-  );
+  return applyDecorators(IsString(), Length(8, 128));
 }
