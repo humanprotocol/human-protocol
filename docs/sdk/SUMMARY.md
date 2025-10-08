@@ -1,5 +1,7 @@
 # Table of contents
 
+- [HUMAN Protocol SDK](README.md)
+
 ## Typescript SDK
 
 - [Encryption](typescript/encryption/README.md)

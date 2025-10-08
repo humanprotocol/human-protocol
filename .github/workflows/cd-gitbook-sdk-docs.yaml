@@ -1,0 +1,29 @@
+name: Publish SDK Docs to GitBook
+
+on:
+  push:
+    tags:
+      - "sdk@*"
+
+permissions:
+  contents: read
+
+jobs:
+  publish-docs:
+    name: Sync docs to GitBook
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Publish docs
+        env:
+          GITBOOK_API_TOKEN: ${{ secrets.GITBOOK_API_TOKEN }}
+          GITBOOK_ORG_ID: ${{ secrets.GITBOOK_ORG_ID }}
+          PARENT_SPACE_ID: ${{ secrets.GITBOOK_PARENT_SPACE_ID }}
+          GITBOOK_SITE_ID: ${{ secrets.GITBOOK_SITE_ID }}
+          GIT_REF: ${{ github.ref }}
+          SPACE_VISIBILITY: ${{ secrets.GITBOOK_SPACE_VISIBILITY }}
+          MAKE_DEFAULT: ${{ vars.GITBOOK_MAKE_DEFAULT }}
+        run: node scripts/gitbook-sync-sdk.mjs
