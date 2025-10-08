@@ -79,10 +79,6 @@ export const TOKEN_ADDRESSES: {
       address: NETWORKS[ChainId.LOCALHOST]!.hmtAddress,
       decimals: 18,
     },
-    // [EscrowFundToken.USDC]: {
-    //   address: '0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f',
-    //   decimals: 6,
-    // },
   },
   [ChainId.BSC_TESTNET]: {
     [EscrowFundToken.HMT]: {

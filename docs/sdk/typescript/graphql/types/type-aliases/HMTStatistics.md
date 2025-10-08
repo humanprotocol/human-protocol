@@ -8,7 +8,7 @@
 
 > **HMTStatistics** = `object`
 
-Defined in: [graphql/types.ts:127](https://github.com/humanprotocol/human-protocol/blob/57c781c4208fceea534a5c18b81692eb57100170/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L127)
+Defined in: [graphql/types.ts:127](https://github.com/humanprotocol/human-protocol/blob/2f541eb9f61d23b64321ff5b999971550d47e843/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L127)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [graphql/types.ts:127](https://github.com/humanprotocol/human-protoc
 
 > **totalHolders**: `number`
 
-Defined in: [graphql/types.ts:130](https://github.com/humanprotocol/human-protocol/blob/57c781c4208fceea534a5c18b81692eb57100170/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L130)
+Defined in: [graphql/types.ts:130](https://github.com/humanprotocol/human-protocol/blob/2f541eb9f61d23b64321ff5b999971550d47e843/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L130)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [graphql/types.ts:130](https://github.com/humanprotocol/human-protoc
 
 > **totalTransferAmount**: `bigint`
 
-Defined in: [graphql/types.ts:128](https://github.com/humanprotocol/human-protocol/blob/57c781c4208fceea534a5c18b81692eb57100170/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L128)
+Defined in: [graphql/types.ts:128](https://github.com/humanprotocol/human-protocol/blob/2f541eb9f61d23b64321ff5b999971550d47e843/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L128)
 
 ***
 
@@ -32,4 +32,4 @@ Defined in: [graphql/types.ts:128](https://github.com/humanprotocol/human-protoc
 
 > **totalTransferCount**: `number`
 
-Defined in: [graphql/types.ts:129](https://github.com/humanprotocol/human-protocol/blob/57c781c4208fceea534a5c18b81692eb57100170/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L129)
+Defined in: [graphql/types.ts:129](https://github.com/humanprotocol/human-protocol/blob/2f541eb9f61d23b64321ff5b999971550d47e843/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L129)
