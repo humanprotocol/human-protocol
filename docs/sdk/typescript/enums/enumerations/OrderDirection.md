@@ -6,7 +6,7 @@
 
 # Enumeration: OrderDirection
 
-Defined in: [enums.ts:13](https://github.com/humanprotocol/human-protocol/blob/57c781c4208fceea534a5c18b81692eb57100170/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L13)
+Defined in: [enums.ts:13](https://github.com/humanprotocol/human-protocol/blob/2f541eb9f61d23b64321ff5b999971550d47e843/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L13)
 
 ## Enumeration Members
 
@@ -14,7 +14,7 @@ Defined in: [enums.ts:13](https://github.com/humanprotocol/human-protocol/blob/5
 
 > **ASC**: `"asc"`
 
-Defined in: [enums.ts:14](https://github.com/humanprotocol/human-protocol/blob/57c781c4208fceea534a5c18b81692eb57100170/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L14)
+Defined in: [enums.ts:14](https://github.com/humanprotocol/human-protocol/blob/2f541eb9f61d23b64321ff5b999971550d47e843/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L14)
 
 ***
 
@@ -22,4 +22,4 @@ Defined in: [enums.ts:14](https://github.com/humanprotocol/human-protocol/blob/5
 
 > **DESC**: `"desc"`
 
-Defined in: [enums.ts:15](https://github.com/humanprotocol/human-protocol/blob/57c781c4208fceea534a5c18b81692eb57100170/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L15)
+Defined in: [enums.ts:15](https://github.com/humanprotocol/human-protocol/blob/2f541eb9f61d23b64321ff5b999971550d47e843/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L15)
