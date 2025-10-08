@@ -21,6 +21,7 @@ import { CANCEL_JOB_STATUSES } from '../../common/constants';
 import {
   ErrorEscrow,
   ErrorJob,
+  ErrorPayment,
   ErrorQualification,
 } from '../../common/constants/errors';
 import { TOKEN_ADDRESSES } from '../../common/constants/tokens';
@@ -34,7 +35,7 @@ import {
   JobRequestType,
   JobStatus,
 } from '../../common/enums/job';
-import { FiatCurrency } from '../../common/enums/payment';
+import { FiatCurrency, PaymentCurrency } from '../../common/enums/payment';
 import { EventType, OracleType } from '../../common/enums/webhook';
 import {
   ConflictError,
@@ -143,6 +144,15 @@ export class JobService {
     requestType: JobRequestType,
     dto: CreateJob,
   ): Promise<number> {
+    // DISABLE HMT
+    if (
+      requestType !== HCaptchaJobType.HCAPTCHA &&
+      (dto.escrowFundToken === EscrowFundToken.HMT ||
+        dto.paymentCurrency === PaymentCurrency.HMT)
+    ) {
+      throw new ValidationError(ErrorPayment.HMTTokenDisabled);
+    }
+
     let { chainId, reputationOracle, exchangeOracle, recordingOracle } = dto;
 
     // Select network

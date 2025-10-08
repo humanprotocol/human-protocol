@@ -295,9 +295,9 @@ describe('JobController', () => {
       },
       userGuide: 'https://example.com/user-guide',
       type: CvatJobType.IMAGE_BOXES,
-      paymentCurrency: PaymentCurrency.HMT,
+      paymentCurrency: PaymentCurrency.USDC,
       paymentAmount: 500,
-      escrowFundToken: EscrowFundToken.HMT,
+      escrowFundToken: EscrowFundToken.USDC,
     };
 
     it('should create a CVAT job successfully', async () => {

@@ -23,4 +23,5 @@ export const TOKEN_ICONS: Record<string, ReactElement> = {
   HMT: <HumanIcon />,
   USDC: <DollarSignIcon />,
   USDT: <DollarSignIcon />,
+  USDT0: <DollarSignIcon />,
 };
