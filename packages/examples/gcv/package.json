@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "@types/xml2js": "^0.4.14",
-    "eslint": "^8.55.0",
+    "eslint": "^9.37.0",
     "jest": "^29.7.0",
     "typescript": "^5.8.3"
   }
