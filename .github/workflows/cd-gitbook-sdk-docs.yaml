@@ -24,6 +24,6 @@ jobs:
           PARENT_SPACE_ID: ${{ secrets.GITBOOK_PARENT_SPACE_ID }}
           GITBOOK_SITE_ID: ${{ secrets.GITBOOK_SITE_ID }}
           GIT_REF: ${{ github.ref }}
-          SPACE_VISIBILITY: ${{ secrets.GITBOOK_SPACE_VISIBILITY }}
+          SPACE_VISIBILITY: ${{ vars.GITBOOK_SPACE_VISIBILITY }}
           MAKE_DEFAULT: ${{ vars.GITBOOK_MAKE_DEFAULT }}
         run: node scripts/gitbook-sync-sdk.mjs
