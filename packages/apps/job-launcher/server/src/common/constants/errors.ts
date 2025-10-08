@@ -128,6 +128,7 @@ export enum ErrorPayment {
   ChainIdMissing = 'ChainId is missing',
   InvalidChainId = 'Invalid chain id',
   BalanceCouldNotBeRetrieved = 'User balance could not be retrieved.',
+  HMTTokenDisabled = 'HMT token is disabled.',
 }
 
 /**
