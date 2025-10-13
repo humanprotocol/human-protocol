@@ -8,7 +8,7 @@
 
 > **CancellationRefund** = `object`
 
-Defined in: [types.ts:193](https://github.com/humanprotocol/human-protocol/blob/111a3dfb8ed775487998fa7cc407fdc884e7a927/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L193)
+Defined in: [types.ts:193](https://github.com/humanprotocol/human-protocol/blob/c6ab6b31903af39ac6b3e92bd60cecc017b01413/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L193)
 
 Represents a cancellation refund event.
 
@@ -18,7 +18,7 @@ Represents a cancellation refund event.
 
 > **amount**: `bigint`
 
-Defined in: [types.ts:209](https://github.com/humanprotocol/human-protocol/blob/111a3dfb8ed775487998fa7cc407fdc884e7a927/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L209)
+Defined in: [types.ts:209](https://github.com/humanprotocol/human-protocol/blob/c6ab6b31903af39ac6b3e92bd60cecc017b01413/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L209)
 
 The amount refunded to the receiver.
 
@@ -28,7 +28,7 @@ The amount refunded to the receiver.
 
 > **block**: `number`
 
-Defined in: [types.ts:214](https://github.com/humanprotocol/human-protocol/blob/111a3dfb8ed775487998fa7cc407fdc884e7a927/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L214)
+Defined in: [types.ts:214](https://github.com/humanprotocol/human-protocol/blob/c6ab6b31903af39ac6b3e92bd60cecc017b01413/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L214)
 
 The block number in which the cancellation refund event occurred.
 
@@ -38,7 +38,7 @@ The block number in which the cancellation refund event occurred.
 
 > **escrowAddress**: `string`
 
-Defined in: [types.ts:201](https://github.com/humanprotocol/human-protocol/blob/111a3dfb8ed775487998fa7cc407fdc884e7a927/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L201)
+Defined in: [types.ts:201](https://github.com/humanprotocol/human-protocol/blob/c6ab6b31903af39ac6b3e92bd60cecc017b01413/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L201)
 
 The address of the escrow associated with the cancellation refund.
 
@@ -48,7 +48,7 @@ The address of the escrow associated with the cancellation refund.
 
 > **id**: `string`
 
-Defined in: [types.ts:197](https://github.com/humanprotocol/human-protocol/blob/111a3dfb8ed775487998fa7cc407fdc884e7a927/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L197)
+Defined in: [types.ts:197](https://github.com/humanprotocol/human-protocol/blob/c6ab6b31903af39ac6b3e92bd60cecc017b01413/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L197)
 
 Unique identifier of the cancellation refund event.
 
@@ -58,7 +58,7 @@ Unique identifier of the cancellation refund event.
 
 > **receiver**: `string`
 
-Defined in: [types.ts:205](https://github.com/humanprotocol/human-protocol/blob/111a3dfb8ed775487998fa7cc407fdc884e7a927/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L205)
+Defined in: [types.ts:205](https://github.com/humanprotocol/human-protocol/blob/c6ab6b31903af39ac6b3e92bd60cecc017b01413/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L205)
 
 The address of the receiver who received the refund.
 
@@ -68,7 +68,7 @@ The address of the receiver who received the refund.
 
 > **timestamp**: `number`
 
-Defined in: [types.ts:218](https://github.com/humanprotocol/human-protocol/blob/111a3dfb8ed775487998fa7cc407fdc884e7a927/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L218)
+Defined in: [types.ts:218](https://github.com/humanprotocol/human-protocol/blob/c6ab6b31903af39ac6b3e92bd60cecc017b01413/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L218)
 
 The timestamp when the cancellation refund event occurred (in UNIX format).
 
@@ -78,6 +78,6 @@ The timestamp when the cancellation refund event occurred (in UNIX format).
 
 > **txHash**: `string`
 
-Defined in: [types.ts:222](https://github.com/humanprotocol/human-protocol/blob/111a3dfb8ed775487998fa7cc407fdc884e7a927/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L222)
+Defined in: [types.ts:222](https://github.com/humanprotocol/human-protocol/blob/c6ab6b31903af39ac6b3e92bd60cecc017b01413/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L222)
 
 The transaction hash of the cancellation refund event.

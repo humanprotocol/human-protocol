@@ -4,6 +4,9 @@
 
 ### Changed
 
+- Relaxed several SDK return types (EscrowUtils, OperatorUtils, TransactionUtils, WorkerUtils) to allow `null` when a subgraph entity does not exist.
+- EscrowUtils.getEscrow now includes `chainId` in the returned object.
+
 ### Deprecated
 
 ### Removed

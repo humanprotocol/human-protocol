@@ -18,6 +18,7 @@ import {
   WebhookStatus,
 } from '../../common/enums/webhook';
 import { ConflictError, NotFoundError } from '../../common/errors';
+import logger from '../../logger';
 import { GCVContentModerationService } from '../content-moderation/gcv-content-moderation.service';
 import { JobEntity } from '../job/job.entity';
 import { JobRepository } from '../job/job.repository';
@@ -29,7 +30,6 @@ import { WebhookRepository } from '../webhook/webhook.repository';
 import { WebhookService } from '../webhook/webhook.service';
 import { CronJobEntity } from './cron-job.entity';
 import { CronJobRepository } from './cron-job.repository';
-import logger from '../../logger';
 
 @Injectable()
 export class CronJobService {

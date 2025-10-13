@@ -21,6 +21,7 @@ import { CANCEL_JOB_STATUSES } from '../../common/constants';
 import {
   ErrorEscrow,
   ErrorJob,
+  ErrorPayment,
   ErrorQualification,
 } from '../../common/constants/errors';
 import { TOKEN_ADDRESSES } from '../../common/constants/tokens';
@@ -34,7 +35,11 @@ import {
   JobRequestType,
   JobStatus,
 } from '../../common/enums/job';
-import { FiatCurrency, PaymentType } from '../../common/enums/payment';
+import {
+  FiatCurrency,
+  PaymentCurrency,
+  PaymentType,
+} from '../../common/enums/payment';
 import { EventType, OracleType } from '../../common/enums/webhook';
 import {
   ConflictError,
@@ -111,6 +116,15 @@ export class JobService {
     requestType: JobRequestType,
     dto: CreateJob,
   ): Promise<number> {
+    // DISABLE HMT
+    if (
+      requestType !== HCaptchaJobType.HCAPTCHA &&
+      (dto.escrowFundToken === EscrowFundToken.HMT ||
+        dto.paymentCurrency === PaymentCurrency.HMT)
+    ) {
+      throw new ValidationError(ErrorPayment.HMTTokenDisabled);
+    }
+
     let { chainId, reputationOracle, exchangeOracle, recordingOracle } = dto;
 
     // Select network
@@ -894,6 +908,14 @@ export class JobService {
   }
 
   public async cancelJob(jobEntity: JobEntity): Promise<void> {
+    const token = (TOKEN_ADDRESSES[jobEntity.chainId as ChainId] ?? {})[
+      jobEntity.token as EscrowFundToken
+    ];
+
+    if (!token) {
+      throw new Error(ErrorPayment.UnsupportedToken);
+    }
+
     const slash = await this.paymentService.getJobPayments(
       jobEntity.id,
       PaymentType.SLASH,
@@ -909,7 +931,7 @@ export class JobService {
       }
 
       await this.paymentService.createRefundPayment({
-        refundAmount: Number(ethers.formatEther(refund.amount)),
+        refundAmount: Number(ethers.formatUnits(refund.amount, token.decimals)),
         refundCurrency: jobEntity.token,
         userId: jobEntity.userId,
         jobId: jobEntity.id,

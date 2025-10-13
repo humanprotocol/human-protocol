@@ -51,6 +51,7 @@ import {
   UserBalanceDto,
 } from './payment.dto';
 import { PaymentService } from './payment.service';
+import { EscrowFundToken } from '../../common/enums/job';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -451,6 +452,9 @@ export class PaymentController {
       throw new ValidationError(ErrorPayment.InvalidChainId);
     }
 
-    return tokens;
+    // Disable HMT
+    const { [EscrowFundToken.HMT]: _omit, ...withoutHMT } = tokens;
+
+    return withoutHMT;
   }
 }

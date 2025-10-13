@@ -150,8 +150,8 @@ describe('JobService', () => {
     describe('Fortune', () => {
       it('should create a Fortune job successfully paid and funded with the same currency', async () => {
         const fortuneJobDto: JobFortuneDto = createFortuneJobDto({
-          paymentCurrency: PaymentCurrency.HMT,
-          escrowFundToken: EscrowFundToken.HMT,
+          paymentCurrency: PaymentCurrency.USDC,
+          escrowFundToken: EscrowFundToken.USDC,
         });
         const fundTokenDecimals = getTokenDecimals(
           fortuneJobDto.chainId!,
@@ -250,7 +250,7 @@ describe('JobService', () => {
       it('should create a Fortune job successfully paid and funded with different currencies', async () => {
         const fortuneJobDto: JobFortuneDto = createFortuneJobDto({
           paymentCurrency: PaymentCurrency.USD,
-          escrowFundToken: EscrowFundToken.HMT,
+          escrowFundToken: EscrowFundToken.USDC,
         });
 
         const fundTokenDecimals = getTokenDecimals(
@@ -355,8 +355,8 @@ describe('JobService', () => {
 
       it('should select the right oracles when no oracle addresses provided', async () => {
         const fortuneJobDto: JobFortuneDto = createFortuneJobDto({
-          paymentCurrency: EscrowFundToken.HMT,
-          escrowFundToken: EscrowFundToken.HMT,
+          paymentCurrency: EscrowFundToken.USDC,
+          escrowFundToken: EscrowFundToken.USDC,
           exchangeOracle: null,
           recordingOracle: null,
           reputationOracle: null,
@@ -749,7 +749,7 @@ describe('JobService', () => {
         jobQuickLaunchDto.chainId = 1;
         jobQuickLaunchDto.manifestUrl = faker.internet.url();
         jobQuickLaunchDto.manifestHash = faker.string.uuid();
-        jobQuickLaunchDto.requestType = FortuneJobType.FORTUNE;
+        jobQuickLaunchDto.requestType = HCaptchaJobType.HCAPTCHA;
         jobQuickLaunchDto.paymentCurrency = PaymentCurrency.HMT;
         jobQuickLaunchDto.paymentAmount = faker.number.float({
           min: 1,
@@ -771,7 +771,7 @@ describe('JobService', () => {
 
         await jobService.createJob(
           userMock,
-          FortuneJobType.FORTUNE,
+          HCaptchaJobType.HCAPTCHA,
           jobQuickLaunchDto,
         );
 
@@ -781,7 +781,7 @@ describe('JobService', () => {
         expect(mockRoutingProtocolService.selectOracles).not.toHaveBeenCalled();
         expect(mockRoutingProtocolService.validateOracles).toHaveBeenCalledWith(
           jobQuickLaunchDto.chainId,
-          FortuneJobType.FORTUNE,
+          HCaptchaJobType.HCAPTCHA,
           jobQuickLaunchDto.reputationOracle,
           jobQuickLaunchDto.exchangeOracle,
           jobQuickLaunchDto.recordingOracle,
@@ -799,7 +799,7 @@ describe('JobService', () => {
           userId: userMock.id,
           manifestUrl: jobQuickLaunchDto.manifestUrl,
           manifestHash: jobQuickLaunchDto.manifestHash,
-          requestType: FortuneJobType.FORTUNE,
+          requestType: HCaptchaJobType.HCAPTCHA,
           fee: expect.any(Number),
           fundAmount: Number(
             mul(
