@@ -17,6 +17,7 @@ import { ethers, Wallet, ZeroAddress } from 'ethers';
 import { createSignerMock } from '../../../test/fixtures/web3';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { ErrorEscrow, ErrorJob } from '../../common/constants/errors';
+import { TOKEN_ADDRESSES } from '../../common/constants/tokens';
 import {
   AudinoJobType,
   CvatJobType,
@@ -1748,7 +1749,12 @@ describe('JobService', () => {
 
       mockPaymentService.getJobPayments.mockResolvedValueOnce([]);
       mockedEscrowUtils.getCancellationRefund.mockResolvedValueOnce({
-        amount: ethers.parseUnits(refundAmount.toString(), 18),
+        amount: ethers.parseUnits(
+          refundAmount.toString(),
+          (TOKEN_ADDRESSES[jobEntity.chainId as ChainId] ?? {})[
+            jobEntity.token as EscrowFundToken
+          ]?.decimals,
+        ),
         escrowAddress: jobEntity.escrowAddress!,
       } as any);
       mockPaymentService.createRefundPayment.mockResolvedValueOnce(undefined);
