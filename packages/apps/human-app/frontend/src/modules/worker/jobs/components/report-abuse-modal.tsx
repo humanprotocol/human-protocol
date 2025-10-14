@@ -4,9 +4,11 @@ import {
   Box,
   Button,
   CircularProgress,
+  FormControl,
+  MenuItem,
+  Select as MuiSelect,
   Stack,
   Typography,
-  TextField,
 } from '@mui/material';
 import ErrorIcon from '@mui/icons-material/Error';
 import SuccessIcon from '@mui/icons-material/CheckCircle';
@@ -22,6 +24,53 @@ interface ReportAbuseModalProps {
 }
 
 const ABUSE_ERROR = 'Abuse has already been reported';
+
+const REASON_OPTIONS = [
+  {
+    name: 'Sexual content',
+    value: 'sexual_content',
+  },
+  {
+    name: 'Nudity',
+    value: 'nudity',
+  },
+  {
+    name: 'Violence',
+    value: 'violence',
+  },
+  {
+    name: 'Gore',
+    value: 'gore',
+  },
+  {
+    name: 'Hate or racism',
+    value: 'hate_or_racism',
+  },
+  {
+    name: 'Drugs',
+    value: 'drugs',
+  },
+  {
+    name: 'Terrorism',
+    value: 'terrorism',
+  },
+  {
+    name: 'Child abuse',
+    value: 'child_abuse',
+  },
+  {
+    name: 'Self harm',
+    value: 'self_harm',
+  },
+  {
+    name: 'Weapons',
+    value: 'weapons',
+  },
+  {
+    name: 'Criminal activity',
+    value: 'criminal_activity',
+  },
+];
 
 function ErrorState({ error }: { error: string }) {
   const { t } = useTranslation();
@@ -101,11 +150,11 @@ export function ReportAbuseModal({
   const isIdleOrLoading = isIdle || isPending;
 
   const handleReportAbuse = () => {
-    reason.trim().length > 0 &&
+    reason.length > 0 &&
       reportAbuseMutation({
         escrow_address: escrowAddress,
         chain_id: chainId,
-        reason: reason.trim(),
+        reason,
       });
   };
 
@@ -120,27 +169,30 @@ export function ReportAbuseModal({
         {t('worker.reportAbuse.modalHeader')}
       </Typography>
       {isIdleOrLoading && (
-        <Typography variant={isMobile ? 'body2' : 'body1'} textAlign="center">
-          {t('worker.reportAbuse.modalParagraph')}
-        </Typography>
+        <>
+          <Typography variant={isMobile ? 'body2' : 'body1'} textAlign="center">
+            {t('worker.reportAbuse.modalParagraph')}
+          </Typography>
+          <FormControl fullWidth sx={{ my: { xs: 2, md: 3 } }}>
+            <MuiSelect
+              value={reason}
+              displayEmpty
+              onChange={(e) => {
+                setReason(e.target.value);
+              }}
+            >
+              {REASON_OPTIONS.map((item) => (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.name}
+                </MenuItem>
+              ))}
+            </MuiSelect>
+          </FormControl>
+        </>
       )}
       {isPending && <CircularProgress size={40} sx={{ mx: 'auto', my: 7 }} />}
       {isError && <ErrorState error={error} />}
       {isSuccess && <SuccessState />}
-      <TextField
-        fullWidth
-        multiline
-        rows={3}
-        label={t('worker.reportAbuse.modalReason')}
-        value={reason}
-        sx={{
-          display: isIdle ? 'flex' : 'none',
-          my: { xs: 4, md: 5 },
-        }}
-        onChange={(e) => {
-          setReason(e.target.value);
-        }}
-      />
       <Box display="flex" gap={2} width="100%">
         <Button
           fullWidth
@@ -156,7 +208,7 @@ export function ReportAbuseModal({
           fullWidth
           onClick={handleReportAbuse}
           variant="contained"
-          disabled={!reason.trim() || isPending}
+          disabled={!reason || isPending}
           sx={{ display: isIdleOrLoading ? 'flex' : 'none' }}
         >
           {isMobile
