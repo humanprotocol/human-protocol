@@ -317,7 +317,20 @@
       "modalSuccessParagraph": "Your issue has been successfully reported. Our team has received the details and will review them shortly.",
       "modalHeaderAlreadyReportedError": "Report Already Submitted",
       "modalParagraphAlreadyReportedError": "This case of abuse has already been reported. Our team is currently reviewing it.",
-      "modalUnknownError": "Something went wrong."
+      "modalUnknownError": "Something went wrong.",
+      "reasons": {
+        "sexual_content": "Sexual content",
+        "nudity": "Nudity",
+        "violence": "Violence",
+        "gore": "Gore",
+        "hate_or_racism": "Hate or racism",
+        "drugs": "Drugs",
+        "terrorism": "Terrorism",
+        "child_abuse": "Child abuse",
+        "self_harm": "Self harm",
+        "weapons": "Weapons",
+        "criminal_activity": "Criminal activity"
+      }
     }
   },
   "operator": {

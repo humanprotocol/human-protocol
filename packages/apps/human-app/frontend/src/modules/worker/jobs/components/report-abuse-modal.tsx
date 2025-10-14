@@ -26,51 +26,18 @@ interface ReportAbuseModalProps {
 const ABUSE_ERROR = 'Abuse has already been reported';
 
 const REASON_OPTIONS = [
-  {
-    name: 'Sexual content',
-    value: 'sexual_content',
-  },
-  {
-    name: 'Nudity',
-    value: 'nudity',
-  },
-  {
-    name: 'Violence',
-    value: 'violence',
-  },
-  {
-    name: 'Gore',
-    value: 'gore',
-  },
-  {
-    name: 'Hate or racism',
-    value: 'hate_or_racism',
-  },
-  {
-    name: 'Drugs',
-    value: 'drugs',
-  },
-  {
-    name: 'Terrorism',
-    value: 'terrorism',
-  },
-  {
-    name: 'Child abuse',
-    value: 'child_abuse',
-  },
-  {
-    name: 'Self harm',
-    value: 'self_harm',
-  },
-  {
-    name: 'Weapons',
-    value: 'weapons',
-  },
-  {
-    name: 'Criminal activity',
-    value: 'criminal_activity',
-  },
-];
+  'sexual_content',
+  'nudity',
+  'violence',
+  'gore',
+  'hate_or_racism',
+  'drugs',
+  'terrorism',
+  'child_abuse',
+  'self_harm',
+  'weapons',
+  'criminal_activity',
+] as const;
 
 function ErrorState({ error }: { error: string }) {
   const { t } = useTranslation();
@@ -181,9 +148,9 @@ export function ReportAbuseModal({
                 setReason(e.target.value);
               }}
             >
-              {REASON_OPTIONS.map((item) => (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.name}
+              {REASON_OPTIONS.map((value) => (
+                <MenuItem key={value} value={value}>
+                  {t(`worker.reportAbuse.reasons.${value}`)}
                 </MenuItem>
               ))}
             </MuiSelect>
