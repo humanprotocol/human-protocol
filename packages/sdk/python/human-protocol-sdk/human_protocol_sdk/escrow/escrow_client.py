@@ -53,7 +53,6 @@ Module
 
 import logging
 from typing import Optional, List, Union
-from decimal import Decimal
 
 from human_protocol_sdk.constants import (
     ESCROW_BULK_PAYOUT_MAX_ITEMS,
@@ -122,9 +121,9 @@ class EscrowConfig:
         recording_oracle_address: str,
         reputation_oracle_address: str,
         exchange_oracle_address: str,
-        recording_oracle_fee: Decimal,
-        reputation_oracle_fee: Decimal,
-        exchange_oracle_fee: Decimal,
+        recording_oracle_fee: int,
+        reputation_oracle_fee: int,
+        exchange_oracle_fee: int,
         manifest: str,
         hash: str,
     ):
@@ -362,7 +361,7 @@ class EscrowClient:
     def fund(
         self,
         escrow_address: str,
-        amount: Decimal,
+        amount: int,
         tx_options: Optional[TxParams] = None,
     ) -> None:
         """
@@ -428,7 +427,7 @@ class EscrowClient:
         escrow_address: str,
         url: str,
         hash: str,
-        funds_to_reserve: Optional[Decimal] = None,
+        funds_to_reserve: Optional[int] = None,
         tx_options: Optional[TxParams] = None,
     ) -> None:
         """
@@ -570,7 +569,7 @@ class EscrowClient:
         self,
         escrow_address: str,
         recipients: List[str],
-        amounts: List[Decimal],
+        amounts: List[int],
         final_results_url: str,
         final_results_hash: str,
         payout_id: Union[str, int],
@@ -679,7 +678,7 @@ class EscrowClient:
         self,
         escrow_address: str,
         recipients: List[str],
-        amounts: List[Decimal],
+        amounts: List[int],
         final_results_url: str,
         final_results_hash: str,
         payoutId: str,
@@ -802,7 +801,7 @@ class EscrowClient:
         self,
         escrow_address: str,
         recipients: List[str],
-        amounts: List[Decimal],
+        amounts: List[int],
         final_results_url: str,
         final_results_hash: str,
     ) -> None:
@@ -1047,7 +1046,7 @@ class EscrowClient:
         except Exception as e:
             handle_error(e, EscrowClientError)
 
-    def get_balance(self, escrow_address: str) -> Decimal:
+    def get_balance(self, escrow_address: str) -> int:
         """
         Gets the balance for a specified escrow address.
 
@@ -1089,7 +1088,7 @@ class EscrowClient:
 
         return self._get_escrow_contract(escrow_address).functions.getBalance().call()
 
-    def get_reserved_funds(self, escrow_address: str) -> Decimal:
+    def get_reserved_funds(self, escrow_address: str) -> int:
         """
         Gets the reserved funds for a specified escrow address.
 
