@@ -7,7 +7,15 @@
   "changelog": false,
   "bumpVersionsWithWorkspaceProtocolOnly": true,
   "privatePackages": {
-    "version": false,
+    "version": true,
     "tag": false
-  }
+  },
+  "ignore": [
+    "@human-protocol/*-client",
+    "@human-protocol/*-server",
+    "@human-protocol/*-frontend",
+    "@human-protocol/*-oracle",
+    "@human-protocol/subgraph",
+    "gcv"
+  ]
 }

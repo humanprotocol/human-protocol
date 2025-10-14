@@ -1,1 +1,2 @@
 recursive-include artifacts *.json
+include package.json
