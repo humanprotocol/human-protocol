@@ -12,6 +12,7 @@ export type EscrowData = {
   intermediateResultsUrl?: string;
   intermediateResultsHash?: string;
   launcher: string;
+  jobRequesterId?: string;
   manifestHash?: string;
   manifestUrl?: string;
   recordingOracle?: string;
@@ -24,7 +25,38 @@ export type EscrowData = {
   token: string;
   totalFundedAmount: string;
   createdAt: string;
-  chainId: number;
+};
+
+export type WorkerData = {
+  id: string;
+  address: string;
+  totalHMTAmountReceived: string;
+  payoutCount: number;
+};
+
+export type InternalTransactionData = {
+  from: string;
+  to: string;
+  value: string;
+  method: string;
+  receiver?: string;
+  escrow?: string;
+  token?: string;
+  id?: string;
+};
+
+export type TransactionData = {
+  block: string;
+  txHash: string;
+  from: string;
+  to: string;
+  timestamp: string;
+  value: string;
+  method: string;
+  receiver?: string;
+  escrow?: string;
+  token?: string;
+  internalTransactions: InternalTransactionData[];
 };
 
 export type HMTStatisticsData = {

@@ -1785,23 +1785,29 @@ export class EscrowUtils {
    * interface IEscrow {
    *   id: string;
    *   address: string;
-   *   amountPaid: string;
-   *   balance: string;
-   *   count: string;
-   *   jobRequesterId: string;
+   *   amountPaid: bigint;
+   *   balance: bigint;
+   *   count: bigint;
    *   factoryAddress: string;
    *   finalResultsUrl?: string;
+   *   finalResultsHash?: string;
    *   intermediateResultsUrl?: string;
+   *   intermediateResultsHash?: string;
    *   launcher: string;
+   *   jobRequesterId?: string;
    *   manifestHash?: string;
    *   manifest?: string;
    *   recordingOracle?: string;
    *   reputationOracle?: string;
    *   exchangeOracle?: string;
-   *   status: EscrowStatus;
+   *   recordingOracleFee?: bigint;
+   *   reputationOracleFee?: bigint;
+   *   exchangeOracleFee?: bigint;
+   *   status: string;
    *   token: string;
-   *   totalFundedAmount: string;
-   *   createdAt: string;
+   *   totalFundedAmount: bigint;
+   *   createdAt: bigint;
+   *   chainId: number;
    * };
    * ```
    *
@@ -1873,13 +1879,30 @@ export class EscrowUtils {
         skip: skip,
       }
     );
-    escrows.map((escrow) => (escrow.chainId = networkData.chainId));
+    const mapped: IEscrow[] = (escrows || []).map((e) => ({
+      ...e,
+      amountPaid: BigInt(e.amountPaid || 0),
+      balance: BigInt(e.balance || 0),
+      count: BigInt(e.count || 0),
+      recordingOracleFee: e.recordingOracleFee
+        ? BigInt(e.recordingOracleFee)
+        : undefined,
+      reputationOracleFee: e.reputationOracleFee
+        ? BigInt(e.reputationOracleFee)
+        : undefined,
+      exchangeOracleFee: e.exchangeOracleFee
+        ? BigInt(e.exchangeOracleFee)
+        : undefined,
+      totalFundedAmount: BigInt(e.totalFundedAmount || 0),
+      createdAt: BigInt(e.createdAt || 0),
+      chainId: networkData.chainId,
+    }));
 
     if (!escrows) {
       return [];
     }
 
-    return escrows;
+    return mapped;
   }
 
   /**
@@ -1906,23 +1929,29 @@ export class EscrowUtils {
    * interface IEscrow {
    *   id: string;
    *   address: string;
-   *   amountPaid: string;
-   *   balance: string;
-   *   count: string;
-   *   jobRequesterId: string;
+   *   amountPaid: bigint;
+   *   balance: bigint;
+   *   count: bigint;
    *   factoryAddress: string;
    *   finalResultsUrl?: string;
+   *   finalResultsHash?: string;
    *   intermediateResultsUrl?: string;
+   *   intermediateResultsHash?: string;
    *   launcher: string;
+   *   jobRequesterId?: string;
    *   manifestHash?: string;
    *   manifest?: string;
    *   recordingOracle?: string;
    *   reputationOracle?: string;
    *   exchangeOracle?: string;
-   *   status: EscrowStatus;
+   *   recordingOracleFee?: bigint;
+   *   reputationOracleFee?: bigint;
+   *   exchangeOracleFee?: bigint;
+   *   status: string;
    *   token: string;
-   *   totalFundedAmount: string;
-   *   createdAt: string;
+   *   totalFundedAmount: bigint;
+   *   createdAt: bigint;
+   *   chainId: number;
    * };
    * ```
    *
@@ -1953,14 +1982,31 @@ export class EscrowUtils {
       throw ErrorInvalidAddress;
     }
 
-    const { escrow } = await gqlFetch<{ escrow: EscrowData }>(
+    const { escrow } = await gqlFetch<{ escrow: EscrowData | null }>(
       getSubgraphUrl(networkData),
       GET_ESCROW_BY_ADDRESS_QUERY(),
       { escrowAddress: escrowAddress.toLowerCase() }
     );
-    escrow.chainId = networkData.chainId;
+    if (!escrow) return null;
 
-    return escrow || null;
+    return {
+      ...escrow,
+      amountPaid: BigInt(escrow.amountPaid || 0),
+      balance: BigInt(escrow.balance || 0),
+      count: BigInt(escrow.count || 0),
+      recordingOracleFee: escrow.recordingOracleFee
+        ? BigInt(escrow.recordingOracleFee)
+        : undefined,
+      reputationOracleFee: escrow.reputationOracleFee
+        ? BigInt(escrow.reputationOracleFee)
+        : undefined,
+      exchangeOracleFee: escrow.exchangeOracleFee
+        ? BigInt(escrow.exchangeOracleFee)
+        : undefined,
+      totalFundedAmount: BigInt(escrow.totalFundedAmount || 0),
+      createdAt: BigInt(escrow.createdAt || 0),
+      chainId: networkData.chainId,
+    };
   }
 
   /**

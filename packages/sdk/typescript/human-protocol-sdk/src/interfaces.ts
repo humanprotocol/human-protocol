@@ -77,27 +77,28 @@ export interface IReputationNetworkSubgraph
 export interface IEscrow {
   id: string;
   address: string;
-  amountPaid: string;
-  balance: string;
-  count: string;
+  amountPaid: bigint;
+  balance: bigint;
+  count: bigint;
   factoryAddress: string;
   finalResultsUrl?: string;
   finalResultsHash?: string;
   intermediateResultsUrl?: string;
   intermediateResultsHash?: string;
   launcher: string;
+  jobRequesterId?: string;
   manifestHash?: string;
   manifest?: string;
   recordingOracle?: string;
   reputationOracle?: string;
   exchangeOracle?: string;
-  recordingOracleFee?: string;
-  reputationOracleFee?: string;
-  exchangeOracleFee?: string;
+  recordingOracleFee?: bigint;
+  reputationOracleFee?: bigint;
+  exchangeOracleFee?: bigint;
   status: string;
   token: string;
-  totalFundedAmount: string;
-  createdAt: string;
+  totalFundedAmount: bigint;
+  createdAt: bigint;
   chainId: number;
 }
 
@@ -156,7 +157,7 @@ export interface IKVStore {
 export interface InternalTransaction {
   from: string;
   to: string;
-  value: string;
+  value: bigint;
   method: string;
   receiver?: string;
   escrow?: string;
@@ -169,7 +170,7 @@ export interface ITransaction {
   from: string;
   to: string;
   timestamp: bigint;
-  value: string;
+  value: bigint;
   method: string;
   receiver?: string;
   escrow?: string;
@@ -214,7 +215,7 @@ export interface IStatusEventFilter extends IPagination {
 export interface IWorker {
   id: string;
   address: string;
-  totalHMTAmountReceived: number;
+  totalHMTAmountReceived: bigint;
   payoutCount: number;
 }
 

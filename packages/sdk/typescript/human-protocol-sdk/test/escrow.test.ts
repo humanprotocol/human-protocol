@@ -44,6 +44,7 @@ import {
 } from '../src/error';
 import { EscrowClient, EscrowUtils } from '../src/escrow';
 import {
+  EscrowData,
   GET_ESCROWS_QUERY,
   GET_ESCROW_BY_ADDRESS_QUERY,
   GET_PAYOUTS_QUERY,
@@ -58,6 +59,7 @@ import {
   FAKE_URL,
   VALID_URL,
 } from './utils/constants';
+import { IEscrow } from '../src/interfaces';
 
 describe('EscrowClient', () => {
   let escrowClient: any,
@@ -2808,19 +2810,19 @@ describe('EscrowUtils', () => {
     });
 
     test('should successfully getEscrows', async () => {
-      const escrows = [
+      const escrows: EscrowData[] = [
         {
           id: '1',
           address: '0x0',
           amountPaid: '3',
           balance: '0',
           count: '1',
-          jobRequesterId: '1',
           factoryAddress: '0x0',
           launcher: '0x0',
           status: 'Completed',
           token: '0x0',
           totalFundedAmount: '3',
+          createdAt: '1',
         },
         {
           id: '2',
@@ -2828,12 +2830,12 @@ describe('EscrowUtils', () => {
           amountPaid: '0',
           balance: '3',
           count: '2',
-          jobRequesterId: '1',
           factoryAddress: '0x0',
           launcher: '0x0',
           status: 'Pending',
           token: '0x0',
           totalFundedAmount: '3',
+          createdAt: '1',
         },
       ];
       const gqlFetchSpy = vi
@@ -2845,7 +2847,25 @@ describe('EscrowUtils', () => {
       };
 
       const result = await EscrowUtils.getEscrows(filter);
-      expect(result).toEqual(escrows);
+      const expected = escrows.map((e) => ({
+        ...e,
+        amountPaid: BigInt(e.amountPaid || 0),
+        balance: BigInt(e.balance || 0),
+        count: BigInt(e.count || 0),
+        totalFundedAmount: BigInt(e.totalFundedAmount || 0),
+        createdAt: BigInt(e.createdAt || 0),
+        recordingOracleFee: e.recordingOracleFee
+          ? BigInt(e.recordingOracleFee)
+          : undefined,
+        reputationOracleFee: e.reputationOracleFee
+          ? BigInt(e.reputationOracleFee)
+          : undefined,
+        exchangeOracleFee: e.exchangeOracleFee
+          ? BigInt(e.exchangeOracleFee)
+          : undefined,
+        chainId: ChainId.POLYGON_AMOY,
+      }));
+      expect(result).toEqual(expected);
       expect(gqlFetchSpy).toHaveBeenCalledWith(
         'https://api.studio.thegraph.com/query/74256/amoy/version/latest',
         GET_ESCROWS_QUERY(filter),
@@ -2866,14 +2886,14 @@ describe('EscrowUtils', () => {
     });
 
     test('should successfully getEscrows for the filter with status array', async () => {
-      const escrows = [
+      const escrows: EscrowData[] = [
         {
           id: '1',
           address: '0x0',
           amountPaid: '3',
           balance: '0',
           count: '1',
-          jobRequesterId: '1',
+          createdAt: '1',
           factoryAddress: '0x0',
           launcher: '0x0',
           status: 'Pending',
@@ -2886,7 +2906,7 @@ describe('EscrowUtils', () => {
           amountPaid: '3',
           balance: '0',
           count: '1',
-          jobRequesterId: '1',
+          createdAt: '1',
           factoryAddress: '0x0',
           launcher: '0x0',
           status: 'Complete',
@@ -2903,19 +2923,37 @@ describe('EscrowUtils', () => {
         status: [EscrowStatus.Pending, EscrowStatus.Complete],
       });
 
-      expect(result).toEqual(escrows);
+      const expected = escrows.map((e) => ({
+        ...e,
+        amountPaid: BigInt(e.amountPaid || 0),
+        balance: BigInt(e.balance || 0),
+        count: BigInt(e.count || 0),
+        totalFundedAmount: BigInt(e.totalFundedAmount || 0),
+        createdAt: BigInt(e.createdAt || 0),
+        recordingOracleFee: e.recordingOracleFee
+          ? BigInt(e.recordingOracleFee)
+          : undefined,
+        reputationOracleFee: e.reputationOracleFee
+          ? BigInt(e.reputationOracleFee)
+          : undefined,
+        exchangeOracleFee: e.exchangeOracleFee
+          ? BigInt(e.exchangeOracleFee)
+          : undefined,
+        chainId: ChainId.POLYGON_AMOY,
+      }));
+      expect(result).toEqual(expected);
       expect(gqlFetchSpy).toHaveBeenCalled();
     });
 
     test('should successfully getEscrows for the filter', async () => {
-      const escrows = [
+      const escrows: EscrowData[] = [
         {
           id: '1',
           address: '0x0',
           amountPaid: '3',
           balance: '0',
           count: '1',
-          jobRequesterId: '1',
+          createdAt: '1',
           factoryAddress: '0x0',
           launcher: '0x0',
           status: 'Completed',
@@ -2932,12 +2970,30 @@ describe('EscrowUtils', () => {
         launcher: ethers.ZeroAddress,
       });
 
-      expect(result).toEqual(escrows);
+      const expected = escrows.map((e) => ({
+        ...e,
+        amountPaid: BigInt(e.amountPaid || 0),
+        balance: BigInt(e.balance || 0),
+        count: BigInt(e.count || 0),
+        totalFundedAmount: BigInt(e.totalFundedAmount || 0),
+        createdAt: BigInt(e.createdAt || 0),
+        recordingOracleFee: e.recordingOracleFee
+          ? BigInt(e.recordingOracleFee)
+          : undefined,
+        reputationOracleFee: e.reputationOracleFee
+          ? BigInt(e.reputationOracleFee)
+          : undefined,
+        exchangeOracleFee: e.exchangeOracleFee
+          ? BigInt(e.exchangeOracleFee)
+          : undefined,
+        chainId: ChainId.POLYGON_AMOY,
+      }));
+      expect(result).toEqual(expected);
       expect(gqlFetchSpy).toHaveBeenCalled();
     });
 
     test('should successfully getEscrows created by a specific job requester', async () => {
-      const escrows = [
+      const escrows: EscrowData[] = [
         {
           id: '1',
           address: '0x0',
@@ -2945,6 +3001,7 @@ describe('EscrowUtils', () => {
           balance: '0',
           count: '1',
           jobRequesterId: '1',
+          createdAt: '1',
           factoryAddress: '0x0',
           launcher: '0x0',
           status: 'Completed',
@@ -2961,19 +3018,37 @@ describe('EscrowUtils', () => {
         jobRequesterId: '1',
       });
 
-      expect(result).toEqual(escrows);
+      const expected = escrows.map((e) => ({
+        ...e,
+        amountPaid: BigInt(e.amountPaid || 0),
+        balance: BigInt(e.balance || 0),
+        count: BigInt(e.count || 0),
+        totalFundedAmount: BigInt(e.totalFundedAmount || 0),
+        createdAt: BigInt(e.createdAt || 0),
+        recordingOracleFee: e.recordingOracleFee
+          ? BigInt(e.recordingOracleFee)
+          : undefined,
+        reputationOracleFee: e.reputationOracleFee
+          ? BigInt(e.reputationOracleFee)
+          : undefined,
+        exchangeOracleFee: e.exchangeOracleFee
+          ? BigInt(e.exchangeOracleFee)
+          : undefined,
+        chainId: ChainId.POLYGON_AMOY,
+      }));
+      expect(result).toEqual(expected);
       expect(gqlFetchSpy).toHaveBeenCalled();
     });
 
     test('should successfully getEscrows with pagination', async () => {
-      const escrows = [
+      const escrows: EscrowData[] = [
         {
           id: '1',
           address: '0x0',
           amountPaid: '3',
           balance: '0',
           count: '1',
-          jobRequesterId: '1',
+          createdAt: '1',
           factoryAddress: '0x0',
           launcher: '0x0',
           status: 'Completed',
@@ -2986,7 +3061,7 @@ describe('EscrowUtils', () => {
           amountPaid: '0',
           balance: '3',
           count: '2',
-          jobRequesterId: '1',
+          createdAt: '1',
           factoryAddress: '0x0',
           launcher: '0x0',
           status: 'Pending',
@@ -3005,7 +3080,25 @@ describe('EscrowUtils', () => {
       };
 
       const result = await EscrowUtils.getEscrows(filter);
-      expect(result).toEqual(escrows);
+      const expected = escrows.map((e) => ({
+        ...e,
+        amountPaid: BigInt(e.amountPaid || 0),
+        balance: BigInt(e.balance || 0),
+        count: BigInt(e.count || 0),
+        totalFundedAmount: BigInt(e.totalFundedAmount || 0),
+        createdAt: BigInt(e.createdAt || 0),
+        recordingOracleFee: e.recordingOracleFee
+          ? BigInt(e.recordingOracleFee)
+          : undefined,
+        reputationOracleFee: e.reputationOracleFee
+          ? BigInt(e.reputationOracleFee)
+          : undefined,
+        exchangeOracleFee: e.exchangeOracleFee
+          ? BigInt(e.exchangeOracleFee)
+          : undefined,
+        chainId: ChainId.POLYGON_AMOY,
+      }));
+      expect(result).toEqual(expected);
       expect(gqlFetchSpy).toHaveBeenCalledWith(
         'https://api.studio.thegraph.com/query/74256/amoy/version/latest',
         GET_ESCROWS_QUERY(filter),
@@ -3026,14 +3119,14 @@ describe('EscrowUtils', () => {
     });
 
     test('should successfully getEscrows with pagination over limits', async () => {
-      const escrows = [
+      const escrows: EscrowData[] = [
         {
           id: '1',
           address: '0x0',
           amountPaid: '3',
           balance: '0',
           count: '1',
-          jobRequesterId: '1',
+          createdAt: '1',
           factoryAddress: '0x0',
           launcher: '0x0',
           status: 'Completed',
@@ -3056,7 +3149,7 @@ describe('EscrowUtils', () => {
           amountPaid: '0',
           balance: '3',
           count: '2',
-          jobRequesterId: '1',
+          createdAt: '1',
           factoryAddress: '0x0',
           launcher: '0x0',
           status: 'Pending',
@@ -3085,7 +3178,26 @@ describe('EscrowUtils', () => {
       };
 
       const result = await EscrowUtils.getEscrows(filter);
-      expect(result).toEqual(escrows);
+
+      const expected = escrows.map((e) => ({
+        ...e,
+        amountPaid: BigInt(e.amountPaid || 0),
+        balance: BigInt(e.balance || 0),
+        count: BigInt(e.count || 0),
+        totalFundedAmount: BigInt(e.totalFundedAmount || 0),
+        createdAt: BigInt(e.createdAt || 0),
+        recordingOracleFee: e.recordingOracleFee
+          ? BigInt(e.recordingOracleFee)
+          : undefined,
+        reputationOracleFee: e.reputationOracleFee
+          ? BigInt(e.reputationOracleFee)
+          : undefined,
+        exchangeOracleFee: e.exchangeOracleFee
+          ? BigInt(e.exchangeOracleFee)
+          : undefined,
+        chainId: ChainId.POLYGON_AMOY,
+      }));
+      expect(result).toEqual(expected);
       expect(gqlFetchSpy).toHaveBeenCalledWith(
         'https://api.studio.thegraph.com/query/74256/amoy/version/latest',
         GET_ESCROWS_QUERY(filter),
@@ -3155,7 +3267,19 @@ describe('EscrowUtils', () => {
 
       const result = await EscrowUtils.getEscrow(chainId, ethers.ZeroAddress);
 
-      expect(result).toEqual({ ...escrow, chainId });
+      const expected: IEscrow = {
+        ...escrow,
+        amountPaid: 3n,
+        balance: 0n,
+        count: 1n,
+        totalFundedAmount: 3n,
+        recordingOracleFee: 1n,
+        reputationOracleFee: 1n,
+        exchangeOracleFee: 1n,
+        createdAt: 0n,
+        chainId,
+      };
+      expect(result).toEqual(expected);
       expect(gqlFetchSpy).toHaveBeenCalledWith(
         NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
         GET_ESCROW_BY_ADDRESS_QUERY(),
