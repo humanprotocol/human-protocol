@@ -19,11 +19,11 @@ class TestTransactionUtils(unittest.TestCase):
             "human_protocol_sdk.transaction.transaction_utils.get_data_from_subgraph"
         ) as mock_function:
             mock_transaction_1 = {
-                "block": 123,
+                "block": "123",
                 "txHash": "0x1234567890123456789012345678901234567890123456789012345678901234",
                 "from": "0x1234567890123456789012345678901234567890",
                 "to": "0x9876543210987654321098765432109876543210",
-                "timestamp": 1622700000,
+                "timestamp": "1622700000",
                 "value": "1000000000000000000",
                 "method": "transfer",
                 "internalTransactions": [
@@ -36,11 +36,11 @@ class TestTransactionUtils(unittest.TestCase):
                 ],
             }
             mock_transaction_2 = {
-                "block": 456,
+                "block": "456",
                 "txHash": "0x9876543210987654321098765432109876543210987654321098765432109876",
                 "from": "0x9876543210987654321098765432109876543210",
                 "to": "0x1234567890123456789012345678901234567890",
-                "timestamp": 1622800000,
+                "timestamp": "1622800000",
                 "value": "2000000000000000000",
                 "method": "transfer",
                 "internalTransactions": [
@@ -151,11 +151,11 @@ class TestTransactionUtils(unittest.TestCase):
             "human_protocol_sdk.transaction.transaction_utils.get_data_from_subgraph"
         ) as mock_function:
             mock_transaction = {
-                "block": 123,
+                "block": "123",
                 "txHash": "0x1234567890123456789012345678901234567890123456789012345678901234",
                 "from": "0x1234567890123456789012345678901234567890",
                 "to": "0x9876543210987654321098765432109876543210",
-                "timestamp": 1622700000,
+                "timestamp": "1622700000",
                 "value": "1000000000000000000",
                 "method": "transfer",
                 "internalTransactions": [
@@ -184,12 +184,12 @@ class TestTransactionUtils(unittest.TestCase):
             )
             self.assertIsNotNone(transaction)
             self.assertEqual(transaction.chain_id, ChainId.POLYGON_AMOY)
-            self.assertEqual(transaction.block, mock_transaction["block"])
+            self.assertEqual(transaction.block, int(mock_transaction["block"]))
             self.assertEqual(transaction.tx_hash, mock_transaction["txHash"])
             self.assertEqual(transaction.from_address, mock_transaction["from"])
             self.assertEqual(transaction.to_address, mock_transaction["to"])
-            self.assertEqual(transaction.timestamp, mock_transaction["timestamp"])
-            self.assertEqual(transaction.value, mock_transaction["value"])
+            self.assertEqual(transaction.timestamp, int(mock_transaction["timestamp"]))
+            self.assertEqual(transaction.value, int(mock_transaction["value"]))
             self.assertEqual(transaction.method, mock_transaction["method"])
 
     def test_get_transaction_empty_data(self):

@@ -39,12 +39,12 @@ class StakerData:
         self,
         id: str,
         address: str,
-        staked_amount: str,
-        locked_amount: str,
-        withdrawn_amount: str,
-        slashed_amount: str,
-        locked_until_timestamp: str,
-        last_deposit_timestamp: str,
+        staked_amount: int,
+        locked_amount: int,
+        withdrawn_amount: int,
+        slashed_amount: int,
+        locked_until_timestamp: int,
+        last_deposit_timestamp: int,
     ):
         self.id = id
         self.address = address
@@ -84,12 +84,12 @@ class StakingUtils:
         return StakerData(
             id=staker.get("id", ""),
             address=staker.get("address", ""),
-            staked_amount=staker.get("stakedAmount", ""),
-            locked_amount=staker.get("lockedAmount", ""),
-            withdrawn_amount=staker.get("withdrawnAmount", ""),
-            slashed_amount=staker.get("slashedAmount", ""),
-            locked_until_timestamp=staker.get("lockedUntilTimestamp", ""),
-            last_deposit_timestamp=staker.get("lastDepositTimestamp", ""),
+            staked_amount=int(staker.get("stakedAmount") or 0),
+            locked_amount=int(staker.get("lockedAmount") or 0),
+            withdrawn_amount=int(staker.get("withdrawnAmount") or 0),
+            slashed_amount=int(staker.get("slashedAmount") or 0),
+            locked_until_timestamp=int(staker.get("lockedUntilTimestamp") or 0),
+            last_deposit_timestamp=int(staker.get("lastDepositTimestamp") or 0),
         )
 
     @staticmethod
@@ -129,12 +129,12 @@ class StakingUtils:
             StakerData(
                 id=staker.get("id", ""),
                 address=staker.get("address", ""),
-                staked_amount=staker.get("stakedAmount", ""),
-                locked_amount=staker.get("lockedAmount", ""),
-                withdrawn_amount=staker.get("withdrawnAmount", ""),
-                slashed_amount=staker.get("slashedAmount", ""),
-                locked_until_timestamp=staker.get("lockedUntilTimestamp", ""),
-                last_deposit_timestamp=staker.get("lastDepositTimestamp", ""),
+                staked_amount=int(staker.get("stakedAmount") or 0),
+                locked_amount=int(staker.get("lockedAmount") or 0),
+                withdrawn_amount=int(staker.get("withdrawnAmount") or 0),
+                slashed_amount=int(staker.get("slashedAmount") or 0),
+                locked_until_timestamp=int(staker.get("lockedUntilTimestamp") or 0),
+                last_deposit_timestamp=int(staker.get("lastDepositTimestamp") or 0),
             )
             for staker in stakers_raw
         ]
