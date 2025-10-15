@@ -244,20 +244,24 @@ class OperatorUtils:
             operators.append(
                 OperatorData(
                     chain_id=filter.chain_id,
-                    id=operator.get("id", ""),
-                    address=operator.get("address", ""),
+                    id=operator.get("id") or "",
+                    address=operator.get("address") or "",
                     staked_amount=int(staker.get("stakedAmount") or 0),
                     locked_amount=int(staker.get("lockedAmount") or 0),
                     locked_until_timestamp=int(staker.get("lockedUntilTimestamp") or 0),
                     withdrawn_amount=int(staker.get("withdrawnAmount") or 0),
                     slashed_amount=int(staker.get("slashedAmount") or 0),
                     amount_jobs_processed=int(operator.get("amountJobsProcessed") or 0),
-                    role=operator.get("role", None),
-                    fee=int(operator.get("fee")) if operator.get("fee", None) else None,
-                    public_key=operator.get("publicKey", None),
-                    webhook_url=operator.get("webhookUrl", None),
-                    website=operator.get("website", None),
-                    url=operator.get("url", None),
+                    role=operator.get("role") or None,
+                    fee=(
+                        int(operator.get("fee"))
+                        if operator.get("fee") or None
+                        else None
+                    ),
+                    public_key=operator.get("publicKey") or None,
+                    webhook_url=operator.get("webhookUrl") or None,
+                    website=operator.get("website") or None,
+                    url=operator.get("url") or None,
                     job_types=(
                         operator.get("jobTypes").split(",")
                         if isinstance(operator.get("jobTypes"), str)
@@ -267,13 +271,13 @@ class OperatorUtils:
                             else []
                         )
                     ),
-                    registration_needed=operator.get("registrationNeeded", None),
+                    registration_needed=operator.get("registrationNeeded") or None,
                     registration_instructions=operator.get(
-                        "registrationInstructions", None
+                        "registrationInstructions" or None
                     ),
                     reputation_networks=reputation_networks,
-                    name=operator.get("name", None),
-                    category=operator.get("category", None),
+                    name=operator.get("name") or None,
+                    category=operator.get("category") or None,
                 )
             )
 
@@ -341,20 +345,20 @@ class OperatorUtils:
         staker = operator.get("staker") or {}
         return OperatorData(
             chain_id=chain_id,
-            id=operator.get("id", ""),
-            address=operator.get("address", ""),
+            id=operator.get("id") or "",
+            address=operator.get("address") or "",
             staked_amount=int(staker.get("stakedAmount") or 0),
             locked_amount=int(staker.get("lockedAmount") or 0),
             locked_until_timestamp=int(staker.get("lockedUntilTimestamp") or 0),
             withdrawn_amount=int(staker.get("withdrawnAmount") or 0),
             slashed_amount=int(staker.get("slashedAmount") or 0),
             amount_jobs_processed=int(operator.get("amountJobsProcessed") or 0),
-            role=operator.get("role", None),
-            fee=int(operator.get("fee")) if operator.get("fee", None) else None,
-            public_key=operator.get("publicKey", None),
-            webhook_url=operator.get("webhookUrl", None),
-            website=operator.get("website", None),
-            url=operator.get("url", None),
+            role=operator.get("role") or None,
+            fee=int(operator.get("fee")) if operator.get("fee") or None else None,
+            public_key=operator.get("publicKey") or None,
+            webhook_url=operator.get("webhookUrl") or None,
+            website=operator.get("website") or None,
+            url=operator.get("url") or None,
             job_types=(
                 operator.get("jobTypes").split(",")
                 if isinstance(operator.get("jobTypes"), str)
@@ -364,11 +368,11 @@ class OperatorUtils:
                     else []
                 )
             ),
-            registration_needed=operator.get("registrationNeeded", None),
-            registration_instructions=operator.get("registrationInstructions", None),
+            registration_needed=operator.get("registrationNeeded") or None,
+            registration_instructions=operator.get("registrationInstructions") or None,
             reputation_networks=reputation_networks,
-            name=operator.get("name", None),
-            category=operator.get("category", None),
+            name=operator.get("name") or None,
+            category=operator.get("category") or None,
         )
 
     @staticmethod
@@ -426,8 +430,8 @@ class OperatorUtils:
         return [
             OperatorData(
                 chain_id=chain_id,
-                id=operator.get("id", ""),
-                address=operator.get("address", ""),
+                id=operator.get("id") or "",
+                address=operator.get("address") or "",
                 staked_amount=int(
                     (staker := operator.get("staker") or {}).get("stakedAmount") or 0
                 ),
@@ -436,12 +440,12 @@ class OperatorUtils:
                 withdrawn_amount=int(staker.get("withdrawnAmount") or 0),
                 slashed_amount=int(staker.get("slashedAmount") or 0),
                 amount_jobs_processed=int(operator.get("amountJobsProcessed") or 0),
-                role=operator.get("role", None),
-                fee=int(operator.get("fee")) if operator.get("fee", None) else None,
-                public_key=operator.get("publicKey", None),
-                webhook_url=operator.get("webhookUrl", None),
-                website=operator.get("website", None),
-                url=operator.get("url", None),
+                role=operator.get("role") or None,
+                fee=int(operator.get("fee")) if operator.get("fee") or None else None,
+                public_key=operator.get("publicKey") or None,
+                webhook_url=operator.get("webhookUrl") or None,
+                website=operator.get("website") or None,
+                url=operator.get("url") or None,
                 job_types=(
                     operator.get("jobTypes").split(",")
                     if isinstance(operator.get("jobTypes"), str)
@@ -451,9 +455,9 @@ class OperatorUtils:
                         else []
                     )
                 ),
-                registration_needed=operator.get("registrationNeeded", None),
+                registration_needed=operator.get("registrationNeeded") or None,
                 registration_instructions=operator.get(
-                    "registrationInstructions", None
+                    "registrationInstructions" or None
                 ),
                 reputation_networks=(
                     [network["address"] for network in operator["reputationNetworks"]]
@@ -461,8 +465,8 @@ class OperatorUtils:
                     and isinstance(operator.get("reputationNetworks"), list)
                     else []
                 ),
-                name=operator.get("name", None),
-                category=operator.get("category", None),
+                name=operator.get("name") or None,
+                category=operator.get("category") or None,
             )
             for operator in operators
         ]
@@ -515,7 +519,7 @@ class OperatorUtils:
 
         return [
             RewardData(
-                escrow_address=reward_added_event.get("escrowAddress", ""),
+                escrow_address=reward_added_event.get("escrowAddress") or "",
                 amount=int(reward_added_event.get("amount") or 0),
             )
             for reward_added_event in reward_added_events

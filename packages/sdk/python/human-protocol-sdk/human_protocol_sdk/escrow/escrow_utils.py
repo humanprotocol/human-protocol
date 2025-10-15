@@ -290,15 +290,15 @@ class EscrowUtils:
             [
                 EscrowData(
                     chain_id=chain_id,
-                    id=escrow.get("id", ""),
-                    address=escrow.get("address", ""),
+                    id=escrow.get("id") or "",
+                    address=escrow.get("address") or "",
                     amount_paid=int(escrow.get("amountPaid") or 0),
                     balance=int(escrow.get("balance") or 0),
                     count=int(escrow.get("count") or 0),
-                    factory_address=escrow.get("factoryAddress", ""),
-                    launcher=escrow.get("launcher", ""),
-                    status=escrow.get("status", ""),
-                    token=escrow.get("token", ""),
+                    factory_address=escrow.get("factoryAddress") or "",
+                    launcher=escrow.get("launcher") or "",
+                    status=escrow.get("status") or "",
+                    token=escrow.get("token") or "",
                     total_funded_amount=int(escrow.get("totalFundedAmount") or 0),
                     created_at=datetime.fromtimestamp(
                         int(escrow.get("createdAt") or 0)
@@ -316,17 +316,17 @@ class EscrowUtils:
                     exchange_oracle=escrow.get("exchangeOracle", None),
                     recording_oracle_fee=(
                         int(escrow.get("recordingOracleFee"))
-                        if escrow.get("recordingOracleFee", None) not in (None, "")
+                        if escrow.get("recordingOracleFee", None) not in (None) or ""
                         else None
                     ),
                     reputation_oracle_fee=(
                         int(escrow.get("reputationOracleFee"))
-                        if escrow.get("reputationOracleFee", None) not in (None, "")
+                        if escrow.get("reputationOracleFee", None) not in (None) or ""
                         else None
                     ),
                     exchange_oracle_fee=(
                         int(escrow.get("exchangeOracleFee"))
-                        if escrow.get("exchangeOracleFee", None) not in (None, "")
+                        if escrow.get("exchangeOracleFee", None) not in (None) or ""
                         else None
                     ),
                 )
@@ -393,15 +393,15 @@ class EscrowUtils:
 
         return EscrowData(
             chain_id=chain_id,
-            id=escrow.get("id", ""),
-            address=escrow.get("address", ""),
+            id=escrow.get("id") or "",
+            address=escrow.get("address") or "",
             amount_paid=int(escrow.get("amountPaid") or 0),
             balance=int(escrow.get("balance") or 0),
             count=int(escrow.get("count") or 0),
-            factory_address=escrow.get("factoryAddress", ""),
-            launcher=escrow.get("launcher", ""),
-            status=escrow.get("status", ""),
-            token=escrow.get("token", ""),
+            factory_address=escrow.get("factoryAddress") or "",
+            launcher=escrow.get("launcher") or "",
+            status=escrow.get("status") or "",
+            token=escrow.get("token") or "",
             total_funded_amount=int(escrow.get("totalFundedAmount") or 0),
             created_at=datetime.fromtimestamp(int(escrow.get("createdAt") or 0)),
             final_results_url=escrow.get("finalResultsUrl", None),
@@ -415,17 +415,17 @@ class EscrowUtils:
             exchange_oracle=escrow.get("exchangeOracle", None),
             recording_oracle_fee=(
                 int(escrow.get("recordingOracleFee"))
-                if escrow.get("recordingOracleFee", None) not in (None, "")
+                if escrow.get("recordingOracleFee", None) not in (None) or ""
                 else None
             ),
             reputation_oracle_fee=(
                 int(escrow.get("reputationOracleFee"))
-                if escrow.get("reputationOracleFee", None) not in (None, "")
+                if escrow.get("reputationOracleFee", None) not in (None) or ""
                 else None
             ),
             exchange_oracle_fee=(
                 int(escrow.get("exchangeOracleFee"))
-                if escrow.get("exchangeOracleFee", None) not in (None, "")
+                if escrow.get("exchangeOracleFee", None) not in (None) or ""
                 else None
             ),
         )

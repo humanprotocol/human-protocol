@@ -82,8 +82,8 @@ class StakingUtils:
 
         staker = data["data"]["staker"]
         return StakerData(
-            id=staker.get("id", ""),
-            address=staker.get("address", ""),
+            id=staker.get("id") or "",
+            address=staker.get("address") or "",
             staked_amount=int(staker.get("stakedAmount") or 0),
             locked_amount=int(staker.get("lockedAmount") or 0),
             withdrawn_amount=int(staker.get("withdrawnAmount") or 0),
@@ -127,8 +127,8 @@ class StakingUtils:
         stakers_raw = data["data"]["stakers"]
         return [
             StakerData(
-                id=staker.get("id", ""),
-                address=staker.get("address", ""),
+                id=staker.get("id") or "",
+                address=staker.get("address") or "",
                 staked_amount=int(staker.get("stakedAmount") or 0),
                 locked_amount=int(staker.get("lockedAmount") or 0),
                 withdrawn_amount=int(staker.get("withdrawnAmount") or 0),

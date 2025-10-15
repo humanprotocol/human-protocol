@@ -87,10 +87,12 @@ class WorkerUtils:
         for worker in workers_raw:
             workers.append(
                 WorkerData(
-                    id=worker.get("id", ""),
-                    address=worker.get("address", ""),
-                    total_amount_received=int(worker.get("totalHMTAmountReceived", 0)),
-                    payout_count=int(worker.get("payoutCount", 0)),
+                    id=worker.get("id") or "",
+                    address=worker.get("address") or "",
+                    total_amount_received=int(
+                        worker.get("totalHMTAmountReceived") or 0
+                    ),
+                    payout_count=int(worker.get("payoutCount") or 0),
                 )
             )
 
@@ -133,8 +135,8 @@ class WorkerUtils:
         worker = worker_data["data"]["worker"]
 
         return WorkerData(
-            id=worker.get("id", ""),
-            address=worker.get("address", ""),
-            total_amount_received=int(worker.get("totalHMTAmountReceived", 0)),
-            payout_count=int(worker.get("payoutCount", 0)),
+            id=worker.get("id") or "",
+            address=worker.get("address") or "",
+            total_amount_received=int(worker.get("totalHMTAmountReceived") or 0),
+            payout_count=int(worker.get("payoutCount") or 0),
         )
