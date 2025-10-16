@@ -316,17 +316,17 @@ class EscrowUtils:
                     exchange_oracle=escrow.get("exchangeOracle", None),
                     recording_oracle_fee=(
                         int(escrow.get("recordingOracleFee"))
-                        if escrow.get("recordingOracleFee", None) not in (None) or ""
+                        if escrow.get("recordingOracleFee")
                         else None
                     ),
                     reputation_oracle_fee=(
                         int(escrow.get("reputationOracleFee"))
-                        if escrow.get("reputationOracleFee", None) not in (None) or ""
+                        if escrow.get("reputationOracleFee")
                         else None
                     ),
                     exchange_oracle_fee=(
                         int(escrow.get("exchangeOracleFee"))
-                        if escrow.get("exchangeOracleFee", None) not in (None) or ""
+                        if escrow.get("exchangeOracleFee")
                         else None
                     ),
                 )
@@ -415,17 +415,17 @@ class EscrowUtils:
             exchange_oracle=escrow.get("exchangeOracle", None),
             recording_oracle_fee=(
                 int(escrow.get("recordingOracleFee"))
-                if escrow.get("recordingOracleFee", None) not in (None) or ""
+                if escrow.get("recordingOracleFee")
                 else None
             ),
             reputation_oracle_fee=(
                 int(escrow.get("reputationOracleFee"))
-                if escrow.get("reputationOracleFee", None) not in (None) or ""
+                if escrow.get("reputationOracleFee")
                 else None
             ),
             exchange_oracle_fee=(
                 int(escrow.get("exchangeOracleFee"))
-                if escrow.get("exchangeOracleFee", None) not in (None) or ""
+                if escrow.get("exchangeOracleFee")
                 else None
             ),
         )
