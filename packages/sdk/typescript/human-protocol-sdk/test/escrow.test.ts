@@ -59,7 +59,7 @@ import {
   FAKE_URL,
   VALID_URL,
 } from './utils/constants';
-import { IEscrow } from '../src/interfaces';
+import { IEscrow, IEscrowsFilter } from '../src/interfaces';
 
 describe('EscrowClient', () => {
   let escrowClient: any,
@@ -2823,6 +2823,19 @@ describe('EscrowUtils', () => {
           token: '0x0',
           totalFundedAmount: '3',
           createdAt: '1',
+          finalResultsHash: null,
+          finalResultsUrl: null,
+          intermediateResultsHash: null,
+          intermediateResultsUrl: null,
+          manifestHash: null,
+          manifest: null,
+          recordingOracle: null,
+          recordingOracleFee: null,
+          reputationOracle: null,
+          reputationOracleFee: null,
+          exchangeOracle: null,
+          exchangeOracleFee: null,
+          jobRequesterId: null,
         },
         {
           id: '2',
@@ -2836,6 +2849,19 @@ describe('EscrowUtils', () => {
           token: '0x0',
           totalFundedAmount: '3',
           createdAt: '1',
+          finalResultsHash: null,
+          finalResultsUrl: null,
+          intermediateResultsHash: null,
+          intermediateResultsUrl: null,
+          manifestHash: null,
+          manifest: null,
+          recordingOracle: null,
+          recordingOracleFee: null,
+          reputationOracle: null,
+          reputationOracleFee: null,
+          exchangeOracle: null,
+          exchangeOracleFee: null,
+          jobRequesterId: null,
         },
       ];
       const gqlFetchSpy = vi
@@ -2853,16 +2879,16 @@ describe('EscrowUtils', () => {
         balance: BigInt(e.balance || 0),
         count: BigInt(e.count || 0),
         totalFundedAmount: BigInt(e.totalFundedAmount || 0),
-        createdAt: BigInt(e.createdAt || 0),
+        createdAt: Number(e.createdAt || 0) * 1000,
         recordingOracleFee: e.recordingOracleFee
-          ? BigInt(e.recordingOracleFee)
-          : undefined,
+          ? Number(e.recordingOracleFee)
+          : null,
         reputationOracleFee: e.reputationOracleFee
-          ? BigInt(e.reputationOracleFee)
-          : undefined,
+          ? Number(e.reputationOracleFee)
+          : null,
         exchangeOracleFee: e.exchangeOracleFee
-          ? BigInt(e.exchangeOracleFee)
-          : undefined,
+          ? Number(e.exchangeOracleFee)
+          : null,
         chainId: ChainId.POLYGON_AMOY,
       }));
       expect(result).toEqual(expected);
@@ -2899,6 +2925,19 @@ describe('EscrowUtils', () => {
           status: 'Pending',
           token: '0x0',
           totalFundedAmount: '3',
+          finalResultsHash: null,
+          finalResultsUrl: null,
+          intermediateResultsHash: null,
+          intermediateResultsUrl: null,
+          manifestHash: null,
+          manifest: null,
+          recordingOracle: null,
+          recordingOracleFee: null,
+          reputationOracle: null,
+          reputationOracleFee: null,
+          exchangeOracle: null,
+          exchangeOracleFee: null,
+          jobRequesterId: null,
         },
         {
           id: '2',
@@ -2912,6 +2951,19 @@ describe('EscrowUtils', () => {
           status: 'Complete',
           token: '0x0',
           totalFundedAmount: '3',
+          finalResultsHash: null,
+          finalResultsUrl: null,
+          intermediateResultsHash: null,
+          intermediateResultsUrl: null,
+          manifestHash: null,
+          manifest: null,
+          recordingOracle: null,
+          recordingOracleFee: null,
+          reputationOracle: null,
+          reputationOracleFee: null,
+          exchangeOracle: null,
+          exchangeOracleFee: null,
+          jobRequesterId: null,
         },
       ];
       const gqlFetchSpy = vi
@@ -2929,16 +2981,16 @@ describe('EscrowUtils', () => {
         balance: BigInt(e.balance || 0),
         count: BigInt(e.count || 0),
         totalFundedAmount: BigInt(e.totalFundedAmount || 0),
-        createdAt: BigInt(e.createdAt || 0),
+        createdAt: Number(e.createdAt || 0) * 1000,
         recordingOracleFee: e.recordingOracleFee
-          ? BigInt(e.recordingOracleFee)
-          : undefined,
+          ? Number(e.recordingOracleFee)
+          : null,
         reputationOracleFee: e.reputationOracleFee
-          ? BigInt(e.reputationOracleFee)
-          : undefined,
+          ? Number(e.reputationOracleFee)
+          : null,
         exchangeOracleFee: e.exchangeOracleFee
-          ? BigInt(e.exchangeOracleFee)
-          : undefined,
+          ? Number(e.exchangeOracleFee)
+          : null,
         chainId: ChainId.POLYGON_AMOY,
       }));
       expect(result).toEqual(expected);
@@ -2959,6 +3011,19 @@ describe('EscrowUtils', () => {
           status: 'Completed',
           token: '0x0',
           totalFundedAmount: '3',
+          finalResultsHash: null,
+          finalResultsUrl: null,
+          intermediateResultsHash: null,
+          intermediateResultsUrl: null,
+          manifestHash: null,
+          manifest: null,
+          recordingOracle: null,
+          recordingOracleFee: null,
+          reputationOracle: null,
+          reputationOracleFee: null,
+          exchangeOracle: null,
+          exchangeOracleFee: null,
+          jobRequesterId: null,
         },
       ];
       const gqlFetchSpy = vi
@@ -2976,16 +3041,16 @@ describe('EscrowUtils', () => {
         balance: BigInt(e.balance || 0),
         count: BigInt(e.count || 0),
         totalFundedAmount: BigInt(e.totalFundedAmount || 0),
-        createdAt: BigInt(e.createdAt || 0),
+        createdAt: Number(e.createdAt || 0) * 1000,
         recordingOracleFee: e.recordingOracleFee
-          ? BigInt(e.recordingOracleFee)
-          : undefined,
+          ? Number(e.recordingOracleFee)
+          : null,
         reputationOracleFee: e.reputationOracleFee
-          ? BigInt(e.reputationOracleFee)
-          : undefined,
+          ? Number(e.reputationOracleFee)
+          : null,
         exchangeOracleFee: e.exchangeOracleFee
-          ? BigInt(e.exchangeOracleFee)
-          : undefined,
+          ? Number(e.exchangeOracleFee)
+          : null,
         chainId: ChainId.POLYGON_AMOY,
       }));
       expect(result).toEqual(expected);
@@ -3007,6 +3072,18 @@ describe('EscrowUtils', () => {
           status: 'Completed',
           token: '0x0',
           totalFundedAmount: '3',
+          finalResultsHash: null,
+          finalResultsUrl: null,
+          intermediateResultsHash: null,
+          intermediateResultsUrl: null,
+          manifestHash: null,
+          manifest: null,
+          recordingOracle: null,
+          recordingOracleFee: null,
+          reputationOracle: null,
+          reputationOracleFee: null,
+          exchangeOracle: null,
+          exchangeOracleFee: null,
         },
       ];
       const gqlFetchSpy = vi
@@ -3024,16 +3101,16 @@ describe('EscrowUtils', () => {
         balance: BigInt(e.balance || 0),
         count: BigInt(e.count || 0),
         totalFundedAmount: BigInt(e.totalFundedAmount || 0),
-        createdAt: BigInt(e.createdAt || 0),
+        createdAt: Number(e.createdAt || 0) * 1000,
         recordingOracleFee: e.recordingOracleFee
-          ? BigInt(e.recordingOracleFee)
-          : undefined,
+          ? Number(e.recordingOracleFee)
+          : null,
         reputationOracleFee: e.reputationOracleFee
-          ? BigInt(e.reputationOracleFee)
-          : undefined,
+          ? Number(e.reputationOracleFee)
+          : null,
         exchangeOracleFee: e.exchangeOracleFee
-          ? BigInt(e.exchangeOracleFee)
-          : undefined,
+          ? Number(e.exchangeOracleFee)
+          : null,
         chainId: ChainId.POLYGON_AMOY,
       }));
       expect(result).toEqual(expected);
@@ -3054,6 +3131,19 @@ describe('EscrowUtils', () => {
           status: 'Completed',
           token: '0x0',
           totalFundedAmount: '3',
+          finalResultsHash: null,
+          finalResultsUrl: null,
+          intermediateResultsHash: null,
+          intermediateResultsUrl: null,
+          manifestHash: null,
+          manifest: null,
+          recordingOracle: null,
+          recordingOracleFee: null,
+          reputationOracle: null,
+          reputationOracleFee: null,
+          exchangeOracle: null,
+          exchangeOracleFee: null,
+          jobRequesterId: null,
         },
         {
           id: '2',
@@ -3067,6 +3157,19 @@ describe('EscrowUtils', () => {
           status: 'Pending',
           token: '0x0',
           totalFundedAmount: '3',
+          finalResultsHash: null,
+          finalResultsUrl: null,
+          intermediateResultsHash: null,
+          intermediateResultsUrl: null,
+          manifestHash: null,
+          manifest: null,
+          recordingOracle: null,
+          recordingOracleFee: null,
+          reputationOracle: null,
+          reputationOracleFee: null,
+          exchangeOracle: null,
+          exchangeOracleFee: null,
+          jobRequesterId: null,
         },
       ];
       const gqlFetchSpy = vi
@@ -3086,16 +3189,16 @@ describe('EscrowUtils', () => {
         balance: BigInt(e.balance || 0),
         count: BigInt(e.count || 0),
         totalFundedAmount: BigInt(e.totalFundedAmount || 0),
-        createdAt: BigInt(e.createdAt || 0),
+        createdAt: Number(e.createdAt || 0) * 1000,
         recordingOracleFee: e.recordingOracleFee
-          ? BigInt(e.recordingOracleFee)
-          : undefined,
+          ? Number(e.recordingOracleFee)
+          : null,
         reputationOracleFee: e.reputationOracleFee
-          ? BigInt(e.reputationOracleFee)
-          : undefined,
+          ? Number(e.reputationOracleFee)
+          : null,
         exchangeOracleFee: e.exchangeOracleFee
-          ? BigInt(e.exchangeOracleFee)
-          : undefined,
+          ? Number(e.exchangeOracleFee)
+          : null,
         chainId: ChainId.POLYGON_AMOY,
       }));
       expect(result).toEqual(expected);
@@ -3142,6 +3245,9 @@ describe('EscrowUtils', () => {
           exchangeOracleFee: '1',
           recordingOracleFee: '1',
           reputationOracleFee: '1',
+          jobRequesterId: '1',
+          manifest: null,
+          manifestHash: null,
         },
         {
           id: '2',
@@ -3165,6 +3271,9 @@ describe('EscrowUtils', () => {
           exchangeOracleFee: '1',
           recordingOracleFee: '1',
           reputationOracleFee: '1',
+          jobRequesterId: '1',
+          manifest: null,
+          manifestHash: null,
         },
       ];
       const gqlFetchSpy = vi
@@ -3185,15 +3294,15 @@ describe('EscrowUtils', () => {
         balance: BigInt(e.balance || 0),
         count: BigInt(e.count || 0),
         totalFundedAmount: BigInt(e.totalFundedAmount || 0),
-        createdAt: BigInt(e.createdAt || 0),
+        createdAt: Number(e.createdAt || 0) * 1000,
         recordingOracleFee: e.recordingOracleFee
-          ? BigInt(e.recordingOracleFee)
+          ? Number(e.recordingOracleFee)
           : undefined,
         reputationOracleFee: e.reputationOracleFee
-          ? BigInt(e.reputationOracleFee)
+          ? Number(e.reputationOracleFee)
           : undefined,
         exchangeOracleFee: e.exchangeOracleFee
-          ? BigInt(e.exchangeOracleFee)
+          ? Number(e.exchangeOracleFee)
           : undefined,
         chainId: ChainId.POLYGON_AMOY,
       }));
@@ -3260,6 +3369,9 @@ describe('EscrowUtils', () => {
         exchangeOracleFee: '1',
         recordingOracleFee: '1',
         reputationOracleFee: '1',
+        jobRequesterId: null,
+        manifest: null,
+        manifestHash: null,
       };
       const gqlFetchSpy = vi
         .spyOn(gqlFetch, 'default')
@@ -3273,11 +3385,14 @@ describe('EscrowUtils', () => {
         balance: 0n,
         count: 1n,
         totalFundedAmount: 3n,
-        recordingOracleFee: 1n,
-        reputationOracleFee: 1n,
-        exchangeOracleFee: 1n,
-        createdAt: 0n,
+        recordingOracleFee: 1,
+        reputationOracleFee: 1,
+        exchangeOracleFee: 1,
+        createdAt: 0,
         chainId,
+        jobRequesterId: null,
+        manifest: null,
+        manifestHash: null,
       };
       expect(result).toEqual(expected);
       expect(gqlFetchSpy).toHaveBeenCalledWith(

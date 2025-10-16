@@ -12,7 +12,7 @@ export interface IOperator {
   address: string;
   stakedAmount: bigint;
   lockedAmount: bigint;
-  lockedUntilTimestamp: bigint;
+  lockedUntilTimestamp: number;
   withdrawnAmount: bigint;
   slashedAmount: bigint;
   amountJobsProcessed: bigint;
@@ -30,32 +30,6 @@ export interface IOperator {
   category?: string;
 }
 
-export interface IOperatorSubgraph {
-  id: string;
-  address: string;
-  amountJobsProcessed: bigint;
-  role?: string;
-  fee?: bigint;
-  publicKey?: string;
-  webhookUrl?: string;
-  website?: string;
-  url?: string;
-  registrationNeeded?: boolean;
-  registrationInstructions?: string;
-  name?: string;
-  category?: string;
-  jobTypes?: string | string[];
-  reputationNetworks?: { address: string }[];
-  staker?: {
-    stakedAmount: bigint;
-    lockedAmount: bigint;
-    lockedUntilTimestamp: bigint;
-    withdrawnAmount: bigint;
-    slashedAmount: bigint;
-    lastDepositTimestamp: bigint;
-  };
-}
-
 export interface IOperatorsFilter extends IPagination {
   chainId: ChainId;
   roles?: string[];
@@ -69,11 +43,6 @@ export interface IReputationNetwork {
   operators: IOperator[];
 }
 
-export interface IReputationNetworkSubgraph
-  extends Omit<IReputationNetwork, 'operators'> {
-  operators: IOperatorSubgraph[];
-}
-
 export interface IEscrow {
   id: string;
   address: string;
@@ -81,24 +50,24 @@ export interface IEscrow {
   balance: bigint;
   count: bigint;
   factoryAddress: string;
-  finalResultsUrl?: string;
-  finalResultsHash?: string;
-  intermediateResultsUrl?: string;
-  intermediateResultsHash?: string;
+  finalResultsUrl: string | null;
+  finalResultsHash: string | null;
+  intermediateResultsUrl: string | null;
+  intermediateResultsHash: string | null;
   launcher: string;
-  jobRequesterId?: string;
-  manifestHash?: string;
-  manifest?: string;
-  recordingOracle?: string;
-  reputationOracle?: string;
-  exchangeOracle?: string;
-  recordingOracleFee?: bigint;
-  reputationOracleFee?: bigint;
-  exchangeOracleFee?: bigint;
+  jobRequesterId: string | null;
+  manifestHash: string | null;
+  manifest: string | null;
+  recordingOracle: string | null;
+  reputationOracle: string | null;
+  exchangeOracle: string | null;
+  recordingOracleFee: number | null;
+  reputationOracleFee: number | null;
+  exchangeOracleFee: number | null;
   status: string;
   token: string;
   totalFundedAmount: bigint;
-  createdAt: bigint;
+  createdAt: number;
   chainId: number;
 }
 
@@ -159,9 +128,9 @@ export interface InternalTransaction {
   to: string;
   value: bigint;
   method: string;
-  receiver?: string;
-  escrow?: string;
-  token?: string;
+  receiver: string | null;
+  escrow: string | null;
+  token: string | null;
 }
 
 export interface ITransaction {
@@ -169,12 +138,12 @@ export interface ITransaction {
   txHash: string;
   from: string;
   to: string;
-  timestamp: bigint;
+  timestamp: number;
   value: bigint;
   method: string;
-  receiver?: string;
-  escrow?: string;
-  token?: string;
+  receiver: string | null;
+  escrow: string | null;
+  token: string | null;
   internalTransactions: InternalTransaction[];
 }
 
@@ -229,10 +198,10 @@ export interface IStaker {
   address: string;
   stakedAmount: bigint;
   lockedAmount: bigint;
-  lockedUntil: bigint;
   withdrawableAmount: bigint;
   slashedAmount: bigint;
-  lastDepositTimestamp: bigint;
+  lockedUntil: number;
+  lastDepositTimestamp: number;
 }
 
 export interface IStakersFilter extends IPagination {

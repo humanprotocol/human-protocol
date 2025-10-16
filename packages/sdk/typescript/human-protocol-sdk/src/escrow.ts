@@ -60,12 +60,12 @@ import {
   IStatusEventFilter,
 } from './interfaces';
 import {
+  CancellationRefund,
   EscrowStatus,
   EscrowWithdraw,
   NetworkData,
-  TransactionLikeWithNonce,
   Payout,
-  CancellationRefund,
+  TransactionLikeWithNonce,
 } from './types';
 import {
   getSubgraphUrl,
@@ -535,7 +535,7 @@ export class EscrowClient extends BaseEthersClient {
     const escrowContract = this.getEscrowContract(escrowAddress);
 
     const hasFundsToReserveParam = typeof a === 'bigint';
-    const fundsToReserve = hasFundsToReserveParam ? (a as bigint) : undefined;
+    const fundsToReserve = hasFundsToReserveParam ? (a as bigint) : null;
     const txOptions = (hasFundsToReserveParam ? b : a) || {};
     // When fundsToReserve is provided and is 0, allow empty URL.
     // In this situation not solutions might have been provided so the escrow can be straight cancelled.
@@ -557,7 +557,7 @@ export class EscrowClient extends BaseEthersClient {
     }
 
     try {
-      if (fundsToReserve !== undefined) {
+      if (fundsToReserve !== null) {
         await (
           await escrowContract['storeResults(string,string,uint256)'](
             url,
@@ -1789,24 +1789,24 @@ export class EscrowUtils {
    *   balance: bigint;
    *   count: bigint;
    *   factoryAddress: string;
-   *   finalResultsUrl?: string;
-   *   finalResultsHash?: string;
-   *   intermediateResultsUrl?: string;
-   *   intermediateResultsHash?: string;
+   *   finalResultsUrl: string | null;
+   *   finalResultsHash: string | null;
+   *   intermediateResultsUrl: string | null;
+   *   intermediateResultsHash: string | null;
    *   launcher: string;
-   *   jobRequesterId?: string;
-   *   manifestHash?: string;
-   *   manifest?: string;
-   *   recordingOracle?: string;
-   *   reputationOracle?: string;
-   *   exchangeOracle?: string;
-   *   recordingOracleFee?: bigint;
-   *   reputationOracleFee?: bigint;
-   *   exchangeOracleFee?: bigint;
+   *   jobRequesterId: string | null;
+   *   manifestHash: string | null;
+   *   manifest: string | null;
+   *   recordingOracle: string | null;
+   *   reputationOracle: string | null;
+   *   exchangeOracle: string | null;
+   *   recordingOracleFee: number | null;
+   *   reputationOracleFee: number | null;
+   *   exchangeOracleFee: number | null;
    *   status: string;
    *   token: string;
    *   totalFundedAmount: bigint;
-   *   createdAt: bigint;
+   *   createdAt: number;
    *   chainId: number;
    * };
    * ```
@@ -1879,24 +1879,9 @@ export class EscrowUtils {
         skip: skip,
       }
     );
-    const mapped: IEscrow[] = (escrows || []).map((e) => ({
-      ...e,
-      amountPaid: BigInt(e.amountPaid || 0),
-      balance: BigInt(e.balance || 0),
-      count: BigInt(e.count || 0),
-      recordingOracleFee: e.recordingOracleFee
-        ? BigInt(e.recordingOracleFee)
-        : undefined,
-      reputationOracleFee: e.reputationOracleFee
-        ? BigInt(e.reputationOracleFee)
-        : undefined,
-      exchangeOracleFee: e.exchangeOracleFee
-        ? BigInt(e.exchangeOracleFee)
-        : undefined,
-      totalFundedAmount: BigInt(e.totalFundedAmount || 0),
-      createdAt: BigInt(e.createdAt || 0),
-      chainId: networkData.chainId,
-    }));
+    const mapped: IEscrow[] = (escrows || []).map((e) =>
+      mapEscrow(e, networkData.chainId)
+    );
 
     if (!escrows) {
       return [];
@@ -1933,24 +1918,24 @@ export class EscrowUtils {
    *   balance: bigint;
    *   count: bigint;
    *   factoryAddress: string;
-   *   finalResultsUrl?: string;
-   *   finalResultsHash?: string;
-   *   intermediateResultsUrl?: string;
-   *   intermediateResultsHash?: string;
+   *   finalResultsUrl: string | null;
+   *   finalResultsHash: string | null;
+   *   intermediateResultsUrl: string | null;
+   *   intermediateResultsHash: string | null;
    *   launcher: string;
-   *   jobRequesterId?: string;
-   *   manifestHash?: string;
-   *   manifest?: string;
-   *   recordingOracle?: string;
-   *   reputationOracle?: string;
-   *   exchangeOracle?: string;
-   *   recordingOracleFee?: bigint;
-   *   reputationOracleFee?: bigint;
-   *   exchangeOracleFee?: bigint;
+   *   jobRequesterId: string | null;
+   *   manifestHash: string | null;
+   *   manifest: string | null;
+   *   recordingOracle: string | null;
+   *   reputationOracle: string | null;
+   *   exchangeOracle: string | null;
+   *   recordingOracleFee: number | null;
+   *   reputationOracleFee: number | null;
+   *   exchangeOracleFee: number | null;
    *   status: string;
    *   token: string;
    *   totalFundedAmount: bigint;
-   *   createdAt: bigint;
+   *   createdAt: number;
    *   chainId: number;
    * };
    * ```
@@ -1989,24 +1974,7 @@ export class EscrowUtils {
     );
     if (!escrow) return null;
 
-    return {
-      ...escrow,
-      amountPaid: BigInt(escrow.amountPaid || 0),
-      balance: BigInt(escrow.balance || 0),
-      count: BigInt(escrow.count || 0),
-      recordingOracleFee: escrow.recordingOracleFee
-        ? BigInt(escrow.recordingOracleFee)
-        : undefined,
-      reputationOracleFee: escrow.reputationOracleFee
-        ? BigInt(escrow.reputationOracleFee)
-        : undefined,
-      exchangeOracleFee: escrow.exchangeOracleFee
-        ? BigInt(escrow.exchangeOracleFee)
-        : undefined,
-      totalFundedAmount: BigInt(escrow.totalFundedAmount || 0),
-      createdAt: BigInt(escrow.createdAt || 0),
-      chainId: networkData.chainId,
-    };
+    return mapEscrow(escrow, networkData.chainId);
   }
 
   /**
@@ -2343,4 +2311,38 @@ export class EscrowUtils {
 
     return cancellationRefundEvents?.[0] || null;
   }
+}
+
+function mapEscrow(e: EscrowData, chainId: ChainId | number): IEscrow {
+  return {
+    id: e.id,
+    address: e.address,
+    amountPaid: BigInt(e.amountPaid || 0),
+    balance: BigInt(e.balance || 0),
+    count: BigInt(e.count || 0),
+    factoryAddress: e.factoryAddress,
+    finalResultsUrl: e.finalResultsUrl,
+    finalResultsHash: e.finalResultsHash,
+    intermediateResultsUrl: e.intermediateResultsUrl,
+    intermediateResultsHash: e.intermediateResultsHash,
+    launcher: e.launcher,
+    jobRequesterId: e.jobRequesterId,
+    manifestHash: e.manifestHash,
+    manifest: e.manifest,
+    recordingOracle: e.recordingOracle,
+    reputationOracle: e.reputationOracle,
+    exchangeOracle: e.exchangeOracle,
+    recordingOracleFee: e.recordingOracleFee
+      ? Number(e.recordingOracleFee)
+      : null,
+    reputationOracleFee: e.reputationOracleFee
+      ? Number(e.reputationOracleFee)
+      : null,
+    exchangeOracleFee: e.exchangeOracleFee ? Number(e.exchangeOracleFee) : null,
+    status: e.status,
+    token: e.token,
+    totalFundedAmount: BigInt(e.totalFundedAmount || 0),
+    createdAt: Number(e.createdAt || 0) * 1000,
+    chainId: Number(chainId),
+  };
 }

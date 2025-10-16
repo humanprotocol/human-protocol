@@ -45,10 +45,7 @@ export class WorkerUtils {
 
     if (!worker) return null;
 
-    return {
-      ...worker,
-      totalHMTAmountReceived: BigInt(worker.totalHMTAmountReceived || 0),
-    };
+    return mapWorker(worker);
   }
 
   /**
@@ -121,9 +118,15 @@ export class WorkerUtils {
       return [];
     }
 
-    return workers.map((w) => ({
-      ...w,
-      totalHMTAmountReceived: BigInt(w.totalHMTAmountReceived || 0),
-    }));
+    return workers.map((w) => mapWorker(w));
   }
+}
+
+function mapWorker(w: WorkerData): IWorker {
+  return {
+    id: w.id,
+    address: w.address,
+    totalHMTAmountReceived: BigInt(w.totalHMTAmountReceived || 0),
+    payoutCount: Number(w.payoutCount || 0),
+  };
 }

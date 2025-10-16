@@ -1,3 +1,4 @@
+import { IReputationNetwork } from '../interfaces';
 import { ChainId } from '../enums';
 
 export type EscrowData = {
@@ -7,20 +8,20 @@ export type EscrowData = {
   balance: string;
   count: string;
   factoryAddress: string;
-  finalResultsUrl?: string;
-  finalResultsHash?: string;
-  intermediateResultsUrl?: string;
-  intermediateResultsHash?: string;
+  finalResultsUrl: string | null;
+  finalResultsHash: string | null;
+  intermediateResultsUrl: string | null;
+  intermediateResultsHash: string | null;
   launcher: string;
-  jobRequesterId?: string;
-  manifestHash?: string;
-  manifestUrl?: string;
-  recordingOracle?: string;
-  reputationOracle?: string;
-  exchangeOracle?: string;
-  recordingOracleFee?: string;
-  reputationOracleFee?: string;
-  exchangeOracleFee?: string;
+  jobRequesterId: string | null;
+  manifestHash: string | null;
+  manifest: string | null;
+  recordingOracle: string | null;
+  reputationOracle: string | null;
+  exchangeOracle: string | null;
+  recordingOracleFee: string | null;
+  reputationOracleFee: string | null;
+  exchangeOracleFee: string | null;
   status: string;
   token: string;
   totalFundedAmount: string;
@@ -31,7 +32,7 @@ export type WorkerData = {
   id: string;
   address: string;
   totalHMTAmountReceived: string;
-  payoutCount: number;
+  payoutCount: string;
 };
 
 export type InternalTransactionData = {
@@ -39,10 +40,10 @@ export type InternalTransactionData = {
   to: string;
   value: string;
   method: string;
-  receiver?: string;
-  escrow?: string;
-  token?: string;
-  id?: string;
+  receiver: string | null;
+  escrow: string | null;
+  token: string | null;
+  id: string | null;
 };
 
 export type TransactionData = {
@@ -53,9 +54,9 @@ export type TransactionData = {
   timestamp: string;
   value: string;
   method: string;
-  receiver?: string;
-  escrow?: string;
-  token?: string;
+  receiver: string | null;
+  escrow: string | null;
+  token: string | null;
   internalTransactions: InternalTransactionData[];
 };
 
@@ -111,21 +112,21 @@ export type RewardAddedEventData = {
 
 export type DailyEscrowData = {
   timestamp: Date;
-  escrowsTotal: number;
-  escrowsPending: number;
-  escrowsSolved: number;
-  escrowsPaid: number;
-  escrowsCancelled: number;
+  escrowsTotal: string;
+  escrowsPending: string;
+  escrowsSolved: string;
+  escrowsPaid: string;
+  escrowsCancelled: string;
 };
 
 export type EscrowStatistics = {
-  totalEscrows: number;
+  totalEscrows: string;
   dailyEscrowsData: DailyEscrowData[];
 };
 
 export type DailyWorkerData = {
   timestamp: Date;
-  activeWorkers: number;
+  activeWorkers: string;
 };
 
 export type WorkerStatistics = {
@@ -134,9 +135,9 @@ export type WorkerStatistics = {
 
 export type DailyPaymentData = {
   timestamp: Date;
-  totalAmountPaid: bigint;
-  totalCount: number;
-  averageAmountPerWorker: bigint;
+  totalAmountPaid: string;
+  totalCount: string;
+  averageAmountPerWorker: string;
 };
 
 export type PaymentStatistics = {
@@ -150,34 +151,34 @@ export type HMTHolderData = {
 
 export type HMTHolder = {
   address: string;
-  balance: bigint;
+  balance: string;
 };
 
 export type DailyHMTData = {
   timestamp: Date;
-  totalTransactionAmount: bigint;
-  totalTransactionCount: number;
-  dailyUniqueSenders: number;
-  dailyUniqueReceivers: number;
+  totalTransactionAmount: string;
+  totalTransactionCount: string;
+  dailyUniqueSenders: string;
+  dailyUniqueReceivers: string;
 };
 
 export type HMTStatistics = {
-  totalTransferAmount: bigint;
-  totalTransferCount: number;
-  totalHolders: number;
+  totalTransferAmount: string;
+  totalTransferCount: string;
+  totalHolders: string;
 };
 
 export type IMDataEntity = {
-  served: number;
-  solved: number;
+  served: string;
+  solved: string;
 };
 
 export type IMData = Record<string, IMDataEntity>;
 
 export type DailyTaskData = {
   timestamp: Date;
-  tasksTotal: number;
-  tasksSolved: number;
+  tasksTotal: string;
+  tasksSolved: string;
 };
 
 export type TaskStatistics = {
@@ -185,7 +186,7 @@ export type TaskStatistics = {
 };
 
 export type StatusEvent = {
-  timestamp: number;
+  timestamp: string;
   escrowAddress: string;
   status: string;
   chainId: ChainId;
@@ -197,5 +198,47 @@ export type KVStoreData = {
   key: string;
   value: string;
   timestamp: Date;
-  block: number;
+  block: string;
 };
+
+export type StakerData = {
+  id: string;
+  address: string;
+  stakedAmount: string;
+  lockedAmount: string;
+  withdrawnAmount: string;
+  slashedAmount: string;
+  lockedUntilTimestamp: string;
+  lastDepositTimestamp: string;
+};
+
+export interface IOperatorSubgraph {
+  id: string;
+  address: string;
+  amountJobsProcessed: string;
+  role?: string;
+  fee?: string;
+  publicKey?: string;
+  webhookUrl?: string;
+  website?: string;
+  url?: string;
+  registrationNeeded?: boolean;
+  registrationInstructions?: string;
+  name?: string;
+  category?: string;
+  jobTypes?: string | string[];
+  reputationNetworks?: { address: string }[];
+  staker?: {
+    stakedAmount: string;
+    lockedAmount: string;
+    lockedUntilTimestamp: string;
+    withdrawnAmount: string;
+    slashedAmount: string;
+    lastDepositTimestamp: string;
+  };
+}
+
+export interface IReputationNetworkSubgraph
+  extends Omit<IReputationNetwork, 'operators'> {
+  operators: IOperatorSubgraph[];
+}

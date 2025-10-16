@@ -1,14 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import gqlFetch from 'graphql-request';
-import {
-  IOperator,
-  IOperatorSubgraph,
-  IOperatorsFilter,
-  IReputationNetworkSubgraph,
-  IReward,
-} from './interfaces';
+import { IOperator, IOperatorsFilter, IReward } from './interfaces';
 import { GET_REWARD_ADDED_EVENTS_QUERY } from './graphql/queries/reward';
-import { RewardAddedEventData } from './graphql';
+import {
+  IOperatorSubgraph,
+  IReputationNetworkSubgraph,
+  RewardAddedEventData,
+} from './graphql';
 import {
   GET_LEADER_QUERY,
   GET_LEADERS_QUERY,
@@ -238,7 +236,7 @@ function mapOperator(operator: IOperatorSubgraph, chainId: ChainId): IOperator {
     address: operator.address,
     stakedAmount: BigInt(staker?.stakedAmount || 0),
     lockedAmount: BigInt(staker?.lockedAmount || 0),
-    lockedUntilTimestamp: BigInt(staker?.lockedUntilTimestamp || 0),
+    lockedUntilTimestamp: Number(staker?.lockedUntilTimestamp || 0) * 1000,
     withdrawnAmount: BigInt(staker?.withdrawnAmount || 0),
     slashedAmount: BigInt(staker?.slashedAmount || 0),
     amountJobsProcessed: BigInt(operator.amountJobsProcessed || 0),

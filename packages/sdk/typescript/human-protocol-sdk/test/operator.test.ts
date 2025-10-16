@@ -20,14 +20,9 @@ import {
   GET_LEADERS_QUERY,
   GET_REPUTATION_NETWORK_QUERY,
 } from '../src/graphql/queries/operator';
-import {
-  IOperator,
-  IOperatorsFilter,
-  IOperatorSubgraph,
-  IReputationNetworkSubgraph,
-  IReward,
-} from '../src/interfaces';
+import { IOperator, IOperatorsFilter, IReward } from '../src/interfaces';
 import { OperatorUtils } from '../src/operator';
+import { IOperatorSubgraph, IReputationNetworkSubgraph } from '../src/graphql';
 
 vi.mock('graphql-request', () => {
   return {
@@ -42,7 +37,7 @@ describe('OperatorUtils', () => {
   const mockOperatorSubgraph: IOperatorSubgraph = {
     id: stakerAddress,
     address: stakerAddress,
-    amountJobsProcessed: ethers.parseEther('25'),
+    amountJobsProcessed: ethers.parseEther('25').toString(),
     jobTypes: ['type1', 'type2'],
     registrationNeeded: true,
     registrationInstructions: 'www.google.com',
@@ -53,12 +48,12 @@ describe('OperatorUtils', () => {
       },
     ],
     staker: {
-      stakedAmount: ethers.parseEther('100'),
-      lockedAmount: ethers.parseEther('25'),
-      lockedUntilTimestamp: ethers.toBigInt(0),
-      withdrawnAmount: ethers.parseEther('25'),
-      slashedAmount: ethers.parseEther('25'),
-      lastDepositTimestamp: ethers.toBigInt(0),
+      stakedAmount: ethers.parseEther('100').toString(),
+      lockedAmount: ethers.parseEther('25').toString(),
+      lockedUntilTimestamp: '0',
+      withdrawnAmount: ethers.parseEther('25').toString(),
+      slashedAmount: ethers.parseEther('25').toString(),
+      lastDepositTimestamp: '0',
     },
   };
   const operator: IOperator = {
@@ -73,7 +68,7 @@ describe('OperatorUtils', () => {
     chainId: ChainId.LOCALHOST,
     stakedAmount: ethers.parseEther('100'),
     lockedAmount: ethers.parseEther('25'),
-    lockedUntilTimestamp: ethers.toBigInt(0),
+    lockedUntilTimestamp: 0,
     withdrawnAmount: ethers.parseEther('25'),
     slashedAmount: ethers.parseEther('25'),
   };

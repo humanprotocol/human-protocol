@@ -22,6 +22,7 @@ import {
 } from './utils/constants';
 import { IStaker, IStakersFilter } from '../src/interfaces';
 import { StakingUtils } from '../src/staking';
+import { StakerData } from '../src/graphql';
 
 vi.mock('graphql-request', () => {
   return {
@@ -564,14 +565,15 @@ describe('StakingUtils', () => {
   const invalidAddress = 'InvalidAddress';
 
   describe('getStaker', () => {
-    const mockStaker: IStaker = {
+    const mockStaker: StakerData = {
+      id: '0x0987654321098765432109876543210987654320',
       address: stakerAddress,
-      stakedAmount: 1000n,
-      lockedAmount: 100n,
-      lockedUntil: 1234567890n,
-      withdrawableAmount: 900n,
-      slashedAmount: 0n,
-      lastDepositTimestamp: 1234567890n,
+      stakedAmount: '1000',
+      lockedAmount: '100',
+      lockedUntilTimestamp: '1234567890',
+      withdrawnAmount: '900',
+      slashedAmount: '0',
+      lastDepositTimestamp: '1234567890',
     };
 
     test('should return staker information', async () => {
@@ -589,7 +591,16 @@ describe('StakingUtils', () => {
         expect.anything(),
         { id: stakerAddress.toLowerCase() }
       );
-      expect(result).toEqual(mockStaker);
+      const expectedStaker: IStaker = {
+        address: mockStaker.address,
+        stakedAmount: BigInt(mockStaker.stakedAmount),
+        lockedAmount: BigInt(mockStaker.lockedAmount),
+        withdrawableAmount: BigInt(mockStaker.withdrawnAmount),
+        slashedAmount: BigInt(mockStaker.slashedAmount),
+        lockedUntil: Number(mockStaker.lockedUntilTimestamp) * 1000,
+        lastDepositTimestamp: Number(mockStaker.lastDepositTimestamp) * 1000,
+      };
+      expect(result).toEqual(expectedStaker);
     });
 
     test('should throw an error for an invalid staker address', async () => {
@@ -621,24 +632,26 @@ describe('StakingUtils', () => {
   });
 
   describe('getStakers', () => {
-    const mockStakers: IStaker[] = [
+    const mockStakers: StakerData[] = [
       {
+        id: '0x0987654321098765432109876543210987654320',
         address: stakerAddress,
-        stakedAmount: 1000n,
-        lockedAmount: 100n,
-        lockedUntil: 1234567890n,
-        withdrawableAmount: 900n,
-        slashedAmount: 0n,
-        lastDepositTimestamp: 1234567890n,
+        stakedAmount: '1000',
+        lockedAmount: '100',
+        lockedUntilTimestamp: '1234567890',
+        withdrawnAmount: '900',
+        slashedAmount: '0',
+        lastDepositTimestamp: '1234567890',
       },
       {
+        id: '0x0987654321098765432109876543210987654321',
         address: '0x0987654321098765432109876543210987654321',
-        stakedAmount: 2000n,
-        lockedAmount: 200n,
-        lockedUntil: 1234567891n,
-        withdrawableAmount: 1800n,
-        slashedAmount: 0n,
-        lastDepositTimestamp: 1234567890n,
+        stakedAmount: '2000',
+        lockedAmount: '200',
+        lockedUntilTimestamp: '1234567891',
+        withdrawnAmount: '1800',
+        slashedAmount: '0',
+        lastDepositTimestamp: '1234567890',
       },
     ];
 
@@ -672,7 +685,16 @@ describe('StakingUtils', () => {
           skip: 0,
         })
       );
-      expect(result).toEqual(mockStakers);
+      const expectedStakers = mockStakers.map((s) => ({
+        address: s.address,
+        stakedAmount: BigInt(s.stakedAmount),
+        lockedAmount: BigInt(s.lockedAmount),
+        withdrawableAmount: BigInt(s.withdrawnAmount),
+        slashedAmount: BigInt(s.slashedAmount),
+        lockedUntil: Number(s.lockedUntilTimestamp) * 1000,
+        lastDepositTimestamp: Number(s.lastDepositTimestamp) * 1000,
+      }));
+      expect(result).toEqual(expectedStakers);
     });
 
     test('should return an empty array if no stakers found', async () => {

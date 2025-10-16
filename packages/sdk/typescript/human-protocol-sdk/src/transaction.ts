@@ -8,13 +8,17 @@ import {
   ErrorInvalidHashProvided,
   ErrorUnsupportedChainID,
 } from './error';
-import {
-  GET_TRANSACTIONS_QUERY,
-  GET_TRANSACTION_QUERY,
-} from './graphql/queries/transaction';
-import { ITransaction, ITransactionsFilter } from './interfaces';
-import { getSubgraphUrl, getUnixTimestamp } from './utils';
 import { TransactionData } from './graphql';
+import {
+  GET_TRANSACTION_QUERY,
+  GET_TRANSACTIONS_QUERY,
+} from './graphql/queries/transaction';
+import {
+  InternalTransaction,
+  ITransaction,
+  ITransactionsFilter,
+} from './interfaces';
+import { getSubgraphUrl, getUnixTimestamp } from './utils';
 
 export class TransactionUtils {
   /**
@@ -80,17 +84,7 @@ export class TransactionUtils {
     });
     if (!transaction) return null;
 
-    return {
-      ...transaction,
-      block: BigInt(transaction.block),
-      timestamp: BigInt(transaction.timestamp),
-      value: BigInt(transaction.value || 0),
-      internalTransactions:
-        transaction.internalTransactions?.map((itx) => ({
-          ...itx,
-          value: BigInt(itx.value || 0),
-        })) || [],
-    };
+    return mapTransaction(transaction);
   }
 
   /**
@@ -208,16 +202,34 @@ export class TransactionUtils {
       return [];
     }
 
-    return transactions.map((transaction) => ({
-      ...transaction,
-      block: BigInt(transaction.block),
-      timestamp: BigInt(transaction.timestamp),
-      value: BigInt(transaction.value || 0),
-      internalTransactions:
-        transaction.internalTransactions?.map((itx) => ({
-          ...itx,
-          value: BigInt(itx.value || 0),
-        })) || [],
-    }));
+    return transactions.map((transaction) => mapTransaction(transaction));
   }
+}
+
+function mapTransaction(t: TransactionData): ITransaction {
+  const internalTransactions: InternalTransaction[] = (
+    t.internalTransactions || []
+  ).map((itx) => ({
+    from: itx.from,
+    to: itx.to,
+    value: BigInt(itx.value || 0),
+    method: itx.method,
+    receiver: itx.receiver,
+    escrow: itx.escrow,
+    token: itx.token,
+  }));
+
+  return {
+    block: BigInt(t.block),
+    txHash: t.txHash,
+    from: t.from,
+    to: t.to,
+    timestamp: Number(t.timestamp || 0) * 1000,
+    value: BigInt(t.value || 0),
+    method: t.method,
+    receiver: t.receiver,
+    escrow: t.escrow,
+    token: t.token,
+    internalTransactions,
+  };
 }
