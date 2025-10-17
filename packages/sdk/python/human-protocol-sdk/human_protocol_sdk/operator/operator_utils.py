@@ -89,12 +89,13 @@ class OperatorData:
         chain_id: ChainId,
         id: str,
         address: str,
-        staked_amount: int,
-        locked_amount: int,
-        locked_until_timestamp: int,
-        withdrawn_amount: int,
-        slashed_amount: int,
         amount_jobs_processed: int,
+        reputation_networks: List[str],
+        staked_amount: Optional[int] = None,
+        locked_amount: Optional[int] = None,
+        locked_until_timestamp: Optional[int] = None,
+        withdrawn_amount: Optional[int] = None,
+        slashed_amount: Optional[int] = None,
         role: Optional[str] = None,
         fee: Optional[int] = None,
         public_key: Optional[str] = None,
@@ -104,7 +105,6 @@ class OperatorData:
         job_types: Optional[List[str]] = None,
         registration_needed: Optional[bool] = None,
         registration_instructions: Optional[str] = None,
-        reputation_networks: Optional[List[str]] = None,
         name: Optional[str] = None,
         category: Optional[str] = None,
     ):
@@ -139,7 +139,9 @@ class OperatorData:
         self.address = address
         self.staked_amount = staked_amount
         self.locked_amount = locked_amount
-        self.locked_until_timestamp = locked_until_timestamp
+        self.locked_until_timestamp = (
+            locked_until_timestamp * 1000 if locked_until_timestamp else None
+        )
         self.withdrawn_amount = withdrawn_amount
         self.slashed_amount = slashed_amount
         self.amount_jobs_processed = amount_jobs_processed
@@ -244,24 +246,45 @@ class OperatorUtils:
             operators.append(
                 OperatorData(
                     chain_id=filter.chain_id,
-                    id=operator.get("id") or "",
-                    address=operator.get("address") or "",
-                    staked_amount=int(staker.get("stakedAmount") or 0),
-                    locked_amount=int(staker.get("lockedAmount") or 0),
-                    locked_until_timestamp=int(staker.get("lockedUntilTimestamp") or 0),
-                    withdrawn_amount=int(staker.get("withdrawnAmount") or 0),
-                    slashed_amount=int(staker.get("slashedAmount") or 0),
-                    amount_jobs_processed=int(operator.get("amountJobsProcessed") or 0),
-                    role=operator.get("role") or None,
-                    fee=(
-                        int(operator.get("fee"))
-                        if operator.get("fee") or None
+                    id=operator.get("id"),
+                    address=operator.get("address"),
+                    staked_amount=(
+                        int(staker.get("stakedAmount"))
+                        if staker.get("stakedAmount") is not None
                         else None
                     ),
-                    public_key=operator.get("publicKey") or None,
-                    webhook_url=operator.get("webhookUrl") or None,
-                    website=operator.get("website") or None,
-                    url=operator.get("url") or None,
+                    locked_amount=(
+                        int(staker.get("lockedAmount"))
+                        if staker.get("lockedAmount") is not None
+                        else None
+                    ),
+                    locked_until_timestamp=(
+                        int(staker.get("lockedUntilTimestamp"))
+                        if staker.get("lockedUntilTimestamp") is not None
+                        else None
+                    ),
+                    withdrawn_amount=(
+                        int(staker.get("withdrawnAmount"))
+                        if staker.get("withdrawnAmount") is not None
+                        else None
+                    ),
+                    slashed_amount=(
+                        int(staker.get("slashedAmount"))
+                        if staker.get("slashedAmount") is not None
+                        else None
+                    ),
+                    amount_jobs_processed=int(operator.get("amountJobsProcessed") or 0),
+                    role=operator.get("role"),
+                    # Preserve 0 fee; only None if absent
+                    fee=(
+                        int(operator.get("fee"))
+                        if operator.get("fee") is not None
+                        else None
+                    ),
+                    public_key=operator.get("publicKey"),
+                    webhook_url=operator.get("webhookUrl"),
+                    website=operator.get("website"),
+                    url=operator.get("url"),
                     job_types=(
                         operator.get("jobTypes").split(",")
                         if isinstance(operator.get("jobTypes"), str)
@@ -271,13 +294,11 @@ class OperatorUtils:
                             else []
                         )
                     ),
-                    registration_needed=operator.get("registrationNeeded") or None,
-                    registration_instructions=operator.get(
-                        "registrationInstructions" or None
-                    ),
+                    registration_needed=operator.get("registrationNeeded"),
+                    registration_instructions=operator.get("registrationInstructions"),
                     reputation_networks=reputation_networks,
-                    name=operator.get("name") or None,
-                    category=operator.get("category") or None,
+                    name=operator.get("name"),
+                    category=operator.get("category"),
                 )
             )
 
@@ -345,20 +366,40 @@ class OperatorUtils:
         staker = operator.get("staker") or {}
         return OperatorData(
             chain_id=chain_id,
-            id=operator.get("id") or "",
-            address=operator.get("address") or "",
-            staked_amount=int(staker.get("stakedAmount") or 0),
-            locked_amount=int(staker.get("lockedAmount") or 0),
-            locked_until_timestamp=int(staker.get("lockedUntilTimestamp") or 0),
-            withdrawn_amount=int(staker.get("withdrawnAmount") or 0),
-            slashed_amount=int(staker.get("slashedAmount") or 0),
+            id=operator.get("id"),
+            address=operator.get("address"),
+            staked_amount=(
+                int(staker.get("stakedAmount"))
+                if staker.get("stakedAmount") is not None
+                else None
+            ),
+            locked_amount=(
+                int(staker.get("lockedAmount"))
+                if staker.get("lockedAmount") is not None
+                else None
+            ),
+            locked_until_timestamp=(
+                int(staker.get("lockedUntilTimestamp"))
+                if staker.get("lockedUntilTimestamp") is not None
+                else None
+            ),
+            withdrawn_amount=(
+                int(staker.get("withdrawnAmount"))
+                if staker.get("withdrawnAmount") is not None
+                else None
+            ),
+            slashed_amount=(
+                int(staker.get("slashedAmount"))
+                if staker.get("slashedAmount") is not None
+                else None
+            ),
             amount_jobs_processed=int(operator.get("amountJobsProcessed") or 0),
-            role=operator.get("role") or None,
-            fee=int(operator.get("fee")) if operator.get("fee") or None else None,
-            public_key=operator.get("publicKey") or None,
-            webhook_url=operator.get("webhookUrl") or None,
-            website=operator.get("website") or None,
-            url=operator.get("url") or None,
+            role=operator.get("role"),
+            fee=(int(operator.get("fee")) if operator.get("fee") is not None else None),
+            public_key=operator.get("publicKey"),
+            webhook_url=operator.get("webhookUrl"),
+            website=operator.get("website"),
+            url=operator.get("url"),
             job_types=(
                 operator.get("jobTypes").split(",")
                 if isinstance(operator.get("jobTypes"), str)
@@ -368,11 +409,11 @@ class OperatorUtils:
                     else []
                 )
             ),
-            registration_needed=operator.get("registrationNeeded") or None,
-            registration_instructions=operator.get("registrationInstructions") or None,
+            registration_needed=operator.get("registrationNeeded"),
+            registration_instructions=operator.get("registrationInstructions"),
             reputation_networks=reputation_networks,
-            name=operator.get("name") or None,
-            category=operator.get("category") or None,
+            name=operator.get("name"),
+            category=operator.get("category"),
         )
 
     @staticmethod
@@ -427,49 +468,76 @@ class OperatorUtils:
             return []
 
         operators = reputation_network_data["data"]["reputationNetwork"]["operators"]
-        return [
-            OperatorData(
-                chain_id=chain_id,
-                id=operator.get("id") or "",
-                address=operator.get("address") or "",
-                staked_amount=int(
-                    (staker := operator.get("staker") or {}).get("stakedAmount") or 0
-                ),
-                locked_amount=int(staker.get("lockedAmount") or 0),
-                locked_until_timestamp=int(staker.get("lockedUntilTimestamp") or 0),
-                withdrawn_amount=int(staker.get("withdrawnAmount") or 0),
-                slashed_amount=int(staker.get("slashedAmount") or 0),
-                amount_jobs_processed=int(operator.get("amountJobsProcessed") or 0),
-                role=operator.get("role") or None,
-                fee=int(operator.get("fee")) if operator.get("fee") or None else None,
-                public_key=operator.get("publicKey") or None,
-                webhook_url=operator.get("webhookUrl") or None,
-                website=operator.get("website") or None,
-                url=operator.get("url") or None,
-                job_types=(
-                    operator.get("jobTypes").split(",")
-                    if isinstance(operator.get("jobTypes"), str)
-                    else (
-                        operator.get("jobTypes", [])
-                        if isinstance(operator.get("jobTypes"), list)
+        result: List[OperatorData] = []
+        for operator in operators:
+            staker = operator.get("staker") or {}
+            result.append(
+                OperatorData(
+                    chain_id=chain_id,
+                    id=operator.get("id"),
+                    address=operator.get("address"),
+                    staked_amount=(
+                        int(staker.get("stakedAmount"))
+                        if staker.get("stakedAmount") is not None
+                        else None
+                    ),
+                    locked_amount=(
+                        int(staker.get("lockedAmount"))
+                        if staker.get("lockedAmount") is not None
+                        else None
+                    ),
+                    locked_until_timestamp=(
+                        int(staker.get("lockedUntilTimestamp"))
+                        if staker.get("lockedUntilTimestamp") is not None
+                        else None
+                    ),
+                    withdrawn_amount=(
+                        int(staker.get("withdrawnAmount"))
+                        if staker.get("withdrawnAmount") is not None
+                        else None
+                    ),
+                    slashed_amount=(
+                        int(staker.get("slashedAmount"))
+                        if staker.get("slashedAmount") is not None
+                        else None
+                    ),
+                    amount_jobs_processed=int(operator.get("amountJobsProcessed") or 0),
+                    role=operator.get("role"),
+                    fee=(
+                        int(operator.get("fee"))
+                        if operator.get("fee") is not None
+                        else None
+                    ),
+                    public_key=operator.get("publicKey"),
+                    webhook_url=operator.get("webhookUrl"),
+                    website=operator.get("website"),
+                    url=operator.get("url"),
+                    job_types=(
+                        operator.get("jobTypes").split(",")
+                        if isinstance(operator.get("jobTypes"), str)
+                        else (
+                            operator.get("jobTypes", [])
+                            if isinstance(operator.get("jobTypes"), list)
+                            else []
+                        )
+                    ),
+                    registration_needed=operator.get("registrationNeeded"),
+                    registration_instructions=operator.get("registrationInstructions"),
+                    reputation_networks=(
+                        [
+                            network["address"]
+                            for network in operator.get("reputationNetworks", [])
+                        ]
+                        if operator.get("reputationNetworks")
+                        and isinstance(operator.get("reputationNetworks"), list)
                         else []
-                    )
-                ),
-                registration_needed=operator.get("registrationNeeded") or None,
-                registration_instructions=operator.get(
-                    "registrationInstructions" or None
-                ),
-                reputation_networks=(
-                    [network["address"] for network in operator["reputationNetworks"]]
-                    if operator.get("reputationNetworks")
-                    and isinstance(operator.get("reputationNetworks"), list)
-                    else []
-                ),
-                name=operator.get("name") or None,
-                category=operator.get("category") or None,
+                    ),
+                    name=operator.get("name"),
+                    category=operator.get("category"),
+                )
             )
-            for operator in operators
-        ]
+
+        return result
 
     @staticmethod
     def get_rewards_info(chain_id: ChainId, slasher: str) -> List[RewardData]:
@@ -519,8 +587,8 @@ class OperatorUtils:
 
         return [
             RewardData(
-                escrow_address=reward_added_event.get("escrowAddress") or "",
-                amount=int(reward_added_event.get("amount") or 0),
+                escrow_address=reward_added_event.get("escrowAddress"),
+                amount=int(reward_added_event.get("amount")),
             )
             for reward_added_event in reward_added_events
         ]

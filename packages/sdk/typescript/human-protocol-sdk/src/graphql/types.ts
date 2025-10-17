@@ -1,5 +1,4 @@
 import { IReputationNetwork } from '../interfaces';
-import { ChainId } from '../enums';
 
 export type EscrowData = {
   id: string;
@@ -110,86 +109,15 @@ export type RewardAddedEventData = {
   amount: string;
 };
 
-export type DailyEscrowData = {
-  timestamp: Date;
-  escrowsTotal: string;
-  escrowsPending: string;
-  escrowsSolved: string;
-  escrowsPaid: string;
-  escrowsCancelled: string;
-};
-
-export type EscrowStatistics = {
-  totalEscrows: string;
-  dailyEscrowsData: DailyEscrowData[];
-};
-
-export type DailyWorkerData = {
-  timestamp: Date;
-  activeWorkers: string;
-};
-
-export type WorkerStatistics = {
-  dailyWorkersData: DailyWorkerData[];
-};
-
-export type DailyPaymentData = {
-  timestamp: Date;
-  totalAmountPaid: string;
-  totalCount: string;
-  averageAmountPerWorker: string;
-};
-
-export type PaymentStatistics = {
-  dailyPaymentsData: DailyPaymentData[];
-};
-
 export type HMTHolderData = {
   address: string;
   balance: string;
-};
-
-export type HMTHolder = {
-  address: string;
-  balance: string;
-};
-
-export type DailyHMTData = {
-  timestamp: Date;
-  totalTransactionAmount: string;
-  totalTransactionCount: string;
-  dailyUniqueSenders: string;
-  dailyUniqueReceivers: string;
-};
-
-export type HMTStatistics = {
-  totalTransferAmount: string;
-  totalTransferCount: string;
-  totalHolders: string;
-};
-
-export type IMDataEntity = {
-  served: string;
-  solved: string;
-};
-
-export type IMData = Record<string, IMDataEntity>;
-
-export type DailyTaskData = {
-  timestamp: Date;
-  tasksTotal: string;
-  tasksSolved: string;
-};
-
-export type TaskStatistics = {
-  dailyTasksData: DailyTaskData[];
 };
 
 export type StatusEvent = {
   timestamp: string;
   escrowAddress: string;
   status: string;
-  chainId: ChainId;
 };
 
 export type KVStoreData = {
@@ -216,29 +144,47 @@ export interface IOperatorSubgraph {
   id: string;
   address: string;
   amountJobsProcessed: string;
-  role?: string;
-  fee?: string;
-  publicKey?: string;
-  webhookUrl?: string;
-  website?: string;
-  url?: string;
-  registrationNeeded?: boolean;
-  registrationInstructions?: string;
-  name?: string;
-  category?: string;
-  jobTypes?: string | string[];
-  reputationNetworks?: { address: string }[];
-  staker?: {
+  role: string | null;
+  fee: string | null;
+  publicKey: string | null;
+  webhookUrl: string | null;
+  website: string | null;
+  url: string | null;
+  registrationNeeded: boolean | null;
+  registrationInstructions: string | null;
+  name: string | null;
+  category: string | null;
+  jobTypes: string | string[] | null;
+  reputationNetworks: { address: string }[];
+  staker: {
     stakedAmount: string;
     lockedAmount: string;
     lockedUntilTimestamp: string;
     withdrawnAmount: string;
     slashedAmount: string;
     lastDepositTimestamp: string;
-  };
+  } | null;
 }
 
 export interface IReputationNetworkSubgraph
   extends Omit<IReputationNetwork, 'operators'> {
   operators: IOperatorSubgraph[];
 }
+
+export type PayoutData = {
+  id: string;
+  escrowAddress: string;
+  recipient: string;
+  amount: string;
+  createdAt: string;
+};
+
+export type CancellationRefundData = {
+  id: string;
+  escrowAddress: string;
+  receiver: string;
+  amount: string;
+  block: string;
+  timestamp: string;
+  txHash: string;
+};

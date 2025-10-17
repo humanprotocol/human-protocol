@@ -10,24 +10,24 @@ export interface IOperator {
   id: string;
   chainId: ChainId;
   address: string;
-  stakedAmount: bigint;
-  lockedAmount: bigint;
-  lockedUntilTimestamp: number;
-  withdrawnAmount: bigint;
-  slashedAmount: bigint;
-  amountJobsProcessed: bigint;
-  role?: string;
-  fee?: bigint;
-  publicKey?: string;
-  webhookUrl?: string;
-  website?: string;
-  url?: string;
-  jobTypes?: string[];
-  registrationNeeded?: boolean;
-  registrationInstructions?: string;
-  reputationNetworks?: string[];
-  name?: string;
-  category?: string;
+  stakedAmount: bigint | null;
+  lockedAmount: bigint | null;
+  lockedUntilTimestamp: number | null;
+  withdrawnAmount: bigint | null;
+  slashedAmount: bigint | null;
+  amountJobsProcessed: bigint | null;
+  role: string | null;
+  fee: bigint | null;
+  publicKey: string | null;
+  webhookUrl: string | null;
+  website: string | null;
+  url: string | null;
+  jobTypes: string[] | null;
+  registrationNeeded: boolean | null;
+  registrationInstructions: string | null;
+  reputationNetworks: string[];
+  name: string | null;
+  category: string | null;
 }
 
 export interface IOperatorsFilter extends IPagination {
@@ -48,7 +48,7 @@ export interface IEscrow {
   address: string;
   amountPaid: bigint;
   balance: bigint;
-  count: bigint;
+  count: number;
   factoryAddress: string;
   finalResultsUrl: string | null;
   finalResultsHash: string | null;
@@ -227,4 +227,88 @@ export interface ICancellationRefundFilter extends IPagination {
   receiver?: string;
   from?: Date;
   to?: Date;
+}
+
+export interface IDailyEscrow {
+  timestamp: number;
+  escrowsTotal: number;
+  escrowsPending: number;
+  escrowsSolved: number;
+  escrowsPaid: number;
+  escrowsCancelled: number;
+}
+
+export interface IEscrowStatistics {
+  totalEscrows: number;
+  dailyEscrowsData: IDailyEscrow[];
+}
+
+export interface IDailyWorker {
+  timestamp: number;
+  activeWorkers: number;
+}
+
+export interface IWorkerStatistics {
+  dailyWorkersData: IDailyWorker[];
+}
+
+export interface IDailyPayment {
+  timestamp: number;
+  totalAmountPaid: bigint;
+  totalCount: number;
+  averageAmountPerWorker: bigint;
+}
+
+export interface IPaymentStatistics {
+  dailyPaymentsData: IDailyPayment[];
+}
+
+export interface IHMTStatistics {
+  totalTransferAmount: bigint;
+  totalTransferCount: number;
+  totalHolders: number;
+}
+
+export interface IHMTHolder {
+  address: string;
+  balance: bigint;
+}
+
+export interface IDailyHMT {
+  timestamp: number;
+  totalTransactionAmount: bigint;
+  totalTransactionCount: number;
+  dailyUniqueSenders: number;
+  dailyUniqueReceivers: number;
+}
+
+export interface IStatusEvent {
+  timestamp: number;
+  escrowAddress: string;
+  status: EscrowStatus;
+  chainId: ChainId;
+}
+
+export interface ICancellationRefund {
+  id: string;
+  escrowAddress: string;
+  receiver: string;
+  amount: bigint;
+  block: number;
+  timestamp: number;
+  txHash: string;
+}
+
+export interface IPayout {
+  id: string;
+  escrowAddress: string;
+  recipient: string;
+  amount: bigint;
+  createdAt: number;
+}
+
+export interface IEscrowWithdraw {
+  txHash: string;
+  tokenAddress: string;
+  withdrawnAmount: bigint;
 }

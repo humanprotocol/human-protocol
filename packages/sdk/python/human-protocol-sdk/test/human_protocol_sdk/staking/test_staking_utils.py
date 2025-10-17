@@ -88,11 +88,11 @@ class TestStakingUtils(unittest.TestCase):
             )
             self.assertEqual(
                 stakers[0].locked_until_timestamp,
-                int(mock_staker_1["lockedUntilTimestamp"]),
+                int(mock_staker_1["lockedUntilTimestamp"]) * 1000,
             )
             self.assertEqual(
                 stakers[0].last_deposit_timestamp,
-                int(mock_staker_1["lastDepositTimestamp"]),
+                int(mock_staker_1["lastDepositTimestamp"]) * 1000,
             )
             self.assertIsInstance(stakers[1], StakerData)
             self.assertEqual(stakers[1].id, "2")
@@ -111,11 +111,11 @@ class TestStakingUtils(unittest.TestCase):
             )
             self.assertEqual(
                 stakers[1].locked_until_timestamp,
-                int(mock_staker_2["lockedUntilTimestamp"]),
+                int(mock_staker_2["lockedUntilTimestamp"]) * 1000,
             )
             self.assertEqual(
                 stakers[1].last_deposit_timestamp,
-                int(mock_staker_2["lastDepositTimestamp"]),
+                int(mock_staker_2["lastDepositTimestamp"]) * 1000,
             )
 
     def test_get_stakers_empty_response(self):
@@ -171,10 +171,12 @@ class TestStakingUtils(unittest.TestCase):
             )
             self.assertEqual(staker.slashed_amount, int(mock_staker["slashedAmount"]))
             self.assertEqual(
-                staker.locked_until_timestamp, int(mock_staker["lockedUntilTimestamp"])
+                staker.locked_until_timestamp,
+                int(mock_staker["lockedUntilTimestamp"]) * 1000,
             )
             self.assertEqual(
-                staker.last_deposit_timestamp, int(mock_staker["lastDepositTimestamp"])
+                staker.last_deposit_timestamp,
+                int(mock_staker["lastDepositTimestamp"]) * 1000,
             )
 
     def test_get_staker_empty_data(self):

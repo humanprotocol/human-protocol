@@ -55,6 +55,13 @@ describe('OperatorUtils', () => {
       slashedAmount: ethers.parseEther('25').toString(),
       lastDepositTimestamp: '0',
     },
+    category: null,
+    fee: null,
+    name: null,
+    publicKey: null,
+    role: null,
+    url: null,
+    webhookUrl: null,
   };
   const operator: IOperator = {
     id: stakerAddress,
@@ -71,6 +78,13 @@ describe('OperatorUtils', () => {
     lockedUntilTimestamp: 0,
     withdrawnAmount: ethers.parseEther('25'),
     slashedAmount: ethers.parseEther('25'),
+    role: null,
+    fee: null,
+    publicKey: null,
+    webhookUrl: null,
+    url: null,
+    name: null,
+    category: null,
   };
 
   describe('getOperator', () => {

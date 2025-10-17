@@ -40,9 +40,9 @@ class InternalTransaction:
         to_address: str,
         value: int,
         method: str,
-        receiver: str,
-        escrow: str,
-        token: str,
+        receiver: Optional[str],
+        escrow: Optional[str],
+        token: Optional[str],
     ):
         self.from_address = from_address
         self.to_address = to_address
@@ -64,9 +64,9 @@ class TransactionData:
         timestamp: int,
         value: int,
         method: str,
-        receiver: str,
-        escrow: str,
-        token: str,
+        receiver: Optional[str],
+        escrow: Optional[str],
+        token: Optional[str],
         internal_transactions: List[InternalTransaction],
     ):
         self.chain_id = chain_id
@@ -74,7 +74,7 @@ class TransactionData:
         self.tx_hash = tx_hash
         self.from_address = from_address
         self.to_address = to_address
-        self.timestamp = timestamp
+        self.timestamp = timestamp * 1000
         self.value = value
         self.method = method
         self.receiver = receiver
@@ -141,25 +141,25 @@ class TransactionUtils:
 
         return TransactionData(
             chain_id=chain_id,
-            block=int(transaction.get("block") or 0),
-            tx_hash=transaction.get("txHash") or "",
-            from_address=transaction.get("from") or "",
-            to_address=transaction.get("to") or "",
-            timestamp=int(transaction.get("timestamp") or 0),
-            value=int(transaction.get("value") or 0),
-            method=transaction.get("method") or "",
-            receiver=transaction.get("receiver") or "",
-            escrow=transaction.get("escrow") or "",
-            token=transaction.get("token") or "",
+            block=int(transaction.get("block")),
+            tx_hash=transaction.get("txHash"),
+            from_address=transaction.get("from"),
+            to_address=transaction.get("to"),
+            timestamp=int(transaction.get("timestamp")),
+            value=int(transaction.get("value")),
+            method=transaction.get("method"),
+            receiver=transaction.get("receiver"),
+            escrow=transaction.get("escrow"),
+            token=transaction.get("token"),
             internal_transactions=[
                 InternalTransaction(
-                    from_address=internal_tx.get("from") or "",
-                    to_address=internal_tx.get("to") or "",
-                    value=int(internal_tx.get("value") or 0),
-                    method=internal_tx.get("method") or "",
-                    receiver=internal_tx.get("receiver") or "",
-                    escrow=internal_tx.get("escrow") or "",
-                    token=internal_tx.get("token") or "",
+                    from_address=internal_tx.get("from"),
+                    to_address=internal_tx.get("to"),
+                    value=int(internal_tx.get("value")),
+                    method=internal_tx.get("method"),
+                    receiver=internal_tx.get("receiver"),
+                    escrow=internal_tx.get("escrow"),
+                    token=internal_tx.get("token"),
                 )
                 for internal_tx in transaction.get("internalTransactions", [])
             ],
@@ -239,25 +239,25 @@ class TransactionUtils:
             [
                 TransactionData(
                     chain_id=filter.chain_id,
-                    block=int(transaction.get("block") or 0),
-                    tx_hash=transaction.get("txHash") or "",
-                    from_address=transaction.get("from") or "",
-                    to_address=transaction.get("to") or "",
-                    timestamp=int(transaction.get("timestamp") or 0),
-                    value=int(transaction.get("value") or 0),
-                    method=transaction.get("method") or "",
-                    receiver=transaction.get("receiver") or "",
-                    escrow=transaction.get("escrow") or "",
-                    token=transaction.get("token") or "",
+                    block=int(transaction.get("block")),
+                    tx_hash=transaction.get("txHash"),
+                    from_address=transaction.get("from"),
+                    to_address=transaction.get("to"),
+                    timestamp=int(transaction.get("timestamp")),
+                    value=int(transaction.get("value")),
+                    method=transaction.get("method"),
+                    receiver=transaction.get("receiver"),
+                    escrow=transaction.get("escrow"),
+                    token=transaction.get("token"),
                     internal_transactions=[
                         InternalTransaction(
-                            from_address=internal_tx.get("from") or "",
-                            to_address=internal_tx.get("to") or "",
-                            value=int(internal_tx.get("value") or 0),
-                            method=internal_tx.get("method") or "",
-                            receiver=internal_tx.get("receiver") or "",
-                            escrow=internal_tx.get("escrow") or "",
-                            token=internal_tx.get("token") or "",
+                            from_address=internal_tx.get("from"),
+                            to_address=internal_tx.get("to"),
+                            value=int(internal_tx.get("value")),
+                            method=internal_tx.get("method"),
+                            receiver=internal_tx.get("receiver"),
+                            escrow=internal_tx.get("escrow"),
+                            token=internal_tx.get("token"),
                         )
                         for internal_tx in transaction.get("internalTransactions", [])
                     ],

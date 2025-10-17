@@ -57,10 +57,11 @@ class EscrowData:
         count: int,
         factory_address: str,
         launcher: str,
+        job_requester_id: Optional[str],
         status: str,
         token: str,
         total_funded_amount: int,
-        created_at: datetime,
+        created_at: int,
         final_results_url: Optional[str] = None,
         final_results_hash: Optional[str] = None,
         intermediate_results_url: Optional[str] = None,
@@ -85,10 +86,11 @@ class EscrowData:
         :param count: Count
         :param factory_address: Factory address
         :param launcher: Launcher
+        :param job_requester_id: Job requester identifier
         :param status: Status
         :param token: Token
         :param total_funded_amount: Total funded amount
-        :param created_at: Creation date
+        :param created_at: Creation timestamp in milliseconds
         :param final_results_url: URL for final results.
         :param final_results_hash: Hash for final results.
         :param intermediate_results_url: URL for intermediate results.
@@ -114,6 +116,7 @@ class EscrowData:
         self.intermediate_results_url = intermediate_results_url
         self.intermediate_results_hash = intermediate_results_hash
         self.launcher = launcher
+        self.job_requester_id = job_requester_id
         self.manifest_hash = manifest_hash
         self.manifest = manifest
         self.recording_oracle = recording_oracle
@@ -125,7 +128,7 @@ class EscrowData:
         self.status = status
         self.token = token
         self.total_funded_amount = total_funded_amount
-        self.created_at = created_at
+        self.created_at = created_at * 1000
         self.chain_id = chain_id
 
 
@@ -133,7 +136,7 @@ class StatusEvent:
     """
     Initializes a StatusEvent instance.
 
-    :param timestamp: The timestamp of the event.
+    :param timestamp: The timestamp of the event in milliseconds.
     :param status: The status of the escrow.
     :param chain_id: The chain identifier where the event occurred.
     :param escrow_address: The address of the escrow.
@@ -142,7 +145,7 @@ class StatusEvent:
     def __init__(
         self, timestamp: int, status: str, chain_id: ChainId, escrow_address: str
     ):
-        self.timestamp = timestamp
+        self.timestamp = timestamp * 1000
         self.status = status
         self.chain_id = chain_id
         self.escrow_address = escrow_address
@@ -157,7 +160,7 @@ class Payout:
     :param escrow_address: The address of the escrow that executed the payout.
     :param recipient: The address of the recipient.
     :param amount: The amount of the payout.
-    :param created_at: The time of creation of the payout.
+    :param created_at: The time of creation of the payout in milliseconds.
     """
 
     def __init__(
@@ -167,7 +170,7 @@ class Payout:
         self.escrow_address = escrow_address
         self.recipient = recipient
         self.amount = amount
-        self.created_at = created_at
+        self.created_at = created_at * 1000
 
 
 class CancellationRefund:
@@ -179,7 +182,7 @@ class CancellationRefund:
     :param receiver: The address of the recipient receiving the refund.
     :param amount: The amount being refunded.
     :param block: The block number in which the refund was processed.
-    :param timestamp: The timestamp of the refund event.
+    :param timestamp: The timestamp of the refund event in milliseconds.
     :param tx_hash: The transaction hash of the refund event.
     """
 
@@ -198,7 +201,7 @@ class CancellationRefund:
         self.receiver = receiver
         self.amount = amount
         self.block = block
-        self.timestamp = timestamp
+        self.timestamp = timestamp * 1000
         self.tx_hash = tx_hash
 
 
@@ -290,30 +293,27 @@ class EscrowUtils:
             [
                 EscrowData(
                     chain_id=chain_id,
-                    id=escrow.get("id") or "",
-                    address=escrow.get("address") or "",
-                    amount_paid=int(escrow.get("amountPaid") or 0),
-                    balance=int(escrow.get("balance") or 0),
-                    count=int(escrow.get("count") or 0),
-                    factory_address=escrow.get("factoryAddress") or "",
-                    launcher=escrow.get("launcher") or "",
-                    status=escrow.get("status") or "",
-                    token=escrow.get("token") or "",
-                    total_funded_amount=int(escrow.get("totalFundedAmount") or 0),
-                    created_at=datetime.fromtimestamp(
-                        int(escrow.get("createdAt") or 0)
-                    ),
-                    final_results_url=escrow.get("finalResultsUrl", None),
-                    final_results_hash=escrow.get("finalResultsHash", None),
-                    intermediate_results_url=escrow.get("intermediateResultsUrl", None),
-                    intermediate_results_hash=escrow.get(
-                        "intermediateResultsHash", None
-                    ),
-                    manifest_hash=escrow.get("manifestHash", None),
-                    manifest=escrow.get("manifest", None),
-                    recording_oracle=escrow.get("recordingOracle", None),
-                    reputation_oracle=escrow.get("reputationOracle", None),
-                    exchange_oracle=escrow.get("exchangeOracle", None),
+                    id=escrow.get("id"),
+                    address=escrow.get("address"),
+                    amount_paid=int(escrow.get("amountPaid")),
+                    balance=int(escrow.get("balance")),
+                    count=int(escrow.get("count")),
+                    factory_address=escrow.get("factoryAddress"),
+                    launcher=escrow.get("launcher"),
+                    job_requester_id=escrow.get("jobRequesterId"),
+                    status=escrow.get("status"),
+                    token=escrow.get("token"),
+                    total_funded_amount=int(escrow.get("totalFundedAmount")),
+                    created_at=int(escrow.get("createdAt")),
+                    final_results_url=escrow.get("finalResultsUrl"),
+                    final_results_hash=escrow.get("finalResultsHash"),
+                    intermediate_results_url=escrow.get("intermediateResultsUrl"),
+                    intermediate_results_hash=escrow.get("intermediateResultsHash"),
+                    manifest_hash=escrow.get("manifestHash"),
+                    manifest=escrow.get("manifest"),
+                    recording_oracle=escrow.get("recordingOracle"),
+                    reputation_oracle=escrow.get("reputationOracle"),
+                    exchange_oracle=escrow.get("exchangeOracle"),
                     recording_oracle_fee=(
                         int(escrow.get("recordingOracleFee"))
                         if escrow.get("recordingOracleFee")
@@ -393,26 +393,27 @@ class EscrowUtils:
 
         return EscrowData(
             chain_id=chain_id,
-            id=escrow.get("id") or "",
-            address=escrow.get("address") or "",
-            amount_paid=int(escrow.get("amountPaid") or 0),
-            balance=int(escrow.get("balance") or 0),
-            count=int(escrow.get("count") or 0),
-            factory_address=escrow.get("factoryAddress") or "",
-            launcher=escrow.get("launcher") or "",
-            status=escrow.get("status") or "",
-            token=escrow.get("token") or "",
-            total_funded_amount=int(escrow.get("totalFundedAmount") or 0),
-            created_at=datetime.fromtimestamp(int(escrow.get("createdAt") or 0)),
-            final_results_url=escrow.get("finalResultsUrl", None),
-            final_results_hash=escrow.get("finalResultsHash", None),
-            intermediate_results_url=escrow.get("intermediateResultsUrl", None),
-            intermediate_results_hash=escrow.get("intermediateResultsHash", None),
-            manifest_hash=escrow.get("manifestHash", None),
-            manifest=escrow.get("manifest", None),
-            recording_oracle=escrow.get("recordingOracle", None),
-            reputation_oracle=escrow.get("reputationOracle", None),
-            exchange_oracle=escrow.get("exchangeOracle", None),
+            id=escrow.get("id"),
+            address=escrow.get("address"),
+            amount_paid=int(escrow.get("amountPaid")),
+            balance=int(escrow.get("balance")),
+            count=int(escrow.get("count")),
+            factory_address=escrow.get("factoryAddress"),
+            launcher=escrow.get("launcher"),
+            job_requester_id=escrow.get("jobRequesterId"),
+            status=escrow.get("status"),
+            token=escrow.get("token"),
+            total_funded_amount=int(escrow.get("totalFundedAmount")),
+            created_at=int(escrow.get("createdAt")),
+            final_results_url=escrow.get("finalResultsUrl"),
+            final_results_hash=escrow.get("finalResultsHash"),
+            intermediate_results_url=escrow.get("intermediateResultsUrl"),
+            intermediate_results_hash=escrow.get("intermediateResultsHash"),
+            manifest_hash=escrow.get("manifestHash"),
+            manifest=escrow.get("manifest"),
+            recording_oracle=escrow.get("recordingOracle"),
+            reputation_oracle=escrow.get("reputationOracle"),
+            exchange_oracle=escrow.get("exchangeOracle"),
             recording_oracle_fee=(
                 int(escrow.get("recordingOracleFee"))
                 if escrow.get("recordingOracleFee")
@@ -478,7 +479,7 @@ class EscrowUtils:
 
         events_with_chain_id = [
             StatusEvent(
-                timestamp=event["timestamp"],
+                timestamp=int(event["timestamp"]),
                 escrow_address=event["escrowAddress"],
                 status=event["status"],
                 chain_id=filter.chain_id,

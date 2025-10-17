@@ -52,8 +52,8 @@ class StakerData:
         self.locked_amount = locked_amount
         self.withdrawn_amount = withdrawn_amount
         self.slashed_amount = slashed_amount
-        self.locked_until_timestamp = locked_until_timestamp
-        self.last_deposit_timestamp = last_deposit_timestamp
+        self.locked_until_timestamp = locked_until_timestamp * 1000
+        self.last_deposit_timestamp = last_deposit_timestamp * 1000
 
 
 class StakingUtilsError(Exception):

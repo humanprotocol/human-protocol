@@ -1,27 +1,29 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ethers } from 'ethers';
 import gqlFetch from 'graphql-request';
 
+import { OrderDirection } from './enums';
 import {
-  GET_ESCROW_STATISTICS_QUERY,
-  GET_EVENT_DAY_DATA_QUERY,
-  GET_HOLDERS_QUERY,
-  GET_HMTOKEN_STATISTICS_QUERY,
-  EscrowStatistics,
   EscrowStatisticsData,
   EventDayData,
-  HMTStatistics,
-  HMTStatisticsData,
-  PaymentStatistics,
-  WorkerStatistics,
+  GET_ESCROW_STATISTICS_QUERY,
+  GET_EVENT_DAY_DATA_QUERY,
+  GET_HMTOKEN_STATISTICS_QUERY,
+  GET_HOLDERS_QUERY,
   HMTHolderData,
-  HMTHolder,
-  DailyHMTData,
+  HMTStatisticsData,
 } from './graphql';
-import { IHMTHoldersParams, IStatisticsFilter } from './interfaces';
+import {
+  IDailyHMT,
+  IEscrowStatistics,
+  IHMTHolder,
+  IHMTHoldersParams,
+  IHMTStatistics,
+  IPaymentStatistics,
+  IStatisticsFilter,
+  IWorkerStatistics,
+} from './interfaces';
 import { NetworkData } from './types';
 import { getSubgraphUrl, getUnixTimestamp, throwError } from './utils';
-import { OrderDirection } from './enums';
 
 /**
  * ## Introduction
@@ -85,8 +87,8 @@ export class StatisticsClient {
    * ```
    *
    * ```ts
-   * type DailyEscrowsData = {
-   *   timestamp: Date;
+   * interface IDailyEscrow {
+   *   timestamp: number;
    *   escrowsTotal: number;
    *   escrowsPending: number;
    *   escrowsSolved: number;
@@ -94,14 +96,14 @@ export class StatisticsClient {
    *   escrowsCancelled: number;
    * };
    *
-   * type EscrowStatistics = {
+   * interface IEscrowStatistics {
    *   totalEscrows: number;
-   *   dailyEscrowsData: DailyEscrowsData[];
+   *   dailyEscrowsData: IDailyEscrow[];
    * };
    * ```
    *
    * @param {IStatisticsFilter} filter Statistics params with duration data
-   * @returns {Promise<EscrowStatistics>} Escrow statistics data.
+   * @returns {Promise<IEscrowStatistics>} Escrow statistics data.
    *
    * **Code example**
    *
@@ -119,7 +121,7 @@ export class StatisticsClient {
    */
   async getEscrowStatistics(
     filter: IStatisticsFilter = {}
-  ): Promise<EscrowStatistics> {
+  ): Promise<IEscrowStatistics> {
     try {
       const first =
         filter.first !== undefined ? Math.min(filter.first, 1000) : 10;
@@ -145,7 +147,7 @@ export class StatisticsClient {
           ? +escrowStatistics.totalEscrowCount
           : 0,
         dailyEscrowsData: eventDayDatas.map((eventDayData) => ({
-          timestamp: new Date(+eventDayData.timestamp * 1000),
+          timestamp: +eventDayData.timestamp * 1000,
           escrowsTotal: +eventDayData.dailyEscrowCount,
           escrowsPending: +eventDayData.dailyPendingStatusEventCount,
           escrowsSolved: +eventDayData.dailyCompletedStatusEventCount,
@@ -174,18 +176,18 @@ export class StatisticsClient {
    * ```
    *
    * ```ts
-   * type DailyWorkerData = {
-   *   timestamp: Date;
+   * interface IDailyWorker {
+   *   timestamp: number;
    *   activeWorkers: number;
    * };
    *
-   * type WorkerStatistics = {
-   *   dailyWorkersData: DailyWorkerData[];
+   * interface IWorkerStatistics {
+   *   dailyWorkersData: IDailyWorker[];
    * };
    * ```
    *
    * @param {IStatisticsFilter} filter Statistics params with duration data
-   * @returns {Promise<WorkerStatistics>} Worker statistics data.
+   * @returns {Promise<IWorkerStatistics>} Worker statistics data.
    *
    * **Code example**
    *
@@ -203,7 +205,7 @@ export class StatisticsClient {
    */
   async getWorkerStatistics(
     filter: IStatisticsFilter = {}
-  ): Promise<WorkerStatistics> {
+  ): Promise<IWorkerStatistics> {
     try {
       const first =
         filter.first !== undefined ? Math.min(filter.first, 1000) : 10;
@@ -222,7 +224,7 @@ export class StatisticsClient {
 
       return {
         dailyWorkersData: eventDayDatas.map((eventDayData) => ({
-          timestamp: new Date(+eventDayData.timestamp * 1000),
+          timestamp: +eventDayData.timestamp * 1000,
           activeWorkers: +eventDayData.dailyWorkerCount,
         })),
       };
@@ -247,20 +249,20 @@ export class StatisticsClient {
    * ```
    *
    * ```ts
-   * type DailyPaymentData = {
-   *   timestamp: Date;
-   *   totalAmountPaid: BigNumber;
+   * interface IDailyPayment {
+   *   timestamp: number;
+   *   totalAmountPaid: bigint;
    *   totalCount: number;
-   *   averageAmountPerWorker: BigNumber;
+   *   averageAmountPerWorker: bigint;
    * };
    *
-   * type PaymentStatistics = {
-   *   dailyPaymentsData: DailyPaymentData[];
+   * interface IPaymentStatistics {
+   *   dailyPaymentsData: IDailyPayment[];
    * };
    * ```
    *
    * @param {IStatisticsFilter} filter Statistics params with duration data
-   * @returns {Promise<PaymentStatistics>} Payment statistics data.
+   * @returns {Promise<IPaymentStatistics>} Payment statistics data.
    *
    * **Code example**
    *
@@ -299,7 +301,7 @@ export class StatisticsClient {
    */
   async getPaymentStatistics(
     filter: IStatisticsFilter = {}
-  ): Promise<PaymentStatistics> {
+  ): Promise<IPaymentStatistics> {
     try {
       const first =
         filter.first !== undefined ? Math.min(filter.first, 1000) : 10;
@@ -318,14 +320,14 @@ export class StatisticsClient {
 
       return {
         dailyPaymentsData: eventDayDatas.map((eventDayData) => ({
-          timestamp: new Date(+eventDayData.timestamp * 1000),
-          totalAmountPaid: ethers.toBigInt(eventDayData.dailyHMTPayoutAmount),
+          timestamp: +eventDayData.timestamp * 1000,
+          totalAmountPaid: BigInt(eventDayData.dailyHMTPayoutAmount),
           totalCount: +eventDayData.dailyPayoutCount,
           averageAmountPerWorker:
             eventDayData.dailyWorkerCount === '0'
-              ? ethers.toBigInt(0)
-              : ethers.toBigInt(eventDayData.dailyHMTPayoutAmount) /
-                ethers.toBigInt(eventDayData.dailyWorkerCount),
+              ? BigInt(0)
+              : BigInt(eventDayData.dailyHMTPayoutAmount) /
+                BigInt(eventDayData.dailyWorkerCount),
         })),
       };
     } catch (e: any) {
@@ -337,14 +339,14 @@ export class StatisticsClient {
    * This function returns the statistical data of HMToken.
    *
    * ```ts
-   * type HMTStatistics = {
-   *   totalTransferAmount: BigNumber;
-   *   totalTransferCount: BigNumber;
+   * interface IHMTStatistics {
+   *   totalTransferAmount: bigint;
+   *   totalTransferCount: number;
    *   totalHolders: number;
    * };
    * ```
    *
-   * @returns {Promise<HMTStatistics>} HMToken statistics data.
+   * @returns {Promise<IHMTStatistics>} HMToken statistics data.
    *
    * **Code example**
    *
@@ -361,17 +363,15 @@ export class StatisticsClient {
    * });
    * ```
    */
-  async getHMTStatistics(): Promise<HMTStatistics> {
+  async getHMTStatistics(): Promise<IHMTStatistics> {
     try {
       const { hmtokenStatistics } = await gqlFetch<{
         hmtokenStatistics: HMTStatisticsData;
       }>(this.subgraphUrl, GET_HMTOKEN_STATISTICS_QUERY);
 
       return {
-        totalTransferAmount: ethers.toBigInt(
-          hmtokenStatistics.totalValueTransfered
-        ),
-        totalTransferCount: Number(hmtokenStatistics.totalTransferEventCount),
+        totalTransferAmount: BigInt(hmtokenStatistics.totalValueTransfered),
+        totalTransferCount: +hmtokenStatistics.totalTransferEventCount,
         totalHolders: +hmtokenStatistics.holders,
       };
     } catch (e: any) {
@@ -385,7 +385,7 @@ export class StatisticsClient {
    * **Input parameters**
    *
    * @param {IHMTHoldersParams} params HMT Holders params with filters and ordering
-   * @returns {Promise<HMTHolder[]>} List of HMToken holders.
+   * @returns {Promise<IHMTHolder[]>} List of HMToken holders.
    *
    * **Code example**
    *
@@ -404,7 +404,7 @@ export class StatisticsClient {
    * })));
    * ```
    */
-  async getHMTHolders(params: IHMTHoldersParams = {}): Promise<HMTHolder[]> {
+  async getHMTHolders(params: IHMTHoldersParams = {}): Promise<IHMTHolder[]> {
     try {
       const { address, orderDirection } = params;
       const query = GET_HOLDERS_QUERY(address);
@@ -421,7 +421,7 @@ export class StatisticsClient {
 
       return holders.map((holder) => ({
         address: holder.address,
-        balance: ethers.toBigInt(holder.balance),
+        balance: BigInt(holder.balance),
       }));
     } catch (e: any) {
       return throwError(e);
@@ -444,8 +444,8 @@ export class StatisticsClient {
    * ```
    *
    * ```ts
-   * type DailyHMTData = {
-   *   timestamp: Date;
+   * interface IDailyHMT {
+   *   timestamp: number;
    *   totalTransactionAmount: bigint;
    *   totalTransactionCount: number;
    *   dailyUniqueSenders: number;
@@ -454,7 +454,7 @@ export class StatisticsClient {
    * ```
    *
    * @param {IStatisticsFilter} filter Statistics params with duration data
-   * @returns {Promise<DailyHMTData[]>} Daily HMToken statistics data.
+   * @returns {Promise<IDailyHMT[]>} Daily HMToken statistics data.
    *
    * **Code example**
    *
@@ -475,9 +475,7 @@ export class StatisticsClient {
    * console.log('HMT statistics from 5/8 - 6/8:', hmtStatisticsRange);
    * ```
    */
-  async getHMTDailyData(
-    filter: IStatisticsFilter = {}
-  ): Promise<DailyHMTData[]> {
+  async getHMTDailyData(filter: IStatisticsFilter = {}): Promise<IDailyHMT[]> {
     try {
       const first =
         filter.first !== undefined ? Math.min(filter.first, 1000) : 10;
@@ -495,10 +493,8 @@ export class StatisticsClient {
       });
 
       return eventDayDatas.map((eventDayData) => ({
-        timestamp: new Date(+eventDayData.timestamp * 1000),
-        totalTransactionAmount: ethers.toBigInt(
-          eventDayData.dailyHMTTransferAmount
-        ),
+        timestamp: +eventDayData.timestamp * 1000,
+        totalTransactionAmount: BigInt(eventDayData.dailyHMTTransferAmount),
         totalTransactionCount: +eventDayData.dailyHMTTransferCount,
         dailyUniqueSenders: +eventDayData.dailyUniqueSenders,
         dailyUniqueReceivers: +eventDayData.dailyUniqueReceivers,

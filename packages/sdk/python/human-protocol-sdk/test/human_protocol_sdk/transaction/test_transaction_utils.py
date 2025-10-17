@@ -188,7 +188,9 @@ class TestTransactionUtils(unittest.TestCase):
             self.assertEqual(transaction.tx_hash, mock_transaction["txHash"])
             self.assertEqual(transaction.from_address, mock_transaction["from"])
             self.assertEqual(transaction.to_address, mock_transaction["to"])
-            self.assertEqual(transaction.timestamp, int(mock_transaction["timestamp"]))
+            self.assertEqual(
+                transaction.timestamp, int(mock_transaction["timestamp"]) * 1000
+            )
             self.assertEqual(transaction.value, int(mock_transaction["value"]))
             self.assertEqual(transaction.method, mock_transaction["method"])
 

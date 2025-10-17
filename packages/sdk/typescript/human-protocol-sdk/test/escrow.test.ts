@@ -59,7 +59,7 @@ import {
   FAKE_URL,
   VALID_URL,
 } from './utils/constants';
-import { IEscrow, IEscrowsFilter } from '../src/interfaces';
+import { IEscrow, IPayout } from '../src/interfaces';
 
 describe('EscrowClient', () => {
   let escrowClient: any,
@@ -2875,11 +2875,11 @@ describe('EscrowUtils', () => {
       const result = await EscrowUtils.getEscrows(filter);
       const expected = escrows.map((e) => ({
         ...e,
-        amountPaid: BigInt(e.amountPaid || 0),
-        balance: BigInt(e.balance || 0),
-        count: BigInt(e.count || 0),
-        totalFundedAmount: BigInt(e.totalFundedAmount || 0),
-        createdAt: Number(e.createdAt || 0) * 1000,
+        amountPaid: BigInt(e.amountPaid),
+        balance: BigInt(e.balance),
+        count: Number(e.count),
+        totalFundedAmount: BigInt(e.totalFundedAmount),
+        createdAt: Number(e.createdAt) * 1000,
         recordingOracleFee: e.recordingOracleFee
           ? Number(e.recordingOracleFee)
           : null,
@@ -2977,11 +2977,11 @@ describe('EscrowUtils', () => {
 
       const expected = escrows.map((e) => ({
         ...e,
-        amountPaid: BigInt(e.amountPaid || 0),
-        balance: BigInt(e.balance || 0),
-        count: BigInt(e.count || 0),
-        totalFundedAmount: BigInt(e.totalFundedAmount || 0),
-        createdAt: Number(e.createdAt || 0) * 1000,
+        amountPaid: BigInt(e.amountPaid),
+        balance: BigInt(e.balance),
+        count: Number(e.count),
+        totalFundedAmount: BigInt(e.totalFundedAmount),
+        createdAt: Number(e.createdAt) * 1000,
         recordingOracleFee: e.recordingOracleFee
           ? Number(e.recordingOracleFee)
           : null,
@@ -3037,11 +3037,11 @@ describe('EscrowUtils', () => {
 
       const expected = escrows.map((e) => ({
         ...e,
-        amountPaid: BigInt(e.amountPaid || 0),
-        balance: BigInt(e.balance || 0),
-        count: BigInt(e.count || 0),
-        totalFundedAmount: BigInt(e.totalFundedAmount || 0),
-        createdAt: Number(e.createdAt || 0) * 1000,
+        amountPaid: BigInt(e.amountPaid),
+        balance: BigInt(e.balance),
+        count: Number(e.count),
+        totalFundedAmount: BigInt(e.totalFundedAmount),
+        createdAt: Number(e.createdAt) * 1000,
         recordingOracleFee: e.recordingOracleFee
           ? Number(e.recordingOracleFee)
           : null,
@@ -3097,11 +3097,11 @@ describe('EscrowUtils', () => {
 
       const expected = escrows.map((e) => ({
         ...e,
-        amountPaid: BigInt(e.amountPaid || 0),
-        balance: BigInt(e.balance || 0),
-        count: BigInt(e.count || 0),
-        totalFundedAmount: BigInt(e.totalFundedAmount || 0),
-        createdAt: Number(e.createdAt || 0) * 1000,
+        amountPaid: BigInt(e.amountPaid),
+        balance: BigInt(e.balance),
+        count: Number(e.count),
+        totalFundedAmount: BigInt(e.totalFundedAmount),
+        createdAt: Number(e.createdAt) * 1000,
         recordingOracleFee: e.recordingOracleFee
           ? Number(e.recordingOracleFee)
           : null,
@@ -3185,11 +3185,11 @@ describe('EscrowUtils', () => {
       const result = await EscrowUtils.getEscrows(filter);
       const expected = escrows.map((e) => ({
         ...e,
-        amountPaid: BigInt(e.amountPaid || 0),
-        balance: BigInt(e.balance || 0),
-        count: BigInt(e.count || 0),
-        totalFundedAmount: BigInt(e.totalFundedAmount || 0),
-        createdAt: Number(e.createdAt || 0) * 1000,
+        amountPaid: BigInt(e.amountPaid),
+        balance: BigInt(e.balance),
+        count: Number(e.count),
+        totalFundedAmount: BigInt(e.totalFundedAmount),
+        createdAt: Number(e.createdAt) * 1000,
         recordingOracleFee: e.recordingOracleFee
           ? Number(e.recordingOracleFee)
           : null,
@@ -3290,11 +3290,11 @@ describe('EscrowUtils', () => {
 
       const expected = escrows.map((e) => ({
         ...e,
-        amountPaid: BigInt(e.amountPaid || 0),
-        balance: BigInt(e.balance || 0),
-        count: BigInt(e.count || 0),
-        totalFundedAmount: BigInt(e.totalFundedAmount || 0),
-        createdAt: Number(e.createdAt || 0) * 1000,
+        amountPaid: BigInt(e.amountPaid),
+        balance: BigInt(e.balance),
+        count: Number(e.count),
+        totalFundedAmount: BigInt(e.totalFundedAmount),
+        createdAt: Number(e.createdAt) * 1000,
         recordingOracleFee: e.recordingOracleFee
           ? Number(e.recordingOracleFee)
           : undefined,
@@ -3372,6 +3372,7 @@ describe('EscrowUtils', () => {
         jobRequesterId: null,
         manifest: null,
         manifestHash: null,
+        createdAt: '0',
       };
       const gqlFetchSpy = vi
         .spyOn(gqlFetch, 'default')
@@ -3383,7 +3384,7 @@ describe('EscrowUtils', () => {
         ...escrow,
         amountPaid: 3n,
         balance: 0n,
-        count: 1n,
+        count: 1,
         totalFundedAmount: 3n,
         recordingOracleFee: 1,
         reputationOracleFee: 1,
@@ -3446,7 +3447,12 @@ describe('EscrowUtils', () => {
       const result = await EscrowUtils.getStatusEvents({
         chainId: ChainId.LOCALHOST,
       });
-      expect(result).toEqual(pendingEvents);
+      const expectedResults = pendingEvents.map((event) => ({
+        ...event,
+        status: EscrowStatus.Pending,
+        timestamp: +event.timestamp * 1000,
+      }));
+      expect(result).toEqual(expectedResults);
       expect(gqlFetchSpy).toHaveBeenCalled();
     });
 
@@ -3479,7 +3485,12 @@ describe('EscrowUtils', () => {
         to: toDate,
       });
 
-      expect(result).toEqual(pendingEvents);
+      const expectedResults = pendingEvents.map((event) => ({
+        ...event,
+        status: EscrowStatus.Pending,
+        timestamp: +event.timestamp * 1000,
+      }));
+      expect(result).toEqual(expectedResults);
       expect(gqlFetchSpy).toHaveBeenCalled();
     });
 
@@ -3513,7 +3524,12 @@ describe('EscrowUtils', () => {
         to: toDate,
       });
 
-      expect(result).toEqual(partialEvents);
+      const expectedResults = partialEvents.map((event) => ({
+        ...event,
+        status: EscrowStatus.Partial,
+        timestamp: +event.timestamp * 1000,
+      }));
+      expect(result).toEqual(expectedResults);
       expect(gqlFetchSpy).toHaveBeenCalled();
     });
 
@@ -3546,7 +3562,12 @@ describe('EscrowUtils', () => {
         to: toDate,
       });
 
-      expect(result).toEqual(pendingEvents);
+      const expectedResults = pendingEvents.map((event) => ({
+        ...event,
+        status: EscrowStatus.Pending,
+        timestamp: +event.timestamp * 1000,
+      }));
+      expect(result).toEqual(expectedResults);
       expect(gqlFetchSpy).toHaveBeenCalled();
     });
   });
@@ -3611,7 +3632,15 @@ describe('EscrowUtils', () => {
       };
 
       const result = await EscrowUtils.getPayouts(filter);
-      expect(result).toEqual(payouts);
+
+      const expected: IPayout[] = payouts.map((payout) => ({
+        id: payout.id,
+        escrowAddress: payout.escrowAddress,
+        recipient: payout.recipient,
+        amount: BigInt(payout.amount),
+        createdAt: Number(payout.createdAt) * 1000,
+      }));
+      expect(result).toEqual(expected);
       expect(gqlFetchSpy).toHaveBeenCalledWith(
         'https://api.studio.thegraph.com/query/74256/amoy/version/latest',
         GET_PAYOUTS_QUERY(filter),
@@ -3651,7 +3680,15 @@ describe('EscrowUtils', () => {
       };
 
       const result = await EscrowUtils.getPayouts(filter);
-      expect(result).toEqual(payouts);
+
+      const expected: IPayout[] = payouts.map((payout) => ({
+        id: payout.id,
+        escrowAddress: payout.escrowAddress,
+        recipient: payout.recipient,
+        amount: BigInt(payout.amount),
+        createdAt: Number(payout.createdAt) * 1000,
+      }));
+      expect(result).toEqual(expected);
       expect(gqlFetchSpy).toHaveBeenCalledWith(
         'https://api.studio.thegraph.com/query/74256/amoy/version/latest',
         GET_PAYOUTS_QUERY(filter),
@@ -3696,7 +3733,15 @@ describe('EscrowUtils', () => {
       };
 
       const result = await EscrowUtils.getPayouts(filter);
-      expect(result).toEqual(payouts);
+
+      const expected: IPayout[] = payouts.map((payout) => ({
+        id: payout.id,
+        escrowAddress: payout.escrowAddress,
+        recipient: payout.recipient,
+        amount: BigInt(payout.amount),
+        createdAt: Number(payout.createdAt) * 1000,
+      }));
+      expect(result).toEqual(expected);
       expect(gqlFetchSpy).toHaveBeenCalledWith(
         'https://api.studio.thegraph.com/query/74256/amoy/version/latest',
         GET_PAYOUTS_QUERY(filter),
@@ -3741,7 +3786,15 @@ describe('EscrowUtils', () => {
       };
 
       const result = await EscrowUtils.getPayouts(filter);
-      expect(result).toEqual(payouts);
+
+      const expected: IPayout[] = payouts.map((payout) => ({
+        id: payout.id,
+        escrowAddress: payout.escrowAddress,
+        recipient: payout.recipient,
+        amount: BigInt(payout.amount),
+        createdAt: Number(payout.createdAt) * 1000,
+      }));
+      expect(result).toEqual(expected);
       expect(gqlFetchSpy).toHaveBeenCalledWith(
         'https://api.studio.thegraph.com/query/74256/amoy/version/latest',
         GET_PAYOUTS_QUERY(filter),

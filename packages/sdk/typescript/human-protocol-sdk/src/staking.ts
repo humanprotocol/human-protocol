@@ -585,11 +585,11 @@ export class StakingUtils {
 function mapStaker(s: StakerData): IStaker {
   return {
     address: s.address,
-    stakedAmount: BigInt(s.stakedAmount || 0),
-    lockedAmount: BigInt(s.lockedAmount || 0),
-    withdrawableAmount: BigInt(s.withdrawnAmount || 0),
-    slashedAmount: BigInt(s.slashedAmount || 0),
-    lockedUntil: Number(s.lockedUntilTimestamp || 0) * 1000,
-    lastDepositTimestamp: Number(s.lastDepositTimestamp || 0) * 1000,
+    stakedAmount: BigInt(s.stakedAmount),
+    lockedAmount: BigInt(s.lockedAmount),
+    withdrawableAmount: BigInt(s.withdrawnAmount),
+    slashedAmount: BigInt(s.slashedAmount),
+    lockedUntil: Number(s.lockedUntilTimestamp) * 1000,
+    lastDepositTimestamp: Number(s.lastDepositTimestamp) * 1000,
   };
 }

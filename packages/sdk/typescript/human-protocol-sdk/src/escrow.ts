@@ -43,6 +43,7 @@ import {
   WarnVersionMismatch,
 } from './error';
 import {
+  CancellationRefundData,
   EscrowData,
   GET_CANCELLATION_REFUNDS_QUERY,
   GET_CANCELLATION_REFUND_BY_ADDRESS_QUERY,
@@ -50,6 +51,7 @@ import {
   GET_ESCROW_BY_ADDRESS_QUERY,
   GET_PAYOUTS_QUERY,
   GET_STATUS_UPDATES_QUERY,
+  PayoutData,
   StatusEvent,
 } from './graphql';
 import {
@@ -58,15 +60,12 @@ import {
   IEscrowsFilter,
   IPayoutFilter,
   IStatusEventFilter,
+  IStatusEvent,
+  ICancellationRefund,
+  IPayout,
+  IEscrowWithdraw,
 } from './interfaces';
-import {
-  CancellationRefund,
-  EscrowStatus,
-  EscrowWithdraw,
-  NetworkData,
-  Payout,
-  TransactionLikeWithNonce,
-} from './types';
+import { EscrowStatus, NetworkData, TransactionLikeWithNonce } from './types';
 import {
   getSubgraphUrl,
   getUnixTimestamp,
@@ -901,7 +900,7 @@ export class EscrowClient extends BaseEthersClient {
    * @param {string} escrowAddress Address of the escrow to withdraw.
    * @param {string} tokenAddress Address of the token to withdraw.
    * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
-   * @returns {EscrowWithdraw} Returns the escrow withdrawal data including transaction hash and withdrawal amount. Throws error if any.
+   * @returns {IEscrowWithdraw} Returns the escrow withdrawal data including transaction hash and withdrawal amount. Throws error if any.
    *
    *
    * **Code example**
@@ -930,7 +929,7 @@ export class EscrowClient extends BaseEthersClient {
     escrowAddress: string,
     tokenAddress: string,
     txOptions: Overrides = {}
-  ): Promise<EscrowWithdraw> {
+  ): Promise<IEscrowWithdraw> {
     if (!ethers.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }
@@ -969,7 +968,7 @@ export class EscrowClient extends BaseEthersClient {
 
             const from = parsedLog?.args[0];
             if (parsedLog?.name === 'Transfer' && from === escrowAddress) {
-              amountTransferred = parsedLog?.args[2];
+              amountTransferred = BigInt(parsedLog?.args[2]);
               break;
             }
           }
@@ -979,13 +978,11 @@ export class EscrowClient extends BaseEthersClient {
         throw ErrorTransferEventNotFoundInTransactionLogs;
       }
 
-      const escrowWithdrawData: EscrowWithdraw = {
+      return {
         txHash: transactionReceipt?.hash || '',
         tokenAddress,
         withdrawnAmount: amountTransferred,
       };
-
-      return escrowWithdrawData;
     } catch (e) {
       return throwError(e);
     }
@@ -2035,7 +2032,7 @@ export class EscrowUtils {
    */
   public static async getStatusEvents(
     filter: IStatusEventFilter
-  ): Promise<StatusEvent[]> {
+  ): Promise<IStatusEvent[]> {
     const {
       chainId,
       statuses,
@@ -2088,14 +2085,12 @@ export class EscrowUtils {
       return [];
     }
 
-    const statusEvents = data['escrowStatusEvents'] as StatusEvent[];
-
-    const eventsWithChainId = statusEvents.map((event) => ({
-      ...event,
+    return data['escrowStatusEvents'].map((event) => ({
+      timestamp: Number(event.timestamp) * 1000,
+      escrowAddress: event.escrowAddress,
+      status: EscrowStatus[event.status as keyof typeof EscrowStatus],
       chainId,
     }));
-
-    return eventsWithChainId;
   }
 
   /**
@@ -2107,7 +2102,7 @@ export class EscrowUtils {
    * Fetch payouts from the subgraph.
    *
    * @param {IPayoutFilter} filter Filter parameters.
-   * @returns {Promise<Payout[]>} List of payouts matching the filters.
+   * @returns {Promise<IPayout[]>} List of payouts matching the filters.
    *
    * **Code example**
    *
@@ -2124,7 +2119,7 @@ export class EscrowUtils {
    * console.log(payouts);
    * ```
    */
-  public static async getPayouts(filter: IPayoutFilter): Promise<Payout[]> {
+  public static async getPayouts(filter: IPayoutFilter): Promise<IPayout[]> {
     const networkData = NETWORKS[filter.chainId];
     if (!networkData) {
       throw ErrorUnsupportedChainID;
@@ -2141,7 +2136,7 @@ export class EscrowUtils {
     const skip = filter.skip || 0;
     const orderDirection = filter.orderDirection || OrderDirection.DESC;
 
-    const { payouts } = await gqlFetch<{ payouts: Payout[] }>(
+    const { payouts } = await gqlFetch<{ payouts: PayoutData[] }>(
       getSubgraphUrl(networkData),
       GET_PAYOUTS_QUERY(filter),
       {
@@ -2154,8 +2149,17 @@ export class EscrowUtils {
         orderDirection,
       }
     );
+    if (!payouts) {
+      return [];
+    }
 
-    return payouts || [];
+    return payouts.map((payout) => ({
+      id: payout.id,
+      escrowAddress: payout.escrowAddress,
+      recipient: payout.recipient,
+      amount: BigInt(payout.amount),
+      createdAt: Number(payout.createdAt) * 1000,
+    }));
   }
 
   /**
@@ -2179,7 +2183,7 @@ export class EscrowUtils {
    * ```
    *
    * ```ts
-   * type CancellationRefund = {
+   * interface ICancellationRefund {
    *   id: string;
    *   escrowAddress: string;
    *   receiver: string;
@@ -2192,7 +2196,7 @@ export class EscrowUtils {
    *
    *
    * @param {Object} filter Filter parameters.
-   * @returns {Promise<CancellationRefund[]>} List of cancellation refunds matching the filters.
+   * @returns {Promise<ICancellationRefund[]>} List of cancellation refunds matching the filters.
    *
    * **Code example**
    *
@@ -2215,7 +2219,7 @@ export class EscrowUtils {
     first?: number;
     skip?: number;
     orderDirection?: OrderDirection;
-  }): Promise<CancellationRefund[]> {
+  }): Promise<ICancellationRefund[]> {
     const networkData = NETWORKS[filter.chainId];
     if (!networkData) throw ErrorUnsupportedChainID;
     if (filter.escrowAddress && !ethers.isAddress(filter.escrowAddress)) {
@@ -2231,7 +2235,7 @@ export class EscrowUtils {
     const orderDirection = filter.orderDirection || OrderDirection.DESC;
 
     const { cancellationRefundEvents } = await gqlFetch<{
-      cancellationRefundEvents: CancellationRefund[];
+      cancellationRefundEvents: CancellationRefundData[];
     }>(getSubgraphUrl(networkData), GET_CANCELLATION_REFUNDS_QUERY(filter), {
       escrowAddress: filter.escrowAddress?.toLowerCase(),
       receiver: filter.receiver?.toLowerCase(),
@@ -2242,7 +2246,19 @@ export class EscrowUtils {
       orderDirection,
     });
 
-    return cancellationRefundEvents || [];
+    if (!cancellationRefundEvents || cancellationRefundEvents.length === 0) {
+      return [];
+    }
+
+    return cancellationRefundEvents.map((event) => ({
+      id: event.id,
+      escrowAddress: event.escrowAddress,
+      receiver: event.receiver,
+      amount: BigInt(event.amount),
+      block: Number(event.block),
+      timestamp: Number(event.timestamp) * 1000,
+      txHash: event.txHash,
+    }));
   }
 
   /**
@@ -2266,7 +2282,7 @@ export class EscrowUtils {
    * ```
    *
    * ```ts
-   * type CancellationRefund = {
+   * interface ICancellationRefund {
    *   id: string;
    *   escrowAddress: string;
    *   receiver: string;
@@ -2280,7 +2296,7 @@ export class EscrowUtils {
    *
    * @param {ChainId} chainId Network in which the escrow has been deployed
    * @param {string} escrowAddress Address of the escrow
-   * @returns {Promise<CancellationRefund>} Cancellation refund data
+   * @returns {Promise<ICancellationRefund>} Cancellation refund data
    *
    * **Code example**
    *
@@ -2293,7 +2309,7 @@ export class EscrowUtils {
   public static async getCancellationRefund(
     chainId: ChainId,
     escrowAddress: string
-  ): Promise<CancellationRefund> {
+  ): Promise<ICancellationRefund | null> {
     const networkData = NETWORKS[chainId];
     if (!networkData) throw ErrorUnsupportedChainID;
 
@@ -2302,14 +2318,26 @@ export class EscrowUtils {
     }
 
     const { cancellationRefundEvents } = await gqlFetch<{
-      cancellationRefundEvents: any;
+      cancellationRefundEvents: CancellationRefundData[];
     }>(
       getSubgraphUrl(networkData),
       GET_CANCELLATION_REFUND_BY_ADDRESS_QUERY(),
       { escrowAddress: escrowAddress.toLowerCase() }
     );
 
-    return cancellationRefundEvents?.[0] || null;
+    if (!cancellationRefundEvents || cancellationRefundEvents.length === 0) {
+      return null;
+    }
+
+    return {
+      id: cancellationRefundEvents[0].id,
+      escrowAddress: cancellationRefundEvents[0].escrowAddress,
+      receiver: cancellationRefundEvents[0].receiver,
+      amount: BigInt(cancellationRefundEvents[0].amount),
+      block: Number(cancellationRefundEvents[0].block),
+      timestamp: Number(cancellationRefundEvents[0].timestamp) * 1000,
+      txHash: cancellationRefundEvents[0].txHash,
+    };
   }
 }
 
@@ -2317,9 +2345,9 @@ function mapEscrow(e: EscrowData, chainId: ChainId | number): IEscrow {
   return {
     id: e.id,
     address: e.address,
-    amountPaid: BigInt(e.amountPaid || 0),
-    balance: BigInt(e.balance || 0),
-    count: BigInt(e.count || 0),
+    amountPaid: BigInt(e.amountPaid),
+    balance: BigInt(e.balance),
+    count: Number(e.count),
     factoryAddress: e.factoryAddress,
     finalResultsUrl: e.finalResultsUrl,
     finalResultsHash: e.finalResultsHash,
@@ -2341,8 +2369,8 @@ function mapEscrow(e: EscrowData, chainId: ChainId | number): IEscrow {
     exchangeOracleFee: e.exchangeOracleFee ? Number(e.exchangeOracleFee) : null,
     status: e.status,
     token: e.token,
-    totalFundedAmount: BigInt(e.totalFundedAmount || 0),
-    createdAt: Number(e.createdAt || 0) * 1000,
+    totalFundedAmount: BigInt(e.totalFundedAmount),
+    createdAt: Number(e.createdAt) * 1000,
     chainId: Number(chainId),
   };
 }
