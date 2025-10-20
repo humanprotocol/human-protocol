@@ -106,6 +106,12 @@ export class OracleDiscoveryService {
               slashedAmount: exchangeOracle.slashedAmount,
               amountJobsProcessed: exchangeOracle.amountJobsProcessed,
               lockedUntilTimestamp: exchangeOracle.lockedUntilTimestamp,
+              fee: exchangeOracle.fee,
+              publicKey: exchangeOracle.publicKey,
+              webhookUrl: exchangeOracle.webhookUrl,
+              website: exchangeOracle.website,
+              reputationNetworks: exchangeOracle.reputationNetworks,
+              category: exchangeOracle.category,
             }),
           );
         }

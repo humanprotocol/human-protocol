@@ -184,8 +184,10 @@ export class WebhookService {
     if (!oracle) {
       throw new NotFoundError('Oracle not found');
     }
-    const oracleWebhookUrl = oracle.webhookUrl;
+    if (!oracle.webhookUrl) {
+      throw new NotFoundError('Oracle webhook URL not found');
+    }
 
-    return oracleWebhookUrl;
+    return oracle.webhookUrl;
   }
 }

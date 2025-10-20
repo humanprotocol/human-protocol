@@ -1745,16 +1745,17 @@ describe('JobService', () => {
   describe('cancelJob', () => {
     it('should create a refund payment and set status to CANCELED', async () => {
       const jobEntity = createJobEntity();
-      const refundAmount = faker.number.float({ min: 1, max: 10 });
+      const tokenDecimals = (TOKEN_ADDRESSES[jobEntity.chainId as ChainId] ??
+        {})[jobEntity.token as EscrowFundToken]?.decimals;
+      const refundAmount = faker.number.float({
+        min: 1,
+        max: 10,
+        fractionDigits: tokenDecimals,
+      });
 
       mockPaymentService.getJobPayments.mockResolvedValueOnce([]);
       mockedEscrowUtils.getCancellationRefund.mockResolvedValueOnce({
-        amount: ethers.parseUnits(
-          refundAmount.toString(),
-          (TOKEN_ADDRESSES[jobEntity.chainId as ChainId] ?? {})[
-            jobEntity.token as EscrowFundToken
-          ]?.decimals,
-        ),
+        amount: ethers.parseUnits(refundAmount.toString(), tokenDecimals),
         escrowAddress: jobEntity.escrowAddress!,
       } as any);
       mockPaymentService.createRefundPayment.mockResolvedValueOnce(undefined);

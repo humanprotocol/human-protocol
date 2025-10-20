@@ -323,6 +323,24 @@ describe('WebhookService', () => {
         ),
       ).rejects.toThrow(new NotFoundError('Oracle not found'));
     });
+
+    it('should throw NotFoundError if webhook url is not found', async () => {
+      (EscrowClient.build as any).mockImplementation(() => ({
+        getJobLauncherAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+      }));
+
+      (OperatorUtils.getOperator as any).mockResolvedValue({
+        webhookUrl: null,
+      });
+
+      await expect(
+        (webhookService as any).getOracleWebhookUrl(
+          JOB_LAUNCHER_WEBHOOK_URL,
+          ChainId.LOCALHOST,
+          EventType.ESCROW_FAILED,
+        ),
+      ).rejects.toThrow(new NotFoundError('Oracle webhook URL not found'));
+    });
   });
 
   describe('handleWebhookError', () => {

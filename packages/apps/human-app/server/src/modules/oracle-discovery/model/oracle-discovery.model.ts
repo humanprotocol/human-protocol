@@ -8,24 +8,24 @@ type DiscoveredOracleCreateProps = {
   id: string;
   address: string;
   chainId: ChainId;
-  stakedAmount: bigint;
-  lockedAmount: bigint;
-  lockedUntilTimestamp: bigint;
-  withdrawnAmount: bigint;
-  slashedAmount: bigint;
-  amountJobsProcessed: bigint;
-  role?: string;
-  fee?: bigint;
-  publicKey?: string;
-  webhookUrl?: string;
-  website?: string;
-  url: string;
-  jobTypes: string[];
-  registrationNeeded?: boolean;
-  registrationInstructions?: string;
-  reputationNetworks?: string[];
-  name?: string;
-  category?: string;
+  stakedAmount: bigint | null;
+  lockedAmount: bigint | null;
+  lockedUntilTimestamp: number | null;
+  withdrawnAmount: bigint | null;
+  slashedAmount: bigint | null;
+  amountJobsProcessed: bigint | null;
+  role: string | null;
+  fee: bigint | null;
+  publicKey: string | null;
+  webhookUrl: string | null;
+  website: string | null;
+  url: string | null;
+  jobTypes: string[] | null;
+  registrationNeeded: boolean | null;
+  registrationInstructions: string | null;
+  reputationNetworks: string[];
+  name: string | null;
+  category: string | null;
 };
 
 export class DiscoveredOracle {
@@ -38,23 +38,31 @@ export class DiscoveredOracle {
   @ApiProperty({ description: 'Chain ID where the oracle is registered' })
   chainId: ChainId;
 
-  @ApiProperty({ description: 'Amount staked by the operator' })
-  stakedAmount: string;
+  @ApiPropertyOptional({ description: 'Amount staked by the operator' })
+  stakedAmount?: string;
 
-  @ApiProperty({ description: 'Amount currently locked by the operator' })
-  lockedAmount: string;
+  @ApiPropertyOptional({
+    description: 'Amount currently locked by the operator',
+  })
+  lockedAmount?: string;
 
-  @ApiProperty({ description: 'Timestamp until funds are locked' })
-  lockedUntilTimestamp: string;
+  @ApiPropertyOptional({ description: 'Timestamp until funds are locked' })
+  lockedUntilTimestamp?: string;
 
-  @ApiProperty({ description: 'Total amount withdrawn by the operator' })
-  withdrawnAmount: string;
+  @ApiPropertyOptional({
+    description: 'Total amount withdrawn by the operator',
+  })
+  withdrawnAmount?: string;
 
-  @ApiProperty({ description: 'Total amount slashed from the operator' })
-  slashedAmount: string;
+  @ApiPropertyOptional({
+    description: 'Total amount slashed from the operator',
+  })
+  slashedAmount?: string;
 
-  @ApiProperty({ description: 'Number of jobs processed by the operator' })
-  amountJobsProcessed: string;
+  @ApiPropertyOptional({
+    description: 'Number of jobs processed by the operator',
+  })
+  amountJobsProcessed?: string;
 
   @ApiPropertyOptional({ description: 'Fee charged by the operator' })
   fee?: bigint;
@@ -68,11 +76,11 @@ export class DiscoveredOracle {
   @ApiPropertyOptional({ description: 'Website of the operator' })
   website?: string;
 
-  @ApiProperty({ description: 'URL of the oracle operator' })
-  url: string;
+  @ApiPropertyOptional({ description: 'URL of the oracle operator' })
+  url?: string;
 
-  @ApiProperty({ description: 'Role of the oracle operator' })
-  role: string;
+  @ApiPropertyOptional({ description: 'Role of the oracle operator' })
+  role?: string;
 
   @ApiPropertyOptional({
     type: [String],
@@ -81,7 +89,7 @@ export class DiscoveredOracle {
   jobTypes: string[];
 
   @ApiPropertyOptional({ description: 'Indicates if registration is needed' })
-  registrationNeeded: boolean;
+  registrationNeeded?: boolean;
 
   @ApiPropertyOptional({
     description: 'Instructions for registration, if needed',
@@ -94,8 +102,8 @@ export class DiscoveredOracle {
   })
   reputationNetworks?: string[];
 
-  @ApiProperty({ description: 'Name of the operator' })
-  name: string;
+  @ApiPropertyOptional({ description: 'Name of the operator' })
+  name?: string;
 
   @ApiPropertyOptional({ description: 'Category of the operator' })
   category?: string;
@@ -107,14 +115,27 @@ export class DiscoveredOracle {
   executionsToSkip = 0;
 
   constructor(props: DiscoveredOracleCreateProps) {
-    Object.assign(this, props);
-    this.registrationNeeded = props.registrationNeeded || false;
-    this.stakedAmount = this.stakedAmount.toString();
-    this.lockedAmount = this.lockedAmount.toString();
-    this.withdrawnAmount = this.withdrawnAmount.toString();
-    this.slashedAmount = this.slashedAmount.toString();
-    this.amountJobsProcessed = this.amountJobsProcessed.toString();
-    this.lockedUntilTimestamp = this.lockedUntilTimestamp.toString();
+    this.id = props.id;
+    this.address = props.address;
+    this.chainId = props.chainId;
+    this.registrationNeeded = props.registrationNeeded ?? undefined;
+    this.role = props.role ?? undefined;
+    this.url = props.url ?? undefined;
+    this.name = props.name ?? undefined;
+    this.fee = props.fee ?? undefined;
+    this.publicKey = props.publicKey ?? undefined;
+    this.webhookUrl = props.webhookUrl ?? undefined;
+    this.website = props.website ?? undefined;
+    this.category = props.category ?? undefined;
+    this.registrationInstructions = props.registrationInstructions ?? undefined;
+    this.jobTypes = props.jobTypes ?? [];
+    this.reputationNetworks = props.reputationNetworks ?? undefined;
+    this.stakedAmount = props.stakedAmount?.toString();
+    this.lockedAmount = props.lockedAmount?.toString();
+    this.withdrawnAmount = props.withdrawnAmount?.toString();
+    this.slashedAmount = props.slashedAmount?.toString();
+    this.amountJobsProcessed = props.amountJobsProcessed?.toString();
+    this.lockedUntilTimestamp = props.lockedUntilTimestamp?.toString();
   }
 }
 
