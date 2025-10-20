@@ -4772,6 +4772,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@human-protocol/python-sdk@workspace:packages/sdk/python/human-protocol-sdk":
+  version: 0.0.0-use.local
+  resolution: "@human-protocol/python-sdk@workspace:packages/sdk/python/human-protocol-sdk"
+  languageName: unknown
+  linkType: soft
+
 "@human-protocol/reputation-oracle@workspace:packages/apps/reputation-oracle/server":
   version: 0.0.0-use.local
   resolution: "@human-protocol/reputation-oracle@workspace:packages/apps/reputation-oracle/server"
