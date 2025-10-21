@@ -76,7 +76,7 @@ def get_hmt_balance(wallet_addr, token_addr, w3):
     :param token_addr: ERC-20 contract
     :param w3: Web3 instance
 
-    :return: Decimal with HMT balance
+    :return: HMT balance (wei)
     """
 
     abi = [
