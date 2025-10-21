@@ -23,8 +23,8 @@ class WorkerData:
         self,
         id: str,
         address: str,
-        total_amount_received: int,
-        payout_count: int,
+        total_amount_received: str,
+        payout_count: str,
     ):
         """
         Initializes a WorkerData instance.
@@ -37,8 +37,8 @@ class WorkerData:
 
         self.id = id
         self.address = address
-        self.total_amount_received = total_amount_received
-        self.payout_count = payout_count
+        self.total_amount_received = int(total_amount_received)
+        self.payout_count = int(payout_count)
 
 
 class WorkerUtils:
@@ -89,8 +89,8 @@ class WorkerUtils:
                 WorkerData(
                     id=worker.get("id"),
                     address=worker.get("address"),
-                    total_amount_received=int(worker.get("totalHMTAmountReceived")),
-                    payout_count=int(worker.get("payoutCount")),
+                    total_amount_received=worker.get("totalHMTAmountReceived"),
+                    payout_count=worker.get("payoutCount"),
                 )
             )
 
@@ -135,6 +135,6 @@ class WorkerUtils:
         return WorkerData(
             id=worker.get("id"),
             address=worker.get("address"),
-            total_amount_received=int(worker.get("totalHMTAmountReceived")),
-            payout_count=int(worker.get("payoutCount")),
+            total_amount_received=worker.get("totalHMTAmountReceived"),
+            payout_count=worker.get("payoutCount"),
         )

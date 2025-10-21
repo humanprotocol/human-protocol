@@ -525,6 +525,7 @@ class TestOperatorUtils(unittest.TestCase):
                                     "jobTypes": job_types,
                                     "registrationNeeded": True,
                                     "registrationInstructions": url,
+                                    "amountJobsProcessed": "25",
                                 }
                             ],
                         }
@@ -576,6 +577,7 @@ class TestOperatorUtils(unittest.TestCase):
                                     "jobTypes": job_types,
                                     "registrationNeeded": True,
                                     "registrationInstructions": url,
+                                    "amountJobsProcessed": "25",
                                 }
                             ],
                         }
@@ -627,6 +629,7 @@ class TestOperatorUtils(unittest.TestCase):
                                     "jobTypes": job_types,
                                     "registrationNeeded": True,
                                     "registrationInstructions": url,
+                                    "amountJobsProcessed": "25",
                                 }
                             ],
                         }

@@ -1876,15 +1876,7 @@ export class EscrowUtils {
         skip: skip,
       }
     );
-    const mapped: IEscrow[] = (escrows || []).map((e) =>
-      mapEscrow(e, networkData.chainId)
-    );
-
-    if (!escrows) {
-      return [];
-    }
-
-    return mapped;
+    return (escrows || []).map((e) => mapEscrow(e, networkData.chainId));
   }
 
   /**

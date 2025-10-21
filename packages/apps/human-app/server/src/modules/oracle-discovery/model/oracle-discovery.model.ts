@@ -14,17 +14,17 @@ type DiscoveredOracleCreateProps = {
   withdrawnAmount: bigint | null;
   slashedAmount: bigint | null;
   amountJobsProcessed: bigint | null;
-  role: string | null;
+  role: string;
   fee: bigint | null;
   publicKey: string | null;
   webhookUrl: string | null;
   website: string | null;
-  url: string | null;
+  url: string;
   jobTypes: string[] | null;
   registrationNeeded: boolean | null;
   registrationInstructions: string | null;
   reputationNetworks: string[];
-  name: string | null;
+  name: string;
   category: string | null;
 };
 
@@ -76,11 +76,11 @@ export class DiscoveredOracle {
   @ApiPropertyOptional({ description: 'Website of the operator' })
   website?: string;
 
-  @ApiPropertyOptional({ description: 'URL of the oracle operator' })
-  url?: string;
+  @ApiProperty({ description: 'URL of the oracle operator' })
+  url: string;
 
-  @ApiPropertyOptional({ description: 'Role of the oracle operator' })
-  role?: string;
+  @ApiProperty({ description: 'Role of the oracle operator' })
+  role: string;
 
   @ApiPropertyOptional({
     type: [String],
@@ -102,8 +102,8 @@ export class DiscoveredOracle {
   })
   reputationNetworks?: string[];
 
-  @ApiPropertyOptional({ description: 'Name of the operator' })
-  name?: string;
+  @ApiProperty({ description: 'Name of the operator' })
+  name: string;
 
   @ApiPropertyOptional({ description: 'Category of the operator' })
   category?: string;
@@ -119,9 +119,9 @@ export class DiscoveredOracle {
     this.address = props.address;
     this.chainId = props.chainId;
     this.registrationNeeded = props.registrationNeeded ?? undefined;
-    this.role = props.role ?? undefined;
-    this.url = props.url ?? undefined;
-    this.name = props.name ?? undefined;
+    this.role = props.role;
+    this.url = props.url;
+    this.name = props.name;
     this.fee = props.fee ?? undefined;
     this.publicKey = props.publicKey ?? undefined;
     this.webhookUrl = props.webhookUrl ?? undefined;
