@@ -1,14 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import gqlFetch from 'graphql-request';
-import {
-  IOperator,
-  IOperatorSubgraph,
-  IOperatorsFilter,
-  IReputationNetworkSubgraph,
-  IReward,
-} from './interfaces';
+import { IOperator, IOperatorsFilter, IReward } from './interfaces';
 import { GET_REWARD_ADDED_EVENTS_QUERY } from './graphql/queries/reward';
-import { RewardAddedEventData } from './graphql';
+import {
+  IOperatorSubgraph,
+  IReputationNetworkSubgraph,
+  RewardAddedEventData,
+} from './graphql';
 import {
   GET_LEADER_QUERY,
   GET_LEADERS_QUERY,
@@ -236,14 +234,20 @@ function mapOperator(operator: IOperatorSubgraph, chainId: ChainId): IOperator {
     id: operator.id,
     chainId,
     address: operator.address,
-    stakedAmount: BigInt(staker?.stakedAmount || 0),
-    lockedAmount: BigInt(staker?.lockedAmount || 0),
-    lockedUntilTimestamp: BigInt(staker?.lockedUntilTimestamp || 0),
-    withdrawnAmount: BigInt(staker?.withdrawnAmount || 0),
-    slashedAmount: BigInt(staker?.slashedAmount || 0),
-    amountJobsProcessed: BigInt(operator.amountJobsProcessed || 0),
+    stakedAmount: staker?.stakedAmount ? BigInt(staker?.stakedAmount) : null,
+    lockedAmount: staker?.lockedAmount ? BigInt(staker?.lockedAmount) : null,
+    lockedUntilTimestamp: staker?.lockedUntilTimestamp
+      ? Number(staker.lockedUntilTimestamp) * 1000
+      : null,
+    withdrawnAmount: staker?.withdrawnAmount
+      ? BigInt(staker?.withdrawnAmount)
+      : null,
+    slashedAmount: staker?.slashedAmount ? BigInt(staker?.slashedAmount) : null,
+    amountJobsProcessed: operator.amountJobsProcessed
+      ? BigInt(operator.amountJobsProcessed)
+      : null,
     role: operator.role,
-    fee: operator.fee ? BigInt(operator.fee) : undefined,
+    fee: operator.fee ? BigInt(operator.fee) : null,
     publicKey: operator.publicKey,
     webhookUrl: operator.webhookUrl,
     website: operator.website,

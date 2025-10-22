@@ -45,8 +45,8 @@ class TestOperatorUtils(unittest.TestCase):
                                     "lockedAmount": "25",
                                     "withdrawnAmount": "25",
                                     "slashedAmount": "25",
-                                    "lockedUntilTimestamp": "0",
-                                    "lastDepositTimestamp": "0",
+                                    "lockedUntilTimestamp": "123456789",
+                                    "lastDepositTimestamp": "123456789",
                                 },
                             }
                         ],
@@ -74,7 +74,7 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(operators[0].address, DEFAULT_GAS_PAYER)
             self.assertEqual(operators[0].staked_amount, 100)
             self.assertEqual(operators[0].locked_amount, 25)
-            self.assertEqual(operators[0].locked_until_timestamp, 0)
+            self.assertEqual(operators[0].locked_until_timestamp, 123456789000)
             self.assertEqual(operators[0].withdrawn_amount, 25)
             self.assertEqual(operators[0].slashed_amount, 25)
             self.assertEqual(operators[0].amount_jobs_processed, 25)
@@ -121,8 +121,8 @@ class TestOperatorUtils(unittest.TestCase):
                                     "lockedAmount": "25",
                                     "withdrawnAmount": "25",
                                     "slashedAmount": "25",
-                                    "lockedUntilTimestamp": "0",
-                                    "lastDepositTimestamp": "0",
+                                    "lockedUntilTimestamp": "123456789",
+                                    "lastDepositTimestamp": "123456789",
                                 },
                             }
                         ],
@@ -150,7 +150,7 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(operators[0].address, DEFAULT_GAS_PAYER)
             self.assertEqual(operators[0].staked_amount, 100)
             self.assertEqual(operators[0].locked_amount, 25)
-            self.assertEqual(operators[0].locked_until_timestamp, 0)
+            self.assertEqual(operators[0].locked_until_timestamp, 123456789000)
             self.assertEqual(operators[0].withdrawn_amount, 25)
             self.assertEqual(operators[0].slashed_amount, 25)
             self.assertEqual(operators[0].amount_jobs_processed, 25)
@@ -197,8 +197,8 @@ class TestOperatorUtils(unittest.TestCase):
                                     "lockedAmount": "25",
                                     "withdrawnAmount": "25",
                                     "slashedAmount": "25",
-                                    "lockedUntilTimestamp": "0",
-                                    "lastDepositTimestamp": "0",
+                                    "lockedUntilTimestamp": "123456789",
+                                    "lastDepositTimestamp": "123456789",
                                 },
                             }
                         ],
@@ -226,7 +226,7 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(operators[0].address, DEFAULT_GAS_PAYER)
             self.assertEqual(operators[0].staked_amount, 100)
             self.assertEqual(operators[0].locked_amount, 25)
-            self.assertEqual(operators[0].locked_until_timestamp, 0)
+            self.assertEqual(operators[0].locked_until_timestamp, 123456789000)
             self.assertEqual(operators[0].withdrawn_amount, 25)
             self.assertEqual(operators[0].slashed_amount, 25)
             self.assertEqual(operators[0].amount_jobs_processed, 25)
@@ -307,8 +307,8 @@ class TestOperatorUtils(unittest.TestCase):
                                 "lockedAmount": "25",
                                 "withdrawnAmount": "25",
                                 "slashedAmount": "25",
-                                "lockedUntilTimestamp": "0",
-                                "lastDepositTimestamp": "0",
+                                "lockedUntilTimestamp": "123456789",
+                                "lastDepositTimestamp": "123456789",
                             },
                         }
                     }
@@ -328,7 +328,7 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(operator.address, staker_address)
             self.assertEqual(operator.staked_amount, 100)
             self.assertEqual(operator.locked_amount, 25)
-            self.assertEqual(operator.locked_until_timestamp, 0)
+            self.assertEqual(operator.locked_until_timestamp, 123456789000)
             self.assertEqual(operator.withdrawn_amount, 25)
             self.assertEqual(operator.slashed_amount, 25)
             self.assertEqual(operator.amount_jobs_processed, 25)
@@ -375,8 +375,8 @@ class TestOperatorUtils(unittest.TestCase):
                                 "lockedAmount": "25",
                                 "withdrawnAmount": "25",
                                 "slashedAmount": "25",
-                                "lockedUntilTimestamp": "0",
-                                "lastDepositTimestamp": "0",
+                                "lockedUntilTimestamp": "123456789",
+                                "lastDepositTimestamp": "123456789",
                             },
                         }
                     }
@@ -396,7 +396,7 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(operator.address, staker_address)
             self.assertEqual(operator.staked_amount, 100)
             self.assertEqual(operator.locked_amount, 25)
-            self.assertEqual(operator.locked_until_timestamp, 0)
+            self.assertEqual(operator.locked_until_timestamp, 123456789000)
             self.assertEqual(operator.withdrawn_amount, 25)
             self.assertEqual(operator.slashed_amount, 25)
             self.assertEqual(operator.amount_jobs_processed, 25)
@@ -443,8 +443,8 @@ class TestOperatorUtils(unittest.TestCase):
                                 "lockedAmount": "25",
                                 "withdrawnAmount": "25",
                                 "slashedAmount": "25",
-                                "lockedUntilTimestamp": "0",
-                                "lastDepositTimestamp": "0",
+                                "lockedUntilTimestamp": "123456789",
+                                "lastDepositTimestamp": "123456789",
                             },
                         }
                     }
@@ -464,7 +464,7 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(operator.address, staker_address)
             self.assertEqual(operator.staked_amount, 100)
             self.assertEqual(operator.locked_amount, 25)
-            self.assertEqual(operator.locked_until_timestamp, 0)
+            self.assertEqual(operator.locked_until_timestamp, 123456789000)
             self.assertEqual(operator.withdrawn_amount, 25)
             self.assertEqual(operator.slashed_amount, 25)
             self.assertEqual(operator.amount_jobs_processed, 25)
@@ -525,6 +525,7 @@ class TestOperatorUtils(unittest.TestCase):
                                     "jobTypes": job_types,
                                     "registrationNeeded": True,
                                     "registrationInstructions": url,
+                                    "amountJobsProcessed": "25",
                                 }
                             ],
                         }
@@ -576,6 +577,7 @@ class TestOperatorUtils(unittest.TestCase):
                                     "jobTypes": job_types,
                                     "registrationNeeded": True,
                                     "registrationInstructions": url,
+                                    "amountJobsProcessed": "25",
                                 }
                             ],
                         }
@@ -627,6 +629,7 @@ class TestOperatorUtils(unittest.TestCase):
                                     "jobTypes": job_types,
                                     "registrationNeeded": True,
                                     "registrationInstructions": url,
+                                    "amountJobsProcessed": "25",
                                 }
                             ],
                         }

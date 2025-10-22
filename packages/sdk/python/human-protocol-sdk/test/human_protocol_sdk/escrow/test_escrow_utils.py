@@ -131,7 +131,7 @@ class TestEscrowUtils(unittest.TestCase):
                 filtered[0].total_funded_amount, int(mock_escrow["totalFundedAmount"])
             )
             self.assertEqual(
-                int(filtered[0].created_at.timestamp()), int(mock_escrow["createdAt"])
+                int(filtered[0].created_at), int(mock_escrow["createdAt"]) * 1000
             )
 
             filter = EscrowFilter(chain_id=ChainId.POLYGON_AMOY)
@@ -181,6 +181,7 @@ class TestEscrowUtils(unittest.TestCase):
                 "status": "Pending",
                 "token": "0x1234567890123456789012345678901234567891",
                 "totalFundedAmount": "1000000000000000000",
+                "createdAt": "1672531200000",
             }
             mock_escrow_2 = {
                 "id": "0x1234567890123456789012345678901234567891",
@@ -200,6 +201,7 @@ class TestEscrowUtils(unittest.TestCase):
                 "status": "Complete",
                 "token": "0x1234567890123456789012345678901234567891",
                 "totalFundedAmount": "1000000000000000000",
+                "createdAt": "1672531200000",
             }
 
             def side_effect(subgraph_url, query, params):
@@ -318,7 +320,7 @@ class TestEscrowUtils(unittest.TestCase):
                 escrow.total_funded_amount, int(mock_escrow["totalFundedAmount"])
             )
             self.assertEqual(
-                int(escrow.created_at.timestamp()), int(mock_escrow["createdAt"])
+                int(escrow.created_at), int(mock_escrow["createdAt"]) * 1000
             )
 
     def test_get_escrow_empty_data(self):
@@ -385,7 +387,7 @@ class TestEscrowUtils(unittest.TestCase):
             result = EscrowUtils.get_status_events(filter)
 
             self.assertEqual(len(result), 1)
-            self.assertEqual(result[0].timestamp, 1620000000)
+            self.assertEqual(result[0].timestamp, 1620000000000)
             self.assertEqual(result[0].escrow_address, "0x123")
             self.assertEqual(result[0].status, "Pending")
             self.assertEqual(result[0].chain_id, ChainId.POLYGON_AMOY)
@@ -418,7 +420,7 @@ class TestEscrowUtils(unittest.TestCase):
             result = EscrowUtils.get_status_events(filter)
 
             self.assertEqual(len(result), 1)
-            self.assertEqual(result[0].timestamp, 1620000000)
+            self.assertEqual(result[0].timestamp, 1620000000000)
             self.assertEqual(result[0].escrow_address, "0x123")
             self.assertEqual(result[0].status, "Pending")
             self.assertEqual(result[0].chain_id, ChainId.POLYGON_AMOY)
@@ -460,7 +462,7 @@ class TestEscrowUtils(unittest.TestCase):
             result = EscrowUtils.get_status_events(filter)
 
             self.assertEqual(len(result), 1)
-            self.assertEqual(result[0].timestamp, 1620000000)
+            self.assertEqual(result[0].timestamp, 1620000000000)
             self.assertEqual(result[0].escrow_address, "0x123")
             self.assertEqual(result[0].status, "Pending")
             self.assertEqual(result[0].chain_id, ChainId.POLYGON_AMOY)
@@ -513,7 +515,7 @@ class TestEscrowUtils(unittest.TestCase):
                 result[0].recipient, "0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef"
             )
             self.assertEqual(result[0].amount, 1000000000000000000)
-            self.assertEqual(result[0].created_at, 1672531200)
+            self.assertEqual(result[0].created_at, 1672531200000)
 
     def test_get_payouts_with_filters(self):
         with patch(
@@ -551,7 +553,7 @@ class TestEscrowUtils(unittest.TestCase):
                 result[0].recipient, "0x1234567890123456789012345678901234567892"
             )
             self.assertEqual(result[0].amount, 1000000000000000000)
-            self.assertEqual(result[0].created_at, 1672531200)
+            self.assertEqual(result[0].created_at, 1672531200000)
 
     def test_get_payouts_no_data(self):
         with patch(
@@ -638,7 +640,7 @@ class TestEscrowUtils(unittest.TestCase):
             self.assertEqual(refunds[0].receiver, mock_refund["receiver"])
             self.assertEqual(refunds[0].amount, int(mock_refund["amount"]))
             self.assertEqual(refunds[0].block, int(mock_refund["block"]))
-            self.assertEqual(refunds[0].timestamp, int(mock_refund["timestamp"]))
+            self.assertEqual(refunds[0].timestamp, int(mock_refund["timestamp"]) * 1000)
             self.assertEqual(refunds[0].tx_hash, mock_refund["txHash"])
 
     def test_get_cancellation_refunds_invalid_escrow_address(self):
@@ -713,7 +715,7 @@ class TestEscrowUtils(unittest.TestCase):
             self.assertEqual(refund.receiver, mock_refund["receiver"])
             self.assertEqual(refund.amount, int(mock_refund["amount"]))
             self.assertEqual(refund.block, int(mock_refund["block"]))
-            self.assertEqual(refund.timestamp, int(mock_refund["timestamp"]))
+            self.assertEqual(refund.timestamp, int(mock_refund["timestamp"]) * 1000)
             self.assertEqual(refund.tx_hash, mock_refund["txHash"])
 
     def test_get_cancellation_refund_no_data(self):

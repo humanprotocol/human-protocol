@@ -5,7 +5,7 @@ import { ethers } from 'ethers';
 
 const runStakingExamples = async () => {
   const stakers = await StakingUtils.getStakers({
-    chainId: ChainId.LOCALHOST,
+    chainId: ChainId.POLYGON_AMOY,
     maxLockedAmount: ethers.parseEther('5').toString(),
     orderBy: 'lastDepositTimestamp',
     orderDirection: OrderDirection.ASC,
@@ -16,7 +16,7 @@ const runStakingExamples = async () => {
 
   try {
     const staker = await StakingUtils.getStaker(
-      ChainId.LOCALHOST,
+      ChainId.POLYGON_AMOY,
       stakers[0].address
     );
     console.log('Staker info:', staker);

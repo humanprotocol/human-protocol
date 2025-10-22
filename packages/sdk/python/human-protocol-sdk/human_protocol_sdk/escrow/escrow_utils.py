@@ -52,15 +52,16 @@ class EscrowData:
         chain_id: ChainId,
         id: str,
         address: str,
-        amount_paid: int,
-        balance: int,
-        count: int,
+        amount_paid: str,
+        balance: str,
+        count: str,
         factory_address: str,
         launcher: str,
+        job_requester_id: Optional[str],
         status: str,
         token: str,
-        total_funded_amount: int,
-        created_at: datetime,
+        total_funded_amount: str,
+        created_at: str,
         final_results_url: Optional[str] = None,
         final_results_hash: Optional[str] = None,
         intermediate_results_url: Optional[str] = None,
@@ -70,9 +71,9 @@ class EscrowData:
         recording_oracle: Optional[str] = None,
         reputation_oracle: Optional[str] = None,
         exchange_oracle: Optional[str] = None,
-        recording_oracle_fee: Optional[int] = None,
-        reputation_oracle_fee: Optional[int] = None,
-        exchange_oracle_fee: Optional[int] = None,
+        recording_oracle_fee: Optional[str] = None,
+        reputation_oracle_fee: Optional[str] = None,
+        exchange_oracle_fee: Optional[str] = None,
     ):
         """
         Initializes an EscrowData instance.
@@ -85,10 +86,11 @@ class EscrowData:
         :param count: Count
         :param factory_address: Factory address
         :param launcher: Launcher
+        :param job_requester_id: Job requester identifier
         :param status: Status
         :param token: Token
         :param total_funded_amount: Total funded amount
-        :param created_at: Creation date
+        :param created_at: Creation timestamp in milliseconds
         :param final_results_url: URL for final results.
         :param final_results_hash: Hash for final results.
         :param intermediate_results_url: URL for intermediate results.
@@ -105,27 +107,34 @@ class EscrowData:
 
         self.id = id
         self.address = address
-        self.amount_paid = amount_paid
-        self.balance = balance
-        self.count = count
+        self.amount_paid = int(amount_paid)
+        self.balance = int(balance)
+        self.count = int(count)
         self.factory_address = factory_address
         self.final_results_url = final_results_url
         self.final_results_hash = final_results_hash
         self.intermediate_results_url = intermediate_results_url
         self.intermediate_results_hash = intermediate_results_hash
         self.launcher = launcher
+        self.job_requester_id = job_requester_id
         self.manifest_hash = manifest_hash
         self.manifest = manifest
         self.recording_oracle = recording_oracle
         self.reputation_oracle = reputation_oracle
         self.exchange_oracle = exchange_oracle
-        self.recording_oracle_fee = recording_oracle_fee
-        self.reputation_oracle_fee = reputation_oracle_fee
-        self.exchange_oracle_fee = exchange_oracle_fee
+        self.recording_oracle_fee = (
+            int(recording_oracle_fee) if recording_oracle_fee is not None else None
+        )
+        self.reputation_oracle_fee = (
+            int(reputation_oracle_fee) if reputation_oracle_fee is not None else None
+        )
+        self.exchange_oracle_fee = (
+            int(exchange_oracle_fee) if exchange_oracle_fee is not None else None
+        )
         self.status = status
         self.token = token
-        self.total_funded_amount = total_funded_amount
-        self.created_at = created_at
+        self.total_funded_amount = int(total_funded_amount)
+        self.created_at = int(created_at) * 1000
         self.chain_id = chain_id
 
 
@@ -133,7 +142,7 @@ class StatusEvent:
     """
     Initializes a StatusEvent instance.
 
-    :param timestamp: The timestamp of the event.
+    :param timestamp: The timestamp of the event in milliseconds.
     :param status: The status of the escrow.
     :param chain_id: The chain identifier where the event occurred.
     :param escrow_address: The address of the escrow.
@@ -142,7 +151,7 @@ class StatusEvent:
     def __init__(
         self, timestamp: int, status: str, chain_id: ChainId, escrow_address: str
     ):
-        self.timestamp = timestamp
+        self.timestamp = timestamp * 1000
         self.status = status
         self.chain_id = chain_id
         self.escrow_address = escrow_address
@@ -157,17 +166,17 @@ class Payout:
     :param escrow_address: The address of the escrow that executed the payout.
     :param recipient: The address of the recipient.
     :param amount: The amount of the payout.
-    :param created_at: The time of creation of the payout.
+    :param created_at: The time of creation of the payout in milliseconds.
     """
 
     def __init__(
-        self, id: str, escrow_address: str, recipient: str, amount: int, created_at: int
+        self, id: str, escrow_address: str, recipient: str, amount: str, created_at: str
     ):
         self.id = id
         self.escrow_address = escrow_address
         self.recipient = recipient
-        self.amount = amount
-        self.created_at = created_at
+        self.amount = int(amount)
+        self.created_at = int(created_at) * 1000
 
 
 class CancellationRefund:
@@ -179,7 +188,7 @@ class CancellationRefund:
     :param receiver: The address of the recipient receiving the refund.
     :param amount: The amount being refunded.
     :param block: The block number in which the refund was processed.
-    :param timestamp: The timestamp of the refund event.
+    :param timestamp: The timestamp of the refund event in milliseconds.
     :param tx_hash: The transaction hash of the refund event.
     """
 
@@ -188,17 +197,17 @@ class CancellationRefund:
         id: str,
         escrow_address: str,
         receiver: str,
-        amount: int,
-        block: int,
-        timestamp: int,
+        amount: str,
+        block: str,
+        timestamp: str,
         tx_hash: str,
     ):
         self.id = id
         self.escrow_address = escrow_address
         self.receiver = receiver
-        self.amount = amount
-        self.block = block
-        self.timestamp = timestamp
+        self.amount = int(amount)
+        self.block = int(block)
+        self.timestamp = int(timestamp) * 1000
         self.tx_hash = tx_hash
 
 
@@ -290,43 +299,30 @@ class EscrowUtils:
             [
                 EscrowData(
                     chain_id=chain_id,
-                    id=escrow.get("id", ""),
-                    address=escrow.get("address", ""),
-                    amount_paid=int(escrow.get("amountPaid", 0)),
-                    balance=int(escrow.get("balance", 0)),
-                    count=int(escrow.get("count", 0)),
-                    factory_address=escrow.get("factoryAddress", ""),
-                    launcher=escrow.get("launcher", ""),
-                    status=escrow.get("status", ""),
-                    token=escrow.get("token", ""),
-                    total_funded_amount=int(escrow.get("totalFundedAmount", 0)),
-                    created_at=datetime.fromtimestamp(int(escrow.get("createdAt", 0))),
-                    final_results_url=escrow.get("finalResultsUrl", None),
-                    final_results_hash=escrow.get("finalResultsHash", None),
-                    intermediate_results_url=escrow.get("intermediateResultsUrl", None),
-                    intermediate_results_hash=escrow.get(
-                        "intermediateResultsHash", None
-                    ),
-                    manifest_hash=escrow.get("manifestHash", None),
-                    manifest=escrow.get("manifest", None),
-                    recording_oracle=escrow.get("recordingOracle", None),
-                    reputation_oracle=escrow.get("reputationOracle", None),
-                    exchange_oracle=escrow.get("exchangeOracle", None),
-                    recording_oracle_fee=(
-                        int(escrow.get("recordingOracleFee"))
-                        if escrow.get("recordingOracleFee", None) not in (None, "")
-                        else None
-                    ),
-                    reputation_oracle_fee=(
-                        int(escrow.get("reputationOracleFee"))
-                        if escrow.get("reputationOracleFee", None) not in (None, "")
-                        else None
-                    ),
-                    exchange_oracle_fee=(
-                        int(escrow.get("exchangeOracleFee"))
-                        if escrow.get("exchangeOracleFee", None) not in (None, "")
-                        else None
-                    ),
+                    id=escrow.get("id"),
+                    address=escrow.get("address"),
+                    amount_paid=escrow.get("amountPaid"),
+                    balance=escrow.get("balance"),
+                    count=escrow.get("count"),
+                    factory_address=escrow.get("factoryAddress"),
+                    launcher=escrow.get("launcher"),
+                    job_requester_id=escrow.get("jobRequesterId"),
+                    status=escrow.get("status"),
+                    token=escrow.get("token"),
+                    total_funded_amount=escrow.get("totalFundedAmount"),
+                    created_at=escrow.get("createdAt"),
+                    final_results_url=escrow.get("finalResultsUrl"),
+                    final_results_hash=escrow.get("finalResultsHash"),
+                    intermediate_results_url=escrow.get("intermediateResultsUrl"),
+                    intermediate_results_hash=escrow.get("intermediateResultsHash"),
+                    manifest_hash=escrow.get("manifestHash"),
+                    manifest=escrow.get("manifest"),
+                    recording_oracle=escrow.get("recordingOracle"),
+                    reputation_oracle=escrow.get("reputationOracle"),
+                    exchange_oracle=escrow.get("exchangeOracle"),
+                    recording_oracle_fee=escrow.get("recordingOracleFee"),
+                    reputation_oracle_fee=escrow.get("reputationOracleFee"),
+                    exchange_oracle_fee=escrow.get("exchangeOracleFee"),
                 )
                 for escrow in escrows_raw
             ]
@@ -391,41 +387,30 @@ class EscrowUtils:
 
         return EscrowData(
             chain_id=chain_id,
-            id=escrow.get("id", ""),
-            address=escrow.get("address", ""),
-            amount_paid=int(escrow.get("amountPaid", 0)),
-            balance=int(escrow.get("balance", 0)),
-            count=int(escrow.get("count", 0)),
-            factory_address=escrow.get("factoryAddress", ""),
-            launcher=escrow.get("launcher", ""),
-            status=escrow.get("status", ""),
-            token=escrow.get("token", ""),
-            total_funded_amount=int(escrow.get("totalFundedAmount", 0)),
-            created_at=datetime.fromtimestamp(int(escrow.get("createdAt", 0))),
-            final_results_url=escrow.get("finalResultsUrl", None),
-            final_results_hash=escrow.get("finalResultsHash", None),
-            intermediate_results_url=escrow.get("intermediateResultsUrl", None),
-            intermediate_results_hash=escrow.get("intermediateResultsHash", None),
-            manifest_hash=escrow.get("manifestHash", None),
-            manifest=escrow.get("manifest", None),
-            recording_oracle=escrow.get("recordingOracle", None),
-            reputation_oracle=escrow.get("reputationOracle", None),
-            exchange_oracle=escrow.get("exchangeOracle", None),
-            recording_oracle_fee=(
-                int(escrow.get("recordingOracleFee"))
-                if escrow.get("recordingOracleFee", None) not in (None, "")
-                else None
-            ),
-            reputation_oracle_fee=(
-                int(escrow.get("reputationOracleFee"))
-                if escrow.get("reputationOracleFee", None) not in (None, "")
-                else None
-            ),
-            exchange_oracle_fee=(
-                int(escrow.get("exchangeOracleFee"))
-                if escrow.get("exchangeOracleFee", None) not in (None, "")
-                else None
-            ),
+            id=escrow.get("id"),
+            address=escrow.get("address"),
+            amount_paid=escrow.get("amountPaid"),
+            balance=escrow.get("balance"),
+            count=escrow.get("count"),
+            factory_address=escrow.get("factoryAddress"),
+            launcher=escrow.get("launcher"),
+            job_requester_id=escrow.get("jobRequesterId"),
+            status=escrow.get("status"),
+            token=escrow.get("token"),
+            total_funded_amount=escrow.get("totalFundedAmount"),
+            created_at=escrow.get("createdAt"),
+            final_results_url=escrow.get("finalResultsUrl"),
+            final_results_hash=escrow.get("finalResultsHash"),
+            intermediate_results_url=escrow.get("intermediateResultsUrl"),
+            intermediate_results_hash=escrow.get("intermediateResultsHash"),
+            manifest_hash=escrow.get("manifestHash"),
+            manifest=escrow.get("manifest"),
+            recording_oracle=escrow.get("recordingOracle"),
+            reputation_oracle=escrow.get("reputationOracle"),
+            exchange_oracle=escrow.get("exchangeOracle"),
+            recording_oracle_fee=escrow.get("recordingOracleFee"),
+            reputation_oracle_fee=escrow.get("reputationOracleFee"),
+            exchange_oracle_fee=escrow.get("exchangeOracleFee"),
         )
 
     @staticmethod
@@ -476,7 +461,7 @@ class EscrowUtils:
 
         events_with_chain_id = [
             StatusEvent(
-                timestamp=event["timestamp"],
+                timestamp=int(event["timestamp"]),
                 escrow_address=event["escrowAddress"],
                 status=event["status"],
                 chain_id=filter.chain_id,
@@ -540,8 +525,8 @@ class EscrowUtils:
                 id=payout["id"],
                 escrow_address=payout["escrowAddress"],
                 recipient=payout["recipient"],
-                amount=int(payout["amount"]),
-                created_at=int(payout["createdAt"]),
+                amount=payout["amount"],
+                created_at=payout["createdAt"],
             )
             for payout in payouts_raw
         ]
@@ -604,9 +589,9 @@ class EscrowUtils:
                 id=refund["id"],
                 escrow_address=refund["escrowAddress"],
                 receiver=refund["receiver"],
-                amount=int(refund["amount"]),
-                block=int(refund["block"]),
-                timestamp=int(refund["timestamp"]),
+                amount=refund["amount"],
+                block=refund["block"],
+                timestamp=refund["timestamp"],
                 tx_hash=refund["txHash"],
             )
             for refund in refunds_raw
@@ -673,8 +658,8 @@ class EscrowUtils:
             id=refund["id"],
             escrow_address=refund["escrowAddress"],
             receiver=refund["receiver"],
-            amount=int(refund["amount"]),
-            block=int(refund["block"]),
-            timestamp=int(refund["timestamp"]),
+            amount=refund["amount"],
+            block=refund["block"],
+            timestamp=refund["timestamp"],
             tx_hash=refund["txHash"],
         )

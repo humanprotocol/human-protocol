@@ -48,12 +48,12 @@ class StakerData:
     ):
         self.id = id
         self.address = address
-        self.staked_amount = staked_amount
-        self.locked_amount = locked_amount
-        self.withdrawn_amount = withdrawn_amount
-        self.slashed_amount = slashed_amount
-        self.locked_until_timestamp = locked_until_timestamp
-        self.last_deposit_timestamp = last_deposit_timestamp
+        self.staked_amount = int(staked_amount)
+        self.locked_amount = int(locked_amount)
+        self.withdrawn_amount = int(withdrawn_amount)
+        self.slashed_amount = int(slashed_amount)
+        self.locked_until_timestamp = int(locked_until_timestamp) * 1000
+        self.last_deposit_timestamp = int(last_deposit_timestamp) * 1000
 
 
 class StakingUtilsError(Exception):
@@ -82,14 +82,14 @@ class StakingUtils:
 
         staker = data["data"]["staker"]
         return StakerData(
-            id=staker.get("id", ""),
-            address=staker.get("address", ""),
-            staked_amount=staker.get("stakedAmount", ""),
-            locked_amount=staker.get("lockedAmount", ""),
-            withdrawn_amount=staker.get("withdrawnAmount", ""),
-            slashed_amount=staker.get("slashedAmount", ""),
-            locked_until_timestamp=staker.get("lockedUntilTimestamp", ""),
-            last_deposit_timestamp=staker.get("lastDepositTimestamp", ""),
+            id=staker.get("id"),
+            address=staker.get("address"),
+            staked_amount=staker.get("stakedAmount"),
+            locked_amount=staker.get("lockedAmount"),
+            withdrawn_amount=staker.get("withdrawnAmount"),
+            slashed_amount=staker.get("slashedAmount"),
+            locked_until_timestamp=staker.get("lockedUntilTimestamp"),
+            last_deposit_timestamp=staker.get("lastDepositTimestamp"),
         )
 
     @staticmethod
@@ -127,14 +127,14 @@ class StakingUtils:
         stakers_raw = data["data"]["stakers"]
         return [
             StakerData(
-                id=staker.get("id", ""),
-                address=staker.get("address", ""),
-                staked_amount=staker.get("stakedAmount", ""),
-                locked_amount=staker.get("lockedAmount", ""),
-                withdrawn_amount=staker.get("withdrawnAmount", ""),
-                slashed_amount=staker.get("slashedAmount", ""),
-                locked_until_timestamp=staker.get("lockedUntilTimestamp", ""),
-                last_deposit_timestamp=staker.get("lastDepositTimestamp", ""),
+                id=staker.get("id") or "",
+                address=staker.get("address") or "",
+                staked_amount=staker.get("stakedAmount"),
+                locked_amount=staker.get("lockedAmount"),
+                withdrawn_amount=staker.get("withdrawnAmount"),
+                slashed_amount=staker.get("slashedAmount"),
+                locked_until_timestamp=staker.get("lockedUntilTimestamp"),
+                last_deposit_timestamp=staker.get("lastDepositTimestamp"),
             )
             for staker in stakers_raw
         ]

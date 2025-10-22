@@ -93,8 +93,8 @@ export class OracleDiscoveryService {
             new DiscoveredOracle({
               id: exchangeOracle.id,
               address: exchangeOracle.address,
-              name: exchangeOracle.name,
-              role: exchangeOracle.role,
+              name: exchangeOracle.name as string,
+              role: exchangeOracle.role as string,
               url: exchangeOracle.url as string,
               jobTypes: exchangeOracle.jobTypes as string[],
               registrationNeeded: exchangeOracle.registrationNeeded,
@@ -106,6 +106,12 @@ export class OracleDiscoveryService {
               slashedAmount: exchangeOracle.slashedAmount,
               amountJobsProcessed: exchangeOracle.amountJobsProcessed,
               lockedUntilTimestamp: exchangeOracle.lockedUntilTimestamp,
+              fee: exchangeOracle.fee,
+              publicKey: exchangeOracle.publicKey,
+              webhookUrl: exchangeOracle.webhookUrl,
+              website: exchangeOracle.website,
+              reputationNetworks: exchangeOracle.reputationNetworks,
+              category: exchangeOracle.category,
             }),
           );
         }

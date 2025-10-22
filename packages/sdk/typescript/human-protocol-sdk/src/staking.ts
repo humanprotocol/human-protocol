@@ -24,6 +24,7 @@ import {
   ErrorUnsupportedChainID,
 } from './error';
 import { IStaker, IStakersFilter, StakerInfo } from './interfaces';
+import { StakerData } from './graphql';
 import { NetworkData } from './types';
 import { getSubgraphUrl, throwError } from './utils';
 import {
@@ -509,7 +510,7 @@ export class StakingUtils {
       throw ErrorUnsupportedChainID;
     }
 
-    const { staker } = await gqlFetch<{ staker: IStaker }>(
+    const { staker } = await gqlFetch<{ staker: StakerData }>(
       getSubgraphUrl(networkData),
       GET_STAKER_BY_ADDRESS_QUERY,
       { id: stakerAddress.toLowerCase() }
@@ -519,7 +520,7 @@ export class StakingUtils {
       throw ErrorStakerNotFound;
     }
 
-    return staker;
+    return mapStaker(staker);
   }
 
   /**
@@ -539,7 +540,7 @@ export class StakingUtils {
       throw ErrorUnsupportedChainID;
     }
 
-    const { stakers } = await gqlFetch<{ stakers: IStaker[] }>(
+    const { stakers } = await gqlFetch<{ stakers: StakerData[] }>(
       getSubgraphUrl(networkData),
       GET_STAKERS_QUERY(filter),
       {
@@ -577,6 +578,18 @@ export class StakingUtils {
       return [];
     }
 
-    return stakers;
+    return stakers.map((s) => mapStaker(s));
   }
+}
+
+function mapStaker(s: StakerData): IStaker {
+  return {
+    address: s.address,
+    stakedAmount: BigInt(s.stakedAmount),
+    lockedAmount: BigInt(s.lockedAmount),
+    withdrawableAmount: BigInt(s.withdrawnAmount),
+    slashedAmount: BigInt(s.slashedAmount),
+    lockedUntil: Number(s.lockedUntilTimestamp) * 1000,
+    lastDepositTimestamp: Number(s.lastDepositTimestamp) * 1000,
+  };
 }

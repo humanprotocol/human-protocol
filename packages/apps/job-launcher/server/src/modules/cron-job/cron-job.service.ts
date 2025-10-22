@@ -515,19 +515,19 @@ export class CronJobService {
         }
         if (!job || job.status === JobStatus.CANCELED) continue;
 
-        if (event.status === EscrowStatus[EscrowStatus.Cancelled]) {
+        if (event.status === EscrowStatus.Cancelled) {
           await this.jobService.cancelJob(job);
           continue;
         }
 
         let newStatus: JobStatus | null = null;
         if (
-          event.status === EscrowStatus[EscrowStatus.Partial] &&
+          event.status === EscrowStatus.Partial &&
           job.status !== JobStatus.PARTIAL
         ) {
           newStatus = JobStatus.PARTIAL;
         } else if (
-          event.status === EscrowStatus[EscrowStatus.Complete] &&
+          event.status === EscrowStatus.Complete &&
           job.status !== JobStatus.COMPLETED
         ) {
           newStatus = JobStatus.COMPLETED;

@@ -8,10 +8,10 @@ import {
   EscrowClient,
   EscrowStatus,
   EscrowUtils,
+  IStatusEvent,
   KVStoreUtils,
   NETWORKS,
 } from '@human-protocol/sdk';
-import { StatusEvent } from '@human-protocol/sdk/dist/graphql';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -1107,7 +1107,7 @@ describe('CronJobService', () => {
   describe('syncJobStatuses Cron Job', () => {
     let cronJobEntityMock: Partial<CronJobEntity>;
     let jobEntityMock: Partial<JobEntity>;
-    let escrowEventMock: Partial<StatusEvent>;
+    let escrowEventMock: Partial<IStatusEvent>;
 
     beforeEach(() => {
       cronJobEntityMock = {
@@ -1125,7 +1125,7 @@ describe('CronJobService', () => {
       escrowEventMock = {
         chainId: ChainId.LOCALHOST,
         escrowAddress: MOCK_ADDRESS,
-        status: EscrowStatus[EscrowStatus.Partial],
+        status: EscrowStatus.Partial,
       };
 
       jest.spyOn(repository, 'findOneByType').mockResolvedValue(null);
