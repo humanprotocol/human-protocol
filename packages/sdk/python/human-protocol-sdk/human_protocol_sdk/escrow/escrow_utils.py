@@ -170,13 +170,13 @@ class Payout:
     """
 
     def __init__(
-        self, id: str, escrow_address: str, recipient: str, amount: int, created_at: int
+        self, id: str, escrow_address: str, recipient: str, amount: str, created_at: str
     ):
         self.id = id
         self.escrow_address = escrow_address
         self.recipient = recipient
-        self.amount = amount
-        self.created_at = created_at * 1000
+        self.amount = int(amount)
+        self.created_at = int(created_at) * 1000
 
 
 class CancellationRefund:
@@ -197,17 +197,17 @@ class CancellationRefund:
         id: str,
         escrow_address: str,
         receiver: str,
-        amount: int,
-        block: int,
-        timestamp: int,
+        amount: str,
+        block: str,
+        timestamp: str,
         tx_hash: str,
     ):
         self.id = id
         self.escrow_address = escrow_address
         self.receiver = receiver
-        self.amount = amount
-        self.block = block
-        self.timestamp = timestamp * 1000
+        self.amount = int(amount)
+        self.block = int(block)
+        self.timestamp = int(timestamp) * 1000
         self.tx_hash = tx_hash
 
 
@@ -525,8 +525,8 @@ class EscrowUtils:
                 id=payout["id"],
                 escrow_address=payout["escrowAddress"],
                 recipient=payout["recipient"],
-                amount=int(payout["amount"]),
-                created_at=int(payout["createdAt"]),
+                amount=payout["amount"],
+                created_at=payout["createdAt"],
             )
             for payout in payouts_raw
         ]
@@ -589,9 +589,9 @@ class EscrowUtils:
                 id=refund["id"],
                 escrow_address=refund["escrowAddress"],
                 receiver=refund["receiver"],
-                amount=int(refund["amount"]),
-                block=int(refund["block"]),
-                timestamp=int(refund["timestamp"]),
+                amount=refund["amount"],
+                block=refund["block"],
+                timestamp=refund["timestamp"],
                 tx_hash=refund["txHash"],
             )
             for refund in refunds_raw
@@ -658,8 +658,8 @@ class EscrowUtils:
             id=refund["id"],
             escrow_address=refund["escrowAddress"],
             receiver=refund["receiver"],
-            amount=int(refund["amount"]),
-            block=int(refund["block"]),
-            timestamp=int(refund["timestamp"]),
+            amount=refund["amount"],
+            block=refund["block"],
+            timestamp=refund["timestamp"],
             tx_hash=refund["txHash"],
         )
