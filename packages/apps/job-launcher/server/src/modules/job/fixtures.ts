@@ -151,9 +151,10 @@ export const createJobEntity = (
     max: 1000,
     fractionDigits: 6,
   });
-  entity.token = faker.helpers.arrayElement(
-    Object.values(EscrowFundToken),
-  ) as EscrowFundToken;
+  entity.token = faker.helpers.arrayElement([
+    EscrowFundToken.HMT,
+    EscrowFundToken.USDC,
+  ]) as EscrowFundToken;
   entity.manifestUrl = faker.internet.url();
   entity.manifestHash = faker.string.uuid();
   entity.failedReason = null;

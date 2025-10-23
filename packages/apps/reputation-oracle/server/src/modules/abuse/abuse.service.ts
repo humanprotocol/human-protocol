@@ -120,7 +120,7 @@ export class AbuseService {
         abuseId: abuseEntity.id,
         escrowAddress: abuseEntity.escrowAddress,
         chainId: abuseEntity.chainId,
-        maxAmount: Number(operator.amountStaked),
+        maxAmount: Number(operator.stakedAmount),
         triggerId: data.trigger_id,
         responseUrl: data.response_url,
       });

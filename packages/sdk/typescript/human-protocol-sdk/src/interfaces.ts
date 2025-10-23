@@ -10,37 +10,30 @@ export interface IOperator {
   id: string;
   chainId: ChainId;
   address: string;
-  amountStaked: bigint;
-  amountLocked: bigint;
-  lockedUntilTimestamp: bigint;
-  amountWithdrawn: bigint;
-  amountSlashed: bigint;
-  reward: bigint;
-  amountJobsProcessed: bigint;
-  role?: string;
-  fee?: bigint;
-  publicKey?: string;
-  webhookUrl?: string;
-  website?: string;
-  url?: string;
-  jobTypes?: string[];
-  registrationNeeded?: boolean;
-  registrationInstructions?: string;
-  reputationNetworks?: string[];
-  name?: string;
-  category?: string;
-}
-
-export interface IOperatorSubgraph
-  extends Omit<IOperator, 'jobTypes' | 'reputationNetworks' | 'chainId'> {
-  jobTypes?: string;
-  reputationNetworks?: { address: string }[];
+  stakedAmount: bigint | null;
+  lockedAmount: bigint | null;
+  lockedUntilTimestamp: number | null;
+  withdrawnAmount: bigint | null;
+  slashedAmount: bigint | null;
+  amountJobsProcessed: bigint | null;
+  role: string | null;
+  fee: bigint | null;
+  publicKey: string | null;
+  webhookUrl: string | null;
+  website: string | null;
+  url: string | null;
+  jobTypes: string[] | null;
+  registrationNeeded: boolean | null;
+  registrationInstructions: string | null;
+  reputationNetworks: string[];
+  name: string | null;
+  category: string | null;
 }
 
 export interface IOperatorsFilter extends IPagination {
   chainId: ChainId;
   roles?: string[];
-  minAmountStaked?: number;
+  minStakedAmount?: number;
   orderBy?: string;
 }
 
@@ -50,39 +43,31 @@ export interface IReputationNetwork {
   operators: IOperator[];
 }
 
-export interface IReputationNetworkSubgraph
-  extends Omit<IReputationNetwork, 'operators'> {
-  operators: IOperatorSubgraph[];
-}
-
-export interface IOperator {
-  address: string;
-  role?: string;
-  url?: string;
-  jobTypes?: string[];
-  registrationNeeded?: boolean;
-  registrationInstructions?: string;
-}
-
 export interface IEscrow {
   id: string;
   address: string;
-  amountPaid: string;
-  balance: string;
-  count: string;
+  amountPaid: bigint;
+  balance: bigint;
+  count: number;
   factoryAddress: string;
-  finalResultsUrl?: string;
-  intermediateResultsUrl?: string;
+  finalResultsUrl: string | null;
+  finalResultsHash: string | null;
+  intermediateResultsUrl: string | null;
+  intermediateResultsHash: string | null;
   launcher: string;
-  manifestHash?: string;
-  manifest?: string;
-  recordingOracle?: string;
-  reputationOracle?: string;
-  exchangeOracle?: string;
+  jobRequesterId: string | null;
+  manifestHash: string | null;
+  manifest: string | null;
+  recordingOracle: string | null;
+  reputationOracle: string | null;
+  exchangeOracle: string | null;
+  recordingOracleFee: number | null;
+  reputationOracleFee: number | null;
+  exchangeOracleFee: number | null;
   status: string;
   token: string;
-  totalFundedAmount: string;
-  createdAt: string;
+  totalFundedAmount: bigint;
+  createdAt: number;
   chainId: number;
 }
 
@@ -141,11 +126,11 @@ export interface IKVStore {
 export interface InternalTransaction {
   from: string;
   to: string;
-  value: string;
+  value: bigint;
   method: string;
-  receiver?: string;
-  escrow?: string;
-  token?: string;
+  receiver: string | null;
+  escrow: string | null;
+  token: string | null;
 }
 
 export interface ITransaction {
@@ -153,12 +138,12 @@ export interface ITransaction {
   txHash: string;
   from: string;
   to: string;
-  timestamp: bigint;
-  value: string;
+  timestamp: number;
+  value: bigint;
   method: string;
-  receiver?: string;
-  escrow?: string;
-  token?: string;
+  receiver: string | null;
+  escrow: string | null;
+  token: string | null;
   internalTransactions: InternalTransaction[];
 }
 
@@ -199,7 +184,7 @@ export interface IStatusEventFilter extends IPagination {
 export interface IWorker {
   id: string;
   address: string;
-  totalHMTAmountReceived: number;
+  totalHMTAmountReceived: bigint;
   payoutCount: number;
 }
 
@@ -207,4 +192,123 @@ export interface IWorkersFilter extends IPagination {
   chainId: ChainId;
   address?: string;
   orderBy?: string;
+}
+
+export interface IStaker {
+  address: string;
+  stakedAmount: bigint;
+  lockedAmount: bigint;
+  withdrawableAmount: bigint;
+  slashedAmount: bigint;
+  lockedUntil: number;
+  lastDepositTimestamp: number;
+}
+
+export interface IStakersFilter extends IPagination {
+  chainId: ChainId;
+  minStakedAmount?: string;
+  maxStakedAmount?: string;
+  minLockedAmount?: string;
+  maxLockedAmount?: string;
+  minWithdrawnAmount?: string;
+  maxWithdrawnAmount?: string;
+  minSlashedAmount?: string;
+  maxSlashedAmount?: string;
+  orderBy?:
+    | 'stakedAmount'
+    | 'lockedAmount'
+    | 'withdrawnAmount'
+    | 'slashedAmount'
+    | 'lastDepositTimestamp';
+}
+export interface ICancellationRefundFilter extends IPagination {
+  chainId: ChainId;
+  escrowAddress?: string;
+  receiver?: string;
+  from?: Date;
+  to?: Date;
+}
+
+export interface IDailyEscrow {
+  timestamp: number;
+  escrowsTotal: number;
+  escrowsPending: number;
+  escrowsSolved: number;
+  escrowsPaid: number;
+  escrowsCancelled: number;
+}
+
+export interface IEscrowStatistics {
+  totalEscrows: number;
+  dailyEscrowsData: IDailyEscrow[];
+}
+
+export interface IDailyWorker {
+  timestamp: number;
+  activeWorkers: number;
+}
+
+export interface IWorkerStatistics {
+  dailyWorkersData: IDailyWorker[];
+}
+
+export interface IDailyPayment {
+  timestamp: number;
+  totalAmountPaid: bigint;
+  totalCount: number;
+  averageAmountPerWorker: bigint;
+}
+
+export interface IPaymentStatistics {
+  dailyPaymentsData: IDailyPayment[];
+}
+
+export interface IHMTStatistics {
+  totalTransferAmount: bigint;
+  totalTransferCount: number;
+  totalHolders: number;
+}
+
+export interface IHMTHolder {
+  address: string;
+  balance: bigint;
+}
+
+export interface IDailyHMT {
+  timestamp: number;
+  totalTransactionAmount: bigint;
+  totalTransactionCount: number;
+  dailyUniqueSenders: number;
+  dailyUniqueReceivers: number;
+}
+
+export interface IStatusEvent {
+  timestamp: number;
+  escrowAddress: string;
+  status: EscrowStatus;
+  chainId: ChainId;
+}
+
+export interface ICancellationRefund {
+  id: string;
+  escrowAddress: string;
+  receiver: string;
+  amount: bigint;
+  block: number;
+  timestamp: number;
+  txHash: string;
+}
+
+export interface IPayout {
+  id: string;
+  escrowAddress: string;
+  recipient: string;
+  amount: bigint;
+  createdAt: number;
+}
+
+export interface IEscrowWithdraw {
+  txHash: string;
+  tokenAddress: string;
+  withdrawnAmount: bigint;
 }

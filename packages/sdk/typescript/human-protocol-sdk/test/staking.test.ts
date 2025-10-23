@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import * as gqlFetch from 'graphql-request';
 import { Overrides, Signer, ethers } from 'ethers';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
-import { ChainId } from '../src/enums';
+import { ChainId, OrderDirection } from '../src/enums';
 import {
   ErrorInvalidEscrowAddressProvided,
   ErrorInvalidSlasherAddressProvided,
@@ -9,14 +10,25 @@ import {
   ErrorInvalidStakingValueSign,
   ErrorInvalidStakingValueType,
   ErrorProviderDoesNotExist,
+  ErrorStakerNotFound,
   ErrorUnsupportedChainID,
 } from '../src/error';
+import { NETWORKS } from '../src/constants';
 import { StakingClient } from '../src/staking';
 import {
   DEFAULT_GAS_PAYER_PRIVKEY,
   FAKE_AMOUNT,
   FAKE_NEGATIVE_AMOUNT,
 } from './utils/constants';
+import { IStaker, IStakersFilter } from '../src/interfaces';
+import { StakingUtils } from '../src/staking';
+import { StakerData } from '../src/graphql';
+
+vi.mock('graphql-request', () => {
+  return {
+    default: vi.fn(),
+  };
+});
 
 describe('StakingClient', () => {
   let stakingClient: any,
@@ -281,7 +293,6 @@ describe('StakingClient', () => {
 
   describe('withdraw', () => {
     test('should call the withdraw method with the correct parameters', async () => {
-      mockStakingContract.withdraw.mockResolvedValueOnce();
       const withdrawSpy = vi
         .spyOn(mockStakingContract, 'withdraw')
         .mockImplementation(() => ({
@@ -296,7 +307,6 @@ describe('StakingClient', () => {
       expect(withdrawSpy).toHaveBeenCalledTimes(1);
     });
     test('should call the withdraw method with transaction options', async () => {
-      mockStakingContract.withdraw.mockResolvedValueOnce();
       const withdrawSpy = vi
         .spyOn(mockStakingContract, 'withdraw')
         .mockImplementation(() => ({
@@ -546,6 +556,186 @@ describe('StakingClient', () => {
       ).rejects.toThrow();
       expect(mockStakingContract.stakes).toHaveBeenCalledWith(stakerAddress);
       expect(mockStakingContract.stakes).toHaveBeenCalledTimes(1);
+    });
+  });
+});
+
+describe('StakingUtils', () => {
+  const stakerAddress = '0x1234567890123456789012345678901234567890';
+  const invalidAddress = 'InvalidAddress';
+
+  describe('getStaker', () => {
+    const mockStaker: StakerData = {
+      id: '0x0987654321098765432109876543210987654320',
+      address: stakerAddress,
+      stakedAmount: '1000',
+      lockedAmount: '100',
+      lockedUntilTimestamp: '1234567890',
+      withdrawnAmount: '900',
+      slashedAmount: '0',
+      lastDepositTimestamp: '1234567890',
+    };
+
+    test('should return staker information', async () => {
+      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
+        staker: mockStaker,
+      });
+
+      const result = await StakingUtils.getStaker(
+        ChainId.LOCALHOST,
+        stakerAddress
+      );
+
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
+        expect.anything(),
+        { id: stakerAddress.toLowerCase() }
+      );
+      const expectedStaker: IStaker = {
+        address: mockStaker.address,
+        stakedAmount: BigInt(mockStaker.stakedAmount),
+        lockedAmount: BigInt(mockStaker.lockedAmount),
+        withdrawableAmount: BigInt(mockStaker.withdrawnAmount),
+        slashedAmount: BigInt(mockStaker.slashedAmount),
+        lockedUntil: Number(mockStaker.lockedUntilTimestamp) * 1000,
+        lastDepositTimestamp: Number(mockStaker.lastDepositTimestamp) * 1000,
+      };
+      expect(result).toEqual(expectedStaker);
+    });
+
+    test('should throw an error for an invalid staker address', async () => {
+      await expect(
+        StakingUtils.getStaker(ChainId.LOCALHOST, invalidAddress)
+      ).rejects.toThrow(ErrorInvalidStakerAddressProvided);
+    });
+
+    test('should throw an error if the gql fetch fails', async () => {
+      const gqlFetchSpy = vi
+        .spyOn(gqlFetch, 'default')
+        .mockRejectedValueOnce(new Error('Error'));
+
+      await expect(
+        StakingUtils.getStaker(ChainId.LOCALHOST, stakerAddress)
+      ).rejects.toThrow();
+      expect(gqlFetchSpy).toHaveBeenCalledTimes(1);
+    });
+
+    test('should throw an error if staker is not found', async () => {
+      vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
+        staker: undefined,
+      });
+
+      await expect(
+        StakingUtils.getStaker(ChainId.LOCALHOST, stakerAddress)
+      ).rejects.toThrow(ErrorStakerNotFound);
+    });
+  });
+
+  describe('getStakers', () => {
+    const mockStakers: StakerData[] = [
+      {
+        id: '0x0987654321098765432109876543210987654320',
+        address: stakerAddress,
+        stakedAmount: '1000',
+        lockedAmount: '100',
+        lockedUntilTimestamp: '1234567890',
+        withdrawnAmount: '900',
+        slashedAmount: '0',
+        lastDepositTimestamp: '1234567890',
+      },
+      {
+        id: '0x0987654321098765432109876543210987654321',
+        address: '0x0987654321098765432109876543210987654321',
+        stakedAmount: '2000',
+        lockedAmount: '200',
+        lockedUntilTimestamp: '1234567891',
+        withdrawnAmount: '1800',
+        slashedAmount: '0',
+        lastDepositTimestamp: '1234567890',
+      },
+    ];
+
+    test('should return an array of stakers', async () => {
+      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
+        stakers: mockStakers,
+      });
+      const filter: IStakersFilter = {
+        chainId: ChainId.LOCALHOST,
+        first: 10,
+        skip: 0,
+      };
+
+      const result = await StakingUtils.getStakers(filter);
+
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
+        expect.anything(),
+        expect.objectContaining({
+          minStakedAmount: undefined,
+          maxStakedAmount: undefined,
+          minLockedAmount: undefined,
+          maxLockedAmount: undefined,
+          minWithdrawnAmount: undefined,
+          maxWithdrawnAmount: undefined,
+          minSlashedAmount: undefined,
+          maxSlashedAmount: undefined,
+          orderBy: 'lastDepositTimestamp',
+          orderDirection: OrderDirection.DESC,
+          first: 10,
+          skip: 0,
+        })
+      );
+      const expectedStakers = mockStakers.map((s) => ({
+        address: s.address,
+        stakedAmount: BigInt(s.stakedAmount),
+        lockedAmount: BigInt(s.lockedAmount),
+        withdrawableAmount: BigInt(s.withdrawnAmount),
+        slashedAmount: BigInt(s.slashedAmount),
+        lockedUntil: Number(s.lockedUntilTimestamp) * 1000,
+        lastDepositTimestamp: Number(s.lastDepositTimestamp) * 1000,
+      }));
+      expect(result).toEqual(expectedStakers);
+    });
+
+    test('should return an empty array if no stakers found', async () => {
+      vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
+        stakers: undefined,
+      });
+      const filter: IStakersFilter = {
+        chainId: ChainId.LOCALHOST,
+        first: 10,
+        skip: 0,
+      };
+
+      const result = await StakingUtils.getStakers(filter);
+      expect(result).toEqual([]);
+    });
+
+    test('should throw an error if the gql fetch fails', async () => {
+      const filter: IStakersFilter = {
+        chainId: ChainId.LOCALHOST,
+        first: 10,
+        skip: 0,
+      };
+
+      const gqlFetchSpy = vi
+        .spyOn(gqlFetch, 'default')
+        .mockRejectedValueOnce(new Error('Error'));
+
+      await expect(StakingUtils.getStakers(filter)).rejects.toThrow();
+      expect(gqlFetchSpy).toHaveBeenCalledTimes(1);
+    });
+
+    test('should throw an error if the chain ID is unsupported', async () => {
+      const filter: IStakersFilter = {
+        chainId: 999999 as ChainId,
+        first: 10,
+        skip: 0,
+      };
+
+      await expect(StakingUtils.getStakers(filter)).rejects.toThrow(
+        ErrorUnsupportedChainID
+      );
     });
   });
 });

@@ -8,17 +8,17 @@ import SectionWrapper from '@/shared/ui/SectionWrapper';
 import TokenAmount from './TokenAmount';
 
 type Props = {
-  amountStaked?: string | number | null;
-  amountLocked?: string | number | null;
-  amountWithdrawable?: string | number | null;
+  stakedAmount?: string | number | null;
+  lockedAmount?: string | number | null;
+  withdrawableAmount?: string | number | null;
 };
 
 const StakeInfo: FC<Props> = ({
-  amountStaked,
-  amountLocked,
-  amountWithdrawable,
+  stakedAmount,
+  lockedAmount,
+  withdrawableAmount,
 }) => {
-  if (!amountStaked && !amountLocked && !amountWithdrawable) return null;
+  if (!stakedAmount && !lockedAmount && !withdrawableAmount) return null;
 
   return (
     <SectionWrapper>
@@ -26,28 +26,28 @@ const StakeInfo: FC<Props> = ({
         Stake Info
       </Typography>
       <Stack gap={4}>
-        {Number.isFinite(Number(amountStaked)) && (
+        {Number.isFinite(Number(stakedAmount)) && (
           <Stack gap={{ xs: 1, md: 0 }} direction={{ sm: 'column', md: 'row' }}>
             <Typography variant="subtitle2" width={300}>
               Staked Tokens
             </Typography>
-            <TokenAmount amount={amountStaked} />
+            <TokenAmount amount={stakedAmount} />
           </Stack>
         )}
-        {Number.isFinite(Number(amountLocked)) && (
+        {Number.isFinite(Number(lockedAmount)) && (
           <Stack gap={{ xs: 1, md: 0 }} direction={{ sm: 'column', md: 'row' }}>
             <Typography variant="subtitle2" width={300}>
               Locked Tokens
             </Typography>
-            <TokenAmount amount={amountLocked} />
+            <TokenAmount amount={lockedAmount} />
           </Stack>
         )}
-        {Number.isFinite(Number(amountWithdrawable)) && (
+        {Number.isFinite(Number(withdrawableAmount)) && (
           <Stack gap={{ xs: 1, md: 0 }} direction={{ sm: 'column', md: 'row' }}>
             <Typography variant="subtitle2" width={300}>
               Withdrawable Tokens
             </Typography>
-            <TokenAmount amount={amountWithdrawable} />
+            <TokenAmount amount={withdrawableAmount} />
           </Stack>
         )}
       </Stack>

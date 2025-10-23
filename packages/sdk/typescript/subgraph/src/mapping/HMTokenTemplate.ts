@@ -1,4 +1,10 @@
-import { Address, BigInt, Bytes, dataSource } from '@graphprotocol/graph-ts';
+import {
+  Address,
+  BigInt,
+  Bytes,
+  dataSource,
+  log,
+} from '@graphprotocol/graph-ts';
 
 import {
   Approval,
@@ -7,7 +13,6 @@ import {
   Transfer,
 } from '../../generated/HMToken/HMToken';
 import {
-  DailyWorker,
   Escrow,
   HMTApprovalEvent,
   HMTBulkApprovalEvent,
@@ -15,7 +20,6 @@ import {
   HMTTransferEvent,
   HMTokenStatistics,
   Holder,
-  Payout,
   UniqueReceiver,
   UniqueSender,
 } from '../../generated/schema';
@@ -228,53 +232,6 @@ export function handleTransfer(event: Transfer): void {
     event.params._value
   );
   uniqueReceiver.save();
-
-  // Track HMT transfer from Escrow for paidAmount, balance, and payout items
-  const fromEscrow = Escrow.load(event.params._from);
-  if (fromEscrow) {
-    fromEscrow.amountPaid = fromEscrow.amountPaid.plus(event.params._value);
-    fromEscrow.balance = fromEscrow.balance.minus(event.params._value);
-    fromEscrow.save();
-
-    // Update worker, and create payout object
-    const worker = createOrLoadWorker(event.params._to);
-    worker.totalHMTAmountReceived = worker.totalHMTAmountReceived.plus(
-      event.params._value
-    );
-    worker.payoutCount = worker.payoutCount.plus(ONE_BI);
-    worker.save();
-
-    const payoutId = event.transaction.hash.concat(event.params._to);
-    const payment = new Payout(payoutId);
-    payment.escrowAddress = event.params._from;
-    payment.recipient = event.params._to;
-    payment.amount = event.params._value;
-    payment.createdAt = event.block.timestamp;
-    payment.save();
-
-    // Update worker and payout day data
-    eventDayData.dailyPayoutCount = eventDayData.dailyPayoutCount.plus(ONE_BI);
-    eventDayData.dailyHMTPayoutAmount = eventDayData.dailyHMTPayoutAmount.plus(
-      event.params._value
-    );
-
-    const eventDayId = toEventDayId(event);
-    const dailyWorkerId = Bytes.fromI32(eventDayId.toI32()).concat(
-      event.params._to
-    );
-
-    let dailyWorker = DailyWorker.load(dailyWorkerId);
-    if (!dailyWorker) {
-      dailyWorker = new DailyWorker(dailyWorkerId);
-      dailyWorker.timestamp = eventDayId;
-      dailyWorker.address = event.params._to;
-      dailyWorker.escrowAddress = event.params._from;
-      dailyWorker.save();
-
-      eventDayData.dailyWorkerCount =
-        eventDayData.dailyWorkerCount.plus(ONE_BI);
-    }
-  }
 
   eventDayData.save();
   statsEntity.save();

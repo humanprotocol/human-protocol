@@ -96,6 +96,7 @@ export function handleIntermediateStorage(event: IntermediateStorage): void {
   eventEntity.escrowAddress = event.address;
   eventEntity.sender = event.transaction.from;
   eventEntity.intermediateResultsUrl = event.params._url;
+  eventEntity.intermediateResultsHash = event.params._hash;
   eventEntity.save();
 
   // Updates escrow statistics
@@ -117,6 +118,7 @@ export function handleIntermediateStorage(event: IntermediateStorage): void {
   const escrowEntity = Escrow.load(dataSource.address());
   if (escrowEntity) {
     escrowEntity.intermediateResultsUrl = event.params._url;
+    escrowEntity.intermediateResultsHash = event.params._hash;
     escrowEntity.save();
 
     createTransaction(
@@ -138,7 +140,7 @@ export function handleBulkTransfer(event: BulkTransfer): void {
   eventEntity.txHash = event.transaction.hash;
   eventEntity.escrowAddress = event.address;
   eventEntity.sender = event.transaction.from;
-  eventEntity.bulkPayoutTxId = event.params._txId;
+  eventEntity.payoutId = event.params._txId.toString();
   eventEntity.bulkCount = event.params._bulkCount;
   eventEntity.save();
 

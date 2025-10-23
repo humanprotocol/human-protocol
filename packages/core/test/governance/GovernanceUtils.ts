@@ -7,7 +7,7 @@ import {
   VHMToken,
   DAOSpokeContract,
   WormholeMock,
-} from '../typechain-types';
+} from '../../typechain-types';
 import { IWormholeVM, IWormholeSignature } from './GovernanceTypes';
 
 let owner: Signer;

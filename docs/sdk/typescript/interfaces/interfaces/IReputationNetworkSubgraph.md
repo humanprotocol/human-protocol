@@ -6,7 +6,7 @@
 
 # Interface: IReputationNetworkSubgraph
 
-Defined in: [interfaces.ts:53](https://github.com/humanprotocol/human-protocol/blob/2f541eb9f61d23b64321ff5b999971550d47e843/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L53)
+Defined in: [interfaces.ts:72](https://github.com/humanprotocol/human-protocol/blob/c6ab6b31903af39ac6b3e92bd60cecc017b01413/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L72)
 
 ## Extends
 
@@ -18,11 +18,11 @@ Defined in: [interfaces.ts:53](https://github.com/humanprotocol/human-protocol/b
 
 > **address**: `string`
 
-Defined in: [interfaces.ts:49](https://github.com/humanprotocol/human-protocol/blob/2f541eb9f61d23b64321ff5b999971550d47e843/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L49)
+Defined in: [interfaces.ts:68](https://github.com/humanprotocol/human-protocol/blob/c6ab6b31903af39ac6b3e92bd60cecc017b01413/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L68)
 
 #### Inherited from
 
-`Omit.address`
+[`IReputationNetwork`](IReputationNetwork.md).[`address`](IReputationNetwork.md#address)
 
 ***
 
@@ -30,11 +30,11 @@ Defined in: [interfaces.ts:49](https://github.com/humanprotocol/human-protocol/b
 
 > **id**: `string`
 
-Defined in: [interfaces.ts:48](https://github.com/humanprotocol/human-protocol/blob/2f541eb9f61d23b64321ff5b999971550d47e843/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L48)
+Defined in: [interfaces.ts:67](https://github.com/humanprotocol/human-protocol/blob/c6ab6b31903af39ac6b3e92bd60cecc017b01413/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L67)
 
 #### Inherited from
 
-`Omit.id`
+[`IReputationNetwork`](IReputationNetwork.md).[`id`](IReputationNetwork.md#id)
 
 ***
 
@@ -42,4 +42,4 @@ Defined in: [interfaces.ts:48](https://github.com/humanprotocol/human-protocol/b
 
 > **operators**: [`IOperatorSubgraph`](IOperatorSubgraph.md)[]
 
-Defined in: [interfaces.ts:55](https://github.com/humanprotocol/human-protocol/blob/2f541eb9f61d23b64321ff5b999971550d47e843/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L55)
+Defined in: [interfaces.ts:74](https://github.com/humanprotocol/human-protocol/blob/c6ab6b31903af39ac6b3e92bd60cecc017b01413/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L74)
