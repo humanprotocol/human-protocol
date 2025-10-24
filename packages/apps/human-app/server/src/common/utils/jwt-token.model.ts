@@ -10,6 +10,8 @@ export class JwtUserData {
   @AutoMap()
   reputation_network: string;
   @AutoMap()
+  stake_eligible?: boolean;
+  @AutoMap()
   email?: string;
   @AutoMap()
   qualifications?: string[];
