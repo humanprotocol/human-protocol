@@ -4,6 +4,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthConfigService } from '@/config';
 import { HCaptchaModule } from '@/integrations/hcaptcha';
 import { EmailModule } from '@/modules/email';
+import { ExchangeModule } from '@/modules/exchange';
+import { ExchangeApiKeysModule } from '@/modules/exchange-api-keys';
 import { UserModule } from '@/modules/user';
 import { Web3Module } from '@/modules/web3';
 
@@ -27,6 +29,8 @@ import { TokenRepository } from './token.repository';
     }),
     Web3Module,
     HCaptchaModule,
+    ExchangeModule,
+    ExchangeApiKeysModule,
     EmailModule,
   ],
   providers: [JwtHttpStrategy, AuthService, TokenRepository],

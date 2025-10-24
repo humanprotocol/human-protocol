@@ -1,5 +1,5 @@
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
-import { ChainId } from '@human-protocol/sdk';
+import { ChainId, StakingClient } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 import { Wallet, ethers } from 'ethers';
 
@@ -105,5 +105,17 @@ export class Web3Service {
     } catch (noop) {
       throw new Error('Failed to fetch token decimals');
     }
+  }
+
+  async getStakedBalance(address: string): Promise<number> {
+    const chainId = this.web3ConfigService.reputationNetworkChainId;
+    const provider = this.getSigner(chainId).provider;
+
+    const stakingClient = await StakingClient.build(provider);
+    const stakerInfo = await stakingClient.getStakerInfo(address);
+
+    const total =
+      (stakerInfo.stakedAmount ?? 0n) + (stakerInfo.lockedAmount ?? 0n);
+    return Number(ethers.formatEther(total));
   }
 }

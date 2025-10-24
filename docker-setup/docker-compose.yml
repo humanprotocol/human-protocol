@@ -103,7 +103,7 @@ services:
         published: ${POSTGRES_PORT:-5433}
     volumes:
       - ./initdb:/docker-entrypoint-initdb.d
-      - postgres-data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql
     environment:
       <<: *postgres_auth_vars
     healthcheck:

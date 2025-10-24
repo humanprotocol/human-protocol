@@ -47,6 +47,10 @@ export class OracleDiscoveryController {
         HttpStatus.FORBIDDEN,
       );
     }
+    if (!req.user?.stake_eligible) {
+      return [];
+    }
+
     const command = this.mapper.map(query, GetOraclesQuery, GetOraclesCommand);
     const oracles = await this.oracleDiscoveryService.getOracles(command);
 
