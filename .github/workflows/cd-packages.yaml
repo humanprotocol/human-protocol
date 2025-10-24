@@ -25,6 +25,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: yarn
+          # Necessary to set up registry for auth
           registry-url: "https://registry.npmjs.org"
       # Ensure npm 11.5.1 or later is installed to support OIDC
       - name: Update npm
