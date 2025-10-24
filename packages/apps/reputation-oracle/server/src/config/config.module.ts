@@ -4,6 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthConfigService } from './auth-config.service';
 import { DatabaseConfigService } from './database-config.service';
 import { EmailConfigService } from './email-config.service';
+import { EncryptionConfigService } from './encryption-config.service';
 import { HCaptchaConfigService } from './hcaptcha-config.service';
 import { KycConfigService } from './kyc-config.service';
 import { NDAConfigService } from './nda-config.service';
@@ -12,6 +13,7 @@ import { ReputationConfigService } from './reputation-config.service';
 import { S3ConfigService } from './s3-config.service';
 import { ServerConfigService } from './server-config.service';
 import { SlackConfigService } from './slack-config.service';
+import { StakingConfigService } from './staking-config.service';
 import { Web3ConfigService } from './web3-config.service';
 
 @Global()
@@ -21,11 +23,13 @@ import { Web3ConfigService } from './web3-config.service';
     AuthConfigService,
     DatabaseConfigService,
     EmailConfigService,
+    EncryptionConfigService,
     HCaptchaConfigService,
     KycConfigService,
     NDAConfigService,
     PGPConfigService,
     ReputationConfigService,
+    StakingConfigService,
     S3ConfigService,
     ServerConfigService,
     SlackConfigService,
@@ -35,11 +39,13 @@ import { Web3ConfigService } from './web3-config.service';
     AuthConfigService,
     DatabaseConfigService,
     EmailConfigService,
+    EncryptionConfigService,
     HCaptchaConfigService,
     KycConfigService,
     NDAConfigService,
     PGPConfigService,
     ReputationConfigService,
+    StakingConfigService,
     S3ConfigService,
     ServerConfigService,
     SlackConfigService,

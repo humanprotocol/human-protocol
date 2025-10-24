@@ -8,6 +8,7 @@ import {
   ValidationOptions,
 } from 'class-validator';
 
+export * from './exchange';
 export * from './password';
 export * from './web3';
 
