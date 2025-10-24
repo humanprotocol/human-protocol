@@ -1,12 +1,17 @@
 name: Publish packages
 
 permissions:
+  id-token: write # required for OIDC on npm
   contents: write # needed to push tags
 
 on:
   push:
     branches:
       - main
+    paths:
+      - "packages/core/**"
+      - "packages/libs/**"
+      - "packages/sdk/typescript/human-protocol-sdk/**"
 
 jobs:
   publish:
@@ -14,10 +19,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          token: ${{ secrets.GH_GITBOOK_TOKEN }}
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: yarn
+          registry-url: "https://registry.npmjs.org"
+      # Ensure npm 11.5.1 or later is installed to support OIDC
+      - name: Update npm
+        run: npm install -g npm@latest
       - name: Install dependencies
         run: yarn install --immutable
       # If there is no new version for dependency package (e.g. core)
@@ -31,7 +42,6 @@ jobs:
         run: yarn workspaces foreach --all --no-private -pt npm publish --tolerate-republish --json | tee publish.log
         env:
           SKIP_PREPACK: true
-          YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Tag published packages
         run: node scripts/tag-published-packages.mjs publish.log
       - name: Push created tags
