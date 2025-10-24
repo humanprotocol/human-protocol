@@ -8,10 +8,11 @@ on:
   push:
     branches:
       - main
-    paths:
-      - "packages/core/**"
-      - "packages/libs/**"
-      - "packages/sdk/typescript/human-protocol-sdk/**"
+    paths-ignore:
+      - "docs/**"
+      - "packages/apps/**"
+      - "packages/examples/**"
+      - "packages/sdk/python/**"
 
 jobs:
   publish:
