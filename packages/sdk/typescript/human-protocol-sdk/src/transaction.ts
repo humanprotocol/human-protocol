@@ -8,11 +8,16 @@ import {
   ErrorInvalidHashProvided,
   ErrorUnsupportedChainID,
 } from './error';
+import { TransactionData } from './graphql';
 import {
-  GET_TRANSACTIONS_QUERY,
   GET_TRANSACTION_QUERY,
+  GET_TRANSACTIONS_QUERY,
 } from './graphql/queries/transaction';
-import { ITransaction, ITransactionsFilter } from './interfaces';
+import {
+  InternalTransaction,
+  ITransaction,
+  ITransactionsFilter,
+} from './interfaces';
 import { getSubgraphUrl, getUnixTimestamp } from './utils';
 
 export class TransactionUtils {
@@ -26,12 +31,24 @@ export class TransactionUtils {
    *   from: string;
    *   to: string;
    *   timestamp: bigint;
-   *   value: string;
+   *   value: bigint;
    *   method: string;
    *   receiver?: string;
    *   escrow?: string;
    *   token?: string;
    *   internalTransactions: InternalTransaction[];
+   * };
+   * ```
+   *
+   * ```ts
+   * type InternalTransaction = {
+   *  from: string;
+   *  to: string;
+   *  value: bigint;
+   *  method: string;
+   *  receiver?: string;
+   *  escrow?: string;
+   *  token?: string;
    * };
    * ```
    *
@@ -61,12 +78,13 @@ export class TransactionUtils {
     }
 
     const { transaction } = await gqlFetch<{
-      transaction: ITransaction;
+      transaction: TransactionData | null;
     }>(getSubgraphUrl(networkData), GET_TRANSACTION_QUERY, {
       hash: hash.toLowerCase(),
     });
+    if (!transaction) return null;
 
-    return transaction || null;
+    return mapTransaction(transaction);
   }
 
   /**
@@ -92,6 +110,18 @@ export class TransactionUtils {
    *   skip?: number; // (Optional) Number of transactions to skip. Default is 0.
    *   orderDirection?: OrderDirection; // (Optional) Order of the results. Default is DESC.
    * }
+   *
+   *
+   * ```ts
+   * type InternalTransaction = {
+   *  from: string;
+   *  to: string;
+   *  value: bigint;
+   *  method: string;
+   *  receiver?: string;
+   *  escrow?: string;
+   *  token?: string;
+   * };
    * ```
    *
    * ```ts
@@ -101,7 +131,7 @@ export class TransactionUtils {
    *   from: string;
    *   to: string;
    *   timestamp: bigint;
-   *   value: string;
+   *   value: bigint;
    *   method: string;
    *   receiver?: string;
    *   escrow?: string;
@@ -150,7 +180,7 @@ export class TransactionUtils {
     }
 
     const { transactions } = await gqlFetch<{
-      transactions: ITransaction[];
+      transactions: TransactionData[];
     }>(getSubgraphUrl(networkData), GET_TRANSACTIONS_QUERY(filter), {
       fromAddress: filter?.fromAddress,
       toAddress: filter?.toAddress,
@@ -172,6 +202,34 @@ export class TransactionUtils {
       return [];
     }
 
-    return transactions;
+    return transactions.map((transaction) => mapTransaction(transaction));
   }
+}
+
+function mapTransaction(t: TransactionData): ITransaction {
+  const internalTransactions: InternalTransaction[] = (
+    t.internalTransactions || []
+  ).map((itx) => ({
+    from: itx.from,
+    to: itx.to,
+    value: BigInt(itx.value),
+    method: itx.method,
+    receiver: itx.receiver,
+    escrow: itx.escrow,
+    token: itx.token,
+  }));
+
+  return {
+    block: BigInt(t.block),
+    txHash: t.txHash,
+    from: t.from,
+    to: t.to,
+    timestamp: Number(t.timestamp) * 1000,
+    value: BigInt(t.value),
+    method: t.method,
+    receiver: t.receiver,
+    escrow: t.escrow,
+    token: t.token,
+    internalTransactions,
+  };
 }

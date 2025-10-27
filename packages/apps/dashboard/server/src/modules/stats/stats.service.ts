@@ -1,5 +1,4 @@
-import { NETWORKS, StatisticsClient } from '@human-protocol/sdk';
-import { DailyHMTData } from '@human-protocol/sdk/dist/graphql';
+import { IDailyHMT, NETWORKS, StatisticsClient } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
@@ -265,7 +264,7 @@ export class StatsService implements OnModuleInit {
   }
 
   private async isHmtDailyStatsFetched(): Promise<boolean> {
-    const data = await this.cacheManager.get<DailyHMTData>(
+    const data = await this.cacheManager.get<IDailyHMT>(
       `${HMT_PREFIX}${HMT_STATS_START_DATE}`,
     );
     return !!data;
@@ -298,7 +297,7 @@ export class StatsService implements OnModuleInit {
         operatingNetworks.map(async (network) => {
           const statisticsClient = new StatisticsClient(NETWORKS[network]);
           let skip = 0;
-          let fetchedRecords: DailyHMTData[] = [];
+          let fetchedRecords: IDailyHMT[] = [];
 
           do {
             fetchedRecords = await statisticsClient.getHMTDailyData({
@@ -310,7 +309,7 @@ export class StatsService implements OnModuleInit {
 
             for (const record of fetchedRecords) {
               const dailyCacheKey = `${HMT_PREFIX}${
-                record.timestamp.toISOString().split('T')[0]
+                new Date(record.timestamp).toISOString().split('T')[0]
               }`;
 
               // Sum daily values

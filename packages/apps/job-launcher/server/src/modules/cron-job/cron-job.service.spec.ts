@@ -1,19 +1,4 @@
-jest.mock('@human-protocol/sdk', () => ({
-  ...jest.requireActual('@human-protocol/sdk'),
-  EscrowClient: {
-    build: jest.fn().mockImplementation(() => ({
-      createEscrow: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-      setup: jest.fn().mockResolvedValue(null),
-      fund: jest.fn().mockResolvedValue(null),
-    })),
-  },
-  KVStoreUtils: {
-    get: jest.fn(),
-  },
-  EscrowUtils: {
-    getStatusEvents: jest.fn(),
-  },
-}));
+jest.mock('@human-protocol/sdk');
 
 import { faker } from '@faker-js/faker';
 import { createMock } from '@golevelup/ts-jest';
@@ -23,10 +8,10 @@ import {
   EscrowClient,
   EscrowStatus,
   EscrowUtils,
+  IStatusEvent,
   KVStoreUtils,
   NETWORKS,
 } from '@human-protocol/sdk';
-import { StatusEvent } from '@human-protocol/sdk/dist/graphql';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -39,7 +24,6 @@ import {
   MOCK_FILE_HASH,
   MOCK_FILE_URL,
   MOCK_MAX_RETRY_COUNT,
-  MOCK_TRANSACTION_HASH,
 } from '../../../test/constants';
 import { NetworkConfigService } from '../../common/config/network-config.service';
 import { ServerConfigService } from '../../common/config/server-config.service';
@@ -80,6 +64,10 @@ import { WhitelistService } from '../whitelist/whitelist.service';
 import { CronJobEntity } from './cron-job.entity';
 import { CronJobRepository } from './cron-job.repository';
 import { CronJobService } from './cron-job.service';
+
+const mockedEscrowClient = jest.mocked(EscrowClient);
+const mockedEscrowUtils = jest.mocked(EscrowUtils);
+const mockedKVStoreUtils = jest.mocked(KVStoreUtils);
 
 describe('CronJobService', () => {
   let service: CronJobService,
@@ -694,7 +682,8 @@ describe('CronJobService', () => {
     let findJobMock: any,
       cronJobEntityMock: Partial<CronJobEntity>,
       jobEntityMock1: Partial<JobEntity>,
-      jobEntityMock2: Partial<JobEntity>;
+      jobEntityMock2: Partial<JobEntity>,
+      escrowInstance: Partial<EscrowClient>;
 
     beforeEach(() => {
       cronJobEntityMock = {
@@ -734,20 +723,21 @@ describe('CronJobService', () => {
 
       jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
 
-      jest.spyOn(jobService, 'processEscrowCancellation').mockResolvedValue({
-        txHash: MOCK_TRANSACTION_HASH,
-        amountRefunded: 1n,
-      });
+      jest.spyOn(jobService, 'processEscrowCancellation').mockResolvedValue();
 
-      (EscrowClient.build as any).mockImplementation(() => ({
+      escrowInstance = {
         getExchangeOracleAddress: jest
           .fn()
           .mockResolvedValue(MOCK_EXCHANGE_ORACLE_ADDRESS),
-      }));
+        getStatus: jest.fn().mockResolvedValue(EscrowStatus.ToCancel),
+      } as Partial<EscrowClient>;
+      mockedEscrowClient.build.mockResolvedValue(
+        escrowInstance as EscrowClient,
+      );
 
-      KVStoreUtils.get = jest
-        .fn()
-        .mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
+      mockedKVStoreUtils.get.mockResolvedValue(
+        MOCK_EXCHANGE_ORACLE_WEBHOOK_URL,
+      );
 
       const manifestMock = {
         requestType: FortuneJobType.FORTUNE,
@@ -787,8 +777,7 @@ describe('CronJobService', () => {
     });
 
     it('should cancel all of the jobs with status TO_CANCEL', async () => {
-      jest.spyOn(webhookRepository, 'createUnique');
-      jest.spyOn(jobService, 'isEscrowFunded').mockResolvedValue(true);
+      jest.spyOn(webhookRepository, 'createMany');
 
       const result = await service.cancelCronJob();
 
@@ -800,12 +789,10 @@ describe('CronJobService', () => {
       expect(jobService.processEscrowCancellation).toHaveBeenCalledWith(
         jobEntityMock2,
       );
-      expect(webhookRepository.createUnique).toHaveBeenCalledTimes(2);
+      expect(webhookRepository.createMany).toHaveBeenCalledTimes(2);
     });
 
     it('should not call process escrow cancellation when escrowAddress is not present', async () => {
-      jest.spyOn(jobService, 'isEscrowFunded').mockResolvedValue(false);
-
       const jobEntityWithoutEscrow = {
         ...jobEntityMock1,
         escrowAddress: undefined,
@@ -823,7 +810,12 @@ describe('CronJobService', () => {
     });
 
     it('should increase retriesCount by 1 if the job cancellation fails', async () => {
-      jest.spyOn(jobService, 'isEscrowFunded').mockResolvedValue(true);
+      mockedEscrowClient.build.mockResolvedValue({
+        getExchangeOracleAddress: jest
+          .fn()
+          .mockResolvedValue(MOCK_EXCHANGE_ORACLE_ADDRESS),
+        getStatus: jest.fn().mockReturnValue(EscrowStatus.ToCancel),
+      } as unknown as EscrowClient);
       jest
         .spyOn(jobService, 'processEscrowCancellation')
         .mockRejectedValueOnce(new Error('cancellation failed'));
@@ -838,7 +830,12 @@ describe('CronJobService', () => {
     });
 
     it('should mark job as failed if the job cancellation fails more than max retries count', async () => {
-      jest.spyOn(jobService, 'isEscrowFunded').mockResolvedValue(true);
+      mockedEscrowClient.build.mockResolvedValue({
+        getExchangeOracleAddress: jest
+          .fn()
+          .mockResolvedValue(MOCK_EXCHANGE_ORACLE_ADDRESS),
+        getStatus: jest.fn().mockResolvedValue(EscrowStatus.ToCancel),
+      } as unknown as EscrowClient);
       jest
         .spyOn(jobService, 'processEscrowCancellation')
         .mockRejectedValueOnce(new Error('cancellation failed'));
@@ -849,7 +846,7 @@ describe('CronJobService', () => {
 
       expect(jobService.processEscrowCancellation).toHaveBeenCalledTimes(2);
       expect(jobEntityMock1.status).toBe(JobStatus.FAILED);
-      expect(jobEntityMock2.status).toBe(JobStatus.CANCELED);
+      expect(jobEntityMock2.status).toBe(JobStatus.CANCELING);
     });
 
     it('should complete the cron job entity on database to unlock', async () => {
@@ -861,6 +858,26 @@ describe('CronJobService', () => {
         cronJobType: CronJobType.CancelEscrow,
         createdAt: expect.any(Date),
       });
+    });
+
+    it('should not call webhooks if escrow status is Launched', async () => {
+      jest.spyOn(webhookRepository, 'createMany');
+
+      (escrowInstance.getStatus as jest.Mock)
+        .mockResolvedValueOnce(EscrowStatus.Cancelled)
+        .mockResolvedValueOnce(EscrowStatus.ToCancel);
+
+      const result = await service.cancelCronJob();
+
+      expect(result).toBeTruthy();
+      expect(jobService.processEscrowCancellation).toHaveBeenCalledWith(
+        jobEntityMock1,
+      );
+      expect(jobRepository.updateOne).toHaveBeenCalledTimes(2);
+      expect(jobService.processEscrowCancellation).toHaveBeenCalledWith(
+        jobEntityMock2,
+      );
+      expect(webhookRepository.createMany).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -1090,7 +1107,7 @@ describe('CronJobService', () => {
   describe('syncJobStatuses Cron Job', () => {
     let cronJobEntityMock: Partial<CronJobEntity>;
     let jobEntityMock: Partial<JobEntity>;
-    let escrowEventMock: Partial<StatusEvent>;
+    let escrowEventMock: Partial<IStatusEvent>;
 
     beforeEach(() => {
       cronJobEntityMock = {
@@ -1108,7 +1125,7 @@ describe('CronJobService', () => {
       escrowEventMock = {
         chainId: ChainId.LOCALHOST,
         escrowAddress: MOCK_ADDRESS,
-        status: EscrowStatus[EscrowStatus.Partial],
+        status: EscrowStatus.Partial,
       };
 
       jest.spyOn(repository, 'findOneByType').mockResolvedValue(null);
@@ -1121,7 +1138,7 @@ describe('CronJobService', () => {
         .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
         .mockResolvedValue(jobEntityMock as any);
 
-      (EscrowUtils.getStatusEvents as any).mockResolvedValue([
+      mockedEscrowUtils.getStatusEvents.mockResolvedValue([
         escrowEventMock as any,
       ]);
     });
@@ -1162,7 +1179,7 @@ describe('CronJobService', () => {
 
       await service.syncJobStatuses();
 
-      expect(EscrowUtils.getStatusEvents).toHaveBeenCalled();
+      expect(mockedEscrowUtils.getStatusEvents).toHaveBeenCalled();
       expect(
         jobRepository.findManyByChainIdsAndEscrowAddresses,
       ).toHaveBeenCalledWith(
@@ -1252,6 +1269,7 @@ describe('CronJobService', () => {
         chainId: ChainId.LOCALHOST,
         escrowAddress: webhookEntity.escrowAddress,
         status: JobStatus.PAID,
+        requestType: FortuneJobType.FORTUNE,
       };
 
       const cronJobEntityMock = {
@@ -1290,7 +1308,7 @@ describe('CronJobService', () => {
 
       expect(jobRepository.updateOne).toHaveBeenCalledWith({
         ...jobEntity,
-        status: JobStatus.CANCELED,
+        status: JobStatus.CANCELING,
       });
       expect(webhookRepository.updateOne).toHaveBeenCalledWith({
         ...webhookEntity,

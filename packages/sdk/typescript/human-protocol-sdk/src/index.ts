@@ -1,4 +1,4 @@
-import { StakingClient } from './staking';
+import { StakingClient, StakingUtils } from './staking';
 import { StorageClient } from './storage';
 import { KVStoreClient, KVStoreUtils } from './kvstore';
 import { EscrowClient, EscrowUtils } from './escrow';
@@ -38,4 +38,5 @@ export {
   OperatorUtils,
   TransactionUtils,
   WorkerUtils,
+  StakingUtils,
 };

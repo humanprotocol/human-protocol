@@ -70,9 +70,22 @@ Gets the value of a key-value pair in the contract.
 :param address: The Ethereum address associated with the key-value pair
 :type key: `str`
 :param key: The key of the key-value pair to get
-:rtype: `str`
-:return: The value of the key-value pair if it exists
-:example:
+
+* **Return type:**
+  `str`
+* **Returns:**
+  The value of the key-value pair if it exists
+* **Example:**
+  ```python
+  from eth_typing import URI
+  from web3 import Web3
+  from web3.providers.auto import load_provider_from_uri
+  from human_protocol_sdk.kvstore import KVStoreClient
+
+  w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+  kvstore_client = KVStoreClient(w3)
+  role = kvstore_client.get('0x62dD51230A30401C455c8398d06F85e4EaB6309f', 'Role')
+  ```
 
 #### set(\*args, \*\*kwargs)
 

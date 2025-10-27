@@ -80,7 +80,7 @@ describe('StatisticsClient', () => {
         totalEscrows: 1,
         dailyEscrowsData: [
           {
-            timestamp: new Date(1000),
+            timestamp: 1000,
             escrowsTotal: 1,
             escrowsPending: 1,
             escrowsSolved: 1,
@@ -141,7 +141,7 @@ describe('StatisticsClient', () => {
       expect(result).toEqual({
         dailyWorkersData: [
           {
-            timestamp: new Date(1000),
+            timestamp: 1000,
             activeWorkers: 4,
           },
         ],
@@ -200,7 +200,7 @@ describe('StatisticsClient', () => {
       expect(result).toEqual({
         dailyPaymentsData: [
           {
-            timestamp: new Date(1000),
+            timestamp: 1000,
             totalAmountPaid: ethers.toBigInt(100),
             totalCount: 4,
             averageAmountPerWorker: ethers.toBigInt(25),
@@ -453,7 +453,7 @@ describe('StatisticsClient', () => {
 
       expect(result).toEqual([
         {
-          timestamp: new Date(1000),
+          timestamp: 1000,
           totalTransactionAmount: ethers.toBigInt(100),
           totalTransactionCount: 4,
           dailyUniqueSenders: 100,

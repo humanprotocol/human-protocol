@@ -1,4 +1,4 @@
-import { ChainId, IOperator } from '@human-protocol/sdk';
+import { ChainId } from '@human-protocol/sdk';
 import { AutoMap } from '@automapper/classes';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsArray, IsOptional } from 'class-validator';
@@ -8,28 +8,27 @@ type DiscoveredOracleCreateProps = {
   id: string;
   address: string;
   chainId: ChainId;
-  amountStaked: bigint;
-  amountLocked: bigint;
-  lockedUntilTimestamp: bigint;
-  amountWithdrawn: bigint;
-  amountSlashed: bigint;
-  reward: bigint;
-  amountJobsProcessed: bigint;
-  role?: string;
-  fee?: bigint;
-  publicKey?: string;
-  webhookUrl?: string;
-  website?: string;
+  stakedAmount: bigint | null;
+  lockedAmount: bigint | null;
+  lockedUntilTimestamp: number | null;
+  withdrawnAmount: bigint | null;
+  slashedAmount: bigint | null;
+  amountJobsProcessed: bigint | null;
+  role: string;
+  fee: bigint | null;
+  publicKey: string | null;
+  webhookUrl: string | null;
+  website: string | null;
   url: string;
-  jobTypes: string[];
-  registrationNeeded?: boolean;
-  registrationInstructions?: string;
-  reputationNetworks?: string[];
-  name?: string;
-  category?: string;
+  jobTypes: string[] | null;
+  registrationNeeded: boolean | null;
+  registrationInstructions: string | null;
+  reputationNetworks: string[];
+  name: string;
+  category: string | null;
 };
 
-export class DiscoveredOracle implements IOperator {
+export class DiscoveredOracle {
   @ApiProperty({ description: 'Unique identifier of the oracle operator' })
   id: string;
 
@@ -39,26 +38,31 @@ export class DiscoveredOracle implements IOperator {
   @ApiProperty({ description: 'Chain ID where the oracle is registered' })
   chainId: ChainId;
 
-  @ApiProperty({ description: 'Amount staked by the operator' })
-  amountStaked: bigint;
+  @ApiPropertyOptional({ description: 'Amount staked by the operator' })
+  stakedAmount?: string;
 
-  @ApiProperty({ description: 'Amount currently locked by the operator' })
-  amountLocked: bigint;
+  @ApiPropertyOptional({
+    description: 'Amount currently locked by the operator',
+  })
+  lockedAmount?: string;
 
-  @ApiProperty({ description: 'Timestamp until funds are locked' })
-  lockedUntilTimestamp: bigint;
+  @ApiPropertyOptional({ description: 'Timestamp until funds are locked' })
+  lockedUntilTimestamp?: string;
 
-  @ApiProperty({ description: 'Total amount withdrawn by the operator' })
-  amountWithdrawn: bigint;
+  @ApiPropertyOptional({
+    description: 'Total amount withdrawn by the operator',
+  })
+  withdrawnAmount?: string;
 
-  @ApiProperty({ description: 'Total amount slashed from the operator' })
-  amountSlashed: bigint;
+  @ApiPropertyOptional({
+    description: 'Total amount slashed from the operator',
+  })
+  slashedAmount?: string;
 
-  @ApiProperty({ description: 'Total reward earned by the operator' })
-  reward: bigint;
-
-  @ApiProperty({ description: 'Number of jobs processed by the operator' })
-  amountJobsProcessed: bigint;
+  @ApiPropertyOptional({
+    description: 'Number of jobs processed by the operator',
+  })
+  amountJobsProcessed?: string;
 
   @ApiPropertyOptional({ description: 'Fee charged by the operator' })
   fee?: bigint;
@@ -85,7 +89,7 @@ export class DiscoveredOracle implements IOperator {
   jobTypes: string[];
 
   @ApiPropertyOptional({ description: 'Indicates if registration is needed' })
-  registrationNeeded: boolean;
+  registrationNeeded?: boolean;
 
   @ApiPropertyOptional({
     description: 'Instructions for registration, if needed',
@@ -111,8 +115,27 @@ export class DiscoveredOracle implements IOperator {
   executionsToSkip = 0;
 
   constructor(props: DiscoveredOracleCreateProps) {
-    Object.assign(this, props);
-    this.registrationNeeded = props.registrationNeeded || false;
+    this.id = props.id;
+    this.address = props.address;
+    this.chainId = props.chainId;
+    this.registrationNeeded = props.registrationNeeded ?? undefined;
+    this.role = props.role;
+    this.url = props.url;
+    this.name = props.name;
+    this.fee = props.fee ?? undefined;
+    this.publicKey = props.publicKey ?? undefined;
+    this.webhookUrl = props.webhookUrl ?? undefined;
+    this.website = props.website ?? undefined;
+    this.category = props.category ?? undefined;
+    this.registrationInstructions = props.registrationInstructions ?? undefined;
+    this.jobTypes = props.jobTypes ?? [];
+    this.reputationNetworks = props.reputationNetworks ?? undefined;
+    this.stakedAmount = props.stakedAmount?.toString();
+    this.lockedAmount = props.lockedAmount?.toString();
+    this.withdrawnAmount = props.withdrawnAmount?.toString();
+    this.slashedAmount = props.slashedAmount?.toString();
+    this.amountJobsProcessed = props.amountJobsProcessed?.toString();
+    this.lockedUntilTimestamp = props.lockedUntilTimestamp?.toString();
   }
 }
 
