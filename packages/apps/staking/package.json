@@ -1,5 +1,5 @@
 {
-  "name": "@human-protocol/staking-dashboard-client",
+  "name": "@apps/staking-dashboard-client",
   "private": true,
   "version": "1.0.0",
   "description": "Staking Dashboard",

@@ -1,5 +1,5 @@
 {
-  "name": "@human-protocol/human-app-server",
+  "name": "@apps/human-app-server",
   "private": true,
   "version": "0.0.1",
   "description": "HUMAN App server",

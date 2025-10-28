@@ -1,5 +1,5 @@
 {
-  "name": "@human-protocol/fortune-exchange-oracle-client",
+  "name": "@apps/fortune-exchange-oracle-client",
   "private": true,
   "version": "1.0.0",
   "description": "Job Launcher Client",
