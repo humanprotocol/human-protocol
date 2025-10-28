@@ -9,7 +9,12 @@ import {
   Query,
   Request,
 } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
 import { RequestWithUser } from '../../common/interfaces/jwt';
 import {
@@ -22,6 +27,7 @@ import Environment from '../../common/utils/environment';
 import { ChainId } from '@human-protocol/sdk';
 
 @ApiTags('Oracle-Discovery')
+@ApiBearerAuth()
 @Controller()
 export class OracleDiscoveryController {
   constructor(
@@ -47,10 +53,6 @@ export class OracleDiscoveryController {
         HttpStatus.FORBIDDEN,
       );
     }
-    if (!req.user?.stake_eligible) {
-      return [];
-    }
-
     const command = this.mapper.map(query, GetOraclesQuery, GetOraclesCommand);
     const oracles = await this.oracleDiscoveryService.getOracles(command);
 

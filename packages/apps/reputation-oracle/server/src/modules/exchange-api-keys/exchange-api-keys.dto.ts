@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Expose } from 'class-transformer';
 import { IsNotEmpty, IsString, MaxLength, Validate } from 'class-validator';
 
 import { SUPPORTED_EXCHANGE_NAMES } from '@/common/constants';
@@ -24,13 +23,19 @@ export class ExchangeNameParamDto {
     name: 'exchange_name',
     enum: SUPPORTED_EXCHANGE_NAMES,
   })
-  @Expose({ name: 'exchange_name' })
   @Validate(ExchangeNameValidator)
   exchangeName: string;
 }
-export class EncrollExchangeApiKeysParamsDto extends ExchangeNameParamDto {}
 
 export class EnrollExchangeApiKeysResponseDto {
   @ApiProperty()
   id: number;
+}
+
+export class EnrolledApiKeyDto {
+  @ApiProperty({ name: 'exchange_name' })
+  exchangeName: string;
+
+  @ApiProperty({ name: 'api_key' })
+  apiKey: string;
 }

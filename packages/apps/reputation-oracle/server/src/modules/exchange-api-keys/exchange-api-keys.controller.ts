@@ -16,16 +16,17 @@ import {
   ApiOperation,
   ApiResponse,
   ApiTags,
+  getSchemaPath,
 } from '@nestjs/swagger';
 
 import type { RequestWithUser } from '@/common/types';
 import Environment from '@/utils/environment';
 
 import {
-  EncrollExchangeApiKeysParamsDto,
+  ExchangeNameParamDto,
   EnrollExchangeApiKeysDto,
   EnrollExchangeApiKeysResponseDto,
-  ExchangeNameParamDto,
+  EnrolledApiKeyDto,
 } from './exchange-api-keys.dto';
 import { ExchangeApiKeysControllerErrorsFilter } from './exchange-api-keys.error-filter';
 import { ExchangeApiKeysRepository } from './exchange-api-keys.repository';
@@ -42,6 +43,26 @@ export class ExchangeApiKeysController {
   ) {}
 
   @ApiOperation({
+    summary: 'Retrieve enrolled exchange with api key',
+    description: 'Returns the enrolled api key for exchange w/o secret key',
+  })
+  @ApiResponse({
+    status: 200,
+    schema: {
+      nullable: true,
+      allOf: [{ $ref: getSchemaPath(EnrolledApiKeyDto) }],
+    },
+  })
+  @Get('/')
+  async retrieveEnrolledApiKeys(
+    @Req() request: RequestWithUser,
+  ): Promise<EnrolledApiKeyDto | null> {
+    const userId = request.user.id;
+
+    return this.exchangeApiKeysService.retrievedEnrolledApiKey(userId);
+  }
+
+  @ApiOperation({
     summary: 'Enroll API keys for exchange',
     description:
       'Enrolls API keys for provided exchange. If keys already exist for exchange - updates them',
@@ -56,15 +77,12 @@ export class ExchangeApiKeysController {
   @Post('/:exchange_name')
   async enroll(
     @Req() request: RequestWithUser,
-    @Param() params: EncrollExchangeApiKeysParamsDto,
+    @Param() params: ExchangeNameParamDto,
     @Body() data: EnrollExchangeApiKeysDto,
   ): Promise<EnrollExchangeApiKeysResponseDto> {
-    const userId = request.user.id;
-    const exchangeName = params.exchangeName;
-
     const key = await this.exchangeApiKeysService.enroll({
-      userId,
-      exchangeName,
+      userId: request.user.id,
+      exchangeName: params.exchangeName,
       apiKey: data.apiKey,
       secretKey: data.secretKey,
     });
@@ -73,25 +91,16 @@ export class ExchangeApiKeysController {
   }
 
   @ApiOperation({
-    summary: 'Delete API keys for exchange',
+    summary: 'Delete API keys',
   })
   @ApiResponse({
     status: 204,
     description: 'Exchange API keys deleted',
   })
   @HttpCode(204)
-  @Delete('/:exchange_name')
-  async delete(
-    @Req() request: RequestWithUser,
-    @Param() params: EncrollExchangeApiKeysParamsDto,
-  ): Promise<void> {
-    const userId = request.user.id;
-    const exchangeName = params.exchangeName;
-
-    await this.exchangeApiKeysRepository.deleteByUserAndExchange(
-      userId,
-      exchangeName,
-    );
+  @Delete('/')
+  async delete(@Req() request: RequestWithUser): Promise<void> {
+    await this.exchangeApiKeysRepository.deleteByUser(request.user.id);
   }
 
   @ApiOperation({
@@ -99,18 +108,12 @@ export class ExchangeApiKeysController {
     description:
       'This functionality is purely for dev solely and works only in non-production environments',
   })
-  @Get('/:exchange_name')
-  async retrieve(
-    @Req() request: RequestWithUser,
-    @Param() params: ExchangeNameParamDto,
-  ): Promise<unknown> {
+  @Get('/exchange')
+  async retrieve(@Req() request: RequestWithUser): Promise<unknown> {
     if (!Environment.isDevelopment()) {
       throw new ForbiddenException();
     }
 
-    const userId = request.user.id;
-    const exchangeName = params.exchangeName;
-
-    return this.exchangeApiKeysService.retrieve(userId, exchangeName);
+    return this.exchangeApiKeysService.retrieve(request.user.id);
   }
 }

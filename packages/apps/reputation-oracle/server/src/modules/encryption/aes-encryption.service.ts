@@ -8,6 +8,17 @@ import logger from '@/logger';
 const ALGORITHM = 'aes-256-gcm';
 const GCM_IV_LENGTH_BYTES = 12;
 
+/**
+ * Security note:
+ * - Best practice is to use one encryption key per purpose (e.g., exchange API keys, PII, etc.).
+ * - At the moment, we only encrypt exchange API keys and therefore use a single key
+ *   provided by EncryptionConfigService.aesEncryptionKey.
+ * - If/when we start encrypting different kinds of data, we should switch to per-purpose keys:
+ *   - add dedicated config entries for each purpose (e.g., ENCRYPTION_USER_EXCHANGE_API_KEY, ...),
+ *   - update this service so encrypt/decrypt accept an explicit encryptionKey parameter,
+ *   - and ensure callers pass the correct key for the data they are encrypting/decrypting.
+ */
+
 type EncryptionOutput = {
   encrypted: Buffer;
   iv: Buffer;

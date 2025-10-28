@@ -1,18 +1,17 @@
-import { Inject, Injectable, forwardRef } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 import { isValidExchangeName } from '@/common/validators/exchange';
 import { AesEncryptionService } from '@/modules/encryption/aes-encryption.service';
-import { ExchangeRouterService } from '@/modules/exchange/exchange.router.service';
+import { ExchangeClientFactory } from '@/modules/exchange/exchange-client.factory';
 
 import { ExchangeApiKeyEntity } from './exchange-api-key.entity';
 import {
-  ExchangeApiKeyNotFoundError,
-  IncompleteKeySuppliedError,
   KeyAuthorizationError,
   ActiveExchangeApiKeyExistsError,
 } from './exchange-api-keys.errors';
 import { ExchangeApiKeysRepository } from './exchange-api-keys.repository';
 import { UserNotFoundError, UserRepository } from '../user';
+import { EnrolledApiKeyDto } from './exchange-api-keys.dto';
 
 @Injectable()
 export class ExchangeApiKeysService {
@@ -20,8 +19,7 @@ export class ExchangeApiKeysService {
     private readonly exchangeApiKeysRepository: ExchangeApiKeysRepository,
     private readonly userRepository: UserRepository,
     private readonly aesEncryptionService: AesEncryptionService,
-    @Inject(forwardRef(() => ExchangeRouterService))
-    private readonly exchangeRouterService: ExchangeRouterService,
+    private readonly exchangeClientFactory: ExchangeClientFactory,
   ) {}
 
   async enroll(input: {
@@ -43,18 +41,14 @@ export class ExchangeApiKeysService {
     const currentKeys =
       await this.exchangeApiKeysRepository.findOneByUserId(userId);
     if (currentKeys) {
-      throw new ActiveExchangeApiKeyExistsError(userId);
+      throw new ActiveExchangeApiKeyExistsError(userId, exchangeName);
     }
 
-    const creds = { apiKey, secret: secretKey };
-    if (
-      !this.exchangeRouterService.checkRequiredCredentials(exchangeName, creds)
-    ) {
-      throw new IncompleteKeySuppliedError(exchangeName);
-    }
-
-    const hasRequiredAccess =
-      await this.exchangeRouterService.checkRequiredAccess(exchangeName, creds);
+    const client = await this.exchangeClientFactory.create(exchangeName, {
+      apiKey,
+      secretKey,
+    });
+    const hasRequiredAccess = await client.checkRequiredAccess();
     if (!hasRequiredAccess) {
       throw new KeyAuthorizationError(exchangeName);
     }
@@ -74,27 +68,19 @@ export class ExchangeApiKeysService {
     ]);
     enrolledKey.apiKey = encryptedApiKey;
     enrolledKey.secretKey = encryptedSecretKey;
-    enrolledKey.updatedAt = new Date();
-
-    await this.exchangeApiKeysRepository.upsert(enrolledKey, [
-      'userId',
-      'exchangeName',
-    ]);
+    await this.exchangeApiKeysRepository.createUnique(enrolledKey);
 
     return enrolledKey;
   }
 
-  async retrieve(
-    userId: number,
-    exchangeName: string,
-  ): Promise<{ id: number; apiKey: string; secretKey: string }> {
-    const entity =
-      await this.exchangeApiKeysRepository.findOneByUserAndExchange(
-        userId,
-        exchangeName,
-      );
+  async retrieve(userId: number): Promise<{
+    exchangeName: string;
+    apiKey: string;
+    secretKey: string;
+  } | null> {
+    const entity = await this.exchangeApiKeysRepository.findOneByUserId(userId);
     if (!entity) {
-      throw new ExchangeApiKeyNotFoundError(userId, exchangeName);
+      return null;
     }
 
     const [decryptedApiKey, decryptedSecretKey] = await Promise.all([
@@ -103,9 +89,29 @@ export class ExchangeApiKeysService {
     ]);
 
     return {
-      id: entity.id,
+      exchangeName: entity.exchangeName,
       apiKey: decryptedApiKey.toString(),
       secretKey: decryptedSecretKey.toString(),
+    };
+  }
+
+  async retrievedEnrolledApiKey(
+    userId: number,
+  ): Promise<EnrolledApiKeyDto | null> {
+    const enrolledKey =
+      await this.exchangeApiKeysRepository.findOneByUserId(userId);
+
+    if (!enrolledKey) {
+      return null;
+    }
+
+    const decodedApiKey = await this.aesEncryptionService.decrypt(
+      enrolledKey.apiKey,
+    );
+
+    return {
+      exchangeName: enrolledKey.exchangeName,
+      apiKey: decodedApiKey.toString(),
     };
   }
 }

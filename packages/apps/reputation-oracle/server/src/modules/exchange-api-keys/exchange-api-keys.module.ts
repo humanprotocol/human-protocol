@@ -1,4 +1,4 @@
-import { Module, forwardRef } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 
 import { EncryptionModule } from '@/modules/encryption';
 import { ExchangeModule } from '@/modules/exchange/exchange.module';
@@ -9,7 +9,7 @@ import { ExchangeApiKeysService } from './exchange-api-keys.service';
 import { UserModule } from '../user';
 
 @Module({
-  imports: [forwardRef(() => ExchangeModule), EncryptionModule, UserModule],
+  imports: [ExchangeModule, EncryptionModule, UserModule],
   providers: [ExchangeApiKeysRepository, ExchangeApiKeysService],
   controllers: [ExchangeApiKeysController],
   exports: [ExchangeApiKeysRepository, ExchangeApiKeysService],

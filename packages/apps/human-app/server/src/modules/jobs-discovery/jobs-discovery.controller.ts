@@ -53,7 +53,7 @@ export class JobsDiscoveryController {
     }
 
     // Require stake eligibility
-    if (!req.user?.stake_eligible) {
+    if (!req.user?.is_stake_eligible) {
       return {
         page: 0,
         page_size: 1,

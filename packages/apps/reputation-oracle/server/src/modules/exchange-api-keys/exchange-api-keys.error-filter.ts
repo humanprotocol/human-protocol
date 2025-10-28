@@ -14,6 +14,7 @@ import {
   KeyAuthorizationError,
   ActiveExchangeApiKeyExistsError,
 } from './exchange-api-keys.errors';
+import { ExchangeApiClientError } from '../exchange/errors';
 import { UserNotFoundError } from '../user';
 
 @Catch(
@@ -42,8 +43,8 @@ export class ExchangeApiKeysControllerErrorsFilter implements ExceptionFilter {
       exception instanceof ActiveExchangeApiKeyExistsError
     ) {
       status = HttpStatus.UNPROCESSABLE_ENTITY;
-      // } else if (exception instanceof ExchangeApiClientError) {
-      //   status = HttpStatus.SERVICE_UNAVAILABLE;
+    } else if (exception instanceof ExchangeApiClientError) {
+      status = HttpStatus.SERVICE_UNAVAILABLE;
     } else if (exception instanceof ExchangeApiKeyNotFoundError) {
       status = HttpStatus.NOT_FOUND;
     }

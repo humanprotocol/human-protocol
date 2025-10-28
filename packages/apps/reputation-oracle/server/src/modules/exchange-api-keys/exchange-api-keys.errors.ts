@@ -1,10 +1,7 @@
 import { BaseError } from '@/common/errors/base';
 
 export class ExchangeApiKeyNotFoundError extends BaseError {
-  constructor(
-    readonly userId: number,
-    readonly exchangeName: string,
-  ) {
+  constructor(readonly userId: number) {
     super('Exchange API key not found');
   }
 }
@@ -22,7 +19,10 @@ export class KeyAuthorizationError extends BaseError {
 }
 
 export class ActiveExchangeApiKeyExistsError extends BaseError {
-  constructor(readonly userId: number) {
+  constructor(
+    readonly userId: number,
+    readonly exchangeName: string,
+  ) {
     super('User already has an active exchange API key');
   }
 }

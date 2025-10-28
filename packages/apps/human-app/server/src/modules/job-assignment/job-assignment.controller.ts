@@ -48,7 +48,7 @@ export class JobAssignmentController {
     @Request() req: RequestWithUser,
   ): Promise<JobAssignmentResponse> {
     // Require stake eligibility
-    if (!req.user?.stake_eligible) {
+    if (!req.user?.is_stake_eligible) {
       throw new ForbiddenException('Stake requirement not met');
     }
     // TODO: temporal - THIRSTYFI
@@ -109,7 +109,7 @@ export class JobAssignmentController {
     @Request() req: RequestWithUser,
   ): Promise<JobsFetchResponse> {
     // Require stake eligibility
-    if (!req.user?.stake_eligible) {
+    if (!req.user?.is_stake_eligible) {
       return {
         page: 0,
         page_size: 1,
@@ -182,7 +182,7 @@ export class JobAssignmentController {
     @Request() req: RequestWithUser,
   ) {
     // Require stake eligibility
-    if (!req.user?.stake_eligible) {
+    if (!req.user?.is_stake_eligible) {
       throw new ForbiddenException('Stake requirement not met');
     }
     const command = this.mapper.map(dto, ResignJobDto, ResignJobCommand);
@@ -200,7 +200,7 @@ export class JobAssignmentController {
     @Request() req: RequestWithUser,
   ) {
     // Require stake eligibility
-    if (!req.user?.stake_eligible) {
+    if (!req.user?.is_stake_eligible) {
       throw new ForbiddenException('Stake requirement not met');
     }
     const command = new JobsFetchParamsCommand();

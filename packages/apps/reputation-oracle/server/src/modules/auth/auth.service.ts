@@ -2,6 +2,7 @@ import { KVStoreKeys, KVStoreUtils, Role } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
+import { SupportedExchange } from '@/common/constants';
 import { SignatureType, UserRole, UserStatus } from '@/common/enums';
 import {
   AuthConfigService,
@@ -12,8 +13,8 @@ import {
 } from '@/config';
 import logger from '@/logger';
 import { EmailAction, EmailService } from '@/modules/email';
-import { ExchangeRouterService } from '@/modules/exchange';
-import { ExchangeApiKeysRepository } from '@/modules/exchange-api-keys';
+import { ExchangeClientFactory } from '@/modules/exchange/exchange-client.factory';
+import { ExchangeApiKeysService } from '@/modules/exchange-api-keys';
 import {
   OperatorStatus,
   SiteKeyRepository,
@@ -59,8 +60,8 @@ export class AuthService {
     private readonly tokenRepository: TokenRepository,
     private readonly userRepository: UserRepository,
     private readonly userService: UserService,
-    private readonly exchangeApiKeysRepository: ExchangeApiKeysRepository,
-    private readonly exchangeRouterService: ExchangeRouterService,
+    private readonly exchangeApiKeysService: ExchangeApiKeysService,
+    private readonly exchangeClientFactory: ExchangeClientFactory,
     private readonly stakingConfigService: StakingConfigService,
     private readonly web3ConfigService: Web3ConfigService,
     private readonly web3Service: Web3Service,
@@ -252,37 +253,7 @@ export class AuthService {
       hCaptchaSiteKey = hCaptchaSiteKeys[0].siteKey;
     }
 
-    let stakeEligible = false;
-    const exchanges =
-      await this.exchangeApiKeysRepository.listExchangesByUserId(userEntity.id);
-
-    let totalStake = 0;
-
-    if (exchanges.length) {
-      const exchangeBalance =
-        await this.exchangeRouterService.getAccountBalance(
-          exchanges[0],
-          userEntity.id,
-          this.stakingConfigService.asset,
-        );
-
-      if (exchangeBalance >= this.stakingConfigService.minThreshold) {
-        totalStake = exchangeBalance;
-      } else if (userEntity.evmAddress) {
-        const onChainStake = await this.web3Service.getStakedBalance(
-          userEntity.evmAddress,
-        );
-        totalStake = exchangeBalance + onChainStake;
-      } else {
-        totalStake = exchangeBalance;
-      }
-    } else if (userEntity.evmAddress) {
-      totalStake = await this.web3Service.getStakedBalance(
-        userEntity.evmAddress,
-      );
-    }
-
-    stakeEligible = totalStake >= this.stakingConfigService.minThreshold;
+    const stakeEligible = await this.calculateStakeEligible(userEntity);
 
     const jwtPayload = {
       email: userEntity.email,
@@ -293,8 +264,8 @@ export class AuthService {
       kyc_status: userEntity.kyc?.status,
       nda_signed:
         userEntity.ndaSignedUrl === this.ndaConfigService.latestNdaUrl,
+      is_stake_eligible: stakeEligible,
       reputation_network: this.web3ConfigService.operatorAddress,
-      stake_eligible: stakeEligible,
       qualifications: userEntity.userQualifications
         ? userEntity.userQualifications.map(
             (userQualification) => userQualification.qualification?.reference,
@@ -304,6 +275,49 @@ export class AuthService {
     };
 
     return this.generateTokens(userEntity.id, jwtPayload);
+  }
+
+  private async calculateStakeEligible(
+    userEntity: Web2UserEntity | UserEntity,
+  ): Promise<boolean> {
+    const apiKeys = await this.exchangeApiKeysService.retrieve(userEntity.id);
+
+    let inspectedStakeAmount = 0;
+
+    if (apiKeys) {
+      try {
+        const client = await this.exchangeClientFactory.create(
+          apiKeys.exchangeName as SupportedExchange,
+          {
+            apiKey: apiKeys.apiKey,
+            secretKey: apiKeys.secretKey,
+          },
+          { timeoutMs: this.stakingConfigService.timeoutMs },
+        );
+        const exchangeBalance = await client.getAccountBalance(
+          this.stakingConfigService.asset,
+        );
+        inspectedStakeAmount += exchangeBalance;
+      } catch (err) {
+        this.logger.warn('Failed to query exchange balance; continuing', {
+          userId: userEntity.id,
+          exchangeName: apiKeys.exchangeName,
+          error: (err as Error)?.message,
+        });
+      }
+    }
+
+    if (
+      inspectedStakeAmount < this.stakingConfigService.minThreshold &&
+      userEntity.evmAddress
+    ) {
+      const onChainStake = await this.web3Service.getStakedBalance(
+        userEntity.evmAddress,
+      );
+      inspectedStakeAmount += onChainStake;
+    }
+
+    return inspectedStakeAmount >= this.stakingConfigService.minThreshold;
   }
 
   async web3Auth(userEntity: OperatorUserEntity): Promise<AuthTokens> {

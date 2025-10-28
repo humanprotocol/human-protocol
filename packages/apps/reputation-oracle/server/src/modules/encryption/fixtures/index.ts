@@ -1,4 +1,6 @@
+import { faker } from '@faker-js/faker';
+
 export const mockEncryptionConfigService = {
   // 32-byte key for AES-256-GCM tests
-  aesEncryptionKey: '12345678901234567890123456789012',
+  aesEncryptionKey: faker.string.sample(32),
 };
