@@ -280,6 +280,8 @@ export class AuthService {
   private async calculateStakeEligible(
     userEntity: Web2UserEntity | UserEntity,
   ): Promise<boolean> {
+    if (!this.stakingConfigService.eligibilityEnabled) return true;
+
     const apiKeys = await this.exchangeApiKeysService.retrieve(userEntity.id);
 
     let inspectedStakeAmount = 0;

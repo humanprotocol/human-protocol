@@ -10,7 +10,7 @@ export class StakingConfigService {
    * Default: 'HMT'
    */
   get asset(): string {
-    return this.configService.get('STAKING_ASSET') || 'HMT';
+    return this.configService.get('STAKING_ASSET', 'HMT');
   }
 
   /**
@@ -27,5 +27,17 @@ export class StakingConfigService {
    */
   get timeoutMs(): number {
     return Number(this.configService.get('STAKING_TIMEOUT_MS')) || 2000;
+  }
+
+  /**
+   * Feature flag to enable/disable staking eligibility enforcement.
+   * When disabled, eligibility will be treated as true unconditionally.
+   * Default: false
+   */
+  get eligibilityEnabled(): boolean {
+    return (
+      this.configService.get<string>('STAKING_ELIGIBILITY_ENABLED', 'false') ===
+      'true'
+    );
   }
 }
