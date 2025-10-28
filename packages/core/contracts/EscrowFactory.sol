@@ -4,7 +4,8 @@ pragma solidity ^0.8.0;
 
 import '@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
-
+import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
+import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import './interfaces/IStaking.sol';
 import './Escrow.sol';
 
@@ -19,6 +20,8 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
     address public staking;
     uint256 public minimumStake;
     address public admin;
+
+    using SafeERC20 for IERC20;
 
     event Launched(address token, address escrow);
     event LaunchedV2(address token, address escrow, string jobRequesterId);
@@ -41,30 +44,93 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
         _setEscrowAdmin(msg.sender);
     }
 
-    /**
-     * @dev Creates a new Escrow contract.
-     *
-     * @param token Token address to be associated with the Escrow contract.
-     * @param jobRequesterId String identifier for the job requester, used for tracking purposes.
-     *
-     * @return The address of the newly created Escrow contract.
-     */
-    function createEscrow(
-        address token,
-        string memory jobRequesterId
-    ) external returns (address) {
+    function _launchEscrow(
+        address _token,
+        string calldata _jobRequesterId
+    ) private {
         uint256 availableStake = IStaking(staking).getAvailableStake(
             msg.sender
         );
         require(availableStake >= minimumStake, 'Insufficient stake');
         require(admin != address(0), ERROR_ZERO_ADDRESS);
 
-        Escrow escrow = new Escrow(token, msg.sender, admin, STANDARD_DURATION);
+        Escrow escrow = new Escrow(
+            _token,
+            msg.sender,
+            admin,
+            STANDARD_DURATION
+        );
         counter++;
         escrowCounters[address(escrow)] = counter;
         lastEscrow = address(escrow);
 
-        emit LaunchedV2(token, lastEscrow, jobRequesterId);
+        emit LaunchedV2(_token, lastEscrow, _jobRequesterId);
+    }
+
+    /**
+     * @dev Creates a new Escrow contract.
+     *
+     * @param _token Token address to be associated with the Escrow contract.
+     * @param _jobRequesterId String identifier for the job requester, used for tracking purposes.
+     *
+     * @return The address of the newly created Escrow contract.
+     */
+    function createEscrow(
+        address _token,
+        string calldata _jobRequesterId
+    ) external returns (address) {
+        _launchEscrow(_token, _jobRequesterId);
+        return lastEscrow;
+    }
+
+    /**
+     * @dev Creates a new Escrow contract and funds it in one transaction.
+     * Requires the caller to have approved the factory for the token and amount.
+     * @param _token Token address to be associated with the Escrow contract.
+     * @param _amount Amount of tokens to fund the Escrow with.
+     * @param _jobRequesterId String identifier for the job requester, used for tracking purposes.
+     * @param _reputationOracle Address of the reputation oracle.
+     * @param _recordingOracle Address of the recording oracle.
+     * @param _exchangeOracle Address of the exchange oracle.
+     * @param _reputationOracleFeePercentage Fee percentage for the reputation oracle.
+     * @param _recordingOracleFeePercentage Fee percentage for the recording oracle.
+     * @param _exchangeOracleFeePercentage Fee percentage for the exchange oracle.
+     * @param _url URL for the escrow manifest.
+     * @param _hash Hash of the escrow manifest.
+     * @return The address of the newly created Escrow contract.
+     */
+    function createFundAndSetupEscrow(
+        address _token,
+        uint256 _amount,
+        string calldata _jobRequesterId,
+        address _reputationOracle,
+        address _recordingOracle,
+        address _exchangeOracle,
+        uint8 _reputationOracleFeePercentage,
+        uint8 _recordingOracleFeePercentage,
+        uint8 _exchangeOracleFeePercentage,
+        string calldata _url,
+        string calldata _hash
+    ) external returns (address) {
+        require(_amount > 0, 'Amount is 0');
+
+        _launchEscrow(_token, _jobRequesterId);
+        IERC20(_token).safeTransferFrom(
+            msg.sender,
+            address(lastEscrow),
+            _amount
+        );
+        Escrow(lastEscrow).setup(
+            _reputationOracle,
+            _recordingOracle,
+            _exchangeOracle,
+            _reputationOracleFeePercentage,
+            _recordingOracleFeePercentage,
+            _exchangeOracleFeePercentage,
+            _url,
+            _hash
+        );
+
         return lastEscrow;
     }
 
