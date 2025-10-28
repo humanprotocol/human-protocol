@@ -82,14 +82,11 @@ export class GateExchangeClient implements ExchangeClient {
       } as RequestInit);
 
       if (res.ok) return true;
-      if (res.status === 401 || res.status === 403) return false;
       this.logger.warn('Gate access check failed', {
         status: res.status,
         statusText: res.statusText,
       });
-      throw new ExchangeApiClientError(
-        `Gate access check failed with status ${res.status}`,
-      );
+      return false;
     } catch (err) {
       const message: string = 'Gate network error during access check';
       this.logger.error(message, {
@@ -129,15 +126,12 @@ export class GateExchangeClient implements ExchangeClient {
       } as RequestInit);
 
       if (!res.ok) {
-        if (res.status === 401 || res.status === 403) return 0;
         this.logger.warn('Gate balance fetch failed', {
           status: res.status,
           statusText: res.statusText,
           asset,
         });
-        throw new ExchangeApiClientError(
-          `Gate balance fetch failed with status ${res.status}`,
-        );
+        return 0;
       }
 
       const data = (await res.json()) as Array<{

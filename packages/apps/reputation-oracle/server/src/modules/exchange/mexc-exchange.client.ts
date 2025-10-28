@@ -54,14 +54,11 @@ export class MexcExchangeClient implements ExchangeClient {
       } as RequestInit);
 
       if (res.ok) return true;
-      if (res.status === 401 || res.status === 403) return false;
       this.logger.warn('MEXC access check failed', {
         status: res.status,
         statusText: res.statusText,
       });
-      throw new ExchangeApiClientError(
-        `MEXC access check failed with status ${res.status}`,
-      );
+      return false;
     } catch (err) {
       const message: string = 'MEXC network error during access check';
       this.logger.error(message, {
@@ -88,15 +85,12 @@ export class MexcExchangeClient implements ExchangeClient {
       } as RequestInit);
 
       if (!res.ok) {
-        if (res.status === 401 || res.status === 403) return 0;
         this.logger.warn('MEXC balance fetch failed', {
           status: res.status,
           statusText: res.statusText,
           asset,
         });
-        throw new ExchangeApiClientError(
-          `MEXC balance fetch failed with status ${res.status}`,
-        );
+        return 0;
       }
 
       const data = (await res.json()) as {
