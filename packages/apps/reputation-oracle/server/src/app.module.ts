@@ -14,6 +14,7 @@ import { AbuseModule } from './modules/abuse';
 import { AuthModule } from './modules/auth';
 import { CronJobModule } from './modules/cron-job';
 import { EscrowCompletionModule } from './modules/escrow-completion';
+import { ExchangeApiKeysModule } from './modules/exchange-api-keys';
 import { HealthModule } from './modules/health';
 import { KycModule } from './modules/kyc';
 import { NDAModule } from './modules/nda';
@@ -72,6 +73,7 @@ import Environment from './utils/environment';
     CronJobModule,
     UserModule,
     NDAModule,
+    ExchangeApiKeysModule,
     EscrowCompletionModule,
     HealthModule,
     KycModule,

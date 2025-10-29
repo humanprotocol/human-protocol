@@ -253,7 +253,7 @@ export class AuthService {
       hCaptchaSiteKey = hCaptchaSiteKeys[0].siteKey;
     }
 
-    const stakeEligible = await this.calculateStakeEligible(userEntity);
+    const stakeEligible = await this.checkStakeEligible(userEntity);
 
     const jwtPayload = {
       email: userEntity.email,
@@ -277,7 +277,7 @@ export class AuthService {
     return this.generateTokens(userEntity.id, jwtPayload);
   }
 
-  private async calculateStakeEligible(
+  private async checkStakeEligible(
     userEntity: Web2UserEntity | UserEntity,
   ): Promise<boolean> {
     if (!this.stakingConfigService.eligibilityEnabled) return true;
@@ -304,7 +304,7 @@ export class AuthService {
         this.logger.warn('Failed to query exchange balance; continuing', {
           userId: userEntity.id,
           exchangeName: apiKeys.exchangeName,
-          error: (err as Error)?.message,
+          error: err,
         });
       }
     }

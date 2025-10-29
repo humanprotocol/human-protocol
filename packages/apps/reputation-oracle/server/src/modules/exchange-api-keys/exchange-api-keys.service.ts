@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { isValidExchangeName } from '@/common/validators/exchange';
 import { AesEncryptionService } from '@/modules/encryption/aes-encryption.service';
 import { ExchangeClientFactory } from '@/modules/exchange/exchange-client.factory';
+import { UserNotFoundError, UserRepository } from '@/modules/user';
 
 import { ExchangeApiKeyEntity } from './exchange-api-key.entity';
 import {
@@ -10,16 +11,14 @@ import {
   ActiveExchangeApiKeyExistsError,
 } from './exchange-api-keys.errors';
 import { ExchangeApiKeysRepository } from './exchange-api-keys.repository';
-import { UserNotFoundError, UserRepository } from '../user';
-import { EnrolledApiKeyDto } from './exchange-api-keys.dto';
 
 @Injectable()
 export class ExchangeApiKeysService {
   constructor(
-    private readonly exchangeApiKeysRepository: ExchangeApiKeysRepository,
-    private readonly userRepository: UserRepository,
     private readonly aesEncryptionService: AesEncryptionService,
+    private readonly exchangeApiKeysRepository: ExchangeApiKeysRepository,
     private readonly exchangeClientFactory: ExchangeClientFactory,
+    private readonly userRepository: UserRepository,
   ) {}
 
   async enroll(input: {
@@ -92,26 +91,6 @@ export class ExchangeApiKeysService {
       exchangeName: entity.exchangeName,
       apiKey: decryptedApiKey.toString(),
       secretKey: decryptedSecretKey.toString(),
-    };
-  }
-
-  async retrievedEnrolledApiKey(
-    userId: number,
-  ): Promise<EnrolledApiKeyDto | null> {
-    const enrolledKey =
-      await this.exchangeApiKeysRepository.findOneByUserId(userId);
-
-    if (!enrolledKey) {
-      return null;
-    }
-
-    const decodedApiKey = await this.aesEncryptionService.decrypt(
-      enrolledKey.apiKey,
-    );
-
-    return {
-      exchangeName: enrolledKey.exchangeName,
-      apiKey: decodedApiKey.toString(),
     };
   }
 }

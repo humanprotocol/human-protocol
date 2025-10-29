@@ -1,6 +1,6 @@
 import { KVStoreClient, KVStoreKeys, Role } from '@human-protocol/sdk';
 import * as dotenv from 'dotenv';
-import { Wallet, ethers, NonceManager } from 'ethers';
+import { Wallet, ethers } from 'ethers';
 import * as Minio from 'minio';
 
 const isLocalEnv = process.env.LOCAL === 'true';
@@ -105,8 +105,7 @@ async function setup(): Promise<void> {
   }
 
   const provider = new ethers.JsonRpcProvider(RPC_URL);
-  const baseWallet = new Wallet(WEB3_PRIVATE_KEY, provider);
-  const wallet = new NonceManager(baseWallet);
+  const wallet = new Wallet(WEB3_PRIVATE_KEY, provider);
 
   const kvStoreClient = await KVStoreClient.build(wallet);
 

@@ -4,6 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { Wallet, ethers } from 'ethers';
 
 import { Web3ConfigService, Web3Network } from '@/config';
+import logger from '@/logger';
 
 import type { Chain, WalletWithProvider } from './types';
 
@@ -23,6 +24,9 @@ export class Web3Service {
   private signersByChainId: {
     [chainId: number]: WalletWithProvider;
   } = {};
+  private readonly logger = logger.child({
+    context: Web3Service.name,
+  });
 
   constructor(private readonly web3ConfigService: Web3ConfigService) {
     const privateKey = this.web3ConfigService.privateKey;
@@ -119,7 +123,9 @@ export class Web3Service {
         (stakerInfo.stakedAmount ?? 0n) + (stakerInfo.lockedAmount ?? 0n);
       return Number(ethers.formatEther(total));
     } catch (error) {
-      throw new Error(`Failed to fetch staked balance: ${error.message}`);
+      const message = 'Failed to fetch staked balance';
+      this.logger.error(message, { address, error });
+      throw new Error(message);
     }
   }
 }

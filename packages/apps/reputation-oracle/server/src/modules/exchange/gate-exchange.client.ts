@@ -33,13 +33,13 @@ export class GateExchangeClient implements ExchangeClient {
   readonly id: SupportedExchange = 'gate';
   private readonly apiKey: string;
   private readonly secretKey: string;
-  private readonly timeoutMs?: number;
+  private readonly timeoutMs: number;
   private readonly apiBaseUrl = Environment.isDevelopment()
     ? DEVELOP_GATE_API_BASE_URL
     : GATE_API_BASE_URL;
   private readonly logger = appLogger.child({
-    context: 'GateExchangeClient',
-    exchange: 'gate',
+    context: GateExchangeClient.name,
+    exchange: this.id,
   });
 
   constructor(
@@ -51,7 +51,7 @@ export class GateExchangeClient implements ExchangeClient {
     }
     this.apiKey = creds.apiKey;
     this.secretKey = creds.secretKey;
-    this.timeoutMs = options?.timeoutMs;
+    this.timeoutMs = options?.timeoutMs || DEFAULT_TIMEOUT_MS;
   }
 
   async checkRequiredAccess(): Promise<boolean> {
@@ -78,21 +78,21 @@ export class GateExchangeClient implements ExchangeClient {
           Timestamp: ts,
           Accept: 'application/json',
         },
-        signal: AbortSignal.timeout(this.timeoutMs ?? DEFAULT_TIMEOUT_MS),
+        signal: AbortSignal.timeout(this.timeoutMs),
       } as RequestInit);
 
       if (res.ok) return true;
-      this.logger.warn('Gate access check failed', {
+      this.logger.debug('Gate access check failed', {
         status: res.status,
         statusText: res.statusText,
       });
       return false;
-    } catch (err) {
-      const message: string = 'Gate network error during access check';
+    } catch (error) {
+      const message: string = 'Failed to check access for Gate';
       this.logger.error(message, {
-        error: err.message,
+        error,
       });
-      throw new ExchangeApiClientError(`${message}: ${(err as Error).message}`);
+      throw new ExchangeApiClientError(message);
     }
   }
 
@@ -122,7 +122,7 @@ export class GateExchangeClient implements ExchangeClient {
           Timestamp: ts,
           Accept: 'application/json',
         },
-        signal: AbortSignal.timeout(this.timeoutMs ?? DEFAULT_TIMEOUT_MS),
+        signal: AbortSignal.timeout(this.timeoutMs),
       } as RequestInit);
 
       if (!res.ok) {
@@ -154,13 +154,13 @@ export class GateExchangeClient implements ExchangeClient {
 
       const entry = data.find((d) => d.currency === asset);
       return entry ? normalize(entry) : 0;
-    } catch (err) {
-      const message: string = 'Gate network error during balance fetch';
+    } catch (error) {
+      const message: string = 'Failed to get account balance for Gate';
       this.logger.error(message, {
-        error: (err as Error)?.message,
+        error,
         asset,
       });
-      throw new ExchangeApiClientError(`${message}: ${err.message}`);
+      throw new ExchangeApiClientError(message);
     }
   }
 }

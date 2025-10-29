@@ -16,10 +16,10 @@ export class MexcExchangeClient implements ExchangeClient {
   readonly id: SupportedExchange = 'mexc';
   private readonly apiKey: string;
   private readonly secretKey: string;
-  private readonly timeoutMs?: number;
+  private readonly timeoutMs: number;
   private readonly logger = appLogger.child({
-    context: 'MexcExchangeClient',
-    exchange: 'mexc',
+    context: MexcExchangeClient.name,
+    exchange: this.id,
   });
   readonly recvWindow = 5000;
 
@@ -32,7 +32,7 @@ export class MexcExchangeClient implements ExchangeClient {
     }
     this.apiKey = creds.apiKey;
     this.secretKey = creds.secretKey;
-    this.timeoutMs = options?.timeoutMs;
+    this.timeoutMs = options?.timeoutMs || DEFAULT_TIMEOUT_MS;
   }
 
   private signQuery(query: string): string {
@@ -50,21 +50,21 @@ export class MexcExchangeClient implements ExchangeClient {
       const res = await fetch(url, {
         method: 'GET',
         headers: { 'X-MEXC-APIKEY': this.apiKey },
-        signal: AbortSignal.timeout(this.timeoutMs ?? DEFAULT_TIMEOUT_MS),
+        signal: AbortSignal.timeout(this.timeoutMs),
       } as RequestInit);
 
       if (res.ok) return true;
-      this.logger.warn('MEXC access check failed', {
+      this.logger.debug('MEXC access check failed', {
         status: res.status,
         statusText: res.statusText,
       });
       return false;
-    } catch (err) {
-      const message: string = 'MEXC network error during access check';
+    } catch (error) {
+      const message: string = 'Failed to check access for MEXC';
       this.logger.error(message, {
-        error: err.message,
+        error,
       });
-      throw new ExchangeApiClientError(`${message}: ${err.message}`);
+      throw new ExchangeApiClientError(message);
     }
   }
 
@@ -81,7 +81,7 @@ export class MexcExchangeClient implements ExchangeClient {
         headers: {
           'X-MEXC-APIKEY': this.apiKey,
         },
-        signal: AbortSignal.timeout(this.timeoutMs ?? DEFAULT_TIMEOUT_MS),
+        signal: AbortSignal.timeout(this.timeoutMs),
       } as RequestInit);
 
       if (!res.ok) {
@@ -103,13 +103,13 @@ export class MexcExchangeClient implements ExchangeClient {
         (parseFloat(entry.free || '0') || 0) +
         (parseFloat(entry.locked || '0') || 0);
       return total;
-    } catch (err) {
-      const message: string = 'MEXC network error during balance fetch';
+    } catch (error) {
+      const message: string = 'Failed to get account balance for MEXC';
       this.logger.error(message, {
-        error: err.message,
+        error,
         asset,
       });
-      throw new ExchangeApiClientError(`${message}: ${err.message}`);
+      throw new ExchangeApiClientError(message);
     }
   }
 }

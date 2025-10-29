@@ -6,7 +6,7 @@ import {
   StakingClient,
 } from '@human-protocol/sdk';
 import * as dotenv from 'dotenv';
-import { ethers, NonceManager, Wallet } from 'ethers';
+import { Wallet, ethers } from 'ethers';
 
 dotenv.config({ path: '.env.local' });
 
@@ -26,8 +26,7 @@ export async function setup(): Promise<void> {
   const { hmtAddress: hmtTokenAddress, stakingAddress } = NETWORKS[
     ChainId.LOCALHOST
   ] as NetworkData;
-  const baseWallet = new Wallet(WEB3_PRIVATE_KEY, provider);
-  const wallet = new NonceManager(baseWallet);
+  const wallet = new Wallet(WEB3_PRIVATE_KEY, provider);
 
   const hmtContract = HMToken__factory.connect(hmtTokenAddress, wallet);
   const hmtTx = await hmtContract.approve(stakingAddress, 1);

@@ -16,7 +16,6 @@ import {
   ApiOperation,
   ApiResponse,
   ApiTags,
-  getSchemaPath,
 } from '@nestjs/swagger';
 
 import type { RequestWithUser } from '@/common/types';
@@ -29,6 +28,7 @@ import {
   EnrolledApiKeyDto,
 } from './exchange-api-keys.dto';
 import { ExchangeApiKeysControllerErrorsFilter } from './exchange-api-keys.error-filter';
+import { ExchangeApiKeyNotFoundError } from './exchange-api-keys.errors';
 import { ExchangeApiKeysRepository } from './exchange-api-keys.repository';
 import { ExchangeApiKeysService } from './exchange-api-keys.service';
 
@@ -48,18 +48,23 @@ export class ExchangeApiKeysController {
   })
   @ApiResponse({
     status: 200,
-    schema: {
-      nullable: true,
-      allOf: [{ $ref: getSchemaPath(EnrolledApiKeyDto) }],
-    },
+    type: EnrolledApiKeyDto,
   })
   @Get('/')
   async retrieveEnrolledApiKeys(
     @Req() request: RequestWithUser,
-  ): Promise<EnrolledApiKeyDto | null> {
+  ): Promise<EnrolledApiKeyDto> {
     const userId = request.user.id;
 
-    return this.exchangeApiKeysService.retrievedEnrolledApiKey(userId);
+    const apiKey = await this.exchangeApiKeysService.retrieve(userId);
+    if (!apiKey) {
+      throw new ExchangeApiKeyNotFoundError(userId);
+    }
+
+    return {
+      exchangeName: apiKey.exchangeName,
+      apiKey: apiKey.apiKey,
+    };
   }
 
   @ApiOperation({
@@ -114,6 +119,10 @@ export class ExchangeApiKeysController {
       throw new ForbiddenException();
     }
 
-    return this.exchangeApiKeysService.retrieve(request.user.id);
+    const apiKey = await this.exchangeApiKeysService.retrieve(request.user.id);
+    if (!apiKey) {
+      throw new ExchangeApiKeyNotFoundError(request.user.id);
+    }
+    return apiKey;
   }
 }
