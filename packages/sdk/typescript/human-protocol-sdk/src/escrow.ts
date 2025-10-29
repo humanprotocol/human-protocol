@@ -314,7 +314,6 @@ export class EscrowClient extends BaseEthersClient {
    *
    * @param {string} tokenAddress - The ERC-20 token address used to fund the escrow.
    * @param {bigint} amount - The token amount to fund the escrow with.
-   *   Use `ethers.parseUnits('1000', decimals)` to generate a `bigint`.
    * @param {string} jobRequesterId - An off-chain identifier for the job requester.
    * @param {IEscrowConfig} escrowConfig - Configuration parameters for escrow setup:
    *   - `recordingOracle`: Address of the recording oracle.
