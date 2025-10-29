@@ -412,7 +412,7 @@ __metadata:
     "@faker-js/faker": "npm:^9.7.0"
     "@fontsource/inter": "npm:^5.0.17"
     "@fontsource/roboto": "npm:^5.2.6"
-    "@hcaptcha/react-hcaptcha": "npm:^0.3.6"
+    "@hcaptcha/react-hcaptcha": "npm:^1.14.0"
     "@hookform/resolvers": "npm:^5.1.0"
     "@human-protocol/sdk": "workspace:*"
     "@mui/icons-material": "npm:^7.0.1"
@@ -539,7 +539,7 @@ __metadata:
   dependencies:
     "@emotion/react": "npm:^11.10.5"
     "@emotion/styled": "npm:^11.10.5"
-    "@hcaptcha/react-hcaptcha": "npm:^1.10.1"
+    "@hcaptcha/react-hcaptcha": "npm:^1.14.0"
     "@human-protocol/sdk": "workspace:*"
     "@mui/icons-material": "npm:^7.0.1"
     "@mui/lab": "npm:^5.0.0-alpha.141"
@@ -4796,33 +4796,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@hcaptcha/loader@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "@hcaptcha/loader@npm:2.0.0"
-  checksum: 10c0/c69c8e62ccf41cc5cce8f25721b9bd8284e201da608022476dc6d69afbd70512a6f272dd2bfe558c4b5fdbc0ee20fb5f062033c4d556e6d523ecb2448203298f
+"@hcaptcha/loader@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "@hcaptcha/loader@npm:2.2.0"
+  checksum: 10c0/f7e85a730844c095bdcc62b5199d129cf70195ff213b6202f81e6e4bd48da81110fcd5b5e9ad7d336493762d952620047eb7e5224c5f4f181dedee47d5e196a1
   languageName: node
   linkType: hard
 
-"@hcaptcha/react-hcaptcha@npm:^0.3.6":
-  version: 0.3.10
-  resolution: "@hcaptcha/react-hcaptcha@npm:0.3.10"
-  peerDependencies:
-    react: ">= 16.3.0"
-    react-dom: ">= 16.3.0"
-  checksum: 10c0/cb9af880be869baffc0088833b24b8ad2338db997f5a19d4c64f4fd9173d7d339639c2811802d6578d8b2f711a25417ef7f3923e23641cbc31e803d7ac732370
-  languageName: node
-  linkType: hard
-
-"@hcaptcha/react-hcaptcha@npm:^1.10.1":
-  version: 1.12.0
-  resolution: "@hcaptcha/react-hcaptcha@npm:1.12.0"
+"@hcaptcha/react-hcaptcha@npm:^1.14.0":
+  version: 1.14.0
+  resolution: "@hcaptcha/react-hcaptcha@npm:1.14.0"
   dependencies:
     "@babel/runtime": "npm:^7.17.9"
-    "@hcaptcha/loader": "npm:^2.0.0"
+    "@hcaptcha/loader": "npm:^2.2.0"
   peerDependencies:
     react: ">= 16.3.0"
     react-dom: ">= 16.3.0"
-  checksum: 10c0/58fddf7cbbeb1c9d784a90a4ee76604efd8d0c968d1d256f72d112d95c8d68bbb1255dd4184148e7e43e38491c5614b3747f4d17393a17d320e28935da47f8e8
+  checksum: 10c0/76182756003208e8c2771f58f7cb0e8da196835872d09859e45a8592eeebff741ad071319c7075e7aeee4ba73dd8c2cab9c412c6214469d883b6a53b4b894744
   languageName: node
   linkType: hard
 
