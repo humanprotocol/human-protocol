@@ -252,13 +252,76 @@ describe('EscrowFactory', function () {
   });
 
   describe('createFundAndSetupEscrow()', () => {
+    const fee = faker.number.int({ min: 1, max: 5 });
+    const manifestUrl = faker.internet.url();
+    const manifestHash = faker.string.alphanumeric(46);
+    const fundAmount = ethers.parseEther(
+      faker.finance.amount({ min: 1, max: 100 })
+    );
     describe('reverts', () => {
+      it('reverts when fund amount is 0', async () => {
+        await expect(
+          escrowFactory
+            .connect(launcher2)
+            .createFundAndSetupEscrow(
+              tokenAddress,
+              0,
+              FIXTURE_REQUESTER_ID,
+              reputationOracleAddress,
+              recordingOracleAddress,
+              exchangeOracleAddress,
+              fee,
+              fee,
+              fee,
+              manifestUrl,
+              manifestHash
+            )
+        ).to.be.revertedWith('Amount is 0');
+      });
+
       it('reverts when launcher has insufficient stake', async () => {
         await expect(
           escrowFactory
             .connect(launcher2)
-            .createEscrow(tokenAddress, FIXTURE_REQUESTER_ID)
+            .createFundAndSetupEscrow(
+              tokenAddress,
+              fundAmount,
+              FIXTURE_REQUESTER_ID,
+              reputationOracleAddress,
+              recordingOracleAddress,
+              exchangeOracleAddress,
+              fee,
+              fee,
+              fee,
+              manifestUrl,
+              manifestHash
+            )
         ).to.be.revertedWith('Insufficient stake');
+      });
+
+      it('reverts when allowance is too low', async () => {
+        await stake(launcher2);
+        await token
+          .connect(launcher2)
+          .approve(await escrowFactory.getAddress(), fundAmount / 2n);
+
+        await expect(
+          escrowFactory
+            .connect(launcher2)
+            .createFundAndSetupEscrow(
+              tokenAddress,
+              fundAmount,
+              FIXTURE_REQUESTER_ID,
+              reputationOracleAddress,
+              recordingOracleAddress,
+              exchangeOracleAddress,
+              fee,
+              fee,
+              fee,
+              manifestUrl,
+              manifestHash
+            )
+        ).to.be.revertedWith('Spender allowance too low');
       });
     });
 
@@ -266,16 +329,9 @@ describe('EscrowFactory', function () {
       it('creates an escrow successfully', async () => {
         await stake(launcher2);
 
-        const fundAmount = ethers.parseEther(
-          faker.finance.amount({ min: 1, max: 100 })
-        );
         await token
-          .connect(owner)
+          .connect(launcher2)
           .approve(await escrowFactory.getAddress(), fundAmount);
-
-        const fee = faker.number.int({ min: 1, max: 5 });
-        const manifestUrl = faker.internet.url();
-        const manifestHash = faker.string.alphanumeric(46);
 
         const tx = await escrowFactory
           .connect(launcher2)

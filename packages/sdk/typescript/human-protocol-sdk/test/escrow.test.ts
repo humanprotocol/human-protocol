@@ -122,6 +122,7 @@ describe('EscrowClient', () => {
 
     mockEscrowFactoryContract = {
       createEscrow: vi.fn(),
+      createFundAndSetupEscrow: vi.fn(),
       hasEscrow: vi.fn(),
       lastEscrow: vi.fn(),
     };
@@ -192,20 +193,20 @@ describe('EscrowClient', () => {
   });
 
   describe('createEscrow', () => {
+    const jobRequesterId = 'job-requester';
     test('should throw an error if tokenAddress is an invalid address', async () => {
       const invalidAddress = FAKE_ADDRESS;
 
       await expect(
-        escrowClient.createEscrow(invalidAddress, [ethers.ZeroAddress])
+        escrowClient.createEscrow(invalidAddress, jobRequesterId)
       ).rejects.toThrow(ErrorInvalidTokenAddress);
     });
 
     test('should create an escrow and return its address', async () => {
       const tokenAddress = ethers.ZeroAddress;
-      const jobRequesterId = 'job-requester';
+
       const expectedEscrowAddress = ethers.ZeroAddress;
 
-      // Create a spy object for the createEscrow method
       const createEscrowSpy = vi
         .spyOn(escrowClient.escrowFactoryContract, 'createEscrow')
         .mockImplementation(() => ({
@@ -236,7 +237,6 @@ describe('EscrowClient', () => {
 
     test('should throw an error if the create an escrow fails', async () => {
       const tokenAddress = ethers.ZeroAddress;
-      const jobRequesterId = 'job-requester';
 
       escrowClient.escrowFactoryContract.createEscrow.mockRejectedValueOnce(
         new Error()
@@ -253,10 +253,8 @@ describe('EscrowClient', () => {
 
     test('should create an escrow and return its address with transaction options', async () => {
       const tokenAddress = ethers.ZeroAddress;
-      const jobRequesterId = 'job-requester';
       const expectedEscrowAddress = ethers.ZeroAddress;
 
-      // Create a spy object for the createEscrow method
       const createEscrowSpy = vi
         .spyOn(escrowClient.escrowFactoryContract, 'createEscrow')
         .mockImplementation(() => ({
@@ -275,6 +273,147 @@ describe('EscrowClient', () => {
       const txOptions: Overrides = { gasLimit: 45000 };
 
       const result = await escrowClient.createEscrow(
+        tokenAddress,
+        jobRequesterId,
+        txOptions
+      );
+
+      expect(createEscrowSpy).toHaveBeenCalledWith(
+        tokenAddress,
+        jobRequesterId,
+        txOptions
+      );
+      expect(result).toBe(expectedEscrowAddress);
+    });
+  });
+
+  describe.only('createFundAndSetupEscrow', () => {
+    const jobRequesterId = 'job-requester';
+    const escrowConfig = {
+      recordingOracle: ethers.ZeroAddress,
+      reputationOracle: ethers.ZeroAddress,
+      exchangeOracle: ethers.ZeroAddress,
+      recordingOracleFee: 10n,
+      reputationOracleFee: 10n,
+      exchangeOracleFee: 10n,
+      manifest: '{"foo":"bar"}',
+      manifestHash: FAKE_HASH,
+    };
+    test('should throw an error if tokenAddress is an invalid address', async () => {
+      const invalidAddress = FAKE_ADDRESS;
+
+      await expect(
+        escrowClient.createFundAndSetupEscrow(
+          invalidAddress,
+          10n,
+          jobRequesterId,
+          {} as any
+        )
+      ).rejects.toThrow(ErrorInvalidTokenAddress);
+    });
+
+    test('should create an escrow and return its address', async () => {
+      const tokenAddress = ethers.ZeroAddress;
+      const jobRequesterId = 'job-requester';
+      const expectedEscrowAddress = ethers.ZeroAddress;
+
+      const createEscrowSpy = vi
+        .spyOn(escrowClient.escrowFactoryContract, 'createFundAndSetupEscrow')
+        .mockImplementation(() => ({
+          wait: async () => ({
+            logs: [
+              {
+                topics: [ethers.id('LaunchedV2(address,address,string)')],
+                args: {
+                  escrow: expectedEscrowAddress,
+                },
+              },
+            ],
+          }),
+        }));
+
+      const result = await escrowClient.createFundAndSetupEscrow(
+        tokenAddress,
+        10n,
+        jobRequesterId,
+        escrowConfig
+      );
+
+      expect(createEscrowSpy).toHaveBeenCalledWith(
+        tokenAddress,
+        10n,
+        jobRequesterId,
+        escrowConfig.reputationOracle,
+        escrowConfig.recordingOracle,
+        escrowConfig.exchangeOracle,
+        escrowConfig.reputationOracleFee,
+        escrowConfig.recordingOracleFee,
+        escrowConfig.exchangeOracleFee,
+        escrowConfig.manifest,
+        escrowConfig.manifestHash,
+        {}
+      );
+      expect(result).toBe(expectedEscrowAddress);
+    });
+
+    test('should throw an error if the createFundAndSetupEscrow fails', async () => {
+      const tokenAddress = ethers.ZeroAddress;
+      const jobRequesterId = 'job-requester';
+
+      escrowClient.escrowFactoryContract.createFundAndSetupEscrow.mockRejectedValueOnce(
+        new Error()
+      );
+
+      await expect(
+        escrowClient.createFundAndSetupEscrow(
+          tokenAddress,
+          10n,
+          jobRequesterId,
+          escrowConfig
+        )
+      ).rejects.toThrow();
+
+      expect(
+        escrowClient.escrowFactoryContract.createFundAndSetupEscrow
+      ).toHaveBeenCalledWith(
+        tokenAddress,
+        10n,
+        jobRequesterId,
+        escrowConfig.reputationOracle,
+        escrowConfig.recordingOracle,
+        escrowConfig.exchangeOracle,
+        escrowConfig.reputationOracleFee,
+        escrowConfig.recordingOracleFee,
+        escrowConfig.exchangeOracleFee,
+        escrowConfig.manifest,
+        escrowConfig.manifestHash,
+        {}
+      );
+    });
+
+    test('should create an escrow and return its address with transaction options', async () => {
+      const tokenAddress = ethers.ZeroAddress;
+      const jobRequesterId = 'job-requester';
+      const expectedEscrowAddress = ethers.ZeroAddress;
+
+      const createEscrowSpy = vi
+        .spyOn(escrowClient.escrowFactoryContract, 'createFundAndSetupEscrow')
+        .mockImplementation(() => ({
+          wait: async () => ({
+            logs: [
+              {
+                topics: [ethers.id('LaunchedV2(address,address,string)')],
+                args: {
+                  escrow: expectedEscrowAddress,
+                },
+              },
+            ],
+          }),
+        }));
+
+      const txOptions: Overrides = { gasLimit: 45000 };
+
+      const result = await escrowClient.createFundAndSetupEscrow(
         tokenAddress,
         jobRequesterId,
         txOptions
