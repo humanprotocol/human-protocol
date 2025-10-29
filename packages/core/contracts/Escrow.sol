@@ -254,7 +254,11 @@ contract Escrow is IEscrow, ReentrancyGuard {
      */
     function complete() external override notExpired adminOrReputationOracle {
         require(
-            status == EscrowStatuses.Paid || status == EscrowStatuses.Partial,
+            status == EscrowStatuses.Paid ||
+                status == EscrowStatuses.Partial ||
+                (status == EscrowStatuses.Pending &&
+                    bytes(intermediateResultsUrl).length > 0 &&
+                    reservedFunds == 0),
             'Invalid status'
         );
         _finalize();

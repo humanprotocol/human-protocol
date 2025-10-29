@@ -1394,7 +1394,7 @@ describe('Escrow', function () {
       await setupEscrow();
     });
     describe('reverts', function () {
-      it('reverts when status is not Paid or Partial', async function () {
+      it('reverts when status is not Paid or Partial or intermediate results does not exist', async function () {
         await expect(
           escrow.connect(reputationOracle).complete()
         ).to.be.revertedWith('Invalid status');
@@ -1412,6 +1412,13 @@ describe('Escrow', function () {
         await expect(
           escrow.connect(recordingOracle).complete()
         ).to.be.revertedWith('Unauthorised');
+      });
+
+      it('reverts when intermediate results exist but reserved funds is not 0', async function () {
+        storeResults();
+        await expect(
+          escrow.connect(reputationOracle).complete()
+        ).to.be.revertedWith('Invalid status');
       });
     });
 
@@ -1470,6 +1477,48 @@ describe('Escrow', function () {
 
         expect(finalLauncherBalance - initialLauncherBalance).to.equal(
           initialEscrowBalance - amounts[0]
+        );
+      });
+
+      it('Reputation oracle: completes the escrow successfully without payouts', async function () {
+        const initialLauncherBalance = await token.balanceOf(launcherAddress);
+        const initialEscrowBalance = await token.balanceOf(escrow.getAddress());
+
+        await storeResults(FIXTURE_URL, FIXTURE_HASH, 0n);
+
+        await expect(escrow.connect(reputationOracle).complete()).to.emit(
+          escrow,
+          'Completed'
+        );
+
+        expect(await escrow.status()).to.equal(Status.Complete);
+        expect(await escrow.remainingFunds()).to.equal('0');
+
+        const finalLauncherBalance = await token.balanceOf(launcherAddress);
+
+        expect(finalLauncherBalance - initialLauncherBalance).to.equal(
+          initialEscrowBalance
+        );
+      });
+
+      it('Admin: completes the escrow successfully without payouts', async function () {
+        const initialLauncherBalance = await token.balanceOf(launcherAddress);
+        const initialEscrowBalance = await token.balanceOf(escrow.getAddress());
+
+        await storeResults(FIXTURE_URL, FIXTURE_HASH, 0n);
+
+        await expect(escrow.connect(admin).complete()).to.emit(
+          escrow,
+          'Completed'
+        );
+
+        expect(await escrow.status()).to.equal(Status.Complete);
+        expect(await escrow.remainingFunds()).to.equal('0');
+
+        const finalLauncherBalance = await token.balanceOf(launcherAddress);
+
+        expect(finalLauncherBalance - initialLauncherBalance).to.equal(
+          initialEscrowBalance
         );
       });
     });
