@@ -3,9 +3,9 @@ name: Human App Check
 on:
   push:
     paths:
-      - 'packages/core/**'
-      - 'packages/sdk/typescript/human-protocol-sdk/**'
-      - 'packages/apps/human-app/**'
+      - "packages/core/**"
+      - "packages/sdk/typescript/human-protocol-sdk/**"
+      - "packages/apps/human-app/**"
 
 jobs:
   job-app-server-test:
@@ -22,4 +22,4 @@ jobs:
       - name: Build libs
         run: yarn build:libs
       - name: Run Job Human App unit tests
-        run: yarn workspace @human-protocol/human-app-server test
+        run: yarn workspace @apps/human-app-server test

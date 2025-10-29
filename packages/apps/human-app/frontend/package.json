@@ -1,5 +1,5 @@
 {
-  "name": "@human-protocol/human-app-frontend",
+  "name": "@apps/human-app-frontend",
   "private": true,
   "version": "1.0.0",
   "scripts": {

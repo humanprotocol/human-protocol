@@ -9,7 +9,7 @@ function maybeCreateGitTagForPackage({ name, version }) {
     return;
   }
 
-  const tag = `${name}@${version}`;
+  const tag = `js/${name}@${version}`;
 
   try {
     childProcess.execSync(`git rev-parse --verify ${tag}`, { stdio: "ignore" });
