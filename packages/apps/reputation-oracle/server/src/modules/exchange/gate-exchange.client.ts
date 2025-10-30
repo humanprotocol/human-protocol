@@ -1,7 +1,7 @@
 import { createHash, createHmac } from 'node:crypto';
 
-import { DEFAULT_TIMEOUT_MS, type SupportedExchange } from '@/common/constants';
-import appLogger from '@/logger';
+import { type SupportedExchange } from '@/common/constants';
+import logger from '@/logger';
 import Environment from '@/utils/environment';
 
 import { ExchangeApiClientError } from './errors';
@@ -10,6 +10,7 @@ import type {
   ExchangeClientCredentials,
   ExchangeClientOptions,
 } from './types';
+import { fetchWithHandling } from './utils';
 
 const GATE_API_BASE_URL = 'https://api.gateio.ws/api/v4';
 const DEVELOP_GATE_API_BASE_URL = 'https://api-testnet.gateapi.io/api/v4';
@@ -33,11 +34,11 @@ export class GateExchangeClient implements ExchangeClient {
   readonly id: SupportedExchange = 'gate';
   private readonly apiKey: string;
   private readonly secretKey: string;
-  private readonly timeoutMs: number;
+  private readonly timeoutMs?: number;
   private readonly apiBaseUrl = Environment.isDevelopment()
     ? DEVELOP_GATE_API_BASE_URL
     : GATE_API_BASE_URL;
-  private readonly logger = appLogger.child({
+  private readonly logger = logger.child({
     context: GateExchangeClient.name,
     exchange: this.id,
   });
@@ -51,7 +52,7 @@ export class GateExchangeClient implements ExchangeClient {
     }
     this.apiKey = creds.apiKey;
     this.secretKey = creds.secretKey;
-    this.timeoutMs = options?.timeoutMs || DEFAULT_TIMEOUT_MS;
+    this.timeoutMs = options?.timeoutMs;
   }
 
   async checkRequiredAccess(): Promise<boolean> {
@@ -69,31 +70,25 @@ export class GateExchangeClient implements ExchangeClient {
       ts,
     );
 
-    try {
-      const res = await fetch(`${this.apiBaseUrl}${path}`, {
-        method,
-        headers: {
-          KEY: this.apiKey,
-          SIGN: signature,
-          Timestamp: ts,
-          Accept: 'application/json',
-        },
-        signal: AbortSignal.timeout(this.timeoutMs),
-      } as RequestInit);
+    const res = await fetchWithHandling(
+      this.id,
+      `${this.apiBaseUrl}${path}`,
+      {
+        KEY: this.apiKey,
+        SIGN: signature,
+        Timestamp: ts,
+        Accept: 'application/json',
+      },
+      this.logger,
+      this.timeoutMs,
+    );
 
-      if (res.ok) return true;
-      this.logger.debug('Gate access check failed', {
-        status: res.status,
-        statusText: res.statusText,
-      });
-      return false;
-    } catch (error) {
-      const message: string = 'Failed to check access for Gate';
-      this.logger.error(message, {
-        error,
-      });
-      throw new ExchangeApiClientError(message);
-    }
+    if (res.ok) return true;
+    this.logger.debug('Gate access check failed', {
+      status: res.status,
+      statusText: res.statusText,
+    });
+    return false;
   }
 
   async getAccountBalance(asset: string): Promise<number> {
@@ -113,54 +108,47 @@ export class GateExchangeClient implements ExchangeClient {
     );
     const url = `${this.apiBaseUrl}${path}?${query}`;
 
-    try {
-      const res = await fetch(url, {
-        method,
-        headers: {
-          KEY: this.apiKey,
-          SIGN: signature,
-          Timestamp: ts,
-          Accept: 'application/json',
-        },
-        signal: AbortSignal.timeout(this.timeoutMs),
-      } as RequestInit);
+    const res = await fetchWithHandling(
+      this.id,
+      url,
+      {
+        KEY: this.apiKey,
+        SIGN: signature,
+        Timestamp: ts,
+        Accept: 'application/json',
+      },
+      this.logger,
+      this.timeoutMs,
+    );
 
-      if (!res.ok) {
-        this.logger.warn('Gate balance fetch failed', {
-          status: res.status,
-          statusText: res.statusText,
-          asset,
-        });
-        return 0;
-      }
-
-      const data = (await res.json()) as Array<{
-        currency: string;
-        available: string;
-        locked?: string;
-        freeze?: string;
-      }>;
-
-      const normalize = (item: {
-        currency: string;
-        available: string;
-        locked?: string;
-        freeze?: string;
-      }) => {
-        const free = parseFloat(item.available) || 0;
-        const locked = parseFloat(item.locked ?? item.freeze ?? '0') || 0;
-        return free + locked;
-      };
-
-      const entry = data.find((d) => d.currency === asset);
-      return entry ? normalize(entry) : 0;
-    } catch (error) {
-      const message: string = 'Failed to get account balance for Gate';
-      this.logger.error(message, {
-        error,
+    if (!res.ok) {
+      this.logger.warn('Gate balance fetch failed', {
+        status: res.status,
+        statusText: res.statusText,
         asset,
       });
-      throw new ExchangeApiClientError(message);
+      return 0;
     }
+
+    const data = (await res.json()) as Array<{
+      currency: string;
+      available: string;
+      locked?: string;
+      freeze?: string;
+    }>;
+
+    const normalize = (item: {
+      currency: string;
+      available: string;
+      locked?: string;
+      freeze?: string;
+    }) => {
+      const free = parseFloat(item.available) || 0;
+      const locked = parseFloat(item.locked ?? item.freeze ?? '0') || 0;
+      return free + locked;
+    };
+
+    const entry = data.find((d) => d.currency === asset);
+    return entry ? normalize(entry) : 0;
   }
 }
