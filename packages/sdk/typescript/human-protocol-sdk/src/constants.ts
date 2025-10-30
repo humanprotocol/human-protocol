@@ -54,7 +54,7 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/sepolia/version/latest',
     subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmaDx3yapopC5xbXqqpkuZ5yLNPjs35wui9kyLS2oX55uE',
+      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmT4xNvZh8ymarrk1zdytjLhCW59iuTavsd4JgHS4LbCVB',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },
@@ -116,7 +116,7 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/amoy/version/latest',
     subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmZq6nAyJZgTqCEChm95xqntPpHJ7mnMBi9iDPDAQSyxZa',
+      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmWRUFWpWoRRUh7Ec1HUJEwxc84DkP4iFTfLLsoVngJAPa',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },
