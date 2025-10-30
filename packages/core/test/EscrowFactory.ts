@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { EventLog, Signer, ZeroAddress } from 'ethers';
 import { ethers, upgrades } from 'hardhat';
 import { EscrowFactory, HMToken, Staking } from '../typechain-types';
-import { fa, faker } from '@faker-js/faker';
+import { faker } from '@faker-js/faker';
 
 let owner: Signer,
   launcher1: Signer,
@@ -349,10 +349,6 @@ describe('EscrowFactory', function () {
             manifestHash
           );
 
-        await expect(tx)
-          .to.emit(escrowFactory, 'LaunchedV2')
-          .withArgs(tokenAddress, anyValue, FIXTURE_REQUESTER_ID);
-
         const receipt = await tx.wait();
         const event = (
           receipt?.logs?.find(({ topics }) =>
@@ -362,6 +358,26 @@ describe('EscrowFactory', function () {
 
         expect(event).to.not.be.undefined;
         const escrowAddress = event[1];
+
+        const escrow = await ethers.getContractAt(
+          'contracts/Escrow.sol:Escrow',
+          escrowAddress
+        );
+
+        await expect(tx)
+          .to.emit(escrowFactory, 'LaunchedV2')
+          .withArgs(tokenAddress, escrowAddress, FIXTURE_REQUESTER_ID)
+          .to.emit(escrow, 'PendingV2')
+          .withArgs(
+            manifestUrl,
+            manifestHash,
+            reputationOracleAddress,
+            recordingOracleAddress,
+            exchangeOracleAddress
+          )
+          .to.emit(escrow, 'Fund')
+          .withArgs(fundAmount);
+
         expect(await escrowFactory.hasEscrow(escrowAddress)).to.be.true;
         expect(await escrowFactory.lastEscrow()).to.equal(escrowAddress);
       });
