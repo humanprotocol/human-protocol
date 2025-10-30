@@ -41,6 +41,7 @@ import {
   ErrorUnsupportedChainID,
   ErrorInvalidManifest,
   InvalidEthereumAddressError,
+  ContractExecutionError,
 } from '../src/error';
 import { EscrowClient, EscrowUtils } from '../src/escrow';
 import {
@@ -238,13 +239,21 @@ describe('EscrowClient', () => {
     test('should throw an error if the create an escrow fails', async () => {
       const tokenAddress = ethers.ZeroAddress;
 
+      const mockedError = ethers.makeError(
+        'Custom error',
+        'CALL_EXCEPTION' as any
+      );
+      const expectedError = new ContractExecutionError(
+        (mockedError as any).reason as string
+      );
+
       escrowClient.escrowFactoryContract.createEscrow.mockRejectedValueOnce(
-        new Error()
+        mockedError
       );
 
       await expect(
         escrowClient.createEscrow(tokenAddress, jobRequesterId)
-      ).rejects.toThrow();
+      ).rejects.toEqual(expectedError);
 
       expect(
         escrowClient.escrowFactoryContract.createEscrow
@@ -515,9 +524,16 @@ describe('EscrowClient', () => {
 
     test('should throw an error if the createFundAndSetupEscrow fails', async () => {
       const jobRequesterId = 'job-requester';
+      const mockedError = ethers.makeError(
+        'Custom error',
+        'CALL_EXCEPTION' as any
+      );
+      const expectedError = new ContractExecutionError(
+        (mockedError as any).reason as string
+      );
 
       escrowClient.escrowFactoryContract.createFundAndSetupEscrow.mockRejectedValueOnce(
-        new Error()
+        mockedError
       );
 
       await expect(
@@ -527,7 +543,7 @@ describe('EscrowClient', () => {
           jobRequesterId,
           escrowConfig
         )
-      ).rejects.toThrow();
+      ).rejects.toEqual(expectedError);
 
       expect(
         escrowClient.escrowFactoryContract.createFundAndSetupEscrow
