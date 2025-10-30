@@ -46,7 +46,7 @@
     "start": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "start:prod": "serve -s dist",
+    "start:prod": "serve -c ./serve.json",
     "format:prettier": "prettier --write \"**/*.{ts,tsx,js,jsx}\"",
     "format:lint": "eslint --fix \"**/*.{ts,tsx,js,jsx}\"",
     "format": "yarn format:prettier && yarn format:lint",
