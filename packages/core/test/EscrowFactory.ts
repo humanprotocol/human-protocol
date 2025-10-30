@@ -5,7 +5,16 @@ import { ethers, upgrades } from 'hardhat';
 import { EscrowFactory, HMToken, Staking } from '../typechain-types';
 import { faker } from '@faker-js/faker';
 
-let owner: Signer, launcher: Signer, admin: Signer;
+let owner: Signer,
+  launcher1: Signer,
+  admin: Signer,
+  launcher2: Signer,
+  exchangeOracle: Signer,
+  recordingOracle: Signer,
+  reputationOracle: Signer;
+let exchangeOracleAddress: string,
+  recordingOracleAddress: string,
+  reputationOracleAddress: string;
 
 let token: HMToken, escrowFactory: EscrowFactory, staking: Staking;
 let stakingAddress: string, tokenAddress: string;
@@ -24,7 +33,18 @@ async function stake(staker: Signer, amount: bigint = FIXTURE_STAKE_AMOUNT) {
 
 describe('EscrowFactory', function () {
   before(async () => {
-    [owner, launcher, admin] = await ethers.getSigners();
+    [
+      owner,
+      launcher1,
+      admin,
+      launcher2,
+      exchangeOracle,
+      recordingOracle,
+      reputationOracle,
+    ] = await ethers.getSigners();
+    exchangeOracleAddress = await exchangeOracle.getAddress();
+    recordingOracleAddress = await recordingOracle.getAddress();
+    reputationOracleAddress = await reputationOracle.getAddress();
 
     const HMToken = await ethers.getContractFactory(
       'contracts/HMToken.sol:HMToken'
@@ -39,7 +59,10 @@ describe('EscrowFactory', function () {
 
     await token
       .connect(owner)
-      .transfer(await launcher.getAddress(), ethers.parseEther('100000'));
+      .transfer(await launcher1.getAddress(), ethers.parseEther('100000'));
+    await token
+      .connect(owner)
+      .transfer(await launcher2.getAddress(), ethers.parseEther('100000'));
 
     const Staking = await ethers.getContractFactory('Staking');
     staking = await Staking.deploy(
@@ -49,8 +72,6 @@ describe('EscrowFactory', function () {
       FEE_PERCENTAGE
     );
     stakingAddress = await staking.getAddress();
-
-    await token.connect(launcher).approve(await staking.getAddress(), 1000);
 
     const EscrowFactory = await ethers.getContractFactory(
       'contracts/EscrowFactory.sol:EscrowFactory'
@@ -109,7 +130,7 @@ describe('EscrowFactory', function () {
 
       it('reverts when caller is not the owner', async () => {
         await expect(
-          escrowFactory.connect(launcher).setStakingAddress(stakingAddress)
+          escrowFactory.connect(launcher1).setStakingAddress(stakingAddress)
         ).to.be.revertedWith('Ownable: caller is not the owner');
       });
     });
@@ -147,7 +168,7 @@ describe('EscrowFactory', function () {
 
       it('reverts when caller is not the owner', async () => {
         await expect(
-          escrowFactory.connect(launcher).setMinimumStake(0)
+          escrowFactory.connect(launcher1).setMinimumStake(0)
         ).to.be.revertedWith('Ownable: caller is not the owner');
       });
     });
@@ -176,7 +197,7 @@ describe('EscrowFactory', function () {
 
       it('reverts when caller is not the owner', async () => {
         await expect(
-          escrowFactory.connect(launcher).setAdmin(await admin.getAddress())
+          escrowFactory.connect(launcher1).setAdmin(await admin.getAddress())
         ).to.be.revertedWith('Ownable: caller is not the owner');
       });
     });
@@ -197,7 +218,7 @@ describe('EscrowFactory', function () {
       it('reverts when launcher has insufficient stake', async () => {
         await expect(
           escrowFactory
-            .connect(launcher)
+            .connect(launcher1)
             .createEscrow(tokenAddress, FIXTURE_REQUESTER_ID)
         ).to.be.revertedWith('Insufficient stake');
       });
@@ -205,10 +226,10 @@ describe('EscrowFactory', function () {
 
     describe('succeeds', () => {
       it('creates an escrow successfully', async () => {
-        await stake(launcher);
+        await stake(launcher1);
 
         const tx = await escrowFactory
-          .connect(launcher)
+          .connect(launcher1)
           .createEscrow(tokenAddress, FIXTURE_REQUESTER_ID);
 
         await expect(tx)
@@ -224,6 +245,139 @@ describe('EscrowFactory', function () {
 
         expect(event).to.not.be.undefined;
         const escrowAddress = event[1];
+        expect(await escrowFactory.hasEscrow(escrowAddress)).to.be.true;
+        expect(await escrowFactory.lastEscrow()).to.equal(escrowAddress);
+      });
+    });
+  });
+
+  describe('createFundAndSetupEscrow()', () => {
+    const fee = faker.number.int({ min: 1, max: 5 });
+    const manifestUrl = faker.internet.url();
+    const manifestHash = faker.string.alphanumeric(46);
+    const fundAmount = ethers.parseEther(
+      faker.finance.amount({ min: 1, max: 100 })
+    );
+    describe('reverts', () => {
+      it('reverts when fund amount is 0', async () => {
+        await expect(
+          escrowFactory
+            .connect(launcher2)
+            .createFundAndSetupEscrow(
+              tokenAddress,
+              0,
+              FIXTURE_REQUESTER_ID,
+              reputationOracleAddress,
+              recordingOracleAddress,
+              exchangeOracleAddress,
+              fee,
+              fee,
+              fee,
+              manifestUrl,
+              manifestHash
+            )
+        ).to.be.revertedWith('Amount is 0');
+      });
+
+      it('reverts when launcher has insufficient stake', async () => {
+        await expect(
+          escrowFactory
+            .connect(launcher2)
+            .createFundAndSetupEscrow(
+              tokenAddress,
+              fundAmount,
+              FIXTURE_REQUESTER_ID,
+              reputationOracleAddress,
+              recordingOracleAddress,
+              exchangeOracleAddress,
+              fee,
+              fee,
+              fee,
+              manifestUrl,
+              manifestHash
+            )
+        ).to.be.revertedWith('Insufficient stake');
+      });
+
+      it('reverts when allowance is too low', async () => {
+        await stake(launcher2);
+        await token
+          .connect(launcher2)
+          .approve(await escrowFactory.getAddress(), fundAmount / 2n);
+
+        await expect(
+          escrowFactory
+            .connect(launcher2)
+            .createFundAndSetupEscrow(
+              tokenAddress,
+              fundAmount,
+              FIXTURE_REQUESTER_ID,
+              reputationOracleAddress,
+              recordingOracleAddress,
+              exchangeOracleAddress,
+              fee,
+              fee,
+              fee,
+              manifestUrl,
+              manifestHash
+            )
+        ).to.be.revertedWith('Spender allowance too low');
+      });
+    });
+
+    describe('succeeds', () => {
+      it('creates an escrow successfully', async () => {
+        await stake(launcher2);
+
+        await token
+          .connect(launcher2)
+          .approve(await escrowFactory.getAddress(), fundAmount);
+
+        const tx = await escrowFactory
+          .connect(launcher2)
+          .createFundAndSetupEscrow(
+            tokenAddress,
+            fundAmount,
+            FIXTURE_REQUESTER_ID,
+            reputationOracleAddress,
+            recordingOracleAddress,
+            exchangeOracleAddress,
+            fee,
+            fee,
+            fee,
+            manifestUrl,
+            manifestHash
+          );
+
+        const receipt = await tx.wait();
+        const event = (
+          receipt?.logs?.find(({ topics }) =>
+            topics.includes(ethers.id('LaunchedV2(address,address,string)'))
+          ) as EventLog
+        )?.args;
+
+        expect(event).to.not.be.undefined;
+        const escrowAddress = event[1];
+
+        const escrow = await ethers.getContractAt(
+          'contracts/Escrow.sol:Escrow',
+          escrowAddress
+        );
+
+        await expect(tx)
+          .to.emit(escrowFactory, 'LaunchedV2')
+          .withArgs(tokenAddress, escrowAddress, FIXTURE_REQUESTER_ID)
+          .to.emit(escrow, 'PendingV2')
+          .withArgs(
+            manifestUrl,
+            manifestHash,
+            reputationOracleAddress,
+            recordingOracleAddress,
+            exchangeOracleAddress
+          )
+          .to.emit(escrow, 'Fund')
+          .withArgs(fundAmount);
+
         expect(await escrowFactory.hasEscrow(escrowAddress)).to.be.true;
         expect(await escrowFactory.lastEscrow()).to.equal(escrowAddress);
       });

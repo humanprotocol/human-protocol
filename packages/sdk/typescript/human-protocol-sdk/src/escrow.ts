@@ -203,8 +203,8 @@ export class EscrowClient extends BaseEthersClient {
   /**
    * This function creates an escrow contract that uses the token passed to pay oracle fees and reward workers.
    *
-   * @param {string} tokenAddress Token address to use for payouts.
-   * @param {string} jobRequesterId Job Requester Id
+   * @param {string} tokenAddress - The address of the token to use for escrow funding.
+   * @param {string} jobRequesterId - Identifier for the job requester.
    * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @returns {Promise<string>} Returns the address of the escrow created.
    *
@@ -244,6 +244,167 @@ export class EscrowClient extends BaseEthersClient {
         await this.escrowFactoryContract.createEscrow(
           tokenAddress,
           jobRequesterId,
+          this.applyTxDefaults(txOptions)
+        )
+      ).wait();
+
+      const event = (
+        result?.logs?.find(({ topics }) =>
+          topics.includes(ethers.id('LaunchedV2(address,address,string)'))
+        ) as EventLog
+      )?.args;
+
+      if (!event) {
+        throw ErrorLaunchedEventIsNotEmitted;
+      }
+
+      return event.escrow;
+    } catch (e: any) {
+      return throwError(e);
+    }
+  }
+  private verifySetupParameters(escrowConfig: IEscrowConfig) {
+    const {
+      recordingOracle,
+      reputationOracle,
+      exchangeOracle,
+      recordingOracleFee,
+      reputationOracleFee,
+      exchangeOracleFee,
+      manifest,
+      manifestHash,
+    } = escrowConfig;
+
+    if (!ethers.isAddress(recordingOracle)) {
+      throw ErrorInvalidRecordingOracleAddressProvided;
+    }
+
+    if (!ethers.isAddress(reputationOracle)) {
+      throw ErrorInvalidReputationOracleAddressProvided;
+    }
+
+    if (!ethers.isAddress(exchangeOracle)) {
+      throw ErrorInvalidExchangeOracleAddressProvided;
+    }
+
+    if (
+      recordingOracleFee <= 0 ||
+      reputationOracleFee <= 0 ||
+      exchangeOracleFee <= 0
+    ) {
+      throw ErrorAmountMustBeGreaterThanZero;
+    }
+
+    if (recordingOracleFee + reputationOracleFee + exchangeOracleFee > 100) {
+      throw ErrorTotalFeeMustBeLessThanHundred;
+    }
+
+    const isManifestValid = isValidUrl(manifest) || isValidJson(manifest);
+    if (!isManifestValid) {
+      throw ErrorInvalidManifest;
+    }
+
+    if (!manifestHash) {
+      throw ErrorHashIsEmptyString;
+    }
+  }
+
+  /**
+   * Creates, funds, and sets up a new escrow contract in a single transaction.
+   *
+   * @param {string} tokenAddress - The ERC-20 token address used to fund the escrow.
+   * @param {bigint} amount - The token amount to fund the escrow with.
+   * @param {string} jobRequesterId - An off-chain identifier for the job requester.
+   * @param {IEscrowConfig} escrowConfig - Configuration parameters for escrow setup:
+   *   - `recordingOracle`: Address of the recording oracle.
+   *   - `reputationOracle`: Address of the reputation oracle.
+   *   - `exchangeOracle`: Address of the exchange oracle.
+   *   - `recordingOracleFee`: Fee (in basis points or percentage * 100) for the recording oracle.
+   *   - `reputationOracleFee`: Fee for the reputation oracle.
+   *   - `exchangeOracleFee`: Fee for the exchange oracle.
+   *   - `manifest`: URL to the manifest file.
+   *   - `manifestHash`: Hash of the manifest content.
+   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
+   *
+   * @returns {Promise<string>} Returns the address of the escrow created.
+   *
+   * @example
+   * import { Wallet, ethers } from 'ethers';
+   * import { EscrowClient, IERC20__factory } from '@human-protocol/sdk';
+   *
+   * const rpcUrl = 'YOUR_RPC_URL';
+   * const privateKey = 'YOUR_PRIVATE_KEY';
+   * const provider = new ethers.JsonRpcProvider(rpcUrl);
+   * const signer = new Wallet(privateKey, provider);
+   *
+   * const escrowClient = await EscrowClient.build(signer);
+   *
+   * const tokenAddress = '0xTokenAddress';
+   * const amount = ethers.parseUnits('1000', 18);
+   * const jobRequesterId = 'requester-123';
+   *
+   * const token = IERC20__factory.connect(tokenAddress, signer);
+   * await token.approve(escrowClient.escrowFactoryContract.target, amount);
+   *
+   * const escrowConfig = {
+   *   recordingOracle: '0xRecordingOracle',
+   *   reputationOracle: '0xReputationOracle',
+   *   exchangeOracle: '0xExchangeOracle',
+   *   recordingOracleFee: 5n,
+   *   reputationOracleFee: 5n,
+   *   exchangeOracleFee: 5n,
+   *   manifest: 'https://example.com/manifest.json',
+   *   manifestHash: 'manifestHash-123',
+   * } satisfies IEscrowConfig;
+   *
+   * const escrowAddress = await escrowClient.createFundAndSetupEscrow(
+   *   tokenAddress,
+   *   amount,
+   *   jobRequesterId,
+   *   escrowConfig
+   * );
+   *
+   * console.log('Escrow created at:', escrowAddress);
+   */
+  @requiresSigner
+  public async createFundAndSetupEscrow(
+    tokenAddress: string,
+    amount: bigint,
+    jobRequesterId: string,
+    escrowConfig: IEscrowConfig,
+    txOptions: Overrides = {}
+  ): Promise<string> {
+    if (!ethers.isAddress(tokenAddress)) {
+      throw ErrorInvalidTokenAddress;
+    }
+
+    this.verifySetupParameters(escrowConfig);
+
+    const {
+      recordingOracle,
+      reputationOracle,
+      exchangeOracle,
+      recordingOracleFee,
+      reputationOracleFee,
+      exchangeOracleFee,
+      manifest,
+      manifestHash,
+    } = escrowConfig;
+
+    try {
+      const result = await (
+        await this.escrowFactoryContract.createFundAndSetupEscrow(
+          tokenAddress,
+          amount,
+          jobRequesterId,
+          reputationOracle,
+          recordingOracle,
+          exchangeOracle,
+          reputationOracleFee,
+          recordingOracleFee,
+          exchangeOracleFee,
+          manifest,
+          manifestHash,
           this.applyTxDefaults(txOptions)
         )
       ).wait();
@@ -319,41 +480,10 @@ export class EscrowClient extends BaseEthersClient {
       manifestHash,
     } = escrowConfig;
 
-    if (!ethers.isAddress(recordingOracle)) {
-      throw ErrorInvalidRecordingOracleAddressProvided;
-    }
-
-    if (!ethers.isAddress(reputationOracle)) {
-      throw ErrorInvalidReputationOracleAddressProvided;
-    }
-
-    if (!ethers.isAddress(exchangeOracle)) {
-      throw ErrorInvalidExchangeOracleAddressProvided;
-    }
+    this.verifySetupParameters(escrowConfig);
 
     if (!ethers.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
-    }
-
-    if (
-      recordingOracleFee <= 0 ||
-      reputationOracleFee <= 0 ||
-      exchangeOracleFee <= 0
-    ) {
-      throw ErrorAmountMustBeGreaterThanZero;
-    }
-
-    if (recordingOracleFee + reputationOracleFee + exchangeOracleFee > 100) {
-      throw ErrorTotalFeeMustBeLessThanHundred;
-    }
-
-    const isManifestValid = isValidUrl(manifest) || isValidJson(manifest);
-    if (!isManifestValid) {
-      throw ErrorInvalidManifest;
-    }
-
-    if (!manifestHash) {
-      throw ErrorHashIsEmptyString;
     }
 
     if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {

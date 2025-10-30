@@ -220,7 +220,7 @@ class EscrowClient:
         Creates a new escrow contract.
 
         :param token_address: Address of the token to be used in the escrow
-        :param job_requester_id: ID of the job requester
+        :param job_requester_id: An off-chain identifier for the job requester
         :param tx_options: (Optional) Transaction options
 
         :return: Address of the created escrow contract
@@ -263,6 +263,105 @@ class EscrowClient:
         try:
             tx_hash = self.factory_contract.functions.createEscrow(
                 token_address, job_requester_id
+            ).transact(apply_tx_defaults(self.w3, tx_options))
+            receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash)
+            event = next(
+                (
+                    self.factory_contract.events.LaunchedV2().process_log(log)
+                    for log in receipt["logs"]
+                    if log["address"] == self.network["factory_address"]
+                ),
+                None,
+            )
+            return event.args.escrow if event else None
+        except Exception as e:
+            handle_error(e, EscrowClientError)
+
+    @requires_signer
+    def create_fund_and_setup_escrow(
+        self,
+        token_address: str,
+        amount: int,
+        job_requester_id: str,
+        escrow_config: EscrowConfig,
+        tx_options: Optional[TxParams] = None,
+    ) -> str:
+        """
+        Creates, funds, and sets up a new escrow contract in a single transaction.
+
+        :param token_address: Address of the token to be used in the escrow
+        :param amount: The token amount to fund the escrow with
+        :param job_requester_id: An off-chain identifier for the job requester
+        :param escrow_config: Configuration parameters for escrow setup
+        :param tx_options: (Optional) Transaction options
+
+        :return: Address of the created escrow contract
+
+        :example:
+            .. code-block:: python
+
+                from eth_typing import URI
+                from web3 import Web3
+                from web3.middleware import SignAndSendRawMiddlewareBuilder
+                from web3.providers.auto import load_provider_from_uri
+
+                from human_protocol_sdk.escrow import EscrowClient
+
+                def get_w3_with_priv_key(priv_key: str):
+                    w3 = Web3(load_provider_from_uri(
+                        URI("http://localhost:8545")))
+                    gas_payer = w3.eth.account.from_key(priv_key)
+                    w3.eth.default_account = gas_payer.address
+                    w3.middleware_onion.inject(
+                        SignAndSendRawMiddlewareBuilder.build(priv_key),
+                        'SignAndSendRawMiddlewareBuilder',
+                        layer=0,
+                    )
+                    return (w3, gas_payer)
+
+                (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
+                escrow_client = EscrowClient(w3)
+
+                token_address = '0x1234567890abcdef1234567890abcdef12345678'
+                job_requester_id = 'job-requester'
+                amount = Web3.to_wei(5, 'ether')  # convert from ETH to WEI
+                escrow_config = EscrowConfig(
+                    recording_oracle_address='0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef',
+                    reputation_oracle_address='0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef',
+                    exchange_oracle_address='0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef',
+                    recording_oracle_fee=100,
+                    reputation_oracle_fee=100,
+                    exchange_oracle_fee=100,
+                    recording_oracle_url='https://example.com/recording',
+                    reputation_oracle_url='https://example.com/reputation',
+                    exchange_oracle_url='https://example.com/exchange',
+                    manifest_url='https://example.com/manifest',
+                    manifest_hash='0xabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdef'
+                )
+
+                escrow_address = escrow_client.create_fund_and_setup_escrow(
+                    token_address,
+                    amount,
+                    job_requester_id,
+                    escrow_config
+                )
+        """
+        if not Web3.is_address(token_address):
+            raise EscrowClientError(f"Invalid token address: {token_address}")
+
+        try:
+            tx_hash = self.factory_contract.functions.createFundAndSetupEscrow(
+                token_address,
+                amount,
+                job_requester_id,
+                escrow_config.reputation_oracle_address,
+                escrow_config.recording_oracle_address,
+                escrow_config.exchange_oracle_address,
+                escrow_config.reputation_oracle_fee,
+                escrow_config.recording_oracle_fee,
+                escrow_config.exchange_oracle_fee,
+                escrow_config.manifest,
+                escrow_config.hash,
             ).transact(apply_tx_defaults(self.w3, tx_options))
             receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash)
             event = next(

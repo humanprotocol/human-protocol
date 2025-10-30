@@ -150,7 +150,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
         uint8 _exchangeOracleFeePercentage,
         string calldata _url,
         string calldata _hash
-    ) external override adminOrLauncher notExpired {
+    ) external override adminLauncherOrFactory notExpired {
         require(_reputationOracle != address(0), 'Invalid reputation oracle');
         require(_recordingOracle != address(0), 'Invalid recording oracle');
         require(_exchangeOracle != address(0), 'Invalid exchange oracle');
@@ -492,6 +492,16 @@ contract Escrow is IEscrow, ReentrancyGuard {
 
     modifier adminOrLauncher() {
         require(msg.sender == admin || msg.sender == launcher, 'Unauthorised');
+        _;
+    }
+
+    modifier adminLauncherOrFactory() {
+        require(
+            msg.sender == admin ||
+                msg.sender == launcher ||
+                msg.sender == escrowFactory,
+            'Unauthorised'
+        );
         _;
     }
 

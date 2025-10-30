@@ -448,6 +448,171 @@ class TestEscrowClient(unittest.TestCase):
         )
         self.assertEqual(result, escrow_address)
 
+    def test_create_fund_and_setup_escrow(self):
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        token_address = "0x1234567890123456789012345678901234567890"
+        job_requester_id = "job-requester"
+        amount = 1000
+
+        mock_create = MagicMock()
+        mock_create.transact.return_value = "tx_hash"
+        self.escrow.factory_contract.functions.createFundAndSetupEscrow = MagicMock(
+            return_value=mock_create
+        )
+
+        mock_event = MagicMock()
+        mock_event.args.escrow = escrow_address
+        mock_events = MagicMock()
+        mock_events.LaunchedV2().process_log.return_value = mock_event
+        self.escrow.factory_contract.events = mock_events
+        self.escrow.network["factory_address"] = (
+            "0x1234567890123456789012345678901234567890"
+        )
+        self.escrow.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": [{"address": self.escrow.network["factory_address"]}]}
+        )
+
+        escrow_config = EscrowConfig(
+            "0x1234567890123456789012345678901234567890",
+            "0x1234567890123456789012345678901234567890",
+            "0x1234567890123456789012345678901234567890",
+            10,
+            10,
+            10,
+            "https://www.example.com/manifest",
+            "hashvalue",
+        )
+
+        result = self.escrow.create_fund_and_setup_escrow(
+            token_address, amount, job_requester_id, escrow_config
+        )
+
+        self.escrow.factory_contract.functions.createFundAndSetupEscrow.assert_called_once_with(
+            token_address,
+            amount,
+            job_requester_id,
+            escrow_config.reputation_oracle_address,
+            escrow_config.recording_oracle_address,
+            escrow_config.exchange_oracle_address,
+            escrow_config.reputation_oracle_fee,
+            escrow_config.recording_oracle_fee,
+            escrow_config.exchange_oracle_fee,
+            escrow_config.manifest,
+            escrow_config.hash,
+        )
+        mock_create.transact.assert_called_once_with({})
+        self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
+            "tx_hash"
+        )
+        self.assertEqual(result, escrow_address)
+
+    def test_create_fund_and_setup_escrow_invalid_token(self):
+        token_address = "invalid_address"
+        job_requester_id = "job-requester"
+        amount = 1000
+
+        escrow_config = EscrowConfig(
+            "0x1234567890123456789012345678901234567890",
+            "0x1234567890123456789012345678901234567890",
+            "0x1234567890123456789012345678901234567890",
+            10,
+            10,
+            10,
+            "https://www.example.com/manifest",
+            "hashvalue",
+        )
+
+        with self.assertRaises(EscrowClientError) as cm:
+            self.escrow.create_fund_and_setup_escrow(
+                token_address, amount, job_requester_id, escrow_config
+            )
+        self.assertEqual(f"Invalid token address: {token_address}", str(cm.exception))
+
+    def test_create_fund_and_setup_escrow_without_account(self):
+        mock_provider = MagicMock(spec=HTTPProvider)
+        w3 = Web3(mock_provider)
+        mock_chain_id = ChainId.LOCALHOST.value
+        type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
+
+        escrowClient = EscrowClient(w3)
+
+        token_address = "0x1234567890123456789012345678901234567890"
+        job_requester_id = "job-requester"
+        amount = 1000
+        escrow_config = EscrowConfig(
+            "0x1234567890123456789012345678901234567890",
+            "0x1234567890123456789012345678901234567890",
+            "0x1234567890123456789012345678901234567890",
+            10,
+            10,
+            10,
+            "https://www.example.com/manifest",
+            "hashvalue",
+        )
+        with self.assertRaises(RequiresSignerError) as cm:
+            escrowClient.create_fund_and_setup_escrow(
+                token_address, amount, job_requester_id, escrow_config
+            )
+        self.assertEqual("You must add an account to Web3 instance", str(cm.exception))
+
+    def test_create_fund_and_setup_escrow_with_tx_options(self):
+        mock_create = MagicMock()
+        mock_create.transact.return_value = "tx_hash"
+        self.escrow.factory_contract.functions.createFundAndSetupEscrow = MagicMock(
+            return_value=mock_create
+        )
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        token_address = "0x1234567890123456789012345678901234567890"
+        job_requester_id = "job-requester"
+        amount = 1000
+        tx_options = {"gas": 50000}
+
+        mock_event = MagicMock()
+        mock_event.args.escrow = escrow_address
+        mock_events = MagicMock()
+        mock_events.LaunchedV2().process_log.return_value = mock_event
+        self.escrow.factory_contract.events = mock_events
+        self.escrow.network["factory_address"] = (
+            "0x1234567890123456789012345678901234567890"
+        )
+        self.escrow.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": [{"address": self.escrow.network["factory_address"]}]}
+        )
+
+        escrow_config = EscrowConfig(
+            "0x1234567890123456789012345678901234567890",
+            "0x1234567890123456789012345678901234567890",
+            "0x1234567890123456789012345678901234567890",
+            10,
+            10,
+            10,
+            "https://www.example.com/manifest",
+            "hashvalue",
+        )
+
+        result = self.escrow.create_fund_and_setup_escrow(
+            token_address, amount, job_requester_id, escrow_config, tx_options
+        )
+
+        self.escrow.factory_contract.functions.createFundAndSetupEscrow.assert_called_once_with(
+            token_address,
+            amount,
+            job_requester_id,
+            escrow_config.reputation_oracle_address,
+            escrow_config.recording_oracle_address,
+            escrow_config.exchange_oracle_address,
+            escrow_config.reputation_oracle_fee,
+            escrow_config.recording_oracle_fee,
+            escrow_config.exchange_oracle_fee,
+            escrow_config.manifest,
+            escrow_config.hash,
+        )
+        mock_create.transact.assert_called_once_with(tx_options)
+        self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
+            "tx_hash"
+        )
+        self.assertEqual(result, escrow_address)
+
     def test_setup(self):
         mock_contract = MagicMock()
         mock_setup = MagicMock()

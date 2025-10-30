@@ -41,6 +41,7 @@ import {
   ErrorUnsupportedChainID,
   ErrorInvalidManifest,
   InvalidEthereumAddressError,
+  ContractExecutionError,
 } from '../src/error';
 import { EscrowClient, EscrowUtils } from '../src/escrow';
 import {
@@ -122,6 +123,7 @@ describe('EscrowClient', () => {
 
     mockEscrowFactoryContract = {
       createEscrow: vi.fn(),
+      createFundAndSetupEscrow: vi.fn(),
       hasEscrow: vi.fn(),
       lastEscrow: vi.fn(),
     };
@@ -192,20 +194,20 @@ describe('EscrowClient', () => {
   });
 
   describe('createEscrow', () => {
+    const jobRequesterId = 'job-requester';
     test('should throw an error if tokenAddress is an invalid address', async () => {
       const invalidAddress = FAKE_ADDRESS;
 
       await expect(
-        escrowClient.createEscrow(invalidAddress, [ethers.ZeroAddress])
+        escrowClient.createEscrow(invalidAddress, jobRequesterId)
       ).rejects.toThrow(ErrorInvalidTokenAddress);
     });
 
     test('should create an escrow and return its address', async () => {
       const tokenAddress = ethers.ZeroAddress;
-      const jobRequesterId = 'job-requester';
+
       const expectedEscrowAddress = ethers.ZeroAddress;
 
-      // Create a spy object for the createEscrow method
       const createEscrowSpy = vi
         .spyOn(escrowClient.escrowFactoryContract, 'createEscrow')
         .mockImplementation(() => ({
@@ -236,15 +238,22 @@ describe('EscrowClient', () => {
 
     test('should throw an error if the create an escrow fails', async () => {
       const tokenAddress = ethers.ZeroAddress;
-      const jobRequesterId = 'job-requester';
+
+      const mockedError = ethers.makeError(
+        'Custom error',
+        'CALL_EXCEPTION' as any
+      );
+      const expectedError = new ContractExecutionError(
+        (mockedError as any).reason as string
+      );
 
       escrowClient.escrowFactoryContract.createEscrow.mockRejectedValueOnce(
-        new Error()
+        mockedError
       );
 
       await expect(
         escrowClient.createEscrow(tokenAddress, jobRequesterId)
-      ).rejects.toThrow();
+      ).rejects.toEqual(expectedError);
 
       expect(
         escrowClient.escrowFactoryContract.createEscrow
@@ -253,10 +262,8 @@ describe('EscrowClient', () => {
 
     test('should create an escrow and return its address with transaction options', async () => {
       const tokenAddress = ethers.ZeroAddress;
-      const jobRequesterId = 'job-requester';
       const expectedEscrowAddress = ethers.ZeroAddress;
 
-      // Create a spy object for the createEscrow method
       const createEscrowSpy = vi
         .spyOn(escrowClient.escrowFactoryContract, 'createEscrow')
         .mockImplementation(() => ({
@@ -289,6 +296,407 @@ describe('EscrowClient', () => {
     });
   });
 
+  describe('createFundAndSetupEscrow', () => {
+    const jobRequesterId = 'job-requester';
+    const escrowConfig = {
+      recordingOracle: ethers.ZeroAddress,
+      reputationOracle: ethers.ZeroAddress,
+      exchangeOracle: ethers.ZeroAddress,
+      recordingOracleFee: 10n,
+      reputationOracleFee: 10n,
+      exchangeOracleFee: 10n,
+      manifest: VALID_URL,
+      manifestHash: FAKE_HASH,
+    };
+    const tokenAddress = ethers.ZeroAddress;
+    const expectedEscrowAddress = ethers.ZeroAddress;
+
+    test('should throw an error if tokenAddress is an invalid address', async () => {
+      const invalidAddress = FAKE_ADDRESS;
+
+      await expect(
+        escrowClient.createFundAndSetupEscrow(
+          invalidAddress,
+          10n,
+          jobRequesterId,
+          {} as any
+        )
+      ).rejects.toThrow(ErrorInvalidTokenAddress);
+    });
+
+    test('should throw an error if recordingOracle is an invalid address', async () => {
+      const escrowConfig = {
+        recordingOracle: FAKE_ADDRESS,
+        reputationOracle: ethers.ZeroAddress,
+        exchangeOracle: ethers.ZeroAddress,
+        recordingOracleFee: 10n,
+        reputationOracleFee: 10n,
+        exchangeOracleFee: 10n,
+        manifest: VALID_URL,
+        manifestHash: FAKE_HASH,
+      };
+
+      await expect(
+        escrowClient.createFundAndSetupEscrow(
+          tokenAddress,
+          10n,
+          jobRequesterId,
+          escrowConfig
+        )
+      ).rejects.toThrow(ErrorInvalidRecordingOracleAddressProvided);
+    });
+
+    test('should throw an error if reputationOracle is an invalid address', async () => {
+      const escrowConfig = {
+        recordingOracle: ethers.ZeroAddress,
+        reputationOracle: FAKE_ADDRESS,
+        exchangeOracle: ethers.ZeroAddress,
+        recordingOracleFee: 10n,
+        reputationOracleFee: 10n,
+        exchangeOracleFee: 10n,
+        manifest: VALID_URL,
+        manifestHash: FAKE_HASH,
+      };
+
+      await expect(
+        escrowClient.createFundAndSetupEscrow(
+          tokenAddress,
+          10n,
+          jobRequesterId,
+          escrowConfig
+        )
+      ).rejects.toThrow(ErrorInvalidReputationOracleAddressProvided);
+    });
+
+    test('should throw an error if exchangeOracle is an invalid address', async () => {
+      const escrowConfig = {
+        recordingOracle: ethers.ZeroAddress,
+        reputationOracle: ethers.ZeroAddress,
+        exchangeOracle: FAKE_ADDRESS,
+        recordingOracleFee: 10n,
+        reputationOracleFee: 10n,
+        exchangeOracleFee: 10n,
+        manifest: VALID_URL,
+        manifestHash: FAKE_HASH,
+      };
+
+      await expect(
+        escrowClient.createFundAndSetupEscrow(
+          tokenAddress,
+          10n,
+          jobRequesterId,
+          escrowConfig
+        )
+      ).rejects.toThrow(ErrorInvalidExchangeOracleAddressProvided);
+    });
+
+    test('should throw an error if recordingOracleFee <= 0', async () => {
+      const escrowConfig = {
+        recordingOracle: ethers.ZeroAddress,
+        reputationOracle: ethers.ZeroAddress,
+        exchangeOracle: ethers.ZeroAddress,
+        recordingOracleFee: 0n,
+        reputationOracleFee: 10n,
+        exchangeOracleFee: 10n,
+        manifest: VALID_URL,
+        manifestHash: FAKE_HASH,
+      };
+
+      await expect(
+        escrowClient.createFundAndSetupEscrow(
+          tokenAddress,
+          10n,
+          jobRequesterId,
+          escrowConfig
+        )
+      ).rejects.toThrow(ErrorAmountMustBeGreaterThanZero);
+    });
+
+    test('should throw an error if reputationOracleFee <= 0', async () => {
+      const escrowConfig = {
+        recordingOracle: ethers.ZeroAddress,
+        reputationOracle: ethers.ZeroAddress,
+        exchangeOracle: ethers.ZeroAddress,
+        recordingOracleFee: 10n,
+        reputationOracleFee: 0n,
+        exchangeOracleFee: 10n,
+        manifest: VALID_URL,
+        hash: FAKE_HASH,
+      };
+
+      await expect(
+        escrowClient.createFundAndSetupEscrow(
+          tokenAddress,
+          10n,
+          jobRequesterId,
+          escrowConfig
+        )
+      ).rejects.toThrow(ErrorAmountMustBeGreaterThanZero);
+    });
+
+    test('should throw an error if exchangeOracleFee <= 0', async () => {
+      const escrowConfig = {
+        recordingOracle: ethers.ZeroAddress,
+        reputationOracle: ethers.ZeroAddress,
+        exchangeOracle: ethers.ZeroAddress,
+        recordingOracleFee: 10n,
+        reputationOracleFee: 10n,
+        exchangeOracleFee: 0n,
+        manifest: VALID_URL,
+        manifestHash: FAKE_HASH,
+      };
+
+      await expect(
+        escrowClient.createFundAndSetupEscrow(
+          tokenAddress,
+          10n,
+          jobRequesterId,
+          escrowConfig
+        )
+      ).rejects.toThrow(ErrorAmountMustBeGreaterThanZero);
+    });
+
+    test('should throw an error if total fee > 100', async () => {
+      const escrowConfig = {
+        recordingOracle: ethers.ZeroAddress,
+        reputationOracle: ethers.ZeroAddress,
+        exchangeOracle: ethers.ZeroAddress,
+        recordingOracleFee: 40n,
+        reputationOracleFee: 40n,
+        exchangeOracleFee: 40n,
+        manifest: VALID_URL,
+        manifestHash: FAKE_HASH,
+      };
+
+      await expect(
+        escrowClient.createFundAndSetupEscrow(
+          tokenAddress,
+          10n,
+          jobRequesterId,
+          escrowConfig
+        )
+      ).rejects.toThrow(ErrorTotalFeeMustBeLessThanHundred);
+    });
+
+    test('should throw an error if manifest is an empty string', async () => {
+      const escrowConfig = {
+        recordingOracle: ethers.ZeroAddress,
+        reputationOracle: ethers.ZeroAddress,
+        exchangeOracle: ethers.ZeroAddress,
+        recordingOracleFee: 10n,
+        reputationOracleFee: 10n,
+        exchangeOracleFee: 10n,
+        manifest: '',
+        manifestHash: FAKE_HASH,
+      };
+
+      await expect(
+        escrowClient.createFundAndSetupEscrow(
+          tokenAddress,
+          10n,
+          jobRequesterId,
+          escrowConfig
+        )
+      ).rejects.toThrow(ErrorInvalidManifest);
+    });
+
+    test('should throw an error if hash is an empty string', async () => {
+      const escrowConfig = {
+        recordingOracle: ethers.ZeroAddress,
+        reputationOracle: ethers.ZeroAddress,
+        exchangeOracle: ethers.ZeroAddress,
+        recordingOracleFee: 10n,
+        reputationOracleFee: 10n,
+        exchangeOracleFee: 10n,
+        manifest: VALID_URL,
+        manifestHash: '',
+      };
+
+      await expect(
+        escrowClient.createFundAndSetupEscrow(
+          tokenAddress,
+          10n,
+          jobRequesterId,
+          escrowConfig
+        )
+      ).rejects.toThrow(ErrorHashIsEmptyString);
+    });
+
+    test('should throw an error if the createFundAndSetupEscrow fails', async () => {
+      const jobRequesterId = 'job-requester';
+      const mockedError = ethers.makeError(
+        'Custom error',
+        'CALL_EXCEPTION' as any
+      );
+      const expectedError = new ContractExecutionError(
+        (mockedError as any).reason as string
+      );
+
+      escrowClient.escrowFactoryContract.createFundAndSetupEscrow.mockRejectedValueOnce(
+        mockedError
+      );
+
+      await expect(
+        escrowClient.createFundAndSetupEscrow(
+          tokenAddress,
+          10n,
+          jobRequesterId,
+          escrowConfig
+        )
+      ).rejects.toEqual(expectedError);
+
+      expect(
+        escrowClient.escrowFactoryContract.createFundAndSetupEscrow
+      ).toHaveBeenCalledWith(
+        tokenAddress,
+        10n,
+        jobRequesterId,
+        escrowConfig.reputationOracle,
+        escrowConfig.recordingOracle,
+        escrowConfig.exchangeOracle,
+        escrowConfig.reputationOracleFee,
+        escrowConfig.recordingOracleFee,
+        escrowConfig.exchangeOracleFee,
+        escrowConfig.manifest,
+        escrowConfig.manifestHash,
+        {}
+      );
+    });
+
+    test('should create, fund and setup an escrow and return its address', async () => {
+      const createFundAndSetupEscrowSpy = vi
+        .spyOn(escrowClient.escrowFactoryContract, 'createFundAndSetupEscrow')
+        .mockImplementation(() => ({
+          wait: async () => ({
+            logs: [
+              {
+                topics: [ethers.id('LaunchedV2(address,address,string)')],
+                args: {
+                  escrow: expectedEscrowAddress,
+                },
+              },
+            ],
+          }),
+        }));
+
+      const result = await escrowClient.createFundAndSetupEscrow(
+        tokenAddress,
+        10n,
+        jobRequesterId,
+        escrowConfig
+      );
+
+      expect(createFundAndSetupEscrowSpy).toHaveBeenCalledWith(
+        tokenAddress,
+        10n,
+        jobRequesterId,
+        escrowConfig.reputationOracle,
+        escrowConfig.recordingOracle,
+        escrowConfig.exchangeOracle,
+        escrowConfig.reputationOracleFee,
+        escrowConfig.recordingOracleFee,
+        escrowConfig.exchangeOracleFee,
+        escrowConfig.manifest,
+        escrowConfig.manifestHash,
+        {}
+      );
+      expect(result).toBe(expectedEscrowAddress);
+    });
+
+    test('should create, fund and setup an escrow and return its address with transaction options', async () => {
+      const createFundAndSetupEscrowSpy = vi
+        .spyOn(escrowClient.escrowFactoryContract, 'createFundAndSetupEscrow')
+        .mockImplementation(() => ({
+          wait: async () => ({
+            logs: [
+              {
+                topics: [ethers.id('LaunchedV2(address,address,string)')],
+                args: {
+                  escrow: expectedEscrowAddress,
+                },
+              },
+            ],
+          }),
+        }));
+
+      const txOptions: Overrides = { gasLimit: 45000 };
+
+      const result = await escrowClient.createFundAndSetupEscrow(
+        tokenAddress,
+        10n,
+        jobRequesterId,
+        escrowConfig,
+        txOptions
+      );
+
+      expect(createFundAndSetupEscrowSpy).toHaveBeenCalledWith(
+        tokenAddress,
+        10n,
+        jobRequesterId,
+        escrowConfig.reputationOracle,
+        escrowConfig.recordingOracle,
+        escrowConfig.exchangeOracle,
+        escrowConfig.reputationOracleFee,
+        escrowConfig.recordingOracleFee,
+        escrowConfig.exchangeOracleFee,
+        escrowConfig.manifest,
+        escrowConfig.manifestHash,
+        txOptions
+      );
+      expect(result).toBe(expectedEscrowAddress);
+    });
+
+    test('should create, fund and setup an escrow and accept manifest as a JSON string', async () => {
+      const escrowConfig = {
+        recordingOracle: ethers.ZeroAddress,
+        reputationOracle: ethers.ZeroAddress,
+        exchangeOracle: ethers.ZeroAddress,
+        recordingOracleFee: 10n,
+        reputationOracleFee: 10n,
+        exchangeOracleFee: 10n,
+        manifest: '{"foo":"bar"}',
+        manifestHash: FAKE_HASH,
+      };
+      const createFundAndSetupEscrowSpy = vi
+        .spyOn(escrowClient.escrowFactoryContract, 'createFundAndSetupEscrow')
+        .mockImplementation(() => ({
+          wait: async () => ({
+            logs: [
+              {
+                topics: [ethers.id('LaunchedV2(address,address,string)')],
+                args: {
+                  escrow: expectedEscrowAddress,
+                },
+              },
+            ],
+          }),
+        }));
+
+      const result = await escrowClient.createFundAndSetupEscrow(
+        tokenAddress,
+        10n,
+        jobRequesterId,
+        escrowConfig
+      );
+
+      expect(createFundAndSetupEscrowSpy).toHaveBeenCalledWith(
+        tokenAddress,
+        10n,
+        jobRequesterId,
+        escrowConfig.reputationOracle,
+        escrowConfig.recordingOracle,
+        escrowConfig.exchangeOracle,
+        escrowConfig.reputationOracleFee,
+        escrowConfig.recordingOracleFee,
+        escrowConfig.exchangeOracleFee,
+        escrowConfig.manifest,
+        escrowConfig.manifestHash,
+        {}
+      );
+      expect(result).toBe(expectedEscrowAddress);
+    });
+  });
+
   describe('setup', () => {
     test('should throw an error if recordingOracle is an invalid address', async () => {
       const escrowConfig = {
@@ -299,7 +707,7 @@ describe('EscrowClient', () => {
         reputationOracleFee: 10n,
         exchangeOracleFee: 10n,
         manifest: VALID_URL,
-        hash: FAKE_HASH,
+        manifestHash: FAKE_HASH,
       };
 
       await expect(
@@ -316,7 +724,7 @@ describe('EscrowClient', () => {
         reputationOracleFee: 10n,
         exchangeOracleFee: 10n,
         manifest: VALID_URL,
-        hash: FAKE_HASH,
+        manifestHash: FAKE_HASH,
       };
 
       await expect(
@@ -333,7 +741,7 @@ describe('EscrowClient', () => {
         reputationOracleFee: 10n,
         exchangeOracleFee: 10n,
         manifest: VALID_URL,
-        hash: FAKE_HASH,
+        manifestHash: FAKE_HASH,
       };
 
       await expect(
@@ -350,7 +758,7 @@ describe('EscrowClient', () => {
         reputationOracleFee: 10n,
         exchangeOracleFee: 10n,
         manifest: VALID_URL,
-        hash: FAKE_HASH,
+        manifestHash: FAKE_HASH,
       };
 
       await expect(
@@ -377,7 +785,7 @@ describe('EscrowClient', () => {
       ).rejects.toThrow(ErrorEscrowAddressIsNotProvidedByFactory);
     });
 
-    test('should throw an error if 0 <= recordingOracleFee', async () => {
+    test('should throw an error if recordingOracleFee <= 0', async () => {
       const escrowConfig = {
         recordingOracle: ethers.ZeroAddress,
         reputationOracle: ethers.ZeroAddress,
@@ -386,7 +794,7 @@ describe('EscrowClient', () => {
         reputationOracleFee: 10n,
         exchangeOracleFee: 10n,
         manifest: VALID_URL,
-        hash: FAKE_HASH,
+        manifestHash: FAKE_HASH,
       };
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
@@ -396,7 +804,7 @@ describe('EscrowClient', () => {
       ).rejects.toThrow(ErrorAmountMustBeGreaterThanZero);
     });
 
-    test('should throw an error if 0 <= reputationOracleFee', async () => {
+    test('should throw an error if reputationOracleFee <= 0', async () => {
       const escrowConfig = {
         recordingOracle: ethers.ZeroAddress,
         reputationOracle: ethers.ZeroAddress,
@@ -405,7 +813,7 @@ describe('EscrowClient', () => {
         reputationOracleFee: 0n,
         exchangeOracleFee: 10n,
         manifest: VALID_URL,
-        hash: FAKE_HASH,
+        manifestHash: FAKE_HASH,
       };
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
@@ -415,7 +823,7 @@ describe('EscrowClient', () => {
       ).rejects.toThrow(ErrorAmountMustBeGreaterThanZero);
     });
 
-    test('should throw an error if 0 <= exchangeOracleFee', async () => {
+    test('should throw an error if exchangeOracleFee <= 0', async () => {
       const escrowConfig = {
         recordingOracle: ethers.ZeroAddress,
         reputationOracle: ethers.ZeroAddress,
@@ -424,7 +832,7 @@ describe('EscrowClient', () => {
         reputationOracleFee: 10n,
         exchangeOracleFee: 0n,
         manifest: VALID_URL,
-        hash: FAKE_HASH,
+        manifestHash: FAKE_HASH,
       };
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
@@ -434,7 +842,7 @@ describe('EscrowClient', () => {
       ).rejects.toThrow(ErrorAmountMustBeGreaterThanZero);
     });
 
-    test('should throw an error if total fee is greater than 100', async () => {
+    test('should throw an error if total fee > 100', async () => {
       const escrowConfig = {
         recordingOracle: ethers.ZeroAddress,
         reputationOracle: ethers.ZeroAddress,
@@ -443,7 +851,7 @@ describe('EscrowClient', () => {
         reputationOracleFee: 40n,
         exchangeOracleFee: 40n,
         manifest: VALID_URL,
-        hash: FAKE_HASH,
+        manifestHash: FAKE_HASH,
       };
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
@@ -515,7 +923,7 @@ describe('EscrowClient', () => {
         reputationOracleFee: 10n,
         exchangeOracleFee: 10n,
         manifest: VALID_URL,
-        hash: '',
+        manifestHash: '',
       };
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
