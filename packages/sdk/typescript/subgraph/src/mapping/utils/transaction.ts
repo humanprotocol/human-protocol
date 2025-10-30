@@ -11,6 +11,7 @@ const mainMethods: string[] = [
   'storeResults',
   'withdraw',
   'requestCancellation',
+  'cancel',
   'stake',
   'unstake',
   'slash',
