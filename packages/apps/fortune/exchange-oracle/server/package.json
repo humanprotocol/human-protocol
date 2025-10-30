@@ -1,5 +1,5 @@
 {
-  "name": "@human-protocol/fortune-exchange-oracle-server",
+  "name": "@apps/fortune-exchange-oracle-server",
   "private": true,
   "version": "1.0.0",
   "description": "Fortune Exchange Oracle",

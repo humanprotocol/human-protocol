@@ -3,9 +3,9 @@ name: Dashboard Check
 on:
   push:
     paths:
-      - 'packages/core/**'
-      - 'packages/sdk/typescript/human-protocol-sdk/**'
-      - 'packages/apps/dashboard/**'
+      - "packages/core/**"
+      - "packages/sdk/typescript/human-protocol-sdk/**"
+      - "packages/apps/dashboard/**"
 
 jobs:
   dashboard-server-test:
@@ -22,4 +22,4 @@ jobs:
       - name: Build libs
         run: yarn build:libs
       - name: Run dashboard Server test
-        run: yarn workspace @human-protocol/dashboard-server test
+        run: yarn workspace @apps/dashboard-server test

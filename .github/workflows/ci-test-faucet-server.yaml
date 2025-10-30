@@ -3,9 +3,9 @@ name: Faucet server check
 on:
   push:
     paths:
-      - 'packages/core/**'
-      - 'packages/sdk/typescript/human-protocol-sdk/**'
-      - 'packages/apps/faucet/server/**'
+      - "packages/core/**"
+      - "packages/sdk/typescript/human-protocol-sdk/**"
+      - "packages/apps/faucet/server/**"
 
 jobs:
   faucet-server-test:
@@ -25,4 +25,4 @@ jobs:
         run: cp .env.example .env
         working-directory: packages/apps/faucet/server
       - name: Run faucet/server test
-        run: yarn workspace @human-protocol/faucet-server test
+        run: yarn workspace @apps/faucet-server test

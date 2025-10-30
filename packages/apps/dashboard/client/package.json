@@ -1,5 +1,5 @@
 {
-  "name": "@human-protocol/dashboard-client",
+  "name": "@apps/dashboard-client",
   "private": true,
   "version": "1.0.0",
   "description": "Human Protocol Dashboard",

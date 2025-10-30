@@ -1,5 +1,5 @@
 {
-  "name": "@human-protocol/dashboard-server",
+  "name": "@apps/dashboard-server",
   "private": true,
   "version": "0.0.1",
   "description": "",

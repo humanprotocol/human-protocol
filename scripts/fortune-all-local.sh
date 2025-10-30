@@ -15,7 +15,7 @@ check_core_folders() {
 deploy_subgraph() {
   echo "Waiting for graph node to be healthy..."
   retries=0
-  while ! yarn workspace @human-protocol/subgraph health-local:node
+  while ! yarn workspace @tools/subgraph health-local:node
   do
     ((retries++))
     if [ "$retries" -ge 10 ]; then
@@ -26,9 +26,9 @@ deploy_subgraph() {
 
   echo "Deploying subgraph..."
 
-  NETWORK=localhost yarn workspace @human-protocol/subgraph generate
-  yarn workspace @human-protocol/subgraph create-local
-  yarn workspace @human-protocol/subgraph deploy-local
+  NETWORK=localhost yarn workspace @tools/subgraph generate
+  yarn workspace @tools/subgraph create-local
+  yarn workspace @tools/subgraph deploy-local
 }
 
 setup_oracles() {
@@ -36,35 +36,35 @@ setup_oracles() {
   # It's important to run these commands sequentially
   # to successfully execute all parallel blockchain transactions
   # that might conflict on same nonce value
-  echo "Setup JL" && yarn workspace @human-protocol/job-launcher-server setup:local
-  echo "Setup RepO" && yarn workspace @human-protocol/reputation-oracle setup:local
-  echo "Setup ExcO" && yarn workspace @human-protocol/fortune-exchange-oracle-server setup:local
-  echo "Setup RecO" && yarn workspace @human-protocol/fortune-recording-oracle setup:local
+  echo "Setup JL" && yarn workspace @apps/job-launcher-server setup:local
+  echo "Setup RepO" && yarn workspace @apps/reputation-oracle setup:local
+  echo "Setup ExcO" && yarn workspace @apps/fortune-exchange-oracle-server setup:local
+  echo "Setup RecO" && yarn workspace @apps/fortune-recording-oracle setup:local
 
   echo "Oracles successfully set up"
 }
 
 run_jl_server() {
-  NODE_ENV=local yarn workspace @human-protocol/job-launcher-server migration:run
-  NODE_ENV=local yarn workspace @human-protocol/job-launcher-server start:dev
+  NODE_ENV=local yarn workspace @apps/job-launcher-server migration:run
+  NODE_ENV=local yarn workspace @apps/job-launcher-server start:dev
 }
 
 run_jl_client() {
-  NODE_ENV=local yarn workspace @human-protocol/job-launcher-client start
+  NODE_ENV=local yarn workspace @apps/job-launcher-client start
 }
 
 run_reputation_oracle() {
-	NODE_ENV=local yarn workspace @human-protocol/reputation-oracle migration:run
-	NODE_ENV=local yarn workspace @human-protocol/reputation-oracle start:dev
+	NODE_ENV=local yarn workspace @apps/reputation-oracle migration:run
+	NODE_ENV=local yarn workspace @apps/reputation-oracle start:dev
 }
 
 run_fortune_exchange_oracle() {
-	NODE_ENV=local yarn workspace @human-protocol/fortune-exchange-oracle-server migration:run
-	NODE_ENV=local yarn workspace @human-protocol/fortune-exchange-oracle-server start:dev
+	NODE_ENV=local yarn workspace @apps/fortune-exchange-oracle-server migration:run
+	NODE_ENV=local yarn workspace @apps/fortune-exchange-oracle-server start:dev
 }
 
 run_fortune_recording_oracle() {
-	NODE_ENV=local yarn workspace @human-protocol/fortune-recording-oracle start:dev
+	NODE_ENV=local yarn workspace @apps/fortune-recording-oracle start:dev
 }
 
 full_run() {

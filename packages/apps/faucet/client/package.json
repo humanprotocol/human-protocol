@@ -1,5 +1,5 @@
 {
-  "name": "@human-protocol/faucet-client",
+  "name": "@apps/faucet-client",
   "private": true,
   "version": "1.0.0",
   "description": "Human Protocol Faucet",

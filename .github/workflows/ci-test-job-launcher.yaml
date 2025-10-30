@@ -3,9 +3,9 @@ name: Job Launcher Check
 on:
   push:
     paths:
-      - 'packages/core/**'
-      - 'packages/sdk/typescript/human-protocol-sdk/**'
-      - 'packages/apps/job-launcher/**'
+      - "packages/core/**"
+      - "packages/sdk/typescript/human-protocol-sdk/**"
+      - "packages/apps/job-launcher/**"
 
 jobs:
   job-launcher-server-test:
@@ -22,4 +22,4 @@ jobs:
       - name: Build libs
         run: yarn build:libs
       - name: Run Job Launcher Server test
-        run: yarn workspace @human-protocol/job-launcher-server test
+        run: yarn workspace @apps/job-launcher-server test

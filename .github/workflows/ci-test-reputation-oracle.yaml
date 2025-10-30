@@ -3,9 +3,9 @@ name: Reputation Oracle Check
 on:
   push:
     paths:
-      - 'packages/core/**'
-      - 'packages/sdk/typescript/human-protocol-sdk/**'
-      - 'packages/apps/reputation-oracle/**'
+      - "packages/core/**"
+      - "packages/sdk/typescript/human-protocol-sdk/**"
+      - "packages/apps/reputation-oracle/**"
 
 jobs:
   reputation-oracle-test:
@@ -22,4 +22,4 @@ jobs:
       - name: Build libs
         run: yarn build:libs
       - name: Run reputation oracle test
-        run: yarn workspace @human-protocol/reputation-oracle test
+        run: yarn workspace @apps/reputation-oracle test

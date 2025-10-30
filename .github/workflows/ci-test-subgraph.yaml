@@ -3,8 +3,8 @@ name: Subgraph check
 on:
   push:
     paths:
-      - 'packages/core/**'
-      - 'packages/sdk/typescript/subgraph/**'
+      - "packages/core/**"
+      - "packages/sdk/typescript/subgraph/**"
 
 jobs:
   subgraph-test:
@@ -22,6 +22,6 @@ jobs:
       - name: Build core package
         run: yarn workspace @human-protocol/core build
       - name: Generate manifest for Polygon for tests
-        run: NETWORK=polygon yarn workspace @human-protocol/subgraph generate 
+        run: NETWORK=polygon yarn workspace @tools/subgraph generate
       - name: Run subgraph test
-        run: yarn workspace @human-protocol/subgraph test
+        run: yarn workspace @tools/subgraph test

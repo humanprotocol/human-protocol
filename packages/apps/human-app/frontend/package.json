@@ -1,12 +1,12 @@
 {
-  "name": "@human-protocol/human-app-frontend",
+  "name": "@apps/human-app-frontend",
   "private": true,
   "version": "1.0.0",
   "scripts": {
     "clean": "tsc --build --clean && rm -rf dist",
     "start": "vite",
     "build": "tsc --build && vite build",
-    "start:prod": "serve -s dist",
+    "start:prod": "serve -c ./serve.json",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "test": "vitest --run",
