@@ -30,16 +30,6 @@ export class EnrollExchangeApiKeysData {
   secretKey: string;
 }
 
-export class DeleteExchangeApiKeysCommand {
-  token: string;
-  exchangeName: string;
-}
-
-export class RetrieveExchangeApiKeysCommand {
-  token: string;
-  exchangeName: string;
-}
-
 export class RetrieveExchangeApiKeysResponse {
   apiKey: string;
 }

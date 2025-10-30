@@ -20,10 +20,8 @@ import { ExchangeApiKeysService } from '../../modules/exchange-api-keys/exchange
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
 import {
-  DeleteExchangeApiKeysCommand,
   EnrollExchangeApiKeysCommand,
   EnrollExchangeApiKeysDto,
-  RetrieveExchangeApiKeysCommand,
   RetrieveExchangeApiKeysResponse,
 } from './model/exchange-api-keys.model';
 
@@ -61,9 +59,7 @@ export class ExchangeApiKeysController {
   @HttpCode(204)
   @Delete('/')
   async delete(@Request() req: RequestWithUser): Promise<void> {
-    const command = new DeleteExchangeApiKeysCommand();
-    command.token = req.token;
-    await this.service.delete(command);
+    await this.service.delete(req.token);
   }
 
   @ApiOperation({
@@ -73,8 +69,6 @@ export class ExchangeApiKeysController {
   async retrieve(
     @Request() req: RequestWithUser,
   ): Promise<RetrieveExchangeApiKeysResponse> {
-    const command = new RetrieveExchangeApiKeysCommand();
-    command.token = req.token;
-    return this.service.retrieve(command);
+    return this.service.retrieve(req.token);
   }
 }
