@@ -296,7 +296,7 @@ describe('EscrowClient', () => {
       recordingOracleFee: 10n,
       reputationOracleFee: 10n,
       exchangeOracleFee: 10n,
-      manifest: '{"foo":"bar"}',
+      manifest: VALID_URL,
       manifestHash: FAKE_HASH,
     };
     const tokenAddress = ethers.ZeroAddress;
@@ -491,40 +491,6 @@ describe('EscrowClient', () => {
       ).rejects.toThrow(ErrorInvalidManifest);
     });
 
-    test('should accept manifest as a JSON string', async () => {
-      const escrowConfig = {
-        recordingOracle: ethers.ZeroAddress,
-        reputationOracle: ethers.ZeroAddress,
-        exchangeOracle: ethers.ZeroAddress,
-        recordingOracleFee: 10n,
-        reputationOracleFee: 10n,
-        exchangeOracleFee: 10n,
-        manifest: '{"foo":"bar"}',
-        manifestHash: FAKE_HASH,
-      };
-
-      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
-      const setupSpy = vi
-        .spyOn(escrowClient.escrowContract, 'setup')
-        .mockImplementation(() => ({
-          wait: vi.fn().mockResolvedValue(true),
-        }));
-
-      await escrowClient.setup(ethers.ZeroAddress, escrowConfig);
-
-      expect(setupSpy).toHaveBeenCalledWith(
-        ethers.ZeroAddress,
-        ethers.ZeroAddress,
-        ethers.ZeroAddress,
-        10n,
-        10n,
-        10n,
-        '{"foo":"bar"}',
-        FAKE_HASH,
-        {}
-      );
-    });
-
     test('should throw an error if hash is an empty string', async () => {
       const escrowConfig = {
         recordingOracle: ethers.ZeroAddress,
@@ -537,10 +503,13 @@ describe('EscrowClient', () => {
         manifestHash: '',
       };
 
-      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
-
       await expect(
-        escrowClient.setup(ethers.ZeroAddress, escrowConfig)
+        escrowClient.createFundAndSetupEscrow(
+          tokenAddress,
+          10n,
+          jobRequesterId,
+          escrowConfig
+        )
       ).rejects.toThrow(ErrorHashIsEmptyString);
     });
 
@@ -578,8 +547,8 @@ describe('EscrowClient', () => {
       );
     });
 
-    test('should create an escrow and return its address', async () => {
-      const createEscrowSpy = vi
+    test('should create, fund and setup an escrow and return its address', async () => {
+      const createFundAndSetupEscrowSpy = vi
         .spyOn(escrowClient.escrowFactoryContract, 'createFundAndSetupEscrow')
         .mockImplementation(() => ({
           wait: async () => ({
@@ -601,7 +570,7 @@ describe('EscrowClient', () => {
         escrowConfig
       );
 
-      expect(createEscrowSpy).toHaveBeenCalledWith(
+      expect(createFundAndSetupEscrowSpy).toHaveBeenCalledWith(
         tokenAddress,
         10n,
         jobRequesterId,
@@ -618,8 +587,8 @@ describe('EscrowClient', () => {
       expect(result).toBe(expectedEscrowAddress);
     });
 
-    test('should create an escrow and return its address with transaction options', async () => {
-      const createEscrowSpy = vi
+    test('should create, fund and setup an escrow and return its address with transaction options', async () => {
+      const createFundAndSetupEscrowSpy = vi
         .spyOn(escrowClient.escrowFactoryContract, 'createFundAndSetupEscrow')
         .mockImplementation(() => ({
           wait: async () => ({
@@ -644,7 +613,7 @@ describe('EscrowClient', () => {
         txOptions
       );
 
-      expect(createEscrowSpy).toHaveBeenCalledWith(
+      expect(createFundAndSetupEscrowSpy).toHaveBeenCalledWith(
         tokenAddress,
         10n,
         jobRequesterId,
@@ -657,6 +626,56 @@ describe('EscrowClient', () => {
         escrowConfig.manifest,
         escrowConfig.manifestHash,
         txOptions
+      );
+      expect(result).toBe(expectedEscrowAddress);
+    });
+
+    test('should create, fund and setup an escrow and accept manifest as a JSON string', async () => {
+      const escrowConfig = {
+        recordingOracle: ethers.ZeroAddress,
+        reputationOracle: ethers.ZeroAddress,
+        exchangeOracle: ethers.ZeroAddress,
+        recordingOracleFee: 10n,
+        reputationOracleFee: 10n,
+        exchangeOracleFee: 10n,
+        manifest: '{"foo":"bar"}',
+        manifestHash: FAKE_HASH,
+      };
+      const createFundAndSetupEscrowSpy = vi
+        .spyOn(escrowClient.escrowFactoryContract, 'createFundAndSetupEscrow')
+        .mockImplementation(() => ({
+          wait: async () => ({
+            logs: [
+              {
+                topics: [ethers.id('LaunchedV2(address,address,string)')],
+                args: {
+                  escrow: expectedEscrowAddress,
+                },
+              },
+            ],
+          }),
+        }));
+
+      const result = await escrowClient.createFundAndSetupEscrow(
+        tokenAddress,
+        10n,
+        jobRequesterId,
+        escrowConfig
+      );
+
+      expect(createFundAndSetupEscrowSpy).toHaveBeenCalledWith(
+        tokenAddress,
+        10n,
+        jobRequesterId,
+        escrowConfig.reputationOracle,
+        escrowConfig.recordingOracle,
+        escrowConfig.exchangeOracle,
+        escrowConfig.reputationOracleFee,
+        escrowConfig.recordingOracleFee,
+        escrowConfig.exchangeOracleFee,
+        escrowConfig.manifest,
+        escrowConfig.manifestHash,
+        {}
       );
       expect(result).toBe(expectedEscrowAddress);
     });
