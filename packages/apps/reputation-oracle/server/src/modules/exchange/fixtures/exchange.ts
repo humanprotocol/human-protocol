@@ -1,3 +1,7 @@
+import { faker } from '@faker-js/faker';
+
+import { SUPPORTED_EXCHANGE_NAMES } from '@/common/constants';
+
 export function generateGateAccountBalance(tokens: string[] = []) {
   if (tokens.length === 0) {
     throw new Error('At least one token must be specified');
@@ -9,6 +13,7 @@ export function generateGateAccountBalance(tokens: string[] = []) {
     freeze: faker.finance.amount(),
   }));
 }
+
 export function generateMexcAccountBalance(tokens: string[] = []) {
   if (tokens.length === 0) {
     throw new Error('At least one token must be specified');
@@ -21,9 +26,6 @@ export function generateMexcAccountBalance(tokens: string[] = []) {
     })),
   };
 }
-import { faker } from '@faker-js/faker';
-
-import { SUPPORTED_EXCHANGE_NAMES } from '@/common/constants';
 
 export function generateExchangeName() {
   return faker.helpers.arrayElement(SUPPORTED_EXCHANGE_NAMES);

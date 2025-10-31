@@ -11,7 +11,7 @@ import type {
 } from './types';
 import { fetchWithHandling } from './utils';
 
-const MEXC_API_BASE_URL = 'https://api.mexc.com/api/v3';
+export const MEXC_API_BASE_URL = 'https://api.mexc.com/api/v3';
 
 export class MexcExchangeClient implements ExchangeClient {
   readonly id: SupportedExchange = 'mexc';
@@ -42,46 +42,31 @@ export class MexcExchangeClient implements ExchangeClient {
 
   async checkRequiredAccess(): Promise<boolean> {
     const path = '/account';
-    const timestamp = Date.now();
-    const query = `timestamp=${timestamp}&recvWindow=${this.recvWindow}`;
-    const signature = this.signQuery(query);
+    const { query, signature } = this.getSignedQuery();
     const url = `${MEXC_API_BASE_URL}${path}?${query}&signature=${signature}`;
 
     const res = await fetchWithHandling(
-      this.id,
       url,
       { 'X-MEXC-APIKEY': this.apiKey },
       this.logger,
       this.timeoutMs,
     );
     if (res.ok) return true;
-    this.logger.debug('MEXC access check failed', {
-      status: res.status,
-      statusText: res.statusText,
-    });
     return false;
   }
 
   async getAccountBalance(asset: string): Promise<number> {
     const path = '/account';
-    const timestamp = Date.now();
-    const query = `timestamp=${timestamp}&recvWindow=${this.recvWindow}`;
-    const signature = this.signQuery(query);
+    const { query, signature } = this.getSignedQuery();
     const url = `${MEXC_API_BASE_URL}${path}?${query}&signature=${signature}`;
 
     const res = await fetchWithHandling(
-      this.id,
       url,
       { 'X-MEXC-APIKEY': this.apiKey },
       this.logger,
       this.timeoutMs,
     );
     if (!res.ok) {
-      this.logger.warn('MEXC balance fetch failed', {
-        status: res.status,
-        statusText: res.statusText,
-        asset,
-      });
       return 0;
     }
     const data = (await res.json()) as {
@@ -94,5 +79,15 @@ export class MexcExchangeClient implements ExchangeClient {
       (parseFloat(entry.free || '0') || 0) +
       (parseFloat(entry.locked || '0') || 0);
     return total;
+  }
+
+  private getSignedQuery(): {
+    query: string;
+    signature: string;
+  } {
+    const timestamp = Date.now();
+    const query = `timestamp=${timestamp}&recvWindow=${this.recvWindow}`;
+    const signature = this.signQuery(query);
+    return { query, signature };
   }
 }

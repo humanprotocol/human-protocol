@@ -1,10 +1,9 @@
-import { DEFAULT_TIMEOUT_MS, type SupportedExchange } from '@/common/constants';
+import { DEFAULT_TIMEOUT_MS } from '@/common/constants';
 import Logger from '@/logger';
 
 import { ExchangeApiClientError } from './errors';
 
 export async function fetchWithHandling(
-  id: SupportedExchange,
   url: string,
   headers: HeadersInit,
   logger: typeof Logger,
@@ -18,8 +17,9 @@ export async function fetchWithHandling(
     });
     return res;
   } catch (error) {
-    const message: string = `Failed to fetch ${id.toUpperCase()}`;
+    const message: string = `Failed to make request for exchange`;
     logger.error(message, {
+      url,
       error,
     });
     throw new ExchangeApiClientError(message);

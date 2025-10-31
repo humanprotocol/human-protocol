@@ -1,14 +1,22 @@
 jest.mock('@/logger');
 
+import crypto from 'crypto';
+
 import { faker } from '@faker-js/faker';
+import nock from 'nock';
 
 import { ExchangeApiClientError } from './errors';
 import { generateMexcAccountBalance } from './fixtures';
-import { MexcExchangeClient } from './mexc-exchange.client';
+import { MexcExchangeClient, MEXC_API_BASE_URL } from './mexc-exchange.client';
 
 describe('MexcExchangeClient', () => {
+  afterAll(() => {
+    nock.restore();
+  });
+
   afterEach(() => {
     jest.resetAllMocks();
+    nock.cleanAll();
   });
 
   describe('constructor', () => {
@@ -21,16 +29,17 @@ describe('MexcExchangeClient', () => {
     it('sets fields correctly', () => {
       const apiKey = faker.string.sample();
       const secretKey = faker.string.sample();
+      const timeoutMs = faker.number.int();
 
       const client = new MexcExchangeClient(
         { apiKey, secretKey },
-        { timeoutMs: 1234 },
+        { timeoutMs: timeoutMs },
       );
 
       expect(client).toBeDefined();
       expect(client['apiKey']).toBe(apiKey);
       expect(client['secretKey']).toBe(secretKey);
-      expect(client['timeoutMs']).toBe(1234);
+      expect(client['timeoutMs']).toBe(timeoutMs);
     });
   });
 
@@ -38,84 +47,90 @@ describe('MexcExchangeClient', () => {
     it('returns a valid signature', () => {
       const apiKey = faker.string.sample();
       const secretKey = faker.string.sample();
+      const query = faker.string.sample();
 
       const client = new MexcExchangeClient({ apiKey, secretKey });
 
-      const query = 'timestamp=123&recvWindow=5000';
       const signature = client['signQuery'](query);
 
-      expect(typeof signature).toBe('string');
-      expect(signature.length).toBeGreaterThan(0);
+      const expectedSignature = crypto
+        .createHmac('sha256', secretKey)
+        .update(query)
+        .digest('hex');
+      expect(signature).toBe(expectedSignature);
+    });
+
+    it('getSignedQuery returns correct structure and signature', () => {
+      const apiKey = faker.string.sample();
+      const secretKey = faker.string.sample();
+      const timestamp = faker.number.int();
+      const client = new MexcExchangeClient({ apiKey, secretKey });
+
+      jest.spyOn(Date, 'now').mockReturnValue(timestamp);
+      const result = client['getSignedQuery']();
+      expect(result).toHaveProperty('query');
+      expect(result).toHaveProperty('signature');
+      expect(result.query).toBe(`timestamp=${timestamp}&recvWindow=5000`);
+
+      const expectedSignature = crypto
+        .createHmac('sha256', secretKey)
+        .update(result.query)
+        .digest('hex');
+      expect(result.signature).toBe(expectedSignature);
+      jest.restoreAllMocks();
     });
   });
 
   describe('checkRequiredAccess', () => {
+    const path = '/account';
+
     it('returns true if fetch is ok', async () => {
       const apiKey = faker.string.sample();
       const secretKey = faker.string.sample();
-
       const client = new MexcExchangeClient({ apiKey, secretKey });
-
-      jest.spyOn(global, 'fetch').mockResolvedValue({
-        ok: true,
-        status: 200,
-        statusText: 'OK',
-        json: async () => ({}),
-      } as Response);
-
+      const scope = nock(MEXC_API_BASE_URL).get(path).query(true).reply(200);
       const result = await client.checkRequiredAccess();
+      scope.done();
       expect(result).toBe(true);
     });
 
     it('returns false if fetch is not ok', async () => {
       const apiKey = faker.string.sample();
       const secretKey = faker.string.sample();
-
       const client = new MexcExchangeClient({ apiKey, secretKey });
-
-      jest.spyOn(global, 'fetch').mockResolvedValue({
-        ok: false,
-        status: 403,
-        statusText: 'Forbidden',
-        json: async () => ({}),
-      } as Response);
-
+      const scope = nock(MEXC_API_BASE_URL).get(path).query(true).reply(403);
       const result = await client.checkRequiredAccess();
+      scope.done();
       expect(result).toBe(false);
     });
 
     it('throws ExchangeApiClientError on fetch error', async () => {
       const apiKey = faker.string.sample();
       const secretKey = faker.string.sample();
-
       const client = new MexcExchangeClient({ apiKey, secretKey });
-
-      jest.spyOn(global, 'fetch').mockImplementation(async () => {
-        throw new Error('network error');
-      });
-
+      const scope = nock(MEXC_API_BASE_URL)
+        .get(path)
+        .query(true)
+        .replyWithError('network error');
       await expect(client.checkRequiredAccess()).rejects.toBeInstanceOf(
         ExchangeApiClientError,
       );
+
+      scope.done();
     });
   });
 
   describe('getAccountBalance', () => {
+    const path = '/account';
+
     it('returns 0 if fetch not ok', async () => {
       const apiKey = faker.string.sample();
       const secretKey = faker.string.sample();
       const asset = faker.finance.currencyCode();
-
       const client = new MexcExchangeClient({ apiKey, secretKey });
-
-      jest.spyOn(global, 'fetch').mockResolvedValue({
-        ok: false,
-        status: 403,
-        statusText: 'Forbidden',
-        json: async () => ({}),
-      } as Response);
-
+      const scope = nock(MEXC_API_BASE_URL).get(path).query(true).reply(403);
       const result = await client.getAccountBalance(asset);
+      scope.done();
       expect(result).toBe(0);
     });
 
@@ -123,17 +138,13 @@ describe('MexcExchangeClient', () => {
       const apiKey = faker.string.sample();
       const secretKey = faker.string.sample();
       const asset = faker.finance.currencyCode();
-
       const client = new MexcExchangeClient({ apiKey, secretKey });
-
-      jest.spyOn(global, 'fetch').mockResolvedValue({
-        ok: true,
-        status: 200,
-        statusText: 'OK',
-        json: async () => generateMexcAccountBalance(['OTHER']),
-      } as Response);
-
+      const scope = nock(MEXC_API_BASE_URL)
+        .get(path)
+        .query(true)
+        .reply(200, generateMexcAccountBalance(['OTHER']));
       const result = await client.getAccountBalance(asset);
+      scope.done();
       expect(result).toBe(0);
     });
 
@@ -141,18 +152,14 @@ describe('MexcExchangeClient', () => {
       const apiKey = faker.string.sample();
       const secretKey = faker.string.sample();
       const asset = faker.finance.currencyCode();
-
       const client = new MexcExchangeClient({ apiKey, secretKey });
-
       const balanceFixture = generateMexcAccountBalance([asset]);
-      jest.spyOn(global, 'fetch').mockResolvedValue({
-        ok: true,
-        status: 200,
-        statusText: 'OK',
-        json: async () => balanceFixture,
-      } as Response);
-
+      const scope = nock(MEXC_API_BASE_URL)
+        .get(path)
+        .query(true)
+        .reply(200, balanceFixture);
       const result = await client.getAccountBalance(asset);
+      scope.done();
       expect(result).toBe(
         parseFloat(balanceFixture.balances[0].free) +
           parseFloat(balanceFixture.balances[0].locked),
@@ -163,16 +170,16 @@ describe('MexcExchangeClient', () => {
       const apiKey = faker.string.sample();
       const secretKey = faker.string.sample();
       const asset = faker.finance.currencyCode();
-
       const client = new MexcExchangeClient({ apiKey, secretKey });
-
-      jest.spyOn(global, 'fetch').mockImplementation(async () => {
-        throw new Error('network error');
-      });
-
+      const scope = nock(MEXC_API_BASE_URL)
+        .get(path)
+        .query(true)
+        .replyWithError('network error');
       await expect(client.getAccountBalance(asset)).rejects.toBeInstanceOf(
         ExchangeApiClientError,
       );
+
+      scope.done();
     });
   });
 });

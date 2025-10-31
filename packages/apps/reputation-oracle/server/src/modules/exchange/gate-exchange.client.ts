@@ -12,23 +12,9 @@ import type {
 } from './types';
 import { fetchWithHandling } from './utils';
 
-const GATE_API_BASE_URL = 'https://api.gateio.ws/api/v4';
-const DEVELOP_GATE_API_BASE_URL = 'https://api-testnet.gateapi.io/api/v4';
-
-function signGateRequest(
-  method: string,
-  path: string,
-  query: string,
-  body: string,
-  secret: string,
-  ts: string,
-): string {
-  const bodyHash = createHash('sha512')
-    .update(body ?? '')
-    .digest('hex');
-  const payload = [method, path, query, bodyHash, ts].join('\n');
-  return createHmac('sha512', secret).update(payload).digest('hex');
-}
+export const GATE_API_BASE_URL = 'https://api.gateio.ws/api/v4';
+export const DEVELOP_GATE_API_BASE_URL =
+  'https://api-testnet.gateapi.io/api/v4';
 
 export class GateExchangeClient implements ExchangeClient {
   readonly id: SupportedExchange = 'gate';
@@ -61,7 +47,7 @@ export class GateExchangeClient implements ExchangeClient {
     const query = '';
     const body = '';
     const ts = String(Math.floor(Date.now() / 1000));
-    const signature = signGateRequest(
+    const signature = this.signGateRequest(
       method,
       `/api/v4${path}`,
       query,
@@ -71,7 +57,6 @@ export class GateExchangeClient implements ExchangeClient {
     );
 
     const res = await fetchWithHandling(
-      this.id,
       `${this.apiBaseUrl}${path}`,
       {
         KEY: this.apiKey,
@@ -84,10 +69,6 @@ export class GateExchangeClient implements ExchangeClient {
     );
 
     if (res.ok) return true;
-    this.logger.debug('Gate access check failed', {
-      status: res.status,
-      statusText: res.statusText,
-    });
     return false;
   }
 
@@ -98,7 +79,7 @@ export class GateExchangeClient implements ExchangeClient {
     const body = '';
     const ts = String(Math.floor(Date.now() / 1000));
     const requestPath = `/api/v4${path}`;
-    const signature = signGateRequest(
+    const signature = this.signGateRequest(
       method,
       requestPath,
       query,
@@ -109,7 +90,6 @@ export class GateExchangeClient implements ExchangeClient {
     const url = `${this.apiBaseUrl}${path}?${query}`;
 
     const res = await fetchWithHandling(
-      this.id,
       url,
       {
         KEY: this.apiKey,
@@ -122,11 +102,6 @@ export class GateExchangeClient implements ExchangeClient {
     );
 
     if (!res.ok) {
-      this.logger.warn('Gate balance fetch failed', {
-        status: res.status,
-        statusText: res.statusText,
-        asset,
-      });
       return 0;
     }
 
@@ -150,5 +125,20 @@ export class GateExchangeClient implements ExchangeClient {
 
     const entry = data.find((d) => d.currency === asset);
     return entry ? normalize(entry) : 0;
+  }
+
+  private signGateRequest(
+    method: string,
+    path: string,
+    query: string,
+    body: string,
+    secret: string,
+    ts: string,
+  ): string {
+    const bodyHash = createHash('sha512')
+      .update(body ?? '')
+      .digest('hex');
+    const payload = [method, path, query, bodyHash, ts].join('\n');
+    return createHmac('sha512', secret).update(payload).digest('hex');
   }
 }
