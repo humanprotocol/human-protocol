@@ -1,10 +1,10 @@
+import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import {
   ChainId,
   NetworkData,
   NETWORKS,
   StakingClient,
 } from '@human-protocol/sdk';
-import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import * as dotenv from 'dotenv';
 import { Wallet, ethers } from 'ethers';
 

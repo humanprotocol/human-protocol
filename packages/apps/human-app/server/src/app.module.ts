@@ -58,6 +58,8 @@ import { OperatorController } from './modules/user-operator/operator.controller'
 import { OperatorModule } from './modules/user-operator/operator.module';
 import { WorkerController } from './modules/user-worker/worker.controller';
 import { WorkerModule } from './modules/user-worker/worker.module';
+import { ExchangeApiKeysModule } from './modules/exchange-api-keys/exchange-api-keys.module';
+import { ExchangeApiKeysController } from './modules/exchange-api-keys/exchange-api-keys.controller';
 
 const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
 
@@ -147,6 +149,7 @@ const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
     NDAModule,
     AbuseModule,
     GovernanceModule,
+    ExchangeApiKeysModule,
   ],
   controllers: [
     AppController,
@@ -162,6 +165,7 @@ const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
     NDAController,
     AbuseController,
     GovernanceController,
+    ExchangeApiKeysController,
   ],
   exports: [HttpModule],
   providers: [
