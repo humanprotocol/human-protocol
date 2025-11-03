@@ -3,7 +3,7 @@ name: Publish SDK Docs to GitBook
 on:
   push:
     tags:
-      - "sdk@*"
+      - "js/sdk@*"
 
 permissions:
   contents: read
