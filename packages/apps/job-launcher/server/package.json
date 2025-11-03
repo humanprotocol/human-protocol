@@ -1,5 +1,5 @@
 {
-  "name": "@human-protocol/job-launcher-server",
+  "name": "@apps/job-launcher-server",
   "private": true,
   "version": "0.0.1",
   "description": "",

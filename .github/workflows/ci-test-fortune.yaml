@@ -3,9 +3,9 @@ name: Fortune check
 on:
   push:
     paths:
-      - 'packages/core/**'
-      - 'packages/sdk/typescript/human-protocol-sdk/**'
-      - 'packages/apps/fortune/**'
+      - "packages/core/**"
+      - "packages/sdk/typescript/human-protocol-sdk/**"
+      - "packages/apps/fortune/**"
 
 jobs:
   fortune-exchange-oracle-test:
@@ -22,7 +22,7 @@ jobs:
       - name: Build libs
         run: yarn build:libs
       - name: Run Exchange Oracle tests
-        run: yarn workspace @human-protocol/fortune-exchange-oracle-server test
+        run: yarn workspace @apps/fortune-exchange-oracle-server test
 
   fortune-recording-oracle-test:
     name: Fortune Recording Oracle Tests
@@ -38,4 +38,4 @@ jobs:
       - name: Build libs
         run: yarn build:libs
       - name: Run Recording Oracle tests
-        run: yarn workspace @human-protocol/fortune-recording-oracle test
+        run: yarn workspace @apps/fortune-recording-oracle test
