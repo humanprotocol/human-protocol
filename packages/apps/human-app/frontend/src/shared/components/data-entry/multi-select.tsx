@@ -115,7 +115,6 @@ export function MultiSelect({
 
   return (
     <Controller
-      defaultValue={[]}
       name={name}
       render={({ field, fieldState }) => {
         return (
