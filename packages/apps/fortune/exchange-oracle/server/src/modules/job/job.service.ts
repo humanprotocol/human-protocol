@@ -382,34 +382,4 @@ export class JobService {
 
     return manifest;
   }
-
-  public async pauseJob(webhook: WebhookDto): Promise<void> {
-    const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
-      webhook.chainId,
-      webhook.escrowAddress,
-    );
-    if (!jobEntity) {
-      throw new ServerError(ErrorJob.NotFound);
-    }
-    if (jobEntity.status !== JobStatus.ACTIVE) {
-      throw new ConflictError(ErrorJob.InvalidStatus);
-    }
-    jobEntity.status = JobStatus.PAUSED;
-    await this.jobRepository.updateOne(jobEntity);
-  }
-
-  public async resumeJob(webhook: WebhookDto): Promise<void> {
-    const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
-      webhook.chainId,
-      webhook.escrowAddress,
-    );
-    if (!jobEntity) {
-      throw new ServerError(ErrorJob.NotFound);
-    }
-    if (jobEntity.status !== JobStatus.PAUSED) {
-      throw new ConflictError(ErrorJob.InvalidStatus);
-    }
-    jobEntity.status = JobStatus.ACTIVE;
-    await this.jobRepository.updateOne(jobEntity);
-  }
 }
