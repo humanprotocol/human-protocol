@@ -54,11 +54,7 @@ export class WebhookService {
         break;
 
       case EventType.ABUSE_DETECTED:
-        await this.jobService.pauseJob(webhook);
-        break;
-
-      case EventType.ABUSE_DISMISSED:
-        await this.jobService.resumeJob(webhook);
+        await this.jobService.cancelJob(webhook);
         break;
 
       case EventType.ESCROW_CANCELED:

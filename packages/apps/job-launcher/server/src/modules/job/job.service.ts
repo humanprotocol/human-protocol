@@ -119,6 +119,7 @@ export class JobService {
     // DISABLE HMT
     if (
       requestType !== HCaptchaJobType.HCAPTCHA &&
+      dto.chainId !== ChainId.LOCALHOST &&
       (dto.escrowFundToken === EscrowFundToken.HMT ||
         dto.paymentCurrency === PaymentCurrency.HMT)
     ) {

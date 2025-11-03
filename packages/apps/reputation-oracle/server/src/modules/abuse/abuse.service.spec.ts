@@ -294,13 +294,6 @@ describe('AbuseService', () => {
         .mockResolvedValueOnce({
           exchangeOracle: fakeAddress,
         } as unknown as IEscrow);
-      mockedOperatorUtils.getOperator
-        .mockResolvedValueOnce({
-          webhookUrl: webhookUrl1,
-        } as IOperator)
-        .mockResolvedValueOnce({
-          webhookUrl: webhookUrl2,
-        } as IOperator);
       mockAbuseSlackBot.sendAbuseNotification
         .mockResolvedValueOnce(undefined)
         .mockResolvedValueOnce(undefined);
@@ -325,41 +318,12 @@ describe('AbuseService', () => {
       mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
         exchangeOracle: fakeAddress,
       } as unknown as IEscrow);
-      mockedOperatorUtils.getOperator.mockResolvedValueOnce({
-        webhookUrl: webhookUrl1,
-      } as IOperator);
       mockAbuseRepository.findToClassify.mockResolvedValueOnce(
         mockAbuseEntities,
       );
 
       mockAbuseSlackBot.sendAbuseNotification.mockRejectedValueOnce(
         new Error(),
-      );
-
-      await abuseService.processAbuseRequests();
-
-      expect(mockAbuseRepository.findToClassify).toHaveBeenCalledTimes(1);
-      expect(mockAbuseRepository.updateOne).toHaveBeenCalledWith({
-        ...mockAbuseEntities[0],
-        retriesCount: 1,
-      });
-    });
-
-    it('should handle errors when createOutgoingWebhook fails', async () => {
-      const mockAbuseEntities = [generateAbuseEntity({ retriesCount: 0 })];
-
-      mockAbuseRepository.findToClassify.mockResolvedValueOnce(
-        mockAbuseEntities,
-      );
-      mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
-        exchangeOracle: fakeAddress,
-      } as unknown as IEscrow);
-      mockedOperatorUtils.getOperator.mockResolvedValueOnce({
-        webhookUrl: webhookUrl1,
-      } as IOperator);
-
-      mockOutgoingWebhookService.createOutgoingWebhook.mockRejectedValueOnce(
-        new DatabaseError('Failed to create webhook'),
       );
 
       await abuseService.processAbuseRequests();
@@ -384,13 +348,6 @@ describe('AbuseService', () => {
         .mockResolvedValueOnce({
           exchangeOracle: fakeAddress,
         } as unknown as IEscrow);
-      mockedOperatorUtils.getOperator
-        .mockResolvedValueOnce({
-          webhookUrl: webhookUrl1,
-        } as IOperator)
-        .mockResolvedValueOnce({
-          webhookUrl: webhookUrl2,
-        } as IOperator);
 
       mockOutgoingWebhookService.createOutgoingWebhook.mockRejectedValueOnce(
         new DatabaseError(DatabaseErrorMessages.DUPLICATED),
@@ -450,24 +407,6 @@ describe('AbuseService', () => {
         retriesCount: 1,
       });
     });
-
-    it('should increment retries when operator data is missing', async () => {
-      const abuseEntity = generateAbuseEntity({ retriesCount: 0 });
-      mockAbuseRepository.findToClassify.mockResolvedValueOnce([abuseEntity]);
-
-      mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
-        exchangeOracle: fakeAddress,
-      } as unknown as IEscrow);
-      mockedOperatorUtils.getOperator.mockResolvedValueOnce(null);
-
-      await abuseService.processAbuseRequests();
-
-      expect(mockAbuseRepository.findToClassify).toHaveBeenCalledTimes(1);
-      expect(mockAbuseRepository.updateOne).toHaveBeenCalledWith({
-        ...abuseEntity,
-        retriesCount: 1,
-      });
-    });
   });
 
   describe('processClassifiedAbuses', () => {
@@ -485,10 +424,15 @@ describe('AbuseService', () => {
       } as unknown as StakingClient);
       mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
         launcher: fakeAddress,
+        exchangeOracle: fakeAddress,
       } as unknown as IEscrow);
-      mockedOperatorUtils.getOperator.mockResolvedValueOnce({
-        webhookUrl: webhookUrl1,
-      } as IOperator);
+      mockedOperatorUtils.getOperator
+        .mockResolvedValueOnce({
+          webhookUrl: webhookUrl1,
+        } as IOperator)
+        .mockResolvedValueOnce({
+          webhookUrl: webhookUrl2,
+        } as IOperator);
       mockOutgoingWebhookService.createOutgoingWebhook.mockResolvedValueOnce(
         undefined,
       );
@@ -511,7 +455,17 @@ describe('AbuseService', () => {
           chainId: mockAbuseEntities[0].chainId,
           eventType: OutgoingWebhookEventType.ABUSE_DETECTED,
         },
-        expect.any(String),
+        webhookUrl1,
+      );
+      expect(
+        mockOutgoingWebhookService.createOutgoingWebhook,
+      ).toHaveBeenCalledWith(
+        {
+          escrowAddress: mockAbuseEntities[0].escrowAddress,
+          chainId: mockAbuseEntities[0].chainId,
+          eventType: OutgoingWebhookEventType.ABUSE_DETECTED,
+        },
+        webhookUrl2,
       );
       expect(mockAbuseRepository.updateOne).toHaveBeenCalledWith({
         ...mockAbuseEntities[0],
@@ -527,12 +481,6 @@ describe('AbuseService', () => {
       mockAbuseRepository.findClassified.mockResolvedValueOnce(
         mockAbuseEntities,
       );
-      mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
-        exchangeOracle: fakeAddress,
-      } as unknown as IEscrow);
-      mockedOperatorUtils.getOperator.mockResolvedValueOnce({
-        webhookUrl: webhookUrl1,
-      } as IOperator);
 
       await abuseService.processClassifiedAbuses();
 
@@ -541,6 +489,11 @@ describe('AbuseService', () => {
         ...mockAbuseEntities[0],
         status: AbuseStatus.COMPLETED,
       });
+      expect(mockedEscrowUtils.getEscrow).not.toHaveBeenCalled();
+      expect(mockedOperatorUtils.getOperator).not.toHaveBeenCalled();
+      expect(
+        mockOutgoingWebhookService.createOutgoingWebhook,
+      ).not.toHaveBeenCalled();
     });
 
     it('should handle empty results from findClassified', async () => {
@@ -563,27 +516,6 @@ describe('AbuseService', () => {
 
       mockAbuseRepository.findClassified.mockResolvedValueOnce([abuseEntity]);
       mockedEscrowUtils.getEscrow.mockResolvedValueOnce(null);
-
-      await abuseService.processClassifiedAbuses();
-
-      expect(mockAbuseRepository.findClassified).toHaveBeenCalledTimes(1);
-      expect(mockAbuseRepository.updateOne).toHaveBeenCalledWith({
-        ...abuseEntity,
-        retriesCount: 1,
-      });
-    });
-
-    it('should increment retries when operator is missing (REJECTED)', async () => {
-      const abuseEntity = generateAbuseEntity({
-        retriesCount: 0,
-        decision: AbuseDecision.REJECTED,
-      });
-
-      mockAbuseRepository.findClassified.mockResolvedValueOnce([abuseEntity]);
-      mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
-        exchangeOracle: fakeAddress,
-      } as unknown as IEscrow);
-      mockedOperatorUtils.getOperator.mockResolvedValueOnce(null);
 
       await abuseService.processClassifiedAbuses();
 
