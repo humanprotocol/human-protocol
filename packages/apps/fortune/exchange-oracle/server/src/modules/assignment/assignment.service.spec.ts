@@ -229,7 +229,7 @@ describe('AssignmentService', () => {
           id: 1,
           manifestUrl: MOCK_MANIFEST_URL,
           reputationNetwork: reputationNetwork,
-          status: JobStatus.PAUSED,
+          status: JobStatus.CANCELED,
         } as any);
 
       await expect(

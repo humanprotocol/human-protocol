@@ -54,13 +54,8 @@ export class WebhookService {
         break;
 
       case EventType.ABUSE_DETECTED:
-        await this.jobService.pauseJob(webhook);
+        await this.jobService.cancelJob(webhook);
         break;
-
-      case EventType.ABUSE_DISMISSED:
-        await this.jobService.resumeJob(webhook);
-        break;
-
       default:
         throw new ValidationError(
           `Invalid webhook event type: ${webhook.eventType}`,
