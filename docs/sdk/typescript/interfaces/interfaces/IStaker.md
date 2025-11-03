@@ -6,7 +6,7 @@
 
 # Interface: IStaker
 
-Defined in: [interfaces.ts:227](https://github.com/humanprotocol/human-protocol/blob/c6ab6b31903af39ac6b3e92bd60cecc017b01413/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L227)
+Defined in: [interfaces.ts:197](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L197)
 
 ## Properties
 
@@ -14,15 +14,15 @@ Defined in: [interfaces.ts:227](https://github.com/humanprotocol/human-protocol/
 
 > **address**: `string`
 
-Defined in: [interfaces.ts:228](https://github.com/humanprotocol/human-protocol/blob/c6ab6b31903af39ac6b3e92bd60cecc017b01413/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L228)
+Defined in: [interfaces.ts:198](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L198)
 
 ***
 
 ### lastDepositTimestamp
 
-> **lastDepositTimestamp**: `bigint`
+> **lastDepositTimestamp**: `number`
 
-Defined in: [interfaces.ts:234](https://github.com/humanprotocol/human-protocol/blob/c6ab6b31903af39ac6b3e92bd60cecc017b01413/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L234)
+Defined in: [interfaces.ts:204](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L204)
 
 ***
 
@@ -30,15 +30,15 @@ Defined in: [interfaces.ts:234](https://github.com/humanprotocol/human-protocol/
 
 > **lockedAmount**: `bigint`
 
-Defined in: [interfaces.ts:230](https://github.com/humanprotocol/human-protocol/blob/c6ab6b31903af39ac6b3e92bd60cecc017b01413/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L230)
+Defined in: [interfaces.ts:200](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L200)
 
 ***
 
 ### lockedUntil
 
-> **lockedUntil**: `bigint`
+> **lockedUntil**: `number`
 
-Defined in: [interfaces.ts:231](https://github.com/humanprotocol/human-protocol/blob/c6ab6b31903af39ac6b3e92bd60cecc017b01413/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L231)
+Defined in: [interfaces.ts:203](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L203)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [interfaces.ts:231](https://github.com/humanprotocol/human-protocol/
 
 > **slashedAmount**: `bigint`
 
-Defined in: [interfaces.ts:233](https://github.com/humanprotocol/human-protocol/blob/c6ab6b31903af39ac6b3e92bd60cecc017b01413/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L233)
+Defined in: [interfaces.ts:202](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L202)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [interfaces.ts:233](https://github.com/humanprotocol/human-protocol/
 
 > **stakedAmount**: `bigint`
 
-Defined in: [interfaces.ts:229](https://github.com/humanprotocol/human-protocol/blob/c6ab6b31903af39ac6b3e92bd60cecc017b01413/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L229)
+Defined in: [interfaces.ts:199](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L199)
 
 ***
 
@@ -62,4 +62,4 @@ Defined in: [interfaces.ts:229](https://github.com/humanprotocol/human-protocol/
 
 > **withdrawableAmount**: `bigint`
 
-Defined in: [interfaces.ts:232](https://github.com/humanprotocol/human-protocol/blob/c6ab6b31903af39ac6b3e92bd60cecc017b01413/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L232)
+Defined in: [interfaces.ts:201](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L201)

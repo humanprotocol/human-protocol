@@ -6,7 +6,7 @@
 
 # Interface: IKeyPair
 
-Defined in: [interfaces.ts:127](https://github.com/humanprotocol/human-protocol/blob/c6ab6b31903af39ac6b3e92bd60cecc017b01413/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L127)
+Defined in: [interfaces.ts:97](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L97)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [interfaces.ts:127](https://github.com/humanprotocol/human-protocol/
 
 > **passphrase**: `string`
 
-Defined in: [interfaces.ts:130](https://github.com/humanprotocol/human-protocol/blob/c6ab6b31903af39ac6b3e92bd60cecc017b01413/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L130)
+Defined in: [interfaces.ts:100](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L100)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [interfaces.ts:130](https://github.com/humanprotocol/human-protocol/
 
 > **privateKey**: `string`
 
-Defined in: [interfaces.ts:128](https://github.com/humanprotocol/human-protocol/blob/c6ab6b31903af39ac6b3e92bd60cecc017b01413/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L128)
+Defined in: [interfaces.ts:98](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L98)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [interfaces.ts:128](https://github.com/humanprotocol/human-protocol/
 
 > **publicKey**: `string`
 
-Defined in: [interfaces.ts:129](https://github.com/humanprotocol/human-protocol/blob/c6ab6b31903af39ac6b3e92bd60cecc017b01413/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L129)
+Defined in: [interfaces.ts:99](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L99)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [interfaces.ts:129](https://github.com/humanprotocol/human-protocol/
 
 > `optional` **revocationCertificate**: `string`
 
-Defined in: [interfaces.ts:131](https://github.com/humanprotocol/human-protocol/blob/c6ab6b31903af39ac6b3e92bd60cecc017b01413/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L131)
+Defined in: [interfaces.ts:101](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L101)

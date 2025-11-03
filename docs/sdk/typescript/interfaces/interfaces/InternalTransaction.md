@@ -6,15 +6,15 @@
 
 # Interface: InternalTransaction
 
-Defined in: [interfaces.ts:156](https://github.com/humanprotocol/human-protocol/blob/c6ab6b31903af39ac6b3e92bd60cecc017b01413/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L156)
+Defined in: [interfaces.ts:126](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L126)
 
 ## Properties
 
-### escrow?
+### escrow
 
-> `optional` **escrow**: `string`
+> **escrow**: `string` \| `null`
 
-Defined in: [interfaces.ts:162](https://github.com/humanprotocol/human-protocol/blob/c6ab6b31903af39ac6b3e92bd60cecc017b01413/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L162)
+Defined in: [interfaces.ts:132](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L132)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [interfaces.ts:162](https://github.com/humanprotocol/human-protocol/
 
 > **from**: `string`
 
-Defined in: [interfaces.ts:157](https://github.com/humanprotocol/human-protocol/blob/c6ab6b31903af39ac6b3e92bd60cecc017b01413/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L157)
+Defined in: [interfaces.ts:127](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L127)
 
 ***
 
@@ -30,15 +30,15 @@ Defined in: [interfaces.ts:157](https://github.com/humanprotocol/human-protocol/
 
 > **method**: `string`
 
-Defined in: [interfaces.ts:160](https://github.com/humanprotocol/human-protocol/blob/c6ab6b31903af39ac6b3e92bd60cecc017b01413/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L160)
+Defined in: [interfaces.ts:130](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L130)
 
 ***
 
-### receiver?
+### receiver
 
-> `optional` **receiver**: `string`
+> **receiver**: `string` \| `null`
 
-Defined in: [interfaces.ts:161](https://github.com/humanprotocol/human-protocol/blob/c6ab6b31903af39ac6b3e92bd60cecc017b01413/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L161)
+Defined in: [interfaces.ts:131](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L131)
 
 ***
 
@@ -46,20 +46,20 @@ Defined in: [interfaces.ts:161](https://github.com/humanprotocol/human-protocol/
 
 > **to**: `string`
 
-Defined in: [interfaces.ts:158](https://github.com/humanprotocol/human-protocol/blob/c6ab6b31903af39ac6b3e92bd60cecc017b01413/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L158)
+Defined in: [interfaces.ts:128](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L128)
 
 ***
 
-### token?
+### token
 
-> `optional` **token**: `string`
+> **token**: `string` \| `null`
 
-Defined in: [interfaces.ts:163](https://github.com/humanprotocol/human-protocol/blob/c6ab6b31903af39ac6b3e92bd60cecc017b01413/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L163)
+Defined in: [interfaces.ts:133](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L133)
 
 ***
 
 ### value
 
-> **value**: `string`
+> **value**: `bigint`
 
-Defined in: [interfaces.ts:159](https://github.com/humanprotocol/human-protocol/blob/c6ab6b31903af39ac6b3e92bd60cecc017b01413/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L159)
+Defined in: [interfaces.ts:129](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L129)

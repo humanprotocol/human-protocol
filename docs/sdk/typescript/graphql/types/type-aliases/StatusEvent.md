@@ -8,23 +8,15 @@
 
 > **StatusEvent** = `object`
 
-Defined in: [graphql/types.ts:155](https://github.com/humanprotocol/human-protocol/blob/c6ab6b31903af39ac6b3e92bd60cecc017b01413/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L155)
+Defined in: [graphql/types.ts:117](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L117)
 
 ## Properties
-
-### chainId
-
-> **chainId**: [`ChainId`](../../../enums/enumerations/ChainId.md)
-
-Defined in: [graphql/types.ts:159](https://github.com/humanprotocol/human-protocol/blob/c6ab6b31903af39ac6b3e92bd60cecc017b01413/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L159)
-
-***
 
 ### escrowAddress
 
 > **escrowAddress**: `string`
 
-Defined in: [graphql/types.ts:157](https://github.com/humanprotocol/human-protocol/blob/c6ab6b31903af39ac6b3e92bd60cecc017b01413/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L157)
+Defined in: [graphql/types.ts:119](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L119)
 
 ***
 
@@ -32,12 +24,12 @@ Defined in: [graphql/types.ts:157](https://github.com/humanprotocol/human-protoc
 
 > **status**: `string`
 
-Defined in: [graphql/types.ts:158](https://github.com/humanprotocol/human-protocol/blob/c6ab6b31903af39ac6b3e92bd60cecc017b01413/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L158)
+Defined in: [graphql/types.ts:120](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L120)
 
 ***
 
 ### timestamp
 
-> **timestamp**: `number`
+> **timestamp**: `string`
 
-Defined in: [graphql/types.ts:156](https://github.com/humanprotocol/human-protocol/blob/c6ab6b31903af39ac6b3e92bd60cecc017b01413/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L156)
+Defined in: [graphql/types.ts:118](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L118)

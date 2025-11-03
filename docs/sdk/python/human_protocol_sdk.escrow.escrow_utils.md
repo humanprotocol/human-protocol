@@ -32,18 +32,18 @@ Represents a cancellation refund event.
   * **id** (`str`) – The unique identifier for the cancellation refund event.
   * **escrow_address** (`str`) – The address of the escrow associated with the refund.
   * **receiver** (`str`) – The address of the recipient receiving the refund.
-  * **amount** (`int`) – The amount being refunded.
-  * **block** (`int`) – The block number in which the refund was processed.
-  * **timestamp** (`int`) – The timestamp of the refund event.
+  * **amount** (`str`) – The amount being refunded.
+  * **block** (`str`) – The block number in which the refund was processed.
+  * **timestamp** (`str`) – The timestamp of the refund event in milliseconds.
   * **tx_hash** (`str`) – The transaction hash of the refund event.
 
 #### \_\_init_\_(id, escrow_address, receiver, amount, block, timestamp, tx_hash)
 
-### *class* human_protocol_sdk.escrow.escrow_utils.EscrowData(chain_id, id, address, amount_paid, balance, count, factory_address, launcher, status, token, total_funded_amount, created_at, final_results_url=None, final_results_hash=None, intermediate_results_url=None, intermediate_results_hash=None, manifest_hash=None, manifest=None, recording_oracle=None, reputation_oracle=None, exchange_oracle=None, recording_oracle_fee=None, reputation_oracle_fee=None, exchange_oracle_fee=None)
+### *class* human_protocol_sdk.escrow.escrow_utils.EscrowData(chain_id, id, address, amount_paid, balance, count, factory_address, launcher, job_requester_id, status, token, total_funded_amount, created_at, final_results_url=None, final_results_hash=None, intermediate_results_url=None, intermediate_results_hash=None, manifest_hash=None, manifest=None, recording_oracle=None, reputation_oracle=None, exchange_oracle=None, recording_oracle_fee=None, reputation_oracle_fee=None, exchange_oracle_fee=None)
 
 Bases: `object`
 
-#### \_\_init_\_(chain_id, id, address, amount_paid, balance, count, factory_address, launcher, status, token, total_funded_amount, created_at, final_results_url=None, final_results_hash=None, intermediate_results_url=None, intermediate_results_hash=None, manifest_hash=None, manifest=None, recording_oracle=None, reputation_oracle=None, exchange_oracle=None, recording_oracle_fee=None, reputation_oracle_fee=None, exchange_oracle_fee=None)
+#### \_\_init_\_(chain_id, id, address, amount_paid, balance, count, factory_address, launcher, job_requester_id, status, token, total_funded_amount, created_at, final_results_url=None, final_results_hash=None, intermediate_results_url=None, intermediate_results_hash=None, manifest_hash=None, manifest=None, recording_oracle=None, reputation_oracle=None, exchange_oracle=None, recording_oracle_fee=None, reputation_oracle_fee=None, exchange_oracle_fee=None)
 
 Initializes an EscrowData instance.
 
@@ -51,15 +51,16 @@ Initializes an EscrowData instance.
   * **chain_id** ([`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)) – Chain identifier
   * **id** (`str`) – Identifier
   * **address** (`str`) – Address
-  * **amount_paid** (`int`) – Amount paid
-  * **balance** (`int`) – Balance
-  * **count** (`int`) – Count
+  * **amount_paid** (`str`) – Amount paid
+  * **balance** (`str`) – Balance
+  * **count** (`str`) – Count
   * **factory_address** (`str`) – Factory address
   * **launcher** (`str`) – Launcher
+  * **job_requester_id** (`Optional`[`str`]) – Job requester identifier
   * **status** (`str`) – Status
   * **token** (`str`) – Token
-  * **total_funded_amount** (`int`) – Total funded amount
-  * **created_at** (`datetime`) – Creation date
+  * **total_funded_amount** (`str`) – Total funded amount
+  * **created_at** (`str`) – Creation timestamp in milliseconds
   * **final_results_url** (`Optional`[`str`]) – URL for final results.
   * **final_results_hash** (`Optional`[`str`]) – Hash for final results.
   * **intermediate_results_url** (`Optional`[`str`]) – URL for intermediate results.
@@ -69,9 +70,9 @@ Initializes an EscrowData instance.
   * **recording_oracle** (`Optional`[`str`]) – Recording Oracle address.
   * **reputation_oracle** (`Optional`[`str`]) – Reputation Oracle address.
   * **exchange_oracle** (`Optional`[`str`]) – Exchange Oracle address.
-  * **recording_oracle_fee** (`Optional`[`int`]) – Fee for the Recording Oracle.
-  * **reputation_oracle_fee** (`Optional`[`int`]) – Fee for the Reputation Oracle.
-  * **exchange_oracle_fee** (`Optional`[`int`]) – Fee for the Exchange Oracle.
+  * **recording_oracle_fee** (`Optional`[`str`]) – Fee for the Recording Oracle.
+  * **reputation_oracle_fee** (`Optional`[`str`]) – Fee for the Reputation Oracle.
+  * **exchange_oracle_fee** (`Optional`[`str`]) – Fee for the Exchange Oracle.
 
 ### *class* human_protocol_sdk.escrow.escrow_utils.EscrowUtils
 
@@ -204,8 +205,8 @@ Initializes a Payout instance.
   * **chain_id** – The chain identifier where the payout occurred.
   * **escrow_address** (`str`) – The address of the escrow that executed the payout.
   * **recipient** (`str`) – The address of the recipient.
-  * **amount** (`int`) – The amount of the payout.
-  * **created_at** (`int`) – The time of creation of the payout.
+  * **amount** (`str`) – The amount of the payout.
+  * **created_at** (`str`) – The time of creation of the payout in milliseconds.
 
 #### \_\_init_\_(id, escrow_address, recipient, amount, created_at)
 
@@ -216,7 +217,7 @@ Bases: `object`
 Initializes a StatusEvent instance.
 
 * **Parameters:**
-  * **timestamp** (`int`) – The timestamp of the event.
+  * **timestamp** (`int`) – The timestamp of the event in milliseconds.
   * **status** (`str`) – The status of the escrow.
   * **chain_id** ([`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)) – The chain identifier where the event occurred.
   * **escrow_address** (`str`) – The address of the escrow.

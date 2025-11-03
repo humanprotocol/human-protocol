@@ -68,7 +68,7 @@ Get HMT balance
   * **token_addr** – ERC-20 contract
   * **w3** – Web3 instance
 * **Returns:**
-  Decimal with HMT balance
+  HMT balance (wei)
 
 ### human_protocol_sdk.utils.get_kvstore_interface()
 

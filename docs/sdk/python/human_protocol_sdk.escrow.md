@@ -17,6 +17,7 @@ obtain information from both the contracts and subgraph.
     * [`EscrowClient.complete()`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowClient.complete)
     * [`EscrowClient.create_bulk_payout_transaction()`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowClient.create_bulk_payout_transaction)
     * [`EscrowClient.create_escrow()`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowClient.create_escrow)
+    * [`EscrowClient.create_fund_and_setup_escrow()`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowClient.create_fund_and_setup_escrow)
     * [`EscrowClient.ensure_correct_bulk_payout_input()`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowClient.ensure_correct_bulk_payout_input)
     * [`EscrowClient.fund()`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowClient.fund)
     * [`EscrowClient.get_balance()`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_balance)

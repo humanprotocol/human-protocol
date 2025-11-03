@@ -87,7 +87,7 @@ Creates a prepared transaction for bulk payout without signing or sending it.
 * **Parameters:**
   * **escrow_address** (`str`) – Address of the escrow
   * **recipients** (`List`[`str`]) – Array of recipient addresses
-  * **amounts** (`List`[`Decimal`]) – Array of amounts the recipients will receive
+  * **amounts** (`List`[`int`]) – Array of amounts the recipients will receive
   * **final_results_url** (`str`) – Final results file URL
   * **final_results_hash** (`str`) – Final results file hash
   * **payoutId** (`str`) – Unique identifier for the payout
@@ -157,6 +157,8 @@ Creates a prepared transaction for bulk payout without signing or sending it.
 
 #### create_escrow(\*args, \*\*kwargs)
 
+#### create_fund_and_setup_escrow(\*args, \*\*kwargs)
+
 #### ensure_correct_bulk_payout_input(escrow_address, recipients, amounts, final_results_url, final_results_hash)
 
 Validates input parameters for bulk payout operations.
@@ -164,7 +166,7 @@ Validates input parameters for bulk payout operations.
 * **Parameters:**
   * **escrow_address** (`str`) – Address of the escrow
   * **recipients** (`List`[`str`]) – Array of recipient addresses
-  * **amounts** (`List`[`Decimal`]) – Array of amounts the recipients will receive
+  * **amounts** (`List`[`int`]) – Array of amounts the recipients will receive
   * **final_results_url** (`str`) – Final results file URL
   * **final_results_hash** (`str`) – Final results file hash
 * **Return type:**
@@ -183,7 +185,7 @@ Gets the balance for a specified escrow address.
 * **Parameters:**
   **escrow_address** (`str`) – Address of the escrow
 * **Return type:**
-  `Decimal`
+  `int`
 * **Returns:**
   Value of the balance
 * **Raises:**
@@ -463,7 +465,7 @@ Gets the reserved funds for a specified escrow address.
 * **Parameters:**
   **escrow_address** (`str`) – Address of the escrow
 * **Return type:**
-  `Decimal`
+  `int`
 * **Returns:**
   Value of the reserved funds
 * **Raises:**
@@ -595,8 +597,8 @@ Initializes a Escrow instance.
 * **Parameters:**
   * **recording_oracle_address** (`str`) – Address of the Recording Oracle
   * **reputation_oracle_address** (`str`) – Address of the Reputation Oracle
-  * **recording_oracle_fee** (`Decimal`) – Fee percentage of the Recording Oracle
-  * **reputation_oracle_fee** (`Decimal`) – Fee percentage of the Reputation Oracle
+  * **recording_oracle_fee** (`int`) – Fee percentage of the Recording Oracle
+  * **reputation_oracle_fee** (`int`) – Fee percentage of the Reputation Oracle
   * **manifest** (`str`) – Manifest data (can be a URL or JSON string)
   * **hash** (`str`) – Manifest file hash
 

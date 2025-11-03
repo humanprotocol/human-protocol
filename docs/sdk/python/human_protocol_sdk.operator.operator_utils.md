@@ -17,11 +17,11 @@ print(
 
 ## Module
 
-### *class* human_protocol_sdk.operator.operator_utils.OperatorData(chain_id, id, address, staked_amount, locked_amount, locked_until_timestamp, withdrawn_amount, slashed_amount, amount_jobs_processed, role=None, fee=None, public_key=None, webhook_url=None, website=None, url=None, job_types=None, registration_needed=None, registration_instructions=None, reputation_networks=None, name=None, category=None)
+### *class* human_protocol_sdk.operator.operator_utils.OperatorData(chain_id, id, address, amount_jobs_processed, reputation_networks, staked_amount=None, locked_amount=None, locked_until_timestamp=None, withdrawn_amount=None, slashed_amount=None, role=None, fee=None, public_key=None, webhook_url=None, website=None, url=None, job_types=None, registration_needed=None, registration_instructions=None, name=None, category=None)
 
 Bases: `object`
 
-#### \_\_init_\_(chain_id, id, address, staked_amount, locked_amount, locked_until_timestamp, withdrawn_amount, slashed_amount, amount_jobs_processed, role=None, fee=None, public_key=None, webhook_url=None, website=None, url=None, job_types=None, registration_needed=None, registration_instructions=None, reputation_networks=None, name=None, category=None)
+#### \_\_init_\_(chain_id, id, address, amount_jobs_processed, reputation_networks, staked_amount=None, locked_amount=None, locked_until_timestamp=None, withdrawn_amount=None, slashed_amount=None, role=None, fee=None, public_key=None, webhook_url=None, website=None, url=None, job_types=None, registration_needed=None, registration_instructions=None, name=None, category=None)
 
 Initializes a OperatorData instance.
 
@@ -29,22 +29,22 @@ Initializes a OperatorData instance.
   * **chain_id** ([`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)) – Chain Identifier
   * **id** (`str`) – Identifier
   * **address** (`str`) – Address
-  * **staked_amount** (`int`) – Amount staked
-  * **locked_amount** (`int`) – Amount locked
-  * **locked_until_timestamp** (`int`) – Locked until timestamp
-  * **withdrawn_amount** (`int`) – Amount withdrawn
-  * **slashed_amount** (`int`) – Amount slashed
-  * **amount_jobs_processed** (`int`) – Amount of jobs launched
+  * **staked_amount** (`Optional`[`str`]) – Amount staked
+  * **locked_amount** (`Optional`[`str`]) – Amount locked
+  * **locked_until_timestamp** (`Optional`[`str`]) – Locked until timestamp
+  * **withdrawn_amount** (`Optional`[`str`]) – Amount withdrawn
+  * **slashed_amount** (`Optional`[`str`]) – Amount slashed
+  * **amount_jobs_processed** (`str`) – Amount of jobs launched
   * **role** (`Optional`[`str`]) – Role
-  * **fee** (`Optional`[`int`]) – Fee
+  * **fee** (`Optional`[`str`]) – Fee
   * **public_key** (`Optional`[`str`]) – Public key
   * **webhook_url** (`Optional`[`str`]) – Webhook URL
   * **website** (`Optional`[`str`]) – Website URL
   * **url** (`Optional`[`str`]) – URL
-  * **job_types** (`Optional`[`List`[`str`]]) – Job types
+  * **job_types** (`Union`[`List`[`str`], `str`, `None`]) – Job types
   * **registration_needed** (`Optional`[`bool`]) – Whether registration is needed
   * **registration_instructions** (`Optional`[`str`]) – Registration instructions
-  * **reputation_networks** (`Optional`[`List`[`str`]]) – List of reputation networks
+  * **reputation_networks** (`Union`[`List`[`str`], `str`]) – List of reputation networks
   * **name** (`Optional`[`str`]) – Name
   * **category** (`Optional`[`str`]) – Category
 
