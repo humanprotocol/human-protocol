@@ -15,7 +15,7 @@ function maybeCreateGitTagForPackage({ name, version }) {
     childProcess.execSync(`git rev-parse --verify ${tag}`, { stdio: "ignore" });
     console.warn(`Git tag already exists, skipping: ${tag}`);
   } catch {
-    childProcess.execSync(`git tag ${tag}`);
+    childProcess.execSync(`git tag -a "${tag}" -m "Released JS package: @human-protocol/${name} - ${version}"`);
     console.log(`Created tag: ${tag}`);
   }
 }
