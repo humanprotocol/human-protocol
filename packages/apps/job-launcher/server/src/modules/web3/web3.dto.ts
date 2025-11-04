@@ -4,9 +4,9 @@ import { IsString } from 'class-validator';
 
 export class OracleDataDto implements Partial<IOperator> {
   address: string;
-  role?: string;
-  url?: string;
-  jobTypes?: string[];
+  role: string | null;
+  url: string | null;
+  jobTypes?: string[] | null;
 }
 
 export class AvailableOraclesDto {

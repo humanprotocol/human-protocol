@@ -1,7 +1,7 @@
 {
   "name": "@human-protocol/core",
   "description": "Human Protocol Core Smart Contracts",
-  "version": "4.2.1",
+  "version": "5.0.0",
   "files": [
     "contracts/**/*.sol",
     "abis/**/*.json",
@@ -54,6 +54,7 @@
   ],
   "license": "MIT",
   "devDependencies": {
+    "@faker-js/faker": "^9.9.0",
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.7",
     "@nomicfoundation/hardhat-ethers": "^3.1.0",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.12",

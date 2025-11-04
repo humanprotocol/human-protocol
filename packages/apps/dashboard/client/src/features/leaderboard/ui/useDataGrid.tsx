@@ -83,7 +83,7 @@ const useDataGrid = (data: LeaderboardData) => {
         ),
       },
       {
-        field: 'amountStaked',
+        field: 'stakedAmount',
         sortable: false,
         flex: 1,
         minWidth: isMobile ? 130 : 260,

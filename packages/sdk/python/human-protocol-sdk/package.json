@@ -1,0 +1,7 @@
+{
+  "name": "@human-protocol/python-sdk",
+  "version": "5.0.0",
+  "private": true,
+  "description": "Stub package to integrate the Python SDK with Changesets (dev-only).",
+  "license": "MIT"
+}

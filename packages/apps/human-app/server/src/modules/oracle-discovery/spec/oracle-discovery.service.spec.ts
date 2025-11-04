@@ -110,7 +110,9 @@ describe('OracleDiscoveryService', () => {
       jest
         .spyOn(OperatorUtils, 'getReputationNetworkOperators')
         .mockResolvedValueOnce(
-          generateGetReputationNetworkOperatorsResponseByChainId(chainId),
+          generateGetReputationNetworkOperatorsResponseByChainId(
+            chainId,
+          ) as any,
         );
     });
 
@@ -137,7 +139,9 @@ describe('OracleDiscoveryService', () => {
       jest
         .spyOn(OperatorUtils, 'getReputationNetworkOperators')
         .mockResolvedValueOnce(
-          generateGetReputationNetworkOperatorsResponseByChainId(chainId),
+          generateGetReputationNetworkOperatorsResponseByChainId(
+            chainId,
+          ) as any,
         );
     });
 
@@ -154,7 +158,9 @@ describe('OracleDiscoveryService', () => {
       jest
         .spyOn(OperatorUtils, 'getReputationNetworkOperators')
         .mockResolvedValueOnce(
-          generateGetReputationNetworkOperatorsResponseByChainId(chainId),
+          generateGetReputationNetworkOperatorsResponseByChainId(
+            chainId,
+          ) as any,
         );
     });
 
@@ -210,7 +216,9 @@ describe('OracleDiscoveryService', () => {
       jest
         .spyOn(OperatorUtils, 'getReputationNetworkOperators')
         .mockResolvedValueOnce(
-          generateGetReputationNetworkOperatorsResponseByChainId(chainId),
+          generateGetReputationNetworkOperatorsResponseByChainId(
+            chainId,
+          ) as any,
         );
     });
 

@@ -11,8 +11,8 @@ Initializes a WorkerData instance.
 * **Parameters:**
   * **id** (`str`) – Worker ID
   * **address** (`str`) – Worker address
-  * **total_amount_received** (`int`) – Total amount received by the worker
-  * **payout_count** (`int`) – Number of payouts received by the worker
+  * **total_amount_received** (`str`) – Total amount received by the worker
+  * **payout_count** (`str`) – Number of payouts received by the worker
 
 ### *class* human_protocol_sdk.worker.worker_utils.WorkerUtils
 

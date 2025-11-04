@@ -5,7 +5,7 @@ import {
 import { Escrow, EscrowStatusEvent } from '../../generated/schema';
 import { Escrow as EscrowTemplate } from '../../generated/templates';
 import { createOrLoadEscrowStatistics } from './Escrow';
-import { createOrLoadOperator } from './Staking';
+import { createOrLoadOperator } from './KVStore';
 import { createTransaction } from './utils/transaction';
 import { getEventDayData } from './utils/dayUpdates';
 import { toEventId } from './utils/event';

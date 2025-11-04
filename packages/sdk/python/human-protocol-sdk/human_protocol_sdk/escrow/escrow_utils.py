@@ -26,13 +26,17 @@ Module
 
 from datetime import datetime
 import logging
-import os
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 from web3 import Web3
 
-from human_protocol_sdk.constants import NETWORKS, ChainId, Status, OrderDirection
-from human_protocol_sdk.filter import EscrowFilter, StatusEventFilter, PayoutFilter
+from human_protocol_sdk.constants import NETWORKS, ChainId
+from human_protocol_sdk.filter import (
+    CancellationRefundFilter,
+    EscrowFilter,
+    StatusEventFilter,
+    PayoutFilter,
+)
 from human_protocol_sdk.utils import (
     get_data_from_subgraph,
 )
@@ -48,22 +52,28 @@ class EscrowData:
         chain_id: ChainId,
         id: str,
         address: str,
-        amount_paid: int,
-        balance: int,
-        count: int,
+        amount_paid: str,
+        balance: str,
+        count: str,
         factory_address: str,
         launcher: str,
+        job_requester_id: Optional[str],
         status: str,
         token: str,
-        total_funded_amount: int,
-        created_at: datetime,
+        total_funded_amount: str,
+        created_at: str,
         final_results_url: Optional[str] = None,
+        final_results_hash: Optional[str] = None,
         intermediate_results_url: Optional[str] = None,
+        intermediate_results_hash: Optional[str] = None,
         manifest_hash: Optional[str] = None,
         manifest: Optional[str] = None,
         recording_oracle: Optional[str] = None,
         reputation_oracle: Optional[str] = None,
         exchange_oracle: Optional[str] = None,
+        recording_oracle_fee: Optional[str] = None,
+        reputation_oracle_fee: Optional[str] = None,
+        exchange_oracle_fee: Optional[str] = None,
     ):
         """
         Initializes an EscrowData instance.
@@ -76,37 +86,55 @@ class EscrowData:
         :param count: Count
         :param factory_address: Factory address
         :param launcher: Launcher
+        :param job_requester_id: Job requester identifier
         :param status: Status
         :param token: Token
         :param total_funded_amount: Total funded amount
-        :param created_at: Creation date
+        :param created_at: Creation timestamp in milliseconds
         :param final_results_url: URL for final results.
+        :param final_results_hash: Hash for final results.
         :param intermediate_results_url: URL for intermediate results.
+        :param intermediate_results_hash: Hash for intermediate results.
         :param manifest_hash: Manifest hash.
         :param manifest: Manifest data (JSON/URL).
         :param recording_oracle: Recording Oracle address.
         :param reputation_oracle: Reputation Oracle address.
         :param exchange_oracle: Exchange Oracle address.
+        :param recording_oracle_fee: Fee for the Recording Oracle.
+        :param reputation_oracle_fee: Fee for the Reputation Oracle.
+        :param exchange_oracle_fee: Fee for the Exchange Oracle.
         """
 
         self.id = id
         self.address = address
-        self.amount_paid = amount_paid
-        self.balance = balance
-        self.count = count
+        self.amount_paid = int(amount_paid)
+        self.balance = int(balance)
+        self.count = int(count)
         self.factory_address = factory_address
         self.final_results_url = final_results_url
+        self.final_results_hash = final_results_hash
         self.intermediate_results_url = intermediate_results_url
+        self.intermediate_results_hash = intermediate_results_hash
         self.launcher = launcher
+        self.job_requester_id = job_requester_id
         self.manifest_hash = manifest_hash
         self.manifest = manifest
         self.recording_oracle = recording_oracle
         self.reputation_oracle = reputation_oracle
         self.exchange_oracle = exchange_oracle
+        self.recording_oracle_fee = (
+            int(recording_oracle_fee) if recording_oracle_fee is not None else None
+        )
+        self.reputation_oracle_fee = (
+            int(reputation_oracle_fee) if reputation_oracle_fee is not None else None
+        )
+        self.exchange_oracle_fee = (
+            int(exchange_oracle_fee) if exchange_oracle_fee is not None else None
+        )
         self.status = status
         self.token = token
-        self.total_funded_amount = total_funded_amount
-        self.created_at = created_at
+        self.total_funded_amount = int(total_funded_amount)
+        self.created_at = int(created_at) * 1000
         self.chain_id = chain_id
 
 
@@ -114,7 +142,7 @@ class StatusEvent:
     """
     Initializes a StatusEvent instance.
 
-    :param timestamp: The timestamp of the event.
+    :param timestamp: The timestamp of the event in milliseconds.
     :param status: The status of the escrow.
     :param chain_id: The chain identifier where the event occurred.
     :param escrow_address: The address of the escrow.
@@ -123,7 +151,7 @@ class StatusEvent:
     def __init__(
         self, timestamp: int, status: str, chain_id: ChainId, escrow_address: str
     ):
-        self.timestamp = timestamp
+        self.timestamp = timestamp * 1000
         self.status = status
         self.chain_id = chain_id
         self.escrow_address = escrow_address
@@ -138,17 +166,49 @@ class Payout:
     :param escrow_address: The address of the escrow that executed the payout.
     :param recipient: The address of the recipient.
     :param amount: The amount of the payout.
-    :param created_at: The time of creation of the payout.
+    :param created_at: The time of creation of the payout in milliseconds.
     """
 
     def __init__(
-        self, id: str, escrow_address: str, recipient: str, amount: int, created_at: int
+        self, id: str, escrow_address: str, recipient: str, amount: str, created_at: str
     ):
         self.id = id
         self.escrow_address = escrow_address
         self.recipient = recipient
-        self.amount = amount
-        self.created_at = created_at
+        self.amount = int(amount)
+        self.created_at = int(created_at) * 1000
+
+
+class CancellationRefund:
+    """
+    Represents a cancellation refund event.
+
+    :param id: The unique identifier for the cancellation refund event.
+    :param escrow_address: The address of the escrow associated with the refund.
+    :param receiver: The address of the recipient receiving the refund.
+    :param amount: The amount being refunded.
+    :param block: The block number in which the refund was processed.
+    :param timestamp: The timestamp of the refund event in milliseconds.
+    :param tx_hash: The transaction hash of the refund event.
+    """
+
+    def __init__(
+        self,
+        id: str,
+        escrow_address: str,
+        receiver: str,
+        amount: str,
+        block: str,
+        timestamp: str,
+        tx_hash: str,
+    ):
+        self.id = id
+        self.escrow_address = escrow_address
+        self.receiver = receiver
+        self.amount = int(amount)
+        self.block = int(block)
+        self.timestamp = int(timestamp) * 1000
+        self.tx_hash = tx_hash
 
 
 class EscrowUtils:
@@ -239,24 +299,30 @@ class EscrowUtils:
             [
                 EscrowData(
                     chain_id=chain_id,
-                    id=escrow.get("id", ""),
-                    address=escrow.get("address", ""),
-                    amount_paid=int(escrow.get("amountPaid", 0)),
-                    balance=int(escrow.get("balance", 0)),
-                    count=int(escrow.get("count", 0)),
-                    factory_address=escrow.get("factoryAddress", ""),
-                    launcher=escrow.get("launcher", ""),
-                    status=escrow.get("status", ""),
-                    token=escrow.get("token", ""),
-                    total_funded_amount=int(escrow.get("totalFundedAmount", 0)),
-                    created_at=datetime.fromtimestamp(int(escrow.get("createdAt", 0))),
-                    final_results_url=escrow.get("finalResultsUrl", None),
-                    intermediate_results_url=escrow.get("intermediateResultsUrl", None),
-                    manifest_hash=escrow.get("manifestHash", None),
-                    manifest=escrow.get("manifest", None),
-                    recording_oracle=escrow.get("recordingOracle", None),
-                    reputation_oracle=escrow.get("reputationOracle", None),
-                    exchange_oracle=escrow.get("exchangeOracle", None),
+                    id=escrow.get("id"),
+                    address=escrow.get("address"),
+                    amount_paid=escrow.get("amountPaid"),
+                    balance=escrow.get("balance"),
+                    count=escrow.get("count"),
+                    factory_address=escrow.get("factoryAddress"),
+                    launcher=escrow.get("launcher"),
+                    job_requester_id=escrow.get("jobRequesterId"),
+                    status=escrow.get("status"),
+                    token=escrow.get("token"),
+                    total_funded_amount=escrow.get("totalFundedAmount"),
+                    created_at=escrow.get("createdAt"),
+                    final_results_url=escrow.get("finalResultsUrl"),
+                    final_results_hash=escrow.get("finalResultsHash"),
+                    intermediate_results_url=escrow.get("intermediateResultsUrl"),
+                    intermediate_results_hash=escrow.get("intermediateResultsHash"),
+                    manifest_hash=escrow.get("manifestHash"),
+                    manifest=escrow.get("manifest"),
+                    recording_oracle=escrow.get("recordingOracle"),
+                    reputation_oracle=escrow.get("reputationOracle"),
+                    exchange_oracle=escrow.get("exchangeOracle"),
+                    recording_oracle_fee=escrow.get("recordingOracleFee"),
+                    reputation_oracle_fee=escrow.get("reputationOracleFee"),
+                    exchange_oracle_fee=escrow.get("exchangeOracleFee"),
                 )
                 for escrow in escrows_raw
             ]
@@ -321,24 +387,30 @@ class EscrowUtils:
 
         return EscrowData(
             chain_id=chain_id,
-            id=escrow.get("id", ""),
-            address=escrow.get("address", ""),
-            amount_paid=int(escrow.get("amountPaid", 0)),
-            balance=int(escrow.get("balance", 0)),
-            count=int(escrow.get("count", 0)),
-            factory_address=escrow.get("factoryAddress", ""),
-            launcher=escrow.get("launcher", ""),
-            status=escrow.get("status", ""),
-            token=escrow.get("token", ""),
-            total_funded_amount=int(escrow.get("totalFundedAmount", 0)),
-            created_at=datetime.fromtimestamp(int(escrow.get("createdAt", 0))),
-            final_results_url=escrow.get("finalResultsUrl", None),
-            intermediate_results_url=escrow.get("intermediateResultsUrl", None),
-            manifest_hash=escrow.get("manifestHash", None),
-            manifest=escrow.get("manifest", None),
-            recording_oracle=escrow.get("recordingOracle", None),
-            reputation_oracle=escrow.get("reputationOracle", None),
-            exchange_oracle=escrow.get("exchangeOracle", None),
+            id=escrow.get("id"),
+            address=escrow.get("address"),
+            amount_paid=escrow.get("amountPaid"),
+            balance=escrow.get("balance"),
+            count=escrow.get("count"),
+            factory_address=escrow.get("factoryAddress"),
+            launcher=escrow.get("launcher"),
+            job_requester_id=escrow.get("jobRequesterId"),
+            status=escrow.get("status"),
+            token=escrow.get("token"),
+            total_funded_amount=escrow.get("totalFundedAmount"),
+            created_at=escrow.get("createdAt"),
+            final_results_url=escrow.get("finalResultsUrl"),
+            final_results_hash=escrow.get("finalResultsHash"),
+            intermediate_results_url=escrow.get("intermediateResultsUrl"),
+            intermediate_results_hash=escrow.get("intermediateResultsHash"),
+            manifest_hash=escrow.get("manifestHash"),
+            manifest=escrow.get("manifest"),
+            recording_oracle=escrow.get("recordingOracle"),
+            reputation_oracle=escrow.get("reputationOracle"),
+            exchange_oracle=escrow.get("exchangeOracle"),
+            recording_oracle_fee=escrow.get("recordingOracleFee"),
+            reputation_oracle_fee=escrow.get("reputationOracleFee"),
+            exchange_oracle_fee=escrow.get("exchangeOracleFee"),
         )
 
     @staticmethod
@@ -389,7 +461,7 @@ class EscrowUtils:
 
         events_with_chain_id = [
             StatusEvent(
-                timestamp=event["timestamp"],
+                timestamp=int(event["timestamp"]),
                 escrow_address=event["escrowAddress"],
                 status=event["status"],
                 chain_id=filter.chain_id,
@@ -453,10 +525,141 @@ class EscrowUtils:
                 id=payout["id"],
                 escrow_address=payout["escrowAddress"],
                 recipient=payout["recipient"],
-                amount=int(payout["amount"]),
-                created_at=int(payout["createdAt"]),
+                amount=payout["amount"],
+                created_at=payout["createdAt"],
             )
             for payout in payouts_raw
         ]
 
         return payouts
+
+    @staticmethod
+    def get_cancellation_refunds(
+        filter: CancellationRefundFilter,
+    ) -> List[CancellationRefund]:
+        """
+        Fetch cancellation refunds from the subgraph based on the provided filter.
+
+        :param filter: Object containing all the necessary parameters to filter cancellation refunds.
+
+        :return List[CancellationRefund]: List of cancellation refunds matching the query parameters.
+
+        :raise EscrowClientError: If an unsupported chain ID or invalid addresses are provided.
+        """
+        from human_protocol_sdk.gql.cancel import get_cancellation_refunds_query
+
+        if filter.escrow_address and not Web3.is_address(filter.escrow_address):
+            raise EscrowClientError("Invalid escrow address")
+
+        if filter.receiver and not Web3.is_address(filter.receiver):
+            raise EscrowClientError("Invalid receiver address")
+
+        network = NETWORKS.get(filter.chain_id)
+        if not network:
+            raise EscrowClientError("Unsupported Chain ID")
+
+        data = get_data_from_subgraph(
+            network,
+            get_cancellation_refunds_query(filter),
+            {
+                "escrowAddress": (
+                    filter.escrow_address.lower() if filter.escrow_address else None
+                ),
+                "receiver": filter.receiver.lower() if filter.receiver else None,
+                "from": int(filter.date_from.timestamp()) if filter.date_from else None,
+                "to": int(filter.date_to.timestamp()) if filter.date_to else None,
+                "first": min(filter.first, 1000),
+                "skip": filter.skip,
+                "orderDirection": filter.order_direction.value,
+            },
+        )
+
+        if (
+            not data
+            or "data" not in data
+            or "cancellationRefundEvents" not in data["data"]
+            or not data["data"]["cancellationRefundEvents"]
+        ):
+            return []
+
+        refunds_raw = data["data"]["cancellationRefundEvents"]
+
+        refunds = [
+            CancellationRefund(
+                id=refund["id"],
+                escrow_address=refund["escrowAddress"],
+                receiver=refund["receiver"],
+                amount=refund["amount"],
+                block=refund["block"],
+                timestamp=refund["timestamp"],
+                tx_hash=refund["txHash"],
+            )
+            for refund in refunds_raw
+        ]
+
+        return refunds
+
+    @staticmethod
+    def get_cancellation_refund(
+        chain_id: ChainId, escrow_address: str
+    ) -> CancellationRefund:
+        """
+        Returns the cancellation refund for a given escrow address.
+
+        :param chain_id: Network in which the escrow has been deployed
+        :param escrow_address: Address of the escrow
+
+        :return: CancellationRefund data or None
+
+        :raise EscrowClientError: If an unsupported chain ID or invalid address is provided.
+
+        :example:
+            .. code-block:: python
+
+                from human_protocol_sdk.constants import ChainId
+                from human_protocol_sdk.escrow import EscrowUtils
+
+                refund = EscrowUtils.get_cancellation_refund(
+                    ChainId.POLYGON_AMOY,
+                    "0x1234567890123456789012345678901234567890"
+                )
+        """
+        from human_protocol_sdk.gql.cancel import (
+            get_cancellation_refund_by_escrow_query,
+        )
+
+        if not Web3.is_address(escrow_address):
+            raise EscrowClientError("Invalid escrow address")
+
+        network = NETWORKS.get(chain_id)
+        if not network:
+            raise EscrowClientError("Unsupported Chain ID")
+
+        data = get_data_from_subgraph(
+            network,
+            get_cancellation_refund_by_escrow_query(),
+            {
+                "escrowAddress": escrow_address.lower(),
+            },
+        )
+
+        if (
+            not data
+            or "data" not in data
+            or "cancellationRefundEvents" not in data["data"]
+            or not data["data"]["cancellationRefundEvents"]
+            or len(data["data"]["cancellationRefundEvents"]) == 0
+        ):
+            return None
+
+        refund = data["data"]["cancellationRefundEvents"][0]
+
+        return CancellationRefund(
+            id=refund["id"],
+            escrow_address=refund["escrowAddress"],
+            receiver=refund["receiver"],
+            amount=refund["amount"],
+            block=refund["block"],
+            timestamp=refund["timestamp"],
+            tx_hash=refund["txHash"],
+        )

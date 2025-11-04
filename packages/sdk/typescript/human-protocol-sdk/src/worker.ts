@@ -1,11 +1,12 @@
+import { ethers } from 'ethers';
 import gqlFetch from 'graphql-request';
 import { NETWORKS } from './constants';
 import { ChainId, OrderDirection } from './enums';
 import { ErrorInvalidAddress, ErrorUnsupportedChainID } from './error';
+import { WorkerData } from './graphql';
 import { GET_WORKER_QUERY, GET_WORKERS_QUERY } from './graphql/queries/worker';
 import { IWorker, IWorkersFilter } from './interfaces';
 import { getSubgraphUrl } from './utils';
-import { ethers } from 'ethers';
 
 export class WorkerUtils {
   /**
@@ -37,12 +38,14 @@ export class WorkerUtils {
     }
 
     const { worker } = await gqlFetch<{
-      worker: IWorker;
+      worker: WorkerData | null;
     }>(getSubgraphUrl(networkData), GET_WORKER_QUERY, {
       address: address.toLowerCase(),
     });
 
-    return worker || null;
+    if (!worker) return null;
+
+    return mapWorker(worker);
   }
 
   /**
@@ -65,7 +68,7 @@ export class WorkerUtils {
    * type IWorker = {
    *   id: string;
    *   address: string;
-   *   totalHMTAmountReceived: string;
+   *   totalHMTAmountReceived: bigint;
    *   payoutCount: number;
    * };
    * ```
@@ -102,7 +105,7 @@ export class WorkerUtils {
     }
 
     const { workers } = await gqlFetch<{
-      workers: IWorker[];
+      workers: WorkerData[];
     }>(getSubgraphUrl(networkData), GET_WORKERS_QUERY(filter), {
       address: filter?.address?.toLowerCase(),
       first: first,
@@ -115,6 +118,15 @@ export class WorkerUtils {
       return [];
     }
 
-    return workers;
+    return workers.map((w) => mapWorker(w));
   }
+}
+
+function mapWorker(w: WorkerData): IWorker {
+  return {
+    id: w.id,
+    address: w.address,
+    totalHMTAmountReceived: BigInt(w.totalHMTAmountReceived || 0),
+    payoutCount: Number(w.payoutCount || 0),
+  };
 }
