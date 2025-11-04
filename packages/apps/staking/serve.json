@@ -1,7 +1,13 @@
 {
   "public": "dist",
-  "symlinks": true,
+  "symlinks": false,
   "trailingSlash": false,
+  "rewrites": [
+    {
+      "source": "**",
+      "destination": "/index.html"
+    }
+  ],
   "headers": [
     {
       "source": "**/*.html",
