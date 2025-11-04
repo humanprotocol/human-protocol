@@ -65,7 +65,7 @@ export class DiscoveredOracle {
   amountJobsProcessed?: string;
 
   @ApiPropertyOptional({ description: 'Fee charged by the operator' })
-  fee?: bigint;
+  fee?: string;
 
   @ApiPropertyOptional({ description: 'Public key of the operator' })
   publicKey?: string;
@@ -122,7 +122,7 @@ export class DiscoveredOracle {
     this.role = props.role;
     this.url = props.url;
     this.name = props.name;
-    this.fee = props.fee ?? undefined;
+    this.fee = props.fee?.toString();
     this.publicKey = props.publicKey ?? undefined;
     this.webhookUrl = props.webhookUrl ?? undefined;
     this.website = props.website ?? undefined;
