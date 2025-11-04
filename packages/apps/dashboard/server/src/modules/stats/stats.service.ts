@@ -324,7 +324,7 @@ export class StatsService implements OnModuleInit {
 
               dailyData[dailyCacheKey].totalTransactionAmount = (
                 BigInt(dailyData[dailyCacheKey].totalTransactionAmount) +
-                BigInt(record.totalTransactionAmount)
+                record.totalTransactionAmount
               ).toString();
               dailyData[dailyCacheKey].totalTransactionCount +=
                 record.totalTransactionCount;
@@ -346,7 +346,7 @@ export class StatsService implements OnModuleInit {
 
               monthlyData[month].totalTransactionAmount = (
                 BigInt(monthlyData[month].totalTransactionAmount) +
-                BigInt(record.totalTransactionAmount)
+                record.totalTransactionAmount
               ).toString();
               monthlyData[month].totalTransactionCount +=
                 record.totalTransactionCount;
