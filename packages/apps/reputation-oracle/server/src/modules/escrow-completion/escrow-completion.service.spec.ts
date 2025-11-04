@@ -285,7 +285,6 @@ describe('EscrowCompletionService', () => {
       mockGetEscrowStatus.mockResolvedValue(
         faker.helpers.arrayElement([
           EscrowStatus.Launched,
-          EscrowStatus.Cancelled,
           EscrowStatus.Complete,
           EscrowStatus.Paid,
           EscrowStatus.Partial,
@@ -840,6 +839,7 @@ describe('EscrowCompletionService', () => {
     const mockCompleteEscrow = jest.fn();
     let launcherAddress: string;
     let exchangeOracleAddress: string;
+    let recordingOracleAddress: string;
 
     beforeEach(() => {
       mockedEscrowClient.build.mockResolvedValue({
@@ -849,6 +849,7 @@ describe('EscrowCompletionService', () => {
 
       launcherAddress = faker.finance.ethereumAddress();
       exchangeOracleAddress = faker.finance.ethereumAddress();
+      recordingOracleAddress = faker.finance.ethereumAddress();
     });
 
     describe('handle failures', () => {
@@ -859,6 +860,7 @@ describe('EscrowCompletionService', () => {
         mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
           launcher: launcherAddress,
           exchangeOracle: exchangeOracleAddress,
+          recordingOracle: recordingOracleAddress,
         } as unknown as IEscrow);
       });
 
@@ -1003,6 +1005,7 @@ describe('EscrowCompletionService', () => {
         mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
           launcher: launcherAddress,
           exchangeOracle: exchangeOracleAddress,
+          recordingOracle: recordingOracleAddress,
         } as unknown as IEscrow);
         mockGetEscrowStatus.mockResolvedValueOnce(escrowStatus);
         const mockGasPrice = faker.number.bigInt();
@@ -1057,7 +1060,9 @@ describe('EscrowCompletionService', () => {
         );
         expect(mockReputationService.assessEscrowParties).toHaveBeenCalledWith(
           paidPayoutsRecord.chainId,
-          paidPayoutsRecord.escrowAddress,
+          launcherAddress,
+          exchangeOracleAddress,
+          recordingOracleAddress,
         );
 
         const expectedWebhookData = {
@@ -1087,6 +1092,7 @@ describe('EscrowCompletionService', () => {
         mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
           launcher: launcherAddress,
           exchangeOracle: exchangeOracleAddress,
+          recordingOracle: recordingOracleAddress,
         } as unknown as IEscrow);
         mockGetEscrowStatus.mockResolvedValueOnce(escrowStatus);
 

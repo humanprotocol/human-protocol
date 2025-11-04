@@ -1,5 +1,21 @@
 # human_protocol_sdk.utils module
 
+### human_protocol_sdk.utils.apply_tx_defaults(w3, tx_options)
+
+Apply network specific default transaction parameters.
+
+Aurora networks enforce a fixed gas price. We always override any user supplied
+gasPrice with DEFAULT_AURORA_GAS_PRICE when on Aurora Testnet.
+EIP-1559 fields are removed to avoid conflicts.
+
+* **Parameters:**
+  * **w3** (`Web3`) – Web3 instance (used to read chain id)
+  * **tx_options** (`Optional`[`TxParams`]) – Original transaction options (can be None)
+* **Return type:**
+  `TxParams`
+* **Returns:**
+  Mutated tx options with enforced defaults
+
 ### human_protocol_sdk.utils.get_contract_interface(contract_entrypoint)
 
 Retrieve the contract interface of a given contract.
@@ -52,7 +68,7 @@ Get HMT balance
   * **token_addr** – ERC-20 contract
   * **w3** – Web3 instance
 * **Returns:**
-  Decimal with HMT balance
+  HMT balance (wei)
 
 ### human_protocol_sdk.utils.get_kvstore_interface()
 

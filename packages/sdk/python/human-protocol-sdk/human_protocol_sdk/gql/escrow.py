@@ -9,8 +9,10 @@ fragment EscrowFields on Escrow {
     count
     factoryAddress
     finalResultsUrl
+    finalResultsHash
     id
-    intermediateResultsUrl
+    intermediateResultsUrl 
+    intermediateResultsHash
     launcher
     jobRequesterId
     manifestHash
@@ -18,6 +20,9 @@ fragment EscrowFields on Escrow {
     recordingOracle
     reputationOracle
     exchangeOracle
+    recordingOracleFee
+    reputationOracleFee
+    exchangeOracleFee
     status
     token
     totalFundedAmount

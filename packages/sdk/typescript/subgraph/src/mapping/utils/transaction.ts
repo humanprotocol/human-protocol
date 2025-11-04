@@ -10,6 +10,7 @@ const mainMethods: string[] = [
   'bulkTransfer',
   'storeResults',
   'withdraw',
+  'requestCancellation',
   'cancel',
   'stake',
   'unstake',

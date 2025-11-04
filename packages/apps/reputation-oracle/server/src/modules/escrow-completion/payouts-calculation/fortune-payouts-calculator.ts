@@ -1,6 +1,5 @@
 import { EscrowClient } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
-import { ethers } from 'ethers';
 import type { OverrideProperties } from 'type-fest';
 
 import { FortuneFinalResult, FortuneManifest } from '@/common/types';
@@ -26,11 +25,12 @@ export class FortunePayoutsCalculator implements EscrowPayoutsCalculator {
   ) {}
 
   async calculate({
-    manifest,
     chainId,
     escrowAddress,
     finalResultsUrl,
   }: CalculateFortunePayoutsInput): Promise<CalculatedPayout[]> {
+    const signer = this.web3Service.getSigner(chainId);
+    const escrowClient = await EscrowClient.build(signer);
     const finalResults =
       await this.storageService.downloadJsonLikeData<FortuneFinalResult[]>(
         finalResultsUrl,
@@ -40,16 +40,8 @@ export class FortunePayoutsCalculator implements EscrowPayoutsCalculator {
       .filter((result) => !result.error)
       .map((item) => item.workerAddress);
 
-    const signer = this.web3Service.getSigner(chainId);
-    const escrowClient = await EscrowClient.build(signer);
-    const tokenAddress = await escrowClient.getTokenAddress(escrowAddress);
-    const tokenDecimals = await this.web3Service.getTokenDecimals(
-      chainId,
-      tokenAddress,
-    );
-    const payoutAmount =
-      ethers.parseUnits(manifest.fundAmount.toString(), tokenDecimals) /
-      BigInt(recipients.length);
+    const reservedFunds = await escrowClient.getReservedFunds(escrowAddress);
+    const payoutAmount = reservedFunds / BigInt(recipients.length);
 
     return recipients.map((recipient) => ({
       address: recipient,

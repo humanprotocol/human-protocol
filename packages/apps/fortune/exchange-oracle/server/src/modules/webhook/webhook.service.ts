@@ -45,7 +45,7 @@ export class WebhookService {
         await this.jobService.completeJob(webhook);
         break;
 
-      case EventType.ESCROW_CANCELED:
+      case EventType.CANCELLATION_REQUESTED:
         await this.jobService.cancelJob(webhook);
         break;
 
@@ -56,6 +56,10 @@ export class WebhookService {
       case EventType.ABUSE_DETECTED:
         await this.jobService.cancelJob(webhook);
         break;
+
+      case EventType.ESCROW_CANCELED:
+        return;
+
       default:
         throw new ValidationError(
           `Invalid webhook event type: ${webhook.eventType}`,
@@ -176,8 +180,10 @@ export class WebhookService {
     if (!oracle) {
       throw new NotFoundError('Oracle not found');
     }
-    const oracleWebhookUrl = oracle.webhookUrl;
+    if (!oracle.webhookUrl) {
+      throw new NotFoundError('Oracle webhook URL not found');
+    }
 
-    return oracleWebhookUrl;
+    return oracle.webhookUrl;
   }
 }

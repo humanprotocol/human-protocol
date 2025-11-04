@@ -5,14 +5,14 @@ import { reputationSchema } from '@/shared/model/reputationSchema';
 const leaderboardEntity = z.object({
   address: z.string(),
   role: z.string(),
-  amountStaked: z
+  stakedAmount: z
     .string()
     .transform((value, ctx) => {
       const valueAsNumber = Number(value);
 
       if (Number.isNaN(valueAsNumber)) {
         ctx.addIssue({
-          path: ['amountStaked'],
+          path: ['stakedAmount'],
           code: z.ZodIssueCode.custom,
         });
       }

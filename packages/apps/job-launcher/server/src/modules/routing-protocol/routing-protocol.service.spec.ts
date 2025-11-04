@@ -147,8 +147,8 @@ describe('RoutingProtocolService', () => {
 
     it('should select the first available oracle of specified type', async () => {
       const availableOracles = [
-        { role: Role.ExchangeOracle, address: '0xExchangeOracle1' },
-        { role: Role.ExchangeOracle, address: '0xExchangeOracle2' },
+        { role: Role.ExchangeOracle, address: '0xExchangeOracle1', url: null },
+        { role: Role.ExchangeOracle, address: '0xExchangeOracle2', url: null },
       ];
 
       const result = routingProtocolService.selectOracleFromAvailable(
@@ -163,8 +163,8 @@ describe('RoutingProtocolService', () => {
 
     it('should shuffle oracles and return the first oracle from the shuffled list', () => {
       const availableOracles = [
-        { role: Role.ExchangeOracle, address: '0xExchangeOracle1' },
-        { role: Role.ExchangeOracle, address: '0xExchangeOracle2' },
+        { role: Role.ExchangeOracle, address: '0xExchangeOracle1', url: null },
+        { role: Role.ExchangeOracle, address: '0xExchangeOracle2', url: null },
       ];
 
       jest
@@ -183,8 +183,8 @@ describe('RoutingProtocolService', () => {
 
     it('should update oracle order and select from the newly shuffled list if jobType changes', () => {
       const availableOracles = [
-        { role: Role.ExchangeOracle, address: '0xExchangeOracle1' },
-        { role: Role.ExchangeOracle, address: '0xExchangeOracle2' },
+        { role: Role.ExchangeOracle, address: '0xExchangeOracle1', url: null },
+        { role: Role.ExchangeOracle, address: '0xExchangeOracle2', url: null },
       ];
 
       routingProtocolService.oracleOrder = {
@@ -218,7 +218,7 @@ describe('RoutingProtocolService', () => {
 
     it('should not shuffle if the oracle hash has not changed for the same jobType', () => {
       const availableOracles = [
-        { role: Role.ExchangeOracle, address: '0xExchangeOracle1' },
+        { role: Role.ExchangeOracle, address: '0xExchangeOracle1', url: null },
       ];
 
       const latestOraclesHash = 'hash123';
@@ -257,8 +257,8 @@ describe('RoutingProtocolService', () => {
 
     it('should update the oracle order and hash if the list of available oracles changes', () => {
       const availableOracles = [
-        { role: Role.ExchangeOracle, address: '0xExchangeOracle1' },
-        { role: Role.ExchangeOracle, address: '0xExchangeOracle2' },
+        { role: Role.ExchangeOracle, address: '0xExchangeOracle1', url: null },
+        { role: Role.ExchangeOracle, address: '0xExchangeOracle2', url: null },
       ];
 
       const previousHash = 'oldHash';
@@ -294,10 +294,18 @@ describe('RoutingProtocolService', () => {
 
     it('should select the oracle from available ones and rotate index', async () => {
       const availableOracles = [
-        { role: Role.ExchangeOracle, address: '0xExchangeOracle1' },
-        { role: Role.ExchangeOracle, address: '0xExchangeOracle2' },
-        { role: Role.RecordingOracle, address: '0xRecordingOracle1' },
-        { role: Role.RecordingOracle, address: '0xRecordingOracle2' },
+        { role: Role.ExchangeOracle, address: '0xExchangeOracle1', url: null },
+        { role: Role.ExchangeOracle, address: '0xExchangeOracle2', url: null },
+        {
+          role: Role.RecordingOracle,
+          address: '0xRecordingOracle1',
+          url: null,
+        },
+        {
+          role: Role.RecordingOracle,
+          address: '0xRecordingOracle2',
+          url: null,
+        },
       ];
 
       const result1 = routingProtocolService.selectOracleFromAvailable(
@@ -342,8 +350,12 @@ describe('RoutingProtocolService', () => {
   describe('selectOracles', () => {
     it('should select reputation oracle and find available oracles', async () => {
       const mockAvailableOracles = [
-        { role: Role.ExchangeOracle, address: '0xExchangeOracle1' },
-        { role: Role.RecordingOracle, address: '0xRecordingOracle1' },
+        { role: Role.ExchangeOracle, address: '0xExchangeOracle1', url: null },
+        {
+          role: Role.RecordingOracle,
+          address: '0xRecordingOracle1',
+          url: null,
+        },
       ];
 
       web3Service.findAvailableOracles = jest
@@ -386,8 +398,8 @@ describe('RoutingProtocolService', () => {
         )
         .mockReturnValue(`${reputationOracle},otherOracle`);
       jest.spyOn(web3Service, 'findAvailableOracles').mockResolvedValue([
-        { address: exchangeOracle, role: Role.ExchangeOracle },
-        { address: recordingOracle, role: Role.RecordingOracle },
+        { address: exchangeOracle, role: Role.ExchangeOracle, url: null },
+        { address: recordingOracle, role: Role.RecordingOracle, url: null },
       ]);
 
       await expect(
@@ -438,7 +450,7 @@ describe('RoutingProtocolService', () => {
       jest
         .spyOn(web3Service, 'findAvailableOracles')
         .mockResolvedValue([
-          { address: 'anotherOracle', role: Role.ExchangeOracle },
+          { address: 'anotherOracle', role: Role.ExchangeOracle, url: null },
         ]);
 
       await expect(
@@ -467,7 +479,7 @@ describe('RoutingProtocolService', () => {
       jest
         .spyOn(web3Service, 'findAvailableOracles')
         .mockResolvedValue([
-          { address: 'anotherOracle', role: Role.RecordingOracle },
+          { address: 'anotherOracle', role: Role.RecordingOracle, url: null },
         ]);
 
       await expect(

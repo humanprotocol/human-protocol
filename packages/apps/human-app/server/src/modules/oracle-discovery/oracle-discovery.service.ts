@@ -93,20 +93,25 @@ export class OracleDiscoveryService {
             new DiscoveredOracle({
               id: exchangeOracle.id,
               address: exchangeOracle.address,
-              name: exchangeOracle.name,
-              role: exchangeOracle.role,
-              url: exchangeOracle.url,
-              jobTypes: exchangeOracle.jobTypes,
+              name: exchangeOracle.name as string,
+              role: exchangeOracle.role as string,
+              url: exchangeOracle.url as string,
+              jobTypes: exchangeOracle.jobTypes as string[],
               registrationNeeded: exchangeOracle.registrationNeeded,
               registrationInstructions: exchangeOracle.registrationInstructions,
               chainId,
-              amountStaked: exchangeOracle.amountStaked,
-              amountLocked: exchangeOracle.amountLocked,
-              amountWithdrawn: exchangeOracle.amountWithdrawn,
-              amountSlashed: exchangeOracle.amountSlashed,
+              stakedAmount: exchangeOracle.stakedAmount,
+              lockedAmount: exchangeOracle.lockedAmount,
+              withdrawnAmount: exchangeOracle.withdrawnAmount,
+              slashedAmount: exchangeOracle.slashedAmount,
               amountJobsProcessed: exchangeOracle.amountJobsProcessed,
-              reward: exchangeOracle.reward,
               lockedUntilTimestamp: exchangeOracle.lockedUntilTimestamp,
+              fee: exchangeOracle.fee,
+              publicKey: exchangeOracle.publicKey,
+              webhookUrl: exchangeOracle.webhookUrl,
+              website: exchangeOracle.website,
+              reputationNetworks: exchangeOracle.reputationNetworks,
+              category: exchangeOracle.category,
             }),
           );
         }
@@ -131,7 +136,7 @@ export class OracleDiscoveryService {
   static checkExpectationsOfDiscoveredOracle(
     operator: IOperator,
     possibleJobTypes: string[],
-  ): operator is DiscoveredOracle {
+  ): boolean {
     if (!operator.url || !operator.name || !operator.role) {
       return false;
     }
