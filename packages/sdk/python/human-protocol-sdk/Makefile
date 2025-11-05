@@ -20,6 +20,7 @@ run-test:
 build-package:
 	make clean-package
 	make build-contracts
+	python3 scripts/embed_version.py
 	python3 setup.py sdist bdist_wheel
 
 publish-package:
