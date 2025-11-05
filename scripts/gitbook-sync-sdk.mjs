@@ -23,7 +23,7 @@ if (!GITBOOK_ORG_ID) fail("Missing GITBOOK_ORG_ID");
 if (!GIT_REF) fail("Missing GIT_REF");
 
 const tag = GIT_REF.replace(/^refs\/tags\//, "");
-if (!/^sdk@/.test(tag)) fail(`Tag must start with sdk@: ${tag}`);
+if (!/^js\/sdk@/.test(tag)) fail(`Tag must start with js/sdk@: ${tag}`);
 const version = tag.split("@")[1];
 if (!version) fail("Cannot derive version from tag");
 
