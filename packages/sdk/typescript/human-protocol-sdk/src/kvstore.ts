@@ -17,15 +17,14 @@ import {
   ErrorUnsupportedChainID,
   InvalidKeyError,
 } from './error';
-import gqlFetch from 'graphql-request';
 import { NetworkData } from './types';
-import { getSubgraphUrl, isValidUrl } from './utils';
+import { getSubgraphUrl, gqlFetchWithRetry, isValidUrl } from './utils';
 import {
   GET_KVSTORE_BY_ADDRESS_AND_KEY_QUERY,
   GET_KVSTORE_BY_ADDRESS_QUERY,
 } from './graphql/queries/kvstore';
 import { KVStoreData } from './graphql';
-import { IKVStore } from './interfaces';
+import { IKVStore, SubgraphRetryConfig } from './interfaces';
 /**
  * ## Introduction
  *
@@ -380,7 +379,8 @@ export class KVStoreUtils {
    */
   public static async getKVStoreData(
     chainId: ChainId,
-    address: string
+    address: string,
+    retryConfig?: SubgraphRetryConfig
   ): Promise<IKVStore[]> {
     const networkData = NETWORKS[chainId];
 
@@ -392,10 +392,11 @@ export class KVStoreUtils {
       throw ErrorInvalidAddress;
     }
 
-    const { kvstores } = await gqlFetch<{ kvstores: KVStoreData[] }>(
+    const { kvstores } = await gqlFetchWithRetry<{ kvstores: KVStoreData[] }>(
       getSubgraphUrl(networkData),
       GET_KVSTORE_BY_ADDRESS_QUERY(),
-      { address: address.toLowerCase() }
+      { address: address.toLowerCase() },
+      retryConfig
     );
 
     const kvStoreData = kvstores.map((item) => ({
@@ -433,7 +434,8 @@ export class KVStoreUtils {
   public static async get(
     chainId: ChainId,
     address: string,
-    key: string
+    key: string,
+    retryConfig?: SubgraphRetryConfig
   ): Promise<string> {
     if (key === '') throw ErrorKVStoreEmptyKey;
     if (!ethers.isAddress(address)) throw ErrorInvalidAddress;
@@ -444,10 +446,11 @@ export class KVStoreUtils {
       throw ErrorUnsupportedChainID;
     }
 
-    const { kvstores } = await gqlFetch<{ kvstores: KVStoreData[] }>(
+    const { kvstores } = await gqlFetchWithRetry<{ kvstores: KVStoreData[] }>(
       getSubgraphUrl(networkData),
       GET_KVSTORE_BY_ADDRESS_AND_KEY_QUERY(),
-      { address: address.toLowerCase(), key }
+      { address: address.toLowerCase(), key },
+      retryConfig
     );
 
     if (!kvstores || kvstores.length === 0) {

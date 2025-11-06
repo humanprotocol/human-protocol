@@ -1,12 +1,11 @@
 import { ethers } from 'ethers';
-import gqlFetch from 'graphql-request';
 import { NETWORKS } from './constants';
 import { ChainId, OrderDirection } from './enums';
 import { ErrorInvalidAddress, ErrorUnsupportedChainID } from './error';
 import { WorkerData } from './graphql';
 import { GET_WORKER_QUERY, GET_WORKERS_QUERY } from './graphql/queries/worker';
-import { IWorker, IWorkersFilter } from './interfaces';
-import { getSubgraphUrl } from './utils';
+import { IWorker, IWorkersFilter, SubgraphRetryConfig } from './interfaces';
+import { getSubgraphUrl, gqlFetchWithRetry } from './utils';
 
 export class WorkerUtils {
   /**
@@ -26,7 +25,8 @@ export class WorkerUtils {
    */
   public static async getWorker(
     chainId: ChainId,
-    address: string
+    address: string,
+    retryConfig?: SubgraphRetryConfig
   ): Promise<IWorker | null> {
     const networkData = NETWORKS[chainId];
 
@@ -37,11 +37,16 @@ export class WorkerUtils {
       throw ErrorInvalidAddress;
     }
 
-    const { worker } = await gqlFetch<{
+    const { worker } = await gqlFetchWithRetry<{
       worker: WorkerData | null;
-    }>(getSubgraphUrl(networkData), GET_WORKER_QUERY, {
-      address: address.toLowerCase(),
-    });
+    }>(
+      getSubgraphUrl(networkData),
+      GET_WORKER_QUERY,
+      {
+        address: address.toLowerCase(),
+      },
+      retryConfig
+    );
 
     if (!worker) return null;
 
@@ -104,15 +109,20 @@ export class WorkerUtils {
       throw ErrorInvalidAddress;
     }
 
-    const { workers } = await gqlFetch<{
+    const { workers } = await gqlFetchWithRetry<{
       workers: WorkerData[];
-    }>(getSubgraphUrl(networkData), GET_WORKERS_QUERY(filter), {
-      address: filter?.address?.toLowerCase(),
-      first: first,
-      skip: skip,
-      orderBy: orderBy,
-      orderDirection: orderDirection,
-    });
+    }>(
+      getSubgraphUrl(networkData),
+      GET_WORKERS_QUERY(filter),
+      {
+        address: filter?.address?.toLowerCase(),
+        first: first,
+        skip: skip,
+        orderBy: orderBy,
+        orderDirection: orderDirection,
+      },
+      filter.retryConfig
+    );
 
     if (!workers) {
       return [];

@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ethers } from 'ethers';
-import gqlFetch from 'graphql-request';
 import { NETWORKS } from './constants';
 import { ChainId, OrderDirection } from './enums';
 import {
@@ -17,8 +16,9 @@ import {
   InternalTransaction,
   ITransaction,
   ITransactionsFilter,
+  SubgraphRetryConfig,
 } from './interfaces';
-import { getSubgraphUrl, getUnixTimestamp } from './utils';
+import { getSubgraphUrl, getUnixTimestamp, gqlFetchWithRetry } from './utils';
 
 export class TransactionUtils {
   /**
@@ -66,7 +66,8 @@ export class TransactionUtils {
    */
   public static async getTransaction(
     chainId: ChainId,
-    hash: string
+    hash: string,
+    retryConfig?: SubgraphRetryConfig
   ): Promise<ITransaction | null> {
     if (!ethers.isHexString(hash)) {
       throw ErrorInvalidHashProvided;
@@ -77,11 +78,16 @@ export class TransactionUtils {
       throw ErrorUnsupportedChainID;
     }
 
-    const { transaction } = await gqlFetch<{
+    const { transaction } = await gqlFetchWithRetry<{
       transaction: TransactionData | null;
-    }>(getSubgraphUrl(networkData), GET_TRANSACTION_QUERY, {
-      hash: hash.toLowerCase(),
-    });
+    }>(
+      getSubgraphUrl(networkData),
+      GET_TRANSACTION_QUERY,
+      {
+        hash: hash.toLowerCase(),
+      },
+      retryConfig
+    );
     if (!transaction) return null;
 
     return mapTransaction(transaction);
@@ -179,24 +185,29 @@ export class TransactionUtils {
       throw ErrorUnsupportedChainID;
     }
 
-    const { transactions } = await gqlFetch<{
+    const { transactions } = await gqlFetchWithRetry<{
       transactions: TransactionData[];
-    }>(getSubgraphUrl(networkData), GET_TRANSACTIONS_QUERY(filter), {
-      fromAddress: filter?.fromAddress,
-      toAddress: filter?.toAddress,
-      startDate: filter?.startDate
-        ? getUnixTimestamp(filter?.startDate)
-        : undefined,
-      endDate: filter.endDate ? getUnixTimestamp(filter.endDate) : undefined,
-      startBlock: filter.startBlock ? filter.startBlock : undefined,
-      endBlock: filter.endBlock ? filter.endBlock : undefined,
-      method: filter.method ? filter.method : undefined,
-      escrow: filter.escrow ? filter.escrow : undefined,
-      token: filter.token ? filter.token : undefined,
-      orderDirection: orderDirection,
-      first: first,
-      skip: skip,
-    });
+    }>(
+      getSubgraphUrl(networkData),
+      GET_TRANSACTIONS_QUERY(filter),
+      {
+        fromAddress: filter?.fromAddress,
+        toAddress: filter?.toAddress,
+        startDate: filter?.startDate
+          ? getUnixTimestamp(filter?.startDate)
+          : undefined,
+        endDate: filter.endDate ? getUnixTimestamp(filter.endDate) : undefined,
+        startBlock: filter.startBlock ? filter.startBlock : undefined,
+        endBlock: filter.endBlock ? filter.endBlock : undefined,
+        method: filter.method ? filter.method : undefined,
+        escrow: filter.escrow ? filter.escrow : undefined,
+        token: filter.token ? filter.token : undefined,
+        orderDirection: orderDirection,
+        first: first,
+        skip: skip,
+      },
+      filter.retryConfig
+    );
 
     if (!transactions) {
       return [];

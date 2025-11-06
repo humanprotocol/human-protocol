@@ -7,7 +7,6 @@ import {
   Staking__factory,
 } from '@human-protocol/core/typechain-types';
 import { ContractRunner, Overrides, ethers } from 'ethers';
-import gqlFetch from 'graphql-request';
 import { BaseEthersClient } from './base';
 import { NETWORKS } from './constants';
 import { requiresSigner } from './decorators';
@@ -23,10 +22,15 @@ import {
   ErrorStakerNotFound,
   ErrorUnsupportedChainID,
 } from './error';
-import { IStaker, IStakersFilter, StakerInfo } from './interfaces';
+import {
+  IStaker,
+  IStakersFilter,
+  StakerInfo,
+  SubgraphRetryConfig,
+} from './interfaces';
 import { StakerData } from './graphql';
 import { NetworkData } from './types';
-import { getSubgraphUrl, throwError } from './utils';
+import { getSubgraphUrl, gqlFetchWithRetry, throwError } from './utils';
 import {
   GET_STAKER_BY_ADDRESS_QUERY,
   GET_STAKERS_QUERY,
@@ -499,7 +503,8 @@ export class StakingUtils {
    */
   public static async getStaker(
     chainId: ChainId,
-    stakerAddress: string
+    stakerAddress: string,
+    retryConfig?: SubgraphRetryConfig
   ): Promise<IStaker> {
     if (!ethers.isAddress(stakerAddress)) {
       throw ErrorInvalidStakerAddressProvided;
@@ -510,10 +515,11 @@ export class StakingUtils {
       throw ErrorUnsupportedChainID;
     }
 
-    const { staker } = await gqlFetch<{ staker: StakerData }>(
+    const { staker } = await gqlFetchWithRetry<{ staker: StakerData }>(
       getSubgraphUrl(networkData),
       GET_STAKER_BY_ADDRESS_QUERY,
-      { id: stakerAddress.toLowerCase() }
+      { id: stakerAddress.toLowerCase() },
+      retryConfig
     );
 
     if (!staker) {
@@ -540,7 +546,7 @@ export class StakingUtils {
       throw ErrorUnsupportedChainID;
     }
 
-    const { stakers } = await gqlFetch<{ stakers: StakerData[] }>(
+    const { stakers } = await gqlFetchWithRetry<{ stakers: StakerData[] }>(
       getSubgraphUrl(networkData),
       GET_STAKERS_QUERY(filter),
       {
@@ -572,7 +578,8 @@ export class StakingUtils {
         orderDirection: orderDirection,
         first: first,
         skip: skip,
-      }
+      },
+      filter.retryConfig
     );
     if (!stakers) {
       return [];

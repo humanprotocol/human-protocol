@@ -10,7 +10,6 @@ import {
   HMToken__factory,
 } from '@human-protocol/core/typechain-types';
 import { ContractRunner, EventLog, Overrides, Signer, ethers } from 'ethers';
-import gqlFetch from 'graphql-request';
 import { BaseEthersClient } from './base';
 import { ESCROW_BULK_PAYOUT_MAX_ITEMS, NETWORKS } from './constants';
 import { requiresSigner } from './decorators';
@@ -62,13 +61,16 @@ import {
   IStatusEventFilter,
   IStatusEvent,
   ICancellationRefund,
+  ICancellationRefundFilter,
   IPayout,
   IEscrowWithdraw,
+  SubgraphRetryConfig,
 } from './interfaces';
 import { EscrowStatus, NetworkData, TransactionLikeWithNonce } from './types';
 import {
   getSubgraphUrl,
   getUnixTimestamp,
+  gqlFetchWithRetry,
   isValidJson,
   isValidUrl,
   throwError,
@@ -1989,7 +1991,7 @@ export class EscrowUtils {
       statuses = Array.isArray(filter.status) ? filter.status : [filter.status];
       statuses = statuses.map((status) => EscrowStatus[status]);
     }
-    const { escrows } = await gqlFetch<{ escrows: EscrowData[] }>(
+    const { escrows } = await gqlFetchWithRetry<{ escrows: EscrowData[] }>(
       getSubgraphUrl(networkData),
       GET_ESCROWS_QUERY(filter),
       {
@@ -2004,7 +2006,8 @@ export class EscrowUtils {
         orderDirection: orderDirection,
         first: first,
         skip: skip,
-      }
+      },
+      filter.retryConfig
     );
     return (escrows || []).map((e) => mapEscrow(e, networkData.chainId));
   }
@@ -2074,7 +2077,8 @@ export class EscrowUtils {
    */
   public static async getEscrow(
     chainId: ChainId,
-    escrowAddress: string
+    escrowAddress: string,
+    retryConfig?: SubgraphRetryConfig
   ): Promise<IEscrow | null> {
     const networkData = NETWORKS[chainId];
 
@@ -2086,10 +2090,11 @@ export class EscrowUtils {
       throw ErrorInvalidAddress;
     }
 
-    const { escrow } = await gqlFetch<{ escrow: EscrowData | null }>(
+    const { escrow } = await gqlFetchWithRetry<{ escrow: EscrowData | null }>(
       getSubgraphUrl(networkData),
       GET_ESCROW_BY_ADDRESS_QUERY(),
-      { escrowAddress: escrowAddress.toLowerCase() }
+      { escrowAddress: escrowAddress.toLowerCase() },
+      retryConfig
     );
     if (!escrow) return null;
 
@@ -2187,7 +2192,7 @@ export class EscrowUtils {
 
     const statusNames = effectiveStatuses.map((status) => EscrowStatus[status]);
 
-    const data = await gqlFetch<{
+    const data = await gqlFetchWithRetry<{
       escrowStatusEvents: StatusEvent[];
     }>(
       getSubgraphUrl(networkData),
@@ -2200,7 +2205,8 @@ export class EscrowUtils {
         orderDirection,
         first: Math.min(first, 1000),
         skip,
-      }
+      },
+      filter.retryConfig
     );
 
     if (!data || !data['escrowStatusEvents']) {
@@ -2258,7 +2264,7 @@ export class EscrowUtils {
     const skip = filter.skip || 0;
     const orderDirection = filter.orderDirection || OrderDirection.DESC;
 
-    const { payouts } = await gqlFetch<{ payouts: PayoutData[] }>(
+    const { payouts } = await gqlFetchWithRetry<{ payouts: PayoutData[] }>(
       getSubgraphUrl(networkData),
       GET_PAYOUTS_QUERY(filter),
       {
@@ -2269,7 +2275,8 @@ export class EscrowUtils {
         first: Math.min(first, 1000),
         skip,
         orderDirection,
-      }
+      },
+      filter.retryConfig
     );
     if (!payouts) {
       return [];
@@ -2332,16 +2339,9 @@ export class EscrowUtils {
    * console.log(cancellationRefunds);
    * ```
    */
-  public static async getCancellationRefunds(filter: {
-    chainId: ChainId;
-    escrowAddress?: string;
-    receiver?: string;
-    from?: Date;
-    to?: Date;
-    first?: number;
-    skip?: number;
-    orderDirection?: OrderDirection;
-  }): Promise<ICancellationRefund[]> {
+  public static async getCancellationRefunds(
+    filter: ICancellationRefundFilter
+  ): Promise<ICancellationRefund[]> {
     const networkData = NETWORKS[filter.chainId];
     if (!networkData) throw ErrorUnsupportedChainID;
     if (filter.escrowAddress && !ethers.isAddress(filter.escrowAddress)) {
@@ -2356,17 +2356,22 @@ export class EscrowUtils {
     const skip = filter.skip || 0;
     const orderDirection = filter.orderDirection || OrderDirection.DESC;
 
-    const { cancellationRefundEvents } = await gqlFetch<{
+    const { cancellationRefundEvents } = await gqlFetchWithRetry<{
       cancellationRefundEvents: CancellationRefundData[];
-    }>(getSubgraphUrl(networkData), GET_CANCELLATION_REFUNDS_QUERY(filter), {
-      escrowAddress: filter.escrowAddress?.toLowerCase(),
-      receiver: filter.receiver?.toLowerCase(),
-      from: filter.from ? getUnixTimestamp(filter.from) : undefined,
-      to: filter.to ? getUnixTimestamp(filter.to) : undefined,
-      first,
-      skip,
-      orderDirection,
-    });
+    }>(
+      getSubgraphUrl(networkData),
+      GET_CANCELLATION_REFUNDS_QUERY(filter),
+      {
+        escrowAddress: filter.escrowAddress?.toLowerCase(),
+        receiver: filter.receiver?.toLowerCase(),
+        from: filter.from ? getUnixTimestamp(filter.from) : undefined,
+        to: filter.to ? getUnixTimestamp(filter.to) : undefined,
+        first,
+        skip,
+        orderDirection,
+      },
+      filter.retryConfig
+    );
 
     if (!cancellationRefundEvents || cancellationRefundEvents.length === 0) {
       return [];
@@ -2430,7 +2435,8 @@ export class EscrowUtils {
    */
   public static async getCancellationRefund(
     chainId: ChainId,
-    escrowAddress: string
+    escrowAddress: string,
+    retryConfig?: SubgraphRetryConfig
   ): Promise<ICancellationRefund | null> {
     const networkData = NETWORKS[chainId];
     if (!networkData) throw ErrorUnsupportedChainID;
@@ -2439,12 +2445,13 @@ export class EscrowUtils {
       throw ErrorInvalidEscrowAddressProvided;
     }
 
-    const { cancellationRefundEvents } = await gqlFetch<{
+    const { cancellationRefundEvents } = await gqlFetchWithRetry<{
       cancellationRefundEvents: CancellationRefundData[];
     }>(
       getSubgraphUrl(networkData),
       GET_CANCELLATION_REFUND_BY_ADDRESS_QUERY(),
-      { escrowAddress: escrowAddress.toLowerCase() }
+      { escrowAddress: escrowAddress.toLowerCase() },
+      retryConfig
     );
 
     if (!cancellationRefundEvents || cancellationRefundEvents.length === 0) {

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ethers } from 'ethers';
+import gqlFetch from 'graphql-request';
 
 import { isURL } from 'validator';
 import { SUBGRAPH_API_KEY_PLACEHOLDER } from './constants';
@@ -15,6 +16,7 @@ import {
   WarnSubgraphApiKeyNotProvided,
 } from './error';
 import { NetworkData } from './types';
+import { SubgraphRetryConfig } from './interfaces';
 
 /**
  * **Handle and throw the error.*
@@ -98,4 +100,62 @@ export const getSubgraphUrl = (networkData: NetworkData) => {
  */
 export const getUnixTimestamp = (date: Date): number => {
   return Math.floor(date.getTime() / 1000);
+};
+
+export const isIndexerError = (error: any): boolean => {
+  if (!error) return false;
+
+  const errorMessage =
+    error.response?.errors?.[0]?.message ||
+    error.message ||
+    error.toString() ||
+    '';
+  return errorMessage.toLowerCase().includes('bad indexers');
+};
+
+const sleep = (ms: number): Promise<void> => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
+/**
+ * Execute a GraphQL request with automatic retry logic for bad indexer errors.
+ * Only retries if config is provided.
+ */
+export const gqlFetchWithRetry = async <T = any>(
+  url: string,
+  query: any,
+  variables?: any,
+  config?: SubgraphRetryConfig
+): Promise<T> => {
+  if (!config) {
+    return await gqlFetch<T>(url, query, variables);
+  }
+
+  const maxRetries = config.maxRetries ?? 3;
+  const baseDelay = config.baseDelay ?? 1000;
+
+  let lastError: any;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const result = await gqlFetch<T>(url, query, variables);
+      return result;
+    } catch (error) {
+      lastError = error;
+
+      if (attempt === maxRetries) {
+        throw error;
+      }
+
+      if (!isIndexerError(error)) {
+        throw error;
+      }
+
+      const delay = baseDelay * Math.pow(2, attempt);
+
+      await sleep(delay);
+    }
+  }
+
+  throw lastError;
 };
