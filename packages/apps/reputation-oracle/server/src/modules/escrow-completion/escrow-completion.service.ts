@@ -274,7 +274,7 @@ export class EscrowCompletionService {
           chainId,
           escrowAddress,
           eventType:
-            escrowData.status === EscrowStatus[EscrowStatus.Cancelled]
+            escrowStatus === EscrowStatus.Cancelled
               ? OutgoingWebhookEventType.ESCROW_CANCELED
               : OutgoingWebhookEventType.ESCROW_COMPLETED,
         };
