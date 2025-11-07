@@ -22,7 +22,7 @@ from typing import List, Optional
 
 from human_protocol_sdk.constants import ChainId, NETWORKS
 
-from human_protocol_sdk.utils import get_data_from_subgraph
+from human_protocol_sdk.utils import SubgraphRetryConfig, get_data_from_subgraph
 from human_protocol_sdk.filter import StatisticsFilter
 
 LOG = logging.getLogger("human_protocol_sdk.statistics")
@@ -290,11 +290,14 @@ class StatisticsClient:
             raise StatisticsClientError("Empty network configuration")
 
     def get_escrow_statistics(
-        self, filter: StatisticsFilter = StatisticsFilter()
+        self,
+        filter: StatisticsFilter = StatisticsFilter(),
+        retry_config: Optional[SubgraphRetryConfig] = None,
     ) -> EscrowStatistics:
         """Get escrow statistics data for the given date range.
 
         :param filter: Object containing the date range
+        :param retry_config: Optional retry behaviour for subgraph requests
 
         :return: Escrow statistics data
 
@@ -326,6 +329,7 @@ class StatisticsClient:
         escrow_statistics_data = get_data_from_subgraph(
             self.network,
             query=get_escrow_statistics_query,
+            retry_config=retry_config,
         )
         escrow_statistics = escrow_statistics_data["data"]["escrowStatistics"]
 
@@ -339,6 +343,7 @@ class StatisticsClient:
                 "skip": filter.skip,
                 "orderDirection": filter.order_direction.value,
             },
+            retry_config=retry_config,
         )
         event_day_datas = event_day_datas_data["data"]["eventDayDatas"]
 
@@ -368,11 +373,14 @@ class StatisticsClient:
         )
 
     def get_worker_statistics(
-        self, filter: StatisticsFilter = StatisticsFilter()
+        self,
+        filter: StatisticsFilter = StatisticsFilter(),
+        retry_config: Optional[SubgraphRetryConfig] = None,
     ) -> WorkerStatistics:
         """Get worker statistics data for the given date range.
 
         :param filter: Object containing the date range
+        :param retry_config: Optional retry behaviour for subgraph requests
 
         :return: Worker statistics data
 
@@ -409,6 +417,7 @@ class StatisticsClient:
                 "skip": filter.skip,
                 "orderDirection": filter.order_direction.value,
             },
+            retry_config=retry_config,
         )
         event_day_datas = event_day_datas_data["data"]["eventDayDatas"]
 
@@ -425,11 +434,14 @@ class StatisticsClient:
         )
 
     def get_payment_statistics(
-        self, filter: StatisticsFilter = StatisticsFilter()
+        self,
+        filter: StatisticsFilter = StatisticsFilter(),
+        retry_config: Optional[SubgraphRetryConfig] = None,
     ) -> PaymentStatistics:
         """Get payment statistics data for the given date range.
 
         :param filter: Object containing the date range
+        :param retry_config: Optional retry behaviour for subgraph requests
 
         :return: Payment statistics data
 
@@ -467,6 +479,7 @@ class StatisticsClient:
                 "skip": filter.skip,
                 "orderDirection": filter.order_direction.value,
             },
+            retry_config=retry_config,
         )
         event_day_datas = event_day_datas_data["data"]["eventDayDatas"]
 
@@ -491,8 +504,12 @@ class StatisticsClient:
             ],
         )
 
-    def get_hmt_statistics(self) -> HMTStatistics:
+    def get_hmt_statistics(
+        self, retry_config: Optional[SubgraphRetryConfig] = None
+    ) -> HMTStatistics:
         """Get HMT statistics data.
+
+        :param retry_config: Optional retry behaviour for subgraph requests
 
         :return: HMT statistics data
 
@@ -514,6 +531,7 @@ class StatisticsClient:
         hmtoken_statistics_data = get_data_from_subgraph(
             self.network,
             query=get_hmtoken_statistics_query,
+            retry_config=retry_config,
         )
         hmtoken_statistics = hmtoken_statistics_data["data"]["hmtokenStatistics"]
 
@@ -528,11 +546,14 @@ class StatisticsClient:
         )
 
     def get_hmt_holders(
-        self, param: HMTHoldersParam = HMTHoldersParam()
+        self,
+        param: HMTHoldersParam = HMTHoldersParam(),
+        retry_config: Optional[SubgraphRetryConfig] = None,
     ) -> List[HMTHolder]:
         """Get HMT holders data with optional filters and ordering.
 
         :param param: Object containing filter and order parameters
+        :param retry_config: Optional retry behaviour for subgraph requests
 
         :return: List of HMT holders
 
@@ -564,6 +585,7 @@ class StatisticsClient:
                 "orderBy": "balance",
                 "orderDirection": param.order_direction,
             },
+            retry_config=retry_config,
         )
 
         holders = holders_data["data"]["holders"]
@@ -577,11 +599,14 @@ class StatisticsClient:
         ]
 
     def get_hmt_daily_data(
-        self, filter: StatisticsFilter = StatisticsFilter()
+        self,
+        filter: StatisticsFilter = StatisticsFilter(),
+        retry_config: Optional[SubgraphRetryConfig] = None,
     ) -> List[DailyHMTData]:
         """Get HMT daily statistics data for the given date range.
 
         :param filter: Object containing the date range
+        :param retry_config: Optional retry behaviour for subgraph requests
 
         :return: HMT statistics data
 
@@ -617,6 +642,7 @@ class StatisticsClient:
                 "skip": filter.skip,
                 "orderDirection": filter.order_direction.value,
             },
+            retry_config=retry_config,
         )
         event_day_datas = event_day_datas_data["data"]["eventDayDatas"]
 

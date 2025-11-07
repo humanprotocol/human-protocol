@@ -293,6 +293,7 @@ export class KVStoreClient extends BaseEthersClient {
    *
    * @param {string} address Address from which to get the key value.
    * @param {string} key Key to obtain the value.
+   * @param {SubgraphRetryConfig} retryConfig Optional configuration for retrying subgraph requests.
    * @returns {string} Value of the key.
    *
    *
@@ -364,6 +365,7 @@ export class KVStoreUtils {
    *
    * @param {ChainId} chainId Network in which the KVStore is deployed
    * @param {string} address Address of the KVStore
+   * @param {SubgraphRetryConfig} retryConfig Optional configuration for retrying subgraph requests.
    * @returns {Promise<IKVStore[]>} KVStore data
    * @throws {ErrorUnsupportedChainID} - Thrown if the network's chainId is not supported
    * @throws {ErrorInvalidAddress} - Thrown if the Address sent is invalid
@@ -413,6 +415,7 @@ export class KVStoreUtils {
    * @param {ChainId} chainId Network in which the KVStore is deployed
    * @param {string} address Address from which to get the key value.
    * @param {string} key Key to obtain the value.
+   * @param {SubgraphRetryConfig} retryConfig Optional configuration for retrying subgraph requests.
    * @returns {Promise<string>} Value of the key.
    * @throws {ErrorUnsupportedChainID} - Thrown if the network's chainId is not supported
    * @throws {ErrorInvalidAddress} - Thrown if the Address sent is invalid
@@ -466,6 +469,7 @@ export class KVStoreUtils {
    * @param {ChainId} chainId Network in which the KVStore is deployed
    * @param {string} address Address from which to get the URL value.
    * @param {string} urlKey Configurable URL key. `url` by default.
+   * @param {SubgraphRetryConfig} retryConfig Optional configuration for retrying subgraph requests.
    * @returns {Promise<string>} URL value for the given address if it exists, and the content is valid
    *
    * **Code example**
@@ -483,7 +487,8 @@ export class KVStoreUtils {
   public static async getFileUrlAndVerifyHash(
     chainId: ChainId,
     address: string,
-    urlKey = 'url'
+    urlKey = 'url',
+    retryConfig?: SubgraphRetryConfig
   ): Promise<string> {
     if (!ethers.isAddress(address)) throw ErrorInvalidAddress;
     const hashKey = urlKey + '_hash';
@@ -492,7 +497,7 @@ export class KVStoreUtils {
       hash = '';
 
     try {
-      url = await this.get(chainId, address, urlKey);
+      url = await this.get(chainId, address, urlKey, retryConfig);
     } catch (e) {
       if (e instanceof Error) throw Error(`Failed to get URL: ${e.message}`);
     }
@@ -542,12 +547,14 @@ export class KVStoreUtils {
    */
   public static async getPublicKey(
     chainId: ChainId,
-    address: string
+    address: string,
+    retryConfig?: SubgraphRetryConfig
   ): Promise<string> {
     const publicKeyUrl = await this.getFileUrlAndVerifyHash(
       chainId,
       address,
-      KVStoreKeys.publicKey
+      KVStoreKeys.publicKey,
+      retryConfig
     );
 
     if (publicKeyUrl === '') {

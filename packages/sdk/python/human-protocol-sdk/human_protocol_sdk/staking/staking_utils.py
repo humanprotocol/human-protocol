@@ -30,7 +30,7 @@ Module
 from typing import List, Optional
 from human_protocol_sdk.constants import NETWORKS, ChainId
 from human_protocol_sdk.filter import StakersFilter
-from human_protocol_sdk.utils import get_data_from_subgraph
+from human_protocol_sdk.utils import SubgraphRetryConfig, get_data_from_subgraph
 from human_protocol_sdk.gql.staking import get_staker_query, get_stakers_query
 
 
@@ -62,7 +62,11 @@ class StakingUtilsError(Exception):
 
 class StakingUtils:
     @staticmethod
-    def get_staker(chain_id: ChainId, address: str) -> Optional[StakerData]:
+    def get_staker(
+        chain_id: ChainId,
+        address: str,
+        retry_config: Optional[SubgraphRetryConfig] = None,
+    ) -> Optional[StakerData]:
         network = NETWORKS.get(chain_id)
         if not network:
             raise StakingUtilsError("Unsupported Chain ID")
@@ -71,6 +75,7 @@ class StakingUtils:
             network,
             query=get_staker_query(),
             params={"id": address.lower()},
+            retry_config=retry_config,
         )
         if (
             not data
@@ -93,7 +98,10 @@ class StakingUtils:
         )
 
     @staticmethod
-    def get_stakers(filter: StakersFilter) -> List[StakerData]:
+    def get_stakers(
+        filter: StakersFilter,
+        retry_config: Optional[SubgraphRetryConfig] = None,
+    ) -> List[StakerData]:
         network_data = NETWORKS.get(filter.chain_id)
         if not network_data:
             raise StakingUtilsError("Unsupported Chain ID")
@@ -115,6 +123,7 @@ class StakingUtils:
                 "first": filter.first,
                 "skip": filter.skip,
             },
+            retry_config=retry_config,
         )
         if (
             not data

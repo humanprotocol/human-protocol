@@ -18,6 +18,7 @@ from human_protocol_sdk.statistics import (
 from human_protocol_sdk.operator import OperatorUtils, OperatorFilter
 from human_protocol_sdk.agreement import agreement
 from human_protocol_sdk.staking.staking_utils import StakingUtils
+from human_protocol_sdk.utils import SubgraphRetryConfig
 
 
 def get_escrow_statistics(statistics_client: StatisticsClient):
@@ -162,7 +163,8 @@ def get_escrows():
                 status=Status.Pending,
                 date_from=datetime.datetime(2023, 5, 8),
                 date_to=datetime.datetime(2023, 6, 8),
-            )
+            ),
+            SubgraphRetryConfig(3, 1000),
         )
     )
 
@@ -232,12 +234,13 @@ def get_stakers_example():
             chain_id=ChainId.POLYGON_AMOY,
             order_by="lastDepositTimestamp",
             order_direction=OrderDirection.ASC,
-        )
+        ),
+        SubgraphRetryConfig(3, 1000),
     )
     print("Filtered stakers:", len(stakers))
 
     if stakers:
-        staker = StakingUtils.get_staker(ChainId.LOCALHOST, stakers[0].address)
+        staker = StakingUtils.get_staker(ChainId.POLYGON_AMOY, stakers[0].address)
         print("Staker info:", staker.address)
     else:
         print("No stakers found.")

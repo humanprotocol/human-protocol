@@ -560,7 +560,8 @@ describe('KVStoreUtils', () => {
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
         ChainId.LOCALHOST,
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
-        'url'
+        'url',
+        undefined
       );
     });
 
@@ -581,7 +582,8 @@ describe('KVStoreUtils', () => {
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
         ChainId.LOCALHOST,
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
-        'url'
+        'url',
+        undefined
       );
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
         ChainId.LOCALHOST,
@@ -608,7 +610,8 @@ describe('KVStoreUtils', () => {
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
         ChainId.LOCALHOST,
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
-        'linkedin_url'
+        'linkedin_url',
+        undefined
       );
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
         ChainId.LOCALHOST,
@@ -635,7 +638,8 @@ describe('KVStoreUtils', () => {
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
         ChainId.LOCALHOST,
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
-        'url'
+        'url',
+        undefined
       );
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
         ChainId.LOCALHOST,
@@ -659,7 +663,8 @@ describe('KVStoreUtils', () => {
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
         ChainId.LOCALHOST,
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
-        'url'
+        'url',
+        undefined
       );
     });
   });
@@ -682,7 +687,8 @@ describe('KVStoreUtils', () => {
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
         ChainId.LOCALHOST,
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
-        'public_key'
+        'public_key',
+        undefined
       );
     });
 
@@ -703,7 +709,8 @@ describe('KVStoreUtils', () => {
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
         ChainId.LOCALHOST,
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
-        'public_key'
+        'public_key',
+        undefined
       );
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
         ChainId.LOCALHOST,
@@ -732,7 +739,8 @@ describe('KVStoreUtils', () => {
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
         ChainId.LOCALHOST,
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
-        'public_key'
+        'public_key',
+        undefined
       );
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
         ChainId.LOCALHOST,
@@ -756,7 +764,8 @@ describe('KVStoreUtils', () => {
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
         ChainId.LOCALHOST,
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
-        'public_key'
+        'public_key',
+        undefined
       );
     });
   });

@@ -38,6 +38,7 @@ from human_protocol_sdk.filter import (
     PayoutFilter,
 )
 from human_protocol_sdk.utils import (
+    SubgraphRetryConfig,
     get_data_from_subgraph,
 )
 
@@ -219,10 +220,12 @@ class EscrowUtils:
     @staticmethod
     def get_escrows(
         filter: EscrowFilter,
+        retry_config: Optional[SubgraphRetryConfig] = None,
     ) -> List[EscrowData]:
         """Get an array of escrow addresses based on the specified filter parameters.
 
         :param filter: Object containing all the necessary parameters to filter
+        :param retry_config: Optional retry behaviour for subgraph requests
 
         :return: List of escrows
 
@@ -283,6 +286,7 @@ class EscrowUtils:
                 "skip": filter.skip,
                 "orderDirection": filter.order_direction.value,
             },
+            retry_config=retry_config,
         )
 
         if (
@@ -334,11 +338,13 @@ class EscrowUtils:
     def get_escrow(
         chain_id: ChainId,
         escrow_address: str,
+        retry_config: Optional[SubgraphRetryConfig] = None,
     ) -> Optional[EscrowData]:
         """Returns the escrow for a given address.
 
         :param chain_id: Network in which the escrow has been deployed
         :param escrow_address: Address of the escrow
+        :param retry_config: Optional retry behaviour for subgraph requests
 
         :return: Escrow data
 
@@ -373,6 +379,7 @@ class EscrowUtils:
             params={
                 "escrowAddress": escrow_address.lower(),
             },
+            retry_config=retry_config,
         )
 
         if (
@@ -414,11 +421,15 @@ class EscrowUtils:
         )
 
     @staticmethod
-    def get_status_events(filter: StatusEventFilter) -> List[StatusEvent]:
+    def get_status_events(
+        filter: StatusEventFilter,
+        retry_config: Optional[SubgraphRetryConfig] = None,
+    ) -> List[StatusEvent]:
         """
         Retrieve status events for specified networks and statuses within a date range.
 
         :param filter: Object containing all the necessary parameters to filter status events.
+        :param retry_config: Optional retry behaviour for subgraph requests
 
         :return List[StatusEvent]: List of status events matching the query parameters.
 
@@ -447,6 +458,7 @@ class EscrowUtils:
                 "skip": filter.skip,
                 "orderDirection": filter.order_direction.value,
             },
+            retry_config=retry_config,
         )
 
         if (
@@ -472,11 +484,15 @@ class EscrowUtils:
         return events_with_chain_id
 
     @staticmethod
-    def get_payouts(filter: PayoutFilter) -> List[Payout]:
+    def get_payouts(
+        filter: PayoutFilter,
+        retry_config: Optional[SubgraphRetryConfig] = None,
+    ) -> List[Payout]:
         """
         Fetch payouts from the subgraph based on the provided filter.
 
         :param filter: Object containing all the necessary parameters to filter payouts.
+        :param retry_config: Optional retry behaviour for subgraph requests
 
         :return List[Payout]: List of payouts matching the query parameters.
 
@@ -508,6 +524,7 @@ class EscrowUtils:
                 "skip": filter.skip,
                 "orderDirection": filter.order_direction.value,
             },
+            retry_config=retry_config,
         )
 
         if (
@@ -536,11 +553,13 @@ class EscrowUtils:
     @staticmethod
     def get_cancellation_refunds(
         filter: CancellationRefundFilter,
+        retry_config: Optional[SubgraphRetryConfig] = None,
     ) -> List[CancellationRefund]:
         """
         Fetch cancellation refunds from the subgraph based on the provided filter.
 
         :param filter: Object containing all the necessary parameters to filter cancellation refunds.
+        :param retry_config: Optional retry behaviour for subgraph requests
 
         :return List[CancellationRefund]: List of cancellation refunds matching the query parameters.
 
@@ -572,6 +591,7 @@ class EscrowUtils:
                 "skip": filter.skip,
                 "orderDirection": filter.order_direction.value,
             },
+            retry_config=retry_config,
         )
 
         if (
@@ -601,13 +621,16 @@ class EscrowUtils:
 
     @staticmethod
     def get_cancellation_refund(
-        chain_id: ChainId, escrow_address: str
+        chain_id: ChainId,
+        escrow_address: str,
+        retry_config: Optional[SubgraphRetryConfig] = None,
     ) -> CancellationRefund:
         """
         Returns the cancellation refund for a given escrow address.
 
         :param chain_id: Network in which the escrow has been deployed
         :param escrow_address: Address of the escrow
+        :param retry_config: Optional retry behaviour for subgraph requests
 
         :return: CancellationRefund data or None
 
@@ -641,6 +664,7 @@ class EscrowUtils:
             {
                 "escrowAddress": escrow_address.lower(),
             },
+            retry_config=retry_config,
         )
 
         if (

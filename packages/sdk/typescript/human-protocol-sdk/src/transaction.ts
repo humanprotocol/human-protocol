@@ -54,6 +54,7 @@ export class TransactionUtils {
    *
    * @param {ChainId} chainId The chain ID.
    * @param {string} hash The transaction hash.
+   * @param {SubgraphRetryConfig} retryConfig Optional configuration for retrying subgraph requests.
    * @returns {Promise<ITransaction | null>} - Returns the transaction details or null if not found.
    *
    * **Code example**
@@ -147,6 +148,7 @@ export class TransactionUtils {
    * ```
    *
    * @param {ITransactionsFilter} filter Filter for the transactions.
+   * @param {SubgraphRetryConfig} retryConfig Optional configuration for retrying subgraph requests.
    * @returns {Promise<ITransaction[]>} Returns an array with all the transaction details.
    *
    * **Code example**
@@ -166,7 +168,8 @@ export class TransactionUtils {
    * ```
    */
   public static async getTransactions(
-    filter: ITransactionsFilter
+    filter: ITransactionsFilter,
+    retryConfig?: SubgraphRetryConfig
   ): Promise<ITransaction[]> {
     if (
       (!!filter.startDate || !!filter.endDate) &&
@@ -206,7 +209,7 @@ export class TransactionUtils {
         first: first,
         skip: skip,
       },
-      filter.retryConfig
+      retryConfig
     );
 
     if (!transactions) {

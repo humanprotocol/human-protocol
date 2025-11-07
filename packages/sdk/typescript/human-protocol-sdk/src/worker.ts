@@ -13,6 +13,7 @@ export class WorkerUtils {
    *
    * @param {ChainId} chainId The chain ID.
    * @param {string} address The worker address.
+   * @param {SubgraphRetryConfig} retryConfig Optional configuration for retrying subgraph requests.
    * @returns {Promise<IWorker | null>} - Returns the worker details or null if not found.
    *
    * **Code example**
@@ -79,6 +80,7 @@ export class WorkerUtils {
    * ```
    *
    * @param {IWorkersFilter} filter Filter for the workers.
+   * @param {SubgraphRetryConfig} retryConfig Optional configuration for retrying subgraph requests.
    * @returns {Promise<IWorker[]>} Returns an array with all the worker details.
    *
    * **Code example**
@@ -94,7 +96,10 @@ export class WorkerUtils {
    * const workers = await WorkerUtils.getWorkers(filter);
    * ```
    */
-  public static async getWorkers(filter: IWorkersFilter): Promise<IWorker[]> {
+  public static async getWorkers(
+    filter: IWorkersFilter,
+    retryConfig?: SubgraphRetryConfig
+  ): Promise<IWorker[]> {
     const first =
       filter.first !== undefined ? Math.min(filter.first, 1000) : 10;
     const skip = filter.skip || 0;
@@ -121,7 +126,7 @@ export class WorkerUtils {
         orderBy: orderBy,
         orderDirection: orderDirection,
       },
-      filter.retryConfig
+      retryConfig
     );
 
     if (!workers) {

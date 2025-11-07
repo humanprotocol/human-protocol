@@ -65,6 +65,7 @@ class TestStatisticsClient(unittest.TestCase):
             mock_function.assert_any_call(
                 NETWORKS[ChainId.LOCALHOST],
                 query=get_escrow_statistics_query,
+                retry_config=None,
             )
 
             mock_function.assert_any_call(
@@ -77,6 +78,7 @@ class TestStatisticsClient(unittest.TestCase):
                     "skip": 0,
                     "orderDirection": "asc",
                 },
+                retry_config=None,
             )
 
             self.assertEqual(escrow_statistics.total_escrows, 1)
@@ -128,6 +130,7 @@ class TestStatisticsClient(unittest.TestCase):
                     "skip": 0,
                     "orderDirection": "asc",
                 },
+                retry_config=None,
             )
 
             self.assertEqual(len(payment_statistics.daily_workers_data), 1)
@@ -173,6 +176,7 @@ class TestStatisticsClient(unittest.TestCase):
                     "skip": 0,
                     "orderDirection": "asc",
                 },
+                retry_config=None,
             )
 
             self.assertEqual(len(payment_statistics.daily_payments_data), 1)
@@ -211,6 +215,7 @@ class TestStatisticsClient(unittest.TestCase):
             mock_function.assert_any_call(
                 NETWORKS[ChainId.LOCALHOST],
                 query=get_hmtoken_statistics_query,
+                retry_config=None,
             )
 
             self.assertEqual(hmt_statistics.total_transfer_amount, 100)
@@ -250,6 +255,7 @@ class TestStatisticsClient(unittest.TestCase):
                     "orderBy": "balance",
                     "orderDirection": param.order_direction,
                 },
+                retry_config=None,
             )
 
             self.assertEqual(len(holders), 2)
@@ -296,6 +302,7 @@ class TestStatisticsClient(unittest.TestCase):
                     "skip": 0,
                     "orderDirection": "asc",
                 },
+                retry_config=None,
             )
 
             self.assertEqual(len(hmt_statistics), 1)

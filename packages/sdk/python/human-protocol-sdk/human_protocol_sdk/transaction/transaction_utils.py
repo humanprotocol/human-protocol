@@ -30,7 +30,7 @@ from typing import List, Optional
 from human_protocol_sdk.constants import NETWORKS, ChainId
 from web3 import Web3
 from human_protocol_sdk.filter import TransactionFilter
-from human_protocol_sdk.utils import get_data_from_subgraph
+from human_protocol_sdk.utils import SubgraphRetryConfig, get_data_from_subgraph
 
 
 class InternalTransaction:
@@ -97,11 +97,14 @@ class TransactionUtils:
     """
 
     @staticmethod
-    def get_transaction(chain_id: ChainId, hash: str) -> Optional[TransactionData]:
+    def get_transaction(
+        chain_id: ChainId, hash: str, retry_config: Optional[SubgraphRetryConfig] = None
+    ) -> Optional[TransactionData]:
         """Returns the transaction for a given hash.
 
         :param chain_id: Network in which the transaction was executed
         :param hash: Hash of the transaction
+        :param retry_config: Optional retry behaviour for subgraph requests
 
         :return: Transaction data
 
@@ -128,6 +131,7 @@ class TransactionUtils:
             network,
             query=get_transaction_query(),
             params={"hash": hash.lower()},
+            retry_config=retry_config,
         )
         if (
             not transaction_data
@@ -166,11 +170,14 @@ class TransactionUtils:
         )
 
     @staticmethod
-    def get_transactions(filter: TransactionFilter) -> List[TransactionData]:
+    def get_transactions(
+        filter: TransactionFilter, retry_config: Optional[SubgraphRetryConfig] = None
+    ) -> List[TransactionData]:
         """Get an array of transactions based on the specified filter parameters.
 
         :param filter: Object containing all the necessary parameters to filter
             (chain_id, from_address, to_address, start_date, end_date, start_block, end_block, method, escrow, token, first, skip, order_direction)
+        :param retry_config: Optional retry behaviour for subgraph requests
 
         :return: List of transactions
 
@@ -223,6 +230,7 @@ class TransactionUtils:
                 "skip": filter.skip,
                 "orderDirection": filter.order_direction.value,
             },
+            retry_config=retry_config,
         )
         if (
             not data

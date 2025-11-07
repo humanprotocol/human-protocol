@@ -67,6 +67,7 @@ class TestOperatorUtils(unittest.TestCase):
                     "first": filter.first,
                     "skip": filter.skip,
                 },
+                retry_config=None,
             )
 
             self.assertEqual(len(operators), 1)
@@ -143,6 +144,7 @@ class TestOperatorUtils(unittest.TestCase):
                     "first": filter.first,
                     "skip": filter.skip,
                 },
+                retry_config=None,
             )
 
             self.assertEqual(len(operators), 1)
@@ -219,6 +221,7 @@ class TestOperatorUtils(unittest.TestCase):
                     "first": filter.first,
                     "skip": filter.skip,
                 },
+                retry_config=None,
             )
 
             self.assertEqual(len(operators), 1)
@@ -271,6 +274,7 @@ class TestOperatorUtils(unittest.TestCase):
                     "first": filter.first,
                     "skip": filter.skip,
                 },
+                retry_config=None,
             )
 
             self.assertEqual(operators, [])
@@ -321,6 +325,7 @@ class TestOperatorUtils(unittest.TestCase):
                 NETWORKS[ChainId.POLYGON],
                 query=get_operator_query,
                 params={"address": staker_address},
+                retry_config=None,
             )
 
             self.assertNotEqual(operator, None)
@@ -389,6 +394,7 @@ class TestOperatorUtils(unittest.TestCase):
                 NETWORKS[ChainId.POLYGON],
                 query=get_operator_query,
                 params={"address": staker_address},
+                retry_config=None,
             )
 
             self.assertNotEqual(operator, None)
@@ -457,6 +463,7 @@ class TestOperatorUtils(unittest.TestCase):
                 NETWORKS[ChainId.POLYGON],
                 query=get_operator_query,
                 params={"address": staker_address},
+                retry_config=None,
             )
 
             self.assertNotEqual(operator, None)
@@ -495,6 +502,7 @@ class TestOperatorUtils(unittest.TestCase):
                 NETWORKS[ChainId.POLYGON],
                 query=get_operator_query,
                 params={"address": staker_address},
+                retry_config=None,
             )
 
             self.assertEqual(operator, None)
@@ -541,6 +549,7 @@ class TestOperatorUtils(unittest.TestCase):
             NETWORKS[ChainId.POLYGON],
             query=get_reputation_network_query(None),
             params={"address": reputation_address, "role": None},
+            retry_config=None,
         )
 
         self.assertNotEqual(operators, [])
@@ -593,6 +602,7 @@ class TestOperatorUtils(unittest.TestCase):
             NETWORKS[ChainId.POLYGON],
             query=get_reputation_network_query(None),
             params={"address": reputation_address, "role": None},
+            retry_config=None,
         )
 
         self.assertNotEqual(operators, [])
@@ -645,6 +655,7 @@ class TestOperatorUtils(unittest.TestCase):
             NETWORKS[ChainId.POLYGON],
             query=get_reputation_network_query(None),
             params={"address": reputation_address, "role": None},
+            retry_config=None,
         )
 
         self.assertNotEqual(operators, [])
@@ -673,6 +684,7 @@ class TestOperatorUtils(unittest.TestCase):
             NETWORKS[ChainId.POLYGON],
             query=get_reputation_network_query(None),
             params={"address": reputation_address, "role": None},
+            retry_config=None,
         )
 
         self.assertEqual(operators, [])
@@ -704,6 +716,7 @@ class TestOperatorUtils(unittest.TestCase):
                 NETWORKS[ChainId.POLYGON],
                 query=get_reward_added_events_query,
                 params={"slasherAddress": slasher},
+                retry_config=None,
             )
 
             self.assertEqual(len(rewards_info), 2)
@@ -726,6 +739,7 @@ class TestOperatorUtils(unittest.TestCase):
                 NETWORKS[ChainId.POLYGON],
                 query=get_reward_added_events_query,
                 params={"slasherAddress": slasher},
+                retry_config=None,
             )
 
             self.assertEqual(rewards_info, [])

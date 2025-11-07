@@ -1942,6 +1942,7 @@ export class EscrowUtils {
    *
    *
    * @param {IEscrowsFilter} filter Filter parameters.
+   * @param {SubgraphRetryConfig} retryConfig Optional configuration for retrying subgraph requests.
    * @returns {IEscrow[]} List of escrows that match the filter.
    *
    * **Code example**
@@ -1958,7 +1959,10 @@ export class EscrowUtils {
    * const escrows = await EscrowUtils.getEscrows(filters);
    * ```
    */
-  public static async getEscrows(filter: IEscrowsFilter): Promise<IEscrow[]> {
+  public static async getEscrows(
+    filter: IEscrowsFilter,
+    retryConfig?: SubgraphRetryConfig
+  ): Promise<IEscrow[]> {
     if (filter.launcher && !ethers.isAddress(filter.launcher)) {
       throw ErrorInvalidAddress;
     }
@@ -2007,7 +2011,7 @@ export class EscrowUtils {
         first: first,
         skip: skip,
       },
-      filter.retryConfig
+      retryConfig
     );
     return (escrows || []).map((e) => mapEscrow(e, networkData.chainId));
   }
@@ -2065,6 +2069,7 @@ export class EscrowUtils {
    *
    * @param {ChainId} chainId Network in which the escrow has been deployed
    * @param {string} escrowAddress Address of the escrow
+   * @param {SubgraphRetryConfig} retryConfig Optional configuration for retrying subgraph requests.
    * @returns {Promise<IEscrow | null>} - Escrow data or null if not found.
    *
    * **Code example**
@@ -2137,6 +2142,7 @@ export class EscrowUtils {
    * ```
    *
    * @param {IStatusEventFilter} filter Filter parameters.
+   * @param {SubgraphRetryConfig} retryConfig Optional configuration for retrying subgraph requests.
    * @returns {Promise<StatusEvent[]>} - Array of status events with their corresponding statuses.
    *
    * **Code example**
@@ -2158,7 +2164,8 @@ export class EscrowUtils {
    * ```
    */
   public static async getStatusEvents(
-    filter: IStatusEventFilter
+    filter: IStatusEventFilter,
+    retryConfig?: SubgraphRetryConfig
   ): Promise<IStatusEvent[]> {
     const {
       chainId,
@@ -2206,7 +2213,7 @@ export class EscrowUtils {
         first: Math.min(first, 1000),
         skip,
       },
-      filter.retryConfig
+      retryConfig
     );
 
     if (!data || !data['escrowStatusEvents']) {
@@ -2230,6 +2237,7 @@ export class EscrowUtils {
    * Fetch payouts from the subgraph.
    *
    * @param {IPayoutFilter} filter Filter parameters.
+   * @param {SubgraphRetryConfig} retryConfig Optional configuration for retrying subgraph requests.
    * @returns {Promise<IPayout[]>} List of payouts matching the filters.
    *
    * **Code example**
@@ -2247,7 +2255,10 @@ export class EscrowUtils {
    * console.log(payouts);
    * ```
    */
-  public static async getPayouts(filter: IPayoutFilter): Promise<IPayout[]> {
+  public static async getPayouts(
+    filter: IPayoutFilter,
+    retryConfig?: SubgraphRetryConfig
+  ): Promise<IPayout[]> {
     const networkData = NETWORKS[filter.chainId];
     if (!networkData) {
       throw ErrorUnsupportedChainID;
@@ -2276,7 +2287,7 @@ export class EscrowUtils {
         skip,
         orderDirection,
       },
-      filter.retryConfig
+      retryConfig
     );
     if (!payouts) {
       return [];
@@ -2325,6 +2336,7 @@ export class EscrowUtils {
    *
    *
    * @param {Object} filter Filter parameters.
+   * @param {SubgraphRetryConfig} retryConfig Optional configuration for retrying subgraph requests.
    * @returns {Promise<ICancellationRefund[]>} List of cancellation refunds matching the filters.
    *
    * **Code example**
@@ -2340,7 +2352,8 @@ export class EscrowUtils {
    * ```
    */
   public static async getCancellationRefunds(
-    filter: ICancellationRefundFilter
+    filter: ICancellationRefundFilter,
+    retryConfig?: SubgraphRetryConfig
   ): Promise<ICancellationRefund[]> {
     const networkData = NETWORKS[filter.chainId];
     if (!networkData) throw ErrorUnsupportedChainID;
@@ -2370,7 +2383,7 @@ export class EscrowUtils {
         skip,
         orderDirection,
       },
-      filter.retryConfig
+      retryConfig
     );
 
     if (!cancellationRefundEvents || cancellationRefundEvents.length === 0) {
@@ -2423,6 +2436,7 @@ export class EscrowUtils {
    *
    * @param {ChainId} chainId Network in which the escrow has been deployed
    * @param {string} escrowAddress Address of the escrow
+   * @param {SubgraphRetryConfig} retryConfig Optional configuration for retrying subgraph requests.
    * @returns {Promise<ICancellationRefund>} Cancellation refund data
    *
    * **Code example**

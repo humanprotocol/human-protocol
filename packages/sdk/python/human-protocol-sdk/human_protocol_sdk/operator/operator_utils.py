@@ -25,7 +25,7 @@ from typing import List, Optional, Union
 
 from human_protocol_sdk.constants import NETWORKS, ChainId, OrderDirection
 from human_protocol_sdk.gql.reward import get_reward_added_events_query
-from human_protocol_sdk.utils import get_data_from_subgraph
+from human_protocol_sdk.utils import SubgraphRetryConfig, get_data_from_subgraph
 from web3 import Web3
 
 LOG = logging.getLogger("human_protocol_sdk.operator")
@@ -198,10 +198,14 @@ class OperatorUtils:
     """
 
     @staticmethod
-    def get_operators(filter: OperatorFilter) -> List[OperatorData]:
+    def get_operators(
+        filter: OperatorFilter,
+        retry_config: Optional[SubgraphRetryConfig] = None,
+    ) -> List[OperatorData]:
         """Get operators data of the protocol.
 
         :param filter: Operator filter
+        :param retry_config: Optional retry behaviour for subgraph requests
 
         :return: List of operators data
 
@@ -237,6 +241,7 @@ class OperatorUtils:
                 "first": filter.first,
                 "skip": filter.skip,
             },
+            retry_config=retry_config,
         )
 
         if (
@@ -283,11 +288,13 @@ class OperatorUtils:
     def get_operator(
         chain_id: ChainId,
         operator_address: str,
+        retry_config: Optional[SubgraphRetryConfig] = None,
     ) -> Optional[OperatorData]:
         """Gets the operator details.
 
         :param chain_id: Network in which the operator exists
         :param operator_address: Address of the operator
+        :param retry_config: Optional retry behaviour for subgraph requests
 
         :return: Operator data if exists, otherwise None
 
@@ -318,6 +325,7 @@ class OperatorUtils:
             network,
             query=get_operator_query,
             params={"address": operator_address.lower()},
+            retry_config=retry_config,
         )
 
         if (
@@ -359,12 +367,14 @@ class OperatorUtils:
         chain_id: ChainId,
         address: str,
         role: Optional[str] = None,
+        retry_config: Optional[SubgraphRetryConfig] = None,
     ) -> List[OperatorData]:
         """Get the reputation network operators of the specified address.
 
         :param chain_id: Network in which the reputation network exists
         :param address: Address of the reputation oracle
         :param role: (Optional) Role of the operator
+        :param retry_config: Optional retry behaviour for subgraph requests
 
         :return: Returns an array of operator details
 
@@ -395,6 +405,7 @@ class OperatorUtils:
             network,
             query=get_reputation_network_query(role),
             params={"address": address.lower(), "role": role},
+            retry_config=retry_config,
         )
 
         if (
@@ -438,11 +449,16 @@ class OperatorUtils:
         return result
 
     @staticmethod
-    def get_rewards_info(chain_id: ChainId, slasher: str) -> List[RewardData]:
+    def get_rewards_info(
+        chain_id: ChainId,
+        slasher: str,
+        retry_config: Optional[SubgraphRetryConfig] = None,
+    ) -> List[RewardData]:
         """Get rewards of the given slasher.
 
         :param chain_id: Network in which the slasher exists
         :param slasher: Address of the slasher
+        :param retry_config: Optional retry behaviour for subgraph requests
 
         :return: List of rewards info
 
@@ -471,6 +487,7 @@ class OperatorUtils:
             network,
             query=get_reward_added_events_query,
             params={"slasherAddress": slasher.lower()},
+            retry_config=retry_config,
         )
 
         if (

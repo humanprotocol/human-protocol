@@ -35,7 +35,6 @@ export interface IOperatorsFilter extends IPagination {
   roles?: string[];
   minStakedAmount?: number;
   orderBy?: string;
-  retryConfig?: SubgraphRetryConfig;
 }
 
 export interface IReputationNetwork {
@@ -82,7 +81,6 @@ export interface IEscrowsFilter extends IPagination {
   from?: Date;
   to?: Date;
   chainId: ChainId;
-  retryConfig?: SubgraphRetryConfig;
 }
 
 export interface IEscrowConfig {
@@ -106,7 +104,6 @@ export interface IKeyPair {
 export interface IStatisticsFilter extends IPagination {
   from?: Date;
   to?: Date;
-  retryConfig?: SubgraphRetryConfig;
 }
 
 export interface IHMTHoldersParams extends IPagination {
@@ -119,7 +116,6 @@ export interface IPayoutFilter extends IPagination {
   recipient?: string;
   from?: Date;
   to?: Date;
-  retryConfig?: SubgraphRetryConfig;
 }
 
 export interface IKVStore {
@@ -162,7 +158,6 @@ export interface ITransactionsFilter extends IPagination {
   method?: string;
   escrow?: string;
   token?: string;
-  retryConfig?: SubgraphRetryConfig;
 }
 
 export interface IPagination {
@@ -184,7 +179,6 @@ export interface IStatusEventFilter extends IPagination {
   from?: Date;
   to?: Date;
   launcher?: string;
-  retryConfig?: SubgraphRetryConfig;
 }
 
 export interface IWorker {
@@ -198,7 +192,6 @@ export interface IWorkersFilter extends IPagination {
   chainId: ChainId;
   address?: string;
   orderBy?: string;
-  retryConfig?: SubgraphRetryConfig;
 }
 
 export interface IStaker {
@@ -227,7 +220,6 @@ export interface IStakersFilter extends IPagination {
     | 'withdrawnAmount'
     | 'slashedAmount'
     | 'lastDepositTimestamp';
-  retryConfig?: SubgraphRetryConfig;
 }
 export interface ICancellationRefundFilter extends IPagination {
   chainId: ChainId;
@@ -235,7 +227,6 @@ export interface ICancellationRefundFilter extends IPagination {
   receiver?: string;
   from?: Date;
   to?: Date;
-  retryConfig?: SubgraphRetryConfig;
 }
 
 export interface IDailyEscrow {

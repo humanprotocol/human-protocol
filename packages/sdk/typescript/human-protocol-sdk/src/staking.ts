@@ -499,6 +499,7 @@ export class StakingUtils {
    *
    * @param {ChainId} chainId Network in which the staking contract is deployed
    * @param {string} stakerAddress Address of the staker
+   * @param {SubgraphRetryConfig} retryConfig Optional configuration for retrying subgraph requests.
    * @returns {Promise<IStaker>} Staker info from subgraph
    */
   public static async getStaker(
@@ -532,9 +533,14 @@ export class StakingUtils {
   /**
    * Gets all stakers from the subgraph with filters, pagination and ordering.
    *
+   * @param {IStakersFilter} filter Stakers filter with pagination and ordering
+   * @param {SubgraphRetryConfig} retryConfig Optional configuration for retrying subgraph requests.
    * @returns {Promise<IStaker[]>} Array of stakers
    */
-  public static async getStakers(filter: IStakersFilter): Promise<IStaker[]> {
+  public static async getStakers(
+    filter: IStakersFilter,
+    retryConfig?: SubgraphRetryConfig
+  ): Promise<IStaker[]> {
     const first =
       filter.first !== undefined ? Math.min(filter.first, 1000) : 10;
     const skip = filter.skip || 0;
@@ -579,7 +585,7 @@ export class StakingUtils {
         first: first,
         skip: skip,
       },
-      filter.retryConfig
+      retryConfig
     );
     if (!stakers) {
       return [];

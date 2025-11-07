@@ -3,7 +3,8 @@ import logging
 import os
 import time
 import re
-from typing import Tuple, Optional
+from typing import Tuple, Optional, Dict, Any
+from dataclasses import dataclass
 
 import requests
 from validators import url as URL
@@ -32,41 +33,108 @@ except ImportError:
     pass
 
 
-def with_retry(fn, retries=3, delay=5, backoff=2):
-    """Retry a function
+@dataclass
+class SubgraphRetryConfig:
+    """Configuration for subgraph retry logic."""
 
-    Mainly used with handle_transaction to retry on case of failure.
-    Uses exponential backoff.
+    max_retries: int = 3
+    base_delay: int = 1000  # milliseconds
 
-    :param fn: <Partial> to run with retry logic.
-    :param retries: number of times to retry the transaction
-    :param delay: time to wait (exponentially)
-    :param backoff: defines the rate of grow for the exponential wait.
 
-    :return: False if transaction never succeeded,
-        otherwise the return of the function
-
-    :note: If the partial returns a Boolean and it happens to be False,
-        we would not know if the tx succeeded and it will retry.
+def is_indexer_error(error: Exception) -> bool:
     """
+    Check if an error indicates that the indexer is down or not synced.
+    This function specifically checks for "bad indexers" errors from The Graph.
 
-    wait_time = delay
+    :param error: The error to check
+    :return: True if the error indicates indexer issues
+    """
+    if not error:
+        return False
 
-    for i in range(retries):
+    response = getattr(error, "response", None)
+
+    message = ""
+    if response is not None:
         try:
-            result = fn()
-            if result:
-                return result
-        except Exception as e:
-            name = getattr(fn, "__name__", "partial")
-            logger.warning(
-                f"(x{i+1}) {name} exception: {e}. Retrying after {wait_time} sec..."
+            data = response.json()
+        except Exception:
+            data = None
+
+        if isinstance(data, dict):
+            errors = data.get("errors")
+            if isinstance(errors, list) and errors:
+                first_error = errors[0]
+                if isinstance(first_error, dict):
+                    message = str(first_error.get("message", ""))
+
+    if not message:
+        message = getattr(error, "message", "") or str(error) or ""
+
+    return "bad indexers" in message.lower()
+
+
+def get_data_from_subgraph(
+    network: dict,
+    query: str,
+    params: dict = None,
+    retry_config: Optional[SubgraphRetryConfig] = None,
+):
+    """Fetch data from the subgraph with optional retry logic for bad indexer errors.
+
+    :param network: Network configuration dictionary
+    :param query: GraphQL query string
+    :param params: Query parameters
+    :param retry_config: Optional retry configuration for bad indexer errors
+
+    :return: JSON response from the subgraph
+
+    :raise Exception: If the subgraph query fails
+    """
+    if not retry_config:
+        return _fetch_subgraph_data(network, query, params)
+
+    max_retries = retry_config.max_retries
+    base_delay = retry_config.base_delay / 1000
+
+    last_error = None
+
+    for attempt in range(max_retries + 1):
+        try:
+            return _fetch_subgraph_data(network, query, params)
+        except Exception as error:
+            last_error = error
+
+            if not is_indexer_error(error):
+                break
+
+            delay = base_delay * (2**attempt)
+            time.sleep(delay)
+
+    raise last_error
+
+
+def _fetch_subgraph_data(network: dict, query: str, params: dict = None):
+    subgraph_api_key = os.getenv("SUBGRAPH_API_KEY", "")
+    if subgraph_api_key:
+        subgraph_url = network["subgraph_url_api_key"].replace(
+            SUBGRAPH_API_KEY_PLACEHOLDER, subgraph_api_key
+        )
+    else:
+        logger.warning(
+            "Warning: SUBGRAPH_API_KEY is not provided. It might cause issues with the subgraph."
+        )
+        subgraph_url = network["subgraph_url"]
+
+    request = requests.post(subgraph_url, json={"query": query, "variables": params})
+    if request.status_code == 200:
+        return request.json()
+    else:
+        raise Exception(
+            "Subgraph query failed. return code is {}. \n{}".format(
+                request.status_code, query
             )
-
-        time.sleep(wait_time)
-        wait_time *= backoff
-
-    return False
+        )
 
 
 def get_hmt_balance(wallet_addr, token_addr, w3):
@@ -190,39 +258,6 @@ def get_kvstore_interface():
     return get_contract_interface(
         "{}/contracts/KVStore.sol/KVStore.json".format(ARTIFACTS_FOLDER)
     )
-
-
-def get_data_from_subgraph(network: dict, query: str, params: dict = None):
-    """Fetch data from the subgraph.
-
-    :param network: Network configuration dictionary
-    :param query: GraphQL query string
-    :param params: Query parameters
-
-    :return: JSON response from the subgraph
-
-    :raise Exception: If the subgraph query fails
-    """
-    subgraph_api_key = os.getenv("SUBGRAPH_API_KEY", "")
-    if subgraph_api_key:
-        subgraph_url = network["subgraph_url_api_key"].replace(
-            SUBGRAPH_API_KEY_PLACEHOLDER, subgraph_api_key
-        )
-    else:
-        logger.warning(
-            "Warning: SUBGRAPH_API_KEY is not provided. It might cause issues with the subgraph."
-        )
-        subgraph_url = network["subgraph_url"]
-
-    request = requests.post(subgraph_url, json={"query": query, "variables": params})
-    if request.status_code == 200:
-        return request.json()
-    else:
-        raise Exception(
-            "Subgraph query failed. return code is {}. \n{}".format(
-                request.status_code, query
-            )
-        )
 
 
 def handle_error(e, exception_class):
