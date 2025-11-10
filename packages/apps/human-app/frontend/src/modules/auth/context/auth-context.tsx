@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 import { z } from 'zod';
 import { createAuthProvider } from '@/shared/contexts/generic-auth-context';
-import { KycStatus } from '@/modules/worker/profile/types/profile-types';
+import { KycStatus } from '@/modules/worker/profile/types';
 
 const userDataSchema = z.object({
   site_key: z.string().optional().nullable(),

@@ -7,7 +7,7 @@ import {
 import { DarkModeSwitch } from '@/shared/components/ui/dark-mode-switch';
 import type { UserData } from '@/modules/auth/context/auth-context';
 import { routerPaths } from '@/router/router-paths';
-import { KycStatus } from '@/modules/worker/profile/types/profile-types';
+import { KycStatus } from '@/modules/worker/profile/types';
 import { type MenuItem } from '../layout/protected';
 
 export const workerDrawerTopMenuItems = (user: UserData | null): MenuItem[] => {

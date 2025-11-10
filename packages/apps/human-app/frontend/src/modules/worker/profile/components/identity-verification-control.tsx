@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Stack, Typography } from '@mui/material';
 import { Chip } from '@/shared/components/ui/chip';
 import { useWorkerIdentityVerificationStatus } from '../hooks';
-import { KycStatus } from '../types/profile-types';
+import { KycStatus } from '../types';
 import { StartIdvBtn } from './buttons';
 
 const getChipColor = (status: KycStatus) => {
