@@ -1,10 +1,11 @@
 /* eslint-disable camelcase */
 import { z } from 'zod';
 import { createAuthProvider } from '@/shared/contexts/generic-auth-context';
+import { KycStatus } from '@/modules/worker/profile/types/profile-types';
 
 const userDataSchema = z.object({
   site_key: z.string().optional().nullable(),
-  kyc_status: z.string().optional().nullable(),
+  kyc_status: z.enum(KycStatus).optional().nullable(),
   wallet_address: z.string().optional().nullable(),
   status: z.enum(['active', 'pending']),
   email: z.string(),
