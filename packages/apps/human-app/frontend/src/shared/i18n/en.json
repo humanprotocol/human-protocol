@@ -199,6 +199,7 @@
       "profileHeader": "Profile",
       "email": "Email",
       "password": "Password",
+      "wallet": "Wallet",
       "resetPassword": "Reset Password",
       "completeIdentityVerification": "Complete Identity Verification",
       "identityVerificationInProgress": "Identity verification in progress",
@@ -206,7 +207,7 @@
       "identityVerificationStatus": "Identity verification",
       "walletAddressMessage": "This address is the wallet address where you will receive payments for completing tasks.",
       "connectWallet": "Connect Wallet",
-      "walletConnected": "Wallet Connected ",
+      "walletConnected": "Connected",
       "addKYCInfoOnChain": "Add KYC Info On-chain",
       "wrongWalletAddress": "Selected wallet address doesn't match the address assigned to the account.",
       "kycInfoOnChainAdded": "KYC Info On-Chain Added",
@@ -215,6 +216,15 @@
       "notificationsConsent": "I would like to be notified about News and Offers",
       "topNotifications": {
         "completeSteps": "Please set up your profile by completing the steps below."
+      },
+      "idvStatusValues": {
+        "none": "Not Started",
+        "approved": "Completed",
+        "resubmission_requested": "Resubmission Required",
+        "declined": "Failed",
+        "review": "Under Review",
+        "expired": "Expired",
+        "abandoned": "Abandoned"
       }
     },
     "oraclesTable": {
