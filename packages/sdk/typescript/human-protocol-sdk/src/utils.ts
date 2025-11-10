@@ -16,7 +16,7 @@ import {
   WarnSubgraphApiKeyNotProvided,
 } from './error';
 import { NetworkData } from './types';
-import { SubgraphRetryConfig } from './interfaces';
+import { SubgraphOptions } from './interfaces';
 
 /**
  * **Handle and throw the error.*
@@ -119,20 +119,20 @@ const sleep = (ms: number): Promise<void> => {
 
 /**
  * Execute a GraphQL request with automatic retry logic for bad indexer errors.
- * Only retries if config is provided.
+ * Only retries if options is provided.
  */
-export const gqlFetchWithRetry = async <T = any>(
+export const customGqlFetch = async <T = any>(
   url: string,
   query: any,
   variables?: any,
-  config?: SubgraphRetryConfig
+  options?: SubgraphOptions
 ): Promise<T> => {
-  if (!config) {
+  if (!options) {
     return await gqlFetch<T>(url, query, variables);
   }
 
-  const maxRetries = config.maxRetries ?? 3;
-  const baseDelay = config.baseDelay ?? 1000;
+  const maxRetries = options.maxRetries ?? 3;
+  const baseDelay = options.baseDelay ?? 1000;
 
   let lastError: any;
 

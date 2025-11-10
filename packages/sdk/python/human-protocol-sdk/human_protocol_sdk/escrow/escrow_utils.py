@@ -39,7 +39,7 @@ from human_protocol_sdk.filter import (
 )
 from human_protocol_sdk.utils import (
     SubgraphRetryConfig,
-    get_data_from_subgraph,
+    custom_gql_fetch,
 )
 
 from human_protocol_sdk.escrow.escrow_client import EscrowClientError
@@ -260,7 +260,7 @@ class EscrowUtils:
             else:
                 statuses = [filter.status.name]
 
-        escrows_data = get_data_from_subgraph(
+        escrows_data = custom_gql_fetch(
             network,
             query=get_escrows_query(filter),
             params={
@@ -373,7 +373,7 @@ class EscrowUtils:
 
         network = NETWORKS[ChainId(chain_id)]
 
-        escrow_data = get_data_from_subgraph(
+        escrow_data = custom_gql_fetch(
             network,
             query=get_escrow_query(),
             params={
@@ -446,7 +446,7 @@ class EscrowUtils:
 
         status_names = [status.name for status in filter.statuses]
 
-        data = get_data_from_subgraph(
+        data = custom_gql_fetch(
             network,
             get_status_query(filter.date_from, filter.date_to, filter.launcher),
             {
@@ -510,7 +510,7 @@ class EscrowUtils:
         if not network:
             raise EscrowClientError("Unsupported Chain ID")
 
-        data = get_data_from_subgraph(
+        data = custom_gql_fetch(
             network,
             get_payouts_query(filter),
             {
@@ -577,7 +577,7 @@ class EscrowUtils:
         if not network:
             raise EscrowClientError("Unsupported Chain ID")
 
-        data = get_data_from_subgraph(
+        data = custom_gql_fetch(
             network,
             get_cancellation_refunds_query(filter),
             {
@@ -658,7 +658,7 @@ class EscrowUtils:
         if not network:
             raise EscrowClientError("Unsupported Chain ID")
 
-        data = get_data_from_subgraph(
+        data = custom_gql_fetch(
             network,
             get_cancellation_refund_by_escrow_query(),
             {

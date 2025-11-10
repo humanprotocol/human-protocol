@@ -16,9 +16,9 @@ import {
   InternalTransaction,
   ITransaction,
   ITransactionsFilter,
-  SubgraphRetryConfig,
+  SubgraphOptions,
 } from './interfaces';
-import { getSubgraphUrl, getUnixTimestamp, gqlFetchWithRetry } from './utils';
+import { getSubgraphUrl, getUnixTimestamp, customGqlFetch } from './utils';
 
 export class TransactionUtils {
   /**
@@ -54,7 +54,7 @@ export class TransactionUtils {
    *
    * @param {ChainId} chainId The chain ID.
    * @param {string} hash The transaction hash.
-   * @param {SubgraphRetryConfig} retryConfig Optional configuration for retrying subgraph requests.
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
    * @returns {Promise<ITransaction | null>} - Returns the transaction details or null if not found.
    *
    * **Code example**
@@ -68,7 +68,7 @@ export class TransactionUtils {
   public static async getTransaction(
     chainId: ChainId,
     hash: string,
-    retryConfig?: SubgraphRetryConfig
+    options?: SubgraphOptions
   ): Promise<ITransaction | null> {
     if (!ethers.isHexString(hash)) {
       throw ErrorInvalidHashProvided;
@@ -79,7 +79,7 @@ export class TransactionUtils {
       throw ErrorUnsupportedChainID;
     }
 
-    const { transaction } = await gqlFetchWithRetry<{
+    const { transaction } = await customGqlFetch<{
       transaction: TransactionData | null;
     }>(
       getSubgraphUrl(networkData),
@@ -87,7 +87,7 @@ export class TransactionUtils {
       {
         hash: hash.toLowerCase(),
       },
-      retryConfig
+      options
     );
     if (!transaction) return null;
 
@@ -148,7 +148,7 @@ export class TransactionUtils {
    * ```
    *
    * @param {ITransactionsFilter} filter Filter for the transactions.
-   * @param {SubgraphRetryConfig} retryConfig Optional configuration for retrying subgraph requests.
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
    * @returns {Promise<ITransaction[]>} Returns an array with all the transaction details.
    *
    * **Code example**
@@ -169,7 +169,7 @@ export class TransactionUtils {
    */
   public static async getTransactions(
     filter: ITransactionsFilter,
-    retryConfig?: SubgraphRetryConfig
+    options?: SubgraphOptions
   ): Promise<ITransaction[]> {
     if (
       (!!filter.startDate || !!filter.endDate) &&
@@ -188,7 +188,7 @@ export class TransactionUtils {
       throw ErrorUnsupportedChainID;
     }
 
-    const { transactions } = await gqlFetchWithRetry<{
+    const { transactions } = await customGqlFetch<{
       transactions: TransactionData[];
     }>(
       getSubgraphUrl(networkData),
@@ -209,7 +209,7 @@ export class TransactionUtils {
         first: first,
         skip: skip,
       },
-      retryConfig
+      options
     );
 
     if (!transactions) {

@@ -4,8 +4,8 @@ import { ChainId, OrderDirection } from './enums';
 import { ErrorInvalidAddress, ErrorUnsupportedChainID } from './error';
 import { WorkerData } from './graphql';
 import { GET_WORKER_QUERY, GET_WORKERS_QUERY } from './graphql/queries/worker';
-import { IWorker, IWorkersFilter, SubgraphRetryConfig } from './interfaces';
-import { getSubgraphUrl, gqlFetchWithRetry } from './utils';
+import { IWorker, IWorkersFilter, SubgraphOptions } from './interfaces';
+import { getSubgraphUrl, customGqlFetch } from './utils';
 
 export class WorkerUtils {
   /**
@@ -13,7 +13,7 @@ export class WorkerUtils {
    *
    * @param {ChainId} chainId The chain ID.
    * @param {string} address The worker address.
-   * @param {SubgraphRetryConfig} retryConfig Optional configuration for retrying subgraph requests.
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
    * @returns {Promise<IWorker | null>} - Returns the worker details or null if not found.
    *
    * **Code example**
@@ -27,7 +27,7 @@ export class WorkerUtils {
   public static async getWorker(
     chainId: ChainId,
     address: string,
-    retryConfig?: SubgraphRetryConfig
+    options?: SubgraphOptions
   ): Promise<IWorker | null> {
     const networkData = NETWORKS[chainId];
 
@@ -38,7 +38,7 @@ export class WorkerUtils {
       throw ErrorInvalidAddress;
     }
 
-    const { worker } = await gqlFetchWithRetry<{
+    const { worker } = await customGqlFetch<{
       worker: WorkerData | null;
     }>(
       getSubgraphUrl(networkData),
@@ -46,7 +46,7 @@ export class WorkerUtils {
       {
         address: address.toLowerCase(),
       },
-      retryConfig
+      options
     );
 
     if (!worker) return null;
@@ -80,7 +80,7 @@ export class WorkerUtils {
    * ```
    *
    * @param {IWorkersFilter} filter Filter for the workers.
-   * @param {SubgraphRetryConfig} retryConfig Optional configuration for retrying subgraph requests.
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
    * @returns {Promise<IWorker[]>} Returns an array with all the worker details.
    *
    * **Code example**
@@ -98,7 +98,7 @@ export class WorkerUtils {
    */
   public static async getWorkers(
     filter: IWorkersFilter,
-    retryConfig?: SubgraphRetryConfig
+    options?: SubgraphOptions
   ): Promise<IWorker[]> {
     const first =
       filter.first !== undefined ? Math.min(filter.first, 1000) : 10;
@@ -114,7 +114,7 @@ export class WorkerUtils {
       throw ErrorInvalidAddress;
     }
 
-    const { workers } = await gqlFetchWithRetry<{
+    const { workers } = await customGqlFetch<{
       workers: WorkerData[];
     }>(
       getSubgraphUrl(networkData),
@@ -126,7 +126,7 @@ export class WorkerUtils {
         orderBy: orderBy,
         orderDirection: orderDirection,
       },
-      retryConfig
+      options
     );
 
     if (!workers) {

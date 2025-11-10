@@ -26,11 +26,11 @@ import {
   IStaker,
   IStakersFilter,
   StakerInfo,
-  SubgraphRetryConfig,
+  SubgraphOptions,
 } from './interfaces';
 import { StakerData } from './graphql';
 import { NetworkData } from './types';
-import { getSubgraphUrl, gqlFetchWithRetry, throwError } from './utils';
+import { getSubgraphUrl, customGqlFetch, throwError } from './utils';
 import {
   GET_STAKER_BY_ADDRESS_QUERY,
   GET_STAKERS_QUERY,
@@ -499,13 +499,13 @@ export class StakingUtils {
    *
    * @param {ChainId} chainId Network in which the staking contract is deployed
    * @param {string} stakerAddress Address of the staker
-   * @param {SubgraphRetryConfig} retryConfig Optional configuration for retrying subgraph requests.
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
    * @returns {Promise<IStaker>} Staker info from subgraph
    */
   public static async getStaker(
     chainId: ChainId,
     stakerAddress: string,
-    retryConfig?: SubgraphRetryConfig
+    options?: SubgraphOptions
   ): Promise<IStaker> {
     if (!ethers.isAddress(stakerAddress)) {
       throw ErrorInvalidStakerAddressProvided;
@@ -516,11 +516,11 @@ export class StakingUtils {
       throw ErrorUnsupportedChainID;
     }
 
-    const { staker } = await gqlFetchWithRetry<{ staker: StakerData }>(
+    const { staker } = await customGqlFetch<{ staker: StakerData }>(
       getSubgraphUrl(networkData),
       GET_STAKER_BY_ADDRESS_QUERY,
       { id: stakerAddress.toLowerCase() },
-      retryConfig
+      options
     );
 
     if (!staker) {
@@ -534,12 +534,12 @@ export class StakingUtils {
    * Gets all stakers from the subgraph with filters, pagination and ordering.
    *
    * @param {IStakersFilter} filter Stakers filter with pagination and ordering
-   * @param {SubgraphRetryConfig} retryConfig Optional configuration for retrying subgraph requests.
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
    * @returns {Promise<IStaker[]>} Array of stakers
    */
   public static async getStakers(
     filter: IStakersFilter,
-    retryConfig?: SubgraphRetryConfig
+    options?: SubgraphOptions
   ): Promise<IStaker[]> {
     const first =
       filter.first !== undefined ? Math.min(filter.first, 1000) : 10;
@@ -552,7 +552,7 @@ export class StakingUtils {
       throw ErrorUnsupportedChainID;
     }
 
-    const { stakers } = await gqlFetchWithRetry<{ stakers: StakerData[] }>(
+    const { stakers } = await customGqlFetch<{ stakers: StakerData[] }>(
       getSubgraphUrl(networkData),
       GET_STAKERS_QUERY(filter),
       {
@@ -585,7 +585,7 @@ export class StakingUtils {
         first: first,
         skip: skip,
       },
-      retryConfig
+      options
     );
     if (!stakers) {
       return [];

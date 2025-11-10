@@ -4,7 +4,7 @@ from validators import ValidationError
 
 from human_protocol_sdk.utils import (
     SubgraphRetryConfig,
-    get_data_from_subgraph,
+    custom_gql_fetch,
     is_indexer_error,
     validate_url,
 )
@@ -60,7 +60,7 @@ class TestGetDataFromSubgraph(unittest.TestCase):
             "human_protocol_sdk.utils._fetch_subgraph_data",
             return_value=expected,
         ) as mock_fetch:
-            result = get_data_from_subgraph(self.network, self.query, self.variables)
+            result = custom_gql_fetch(self.network, self.query, self.variables)
 
         self.assertEqual(result, expected)
         mock_fetch.assert_called_once_with(self.network, self.query, self.variables)
@@ -73,7 +73,7 @@ class TestGetDataFromSubgraph(unittest.TestCase):
             "human_protocol_sdk.utils._fetch_subgraph_data",
             side_effect=[error, {"data": {"ok": True}}],
         ) as mock_fetch, patch("human_protocol_sdk.utils.time.sleep") as mock_sleep:
-            result = get_data_from_subgraph(
+            result = custom_gql_fetch(
                 self.network, self.query, self.variables, retry_config=retry_config
             )
 
@@ -88,7 +88,7 @@ class TestGetDataFromSubgraph(unittest.TestCase):
             side_effect=Exception("network failure"),
         ) as mock_fetch, patch("human_protocol_sdk.utils.time.sleep") as mock_sleep:
             with self.assertRaises(Exception) as ctx:
-                get_data_from_subgraph(
+                custom_gql_fetch(
                     self.network, self.query, self.variables, retry_config=retry_config
                 )
 
@@ -108,7 +108,7 @@ class TestGetDataFromSubgraph(unittest.TestCase):
             side_effect=errors,
         ) as mock_fetch, patch("human_protocol_sdk.utils.time.sleep"):
             with self.assertRaises(Exception) as ctx:
-                get_data_from_subgraph(
+                custom_gql_fetch(
                     self.network, self.query, self.variables, retry_config=retry_config
                 )
 

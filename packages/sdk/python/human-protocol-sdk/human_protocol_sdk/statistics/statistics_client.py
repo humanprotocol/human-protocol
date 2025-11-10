@@ -22,7 +22,7 @@ from typing import List, Optional
 
 from human_protocol_sdk.constants import ChainId, NETWORKS
 
-from human_protocol_sdk.utils import SubgraphRetryConfig, get_data_from_subgraph
+from human_protocol_sdk.utils import SubgraphRetryConfig, custom_gql_fetch
 from human_protocol_sdk.filter import StatisticsFilter
 
 LOG = logging.getLogger("human_protocol_sdk.statistics")
@@ -326,14 +326,14 @@ class StatisticsClient:
             get_escrow_statistics_query,
         )
 
-        escrow_statistics_data = get_data_from_subgraph(
+        escrow_statistics_data = custom_gql_fetch(
             self.network,
             query=get_escrow_statistics_query,
             retry_config=retry_config,
         )
         escrow_statistics = escrow_statistics_data["data"]["escrowStatistics"]
 
-        event_day_datas_data = get_data_from_subgraph(
+        event_day_datas_data = custom_gql_fetch(
             self.network,
             query=get_event_day_data_query(filter),
             params={
@@ -407,7 +407,7 @@ class StatisticsClient:
             get_event_day_data_query,
         )
 
-        event_day_datas_data = get_data_from_subgraph(
+        event_day_datas_data = custom_gql_fetch(
             self.network,
             query=get_event_day_data_query(filter),
             params={
@@ -469,7 +469,7 @@ class StatisticsClient:
             get_event_day_data_query,
         )
 
-        event_day_datas_data = get_data_from_subgraph(
+        event_day_datas_data = custom_gql_fetch(
             self.network,
             query=get_event_day_data_query(filter),
             params={
@@ -528,7 +528,7 @@ class StatisticsClient:
             get_hmtoken_statistics_query,
         )
 
-        hmtoken_statistics_data = get_data_from_subgraph(
+        hmtoken_statistics_data = custom_gql_fetch(
             self.network,
             query=get_hmtoken_statistics_query,
             retry_config=retry_config,
@@ -577,7 +577,7 @@ class StatisticsClient:
         """
         from human_protocol_sdk.gql.hmtoken import get_holders_query
 
-        holders_data = get_data_from_subgraph(
+        holders_data = custom_gql_fetch(
             self.network,
             query=get_holders_query(address=param.address),
             params={
@@ -632,7 +632,7 @@ class StatisticsClient:
             get_event_day_data_query,
         )
 
-        event_day_datas_data = get_data_from_subgraph(
+        event_day_datas_data = custom_gql_fetch(
             self.network,
             query=get_event_day_data_query(filter),
             params={

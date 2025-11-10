@@ -13,7 +13,7 @@ from web3.providers.rpc import HTTPProvider
 class TestKVStoreUtils(unittest.TestCase):
     def test_get_kvstore_data(self):
         with patch(
-            "human_protocol_sdk.kvstore.kvstore_utils.get_data_from_subgraph"
+            "human_protocol_sdk.kvstore.kvstore_utils.custom_gql_fetch"
         ) as mock_function:
             mock_kvstore_data = [
                 {
@@ -59,7 +59,7 @@ class TestKVStoreUtils(unittest.TestCase):
 
     def test_get_kvstore_data_empty_data(self):
         with patch(
-            "human_protocol_sdk.kvstore.kvstore_utils.get_data_from_subgraph"
+            "human_protocol_sdk.kvstore.kvstore_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.return_value = {
                 "data": {
@@ -93,7 +93,7 @@ class TestKVStoreUtils(unittest.TestCase):
             KVStoreUtils.get_kvstore_data(ChainId.LOCALHOST, "invalid_address")
         self.assertEqual("Invalid KVStore address: invalid_address", str(cm.exception))
 
-    @patch("human_protocol_sdk.kvstore.kvstore_utils.get_data_from_subgraph")
+    @patch("human_protocol_sdk.kvstore.kvstore_utils.custom_gql_fetch")
     def test_get(self, mock_function):
         address = Web3.to_checksum_address("0x1234567890123456789012345678901234567890")
         key = "key1"
@@ -124,7 +124,7 @@ class TestKVStoreUtils(unittest.TestCase):
         )
         self.assertEqual(result, "1")
 
-    @patch("human_protocol_sdk.kvstore.kvstore_utils.get_data_from_subgraph")
+    @patch("human_protocol_sdk.kvstore.kvstore_utils.custom_gql_fetch")
     def test_get_empty_key(self, mock_function):
         address = Web3.to_checksum_address("0x1234567890123456789012345678901234567890")
         key = ""
@@ -132,7 +132,7 @@ class TestKVStoreUtils(unittest.TestCase):
             KVStoreUtils.get(ChainId.LOCALHOST, address, key)
         self.assertEqual("Key cannot be empty", str(cm.exception))
 
-    @patch("human_protocol_sdk.kvstore.kvstore_utils.get_data_from_subgraph")
+    @patch("human_protocol_sdk.kvstore.kvstore_utils.custom_gql_fetch")
     def test_get_invalid_address(self, mock_function):
         address = "invalid_address"
         key = "key"
@@ -140,7 +140,7 @@ class TestKVStoreUtils(unittest.TestCase):
             KVStoreUtils.get(ChainId.LOCALHOST, address, key)
         self.assertEqual(f"Invalid address: {address}", str(cm.exception))
 
-    @patch("human_protocol_sdk.kvstore.kvstore_utils.get_data_from_subgraph")
+    @patch("human_protocol_sdk.kvstore.kvstore_utils.custom_gql_fetch")
     def test_get_empty_value(self, mock_function):
         mock_function.return_value = {"data": {"kvstores": []}}
 
@@ -160,7 +160,7 @@ class TestKVStoreUtils(unittest.TestCase):
             retry_config=None,
         )
 
-    @patch("human_protocol_sdk.kvstore.kvstore_utils.get_data_from_subgraph")
+    @patch("human_protocol_sdk.kvstore.kvstore_utils.custom_gql_fetch")
     def test_get_without_account(self, mock_function):
         mock_function.return_value = {
             "data": {
@@ -190,7 +190,7 @@ class TestKVStoreUtils(unittest.TestCase):
         )
         self.assertEqual(result, "mock_value")
 
-    @patch("human_protocol_sdk.kvstore.kvstore_utils.get_data_from_subgraph")
+    @patch("human_protocol_sdk.kvstore.kvstore_utils.custom_gql_fetch")
     def test_get_file_url_and_verify_hash(self, mock_function):
         mock_function.side_effect = [
             {"data": {"kvstores": [{"value": "https://example.com"}]}},
@@ -209,7 +209,7 @@ class TestKVStoreUtils(unittest.TestCase):
 
             self.assertEqual(result, "https://example.com")
 
-    @patch("human_protocol_sdk.kvstore.kvstore_utils.get_data_from_subgraph")
+    @patch("human_protocol_sdk.kvstore.kvstore_utils.custom_gql_fetch")
     def test_get_file_url_and_verify_hash_with_key(self, mock_function):
         mock_function.side_effect = [
             {"data": {"kvstores": [{"value": "https://example.com"}]}},
@@ -228,14 +228,14 @@ class TestKVStoreUtils(unittest.TestCase):
 
             self.assertEqual(result, "https://example.com")
 
-    @patch("human_protocol_sdk.kvstore.kvstore_utils.get_data_from_subgraph")
+    @patch("human_protocol_sdk.kvstore.kvstore_utils.custom_gql_fetch")
     def test_get_file_url_and_verify_hash_invalid_address(self, mock_function):
         address = "invalid_address"
         with self.assertRaises(KVStoreClientError) as cm:
             KVStoreUtils.get_file_url_and_verify_hash(ChainId.LOCALHOST, address)
         self.assertEqual(f"Invalid address: {address}", str(cm.exception))
 
-    @patch("human_protocol_sdk.kvstore.kvstore_utils.get_data_from_subgraph")
+    @patch("human_protocol_sdk.kvstore.kvstore_utils.custom_gql_fetch")
     def test_get_file_url_and_verify_hash_empty_value(self, mock_function):
         mock_function.return_value = {"data": {"kvstores": []}}
 
@@ -248,7 +248,7 @@ class TestKVStoreUtils(unittest.TestCase):
             f"Key '{key}' not found for address {address}", str(cm.exception)
         )
 
-    @patch("human_protocol_sdk.kvstore.kvstore_utils.get_data_from_subgraph")
+    @patch("human_protocol_sdk.kvstore.kvstore_utils.custom_gql_fetch")
     def test_get_file_url_and_verify_hash_without_account(self, mock_function):
         mock_function.side_effect = [
             {"data": {"kvstores": [{"value": "https://example.com"}]}},
@@ -267,7 +267,7 @@ class TestKVStoreUtils(unittest.TestCase):
 
             self.assertEqual(result, "https://example.com")
 
-    @patch("human_protocol_sdk.kvstore.kvstore_utils.get_data_from_subgraph")
+    @patch("human_protocol_sdk.kvstore.kvstore_utils.custom_gql_fetch")
     def test_get_file_url_and_verify_hash_invalid_hash(self, mock_function):
         mock_function.side_effect = [
             {"data": {"kvstores": [{"value": "https://example.com"}]}},
@@ -284,7 +284,7 @@ class TestKVStoreUtils(unittest.TestCase):
                 KVStoreUtils.get_file_url_and_verify_hash(ChainId.LOCALHOST, address)
             self.assertEqual("Invalid hash", str(cm.exception))
 
-    @patch("human_protocol_sdk.kvstore.kvstore_utils.get_data_from_subgraph")
+    @patch("human_protocol_sdk.kvstore.kvstore_utils.custom_gql_fetch")
     def test_get_public_key(self, mock_function):
         mock_function.side_effect = [
             {"data": {"kvstores": [{"value": "PUBLIC_KEY_URL"}]}},
@@ -307,7 +307,7 @@ class TestKVStoreUtils(unittest.TestCase):
             KVStoreUtils.get_public_key(ChainId.LOCALHOST, address)
         self.assertEqual(f"Invalid address: {address}", str(cm.exception))
 
-    @patch("human_protocol_sdk.kvstore.kvstore_utils.get_data_from_subgraph")
+    @patch("human_protocol_sdk.kvstore.kvstore_utils.custom_gql_fetch")
     def test_get_public_key_empty_value(self, mock_function):
         mock_function.return_value = {"data": {"kvstores": []}}
 
@@ -321,7 +321,7 @@ class TestKVStoreUtils(unittest.TestCase):
             f"Key '{key}' not found for address {address}", str(cm.exception)
         )
 
-    @patch("human_protocol_sdk.kvstore.kvstore_utils.get_data_from_subgraph")
+    @patch("human_protocol_sdk.kvstore.kvstore_utils.custom_gql_fetch")
     def test_get_public_key_invalid_hash(self, mock_function):
         mock_function.side_effect = [
             {"data": {"kvstores": [{"value": "PUBLIC_KEY_URL"}]}},
@@ -338,7 +338,7 @@ class TestKVStoreUtils(unittest.TestCase):
                 KVStoreUtils.get_public_key(ChainId.LOCALHOST, address)
             self.assertEqual("Invalid hash", str(cm.exception))
 
-    @patch("human_protocol_sdk.kvstore.kvstore_utils.get_data_from_subgraph")
+    @patch("human_protocol_sdk.kvstore.kvstore_utils.custom_gql_fetch")
     def test_get_public_key_without_account(self, mock_function):
         mock_function.side_effect = [
             {"data": {"kvstores": [{"value": "PUBLIC_KEY_URL"}]}},

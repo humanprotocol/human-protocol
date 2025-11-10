@@ -25,7 +25,7 @@ from typing import List, Optional, Union
 
 from human_protocol_sdk.constants import NETWORKS, ChainId, OrderDirection
 from human_protocol_sdk.gql.reward import get_reward_added_events_query
-from human_protocol_sdk.utils import SubgraphRetryConfig, get_data_from_subgraph
+from human_protocol_sdk.utils import SubgraphRetryConfig, custom_gql_fetch
 from web3 import Web3
 
 LOG = logging.getLogger("human_protocol_sdk.operator")
@@ -230,7 +230,7 @@ class OperatorUtils:
         if not network.get("subgraph_url"):
             return []
 
-        operators_data = get_data_from_subgraph(
+        operators_data = custom_gql_fetch(
             network,
             query=get_operators_query(filter),
             params={
@@ -321,7 +321,7 @@ class OperatorUtils:
 
         network = NETWORKS[chain_id]
 
-        operator_data = get_data_from_subgraph(
+        operator_data = custom_gql_fetch(
             network,
             query=get_operator_query,
             params={"address": operator_address.lower()},
@@ -401,7 +401,7 @@ class OperatorUtils:
 
         network = NETWORKS[chain_id]
 
-        reputation_network_data = get_data_from_subgraph(
+        reputation_network_data = custom_gql_fetch(
             network,
             query=get_reputation_network_query(role),
             params={"address": address.lower(), "role": role},
@@ -483,7 +483,7 @@ class OperatorUtils:
 
         network = NETWORKS[chain_id]
 
-        reward_added_events_data = get_data_from_subgraph(
+        reward_added_events_data = custom_gql_fetch(
             network,
             query=get_reward_added_events_query,
             params={"slasherAddress": slasher.lower()},

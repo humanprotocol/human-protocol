@@ -74,7 +74,7 @@ def is_indexer_error(error: Exception) -> bool:
     return "bad indexers" in message.lower()
 
 
-def get_data_from_subgraph(
+def custom_gql_fetch(
     network: dict,
     query: str,
     params: dict = None,

@@ -64,13 +64,13 @@ import {
   ICancellationRefundFilter,
   IPayout,
   IEscrowWithdraw,
-  SubgraphRetryConfig,
+  SubgraphOptions,
 } from './interfaces';
 import { EscrowStatus, NetworkData, TransactionLikeWithNonce } from './types';
 import {
   getSubgraphUrl,
   getUnixTimestamp,
-  gqlFetchWithRetry,
+  customGqlFetch,
   isValidJson,
   isValidUrl,
   throwError,
@@ -1942,7 +1942,7 @@ export class EscrowUtils {
    *
    *
    * @param {IEscrowsFilter} filter Filter parameters.
-   * @param {SubgraphRetryConfig} retryConfig Optional configuration for retrying subgraph requests.
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
    * @returns {IEscrow[]} List of escrows that match the filter.
    *
    * **Code example**
@@ -1961,7 +1961,7 @@ export class EscrowUtils {
    */
   public static async getEscrows(
     filter: IEscrowsFilter,
-    retryConfig?: SubgraphRetryConfig
+    options?: SubgraphOptions
   ): Promise<IEscrow[]> {
     if (filter.launcher && !ethers.isAddress(filter.launcher)) {
       throw ErrorInvalidAddress;
@@ -1995,7 +1995,7 @@ export class EscrowUtils {
       statuses = Array.isArray(filter.status) ? filter.status : [filter.status];
       statuses = statuses.map((status) => EscrowStatus[status]);
     }
-    const { escrows } = await gqlFetchWithRetry<{ escrows: EscrowData[] }>(
+    const { escrows } = await customGqlFetch<{ escrows: EscrowData[] }>(
       getSubgraphUrl(networkData),
       GET_ESCROWS_QUERY(filter),
       {
@@ -2011,7 +2011,7 @@ export class EscrowUtils {
         first: first,
         skip: skip,
       },
-      retryConfig
+      options
     );
     return (escrows || []).map((e) => mapEscrow(e, networkData.chainId));
   }
@@ -2069,7 +2069,7 @@ export class EscrowUtils {
    *
    * @param {ChainId} chainId Network in which the escrow has been deployed
    * @param {string} escrowAddress Address of the escrow
-   * @param {SubgraphRetryConfig} retryConfig Optional configuration for retrying subgraph requests.
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
    * @returns {Promise<IEscrow | null>} - Escrow data or null if not found.
    *
    * **Code example**
@@ -2083,7 +2083,7 @@ export class EscrowUtils {
   public static async getEscrow(
     chainId: ChainId,
     escrowAddress: string,
-    retryConfig?: SubgraphRetryConfig
+    options?: SubgraphOptions
   ): Promise<IEscrow | null> {
     const networkData = NETWORKS[chainId];
 
@@ -2095,11 +2095,11 @@ export class EscrowUtils {
       throw ErrorInvalidAddress;
     }
 
-    const { escrow } = await gqlFetchWithRetry<{ escrow: EscrowData | null }>(
+    const { escrow } = await customGqlFetch<{ escrow: EscrowData | null }>(
       getSubgraphUrl(networkData),
       GET_ESCROW_BY_ADDRESS_QUERY(),
       { escrowAddress: escrowAddress.toLowerCase() },
-      retryConfig
+      options
     );
     if (!escrow) return null;
 
@@ -2142,7 +2142,7 @@ export class EscrowUtils {
    * ```
    *
    * @param {IStatusEventFilter} filter Filter parameters.
-   * @param {SubgraphRetryConfig} retryConfig Optional configuration for retrying subgraph requests.
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
    * @returns {Promise<StatusEvent[]>} - Array of status events with their corresponding statuses.
    *
    * **Code example**
@@ -2165,7 +2165,7 @@ export class EscrowUtils {
    */
   public static async getStatusEvents(
     filter: IStatusEventFilter,
-    retryConfig?: SubgraphRetryConfig
+    options?: SubgraphOptions
   ): Promise<IStatusEvent[]> {
     const {
       chainId,
@@ -2199,7 +2199,7 @@ export class EscrowUtils {
 
     const statusNames = effectiveStatuses.map((status) => EscrowStatus[status]);
 
-    const data = await gqlFetchWithRetry<{
+    const data = await customGqlFetch<{
       escrowStatusEvents: StatusEvent[];
     }>(
       getSubgraphUrl(networkData),
@@ -2213,7 +2213,7 @@ export class EscrowUtils {
         first: Math.min(first, 1000),
         skip,
       },
-      retryConfig
+      options
     );
 
     if (!data || !data['escrowStatusEvents']) {
@@ -2237,7 +2237,7 @@ export class EscrowUtils {
    * Fetch payouts from the subgraph.
    *
    * @param {IPayoutFilter} filter Filter parameters.
-   * @param {SubgraphRetryConfig} retryConfig Optional configuration for retrying subgraph requests.
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
    * @returns {Promise<IPayout[]>} List of payouts matching the filters.
    *
    * **Code example**
@@ -2257,7 +2257,7 @@ export class EscrowUtils {
    */
   public static async getPayouts(
     filter: IPayoutFilter,
-    retryConfig?: SubgraphRetryConfig
+    options?: SubgraphOptions
   ): Promise<IPayout[]> {
     const networkData = NETWORKS[filter.chainId];
     if (!networkData) {
@@ -2275,7 +2275,7 @@ export class EscrowUtils {
     const skip = filter.skip || 0;
     const orderDirection = filter.orderDirection || OrderDirection.DESC;
 
-    const { payouts } = await gqlFetchWithRetry<{ payouts: PayoutData[] }>(
+    const { payouts } = await customGqlFetch<{ payouts: PayoutData[] }>(
       getSubgraphUrl(networkData),
       GET_PAYOUTS_QUERY(filter),
       {
@@ -2287,7 +2287,7 @@ export class EscrowUtils {
         skip,
         orderDirection,
       },
-      retryConfig
+      options
     );
     if (!payouts) {
       return [];
@@ -2336,7 +2336,7 @@ export class EscrowUtils {
    *
    *
    * @param {Object} filter Filter parameters.
-   * @param {SubgraphRetryConfig} retryConfig Optional configuration for retrying subgraph requests.
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
    * @returns {Promise<ICancellationRefund[]>} List of cancellation refunds matching the filters.
    *
    * **Code example**
@@ -2353,7 +2353,7 @@ export class EscrowUtils {
    */
   public static async getCancellationRefunds(
     filter: ICancellationRefundFilter,
-    retryConfig?: SubgraphRetryConfig
+    options?: SubgraphOptions
   ): Promise<ICancellationRefund[]> {
     const networkData = NETWORKS[filter.chainId];
     if (!networkData) throw ErrorUnsupportedChainID;
@@ -2369,7 +2369,7 @@ export class EscrowUtils {
     const skip = filter.skip || 0;
     const orderDirection = filter.orderDirection || OrderDirection.DESC;
 
-    const { cancellationRefundEvents } = await gqlFetchWithRetry<{
+    const { cancellationRefundEvents } = await customGqlFetch<{
       cancellationRefundEvents: CancellationRefundData[];
     }>(
       getSubgraphUrl(networkData),
@@ -2383,7 +2383,7 @@ export class EscrowUtils {
         skip,
         orderDirection,
       },
-      retryConfig
+      options
     );
 
     if (!cancellationRefundEvents || cancellationRefundEvents.length === 0) {
@@ -2436,7 +2436,7 @@ export class EscrowUtils {
    *
    * @param {ChainId} chainId Network in which the escrow has been deployed
    * @param {string} escrowAddress Address of the escrow
-   * @param {SubgraphRetryConfig} retryConfig Optional configuration for retrying subgraph requests.
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
    * @returns {Promise<ICancellationRefund>} Cancellation refund data
    *
    * **Code example**
@@ -2450,7 +2450,7 @@ export class EscrowUtils {
   public static async getCancellationRefund(
     chainId: ChainId,
     escrowAddress: string,
-    retryConfig?: SubgraphRetryConfig
+    options?: SubgraphOptions
   ): Promise<ICancellationRefund | null> {
     const networkData = NETWORKS[chainId];
     if (!networkData) throw ErrorUnsupportedChainID;
@@ -2459,13 +2459,13 @@ export class EscrowUtils {
       throw ErrorInvalidEscrowAddressProvided;
     }
 
-    const { cancellationRefundEvents } = await gqlFetchWithRetry<{
+    const { cancellationRefundEvents } = await customGqlFetch<{
       cancellationRefundEvents: CancellationRefundData[];
     }>(
       getSubgraphUrl(networkData),
       GET_CANCELLATION_REFUND_BY_ADDRESS_QUERY(),
       { escrowAddress: escrowAddress.toLowerCase() },
-      retryConfig
+      options
     );
 
     if (!cancellationRefundEvents || cancellationRefundEvents.length === 0) {

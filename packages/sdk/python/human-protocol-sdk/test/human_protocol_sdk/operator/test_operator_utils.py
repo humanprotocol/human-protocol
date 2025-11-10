@@ -18,7 +18,7 @@ class TestOperatorUtils(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -97,7 +97,7 @@ class TestOperatorUtils(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -174,7 +174,7 @@ class TestOperatorUtils(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -251,7 +251,7 @@ class TestOperatorUtils(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.return_value = [
                 {
@@ -285,7 +285,7 @@ class TestOperatorUtils(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -356,7 +356,7 @@ class TestOperatorUtils(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -425,7 +425,7 @@ class TestOperatorUtils(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -492,7 +492,7 @@ class TestOperatorUtils(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.return_value = [{"data": {"operator": None}}]
 
@@ -517,7 +517,7 @@ class TestOperatorUtils(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -570,7 +570,7 @@ class TestOperatorUtils(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -623,7 +623,7 @@ class TestOperatorUtils(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -672,7 +672,7 @@ class TestOperatorUtils(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.return_value = [{"data": {"reputationNetwork": None}}]
 
@@ -694,7 +694,7 @@ class TestOperatorUtils(unittest.TestCase):
 
         mock_function = MagicMock()
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.return_value = {
                 "data": {
@@ -730,7 +730,7 @@ class TestOperatorUtils(unittest.TestCase):
 
         mock_function = MagicMock()
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.return_value = {"data": {"rewardAddedEvents": None}}
             rewards_info = OperatorUtils.get_rewards_info(ChainId.POLYGON, slasher)

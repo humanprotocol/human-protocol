@@ -10,7 +10,7 @@ from human_protocol_sdk.gql.worker import get_worker_query, get_workers_query
 class TestWorkerUtils(unittest.TestCase):
     def test_get_workers(self):
         with patch(
-            "human_protocol_sdk.worker.worker_utils.get_data_from_subgraph"
+            "human_protocol_sdk.worker.worker_utils.custom_gql_fetch"
         ) as mock_function:
             mock_worker_1 = {
                 "id": "worker1",
@@ -55,7 +55,7 @@ class TestWorkerUtils(unittest.TestCase):
 
     def test_get_workers_empty_response(self):
         with patch(
-            "human_protocol_sdk.worker.worker_utils.get_data_from_subgraph"
+            "human_protocol_sdk.worker.worker_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.return_value = {"data": {"workers": []}}
 
@@ -88,7 +88,7 @@ class TestWorkerUtils(unittest.TestCase):
 
     def test_get_worker(self):
         with patch(
-            "human_protocol_sdk.worker.worker_utils.get_data_from_subgraph"
+            "human_protocol_sdk.worker.worker_utils.custom_gql_fetch"
         ) as mock_function:
             mock_worker = {
                 "id": "worker1",
@@ -118,7 +118,7 @@ class TestWorkerUtils(unittest.TestCase):
 
     def test_get_worker_empty_data(self):
         with patch(
-            "human_protocol_sdk.worker.worker_utils.get_data_from_subgraph"
+            "human_protocol_sdk.worker.worker_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.return_value = {"data": {"worker": None}}
 

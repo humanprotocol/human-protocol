@@ -33,7 +33,7 @@ class TestStatisticsClient(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.statistics.statistics_client.get_data_from_subgraph"
+            "human_protocol_sdk.statistics.statistics_client.custom_gql_fetch"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -103,7 +103,7 @@ class TestStatisticsClient(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.statistics.statistics_client.get_data_from_subgraph"
+            "human_protocol_sdk.statistics.statistics_client.custom_gql_fetch"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -147,7 +147,7 @@ class TestStatisticsClient(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.statistics.statistics_client.get_data_from_subgraph"
+            "human_protocol_sdk.statistics.statistics_client.custom_gql_fetch"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -196,7 +196,7 @@ class TestStatisticsClient(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.statistics.statistics_client.get_data_from_subgraph"
+            "human_protocol_sdk.statistics.statistics_client.custom_gql_fetch"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -230,7 +230,7 @@ class TestStatisticsClient(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.statistics.statistics_client.get_data_from_subgraph"
+            "human_protocol_sdk.statistics.statistics_client.custom_gql_fetch"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -272,7 +272,7 @@ class TestStatisticsClient(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.statistics.statistics_client.get_data_from_subgraph"
+            "human_protocol_sdk.statistics.statistics_client.custom_gql_fetch"
         ) as mock_function:
             mock_function.side_effect = [
                 {

@@ -30,7 +30,7 @@ Module
 from typing import List, Optional
 from human_protocol_sdk.constants import NETWORKS, ChainId
 from human_protocol_sdk.filter import StakersFilter
-from human_protocol_sdk.utils import SubgraphRetryConfig, get_data_from_subgraph
+from human_protocol_sdk.utils import SubgraphRetryConfig, custom_gql_fetch
 from human_protocol_sdk.gql.staking import get_staker_query, get_stakers_query
 
 
@@ -71,7 +71,7 @@ class StakingUtils:
         if not network:
             raise StakingUtilsError("Unsupported Chain ID")
 
-        data = get_data_from_subgraph(
+        data = custom_gql_fetch(
             network,
             query=get_staker_query(),
             params={"id": address.lower()},
@@ -106,7 +106,7 @@ class StakingUtils:
         if not network_data:
             raise StakingUtilsError("Unsupported Chain ID")
 
-        data = get_data_from_subgraph(
+        data = custom_gql_fetch(
             network_data,
             query=get_stakers_query(filter),
             params={

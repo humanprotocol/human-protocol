@@ -19,13 +19,13 @@ import {
   IPaymentStatistics,
   IStatisticsFilter,
   IWorkerStatistics,
-  SubgraphRetryConfig,
+  SubgraphOptions,
 } from './interfaces';
 import { NetworkData } from './types';
 import {
   getSubgraphUrl,
   getUnixTimestamp,
-  gqlFetchWithRetry,
+  customGqlFetch,
   throwError,
 } from './utils';
 
@@ -107,7 +107,7 @@ export class StatisticsClient {
    * ```
    *
    * @param {IStatisticsFilter} filter Statistics params with duration data
-   * @param {SubgraphRetryConfig} retryConfig Optional configuration for retrying subgraph requests.
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
    * @returns {Promise<IEscrowStatistics>} Escrow statistics data.
    *
    * **Code example**
@@ -126,7 +126,7 @@ export class StatisticsClient {
    */
   async getEscrowStatistics(
     filter: IStatisticsFilter = {},
-    retryConfig?: SubgraphRetryConfig
+    options?: SubgraphOptions
   ): Promise<IEscrowStatistics> {
     try {
       const first =
@@ -134,11 +134,11 @@ export class StatisticsClient {
       const skip = filter.skip || 0;
       const orderDirection = filter.orderDirection || OrderDirection.ASC;
 
-      const { escrowStatistics } = await gqlFetchWithRetry<{
+      const { escrowStatistics } = await customGqlFetch<{
         escrowStatistics: EscrowStatisticsData;
-      }>(this.subgraphUrl, GET_ESCROW_STATISTICS_QUERY, retryConfig);
+      }>(this.subgraphUrl, GET_ESCROW_STATISTICS_QUERY, options);
 
-      const { eventDayDatas } = await gqlFetchWithRetry<{
+      const { eventDayDatas } = await customGqlFetch<{
         eventDayDatas: EventDayData[];
       }>(
         this.subgraphUrl,
@@ -150,7 +150,7 @@ export class StatisticsClient {
           first: first,
           skip: skip,
         },
-        retryConfig
+        options
       );
 
       return {
@@ -198,7 +198,7 @@ export class StatisticsClient {
    * ```
    *
    * @param {IStatisticsFilter} filter Statistics params with duration data
-   * @param {SubgraphRetryConfig} retryConfig Optional configuration for retrying subgraph requests.
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
    * @returns {Promise<IWorkerStatistics>} Worker statistics data.
    *
    * **Code example**
@@ -217,7 +217,7 @@ export class StatisticsClient {
    */
   async getWorkerStatistics(
     filter: IStatisticsFilter = {},
-    retryConfig?: SubgraphRetryConfig
+    options?: SubgraphOptions
   ): Promise<IWorkerStatistics> {
     try {
       const first =
@@ -225,7 +225,7 @@ export class StatisticsClient {
       const skip = filter.skip || 0;
       const orderDirection = filter.orderDirection || OrderDirection.ASC;
 
-      const { eventDayDatas } = await gqlFetchWithRetry<{
+      const { eventDayDatas } = await customGqlFetch<{
         eventDayDatas: EventDayData[];
       }>(
         this.subgraphUrl,
@@ -237,7 +237,7 @@ export class StatisticsClient {
           first: first,
           skip: skip,
         },
-        retryConfig
+        options
       );
 
       return {
@@ -280,7 +280,7 @@ export class StatisticsClient {
    * ```
    *
    * @param {IStatisticsFilter} filter Statistics params with duration data
-   * @param {SubgraphRetryConfig} retryConfig Optional configuration for retrying subgraph requests.
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
    * @returns {Promise<IPaymentStatistics>} Payment statistics data.
    *
    * **Code example**
@@ -320,7 +320,7 @@ export class StatisticsClient {
    */
   async getPaymentStatistics(
     filter: IStatisticsFilter = {},
-    retryConfig?: SubgraphRetryConfig
+    options?: SubgraphOptions
   ): Promise<IPaymentStatistics> {
     try {
       const first =
@@ -328,7 +328,7 @@ export class StatisticsClient {
       const skip = filter.skip || 0;
       const orderDirection = filter.orderDirection || OrderDirection.ASC;
 
-      const { eventDayDatas } = await gqlFetchWithRetry<{
+      const { eventDayDatas } = await customGqlFetch<{
         eventDayDatas: EventDayData[];
       }>(
         this.subgraphUrl,
@@ -340,7 +340,7 @@ export class StatisticsClient {
           first: first,
           skip: skip,
         },
-        retryConfig
+        options
       );
 
       return {
@@ -371,7 +371,7 @@ export class StatisticsClient {
    * };
    * ```
    *
-   * @param {SubgraphRetryConfig} retryConfig Optional configuration for retrying subgraph requests.
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
    * @returns {Promise<IHMTStatistics>} HMToken statistics data.
    *
    * **Code example**
@@ -389,13 +389,11 @@ export class StatisticsClient {
    * });
    * ```
    */
-  async getHMTStatistics(
-    retryConfig?: SubgraphRetryConfig
-  ): Promise<IHMTStatistics> {
+  async getHMTStatistics(options?: SubgraphOptions): Promise<IHMTStatistics> {
     try {
-      const { hmtokenStatistics } = await gqlFetchWithRetry<{
+      const { hmtokenStatistics } = await customGqlFetch<{
         hmtokenStatistics: HMTStatisticsData;
-      }>(this.subgraphUrl, GET_HMTOKEN_STATISTICS_QUERY, retryConfig);
+      }>(this.subgraphUrl, GET_HMTOKEN_STATISTICS_QUERY, options);
 
       return {
         totalTransferAmount: BigInt(hmtokenStatistics.totalValueTransfered),
@@ -413,7 +411,7 @@ export class StatisticsClient {
    * **Input parameters**
    *
    * @param {IHMTHoldersParams} params HMT Holders params with filters and ordering
-   * @param {SubgraphRetryConfig} retryConfig Optional configuration for retrying subgraph requests.
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
    * @returns {Promise<IHMTHolder[]>} List of HMToken holders.
    *
    * **Code example**
@@ -435,13 +433,13 @@ export class StatisticsClient {
    */
   async getHMTHolders(
     params: IHMTHoldersParams = {},
-    retryConfig?: SubgraphRetryConfig
+    options?: SubgraphOptions
   ): Promise<IHMTHolder[]> {
     try {
       const { address, orderDirection } = params;
       const query = GET_HOLDERS_QUERY(address);
 
-      const { holders } = await gqlFetchWithRetry<{ holders: HMTHolderData[] }>(
+      const { holders } = await customGqlFetch<{ holders: HMTHolderData[] }>(
         this.subgraphUrl,
         query,
         {
@@ -449,7 +447,7 @@ export class StatisticsClient {
           orderBy: 'balance',
           orderDirection,
         },
-        retryConfig
+        options
       );
 
       return holders.map((holder) => ({
@@ -487,7 +485,7 @@ export class StatisticsClient {
    * ```
    *
    * @param {IStatisticsFilter} filter Statistics params with duration data
-   * @param {SubgraphRetryConfig} retryConfig Optional configuration for retrying subgraph requests.
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
    * @returns {Promise<IDailyHMT[]>} Daily HMToken statistics data.
    *
    * **Code example**
@@ -511,7 +509,7 @@ export class StatisticsClient {
    */
   async getHMTDailyData(
     filter: IStatisticsFilter = {},
-    retryConfig?: SubgraphRetryConfig
+    options?: SubgraphOptions
   ): Promise<IDailyHMT[]> {
     try {
       const first =
@@ -519,7 +517,7 @@ export class StatisticsClient {
       const skip = filter.skip || 0;
       const orderDirection = filter.orderDirection || OrderDirection.ASC;
 
-      const { eventDayDatas } = await gqlFetchWithRetry<{
+      const { eventDayDatas } = await customGqlFetch<{
         eventDayDatas: EventDayData[];
       }>(
         this.subgraphUrl,
@@ -531,7 +529,7 @@ export class StatisticsClient {
           first: first,
           skip: skip,
         },
-        retryConfig
+        options
       );
 
       return eventDayDatas.map((eventDayData) => ({

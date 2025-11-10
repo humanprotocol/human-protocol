@@ -29,7 +29,7 @@ from web3 import Web3
 import requests
 
 from human_protocol_sdk.constants import NETWORKS, ChainId, KVStoreKeys
-from human_protocol_sdk.utils import SubgraphRetryConfig, get_data_from_subgraph
+from human_protocol_sdk.utils import SubgraphRetryConfig, custom_gql_fetch
 
 from human_protocol_sdk.kvstore.kvstore_client import KVStoreClientError
 
@@ -90,7 +90,7 @@ class KVStoreUtils:
 
         network = NETWORKS[ChainId(chain_id)]
 
-        kvstore_data = get_data_from_subgraph(
+        kvstore_data = custom_gql_fetch(
             network,
             query=get_kvstore_by_address_query(),
             params={
@@ -151,7 +151,7 @@ class KVStoreUtils:
 
         network = NETWORKS[ChainId(chain_id)]
 
-        kvstore_data = get_data_from_subgraph(
+        kvstore_data = custom_gql_fetch(
             network,
             query=get_kvstore_by_address_and_key_query(),
             params={

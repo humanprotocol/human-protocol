@@ -3,7 +3,7 @@ import {
   IOperator,
   IOperatorsFilter,
   IReward,
-  SubgraphRetryConfig,
+  SubgraphOptions,
 } from './interfaces';
 import { GET_REWARD_ADDED_EVENTS_QUERY } from './graphql/queries/reward';
 import {
@@ -22,7 +22,7 @@ import {
   ErrorInvalidStakerAddressProvided,
   ErrorUnsupportedChainID,
 } from './error';
-import { getSubgraphUrl, gqlFetchWithRetry } from './utils';
+import { getSubgraphUrl, customGqlFetch } from './utils';
 import { ChainId, OrderDirection } from './enums';
 import { NETWORKS } from './constants';
 
@@ -32,7 +32,7 @@ export class OperatorUtils {
    *
    * @param {ChainId} chainId Network in which the operator is deployed
    * @param {string} address Operator address.
-   * @param {SubgraphRetryConfig} retryConfig Optional configuration for retrying subgraph requests.
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
    * @returns {Promise<IOperator | null>} - Returns the operator details or null if not found.
    *
    * **Code example**
@@ -46,7 +46,7 @@ export class OperatorUtils {
   public static async getOperator(
     chainId: ChainId,
     address: string,
-    retryConfig?: SubgraphRetryConfig
+    options?: SubgraphOptions
   ): Promise<IOperator | null> {
     if (!ethers.isAddress(address)) {
       throw ErrorInvalidStakerAddressProvided;
@@ -57,11 +57,11 @@ export class OperatorUtils {
       throw ErrorUnsupportedChainID;
     }
 
-    const { operator } = await gqlFetchWithRetry<{
+    const { operator } = await customGqlFetch<{
       operator: IOperatorSubgraph;
     }>(getSubgraphUrl(networkData), GET_LEADER_QUERY, {
       address: address.toLowerCase(),
-      retryConfig,
+      options,
     });
 
     if (!operator) {
@@ -75,7 +75,7 @@ export class OperatorUtils {
    * This function returns all the operator details of the protocol.
    *
    * @param {IOperatorsFilter} filter Filter for the operators.
-   * @param {SubgraphRetryConfig} retryConfig Optional configuration for retrying subgraph requests.
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
    * @returns {Promise<IOperator[]>} Returns an array with all the operator details.
    *
    * **Code example**
@@ -91,7 +91,7 @@ export class OperatorUtils {
    */
   public static async getOperators(
     filter: IOperatorsFilter,
-    retryConfig?: SubgraphRetryConfig
+    options?: SubgraphOptions
   ): Promise<IOperator[]> {
     const first =
       filter.first !== undefined && filter.first > 0
@@ -116,7 +116,7 @@ export class OperatorUtils {
       throw ErrorUnsupportedChainID;
     }
 
-    const { operators } = await gqlFetchWithRetry<{
+    const { operators } = await customGqlFetch<{
       operators: IOperatorSubgraph[];
     }>(
       getSubgraphUrl(networkData),
@@ -129,7 +129,7 @@ export class OperatorUtils {
         first: first,
         skip: skip,
       },
-      retryConfig
+      options
     );
 
     if (!operators) {
@@ -145,7 +145,7 @@ export class OperatorUtils {
    * @param {ChainId} chainId Network in which the reputation network is deployed
    * @param {string} address Address of the reputation oracle.
    * @param {string} [role] - (Optional) Role of the operator.
-   * @param {SubgraphRetryConfig} retryConfig Optional configuration for retrying subgraph requests.
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
    * @returns {Promise<IOperator[]>} - Returns an array of operator details.
    *
    * **Code example**
@@ -160,14 +160,14 @@ export class OperatorUtils {
     chainId: ChainId,
     address: string,
     role?: string,
-    retryConfig?: SubgraphRetryConfig
+    options?: SubgraphOptions
   ): Promise<IOperator[]> {
     const networkData = NETWORKS[chainId];
 
     if (!networkData) {
       throw ErrorUnsupportedChainID;
     }
-    const { reputationNetwork } = await gqlFetchWithRetry<{
+    const { reputationNetwork } = await customGqlFetch<{
       reputationNetwork: IReputationNetworkSubgraph;
     }>(
       getSubgraphUrl(networkData),
@@ -176,7 +176,7 @@ export class OperatorUtils {
         address: address.toLowerCase(),
         role: role,
       },
-      retryConfig
+      options
     );
 
     if (!reputationNetwork) return [];
@@ -191,7 +191,7 @@ export class OperatorUtils {
    *
    * @param {ChainId} chainId Network in which the rewards are deployed
    * @param {string} slasherAddress Slasher address.
-   * @param {SubgraphRetryConfig} retryConfig Optional configuration for retrying subgraph requests.
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
    * @returns {Promise<IReward[]>} Returns an array of Reward objects that contain the rewards earned by the user through slashing other users.
    *
    * **Code example**
@@ -205,7 +205,7 @@ export class OperatorUtils {
   public static async getRewards(
     chainId: ChainId,
     slasherAddress: string,
-    retryConfig?: SubgraphRetryConfig
+    options?: SubgraphOptions
   ): Promise<IReward[]> {
     if (!ethers.isAddress(slasherAddress)) {
       throw ErrorInvalidSlasherAddressProvided;
@@ -216,7 +216,7 @@ export class OperatorUtils {
       throw ErrorUnsupportedChainID;
     }
 
-    const { rewardAddedEvents } = await gqlFetchWithRetry<{
+    const { rewardAddedEvents } = await customGqlFetch<{
       rewardAddedEvents: RewardAddedEventData[];
     }>(
       getSubgraphUrl(networkData),
@@ -224,7 +224,7 @@ export class OperatorUtils {
       {
         slasherAddress: slasherAddress.toLowerCase(),
       },
-      retryConfig
+      options
     );
 
     if (!rewardAddedEvents) return [];

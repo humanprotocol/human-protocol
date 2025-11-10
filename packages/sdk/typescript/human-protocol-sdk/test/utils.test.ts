@@ -23,7 +23,7 @@ import {
 import {
   getSubgraphUrl,
   getUnixTimestamp,
-  gqlFetchWithRetry,
+  customGqlFetch,
   isIndexerError,
   isValidJson,
   isValidUrl,
@@ -202,7 +202,7 @@ describe('isIndexerError', () => {
   });
 });
 
-describe('gqlFetchWithRetry', () => {
+describe('customGqlFetch', () => {
   const mockUrl = 'http://test-subgraph.com';
   const mockQuery = 'query { test }';
   const mockVariables = { id: '123' };
@@ -218,7 +218,7 @@ describe('gqlFetchWithRetry', () => {
       .spyOn(gqlFetch, 'default')
       .mockResolvedValue(expectedResult);
 
-    const result = await gqlFetchWithRetry(mockUrl, mockQuery, mockVariables);
+    const result = await customGqlFetch(mockUrl, mockQuery, mockVariables);
 
     expect(gqlFetchSpy).toHaveBeenCalledTimes(1);
     expect(gqlFetchSpy).toHaveBeenCalledWith(mockUrl, mockQuery, mockVariables);
@@ -231,7 +231,7 @@ describe('gqlFetchWithRetry', () => {
       .spyOn(gqlFetch, 'default')
       .mockResolvedValue(expectedResult);
 
-    const result = await gqlFetchWithRetry(mockUrl, mockQuery, mockVariables, {
+    const result = await customGqlFetch(mockUrl, mockQuery, mockVariables, {
       maxRetries: 3,
       baseDelay: 100,
     });
@@ -253,7 +253,7 @@ describe('gqlFetchWithRetry', () => {
       .mockRejectedValueOnce(badIndexerError)
       .mockResolvedValueOnce(expectedResult);
 
-    const result = await gqlFetchWithRetry(mockUrl, mockQuery, mockVariables, {
+    const result = await customGqlFetch(mockUrl, mockQuery, mockVariables, {
       maxRetries: 3,
       baseDelay: 10,
     });
@@ -269,7 +269,7 @@ describe('gqlFetchWithRetry', () => {
       .mockRejectedValue(regularError);
 
     await expect(
-      gqlFetchWithRetry(mockUrl, mockQuery, mockVariables, {
+      customGqlFetch(mockUrl, mockQuery, mockVariables, {
         maxRetries: 3,
         baseDelay: 10,
       })
@@ -289,7 +289,7 @@ describe('gqlFetchWithRetry', () => {
       .mockRejectedValue(badIndexerError);
 
     await expect(
-      gqlFetchWithRetry(mockUrl, mockQuery, mockVariables, {
+      customGqlFetch(mockUrl, mockQuery, mockVariables, {
         maxRetries: 2,
         baseDelay: 10,
       })
@@ -309,7 +309,7 @@ describe('gqlFetchWithRetry', () => {
       .mockRejectedValue(badIndexerError);
 
     await expect(
-      gqlFetchWithRetry(mockUrl, mockQuery, mockVariables, { baseDelay: 10 })
+      customGqlFetch(mockUrl, mockQuery, mockVariables, { baseDelay: 10 })
     ).rejects.toEqual(badIndexerError);
 
     expect(gqlFetchSpy).toHaveBeenCalledTimes(4);
@@ -326,7 +326,7 @@ describe('gqlFetchWithRetry', () => {
       .mockRejectedValue(badIndexerError);
 
     await expect(
-      gqlFetchWithRetry(mockUrl, mockQuery, mockVariables, {
+      customGqlFetch(mockUrl, mockQuery, mockVariables, {
         maxRetries: 1,
         baseDelay: 10,
       })

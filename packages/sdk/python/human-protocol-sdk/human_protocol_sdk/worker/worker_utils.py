@@ -4,7 +4,7 @@ from typing import List, Optional
 from web3 import Web3
 
 from human_protocol_sdk.constants import NETWORKS, ChainId
-from human_protocol_sdk.utils import SubgraphRetryConfig, get_data_from_subgraph
+from human_protocol_sdk.utils import SubgraphRetryConfig, custom_gql_fetch
 from human_protocol_sdk.filter import WorkerFilter
 
 LOG = logging.getLogger("human_protocol_sdk.worker")
@@ -66,7 +66,7 @@ class WorkerUtils:
         if not network:
             raise WorkerUtilsError("Unsupported Chain ID")
 
-        workers_data = get_data_from_subgraph(
+        workers_data = custom_gql_fetch(
             network,
             query=get_workers_query(filter),
             params={
@@ -126,7 +126,7 @@ class WorkerUtils:
             raise WorkerUtilsError(f"Invalid operator address: {worker_address}")
 
         network = NETWORKS[chain_id]
-        worker_data = get_data_from_subgraph(
+        worker_data = custom_gql_fetch(
             network,
             query=get_worker_query(),
             params={"address": worker_address.lower()},
