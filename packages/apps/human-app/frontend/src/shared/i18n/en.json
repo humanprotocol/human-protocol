@@ -200,11 +200,11 @@
       "email": "Email",
       "password": "Password",
       "wallet": "Wallet",
-      "kycStatus": "KYC Status",
       "resetPassword": "Reset Password",
       "completeIdentityVerification": "Complete Identity Verification",
       "identityVerificationInProgress": "Identity verification in progress",
       "confirmEmail": "Confirm email",
+      "identityVerificationStatus": "Identity verification",
       "walletAddressMessage": "This address is the wallet address where you will receive payments for completing tasks.",
       "connectWallet": "Connect Wallet",
       "walletConnected": "Connected",
@@ -217,7 +217,7 @@
       "topNotifications": {
         "completeSteps": "Please set up your profile by completing the steps below."
       },
-      "kycStatusValues": {
+      "IdvStatusValues": {
         "none": "Not Started",
         "approved": "Completed",
         "resubmission_requested": "Resubmission Required",

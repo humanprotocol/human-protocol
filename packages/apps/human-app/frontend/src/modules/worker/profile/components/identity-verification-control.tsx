@@ -20,7 +20,7 @@ export function IdentityVerificationControl() {
   const { t } = useTranslation();
   const { status } = useWorkerIdentityVerificationStatus();
 
-  const label = t(`worker.profile.kycStatusValues.${status}`);
+  const label = t(`worker.profile.IdvStatusValues.${status}`);
 
   if (status === KycStatus.NONE) {
     return <StartIdvBtn />;
@@ -29,7 +29,7 @@ export function IdentityVerificationControl() {
   return (
     <Stack direction="row" alignItems="center" gap={1}>
       <Typography variant="buttonLarge">
-        {t('worker.profile.kycStatus')}:{' '}
+        {t('worker.profile.identityVerificationStatus')}:{' '}
       </Typography>
       <Chip label={label} backgroundColor={getChipColor(status)} />
     </Stack>
