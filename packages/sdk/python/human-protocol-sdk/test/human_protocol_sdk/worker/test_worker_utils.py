@@ -47,7 +47,7 @@ class TestWorkerUtils(unittest.TestCase):
                     "orderBy": "totalHMTAmountReceived",
                     "orderDirection": "asc",
                 },
-                retry_config=None,
+                options=None,
             )
             self.assertEqual(len(workers), 2)
             self.assertEqual(workers[0].id, "worker1")
@@ -76,7 +76,7 @@ class TestWorkerUtils(unittest.TestCase):
                     "orderBy": "payoutCount",
                     "orderDirection": "desc",
                 },
-                retry_config=None,
+                options=None,
             )
             self.assertEqual(len(workers), 0)
 
@@ -108,7 +108,7 @@ class TestWorkerUtils(unittest.TestCase):
                 NETWORKS[ChainId.POLYGON_AMOY],
                 query=get_worker_query(),
                 params={"address": "0x1234567890123456789012345678901234567890"},
-                retry_config=None,
+                options=None,
             )
             self.assertIsNotNone(worker)
             self.assertEqual(worker.id, "worker1")
@@ -130,7 +130,7 @@ class TestWorkerUtils(unittest.TestCase):
                 NETWORKS[ChainId.POLYGON_AMOY],
                 query=get_worker_query(),
                 params={"address": "0x1234567890123456789012345678901234567890"},
-                retry_config=None,
+                options=None,
             )
 
             self.assertIsNone(worker)

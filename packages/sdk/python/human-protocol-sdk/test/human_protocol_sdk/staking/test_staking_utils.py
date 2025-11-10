@@ -69,7 +69,7 @@ class TestStakingUtils(unittest.TestCase):
                     "first": 2,
                     "skip": 0,
                 },
-                retry_config=None,
+                options=None,
             )
             self.assertEqual(len(stakers), 2)
             self.assertIsInstance(stakers[0], StakerData)
@@ -161,7 +161,7 @@ class TestStakingUtils(unittest.TestCase):
                 NETWORKS[ChainId.POLYGON_AMOY],
                 query=get_staker_query(),
                 params={"id": "0x123"},
-                retry_config=None,
+                options=None,
             )
             self.assertIsInstance(staker, StakerData)
             self.assertEqual(staker.id, "1")

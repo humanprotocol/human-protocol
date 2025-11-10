@@ -3,7 +3,7 @@ from unittest.mock import Mock, patch
 from validators import ValidationError
 
 from human_protocol_sdk.utils import (
-    SubgraphRetryConfig,
+    SubgraphOptions,
     custom_gql_fetch,
     is_indexer_error,
     validate_url,
@@ -54,7 +54,7 @@ class TestGetDataFromSubgraph(unittest.TestCase):
         self.query = "query Test"
         self.variables = {"foo": "bar"}
 
-    def test_returns_response_without_retry_config(self):
+    def test_returns_response_without_options(self):
         expected = {"data": {"ok": True}}
         with patch(
             "human_protocol_sdk.utils._fetch_subgraph_data",
@@ -66,7 +66,7 @@ class TestGetDataFromSubgraph(unittest.TestCase):
         mock_fetch.assert_called_once_with(self.network, self.query, self.variables)
 
     def test_retries_on_indexer_error_and_succeeds(self):
-        retry_config = SubgraphRetryConfig(max_retries=2, base_delay=100)
+        options = SubgraphOptions(max_retries=2, base_delay=100)
         error = make_graphql_error({"errors": [{"message": "Bad indexers: syncing"}]})
 
         with patch(
@@ -74,7 +74,7 @@ class TestGetDataFromSubgraph(unittest.TestCase):
             side_effect=[error, {"data": {"ok": True}}],
         ) as mock_fetch, patch("human_protocol_sdk.utils.time.sleep") as mock_sleep:
             result = custom_gql_fetch(
-                self.network, self.query, self.variables, retry_config=retry_config
+                self.network, self.query, self.variables, options=options
             )
 
         self.assertEqual(result, {"data": {"ok": True}})
@@ -82,14 +82,14 @@ class TestGetDataFromSubgraph(unittest.TestCase):
         mock_sleep.assert_called_once()
 
     def test_raises_immediately_on_non_indexer_error(self):
-        retry_config = SubgraphRetryConfig(max_retries=3, base_delay=50)
+        options = SubgraphOptions(max_retries=3, base_delay=50)
         with patch(
             "human_protocol_sdk.utils._fetch_subgraph_data",
             side_effect=Exception("network failure"),
         ) as mock_fetch, patch("human_protocol_sdk.utils.time.sleep") as mock_sleep:
             with self.assertRaises(Exception) as ctx:
                 custom_gql_fetch(
-                    self.network, self.query, self.variables, retry_config=retry_config
+                    self.network, self.query, self.variables, options=options
                 )
 
         self.assertIn("network failure", str(ctx.exception))
@@ -97,7 +97,7 @@ class TestGetDataFromSubgraph(unittest.TestCase):
         mock_sleep.assert_not_called()
 
     def test_raises_after_exhausting_retries(self):
-        retry_config = SubgraphRetryConfig(max_retries=2, base_delay=10)
+        options = SubgraphOptions(max_retries=2, base_delay=10)
         errors = [
             make_graphql_error({"errors": [{"message": "bad indexers: stalled"}]})
             for _ in range(3)
@@ -109,7 +109,7 @@ class TestGetDataFromSubgraph(unittest.TestCase):
         ) as mock_fetch, patch("human_protocol_sdk.utils.time.sleep"):
             with self.assertRaises(Exception) as ctx:
                 custom_gql_fetch(
-                    self.network, self.query, self.variables, retry_config=retry_config
+                    self.network, self.query, self.variables, options=options
                 )
 
         self.assertTrue(is_indexer_error(ctx.exception))

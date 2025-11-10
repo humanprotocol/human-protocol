@@ -51,7 +51,7 @@ class TestEscrowUtils(unittest.TestCase):
                 "createdAt": "1683811973",
             }
 
-            def side_effect(subgraph_url, query, params, retry_config):
+            def side_effect(subgraph_url, query, params, options):
                 if subgraph_url == NETWORKS[ChainId.POLYGON_AMOY]:
                     return {"data": {"escrows": [mock_escrow]}}
 
@@ -83,7 +83,7 @@ class TestEscrowUtils(unittest.TestCase):
                     "skip": 0,
                     "orderDirection": "desc",
                 },
-                retry_config=None,
+                options=None,
             )
             self.assertEqual(len(filtered), 1)
             self.assertEqual(filtered[0].address, mock_escrow["address"])
@@ -155,7 +155,7 @@ class TestEscrowUtils(unittest.TestCase):
                     "skip": 0,
                     "orderDirection": "desc",
                 },
-                retry_config=None,
+                options=None,
             )
             self.assertEqual(len(filtered), 1)
             self.assertEqual(filtered[0].chain_id, ChainId.POLYGON_AMOY)
@@ -206,7 +206,7 @@ class TestEscrowUtils(unittest.TestCase):
                 "createdAt": "1672531200000",
             }
 
-            def side_effect(subgraph_url, query, params, retry_config):
+            def side_effect(subgraph_url, query, params, options):
                 if subgraph_url == NETWORKS[ChainId.POLYGON_AMOY]:
                     return {"data": {"escrows": [mock_escrow_1, mock_escrow_2]}}
 
@@ -234,7 +234,7 @@ class TestEscrowUtils(unittest.TestCase):
                     "skip": 0,
                     "orderDirection": "desc",
                 },
-                retry_config=None,
+                options=None,
             )
             self.assertEqual(len(filtered), 2)
             self.assertEqual(filtered[0].address, mock_escrow_1["address"])
@@ -287,7 +287,7 @@ class TestEscrowUtils(unittest.TestCase):
                 params={
                     "escrowAddress": "0x1234567890123456789012345678901234567890",
                 },
-                retry_config=None,
+                options=None,
             )
             self.assertEqual(escrow.chain_id, ChainId.POLYGON_AMOY)
             self.assertEqual(escrow.address, mock_escrow["address"])
@@ -347,7 +347,7 @@ class TestEscrowUtils(unittest.TestCase):
                 params={
                     "escrowAddress": "0x1234567890123456789012345678901234567890",
                 },
-                retry_config=None,
+                options=None,
             )
             self.assertEqual(escrow, None)
 
@@ -621,7 +621,7 @@ class TestEscrowUtils(unittest.TestCase):
                 "txHash": "0xhash1",
             }
 
-            def side_effect(subgraph_url, query, params, retry_config):
+            def side_effect(subgraph_url, query, params, options):
                 if subgraph_url == NETWORKS[ChainId.POLYGON_AMOY]:
                     return {"data": {"cancellationRefundEvents": [mock_refund]}}
 

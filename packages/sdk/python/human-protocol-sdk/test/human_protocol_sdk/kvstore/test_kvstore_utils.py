@@ -51,7 +51,7 @@ class TestKVStoreUtils(unittest.TestCase):
                 params={
                     "address": "0x15d34aaf54267db7d7c367839aaf71a00a2c6a65",
                 },
-                retry_config=None,
+                options=None,
             )
             self.assertEqual(len(kvstores), 2)
             self.assertEqual(kvstores[0].key, "fee")
@@ -77,7 +77,7 @@ class TestKVStoreUtils(unittest.TestCase):
                 params={
                     "address": "0x15d34aaf54267db7d7c367839aaf71a00a2c6a65",
                 },
-                retry_config=None,
+                options=None,
             )
             self.assertEqual(kvstores, [])
 
@@ -120,7 +120,7 @@ class TestKVStoreUtils(unittest.TestCase):
             NETWORKS[ChainId.LOCALHOST],
             query=get_kvstore_by_address_and_key_query(),
             params={"address": address, "key": key},
-            retry_config=None,
+            options=None,
         )
         self.assertEqual(result, "1")
 
@@ -157,7 +157,7 @@ class TestKVStoreUtils(unittest.TestCase):
             NETWORKS[ChainId.LOCALHOST],
             query=get_kvstore_by_address_and_key_query(),
             params={"address": address, "key": key},
-            retry_config=None,
+            options=None,
         )
 
     @patch("human_protocol_sdk.kvstore.kvstore_utils.custom_gql_fetch")
@@ -186,7 +186,7 @@ class TestKVStoreUtils(unittest.TestCase):
             NETWORKS[ChainId.LOCALHOST],
             query=get_kvstore_by_address_and_key_query(),
             params={"address": address, "key": key},
-            retry_config=None,
+            options=None,
         )
         self.assertEqual(result, "mock_value")
 

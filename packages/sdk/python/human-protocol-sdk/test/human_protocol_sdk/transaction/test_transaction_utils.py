@@ -82,7 +82,7 @@ class TestTransactionUtils(unittest.TestCase):
                     "token": None,
                     "method": None,
                 },
-                retry_config=None,
+                options=None,
             )
             self.assertEqual(len(transactions), 2)
             self.assertEqual(transactions[0].chain_id, ChainId.POLYGON_AMOY)
@@ -118,7 +118,7 @@ class TestTransactionUtils(unittest.TestCase):
                     "token": None,
                     "method": None,
                 },
-                retry_config=None,
+                options=None,
             )
             self.assertEqual(len(transactions), 0)
 
@@ -183,7 +183,7 @@ class TestTransactionUtils(unittest.TestCase):
                 params={
                     "hash": "0x1234567890123456789012345678901234567890123456789012345678901234"
                 },
-                retry_config=None,
+                options=None,
             )
             self.assertIsNotNone(transaction)
             self.assertEqual(transaction.chain_id, ChainId.POLYGON_AMOY)
@@ -212,7 +212,7 @@ class TestTransactionUtils(unittest.TestCase):
                 NETWORKS[ChainId.POLYGON_AMOY],
                 query=ANY,
                 params={"hash": "transaction_hash"},
-                retry_config=None,
+                options=None,
             )
 
             self.assertIsNone(transaction)
