@@ -20,7 +20,7 @@ export function IdentityVerificationControl() {
   const { t } = useTranslation();
   const { status } = useWorkerIdentityVerificationStatus();
 
-  const label = t(`worker.profile.identityVerificationStatus.${status}`);
+  const label = t(`worker.profile.kycStatusValues.${status}`);
 
   if (status === KycStatus.NONE) {
     return <StartIdvBtn />;

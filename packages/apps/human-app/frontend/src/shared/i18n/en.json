@@ -217,7 +217,7 @@
       "topNotifications": {
         "completeSteps": "Please set up your profile by completing the steps below."
       },
-      "identityVerificationStatus": {
+      "kycStatusValues": {
         "none": "Not Started",
         "approved": "Completed",
         "resubmission_requested": "Resubmission Required",
