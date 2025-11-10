@@ -34,8 +34,8 @@ except ImportError:
 
 
 @dataclass
-class SubgraphRetryConfig:
-    """Configuration for subgraph retry logic."""
+class SubgraphOptions:
+    """Configuration for subgraph logic."""
 
     max_retries: int = 3
     base_delay: int = 1000  # milliseconds
@@ -78,24 +78,24 @@ def custom_gql_fetch(
     network: dict,
     query: str,
     params: dict = None,
-    retry_config: Optional[SubgraphRetryConfig] = None,
+    options: Optional[SubgraphOptions] = None,
 ):
-    """Fetch data from the subgraph with optional retry logic for bad indexer errors.
+    """Fetch data from the subgraph with optional logic.
 
     :param network: Network configuration dictionary
     :param query: GraphQL query string
     :param params: Query parameters
-    :param retry_config: Optional retry configuration for bad indexer errors
+    :param options: Optional subgraph configuration
 
     :return: JSON response from the subgraph
 
     :raise Exception: If the subgraph query fails
     """
-    if not retry_config:
+    if not options:
         return _fetch_subgraph_data(network, query, params)
 
-    max_retries = retry_config.max_retries
-    base_delay = retry_config.base_delay / 1000
+    max_retries = options.max_retries
+    base_delay = options.base_delay / 1000
 
     last_error = None
 

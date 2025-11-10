@@ -30,7 +30,7 @@ Module
 from typing import List, Optional
 from human_protocol_sdk.constants import NETWORKS, ChainId
 from human_protocol_sdk.filter import StakersFilter
-from human_protocol_sdk.utils import SubgraphRetryConfig, custom_gql_fetch
+from human_protocol_sdk.utils import SubgraphOptions, custom_gql_fetch
 from human_protocol_sdk.gql.staking import get_staker_query, get_stakers_query
 
 
@@ -65,7 +65,7 @@ class StakingUtils:
     def get_staker(
         chain_id: ChainId,
         address: str,
-        retry_config: Optional[SubgraphRetryConfig] = None,
+        options: Optional[SubgraphOptions] = None,
     ) -> Optional[StakerData]:
         network = NETWORKS.get(chain_id)
         if not network:
@@ -75,7 +75,7 @@ class StakingUtils:
             network,
             query=get_staker_query(),
             params={"id": address.lower()},
-            retry_config=retry_config,
+            options=options,
         )
         if (
             not data
@@ -100,7 +100,7 @@ class StakingUtils:
     @staticmethod
     def get_stakers(
         filter: StakersFilter,
-        retry_config: Optional[SubgraphRetryConfig] = None,
+        options: Optional[SubgraphOptions] = None,
     ) -> List[StakerData]:
         network_data = NETWORKS.get(filter.chain_id)
         if not network_data:
@@ -123,7 +123,7 @@ class StakingUtils:
                 "first": filter.first,
                 "skip": filter.skip,
             },
-            retry_config=retry_config,
+            options=options,
         )
         if (
             not data

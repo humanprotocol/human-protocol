@@ -29,7 +29,7 @@ from web3 import Web3
 import requests
 
 from human_protocol_sdk.constants import NETWORKS, ChainId, KVStoreKeys
-from human_protocol_sdk.utils import SubgraphRetryConfig, custom_gql_fetch
+from human_protocol_sdk.utils import SubgraphOptions, custom_gql_fetch
 
 from human_protocol_sdk.kvstore.kvstore_client import KVStoreClientError
 
@@ -57,13 +57,13 @@ class KVStoreUtils:
     def get_kvstore_data(
         chain_id: ChainId,
         address: str,
-        retry_config: Optional[SubgraphRetryConfig] = None,
+        options: Optional[SubgraphOptions] = None,
     ) -> Optional[List[KVStoreData]]:
         """Returns the KVStore data for a given address.
 
         :param chain_id: Network in which the KVStore data has been deployed
         :param address: Address of the KVStore
-        :param retry_config: Optional retry behaviour for subgraph requests
+        :param options: Optional config for subgraph requests
 
         :return: List of KVStore data
 
@@ -96,7 +96,7 @@ class KVStoreUtils:
             params={
                 "address": address.lower(),
             },
-            retry_config=retry_config,
+            options=options,
         )
 
         if (
@@ -118,14 +118,14 @@ class KVStoreUtils:
         chain_id: ChainId,
         address: str,
         key: str,
-        retry_config: Optional[SubgraphRetryConfig] = None,
+        options: Optional[SubgraphOptions] = None,
     ) -> str:
         """Gets the value of a key-value pair in the contract.
 
         :param chain_id: Network in which the KVStore data has been deployed
         :param address: The Ethereum address associated with the key-value pair
         :param key: The key of the key-value pair to get
-        :param retry_config: Optional retry behaviour for subgraph requests
+        :param options: Optional config for subgraph requests
 
         :return: The value of the key-value pair if it exists
 
@@ -158,7 +158,7 @@ class KVStoreUtils:
                 "address": address.lower(),
                 "key": key,
             },
-            retry_config=retry_config,
+            options=options,
         )
 
         if (
@@ -176,14 +176,14 @@ class KVStoreUtils:
         chain_id: ChainId,
         address: str,
         key: Optional[str] = "url",
-        retry_config: Optional[SubgraphRetryConfig] = None,
+        options: Optional[SubgraphOptions] = None,
     ) -> str:
         """Gets the URL value of the given entity, and verify its hash.
 
         :param chain_id: Network in which the KVStore data has been deployed
         :param address: Address from which to get the URL value.
         :param key: Configurable URL key. `url` by default.
-        :param retry_config: Optional retry behaviour for subgraph requests
+        :param options: Optional config for subgraph requests
 
         :return url: The URL value of the given address if exists, and the content is valid
 
@@ -203,10 +203,8 @@ class KVStoreUtils:
         if not Web3.is_address(address):
             raise KVStoreClientError(f"Invalid address: {address}")
 
-        url = KVStoreUtils.get(chain_id, address, key, retry_config=retry_config)
-        hash = KVStoreUtils.get(
-            chain_id, address, key + "_hash", retry_config=retry_config
-        )
+        url = KVStoreUtils.get(chain_id, address, key, options=options)
+        hash = KVStoreUtils.get(chain_id, address, key + "_hash", options=options)
 
         if len(url) == 0:
             return url

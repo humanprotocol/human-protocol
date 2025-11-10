@@ -4,7 +4,7 @@ from typing import List, Optional
 from web3 import Web3
 
 from human_protocol_sdk.constants import NETWORKS, ChainId
-from human_protocol_sdk.utils import SubgraphRetryConfig, custom_gql_fetch
+from human_protocol_sdk.utils import SubgraphOptions, custom_gql_fetch
 from human_protocol_sdk.filter import WorkerFilter
 
 LOG = logging.getLogger("human_protocol_sdk.worker")
@@ -49,12 +49,12 @@ class WorkerUtils:
     @staticmethod
     def get_workers(
         filter: WorkerFilter,
-        retry_config: Optional[SubgraphRetryConfig] = None,
+        options: Optional[SubgraphOptions] = None,
     ) -> List[WorkerData]:
         """Get workers data of the protocol.
 
         :param filter: Worker filter
-        :param retry_config: Optional retry behaviour for subgraph requests
+        :param options: Optional config for subgraph requests
 
         :return: List of workers data
         """
@@ -76,7 +76,7 @@ class WorkerUtils:
                 "first": filter.first,
                 "skip": filter.skip,
             },
-            retry_config=retry_config,
+            options=options,
         )
 
         if (
@@ -105,13 +105,13 @@ class WorkerUtils:
     def get_worker(
         chain_id: ChainId,
         worker_address: str,
-        retry_config: Optional[SubgraphRetryConfig] = None,
+        options: Optional[SubgraphOptions] = None,
     ) -> Optional[WorkerData]:
         """Gets the worker details.
 
         :param chain_id: Network in which the worker exists
         :param worker_address: Address of the worker
-        :param retry_config: Optional retry behaviour for subgraph requests
+        :param options: Optional config for subgraph requests
 
         :return: Worker data if exists, otherwise None
         """
@@ -130,7 +130,7 @@ class WorkerUtils:
             network,
             query=get_worker_query(),
             params={"address": worker_address.lower()},
-            retry_config=retry_config,
+            options=options,
         )
 
         if (

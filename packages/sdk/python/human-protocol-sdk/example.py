@@ -18,7 +18,7 @@ from human_protocol_sdk.statistics import (
 from human_protocol_sdk.operator import OperatorUtils, OperatorFilter
 from human_protocol_sdk.agreement import agreement
 from human_protocol_sdk.staking.staking_utils import StakingUtils
-from human_protocol_sdk.utils import SubgraphRetryConfig
+from human_protocol_sdk.utils import SubgraphOptions
 
 
 def get_escrow_statistics(statistics_client: StatisticsClient):
@@ -164,7 +164,7 @@ def get_escrows():
                 date_from=datetime.datetime(2023, 5, 8),
                 date_to=datetime.datetime(2023, 6, 8),
             ),
-            SubgraphRetryConfig(3, 1000),
+            SubgraphOptions(3, 1000),
         )
     )
 
@@ -235,7 +235,7 @@ def get_stakers_example():
             order_by="lastDepositTimestamp",
             order_direction=OrderDirection.ASC,
         ),
-        SubgraphRetryConfig(3, 1000),
+        SubgraphOptions(3, 1000),
     )
     print("Filtered stakers:", len(stakers))
 
