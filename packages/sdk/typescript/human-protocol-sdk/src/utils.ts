@@ -151,8 +151,7 @@ export const customGqlFetch = async <T = any>(
         throw error;
       }
 
-      const delay = baseDelay * Math.pow(2, attempt);
-
+      const delay = baseDelay * attempt;
       await sleep(delay);
     }
   }

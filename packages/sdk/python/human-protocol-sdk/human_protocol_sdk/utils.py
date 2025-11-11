@@ -108,7 +108,7 @@ def custom_gql_fetch(
             if not is_indexer_error(error):
                 break
 
-            delay = base_delay * (2**attempt)
+            delay = base_delay * attempt
             time.sleep(delay)
 
     raise last_error
