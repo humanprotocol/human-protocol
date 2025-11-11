@@ -51,6 +51,7 @@
     "vitest": "^3.0.9"
   },
   "devDependencies": {
+    "@types/validator": "^13.15.4",
     "eslint": "^8.55.0",
     "prettier": "^3.4.2",
     "ts-node": "^10.9.2",
