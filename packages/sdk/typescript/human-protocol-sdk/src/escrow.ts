@@ -263,6 +263,7 @@ export class EscrowClient extends BaseEthersClient {
       return throwError(e);
     }
   }
+
   private verifySetupParameters(escrowConfig: IEscrowConfig) {
     const {
       recordingOracle,
