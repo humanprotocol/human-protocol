@@ -14,6 +14,7 @@ import { getErrorMessageForError } from '@/shared/errors';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { useHCaptchaUserStats } from '../hooks';
 import { UserStatsDetails } from './user-stats-details';
+import { LoadingOverlay } from './user-stats-loading-overlay';
 
 const accordionWidth = { width: '284px' };
 
@@ -25,6 +26,7 @@ export function UserStatsAccordion() {
     isError: isHcaptchaUserStatsError,
     error: hcaptchaUserStatsError,
     refetch: refetchUserStats,
+    isRefetching: isHcaptchaUserStatsRefetching,
   } = useHCaptchaUserStats();
   const { showNotification } = useNotification();
 
@@ -40,7 +42,23 @@ export function UserStatsAccordion() {
 
   return (
     <Grid sx={{ height: '76px' }}>
-      <Accordion sx={{ ...accordionWidth }}>
+      <Accordion
+        sx={{
+          ...accordionWidth,
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+      >
+        {isHcaptchaUserStatsRefetching && (
+          <LoadingOverlay
+            sx={{
+              width: '100%',
+              height: '100%',
+              top: 0,
+              left: 0,
+            }}
+          />
+        )}
         <AccordionSummary
           aria-controls="panel1-content"
           disabled={isHcaptchaUserStatsPending || isHcaptchaUserStatsError}
@@ -61,10 +79,9 @@ export function UserStatsAccordion() {
         {hcaptchaUserStats ? (
           <AccordionDetails sx={{ ...accordionWidth }}>
             <UserStatsDetails
-              refetch={() => {
-                void refetchUserStats();
-              }}
+              refetch={() => void refetchUserStats()}
               stats={hcaptchaUserStats}
+              isRefetching={isHcaptchaUserStatsRefetching}
             />
           </AccordionDetails>
         ) : null}
