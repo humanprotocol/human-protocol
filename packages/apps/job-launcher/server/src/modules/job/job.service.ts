@@ -144,7 +144,10 @@ export class JobService {
     }
 
     const feePercentage = Number(
-      await this.getOracleFee(this.web3Service.getOperatorAddress(), chainId),
+      await this.getOracleFee(
+        await this.web3Service.getOperatorAddress(),
+        chainId,
+      ),
     );
 
     const paymentCurrencyRate = await this.rateService.getRate(
@@ -338,6 +341,13 @@ export class JobService {
       manifest: jobEntity.manifestUrl,
       manifestHash: jobEntity.manifestHash,
     };
+
+    await this.web3Service.ensureEscrowAllowance(
+      jobEntity.chainId,
+      token,
+      weiAmount,
+      NETWORKS[jobEntity.chainId as ChainId]!.factoryAddress,
+    );
 
     const escrowAddress = await escrowClient.createFundAndSetupEscrow(
       token.address,
@@ -687,7 +697,7 @@ export class JobService {
     const baseManifestDetails = {
       chainId,
       tokenAddress: escrow ? escrow.token : ethers.ZeroAddress,
-      requesterAddress: signer.address,
+      requesterAddress: await signer.getAddress(),
       fundAmount: escrow
         ? Number(
             ethers.formatUnits(escrow.totalFundedAmount, fundTokenDecimals),

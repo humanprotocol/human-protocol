@@ -1,6 +1,10 @@
+import { faker } from '@faker-js/faker/.';
+import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import { ChainId, OperatorUtils, Role } from '@human-protocol/sdk';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
+import { NonceManager } from 'ethers';
+import { createSignerMock } from '../../../test/fixtures/web3';
 import { NetworkConfigService } from '../../common/config/network-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ErrorWeb3 } from '../../common/constants/errors';
@@ -95,8 +99,8 @@ describe('Web3Service', () => {
   });
 
   describe('getOperatorAddress', () => {
-    it('should get the operator address', () => {
-      const operatorAddress = web3Service.getOperatorAddress();
+    it('should get the operator address', async () => {
+      const operatorAddress = await web3Service.getOperatorAddress();
       expect(operatorAddress).toBe(MOCK_ADDRESS);
     });
   });
@@ -455,6 +459,87 @@ describe('Web3Service', () => {
 
       expect(result).toEqual([]);
       expect(OperatorUtils.getOperator).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('ensureEscrowAllowance', () => {
+    let mockSigner: jest.Mocked<NonceManager>;
+    const mockToken = {
+      address: faker.finance.ethereumAddress(),
+      decimals: 18,
+    };
+    const mockSpender = faker.finance.ethereumAddress();
+    const mockRequiredAmount = faker.number.bigInt();
+
+    beforeAll(async () => {
+      mockSigner = createSignerMock();
+      jest.spyOn(web3Service, 'getSigner').mockReturnValue(mockSigner);
+      jest
+        .spyOn(web3Service, 'getOperatorAddress')
+        .mockResolvedValue(await mockSigner.getAddress());
+      jest
+        .spyOn(web3Service.web3ConfigService, 'approveAmount', 'get')
+        .mockReturnValue(0);
+    });
+
+    afterAll(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('should call approve on the ERC20 token if current allowance is less than required amount', async () => {
+      const mockApprove = jest.fn().mockResolvedValue({
+        wait: jest.fn().mockResolvedValue({}),
+      });
+      const mockAllowance = mockRequiredAmount - 1n;
+      const mockErc20 = {
+        allowance: jest.fn().mockResolvedValue(mockAllowance),
+        approve: mockApprove,
+      };
+
+      jest
+        .spyOn(HMToken__factory, 'connect')
+        .mockReturnValue(mockErc20 as never);
+
+      await web3Service.ensureEscrowAllowance(
+        ChainId.POLYGON_AMOY,
+        mockToken,
+        mockRequiredAmount,
+        mockSpender,
+      );
+
+      expect(mockErc20.allowance).toHaveBeenCalledWith(
+        await mockSigner.getAddress(),
+        mockSpender,
+      );
+      expect(mockApprove).toHaveBeenCalledWith(mockSpender, mockRequiredAmount);
+    });
+
+    it('should not call approve if current allowance is greater than or equal to required amount', async () => {
+      const mockAllowance = mockRequiredAmount + 1n;
+      const mockApprove = jest.fn().mockResolvedValue({
+        wait: jest.fn(),
+      });
+      const mockErc20 = {
+        allowance: jest.fn().mockResolvedValue(mockAllowance),
+        approve: mockApprove,
+      };
+
+      jest
+        .spyOn(HMToken__factory, 'connect')
+        .mockReturnValue(mockErc20 as never);
+
+      await web3Service.ensureEscrowAllowance(
+        ChainId.POLYGON_AMOY,
+        mockToken,
+        mockRequiredAmount,
+        mockSpender,
+      );
+
+      expect(mockErc20.allowance).toHaveBeenCalledWith(
+        await mockSigner.getAddress(),
+        mockSpender,
+      );
+      expect(mockApprove).not.toHaveBeenCalled();
     });
   });
 });

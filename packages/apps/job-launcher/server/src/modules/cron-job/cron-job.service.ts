@@ -142,7 +142,7 @@ export class CronJobService {
         try {
           await this.jobService.createEscrow(jobEntity);
         } catch (error) {
-          this.logger.error('Error in moderateContentCronJob', {
+          this.logger.error('Error in createEscrowCronJob', {
             jobId: jobEntity.id,
             error,
           });
@@ -391,7 +391,7 @@ export class CronJobService {
             chainId: network.chainId,
             statuses,
             from,
-            launcher: this.web3Service.getOperatorAddress(),
+            launcher: await this.web3Service.getOperatorAddress(),
             first: 100,
             skip,
           });
