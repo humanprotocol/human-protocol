@@ -12,7 +12,7 @@ import {
   NETWORKS,
 } from '@human-protocol/sdk';
 import { Test } from '@nestjs/testing';
-import { ethers, Wallet, ZeroAddress } from 'ethers';
+import { ethers, ZeroAddress } from 'ethers';
 import { createSignerMock } from '../../../test/fixtures/web3';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { ErrorEscrow, ErrorJob } from '../../common/constants/errors';
@@ -823,18 +823,60 @@ describe('JobService', () => {
         escrowAddress: null,
       });
 
+      const signer = createSignerMock();
+      mockWeb3Service.getSigner.mockReturnValueOnce(signer);
+
+      const getOracleFeeSpy = jest
+        .spyOn(jobService as any, 'getOracleFee')
+        .mockResolvedValue(1n);
+
       const escrowAddress = faker.finance.ethereumAddress();
+      const createFundAndSetupEscrowMock = jest
+        .fn()
+        .mockResolvedValueOnce(escrowAddress);
       mockedEscrowClient.build.mockResolvedValueOnce({
-        createEscrow: jest.fn().mockResolvedValueOnce(escrowAddress),
+        createFundAndSetupEscrow: createFundAndSetupEscrowMock,
       } as unknown as EscrowClient);
 
+      mockWeb3Service.ensureEscrowAllowance.mockResolvedValueOnce(undefined);
       mockWeb3Service.calculateGasPrice.mockResolvedValueOnce(1n);
+
+      const token = (TOKEN_ADDRESSES[jobEntity.chainId as ChainId] ?? {})[
+        jobEntity.token as EscrowFundToken
+      ]!;
+      const expectedWeiAmount = ethers.parseUnits(
+        jobEntity.fundAmount.toString(),
+        token.decimals,
+      );
 
       const result = await jobService.createEscrow(jobEntity);
 
       expect(mockWeb3Service.getSigner).toHaveBeenCalledWith(jobEntity.chainId);
+      expect(mockedEscrowClient.build).toHaveBeenCalledWith(signer);
+      expect(mockWeb3Service.ensureEscrowAllowance).toHaveBeenCalledWith(
+        jobEntity.chainId,
+        token,
+        expectedWeiAmount,
+        NETWORKS[jobEntity.chainId as ChainId]!.factoryAddress,
+      );
       expect(mockWeb3Service.calculateGasPrice).toHaveBeenCalledWith(
         jobEntity.chainId,
+      );
+      expect(createFundAndSetupEscrowMock).toHaveBeenCalledWith(
+        token.address,
+        expectedWeiAmount,
+        jobEntity.userId.toString(),
+        expect.objectContaining({
+          recordingOracle: jobEntity.recordingOracle,
+          recordingOracleFee: 1n,
+          reputationOracle: jobEntity.reputationOracle,
+          reputationOracleFee: 1n,
+          exchangeOracle: jobEntity.exchangeOracle,
+          exchangeOracleFee: 1n,
+          manifest: jobEntity.manifestUrl,
+          manifestHash: jobEntity.manifestHash,
+        }),
+        { gasPrice: 1n },
       );
       expect(result.status).toBe(JobStatus.LAUNCHED);
       expect(result.escrowAddress).toBe(escrowAddress);
@@ -843,6 +885,8 @@ describe('JobService', () => {
         status: JobStatus.LAUNCHED,
         escrowAddress,
       });
+
+      getOracleFeeSpy.mockRestore();
     });
 
     it('should throw if escrow address is not returned', async () => {
@@ -852,15 +896,53 @@ describe('JobService', () => {
         escrowAddress: null,
       });
 
+      const signer = createSignerMock();
+      mockWeb3Service.getSigner.mockReturnValueOnce(signer);
+
+      const getOracleFeeSpy = jest
+        .spyOn(jobService as any, 'getOracleFee')
+        .mockResolvedValue(1n);
+
+      const createFundAndSetupEscrowMock = jest
+        .fn()
+        .mockResolvedValueOnce(undefined);
       mockedEscrowClient.build.mockResolvedValueOnce({
-        createEscrow: jest.fn().mockResolvedValueOnce(undefined),
+        createFundAndSetupEscrow: createFundAndSetupEscrowMock,
       } as unknown as EscrowClient);
 
+      mockWeb3Service.ensureEscrowAllowance.mockResolvedValueOnce(undefined);
       mockWeb3Service.calculateGasPrice.mockResolvedValueOnce(1n);
+
+      const token = (TOKEN_ADDRESSES[jobEntity.chainId as ChainId] ?? {})[
+        jobEntity.token as EscrowFundToken
+      ]!;
+      const expectedWeiAmount = ethers.parseUnits(
+        jobEntity.fundAmount.toString(),
+        token.decimals,
+      );
+      const expectedFactoryAddress =
+        NETWORKS[jobEntity.chainId as ChainId]!.factoryAddress;
 
       await expect(jobService.createEscrow(jobEntity)).rejects.toThrow(
         new ConflictError(ErrorEscrow.NotCreated),
       );
+
+      expect(mockWeb3Service.ensureEscrowAllowance).toHaveBeenCalledWith(
+        jobEntity.chainId,
+        token,
+        expectedWeiAmount,
+        expectedFactoryAddress,
+      );
+      expect(createFundAndSetupEscrowMock).toHaveBeenCalledWith(
+        token.address,
+        expectedWeiAmount,
+        jobEntity.userId.toString(),
+        expect.any(Object),
+        { gasPrice: 1n },
+      );
+      expect(mockJobRepository.updateOne).not.toHaveBeenCalled();
+
+      getOracleFeeSpy.mockRestore();
     });
   });
 
@@ -1431,7 +1513,7 @@ describe('JobService', () => {
       mockJobRepository.findOneByIdAndUserId.mockResolvedValueOnce(jobEntity);
       mockedEscrowUtils.getEscrow.mockResolvedValueOnce(getEscrowData);
       mockManifestService.downloadManifest.mockResolvedValueOnce(manifestMock);
-      const signer = createSignerMock() as unknown as Wallet;
+      const signer = createSignerMock();
       mockWeb3Service.getSigner.mockReturnValueOnce(signer);
 
       const result = await jobService.getDetails(
@@ -1460,7 +1542,7 @@ describe('JobService', () => {
           exchangeOracleAddress: jobEntity.exchangeOracle,
           recordingOracleAddress: jobEntity.recordingOracle,
           reputationOracleAddress: jobEntity.reputationOracle,
-          requesterAddress: signer.address,
+          requesterAddress: await signer.getAddress(),
           tokenAddress: getEscrowData.token,
         },
       });
@@ -1475,7 +1557,7 @@ describe('JobService', () => {
 
       mockJobRepository.findOneByIdAndUserId.mockResolvedValueOnce(jobEntity);
       mockManifestService.downloadManifest.mockResolvedValueOnce(manifestMock);
-      const signer = createSignerMock() as unknown as Wallet;
+      const signer = createSignerMock();
       mockWeb3Service.getSigner.mockReturnValueOnce(signer);
 
       const result = await jobService.getDetails(
@@ -1503,7 +1585,7 @@ describe('JobService', () => {
           exchangeOracleAddress: ZeroAddress,
           recordingOracleAddress: ZeroAddress,
           reputationOracleAddress: ZeroAddress,
-          requesterAddress: signer.address,
+          requesterAddress: await signer.getAddress(),
           tokenAddress: ZeroAddress,
         },
       });

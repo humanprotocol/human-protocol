@@ -577,7 +577,7 @@ export class ManifestService {
     if (this.pgpConfigService.encrypt) {
       const signer = this.web3Service.getSigner(chainId);
       const publicKeys: string[] = [
-        await KVStoreUtils.getPublicKey(chainId, signer.address),
+        await KVStoreUtils.getPublicKey(chainId, await signer.getAddress()),
       ];
 
       for (const address of oracleAddresses) {

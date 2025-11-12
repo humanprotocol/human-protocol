@@ -1,12 +1,10 @@
 import { ChainId, NETWORKS } from '@human-protocol/sdk';
 import { EscrowFundToken } from '../enums/job';
+import { IERC20Token } from '../interfaces/web3';
 
 export const TOKEN_ADDRESSES: {
   [chainId in ChainId]?: {
-    [token in EscrowFundToken]?: {
-      address: string;
-      decimals: number;
-    };
+    [token in EscrowFundToken]?: IERC20Token;
   };
 } = {
   [ChainId.MAINNET]: {

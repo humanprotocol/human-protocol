@@ -110,4 +110,8 @@ export class Web3ConfigService {
       'AUDINO_RECORDING_ORACLE_ADDRESS',
     );
   }
+
+  get approveAmount(): number {
+    return this.configService.get<number>('APPROVE_AMOUNT', 100);
+  }
 }

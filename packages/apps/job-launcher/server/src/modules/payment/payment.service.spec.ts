@@ -62,7 +62,7 @@ describe('PaymentService', () => {
   let rateService: jest.Mocked<RateService>;
 
   const signerMock = {
-    address: MOCK_ADDRESS,
+    getAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
     getNetwork: jest.fn().mockResolvedValue({ chainId: ChainId.LOCALHOST }),
   };
 
