@@ -34,11 +34,6 @@ export function MoreButton({ job, isDisabled }: MoreButtonProps) {
         oracle_address: oracleAddress ?? '',
         assignment_id: job.assignment_id,
       });
-      showNotification({
-        message: 'Task cancelled. Press Refresh button to see the changes',
-        type: TopNotificationType.SUCCESS,
-        durationMs: 5000,
-      });
     } catch (error) {
       showNotification({
         message: 'Something went wrong',
