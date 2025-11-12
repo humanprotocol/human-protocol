@@ -324,22 +324,3 @@ def validate_json(data: str) -> bool:
         return True
     except (ValueError, TypeError):
         return False
-
-
-def apply_tx_defaults(w3: Web3, tx_options: Optional[TxParams]) -> TxParams:
-    """Apply network specific default transaction parameters.
-
-    Aurora networks enforce a fixed gas price. We always override any user supplied
-    gasPrice with DEFAULT_AURORA_GAS_PRICE when on Aurora Testnet.
-    EIP-1559 fields are removed to avoid conflicts.
-
-    :param w3: Web3 instance (used to read chain id)
-    :param tx_options: Original transaction options (can be None)
-    :return: Mutated tx options with enforced defaults
-    """
-    opts: TxParams = dict(tx_options) if tx_options else {}
-    if w3.eth.chain_id == ChainId.AURORA_TESTNET.value:
-        opts["gasPrice"] = DEFAULT_AURORA_GAS_PRICE
-        opts.pop("maxFeePerGas", None)
-        opts.pop("maxPriorityFeePerGas", None)
-    return opts

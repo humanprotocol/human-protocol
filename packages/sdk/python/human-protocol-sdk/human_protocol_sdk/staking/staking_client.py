@@ -68,7 +68,6 @@ from human_protocol_sdk.utils import (
     get_factory_interface,
     get_staking_interface,
     handle_error,
-    apply_tx_defaults,
 )
 
 LOG = logging.getLogger("human_protocol_sdk.staking")
@@ -176,7 +175,7 @@ class StakingClient:
         try:
             tx_hash = self.hmtoken_contract.functions.approve(
                 self.network["staking_address"], amount
-            ).transact(apply_tx_defaults(self.w3, tx_options))
+            ).transact(tx_options)
             self.w3.eth.wait_for_transaction_receipt(tx_hash)
         except Exception as e:
             handle_error(e, StakingClientError)
@@ -227,9 +226,7 @@ class StakingClient:
         if amount <= 0:
             raise StakingClientError("Amount to stake must be greater than 0")
         try:
-            tx_hash = self.staking_contract.functions.stake(amount).transact(
-                apply_tx_defaults(self.w3, tx_options)
-            )
+            tx_hash = self.staking_contract.functions.stake(amount).transact(tx_options)
             self.w3.eth.wait_for_transaction_receipt(tx_hash)
         except Exception as e:
             handle_error(e, StakingClientError)
@@ -279,7 +276,7 @@ class StakingClient:
             raise StakingClientError("Amount to unstake must be greater than 0")
         try:
             tx_hash = self.staking_contract.functions.unstake(amount).transact(
-                apply_tx_defaults(self.w3, tx_options)
+                tx_options
             )
             self.w3.eth.wait_for_transaction_receipt(tx_hash)
         except Exception as e:
@@ -324,9 +321,7 @@ class StakingClient:
         """
 
         try:
-            tx_hash = self.staking_contract.functions.withdraw().transact(
-                apply_tx_defaults(self.w3, tx_options)
-            )
+            tx_hash = self.staking_contract.functions.withdraw().transact(tx_options)
             self.w3.eth.wait_for_transaction_receipt(tx_hash)
         except Exception as e:
             handle_error(e, StakingClientError)
@@ -395,7 +390,7 @@ class StakingClient:
         try:
             tx_hash = self.staking_contract.functions.slash(
                 slasher, staker, escrow_address, amount
-            ).transact(apply_tx_defaults(self.w3, tx_options))
+            ).transact(tx_options)
             self.w3.eth.wait_for_transaction_receipt(tx_hash)
         except Exception as e:
             handle_error(e, StakingClientError)

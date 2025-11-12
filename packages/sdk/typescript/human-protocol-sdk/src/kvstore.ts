@@ -175,9 +175,7 @@ export class KVStoreClient extends BaseEthersClient {
   ): Promise<void> {
     if (key === '') throw ErrorKVStoreEmptyKey;
     try {
-      await (
-        await this.contract.set(key, value, this.applyTxDefaults(txOptions))
-      ).wait();
+      await (await this.contract.set(key, value, txOptions)).wait();
     } catch (e) {
       if (e instanceof Error) throw Error(`Failed to set value: ${e.message}`);
     }
@@ -222,13 +220,7 @@ export class KVStoreClient extends BaseEthersClient {
     if (keys.includes('')) throw ErrorKVStoreEmptyKey;
 
     try {
-      await (
-        await this.contract.setBulk(
-          keys,
-          values,
-          this.applyTxDefaults(txOptions)
-        )
-      ).wait();
+      await (await this.contract.setBulk(keys, values, txOptions)).wait();
     } catch (e) {
       if (e instanceof Error)
         throw Error(`Failed to set bulk values: ${e.message}`);
@@ -281,7 +273,7 @@ export class KVStoreClient extends BaseEthersClient {
         await this.contract.setBulk(
           [urlKey, hashKey],
           [url, contentHash],
-          this.applyTxDefaults(txOptions)
+          txOptions
         )
       ).wait();
     } catch (e) {
