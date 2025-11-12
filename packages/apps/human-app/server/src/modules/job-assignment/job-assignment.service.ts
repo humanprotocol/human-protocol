@@ -69,7 +69,7 @@ export class JobAssignmentService {
       );
     assignmentsParamsCommand.token = command.token;
 
-    void this.updateAssignmentsCache(assignmentsParamsCommand);
+    await this.updateAssignmentsCache(assignmentsParamsCommand);
 
     return response;
   }
@@ -82,7 +82,7 @@ export class JobAssignmentService {
     assignmentsParamsCommand.oracleAddress = command.oracleAddress;
     assignmentsParamsCommand.token = command.token;
 
-    void this.updateAssignmentsCache(assignmentsParamsCommand);
+    await this.updateAssignmentsCache(assignmentsParamsCommand);
 
     return response;
   }
