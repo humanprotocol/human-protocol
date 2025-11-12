@@ -81,6 +81,18 @@ class TestGetDataFromSubgraph(unittest.TestCase):
         self.assertEqual(mock_fetch.call_count, 2)
         mock_sleep.assert_called_once()
 
+    def test_raises_when_retry_options_incomplete(self):
+        options = SubgraphOptions(max_retries=2)
+
+        with patch("human_protocol_sdk.utils._fetch_subgraph_data") as mock_fetch:
+            with self.assertRaises(ValueError) as ctx:
+                custom_gql_fetch(
+                    self.network, self.query, self.variables, options=options
+                )
+
+        self.assertIn("max_retries", str(ctx.exception))
+        mock_fetch.assert_not_called()
+
     def test_raises_immediately_on_non_indexer_error(self):
         options = SubgraphOptions(max_retries=3, base_delay=50)
         with patch(

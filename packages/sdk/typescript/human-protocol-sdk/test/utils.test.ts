@@ -19,6 +19,7 @@ import {
   ReplacementUnderpriced,
   TransactionReplaced,
   WarnSubgraphApiKeyNotProvided,
+  ErrorRetryParametersMissing,
 } from '../src/error';
 import {
   getSubgraphUrl,
@@ -298,21 +299,24 @@ describe('customGqlFetch', () => {
     expect(gqlFetchSpy).toHaveBeenCalledTimes(3);
   });
 
-  test('uses default values for missing maxRetries', async () => {
-    const badIndexerError = {
-      response: {
-        errors: [{ message: 'bad indexers: {0x123: Timeout}' }],
-      },
-    };
-    const gqlFetchSpy = vi
-      .spyOn(gqlFetch, 'default')
-      .mockRejectedValue(badIndexerError);
+  test('throws when retry options are incomplete', async () => {
+    const gqlFetchSpy = vi.spyOn(gqlFetch, 'default');
 
     await expect(
       customGqlFetch(mockUrl, mockQuery, mockVariables, { baseDelay: 10 })
-    ).rejects.toEqual(badIndexerError);
+    ).rejects.toBe(ErrorRetryParametersMissing);
 
-    expect(gqlFetchSpy).toHaveBeenCalledTimes(4);
+    expect(gqlFetchSpy).not.toHaveBeenCalled();
+  });
+
+  test('throws when only maxRetries is provided', async () => {
+    const gqlFetchSpy = vi.spyOn(gqlFetch, 'default');
+
+    await expect(
+      customGqlFetch(mockUrl, mockQuery, mockVariables, { maxRetries: 1 })
+    ).rejects.toBe(ErrorRetryParametersMissing);
+
+    expect(gqlFetchSpy).not.toHaveBeenCalled();
   });
 
   test('uses custom maxRetries when provided', async () => {

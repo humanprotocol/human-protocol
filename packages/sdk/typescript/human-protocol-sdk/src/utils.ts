@@ -7,6 +7,7 @@ import { SUBGRAPH_API_KEY_PLACEHOLDER } from './constants';
 import { ChainId } from './enums';
 import {
   ContractExecutionError,
+  ErrorRetryParametersMissing,
   EthereumError,
   InvalidArgumentError,
   NonceExpired,
@@ -131,19 +132,23 @@ export const customGqlFetch = async <T = any>(
     return await gqlFetch<T>(url, query, variables);
   }
 
-  const maxRetries = options.maxRetries ?? 3;
-  const baseDelay = options.baseDelay ?? 1000;
+  if (
+    (options.maxRetries && options.baseDelay === undefined) ||
+    (options.baseDelay && options.maxRetries === undefined)
+  ) {
+    throw ErrorRetryParametersMissing;
+  }
 
   let lastError: any;
 
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+  for (let attempt = 0; attempt <= (options.maxRetries as number); attempt++) {
     try {
       const result = await gqlFetch<T>(url, query, variables);
       return result;
     } catch (error) {
       lastError = error;
 
-      if (attempt === maxRetries) {
+      if (attempt === options.maxRetries) {
         throw error;
       }
 
@@ -151,7 +156,7 @@ export const customGqlFetch = async <T = any>(
         throw error;
       }
 
-      const delay = baseDelay * attempt;
+      const delay = (options.baseDelay as number) * attempt;
       await sleep(delay);
     }
   }

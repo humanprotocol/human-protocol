@@ -317,8 +317,8 @@ export interface IEscrowWithdraw {
  * Configuration options for subgraph requests with retry logic.
  */
 export interface SubgraphOptions {
-  /** Maximum number of retry attempts (default: 3) */
+  /** Maximum number of retry attempts */
   maxRetries?: number;
-  /** Base delay between retries in milliseconds (default: 1000) */
+  /** Base delay between retries in milliseconds */
   baseDelay?: number;
 }

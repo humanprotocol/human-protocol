@@ -3,7 +3,7 @@ import logging
 import os
 import time
 import re
-from typing import Tuple, Optional, Dict, Any
+from typing import Tuple, Optional
 from dataclasses import dataclass
 
 import requests
@@ -37,8 +37,8 @@ except ImportError:
 class SubgraphOptions:
     """Configuration for subgraph logic."""
 
-    max_retries: int = 3
-    base_delay: int = 1000  # milliseconds
+    max_retries: Optional[int] = None
+    base_delay: Optional[int] = None  # milliseconds
 
 
 def is_indexer_error(error: Exception) -> bool:
@@ -94,7 +94,17 @@ def custom_gql_fetch(
     if not options:
         return _fetch_subgraph_data(network, query, params)
 
-    max_retries = options.max_retries
+    if (
+        options.max_retries is not None
+        and options.base_delay is None
+        or options.max_retries is None
+        and options.base_delay is not None
+    ):
+        raise ValueError(
+            "Retry configuration must include both max_retries and base_delay"
+        )
+
+    max_retries = int(options.max_retries)
     base_delay = options.base_delay / 1000
 
     last_error = None
