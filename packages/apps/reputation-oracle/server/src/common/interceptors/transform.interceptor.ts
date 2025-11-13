@@ -23,6 +23,10 @@ export class TransformInterceptor implements NestInterceptor {
       request.query = this.transformRequestData(request.query);
     }
 
+    if (request.params) {
+      request.params = this.transformRequestData(request.params);
+    }
+
     return next.handle().pipe(map((data) => this.transformResponseData(data)));
   }
 

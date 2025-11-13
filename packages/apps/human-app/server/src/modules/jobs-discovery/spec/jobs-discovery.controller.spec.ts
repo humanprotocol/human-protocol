@@ -14,6 +14,7 @@ import {
   dtoFixture,
   jobsDiscoveryParamsCommandFixture,
   responseFixture,
+  jobDiscoveryToken,
 } from './jobs-discovery.fixtures';
 import { jobsDiscoveryServiceMock } from './jobs-discovery.service.mock';
 
@@ -73,7 +74,7 @@ describe('JobsDiscoveryController', () => {
       const dto = dtoFixture;
       const command = jobsDiscoveryParamsCommandFixture;
       await controller.getJobs(dto, {
-        user: { qualifications: [] },
+        user: { qualifications: [], is_stake_eligible: true },
         token: command.token,
       } as any);
       command.data.qualifications = [];
@@ -90,6 +91,22 @@ describe('JobsDiscoveryController', () => {
       ).rejects.toThrow(
         new HttpException('Jobs discovery is disabled', HttpStatus.FORBIDDEN),
       );
+      (configServiceMock as any).jobsDiscoveryFlag = true;
+    });
+
+    it('should return empty results if user is not stake eligible', async () => {
+      const dto = dtoFixture;
+      const result = await controller.getJobs(dto, {
+        user: { qualifications: [], is_stake_eligible: false },
+        token: jobDiscoveryToken,
+      } as any);
+      expect(result).toEqual({
+        page: 0,
+        page_size: 1,
+        total_pages: 1,
+        total_results: 0,
+        results: [],
+      });
     });
   });
 });

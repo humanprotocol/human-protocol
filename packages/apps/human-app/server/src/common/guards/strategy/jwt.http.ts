@@ -44,6 +44,7 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
       status: string;
       wallet_address: string;
       reputation_network: string;
+      is_stake_eligible?: boolean;
       qualifications?: string[];
       site_key?: string;
       email?: string;
@@ -58,6 +59,7 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
       wallet_address: payload.wallet_address,
       status: payload.status,
       reputation_network: payload.reputation_network,
+      is_stake_eligible: payload.is_stake_eligible,
       qualifications: payload.qualifications,
       site_key: payload.site_key,
       email: payload.email,
