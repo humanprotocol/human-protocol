@@ -6,7 +6,7 @@
 
 # Class: StatisticsClient
 
-Defined in: [statistics.ts:60](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L60)
+Defined in: [statistics.ts:60](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L60)
 
 ## Introduction
 
@@ -45,7 +45,7 @@ const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_AMOY]);
 
 > **new StatisticsClient**(`networkData`): `StatisticsClient`
 
-Defined in: [statistics.ts:69](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L69)
+Defined in: [statistics.ts:69](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L69)
 
 **StatisticsClient constructor**
 
@@ -67,7 +67,7 @@ The network information required to connect to the Statistics contract
 
 > **networkData**: [`NetworkData`](../../types/type-aliases/NetworkData.md)
 
-Defined in: [statistics.ts:61](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L61)
+Defined in: [statistics.ts:61](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L61)
 
 ***
 
@@ -75,7 +75,7 @@ Defined in: [statistics.ts:61](https://github.com/humanprotocol/human-protocol/b
 
 > **subgraphUrl**: `string`
 
-Defined in: [statistics.ts:62](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L62)
+Defined in: [statistics.ts:62](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L62)
 
 ## Methods
 
@@ -83,7 +83,7 @@ Defined in: [statistics.ts:62](https://github.com/humanprotocol/human-protocol/b
 
 > **getEscrowStatistics**(`filter`): `Promise`\<[`IEscrowStatistics`](../../interfaces/interfaces/IEscrowStatistics.md)\>
 
-Defined in: [statistics.ts:122](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L122)
+Defined in: [statistics.ts:122](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L122)
 
 This function returns the statistical data of escrows.
 
@@ -149,7 +149,7 @@ const escrowStatisticsApril = await statisticsClient.getEscrowStatistics({
 
 > **getHMTDailyData**(`filter`): `Promise`\<[`IDailyHMT`](../../interfaces/interfaces/IDailyHMT.md)[]\>
 
-Defined in: [statistics.ts:478](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L478)
+Defined in: [statistics.ts:478](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L478)
 
 This function returns the statistical data of HMToken day by day.
 
@@ -214,7 +214,7 @@ console.log('HMT statistics from 5/8 - 6/8:', hmtStatisticsRange);
 
 > **getHMTHolders**(`params`): `Promise`\<[`IHMTHolder`](../../interfaces/interfaces/IHMTHolder.md)[]\>
 
-Defined in: [statistics.ts:407](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L407)
+Defined in: [statistics.ts:407](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L407)
 
 This function returns the holders of the HMToken with optional filters and ordering.
 
@@ -257,7 +257,7 @@ console.log('HMT holders:', hmtHolders.map((h) => ({
 
 > **getHMTStatistics**(): `Promise`\<[`IHMTStatistics`](../../interfaces/interfaces/IHMTStatistics.md)\>
 
-Defined in: [statistics.ts:366](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L366)
+Defined in: [statistics.ts:366](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L366)
 
 This function returns the statistical data of HMToken.
 
@@ -296,7 +296,7 @@ console.log('HMT statistics:', {
 
 > **getPaymentStatistics**(`filter`): `Promise`\<[`IPaymentStatistics`](../../interfaces/interfaces/IPaymentStatistics.md)\>
 
-Defined in: [statistics.ts:302](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L302)
+Defined in: [statistics.ts:302](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L302)
 
 This function returns the statistical data of payments.
 
@@ -380,7 +380,7 @@ console.log(
 
 > **getWorkerStatistics**(`filter`): `Promise`\<[`IWorkerStatistics`](../../interfaces/interfaces/IWorkerStatistics.md)\>
 
-Defined in: [statistics.ts:206](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L206)
+Defined in: [statistics.ts:206](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L206)
 
 This function returns the statistical data of workers.
 
