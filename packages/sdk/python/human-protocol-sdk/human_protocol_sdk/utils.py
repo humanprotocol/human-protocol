@@ -18,7 +18,6 @@ from human_protocol_sdk.constants import (
     ARTIFACTS_FOLDER,
     SUBGRAPH_API_KEY_PLACEHOLDER,
     ChainId,
-    DEFAULT_AURORA_GAS_PRICE,
 )
 
 logger = logging.getLogger("human_protocol_sdk.utils")

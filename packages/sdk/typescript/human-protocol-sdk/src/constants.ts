@@ -117,21 +117,6 @@ export const NETWORKS: {
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },
-  [ChainId.AURORA_TESTNET]: {
-    chainId: ChainId.AURORA_TESTNET,
-    title: 'Aurora Testnet',
-    scanUrl: 'https://explorer.testnet.aurora.dev/',
-    factoryAddress: '0xbA537fEF2442cD48f60686FE1Bbbe40F964a7940',
-    hmtAddress: '0x792abbcC99c01dbDec49c9fa9A828a186Da45C33',
-    stakingAddress: '0x7457d26a3C70Bd71F7557C773b303c1dB82BBB68',
-    kvstoreAddress: '0xD6D347ba6987519B4e42EcED43dF98eFf5465a23',
-    subgraphUrl:
-      'https://api.studio.thegraph.com/query/74256/amoy/version/latest',
-    subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmVHYvjbsgAroR9EMgqqGTQ7aKPRFMVekY6evU6mFPUU7J',
-    oldSubgraphUrl: '',
-    oldFactoryAddress: '',
-  },
   [ChainId.LOCALHOST]: {
     chainId: ChainId.LOCALHOST,
     title: 'Localhost',

@@ -50,18 +50,6 @@ class ServiceIntegrationTest(unittest.TestCase):
         assert w3.eth.default_account == DEFAULT_GAS_PAYER
         assert w3.manager._provider.endpoint_uri == PolygonAmoyConfig.rpc_api
 
-    def test_get_web3_aurora_testnet(self):
-        class AuroraTestnetConfig:
-            chain_id = 1313161555
-            rpc_api = "	https://testnet.aurora.dev"
-            private_key = DEFAULT_GAS_PAYER_PRIV
-
-        with patch("src.chain.web3.Config.aurora_testnet", AuroraTestnetConfig):
-            w3 = get_web3(ChainId.AURORA_TESTNET.value)
-        assert isinstance(w3, Web3)
-        assert w3.eth.default_account == DEFAULT_GAS_PAYER
-        assert w3.manager._provider.endpoint_uri == AuroraTestnetConfig.rpc_api
-
     def test_get_web3_localhost(self):
         w3 = get_web3(ChainId.LOCALHOST.value)
         assert isinstance(w3, Web3)
@@ -79,7 +67,8 @@ class ServiceIntegrationTest(unittest.TestCase):
                 DEFAULT_GAS_PAYER_PRIV,
             ):
                 mock_function.return_value = self.w3
-                signature, serialized_message = sign_message(ChainId.POLYGON.value, "message")
+                signature, serialized_message = sign_message(
+                    ChainId.POLYGON.value, "message")
             assert signature == SIGNATURE
             assert serialized_message == json.dumps("message")
 
@@ -90,20 +79,8 @@ class ServiceIntegrationTest(unittest.TestCase):
                 DEFAULT_GAS_PAYER_PRIV,
             ):
                 mock_function.return_value = self.w3
-                signature, serialized_message = sign_message(ChainId.POLYGON_AMOY.value, "message")
-            assert signature == SIGNATURE
-            assert serialized_message == json.dumps("message")
-
-    def test_sign_message_aurora_tesnet(self):
-        with patch("src.chain.web3.get_web3") as mock_function:
-            with patch(
-                "src.chain.web3.Config.aurora_testnet.private_key",
-                DEFAULT_GAS_PAYER_PRIV,
-            ):
-                mock_function.return_value = self.w3
                 signature, serialized_message = sign_message(
-                    ChainId.AURORA_TESTNET.value, "message"
-                )
+                    ChainId.POLYGON_AMOY.value, "message")
             assert signature == SIGNATURE
             assert serialized_message == json.dumps("message")
 
@@ -114,7 +91,8 @@ class ServiceIntegrationTest(unittest.TestCase):
     def test_recover_signer(self):
         with patch("src.chain.web3.get_web3") as mock_function:
             mock_function.return_value = self.w3
-            signer = recover_signer(ChainId.POLYGON.value, "message", SIGNATURE)
+            signer = recover_signer(
+                ChainId.POLYGON.value, "message", SIGNATURE)
         assert signer == DEFAULT_GAS_PAYER
 
     def test_recover_signer_invalid_signature(self):
