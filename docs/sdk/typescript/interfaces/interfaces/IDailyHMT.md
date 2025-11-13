@@ -6,7 +6,7 @@
 
 # Interface: IDailyHMT
 
-Defined in: [interfaces.ts:277](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L277)
+Defined in: [interfaces.ts:277](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L277)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [interfaces.ts:277](https://github.com/humanprotocol/human-protocol/
 
 > **dailyUniqueReceivers**: `number`
 
-Defined in: [interfaces.ts:282](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L282)
+Defined in: [interfaces.ts:282](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L282)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [interfaces.ts:282](https://github.com/humanprotocol/human-protocol/
 
 > **dailyUniqueSenders**: `number`
 
-Defined in: [interfaces.ts:281](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L281)
+Defined in: [interfaces.ts:281](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L281)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [interfaces.ts:281](https://github.com/humanprotocol/human-protocol/
 
 > **timestamp**: `number`
 
-Defined in: [interfaces.ts:278](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L278)
+Defined in: [interfaces.ts:278](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L278)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [interfaces.ts:278](https://github.com/humanprotocol/human-protocol/
 
 > **totalTransactionAmount**: `bigint`
 
-Defined in: [interfaces.ts:279](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L279)
+Defined in: [interfaces.ts:279](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L279)
 
 ***
 
@@ -46,4 +46,4 @@ Defined in: [interfaces.ts:279](https://github.com/humanprotocol/human-protocol/
 
 > **totalTransactionCount**: `number`
 
-Defined in: [interfaces.ts:280](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L280)
+Defined in: [interfaces.ts:280](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L280)

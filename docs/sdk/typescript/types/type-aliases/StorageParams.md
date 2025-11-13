@@ -8,7 +8,7 @@
 
 > **StorageParams** = `object`
 
-Defined in: [types.ts:58](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L58)
+Defined in: [types.ts:58](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L58)
 
 ## Deprecated
 
@@ -20,7 +20,7 @@ StorageClient is deprecated. Use Minio.Client directly.
 
 > **endPoint**: `string`
 
-Defined in: [types.ts:62](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L62)
+Defined in: [types.ts:62](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L62)
 
 Request endPoint
 
@@ -30,7 +30,7 @@ Request endPoint
 
 > `optional` **port**: `number`
 
-Defined in: [types.ts:74](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L74)
+Defined in: [types.ts:74](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L74)
 
 TCP/IP port number. Default value set to 80 for HTTP and 443 for HTTPs
 
@@ -40,7 +40,7 @@ TCP/IP port number. Default value set to 80 for HTTP and 443 for HTTPs
 
 > `optional` **region**: `string`
 
-Defined in: [types.ts:70](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L70)
+Defined in: [types.ts:70](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L70)
 
 Region
 
@@ -50,6 +50,6 @@ Region
 
 > **useSSL**: `boolean`
 
-Defined in: [types.ts:66](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L66)
+Defined in: [types.ts:66](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L66)
 
 Enable secure (HTTPS) access. Default value set to false

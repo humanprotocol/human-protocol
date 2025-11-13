@@ -23,7 +23,7 @@ from human_protocol_sdk.filter import (
 class TestEscrowUtils(unittest.TestCase):
     def test_get_escrows(self):
         with patch(
-            "human_protocol_sdk.escrow.escrow_utils.get_data_from_subgraph"
+            "human_protocol_sdk.escrow.escrow_utils.custom_gql_fetch"
         ) as mock_function:
             mock_escrow = {
                 "id": "0x1234567890123456789012345678901234567891",
@@ -51,7 +51,7 @@ class TestEscrowUtils(unittest.TestCase):
                 "createdAt": "1683811973",
             }
 
-            def side_effect(subgraph_url, query, params):
+            def side_effect(subgraph_url, query, params, options):
                 if subgraph_url == NETWORKS[ChainId.POLYGON_AMOY]:
                     return {"data": {"escrows": [mock_escrow]}}
 
@@ -83,6 +83,7 @@ class TestEscrowUtils(unittest.TestCase):
                     "skip": 0,
                     "orderDirection": "desc",
                 },
+                options=None,
             )
             self.assertEqual(len(filtered), 1)
             self.assertEqual(filtered[0].address, mock_escrow["address"])
@@ -154,6 +155,7 @@ class TestEscrowUtils(unittest.TestCase):
                     "skip": 0,
                     "orderDirection": "desc",
                 },
+                options=None,
             )
             self.assertEqual(len(filtered), 1)
             self.assertEqual(filtered[0].chain_id, ChainId.POLYGON_AMOY)
@@ -161,7 +163,7 @@ class TestEscrowUtils(unittest.TestCase):
     def test_get_escrows_with_status_array(self):
         """Test get_escrows with an array of statuses, similar to the TypeScript test."""
         with patch(
-            "human_protocol_sdk.escrow.escrow_utils.get_data_from_subgraph"
+            "human_protocol_sdk.escrow.escrow_utils.custom_gql_fetch"
         ) as mock_function:
             mock_escrow_1 = {
                 "id": "0x1234567890123456789012345678901234567891",
@@ -204,7 +206,7 @@ class TestEscrowUtils(unittest.TestCase):
                 "createdAt": "1672531200000",
             }
 
-            def side_effect(subgraph_url, query, params):
+            def side_effect(subgraph_url, query, params, options):
                 if subgraph_url == NETWORKS[ChainId.POLYGON_AMOY]:
                     return {"data": {"escrows": [mock_escrow_1, mock_escrow_2]}}
 
@@ -232,6 +234,7 @@ class TestEscrowUtils(unittest.TestCase):
                     "skip": 0,
                     "orderDirection": "desc",
                 },
+                options=None,
             )
             self.assertEqual(len(filtered), 2)
             self.assertEqual(filtered[0].address, mock_escrow_1["address"])
@@ -239,7 +242,7 @@ class TestEscrowUtils(unittest.TestCase):
 
     def test_get_escrow(self):
         with patch(
-            "human_protocol_sdk.escrow.escrow_utils.get_data_from_subgraph"
+            "human_protocol_sdk.escrow.escrow_utils.custom_gql_fetch"
         ) as mock_function:
             mock_escrow = {
                 "id": "0x1234567890123456789012345678901234567891",
@@ -284,6 +287,7 @@ class TestEscrowUtils(unittest.TestCase):
                 params={
                     "escrowAddress": "0x1234567890123456789012345678901234567890",
                 },
+                options=None,
             )
             self.assertEqual(escrow.chain_id, ChainId.POLYGON_AMOY)
             self.assertEqual(escrow.address, mock_escrow["address"])
@@ -325,7 +329,7 @@ class TestEscrowUtils(unittest.TestCase):
 
     def test_get_escrow_empty_data(self):
         with patch(
-            "human_protocol_sdk.escrow.escrow_utils.get_data_from_subgraph"
+            "human_protocol_sdk.escrow.escrow_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.return_value = {
                 "data": {
@@ -343,6 +347,7 @@ class TestEscrowUtils(unittest.TestCase):
                 params={
                     "escrowAddress": "0x1234567890123456789012345678901234567890",
                 },
+                options=None,
             )
             self.assertEqual(escrow, None)
 
@@ -367,9 +372,9 @@ class TestEscrowUtils(unittest.TestCase):
 
     def test_get_status_events(self):
         with patch(
-            "human_protocol_sdk.escrow.escrow_utils.get_data_from_subgraph"
-        ) as mock_get_data_from_subgraph:
-            mock_get_data_from_subgraph.return_value = {
+            "human_protocol_sdk.escrow.escrow_utils.custom_gql_fetch"
+        ) as mock_custom_gql_fetch:
+            mock_custom_gql_fetch.return_value = {
                 "data": {
                     "escrowStatusEvents": [
                         {
@@ -394,9 +399,9 @@ class TestEscrowUtils(unittest.TestCase):
 
     def test_get_status_events_with_date_range(self):
         with patch(
-            "human_protocol_sdk.escrow.escrow_utils.get_data_from_subgraph"
-        ) as mock_get_data_from_subgraph:
-            mock_get_data_from_subgraph.return_value = {
+            "human_protocol_sdk.escrow.escrow_utils.custom_gql_fetch"
+        ) as mock_custom_gql_fetch:
+            mock_custom_gql_fetch.return_value = {
                 "data": {
                     "escrowStatusEvents": [
                         {
@@ -427,9 +432,9 @@ class TestEscrowUtils(unittest.TestCase):
 
     def test_get_status_events_no_data(self):
         with patch(
-            "human_protocol_sdk.escrow.escrow_utils.get_data_from_subgraph"
-        ) as mock_get_data_from_subgraph:
-            mock_get_data_from_subgraph.return_value = {"data": {}}
+            "human_protocol_sdk.escrow.escrow_utils.custom_gql_fetch"
+        ) as mock_custom_gql_fetch:
+            mock_custom_gql_fetch.return_value = {"data": {}}
 
             filter = StatusEventFilter(
                 chain_id=ChainId.POLYGON_AMOY, statuses=[Status.Pending]
@@ -440,9 +445,9 @@ class TestEscrowUtils(unittest.TestCase):
 
     def test_get_status_events_with_launcher(self):
         with patch(
-            "human_protocol_sdk.escrow.escrow_utils.get_data_from_subgraph"
-        ) as mock_get_data_from_subgraph:
-            mock_get_data_from_subgraph.return_value = {
+            "human_protocol_sdk.escrow.escrow_utils.custom_gql_fetch"
+        ) as mock_custom_gql_fetch:
+            mock_custom_gql_fetch.return_value = {
                 "data": {
                     "escrowStatusEvents": [
                         {
@@ -487,9 +492,9 @@ class TestEscrowUtils(unittest.TestCase):
 
     def test_get_payouts(self):
         with patch(
-            "human_protocol_sdk.escrow.escrow_utils.get_data_from_subgraph"
-        ) as mock_get_data_from_subgraph:
-            mock_get_data_from_subgraph.return_value = {
+            "human_protocol_sdk.escrow.escrow_utils.custom_gql_fetch"
+        ) as mock_custom_gql_fetch:
+            mock_custom_gql_fetch.return_value = {
                 "data": {
                     "payouts": [
                         {
@@ -519,9 +524,9 @@ class TestEscrowUtils(unittest.TestCase):
 
     def test_get_payouts_with_filters(self):
         with patch(
-            "human_protocol_sdk.escrow.escrow_utils.get_data_from_subgraph"
-        ) as mock_get_data_from_subgraph:
-            mock_get_data_from_subgraph.return_value = {
+            "human_protocol_sdk.escrow.escrow_utils.custom_gql_fetch"
+        ) as mock_custom_gql_fetch:
+            mock_custom_gql_fetch.return_value = {
                 "data": {
                     "payouts": [
                         {
@@ -557,9 +562,9 @@ class TestEscrowUtils(unittest.TestCase):
 
     def test_get_payouts_no_data(self):
         with patch(
-            "human_protocol_sdk.escrow.escrow_utils.get_data_from_subgraph"
-        ) as mock_get_data_from_subgraph:
-            mock_get_data_from_subgraph.return_value = {"data": {"payouts": []}}
+            "human_protocol_sdk.escrow.escrow_utils.custom_gql_fetch"
+        ) as mock_custom_gql_fetch:
+            mock_custom_gql_fetch.return_value = {"data": {"payouts": []}}
 
             filter = PayoutFilter(chain_id=ChainId.POLYGON_AMOY)
             result = EscrowUtils.get_payouts(filter)
@@ -568,9 +573,9 @@ class TestEscrowUtils(unittest.TestCase):
 
     def test_get_payouts_with_pagination(self):
         with patch(
-            "human_protocol_sdk.escrow.escrow_utils.get_data_from_subgraph"
-        ) as mock_get_data_from_subgraph:
-            mock_get_data_from_subgraph.return_value = {
+            "human_protocol_sdk.escrow.escrow_utils.custom_gql_fetch"
+        ) as mock_custom_gql_fetch:
+            mock_custom_gql_fetch.return_value = {
                 "data": {
                     "payouts": [
                         {
@@ -604,7 +609,7 @@ class TestEscrowUtils(unittest.TestCase):
         from human_protocol_sdk.escrow.escrow_utils import CancellationRefundFilter
 
         with patch(
-            "human_protocol_sdk.escrow.escrow_utils.get_data_from_subgraph"
+            "human_protocol_sdk.escrow.escrow_utils.custom_gql_fetch"
         ) as mock_function:
             mock_refund = {
                 "id": "1",
@@ -616,7 +621,7 @@ class TestEscrowUtils(unittest.TestCase):
                 "txHash": "0xhash1",
             }
 
-            def side_effect(subgraph_url, query, params):
+            def side_effect(subgraph_url, query, params, options):
                 if subgraph_url == NETWORKS[ChainId.POLYGON_AMOY]:
                     return {"data": {"cancellationRefundEvents": [mock_refund]}}
 
@@ -674,7 +679,7 @@ class TestEscrowUtils(unittest.TestCase):
         from human_protocol_sdk.escrow.escrow_utils import CancellationRefundFilter
 
         with patch(
-            "human_protocol_sdk.escrow.escrow_utils.get_data_from_subgraph"
+            "human_protocol_sdk.escrow.escrow_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.return_value = {"data": {"cancellationRefundEvents": []}}
 
@@ -685,7 +690,7 @@ class TestEscrowUtils(unittest.TestCase):
 
     def test_get_cancellation_refund(self):
         with patch(
-            "human_protocol_sdk.escrow.escrow_utils.get_data_from_subgraph"
+            "human_protocol_sdk.escrow.escrow_utils.custom_gql_fetch"
         ) as mock_function:
             mock_refund = {
                 "id": "1",
@@ -720,7 +725,7 @@ class TestEscrowUtils(unittest.TestCase):
 
     def test_get_cancellation_refund_no_data(self):
         with patch(
-            "human_protocol_sdk.escrow.escrow_utils.get_data_from_subgraph"
+            "human_protocol_sdk.escrow.escrow_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.return_value = {"data": {"cancellationRefundEvents": []}}
 

@@ -6,7 +6,7 @@
 
 # Interface: IEscrowStatistics
 
-Defined in: [interfaces.ts:241](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L241)
+Defined in: [interfaces.ts:241](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L241)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [interfaces.ts:241](https://github.com/humanprotocol/human-protocol/
 
 > **dailyEscrowsData**: [`IDailyEscrow`](IDailyEscrow.md)[]
 
-Defined in: [interfaces.ts:243](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L243)
+Defined in: [interfaces.ts:243](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L243)
 
 ***
 
@@ -22,4 +22,4 @@ Defined in: [interfaces.ts:243](https://github.com/humanprotocol/human-protocol/
 
 > **totalEscrows**: `number`
 
-Defined in: [interfaces.ts:242](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L242)
+Defined in: [interfaces.ts:242](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L242)

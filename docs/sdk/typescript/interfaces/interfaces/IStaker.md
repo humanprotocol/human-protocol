@@ -6,7 +6,7 @@
 
 # Interface: IStaker
 
-Defined in: [interfaces.ts:197](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L197)
+Defined in: [interfaces.ts:197](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L197)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [interfaces.ts:197](https://github.com/humanprotocol/human-protocol/
 
 > **address**: `string`
 
-Defined in: [interfaces.ts:198](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L198)
+Defined in: [interfaces.ts:198](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L198)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [interfaces.ts:198](https://github.com/humanprotocol/human-protocol/
 
 > **lastDepositTimestamp**: `number`
 
-Defined in: [interfaces.ts:204](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L204)
+Defined in: [interfaces.ts:204](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L204)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [interfaces.ts:204](https://github.com/humanprotocol/human-protocol/
 
 > **lockedAmount**: `bigint`
 
-Defined in: [interfaces.ts:200](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L200)
+Defined in: [interfaces.ts:200](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L200)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [interfaces.ts:200](https://github.com/humanprotocol/human-protocol/
 
 > **lockedUntil**: `number`
 
-Defined in: [interfaces.ts:203](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L203)
+Defined in: [interfaces.ts:203](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L203)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [interfaces.ts:203](https://github.com/humanprotocol/human-protocol/
 
 > **slashedAmount**: `bigint`
 
-Defined in: [interfaces.ts:202](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L202)
+Defined in: [interfaces.ts:202](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L202)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [interfaces.ts:202](https://github.com/humanprotocol/human-protocol/
 
 > **stakedAmount**: `bigint`
 
-Defined in: [interfaces.ts:199](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L199)
+Defined in: [interfaces.ts:199](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L199)
 
 ***
 
@@ -62,4 +62,4 @@ Defined in: [interfaces.ts:199](https://github.com/humanprotocol/human-protocol/
 
 > **withdrawableAmount**: `bigint`
 
-Defined in: [interfaces.ts:201](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L201)
+Defined in: [interfaces.ts:201](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L201)

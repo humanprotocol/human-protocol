@@ -6,7 +6,7 @@
 
 # Class: EscrowUtils
 
-Defined in: [escrow.ts:1840](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1840)
+Defined in: [escrow.ts:1842](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1842)
 
 ## Introduction
 
@@ -52,9 +52,9 @@ const escrowAddresses = new EscrowUtils.getEscrows({
 
 ### getCancellationRefund()
 
-> `static` **getCancellationRefund**(`chainId`, `escrowAddress`): `Promise`\<[`ICancellationRefund`](../../interfaces/interfaces/ICancellationRefund.md) \| `null`\>
+> `static` **getCancellationRefund**(`chainId`, `escrowAddress`, `options?`): `Promise`\<[`ICancellationRefund`](../../interfaces/interfaces/ICancellationRefund.md) \| `null`\>
 
-Defined in: [escrow.ts:2415](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L2415)
+Defined in: [escrow.ts:2434](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L2434)
 
 This function returns the cancellation refund for a given escrow address.
 
@@ -101,6 +101,12 @@ Network in which the escrow has been deployed
 
 Address of the escrow
 
+##### options?
+
+[`SubgraphOptions`](../../interfaces/interfaces/SubgraphOptions.md)
+
+Optional configuration for subgraph requests.
+
 #### Returns
 
 `Promise`\<[`ICancellationRefund`](../../interfaces/interfaces/ICancellationRefund.md) \| `null`\>
@@ -119,9 +125,9 @@ const cancellationRefund = await EscrowUtils.getCancellationRefund(ChainId.POLYG
 
 ### getCancellationRefunds()
 
-> `static` **getCancellationRefunds**(`filter`): `Promise`\<[`ICancellationRefund`](../../interfaces/interfaces/ICancellationRefund.md)[]\>
+> `static` **getCancellationRefunds**(`filter`, `options?`): `Promise`\<[`ICancellationRefund`](../../interfaces/interfaces/ICancellationRefund.md)[]\>
 
-Defined in: [escrow.ts:2319](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L2319)
+Defined in: [escrow.ts:2338](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L2338)
 
 This function returns the cancellation refunds for a given set of networks.
 
@@ -158,39 +164,15 @@ interface ICancellationRefund {
 
 ##### filter
 
+[`ICancellationRefundFilter`](../../interfaces/interfaces/ICancellationRefundFilter.md)
+
 Filter parameters.
 
-###### chainId
+##### options?
 
-[`ChainId`](../../enums/enumerations/ChainId.md)
+[`SubgraphOptions`](../../interfaces/interfaces/SubgraphOptions.md)
 
-###### escrowAddress?
-
-`string`
-
-###### first?
-
-`number`
-
-###### from?
-
-`Date`
-
-###### orderDirection?
-
-[`OrderDirection`](../../enums/enumerations/OrderDirection.md)
-
-###### receiver?
-
-`string`
-
-###### skip?
-
-`number`
-
-###### to?
-
-`Date`
+Optional configuration for subgraph requests.
 
 #### Returns
 
@@ -214,9 +196,9 @@ console.log(cancellationRefunds);
 
 ### getEscrow()
 
-> `static` **getEscrow**(`chainId`, `escrowAddress`): `Promise`\<[`IEscrow`](../../interfaces/interfaces/IEscrow.md) \| `null`\>
+> `static` **getEscrow**(`chainId`, `escrowAddress`, `options?`): `Promise`\<[`IEscrow`](../../interfaces/interfaces/IEscrow.md) \| `null`\>
 
-Defined in: [escrow.ts:2059](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L2059)
+Defined in: [escrow.ts:2067](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L2067)
 
 This function returns the escrow data for a given address.
 
@@ -281,6 +263,12 @@ Network in which the escrow has been deployed
 
 Address of the escrow
 
+##### options?
+
+[`SubgraphOptions`](../../interfaces/interfaces/SubgraphOptions.md)
+
+Optional configuration for subgraph requests.
+
 #### Returns
 
 `Promise`\<[`IEscrow`](../../interfaces/interfaces/IEscrow.md) \| `null`\>
@@ -299,9 +287,9 @@ const escrow = new EscrowUtils.getEscrow(ChainId.POLYGON_AMOY, "0x12345678901234
 
 ### getEscrows()
 
-> `static` **getEscrows**(`filter`): `Promise`\<[`IEscrow`](../../interfaces/interfaces/IEscrow.md)[]\>
+> `static` **getEscrows**(`filter`, `options?`): `Promise`\<[`IEscrow`](../../interfaces/interfaces/IEscrow.md)[]\>
 
-Defined in: [escrow.ts:1943](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1943)
+Defined in: [escrow.ts:1946](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1946)
 
 This function returns an array of escrows based on the specified filter parameters.
 
@@ -393,6 +381,12 @@ interface IEscrow {
 
 Filter parameters.
 
+##### options?
+
+[`SubgraphOptions`](../../interfaces/interfaces/SubgraphOptions.md)
+
+Optional configuration for subgraph requests.
+
 #### Returns
 
 `Promise`\<[`IEscrow`](../../interfaces/interfaces/IEscrow.md)[]\>
@@ -417,9 +411,9 @@ const escrows = await EscrowUtils.getEscrows(filters);
 
 ### getPayouts()
 
-> `static` **getPayouts**(`filter`): `Promise`\<[`IPayout`](../../interfaces/interfaces/IPayout.md)[]\>
+> `static` **getPayouts**(`filter`, `options?`): `Promise`\<[`IPayout`](../../interfaces/interfaces/IPayout.md)[]\>
 
-Defined in: [escrow.ts:2228](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L2228)
+Defined in: [escrow.ts:2242](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L2242)
 
 This function returns the payouts for a given set of networks.
 
@@ -435,6 +429,12 @@ Fetch payouts from the subgraph.
 [`IPayoutFilter`](../../interfaces/interfaces/IPayoutFilter.md)
 
 Filter parameters.
+
+##### options?
+
+[`SubgraphOptions`](../../interfaces/interfaces/SubgraphOptions.md)
+
+Optional configuration for subgraph requests.
 
 #### Returns
 
@@ -461,9 +461,9 @@ console.log(payouts);
 
 ### getStatusEvents()
 
-> `static` **getStatusEvents**(`filter`): `Promise`\<[`IStatusEvent`](../../interfaces/interfaces/IStatusEvent.md)[]\>
+> `static` **getStatusEvents**(`filter`, `options?`): `Promise`\<[`IStatusEvent`](../../interfaces/interfaces/IStatusEvent.md)[]\>
 
-Defined in: [escrow.ts:2139](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L2139)
+Defined in: [escrow.ts:2150](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L2150)
 
 This function returns the status events for a given set of networks within an optional date range.
 
@@ -506,6 +506,12 @@ type Status = {
 [`IStatusEventFilter`](../../interfaces/interfaces/IStatusEventFilter.md)
 
 Filter parameters.
+
+##### options?
+
+[`SubgraphOptions`](../../interfaces/interfaces/SubgraphOptions.md)
+
+Optional configuration for subgraph requests.
 
 #### Returns
 

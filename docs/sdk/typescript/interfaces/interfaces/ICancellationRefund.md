@@ -6,7 +6,7 @@
 
 # Interface: ICancellationRefund
 
-Defined in: [interfaces.ts:292](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L292)
+Defined in: [interfaces.ts:292](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L292)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [interfaces.ts:292](https://github.com/humanprotocol/human-protocol/
 
 > **amount**: `bigint`
 
-Defined in: [interfaces.ts:296](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L296)
+Defined in: [interfaces.ts:296](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L296)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [interfaces.ts:296](https://github.com/humanprotocol/human-protocol/
 
 > **block**: `number`
 
-Defined in: [interfaces.ts:297](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L297)
+Defined in: [interfaces.ts:297](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L297)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [interfaces.ts:297](https://github.com/humanprotocol/human-protocol/
 
 > **escrowAddress**: `string`
 
-Defined in: [interfaces.ts:294](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L294)
+Defined in: [interfaces.ts:294](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L294)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [interfaces.ts:294](https://github.com/humanprotocol/human-protocol/
 
 > **id**: `string`
 
-Defined in: [interfaces.ts:293](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L293)
+Defined in: [interfaces.ts:293](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L293)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [interfaces.ts:293](https://github.com/humanprotocol/human-protocol/
 
 > **receiver**: `string`
 
-Defined in: [interfaces.ts:295](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L295)
+Defined in: [interfaces.ts:295](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L295)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [interfaces.ts:295](https://github.com/humanprotocol/human-protocol/
 
 > **timestamp**: `number`
 
-Defined in: [interfaces.ts:298](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L298)
+Defined in: [interfaces.ts:298](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L298)
 
 ***
 
@@ -62,4 +62,4 @@ Defined in: [interfaces.ts:298](https://github.com/humanprotocol/human-protocol/
 
 > **txHash**: `string`
 
-Defined in: [interfaces.ts:299](https://github.com/humanprotocol/human-protocol/blob/808fcefddc45ffa31732b4334ad6f8f9018489cb/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L299)
+Defined in: [interfaces.ts:299](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L299)

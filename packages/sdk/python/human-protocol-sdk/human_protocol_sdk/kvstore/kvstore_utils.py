@@ -29,7 +29,7 @@ from web3 import Web3
 import requests
 
 from human_protocol_sdk.constants import NETWORKS, ChainId, KVStoreKeys
-from human_protocol_sdk.utils import get_data_from_subgraph
+from human_protocol_sdk.utils import SubgraphOptions, custom_gql_fetch
 
 from human_protocol_sdk.kvstore.kvstore_client import KVStoreClientError
 
@@ -57,11 +57,13 @@ class KVStoreUtils:
     def get_kvstore_data(
         chain_id: ChainId,
         address: str,
+        options: Optional[SubgraphOptions] = None,
     ) -> Optional[List[KVStoreData]]:
         """Returns the KVStore data for a given address.
 
         :param chain_id: Network in which the KVStore data has been deployed
         :param address: Address of the KVStore
+        :param options: Optional config for subgraph requests
 
         :return: List of KVStore data
 
@@ -88,12 +90,13 @@ class KVStoreUtils:
 
         network = NETWORKS[ChainId(chain_id)]
 
-        kvstore_data = get_data_from_subgraph(
+        kvstore_data = custom_gql_fetch(
             network,
             query=get_kvstore_by_address_query(),
             params={
                 "address": address.lower(),
             },
+            options=options,
         )
 
         if (
@@ -111,12 +114,18 @@ class KVStoreUtils:
         ]
 
     @staticmethod
-    def get(chain_id: ChainId, address: str, key: str) -> str:
+    def get(
+        chain_id: ChainId,
+        address: str,
+        key: str,
+        options: Optional[SubgraphOptions] = None,
+    ) -> str:
         """Gets the value of a key-value pair in the contract.
 
         :param chain_id: Network in which the KVStore data has been deployed
         :param address: The Ethereum address associated with the key-value pair
         :param key: The key of the key-value pair to get
+        :param options: Optional config for subgraph requests
 
         :return: The value of the key-value pair if it exists
 
@@ -142,13 +151,14 @@ class KVStoreUtils:
 
         network = NETWORKS[ChainId(chain_id)]
 
-        kvstore_data = get_data_from_subgraph(
+        kvstore_data = custom_gql_fetch(
             network,
             query=get_kvstore_by_address_and_key_query(),
             params={
                 "address": address.lower(),
                 "key": key,
             },
+            options=options,
         )
 
         if (
@@ -163,13 +173,17 @@ class KVStoreUtils:
 
     @staticmethod
     def get_file_url_and_verify_hash(
-        chain_id: ChainId, address: str, key: Optional[str] = "url"
+        chain_id: ChainId,
+        address: str,
+        key: Optional[str] = "url",
+        options: Optional[SubgraphOptions] = None,
     ) -> str:
         """Gets the URL value of the given entity, and verify its hash.
 
         :param chain_id: Network in which the KVStore data has been deployed
         :param address: Address from which to get the URL value.
         :param key: Configurable URL key. `url` by default.
+        :param options: Optional config for subgraph requests
 
         :return url: The URL value of the given address if exists, and the content is valid
 
@@ -189,8 +203,8 @@ class KVStoreUtils:
         if not Web3.is_address(address):
             raise KVStoreClientError(f"Invalid address: {address}")
 
-        url = KVStoreUtils.get(chain_id, address, key)
-        hash = KVStoreUtils.get(chain_id, address, key + "_hash")
+        url = KVStoreUtils.get(chain_id, address, key, options=options)
+        hash = KVStoreUtils.get(chain_id, address, key + "_hash", options=options)
 
         if len(url) == 0:
             return url

@@ -34,12 +34,12 @@ Bases: `object`
 
 Bases: `object`
 
-#### *static* get_staker(chain_id, address)
+#### *static* get_staker(chain_id, address, options=None)
 
 * **Return type:**
   `Optional`[[`StakerData`](#human_protocol_sdk.staking.staking_utils.StakerData)]
 
-#### *static* get_stakers(filter)
+#### *static* get_stakers(filter, options=None)
 
 * **Return type:**
   `List`[[`StakerData`](#human_protocol_sdk.staking.staking_utils.StakerData)]

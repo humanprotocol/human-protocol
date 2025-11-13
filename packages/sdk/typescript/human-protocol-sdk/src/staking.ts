@@ -7,7 +7,6 @@ import {
   Staking__factory,
 } from '@human-protocol/core/typechain-types';
 import { ContractRunner, Overrides, ethers } from 'ethers';
-import gqlFetch from 'graphql-request';
 import { BaseEthersClient } from './base';
 import { NETWORKS } from './constants';
 import { requiresSigner } from './decorators';
@@ -23,10 +22,15 @@ import {
   ErrorStakerNotFound,
   ErrorUnsupportedChainID,
 } from './error';
-import { IStaker, IStakersFilter, StakerInfo } from './interfaces';
+import {
+  IStaker,
+  IStakersFilter,
+  StakerInfo,
+  SubgraphOptions,
+} from './interfaces';
 import { StakerData } from './graphql';
 import { NetworkData } from './types';
-import { getSubgraphUrl, throwError } from './utils';
+import { getSubgraphUrl, customGqlFetch, throwError } from './utils';
 import {
   GET_STAKER_BY_ADDRESS_QUERY,
   GET_STAKERS_QUERY,
@@ -483,11 +487,13 @@ export class StakingUtils {
    *
    * @param {ChainId} chainId Network in which the staking contract is deployed
    * @param {string} stakerAddress Address of the staker
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
    * @returns {Promise<IStaker>} Staker info from subgraph
    */
   public static async getStaker(
     chainId: ChainId,
-    stakerAddress: string
+    stakerAddress: string,
+    options?: SubgraphOptions
   ): Promise<IStaker> {
     if (!ethers.isAddress(stakerAddress)) {
       throw ErrorInvalidStakerAddressProvided;
@@ -498,10 +504,11 @@ export class StakingUtils {
       throw ErrorUnsupportedChainID;
     }
 
-    const { staker } = await gqlFetch<{ staker: StakerData }>(
+    const { staker } = await customGqlFetch<{ staker: StakerData }>(
       getSubgraphUrl(networkData),
       GET_STAKER_BY_ADDRESS_QUERY,
-      { id: stakerAddress.toLowerCase() }
+      { id: stakerAddress.toLowerCase() },
+      options
     );
 
     if (!staker) {
@@ -514,9 +521,14 @@ export class StakingUtils {
   /**
    * Gets all stakers from the subgraph with filters, pagination and ordering.
    *
+   * @param {IStakersFilter} filter Stakers filter with pagination and ordering
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
    * @returns {Promise<IStaker[]>} Array of stakers
    */
-  public static async getStakers(filter: IStakersFilter): Promise<IStaker[]> {
+  public static async getStakers(
+    filter: IStakersFilter,
+    options?: SubgraphOptions
+  ): Promise<IStaker[]> {
     const first =
       filter.first !== undefined ? Math.min(filter.first, 1000) : 10;
     const skip = filter.skip || 0;
@@ -528,7 +540,7 @@ export class StakingUtils {
       throw ErrorUnsupportedChainID;
     }
 
-    const { stakers } = await gqlFetch<{ stakers: StakerData[] }>(
+    const { stakers } = await customGqlFetch<{ stakers: StakerData[] }>(
       getSubgraphUrl(networkData),
       GET_STAKERS_QUERY(filter),
       {
@@ -560,7 +572,8 @@ export class StakingUtils {
         orderDirection: orderDirection,
         first: first,
         skip: skip,
-      }
+      },
+      options
     );
     if (!stakers) {
       return [];
