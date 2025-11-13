@@ -4,7 +4,7 @@ from typing import List, Optional
 from web3 import Web3
 
 from human_protocol_sdk.constants import NETWORKS, ChainId
-from human_protocol_sdk.utils import get_data_from_subgraph
+from human_protocol_sdk.utils import SubgraphOptions, custom_gql_fetch
 from human_protocol_sdk.filter import WorkerFilter
 
 LOG = logging.getLogger("human_protocol_sdk.worker")
@@ -47,10 +47,14 @@ class WorkerUtils:
     """
 
     @staticmethod
-    def get_workers(filter: WorkerFilter) -> List[WorkerData]:
+    def get_workers(
+        filter: WorkerFilter,
+        options: Optional[SubgraphOptions] = None,
+    ) -> List[WorkerData]:
         """Get workers data of the protocol.
 
         :param filter: Worker filter
+        :param options: Optional config for subgraph requests
 
         :return: List of workers data
         """
@@ -62,7 +66,7 @@ class WorkerUtils:
         if not network:
             raise WorkerUtilsError("Unsupported Chain ID")
 
-        workers_data = get_data_from_subgraph(
+        workers_data = custom_gql_fetch(
             network,
             query=get_workers_query(filter),
             params={
@@ -72,6 +76,7 @@ class WorkerUtils:
                 "first": filter.first,
                 "skip": filter.skip,
             },
+            options=options,
         )
 
         if (
@@ -97,11 +102,16 @@ class WorkerUtils:
         return workers
 
     @staticmethod
-    def get_worker(chain_id: ChainId, worker_address: str) -> Optional[WorkerData]:
+    def get_worker(
+        chain_id: ChainId,
+        worker_address: str,
+        options: Optional[SubgraphOptions] = None,
+    ) -> Optional[WorkerData]:
         """Gets the worker details.
 
         :param chain_id: Network in which the worker exists
         :param worker_address: Address of the worker
+        :param options: Optional config for subgraph requests
 
         :return: Worker data if exists, otherwise None
         """
@@ -116,10 +126,11 @@ class WorkerUtils:
             raise WorkerUtilsError(f"Invalid operator address: {worker_address}")
 
         network = NETWORKS[chain_id]
-        worker_data = get_data_from_subgraph(
+        worker_data = custom_gql_fetch(
             network,
             query=get_worker_query(),
             params={"address": worker_address.lower()},
+            options=options,
         )
 
         if (

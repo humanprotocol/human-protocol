@@ -10,7 +10,6 @@ import {
   HMToken__factory,
 } from '@human-protocol/core/typechain-types';
 import { ContractRunner, EventLog, Overrides, Signer, ethers } from 'ethers';
-import gqlFetch from 'graphql-request';
 import { BaseEthersClient } from './base';
 import { ESCROW_BULK_PAYOUT_MAX_ITEMS, NETWORKS } from './constants';
 import { requiresSigner } from './decorators';
@@ -62,13 +61,16 @@ import {
   IStatusEventFilter,
   IStatusEvent,
   ICancellationRefund,
+  ICancellationRefundFilter,
   IPayout,
   IEscrowWithdraw,
+  SubgraphOptions,
 } from './interfaces';
 import { EscrowStatus, NetworkData, TransactionLikeWithNonce } from './types';
 import {
   getSubgraphUrl,
   getUnixTimestamp,
+  customGqlFetch,
   isValidJson,
   isValidUrl,
   throwError,
@@ -1940,6 +1942,7 @@ export class EscrowUtils {
    *
    *
    * @param {IEscrowsFilter} filter Filter parameters.
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
    * @returns {IEscrow[]} List of escrows that match the filter.
    *
    * **Code example**
@@ -1956,7 +1959,10 @@ export class EscrowUtils {
    * const escrows = await EscrowUtils.getEscrows(filters);
    * ```
    */
-  public static async getEscrows(filter: IEscrowsFilter): Promise<IEscrow[]> {
+  public static async getEscrows(
+    filter: IEscrowsFilter,
+    options?: SubgraphOptions
+  ): Promise<IEscrow[]> {
     if (filter.launcher && !ethers.isAddress(filter.launcher)) {
       throw ErrorInvalidAddress;
     }
@@ -1989,7 +1995,7 @@ export class EscrowUtils {
       statuses = Array.isArray(filter.status) ? filter.status : [filter.status];
       statuses = statuses.map((status) => EscrowStatus[status]);
     }
-    const { escrows } = await gqlFetch<{ escrows: EscrowData[] }>(
+    const { escrows } = await customGqlFetch<{ escrows: EscrowData[] }>(
       getSubgraphUrl(networkData),
       GET_ESCROWS_QUERY(filter),
       {
@@ -2004,7 +2010,8 @@ export class EscrowUtils {
         orderDirection: orderDirection,
         first: first,
         skip: skip,
-      }
+      },
+      options
     );
     return (escrows || []).map((e) => mapEscrow(e, networkData.chainId));
   }
@@ -2062,6 +2069,7 @@ export class EscrowUtils {
    *
    * @param {ChainId} chainId Network in which the escrow has been deployed
    * @param {string} escrowAddress Address of the escrow
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
    * @returns {Promise<IEscrow | null>} - Escrow data or null if not found.
    *
    * **Code example**
@@ -2074,7 +2082,8 @@ export class EscrowUtils {
    */
   public static async getEscrow(
     chainId: ChainId,
-    escrowAddress: string
+    escrowAddress: string,
+    options?: SubgraphOptions
   ): Promise<IEscrow | null> {
     const networkData = NETWORKS[chainId];
 
@@ -2086,10 +2095,11 @@ export class EscrowUtils {
       throw ErrorInvalidAddress;
     }
 
-    const { escrow } = await gqlFetch<{ escrow: EscrowData | null }>(
+    const { escrow } = await customGqlFetch<{ escrow: EscrowData | null }>(
       getSubgraphUrl(networkData),
       GET_ESCROW_BY_ADDRESS_QUERY(),
-      { escrowAddress: escrowAddress.toLowerCase() }
+      { escrowAddress: escrowAddress.toLowerCase() },
+      options
     );
     if (!escrow) return null;
 
@@ -2132,6 +2142,7 @@ export class EscrowUtils {
    * ```
    *
    * @param {IStatusEventFilter} filter Filter parameters.
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
    * @returns {Promise<StatusEvent[]>} - Array of status events with their corresponding statuses.
    *
    * **Code example**
@@ -2153,7 +2164,8 @@ export class EscrowUtils {
    * ```
    */
   public static async getStatusEvents(
-    filter: IStatusEventFilter
+    filter: IStatusEventFilter,
+    options?: SubgraphOptions
   ): Promise<IStatusEvent[]> {
     const {
       chainId,
@@ -2187,7 +2199,7 @@ export class EscrowUtils {
 
     const statusNames = effectiveStatuses.map((status) => EscrowStatus[status]);
 
-    const data = await gqlFetch<{
+    const data = await customGqlFetch<{
       escrowStatusEvents: StatusEvent[];
     }>(
       getSubgraphUrl(networkData),
@@ -2200,7 +2212,8 @@ export class EscrowUtils {
         orderDirection,
         first: Math.min(first, 1000),
         skip,
-      }
+      },
+      options
     );
 
     if (!data || !data['escrowStatusEvents']) {
@@ -2224,6 +2237,7 @@ export class EscrowUtils {
    * Fetch payouts from the subgraph.
    *
    * @param {IPayoutFilter} filter Filter parameters.
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
    * @returns {Promise<IPayout[]>} List of payouts matching the filters.
    *
    * **Code example**
@@ -2241,7 +2255,10 @@ export class EscrowUtils {
    * console.log(payouts);
    * ```
    */
-  public static async getPayouts(filter: IPayoutFilter): Promise<IPayout[]> {
+  public static async getPayouts(
+    filter: IPayoutFilter,
+    options?: SubgraphOptions
+  ): Promise<IPayout[]> {
     const networkData = NETWORKS[filter.chainId];
     if (!networkData) {
       throw ErrorUnsupportedChainID;
@@ -2258,7 +2275,7 @@ export class EscrowUtils {
     const skip = filter.skip || 0;
     const orderDirection = filter.orderDirection || OrderDirection.DESC;
 
-    const { payouts } = await gqlFetch<{ payouts: PayoutData[] }>(
+    const { payouts } = await customGqlFetch<{ payouts: PayoutData[] }>(
       getSubgraphUrl(networkData),
       GET_PAYOUTS_QUERY(filter),
       {
@@ -2269,7 +2286,8 @@ export class EscrowUtils {
         first: Math.min(first, 1000),
         skip,
         orderDirection,
-      }
+      },
+      options
     );
     if (!payouts) {
       return [];
@@ -2318,6 +2336,7 @@ export class EscrowUtils {
    *
    *
    * @param {Object} filter Filter parameters.
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
    * @returns {Promise<ICancellationRefund[]>} List of cancellation refunds matching the filters.
    *
    * **Code example**
@@ -2332,16 +2351,10 @@ export class EscrowUtils {
    * console.log(cancellationRefunds);
    * ```
    */
-  public static async getCancellationRefunds(filter: {
-    chainId: ChainId;
-    escrowAddress?: string;
-    receiver?: string;
-    from?: Date;
-    to?: Date;
-    first?: number;
-    skip?: number;
-    orderDirection?: OrderDirection;
-  }): Promise<ICancellationRefund[]> {
+  public static async getCancellationRefunds(
+    filter: ICancellationRefundFilter,
+    options?: SubgraphOptions
+  ): Promise<ICancellationRefund[]> {
     const networkData = NETWORKS[filter.chainId];
     if (!networkData) throw ErrorUnsupportedChainID;
     if (filter.escrowAddress && !ethers.isAddress(filter.escrowAddress)) {
@@ -2356,17 +2369,22 @@ export class EscrowUtils {
     const skip = filter.skip || 0;
     const orderDirection = filter.orderDirection || OrderDirection.DESC;
 
-    const { cancellationRefundEvents } = await gqlFetch<{
+    const { cancellationRefundEvents } = await customGqlFetch<{
       cancellationRefundEvents: CancellationRefundData[];
-    }>(getSubgraphUrl(networkData), GET_CANCELLATION_REFUNDS_QUERY(filter), {
-      escrowAddress: filter.escrowAddress?.toLowerCase(),
-      receiver: filter.receiver?.toLowerCase(),
-      from: filter.from ? getUnixTimestamp(filter.from) : undefined,
-      to: filter.to ? getUnixTimestamp(filter.to) : undefined,
-      first,
-      skip,
-      orderDirection,
-    });
+    }>(
+      getSubgraphUrl(networkData),
+      GET_CANCELLATION_REFUNDS_QUERY(filter),
+      {
+        escrowAddress: filter.escrowAddress?.toLowerCase(),
+        receiver: filter.receiver?.toLowerCase(),
+        from: filter.from ? getUnixTimestamp(filter.from) : undefined,
+        to: filter.to ? getUnixTimestamp(filter.to) : undefined,
+        first,
+        skip,
+        orderDirection,
+      },
+      options
+    );
 
     if (!cancellationRefundEvents || cancellationRefundEvents.length === 0) {
       return [];
@@ -2418,6 +2436,7 @@ export class EscrowUtils {
    *
    * @param {ChainId} chainId Network in which the escrow has been deployed
    * @param {string} escrowAddress Address of the escrow
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
    * @returns {Promise<ICancellationRefund>} Cancellation refund data
    *
    * **Code example**
@@ -2430,7 +2449,8 @@ export class EscrowUtils {
    */
   public static async getCancellationRefund(
     chainId: ChainId,
-    escrowAddress: string
+    escrowAddress: string,
+    options?: SubgraphOptions
   ): Promise<ICancellationRefund | null> {
     const networkData = NETWORKS[chainId];
     if (!networkData) throw ErrorUnsupportedChainID;
@@ -2439,12 +2459,13 @@ export class EscrowUtils {
       throw ErrorInvalidEscrowAddressProvided;
     }
 
-    const { cancellationRefundEvents } = await gqlFetch<{
+    const { cancellationRefundEvents } = await customGqlFetch<{
       cancellationRefundEvents: CancellationRefundData[];
     }>(
       getSubgraphUrl(networkData),
       GET_CANCELLATION_REFUND_BY_ADDRESS_QUERY(),
-      { escrowAddress: escrowAddress.toLowerCase() }
+      { escrowAddress: escrowAddress.toLowerCase() },
+      options
     );
 
     if (!cancellationRefundEvents || cancellationRefundEvents.length === 0) {
