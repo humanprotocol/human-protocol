@@ -6,7 +6,7 @@
 
 # Interface: IDailyPayment
 
-Defined in: [interfaces.ts:255](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L255)
+Defined in: [interfaces.ts:255](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L255)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [interfaces.ts:255](https://github.com/humanprotocol/human-protocol/
 
 > **averageAmountPerWorker**: `bigint`
 
-Defined in: [interfaces.ts:259](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L259)
+Defined in: [interfaces.ts:259](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L259)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [interfaces.ts:259](https://github.com/humanprotocol/human-protocol/
 
 > **timestamp**: `number`
 
-Defined in: [interfaces.ts:256](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L256)
+Defined in: [interfaces.ts:256](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L256)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [interfaces.ts:256](https://github.com/humanprotocol/human-protocol/
 
 > **totalAmountPaid**: `bigint`
 
-Defined in: [interfaces.ts:257](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L257)
+Defined in: [interfaces.ts:257](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L257)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [interfaces.ts:257](https://github.com/humanprotocol/human-protocol/
 
 > **totalCount**: `number`
 
-Defined in: [interfaces.ts:258](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L258)
+Defined in: [interfaces.ts:258](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L258)

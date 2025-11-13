@@ -8,7 +8,7 @@
 
 > **CancellationRefundData** = `object`
 
-Defined in: [graphql/types.ts:182](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L182)
+Defined in: [graphql/types.ts:182](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L182)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [graphql/types.ts:182](https://github.com/humanprotocol/human-protoc
 
 > **amount**: `string`
 
-Defined in: [graphql/types.ts:186](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L186)
+Defined in: [graphql/types.ts:186](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L186)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [graphql/types.ts:186](https://github.com/humanprotocol/human-protoc
 
 > **block**: `string`
 
-Defined in: [graphql/types.ts:187](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L187)
+Defined in: [graphql/types.ts:187](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L187)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [graphql/types.ts:187](https://github.com/humanprotocol/human-protoc
 
 > **escrowAddress**: `string`
 
-Defined in: [graphql/types.ts:184](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L184)
+Defined in: [graphql/types.ts:184](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L184)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [graphql/types.ts:184](https://github.com/humanprotocol/human-protoc
 
 > **id**: `string`
 
-Defined in: [graphql/types.ts:183](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L183)
+Defined in: [graphql/types.ts:183](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L183)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [graphql/types.ts:183](https://github.com/humanprotocol/human-protoc
 
 > **receiver**: `string`
 
-Defined in: [graphql/types.ts:185](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L185)
+Defined in: [graphql/types.ts:185](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L185)
 
 ***
 
@@ -56,7 +56,7 @@ Defined in: [graphql/types.ts:185](https://github.com/humanprotocol/human-protoc
 
 > **timestamp**: `string`
 
-Defined in: [graphql/types.ts:188](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L188)
+Defined in: [graphql/types.ts:188](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L188)
 
 ***
 
@@ -64,4 +64,4 @@ Defined in: [graphql/types.ts:188](https://github.com/humanprotocol/human-protoc
 
 > **txHash**: `string`
 
-Defined in: [graphql/types.ts:189](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L189)
+Defined in: [graphql/types.ts:189](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L189)

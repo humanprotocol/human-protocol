@@ -8,7 +8,7 @@
 
 > **WorkerData** = `object`
 
-Defined in: [graphql/types.ts:30](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L30)
+Defined in: [graphql/types.ts:30](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L30)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [graphql/types.ts:30](https://github.com/humanprotocol/human-protoco
 
 > **address**: `string`
 
-Defined in: [graphql/types.ts:32](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L32)
+Defined in: [graphql/types.ts:32](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L32)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [graphql/types.ts:32](https://github.com/humanprotocol/human-protoco
 
 > **id**: `string`
 
-Defined in: [graphql/types.ts:31](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L31)
+Defined in: [graphql/types.ts:31](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L31)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [graphql/types.ts:31](https://github.com/humanprotocol/human-protoco
 
 > **payoutCount**: `string`
 
-Defined in: [graphql/types.ts:34](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L34)
+Defined in: [graphql/types.ts:34](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L34)
 
 ***
 
@@ -40,4 +40,4 @@ Defined in: [graphql/types.ts:34](https://github.com/humanprotocol/human-protoco
 
 > **totalHMTAmountReceived**: `string`
 
-Defined in: [graphql/types.ts:33](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L33)
+Defined in: [graphql/types.ts:33](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L33)

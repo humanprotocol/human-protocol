@@ -8,7 +8,7 @@
 
 > **RewardAddedEventData** = `object`
 
-Defined in: [graphql/types.ts:105](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L105)
+Defined in: [graphql/types.ts:105](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L105)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [graphql/types.ts:105](https://github.com/humanprotocol/human-protoc
 
 > **amount**: `string`
 
-Defined in: [graphql/types.ts:109](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L109)
+Defined in: [graphql/types.ts:109](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L109)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [graphql/types.ts:109](https://github.com/humanprotocol/human-protoc
 
 > **escrowAddress**: `string`
 
-Defined in: [graphql/types.ts:106](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L106)
+Defined in: [graphql/types.ts:106](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L106)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [graphql/types.ts:106](https://github.com/humanprotocol/human-protoc
 
 > **slasher**: `string`
 
-Defined in: [graphql/types.ts:108](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L108)
+Defined in: [graphql/types.ts:108](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L108)
 
 ***
 
@@ -40,4 +40,4 @@ Defined in: [graphql/types.ts:108](https://github.com/humanprotocol/human-protoc
 
 > **staker**: `string`
 
-Defined in: [graphql/types.ts:107](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L107)
+Defined in: [graphql/types.ts:107](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L107)

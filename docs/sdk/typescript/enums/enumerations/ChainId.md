@@ -6,7 +6,7 @@
 
 # Enumeration: ChainId
 
-Defined in: [enums.ts:1](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L1)
+Defined in: [enums.ts:1](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L1)
 
 ## Enumeration Members
 
@@ -14,7 +14,7 @@ Defined in: [enums.ts:1](https://github.com/humanprotocol/human-protocol/blob/d0
 
 > **ALL**: `-1`
 
-Defined in: [enums.ts:2](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L2)
+Defined in: [enums.ts:2](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L2)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [enums.ts:2](https://github.com/humanprotocol/human-protocol/blob/d0
 
 > **AURORA\_TESTNET**: `1313161555`
 
-Defined in: [enums.ts:9](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L9)
+Defined in: [enums.ts:9](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L9)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [enums.ts:9](https://github.com/humanprotocol/human-protocol/blob/d0
 
 > **BSC\_MAINNET**: `56`
 
-Defined in: [enums.ts:5](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L5)
+Defined in: [enums.ts:5](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L5)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [enums.ts:5](https://github.com/humanprotocol/human-protocol/blob/d0
 
 > **BSC\_TESTNET**: `97`
 
-Defined in: [enums.ts:6](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L6)
+Defined in: [enums.ts:6](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L6)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [enums.ts:6](https://github.com/humanprotocol/human-protocol/blob/d0
 
 > **LOCALHOST**: `1338`
 
-Defined in: [enums.ts:10](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L10)
+Defined in: [enums.ts:10](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L10)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [enums.ts:10](https://github.com/humanprotocol/human-protocol/blob/d
 
 > **MAINNET**: `1`
 
-Defined in: [enums.ts:3](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L3)
+Defined in: [enums.ts:3](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L3)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [enums.ts:3](https://github.com/humanprotocol/human-protocol/blob/d0
 
 > **POLYGON**: `137`
 
-Defined in: [enums.ts:7](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L7)
+Defined in: [enums.ts:7](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L7)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [enums.ts:7](https://github.com/humanprotocol/human-protocol/blob/d0
 
 > **POLYGON\_AMOY**: `80002`
 
-Defined in: [enums.ts:8](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L8)
+Defined in: [enums.ts:8](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L8)
 
 ***
 
@@ -78,4 +78,4 @@ Defined in: [enums.ts:8](https://github.com/humanprotocol/human-protocol/blob/d0
 
 > **SEPOLIA**: `11155111`
 
-Defined in: [enums.ts:4](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L4)
+Defined in: [enums.ts:4](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L4)
