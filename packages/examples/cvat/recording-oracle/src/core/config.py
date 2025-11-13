@@ -78,8 +78,7 @@ class LocalhostConfig(_NetworkConfig):
         "LOCALHOST_PRIVATE_KEY",
         "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
     )
-    addr = getenv("LOCALHOST_AMOY_ADDR",
-                  "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
+    addr = getenv("LOCALHOST_AMOY_ADDR", "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
 
     exchange_oracle_address = getenv("LOCALHOST_EXCHANGE_ORACLE_ADDRESS")
     exchange_oracle_url = getenv("LOCALHOST_EXCHANGE_ORACLE_URL")
@@ -88,8 +87,7 @@ class LocalhostConfig(_NetworkConfig):
 
 
 class CronConfig:
-    process_exchange_oracle_webhooks_int = int(
-        getenv("PROCESS_EXCHANGE_ORACLE_WEBHOOKS_INT", 3000))
+    process_exchange_oracle_webhooks_int = int(getenv("PROCESS_EXCHANGE_ORACLE_WEBHOOKS_INT", 3000))
     process_exchange_oracle_webhooks_chunk_size = int(
         getenv("PROCESS_EXCHANGE_ORACLE_WEBHOOKS_CHUNK_SIZE", 5)
     )
@@ -152,8 +150,7 @@ class ExchangeOracleStorageConfig(IStorageConfig):
     data_bucket_name = os.environ["EXCHANGE_ORACLE_STORAGE_RESULTS_BUCKET_NAME"]
     results_dir_suffix = getenv("STORAGE_RESULTS_DIR_SUFFIX", "-results")
     secure = to_bool(getenv("EXCHANGE_ORACLE_STORAGE_USE_SSL", "true"))
-    use_path_style = to_bool(
-        getenv("EXCHANGE_ORACLE_STORAGE_USE_PATH_STYLE", "false"))
+    use_path_style = to_bool(getenv("EXCHANGE_ORACLE_STORAGE_USE_PATH_STYLE", "false"))
     # AWS S3 specific attributes
     access_key = getenv("EXCHANGE_ORACLE_STORAGE_ACCESS_KEY")
     secret_key = getenv("EXCHANGE_ORACLE_STORAGE_SECRET_KEY")
@@ -162,14 +159,12 @@ class ExchangeOracleStorageConfig(IStorageConfig):
 
 
 class FeaturesConfig:
-    enable_custom_cloud_host = to_bool(
-        getenv("ENABLE_CUSTOM_CLOUD_HOST", "no"))
+    enable_custom_cloud_host = to_bool(getenv("ENABLE_CUSTOM_CLOUD_HOST", "no"))
     "Allows using a custom host in manifest bucket urls"
 
 
 class ValidationConfig:
-    min_available_gt_threshold = float(
-        getenv("MIN_AVAILABLE_GT_THRESHOLD", "0.3"))
+    min_available_gt_threshold = float(getenv("MIN_AVAILABLE_GT_THRESHOLD", "0.3"))
     """
     The minimum required share of available GT frames required to continue annotation attempts.
     When there is no enough GT left, annotation stops.
@@ -188,8 +183,7 @@ class ValidationConfig:
     This can raise escrow annotation chances at the cost of reduced quality threshold.
     """
 
-    unverifiable_assignments_threshold = float(
-        getenv("UNVERIFIABLE_ASSIGNMENTS_THRESHOLD", "0.1"))
+    unverifiable_assignments_threshold = float(getenv("UNVERIFIABLE_ASSIGNMENTS_THRESHOLD", "0.1"))
     """
     Deprecated. Not expected to happen in practice, kept only as a safety fallback rule.
 
@@ -227,8 +221,7 @@ class EncryptionConfig(_BaseConfig):
         ex_prefix = "Wrong server configuration."
 
         if (cls.pgp_public_key_url or cls.pgp_passphrase) and not cls.pgp_private_key:
-            raise Exception(
-                f"{ex_prefix} The PGP_PRIVATE_KEY environment is not set.")
+            raise Exception(f"{ex_prefix} The PGP_PRIVATE_KEY environment is not set.")
 
         if cls.pgp_private_key:
             try:
@@ -246,11 +239,9 @@ class CvatConfig:
     admin_pass = getenv("CVAT_ADMIN_PASS", "admin")
     org_slug = getenv("CVAT_ORG_SLUG", "org1")
 
-    quality_retrieval_timeout = int(
-        getenv("CVAT_QUALITY_RETRIEVAL_TIMEOUT", 60 * 60))
+    quality_retrieval_timeout = int(getenv("CVAT_QUALITY_RETRIEVAL_TIMEOUT", 60 * 60))
     quality_check_interval = int(getenv("CVAT_QUALITY_CHECK_INTERVAL", 5))
-    quality_reports_page_size = int(
-        getenv("CVAT_QUALITY_REPORTS_PAGE_SIZE", 100))
+    quality_reports_page_size = int(getenv("CVAT_QUALITY_REPORTS_PAGE_SIZE", 100))
 
 
 class Config:

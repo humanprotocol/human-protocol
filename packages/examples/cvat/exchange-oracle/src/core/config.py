@@ -103,8 +103,7 @@ class LocalhostConfig(_NetworkConfig):
         "LOCALHOST_PRIVATE_KEY",
         "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
     )
-    addr = getenv("LOCALHOST_AMOY_ADDR",
-                  "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
+    addr = getenv("LOCALHOST_AMOY_ADDR", "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
 
     job_launcher_url = getenv("LOCALHOST_JOB_LAUNCHER_URL")
 
@@ -116,14 +115,12 @@ class LocalhostConfig(_NetworkConfig):
 
 
 class CronConfig:
-    process_job_launcher_webhooks_int = int(
-        getenv("PROCESS_JOB_LAUNCHER_WEBHOOKS_INT", 30))
+    process_job_launcher_webhooks_int = int(getenv("PROCESS_JOB_LAUNCHER_WEBHOOKS_INT", 30))
     process_job_launcher_webhooks_chunk_size = int(
         getenv("PROCESS_JOB_LAUNCHER_WEBHOOKS_CHUNK_SIZE", 5)
     )
 
-    process_recording_oracle_webhooks_int = int(
-        getenv("PROCESS_RECORDING_ORACLE_WEBHOOKS_INT", 30))
+    process_recording_oracle_webhooks_int = int(getenv("PROCESS_RECORDING_ORACLE_WEBHOOKS_INT", 30))
     process_recording_oracle_webhooks_chunk_size = int(
         getenv("PROCESS_RECORDING_ORACLE_WEBHOOKS_CHUNK_SIZE", 5)
     )
@@ -135,37 +132,28 @@ class CronConfig:
         getenv("PROCESS_REPUTATION_ORACLE_WEBHOOKS_INT", 5)
     )
 
-    process_cvat_webhooks_workers = int(
-        getenv("PROCESS_CVAT_WEBHOOKS_WORKERS", 10))
+    process_cvat_webhooks_workers = int(getenv("PROCESS_CVAT_WEBHOOKS_WORKERS", 10))
     """
     The maximum number of parallel workers. Workers are added lazily, if the existing workers
     can't finish in time.
     """
     process_cvat_webhooks_int = int(getenv("PROCESS_CVAT_WEBHOOKS_INT", 5))
-    process_cvat_webhooks_chunk_size = int(
-        getenv("PROCESS_CVAT_WEBHOOKS_CHUNK_SIZE", 10))
+    process_cvat_webhooks_chunk_size = int(getenv("PROCESS_CVAT_WEBHOOKS_CHUNK_SIZE", 10))
 
-    track_completed_projects_int = int(
-        getenv("TRACK_COMPLETED_PROJECTS_INT", 30))
+    track_completed_projects_int = int(getenv("TRACK_COMPLETED_PROJECTS_INT", 30))
     track_completed_tasks_int = int(getenv("TRACK_COMPLETED_TASKS_INT", 30))
 
     track_creating_tasks_int = int(getenv("TRACK_CREATING_TASKS_INT", 300))
-    track_creating_tasks_chunk_size = getenv(
-        "TRACK_CREATING_TASKS_CHUNK_SIZE", 5)
+    track_creating_tasks_chunk_size = getenv("TRACK_CREATING_TASKS_CHUNK_SIZE", 5)
 
     track_assignments_int = int(getenv("TRACK_ASSIGNMENTS_INT", 5))
-    track_assignments_chunk_size = int(
-        getenv("TRACK_ASSIGNMENTS_CHUNK_SIZE", 10))
+    track_assignments_chunk_size = int(getenv("TRACK_ASSIGNMENTS_CHUNK_SIZE", 10))
 
-    track_completed_escrows_int = int(
-        getenv("TRACK_COMPLETED_ESCROWS_INT", 60))
-    track_completed_escrows_chunk_size = int(
-        getenv("TRACK_COMPLETED_ESCROWS_CHUNK_SIZE", 100))
+    track_completed_escrows_int = int(getenv("TRACK_COMPLETED_ESCROWS_INT", 60))
+    track_completed_escrows_chunk_size = int(getenv("TRACK_COMPLETED_ESCROWS_CHUNK_SIZE", 100))
 
-    track_escrow_validations_int = int(
-        getenv("TRACK_ESCROW_VALIDATIONS_INT", 60))
-    track_escrow_validations_chunk_size = int(
-        getenv("TRACK_ESCROW_VALIDATIONS_CHUNK_SIZE", 1))
+    track_escrow_validations_int = int(getenv("TRACK_ESCROW_VALIDATIONS_INT", 60))
+    track_escrow_validations_chunk_size = int(getenv("TRACK_ESCROW_VALIDATIONS_CHUNK_SIZE", 1))
 
     track_completed_escrows_max_downloading_retries = int(
         getenv("TRACK_COMPLETED_ESCROWS_MAX_DOWNLOADING_RETRIES", 10)
@@ -177,13 +165,10 @@ class CronConfig:
     )
     "Maximum number of parallel downloading requests during results downloading"
 
-    process_rejected_projects_chunk_size = int(
-        getenv("REJECTED_PROJECTS_CHUNK_SIZE", 20))
-    process_accepted_projects_chunk_size = int(
-        getenv("ACCEPTED_PROJECTS_CHUNK_SIZE", 20))
+    process_rejected_projects_chunk_size = int(getenv("REJECTED_PROJECTS_CHUNK_SIZE", 20))
+    process_accepted_projects_chunk_size = int(getenv("ACCEPTED_PROJECTS_CHUNK_SIZE", 20))
 
-    track_escrow_creation_chunk_size = int(
-        getenv("TRACK_ESCROW_CREATION_CHUNK_SIZE", 20))
+    track_escrow_creation_chunk_size = int(getenv("TRACK_ESCROW_CREATION_CHUNK_SIZE", 20))
     track_escrow_creation_int = int(getenv("TRACK_ESCROW_CREATION_INT", 300))
 
 
@@ -195,8 +180,7 @@ class CvatConfig:
 
     image_quality = int(getenv("CVAT_IMAGE_QUALITY", 70))
     max_jobs_per_task = int(getenv("CVAT_MAX_JOBS_PER_TASK", 1000))
-    task_creation_check_interval = int(
-        getenv("CVAT_TASK_CREATION_CHECK_INTERVAL", 5))
+    task_creation_check_interval = int(getenv("CVAT_TASK_CREATION_CHECK_INTERVAL", 5))
 
     export_timeout = int(getenv("CVAT_EXPORT_TIMEOUT", 5 * 60))
     "Timeout, in seconds, for annotations or dataset export waiting"
@@ -227,8 +211,7 @@ class StorageConfig:
     endpoint_url: ClassVar[str] = os.environ[
         "STORAGE_ENDPOINT_URL"
     ]  # TODO: probably should be optional
-    results_dir_suffix: ClassVar[str] = getenv(
-        "STORAGE_RESULTS_DIR_SUFFIX", "-results")
+    results_dir_suffix: ClassVar[str] = getenv("STORAGE_RESULTS_DIR_SUFFIX", "-results")
     secure: ClassVar[bool] = to_bool(getenv("STORAGE_USE_SSL", "true"))
 
     # S3 specific attributes
@@ -255,8 +238,7 @@ class StorageConfig:
 
 
 class FeaturesConfig:
-    enable_custom_cloud_host = to_bool(
-        getenv("ENABLE_CUSTOM_CLOUD_HOST", "no"))
+    enable_custom_cloud_host = to_bool(getenv("ENABLE_CUSTOM_CLOUD_HOST", "no"))
     "Allows using a custom host in manifest bucket urls"
 
     request_logging_enabled = to_bool(getenv("REQUEST_LOGGING_ENABLED", "0"))
@@ -265,24 +247,20 @@ class FeaturesConfig:
     profiling_enabled = to_bool(getenv("PROFILING_ENABLED", "0"))
     "Allow to profile specific requests"
 
-    manifest_cache_ttl = int(
-        getenv("MANIFEST_CACHE_TTL", str(2 * 24 * 60 * 60)))
+    manifest_cache_ttl = int(getenv("MANIFEST_CACHE_TTL", str(2 * 24 * 60 * 60)))
     "TTL for cached manifests, in seconds"
 
-    token_symbol_ttl = int(
-        getenv("TOKEN_SYMBOL_CACHE_TTL", str(2 * 24 * 60 * 60)))
+    token_symbol_ttl = int(getenv("TOKEN_SYMBOL_CACHE_TTL", str(2 * 24 * 60 * 60)))
     "TTL for cached token symbols, in seconds"
 
-    max_data_storage_connections = int(
-        getenv("MAX_DATA_STORAGE_CONNECTIONS", 5))
+    max_data_storage_connections = int(getenv("MAX_DATA_STORAGE_CONNECTIONS", 5))
     "Max parallel data storage connections in 1 client (job creation, ...)"
 
 
 class CoreConfig:
     default_assignment_time = int(getenv("DEFAULT_ASSIGNMENT_TIME", 1800))
 
-    skeleton_assignment_size_mult = int(
-        getenv("SKELETON_ASSIGNMENT_SIZE_MULT", 1))
+    skeleton_assignment_size_mult = int(getenv("SKELETON_ASSIGNMENT_SIZE_MULT", 1))
     "Assignment size multiplier for image_skeletons_from_boxes tasks"
 
     min_roi_size_w = int(getenv("MIN_ROI_SIZE_W", 350))
@@ -319,8 +297,7 @@ class EncryptionConfig(_BaseConfig):
         ex_prefix = "Wrong server configuration."
 
         if (cls.pgp_public_key_url or cls.pgp_passphrase) and not cls.pgp_private_key:
-            raise Exception(
-                f"{ex_prefix} The PGP_PRIVATE_KEY environment is not set.")
+            raise Exception(f"{ex_prefix} The PGP_PRIVATE_KEY environment is not set.")
 
         if cls.pgp_private_key:
             try:
@@ -362,8 +339,7 @@ class Environment(str, Enum):
 class Config:
     debug = to_bool(getenv("DEBUG", "false"))
     port = int(getenv("PORT", 8000))
-    environment = Environment(
-        getenv("ENVIRONMENT", Environment.DEVELOPMENT.value))
+    environment = Environment(getenv("ENVIRONMENT", Environment.DEVELOPMENT.value))
     workers_amount = int(getenv("WORKERS_AMOUNT", 1))
     webhook_max_retries = int(getenv("WEBHOOK_MAX_RETRIES", 5))
     webhook_delay_if_failed = int(getenv("WEBHOOK_DELAY_IF_FAILED", 60))

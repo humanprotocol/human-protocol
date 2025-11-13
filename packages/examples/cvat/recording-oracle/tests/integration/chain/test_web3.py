@@ -80,8 +80,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             ),
         ):
             mock_function.return_value = self.w3
-            signed_message, _ = sign_message(
-                ChainId.POLYGON_AMOY.value, "message")
+            signed_message, _ = sign_message(ChainId.POLYGON_AMOY.value, "message")
         assert signed_message == SIGNATURE
 
     def test_sign_message_invalid_chain_id(self):
@@ -91,8 +90,7 @@ class ServiceIntegrationTest(unittest.TestCase):
     def test_recover_signer(self):
         with patch("src.chain.web3.get_web3") as mock_function:
             mock_function.return_value = self.w3
-            signer = recover_signer(
-                ChainId.POLYGON.value, "message", SIGNATURE)
+            signer = recover_signer(ChainId.POLYGON.value, "message", SIGNATURE)
         assert signer == DEFAULT_GAS_PAYER
 
     def test_recover_signer_invalid_signature(self):

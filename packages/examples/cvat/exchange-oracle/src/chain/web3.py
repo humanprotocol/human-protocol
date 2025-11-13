@@ -29,8 +29,7 @@ def get_web3(chain_id: int | Networks):
         case Networks.localhost:
             network = Config.localhost
         case _:
-            raise ValueError(
-                f"{chain_id} is not in available list of networks.")
+            raise ValueError(f"{chain_id} is not in available list of networks.")
 
     w3 = Web3(HTTPProvider(network.rpc_api))
     gas_payer = w3.eth.account.from_key(network.private_key)
@@ -58,8 +57,7 @@ def sign_message(chain_id: Networks, message) -> str:
         case Config.localhost.chain_id:
             private_key = Config.localhost.private_key
         case _:
-            raise ValueError(
-                f"{chain_id} is not in available list of networks.")
+            raise ValueError(f"{chain_id} is not in available list of networks.")
 
     serialized_message = serialize_message(message)
     signed_message = w3.eth.account.sign_message(
@@ -83,6 +81,5 @@ def validate_address(escrow_address: str) -> str:
 
 def get_token_symbol(chain_id: int, token_address: str) -> str:
     w3 = get_web3(chain_id)
-    contract = w3.eth.contract(
-        address=w3.to_checksum_address(token_address), abi=symbol_abi)
+    contract = w3.eth.contract(address=w3.to_checksum_address(token_address), abi=symbol_abi)
     return contract.functions.symbol().call()
