@@ -246,7 +246,7 @@ export class EscrowClient extends BaseEthersClient {
         await this.escrowFactoryContract.createEscrow(
           tokenAddress,
           jobRequesterId,
-          this.applyTxDefaults(txOptions)
+          txOptions
         )
       ).wait();
 
@@ -407,7 +407,7 @@ export class EscrowClient extends BaseEthersClient {
           exchangeOracleFee,
           manifest,
           manifestHash,
-          this.applyTxDefaults(txOptions)
+          txOptions
         )
       ).wait();
 
@@ -505,7 +505,7 @@ export class EscrowClient extends BaseEthersClient {
           exchangeOracleFee,
           manifest,
           manifestHash,
-          this.applyTxDefaults(txOptions)
+          txOptions
         )
       ).wait();
 
@@ -569,11 +569,7 @@ export class EscrowClient extends BaseEthersClient {
         this.runner
       );
       await (
-        await tokenContract.transfer(
-          escrowAddress,
-          amount,
-          this.applyTxDefaults(txOptions)
-        )
+        await tokenContract.transfer(escrowAddress, amount, txOptions)
       ).wait();
 
       return;
@@ -694,7 +690,7 @@ export class EscrowClient extends BaseEthersClient {
             url,
             hash,
             fundsToReserve,
-            this.applyTxDefaults(txOptions)
+            txOptions
           )
         ).wait();
       } else {
@@ -702,7 +698,7 @@ export class EscrowClient extends BaseEthersClient {
           await escrowContract['storeResults(string,string)'](
             url,
             hash,
-            this.applyTxDefaults(txOptions)
+            txOptions
           )
         ).wait();
       }
@@ -758,9 +754,7 @@ export class EscrowClient extends BaseEthersClient {
     try {
       const escrowContract = this.getEscrowContract(escrowAddress);
 
-      await (
-        await escrowContract.complete(this.applyTxDefaults(txOptions))
-      ).wait();
+      await (await escrowContract.complete(txOptions)).wait();
       return;
     } catch (e) {
       return throwError(e);
@@ -900,7 +894,7 @@ export class EscrowClient extends BaseEthersClient {
             finalResultsHash,
             id,
             forceComplete,
-            this.applyTxDefaults(txOptions)
+            txOptions
           )
         ).wait();
       } else {
@@ -914,7 +908,7 @@ export class EscrowClient extends BaseEthersClient {
             finalResultsHash,
             id,
             forceComplete,
-            this.applyTxDefaults(txOptions)
+            txOptions
           )
         ).wait();
       }
@@ -968,9 +962,7 @@ export class EscrowClient extends BaseEthersClient {
 
     try {
       const escrowContract = this.getEscrowContract(escrowAddress);
-      await (
-        await escrowContract.cancel(this.applyTxDefaults(txOptions))
-      ).wait();
+      await (await escrowContract.cancel(txOptions)).wait();
     } catch (e) {
       return throwError(e);
     }
@@ -1016,11 +1008,7 @@ export class EscrowClient extends BaseEthersClient {
 
     try {
       const escrowContract = this.getEscrowContract(escrowAddress);
-      await (
-        await escrowContract.requestCancellation(
-          this.applyTxDefaults(txOptions)
-        )
-      ).wait();
+      await (await escrowContract.requestCancellation(txOptions)).wait();
     } catch (e) {
       return throwError(e);
     }
@@ -1078,10 +1066,7 @@ export class EscrowClient extends BaseEthersClient {
       const escrowContract = this.getEscrowContract(escrowAddress);
 
       const transactionReceipt = await (
-        await escrowContract.withdraw(
-          tokenAddress,
-          this.applyTxDefaults(txOptions)
-        )
+        await escrowContract.withdraw(tokenAddress, txOptions)
       ).wait();
 
       let amountTransferred: bigint | undefined = undefined;
@@ -1171,7 +1156,6 @@ export class EscrowClient extends BaseEthersClient {
     forceComplete = false,
     txOptions: Overrides = {}
   ): Promise<TransactionLikeWithNonce> {
-    txOptions = this.applyTxDefaults(txOptions);
     await this.ensureCorrectBulkPayoutInput(
       escrowAddress,
       recipients,

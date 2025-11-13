@@ -132,7 +132,6 @@
 
 * [human_protocol_sdk.constants module](human_protocol_sdk.constants.md)
   * [`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)
-    * [`ChainId.AURORA_TESTNET`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId.AURORA_TESTNET)
     * [`ChainId.BSC_MAINNET`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId.BSC_MAINNET)
     * [`ChainId.BSC_TESTNET`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId.BSC_TESTNET)
     * [`ChainId.LOCALHOST`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId.LOCALHOST)
@@ -209,7 +208,6 @@
     * [`SubgraphOptions.__init__()`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.SubgraphOptions.__init__)
     * [`SubgraphOptions.base_delay`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.SubgraphOptions.base_delay)
     * [`SubgraphOptions.max_retries`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.SubgraphOptions.max_retries)
-  * [`apply_tx_defaults()`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.apply_tx_defaults)
   * [`custom_gql_fetch()`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.custom_gql_fetch)
   * [`get_contract_interface()`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.get_contract_interface)
   * [`get_erc20_interface()`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.get_erc20_interface)

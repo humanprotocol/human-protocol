@@ -69,12 +69,6 @@ export const TOKEN_ADDRESSES: {
       decimals: 6,
     },
   },
-  [ChainId.AURORA_TESTNET]: {
-    [EscrowFundToken.HMT]: {
-      address: NETWORKS[ChainId.AURORA_TESTNET]!.hmtAddress,
-      decimals: 18,
-    },
-  },
   [ChainId.LOCALHOST]: {
     [EscrowFundToken.HMT]: {
       address: NETWORKS[ChainId.LOCALHOST]!.hmtAddress,

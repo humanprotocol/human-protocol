@@ -384,7 +384,7 @@ class TestEscrowClient(unittest.TestCase):
         self.escrow.factory_contract.functions.createEscrow.assert_called_once_with(
             token_address, job_requester_id
         )
-        mock_create.transact.assert_called_once_with({})
+        mock_create.transact.assert_called_once_with(None)
         self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
@@ -500,7 +500,7 @@ class TestEscrowClient(unittest.TestCase):
             escrow_config.manifest,
             escrow_config.hash,
         )
-        mock_create.transact.assert_called_once_with({})
+        mock_create.transact.assert_called_once_with(None)
         self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
@@ -647,7 +647,7 @@ class TestEscrowClient(unittest.TestCase):
             escrow_config.manifest,
             escrow_config.hash,
         )
-        mock_setup.transact.assert_called_once_with({})
+        mock_setup.transact.assert_called_once_with(None)
         self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
@@ -828,7 +828,7 @@ class TestEscrowClient(unittest.TestCase):
         mock_token_contract.functions.transfer.assert_called_once_with(
             escrow_address, amount
         )
-        mock_transfer.transact.assert_called_once_with({})
+        mock_transfer.transact.assert_called_once_with(None)
         self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
@@ -909,7 +909,7 @@ class TestEscrowClient(unittest.TestCase):
 
         self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
         mock_contract.functions.storeResults.assert_called_once_with(url, hash)
-        mock_store.transact.assert_called_once_with({})
+        mock_store.transact.assert_called_once_with(None)
         self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
@@ -1038,7 +1038,7 @@ class TestEscrowClient(unittest.TestCase):
         mock_contract.functions.storeResults.assert_called_once_with(
             url, hash, funds_to_reserve
         )
-        mock_store.transact.assert_called_once_with({})
+        mock_store.transact.assert_called_once_with(None)
 
     def test_store_results_with_funds_to_reserve_zero_allows_empty(self):
         mock_contract = MagicMock()
@@ -1119,7 +1119,7 @@ class TestEscrowClient(unittest.TestCase):
         mock_contract.functions.bulkPayOut.assert_called_once_with(
             recipients, amounts, final_results_url, final_results_hash, txId, True
         )
-        mock_bulk.transact.assert_called_once_with({})
+        mock_bulk.transact.assert_called_once_with(None)
         self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
@@ -1580,7 +1580,7 @@ class TestEscrowClient(unittest.TestCase):
 
         self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
         mock_contract.functions.complete.assert_called_once_with()
-        mock_complete.transact.assert_called_once_with({})
+        mock_complete.transact.assert_called_once_with(None)
         self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
@@ -1675,7 +1675,7 @@ class TestEscrowClient(unittest.TestCase):
 
         self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
         mock_contract.functions.requestCancellation.assert_called_once_with()
-        mock_request.transact.assert_called_once_with({})
+        mock_request.transact.assert_called_once_with(None)
         self.assertIsNone(result)
 
     def test_request_cancellation_invalid_address(self):
@@ -1759,7 +1759,7 @@ class TestEscrowClient(unittest.TestCase):
         self.assertIsNone(result)
         self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
         mock_contract.functions.cancel.assert_called_once_with()
-        mock_cancel.transact.assert_called_once_with({})
+        mock_cancel.transact.assert_called_once_with(None)
         self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
@@ -1869,7 +1869,7 @@ class TestEscrowClient(unittest.TestCase):
 
         self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
         mock_contract.functions.withdraw.assert_called_once_with(token_address)
-        mock_withdraw.transact.assert_called_once_with({})
+        mock_withdraw.transact.assert_called_once_with(None)
         self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )

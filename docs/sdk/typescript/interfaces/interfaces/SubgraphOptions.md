@@ -6,7 +6,7 @@
 
 # Interface: SubgraphOptions
 
-Defined in: [interfaces.ts:319](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L319)
+Defined in: [interfaces.ts:319](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L319)
 
 Configuration options for subgraph requests with retry logic.
 
@@ -16,7 +16,7 @@ Configuration options for subgraph requests with retry logic.
 
 > `optional` **baseDelay**: `number`
 
-Defined in: [interfaces.ts:323](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L323)
+Defined in: [interfaces.ts:323](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L323)
 
 Base delay between retries in milliseconds
 
@@ -26,6 +26,6 @@ Base delay between retries in milliseconds
 
 > `optional` **maxRetries**: `number`
 
-Defined in: [interfaces.ts:321](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L321)
+Defined in: [interfaces.ts:321](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L321)
 
 Maximum number of retry attempts

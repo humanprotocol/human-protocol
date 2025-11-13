@@ -6,7 +6,7 @@
 
 # Class: KVStoreUtils
 
-Defined in: [kvstore.ts:362](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L362)
+Defined in: [kvstore.ts:354](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L354)
 
 ## Introduction
 
@@ -55,7 +55,7 @@ const KVStoreAddresses = await KVStoreUtils.getKVStoreData(
 
 > `static` **get**(`chainId`, `address`, `key`, `options?`): `Promise`\<`string`\>
 
-Defined in: [kvstore.ts:437](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L437)
+Defined in: [kvstore.ts:429](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L429)
 
 Gets the value of a key-value pair in the KVStore using the subgraph.
 
@@ -122,7 +122,7 @@ console.log(value);
 
 > `static` **getFileUrlAndVerifyHash**(`chainId`, `address`, `urlKey`, `options?`): `Promise`\<`string`\>
 
-Defined in: [kvstore.ts:487](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L487)
+Defined in: [kvstore.ts:479](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L479)
 
 Gets the URL value of the given entity, and verifies its hash.
 
@@ -176,7 +176,7 @@ console.log(url);
 
 > `static` **getKVStoreData**(`chainId`, `address`, `options?`): `Promise`\<[`IKVStore`](../../interfaces/interfaces/IKVStore.md)[]\>
 
-Defined in: [kvstore.ts:382](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L382)
+Defined in: [kvstore.ts:374](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L374)
 
 This function returns the KVStore data for a given address.
 
@@ -229,7 +229,7 @@ console.log(kvStoreData);
 
 > `static` **getPublicKey**(`chainId`, `address`, `options?`): `Promise`\<`string`\>
 
-Defined in: [kvstore.ts:548](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L548)
+Defined in: [kvstore.ts:540](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L540)
 
 Gets the public key of the given entity, and verifies its hash.
 

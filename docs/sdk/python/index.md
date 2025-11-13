@@ -68,7 +68,6 @@ pip install human-protocol-sdk[agreement]
       * [`InvalidPublicKey`](human_protocol_sdk.legacy_encryption.md#human_protocol_sdk.legacy_encryption.InvalidPublicKey)
     * [human_protocol_sdk.utils module](human_protocol_sdk.utils.md)
       * [`SubgraphOptions`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.SubgraphOptions)
-      * [`apply_tx_defaults()`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.apply_tx_defaults)
       * [`custom_gql_fetch()`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.custom_gql_fetch)
       * [`get_contract_interface()`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.get_contract_interface)
       * [`get_erc20_interface()`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.get_erc20_interface)

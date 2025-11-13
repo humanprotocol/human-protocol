@@ -6,7 +6,7 @@
 
 # Interface: IEscrowWithdraw
 
-Defined in: [interfaces.ts:310](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L310)
+Defined in: [interfaces.ts:310](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L310)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [interfaces.ts:310](https://github.com/humanprotocol/human-protocol/
 
 > **tokenAddress**: `string`
 
-Defined in: [interfaces.ts:312](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L312)
+Defined in: [interfaces.ts:312](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L312)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [interfaces.ts:312](https://github.com/humanprotocol/human-protocol/
 
 > **txHash**: `string`
 
-Defined in: [interfaces.ts:311](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L311)
+Defined in: [interfaces.ts:311](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L311)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [interfaces.ts:311](https://github.com/humanprotocol/human-protocol/
 
 > **withdrawnAmount**: `bigint`
 
-Defined in: [interfaces.ts:313](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L313)
+Defined in: [interfaces.ts:313](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L313)

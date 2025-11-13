@@ -6,7 +6,7 @@
 
 # Class: StakingUtils
 
-Defined in: [staking.ts:496](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L496)
+Defined in: [staking.ts:484](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L484)
 
 Utility class for Staking-related subgraph queries.
 
@@ -26,7 +26,7 @@ Utility class for Staking-related subgraph queries.
 
 > `static` **getStaker**(`chainId`, `stakerAddress`, `options?`): `Promise`\<[`IStaker`](../../interfaces/interfaces/IStaker.md)\>
 
-Defined in: [staking.ts:505](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L505)
+Defined in: [staking.ts:493](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L493)
 
 Gets staking info for a staker from the subgraph.
 
@@ -62,7 +62,7 @@ Staker info from subgraph
 
 > `static` **getStakers**(`filter`, `options?`): `Promise`\<[`IStaker`](../../interfaces/interfaces/IStaker.md)[]\>
 
-Defined in: [staking.ts:540](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L540)
+Defined in: [staking.ts:528](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L528)
 
 Gets all stakers from the subgraph with filters, pagination and ordering.
 

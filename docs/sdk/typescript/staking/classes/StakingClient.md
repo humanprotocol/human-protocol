@@ -6,7 +6,7 @@
 
 # Class: StakingClient
 
-Defined in: [staking.ts:108](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L108)
+Defined in: [staking.ts:108](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L108)
 
 ## Introduction
 
@@ -86,7 +86,7 @@ const stakingClient = await StakingClient.build(provider);
 
 > **new StakingClient**(`runner`, `networkData`): `StakingClient`
 
-Defined in: [staking.ts:119](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L119)
+Defined in: [staking.ts:119](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L119)
 
 **StakingClient constructor**
 
@@ -118,7 +118,7 @@ The network information required to connect to the Staking contract
 
 > **escrowFactoryContract**: `EscrowFactory`
 
-Defined in: [staking.ts:111](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L111)
+Defined in: [staking.ts:111](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L111)
 
 ***
 
@@ -126,7 +126,7 @@ Defined in: [staking.ts:111](https://github.com/humanprotocol/human-protocol/blo
 
 > **networkData**: [`NetworkData`](../../types/type-aliases/NetworkData.md)
 
-Defined in: [base.ts:14](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L14)
+Defined in: [base.ts:12](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
 
 #### Inherited from
 
@@ -138,7 +138,7 @@ Defined in: [base.ts:14](https://github.com/humanprotocol/human-protocol/blob/fa
 
 > `protected` **runner**: `ContractRunner`
 
-Defined in: [base.ts:13](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L13)
+Defined in: [base.ts:11](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
 
 #### Inherited from
 
@@ -150,7 +150,7 @@ Defined in: [base.ts:13](https://github.com/humanprotocol/human-protocol/blob/fa
 
 > **stakingContract**: `Staking`
 
-Defined in: [staking.ts:110](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L110)
+Defined in: [staking.ts:110](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L110)
 
 ***
 
@@ -158,44 +158,15 @@ Defined in: [staking.ts:110](https://github.com/humanprotocol/human-protocol/blo
 
 > **tokenContract**: `HMToken`
 
-Defined in: [staking.ts:109](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L109)
+Defined in: [staking.ts:109](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L109)
 
 ## Methods
-
-### applyTxDefaults()
-
-> `protected` **applyTxDefaults**(`txOptions`): `Overrides`
-
-Defined in: [base.ts:35](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L35)
-
-Internal helper to enrich transaction overrides with network specific defaults.
-
-Aurora networks use a fixed gas price. We always override any user provided
-gasPrice with the canonical DEFAULT_AURORA_GAS_PRICE to avoid mismatches
-or tx failures due to an unexpected value. For other networks the user
-supplied fee parameters are left untouched.
-
-#### Parameters
-
-##### txOptions
-
-`Overrides` = `{}`
-
-#### Returns
-
-`Overrides`
-
-#### Inherited from
-
-[`BaseEthersClient`](../../base/classes/BaseEthersClient.md).[`applyTxDefaults`](../../base/classes/BaseEthersClient.md#applytxdefaults)
-
-***
 
 ### approveStake()
 
 > **approveStake**(`amount`, `txOptions?`): `Promise`\<`void`\>
 
-Defined in: [staking.ts:204](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L204)
+Defined in: [staking.ts:204](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L204)
 
 This function approves the staking contract to transfer a specified amount of tokens when the user stakes. It increases the allowance for the staking contract.
 
@@ -242,7 +213,7 @@ await stakingClient.approveStake(amount);
 
 > **getStakerInfo**(`stakerAddress`): `Promise`\<[`StakerInfo`](../../interfaces/interfaces/StakerInfo.md)\>
 
-Defined in: [staking.ts:458](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L458)
+Defined in: [staking.ts:446](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L446)
 
 Retrieves comprehensive staking information for a staker.
 
@@ -278,7 +249,7 @@ console.log(stakingInfo.tokensStaked);
 
 > **slash**(`slasher`, `staker`, `escrowAddress`, `amount`, `txOptions?`): `Promise`\<`void`\>
 
-Defined in: [staking.ts:396](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L396)
+Defined in: [staking.ts:384](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L384)
 
 This function reduces the allocated amount by a staker in an escrow and transfers those tokens to the reward pool. This allows the slasher to claim them later.
 
@@ -343,7 +314,7 @@ await stakingClient.slash('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', '0xf39Fd
 
 > **stake**(`amount`, `txOptions?`): `Promise`\<`void`\>
 
-Defined in: [staking.ts:258](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L258)
+Defined in: [staking.ts:258](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L258)
 
 This function stakes a specified amount of tokens on a specific network.
 
@@ -393,7 +364,7 @@ await stakingClient.stake(amount);
 
 > **unstake**(`amount`, `txOptions?`): `Promise`\<`void`\>
 
-Defined in: [staking.ts:307](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L307)
+Defined in: [staking.ts:302](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L302)
 
 This function unstakes tokens from staking contract. The unstaked tokens stay locked for a period of time.
 
@@ -442,7 +413,7 @@ await stakingClient.unstake(amount);
 
 > **withdraw**(`txOptions?`): `Promise`\<`void`\>
 
-Defined in: [staking.ts:357](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L357)
+Defined in: [staking.ts:347](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L347)
 
 This function withdraws unstaked and non-locked tokens from staking contract to the user wallet.
 
@@ -484,7 +455,7 @@ await stakingClient.withdraw();
 
 > `static` **build**(`runner`): `Promise`\<`StakingClient`\>
 
-Defined in: [staking.ts:147](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L147)
+Defined in: [staking.ts:147](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L147)
 
 Creates an instance of StakingClient from a Runner.
 

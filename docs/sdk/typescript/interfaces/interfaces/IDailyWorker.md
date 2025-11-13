@@ -6,7 +6,7 @@
 
 # Interface: IDailyWorker
 
-Defined in: [interfaces.ts:246](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L246)
+Defined in: [interfaces.ts:246](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L246)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [interfaces.ts:246](https://github.com/humanprotocol/human-protocol/
 
 > **activeWorkers**: `number`
 
-Defined in: [interfaces.ts:248](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L248)
+Defined in: [interfaces.ts:248](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L248)
 
 ***
 
@@ -22,4 +22,4 @@ Defined in: [interfaces.ts:248](https://github.com/humanprotocol/human-protocol/
 
 > **timestamp**: `number`
 
-Defined in: [interfaces.ts:247](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L247)
+Defined in: [interfaces.ts:247](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L247)

@@ -6,7 +6,7 @@
 
 # Interface: IOperatorSubgraph
 
-Defined in: [graphql/types.ts:143](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L143)
+Defined in: [graphql/types.ts:143](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L143)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [graphql/types.ts:143](https://github.com/humanprotocol/human-protoc
 
 > **address**: `string`
 
-Defined in: [graphql/types.ts:145](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L145)
+Defined in: [graphql/types.ts:145](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L145)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [graphql/types.ts:145](https://github.com/humanprotocol/human-protoc
 
 > **amountJobsProcessed**: `string`
 
-Defined in: [graphql/types.ts:146](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L146)
+Defined in: [graphql/types.ts:146](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L146)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [graphql/types.ts:146](https://github.com/humanprotocol/human-protoc
 
 > **category**: `string` \| `null`
 
-Defined in: [graphql/types.ts:156](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L156)
+Defined in: [graphql/types.ts:156](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L156)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [graphql/types.ts:156](https://github.com/humanprotocol/human-protoc
 
 > **fee**: `string` \| `null`
 
-Defined in: [graphql/types.ts:148](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L148)
+Defined in: [graphql/types.ts:148](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L148)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [graphql/types.ts:148](https://github.com/humanprotocol/human-protoc
 
 > **id**: `string`
 
-Defined in: [graphql/types.ts:144](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L144)
+Defined in: [graphql/types.ts:144](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L144)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [graphql/types.ts:144](https://github.com/humanprotocol/human-protoc
 
 > **jobTypes**: `string` \| `string`[] \| `null`
 
-Defined in: [graphql/types.ts:157](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L157)
+Defined in: [graphql/types.ts:157](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L157)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [graphql/types.ts:157](https://github.com/humanprotocol/human-protoc
 
 > **name**: `string` \| `null`
 
-Defined in: [graphql/types.ts:155](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L155)
+Defined in: [graphql/types.ts:155](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L155)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [graphql/types.ts:155](https://github.com/humanprotocol/human-protoc
 
 > **publicKey**: `string` \| `null`
 
-Defined in: [graphql/types.ts:149](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L149)
+Defined in: [graphql/types.ts:149](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L149)
 
 ***
 
@@ -78,7 +78,7 @@ Defined in: [graphql/types.ts:149](https://github.com/humanprotocol/human-protoc
 
 > **registrationInstructions**: `string` \| `null`
 
-Defined in: [graphql/types.ts:154](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L154)
+Defined in: [graphql/types.ts:154](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L154)
 
 ***
 
@@ -86,7 +86,7 @@ Defined in: [graphql/types.ts:154](https://github.com/humanprotocol/human-protoc
 
 > **registrationNeeded**: `boolean` \| `null`
 
-Defined in: [graphql/types.ts:153](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L153)
+Defined in: [graphql/types.ts:153](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L153)
 
 ***
 
@@ -94,7 +94,7 @@ Defined in: [graphql/types.ts:153](https://github.com/humanprotocol/human-protoc
 
 > **reputationNetworks**: `object`[]
 
-Defined in: [graphql/types.ts:158](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L158)
+Defined in: [graphql/types.ts:158](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L158)
 
 #### address
 
@@ -106,7 +106,7 @@ Defined in: [graphql/types.ts:158](https://github.com/humanprotocol/human-protoc
 
 > **role**: `string` \| `null`
 
-Defined in: [graphql/types.ts:147](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L147)
+Defined in: [graphql/types.ts:147](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L147)
 
 ***
 
@@ -114,7 +114,7 @@ Defined in: [graphql/types.ts:147](https://github.com/humanprotocol/human-protoc
 
 > **staker**: \{ `lastDepositTimestamp`: `string`; `lockedAmount`: `string`; `lockedUntilTimestamp`: `string`; `slashedAmount`: `string`; `stakedAmount`: `string`; `withdrawnAmount`: `string`; \} \| `null`
 
-Defined in: [graphql/types.ts:159](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L159)
+Defined in: [graphql/types.ts:159](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L159)
 
 ***
 
@@ -122,7 +122,7 @@ Defined in: [graphql/types.ts:159](https://github.com/humanprotocol/human-protoc
 
 > **url**: `string` \| `null`
 
-Defined in: [graphql/types.ts:152](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L152)
+Defined in: [graphql/types.ts:152](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L152)
 
 ***
 
@@ -130,7 +130,7 @@ Defined in: [graphql/types.ts:152](https://github.com/humanprotocol/human-protoc
 
 > **webhookUrl**: `string` \| `null`
 
-Defined in: [graphql/types.ts:150](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L150)
+Defined in: [graphql/types.ts:150](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L150)
 
 ***
 
@@ -138,4 +138,4 @@ Defined in: [graphql/types.ts:150](https://github.com/humanprotocol/human-protoc
 
 > **website**: `string` \| `null`
 
-Defined in: [graphql/types.ts:151](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L151)
+Defined in: [graphql/types.ts:151](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L151)
