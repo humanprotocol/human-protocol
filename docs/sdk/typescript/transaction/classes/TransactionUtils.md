@@ -6,7 +6,7 @@
 
 # Class: TransactionUtils
 
-Defined in: [transaction.ts:23](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L23)
+Defined in: [transaction.ts:23](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L23)
 
 ## Constructors
 
@@ -22,9 +22,9 @@ Defined in: [transaction.ts:23](https://github.com/humanprotocol/human-protocol/
 
 ### getTransaction()
 
-> `static` **getTransaction**(`chainId`, `hash`): `Promise`\<[`ITransaction`](../../interfaces/interfaces/ITransaction.md) \| `null`\>
+> `static` **getTransaction**(`chainId`, `hash`, `options?`): `Promise`\<[`ITransaction`](../../interfaces/interfaces/ITransaction.md) \| `null`\>
 
-Defined in: [transaction.ts:67](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L67)
+Defined in: [transaction.ts:68](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L68)
 
 This function returns the transaction data for the given hash.
 
@@ -70,6 +70,12 @@ The chain ID.
 
 The transaction hash.
 
+##### options?
+
+[`SubgraphOptions`](../../interfaces/interfaces/SubgraphOptions.md)
+
+Optional configuration for subgraph requests.
+
 #### Returns
 
 `Promise`\<[`ITransaction`](../../interfaces/interfaces/ITransaction.md) \| `null`\>
@@ -88,9 +94,9 @@ const transaction = await TransactionUtils.getTransaction(ChainId.POLYGON, '0x62
 
 ### getTransactions()
 
-> `static` **getTransactions**(`filter`): `Promise`\<[`ITransaction`](../../interfaces/interfaces/ITransaction.md)[]\>
+> `static` **getTransactions**(`filter`, `options?`): `Promise`\<[`ITransaction`](../../interfaces/interfaces/ITransaction.md)[]\>
 
-Defined in: [transaction.ts:162](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L162)
+Defined in: [transaction.ts:170](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L170)
 
 This function returns all transaction details based on the provided filter.
 
@@ -144,6 +150,7 @@ type ITransaction = {
 ```
 
 @param {ITransactionsFilter} filter Filter for the transactions.
+@param {SubgraphOptions} options Optional configuration for subgraph requests.
 @returns {Promise<ITransaction[]>} Returns an array with all the transaction details.
 
 **Code example**
@@ -167,6 +174,10 @@ const transactions = await TransactionUtils.getTransactions(filter);
 ##### filter
 
 [`ITransactionsFilter`](../../interfaces/interfaces/ITransactionsFilter.md)
+
+##### options?
+
+[`SubgraphOptions`](../../interfaces/interfaces/SubgraphOptions.md)
 
 #### Returns
 

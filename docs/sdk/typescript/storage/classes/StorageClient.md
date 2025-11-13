@@ -6,7 +6,7 @@
 
 # ~~Class: StorageClient~~
 
-Defined in: [storage.ts:63](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L63)
+Defined in: [storage.ts:63](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L63)
 
 ## Deprecated
 
@@ -61,7 +61,7 @@ const storageClient = new StorageClient(params, credentials);
 
 > **new StorageClient**(`params`, `credentials?`): `StorageClient`
 
-Defined in: [storage.ts:73](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L73)
+Defined in: [storage.ts:73](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L73)
 
 **Storage client constructor**
 
@@ -89,7 +89,7 @@ Optional. Cloud storage access data. If credentials are not provided - use anony
 
 > **bucketExists**(`bucket`): `Promise`\<`boolean`\>
 
-Defined in: [storage.ts:262](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L262)
+Defined in: [storage.ts:262](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L262)
 
 This function checks if a bucket exists.
 
@@ -133,7 +133,7 @@ const exists = await storageClient.bucketExists('bucket-name');
 
 > **downloadFiles**(`keys`, `bucket`): `Promise`\<`any`[]\>
 
-Defined in: [storage.ts:112](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L112)
+Defined in: [storage.ts:112](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L112)
 
 This function downloads files from a bucket.
 
@@ -181,7 +181,7 @@ const files = await storageClient.downloadFiles(keys, 'bucket-name');
 
 > **listObjects**(`bucket`): `Promise`\<`string`[]\>
 
-Defined in: [storage.ts:292](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L292)
+Defined in: [storage.ts:292](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L292)
 
 This function lists all file names contained in the bucket.
 
@@ -225,7 +225,7 @@ const fileNames = await storageClient.listObjects('bucket-name');
 
 > **uploadFiles**(`files`, `bucket`): `Promise`\<[`UploadFile`](../../types/type-aliases/UploadFile.md)[]\>
 
-Defined in: [storage.ts:198](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L198)
+Defined in: [storage.ts:198](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L198)
 
 This function uploads files to a bucket.
 
@@ -278,7 +278,7 @@ const uploadedFiles = await storageClient.uploadFiles(files, 'bucket-name');
 
 > `static` **downloadFileFromUrl**(`url`): `Promise`\<`any`\>
 
-Defined in: [storage.ts:146](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L146)
+Defined in: [storage.ts:146](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L146)
 
 This function downloads files from a URL.
 

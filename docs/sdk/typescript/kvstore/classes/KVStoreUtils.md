@@ -6,7 +6,7 @@
 
 # Class: KVStoreUtils
 
-Defined in: [kvstore.ts:362](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L362)
+Defined in: [kvstore.ts:362](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L362)
 
 ## Introduction
 
@@ -53,9 +53,9 @@ const KVStoreAddresses = await KVStoreUtils.getKVStoreData(
 
 ### get()
 
-> `static` **get**(`chainId`, `address`, `key`): `Promise`\<`string`\>
+> `static` **get**(`chainId`, `address`, `key`, `options?`): `Promise`\<`string`\>
 
-Defined in: [kvstore.ts:433](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L433)
+Defined in: [kvstore.ts:437](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L437)
 
 Gets the value of a key-value pair in the KVStore using the subgraph.
 
@@ -78,6 +78,12 @@ Address from which to get the key value.
 `string`
 
 Key to obtain the value.
+
+##### options?
+
+[`SubgraphOptions`](../../interfaces/interfaces/SubgraphOptions.md)
+
+Optional configuration for subgraph requests.
 
 #### Returns
 
@@ -114,9 +120,9 @@ console.log(value);
 
 ### getFileUrlAndVerifyHash()
 
-> `static` **getFileUrlAndVerifyHash**(`chainId`, `address`, `urlKey`): `Promise`\<`string`\>
+> `static` **getFileUrlAndVerifyHash**(`chainId`, `address`, `urlKey`, `options?`): `Promise`\<`string`\>
 
-Defined in: [kvstore.ts:480](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L480)
+Defined in: [kvstore.ts:487](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L487)
 
 Gets the URL value of the given entity, and verifies its hash.
 
@@ -140,6 +146,12 @@ Address from which to get the URL value.
 
 Configurable URL key. `url` by default.
 
+##### options?
+
+[`SubgraphOptions`](../../interfaces/interfaces/SubgraphOptions.md)
+
+Optional configuration for subgraph requests.
+
 #### Returns
 
 `Promise`\<`string`\>
@@ -162,9 +174,9 @@ console.log(url);
 
 ### getKVStoreData()
 
-> `static` **getKVStoreData**(`chainId`, `address`): `Promise`\<[`IKVStore`](../../interfaces/interfaces/IKVStore.md)[]\>
+> `static` **getKVStoreData**(`chainId`, `address`, `options?`): `Promise`\<[`IKVStore`](../../interfaces/interfaces/IKVStore.md)[]\>
 
-Defined in: [kvstore.ts:381](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L381)
+Defined in: [kvstore.ts:382](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L382)
 
 This function returns the KVStore data for a given address.
 
@@ -181,6 +193,12 @@ Network in which the KVStore is deployed
 `string`
 
 Address of the KVStore
+
+##### options?
+
+[`SubgraphOptions`](../../interfaces/interfaces/SubgraphOptions.md)
+
+Optional configuration for subgraph requests.
 
 #### Returns
 
@@ -209,9 +227,9 @@ console.log(kvStoreData);
 
 ### getPublicKey()
 
-> `static` **getPublicKey**(`chainId`, `address`): `Promise`\<`string`\>
+> `static` **getPublicKey**(`chainId`, `address`, `options?`): `Promise`\<`string`\>
 
-Defined in: [kvstore.ts:540](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L540)
+Defined in: [kvstore.ts:548](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L548)
 
 Gets the public key of the given entity, and verifies its hash.
 
@@ -228,6 +246,10 @@ Network in which the KVStore is deployed
 `string`
 
 Address from which to get the public key.
+
+##### options?
+
+[`SubgraphOptions`](../../interfaces/interfaces/SubgraphOptions.md)
 
 #### Returns
 

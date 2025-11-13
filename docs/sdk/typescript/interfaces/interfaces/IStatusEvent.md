@@ -6,7 +6,7 @@
 
 # Interface: IStatusEvent
 
-Defined in: [interfaces.ts:285](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L285)
+Defined in: [interfaces.ts:285](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L285)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [interfaces.ts:285](https://github.com/humanprotocol/human-protocol/
 
 > **chainId**: [`ChainId`](../../enums/enumerations/ChainId.md)
 
-Defined in: [interfaces.ts:289](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L289)
+Defined in: [interfaces.ts:289](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L289)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [interfaces.ts:289](https://github.com/humanprotocol/human-protocol/
 
 > **escrowAddress**: `string`
 
-Defined in: [interfaces.ts:287](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L287)
+Defined in: [interfaces.ts:287](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L287)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [interfaces.ts:287](https://github.com/humanprotocol/human-protocol/
 
 > **status**: [`EscrowStatus`](../../types/enumerations/EscrowStatus.md)
 
-Defined in: [interfaces.ts:288](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L288)
+Defined in: [interfaces.ts:288](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L288)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [interfaces.ts:288](https://github.com/humanprotocol/human-protocol/
 
 > **timestamp**: `number`
 
-Defined in: [interfaces.ts:286](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L286)
+Defined in: [interfaces.ts:286](https://github.com/humanprotocol/human-protocol/blob/faeb610cb2eb1159ae2a32eb5ba27f30a6f24913/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L286)
