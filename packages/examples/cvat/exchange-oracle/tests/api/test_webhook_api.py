@@ -34,7 +34,8 @@ def test_incoming_webhook_200(client: TestClient) -> None:
 
         assert response.status_code == 200
 
-        db_query = select(Webhook).where(Webhook.escrow_address == escrow_address)
+        db_query = select(Webhook).where(
+            Webhook.escrow_address == escrow_address)
         webhook = session.execute(db_query).scalars().first()
         assert response.json() == {"id": webhook.id}
 
@@ -116,7 +117,7 @@ def test_incoming_webhook_400_invalid_chain_id(client: TestClient) -> None:
         "errors": [
             {
                 "field": "chain_id",
-                "message": "Input should be 137, 80002, 1313161555 or 1338",
+                "message": "Input should be 137, 80002 or 1338",
             }
         ]
     }
