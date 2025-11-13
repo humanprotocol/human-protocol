@@ -76,25 +76,6 @@ export class OracleDiscoveryController {
     });
     oracles.push(thisrtyOracle);
 
-    if (!Environment.isProduction()) {
-      return oracles;
-    }
-
-    const isAudinoAvailableForUser = (req?.user?.qualifications ?? []).includes(
-      'audino',
-    );
-
-    /**
-     * TODO: remove filtering logic when Audino available for everyone
-     */
-    return oracles.filter((oracle) => {
-      const isAudinoOracle = oracle.jobTypes.includes('audio_transcription');
-
-      if (isAudinoOracle) {
-        return isAudinoAvailableForUser;
-      } else {
-        return true;
-      }
-    });
+    return oracles;
   }
 }
