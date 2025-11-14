@@ -1,5 +1,5 @@
 import { HttpStatus } from '@nestjs/common';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { parseString } from 'xml2js';
 import { StorageDataDto } from '../../modules/job/job.dto';
 import { ErrorBucket } from '../constants/errors';
@@ -10,6 +10,7 @@ import {
   GCS_HTTP_REGEX_PATH_BASED,
   GCS_HTTP_REGEX_SUBDOMAIN,
 } from './gcstorage';
+import { formatAxiosError } from './http';
 
 export function generateBucketUrl(
   storageData: StorageDataDto,
@@ -140,7 +141,11 @@ export async function listObjectsInBucket(url: URL): Promise<string[]> {
       } while (nextContinuationToken);
       resolve(objects);
     } catch (err) {
-      reject(err);
+      let formatted = err;
+      if (err instanceof AxiosError) {
+        formatted = formatAxiosError(err);
+      }
+      reject(formatted);
     }
   });
 }

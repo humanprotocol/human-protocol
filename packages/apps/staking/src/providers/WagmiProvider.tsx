@@ -1,8 +1,8 @@
-import { FC, PropsWithChildren } from 'react';
-import { createConfig, http, WagmiProvider as WWagmiProvider } from 'wagmi';
-import { walletConnect, coinbaseWallet } from 'wagmi/connectors';
-import * as wagmiChains from 'wagmi/chains';
-import { LOCALHOST, SUPPORTED_CHAIN_IDS } from '../constants/chains';
+import { FC, PropsWithChildren } from "react";
+import { createConfig, http, WagmiProvider as WWagmiProvider } from "wagmi";
+import { walletConnect, coinbaseWallet } from "wagmi/connectors";
+import * as wagmiChains from "wagmi/chains";
+import { LOCALHOST, SUPPORTED_CHAIN_IDS } from "../constants/chains";
 
 const projectId = import.meta.env.VITE_APP_WALLETCONNECT_PROJECT_ID;
 
@@ -13,12 +13,11 @@ const chainIdToChainMap: Record<number, any> = {
   [wagmiChains.bscTestnet.id]: wagmiChains.bscTestnet,
   [wagmiChains.polygon.id]: wagmiChains.polygon,
   [wagmiChains.polygonAmoy.id]: wagmiChains.polygonAmoy,
-  [wagmiChains.auroraTestnet.id]: wagmiChains.auroraTestnet,
   [LOCALHOST.id]: LOCALHOST,
 };
 
 const supportedChains = SUPPORTED_CHAIN_IDS.map(
-  (id) => chainIdToChainMap[id]
+  (id) => chainIdToChainMap[id],
 ).filter(Boolean);
 
 export const wagmiConfig = createConfig({
@@ -26,17 +25,17 @@ export const wagmiConfig = createConfig({
   connectors: [
     walletConnect({
       showQrModal: true,
-      projectId: projectId ?? '',
+      projectId: projectId ?? "",
     }),
     coinbaseWallet({
-      appName: 'human-staking-dashboard',
+      appName: "human-staking-dashboard",
     }),
   ],
   transports: Object.fromEntries(
     supportedChains.map((chain) => [
       chain.id,
       http(chain.rpcUrls.default.http[0]),
-    ])
+    ]),
   ),
 });
 

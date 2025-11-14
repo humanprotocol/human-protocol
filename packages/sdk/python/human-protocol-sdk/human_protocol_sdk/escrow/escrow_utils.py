@@ -24,7 +24,6 @@ Module
 ------
 """
 
-from datetime import datetime
 import logging
 from typing import List, Optional
 
@@ -38,7 +37,8 @@ from human_protocol_sdk.filter import (
     PayoutFilter,
 )
 from human_protocol_sdk.utils import (
-    get_data_from_subgraph,
+    SubgraphOptions,
+    custom_gql_fetch,
 )
 
 from human_protocol_sdk.escrow.escrow_client import EscrowClientError
@@ -219,10 +219,12 @@ class EscrowUtils:
     @staticmethod
     def get_escrows(
         filter: EscrowFilter,
+        options: Optional[SubgraphOptions] = None,
     ) -> List[EscrowData]:
         """Get an array of escrow addresses based on the specified filter parameters.
 
         :param filter: Object containing all the necessary parameters to filter
+        :param options: Optional config for subgraph requests
 
         :return: List of escrows
 
@@ -257,7 +259,7 @@ class EscrowUtils:
             else:
                 statuses = [filter.status.name]
 
-        escrows_data = get_data_from_subgraph(
+        escrows_data = custom_gql_fetch(
             network,
             query=get_escrows_query(filter),
             params={
@@ -283,6 +285,7 @@ class EscrowUtils:
                 "skip": filter.skip,
                 "orderDirection": filter.order_direction.value,
             },
+            options=options,
         )
 
         if (
@@ -334,11 +337,13 @@ class EscrowUtils:
     def get_escrow(
         chain_id: ChainId,
         escrow_address: str,
+        options: Optional[SubgraphOptions] = None,
     ) -> Optional[EscrowData]:
         """Returns the escrow for a given address.
 
         :param chain_id: Network in which the escrow has been deployed
         :param escrow_address: Address of the escrow
+        :param options: Optional config for subgraph requests
 
         :return: Escrow data
 
@@ -367,12 +372,13 @@ class EscrowUtils:
 
         network = NETWORKS[ChainId(chain_id)]
 
-        escrow_data = get_data_from_subgraph(
+        escrow_data = custom_gql_fetch(
             network,
             query=get_escrow_query(),
             params={
                 "escrowAddress": escrow_address.lower(),
             },
+            options=options,
         )
 
         if (
@@ -414,11 +420,15 @@ class EscrowUtils:
         )
 
     @staticmethod
-    def get_status_events(filter: StatusEventFilter) -> List[StatusEvent]:
+    def get_status_events(
+        filter: StatusEventFilter,
+        options: Optional[SubgraphOptions] = None,
+    ) -> List[StatusEvent]:
         """
         Retrieve status events for specified networks and statuses within a date range.
 
         :param filter: Object containing all the necessary parameters to filter status events.
+        :param options: Optional config for subgraph requests
 
         :return List[StatusEvent]: List of status events matching the query parameters.
 
@@ -435,7 +445,7 @@ class EscrowUtils:
 
         status_names = [status.name for status in filter.statuses]
 
-        data = get_data_from_subgraph(
+        data = custom_gql_fetch(
             network,
             get_status_query(filter.date_from, filter.date_to, filter.launcher),
             {
@@ -447,6 +457,7 @@ class EscrowUtils:
                 "skip": filter.skip,
                 "orderDirection": filter.order_direction.value,
             },
+            options=options,
         )
 
         if (
@@ -472,11 +483,15 @@ class EscrowUtils:
         return events_with_chain_id
 
     @staticmethod
-    def get_payouts(filter: PayoutFilter) -> List[Payout]:
+    def get_payouts(
+        filter: PayoutFilter,
+        options: Optional[SubgraphOptions] = None,
+    ) -> List[Payout]:
         """
         Fetch payouts from the subgraph based on the provided filter.
 
         :param filter: Object containing all the necessary parameters to filter payouts.
+        :param options: Optional config for subgraph requests
 
         :return List[Payout]: List of payouts matching the query parameters.
 
@@ -494,7 +509,7 @@ class EscrowUtils:
         if not network:
             raise EscrowClientError("Unsupported Chain ID")
 
-        data = get_data_from_subgraph(
+        data = custom_gql_fetch(
             network,
             get_payouts_query(filter),
             {
@@ -508,6 +523,7 @@ class EscrowUtils:
                 "skip": filter.skip,
                 "orderDirection": filter.order_direction.value,
             },
+            options=options,
         )
 
         if (
@@ -536,11 +552,13 @@ class EscrowUtils:
     @staticmethod
     def get_cancellation_refunds(
         filter: CancellationRefundFilter,
+        options: Optional[SubgraphOptions] = None,
     ) -> List[CancellationRefund]:
         """
         Fetch cancellation refunds from the subgraph based on the provided filter.
 
         :param filter: Object containing all the necessary parameters to filter cancellation refunds.
+        :param options: Optional config for subgraph requests
 
         :return List[CancellationRefund]: List of cancellation refunds matching the query parameters.
 
@@ -558,7 +576,7 @@ class EscrowUtils:
         if not network:
             raise EscrowClientError("Unsupported Chain ID")
 
-        data = get_data_from_subgraph(
+        data = custom_gql_fetch(
             network,
             get_cancellation_refunds_query(filter),
             {
@@ -572,6 +590,7 @@ class EscrowUtils:
                 "skip": filter.skip,
                 "orderDirection": filter.order_direction.value,
             },
+            options=options,
         )
 
         if (
@@ -601,13 +620,16 @@ class EscrowUtils:
 
     @staticmethod
     def get_cancellation_refund(
-        chain_id: ChainId, escrow_address: str
+        chain_id: ChainId,
+        escrow_address: str,
+        options: Optional[SubgraphOptions] = None,
     ) -> CancellationRefund:
         """
         Returns the cancellation refund for a given escrow address.
 
         :param chain_id: Network in which the escrow has been deployed
         :param escrow_address: Address of the escrow
+        :param options: Optional config for subgraph requests
 
         :return: CancellationRefund data or None
 
@@ -635,12 +657,13 @@ class EscrowUtils:
         if not network:
             raise EscrowClientError("Unsupported Chain ID")
 
-        data = get_data_from_subgraph(
+        data = custom_gql_fetch(
             network,
             get_cancellation_refund_by_escrow_query(),
             {
                 "escrowAddress": escrow_address.lower(),
             },
+            options=options,
         )
 
         if (

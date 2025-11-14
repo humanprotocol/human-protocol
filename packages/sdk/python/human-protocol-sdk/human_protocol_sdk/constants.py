@@ -12,7 +12,6 @@ class ChainId(Enum):
     BSC_TESTNET = 97
     POLYGON = 137
     POLYGON_AMOY = 80002
-    AURORA_TESTNET = 1313161555
     LOCALHOST = 1338
 
 
@@ -131,22 +130,6 @@ NETWORKS = {
         "old_subgraph_url": "",
         "old_factory_address": "",
     },
-    ChainId.AURORA_TESTNET: {
-        "title": "Aurora Testnet",
-        "scan_url": "https://testnet.aurorascan.dev",
-        "subgraph_url": (
-            "https://api.studio.thegraph.com/query/74256/amoy/version/aurora-testnet"
-        ),
-        "subgraph_url_api_key": (
-            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmVHYvjbsgAroR9EMgqqGTQ7aKPRFMVekY6evU6mFPUU7J"
-        ),
-        "hmt_address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
-        "factory_address": "0xbA537fEF2442cD48f60686FE1Bbbe40F964a7940",
-        "staking_address": "0x7457d26a3C70Bd71F7557C773b303c1dB82BBB68",
-        "kvstore_address": "0xD6D347ba6987519B4e42EcED43dF98eFf5465a23",
-        "old_subgraph_url": "",
-        "old_factory_address": "",
-    },
     ChainId.LOCALHOST: {
         "title": "Localhost",
         "scan_url": "",
@@ -160,8 +143,6 @@ NETWORKS = {
         "old_factory_address": "",
     },
 }
-
-DEFAULT_AURORA_GAS_PRICE = Web3.to_wei(0.07, "gwei")
 
 
 SUBGRAPH_API_KEY_PLACEHOLDER = "[SUBGRAPH_API_KEY]"

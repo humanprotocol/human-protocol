@@ -78,7 +78,7 @@ class TestKVStoreClient(unittest.TestCase):
         self.kvstore.set(key, value)
 
         self.kvstore.kvstore_contract.functions.set.assert_called_once_with(key, value)
-        mock_set.transact.assert_called_once_with({})
+        mock_set.transact.assert_called_once_with(None)
         self.kvstore.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
@@ -140,7 +140,7 @@ class TestKVStoreClient(unittest.TestCase):
         self.kvstore.kvstore_contract.functions.setBulk.assert_called_once_with(
             keys, values
         )
-        mock_set_bulk.transact.assert_called_once_with({})
+        mock_set_bulk.transact.assert_called_once_with(None)
         self.kvstore.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
@@ -226,7 +226,7 @@ class TestKVStoreClient(unittest.TestCase):
             self.kvstore.kvstore_contract.functions.setBulk.assert_called_once_with(
                 ["url", "url_hash"], [url, content_hash]
             )
-            mock_set_bulk.transact.assert_called_once_with({})
+            mock_set_bulk.transact.assert_called_once_with(None)
             self.kvstore.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
                 "tx_hash"
             )
@@ -255,7 +255,7 @@ class TestKVStoreClient(unittest.TestCase):
                 ["linkedin_url", "linkedin_url_hash"], [url, content_hash]
             )
 
-            mock_set_bulk.transact.assert_called_once_with({})
+            mock_set_bulk.transact.assert_called_once_with(None)
             self.kvstore.w3.eth.wait_for_transaction_receipt.assert_called_once_with
 
     def test_set_file_url_and_hash_invalid_url(self):

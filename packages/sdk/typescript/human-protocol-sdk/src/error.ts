@@ -307,6 +307,13 @@ export const ErrorBulkPayOutVersion = new Error(
 );
 
 /**
+ * @constant {Error} - Retry configuration is missing required parameters.
+ */
+export const ErrorRetryParametersMissing = new Error(
+  'Retry configuration must include both maxRetries and baseDelay'
+);
+
+/**
  * @constant {Warning} - Possible version mismatch.
  */
 export const WarnVersionMismatch =

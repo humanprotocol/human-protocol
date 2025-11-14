@@ -62,7 +62,8 @@ describe('StatisticsClient', () => {
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
         'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
-        GET_ESCROW_STATISTICS_QUERY
+        GET_ESCROW_STATISTICS_QUERY,
+        undefined
       );
       expect(gqlFetchSpy).toHaveBeenCalledWith(
         'https://api.studio.thegraph.com/query/74256/polygon/version/latest',

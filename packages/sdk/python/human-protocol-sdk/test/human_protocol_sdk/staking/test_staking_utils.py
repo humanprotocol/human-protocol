@@ -14,7 +14,7 @@ from human_protocol_sdk.gql.staking import get_staker_query, get_stakers_query
 class TestStakingUtils(unittest.TestCase):
     def test_get_stakers(self):
         with patch(
-            "human_protocol_sdk.staking.staking_utils.get_data_from_subgraph"
+            "human_protocol_sdk.staking.staking_utils.custom_gql_fetch"
         ) as mock_function:
             mock_staker_1 = {
                 "id": "1",
@@ -69,6 +69,7 @@ class TestStakingUtils(unittest.TestCase):
                     "first": 2,
                     "skip": 0,
                 },
+                options=None,
             )
             self.assertEqual(len(stakers), 2)
             self.assertIsInstance(stakers[0], StakerData)
@@ -120,7 +121,7 @@ class TestStakingUtils(unittest.TestCase):
 
     def test_get_stakers_empty_response(self):
         with patch(
-            "human_protocol_sdk.staking.staking_utils.get_data_from_subgraph"
+            "human_protocol_sdk.staking.staking_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.return_value = {"data": {"stakers": []}}
 
@@ -139,7 +140,7 @@ class TestStakingUtils(unittest.TestCase):
 
     def test_get_staker(self):
         with patch(
-            "human_protocol_sdk.staking.staking_utils.get_data_from_subgraph"
+            "human_protocol_sdk.staking.staking_utils.custom_gql_fetch"
         ) as mock_function:
             mock_staker = {
                 "id": "1",
@@ -160,6 +161,7 @@ class TestStakingUtils(unittest.TestCase):
                 NETWORKS[ChainId.POLYGON_AMOY],
                 query=get_staker_query(),
                 params={"id": "0x123"},
+                options=None,
             )
             self.assertIsInstance(staker, StakerData)
             self.assertEqual(staker.id, "1")
@@ -181,7 +183,7 @@ class TestStakingUtils(unittest.TestCase):
 
     def test_get_staker_empty_data(self):
         with patch(
-            "human_protocol_sdk.staking.staking_utils.get_data_from_subgraph"
+            "human_protocol_sdk.staking.staking_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.return_value = {"data": {"staker": None}}
 

@@ -4,7 +4,6 @@ import { Button } from '@/shared/components/ui/button';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
 import { useWalletConnect } from '@/shared/contexts/wallet-connect';
 import { useWorkerIdentityVerificationStatus } from '../hooks';
-import { DoneLabel } from './status-labels';
 import { WalletConnectDone } from './wallet-connect-done';
 import { RegisterAddressBtn } from './buttons';
 
@@ -18,11 +17,7 @@ export function WalletConnectionControl() {
   const hasWalletAddress = Boolean(walletAddress);
 
   if (hasWalletAddress) {
-    return (
-      <DoneLabel>
-        <WalletConnectDone />
-      </DoneLabel>
-    );
+    return <WalletConnectDone />;
   }
 
   if (isVerificationCompleted && isConnected) {

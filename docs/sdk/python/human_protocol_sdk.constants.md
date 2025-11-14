@@ -6,8 +6,6 @@ Bases: `Enum`
 
 Enum for chain IDs.
 
-#### AURORA_TESTNET *= 1313161555*
-
 #### BSC_MAINNET *= 56*
 
 #### BSC_TESTNET *= 97*

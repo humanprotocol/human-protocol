@@ -18,7 +18,7 @@ class TestOperatorUtils(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -67,6 +67,7 @@ class TestOperatorUtils(unittest.TestCase):
                     "first": filter.first,
                     "skip": filter.skip,
                 },
+                options=None,
             )
 
             self.assertEqual(len(operators), 1)
@@ -96,7 +97,7 @@ class TestOperatorUtils(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -143,6 +144,7 @@ class TestOperatorUtils(unittest.TestCase):
                     "first": filter.first,
                     "skip": filter.skip,
                 },
+                options=None,
             )
 
             self.assertEqual(len(operators), 1)
@@ -172,7 +174,7 @@ class TestOperatorUtils(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -219,6 +221,7 @@ class TestOperatorUtils(unittest.TestCase):
                     "first": filter.first,
                     "skip": filter.skip,
                 },
+                options=None,
             )
 
             self.assertEqual(len(operators), 1)
@@ -248,7 +251,7 @@ class TestOperatorUtils(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.return_value = [
                 {
@@ -271,6 +274,7 @@ class TestOperatorUtils(unittest.TestCase):
                     "first": filter.first,
                     "skip": filter.skip,
                 },
+                options=None,
             )
 
             self.assertEqual(operators, [])
@@ -281,7 +285,7 @@ class TestOperatorUtils(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -321,6 +325,7 @@ class TestOperatorUtils(unittest.TestCase):
                 NETWORKS[ChainId.POLYGON],
                 query=get_operator_query,
                 params={"address": staker_address},
+                options=None,
             )
 
             self.assertNotEqual(operator, None)
@@ -351,7 +356,7 @@ class TestOperatorUtils(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -389,6 +394,7 @@ class TestOperatorUtils(unittest.TestCase):
                 NETWORKS[ChainId.POLYGON],
                 query=get_operator_query,
                 params={"address": staker_address},
+                options=None,
             )
 
             self.assertNotEqual(operator, None)
@@ -419,7 +425,7 @@ class TestOperatorUtils(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -457,6 +463,7 @@ class TestOperatorUtils(unittest.TestCase):
                 NETWORKS[ChainId.POLYGON],
                 query=get_operator_query,
                 params={"address": staker_address},
+                options=None,
             )
 
             self.assertNotEqual(operator, None)
@@ -485,7 +492,7 @@ class TestOperatorUtils(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.return_value = [{"data": {"operator": None}}]
 
@@ -495,6 +502,7 @@ class TestOperatorUtils(unittest.TestCase):
                 NETWORKS[ChainId.POLYGON],
                 query=get_operator_query,
                 params={"address": staker_address},
+                options=None,
             )
 
             self.assertEqual(operator, None)
@@ -509,7 +517,7 @@ class TestOperatorUtils(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -541,6 +549,7 @@ class TestOperatorUtils(unittest.TestCase):
             NETWORKS[ChainId.POLYGON],
             query=get_reputation_network_query(None),
             params={"address": reputation_address, "role": None},
+            options=None,
         )
 
         self.assertNotEqual(operators, [])
@@ -561,7 +570,7 @@ class TestOperatorUtils(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -593,6 +602,7 @@ class TestOperatorUtils(unittest.TestCase):
             NETWORKS[ChainId.POLYGON],
             query=get_reputation_network_query(None),
             params={"address": reputation_address, "role": None},
+            options=None,
         )
 
         self.assertNotEqual(operators, [])
@@ -613,7 +623,7 @@ class TestOperatorUtils(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -645,6 +655,7 @@ class TestOperatorUtils(unittest.TestCase):
             NETWORKS[ChainId.POLYGON],
             query=get_reputation_network_query(None),
             params={"address": reputation_address, "role": None},
+            options=None,
         )
 
         self.assertNotEqual(operators, [])
@@ -661,7 +672,7 @@ class TestOperatorUtils(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.return_value = [{"data": {"reputationNetwork": None}}]
 
@@ -673,6 +684,7 @@ class TestOperatorUtils(unittest.TestCase):
             NETWORKS[ChainId.POLYGON],
             query=get_reputation_network_query(None),
             params={"address": reputation_address, "role": None},
+            options=None,
         )
 
         self.assertEqual(operators, [])
@@ -682,7 +694,7 @@ class TestOperatorUtils(unittest.TestCase):
 
         mock_function = MagicMock()
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.return_value = {
                 "data": {
@@ -704,6 +716,7 @@ class TestOperatorUtils(unittest.TestCase):
                 NETWORKS[ChainId.POLYGON],
                 query=get_reward_added_events_query,
                 params={"slasherAddress": slasher},
+                options=None,
             )
 
             self.assertEqual(len(rewards_info), 2)
@@ -717,7 +730,7 @@ class TestOperatorUtils(unittest.TestCase):
 
         mock_function = MagicMock()
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.return_value = {"data": {"rewardAddedEvents": None}}
             rewards_info = OperatorUtils.get_rewards_info(ChainId.POLYGON, slasher)
@@ -726,6 +739,7 @@ class TestOperatorUtils(unittest.TestCase):
                 NETWORKS[ChainId.POLYGON],
                 query=get_reward_added_events_query,
                 params={"slasherAddress": slasher},
+                options=None,
             )
 
             self.assertEqual(rewards_info, [])

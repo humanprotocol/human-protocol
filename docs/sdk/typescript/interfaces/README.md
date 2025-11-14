@@ -44,3 +44,4 @@
 - [IWorkersFilter](interfaces/IWorkersFilter.md)
 - [IWorkerStatistics](interfaces/IWorkerStatistics.md)
 - [StakerInfo](interfaces/StakerInfo.md)
+- [SubgraphOptions](interfaces/SubgraphOptions.md)

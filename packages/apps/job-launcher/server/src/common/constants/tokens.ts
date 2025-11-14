@@ -53,10 +53,11 @@ export const TOKEN_ADDRESSES: {
       address: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
       decimals: 6,
     },
-    [EscrowFundToken.USDC]: {
-      address: '0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359',
-      decimals: 6,
-    },
+    // Disabled
+    // [EscrowFundToken.USDC]: {
+    //   address: '0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359',
+    //   decimals: 6,
+    // },
   },
   [ChainId.POLYGON_AMOY]: {
     [EscrowFundToken.HMT]: {
@@ -66,12 +67,6 @@ export const TOKEN_ADDRESSES: {
     [EscrowFundToken.USDC]: {
       address: '0x41e94eb019c0762f9bfcf9fb1e58725bfb0e7582',
       decimals: 6,
-    },
-  },
-  [ChainId.AURORA_TESTNET]: {
-    [EscrowFundToken.HMT]: {
-      address: NETWORKS[ChainId.AURORA_TESTNET]!.hmtAddress,
-      decimals: 18,
     },
   },
   [ChainId.LOCALHOST]: {

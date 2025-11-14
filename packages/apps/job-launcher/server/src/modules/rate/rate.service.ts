@@ -7,6 +7,7 @@ import { ErrorCurrency } from '../../common/constants/errors';
 import { CoingeckoTokenId } from '../../common/constants/payment';
 import { EscrowFundToken } from '../../common/enums/job';
 import { NotFoundError } from '../../common/errors';
+import { formatAxiosError } from '../../common/utils/http';
 import logger from '../../logger';
 
 @Injectable()
@@ -77,10 +78,11 @@ export class RateService {
 
       return finalRate;
     } catch (error) {
+      const formattedError = formatAxiosError(error);
       this.logger.error('Error while getting rate', {
         from,
         to,
-        error,
+        error: formattedError,
       });
       throw new NotFoundError(ErrorCurrency.PairNotFound);
     }

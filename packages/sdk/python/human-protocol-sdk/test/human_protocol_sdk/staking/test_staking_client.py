@@ -88,7 +88,7 @@ class TestStakingClient(unittest.TestCase):
         self.staking_client.hmtoken_contract.functions.approve.assert_called_once_with(
             NETWORKS[ChainId.LOCALHOST]["staking_address"], 100
         )
-        mock_approve.transact.assert_called_once_with({})
+        mock_approve.transact.assert_called_once_with(None)
         self.staking_client.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
@@ -134,7 +134,7 @@ class TestStakingClient(unittest.TestCase):
         self.staking_client.staking_contract.functions.stake.assert_called_once_with(
             100
         )
-        mock_stake.transact.assert_called_once_with({})
+        mock_stake.transact.assert_called_once_with(None)
         self.staking_client.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
@@ -180,7 +180,7 @@ class TestStakingClient(unittest.TestCase):
         self.staking_client.staking_contract.functions.unstake.assert_called_once_with(
             100
         )
-        mock_unstake.transact.assert_called_once_with({})
+        mock_unstake.transact.assert_called_once_with(None)
         self.staking_client.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
@@ -224,7 +224,7 @@ class TestStakingClient(unittest.TestCase):
         self.staking_client.withdraw()
 
         self.staking_client.staking_contract.functions.withdraw.assert_called_once_with()
-        mock_withdraw.transact.assert_called_once_with({})
+        mock_withdraw.transact.assert_called_once_with(None)
         self.staking_client.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
@@ -273,7 +273,7 @@ class TestStakingClient(unittest.TestCase):
         self.staking_client.staking_contract.functions.slash.assert_called_once_with(
             slasher, staker, escrow_address, 50
         )
-        mock_slash.transact.assert_called_once_with({})
+        mock_slash.transact.assert_called_once_with(None)
         self.staking_client.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )

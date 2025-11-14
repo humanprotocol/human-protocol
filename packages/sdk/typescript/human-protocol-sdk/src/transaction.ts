@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ethers } from 'ethers';
-import gqlFetch from 'graphql-request';
 import { NETWORKS } from './constants';
 import { ChainId, OrderDirection } from './enums';
 import {
@@ -17,8 +16,9 @@ import {
   InternalTransaction,
   ITransaction,
   ITransactionsFilter,
+  SubgraphOptions,
 } from './interfaces';
-import { getSubgraphUrl, getUnixTimestamp } from './utils';
+import { getSubgraphUrl, getUnixTimestamp, customGqlFetch } from './utils';
 
 export class TransactionUtils {
   /**
@@ -54,6 +54,7 @@ export class TransactionUtils {
    *
    * @param {ChainId} chainId The chain ID.
    * @param {string} hash The transaction hash.
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
    * @returns {Promise<ITransaction | null>} - Returns the transaction details or null if not found.
    *
    * **Code example**
@@ -66,7 +67,8 @@ export class TransactionUtils {
    */
   public static async getTransaction(
     chainId: ChainId,
-    hash: string
+    hash: string,
+    options?: SubgraphOptions
   ): Promise<ITransaction | null> {
     if (!ethers.isHexString(hash)) {
       throw ErrorInvalidHashProvided;
@@ -77,11 +79,16 @@ export class TransactionUtils {
       throw ErrorUnsupportedChainID;
     }
 
-    const { transaction } = await gqlFetch<{
+    const { transaction } = await customGqlFetch<{
       transaction: TransactionData | null;
-    }>(getSubgraphUrl(networkData), GET_TRANSACTION_QUERY, {
-      hash: hash.toLowerCase(),
-    });
+    }>(
+      getSubgraphUrl(networkData),
+      GET_TRANSACTION_QUERY,
+      {
+        hash: hash.toLowerCase(),
+      },
+      options
+    );
     if (!transaction) return null;
 
     return mapTransaction(transaction);
@@ -141,6 +148,7 @@ export class TransactionUtils {
    * ```
    *
    * @param {ITransactionsFilter} filter Filter for the transactions.
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
    * @returns {Promise<ITransaction[]>} Returns an array with all the transaction details.
    *
    * **Code example**
@@ -160,7 +168,8 @@ export class TransactionUtils {
    * ```
    */
   public static async getTransactions(
-    filter: ITransactionsFilter
+    filter: ITransactionsFilter,
+    options?: SubgraphOptions
   ): Promise<ITransaction[]> {
     if (
       (!!filter.startDate || !!filter.endDate) &&
@@ -179,24 +188,29 @@ export class TransactionUtils {
       throw ErrorUnsupportedChainID;
     }
 
-    const { transactions } = await gqlFetch<{
+    const { transactions } = await customGqlFetch<{
       transactions: TransactionData[];
-    }>(getSubgraphUrl(networkData), GET_TRANSACTIONS_QUERY(filter), {
-      fromAddress: filter?.fromAddress,
-      toAddress: filter?.toAddress,
-      startDate: filter?.startDate
-        ? getUnixTimestamp(filter?.startDate)
-        : undefined,
-      endDate: filter.endDate ? getUnixTimestamp(filter.endDate) : undefined,
-      startBlock: filter.startBlock ? filter.startBlock : undefined,
-      endBlock: filter.endBlock ? filter.endBlock : undefined,
-      method: filter.method ? filter.method : undefined,
-      escrow: filter.escrow ? filter.escrow : undefined,
-      token: filter.token ? filter.token : undefined,
-      orderDirection: orderDirection,
-      first: first,
-      skip: skip,
-    });
+    }>(
+      getSubgraphUrl(networkData),
+      GET_TRANSACTIONS_QUERY(filter),
+      {
+        fromAddress: filter?.fromAddress,
+        toAddress: filter?.toAddress,
+        startDate: filter?.startDate
+          ? getUnixTimestamp(filter?.startDate)
+          : undefined,
+        endDate: filter.endDate ? getUnixTimestamp(filter.endDate) : undefined,
+        startBlock: filter.startBlock ? filter.startBlock : undefined,
+        endBlock: filter.endBlock ? filter.endBlock : undefined,
+        method: filter.method ? filter.method : undefined,
+        escrow: filter.escrow ? filter.escrow : undefined,
+        token: filter.token ? filter.token : undefined,
+        orderDirection: orderDirection,
+        first: first,
+        skip: skip,
+      },
+      options
+    );
 
     if (!transactions) {
       return [];

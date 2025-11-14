@@ -52,7 +52,6 @@ Module
 """
 
 import logging
-import os
 from typing import List, Optional
 
 import requests
@@ -63,7 +62,6 @@ from human_protocol_sdk.utils import (
     get_kvstore_interface,
     handle_error,
     validate_url,
-    apply_tx_defaults,
 )
 from web3 import Web3
 from web3.middleware import ExtraDataToPOAMiddleware
@@ -160,7 +158,7 @@ class KVStoreClient:
 
         try:
             tx_hash = self.kvstore_contract.functions.set(key, value).transact(
-                apply_tx_defaults(self.w3, tx_options)
+                tx_options
             )
             self.w3.eth.wait_for_transaction_receipt(tx_hash)
         except Exception as e:
@@ -217,7 +215,7 @@ class KVStoreClient:
 
         try:
             tx_hash = self.kvstore_contract.functions.setBulk(keys, values).transact(
-                apply_tx_defaults(self.w3, tx_options)
+                tx_options
             )
             self.w3.eth.wait_for_transaction_receipt(tx_hash)
         except Exception as e:
@@ -276,7 +274,7 @@ class KVStoreClient:
         try:
             tx_hash = self.kvstore_contract.functions.setBulk(
                 [key, key + "_hash"], [url, content_hash]
-            ).transact(apply_tx_defaults(self.w3, tx_options))
+            ).transact(tx_options)
             self.w3.eth.wait_for_transaction_receipt(tx_hash)
         except Exception as e:
             handle_error(e, KVStoreClientError)

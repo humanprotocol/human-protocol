@@ -30,7 +30,7 @@ from typing import List, Optional
 from human_protocol_sdk.constants import NETWORKS, ChainId
 from web3 import Web3
 from human_protocol_sdk.filter import TransactionFilter
-from human_protocol_sdk.utils import get_data_from_subgraph
+from human_protocol_sdk.utils import SubgraphOptions, custom_gql_fetch
 
 
 class InternalTransaction:
@@ -97,11 +97,14 @@ class TransactionUtils:
     """
 
     @staticmethod
-    def get_transaction(chain_id: ChainId, hash: str) -> Optional[TransactionData]:
+    def get_transaction(
+        chain_id: ChainId, hash: str, options: Optional[SubgraphOptions] = None
+    ) -> Optional[TransactionData]:
         """Returns the transaction for a given hash.
 
         :param chain_id: Network in which the transaction was executed
         :param hash: Hash of the transaction
+        :param options: Optional config for subgraph requests
 
         :return: Transaction data
 
@@ -124,10 +127,11 @@ class TransactionUtils:
 
         from human_protocol_sdk.gql.transaction import get_transaction_query
 
-        transaction_data = get_data_from_subgraph(
+        transaction_data = custom_gql_fetch(
             network,
             query=get_transaction_query(),
             params={"hash": hash.lower()},
+            options=options,
         )
         if (
             not transaction_data
@@ -166,11 +170,14 @@ class TransactionUtils:
         )
 
     @staticmethod
-    def get_transactions(filter: TransactionFilter) -> List[TransactionData]:
+    def get_transactions(
+        filter: TransactionFilter, options: Optional[SubgraphOptions] = None
+    ) -> List[TransactionData]:
         """Get an array of transactions based on the specified filter parameters.
 
         :param filter: Object containing all the necessary parameters to filter
             (chain_id, from_address, to_address, start_date, end_date, start_block, end_block, method, escrow, token, first, skip, order_direction)
+        :param options: Optional config for subgraph requests
 
         :return: List of transactions
 
@@ -200,7 +207,7 @@ class TransactionUtils:
         if not network_data:
             raise TransactionUtilsError("Unsupported Chain ID")
 
-        data = get_data_from_subgraph(
+        data = custom_gql_fetch(
             network_data,
             query=get_transactions_query(filter),
             params={
@@ -223,6 +230,7 @@ class TransactionUtils:
                 "skip": filter.skip,
                 "orderDirection": filter.order_direction.value,
             },
+            options=options,
         )
         if (
             not data

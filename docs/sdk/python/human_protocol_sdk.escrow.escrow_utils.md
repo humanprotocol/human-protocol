@@ -80,13 +80,14 @@ Bases: `object`
 
 A utility class that provides additional escrow-related functionalities.
 
-#### *static* get_cancellation_refund(chain_id, escrow_address)
+#### *static* get_cancellation_refund(chain_id, escrow_address, options=None)
 
 Returns the cancellation refund for a given escrow address.
 
 * **Parameters:**
   * **chain_id** ([`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)) – Network in which the escrow has been deployed
   * **escrow_address** (`str`) – Address of the escrow
+  * **options** (`Optional`[[`SubgraphOptions`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.SubgraphOptions)]) – Optional config for subgraph requests
 * **Return type:**
   [`CancellationRefund`](#human_protocol_sdk.escrow.escrow_utils.CancellationRefund)
 * **Returns:**
@@ -104,12 +105,13 @@ Returns the cancellation refund for a given escrow address.
   )
   ```
 
-#### *static* get_cancellation_refunds(filter)
+#### *static* get_cancellation_refunds(filter, options=None)
 
 Fetch cancellation refunds from the subgraph based on the provided filter.
 
 * **Parameters:**
-  **filter** ([`CancellationRefundFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.CancellationRefundFilter)) – Object containing all the necessary parameters to filter cancellation refunds.
+  * **filter** ([`CancellationRefundFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.CancellationRefundFilter)) – Object containing all the necessary parameters to filter cancellation refunds.
+  * **options** (`Optional`[[`SubgraphOptions`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.SubgraphOptions)]) – Optional config for subgraph requests
 * **Return List[CancellationRefund]:**
   List of cancellation refunds matching the query parameters.
 * **Raises:**
@@ -117,13 +119,14 @@ Fetch cancellation refunds from the subgraph based on the provided filter.
 * **Return type:**
   `List`[[`CancellationRefund`](#human_protocol_sdk.escrow.escrow_utils.CancellationRefund)]
 
-#### *static* get_escrow(chain_id, escrow_address)
+#### *static* get_escrow(chain_id, escrow_address, options=None)
 
 Returns the escrow for a given address.
 
 * **Parameters:**
   * **chain_id** ([`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)) – Network in which the escrow has been deployed
   * **escrow_address** (`str`) – Address of the escrow
+  * **options** (`Optional`[[`SubgraphOptions`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.SubgraphOptions)]) – Optional config for subgraph requests
 * **Return type:**
   `Optional`[[`EscrowData`](#human_protocol_sdk.escrow.escrow_utils.EscrowData)]
 * **Returns:**
@@ -141,12 +144,13 @@ Returns the escrow for a given address.
   )
   ```
 
-#### *static* get_escrows(filter)
+#### *static* get_escrows(filter, options=None)
 
 Get an array of escrow addresses based on the specified filter parameters.
 
 * **Parameters:**
-  **filter** ([`EscrowFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.EscrowFilter)) – Object containing all the necessary parameters to filter
+  * **filter** ([`EscrowFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.EscrowFilter)) – Object containing all the necessary parameters to filter
+  * **options** (`Optional`[[`SubgraphOptions`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.SubgraphOptions)]) – Optional config for subgraph requests
 * **Return type:**
   `List`[[`EscrowData`](#human_protocol_sdk.escrow.escrow_utils.EscrowData)]
 * **Returns:**
@@ -168,12 +172,13 @@ Get an array of escrow addresses based on the specified filter parameters.
   )
   ```
 
-#### *static* get_payouts(filter)
+#### *static* get_payouts(filter, options=None)
 
 Fetch payouts from the subgraph based on the provided filter.
 
 * **Parameters:**
-  **filter** ([`PayoutFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.PayoutFilter)) – Object containing all the necessary parameters to filter payouts.
+  * **filter** ([`PayoutFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.PayoutFilter)) – Object containing all the necessary parameters to filter payouts.
+  * **options** (`Optional`[[`SubgraphOptions`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.SubgraphOptions)]) – Optional config for subgraph requests
 * **Return List[Payout]:**
   List of payouts matching the query parameters.
 * **Raises:**
@@ -181,12 +186,13 @@ Fetch payouts from the subgraph based on the provided filter.
 * **Return type:**
   `List`[[`Payout`](#human_protocol_sdk.escrow.escrow_utils.Payout)]
 
-#### *static* get_status_events(filter)
+#### *static* get_status_events(filter, options=None)
 
 Retrieve status events for specified networks and statuses within a date range.
 
 * **Parameters:**
-  **filter** ([`StatusEventFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.StatusEventFilter)) – Object containing all the necessary parameters to filter status events.
+  * **filter** ([`StatusEventFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.StatusEventFilter)) – Object containing all the necessary parameters to filter status events.
+  * **options** (`Optional`[[`SubgraphOptions`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.SubgraphOptions)]) – Optional config for subgraph requests
 * **Return List[StatusEvent]:**
   List of status events matching the query parameters.
 * **Raises:**

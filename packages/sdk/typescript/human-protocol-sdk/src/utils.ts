@@ -1,11 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ethers } from 'ethers';
+import gqlFetch from 'graphql-request';
 
 import { isURL } from 'validator';
 import { SUBGRAPH_API_KEY_PLACEHOLDER } from './constants';
 import { ChainId } from './enums';
 import {
   ContractExecutionError,
+  ErrorRetryParametersMissing,
   EthereumError,
   InvalidArgumentError,
   NonceExpired,
@@ -15,6 +17,7 @@ import {
   WarnSubgraphApiKeyNotProvided,
 } from './error';
 import { NetworkData } from './types';
+import { SubgraphOptions } from './interfaces';
 
 /**
  * **Handle and throw the error.*
@@ -98,4 +101,65 @@ export const getSubgraphUrl = (networkData: NetworkData) => {
  */
 export const getUnixTimestamp = (date: Date): number => {
   return Math.floor(date.getTime() / 1000);
+};
+
+export const isIndexerError = (error: any): boolean => {
+  if (!error) return false;
+
+  const errorMessage =
+    error.response?.errors?.[0]?.message ||
+    error.message ||
+    error.toString() ||
+    '';
+  return errorMessage.toLowerCase().includes('bad indexers');
+};
+
+const sleep = (ms: number): Promise<void> => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
+/**
+ * Execute a GraphQL request with automatic retry logic for bad indexer errors.
+ * Only retries if options is provided.
+ */
+export const customGqlFetch = async <T = any>(
+  url: string,
+  query: any,
+  variables?: any,
+  options?: SubgraphOptions
+): Promise<T> => {
+  if (!options) {
+    return await gqlFetch<T>(url, query, variables);
+  }
+
+  if (
+    (options.maxRetries && options.baseDelay === undefined) ||
+    (options.baseDelay && options.maxRetries === undefined)
+  ) {
+    throw ErrorRetryParametersMissing;
+  }
+
+  let lastError: any;
+
+  for (let attempt = 0; attempt <= (options.maxRetries as number); attempt++) {
+    try {
+      const result = await gqlFetch<T>(url, query, variables);
+      return result;
+    } catch (error) {
+      lastError = error;
+
+      if (attempt === options.maxRetries) {
+        throw error;
+      }
+
+      if (!isIndexerError(error)) {
+        throw error;
+      }
+
+      const delay = (options.baseDelay as number) * attempt;
+      await sleep(delay);
+    }
+  }
+
+  throw lastError;
 };

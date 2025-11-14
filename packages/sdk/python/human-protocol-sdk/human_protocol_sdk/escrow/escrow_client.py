@@ -71,7 +71,7 @@ from web3 import Web3, contract
 from web3.middleware import ExtraDataToPOAMiddleware
 from web3.types import TxParams
 
-from human_protocol_sdk.utils import validate_url, apply_tx_defaults
+from human_protocol_sdk.utils import validate_url
 from human_protocol_sdk.decorators import requires_signer
 
 LOG = logging.getLogger("human_protocol_sdk.escrow")
@@ -263,7 +263,7 @@ class EscrowClient:
         try:
             tx_hash = self.factory_contract.functions.createEscrow(
                 token_address, job_requester_id
-            ).transact(apply_tx_defaults(self.w3, tx_options))
+            ).transact(tx_options)
             receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash)
             event = next(
                 (
@@ -362,7 +362,7 @@ class EscrowClient:
                 escrow_config.exchange_oracle_fee,
                 escrow_config.manifest,
                 escrow_config.hash,
-            ).transact(apply_tx_defaults(self.w3, tx_options))
+            ).transact(tx_options)
             receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash)
             event = next(
                 (
@@ -450,7 +450,7 @@ class EscrowClient:
                     escrow_config.manifest,
                     escrow_config.hash,
                 )
-                .transact(apply_tx_defaults(self.w3, tx_options))
+                .transact(tx_options)
             )
             self.w3.eth.wait_for_transaction_receipt(tx_hash)
         except Exception as e:
@@ -515,7 +515,7 @@ class EscrowClient:
         try:
             tx_hash = token_contract.functions.transfer(
                 escrow_address, amount
-            ).transact(apply_tx_defaults(self.w3, tx_options))
+            ).transact(tx_options)
             self.w3.eth.wait_for_transaction_receipt(tx_hash)
         except Exception as e:
             handle_error(e, EscrowClientError)
@@ -592,10 +592,10 @@ class EscrowClient:
             if funds_to_reserve is not None:
                 tx_hash = contract.functions.storeResults(
                     url, hash, funds_to_reserve
-                ).transact(apply_tx_defaults(self.w3, tx_options))
+                ).transact(tx_options)
             else:
                 tx_hash = contract.functions.storeResults(url, hash).transact(
-                    apply_tx_defaults(self.w3, tx_options)
+                    tx_options
                 )
             self.w3.eth.wait_for_transaction_receipt(tx_hash)
         except Exception as e:
@@ -657,7 +657,7 @@ class EscrowClient:
             tx_hash = (
                 self._get_escrow_contract(escrow_address)
                 .functions.complete()
-                .transact(apply_tx_defaults(self.w3, tx_options))
+                .transact(tx_options)
             )
             self.w3.eth.wait_for_transaction_receipt(tx_hash)
         except Exception as e:
@@ -749,7 +749,7 @@ class EscrowClient:
                     final_results_hash,
                     payout_id,
                     force_complete,
-                ).transact(apply_tx_defaults(self.w3, tx_options))
+                ).transact(tx_options)
             else:
                 tx_id = payout_id
                 tx_hash = contract.functions.bulkPayOut(
@@ -759,7 +759,7 @@ class EscrowClient:
                     final_results_hash,
                     tx_id,
                     force_complete,
-                ).transact(apply_tx_defaults(self.w3, tx_options))
+                ).transact(tx_options)
             self.w3.eth.wait_for_transaction_receipt(tx_hash)
         except Exception as e:
             error_text = str(e) or ""
@@ -987,7 +987,7 @@ class EscrowClient:
             tx_hash = (
                 self._get_escrow_contract(escrow_address)
                 .functions.requestCancellation()
-                .transact(apply_tx_defaults(self.w3, tx_options))
+                .transact(tx_options)
             )
             self.w3.eth.wait_for_transaction_receipt(tx_hash)
         except Exception as e:
@@ -1046,7 +1046,7 @@ class EscrowClient:
             tx_hash = (
                 self._get_escrow_contract(escrow_address)
                 .functions.cancel()
-                .transact(apply_tx_defaults(self.w3, tx_options))
+                .transact(tx_options)
             )
             self.w3.eth.wait_for_transaction_receipt(tx_hash)
         except Exception as e:
@@ -1114,7 +1114,7 @@ class EscrowClient:
             tx_hash = (
                 self._get_escrow_contract(escrow_address)
                 .functions.withdraw(token_address)
-                .transact(apply_tx_defaults(self.w3, tx_options))
+                .transact(tx_options)
             )
             receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash)
 
