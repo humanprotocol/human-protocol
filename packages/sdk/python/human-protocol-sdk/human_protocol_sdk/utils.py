@@ -38,6 +38,7 @@ class SubgraphOptions:
 
     max_retries: Optional[int] = None
     base_delay: Optional[int] = None  # milliseconds
+    indexer_id: Optional[str] = None
 
 
 def is_indexer_error(error: Exception) -> bool:
@@ -90,40 +91,50 @@ def custom_gql_fetch(
 
     :raise Exception: If the subgraph query fails
     """
+    subgraph_api_key = os.getenv("SUBGRAPH_API_KEY", "")
+
     if not options:
         return _fetch_subgraph_data(network, query, params)
 
-    if (
-        options.max_retries is not None
-        and options.base_delay is None
-        or options.max_retries is None
-        and options.base_delay is not None
-    ):
+    has_max_retries = options.max_retries is not None
+    has_base_delay = options.base_delay is not None
+
+    if has_max_retries != has_base_delay:
         raise ValueError(
             "Retry configuration must include both max_retries and base_delay"
         )
 
-    max_retries = int(options.max_retries)
-    base_delay = options.base_delay / 1000
+    if options.indexer_id and not subgraph_api_key:
+        raise ValueError(
+            "Routing requests to a specific indexer requires SUBGRAPH_API_KEY to be set"
+        )
+
+    max_retries = int(options.max_retries) if has_max_retries else 0
+    base_delay_seconds = (options.base_delay or 0) / 1000
 
     last_error = None
 
     for attempt in range(max_retries + 1):
         try:
-            return _fetch_subgraph_data(network, query, params)
+            return _fetch_subgraph_data(network, query, params, options.indexer_id)
         except Exception as error:
             last_error = error
 
             if not is_indexer_error(error):
                 break
 
-            delay = base_delay * attempt
+            delay = base_delay_seconds * attempt
             time.sleep(delay)
 
     raise last_error
 
 
-def _fetch_subgraph_data(network: dict, query: str, params: dict = None):
+def _fetch_subgraph_data(
+    network: dict,
+    query: str,
+    params: dict = None,
+    indexer_id: Optional[str] = None,
+):
     subgraph_api_key = os.getenv("SUBGRAPH_API_KEY", "")
     if subgraph_api_key:
         subgraph_url = network["subgraph_url_api_key"].replace(
@@ -135,7 +146,15 @@ def _fetch_subgraph_data(network: dict, query: str, params: dict = None):
         )
         subgraph_url = network["subgraph_url"]
 
-    request = requests.post(subgraph_url, json={"query": query, "variables": params})
+    subgraph_url = _attach_indexer_id(subgraph_url, indexer_id)
+
+    headers = (
+        {"Authorization": f"Bearer {subgraph_api_key}"} if subgraph_api_key else None
+    )
+
+    request = requests.post(
+        subgraph_url, json={"query": query, "variables": params}, headers=headers
+    )
     if request.status_code == 200:
         return request.json()
     else:
@@ -144,6 +163,12 @@ def _fetch_subgraph_data(network: dict, query: str, params: dict = None):
                 request.status_code, query
             )
         )
+
+
+def _attach_indexer_id(url: str, indexer_id: Optional[str]) -> str:
+    if not indexer_id:
+        return url
+    return f"{url}/indexers/id/{indexer_id}"
 
 
 def get_hmt_balance(wallet_addr, token_addr, w3):

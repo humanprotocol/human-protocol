@@ -36,7 +36,7 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/ethereum/version/latest',
     subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmXGmcjEtwwEgB83KE2ECjjYY38kLMqzaq4ip8GWY7A6zz',
+      'https://gateway.thegraph.com/api/deployments/id/QmXGmcjEtwwEgB83KE2ECjjYY38kLMqzaq4ip8GWY7A6zz',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },
@@ -51,7 +51,7 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/sepolia/version/latest',
     subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmT4xNvZh8ymarrk1zdytjLhCW59iuTavsd4JgHS4LbCVB',
+      'https://gateway.thegraph.com/api/deployments/id/QmT4xNvZh8ymarrk1zdytjLhCW59iuTavsd4JgHS4LbCVB',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },
@@ -66,7 +66,7 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/bsc/version/latest',
     subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmdVdpm9NnFz5B8QyzhW1bW1nNfRWemTiFn2MrhYZGTSQD',
+      'https://gateway.thegraph.com/api/deployments/id/QmdVdpm9NnFz5B8QyzhW1bW1nNfRWemTiFn2MrhYZGTSQD',
     oldSubgraphUrl: 'https://api.thegraph.com/subgraphs/name/humanprotocol/bsc',
     oldFactoryAddress: '0xc88bC422cAAb2ac8812de03176402dbcA09533f4',
   },
@@ -81,7 +81,7 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/bsc-testnet/version/latest',
     subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmZjYMktZe8RAz7W7qL33VZBV6AC57xsLyE1cEfv6NABdZ',
+      'https://gateway.thegraph.com/api/deployments/id/QmZjYMktZe8RAz7W7qL33VZBV6AC57xsLyE1cEfv6NABdZ',
     oldSubgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/bsctest',
     oldFactoryAddress: '0xaae6a2646c1f88763e62e0cd08ad050ea66ac46f',
@@ -97,7 +97,7 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
     subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmUt9mmfNjtC5ZnQNiWHRbFG3k5zfngMuoTyky9jhXYqG2',
+      'https://gateway.thegraph.com/api/deployments/id/QmUt9mmfNjtC5ZnQNiWHRbFG3k5zfngMuoTyky9jhXYqG2',
     oldSubgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/polygon',
     oldFactoryAddress: '0x45eBc3eAE6DA485097054ae10BA1A0f8e8c7f794',
@@ -113,7 +113,7 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/amoy/version/latest',
     subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmWRUFWpWoRRUh7Ec1HUJEwxc84DkP4iFTfLLsoVngJAPa',
+      'https://gateway.thegraph.com/api/deployments/id/QmWRUFWpWoRRUh7Ec1HUJEwxc84DkP4iFTfLLsoVngJAPa',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },

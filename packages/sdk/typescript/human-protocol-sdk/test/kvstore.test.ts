@@ -461,7 +461,8 @@ describe('KVStoreUtils', () => {
     //   expect(gqlFetchSpy).toHaveBeenCalledWith(
     //     NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
     //     GET_KVSTORE_BY_ADDRESS_AND_KEY_QUERY(),
-    //     { address: ethers.ZeroAddress, key: 'key1' }
+    //     { address: ethers.ZeroAddress, key: 'key1' },
+    //     undefined
     //   );
     // });
 
@@ -497,7 +498,8 @@ describe('KVStoreUtils', () => {
       expect(gqlFetchSpy).toHaveBeenCalledWith(
         NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
         GET_KVSTORE_BY_ADDRESS_AND_KEY_QUERY(),
-        { address: ethers.ZeroAddress, key: 'key1' }
+        { address: ethers.ZeroAddress, key: 'key1' },
+        undefined
       );
     });
 
@@ -534,7 +536,8 @@ describe('KVStoreUtils', () => {
       expect(gqlFetchSpy).toHaveBeenCalledWith(
         NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
         GET_KVSTORE_BY_ADDRESS_AND_KEY_QUERY(),
-        { address: ethers.ZeroAddress, key: 'key1' }
+        { address: ethers.ZeroAddress, key: 'key1' },
+        undefined
       );
     });
   });
@@ -829,7 +832,8 @@ describe('KVStoreUtils', () => {
       expect(gqlFetchSpy).toHaveBeenCalledWith(
         NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
         GET_KVSTORE_BY_ADDRESS_QUERY(),
-        { address: ethers.ZeroAddress }
+        { address: ethers.ZeroAddress },
+        undefined
       );
     });
   });

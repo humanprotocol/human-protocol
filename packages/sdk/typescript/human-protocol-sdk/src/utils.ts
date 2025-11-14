@@ -8,6 +8,7 @@ import { ChainId } from './enums';
 import {
   ContractExecutionError,
   ErrorRetryParametersMissing,
+  ErrorRoutingRequestsToIndexerRequiresApiKey,
   EthereumError,
   InvalidArgumentError,
   NonceExpired,
@@ -118,6 +119,13 @@ const sleep = (ms: number): Promise<void> => {
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
 
+const buildIndexerUrl = (baseUrl: string, indexerId?: string): string => {
+  if (!indexerId) {
+    return baseUrl;
+  }
+  return `${baseUrl}/indexers/id/${indexerId}`;
+};
+
 /**
  * Execute a GraphQL request with automatic retry logic for bad indexer errors.
  * Only retries if options is provided.
@@ -128,35 +136,44 @@ export const customGqlFetch = async <T = any>(
   variables?: any,
   options?: SubgraphOptions
 ): Promise<T> => {
+  const apiKey = process.env.SUBGRAPH_API_KEY;
+  const headers = apiKey
+    ? {
+        Authorization: `Bearer ${apiKey}`,
+      }
+    : undefined;
+
   if (!options) {
-    return await gqlFetch<T>(url, query, variables);
+    return await gqlFetch<T>(url, query, variables, headers);
   }
 
-  if (
-    (options.maxRetries && options.baseDelay === undefined) ||
-    (options.baseDelay && options.maxRetries === undefined)
-  ) {
+  const hasMaxRetries = options.maxRetries !== undefined;
+  const hasBaseDelay = options.baseDelay !== undefined;
+
+  if (hasMaxRetries !== hasBaseDelay) {
     throw ErrorRetryParametersMissing;
   }
+  if (options.indexerId && !headers) {
+    throw ErrorRoutingRequestsToIndexerRequiresApiKey;
+  }
 
+  const targetUrl = buildIndexerUrl(url, options.indexerId);
+
+  const maxRetries = hasMaxRetries ? (options.maxRetries as number) : 0;
+  const baseDelay = hasBaseDelay ? (options.baseDelay as number) : 0;
   let lastError: any;
 
-  for (let attempt = 0; attempt <= (options.maxRetries as number); attempt++) {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      const result = await gqlFetch<T>(url, query, variables);
-      return result;
+      return await gqlFetch<T>(targetUrl, query, variables, headers);
     } catch (error) {
       lastError = error;
 
-      if (attempt === options.maxRetries) {
+      if (attempt === maxRetries || !isIndexerError(error)) {
         throw error;
       }
 
-      if (!isIndexerError(error)) {
-        throw error;
-      }
-
-      const delay = (options.baseDelay as number) * attempt;
+      const delay = baseDelay * attempt;
       await sleep(delay);
     }
   }

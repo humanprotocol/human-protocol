@@ -3315,7 +3315,8 @@ describe('EscrowUtils', () => {
           reputationOracle: undefined,
           status: undefined,
           to: undefined,
-        }
+        },
+        undefined
       );
     });
 
@@ -3625,7 +3626,8 @@ describe('EscrowUtils', () => {
           reputationOracle: undefined,
           status: undefined,
           to: undefined,
-        }
+        },
+        undefined
       );
     });
 
@@ -3730,7 +3732,8 @@ describe('EscrowUtils', () => {
           reputationOracle: undefined,
           status: undefined,
           to: undefined,
-        }
+        },
+        undefined
       );
     });
   });
@@ -3807,7 +3810,8 @@ describe('EscrowUtils', () => {
       expect(gqlFetchSpy).toHaveBeenCalledWith(
         NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
         GET_ESCROW_BY_ADDRESS_QUERY(),
-        { escrowAddress: escrow.address }
+        { escrowAddress: escrow.address },
+        undefined
       );
     });
   });
@@ -4060,7 +4064,8 @@ describe('EscrowUtils', () => {
           first: 10,
           skip: 0,
           orderDirection: OrderDirection.DESC,
-        }
+        },
+        undefined
       );
     });
 
@@ -4108,7 +4113,8 @@ describe('EscrowUtils', () => {
           first: 10,
           skip: 0,
           orderDirection: OrderDirection.DESC,
-        }
+        },
+        undefined
       );
     });
 
@@ -4161,7 +4167,8 @@ describe('EscrowUtils', () => {
           first: 20,
           skip: 10,
           orderDirection: OrderDirection.DESC,
-        }
+        },
+        undefined
       );
     });
 
@@ -4214,7 +4221,8 @@ describe('EscrowUtils', () => {
           first: 1000,
           skip: 10,
           orderDirection: OrderDirection.DESC,
-        }
+        },
+        undefined
       );
     });
 

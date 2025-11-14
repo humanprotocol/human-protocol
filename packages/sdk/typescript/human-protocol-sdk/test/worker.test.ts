@@ -42,7 +42,8 @@ describe('WorkerUtils', () => {
         GET_WORKER_QUERY,
         {
           address: workerAddress.toLowerCase(),
-        }
+        },
+        undefined
       );
       const expected: IWorker = {
         ...mockWorker,
@@ -66,7 +67,8 @@ describe('WorkerUtils', () => {
         GET_WORKER_QUERY,
         {
           address: workerAddress.toLowerCase(),
-        }
+        },
+        undefined
       );
       expect(result).toBeNull();
     });
@@ -129,7 +131,8 @@ describe('WorkerUtils', () => {
           skip: 0,
           orderBy: 'totalHMTAmountReceived',
           orderDirection: 'asc',
-        }
+        },
+        undefined
       );
       const expected: IWorker[] = mockWorkers.map((mockWorker) => ({
         ...mockWorker,
@@ -160,7 +163,8 @@ describe('WorkerUtils', () => {
           skip: 0,
           orderBy: 'payoutCount',
           orderDirection: 'desc',
-        }
+        },
+        undefined
       );
       expect(result).toEqual([]);
     });
@@ -201,7 +205,8 @@ describe('WorkerUtils', () => {
           skip: 0,
           orderBy: 'payoutCount',
           orderDirection: 'desc',
-        }
+        },
+        undefined
       );
 
       const expected: IWorker[] = mockWorkers.map((mockWorker) => ({
