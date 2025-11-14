@@ -1,8 +1,11 @@
+import os
 import unittest
 from unittest.mock import Mock, patch
 from validators import ValidationError
 
 from human_protocol_sdk.utils import (
+    _attach_indexer_id,
+    _fetch_subgraph_data,
     SubgraphOptions,
     custom_gql_fetch,
     is_indexer_error,
@@ -53,6 +56,12 @@ class TestGetDataFromSubgraph(unittest.TestCase):
         }
         self.query = "query Test"
         self.variables = {"foo": "bar"}
+        if "SUBGRAPH_API_KEY" in os.environ:
+            del os.environ["SUBGRAPH_API_KEY"]
+
+    def tearDown(self):
+        if "SUBGRAPH_API_KEY" in os.environ:
+            del os.environ["SUBGRAPH_API_KEY"]
 
     def test_returns_response_without_options(self):
         expected = {"data": {"ok": True}}
@@ -126,3 +135,65 @@ class TestGetDataFromSubgraph(unittest.TestCase):
 
         self.assertTrue(is_indexer_error(ctx.exception))
         self.assertEqual(mock_fetch.call_count, 3)
+
+    def test_routes_requests_to_specific_indexer(self):
+        options = SubgraphOptions(indexer_id="0xabc123")
+        expected = {"data": {"ok": True}}
+        os.environ["SUBGRAPH_API_KEY"] = "secure-token"
+
+        with patch(
+            "human_protocol_sdk.utils._fetch_subgraph_data",
+            return_value=expected,
+        ) as mock_fetch:
+            result = custom_gql_fetch(
+                self.network, self.query, self.variables, options=options
+            )
+
+        self.assertEqual(result, expected)
+        mock_fetch.assert_called_once_with(
+            self.network, self.query, self.variables, "0xabc123"
+        )
+
+    def test_raises_when_indexer_without_api_key(self):
+        options = SubgraphOptions(indexer_id="0xabc123")
+
+        with self.assertRaises(ValueError) as ctx:
+            custom_gql_fetch(self.network, self.query, self.variables, options)
+
+        self.assertIn(
+            "Routing requests to a specific indexer requires SUBGRAPH_API_KEY to be set",
+            str(ctx.exception),
+        )
+
+    def test_fetch_subgraph_adds_authorization_header(self):
+        network = {
+            "subgraph_url": "http://subgraph",
+            "subgraph_url_api_key": "http://subgraph-with-key",
+        }
+
+        with patch.dict(os.environ, {"SUBGRAPH_API_KEY": "token"}, clear=True):
+            with patch("human_protocol_sdk.utils.requests.post") as mock_post:
+                mock_post.return_value.status_code = 200
+                mock_post.return_value.json.return_value = {"data": {}}
+
+                _fetch_subgraph_data(network, self.query, self.variables)
+
+        mock_post.assert_called_once()
+        self.assertEqual(
+            mock_post.call_args.kwargs.get("headers"),
+            {"Authorization": "Bearer token"},
+        )
+
+
+class TestAttachIndexerId(unittest.TestCase):
+    def test_converts_subgraph_path_to_deployment(self):
+        base_url = "https://gateway.thegraph.com/api/key/deployments/id/Qm123"
+        result = _attach_indexer_id(base_url, "0xabc")
+        self.assertEqual(
+            result,
+            "https://gateway.thegraph.com/api/key/deployments/id/Qm123/indexers/id/0xabc",
+        )
+
+    def test_returns_original_url_when_indexer_missing(self):
+        url = "https://gateway.thegraph.com/api/deployments/id/Qm123"
+        self.assertEqual(_attach_indexer_id(url, None), url)
