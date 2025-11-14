@@ -22,10 +22,9 @@ export async function sendSlackNotification(
     slackLogger.debug('Slack notification sent', payload);
     return true;
   } catch (error) {
-    slackLogger.error(
-      'Error sending Slack notification',
-      formatAxiosError(error),
-    );
+    slackLogger.error('Error sending Slack notification', {
+      error: formatAxiosError(error),
+    });
     return false;
   }
 }

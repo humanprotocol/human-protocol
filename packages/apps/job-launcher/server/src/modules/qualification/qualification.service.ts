@@ -52,7 +52,7 @@ export class QualificationService {
       const formattedError = formatAxiosError(error);
       this.logger.error(
         'Error fetching qualifications from reputation oracle',
-        formattedError,
+        { error: formattedError },
       );
       throw new ServerError(ErrorQualification.FailedToFetchQualifications);
     }

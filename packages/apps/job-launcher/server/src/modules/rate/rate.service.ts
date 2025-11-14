@@ -82,7 +82,7 @@ export class RateService {
       this.logger.error('Error while getting rate', {
         from,
         to,
-        formattedError,
+        error: formattedError,
       });
       throw new NotFoundError(ErrorCurrency.PairNotFound);
     }
