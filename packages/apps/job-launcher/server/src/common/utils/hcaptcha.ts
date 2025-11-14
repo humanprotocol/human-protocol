@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { formatAxiosError } from './http';
 
 export async function verifyToken(
   url: string,
@@ -17,11 +18,18 @@ export async function verifyToken(
     queryParams.remoteip = ip;
   }
 
-  const { data } = await axios.post(
-    `${url}/siteverify`,
-    {},
-    { params: queryParams },
-  );
+  try {
+    const { data } = await axios.post(
+      `${url}/siteverify`,
+      {},
+      { params: queryParams },
+    );
 
-  return data;
+    return data;
+  } catch (error) {
+    return {
+      success: false,
+      error: formatAxiosError(error),
+    };
+  }
 }
