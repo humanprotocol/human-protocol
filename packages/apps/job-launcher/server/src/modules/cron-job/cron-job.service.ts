@@ -509,7 +509,7 @@ export class CronJobService {
         const key = `${event.chainId}-${ethers.getAddress(event.escrowAddress)}`;
         const job = jobMap.get(key);
 
-        const eventTimestamp = new Date(event.timestamp * 1000).getTime();
+        const eventTimestamp = event.timestamp;
         if (eventTimestamp > latestEventTimestamp) {
           latestEventTimestamp = eventTimestamp;
         }
