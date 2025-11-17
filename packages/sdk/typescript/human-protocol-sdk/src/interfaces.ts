@@ -312,3 +312,13 @@ export interface IEscrowWithdraw {
   tokenAddress: string;
   withdrawnAmount: bigint;
 }
+
+/**
+ * Configuration options for subgraph requests with retry logic.
+ */
+export interface SubgraphOptions {
+  /** Maximum number of retry attempts */
+  maxRetries?: number;
+  /** Base delay between retries in milliseconds */
+  baseDelay?: number;
+}

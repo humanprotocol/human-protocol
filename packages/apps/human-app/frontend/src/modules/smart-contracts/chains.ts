@@ -27,7 +27,6 @@ export const TestnetChainsIds = [
   ChainId.POLYGON_AMOY,
   ChainId.SEPOLIA,
   ChainId.BSC_TESTNET,
-  ChainId.AURORA_TESTNET,
   ChainId.LOCALHOST,
 ] as const;
 

@@ -22,7 +22,7 @@ from typing import List, Optional
 
 from human_protocol_sdk.constants import ChainId, NETWORKS
 
-from human_protocol_sdk.utils import get_data_from_subgraph
+from human_protocol_sdk.utils import SubgraphOptions, custom_gql_fetch
 from human_protocol_sdk.filter import StatisticsFilter
 
 LOG = logging.getLogger("human_protocol_sdk.statistics")
@@ -290,11 +290,14 @@ class StatisticsClient:
             raise StatisticsClientError("Empty network configuration")
 
     def get_escrow_statistics(
-        self, filter: StatisticsFilter = StatisticsFilter()
+        self,
+        filter: StatisticsFilter = StatisticsFilter(),
+        options: Optional[SubgraphOptions] = None,
     ) -> EscrowStatistics:
         """Get escrow statistics data for the given date range.
 
         :param filter: Object containing the date range
+        :param options: Optional config for subgraph requests
 
         :return: Escrow statistics data
 
@@ -323,13 +326,14 @@ class StatisticsClient:
             get_escrow_statistics_query,
         )
 
-        escrow_statistics_data = get_data_from_subgraph(
+        escrow_statistics_data = custom_gql_fetch(
             self.network,
             query=get_escrow_statistics_query,
+            options=options,
         )
         escrow_statistics = escrow_statistics_data["data"]["escrowStatistics"]
 
-        event_day_datas_data = get_data_from_subgraph(
+        event_day_datas_data = custom_gql_fetch(
             self.network,
             query=get_event_day_data_query(filter),
             params={
@@ -339,6 +343,7 @@ class StatisticsClient:
                 "skip": filter.skip,
                 "orderDirection": filter.order_direction.value,
             },
+            options=options,
         )
         event_day_datas = event_day_datas_data["data"]["eventDayDatas"]
 
@@ -368,11 +373,14 @@ class StatisticsClient:
         )
 
     def get_worker_statistics(
-        self, filter: StatisticsFilter = StatisticsFilter()
+        self,
+        filter: StatisticsFilter = StatisticsFilter(),
+        options: Optional[SubgraphOptions] = None,
     ) -> WorkerStatistics:
         """Get worker statistics data for the given date range.
 
         :param filter: Object containing the date range
+        :param options: Optional config for subgraph requests
 
         :return: Worker statistics data
 
@@ -399,7 +407,7 @@ class StatisticsClient:
             get_event_day_data_query,
         )
 
-        event_day_datas_data = get_data_from_subgraph(
+        event_day_datas_data = custom_gql_fetch(
             self.network,
             query=get_event_day_data_query(filter),
             params={
@@ -409,6 +417,7 @@ class StatisticsClient:
                 "skip": filter.skip,
                 "orderDirection": filter.order_direction.value,
             },
+            options=options,
         )
         event_day_datas = event_day_datas_data["data"]["eventDayDatas"]
 
@@ -425,11 +434,14 @@ class StatisticsClient:
         )
 
     def get_payment_statistics(
-        self, filter: StatisticsFilter = StatisticsFilter()
+        self,
+        filter: StatisticsFilter = StatisticsFilter(),
+        options: Optional[SubgraphOptions] = None,
     ) -> PaymentStatistics:
         """Get payment statistics data for the given date range.
 
         :param filter: Object containing the date range
+        :param options: Optional config for subgraph requests
 
         :return: Payment statistics data
 
@@ -457,7 +469,7 @@ class StatisticsClient:
             get_event_day_data_query,
         )
 
-        event_day_datas_data = get_data_from_subgraph(
+        event_day_datas_data = custom_gql_fetch(
             self.network,
             query=get_event_day_data_query(filter),
             params={
@@ -467,6 +479,7 @@ class StatisticsClient:
                 "skip": filter.skip,
                 "orderDirection": filter.order_direction.value,
             },
+            options=options,
         )
         event_day_datas = event_day_datas_data["data"]["eventDayDatas"]
 
@@ -491,8 +504,12 @@ class StatisticsClient:
             ],
         )
 
-    def get_hmt_statistics(self) -> HMTStatistics:
+    def get_hmt_statistics(
+        self, options: Optional[SubgraphOptions] = None
+    ) -> HMTStatistics:
         """Get HMT statistics data.
+
+        :param options: Optional config for subgraph requests
 
         :return: HMT statistics data
 
@@ -511,9 +528,10 @@ class StatisticsClient:
             get_hmtoken_statistics_query,
         )
 
-        hmtoken_statistics_data = get_data_from_subgraph(
+        hmtoken_statistics_data = custom_gql_fetch(
             self.network,
             query=get_hmtoken_statistics_query,
+            options=options,
         )
         hmtoken_statistics = hmtoken_statistics_data["data"]["hmtokenStatistics"]
 
@@ -528,11 +546,14 @@ class StatisticsClient:
         )
 
     def get_hmt_holders(
-        self, param: HMTHoldersParam = HMTHoldersParam()
+        self,
+        param: HMTHoldersParam = HMTHoldersParam(),
+        options: Optional[SubgraphOptions] = None,
     ) -> List[HMTHolder]:
         """Get HMT holders data with optional filters and ordering.
 
         :param param: Object containing filter and order parameters
+        :param options: Optional config for subgraph requests
 
         :return: List of HMT holders
 
@@ -556,7 +577,7 @@ class StatisticsClient:
         """
         from human_protocol_sdk.gql.hmtoken import get_holders_query
 
-        holders_data = get_data_from_subgraph(
+        holders_data = custom_gql_fetch(
             self.network,
             query=get_holders_query(address=param.address),
             params={
@@ -564,6 +585,7 @@ class StatisticsClient:
                 "orderBy": "balance",
                 "orderDirection": param.order_direction,
             },
+            options=options,
         )
 
         holders = holders_data["data"]["holders"]
@@ -577,11 +599,14 @@ class StatisticsClient:
         ]
 
     def get_hmt_daily_data(
-        self, filter: StatisticsFilter = StatisticsFilter()
+        self,
+        filter: StatisticsFilter = StatisticsFilter(),
+        options: Optional[SubgraphOptions] = None,
     ) -> List[DailyHMTData]:
         """Get HMT daily statistics data for the given date range.
 
         :param filter: Object containing the date range
+        :param options: Optional config for subgraph requests
 
         :return: HMT statistics data
 
@@ -607,7 +632,7 @@ class StatisticsClient:
             get_event_day_data_query,
         )
 
-        event_day_datas_data = get_data_from_subgraph(
+        event_day_datas_data = custom_gql_fetch(
             self.network,
             query=get_event_day_data_query(filter),
             params={
@@ -617,6 +642,7 @@ class StatisticsClient:
                 "skip": filter.skip,
                 "orderDirection": filter.order_direction.value,
             },
+            options=options,
         )
         event_day_datas = event_day_datas_data["data"]["eventDayDatas"]
 

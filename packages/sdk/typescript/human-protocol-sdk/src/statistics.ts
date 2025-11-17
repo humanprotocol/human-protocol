@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import gqlFetch from 'graphql-request';
-
 import { OrderDirection } from './enums';
 import {
   EscrowStatisticsData,
@@ -21,9 +19,15 @@ import {
   IPaymentStatistics,
   IStatisticsFilter,
   IWorkerStatistics,
+  SubgraphOptions,
 } from './interfaces';
 import { NetworkData } from './types';
-import { getSubgraphUrl, getUnixTimestamp, throwError } from './utils';
+import {
+  getSubgraphUrl,
+  getUnixTimestamp,
+  customGqlFetch,
+  throwError,
+} from './utils';
 
 /**
  * ## Introduction
@@ -103,6 +107,7 @@ export class StatisticsClient {
    * ```
    *
    * @param {IStatisticsFilter} filter Statistics params with duration data
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
    * @returns {Promise<IEscrowStatistics>} Escrow statistics data.
    *
    * **Code example**
@@ -120,7 +125,8 @@ export class StatisticsClient {
    * ```
    */
   async getEscrowStatistics(
-    filter: IStatisticsFilter = {}
+    filter: IStatisticsFilter = {},
+    options?: SubgraphOptions
   ): Promise<IEscrowStatistics> {
     try {
       const first =
@@ -128,19 +134,24 @@ export class StatisticsClient {
       const skip = filter.skip || 0;
       const orderDirection = filter.orderDirection || OrderDirection.ASC;
 
-      const { escrowStatistics } = await gqlFetch<{
+      const { escrowStatistics } = await customGqlFetch<{
         escrowStatistics: EscrowStatisticsData;
-      }>(this.subgraphUrl, GET_ESCROW_STATISTICS_QUERY);
+      }>(this.subgraphUrl, GET_ESCROW_STATISTICS_QUERY, options);
 
-      const { eventDayDatas } = await gqlFetch<{
+      const { eventDayDatas } = await customGqlFetch<{
         eventDayDatas: EventDayData[];
-      }>(this.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(filter), {
-        from: filter.from ? getUnixTimestamp(filter.from) : undefined,
-        to: filter.to ? getUnixTimestamp(filter.to) : undefined,
-        orderDirection: orderDirection,
-        first: first,
-        skip: skip,
-      });
+      }>(
+        this.subgraphUrl,
+        GET_EVENT_DAY_DATA_QUERY(filter),
+        {
+          from: filter.from ? getUnixTimestamp(filter.from) : undefined,
+          to: filter.to ? getUnixTimestamp(filter.to) : undefined,
+          orderDirection: orderDirection,
+          first: first,
+          skip: skip,
+        },
+        options
+      );
 
       return {
         totalEscrows: escrowStatistics?.totalEscrowCount
@@ -187,6 +198,7 @@ export class StatisticsClient {
    * ```
    *
    * @param {IStatisticsFilter} filter Statistics params with duration data
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
    * @returns {Promise<IWorkerStatistics>} Worker statistics data.
    *
    * **Code example**
@@ -204,7 +216,8 @@ export class StatisticsClient {
    * ```
    */
   async getWorkerStatistics(
-    filter: IStatisticsFilter = {}
+    filter: IStatisticsFilter = {},
+    options?: SubgraphOptions
   ): Promise<IWorkerStatistics> {
     try {
       const first =
@@ -212,15 +225,20 @@ export class StatisticsClient {
       const skip = filter.skip || 0;
       const orderDirection = filter.orderDirection || OrderDirection.ASC;
 
-      const { eventDayDatas } = await gqlFetch<{
+      const { eventDayDatas } = await customGqlFetch<{
         eventDayDatas: EventDayData[];
-      }>(this.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(filter), {
-        from: filter.from ? getUnixTimestamp(filter.from) : undefined,
-        to: filter.to ? getUnixTimestamp(filter.to) : undefined,
-        orderDirection: orderDirection,
-        first: first,
-        skip: skip,
-      });
+      }>(
+        this.subgraphUrl,
+        GET_EVENT_DAY_DATA_QUERY(filter),
+        {
+          from: filter.from ? getUnixTimestamp(filter.from) : undefined,
+          to: filter.to ? getUnixTimestamp(filter.to) : undefined,
+          orderDirection: orderDirection,
+          first: first,
+          skip: skip,
+        },
+        options
+      );
 
       return {
         dailyWorkersData: eventDayDatas.map((eventDayData) => ({
@@ -262,6 +280,7 @@ export class StatisticsClient {
    * ```
    *
    * @param {IStatisticsFilter} filter Statistics params with duration data
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
    * @returns {Promise<IPaymentStatistics>} Payment statistics data.
    *
    * **Code example**
@@ -300,7 +319,8 @@ export class StatisticsClient {
    * ```
    */
   async getPaymentStatistics(
-    filter: IStatisticsFilter = {}
+    filter: IStatisticsFilter = {},
+    options?: SubgraphOptions
   ): Promise<IPaymentStatistics> {
     try {
       const first =
@@ -308,15 +328,20 @@ export class StatisticsClient {
       const skip = filter.skip || 0;
       const orderDirection = filter.orderDirection || OrderDirection.ASC;
 
-      const { eventDayDatas } = await gqlFetch<{
+      const { eventDayDatas } = await customGqlFetch<{
         eventDayDatas: EventDayData[];
-      }>(this.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(filter), {
-        from: filter.from ? getUnixTimestamp(filter.from) : undefined,
-        to: filter.to ? getUnixTimestamp(filter.to) : undefined,
-        orderDirection: orderDirection,
-        first: first,
-        skip: skip,
-      });
+      }>(
+        this.subgraphUrl,
+        GET_EVENT_DAY_DATA_QUERY(filter),
+        {
+          from: filter.from ? getUnixTimestamp(filter.from) : undefined,
+          to: filter.to ? getUnixTimestamp(filter.to) : undefined,
+          orderDirection: orderDirection,
+          first: first,
+          skip: skip,
+        },
+        options
+      );
 
       return {
         dailyPaymentsData: eventDayDatas.map((eventDayData) => ({
@@ -346,6 +371,7 @@ export class StatisticsClient {
    * };
    * ```
    *
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
    * @returns {Promise<IHMTStatistics>} HMToken statistics data.
    *
    * **Code example**
@@ -363,11 +389,11 @@ export class StatisticsClient {
    * });
    * ```
    */
-  async getHMTStatistics(): Promise<IHMTStatistics> {
+  async getHMTStatistics(options?: SubgraphOptions): Promise<IHMTStatistics> {
     try {
-      const { hmtokenStatistics } = await gqlFetch<{
+      const { hmtokenStatistics } = await customGqlFetch<{
         hmtokenStatistics: HMTStatisticsData;
-      }>(this.subgraphUrl, GET_HMTOKEN_STATISTICS_QUERY);
+      }>(this.subgraphUrl, GET_HMTOKEN_STATISTICS_QUERY, options);
 
       return {
         totalTransferAmount: BigInt(hmtokenStatistics.totalValueTransfered),
@@ -385,6 +411,7 @@ export class StatisticsClient {
    * **Input parameters**
    *
    * @param {IHMTHoldersParams} params HMT Holders params with filters and ordering
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
    * @returns {Promise<IHMTHolder[]>} List of HMToken holders.
    *
    * **Code example**
@@ -404,19 +431,23 @@ export class StatisticsClient {
    * })));
    * ```
    */
-  async getHMTHolders(params: IHMTHoldersParams = {}): Promise<IHMTHolder[]> {
+  async getHMTHolders(
+    params: IHMTHoldersParams = {},
+    options?: SubgraphOptions
+  ): Promise<IHMTHolder[]> {
     try {
       const { address, orderDirection } = params;
       const query = GET_HOLDERS_QUERY(address);
 
-      const { holders } = await gqlFetch<{ holders: HMTHolderData[] }>(
+      const { holders } = await customGqlFetch<{ holders: HMTHolderData[] }>(
         this.subgraphUrl,
         query,
         {
           address,
           orderBy: 'balance',
           orderDirection,
-        }
+        },
+        options
       );
 
       return holders.map((holder) => ({
@@ -454,6 +485,7 @@ export class StatisticsClient {
    * ```
    *
    * @param {IStatisticsFilter} filter Statistics params with duration data
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
    * @returns {Promise<IDailyHMT[]>} Daily HMToken statistics data.
    *
    * **Code example**
@@ -475,22 +507,30 @@ export class StatisticsClient {
    * console.log('HMT statistics from 5/8 - 6/8:', hmtStatisticsRange);
    * ```
    */
-  async getHMTDailyData(filter: IStatisticsFilter = {}): Promise<IDailyHMT[]> {
+  async getHMTDailyData(
+    filter: IStatisticsFilter = {},
+    options?: SubgraphOptions
+  ): Promise<IDailyHMT[]> {
     try {
       const first =
         filter.first !== undefined ? Math.min(filter.first, 1000) : 10;
       const skip = filter.skip || 0;
       const orderDirection = filter.orderDirection || OrderDirection.ASC;
 
-      const { eventDayDatas } = await gqlFetch<{
+      const { eventDayDatas } = await customGqlFetch<{
         eventDayDatas: EventDayData[];
-      }>(this.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(filter), {
-        from: filter.from ? getUnixTimestamp(filter.from) : undefined,
-        to: filter.to ? getUnixTimestamp(filter.to) : undefined,
-        orderDirection: orderDirection,
-        first: first,
-        skip: skip,
-      });
+      }>(
+        this.subgraphUrl,
+        GET_EVENT_DAY_DATA_QUERY(filter),
+        {
+          from: filter.from ? getUnixTimestamp(filter.from) : undefined,
+          to: filter.to ? getUnixTimestamp(filter.to) : undefined,
+          orderDirection: orderDirection,
+          first: first,
+          skip: skip,
+        },
+        options
+      );
 
       return eventDayDatas.map((eventDayData) => ({
         timestamp: +eventDayData.timestamp * 1000,

@@ -62,9 +62,6 @@ export class Web3ConfigService {
       [ChainId.POLYGON_AMOY]: this.configService.get('RPC_URL_POLYGON_AMOY'),
       [ChainId.BSC_MAINNET]: this.configService.get('RPC_URL_BSC_MAINNET'),
       [ChainId.BSC_TESTNET]: this.configService.get('RPC_URL_BSC_TESTNET'),
-      [ChainId.AURORA_TESTNET]: this.configService.get(
-        'RPC_URL_AURORA_TESTNET',
-      ),
       [ChainId.SEPOLIA]: this.configService.get('RPC_URL_SEPOLIA'),
       [ChainId.LOCALHOST]: this.configService.get('RPC_URL_LOCALHOST'),
     };

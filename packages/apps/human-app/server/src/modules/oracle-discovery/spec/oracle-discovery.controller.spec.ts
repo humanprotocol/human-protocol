@@ -80,9 +80,7 @@ describe('OracleDiscoveryController', () => {
 
       (configServiceMock as any).jobsDiscoveryFlag = false;
 
-      await expect(
-        controller.getOracles({ qualifications: [] } as any, dtoFixture),
-      ).rejects.toThrow(
+      await expect(controller.getOracles(dtoFixture)).rejects.toThrow(
         new HttpException(
           'Oracles discovery is disabled',
           HttpStatus.FORBIDDEN,

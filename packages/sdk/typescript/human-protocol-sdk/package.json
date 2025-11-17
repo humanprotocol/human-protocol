@@ -1,7 +1,7 @@
 {
   "name": "@human-protocol/sdk",
   "description": "Human Protocol SDK",
-  "version": "5.0.0",
+  "version": "5.1.0",
   "files": [
     "src",
     "dist"
@@ -51,6 +51,7 @@
     "vitest": "^3.0.9"
   },
   "devDependencies": {
+    "@types/validator": "^13.15.4",
     "eslint": "^8.55.0",
     "prettier": "^3.4.2",
     "ts-node": "^10.9.2",

@@ -8,7 +8,7 @@
 
 > **StakerData** = `object`
 
-Defined in: [graphql/types.ts:132](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L132)
+Defined in: [graphql/types.ts:132](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L132)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [graphql/types.ts:132](https://github.com/humanprotocol/human-protoc
 
 > **address**: `string`
 
-Defined in: [graphql/types.ts:134](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L134)
+Defined in: [graphql/types.ts:134](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L134)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [graphql/types.ts:134](https://github.com/humanprotocol/human-protoc
 
 > **id**: `string`
 
-Defined in: [graphql/types.ts:133](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L133)
+Defined in: [graphql/types.ts:133](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L133)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [graphql/types.ts:133](https://github.com/humanprotocol/human-protoc
 
 > **lastDepositTimestamp**: `string`
 
-Defined in: [graphql/types.ts:140](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L140)
+Defined in: [graphql/types.ts:140](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L140)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [graphql/types.ts:140](https://github.com/humanprotocol/human-protoc
 
 > **lockedAmount**: `string`
 
-Defined in: [graphql/types.ts:136](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L136)
+Defined in: [graphql/types.ts:136](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L136)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [graphql/types.ts:136](https://github.com/humanprotocol/human-protoc
 
 > **lockedUntilTimestamp**: `string`
 
-Defined in: [graphql/types.ts:139](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L139)
+Defined in: [graphql/types.ts:139](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L139)
 
 ***
 
@@ -56,7 +56,7 @@ Defined in: [graphql/types.ts:139](https://github.com/humanprotocol/human-protoc
 
 > **slashedAmount**: `string`
 
-Defined in: [graphql/types.ts:138](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L138)
+Defined in: [graphql/types.ts:138](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L138)
 
 ***
 
@@ -64,7 +64,7 @@ Defined in: [graphql/types.ts:138](https://github.com/humanprotocol/human-protoc
 
 > **stakedAmount**: `string`
 
-Defined in: [graphql/types.ts:135](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L135)
+Defined in: [graphql/types.ts:135](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L135)
 
 ***
 
@@ -72,4 +72,4 @@ Defined in: [graphql/types.ts:135](https://github.com/humanprotocol/human-protoc
 
 > **withdrawnAmount**: `string`
 
-Defined in: [graphql/types.ts:137](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L137)
+Defined in: [graphql/types.ts:137](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L137)

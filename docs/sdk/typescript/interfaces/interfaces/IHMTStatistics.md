@@ -6,7 +6,7 @@
 
 # Interface: IHMTStatistics
 
-Defined in: [interfaces.ts:266](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L266)
+Defined in: [interfaces.ts:266](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L266)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [interfaces.ts:266](https://github.com/humanprotocol/human-protocol/
 
 > **totalHolders**: `number`
 
-Defined in: [interfaces.ts:269](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L269)
+Defined in: [interfaces.ts:269](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L269)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [interfaces.ts:269](https://github.com/humanprotocol/human-protocol/
 
 > **totalTransferAmount**: `bigint`
 
-Defined in: [interfaces.ts:267](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L267)
+Defined in: [interfaces.ts:267](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L267)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [interfaces.ts:267](https://github.com/humanprotocol/human-protocol/
 
 > **totalTransferCount**: `number`
 
-Defined in: [interfaces.ts:268](https://github.com/humanprotocol/human-protocol/blob/d055cfd598260e2e29b8b12885f1ee350eef64a4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L268)
+Defined in: [interfaces.ts:268](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L268)
