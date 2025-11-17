@@ -7,7 +7,7 @@ vi.mock('graphql-request', () => {
 });
 
 import * as gqlFetch from 'graphql-request';
-import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { beforeEach, afterEach, describe, expect, test, vi } from 'vitest';
 import { ChainId } from '../src';
 import { NETWORKS } from '../src/constants';
 import {
@@ -20,6 +20,7 @@ import {
   TransactionReplaced,
   WarnSubgraphApiKeyNotProvided,
   ErrorRetryParametersMissing,
+  ErrorRoutingRequestsToIndexerRequiresApiKey,
 } from '../src/error';
 import {
   getSubgraphUrl,
@@ -211,6 +212,11 @@ describe('customGqlFetch', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.resetModules();
+    delete process.env.SUBGRAPH_API_KEY;
+  });
+
+  afterEach(() => {
+    delete process.env.SUBGRAPH_API_KEY;
   });
 
   test('calls gqlFetch directly when no config provided', async () => {
@@ -222,7 +228,12 @@ describe('customGqlFetch', () => {
     const result = await customGqlFetch(mockUrl, mockQuery, mockVariables);
 
     expect(gqlFetchSpy).toHaveBeenCalledTimes(1);
-    expect(gqlFetchSpy).toHaveBeenCalledWith(mockUrl, mockQuery, mockVariables);
+    expect(gqlFetchSpy).toHaveBeenCalledWith(
+      mockUrl,
+      mockQuery,
+      mockVariables,
+      undefined
+    );
     expect(result).toBe(expectedResult);
   });
 
@@ -239,6 +250,63 @@ describe('customGqlFetch', () => {
 
     expect(gqlFetchSpy).toHaveBeenCalledTimes(1);
     expect(result).toBe(expectedResult);
+  });
+
+  test('routes requests to the specified indexer id', async () => {
+    const expectedResult = { data: 'ok' };
+    const gqlFetchSpy = vi
+      .spyOn(gqlFetch, 'default')
+      .mockResolvedValue(expectedResult);
+
+    const indexerId = '0xabc123';
+    process.env.SUBGRAPH_API_KEY = 'secure-token';
+
+    const result = await customGqlFetch(mockUrl, mockQuery, mockVariables, {
+      indexerId,
+    });
+
+    expect(gqlFetchSpy).toHaveBeenCalledWith(
+      `${mockUrl}/indexers/id/${indexerId}`,
+      mockQuery,
+      mockVariables,
+      {
+        Authorization: 'Bearer secure-token',
+      }
+    );
+    expect(result).toBe(expectedResult);
+  });
+
+  test('adds authorization header when API key present', async () => {
+    const expectedResult = { data: 'secured' };
+    const gqlFetchSpy = vi
+      .spyOn(gqlFetch, 'default')
+      .mockResolvedValue(expectedResult);
+
+    process.env.SUBGRAPH_API_KEY = 'secure-token';
+
+    const result = await customGqlFetch(mockUrl, mockQuery, mockVariables);
+
+    expect(gqlFetchSpy).toHaveBeenCalledWith(
+      mockUrl,
+      mockQuery,
+      mockVariables,
+      {
+        Authorization: 'Bearer secure-token',
+      }
+    );
+    expect(result).toBe(expectedResult);
+  });
+
+  test('throws when indexer id provided without API key', async () => {
+    const gqlFetchSpy = vi.spyOn(gqlFetch, 'default');
+
+    await expect(
+      customGqlFetch(mockUrl, mockQuery, mockVariables, {
+        indexerId: '0xabc123',
+      })
+    ).rejects.toThrow(ErrorRoutingRequestsToIndexerRequiresApiKey);
+
+    expect(gqlFetchSpy).not.toHaveBeenCalled();
   });
 
   test('retries on bad indexers error', async () => {

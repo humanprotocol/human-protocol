@@ -103,7 +103,8 @@ describe('OperatorUtils', () => {
         GET_LEADER_QUERY,
         {
           address: stakerAddress,
-        }
+        },
+        undefined
       );
       expect(result).toEqual(operator);
     });
@@ -123,7 +124,8 @@ describe('OperatorUtils', () => {
         GET_LEADER_QUERY,
         {
           address: stakerAddress,
-        }
+        },
+        undefined
       );
       expect(result).toEqual({ ...operator, jobTypes: [] });
     });
@@ -143,7 +145,8 @@ describe('OperatorUtils', () => {
         GET_LEADER_QUERY,
         {
           address: stakerAddress,
-        }
+        },
+        undefined
       );
       expect(result).toEqual({
         ...operator,
@@ -183,7 +186,8 @@ describe('OperatorUtils', () => {
         GET_LEADER_QUERY,
         {
           address: stakerAddress,
-        }
+        },
+        undefined
       );
       expect(result).toEqual(null);
     });
@@ -210,7 +214,8 @@ describe('OperatorUtils', () => {
           orderDirection: OrderDirection.DESC,
           first: 10,
           skip: 0,
-        }
+        },
+        undefined
       );
       expect(result).toEqual([operator, operator]);
     });
@@ -238,7 +243,8 @@ describe('OperatorUtils', () => {
           orderDirection: OrderDirection.DESC,
           first: 10, // Default value
           skip: 0,
-        }
+        },
+        undefined
       );
       expect(result).toEqual([operator]);
     });
@@ -266,7 +272,8 @@ describe('OperatorUtils', () => {
           orderDirection: OrderDirection.DESC,
           first: 10,
           skip: 0, // Default value
-        }
+        },
+        undefined
       );
       expect(result).toEqual([operator]);
     });
@@ -292,7 +299,8 @@ describe('OperatorUtils', () => {
           orderDirection: OrderDirection.DESC,
           first: 10, // Default value
           skip: 0, // Default value
-        }
+        },
+        undefined
       );
       expect(result).toEqual([operator]);
     });
@@ -322,7 +330,8 @@ describe('OperatorUtils', () => {
           orderDirection: OrderDirection.DESC,
           first: 10,
           skip: 0,
-        }
+        },
+        undefined
       );
       expect(result).toEqual([
         { ...operator, jobTypes: ['type1', 'type2', 'type3'] },
@@ -353,7 +362,8 @@ describe('OperatorUtils', () => {
           orderDirection: OrderDirection.DESC,
           first: 10,
           skip: 0,
-        }
+        },
+        undefined
       );
 
       expect(result).toEqual([
@@ -414,7 +424,8 @@ describe('OperatorUtils', () => {
         {
           address: stakerAddress,
           role: undefined,
-        }
+        },
+        undefined
       );
       expect(result).toEqual([operator]);
     });
@@ -435,7 +446,8 @@ describe('OperatorUtils', () => {
         {
           address: stakerAddress,
           role: undefined,
-        }
+        },
+        undefined
       );
       expect(result).toEqual([]);
     });
@@ -459,7 +471,8 @@ describe('OperatorUtils', () => {
         {
           address: stakerAddress,
           role: undefined,
-        }
+        },
+        undefined
       );
       expect(result).toEqual([{ ...operator, jobTypes: [] }]);
     });
@@ -484,7 +497,8 @@ describe('OperatorUtils', () => {
         {
           address: stakerAddress,
           role: undefined,
-        }
+        },
+        undefined
       );
       expect(result).toEqual([
         { ...operator, jobTypes: ['type1', 'type2', 'type3'] },
