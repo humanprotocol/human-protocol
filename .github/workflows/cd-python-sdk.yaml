@@ -4,6 +4,12 @@ permissions:
   contents: write
 
 on:
+  workflow_dispatch:
+    inputs:
+      push_git_tags:
+        description: "Push git tags after publishing (true/false)"
+        required: false
+        default: "false"
   push:
     branches:
       - main
@@ -15,6 +21,8 @@ jobs:
   publish-python-sdk:
     name: Publish Python SDK
     runs-on: ubuntu-latest
+    env:
+      PUSH_GIT_TAGS: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.push_git_tags || 'true' }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -52,6 +60,7 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
         run: make publish-package
       - name: Create and push tag
+        if: ${{ env.PUSH_GIT_TAGS == 'true' }}
         working-directory: ./packages/sdk/python/human-protocol-sdk
         run: |
           VERSION="${{ steps.read_version.outputs.version }}"
