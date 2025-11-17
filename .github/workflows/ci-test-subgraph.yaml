@@ -2,6 +2,7 @@ name: Subgraph check
 
 on:
   push:
+    tags-ignore: '*'
     paths:
       - "packages/core/**"
       - "packages/sdk/typescript/subgraph/**"

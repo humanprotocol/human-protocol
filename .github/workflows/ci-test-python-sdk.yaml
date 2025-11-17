@@ -2,6 +2,7 @@ name: Python SDK check
 
 on:
   push:
+    tags-ignore: '*'
     paths:
       - 'packages/core/**'
       - 'packages/sdk/python/human-protocol-sdk/**'

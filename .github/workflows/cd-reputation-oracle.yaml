@@ -3,6 +3,7 @@ name: Deploy Reputation oracle
 on:
   push:
     branches: [ develop, main ]
+    tags-ignore: '*'
     paths:
       - 'packages/apps/reputation-oracle/server/**'
   pull_request:
