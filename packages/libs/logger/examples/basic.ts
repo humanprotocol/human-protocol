@@ -26,8 +26,17 @@ logger.error(
   'Something went wrong 1',
   new CustomError('Error as whole second argument'),
 );
+class CustomError2 extends Error {
+  constructor(readonly details: string) {
+    super('Custom error happened');
+    /**
+     * Assign custom name to see it in error kind.
+     */
+    this.name = 'CustomErrorName';
+  }
+}
 logger.error('Something went wrong 2', {
-  error: new CustomError('Error as specific key for errors'),
+  error: new CustomError2('Error as specific key for errors'),
 });
 
 // logging custom error with toJSON
