@@ -1,4 +1,3 @@
-// @ts-check
 import eslint from '@eslint/js';
 import globals from 'globals';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
@@ -12,7 +11,7 @@ const __dirname = path.dirname(__filename);
 
 export default tseslint.config(
   {
-    ignores: ['dist', 'node_modules'],
+    ignores: ['dist', 'node_modules', 'vite.config.ts'],
   },
   eslint.configs.recommended,
   tseslint.configs.recommended,

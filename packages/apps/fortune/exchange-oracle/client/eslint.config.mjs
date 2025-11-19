@@ -1,9 +1,7 @@
 import eslint from "@eslint/js";
 import globals from "globals";
 import tseslint from "typescript-eslint";
-// @ts-expect-error - package does not provide type definitions
 import reactHooksPlugin from "eslint-plugin-react-hooks";
-// @ts-expect-error - package does not provide type definitions
 import reactRefreshPlugin from "eslint-plugin-react-refresh";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
@@ -14,7 +12,7 @@ const __dirname = path.dirname(__filename);
 /** @type {import('eslint').Linter.FlatConfig[]} */
 const config = tseslint.config(
   {
-    ignores: ["dist", ".eslintrc.cjs"],
+    ignores: ["dist", ".eslintrc.cjs", "vite.config.ts"],
   },
   eslint.configs.recommended,
   tseslint.configs.recommended,
