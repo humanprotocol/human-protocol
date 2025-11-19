@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 import { t } from 'i18next';
 import Typography from '@mui/material/Typography';
 import { useColorMode } from '@/shared/contexts/color-mode';

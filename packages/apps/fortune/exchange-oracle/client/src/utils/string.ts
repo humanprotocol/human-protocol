@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const parseErrorMessage = (error: any) => {
   if (typeof error === 'string') {
     return error;

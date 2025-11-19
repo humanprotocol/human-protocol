@@ -1,4 +1,3 @@
-/* eslint-disable camelcase -- ...*/
 import { FormProvider, useForm } from 'react-hook-form';
 import { Box, Grid, Typography } from '@mui/material';
 import { zodResolver } from '@hookform/resolvers/zod';

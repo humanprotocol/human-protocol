@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 vi.mock('graphql-request', () => {
   return {
     default: vi.fn(),

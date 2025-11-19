@@ -34,7 +34,6 @@ export function Input({
           InputProps={
             mask
               ? {
-                  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any -- disable
                   inputComponent: mask as any,
                 }
               : undefined

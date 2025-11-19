@@ -79,7 +79,7 @@ export class StorageClient {
         accessKey: credentials?.accessKey ?? '',
         secretKey: credentials?.secretKey ?? '',
       });
-    } catch (e) {
+    } catch {
       throw ErrorStorageClientNotInitialized;
     }
   }
@@ -122,7 +122,7 @@ export class StorageClient {
           const content = response?.read();
 
           return { key, content: JSON.parse(content?.toString('utf-8') || '') };
-        } catch (e) {
+        } catch {
           throw ErrorStorageFileNotFound;
         }
       })
@@ -160,7 +160,7 @@ export class StorageClient {
       }
 
       return data;
-    } catch (e) {
+    } catch {
       throw ErrorStorageFileNotFound;
     }
   }
@@ -226,7 +226,7 @@ export class StorageClient {
             }/${bucket}/${key}`,
             hash,
           };
-        } catch (e) {
+        } catch {
           throw ErrorStorageFileNotUploaded;
         }
       })

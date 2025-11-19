@@ -18,7 +18,6 @@ import { ZERO_BI } from './utils/number';
 import { toEventId } from './utils/event';
 import { createTransaction } from './utils/transaction';
 
-// eslint-disable-next-line prettier/prettier
 export const TOKEN_ADDRESS = Address.fromString('{{ HMToken.address }}');
 
 export function createOrLoadStaker(address: Address): Staker {

@@ -6,7 +6,6 @@ const apiPaths = {
 };
 
 const registeredOraclesSuccessResponseSchema = z.object({
-  // eslint-disable-next-line camelcase
   oracle_addresses: z.array(z.string()),
 });
 
