@@ -41,9 +41,9 @@ Lib exports `createLogger` factory function that should be used to create a logg
 ```ts
 import { createLogger, LogLevel } from '@human-protocol/logger';
 
-const ENV_NAME = process.NODE_ENV || 'development';
+const ENV_NAME = process.env.NODE_ENV || 'development';
 const isDevelopment = ENV_NAME === 'development';
-const isTest = process.NODE_ENV === 'test'
+const isTest = process.env.NODE_ENV === 'test';
 
 const defaultAppLogger = createLogger(
   {
@@ -99,7 +99,7 @@ Logger has next API contract: log message first and any useful detail in log met
 logger.info('Info without any context');
 
 // to log message with some context info
-loger.info('New user registered', {
+logger.info('New user registered', {
   userAgent,
   country,
   ip,
@@ -113,7 +113,7 @@ logger.error('Something went wrong', error);
 logger.error('Error updating some entity', {
   error,
   entityId: 42,
-  ...extra
+  ...extra,
 });
 
 // to log anything

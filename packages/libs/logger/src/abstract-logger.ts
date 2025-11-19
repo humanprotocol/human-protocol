@@ -1,3 +1,4 @@
+import { ERROR_KEY, MESSAGE_KEY, TIMESTAMP_KEY } from './constants';
 import { ChildBindings, Logger, LogLevel, LogMeta, LogRecord } from './types';
 
 function isPlainObject(maybeObj: unknown): maybeObj is LogMeta {
@@ -71,17 +72,16 @@ abstract class LoggerWrapper implements Logger {
       metaArgument = {};
     } else if (errorOrMeta instanceof Error) {
       metaArgument = {
-        error: serializeError(errorOrMeta),
+        [ERROR_KEY]: serializeError(errorOrMeta),
       };
     } else if (isPlainObject(errorOrMeta)) {
-      const { error, ...meta } = errorOrMeta;
-      metaArgument = meta;
+      metaArgument = Object.assign({}, errorOrMeta);
+
+      const error = metaArgument[ERROR_KEY];
       if (error instanceof Error) {
-        Object.assign(metaArgument, {
-          error: serializeError(error),
-        });
+        metaArgument[ERROR_KEY] = serializeError(error);
       } else if (error !== undefined) {
-        metaArgument.error = error;
+        metaArgument[ERROR_KEY] = error;
       }
     } else {
       /**
@@ -96,8 +96,8 @@ abstract class LoggerWrapper implements Logger {
       ...this.bindings,
       ...metaArgument,
       level,
-      message: logMessage,
-      timestamp: Date.now(),
+      [MESSAGE_KEY]: logMessage,
+      [TIMESTAMP_KEY]: Date.now(),
     };
 
     if (this.name) {
