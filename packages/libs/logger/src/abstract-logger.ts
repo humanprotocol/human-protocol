@@ -9,11 +9,30 @@ function isValidLoggerName(maybeName: unknown): maybeName is string {
   return typeof maybeName === 'string' && maybeName.length > 0;
 }
 
-function serializeError(error: Error) {
-  const errorKind =
-    Object.prototype.toString.call(error.constructor) === '[object Function]'
-      ? error.constructor.name
-      : error.name;
+type ErrorLike = {
+  name: string;
+  message: string;
+  stack?: string;
+  cause?: unknown;
+};
+function serializeError(error: ErrorLike) {
+  let errorKind: string;
+  if (
+    Object.prototype.toString.call(error.constructor) === '[object Function]' &&
+    error.name === 'Error'
+  ) {
+    /**
+     * Some errors (e.g. https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal/timeout_static)
+     * might have with weird constructor name and `name` implying `code` (error id) there,
+     * and `name` prop should be used instead of constructor name then.
+     *
+     * So here we handle only custom errors that extend Error class, but do not have
+     * `this.name = this.constructor.name` set. In any other case `error.name` should be sufficient.
+     */
+    errorKind = error.constructor.name;
+  } else {
+    errorKind = error.name;
+  }
 
   if (Reflect.has(error, 'toJSON')) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
