@@ -1,10 +1,10 @@
 export const parseErrorMessage = (error: any) => {
-  if (typeof error === "string") {
+  if (typeof error === 'string') {
     return error;
   }
 
   if (error?.response) {
-    return error.response?.data?.message ?? "Something went wrong.";
+    return error.response?.data?.message ?? 'Something went wrong.';
   }
 
   if (error?.message) {
@@ -16,11 +16,11 @@ export const parseErrorMessage = (error: any) => {
     return error.message;
   }
 
-  return "Something went wrong.";
+  return 'Something went wrong.';
 };
 
 export const formatAddress = (address?: string) => {
-  if (!address) return "";
+  if (!address) return '';
   return `${address.slice(0, 6)}…${address.slice(-5)}`;
 };
 

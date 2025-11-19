@@ -48,6 +48,11 @@ export default tseslint.config(
           ignoreRestSiblings: true,
         },
       ],
+      '@/quotes': [
+        'error',
+        'single',
+        { 'avoidEscape': true, 'allowTemplateLiterals': true }
+      ],
       'import/order': [
         'warn',
         {

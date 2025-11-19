@@ -33,6 +33,11 @@ export default tseslint.config(
     },
     rules: {
       'no-console': 'warn',
+      '@/quotes': [
+        'error',
+        'single',
+        { avoidEscape: true, allowTemplateLiterals: true },
+      ],
     },
   },
   {

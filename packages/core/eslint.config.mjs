@@ -37,6 +37,11 @@ export default tseslint.config(
       '@typescript-eslint/no-inferrable-types': 'warn',
       '@typescript-eslint/no-empty-function': 'warn',
       '@typescript-eslint/no-unused-expressions': 'off',
+      '@/quotes': [
+        'error',
+        'single',
+        { avoidEscape: true, allowTemplateLiterals: true },
+      ],
     },
   },
   {

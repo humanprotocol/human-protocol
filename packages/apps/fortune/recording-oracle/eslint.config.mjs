@@ -33,6 +33,11 @@ export default tseslint.config(
       'prettier/prettier': 'error',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
+      '@/quotes': [
+        'error',
+        'single',
+        { avoidEscape: true, allowTemplateLiterals: true },
+      ],
     },
   },
   {

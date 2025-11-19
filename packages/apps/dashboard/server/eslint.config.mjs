@@ -36,6 +36,11 @@ export default tseslint.config(
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-empty-function': 'off',
       '@typescript-eslint/no-non-null-assertion': 'off',
+      "@/quotes": [
+        "error",
+        "single",
+        { "avoidEscape": true, "allowTemplateLiterals": true }
+      ],
     },
   },
   {
