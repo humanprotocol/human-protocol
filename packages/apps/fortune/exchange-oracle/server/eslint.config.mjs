@@ -4,7 +4,8 @@ import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
 import jestPlugin from 'eslint-plugin-jest';
 import tseslint from 'typescript-eslint';
 
-export default tseslint.config(
+/** @type {import('eslint').Linter.FlatConfig[]} */
+const config = tseslint.config(
   {
     ignores: ['dist', '.eslintrc.js'],
   },
@@ -48,3 +49,5 @@ export default tseslint.config(
     },
   },
 );
+
+export default config;
