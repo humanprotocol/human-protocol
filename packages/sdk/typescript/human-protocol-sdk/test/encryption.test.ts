@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, test, expect, beforeAll } from 'vitest';
 import { Encryption, EncryptionUtils } from '../src/encryption';
 import {

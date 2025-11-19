@@ -89,7 +89,9 @@ export class StorageService {
 
       try {
         jsonLikeData = JSON.parse(jsonLikeData);
-      } catch (_noop) {}
+      } catch (_noop) {
+        // Ignore error
+      }
 
       return jsonLikeData;
     } catch (_error) {

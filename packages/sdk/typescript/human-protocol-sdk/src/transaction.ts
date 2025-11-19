@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ethers } from 'ethers';
 import { NETWORKS } from './constants';
 import { ChainId, OrderDirection } from './enums';

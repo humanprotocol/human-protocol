@@ -1,7 +1,9 @@
 import Box from '@mui/material/Box';
 import { FC, PropsWithChildren } from 'react';
 
-export const PageWrapper: FC<PropsWithChildren<{}>> = ({ children }) => (
+type PageWrapperProps = PropsWithChildren<Record<string, never>>;
+
+export const PageWrapper: FC<PageWrapperProps> = ({ children }) => (
   <Box sx={{ px: { xs: 0, md: 3, lg: 5, xl: 7 } }}>
     <Box
       sx={{

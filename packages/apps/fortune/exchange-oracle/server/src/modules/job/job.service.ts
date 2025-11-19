@@ -255,9 +255,11 @@ export class JobService {
           invalidJobSolution.escrowAddress,
           invalidJobSolution.chainId,
         );
-      for (const invalidSolution of (
-        invalidJobSolution.eventData as RejectionEventData
-      )?.assignments) {
+      const rejectionEventData =
+        invalidJobSolution.eventData as RejectionEventData;
+      const assignments = rejectionEventData.assignments ?? [];
+
+      for (const invalidSolution of assignments) {
         const foundSolution = existingJobSolutions.find(
           (sol) => sol.workerAddress === invalidSolution.assigneeId,
         );

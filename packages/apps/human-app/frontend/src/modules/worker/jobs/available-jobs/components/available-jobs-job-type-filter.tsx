@@ -1,4 +1,3 @@
-/* eslint-disable camelcase --- ... */
 import { useTranslation } from 'react-i18next';
 import { useMemo } from 'react';
 import { Filtering } from '@/shared/components/ui/table/table-header-menu/filtering';

@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 import { useJobsFilterStore } from '../../hooks';

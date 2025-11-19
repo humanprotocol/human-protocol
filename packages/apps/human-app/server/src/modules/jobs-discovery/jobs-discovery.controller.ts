@@ -57,7 +57,7 @@ export class JobsDiscoveryController {
       process.env.THIRSTYFI_ORACLE_ADDRESS
     ) {
       let data: any;
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
       if (new Date(process.env.THIRSTYFI_TASK_EXPIRATION_DATE!) >= new Date()) {
         const response = await axios.get<any>(
           `${process.env.THIRSTIFY_EXO}/participant`,

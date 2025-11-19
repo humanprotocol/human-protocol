@@ -1,17 +1,17 @@
-import HMTokenABI from '@human-protocol/core/abis/HMToken.json';
+import HMTokenABI from "@human-protocol/core/abis/HMToken.json";
 import {
   ChainId,
   NETWORKS,
   StakerInfo,
   StakingClient,
-} from '@human-protocol/sdk';
-import { Eip1193Provider, ethers } from 'ethers';
-import { useEffect, useState } from 'react';
-import { useAccount, useWalletClient } from 'wagmi';
-import { useSnackbar } from '../providers/SnackProvider';
-import { parseErrorMessage } from '../utils/string';
-import { formatAmount } from '../utils/units';
-import { SUPPORTED_CHAIN_IDS } from '../constants/chains';
+} from "@human-protocol/sdk";
+import { Eip1193Provider, ethers } from "ethers";
+import { useEffect, useState } from "react";
+import { useAccount, useWalletClient } from "wagmi";
+import { useSnackbar } from "../providers/SnackProvider";
+import { parseErrorMessage } from "../utils/string";
+import { formatAmount } from "../utils/units";
+import { SUPPORTED_CHAIN_IDS } from "../constants/chains";
 
 export const useStake = () => {
   const { address, chainId, connector } = useAccount();
@@ -19,7 +19,7 @@ export const useStake = () => {
   const { showError, openSnackbar } = useSnackbar();
 
   const [stakingClient, setStakingClient] = useState<StakingClient | null>(
-    null
+    null,
   );
   const [stakingData, setStakingData] = useState<StakerInfo | null>(null);
   const [tokenBalance, setTokenBalance] = useState<number>(0);
@@ -33,7 +33,7 @@ export const useStake = () => {
           checkSupportedChain();
           const eeip193Provider = await connector?.getProvider();
           const provider = new ethers.BrowserProvider(
-            eeip193Provider as Eip1193Provider
+            eeip193Provider as Eip1193Provider,
           );
           setBrowserProvider(provider);
           const signer = await provider.getSigner();
@@ -58,7 +58,7 @@ export const useStake = () => {
     if (!isSupportedChain) {
       resetData();
       throw new Error(
-        'Unsupported chain. Please switch to a supported network.'
+        "Unsupported chain. Please switch to a supported network.",
       );
     }
   };
@@ -73,34 +73,34 @@ export const useStake = () => {
     try {
       const stakingInfo = await stakingClient.getStakerInfo(address!);
       setStakingData(stakingInfo);
-    } catch (error) {
-      showError('Error fetching staking data');
+    } catch {
+      showError("Error fetching staking data");
     }
   };
 
   const fetchTokenBalance = async (
     provider: ethers.BrowserProvider,
     address: string,
-    chainId?: number
+    chainId?: number,
   ) => {
     checkSupportedChain();
     try {
       const tokenAddress = NETWORKS[chainId as ChainId]?.hmtAddress;
       if (!tokenAddress) {
-        showError('Token address not found for this network');
+        showError("Token address not found for this network");
         return;
       }
 
       const tokenContract = new ethers.Contract(
         tokenAddress,
         HMTokenABI,
-        provider
+        provider,
       );
       const balance = await tokenContract.balanceOf(address);
 
       setTokenBalance(formatAmount(balance));
-    } catch (error) {
-      showError('Error fetching token balance');
+    } catch {
+      showError("Error fetching token balance");
     }
   };
 
@@ -110,12 +110,12 @@ export const useStake = () => {
     try {
       checkSupportedChain();
       if (stakingClient && amount && address) {
-        const weiAmount = ethers.parseUnits(amount, 'ether');
+        const weiAmount = ethers.parseUnits(amount, "ether");
         await stakingClient.approveStake(weiAmount);
         await stakingClient.stake(weiAmount);
         await fetchStakingData(stakingClient);
         await fetchTokenBalance(browserProvider, address, chainId);
-        openSnackbar('Stake successful', 'success');
+        openSnackbar("Stake successful", "success");
       }
     } catch (error) {
       showError(parseErrorMessage(error));
@@ -129,11 +129,11 @@ export const useStake = () => {
     try {
       checkSupportedChain();
       if (stakingClient && amount && address) {
-        const weiAmount = ethers.parseUnits(amount, 'ether');
+        const weiAmount = ethers.parseUnits(amount, "ether");
         await stakingClient.unstake(weiAmount);
         await fetchStakingData(stakingClient);
         await fetchTokenBalance(browserProvider, address, chainId);
-        openSnackbar('Unstake successful', 'success');
+        openSnackbar("Unstake successful", "success");
       }
     } catch (error) {
       showError(parseErrorMessage(error));
@@ -150,7 +150,7 @@ export const useStake = () => {
         await stakingClient.withdraw();
         await fetchStakingData(stakingClient);
         await fetchTokenBalance(browserProvider, address, chainId);
-        openSnackbar('Withdraw successful', 'success');
+        openSnackbar("Withdraw successful", "success");
       }
     } catch (error) {
       showError(parseErrorMessage(error));
@@ -162,14 +162,14 @@ export const useStake = () => {
     tokenBalance,
     stakedAmount: stakingData?.stakedAmount
       ? formatAmount(stakingData?.stakedAmount)
-      : '0',
+      : "0",
     lockedAmount: stakingData?.lockedAmount
       ? formatAmount(stakingData?.lockedAmount)
-      : '0',
+      : "0",
     lockedUntil: stakingData?.lockedUntil,
     withdrawableAmount: stakingData?.withdrawableAmount
       ? formatAmount(stakingData?.withdrawableAmount)
-      : '0',
+      : "0",
     handleStake,
     handleUnstake,
     handleWithdraw,

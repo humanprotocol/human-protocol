@@ -1,4 +1,3 @@
-/* eslint-disable camelcase -- ... */
 import { Grid, Typography } from '@mui/material';
 import { Trans, useTranslation } from 'react-i18next';
 import { z } from 'zod';

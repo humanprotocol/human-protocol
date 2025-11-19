@@ -15,7 +15,7 @@ export default function VerifyEmailForm() {
   const handleResend = async () => {
     setIsLoading(true);
     try {
-      await authService.resendEmailVerification(user?.email!);
+      await authService.resendEmailVerification(user!.email);
     } catch (err) {
       // eslint-disable-next-line no-console
       console.log(err);
@@ -55,7 +55,7 @@ export default function VerifyEmailForm() {
         Hi,
         <br />
         <br />
-        We sent an email to {user?.email!}, please check your inbox and verify
+        We sent an email to {user!.email}, please check your inbox and verify
         your email. If you can’t find our email, please check junk junk/spam
         email folder.
       </Typography>

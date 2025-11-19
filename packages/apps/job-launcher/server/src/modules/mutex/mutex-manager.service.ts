@@ -20,7 +20,7 @@ export class MutexManagerService implements OnModuleDestroy {
       this.scheduleMutexCleanup(key);
     }
     this.scheduleMutexCleanup(key); // Reset timeout on access
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
     return this.mutexes.get(key)!;
   }
 

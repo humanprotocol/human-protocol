@@ -88,7 +88,7 @@ export const CryptoTopUpForm = () => {
 
       await publicClient?.waitForTransactionReceipt({
         hash: transactionHash,
-        confirmations: Number(import.meta.env.VITE_APP_MIN_CONFIRMATIONS) ?? 1,
+        confirmations: Number(import.meta.env.VITE_APP_MIN_CONFIRMATIONS ?? 1),
         retryCount: 10,
         retryDelay: ({ count }) => Math.min(1000 * 2 ** count, 30000),
       });
@@ -157,7 +157,7 @@ export const CryptoTopUpForm = () => {
                 type="number"
                 value={amount}
                 onChange={(e) => {
-                  let value = e.target.value;
+                  const value = e.target.value;
                   const maxDecimals = Math.min(tokenDecimals, 6);
                   const regex = new RegExp(`^\\d*\\.?\\d{0,${maxDecimals}}$`);
                   if (regex.test(value)) {

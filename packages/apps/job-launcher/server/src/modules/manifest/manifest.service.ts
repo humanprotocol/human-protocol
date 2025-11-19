@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
   ChainId,
   Encryption,
@@ -132,7 +131,7 @@ export class ManifestService {
     switch (requestType) {
       case CvatJobType.IMAGE_POLYGONS:
       case CvatJobType.IMAGE_BOXES:
-      case CvatJobType.IMAGE_POINTS:
+      case CvatJobType.IMAGE_POINTS: {
         const data = await listObjectsInBucket(urls.dataUrl);
         if (!data || data.length === 0 || !data[0])
           throw new ValidationError(ErrorJob.DatasetValidationFailed);
@@ -145,8 +144,9 @@ export class ManifestService {
         await this.checkImageConsistency(gt.images, data);
 
         return data.length - gt.images.length;
+      }
 
-      case CvatJobType.IMAGE_BOXES_FROM_POINTS:
+      case CvatJobType.IMAGE_BOXES_FROM_POINTS: {
         const points = (await this.storageService.downloadJsonLikeData(
           urls.pointsUrl!.href,
         )) as any;
@@ -175,8 +175,9 @@ export class ManifestService {
         });
 
         return points.annotations.length - gtEntries;
+      }
 
-      case CvatJobType.IMAGE_SKELETONS_FROM_BOXES:
+      case CvatJobType.IMAGE_SKELETONS_FROM_BOXES: {
         const boxes = (await this.storageService.downloadJsonLikeData(
           urls.boxesUrl!.href,
         )) as any;
@@ -205,6 +206,7 @@ export class ManifestService {
         });
 
         return boxes.annotations.length - gtEntries;
+      }
 
       default:
         throw new ValidationError(ErrorJob.InvalidRequestType);
@@ -408,7 +410,7 @@ export class ManifestService {
           throw new ValidationError(ErrorJob.JobParamsValidationFailed);
         }
 
-        const polygonManifest = {
+        return {
           ...commonManifestProperties,
           request_type: JobCaptchaRequestType.IMAGE_LABEL_AREA_SELECT,
           request_config: {
@@ -427,14 +429,12 @@ export class ManifestService {
           requester_question_example: jobDto.annotations.exampleImages || [],
         };
 
-        return polygonManifest;
-
       case JobCaptchaShapeType.POINT:
         if (!jobDto.annotations.label) {
           throw new ValidationError(ErrorJob.JobParamsValidationFailed);
         }
 
-        const pointManifest = {
+        return {
           ...commonManifestProperties,
           request_type: JobCaptchaRequestType.IMAGE_LABEL_AREA_SELECT,
           request_config: {
@@ -451,13 +451,12 @@ export class ManifestService {
           requester_question_example: jobDto.annotations.exampleImages || [],
         };
 
-        return pointManifest;
       case JobCaptchaShapeType.BOUNDING_BOX:
         if (!jobDto.annotations.label) {
           throw new ValidationError(ErrorJob.JobParamsValidationFailed);
         }
 
-        const boundingBoxManifest = {
+        return {
           ...commonManifestProperties,
           request_type: JobCaptchaRequestType.IMAGE_LABEL_AREA_SELECT,
           request_config: {
@@ -474,13 +473,12 @@ export class ManifestService {
           requester_question_example: jobDto.annotations.exampleImages || [],
         };
 
-        return boundingBoxManifest;
       case JobCaptchaShapeType.IMMO:
         if (!jobDto.annotations.label) {
           throw new ValidationError(ErrorJob.JobParamsValidationFailed);
         }
 
-        const immoManifest = {
+        return {
           ...commonManifestProperties,
           request_type: JobCaptchaRequestType.TEXT_FREEE_NTRY,
           request_config: {
@@ -496,8 +494,6 @@ export class ManifestService {
           },
           taskdata: [],
         };
-
-        return immoManifest;
 
       default:
         throw new ValidationError(ErrorJob.HCaptchaInvalidJobType);

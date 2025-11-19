@@ -15,7 +15,8 @@ export class RedisHealthIndicator extends HealthIndicator {
     try {
       await redisClient.ping();
       isHealthy = true;
-    } catch (_noop) {}
+      // eslint-disable-next-line no-empty
+    } catch {}
 
     const result = this.getStatus(key, isHealthy);
 

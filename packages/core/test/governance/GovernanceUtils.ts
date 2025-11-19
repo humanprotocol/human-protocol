@@ -27,7 +27,7 @@ export const increaseTime = async (seconds: number) => {
   try {
     await ethers.provider.send('evm_increaseTime', [seconds]);
     await ethers.provider.send('evm_mine');
-  } catch (error) {
+  } catch {
     throw new Error(`Failed to increase time by ${seconds} seconds`);
   }
 };
