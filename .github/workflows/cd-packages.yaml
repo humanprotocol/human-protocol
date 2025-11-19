@@ -23,7 +23,6 @@ on:
       - "packages/apps/**"
       - "packages/examples/**"
       - "packages/sdk/python/**"
-  workflow_dispatch:
 
 jobs:
   publish:
@@ -62,7 +61,6 @@ jobs:
         run: yarn workspaces foreach --all --no-private -pt npm publish --tolerate-republish --tag ${NPM_PUBLISH_TAG} --json | tee publish.log
         env:
           SKIP_PREPACK: true
-          NPM_PUBLISH_TAG: ${{ env.NPM_PUBLISH_TAG }}
       - name: Tag published packages
         if: ${{ env.PUSH_GIT_TAGS == 'true' }}
         run: node scripts/tag-published-packages.mjs publish.log
