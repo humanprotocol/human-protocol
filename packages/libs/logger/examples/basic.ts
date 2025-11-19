@@ -13,7 +13,38 @@ logger.info('New user registered', {
 });
 
 // to log an error
-logger.error('Something went wrong', new Error('Very surprising error'));
+class CustomError extends Error {
+  constructor(readonly details: string) {
+    super('Custom error happened');
+    /**
+     * Haven't assigned 'name' from 'this.constructor.name',
+     * but in example you should see correct error kind anyways.
+     */
+  }
+}
+logger.error(
+  'Something went wrong 1',
+  new CustomError('Error as whole second argument'),
+);
+logger.error('Something went wrong 2', {
+  error: new CustomError('Error as specific key for errors'),
+});
+
+// logging custom error with toJSON
+class ErrorWithToJSON extends CustomError {
+  constructor(readonly toLog: string) {
+    super('Error has toJSON and "details" prop will not be logged');
+  }
+
+  toJSON() {
+    return {
+      name: this.name,
+      stack: this.stack,
+      toLog: this.toLog,
+    };
+  }
+}
+logger.error('Logging custom error with toJSON', new ErrorWithToJSON('No way'));
 
 // or error with some extra context
 const extra = {

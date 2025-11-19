@@ -4944,6 +4944,7 @@ __metadata:
     pino: "npm:^9.7.0"
     pino-pretty: "npm:^13.0.0"
     prettier: "npm:^3.4.2"
+    ts-node: "npm:^10.9.2"
     typescript: "npm:^5.8.3"
     typescript-eslint: "npm:^8.35.1"
   peerDependencies:

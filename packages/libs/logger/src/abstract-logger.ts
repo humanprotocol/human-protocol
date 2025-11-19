@@ -10,14 +10,28 @@ function isValidLoggerName(maybeName: unknown): maybeName is string {
 }
 
 function serializeError(error: Error) {
-  const { name, message, stack, ...errorProps } = error;
+  const errorKind =
+    Object.prototype.toString.call(error.constructor) === '[object Function]'
+      ? error.constructor.name
+      : error.name;
 
-  return {
-    kind: name,
-    message,
-    stack,
-    ...errorProps,
-  };
+  if (Reflect.has(error, 'toJSON')) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const serialized = (error as any).toJSON();
+
+    delete serialized.name;
+    serialized.kind = errorKind;
+
+    return serialized;
+  } else {
+    const { message, stack, ...errorProps } = error;
+    return {
+      kind: errorKind,
+      message,
+      stack,
+      ...errorProps,
+    };
+  }
 }
 
 abstract class LoggerWrapper implements Logger {
