@@ -8,6 +8,7 @@ import { ErrorWeb3 } from '../../common/constants/errors';
 import { ConflictError, ValidationError } from '../../common/errors';
 import { IERC20Token } from '../../common/interfaces/web3';
 import logger from '../../logger';
+import { RateService } from '../rate/rate.service';
 import { AvailableOraclesDto, OracleDataDto } from './web3.dto';
 
 @Injectable()
@@ -18,6 +19,7 @@ export class Web3Service {
   constructor(
     public readonly web3ConfigService: Web3ConfigService,
     public readonly networkConfigService: NetworkConfigService,
+    private readonly rateService: RateService,
   ) {
     const privateKey = this.web3ConfigService.privateKey;
 
@@ -199,15 +201,30 @@ export class Web3Service {
       return;
     }
 
-    const approveAmount =
-      this.web3ConfigService.approveAmount === 0 ||
-      this.web3ConfigService.approveAmount < requiredAmount
-        ? requiredAmount
-        : ethers.parseUnits(
-            this.web3ConfigService.approveAmount.toString(),
-            token.decimals,
-          );
-
+    let approveAmount = requiredAmount;
+    if (this.web3ConfigService.approveAmountUsd > 0) {
+      try {
+        const usdToTokenRate = await this.rateService.getRate(
+          'usd',
+          token.symbol,
+        );
+        const tokenAmount =
+          this.web3ConfigService.approveAmountUsd * usdToTokenRate;
+        const converted = ethers.parseUnits(
+          tokenAmount.toString(),
+          token.decimals,
+        );
+        if (converted > approveAmount) {
+          approveAmount = converted;
+        }
+      } catch (error) {
+        this.logger.error('Failed to convert approve amount from USD', {
+          chainId,
+          token: token.symbol,
+          error,
+        });
+      }
+    }
     const tx = await erc20.approve(spender, approveAmount);
     await tx.wait();
   }
