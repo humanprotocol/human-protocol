@@ -3,6 +3,7 @@ import {
   EscrowClient,
   EscrowStatus,
   EscrowUtils,
+  ICancellationRefund,
   KVStoreKeys,
   KVStoreUtils,
   NETWORKS,
@@ -80,6 +81,7 @@ import {
 } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
+import { Escrow, Escrow__factory } from '@human-protocol/core/typechain-types';
 
 @Injectable()
 export class JobService {
@@ -923,21 +925,85 @@ export class JobService {
       PaymentType.SLASH,
     );
     if (!slash?.length) {
-      const refund = await EscrowUtils.getCancellationRefund(
-        jobEntity.chainId,
-        jobEntity.escrowAddress!,
-      );
-
-      if (!refund || !refund.amount) {
-        throw new ConflictError(ErrorJob.NoRefundFound);
+      let refund: ICancellationRefund | null = null;
+      try {
+        refund = await EscrowUtils.getCancellationRefund(
+          jobEntity.chainId,
+          jobEntity.escrowAddress!,
+        );
+      } catch {
+        // Ignore error
       }
 
-      await this.paymentService.createRefundPayment({
-        refundAmount: Number(ethers.formatUnits(refund.amount, token.decimals)),
-        refundCurrency: jobEntity.token,
-        userId: jobEntity.userId,
-        jobId: jobEntity.id,
-      });
+      let amount = 0n;
+
+      if (!refund) {
+        //Temp fix
+        const signer = this.web3Service.getSigner(jobEntity.chainId);
+        const provider = signer.provider;
+        const contract: Escrow = Escrow__factory.connect(
+          jobEntity.escrowAddress!,
+          provider,
+        );
+        const fromBlock = 79278120; //This issue started at this block
+        const toBlock = 'latest';
+        const cancelledFilter = contract.filters?.Cancelled?.();
+        const cancelledLogs = await contract.queryFilter(
+          cancelledFilter,
+          fromBlock,
+          toBlock,
+        );
+
+        for (const log of cancelledLogs) {
+          if (!provider) continue;
+          const erc20Interface = new ethers.Interface([
+            'event Transfer(address indexed from, address indexed to, uint256 value)',
+          ]);
+
+          const transferTopic = erc20Interface.getEvent('Transfer')!.topicHash;
+          const receipt = await provider.getTransactionReceipt(
+            log.transactionHash,
+          );
+
+          const transferLogs = receipt!.logs.filter(
+            (l) =>
+              l.address.toLowerCase() === token.address.toLowerCase() &&
+              l.topics[0] === transferTopic,
+          );
+          for (const tlog of transferLogs) {
+            const decoded = erc20Interface.decodeEventLog(
+              'Transfer',
+              tlog.data,
+              tlog.topics,
+            );
+
+            const from = decoded.from as string;
+            const to = decoded.to as string;
+            const value = decoded.value as bigint;
+            if (
+              from.toLowerCase() === jobEntity.escrowAddress!.toLowerCase() &&
+              to.toLowerCase() === signer.address.toLowerCase()
+            ) {
+              amount = value;
+              break;
+            }
+          }
+        }
+      } else {
+        if (!refund.amount) {
+          throw new Error(ErrorJob.NoRefundFound);
+        }
+        amount = refund.amount;
+      }
+
+      if (amount > 0n) {
+        await this.paymentService.createRefundPayment({
+          refundAmount: Number(ethers.formatUnits(amount, token.decimals)),
+          refundCurrency: jobEntity.token,
+          userId: jobEntity.userId,
+          jobId: jobEntity.id,
+        });
+      }
     }
 
     jobEntity.status = JobStatus.CANCELED;
