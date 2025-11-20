@@ -2,7 +2,7 @@ import logger from '../src';
 
 void (async () => {
   try {
-    await fetch('https://httpbin.org/dealay/5', {
+    await fetch('https://httpbin.org/delay/5', {
       signal: AbortSignal.timeout(0),
     });
   } catch (error) {
