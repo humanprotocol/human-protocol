@@ -120,6 +120,7 @@ export class StorageService {
         this.s3ConfigService.bucket,
         `${escrowAddress}-${chainId}.json`,
         fileToUpload,
+        undefined,
         {
           'Content-Type': 'application/json',
           'Cache-Control': 'no-store',
