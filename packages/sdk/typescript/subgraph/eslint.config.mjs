@@ -1,8 +1,6 @@
 import eslint from '@eslint/js';
 import globals from 'globals';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
-// @ts-expect-error - package does not provide type definitions
-import jestPlugin from 'eslint-plugin-jest';
 import tseslint from 'typescript-eslint';
 import { flatConfigs as graphqlFlatConfigs } from '@graphql-eslint/eslint-plugin';
 const graphqlOperations = graphqlFlatConfigs['operations-recommended'];
@@ -27,9 +25,6 @@ export default tseslint.config(
         projectService: true,
         tsconfigRootDir: import.meta.dirname,
       },
-    },
-    plugins: {
-      jest: jestPlugin,
     },
     rules: {
       'no-console': 'warn',
@@ -57,9 +52,6 @@ export default tseslint.config(
       globals: {
         ...globals.jest,
       },
-    },
-    plugins: {
-      jest: jestPlugin,
     },
   }
 );

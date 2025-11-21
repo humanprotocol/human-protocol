@@ -38,7 +38,7 @@ const config = tseslint.config(
       '@/quotes': [
         'error',
         'single',
-        { 'avoidEscape': true, 'allowTemplateLiterals': true }
+        { avoidEscape: true, allowTemplateLiterals: true },
       ],
     },
   },
