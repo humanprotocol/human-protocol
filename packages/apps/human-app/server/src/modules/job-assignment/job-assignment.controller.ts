@@ -48,7 +48,6 @@ export class JobAssignmentController {
   ): Promise<JobAssignmentResponse> {
     // TODO: temporal - THIRSTYFI
     if (jobAssignmentDto.escrow_address === 'thirstyfi-task') {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       if (new Date(process.env.THIRSTYFI_TASK_EXPIRATION_DATE!) < new Date()) {
         throw new BadRequestException('Expired task');
       }
@@ -81,7 +80,8 @@ export class JobAssignmentController {
           expires_at: process.env.THIRSTYFI_TASK_EXPIRATION_DATE ?? '',
         };
       } catch (error) {
-        console.log(error);
+        // eslint-disable-next-line no-console
+        console.error(error);
         throw new BadRequestException(error.response.data.error);
       }
     }

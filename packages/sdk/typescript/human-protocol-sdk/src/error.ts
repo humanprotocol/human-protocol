@@ -307,6 +307,20 @@ export const ErrorBulkPayOutVersion = new Error(
 );
 
 /**
+ * @constant {Error} - Retry configuration is missing required parameters.
+ */
+export const ErrorRetryParametersMissing = new Error(
+  'Retry configuration must include both maxRetries and baseDelay'
+);
+
+/**
+ * @constant {Error} - Retry configuration is missing required parameters.
+ */
+export const ErrorRoutingRequestsToIndexerRequiresApiKey = new Error(
+  'Routing requests to a specific indexer requires SUBGRAPH_API_KEY to be set'
+);
+
+/**
  * @constant {Warning} - Possible version mismatch.
  */
 export const WarnVersionMismatch =

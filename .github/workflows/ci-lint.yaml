@@ -2,6 +2,7 @@ name: Lint check
 
 on:
   push:
+    tags-ignore: '*'
     paths-ignore:
       - 'packages/examples/cvat/**'
 

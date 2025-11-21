@@ -31,7 +31,6 @@ const tokenAddressString = '0xa16081f360e3847006db660bae1c6d1b2e17ffaa';
 const escrowAddressString = '0xa16081f360e3847006db660bae1c6d1b2e17ec2a';
 const escrowAddress = Address.fromString(escrowAddressString);
 const operatorAddressString = '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266';
-const operatorAddress = Address.fromString(operatorAddressString);
 const holderAddressString = '0x70997970c51812dc3a010c7d01b50e0d17dc79c8';
 const holderAddress = Address.fromString(holderAddressString);
 const holder1AddressString = '0x92a2eEF7Ff696BCef98957a0189872680600a959';

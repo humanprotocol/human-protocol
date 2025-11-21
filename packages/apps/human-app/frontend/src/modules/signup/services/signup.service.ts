@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 import { z } from 'zod';
 import { ApiClientError, humanAppApiClient } from '@/api';
 import { type SignUpDto } from '../worker/schema';
@@ -14,6 +13,7 @@ const apiPaths = {
   },
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const web3SignInSuccessResponseSchema = z.object({
   access_token: z.string(),
   refresh_token: z.string(),

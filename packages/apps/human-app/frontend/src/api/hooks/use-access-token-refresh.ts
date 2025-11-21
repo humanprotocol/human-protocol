@@ -24,7 +24,6 @@ export function useAccessTokenRefresh() {
       try {
         await authService.refreshAccessToken();
       } catch (error) {
-        // eslint-disable-next-line no-console
         console.error(error);
         if (authType === 'web2' && web2User) {
           web2SignOut({ throwExpirationModal: false });

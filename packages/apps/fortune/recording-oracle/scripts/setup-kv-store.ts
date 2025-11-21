@@ -29,7 +29,7 @@ async function setupCommonValues(kvStoreClient: KVStoreClient): Promise<void> {
   const serverUrl = SERVER_URL || `http://${HOST}:${PORT}`;
   try {
     new URL(serverUrl);
-  } catch (_noop) {
+  } catch {
     throw new Error('Invalid SERVER_URL');
   }
   let url = serverUrl.endsWith('/') ? serverUrl.slice(0, -1) : serverUrl;

@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 import { ErrorAuth, ErrorUser } from '../../common/constants/errors';
@@ -39,6 +38,8 @@ import { ApiKeyRepository } from './apikey.repository';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly jwtService: JwtService,
     private readonly userService: UserService,
@@ -80,19 +81,7 @@ export class AuthService {
   }
 
   public async signup(data: UserCreateDto, ip?: string): Promise<UserEntity> {
-    if (
-      !(
-        await verifyToken(
-          this.authConfigService.hcaptchaProtectionUrl,
-          this.authConfigService.hCaptchaSiteKey,
-          this.authConfigService.hCaptchaSecret,
-          data.hCaptchaToken,
-          ip,
-        )
-      ).success
-    ) {
-      throw new ForbiddenError(ErrorAuth.InvalidCaptchaToken);
-    }
+    await this.ensureCaptchaValid(data.hCaptchaToken, ip);
     const storedUser = await this.userRepository.findByEmail(data.email);
     if (storedUser) {
       throw new ConflictError(ErrorUser.DuplicatedEmail);
@@ -185,19 +174,7 @@ export class AuthService {
     data: ForgotPasswordDto,
     ip?: string,
   ): Promise<void> {
-    if (
-      !(
-        await verifyToken(
-          this.authConfigService.hcaptchaProtectionUrl,
-          this.authConfigService.hCaptchaSiteKey,
-          this.authConfigService.hCaptchaSecret,
-          data.hCaptchaToken,
-          ip,
-        )
-      ).success
-    ) {
-      throw new ForbiddenError(ErrorAuth.InvalidCaptchaToken);
-    }
+    await this.ensureCaptchaValid(data.hCaptchaToken, ip);
     const userEntity = await this.userRepository.findByEmail(data.email);
 
     if (!userEntity) {
@@ -245,19 +222,7 @@ export class AuthService {
     data: RestorePasswordDto,
     ip?: string,
   ): Promise<void> {
-    if (
-      !(
-        await verifyToken(
-          this.authConfigService.hcaptchaProtectionUrl,
-          this.authConfigService.hCaptchaSiteKey,
-          this.authConfigService.hCaptchaSecret,
-          data.hCaptchaToken,
-          ip,
-        )
-      ).success
-    ) {
-      throw new ForbiddenError(ErrorAuth.InvalidCaptchaToken);
-    }
+    await this.ensureCaptchaValid(data.hCaptchaToken, ip);
 
     const tokenEntity = await this.tokenRepository.findOneByUuidAndType(
       data.token,
@@ -425,5 +390,25 @@ export class AuthService {
     }
 
     return null;
+  }
+
+  private async ensureCaptchaValid(token: string, ip?: string): Promise<void> {
+    const verification = await verifyToken(
+      this.authConfigService.hcaptchaProtectionUrl,
+      this.authConfigService.hCaptchaSiteKey,
+      this.authConfigService.hCaptchaSecret,
+      token,
+      ip,
+    );
+
+    if (verification.success) {
+      return;
+    }
+
+    this.logger.error(ErrorAuth.InvalidCaptchaToken, {
+      error: verification.error,
+    });
+
+    throw new ForbiddenError(ErrorAuth.InvalidCaptchaToken);
   }
 }

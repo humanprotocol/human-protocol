@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { ChainId, EscrowClient, OperatorUtils } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';

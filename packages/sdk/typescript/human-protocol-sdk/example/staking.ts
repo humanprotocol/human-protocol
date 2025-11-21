@@ -20,7 +20,7 @@ const runStakingExamples = async () => {
       stakers[0].address
     );
     console.log('Staker info:', staker);
-  } catch (e) {
+  } catch {
     console.log('Staker not found');
   }
 };

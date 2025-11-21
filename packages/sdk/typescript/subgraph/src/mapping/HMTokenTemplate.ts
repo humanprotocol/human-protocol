@@ -1,10 +1,4 @@
-import {
-  Address,
-  BigInt,
-  Bytes,
-  dataSource,
-  log,
-} from '@graphprotocol/graph-ts';
+import { Address, BigInt, Bytes, dataSource } from '@graphprotocol/graph-ts';
 
 import {
   Approval,
@@ -23,9 +17,8 @@ import {
   UniqueReceiver,
   UniqueSender,
 } from '../../generated/schema';
-import { toEventDayId, toEventId } from './utils/event';
+import { toEventId } from './utils/event';
 import { ONE_BI, ONE_DAY, ZERO_BI } from './utils/number';
-import { createOrLoadWorker } from './Escrow';
 import { getEventDayData } from './utils/dayUpdates';
 import { createTransaction } from './utils/transaction';
 import { toBytes } from './utils/string';

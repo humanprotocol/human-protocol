@@ -18,6 +18,7 @@ export function useRefreshJobsMutation(callbacks?: {
         void callbacks.onSuccess();
       }
       await queryClient.invalidateQueries({ queryKey: ['fetchMyJobs'] });
+      await queryClient.invalidateQueries({ queryKey: ['myJobsInfinite'] });
     },
     onError: (error) => {
       if (callbacks?.onError) {

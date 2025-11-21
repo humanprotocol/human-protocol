@@ -3,6 +3,7 @@ name: Deploy Job launcher server
 on:
   push:
     branches: [ develop, main ]
+    tags-ignore: '*'
     paths:
       - 'packages/apps/job-launcher/server/**'
   pull_request:

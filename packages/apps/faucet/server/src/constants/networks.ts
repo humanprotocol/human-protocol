@@ -16,9 +16,6 @@ export const FAUCET_NETWORKS: {
   [ChainId.POLYGON_AMOY]: {
     rpcUrl: process.env.RPC_URL_POLYGON_AMOY || '',
   },
-  [ChainId.AURORA_TESTNET]: {
-    rpcUrl: process.env.RPC_URL_AURORA_TESTNET || '',
-  },
   [ChainId.LOCALHOST]: {
     rpcUrl: process.env.RPC_PORT
       ? `http://127.0.0.1:${process.env.RPC_PORT}`

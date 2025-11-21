@@ -4,6 +4,7 @@ import os
 import time
 import re
 from typing import Tuple, Optional
+from dataclasses import dataclass
 
 import requests
 from validators import url as URL
@@ -18,7 +19,6 @@ from human_protocol_sdk.constants import (
     ARTIFACTS_FOLDER,
     SUBGRAPH_API_KEY_PLACEHOLDER,
     ChainId,
-    DEFAULT_AURORA_GAS_PRICE,
 )
 
 logger = logging.getLogger("human_protocol_sdk.utils")
@@ -32,41 +32,143 @@ except ImportError:
     pass
 
 
-def with_retry(fn, retries=3, delay=5, backoff=2):
-    """Retry a function
+@dataclass
+class SubgraphOptions:
+    """Configuration for subgraph logic."""
 
-    Mainly used with handle_transaction to retry on case of failure.
-    Uses exponential backoff.
+    max_retries: Optional[int] = None
+    base_delay: Optional[int] = None  # milliseconds
+    indexer_id: Optional[str] = None
 
-    :param fn: <Partial> to run with retry logic.
-    :param retries: number of times to retry the transaction
-    :param delay: time to wait (exponentially)
-    :param backoff: defines the rate of grow for the exponential wait.
 
-    :return: False if transaction never succeeded,
-        otherwise the return of the function
-
-    :note: If the partial returns a Boolean and it happens to be False,
-        we would not know if the tx succeeded and it will retry.
+def is_indexer_error(error: Exception) -> bool:
     """
+    Check if an error indicates that the indexer is down or not synced.
+    This function specifically checks for "bad indexers" errors from The Graph.
 
-    wait_time = delay
+    :param error: The error to check
+    :return: True if the error indicates indexer issues
+    """
+    if not error:
+        return False
 
-    for i in range(retries):
+    response = getattr(error, "response", None)
+
+    message = ""
+    if response is not None:
         try:
-            result = fn()
-            if result:
-                return result
-        except Exception as e:
-            name = getattr(fn, "__name__", "partial")
-            logger.warning(
-                f"(x{i+1}) {name} exception: {e}. Retrying after {wait_time} sec..."
+            data = response.json()
+        except Exception:
+            data = None
+
+        if isinstance(data, dict):
+            errors = data.get("errors")
+            if isinstance(errors, list) and errors:
+                first_error = errors[0]
+                if isinstance(first_error, dict):
+                    message = str(first_error.get("message", ""))
+
+    if not message:
+        message = getattr(error, "message", "") or str(error) or ""
+
+    return "bad indexers" in message.lower()
+
+
+def custom_gql_fetch(
+    network: dict,
+    query: str,
+    params: dict = None,
+    options: Optional[SubgraphOptions] = None,
+):
+    """Fetch data from the subgraph with optional logic.
+
+    :param network: Network configuration dictionary
+    :param query: GraphQL query string
+    :param params: Query parameters
+    :param options: Optional subgraph configuration
+
+    :return: JSON response from the subgraph
+
+    :raise Exception: If the subgraph query fails
+    """
+    subgraph_api_key = os.getenv("SUBGRAPH_API_KEY", "")
+
+    if not options:
+        return _fetch_subgraph_data(network, query, params)
+
+    has_max_retries = options.max_retries is not None
+    has_base_delay = options.base_delay is not None
+
+    if has_max_retries != has_base_delay:
+        raise ValueError(
+            "Retry configuration must include both max_retries and base_delay"
+        )
+
+    if options.indexer_id and not subgraph_api_key:
+        raise ValueError(
+            "Routing requests to a specific indexer requires SUBGRAPH_API_KEY to be set"
+        )
+
+    max_retries = int(options.max_retries) if has_max_retries else 0
+    base_delay_seconds = (options.base_delay or 0) / 1000
+
+    last_error = None
+
+    for attempt in range(max_retries + 1):
+        try:
+            return _fetch_subgraph_data(network, query, params, options.indexer_id)
+        except Exception as error:
+            last_error = error
+
+            if not is_indexer_error(error):
+                break
+
+            delay = base_delay_seconds * attempt
+            time.sleep(delay)
+
+    raise last_error
+
+
+def _fetch_subgraph_data(
+    network: dict,
+    query: str,
+    params: dict = None,
+    indexer_id: Optional[str] = None,
+):
+    subgraph_api_key = os.getenv("SUBGRAPH_API_KEY", "")
+    if subgraph_api_key:
+        subgraph_url = network["subgraph_url_api_key"].replace(
+            SUBGRAPH_API_KEY_PLACEHOLDER, subgraph_api_key
+        )
+    else:
+        logger.warning(
+            "Warning: SUBGRAPH_API_KEY is not provided. It might cause issues with the subgraph."
+        )
+        subgraph_url = network["subgraph_url"]
+
+    subgraph_url = _attach_indexer_id(subgraph_url, indexer_id)
+
+    headers = (
+        {"Authorization": f"Bearer {subgraph_api_key}"} if subgraph_api_key else None
+    )
+
+    request = requests.post(
+        subgraph_url, json={"query": query, "variables": params}, headers=headers
+    )
+    if request.status_code == 200:
+        return request.json()
+    else:
+        raise Exception(
+            "Subgraph query failed. return code is {}. \n{}".format(
+                request.status_code, query
             )
+        )
 
-        time.sleep(wait_time)
-        wait_time *= backoff
 
-    return False
+def _attach_indexer_id(url: str, indexer_id: Optional[str]) -> str:
+    if not indexer_id:
+        return url
+    return f"{url}/indexers/id/{indexer_id}"
 
 
 def get_hmt_balance(wallet_addr, token_addr, w3):
@@ -192,39 +294,6 @@ def get_kvstore_interface():
     )
 
 
-def get_data_from_subgraph(network: dict, query: str, params: dict = None):
-    """Fetch data from the subgraph.
-
-    :param network: Network configuration dictionary
-    :param query: GraphQL query string
-    :param params: Query parameters
-
-    :return: JSON response from the subgraph
-
-    :raise Exception: If the subgraph query fails
-    """
-    subgraph_api_key = os.getenv("SUBGRAPH_API_KEY", "")
-    if subgraph_api_key:
-        subgraph_url = network["subgraph_url_api_key"].replace(
-            SUBGRAPH_API_KEY_PLACEHOLDER, subgraph_api_key
-        )
-    else:
-        logger.warning(
-            "Warning: SUBGRAPH_API_KEY is not provided. It might cause issues with the subgraph."
-        )
-        subgraph_url = network["subgraph_url"]
-
-    request = requests.post(subgraph_url, json={"query": query, "variables": params})
-    if request.status_code == 200:
-        return request.json()
-    else:
-        raise Exception(
-            "Subgraph query failed. return code is {}. \n{}".format(
-                request.status_code, query
-            )
-        )
-
-
 def handle_error(e, exception_class):
     """
     Handles and translates errors raised during contract transactions.
@@ -324,22 +393,3 @@ def validate_json(data: str) -> bool:
         return True
     except (ValueError, TypeError):
         return False
-
-
-def apply_tx_defaults(w3: Web3, tx_options: Optional[TxParams]) -> TxParams:
-    """Apply network specific default transaction parameters.
-
-    Aurora networks enforce a fixed gas price. We always override any user supplied
-    gasPrice with DEFAULT_AURORA_GAS_PRICE when on Aurora Testnet.
-    EIP-1559 fields are removed to avoid conflicts.
-
-    :param w3: Web3 instance (used to read chain id)
-    :param tx_options: Original transaction options (can be None)
-    :return: Mutated tx options with enforced defaults
-    """
-    opts: TxParams = dict(tx_options) if tx_options else {}
-    if w3.eth.chain_id == ChainId.AURORA_TESTNET.value:
-        opts["gasPrice"] = DEFAULT_AURORA_GAS_PRICE
-        opts.pop("maxFeePerGas", None)
-        opts.pop("maxPriorityFeePerGas", None)
-    return opts

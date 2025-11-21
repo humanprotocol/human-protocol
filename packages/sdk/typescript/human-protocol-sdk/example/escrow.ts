@@ -9,11 +9,14 @@ export const getEscrows = async () => {
     return;
   }
 
-  const escrows = await EscrowUtils.getEscrows({
-    status: [EscrowStatus.Pending, EscrowStatus.Complete],
-    chainId: ChainId.POLYGON_AMOY,
-    first: 1000,
-  });
+  const escrows = await EscrowUtils.getEscrows(
+    {
+      status: [EscrowStatus.Pending, EscrowStatus.Complete],
+      chainId: ChainId.POLYGON_AMOY,
+      first: 10,
+    },
+    { indexerId: '0xbdfb5ee5a2abf4fc7bb1bd1221067aef7f9de491' }
+  );
 
   console.log('Pending escrows:', escrows.length);
 };

@@ -5,9 +5,20 @@ permissions:
   contents: write # needed to push tags
 
 on:
+  workflow_dispatch:
+    inputs:
+      npm_tag:
+        description: "npm dist-tag to use when publishing manually (e.g., alpha, beta)"
+        required: false
+        default: "beta"
+      push_git_tags:
+        description: "Push git tags after publishing (true/false)"
+        required: false
+        default: "false"
   push:
     branches:
       - main
+    tags-ignore: '*'
     paths-ignore:
       - "docs/**"
       - "packages/apps/**"
@@ -18,10 +29,17 @@ jobs:
   publish:
     name: Publish packages to NPM
     runs-on: ubuntu-latest
+    env:
+      NPM_PUBLISH_TAG: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.npm_tag || 'latest' }}
+      PUSH_GIT_TAGS: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.push_git_tags || 'true' }}
     steps:
       - uses: actions/checkout@v5
         with:
           token: ${{ secrets.GH_GITBOOK_TOKEN }}
+      - name: Setup git identity
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -41,10 +59,12 @@ jobs:
       - name: Build packages
         run: yarn workspaces foreach --all --no-private -pt run build
       - name: Publish packages
-        run: yarn workspaces foreach --all --no-private -pt npm publish --tolerate-republish --json | tee publish.log
+        run: yarn workspaces foreach --all --no-private -pt npm publish --tolerate-republish --tag ${NPM_PUBLISH_TAG} --json | tee publish.log
         env:
           SKIP_PREPACK: true
       - name: Tag published packages
+        if: ${{ env.PUSH_GIT_TAGS == 'true' }}
         run: node scripts/tag-published-packages.mjs publish.log
       - name: Push created tags
+        if: ${{ env.PUSH_GIT_TAGS == 'true' }}
         run: git push origin --tags

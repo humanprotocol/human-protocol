@@ -2,6 +2,7 @@ name: CVAT Recording Oracle Tests
 
 on:
   push:
+    tags-ignore: '*'
     paths:
       - 'packages/examples/cvat/recording-oracle/**'
       - 'packages/core/**'

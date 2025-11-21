@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
   ChainId,
   EscrowClient,
@@ -857,7 +856,9 @@ export class JobService {
         oracleAddress,
         KVStoreKeys.fee,
       );
-    } catch {}
+    } catch {
+      // Ignore error
+    }
 
     return BigInt(feeValue ? feeValue : 1);
   }

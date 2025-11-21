@@ -1,34 +1,14 @@
-import Box from '@mui/material/Box';
-import Drawer from '@mui/material/Drawer';
-import CssBaseline from '@mui/material/CssBaseline';
-import { Grid, Typography } from '@mui/material';
+import { Box, CssBaseline, Drawer, Stack, Typography } from '@mui/material';
 import { t } from 'i18next';
 import { Loader } from '@/shared/components/ui/loader';
 import { Alert } from '@/shared/components/ui/alert';
 import { getErrorMessageForError } from '@/shared/errors';
-import { type HCaptchaUserStatsSuccess } from '../types';
 import { useHCaptchaUserStats } from '../hooks';
 import { UserStatsDetails } from './user-stats-details';
+import { LoadingOverlay } from './user-stats-loading-overlay';
 
 export interface UserStatsDrawerNavigationProps {
   isOpen: boolean;
-}
-
-function UserStatsDrawerContent({
-  stats,
-  refetch,
-}: Readonly<{
-  stats: HCaptchaUserStatsSuccess;
-  refetch: () => void;
-}>) {
-  return (
-    <>
-      <Typography variant="mobileHeaderLarge">
-        {t('worker.hcaptchaLabelingStats.hCapchaStatistics')}
-      </Typography>
-      <UserStatsDetails refetch={refetch} stats={stats} />
-    </>
-  );
 }
 
 export function UserStatsDrawer({
@@ -39,6 +19,7 @@ export function UserStatsDrawer({
     error: hcaptchaUserStatsError,
     status: hcaptchaUserStatsStatus,
     refetch: hcaptchaUserStatsRefetch,
+    isRefetching: isHcaptchaUserStatsRefetching,
   } = useHCaptchaUserStats();
 
   return (
@@ -46,47 +27,53 @@ export function UserStatsDrawer({
       <CssBaseline />
       <Drawer
         anchor="left"
+        variant="persistent"
         open={isOpen}
         sx={{
           width: '100%',
           flexShrink: 0,
           '& .MuiDrawer-paper': {
             width: '100%',
-            boxSizing: 'border-box',
-            paddingTop: '44px',
+            paddingTop: 11,
           },
         }}
-        variant="persistent"
       >
-        <Grid
-          container
-          sx={{
-            width: '100%',
-            justifyContent: 'center',
-            alignItems: 'center',
-            padding: '2rem',
-            flexDirection: 'column',
-            gap: '2rem',
-            marginTop: '50px',
-          }}
-        >
-          {hcaptchaUserStatsStatus === 'success' ? (
-            <UserStatsDrawerContent
-              refetch={() => {
-                void hcaptchaUserStatsRefetch();
+        <Box position="relative">
+          {isHcaptchaUserStatsRefetching && (
+            <LoadingOverlay
+              sx={{
+                width: 'calc(100% - 16px)',
+                height: 'calc(100% - 8px)',
+                top: 0,
+                left: '8px',
+                right: '8px',
+                bottom: '8px',
               }}
-              stats={hcaptchaUserStats}
             />
-          ) : null}
-          {hcaptchaUserStatsStatus === 'error' ? (
-            <Alert color="error" severity="error">
-              {getErrorMessageForError(hcaptchaUserStatsError)}
-            </Alert>
-          ) : null}
-          {hcaptchaUserStatsStatus === 'pending' ? (
-            <Loader sx={{ zIndex: '55' }} />
-          ) : null}
-        </Grid>
+          )}
+          <Stack px={6.5} py={3}>
+            {hcaptchaUserStatsStatus === 'success' ? (
+              <>
+                <Typography variant="mobileHeaderLarge" mb={3}>
+                  {t('worker.hcaptchaLabelingStats.hCapchaStatistics')}
+                </Typography>
+                <UserStatsDetails
+                  refetch={() => void hcaptchaUserStatsRefetch()}
+                  stats={hcaptchaUserStats}
+                  isRefetching={isHcaptchaUserStatsRefetching}
+                />
+              </>
+            ) : null}
+            {hcaptchaUserStatsStatus === 'error' ? (
+              <Alert color="error" severity="error">
+                {getErrorMessageForError(hcaptchaUserStatsError)}
+              </Alert>
+            ) : null}
+            {hcaptchaUserStatsStatus === 'pending' ? (
+              <Loader sx={{ zIndex: '55' }} />
+            ) : null}
+          </Stack>
+        </Box>
       </Drawer>
     </Box>
   );

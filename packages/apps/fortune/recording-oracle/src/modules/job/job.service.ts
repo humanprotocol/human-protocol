@@ -217,7 +217,7 @@ export class JobService {
           reputationOracleAddress,
           KVStoreKeys.webhookUrl,
         )) as string;
-      } catch (e) {
+      } catch {
         //Ignore the error
       }
 
@@ -318,7 +318,7 @@ export class JobService {
         reputationOracleAddress,
         KVStoreKeys.webhookUrl,
       )) as string;
-    } catch (e) {
+    } catch {
       //Ignore the error
     }
 

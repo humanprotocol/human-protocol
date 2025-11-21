@@ -324,7 +324,7 @@ export class StatsService implements OnModuleInit {
 
               dailyData[dailyCacheKey].totalTransactionAmount = (
                 BigInt(dailyData[dailyCacheKey].totalTransactionAmount) +
-                BigInt(record.totalTransactionAmount)
+                record.totalTransactionAmount
               ).toString();
               dailyData[dailyCacheKey].totalTransactionCount +=
                 record.totalTransactionCount;
@@ -346,7 +346,7 @@ export class StatsService implements OnModuleInit {
 
               monthlyData[month].totalTransactionAmount = (
                 BigInt(monthlyData[month].totalTransactionAmount) +
-                BigInt(record.totalTransactionAmount)
+                record.totalTransactionAmount
               ).toString();
               monthlyData[month].totalTransactionCount +=
                 record.totalTransactionCount;
@@ -392,47 +392,66 @@ export class StatsService implements OnModuleInit {
       return cachedHmtPrice;
     }
 
-    const headers = this.envConfigService.hmtPriceSourceApiKey
-      ? { 'x-cg-demo-api-key': this.envConfigService.hmtPriceSourceApiKey }
-      : {};
+    try {
+      const headers = this.envConfigService.hmtPriceSourceApiKey
+        ? { 'x-cg-demo-api-key': this.envConfigService.hmtPriceSourceApiKey }
+        : {};
 
-    const { data } = await lastValueFrom(
-      this.httpService.get(this.envConfigService.hmtPriceSource, { headers }),
-    );
-
-    let hmtPrice: number;
-
-    if (this.envConfigService.hmtPriceSource.includes('coingecko')) {
-      if (
-        !data ||
-        !data[this.envConfigService.hmtPriceFromKey] ||
-        !data[this.envConfigService.hmtPriceFromKey][
-          this.envConfigService.hmtPriceToKey
-        ]
-      ) {
-        throw new Error('Failed to fetch HMT price from CoinGecko API');
-      }
-      hmtPrice = parseFloat(
-        data[this.envConfigService.hmtPriceFromKey][
-          this.envConfigService.hmtPriceToKey
-        ],
+      const { data } = await lastValueFrom(
+        this.httpService.get(this.envConfigService.hmtPriceSource, { headers }),
       );
-    } else if (this.envConfigService.hmtPriceSource.includes('coinlore')) {
-      if (!data || !data[0] || !data[0].price_usd || data[0].symbol !== 'HMT') {
-        throw new Error('Failed to fetch HMT price from Coinlore API');
+
+      let hmtPrice: number;
+
+      if (this.envConfigService.hmtPriceSource.includes('coingecko')) {
+        if (
+          !data ||
+          !data[this.envConfigService.hmtPriceFromKey] ||
+          !data[this.envConfigService.hmtPriceFromKey][
+            this.envConfigService.hmtPriceToKey
+          ]
+        ) {
+          throw new Error('Failed to fetch HMT price from CoinGecko API');
+        }
+        hmtPrice = parseFloat(
+          data[this.envConfigService.hmtPriceFromKey][
+            this.envConfigService.hmtPriceToKey
+          ],
+        );
+      } else if (this.envConfigService.hmtPriceSource.includes('coinlore')) {
+        if (
+          !data ||
+          !data[0] ||
+          !data[0].price_usd ||
+          data[0].symbol !== 'HMT'
+        ) {
+          throw new Error('Failed to fetch HMT price from Coinlore API');
+        }
+        hmtPrice = parseFloat(data[0].price_usd);
+      } else {
+        throw new Error('Unsupported HMT price source');
       }
-      hmtPrice = parseFloat(data[0].price_usd);
-    } else {
-      throw new Error('Unsupported HMT price source');
+
+      await this.cacheManager.set(
+        this.redisConfigService.hmtPriceCacheKey,
+        hmtPrice,
+        this.redisConfigService.cacheHmtPriceTTL,
+      );
+
+      return hmtPrice;
+    } catch (error) {
+      let formattedError = error;
+      if (error instanceof AxiosError) {
+        formattedError = httpUtils.formatAxiosError(error);
+      }
+
+      this.logger.error('Failed to fetch HMT price', {
+        source: this.envConfigService.hmtPriceSource,
+        error: formattedError,
+      });
+
+      throw error;
     }
-
-    await this.cacheManager.set(
-      this.redisConfigService.hmtPriceCacheKey,
-      hmtPrice,
-      this.redisConfigService.cacheHmtPriceTTL,
-    );
-
-    return hmtPrice;
   }
 
   async hCaptchaStats(from: string, to: string): Promise<HcaptchaDailyStats[]> {

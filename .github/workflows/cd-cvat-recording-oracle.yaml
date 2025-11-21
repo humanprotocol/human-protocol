@@ -3,6 +3,7 @@ name: Deploy CVAT Recording Oracle
 on:
   push:
     branches: [ develop, main, cvat-milestone-2 ]
+    tags-ignore: '*'
     paths:
       - 'packages/examples/cvat/recording-oracle/**'
   pull_request:

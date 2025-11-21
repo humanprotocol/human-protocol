@@ -118,13 +118,6 @@ const config: HardhatUserConfig = {
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
       timeout: 2000000,
     },
-    auroraTestnet: {
-      chainId: 1313161555,
-      url: process.env.ETH_AURORA_TESTNET_URL || '',
-      accounts:
-        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
-      timeout: 2000000,
-    },
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,
@@ -169,16 +162,6 @@ const config: HardhatUserConfig = {
   ],
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY || '',
-    customChains: [
-      {
-        network: 'auroraTestnet',
-        chainId: 1313161555,
-        urls: {
-          apiURL: 'https://explorer.testnet.aurora.dev/api',
-          browserURL: 'http://explorer.testnet.aurora.dev',
-        },
-      },
-    ],
   },
   mocha: {
     timeout: 200000,

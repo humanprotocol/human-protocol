@@ -12,7 +12,6 @@ class ChainId(Enum):
     BSC_TESTNET = 97
     POLYGON = 137
     POLYGON_AMOY = 80002
-    AURORA_TESTNET = 1313161555
     LOCALHOST = 1338
 
 
@@ -38,7 +37,7 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/ethereum/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmQwp4Rr2J4UbPFykb9eXg2t7GPcGRS6WT7QzExZtv32jK"
+            "https://gateway.thegraph.com/api/deployments/id/QmXGmcjEtwwEgB83KE2ECjjYY38kLMqzaq4ip8GWY7A6zz"
         ),
         "hmt_address": "0xd1ba9BAC957322D6e8c07a160a3A8dA11A0d2867",
         "factory_address": "0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a",
@@ -54,7 +53,7 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/sepolia/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmT4xNvZh8ymarrk1zdytjLhCW59iuTavsd4JgHS4LbCVB"
+            "https://gateway.thegraph.com/api/deployments/id/QmT4xNvZh8ymarrk1zdytjLhCW59iuTavsd4JgHS4LbCVB"
         ),
         "hmt_address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
         "factory_address": "0x5987A5558d961ee674efe4A8c8eB7B1b5495D3bf",
@@ -70,7 +69,7 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/bsc/version/latest"
         ),
         "subgraph_url_api_key": (
-            "hthttps://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmT2VoBLjAfc4pQzDmeCGra6weoLuk2jPRgnRz5iSMUw1t"
+            "https://gateway.thegraph.com/api/deployments/id/QmdVdpm9NnFz5B8QyzhW1bW1nNfRWemTiFn2MrhYZGTSQD"
         ),
         "hmt_address": "0x711Fd6ab6d65A98904522d4e3586F492B989c527",
         "factory_address": "0x92FD968AcBd521c232f5fB8c33b342923cC72714",
@@ -86,7 +85,7 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/bsc-testnet/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmZjYMktZe8RAz7W7qL33VZBV6AC57xsLyE1cEfv6NABdZ"
+            "https://gateway.thegraph.com/api/deployments/id/QmZjYMktZe8RAz7W7qL33VZBV6AC57xsLyE1cEfv6NABdZ"
         ),
         "hmt_address": "0xE3D74BBFa45B4bCa69FF28891fBE392f4B4d4e4d",
         "factory_address": "0x2bfA592DBDaF434DDcbb893B1916120d181DAD18",
@@ -104,7 +103,7 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/polygon/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmT72ecfx6Zaje21kLNi17kDJTpPKFYvzQETDyLpQgDrPu"
+            "https://gateway.thegraph.com/api/deployments/id/QmUt9mmfNjtC5ZnQNiWHRbFG3k5zfngMuoTyky9jhXYqG2"
         ),
         "hmt_address": "0xc748B2A084F8eFc47E086ccdDD9b7e67aEb571BF",
         "factory_address": "0xBDBfD2cC708199C5640C6ECdf3B0F4A4C67AdfcB",
@@ -122,28 +121,12 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/amoy/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmWRUFWpWoRRUh7Ec1HUJEwxc84DkP4iFTfLLsoVngJAPa"
+            "https://gateway.thegraph.com/api/deployments/id/QmWRUFWpWoRRUh7Ec1HUJEwxc84DkP4iFTfLLsoVngJAPa"
         ),
         "hmt_address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
         "factory_address": "0xAFf5a986A530ff839d49325A5dF69F96627E8D29",
         "staking_address": "0xffE496683F842a923110415b7278ded3F265f2C5",
         "kvstore_address": "0x724AeFC243EdacCA27EAB86D3ec5a76Af4436Fc7",
-        "old_subgraph_url": "",
-        "old_factory_address": "",
-    },
-    ChainId.AURORA_TESTNET: {
-        "title": "Aurora Testnet",
-        "scan_url": "https://testnet.aurorascan.dev",
-        "subgraph_url": (
-            "https://api.studio.thegraph.com/query/74256/amoy/version/aurora-testnet"
-        ),
-        "subgraph_url_api_key": (
-            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmVHYvjbsgAroR9EMgqqGTQ7aKPRFMVekY6evU6mFPUU7J"
-        ),
-        "hmt_address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
-        "factory_address": "0xbA537fEF2442cD48f60686FE1Bbbe40F964a7940",
-        "staking_address": "0x7457d26a3C70Bd71F7557C773b303c1dB82BBB68",
-        "kvstore_address": "0xD6D347ba6987519B4e42EcED43dF98eFf5465a23",
         "old_subgraph_url": "",
         "old_factory_address": "",
     },
@@ -160,8 +143,6 @@ NETWORKS = {
         "old_factory_address": "",
     },
 }
-
-DEFAULT_AURORA_GAS_PRICE = Web3.to_wei(0.07, "gwei")
 
 
 SUBGRAPH_API_KEY_PLACEHOLDER = "[SUBGRAPH_API_KEY]"

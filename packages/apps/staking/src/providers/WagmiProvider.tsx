@@ -13,12 +13,11 @@ const chainIdToChainMap: Record<number, any> = {
   [wagmiChains.bscTestnet.id]: wagmiChains.bscTestnet,
   [wagmiChains.polygon.id]: wagmiChains.polygon,
   [wagmiChains.polygonAmoy.id]: wagmiChains.polygonAmoy,
-  [wagmiChains.auroraTestnet.id]: wagmiChains.auroraTestnet,
   [LOCALHOST.id]: LOCALHOST,
 };
 
 const supportedChains = SUPPORTED_CHAIN_IDS.map(
-  (id) => chainIdToChainMap[id]
+  (id) => chainIdToChainMap[id],
 ).filter(Boolean);
 
 export const wagmiConfig = createConfig({
@@ -36,7 +35,7 @@ export const wagmiConfig = createConfig({
     supportedChains.map((chain) => [
       chain.id,
       http(chain.rpcUrls.default.http[0]),
-    ])
+    ]),
   ),
 });
 

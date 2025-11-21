@@ -36,7 +36,7 @@ Bases: `object`
 
 A utility class that provides additional KVStore-related functionalities.
 
-#### *static* get(chain_id, address, key)
+#### *static* get(chain_id, address, key, options=None)
 
 Gets the value of a key-value pair in the contract.
 
@@ -44,6 +44,7 @@ Gets the value of a key-value pair in the contract.
   * **chain_id** ([`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)) – Network in which the KVStore data has been deployed
   * **address** (`str`) – The Ethereum address associated with the key-value pair
   * **key** (`str`) – The key of the key-value pair to get
+  * **options** (`Optional`[[`SubgraphOptions`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.SubgraphOptions)]) – Optional config for subgraph requests
 * **Return type:**
   `str`
 * **Returns:**
@@ -61,7 +62,7 @@ Gets the value of a key-value pair in the contract.
   print(result)
   ```
 
-#### *static* get_file_url_and_verify_hash(chain_id, address, key='url')
+#### *static* get_file_url_and_verify_hash(chain_id, address, key='url', options=None)
 
 Gets the URL value of the given entity, and verify its hash.
 
@@ -69,6 +70,7 @@ Gets the URL value of the given entity, and verify its hash.
   * **chain_id** ([`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)) – Network in which the KVStore data has been deployed
   * **address** (`str`) – Address from which to get the URL value.
   * **key** (`Optional`[`str`]) – Configurable URL key. url by default.
+  * **options** (`Optional`[[`SubgraphOptions`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.SubgraphOptions)]) – Optional config for subgraph requests
 * **Return url:**
   The URL value of the given address if exists, and the content is valid
 * **Example:**
@@ -85,13 +87,14 @@ Gets the URL value of the given entity, and verify its hash.
 * **Return type:**
   `str`
 
-#### *static* get_kvstore_data(chain_id, address)
+#### *static* get_kvstore_data(chain_id, address, options=None)
 
 Returns the KVStore data for a given address.
 
 * **Parameters:**
   * **chain_id** ([`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)) – Network in which the KVStore data has been deployed
   * **address** (`str`) – Address of the KVStore
+  * **options** (`Optional`[[`SubgraphOptions`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.SubgraphOptions)]) – Optional config for subgraph requests
 * **Return type:**
   `Optional`[`List`[[`KVStoreData`](#human_protocol_sdk.kvstore.kvstore_utils.KVStoreData)]]
 * **Returns:**

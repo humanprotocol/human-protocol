@@ -20,9 +20,7 @@ export async function ethKvStoreSetBulk({
       signer
     );
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- untyped ethers
     const tx = await ethKVStoreContract.setBulk(keys, values);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access  -- untyped ethers
     await tx.wait();
   } catch (error) {
     throw new JsonRpcError(error);

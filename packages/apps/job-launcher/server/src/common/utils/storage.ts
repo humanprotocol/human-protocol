@@ -1,5 +1,5 @@
 import { HttpStatus } from '@nestjs/common';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { parseString } from 'xml2js';
 import { StorageDataDto } from '../../modules/job/job.dto';
 import { ErrorBucket } from '../constants/errors';
@@ -10,6 +10,19 @@ import {
   GCS_HTTP_REGEX_PATH_BASED,
   GCS_HTTP_REGEX_SUBDOMAIN,
 } from './gcstorage';
+import { formatAxiosError } from './http';
+
+function parseXml(xml: string): Promise<any> {
+  return new Promise((resolve, reject) => {
+    parseString(xml, (err: any, result: any) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(result);
+    });
+  });
+}
 
 export function generateBucketUrl(
   storageData: StorageDataDto,
@@ -74,73 +87,75 @@ function isRegion(value: string): value is AWSRegions {
 }
 
 export async function listObjectsInBucket(url: URL): Promise<string[]> {
-  return new Promise(async (resolve, reject) => {
-    try {
-      let objects: string[] = [];
-      let nextContinuationToken: string | undefined;
-      const baseUrl = `${url.protocol}//${url.host}`;
-      do {
-        let requestUrl = `${baseUrl}`;
-        if (['localhost', 'minio'].includes(url.hostname)) {
-          const pathname = url.pathname.replace(/^\//, '');
-          const [bucketName, ...folderParts] = pathname.split('/');
+  try {
+    let objects: string[] = [];
+    let nextContinuationToken: string | undefined;
+    const baseUrl = `${url.protocol}//${url.host}`;
 
-          requestUrl += `/${bucketName}?list-type=2`;
+    do {
+      let requestUrl = `${baseUrl}`;
+      if (['localhost', 'minio'].includes(url.hostname)) {
+        const pathname = url.pathname.replace(/^\//, '');
+        const [bucketName, ...folderParts] = pathname.split('/');
 
-          const folderPrefix = folderParts.join('/');
-          if (folderPrefix) {
-            requestUrl += `&prefix=${folderPrefix}`;
-          }
-        } else if (GCS_HTTP_REGEX_SUBDOMAIN.test(url.href)) {
-          requestUrl += `?list-type=2&prefix=${url.pathname.replace(/^\//, '')}`;
-        } else if (GCS_HTTP_REGEX_PATH_BASED.test(url.href)) {
-          const pathname = url.pathname.replace(/^\//, '');
-          const [bucketName, ...folderParts] = pathname.split('/');
-          requestUrl += `/${bucketName}?list-type=2`;
+        requestUrl += `/${bucketName}?list-type=2`;
 
-          const folderPrefix = folderParts.join('/');
-          if (folderPrefix) {
-            requestUrl += `&prefix=${folderPrefix}`;
-          }
-        } else {
-          requestUrl += `?list-type=2`;
-
-          if (url.pathname) {
-            requestUrl += `&prefix=${url.pathname.replace(/^\//, '')}`;
-          }
+        const folderPrefix = folderParts.join('/');
+        if (folderPrefix) {
+          requestUrl += `&prefix=${folderPrefix}`;
         }
+      } else if (GCS_HTTP_REGEX_SUBDOMAIN.test(url.href)) {
+        requestUrl += `?list-type=2&prefix=${url.pathname.replace(/^\//, '')}`;
+      } else if (GCS_HTTP_REGEX_PATH_BASED.test(url.href)) {
+        const pathname = url.pathname.replace(/^\//, '');
+        const [bucketName, ...folderParts] = pathname.split('/');
+        requestUrl += `/${bucketName}?list-type=2`;
 
-        if (nextContinuationToken) {
-          requestUrl += `&continuation-token=${encodeURIComponent(
-            nextContinuationToken,
-          )}`;
+        const folderPrefix = folderParts.join('/');
+        if (folderPrefix) {
+          requestUrl += `&prefix=${folderPrefix}`;
         }
+      } else {
+        requestUrl += `?list-type=2`;
 
-        const response = await axios.get(requestUrl);
-
-        if (response.status === HttpStatus.OK && response.data) {
-          parseString(response.data, (err: any, result: any) => {
-            if (err) {
-              reject(err);
-            }
-            nextContinuationToken = result.ListBucketResult
-              .NextContinuationToken
-              ? result.ListBucketResult.NextContinuationToken[0]
-              : undefined;
-
-            const objectKeys = result.ListBucketResult.Contents?.map(
-              (item: any) => item.Key,
-            );
-
-            objects = objects.concat(objectKeys?.flat());
-          });
-        } else {
-          reject(ErrorBucket.FailedToFetchBucketContents);
+        if (url.pathname) {
+          requestUrl += `&prefix=${url.pathname.replace(/^\//, '')}`;
         }
-      } while (nextContinuationToken);
-      resolve(objects);
-    } catch (err) {
-      reject(err);
+      }
+
+      if (nextContinuationToken) {
+        requestUrl += `&continuation-token=${encodeURIComponent(
+          nextContinuationToken,
+        )}`;
+      }
+
+      const response = await axios.get(requestUrl);
+
+      if (response.status !== HttpStatus.OK || !response.data) {
+        throw ErrorBucket.FailedToFetchBucketContents;
+      }
+
+      const parsed = await parseXml(response.data);
+
+      nextContinuationToken = parsed.ListBucketResult?.NextContinuationToken
+        ? parsed.ListBucketResult.NextContinuationToken[0]
+        : undefined;
+
+      const objectKeys = parsed.ListBucketResult?.Contents?.map(
+        (item: any) => item.Key,
+      );
+
+      if (objectKeys) {
+        objects = objects.concat(objectKeys.flat());
+      }
+    } while (nextContinuationToken);
+
+    return objects;
+  } catch (err) {
+    let formatted = err;
+    if (err instanceof AxiosError) {
+      formatted = formatAxiosError(err);
     }
-  });
+    throw formatted;
+  }
 }

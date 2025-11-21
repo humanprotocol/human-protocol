@@ -2,6 +2,7 @@ name: Reputation Oracle Check
 
 on:
   push:
+    tags-ignore: '*'
     paths:
       - "packages/core/**"
       - "packages/sdk/typescript/human-protocol-sdk/**"

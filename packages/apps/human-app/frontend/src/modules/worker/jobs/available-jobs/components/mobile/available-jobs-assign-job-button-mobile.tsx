@@ -34,9 +34,11 @@ export function AvailableJobsAssignJobButtonMobile({
       fullWidth
       loading={isPending}
       onClick={() => {
-        isThirstyfi
-          ? openModal({ ...assignJobPayload })
-          : assignJobMutation(assignJobPayload);
+        if (isThirstyfi) {
+          openModal({ ...assignJobPayload });
+        } else {
+          assignJobMutation(assignJobPayload);
+        }
       }}
       size="small"
       sx={{

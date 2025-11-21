@@ -62,7 +62,9 @@ describe('StatisticsClient', () => {
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
         'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
-        GET_ESCROW_STATISTICS_QUERY
+        GET_ESCROW_STATISTICS_QUERY,
+        undefined,
+        undefined
       );
       expect(gqlFetchSpy).toHaveBeenCalledWith(
         'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
@@ -73,7 +75,8 @@ describe('StatisticsClient', () => {
           orderDirection: OrderDirection.ASC,
           first: 10,
           skip: 0,
-        }
+        },
+        undefined
       );
 
       expect(result).toEqual({
@@ -135,7 +138,8 @@ describe('StatisticsClient', () => {
           orderDirection: OrderDirection.ASC,
           first: 10,
           skip: 0,
-        }
+        },
+        undefined
       );
 
       expect(result).toEqual({
@@ -194,7 +198,8 @@ describe('StatisticsClient', () => {
           orderDirection: OrderDirection.ASC,
           first: 10,
           skip: 0,
-        }
+        },
+        undefined
       );
 
       expect(result).toEqual({
@@ -281,7 +286,8 @@ describe('StatisticsClient', () => {
           address: undefined,
           orderBy: 'balance',
           orderDirection: undefined,
-        }
+        },
+        undefined
       );
 
       expect(result).toEqual([
@@ -316,7 +322,8 @@ describe('StatisticsClient', () => {
         {
           address: '0x123',
           orderBy: 'balance',
-        }
+        },
+        undefined
       );
 
       expect(result).toEqual([
@@ -352,7 +359,8 @@ describe('StatisticsClient', () => {
         {
           orderBy: 'balance',
           orderDirection: 'asc',
-        }
+        },
+        undefined
       );
 
       expect(result).toEqual([
@@ -391,7 +399,8 @@ describe('StatisticsClient', () => {
         {
           orderBy: 'balance',
           orderDirection: 'desc',
-        }
+        },
+        undefined
       );
 
       expect(result).toEqual([
@@ -448,7 +457,8 @@ describe('StatisticsClient', () => {
           orderDirection: OrderDirection.ASC,
           first: 10,
           skip: 0,
-        }
+        },
+        undefined
       );
 
       expect(result).toEqual([

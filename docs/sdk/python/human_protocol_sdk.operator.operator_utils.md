@@ -73,13 +73,14 @@ Bases: `object`
 
 A utility class that provides additional operator-related functionalities.
 
-#### *static* get_operator(chain_id, operator_address)
+#### *static* get_operator(chain_id, operator_address, options=None)
 
 Gets the operator details.
 
 * **Parameters:**
   * **chain_id** ([`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)) – Network in which the operator exists
   * **operator_address** (`str`) – Address of the operator
+  * **options** (`Optional`[[`SubgraphOptions`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.SubgraphOptions)]) – Optional config for subgraph requests
 * **Return type:**
   `Optional`[[`OperatorData`](#human_protocol_sdk.operator.operator_utils.OperatorData)]
 * **Returns:**
@@ -96,12 +97,13 @@ Gets the operator details.
   print(operator_data)
   ```
 
-#### *static* get_operators(filter)
+#### *static* get_operators(filter, options=None)
 
 Get operators data of the protocol.
 
 * **Parameters:**
-  **filter** ([`OperatorFilter`](#human_protocol_sdk.operator.operator_utils.OperatorFilter)) – Operator filter
+  * **filter** ([`OperatorFilter`](#human_protocol_sdk.operator.operator_utils.OperatorFilter)) – Operator filter
+  * **options** (`Optional`[[`SubgraphOptions`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.SubgraphOptions)]) – Optional config for subgraph requests
 * **Return type:**
   `List`[[`OperatorData`](#human_protocol_sdk.operator.operator_utils.OperatorData)]
 * **Returns:**
@@ -118,7 +120,7 @@ Get operators data of the protocol.
   )
   ```
 
-#### *static* get_reputation_network_operators(chain_id, address, role=None)
+#### *static* get_reputation_network_operators(chain_id, address, role=None, options=None)
 
 Get the reputation network operators of the specified address.
 
@@ -126,6 +128,7 @@ Get the reputation network operators of the specified address.
   * **chain_id** ([`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)) – Network in which the reputation network exists
   * **address** (`str`) – Address of the reputation oracle
   * **role** (`Optional`[`str`]) – (Optional) Role of the operator
+  * **options** (`Optional`[[`SubgraphOptions`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.SubgraphOptions)]) – Optional config for subgraph requests
 * **Return type:**
   `List`[[`OperatorData`](#human_protocol_sdk.operator.operator_utils.OperatorData)]
 * **Returns:**
@@ -142,13 +145,14 @@ Get the reputation network operators of the specified address.
   print(operators)
   ```
 
-#### *static* get_rewards_info(chain_id, slasher)
+#### *static* get_rewards_info(chain_id, slasher, options=None)
 
 Get rewards of the given slasher.
 
 * **Parameters:**
   * **chain_id** ([`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)) – Network in which the slasher exists
   * **slasher** (`str`) – Address of the slasher
+  * **options** (`Optional`[[`SubgraphOptions`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.SubgraphOptions)]) – Optional config for subgraph requests
 * **Return type:**
   `List`[[`RewardData`](#human_protocol_sdk.operator.operator_utils.RewardData)]
 * **Returns:**

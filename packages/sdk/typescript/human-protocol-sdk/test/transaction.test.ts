@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 vi.mock('graphql-request', () => {
   return {
     default: vi.fn(),
@@ -64,7 +61,8 @@ describe('TransactionUtils', () => {
         GET_TRANSACTION_QUERY,
         {
           hash: txHash.toLowerCase(),
-        }
+        },
+        undefined
       );
       const expected: ITransaction = {
         block: 12345n,
@@ -164,7 +162,8 @@ describe('TransactionUtils', () => {
           orderDirection: OrderDirection.DESC,
           first: 10,
           skip: 0,
-        }
+        },
+        undefined
       );
       const expected: ITransaction = {
         block: 12345n,
@@ -223,7 +222,8 @@ describe('TransactionUtils', () => {
           orderDirection: OrderDirection.DESC,
           first: 10,
           skip: 0,
-        }
+        },
+        undefined
       );
       const expected: ITransaction = {
         block: 12345n,
@@ -280,7 +280,8 @@ describe('TransactionUtils', () => {
           orderDirection: OrderDirection.DESC,
           first: 10,
           skip: 0,
-        }
+        },
+        undefined
       );
       const expected: ITransaction = {
         block: 12345n,
@@ -337,7 +338,8 @@ describe('TransactionUtils', () => {
           orderDirection: OrderDirection.DESC,
           first: 10,
           skip: 0,
-        }
+        },
+        undefined
       );
       const expected: ITransaction = {
         block: 12345n,
@@ -394,7 +396,8 @@ describe('TransactionUtils', () => {
           orderDirection: OrderDirection.DESC,
           first: 10,
           skip: 0,
-        }
+        },
+        undefined
       );
       const expected: ITransaction = {
         block: 12345n,
@@ -451,7 +454,8 @@ describe('TransactionUtils', () => {
           orderDirection: OrderDirection.DESC,
           first: 10,
           skip: 0,
-        }
+        },
+        undefined
       );
       const expected: ITransaction = {
         block: 12345n,
@@ -536,7 +540,8 @@ describe('TransactionUtils', () => {
           orderDirection: OrderDirection.DESC,
           first: 10,
           skip: 10,
-        }
+        },
+        undefined
       );
       const expected: ITransaction = {
         block: 12345n,
@@ -592,7 +597,8 @@ describe('TransactionUtils', () => {
           orderDirection: OrderDirection.DESC,
           first: 1000,
           skip: 10,
-        }
+        },
+        undefined
       );
       const expected: ITransaction = {
         block: 12345n,
@@ -651,7 +657,8 @@ describe('TransactionUtils', () => {
           orderDirection: OrderDirection.DESC,
           first: 5,
           skip: 5,
-        }
+        },
+        undefined
       );
       const expected: ITransaction = {
         block: 12345n,

@@ -1,7 +1,13 @@
 {
   "public": "dist",
-  "symlinks": true,
+  "symlinks": false,
   "trailingSlash": false,
+  "rewrites": [
+    {
+      "source": "**",
+      "destination": "/index.html"
+    }
+  ],
   "headers": [
     {
       "source": "**/*.html",
@@ -12,7 +18,7 @@
         },
         {
           "key": "Content-Security-Policy",
-          "value": "frame-ancestors: 'none';"
+          "value": "frame-ancestors 'none';"
         },
         {
           "key": "Strict-Transport-Security",

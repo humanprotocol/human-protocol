@@ -1,4 +1,3 @@
-/* eslint-disable camelcase -- ...*/
 import { useState } from 'react';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import { Button, MenuList, ListItemButton, Popover } from '@mui/material';
@@ -6,6 +5,7 @@ import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useModal } from '@/shared/contexts/modal-context';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
+import { TopNotificationType, useNotification } from '@/shared/hooks';
 import { useResignJobMutation } from '../my-jobs/hooks';
 import { type MyJob } from '../schemas';
 import { ReportAbuseModal } from './report-abuse-modal';
@@ -18,19 +18,28 @@ interface MoreButtonProps {
 export function MoreButton({ job, isDisabled }: MoreButtonProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const { address: oracleAddress } = useParams<{ address: string }>();
-  const { mutate: rejectTaskMutation } = useResignJobMutation();
+  const { mutateAsync: rejectTaskMutation } = useResignJobMutation();
   const { openModal, closeModal } = useModal();
   const isMobile = useIsMobile();
   const { t } = useTranslation();
+  const { showNotification } = useNotification();
 
   const isOpen = Boolean(anchorEl);
 
-  const handleCancelTask = () => {
+  const handleCancelTask = async () => {
     setAnchorEl(null);
-    rejectTaskMutation({
-      oracle_address: oracleAddress ?? '',
-      assignment_id: job.assignment_id,
-    });
+    try {
+      await rejectTaskMutation({
+        oracle_address: oracleAddress ?? '',
+        assignment_id: job.assignment_id,
+      });
+    } catch {
+      showNotification({
+        message: 'Something went wrong',
+        type: TopNotificationType.WARNING,
+        durationMs: 5000,
+      });
+    }
   };
 
   const handleOpenReportAbuseModal = () => {
@@ -61,7 +70,9 @@ export function MoreButton({ job, isDisabled }: MoreButtonProps) {
           color: '#858ec6',
         }}
         onClick={(e) => {
-          !isDisabled && setAnchorEl(e.currentTarget);
+          if (!isDisabled) {
+            setAnchorEl(e.currentTarget);
+          }
         }}
       >
         <MoreHorizIcon />
@@ -90,7 +101,7 @@ export function MoreButton({ job, isDisabled }: MoreButtonProps) {
         }}
       >
         <MenuList>
-          <ListItemButton onClick={handleCancelTask}>
+          <ListItemButton onClick={() => void handleCancelTask()}>
             {t('worker.reportAbuse.cancel')}
           </ListItemButton>
           <ListItemButton onClick={handleOpenReportAbuseModal}>

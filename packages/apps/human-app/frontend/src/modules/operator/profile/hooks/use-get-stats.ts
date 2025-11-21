@@ -1,4 +1,3 @@
-/* eslint-disable camelcase -- ... */
 import { useQuery } from '@tanstack/react-query';
 import { useGetKeys } from '@/modules/operator/hooks/use-get-keys';
 import * as operatorProfileService from '../services/profile.service';

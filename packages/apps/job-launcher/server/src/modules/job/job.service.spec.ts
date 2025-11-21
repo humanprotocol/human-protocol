@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 jest.mock('@human-protocol/sdk');
 
 import { faker } from '@faker-js/faker';

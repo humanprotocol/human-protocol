@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Injectable } from '@nestjs/common';
 import { EventType } from '../../common/enums/webhook';
 import { ValidationError } from '../../common/errors';
