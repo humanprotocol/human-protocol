@@ -494,11 +494,6 @@ describe('Web3Service', () => {
         .mockReturnValue(0);
     });
 
-    afterEach(() => {
-      mockRateService.getRate.mockReset();
-      approveAmountUsdSpy.mockReturnValue(0);
-    });
-
     afterAll(() => {
       jest.restoreAllMocks();
     });
