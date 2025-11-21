@@ -112,6 +112,6 @@ export class Web3ConfigService {
   }
 
   get approveAmountUsd(): number {
-    return this.configService.get<number>('APPROVE_AMOUNT_USD', 100);
+    return this.configService.get<number>('APPROVE_AMOUNT_USD', 0);
   }
 }
