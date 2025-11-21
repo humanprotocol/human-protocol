@@ -971,7 +971,7 @@ export class JobService {
     tokenAddress: string,
   ): Promise<bigint> {
     const signer = this.web3Service.getSigner(chainId);
-    const provider = signer.provider;
+    const provider = signer.provider!;
     const contract: Escrow = Escrow__factory.connect(escrowAddress!, provider);
     const fromBlock = 79278120; //This issue started at this block
     const toBlock = 'latest';
@@ -983,7 +983,6 @@ export class JobService {
     );
 
     for (const log of cancelledLogs) {
-      if (!provider) continue;
       const erc20Interface = new ethers.Interface([
         'event Transfer(address indexed from, address indexed to, uint256 value)',
       ]);
