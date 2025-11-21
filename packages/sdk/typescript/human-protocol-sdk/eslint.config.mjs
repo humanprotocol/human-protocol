@@ -2,7 +2,6 @@ import eslint from '@eslint/js';
 import globals from 'globals';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import importPlugin from 'eslint-plugin-import';
-// @ts-expect-error - package does not provide type definitions
 import jestPlugin from 'eslint-plugin-jest';
 import tseslint from 'typescript-eslint';
 
@@ -36,7 +35,7 @@ export default tseslint.config(
       '@/quotes': [
         'error',
         'single',
-        { 'avoidEscape': true, 'allowTemplateLiterals': true }
+        { avoidEscape: true, allowTemplateLiterals: true },
       ],
     },
   },

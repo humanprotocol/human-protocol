@@ -1,7 +1,6 @@
 import eslint from '@eslint/js';
 import globals from 'globals';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
-import jestPlugin from 'eslint-plugin-jest';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
@@ -24,16 +23,13 @@ export default tseslint.config(
         projectService: true,
       },
     },
-    plugins: {
-      jest: jestPlugin,
-    },
     rules: {
       'no-console': 'warn',
       'prettier/prettier': 'error',
       '@/quotes': [
         'error',
         'single',
-        { 'avoidEscape': true, 'allowTemplateLiterals': true }
+        { avoidEscape: true, allowTemplateLiterals: true },
       ],
     },
   },
@@ -43,9 +39,6 @@ export default tseslint.config(
       globals: {
         ...globals.jest,
       },
-    },
-    plugins: {
-      jest: jestPlugin,
     },
   }
 );
