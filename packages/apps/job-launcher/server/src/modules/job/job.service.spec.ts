@@ -1804,16 +1804,78 @@ describe('JobService', () => {
       expect(mockJobRepository.updateOne).toHaveBeenCalledWith(jobEntity);
     });
 
-    it('should throw ConflictError if no refund is found', async () => {
+    it('should not create a refund and set status to CANCELED when no refund is found', async () => {
       const jobEntity = createJobEntity();
       mockPaymentService.getJobPayments.mockResolvedValueOnce([]);
       mockedEscrowUtils.getCancellationRefund.mockResolvedValueOnce(
         null as any,
       );
 
-      await expect(jobService.cancelJob(jobEntity)).rejects.toThrow(
-        new ConflictError(ErrorJob.NoRefundFound),
+      jest
+        .spyOn(jobService as any, 'getRefundAmount')
+        .mockResolvedValueOnce(0n);
+
+      mockJobRepository.updateOne.mockResolvedValueOnce(jobEntity);
+
+      await jobService.cancelJob(jobEntity);
+
+      expect(mockPaymentService.getJobPayments).toHaveBeenCalledWith(
+        jobEntity.id,
+        PaymentType.SLASH,
       );
+      expect(EscrowUtils.getCancellationRefund).toHaveBeenCalledWith(
+        jobEntity.chainId,
+        jobEntity.escrowAddress,
+      );
+      expect(mockPaymentService.createRefundPayment).not.toHaveBeenCalled();
+      expect(jobEntity.status).toBe(JobStatus.CANCELED);
+      expect(mockJobRepository.updateOne).toHaveBeenCalledWith(jobEntity);
+    });
+
+    it('should create a refund when on-chain refund amount is greater than 0', async () => {
+      const jobEntity = createJobEntity();
+      const tokenDecimals = (TOKEN_ADDRESSES[jobEntity.chainId as ChainId] ??
+        {})[jobEntity.token as EscrowFundToken]?.decimals;
+
+      mockPaymentService.getJobPayments.mockResolvedValueOnce([]);
+      mockedEscrowUtils.getCancellationRefund.mockResolvedValueOnce(
+        null as any,
+      );
+
+      const refundAmount = faker.number.float({
+        min: 1,
+        max: 10,
+        fractionDigits: tokenDecimals,
+      });
+
+      // Mock on-chain refund lookup to return a positive amount
+      jest
+        .spyOn(jobService as any, 'getRefundAmount')
+        .mockResolvedValueOnce(
+          ethers.parseUnits(refundAmount.toString(), tokenDecimals),
+        );
+
+      mockPaymentService.createRefundPayment.mockResolvedValueOnce(undefined);
+      mockJobRepository.updateOne.mockResolvedValueOnce(jobEntity);
+
+      await jobService.cancelJob(jobEntity);
+
+      expect(mockPaymentService.getJobPayments).toHaveBeenCalledWith(
+        jobEntity.id,
+        PaymentType.SLASH,
+      );
+      expect(EscrowUtils.getCancellationRefund).toHaveBeenCalledWith(
+        jobEntity.chainId,
+        jobEntity.escrowAddress,
+      );
+      expect(mockPaymentService.createRefundPayment).toHaveBeenCalledWith({
+        refundAmount: refundAmount,
+        refundCurrency: jobEntity.token,
+        userId: jobEntity.userId,
+        jobId: jobEntity.id,
+      });
+      expect(jobEntity.status).toBe(JobStatus.CANCELED);
+      expect(mockJobRepository.updateOne).toHaveBeenCalledWith(jobEntity);
     });
 
     it('should throw ConflictError if refund.amount is empty', async () => {
