@@ -32,7 +32,7 @@ jobs:
       MOONSCAN_API_KEY: ${{ secrets.MOONSCAN_API_KEY }}
       AVALANCHE_API_KEY: ${{ secrets.AVALANCHE_API_KEY }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           token: ${{ secrets.GH_TOKEN_CD_CONTRACTS }}
       - uses: actions/setup-node@v4
@@ -126,7 +126,7 @@ jobs:
           git stash --include-untracked
       - name: Checkout develop
         if: always() && steps.check_changes.outputs.changes == 'true'
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: develop
           token: ${{ secrets.GH_TOKEN_CD_CONTRACTS }}
