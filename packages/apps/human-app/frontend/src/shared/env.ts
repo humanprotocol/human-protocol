@@ -18,8 +18,6 @@ const envSchema = z.object({
     .string()
     .transform((value) => Number(value))
     .pipe(z.number()),
-  VITE_H_CAPTCHA_EXCHANGE_URL: z.string(),
-  VITE_H_CAPTCHA_LABELING_BASE_URL: z.string(),
   VITE_WALLET_CONNECT_PROJECT_ID: z.string(),
   VITE_DAPP_META_NAME: z.string(),
   VITE_DAPP_META_DESCRIPTION: z.string(),

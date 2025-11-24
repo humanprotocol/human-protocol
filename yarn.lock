@@ -407,7 +407,7 @@ __metadata:
     "@faker-js/faker": "npm:^9.7.0"
     "@fontsource/inter": "npm:^5.0.17"
     "@fontsource/roboto": "npm:^5.2.6"
-    "@hcaptcha/react-hcaptcha": "npm:^0.3.6"
+    "@hcaptcha/react-hcaptcha": "npm:^1.14.0"
     "@hookform/resolvers": "npm:^5.1.0"
     "@human-protocol/sdk": "workspace:*"
     "@mui/icons-material": "npm:^7.0.1"
@@ -535,7 +535,7 @@ __metadata:
   dependencies:
     "@emotion/react": "npm:^11.10.5"
     "@emotion/styled": "npm:^11.10.5"
-    "@hcaptcha/react-hcaptcha": "npm:^1.10.1"
+    "@hcaptcha/react-hcaptcha": "npm:^1.14.0"
     "@human-protocol/sdk": "workspace:*"
     "@mui/icons-material": "npm:^7.0.1"
     "@mui/lab": "npm:^5.0.0-alpha.141"
@@ -4851,17 +4851,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@hcaptcha/react-hcaptcha@npm:^0.3.6":
-  version: 0.3.10
-  resolution: "@hcaptcha/react-hcaptcha@npm:0.3.10"
-  peerDependencies:
-    react: ">= 16.3.0"
-    react-dom: ">= 16.3.0"
-  checksum: 10c0/cb9af880be869baffc0088833b24b8ad2338db997f5a19d4c64f4fd9173d7d339639c2811802d6578d8b2f711a25417ef7f3923e23641cbc31e803d7ac732370
-  languageName: node
-  linkType: hard
-
-"@hcaptcha/react-hcaptcha@npm:^1.10.1":
+"@hcaptcha/react-hcaptcha@npm:^1.14.0":
   version: 1.14.0
   resolution: "@hcaptcha/react-hcaptcha@npm:1.14.0"
   dependencies:
