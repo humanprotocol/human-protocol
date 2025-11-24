@@ -273,11 +273,11 @@ contract Escrow is IEscrow, ReentrancyGuard {
         uint256 _remaining = remainingFunds;
 
         if (_remaining > 0) {
+            IERC20 tokenContract = IERC20(token);
+            tokenContract.safeTransfer(launcher, _remaining);
             if (_status == EscrowStatuses.ToCancel) {
                 emit CancellationRefund(_remaining);
             }
-            IERC20 tokenContract = IERC20(token);
-            tokenContract.safeTransfer(launcher, _remaining);
             remainingFunds = 0;
             reservedFunds = 0;
         }
