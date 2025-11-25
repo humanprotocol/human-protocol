@@ -1,9 +1,9 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
   ChainId,
   EscrowClient,
   EscrowStatus,
   EscrowUtils,
+  ICancellationRefund,
   KVStoreKeys,
   KVStoreUtils,
   NETWORKS,
@@ -68,7 +68,6 @@ import { StorageService } from '../storage/storage.service';
 import { UserEntity } from '../user/user.entity';
 import { Web3Service } from '../web3/web3.service';
 import { WebhookDataDto } from '../webhook/webhook.dto';
-import { WebhookEntity } from '../webhook/webhook.entity';
 import { WebhookRepository } from '../webhook/webhook.repository';
 import { WhitelistService } from '../whitelist/whitelist.service';
 import {
@@ -81,6 +80,7 @@ import {
 } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
+import { Escrow, Escrow__factory } from '@human-protocol/core/typechain-types';
 
 @Injectable()
 export class JobService {
@@ -145,7 +145,10 @@ export class JobService {
     }
 
     const feePercentage = Number(
-      await this.getOracleFee(this.web3Service.getOperatorAddress(), chainId),
+      await this.getOracleFee(
+        await this.web3Service.getOperatorAddress(),
+        chainId,
+      ),
     );
 
     const paymentCurrencyRate = await this.rateService.getRate(
@@ -311,31 +314,14 @@ export class JobService {
 
     const escrowClient = await EscrowClient.build(signer);
 
-    const escrowAddress = await escrowClient.createEscrow(
-      (TOKEN_ADDRESSES[jobEntity.chainId as ChainId] ?? {})[
-        jobEntity.token as EscrowFundToken
-      ]!.address,
-      jobEntity.userId.toString(),
-      {
-        gasPrice: await this.web3Service.calculateGasPrice(jobEntity.chainId),
-      },
+    const token = (TOKEN_ADDRESSES[jobEntity.chainId as ChainId] ?? {})[
+      jobEntity.token as EscrowFundToken
+    ]!;
+
+    const weiAmount = ethers.parseUnits(
+      jobEntity.fundAmount.toString(),
+      token.decimals,
     );
-
-    if (!escrowAddress) {
-      throw new ConflictError(ErrorEscrow.NotCreated);
-    }
-
-    jobEntity.status = JobStatus.CREATED;
-    jobEntity.escrowAddress = escrowAddress;
-    await this.jobRepository.updateOne(jobEntity);
-
-    return jobEntity;
-  }
-
-  public async setupEscrow(jobEntity: JobEntity): Promise<JobEntity> {
-    const signer = this.web3Service.getSigner(jobEntity.chainId);
-
-    const escrowClient = await EscrowClient.build(signer);
 
     const escrowConfig = {
       recordingOracle: jobEntity.recordingOracle,
@@ -357,47 +343,32 @@ export class JobService {
       manifestHash: jobEntity.manifestHash,
     };
 
-    await escrowClient.setup(jobEntity.escrowAddress!, escrowConfig, {
-      gasPrice: await this.web3Service.calculateGasPrice(jobEntity.chainId),
-    });
+    await this.web3Service.ensureEscrowAllowance(
+      jobEntity.chainId,
+      token,
+      weiAmount,
+      NETWORKS[jobEntity.chainId as ChainId]!.factoryAddress,
+    );
+
+    const escrowAddress = await escrowClient.createFundAndSetupEscrow(
+      token.address,
+      weiAmount,
+      jobEntity.userId.toString(),
+      escrowConfig,
+      {
+        gasPrice: await this.web3Service.calculateGasPrice(jobEntity.chainId),
+      },
+    );
+
+    if (!escrowAddress) {
+      throw new ConflictError(ErrorEscrow.NotCreated);
+    }
 
     jobEntity.status = JobStatus.LAUNCHED;
+    jobEntity.escrowAddress = escrowAddress;
     await this.jobRepository.updateOne(jobEntity);
 
-    const oracleType = this.getOracleType(jobEntity.requestType);
-    const webhookEntity = new WebhookEntity();
-    Object.assign(webhookEntity, {
-      escrowAddress: jobEntity.escrowAddress,
-      chainId: jobEntity.chainId,
-      eventType: EventType.ESCROW_CREATED,
-      oracleType: oracleType,
-      hasSignature: oracleType !== OracleType.HCAPTCHA ? true : false,
-      oracleAddress: jobEntity.exchangeOracle,
-    });
-    await this.webhookRepository.createUnique(webhookEntity);
-
     return jobEntity;
-  }
-
-  public async fundEscrow(jobEntity: JobEntity): Promise<JobEntity> {
-    const signer = this.web3Service.getSigner(jobEntity.chainId);
-
-    const escrowClient = await EscrowClient.build(signer);
-
-    const token = (TOKEN_ADDRESSES[jobEntity.chainId as ChainId] ?? {})[
-      jobEntity.token as EscrowFundToken
-    ]!;
-
-    const weiAmount = ethers.parseUnits(
-      jobEntity.fundAmount.toString(),
-      token.decimals,
-    );
-    await escrowClient.fund(jobEntity.escrowAddress!, weiAmount, {
-      gasPrice: await this.web3Service.calculateGasPrice(jobEntity.chainId),
-    });
-
-    jobEntity.status = JobStatus.FUNDED;
-    return this.jobRepository.updateOne(jobEntity);
   }
 
   public async requestToCancelJobById(
@@ -450,30 +421,13 @@ export class JobService {
       throw new ConflictError(ErrorJob.InvalidStatusCancellation);
     }
 
-    let status = JobStatus.TO_CANCEL;
-    switch (jobEntity.status) {
-      case JobStatus.PAID:
-        if (await this.isCronJobRunning(CronJobType.CreateEscrow)) {
-          status = JobStatus.FAILED;
-        }
-        break;
-      case JobStatus.CREATED:
-        if (await this.isCronJobRunning(CronJobType.FundEscrow)) {
-          status = JobStatus.FAILED;
-        }
-        break;
-      case JobStatus.FUNDED:
-        if (await this.isCronJobRunning(CronJobType.SetupEscrow)) {
-          status = JobStatus.FAILED;
-        }
-        break;
+    if (jobEntity.status === JobStatus.PAID) {
+      if (await this.isCronJobRunning(CronJobType.CreateEscrow)) {
+        throw new ConflictError(ErrorJob.CancelWhileProcessing);
+      }
     }
 
-    if (status === JobStatus.FAILED) {
-      throw new ConflictError(ErrorJob.CancelWhileProcessing);
-    }
-
-    jobEntity.status = status;
+    jobEntity.status = JobStatus.TO_CANCEL;
 
     jobEntity.retriesCount = 0;
     await this.jobRepository.updateOne(jobEntity);
@@ -744,7 +698,7 @@ export class JobService {
     const baseManifestDetails = {
       chainId,
       tokenAddress: escrow ? escrow.token : ethers.ZeroAddress,
-      requesterAddress: signer.address,
+      requesterAddress: await signer.getAddress(),
       fundAmount: escrow
         ? Number(
             ethers.formatUnits(escrow.totalFundedAmount, fundTokenDecimals),
@@ -857,7 +811,9 @@ export class JobService {
         oracleAddress,
         KVStoreKeys.fee,
       );
-    } catch {}
+    } catch {
+      // Ignore error
+    }
 
     return BigInt(feeValue ? feeValue : 1);
   }
@@ -922,24 +878,95 @@ export class JobService {
       PaymentType.SLASH,
     );
     if (!slash?.length) {
-      const refund = await EscrowUtils.getCancellationRefund(
-        jobEntity.chainId,
-        jobEntity.escrowAddress!,
-      );
-
-      if (!refund || !refund.amount) {
-        throw new ConflictError(ErrorJob.NoRefundFound);
+      let refund: ICancellationRefund | null = null;
+      try {
+        refund = await EscrowUtils.getCancellationRefund(
+          jobEntity.chainId,
+          jobEntity.escrowAddress!,
+        );
+      } catch {
+        // Ignore error
       }
 
-      await this.paymentService.createRefundPayment({
-        refundAmount: Number(ethers.formatUnits(refund.amount, token.decimals)),
-        refundCurrency: jobEntity.token,
-        userId: jobEntity.userId,
-        jobId: jobEntity.id,
-      });
+      let amount = 0n;
+
+      if (!refund) {
+        //Temp fix
+        amount = await this.getRefundAmount(
+          jobEntity.chainId,
+          jobEntity.escrowAddress!,
+          token.address,
+        );
+      } else {
+        if (!refund.amount) {
+          throw new ConflictError(ErrorJob.NoRefundFound);
+        }
+        amount = refund.amount;
+      }
+
+      if (amount > 0n) {
+        await this.paymentService.createRefundPayment({
+          refundAmount: Number(ethers.formatUnits(amount, token.decimals)),
+          refundCurrency: jobEntity.token,
+          userId: jobEntity.userId,
+          jobId: jobEntity.id,
+        });
+      }
     }
 
     jobEntity.status = JobStatus.CANCELED;
     await this.jobRepository.updateOne(jobEntity);
+  }
+
+  public async getRefundAmount(
+    chainId: ChainId,
+    escrowAddress: string,
+    tokenAddress: string,
+  ): Promise<bigint> {
+    const signer = this.web3Service.getSigner(chainId);
+    const provider = signer.provider!;
+    const contract: Escrow = Escrow__factory.connect(escrowAddress!, provider);
+    const fromBlock = 79278120; //This issue started at this block
+    const toBlock = 'latest';
+    const cancelledFilter = contract.filters?.Cancelled?.();
+    const cancelledLogs = await contract.queryFilter(
+      cancelledFilter,
+      fromBlock,
+      toBlock,
+    );
+
+    for (const log of cancelledLogs) {
+      const erc20Interface = new ethers.Interface([
+        'event Transfer(address indexed from, address indexed to, uint256 value)',
+      ]);
+
+      const transferTopic = erc20Interface.getEvent('Transfer')!.topicHash;
+      const receipt = await provider.getTransactionReceipt(log.transactionHash);
+
+      const transferLogs = receipt!.logs.filter(
+        (l) =>
+          l.address.toLowerCase() === tokenAddress.toLowerCase() &&
+          l.topics[0] === transferTopic,
+      );
+      for (const tlog of transferLogs) {
+        const decoded = erc20Interface.decodeEventLog(
+          'Transfer',
+          tlog.data,
+          tlog.topics,
+        );
+
+        const from = decoded.from as string;
+        const to = decoded.to as string;
+        const value = decoded.value as bigint;
+        if (
+          from.toLowerCase() === escrowAddress.toLowerCase() &&
+          to.toLowerCase() === signer.address.toLowerCase()
+        ) {
+          return value;
+        }
+      }
+    }
+
+    return 0n;
   }
 }

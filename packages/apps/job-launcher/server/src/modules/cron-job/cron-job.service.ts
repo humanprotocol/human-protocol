@@ -142,7 +142,7 @@ export class CronJobService {
         try {
           await this.jobService.createEscrow(jobEntity);
         } catch (error) {
-          this.logger.error('Error in moderateContentCronJob', {
+          this.logger.error('Error in createEscrowCronJob', {
             jobId: jobEntity.id,
             error,
           });
@@ -157,86 +157,6 @@ export class CronJobService {
     }
 
     this.logger.debug('Create escrow STOP');
-    await this.completeCronJob(cronJob);
-  }
-
-  @Cron('1-59/2 * * * *')
-  public async setupEscrowCronJob() {
-    const isCronJobRunning = await this.isCronJobRunning(
-      CronJobType.SetupEscrow,
-    );
-
-    if (isCronJobRunning) {
-      return;
-    }
-
-    this.logger.debug('Setup escrow START');
-    const cronJob = await this.startCronJob(CronJobType.SetupEscrow);
-
-    try {
-      const jobEntities = await this.jobRepository.findByStatus(
-        JobStatus.FUNDED,
-      );
-
-      for (const jobEntity of jobEntities) {
-        try {
-          await this.jobService.setupEscrow(jobEntity);
-        } catch (error) {
-          this.logger.error('Error setting up escrow', {
-            jobId: jobEntity.id,
-            error,
-          });
-          await this.jobService.handleProcessJobFailure(
-            jobEntity,
-            ErrorEscrow.NotSetup,
-          );
-        }
-      }
-    } catch (error) {
-      this.logger.error('Error in setupEscrow cron job', error);
-    }
-
-    this.logger.debug('Setup escrow STOP');
-    await this.completeCronJob(cronJob);
-  }
-
-  @Cron('*/2 * * * *')
-  public async fundEscrowCronJob() {
-    const isCronJobRunning = await this.isCronJobRunning(
-      CronJobType.FundEscrow,
-    );
-
-    if (isCronJobRunning) {
-      return;
-    }
-
-    this.logger.debug('Fund escrow START');
-    const cronJob = await this.startCronJob(CronJobType.FundEscrow);
-
-    try {
-      const jobEntities = await this.jobRepository.findByStatus(
-        JobStatus.CREATED,
-      );
-
-      for (const jobEntity of jobEntities) {
-        try {
-          await this.jobService.fundEscrow(jobEntity);
-        } catch (error) {
-          this.logger.error('Error funding escrow', {
-            jobId: jobEntity.id,
-            error,
-          });
-          await this.jobService.handleProcessJobFailure(
-            jobEntity,
-            ErrorEscrow.NotFunded,
-          );
-        }
-      }
-    } catch (error) {
-      this.logger.error('Error in fundEscrow cron job', error);
-    }
-
-    this.logger.debug('Fund escrow STOP');
     await this.completeCronJob(cronJob);
   }
 
@@ -471,7 +391,7 @@ export class CronJobService {
             chainId: network.chainId,
             statuses,
             from,
-            launcher: this.web3Service.getOperatorAddress(),
+            launcher: await this.web3Service.getOperatorAddress(),
             first: 100,
             skip,
           });

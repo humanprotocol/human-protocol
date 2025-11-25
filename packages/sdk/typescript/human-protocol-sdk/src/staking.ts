@@ -450,7 +450,7 @@ export class StakingClient extends BaseEthersClient {
 
     try {
       const stakerInfo = await this.stakingContract.stakes(stakerAddress);
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
       const currentBlock = await this.runner.provider!.getBlockNumber();
 
       const tokensWithdrawable =

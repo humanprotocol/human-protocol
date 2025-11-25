@@ -53,57 +53,46 @@ function isRegion(value: string): value is AWSRegions {
 }
 
 export async function listObjectsInBucket(url: URL): Promise<string[]> {
-  return new Promise(async (resolve, reject) => {
-    try {
-      let objects: string[] = [];
-      let nextContinuationToken: string | undefined;
-      const baseUrl = `${url.protocol}//${url.host}/`;
-      do {
-        let requestOptions = `${baseUrl}`;
+  let objects: string[] = [];
+  let nextContinuationToken: string | undefined;
+  const baseUrl = `${url.protocol}//${url.host}/`;
+  do {
+    let requestOptions = `${baseUrl}`;
 
-        if (url.hostname !== 'localhost' && url.hostname !== '127.0.0.1') {
-          requestOptions += `?list-type=2${
-            nextContinuationToken
-              ? `&continuation-token=${encodeURIComponent(
-                  nextContinuationToken,
-                )}`
-              : ''
-          }${url.pathname ? `&prefix=${url.pathname.replace(/^\//, '')}` : ''}`;
-        } else {
-          requestOptions += `${url.pathname ? `${url.pathname.replace(/^\//, '')}` : ''}?list-type=2${
-            nextContinuationToken
-              ? `&continuation-token=${encodeURIComponent(
-                  nextContinuationToken,
-                )}`
-              : ''
-          }`;
-        }
-
-        const response = await axios.get(requestOptions);
-
-        if (response.status === HttpStatus.OK && response.data) {
-          parseString(response.data, (err: any, result: any) => {
-            if (err) {
-              reject(err);
-            }
-            nextContinuationToken = result.ListBucketResult
-              .NextContinuationToken
-              ? result.ListBucketResult.NextContinuationToken[0]
-              : undefined;
-
-            const objectKeys = result.ListBucketResult.Contents?.map(
-              (item: any) => item.Key,
-            );
-
-            objects = objects.concat(objectKeys?.flat());
-          });
-        } else {
-          reject(ErrorBucket.FailedToFetchBucketContents);
-        }
-      } while (nextContinuationToken);
-      resolve(objects);
-    } catch (err) {
-      reject(err);
+    if (url.hostname !== 'localhost' && url.hostname !== '127.0.0.1') {
+      requestOptions += `?list-type=2${
+        nextContinuationToken
+          ? `&continuation-token=${encodeURIComponent(nextContinuationToken)}`
+          : ''
+      }${url.pathname ? `&prefix=${url.pathname.replace(/^\//, '')}` : ''}`;
+    } else {
+      requestOptions += `${url.pathname ? `${url.pathname.replace(/^\//, '')}` : ''}?list-type=2${
+        nextContinuationToken
+          ? `&continuation-token=${encodeURIComponent(nextContinuationToken)}`
+          : ''
+      }`;
     }
-  });
+
+    const response = await axios.get(requestOptions);
+
+    if (response.status === HttpStatus.OK && response.data) {
+      parseString(response.data, (err: any, result: any) => {
+        if (err) {
+          throw new Error(err);
+        }
+        nextContinuationToken = result.ListBucketResult.NextContinuationToken
+          ? result.ListBucketResult.NextContinuationToken[0]
+          : undefined;
+
+        const objectKeys = result.ListBucketResult.Contents?.map(
+          (item: any) => item.Key,
+        );
+
+        objects = objects.concat(objectKeys?.flat());
+      });
+    } else {
+      throw new Error(ErrorBucket.FailedToFetchBucketContents);
+    }
+  } while (nextContinuationToken);
+  return objects;
 }

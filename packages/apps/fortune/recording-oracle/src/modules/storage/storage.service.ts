@@ -49,9 +49,12 @@ export class StorageService {
         EncryptionUtils.isEncrypted(fileContent)
       ) {
         try {
+          const privateKey = this.pgpConfigService.privateKey;
+          if (!privateKey) {
+            throw new ServerError('Unable to decrypt manifest');
+          }
           const encryption = await Encryption.build(
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            this.pgpConfigService.privateKey!,
+            privateKey,
             this.pgpConfigService.passphrase,
           );
 
@@ -112,7 +115,7 @@ export class StorageService {
           recordingOraclePublicKey,
           reputationOraclePublicKey,
         ]);
-      } catch (e) {
+      } catch {
         throw new ServerError('Encryption error');
       }
     }
@@ -130,7 +133,7 @@ export class StorageService {
       );
 
       return { url: this.getJobUrl(hash), hash };
-    } catch (e) {
+    } catch {
       throw new ServerError('File not uploaded');
     }
   }

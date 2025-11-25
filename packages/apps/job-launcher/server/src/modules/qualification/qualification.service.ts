@@ -34,7 +34,9 @@ export class QualificationService {
         this.web3ConfigService.reputationOracleAddress,
         KVStoreKeys.url,
       );
-    } catch {}
+    } catch {
+      // Ignore error
+    }
 
     if (!reputationOracleUrl || reputationOracleUrl === '') {
       throw new ServerError(ErrorWeb3.ReputationOracleUrlNotSet);

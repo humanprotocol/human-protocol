@@ -39,22 +39,32 @@ It's expected to be used only in dev environments, such as a developer toolbox, 
 Lib exports `createLogger` factory function that should be used to create a logger intance with proper bindings for application. Recommended bindings are at least `service` and `environment`, so that you can distinguish logs coming from different sources in your log-management system easilly.
 
 ```ts
-import { createLogger, LogLevel } from '@human-protocol/logger';
+import { createLogger, isLogLevel, LogLevel } from '@human-protocol/logger';
 
-const ENV_NAME = process.NODE_ENV || 'development';
+const ENV_NAME = process.env.NODE_ENV || 'development';
 const isDevelopment = ENV_NAME === 'development';
-const isTest = process.NODE_ENV === 'test'
+const isTest = process.env.NODE_ENV === 'test';
+
+const LOG_LEVEL_OVERRIDE = process.env.LOG_LEVEL;
+
+let logLevel = LogLevel.INFO;
+if (isLogLevel(LOG_LEVEL_OVERRIDE)) {
+  logLevel = LOG_LEVEL_OVERRIDE;
+} else if (isDevelopment) {
+  logLevel = LogLevel.DEBUG;
+}
 
 const defaultAppLogger = createLogger(
   {
     name: 'DefaultLogger',
-    level: isDevelopment ? LogLevel.DEBUG : LogLevel.INFO,
-    pretty: isDevelopment,
+    level: logLevel,
+    pretty: isDevelopment || process.env.LOG_PRETTY === 'true',
     disabled: isTest,
   },
   {
     environment: ENV_NAME,
-    service: 'you-application-name',
+    service: 'your-application-name',
+    version: 'your-app-version',
   },
 );
 
@@ -88,6 +98,8 @@ import { Logger } from '@nestjs/common';
 ```
 
 ## Usage examples
+> Some of the examples are available in `examples` folder. To run - use `yarn ts-node examples/<some-example>`, e.g. `yarn ts-node examples/basic.ts`
+
 Logger has next API contract: log message first and any useful detail in log meta as a second argument.
 
 :information_source: If meta is not a plain object and not an error - it is being logged as "meta" property
@@ -99,7 +111,7 @@ Logger has next API contract: log message first and any useful detail in log met
 logger.info('Info without any context');
 
 // to log message with some context info
-loger.info('New user registered', {
+logger.info('New user registered', {
   userAgent,
   country,
   ip,
@@ -113,7 +125,7 @@ logger.error('Something went wrong', error);
 logger.error('Error updating some entity', {
   error,
   entityId: 42,
-  ...extra
+  ...extra,
 });
 
 // to log anything

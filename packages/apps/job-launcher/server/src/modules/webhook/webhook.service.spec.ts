@@ -1,4 +1,4 @@
-import { faker } from '@faker-js/faker/.';
+import { faker } from '@faker-js/faker';
 import { createMock } from '@golevelup/ts-jest';
 import { ChainId, KVStoreUtils } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
@@ -111,7 +111,7 @@ describe('WebhookService', () => {
       });
       await expect(
         (webhookService as any).sendWebhook(webhookEntity),
-      ).rejects.toThrow(new ServerError('HTTP request failed'));
+      ).rejects.toThrow(new Error('HTTP request failed'));
     });
 
     it('should successfully process a fortune webhook', async () => {

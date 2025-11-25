@@ -121,7 +121,7 @@ describe('HCaptchaService', () => {
         .spyOn(hCaptchaVerifyGateway, 'sendTokenToVerify')
         .mockResolvedValue(apiResponse);
 
-      await expect(service.verifyToken(command)).rejects.toThrowError(
+      await expect(service.verifyToken(command)).rejects.toThrow(
         errorMessageFixture,
       );
     });
@@ -135,7 +135,7 @@ describe('HCaptchaService', () => {
         .spyOn(hCaptchaVerifyGateway, 'sendTokenToVerify')
         .mockResolvedValue(apiResponse);
 
-      await expect(service.verifyToken(command)).rejects.toThrowError(
+      await expect(service.verifyToken(command)).rejects.toThrow(
         errorMessageFixture,
       );
     });

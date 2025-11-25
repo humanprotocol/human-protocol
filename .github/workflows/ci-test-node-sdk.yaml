@@ -2,6 +2,7 @@ name: Node.js SDK check
 
 on:
   push:
+    tags-ignore: '*'
     paths:
       - 'packages/core/**'
       - 'packages/sdk/typescript/human-protocol-sdk/**'
@@ -11,8 +12,8 @@ jobs:
     name: Node.js SDK Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version-file: .nvmrc
           cache: yarn

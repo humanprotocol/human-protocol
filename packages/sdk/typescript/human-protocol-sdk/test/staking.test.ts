@@ -589,7 +589,8 @@ describe('StakingUtils', () => {
       expect(gqlFetchSpy).toHaveBeenCalledWith(
         NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
         expect.anything(),
-        { id: stakerAddress.toLowerCase() }
+        { id: stakerAddress.toLowerCase() },
+        undefined
       );
       const expectedStaker: IStaker = {
         address: mockStaker.address,
@@ -683,7 +684,8 @@ describe('StakingUtils', () => {
           orderDirection: OrderDirection.DESC,
           first: 10,
           skip: 0,
-        })
+        }),
+        undefined
       );
       const expectedStakers = mockStakers.map((s) => ({
         address: s.address,

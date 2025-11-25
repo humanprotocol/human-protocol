@@ -1,14 +1,16 @@
 # human_protocol_sdk.utils module
 
-### *class* human_protocol_sdk.utils.SubgraphOptions(max_retries=None, base_delay=None)
+### *class* human_protocol_sdk.utils.SubgraphOptions(max_retries=None, base_delay=None, indexer_id=None)
 
 Bases: `object`
 
 Configuration for subgraph logic.
 
-#### \_\_init_\_(max_retries=None, base_delay=None)
+#### \_\_init_\_(max_retries=None, base_delay=None, indexer_id=None)
 
 #### base_delay *: `Optional`[`int`]* *= None*
+
+#### indexer_id *: `Optional`[`str`]* *= None*
 
 #### max_retries *: `Optional`[`int`]* *= None*
 

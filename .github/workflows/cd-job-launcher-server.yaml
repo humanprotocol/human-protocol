@@ -3,6 +3,7 @@ name: Deploy Job launcher server
 on:
   push:
     branches: [ develop, main ]
+    tags-ignore: '*'
     paths:
       - 'packages/apps/job-launcher/server/**'
   pull_request:
@@ -21,7 +22,7 @@ jobs:
     if: ${{ github.event_name == 'pull_request' }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: PR check
         run: |
@@ -41,7 +42,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
 
     - uses: convictional/trigger-workflow-and-wait@v1.6.5
       with:

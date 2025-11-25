@@ -19,7 +19,7 @@ export const parseUrl = (
       endPoint: 'storage.googleapis.com',
     },
     {
-      regex: /^https:\/\/([^\.]+)\.storage\.googleapis\.com\/?$/,
+      regex: /^https:\/\/([^.]+)\.storage\.googleapis\.com\/?$/,
       endPoint: 'storage.googleapis.com',
     },
     {
@@ -27,7 +27,7 @@ export const parseUrl = (
       endPoint: 's3.amazonaws.com',
     },
     {
-      regex: /^https:\/\/([^\.]+)\.s3\.([a-z0-9-]+)\.amazonaws\.com\/?$/,
+      regex: /^https:\/\/([^.]+)\.s3\.([a-z0-9-]+)\.amazonaws\.com\/?$/,
       endPoint: 's3.amazonaws.com',
     },
     {
@@ -64,7 +64,7 @@ export const parseUrl = (
       }
 
       if (filename) {
-        match = filename.match(/([^\/]+)\.([^.\/]+)$/);
+        match = filename.match(/([^/]+)\.([^./]+)$/);
         if (match && match.length > 1) {
           data.filename = match[1];
           data.extension = match[2];

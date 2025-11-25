@@ -52,7 +52,7 @@ async function getStats(statsBaseUrl: string) {
     );
 
     return result;
-  } catch (error) {
+  } catch {
     throw new Error('Failed to get stats');
   }
 }

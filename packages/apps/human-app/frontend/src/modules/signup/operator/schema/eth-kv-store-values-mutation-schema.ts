@@ -90,7 +90,6 @@ export const getEditEthKVStoreValuesMutationSchema = (
         ) {
           hasFieldChanged = true;
         } else {
-          // eslint-disable-next-line eqeqeq -- expect to do conversion for this compare
           hasFieldChanged = newFiledData != initialFiledData;
         }
 

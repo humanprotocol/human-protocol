@@ -1,4 +1,3 @@
-/* eslint-disable camelcase -- ...*/
 import { z } from 'zod';
 import { FormProvider, useForm } from 'react-hook-form';
 import Stack from '@mui/material/Stack';

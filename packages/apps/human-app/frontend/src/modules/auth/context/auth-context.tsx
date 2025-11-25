@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 import { z } from 'zod';
 import { createAuthProvider } from '@/shared/contexts/generic-auth-context';
 import { KycStatus } from '@/modules/worker/profile/types';

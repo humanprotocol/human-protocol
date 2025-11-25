@@ -1,4 +1,5 @@
 import { createMock } from '@golevelup/ts-jest';
+import { Escrow__factory } from '@human-protocol/core/typechain-types';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import {
@@ -6,7 +7,16 @@ import {
   MOCK_MANIFEST_URL,
   MOCK_PRIVATE_KEY,
 } from '../../../test/constants';
-import { AssignmentStatus, JobStatus, JobType } from '../../common/enums/job';
+import { ServerConfigService } from '../../common/config/server-config.service';
+import { ErrorAssignment, ErrorJob } from '../../common/constant/errors';
+import { SortDirection } from '../../common/enums/collection';
+import {
+  AssignmentSortField,
+  AssignmentStatus,
+  JobStatus,
+  JobType,
+} from '../../common/enums/job';
+import { ConflictError, ServerError } from '../../common/errors';
 import { AssignmentRepository } from '../assignment/assignment.repository';
 import { AssignmentService } from '../assignment/assignment.service';
 import { ManifestDto } from '../job/job.dto';
@@ -14,13 +24,7 @@ import { JobRepository } from '../job/job.repository';
 import { JobService } from '../job/job.service';
 import { Web3Service } from '../web3/web3.service';
 import { AssignmentDto, CreateAssignmentDto } from './assignment.dto';
-import { Escrow__factory } from '@human-protocol/core/typechain-types';
-import { AssignmentSortField } from '../../common/enums/job';
-import { SortDirection } from '../../common/enums/collection';
 import { AssignmentEntity } from './assignment.entity';
-import { ErrorAssignment, ErrorJob } from '../../common/constant/errors';
-import { BadRequestException } from '@nestjs/common';
-import { ServerConfigService } from '../../common/config/server-config.service';
 
 jest.mock('@human-protocol/core/typechain-types', () => ({
   ...jest.requireActual('@human-protocol/core/typechain-types'),
@@ -518,7 +522,7 @@ describe('AssignmentService', () => {
 
       await expect(
         assignmentService.resign(assignmentId, workerAddress),
-      ).rejects.toThrow(new BadRequestException(ErrorAssignment.NotFound));
+      ).rejects.toThrow(new ServerError(ErrorAssignment.NotFound));
     });
 
     it('should throw InvalidStatus if assignment status is not ACTIVE', async () => {
@@ -536,7 +540,7 @@ describe('AssignmentService', () => {
 
       await expect(
         assignmentService.resign(assignmentId, workerAddress),
-      ).rejects.toThrow(new BadRequestException(ErrorAssignment.InvalidStatus));
+      ).rejects.toThrow(new ConflictError(ErrorAssignment.InvalidStatus));
     });
   });
 });

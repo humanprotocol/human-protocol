@@ -1,8 +1,8 @@
-import { FC, PropsWithChildren } from "react";
-import { createConfig, http, WagmiProvider as WWagmiProvider } from "wagmi";
-import { walletConnect, coinbaseWallet } from "wagmi/connectors";
-import * as wagmiChains from "wagmi/chains";
-import { LOCALHOST, SUPPORTED_CHAIN_IDS } from "../constants/chains";
+import { FC, PropsWithChildren } from 'react';
+import { createConfig, http, WagmiProvider as WWagmiProvider } from 'wagmi';
+import { walletConnect, coinbaseWallet } from 'wagmi/connectors';
+import * as wagmiChains from 'wagmi/chains';
+import { LOCALHOST, SUPPORTED_CHAIN_IDS } from '../constants/chains';
 
 const projectId = import.meta.env.VITE_APP_WALLETCONNECT_PROJECT_ID;
 
@@ -25,10 +25,10 @@ export const wagmiConfig = createConfig({
   connectors: [
     walletConnect({
       showQrModal: true,
-      projectId: projectId ?? "",
+      projectId: projectId ?? '',
     }),
     coinbaseWallet({
-      appName: "human-staking-dashboard",
+      appName: 'human-staking-dashboard',
     }),
   ],
   transports: Object.fromEntries(

@@ -18,6 +18,8 @@ const OracleSchema = z.object({
   registrationInstructions: z.string().optional().nullable(),
 });
 
+const OracleListSchema = z.array(OracleSchema);
+
 type OracleBase = z.infer<typeof OracleSchema>;
 
 export type Oracle = OracleBase & {
@@ -39,8 +41,7 @@ const H_CAPTCHA_ORACLE: Oracle = {
 async function getOracles(selectedJobTypes: string[]) {
   try {
     const params = selectedJobTypes.length
-      ? // eslint-disable-next-line camelcase
-        { selected_job_types: selectedJobTypes }
+      ? { selected_job_types: selectedJobTypes }
       : undefined;
 
     const queryParams = params ?? {};
@@ -63,8 +64,9 @@ async function getOracles(selectedJobTypes: string[]) {
       );
 
       if (Array.isArray(results)) {
+        const parsedResults = OracleListSchema.parse(results);
         oracles = oracles.concat(
-          results.map((oracle: OracleBase) => ({
+          parsedResults.map((oracle: OracleBase) => ({
             ...oracle,
             name: oracle.name ? oracle.name.split(' ')[0] : '',
           }))
