@@ -6,7 +6,7 @@
 
 # Interface: IPayout
 
-Defined in: [interfaces.ts:302](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L302)
+Defined in: [interfaces.ts:302](https://github.com/humanprotocol/human-protocol/blob/0661934b14ae802af3f939783433c196862268e2/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L302)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [interfaces.ts:302](https://github.com/humanprotocol/human-protocol/
 
 > **amount**: `bigint`
 
-Defined in: [interfaces.ts:306](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L306)
+Defined in: [interfaces.ts:306](https://github.com/humanprotocol/human-protocol/blob/0661934b14ae802af3f939783433c196862268e2/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L306)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [interfaces.ts:306](https://github.com/humanprotocol/human-protocol/
 
 > **createdAt**: `number`
 
-Defined in: [interfaces.ts:307](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L307)
+Defined in: [interfaces.ts:307](https://github.com/humanprotocol/human-protocol/blob/0661934b14ae802af3f939783433c196862268e2/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L307)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [interfaces.ts:307](https://github.com/humanprotocol/human-protocol/
 
 > **escrowAddress**: `string`
 
-Defined in: [interfaces.ts:304](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L304)
+Defined in: [interfaces.ts:304](https://github.com/humanprotocol/human-protocol/blob/0661934b14ae802af3f939783433c196862268e2/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L304)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [interfaces.ts:304](https://github.com/humanprotocol/human-protocol/
 
 > **id**: `string`
 
-Defined in: [interfaces.ts:303](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L303)
+Defined in: [interfaces.ts:303](https://github.com/humanprotocol/human-protocol/blob/0661934b14ae802af3f939783433c196862268e2/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L303)
 
 ***
 
@@ -46,4 +46,4 @@ Defined in: [interfaces.ts:303](https://github.com/humanprotocol/human-protocol/
 
 > **recipient**: `string`
 
-Defined in: [interfaces.ts:305](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L305)
+Defined in: [interfaces.ts:305](https://github.com/humanprotocol/human-protocol/blob/0661934b14ae802af3f939783433c196862268e2/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L305)

@@ -207,6 +207,7 @@
   * [`SubgraphOptions`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.SubgraphOptions)
     * [`SubgraphOptions.__init__()`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.SubgraphOptions.__init__)
     * [`SubgraphOptions.base_delay`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.SubgraphOptions.base_delay)
+    * [`SubgraphOptions.indexer_id`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.SubgraphOptions.indexer_id)
     * [`SubgraphOptions.max_retries`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.SubgraphOptions.max_retries)
   * [`custom_gql_fetch()`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.custom_gql_fetch)
   * [`get_contract_interface()`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.get_contract_interface)

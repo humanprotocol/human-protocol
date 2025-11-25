@@ -1,7 +1,7 @@
 {
   "name": "@human-protocol/core",
   "description": "Human Protocol Core Smart Contracts",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "files": [
     "contracts/**/*.sol",
     "abis/**/*.json",

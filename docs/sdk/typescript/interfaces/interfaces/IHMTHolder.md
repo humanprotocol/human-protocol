@@ -6,7 +6,7 @@
 
 # Interface: IHMTHolder
 
-Defined in: [interfaces.ts:272](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L272)
+Defined in: [interfaces.ts:272](https://github.com/humanprotocol/human-protocol/blob/0661934b14ae802af3f939783433c196862268e2/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L272)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [interfaces.ts:272](https://github.com/humanprotocol/human-protocol/
 
 > **address**: `string`
 
-Defined in: [interfaces.ts:273](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L273)
+Defined in: [interfaces.ts:273](https://github.com/humanprotocol/human-protocol/blob/0661934b14ae802af3f939783433c196862268e2/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L273)
 
 ***
 
@@ -22,4 +22,4 @@ Defined in: [interfaces.ts:273](https://github.com/humanprotocol/human-protocol/
 
 > **balance**: `bigint`
 
-Defined in: [interfaces.ts:274](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L274)
+Defined in: [interfaces.ts:274](https://github.com/humanprotocol/human-protocol/blob/0661934b14ae802af3f939783433c196862268e2/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L274)
