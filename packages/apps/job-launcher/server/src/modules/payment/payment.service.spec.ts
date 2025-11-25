@@ -3,7 +3,7 @@ jest.mock('../../common/utils/signature', () => ({
   verifySignature: jest.fn().mockReturnValue(true),
 }));
 
-import { faker } from '@faker-js/faker/.';
+import { faker } from '@faker-js/faker';
 import { createMock } from '@golevelup/ts-jest';
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import { ChainId, NETWORKS } from '@human-protocol/sdk';
@@ -554,7 +554,9 @@ describe('PaymentService', () => {
 
       await expect(
         paymentService.createCryptoPayment(userId, dto, MOCK_SIGNATURE),
-      ).rejects.toThrow(new ConflictError(ErrorSignature.SignatureNotVerified));
+      ).rejects.toThrow(
+        new ConflictException(ErrorSignature.SignatureNotVerified),
+      );
     });
 
     it('should throw a not found exception if the transaction is not found by hash', async () => {
@@ -873,7 +875,7 @@ describe('PaymentService', () => {
           setupId: '1',
           defaultCard: false,
         }),
-      ).rejects.toThrow(new ServerError(ErrorPayment.SetupNotFound));
+      ).rejects.toThrow(new NotFoundError(ErrorPayment.SetupNotFound));
     });
   });
 
