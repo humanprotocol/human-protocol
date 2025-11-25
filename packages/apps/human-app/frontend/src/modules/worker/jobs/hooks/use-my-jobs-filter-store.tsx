@@ -1,4 +1,3 @@
-/* eslint-disable camelcase -- api params*/
 import { create } from 'zustand';
 import type { PageSize } from '@/shared/types/entity.type';
 import { SortDirection, SortField, type MyJobStatus } from '../types';

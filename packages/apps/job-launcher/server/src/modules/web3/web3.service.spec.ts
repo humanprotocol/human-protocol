@@ -1,9 +1,14 @@
+import { faker } from '@faker-js/faker/.';
+import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import { ChainId, OperatorUtils, Role } from '@human-protocol/sdk';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
+import { NonceManager, ethers } from 'ethers';
+import { createSignerMock } from '../../../test/fixtures/web3';
 import { NetworkConfigService } from '../../common/config/network-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ErrorWeb3 } from '../../common/constants/errors';
+import { EscrowFundToken } from '../../common/enums/job';
 import { Web3Env } from '../../common/enums/web3';
 import { ConflictError, ValidationError } from '../../common/errors';
 import {
@@ -13,6 +18,7 @@ import {
   MOCK_REPUTATION_ORACLES,
   mockConfig,
 } from './../../../test/constants';
+import { RateService } from '../rate/rate.service';
 import { OracleDataDto } from './web3.dto';
 import { Web3Service } from './web3.service';
 
@@ -30,6 +36,9 @@ jest.mock('@human-protocol/sdk', () => {
 describe('Web3Service', () => {
   let configService: ConfigService;
   let web3Service: Web3Service;
+  const mockRateService = {
+    getRate: jest.fn(),
+  };
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -49,6 +58,10 @@ describe('Web3Service', () => {
         Web3Service,
         NetworkConfigService,
         Web3ConfigService,
+        {
+          provide: RateService,
+          useValue: mockRateService,
+        },
       ],
     }).compile();
 
@@ -68,6 +81,7 @@ describe('Web3Service', () => {
           new Web3Service(
             new Web3ConfigService(configService),
             new NetworkConfigService(configService),
+            mockRateService as unknown as RateService,
           ),
       ).toThrow(new Error(ErrorWeb3.NoValidNetworks));
     });
@@ -95,8 +109,8 @@ describe('Web3Service', () => {
   });
 
   describe('getOperatorAddress', () => {
-    it('should get the operator address', () => {
-      const operatorAddress = web3Service.getOperatorAddress();
+    it('should get the operator address', async () => {
+      const operatorAddress = await web3Service.getOperatorAddress();
       expect(operatorAddress).toBe(MOCK_ADDRESS);
     });
   });
@@ -455,6 +469,130 @@ describe('Web3Service', () => {
 
       expect(result).toEqual([]);
       expect(OperatorUtils.getOperator).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('ensureEscrowAllowance', () => {
+    let mockSigner: jest.Mocked<NonceManager>;
+    const mockToken = {
+      address: faker.finance.ethereumAddress(),
+      decimals: 18,
+      symbol: EscrowFundToken.HMT,
+    };
+    const mockSpender = faker.finance.ethereumAddress();
+    const mockRequiredAmount = faker.number.bigInt();
+    let approveAmountUsdSpy: jest.SpyInstance<number, []>;
+
+    beforeAll(async () => {
+      mockSigner = createSignerMock();
+      jest.spyOn(web3Service, 'getSigner').mockReturnValue(mockSigner);
+      jest
+        .spyOn(web3Service, 'getOperatorAddress')
+        .mockResolvedValue(await mockSigner.getAddress());
+      approveAmountUsdSpy = jest
+        .spyOn(web3Service.web3ConfigService, 'approveAmountUsd', 'get')
+        .mockReturnValue(0);
+    });
+
+    afterAll(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('should call approve on the ERC20 token if current allowance is less than required amount', async () => {
+      const mockApprove = jest.fn().mockResolvedValue({
+        wait: jest.fn().mockResolvedValue({}),
+      });
+      const mockAllowance = mockRequiredAmount - 1n;
+      const mockErc20 = {
+        allowance: jest.fn().mockResolvedValue(mockAllowance),
+        approve: mockApprove,
+      };
+
+      jest
+        .spyOn(HMToken__factory, 'connect')
+        .mockReturnValue(mockErc20 as never);
+
+      await web3Service.ensureEscrowAllowance(
+        ChainId.POLYGON_AMOY,
+        mockToken,
+        mockRequiredAmount,
+        mockSpender,
+      );
+
+      expect(mockErc20.allowance).toHaveBeenCalledWith(
+        await mockSigner.getAddress(),
+        mockSpender,
+      );
+      expect(mockApprove).toHaveBeenCalledWith(mockSpender, mockRequiredAmount);
+      expect(mockRateService.getRate).not.toHaveBeenCalled();
+    });
+
+    it('should not call approve if current allowance is greater than or equal to required amount', async () => {
+      const mockAllowance = mockRequiredAmount + 1n;
+      const mockApprove = jest.fn().mockResolvedValue({
+        wait: jest.fn(),
+      });
+      const mockErc20 = {
+        allowance: jest.fn().mockResolvedValue(mockAllowance),
+        approve: mockApprove,
+      };
+
+      jest
+        .spyOn(HMToken__factory, 'connect')
+        .mockReturnValue(mockErc20 as never);
+
+      await web3Service.ensureEscrowAllowance(
+        ChainId.POLYGON_AMOY,
+        mockToken,
+        mockRequiredAmount,
+        mockSpender,
+      );
+
+      expect(mockErc20.allowance).toHaveBeenCalledWith(
+        await mockSigner.getAddress(),
+        mockSpender,
+      );
+      expect(mockApprove).not.toHaveBeenCalled();
+      expect(mockRateService.getRate).not.toHaveBeenCalled();
+    });
+
+    it('should convert approveAmountUsd to token units when higher than required amount', async () => {
+      const mockApproveAmount = faker.number.int({ min: 50, max: 150 });
+      const mockRate = faker.number.float({ min: 1, max: 5 });
+
+      approveAmountUsdSpy.mockReturnValue(mockApproveAmount);
+      mockRateService.getRate.mockResolvedValue(mockRate);
+
+      const mockApprove = jest.fn().mockResolvedValue({
+        wait: jest.fn().mockResolvedValue({}),
+      });
+      const mockAllowance = mockRequiredAmount - 1n;
+      const mockErc20 = {
+        allowance: jest.fn().mockResolvedValue(mockAllowance),
+        approve: mockApprove,
+      };
+
+      jest
+        .spyOn(HMToken__factory, 'connect')
+        .mockReturnValue(mockErc20 as never);
+
+      await web3Service.ensureEscrowAllowance(
+        ChainId.POLYGON_AMOY,
+        mockToken,
+        mockRequiredAmount,
+        mockSpender,
+      );
+
+      const expectedAmount = ethers.parseUnits(
+        (mockApproveAmount * mockRate).toString(),
+        mockToken.decimals,
+      );
+
+      expect(mockRateService.getRate).toHaveBeenCalledWith(
+        'usd',
+        mockToken.symbol,
+      );
+      expect(mockApprove).toHaveBeenCalledWith(mockSpender, expectedAmount);
     });
   });
 });

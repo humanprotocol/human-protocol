@@ -5,7 +5,7 @@ import { UserStatus } from '../../state/auth/types';
 
 export function ProtectedRoute({ children }: { children: JSX.Element }) {
   const { isAuthed, user } = useAppSelector((state) => state.auth);
-  let location = useLocation();
+  const location = useLocation();
 
   if (!isAuthed) {
     // Redirect them to the /login page, but save the current location they were

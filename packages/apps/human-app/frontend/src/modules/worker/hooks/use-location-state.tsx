@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access -- that's ok because we validate this members with zod */
 import { useEffect, useState } from 'react';
 import type { Location } from 'react-router-dom';
 import { useLocation, useNavigate } from 'react-router-dom';

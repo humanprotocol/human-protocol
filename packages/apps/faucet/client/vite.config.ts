@@ -9,31 +9,29 @@ import { nodePolyfills } from 'vite-plugin-node-polyfills';
 dotenv.config();
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => {
-  return {
-    plugins: [
-      react(),
-      nodePolyfills({
-        // Whether to polyfill `node:` protocol imports.
-        protocolImports: true,
-      }),
-    ],
-    worker: {
-      plugins: () => react(),
+export default defineConfig({
+  plugins: [
+    react(),
+    nodePolyfills({
+      // Whether to polyfill `node:` protocol imports.
+      protocolImports: true,
+    }),
+  ],
+  worker: {
+    plugins: () => react(),
+  },
+  resolve: {
+    alias: [{ find: 'src', replacement: path.resolve(__dirname, 'src') }],
+  },
+  optimizeDeps: {
+    include: ['@human-protocol/sdk'],
+  },
+  build: {
+    commonjsOptions: {
+      include: [/human-protocol-sdk/, /node_modules/],
     },
-    resolve: {
-      alias: [{ find: 'src', replacement: path.resolve(__dirname, 'src') }],
-    },
-    optimizeDeps: {
-      include: ['@human-protocol/sdk'],
-    },
-    build: {
-      commonjsOptions: {
-        include: [/human-protocol-sdk/, /node_modules/],
-      },
-    },
-    server: {
-      port: 3006,
-    },
-  };
+  },
+  server: {
+    port: 3006,
+  },
 });

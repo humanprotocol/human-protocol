@@ -97,12 +97,10 @@ export class HttpApiClient {
         return successSchema.parse(responseBody) as T;
       } catch (error) {
         if (error instanceof ZodError) {
-          // eslint-disable-next-line no-console
           console.error('Response parsing error: ', error.issues);
           throw new Error('Response schema validation error.');
         }
 
-        // eslint-disable-next-line no-console
         console.error('Unexpected error while parsing response body: ', error);
         throw new Error(`Error parsing response body.`);
       }

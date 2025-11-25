@@ -1,4 +1,3 @@
-/* eslint-disable camelcase -- ...*/
 import { t } from 'i18next';
 import Grid from '@mui/material/Grid';
 import { type MRT_ColumnDef } from 'material-react-table';

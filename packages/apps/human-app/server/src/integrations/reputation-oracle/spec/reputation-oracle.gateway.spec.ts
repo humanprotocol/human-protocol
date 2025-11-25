@@ -169,10 +169,7 @@ describe('ReputationOracleGateway', () => {
         .mockReturnValue(throwError(() => new Error('Internal Server Error')));
 
       await expect(service.sendWorkerSignup(command)).rejects.toThrow(
-        new HttpException(
-          'Internal Server Error',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        ),
+        new Error('Internal Server Error'),
       );
     });
   });
@@ -230,12 +227,7 @@ describe('ReputationOracleGateway', () => {
 
       await expect(
         service.sendRegistrationInExchangeOracle(command),
-      ).rejects.toThrow(
-        new HttpException(
-          'Internal Server Error',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        ),
-      );
+      ).rejects.toThrow(new Error('Internal Server Error'));
     });
   });
 
@@ -361,10 +353,7 @@ describe('ReputationOracleGateway', () => {
         .mockReturnValue(throwError(() => new Error('Internal Server Error')));
 
       await expect(service.sendWorkerSignin(command)).rejects.toThrow(
-        new HttpException(
-          'Internal Server Error',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        ),
+        new Error('Internal Server Error'),
       );
     });
   });
@@ -412,10 +401,7 @@ describe('ReputationOracleGateway', () => {
 
       const command: EmailVerificationCommand = emailVerificationCommandFixture;
       await expect(service.sendEmailVerification(command)).rejects.toThrow(
-        new HttpException(
-          'Internal Server Error',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        ),
+        new Error('Internal Server Error'),
       );
     });
   });
@@ -471,12 +457,7 @@ describe('ReputationOracleGateway', () => {
         resendEmailVerificationCommandFixture;
       await expect(
         service.sendResendEmailVerification(command),
-      ).rejects.toThrow(
-        new HttpException(
-          'Internal Server Error',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        ),
-      );
+      ).rejects.toThrow(new Error('Internal Server Error'));
     });
   });
 
@@ -523,10 +504,7 @@ describe('ReputationOracleGateway', () => {
 
       const command: ForgotPasswordCommand = forgotPasswordCommandFixture;
       await expect(service.sendForgotPassword(command)).rejects.toThrow(
-        new HttpException(
-          'Internal Server Error',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        ),
+        new Error('Internal Server Error'),
       );
     });
   });
@@ -574,12 +552,7 @@ describe('ReputationOracleGateway', () => {
 
       await expect(
         service.sendRestorePassword(restorePasswordCommandFixture),
-      ).rejects.toThrow(
-        new HttpException(
-          'Internal Server Error',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        ),
-      );
+      ).rejects.toThrow(new Error('Internal Server Error'));
     });
   });
 
@@ -631,10 +604,7 @@ describe('ReputationOracleGateway', () => {
 
       const command: PrepareSignatureCommand = prepareSignatureCommandFixture;
       await expect(service.sendPrepareSignature(command)).rejects.toThrow(
-        new HttpException(
-          'Internal Server Error',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        ),
+        new Error('Internal Server Error'),
       );
     });
   });
@@ -682,12 +652,7 @@ describe('ReputationOracleGateway', () => {
 
       await expect(
         service.sendDisableOperator(disableOperatorCommandFixture),
-      ).rejects.toThrow(
-        new HttpException(
-          'Internal Server Error',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        ),
-      );
+      ).rejects.toThrow(new Error('Internal Server Error'));
     });
   });
   describe('sendKycOnChain', () => {
@@ -735,10 +700,7 @@ describe('ReputationOracleGateway', () => {
         .mockReturnValue(throwError(() => new Error('Internal Server Error')));
 
       await expect(service.sendKycProcedureStart('token')).rejects.toThrow(
-        new HttpException(
-          'Internal Server Error',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        ),
+        new Error('Internal Server Error'),
       );
     });
   });
@@ -786,12 +748,7 @@ describe('ReputationOracleGateway', () => {
 
       await expect(
         service.approveUserAsLabeler(enableLabelingCommandFixture),
-      ).rejects.toThrow(
-        new HttpException(
-          'Internal Server Error',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        ),
-      );
+      ).rejects.toThrow(new Error('Internal Server Error'));
     });
   });
   describe('sendBlockchainAddressRegistration', () => {
@@ -870,10 +827,7 @@ describe('ReputationOracleGateway', () => {
         refreshToken: 'token',
       };
       await expect(service.sendRefreshToken(command)).rejects.toThrow(
-        new HttpException(
-          'Internal Server Error',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        ),
+        new Error('Internal Server Error'),
       );
     });
   });

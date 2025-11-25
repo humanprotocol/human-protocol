@@ -113,8 +113,6 @@ export class JobRepository extends BaseRepository<JobEntity> {
           JobStatus.UNDER_MODERATION,
           JobStatus.MODERATION_PASSED,
           JobStatus.POSSIBLE_ABUSE_IN_REVIEW,
-          JobStatus.CREATED,
-          JobStatus.FUNDED,
         ];
         break;
       case JobStatusFilter.CANCELED:

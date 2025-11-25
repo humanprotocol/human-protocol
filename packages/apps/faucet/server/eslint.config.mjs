@@ -1,0 +1,44 @@
+import eslint from '@eslint/js';
+import globals from 'globals';
+import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
+import tseslint from 'typescript-eslint';
+
+export default tseslint.config(
+  {
+    ignores: ['build/', 'dist/', 'node_modules/'],
+  },
+  eslint.configs.recommended,
+  tseslint.configs.recommended,
+  eslintPluginPrettierRecommended,
+  {
+    files: ['**/*.ts', '**/*.js'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+        ...globals.es2022,
+      },
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      parserOptions: {
+        projectService: true,
+      },
+    },
+    rules: {
+      'no-console': 'warn',
+      'prettier/prettier': 'error',
+      '@/quotes': [
+        'error',
+        'single',
+        { avoidEscape: true, allowTemplateLiterals: true },
+      ],
+    },
+  },
+  {
+    files: ['**/*.spec.ts', '**/*.spec.tsx', '**/*.test.ts', '**/*.test.tsx'],
+    languageOptions: {
+      globals: {
+        ...globals.jest,
+      },
+    },
+  }
+);

@@ -145,7 +145,7 @@ describe('DetailsService', () => {
     expect(result[1].address).toBe('0xC');
     expect(result[2].address).toBe('0xD');
     expect(result.length).toBe(5);
-    expect(getOperatorsSpy).toBeCalledWith(
+    expect(getOperatorsSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         first: 5,
       }),

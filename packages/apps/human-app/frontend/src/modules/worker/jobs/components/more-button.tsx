@@ -1,4 +1,3 @@
-/* eslint-disable camelcase -- ...*/
 import { useState } from 'react';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import { Button, MenuList, ListItemButton, Popover } from '@mui/material';
@@ -34,7 +33,7 @@ export function MoreButton({ job, isDisabled }: MoreButtonProps) {
         oracle_address: oracleAddress ?? '',
         assignment_id: job.assignment_id,
       });
-    } catch (error) {
+    } catch {
       showNotification({
         message: 'Something went wrong',
         type: TopNotificationType.WARNING,
@@ -71,7 +70,9 @@ export function MoreButton({ job, isDisabled }: MoreButtonProps) {
           color: '#858ec6',
         }}
         onClick={(e) => {
-          !isDisabled && setAnchorEl(e.currentTarget);
+          if (!isDisabled) {
+            setAnchorEl(e.currentTarget);
+          }
         }}
       >
         <MoreHorizIcon />

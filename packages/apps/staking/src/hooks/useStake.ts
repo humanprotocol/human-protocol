@@ -19,7 +19,7 @@ export const useStake = () => {
   const { showError, openSnackbar } = useSnackbar();
 
   const [stakingClient, setStakingClient] = useState<StakingClient | null>(
-    null
+    null,
   );
   const [stakingData, setStakingData] = useState<StakerInfo | null>(null);
   const [tokenBalance, setTokenBalance] = useState<number>(0);
@@ -33,7 +33,7 @@ export const useStake = () => {
           checkSupportedChain();
           const eeip193Provider = await connector?.getProvider();
           const provider = new ethers.BrowserProvider(
-            eeip193Provider as Eip1193Provider
+            eeip193Provider as Eip1193Provider,
           );
           setBrowserProvider(provider);
           const signer = await provider.getSigner();
@@ -58,7 +58,7 @@ export const useStake = () => {
     if (!isSupportedChain) {
       resetData();
       throw new Error(
-        'Unsupported chain. Please switch to a supported network.'
+        'Unsupported chain. Please switch to a supported network.',
       );
     }
   };
@@ -73,7 +73,7 @@ export const useStake = () => {
     try {
       const stakingInfo = await stakingClient.getStakerInfo(address!);
       setStakingData(stakingInfo);
-    } catch (error) {
+    } catch {
       showError('Error fetching staking data');
     }
   };
@@ -81,7 +81,7 @@ export const useStake = () => {
   const fetchTokenBalance = async (
     provider: ethers.BrowserProvider,
     address: string,
-    chainId?: number
+    chainId?: number,
   ) => {
     checkSupportedChain();
     try {
@@ -94,12 +94,12 @@ export const useStake = () => {
       const tokenContract = new ethers.Contract(
         tokenAddress,
         HMTokenABI,
-        provider
+        provider,
       );
       const balance = await tokenContract.balanceOf(address);
 
       setTokenBalance(formatAmount(balance));
-    } catch (error) {
+    } catch {
       showError('Error fetching token balance');
     }
   };

@@ -206,7 +206,7 @@ describe('WebhookService', () => {
         .mockResolvedValue('');
       await expect(
         (webhookService as any).sendWebhook(webhookEntity),
-      ).rejects.toThrowError(ErrorWebhook.UrlNotFound);
+      ).rejects.toThrow(ErrorWebhook.UrlNotFound);
     });
 
     it('should handle error if any exception is thrown', async () => {
@@ -218,7 +218,7 @@ describe('WebhookService', () => {
       });
       await expect(
         (webhookService as any).sendWebhook(webhookEntity),
-      ).rejects.toThrowError('HTTP request failed');
+      ).rejects.toThrow('HTTP request failed');
     });
 
     it('should successfully process a webhook with signature', async () => {
@@ -295,7 +295,7 @@ describe('WebhookService', () => {
           ChainId.LOCALHOST,
           EventType.ESCROW_CREATED,
         ),
-      ).rejects.toThrowError('Invalid outgoing event type');
+      ).rejects.toThrow('Invalid outgoing event type');
     });
 
     it('should throw NotFoundError if operator is not found', async () => {
