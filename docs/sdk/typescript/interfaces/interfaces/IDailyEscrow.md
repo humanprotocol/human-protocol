@@ -6,7 +6,7 @@
 
 # Interface: IDailyEscrow
 
-Defined in: [interfaces.ts:232](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L232)
+Defined in: [interfaces.ts:232](https://github.com/humanprotocol/human-protocol/blob/0661934b14ae802af3f939783433c196862268e2/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L232)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [interfaces.ts:232](https://github.com/humanprotocol/human-protocol/
 
 > **escrowsCancelled**: `number`
 
-Defined in: [interfaces.ts:238](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L238)
+Defined in: [interfaces.ts:238](https://github.com/humanprotocol/human-protocol/blob/0661934b14ae802af3f939783433c196862268e2/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L238)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [interfaces.ts:238](https://github.com/humanprotocol/human-protocol/
 
 > **escrowsPaid**: `number`
 
-Defined in: [interfaces.ts:237](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L237)
+Defined in: [interfaces.ts:237](https://github.com/humanprotocol/human-protocol/blob/0661934b14ae802af3f939783433c196862268e2/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L237)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [interfaces.ts:237](https://github.com/humanprotocol/human-protocol/
 
 > **escrowsPending**: `number`
 
-Defined in: [interfaces.ts:235](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L235)
+Defined in: [interfaces.ts:235](https://github.com/humanprotocol/human-protocol/blob/0661934b14ae802af3f939783433c196862268e2/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L235)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [interfaces.ts:235](https://github.com/humanprotocol/human-protocol/
 
 > **escrowsSolved**: `number`
 
-Defined in: [interfaces.ts:236](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L236)
+Defined in: [interfaces.ts:236](https://github.com/humanprotocol/human-protocol/blob/0661934b14ae802af3f939783433c196862268e2/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L236)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [interfaces.ts:236](https://github.com/humanprotocol/human-protocol/
 
 > **escrowsTotal**: `number`
 
-Defined in: [interfaces.ts:234](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L234)
+Defined in: [interfaces.ts:234](https://github.com/humanprotocol/human-protocol/blob/0661934b14ae802af3f939783433c196862268e2/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L234)
 
 ***
 
@@ -54,4 +54,4 @@ Defined in: [interfaces.ts:234](https://github.com/humanprotocol/human-protocol/
 
 > **timestamp**: `number`
 
-Defined in: [interfaces.ts:233](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L233)
+Defined in: [interfaces.ts:233](https://github.com/humanprotocol/human-protocol/blob/0661934b14ae802af3f939783433c196862268e2/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L233)

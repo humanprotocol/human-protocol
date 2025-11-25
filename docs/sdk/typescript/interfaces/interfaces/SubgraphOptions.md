@@ -6,7 +6,7 @@
 
 # Interface: SubgraphOptions
 
-Defined in: [interfaces.ts:319](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L319)
+Defined in: [interfaces.ts:319](https://github.com/humanprotocol/human-protocol/blob/0661934b14ae802af3f939783433c196862268e2/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L319)
 
 Configuration options for subgraph requests with retry logic.
 
@@ -16,9 +16,20 @@ Configuration options for subgraph requests with retry logic.
 
 > `optional` **baseDelay**: `number`
 
-Defined in: [interfaces.ts:323](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L323)
+Defined in: [interfaces.ts:323](https://github.com/humanprotocol/human-protocol/blob/0661934b14ae802af3f939783433c196862268e2/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L323)
 
 Base delay between retries in milliseconds
+
+***
+
+### indexerId?
+
+> `optional` **indexerId**: `string`
+
+Defined in: [interfaces.ts:328](https://github.com/humanprotocol/human-protocol/blob/0661934b14ae802af3f939783433c196862268e2/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L328)
+
+Optional indexer identifier. When provided, requests target
+`{gateway}/deployments/id/<DEPLOYMENT_ID>/indexers/id/<INDEXER_ID>`.
 
 ***
 
@@ -26,6 +37,6 @@ Base delay between retries in milliseconds
 
 > `optional` **maxRetries**: `number`
 
-Defined in: [interfaces.ts:321](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L321)
+Defined in: [interfaces.ts:321](https://github.com/humanprotocol/human-protocol/blob/0661934b14ae802af3f939783433c196862268e2/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L321)
 
 Maximum number of retry attempts
