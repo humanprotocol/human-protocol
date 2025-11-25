@@ -1,10 +1,5 @@
 import { createMock } from '@golevelup/ts-jest';
-import {
-  Encryption,
-  EscrowClient,
-  OperatorUtils,
-  StorageClient,
-} from '@human-protocol/sdk';
+import { Encryption, EscrowClient, OperatorUtils } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
@@ -36,6 +31,7 @@ import { S3ConfigService } from '../../common/config/s3-config.service';
 import { ErrorJob, ErrorAssignment } from '../../common/constant/errors';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
+import { downloadFileFromUrl } from '../../common/utils/storage';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -45,12 +41,13 @@ jest.mock('@human-protocol/sdk', () => ({
   OperatorUtils: {
     getOperator: jest.fn(),
   },
-  StorageClient: {
-    downloadFileFromUrl: jest.fn(),
-  },
   Encryption: {
     build: jest.fn(),
   },
+}));
+jest.mock('../../common/utils/storage', () => ({
+  ...jest.requireActual('../../common/utils/storage'),
+  downloadFileFromUrl: jest.fn(),
 }));
 jest.mock('minio', () => {
   class Client {
@@ -442,6 +439,7 @@ describe('JobService', () => {
   });
 
   describe('solveJob', () => {
+    const downloadFileFromUrlMock = jest.mocked(downloadFileFromUrl);
     const assignment = {
       id: 1,
       jobId: 1,
@@ -480,9 +478,7 @@ describe('JobService', () => {
 
       storageService.downloadJobSolutions = jest.fn().mockResolvedValueOnce([]);
 
-      StorageClient.downloadFileFromUrl = jest
-        .fn()
-        .mockResolvedValueOnce(manifest);
+      downloadFileFromUrlMock.mockResolvedValueOnce(manifest);
 
       const solutionsUrl =
         'http://localhost:9000/solution/0x1234567890123456789012345678901234567890-1.json';
@@ -547,9 +543,7 @@ describe('JobService', () => {
         },
       ]);
 
-      StorageClient.downloadFileFromUrl = jest
-        .fn()
-        .mockResolvedValueOnce(manifest);
+      downloadFileFromUrlMock.mockResolvedValueOnce(manifest);
 
       (Encryption.build as any).mockImplementation(() => ({
         decrypt: jest.fn().mockResolvedValue(JSON.stringify(manifest)),
@@ -582,9 +576,7 @@ describe('JobService', () => {
         },
       ]);
 
-      StorageClient.downloadFileFromUrl = jest
-        .fn()
-        .mockResolvedValueOnce(manifest);
+      downloadFileFromUrlMock.mockResolvedValueOnce(manifest);
 
       (Encryption.build as any).mockImplementation(() => ({
         decrypt: jest.fn().mockResolvedValue(JSON.stringify(manifest)),

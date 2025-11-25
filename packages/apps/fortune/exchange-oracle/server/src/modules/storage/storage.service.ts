@@ -4,11 +4,11 @@ import {
   EncryptionUtils,
   EscrowClient,
   KVStoreUtils,
-  StorageClient,
 } from '@human-protocol/sdk';
 import { Inject, Injectable } from '@nestjs/common';
 import * as Minio from 'minio';
 
+import { downloadFileFromUrl } from '../../common/utils/storage';
 import logger from '../../logger';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { S3ConfigService } from '../../common/config/s3-config.service';
@@ -49,7 +49,7 @@ export class StorageService {
   ): Promise<ISolution[]> {
     const url = this.getJobUrl(escrowAddress, chainId);
     try {
-      const fileContent = await StorageClient.downloadFileFromUrl(url);
+      const fileContent = await downloadFileFromUrl(url);
       if (EncryptionUtils.isEncrypted(fileContent)) {
         const encryption = await Encryption.build(
           this.pgpConfigService.privateKey!,

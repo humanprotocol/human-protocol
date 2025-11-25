@@ -6,7 +6,6 @@ import {
   KVStoreKeys,
   KVStoreUtils,
   NETWORKS,
-  StorageParams,
 } from '@human-protocol/sdk';
 import { Inject, Injectable } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
@@ -84,7 +83,6 @@ import { JobRepository } from './job.repository';
 @Injectable()
 export class JobService {
   private readonly logger = logger.child({ context: JobService.name });
-  public readonly storageParams: StorageParams;
   public readonly bucket: string;
   private cronJobRepository: CronJobRepository;
 
