@@ -387,7 +387,7 @@ export class EncryptionUtils {
     const { privateKey, publicKey, revocationCertificate } =
       await openpgp.generateKey({
         type: 'ecc',
-        curve: 'ed25519',
+        curve: 'ed25519Legacy',
         userIDs: [{ name: name, email: email }],
         passphrase: passphrase,
         format: 'armored',
