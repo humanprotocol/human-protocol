@@ -742,7 +742,7 @@ describe('StripeService', () => {
 
       await expect(
         service.getReceiptUrl(mockPaymentIntent.id, customerId),
-      ).rejects.toThrow(new NotFoundError(ErrorPayment.NotFound));
+      ).rejects.toThrow(new ServerError(ErrorPayment.NotFound));
     });
   });
 

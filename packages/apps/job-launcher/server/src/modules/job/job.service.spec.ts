@@ -983,9 +983,7 @@ describe('JobService', () => {
           jobEntityMock.userId,
           jobEntityMock.id,
         ),
-      ).rejects.toThrow(
-        new ValidationError(ErrorJob.InvalidStatusCancellation),
-      );
+      ).rejects.toThrow(new ConflictError(ErrorJob.InvalidStatusCancellation));
     });
   });
 
@@ -1034,9 +1032,7 @@ describe('JobService', () => {
           ChainId.POLYGON_AMOY,
           jobEntityMock.escrowAddress!,
         ),
-      ).rejects.toThrow(
-        new ValidationError(ErrorJob.InvalidStatusCancellation),
-      );
+      ).rejects.toThrow(new ConflictError(ErrorJob.InvalidStatusCancellation));
       expect(mockWeb3Service.validateChainId).toHaveBeenCalledWith(
         ChainId.POLYGON_AMOY,
       );
@@ -1446,7 +1442,7 @@ describe('JobService', () => {
           escrowAddress: '0x',
           eventData: { reason: faker.lorem.sentence() },
         }),
-      ).rejects.toThrow(new ValidationError(ErrorJob.NotLaunched));
+      ).rejects.toThrow(new ConflictError(ErrorJob.NotLaunched));
     });
 
     it('should throw an error if event data is missing', async () => {

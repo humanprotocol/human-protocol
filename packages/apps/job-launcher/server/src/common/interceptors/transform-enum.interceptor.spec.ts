@@ -102,7 +102,7 @@ describe('TransformEnumInterceptor', () => {
       status: 'paid',
       userType: 'operator',
     });
-    expect(callHandler.handle).toBeCalled(); // Ensure the handler is called
+    expect(callHandler.handle).toHaveBeenCalled(); // Ensure the handler is called
   });
 
   it('should throw an error if the query value is not a valid enum', async () => {
@@ -143,7 +143,7 @@ describe('TransformEnumInterceptor', () => {
       amount: 5,
       address: '0xCf88b3f1992458C2f5a229573c768D0E9F70C44e',
     });
-    expect(callHandler.handle).toBeCalled(); // Ensure the handler is called
+    expect(callHandler.handle).toHaveBeenCalled(); // Ensure the handler is called
   });
 
   it('should throw an error if the value is not a valid enum', async () => {
@@ -182,7 +182,7 @@ describe('TransformEnumInterceptor', () => {
     expect(request.body.address).toBe(
       '0xCf88b3f1992458C2f5a229573c768D0E9F70C44e',
     ); // Non-enum string should remain unchanged
-    expect(callHandler.handle).toBeCalled();
+    expect(callHandler.handle).toHaveBeenCalled();
   });
 
   it('should handle nested objects with enums', async () => {

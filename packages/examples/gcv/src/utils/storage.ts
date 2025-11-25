@@ -78,7 +78,7 @@ export async function listObjectsInBucket(url: URL): Promise<string[]> {
     if (response.status === HttpStatus.OK && response.data) {
       parseString(response.data, (err: any, result: any) => {
         if (err) {
-          reject(err);
+          throw new Error(err);
         }
         nextContinuationToken = result.ListBucketResult.NextContinuationToken
           ? result.ListBucketResult.NextContinuationToken[0]
