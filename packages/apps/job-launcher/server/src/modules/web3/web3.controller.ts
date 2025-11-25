@@ -52,7 +52,7 @@ export class Web3Controller {
   })
   @Public()
   @Get('/operator-address')
-  getOperatorAddress(): string {
+  async getOperatorAddress(): Promise<string> {
     return this.web3Service.getOperatorAddress();
   }
 
