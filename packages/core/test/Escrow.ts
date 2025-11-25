@@ -465,7 +465,9 @@ describe('Escrow', function () {
         await escrow.connect(launcher).requestCancellation();
         await expect(storeResults())
           .to.emit(escrow, 'IntermediateStorage')
-          .withArgs(FIXTURE_URL, FIXTURE_HASH);
+          .withArgs(FIXTURE_URL, FIXTURE_HASH)
+          .to.emit(escrow, 'CancellationRefund')
+          .withArgs(FIXTURE_FUND_AMOUNT);
         expect(await escrow.intermediateResultsUrl()).to.equal(FIXTURE_URL);
         expect(await escrow.status()).to.equal(Status.Cancelled);
         expect(await escrow.remainingFunds()).to.equal(ethers.parseEther('0'));
@@ -491,7 +493,9 @@ describe('Escrow', function () {
           storeResults(FIXTURE_URL, FIXTURE_HASH, ethers.parseEther('0'), admin)
         )
           .to.emit(escrow, 'IntermediateStorage')
-          .withArgs(FIXTURE_URL, FIXTURE_HASH);
+          .withArgs(FIXTURE_URL, FIXTURE_HASH)
+          .to.emit(escrow, 'CancellationRefund')
+          .withArgs(FIXTURE_FUND_AMOUNT);
         expect(await escrow.intermediateResultsUrl()).to.equal(FIXTURE_URL);
         expect(await escrow.status()).to.equal(Status.Cancelled);
         expect(await escrow.remainingFunds()).to.equal(ethers.parseEther('0'));
@@ -1565,10 +1569,11 @@ describe('Escrow', function () {
             escrow.getAddress()
           );
 
-          await expect(escrow.connect(reputationOracle).cancel()).to.emit(
-            escrow,
-            'Cancelled'
-          );
+          await expect(escrow.connect(reputationOracle).cancel())
+            .to.emit(escrow, 'CancellationRefund')
+            .withArgs(initialEscrowBalance)
+            .to.emit(escrow, 'Cancelled');
+
           expect(await escrow.status()).to.equal(Status.Cancelled);
 
           expect(await escrow.remainingFunds()).to.equal('0');
@@ -1586,10 +1591,11 @@ describe('Escrow', function () {
             escrow.getAddress()
           );
 
-          await expect(escrow.connect(admin).cancel()).to.emit(
-            escrow,
-            'Cancelled'
-          );
+          await expect(escrow.connect(admin).cancel())
+            .to.emit(escrow, 'CancellationRefund')
+            .withArgs(initialEscrowBalance)
+            .to.emit(escrow, 'Cancelled');
+
           expect(await escrow.status()).to.equal(Status.Cancelled);
 
           expect(await escrow.remainingFunds()).to.equal('0');
@@ -1609,10 +1615,11 @@ describe('Escrow', function () {
 
           await storeResults(FIXTURE_URL, FIXTURE_HASH, initialEscrowBalance);
 
-          await expect(escrow.connect(reputationOracle).cancel()).to.emit(
-            escrow,
-            'Cancelled'
-          );
+          await expect(escrow.connect(reputationOracle).cancel())
+            .to.emit(escrow, 'CancellationRefund')
+            .withArgs(initialEscrowBalance)
+            .to.emit(escrow, 'Cancelled');
+
           expect(await escrow.status()).to.equal(Status.Cancelled);
 
           expect(await escrow.remainingFunds()).to.equal('0');
@@ -1632,10 +1639,11 @@ describe('Escrow', function () {
 
           await storeResults(FIXTURE_URL, FIXTURE_HASH, initialEscrowBalance);
 
-          await expect(escrow.connect(admin).cancel()).to.emit(
-            escrow,
-            'Cancelled'
-          );
+          await expect(escrow.connect(admin).cancel())
+            .to.emit(escrow, 'CancellationRefund')
+            .withArgs(initialEscrowBalance)
+            .to.emit(escrow, 'Cancelled');
+
           expect(await escrow.status()).to.equal(Status.Cancelled);
 
           expect(await escrow.remainingFunds()).to.equal('0');
@@ -1660,10 +1668,11 @@ describe('Escrow', function () {
               'bulkPayOut(address[],uint256[],string,string,string,bool)'
             ]([externalAddress], [initialEscrowBalance / 2n], FIXTURE_URL, FIXTURE_HASH, '000', false);
 
-          await expect(escrow.connect(reputationOracle).cancel()).to.emit(
-            escrow,
-            'Cancelled'
-          );
+          await expect(escrow.connect(reputationOracle).cancel())
+            .to.emit(escrow, 'CancellationRefund')
+            .withArgs(initialEscrowBalance / 2n)
+            .to.emit(escrow, 'Cancelled');
+
           expect(await escrow.status()).to.equal(Status.Cancelled);
 
           expect(await escrow.remainingFunds()).to.equal('0');
@@ -1688,10 +1697,11 @@ describe('Escrow', function () {
               'bulkPayOut(address[],uint256[],string,string,string,bool)'
             ]([externalAddress], [initialEscrowBalance / 2n], FIXTURE_URL, FIXTURE_HASH, '000', false);
 
-          await expect(escrow.connect(admin).cancel()).to.emit(
-            escrow,
-            'Cancelled'
-          );
+          await expect(escrow.connect(admin).cancel())
+            .to.emit(escrow, 'CancellationRefund')
+            .withArgs(initialEscrowBalance / 2n)
+            .to.emit(escrow, 'Cancelled');
+
           expect(await escrow.status()).to.equal(Status.Cancelled);
 
           expect(await escrow.remainingFunds()).to.equal('0');
