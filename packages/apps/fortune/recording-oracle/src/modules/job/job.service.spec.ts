@@ -156,9 +156,9 @@ describe('JobService', () => {
         eventData: { solutionsUrl: MOCK_FILE_URL },
       };
 
-      await expect(
-        jobService.processJobSolution(jobSolution),
-      ).rejects.toThrowError(ErrorJob.AddressMismatches);
+      await expect(jobService.processJobSolution(jobSolution)).rejects.toThrow(
+        ErrorJob.AddressMismatches,
+      );
     });
 
     it('should throw bad request exception when escrow status is not pending', async () => {
@@ -175,9 +175,9 @@ describe('JobService', () => {
         eventData: { solutionsUrl: MOCK_FILE_URL },
       };
 
-      await expect(
-        jobService.processJobSolution(jobSolution),
-      ).rejects.toThrowError(ErrorJob.InvalidStatus);
+      await expect(jobService.processJobSolution(jobSolution)).rejects.toThrow(
+        ErrorJob.InvalidStatus,
+      );
     });
 
     it('should throw bad request exception when manifest is invalid', async () => {
@@ -202,9 +202,9 @@ describe('JobService', () => {
         eventData: { solutionsUrl: MOCK_FILE_URL },
       };
 
-      await expect(
-        jobService.processJobSolution(jobSolution),
-      ).rejects.toThrowError(ErrorJob.InvalidManifest);
+      await expect(jobService.processJobSolution(jobSolution)).rejects.toThrow(
+        ErrorJob.InvalidManifest,
+      );
     });
 
     it('should throw bad request exception when manifest contains an invalid job type', async () => {
@@ -231,9 +231,9 @@ describe('JobService', () => {
         eventData: { solutionsUrl: MOCK_FILE_URL },
       };
 
-      await expect(
-        jobService.processJobSolution(jobSolution),
-      ).rejects.toThrowError(ErrorJob.InvalidJobType);
+      await expect(jobService.processJobSolution(jobSolution)).rejects.toThrow(
+        ErrorJob.InvalidJobType,
+      );
     });
 
     it('should throw bad request exception when all solutions have already been sent', async () => {
@@ -293,9 +293,9 @@ describe('JobService', () => {
         eventData: { solutionsUrl: MOCK_FILE_URL },
       };
 
-      await expect(
-        jobService.processJobSolution(newSolution),
-      ).rejects.toThrowError(ErrorJob.AllSolutionsHaveAlreadyBeenSent);
+      await expect(jobService.processJobSolution(newSolution)).rejects.toThrow(
+        ErrorJob.AllSolutionsHaveAlreadyBeenSent,
+      );
     });
 
     it('should throw bad request exception when webhook was not sent', async () => {

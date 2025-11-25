@@ -1,4 +1,5 @@
 import { createMock } from '@golevelup/ts-jest';
+import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import { Encryption, EscrowClient, OperatorUtils } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
@@ -9,6 +10,9 @@ import {
   MOCK_MANIFEST_URL,
   mockConfig,
 } from '../../../test/constants';
+import { PGPConfigService } from '../../common/config/pgp-config.service';
+import { S3ConfigService } from '../../common/config/s3-config.service';
+import { ErrorAssignment, ErrorJob } from '../../common/constant/errors';
 import {
   AssignmentStatus,
   JobFieldName,
@@ -16,6 +20,12 @@ import {
   JobType,
 } from '../../common/enums/job';
 import { EventType, WebhookStatus } from '../../common/enums/webhook';
+import {
+  ConflictError,
+  ServerError,
+  ValidationError,
+} from '../../common/errors';
+import { downloadFileFromUrl } from '../../common/utils/storage';
 import { AssignmentEntity } from '../assignment/assignment.entity';
 import { AssignmentRepository } from '../assignment/assignment.repository';
 import { StorageService } from '../storage/storage.service';
@@ -26,12 +36,6 @@ import { ManifestDto } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
 import { JobService } from './job.service';
-import { PGPConfigService } from '../../common/config/pgp-config.service';
-import { S3ConfigService } from '../../common/config/s3-config.service';
-import { ErrorJob, ErrorAssignment } from '../../common/constant/errors';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { HMToken__factory } from '@human-protocol/core/typechain-types';
-import { downloadFileFromUrl } from '../../common/utils/storage';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -248,17 +252,17 @@ describe('JobService', () => {
       );
     });
 
-    it('should throw NotFoundException if job does not exist', async () => {
+    it('should throw ServerError if job does not exist', async () => {
       jest
         .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddressWithAssignments')
         .mockResolvedValue(null);
 
       await expect(jobService.completeJob(webhook)).rejects.toThrow(
-        new NotFoundException(ErrorJob.NotFound),
+        new ServerError(ErrorJob.NotFound),
       );
     });
 
-    it('should throw BadRequestException if job is already completed', async () => {
+    it('should throw ConflictError if job is already completed', async () => {
       const jobEntity = new JobEntity();
       jobEntity.chainId = chainId;
       jobEntity.escrowAddress = escrowAddress;
@@ -269,7 +273,7 @@ describe('JobService', () => {
         .mockResolvedValue(jobEntity);
 
       await expect(jobService.completeJob(webhook)).rejects.toThrow(
-        new BadRequestException(ErrorJob.AlreadyCompleted),
+        new ConflictError(ErrorJob.AlreadyCompleted),
       );
     });
   });
@@ -322,17 +326,17 @@ describe('JobService', () => {
       );
     });
 
-    it('should throw NotFoundException if job does not exist', async () => {
+    it('should throw ServerError if job does not exist', async () => {
       jest
         .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddressWithAssignments')
         .mockResolvedValue(null);
 
       await expect(jobService.cancelJob(webhook)).rejects.toThrow(
-        new NotFoundException(ErrorJob.NotFound),
+        new ServerError(ErrorJob.NotFound),
       );
     });
 
-    it('should throw BadRequestException if job is already canceled', async () => {
+    it('should throw ConflictError if job is already canceled', async () => {
       const jobEntity = new JobEntity();
       jobEntity.chainId = chainId;
       jobEntity.escrowAddress = escrowAddress;
@@ -343,7 +347,7 @@ describe('JobService', () => {
         .mockResolvedValue(jobEntity);
 
       await expect(jobService.cancelJob(webhook)).rejects.toThrow(
-        new BadRequestException(ErrorJob.AlreadyCanceled),
+        new ConflictError(ErrorJob.AlreadyCanceled),
       );
     });
   });
@@ -509,7 +513,7 @@ describe('JobService', () => {
       assignment.status = AssignmentStatus.CANCELED;
 
       await expect(jobService.solveJob(1, 'solution')).rejects.toThrow(
-        new BadRequestException(ErrorAssignment.InvalidStatus),
+        new ConflictError(ErrorAssignment.InvalidStatus),
       );
       expect(web3Service.getSigner).toHaveBeenCalledWith(chainId);
     });
@@ -583,7 +587,7 @@ describe('JobService', () => {
       }));
 
       await expect(jobService.solveJob(1, 'solution')).rejects.toThrow(
-        new BadRequestException(ErrorJob.SolutionAlreadySubmitted),
+        new ValidationError(ErrorJob.SolutionAlreadySubmitted),
       );
       expect(web3Service.getSigner).toHaveBeenCalledWith(chainId);
     });

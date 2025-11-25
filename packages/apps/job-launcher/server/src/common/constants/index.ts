@@ -37,8 +37,6 @@ export const CANCEL_JOB_STATUSES = [
   JobStatus.PAID,
   JobStatus.FAILED,
   JobStatus.LAUNCHED,
-  JobStatus.FUNDED,
-  JobStatus.CREATED,
   JobStatus.PARTIAL,
 ];
 

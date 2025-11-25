@@ -1,7 +1,7 @@
 {
   "name": "@human-protocol/sdk",
   "description": "Human Protocol SDK",
-  "version": "5.1.0",
+  "version": "5.2.0",
   "files": [
     "src",
     "dist"
@@ -42,9 +42,9 @@
     "axios": "^1.4.0",
     "ethers": "~6.15.0",
     "graphql": "^16.8.1",
-    "graphql-request": "^6.1.0",
+    "graphql-request": "^7.3.4",
     "graphql-tag": "^2.12.6",
-    "openpgp": "^5.11.2",
+    "openpgp": "^6.2.2",
     "secp256k1": "^5.0.1",
     "validator": "^13.12.0",
     "vitest": "^3.0.9"

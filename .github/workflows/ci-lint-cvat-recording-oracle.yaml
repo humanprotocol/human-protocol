@@ -19,7 +19,7 @@ jobs:
     name: CVAT Recording Oracle Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:

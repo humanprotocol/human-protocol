@@ -1,6 +1,6 @@
 {
   "name": "@human-protocol/logger",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "description": "Unified logging package for HUMAN Protocol",
   "type": "commonjs",
   "main": "dist/index.js",

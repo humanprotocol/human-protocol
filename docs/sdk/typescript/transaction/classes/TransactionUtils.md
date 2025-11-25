@@ -6,7 +6,7 @@
 
 # Class: TransactionUtils
 
-Defined in: [transaction.ts:23](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L23)
+Defined in: [transaction.ts:22](https://github.com/humanprotocol/human-protocol/blob/0661934b14ae802af3f939783433c196862268e2/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L22)
 
 ## Constructors
 
@@ -24,7 +24,7 @@ Defined in: [transaction.ts:23](https://github.com/humanprotocol/human-protocol/
 
 > `static` **getTransaction**(`chainId`, `hash`, `options?`): `Promise`\<[`ITransaction`](../../interfaces/interfaces/ITransaction.md) \| `null`\>
 
-Defined in: [transaction.ts:68](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L68)
+Defined in: [transaction.ts:67](https://github.com/humanprotocol/human-protocol/blob/0661934b14ae802af3f939783433c196862268e2/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L67)
 
 This function returns the transaction data for the given hash.
 
@@ -96,7 +96,7 @@ const transaction = await TransactionUtils.getTransaction(ChainId.POLYGON, '0x62
 
 > `static` **getTransactions**(`filter`, `options?`): `Promise`\<[`ITransaction`](../../interfaces/interfaces/ITransaction.md)[]\>
 
-Defined in: [transaction.ts:170](https://github.com/humanprotocol/human-protocol/blob/61aec7f941934ccbea233e5338eb9fedacd0b20e/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L170)
+Defined in: [transaction.ts:169](https://github.com/humanprotocol/human-protocol/blob/0661934b14ae802af3f939783433c196862268e2/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L169)
 
 This function returns all transaction details based on the provided filter.
 

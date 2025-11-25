@@ -33,14 +33,14 @@ jobs:
       NPM_PUBLISH_TAG: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.npm_tag || 'latest' }}
       PUSH_GIT_TAGS: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.push_git_tags || 'true' }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           token: ${{ secrets.GH_GITBOOK_TOKEN }}
       - name: Setup git identity
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version-file: .nvmrc
           cache: yarn

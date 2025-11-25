@@ -1,7 +1,7 @@
 {
   "name": "@human-protocol/core",
   "description": "Human Protocol Core Smart Contracts",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "files": [
     "contracts/**/*.sol",
     "abis/**/*.json",
@@ -79,7 +79,7 @@
     "hardhat-contract-sizer": "^2.6.1",
     "hardhat-dependency-compiler": "^1.2.1",
     "hardhat-gas-reporter": "^2.0.2",
-    "openpgp": "5.11.2",
+    "openpgp": "6.2.2",
     "prettier": "^3.4.2",
     "prettier-plugin-solidity": "^1.3.1",
     "solidity-coverage": "^0.8.16",
