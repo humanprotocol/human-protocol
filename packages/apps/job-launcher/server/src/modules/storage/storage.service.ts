@@ -127,6 +127,7 @@ export class StorageService {
         this.s3ConfigService.bucket,
         fileKey,
         fileContents,
+        undefined,
         {
           'Content-Type': contentType,
           'Cache-Control': 'no-store',

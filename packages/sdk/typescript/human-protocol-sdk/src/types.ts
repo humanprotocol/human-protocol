@@ -37,63 +37,6 @@ export enum EscrowStatus {
 }
 
 /**
- * AWS/GCP cloud storage access data
- * @readonly
- * @deprecated StorageClient is deprecated. Use Minio.Client directly.
- */
-export type StorageCredentials = {
-  /**
-   * Access Key
-   */
-  accessKey: string;
-  /**
-   * Secret Key
-   */
-  secretKey: string;
-};
-
-/**
- * @deprecated StorageClient is deprecated. Use Minio.Client directly.
- */
-export type StorageParams = {
-  /**
-   * Request endPoint
-   */
-  endPoint: string;
-  /**
-   * Enable secure (HTTPS) access. Default value set to false
-   */
-  useSSL: boolean;
-  /**
-   * Region
-   */
-  region?: string;
-  /**
-   * TCP/IP port number. Default value set to 80 for HTTP and 443 for HTTPs
-   */
-  port?: number;
-};
-
-/**
- * Upload file data
- * @readonly
- */
-export type UploadFile = {
-  /**
-   * Uploaded object key
-   */
-  key: string;
-  /**
-   * Uploaded object URL
-   */
-  url: string;
-  /**
-   * Hash of uploaded object key
-   */
-  hash: string;
-};
-
-/**
  * Network data
  */
 export type NetworkData = {

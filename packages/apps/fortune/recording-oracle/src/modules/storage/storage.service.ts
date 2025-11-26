@@ -4,7 +4,6 @@ import {
   EncryptionUtils,
   EscrowClient,
   KVStoreUtils,
-  StorageClient,
 } from '@human-protocol/sdk';
 import { Inject, Injectable } from '@nestjs/common';
 import crypto from 'crypto';
@@ -15,6 +14,7 @@ import { ServerError, ValidationError } from '../../common/errors';
 import { ISolution } from '../../common/interfaces/job';
 import { SaveSolutionsDto } from '../job/job.dto';
 import { Web3Service } from '../web3/web3.service';
+import { downloadFileFromUrl } from '../../common/utils/storage';
 
 @Injectable()
 export class StorageService {
@@ -42,7 +42,7 @@ export class StorageService {
 
   public async download(url: string): Promise<any> {
     try {
-      const fileContent = await StorageClient.downloadFileFromUrl(url);
+      const fileContent = await downloadFileFromUrl(url);
 
       if (
         typeof fileContent === 'string' &&
@@ -126,6 +126,7 @@ export class StorageService {
         this.s3ConfigService.bucket,
         `${hash}.json`,
         fileToUpload,
+        undefined,
         {
           'Content-Type': 'application/json',
           'Cache-Control': 'no-store',

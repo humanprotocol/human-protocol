@@ -5,7 +5,6 @@ import {
   EscrowClient,
   EscrowStatus,
   KVStoreUtils,
-  StorageClient,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
@@ -36,6 +35,7 @@ import { Web3Service } from '../web3/web3.service';
 import { WebhookDto } from '../webhook/webhook.dto';
 import { JobService } from './job.service';
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
+import { downloadFileFromUrl } from '@/common/utils/storage';
 
 jest.mock('minio', () => {
   class Client {
@@ -51,19 +51,16 @@ jest.mock('minio', () => {
   return { Client };
 });
 
+jest.mock('@/common/utils/storage', () => ({
+  ...jest.requireActual('@/common/utils/storage'),
+  downloadFileFromUrl: jest.fn(),
+}));
+
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
   EscrowClient: {
     build: jest.fn().mockImplementation(() => ({})),
   },
-  StorageClient: jest.fn().mockImplementation(() => ({
-    downloadFileFromUrl: jest.fn().mockResolvedValue(
-      JSON.stringify({
-        submissionsRequired: 3,
-        requestType: JobRequestType.FORTUNE,
-      }),
-    ),
-  })),
   KVStoreUtils: {
     get: jest.fn(),
     getPublicKey: jest.fn().mockResolvedValue('publicKey'),
@@ -75,6 +72,7 @@ jest.mock('@human-protocol/sdk', () => ({
 
 describe('JobService', () => {
   let jobService: JobService;
+  const downloadFileFromUrlMock = jest.mocked(downloadFileFromUrl);
 
   jest
     .spyOn(Web3ConfigService.prototype, 'privateKey', 'get')
@@ -193,9 +191,9 @@ describe('JobService', () => {
         getManifest: jest.fn().mockResolvedValue('http://example.com/manifest'),
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
-      StorageClient.downloadFileFromUrl = jest
-        .fn()
-        .mockResolvedValue(JSON.stringify(invalidManifest));
+      downloadFileFromUrlMock.mockResolvedValue(
+        JSON.stringify(invalidManifest),
+      );
 
       const jobSolution: WebhookDto = {
         escrowAddress: MOCK_ADDRESS,
@@ -221,9 +219,9 @@ describe('JobService', () => {
         getManifest: jest.fn().mockResolvedValue('http://example.com/manifest'),
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
-      StorageClient.downloadFileFromUrl = jest
-        .fn()
-        .mockResolvedValue(JSON.stringify(invalidManifest));
+      downloadFileFromUrlMock.mockResolvedValue(
+        JSON.stringify(invalidManifest),
+      );
       EncryptionUtils.isEncrypted = jest.fn().mockReturnValueOnce(false);
 
       const jobSolution: WebhookDto = {
@@ -283,8 +281,7 @@ describe('JobService', () => {
         },
       ];
 
-      StorageClient.downloadFileFromUrl = jest
-        .fn()
+      downloadFileFromUrlMock
         .mockResolvedValueOnce(JSON.stringify(manifest))
         .mockResolvedValueOnce(JSON.stringify(existingJobSolutions))
         .mockResolvedValue(JSON.stringify(exchangeJobSolutions));
@@ -341,8 +338,7 @@ describe('JobService', () => {
         },
       ];
 
-      StorageClient.downloadFileFromUrl = jest
-        .fn()
+      downloadFileFromUrlMock
         .mockResolvedValueOnce(JSON.stringify(manifest))
         .mockResolvedValueOnce(JSON.stringify(existingJobSolutions))
         .mockResolvedValue(JSON.stringify(exchangeJobSolutions));
@@ -403,8 +399,7 @@ describe('JobService', () => {
         },
       ];
 
-      StorageClient.downloadFileFromUrl = jest
-        .fn()
+      downloadFileFromUrlMock
         .mockResolvedValueOnce(JSON.stringify(manifest))
         .mockResolvedValueOnce(JSON.stringify(existingJobSolutions))
         .mockResolvedValue(JSON.stringify(exchangeJobSolutions));
@@ -464,8 +459,7 @@ describe('JobService', () => {
         },
       ];
 
-      StorageClient.downloadFileFromUrl = jest
-        .fn()
+      downloadFileFromUrlMock
         .mockResolvedValueOnce(JSON.stringify(manifest))
         .mockResolvedValueOnce(JSON.stringify(existingJobSolutions))
         .mockResolvedValue(JSON.stringify(exchangeJobSolutions));
@@ -555,8 +549,7 @@ describe('JobService', () => {
         solution: 'Solution 4',
       },
     ];
-    StorageClient.downloadFileFromUrl = jest
-      .fn()
+    downloadFileFromUrlMock
       .mockResolvedValueOnce(JSON.stringify(manifest))
       .mockResolvedValueOnce(JSON.stringify(existingJobSolutions))
       .mockResolvedValue(JSON.stringify(exchangeJobSolutions));
@@ -633,8 +626,7 @@ describe('JobService', () => {
         solution: 'Solution 2',
       },
     ];
-    StorageClient.downloadFileFromUrl = jest
-      .fn()
+    downloadFileFromUrlMock
       .mockResolvedValueOnce(JSON.stringify(manifest))
       .mockResolvedValueOnce(JSON.stringify(existingJobSolutions))
       .mockResolvedValue(JSON.stringify(exchangeJobSolutions));
@@ -716,8 +708,7 @@ describe('JobService', () => {
         solution: 'ass',
       },
     ];
-    StorageClient.downloadFileFromUrl = jest
-      .fn()
+    downloadFileFromUrlMock
       .mockResolvedValueOnce(JSON.stringify(manifest))
       .mockResolvedValueOnce(JSON.stringify(existingJobSolutions))
       .mockResolvedValue(JSON.stringify(exchangeJobSolutions));

@@ -1,9 +1,4 @@
-import {
-  ChainId,
-  KVStoreKeys,
-  KVStoreUtils,
-  StorageClient,
-} from '@human-protocol/sdk';
+import { ChainId, KVStoreKeys, KVStoreUtils } from '@human-protocol/sdk';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { HttpException, Inject, Injectable } from '@nestjs/common';
 import { Cache } from 'cache-manager';
@@ -14,6 +9,7 @@ import {
   ORACLE_URL_CACHE_KEY,
   REPUTATION_ORACLE_PUBLIC_KEY,
 } from '../../common/constants/cache';
+import { downloadFileFromUrl } from '../../common/utils/storage';
 
 @Injectable()
 export class KvStoreGateway {
@@ -119,7 +115,7 @@ export class KvStoreGateway {
         address,
         JWT_KVSTORE_KEY,
       );
-      publicKey = (await StorageClient.downloadFileFromUrl(url)) as string;
+      publicKey = (await downloadFileFromUrl(url)) as string;
     } catch (e) {
       if (e.toString().includes('Error: Invalid address')) {
         throw new HttpException(
