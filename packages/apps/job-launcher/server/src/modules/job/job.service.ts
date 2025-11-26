@@ -960,7 +960,7 @@ export class JobService {
         const value = decoded.value as bigint;
         if (
           from.toLowerCase() === escrowAddress.toLowerCase() &&
-          to.toLowerCase() === signer.address.toLowerCase()
+          to.toLowerCase() === (await signer.getAddress()).toLowerCase()
         ) {
           return value;
         }
