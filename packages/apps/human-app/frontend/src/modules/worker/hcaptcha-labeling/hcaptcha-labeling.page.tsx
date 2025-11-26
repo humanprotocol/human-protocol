@@ -145,10 +145,13 @@ export function HcaptchaLabelingPage() {
               <Grid container sx={{ width: '100%', justifyContent: 'center' }}>
                 <HCaptcha
                   custom
-                  sitekey={user.site_key || env.VITE_H_CAPTCHA_SITE_KEY}
-                  theme={isDarkMode ? 'dark' : 'light'}
+                  // @ts-expect-error -- this props are not defined by TS by are used for enterprise version: https://github.com/hCaptcha/react-hcaptcha?tab=readme-ov-file#references
+                  endpoint={env.VITE_H_CAPTCHA_EXCHANGE_URL}
                   onVerify={hcaptchaOnSuccess}
                   ref={captchaRef}
+                  reportapi={env.VITE_H_CAPTCHA_LABELING_BASE_URL}
+                  sitekey={user.site_key ?? ''}
+                  theme={isDarkMode ? 'dark' : 'light'}
                 />
               </Grid>
             ) : (
