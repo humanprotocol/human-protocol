@@ -1,4 +1,4 @@
-import { faker } from '@faker-js/faker/.';
+import { faker } from '@faker-js/faker';
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import { ChainId, OperatorUtils, Role } from '@human-protocol/sdk';
 import { ConfigService } from '@nestjs/config';
