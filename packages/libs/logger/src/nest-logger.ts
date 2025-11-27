@@ -4,7 +4,10 @@ import type { LoggerService } from '@nestjs/common';
 import { Logger, LogLevel, LogMeta } from './types';
 
 class NestLogger implements LoggerService {
-  constructor(private readonly loggerInstance: Logger) {}
+  constructor(
+    private readonly loggerInstance: Logger,
+    readonly contextsToIgnore: string[] = [],
+  ) {}
 
   log(message: any, ...optionalParams: any[]) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
@@ -60,7 +63,7 @@ class NestLogger implements LoggerService {
     message: unknown,
     ...optionalParams: unknown[]
   ): void {
-    const logMeta: LogMeta = {};
+    const logMeta: LogMeta & { context?: string } = {};
 
     let params: unknown[] = [];
     // Nest always add "context" as last param
@@ -72,6 +75,10 @@ class NestLogger implements LoggerService {
       } else {
         params = optionalParams;
       }
+    }
+
+    if (logMeta.context && this.contextsToIgnore.includes(logMeta.context)) {
+      return;
     }
 
     // Case when Nest logs something other than context
