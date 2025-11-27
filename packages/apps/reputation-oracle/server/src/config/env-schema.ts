@@ -81,10 +81,23 @@ export const envValidator = Joi.object({
   KYC_BASE_URL: Joi.string().uri({ scheme: ['http', 'https'] }),
   // Human App
   HUMAN_APP_SECRET_KEY: Joi.string().required(),
+  // Staking configuration
+  STAKING_ASSET: Joi.string().description(
+    'Asset symbol to check for staking (default HMT)',
+  ),
+  STAKING_MIN_THRESHOLD: Joi.number()
+    .min(0)
+    .description('Minimum asset amount to qualify as staked'),
+  STAKING_TIMEOUT_MS: Joi.number()
+    .integer()
+    .min(100)
+    .description('HTTP timeout for exchange staking checks in ms'),
   // Slack notifications
   ABUSE_SLACK_WEBHOOK_URL: Joi.string()
     .uri({ scheme: ['http', 'https'] })
     .required(),
   ABUSE_SLACK_OAUTH_TOKEN: Joi.string().required(),
   ABUSE_SLACK_SIGNING_SECRET: Joi.string().required(),
+  // Encryption
+  AES_ENCRYPTION_KEY: Joi.string().required().length(32),
 });

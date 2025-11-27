@@ -95,6 +95,11 @@ import {
   ReportAbuseParams,
   ReportedAbuseResponse,
 } from '../../modules/abuse/model/abuse.model';
+import { HttpMethod } from '../../common/enums/http-method';
+import {
+  EnrollExchangeApiKeysCommand,
+  EnrollExchangeApiKeysData,
+} from '../../modules/exchange-api-keys/model/exchange-api-keys.model';
 
 @Injectable()
 export class ReputationOracleGateway {
@@ -135,6 +140,44 @@ export class ReputationOracleGateway {
   ): Promise<T> {
     const response = await lastValueFrom(this.httpService.request(options));
     return response.data as T;
+  }
+
+  async enrollExchangeApiKeys(
+    command: EnrollExchangeApiKeysCommand,
+  ): Promise<{ id: number }> {
+    const enrollExchangeApiKeysData = this.mapper.map(
+      command,
+      EnrollExchangeApiKeysCommand,
+      EnrollExchangeApiKeysData,
+    );
+    const options = this.getEndpointOptions(
+      ReputationOracleEndpoints.EXCHANGE_API_KEYS_ENROLL,
+      enrollExchangeApiKeysData,
+      command.token,
+    );
+    options.url = `${options.url}/${command.exchangeName}`;
+    return this.handleRequestToReputationOracle<{ id: number }>(options);
+  }
+
+  async deleteExchangeApiKeys(token: string) {
+    const options = this.getEndpointOptions(
+      ReputationOracleEndpoints.EXCHANGE_API_KEYS_DELETE,
+      undefined,
+      token,
+    );
+    options.method = HttpMethod.DELETE;
+    return this.handleRequestToReputationOracle<void>(options);
+  }
+
+  async retrieveExchangeApiKeys(token: string): Promise<{ apiKey: string }> {
+    const options = this.getEndpointOptions(
+      ReputationOracleEndpoints.EXCHANGE_API_KEYS_RETRIEVE,
+      undefined,
+      token,
+    );
+    return this.handleRequestToReputationOracle<{
+      apiKey: string;
+    }>(options);
   }
   async sendWorkerSignup(command: SignupWorkerCommand): Promise<void> {
     const signupWorkerData = this.mapper.map(

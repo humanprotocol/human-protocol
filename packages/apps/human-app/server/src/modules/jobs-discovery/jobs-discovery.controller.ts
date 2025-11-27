@@ -51,6 +51,18 @@ export class JobsDiscoveryController {
         HttpStatus.FORBIDDEN,
       );
     }
+
+    // Require stake eligibility
+    if (!req.user?.is_stake_eligible) {
+      return {
+        page: 0,
+        page_size: 1,
+        total_pages: 1,
+        total_results: 0,
+        results: [],
+      };
+    }
+
     // TODO: temporal - THIRSTYFI
     if (
       jobsDiscoveryParamsDto.oracle_address ===

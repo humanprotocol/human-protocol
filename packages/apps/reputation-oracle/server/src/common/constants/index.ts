@@ -15,3 +15,8 @@ export const RESEND_EMAIL_VERIFICATION_PATH =
 export const LOGOUT_PATH = '/auth/logout';
 
 export const BACKOFF_INTERVAL_SECONDS = 120;
+
+export const SUPPORTED_EXCHANGE_NAMES = ['mexc', 'gate'] as const;
+export type SupportedExchange = (typeof SUPPORTED_EXCHANGE_NAMES)[number];
+
+export const DEFAULT_TIMEOUT_MS = 5000;

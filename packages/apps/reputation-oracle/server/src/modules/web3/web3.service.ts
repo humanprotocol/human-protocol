@@ -1,9 +1,10 @@
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
-import { ChainId } from '@human-protocol/sdk';
+import { ChainId, StakingClient } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 import { Wallet, ethers } from 'ethers';
 
 import { Web3ConfigService, Web3Network } from '@/config';
+import logger from '@/logger';
 
 import type { Chain, WalletWithProvider } from './types';
 
@@ -22,6 +23,9 @@ export class Web3Service {
   private signersByChainId: {
     [chainId: number]: WalletWithProvider;
   } = {};
+  private readonly logger = logger.child({
+    context: Web3Service.name,
+  });
 
   constructor(private readonly web3ConfigService: Web3ConfigService) {
     const privateKey = this.web3ConfigService.privateKey;
@@ -103,6 +107,24 @@ export class Web3Service {
       return decimals;
     } catch (noop) {
       throw new Error('Failed to fetch token decimals');
+    }
+  }
+
+  async getStakedBalance(address: string): Promise<number> {
+    try {
+      const chainId = this.web3ConfigService.reputationNetworkChainId;
+      const provider = this.getSigner(chainId).provider;
+
+      const stakingClient = await StakingClient.build(provider);
+      const stakerInfo = await stakingClient.getStakerInfo(address);
+
+      const total =
+        (stakerInfo.stakedAmount ?? 0n) + (stakerInfo.lockedAmount ?? 0n);
+      return Number(ethers.formatEther(total));
+    } catch (error) {
+      const message = 'Failed to fetch staked balance';
+      this.logger.error(message, { address, error });
+      throw new Error(message);
     }
   }
 }

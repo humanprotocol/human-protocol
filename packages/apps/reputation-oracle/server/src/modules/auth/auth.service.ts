@@ -2,15 +2,19 @@ import { KVStoreKeys, KVStoreUtils, Role } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
+import { SupportedExchange } from '@/common/constants';
 import { SignatureType, UserRole, UserStatus } from '@/common/enums';
 import {
   AuthConfigService,
   NDAConfigService,
   ServerConfigService,
+  StakingConfigService,
   Web3ConfigService,
 } from '@/config';
 import logger from '@/logger';
 import { EmailAction, EmailService } from '@/modules/email';
+import { ExchangeClientFactory } from '@/modules/exchange/exchange-client.factory';
+import { ExchangeApiKeysService } from '@/modules/exchange-api-keys';
 import {
   OperatorStatus,
   SiteKeyRepository,
@@ -21,6 +25,7 @@ import {
   type OperatorUserEntity,
   type Web2UserEntity,
 } from '@/modules/user';
+import { Web3Service } from '@/modules/web3';
 import * as httpUtils from '@/utils/http';
 import * as securityUtils from '@/utils/security';
 import * as web3Utils from '@/utils/web3';
@@ -55,7 +60,11 @@ export class AuthService {
     private readonly tokenRepository: TokenRepository,
     private readonly userRepository: UserRepository,
     private readonly userService: UserService,
+    private readonly exchangeApiKeysService: ExchangeApiKeysService,
+    private readonly exchangeClientFactory: ExchangeClientFactory,
+    private readonly stakingConfigService: StakingConfigService,
     private readonly web3ConfigService: Web3ConfigService,
+    private readonly web3Service: Web3Service,
   ) {}
 
   async signup(email: string, password: string): Promise<void> {
@@ -244,6 +253,8 @@ export class AuthService {
       hCaptchaSiteKey = hCaptchaSiteKeys[0].siteKey;
     }
 
+    const stakeEligible = await this.checkStakeEligible(userEntity);
+
     const jwtPayload = {
       email: userEntity.email,
       status: userEntity.status,
@@ -253,6 +264,7 @@ export class AuthService {
       kyc_status: userEntity.kyc?.status,
       nda_signed:
         userEntity.ndaSignedUrl === this.ndaConfigService.latestNdaUrl,
+      is_stake_eligible: stakeEligible,
       reputation_network: this.web3ConfigService.operatorAddress,
       qualifications: userEntity.userQualifications
         ? userEntity.userQualifications.map(
@@ -263,6 +275,51 @@ export class AuthService {
     };
 
     return this.generateTokens(userEntity.id, jwtPayload);
+  }
+
+  private async checkStakeEligible(
+    userEntity: Web2UserEntity | UserEntity,
+  ): Promise<boolean> {
+    if (!this.stakingConfigService.eligibilityEnabled) return true;
+
+    const apiKeys = await this.exchangeApiKeysService.retrieve(userEntity.id);
+
+    let inspectedStakeAmount = 0;
+
+    if (apiKeys) {
+      try {
+        const client = await this.exchangeClientFactory.create(
+          apiKeys.exchangeName as SupportedExchange,
+          {
+            apiKey: apiKeys.apiKey,
+            secretKey: apiKeys.secretKey,
+          },
+          { timeoutMs: this.stakingConfigService.timeoutMs },
+        );
+        const exchangeBalance = await client.getAccountBalance(
+          this.stakingConfigService.asset,
+        );
+        inspectedStakeAmount += exchangeBalance;
+      } catch (err) {
+        this.logger.warn('Failed to query exchange balance; continuing', {
+          userId: userEntity.id,
+          exchangeName: apiKeys.exchangeName,
+          error: err,
+        });
+      }
+    }
+
+    if (
+      inspectedStakeAmount < this.stakingConfigService.minThreshold &&
+      userEntity.evmAddress
+    ) {
+      const onChainStake = await this.web3Service.getStakedBalance(
+        userEntity.evmAddress,
+      );
+      inspectedStakeAmount += onChainStake;
+    }
+
+    return inspectedStakeAmount >= this.stakingConfigService.minThreshold;
   }
 
   async web3Auth(userEntity: OperatorUserEntity): Promise<AuthTokens> {

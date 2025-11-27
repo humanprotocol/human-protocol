@@ -13,6 +13,7 @@ import { TokenEntity } from '@/modules/auth/token.entity';
 import { CronJobEntity } from '@/modules/cron-job/cron-job.entity';
 import { EscrowCompletionEntity } from '@/modules/escrow-completion/escrow-completion.entity';
 import { EscrowPayoutsBatchEntity } from '@/modules/escrow-completion/escrow-payouts-batch.entity';
+import { ExchangeApiKeyEntity } from '@/modules/exchange-api-keys';
 import { KycEntity } from '@/modules/kyc/kyc.entity';
 import { QualificationEntity } from '@/modules/qualification/qualification.entity';
 import { UserQualificationEntity } from '@/modules/qualification/user-qualification.entity';
@@ -71,6 +72,7 @@ import { TypeOrmLoggerModule, TypeOrmLoggerService } from './typeorm';
             OutgoingWebhookEntity,
             EscrowCompletionEntity,
             EscrowPayoutsBatchEntity,
+            ExchangeApiKeyEntity,
             ReputationEntity,
             TokenEntity,
             UserEntity,

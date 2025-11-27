@@ -11,13 +11,18 @@ import { SignatureType, UserStatus, UserRole } from '@/common/enums';
 import {
   AuthConfigService,
   NDAConfigService,
+  StakingConfigService,
   ServerConfigService,
   Web3ConfigService,
 } from '@/config';
 import { EmailAction, EmailService } from '@/modules/email';
+import { ExchangeClientFactory } from '@/modules/exchange';
+import type { ExchangeClient } from '@/modules/exchange/types';
+import { ExchangeApiKeysService } from '@/modules/exchange-api-keys';
 import { SiteKeyRepository } from '@/modules/user';
 import { UserEntity, UserRepository, UserService } from '@/modules/user';
 import { generateOperator, generateWorkerUser } from '@/modules/user/fixtures';
+import { Web3Service } from '@/modules/web3';
 import { mockWeb3ConfigService } from '@/modules/web3/fixtures';
 import * as secutiryUtils from '@/utils/security';
 import * as web3Utils from '@/utils/web3';
@@ -28,6 +33,7 @@ import * as AuthErrors from './auth.error';
 import { AuthService } from './auth.service';
 import { TokenEntity, TokenType } from './token.entity';
 import { TokenRepository } from './token.repository';
+import { generateExchangeApiKeysData } from '../exchange-api-keys/fixtures';
 
 const mockKVStoreUtils = jest.mocked(KVStoreUtils);
 
@@ -40,6 +46,12 @@ const mockAuthConfigService: Omit<AuthConfigService, 'configService'> = {
   verifyEmailTokenExpiresIn: 86400000,
   forgotPasswordExpiresIn: 86400000,
   humanAppSecretKey: faker.string.alphanumeric({ length: 42 }),
+};
+const mockStakingConfigService: Omit<StakingConfigService, 'configService'> = {
+  eligibilityEnabled: true,
+  minThreshold: 100,
+  asset: 'ETH',
+  timeoutMs: 2000,
 };
 
 const mockEmailService = createMock<EmailService>();
@@ -56,6 +68,9 @@ const mockSiteKeyRepository = createMock<SiteKeyRepository>();
 const mockTokenRepository = createMock<TokenRepository>();
 const mockUserRepository = createMock<UserRepository>();
 const mockUserService = createMock<UserService>();
+const mockExchangeApiKeysService = createMock<ExchangeApiKeysService>();
+const mockExchangeClientFactory = createMock<ExchangeClientFactory>();
+const mockWeb3Service = createMock<Web3Service>();
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -85,6 +100,13 @@ describe('AuthService', () => {
         { provide: UserRepository, useValue: mockUserRepository },
         { provide: UserService, useValue: mockUserService },
         { provide: Web3ConfigService, useValue: mockWeb3ConfigService },
+        {
+          provide: ExchangeApiKeysService,
+          useValue: mockExchangeApiKeysService,
+        },
+        { provide: ExchangeClientFactory, useValue: mockExchangeClientFactory },
+        { provide: StakingConfigService, useValue: mockStakingConfigService },
+        { provide: Web3Service, useValue: mockWeb3Service },
       ],
     }).compile();
 
@@ -626,6 +648,7 @@ describe('AuthService', () => {
         wallet_address: user.evmAddress,
         role: user.role,
         kyc_status: user.kyc?.status,
+        is_stake_eligible: true,
         nda_signed: user.ndaSignedUrl === mockNdaConfigService.latestNdaUrl,
         reputation_network: mockWeb3ConfigService.operatorAddress,
         qualifications: user.userQualifications
@@ -635,6 +658,11 @@ describe('AuthService', () => {
           : [],
       };
 
+      const spyOncheckStakeEligible = jest
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .spyOn(service as any, 'checkStakeEligible')
+        .mockImplementation();
+      spyOncheckStakeEligible.mockResolvedValueOnce(true);
       const spyOnGenerateTokens = jest
         .spyOn(service, 'generateTokens')
         .mockImplementation();
@@ -651,7 +679,138 @@ describe('AuthService', () => {
         expectedJwtPayload,
       );
 
+      expect(spyOncheckStakeEligible).toHaveBeenCalledTimes(1);
+
+      spyOncheckStakeEligible.mockRestore();
       spyOnGenerateTokens.mockRestore();
+    });
+  });
+
+  describe('checkStakeEligible', () => {
+    it('returns true when feature flag disabled', async () => {
+      const user = generateWorkerUser();
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (mockStakingConfigService as any).eligibilityEnabled = false;
+
+      const result = await service['checkStakeEligible'](user);
+
+      expect(result).toBe(true);
+      expect(mockExchangeApiKeysService.retrieve).not.toHaveBeenCalled();
+      expect(mockWeb3Service.getStakedBalance).not.toHaveBeenCalled();
+    });
+
+    it('returns true when exchange balance meets threshold (no on-chain call)', async () => {
+      const user = generateWorkerUser();
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (mockStakingConfigService as any).eligibilityEnabled = true;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (mockStakingConfigService as any).minThreshold = 1000;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (mockStakingConfigService as any).asset = 'HMT';
+
+      mockExchangeApiKeysService.retrieve.mockResolvedValueOnce(
+        generateExchangeApiKeysData(),
+      );
+
+      const mockClient = {
+        getAccountBalance: jest.fn().mockResolvedValue(1500),
+      };
+      mockExchangeClientFactory.create.mockResolvedValueOnce(
+        mockClient as unknown as ExchangeClient,
+      );
+
+      const result = await service['checkStakeEligible'](user);
+
+      expect(result).toBe(true);
+      expect(mockExchangeClientFactory.create).toHaveBeenCalledTimes(1);
+      expect(mockWeb3Service.getStakedBalance).not.toHaveBeenCalled();
+    });
+
+    it('returns true when exchange balance below threshold but on-chain makes up the difference', async () => {
+      const user = generateWorkerUser({
+        privateKey: generateEthWallet().privateKey,
+      });
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (mockStakingConfigService as any).eligibilityEnabled = true;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (mockStakingConfigService as any).minThreshold = 1000;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (mockStakingConfigService as any).asset = 'HMT';
+
+      mockExchangeApiKeysService.retrieve.mockResolvedValueOnce(
+        generateExchangeApiKeysData(),
+      );
+
+      const mockClient = {
+        getAccountBalance: jest.fn().mockResolvedValue(400),
+      };
+      mockExchangeClientFactory.create.mockResolvedValueOnce(
+        mockClient as unknown as ExchangeClient,
+      );
+      mockWeb3Service.getStakedBalance.mockResolvedValueOnce(600);
+
+      const result = await service['checkStakeEligible'](user);
+
+      expect(result).toBe(true);
+      expect(mockExchangeClientFactory.create).toHaveBeenCalledTimes(1);
+      expect(mockWeb3Service.getStakedBalance).toHaveBeenCalledTimes(1);
+      expect(mockWeb3Service.getStakedBalance).toHaveBeenCalledWith(
+        user.evmAddress,
+      );
+    });
+
+    it('returns false when no exchange keys and on-chain stake below threshold', async () => {
+      const user = generateWorkerUser({
+        privateKey: generateEthWallet().privateKey,
+      });
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (mockStakingConfigService as any).eligibilityEnabled = true;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (mockStakingConfigService as any).minThreshold = 1000;
+
+      mockExchangeApiKeysService.retrieve.mockResolvedValueOnce(null);
+      mockWeb3Service.getStakedBalance.mockResolvedValueOnce(500);
+
+      const result = await service['checkStakeEligible'](user);
+
+      expect(result).toBe(false);
+      expect(mockExchangeClientFactory.create).not.toHaveBeenCalled();
+      expect(mockWeb3Service.getStakedBalance).toHaveBeenCalledTimes(1);
+    });
+
+    it('continues on exchange error and returns based on on-chain stake', async () => {
+      const user = generateWorkerUser({
+        privateKey: generateEthWallet().privateKey,
+      });
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (mockStakingConfigService as any).eligibilityEnabled = true;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (mockStakingConfigService as any).minThreshold = 1000;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (mockStakingConfigService as any).asset = 'HMT';
+
+      mockExchangeApiKeysService.retrieve.mockResolvedValueOnce(
+        generateExchangeApiKeysData(),
+      );
+
+      const mockClient = {
+        getAccountBalance: jest.fn().mockRejectedValue(new Error('network')),
+      };
+      mockExchangeClientFactory.create.mockResolvedValueOnce(
+        mockClient as unknown as ExchangeClient,
+      );
+      mockWeb3Service.getStakedBalance.mockResolvedValueOnce(1200);
+
+      const result = await service['checkStakeEligible'](user);
+
+      expect(result).toBe(true);
+      expect(mockExchangeClientFactory.create).toHaveBeenCalledTimes(1);
+      expect(mockWeb3Service.getStakedBalance).toHaveBeenCalledTimes(1);
     });
   });
 
