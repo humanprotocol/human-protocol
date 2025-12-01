@@ -85,6 +85,12 @@ import { NestLogger } from '@human-protocol/logger';
 // initialize an overridden instance
 export const nestLoggerOverride = new NestLogger(
   defaultAppLogger.child({ name: 'NestLogger' }),
+  /**
+   * You may also want to disable logging from some noisy Nest.js contexts,
+   * e.g. app initialization logging.
+   * NOTE: it will disable logging on all levels for these contexts
+  */
+  ['InstanceLoader', 'RouterExplorer', 'RoutesResolver'],
 );
 
 
