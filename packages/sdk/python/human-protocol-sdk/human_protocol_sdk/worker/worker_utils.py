@@ -1,3 +1,18 @@
+"""Utility helpers for worker-related operations.
+
+Example:
+    ```python
+    from human_protocol_sdk.constants import ChainId
+    from human_protocol_sdk.worker import WorkerUtils, WorkerFilter
+
+    workers = WorkerUtils.get_workers(
+        WorkerFilter(chain_id=ChainId.POLYGON_AMOY)
+    )
+    for worker in workers:
+        print(f"{worker.address}: {worker.total_amount_received}")
+    ```
+"""
+
 import logging
 from typing import List, Optional
 
@@ -11,14 +26,21 @@ LOG = logging.getLogger("human_protocol_sdk.worker")
 
 
 class WorkerUtilsError(Exception):
-    """
-    Raised when an error occurs when getting data from subgraph.
-    """
+    """Exception raised when errors occur during worker data retrieval operations."""
 
     pass
 
 
 class WorkerData:
+    """Represents worker information retrieved from the subgraph.
+
+    Attributes:
+        id (str): Unique worker identifier.
+        address (str): Worker's Ethereum address.
+        total_amount_received (int): Total amount of HMT tokens received by the worker.
+        payout_count (int): Number of payouts the worker has received.
+    """
+
     def __init__(
         self,
         id: str,
@@ -26,15 +48,6 @@ class WorkerData:
         total_amount_received: str,
         payout_count: str,
     ):
-        """
-        Initializes a WorkerData instance.
-
-        :param id: Worker ID
-        :param address: Worker address
-        :param total_amount_received: Total amount received by the worker
-        :param payout_count: Number of payouts received by the worker
-        """
-
         self.id = id
         self.address = address
         self.total_amount_received = int(total_amount_received)
@@ -42,8 +55,10 @@ class WorkerData:
 
 
 class WorkerUtils:
-    """
-    A utility class that provides additional worker-related functionalities.
+    """Utility class providing worker-related query and data retrieval functions.
+
+    This class offers static methods to fetch worker data from the Human Protocol
+    subgraph, including filtered worker lists and individual worker details.
     """
 
     @staticmethod
@@ -51,12 +66,44 @@ class WorkerUtils:
         filter: WorkerFilter,
         options: Optional[SubgraphOptions] = None,
     ) -> List[WorkerData]:
-        """Get workers data of the protocol.
+        """Retrieve a list of workers matching the provided filter criteria.
 
-        :param filter: Worker filter
-        :param options: Optional config for subgraph requests
+        Queries the subgraph for workers based on the specified parameters including
+        address filters, ordering preferences, and pagination.
 
-        :return: List of workers data
+        Args:
+            filter (WorkerFilter): Filter parameters including chain ID, worker address,
+                ordering, and pagination options.
+            options (Optional[SubgraphOptions]): Optional configuration for subgraph requests
+                such as custom endpoints or timeout settings.
+
+        Returns:
+            List[WorkerData]: A list of worker records matching the filter criteria.
+                Returns an empty list if no matches are found.
+
+        Raises:
+            WorkerUtilsError: If the chain ID is not supported.
+
+        Example:
+            ```python
+            from human_protocol_sdk.constants import ChainId
+            from human_protocol_sdk.worker import WorkerUtils, WorkerFilter
+
+            # Get all workers
+            workers = WorkerUtils.get_workers(
+                WorkerFilter(chain_id=ChainId.POLYGON_AMOY)
+            )
+            for worker in workers:
+                print(f"{worker.address}: {worker.total_amount_received} HMT")
+
+            # Get specific worker
+            workers = WorkerUtils.get_workers(
+                WorkerFilter(
+                    chain_id=ChainId.POLYGON_AMOY,
+                    worker_address="0x1234567890123456789012345678901234567890",
+                )
+            )
+            ```
         """
 
         from human_protocol_sdk.gql.worker import get_workers_query
@@ -107,13 +154,35 @@ class WorkerUtils:
         worker_address: str,
         options: Optional[SubgraphOptions] = None,
     ) -> Optional[WorkerData]:
-        """Gets the worker details.
+        """Retrieve a single worker by their address.
 
-        :param chain_id: Network in which the worker exists
-        :param worker_address: Address of the worker
-        :param options: Optional config for subgraph requests
+        Fetches detailed information about a specific worker from the subgraph,
+        including their total earnings and payout history.
 
-        :return: Worker data if exists, otherwise None
+        Args:
+            chain_id (ChainId): Network where the worker has participated.
+            worker_address (str): Ethereum address of the worker.
+            options (Optional[SubgraphOptions]): Optional configuration for subgraph requests.
+
+        Returns:
+            Optional[WorkerData]: Worker data if found, otherwise ``None``.
+
+        Raises:
+            WorkerUtilsError: If the chain ID is not supported or the worker address is invalid.
+
+        Example:
+            ```python
+            from human_protocol_sdk.constants import ChainId
+            from human_protocol_sdk.worker import WorkerUtils
+
+            worker = WorkerUtils.get_worker(
+                ChainId.POLYGON_AMOY,
+                "0x1234567890123456789012345678901234567890",
+            )
+            if worker:
+                print(f"Total received: {worker.total_amount_received} HMT")
+                print(f"Payout count: {worker.payout_count}")
+            ```
         """
 
         from human_protocol_sdk.gql.worker import get_worker_query
@@ -123,7 +192,7 @@ class WorkerUtils:
             raise WorkerUtilsError("Unsupported Chain ID")
 
         if not Web3.is_address(worker_address):
-            raise WorkerUtilsError(f"Invalid operator address: {worker_address}")
+            raise WorkerUtilsError(f"Invalid worker address: {worker_address}")
 
         network = NETWORKS[chain_id]
         worker_data = custom_gql_fetch(

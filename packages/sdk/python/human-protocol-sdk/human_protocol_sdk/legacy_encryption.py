@@ -1,12 +1,31 @@
 """
-Legacy version of encryption module.
-Learn more about [encryption](human_protocol_sdk.encryption.md#human_protocol_sdk.encryption.Encryption).
+Legacy encryption utilities for backward compatibility.
+
+This module provides deprecated encryption functionality maintained for backward
+compatibility with older versions of the SDK. For new implementations, use the
+``human_protocol_sdk.encryption`` module instead.
+
+Warning:
+    This module is deprecated and will be removed in a future version.
+    Please migrate to ``human_protocol_sdk.encryption.Encryption`` and
+    ``human_protocol_sdk.encryption.EncryptionUtils``.
+
+Example:
+    ```python
+    # Deprecated - for backward compatibility only
+    from human_protocol_sdk.legacy_encryption import LegacyEncryption
+    
+    # Recommended - use this instead
+    from human_protocol_sdk.encryption import Encryption
+    ```
 """
 
+import warnings
 import hashlib
 import os
 import struct
 import typing as t
+from typing import Optional, List, Union
 
 from cryptography.hazmat.primitives import hashes, hmac
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -19,65 +38,60 @@ from eth_keys import (
     keys as eth_keys,
 )
 from eth_utils import int_to_big_endian
+from pgpy import PGPKey, PGPMessage
+from pgpy.constants import SymmetricKeyAlgorithm
+from pgpy.errors import PGPError
 
 
 class InvalidPublicKey(Exception):
-    """
-    A custom exception raised when trying to convert bytes
-    into an elliptic curve public key.
-    """
+    """Exception raised when converting bytes into an elliptic curve public key fails."""
 
     pass
 
 
 class DecryptionError(Exception):
-    """
-    Raised when a message could not be decrypted.
-    """
+    """Exception raised when a message could not be decrypted."""
 
     pass
 
 
 class Encryption:
-    """
-    Encryption class specialized in encrypting and decrypting a byte string.
+    """Encryption class specialized in encrypting and decrypting byte strings using ECIES.
+
+    This class implements Elliptic Curve Integrated Encryption Scheme (ECIES) using
+    SECP256K1 elliptic curve, AES256 cipher, and HMAC-SHA-256-32.
+
+    Attributes:
+        ELLIPTIC_CURVE (ec.EllipticCurve): SECP256K1 elliptic curve definition.
+        KEY_LEN (int): Key length for ECIES (32 bytes for AES256 and HMAC-SHA-256-32).
+        CIPHER: AES cipher algorithm definition.
+        MODE: CTR cipher mode definition.
+        PUBLIC_KEY_LEN (int): Length of public keys in uncompressed form (64 bytes).
     """
 
     ELLIPTIC_CURVE: ec.EllipticCurve = ec.SECP256K1()
-    """ Elliptic curve definition. """
-
     KEY_LEN = 32
-    """ ECIES using AES256 and HMAC-SHA-256-32 """
-
     CIPHER = AES
-    """ Cipher algorithm definition. """
-
     MODE = CTR
-    """ Cipher mode definition. """
-
     PUBLIC_KEY_LEN: int = 64
-    """
-    Length of public keys: 512 bit keys in uncompressed form, without
-    format byte
-    """
 
     @staticmethod
     def is_encrypted(data: bytes) -> bool:
-        """
-        Checks whether data is already encrypted by verifying ecies header.
+        """Check whether data is already encrypted by verifying ECIES header.
 
-        :param data: Data to be checked.
+        Args:
+            data (bytes): Data to be checked for encryption.
 
-        :return: True if data is encrypted, False otherwise.
+        Returns:
+            bool: ``True`` if data has valid ECIES header (starts with 0x04), ``False`` otherwise.
 
-        :example:
-            .. code-block:: python
+        Example:
+            ```python
+            from human_protocol_sdk.legacy_encryption import Encryption
 
-                from human_protocol_sdk.legacy_encryption import Encryption
-
-                encrypted_message_str = "0402f48d28d29ae3d681e4cbbe499be0803c2a9d94534d0a4501ab79fd531183fbd837a021c1c117f47737e71c430b9d33915615f68c8dcb5e2f4e4dda4c9415d20a8b5fad9770b14067f2dd31a141a8a8da1f56eb2577715409dbf3c39b9bfa7b90c1acd838fe147c95f0e1ca9359a4cfd52367a73a6d6c548b492faa"
-
-                is_encrypted = Encryption.is_encrypted(bytes.fromhex(encrypted_message_str))
+            encrypted_hex = "0402f48d28d29ae3d681e4cbbe499be0803c2a9d94534d0a4501ab79fd531183fbd837a021c1c117f47737e71c430b9d33915615f68c8dcb5e2f4e4dda4c9415d20a8b5fad9770b14067f2dd31a141a8a8da1f56eb2577715409dbf3c39b9bfa7b90c1acd838fe147c95f0e1ca9359a4cfd52367a73a6d6c548b492faa"
+            is_encrypted = Encryption.is_encrypted(bytes.fromhex(encrypted_hex))
+            ```
         """
         return data[:1] == b"\x04"
 
@@ -87,31 +101,39 @@ class Encryption:
         public_key: eth_datatypes.PublicKey,
         shared_mac_data: bytes = b"",
     ) -> bytes:
-        """
-        Encrypt data with ECIES method to the given public key
-        1) generate r = random value
-        2) generate shared-secret = kdf( ecdhAgree(r, P) )
-        3) generate R = rG [same op as generating a public key]
-        4) 0x04 || R || AsymmetricEncrypt(shared-secret, plaintext) || tag
+        """Encrypt data using ECIES method with the given public key.
 
-        :param data: Data to be encrypted
-        :param public_key: Public to be used to encrypt provided data.
-        :param shared_mac_data: shared mac additional data as suffix.
+        The encryption process follows these steps:
+        1. Generate random ephemeral private key r
+        2. Generate shared secret using ECDH key agreement
+        3. Derive encryption and MAC keys from shared secret
+        4. Generate ephemeral public key R = r*G
+        5. Encrypt data using AES256-CTR
+        6. Generate authentication tag using HMAC-SHA256
+        7. Return: 0x04 || R || IV || ciphertext || tag
 
-        :return: Encrypted byte string
+        Args:
+            data (bytes): Data to be encrypted.
+            public_key (eth_datatypes.PublicKey): Public key to encrypt data for.
+            shared_mac_data (bytes): Additional data to include in MAC computation. Defaults to empty bytes.
 
-        :example:
-            .. code-block:: python
+        Returns:
+            bytes: Encrypted message in ECIES format.
 
-                from human_protocol_sdk.legacy_encryption import Encryption
-                from eth_keys import datatypes
+        Raises:
+            DecryptionError: If key exchange fails or public key is invalid.
 
-                public_key_str = "0a1d228684bc8c8c7611df3264f04ebd823651acc46b28b3574d2e69900d5e34f04a26cf13237fa42ab23245b58060c239b356b0a276f57e8de1234c7100fcf9"
+        Example:
+            ```python
+            from human_protocol_sdk.legacy_encryption import Encryption
+            from eth_keys import datatypes
 
-                public_key = datatypes.PublicKey(bytes.fromhex(private_key_str))
+            public_key_hex = "0a1d228684bc8c8c7611df3264f04ebd823651acc46b28b3574d2e69900d5e34f04a26cf13237fa42ab23245b58060c239b356b0a276f57e8de1234c7100fcf9"
+            public_key = datatypes.PublicKey(bytes.fromhex(public_key_hex))
 
-                encryption = Encryption()
-                encrypted_message = encryption.encrypt(b'your message', public_key)
+            encryption = Encryption()
+            encrypted = encryption.encrypt(b'your message', public_key)
+            ```
         """
 
         # 1) generate r = random value
@@ -156,33 +178,39 @@ class Encryption:
         private_key: eth_datatypes.PrivateKey,
         shared_mac_data: bytes = b"",
     ) -> bytes:
-        """
-        Decrypt data with ECIES method using the given private key
-        1) generate shared-secret = kdf( ecdhAgree(myPrivKey, msg[1:65]) )
-        2) verify tag
-        3) decrypt
-        ecdhAgree(r, recipientPublic) == ecdhAgree(recipientPrivate, R)
-        [where R = r*G, and recipientPublic = recipientPrivate*G]
+        """Decrypt data using ECIES method with the given private key.
 
-        :param data: Data to be decrypted
-        :param private_key: Private key to be used in agreement.
-        :param shared_mac_data: shared mac additional data as suffix.
+        The decryption process follows these steps:
+        1. Extract ephemeral public key R from message
+        2. Generate shared secret using ECDH: ecdhAgree(privateKey, R)
+        3. Derive encryption and MAC keys from shared secret
+        4. Verify authentication tag
+        5. Decrypt ciphertext using AES256-CTR
 
-        :return: Decrypted byte string
+        Args:
+            data (bytes): Encrypted message in ECIES format.
+            private_key (eth_datatypes.PrivateKey): Private key to decrypt the data.
+            shared_mac_data (bytes): Additional data used in MAC computation. Defaults to empty bytes.
 
-        :example:
-            .. code-block:: python
+        Returns:
+            bytes: Decrypted plaintext data.
 
-                from human_protocol_sdk.legacy_encryption import Encryption
-                from eth_keys import datatypes
+        Raises:
+            DecryptionError: If ECIES header is invalid, tag verification fails,
+                key exchange fails, or decryption fails.
 
-                private_key_str = "9822f95dd945e373300f8c8459a831846eda97f314689e01f7cf5b8f1c2298b3"
-                encrypted_message_str = "0402f48d28d29ae3d681e4cbbe499be0803c2a9d94534d0a4501ab79fd531183fbd837a021c1c117f47737e71c430b9d33915615f68c8dcb5e2f4e4dda4c9415d20a8b5fad9770b14067f2dd31a141a8a8da1f56eb2577715409dbf3c39b9bfa7b90c1acd838fe147c95f0e1ca9359a4cfd52367a73a6d6c548b492faa"
+        Example:
+            ```python
+            from human_protocol_sdk.legacy_encryption import Encryption
+            from eth_keys import datatypes
 
-                private_key = datatypes.PrivateKey(bytes.fromhex(private_key_str))
+            private_key_hex = "9822f95dd945e373300f8c8459a831846eda97f314689e01f7cf5b8f1c2298b3"
+            encrypted_hex = "0402f48d28d29ae3d681e4cbbe499be0803c2a9d94534d0a4501ab79fd531183fbd837a021c1c117f47737e71c430b9d33915615f68c8dcb5e2f4e4dda4c9415d20a8b5fad9770b14067f2dd31a141a8a8da1f56eb2577715409dbf3c39b9bfa7b90c1acd838fe147c95f0e1ca9359a4cfd52367a73a6d6c548b492faa"
 
-                encryption = Encryption()
-                encrypted_message = encryption.decrypt(bytes.fromhex(encrypted_message_str), private_key)
+            private_key = datatypes.PrivateKey(bytes.fromhex(private_key_hex))
+            encryption = Encryption()
+            decrypted = encryption.decrypt(bytes.fromhex(encrypted_hex), private_key)
+            ```
         """
 
         if self.is_encrypted(data) is False:
@@ -232,26 +260,20 @@ class Encryption:
     def _process_key_exchange(
         self, private_key: eth_datatypes.PrivateKey, public_key: eth_datatypes.PublicKey
     ) -> bytes:
-        """
-        Performs a key exchange operation using the
-        ECDH (Elliptic-curve Diffie–Hellman) algorithm.
+        """Perform ECDH key exchange operation.
 
-        NIST SP 800-56a Concatenation Key Derivation Function
-        (see section 4) - Key agreement.
-        https://csrc.nist.gov/CSRC/media/Publications/sp/800-56a/archive/2006-05-03/documents/sp800-56-draft-jul2005.pdf
+        Implements NIST SP 800-56a Concatenation Key Derivation Function (section 4)
+        for key agreement using ECDH (Elliptic-curve Diffie-Hellman) algorithm.
 
+        Args:
+            private_key (eth_datatypes.PrivateKey): Private key for the initiator.
+            public_key (eth_datatypes.PublicKey): Public key for the responder.
 
-        A key establishment procedure where the resultant secret keying
-        material is a function of information contributed by two participants,
-        so that no party can predetermine the value of the secret keying
-        material independently from the contribut ions of the other parties.
-        Contrast with key transport.
+        Returns:
+            bytes: Shared secret key material resulting from the ECDH exchange.
 
-        :param private_key: Private key to be used in agreement (the initiator).
-        :param public_key: Public key to be exchanged (responder).
-
-        :return: Key material resulted of the exchange between two keys, assuming
-            that they derive the same key material
+        Raises:
+            InvalidPublicKey: If the public key cannot be converted to a valid elliptic curve point.
         """
 
         private_key_int = int(t.cast(int, private_key))
@@ -275,18 +297,18 @@ class Encryption:
             raise InvalidPublicKey(str(error)) from error
 
     def generate_private_key(self) -> eth_datatypes.PrivateKey:
-        """
-        Generates a new SECP256K1 private key and return it
+        """Generate a new SECP256K1 private key.
 
-        :return: New SECP256K1 private key.
+        Returns:
+            eth_datatypes.PrivateKey: Newly generated SECP256K1 private key.
 
-        :example:
-            .. code-block:: python
+        Example:
+            ```python
+            from human_protocol_sdk.legacy_encryption import Encryption
 
-                from human_protocol_sdk.legacy_encryption import Encryption
-
-                encryption = Encryption()
-                private_key = encryption.generate_private_key()
+            encryption = Encryption()
+            private_key = encryption.generate_private_key()
+            ```
         """
 
         key = ec.generate_private_key(curve=self.ELLIPTIC_CURVE)
@@ -296,41 +318,37 @@ class Encryption:
 
     @staticmethod
     def generate_public_key(private_key: bytes) -> eth_keys.PublicKey:
-        """
-        Generates a public key with combination to private key provided.
+        """Generate a public key from the given private key.
 
-        :param private_key: Private to be used to create public key.
+        Args:
+            private_key (bytes): Private key bytes to derive the public key from.
 
-        :return: Public key object.
+        Returns:
+            eth_keys.PublicKey: Public key object corresponding to the private key.
 
-        :example:
-            .. code-block:: python
+        Example:
+            ```python
+            from human_protocol_sdk.legacy_encryption import Encryption
 
-                from human_protocol_sdk.legacy_encryption import Encryption
-
-                private_key_str = "9822f95dd945e373300f8c8459a831846eda97f314689e01f7cf5b8f1c2298b3"
-
-                public_key = Encryption.generate_public_key(bytes.fromhex(private_key_str))
+            private_key_hex = "9822f95dd945e373300f8c8459a831846eda97f314689e01f7cf5b8f1c2298b3"
+            public_key = Encryption.generate_public_key(bytes.fromhex(private_key_hex))
+            ```
         """
 
         private_key_obj = eth_keys.PrivateKey(private_key)
         return private_key_obj.public_key
 
     def _get_key_derivation(self, key_material: bytes) -> bytes:
-        """
-        NIST SP 800-56a Concatenation Key Derivation Function
-        (see section 5.8.1) - KDF.
+        """Derive encryption and MAC keys from shared secret using KDF.
 
-        An Approved key derivation function (KDF) shall be used to derive
-        secret keying material from a shared secret.
+        Implements NIST SP 800-56a Concatenation Key Derivation Function (section 5.8.1).
+        Uses SHA256 hash to derive secret keying material from ECDH shared secret.
 
-        Pretty much copied from geth's implementation:
-        https://github.com/ethereum/go-ethereum/blob/673007d7aed1d2678ea3277eceb7b55dc29cf092/crypto/ecies/ecies.go#L167
+        Args:
+            key_material (bytes): Shared secret from ECDH key exchange.
 
-        :param key_material: Key material derived from ECDH (shared secret) exchange and
-            must be processed to deverive a key secret.
-
-        :return: Key secret derived - a called KDF
+        Returns:
+            bytes: Derived key secret (concatenation of encryption key and MAC key).
         """
 
         key = b""
@@ -350,7 +368,15 @@ class Encryption:
 
     @staticmethod
     def _hmac_sha256(key: bytes, msg: bytes) -> bytes:
-        """Generates hash MAC using SHA256 Hash Algorithm"""
+        """Generate HMAC using SHA256 hash algorithm.
+
+        Args:
+            key (bytes): HMAC key.
+            msg (bytes): Message to authenticate.
+
+        Returns:
+            bytes: HMAC-SHA256 digest.
+        """
 
         mac = hmac.HMAC(key, hashes.SHA256())
         mac.update(msg)
@@ -358,10 +384,11 @@ class Encryption:
 
     @staticmethod
     def _pad32(value: bytes) -> bytes:
-        """
-        :param value: Value to be add padding on the data.
+        """Pad value to 32 bytes with leading zeros.
 
-        :return: value with added code added.
-        """
+        Args:
+            value (bytes): Value to pad.
 
-        return value.rjust(32, b"\x00")
+        Returns:
+            bytes: Value padded to 32 bytes.
+        """

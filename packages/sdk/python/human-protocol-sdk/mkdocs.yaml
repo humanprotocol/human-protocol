@@ -61,7 +61,7 @@ plugins:
       handlers:
         python:
           options:
-            docstring_style: google      # or "numpy" / "restructuredtext"
+            docstring_style: google
             show_source: false
             separate_signature: true
             merge_init_into_class: true
@@ -73,6 +73,7 @@ nav:
   - Encryption: 
       - Encryption: encryption.md
       - Encryption Utils: encryption_utils.md
+      - LegacyEncryption: legacy_encryption.md
   - Escrow: 
       - EscrowClient: escrow_client.md
       - EscrowUtils: escrow_utils.md
@@ -85,10 +86,11 @@ nav:
       - StakingClient: staking_client.md
       - StakingUtils: staking_utils.md
   - Statistics:
-      - StatisticsClient: statistics_client.md
+      - StatisticsUtils: statistics_utils.md
   - Transaction: 
       - TransactionUtils: transaction_utils.md
-  - Worker: api/worker.md
-  - Core utilities: api/core.md
+  - Worker:
+      - WorkerUtils: worker_utils.md
+  - Core utilities: core.md
 extra_css:
   - overrides/assets/css/custom.css

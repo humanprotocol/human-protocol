@@ -59,20 +59,44 @@ LOG = logging.getLogger("human_protocol_sdk.kvstore")
 
 
 class KVStoreClientError(Exception):
-    """Raised when an error occurs while interacting with KVStore."""
+    """Exception raised when errors occur during KVStore operations."""
 
     pass
 
 
 class KVStoreClient:
-    """Manage KVStore interactions on the HUMAN network."""
+    """Client for interacting with the KVStore smart contract.
+
+    This client provides methods to read and write key-value pairs on-chain,
+    supporting both individual and bulk operations, as well as URL storage with
+    content hash verification.
+
+    Attributes:
+        w3 (Web3): Web3 instance configured for the target network.
+        network (dict): Network configuration for the current chain.
+        kvstore_contract (Contract): Contract instance for the KVStore.
+        gas_limit (Optional[int]): Optional gas limit for transactions.
+    """
 
     def __init__(self, web3: Web3, gas_limit: Optional[int] = None):
-        """Create a KVStore client.
+        """Initialize a KVStoreClient instance.
 
         Args:
-            web3: Web3 instance configured for the target network.
-            gas_limit: Optional gas limit for transactions.
+            web3 (Web3): Web3 instance configured for the target network.
+                Must have a valid provider and chain ID.
+            gas_limit (Optional[int]): Optional gas limit for transactions.
+
+        Raises:
+            KVStoreClientError: If chain ID is invalid or network configuration is missing.
+
+        Example:
+            ```python
+            from web3 import Web3
+            from human_protocol_sdk.kvstore import KVStoreClient
+
+            w3 = Web3(Web3.HTTPProvider("http://localhost:8545"))
+            kvstore_client = KVStoreClient(w3)
+            ```
         """
 
         # Initialize web3 instance
@@ -102,15 +126,20 @@ class KVStoreClient:
 
     @requires_signer
     def set(self, key: str, value: str, tx_options: Optional[TxParams] = None) -> None:
-        """Set the value of a key-value pair in the contract.
+        """Set a key-value pair in the KVStore contract.
+
+        Stores a single key-value pair on-chain associated with the sender's address.
 
         Args:
-            key: Key to set.
-            value: Value to assign.
-            tx_options: Optional transaction parameters.
+            key (str): Key to set (cannot be empty).
+            value (str): Value to assign to the key.
+            tx_options (Optional[TxParams]): Optional transaction parameters such as gas limit.
+
+        Returns:
+            None
 
         Raises:
-            KVStoreClientError: On invalid input or transaction failure.
+            KVStoreClientError: If the key is empty or the transaction fails.
 
         Example:
             ```python
@@ -133,15 +162,22 @@ class KVStoreClient:
     def set_bulk(
         self, keys: List[str], values: List[str], tx_options: Optional[TxParams] = None
     ) -> None:
-        """Set multiple key-value pairs in the contract.
+        """Set multiple key-value pairs in the KVStore contract.
+
+        Stores multiple key-value pairs on-chain in a single transaction,
+        all associated with the sender's address.
 
         Args:
-            keys: List of keys to set.
-            values: Corresponding list of values.
-            tx_options: Optional transaction parameters.
+            keys (List[str]): List of keys to set (no key can be empty).
+            values (List[str]): Corresponding list of values (must match keys length).
+            tx_options (Optional[TxParams]): Optional transaction parameters such as gas limit.
+
+        Returns:
+            None
 
         Raises:
-            KVStoreClientError: On invalid input or transaction failure.
+            KVStoreClientError: If any key is empty, arrays are empty, arrays have different
+                lengths, or the transaction fails.
 
         Example:
             ```python
@@ -174,19 +210,27 @@ class KVStoreClient:
         key: Optional[str] = "url",
         tx_options: Optional[TxParams] = None,
     ) -> None:
-        """Set a URL value and its hash for the sender address.
+        """Set a URL value and its content hash in the KVStore.
+
+        Fetches the content from the URL, computes its hash, and stores both
+        the URL and hash on-chain. The hash key is automatically generated
+        by appending ``_hash`` to the provided key.
 
         Args:
-            url: URL to set.
-            key: Configurable URL key (defaults to ``url``).
-            tx_options: Optional transaction parameters.
+            url (str): URL to store (must be valid and accessible).
+            key (Optional[str]): Configurable URL key. Defaults to ``"url"``.
+                The hash will be stored with key ``"{key}_hash"``.
+            tx_options (Optional[TxParams]): Optional transaction parameters such as gas limit.
+
+        Returns:
+            None
 
         Raises:
-            KVStoreClientError: If validation or transaction fails.
+            KVStoreClientError: If the URL is invalid, unreachable, or the transaction fails.
 
         Example:
             ```python
-            kvstore_client.set_file_url_and_hash("http://localhost")
+            kvstore_client.set_file_url_and_hash("http://localhost/manifest.json")
             kvstore_client.set_file_url_and_hash(
                 "https://linkedin.com/me", "linkedin_url"
             )
@@ -206,14 +250,19 @@ class KVStoreClient:
             handle_error(e, KVStoreClientError)
 
     def get(self, address: str, key: str) -> str:
-        """Get the value of a key-value pair in the contract.
+        """Get the value of a key-value pair from the KVStore.
+
+        Retrieves the value associated with a key for a specific address.
 
         Args:
-            address: Ethereum address associated with the key-value pair.
-            key: Key to retrieve.
+            address (str): Ethereum address associated with the key-value pair.
+            key (str): Key to retrieve (cannot be empty).
 
         Returns:
-            Value of the key-value pair if it exists.
+            str: Value of the key-value pair if it exists, empty string otherwise.
+
+        Raises:
+            KVStoreClientError: If the key is empty, address is invalid, or the query fails.
 
         Example:
             ```python
@@ -221,6 +270,7 @@ class KVStoreClient:
                 "0x62dD51230A30401C455c8398d06F85e4EaB6309f",
                 "Role",
             )
+            print(role)  # "RecordingOracle"
             ```
         """
 

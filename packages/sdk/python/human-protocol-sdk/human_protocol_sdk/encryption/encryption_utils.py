@@ -8,18 +8,29 @@ from pgpy.errors import PGPError
 
 
 class EncryptionUtils:
-    """Utility helpers for PGP encryption-related functionality."""
+    """Utility class providing static methods for PGP encryption operations.
+
+    This class offers helper methods for encrypting messages, verifying signatures,
+    extracting signed data, and checking message encryption status without requiring
+    a private key instance.
+    """
 
     @staticmethod
     def encrypt(message: str, public_keys: List[str]) -> str:
         """Encrypt a message using recipient public keys.
 
+        Encrypts a message so that only holders of the corresponding private keys
+        can decrypt it. Does not sign the message.
+
         Args:
-            message: Message to encrypt.
-            public_keys: Armored public keys of the recipients.
+            message (str): Plain text message to encrypt.
+            public_keys (List[str]): List of armored PGP public keys of the recipients.
 
         Returns:
-            Armored encrypted message.
+            str: Armored encrypted PGP message.
+
+        Raises:
+            PGPError: If encryption fails or public keys are invalid.
 
         Example:
             ```python
@@ -46,12 +57,25 @@ class EncryptionUtils:
     def verify(message: str, public_key: str) -> bool:
         """Verify the signature of a message.
 
+        Checks if a signed message has a valid signature from the holder of
+        the private key corresponding to the provided public key.
+
         Args:
-            message: Armored message to verify.
-            public_key: Armored public key.
+            message (str): Armored PGP message to verify.
+            public_key (str): Armored PGP public key to verify the signature against.
 
         Returns:
-            True if the signature is valid, False otherwise.
+            bool: ``True`` if the signature is valid, ``False`` otherwise.
+
+        Example:
+            ```python
+            from human_protocol_sdk.encryption import EncryptionUtils
+
+            is_valid = EncryptionUtils.verify(
+                signed_message,
+                "-----BEGIN PGP PUBLIC KEY BLOCK-----..."
+            )
+            ```
         """
         try:
             signed_message = (
@@ -67,11 +91,21 @@ class EncryptionUtils:
     def get_signed_data(message: str) -> str:
         """Extract the signed data from an armored signed message.
 
+        Retrieves the original message content from a PGP signed message without
+        verifying the signature.
+
         Args:
-            message: Armored message.
+            message (str): Armored PGP signed message.
 
         Returns:
-            Extracted signed data.
+            str: Extracted message content, or ``False`` if extraction fails.
+
+        Example:
+            ```python
+            from human_protocol_sdk.encryption import EncryptionUtils
+
+            original_message = EncryptionUtils.get_signed_data(signed_message)
+            ```
         """
         try:
             signed_message = (
@@ -83,13 +117,24 @@ class EncryptionUtils:
 
     @staticmethod
     def is_encrypted(message: str) -> bool:
-        """Check whether a provided message is armored and encrypted.
+        """Check whether a message is armored and encrypted.
+
+        Determines if the provided text is a valid PGP encrypted message by checking
+        the message header.
 
         Args:
-            message: Text to check.
+            message (str): Text to check for encryption.
 
         Returns:
-            True if the message is a PGP message, False otherwise.
+            bool: ``True`` if the message is a PGP encrypted message, ``False`` otherwise.
+
+        Example:
+            ```python
+            from human_protocol_sdk.encryption import EncryptionUtils
+
+            if EncryptionUtils.is_encrypted(some_text):
+                print("Message is encrypted")
+            ```
         """
         try:
             unarmored = PGPMessage.ascii_unarmor(message)

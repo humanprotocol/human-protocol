@@ -34,20 +34,40 @@ except ImportError:
 
 @dataclass
 class SubgraphOptions:
-    """Configuration for subgraph logic."""
+    """Configuration options for subgraph queries with retry logic and indexer routing.
+
+    Attributes:
+        max_retries: Maximum number of retry attempts for failed queries. Must be paired with base_delay.
+        base_delay: Base delay in milliseconds between retry attempts. Must be paired with max_retries.
+        indexer_id: Specific indexer ID to route requests to (requires SUBGRAPH_API_KEY environment variable).
+    """
 
     max_retries: Optional[int] = None
-    base_delay: Optional[int] = None  # milliseconds
+    base_delay: Optional[int] = None
     indexer_id: Optional[str] = None
 
 
 def is_indexer_error(error: Exception) -> bool:
-    """
-    Check if an error indicates that the indexer is down or not synced.
-    This function specifically checks for "bad indexers" errors from The Graph.
+    """Check if an error indicates that The Graph indexer is down or not synced.
 
-    :param error: The error to check
-    :return: True if the error indicates indexer issues
+    This function inspects error responses from The Graph API to detect "bad indexers"
+    messages that indicate infrastructure issues rather than query problems.
+
+    Args:
+        error: The exception to check.
+
+    Returns:
+        True if the error indicates indexer issues, False otherwise.
+
+    Example:
+        ```python
+        try:
+            data = custom_gql_fetch(network, query)
+        except Exception as e:
+            if is_indexer_error(e):
+                # Retry with different indexer
+                pass
+        ```
     """
     if not error:
         return False
@@ -80,16 +100,39 @@ def custom_gql_fetch(
     params: dict = None,
     options: Optional[SubgraphOptions] = None,
 ):
-    """Fetch data from the subgraph with optional logic.
+    """Fetch data from the subgraph with optional retry logic and indexer routing.
 
-    :param network: Network configuration dictionary
-    :param query: GraphQL query string
-    :param params: Query parameters
-    :param options: Optional subgraph configuration
+    Args:
+        network: Network configuration dictionary containing subgraph URLs.
+        query: GraphQL query string to execute.
+        params: Optional query parameters/variables dictionary.
+        options: Optional subgraph configuration for retries and indexer selection.
 
-    :return: JSON response from the subgraph
+    Returns:
+        JSON response from the subgraph containing the query results.
 
-    :raise Exception: If the subgraph query fails
+    Raises:
+        ValueError: If retry configuration is incomplete or indexer routing requires missing API key.
+        Exception: If the subgraph query fails after all retry attempts.
+
+    Example:
+        ```python
+        from human_protocol_sdk.constants import NETWORKS, ChainId
+        from human_protocol_sdk.utils import SubgraphOptions, custom_gql_fetch
+
+        network = NETWORKS[ChainId.POLYGON_AMOY]
+        query = "{ escrows(first: 10) { id address } }"
+
+        # Simple query
+        data = custom_gql_fetch(network, query)
+
+        # With retry logic
+        data = custom_gql_fetch(
+            network,
+            query,
+            options=SubgraphOptions(max_retries=3, base_delay=1000)
+        )
+        ```
     """
     subgraph_api_key = os.getenv("SUBGRAPH_API_KEY", "")
 
@@ -135,6 +178,20 @@ def _fetch_subgraph_data(
     params: dict = None,
     indexer_id: Optional[str] = None,
 ):
+    """Internal function to fetch data from the subgraph API.
+
+    Args:
+        network: Network configuration dictionary containing subgraph URLs.
+        query: GraphQL query string to execute.
+        params: Optional query parameters/variables dictionary.
+        indexer_id: Optional indexer ID to route the request to.
+
+    Returns:
+        JSON response from the subgraph.
+
+    Raises:
+        Exception: If the HTTP request fails or returns a non-200 status code.
+    """
     subgraph_api_key = os.getenv("SUBGRAPH_API_KEY", "")
     if subgraph_api_key:
         subgraph_url = network["subgraph_url_api_key"].replace(
@@ -166,21 +223,43 @@ def _fetch_subgraph_data(
 
 
 def _attach_indexer_id(url: str, indexer_id: Optional[str]) -> str:
+    """Append indexer ID to the subgraph URL for routing.
+
+    Args:
+        url: Base subgraph URL.
+        indexer_id: Optional indexer ID to append.
+
+    Returns:
+        Modified URL with indexer routing path if indexer_id is provided, otherwise the original URL.
+    """
     if not indexer_id:
         return url
     return f"{url}/indexers/id/{indexer_id}"
 
 
 def get_hmt_balance(wallet_addr, token_addr, w3):
-    """Get HMT balance
+    """Get the HMT token balance for a wallet address.
 
-    :param wallet_addr: wallet address
-    :param token_addr: ERC-20 contract
-    :param w3: Web3 instance
+    Args:
+        wallet_addr: Wallet address to check balance for.
+        token_addr: ERC-20 token contract address.
+        w3: Web3 instance connected to the network.
 
-    :return: HMT balance (wei)
+    Returns:
+        int: HMT token balance in wei.
+
+    Example:
+        ```python
+        from web3 import Web3
+
+        w3 = Web3(Web3.HTTPProvider("https://polygon-rpc.com"))
+        balance = get_hmt_balance(
+            "0x1234567890123456789012345678901234567890",
+            "0xc748B2A084F8eFc47E086ccdDD9b7e67aEb571BF",
+            w3
+        )
+        ```
     """
-
     abi = [
         {
             "constant": True,
@@ -197,12 +276,26 @@ def get_hmt_balance(wallet_addr, token_addr, w3):
 def parse_transfer_transaction(
     hmtoken_contract: Contract, tx_receipt: Optional[TxReceipt]
 ) -> Tuple[bool, Optional[int]]:
-    """Parse a transfer transaction receipt.
+    """Parse a transaction receipt to extract HMT transfer information.
 
-    :param hmtoken_contract: The HMT token contract
-    :param tx_receipt: The transaction receipt
+    Args:
+        hmtoken_contract: The HMT token contract instance.
+        tx_receipt: Transaction receipt to parse, or None.
 
-    :return: A tuple indicating if HMT was transferred and the transaction balance
+    Returns:
+        A tuple containing:
+            - bool: True if HMT was successfully transferred, False otherwise.
+            - Optional[int]: The transfer amount in wei if successful, None otherwise.
+
+    Example:
+        ```python
+        from web3 import Web3
+
+        tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+        transferred, amount = parse_transfer_transaction(hmt_contract, tx_receipt)
+        if transferred:
+            print(f"Transferred {amount} wei")
+        ```
     """
     hmt_transferred = False
     tx_balance = None
@@ -221,22 +314,36 @@ def parse_transfer_transaction(
 
 
 def get_contract_interface(contract_entrypoint):
-    """Retrieve the contract interface of a given contract.
+    """Retrieve the contract ABI and interface from a compiled artifact file.
 
-    :param contract_entrypoint: the entrypoint of the JSON.
+    Args:
+        contract_entrypoint: File path to the contract JSON artifact.
 
-    :return: The contract interface containing the contract abi.
+    Returns:
+        dict: Contract interface dictionary containing the ABI and other metadata.
+
+    Example:
+        ```python
+        interface = get_contract_interface("artifacts/contracts/MyContract.sol/MyContract.json")
+        abi = interface["abi"]
+        ```
     """
-
     with open(contract_entrypoint) as f:
         contract_interface = json.load(f)
     return contract_interface
 
 
 def get_erc20_interface():
-    """Retrieve the ERC20 interface.
+    """Retrieve the standard ERC20 token contract interface.
 
-    :return: The ERC20 interface of smart contract.
+    Returns:
+        dict: The ERC20 contract interface containing the ABI.
+
+    Example:
+        ```python
+        erc20_interface = get_erc20_interface()
+        token_contract = w3.eth.contract(address=token_address, abi=erc20_interface["abi"])
+        ```
     """
 
     return get_contract_interface(
@@ -247,10 +354,16 @@ def get_erc20_interface():
 
 
 def get_factory_interface():
-    """Retrieve the EscrowFactory interface.
+    """Retrieve the EscrowFactory contract interface.
 
-    :return: The EscrowFactory interface of smart contract.
+    Returns:
+        dict: The EscrowFactory contract interface containing the ABI.
 
+    Example:
+        ```python
+        factory_interface = get_factory_interface()
+        factory_contract = w3.eth.contract(address=factory_address, abi=factory_interface["abi"])
+        ```
     """
 
     return get_contract_interface(
@@ -259,10 +372,16 @@ def get_factory_interface():
 
 
 def get_staking_interface():
-    """Retrieve the Staking interface.
+    """Retrieve the Staking contract interface.
 
-    :return: The Staking interface of smart contract.
+    Returns:
+        dict: The Staking contract interface containing the ABI.
 
+    Example:
+        ```python
+        staking_interface = get_staking_interface()
+        staking_contract = w3.eth.contract(address=staking_address, abi=staking_interface["abi"])
+        ```
     """
 
     return get_contract_interface(
@@ -271,10 +390,16 @@ def get_staking_interface():
 
 
 def get_escrow_interface():
-    """Retrieve the RewardPool interface.
+    """Retrieve the Escrow contract interface.
 
-    :return: The RewardPool interface of smart contract.
+    Returns:
+        dict: The Escrow contract interface containing the ABI.
 
+    Example:
+        ```python
+        escrow_interface = get_escrow_interface()
+        escrow_contract = w3.eth.contract(address=escrow_address, abi=escrow_interface["abi"])
+        ```
     """
 
     return get_contract_interface(
@@ -283,10 +408,16 @@ def get_escrow_interface():
 
 
 def get_kvstore_interface():
-    """Retrieve the KVStore interface.
+    """Retrieve the KVStore contract interface.
 
-    :return: The KVStore interface of smart contract.
+    Returns:
+        dict: The KVStore contract interface containing the ABI.
 
+    Example:
+        ```python
+        kvstore_interface = get_kvstore_interface()
+        kvstore_contract = w3.eth.contract(address=kvstore_address, abi=kvstore_interface["abi"])
+        ```
     """
 
     return get_contract_interface(
@@ -295,24 +426,29 @@ def get_kvstore_interface():
 
 
 def handle_error(e, exception_class):
-    """
-    Handles and translates errors raised during contract transactions.
+    """Handle and translate errors raised during contract transactions.
 
     This function captures exceptions (especially ContractLogicError from web3.py),
-    extracts meaningful revert reasons if present, logs unexpected errors, and raises
+    extracts meaningful revert reasons when present, logs unexpected errors, and raises
     a custom exception with a clear message for SDK users.
 
-    :param e: The exception object raised during a transaction.
-    :param exception_class: The custom exception class to raise (e.g., EscrowClientError).
+    Args:
+        e: The exception object raised during a transaction.
+        exception_class: The custom exception class to raise (e.g., EscrowClientError).
 
-    :raises exception_class: With a detailed error message, including contract revert reasons if available.
+    Raises:
+        exception_class: Always raises the provided exception class with a formatted error message.
 
-    :example:
+    Example:
+        ```python
+        from human_protocol_sdk.escrow import EscrowClientError
+
         try:
             tx_hash = contract.functions.someMethod(...).transact()
             w3.eth.wait_for_transaction_receipt(tx_hash)
         except Exception as e:
             handle_error(e, EscrowClientError)
+        ```
     """
 
     def extract_reason(msg):
@@ -349,13 +485,27 @@ def handle_error(e, exception_class):
 
 
 def validate_url(url: str) -> bool:
-    """Validates the given URL.
+    """Validate whether a string is a properly formatted URL.
 
-    :param url: Public or private URL address
+    This function supports both standard URLs and Docker network URLs that may
+    not be recognized by strict validators.
 
-    :return: True if URL is valid, False otherwise
+    Args:
+        url: URL string to validate (e.g., "https://example.com" or "http://localhost:8080").
 
-    :raise ValidationFailure: If the URL is invalid
+    Returns:
+        bool: True if the URL is valid, False otherwise.
+
+    Raises:
+        ValidationFailure: If the URL format is invalid according to the validators library.
+
+    Example:
+        ```python
+        from human_protocol_sdk.utils import validate_url
+
+        if validate_url("https://example.com"):
+            print("Valid URL")
+        ```
     """
 
     # validators.url tracks docker network URL as invalid
@@ -384,9 +534,21 @@ def validate_url(url: str) -> bool:
 
 
 def validate_json(data: str) -> bool:
-    """Validates if the given string is a valid JSON.
-    :param data: String to validate
-    :return: True if the string is a valid JSON, False otherwise
+    """Validate whether a string contains valid JSON data.
+
+    Args:
+        data: String to validate as JSON.
+
+    Returns:
+        bool: True if the string is valid JSON, False otherwise.
+
+    Example:
+        ```python
+        from human_protocol_sdk.utils import validate_json
+
+        if validate_json('{"key": "value"}'):
+            print("Valid JSON")
+        ```
     """
     try:
         json.loads(data)

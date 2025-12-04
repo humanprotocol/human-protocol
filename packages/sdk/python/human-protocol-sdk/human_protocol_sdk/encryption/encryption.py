@@ -7,14 +7,36 @@ from pgpy.errors import PGPError
 
 
 class Encryption:
-    """Encryption and decryption helper using PGP (Pretty Good Privacy)."""
+    """Encryption and decryption helper using PGP (Pretty Good Privacy).
+
+    This class provides methods to sign, encrypt, decrypt, and verify messages
+    using PGP encryption with private/public key pairs.
+
+    Attributes:
+        private_key (PGPKey): The unlocked PGP private key.
+        passphrase (Optional[str]): Passphrase used to unlock the private key.
+    """
 
     def __init__(self, private_key_armored: str, passphrase: Optional[str] = None):
-        """Create an Encryption helper.
+        """Initialize an Encryption instance with a private key.
 
         Args:
-            private_key_armored: Armored representation of the private key.
-            passphrase: Passphrase to unlock the private key.
+            private_key_armored (str): Armored representation of the PGP private key.
+            passphrase (Optional[str]): Passphrase to unlock the private key if it's locked.
+
+        Raises:
+            ValueError: If the private key is invalid, cannot be unlocked with the passphrase,
+                or is locked and no passphrase is provided.
+
+        Example:
+            ```python
+            from human_protocol_sdk.encryption import Encryption
+
+            encryption = Encryption(
+                "-----BEGIN PGP PRIVATE KEY BLOCK-----...",
+                "your-passphrase"
+            )
+            ```
         """
         try:
             self.private_key, _ = PGPKey.from_blob(private_key_armored)
@@ -37,12 +59,17 @@ class Encryption:
     ) -> str:
         """Sign and encrypt a message with recipient public keys.
 
+        Signs the message with the private key and encrypts it for all specified recipients.
+
         Args:
-            message: Message to sign and encrypt.
-            public_keys: Armored public keys of the recipients.
+            message (Union[str, bytes]): Message content to sign and encrypt.
+            public_keys (List[str]): List of armored PGP public keys of the recipients.
 
         Returns:
-            Armored, signed, and encrypted message.
+            str: Armored, signed, and encrypted PGP message.
+
+        Raises:
+            ValueError: If the private key cannot be unlocked or encryption fails.
 
         Example:
             ```python
@@ -80,12 +107,19 @@ class Encryption:
     def decrypt(self, message: str, public_key: Optional[str] = None) -> bytes:
         """Decrypt a message using the private key.
 
+        Decrypts an encrypted message and optionally verifies the signature using
+        the sender's public key.
+
         Args:
-            message: Armored message to decrypt.
-            public_key: Optional armored public key to verify signatures.
+            message (str): Armored PGP message to decrypt.
+            public_key (Optional[str]): Optional armored public key to verify the message signature.
 
         Returns:
-            Decrypted message bytes.
+            bytes: Decrypted message as bytes.
+
+        Raises:
+            ValueError: If the private key cannot be unlocked, decryption fails,
+                or signature verification fails when a public key is provided.
 
         Example:
             ```python
@@ -93,6 +127,12 @@ class Encryption:
 
             encryption = Encryption("-----BEGIN PGP PRIVATE KEY BLOCK-----...", "passphrase")
             decrypted_message = encryption.decrypt(encrypted_message)
+
+            # Or with signature verification:
+            decrypted_message = encryption.decrypt(
+                encrypted_message,
+                public_key="-----BEGIN PGP PUBLIC KEY BLOCK-----..."
+            )
             ```
         """
         pgp_message = PGPMessage.from_blob(message)
@@ -128,18 +168,24 @@ class Encryption:
     def sign(self, message: Union[str, bytes]) -> str:
         """Sign a message with the private key.
 
+        Creates a cleartext signed message that can be verified by anyone with
+        the corresponding public key.
+
         Args:
-            message: Message to sign.
+            message (Union[str, bytes]): Message content to sign.
 
         Returns:
-            Armored signed message.
+            str: Armored signed PGP message in cleartext format.
+
+        Raises:
+            ValueError: If the private key cannot be unlocked or signing fails.
 
         Example:
             ```python
             from human_protocol_sdk.encryption import Encryption
 
             encryption = Encryption("-----BEGIN PGP PRIVATE KEY BLOCK-----...", "passphrase")
-            signed_message = await encryption.sign("MESSAGE")
+            signed_message = encryption.sign("MESSAGE")
             ```
         """
         message = PGPMessage.new(message, cleartext=True)

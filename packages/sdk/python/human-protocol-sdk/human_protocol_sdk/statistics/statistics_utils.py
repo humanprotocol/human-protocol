@@ -1,11 +1,11 @@
-"""Client to retrieve statistical information from the subgraph.
+"""Utility helpers for retrieving statistical information from the subgraph.
 
 Example:
     ```python
     from human_protocol_sdk.constants import ChainId
-    from human_protocol_sdk.statistics import StatisticsClient
+    from human_protocol_sdk.statistics import StatisticsUtils
 
-    statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
+    stats = StatisticsUtils.get_escrow_statistics(ChainId.POLYGON_AMOY)
     ```
 """
 
@@ -22,32 +22,40 @@ from human_protocol_sdk.filter import StatisticsFilter
 LOG = logging.getLogger("human_protocol_sdk.statistics")
 
 
-class StatisticsClientError(Exception):
-    """Raised when an error occurs fetching data from the subgraph."""
+class StatisticsUtilsError(Exception):
+    """Exception raised when errors occur during statistics operations."""
 
     pass
 
 
 class HMTHoldersParam:
-    """Parameters for querying HMT holders."""
+    """Filter parameters for querying HMT token holders.
+
+    Attributes:
+        address (Optional[str]): Optional holder address to filter by.
+        order_direction (str): Sort direction - either "asc" or "desc".
+    """
 
     def __init__(
         self,
         address: str = None,
         order_direction: str = "asc",
     ):
-        """Create holder query parameters.
-
-        Args:
-            address: Optional holder address filter.
-            order_direction: Sort direction (`asc` or `desc`).
-        """
         self.address = address
         self.order_direction = order_direction
 
 
 class DailyEscrowData:
-    """Aggregated daily escrow metrics."""
+    """Represents aggregated escrow metrics for a single day.
+
+    Attributes:
+        timestamp (datetime): Day boundary timestamp.
+        escrows_total (int): Total number of escrows created on this day.
+        escrows_pending (int): Number of escrows in pending status.
+        escrows_solved (int): Number of escrows that were solved/completed.
+        escrows_paid (int): Number of escrows that were paid out.
+        escrows_cancelled (int): Number of escrows that were cancelled.
+    """
 
     def __init__(
         self,
@@ -58,17 +66,6 @@ class DailyEscrowData:
         escrows_paid: int,
         escrows_cancelled: int,
     ):
-        """Initialize a daily escrow record.
-
-        Args:
-            timestamp: Day boundary timestamp.
-            escrows_total: Total escrows.
-            escrows_pending: Pending escrows.
-            escrows_solved: Solved escrows.
-            escrows_paid: Paid escrows.
-            escrows_cancelled: Cancelled escrows.
-        """
-
         self.timestamp = timestamp
         self.escrows_total = escrows_total
         self.escrows_pending = escrows_pending
@@ -78,61 +75,62 @@ class DailyEscrowData:
 
 
 class EscrowStatistics:
-    """Escrow statistics data."""
+    """Aggregate escrow statistics data.
+
+    Attributes:
+        total_escrows (int): Total number of escrows across all time.
+        daily_escrows_data (List[DailyEscrowData]): Daily breakdown of escrow metrics.
+    """
 
     def __init__(
         self,
         total_escrows: int,
         daily_escrows_data: List[DailyEscrowData],
     ):
-        """Initialize escrow statistics.
-
-        Args:
-            total_escrows: Total escrows.
-            daily_escrows_data: Per-day escrow data.
-        """
-
         self.total_escrows = total_escrows
         self.daily_escrows_data = daily_escrows_data
 
 
 class DailyWorkerData:
-    """Aggregated daily worker metrics."""
+    """Represents aggregated worker metrics for a single day.
+
+    Attributes:
+        timestamp (datetime): Day boundary timestamp.
+        active_workers (int): Number of active workers on this day.
+    """
 
     def __init__(
         self,
         timestamp: datetime,
         active_workers: int,
     ):
-        """Initialize a daily worker record.
-
-        Args:
-            timestamp: Day boundary timestamp.
-            active_workers: Number of active workers.
-        """
-
         self.timestamp = timestamp
         self.active_workers = active_workers
 
 
 class WorkerStatistics:
-    """Worker statistics data."""
+    """Aggregate worker statistics data.
+
+    Attributes:
+        daily_workers_data (List[DailyWorkerData]): Daily breakdown of worker metrics.
+    """
 
     def __init__(
         self,
         daily_workers_data: List[DailyWorkerData],
     ):
-        """Initialize worker statistics.
-
-        Args:
-            daily_workers_data: Per-day worker data.
-        """
-
         self.daily_workers_data = daily_workers_data
 
 
 class DailyPaymentData:
-    """Aggregated daily payment metrics."""
+    """Represents aggregated payment metrics for a single day.
+
+    Attributes:
+        timestamp (datetime): Day boundary timestamp.
+        total_amount_paid (int): Total amount paid out on this day.
+        total_count (int): Number of payment transactions.
+        average_amount_per_worker (int): Average payout amount per worker.
+    """
 
     def __init__(
         self,
@@ -141,15 +139,6 @@ class DailyPaymentData:
         total_count: int,
         average_amount_per_worker: int,
     ):
-        """Initialize a daily payment record.
-
-        Args:
-            timestamp: Day boundary timestamp.
-            total_amount_paid: Total amount paid.
-            total_count: Payment count.
-            average_amount_per_worker: Average payout per worker.
-        """
-
         self.timestamp = timestamp
         self.total_amount_paid = total_amount_paid
         self.total_count = total_count
@@ -157,42 +146,46 @@ class DailyPaymentData:
 
 
 class PaymentStatistics:
-    """Payment statistics data."""
+    """Aggregate payment statistics data.
+
+    Attributes:
+        daily_payments_data (List[DailyPaymentData]): Daily breakdown of payment metrics.
+    """
 
     def __init__(
         self,
         daily_payments_data: List[DailyPaymentData],
     ):
-        """Initialize payment statistics.
-
-        Args:
-            daily_payments_data: Per-day payment data.
-        """
-
         self.daily_payments_data = daily_payments_data
 
 
 class HMTHolder:
-    """HMT holder record."""
+    """Represents an HMT token holder.
+
+    Attributes:
+        address (str): Ethereum address of the holder.
+        balance (int): Token balance in smallest unit.
+    """
 
     def __init__(
         self,
         address: str,
         balance: int,
     ):
-        """Initialize a holder record.
-
-        Args:
-            address: Holder address.
-            balance: Holder balance.
-        """
-
         self.address = address
         self.balance = balance
 
 
 class DailyHMTData:
-    """Aggregated daily HMT transfer metrics."""
+    """Represents aggregated HMT transfer metrics for a single day.
+
+    Attributes:
+        timestamp (datetime): Day boundary timestamp.
+        total_transaction_amount (int): Total amount transferred on this day.
+        total_transaction_count (int): Number of transfer transactions.
+        daily_unique_senders (int): Number of unique addresses sending tokens.
+        daily_unique_receivers (int): Number of unique addresses receiving tokens.
+    """
 
     def __init__(
         self,
@@ -202,16 +195,6 @@ class DailyHMTData:
         daily_unique_senders: int,
         daily_unique_receivers: int,
     ):
-        """Initialize daily HMT transfer data.
-
-        Args:
-            timestamp: Day boundary timestamp.
-            total_transaction_amount: Total transfer amount.
-            total_transaction_count: Total transfer count.
-            daily_unique_senders: Unique senders.
-            daily_unique_receivers: Unique receivers.
-        """
-
         self.timestamp = timestamp
         self.total_transaction_amount = total_transaction_amount
         self.total_transaction_count = total_transaction_count
@@ -220,7 +203,13 @@ class DailyHMTData:
 
 
 class HMTStatistics:
-    """HMT aggregate statistics."""
+    """Aggregate HMT token statistics.
+
+    Attributes:
+        total_transfer_amount (int): Total amount transferred across all time.
+        total_transfer_count (int): Total number of transfer transactions.
+        total_holders (int): Total number of token holders.
+    """
 
     def __init__(
         self,
@@ -228,71 +217,69 @@ class HMTStatistics:
         total_transfer_count: int,
         total_holders: int,
     ):
-        """Initialize HMT statistics.
-
-        Args:
-            total_transfer_amount: Total transfer amount.
-            total_transfer_count: Total transfer count.
-            total_holders: Total holder count.
-        """
-
         self.total_transfer_amount = total_transfer_amount
         self.total_transfer_count = total_transfer_count
         self.total_holders = total_holders
 
 
-class StatisticsClient:
-    """Client for retrieving statistical data."""
+class StatisticsUtils:
+    """Utility class providing statistical data retrieval functions.
 
-    def __init__(self, chain_id: ChainId = ChainId.POLYGON_AMOY):
-        """Create a statistics client.
+    This class offers static methods to fetch various statistics from the Human Protocol
+    subgraph, including escrow metrics, worker activity, payment data, and HMT token statistics.
+    """
 
-        Args:
-            chain_id: Chain ID to read statistical data from.
-
-        Raises:
-            StatisticsClientError: If the chain ID is invalid or config is missing.
-        """
-
-        if chain_id.value not in [chain_id.value for chain_id in ChainId]:
-            raise StatisticsClientError(f"Invalid ChainId: {chain_id}")
-
-        self.network = NETWORKS[ChainId(chain_id)]
-
-        if not self.network:
-            raise StatisticsClientError("Empty network configuration")
-
+    @staticmethod
     def get_escrow_statistics(
-        self,
+        chain_id: ChainId,
         filter: StatisticsFilter = StatisticsFilter(),
         options: Optional[SubgraphOptions] = None,
     ) -> EscrowStatistics:
-        """Get escrow statistics data for the given date range.
+        """Retrieve escrow statistics for a given date range.
+
+        Fetches aggregate escrow data including total counts and daily breakdowns
+        of escrow creation and status changes.
 
         Args:
-            filter: Date range and pagination filter.
-            options: Optional subgraph request configuration.
+            chain_id (ChainId): Network to retrieve statistics from.
+            filter (StatisticsFilter): Date range and pagination filter. Defaults to all-time data.
+            options (Optional[SubgraphOptions]): Optional configuration for subgraph requests.
 
         Returns:
-            Escrow statistics data.
+            EscrowStatistics: Escrow statistics including total count and daily data.
+
+        Raises:
+            StatisticsUtilsError: If the chain ID is invalid or network configuration is missing.
 
         Example:
             ```python
             from human_protocol_sdk.constants import ChainId
-            from human_protocol_sdk.statistics import StatisticsClient
+            from human_protocol_sdk.statistics import StatisticsUtils
             from human_protocol_sdk.filter import StatisticsFilter
+            import datetime
 
-            statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
+            # Get all-time statistics
+            stats = StatisticsUtils.get_escrow_statistics(ChainId.POLYGON_AMOY)
+            print(f"Total escrows: {stats.total_escrows}")
 
-            statistics_client.get_escrow_statistics()
-            statistics_client.get_escrow_statistics(
+            # Get statistics for specific date range
+            stats = StatisticsUtils.get_escrow_statistics(
+                ChainId.POLYGON_AMOY,
                 StatisticsFilter(
                     date_from=datetime.datetime(2023, 5, 8),
                     date_to=datetime.datetime(2023, 6, 8),
                 )
             )
+            for day_data in stats.daily_escrows_data:
+                print(f"{day_data.timestamp}: {day_data.escrows_total} escrows")
             ```
         """
+        if chain_id.value not in [cid.value for cid in ChainId]:
+            raise StatisticsUtilsError(f"Invalid ChainId: {chain_id}")
+
+        network = NETWORKS.get(chain_id)
+        if not network:
+            raise StatisticsUtilsError("Empty network configuration")
 
         from human_protocol_sdk.gql.statistics import (
             get_event_day_data_query,
@@ -300,14 +287,14 @@ class StatisticsClient:
         )
 
         escrow_statistics_data = custom_gql_fetch(
-            self.network,
+            network,
             query=get_escrow_statistics_query,
             options=options,
         )
         escrow_statistics = escrow_statistics_data["data"]["escrowStatistics"]
 
         event_day_datas_data = custom_gql_fetch(
-            self.network,
+            network,
             query=get_event_day_data_query(filter),
             params={
                 "from": int(filter.date_from.timestamp()) if filter.date_from else None,
@@ -345,43 +332,59 @@ class StatisticsClient:
             ],
         )
 
+    @staticmethod
     def get_worker_statistics(
-        self,
+        chain_id: ChainId,
         filter: StatisticsFilter = StatisticsFilter(),
         options: Optional[SubgraphOptions] = None,
     ) -> WorkerStatistics:
-        """Get worker statistics data for the given date range.
+        """Retrieve worker activity statistics for a given date range.
+
+        Fetches daily worker activity metrics showing the number of active workers
+        participating in escrows.
 
         Args:
-            filter: Date range and pagination filter.
-            options: Optional subgraph request configuration.
+            chain_id (ChainId): Network to retrieve statistics from.
+            filter (StatisticsFilter): Date range and pagination filter. Defaults to all-time data.
+            options (Optional[SubgraphOptions]): Optional configuration for subgraph requests.
 
         Returns:
-            Worker statistics data.
+            WorkerStatistics: Worker statistics with daily activity breakdown.
+
+        Raises:
+            StatisticsUtilsError: If the chain ID is invalid or network configuration is missing.
 
         Example:
             ```python
             from human_protocol_sdk.constants import ChainId
-            from human_protocol_sdk.statistics import StatisticsClient
+            from human_protocol_sdk.statistics import StatisticsUtils
             from human_protocol_sdk.filter import StatisticsFilter
+            import datetime
 
-            statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
-
-            statistics_client.get_worker_statistics()
-            statistics_client.get_worker_statistics(
+            stats = StatisticsUtils.get_worker_statistics(
+                ChainId.POLYGON_AMOY,
                 StatisticsFilter(
                     date_from=datetime.datetime(2023, 5, 8),
                     date_to=datetime.datetime(2023, 6, 8),
                 )
             )
+            for day_data in stats.daily_workers_data:
+                print(f"{day_data.timestamp}: {day_data.active_workers} workers")
             ```
         """
+        if chain_id.value not in [cid.value for cid in ChainId]:
+            raise StatisticsUtilsError(f"Invalid ChainId: {chain_id}")
+
+        network = NETWORKS.get(chain_id)
+        if not network:
+            raise StatisticsUtilsError("Empty network configuration")
+
         from human_protocol_sdk.gql.statistics import (
             get_event_day_data_query,
         )
 
         event_day_datas_data = custom_gql_fetch(
-            self.network,
+            network,
             query=get_event_day_data_query(filter),
             params={
                 "from": int(filter.date_from.timestamp()) if filter.date_from else None,
@@ -406,44 +409,60 @@ class StatisticsClient:
             ],
         )
 
+    @staticmethod
     def get_payment_statistics(
-        self,
+        chain_id: ChainId,
         filter: StatisticsFilter = StatisticsFilter(),
         options: Optional[SubgraphOptions] = None,
     ) -> PaymentStatistics:
-        """Get payment statistics data for the given date range.
+        """Retrieve payment statistics for a given date range.
+
+        Fetches daily payment metrics including total amounts paid, transaction counts,
+        and average payment per worker.
 
         Args:
-            filter: Date range and pagination filter.
-            options: Optional subgraph request configuration.
+            chain_id (ChainId): Network to retrieve statistics from.
+            filter (StatisticsFilter): Date range and pagination filter. Defaults to all-time data.
+            options (Optional[SubgraphOptions]): Optional configuration for subgraph requests.
 
         Returns:
-            Payment statistics data.
+            PaymentStatistics: Payment statistics with daily breakdown.
+
+        Raises:
+            StatisticsUtilsError: If the chain ID is invalid or network configuration is missing.
 
         Example:
             ```python
             from human_protocol_sdk.constants import ChainId
-            from human_protocol_sdk.statistics import StatisticsClient
+            from human_protocol_sdk.statistics import StatisticsUtils
             from human_protocol_sdk.filter import StatisticsFilter
+            import datetime
 
-            statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
-
-            statistics_client.get_payment_statistics()
-            statistics_client.get_payment_statistics(
+            stats = StatisticsUtils.get_payment_statistics(
+                ChainId.POLYGON_AMOY,
                 StatisticsFilter(
                     date_from=datetime.datetime(2023, 5, 8),
                     date_to=datetime.datetime(2023, 6, 8),
                 )
             )
+            for day_data in stats.daily_payments_data:
+                print(f"{day_data.timestamp}: {day_data.total_amount_paid} paid")
+                print(f"  Average per worker: {day_data.average_amount_per_worker}")
             ```
         """
+        if chain_id.value not in [cid.value for cid in ChainId]:
+            raise StatisticsUtilsError(f"Invalid ChainId: {chain_id}")
+
+        network = NETWORKS.get(chain_id)
+        if not network:
+            raise StatisticsUtilsError("Empty network configuration")
 
         from human_protocol_sdk.gql.statistics import (
             get_event_day_data_query,
         )
 
         event_day_datas_data = custom_gql_fetch(
-            self.network,
+            network,
             query=get_event_day_data_query(filter),
             params={
                 "from": int(filter.date_from.timestamp()) if filter.date_from else None,
@@ -477,33 +496,48 @@ class StatisticsClient:
             ],
         )
 
+    @staticmethod
     def get_hmt_statistics(
-        self, options: Optional[SubgraphOptions] = None
+        chain_id: ChainId, options: Optional[SubgraphOptions] = None
     ) -> HMTStatistics:
-        """Get HMT statistics data.
+        """Retrieve aggregate HMT token statistics.
+
+        Fetches overall HMT token metrics including total transfers and holder counts.
 
         Args:
-            options: Optional subgraph request configuration.
+            chain_id (ChainId): Network to retrieve statistics from.
+            options (Optional[SubgraphOptions]): Optional configuration for subgraph requests.
 
         Returns:
-            HMT statistics data.
+            HMTStatistics: Aggregate HMT token statistics.
+
+        Raises:
+            StatisticsUtilsError: If the chain ID is invalid or network configuration is missing.
 
         Example:
             ```python
             from human_protocol_sdk.constants import ChainId
-            from human_protocol_sdk.statistics import StatisticsClient
+            from human_protocol_sdk.statistics import StatisticsUtils
 
-            statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
-            statistics_client.get_hmt_statistics()
+            stats = StatisticsUtils.get_hmt_statistics(ChainId.POLYGON_AMOY)
+            print(f"Total holders: {stats.total_holders}")
+            print(f"Total transfers: {stats.total_transfer_count}")
+            print(f"Total amount transferred: {stats.total_transfer_amount}")
             ```
         """
+        if chain_id.value not in [cid.value for cid in ChainId]:
+            raise StatisticsUtilsError(f"Invalid ChainId: {chain_id}")
+
+        network = NETWORKS.get(chain_id)
+        if not network:
+            raise StatisticsUtilsError("Empty network configuration")
+
         from human_protocol_sdk.gql.statistics import (
-            get_event_day_data_query,
             get_hmtoken_statistics_query,
         )
 
         hmtoken_statistics_data = custom_gql_fetch(
-            self.network,
+            network,
             query=get_hmtoken_statistics_query,
             options=options,
         )
@@ -519,40 +553,58 @@ class StatisticsClient:
             total_holders=int(hmtoken_statistics.get("holders", 0)),
         )
 
+    @staticmethod
     def get_hmt_holders(
-        self,
+        chain_id: ChainId,
         param: HMTHoldersParam = HMTHoldersParam(),
         options: Optional[SubgraphOptions] = None,
     ) -> List[HMTHolder]:
-        """Get HMT holders data with optional filters and ordering.
+        """Retrieve HMT token holders with optional filters and ordering.
+
+        Fetches a list of addresses holding HMT tokens with their balances.
 
         Args:
-            param: Holder filters and sort preferences.
-            options: Optional subgraph request configuration.
+            chain_id (ChainId): Network to retrieve holder data from.
+            param (HMTHoldersParam): Filter parameters and sort preferences.
+            options (Optional[SubgraphOptions]): Optional configuration for subgraph requests.
 
         Returns:
-            List of HMT holders.
+            List[HMTHolder]: List of token holders with addresses and balances.
+
+        Raises:
+            StatisticsUtilsError: If the chain ID is invalid or network configuration is missing.
 
         Example:
             ```python
             from human_protocol_sdk.constants import ChainId
-            from human_protocol_sdk.statistics import StatisticsClient, HMTHoldersParam
+            from human_protocol_sdk.statistics import StatisticsUtils, HMTHoldersParam
 
-            statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
+            # Get all holders sorted by balance ascending
+            holders = StatisticsUtils.get_hmt_holders(ChainId.POLYGON_AMOY)
+            for holder in holders:
+                print(f"{holder.address}: {holder.balance}")
 
-            statistics_client.get_hmt_holders()
-            statistics_client.get_hmt_holders(
+            # Get specific holder
+            holders = StatisticsUtils.get_hmt_holders(
+                ChainId.POLYGON_AMOY,
                 HMTHoldersParam(
                     address="0x123...",
-                    order_direction="asc",
+                    order_direction="desc",
                 )
             )
             ```
         """
+        if chain_id.value not in [cid.value for cid in ChainId]:
+            raise StatisticsUtilsError(f"Invalid ChainId: {chain_id}")
+
+        network = NETWORKS.get(chain_id)
+        if not network:
+            raise StatisticsUtilsError("Empty network configuration")
+
         from human_protocol_sdk.gql.hmtoken import get_holders_query
 
         holders_data = custom_gql_fetch(
-            self.network,
+            network,
             query=get_holders_query(address=param.address),
             params={
                 "address": param.address,
@@ -572,42 +624,62 @@ class StatisticsClient:
             for holder in holders
         ]
 
+    @staticmethod
     def get_hmt_daily_data(
-        self,
+        chain_id: ChainId,
         filter: StatisticsFilter = StatisticsFilter(),
         options: Optional[SubgraphOptions] = None,
     ) -> List[DailyHMTData]:
-        """Get HMT daily statistics data for the given date range.
+        """Retrieve daily HMT token transfer statistics for a given date range.
+
+        Fetches daily metrics about HMT token transfers including amounts, counts,
+        and unique participants.
 
         Args:
-            filter: Date range and pagination filter.
-            options: Optional subgraph request configuration.
+            chain_id (ChainId): Network to retrieve statistics from.
+            filter (StatisticsFilter): Date range and pagination filter. Defaults to all-time data.
+            options (Optional[SubgraphOptions]): Optional configuration for subgraph requests.
 
         Returns:
-            Daily HMT transfer statistics.
+            List[DailyHMTData]: Daily HMT transfer statistics.
+
+        Raises:
+            StatisticsUtilsError: If the chain ID is invalid or network configuration is missing.
 
         Example:
             ```python
             from human_protocol_sdk.constants import ChainId
-            from human_protocol_sdk.statistics import StatisticsClient, StatisticsFilter
+            from human_protocol_sdk.statistics import StatisticsUtils
+            from human_protocol_sdk.filter import StatisticsFilter
+            import datetime
 
-            statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
-
-            statistics_client.get_hmt_daily_data()
-            statistics_client.get_hmt_daily_data(
+            daily_data = StatisticsUtils.get_hmt_daily_data(
+                ChainId.POLYGON_AMOY,
                 StatisticsFilter(
                     date_from=datetime.datetime(2023, 5, 8),
                     date_to=datetime.datetime(2023, 6, 8),
                 )
             )
+            for day in daily_data:
+                print(f"{day.timestamp}:")
+                print(f"  Transfers: {day.total_transaction_count}")
+                print(f"  Amount: {day.total_transaction_amount}")
+                print(f"  Unique senders: {day.daily_unique_senders}")
             ```
         """
+        if chain_id.value not in [cid.value for cid in ChainId]:
+            raise StatisticsUtilsError(f"Invalid ChainId: {chain_id}")
+
+        network = NETWORKS.get(chain_id)
+        if not network:
+            raise StatisticsUtilsError("Empty network configuration")
+
         from human_protocol_sdk.gql.statistics import (
             get_event_day_data_query,
         )
 
         event_day_datas_data = custom_gql_fetch(
-            self.network,
+            network,
             query=get_event_day_data_query(filter),
             params={
                 "from": int(filter.date_from.timestamp()) if filter.date_from else None,

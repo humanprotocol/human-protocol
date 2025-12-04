@@ -45,19 +45,46 @@ LOG = logging.getLogger("human_protocol_sdk.staking")
 
 
 class StakingClientError(Exception):
-    """Raised when an error occurs interacting with staking."""
+    """Exception raised when errors occur during staking operations."""
 
     pass
 
 
 class StakingClient:
-    """Manage staking on the HUMAN network."""
+    """Client for interacting with the staking smart contract.
+
+    This client provides methods to stake, unstake, withdraw, and slash HMT tokens,
+    as well as query staker information on the Human Protocol network.
+
+    Attributes:
+        w3 (Web3): Web3 instance configured for the target network.
+        network (dict): Network configuration for the current chain.
+        hmtoken_contract (Contract): Contract instance for the HMT token.
+        factory_contract (Contract): Contract instance for the escrow factory.
+        staking_contract (Contract): Contract instance for the staking contract.
+    """
 
     def __init__(self, w3: Web3):
-        """Create a staking client.
+        """Initialize a StakingClient instance.
 
         Args:
-            w3: Web3 instance configured for the target network.
+            w3 (Web3): Web3 instance configured for the target network.
+                Must have a valid provider and chain ID.
+
+        Raises:
+            StakingClientError: If chain ID is invalid, network configuration is missing,
+                or network configuration is empty.
+
+        Example:
+            ```python
+            from eth_typing import URI
+            from web3 import Web3
+            from web3.providers.auto import load_provider_from_uri
+            from human_protocol_sdk.staking import StakingClient
+
+            w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+            staking_client = StakingClient(w3)
+            ```
         """
 
         # Initialize web3 instance
@@ -101,9 +128,27 @@ class StakingClient:
     def approve_stake(self, amount: int, tx_options: Optional[TxParams] = None) -> None:
         """Approve HMT tokens for staking.
 
+        Grants the staking contract permission to transfer HMT tokens from the caller's
+        account. This must be called before staking.
+
         Args:
-            amount: Amount to approve (must be positive).
-            tx_options: Optional transaction parameters.
+            amount (int): Amount of HMT tokens to approve in token's smallest unit
+                (must be greater than 0).
+            tx_options (Optional[TxParams]): Optional transaction parameters such as gas limit.
+
+        Returns:
+            None
+
+        Raises:
+            StakingClientError: If the amount is not positive or the transaction fails.
+
+        Example:
+            ```python
+            from web3 import Web3
+
+            amount = Web3.to_wei(100, "ether")
+            staking_client.approve_stake(amount)
+            ```
         """
 
         if amount <= 0:
@@ -120,9 +165,16 @@ class StakingClient:
     def stake(self, amount: int, tx_options: Optional[TxParams] = None) -> None:
         """Stake HMT tokens.
 
+        Deposits HMT tokens into the staking contract. The tokens must be approved first
+        using ``approve_stake()``.
+
         Args:
-            amount: Amount to stake (must be greater than 0 and within approved/balance limits).
-            tx_options: Optional transaction parameters.
+            amount (int): Amount of HMT tokens to stake in token's smallest unit
+                (must be greater than 0 and within approved/balance limits).
+            tx_options (Optional[TxParams]): Optional transaction parameters such as gas limit.
+
+        Returns:
+            None
 
         Raises:
             StakingClientError: If the amount is invalid or the transaction fails.
@@ -163,9 +215,16 @@ class StakingClient:
     def unstake(self, amount: int, tx_options: Optional[TxParams] = None) -> None:
         """Unstake HMT tokens.
 
+        Initiates the unstaking process for the specified amount. The tokens will be
+        locked for a period before they can be withdrawn.
+
         Args:
-            amount: Amount to unstake (must be greater than 0 and <= unlocked stake).
-            tx_options: Optional transaction parameters.
+            amount (int): Amount of HMT tokens to unstake in token's smallest unit
+                (must be greater than 0 and less than or equal to unlocked staked amount).
+            tx_options (Optional[TxParams]): Optional transaction parameters such as gas limit.
+
+        Returns:
+            None
 
         Raises:
             StakingClientError: If the amount is invalid or the transaction fails.
@@ -191,11 +250,17 @@ class StakingClient:
     def withdraw(self, tx_options: Optional[TxParams] = None) -> None:
         """Withdraw unlocked unstaked HMT tokens.
 
+        Withdraws all available unstaked tokens that have completed the unlocking period
+        and transfers them back to the caller's account.
+
         Args:
-            tx_options: Optional transaction parameters.
+            tx_options (Optional[TxParams]): Optional transaction parameters such as gas limit.
+
+        Returns:
+            None
 
         Raises:
-            StakingClientError: If the transaction fails or no tokens are withdrawable.
+            StakingClientError: If the transaction fails or no tokens are available to withdraw.
 
         Example:
             ```python
@@ -218,14 +283,35 @@ class StakingClient:
         amount: int,
         tx_options: Optional[TxParams] = None,
     ) -> None:
-        """Slash a staker for a given escrow.
+        """Slash a staker's stake for a given escrow.
+
+        Penalizes a staker by reducing their staked amount and distributing rewards
+        to the slasher for detecting misbehavior or violations.
 
         Args:
-            slasher: Address of the slasher.
-            staker: Address of the staker.
-            escrow_address: Address of the escrow.
-            amount: Amount to slash (must be > 0 and within allocation).
-            tx_options: Optional transaction parameters.
+            slasher (str): Address of the entity performing the slash (receives rewards).
+            staker (str): Address of the staker to be slashed.
+            escrow_address (str): Address of the escrow associated with the violation.
+            amount (int): Amount to slash in token's smallest unit
+                (must be greater than 0 and within staker's allocation to the escrow).
+            tx_options (Optional[TxParams]): Optional transaction parameters such as gas limit.
+
+        Returns:
+            None
+
+        Raises:
+            StakingClientError: If the amount is invalid, escrow address is invalid,
+                or the transaction fails.
+
+        Example:
+            ```python
+            staking_client.slash(
+                "0xSlasherAddress",
+                "0xStakerAddress",
+                "0xEscrowAddress",
+                Web3.to_wei(10, "ether"),
+            )
+            ```
         """
 
         if amount <= 0:
@@ -243,19 +329,28 @@ class StakingClient:
     def get_staker_info(self, staker_address: str) -> dict:
         """Retrieve comprehensive staking information for a staker.
 
+        Fetches on-chain staking data including staked amount, locked amount,
+        lock expiration, and withdrawable amount.
+
         Args:
-            staker_address: Address of the staker.
+            staker_address (str): Ethereum address of the staker.
 
         Returns:
-            Dictionary containing staker information.
+            dict: Dictionary containing:
+                - ``stakedAmount`` (int): Total staked amount.
+                - ``lockedAmount`` (int): Currently locked amount.
+                - ``lockedUntil`` (int): Block number until tokens are locked (0 if unlocked).
+                - ``withdrawableAmount`` (int): Amount available for withdrawal.
 
         Raises:
-            StakingClientError: If the staker address is invalid.
+            StakingClientError: If the staker address is invalid or the query fails.
 
         Example:
             ```python
             staking_info = staking_client.get_staker_info("0xYourStakerAddress")
-            print(staking_info["stakedAmount"])
+            print(f"Staked: {staking_info['stakedAmount']}")
+            print(f"Locked: {staking_info['lockedAmount']}")
+            print(f"Withdrawable: {staking_info['withdrawableAmount']}")
             ```
         """
         if not Web3.is_address(staker_address):
@@ -287,13 +382,16 @@ class StakingClient:
             raise StakingClientError(f"Failed to get staker info: {str(e)}")
 
     def _is_valid_escrow(self, escrow_address: str) -> bool:
-        """Check if an escrow address exists in the factory.
+        """Check if an escrow address exists in the factory registry.
+
+        Internal method to validate that an escrow address is registered with the
+        escrow factory contract.
 
         Args:
-            escrow_address: Escrow address to validate.
+            escrow_address (str): Escrow address to validate.
 
         Returns:
-            True if the escrow exists in the factory registry; otherwise False.
+            bool: ``True`` if the escrow exists in the factory registry, ``False`` otherwise.
         """
 
         # TODO: Use Escrow/Job Module once implemented
