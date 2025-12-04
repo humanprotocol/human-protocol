@@ -1,28 +1,20 @@
-"""
-Utility class for transaction-related operations.
+"""Utility helpers for transaction-related subgraph queries.
 
-Code Example
-------------
-
-.. code-block:: python
-
+Example:
+    ```python
     from human_protocol_sdk.constants import ChainId
     from human_protocol_sdk.transaction import TransactionUtils, TransactionFilter
 
-    print(
-        TransactionUtils.get_transactions(
-            TransactionFilter(
-                chain_id=ChainId.POLYGON_AMOY,
-                from_address="0x1234567890123456789012345678901234567890",
-                to_address="0x0987654321098765432109876543210987654321",
-                start_date=datetime.datetime(2023, 5, 8),
-                end_date=datetime.datetime(2023, 6, 8),
-            )
+    TransactionUtils.get_transactions(
+        TransactionFilter(
+            chain_id=ChainId.POLYGON_AMOY,
+            from_address="0x1234567890123456789012345678901234567890",
+            to_address="0x0987654321098765432109876543210987654321",
+            start_date=datetime.datetime(2023, 5, 8),
+            end_date=datetime.datetime(2023, 6, 8),
         )
     )
-
-Module
-------
+    ```
 """
 
 from typing import List, Optional
@@ -34,6 +26,8 @@ from human_protocol_sdk.utils import SubgraphOptions, custom_gql_fetch
 
 
 class InternalTransaction:
+    """Internal transaction detail."""
+
     def __init__(
         self,
         from_address: str,
@@ -84,17 +78,13 @@ class TransactionData:
 
 
 class TransactionUtilsError(Exception):
-    """
-    Raises when some error happens when getting data from subgraph.
-    """
+    """Raised when a transaction lookup fails."""
 
     pass
 
 
 class TransactionUtils:
-    """
-    A utility class that provides additional transaction-related functionalities.
-    """
+    """Utility helpers to query on-chain transactions from the subgraph."""
 
     @staticmethod
     def get_transaction(
@@ -102,24 +92,27 @@ class TransactionUtils:
     ) -> Optional[TransactionData]:
         """Returns the transaction for a given hash.
 
-        :param chain_id: Network in which the transaction was executed
-        :param hash: Hash of the transaction
-        :param options: Optional config for subgraph requests
+        Args:
+            chain_id: Network in which the transaction was executed.
+            hash: Transaction hash.
+            options: Optional subgraph request configuration.
 
-        :return: Transaction data
+        Returns:
+            Transaction data if found, otherwise None.
 
-        :example:
-            .. code-block:: python
+        Raises:
+            TransactionUtilsError: If the chain ID is unsupported.
 
-                from human_protocol_sdk.constants import ChainId
-                from human_protocol_sdk.transaction import TransactionUtils
+        Example:
+            ```python
+            from human_protocol_sdk.constants import ChainId
+            from human_protocol_sdk.transaction import TransactionUtils
 
-                print(
-                    TransactionUtils.get_transaction(
-                        ChainId.POLYGON_AMOY,
-                        "0x1234567890123456789012345678901234567891"
-                    )
-                )
+            TransactionUtils.get_transaction(
+                ChainId.POLYGON_AMOY,
+                "0x1234567890123456789012345678901234567891",
+            )
+            ```
         """
         network = NETWORKS.get(chain_id)
         if not network:
@@ -175,31 +168,33 @@ class TransactionUtils:
     ) -> List[TransactionData]:
         """Get an array of transactions based on the specified filter parameters.
 
-        :param filter: Object containing all the necessary parameters to filter
-            (chain_id, from_address, to_address, start_date, end_date, start_block, end_block, method, escrow, token, first, skip, order_direction)
-        :param options: Optional config for subgraph requests
+        Args:
+            filter: Filter parameters (chain, addresses, date/block ranges, method, escrow, token, pagination).
+            options: Optional subgraph request configuration.
 
-        :return: List of transactions
+        Returns:
+            List of transactions matching the filter.
 
-        :example:
-            .. code-block:: python
+        Raises:
+            TransactionUtilsError: If the chain ID is unsupported.
 
-                from human_protocol_sdk.constants import ChainId
-                from human_protocol_sdk.transaction import TransactionUtils, TransactionFilter
+        Example:
+            ```python
+            from human_protocol_sdk.constants import ChainId
+            from human_protocol_sdk.transaction import TransactionUtils, TransactionFilter
 
-                print(
-                    TransactionUtils.get_transactions(
-                        TransactionFilter(
-                            chain_id=ChainId.POLYGON_AMOY,
-                            from_address="0x1234567890123456789012345678901234567890",
-                            to_address="0x0987654321098765432109876543210987654321",
-                            method="transfer",
-                            escrow="0x0987654321098765432109876543210987654321",
-                            start_date=datetime.datetime(2023, 5, 8),
-                            end_date=datetime.datetime(2023, 6, 8),
-                        )
-                    )
+            TransactionUtils.get_transactions(
+                TransactionFilter(
+                    chain_id=ChainId.POLYGON_AMOY,
+                    from_address="0x1234567890123456789012345678901234567890",
+                    to_address="0x0987654321098765432109876543210987654321",
+                    method="transfer",
+                    escrow="0x0987654321098765432109876543210987654321",
+                    start_date=datetime.datetime(2023, 5, 8),
+                    end_date=datetime.datetime(2023, 6, 8),
                 )
+            )
+            ```
         """
         from human_protocol_sdk.gql.transaction import get_transactions_query
 

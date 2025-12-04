@@ -1,54 +1,25 @@
-"""
-This client enables performing actions on staking contracts and
-obtaining staking information from both the contracts and subgraph.
+"""Client for staking actions and queries on HUMAN Protocol.
 
-Internally, the SDK will use one network or another according to the network ID of the web3.
-To use this client, you need to create a Web3 instance and configure the default account,
-as well as some middlewares.
+Internally selects network config based on the Web3 chain id.
 
-Code Example
-------------
-
-* With Signer
-
-.. code-block:: python
-
+Example:
+    ```python
     from eth_typing import URI
     from web3 import Web3
     from web3.middleware import SignAndSendRawMiddlewareBuilder
     from web3.providers.auto import load_provider_from_uri
-
-    from human_protocol_sdk.staking import StakingClient
-
-    def get_w3_with_priv_key(priv_key: str):
-        w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
-        gas_payer = w3.eth.account.from_key(priv_key)
-        w3.eth.default_account = gas_payer.address
-        w3.middleware_onion.inject(
-            SignAndSendRawMiddlewareBuilder.build(priv_key),
-            'SignAndSendRawMiddlewareBuilder',
-            layer=0,
-        )
-        return (w3, gas_payer)
-
-    (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
-    staking_client = StakingClient(w3)
-
-* Without Signer (For read operations only)
-
-.. code-block:: python
-
-    from eth_typing import URI
-    from web3 import Web3
-    from web3.providers.auto import load_provider_from_uri
-
     from human_protocol_sdk.staking import StakingClient
 
     w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+    gas_payer = w3.eth.account.from_key("YOUR_PRIVATE_KEY")
+    w3.eth.default_account = gas_payer.address
+    w3.middleware_onion.inject(
+        SignAndSendRawMiddlewareBuilder.build("YOUR_PRIVATE_KEY"),
+        "SignAndSendRawMiddlewareBuilder",
+        layer=0,
+    )
     staking_client = StakingClient(w3)
-
-Module
-------
+    ```
 """
 
 import logging
@@ -74,23 +45,19 @@ LOG = logging.getLogger("human_protocol_sdk.staking")
 
 
 class StakingClientError(Exception):
-    """
-    Raises when some error happens when interacting with staking.
-    """
+    """Raised when an error occurs interacting with staking."""
 
     pass
 
 
 class StakingClient:
-    """
-    A class used to manage staking on the HUMAN network.
-    """
+    """Manage staking on the HUMAN network."""
 
     def __init__(self, w3: Web3):
-        """Initializes a Staking instance
+        """Create a staking client.
 
-        :param w3: Web3 instance
-
+        Args:
+            w3: Web3 instance configured for the target network.
         """
 
         # Initialize web3 instance
@@ -132,42 +99,11 @@ class StakingClient:
 
     @requires_signer
     def approve_stake(self, amount: int, tx_options: Optional[TxParams] = None) -> None:
-        """Approves HMT token for Staking.
+        """Approve HMT tokens for staking.
 
-        :param amount: Amount to approve
-        :param tx_options: (Optional) Additional transaction parameters
-
-        :return: None
-
-        :validate:
-            Amount must be greater than 0
-
-        :example:
-            .. code-block:: python
-
-                from eth_typing import URI
-                from web3 import Web3
-                from web3.middleware import SignAndSendRawMiddlewareBuilder
-                from web3.providers.auto import load_provider_from_uri
-
-                from human_protocol_sdk.staking import StakingClient
-
-                def get_w3_with_priv_key(priv_key: str):
-                    w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
-                    gas_payer = w3.eth.account.from_key(priv_key)
-                    w3.eth.default_account = gas_payer.address
-                    w3.middleware_onion.inject(
-                        SignAndSendRawMiddlewareBuilder.build(priv_key),
-                        'SignAndSendRawMiddlewareBuilder',
-                        layer=0,
-                    )
-                    return (w3, gas_payer)
-
-                (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
-                staking_client = StakingClient(w3)
-
-                amount = Web3.to_wei(5, 'ether') # convert from ETH to WEI
-                staking_client.approve_stake(amount)
+        Args:
+            amount: Amount to approve (must be positive).
+            tx_options: Optional transaction parameters.
         """
 
         if amount <= 0:
@@ -182,45 +118,37 @@ class StakingClient:
 
     @requires_signer
     def stake(self, amount: int, tx_options: Optional[TxParams] = None) -> None:
-        """Stakes HMT token.
+        """Stake HMT tokens.
 
-        :param amount: Amount to stake
-        :param tx_options: (Optional) Additional transaction parameters
+        Args:
+            amount: Amount to stake (must be greater than 0 and within approved/balance limits).
+            tx_options: Optional transaction parameters.
 
-        :return: None
+        Raises:
+            StakingClientError: If the amount is invalid or the transaction fails.
 
-        :validate:
-            - Amount must be greater than 0
-            - Amount must be less than or equal to the approved amount (on-chain)
-            - Amount must be less than or equal to the balance of the staker (on-chain)
+        Example:
+            ```python
+            from eth_typing import URI
+            from web3 import Web3
+            from web3.middleware import SignAndSendRawMiddlewareBuilder
+            from web3.providers.auto import load_provider_from_uri
+            from human_protocol_sdk.staking import StakingClient
 
-        :example:
-            .. code-block:: python
+            w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+            gas_payer = w3.eth.account.from_key("YOUR_PRIVATE_KEY")
+            w3.eth.default_account = gas_payer.address
+            w3.middleware_onion.inject(
+                SignAndSendRawMiddlewareBuilder.build("YOUR_PRIVATE_KEY"),
+                "SignAndSendRawMiddlewareBuilder",
+                layer=0,
+            )
 
-                from eth_typing import URI
-                from web3 import Web3
-                from web3.middleware import SignAndSendRawMiddlewareBuilder
-                from web3.providers.auto import load_provider_from_uri
-
-                from human_protocol_sdk.staking import StakingClient
-
-                def get_w3_with_priv_key(priv_key: str):
-                    w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
-                    gas_payer = w3.eth.account.from_key(priv_key)
-                    w3.eth.default_account = gas_payer.address
-                    w3.middleware_onion.inject(
-                        SignAndSendRawMiddlewareBuilder.build(priv_key),
-                        'SignAndSendRawMiddlewareBuilder',
-                        layer=0,
-                    )
-                    return (w3, gas_payer)
-
-                (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
-                staking_client = StakingClient(w3)
-
-                amount = Web3.to_wei(5, 'ether') # convert from ETH to WEI
-                staking_client.approve_stake(amount) # if it was already approved before, this is not necessary
-                staking_client.stake(amount)
+            staking_client = StakingClient(w3)
+            amount = Web3.to_wei(5, "ether")
+            staking_client.approve_stake(amount)
+            staking_client.stake(amount)
+            ```
         """
 
         if amount <= 0:
@@ -233,43 +161,20 @@ class StakingClient:
 
     @requires_signer
     def unstake(self, amount: int, tx_options: Optional[TxParams] = None) -> None:
-        """Unstakes HMT token.
+        """Unstake HMT tokens.
 
-        :param amount: Amount to unstake
-        :param tx_options: (Optional) Additional transaction parameters
+        Args:
+            amount: Amount to unstake (must be greater than 0 and <= unlocked stake).
+            tx_options: Optional transaction parameters.
 
-        :return: None
+        Raises:
+            StakingClientError: If the amount is invalid or the transaction fails.
 
-        :validate:
-            - Amount must be greater than 0
-            - Amount must be less than or equal to the staked amount which is not locked / allocated (on-chain)
-
-        :example:
-            .. code-block:: python
-
-                from eth_typing import URI
-                from web3 import Web3
-                from web3.middleware import SignAndSendRawMiddlewareBuilder
-                from web3.providers.auto import load_provider_from_uri
-
-                from human_protocol_sdk.staking import StakingClient
-
-                def get_w3_with_priv_key(priv_key: str):
-                    w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
-                    gas_payer = w3.eth.account.from_key(priv_key)
-                    w3.eth.default_account = gas_payer.address
-                    w3.middleware_onion.inject(
-                        SignAndSendRawMiddlewareBuilder.build(priv_key),
-                        'SignAndSendRawMiddlewareBuilder',
-                        layer=0,
-                    )
-                    return (w3, gas_payer)
-
-                (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
-                staking_client = StakingClient(w3)
-
-                amount = Web3.to_wei(5, 'ether') # convert from ETH to WEI
-                staking_client.unstake(amount)
+        Example:
+            ```python
+            amount = Web3.to_wei(5, "ether")
+            staking_client.unstake(amount)
+            ```
         """
 
         if amount <= 0:
@@ -284,40 +189,18 @@ class StakingClient:
 
     @requires_signer
     def withdraw(self, tx_options: Optional[TxParams] = None) -> None:
-        """Withdraws HMT token.
+        """Withdraw unlocked unstaked HMT tokens.
 
-        :param tx_options: (Optional) Additional transaction parameters
+        Args:
+            tx_options: Optional transaction parameters.
 
-        :return: None
+        Raises:
+            StakingClientError: If the transaction fails or no tokens are withdrawable.
 
-        :validate:
-            - There must be unstaked tokens which is unlocked (on-chain)
-
-        :example:
-            .. code-block:: python
-
-                from eth_typing import URI
-                from web3 import Web3
-                from web3.middleware import SignAndSendRawMiddlewareBuilder
-                from web3.providers.auto import load_provider_from_uri
-
-                from human_protocol_sdk.staking import StakingClient
-
-                def get_w3_with_priv_key(priv_key: str):
-                    w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
-                    gas_payer = w3.eth.account.from_key(priv_key)
-                    w3.eth.default_account = gas_payer.address
-                    w3.middleware_onion.inject(
-                        SignAndSendRawMiddlewareBuilder.build(priv_key),
-                        'SignAndSendRawMiddlewareBuilder',
-                        layer=0,
-                    )
-                    return (w3, gas_payer)
-
-                (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
-                staking_client = StakingClient(w3)
-
-                staking_client.withdraw()
+        Example:
+            ```python
+            staking_client.withdraw()
+            ```
         """
 
         try:
@@ -335,52 +218,14 @@ class StakingClient:
         amount: int,
         tx_options: Optional[TxParams] = None,
     ) -> None:
-        """Slashes HMT token.
+        """Slash a staker for a given escrow.
 
-        :param slasher: Address of the slasher
-        :param staker: Address of the staker
-        :param escrow_address: Address of the escrow
-        :param amount: Amount to slash
-        :param tx_options: (Optional) Additional transaction parameters
-
-        :return: None
-
-        :validate:
-            - Amount must be greater than 0
-            - Amount must be less than or equal to the amount allocated to the escrow (on-chain)
-            - Escrow address must be valid
-
-        :example:
-            .. code-block:: python
-
-                from eth_typing import URI
-                from web3 import Web3
-                from web3.middleware import SignAndSendRawMiddlewareBuilder
-                from web3.providers.auto import load_provider_from_uri
-
-                from human_protocol_sdk.staking import StakingClient
-
-                def get_w3_with_priv_key(priv_key: str):
-                    w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
-                    gas_payer = w3.eth.account.from_key(priv_key)
-                    w3.eth.default_account = gas_payer.address
-                    w3.middleware_onion.inject(
-                        SignAndSendRawMiddlewareBuilder.build(priv_key),
-                        'SignAndSendRawMiddlewareBuilder',
-                        layer=0,
-                    )
-                    return (w3, gas_payer)
-
-                (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
-                staking_client = StakingClient(w3)
-
-                amount = Web3.to_wei(5, 'ether') # convert from ETH to WEI
-                staking_client.slash(
-                    '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
-                    '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
-                    '0x62dD51230A30401C455c8398d06F85e4EaB6309f',
-                    amount
-                )
+        Args:
+            slasher: Address of the slasher.
+            staker: Address of the staker.
+            escrow_address: Address of the escrow.
+            amount: Amount to slash (must be > 0 and within allocation).
+            tx_options: Optional transaction parameters.
         """
 
         if amount <= 0:
@@ -396,28 +241,22 @@ class StakingClient:
             handle_error(e, StakingClientError)
 
     def get_staker_info(self, staker_address: str) -> dict:
-        """Retrieves comprehensive staking information for a staker.
+        """Retrieve comprehensive staking information for a staker.
 
-        :param staker_address: The address of the staker
-        :return: A dictionary containing staker information
+        Args:
+            staker_address: Address of the staker.
 
-        :validate:
-            - Staker address must be valid
+        Returns:
+            Dictionary containing staker information.
 
-        :example:
-            .. code-block:: python
+        Raises:
+            StakingClientError: If the staker address is invalid.
 
-                from eth_typing import URI
-                from web3 import Web3
-                from web3.providers.auto import load_provider_from_uri
-
-                from human_protocol_sdk.staking import StakingClient
-
-                w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
-                staking_client = StakingClient(w3)
-
-                staking_info = staking_client.get_staker_info('0xYourStakerAddress')
-                print(staking_info['stakedAmount'])
+        Example:
+            ```python
+            staking_info = staking_client.get_staker_info("0xYourStakerAddress")
+            print(staking_info["stakedAmount"])
+            ```
         """
         if not Web3.is_address(staker_address):
             raise StakingClientError(f"Invalid staker address: {staker_address}")
@@ -448,11 +287,13 @@ class StakingClient:
             raise StakingClientError(f"Failed to get staker info: {str(e)}")
 
     def _is_valid_escrow(self, escrow_address: str) -> bool:
-        """Checks if the escrow address is valid.
+        """Check if an escrow address exists in the factory.
 
-        :param escrow_address: Address of the escrow
+        Args:
+            escrow_address: Escrow address to validate.
 
-        :return: True if the escrow address is valid, False otherwise
+        Returns:
+            True if the escrow exists in the factory registry; otherwise False.
         """
 
         # TODO: Use Escrow/Job Module once implemented

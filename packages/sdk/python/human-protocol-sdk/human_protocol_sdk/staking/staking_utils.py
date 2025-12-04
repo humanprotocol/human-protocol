@@ -1,31 +1,4 @@
-"""
-Utility class for staking-related operations.
-
-Code Example
-------------
-
-.. code-block:: python
-
-    from human_protocol_sdk.constants import ChainId
-    from human_protocol_sdk.staking.staking_utils import StakingUtils, StakersFilter
-
-    stakers = StakingUtils.get_stakers(
-        StakersFilter(
-            chain_id=ChainId.POLYGON_AMOY,
-            min_staked_amount="1000000000000000000",
-            max_locked_amount="5000000000000000000",
-            order_by="withdrawnAmount",
-            order_direction="asc",
-            first=5,
-            skip=0,
-        )
-    )
-    print("Filtered stakers:", stakers)
-
-Module
-------
-
-"""
+"""Utility helpers for staking-related operations."""
 
 from typing import List, Optional
 from human_protocol_sdk.constants import NETWORKS, ChainId
@@ -46,6 +19,18 @@ class StakerData:
         locked_until_timestamp: str,
         last_deposit_timestamp: str,
     ):
+        """Represents staker data returned from the subgraph.
+
+        Args:
+            id: Staker ID.
+            address: Staker address.
+            staked_amount: Total staked amount.
+            locked_amount: Locked amount.
+            withdrawn_amount: Withdrawn amount.
+            slashed_amount: Slashed amount.
+            locked_until_timestamp: Time until locked amount is released (seconds).
+            last_deposit_timestamp: Last deposit time (seconds).
+        """
         self.id = id
         self.address = address
         self.staked_amount = int(staked_amount)
@@ -57,7 +42,7 @@ class StakerData:
 
 
 class StakingUtilsError(Exception):
-    pass
+    """Raised when staking utility operations fail."""
 
 
 class StakingUtils:
@@ -67,6 +52,16 @@ class StakingUtils:
         address: str,
         options: Optional[SubgraphOptions] = None,
     ) -> Optional[StakerData]:
+        """Get a single staker by address.
+
+        Args:
+            chain_id: Network to request data.
+            address: Staker address.
+            options: Optional config for subgraph requests.
+
+        Returns:
+            Staker data if found, otherwise ``None``.
+        """
         network = NETWORKS.get(chain_id)
         if not network:
             raise StakingUtilsError("Unsupported Chain ID")
@@ -102,6 +97,15 @@ class StakingUtils:
         filter: StakersFilter,
         options: Optional[SubgraphOptions] = None,
     ) -> List[StakerData]:
+        """List stakers matching the provided filter.
+
+        Args:
+            filter: Staker filter parameters.
+            options: Optional config for subgraph requests.
+
+        Returns:
+            A list of staker records.
+        """
         network_data = NETWORKS.get(filter.chain_id)
         if not network_data:
             raise StakingUtilsError("Unsupported Chain ID")

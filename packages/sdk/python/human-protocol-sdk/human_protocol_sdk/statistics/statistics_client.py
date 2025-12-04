@@ -1,18 +1,12 @@
-"""
-This client enables to obtain statistical information from the subgraph.
+"""Client to retrieve statistical information from the subgraph.
 
-Code Example
-------------
-
-.. code-block:: python
-
+Example:
+    ```python
     from human_protocol_sdk.constants import ChainId
     from human_protocol_sdk.statistics import StatisticsClient
 
     statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
-
-Module
-------
+    ```
 """
 
 from datetime import datetime
@@ -29,37 +23,31 @@ LOG = logging.getLogger("human_protocol_sdk.statistics")
 
 
 class StatisticsClientError(Exception):
-    """
-    Raises when some error happens when getting data from subgraph.
-    """
+    """Raised when an error occurs fetching data from the subgraph."""
 
     pass
 
 
 class HMTHoldersParam:
-    """
-    A class used to specify parameters for querying HMT holders.
-    """
+    """Parameters for querying HMT holders."""
 
     def __init__(
         self,
         address: str = None,
         order_direction: str = "asc",
     ):
-        """
-        Initializes a HMTHoldersParam instance.
+        """Create holder query parameters.
 
-        :param address: Filter by holder's address
-        :param order_direction: Optional. Direction of sorting ('asc' for ascending, 'desc' for descending)
+        Args:
+            address: Optional holder address filter.
+            order_direction: Sort direction (`asc` or `desc`).
         """
         self.address = address
         self.order_direction = order_direction
 
 
 class DailyEscrowData:
-    """
-    A class used to specify daily escrow data.
-    """
+    """Aggregated daily escrow metrics."""
 
     def __init__(
         self,
@@ -70,15 +58,15 @@ class DailyEscrowData:
         escrows_paid: int,
         escrows_cancelled: int,
     ):
-        """
-        Initializes a DailyEscrowData instance.
+        """Initialize a daily escrow record.
 
-        :param timestamp: Timestamp
-        :param escrows_total: Total escrows
-        :param escrows_pending: Pending escrows
-        :param escrows_solved: Solved escrows
-        :param escrows_paid: Paid escrows
-        :param escrows_cancelled: Cancelled escrows
+        Args:
+            timestamp: Day boundary timestamp.
+            escrows_total: Total escrows.
+            escrows_pending: Pending escrows.
+            escrows_solved: Solved escrows.
+            escrows_paid: Paid escrows.
+            escrows_cancelled: Cancelled escrows.
         """
 
         self.timestamp = timestamp
@@ -90,20 +78,18 @@ class DailyEscrowData:
 
 
 class EscrowStatistics:
-    """
-    A class used to specify escrow statistics.
-    """
+    """Escrow statistics data."""
 
     def __init__(
         self,
         total_escrows: int,
         daily_escrows_data: List[DailyEscrowData],
     ):
-        """
-        Initializes a EscrowStatistics instance.
+        """Initialize escrow statistics.
 
-        :param total_escrows: Total escrows
-        :param daily_escrows_data: Daily escrows data
+        Args:
+            total_escrows: Total escrows.
+            daily_escrows_data: Per-day escrow data.
         """
 
         self.total_escrows = total_escrows
@@ -111,20 +97,18 @@ class EscrowStatistics:
 
 
 class DailyWorkerData:
-    """
-    A class used to specify daily worker data.
-    """
+    """Aggregated daily worker metrics."""
 
     def __init__(
         self,
         timestamp: datetime,
         active_workers: int,
     ):
-        """
-        Initializes a DailyWorkerData instance.
+        """Initialize a daily worker record.
 
-        :param timestamp: Timestamp
-        :param active_workers: Active workers
+        Args:
+            timestamp: Day boundary timestamp.
+            active_workers: Number of active workers.
         """
 
         self.timestamp = timestamp
@@ -132,27 +116,23 @@ class DailyWorkerData:
 
 
 class WorkerStatistics:
-    """
-    A class used to specify worker statistics.
-    """
+    """Worker statistics data."""
 
     def __init__(
         self,
         daily_workers_data: List[DailyWorkerData],
     ):
-        """
-        Initializes a WorkerStatistics instance.
+        """Initialize worker statistics.
 
-        :param daily_workers_data: Daily workers data
+        Args:
+            daily_workers_data: Per-day worker data.
         """
 
         self.daily_workers_data = daily_workers_data
 
 
 class DailyPaymentData:
-    """
-    A class used to specify daily payment data.
-    """
+    """Aggregated daily payment metrics."""
 
     def __init__(
         self,
@@ -161,13 +141,13 @@ class DailyPaymentData:
         total_count: int,
         average_amount_per_worker: int,
     ):
-        """
-        Initializes a DailyPaymentData instance.
+        """Initialize a daily payment record.
 
-        :param timestamp: Timestamp
-        :param total_amount_paid: Total amount paid
-        :param total_count: Total count
-        :param average_amount_per_worker: Average amount per worker
+        Args:
+            timestamp: Day boundary timestamp.
+            total_amount_paid: Total amount paid.
+            total_count: Payment count.
+            average_amount_per_worker: Average payout per worker.
         """
 
         self.timestamp = timestamp
@@ -177,38 +157,34 @@ class DailyPaymentData:
 
 
 class PaymentStatistics:
-    """
-    A class used to specify payment statistics.
-    """
+    """Payment statistics data."""
 
     def __init__(
         self,
         daily_payments_data: List[DailyPaymentData],
     ):
-        """
-        Initializes a PaymentStatistics instance.
+        """Initialize payment statistics.
 
-        :param daily_payments_data: Daily payments data
+        Args:
+            daily_payments_data: Per-day payment data.
         """
 
         self.daily_payments_data = daily_payments_data
 
 
 class HMTHolder:
-    """
-    A class used to specify HMT holder.
-    """
+    """HMT holder record."""
 
     def __init__(
         self,
         address: str,
         balance: int,
     ):
-        """
-        Initializes a HMTHolder instance.
+        """Initialize a holder record.
 
-        :param address: Holder address
-        :param balance: Holder balance
+        Args:
+            address: Holder address.
+            balance: Holder balance.
         """
 
         self.address = address
@@ -216,9 +192,7 @@ class HMTHolder:
 
 
 class DailyHMTData:
-    """
-    A class used to specify daily HMT data.
-    """
+    """Aggregated daily HMT transfer metrics."""
 
     def __init__(
         self,
@@ -228,14 +202,14 @@ class DailyHMTData:
         daily_unique_senders: int,
         daily_unique_receivers: int,
     ):
-        """
-        Initializes a DailyHMTData instance.
+        """Initialize daily HMT transfer data.
 
-        :param timestamp: Timestamp
-        :param total_transaction_amount: Total transaction amount
-        :param total_transaction_count: Total transaction count
-        :param daily_unique_senders: Total unique senders
-        :param daily_unique_receivers: Total unique receivers
+        Args:
+            timestamp: Day boundary timestamp.
+            total_transaction_amount: Total transfer amount.
+            total_transaction_count: Total transfer count.
+            daily_unique_senders: Unique senders.
+            daily_unique_receivers: Unique receivers.
         """
 
         self.timestamp = timestamp
@@ -246,9 +220,7 @@ class DailyHMTData:
 
 
 class HMTStatistics:
-    """
-    A class used to specify HMT statistics.
-    """
+    """HMT aggregate statistics."""
 
     def __init__(
         self,
@@ -256,12 +228,12 @@ class HMTStatistics:
         total_transfer_count: int,
         total_holders: int,
     ):
-        """
-        Initializes a HMTStatistics instance.
+        """Initialize HMT statistics.
 
-        :param total_transfer_amount: Total transfer amount
-        :param total_transfer_count: Total transfer count
-        :param total_holders: Total holders
+        Args:
+            total_transfer_amount: Total transfer amount.
+            total_transfer_count: Total transfer count.
+            total_holders: Total holder count.
         """
 
         self.total_transfer_amount = total_transfer_amount
@@ -270,15 +242,16 @@ class HMTStatistics:
 
 
 class StatisticsClient:
-    """
-    A client used to get statistical data.
-    """
+    """Client for retrieving statistical data."""
 
     def __init__(self, chain_id: ChainId = ChainId.POLYGON_AMOY):
-        """Initializes a Statistics instance
+        """Create a statistics client.
 
-        :param chain_id: Chain ID to get statistical data from
+        Args:
+            chain_id: Chain ID to read statistical data from.
 
+        Raises:
+            StatisticsClientError: If the chain ID is invalid or config is missing.
         """
 
         if chain_id.value not in [chain_id.value for chain_id in ChainId]:
@@ -296,29 +269,29 @@ class StatisticsClient:
     ) -> EscrowStatistics:
         """Get escrow statistics data for the given date range.
 
-        :param filter: Object containing the date range
-        :param options: Optional config for subgraph requests
+        Args:
+            filter: Date range and pagination filter.
+            options: Optional subgraph request configuration.
 
-        :return: Escrow statistics data
+        Returns:
+            Escrow statistics data.
 
-        :example:
-            .. code-block:: python
+        Example:
+            ```python
+            from human_protocol_sdk.constants import ChainId
+            from human_protocol_sdk.statistics import StatisticsClient
+            from human_protocol_sdk.filter import StatisticsFilter
 
-                from human_protocol_sdk.constants import ChainId
-                from human_protocol_sdk.statistics import StatisticsClient
-                from human_protocol_sdk.filter import StatisticsFilter
+            statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
 
-                statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
-
-                print(statistics_client.get_escrow_statistics())
-                print(
-                    statistics_client.get_escrow_statistics(
-                        StatisticsFilter(
-                            date_from=datetime.datetime(2023, 5, 8),
-                            date_to=datetime.datetime(2023, 6, 8),
-                        )
-                    )
+            statistics_client.get_escrow_statistics()
+            statistics_client.get_escrow_statistics(
+                StatisticsFilter(
+                    date_from=datetime.datetime(2023, 5, 8),
+                    date_to=datetime.datetime(2023, 6, 8),
                 )
+            )
+            ```
         """
 
         from human_protocol_sdk.gql.statistics import (
@@ -379,29 +352,29 @@ class StatisticsClient:
     ) -> WorkerStatistics:
         """Get worker statistics data for the given date range.
 
-        :param filter: Object containing the date range
-        :param options: Optional config for subgraph requests
+        Args:
+            filter: Date range and pagination filter.
+            options: Optional subgraph request configuration.
 
-        :return: Worker statistics data
+        Returns:
+            Worker statistics data.
 
-        :example:
-            .. code-block:: python
+        Example:
+            ```python
+            from human_protocol_sdk.constants import ChainId
+            from human_protocol_sdk.statistics import StatisticsClient
+            from human_protocol_sdk.filter import StatisticsFilter
 
-                from human_protocol_sdk.constants import ChainId
-                from human_protocol_sdk.statistics import StatisticsClient
-                from human_protocol_sdk.filter import StatisticsFilter
+            statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
 
-                statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
-
-                print(statistics_client.get_worker_statistics())
-                print(
-                    statistics_client.get_worker_statistics(
-                        StatisticsFilter(
-                            date_from=datetime.datetime(2023, 5, 8),
-                            date_to=datetime.datetime(2023, 6, 8),
-                        )
-                    )
+            statistics_client.get_worker_statistics()
+            statistics_client.get_worker_statistics(
+                StatisticsFilter(
+                    date_from=datetime.datetime(2023, 5, 8),
+                    date_to=datetime.datetime(2023, 6, 8),
                 )
+            )
+            ```
         """
         from human_protocol_sdk.gql.statistics import (
             get_event_day_data_query,
@@ -440,29 +413,29 @@ class StatisticsClient:
     ) -> PaymentStatistics:
         """Get payment statistics data for the given date range.
 
-        :param filter: Object containing the date range
-        :param options: Optional config for subgraph requests
+        Args:
+            filter: Date range and pagination filter.
+            options: Optional subgraph request configuration.
 
-        :return: Payment statistics data
+        Returns:
+            Payment statistics data.
 
-        :example:
-            .. code-block:: python
+        Example:
+            ```python
+            from human_protocol_sdk.constants import ChainId
+            from human_protocol_sdk.statistics import StatisticsClient
+            from human_protocol_sdk.filter import StatisticsFilter
 
-                from human_protocol_sdk.constants import ChainId
-                from human_protocol_sdk.statistics import StatisticsClient
-                from human_protocol_sdk.filter import StatisticsFilter
+            statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
 
-                statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
-
-                print(statistics_client.get_payment_statistics())
-                print(
-                    statistics_client.get_payment_statistics(
-                        StatisticsFilter(
-                            date_from=datetime.datetime(2023, 5, 8),
-                            date_to=datetime.datetime(2023, 6, 8),
-                        )
-                    )
+            statistics_client.get_payment_statistics()
+            statistics_client.get_payment_statistics(
+                StatisticsFilter(
+                    date_from=datetime.datetime(2023, 5, 8),
+                    date_to=datetime.datetime(2023, 6, 8),
                 )
+            )
+            ```
         """
 
         from human_protocol_sdk.gql.statistics import (
@@ -509,19 +482,20 @@ class StatisticsClient:
     ) -> HMTStatistics:
         """Get HMT statistics data.
 
-        :param options: Optional config for subgraph requests
+        Args:
+            options: Optional subgraph request configuration.
 
-        :return: HMT statistics data
+        Returns:
+            HMT statistics data.
 
-        :example:
-            .. code-block:: python
+        Example:
+            ```python
+            from human_protocol_sdk.constants import ChainId
+            from human_protocol_sdk.statistics import StatisticsClient
 
-                from human_protocol_sdk.constants import ChainId
-                from human_protocol_sdk.statistics import StatisticsClient
-
-                statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
-
-                print(statistics_client.get_hmt_statistics())
+            statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
+            statistics_client.get_hmt_statistics()
+            ```
         """
         from human_protocol_sdk.gql.statistics import (
             get_event_day_data_query,
@@ -552,28 +526,28 @@ class StatisticsClient:
     ) -> List[HMTHolder]:
         """Get HMT holders data with optional filters and ordering.
 
-        :param param: Object containing filter and order parameters
-        :param options: Optional config for subgraph requests
+        Args:
+            param: Holder filters and sort preferences.
+            options: Optional subgraph request configuration.
 
-        :return: List of HMT holders
+        Returns:
+            List of HMT holders.
 
-        :example:
-            .. code-block:: python
+        Example:
+            ```python
+            from human_protocol_sdk.constants import ChainId
+            from human_protocol_sdk.statistics import StatisticsClient, HMTHoldersParam
 
-                from human_protocol_sdk.constants import ChainId
-                from human_protocol_sdk.statistics import StatisticsClient, HMTHoldersParam
+            statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
 
-                statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
-
-                print(statistics_client.get_hmt_holders())
-                print(
-                    statistics_client.get_hmt_holders(
-                        HMTHoldersParam(
-                            address="0x123...",
-                            order_direction="asc",
-                        )
-                    )
+            statistics_client.get_hmt_holders()
+            statistics_client.get_hmt_holders(
+                HMTHoldersParam(
+                    address="0x123...",
+                    order_direction="asc",
                 )
+            )
+            ```
         """
         from human_protocol_sdk.gql.hmtoken import get_holders_query
 
@@ -605,28 +579,28 @@ class StatisticsClient:
     ) -> List[DailyHMTData]:
         """Get HMT daily statistics data for the given date range.
 
-        :param filter: Object containing the date range
-        :param options: Optional config for subgraph requests
+        Args:
+            filter: Date range and pagination filter.
+            options: Optional subgraph request configuration.
 
-        :return: HMT statistics data
+        Returns:
+            Daily HMT transfer statistics.
 
-        :example:
-            .. code-block:: python
+        Example:
+            ```python
+            from human_protocol_sdk.constants import ChainId
+            from human_protocol_sdk.statistics import StatisticsClient, StatisticsFilter
 
-                from human_protocol_sdk.constants import ChainId
-                from human_protocol_sdk.statistics import StatisticsClient, StatisticsFilter
+            statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
 
-                statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
-
-                print(statistics_client.get_hmt_daily_data())
-                print(
-                    statistics_client.get_hmt_daily_data(
-                        StatisticsFilter(
-                            date_from=datetime.datetime(2023, 5, 8),
-                            date_to=datetime.datetime(2023, 6, 8),
-                        )
-                    )
+            statistics_client.get_hmt_daily_data()
+            statistics_client.get_hmt_daily_data(
+                StatisticsFilter(
+                    date_from=datetime.datetime(2023, 5, 8),
+                    date_to=datetime.datetime(2023, 6, 8),
                 )
+            )
+            ```
         """
         from human_protocol_sdk.gql.statistics import (
             get_event_day_data_query,

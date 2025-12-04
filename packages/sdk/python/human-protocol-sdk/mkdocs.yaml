@@ -1,0 +1,94 @@
+site_name: HUMAN Protocol Python SDK Docs
+site_url: https://sdk.humanprotocol.org/python/
+repo_name: humanprotocol/human-protocol-sdk
+repo_url: https://github.com/humanprotocol/human-protocol-sdk
+docs_dir: docs
+site_dir: site/python
+theme:
+  name: material
+  custom_dir: docs/overrides
+  logo: overrides/assets/img/logo.svg
+  favicon: overrides/assets/img/logo.svg
+  palette:
+    - scheme: default
+      primary: deep purple
+      accent: purple
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: deep purple
+      accent: purple
+      toggle:
+        icon: material/brightness-3
+        name: Switch to light mode
+font:
+  text: Noto Sans
+  code: Roboto Mono
+features:
+  - navigation.instant
+  - navigation.instant.prefetch
+  - navigation.top
+  - navigation.tracking
+  - navigation.path
+  - navigation.indexes
+  - navigation.prune
+  - content.tabs
+  - content.code.copy
+  - toc.follow
+  - announce.dismiss
+extra:
+  language: python
+  version:
+    provider: mike
+markdown_extensions:
+  - toc:
+      baselevel: 1
+      permalink: true
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.magiclink
+  - attr_list
+  - md_in_html
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: google      # or "numpy" / "restructuredtext"
+            show_source: false
+            separate_signature: true
+            merge_init_into_class: true
+            heading_level: 2
+  - mike
+  - section-index
+nav:
+  - Overview: index.md
+  - Encryption: 
+      - Encryption: encryption.md
+      - Encryption Utils: encryption_utils.md
+  - Escrow: 
+      - EscrowClient: escrow_client.md
+      - EscrowUtils: escrow_utils.md
+  - KVStore:
+      - KVStoreClient: kvstore_client.md
+      - KVStoreUtils: kvstore_utils.md
+  - Operator:
+      - OperatorUtils: operator_utils.md
+  - Staking: 
+      - StakingClient: staking_client.md
+      - StakingUtils: staking_utils.md
+  - Statistics:
+      - StatisticsClient: statistics_client.md
+  - Transaction: 
+      - TransactionUtils: transaction_utils.md
+  - Worker: api/worker.md
+  - Core utilities: api/core.md
+extra_css:
+  - overrides/assets/css/custom.css

@@ -1,18 +1,10 @@
-"""
-This client enables to interact with S3 cloud storage services like Amazon S3 Bucket,
-Google Cloud Storage and others.
+"""Client helpers for interacting with S3-compatible storage.
 
-If credentials are not provided, anonymous access will be used (for downloading files).
+If credentials are not provided, anonymous access is used (for downloads).
 
-Code Example
-------------
-
-.. code-block:: python
-
-    from human_protocol_sdk.storage import (
-        Credentials,
-        StorageClient,
-    )
+Example:
+    ```python
+    from human_protocol_sdk.storage import Credentials, StorageClient
 
     credentials = Credentials(
         access_key="my-access-key",
@@ -24,9 +16,7 @@ Code Example
         region="us-west-2",
         credentials=credentials,
     )
-
-Module
-------
+    ```
 """
 
 import hashlib
@@ -50,40 +40,26 @@ warn(f"The module {__name__} is deprecated.", DeprecationWarning, stacklevel=2)
 
 
 class StorageClientError(Exception):
-    """
-    Raises when some error happens when interacting with storage.
-    """
+    """Raised when an error happens while interacting with storage."""
 
     pass
 
 
 class StorageFileNotFoundError(StorageClientError):
-    """
-    Raises when some error happens when file is not found by its key.
-    """
+    """Raised when a file is not found by its key."""
 
     pass
 
 
 class Credentials:
-    """
-    A class to represent the credentials required to authenticate with an S3-compatible service.
-
-    Example::
-
-        credentials = Credentials(
-            access_key='my-access-key',
-            secret_key='my-secret-key'
-        )
-
-    """
+    """Credentials required to authenticate with an S3-compatible service."""
 
     def __init__(self, access_key: str, secret_key: str):
-        """
-        Initializes a Credentials instance.
+        """Create credentials.
 
-        :param access_key: The access key for the S3-compatible service.
-        :param secret_key: The secret key for the S3-compatible service.
+        Args:
+            access_key: Access key for the S3-compatible service.
+            secret_key: Secret key for the S3-compatible service.
         """
 
         self.access_key = access_key
@@ -91,29 +67,7 @@ class Credentials:
 
 
 class StorageClient:
-    """
-    A class for downloading files from an S3-compatible service.
-
-    :attribute:
-        - client (Minio): The S3-compatible client used for interacting with the service.
-
-    :example:
-        .. code-block:: python
-
-            # Download a list of files from an S3-compatible service
-            client = StorageClient(
-                endpoint_url='https://s3.us-west-2.amazonaws.com',
-                region='us-west-2',
-                credentials=Credentials(
-                    access_key='my-access-key',
-                    secret_key='my-secret-key'
-                )
-            )
-            files = ['file1.txt', 'file2.txt']
-            bucket = 'my-bucket'
-            result_files = client.download_files(files=files, bucket=bucket)
-
-    """
+    """Client for interacting with S3-compatible services."""
 
     def __init__(
         self,
@@ -122,17 +76,15 @@ class StorageClient:
         credentials: Optional[Credentials] = None,
         secure: Optional[bool] = True,
     ):
-        """
-        Initializes the StorageClient with the given endpoint_url, region, and credentials.
+        """Create a storage client.
 
-        If credentials are not provided, anonymous access will be used.
+        If credentials are not provided, anonymous access is used.
 
-        :param endpoint_url: The URL of the S3-compatible service.
-        :param region: The region of the S3-compatible service. Defaults to None.
-        :param credentials: The credentials required to authenticate with the S3-compatible service.
-            Defaults to None for anonymous access.
-        :param secure: Flag to indicate to use secure (TLS) connection to S3 service or not.
-            Defaults to True.
+        Args:
+            endpoint_url: URL of the S3-compatible service.
+            region: Region of the S3-compatible service.
+            credentials: Credentials for authentication (optional for anonymous access).
+            secure: Whether to use TLS to connect to the service.
         """
         try:
             self.client = (
@@ -157,40 +109,39 @@ class StorageClient:
             raise e
 
     def download_files(self, files: List[str], bucket: str) -> List[bytes]:
-        """
-        Downloads a list of files from the specified S3-compatible bucket.
+        """Download files from the specified bucket.
 
-        :param files: A list of file keys to download.
-        :param bucket: The name of the S3-compatible bucket to download from.
+        Args:
+            files: List of file keys to download.
+            bucket: Name of the S3-compatible bucket.
 
-        :return: A list of file contents (bytes) downloaded from the bucket.
+        Returns:
+            List of file contents (bytes) from the bucket.
 
-        :raise StorageClientError: If an error occurs while downloading the files.
-        :raise StorageFileNotFoundError: If one of the specified files is not found in the bucket.
+        Raises:
+            StorageClientError: If an error occurs while downloading.
+            StorageFileNotFoundError: If a file is not found in the bucket.
 
-        :example:
-            .. code-block:: python
+        Example:
+            ```python
+            from human_protocol_sdk.storage import Credentials, StorageClient
 
-                from human_protocol_sdk.storage import (
-                    Credentials,
-                    StorageClient,
-                )
+            credentials = Credentials(
+                access_key="my-access-key",
+                secret_key="my-secret-key",
+            )
 
-                credentials = Credentials(
-                    access_key="my-access-key",
-                    secret_key="my-secret-key",
-                )
+            storage_client = StorageClient(
+                endpoint_url="s3.us-west-2.amazonaws.com",
+                region="us-west-2",
+                credentials=credentials,
+            )
 
-                storage_client = StorageClient(
-                    endpoint_url="s3.us-west-2.amazonaws.com",
-                    region="us-west-2",
-                    credentials=credentials,
-                )
-
-                result = storage_client.download_files(
-                    files = ["file1.txt", "file2.txt"],
-                    bucket = "my-bucket"
-                )
+            result = storage_client.download_files(
+                files=["file1.txt", "file2.txt"],
+                bucket="my-bucket",
+            )
+            ```
         """
         result_files = []
         for file in files:
@@ -207,39 +158,40 @@ class StorageClient:
         return result_files
 
     def upload_files(self, files: List[dict], bucket: str) -> List[dict]:
-        """
-        Uploads a list of files to the specified S3-compatible bucket.
+        """Upload a list of files to the specified bucket.
 
-        :param files: A list of files to upload.
-        :param bucket: The name of the S3-compatible bucket to upload to.
+        Args:
+            files: List of file payloads to upload. Each item can be a dict with
+                ``file`` (bytes/str), ``key``, and ``hash`` or an arbitrary object
+                that will be JSON-serialized.
+            bucket: Name of the S3-compatible bucket to upload to.
 
-        :return: List of dict with key, url, hash fields
+        Returns:
+            List of dicts containing ``key``, ``url``, and ``hash`` fields.
 
-        :raise StorageClientError: If an error occurs while uploading the files.
+        Raises:
+            StorageClientError: If an error occurs while uploading the files.
 
-        :example:
-            .. code-block:: python
+        Example:
+            ```python
+            from human_protocol_sdk.storage import Credentials, StorageClient
 
-                from human_protocol_sdk.storage import (
-                    Credentials,
-                    StorageClient,
-                )
+            credentials = Credentials(
+                access_key="my-access-key",
+                secret_key="my-secret-key",
+            )
 
-                credentials = Credentials(
-                    access_key="my-access-key",
-                    secret_key="my-secret-key",
-                )
+            storage_client = StorageClient(
+                endpoint_url="s3.us-west-2.amazonaws.com",
+                region="us-west-2",
+                credentials=credentials,
+            )
 
-                storage_client = StorageClient(
-                    endpoint_url="s3.us-west-2.amazonaws.com",
-                    region="us-west-2",
-                    credentials=credentials,
-                )
-
-                result = storage_client.upload_files(
-                    files = [{"file": "file content", "key": "file1.txt", "hash": "hash1"}],
-                    bucket = "my-bucket"
-                )
+            result = storage_client.upload_files(
+                files=[{"file": b\"content\", "key": "file1.txt", "hash": "hash1"}],
+                bucket="my-bucket",
+            )
+            ```
         """
         result_files = []
         for file in files:
@@ -295,37 +247,16 @@ class StorageClient:
         return result_files
 
     def bucket_exists(self, bucket: str) -> bool:
-        """
-        Check if a given bucket exists.
+        """Check if a given bucket exists.
 
-        :param bucket: The name of the bucket to check.
+        Args:
+            bucket: The name of the bucket to check.
 
-        :return: True if the bucket exists, False otherwise.
+        Returns:
+            True if the bucket exists, False otherwise.
 
-        :raise StorageClientError: If an error occurs while checking the bucket.
-
-        :example:
-            .. code-block:: python
-
-                from human_protocol_sdk.storage import (
-                    Credentials,
-                    StorageClient,
-                )
-
-                credentials = Credentials(
-                    access_key="my-access-key",
-                    secret_key="my-secret-key",
-                )
-
-                storage_client = StorageClient(
-                    endpoint_url="s3.us-west-2.amazonaws.com",
-                    region="us-west-2",
-                    credentials=credentials,
-                )
-
-                is_exists = storage_client.bucket_exists(
-                    bucket = "my-bucket"
-                )
+        Raises:
+            StorageClientError: If an error occurs while checking the bucket.
         """
         try:
             return self.client.bucket_exists(bucket_name=bucket)
@@ -336,37 +267,16 @@ class StorageClient:
             raise StorageClientError(str(e))
 
     def list_objects(self, bucket: str) -> List[str]:
-        """
-        Return a list of all objects in a given bucket.
+        """Return a list of all objects in a given bucket.
 
-        :param bucket: The name of the bucket to list objects from.
+        Args:
+            bucket: The name of the bucket to list objects from.
 
-        :return: A list of object keys in the given bucket.
+        Returns:
+            A list of object keys in the given bucket.
 
-        :raise StorageClientError: If an error occurs while listing the objects.
-
-        :example:
-            .. code-block:: python
-
-                from human_protocol_sdk.storage import (
-                    Credentials,
-                    StorageClient,
-                )
-
-                credentials = Credentials(
-                    access_key="my-access-key",
-                    secret_key="my-secret-key",
-                )
-
-                storage_client = StorageClient(
-                    endpoint_url="s3.us-west-2.amazonaws.com",
-                    region="us-west-2",
-                    credentials=credentials,
-                )
-
-                result = storage_client.list_objects(
-                    bucket = "my-bucket"
-                )
+        Raises:
+            StorageClientError: If an error occurs while listing the objects.
         """
         try:
             objects = list(self.client.list_objects(bucket_name=bucket))
