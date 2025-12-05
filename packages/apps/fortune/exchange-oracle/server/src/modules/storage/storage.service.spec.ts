@@ -2,7 +2,6 @@ import {
   ChainId,
   Encryption,
   EncryptionUtils,
-  StorageClient,
   EscrowClient,
   KVStoreUtils,
 } from '@human-protocol/sdk';
@@ -13,12 +12,10 @@ import { Web3Service } from '../web3/web3.service';
 import { ConfigService } from '@nestjs/config';
 import { S3ConfigService } from '../../common/config/s3-config.service';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
+import { downloadFileFromUrl } from '../../common/utils/storage';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
-  StorageClient: {
-    downloadFileFromUrl: jest.fn(),
-  },
   Encryption: {
     build: jest.fn(),
   },
@@ -31,6 +28,11 @@ jest.mock('@human-protocol/sdk', () => ({
   EscrowClient: {
     build: jest.fn(),
   },
+}));
+
+jest.mock('../../common/utils/storage', () => ({
+  ...jest.requireActual('../../common/utils/storage'),
+  downloadFileFromUrl: jest.fn(),
 }));
 
 jest.mock('minio', () => {
@@ -125,6 +127,7 @@ describe('StorageService', () => {
         s3ConfigService.bucket,
         `${escrowAddress}-${chainId}.json`,
         'encrypted',
+        undefined,
         {
           'Content-Type': 'application/json',
           'Cache-Control': 'no-store',
@@ -159,6 +162,7 @@ describe('StorageService', () => {
         s3ConfigService.bucket,
         `${escrowAddress}-${chainId}.json`,
         'encrypted',
+        undefined,
         {
           'Content-Type': 'application/json',
           'Cache-Control': 'no-store',
@@ -239,6 +243,8 @@ describe('StorageService', () => {
   });
 
   describe('downloadJobSolutions', () => {
+    const downloadFileFromUrlMock = jest.mocked(downloadFileFromUrl);
+
     it('should download the encrypted file correctly', async () => {
       const workerAddress = '0x1234567890123456789012345678901234567891';
       const escrowAddress = '0x1234567890123456789012345678901234567890';
@@ -252,9 +258,7 @@ describe('StorageService', () => {
         },
       ];
 
-      StorageClient.downloadFileFromUrl = jest
-        .fn()
-        .mockResolvedValue('encrypted-content');
+      downloadFileFromUrlMock.mockResolvedValue('encrypted-content');
 
       EncryptionUtils.isEncrypted = jest.fn().mockReturnValue(true);
 
@@ -282,9 +286,7 @@ describe('StorageService', () => {
         },
       ];
 
-      StorageClient.downloadFileFromUrl = jest
-        .fn()
-        .mockResolvedValue(expectedJobFile);
+      downloadFileFromUrlMock.mockResolvedValue(expectedJobFile);
 
       EncryptionUtils.isEncrypted = jest.fn().mockReturnValue(false);
 
@@ -299,9 +301,7 @@ describe('StorageService', () => {
       const escrowAddress = '0x1234567890123456789012345678901234567890';
       const chainId = ChainId.LOCALHOST;
 
-      StorageClient.downloadFileFromUrl = jest
-        .fn()
-        .mockRejectedValue('Network error');
+      downloadFileFromUrlMock.mockRejectedValue('Network error');
 
       const solutionsFile = await storageService.downloadJobSolutions(
         escrowAddress,

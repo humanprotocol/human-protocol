@@ -73,7 +73,7 @@ async function setupPublicKeyFile(
     throw new Error('Bucket does not exists');
   }
 
-  await minioClient.putObject(s3Bucket, keyName, publicKey, {
+  await minioClient.putObject(s3Bucket, keyName, publicKey, undefined, {
     'Content-Type': 'text/plain',
     'Cache-Control': 'no-store',
   });

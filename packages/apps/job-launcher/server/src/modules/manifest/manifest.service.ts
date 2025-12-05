@@ -1,9 +1,4 @@
-import {
-  ChainId,
-  Encryption,
-  KVStoreUtils,
-  StorageParams,
-} from '@human-protocol/sdk';
+import { ChainId, Encryption, KVStoreUtils } from '@human-protocol/sdk';
 import {
   ValidationError as ClassValidationError,
   Injectable,
@@ -72,7 +67,6 @@ import {
 
 @Injectable()
 export class ManifestService {
-  public readonly storageParams: StorageParams;
   public readonly bucket: string;
 
   constructor(

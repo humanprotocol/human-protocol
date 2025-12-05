@@ -7,10 +7,10 @@ import {
   Encryption,
   EncryptionUtils,
   EscrowClient,
-  StorageClient,
 } from '@human-protocol/sdk';
 import { Inject, Injectable } from '@nestjs/common';
 
+import { downloadFileFromUrl } from '../../common/utils/storage';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { ErrorAssignment, ErrorJob } from '../../common/constant/errors';
 import { SortDirection } from '../../common/enums/collection';
@@ -348,8 +348,7 @@ export class JobService {
     let manifest: ManifestDto | null = null;
 
     try {
-      const manifestEncrypted =
-        await StorageClient.downloadFileFromUrl(manifestUrl);
+      const manifestEncrypted = await downloadFileFromUrl(manifestUrl);
 
       if (
         typeof manifestEncrypted === 'string' &&
