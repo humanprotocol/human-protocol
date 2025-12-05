@@ -19,6 +19,20 @@ import {
 } from './interfaces';
 import { getSubgraphUrl, getUnixTimestamp, customGqlFetch } from './utils';
 
+/**
+ * Utility class for transaction-related operations.
+ *
+ * @example
+ * ```ts
+ * import { TransactionUtils, ChainId } from '@human-protocol/sdk';
+ *
+ * const transaction = await TransactionUtils.getTransaction(
+ *   ChainId.POLYGON_AMOY,
+ *   '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
+ * );
+ * console.log('Transaction:', transaction);
+ * ```
+ */
 export class TransactionUtils {
   /**
    * This function returns the transaction data for the given hash.
@@ -51,17 +65,22 @@ export class TransactionUtils {
    * };
    * ```
    *
-   * @param {ChainId} chainId The chain ID.
-   * @param {string} hash The transaction hash.
-   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
-   * @returns {Promise<ITransaction | null>} - Returns the transaction details or null if not found.
+   * @param chainId - The chain ID.
+   * @param hash - The transaction hash.
+   * @param options - Optional configuration for subgraph requests.
+   * @returns Returns the transaction details or null if not found.
+   * @throws ErrorInvalidHashProvided If the hash is invalid
+   * @throws ErrorUnsupportedChainID If the chain ID is not supported
    *
-   * **Code example**
-   *
+   * @example
    * ```ts
    * import { TransactionUtils, ChainId } from '@human-protocol/sdk';
    *
-   * const transaction = await TransactionUtils.getTransaction(ChainId.POLYGON, '0x62dD51230A30401C455c8398d06F85e4EaB6309f');
+   * const transaction = await TransactionUtils.getTransaction(
+   *   ChainId.POLYGON_AMOY,
+   *   '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
+   * );
+   * console.log('Transaction:', transaction);
    * ```
    */
   public static async getTransaction(
@@ -116,7 +135,7 @@ export class TransactionUtils {
    *   skip?: number; // (Optional) Number of transactions to skip. Default is 0.
    *   orderDirection?: OrderDirection; // (Optional) Order of the results. Default is DESC.
    * }
-   *
+   * ```
    *
    * ```ts
    * type InternalTransaction = {
@@ -146,17 +165,18 @@ export class TransactionUtils {
    * };
    * ```
    *
-   * @param {ITransactionsFilter} filter Filter for the transactions.
-   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
-   * @returns {Promise<ITransaction[]>} Returns an array with all the transaction details.
+   * @param filter - Filter for the transactions.
+   * @param options - Optional configuration for subgraph requests.
+   * @returns Returns an array with all the transaction details.
+   * @throws ErrorCannotUseDateAndBlockSimultaneously If both date and block filters are used
+   * @throws ErrorUnsupportedChainID If the chain ID is not supported
    *
-   * **Code example**
-   *
+   * @example
    * ```ts
    * import { TransactionUtils, ChainId, OrderDirection } from '@human-protocol/sdk';
    *
-   * const filter: ITransactionsFilter = {
-   *   chainId: ChainId.POLYGON,
+   * const filter = {
+   *   chainId: ChainId.POLYGON_AMOY,
    *   startDate: new Date('2022-01-01'),
    *   endDate: new Date('2022-12-31'),
    *   first: 10,
@@ -164,6 +184,7 @@ export class TransactionUtils {
    *   orderDirection: OrderDirection.DESC,
    * };
    * const transactions = await TransactionUtils.getTransactions(filter);
+   * console.log('Transactions:', transactions.length);
    * ```
    */
   public static async getTransactions(

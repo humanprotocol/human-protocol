@@ -1,3 +1,8 @@
+"""Decorators for SDK functionality."""
+
+from typing import Callable, Any
+
+
 class RequiresSignerError(Exception):
     """Raised when a transaction-signing method is called without proper Web3 account configuration.
 
@@ -11,7 +16,7 @@ class RequiresSignerError(Exception):
     pass
 
 
-def requires_signer(method):
+def requires_signer(method: Callable[..., Any]) -> Callable[..., Any]:
     """Decorator that ensures Web3 instance has signing capabilities before executing a method.
 
     This decorator validates that the Web3 instance has both a default account configured
@@ -19,10 +24,10 @@ def requires_signer(method):
     methods that need to sign and send transactions.
 
     Args:
-        method: The method to decorate (must be a method of a class with a `w3` attribute).
+        method (Callable[..., Any]): The method to decorate (must be a method of a class with a `w3` attribute).
 
     Returns:
-        Wrapped method that performs validation before execution.
+        Callable[..., Any]: Wrapped method that performs validation before execution.
 
     Raises:
         RequiresSignerError: If the Web3 instance lacks a default account or signing middleware.
@@ -44,7 +49,7 @@ def requires_signer(method):
         ```
     """
 
-    def wrapper(self, *args, **kwargs):
+    def wrapper(self: Any, *args: Any, **kwargs: Any) -> Any:
         if not self.w3.eth.default_account:
             raise RequiresSignerError("You must add an account to Web3 instance")
         if not self.w3.middleware_onion.get("SignAndSendRawMiddlewareBuilder"):

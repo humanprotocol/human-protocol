@@ -30,16 +30,10 @@ import {
 } from './utils';
 
 /**
- * ## Introduction
+ * Utility class for statistics-related operations.
  *
- * This client enables obtaining statistical information from the subgraph.
- *
- * Unlike other SDK clients, `StatisticsClient` does not require `signer` or `provider` to be provided.
- * We just need to create a client object using relevant network data.
- *
- * ```ts
- * constructor(network: NetworkData)
- * ```
+ * Unlike other SDK clients, `StatisticsUtils` does not require `signer` or `provider` to be provided.
+ * We just need to pass the network data to each static method.
  *
  * ## Installation
  *
@@ -53,28 +47,16 @@ import {
  * yarn install @human-protocol/sdk
  * ```
  *
- * ## Code example
- *
+ * @example
  * ```ts
- * import { StatisticsClient, ChainId, NETWORKS } from '@human-protocol/sdk';
+ * import { StatisticsUtils, ChainId, NETWORKS } from '@human-protocol/sdk';
  *
- * const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_AMOY]);
+ * const networkData = NETWORKS[ChainId.POLYGON_AMOY];
+ * const escrowStats = await StatisticsUtils.getEscrowStatistics(networkData);
+ * console.log('Total escrows:', escrowStats.totalEscrows);
  * ```
  */
-export class StatisticsClient {
-  public networkData: NetworkData;
-  public subgraphUrl: string;
-
-  /**
-   * **StatisticsClient constructor**
-   *
-   * @param {NetworkData} networkData - The network information required to connect to the Statistics contract
-   */
-  constructor(networkData: NetworkData) {
-    this.networkData = networkData;
-    this.subgraphUrl = getSubgraphUrl(networkData);
-  }
-
+export class StatisticsUtils {
   /**
    * This function returns the statistical data of escrows.
    *
@@ -106,29 +88,36 @@ export class StatisticsClient {
    * };
    * ```
    *
-   * @param {IStatisticsFilter} filter Statistics params with duration data
-   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
-   * @returns {Promise<IEscrowStatistics>} Escrow statistics data.
+   * @param networkData - The network information required to connect to the subgraph
+   * @param filter - Statistics params with duration data
+   * @param options - Optional configuration for subgraph requests.
+   * @returns Escrow statistics data.
    *
-   * **Code example**
-   *
+   * @example
    * ```ts
-   * import { StatisticsClient, ChainId, NETWORKS } from '@human-protocol/sdk';
+   * import { StatisticsUtils, ChainId, NETWORKS } from '@human-protocol/sdk';
    *
-   * const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_AMOY]);
+   * const networkData = NETWORKS[ChainId.POLYGON_AMOY];
+   * const escrowStats = await StatisticsUtils.getEscrowStatistics(networkData);
+   * console.log('Total escrows:', escrowStats.totalEscrows);
    *
-   * const escrowStatistics = await statisticsClient.getEscrowStatistics();
-   * const escrowStatisticsApril = await statisticsClient.getEscrowStatistics({
-   *    from: new Date('2021-04-01'),
-   *    to: new Date('2021-04-30'),
-   * });
+   * const escrowStatsApril = await StatisticsUtils.getEscrowStatistics(
+   *   networkData,
+   *   {
+   *     from: new Date('2021-04-01'),
+   *     to: new Date('2021-04-30'),
+   *   }
+   * );
+   * console.log('April escrows:', escrowStatsApril.totalEscrows);
    * ```
    */
-  async getEscrowStatistics(
+  static async getEscrowStatistics(
+    networkData: NetworkData,
     filter: IStatisticsFilter = {},
     options?: SubgraphOptions
   ): Promise<IEscrowStatistics> {
     try {
+      const subgraphUrl = getSubgraphUrl(networkData);
       const first =
         filter.first !== undefined ? Math.min(filter.first, 1000) : 10;
       const skip = filter.skip || 0;
@@ -136,12 +125,12 @@ export class StatisticsClient {
 
       const { escrowStatistics } = await customGqlFetch<{
         escrowStatistics: EscrowStatisticsData;
-      }>(this.subgraphUrl, GET_ESCROW_STATISTICS_QUERY, options);
+      }>(subgraphUrl, GET_ESCROW_STATISTICS_QUERY, options);
 
       const { eventDayDatas } = await customGqlFetch<{
         eventDayDatas: EventDayData[];
       }>(
-        this.subgraphUrl,
+        subgraphUrl,
         GET_EVENT_DAY_DATA_QUERY(filter),
         {
           from: filter.from ? getUnixTimestamp(filter.from) : undefined,
@@ -197,29 +186,36 @@ export class StatisticsClient {
    * };
    * ```
    *
-   * @param {IStatisticsFilter} filter Statistics params with duration data
-   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
-   * @returns {Promise<IWorkerStatistics>} Worker statistics data.
+   * @param networkData - The network information required to connect to the subgraph
+   * @param filter - Statistics params with duration data
+   * @param options - Optional configuration for subgraph requests.
+   * @returns Worker statistics data.
    *
-   * **Code example**
-   *
+   * @example
    * ```ts
-   * import { StatisticsClient, ChainId, NETWORKS } from '@human-protocol/sdk';
+   * import { StatisticsUtils, ChainId, NETWORKS } from '@human-protocol/sdk';
    *
-   * const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_AMOY]);
+   * const networkData = NETWORKS[ChainId.POLYGON_AMOY];
+   * const workerStats = await StatisticsUtils.getWorkerStatistics(networkData);
+   * console.log('Daily workers data:', workerStats.dailyWorkersData);
    *
-   * const workerStatistics = await statisticsClient.getWorkerStatistics();
-   * const workerStatisticsApril = await statisticsClient.getWorkerStatistics({
-   *    from: new Date('2021-04-01'),
-   *    to: new Date('2021-04-30'),
-   * });
+   * const workerStatsApril = await StatisticsUtils.getWorkerStatistics(
+   *   networkData,
+   *   {
+   *     from: new Date('2021-04-01'),
+   *     to: new Date('2021-04-30'),
+   *   }
+   * );
+   * console.log('April workers:', workerStatsApril.dailyWorkersData.length);
    * ```
    */
-  async getWorkerStatistics(
+  static async getWorkerStatistics(
+    networkData: NetworkData,
     filter: IStatisticsFilter = {},
     options?: SubgraphOptions
   ): Promise<IWorkerStatistics> {
     try {
+      const subgraphUrl = getSubgraphUrl(networkData);
       const first =
         filter.first !== undefined ? Math.min(filter.first, 1000) : 10;
       const skip = filter.skip || 0;
@@ -228,7 +224,7 @@ export class StatisticsClient {
       const { eventDayDatas } = await customGqlFetch<{
         eventDayDatas: EventDayData[];
       }>(
-        this.subgraphUrl,
+        subgraphUrl,
         GET_EVENT_DAY_DATA_QUERY(filter),
         {
           from: filter.from ? getUnixTimestamp(filter.from) : undefined,
@@ -279,50 +275,43 @@ export class StatisticsClient {
    * };
    * ```
    *
-   * @param {IStatisticsFilter} filter Statistics params with duration data
-   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
-   * @returns {Promise<IPaymentStatistics>} Payment statistics data.
+   * @param networkData - The network information required to connect to the subgraph
+   * @param filter - Statistics params with duration data
+   * @param options - Optional configuration for subgraph requests.
+   * @returns Payment statistics data.
    *
-   * **Code example**
-   *
+   * @example
    * ```ts
-   * import { StatisticsClient, ChainId, NETWORKS } from '@human-protocol/sdk';
+   * import { StatisticsUtils, ChainId, NETWORKS } from '@human-protocol/sdk';
    *
-   * const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_AMOY]);
-   *
+   * const networkData = NETWORKS[ChainId.POLYGON_AMOY];
+   * const paymentStats = await StatisticsUtils.getPaymentStatistics(networkData);
    * console.log(
    *   'Payment statistics:',
-   *   (await statisticsClient.getPaymentStatistics()).dailyPaymentsData.map(
-   *     (p) => ({
-   *       ...p,
-   *       totalAmountPaid: p.totalAmountPaid.toString(),
-   *       averageAmountPerJob: p.averageAmountPerJob.toString(),
-   *       averageAmountPerWorker: p.averageAmountPerWorker.toString(),
-   *     })
-   *   )
-   * );
-   *
-   * console.log(
-   *   'Payment statistics from 5/8 - 6/8:',
-   *   (
-   *     await statisticsClient.getPaymentStatistics({
-   *       from: new Date(2023, 4, 8),
-   *       to: new Date(2023, 5, 8),
-   *     })
-   *   ).dailyPaymentsData.map((p) => ({
+   *   paymentStats.dailyPaymentsData.map((p) => ({
    *     ...p,
    *     totalAmountPaid: p.totalAmountPaid.toString(),
-   *     averageAmountPerJob: p.averageAmountPerJob.toString(),
    *     averageAmountPerWorker: p.averageAmountPerWorker.toString(),
    *   }))
    * );
+   *
+   * const paymentStatsRange = await StatisticsUtils.getPaymentStatistics(
+   *   networkData,
+   *   {
+   *     from: new Date(2023, 4, 8),
+   *     to: new Date(2023, 5, 8),
+   *   }
+   * );
+   * console.log('Payment statistics from 5/8 - 6/8:', paymentStatsRange.dailyPaymentsData.length);
    * ```
    */
-  async getPaymentStatistics(
+  static async getPaymentStatistics(
+    networkData: NetworkData,
     filter: IStatisticsFilter = {},
     options?: SubgraphOptions
   ): Promise<IPaymentStatistics> {
     try {
+      const subgraphUrl = getSubgraphUrl(networkData);
       const first =
         filter.first !== undefined ? Math.min(filter.first, 1000) : 10;
       const skip = filter.skip || 0;
@@ -331,7 +320,7 @@ export class StatisticsClient {
       const { eventDayDatas } = await customGqlFetch<{
         eventDayDatas: EventDayData[];
       }>(
-        this.subgraphUrl,
+        subgraphUrl,
         GET_EVENT_DAY_DATA_QUERY(filter),
         {
           from: filter.from ? getUnixTimestamp(filter.from) : undefined,
@@ -371,29 +360,31 @@ export class StatisticsClient {
    * };
    * ```
    *
-   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
-   * @returns {Promise<IHMTStatistics>} HMToken statistics data.
+   * @param networkData - The network information required to connect to the subgraph
+   * @param options - Optional configuration for subgraph requests.
+   * @returns HMToken statistics data.
    *
-   * **Code example**
-   *
+   * @example
    * ```ts
-   * import { StatisticsClient, ChainId, NETWORKS } from '@human-protocol/sdk';
+   * import { StatisticsUtils, ChainId, NETWORKS } from '@human-protocol/sdk';
    *
-   * const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_AMOY]);
-   *
-   * const hmtStatistics = await statisticsClient.getHMTStatistics();
-   *
+   * const networkData = NETWORKS[ChainId.POLYGON_AMOY];
+   * const hmtStats = await StatisticsUtils.getHMTStatistics(networkData);
    * console.log('HMT statistics:', {
-   *   ...hmtStatistics,
-   *   totalTransferAmount: hmtStatistics.totalTransferAmount.toString(),
+   *   ...hmtStats,
+   *   totalTransferAmount: hmtStats.totalTransferAmount.toString(),
    * });
    * ```
    */
-  async getHMTStatistics(options?: SubgraphOptions): Promise<IHMTStatistics> {
+  static async getHMTStatistics(
+    networkData: NetworkData,
+    options?: SubgraphOptions
+  ): Promise<IHMTStatistics> {
     try {
+      const subgraphUrl = getSubgraphUrl(networkData);
       const { hmtokenStatistics } = await customGqlFetch<{
         hmtokenStatistics: HMTStatisticsData;
-      }>(this.subgraphUrl, GET_HMTOKEN_STATISTICS_QUERY, options);
+      }>(subgraphUrl, GET_HMTOKEN_STATISTICS_QUERY, options);
 
       return {
         totalTransferAmount: BigInt(hmtokenStatistics.totalValueTransfered),
@@ -408,39 +399,37 @@ export class StatisticsClient {
   /**
    * This function returns the holders of the HMToken with optional filters and ordering.
    *
-   * **Input parameters**
+   * @param networkData - The network information required to connect to the subgraph
+   * @param params - HMT Holders params with filters and ordering
+   * @param options - Optional configuration for subgraph requests.
+   * @returns List of HMToken holders.
    *
-   * @param {IHMTHoldersParams} params HMT Holders params with filters and ordering
-   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
-   * @returns {Promise<IHMTHolder[]>} List of HMToken holders.
-   *
-   * **Code example**
-   *
+   * @example
    * ```ts
-   * import { StatisticsClient, ChainId, NETWORKS } from '@human-protocol/sdk';
+   * import { StatisticsUtils, ChainId, NETWORKS } from '@human-protocol/sdk';
    *
-   * const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_AMOY]);
-   *
-   * const hmtHolders = await statisticsClient.getHMTHolders({
+   * const networkData = NETWORKS[ChainId.POLYGON_AMOY];
+   * const hmtHolders = await StatisticsUtils.getHMTHolders(networkData, {
    *   orderDirection: 'asc',
    * });
-   *
    * console.log('HMT holders:', hmtHolders.map((h) => ({
    *   ...h,
    *   balance: h.balance.toString(),
    * })));
    * ```
    */
-  async getHMTHolders(
+  static async getHMTHolders(
+    networkData: NetworkData,
     params: IHMTHoldersParams = {},
     options?: SubgraphOptions
   ): Promise<IHMTHolder[]> {
     try {
+      const subgraphUrl = getSubgraphUrl(networkData);
       const { address, orderDirection } = params;
       const query = GET_HOLDERS_QUERY(address);
 
       const { holders } = await customGqlFetch<{ holders: HMTHolderData[] }>(
-        this.subgraphUrl,
+        subgraphUrl,
         query,
         {
           address,
@@ -484,34 +473,36 @@ export class StatisticsClient {
    * }
    * ```
    *
-   * @param {IStatisticsFilter} filter Statistics params with duration data
-   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
-   * @returns {Promise<IDailyHMT[]>} Daily HMToken statistics data.
+   * @param networkData - The network information required to connect to the subgraph
+   * @param filter - Statistics params with duration data
+   * @param options - Optional configuration for subgraph requests.
+   * @returns Daily HMToken statistics data.
    *
-   * **Code example**
-   *
+   * @example
    * ```ts
-   * import { StatisticsClient, ChainId, NETWORKS } from '@human-protocol/sdk';
+   * import { StatisticsUtils, ChainId, NETWORKS } from '@human-protocol/sdk';
    *
-   * const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_AMOY]);
-   *
-   * const dailyHMTStats = await statisticsClient.getHMTStatistics();
-   *
+   * const networkData = NETWORKS[ChainId.POLYGON_AMOY];
+   * const dailyHMTStats = await StatisticsUtils.getHMTDailyData(networkData);
    * console.log('Daily HMT statistics:', dailyHMTStats);
    *
-   * const hmtStatisticsRange = await statisticsClient.getHMTStatistics({
-   *   from: new Date(2023, 4, 8),
-   *   to: new Date(2023, 5, 8),
-   * });
-   *
-   * console.log('HMT statistics from 5/8 - 6/8:', hmtStatisticsRange);
+   * const hmtStatsRange = await StatisticsUtils.getHMTDailyData(
+   *   networkData,
+   *   {
+   *     from: new Date(2023, 4, 8),
+   *     to: new Date(2023, 5, 8),
+   *   }
+   * );
+   * console.log('HMT statistics from 5/8 - 6/8:', hmtStatsRange.length);
    * ```
    */
-  async getHMTDailyData(
+  static async getHMTDailyData(
+    networkData: NetworkData,
     filter: IStatisticsFilter = {},
     options?: SubgraphOptions
   ): Promise<IDailyHMT[]> {
     try {
+      const subgraphUrl = getSubgraphUrl(networkData);
       const first =
         filter.first !== undefined ? Math.min(filter.first, 1000) : 10;
       const skip = filter.skip || 0;
@@ -520,7 +511,7 @@ export class StatisticsClient {
       const { eventDayDatas } = await customGqlFetch<{
         eventDayDatas: EventDayData[];
       }>(
-        this.subgraphUrl,
+        subgraphUrl,
         GET_EVENT_DAY_DATA_QUERY(filter),
         {
           from: filter.from ? getUnixTimestamp(filter.from) : undefined,

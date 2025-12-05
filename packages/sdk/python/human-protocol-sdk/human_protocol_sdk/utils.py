@@ -3,7 +3,7 @@ import logging
 import os
 import time
 import re
-from typing import Tuple, Optional
+from typing import Tuple, Optional, Any, Dict, Type
 from dataclasses import dataclass
 
 import requests
@@ -37,9 +37,9 @@ class SubgraphOptions:
     """Configuration options for subgraph queries with retry logic and indexer routing.
 
     Attributes:
-        max_retries: Maximum number of retry attempts for failed queries. Must be paired with base_delay.
-        base_delay: Base delay in milliseconds between retry attempts. Must be paired with max_retries.
-        indexer_id: Specific indexer ID to route requests to (requires SUBGRAPH_API_KEY environment variable).
+        max_retries (Optional[int]): Maximum number of retry attempts for failed queries. Must be paired with base_delay.
+        base_delay (Optional[int]): Base delay in milliseconds between retry attempts. Must be paired with max_retries.
+        indexer_id (Optional[str]): Specific indexer ID to route requests to (requires SUBGRAPH_API_KEY environment variable).
     """
 
     max_retries: Optional[int] = None
@@ -54,10 +54,10 @@ def is_indexer_error(error: Exception) -> bool:
     messages that indicate infrastructure issues rather than query problems.
 
     Args:
-        error: The exception to check.
+        error (Exception): The exception to check.
 
     Returns:
-        True if the error indicates indexer issues, False otherwise.
+        bool: True if the error indicates indexer issues, False otherwise.
 
     Example:
         ```python
@@ -95,21 +95,21 @@ def is_indexer_error(error: Exception) -> bool:
 
 
 def custom_gql_fetch(
-    network: dict,
+    network: Dict[str, Any],
     query: str,
-    params: dict = None,
+    params: Optional[Dict[str, Any]] = None,
     options: Optional[SubgraphOptions] = None,
-):
+) -> Dict[str, Any]:
     """Fetch data from the subgraph with optional retry logic and indexer routing.
 
     Args:
-        network: Network configuration dictionary containing subgraph URLs.
-        query: GraphQL query string to execute.
-        params: Optional query parameters/variables dictionary.
-        options: Optional subgraph configuration for retries and indexer selection.
+        network (Dict[str, Any]): Network configuration dictionary containing subgraph URLs.
+        query (str): GraphQL query string to execute.
+        params (Optional[Dict[str, Any]]): Optional query parameters/variables dictionary.
+        options (Optional[SubgraphOptions]): Optional subgraph configuration for retries and indexer selection.
 
     Returns:
-        JSON response from the subgraph containing the query results.
+        Dict[str, Any]: JSON response from the subgraph containing the query results.
 
     Raises:
         ValueError: If retry configuration is incomplete or indexer routing requires missing API key.
@@ -173,21 +173,21 @@ def custom_gql_fetch(
 
 
 def _fetch_subgraph_data(
-    network: dict,
+    network: Dict[str, Any],
     query: str,
-    params: dict = None,
+    params: Optional[Dict[str, Any]] = None,
     indexer_id: Optional[str] = None,
-):
+) -> Dict[str, Any]:
     """Internal function to fetch data from the subgraph API.
 
     Args:
-        network: Network configuration dictionary containing subgraph URLs.
-        query: GraphQL query string to execute.
-        params: Optional query parameters/variables dictionary.
-        indexer_id: Optional indexer ID to route the request to.
+        network (Dict[str, Any]): Network configuration dictionary containing subgraph URLs.
+        query (str): GraphQL query string to execute.
+        params (Optional[Dict[str, Any]]): Optional query parameters/variables dictionary.
+        indexer_id (Optional[str]): Optional indexer ID to route the request to.
 
     Returns:
-        JSON response from the subgraph.
+        Dict[str, Any]: JSON response from the subgraph.
 
     Raises:
         Exception: If the HTTP request fails or returns a non-200 status code.
@@ -237,13 +237,13 @@ def _attach_indexer_id(url: str, indexer_id: Optional[str]) -> str:
     return f"{url}/indexers/id/{indexer_id}"
 
 
-def get_hmt_balance(wallet_addr, token_addr, w3):
+def get_hmt_balance(wallet_addr: str, token_addr: str, w3: Web3) -> int:
     """Get the HMT token balance for a wallet address.
 
     Args:
-        wallet_addr: Wallet address to check balance for.
-        token_addr: ERC-20 token contract address.
-        w3: Web3 instance connected to the network.
+        wallet_addr (str): Wallet address to check balance for.
+        token_addr (str): ERC-20 token contract address.
+        w3 (Web3): Web3 instance connected to the network.
 
     Returns:
         int: HMT token balance in wei.
@@ -313,14 +313,14 @@ def parse_transfer_transaction(
     return hmt_transferred and tx_balance is not None, tx_balance
 
 
-def get_contract_interface(contract_entrypoint):
+def get_contract_interface(contract_entrypoint: str) -> Dict[str, Any]:
     """Retrieve the contract ABI and interface from a compiled artifact file.
 
     Args:
-        contract_entrypoint: File path to the contract JSON artifact.
+        contract_entrypoint (str): File path to the contract JSON artifact.
 
     Returns:
-        dict: Contract interface dictionary containing the ABI and other metadata.
+        Dict[str, Any]: Contract interface dictionary containing the ABI and other metadata.
 
     Example:
         ```python
@@ -333,11 +333,11 @@ def get_contract_interface(contract_entrypoint):
     return contract_interface
 
 
-def get_erc20_interface():
+def get_erc20_interface() -> Dict[str, Any]:
     """Retrieve the standard ERC20 token contract interface.
 
     Returns:
-        dict: The ERC20 contract interface containing the ABI.
+        Dict[str, Any]: The ERC20 contract interface containing the ABI.
 
     Example:
         ```python
@@ -353,11 +353,11 @@ def get_erc20_interface():
     )
 
 
-def get_factory_interface():
+def get_factory_interface() -> Dict[str, Any]:
     """Retrieve the EscrowFactory contract interface.
 
     Returns:
-        dict: The EscrowFactory contract interface containing the ABI.
+        Dict[str, Any]: The EscrowFactory contract interface containing the ABI.
 
     Example:
         ```python
@@ -371,11 +371,11 @@ def get_factory_interface():
     )
 
 
-def get_staking_interface():
+def get_staking_interface() -> Dict[str, Any]:
     """Retrieve the Staking contract interface.
 
     Returns:
-        dict: The Staking contract interface containing the ABI.
+        Dict[str, Any]: The Staking contract interface containing the ABI.
 
     Example:
         ```python
@@ -389,11 +389,11 @@ def get_staking_interface():
     )
 
 
-def get_escrow_interface():
+def get_escrow_interface() -> Dict[str, Any]:
     """Retrieve the Escrow contract interface.
 
     Returns:
-        dict: The Escrow contract interface containing the ABI.
+        Dict[str, Any]: The Escrow contract interface containing the ABI.
 
     Example:
         ```python
@@ -407,11 +407,11 @@ def get_escrow_interface():
     )
 
 
-def get_kvstore_interface():
+def get_kvstore_interface() -> Dict[str, Any]:
     """Retrieve the KVStore contract interface.
 
     Returns:
-        dict: The KVStore contract interface containing the ABI.
+        Dict[str, Any]: The KVStore contract interface containing the ABI.
 
     Example:
         ```python
@@ -425,7 +425,7 @@ def get_kvstore_interface():
     )
 
 
-def handle_error(e, exception_class):
+def handle_error(e: Exception, exception_class: Type[Exception]) -> None:
     """Handle and translate errors raised during contract transactions.
 
     This function captures exceptions (especially ContractLogicError from web3.py),
@@ -433,8 +433,8 @@ def handle_error(e, exception_class):
     a custom exception with a clear message for SDK users.
 
     Args:
-        e: The exception object raised during a transaction.
-        exception_class: The custom exception class to raise (e.g., EscrowClientError).
+        e (Exception): The exception object raised during a transaction.
+        exception_class (Type[Exception]): The custom exception class to raise (e.g., EscrowClientError).
 
     Raises:
         exception_class: Always raises the provided exception class with a formatted error message.

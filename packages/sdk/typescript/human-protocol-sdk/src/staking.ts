@@ -73,12 +73,12 @@ import {
  *
  * ```ts
  * import { StakingClient } from '@human-protocol/sdk';
- * import { Wallet, providers } from 'ethers';
+ * import { Wallet, JsonRpcProvider } from 'ethers';
  *
  * const rpcUrl = 'YOUR_RPC_URL';
  * const privateKey = 'YOUR_PRIVATE_KEY';
  *
- * const provider = new providers.JsonRpcProvider(rpcUrl);
+ * const provider = new JsonRpcProvider(rpcUrl);
  * const signer = new Wallet(privateKey, provider);
  * const stakingClient = await StakingClient.build(signer);
  * ```
@@ -97,11 +97,11 @@ import {
  *
  * ```ts
  * import { StakingClient } from '@human-protocol/sdk';
- * import { providers } from 'ethers';
+ * import { JsonRpcProvider } from 'ethers';
  *
  * const rpcUrl = 'YOUR_RPC_URL';
  *
- * const provider = new providers.JsonRpcProvider(rpcUrl);
+ * const provider = new JsonRpcProvider(rpcUrl);
  * const stakingClient = await StakingClient.build(provider);
  * ```
  */
@@ -113,8 +113,8 @@ export class StakingClient extends BaseEthersClient {
   /**
    * **StakingClient constructor**
    *
-   * @param {ContractRunner} runner - The Runner object to interact with the Ethereum network
-   * @param {NetworkData} networkData - The network information required to connect to the Staking contract
+   * @param runner - The Runner object to interact with the Ethereum network
+   * @param networkData - The network information required to connect to the Staking contract
    */
   constructor(runner: ContractRunner, networkData: NetworkData) {
     super(runner, networkData);
@@ -138,11 +138,23 @@ export class StakingClient extends BaseEthersClient {
   /**
    * Creates an instance of StakingClient from a Runner.
    *
-   * @param {ContractRunner} runner - The Runner object to interact with the Ethereum network
+   * @param runner - The Runner object to interact with the Ethereum network
+   * @returns An instance of StakingClient
+   * @throws ErrorProviderDoesNotExist If the provider does not exist for the provided Signer
+   * @throws ErrorUnsupportedChainID If the network's chainId is not supported
    *
-   * @returns {Promise<StakingClient>} - An instance of StakingClient
-   * @throws {ErrorProviderDoesNotExist} - Thrown if the provider does not exist for the provided Signer
-   * @throws {ErrorUnsupportedChainID} - Thrown if the network's chainId is not supported
+   * @example
+   * ```ts
+   * import { StakingClient } from '@human-protocol/sdk';
+   * import { Wallet, JsonRpcProvider } from 'ethers';
+   *
+   * const rpcUrl = 'YOUR_RPC_URL';
+   * const privateKey = 'YOUR_PRIVATE_KEY';
+   *
+   * const provider = new JsonRpcProvider(rpcUrl);
+   * const signer = new Wallet(privateKey, provider);
+   * const stakingClient = await StakingClient.build(signer);
+   * ```
    */
   public static async build(runner: ContractRunner): Promise<StakingClient> {
     if (!runner.provider) {
@@ -179,24 +191,16 @@ export class StakingClient extends BaseEthersClient {
   /**
    * This function approves the staking contract to transfer a specified amount of tokens when the user stakes. It increases the allowance for the staking contract.
    *
-   * @param {bigint} amount Amount in WEI of tokens to approve for stake.
-   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
-   * @returns Returns void if successful. Throws error if any.
+   * @param amount - Amount in WEI of tokens to approve for stake.
+   * @param txOptions - Additional transaction parameters (optional, defaults to an empty object).
+   * @throws ErrorInvalidStakingValueType If the amount is not a bigint
+   * @throws ErrorInvalidStakingValueSign If the amount is negative
    *
-   * **Code example**
-   *
+   * @example
    * ```ts
-   * import { ethers, Wallet, providers } from 'ethers';
-   * import { StakingClient } from '@human-protocol/sdk';
+   * import { ethers } from 'ethers';
    *
-   * const rpcUrl = 'YOUR_RPC_URL';
-   * const privateKey = 'YOUR_PRIVATE_KEY';
-   *
-   * const provider = new providers.JsonRpcProvider(rpcUrl);
-   * const signer = new Wallet(privateKey, provider);
-   * const stakingClient = await StakingClient.build(signer);
-   *
-   * const amount = ethers.parseUnits(5, 'ether'); //convert from ETH to WEI
+   * const amount = ethers.parseUnits('5', 'ether'); //convert from ETH to WEI
    * await stakingClient.approveStake(amount);
    * ```
    */
@@ -232,24 +236,16 @@ export class StakingClient extends BaseEthersClient {
    *
    * > `approveStake` must be called before
    *
-   * @param {bigint} amount Amount in WEI of tokens to stake.
-   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
-   * @returns Returns void if successful. Throws error if any.
+   * @param amount - Amount in WEI of tokens to stake.
+   * @param txOptions - Additional transaction parameters (optional, defaults to an empty object).
+   * @throws ErrorInvalidStakingValueType If the amount is not a bigint
+   * @throws ErrorInvalidStakingValueSign If the amount is negative
    *
-   * **Code example**
-   *
+   * @example
    * ```ts
-   * import { ethers, Wallet, providers } from 'ethers';
-   * import { StakingClient } from '@human-protocol/sdk';
+   * import { ethers } from 'ethers';
    *
-   * const rpcUrl = 'YOUR_RPC_URL';
-   * const privateKey = 'YOUR_PRIVATE_KEY';
-   *
-   * const provider = new providers.JsonRpcProvider(rpcUrl);
-   * const signer = new Wallet(privateKey, provider);
-   * const stakingClient = await StakingClient.build(signer);
-   *
-   * const amount = ethers.parseUnits(5, 'ether'); //convert from ETH to WEI
+   * const amount = ethers.parseUnits('5', 'ether'); //convert from ETH to WEI
    * await stakingClient.approveStake(amount); // if it was already approved before, this is not necessary
    * await stakingClient.stake(amount);
    * ```
@@ -277,24 +273,16 @@ export class StakingClient extends BaseEthersClient {
    *
    * > Must have tokens available to unstake
    *
-   * @param {bigint} amount Amount in WEI of tokens to unstake.
-   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
-   * @returns Returns void if successful. Throws error if any.
+   * @param amount - Amount in WEI of tokens to unstake.
+   * @param txOptions - Additional transaction parameters (optional, defaults to an empty object).
+   * @throws ErrorInvalidStakingValueType If the amount is not a bigint
+   * @throws ErrorInvalidStakingValueSign If the amount is negative
    *
-   * **Code example**
-   *
+   * @example
    * ```ts
-   * import { ethers, Wallet, providers } from 'ethers';
-   * import { StakingClient } from '@human-protocol/sdk';
+   * import { ethers } from 'ethers';
    *
-   * const rpcUrl = 'YOUR_RPC_URL';
-   * const privateKey = 'YOUR_PRIVATE_KEY';
-   *
-   * const provider = new providers.JsonRpcProvider(rpcUrl);
-   * const signer = new Wallet(privateKey, provider);
-   * const stakingClient = await StakingClient.build(signer);
-   *
-   * const amount = ethers.parseUnits(5, 'ether'); //convert from ETH to WEI
+   * const amount = ethers.parseUnits('5', 'ether'); //convert from ETH to WEI
    * await stakingClient.unstake(amount);
    * ```
    */
@@ -324,22 +312,10 @@ export class StakingClient extends BaseEthersClient {
    *
    * > Must have tokens available to withdraw
    *
-   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
-   * @returns Returns void if successful. Throws error if any.
+   * @param txOptions - Additional transaction parameters (optional, defaults to an empty object).
    *
-   * **Code example**
-   *
+   * @example
    * ```ts
-   * import { Wallet, providers } from 'ethers';
-   * import { StakingClient } from '@human-protocol/sdk';
-   *
-   * const rpcUrl = 'YOUR_RPC_URL';
-   * const privateKey = 'YOUR_PRIVATE_KEY';
-   *
-   * const provider = new providers.JsonRpcProvider(rpcUrl);
-   * const signer = new Wallet(privateKey, provider);
-   * const stakingClient = await StakingClient.build(signer);
-   *
    * await stakingClient.withdraw();
    * ```
    */
@@ -356,28 +332,29 @@ export class StakingClient extends BaseEthersClient {
   /**
    * This function reduces the allocated amount by a staker in an escrow and transfers those tokens to the reward pool. This allows the slasher to claim them later.
    *
-   * @param {string} slasher Wallet address from who requested the slash
-   * @param {string} staker Wallet address from who is going to be slashed
-   * @param {string} escrowAddress Address of the escrow that the slash is made
-   * @param {bigint} amount Amount in WEI of tokens to slash.
-   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
-   * @returns Returns void if successful. Throws error if any.
+   * @param slasher - Wallet address from who requested the slash
+   * @param staker - Wallet address from who is going to be slashed
+   * @param escrowAddress - Address of the escrow that the slash is made
+   * @param amount - Amount in WEI of tokens to slash.
+   * @param txOptions - Additional transaction parameters (optional, defaults to an empty object).
+   * @throws ErrorInvalidStakingValueType If the amount is not a bigint
+   * @throws ErrorInvalidStakingValueSign If the amount is negative
+   * @throws ErrorInvalidSlasherAddressProvided If the slasher address is invalid
+   * @throws ErrorInvalidStakerAddressProvided If the staker address is invalid
+   * @throws ErrorInvalidEscrowAddressProvided If the escrow address is invalid
+   * @throws ErrorEscrowAddressIsNotProvidedByFactory If the escrow is not provided by the factory
    *
-   * **Code example**
-   *
+   * @example
    * ```ts
-   * import { ethers, Wallet, providers } from 'ethers';
-   * import { StakingClient } from '@human-protocol/sdk';
+   * import { ethers } from 'ethers';
    *
-   * const rpcUrl = 'YOUR_RPC_URL';
-   * const privateKey = 'YOUR_PRIVATE_KEY';
-   *
-   * const provider = new providers.JsonRpcProvider(rpcUrl);
-   * const signer = new Wallet(privateKey, provider);
-   * const stakingClient = await StakingClient.build(signer);
-   *
-   * const amount = ethers.parseUnits(5, 'ether'); //convert from ETH to WEI
-   * await stakingClient.slash('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', '0x62dD51230A30401C455c8398d06F85e4EaB6309f', amount);
+   * const amount = ethers.parseUnits('5', 'ether'); //convert from ETH to WEI
+   * await stakingClient.slash(
+   *   '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
+   *   '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
+   *   '0x62dD51230A30401C455c8398d06F85e4EaB6309f',
+   *   amount
+   * );
    * ```
    */
   @requiresSigner
@@ -426,21 +403,14 @@ export class StakingClient extends BaseEthersClient {
   /**
    * Retrieves comprehensive staking information for a staker.
    *
-   * @param {string} stakerAddress - The address of the staker.
-   * @returns {Promise<StakerInfo>}
+   * @param stakerAddress - The address of the staker.
+   * @returns Staking information for the staker
+   * @throws ErrorInvalidStakerAddressProvided If the staker address is invalid
    *
-   * **Code example**
-   *
+   * @example
    * ```ts
-   * import { StakingClient } from '@human-protocol/sdk';
-   *
-   * const rpcUrl = 'YOUR_RPC_URL';
-   *
-   * const provider = new providers.JsonRpcProvider(rpcUrl);
-   * const stakingClient = await StakingClient.build(provider);
-   *
    * const stakingInfo = await stakingClient.getStakerInfo('0xYourStakerAddress');
-   * console.log(stakingInfo.tokensStaked);
+   * console.log('Tokens staked:', stakingInfo.stakedAmount);
    * ```
    */
   public async getStakerInfo(stakerAddress: string): Promise<StakerInfo> {
@@ -480,15 +450,40 @@ export class StakingClient extends BaseEthersClient {
 
 /**
  * Utility class for Staking-related subgraph queries.
+ *
+ * @example
+ * ```ts
+ * import { StakingUtils, ChainId } from '@human-protocol/sdk';
+ *
+ * const staker = await StakingUtils.getStaker(
+ *   ChainId.POLYGON_AMOY,
+ *   '0xYourStakerAddress'
+ * );
+ * console.log('Staked amount:', staker.stakedAmount);
+ * ```
  */
 export class StakingUtils {
   /**
    * Gets staking info for a staker from the subgraph.
    *
-   * @param {ChainId} chainId Network in which the staking contract is deployed
-   * @param {string} stakerAddress Address of the staker
-   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
-   * @returns {Promise<IStaker>} Staker info from subgraph
+   * @param chainId - Network in which the staking contract is deployed
+   * @param stakerAddress - Address of the staker
+   * @param options - Optional configuration for subgraph requests.
+   * @returns Staker info from subgraph
+   * @throws ErrorInvalidStakerAddressProvided If the staker address is invalid
+   * @throws ErrorUnsupportedChainID If the chain ID is not supported
+   * @throws ErrorStakerNotFound If the staker is not found
+   *
+   * @example
+   * ```ts
+   * import { StakingUtils, ChainId } from '@human-protocol/sdk';
+   *
+   * const staker = await StakingUtils.getStaker(
+   *   ChainId.POLYGON_AMOY,
+   *   '0xYourStakerAddress'
+   * );
+   * console.log('Staked amount:', staker.stakedAmount);
+   * ```
    */
   public static async getStaker(
     chainId: ChainId,
@@ -521,9 +516,22 @@ export class StakingUtils {
   /**
    * Gets all stakers from the subgraph with filters, pagination and ordering.
    *
-   * @param {IStakersFilter} filter Stakers filter with pagination and ordering
-   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
-   * @returns {Promise<IStaker[]>} Array of stakers
+   * @param filter - Stakers filter with pagination and ordering
+   * @param options - Optional configuration for subgraph requests.
+   * @returns Array of stakers
+   * @throws ErrorUnsupportedChainID If the chain ID is not supported
+   *
+   * @example
+   * ```ts
+   * import { ChainId } from '@human-protocol/sdk';
+   *
+   * const filter = {
+   *   chainId: ChainId.POLYGON_AMOY,
+   *   minStakedAmount: '1000000000000000000', // 1 token in WEI
+   * };
+   * const stakers = await StakingUtils.getStakers(filter);
+   * console.log('Stakers:', stakers.length);
+   * ```
    */
   public static async getStakers(
     filter: IStakersFilter,

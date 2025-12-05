@@ -1,0 +1,45 @@
+{
+    "$schema": "https://typedoc-plugin-markdown.org/schema.json",
+    "entryPoints": [
+        "src/index.ts"
+    ],
+    "entryPointStrategy": "expand",
+    "out": "docs",
+    "plugin": [
+        "typedoc-plugin-markdown"
+    ],
+    "readme": "none",
+    "cleanOutputDir": true,
+    "excludePrivate": true,
+    "excludeInternal": true,
+    "excludeProtected": false,
+    "excludeExternals": false,
+    "excludeNotDocumented": true,
+    "categorizeByGroup": false,
+    "blockTagsPreserveOrder": [
+        "@param",
+        "@returns",
+        "@throws",
+        "@example",
+        "@remarks"
+    ],
+    "parametersFormat": "table",
+    "classPropertiesFormat": "table",
+    "interfacePropertiesFormat": "table",
+    "propertyMembersFormat": "table",
+    "enumMembersFormat": "table",
+    "typeDeclarationFormat": "table",
+    "useCodeBlocks": true,
+    "expandParameters": true,
+    "hidePageHeader": true,
+    "hidePageTitle": true,
+    "hideBreadcrumbs": true,
+    "disableSources": true,
+    "sort": [
+        "source-order"
+    ],
+    "includeVersion": true,
+    "markdown": {
+        "hideSignature": true
+    }
+}
