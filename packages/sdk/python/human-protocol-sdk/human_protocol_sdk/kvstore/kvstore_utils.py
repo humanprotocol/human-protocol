@@ -1,4 +1,4 @@
-"""Utility helpers for on-chain KVStore data.
+"""Utility helpers for KVStore queries.
 
 Example:
     ```python

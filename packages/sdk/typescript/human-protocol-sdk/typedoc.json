@@ -9,14 +9,15 @@
         "typedoc-plugin-markdown"
     ],
     "readme": "none",
-    "cleanOutputDir": true,
+    "cleanOutputDir": false,
     "excludePrivate": true,
     "excludeInternal": true,
     "excludeProtected": false,
     "excludeExternals": false,
     "excludeNotDocumented": true,
     "categorizeByGroup": false,
-    "blockTagsPreserveOrder": [
+    "mergeReadme": false,
+    "blockTags": [
         "@param",
         "@returns",
         "@throws",
@@ -35,11 +36,11 @@
     "hidePageTitle": true,
     "hideBreadcrumbs": true,
     "disableSources": true,
+    "excludeTags": [
+        "@overload"
+    ],
     "sort": [
         "source-order"
     ],
-    "includeVersion": true,
-    "markdown": {
-        "hideSignature": true
-    }
+    "includeVersion": true
 }

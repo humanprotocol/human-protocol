@@ -20,7 +20,7 @@ import {
 import { getSubgraphUrl, getUnixTimestamp, customGqlFetch } from './utils';
 
 /**
- * Utility class for transaction-related operations.
+ * Utility class for transaction-related queries.
  *
  * @example
  * ```ts

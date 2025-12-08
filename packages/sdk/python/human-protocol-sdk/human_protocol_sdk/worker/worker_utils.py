@@ -1,4 +1,4 @@
-"""Utility helpers for worker-related operations.
+"""Utility helpers for worker-related queries.
 
 Example:
     ```python

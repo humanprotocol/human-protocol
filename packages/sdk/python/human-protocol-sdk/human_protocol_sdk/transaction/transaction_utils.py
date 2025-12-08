@@ -1,4 +1,4 @@
-"""Utility helpers for transaction-related subgraph queries.
+"""Utility helpers for transaction-related queries.
 
 Example:
     ```python

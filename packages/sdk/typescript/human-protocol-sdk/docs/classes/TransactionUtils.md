@@ -1,4 +1,4 @@
-Utility class for transaction-related operations.
+Utility class for transaction-related queries.
 
 ## Example
 
@@ -53,27 +53,6 @@ type InternalTransaction = {
 };
 ```
 
-#### Throws
-
-| Type | Description |
-|------|-------------|
-| `ErrorInvalidHashProvided` | If the hash is invalid |
-| `ErrorUnsupportedChainID` | If the chain ID is not supported |
-
-#### Example
-
-```ts
-import { TransactionUtils, ChainId } from '@human-protocol/sdk';
-
-const transaction = await TransactionUtils.getTransaction(
-  ChainId.POLYGON_AMOY,
-  '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
-);
-console.log('Transaction:', transaction);
-```
-
-#### Parameters
-
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `chainId` | `ChainId` | The chain ID. |
@@ -85,6 +64,26 @@ console.log('Transaction:', transaction);
 | Type | Description |
 |------|-------------|
 | `ITransaction \| null` | Returns the transaction details or null if not found. |
+
+#### Throws
+
+| Type | Description |
+|------|-------------|
+| `ErrorInvalidHashProvided` | If the hash is invalid |
+| `ErrorUnsupportedChainID` | If the chain ID is not supported |
+
+???+ example "Example"
+
+    ```ts
+    import { TransactionUtils, ChainId } from '@human-protocol/sdk';
+    
+    const transaction = await TransactionUtils.getTransaction(
+      ChainId.POLYGON_AMOY,
+      '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
+    );
+    console.log('Transaction:', transaction);
+    ```
+
 
 ***
 
@@ -146,32 +145,6 @@ type ITransaction = {
 };
 ```
 
-#### Throws
-
-| Type | Description |
-|------|-------------|
-| `ErrorCannotUseDateAndBlockSimultaneously` | If both date and block filters are used |
-| `ErrorUnsupportedChainID` | If the chain ID is not supported |
-
-#### Example
-
-```ts
-import { TransactionUtils, ChainId, OrderDirection } from '@human-protocol/sdk';
-
-const filter = {
-  chainId: ChainId.POLYGON_AMOY,
-  startDate: new Date('2022-01-01'),
-  endDate: new Date('2022-12-31'),
-  first: 10,
-  skip: 0,
-  orderDirection: OrderDirection.DESC,
-};
-const transactions = await TransactionUtils.getTransactions(filter);
-console.log('Transactions:', transactions.length);
-```
-
-#### Parameters
-
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `filter` | `ITransactionsFilter` | Filter for the transactions. |
@@ -182,3 +155,28 @@ console.log('Transactions:', transactions.length);
 | Type | Description |
 |------|-------------|
 | `ITransaction[]` | Returns an array with all the transaction details. |
+
+#### Throws
+
+| Type | Description |
+|------|-------------|
+| `ErrorCannotUseDateAndBlockSimultaneously` | If both date and block filters are used |
+| `ErrorUnsupportedChainID` | If the chain ID is not supported |
+
+???+ example "Example"
+
+    ```ts
+    import { TransactionUtils, ChainId, OrderDirection } from '@human-protocol/sdk';
+    
+    const filter = {
+      chainId: ChainId.POLYGON_AMOY,
+      startDate: new Date('2022-01-01'),
+      endDate: new Date('2022-12-31'),
+      first: 10,
+      skip: 0,
+      orderDirection: OrderDirection.DESC,
+    };
+    const transactions = await TransactionUtils.getTransactions(filter);
+    console.log('Transactions:', transactions.length);
+    ```
+

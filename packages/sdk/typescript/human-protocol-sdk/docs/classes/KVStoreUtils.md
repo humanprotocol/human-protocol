@@ -1,4 +1,4 @@
-Utility class for KVStore-related operations.
+Utility helpers for KVStore-related queries.
 
 ## Example
 
@@ -25,25 +25,6 @@ options?: SubgraphOptions): Promise<IKVStore[]>;
 
 This function returns the KVStore data for a given address.
 
-#### Throws
-
-| Type | Description |
-|------|-------------|
-| `ErrorUnsupportedChainID` | If the network's chainId is not supported |
-| `ErrorInvalidAddress` | If the address is invalid |
-
-#### Example
-
-```ts
-const kvStoreData = await KVStoreUtils.getKVStoreData(
-  ChainId.POLYGON_AMOY,
-  "0x1234567890123456789012345678901234567890"
-);
-console.log('KVStore data:', kvStoreData);
-```
-
-#### Parameters
-
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `chainId` | `ChainId` | Network in which the KVStore is deployed |
@@ -55,6 +36,24 @@ console.log('KVStore data:', kvStoreData);
 | Type | Description |
 |------|-------------|
 | `IKVStore[]` | KVStore data |
+
+#### Throws
+
+| Type | Description |
+|------|-------------|
+| `ErrorUnsupportedChainID` | If the network's chainId is not supported |
+| `ErrorInvalidAddress` | If the address is invalid |
+
+???+ example "Example"
+
+    ```ts
+    const kvStoreData = await KVStoreUtils.getKVStoreData(
+      ChainId.POLYGON_AMOY,
+      "0x1234567890123456789012345678901234567890"
+    );
+    console.log('KVStore data:', kvStoreData);
+    ```
+
 
 ***
 
@@ -70,28 +69,6 @@ options?: SubgraphOptions): Promise<string>;
 
 Gets the value of a key-value pair in the KVStore using the subgraph.
 
-#### Throws
-
-| Type | Description |
-|------|-------------|
-| `ErrorUnsupportedChainID` | If the network's chainId is not supported |
-| `ErrorInvalidAddress` | If the address is invalid |
-| `ErrorKVStoreEmptyKey` | If the key is empty |
-| `InvalidKeyError` | If the key is not found |
-
-#### Example
-
-```ts
-const value = await KVStoreUtils.get(
-  ChainId.POLYGON_AMOY,
-  '0x1234567890123456789012345678901234567890',
-  'role'
-);
-console.log('Value:', value);
-```
-
-#### Parameters
-
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `chainId` | `ChainId` | Network in which the KVStore is deployed |
@@ -104,6 +81,27 @@ console.log('Value:', value);
 | Type | Description |
 |------|-------------|
 | `string` | Value of the key. |
+
+#### Throws
+
+| Type | Description |
+|------|-------------|
+| `ErrorUnsupportedChainID` | If the network's chainId is not supported |
+| `ErrorInvalidAddress` | If the address is invalid |
+| `ErrorKVStoreEmptyKey` | If the key is empty |
+| `InvalidKeyError` | If the key is not found |
+
+???+ example "Example"
+
+    ```ts
+    const value = await KVStoreUtils.get(
+      ChainId.POLYGON_AMOY,
+      '0x1234567890123456789012345678901234567890',
+      'role'
+    );
+    console.log('Value:', value);
+    ```
+
 
 ***
 
@@ -119,26 +117,6 @@ options?: SubgraphOptions): Promise<string>;
 
 Gets the URL value of the given entity, and verifies its hash.
 
-#### Throws
-
-| Type | Description |
-|------|-------------|
-| `ErrorInvalidAddress` | If the address is invalid |
-| `ErrorInvalidHash` | If the hash verification fails |
-| `Error` | If fetching URL or hash fails |
-
-#### Example
-
-```ts
-const url = await KVStoreUtils.getFileUrlAndVerifyHash(
-  ChainId.POLYGON_AMOY,
-  '0x1234567890123456789012345678901234567890'
-);
-console.log('Verified URL:', url);
-```
-
-#### Parameters
-
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
 | `chainId` | `ChainId` | `undefined` | Network in which the KVStore is deployed |
@@ -151,6 +129,25 @@ console.log('Verified URL:', url);
 | Type | Description |
 |------|-------------|
 | `string` | URL value for the given address if it exists, and the content is valid |
+
+#### Throws
+
+| Type | Description |
+|------|-------------|
+| `ErrorInvalidAddress` | If the address is invalid |
+| `ErrorInvalidHash` | If the hash verification fails |
+| `Error` | If fetching URL or hash fails |
+
+???+ example "Example"
+
+    ```ts
+    const url = await KVStoreUtils.getFileUrlAndVerifyHash(
+      ChainId.POLYGON_AMOY,
+      '0x1234567890123456789012345678901234567890'
+    );
+    console.log('Verified URL:', url);
+    ```
+
 
 ***
 
@@ -165,26 +162,6 @@ options?: SubgraphOptions): Promise<string>;
 
 Gets the public key of the given entity, and verifies its hash.
 
-#### Throws
-
-| Type | Description |
-|------|-------------|
-| `ErrorInvalidAddress` | If the address is invalid |
-| `ErrorInvalidHash` | If the hash verification fails |
-| `Error` | If fetching the public key fails |
-
-#### Example
-
-```ts
-const publicKey = await KVStoreUtils.getPublicKey(
-  ChainId.POLYGON_AMOY,
-  '0x1234567890123456789012345678901234567890'
-);
-console.log('Public key:', publicKey);
-```
-
-#### Parameters
-
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `chainId` | `ChainId` | Network in which the KVStore is deployed |
@@ -196,3 +173,22 @@ console.log('Public key:', publicKey);
 | Type | Description |
 |------|-------------|
 | `string` | Public key for the given address if it exists, and the content is valid |
+
+#### Throws
+
+| Type | Description |
+|------|-------------|
+| `ErrorInvalidAddress` | If the address is invalid |
+| `ErrorInvalidHash` | If the hash verification fails |
+| `Error` | If fetching the public key fails |
+
+???+ example "Example"
+
+    ```ts
+    const publicKey = await KVStoreUtils.getPublicKey(
+      ChainId.POLYGON_AMOY,
+      '0x1234567890123456789012345678901234567890'
+    );
+    console.log('Public key:', publicKey);
+    ```
+

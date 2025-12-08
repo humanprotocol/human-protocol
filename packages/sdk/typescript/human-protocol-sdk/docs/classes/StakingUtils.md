@@ -1,4 +1,4 @@
-Utility class for Staking-related subgraph queries.
+Utility helpers for Staking-related queries.
 
 ## Example
 
@@ -25,28 +25,6 @@ options?: SubgraphOptions): Promise<IStaker>;
 
 Gets staking info for a staker from the subgraph.
 
-#### Throws
-
-| Type | Description |
-|------|-------------|
-| `ErrorInvalidStakerAddressProvided` | If the staker address is invalid |
-| `ErrorUnsupportedChainID` | If the chain ID is not supported |
-| `ErrorStakerNotFound` | If the staker is not found |
-
-#### Example
-
-```ts
-import { StakingUtils, ChainId } from '@human-protocol/sdk';
-
-const staker = await StakingUtils.getStaker(
-  ChainId.POLYGON_AMOY,
-  '0xYourStakerAddress'
-);
-console.log('Staked amount:', staker.stakedAmount);
-```
-
-#### Parameters
-
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `chainId` | `ChainId` | Network in which the staking contract is deployed |
@@ -59,6 +37,27 @@ console.log('Staked amount:', staker.stakedAmount);
 |------|-------------|
 | `IStaker` | Staker info from subgraph |
 
+#### Throws
+
+| Type | Description |
+|------|-------------|
+| `ErrorInvalidStakerAddressProvided` | If the staker address is invalid |
+| `ErrorUnsupportedChainID` | If the chain ID is not supported |
+| `ErrorStakerNotFound` | If the staker is not found |
+
+???+ example "Example"
+
+    ```ts
+    import { StakingUtils, ChainId } from '@human-protocol/sdk';
+    
+    const staker = await StakingUtils.getStaker(
+      ChainId.POLYGON_AMOY,
+      '0xYourStakerAddress'
+    );
+    console.log('Staked amount:', staker.stakedAmount);
+    ```
+
+
 ***
 
 ### getStakers()
@@ -68,27 +67,6 @@ static getStakers(filter: IStakersFilter, options?: SubgraphOptions): Promise<IS
 ```
 
 Gets all stakers from the subgraph with filters, pagination and ordering.
-
-#### Throws
-
-| Type | Description |
-|------|-------------|
-| `ErrorUnsupportedChainID` | If the chain ID is not supported |
-
-#### Example
-
-```ts
-import { ChainId } from '@human-protocol/sdk';
-
-const filter = {
-  chainId: ChainId.POLYGON_AMOY,
-  minStakedAmount: '1000000000000000000', // 1 token in WEI
-};
-const stakers = await StakingUtils.getStakers(filter);
-console.log('Stakers:', stakers.length);
-```
-
-#### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
@@ -100,3 +78,23 @@ console.log('Stakers:', stakers.length);
 | Type | Description |
 |------|-------------|
 | `IStaker[]` | Array of stakers |
+
+#### Throws
+
+| Type | Description |
+|------|-------------|
+| `ErrorUnsupportedChainID` | If the chain ID is not supported |
+
+???+ example "Example"
+
+    ```ts
+    import { ChainId } from '@human-protocol/sdk';
+    
+    const filter = {
+      chainId: ChainId.POLYGON_AMOY,
+      minStakedAmount: '1000000000000000000', // 1 token in WEI
+    };
+    const stakers = await StakingUtils.getStakers(filter);
+    console.log('Stakers:', stakers.length);
+    ```
+

@@ -27,7 +27,7 @@ import { ChainId, OrderDirection } from './enums';
 import { NETWORKS } from './constants';
 
 /**
- * Utility class for operator-related operations.
+ * Utility helpers for operator-related queries.
  *
  * @example
  * ```ts

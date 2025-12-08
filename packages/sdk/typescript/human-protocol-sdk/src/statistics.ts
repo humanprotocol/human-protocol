@@ -30,22 +30,10 @@ import {
 } from './utils';
 
 /**
- * Utility class for statistics-related operations.
+ * Utility class for statistics-related queries.
  *
  * Unlike other SDK clients, `StatisticsUtils` does not require `signer` or `provider` to be provided.
  * We just need to pass the network data to each static method.
- *
- * ## Installation
- *
- * ### npm
- * ```bash
- * npm install @human-protocol/sdk
- * ```
- *
- * ### yarn
- * ```bash
- * yarn install @human-protocol/sdk
- * ```
  *
  * @example
  * ```ts

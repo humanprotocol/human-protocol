@@ -8,7 +8,7 @@ const ROOT = 'docs'; // adjust if needed
 function processFile(path: PathOrFileDescriptor) {
   const original = readFileSync(path, 'utf8');
   const lines = original.split('\n');
-  const out = [];
+  const out: string[] = [];
 
   let i = 0;
 
@@ -17,7 +17,7 @@ function processFile(path: PathOrFileDescriptor) {
 
     // ---------- THROWS: merge all into one table ----------
     if (line.startsWith('#### Throws')) {
-      const rows = [];
+      const rows: { type: string; desc: string }[] = [];
 
       // consume all consecutive "#### Throws" sections
       while (i < lines.length && lines[i].startsWith('#### Throws')) {
@@ -45,7 +45,7 @@ function processFile(path: PathOrFileDescriptor) {
 
         // if description is empty, read following lines
         if (!desc) {
-          const descParts = [];
+          const descParts: string[] = [];
           while (
             i < lines.length &&
             lines[i].trim() !== '' &&
@@ -94,7 +94,7 @@ function processFile(path: PathOrFileDescriptor) {
       while (i < lines.length && lines[i].trim() === '') i++;
 
       // description lines until next heading or blank+heading
-      const descParts = [];
+      const descParts: string[] = [];
       while (
         i < lines.length &&
         lines[i].trim() !== '' &&
@@ -128,12 +128,79 @@ function processFile(path: PathOrFileDescriptor) {
       continue;
     }
 
+    // ---------- Handle orphan Param sections (from overloads) ----------
+    if (line.startsWith('#### Param')) {
+      // Skip orphan param lines that appear before method signatures
+      i++;
+      while (i < lines.length && lines[i].trim() === '') i++;
+      continue;
+    }
+
     // default: copy line
     out.push(line);
     i++;
   }
 
-  writeFileSync(path, out.join('\n'));
+  // second pass: transform Examples into admonitions
+  let text = out.join('\n');
+  text = transformExamples(text);
+
+  writeFileSync(path, text);
+}
+
+// ---------- EXAMPLES -> admonition ----------
+
+function transformExamples(text: string): string {
+  const lines = text.split('\n');
+  const out: string[] = [];
+  let i = 0;
+
+  while (i < lines.length) {
+    const line = lines[i];
+
+    // Match "#### Example"
+    if (line.startsWith('#### Example')) {
+      i++; // skip heading
+
+      // Skip blank lines
+      while (i < lines.length && lines[i].trim() === '') i++;
+
+      // If next line is not a code fence, leave it alone
+      if (i >= lines.length || !lines[i].trim().startsWith('```')) {
+        out.push('#### Example');
+        continue;
+      }
+
+      // Capture exactly one fenced code block
+      const code: string[] = [];
+      code.push(lines[i]); // opening ```
+      i++;
+
+      // Capture lines until closing ```
+      while (i < lines.length && !lines[i].trim().startsWith('```')) {
+        code.push(lines[i]);
+        i++;
+      }
+
+      // Capture final ```
+      if (i < lines.length) {
+        code.push(lines[i]);
+        i++;
+      }
+
+      // Emit MkDocs Material example block
+      out.push('???+ example "Example"', '');
+      for (const l of code) out.push('    ' + l); // indent
+      out.push('');
+
+      continue;
+    }
+
+    out.push(line);
+    i++;
+  }
+
+  return out.join('\n');
 }
 
 function main() {

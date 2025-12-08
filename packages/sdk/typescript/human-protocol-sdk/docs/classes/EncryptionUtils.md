@@ -1,15 +1,5 @@
 Utility class for encryption-related operations.
 
-## Example
-
-```ts
-import { EncryptionUtils } from '@human-protocol/sdk';
-
-const publicKey = '-----BEGIN PGP PUBLIC KEY BLOCK-----...';
-const isValid = await EncryptionUtils.verify('message', publicKey);
-console.log('Signature valid:', isValid);
-```
-
 ## Methods
 
 ### verify()
@@ -19,16 +9,6 @@ static verify(message: string, publicKey: string): Promise<boolean>;
 ```
 
 This function verifies the signature of a signed message using the public key.
-
-#### Example
-
-```ts
-const publicKey = '-----BEGIN PGP PUBLIC KEY BLOCK-----...';
-const result = await EncryptionUtils.verify('message', publicKey);
-console.log('Verification result:', result);
-```
-
-#### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
@@ -41,6 +21,17 @@ console.log('Verification result:', result);
 |------|-------------|
 | `boolean` | True if verified. False if not verified. |
 
+???+ example "Example"
+
+    ```ts
+    import { EncryptionUtils } from '@human-protocol/sdk';
+    
+    const publicKey = '-----BEGIN PGP PUBLIC KEY BLOCK-----...';
+    const result = await EncryptionUtils.verify('message', publicKey);
+    console.log('Verification result:', result);
+    ```
+
+
 ***
 
 ### getSignedData()
@@ -51,21 +42,6 @@ static getSignedData(message: string): Promise<string>;
 
 This function gets signed data from a signed message.
 
-#### Throws
-
-| Type | Description |
-|------|-------------|
-| `Error` | If data could not be extracted from the message |
-
-#### Example
-
-```ts
-const signedData = await EncryptionUtils.getSignedData('message');
-console.log('Signed data:', signedData);
-```
-
-#### Parameters
-
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `message` | `string` | Message. |
@@ -75,6 +51,22 @@ console.log('Signed data:', signedData);
 | Type | Description |
 |------|-------------|
 | `string` | Signed data. |
+
+#### Throws
+
+| Type | Description |
+|------|-------------|
+| `Error` | If data could not be extracted from the message |
+
+???+ example "Example"
+
+    ```ts
+    import { EncryptionUtils } from '@human-protocol/sdk';
+    
+    const signedData = await EncryptionUtils.getSignedData('message');
+    console.log('Signed data:', signedData);
+    ```
+
 
 ***
 
@@ -89,18 +81,6 @@ passphrase: string): Promise<IKeyPair>;
 
 This function generates a key pair for encryption and decryption.
 
-#### Example
-
-```ts
-const name = 'YOUR_NAME';
-const email = 'YOUR_EMAIL';
-const passphrase = 'YOUR_PASSPHRASE';
-const keyPair = await EncryptionUtils.generateKeyPair(name, email, passphrase);
-console.log('Public key:', keyPair.publicKey);
-```
-
-#### Parameters
-
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
 | `name` | `string` | `undefined` | Name for the key pair. |
@@ -113,6 +93,19 @@ console.log('Public key:', keyPair.publicKey);
 |------|-------------|
 | `IKeyPair` | Key pair generated. |
 
+???+ example "Example"
+
+    ```ts
+    import { EncryptionUtils } from '@human-protocol/sdk';
+    
+    const name = 'YOUR_NAME';
+    const email = 'YOUR_EMAIL';
+    const passphrase = 'YOUR_PASSPHRASE';
+    const keyPair = await EncryptionUtils.generateKeyPair(name, email, passphrase);
+    console.log('Public key:', keyPair.publicKey);
+    ```
+
+
 ***
 
 ### encrypt()
@@ -123,21 +116,9 @@ static encrypt(message: MessageDataType, publicKeys: string[]): Promise<string>;
 
 This function encrypts a message using the specified public keys.
 
-#### Example
-
-```ts
-const publicKey1 = '-----BEGIN PGP PUBLIC KEY BLOCK-----...';
-const publicKey2 = '-----BEGIN PGP PUBLIC KEY BLOCK-----...';
-const publicKeys = [publicKey1, publicKey2];
-const encryptedMessage = await EncryptionUtils.encrypt('message', publicKeys);
-console.log('Encrypted message:', encryptedMessage);
-```
-
-#### Parameters
-
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `message` | `MessageDataType` | Message to encrypt. |
+| `message` | [`MessageDataType`](../type-aliases/MessageDataType.md) | Message to encrypt. |
 | `publicKeys` | `string`[] | Array of public keys to use for encryption. |
 
 #### Returns
@@ -145,6 +126,19 @@ console.log('Encrypted message:', encryptedMessage);
 | Type | Description |
 |------|-------------|
 | `string` | Message encrypted. |
+
+???+ example "Example"
+
+    ```ts
+    import { EncryptionUtils } from '@human-protocol/sdk';
+    
+    const publicKey1 = '-----BEGIN PGP PUBLIC KEY BLOCK-----...';
+    const publicKey2 = '-----BEGIN PGP PUBLIC KEY BLOCK-----...';
+    const publicKeys = [publicKey1, publicKey2];
+    const encryptedMessage = await EncryptionUtils.encrypt('message', publicKeys);
+    console.log('Encrypted message:', encryptedMessage);
+    ```
+
 
 ***
 
@@ -156,21 +150,6 @@ static isEncrypted(message: string): boolean;
 
 Verifies if a message appears to be encrypted with OpenPGP.
 
-#### Example
-
-```ts
-const message = '-----BEGIN PGP MESSAGE-----...';
-const isEncrypted = EncryptionUtils.isEncrypted(message);
-
-if (isEncrypted) {
-  console.log('The message is encrypted with OpenPGP.');
-} else {
-  console.log('The message is not encrypted with OpenPGP.');
-}
-```
-
-#### Parameters
-
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `message` | `string` | Message to verify. |
@@ -180,3 +159,19 @@ if (isEncrypted) {
 | Type | Description |
 |------|-------------|
 | `boolean` | `true` if the message appears to be encrypted, `false` if not. |
+
+???+ example "Example"
+
+    ```ts
+    import { EncryptionUtils } from '@human-protocol/sdk';
+    
+    const message = '-----BEGIN PGP MESSAGE-----...';
+    const isEncrypted = EncryptionUtils.isEncrypted(message);
+    
+    if (isEncrypted) {
+      console.log('The message is encrypted with OpenPGP.');
+    } else {
+      console.log('The message is not encrypted with OpenPGP.');
+    }
+    ```
+

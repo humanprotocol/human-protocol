@@ -1,4 +1,4 @@
-"""Client for staking actions and queries on HUMAN Protocol.
+"""Client for staking actions on HUMAN Protocol.
 
 Internally selects network config based on the Web3 chain id.
 

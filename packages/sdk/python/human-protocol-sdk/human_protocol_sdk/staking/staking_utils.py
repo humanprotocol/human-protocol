@@ -1,4 +1,4 @@
-"""Utility helpers for staking-related operations."""
+"""Utility helpers for staking-related queries."""
 
 from typing import List, Optional
 from human_protocol_sdk.constants import NETWORKS, ChainId

@@ -26,12 +26,10 @@ import {
 import { KVStoreData } from './graphql';
 import { IKVStore, SubgraphOptions } from './interfaces';
 /**
- * ## Introduction
- *
- * This client enables performing actions on KVStore contract and obtaining information from both the contracts and subgraph.
+ * Client for interacting with the KVStore contract.
  *
  * Internally, the SDK will use one network or another according to the network ID of the `runner`.
- * To use this client, it is recommended to initialize it using the static `build` method.
+ * To use this client, it is recommended to initialize it using the static [`build`](/ts/classes/KVStoreClient/#build) method.
  *
  * ```ts
  * static async build(runner: ContractRunner): Promise<KVStoreClient>;
@@ -42,23 +40,11 @@ import { IKVStore, SubgraphOptions } from './interfaces';
  * - **Signer**: when the user wants to use this model to send transactions calling the contract functions.
  * - **Provider**: when the user wants to use this model to get information from the contracts or subgraph.
  *
- * ## Installation
+ * @example
  *
- * ### npm
- * ```bash
- * npm install @human-protocol/sdk
- * ```
+ * ###Using Signer
  *
- * ### yarn
- * ```bash
- * yarn install @human-protocol/sdk
- * ```
- *
- * ## Code example
- *
- * ### Signer
- *
- * **Using private key (backend)**
+ * ####Using private key (backend)
  *
  * ```ts
  * import { KVStoreClient } from '@human-protocol/sdk';
@@ -72,7 +58,7 @@ import { IKVStore, SubgraphOptions } from './interfaces';
  * const kvstoreClient = await KVStoreClient.build(signer);
  * ```
  *
- * **Using Wagmi (frontend)**
+ * ####Using Wagmi (frontend)
  *
  * ```ts
  * import { useSigner, useChainId } from 'wagmi';
@@ -82,7 +68,7 @@ import { IKVStore, SubgraphOptions } from './interfaces';
  * const kvstoreClient = await KVStoreClient.build(signer);
  * ```
  *
- * ### Provider
+ * ###Using Provider
  *
  * ```ts
  * import { KVStoreClient } from '@human-protocol/sdk';
@@ -287,7 +273,7 @@ export class KVStoreClient extends BaseEthersClient {
 }
 
 /**
- * Utility class for KVStore-related operations.
+ * Utility helpers for KVStore-related queries.
  *
  * @example
  * ```ts

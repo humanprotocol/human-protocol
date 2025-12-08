@@ -10,10 +10,9 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "clean": "tsc --build --clean && rm -rf ./dist",
-    "clean:doc": "rm -rf docs",
     "build": "yarn clean && tsc --build",
     "docs:post": "ts-node scripts/postprocess-docs.ts",
-    "build:doc": "yarn clean:doc && typedoc && yarn docs:post",
+    "build:doc": "typedoc && yarn docs:post",
     "test": "vitest -u",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

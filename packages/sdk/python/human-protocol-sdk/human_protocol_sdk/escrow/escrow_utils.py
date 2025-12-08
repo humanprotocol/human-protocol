@@ -1,4 +1,4 @@
-"""Utility helpers for escrow-related operations.
+"""Utility helpers for escrow-related queries.
 
 Example:
     ```python

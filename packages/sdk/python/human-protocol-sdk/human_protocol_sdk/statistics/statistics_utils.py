@@ -1,4 +1,4 @@
-"""Utility helpers for retrieving statistical information from the subgraph.
+"""Utility helpers for retrieving statistics information.
 
 Example:
     ```python

@@ -1,19 +1,7 @@
-Utility class for statistics-related operations.
+Utility class for statistics-related queries.
 
 Unlike other SDK clients, `StatisticsUtils` does not require `signer` or `provider` to be provided.
 We just need to pass the network data to each static method.
-
-## Installation
-
-### npm
-```bash
-npm install @human-protocol/sdk
-```
-
-### yarn
-```bash
-yarn install @human-protocol/sdk
-```
 
 ## Example
 
@@ -66,27 +54,6 @@ interface IEscrowStatistics {
 };
 ```
 
-#### Example
-
-```ts
-import { StatisticsUtils, ChainId, NETWORKS } from '@human-protocol/sdk';
-
-const networkData = NETWORKS[ChainId.POLYGON_AMOY];
-const escrowStats = await StatisticsUtils.getEscrowStatistics(networkData);
-console.log('Total escrows:', escrowStats.totalEscrows);
-
-const escrowStatsApril = await StatisticsUtils.getEscrowStatistics(
-  networkData,
-  {
-    from: new Date('2021-04-01'),
-    to: new Date('2021-04-30'),
-  }
-);
-console.log('April escrows:', escrowStatsApril.totalEscrows);
-```
-
-#### Parameters
-
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `networkData` | [`NetworkData`](../type-aliases/NetworkData.md) | The network information required to connect to the subgraph |
@@ -98,6 +65,26 @@ console.log('April escrows:', escrowStatsApril.totalEscrows);
 | Type | Description |
 |------|-------------|
 | `IEscrowStatistics` | Escrow statistics data. |
+
+???+ example "Example"
+
+    ```ts
+    import { StatisticsUtils, ChainId, NETWORKS } from '@human-protocol/sdk';
+    
+    const networkData = NETWORKS[ChainId.POLYGON_AMOY];
+    const escrowStats = await StatisticsUtils.getEscrowStatistics(networkData);
+    console.log('Total escrows:', escrowStats.totalEscrows);
+    
+    const escrowStatsApril = await StatisticsUtils.getEscrowStatistics(
+      networkData,
+      {
+        from: new Date('2021-04-01'),
+        to: new Date('2021-04-30'),
+      }
+    );
+    console.log('April escrows:', escrowStatsApril.totalEscrows);
+    ```
+
 
 ***
 
@@ -135,27 +122,6 @@ interface IWorkerStatistics {
 };
 ```
 
-#### Example
-
-```ts
-import { StatisticsUtils, ChainId, NETWORKS } from '@human-protocol/sdk';
-
-const networkData = NETWORKS[ChainId.POLYGON_AMOY];
-const workerStats = await StatisticsUtils.getWorkerStatistics(networkData);
-console.log('Daily workers data:', workerStats.dailyWorkersData);
-
-const workerStatsApril = await StatisticsUtils.getWorkerStatistics(
-  networkData,
-  {
-    from: new Date('2021-04-01'),
-    to: new Date('2021-04-30'),
-  }
-);
-console.log('April workers:', workerStatsApril.dailyWorkersData.length);
-```
-
-#### Parameters
-
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `networkData` | [`NetworkData`](../type-aliases/NetworkData.md) | The network information required to connect to the subgraph |
@@ -167,6 +133,26 @@ console.log('April workers:', workerStatsApril.dailyWorkersData.length);
 | Type | Description |
 |------|-------------|
 | `IWorkerStatistics` | Worker statistics data. |
+
+???+ example "Example"
+
+    ```ts
+    import { StatisticsUtils, ChainId, NETWORKS } from '@human-protocol/sdk';
+    
+    const networkData = NETWORKS[ChainId.POLYGON_AMOY];
+    const workerStats = await StatisticsUtils.getWorkerStatistics(networkData);
+    console.log('Daily workers data:', workerStats.dailyWorkersData);
+    
+    const workerStatsApril = await StatisticsUtils.getWorkerStatistics(
+      networkData,
+      {
+        from: new Date('2021-04-01'),
+        to: new Date('2021-04-30'),
+      }
+    );
+    console.log('April workers:', workerStatsApril.dailyWorkersData.length);
+    ```
+
 
 ***
 
@@ -206,34 +192,6 @@ interface IPaymentStatistics {
 };
 ```
 
-#### Example
-
-```ts
-import { StatisticsUtils, ChainId, NETWORKS } from '@human-protocol/sdk';
-
-const networkData = NETWORKS[ChainId.POLYGON_AMOY];
-const paymentStats = await StatisticsUtils.getPaymentStatistics(networkData);
-console.log(
-  'Payment statistics:',
-  paymentStats.dailyPaymentsData.map((p) => ({
-    ...p,
-    totalAmountPaid: p.totalAmountPaid.toString(),
-    averageAmountPerWorker: p.averageAmountPerWorker.toString(),
-  }))
-);
-
-const paymentStatsRange = await StatisticsUtils.getPaymentStatistics(
-  networkData,
-  {
-    from: new Date(2023, 4, 8),
-    to: new Date(2023, 5, 8),
-  }
-);
-console.log('Payment statistics from 5/8 - 6/8:', paymentStatsRange.dailyPaymentsData.length);
-```
-
-#### Parameters
-
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `networkData` | [`NetworkData`](../type-aliases/NetworkData.md) | The network information required to connect to the subgraph |
@@ -245,6 +203,33 @@ console.log('Payment statistics from 5/8 - 6/8:', paymentStatsRange.dailyPayment
 | Type | Description |
 |------|-------------|
 | `IPaymentStatistics` | Payment statistics data. |
+
+???+ example "Example"
+
+    ```ts
+    import { StatisticsUtils, ChainId, NETWORKS } from '@human-protocol/sdk';
+    
+    const networkData = NETWORKS[ChainId.POLYGON_AMOY];
+    const paymentStats = await StatisticsUtils.getPaymentStatistics(networkData);
+    console.log(
+      'Payment statistics:',
+      paymentStats.dailyPaymentsData.map((p) => ({
+        ...p,
+        totalAmountPaid: p.totalAmountPaid.toString(),
+        averageAmountPerWorker: p.averageAmountPerWorker.toString(),
+      }))
+    );
+    
+    const paymentStatsRange = await StatisticsUtils.getPaymentStatistics(
+      networkData,
+      {
+        from: new Date(2023, 4, 8),
+        to: new Date(2023, 5, 8),
+      }
+    );
+    console.log('Payment statistics from 5/8 - 6/8:', paymentStatsRange.dailyPaymentsData.length);
+    ```
+
 
 ***
 
@@ -264,21 +249,6 @@ interface IHMTStatistics {
 };
 ```
 
-#### Example
-
-```ts
-import { StatisticsUtils, ChainId, NETWORKS } from '@human-protocol/sdk';
-
-const networkData = NETWORKS[ChainId.POLYGON_AMOY];
-const hmtStats = await StatisticsUtils.getHMTStatistics(networkData);
-console.log('HMT statistics:', {
-  ...hmtStats,
-  totalTransferAmount: hmtStats.totalTransferAmount.toString(),
-});
-```
-
-#### Parameters
-
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `networkData` | [`NetworkData`](../type-aliases/NetworkData.md) | The network information required to connect to the subgraph |
@@ -289,6 +259,20 @@ console.log('HMT statistics:', {
 | Type | Description |
 |------|-------------|
 | `IHMTStatistics` | HMToken statistics data. |
+
+???+ example "Example"
+
+    ```ts
+    import { StatisticsUtils, ChainId, NETWORKS } from '@human-protocol/sdk';
+    
+    const networkData = NETWORKS[ChainId.POLYGON_AMOY];
+    const hmtStats = await StatisticsUtils.getHMTStatistics(networkData);
+    console.log('HMT statistics:', {
+      ...hmtStats,
+      totalTransferAmount: hmtStats.totalTransferAmount.toString(),
+    });
+    ```
+
 
 ***
 
@@ -303,23 +287,6 @@ options?: SubgraphOptions): Promise<IHMTHolder[]>;
 
 This function returns the holders of the HMToken with optional filters and ordering.
 
-#### Example
-
-```ts
-import { StatisticsUtils, ChainId, NETWORKS } from '@human-protocol/sdk';
-
-const networkData = NETWORKS[ChainId.POLYGON_AMOY];
-const hmtHolders = await StatisticsUtils.getHMTHolders(networkData, {
-  orderDirection: 'asc',
-});
-console.log('HMT holders:', hmtHolders.map((h) => ({
-  ...h,
-  balance: h.balance.toString(),
-})));
-```
-
-#### Parameters
-
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `networkData` | [`NetworkData`](../type-aliases/NetworkData.md) | The network information required to connect to the subgraph |
@@ -331,6 +298,22 @@ console.log('HMT holders:', hmtHolders.map((h) => ({
 | Type | Description |
 |------|-------------|
 | `IHMTHolder[]` | List of HMToken holders. |
+
+???+ example "Example"
+
+    ```ts
+    import { StatisticsUtils, ChainId, NETWORKS } from '@human-protocol/sdk';
+    
+    const networkData = NETWORKS[ChainId.POLYGON_AMOY];
+    const hmtHolders = await StatisticsUtils.getHMTHolders(networkData, {
+      orderDirection: 'asc',
+    });
+    console.log('HMT holders:', hmtHolders.map((h) => ({
+      ...h,
+      balance: h.balance.toString(),
+    })));
+    ```
+
 
 ***
 
@@ -367,27 +350,6 @@ interface IDailyHMT {
 }
 ```
 
-#### Example
-
-```ts
-import { StatisticsUtils, ChainId, NETWORKS } from '@human-protocol/sdk';
-
-const networkData = NETWORKS[ChainId.POLYGON_AMOY];
-const dailyHMTStats = await StatisticsUtils.getHMTDailyData(networkData);
-console.log('Daily HMT statistics:', dailyHMTStats);
-
-const hmtStatsRange = await StatisticsUtils.getHMTDailyData(
-  networkData,
-  {
-    from: new Date(2023, 4, 8),
-    to: new Date(2023, 5, 8),
-  }
-);
-console.log('HMT statistics from 5/8 - 6/8:', hmtStatsRange.length);
-```
-
-#### Parameters
-
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `networkData` | [`NetworkData`](../type-aliases/NetworkData.md) | The network information required to connect to the subgraph |
@@ -399,3 +361,23 @@ console.log('HMT statistics from 5/8 - 6/8:', hmtStatsRange.length);
 | Type | Description |
 |------|-------------|
 | `IDailyHMT[]` | Daily HMToken statistics data. |
+
+???+ example "Example"
+
+    ```ts
+    import { StatisticsUtils, ChainId, NETWORKS } from '@human-protocol/sdk';
+    
+    const networkData = NETWORKS[ChainId.POLYGON_AMOY];
+    const dailyHMTStats = await StatisticsUtils.getHMTDailyData(networkData);
+    console.log('Daily HMT statistics:', dailyHMTStats);
+    
+    const hmtStatsRange = await StatisticsUtils.getHMTDailyData(
+      networkData,
+      {
+        from: new Date(2023, 4, 8),
+        to: new Date(2023, 5, 8),
+      }
+    );
+    console.log('HMT statistics from 5/8 - 6/8:', hmtStatsRange.length);
+    ```
+

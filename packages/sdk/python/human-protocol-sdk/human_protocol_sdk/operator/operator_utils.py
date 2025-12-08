@@ -1,4 +1,4 @@
-"""Utility helpers for querying operator data.
+"""Utility helpers for operator-related queries.
 
 Example:
     ```python

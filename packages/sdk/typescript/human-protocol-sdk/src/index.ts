@@ -2,7 +2,7 @@ import { StakingClient, StakingUtils } from './staking';
 import { KVStoreClient, KVStoreUtils } from './kvstore';
 import { EscrowClient, EscrowUtils } from './escrow';
 import { StatisticsUtils } from './statistics';
-import { Encryption, EncryptionUtils } from './encryption';
+import { Encryption, EncryptionUtils, MessageDataType } from './encryption';
 import { OperatorUtils } from './operator';
 import { TransactionUtils } from './transaction';
 import { WorkerUtils } from './worker';
@@ -37,4 +37,5 @@ export {
   TransactionUtils,
   WorkerUtils,
   StakingUtils,
+  MessageDataType,
 };

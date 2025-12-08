@@ -21,10 +21,16 @@ import { NetworkData } from './types';
 import { SubgraphOptions } from './interfaces';
 
 /**
- * **Handle and throw the error.*
+ * Handles and throws appropriate error types based on the Ethereum error.
  *
- * @param {any} e
- * @returns
+ * @param e - The error to handle
+ * @throws {InvalidArgumentError} If the error is an invalid argument error
+ * @throws {ContractExecutionError} If the error is a contract execution error
+ * @throws {TransactionReplaced} If the transaction was replaced
+ * @throws {ReplacementUnderpriced} If the replacement transaction was underpriced
+ * @throws {NumericFault} If there's a numeric fault
+ * @throws {NonceExpired} If the nonce has expired
+ * @throws {EthereumError} For any other Ethereum-related error
  */
 export const throwError = (e: any) => {
   if (ethers.isError(e, 'INVALID_ARGUMENT')) {
@@ -45,10 +51,10 @@ export const throwError = (e: any) => {
 };
 
 /**
- * **URL validation.*
+ * Validates if a string is a valid URL.
  *
- * @param {string} url
- * @returns
+ * @param url - The URL string to validate
+ * @returns True if the URL is valid, false otherwise
  */
 export const isValidUrl = (url: string): boolean => {
   return isURL(url, {
@@ -59,10 +65,10 @@ export const isValidUrl = (url: string): boolean => {
 };
 
 /**
- * **Check if a string is a valid JSON.*
+ * Checks if a string is valid JSON.
  *
- * @param {string} input
- * @returns {boolean}
+ * @param input - The string to check
+ * @returns True if the string is valid JSON, false otherwise
  */
 export const isValidJson = (input: string): boolean => {
   try {
@@ -74,10 +80,10 @@ export const isValidJson = (input: string): boolean => {
 };
 
 /**
- * **Get the subgraph URL.*
+ * Gets the subgraph URL for the given network, using API key if available.
  *
- * @param {NetworkData} networkData
- * @returns
+ * @param networkData - The network data containing subgraph URLs
+ * @returns The subgraph URL with API key if available
  */
 export const getSubgraphUrl = (networkData: NetworkData) => {
   let subgraphUrl = networkData.subgraphUrl;
@@ -95,10 +101,10 @@ export const getSubgraphUrl = (networkData: NetworkData) => {
 };
 
 /**
- * **Convert a date to Unix timestamp (seconds since epoch).*
+ * Converts a Date object to Unix timestamp (seconds since epoch).
  *
- * @param {Date} date
- * @returns {number}
+ * @param date - The date to convert
+ * @returns Unix timestamp in seconds
  */
 export const getUnixTimestamp = (date: Date): number => {
   return Math.floor(date.getTime() / 1000);
@@ -127,8 +133,16 @@ const buildIndexerUrl = (baseUrl: string, indexerId?: string): string => {
 };
 
 /**
- * Execute a GraphQL request with automatic retry logic for bad indexer errors.
- * Only retries if options is provided.
+ * Executes a GraphQL request with automatic retry logic for bad indexer errors.
+ * Only retries if options is provided with maxRetries and baseDelay.
+ *
+ * @param url - The GraphQL endpoint URL
+ * @param query - The GraphQL query to execute
+ * @param variables - Variables for the GraphQL query (optional)
+ * @param options - Optional configuration for subgraph requests including retry logic
+ * @returns The response data from the GraphQL query
+ * @throws ErrorRetryParametersMissing If only one of maxRetries or baseDelay is provided
+ * @throws ErrorRoutingRequestsToIndexerRequiresApiKey If indexerId is provided without API key
  */
 export const customGqlFetch = async <T = any>(
   url: string,

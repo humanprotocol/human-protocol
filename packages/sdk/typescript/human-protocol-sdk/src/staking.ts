@@ -37,9 +37,7 @@ import {
 } from './graphql/queries/staking';
 
 /**
- * ## Introduction
- *
- * This client enables performing actions on staking contracts and obtaining staking information from both the contracts and subgraph.
+ * Client for staking actions on HUMAN Protocol.
  *
  * Internally, the SDK will use one network or another according to the network ID of the `runner`.
  * To use this client, it is recommended to initialize it using the static `build` method.
@@ -53,23 +51,11 @@ import {
  * - **Signer**: when the user wants to use this model to send transactions calling the contract functions.
  * - **Provider**: when the user wants to use this model to get information from the contracts or subgraph.
  *
- * ## Installation
+ * @example
  *
- * ### npm
- * ```bash
- * npm install @human-protocol/sdk
- * ```
+ * ###Using Signer
  *
- * ### yarn
- * ```bash
- * yarn install @human-protocol/sdk
- * ```
- *
- * ## Code example
- *
- * ### Signer
- *
- * **Using private key (backend)**
+ * ####Using private key (backend)
  *
  * ```ts
  * import { StakingClient } from '@human-protocol/sdk';
@@ -83,7 +69,7 @@ import {
  * const stakingClient = await StakingClient.build(signer);
  * ```
  *
- * **Using Wagmi (frontend)**
+ * ####Using Wagmi (frontend)
  *
  * ```ts
  * import { useSigner, useChainId } from 'wagmi';
@@ -93,7 +79,7 @@ import {
  * const stakingClient = await StakingClient.build(signer);
  * ```
  *
- * ### Provider
+ * ###Using Provider
  *
  * ```ts
  * import { StakingClient } from '@human-protocol/sdk';
@@ -234,7 +220,8 @@ export class StakingClient extends BaseEthersClient {
   /**
    * This function stakes a specified amount of tokens on a specific network.
    *
-   * > `approveStake` must be called before
+   * !!! note
+   *     `approveStake` must be called before
    *
    * @param amount - Amount in WEI of tokens to stake.
    * @param txOptions - Additional transaction parameters (optional, defaults to an empty object).
@@ -271,7 +258,8 @@ export class StakingClient extends BaseEthersClient {
   /**
    * This function unstakes tokens from staking contract. The unstaked tokens stay locked for a period of time.
    *
-   * > Must have tokens available to unstake
+   * !!! note
+   *     Must have tokens available to unstake
    *
    * @param amount - Amount in WEI of tokens to unstake.
    * @param txOptions - Additional transaction parameters (optional, defaults to an empty object).
@@ -309,8 +297,8 @@ export class StakingClient extends BaseEthersClient {
 
   /**
    * This function withdraws unstaked and non-locked tokens from staking contract to the user wallet.
-   *
-   * > Must have tokens available to withdraw
+   * !!! note
+   *     Must have tokens available to withdraw
    *
    * @param txOptions - Additional transaction parameters (optional, defaults to an empty object).
    *
@@ -449,7 +437,7 @@ export class StakingClient extends BaseEthersClient {
 }
 
 /**
- * Utility class for Staking-related subgraph queries.
+ * Utility helpers for Staking-related queries.
  *
  * @example
  * ```ts

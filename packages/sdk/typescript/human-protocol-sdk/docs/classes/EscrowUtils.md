@@ -1,4 +1,4 @@
-Utility class for escrow-related operations.
+Utility helpers for escrow-related queries.
 
 ## Example
 
@@ -21,30 +21,6 @@ static getEscrows(filter: IEscrowsFilter, options?: SubgraphOptions): Promise<IE
 
 This function returns an array of escrows based on the specified filter parameters.
 
-#### Throws
-
-| Type | Description |
-|------|-------------|
-| `ErrorInvalidAddress` | If any filter address is invalid |
-| `ErrorUnsupportedChainID` | If the chain ID is not supported |
-
-#### Example
-
-```ts
-import { ChainId, EscrowStatus } from '@human-protocol/sdk';
-
-const filters = {
-  status: EscrowStatus.Pending,
-  from: new Date(2023, 4, 8),
-  to: new Date(2023, 5, 8),
-  chainId: ChainId.POLYGON_AMOY
-};
-const escrows = await EscrowUtils.getEscrows(filters);
-console.log('Found escrows:', escrows.length);
-```
-
-#### Parameters
-
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `filter` | `IEscrowsFilter` | Filter parameters. |
@@ -55,6 +31,29 @@ console.log('Found escrows:', escrows.length);
 | Type | Description |
 |------|-------------|
 | `IEscrow[]` | List of escrows that match the filter. |
+
+#### Throws
+
+| Type | Description |
+|------|-------------|
+| `ErrorInvalidAddress` | If any filter address is invalid |
+| `ErrorUnsupportedChainID` | If the chain ID is not supported |
+
+???+ example "Example"
+
+    ```ts
+    import { ChainId, EscrowStatus } from '@human-protocol/sdk';
+    
+    const filters = {
+      status: EscrowStatus.Pending,
+      from: new Date(2023, 4, 8),
+      to: new Date(2023, 5, 8),
+      chainId: ChainId.POLYGON_AMOY
+    };
+    const escrows = await EscrowUtils.getEscrows(filters);
+    console.log('Found escrows:', escrows.length);
+    ```
+
 
 ***
 
@@ -71,29 +70,6 @@ This function returns the escrow data for a given address.
 
 > This uses Subgraph
 
-#### Throws
-
-| Type | Description |
-|------|-------------|
-| `ErrorUnsupportedChainID` | If the chain ID is not supported |
-| `ErrorInvalidAddress` | If the escrow address is invalid |
-
-#### Example
-
-```ts
-import { ChainId } from '@human-protocol/sdk';
-
-const escrow = await EscrowUtils.getEscrow(
-  ChainId.POLYGON_AMOY,
-  "0x1234567890123456789012345678901234567890"
-);
-if (escrow) {
-  console.log('Escrow status:', escrow.status);
-}
-```
-
-#### Parameters
-
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `chainId` | `ChainId` | Network in which the escrow has been deployed |
@@ -105,6 +81,28 @@ if (escrow) {
 | Type | Description |
 |------|-------------|
 | `IEscrow \| null` | Escrow data or null if not found. |
+
+#### Throws
+
+| Type | Description |
+|------|-------------|
+| `ErrorUnsupportedChainID` | If the chain ID is not supported |
+| `ErrorInvalidAddress` | If the escrow address is invalid |
+
+???+ example "Example"
+
+    ```ts
+    import { ChainId } from '@human-protocol/sdk';
+    
+    const escrow = await EscrowUtils.getEscrow(
+      ChainId.POLYGON_AMOY,
+      "0x1234567890123456789012345678901234567890"
+    );
+    if (escrow) {
+      console.log('Escrow status:', escrow.status);
+    }
+    ```
+
 
 ***
 
@@ -118,31 +116,6 @@ This function returns the status events for a given set of networks within an op
 
 > This uses Subgraph
 
-#### Throws
-
-| Type | Description |
-|------|-------------|
-| `ErrorInvalidAddress` | If the launcher address is invalid |
-| `ErrorUnsupportedChainID` | If the chain ID is not supported |
-
-#### Example
-
-```ts
-import { ChainId, EscrowStatus } from '@human-protocol/sdk';
-
-const fromDate = new Date('2023-01-01');
-const toDate = new Date('2023-12-31');
-const statusEvents = await EscrowUtils.getStatusEvents({
-  chainId: ChainId.POLYGON,
-  statuses: [EscrowStatus.Pending, EscrowStatus.Complete],
-  from: fromDate,
-  to: toDate
-});
-console.log('Status events:', statusEvents.length);
-```
-
-#### Parameters
-
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `filter` | `IStatusEventFilter` | Filter parameters. |
@@ -153,6 +126,30 @@ console.log('Status events:', statusEvents.length);
 | Type | Description |
 |------|-------------|
 | `IStatusEvent[]` | Array of status events with their corresponding statuses. |
+
+#### Throws
+
+| Type | Description |
+|------|-------------|
+| `ErrorInvalidAddress` | If the launcher address is invalid |
+| `ErrorUnsupportedChainID` | If the chain ID is not supported |
+
+???+ example "Example"
+
+    ```ts
+    import { ChainId, EscrowStatus } from '@human-protocol/sdk';
+    
+    const fromDate = new Date('2023-01-01');
+    const toDate = new Date('2023-12-31');
+    const statusEvents = await EscrowUtils.getStatusEvents({
+      chainId: ChainId.POLYGON,
+      statuses: [EscrowStatus.Pending, EscrowStatus.Complete],
+      from: fromDate,
+      to: toDate
+    });
+    console.log('Status events:', statusEvents.length);
+    ```
+
 
 ***
 
@@ -166,30 +163,6 @@ This function returns the payouts for a given set of networks.
 
 > This uses Subgraph
 
-#### Throws
-
-| Type | Description |
-|------|-------------|
-| `ErrorUnsupportedChainID` | If the chain ID is not supported |
-| `ErrorInvalidAddress` | If any filter address is invalid |
-
-#### Example
-
-```ts
-import { ChainId } from '@human-protocol/sdk';
-
-const payouts = await EscrowUtils.getPayouts({
-  chainId: ChainId.POLYGON,
-  escrowAddress: '0x1234567890123456789012345678901234567890',
-  recipient: '0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef',
-  from: new Date('2023-01-01'),
-  to: new Date('2023-12-31')
-});
-console.log('Payouts:', payouts.length);
-```
-
-#### Parameters
-
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `filter` | `IPayoutFilter` | Filter parameters. |
@@ -200,6 +173,29 @@ console.log('Payouts:', payouts.length);
 | Type | Description |
 |------|-------------|
 | `IPayout[]` | List of payouts matching the filters. |
+
+#### Throws
+
+| Type | Description |
+|------|-------------|
+| `ErrorUnsupportedChainID` | If the chain ID is not supported |
+| `ErrorInvalidAddress` | If any filter address is invalid |
+
+???+ example "Example"
+
+    ```ts
+    import { ChainId } from '@human-protocol/sdk';
+    
+    const payouts = await EscrowUtils.getPayouts({
+      chainId: ChainId.POLYGON,
+      escrowAddress: '0x1234567890123456789012345678901234567890',
+      recipient: '0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef',
+      from: new Date('2023-01-01'),
+      to: new Date('2023-12-31')
+    });
+    console.log('Payouts:', payouts.length);
+    ```
+
 
 ***
 
@@ -213,28 +209,6 @@ This function returns the cancellation refunds for a given set of networks.
 
 > This uses Subgraph
 
-#### Throws
-
-| Type | Description |
-|------|-------------|
-| `ErrorUnsupportedChainID` | If the chain ID is not supported |
-| `ErrorInvalidEscrowAddressProvided` | If the escrow address is invalid |
-| `ErrorInvalidAddress` | If the receiver address is invalid |
-
-#### Example
-
-```ts
-import { ChainId } from '@human-protocol/sdk';
-
-const cancellationRefunds = await EscrowUtils.getCancellationRefunds({
-   chainId: ChainId.POLYGON_AMOY,
-   escrowAddress: '0x1234567890123456789012345678901234567890',
-});
-console.log('Cancellation refunds:', cancellationRefunds.length);
-```
-
-#### Parameters
-
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `filter` | `ICancellationRefundFilter` | Filter parameters. |
@@ -245,6 +219,27 @@ console.log('Cancellation refunds:', cancellationRefunds.length);
 | Type | Description |
 |------|-------------|
 | `ICancellationRefund[]` | List of cancellation refunds matching the filters. |
+
+#### Throws
+
+| Type | Description |
+|------|-------------|
+| `ErrorUnsupportedChainID` | If the chain ID is not supported |
+| `ErrorInvalidEscrowAddressProvided` | If the escrow address is invalid |
+| `ErrorInvalidAddress` | If the receiver address is invalid |
+
+???+ example "Example"
+
+    ```ts
+    import { ChainId } from '@human-protocol/sdk';
+    
+    const cancellationRefunds = await EscrowUtils.getCancellationRefunds({
+       chainId: ChainId.POLYGON_AMOY,
+       escrowAddress: '0x1234567890123456789012345678901234567890',
+    });
+    console.log('Cancellation refunds:', cancellationRefunds.length);
+    ```
+
 
 ***
 
@@ -261,29 +256,6 @@ This function returns the cancellation refund for a given escrow address.
 
 > This uses Subgraph
 
-#### Throws
-
-| Type | Description |
-|------|-------------|
-| `ErrorUnsupportedChainID` | If the chain ID is not supported |
-| `ErrorInvalidEscrowAddressProvided` | If the escrow address is invalid |
-
-#### Example
-
-```ts
-import { ChainId } from '@human-protocol/sdk';
-
-const cancellationRefund = await EscrowUtils.getCancellationRefund(
-  ChainId.POLYGON_AMOY,
-  "0x1234567890123456789012345678901234567890"
-);
-if (cancellationRefund) {
-  console.log('Refund amount:', cancellationRefund.amount);
-}
-```
-
-#### Parameters
-
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `chainId` | `ChainId` | Network in which the escrow has been deployed |
@@ -295,3 +267,25 @@ if (cancellationRefund) {
 | Type | Description |
 |------|-------------|
 | `ICancellationRefund \| null` | Cancellation refund data or null if not found. |
+
+#### Throws
+
+| Type | Description |
+|------|-------------|
+| `ErrorUnsupportedChainID` | If the chain ID is not supported |
+| `ErrorInvalidEscrowAddressProvided` | If the escrow address is invalid |
+
+???+ example "Example"
+
+    ```ts
+    import { ChainId } from '@human-protocol/sdk';
+    
+    const cancellationRefund = await EscrowUtils.getCancellationRefund(
+      ChainId.POLYGON_AMOY,
+      "0x1234567890123456789012345678901234567890"
+    );
+    if (cancellationRefund) {
+      console.log('Refund amount:', cancellationRefund.amount);
+    }
+    ```
+

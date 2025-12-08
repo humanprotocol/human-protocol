@@ -4,8 +4,10 @@ import { IKeyPair } from './interfaces';
 /**
  * Type representing the data type of a message.
  * It can be either a string or a Uint8Array.
+ *
+ * @public
  */
-type MessageDataType = string | Uint8Array;
+export type MessageDataType = string | Uint8Array;
 
 function makeMessageDataBinary(message: MessageDataType): Uint8Array {
   if (typeof message === 'string') {
@@ -192,15 +194,6 @@ export class Encryption {
 
 /**
  * Utility class for encryption-related operations.
- *
- * @example
- * ```ts
- * import { EncryptionUtils } from '@human-protocol/sdk';
- *
- * const publicKey = '-----BEGIN PGP PUBLIC KEY BLOCK-----...';
- * const isValid = await EncryptionUtils.verify('message', publicKey);
- * console.log('Signature valid:', isValid);
- * ```
  */
 export class EncryptionUtils {
   /**
@@ -212,6 +205,8 @@ export class EncryptionUtils {
    *
    * @example
    * ```ts
+   * import { EncryptionUtils } from '@human-protocol/sdk';
+   *
    * const publicKey = '-----BEGIN PGP PUBLIC KEY BLOCK-----...';
    * const result = await EncryptionUtils.verify('message', publicKey);
    * console.log('Verification result:', result);
@@ -245,6 +240,8 @@ export class EncryptionUtils {
    *
    * @example
    * ```ts
+   * import { EncryptionUtils } from '@human-protocol/sdk';
+   *
    * const signedData = await EncryptionUtils.getSignedData('message');
    * console.log('Signed data:', signedData);
    * ```
@@ -271,6 +268,8 @@ export class EncryptionUtils {
    *
    * @example
    * ```ts
+   * import { EncryptionUtils } from '@human-protocol/sdk';
+   *
    * const name = 'YOUR_NAME';
    * const email = 'YOUR_EMAIL';
    * const passphrase = 'YOUR_PASSPHRASE';
@@ -309,6 +308,8 @@ export class EncryptionUtils {
    *
    * @example
    * ```ts
+   * import { EncryptionUtils } from '@human-protocol/sdk';
+   *
    * const publicKey1 = '-----BEGIN PGP PUBLIC KEY BLOCK-----...';
    * const publicKey2 = '-----BEGIN PGP PUBLIC KEY BLOCK-----...';
    * const publicKeys = [publicKey1, publicKey2];
@@ -344,6 +345,8 @@ export class EncryptionUtils {
    *
    * @example
    * ```ts
+   * import { EncryptionUtils } from '@human-protocol/sdk';
+   *
    * const message = '-----BEGIN PGP MESSAGE-----...';
    * const isEncrypted = EncryptionUtils.isEncrypted(message);
    *

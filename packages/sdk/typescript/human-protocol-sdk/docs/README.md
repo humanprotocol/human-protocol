@@ -14,8 +14,8 @@
 - [StakingClient](classes/StakingClient.md)
 - [StakingUtils](classes/StakingUtils.md)
 - [StatisticsUtils](classes/StatisticsUtils.md)
-- [~~StorageClient~~](classes/StorageClient.md)
 - [TransactionUtils](classes/TransactionUtils.md)
+- [WorkerUtils](classes/WorkerUtils.md)
 
 ## Interfaces
 
@@ -23,7 +23,5 @@
 
 ## Type Aliases
 
-- [~~StorageCredentials~~](type-aliases/StorageCredentials.md)
-- [~~StorageParams~~](type-aliases/StorageParams.md)
-- [UploadFile](type-aliases/UploadFile.md)
+- [MessageDataType](type-aliases/MessageDataType.md)
 - [NetworkData](type-aliases/NetworkData.md)

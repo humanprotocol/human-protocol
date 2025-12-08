@@ -1,4 +1,4 @@
-"""Client for interacting with the KVStore contract and subgraph.
+"""Client for interacting with the KVStore contract.
 
 Selects the network based on the Web3 chain id. Configure Web3 with an account
 and signer middleware for writes; read operations work without a signer.
