@@ -78,7 +78,7 @@ class WorkerUtils:
                 such as custom endpoints or timeout settings.
 
         Returns:
-            List[WorkerData]: A list of worker records matching the filter criteria.
+            A list of worker records matching the filter criteria.
                 Returns an empty list if no matches are found.
 
         Raises:
@@ -165,7 +165,7 @@ class WorkerUtils:
             options (Optional[SubgraphOptions]): Optional configuration for subgraph requests.
 
         Returns:
-            Optional[WorkerData]: Worker data if found, otherwise ``None``.
+            Worker data if found, otherwise ``None``.
 
         Raises:
             WorkerUtilsError: If the chain ID is not supported or the worker address is invalid.

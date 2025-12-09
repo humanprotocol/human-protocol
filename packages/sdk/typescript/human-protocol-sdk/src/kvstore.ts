@@ -143,6 +143,7 @@ export class KVStoreClient extends BaseEthersClient {
    * @param key - Key of the key-value pair
    * @param value - Value of the key-value pair
    * @param txOptions - Additional transaction parameters (optional, defaults to an empty object).
+   * @returns -
    * @throws ErrorKVStoreEmptyKey If the key is empty
    * @throws Error If the transaction fails
    *
@@ -171,6 +172,7 @@ export class KVStoreClient extends BaseEthersClient {
    * @param keys - Array of keys (keys and value must have the same order)
    * @param values - Array of values
    * @param txOptions - Additional transaction parameters (optional, defaults to an empty object).
+   * @returns -
    * @throws ErrorKVStoreArrayLength If keys and values arrays have different lengths
    * @throws ErrorKVStoreEmptyKey If any key is empty
    * @throws Error If the transaction fails
@@ -205,6 +207,7 @@ export class KVStoreClient extends BaseEthersClient {
    * @param url - URL to set
    * @param urlKey - Configurable URL key. `url` by default.
    * @param txOptions - Additional transaction parameters (optional, defaults to an empty object).
+   * @returns -
    * @throws ErrorInvalidUrl If the URL is invalid
    * @throws Error If the transaction fails
    *

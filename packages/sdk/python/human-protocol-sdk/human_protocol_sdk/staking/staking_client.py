@@ -336,11 +336,12 @@ class StakingClient:
             staker_address (str): Ethereum address of the staker.
 
         Returns:
-            dict: Dictionary containing:
-                - ``stakedAmount`` (int): Total staked amount.
-                - ``lockedAmount`` (int): Currently locked amount.
-                - ``lockedUntil`` (int): Block number until tokens are locked (0 if unlocked).
-                - ``withdrawableAmount`` (int): Amount available for withdrawal.
+            Staker info with keys:
+
+                - `stakedAmount` (int): Total staked amount.
+                - `lockedAmount` (int): Currently locked amount.
+                - `lockedUntil` (int): Block number until tokens are locked (0 if unlocked).
+                - `withdrawableAmount` (int): Amount available for withdrawal.
 
         Raises:
             StakingClientError: If the staker address is invalid or the query fails.
@@ -391,7 +392,7 @@ class StakingClient:
             escrow_address (str): Escrow address to validate.
 
         Returns:
-            bool: ``True`` if the escrow exists in the factory registry, ``False`` otherwise.
+            ``True`` if the escrow exists in the factory registry, ``False`` otherwise.
         """
 
         # TODO: Use Escrow/Job Module once implemented

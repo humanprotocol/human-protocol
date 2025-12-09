@@ -25,11 +25,14 @@ options?: SubgraphOptions): Promise<IOperator | null>;
 
 This function returns the operator data for the given address.
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `chainId` | `ChainId` | Network in which the operator is deployed |
 | `address` | `string` | Operator address. |
 | `options?` | [`SubgraphOptions`](../interfaces/SubgraphOptions.md) | Optional configuration for subgraph requests. |
+
 
 #### Returns
 
@@ -67,10 +70,13 @@ static getOperators(filter: IOperatorsFilter, options?: SubgraphOptions): Promis
 
 This function returns all the operator details of the protocol.
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `filter` | `IOperatorsFilter` | Filter for the operators. |
 | `options?` | [`SubgraphOptions`](../interfaces/SubgraphOptions.md) | Optional configuration for subgraph requests. |
+
 
 #### Returns
 
@@ -111,12 +117,15 @@ options?: SubgraphOptions): Promise<IOperator[]>;
 
 Retrieves the reputation network operators of the specified address.
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `chainId` | `ChainId` | Network in which the reputation network is deployed |
 | `address` | `string` | Address of the reputation oracle. |
 | `role?` | `string` | Role of the operator (optional). |
 | `options?` | [`SubgraphOptions`](../interfaces/SubgraphOptions.md) | Optional configuration for subgraph requests. |
+
 
 #### Returns
 
@@ -156,11 +165,14 @@ options?: SubgraphOptions): Promise<IReward[]>;
 
 This function returns information about the rewards for a given slasher address.
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `chainId` | `ChainId` | Network in which the rewards are deployed |
 | `slasherAddress` | `string` | Slasher address. |
 | `options?` | [`SubgraphOptions`](../interfaces/SubgraphOptions.md) | Optional configuration for subgraph requests. |
+
 
 #### Returns
 

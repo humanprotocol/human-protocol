@@ -68,7 +68,7 @@ class KVStoreUtils:
                 such as custom endpoints or timeout settings.
 
         Returns:
-            Optional[List[KVStoreData]]: List of KVStore data entries if found, empty list otherwise.
+            List of KVStore data entries if found, empty list otherwise.
 
         Raises:
             KVStoreClientError: If the chain ID is invalid or the address is malformed.
@@ -137,7 +137,7 @@ class KVStoreUtils:
             options (Optional[SubgraphOptions]): Optional configuration for subgraph requests.
 
         Returns:
-            str: Value for the key if it exists.
+            Value for the key if it exists.
 
         Raises:
             KVStoreClientError: If the key is empty, address is invalid, chain ID is invalid,
@@ -206,7 +206,7 @@ class KVStoreUtils:
             options (Optional[SubgraphOptions]): Optional configuration for subgraph requests.
 
         Returns:
-            str: URL value if it exists and the content hash matches.
+            URL value if it exists and the content hash matches.
                 Returns empty string if URL is not set.
 
         Raises:
@@ -261,7 +261,7 @@ class KVStoreUtils:
             address (str): Address from which to get the public key.
 
         Returns:
-            str: Public key content if it exists and is valid.
+            Public key content if it exists and is valid.
                 Returns empty string if no public key is set.
 
         Raises:

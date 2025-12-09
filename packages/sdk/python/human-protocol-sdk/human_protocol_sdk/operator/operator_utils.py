@@ -246,7 +246,7 @@ class OperatorUtils:
                 such as custom endpoints or timeout settings.
 
         Returns:
-            List[OperatorData]: A list of operator records matching the filter criteria.
+            A list of operator records matching the filter criteria.
                 Returns an empty list if no matches are found.
 
         Example:
@@ -340,7 +340,7 @@ class OperatorUtils:
             options (Optional[SubgraphOptions]): Optional configuration for subgraph requests.
 
         Returns:
-            Optional[OperatorData]: Operator data if found, otherwise ``None``.
+            Operator data if found, otherwise ``None``.
 
         Raises:
             OperatorUtilsError: If the chain ID is invalid or the operator address is malformed.
@@ -430,7 +430,7 @@ class OperatorUtils:
             options (Optional[SubgraphOptions]): Optional configuration for subgraph requests.
 
         Returns:
-            List[OperatorData]: A list of operators registered under the reputation network.
+            A list of operators registered under the reputation network.
                 Returns an empty list if no operators are found.
 
         Raises:
@@ -524,7 +524,7 @@ class OperatorUtils:
             options (Optional[SubgraphOptions]): Optional configuration for subgraph requests.
 
         Returns:
-            List[RewardData]: A list of rewards received by the slasher.
+            A list of rewards received by the slasher.
                 Returns an empty list if no rewards are found.
 
         Raises:

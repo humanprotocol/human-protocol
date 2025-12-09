@@ -134,6 +134,7 @@ export class EscrowClient extends BaseEthersClient {
    *
    * @param runner - The Runner object to interact with the Ethereum network
    * @param networkData - The network information required to connect to the Escrow contract
+   * @returns An instance of EscrowClient
    */
   constructor(runner: ContractRunner, networkData: NetworkData) {
     super(runner, networkData);
@@ -184,8 +185,7 @@ export class EscrowClient extends BaseEthersClient {
 
   /**
    * This function creates an escrow contract that uses the token passed to pay oracle fees and reward workers.
-   * !!! note
-   *      Need to have available stake.
+   * @remarks Need to have available stake.
    * @param tokenAddress - The address of the token to use for escrow funding.
    * @param jobRequesterId - Identifier for the job requester.
    * @param txOptions - Additional transaction parameters (optional, defaults to an empty object).
@@ -285,6 +285,7 @@ export class EscrowClient extends BaseEthersClient {
   /**
    * Creates, funds, and sets up a new escrow contract in a single transaction.
    *
+   * @remarks Need to have available stake and approve allowance in the token contract before calling this method.
    * @param tokenAddress - The ERC-20 token address used to fund the escrow.
    * @param amount - The token amount to fund the escrow with.
    * @param jobRequesterId - An off-chain identifier for the job requester.
@@ -395,13 +396,12 @@ export class EscrowClient extends BaseEthersClient {
   /**
    * This function sets up the parameters of the escrow.
    *
-   * !!! note
-   *      Only Job Launcher or admin can call it.
+   * @remarks Only Job Launcher or admin can call it.
    *
    * @param escrowAddress - Address of the escrow to set up.
    * @param escrowConfig - Escrow configuration parameters.
    * @param txOptions - Additional transaction parameters (optional, defaults to an empty object).
-   *
+   * @returns -
    * @throws ErrorInvalidRecordingOracleAddressProvided If the recording oracle address is invalid
    * @throws ErrorInvalidReputationOracleAddressProvided If the reputation oracle address is invalid
    * @throws ErrorInvalidExchangeOracleAddressProvided If the exchange oracle address is invalid
@@ -485,6 +485,7 @@ export class EscrowClient extends BaseEthersClient {
    * @param escrowAddress - Address of the escrow to fund.
    * @param amount - Amount to be added as funds.
    * @param txOptions - Additional transaction parameters (optional, defaults to an empty object).
+   * @returns -
    * @throws ErrorInvalidEscrowAddressProvided If the escrow address is invalid
    * @throws ErrorAmountMustBeGreaterThanZero If the amount is less than or equal to zero
    * @throws ErrorEscrowAddressIsNotProvidedByFactory If the escrow is not provided by the factory
@@ -537,12 +538,39 @@ export class EscrowClient extends BaseEthersClient {
   /**
    * Stores the result URL and result hash for an escrow.
    *
-   * !!! note
-   *     Only Recording Oracle or admin can call it.
+   * @remarks Only Recording Oracle or admin can call it.
    *
-   * This method has two overloads:
-   * - `storeResults(escrowAddress, url, hash, txOptions?)` - Without funds to reserve
-   * - `storeResults(escrowAddress, url, hash, fundsToReserve, txOptions?)` - With funds to reserve
+   * @param escrowAddress - The escrow address.
+   * @param url - The URL containing the final results. May be empty only when `fundsToReserve` is `0n`.
+   * @param hash - The hash of the results payload.
+   * @param txOptions - Optional transaction overrides.
+   * @returns -
+   * @throws ErrorInvalidEscrowAddressProvided If the provided escrow address is invalid.
+   * @throws ErrorInvalidUrl If the URL format is invalid.
+   * @throws ErrorHashIsEmptyString If the hash is empty and empty values are not allowed.
+   * @throws ErrorEscrowAddressIsNotProvidedByFactory If the escrow does not exist in the factory.
+   * @throws ErrorStoreResultsVersion If the contract supports only the deprecated signature.
+   *
+   * @example
+   * ```ts
+   * await escrowClient.storeResults(
+   *   '0x62dD51230A30401C455c8398d06F85e4EaB6309f',
+   *   'https://example.com/results.json',
+   *   '0xHASH123'
+   * );
+   * ```
+   */
+  async storeResults(
+    escrowAddress: string,
+    url: string,
+    hash: string,
+    txOptions?: Overrides
+  ): Promise<void>;
+
+  /**
+   * Stores the result URL and result hash for an escrow.
+   *
+   * @remarks Only Recording Oracle or admin can call it.
    *
    * If `fundsToReserve` is provided, the escrow reserves the specified funds.
    * When `fundsToReserve` is `0n`, an empty URL is allowed (for cases where no solutions were provided).
@@ -552,7 +580,7 @@ export class EscrowClient extends BaseEthersClient {
    * @param hash - The hash of the results payload.
    * @param fundsToReserve - Optional amount of funds to reserve (when using second overload).
    * @param txOptions - Optional transaction overrides.
-   *
+   * @returns -
    * @throws ErrorInvalidEscrowAddressProvided If the provided escrow address is invalid.
    * @throws ErrorInvalidUrl If the URL format is invalid.
    * @throws ErrorHashIsEmptyString If the hash is empty and empty values are not allowed.
@@ -560,17 +588,6 @@ export class EscrowClient extends BaseEthersClient {
    * @throws ErrorStoreResultsVersion If the contract supports only the deprecated signature.
    *
    * @example
-   * Without funds to reserve:
-   * ```ts
-   * await escrowClient.storeResults(
-   *   '0x62dD51230A30401C455c8398d06F85e4EaB6309f',
-   *   'https://example.com/results.json',
-   *   '0xHASH123'
-   * );
-   * ```
-   *
-   * @example
-   * With funds to reserve:
    * ```ts
    * import { ethers } from 'ethers';
    *
@@ -582,12 +599,6 @@ export class EscrowClient extends BaseEthersClient {
    * );
    * ```
    */
-  async storeResults(
-    escrowAddress: string,
-    url: string,
-    hash: string,
-    txOptions?: Overrides
-  ): Promise<void>;
   async storeResults(
     escrowAddress: string,
     url: string,
@@ -596,54 +607,6 @@ export class EscrowClient extends BaseEthersClient {
     txOptions?: Overrides
   ): Promise<void>;
 
-  /**
-   * Stores the result URL and result hash for an escrow.
-   *
-   * !!! note
-   *     Only Recording Oracle or admin can call it.
-   *
-   * This method has two overloads:
-   * - `storeResults(escrowAddress, url, hash, txOptions?)` - Without funds to reserve
-   * - `storeResults(escrowAddress, url, hash, fundsToReserve, txOptions?)` - With funds to reserve
-   *
-   * If `fundsToReserve` is provided, the escrow reserves the specified funds.
-   * When `fundsToReserve` is `0n`, an empty URL is allowed (for cases where no solutions were provided).
-   *
-   * @param escrowAddress - The escrow address.
-   * @param url - The URL containing the final results. May be empty only when `fundsToReserve` is `0n`.
-   * @param hash - The hash of the results payload.
-   * @param fundsToReserve - Optional amount of funds to reserve (when using second overload).
-   * @param txOptions - Optional transaction overrides.
-   *
-   * @throws ErrorInvalidEscrowAddressProvided If the provided escrow address is invalid.
-   * @throws ErrorInvalidUrl If the URL format is invalid.
-   * @throws ErrorHashIsEmptyString If the hash is empty and empty values are not allowed.
-   * @throws ErrorEscrowAddressIsNotProvidedByFactory If the escrow does not exist in the factory.
-   * @throws ErrorStoreResultsVersion If the contract supports only the deprecated signature.
-   *
-   * @example
-   * Without funds to reserve:
-   * ```ts
-   * await escrowClient.storeResults(
-   *   '0x62dD51230A30401C455c8398d06F85e4EaB6309f',
-   *   'https://example.com/results.json',
-   *   '0xHASH123'
-   * );
-   * ```
-   *
-   * @example
-   * With funds to reserve:
-   * ```ts
-   * import { ethers } from 'ethers';
-   *
-   * await escrowClient.storeResults(
-   *   '0x62dD51230A30401C455c8398d06F85e4EaB6309f',
-   *   'https://example.com/results.json',
-   *   '0xHASH123',
-   *   ethers.parseEther('5')
-   * );
-   * ```
-   */
   @requiresSigner
   async storeResults(
     escrowAddress: string,
@@ -707,15 +670,14 @@ export class EscrowClient extends BaseEthersClient {
 
   /**
    * This function sets the status of an escrow to completed.
-   *
+   * @remarks Only Recording Oracle or admin can call it.
    * @param escrowAddress - Address of the escrow.
    * @param txOptions - Additional transaction parameters (optional, defaults to an empty object).
-   * @throws ErrorInvalidEscrowAddressProvided If the escrow address is invalid
-   * @throws ErrorEscrowAddressIsNotProvidedByFactory If the escrow is not provided by the factory
+   * @returns -
+   * @throws ErrorInvalidEscrowAddressProvided If the escrow address is invalid.
+   * @throws ErrorEscrowAddressIsNotProvidedByFactory If the escrow is not provided by the factory.
    *
    * @example
-   * > Only Recording Oracle or admin can call it.
-   *
    * ```ts
    * await escrowClient.complete('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
    * ```
@@ -745,6 +707,7 @@ export class EscrowClient extends BaseEthersClient {
 
   /**
    * This function pays out the amounts specified to the workers and sets the URL of the final results file.
+   * @remarks Only Reputation Oracle or admin can call it.
    *
    * @param escrowAddress - Escrow address to payout.
    * @param recipients - Array of recipient addresses.
@@ -754,6 +717,7 @@ export class EscrowClient extends BaseEthersClient {
    * @param txId - Transaction ID.
    * @param forceComplete - Indicates if remaining balance should be transferred to the escrow creator (optional, defaults to false).
    * @param txOptions - Additional transaction parameters (optional, defaults to an empty object).
+   * @returns -
    * @throws ErrorInvalidEscrowAddressProvided If the escrow address is invalid
    * @throws ErrorRecipientCannotBeEmptyArray If the recipients array is empty
    * @throws ErrorTooManyRecipients If there are too many recipients
@@ -767,8 +731,6 @@ export class EscrowClient extends BaseEthersClient {
    * @throws ErrorBulkPayOutVersion If using deprecated signature
    *
    * @example
-   * > Only Reputation Oracle or admin can call it.
-   *
    * ```ts
    * import { ethers } from 'ethers';
    *
@@ -802,7 +764,7 @@ export class EscrowClient extends BaseEthersClient {
 
   /**
    * This function pays out the amounts specified to the workers and sets the URL of the final results file.
-   *
+   * @remarks Only Reputation Oracle or admin can call it.
    * @param escrowAddress - Escrow address to payout.
    * @param recipients - Array of recipient addresses.
    * @param amounts - Array of amounts the recipients will receive.
@@ -811,6 +773,7 @@ export class EscrowClient extends BaseEthersClient {
    * @param payoutId - Payout ID.
    * @param forceComplete - Indicates if remaining balance should be transferred to the escrow creator (optional, defaults to false).
    * @param txOptions - Additional transaction parameters (optional, defaults to an empty object).
+   * @returns -
    * @throws ErrorInvalidEscrowAddressProvided If the escrow address is invalid
    * @throws ErrorRecipientCannotBeEmptyArray If the recipients array is empty
    * @throws ErrorTooManyRecipients If there are too many recipients
@@ -824,7 +787,6 @@ export class EscrowClient extends BaseEthersClient {
    * @throws ErrorBulkPayOutVersion If using deprecated signature
    *
    * @example
-   * > Only Reputation Oracle or admin can call it.
    *
    * ```ts
    * import { ethers } from 'ethers';
@@ -922,14 +884,14 @@ export class EscrowClient extends BaseEthersClient {
 
   /**
    * This function cancels the specified escrow and sends the balance to the canceler.
-   *
+   * @remarks Only Job Launcher or admin can call it.
    * @param escrowAddress - Address of the escrow to cancel.
    * @param txOptions - Additional transaction parameters (optional, defaults to an empty object).
+   * @returns -
    * @throws ErrorInvalidEscrowAddressProvided If the escrow address is invalid
    * @throws ErrorEscrowAddressIsNotProvidedByFactory If the escrow is not provided by the factory
    *
    * @example
-   * > Only Job Launcher or admin can call it.
    *
    * ```ts
    * await escrowClient.cancel('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
@@ -958,14 +920,14 @@ export class EscrowClient extends BaseEthersClient {
 
   /**
    * This function requests the cancellation of the specified escrow (moves status to ToCancel or finalizes if expired).
-   *
+   * @remarks Only Job Launcher or admin can call it.
    * @param escrowAddress - Address of the escrow to request cancellation.
    * @param txOptions - Additional transaction parameters (optional, defaults to an empty object).
+   * @returns -
    * @throws ErrorInvalidEscrowAddressProvided If the escrow address is invalid
    * @throws ErrorEscrowAddressIsNotProvidedByFactory If the escrow is not provided by the factory
    *
    * @example
-   * > Only Job Launcher or admin can call it.
    *
    * ```ts
    * await escrowClient.requestCancellation('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
@@ -994,6 +956,7 @@ export class EscrowClient extends BaseEthersClient {
 
   /**
    * This function withdraws additional tokens in the escrow to the canceler.
+   * @remarks Only Job Launcher or admin can call it.
    *
    * @param escrowAddress - Address of the escrow to withdraw.
    * @param tokenAddress - Address of the token to withdraw.
@@ -1005,7 +968,6 @@ export class EscrowClient extends BaseEthersClient {
    * @throws ErrorTransferEventNotFoundInTransactionLogs If the Transfer event is not found in transaction logs
    *
    * @example
-   * > Only Job Launcher or admin can call it.
    *
    * ```ts
    * const withdrawData = await escrowClient.withdraw(
@@ -1078,6 +1040,7 @@ export class EscrowClient extends BaseEthersClient {
 
   /**
    * Creates a prepared transaction for bulk payout without immediately sending it.
+   * @remarks Only Reputation Oracle or admin can call it.
    *
    * @param escrowAddress - Escrow address to payout.
    * @param recipients - Array of recipient addresses.
@@ -1100,7 +1063,6 @@ export class EscrowClient extends BaseEthersClient {
    * @throws ErrorEscrowAddressIsNotProvidedByFactory If the escrow is not provided by the factory
    *
    * @example
-   * > Only Reputation Oracle or admin can call it.
    *
    * ```ts
    * import { ethers } from 'ethers';

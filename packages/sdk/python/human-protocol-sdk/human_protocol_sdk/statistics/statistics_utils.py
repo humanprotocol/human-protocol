@@ -246,7 +246,7 @@ class StatisticsUtils:
             options (Optional[SubgraphOptions]): Optional configuration for subgraph requests.
 
         Returns:
-            EscrowStatistics: Escrow statistics including total count and daily data.
+            Escrow statistics including total count and daily data.
 
         Raises:
             StatisticsUtilsError: If the chain ID is invalid or network configuration is missing.
@@ -349,7 +349,7 @@ class StatisticsUtils:
             options (Optional[SubgraphOptions]): Optional configuration for subgraph requests.
 
         Returns:
-            WorkerStatistics: Worker statistics with daily activity breakdown.
+            Worker statistics with daily activity breakdown.
 
         Raises:
             StatisticsUtilsError: If the chain ID is invalid or network configuration is missing.
@@ -426,7 +426,7 @@ class StatisticsUtils:
             options (Optional[SubgraphOptions]): Optional configuration for subgraph requests.
 
         Returns:
-            PaymentStatistics: Payment statistics with daily breakdown.
+            Payment statistics with daily breakdown.
 
         Raises:
             StatisticsUtilsError: If the chain ID is invalid or network configuration is missing.
@@ -509,7 +509,7 @@ class StatisticsUtils:
             options (Optional[SubgraphOptions]): Optional configuration for subgraph requests.
 
         Returns:
-            HMTStatistics: Aggregate HMT token statistics.
+            Aggregate HMT token statistics.
 
         Raises:
             StatisticsUtilsError: If the chain ID is invalid or network configuration is missing.
@@ -569,7 +569,7 @@ class StatisticsUtils:
             options (Optional[SubgraphOptions]): Optional configuration for subgraph requests.
 
         Returns:
-            List[HMTHolder]: List of token holders with addresses and balances.
+            List of token holders with addresses and balances.
 
         Raises:
             StatisticsUtilsError: If the chain ID is invalid or network configuration is missing.
@@ -641,7 +641,7 @@ class StatisticsUtils:
             options (Optional[SubgraphOptions]): Optional configuration for subgraph requests.
 
         Returns:
-            List[DailyHMTData]: Daily HMT transfer statistics.
+            List of daily HMT transfer statistics.
 
         Raises:
             StatisticsUtilsError: If the chain ID is invalid or network configuration is missing.

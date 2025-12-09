@@ -136,7 +136,7 @@ class TransactionUtils:
             options (Optional[SubgraphOptions]): Optional configuration for subgraph requests.
 
         Returns:
-            Optional[TransactionData]: Transaction data if found, otherwise ``None``.
+            Transaction data if found, otherwise ``None``.
 
         Raises:
             TransactionUtilsError: If the chain ID is not supported.
@@ -222,7 +222,7 @@ class TransactionUtils:
             options (Optional[SubgraphOptions]): Optional configuration for subgraph requests.
 
         Returns:
-            List[TransactionData]: A list of transactions matching the filter criteria.
+            A list of transactions matching the filter criteria.
                 Returns an empty list if no matches are found.
 
         Raises:

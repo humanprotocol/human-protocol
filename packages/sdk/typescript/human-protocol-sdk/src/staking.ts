@@ -179,6 +179,7 @@ export class StakingClient extends BaseEthersClient {
    *
    * @param amount - Amount in WEI of tokens to approve for stake.
    * @param txOptions - Additional transaction parameters (optional, defaults to an empty object).
+   * @returns -
    * @throws ErrorInvalidStakingValueType If the amount is not a bigint
    * @throws ErrorInvalidStakingValueSign If the amount is negative
    *
@@ -225,6 +226,7 @@ export class StakingClient extends BaseEthersClient {
    *
    * @param amount - Amount in WEI of tokens to stake.
    * @param txOptions - Additional transaction parameters (optional, defaults to an empty object).
+   * @returns -
    * @throws ErrorInvalidStakingValueType If the amount is not a bigint
    * @throws ErrorInvalidStakingValueSign If the amount is negative
    *
@@ -263,6 +265,7 @@ export class StakingClient extends BaseEthersClient {
    *
    * @param amount - Amount in WEI of tokens to unstake.
    * @param txOptions - Additional transaction parameters (optional, defaults to an empty object).
+   * @returns -
    * @throws ErrorInvalidStakingValueType If the amount is not a bigint
    * @throws ErrorInvalidStakingValueSign If the amount is negative
    *
@@ -301,6 +304,7 @@ export class StakingClient extends BaseEthersClient {
    *     Must have tokens available to withdraw
    *
    * @param txOptions - Additional transaction parameters (optional, defaults to an empty object).
+   * @returns -
    *
    * @example
    * ```ts
@@ -325,6 +329,7 @@ export class StakingClient extends BaseEthersClient {
    * @param escrowAddress - Address of the escrow that the slash is made
    * @param amount - Amount in WEI of tokens to slash.
    * @param txOptions - Additional transaction parameters (optional, defaults to an empty object).
+   * @returns -
    * @throws ErrorInvalidStakingValueType If the amount is not a bigint
    * @throws ErrorInvalidStakingValueSign If the amount is negative
    * @throws ErrorInvalidSlasherAddressProvided If the slasher address is invalid

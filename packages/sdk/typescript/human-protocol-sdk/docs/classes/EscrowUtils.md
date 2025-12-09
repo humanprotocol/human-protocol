@@ -21,10 +21,13 @@ static getEscrows(filter: IEscrowsFilter, options?: SubgraphOptions): Promise<IE
 
 This function returns an array of escrows based on the specified filter parameters.
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `filter` | `IEscrowsFilter` | Filter parameters. |
 | `options?` | [`SubgraphOptions`](../interfaces/SubgraphOptions.md) | Optional configuration for subgraph requests. |
+
 
 #### Returns
 
@@ -70,11 +73,14 @@ This function returns the escrow data for a given address.
 
 > This uses Subgraph
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `chainId` | `ChainId` | Network in which the escrow has been deployed |
 | `escrowAddress` | `string` | Address of the escrow |
 | `options?` | [`SubgraphOptions`](../interfaces/SubgraphOptions.md) | Optional configuration for subgraph requests. |
+
 
 #### Returns
 
@@ -116,10 +122,13 @@ This function returns the status events for a given set of networks within an op
 
 > This uses Subgraph
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `filter` | `IStatusEventFilter` | Filter parameters. |
 | `options?` | [`SubgraphOptions`](../interfaces/SubgraphOptions.md) | Optional configuration for subgraph requests. |
+
 
 #### Returns
 
@@ -163,10 +172,13 @@ This function returns the payouts for a given set of networks.
 
 > This uses Subgraph
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `filter` | `IPayoutFilter` | Filter parameters. |
 | `options?` | [`SubgraphOptions`](../interfaces/SubgraphOptions.md) | Optional configuration for subgraph requests. |
+
 
 #### Returns
 
@@ -209,10 +221,13 @@ This function returns the cancellation refunds for a given set of networks.
 
 > This uses Subgraph
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `filter` | `ICancellationRefundFilter` | Filter parameters. |
 | `options?` | [`SubgraphOptions`](../interfaces/SubgraphOptions.md) | Optional configuration for subgraph requests. |
+
 
 #### Returns
 
@@ -256,11 +271,14 @@ This function returns the cancellation refund for a given escrow address.
 
 > This uses Subgraph
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `chainId` | `ChainId` | Network in which the escrow has been deployed |
 | `escrowAddress` | `string` | Address of the escrow |
 | `options?` | [`SubgraphOptions`](../interfaces/SubgraphOptions.md) | Optional configuration for subgraph requests. |
+
 
 #### Returns
 

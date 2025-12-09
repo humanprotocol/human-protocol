@@ -69,7 +69,7 @@ class StakingUtils:
             options (Optional[SubgraphOptions]): Optional configuration for subgraph requests.
 
         Returns:
-            Optional[StakerData]: Staker data if found, otherwise ``None``.
+            Staker data if found, otherwise ``None``.
 
         Raises:
             StakingUtilsError: If the chain ID is not supported.
@@ -134,7 +134,7 @@ class StakingUtils:
             options (Optional[SubgraphOptions]): Optional configuration for subgraph requests.
 
         Returns:
-            List[StakerData]: A list of staker records matching the filter criteria.
+            A list of staker records matching the filter criteria.
                 Returns an empty list if no matches are found.
 
         Raises:

@@ -231,7 +231,7 @@ class EscrowClient:
             tx_options (Optional[TxParams]): Optional transaction parameters such as gas limit.
 
         Returns:
-            str: Address of the newly created escrow contract.
+            Address of the newly created escrow contract.
 
         Raises:
             EscrowClientError: If the token address is invalid or the transaction fails.
@@ -287,7 +287,7 @@ class EscrowClient:
             tx_options (Optional[TxParams]): Optional transaction parameters such as gas limit.
 
         Returns:
-            str: Address of the newly created and configured escrow contract.
+            Address of the newly created and configured escrow contract.
 
         Raises:
             EscrowClientError: If inputs are invalid or the transaction fails.
@@ -650,7 +650,7 @@ class EscrowClient:
             tx_options (Optional[TxParams]): Optional transaction parameters to seed the transaction.
 
         Returns:
-            TxParams: A populated transaction dictionary ready to sign and send,
+            A populated transaction dictionary ready to sign and send,
                 including nonce, gas estimate, gas price/fees, and chain ID.
 
         Raises:
@@ -820,7 +820,7 @@ class EscrowClient:
             tx_options (Optional[TxParams]): Optional transaction parameters such as gas limit.
 
         Returns:
-            EscrowCancel: Cancellation details including transaction hash and refunded amount.
+            Cancellation details including transaction hash and refunded amount.
 
         Raises:
             EscrowClientError: If validation fails or the transfer event is missing.
@@ -863,7 +863,7 @@ class EscrowClient:
             tx_options (Optional[TxParams]): Optional transaction parameters such as gas limit.
 
         Returns:
-            EscrowWithdraw: Withdrawal details including transaction hash, token address, and amount.
+            Withdrawal details including transaction hash, token address, and amount.
 
         Raises:
             EscrowClientError: If validation fails or transfer event is missing.
@@ -927,7 +927,7 @@ class EscrowClient:
             escrow_address (str): Address of the escrow.
 
         Returns:
-            int: Remaining escrow balance in token's smallest unit.
+            Remaining escrow balance in token's smallest unit.
 
         Raises:
             EscrowClientError: If the escrow address is invalid.
@@ -957,7 +957,7 @@ class EscrowClient:
             escrow_address (str): Address of the escrow.
 
         Returns:
-            int: Reserved funds amount in token's smallest unit.
+            Reserved funds amount in token's smallest unit.
 
         Raises:
             EscrowClientError: If the escrow address is invalid.
@@ -979,7 +979,7 @@ class EscrowClient:
             escrow_address (str): Address of the escrow.
 
         Returns:
-            str: Manifest file hash.
+            Manifest file hash.
 
         Raises:
             EscrowClientError: If the escrow address is invalid.
@@ -1019,7 +1019,7 @@ class EscrowClient:
             escrow_address (str): Address of the escrow.
 
         Returns:
-            str: Final results URL.
+            Final results URL.
 
         Raises:
             EscrowClientError: If the escrow address is invalid.
@@ -1041,7 +1041,7 @@ class EscrowClient:
             escrow_address (str): Address of the escrow.
 
         Returns:
-            str: Intermediate results URL.
+            Intermediate results URL.
 
         Raises:
             EscrowClientError: If the escrow address is invalid.
@@ -1065,7 +1065,7 @@ class EscrowClient:
             escrow_address (str): Address of the escrow.
 
         Returns:
-            str: Intermediate results file hash.
+            Intermediate results file hash.
 
         Raises:
             EscrowClientError: If the escrow address is invalid.
@@ -1089,7 +1089,7 @@ class EscrowClient:
             escrow_address (str): Address of the escrow.
 
         Returns:
-            str: Token address used to fund the escrow.
+            Token address used to fund the escrow.
 
         Raises:
             EscrowClientError: If the escrow address is invalid.
@@ -1109,7 +1109,7 @@ class EscrowClient:
             escrow_address (str): Address of the escrow.
 
         Returns:
-            Status: Current escrow status enum value.
+            Current escrow status enum value.
 
         Raises:
             EscrowClientError: If the escrow address is invalid.
@@ -1131,7 +1131,7 @@ class EscrowClient:
             escrow_address (str): Address of the escrow.
 
         Returns:
-            str: Recording oracle address.
+            Recording oracle address.
 
         Raises:
             EscrowClientError: If the escrow address is invalid.
@@ -1153,7 +1153,7 @@ class EscrowClient:
             escrow_address (str): Address of the escrow.
 
         Returns:
-            str: Reputation oracle address.
+            Reputation oracle address.
 
         Raises:
             EscrowClientError: If the escrow address is invalid.
@@ -1177,7 +1177,7 @@ class EscrowClient:
             escrow_address (str): Address of the escrow.
 
         Returns:
-            str: Exchange oracle address.
+            Exchange oracle address.
 
         Raises:
             EscrowClientError: If the escrow address is invalid.
@@ -1199,7 +1199,7 @@ class EscrowClient:
             escrow_address (str): Address of the escrow.
 
         Returns:
-            str: Job launcher address.
+            Job launcher address.
 
         Raises:
             EscrowClientError: If the escrow address is invalid.
@@ -1219,7 +1219,7 @@ class EscrowClient:
             escrow_address (str): Address of the escrow.
 
         Returns:
-            str: Escrow factory address.
+            Escrow factory address.
 
         Raises:
             EscrowClientError: If the escrow address is invalid.
@@ -1242,7 +1242,7 @@ class EscrowClient:
             address (str): Address of the deployed escrow.
 
         Returns:
-            contract.Contract: The instance of the escrow contract.
+            The instance of the escrow contract.
 
         Raises:
             EscrowClientError: If the address is not a valid escrow from the factory.

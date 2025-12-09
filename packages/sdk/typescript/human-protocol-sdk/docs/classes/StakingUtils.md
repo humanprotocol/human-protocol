@@ -25,11 +25,14 @@ options?: SubgraphOptions): Promise<IStaker>;
 
 Gets staking info for a staker from the subgraph.
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `chainId` | `ChainId` | Network in which the staking contract is deployed |
 | `stakerAddress` | `string` | Address of the staker |
 | `options?` | [`SubgraphOptions`](../interfaces/SubgraphOptions.md) | Optional configuration for subgraph requests. |
+
 
 #### Returns
 
@@ -68,10 +71,13 @@ static getStakers(filter: IStakersFilter, options?: SubgraphOptions): Promise<IS
 
 Gets all stakers from the subgraph with filters, pagination and ordering.
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `filter` | `IStakersFilter` | Stakers filter with pagination and ordering |
 | `options?` | [`SubgraphOptions`](../interfaces/SubgraphOptions.md) | Optional configuration for subgraph requests. |
+
 
 #### Returns
 

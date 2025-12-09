@@ -66,7 +66,7 @@ class Encryption:
             public_keys (List[str]): List of armored PGP public keys of the recipients.
 
         Returns:
-            str: Armored, signed, and encrypted PGP message.
+            Armored, signed, and encrypted PGP message.
 
         Raises:
             ValueError: If the private key cannot be unlocked or encryption fails.
@@ -115,7 +115,7 @@ class Encryption:
             public_key (Optional[str]): Optional armored public key to verify the message signature.
 
         Returns:
-            bytes: Decrypted message as bytes.
+            Decrypted message as bytes.
 
         Raises:
             ValueError: If the private key cannot be unlocked, decryption fails,
@@ -175,7 +175,7 @@ class Encryption:
             message (Union[str, bytes]): Message content to sign.
 
         Returns:
-            str: Armored signed PGP message in cleartext format.
+            Armored signed PGP message in cleartext format.
 
         Raises:
             ValueError: If the private key cannot be unlocked or signing fails.

@@ -66,16 +66,21 @@ new StakingClient(runner: ContractRunner, networkData: NetworkData): StakingClie
 
 **StakingClient constructor**
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `runner` | `ContractRunner` | The Runner object to interact with the Ethereum network |
 | `networkData` | [`NetworkData`](../type-aliases/NetworkData.md) | The network information required to connect to the Staking contract |
 
+
 #### Returns
 
 | Type | Description |
 |------|-------------|
-| `StakingClient` | #### Overrides |
+| `StakingClient` | - |
+
+#### Overrides
 
 ```ts
 BaseEthersClient.constructor
@@ -91,9 +96,12 @@ static build(runner: ContractRunner): Promise<StakingClient>;
 
 Creates an instance of StakingClient from a Runner.
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `runner` | `ContractRunner` | The Runner object to interact with the Ethereum network |
+
 
 #### Returns
 
@@ -133,23 +141,25 @@ approveStake(amount: bigint, txOptions: Overrides): Promise<void>;
 
 This function approves the staking contract to transfer a specified amount of tokens when the user stakes. It increases the allowance for the staking contract.
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `amount` | `bigint` | Amount in WEI of tokens to approve for stake. |
 | `txOptions` | `Overrides` | Additional transaction parameters (optional, defaults to an empty object). |
 
+
 #### Returns
 
 | Type | Description |
 |------|-------------|
-| `void` | #### Throws |
-
-ErrorInvalidStakingValueType If the amount is not a bigint
+| `void` | - |
 
 #### Throws
 
 | Type | Description |
 |------|-------------|
+| `ErrorInvalidStakingValueType` | If the amount is not a bigint |
 | `ErrorInvalidStakingValueSign` | If the amount is negative |
 
 ???+ example "Example"
@@ -175,23 +185,25 @@ This function stakes a specified amount of tokens on a specific network.
 !!! note
     `approveStake` must be called before
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `amount` | `bigint` | Amount in WEI of tokens to stake. |
 | `txOptions` | `Overrides` | Additional transaction parameters (optional, defaults to an empty object). |
 
+
 #### Returns
 
 | Type | Description |
 |------|-------------|
-| `void` | #### Throws |
-
-ErrorInvalidStakingValueType If the amount is not a bigint
+| `void` | - |
 
 #### Throws
 
 | Type | Description |
 |------|-------------|
+| `ErrorInvalidStakingValueType` | If the amount is not a bigint |
 | `ErrorInvalidStakingValueSign` | If the amount is negative |
 
 ???+ example "Example"
@@ -218,23 +230,25 @@ This function unstakes tokens from staking contract. The unstaked tokens stay lo
 !!! note
     Must have tokens available to unstake
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `amount` | `bigint` | Amount in WEI of tokens to unstake. |
 | `txOptions` | `Overrides` | Additional transaction parameters (optional, defaults to an empty object). |
 
+
 #### Returns
 
 | Type | Description |
 |------|-------------|
-| `void` | #### Throws |
-
-ErrorInvalidStakingValueType If the amount is not a bigint
+| `void` | - |
 
 #### Throws
 
 | Type | Description |
 |------|-------------|
+| `ErrorInvalidStakingValueType` | If the amount is not a bigint |
 | `ErrorInvalidStakingValueSign` | If the amount is negative |
 
 ???+ example "Example"
@@ -259,19 +273,25 @@ This function withdraws unstaked and non-locked tokens from staking contract to 
 !!! note
     Must have tokens available to withdraw
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `txOptions` | `Overrides` | Additional transaction parameters (optional, defaults to an empty object). |
+
 
 #### Returns
 
 | Type | Description |
 |------|-------------|
-| `void` | #### Example |
+| `void` | - |
 
-```ts
-await stakingClient.withdraw();
-```
+???+ example "Example"
+
+    ```ts
+    await stakingClient.withdraw();
+    ```
+
 
 ***
 
@@ -288,6 +308,8 @@ txOptions: Overrides): Promise<void>;
 
 This function reduces the allocated amount by a staker in an escrow and transfers those tokens to the reward pool. This allows the slasher to claim them later.
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `slasher` | `string` | Wallet address from who requested the slash |
@@ -296,18 +318,18 @@ This function reduces the allocated amount by a staker in an escrow and transfer
 | `amount` | `bigint` | Amount in WEI of tokens to slash. |
 | `txOptions` | `Overrides` | Additional transaction parameters (optional, defaults to an empty object). |
 
+
 #### Returns
 
 | Type | Description |
 |------|-------------|
-| `void` | #### Throws |
-
-ErrorInvalidStakingValueType If the amount is not a bigint
+| `void` | - |
 
 #### Throws
 
 | Type | Description |
 |------|-------------|
+| `ErrorInvalidStakingValueType` | If the amount is not a bigint |
 | `ErrorInvalidStakingValueSign` | If the amount is negative |
 | `ErrorInvalidSlasherAddressProvided` | If the slasher address is invalid |
 | `ErrorInvalidStakerAddressProvided` | If the staker address is invalid |
@@ -339,9 +361,12 @@ getStakerInfo(stakerAddress: string): Promise<StakerInfo>;
 
 Retrieves comprehensive staking information for a staker.
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `stakerAddress` | `string` | The address of the staker. |
+
 
 #### Returns
 

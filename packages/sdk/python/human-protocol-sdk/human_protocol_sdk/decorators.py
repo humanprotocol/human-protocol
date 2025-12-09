@@ -27,7 +27,7 @@ def requires_signer(method: Callable[..., Any]) -> Callable[..., Any]:
         method (Callable[..., Any]): The method to decorate (must be a method of a class with a `w3` attribute).
 
     Returns:
-        Callable[..., Any]: Wrapped method that performs validation before execution.
+        Wrapped method that performs validation before execution.
 
     Raises:
         RequiresSignerError: If the Web3 instance lacks a default account or signing middleware.

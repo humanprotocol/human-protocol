@@ -259,7 +259,7 @@ class KVStoreClient:
             key (str): Key to retrieve (cannot be empty).
 
         Returns:
-            str: Value of the key-value pair if it exists, empty string otherwise.
+            Value of the key-value pair if it exists, empty string otherwise.
 
         Raises:
             KVStoreClientError: If the key is empty, address is invalid, or the query fails.

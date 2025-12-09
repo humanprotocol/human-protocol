@@ -10,10 +10,13 @@ static verify(message: string, publicKey: string): Promise<boolean>;
 
 This function verifies the signature of a signed message using the public key.
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `message` | `string` | Message to verify. |
 | `publicKey` | `string` | Public key to verify that the message was signed by a specific source. |
+
 
 #### Returns
 
@@ -42,9 +45,12 @@ static getSignedData(message: string): Promise<string>;
 
 This function gets signed data from a signed message.
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `message` | `string` | Message. |
+
 
 #### Returns
 
@@ -81,11 +87,14 @@ passphrase: string): Promise<IKeyPair>;
 
 This function generates a key pair for encryption and decryption.
 
+#### Parameters
+
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
 | `name` | `string` | `undefined` | Name for the key pair. |
 | `email` | `string` | `undefined` | Email for the key pair. |
 | `passphrase` | `string` | `''` | Passphrase to encrypt the private key (optional, defaults to empty string). |
+
 
 #### Returns
 
@@ -116,10 +125,13 @@ static encrypt(message: MessageDataType, publicKeys: string[]): Promise<string>;
 
 This function encrypts a message using the specified public keys.
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `message` | [`MessageDataType`](../type-aliases/MessageDataType.md) | Message to encrypt. |
 | `publicKeys` | `string`[] | Array of public keys to use for encryption. |
+
 
 #### Returns
 
@@ -150,9 +162,12 @@ static isEncrypted(message: string): boolean;
 
 Verifies if a message appears to be encrypted with OpenPGP.
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `message` | `string` | Message to verify. |
+
 
 #### Returns
 

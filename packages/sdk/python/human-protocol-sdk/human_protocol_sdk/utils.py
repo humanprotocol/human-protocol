@@ -57,7 +57,7 @@ def is_indexer_error(error: Exception) -> bool:
         error (Exception): The exception to check.
 
     Returns:
-        bool: True if the error indicates indexer issues, False otherwise.
+        True if the error indicates indexer issues, False otherwise.
 
     Example:
         ```python
@@ -109,7 +109,7 @@ def custom_gql_fetch(
         options (Optional[SubgraphOptions]): Optional subgraph configuration for retries and indexer selection.
 
     Returns:
-        Dict[str, Any]: JSON response from the subgraph containing the query results.
+        JSON response from the subgraph containing the query results.
 
     Raises:
         ValueError: If retry configuration is incomplete or indexer routing requires missing API key.
@@ -187,7 +187,7 @@ def _fetch_subgraph_data(
         indexer_id (Optional[str]): Optional indexer ID to route the request to.
 
     Returns:
-        Dict[str, Any]: JSON response from the subgraph.
+        JSON response from the subgraph.
 
     Raises:
         Exception: If the HTTP request fails or returns a non-200 status code.
@@ -246,7 +246,7 @@ def get_hmt_balance(wallet_addr: str, token_addr: str, w3: Web3) -> int:
         w3 (Web3): Web3 instance connected to the network.
 
     Returns:
-        int: HMT token balance in wei.
+        HMT token balance in wei.
 
     Example:
         ```python
@@ -284,6 +284,7 @@ def parse_transfer_transaction(
 
     Returns:
         A tuple containing:
+
             - bool: True if HMT was successfully transferred, False otherwise.
             - Optional[int]: The transfer amount in wei if successful, None otherwise.
 
@@ -320,7 +321,7 @@ def get_contract_interface(contract_entrypoint: str) -> Dict[str, Any]:
         contract_entrypoint (str): File path to the contract JSON artifact.
 
     Returns:
-        Dict[str, Any]: Contract interface dictionary containing the ABI and other metadata.
+        Contract interface dictionary containing the ABI and other metadata.
 
     Example:
         ```python
@@ -337,7 +338,7 @@ def get_erc20_interface() -> Dict[str, Any]:
     """Retrieve the standard ERC20 token contract interface.
 
     Returns:
-        Dict[str, Any]: The ERC20 contract interface containing the ABI.
+        The ERC20 contract interface containing the ABI.
 
     Example:
         ```python
@@ -357,7 +358,7 @@ def get_factory_interface() -> Dict[str, Any]:
     """Retrieve the EscrowFactory contract interface.
 
     Returns:
-        Dict[str, Any]: The EscrowFactory contract interface containing the ABI.
+        The EscrowFactory contract interface containing the ABI.
 
     Example:
         ```python
@@ -375,7 +376,7 @@ def get_staking_interface() -> Dict[str, Any]:
     """Retrieve the Staking contract interface.
 
     Returns:
-        Dict[str, Any]: The Staking contract interface containing the ABI.
+        The Staking contract interface containing the ABI.
 
     Example:
         ```python
@@ -393,7 +394,7 @@ def get_escrow_interface() -> Dict[str, Any]:
     """Retrieve the Escrow contract interface.
 
     Returns:
-        Dict[str, Any]: The Escrow contract interface containing the ABI.
+        The Escrow contract interface containing the ABI.
 
     Example:
         ```python
@@ -411,7 +412,7 @@ def get_kvstore_interface() -> Dict[str, Any]:
     """Retrieve the KVStore contract interface.
 
     Returns:
-        Dict[str, Any]: The KVStore contract interface containing the ABI.
+        The KVStore contract interface containing the ABI.
 
     Example:
         ```python
@@ -494,7 +495,7 @@ def validate_url(url: str) -> bool:
         url: URL string to validate (e.g., "https://example.com" or "http://localhost:8080").
 
     Returns:
-        bool: True if the URL is valid, False otherwise.
+        True if the URL is valid, False otherwise.
 
     Raises:
         ValidationFailure: If the URL format is invalid according to the validators library.
@@ -540,7 +541,7 @@ def validate_json(data: str) -> bool:
         data: String to validate as JSON.
 
     Returns:
-        bool: True if the string is valid JSON, False otherwise.
+        True if the string is valid JSON, False otherwise.
 
     Example:
         ```python

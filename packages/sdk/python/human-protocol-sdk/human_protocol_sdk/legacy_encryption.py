@@ -83,7 +83,7 @@ class Encryption:
             data (bytes): Data to be checked for encryption.
 
         Returns:
-            bool: ``True`` if data has valid ECIES header (starts with 0x04), ``False`` otherwise.
+            ``True`` if data has valid ECIES header (starts with 0x04), ``False`` otherwise.
 
         Example:
             ```python
@@ -118,7 +118,7 @@ class Encryption:
             shared_mac_data (bytes): Additional data to include in MAC computation. Defaults to empty bytes.
 
         Returns:
-            bytes: Encrypted message in ECIES format.
+            Encrypted message in ECIES format.
 
         Raises:
             DecryptionError: If key exchange fails or public key is invalid.
@@ -193,7 +193,7 @@ class Encryption:
             shared_mac_data (bytes): Additional data used in MAC computation. Defaults to empty bytes.
 
         Returns:
-            bytes: Decrypted plaintext data.
+            Decrypted plaintext data.
 
         Raises:
             DecryptionError: If ECIES header is invalid, tag verification fails,
@@ -270,7 +270,7 @@ class Encryption:
             public_key (eth_datatypes.PublicKey): Public key for the responder.
 
         Returns:
-            bytes: Shared secret key material resulting from the ECDH exchange.
+            Shared secret key material resulting from the ECDH exchange.
 
         Raises:
             InvalidPublicKey: If the public key cannot be converted to a valid elliptic curve point.
@@ -300,7 +300,7 @@ class Encryption:
         """Generate a new SECP256K1 private key.
 
         Returns:
-            eth_datatypes.PrivateKey: Newly generated SECP256K1 private key.
+            Newly generated SECP256K1 private key.
 
         Example:
             ```python
@@ -324,7 +324,7 @@ class Encryption:
             private_key (bytes): Private key bytes to derive the public key from.
 
         Returns:
-            eth_keys.PublicKey: Public key object corresponding to the private key.
+            Public key object corresponding to the private key.
 
         Example:
             ```python
@@ -348,7 +348,7 @@ class Encryption:
             key_material (bytes): Shared secret from ECDH key exchange.
 
         Returns:
-            bytes: Derived key secret (concatenation of encryption key and MAC key).
+            Derived key secret (concatenation of encryption key and MAC key).
         """
 
         key = b""
@@ -375,7 +375,7 @@ class Encryption:
             msg (bytes): Message to authenticate.
 
         Returns:
-            bytes: HMAC-SHA256 digest.
+            HMAC-SHA256 digest.
         """
 
         mac = hmac.HMAC(key, hashes.SHA256())
@@ -390,5 +390,5 @@ class Encryption:
             value (bytes): Value to pad.
 
         Returns:
-            bytes: Value padded to 32 bytes.
+            Value padded to 32 bytes.
         """

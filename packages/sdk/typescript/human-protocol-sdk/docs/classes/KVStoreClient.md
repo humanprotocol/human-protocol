@@ -66,16 +66,21 @@ new KVStoreClient(runner: ContractRunner, networkData: NetworkData): KVStoreClie
 
 **KVStoreClient constructor**
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `runner` | `ContractRunner` | The Runner object to interact with the Ethereum network |
 | `networkData` | [`NetworkData`](../type-aliases/NetworkData.md) | The network information required to connect to the KVStore contract |
 
+
 #### Returns
 
 | Type | Description |
 |------|-------------|
-| `KVStoreClient` | #### Overrides |
+| `KVStoreClient` | - |
+
+#### Overrides
 
 ```ts
 BaseEthersClient.constructor
@@ -91,9 +96,12 @@ static build(runner: ContractRunner): Promise<KVStoreClient>;
 
 Creates an instance of KVStoreClient from a runner.
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `runner` | `ContractRunner` | The Runner object to interact with the Ethereum network |
+
 
 #### Returns
 
@@ -136,24 +144,26 @@ txOptions: Overrides): Promise<void>;
 
 This function sets a key-value pair associated with the address that submits the transaction.
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `key` | `string` | Key of the key-value pair |
 | `value` | `string` | Value of the key-value pair |
 | `txOptions` | `Overrides` | Additional transaction parameters (optional, defaults to an empty object). |
 
+
 #### Returns
 
 | Type | Description |
 |------|-------------|
-| `void` | #### Throws |
-
-ErrorKVStoreEmptyKey If the key is empty
+| `void` | - |
 
 #### Throws
 
 | Type | Description |
 |------|-------------|
+| `ErrorKVStoreEmptyKey` | If the key is empty |
 | `Error` | If the transaction fails |
 
 ???+ example "Example"
@@ -176,24 +186,26 @@ txOptions: Overrides): Promise<void>;
 
 This function sets key-value pairs in bulk associated with the address that submits the transaction.
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `keys` | `string`[] | Array of keys (keys and value must have the same order) |
 | `values` | `string`[] | Array of values |
 | `txOptions` | `Overrides` | Additional transaction parameters (optional, defaults to an empty object). |
 
+
 #### Returns
 
 | Type | Description |
 |------|-------------|
-| `void` | #### Throws |
-
-ErrorKVStoreArrayLength If keys and values arrays have different lengths
+| `void` | - |
 
 #### Throws
 
 | Type | Description |
 |------|-------------|
+| `ErrorKVStoreArrayLength` | If keys and values arrays have different lengths |
 | `ErrorKVStoreEmptyKey` | If any key is empty |
 | `Error` | If the transaction fails |
 
@@ -219,24 +231,26 @@ txOptions: Overrides): Promise<void>;
 
 Sets a URL value for the address that submits the transaction, and its hash.
 
+#### Parameters
+
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
 | `url` | `string` | `undefined` | URL to set |
 | `urlKey` | `string` | `'url'` | Configurable URL key. `url` by default. |
 | `txOptions` | `Overrides` | `{}` | Additional transaction parameters (optional, defaults to an empty object). |
 
+
 #### Returns
 
 | Type | Description |
 |------|-------------|
-| `void` | #### Throws |
-
-ErrorInvalidUrl If the URL is invalid
+| `void` | - |
 
 #### Throws
 
 | Type | Description |
 |------|-------------|
+| `ErrorInvalidUrl` | If the URL is invalid |
 | `Error` | If the transaction fails |
 
 ???+ example "Example"
@@ -257,10 +271,13 @@ get(address: string, key: string): Promise<string>;
 
 Gets the value of a key-value pair in the contract.
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `address` | `string` | Address from which to get the key value. |
 | `key` | `string` | Key to obtain the value. |
+
 
 #### Returns
 

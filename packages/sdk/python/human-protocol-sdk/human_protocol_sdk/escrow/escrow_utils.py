@@ -228,7 +228,7 @@ class EscrowUtils:
                 such as custom endpoints or timeout settings.
 
         Returns:
-            List[EscrowData]: A list of escrow records matching the filter criteria.
+            A list of escrow records matching the filter criteria.
                 Returns an empty list if no matches are found.
 
         Example:
@@ -352,7 +352,7 @@ class EscrowUtils:
             options (Optional[SubgraphOptions]): Optional configuration for subgraph requests.
 
         Returns:
-            Optional[EscrowData]: Escrow data if found, otherwise ``None``.
+            Escrow data if found, otherwise ``None``.
 
         Raises:
             EscrowClientError: If the chain ID is invalid or the escrow address is malformed.
@@ -445,7 +445,7 @@ class EscrowUtils:
             options (Optional[SubgraphOptions]): Optional configuration for subgraph requests.
 
         Returns:
-            List[StatusEvent]: A list of status change events matching the filter criteria.
+            A list of status change events matching the filter criteria.
                 Returns an empty list if no matches are found.
 
         Raises:
@@ -532,7 +532,7 @@ class EscrowUtils:
             options (Optional[SubgraphOptions]): Optional configuration for subgraph requests.
 
         Returns:
-            List[Payout]: A list of payout records matching the query parameters.
+            A list of payout records matching the query parameters.
                 Returns an empty list if no matches are found.
 
         Raises:
@@ -620,7 +620,7 @@ class EscrowUtils:
             options (Optional[SubgraphOptions]): Optional configuration for subgraph requests.
 
         Returns:
-            List[CancellationRefund]: A list of cancellation refunds matching the query parameters.
+            A list of cancellation refunds matching the query parameters.
                 Returns an empty list if no matches are found.
 
         Raises:
@@ -711,7 +711,7 @@ class EscrowUtils:
             options (Optional[SubgraphOptions]): Optional configuration for subgraph requests.
 
         Returns:
-            CancellationRefund: Cancellation refund data if found, otherwise ``None``.
+            Cancellation refund data if found, otherwise ``None``.
 
         Raises:
             EscrowClientError: If an unsupported chain ID or invalid escrow address is provided.

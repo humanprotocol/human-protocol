@@ -27,7 +27,7 @@ class EncryptionUtils:
             public_keys (List[str]): List of armored PGP public keys of the recipients.
 
         Returns:
-            str: Armored encrypted PGP message.
+            Armored encrypted PGP message.
 
         Raises:
             PGPError: If encryption fails or public keys are invalid.
@@ -65,7 +65,7 @@ class EncryptionUtils:
             public_key (str): Armored PGP public key to verify the signature against.
 
         Returns:
-            bool: ``True`` if the signature is valid, ``False`` otherwise.
+            ``True`` if the signature is valid, ``False`` otherwise.
 
         Example:
             ```python
@@ -98,7 +98,7 @@ class EncryptionUtils:
             message (str): Armored PGP signed message.
 
         Returns:
-            str: Extracted message content, or ``False`` if extraction fails.
+            Extracted message content, or ``False`` if extraction fails.
 
         Example:
             ```python
@@ -126,7 +126,7 @@ class EncryptionUtils:
             message (str): Text to check for encryption.
 
         Returns:
-            bool: ``True`` if the message is a PGP encrypted message, ``False`` otherwise.
+            ``True`` if the message is a PGP encrypted message, ``False`` otherwise.
 
         Example:
             ```python

@@ -25,11 +25,14 @@ options?: SubgraphOptions): Promise<IKVStore[]>;
 
 This function returns the KVStore data for a given address.
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `chainId` | `ChainId` | Network in which the KVStore is deployed |
 | `address` | `string` | Address of the KVStore |
 | `options?` | [`SubgraphOptions`](../interfaces/SubgraphOptions.md) | Optional configuration for subgraph requests. |
+
 
 #### Returns
 
@@ -69,12 +72,15 @@ options?: SubgraphOptions): Promise<string>;
 
 Gets the value of a key-value pair in the KVStore using the subgraph.
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `chainId` | `ChainId` | Network in which the KVStore is deployed |
 | `address` | `string` | Address from which to get the key value. |
 | `key` | `string` | Key to obtain the value. |
 | `options?` | [`SubgraphOptions`](../interfaces/SubgraphOptions.md) | Optional configuration for subgraph requests. |
+
 
 #### Returns
 
@@ -117,12 +123,15 @@ options?: SubgraphOptions): Promise<string>;
 
 Gets the URL value of the given entity, and verifies its hash.
 
+#### Parameters
+
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
 | `chainId` | `ChainId` | `undefined` | Network in which the KVStore is deployed |
 | `address` | `string` | `undefined` | Address from which to get the URL value. |
 | `urlKey` | `string` | `'url'` | Configurable URL key. `url` by default. |
 | `options?` | [`SubgraphOptions`](../interfaces/SubgraphOptions.md) | `undefined` | Optional configuration for subgraph requests. |
+
 
 #### Returns
 
@@ -162,11 +171,14 @@ options?: SubgraphOptions): Promise<string>;
 
 Gets the public key of the given entity, and verifies its hash.
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `chainId` | `ChainId` | Network in which the KVStore is deployed |
 | `address` | `string` | Address from which to get the public key. |
 | `options?` | [`SubgraphOptions`](../interfaces/SubgraphOptions.md) | Optional configuration for subgraph requests. |
+
 
 #### Returns
 

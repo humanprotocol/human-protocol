@@ -25,11 +25,14 @@ options?: SubgraphOptions): Promise<IWorker | null>;
 
 This function returns the worker data for the given address.
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `chainId` | `ChainId` | The chain ID. |
 | `address` | `string` | The worker address. |
 | `options?` | [`SubgraphOptions`](../interfaces/SubgraphOptions.md) | Optional configuration for subgraph requests. |
+
 
 #### Returns
 
@@ -89,10 +92,13 @@ type IWorker = {
 };
 ```
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `filter` | `IWorkersFilter` | Filter for the workers. |
 | `options?` | [`SubgraphOptions`](../interfaces/SubgraphOptions.md) | Optional configuration for subgraph requests. |
+
 
 #### Returns
 

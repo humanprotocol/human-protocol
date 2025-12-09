@@ -54,11 +54,14 @@ interface IEscrowStatistics {
 };
 ```
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `networkData` | [`NetworkData`](../type-aliases/NetworkData.md) | The network information required to connect to the subgraph |
 | `filter` | `IStatisticsFilter` | Statistics params with duration data |
 | `options?` | [`SubgraphOptions`](../interfaces/SubgraphOptions.md) | Optional configuration for subgraph requests. |
+
 
 #### Returns
 
@@ -122,11 +125,14 @@ interface IWorkerStatistics {
 };
 ```
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `networkData` | [`NetworkData`](../type-aliases/NetworkData.md) | The network information required to connect to the subgraph |
 | `filter` | `IStatisticsFilter` | Statistics params with duration data |
 | `options?` | [`SubgraphOptions`](../interfaces/SubgraphOptions.md) | Optional configuration for subgraph requests. |
+
 
 #### Returns
 
@@ -192,11 +198,14 @@ interface IPaymentStatistics {
 };
 ```
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `networkData` | [`NetworkData`](../type-aliases/NetworkData.md) | The network information required to connect to the subgraph |
 | `filter` | `IStatisticsFilter` | Statistics params with duration data |
 | `options?` | [`SubgraphOptions`](../interfaces/SubgraphOptions.md) | Optional configuration for subgraph requests. |
+
 
 #### Returns
 
@@ -249,10 +258,13 @@ interface IHMTStatistics {
 };
 ```
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `networkData` | [`NetworkData`](../type-aliases/NetworkData.md) | The network information required to connect to the subgraph |
 | `options?` | [`SubgraphOptions`](../interfaces/SubgraphOptions.md) | Optional configuration for subgraph requests. |
+
 
 #### Returns
 
@@ -287,11 +299,14 @@ options?: SubgraphOptions): Promise<IHMTHolder[]>;
 
 This function returns the holders of the HMToken with optional filters and ordering.
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `networkData` | [`NetworkData`](../type-aliases/NetworkData.md) | The network information required to connect to the subgraph |
 | `params` | `IHMTHoldersParams` | HMT Holders params with filters and ordering |
 | `options?` | [`SubgraphOptions`](../interfaces/SubgraphOptions.md) | Optional configuration for subgraph requests. |
+
 
 #### Returns
 
@@ -350,11 +365,14 @@ interface IDailyHMT {
 }
 ```
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `networkData` | [`NetworkData`](../type-aliases/NetworkData.md) | The network information required to connect to the subgraph |
 | `filter` | `IStatisticsFilter` | Statistics params with duration data |
 | `options?` | [`SubgraphOptions`](../interfaces/SubgraphOptions.md) | Optional configuration for subgraph requests. |
+
 
 #### Returns
 

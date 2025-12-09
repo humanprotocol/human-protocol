@@ -53,11 +53,14 @@ type InternalTransaction = {
 };
 ```
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `chainId` | `ChainId` | The chain ID. |
 | `hash` | `string` | The transaction hash. |
 | `options?` | [`SubgraphOptions`](../interfaces/SubgraphOptions.md) | Optional configuration for subgraph requests. |
+
 
 #### Returns
 
@@ -145,10 +148,13 @@ type ITransaction = {
 };
 ```
 
+#### Parameters
+
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `filter` | `ITransactionsFilter` | Filter for the transactions. |
 | `options?` | [`SubgraphOptions`](../interfaces/SubgraphOptions.md) | Optional configuration for subgraph requests. |
+
 
 #### Returns
 
