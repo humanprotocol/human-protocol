@@ -52,6 +52,9 @@
       .sdk-icon {
         font-size: 2.4rem;
         margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
       .sdk-card h2 {
         margin: 0 0 0.5rem;
@@ -68,6 +71,7 @@
         display: flex;
         gap: 0.4rem;
         flex-wrap: wrap;
+        justify-content: center;
       }
       .sdk-badge {
         font-size: 0.7rem;
@@ -82,6 +86,8 @@
         display: flex;
         gap: 0.5rem;
         flex-wrap: wrap;
+        flex-direction: column; /* stack vertically */
+        align-items: center;    /* center horizontally */
       }
       .sdk-btn {
         border-radius: 999px;
@@ -128,6 +134,12 @@
       .sdk-footer li {
         margin: 0.25rem 0;
       }
+      .sdk-top-logo {
+        width: 128px;
+        height: 128px;
+        display: inline-block;
+        margin-bottom: 0.75rem;
+      }
       @media (max-width: 768px) {
         .sdk-card {
           width: 100%;
@@ -137,6 +149,7 @@
   </head>
   <body>
     <main class="sdk-hero">
+      <img src="/overrides/assets/img/logo.svg" alt="HUMAN Protocol Logo" class="sdk-top-logo" width="128" height="128" />
       <h1>HUMAN Protocol SDKs</h1>
       <p>
         Choose your preferred language SDK to integrate with HUMAN Protocol.
@@ -147,7 +160,9 @@
       <div class="sdk-grid">
         <!-- TypeScript card -->
         <section class="sdk-card">
-          <div class="sdk-icon">🟦</div>
+          <div class="sdk-icon">
+            <img src="/overrides/assets/img/ts-logo.png" alt="TypeScript Logo" width="64" height="64" />
+          </div>
           <div class="sdk-badges">
             <span class="sdk-badge">TypeScript</span>
             <span class="sdk-badge">Node.js / Browser</span>
@@ -169,7 +184,9 @@
 
         <!-- Python card -->
         <section class="sdk-card">
-          <div class="sdk-icon">🐍</div>
+          <div class="sdk-icon">
+            <img src="/overrides/assets/img/python-logo.webp" alt="Python Logo" width="64" height="64" />
+          </div>
           <div class="sdk-badges">
             <span class="sdk-badge">Python</span>
             <span class="sdk-badge">Scripts / Services</span>

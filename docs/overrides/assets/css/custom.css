@@ -22,6 +22,7 @@
   --md-accent-fg-color: rgb(99, 9, 255);
   --pg-light-border: rgb(47, 47, 47);
   --hb-hero-color: rgb(212, 207, 255);
+  --md-code-bg-color: rgb(22 23 24);
   --md-footer-bg-color--dark: var(--md-primary-fg-color);
 }
 
