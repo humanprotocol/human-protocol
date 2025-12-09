@@ -55,6 +55,3 @@ cache
 
 # Ignore developer-only local files
 .local
-
-docs/python
-docs/ts
