@@ -1,7 +1,7 @@
 site_name: HUMAN Protocol Python SDK Docs
 site_url: https://sdk.humanprotocol.org/python/
-repo_name: humanprotocol/human-protocol-sdk
-repo_url: https://github.com/humanprotocol/human-protocol-sdk
+repo_name: humanprotocol/human-protocol
+repo_url: https://github.com/humanprotocol/human-protocol
 docs_dir: ../packages/sdk/python/human-protocol-sdk/docs
 site_dir: python
 theme:

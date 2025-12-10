@@ -14,6 +14,9 @@ HUMAN Protocol is a decentralized infrastructure for coordinating human work at 
 - **Statistics**: Access protocol-wide metrics and analytics
 - **Encryption**: Secure message encryption using PGP for private communications
 
+!!! info "Subgraph access and rate limits"
+    The SDK calls public subgraph endpoints by default. Unauthenticated requests are rate-limited and may return errors. For higher limits, use your own [API key](https://thegraph.com/docs/it/subgraphs/querying/managing-api-keys/).
+
 ## Key Features
 
 ### Smart Contract Interactions

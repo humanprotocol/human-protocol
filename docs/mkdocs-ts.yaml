@@ -1,7 +1,7 @@
 site_name: HUMAN Protocol TypeScript SDK Docs
 site_url: https://sdk.humanprotocol.org/ts/
-repo_name: humanprotocol/human-protocol-sdk
-repo_url: https://github.com/humanprotocol/human-protocol-sdk
+repo_name: humanprotocol/human-protocol
+repo_url: https://github.com/humanprotocol/human-protocol
 docs_dir: ../packages/sdk/typescript/human-protocol-sdk/docs
 site_dir: ts
 theme:

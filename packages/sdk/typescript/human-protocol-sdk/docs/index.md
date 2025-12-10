@@ -14,6 +14,9 @@ HUMAN Protocol is a decentralized infrastructure for coordinating human work at 
 - **Statistics**: Access protocol-wide metrics and analytics
 - **Encryption**: Secure message encryption using PGP for private communications
 
+!!! info "Subgraph access and rate limits"
+    The SDK calls public subgraph endpoints by default. Unauthenticated requests are rate-limited and may return errors. For higher limits, use your own [API key](https://thegraph.com/docs/it/subgraphs/querying/managing-api-keys/).
+
 ## Key Features
 
 ### Smart Contract Clients
@@ -63,6 +66,9 @@ npm install @human-protocol/sdk
 ```bash
 yarn add @human-protocol/sdk
 ```
+
+!!! warning "Keep ethers in sync"
+    The SDK is built against a specific `ethers` major/minor (currently `6.15.x`). Pin the same major/minor in your app. Mixing different minors (e.g., `6.16.x` with the SDK) can trigger errors.
 
 ## Quick Start
 
