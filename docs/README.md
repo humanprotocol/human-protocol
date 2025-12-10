@@ -2,13 +2,16 @@
 
 ## Prerequisites
 - `pip install -r docs/requirements.txt`
+- `yarn install`
+- `yarn build:libs`
 
 ## Local preview
 - TypeScript docs: `mkdocs serve -f docs/mkdocs-ts.yaml`
 - Python docs: `mkdocs serve -f docs/mkdocs-python.yaml`
 
 ## Deploying a new version (mike)
-- TypeScript:  
+- TypeScript:
+  `yarn workspace @human-protocol/sdk build:doc` 
   `mike deploy -F ./docs/mkdocs-ts.yaml --deploy-prefix docs/ts [VERSION]`  
   `mike set-default -F ./docs/mkdocs-ts.yaml --deploy-prefix docs/ts [VERSION]`
 - Python:  
