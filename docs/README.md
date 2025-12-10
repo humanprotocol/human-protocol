@@ -10,8 +10,8 @@
 - Python docs: `mkdocs serve -f docs/mkdocs-python.yaml`
 
 ## Deploying a new version (mike)
-- TypeScript:
-  `yarn workspace @human-protocol/sdk build:doc` 
+- TypeScript:  
+  `yarn workspace @human-protocol/sdk build:doc`  
   `mike deploy -F ./docs/mkdocs-ts.yaml --deploy-prefix docs/ts [VERSION]`  
   `mike set-default -F ./docs/mkdocs-ts.yaml --deploy-prefix docs/ts [VERSION]`
 - Python:  
