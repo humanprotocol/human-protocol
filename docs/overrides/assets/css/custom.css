@@ -257,3 +257,23 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--md-primary-fg-color);
   font-weight: 700;
 }
+
+/* Disclaimer bar */
+.md-disclaimer {
+  background: rgb(212, 207, 255);
+  color: var(--md-primary-fg-color);
+  border-bottom: 1px solid rgba(99, 9, 255, 0.25);
+  padding: 0.1rem 0;
+}
+
+.md-disclaimer p {
+  margin: 0;
+  font-size: 0.6rem;
+  text-align: center;
+}
+
+.md-disclaimer__link {
+  font-weight: 550;
+  color: rgb(99, 9, 255);
+  text-decoration: underline;
+}
