@@ -11,10 +11,18 @@
 <header class="{{ class }}" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="{{ lang.t('header') }}">
 
-    {# -------------------------------------------- #}
-    {% set lang_code = config.extra.language | default("ts") %}
+{# -------------------------------------------- #}
+{# Normalize language code across configs (ts/typescript vs python) #}
+{% set lang_raw = config.extra.language | default("ts") | lower %}
+{% if "ts" in lang_raw %}
+  {% set lang_code = "ts" %}
+{% elif "py" in lang_raw %}
+  {% set lang_code = "python" %}
+{% else %}
+  {% set lang_code = lang_raw %}
+{% endif %}
 
-    <div class="md-header__langswitch md-header__button" tabindex="0">
+    <div class="md-header__langswitch md-header__button" tabindex="0" data-lang-default="{{ lang_code }}">
       <span class="md-header__langlabel">
         {{ "TypeScript" if lang_code == "ts" else "Python" }}
       </span>
@@ -102,3 +110,53 @@
     {% endif %}
   {% endif %}
 </header>
+
+<script>
+  (function () {
+    function updateLangSwitch() {
+      const path = (window.location && window.location.pathname) || "";
+      const firstSegment = path.split("/").filter(Boolean)[0] || "";
+      const switchEl = document.querySelector(".md-header__langswitch");
+      const defaultLang = (switchEl && switchEl.dataset.langDefault) || "ts";
+      const isTs = firstSegment === "ts";
+      const isPy = firstSegment === "python";
+      const currentLang = isTs ? "ts" : isPy ? "python" : defaultLang;
+      const detectedLabel = currentLang === "ts" ? "TypeScript" : "Python";
+      document.querySelectorAll(".md-header__langlabel").forEach((el) => {
+        el.textContent = detectedLabel;
+      });
+      document.querySelectorAll(".md-header__langitem").forEach((el) => {
+        const href = el.getAttribute("href") || "";
+        const active =
+          (currentLang === "ts" && href.indexOf("/ts") === 0) ||
+          (currentLang === "python" && href.indexOf("/python") === 0);
+        el.classList.toggle("md-header__langitem--active", active);
+      });
+    }
+
+    // Initial load
+    updateLangSwitch();
+
+    // Update immediately when a language item is clicked (before navigation)
+    document.querySelectorAll(".md-header__langitem").forEach((el) => {
+      el.addEventListener("click", (ev) => {
+        const href = el.getAttribute("href") || "";
+        const isTsTarget = href.indexOf("/ts") === 0;
+        const isPyTarget = href.indexOf("/python") === 0;
+        const label = document.querySelectorAll(".md-header__langlabel");
+        label.forEach((el) => {
+          if (isTsTarget) el.textContent = "TypeScript";
+          else if (isPyTarget) el.textContent = "Python";
+        });
+      });
+    });
+
+    // Re-run after client-side navigation (Material instant loading)
+    if (window.document$ && typeof window.document$.subscribe === "function") {
+      window.document$.subscribe(updateLangSwitch);
+    }
+
+    // Safety: rerun after initial paint
+    window.addEventListener("load", () => setTimeout(updateLangSwitch, 0));
+  })();
+</script>
