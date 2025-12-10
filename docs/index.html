@@ -38,8 +38,8 @@
         width: 320px;
         padding: 2rem 1.75rem;
         border-radius: 16px;
-        background: radial-gradient(circle at top left,#312e81,#111827 55%);
-        border: 1px solid rgba(167,139,250,0.3);
+        background: radial-gradient(circle at top left,rgb(33, 25, 67),#111827 55%);
+        border: 1px solid rgba(212, 207, 255,0.3);
         box-shadow: 0 18px 40px rgba(0,0,0,0.5);
         text-align: left;
         transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
@@ -47,7 +47,7 @@
       .sdk-card:hover {
         transform: translateY(-4px);
         box-shadow: 0 24px 55px rgba(0,0,0,0.65);
-        border-color: rgba(196,181,253,0.8);
+        border-color: rgba(212, 207, 255,0.8);
       }
       .sdk-icon {
         font-size: 2.4rem;
@@ -59,12 +59,14 @@
       .sdk-card h2 {
         margin: 0 0 0.5rem;
         font-size: 1.35rem;
+        text-align: center;
       }
       .sdk-card p {
         margin: 0 0 1.25rem;
         font-size: 0.98rem;
         line-height: 1.5;
         opacity: 0.9;
+        text-align: center;
       }
       .sdk-badges {
         margin-bottom: 1.25rem;
@@ -79,8 +81,8 @@
         letter-spacing: 0.06em;
         padding: 0.15rem 0.55rem;
         border-radius: 999px;
-        border: 1px solid rgba(196,181,253,0.7);
-        color: rgba(224,231,255,0.9);
+        border: 1px solid rgba(212, 207, 255,0.7);
+        color: rgba(212, 207, 255,0.9);
       }
       .sdk-actions {
         display: flex;
@@ -103,7 +105,7 @@
         background: transparent;
       }
       .sdk-btn-primary {
-        background: linear-gradient(135deg,#a855f7,#6366f1);
+        background: linear-gradient(135deg,rgb(99, 9, 255),#6366f1);
         color: #f9fafb;
         border-color: rgba(248,250,252,0.05);
       }
@@ -150,11 +152,13 @@
   <body>
     <main class="sdk-hero">
       <img src="/overrides/assets/img/logo.svg" alt="HUMAN Protocol Logo" class="sdk-top-logo" width="128" height="128" />
-      <h1>HUMAN Protocol SDKs</h1>
+      <h1>
+          HUMAN Protocol SDKs
+      </h1>
       <p>
         Choose your preferred language SDK to integrate with HUMAN Protocol.
-        Both SDKs expose the same core concepts (Escrow, Staking, KVStore, Oracles)
-        so you can build automation, dApps, and services in the stack you know best.
+        Both SDKs expose the same core concepts, so you can build automation, 
+        dApps, and services in the stack you know best.
       </p>
 
       <div class="sdk-grid">
@@ -165,12 +169,11 @@
           </div>
           <div class="sdk-badges">
             <span class="sdk-badge">TypeScript</span>
-            <span class="sdk-badge">Node.js / Browser</span>
+            <span class="sdk-badge">Node.js</span>
           </div>
           <h2>TypeScript SDK</h2>
           <p>
-            Typed client for Node.js and browser-based apps. Ideal if you’re building dashboards,
-            dApps, or services that interact with HUMAN Protocol contracts directly.
+            Type-safe SDK for web, dApps and backend services.
           </p>
           <div class="sdk-actions">
             <a href="/ts/" class="sdk-btn sdk-btn-primary">
@@ -189,12 +192,10 @@
           </div>
           <div class="sdk-badges">
             <span class="sdk-badge">Python</span>
-            <span class="sdk-badge">Scripts / Services</span>
           </div>
           <h2>Python SDK</h2>
           <p>
-            Pythonic client for automation, bots, data pipelines, and backend services.
-            Perfect when your stack is already built around Python and notebooks.
+            Python SDK for automation, bots, data/ML pipelines, and backend services.
           </p>
           <div class="sdk-actions">
             <a href="/python/" class="sdk-btn sdk-btn-primary">
@@ -209,11 +210,9 @@
     </main>
 
     <footer class="sdk-footer">
-      <div>Not sure where to start?</div>
-      <ul>
-        <li><strong>Use TypeScript</strong> if you’re building web apps, dashboards, or dApps.</li>
-        <li><strong>Use Python</strong> if you’re scripting, automating, or doing data/ML workflows.</li>
-      </ul>
+      <a href="https://docs.humanprotocol.org" class="sdk-btn sdk-btn-primary" style="margin-top: 1rem;">
+        Visit HUMAN Protocol documentation <span class="sdk-arrow">↗</span>
+      </a>
     </footer>
   </body>
 </html>
