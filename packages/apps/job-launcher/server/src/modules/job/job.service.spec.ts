@@ -27,7 +27,11 @@ import {
   JobStatusFilter,
 } from '../../common/enums/job';
 import { PaymentCurrency, PaymentType } from '../../common/enums/payment';
-import { EventType, OracleType } from '../../common/enums/webhook';
+import {
+  EventType,
+  OracleType,
+  WebhookStatus,
+} from '../../common/enums/webhook';
 import {
   ConflictError,
   NotFoundError,
@@ -884,6 +888,17 @@ describe('JobService', () => {
         ...jobEntity,
         status: JobStatus.LAUNCHED,
         escrowAddress,
+      });
+      expect(mockWebhookRepository.createUnique).toHaveBeenCalledWith({
+        chainId: jobEntity.chainId,
+        escrowAddress,
+        eventType: EventType.ESCROW_CREATED,
+        oracleType: OracleType.FORTUNE,
+        hasSignature: true,
+        oracleAddress: jobEntity.exchangeOracle,
+        retriesCount: 0,
+        waitUntil: expect.any(Date),
+        status: WebhookStatus.PENDING,
       });
 
       getOracleFeeSpy.mockRestore();
