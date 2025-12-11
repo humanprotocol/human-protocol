@@ -7,6 +7,7 @@ const mainMethods: string[] = [
   'setup',
   'requestCancellation',
   'withdraw',
+  'fund',
   'cancel',
   'complete',
   'storeResults',
