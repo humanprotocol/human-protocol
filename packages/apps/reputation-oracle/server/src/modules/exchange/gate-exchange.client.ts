@@ -46,14 +46,11 @@ export class GateExchangeClient implements ExchangeClient {
     const path = '/spot/accounts';
     const query = '';
     const body = '';
-    const ts = String(Math.floor(Date.now() / 1000));
-    const signature = this.signGateRequest(
+    const { signature, timestamp } = this.signGateRequest(
       method,
       `/api/v4${path}`,
       query,
       body,
-      this.secretKey,
-      ts,
     );
 
     const res = await fetchWithHandling(
@@ -61,7 +58,7 @@ export class GateExchangeClient implements ExchangeClient {
       {
         KEY: this.apiKey,
         SIGN: signature,
-        Timestamp: ts,
+        Timestamp: timestamp,
         Accept: 'application/json',
       },
       this.logger,
@@ -77,15 +74,12 @@ export class GateExchangeClient implements ExchangeClient {
     const path = '/spot/accounts';
     const query = `currency=${encodeURIComponent(asset)}`;
     const body = '';
-    const ts = String(Math.floor(Date.now() / 1000));
     const requestPath = `/api/v4${path}`;
-    const signature = this.signGateRequest(
+    const { signature, timestamp } = this.signGateRequest(
       method,
       requestPath,
       query,
       body,
-      this.secretKey,
-      ts,
     );
     const url = `${this.apiBaseUrl}${path}?${query}`;
 
@@ -94,7 +88,7 @@ export class GateExchangeClient implements ExchangeClient {
       {
         KEY: this.apiKey,
         SIGN: signature,
-        Timestamp: ts,
+        Timestamp: timestamp,
         Accept: 'application/json',
       },
       this.logger,
@@ -132,13 +126,15 @@ export class GateExchangeClient implements ExchangeClient {
     path: string,
     query: string,
     body: string,
-    secret: string,
-    ts: string,
-  ): string {
+  ): { signature: string; timestamp: string } {
+    const timestamp = String(Math.floor(Date.now() / 1000));
     const bodyHash = createHash('sha512')
       .update(body ?? '')
       .digest('hex');
-    const payload = [method, path, query, bodyHash, ts].join('\n');
-    return createHmac('sha512', secret).update(payload).digest('hex');
+    const payload = [method, path, query, bodyHash, timestamp].join('\n');
+    const signature = createHmac('sha512', this.secretKey)
+      .update(payload)
+      .digest('hex');
+    return { signature, timestamp };
   }
 }

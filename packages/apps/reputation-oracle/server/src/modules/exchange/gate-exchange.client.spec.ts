@@ -30,26 +30,36 @@ describe('GateExchangeClient', () => {
       const path = faker.string.sample();
       const query = faker.string.sample();
       const body = faker.string.sample();
-      const secret = faker.string.sample();
-      const ts = faker.number.int().toString();
+      const now = faker.number.int();
 
       const client = new GateExchangeClient({ apiKey, secretKey });
 
-      const bodyHash = crypto.createHash('sha512').update(body).digest('hex');
-      const payload = [method, path, query, bodyHash, ts].join('\n');
-      const expectedSignature = crypto
-        .createHmac('sha512', secret)
-        .update(payload)
-        .digest('hex');
-
-      const signature = client['signGateRequest'](
+      jest.useFakeTimers({ now });
+      const { signature, timestamp } = client['signGateRequest'](
         method,
         path,
         query,
         body,
-        secret,
-        ts,
       );
+      jest.useRealTimers();
+
+      const bodyHash = crypto
+        .createHash('sha512')
+        .update(body ?? '')
+        .digest('hex');
+      const payload = [
+        method,
+        path,
+        query,
+        bodyHash,
+        String(Math.floor(now / 1000)),
+      ].join('\n');
+      const expectedSignature = crypto
+        .createHmac('sha512', secretKey)
+        .update(payload)
+        .digest('hex');
+
+      expect(timestamp).toBe(String(Math.floor(now / 1000)));
       expect(signature).toBe(expectedSignature);
     });
   });
@@ -64,14 +74,15 @@ describe('GateExchangeClient', () => {
     it('sets fields correctly', () => {
       const apiKey = faker.string.sample();
       const secretKey = faker.string.sample();
+      const timeoutMs = faker.number.int();
       const client = new GateExchangeClient(
         { apiKey, secretKey },
-        { timeoutMs: 1234 },
+        { timeoutMs: timeoutMs },
       );
       expect(client).toBeDefined();
       expect(client['apiKey']).toBe(apiKey);
       expect(client['secretKey']).toBe(secretKey);
-      expect(client['timeoutMs']).toBe(1234);
+      expect(client['timeoutMs']).toBe(timeoutMs);
     });
   });
 
@@ -112,10 +123,19 @@ describe('GateExchangeClient', () => {
         .get(path)
         .query(true)
         .replyWithError('network error');
-      await expect(client.checkRequiredAccess()).rejects.toBeInstanceOf(
-        ExchangeApiClientError,
-      );
+      let thrownError;
+      try {
+        await client.checkRequiredAccess();
+      } catch (error) {
+        thrownError = error;
+      }
+
       scope.done();
+
+      expect(thrownError).toBeInstanceOf(ExchangeApiClientError);
+      expect((thrownError as Error).message).toBe(
+        'Failed to make request for exchange',
+      );
     });
   });
 
@@ -178,10 +198,19 @@ describe('GateExchangeClient', () => {
         .get(path)
         .query(true)
         .replyWithError('network error');
-      await expect(client.getAccountBalance(asset)).rejects.toBeInstanceOf(
-        ExchangeApiClientError,
-      );
+      let thrownError;
+      try {
+        await client.getAccountBalance(asset);
+      } catch (error) {
+        thrownError = error;
+      }
+
       scope.done();
+
+      expect(thrownError).toBeInstanceOf(ExchangeApiClientError);
+      expect((thrownError as Error).message).toBe(
+        'Failed to make request for exchange',
+      );
     });
   });
 });

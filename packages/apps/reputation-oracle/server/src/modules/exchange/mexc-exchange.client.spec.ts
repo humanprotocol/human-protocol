@@ -1,6 +1,6 @@
 jest.mock('@/logger');
 
-import crypto from 'crypto';
+import { createHmac } from 'crypto';
 
 import { faker } from '@faker-js/faker';
 import nock from 'nock';
@@ -44,40 +44,24 @@ describe('MexcExchangeClient', () => {
   });
 
   describe('signQuery', () => {
-    it('returns a valid signature', () => {
-      const apiKey = faker.string.sample();
-      const secretKey = faker.string.sample();
-      const query = faker.string.sample();
-
-      const client = new MexcExchangeClient({ apiKey, secretKey });
-
-      const signature = client['signQuery'](query);
-
-      const expectedSignature = crypto
-        .createHmac('sha256', secretKey)
-        .update(query)
-        .digest('hex');
-      expect(signature).toBe(expectedSignature);
-    });
-
     it('getSignedQuery returns correct structure and signature', () => {
       const apiKey = faker.string.sample();
       const secretKey = faker.string.sample();
-      const timestamp = faker.number.int();
       const client = new MexcExchangeClient({ apiKey, secretKey });
 
-      jest.spyOn(Date, 'now').mockReturnValue(timestamp);
+      const now = Date.now();
+      jest.useFakeTimers({ now });
       const result = client['getSignedQuery']();
+      jest.useRealTimers();
+
       expect(result).toHaveProperty('query');
       expect(result).toHaveProperty('signature');
-      expect(result.query).toBe(`timestamp=${timestamp}&recvWindow=5000`);
+      expect(result.query).toBe(`timestamp=${now}&recvWindow=5000`);
 
-      const expectedSignature = crypto
-        .createHmac('sha256', secretKey)
+      const expectedSignature = createHmac('sha256', secretKey)
         .update(result.query)
         .digest('hex');
       expect(result.signature).toBe(expectedSignature);
-      jest.restoreAllMocks();
     });
   });
 
@@ -112,11 +96,19 @@ describe('MexcExchangeClient', () => {
         .get(path)
         .query(true)
         .replyWithError('network error');
-      await expect(client.checkRequiredAccess()).rejects.toBeInstanceOf(
-        ExchangeApiClientError,
-      );
+      let thrownError: unknown;
+      try {
+        await client.checkRequiredAccess();
+      } catch (error) {
+        thrownError = error;
+      }
 
       scope.done();
+
+      expect(thrownError).toBeInstanceOf(ExchangeApiClientError);
+      expect((thrownError as Error).message).toBe(
+        'Failed to make request for exchange',
+      );
     });
   });
 
@@ -175,11 +167,19 @@ describe('MexcExchangeClient', () => {
         .get(path)
         .query(true)
         .replyWithError('network error');
-      await expect(client.getAccountBalance(asset)).rejects.toBeInstanceOf(
-        ExchangeApiClientError,
-      );
+      let thrownError: unknown;
+      try {
+        await client.getAccountBalance(asset);
+      } catch (error) {
+        thrownError = error;
+      }
 
       scope.done();
+
+      expect(thrownError).toBeInstanceOf(ExchangeApiClientError);
+      expect((thrownError as Error).message).toBe(
+        'Failed to make request for exchange',
+      );
     });
   });
 });
