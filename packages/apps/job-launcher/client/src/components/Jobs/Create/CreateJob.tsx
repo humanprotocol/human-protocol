@@ -6,7 +6,6 @@ import { NetworkSelect } from '../../../components/NetworkSelect';
 import { IS_MAINNET } from '../../../constants/chains';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
 import { JobType, PayMethod } from '../../../types';
-import { AudinoJobRequestForm } from './AudinoJobRequestForm';
 import { CvatJobRequestForm } from './CvatJobRequestForm';
 import { FortuneJobRequestForm } from './FortuneJobRequestForm';
 import { HCaptchaJobRequestForm } from './HCaptchaJobRequestForm';
@@ -66,10 +65,6 @@ export const CreateJob = () => {
               <MenuItem value={JobType.FORTUNE}>Fortune</MenuItem>
             )}
             {!IS_MAINNET && <MenuItem value={JobType.CVAT}>CVAT</MenuItem>}
-            {/* {!IS_MAINNET && (
-              <MenuItem value={JobType.HCAPTCHA}>hCaptcha</MenuItem>
-            )} */}
-            <MenuItem value={JobType.AUDINO}>Audino</MenuItem>
           </Select>
         </FormControl>
         <NetworkSelect
@@ -86,7 +81,6 @@ export const CreateJob = () => {
       {jobRequest.jobType === JobType.FORTUNE && <FortuneJobRequestForm />}
       {jobRequest.jobType === JobType.CVAT && <CvatJobRequestForm />}
       {jobRequest.jobType === JobType.HCAPTCHA && <HCaptchaJobRequestForm />}
-      {jobRequest.jobType === JobType.AUDINO && <AudinoJobRequestForm />}
     </Box>
   );
 };

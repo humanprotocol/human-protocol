@@ -1,4 +1,4 @@
-import { AudinoJobType, CvatJobType, FortuneJobType } from '@/common/enums';
+import { CvatJobType, FortuneJobType } from '@/common/enums';
 
 export type FortuneManifest = {
   submissionsRequired: number;
@@ -16,15 +16,6 @@ export type CvatManifest = {
   job_bounty: string;
 };
 
-export type AudinoManifest = {
-  annotation: {
-    type: AudinoJobType;
-  };
-  validation: {
-    min_quality: number;
-  };
-};
+export type JobManifest = FortuneManifest | CvatManifest;
 
-export type JobManifest = FortuneManifest | CvatManifest | AudinoManifest;
-
-export type JobRequestType = FortuneJobType | CvatJobType | AudinoJobType;
+export type JobRequestType = FortuneJobType | CvatJobType;

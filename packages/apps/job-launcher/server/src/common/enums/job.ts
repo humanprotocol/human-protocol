@@ -42,6 +42,7 @@ export enum CvatJobType {
   IMAGE_SKELETONS_FROM_BOXES = 'image_skeletons_from_boxes',
 }
 
+/** @deprecated Audino jobs are no longer supported. */
 export enum AudinoJobType {
   AUDIO_TRANSCRIPTION = 'audio_transcription',
   AUDIO_ATTRIBUTE_ANNOTATION = 'audio_attribute_annotation',
@@ -54,11 +55,7 @@ export const JobType = [
   ...Object.values(AudinoJobType),
 ];
 
-export type JobRequestType =
-  | CvatJobType
-  | FortuneJobType
-  | AudinoJobType
-  | HCaptchaJobType;
+export type JobRequestType = CvatJobType | FortuneJobType | HCaptchaJobType;
 
 export enum JobCaptchaMode {
   BATCH = 'batch',

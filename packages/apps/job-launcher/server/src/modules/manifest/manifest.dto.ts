@@ -18,11 +18,7 @@ import {
   JobCaptchaShapeType,
   JobRequestType,
 } from '../../common/enums/job';
-import {
-  FortuneJobType,
-  CvatJobType,
-  AudinoJobType,
-} from '../../common/enums/job';
+import { FortuneJobType, CvatJobType } from '../../common/enums/job';
 import { Type } from 'class-transformer';
 
 export class FortuneManifestDto {
@@ -141,62 +137,6 @@ export class CvatManifestDto {
 
   @IsString()
   public job_bounty: string;
-}
-
-class AudinoData {
-  @IsUrl()
-  public data_url: string;
-}
-
-class AudinoAnnotation {
-  @IsArray()
-  public labels: Array<{ name: string }>;
-
-  @IsString()
-  public description: string;
-
-  @IsString()
-  @IsUrl()
-  public user_guide: string;
-
-  @IsEnumCaseInsensitive(AudinoJobType)
-  public type: AudinoJobType;
-
-  @IsNumber()
-  @IsPositive()
-  public segment_duration: number;
-
-  @IsArray()
-  @IsString({ each: true })
-  @IsOptional()
-  public qualifications?: string[];
-}
-
-class AudinoValidation {
-  @IsNumber()
-  @IsPositive()
-  public min_quality: number;
-
-  @IsString()
-  @IsUrl()
-  public gt_url: string;
-}
-
-export class AudinoManifestDto {
-  @IsObject()
-  @ValidateNested()
-  @Type(() => AudinoData)
-  public data: AudinoData;
-
-  @IsObject()
-  @ValidateNested()
-  @Type(() => AudinoAnnotation)
-  public annotation: AudinoAnnotation;
-
-  @IsObject()
-  @ValidateNested()
-  @Type(() => AudinoValidation)
-  public validation: AudinoValidation;
 }
 
 export class RestrictedAudience {
@@ -458,5 +398,4 @@ export class ManifestDetails {
 export type ManifestDto =
   | FortuneManifestDto
   | CvatManifestDto
-  | HCaptchaManifestDto
-  | AudinoManifestDto;
+  | HCaptchaManifestDto;

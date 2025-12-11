@@ -31,7 +31,6 @@ import { MutexManagerService } from '../mutex/mutex-manager.service';
 import {
   FortuneFinalResultDto,
   GetJobsDto,
-  JobAudinoDto,
   JobCancelDto,
   JobCvatDto,
   JobDetailsDto,
@@ -168,42 +167,6 @@ export class JobController {
     @Request() req: RequestWithUser,
   ): Promise<number> {
     throw new ForbiddenError('Disabled');
-    return await this.mutexManagerService.runExclusive(
-      `user${req.user.id}`,
-      MUTEX_TIMEOUT,
-      async () => {
-        return await this.jobService.createJob(req.user, data.type, data);
-      },
-    );
-  }
-
-  @ApiOperation({
-    summary: 'Create an Audino job',
-    description: 'Endpoint to create a new Audino job.',
-  })
-  @ApiBody({ type: JobAudinoDto })
-  @ApiResponse({
-    status: 201,
-    description: 'ID of the created Audino job.',
-    type: Number,
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Bad Request. Invalid input parameters.',
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized. Missing or invalid credentials.',
-  })
-  @ApiResponse({
-    status: 409,
-    description: 'Conflict. Conflict with the current state of the server.',
-  })
-  @Post('/audino')
-  public async createAudinoJob(
-    @Body() data: JobAudinoDto,
-    @Request() req: RequestWithUser,
-  ): Promise<number> {
     return await this.mutexManagerService.runExclusive(
       `user${req.user.id}`,
       MUTEX_TIMEOUT,

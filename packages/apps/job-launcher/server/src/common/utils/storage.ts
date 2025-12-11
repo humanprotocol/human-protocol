@@ -3,7 +3,7 @@ import axios, { AxiosError } from 'axios';
 import { parseString } from 'xml2js';
 import { StorageDataDto } from '../../modules/job/job.dto';
 import { ErrorBucket } from '../constants/errors';
-import { AudinoJobType, CvatJobType, JobRequestType } from '../enums/job';
+import { CvatJobType, JobRequestType } from '../enums/job';
 import { AWSRegions, StorageProviders } from '../enums/storage';
 import { ValidationError } from '../errors';
 import {
@@ -36,8 +36,6 @@ export function generateBucketUrl(
         CvatJobType.IMAGE_POINTS,
         CvatJobType.IMAGE_BOXES_FROM_POINTS,
         CvatJobType.IMAGE_SKELETONS_FROM_BOXES,
-        AudinoJobType.AUDIO_TRANSCRIPTION,
-        AudinoJobType.AUDIO_ATTRIBUTE_ANNOTATION,
       ] as JobRequestType[]
     ).includes(jobType) &&
     storageData.provider != StorageProviders.AWS &&
