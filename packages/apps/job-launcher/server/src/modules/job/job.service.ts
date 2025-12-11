@@ -66,6 +66,7 @@ import { StorageService } from '../storage/storage.service';
 import { UserEntity } from '../user/user.entity';
 import { Web3Service } from '../web3/web3.service';
 import { WebhookDataDto } from '../webhook/webhook.dto';
+import { WebhookEntity } from '../webhook/webhook.entity';
 import { WebhookRepository } from '../webhook/webhook.repository';
 import { WhitelistService } from '../whitelist/whitelist.service';
 import {
@@ -358,6 +359,18 @@ export class JobService {
     jobEntity.status = JobStatus.LAUNCHED;
     jobEntity.escrowAddress = escrowAddress;
     await this.jobRepository.updateOne(jobEntity);
+
+    const oracleType = this.getOracleType(jobEntity.requestType);
+    const webhookEntity = new WebhookEntity();
+    Object.assign(webhookEntity, {
+      escrowAddress: jobEntity.escrowAddress,
+      chainId: jobEntity.chainId,
+      eventType: EventType.ESCROW_CREATED,
+      oracleType: oracleType,
+      hasSignature: oracleType !== OracleType.HCAPTCHA ? true : false,
+      oracleAddress: jobEntity.exchangeOracle,
+    });
+    await this.webhookRepository.createUnique(webhookEntity);
 
     return jobEntity;
   }
