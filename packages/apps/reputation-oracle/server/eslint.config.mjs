@@ -32,13 +32,13 @@ export default tseslint.config(
       '@typescript-eslint/no-floating-promises': 'warn',
       '@typescript-eslint/no-unsafe-argument': 'warn',
       '@typescript-eslint/no-unused-vars': ['error', {
-        "args": "all",
-        "argsIgnorePattern": "^_",
-        "caughtErrors": "all",
-        "caughtErrorsIgnorePattern": "^noop",
-        "destructuredArrayIgnorePattern": "^_",
-        "varsIgnorePattern": "^_",
-        "ignoreRestSiblings": true
+        'args': 'all',
+        'argsIgnorePattern': '^_',
+        'caughtErrors': 'all',
+        'caughtErrorsIgnorePattern': '^noop',
+        'destructuredArrayIgnorePattern': '^_',
+        'varsIgnorePattern': '^_',
+        'ignoreRestSiblings': true
       }],
       'import/order': [
         'warn',
@@ -47,6 +47,11 @@ export default tseslint.config(
           'newlines-between': 'always',
           groups: ['builtin', 'external', 'internal', ['parent', 'sibling', 'index']],
         },
+      ],
+      '@/quotes': [
+        'error',
+        'single',
+        { 'avoidEscape': true, 'allowTemplateLiterals': true }
       ],
     },
     settings: {

@@ -14,7 +14,6 @@ export function useDisableWeb3Operator() {
 
       await authService.refreshAccessToken();
 
-      // eslint-disable-next-line camelcase
       updateUserData({ operator_status: OperatorStatus.INACTIVE });
     },
     mutationKey: ['disableOperator', address, chainId],

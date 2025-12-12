@@ -2,9 +2,10 @@ name: Subgraph check
 
 on:
   push:
+    tags-ignore: '*'
     paths:
-      - 'packages/core/**'
-      - 'packages/sdk/typescript/subgraph/**'
+      - "packages/core/**"
+      - "packages/sdk/typescript/subgraph/**"
 
 jobs:
   subgraph-test:
@@ -12,8 +13,8 @@ jobs:
     # TODO: Use ubuntu-latest when graph binary is not failing on ubuntu 24.04
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version-file: .nvmrc
           cache: yarn
@@ -22,6 +23,6 @@ jobs:
       - name: Build core package
         run: yarn workspace @human-protocol/core build
       - name: Generate manifest for Polygon for tests
-        run: NETWORK=polygon yarn workspace @human-protocol/subgraph generate 
+        run: NETWORK=polygon yarn workspace @tools/subgraph generate
       - name: Run subgraph test
-        run: yarn workspace @human-protocol/subgraph test
+        run: yarn workspace @tools/subgraph test

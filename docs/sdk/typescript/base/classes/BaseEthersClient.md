@@ -4,9 +4,9 @@
 
 [@human-protocol/sdk](../../modules.md) / [base](../README.md) / BaseEthersClient
 
-# Class: `abstract` BaseEthersClient
+# Abstract Class: BaseEthersClient
 
-Defined in: [base.ts:12](https://github.com/humanprotocol/human-protocol/blob/2f541eb9f61d23b64321ff5b999971550d47e843/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
+Defined in: [base.ts:10](https://github.com/humanprotocol/human-protocol/blob/0661934b14ae802af3f939783433c196862268e2/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L10)
 
 ## Introduction
 
@@ -24,7 +24,7 @@ This class is used as a base class for other clients making on-chain calls.
 
 > **new BaseEthersClient**(`runner`, `networkData`): `BaseEthersClient`
 
-Defined in: [base.ts:22](https://github.com/humanprotocol/human-protocol/blob/2f541eb9f61d23b64321ff5b999971550d47e843/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L22)
+Defined in: [base.ts:20](https://github.com/humanprotocol/human-protocol/blob/0661934b14ae802af3f939783433c196862268e2/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L20)
 
 **BaseClient constructor**
 
@@ -52,7 +52,7 @@ The network information required to connect to the contracts
 
 > **networkData**: [`NetworkData`](../../types/type-aliases/NetworkData.md)
 
-Defined in: [base.ts:14](https://github.com/humanprotocol/human-protocol/blob/2f541eb9f61d23b64321ff5b999971550d47e843/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L14)
+Defined in: [base.ts:12](https://github.com/humanprotocol/human-protocol/blob/0661934b14ae802af3f939783433c196862268e2/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
 
 ***
 
@@ -60,29 +60,4 @@ Defined in: [base.ts:14](https://github.com/humanprotocol/human-protocol/blob/2f
 
 > `protected` **runner**: `ContractRunner`
 
-Defined in: [base.ts:13](https://github.com/humanprotocol/human-protocol/blob/2f541eb9f61d23b64321ff5b999971550d47e843/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L13)
-
-## Methods
-
-### applyTxDefaults()
-
-> `protected` **applyTxDefaults**(`txOptions`): `Overrides`
-
-Defined in: [base.ts:35](https://github.com/humanprotocol/human-protocol/blob/2f541eb9f61d23b64321ff5b999971550d47e843/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L35)
-
-Internal helper to enrich transaction overrides with network specific defaults.
-
-Aurora networks use a fixed gas price. We always override any user provided
-gasPrice with the canonical DEFAULT_AURORA_GAS_PRICE to avoid mismatches
-or tx failures due to an unexpected value. For other networks the user
-supplied fee parameters are left untouched.
-
-#### Parameters
-
-##### txOptions
-
-`Overrides` = `{}`
-
-#### Returns
-
-`Overrides`
+Defined in: [base.ts:11](https://github.com/humanprotocol/human-protocol/blob/0661934b14ae802af3f939783433c196862268e2/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)

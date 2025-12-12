@@ -1,10 +1,12 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
+import { AxiosError } from 'axios';
 import { ethers } from 'ethers';
 import { firstValueFrom } from 'rxjs';
 
 import { HCaptchaConfigService } from '@/config';
 import logger from '@/logger';
+import { formatAxiosError } from '@/utils/http';
 
 import {
   GetLabelerQueryParams,
@@ -59,7 +61,13 @@ export class HCaptchaService {
         });
       }
     } catch (error) {
-      this.logger.error('Error occurred during token verification', error);
+      let formattedError = error;
+      if (error instanceof AxiosError) {
+        formattedError = formatAxiosError(error);
+      }
+      this.logger.error('Error occurred during token verification', {
+        error: formattedError,
+      });
     }
 
     return false;
@@ -105,8 +113,12 @@ export class HCaptchaService {
         });
       }
     } catch (error) {
+      let formattedError = error;
+      if (error instanceof AxiosError) {
+        formattedError = formatAxiosError(error);
+      }
       this.logger.error('Error occurred during labeling registration', {
-        error,
+        error: formattedError,
         ...data,
       });
     }
@@ -134,8 +146,12 @@ export class HCaptchaService {
         return response.data;
       }
     } catch (error) {
+      let formattedError = error;
+      if (error instanceof AxiosError) {
+        formattedError = formatAxiosError(error);
+      }
       this.logger.error(`Error occurred while retrieving labeler data`, {
-        error,
+        error: formattedError,
         email,
       });
     }

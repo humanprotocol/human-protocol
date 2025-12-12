@@ -3,7 +3,6 @@ jest.mock('../../common/utils/storage', () => ({
   listObjectsInBucket: jest.fn(),
 }));
 
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { faker } from '@faker-js/faker';
 import { createMock } from '@golevelup/ts-jest';
 import { Encryption } from '@human-protocol/sdk';

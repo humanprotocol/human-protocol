@@ -1,4 +1,3 @@
-/* eslint-disable camelcase -- ... */
 import { Grid, List, Paper, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useEffect } from 'react';

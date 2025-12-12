@@ -1,4 +1,3 @@
-/* eslint-disable camelcase -- ...*/
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 

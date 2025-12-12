@@ -31,7 +31,6 @@ const tokenAddressString = '0xa16081f360e3847006db660bae1c6d1b2e17ffaa';
 const escrowAddressString = '0xa16081f360e3847006db660bae1c6d1b2e17ec2a';
 const escrowAddress = Address.fromString(escrowAddressString);
 const operatorAddressString = '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266';
-const operatorAddress = Address.fromString(operatorAddressString);
 const holderAddressString = '0x70997970c51812dc3a010c7d01b50e0d17dc79c8';
 const holderAddress = Address.fromString(holderAddressString);
 const holder1AddressString = '0x92a2eEF7Ff696BCef98957a0189872680600a959';
@@ -243,123 +242,6 @@ describe('HMToken', () => {
         transfer.transaction.hash.toHex(),
         'receiver',
         holderAddressString
-      );
-      assert.fieldEquals(
-        'Transaction',
-        transfer.transaction.hash.toHex(),
-        'token',
-        tokenAddressString
-      );
-      assert.fieldEquals(
-        'Transaction',
-        transfer.transaction.hash.toHex(),
-        'value',
-        '1'
-      );
-    });
-
-    test('Should properly handle Transfer event from Escrow', () => {
-      const transfer = createTransferEvent(
-        escrowAddressString,
-        operatorAddressString,
-        1,
-        BigInt.fromI32(10)
-      );
-
-      handleTransfer(transfer);
-
-      const id = toEventId(transfer).toHex();
-
-      // HMTTransferEvent
-      assert.fieldEquals(
-        'HMTTransferEvent',
-        id,
-        'block',
-        transfer.block.number.toString()
-      );
-      assert.fieldEquals(
-        'HMTTransferEvent',
-        id,
-        'timestamp',
-        transfer.block.timestamp.toString()
-      );
-      assert.fieldEquals(
-        'HMTTransferEvent',
-        id,
-        'txHash',
-        transfer.transaction.hash.toHex()
-      );
-      assert.fieldEquals('HMTTransferEvent', id, 'from', escrowAddressString);
-      assert.fieldEquals('HMTTransferEvent', id, 'to', operatorAddressString);
-      assert.fieldEquals('HMTTransferEvent', id, 'amount', '1');
-
-      // Escrow
-      assert.fieldEquals('Escrow', escrowAddressString, 'balance', '100');
-      assert.fieldEquals('Escrow', escrowAddressString, 'amountPaid', '1');
-
-      // Worker
-      assert.fieldEquals(
-        'Worker',
-        operatorAddressString,
-        'totalHMTAmountReceived',
-        '1'
-      );
-      assert.fieldEquals('Worker', operatorAddressString, 'payoutCount', '1');
-
-      // Payout
-      const payoutId = transfer.transaction.hash
-        .concat(operatorAddress)
-        .toHex();
-      assert.fieldEquals(
-        'Payout',
-        payoutId,
-        'escrowAddress',
-        escrowAddressString
-      );
-      assert.fieldEquals(
-        'Payout',
-        payoutId,
-        'recipient',
-        operatorAddressString
-      );
-      assert.fieldEquals('Payout', payoutId, 'amount', '1');
-
-      // Transaction
-      assert.fieldEquals(
-        'Transaction',
-        transfer.transaction.hash.toHex(),
-        'txHash',
-        transfer.transaction.hash.toHex()
-      );
-      assert.fieldEquals(
-        'Transaction',
-        transfer.transaction.hash.toHex(),
-        'method',
-        'transfer'
-      );
-      assert.fieldEquals(
-        'Transaction',
-        transfer.transaction.hash.toHex(),
-        'block',
-        transfer.block.number.toString()
-      );
-      assert.fieldEquals(
-        'Transaction',
-        transfer.transaction.hash.toHex(),
-        'from',
-        escrowAddressString
-      );
-      assert.fieldEquals(
-        'Transaction',
-        transfer.transaction.hash.toHex(),
-        'to',
-        tokenAddressString
-      );
-      assert.fieldEquals(
-        'Transaction',
-        transfer.transaction.hash.toHex(),
-        'receiver',
-        operatorAddressString
       );
       assert.fieldEquals(
         'Transaction',

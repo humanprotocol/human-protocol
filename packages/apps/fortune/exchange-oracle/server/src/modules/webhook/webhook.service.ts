@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { ChainId, EscrowClient, OperatorUtils } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
@@ -45,7 +44,7 @@ export class WebhookService {
         await this.jobService.completeJob(webhook);
         break;
 
-      case EventType.ESCROW_CANCELED:
+      case EventType.CANCELLATION_REQUESTED:
         await this.jobService.cancelJob(webhook);
         break;
 
@@ -54,12 +53,11 @@ export class WebhookService {
         break;
 
       case EventType.ABUSE_DETECTED:
-        await this.jobService.pauseJob(webhook);
+        await this.jobService.cancelJob(webhook);
         break;
 
-      case EventType.ABUSE_DISMISSED:
-        await this.jobService.resumeJob(webhook);
-        break;
+      case EventType.ESCROW_CANCELED:
+        return;
 
       default:
         throw new ValidationError(
@@ -181,8 +179,10 @@ export class WebhookService {
     if (!oracle) {
       throw new NotFoundError('Oracle not found');
     }
-    const oracleWebhookUrl = oracle.webhookUrl;
+    if (!oracle.webhookUrl) {
+      throw new NotFoundError('Oracle webhook URL not found');
+    }
 
-    return oracleWebhookUrl;
+    return oracle.webhookUrl;
   }
 }

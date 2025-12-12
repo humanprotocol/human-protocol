@@ -27,7 +27,6 @@ export const wagmiConfig = createConfig({
     wagmiChains.avalanche,
     wagmiChains.xLayer,
     wagmiChains.xLayerTestnet,
-    wagmiChains.auroraTestnet,
     LOCALHOST,
   ],
   connectors: [
@@ -68,10 +67,6 @@ export const wagmiConfig = createConfig({
     ]),
     [wagmiChains.xLayer.id]: fallback([unstable_connector(metaMask), http()]),
     [wagmiChains.xLayerTestnet.id]: fallback([
-      unstable_connector(metaMask),
-      http(),
-    ]),
-    [wagmiChains.auroraTestnet.id]: fallback([
       unstable_connector(metaMask),
       http(),
     ]),

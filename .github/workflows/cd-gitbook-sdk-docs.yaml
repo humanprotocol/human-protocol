@@ -3,7 +3,7 @@ name: Publish SDK Docs to GitBook
 on:
   push:
     tags:
-      - "sdk@*"
+      - "js/sdk@*"
 
 permissions:
   contents: read
@@ -13,8 +13,8 @@ jobs:
     name: Sync docs to GitBook
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version-file: .nvmrc
       - name: Publish docs

@@ -4,7 +4,6 @@ import {
   EncryptionUtils,
   EscrowClient,
   KVStoreUtils,
-  StorageClient,
 } from '@human-protocol/sdk';
 import { Inject, Injectable } from '@nestjs/common';
 import crypto from 'crypto';
@@ -15,6 +14,7 @@ import { ServerError, ValidationError } from '../../common/errors';
 import { ISolution } from '../../common/interfaces/job';
 import { SaveSolutionsDto } from '../job/job.dto';
 import { Web3Service } from '../web3/web3.service';
+import { downloadFileFromUrl } from '../../common/utils/storage';
 
 @Injectable()
 export class StorageService {
@@ -42,16 +42,19 @@ export class StorageService {
 
   public async download(url: string): Promise<any> {
     try {
-      const fileContent = await StorageClient.downloadFileFromUrl(url);
+      const fileContent = await downloadFileFromUrl(url);
 
       if (
         typeof fileContent === 'string' &&
         EncryptionUtils.isEncrypted(fileContent)
       ) {
         try {
+          const privateKey = this.pgpConfigService.privateKey;
+          if (!privateKey) {
+            throw new ServerError('Unable to decrypt manifest');
+          }
           const encryption = await Encryption.build(
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            this.pgpConfigService.privateKey!,
+            privateKey,
             this.pgpConfigService.passphrase,
           );
 
@@ -112,7 +115,7 @@ export class StorageService {
           recordingOraclePublicKey,
           reputationOraclePublicKey,
         ]);
-      } catch (e) {
+      } catch {
         throw new ServerError('Encryption error');
       }
     }
@@ -123,6 +126,7 @@ export class StorageService {
         this.s3ConfigService.bucket,
         `${hash}.json`,
         fileToUpload,
+        undefined,
         {
           'Content-Type': 'application/json',
           'Cache-Control': 'no-store',
@@ -130,7 +134,7 @@ export class StorageService {
       );
 
       return { url: this.getJobUrl(hash), hash };
-    } catch (e) {
+    } catch {
       throw new ServerError('File not uploaded');
     }
   }

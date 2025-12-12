@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import { ImageAnnotatorClient, protos } from '@google-cloud/vision';
+import { ImageAnnotatorClient } from '@google-cloud/vision';
 import { generateBucketUrl, listObjectsInBucket } from './storage';
 import { StorageDataDto } from '../dto/storage';
 import { VisionModeration } from './vision';

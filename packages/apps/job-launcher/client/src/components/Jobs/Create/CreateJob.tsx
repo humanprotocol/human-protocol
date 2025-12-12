@@ -65,7 +65,7 @@ export const CreateJob = () => {
             {!IS_MAINNET && (
               <MenuItem value={JobType.FORTUNE}>Fortune</MenuItem>
             )}
-            <MenuItem value={JobType.CVAT}>CVAT</MenuItem>
+            {!IS_MAINNET && <MenuItem value={JobType.CVAT}>CVAT</MenuItem>}
             {/* {!IS_MAINNET && (
               <MenuItem value={JobType.HCAPTCHA}>hCaptcha</MenuItem>
             )} */}

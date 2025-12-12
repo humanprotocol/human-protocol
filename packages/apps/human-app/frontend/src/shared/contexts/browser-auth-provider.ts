@@ -1,4 +1,3 @@
-/* eslint-disable camelcase -- ...*/
 import type {
   AuthType,
   BrowserAuthProvider,
@@ -93,7 +92,7 @@ const browserAuthProvider: BrowserAuthProvider = {
       return {
         data: JSON.parse(userData) as unknown,
       };
-    } catch (error) {
+    } catch {
       return { data: {} as unknown };
     }
   },

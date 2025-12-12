@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Injectable } from '@nestjs/common';
 import { EventType } from '../../common/enums/webhook';
 import { ValidationError } from '../../common/errors';
@@ -16,6 +15,10 @@ export class WebhookService {
 
       case EventType.SUBMISSION_IN_REVIEW:
         await this.jobService.processJobSolution(wehbook);
+        break;
+
+      case EventType.CANCELLATION_REQUESTED:
+        await this.jobService.cancelJob(wehbook);
         break;
 
       default:

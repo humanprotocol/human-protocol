@@ -1,4 +1,3 @@
-/* eslint-disable camelcase -- ...*/
 import { useModal } from '@/shared/contexts/modal-context';
 import { ThirstyfiInfoModal } from '../thirstyfi-info-modal';
 

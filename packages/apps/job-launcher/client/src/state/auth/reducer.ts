@@ -40,7 +40,7 @@ export default createReducer(initialState, (builder) => {
     state.accessToken = accessToken;
     state.refreshToken = refreshToken;
   });
-  builder.addCase(signOut, (state, action) => {
+  builder.addCase(signOut, (state) => {
     state.isAuthed = false;
     state.accessToken = undefined;
     state.refreshToken = undefined;

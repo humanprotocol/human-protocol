@@ -12,10 +12,7 @@
 
 ## Type Aliases
 
-- [EscrowCancel](type-aliases/EscrowCancel.md)
-- [EscrowWithdraw](type-aliases/EscrowWithdraw.md)
 - [NetworkData](type-aliases/NetworkData.md)
-- [Payout](type-aliases/Payout.md)
 - [~~StorageCredentials~~](type-aliases/StorageCredentials.md)
 - [~~StorageParams~~](type-aliases/StorageParams.md)
 - [TransactionLikeWithNonce](type-aliases/TransactionLikeWithNonce.md)

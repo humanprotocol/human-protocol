@@ -14,9 +14,7 @@ export async function hmTokenApprove({
 } & ContractCallArguments) {
   try {
     const hmTokenContract = new Contract(contractAddress, HMToken.abi, signer);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- untyped ethers
     const tx = await hmTokenContract.approve(spender, amount);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access  -- untyped ethers
     await tx.wait();
   } catch (error) {
     throw new JsonRpcError(error);

@@ -18,7 +18,7 @@ class TestOperatorUtils(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -27,12 +27,6 @@ class TestOperatorUtils(unittest.TestCase):
                             {
                                 "id": DEFAULT_GAS_PAYER,
                                 "address": DEFAULT_GAS_PAYER,
-                                "amountStaked": "100",
-                                "amountLocked": "25",
-                                "lockedUntilTimestamp": "0",
-                                "amountWithdrawn": "25",
-                                "amountSlashed": "25",
-                                "reward": "25",
                                 "amountJobsProcessed": "25",
                                 "role": "role",
                                 "fee": None,
@@ -46,6 +40,14 @@ class TestOperatorUtils(unittest.TestCase):
                                 "reputationNetworks": [{"address": "0x01"}],
                                 "name": "Alice",
                                 "category": "machine_learning",
+                                "staker": {
+                                    "stakedAmount": "100",
+                                    "lockedAmount": "25",
+                                    "withdrawnAmount": "25",
+                                    "slashedAmount": "25",
+                                    "lockedUntilTimestamp": "123456789",
+                                    "lastDepositTimestamp": "123456789",
+                                },
                             }
                         ],
                     }
@@ -58,24 +60,24 @@ class TestOperatorUtils(unittest.TestCase):
                 NETWORKS[ChainId.POLYGON],
                 query=get_operators_query(filter),
                 params={
-                    "minAmountStaked": filter.min_amount_staked,
+                    "minStakedAmount": filter.min_staked_amount,
                     "roles": filter.roles,
                     "orderBy": filter.order_by,
                     "orderDirection": filter.order_direction.value,
                     "first": filter.first,
                     "skip": filter.skip,
                 },
+                options=None,
             )
 
             self.assertEqual(len(operators), 1)
             self.assertEqual(operators[0].id, DEFAULT_GAS_PAYER)
             self.assertEqual(operators[0].address, DEFAULT_GAS_PAYER)
-            self.assertEqual(operators[0].amount_staked, 100)
-            self.assertEqual(operators[0].amount_locked, 25)
-            self.assertEqual(operators[0].locked_until_timestamp, 0)
-            self.assertEqual(operators[0].amount_withdrawn, 25)
-            self.assertEqual(operators[0].amount_slashed, 25)
-            self.assertEqual(operators[0].reward, 25)
+            self.assertEqual(operators[0].staked_amount, 100)
+            self.assertEqual(operators[0].locked_amount, 25)
+            self.assertEqual(operators[0].locked_until_timestamp, 123456789000)
+            self.assertEqual(operators[0].withdrawn_amount, 25)
+            self.assertEqual(operators[0].slashed_amount, 25)
             self.assertEqual(operators[0].amount_jobs_processed, 25)
             self.assertEqual(operators[0].role, "role")
             self.assertEqual(operators[0].fee, None)
@@ -95,7 +97,7 @@ class TestOperatorUtils(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -104,12 +106,6 @@ class TestOperatorUtils(unittest.TestCase):
                             {
                                 "id": DEFAULT_GAS_PAYER,
                                 "address": DEFAULT_GAS_PAYER,
-                                "amountStaked": "100",
-                                "amountLocked": "25",
-                                "lockedUntilTimestamp": "0",
-                                "amountWithdrawn": "25",
-                                "amountSlashed": "25",
-                                "reward": "25",
                                 "amountJobsProcessed": "25",
                                 "role": "role",
                                 "fee": None,
@@ -121,6 +117,14 @@ class TestOperatorUtils(unittest.TestCase):
                                 "reputationNetworks": [{"address": "0x01"}],
                                 "name": "Alice",
                                 "category": "machine_learning",
+                                "staker": {
+                                    "stakedAmount": "100",
+                                    "lockedAmount": "25",
+                                    "withdrawnAmount": "25",
+                                    "slashedAmount": "25",
+                                    "lockedUntilTimestamp": "123456789",
+                                    "lastDepositTimestamp": "123456789",
+                                },
                             }
                         ],
                     }
@@ -133,24 +137,24 @@ class TestOperatorUtils(unittest.TestCase):
                 NETWORKS[ChainId.POLYGON],
                 query=get_operators_query(filter),
                 params={
-                    "minAmountStaked": filter.min_amount_staked,
+                    "minStakedAmount": filter.min_staked_amount,
                     "roles": filter.roles,
                     "orderBy": filter.order_by,
                     "orderDirection": filter.order_direction.value,
                     "first": filter.first,
                     "skip": filter.skip,
                 },
+                options=None,
             )
 
             self.assertEqual(len(operators), 1)
             self.assertEqual(operators[0].id, DEFAULT_GAS_PAYER)
             self.assertEqual(operators[0].address, DEFAULT_GAS_PAYER)
-            self.assertEqual(operators[0].amount_staked, 100)
-            self.assertEqual(operators[0].amount_locked, 25)
-            self.assertEqual(operators[0].locked_until_timestamp, 0)
-            self.assertEqual(operators[0].amount_withdrawn, 25)
-            self.assertEqual(operators[0].amount_slashed, 25)
-            self.assertEqual(operators[0].reward, 25)
+            self.assertEqual(operators[0].staked_amount, 100)
+            self.assertEqual(operators[0].locked_amount, 25)
+            self.assertEqual(operators[0].locked_until_timestamp, 123456789000)
+            self.assertEqual(operators[0].withdrawn_amount, 25)
+            self.assertEqual(operators[0].slashed_amount, 25)
             self.assertEqual(operators[0].amount_jobs_processed, 25)
             self.assertEqual(operators[0].role, "role")
             self.assertEqual(operators[0].fee, None)
@@ -170,7 +174,7 @@ class TestOperatorUtils(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -179,12 +183,6 @@ class TestOperatorUtils(unittest.TestCase):
                             {
                                 "id": DEFAULT_GAS_PAYER,
                                 "address": DEFAULT_GAS_PAYER,
-                                "amountStaked": "100",
-                                "amountLocked": "25",
-                                "lockedUntilTimestamp": "0",
-                                "amountWithdrawn": "25",
-                                "amountSlashed": "25",
-                                "reward": "25",
                                 "amountJobsProcessed": "25",
                                 "role": "role",
                                 "fee": None,
@@ -196,6 +194,14 @@ class TestOperatorUtils(unittest.TestCase):
                                 "reputationNetworks": [{"address": "0x01"}],
                                 "name": "Alice",
                                 "category": "machine_learning",
+                                "staker": {
+                                    "stakedAmount": "100",
+                                    "lockedAmount": "25",
+                                    "withdrawnAmount": "25",
+                                    "slashedAmount": "25",
+                                    "lockedUntilTimestamp": "123456789",
+                                    "lastDepositTimestamp": "123456789",
+                                },
                             }
                         ],
                     }
@@ -208,24 +214,24 @@ class TestOperatorUtils(unittest.TestCase):
                 NETWORKS[ChainId.POLYGON],
                 query=get_operators_query(filter),
                 params={
-                    "minAmountStaked": filter.min_amount_staked,
+                    "minStakedAmount": filter.min_staked_amount,
                     "roles": filter.roles,
                     "orderBy": filter.order_by,
                     "orderDirection": filter.order_direction.value,
                     "first": filter.first,
                     "skip": filter.skip,
                 },
+                options=None,
             )
 
             self.assertEqual(len(operators), 1)
             self.assertEqual(operators[0].id, DEFAULT_GAS_PAYER)
             self.assertEqual(operators[0].address, DEFAULT_GAS_PAYER)
-            self.assertEqual(operators[0].amount_staked, 100)
-            self.assertEqual(operators[0].amount_locked, 25)
-            self.assertEqual(operators[0].locked_until_timestamp, 0)
-            self.assertEqual(operators[0].amount_withdrawn, 25)
-            self.assertEqual(operators[0].amount_slashed, 25)
-            self.assertEqual(operators[0].reward, 25)
+            self.assertEqual(operators[0].staked_amount, 100)
+            self.assertEqual(operators[0].locked_amount, 25)
+            self.assertEqual(operators[0].locked_until_timestamp, 123456789000)
+            self.assertEqual(operators[0].withdrawn_amount, 25)
+            self.assertEqual(operators[0].slashed_amount, 25)
             self.assertEqual(operators[0].amount_jobs_processed, 25)
             self.assertEqual(operators[0].role, "role")
             self.assertEqual(operators[0].fee, None)
@@ -245,7 +251,7 @@ class TestOperatorUtils(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.return_value = [
                 {
@@ -261,13 +267,14 @@ class TestOperatorUtils(unittest.TestCase):
                 NETWORKS[ChainId.POLYGON],
                 query=get_operators_query(filter),
                 params={
-                    "minAmountStaked": filter.min_amount_staked,
+                    "minStakedAmount": filter.min_staked_amount,
                     "roles": filter.roles,
                     "orderBy": filter.order_by,
                     "orderDirection": filter.order_direction.value,
                     "first": filter.first,
                     "skip": filter.skip,
                 },
+                options=None,
             )
 
             self.assertEqual(operators, [])
@@ -278,7 +285,7 @@ class TestOperatorUtils(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -286,12 +293,6 @@ class TestOperatorUtils(unittest.TestCase):
                         "operator": {
                             "id": staker_address,
                             "address": staker_address,
-                            "amountStaked": "100",
-                            "amountLocked": "25",
-                            "lockedUntilTimestamp": "0",
-                            "amountWithdrawn": "25",
-                            "amountSlashed": "25",
-                            "reward": "25",
                             "amountJobsProcessed": "25",
                             "role": "role",
                             "fee": None,
@@ -305,6 +306,14 @@ class TestOperatorUtils(unittest.TestCase):
                             "reputationNetworks": [{"address": "0x01"}],
                             "name": "Alice",
                             "category": "machine_learning",
+                            "staker": {
+                                "stakedAmount": "100",
+                                "lockedAmount": "25",
+                                "withdrawnAmount": "25",
+                                "slashedAmount": "25",
+                                "lockedUntilTimestamp": "123456789",
+                                "lastDepositTimestamp": "123456789",
+                            },
                         }
                     }
                 }
@@ -316,17 +325,17 @@ class TestOperatorUtils(unittest.TestCase):
                 NETWORKS[ChainId.POLYGON],
                 query=get_operator_query,
                 params={"address": staker_address},
+                options=None,
             )
 
             self.assertNotEqual(operator, None)
             self.assertEqual(operator.id, staker_address)
             self.assertEqual(operator.address, staker_address)
-            self.assertEqual(operator.amount_staked, 100)
-            self.assertEqual(operator.amount_locked, 25)
-            self.assertEqual(operator.locked_until_timestamp, 0)
-            self.assertEqual(operator.amount_withdrawn, 25)
-            self.assertEqual(operator.amount_slashed, 25)
-            self.assertEqual(operator.reward, 25)
+            self.assertEqual(operator.staked_amount, 100)
+            self.assertEqual(operator.locked_amount, 25)
+            self.assertEqual(operator.locked_until_timestamp, 123456789000)
+            self.assertEqual(operator.withdrawn_amount, 25)
+            self.assertEqual(operator.slashed_amount, 25)
             self.assertEqual(operator.amount_jobs_processed, 25)
             self.assertEqual(operator.role, "role")
             self.assertEqual(operator.fee, None)
@@ -347,7 +356,7 @@ class TestOperatorUtils(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -355,12 +364,6 @@ class TestOperatorUtils(unittest.TestCase):
                         "operator": {
                             "id": staker_address,
                             "address": staker_address,
-                            "amountStaked": "100",
-                            "amountLocked": "25",
-                            "lockedUntilTimestamp": "0",
-                            "amountWithdrawn": "25",
-                            "amountSlashed": "25",
-                            "reward": "25",
                             "amountJobsProcessed": "25",
                             "role": "role",
                             "fee": None,
@@ -372,6 +375,14 @@ class TestOperatorUtils(unittest.TestCase):
                             "reputationNetworks": [{"address": "0x01"}],
                             "name": "Alice",
                             "category": "machine_learning",
+                            "staker": {
+                                "stakedAmount": "100",
+                                "lockedAmount": "25",
+                                "withdrawnAmount": "25",
+                                "slashedAmount": "25",
+                                "lockedUntilTimestamp": "123456789",
+                                "lastDepositTimestamp": "123456789",
+                            },
                         }
                     }
                 }
@@ -383,17 +394,17 @@ class TestOperatorUtils(unittest.TestCase):
                 NETWORKS[ChainId.POLYGON],
                 query=get_operator_query,
                 params={"address": staker_address},
+                options=None,
             )
 
             self.assertNotEqual(operator, None)
             self.assertEqual(operator.id, staker_address)
             self.assertEqual(operator.address, staker_address)
-            self.assertEqual(operator.amount_staked, 100)
-            self.assertEqual(operator.amount_locked, 25)
-            self.assertEqual(operator.locked_until_timestamp, 0)
-            self.assertEqual(operator.amount_withdrawn, 25)
-            self.assertEqual(operator.amount_slashed, 25)
-            self.assertEqual(operator.reward, 25)
+            self.assertEqual(operator.staked_amount, 100)
+            self.assertEqual(operator.locked_amount, 25)
+            self.assertEqual(operator.locked_until_timestamp, 123456789000)
+            self.assertEqual(operator.withdrawn_amount, 25)
+            self.assertEqual(operator.slashed_amount, 25)
             self.assertEqual(operator.amount_jobs_processed, 25)
             self.assertEqual(operator.role, "role")
             self.assertEqual(operator.fee, None)
@@ -414,7 +425,7 @@ class TestOperatorUtils(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -422,12 +433,6 @@ class TestOperatorUtils(unittest.TestCase):
                         "operator": {
                             "id": staker_address,
                             "address": staker_address,
-                            "amountStaked": "100",
-                            "amountLocked": "25",
-                            "lockedUntilTimestamp": "0",
-                            "amountWithdrawn": "25",
-                            "amountSlashed": "25",
-                            "reward": "25",
                             "amountJobsProcessed": "25",
                             "role": "role",
                             "fee": None,
@@ -439,6 +444,14 @@ class TestOperatorUtils(unittest.TestCase):
                             "reputationNetworks": [{"address": "0x01"}],
                             "name": "Alice",
                             "category": "machine_learning",
+                            "staker": {
+                                "stakedAmount": "100",
+                                "lockedAmount": "25",
+                                "withdrawnAmount": "25",
+                                "slashedAmount": "25",
+                                "lockedUntilTimestamp": "123456789",
+                                "lastDepositTimestamp": "123456789",
+                            },
                         }
                     }
                 }
@@ -450,17 +463,17 @@ class TestOperatorUtils(unittest.TestCase):
                 NETWORKS[ChainId.POLYGON],
                 query=get_operator_query,
                 params={"address": staker_address},
+                options=None,
             )
 
             self.assertNotEqual(operator, None)
             self.assertEqual(operator.id, staker_address)
             self.assertEqual(operator.address, staker_address)
-            self.assertEqual(operator.amount_staked, 100)
-            self.assertEqual(operator.amount_locked, 25)
-            self.assertEqual(operator.locked_until_timestamp, 0)
-            self.assertEqual(operator.amount_withdrawn, 25)
-            self.assertEqual(operator.amount_slashed, 25)
-            self.assertEqual(operator.reward, 25)
+            self.assertEqual(operator.staked_amount, 100)
+            self.assertEqual(operator.locked_amount, 25)
+            self.assertEqual(operator.locked_until_timestamp, 123456789000)
+            self.assertEqual(operator.withdrawn_amount, 25)
+            self.assertEqual(operator.slashed_amount, 25)
             self.assertEqual(operator.amount_jobs_processed, 25)
             self.assertEqual(operator.role, "role")
             self.assertEqual(operator.fee, None)
@@ -479,7 +492,7 @@ class TestOperatorUtils(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.return_value = [{"data": {"operator": None}}]
 
@@ -489,6 +502,7 @@ class TestOperatorUtils(unittest.TestCase):
                 NETWORKS[ChainId.POLYGON],
                 query=get_operator_query,
                 params={"address": staker_address},
+                options=None,
             )
 
             self.assertEqual(operator, None)
@@ -503,7 +517,7 @@ class TestOperatorUtils(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -519,6 +533,7 @@ class TestOperatorUtils(unittest.TestCase):
                                     "jobTypes": job_types,
                                     "registrationNeeded": True,
                                     "registrationInstructions": url,
+                                    "amountJobsProcessed": "25",
                                 }
                             ],
                         }
@@ -534,6 +549,7 @@ class TestOperatorUtils(unittest.TestCase):
             NETWORKS[ChainId.POLYGON],
             query=get_reputation_network_query(None),
             params={"address": reputation_address, "role": None},
+            options=None,
         )
 
         self.assertNotEqual(operators, [])
@@ -554,7 +570,7 @@ class TestOperatorUtils(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -570,6 +586,7 @@ class TestOperatorUtils(unittest.TestCase):
                                     "jobTypes": job_types,
                                     "registrationNeeded": True,
                                     "registrationInstructions": url,
+                                    "amountJobsProcessed": "25",
                                 }
                             ],
                         }
@@ -585,6 +602,7 @@ class TestOperatorUtils(unittest.TestCase):
             NETWORKS[ChainId.POLYGON],
             query=get_reputation_network_query(None),
             params={"address": reputation_address, "role": None},
+            options=None,
         )
 
         self.assertNotEqual(operators, [])
@@ -605,7 +623,7 @@ class TestOperatorUtils(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -621,6 +639,7 @@ class TestOperatorUtils(unittest.TestCase):
                                     "jobTypes": job_types,
                                     "registrationNeeded": True,
                                     "registrationInstructions": url,
+                                    "amountJobsProcessed": "25",
                                 }
                             ],
                         }
@@ -636,6 +655,7 @@ class TestOperatorUtils(unittest.TestCase):
             NETWORKS[ChainId.POLYGON],
             query=get_reputation_network_query(None),
             params={"address": reputation_address, "role": None},
+            options=None,
         )
 
         self.assertNotEqual(operators, [])
@@ -652,7 +672,7 @@ class TestOperatorUtils(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.return_value = [{"data": {"reputationNetwork": None}}]
 
@@ -664,6 +684,7 @@ class TestOperatorUtils(unittest.TestCase):
             NETWORKS[ChainId.POLYGON],
             query=get_reputation_network_query(None),
             params={"address": reputation_address, "role": None},
+            options=None,
         )
 
         self.assertEqual(operators, [])
@@ -673,7 +694,7 @@ class TestOperatorUtils(unittest.TestCase):
 
         mock_function = MagicMock()
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.return_value = {
                 "data": {
@@ -695,6 +716,7 @@ class TestOperatorUtils(unittest.TestCase):
                 NETWORKS[ChainId.POLYGON],
                 query=get_reward_added_events_query,
                 params={"slasherAddress": slasher},
+                options=None,
             )
 
             self.assertEqual(len(rewards_info), 2)
@@ -708,7 +730,7 @@ class TestOperatorUtils(unittest.TestCase):
 
         mock_function = MagicMock()
         with patch(
-            "human_protocol_sdk.operator.operator_utils.get_data_from_subgraph"
+            "human_protocol_sdk.operator.operator_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.return_value = {"data": {"rewardAddedEvents": None}}
             rewards_info = OperatorUtils.get_rewards_info(ChainId.POLYGON, slasher)
@@ -717,6 +739,7 @@ class TestOperatorUtils(unittest.TestCase):
                 NETWORKS[ChainId.POLYGON],
                 query=get_reward_added_events_query,
                 params={"slasherAddress": slasher},
+                options=None,
             )
 
             self.assertEqual(rewards_info, [])

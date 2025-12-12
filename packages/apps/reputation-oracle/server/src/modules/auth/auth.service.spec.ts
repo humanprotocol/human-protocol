@@ -449,7 +449,7 @@ describe('AuthService', () => {
 
       await expect(
         service.web3Signup(signature, ethWallet.address),
-      ).rejects.toThrow(new AuthErrors.InvalidOperatorFeeError(''));
+      ).rejects.toThrow(new AuthErrors.InvalidOperatorUrlError(''));
     });
   });
 

@@ -71,7 +71,7 @@ const BillingDetailsModal = ({
   };
 
   const validateForm = () => {
-    let newErrors: { [key: string]: string } = {};
+    const newErrors: { [key: string]: string } = {};
 
     if (!formData?.name) {
       newErrors.name = 'name required';

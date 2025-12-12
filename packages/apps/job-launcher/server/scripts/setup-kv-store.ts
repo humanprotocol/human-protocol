@@ -1,6 +1,6 @@
 import { KVStoreClient, KVStoreKeys, Role } from '@human-protocol/sdk';
 import * as dotenv from 'dotenv';
-import { Wallet, ethers } from 'ethers';
+import { Wallet, ethers, NonceManager } from 'ethers';
 import * as Minio from 'minio';
 
 const isLocalEnv = process.env.LOCAL === 'true';
@@ -80,7 +80,7 @@ async function setupPublicKeyFile(
     throw new Error('Bucket does not exists');
   }
 
-  await minioClient.putObject(s3Bucket, keyName, publicKey, {
+  await minioClient.putObject(s3Bucket, keyName, publicKey, undefined, {
     'Content-Type': 'text/plain',
     'Cache-Control': 'no-store',
   });
@@ -105,7 +105,8 @@ async function setup(): Promise<void> {
   }
 
   const provider = new ethers.JsonRpcProvider(RPC_URL);
-  const wallet = new Wallet(WEB3_PRIVATE_KEY, provider);
+  const baseWallet = new Wallet(WEB3_PRIVATE_KEY, provider);
+  const wallet = new NonceManager(baseWallet);
 
   const kvStoreClient = await KVStoreClient.build(wallet);
 

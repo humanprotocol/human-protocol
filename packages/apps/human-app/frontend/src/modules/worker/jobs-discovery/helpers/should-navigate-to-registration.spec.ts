@@ -21,7 +21,6 @@ describe('shouldNavigateToRegistration Helper', () => {
 
   it('should return true when registration is needed and oracle address is not in the array', () => {
     const registrationData = {
-      // eslint-disable-next-line camelcase
       oracle_addresses: [faker.finance.ethereumAddress()],
     };
 
@@ -31,7 +30,6 @@ describe('shouldNavigateToRegistration Helper', () => {
 
   it('should return false when registration is needed but oracle address is in the array', () => {
     const registrationData = {
-      // eslint-disable-next-line camelcase
       oracle_addresses: [oracle.address],
     };
 
@@ -41,7 +39,6 @@ describe('shouldNavigateToRegistration Helper', () => {
 
   it('should return false when registration is not needed, regardless of address', () => {
     const registrationData = {
-      // eslint-disable-next-line camelcase
       oracle_addresses: [],
     };
 

@@ -16,7 +16,6 @@ export const TESTNET_CHAIN_IDS = [
   ChainId.BSC_TESTNET,
   ChainId.POLYGON_AMOY,
   ChainId.SEPOLIA,
-  ChainId.AURORA_TESTNET,
 ];
 export const MAINNET_CHAIN_IDS = [ChainId.BSC_MAINNET, ChainId.POLYGON];
 
@@ -38,8 +37,6 @@ export const CANCEL_JOB_STATUSES = [
   JobStatus.PAID,
   JobStatus.FAILED,
   JobStatus.LAUNCHED,
-  JobStatus.FUNDED,
-  JobStatus.CREATED,
   JobStatus.PARTIAL,
 ];
 

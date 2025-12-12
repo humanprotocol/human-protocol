@@ -129,7 +129,6 @@ export const FiatPayForm = ({
     fetchJobLauncherData();
     fetchCards();
     fetchBillingInfo();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchCards = async () => {
@@ -344,7 +343,7 @@ export const FiatPayForm = ({
                       value={amount}
                       type="number"
                       onChange={(e) => {
-                        let value = e.target.value;
+                        const value = e.target.value;
                         if (/^\d*\.?\d{0,2}$/.test(value)) {
                           setAmount(value);
                         }

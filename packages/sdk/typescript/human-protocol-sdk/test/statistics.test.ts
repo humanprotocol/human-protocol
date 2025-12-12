@@ -62,7 +62,9 @@ describe('StatisticsClient', () => {
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
         'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
-        GET_ESCROW_STATISTICS_QUERY
+        GET_ESCROW_STATISTICS_QUERY,
+        undefined,
+        undefined
       );
       expect(gqlFetchSpy).toHaveBeenCalledWith(
         'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
@@ -73,14 +75,15 @@ describe('StatisticsClient', () => {
           orderDirection: OrderDirection.ASC,
           first: 10,
           skip: 0,
-        }
+        },
+        undefined
       );
 
       expect(result).toEqual({
         totalEscrows: 1,
         dailyEscrowsData: [
           {
-            timestamp: new Date(1000),
+            timestamp: 1000,
             escrowsTotal: 1,
             escrowsPending: 1,
             escrowsSolved: 1,
@@ -135,13 +138,14 @@ describe('StatisticsClient', () => {
           orderDirection: OrderDirection.ASC,
           first: 10,
           skip: 0,
-        }
+        },
+        undefined
       );
 
       expect(result).toEqual({
         dailyWorkersData: [
           {
-            timestamp: new Date(1000),
+            timestamp: 1000,
             activeWorkers: 4,
           },
         ],
@@ -194,13 +198,14 @@ describe('StatisticsClient', () => {
           orderDirection: OrderDirection.ASC,
           first: 10,
           skip: 0,
-        }
+        },
+        undefined
       );
 
       expect(result).toEqual({
         dailyPaymentsData: [
           {
-            timestamp: new Date(1000),
+            timestamp: 1000,
             totalAmountPaid: ethers.toBigInt(100),
             totalCount: 4,
             averageAmountPerWorker: ethers.toBigInt(25),
@@ -281,7 +286,8 @@ describe('StatisticsClient', () => {
           address: undefined,
           orderBy: 'balance',
           orderDirection: undefined,
-        }
+        },
+        undefined
       );
 
       expect(result).toEqual([
@@ -316,7 +322,8 @@ describe('StatisticsClient', () => {
         {
           address: '0x123',
           orderBy: 'balance',
-        }
+        },
+        undefined
       );
 
       expect(result).toEqual([
@@ -352,7 +359,8 @@ describe('StatisticsClient', () => {
         {
           orderBy: 'balance',
           orderDirection: 'asc',
-        }
+        },
+        undefined
       );
 
       expect(result).toEqual([
@@ -391,7 +399,8 @@ describe('StatisticsClient', () => {
         {
           orderBy: 'balance',
           orderDirection: 'desc',
-        }
+        },
+        undefined
       );
 
       expect(result).toEqual([
@@ -448,12 +457,13 @@ describe('StatisticsClient', () => {
           orderDirection: OrderDirection.ASC,
           first: 10,
           skip: 0,
-        }
+        },
+        undefined
       );
 
       expect(result).toEqual([
         {
-          timestamp: new Date(1000),
+          timestamp: 1000,
           totalTransactionAmount: ethers.toBigInt(100),
           totalTransactionCount: 4,
           dailyUniqueSenders: 100,

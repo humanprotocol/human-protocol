@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 vi.mock('graphql-request', () => {
   return {
     default: vi.fn(),
@@ -15,6 +12,7 @@ import {
   ErrorCannotUseDateAndBlockSimultaneously,
   ErrorInvalidHashProvided,
 } from '../src/error';
+import { TransactionData } from '../src/graphql';
 import { GET_TRANSACTION_QUERY } from '../src/graphql/queries/transaction';
 import { ITransaction, ITransactionsFilter } from '../src/interfaces';
 import { TransactionUtils } from '../src/transaction';
@@ -24,20 +22,26 @@ describe('TransactionUtils', () => {
     const txHash = '0x62dD51230A30401C455c8398d06F85e4EaB6309f';
     const invalidHash = 'InvalidHash';
 
-    const mockTransaction: ITransaction = {
-      block: 12345n,
+    const mockTransaction = {
+      block: '12345',
       txHash: txHash,
       from: '0x1234567890123456789012345678901234567890',
       to: '0x0987654321098765432109876543210987654321',
-      timestamp: 1625247600n,
+      timestamp: '1625247600',
       value: '1000000000000000000',
       method: 'transfer',
+      receiver: null,
+      escrow: null,
+      token: null,
       internalTransactions: [
         {
           from: '0x1234567890123456789012345678901234567890',
           to: '0x1234567890123456789012345678901234567891',
           value: '1000000000000000000',
           method: 'transfer',
+          receiver: null,
+          escrow: null,
+          token: null,
         },
       ],
     };
@@ -57,9 +61,33 @@ describe('TransactionUtils', () => {
         GET_TRANSACTION_QUERY,
         {
           hash: txHash.toLowerCase(),
-        }
+        },
+        undefined
       );
-      expect(result).toEqual(mockTransaction);
+      const expected: ITransaction = {
+        block: 12345n,
+        txHash,
+        from: mockTransaction.from,
+        to: mockTransaction.to,
+        timestamp: 1625247600000,
+        value: 1000000000000000000n,
+        method: 'transfer',
+        receiver: null,
+        escrow: null,
+        token: null,
+        internalTransactions: [
+          {
+            from: mockTransaction.internalTransactions[0].from,
+            to: mockTransaction.internalTransactions[0].to,
+            value: 1000000000000000000n,
+            method: 'transfer',
+            receiver: null,
+            escrow: null,
+            token: null,
+          },
+        ],
+      };
+      expect(result).toEqual(expected);
     });
 
     test('should throw an error for an invalid transaction hash', async () => {
@@ -81,20 +109,27 @@ describe('TransactionUtils', () => {
   });
 
   describe('getTransactions', () => {
-    const mockTransaction: ITransaction = {
-      block: 12345n,
+    const mockTransaction: TransactionData = {
+      block: '12345',
       txHash: '0x62dD51230A30401C455c8398d06F85e4EaB6309f',
       from: '0x1234567890123456789012345678901234567890',
       to: '0x0987654321098765432109876543210987654321',
-      timestamp: 1625247600n,
+      timestamp: '1625247600',
       value: '1000000000000000000',
       method: 'transfer',
+      receiver: null,
+      escrow: null,
+      token: null,
       internalTransactions: [
         {
           from: '0x1234567890123456789012345678901234567890',
           to: '0x1234567890123456789012345678901234567891',
           value: '1000000000000000000',
           method: 'transfer',
+          receiver: null,
+          escrow: null,
+          token: null,
+          id: null,
         },
       ],
     };
@@ -127,9 +162,34 @@ describe('TransactionUtils', () => {
           orderDirection: OrderDirection.DESC,
           first: 10,
           skip: 0,
-        }
+        },
+        undefined
       );
-      expect(result).toEqual([mockTransaction, mockTransaction]);
+      const expected: ITransaction = {
+        block: 12345n,
+        txHash: mockTransaction.txHash,
+        from: mockTransaction.from,
+        to: mockTransaction.to,
+        timestamp: 1625247600000,
+        value: 1000000000000000000n,
+        method: 'transfer',
+        receiver: null,
+        escrow: null,
+        token: null,
+        internalTransactions: [
+          {
+            from: mockTransaction.internalTransactions[0].from,
+            to: mockTransaction.internalTransactions[0].to,
+            value: 1000000000000000000n,
+            method: 'transfer',
+            receiver: null,
+            escrow: null,
+            token: null,
+          },
+        ],
+      };
+      expect(result).toEqual([expected, expected]);
+      // type assertions (bigint fields)
     });
 
     test('should return an array of transactions with date filter', async () => {
@@ -162,9 +222,33 @@ describe('TransactionUtils', () => {
           orderDirection: OrderDirection.DESC,
           first: 10,
           skip: 0,
-        }
+        },
+        undefined
       );
-      expect(result).toEqual([mockTransaction, mockTransaction]);
+      const expected: ITransaction = {
+        block: 12345n,
+        txHash: mockTransaction.txHash,
+        from: mockTransaction.from,
+        to: mockTransaction.to,
+        timestamp: 1625247600000,
+        value: 1000000000000000000n,
+        method: 'transfer',
+        receiver: null,
+        escrow: null,
+        token: null,
+        internalTransactions: [
+          {
+            from: mockTransaction.internalTransactions[0].from,
+            to: mockTransaction.internalTransactions[0].to,
+            value: 1000000000000000000n,
+            method: 'transfer',
+            receiver: null,
+            escrow: null,
+            token: null,
+          },
+        ],
+      };
+      expect(result).toEqual([expected, expected]);
     });
 
     test('should return an array of transactions with address filter', async () => {
@@ -196,9 +280,33 @@ describe('TransactionUtils', () => {
           orderDirection: OrderDirection.DESC,
           first: 10,
           skip: 0,
-        }
+        },
+        undefined
       );
-      expect(result).toEqual([mockTransaction, mockTransaction]);
+      const expected: ITransaction = {
+        block: 12345n,
+        txHash: mockTransaction.txHash,
+        from: mockTransaction.from,
+        to: mockTransaction.to,
+        timestamp: 1625247600000,
+        value: 1000000000000000000n,
+        method: 'transfer',
+        receiver: null,
+        escrow: null,
+        token: null,
+        internalTransactions: [
+          {
+            from: mockTransaction.internalTransactions[0].from,
+            to: mockTransaction.internalTransactions[0].to,
+            value: 1000000000000000000n,
+            method: 'transfer',
+            receiver: null,
+            escrow: null,
+            token: null,
+          },
+        ],
+      };
+      expect(result).toEqual([expected, expected]);
     });
 
     test('should return an array of transactions filtered by method', async () => {
@@ -230,9 +338,33 @@ describe('TransactionUtils', () => {
           orderDirection: OrderDirection.DESC,
           first: 10,
           skip: 0,
-        }
+        },
+        undefined
       );
-      expect(result).toEqual([mockTransaction]);
+      const expected: ITransaction = {
+        block: 12345n,
+        txHash: mockTransaction.txHash,
+        from: mockTransaction.from,
+        to: mockTransaction.to,
+        timestamp: 1625247600000,
+        value: 1000000000000000000n,
+        method: 'transfer',
+        receiver: null,
+        escrow: null,
+        token: null,
+        internalTransactions: [
+          {
+            from: mockTransaction.internalTransactions[0].from,
+            to: mockTransaction.internalTransactions[0].to,
+            value: 1000000000000000000n,
+            method: 'transfer',
+            receiver: null,
+            escrow: null,
+            token: null,
+          },
+        ],
+      };
+      expect(result).toEqual([expected]);
     });
 
     test('should return an array of transactions filtered by escrow', async () => {
@@ -264,9 +396,33 @@ describe('TransactionUtils', () => {
           orderDirection: OrderDirection.DESC,
           first: 10,
           skip: 0,
-        }
+        },
+        undefined
       );
-      expect(result).toEqual([mockTransaction]);
+      const expected: ITransaction = {
+        block: 12345n,
+        txHash: mockTransaction.txHash,
+        from: mockTransaction.from,
+        to: mockTransaction.to,
+        timestamp: 1625247600000,
+        value: 1000000000000000000n,
+        method: 'transfer',
+        receiver: null,
+        escrow: null,
+        token: null,
+        internalTransactions: [
+          {
+            from: mockTransaction.internalTransactions[0].from,
+            to: mockTransaction.internalTransactions[0].to,
+            value: 1000000000000000000n,
+            method: 'transfer',
+            receiver: null,
+            escrow: null,
+            token: null,
+          },
+        ],
+      };
+      expect(result).toEqual([expected]);
     });
 
     test('should return an array of transactions filtered by token', async () => {
@@ -298,9 +454,33 @@ describe('TransactionUtils', () => {
           orderDirection: OrderDirection.DESC,
           first: 10,
           skip: 0,
-        }
+        },
+        undefined
       );
-      expect(result).toEqual([mockTransaction]);
+      const expected: ITransaction = {
+        block: 12345n,
+        txHash: mockTransaction.txHash,
+        from: mockTransaction.from,
+        to: mockTransaction.to,
+        timestamp: 1625247600000,
+        value: 1000000000000000000n,
+        method: 'transfer',
+        receiver: null,
+        escrow: null,
+        token: null,
+        internalTransactions: [
+          {
+            from: mockTransaction.internalTransactions[0].from,
+            to: mockTransaction.internalTransactions[0].to,
+            value: 1000000000000000000n,
+            method: 'transfer',
+            receiver: null,
+            escrow: null,
+            token: null,
+          },
+        ],
+      };
+      expect(result).toEqual([expected]);
     });
 
     test('should throw an error if both date and block filters are used', async () => {
@@ -360,9 +540,33 @@ describe('TransactionUtils', () => {
           orderDirection: OrderDirection.DESC,
           first: 10,
           skip: 10,
-        }
+        },
+        undefined
       );
-      expect(result).toEqual([mockTransaction, mockTransaction]);
+      const expected: ITransaction = {
+        block: 12345n,
+        txHash: mockTransaction.txHash,
+        from: mockTransaction.from,
+        to: mockTransaction.to,
+        timestamp: 1625247600000,
+        value: 1000000000000000000n,
+        method: 'transfer',
+        receiver: null,
+        escrow: null,
+        token: null,
+        internalTransactions: [
+          {
+            from: mockTransaction.internalTransactions[0].from,
+            to: mockTransaction.internalTransactions[0].to,
+            value: 1000000000000000000n,
+            method: 'transfer',
+            receiver: null,
+            escrow: null,
+            token: null,
+          },
+        ],
+      };
+      expect(result).toEqual([expected, expected]);
     });
 
     test('should return an array of transactions with pagination over limits', async () => {
@@ -393,9 +597,33 @@ describe('TransactionUtils', () => {
           orderDirection: OrderDirection.DESC,
           first: 1000,
           skip: 10,
-        }
+        },
+        undefined
       );
-      expect(result).toEqual([mockTransaction, mockTransaction]);
+      const expected: ITransaction = {
+        block: 12345n,
+        txHash: mockTransaction.txHash,
+        from: mockTransaction.from,
+        to: mockTransaction.to,
+        timestamp: 1625247600000,
+        value: 1000000000000000000n,
+        method: 'transfer',
+        receiver: null,
+        escrow: null,
+        token: null,
+        internalTransactions: [
+          {
+            from: mockTransaction.internalTransactions[0].from,
+            to: mockTransaction.internalTransactions[0].to,
+            value: 1000000000000000000n,
+            method: 'transfer',
+            receiver: null,
+            escrow: null,
+            token: null,
+          },
+        ],
+      };
+      expect(result).toEqual([expected, expected]);
     });
 
     test('should return an array of transactions with pagination and filters', async () => {
@@ -429,9 +657,33 @@ describe('TransactionUtils', () => {
           orderDirection: OrderDirection.DESC,
           first: 5,
           skip: 5,
-        }
+        },
+        undefined
       );
-      expect(result).toEqual([mockTransaction, mockTransaction]);
+      const expected: ITransaction = {
+        block: 12345n,
+        txHash: mockTransaction.txHash,
+        from: mockTransaction.from,
+        to: mockTransaction.to,
+        timestamp: 1625247600000,
+        value: 1000000000000000000n,
+        method: 'transfer',
+        receiver: null,
+        escrow: null,
+        token: null,
+        internalTransactions: [
+          {
+            from: mockTransaction.internalTransactions[0].from,
+            to: mockTransaction.internalTransactions[0].to,
+            value: 1000000000000000000n,
+            method: 'transfer',
+            receiver: null,
+            escrow: null,
+            token: null,
+          },
+        ],
+      };
+      expect(result).toEqual([expected, expected]);
     });
   });
 });

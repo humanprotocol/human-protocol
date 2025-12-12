@@ -1,4 +1,3 @@
-/* eslint-disable camelcase -- ...*/
 import { t } from 'i18next';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';

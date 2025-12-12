@@ -6,7 +6,7 @@
 
 # Class: StatisticsClient
 
-Defined in: [statistics.ts:58](https://github.com/humanprotocol/human-protocol/blob/2f541eb9f61d23b64321ff5b999971550d47e843/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L58)
+Defined in: [statistics.ts:64](https://github.com/humanprotocol/human-protocol/blob/0661934b14ae802af3f939783433c196862268e2/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L64)
 
 ## Introduction
 
@@ -45,7 +45,7 @@ const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_AMOY]);
 
 > **new StatisticsClient**(`networkData`): `StatisticsClient`
 
-Defined in: [statistics.ts:67](https://github.com/humanprotocol/human-protocol/blob/2f541eb9f61d23b64321ff5b999971550d47e843/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L67)
+Defined in: [statistics.ts:73](https://github.com/humanprotocol/human-protocol/blob/0661934b14ae802af3f939783433c196862268e2/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L73)
 
 **StatisticsClient constructor**
 
@@ -67,7 +67,7 @@ The network information required to connect to the Statistics contract
 
 > **networkData**: [`NetworkData`](../../types/type-aliases/NetworkData.md)
 
-Defined in: [statistics.ts:59](https://github.com/humanprotocol/human-protocol/blob/2f541eb9f61d23b64321ff5b999971550d47e843/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L59)
+Defined in: [statistics.ts:65](https://github.com/humanprotocol/human-protocol/blob/0661934b14ae802af3f939783433c196862268e2/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L65)
 
 ***
 
@@ -75,15 +75,15 @@ Defined in: [statistics.ts:59](https://github.com/humanprotocol/human-protocol/b
 
 > **subgraphUrl**: `string`
 
-Defined in: [statistics.ts:60](https://github.com/humanprotocol/human-protocol/blob/2f541eb9f61d23b64321ff5b999971550d47e843/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L60)
+Defined in: [statistics.ts:66](https://github.com/humanprotocol/human-protocol/blob/0661934b14ae802af3f939783433c196862268e2/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L66)
 
 ## Methods
 
 ### getEscrowStatistics()
 
-> **getEscrowStatistics**(`filter`): `Promise`\<[`EscrowStatistics`](../../graphql/types/type-aliases/EscrowStatistics.md)\>
+> **getEscrowStatistics**(`filter`, `options?`): `Promise`\<[`IEscrowStatistics`](../../interfaces/interfaces/IEscrowStatistics.md)\>
 
-Defined in: [statistics.ts:120](https://github.com/humanprotocol/human-protocol/blob/2f541eb9f61d23b64321ff5b999971550d47e843/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L120)
+Defined in: [statistics.ts:127](https://github.com/humanprotocol/human-protocol/blob/0661934b14ae802af3f939783433c196862268e2/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L127)
 
 This function returns the statistical data of escrows.
 
@@ -100,8 +100,8 @@ interface IStatisticsFilter {
 ```
 
 ```ts
-type DailyEscrowsData = {
-  timestamp: Date;
+interface IDailyEscrow {
+  timestamp: number;
   escrowsTotal: number;
   escrowsPending: number;
   escrowsSolved: number;
@@ -109,9 +109,9 @@ type DailyEscrowsData = {
   escrowsCancelled: number;
 };
 
-type EscrowStatistics = {
+interface IEscrowStatistics {
   totalEscrows: number;
-  dailyEscrowsData: DailyEscrowsData[];
+  dailyEscrowsData: IDailyEscrow[];
 };
 ```
 
@@ -123,9 +123,15 @@ type EscrowStatistics = {
 
 Statistics params with duration data
 
+##### options?
+
+[`SubgraphOptions`](../../interfaces/interfaces/SubgraphOptions.md)
+
+Optional configuration for subgraph requests.
+
 #### Returns
 
-`Promise`\<[`EscrowStatistics`](../../graphql/types/type-aliases/EscrowStatistics.md)\>
+`Promise`\<[`IEscrowStatistics`](../../interfaces/interfaces/IEscrowStatistics.md)\>
 
 Escrow statistics data.
 
@@ -147,9 +153,9 @@ const escrowStatisticsApril = await statisticsClient.getEscrowStatistics({
 
 ### getHMTDailyData()
 
-> **getHMTDailyData**(`filter`): `Promise`\<[`DailyHMTData`](../../graphql/types/type-aliases/DailyHMTData.md)[]\>
+> **getHMTDailyData**(`filter`, `options?`): `Promise`\<[`IDailyHMT`](../../interfaces/interfaces/IDailyHMT.md)[]\>
 
-Defined in: [statistics.ts:478](https://github.com/humanprotocol/human-protocol/blob/2f541eb9f61d23b64321ff5b999971550d47e843/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L478)
+Defined in: [statistics.ts:510](https://github.com/humanprotocol/human-protocol/blob/0661934b14ae802af3f939783433c196862268e2/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L510)
 
 This function returns the statistical data of HMToken day by day.
 
@@ -166,8 +172,8 @@ interface IStatisticsFilter {
 ```
 
 ```ts
-type DailyHMTData = {
-  timestamp: Date;
+interface IDailyHMT {
+  timestamp: number;
   totalTransactionAmount: bigint;
   totalTransactionCount: number;
   dailyUniqueSenders: number;
@@ -183,9 +189,15 @@ type DailyHMTData = {
 
 Statistics params with duration data
 
+##### options?
+
+[`SubgraphOptions`](../../interfaces/interfaces/SubgraphOptions.md)
+
+Optional configuration for subgraph requests.
+
 #### Returns
 
-`Promise`\<[`DailyHMTData`](../../graphql/types/type-aliases/DailyHMTData.md)[]\>
+`Promise`\<[`IDailyHMT`](../../interfaces/interfaces/IDailyHMT.md)[]\>
 
 Daily HMToken statistics data.
 
@@ -212,9 +224,9 @@ console.log('HMT statistics from 5/8 - 6/8:', hmtStatisticsRange);
 
 ### getHMTHolders()
 
-> **getHMTHolders**(`params`): `Promise`\<[`HMTHolder`](../../graphql/types/type-aliases/HMTHolder.md)[]\>
+> **getHMTHolders**(`params`, `options?`): `Promise`\<[`IHMTHolder`](../../interfaces/interfaces/IHMTHolder.md)[]\>
 
-Defined in: [statistics.ts:407](https://github.com/humanprotocol/human-protocol/blob/2f541eb9f61d23b64321ff5b999971550d47e843/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L407)
+Defined in: [statistics.ts:434](https://github.com/humanprotocol/human-protocol/blob/0661934b14ae802af3f939783433c196862268e2/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L434)
 
 This function returns the holders of the HMToken with optional filters and ordering.
 
@@ -228,9 +240,15 @@ This function returns the holders of the HMToken with optional filters and order
 
 HMT Holders params with filters and ordering
 
+##### options?
+
+[`SubgraphOptions`](../../interfaces/interfaces/SubgraphOptions.md)
+
+Optional configuration for subgraph requests.
+
 #### Returns
 
-`Promise`\<[`HMTHolder`](../../graphql/types/type-aliases/HMTHolder.md)[]\>
+`Promise`\<[`IHMTHolder`](../../interfaces/interfaces/IHMTHolder.md)[]\>
 
 List of HMToken holders.
 
@@ -255,23 +273,31 @@ console.log('HMT holders:', hmtHolders.map((h) => ({
 
 ### getHMTStatistics()
 
-> **getHMTStatistics**(): `Promise`\<[`HMTStatistics`](../../graphql/types/type-aliases/HMTStatistics.md)\>
+> **getHMTStatistics**(`options?`): `Promise`\<[`IHMTStatistics`](../../interfaces/interfaces/IHMTStatistics.md)\>
 
-Defined in: [statistics.ts:364](https://github.com/humanprotocol/human-protocol/blob/2f541eb9f61d23b64321ff5b999971550d47e843/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L364)
+Defined in: [statistics.ts:392](https://github.com/humanprotocol/human-protocol/blob/0661934b14ae802af3f939783433c196862268e2/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L392)
 
 This function returns the statistical data of HMToken.
 
 ```ts
-type HMTStatistics = {
-  totalTransferAmount: BigNumber;
-  totalTransferCount: BigNumber;
+interface IHMTStatistics {
+  totalTransferAmount: bigint;
+  totalTransferCount: number;
   totalHolders: number;
 };
 ```
 
+#### Parameters
+
+##### options?
+
+[`SubgraphOptions`](../../interfaces/interfaces/SubgraphOptions.md)
+
+Optional configuration for subgraph requests.
+
 #### Returns
 
-`Promise`\<[`HMTStatistics`](../../graphql/types/type-aliases/HMTStatistics.md)\>
+`Promise`\<[`IHMTStatistics`](../../interfaces/interfaces/IHMTStatistics.md)\>
 
 HMToken statistics data.
 
@@ -294,9 +320,9 @@ console.log('HMT statistics:', {
 
 ### getPaymentStatistics()
 
-> **getPaymentStatistics**(`filter`): `Promise`\<[`PaymentStatistics`](../../graphql/types/type-aliases/PaymentStatistics.md)\>
+> **getPaymentStatistics**(`filter`, `options?`): `Promise`\<[`IPaymentStatistics`](../../interfaces/interfaces/IPaymentStatistics.md)\>
 
-Defined in: [statistics.ts:300](https://github.com/humanprotocol/human-protocol/blob/2f541eb9f61d23b64321ff5b999971550d47e843/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L300)
+Defined in: [statistics.ts:321](https://github.com/humanprotocol/human-protocol/blob/0661934b14ae802af3f939783433c196862268e2/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L321)
 
 This function returns the statistical data of payments.
 
@@ -313,15 +339,15 @@ interface IStatisticsFilter {
 ```
 
 ```ts
-type DailyPaymentData = {
-  timestamp: Date;
-  totalAmountPaid: BigNumber;
+interface IDailyPayment {
+  timestamp: number;
+  totalAmountPaid: bigint;
   totalCount: number;
-  averageAmountPerWorker: BigNumber;
+  averageAmountPerWorker: bigint;
 };
 
-type PaymentStatistics = {
-  dailyPaymentsData: DailyPaymentData[];
+interface IPaymentStatistics {
+  dailyPaymentsData: IDailyPayment[];
 };
 ```
 
@@ -333,9 +359,15 @@ type PaymentStatistics = {
 
 Statistics params with duration data
 
+##### options?
+
+[`SubgraphOptions`](../../interfaces/interfaces/SubgraphOptions.md)
+
+Optional configuration for subgraph requests.
+
 #### Returns
 
-`Promise`\<[`PaymentStatistics`](../../graphql/types/type-aliases/PaymentStatistics.md)\>
+`Promise`\<[`IPaymentStatistics`](../../interfaces/interfaces/IPaymentStatistics.md)\>
 
 Payment statistics data.
 
@@ -378,9 +410,9 @@ console.log(
 
 ### getWorkerStatistics()
 
-> **getWorkerStatistics**(`filter`): `Promise`\<[`WorkerStatistics`](../../graphql/types/type-aliases/WorkerStatistics.md)\>
+> **getWorkerStatistics**(`filter`, `options?`): `Promise`\<[`IWorkerStatistics`](../../interfaces/interfaces/IWorkerStatistics.md)\>
 
-Defined in: [statistics.ts:204](https://github.com/humanprotocol/human-protocol/blob/2f541eb9f61d23b64321ff5b999971550d47e843/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L204)
+Defined in: [statistics.ts:218](https://github.com/humanprotocol/human-protocol/blob/0661934b14ae802af3f939783433c196862268e2/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L218)
 
 This function returns the statistical data of workers.
 
@@ -397,13 +429,13 @@ interface IStatisticsFilter {
 ```
 
 ```ts
-type DailyWorkerData = {
-  timestamp: Date;
+interface IDailyWorker {
+  timestamp: number;
   activeWorkers: number;
 };
 
-type WorkerStatistics = {
-  dailyWorkersData: DailyWorkerData[];
+interface IWorkerStatistics {
+  dailyWorkersData: IDailyWorker[];
 };
 ```
 
@@ -415,9 +447,15 @@ type WorkerStatistics = {
 
 Statistics params with duration data
 
+##### options?
+
+[`SubgraphOptions`](../../interfaces/interfaces/SubgraphOptions.md)
+
+Optional configuration for subgraph requests.
+
 #### Returns
 
-`Promise`\<[`WorkerStatistics`](../../graphql/types/type-aliases/WorkerStatistics.md)\>
+`Promise`\<[`IWorkerStatistics`](../../interfaces/interfaces/IWorkerStatistics.md)\>
 
 Worker statistics data.
 

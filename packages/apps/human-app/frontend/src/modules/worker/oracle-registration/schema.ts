@@ -1,8 +1,8 @@
-/* eslint-disable camelcase */
 import { ethers } from 'ethers';
 import { t } from 'i18next';
 import { z } from 'zod';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const registrationInExchangeOracleDtoSchema = z.object({
   oracle_address: z
     .string()

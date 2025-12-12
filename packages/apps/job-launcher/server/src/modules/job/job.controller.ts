@@ -167,6 +167,7 @@ export class JobController {
     @Body() data: JobCvatDto,
     @Request() req: RequestWithUser,
   ): Promise<number> {
+    throw new ForbiddenError('Disabled');
     return await this.mutexManagerService.runExclusive(
       `user${req.user.id}`,
       MUTEX_TIMEOUT,

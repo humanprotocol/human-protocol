@@ -6,8 +6,10 @@ from human_protocol_sdk.worker import WorkerUtils
 from human_protocol_sdk.filter import (
     EscrowFilter,
     PayoutFilter,
+    CancellationRefundFilter,
     StatisticsFilter,
     WorkerFilter,
+    StakersFilter,
 )
 from human_protocol_sdk.statistics import (
     StatisticsClient,
@@ -15,6 +17,8 @@ from human_protocol_sdk.statistics import (
 )
 from human_protocol_sdk.operator import OperatorUtils, OperatorFilter
 from human_protocol_sdk.agreement import agreement
+from human_protocol_sdk.staking.staking_utils import StakingUtils
+from human_protocol_sdk.utils import SubgraphOptions
 
 
 def get_escrow_statistics(statistics_client: StatisticsClient):
@@ -105,6 +109,52 @@ def get_payouts():
         )
 
 
+def get_cancellation_refunds():
+    # List recent cancellation refunds
+    filter = CancellationRefundFilter(
+        chain_id=ChainId.POLYGON_AMOY,
+        first=5,
+        skip=0,
+        order_direction=OrderDirection.ASC,
+    )
+
+    refunds = EscrowUtils.get_cancellation_refunds(filter)
+    for refund in refunds:
+        print(
+            "Refund ID:",
+            refund.id,
+            "Escrow:",
+            refund.escrow_address,
+            "Amount:",
+            refund.amount,
+            "Receiver:",
+            refund.receiver,
+            "Tx:",
+            refund.tx_hash,
+        )
+
+    # Fetch a single cancellation refund by escrow address if available
+    if refunds:
+        single = EscrowUtils.get_cancellation_refund(
+            ChainId.POLYGON_AMOY, refunds[0].escrow_address
+        )
+        if single:
+            print(
+                "Single refund:",
+                single.id,
+                "Escrow:",
+                single.escrow_address,
+                "Amount:",
+                single.amount,
+                "Receiver:",
+                single.receiver,
+                "Tx:",
+                single.tx_hash,
+            )
+        else:
+            print("No single refund found for escrow", refunds[0].escrow_address)
+
+
 def get_escrows():
     print(
         EscrowUtils.get_escrows(
@@ -113,7 +163,8 @@ def get_escrows():
                 status=Status.Pending,
                 date_from=datetime.datetime(2023, 5, 8),
                 date_to=datetime.datetime(2023, 6, 8),
-            )
+            ),
+            SubgraphOptions(3, 1000),
         )
     )
 
@@ -131,22 +182,23 @@ def get_operators():
         OperatorFilter(chain_id=ChainId.POLYGON_AMOY)
     )
     print(operators)
+    print(vars(operators[0]))
     print(OperatorUtils.get_operator(ChainId.POLYGON_AMOY, operators[0].address))
     print(
         OperatorUtils.get_operators(
-            OperatorFilter(chain_id=ChainId.POLYGON_AMOY, roles="Job Launcher")
+            OperatorFilter(chain_id=ChainId.POLYGON_AMOY, roles="job_launcher")
         )
     )
     operators = OperatorUtils.get_operators(
-        OperatorFilter(chain_id=ChainId.POLYGON_AMOY, roles=["Job Launcher"])
+        OperatorFilter(chain_id=ChainId.POLYGON_AMOY, roles=["job_launcher"])
     )
     print(len(operators))
 
     operators = OperatorUtils.get_operators(
         OperatorFilter(
             chain_id=ChainId.POLYGON_AMOY,
-            min_amount_staked=1,
-            roles=["Job Launcher", "Reputation Oracle"],
+            min_staked_amount=1,
+            roles=["job_launcher", "reputation_oracle"],
         )
     )
     print(len(operators))
@@ -176,6 +228,24 @@ def agreement_example():
     print(agreement_report)
 
 
+def get_stakers_example():
+    stakers = StakingUtils.get_stakers(
+        StakersFilter(
+            chain_id=ChainId.POLYGON_AMOY,
+            order_by="lastDepositTimestamp",
+            order_direction=OrderDirection.ASC,
+        ),
+        SubgraphOptions(3, 1000),
+    )
+    print("Filtered stakers:", len(stakers))
+
+    if stakers:
+        staker = StakingUtils.get_staker(ChainId.POLYGON_AMOY, stakers[0].address)
+        print("Staker info:", staker.address)
+    else:
+        print("No stakers found.")
+
+
 if __name__ == "__main__":
     statistics_client = StatisticsClient()
 
@@ -184,6 +254,7 @@ if __name__ == "__main__":
     get_escrows()
     get_operators()
     get_payouts()
+    get_cancellation_refunds()
 
     statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
     get_hmt_holders(statistics_client)
@@ -195,3 +266,4 @@ if __name__ == "__main__":
 
     agreement_example()
     get_workers()
+    get_stakers_example()

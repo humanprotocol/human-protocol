@@ -78,7 +78,7 @@ export const AuthHeader = () => {
     setIsLoggingOut(false);
   };
 
-  let segements = pathname.split('/').filter((s) => s);
+  const segements = pathname.split('/').filter((s) => s);
 
   return (
     <AppBar

@@ -73,7 +73,6 @@ export function createAuthProvider<T extends UserData | Web3UserData>(config: {
 
         browserAuthProvider.signOutSubscription = displayExpirationModal;
       } catch (e) {
-        // eslint-disable-next-line no-console
         console.error('Invalid JWT payload:', e);
         signOut({
           status: 'error',

@@ -5,7 +5,6 @@ import {
   EscrowClient,
   EscrowStatus,
   KVStoreUtils,
-  StorageClient,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
@@ -35,6 +34,8 @@ import { StorageService } from '../storage/storage.service';
 import { Web3Service } from '../web3/web3.service';
 import { WebhookDto } from '../webhook/webhook.dto';
 import { JobService } from './job.service';
+import { HMToken__factory } from '@human-protocol/core/typechain-types';
+import { downloadFileFromUrl } from '@/common/utils/storage';
 
 jest.mock('minio', () => {
   class Client {
@@ -50,19 +51,16 @@ jest.mock('minio', () => {
   return { Client };
 });
 
+jest.mock('@/common/utils/storage', () => ({
+  ...jest.requireActual('@/common/utils/storage'),
+  downloadFileFromUrl: jest.fn(),
+}));
+
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
   EscrowClient: {
     build: jest.fn().mockImplementation(() => ({})),
   },
-  StorageClient: jest.fn().mockImplementation(() => ({
-    downloadFileFromUrl: jest.fn().mockResolvedValue(
-      JSON.stringify({
-        submissionsRequired: 3,
-        requestType: JobRequestType.FORTUNE,
-      }),
-    ),
-  })),
   KVStoreUtils: {
     get: jest.fn(),
     getPublicKey: jest.fn().mockResolvedValue('publicKey'),
@@ -74,6 +72,7 @@ jest.mock('@human-protocol/sdk', () => ({
 
 describe('JobService', () => {
   let jobService: JobService;
+  const downloadFileFromUrlMock = jest.mocked(downloadFileFromUrl);
 
   jest
     .spyOn(Web3ConfigService.prototype, 'privateKey', 'get')
@@ -131,6 +130,13 @@ describe('JobService', () => {
   });
 
   describe('processJobSolution', () => {
+    beforeAll(() => {
+      const decimalsMock = jest.fn().mockResolvedValue(18);
+      const tokenContractMock = { decimals: decimalsMock };
+      jest
+        .spyOn(HMToken__factory, 'connect')
+        .mockReturnValue(tokenContractMock as any);
+    });
     afterEach(() => {
       jest.clearAllMocks();
     });
@@ -150,9 +156,9 @@ describe('JobService', () => {
         eventData: { solutionsUrl: MOCK_FILE_URL },
       };
 
-      await expect(
-        jobService.processJobSolution(jobSolution),
-      ).rejects.toThrowError(ErrorJob.AddressMismatches);
+      await expect(jobService.processJobSolution(jobSolution)).rejects.toThrow(
+        ErrorJob.AddressMismatches,
+      );
     });
 
     it('should throw bad request exception when escrow status is not pending', async () => {
@@ -169,9 +175,9 @@ describe('JobService', () => {
         eventData: { solutionsUrl: MOCK_FILE_URL },
       };
 
-      await expect(
-        jobService.processJobSolution(jobSolution),
-      ).rejects.toThrowError(ErrorJob.InvalidStatus);
+      await expect(jobService.processJobSolution(jobSolution)).rejects.toThrow(
+        ErrorJob.InvalidStatus,
+      );
     });
 
     it('should throw bad request exception when manifest is invalid', async () => {
@@ -185,9 +191,9 @@ describe('JobService', () => {
         getManifest: jest.fn().mockResolvedValue('http://example.com/manifest'),
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
-      StorageClient.downloadFileFromUrl = jest
-        .fn()
-        .mockResolvedValue(JSON.stringify(invalidManifest));
+      downloadFileFromUrlMock.mockResolvedValue(
+        JSON.stringify(invalidManifest),
+      );
 
       const jobSolution: WebhookDto = {
         escrowAddress: MOCK_ADDRESS,
@@ -196,9 +202,9 @@ describe('JobService', () => {
         eventData: { solutionsUrl: MOCK_FILE_URL },
       };
 
-      await expect(
-        jobService.processJobSolution(jobSolution),
-      ).rejects.toThrowError(ErrorJob.InvalidManifest);
+      await expect(jobService.processJobSolution(jobSolution)).rejects.toThrow(
+        ErrorJob.InvalidManifest,
+      );
     });
 
     it('should throw bad request exception when manifest contains an invalid job type', async () => {
@@ -213,9 +219,9 @@ describe('JobService', () => {
         getManifest: jest.fn().mockResolvedValue('http://example.com/manifest'),
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
-      StorageClient.downloadFileFromUrl = jest
-        .fn()
-        .mockResolvedValue(JSON.stringify(invalidManifest));
+      downloadFileFromUrlMock.mockResolvedValue(
+        JSON.stringify(invalidManifest),
+      );
       EncryptionUtils.isEncrypted = jest.fn().mockReturnValueOnce(false);
 
       const jobSolution: WebhookDto = {
@@ -225,9 +231,9 @@ describe('JobService', () => {
         eventData: { solutionsUrl: MOCK_FILE_URL },
       };
 
-      await expect(
-        jobService.processJobSolution(jobSolution),
-      ).rejects.toThrowError(ErrorJob.InvalidJobType);
+      await expect(jobService.processJobSolution(jobSolution)).rejects.toThrow(
+        ErrorJob.InvalidJobType,
+      );
     });
 
     it('should throw bad request exception when all solutions have already been sent', async () => {
@@ -275,8 +281,7 @@ describe('JobService', () => {
         },
       ];
 
-      StorageClient.downloadFileFromUrl = jest
-        .fn()
+      downloadFileFromUrlMock
         .mockResolvedValueOnce(JSON.stringify(manifest))
         .mockResolvedValueOnce(JSON.stringify(existingJobSolutions))
         .mockResolvedValue(JSON.stringify(exchangeJobSolutions));
@@ -288,9 +293,9 @@ describe('JobService', () => {
         eventData: { solutionsUrl: MOCK_FILE_URL },
       };
 
-      await expect(
-        jobService.processJobSolution(newSolution),
-      ).rejects.toThrowError(ErrorJob.AllSolutionsHaveAlreadyBeenSent);
+      await expect(jobService.processJobSolution(newSolution)).rejects.toThrow(
+        ErrorJob.AllSolutionsHaveAlreadyBeenSent,
+      );
     });
 
     it('should throw bad request exception when webhook was not sent', async () => {
@@ -311,6 +316,7 @@ describe('JobService', () => {
           .fn()
           .mockResolvedValue('http://example.com/results'),
         storeResults: jest.fn().mockResolvedValue(true),
+        getTokenAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
 
@@ -332,8 +338,7 @@ describe('JobService', () => {
         },
       ];
 
-      StorageClient.downloadFileFromUrl = jest
-        .fn()
+      downloadFileFromUrlMock
         .mockResolvedValueOnce(JSON.stringify(manifest))
         .mockResolvedValueOnce(JSON.stringify(existingJobSolutions))
         .mockResolvedValue(JSON.stringify(exchangeJobSolutions));
@@ -365,6 +370,7 @@ describe('JobService', () => {
         getManifest: jest.fn().mockResolvedValue('http://example.com/manifest'),
         getIntermediateResultsUrl: jest.fn().mockResolvedValue(''),
         storeResults: jest.fn().mockResolvedValue(true),
+        getTokenAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
 
@@ -393,8 +399,7 @@ describe('JobService', () => {
         },
       ];
 
-      StorageClient.downloadFileFromUrl = jest
-        .fn()
+      downloadFileFromUrlMock
         .mockResolvedValueOnce(JSON.stringify(manifest))
         .mockResolvedValueOnce(JSON.stringify(existingJobSolutions))
         .mockResolvedValue(JSON.stringify(exchangeJobSolutions));
@@ -421,6 +426,7 @@ describe('JobService', () => {
           .fn()
           .mockResolvedValue('http://existing-solutions'),
         storeResults: jest.fn().mockResolvedValue(true),
+        getTokenAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
 
@@ -453,8 +459,7 @@ describe('JobService', () => {
         },
       ];
 
-      StorageClient.downloadFileFromUrl = jest
-        .fn()
+      downloadFileFromUrlMock
         .mockResolvedValueOnce(JSON.stringify(manifest))
         .mockResolvedValueOnce(JSON.stringify(existingJobSolutions))
         .mockResolvedValue(JSON.stringify(exchangeJobSolutions));
@@ -499,6 +504,7 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue('http://existing-solutions'),
       storeResults: jest.fn().mockResolvedValue(true),
+      getTokenAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
     };
     (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
 
@@ -543,8 +549,7 @@ describe('JobService', () => {
         solution: 'Solution 4',
       },
     ];
-    StorageClient.downloadFileFromUrl = jest
-      .fn()
+    downloadFileFromUrlMock
       .mockResolvedValueOnce(JSON.stringify(manifest))
       .mockResolvedValueOnce(JSON.stringify(existingJobSolutions))
       .mockResolvedValue(JSON.stringify(exchangeJobSolutions));
@@ -589,6 +594,7 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue('http://existing-solutions'),
       storeResults: jest.fn().mockResolvedValue(true),
+      getTokenAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
     };
     (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
     KVStoreUtils.get = jest
@@ -620,8 +626,7 @@ describe('JobService', () => {
         solution: 'Solution 2',
       },
     ];
-    StorageClient.downloadFileFromUrl = jest
-      .fn()
+    downloadFileFromUrlMock
       .mockResolvedValueOnce(JSON.stringify(manifest))
       .mockResolvedValueOnce(JSON.stringify(existingJobSolutions))
       .mockResolvedValue(JSON.stringify(exchangeJobSolutions));
@@ -671,6 +676,7 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue('http://existing-solutions'),
       storeResults: jest.fn().mockResolvedValue(true),
+      getTokenAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
     };
     (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
     KVStoreUtils.get = jest
@@ -702,8 +708,7 @@ describe('JobService', () => {
         solution: 'ass',
       },
     ];
-    StorageClient.downloadFileFromUrl = jest
-      .fn()
+    downloadFileFromUrlMock
       .mockResolvedValueOnce(JSON.stringify(manifest))
       .mockResolvedValueOnce(JSON.stringify(existingJobSolutions))
       .mockResolvedValue(JSON.stringify(exchangeJobSolutions));

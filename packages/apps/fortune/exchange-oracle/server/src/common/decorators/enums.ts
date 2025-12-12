@@ -9,8 +9,7 @@ export function IsEnumCaseInsensitive(
   enumType: any,
   validationOptions?: ValidationOptions,
 ) {
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  return function (object: Object, propertyName: string) {
+  return function (object: object, propertyName: string) {
     // Attach enum metadata to the property
     Reflect.defineMetadata('custom:enum', enumType, object, propertyName);
 

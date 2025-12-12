@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
   HMToken,
   HMToken__factory,
@@ -254,7 +253,7 @@ export class PaymentService {
           topics: transaction.logs[0].topics as string[],
           data: transaction.logs[0].data,
         })?.args['_to'],
-      ) !== ethers.hexlify(signer.address)
+      ) !== ethers.hexlify(await signer.getAddress())
     ) {
       throw new ConflictError(ErrorPayment.InvalidRecipient);
     }
@@ -574,5 +573,12 @@ export class PaymentService {
       balances,
       totalUsdAmount: totalUSDAmount,
     };
+  }
+
+  public async getJobPayments(
+    jobId: number,
+    type?: string,
+  ): Promise<PaymentEntity[]> {
+    return this.paymentRepository.findByJobIdAndType(jobId, type);
   }
 }

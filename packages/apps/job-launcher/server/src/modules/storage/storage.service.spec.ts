@@ -38,7 +38,7 @@ import { ContentType } from '../../common/enums/storage';
 import { ServerError, ValidationError } from '../../common/errors';
 import { hashString } from '../../common/utils';
 import { StorageService } from './storage.service';
-import { faker } from '@faker-js/faker/.';
+import { faker } from '@faker-js/faker';
 
 describe('StorageService', () => {
   let storageService: StorageService;
@@ -220,6 +220,7 @@ describe('StorageService', () => {
         'solution',
         expect.any(String),
         expect.any(String),
+        undefined,
         {
           'Content-Type': ContentType.APPLICATION_JSON,
           'Cache-Control': 'no-store',

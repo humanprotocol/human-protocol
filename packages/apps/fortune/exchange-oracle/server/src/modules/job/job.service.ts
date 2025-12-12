@@ -7,10 +7,10 @@ import {
   Encryption,
   EncryptionUtils,
   EscrowClient,
-  StorageClient,
 } from '@human-protocol/sdk';
 import { Inject, Injectable } from '@nestjs/common';
 
+import { downloadFileFromUrl } from '../../common/utils/storage';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { ErrorAssignment, ErrorJob } from '../../common/constant/errors';
 import { SortDirection } from '../../common/enums/collection';
@@ -255,9 +255,11 @@ export class JobService {
           invalidJobSolution.escrowAddress,
           invalidJobSolution.chainId,
         );
-      for (const invalidSolution of (
-        invalidJobSolution.eventData as RejectionEventData
-      )?.assignments) {
+      const rejectionEventData =
+        invalidJobSolution.eventData as RejectionEventData;
+      const assignments = rejectionEventData.assignments ?? [];
+
+      for (const invalidSolution of assignments) {
         const foundSolution = existingJobSolutions.find(
           (sol) => sol.workerAddress === invalidSolution.assigneeId,
         );
@@ -346,8 +348,7 @@ export class JobService {
     let manifest: ManifestDto | null = null;
 
     try {
-      const manifestEncrypted =
-        await StorageClient.downloadFileFromUrl(manifestUrl);
+      const manifestEncrypted = await downloadFileFromUrl(manifestUrl);
 
       if (
         typeof manifestEncrypted === 'string' &&
@@ -381,35 +382,5 @@ export class JobService {
     }
 
     return manifest;
-  }
-
-  public async pauseJob(webhook: WebhookDto): Promise<void> {
-    const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
-      webhook.chainId,
-      webhook.escrowAddress,
-    );
-    if (!jobEntity) {
-      throw new ServerError(ErrorJob.NotFound);
-    }
-    if (jobEntity.status !== JobStatus.ACTIVE) {
-      throw new ConflictError(ErrorJob.InvalidStatus);
-    }
-    jobEntity.status = JobStatus.PAUSED;
-    await this.jobRepository.updateOne(jobEntity);
-  }
-
-  public async resumeJob(webhook: WebhookDto): Promise<void> {
-    const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
-      webhook.chainId,
-      webhook.escrowAddress,
-    );
-    if (!jobEntity) {
-      throw new ServerError(ErrorJob.NotFound);
-    }
-    if (jobEntity.status !== JobStatus.PAUSED) {
-      throw new ConflictError(ErrorJob.InvalidStatus);
-    }
-    jobEntity.status = JobStatus.ACTIVE;
-    await this.jobRepository.updateOne(jobEntity);
   }
 }

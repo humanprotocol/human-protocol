@@ -4,42 +4,6 @@
 export const ErrorStakingMissing = new Error('Staking contract is missing');
 
 /**
- * @constant {Error} - The Storage client not initialized.
- */
-export const ErrorStorageClientNotInitialized = new Error(
-  'Storage client not initialized'
-);
-
-/**
- * @constant {Error} - The Storage client does not exist.
- */
-export const ErrorStorageClientNotExists = new Error(
-  'Storage client does not exist'
-);
-
-/**
- * @constant {Error} - The Storage credentials are missing.
- */
-export const ErrorStorageCredentialsMissing = new Error(
-  'Storage credentials are missing'
-);
-
-/**
- * @constant {Error} - The Storage bucket not found.
- */
-export const ErrorStorageBucketNotFound = new Error('Bucket not found');
-
-/**
- * @constant {Error} - The Storage file not found.
- */
-export const ErrorStorageFileNotFound = new Error('File not found');
-
-/**
- * @constant {Error} - The Storage file not uploaded.
- */
-export const ErrorStorageFileNotUploaded = new Error('File not uploaded');
-
-/**
  * @constant {Error} - The KVStore key cannot be empty.
  */
 export const ErrorKVStoreEmptyKey = new Error('Key cannot be empty');
@@ -171,6 +135,11 @@ export const ErrorProviderDoesNotExist = new Error('Provider does not exist');
 export const ErrorUnsupportedChainID = new Error('Unsupported chain ID');
 
 /**
+ * @constant {Error} - Staker not found.
+ */
+export const ErrorStakerNotFound = new Error('Staker not found');
+
+/**
  * @constant {Error} - Sending a transaction requires a signer.
  */
 export const ErrorSigner = new Error('Signer required');
@@ -205,13 +174,6 @@ export const ErrorInvalidUrl = new Error('Invalid URL string');
  * @constant {Error} - Invalid manifest.
  */
 export const ErrorInvalidManifest = new Error('Invalid manifest');
-
-/**
- * @constant {Error} - List of handlers cannot be empty.
- */
-export const ErrorListOfHandlersCannotBeEmpty = new Error(
-  'List of handlers cannot be empty'
-);
 
 /**
  * @constant {Error} - No URL provided.
@@ -293,6 +255,40 @@ export const ErrorInvalidHash = new Error('Invalid hash');
  * @constant {Error} - The status is not supported.
  */
 export const ErrorUnsupportedStatus = new Error('Unsupported status for query');
+
+/**
+ * @constant {Error} - Invalid storeResults parameters for the escrow version
+ */
+export const ErrorStoreResultsVersion = new Error(
+  'Invalid storeResults parameters for the contract version of the specified escrow address'
+);
+
+/**
+ * @constant {Error} - Invalid bulkPayOut parameters for the escrow version
+ */
+export const ErrorBulkPayOutVersion = new Error(
+  'Invalid bulkPayOut parameters for the contract version of the specified escrow address'
+);
+
+/**
+ * @constant {Error} - Retry configuration is missing required parameters.
+ */
+export const ErrorRetryParametersMissing = new Error(
+  'Retry configuration must include both maxRetries and baseDelay'
+);
+
+/**
+ * @constant {Error} - Retry configuration is missing required parameters.
+ */
+export const ErrorRoutingRequestsToIndexerRequiresApiKey = new Error(
+  'Routing requests to a specific indexer requires SUBGRAPH_API_KEY to be set'
+);
+
+/**
+ * @constant {Warning} - Possible version mismatch.
+ */
+export const WarnVersionMismatch =
+  'There may be a mismatch between the parameters passed and the expected parameters of the escrow contract version';
 
 /**
  * @constant {Warning} - The SUBGRAPH_API_KEY is not being provided.

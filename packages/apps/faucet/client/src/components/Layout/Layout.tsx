@@ -4,7 +4,9 @@ import { FC, PropsWithChildren } from 'react';
 import { Footer } from '../Footer';
 import { Header } from '../Header';
 
-export const Layout: FC<PropsWithChildren<{}>> = ({ children }) => (
+type LayoutProps = PropsWithChildren<Record<string, never>>;
+
+export const Layout: FC<LayoutProps> = ({ children }) => (
   <Box
     sx={{
       marginTop: '88px',

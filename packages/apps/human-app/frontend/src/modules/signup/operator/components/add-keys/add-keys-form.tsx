@@ -18,7 +18,7 @@ export function AddKeysForm({
      * This check is necessary because TS can't infer
      * "undefined" from optional object's property
      */
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+
     if (value === undefined) {
       return false;
     }

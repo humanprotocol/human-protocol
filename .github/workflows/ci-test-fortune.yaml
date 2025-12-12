@@ -2,18 +2,19 @@ name: Fortune check
 
 on:
   push:
+    tags-ignore: '*'
     paths:
-      - 'packages/core/**'
-      - 'packages/sdk/typescript/human-protocol-sdk/**'
-      - 'packages/apps/fortune/**'
+      - "packages/core/**"
+      - "packages/sdk/typescript/human-protocol-sdk/**"
+      - "packages/apps/fortune/**"
 
 jobs:
   fortune-exchange-oracle-test:
     name: Fortune Exchange Oracle Tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version-file: .nvmrc
           cache: yarn
@@ -22,14 +23,14 @@ jobs:
       - name: Build libs
         run: yarn build:libs
       - name: Run Exchange Oracle tests
-        run: yarn workspace @human-protocol/fortune-exchange-oracle-server test
+        run: yarn workspace @apps/fortune-exchange-oracle-server test
 
   fortune-recording-oracle-test:
     name: Fortune Recording Oracle Tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version-file: .nvmrc
           cache: yarn
@@ -38,4 +39,4 @@ jobs:
       - name: Build libs
         run: yarn build:libs
       - name: Run Recording Oracle tests
-        run: yarn workspace @human-protocol/fortune-recording-oracle test
+        run: yarn workspace @apps/fortune-recording-oracle test

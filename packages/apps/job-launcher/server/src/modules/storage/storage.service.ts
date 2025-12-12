@@ -89,7 +89,9 @@ export class StorageService {
 
       try {
         jsonLikeData = JSON.parse(jsonLikeData);
-      } catch (_noop) {}
+      } catch (_noop) {
+        // Ignore error
+      }
 
       return jsonLikeData;
     } catch (_error) {
@@ -125,6 +127,7 @@ export class StorageService {
         this.s3ConfigService.bucket,
         fileKey,
         fileContents,
+        undefined,
         {
           'Content-Type': contentType,
           'Cache-Control': 'no-store',

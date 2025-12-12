@@ -41,13 +41,14 @@ Bases: `object`
 
 A utility class that provides additional transaction-related functionalities.
 
-#### *static* get_transaction(chain_id, hash)
+#### *static* get_transaction(chain_id, hash, options=None)
 
 Returns the transaction for a given hash.
 
 * **Parameters:**
   * **chain_id** ([`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)) – Network in which the transaction was executed
   * **hash** (`str`) – Hash of the transaction
+  * **options** (`Optional`[[`SubgraphOptions`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.SubgraphOptions)]) – Optional config for subgraph requests
 * **Return type:**
   `Optional`[[`TransactionData`](#human_protocol_sdk.transaction.transaction_utils.TransactionData)]
 * **Returns:**
@@ -65,13 +66,14 @@ Returns the transaction for a given hash.
   )
   ```
 
-#### *static* get_transactions(filter)
+#### *static* get_transactions(filter, options=None)
 
 Get an array of transactions based on the specified filter parameters.
 
 * **Parameters:**
-  **filter** ([`TransactionFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.TransactionFilter)) – Object containing all the necessary parameters to filter
-  (chain_id, from_address, to_address, start_date, end_date, start_block, end_block, method, escrow, token, first, skip, order_direction)
+  * **filter** ([`TransactionFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.TransactionFilter)) – Object containing all the necessary parameters to filter
+    (chain_id, from_address, to_address, start_date, end_date, start_block, end_block, method, escrow, token, first, skip, order_direction)
+  * **options** (`Optional`[[`SubgraphOptions`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.SubgraphOptions)]) – Optional config for subgraph requests
 * **Return type:**
   `List`[[`TransactionData`](#human_protocol_sdk.transaction.transaction_utils.TransactionData)]
 * **Returns:**

@@ -1,6 +1,5 @@
 import type { ChainId } from '@human-protocol/sdk/src/enums';
 
-import AuroraIcon from '@/shared/ui/icons/AuroraIcon';
 import BinanceSmartChainIcon from '@/shared/ui/icons/BinanceSmartChainIcon';
 import EthereumIcon from '@/shared/ui/icons/EthereumIcon';
 import HumanIcon from '@/shared/ui/icons/HumanIcon';
@@ -18,8 +17,6 @@ export const NetworkIcon = ({ chainId }: { chainId: ChainId }) => {
       case 137:
       case 80002:
         return <PolygonIcon />;
-      case 1313161555:
-        return <AuroraIcon />;
       default:
         return <HumanIcon />;
     }

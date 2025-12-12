@@ -143,12 +143,12 @@ describe('WebhookService', () => {
       expect(jobService.createJob).toHaveBeenCalledWith(webhook);
     });
 
-    it('should handle an incoming escrow canceled webhook', async () => {
+    it('should handle an incoming cancellation request webhook', async () => {
       jest.spyOn(jobService, 'cancelJob').mockResolvedValue();
       const webhook: WebhookDto = {
         chainId,
         escrowAddress,
-        eventType: EventType.ESCROW_CANCELED,
+        eventType: EventType.CANCELLATION_REQUESTED,
       };
       expect(await webhookService.handleWebhook(webhook)).toBe(undefined);
       expect(jobService.cancelJob).toHaveBeenCalledWith(webhook);
@@ -169,21 +169,11 @@ describe('WebhookService', () => {
     });
 
     it('should handle an incoming escrow abuse webhook', async () => {
-      jest.spyOn(jobService, 'pauseJob').mockResolvedValue();
+      jest.spyOn(jobService, 'cancelJob').mockResolvedValue();
       const webhook: WebhookDto = {
         chainId,
         escrowAddress,
         eventType: EventType.ABUSE_DETECTED,
-      };
-      expect(await webhookService.handleWebhook(webhook)).toBe(undefined);
-    });
-
-    it('should handle an incoming escrow resume webhook', async () => {
-      jest.spyOn(jobService, 'resumeJob').mockResolvedValue();
-      const webhook: WebhookDto = {
-        chainId,
-        escrowAddress,
-        eventType: EventType.ABUSE_DISMISSED,
       };
       expect(await webhookService.handleWebhook(webhook)).toBe(undefined);
     });
@@ -216,7 +206,7 @@ describe('WebhookService', () => {
         .mockResolvedValue('');
       await expect(
         (webhookService as any).sendWebhook(webhookEntity),
-      ).rejects.toThrowError(ErrorWebhook.UrlNotFound);
+      ).rejects.toThrow(ErrorWebhook.UrlNotFound);
     });
 
     it('should handle error if any exception is thrown', async () => {
@@ -228,7 +218,7 @@ describe('WebhookService', () => {
       });
       await expect(
         (webhookService as any).sendWebhook(webhookEntity),
-      ).rejects.toThrowError('HTTP request failed');
+      ).rejects.toThrow('HTTP request failed');
     });
 
     it('should successfully process a webhook with signature', async () => {
@@ -305,7 +295,7 @@ describe('WebhookService', () => {
           ChainId.LOCALHOST,
           EventType.ESCROW_CREATED,
         ),
-      ).rejects.toThrowError('Invalid outgoing event type');
+      ).rejects.toThrow('Invalid outgoing event type');
     });
 
     it('should throw NotFoundError if operator is not found', async () => {
@@ -322,6 +312,24 @@ describe('WebhookService', () => {
           EventType.ESCROW_FAILED,
         ),
       ).rejects.toThrow(new NotFoundError('Oracle not found'));
+    });
+
+    it('should throw NotFoundError if webhook url is not found', async () => {
+      (EscrowClient.build as any).mockImplementation(() => ({
+        getJobLauncherAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+      }));
+
+      (OperatorUtils.getOperator as any).mockResolvedValue({
+        webhookUrl: null,
+      });
+
+      await expect(
+        (webhookService as any).getOracleWebhookUrl(
+          JOB_LAUNCHER_WEBHOOK_URL,
+          ChainId.LOCALHOST,
+          EventType.ESCROW_FAILED,
+        ),
+      ).rejects.toThrow(new NotFoundError('Oracle webhook URL not found'));
     });
   });
 

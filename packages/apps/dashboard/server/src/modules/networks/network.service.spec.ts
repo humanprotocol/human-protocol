@@ -22,7 +22,6 @@ describe('NetworksService', () => {
     process.env.RPC_URL_POLYGON = 'https://testrpc.com';
     process.env.RPC_URL_BSC_MAINNET = 'https://testrpc.com';
     process.env.RPC_URL_ETHEREUM = 'https://testrpc.com';
-    process.env.RPC_URL_AURORA_TESTNET = 'https://testrpc.com';
     process.env.WEB3_ENV = 'mainnet';
   });
 

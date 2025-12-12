@@ -16,14 +16,14 @@ from human_protocol_sdk.filter import TransactionFilter
 class TestTransactionUtils(unittest.TestCase):
     def test_get_transactions(self):
         with patch(
-            "human_protocol_sdk.transaction.transaction_utils.get_data_from_subgraph"
+            "human_protocol_sdk.transaction.transaction_utils.custom_gql_fetch"
         ) as mock_function:
             mock_transaction_1 = {
-                "block": 123,
+                "block": "123",
                 "txHash": "0x1234567890123456789012345678901234567890123456789012345678901234",
                 "from": "0x1234567890123456789012345678901234567890",
                 "to": "0x9876543210987654321098765432109876543210",
-                "timestamp": 1622700000,
+                "timestamp": "1622700000",
                 "value": "1000000000000000000",
                 "method": "transfer",
                 "internalTransactions": [
@@ -36,11 +36,11 @@ class TestTransactionUtils(unittest.TestCase):
                 ],
             }
             mock_transaction_2 = {
-                "block": 456,
+                "block": "456",
                 "txHash": "0x9876543210987654321098765432109876543210987654321098765432109876",
                 "from": "0x9876543210987654321098765432109876543210",
                 "to": "0x1234567890123456789012345678901234567890",
-                "timestamp": 1622800000,
+                "timestamp": "1622800000",
                 "value": "2000000000000000000",
                 "method": "transfer",
                 "internalTransactions": [
@@ -82,6 +82,7 @@ class TestTransactionUtils(unittest.TestCase):
                     "token": None,
                     "method": None,
                 },
+                options=None,
             )
             self.assertEqual(len(transactions), 2)
             self.assertEqual(transactions[0].chain_id, ChainId.POLYGON_AMOY)
@@ -89,7 +90,7 @@ class TestTransactionUtils(unittest.TestCase):
 
     def test_get_transactions_empty_response(self):
         with patch(
-            "human_protocol_sdk.transaction.transaction_utils.get_data_from_subgraph"
+            "human_protocol_sdk.transaction.transaction_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.return_value = {"data": {"transactions": []}}
 
@@ -117,6 +118,7 @@ class TestTransactionUtils(unittest.TestCase):
                     "token": None,
                     "method": None,
                 },
+                options=None,
             )
             self.assertEqual(len(transactions), 0)
 
@@ -148,14 +150,14 @@ class TestTransactionUtils(unittest.TestCase):
 
     def test_get_transaction(self):
         with patch(
-            "human_protocol_sdk.transaction.transaction_utils.get_data_from_subgraph"
+            "human_protocol_sdk.transaction.transaction_utils.custom_gql_fetch"
         ) as mock_function:
             mock_transaction = {
-                "block": 123,
+                "block": "123",
                 "txHash": "0x1234567890123456789012345678901234567890123456789012345678901234",
                 "from": "0x1234567890123456789012345678901234567890",
                 "to": "0x9876543210987654321098765432109876543210",
-                "timestamp": 1622700000,
+                "timestamp": "1622700000",
                 "value": "1000000000000000000",
                 "method": "transfer",
                 "internalTransactions": [
@@ -181,20 +183,23 @@ class TestTransactionUtils(unittest.TestCase):
                 params={
                     "hash": "0x1234567890123456789012345678901234567890123456789012345678901234"
                 },
+                options=None,
             )
             self.assertIsNotNone(transaction)
             self.assertEqual(transaction.chain_id, ChainId.POLYGON_AMOY)
-            self.assertEqual(transaction.block, mock_transaction["block"])
+            self.assertEqual(transaction.block, int(mock_transaction["block"]))
             self.assertEqual(transaction.tx_hash, mock_transaction["txHash"])
             self.assertEqual(transaction.from_address, mock_transaction["from"])
             self.assertEqual(transaction.to_address, mock_transaction["to"])
-            self.assertEqual(transaction.timestamp, mock_transaction["timestamp"])
-            self.assertEqual(transaction.value, mock_transaction["value"])
+            self.assertEqual(
+                transaction.timestamp, int(mock_transaction["timestamp"]) * 1000
+            )
+            self.assertEqual(transaction.value, int(mock_transaction["value"]))
             self.assertEqual(transaction.method, mock_transaction["method"])
 
     def test_get_transaction_empty_data(self):
         with patch(
-            "human_protocol_sdk.transaction.transaction_utils.get_data_from_subgraph"
+            "human_protocol_sdk.transaction.transaction_utils.custom_gql_fetch"
         ) as mock_function:
 
             mock_function.return_value = {"data": {"transaction": None}}
@@ -207,6 +212,7 @@ class TestTransactionUtils(unittest.TestCase):
                 NETWORKS[ChainId.POLYGON_AMOY],
                 query=ANY,
                 params={"hash": "transaction_hash"},
+                options=None,
             )
 
             self.assertIsNone(transaction)

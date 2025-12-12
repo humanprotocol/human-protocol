@@ -9,7 +9,9 @@ export const useJobDetails = (jobId: number) => {
     try {
       const results = await jobService.getJobResult(jobId);
       jobData.results = results;
-    } catch {}
+    } catch {
+      // No results found
+    }
     return jobData;
   });
 };

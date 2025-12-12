@@ -1,9 +1,6 @@
-import Grid from '@mui/material/Grid/Grid';
-import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography/Typography';
+import { Stack, TextField, Typography } from '@mui/material';
 import { t } from 'i18next';
 import styled from '@mui/material/styles/styled';
-import { CheckmarkIcon } from '@/shared/components/ui/icons';
 import { colorPalette } from '@/shared/styles/color-palette';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
 import { useColorMode } from '@/shared/contexts/color-mode';
@@ -12,6 +9,7 @@ import {
   onlyDarkModeColor,
 } from '@/shared/styles/dark-color-palette';
 import { useWalletConnect } from '@/shared/contexts/wallet-connect';
+import { Chip } from '@/shared/components/ui/chip';
 
 const CustomTextField = styled(TextField)(() => ({
   '& .Mui-disabled': {
@@ -43,12 +41,17 @@ export function WalletConnectDone() {
   );
 
   return (
-    <Grid alignItems="center" container gap="0.5rem" padding="0.5rem 0">
-      <Typography variant="buttonLarge">
-        {t('worker.profile.walletConnected')}
-      </Typography>
-      <CheckmarkIcon />
+    <Stack gap={3}>
+      <Stack direction="row" alignItems="center" gap={1}>
+        <Typography variant="buttonLarge">
+          {t('worker.profile.wallet')}:{' '}
+        </Typography>
+        <Chip
+          label={t('worker.profile.walletConnected')}
+          backgroundColor="success.main"
+        />
+      </Stack>
       {address && !user.wallet_address ? null : textFiled}
-    </Grid>
+    </Stack>
   );
 }

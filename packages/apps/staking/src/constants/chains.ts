@@ -18,7 +18,6 @@ switch (import.meta.env.VITE_APP_ENVIRONMENT.toLowerCase()) {
       ChainId.BSC_TESTNET,
       ChainId.POLYGON_AMOY,
       ChainId.SEPOLIA,
-      ChainId.AURORA_TESTNET,
     ];
     break;
   case 'localhost':
@@ -31,12 +30,12 @@ const supportedChains =
   import.meta.env.VITE_APP_SUPPORTED_CHAINS?.split(',') || [];
 
 export const SUPPORTED_CHAIN_IDS: ChainId[] = initialSupportedChainIds.filter(
-  (chainId) => supportedChains.includes(chainId.toString())
+  (chainId) => supportedChains.includes(chainId.toString()),
 );
 
 if (SUPPORTED_CHAIN_IDS.length === 0) {
   throw new Error(
-    'No valid RPC URL provided for the supported blockchain environment'
+    'No valid RPC URL provided for the supported blockchain environment',
   );
 }
 

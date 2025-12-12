@@ -103,14 +103,13 @@ export class AuthService implements AuthProvider {
         commonApiPaths.auth.refresh.path,
         {
           body: {
-            // eslint-disable-next-line camelcase
             refresh_token: refreshToken,
           },
         }
       );
 
       return response;
-    } catch (error) {
+    } catch {
       return null;
     }
   }

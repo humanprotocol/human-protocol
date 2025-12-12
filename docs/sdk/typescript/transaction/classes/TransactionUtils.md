@@ -6,7 +6,7 @@
 
 # Class: TransactionUtils
 
-Defined in: [transaction.ts:18](https://github.com/humanprotocol/human-protocol/blob/2f541eb9f61d23b64321ff5b999971550d47e843/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L18)
+Defined in: [transaction.ts:22](https://github.com/humanprotocol/human-protocol/blob/0661934b14ae802af3f939783433c196862268e2/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L22)
 
 ## Constructors
 
@@ -22,9 +22,9 @@ Defined in: [transaction.ts:18](https://github.com/humanprotocol/human-protocol/
 
 ### getTransaction()
 
-> `static` **getTransaction**(`chainId`, `hash`): `Promise`\<`null` \| [`ITransaction`](../../interfaces/interfaces/ITransaction.md)\>
+> `static` **getTransaction**(`chainId`, `hash`, `options?`): `Promise`\<[`ITransaction`](../../interfaces/interfaces/ITransaction.md) \| `null`\>
 
-Defined in: [transaction.ts:50](https://github.com/humanprotocol/human-protocol/blob/2f541eb9f61d23b64321ff5b999971550d47e843/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L50)
+Defined in: [transaction.ts:67](https://github.com/humanprotocol/human-protocol/blob/0661934b14ae802af3f939783433c196862268e2/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L67)
 
 This function returns the transaction data for the given hash.
 
@@ -35,12 +35,24 @@ type ITransaction = {
   from: string;
   to: string;
   timestamp: bigint;
-  value: string;
+  value: bigint;
   method: string;
   receiver?: string;
   escrow?: string;
   token?: string;
   internalTransactions: InternalTransaction[];
+};
+```
+
+```ts
+type InternalTransaction = {
+ from: string;
+ to: string;
+ value: bigint;
+ method: string;
+ receiver?: string;
+ escrow?: string;
+ token?: string;
 };
 ```
 
@@ -58,9 +70,15 @@ The chain ID.
 
 The transaction hash.
 
+##### options?
+
+[`SubgraphOptions`](../../interfaces/interfaces/SubgraphOptions.md)
+
+Optional configuration for subgraph requests.
+
 #### Returns
 
-`Promise`\<`null` \| [`ITransaction`](../../interfaces/interfaces/ITransaction.md)\>
+`Promise`\<[`ITransaction`](../../interfaces/interfaces/ITransaction.md) \| `null`\>
 
 - Returns the transaction details or null if not found.
 
@@ -76,9 +94,9 @@ const transaction = await TransactionUtils.getTransaction(ChainId.POLYGON, '0x62
 
 ### getTransactions()
 
-> `static` **getTransactions**(`filter`): `Promise`\<[`ITransaction`](../../interfaces/interfaces/ITransaction.md)[]\>
+> `static` **getTransactions**(`filter`, `options?`): `Promise`\<[`ITransaction`](../../interfaces/interfaces/ITransaction.md)[]\>
 
-Defined in: [transaction.ts:132](https://github.com/humanprotocol/human-protocol/blob/2f541eb9f61d23b64321ff5b999971550d47e843/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L132)
+Defined in: [transaction.ts:169](https://github.com/humanprotocol/human-protocol/blob/0661934b14ae802af3f939783433c196862268e2/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L169)
 
 This function returns all transaction details based on the provided filter.
 
@@ -102,6 +120,17 @@ interface ITransactionsFilter {
   skip?: number; // (Optional) Number of transactions to skip. Default is 0.
   orderDirection?: OrderDirection; // (Optional) Order of the results. Default is DESC.
 }
+
+```ts
+type InternalTransaction = {
+ from: string;
+ to: string;
+ value: bigint;
+ method: string;
+ receiver?: string;
+ escrow?: string;
+ token?: string;
+};
 ```
 
 ```ts
@@ -111,7 +140,7 @@ type ITransaction = {
   from: string;
   to: string;
   timestamp: bigint;
-  value: string;
+  value: bigint;
   method: string;
   receiver?: string;
   escrow?: string;
@@ -120,19 +149,9 @@ type ITransaction = {
 };
 ```
 
-#### Parameters
-
-##### filter
-
-[`ITransactionsFilter`](../../interfaces/interfaces/ITransactionsFilter.md)
-
-Filter for the transactions.
-
-#### Returns
-
-`Promise`\<[`ITransaction`](../../interfaces/interfaces/ITransaction.md)[]\>
-
-Returns an array with all the transaction details.
+@param {ITransactionsFilter} filter Filter for the transactions.
+@param {SubgraphOptions} options Optional configuration for subgraph requests.
+@returns {Promise<ITransaction[]>} Returns an array with all the transaction details.
 
 **Code example**
 
@@ -149,3 +168,17 @@ const filter: ITransactionsFilter = {
 };
 const transactions = await TransactionUtils.getTransactions(filter);
 ```
+
+#### Parameters
+
+##### filter
+
+[`ITransactionsFilter`](../../interfaces/interfaces/ITransactionsFilter.md)
+
+##### options?
+
+[`SubgraphOptions`](../../interfaces/interfaces/SubgraphOptions.md)
+
+#### Returns
+
+`Promise`\<[`ITransaction`](../../interfaces/interfaces/ITransaction.md)[]\>

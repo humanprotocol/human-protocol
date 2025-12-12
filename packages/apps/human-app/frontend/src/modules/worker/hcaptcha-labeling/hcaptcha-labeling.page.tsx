@@ -144,8 +144,8 @@ export function HcaptchaLabelingPage() {
             {canSolveCaptcha ? (
               <Grid container sx={{ width: '100%', justifyContent: 'center' }}>
                 <HCaptcha
-                  // @ts-expect-error -- this props are not defined by TS by are used for enterprise version: https://github.com/hCaptcha/react-hcaptcha?tab=readme-ov-file#references
                   custom
+                  // @ts-expect-error -- this props are not defined by TS by are used for enterprise version: https://github.com/hCaptcha/react-hcaptcha?tab=readme-ov-file#references
                   endpoint={env.VITE_H_CAPTCHA_EXCHANGE_URL}
                   onVerify={hcaptchaOnSuccess}
                   ref={captchaRef}

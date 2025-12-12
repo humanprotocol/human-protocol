@@ -4,7 +4,7 @@
     "baseUrl": ".",
     "declaration": true,
     "declarationMap": true,
-    "outDir": "./dist",
+    "outDir": "./dist"
   },
   "include": ["./scripts", "./test", "./typechain-types"],
   "files": ["./hardhat.config.ts"]

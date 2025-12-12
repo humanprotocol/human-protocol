@@ -1,4 +1,3 @@
-/* eslint-disable camelcase -- ...*/
 import { z } from 'zod';
 
 export const createPaginationSchema = <T>(resultsSchema: z.ZodType<T>) =>

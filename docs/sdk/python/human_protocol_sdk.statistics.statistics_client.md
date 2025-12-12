@@ -161,12 +161,13 @@ Initializes a Statistics instance
 * **Parameters:**
   **chain_id** ([`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)) – Chain ID to get statistical data from
 
-#### get_escrow_statistics(filter=<human_protocol_sdk.filter.StatisticsFilter object>)
+#### get_escrow_statistics(filter=<human_protocol_sdk.filter.StatisticsFilter object>, options=None)
 
 Get escrow statistics data for the given date range.
 
 * **Parameters:**
-  **filter** ([`StatisticsFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.StatisticsFilter)) – Object containing the date range
+  * **filter** ([`StatisticsFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.StatisticsFilter)) – Object containing the date range
+  * **options** (`Optional`[[`SubgraphOptions`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.SubgraphOptions)]) – Optional config for subgraph requests
 * **Return type:**
   [`EscrowStatistics`](#human_protocol_sdk.statistics.statistics_client.EscrowStatistics)
 * **Returns:**
@@ -190,12 +191,13 @@ Get escrow statistics data for the given date range.
   )
   ```
 
-#### get_hmt_daily_data(filter=<human_protocol_sdk.filter.StatisticsFilter object>)
+#### get_hmt_daily_data(filter=<human_protocol_sdk.filter.StatisticsFilter object>, options=None)
 
 Get HMT daily statistics data for the given date range.
 
 * **Parameters:**
-  **filter** ([`StatisticsFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.StatisticsFilter)) – Object containing the date range
+  * **filter** ([`StatisticsFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.StatisticsFilter)) – Object containing the date range
+  * **options** (`Optional`[[`SubgraphOptions`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.SubgraphOptions)]) – Optional config for subgraph requests
 * **Return type:**
   `List`[[`DailyHMTData`](#human_protocol_sdk.statistics.statistics_client.DailyHMTData)]
 * **Returns:**
@@ -218,12 +220,13 @@ Get HMT daily statistics data for the given date range.
   )
   ```
 
-#### get_hmt_holders(param=<human_protocol_sdk.statistics.statistics_client.HMTHoldersParam object>)
+#### get_hmt_holders(param=<human_protocol_sdk.statistics.statistics_client.HMTHoldersParam object>, options=None)
 
 Get HMT holders data with optional filters and ordering.
 
 * **Parameters:**
-  **param** ([`HMTHoldersParam`](#human_protocol_sdk.statistics.statistics_client.HMTHoldersParam)) – Object containing filter and order parameters
+  * **param** ([`HMTHoldersParam`](#human_protocol_sdk.statistics.statistics_client.HMTHoldersParam)) – Object containing filter and order parameters
+  * **options** (`Optional`[[`SubgraphOptions`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.SubgraphOptions)]) – Optional config for subgraph requests
 * **Return type:**
   `List`[[`HMTHolder`](#human_protocol_sdk.statistics.statistics_client.HMTHolder)]
 * **Returns:**
@@ -246,10 +249,12 @@ Get HMT holders data with optional filters and ordering.
   )
   ```
 
-#### get_hmt_statistics()
+#### get_hmt_statistics(options=None)
 
 Get HMT statistics data.
 
+* **Parameters:**
+  **options** (`Optional`[[`SubgraphOptions`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.SubgraphOptions)]) – Optional config for subgraph requests
 * **Return type:**
   [`HMTStatistics`](#human_protocol_sdk.statistics.statistics_client.HMTStatistics)
 * **Returns:**
@@ -264,12 +269,13 @@ Get HMT statistics data.
   print(statistics_client.get_hmt_statistics())
   ```
 
-#### get_payment_statistics(filter=<human_protocol_sdk.filter.StatisticsFilter object>)
+#### get_payment_statistics(filter=<human_protocol_sdk.filter.StatisticsFilter object>, options=None)
 
 Get payment statistics data for the given date range.
 
 * **Parameters:**
-  **filter** ([`StatisticsFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.StatisticsFilter)) – Object containing the date range
+  * **filter** ([`StatisticsFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.StatisticsFilter)) – Object containing the date range
+  * **options** (`Optional`[[`SubgraphOptions`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.SubgraphOptions)]) – Optional config for subgraph requests
 * **Return type:**
   [`PaymentStatistics`](#human_protocol_sdk.statistics.statistics_client.PaymentStatistics)
 * **Returns:**
@@ -293,12 +299,13 @@ Get payment statistics data for the given date range.
   )
   ```
 
-#### get_worker_statistics(filter=<human_protocol_sdk.filter.StatisticsFilter object>)
+#### get_worker_statistics(filter=<human_protocol_sdk.filter.StatisticsFilter object>, options=None)
 
 Get worker statistics data for the given date range.
 
 * **Parameters:**
-  **filter** ([`StatisticsFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.StatisticsFilter)) – Object containing the date range
+  * **filter** ([`StatisticsFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.StatisticsFilter)) – Object containing the date range
+  * **options** (`Optional`[[`SubgraphOptions`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.SubgraphOptions)]) – Optional config for subgraph requests
 * **Return type:**
   [`WorkerStatistics`](#human_protocol_sdk.statistics.statistics_client.WorkerStatistics)
 * **Returns:**

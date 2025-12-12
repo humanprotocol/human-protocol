@@ -1,4 +1,3 @@
-/* eslint-disable camelcase -- ...*/
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';

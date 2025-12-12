@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Address, BigInt, ethereum } from '@graphprotocol/graph-ts';
 import { Transaction, InternalTransaction } from '../../../generated/schema';
 import { toEventId, toPreviousEventId } from './event';
@@ -10,6 +9,7 @@ const mainMethods: string[] = [
   'bulkTransfer',
   'storeResults',
   'withdraw',
+  'requestCancellation',
   'cancel',
   'stake',
   'unstake',

@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 import React, { useEffect, useState } from 'react';
 import { Box, Grid, Paper, Stack, Tab, Tabs, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';

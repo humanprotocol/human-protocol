@@ -26,8 +26,6 @@ def get_web3(chain_id: int | Networks):
             network = Config.polygon_mainnet
         case Networks.polygon_amoy:
             network = Config.polygon_amoy
-        case Networks.aurora_testnet:
-            network = Config.aurora_testnet
         case Networks.localhost:
             network = Config.localhost
         case _:
@@ -56,8 +54,6 @@ def sign_message(chain_id: Networks, message) -> str:
             private_key = Config.polygon_mainnet.private_key
         case Config.polygon_amoy.chain_id:
             private_key = Config.polygon_amoy.private_key
-        case Config.aurora_testnet.chain_id:
-            private_key = Config.aurora_testnet.private_key
         case Config.localhost.chain_id:
             private_key = Config.localhost.private_key
         case _:

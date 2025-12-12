@@ -1,4 +1,3 @@
-/* eslint-disable camelcase -- ....*/
 import { Grid, Typography } from '@mui/material';
 import { t } from 'i18next';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';

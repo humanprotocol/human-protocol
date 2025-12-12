@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 import { useState } from 'react';
 import {
   Box,
@@ -117,12 +116,15 @@ export function ReportAbuseModal({
   const isIdleOrLoading = isIdle || isPending;
 
   const handleReportAbuse = () => {
-    reason.length > 0 &&
-      reportAbuseMutation({
-        escrow_address: escrowAddress,
-        chain_id: chainId,
-        reason,
-      });
+    if (!reason.length) {
+      return;
+    }
+
+    reportAbuseMutation({
+      escrow_address: escrowAddress,
+      chain_id: chainId,
+      reason,
+    });
   };
 
   return (

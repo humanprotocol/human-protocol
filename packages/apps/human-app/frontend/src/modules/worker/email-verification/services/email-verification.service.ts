@@ -24,7 +24,6 @@ async function resendEmailVerification(token: string) {
   try {
     await authorizedHumanAppApiClient.post(apiPaths.resendEmailVerification, {
       body: {
-        // eslint-disable-next-line camelcase
         h_captcha_token: token,
       },
     });

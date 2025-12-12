@@ -1,6 +1,7 @@
 import pino from 'pino';
 
 import LoggerWrapper from './abstract-logger';
+import { ERROR_KEY, MESSAGE_KEY, TIMESTAMP_KEY } from './constants';
 import {
   ChildBindings,
   LogMeta,
@@ -52,7 +53,9 @@ export const createPinoLogger: LoggerFactory = (
       ? {
           target: 'pino-pretty',
           options: {
-            messageKey: 'message',
+            messageKey: MESSAGE_KEY,
+            timestampKey: TIMESTAMP_KEY,
+            errorLikeObjectKeys: [ERROR_KEY],
             translateTime: "SYS:yyyy-mm-dd, HH:MM:ss'Z'",
             colorize: true,
           },

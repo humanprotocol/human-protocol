@@ -1,4 +1,3 @@
-/* eslint-disable camelcase --- ... */
 import { t } from 'i18next';
 import { Sorting } from '@/shared/components/ui/table/table-header-menu/sorting';
 import { useJobsFilterStore } from '../../hooks';

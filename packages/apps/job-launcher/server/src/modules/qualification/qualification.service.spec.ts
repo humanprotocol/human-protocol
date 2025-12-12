@@ -21,6 +21,10 @@ import { ErrorQualification, ErrorWeb3 } from '../../common/constants/errors';
 import { ServerError, ValidationError } from '../../common/errors';
 import { Web3Service } from '../web3/web3.service';
 import { QualificationService } from './qualification.service';
+import { RateService } from '../rate/rate.service';
+import { createMock } from '@golevelup/ts-jest';
+
+const mockRateService = createMock<RateService>();
 
 describe.only('QualificationService', () => {
   let qualificationService: QualificationService, httpService: HttpService;
@@ -49,6 +53,10 @@ describe.only('QualificationService', () => {
           useValue: {
             get: jest.fn(),
           },
+        },
+        {
+          provide: RateService,
+          useValue: mockRateService,
         },
       ],
     })

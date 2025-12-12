@@ -452,6 +452,10 @@ export class PaymentController {
       throw new ValidationError(ErrorPayment.InvalidChainId);
     }
 
+    if (chainId === ChainId.LOCALHOST) {
+      return tokens;
+    }
+
     // Disable HMT
     const { [EscrowFundToken.HMT]: _omit, ...withoutHMT } = tokens;
 

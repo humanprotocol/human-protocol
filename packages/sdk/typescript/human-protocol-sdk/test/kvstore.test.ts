@@ -461,7 +461,8 @@ describe('KVStoreUtils', () => {
     //   expect(gqlFetchSpy).toHaveBeenCalledWith(
     //     NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
     //     GET_KVSTORE_BY_ADDRESS_AND_KEY_QUERY(),
-    //     { address: ethers.ZeroAddress, key: 'key1' }
+    //     { address: ethers.ZeroAddress, key: 'key1' },
+    //     undefined
     //   );
     // });
 
@@ -497,7 +498,8 @@ describe('KVStoreUtils', () => {
       expect(gqlFetchSpy).toHaveBeenCalledWith(
         NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
         GET_KVSTORE_BY_ADDRESS_AND_KEY_QUERY(),
-        { address: ethers.ZeroAddress, key: 'key1' }
+        { address: ethers.ZeroAddress, key: 'key1' },
+        undefined
       );
     });
 
@@ -534,7 +536,8 @@ describe('KVStoreUtils', () => {
       expect(gqlFetchSpy).toHaveBeenCalledWith(
         NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
         GET_KVSTORE_BY_ADDRESS_AND_KEY_QUERY(),
-        { address: ethers.ZeroAddress, key: 'key1' }
+        { address: ethers.ZeroAddress, key: 'key1' },
+        undefined
       );
     });
   });
@@ -560,7 +563,8 @@ describe('KVStoreUtils', () => {
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
         ChainId.LOCALHOST,
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
-        'url'
+        'url',
+        undefined
       );
     });
 
@@ -581,7 +585,8 @@ describe('KVStoreUtils', () => {
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
         ChainId.LOCALHOST,
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
-        'url'
+        'url',
+        undefined
       );
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
         ChainId.LOCALHOST,
@@ -608,7 +613,8 @@ describe('KVStoreUtils', () => {
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
         ChainId.LOCALHOST,
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
-        'linkedin_url'
+        'linkedin_url',
+        undefined
       );
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
         ChainId.LOCALHOST,
@@ -635,7 +641,8 @@ describe('KVStoreUtils', () => {
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
         ChainId.LOCALHOST,
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
-        'url'
+        'url',
+        undefined
       );
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
         ChainId.LOCALHOST,
@@ -659,7 +666,8 @@ describe('KVStoreUtils', () => {
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
         ChainId.LOCALHOST,
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
-        'url'
+        'url',
+        undefined
       );
     });
   });
@@ -682,7 +690,8 @@ describe('KVStoreUtils', () => {
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
         ChainId.LOCALHOST,
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
-        'public_key'
+        'public_key',
+        undefined
       );
     });
 
@@ -703,7 +712,8 @@ describe('KVStoreUtils', () => {
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
         ChainId.LOCALHOST,
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
-        'public_key'
+        'public_key',
+        undefined
       );
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
         ChainId.LOCALHOST,
@@ -732,7 +742,8 @@ describe('KVStoreUtils', () => {
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
         ChainId.LOCALHOST,
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
-        'public_key'
+        'public_key',
+        undefined
       );
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
         ChainId.LOCALHOST,
@@ -756,7 +767,8 @@ describe('KVStoreUtils', () => {
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
         ChainId.LOCALHOST,
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
-        'public_key'
+        'public_key',
+        undefined
       );
     });
   });
@@ -820,7 +832,8 @@ describe('KVStoreUtils', () => {
       expect(gqlFetchSpy).toHaveBeenCalledWith(
         NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
         GET_KVSTORE_BY_ADDRESS_QUERY(),
-        { address: ethers.ZeroAddress }
+        { address: ethers.ZeroAddress },
+        undefined
       );
     });
   });

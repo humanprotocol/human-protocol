@@ -5,9 +5,10 @@ import { firstValueFrom } from 'rxjs';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ErrorQualification, ErrorWeb3 } from '../../common/constants/errors';
 import { ServerError } from '../../common/errors';
+import { formatAxiosError } from '../../common/utils/http';
+import logger from '../../logger';
 import { Web3Service } from '../web3/web3.service';
 import { QualificationDto } from './qualification.dto';
-import logger from '../../logger';
 
 @Injectable()
 export class QualificationService {
@@ -33,7 +34,9 @@ export class QualificationService {
         this.web3ConfigService.reputationOracleAddress,
         KVStoreKeys.url,
       );
-    } catch {}
+    } catch {
+      // Ignore error
+    }
 
     if (!reputationOracleUrl || reputationOracleUrl === '') {
       throw new ServerError(ErrorWeb3.ReputationOracleUrlNotSet);
@@ -48,9 +51,10 @@ export class QualificationService {
 
       return data;
     } catch (error) {
+      const formattedError = formatAxiosError(error);
       this.logger.error(
         'Error fetching qualifications from reputation oracle',
-        error,
+        { error: formattedError },
       );
       throw new ServerError(ErrorQualification.FailedToFetchQualifications);
     }

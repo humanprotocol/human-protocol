@@ -1,4 +1,3 @@
-/* eslint-disable camelcase -- ...*/
 import { useMutation } from '@tanstack/react-query';
 import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';

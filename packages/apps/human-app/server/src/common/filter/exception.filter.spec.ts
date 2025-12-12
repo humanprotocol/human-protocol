@@ -47,13 +47,13 @@ describe('ExceptionFilter', () => {
       new HttpException('Http exception', HttpStatus.BAD_REQUEST),
       mockArgumentsHost,
     );
-    expect(mockHttpArgumentsHost).toBeCalledTimes(1);
-    expect(mockHttpArgumentsHost).toBeCalledWith();
-    expect(mockGetResponse).toBeCalledTimes(1);
-    expect(mockGetResponse).toBeCalledWith();
-    expect(mockStatus).toBeCalledTimes(1);
-    expect(mockStatus).toBeCalledWith(HttpStatus.BAD_REQUEST);
-    expect(mockJson).toBeCalledTimes(1);
-    expect(mockJson).toBeCalledWith('Http exception');
+    expect(mockHttpArgumentsHost).toHaveBeenCalledTimes(1);
+    expect(mockHttpArgumentsHost).toHaveBeenCalledWith();
+    expect(mockGetResponse).toHaveBeenCalledTimes(1);
+    expect(mockGetResponse).toHaveBeenCalledWith();
+    expect(mockStatus).toHaveBeenCalledTimes(1);
+    expect(mockStatus).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+    expect(mockJson).toHaveBeenCalledTimes(1);
+    expect(mockJson).toHaveBeenCalledWith('Http exception');
   });
 });

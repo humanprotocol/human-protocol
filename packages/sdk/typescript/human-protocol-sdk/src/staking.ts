@@ -10,7 +10,7 @@ import { ContractRunner, Overrides, ethers } from 'ethers';
 import { BaseEthersClient } from './base';
 import { NETWORKS } from './constants';
 import { requiresSigner } from './decorators';
-import { ChainId } from './enums';
+import { ChainId, OrderDirection } from './enums';
 import {
   ErrorEscrowAddressIsNotProvidedByFactory,
   ErrorInvalidEscrowAddressProvided,
@@ -19,11 +19,22 @@ import {
   ErrorInvalidStakingValueSign,
   ErrorInvalidStakingValueType,
   ErrorProviderDoesNotExist,
+  ErrorStakerNotFound,
   ErrorUnsupportedChainID,
 } from './error';
+import {
+  IStaker,
+  IStakersFilter,
+  StakerInfo,
+  SubgraphOptions,
+} from './interfaces';
+import { StakerData } from './graphql';
 import { NetworkData } from './types';
-import { throwError } from './utils';
-import { StakerInfo } from './interfaces';
+import { getSubgraphUrl, customGqlFetch, throwError } from './utils';
+import {
+  GET_STAKER_BY_ADDRESS_QUERY,
+  GET_STAKERS_QUERY,
+} from './graphql/queries/staking';
 
 /**
  * ## Introduction
@@ -207,7 +218,7 @@ export class StakingClient extends BaseEthersClient {
         await this.tokenContract.approve(
           await this.stakingContract.getAddress(),
           amount,
-          this.applyTxDefaults(txOptions)
+          txOptions
         )
       ).wait();
       return;
@@ -254,12 +265,7 @@ export class StakingClient extends BaseEthersClient {
     }
 
     try {
-      await (
-        await this.stakingContract.stake(
-          amount,
-          this.applyTxDefaults(txOptions)
-        )
-      ).wait();
+      await (await this.stakingContract.stake(amount, txOptions)).wait();
       return;
     } catch (e) {
       return throwError(e);
@@ -306,12 +312,7 @@ export class StakingClient extends BaseEthersClient {
     }
 
     try {
-      await (
-        await this.stakingContract.unstake(
-          amount,
-          this.applyTxDefaults(txOptions)
-        )
-      ).wait();
+      await (await this.stakingContract.unstake(amount, txOptions)).wait();
       return;
     } catch (e) {
       return throwError(e);
@@ -345,9 +346,7 @@ export class StakingClient extends BaseEthersClient {
   @requiresSigner
   public async withdraw(txOptions: Overrides = {}): Promise<void> {
     try {
-      await (
-        await this.stakingContract.withdraw(this.applyTxDefaults(txOptions))
-      ).wait();
+      await (await this.stakingContract.withdraw(txOptions)).wait();
       return;
     } catch (e) {
       return throwError(e);
@@ -414,7 +413,7 @@ export class StakingClient extends BaseEthersClient {
           staker,
           escrowAddress,
           amount,
-          this.applyTxDefaults(txOptions)
+          txOptions
         )
       ).wait();
 
@@ -451,7 +450,7 @@ export class StakingClient extends BaseEthersClient {
 
     try {
       const stakerInfo = await this.stakingContract.stakes(stakerAddress);
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
       const currentBlock = await this.runner.provider!.getBlockNumber();
 
       const tokensWithdrawable =
@@ -477,4 +476,121 @@ export class StakingClient extends BaseEthersClient {
       return throwError(error);
     }
   }
+}
+
+/**
+ * Utility class for Staking-related subgraph queries.
+ */
+export class StakingUtils {
+  /**
+   * Gets staking info for a staker from the subgraph.
+   *
+   * @param {ChainId} chainId Network in which the staking contract is deployed
+   * @param {string} stakerAddress Address of the staker
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
+   * @returns {Promise<IStaker>} Staker info from subgraph
+   */
+  public static async getStaker(
+    chainId: ChainId,
+    stakerAddress: string,
+    options?: SubgraphOptions
+  ): Promise<IStaker> {
+    if (!ethers.isAddress(stakerAddress)) {
+      throw ErrorInvalidStakerAddressProvided;
+    }
+
+    const networkData: NetworkData | undefined = NETWORKS[chainId];
+    if (!networkData) {
+      throw ErrorUnsupportedChainID;
+    }
+
+    const { staker } = await customGqlFetch<{ staker: StakerData }>(
+      getSubgraphUrl(networkData),
+      GET_STAKER_BY_ADDRESS_QUERY,
+      { id: stakerAddress.toLowerCase() },
+      options
+    );
+
+    if (!staker) {
+      throw ErrorStakerNotFound;
+    }
+
+    return mapStaker(staker);
+  }
+
+  /**
+   * Gets all stakers from the subgraph with filters, pagination and ordering.
+   *
+   * @param {IStakersFilter} filter Stakers filter with pagination and ordering
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
+   * @returns {Promise<IStaker[]>} Array of stakers
+   */
+  public static async getStakers(
+    filter: IStakersFilter,
+    options?: SubgraphOptions
+  ): Promise<IStaker[]> {
+    const first =
+      filter.first !== undefined ? Math.min(filter.first, 1000) : 10;
+    const skip = filter.skip || 0;
+    const orderDirection = filter.orderDirection || OrderDirection.DESC;
+    const orderBy = filter.orderBy || 'lastDepositTimestamp';
+
+    const networkData = NETWORKS[filter.chainId];
+    if (!networkData) {
+      throw ErrorUnsupportedChainID;
+    }
+
+    const { stakers } = await customGqlFetch<{ stakers: StakerData[] }>(
+      getSubgraphUrl(networkData),
+      GET_STAKERS_QUERY(filter),
+      {
+        minStakedAmount: filter.minStakedAmount
+          ? filter.minStakedAmount
+          : undefined,
+        maxStakedAmount: filter.maxStakedAmount
+          ? filter.maxStakedAmount
+          : undefined,
+        minLockedAmount: filter.minLockedAmount
+          ? filter.minLockedAmount
+          : undefined,
+        maxLockedAmount: filter.maxLockedAmount
+          ? filter.maxLockedAmount
+          : undefined,
+        minWithdrawnAmount: filter.minWithdrawnAmount
+          ? filter.minWithdrawnAmount
+          : undefined,
+        maxWithdrawnAmount: filter.maxWithdrawnAmount
+          ? filter.maxWithdrawnAmount
+          : undefined,
+        minSlashedAmount: filter.minSlashedAmount
+          ? filter.minSlashedAmount
+          : undefined,
+        maxSlashedAmount: filter.maxSlashedAmount
+          ? filter.maxSlashedAmount
+          : undefined,
+        orderBy: orderBy,
+        orderDirection: orderDirection,
+        first: first,
+        skip: skip,
+      },
+      options
+    );
+    if (!stakers) {
+      return [];
+    }
+
+    return stakers.map((s) => mapStaker(s));
+  }
+}
+
+function mapStaker(s: StakerData): IStaker {
+  return {
+    address: s.address,
+    stakedAmount: BigInt(s.stakedAmount),
+    lockedAmount: BigInt(s.lockedAmount),
+    withdrawableAmount: BigInt(s.withdrawnAmount),
+    slashedAmount: BigInt(s.slashedAmount),
+    lockedUntil: Number(s.lockedUntilTimestamp) * 1000,
+    lastDepositTimestamp: Number(s.lastDepositTimestamp) * 1000,
+  };
 }

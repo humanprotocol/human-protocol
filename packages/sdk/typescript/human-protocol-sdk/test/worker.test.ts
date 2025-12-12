@@ -9,6 +9,7 @@ import {
 } from '../src/graphql/queries/worker';
 import { IWorker, IWorkersFilter } from '../src/interfaces';
 import { WorkerUtils } from '../src/worker';
+import { WorkerData } from '../src/graphql';
 
 vi.mock('graphql-request', () => {
   return {
@@ -19,10 +20,10 @@ vi.mock('graphql-request', () => {
 describe('WorkerUtils', () => {
   describe('getWorker', () => {
     const workerAddress = '0x1234567890abcdef1234567890abcdef12345678';
-    const mockWorker: IWorker = {
+    const mockWorker: WorkerData = {
       id: workerAddress,
       address: workerAddress,
-      totalHMTAmountReceived: 1000,
+      totalHMTAmountReceived: '1000',
       payoutCount: 10,
     };
 
@@ -41,9 +42,14 @@ describe('WorkerUtils', () => {
         GET_WORKER_QUERY,
         {
           address: workerAddress.toLowerCase(),
-        }
+        },
+        undefined
       );
-      expect(result).toEqual(mockWorker);
+      const expected: IWorker = {
+        ...mockWorker,
+        totalHMTAmountReceived: BigInt(mockWorker.totalHMTAmountReceived || 0),
+      };
+      expect(result).toEqual(expected);
     });
 
     test('should return null if worker is not found', async () => {
@@ -61,7 +67,8 @@ describe('WorkerUtils', () => {
         GET_WORKER_QUERY,
         {
           address: workerAddress.toLowerCase(),
-        }
+        },
+        undefined
       );
       expect(result).toBeNull();
     });
@@ -85,17 +92,17 @@ describe('WorkerUtils', () => {
   });
 
   describe('getWorkers', () => {
-    const mockWorkers: IWorker[] = [
+    const mockWorkers: WorkerData[] = [
       {
         id: '0x1234567890abcdef1234567890abcdef12345678',
         address: '0x1234567890abcdef1234567890abcdef12345678',
-        totalHMTAmountReceived: 1000,
+        totalHMTAmountReceived: '1000',
         payoutCount: 10,
       },
       {
         id: '0xabcdefabcdefabcdefabcdefabcdefabcdef',
         address: '0xabcdefabcdefabcdefabcdefabcdefabcdef',
-        totalHMTAmountReceived: 2000,
+        totalHMTAmountReceived: '2000',
         payoutCount: 20,
       },
     ];
@@ -124,9 +131,14 @@ describe('WorkerUtils', () => {
           skip: 0,
           orderBy: 'totalHMTAmountReceived',
           orderDirection: 'asc',
-        }
+        },
+        undefined
       );
-      expect(result).toEqual(mockWorkers);
+      const expected: IWorker[] = mockWorkers.map((mockWorker) => ({
+        ...mockWorker,
+        totalHMTAmountReceived: BigInt(mockWorker.totalHMTAmountReceived || 0),
+      }));
+      expect(result).toEqual(expected);
     });
 
     test('should return an empty list if no workers are found', async () => {
@@ -151,7 +163,8 @@ describe('WorkerUtils', () => {
           skip: 0,
           orderBy: 'payoutCount',
           orderDirection: 'desc',
-        }
+        },
+        undefined
       );
       expect(result).toEqual([]);
     });
@@ -192,9 +205,15 @@ describe('WorkerUtils', () => {
           skip: 0,
           orderBy: 'payoutCount',
           orderDirection: 'desc',
-        }
+        },
+        undefined
       );
-      expect(result).toEqual(mockWorkers);
+
+      const expected: IWorker[] = mockWorkers.map((mockWorker) => ({
+        ...mockWorker,
+        totalHMTAmountReceived: BigInt(mockWorker.totalHMTAmountReceived || 0),
+      }));
+      expect(result).toEqual(expected);
     });
   });
 });

@@ -6,7 +6,6 @@ export enum ChainId {
   BSC_TESTNET = 97,
   POLYGON = 137,
   POLYGON_AMOY = 80002,
-  AURORA_TESTNET = 1313161555,
   LOCALHOST = 1338,
 }
 

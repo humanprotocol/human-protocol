@@ -10,7 +10,7 @@ from human_protocol_sdk.gql.worker import get_worker_query, get_workers_query
 class TestWorkerUtils(unittest.TestCase):
     def test_get_workers(self):
         with patch(
-            "human_protocol_sdk.worker.worker_utils.get_data_from_subgraph"
+            "human_protocol_sdk.worker.worker_utils.custom_gql_fetch"
         ) as mock_function:
             mock_worker_1 = {
                 "id": "worker1",
@@ -47,6 +47,7 @@ class TestWorkerUtils(unittest.TestCase):
                     "orderBy": "totalHMTAmountReceived",
                     "orderDirection": "asc",
                 },
+                options=None,
             )
             self.assertEqual(len(workers), 2)
             self.assertEqual(workers[0].id, "worker1")
@@ -54,7 +55,7 @@ class TestWorkerUtils(unittest.TestCase):
 
     def test_get_workers_empty_response(self):
         with patch(
-            "human_protocol_sdk.worker.worker_utils.get_data_from_subgraph"
+            "human_protocol_sdk.worker.worker_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.return_value = {"data": {"workers": []}}
 
@@ -75,6 +76,7 @@ class TestWorkerUtils(unittest.TestCase):
                     "orderBy": "payoutCount",
                     "orderDirection": "desc",
                 },
+                options=None,
             )
             self.assertEqual(len(workers), 0)
 
@@ -86,7 +88,7 @@ class TestWorkerUtils(unittest.TestCase):
 
     def test_get_worker(self):
         with patch(
-            "human_protocol_sdk.worker.worker_utils.get_data_from_subgraph"
+            "human_protocol_sdk.worker.worker_utils.custom_gql_fetch"
         ) as mock_function:
             mock_worker = {
                 "id": "worker1",
@@ -106,6 +108,7 @@ class TestWorkerUtils(unittest.TestCase):
                 NETWORKS[ChainId.POLYGON_AMOY],
                 query=get_worker_query(),
                 params={"address": "0x1234567890123456789012345678901234567890"},
+                options=None,
             )
             self.assertIsNotNone(worker)
             self.assertEqual(worker.id, "worker1")
@@ -115,7 +118,7 @@ class TestWorkerUtils(unittest.TestCase):
 
     def test_get_worker_empty_data(self):
         with patch(
-            "human_protocol_sdk.worker.worker_utils.get_data_from_subgraph"
+            "human_protocol_sdk.worker.worker_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.return_value = {"data": {"worker": None}}
 
@@ -127,6 +130,7 @@ class TestWorkerUtils(unittest.TestCase):
                 NETWORKS[ChainId.POLYGON_AMOY],
                 query=get_worker_query(),
                 params={"address": "0x1234567890123456789012345678901234567890"},
+                options=None,
             )
 
             self.assertIsNone(worker)

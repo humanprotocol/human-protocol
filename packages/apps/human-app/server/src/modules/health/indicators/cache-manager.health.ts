@@ -16,7 +16,8 @@ export class CacheManagerHealthIndicator extends HealthIndicator {
     try {
       await cacheManager.get(`health-indicator-synthetic-key`);
       isHealthy = true;
-    } catch (_noop) {}
+      // eslint-disable-next-line no-empty
+    } catch {}
 
     const result = this.getStatus(key, isHealthy);
 

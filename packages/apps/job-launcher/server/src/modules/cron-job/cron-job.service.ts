@@ -4,21 +4,21 @@ import {
   ErrorCronJob,
   ErrorEscrow,
   ErrorJob,
-  ErrorPayment,
 } from '../../common/constants/errors';
 import { CronJobType } from '../../common/enums/cron-job';
 
-import { ChainId, EscrowStatus, EscrowUtils } from '@human-protocol/sdk';
+import { EscrowClient, EscrowStatus, EscrowUtils } from '@human-protocol/sdk';
 import { Cron } from '@nestjs/schedule';
 import { ethers } from 'ethers';
 import { NetworkConfigService } from '../../common/config/network-config.service';
-import { EscrowFundToken, JobStatus } from '../../common/enums/job';
+import { JobStatus } from '../../common/enums/job';
 import {
   EventType,
   OracleType,
   WebhookStatus,
 } from '../../common/enums/webhook';
 import { ConflictError, NotFoundError } from '../../common/errors';
+import logger from '../../logger';
 import { GCVContentModerationService } from '../content-moderation/gcv-content-moderation.service';
 import { JobEntity } from '../job/job.entity';
 import { JobRepository } from '../job/job.repository';
@@ -30,8 +30,6 @@ import { WebhookRepository } from '../webhook/webhook.repository';
 import { WebhookService } from '../webhook/webhook.service';
 import { CronJobEntity } from './cron-job.entity';
 import { CronJobRepository } from './cron-job.repository';
-import logger from '../../logger';
-import { TOKEN_ADDRESSES } from '../../common/constants/tokens';
 
 @Injectable()
 export class CronJobService {
@@ -144,7 +142,7 @@ export class CronJobService {
         try {
           await this.jobService.createEscrow(jobEntity);
         } catch (error) {
-          this.logger.error('Error in moderateContentCronJob', {
+          this.logger.error('Error in createEscrowCronJob', {
             jobId: jobEntity.id,
             error,
           });
@@ -159,86 +157,6 @@ export class CronJobService {
     }
 
     this.logger.debug('Create escrow STOP');
-    await this.completeCronJob(cronJob);
-  }
-
-  @Cron('1-59/2 * * * *')
-  public async setupEscrowCronJob() {
-    const isCronJobRunning = await this.isCronJobRunning(
-      CronJobType.SetupEscrow,
-    );
-
-    if (isCronJobRunning) {
-      return;
-    }
-
-    this.logger.debug('Setup escrow START');
-    const cronJob = await this.startCronJob(CronJobType.SetupEscrow);
-
-    try {
-      const jobEntities = await this.jobRepository.findByStatus(
-        JobStatus.FUNDED,
-      );
-
-      for (const jobEntity of jobEntities) {
-        try {
-          await this.jobService.setupEscrow(jobEntity);
-        } catch (error) {
-          this.logger.error('Error setting up escrow', {
-            jobId: jobEntity.id,
-            error,
-          });
-          await this.jobService.handleProcessJobFailure(
-            jobEntity,
-            ErrorEscrow.NotSetup,
-          );
-        }
-      }
-    } catch (error) {
-      this.logger.error('Error in setupEscrow cron job', error);
-    }
-
-    this.logger.debug('Setup escrow STOP');
-    await this.completeCronJob(cronJob);
-  }
-
-  @Cron('*/2 * * * *')
-  public async fundEscrowCronJob() {
-    const isCronJobRunning = await this.isCronJobRunning(
-      CronJobType.FundEscrow,
-    );
-
-    if (isCronJobRunning) {
-      return;
-    }
-
-    this.logger.debug('Fund escrow START');
-    const cronJob = await this.startCronJob(CronJobType.FundEscrow);
-
-    try {
-      const jobEntities = await this.jobRepository.findByStatus(
-        JobStatus.CREATED,
-      );
-
-      for (const jobEntity of jobEntities) {
-        try {
-          await this.jobService.fundEscrow(jobEntity);
-        } catch (error) {
-          this.logger.error('Error funding escrow', {
-            jobId: jobEntity.id,
-            error,
-          });
-          await this.jobService.handleProcessJobFailure(
-            jobEntity,
-            ErrorEscrow.NotFunded,
-          );
-        }
-      }
-    } catch (error) {
-      this.logger.error('Error in fundEscrow cron job', error);
-    }
-
-    this.logger.debug('Fund escrow STOP');
     await this.completeCronJob(cronJob);
   }
 
@@ -262,55 +180,41 @@ export class CronJobService {
 
       for (const jobEntity of jobEntities) {
         try {
-          if (
-            jobEntity.escrowAddress &&
-            (await this.jobService.isEscrowFunded(
-              jobEntity.chainId,
+          let escrowStatus: EscrowStatus | null = null;
+          if (jobEntity.escrowAddress) {
+            const signer = this.web3Service.getSigner(jobEntity.chainId);
+            const escrowClient = await EscrowClient.build(signer);
+
+            await this.jobService.processEscrowCancellation(jobEntity);
+
+            escrowStatus = await escrowClient.getStatus(
               jobEntity.escrowAddress,
-            ))
+            );
+          }
+          if (
+            !jobEntity.escrowAddress ||
+            escrowStatus === EscrowStatus.Cancelled
           ) {
-            const { amountRefunded } =
-              await this.jobService.processEscrowCancellation(jobEntity);
-            const token = (TOKEN_ADDRESSES[jobEntity.chainId as ChainId] ?? {})[
-              jobEntity.token as EscrowFundToken
-            ];
-
-            if (!token) {
-              throw new Error(ErrorPayment.UnsupportedToken);
-            }
-
-            await this.paymentService.createRefundPayment({
-              refundAmount: Number(
-                ethers.formatUnits(amountRefunded, token.decimals),
-              ),
-              refundCurrency: jobEntity.token,
-              userId: jobEntity.userId,
-              jobId: jobEntity.id,
-            });
-          } else {
             await this.paymentService.createRefundPayment({
               refundAmount: jobEntity.fundAmount,
               refundCurrency: jobEntity.token,
               userId: jobEntity.userId,
               jobId: jobEntity.id,
             });
+
+            jobEntity.status = JobStatus.CANCELED;
+            await this.jobRepository.updateOne(jobEntity);
+            continue;
           }
-          jobEntity.status = JobStatus.CANCELED;
+
+          jobEntity.status = JobStatus.CANCELING;
           await this.jobRepository.updateOne(jobEntity);
 
           const oracleType = this.jobService.getOracleType(
             jobEntity.requestType,
           );
           if (oracleType !== OracleType.HCAPTCHA) {
-            const webhookEntity = new WebhookEntity();
-            Object.assign(webhookEntity, {
-              escrowAddress: jobEntity.escrowAddress,
-              chainId: jobEntity.chainId,
-              eventType: EventType.ESCROW_CANCELED,
-              oracleType,
-              hasSignature: true,
-            });
-            await this.webhookRepository.createUnique(webhookEntity);
+            await this.createCancellationWebhooks(jobEntity, oracleType);
           }
         } catch (error) {
           this.logger.error('Error canceling escrow', {
@@ -351,7 +255,7 @@ export class CronJobService {
     try {
       const webhookEntities = await this.webhookRepository.findByStatusAndType(
         WebhookStatus.PENDING,
-        [EventType.ESCROW_CREATED, EventType.ESCROW_CANCELED],
+        [EventType.ESCROW_CREATED, EventType.CANCELLATION_REQUESTED],
       );
 
       for (const webhookEntity of webhookEntities) {
@@ -412,16 +316,26 @@ export class CronJobService {
           }
           if (
             jobEntity.escrowAddress &&
+            jobEntity.status !== JobStatus.CANCELING &&
             jobEntity.status !== JobStatus.CANCELED
           ) {
             await this.jobService.processEscrowCancellation(jobEntity);
           }
 
-          if (jobEntity.status !== JobStatus.CANCELED) {
-            jobEntity.status = JobStatus.CANCELED;
+          if (
+            jobEntity.status !== JobStatus.CANCELING &&
+            jobEntity.status !== JobStatus.CANCELED
+          ) {
+            jobEntity.status = JobStatus.CANCELING;
             await this.jobRepository.updateOne(jobEntity);
           }
           await this.paymentService.createSlash(jobEntity);
+          const oracleType = this.jobService.getOracleType(
+            jobEntity.requestType,
+          );
+          if (oracleType !== OracleType.HCAPTCHA) {
+            await this.createCancellationWebhooks(jobEntity, oracleType);
+          }
         } catch (error) {
           this.logger.error('Error slashing escrow', {
             escrowAddress: webhookEntity.escrowAddress,
@@ -461,7 +375,11 @@ export class CronJobService {
 
     try {
       const events = [];
-      const statuses = [EscrowStatus.Partial, EscrowStatus.Complete];
+      const statuses = [
+        EscrowStatus.Partial,
+        EscrowStatus.Complete,
+        EscrowStatus.Cancelled,
+      ];
       const from = lastCronJob?.lastSubgraphTime || undefined;
 
       for (const network of this.networkConfigService.networks) {
@@ -473,7 +391,7 @@ export class CronJobService {
             chainId: network.chainId,
             statuses,
             from,
-            launcher: this.web3Service.getOperatorAddress(),
+            launcher: await this.web3Service.getOperatorAddress(),
             first: 100,
             skip,
           });
@@ -511,21 +429,25 @@ export class CronJobService {
         const key = `${event.chainId}-${ethers.getAddress(event.escrowAddress)}`;
         const job = jobMap.get(key);
 
-        if (
-          !job ||
-          job.status === JobStatus.TO_CANCEL ||
-          job.status === JobStatus.CANCELED
-        )
+        const eventTimestamp = event.timestamp;
+        if (eventTimestamp > latestEventTimestamp) {
+          latestEventTimestamp = eventTimestamp;
+        }
+        if (!job || job.status === JobStatus.CANCELED) continue;
+
+        if (event.status === EscrowStatus.Cancelled) {
+          await this.jobService.cancelJob(job);
           continue;
+        }
 
         let newStatus: JobStatus | null = null;
         if (
-          event.status === EscrowStatus[EscrowStatus.Partial] &&
+          event.status === EscrowStatus.Partial &&
           job.status !== JobStatus.PARTIAL
         ) {
           newStatus = JobStatus.PARTIAL;
         } else if (
-          event.status === EscrowStatus[EscrowStatus.Complete] &&
+          event.status === EscrowStatus.Complete &&
           job.status !== JobStatus.COMPLETED
         ) {
           newStatus = JobStatus.COMPLETED;
@@ -534,10 +456,6 @@ export class CronJobService {
         if (newStatus && newStatus !== job.status) {
           job.status = newStatus;
           jobsToUpdate.push(job);
-        }
-        const eventTimestamp = new Date(event.timestamp * 1000).getTime();
-        if (eventTimestamp > latestEventTimestamp) {
-          latestEventTimestamp = eventTimestamp;
         }
       }
 
@@ -555,5 +473,28 @@ export class CronJobService {
 
     this.logger.debug('Update jobs STOP');
     await this.completeCronJob(cronJob);
+  }
+  private async createCancellationWebhooks(
+    jobEntity: JobEntity,
+    oracleType: OracleType,
+  ) {
+    const baseWebhook = {
+      escrowAddress: jobEntity.escrowAddress,
+      chainId: jobEntity.chainId,
+      eventType: EventType.CANCELLATION_REQUESTED,
+      oracleType,
+      hasSignature: true,
+    };
+    const webhooks = [
+      Object.assign(new WebhookEntity(), {
+        ...baseWebhook,
+        oracleAddress: jobEntity.exchangeOracle,
+      }),
+      Object.assign(new WebhookEntity(), {
+        ...baseWebhook,
+        oracleAddress: jobEntity.recordingOracle,
+      }),
+    ];
+    await this.webhookRepository.createMany(webhooks);
   }
 }

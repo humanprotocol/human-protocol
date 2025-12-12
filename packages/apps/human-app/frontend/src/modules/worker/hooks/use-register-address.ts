@@ -39,7 +39,6 @@ function useRegisterAddressMutation(callbacks: RegisterAddressCallbacks) {
     await profileService.registerAddress({ address, chainId, signature });
     await refreshAccessTokenAsync({ authType: 'web2' });
     updateUserData({
-      // eslint-disable-next-line camelcase
       wallet_address: address,
     });
   };

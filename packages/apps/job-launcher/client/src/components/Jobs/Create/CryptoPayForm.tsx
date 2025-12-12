@@ -203,8 +203,9 @@ export const CryptoPayForm = ({
 
           await publicClient?.waitForTransactionReceipt({
             hash,
-            confirmations:
-              Number(import.meta.env.VITE_APP_MIN_CONFIRMATIONS) ?? 1,
+            confirmations: Number(
+              import.meta.env.VITE_APP_MIN_CONFIRMATIONS ?? 1,
+            ),
             retryCount: 10,
             retryDelay: ({ count }) => Math.min(1000 * 2 ** count, 30000),
           });
@@ -339,7 +340,7 @@ export const CryptoPayForm = ({
                 value={amount}
                 type="number"
                 onChange={(e) => {
-                  let value = e.target.value;
+                  const value = e.target.value;
                   const regex = new RegExp(`^\\d*\\.?\\d{0,${decimals}}$`);
                   if (regex.test(value)) {
                     setAmount(value);

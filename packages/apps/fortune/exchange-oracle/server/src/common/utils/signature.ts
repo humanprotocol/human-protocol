@@ -41,7 +41,7 @@ export function recoverSigner(
 
   try {
     return ethers.verifyMessage(message, signature);
-  } catch (e) {
+  } catch {
     throw new ValidationError('Invalid signature');
   }
 }

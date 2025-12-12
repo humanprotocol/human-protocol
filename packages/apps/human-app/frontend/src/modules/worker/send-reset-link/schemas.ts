@@ -10,7 +10,6 @@ const sendResetLinkEmailDtoSchema = z.object({
 type SendResetLinkEmail = z.infer<typeof sendResetLinkEmailDtoSchema>;
 
 export const sendResetLinkHcaptchaDtoSchema = z.object({
-  // eslint-disable-next-line camelcase
   h_captcha_token: z.string().min(1, t('validation.captcha')).prefault('token'),
 });
 

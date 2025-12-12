@@ -1,10 +1,6 @@
 import { createMock } from '@golevelup/ts-jest';
-import {
-  Encryption,
-  EscrowClient,
-  OperatorUtils,
-  StorageClient,
-} from '@human-protocol/sdk';
+import { HMToken__factory } from '@human-protocol/core/typechain-types';
+import { Encryption, EscrowClient, OperatorUtils } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
@@ -14,6 +10,9 @@ import {
   MOCK_MANIFEST_URL,
   mockConfig,
 } from '../../../test/constants';
+import { PGPConfigService } from '../../common/config/pgp-config.service';
+import { S3ConfigService } from '../../common/config/s3-config.service';
+import { ErrorAssignment, ErrorJob } from '../../common/constant/errors';
 import {
   AssignmentStatus,
   JobFieldName,
@@ -21,6 +20,12 @@ import {
   JobType,
 } from '../../common/enums/job';
 import { EventType, WebhookStatus } from '../../common/enums/webhook';
+import {
+  ConflictError,
+  ServerError,
+  ValidationError,
+} from '../../common/errors';
+import { downloadFileFromUrl } from '../../common/utils/storage';
 import { AssignmentEntity } from '../assignment/assignment.entity';
 import { AssignmentRepository } from '../assignment/assignment.repository';
 import { StorageService } from '../storage/storage.service';
@@ -31,11 +36,6 @@ import { ManifestDto } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
 import { JobService } from './job.service';
-import { PGPConfigService } from '../../common/config/pgp-config.service';
-import { S3ConfigService } from '../../common/config/s3-config.service';
-import { ErrorJob, ErrorAssignment } from '../../common/constant/errors';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { HMToken__factory } from '@human-protocol/core/typechain-types';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -45,12 +45,13 @@ jest.mock('@human-protocol/sdk', () => ({
   OperatorUtils: {
     getOperator: jest.fn(),
   },
-  StorageClient: {
-    downloadFileFromUrl: jest.fn(),
-  },
   Encryption: {
     build: jest.fn(),
   },
+}));
+jest.mock('../../common/utils/storage', () => ({
+  ...jest.requireActual('../../common/utils/storage'),
+  downloadFileFromUrl: jest.fn(),
 }));
 jest.mock('minio', () => {
   class Client {
@@ -251,17 +252,17 @@ describe('JobService', () => {
       );
     });
 
-    it('should throw NotFoundException if job does not exist', async () => {
+    it('should throw ServerError if job does not exist', async () => {
       jest
         .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddressWithAssignments')
         .mockResolvedValue(null);
 
       await expect(jobService.completeJob(webhook)).rejects.toThrow(
-        new NotFoundException(ErrorJob.NotFound),
+        new ServerError(ErrorJob.NotFound),
       );
     });
 
-    it('should throw BadRequestException if job is already completed', async () => {
+    it('should throw ConflictError if job is already completed', async () => {
       const jobEntity = new JobEntity();
       jobEntity.chainId = chainId;
       jobEntity.escrowAddress = escrowAddress;
@@ -272,7 +273,7 @@ describe('JobService', () => {
         .mockResolvedValue(jobEntity);
 
       await expect(jobService.completeJob(webhook)).rejects.toThrow(
-        new BadRequestException(ErrorJob.AlreadyCompleted),
+        new ConflictError(ErrorJob.AlreadyCompleted),
       );
     });
   });
@@ -325,17 +326,17 @@ describe('JobService', () => {
       );
     });
 
-    it('should throw NotFoundException if job does not exist', async () => {
+    it('should throw ServerError if job does not exist', async () => {
       jest
         .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddressWithAssignments')
         .mockResolvedValue(null);
 
       await expect(jobService.cancelJob(webhook)).rejects.toThrow(
-        new NotFoundException(ErrorJob.NotFound),
+        new ServerError(ErrorJob.NotFound),
       );
     });
 
-    it('should throw BadRequestException if job is already canceled', async () => {
+    it('should throw ConflictError if job is already canceled', async () => {
       const jobEntity = new JobEntity();
       jobEntity.chainId = chainId;
       jobEntity.escrowAddress = escrowAddress;
@@ -346,7 +347,7 @@ describe('JobService', () => {
         .mockResolvedValue(jobEntity);
 
       await expect(jobService.cancelJob(webhook)).rejects.toThrow(
-        new BadRequestException(ErrorJob.AlreadyCanceled),
+        new ConflictError(ErrorJob.AlreadyCanceled),
       );
     });
   });
@@ -442,6 +443,7 @@ describe('JobService', () => {
   });
 
   describe('solveJob', () => {
+    const downloadFileFromUrlMock = jest.mocked(downloadFileFromUrl);
     const assignment = {
       id: 1,
       jobId: 1,
@@ -480,9 +482,7 @@ describe('JobService', () => {
 
       storageService.downloadJobSolutions = jest.fn().mockResolvedValueOnce([]);
 
-      StorageClient.downloadFileFromUrl = jest
-        .fn()
-        .mockResolvedValueOnce(manifest);
+      downloadFileFromUrlMock.mockResolvedValueOnce(manifest);
 
       const solutionsUrl =
         'http://localhost:9000/solution/0x1234567890123456789012345678901234567890-1.json';
@@ -513,7 +513,7 @@ describe('JobService', () => {
       assignment.status = AssignmentStatus.CANCELED;
 
       await expect(jobService.solveJob(1, 'solution')).rejects.toThrow(
-        new BadRequestException(ErrorAssignment.InvalidStatus),
+        new ConflictError(ErrorAssignment.InvalidStatus),
       );
       expect(web3Service.getSigner).toHaveBeenCalledWith(chainId);
     });
@@ -547,9 +547,7 @@ describe('JobService', () => {
         },
       ]);
 
-      StorageClient.downloadFileFromUrl = jest
-        .fn()
-        .mockResolvedValueOnce(manifest);
+      downloadFileFromUrlMock.mockResolvedValueOnce(manifest);
 
       (Encryption.build as any).mockImplementation(() => ({
         decrypt: jest.fn().mockResolvedValue(JSON.stringify(manifest)),
@@ -582,16 +580,14 @@ describe('JobService', () => {
         },
       ]);
 
-      StorageClient.downloadFileFromUrl = jest
-        .fn()
-        .mockResolvedValueOnce(manifest);
+      downloadFileFromUrlMock.mockResolvedValueOnce(manifest);
 
       (Encryption.build as any).mockImplementation(() => ({
         decrypt: jest.fn().mockResolvedValue(JSON.stringify(manifest)),
       }));
 
       await expect(jobService.solveJob(1, 'solution')).rejects.toThrow(
-        new BadRequestException(ErrorJob.SolutionAlreadySubmitted),
+        new ValidationError(ErrorJob.SolutionAlreadySubmitted),
       );
       expect(web3Service.getSigner).toHaveBeenCalledWith(chainId);
     });
@@ -665,56 +661,6 @@ describe('JobService', () => {
           eventData: { assignments: [{ assigneeId: workerAddress }] },
         }),
       ).rejects.toThrow(`Solution not found in Escrow: ${escrowAddress}`);
-    });
-  });
-
-  describe('pauseJob', () => {
-    const webhook: WebhookDto = {
-      chainId,
-      escrowAddress,
-      eventType: EventType.ABUSE_DETECTED,
-    };
-
-    it('should create a new job in the database', async () => {
-      jest
-        .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
-        .mockResolvedValue({
-          chainId: chainId,
-          escrowAddress: escrowAddress,
-          status: JobStatus.ACTIVE,
-        } as JobEntity);
-      const result = await jobService.pauseJob(webhook);
-
-      expect(result).toEqual(undefined);
-      expect(jobRepository.updateOne).toHaveBeenCalledWith({
-        chainId: chainId,
-        escrowAddress: escrowAddress,
-        status: JobStatus.PAUSED,
-      });
-    });
-
-    it('should fail if job not exists', async () => {
-      jest
-        .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
-        .mockResolvedValue(null);
-
-      await expect(jobService.pauseJob(webhook)).rejects.toThrow(
-        ErrorJob.NotFound,
-      );
-    });
-
-    it('should fail if job is not in Active status', async () => {
-      jest
-        .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
-        .mockResolvedValue({
-          chainId: chainId,
-          escrowAddress: escrowAddress,
-          status: JobStatus.CANCELED,
-        } as JobEntity);
-
-      await expect(jobService.pauseJob(webhook)).rejects.toThrow(
-        ErrorJob.InvalidStatus,
-      );
     });
   });
 });

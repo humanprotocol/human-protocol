@@ -1,11 +1,11 @@
-import gqlFetch from 'graphql-request';
+import { ethers } from 'ethers';
 import { NETWORKS } from './constants';
 import { ChainId, OrderDirection } from './enums';
 import { ErrorInvalidAddress, ErrorUnsupportedChainID } from './error';
+import { WorkerData } from './graphql';
 import { GET_WORKER_QUERY, GET_WORKERS_QUERY } from './graphql/queries/worker';
-import { IWorker, IWorkersFilter } from './interfaces';
-import { getSubgraphUrl } from './utils';
-import { ethers } from 'ethers';
+import { IWorker, IWorkersFilter, SubgraphOptions } from './interfaces';
+import { getSubgraphUrl, customGqlFetch } from './utils';
 
 export class WorkerUtils {
   /**
@@ -13,6 +13,7 @@ export class WorkerUtils {
    *
    * @param {ChainId} chainId The chain ID.
    * @param {string} address The worker address.
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
    * @returns {Promise<IWorker | null>} - Returns the worker details or null if not found.
    *
    * **Code example**
@@ -25,7 +26,8 @@ export class WorkerUtils {
    */
   public static async getWorker(
     chainId: ChainId,
-    address: string
+    address: string,
+    options?: SubgraphOptions
   ): Promise<IWorker | null> {
     const networkData = NETWORKS[chainId];
 
@@ -36,13 +38,20 @@ export class WorkerUtils {
       throw ErrorInvalidAddress;
     }
 
-    const { worker } = await gqlFetch<{
-      worker: IWorker;
-    }>(getSubgraphUrl(networkData), GET_WORKER_QUERY, {
-      address: address.toLowerCase(),
-    });
+    const { worker } = await customGqlFetch<{
+      worker: WorkerData | null;
+    }>(
+      getSubgraphUrl(networkData),
+      GET_WORKER_QUERY,
+      {
+        address: address.toLowerCase(),
+      },
+      options
+    );
 
-    return worker || null;
+    if (!worker) return null;
+
+    return mapWorker(worker);
   }
 
   /**
@@ -65,12 +74,13 @@ export class WorkerUtils {
    * type IWorker = {
    *   id: string;
    *   address: string;
-   *   totalHMTAmountReceived: string;
+   *   totalHMTAmountReceived: bigint;
    *   payoutCount: number;
    * };
    * ```
    *
    * @param {IWorkersFilter} filter Filter for the workers.
+   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
    * @returns {Promise<IWorker[]>} Returns an array with all the worker details.
    *
    * **Code example**
@@ -86,7 +96,10 @@ export class WorkerUtils {
    * const workers = await WorkerUtils.getWorkers(filter);
    * ```
    */
-  public static async getWorkers(filter: IWorkersFilter): Promise<IWorker[]> {
+  public static async getWorkers(
+    filter: IWorkersFilter,
+    options?: SubgraphOptions
+  ): Promise<IWorker[]> {
     const first =
       filter.first !== undefined ? Math.min(filter.first, 1000) : 10;
     const skip = filter.skip || 0;
@@ -101,20 +114,34 @@ export class WorkerUtils {
       throw ErrorInvalidAddress;
     }
 
-    const { workers } = await gqlFetch<{
-      workers: IWorker[];
-    }>(getSubgraphUrl(networkData), GET_WORKERS_QUERY(filter), {
-      address: filter?.address?.toLowerCase(),
-      first: first,
-      skip: skip,
-      orderBy: orderBy,
-      orderDirection: orderDirection,
-    });
+    const { workers } = await customGqlFetch<{
+      workers: WorkerData[];
+    }>(
+      getSubgraphUrl(networkData),
+      GET_WORKERS_QUERY(filter),
+      {
+        address: filter?.address?.toLowerCase(),
+        first: first,
+        skip: skip,
+        orderBy: orderBy,
+        orderDirection: orderDirection,
+      },
+      options
+    );
 
     if (!workers) {
       return [];
     }
 
-    return workers;
+    return workers.map((w) => mapWorker(w));
   }
+}
+
+function mapWorker(w: WorkerData): IWorker {
+  return {
+    id: w.id,
+    address: w.address,
+    totalHMTAmountReceived: BigInt(w.totalHMTAmountReceived || 0),
+    payoutCount: Number(w.payoutCount || 0),
+  };
 }

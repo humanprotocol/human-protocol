@@ -1,4 +1,3 @@
-/* eslint-disable camelcase -- ... */
 import type { MRT_ColumnDef } from 'material-react-table';
 import { t } from 'i18next';
 import { Grid } from '@mui/material';
@@ -136,9 +135,11 @@ export const useGetAvailableJobsColumns = (
                 sx={{ width: '94px' }}
                 loading={isPending}
                 onClick={() => {
-                  isThirstyfi
-                    ? openModal({ escrow_address, chain_id })
-                    : assignJobMutation({ escrow_address, chain_id });
+                  if (isThirstyfi) {
+                    openModal({ escrow_address, chain_id });
+                  } else {
+                    assignJobMutation({ escrow_address, chain_id });
+                  }
                 }}
               >
                 {t('worker.jobs.selectJob')}

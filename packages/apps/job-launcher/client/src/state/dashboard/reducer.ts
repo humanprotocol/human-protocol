@@ -5,4 +5,4 @@ const initialState: DashboardState = {
   dataLoaded: false,
 };
 
-export default createReducer(initialState, (builder) => {});
+export default createReducer(initialState, () => {});

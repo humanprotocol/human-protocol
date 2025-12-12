@@ -7,7 +7,6 @@ import {
   HttpException,
   HttpStatus,
   Query,
-  Request,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -16,14 +15,12 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
-import { RequestWithUser } from '../../common/interfaces/jwt';
 import {
   DiscoveredOracle,
   GetOraclesCommand,
   GetOraclesQuery,
 } from './model/oracle-discovery.model';
 import { OracleDiscoveryService } from './oracle-discovery.service';
-import Environment from '../../common/utils/environment';
 import { ChainId } from '@human-protocol/sdk';
 
 @ApiTags('Oracle-Discovery')
@@ -44,7 +41,6 @@ export class OracleDiscoveryController {
   @Header('Cache-Control', 'private, max-age=60')
   @Get('/oracles')
   public async getOracles(
-    @Request() req: RequestWithUser,
     @Query() query: GetOraclesQuery,
   ): Promise<DiscoveredOracle[]> {
     if (!this.environmentConfigService.jobsDiscoveryFlag) {
@@ -61,41 +57,27 @@ export class OracleDiscoveryController {
       id: 'thisrty-oracle',
       address: process.env.THIRSTYFI_ORACLE_ADDRESS ?? '',
       chainId: ChainId.POLYGON,
-      amountStaked: '0' as any,
-      amountLocked: '0' as any,
-      lockedUntilTimestamp: '0' as any,
-      amountWithdrawn: '0' as any,
-      amountSlashed: '0' as any,
-      reward: '0' as any,
-      amountJobsProcessed: '0' as any,
+      stakedAmount: 0n,
+      lockedAmount: 0n,
+      lockedUntilTimestamp: 0,
+      withdrawnAmount: 0n,
+      slashedAmount: 0n,
+      amountJobsProcessed: 0n,
       role: 'exchange_oracle',
       url: ' ',
       jobTypes: ['thirstyfi'],
       name: 'ThirstyFi',
       registrationNeeded: false,
-      // registrationInstructions: 'https://www.thisrty.com/',
+      registrationInstructions: null,
+      publicKey: null,
+      webhookUrl: null,
+      website: null,
+      fee: null,
+      reputationNetworks: [],
+      category: null,
     });
     oracles.push(thisrtyOracle);
 
-    if (!Environment.isProduction()) {
-      return oracles;
-    }
-
-    const isAudinoAvailableForUser = (req?.user?.qualifications ?? []).includes(
-      'audino',
-    );
-
-    /**
-     * TODO: remove filtering logic when Audino available for everyone
-     */
-    return oracles.filter((oracle) => {
-      const isAudinoOracle = oracle.jobTypes.includes('audio_transcription');
-
-      if (isAudinoOracle) {
-        return isAudinoAvailableForUser;
-      } else {
-        return true;
-      }
-    });
+    return oracles;
   }
 }

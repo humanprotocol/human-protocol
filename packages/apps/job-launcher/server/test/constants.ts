@@ -40,7 +40,6 @@ export const MOCK_RECORDING_ORACLE_ADDRESS =
 export const MOCK_REPUTATION_ORACLE_ADDRESS =
   '0x2E04d5D6cE3fF2261D0Cb04d41Fb4Cd67362A473';
 export const MOCK_EXCHANGE_ORACLE_WEBHOOK_URL = 'http://localhost:3000';
-('0x2E04d5D6cE3fF2261D0Cb04d41Fb4Cd67362A473');
 export const MOCK_REPUTATION_ORACLE_URL = 'http://reporacle:3000';
 export const MOCK_RECORDING_ORACLE_URL = 'http://recoracle:3000';
 export const MOCK_EXCHANGE_ORACLE_URL = 'http://exoracle:3000';

@@ -14,7 +14,6 @@ export function useEnableWeb3Operator() {
 
       await authService.refreshAccessToken();
 
-      // eslint-disable-next-line camelcase
       updateUserData({ operator_status: OperatorStatus.ACTIVE });
     },
     mutationKey: ['enableOperator', address, chainId],

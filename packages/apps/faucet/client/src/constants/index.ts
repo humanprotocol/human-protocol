@@ -4,5 +4,4 @@ export const FAUCET_CHAIN_IDS = [
   ChainId.SEPOLIA,
   ChainId.BSC_TESTNET,
   ChainId.POLYGON_AMOY,
-  ChainId.AURORA_TESTNET,
 ];

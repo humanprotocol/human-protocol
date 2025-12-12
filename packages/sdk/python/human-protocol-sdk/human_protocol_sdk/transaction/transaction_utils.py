@@ -30,7 +30,7 @@ from typing import List, Optional
 from human_protocol_sdk.constants import NETWORKS, ChainId
 from web3 import Web3
 from human_protocol_sdk.filter import TransactionFilter
-from human_protocol_sdk.utils import get_data_from_subgraph
+from human_protocol_sdk.utils import SubgraphOptions, custom_gql_fetch
 
 
 class InternalTransaction:
@@ -38,11 +38,11 @@ class InternalTransaction:
         self,
         from_address: str,
         to_address: str,
-        value: str,
+        value: int,
         method: str,
-        receiver: str,
-        escrow: str,
-        token: str,
+        receiver: Optional[str],
+        escrow: Optional[str],
+        token: Optional[str],
     ):
         self.from_address = from_address
         self.to_address = to_address
@@ -62,11 +62,11 @@ class TransactionData:
         from_address: str,
         to_address: str,
         timestamp: int,
-        value: str,
+        value: int,
         method: str,
-        receiver: str,
-        escrow: str,
-        token: str,
+        receiver: Optional[str],
+        escrow: Optional[str],
+        token: Optional[str],
         internal_transactions: List[InternalTransaction],
     ):
         self.chain_id = chain_id
@@ -74,7 +74,7 @@ class TransactionData:
         self.tx_hash = tx_hash
         self.from_address = from_address
         self.to_address = to_address
-        self.timestamp = timestamp
+        self.timestamp = timestamp * 1000
         self.value = value
         self.method = method
         self.receiver = receiver
@@ -97,11 +97,14 @@ class TransactionUtils:
     """
 
     @staticmethod
-    def get_transaction(chain_id: ChainId, hash: str) -> Optional[TransactionData]:
+    def get_transaction(
+        chain_id: ChainId, hash: str, options: Optional[SubgraphOptions] = None
+    ) -> Optional[TransactionData]:
         """Returns the transaction for a given hash.
 
         :param chain_id: Network in which the transaction was executed
         :param hash: Hash of the transaction
+        :param options: Optional config for subgraph requests
 
         :return: Transaction data
 
@@ -124,10 +127,11 @@ class TransactionUtils:
 
         from human_protocol_sdk.gql.transaction import get_transaction_query
 
-        transaction_data = get_data_from_subgraph(
+        transaction_data = custom_gql_fetch(
             network,
             query=get_transaction_query(),
             params={"hash": hash.lower()},
+            options=options,
         )
         if (
             not transaction_data
@@ -141,36 +145,39 @@ class TransactionUtils:
 
         return TransactionData(
             chain_id=chain_id,
-            block=transaction.get("block", 0),
-            tx_hash=transaction.get("txHash", ""),
-            from_address=transaction.get("from", ""),
-            to_address=transaction.get("to", ""),
-            timestamp=transaction.get("timestamp", 0),
-            value=transaction.get("value", ""),
-            method=transaction.get("method", ""),
-            receiver=transaction.get("receiver", ""),
-            escrow=transaction.get("escrow", ""),
-            token=transaction.get("token", ""),
+            block=int(transaction.get("block")),
+            tx_hash=transaction.get("txHash"),
+            from_address=transaction.get("from"),
+            to_address=transaction.get("to"),
+            timestamp=int(transaction.get("timestamp")),
+            value=int(transaction.get("value")),
+            method=transaction.get("method"),
+            receiver=transaction.get("receiver"),
+            escrow=transaction.get("escrow"),
+            token=transaction.get("token"),
             internal_transactions=[
                 InternalTransaction(
-                    from_address=internal_tx.get("from", ""),
-                    to_address=internal_tx.get("to", ""),
-                    value=internal_tx.get("value", ""),
-                    method=internal_tx.get("method", ""),
-                    receiver=internal_tx.get("receiver", ""),
-                    escrow=internal_tx.get("escrow", ""),
-                    token=internal_tx.get("token", ""),
+                    from_address=internal_tx.get("from"),
+                    to_address=internal_tx.get("to"),
+                    value=int(internal_tx.get("value")),
+                    method=internal_tx.get("method"),
+                    receiver=internal_tx.get("receiver"),
+                    escrow=internal_tx.get("escrow"),
+                    token=internal_tx.get("token"),
                 )
                 for internal_tx in transaction.get("internalTransactions", [])
             ],
         )
 
     @staticmethod
-    def get_transactions(filter: TransactionFilter) -> List[TransactionData]:
+    def get_transactions(
+        filter: TransactionFilter, options: Optional[SubgraphOptions] = None
+    ) -> List[TransactionData]:
         """Get an array of transactions based on the specified filter parameters.
 
         :param filter: Object containing all the necessary parameters to filter
             (chain_id, from_address, to_address, start_date, end_date, start_block, end_block, method, escrow, token, first, skip, order_direction)
+        :param options: Optional config for subgraph requests
 
         :return: List of transactions
 
@@ -200,7 +207,7 @@ class TransactionUtils:
         if not network_data:
             raise TransactionUtilsError("Unsupported Chain ID")
 
-        data = get_data_from_subgraph(
+        data = custom_gql_fetch(
             network_data,
             query=get_transactions_query(filter),
             params={
@@ -223,6 +230,7 @@ class TransactionUtils:
                 "skip": filter.skip,
                 "orderDirection": filter.order_direction.value,
             },
+            options=options,
         )
         if (
             not data
@@ -239,25 +247,25 @@ class TransactionUtils:
             [
                 TransactionData(
                     chain_id=filter.chain_id,
-                    block=transaction.get("block", 0),
-                    tx_hash=transaction.get("txHash", ""),
-                    from_address=transaction.get("from", ""),
-                    to_address=transaction.get("to", ""),
-                    timestamp=transaction.get("timestamp", 0),
-                    value=transaction.get("value", ""),
-                    method=transaction.get("method", ""),
-                    receiver=transaction.get("receiver", ""),
-                    escrow=transaction.get("escrow", ""),
-                    token=transaction.get("token", ""),
+                    block=int(transaction.get("block")),
+                    tx_hash=transaction.get("txHash"),
+                    from_address=transaction.get("from"),
+                    to_address=transaction.get("to"),
+                    timestamp=int(transaction.get("timestamp")),
+                    value=int(transaction.get("value")),
+                    method=transaction.get("method"),
+                    receiver=transaction.get("receiver"),
+                    escrow=transaction.get("escrow"),
+                    token=transaction.get("token"),
                     internal_transactions=[
                         InternalTransaction(
-                            from_address=internal_tx.get("from", ""),
-                            to_address=internal_tx.get("to", ""),
-                            value=internal_tx.get("value", ""),
-                            method=internal_tx.get("method", ""),
-                            receiver=internal_tx.get("receiver", ""),
-                            escrow=internal_tx.get("escrow", ""),
-                            token=internal_tx.get("token", ""),
+                            from_address=internal_tx.get("from"),
+                            to_address=internal_tx.get("to"),
+                            value=int(internal_tx.get("value")),
+                            method=internal_tx.get("method"),
+                            receiver=internal_tx.get("receiver"),
+                            escrow=internal_tx.get("escrow"),
+                            token=internal_tx.get("token"),
                         )
                         for internal_tx in transaction.get("internalTransactions", [])
                     ],

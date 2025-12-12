@@ -1,22 +1,25 @@
+import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import { ChainId, OperatorUtils, Role } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
-import { Wallet, ethers } from 'ethers';
+import { NonceManager, Wallet, ethers } from 'ethers';
 import { NetworkConfigService } from '../../common/config/network-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ErrorWeb3 } from '../../common/constants/errors';
 import { ConflictError, ValidationError } from '../../common/errors';
-import { AvailableOraclesDto, OracleDataDto } from './web3.dto';
+import { IERC20Token } from '../../common/interfaces/web3';
 import logger from '../../logger';
+import { RateService } from '../rate/rate.service';
+import { AvailableOraclesDto, OracleDataDto } from './web3.dto';
 
 @Injectable()
 export class Web3Service {
   private readonly logger = logger.child({ context: Web3Service.name });
-  private signers: { [key: number]: Wallet } = {};
-  public readonly signerAddress: string;
+  private signers: { [key: number]: NonceManager } = {};
 
   constructor(
     public readonly web3ConfigService: Web3ConfigService,
     public readonly networkConfigService: NetworkConfigService,
+    private readonly rateService: RateService,
   ) {
     const privateKey = this.web3ConfigService.privateKey;
 
@@ -26,11 +29,12 @@ export class Web3Service {
 
     for (const network of this.networkConfigService.networks) {
       const provider = new ethers.JsonRpcProvider(network.rpcUrl);
-      this.signers[network.chainId] = new Wallet(privateKey, provider);
+      const baseWallet = new Wallet(privateKey, provider);
+      this.signers[network.chainId] = new NonceManager(baseWallet);
     }
   }
 
-  public getSigner(chainId: number): Wallet {
+  public getSigner(chainId: number): NonceManager {
     this.validateChainId(chainId);
     return this.signers[chainId];
   }
@@ -52,8 +56,8 @@ export class Web3Service {
     throw new ConflictError(ErrorWeb3.GasPriceError);
   }
 
-  public getOperatorAddress(): string {
-    return Object.values(this.signers)[0].address;
+  public async getOperatorAddress(): Promise<string> {
+    return Object.values(this.signers)[0].getAddress();
   }
 
   public async getAvailableOracles(
@@ -141,7 +145,7 @@ export class Web3Service {
   ): Promise<string[]> {
     const operator = await OperatorUtils.getOperator(
       chainId,
-      this.getOperatorAddress(),
+      await this.getOperatorAddress(),
     );
 
     if (!operator || !operator.reputationNetworks) {
@@ -177,5 +181,51 @@ export class Web3Service {
     );
 
     return matchingOracles.filter(Boolean) as string[];
+  }
+
+  public async ensureEscrowAllowance(
+    chainId: number,
+    token: IERC20Token,
+    requiredAmount: bigint,
+    spender: string,
+  ): Promise<void> {
+    const signer = this.getSigner(chainId);
+    const erc20 = HMToken__factory.connect(token.address, signer);
+
+    const currentAllowance = await erc20.allowance(
+      await this.getOperatorAddress(),
+      spender,
+    );
+
+    if (currentAllowance >= requiredAmount) {
+      return;
+    }
+
+    let approveAmount = requiredAmount;
+    if (this.web3ConfigService.approveAmountUsd > 0) {
+      try {
+        const usdToTokenRate = await this.rateService.getRate(
+          'usd',
+          token.symbol,
+        );
+        const tokenAmount =
+          this.web3ConfigService.approveAmountUsd * usdToTokenRate;
+        const converted = ethers.parseUnits(
+          tokenAmount.toString(),
+          token.decimals,
+        );
+        if (converted > approveAmount) {
+          approveAmount = converted;
+        }
+      } catch (error) {
+        this.logger.error('Failed to convert approve amount from USD', {
+          chainId,
+          token: token.symbol,
+          error,
+        });
+      }
+    }
+    const tx = await erc20.approve(spender, approveAmount);
+    await tx.wait();
   }
 }

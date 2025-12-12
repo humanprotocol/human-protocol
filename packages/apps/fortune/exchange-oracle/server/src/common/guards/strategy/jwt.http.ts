@@ -3,7 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
 import { KVStore__factory } from '@human-protocol/core/typechain-types';
-import { ChainId, NETWORKS, StorageClient } from '@human-protocol/sdk';
+import { ChainId, NETWORKS } from '@human-protocol/sdk';
 import { ethers } from 'ethers';
 import * as jwt from 'jsonwebtoken';
 import { JWT_KVSTORE_KEY, KYC_APPROVED } from '../../../common/constant';
@@ -11,6 +11,7 @@ import { Role } from '../../../common/enums/role';
 import { JwtUser } from '../../../common/types/jwt';
 import { Web3Service } from '../../../modules/web3/web3.service';
 import { AuthError, ValidationError } from '../../errors';
+import { downloadFileFromUrl } from '../../utils/storage';
 
 @Injectable()
 export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
@@ -47,9 +48,7 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
               address,
               JWT_KVSTORE_KEY,
             );
-            publicKey = (await StorageClient.downloadFileFromUrl(
-              url,
-            )) as string;
+            publicKey = (await downloadFileFromUrl(url)) as string;
 
             this.publicKeyCache.set(cacheKey, {
               value: publicKey,

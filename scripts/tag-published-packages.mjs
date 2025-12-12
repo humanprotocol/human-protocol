@@ -9,13 +9,13 @@ function maybeCreateGitTagForPackage({ name, version }) {
     return;
   }
 
-  const tag = `${name}@${version}`;
+  const tag = `js/${name}@${version}`;
 
   try {
     childProcess.execSync(`git rev-parse --verify ${tag}`, { stdio: "ignore" });
     console.warn(`Git tag already exists, skipping: ${tag}`);
   } catch {
-    childProcess.execSync(`git tag ${tag}`);
+    childProcess.execSync(`git tag -a "${tag}" -m "Released JS package: @human-protocol/${name} - ${version}"`);
     console.log(`Created tag: ${tag}`);
   }
 }

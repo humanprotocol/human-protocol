@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 import { z } from 'zod';
 import { createPaginationSchema } from '@/shared/helpers/pagination';
 import { MyJobStatus, UNKNOWN_JOB_STATUS } from './types';
@@ -11,7 +10,7 @@ const myJobSchema = z.object({
   status: z.string().transform((value) => {
     try {
       return z.enum(MyJobStatus).parse(value.toUpperCase());
-    } catch (error) {
+    } catch {
       return UNKNOWN_JOB_STATUS;
     }
   }),
