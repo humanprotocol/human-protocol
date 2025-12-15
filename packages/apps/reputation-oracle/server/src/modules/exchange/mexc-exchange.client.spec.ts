@@ -5,7 +5,10 @@ import { createHmac } from 'crypto';
 import { faker } from '@faker-js/faker';
 import nock from 'nock';
 
-import { ExchangeApiClientError } from './errors';
+import {
+  ExchangeApiClientError,
+  ExchangeProviderResponseError,
+} from './errors';
 import { generateMexcAccountBalance } from './fixtures';
 import { MexcExchangeClient, MEXC_API_BASE_URL } from './mexc-exchange.client';
 
@@ -115,15 +118,23 @@ describe('MexcExchangeClient', () => {
   describe('getAccountBalance', () => {
     const path = '/account';
 
-    it('returns 0 if fetch not ok', async () => {
+    it('throws ExchangeProviderResponseError with response detail if fetch not ok', async () => {
       const apiKey = faker.string.sample();
       const secretKey = faker.string.sample();
       const asset = faker.finance.currencyCode();
       const client = new MexcExchangeClient({ apiKey, secretKey });
-      const scope = nock(MEXC_API_BASE_URL).get(path).query(true).reply(403);
-      const result = await client.getAccountBalance(asset);
+      const errorPayload = { msg: 'forbidden' };
+      const scope = nock(MEXC_API_BASE_URL)
+        .get(path)
+        .query(true)
+        .reply(400, errorPayload);
+
+      const balancePromise = client.getAccountBalance(asset);
+      await expect(balancePromise).rejects.toThrow(
+        ExchangeProviderResponseError,
+      );
+
       scope.done();
-      expect(result).toBe(0);
     });
 
     it('returns 0 if asset not found', async () => {

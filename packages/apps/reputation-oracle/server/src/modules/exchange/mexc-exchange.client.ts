@@ -3,7 +3,10 @@ import { createHmac } from 'node:crypto';
 import { type SupportedExchange } from '@/common/constants';
 import logger from '@/logger';
 
-import { ExchangeApiClientError } from './errors';
+import {
+  ExchangeApiClientError,
+  ExchangeProviderResponseError,
+} from './errors';
 import type {
   ExchangeClient,
   ExchangeClientCredentials,
@@ -67,7 +70,12 @@ export class MexcExchangeClient implements ExchangeClient {
       this.timeoutMs,
     );
     if (!res.ok) {
-      return 0;
+      const errorBody = await res.json();
+      throw new ExchangeProviderResponseError(
+        this.id,
+        res.status,
+        errorBody.msg as string,
+      );
     }
     const data = (await res.json()) as {
       balances?: Array<{ asset: string; free: string; locked: string }>;

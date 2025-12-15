@@ -111,20 +111,14 @@ export class Web3Service {
   }
 
   async getStakedBalance(address: string): Promise<number> {
-    try {
-      const chainId = this.web3ConfigService.reputationNetworkChainId;
-      const provider = this.getSigner(chainId).provider;
+    const chainId = this.web3ConfigService.reputationNetworkChainId;
+    const provider = this.getSigner(chainId).provider;
 
-      const stakingClient = await StakingClient.build(provider);
-      const stakerInfo = await stakingClient.getStakerInfo(address);
+    const stakingClient = await StakingClient.build(provider);
+    const stakerInfo = await stakingClient.getStakerInfo(address);
 
-      const total =
-        (stakerInfo.stakedAmount ?? 0n) + (stakerInfo.lockedAmount ?? 0n);
-      return Number(ethers.formatEther(total));
-    } catch (error) {
-      const message = 'Failed to fetch staked balance';
-      this.logger.error(message, { address, error });
-      throw new Error(message);
-    }
+    const total =
+      (stakerInfo.stakedAmount ?? 0n) + (stakerInfo.lockedAmount ?? 0n);
+    return Number(ethers.formatEther(total));
   }
 }

@@ -137,6 +137,7 @@ describe('StorageService', () => {
         mockS3ConfigService.bucket,
         fileName,
         fileContent,
+        undefined,
         {
           'Content-Type': contentType,
           'Cache-Control': 'no-store',

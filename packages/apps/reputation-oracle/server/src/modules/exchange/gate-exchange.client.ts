@@ -4,7 +4,10 @@ import { type SupportedExchange } from '@/common/constants';
 import logger from '@/logger';
 import Environment from '@/utils/environment';
 
-import { ExchangeApiClientError } from './errors';
+import {
+  ExchangeApiClientError,
+  ExchangeProviderResponseError,
+} from './errors';
 import type {
   ExchangeClient,
   ExchangeClientCredentials,
@@ -96,7 +99,12 @@ export class GateExchangeClient implements ExchangeClient {
     );
 
     if (!res.ok) {
-      return 0;
+      const errorBody = await res.json();
+      throw new ExchangeProviderResponseError(
+        this.id,
+        res.status,
+        errorBody.message as string,
+      );
     }
 
     const data = (await res.json()) as Array<{

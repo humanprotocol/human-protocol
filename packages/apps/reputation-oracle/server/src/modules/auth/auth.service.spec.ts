@@ -16,8 +16,6 @@ import {
   Web3ConfigService,
 } from '@/config';
 import { EmailAction, EmailService } from '@/modules/email';
-import { ExchangeClientFactory } from '@/modules/exchange';
-import type { ExchangeClient } from '@/modules/exchange/types';
 import { ExchangeApiKeysService } from '@/modules/exchange-api-keys';
 import { SiteKeyRepository } from '@/modules/user';
 import { UserEntity, UserRepository, UserService } from '@/modules/user';
@@ -33,7 +31,6 @@ import * as AuthErrors from './auth.error';
 import { AuthService } from './auth.service';
 import { TokenEntity, TokenType } from './token.entity';
 import { TokenRepository } from './token.repository';
-import { generateExchangeApiKeysData } from '../exchange-api-keys/fixtures';
 
 const mockKVStoreUtils = jest.mocked(KVStoreUtils);
 
@@ -69,7 +66,6 @@ const mockTokenRepository = createMock<TokenRepository>();
 const mockUserRepository = createMock<UserRepository>();
 const mockUserService = createMock<UserService>();
 const mockExchangeApiKeysService = createMock<ExchangeApiKeysService>();
-const mockExchangeClientFactory = createMock<ExchangeClientFactory>();
 const mockWeb3Service = createMock<Web3Service>();
 
 describe('AuthService', () => {
@@ -104,7 +100,6 @@ describe('AuthService', () => {
           provide: ExchangeApiKeysService,
           useValue: mockExchangeApiKeysService,
         },
-        { provide: ExchangeClientFactory, useValue: mockExchangeClientFactory },
         { provide: StakingConfigService, useValue: mockStakingConfigService },
         { provide: Web3Service, useValue: mockWeb3Service },
       ],
@@ -696,7 +691,9 @@ describe('AuthService', () => {
       const result = await service['checkStakeEligible'](user);
 
       expect(result).toBe(true);
-      expect(mockExchangeApiKeysService.retrieve).not.toHaveBeenCalled();
+      expect(
+        mockExchangeApiKeysService.getExchangeStakedBalance,
+      ).not.toHaveBeenCalled();
       expect(mockWeb3Service.getStakedBalance).not.toHaveBeenCalled();
     });
 
@@ -710,21 +707,16 @@ describe('AuthService', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (mockStakingConfigService as any).asset = 'HMT';
 
-      mockExchangeApiKeysService.retrieve.mockResolvedValueOnce(
-        generateExchangeApiKeysData(),
-      );
-
-      const mockClient = {
-        getAccountBalance: jest.fn().mockResolvedValue(1500),
-      };
-      mockExchangeClientFactory.create.mockResolvedValueOnce(
-        mockClient as unknown as ExchangeClient,
+      mockExchangeApiKeysService.getExchangeStakedBalance.mockResolvedValueOnce(
+        1500,
       );
 
       const result = await service['checkStakeEligible'](user);
 
       expect(result).toBe(true);
-      expect(mockExchangeClientFactory.create).toHaveBeenCalledTimes(1);
+      expect(
+        mockExchangeApiKeysService.getExchangeStakedBalance,
+      ).toHaveBeenCalledWith(user.id);
       expect(mockWeb3Service.getStakedBalance).not.toHaveBeenCalled();
     });
 
@@ -740,22 +732,17 @@ describe('AuthService', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (mockStakingConfigService as any).asset = 'HMT';
 
-      mockExchangeApiKeysService.retrieve.mockResolvedValueOnce(
-        generateExchangeApiKeysData(),
-      );
-
-      const mockClient = {
-        getAccountBalance: jest.fn().mockResolvedValue(400),
-      };
-      mockExchangeClientFactory.create.mockResolvedValueOnce(
-        mockClient as unknown as ExchangeClient,
+      mockExchangeApiKeysService.getExchangeStakedBalance.mockResolvedValueOnce(
+        400,
       );
       mockWeb3Service.getStakedBalance.mockResolvedValueOnce(600);
 
       const result = await service['checkStakeEligible'](user);
 
       expect(result).toBe(true);
-      expect(mockExchangeClientFactory.create).toHaveBeenCalledTimes(1);
+      expect(
+        mockExchangeApiKeysService.getExchangeStakedBalance,
+      ).toHaveBeenCalledWith(user.id);
       expect(mockWeb3Service.getStakedBalance).toHaveBeenCalledTimes(1);
       expect(mockWeb3Service.getStakedBalance).toHaveBeenCalledWith(
         user.evmAddress,
@@ -772,13 +759,17 @@ describe('AuthService', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (mockStakingConfigService as any).minThreshold = 1000;
 
-      mockExchangeApiKeysService.retrieve.mockResolvedValueOnce(null);
+      mockExchangeApiKeysService.getExchangeStakedBalance.mockResolvedValueOnce(
+        0,
+      );
       mockWeb3Service.getStakedBalance.mockResolvedValueOnce(500);
 
       const result = await service['checkStakeEligible'](user);
 
       expect(result).toBe(false);
-      expect(mockExchangeClientFactory.create).not.toHaveBeenCalled();
+      expect(
+        mockExchangeApiKeysService.getExchangeStakedBalance,
+      ).toHaveBeenCalledWith(user.id);
       expect(mockWeb3Service.getStakedBalance).toHaveBeenCalledTimes(1);
     });
 
@@ -794,22 +785,17 @@ describe('AuthService', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (mockStakingConfigService as any).asset = 'HMT';
 
-      mockExchangeApiKeysService.retrieve.mockResolvedValueOnce(
-        generateExchangeApiKeysData(),
-      );
-
-      const mockClient = {
-        getAccountBalance: jest.fn().mockRejectedValue(new Error('network')),
-      };
-      mockExchangeClientFactory.create.mockResolvedValueOnce(
-        mockClient as unknown as ExchangeClient,
+      mockExchangeApiKeysService.getExchangeStakedBalance.mockRejectedValueOnce(
+        new Error('network'),
       );
       mockWeb3Service.getStakedBalance.mockResolvedValueOnce(1200);
 
       const result = await service['checkStakeEligible'](user);
 
       expect(result).toBe(true);
-      expect(mockExchangeClientFactory.create).toHaveBeenCalledTimes(1);
+      expect(
+        mockExchangeApiKeysService.getExchangeStakedBalance,
+      ).toHaveBeenCalledWith(user.id);
       expect(mockWeb3Service.getStakedBalance).toHaveBeenCalledTimes(1);
     });
   });

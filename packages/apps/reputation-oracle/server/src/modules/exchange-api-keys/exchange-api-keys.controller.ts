@@ -22,10 +22,12 @@ import type { RequestWithUser } from '@/common/types';
 import Environment from '@/utils/environment';
 
 import {
-  ExchangeNameParamDto,
   EnrollExchangeApiKeysDto,
   EnrollExchangeApiKeysResponseDto,
   EnrolledApiKeyDto,
+  ExchangeNameParamDto,
+  StakeSummaryResponseDto,
+  SupportedExchangesResponseDto,
 } from './exchange-api-keys.dto';
 import { ExchangeApiKeysControllerErrorsFilter } from './exchange-api-keys.error-filter';
 import { ExchangeApiKeyNotFoundError } from './exchange-api-keys.errors';
@@ -124,5 +126,23 @@ export class ExchangeApiKeysController {
       throw new ExchangeApiKeyNotFoundError(request.user.id);
     }
     return apiKey;
+  }
+
+  @ApiOperation({ summary: 'List supported exchanges' })
+  @ApiResponse({ status: 200, type: SupportedExchangesResponseDto })
+  @Get('/supported')
+  async getSupportedExchanges(): Promise<SupportedExchangesResponseDto> {
+    return {
+      exchanges: this.exchangeApiKeysService.getSupportedExchanges(),
+    };
+  }
+
+  @ApiOperation({ summary: 'Retrieve aggregated staking info' })
+  @ApiResponse({ status: 200, type: StakeSummaryResponseDto })
+  @Get('/stake')
+  async getStakeSummary(
+    @Req() request: RequestWithUser,
+  ): Promise<StakeSummaryResponseDto> {
+    return this.exchangeApiKeysService.getStakeSummary(request.user.id);
   }
 }

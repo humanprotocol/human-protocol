@@ -39,3 +39,19 @@ export class EnrolledApiKeyDto {
   @ApiProperty({ name: 'api_key' })
   apiKey: string;
 }
+
+export class SupportedExchangesResponseDto {
+  @ApiProperty({ type: [String], enum: SUPPORTED_EXCHANGE_NAMES })
+  exchanges: string[];
+}
+
+export class StakeSummaryResponseDto {
+  @ApiProperty({ name: 'exchange_stake' })
+  exchangeStake: number;
+
+  @ApiProperty({ name: 'on_chain_stake' })
+  onChainStake: number;
+
+  @ApiProperty({ name: 'min_threshold' })
+  minThreshold: number;
+}
