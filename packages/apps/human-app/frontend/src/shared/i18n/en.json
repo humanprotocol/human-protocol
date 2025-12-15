@@ -90,7 +90,8 @@
     "pageCardError": {
       "reload": "Reload",
       "goHome": "Home Page"
-    }
+    },
+    "copyToClipboard": "Copied"
   },
   "homepage": {
     "humanApp": "HUMAN App",
@@ -225,6 +226,34 @@
         "review": "Under Review",
         "expired": "Expired",
         "abandoned": "Abandoned"
+      },
+      "stakingStatusValues": {
+        "staked": "Staked",
+        "error": "Error",
+        "notStaked": "Not Staked"
+      },
+      "stakingInfo": {
+        "prompt": "Before you can start earning on the HUMAN App, you’ll need to stake HMT. You can stake directly on our Staking Dashboard, or connect your exchange account to stake automatically via API KEY.",
+        "stakeHmt": "Stake HMT",
+        "stakingInfoValue": "Staking Info Value",
+        "stakedAmount": "Staked amount"
+      },
+      "apiKeyData": {
+        "apiKey": "API KEY",
+        "exchange": "Exchange",
+        "apiSecret": "API Secret",
+        "apiKeyConnected": "Connected",
+        "apiKeyNotConnected": "Not connected",
+        "cancel": "Cancel",
+        "connectYourApiKey": "Connect your API KEY",
+        "connectApiKey": "Connect API KEY",
+        "modalDescription": "To stake HMT using your exchange balance, connect your exchange account by adding your API key and secret. Your credentials are encrypted and securely stored.",
+        "modalFooterAgreement": "By connecting your API KEY, you agree to HUMAN Protocol Terms of Service and consent to its Privacy Policy.",
+        "deleteApiKey": "Delete API KEY",
+        "deleteApiKeyConfirmation": "Are you sure you want to delete your API key?",
+        "deleteApiKeyDescription": "You can only solve jobs in the HUMAN App if you have staked HMT.",
+        "editApiKey": "Edit API KEY",
+        "saveChanges": "Save Changes"
       }
     },
     "oraclesTable": {

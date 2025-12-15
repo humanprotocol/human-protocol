@@ -1,4 +1,4 @@
-import { Grid, Paper } from '@mui/material';
+import { Paper, Stack } from '@mui/material';
 import { useEffect } from 'react';
 import { t } from 'i18next';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
@@ -8,7 +8,12 @@ import {
   TopNotificationType,
   useNotification,
 } from '@/shared/hooks/use-notification';
-import { ProfileData, ProfileActions } from '../components';
+import {
+  ProfileData,
+  IdentityVerificationControl,
+  WalletConnectionControl,
+  StakingInfo,
+} from '../components';
 
 export function WorkerProfilePage() {
   const { user } = useAuthenticatedUser();
@@ -55,16 +60,12 @@ export function WorkerProfilePage() {
         justifyContent: 'center',
       }}
     >
-      <Grid
-        container
-        sx={{
-          maxWidth: '376px',
-          gap: '3rem',
-        }}
-      >
+      <Stack width="100%" maxWidth="450px" gap={3}>
         <ProfileData />
-        <ProfileActions />
-      </Grid>
+        <IdentityVerificationControl />
+        <WalletConnectionControl />
+        {!!user.wallet_address && <StakingInfo />}
+      </Stack>
     </Paper>
   );
 }

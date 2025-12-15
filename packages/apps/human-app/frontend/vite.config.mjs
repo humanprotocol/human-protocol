@@ -22,6 +22,9 @@ const config = defineConfig({
   },
   build: {
     target: 'esnext',
+    commonjsOptions: {
+      include: [/core/, /human-protocol-sdk/, /node_modules/],
+    },
   },
   server: {
     host: '127.0.0.1',
@@ -29,12 +32,14 @@ const config = defineConfig({
   },
   optimizeDeps: {
     include: [
+      '@human-protocol/sdk',
       '@mui/material',
       '@emotion/react',
       '@emotion/styled',
       '@mui/material/Tooltip',
       '@mui/material/Paper',
     ],
+    force: true,
   },
 });
 

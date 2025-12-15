@@ -1,30 +1,42 @@
-import { DialogContent } from '@mui/material';
-import DialogMui from '@mui/material/Dialog';
+import { DialogContent, IconButton, Dialog } from '@mui/material';
 import { useModal } from '../../../contexts/modal-context';
-import { ModalHeader } from './modal-header';
+import CloseIcon from '@mui/icons-material/Close';
 
 export function GlobalModal() {
   const { open, closeModal, showCloseButton, content, onTransitionExited } =
     useModal();
 
   return (
-    <DialogMui
+    <Dialog
       open={open}
       onClose={closeModal}
       onTransitionExited={onTransitionExited}
       PaperProps={{
         sx: {
           flex: 1,
+          maxWidth: '800px',
+          position: 'relative',
         },
       }}
     >
-      <ModalHeader
-        closeButton={{
-          isVisible: showCloseButton,
-          onClick: closeModal,
-        }}
-      />
-      <DialogContent>{content}</DialogContent>
-    </DialogMui>
+      {showCloseButton && (
+        <IconButton
+          data-testid="button-close-modal"
+          aria-label="close"
+          onClick={closeModal}
+          sx={{
+            position: 'absolute',
+            top: 16,
+            right: 16,
+            p: 0,
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
+      )}
+      <DialogContent sx={{ py: 4, px: { xs: 2, md: 4 } }}>
+        {content}
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -39,6 +39,12 @@ import MoonIconLight from '@/assets/icons/moon.svg';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import WorkHeaderDark from '@/assets/icons-dark-mode/work-header.svg';
 import WorkHeaderLight from '@/assets/icons/work-header.svg';
+import CopyIconLight from '@/assets/icons/content-copy.svg';
+import CopyIconDark from '@/assets/icons-dark-mode/content-copy.svg';
+import EditIconLight from '@/assets/icons/edit-icon.svg';
+import EditIconDark from '@/assets/icons-dark-mode/edit-icon.svg';
+import DeleteIconLight from '@/assets/icons/delete-icon.svg';
+import DeleteIconDark from '@/assets/icons-dark-mode/delete-icon.svg';
 
 function HomepageLogoIcon() {
   const { isDarkMode } = useColorMode();
@@ -124,6 +130,18 @@ function MoonIcon() {
   const { isDarkMode } = useColorMode();
   return isDarkMode ? <MoonIconDark /> : <MoonIconLight />;
 }
+function CopyIcon() {
+  const { isDarkMode } = useColorMode();
+  return isDarkMode ? <CopyIconDark /> : <CopyIconLight />;
+}
+function EditIcon() {
+  const { isDarkMode } = useColorMode();
+  return isDarkMode ? <EditIconDark /> : <EditIconLight />;
+}
+function DeleteIcon() {
+  const { isDarkMode } = useColorMode();
+  return isDarkMode ? <DeleteIconDark /> : <DeleteIconLight />;
+}
 
 export {
   HomepageLogoIcon,
@@ -148,4 +166,7 @@ export {
   SunIcon,
   MoonIcon,
   WorkHeaderIcon,
+  CopyIcon,
+  EditIcon,
+  DeleteIcon,
 };
