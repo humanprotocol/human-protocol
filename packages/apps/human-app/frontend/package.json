@@ -55,7 +55,7 @@
     "vite-plugin-svgr": "^4.2.0",
     "wagmi": "^2.15.6",
     "zod": "^4.0.17",
-    "zustand": "^4.5.0"
+    "zustand": "^5.0.9"
   },
   "devDependencies": {
     "@tanstack/eslint-plugin-query": "^5.60.1",
