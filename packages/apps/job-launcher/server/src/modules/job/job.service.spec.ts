@@ -18,7 +18,6 @@ import { ServerConfigService } from '../../common/config/server-config.service';
 import { ErrorEscrow, ErrorJob } from '../../common/constants/errors';
 import { TOKEN_ADDRESSES } from '../../common/constants/tokens';
 import {
-  AudinoJobType,
   CvatJobType,
   EscrowFundToken,
   FortuneJobType,
@@ -40,7 +39,6 @@ import {
 import { div, max, mul } from '../../common/utils/decimal';
 import { getTokenDecimals } from '../../common/utils/tokens';
 import {
-  createMockAudinoManifest,
   createMockCvatManifest,
   createMockFortuneManifest,
   createMockHcaptchaManifest,
@@ -58,7 +56,6 @@ import { WebhookRepository } from '../webhook/webhook.repository';
 import { WhitelistEntity } from '../whitelist/whitelist.entity';
 import { WhitelistService } from '../whitelist/whitelist.service';
 import {
-  createAudinoJobDto,
   createCaptchaJobDto,
   createCvatJobDto,
   createFortuneJobDto,
@@ -566,92 +563,6 @@ describe('JobService', () => {
           exchangeOracle: cvatJobDto.exchangeOracle,
           recordingOracle: cvatJobDto.recordingOracle,
           reputationOracle: cvatJobDto.reputationOracle,
-          payments: expect.any(Array),
-        });
-      });
-    });
-
-    describe('Audino', () => {
-      it('should create an Audino job', async () => {
-        const audinoJobDto = createAudinoJobDto();
-        const fundTokenDecimals = getTokenDecimals(
-          audinoJobDto.chainId!,
-          audinoJobDto.escrowFundToken,
-        );
-
-        const mockManifest = createMockAudinoManifest();
-        mockManifestService.createManifest.mockResolvedValueOnce(mockManifest);
-        const mockUrl = faker.internet.url();
-        const mockHash = faker.string.uuid();
-        mockManifestService.uploadManifest.mockResolvedValueOnce({
-          url: mockUrl,
-          hash: mockHash,
-        });
-        const jobEntityMock = createJobEntity();
-        mockJobRepository.createUnique = jest
-          .fn()
-          .mockResolvedValueOnce(jobEntityMock);
-        mockRateService.getRate
-          .mockResolvedValueOnce(tokenToUsdRate)
-          .mockResolvedValueOnce(usdToTokenRate);
-
-        await jobService.createJob(
-          userMock,
-          AudinoJobType.AUDIO_TRANSCRIPTION,
-          audinoJobDto,
-        );
-
-        expect(mockWeb3Service.validateChainId).toHaveBeenCalledWith(
-          audinoJobDto.chainId,
-        );
-        expect(mockRoutingProtocolService.selectOracles).not.toHaveBeenCalled();
-        expect(mockRoutingProtocolService.validateOracles).toHaveBeenCalledWith(
-          audinoJobDto.chainId,
-          audinoJobDto.type,
-          audinoJobDto.reputationOracle,
-          audinoJobDto.exchangeOracle,
-          audinoJobDto.recordingOracle,
-        );
-        expect(mockManifestService.createManifest).toHaveBeenCalledWith(
-          audinoJobDto,
-          audinoJobDto.type,
-          audinoJobDto.paymentAmount,
-          fundTokenDecimals,
-        );
-        expect(mockManifestService.uploadManifest).toHaveBeenCalledWith(
-          audinoJobDto.chainId,
-          mockManifest,
-          [
-            audinoJobDto.exchangeOracle,
-            audinoJobDto.reputationOracle,
-            audinoJobDto.recordingOracle,
-          ],
-        );
-        expect(mockPaymentService.createWithdrawalPayment).toHaveBeenCalledWith(
-          userMock.id,
-          expect.any(Number),
-          audinoJobDto.paymentCurrency,
-          tokenToUsdRate,
-        );
-        expect(mockJobRepository.updateOne).toHaveBeenCalledWith({
-          chainId: audinoJobDto.chainId,
-          userId: userMock.id,
-          manifestUrl: mockUrl,
-          manifestHash: mockHash,
-          requestType: audinoJobDto.type,
-          fee: expect.any(Number),
-          fundAmount: Number(
-            mul(
-              mul(audinoJobDto.paymentAmount, tokenToUsdRate),
-              usdToTokenRate,
-            ).toFixed(6),
-          ),
-          status: JobStatus.MODERATION_PASSED,
-          waitUntil: expect.any(Date),
-          token: audinoJobDto.escrowFundToken,
-          exchangeOracle: audinoJobDto.exchangeOracle,
-          recordingOracle: audinoJobDto.recordingOracle,
-          reputationOracle: audinoJobDto.reputationOracle,
           payments: expect.any(Array),
         });
       });
@@ -1330,13 +1241,6 @@ describe('JobService', () => {
       'should return OracleType.CVAT for CVAT job type %s',
       (jobType) => {
         expect(jobService.getOracleType(jobType)).toBe(OracleType.CVAT);
-      },
-    );
-
-    it.each(Object.values(AudinoJobType))(
-      'should return OracleType.AUDINO for Audino job type %s',
-      (jobType) => {
-        expect(jobService.getOracleType(jobType)).toBe(OracleType.AUDINO);
       },
     );
 
