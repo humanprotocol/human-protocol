@@ -85,7 +85,7 @@ export function AddApiKeyModal() {
             )}
           </FormControl>
           <FormControl
-            error={!!errors.exchange}
+            error={!!errors.apiKey}
             sx={{ width: { xs: '100%', md: '70%' } }}
           >
             <Controller
