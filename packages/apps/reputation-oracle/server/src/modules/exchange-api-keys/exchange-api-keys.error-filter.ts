@@ -47,7 +47,7 @@ export class ExchangeApiKeysControllerErrorsFilter implements ExceptionFilter {
     ) {
       status = HttpStatus.UNPROCESSABLE_ENTITY;
     } else if (exception instanceof ExchangeProviderResponseError) {
-      status = HttpStatus.SERVICE_UNAVAILABLE;
+      status = HttpStatus.UNPROCESSABLE_ENTITY;
       this.logger.error('Exchange API client error', { error: exception });
     } else if (exception instanceof ExchangeApiClientError) {
       status = HttpStatus.SERVICE_UNAVAILABLE;
