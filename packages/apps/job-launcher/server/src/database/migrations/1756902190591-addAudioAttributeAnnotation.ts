@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddAudioAttributeAnnotation1756902190591
-  implements MigrationInterface
-{
+export class AddAudioAttributeAnnotation1756902190591 implements MigrationInterface {
   name = 'AddAudioAttributeAnnotation1756902190591';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

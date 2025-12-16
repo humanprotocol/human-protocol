@@ -28,9 +28,9 @@ export interface EscrowResultsProcessor {
 }
 
 @Injectable()
-export abstract class BaseEscrowResultsProcessor<TManifest extends JobManifest>
-  implements EscrowResultsProcessor
-{
+export abstract class BaseEscrowResultsProcessor<
+  TManifest extends JobManifest,
+> implements EscrowResultsProcessor {
   constructor(
     private readonly storageService: StorageService,
     private readonly pgpEncryptionService: PgpEncryptionService,
