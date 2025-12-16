@@ -2,6 +2,7 @@ import { Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/components/ui/button';
 import { useIsMobile } from '@/shared/hooks';
+import { useDeleteExchangeApiKeys } from '../../hooks/use-exchange-api-keys';
 
 interface DeleteApiKeyModalProps {
   onClose: () => void;
@@ -9,7 +10,12 @@ interface DeleteApiKeyModalProps {
 
 export function DeleteApiKeyModal({ onClose }: DeleteApiKeyModalProps) {
   const { t } = useTranslation();
+  const { mutate: deleteExchangeApiKey } = useDeleteExchangeApiKeys();
   const isMobile = useIsMobile();
+
+  const handleDeleteExchangeApiKey = () => {
+    deleteExchangeApiKey();
+  };
 
   return (
     <Stack>
@@ -41,6 +47,7 @@ export function DeleteApiKeyModal({ onClose }: DeleteApiKeyModalProps) {
           size="large"
           fullWidth={isMobile}
           sx={{ bgcolor: 'primary.light' }}
+          onClick={handleDeleteExchangeApiKey}
         >
           {t('worker.profile.apiKeyData.deleteApiKey')}
         </Button>

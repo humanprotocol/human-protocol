@@ -8,12 +8,14 @@ import {
   useDeleteApiKeyModal,
   useEditApiKeyModal,
 } from '../hooks/use-api-key-modals';
+import { useGetExchangeApiKeys } from '../../hooks/use-exchange-api-keys';
 
 export function ApiKeyData() {
   const { isDarkMode } = useColorMode();
   const { t } = useTranslation();
   const { openModal: openEditApiKeyModal } = useEditApiKeyModal();
   const { openModal: openDeleteApiKeyModal } = useDeleteApiKeyModal();
+  const { data: exchangeApiKey } = useGetExchangeApiKeys();
 
   const textField = isDarkMode ? (
     <CustomTextFieldDark
@@ -42,7 +44,12 @@ export function ApiKeyData() {
       </Stack>
       <Stack gap={2} direction="row" alignItems="center">
         {textField}
-        <Stack direction="row" alignItems="center" gap={1}>
+        <Stack
+          display={exchangeApiKey ? 'flex' : 'none'}
+          direction="row"
+          alignItems="center"
+          gap={1}
+        >
           <IconButton
             disableRipple
             sx={{ p: 0, '&:hover': { bgcolor: 'inherit' } }}

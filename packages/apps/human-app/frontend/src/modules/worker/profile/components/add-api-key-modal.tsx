@@ -12,9 +12,11 @@ import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 import { Button } from '@/shared/components/ui/button';
 import { useIsMobile } from '@/shared/hooks';
+import { useEnrollExchangeApiKeys } from '../../hooks/use-exchange-api-keys';
 
 export function AddApiKeyModal() {
   const { t } = useTranslation();
+  const { mutate: enrollExchangeApiKey } = useEnrollExchangeApiKeys();
   const isMobile = useIsMobile();
 
   const {
@@ -41,7 +43,7 @@ export function AddApiKeyModal() {
     apiKey: string;
     apiSecret: string;
   }) => {
-    console.log(data);
+    enrollExchangeApiKey(data);
   };
 
   return (
