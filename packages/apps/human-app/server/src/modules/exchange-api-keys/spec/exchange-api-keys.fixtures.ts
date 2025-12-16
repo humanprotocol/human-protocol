@@ -33,10 +33,13 @@ export const retrieveExchangeApiKeysResponseFixture: RetrieveExchangeApiKeysResp
     exchangeName: EXCHANGE_NAME,
   };
 
-export const stakeSummaryResponseFixture = {
-  exchangeStake: 1000,
-  onChainStake: 500,
-  minThreshold: 1000,
-};
-
-export const supportedExchangesResponseFixture = ['Mexc', 'Gate'];
+export const supportedExchangesResponseFixture = [
+  {
+    name: 'mexc',
+    displayName: 'MEXC Global',
+  },
+  {
+    name: 'gate',
+    displayName: 'Gate',
+  },
+];

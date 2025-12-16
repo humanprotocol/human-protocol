@@ -5,7 +5,6 @@ import {
   enrollExchangeApiKeysCommandFixture,
   enrollExchangeApiKeysResponseFixture,
   retrieveExchangeApiKeysResponseFixture,
-  stakeSummaryResponseFixture,
   supportedExchangesResponseFixture,
   TOKEN,
 } from './exchange-api-keys.fixtures';
@@ -72,17 +71,6 @@ describe('ExchangeApiKeysService', () => {
         TOKEN,
       );
       expect(result).toEqual(retrieveExchangeApiKeysResponseFixture);
-    });
-  });
-
-  describe('getStakeSummary', () => {
-    it('should retrieve stake summary', async () => {
-      (reputationOracleMock.getStakeSummary as jest.Mock).mockResolvedValue(
-        stakeSummaryResponseFixture,
-      );
-      const result = await service.getStakeSummary(TOKEN);
-      expect(reputationOracleMock.getStakeSummary).toHaveBeenCalledWith(TOKEN);
-      expect(result).toEqual(stakeSummaryResponseFixture);
     });
   });
 

@@ -1,7 +1,7 @@
 export type StakeSummaryData = {
-  exchangeStake: number;
-  onChainStake: number;
-  minThreshold: number;
+  exchangeStake: string;
+  onChainStake: string;
+  minThreshold: string;
   exchangeError?: string;
   onChainError?: string;
 };

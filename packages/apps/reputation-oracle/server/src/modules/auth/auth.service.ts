@@ -12,7 +12,7 @@ import {
 } from '@/config';
 import logger from '@/logger';
 import { EmailAction, EmailService } from '@/modules/email';
-import { ExchangeApiKeysService } from '@/modules/exchange-api-keys';
+import { StakingService } from '@/modules/staking';
 import {
   OperatorStatus,
   SiteKeyRepository,
@@ -23,7 +23,6 @@ import {
   type OperatorUserEntity,
   type Web2UserEntity,
 } from '@/modules/user';
-import { Web3Service } from '@/modules/web3';
 import * as httpUtils from '@/utils/http';
 import * as securityUtils from '@/utils/security';
 import * as web3Utils from '@/utils/web3';
@@ -59,9 +58,8 @@ export class AuthService {
     private readonly userRepository: UserRepository,
     private readonly userService: UserService,
     private readonly web3ConfigService: Web3ConfigService,
-    private readonly exchangeApiKeysService: ExchangeApiKeysService,
+    private readonly stakingService: StakingService,
     private readonly stakingConfigService: StakingConfigService,
-    private readonly web3Service: Web3Service,
   ) {}
 
   async signup(email: string, password: string): Promise<void> {
@@ -283,9 +281,7 @@ export class AuthService {
 
     try {
       const exchangeBalance =
-        await this.exchangeApiKeysService.getExchangeStakedBalance(
-          userEntity.id,
-        );
+        await this.stakingService.getExchangeStakedBalance(userEntity.id);
       inspectedStakeAmount += exchangeBalance;
     } catch (err) {
       this.logger.warn('Failed to query exchange balance; continuing', {
@@ -299,7 +295,7 @@ export class AuthService {
       userEntity.evmAddress
     ) {
       try {
-        const onChainStake = await this.web3Service.getStakedBalance(
+        const onChainStake = await this.stakingService.getOnChainStakedBalance(
           userEntity.evmAddress,
         );
         inspectedStakeAmount += onChainStake;

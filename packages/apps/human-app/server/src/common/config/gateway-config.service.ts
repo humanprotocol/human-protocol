@@ -156,13 +156,13 @@ export class GatewayConfigService {
               method: HttpMethod.GET,
               headers: this.JSON_HEADER,
             },
-            [ReputationOracleEndpoints.EXCHANGE_API_KEYS_STAKE_SUMMARY]: {
-              endpoint: '/exchange-api-keys/stake',
+            [ReputationOracleEndpoints.EXCHANGE_API_KEYS_SUPPORTED_EXCHANGES]: {
+              endpoint: '/exchange-api-keys/supported',
               method: HttpMethod.GET,
               headers: this.JSON_HEADER,
             },
-            [ReputationOracleEndpoints.EXCHANGE_API_KEYS_SUPPORTED_EXCHANGES]: {
-              endpoint: '/exchange-api-keys/supported',
+            [ReputationOracleEndpoints.STAKE_SUMMARY]: {
+              endpoint: '/staking/summary',
               method: HttpMethod.GET,
               headers: this.JSON_HEADER,
             },

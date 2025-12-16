@@ -1,6 +1,6 @@
 import { createHash, createHmac } from 'node:crypto';
 
-import { type SupportedExchange } from '@/common/constants';
+import { SupportedExchange } from '@/common/constants';
 import logger from '@/logger';
 import Environment from '@/utils/environment';
 
@@ -20,7 +20,7 @@ export const DEVELOP_GATE_API_BASE_URL =
   'https://api-testnet.gateapi.io/api/v4';
 
 export class GateExchangeClient implements ExchangeClient {
-  readonly id: SupportedExchange = 'gate';
+  readonly id = SupportedExchange.GATE;
   private readonly apiKey: string;
   private readonly secretKey: string;
   private readonly timeoutMs?: number;

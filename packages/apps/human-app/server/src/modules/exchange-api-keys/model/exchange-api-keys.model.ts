@@ -35,16 +35,10 @@ export class RetrieveExchangeApiKeysResponse {
   exchangeName: string;
 }
 
-export class StakeSummaryResponse {
-  @ApiProperty({ name: 'exchange_stake' })
-  @AutoMap()
-  exchangeStake: number;
+export class SupportedExchangeResponse {
+  @ApiProperty()
+  name: string;
 
-  @ApiProperty({ name: 'on_chain_stake' })
-  @AutoMap()
-  onChainStake: number;
-
-  @ApiProperty({ name: 'min_threshold' })
-  @AutoMap()
-  minThreshold: number;
+  @ApiProperty()
+  displayName: string;
 }

@@ -1,8 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, MaxLength, Validate } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsString, MaxLength } from 'class-validator';
 
-import { SUPPORTED_EXCHANGE_NAMES } from '@/common/constants';
-import { ExchangeNameValidator } from '@/common/validators';
+import { SupportedExchange } from '@/common/constants';
 
 export class EnrollExchangeApiKeysDto {
   @ApiProperty({ name: 'api_key' })
@@ -21,10 +20,10 @@ export class EnrollExchangeApiKeysDto {
 export class ExchangeNameParamDto {
   @ApiProperty({
     name: 'exchange_name',
-    enum: SUPPORTED_EXCHANGE_NAMES,
+    enum: SupportedExchange,
   })
-  @Validate(ExchangeNameValidator)
-  exchangeName: string;
+  @IsEnum(SupportedExchange)
+  exchangeName: SupportedExchange;
 }
 
 export class EnrollExchangeApiKeysResponseDto {
@@ -40,13 +39,10 @@ export class EnrolledApiKeyDto {
   apiKey: string;
 }
 
-export class StakeSummaryResponseDto {
-  @ApiProperty({ name: 'exchange_stake' })
-  exchangeStake: number;
+export class SupportedExchangeDto {
+  @ApiProperty({ name: 'name' })
+  name: string;
 
-  @ApiProperty({ name: 'on_chain_stake' })
-  onChainStake: number;
-
-  @ApiProperty({ name: 'min_threshold' })
-  minThreshold: number;
+  @ApiProperty({ name: 'display_name' })
+  displayName: string;
 }

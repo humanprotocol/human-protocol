@@ -16,11 +16,10 @@ import {
   Web3ConfigService,
 } from '@/config';
 import { EmailAction, EmailService } from '@/modules/email';
-import { ExchangeApiKeysService } from '@/modules/exchange-api-keys';
+import { StakingService } from '@/modules/staking';
 import { SiteKeyRepository } from '@/modules/user';
 import { UserEntity, UserRepository, UserService } from '@/modules/user';
 import { generateOperator, generateWorkerUser } from '@/modules/user/fixtures';
-import { Web3Service } from '@/modules/web3';
 import { mockWeb3ConfigService } from '@/modules/web3/fixtures';
 import * as secutiryUtils from '@/utils/security';
 import * as web3Utils from '@/utils/web3';
@@ -65,8 +64,7 @@ const mockSiteKeyRepository = createMock<SiteKeyRepository>();
 const mockTokenRepository = createMock<TokenRepository>();
 const mockUserRepository = createMock<UserRepository>();
 const mockUserService = createMock<UserService>();
-const mockExchangeApiKeysService = createMock<ExchangeApiKeysService>();
-const mockWeb3Service = createMock<Web3Service>();
+const mockStakingService = createMock<StakingService>();
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -96,12 +94,8 @@ describe('AuthService', () => {
         { provide: UserRepository, useValue: mockUserRepository },
         { provide: UserService, useValue: mockUserService },
         { provide: Web3ConfigService, useValue: mockWeb3ConfigService },
-        {
-          provide: ExchangeApiKeysService,
-          useValue: mockExchangeApiKeysService,
-        },
+        { provide: StakingService, useValue: mockStakingService },
         { provide: StakingConfigService, useValue: mockStakingConfigService },
-        { provide: Web3Service, useValue: mockWeb3Service },
       ],
     }).compile();
 
@@ -692,9 +686,9 @@ describe('AuthService', () => {
 
       expect(result).toBe(true);
       expect(
-        mockExchangeApiKeysService.getExchangeStakedBalance,
+        mockStakingService.getExchangeStakedBalance,
       ).not.toHaveBeenCalled();
-      expect(mockWeb3Service.getStakedBalance).not.toHaveBeenCalled();
+      expect(mockStakingService.getOnChainStakedBalance).not.toHaveBeenCalled();
     });
 
     it('returns true when exchange balance meets threshold (no on-chain call)', async () => {
@@ -707,17 +701,15 @@ describe('AuthService', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (mockStakingConfigService as any).asset = 'HMT';
 
-      mockExchangeApiKeysService.getExchangeStakedBalance.mockResolvedValueOnce(
-        1500,
-      );
+      mockStakingService.getExchangeStakedBalance.mockResolvedValueOnce(1500);
 
       const result = await service['checkStakeEligible'](user);
 
       expect(result).toBe(true);
-      expect(
-        mockExchangeApiKeysService.getExchangeStakedBalance,
-      ).toHaveBeenCalledWith(user.id);
-      expect(mockWeb3Service.getStakedBalance).not.toHaveBeenCalled();
+      expect(mockStakingService.getExchangeStakedBalance).toHaveBeenCalledWith(
+        user.id,
+      );
+      expect(mockStakingService.getOnChainStakedBalance).not.toHaveBeenCalled();
     });
 
     it('returns true when exchange balance below threshold but on-chain makes up the difference', async () => {
@@ -732,19 +724,19 @@ describe('AuthService', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (mockStakingConfigService as any).asset = 'HMT';
 
-      mockExchangeApiKeysService.getExchangeStakedBalance.mockResolvedValueOnce(
-        400,
-      );
-      mockWeb3Service.getStakedBalance.mockResolvedValueOnce(600);
+      mockStakingService.getExchangeStakedBalance.mockResolvedValueOnce(400);
+      mockStakingService.getOnChainStakedBalance.mockResolvedValueOnce(600);
 
       const result = await service['checkStakeEligible'](user);
 
       expect(result).toBe(true);
-      expect(
-        mockExchangeApiKeysService.getExchangeStakedBalance,
-      ).toHaveBeenCalledWith(user.id);
-      expect(mockWeb3Service.getStakedBalance).toHaveBeenCalledTimes(1);
-      expect(mockWeb3Service.getStakedBalance).toHaveBeenCalledWith(
+      expect(mockStakingService.getExchangeStakedBalance).toHaveBeenCalledWith(
+        user.id,
+      );
+      expect(mockStakingService.getOnChainStakedBalance).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(mockStakingService.getOnChainStakedBalance).toHaveBeenCalledWith(
         user.evmAddress,
       );
     });
@@ -759,18 +751,18 @@ describe('AuthService', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (mockStakingConfigService as any).minThreshold = 1000;
 
-      mockExchangeApiKeysService.getExchangeStakedBalance.mockResolvedValueOnce(
-        0,
-      );
-      mockWeb3Service.getStakedBalance.mockResolvedValueOnce(500);
+      mockStakingService.getExchangeStakedBalance.mockResolvedValueOnce(0);
+      mockStakingService.getOnChainStakedBalance.mockResolvedValueOnce(500);
 
       const result = await service['checkStakeEligible'](user);
 
       expect(result).toBe(false);
-      expect(
-        mockExchangeApiKeysService.getExchangeStakedBalance,
-      ).toHaveBeenCalledWith(user.id);
-      expect(mockWeb3Service.getStakedBalance).toHaveBeenCalledTimes(1);
+      expect(mockStakingService.getExchangeStakedBalance).toHaveBeenCalledWith(
+        user.id,
+      );
+      expect(mockStakingService.getOnChainStakedBalance).toHaveBeenCalledTimes(
+        1,
+      );
     });
 
     it('continues on exchange error and returns based on on-chain stake', async () => {
@@ -785,18 +777,20 @@ describe('AuthService', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (mockStakingConfigService as any).asset = 'HMT';
 
-      mockExchangeApiKeysService.getExchangeStakedBalance.mockRejectedValueOnce(
+      mockStakingService.getExchangeStakedBalance.mockRejectedValueOnce(
         new Error('network'),
       );
-      mockWeb3Service.getStakedBalance.mockResolvedValueOnce(1200);
+      mockStakingService.getOnChainStakedBalance.mockResolvedValueOnce(1200);
 
       const result = await service['checkStakeEligible'](user);
 
       expect(result).toBe(true);
-      expect(
-        mockExchangeApiKeysService.getExchangeStakedBalance,
-      ).toHaveBeenCalledWith(user.id);
-      expect(mockWeb3Service.getStakedBalance).toHaveBeenCalledTimes(1);
+      expect(mockStakingService.getExchangeStakedBalance).toHaveBeenCalledWith(
+        user.id,
+      );
+      expect(mockStakingService.getOnChainStakedBalance).toHaveBeenCalledTimes(
+        1,
+      );
     });
   });
 

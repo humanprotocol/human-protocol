@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 
-import { SUPPORTED_EXCHANGE_NAMES } from '@/common/constants';
+import { SupportedExchange } from '@/common/constants';
 
 export function generateGateAccountBalance(tokens: string[] = []) {
   if (tokens.length === 0) {
@@ -28,5 +28,5 @@ export function generateMexcAccountBalance(tokens: string[] = []) {
 }
 
 export function generateExchangeName() {
-  return faker.helpers.arrayElement(SUPPORTED_EXCHANGE_NAMES);
+  return faker.helpers.enumValue(SupportedExchange);
 }

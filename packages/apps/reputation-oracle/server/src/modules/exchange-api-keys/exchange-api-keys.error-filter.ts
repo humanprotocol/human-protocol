@@ -15,10 +15,7 @@ import {
   KeyAuthorizationError,
   ActiveExchangeApiKeyExistsError,
 } from './exchange-api-keys.errors';
-import {
-  ExchangeApiClientError,
-  ExchangeProviderResponseError,
-} from '../exchange/errors';
+import { ExchangeApiClientError } from '../exchange/errors';
 
 @Catch(
   UserNotFoundError,
@@ -26,7 +23,6 @@ import {
   KeyAuthorizationError,
   ActiveExchangeApiKeyExistsError,
   ExchangeApiKeyNotFoundError,
-  ExchangeProviderResponseError,
 )
 export class ExchangeApiKeysControllerErrorsFilter implements ExceptionFilter {
   private readonly logger = logger.child({
@@ -46,9 +42,6 @@ export class ExchangeApiKeysControllerErrorsFilter implements ExceptionFilter {
       exception instanceof ActiveExchangeApiKeyExistsError
     ) {
       status = HttpStatus.UNPROCESSABLE_ENTITY;
-    } else if (exception instanceof ExchangeProviderResponseError) {
-      status = HttpStatus.UNPROCESSABLE_ENTITY;
-      this.logger.error('Exchange API client error', { error: exception });
     } else if (exception instanceof ExchangeApiClientError) {
       status = HttpStatus.SERVICE_UNAVAILABLE;
     } else if (exception instanceof ExchangeApiKeyNotFoundError) {

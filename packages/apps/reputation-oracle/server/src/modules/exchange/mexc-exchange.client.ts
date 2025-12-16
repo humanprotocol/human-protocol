@@ -1,6 +1,6 @@
 import { createHmac } from 'node:crypto';
 
-import { type SupportedExchange } from '@/common/constants';
+import { SupportedExchange } from '@/common/constants';
 import logger from '@/logger';
 
 import {
@@ -17,7 +17,7 @@ import { fetchWithHandling } from './utils';
 export const MEXC_API_BASE_URL = 'https://api.mexc.com/api/v3';
 
 export class MexcExchangeClient implements ExchangeClient {
-  readonly id: SupportedExchange = 'mexc';
+  readonly id = SupportedExchange.MEXC;
   private readonly apiKey: string;
   private readonly secretKey: string;
   private readonly timeoutMs?: number;

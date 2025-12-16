@@ -100,8 +100,9 @@ import {
   EnrollExchangeApiKeysCommand,
   EnrollExchangeApiKeysData,
   RetrieveExchangeApiKeysResponse,
-  StakeSummaryResponse,
+  SupportedExchangeResponse,
 } from '../../modules/exchange-api-keys/model/exchange-api-keys.model';
+import { StakeSummaryResponse } from '../../modules/staking/model/staking.model';
 
 @Injectable()
 export class ReputationOracleGateway {
@@ -186,20 +187,24 @@ export class ReputationOracleGateway {
 
   async getStakeSummary(token: string): Promise<StakeSummaryResponse> {
     const options = this.getEndpointOptions(
-      ReputationOracleEndpoints.EXCHANGE_API_KEYS_STAKE_SUMMARY,
+      ReputationOracleEndpoints.STAKE_SUMMARY,
       undefined,
       token,
     );
     return this.handleRequestToReputationOracle<StakeSummaryResponse>(options);
   }
 
-  async supportedExchanges(token: string): Promise<string[]> {
+  async supportedExchanges(
+    token: string,
+  ): Promise<SupportedExchangeResponse[]> {
     const options = this.getEndpointOptions(
       ReputationOracleEndpoints.EXCHANGE_API_KEYS_SUPPORTED_EXCHANGES,
       undefined,
       token,
     );
-    return this.handleRequestToReputationOracle<string[]>(options);
+    return this.handleRequestToReputationOracle<SupportedExchangeResponse[]>(
+      options,
+    );
   }
 
   async sendWorkerSignup(command: SignupWorkerCommand): Promise<void> {

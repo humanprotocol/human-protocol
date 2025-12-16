@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { ReputationOracleGateway } from '../../integrations/reputation-oracle/reputation-oracle.gateway';
 import {
   EnrollExchangeApiKeysCommand,
-  StakeSummaryResponse,
   RetrieveExchangeApiKeysResponse,
+  SupportedExchangeResponse,
 } from './model/exchange-api-keys.model';
 
 @Injectable()
@@ -22,11 +22,7 @@ export class ExchangeApiKeysService {
     return this.reputationOracle.retrieveExchangeApiKeys(token);
   }
 
-  getStakeSummary(token: string): Promise<StakeSummaryResponse> {
-    return this.reputationOracle.getStakeSummary(token);
-  }
-
-  getSupportedExchanges(token: string): Promise<string[]> {
+  getSupportedExchanges(token: string): Promise<SupportedExchangeResponse[]> {
     return this.reputationOracle.supportedExchanges(token);
   }
 }

@@ -22,8 +22,8 @@ import { Mapper } from '@automapper/core';
 import {
   EnrollExchangeApiKeysCommand,
   EnrollExchangeApiKeysDto,
-  StakeSummaryResponse,
   RetrieveExchangeApiKeysResponse,
+  SupportedExchangeResponse,
 } from './model/exchange-api-keys.model';
 
 @ApiTags('Exchange-Api-Keys')
@@ -73,19 +73,11 @@ export class ExchangeApiKeysController {
     return this.service.retrieve(req.token);
   }
 
-  @ApiOperation({ summary: 'Get exchange API keys stake summary' })
-  @Get('/stake')
-  async getStakeSummary(
-    @Request() req: RequestWithUser,
-  ): Promise<StakeSummaryResponse> {
-    return this.service.getStakeSummary(req.token);
-  }
-
   @ApiOperation({ summary: 'Get supported exchanges' })
   @Get('/supported-exchanges')
   async getSupportedExchanges(
     @Request() req: RequestWithUser,
-  ): Promise<string[]> {
+  ): Promise<SupportedExchangeResponse[]> {
     return this.service.getSupportedExchanges(req.token);
   }
 }
