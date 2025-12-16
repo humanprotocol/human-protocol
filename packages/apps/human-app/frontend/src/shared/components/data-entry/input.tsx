@@ -5,8 +5,10 @@ import { Typography } from '@mui/material';
 import { type InputMask } from '@/shared/components/data-entry/input-masks';
 import { useColorMode } from '@/shared/contexts/color-mode';
 
-export interface InputProps
-  extends Omit<TextFieldProps, 'name' | 'error' | 'helperText'> {
+export interface InputProps extends Omit<
+  TextFieldProps,
+  'name' | 'error' | 'helperText'
+> {
   name: string;
   label?: string;
   autoComplete?: string;

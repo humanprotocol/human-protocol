@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class RemoveNullableFromJobEntity1748612934037
-  implements MigrationInterface
-{
+export class RemoveNullableFromJobEntity1748612934037 implements MigrationInterface {
   name = 'RemoveNullableFromJobEntity1748612934037';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
