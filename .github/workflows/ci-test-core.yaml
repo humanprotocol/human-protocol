@@ -2,7 +2,7 @@ name: Protocol check
 
 on:
   push:
-    tags-ignore: '*'
+    branches: '**'
     paths:
       - 'packages/core/**'
 
