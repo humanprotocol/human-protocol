@@ -30,4 +30,13 @@ export const enrollExchangeApiKeysResponseFixture = {
 export const retrieveExchangeApiKeysResponseFixture: RetrieveExchangeApiKeysResponse =
   {
     apiKey: API_KEY,
+    exchangeName: EXCHANGE_NAME,
   };
+
+export const stakeSummaryResponseFixture = {
+  exchangeStake: 1000,
+  onChainStake: 500,
+  minThreshold: 1000,
+};
+
+export const supportedExchangesResponseFixture = ['Mexc', 'Gate'];

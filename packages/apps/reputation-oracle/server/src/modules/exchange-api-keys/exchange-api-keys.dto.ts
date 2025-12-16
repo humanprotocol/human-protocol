@@ -40,11 +40,6 @@ export class EnrolledApiKeyDto {
   apiKey: string;
 }
 
-export class SupportedExchangesResponseDto {
-  @ApiProperty({ type: [String], enum: SUPPORTED_EXCHANGE_NAMES })
-  exchanges: string[];
-}
-
 export class StakeSummaryResponseDto {
   @ApiProperty({ name: 'exchange_stake' })
   exchangeStake: number;

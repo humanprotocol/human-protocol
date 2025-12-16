@@ -5,6 +5,8 @@ import {
   enrollExchangeApiKeysCommandFixture,
   enrollExchangeApiKeysResponseFixture,
   retrieveExchangeApiKeysResponseFixture,
+  stakeSummaryResponseFixture,
+  supportedExchangesResponseFixture,
   TOKEN,
 } from './exchange-api-keys.fixtures';
 
@@ -17,6 +19,8 @@ describe('ExchangeApiKeysService', () => {
       enrollExchangeApiKeys: jest.fn(),
       deleteExchangeApiKeys: jest.fn(),
       retrieveExchangeApiKeys: jest.fn(),
+      getStakeSummary: jest.fn(),
+      supportedExchanges: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -68,6 +72,30 @@ describe('ExchangeApiKeysService', () => {
         TOKEN,
       );
       expect(result).toEqual(retrieveExchangeApiKeysResponseFixture);
+    });
+  });
+
+  describe('getStakeSummary', () => {
+    it('should retrieve stake summary', async () => {
+      (reputationOracleMock.getStakeSummary as jest.Mock).mockResolvedValue(
+        stakeSummaryResponseFixture,
+      );
+      const result = await service.getStakeSummary(TOKEN);
+      expect(reputationOracleMock.getStakeSummary).toHaveBeenCalledWith(TOKEN);
+      expect(result).toEqual(stakeSummaryResponseFixture);
+    });
+  });
+
+  describe('getSupportedExchanges', () => {
+    it('should retrieve supported exchanges', async () => {
+      (reputationOracleMock.supportedExchanges as jest.Mock).mockResolvedValue(
+        supportedExchangesResponseFixture,
+      );
+      const result = await service.getSupportedExchanges(TOKEN);
+      expect(reputationOracleMock.supportedExchanges).toHaveBeenCalledWith(
+        TOKEN,
+      );
+      expect(result).toEqual(supportedExchangesResponseFixture);
     });
   });
 });

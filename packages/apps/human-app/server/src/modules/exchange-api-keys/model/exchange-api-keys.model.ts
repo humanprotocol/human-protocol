@@ -32,4 +32,19 @@ export class EnrollExchangeApiKeysData {
 
 export class RetrieveExchangeApiKeysResponse {
   apiKey: string;
+  exchangeName: string;
+}
+
+export class StakeSummaryResponse {
+  @ApiProperty({ name: 'exchange_stake' })
+  @AutoMap()
+  exchangeStake: number;
+
+  @ApiProperty({ name: 'on_chain_stake' })
+  @AutoMap()
+  onChainStake: number;
+
+  @ApiProperty({ name: 'min_threshold' })
+  @AutoMap()
+  minThreshold: number;
 }

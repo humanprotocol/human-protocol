@@ -82,4 +82,24 @@ describe('ExchangeApiKeysController', () => {
       expect(result).toEqual(retrieveExchangeApiKeysResponseFixture);
     });
   });
+
+  describe('getStakeSummary', () => {
+    it('should call service.getStakeSummary with token and return response', async () => {
+      const req: RequestWithUser = { token: TOKEN } as RequestWithUser;
+      const result = await controller.getStakeSummary(req);
+      expect(service.getStakeSummary).toHaveBeenCalledWith(TOKEN);
+      expect(result).toEqual(exchangeApiKeysServiceMock.getStakeSummary(TOKEN));
+    });
+  });
+
+  describe('getSupportedExchanges', () => {
+    it('should call service.getSupportedExchanges with token and return response', async () => {
+      const req: RequestWithUser = { token: TOKEN } as RequestWithUser;
+      const result = await controller.getSupportedExchanges(req);
+      expect(service.getSupportedExchanges).toHaveBeenCalledWith(TOKEN);
+      expect(result).toEqual(
+        exchangeApiKeysServiceMock.getSupportedExchanges(TOKEN),
+      );
+    });
+  });
 });

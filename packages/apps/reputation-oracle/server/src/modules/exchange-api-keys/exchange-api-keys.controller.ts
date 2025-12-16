@@ -27,7 +27,6 @@ import {
   EnrolledApiKeyDto,
   ExchangeNameParamDto,
   StakeSummaryResponseDto,
-  SupportedExchangesResponseDto,
 } from './exchange-api-keys.dto';
 import { ExchangeApiKeysControllerErrorsFilter } from './exchange-api-keys.error-filter';
 import { ExchangeApiKeyNotFoundError } from './exchange-api-keys.errors';
@@ -129,12 +128,10 @@ export class ExchangeApiKeysController {
   }
 
   @ApiOperation({ summary: 'List supported exchanges' })
-  @ApiResponse({ status: 200, type: SupportedExchangesResponseDto })
+  @ApiResponse({ status: 200, type: String, isArray: true })
   @Get('/supported')
-  async getSupportedExchanges(): Promise<SupportedExchangesResponseDto> {
-    return {
-      exchanges: this.exchangeApiKeysService.getSupportedExchanges(),
-    };
+  async getSupportedExchanges(): Promise<string[]> {
+    return this.exchangeApiKeysService.getSupportedExchanges();
   }
 
   @ApiOperation({ summary: 'Retrieve aggregated staking info' })

@@ -99,6 +99,8 @@ import { HttpMethod } from '../../common/enums/http-method';
 import {
   EnrollExchangeApiKeysCommand,
   EnrollExchangeApiKeysData,
+  RetrieveExchangeApiKeysResponse,
+  StakeSummaryResponse,
 } from '../../modules/exchange-api-keys/model/exchange-api-keys.model';
 
 @Injectable()
@@ -169,16 +171,37 @@ export class ReputationOracleGateway {
     return this.handleRequestToReputationOracle<void>(options);
   }
 
-  async retrieveExchangeApiKeys(token: string): Promise<{ apiKey: string }> {
+  async retrieveExchangeApiKeys(
+    token: string,
+  ): Promise<RetrieveExchangeApiKeysResponse> {
     const options = this.getEndpointOptions(
       ReputationOracleEndpoints.EXCHANGE_API_KEYS_RETRIEVE,
       undefined,
       token,
     );
-    return this.handleRequestToReputationOracle<{
-      apiKey: string;
-    }>(options);
+    return this.handleRequestToReputationOracle<RetrieveExchangeApiKeysResponse>(
+      options,
+    );
   }
+
+  async getStakeSummary(token: string): Promise<StakeSummaryResponse> {
+    const options = this.getEndpointOptions(
+      ReputationOracleEndpoints.EXCHANGE_API_KEYS_STAKE_SUMMARY,
+      undefined,
+      token,
+    );
+    return this.handleRequestToReputationOracle<StakeSummaryResponse>(options);
+  }
+
+  async supportedExchanges(token: string): Promise<string[]> {
+    const options = this.getEndpointOptions(
+      ReputationOracleEndpoints.EXCHANGE_API_KEYS_SUPPORTED_EXCHANGES,
+      undefined,
+      token,
+    );
+    return this.handleRequestToReputationOracle<string[]>(options);
+  }
+
   async sendWorkerSignup(command: SignupWorkerCommand): Promise<void> {
     const signupWorkerData = this.mapper.map(
       command,
