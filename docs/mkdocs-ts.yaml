@@ -41,6 +41,7 @@ extra:
   language: typescript
   version:
     provider: mike
+  logo_href: https://sdk.humanprotocol.org
 markdown_extensions:
   - toc:
       baselevel: 1
