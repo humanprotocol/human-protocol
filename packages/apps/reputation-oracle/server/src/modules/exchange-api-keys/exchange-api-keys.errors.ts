@@ -17,12 +17,3 @@ export class KeyAuthorizationError extends BaseError {
     super("Provided API key can't be authorized on exchange");
   }
 }
-
-export class ActiveExchangeApiKeyExistsError extends BaseError {
-  constructor(
-    readonly userId: number,
-    readonly exchangeName: string,
-  ) {
-    super('User already has an active exchange API key');
-  }
-}

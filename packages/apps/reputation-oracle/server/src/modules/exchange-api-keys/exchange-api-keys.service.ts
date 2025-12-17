@@ -10,10 +10,7 @@ import { ExchangeClientFactory } from '@/modules/exchange/exchange-client.factor
 import { UserNotFoundError, UserRepository } from '@/modules/user';
 
 import { ExchangeApiKeyEntity } from './exchange-api-key.entity';
-import {
-  ActiveExchangeApiKeyExistsError,
-  KeyAuthorizationError,
-} from './exchange-api-keys.errors';
+import { KeyAuthorizationError } from './exchange-api-keys.errors';
 import { ExchangeApiKeysRepository } from './exchange-api-keys.repository';
 
 @Injectable()
@@ -39,9 +36,6 @@ export class ExchangeApiKeysService {
 
     const currentKeys =
       await this.exchangeApiKeysRepository.findOneByUserId(userId);
-    if (currentKeys) {
-      throw new ActiveExchangeApiKeyExistsError(userId, exchangeName);
-    }
 
     const client = await this.exchangeClientFactory.create(exchangeName, {
       apiKey,
@@ -57,14 +51,21 @@ export class ExchangeApiKeysService {
       throw new UserNotFoundError(userId);
     }
 
-    const enrolledKey = new ExchangeApiKeyEntity();
-    enrolledKey.userId = userId;
-    enrolledKey.exchangeName = exchangeName;
-
     const [encryptedApiKey, encryptedSecretKey] = await Promise.all([
       this.aesEncryptionService.encrypt(Buffer.from(apiKey)),
       this.aesEncryptionService.encrypt(Buffer.from(secretKey)),
     ]);
+    if (currentKeys) {
+      currentKeys.exchangeName = exchangeName;
+      currentKeys.apiKey = encryptedApiKey;
+      currentKeys.secretKey = encryptedSecretKey;
+
+      return this.exchangeApiKeysRepository.updateOne(currentKeys);
+    }
+
+    const enrolledKey = new ExchangeApiKeyEntity();
+    enrolledKey.userId = userId;
+    enrolledKey.exchangeName = exchangeName;
     enrolledKey.apiKey = encryptedApiKey;
     enrolledKey.secretKey = encryptedSecretKey;
     await this.exchangeApiKeysRepository.createUnique(enrolledKey);

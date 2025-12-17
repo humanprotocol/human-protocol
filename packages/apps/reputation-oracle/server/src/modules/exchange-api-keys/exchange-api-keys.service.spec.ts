@@ -12,10 +12,7 @@ import { ExchangeApiKeysService } from './exchange-api-keys.service';
 import { UserEntity, UserNotFoundError, UserRepository } from '@/modules/user';
 
 import { ExchangeApiKeyEntity } from './exchange-api-key.entity';
-import {
-  ActiveExchangeApiKeyExistsError,
-  KeyAuthorizationError,
-} from './exchange-api-keys.errors';
+import { KeyAuthorizationError } from './exchange-api-keys.errors';
 import { ExchangeApiKeysRepository } from './exchange-api-keys.repository';
 import {
   generateExchangeApiKey,
@@ -104,20 +101,31 @@ describe('ExchangeApiKeysService', () => {
       expect(thrownError.exchangeName).toBe(input.exchangeName);
     });
 
-    it('should throw if user already has active keys', async () => {
+    it('should overwrite existing keys if user already has active ones', async () => {
       const input = generateExchangeApiKeysData();
+      const existingKey = generateExchangeApiKey();
       mockExchangeApiKeysRepository.findOneByUserId.mockResolvedValueOnce(
-        generateExchangeApiKey(),
+        existingKey,
+      );
+      mockExchangeClient.checkRequiredAccess.mockResolvedValueOnce(true);
+      mockUserRepository.findOneById.mockResolvedValueOnce({
+        id: input.userId,
+      } as UserEntity);
+      mockExchangeApiKeysRepository.updateOne.mockImplementation(
+        async (entity) => entity,
       );
 
-      let thrownError;
-      try {
-        await exchangeApiKeysService.enroll(input);
-      } catch (error) {
-        thrownError = error;
-      }
+      const updatedEntity = await exchangeApiKeysService.enroll(input);
 
-      expect(thrownError).toBeInstanceOf(ActiveExchangeApiKeyExistsError);
+      expect(mockExchangeApiKeysRepository.updateOne).toHaveBeenCalledWith(
+        existingKey,
+      );
+      const [decryptedApiKey, decryptedSecretKey] = await Promise.all([
+        aesEncryptionService.decrypt(updatedEntity.apiKey),
+        aesEncryptionService.decrypt(updatedEntity.secretKey),
+      ]);
+      expect(decryptedApiKey.toString()).toBe(input.apiKey);
+      expect(decryptedSecretKey.toString()).toBe(input.secretKey);
     });
 
     it('should throw if user not exists', async () => {

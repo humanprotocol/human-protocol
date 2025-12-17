@@ -13,7 +13,6 @@ import {
   ExchangeApiKeyNotFoundError,
   IncompleteKeySuppliedError,
   KeyAuthorizationError,
-  ActiveExchangeApiKeyExistsError,
 } from './exchange-api-keys.errors';
 import { ExchangeApiClientError } from '../exchange/errors';
 
@@ -21,7 +20,6 @@ import { ExchangeApiClientError } from '../exchange/errors';
   UserNotFoundError,
   IncompleteKeySuppliedError,
   KeyAuthorizationError,
-  ActiveExchangeApiKeyExistsError,
   ExchangeApiKeyNotFoundError,
 )
 export class ExchangeApiKeysControllerErrorsFilter implements ExceptionFilter {
@@ -38,8 +36,7 @@ export class ExchangeApiKeysControllerErrorsFilter implements ExceptionFilter {
     if (
       exception instanceof UserNotFoundError ||
       exception instanceof IncompleteKeySuppliedError ||
-      exception instanceof KeyAuthorizationError ||
-      exception instanceof ActiveExchangeApiKeyExistsError
+      exception instanceof KeyAuthorizationError
     ) {
       status = HttpStatus.UNPROCESSABLE_ENTITY;
     } else if (exception instanceof ExchangeApiClientError) {
