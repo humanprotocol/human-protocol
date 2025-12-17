@@ -78,9 +78,9 @@ export class StakingService {
         await this.getExchangeStakedBalance(userId),
       );
     } catch (error) {
-      summary.onChainError = error.message
+      summary.exchangeError = error.message
         ? error.message
-        : 'Unable to fetch on-chain stake';
+        : 'Unable to fetch exchange stake';
       this.logger.warn('Failed to retrieve exchange stake', {
         userId,
         error,
