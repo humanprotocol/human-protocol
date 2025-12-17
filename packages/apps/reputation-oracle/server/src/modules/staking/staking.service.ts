@@ -6,10 +6,7 @@ import { SupportedExchange } from '@/common/constants';
 import { StakingConfigService, Web3ConfigService } from '@/config';
 import logger from '@/logger';
 import { ExchangeClientFactory } from '@/modules/exchange/exchange-client.factory';
-import {
-  ExchangeApiKeyNotFoundError,
-  ExchangeApiKeysService,
-} from '@/modules/exchange-api-keys';
+import { ExchangeApiKeysService } from '@/modules/exchange-api-keys';
 import { UserNotFoundError, UserRepository } from '@/modules/user';
 import { Web3Service } from '@/modules/web3';
 import { formatStake } from '@/utils/stake';
@@ -34,7 +31,7 @@ export class StakingService {
   async getExchangeStakedBalance(userId: number): Promise<number> {
     const apiKeys = await this.exchangeApiKeysService.retrieve(userId);
     if (!apiKeys) {
-      throw new ExchangeApiKeyNotFoundError(userId);
+      return 0;
     }
 
     const client = await this.exchangeClientFactory.create(

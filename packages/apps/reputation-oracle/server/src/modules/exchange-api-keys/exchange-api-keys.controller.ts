@@ -54,12 +54,12 @@ export class ExchangeApiKeysController {
   @Get('/')
   async retrieveEnrolledApiKeys(
     @Req() request: RequestWithUser,
-  ): Promise<EnrolledApiKeyDto> {
+  ): Promise<EnrolledApiKeyDto | null> {
     const userId = request.user.id;
 
     const apiKey = await this.exchangeApiKeysService.retrieve(userId);
     if (!apiKey) {
-      throw new ExchangeApiKeyNotFoundError(userId);
+      return null;
     }
 
     return {

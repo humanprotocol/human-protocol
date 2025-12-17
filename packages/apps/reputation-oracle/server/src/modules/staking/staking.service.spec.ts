@@ -10,10 +10,7 @@ import { SupportedExchange } from '@/common/constants';
 import { StakingConfigService, Web3ConfigService } from '@/config';
 import { type ExchangeClient } from '@/modules/exchange';
 import { ExchangeClientFactory } from '@/modules/exchange/exchange-client.factory';
-import {
-  ExchangeApiKeyNotFoundError,
-  ExchangeApiKeysService,
-} from '@/modules/exchange-api-keys';
+import { ExchangeApiKeysService } from '@/modules/exchange-api-keys';
 import { UserEntity, UserNotFoundError, UserRepository } from '@/modules/user';
 import { WalletWithProvider, Web3Service } from '@/modules/web3';
 import { mockWeb3ConfigService } from '@/modules/web3/fixtures';
@@ -72,12 +69,12 @@ describe('StakingService', () => {
 
   describe('getExchangeStakedBalance', () => {
     const userId = faker.number.int();
-    it('throws ExchangeApiKeyNotFoundError when user has no exchange keys', async () => {
+    it('returns 0 when user has no exchange keys', async () => {
       mockExchangeApiKeysService.retrieve.mockResolvedValueOnce(null);
 
       await expect(
         stakingService.getExchangeStakedBalance(userId),
-      ).rejects.toBeInstanceOf(ExchangeApiKeyNotFoundError);
+      ).resolves.toBe(0);
     });
 
     it('returns balance fetched from exchange client', async () => {
