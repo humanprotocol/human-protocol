@@ -1,10 +1,14 @@
+jest.mock('@human-protocol/sdk');
+
 import { faker } from '@faker-js/faker';
 import { createMock } from '@golevelup/ts-jest';
+import { StakingClient } from '@human-protocol/sdk';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ethers } from 'ethers';
 
 import { SupportedExchange } from '@/common/constants';
 import { StakingConfigService, Web3ConfigService } from '@/config';
+import { type ExchangeClient } from '@/modules/exchange';
 import { ExchangeClientFactory } from '@/modules/exchange/exchange-client.factory';
 import {
   ExchangeApiKeyNotFoundError,
@@ -15,19 +19,7 @@ import { WalletWithProvider, Web3Service } from '@/modules/web3';
 import { mockWeb3ConfigService } from '@/modules/web3/fixtures';
 
 import { StakingService } from './staking.service';
-import { ExchangeClient } from '../exchange/types';
 
-jest.mock('@human-protocol/sdk', () => {
-  const actual = jest.requireActual('@human-protocol/sdk');
-  return {
-    ...actual,
-    StakingClient: {
-      build: jest.fn(),
-    },
-  };
-});
-
-const { StakingClient } = jest.requireMock('@human-protocol/sdk');
 const mockExchangeApiKeysService = createMock<ExchangeApiKeysService>();
 const mockExchangeClientFactory = {
   create: jest.fn(),
@@ -41,14 +33,14 @@ const mockStakingConfigService: Omit<StakingConfigService, 'configService'> = {
   asset: 'HMT',
   timeoutMs: faker.number.int({ min: 1000, max: 10000 }),
 };
+const mockedStakingClient = jest.mocked(StakingClient);
 
 describe('StakingService', () => {
   let stakingService: StakingService;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     mockExchangeClientFactory.create.mockResolvedValue(mockExchangeClient);
     mockExchangeClient.getAccountBalance.mockReset();
-    (StakingClient.build as jest.Mock).mockReset();
     mockWeb3Service.getSigner.mockReturnValue({
       provider: {},
     } as never);
@@ -74,7 +66,7 @@ describe('StakingService', () => {
     stakingService = module.get(StakingService);
   });
 
-  afterEach(() => {
+  afterAll(() => {
     jest.clearAllMocks();
   });
 
@@ -121,6 +113,22 @@ describe('StakingService', () => {
     };
     const onChainStake = faker.number.int();
     const exchangeStake = faker.number.int();
+    let spyOnGetExchangeStakedBalance: jest.SpyInstance;
+    let spyOnGetOnChainStakedBalance: jest.SpyInstance;
+
+    beforeAll(() => {
+      spyOnGetExchangeStakedBalance = jest
+        .spyOn(stakingService, 'getExchangeStakedBalance')
+        .mockImplementation();
+      spyOnGetOnChainStakedBalance = jest
+        .spyOn(stakingService, 'getOnChainStakedBalance')
+        .mockImplementation();
+    });
+
+    afterAll(() => {
+      spyOnGetExchangeStakedBalance.mockRestore();
+      spyOnGetOnChainStakedBalance.mockRestore();
+    });
 
     it('throws when user is not found', async () => {
       mockUserRepository.findOneById.mockResolvedValueOnce(null);
@@ -132,32 +140,19 @@ describe('StakingService', () => {
 
     it('returns aggregated exchange and on-chain stakes', async () => {
       mockUserRepository.findOneById.mockResolvedValueOnce(user as UserEntity);
-      const exchangeStakeSpy = jest
-        .spyOn(stakingService, 'getExchangeStakedBalance')
-        .mockResolvedValueOnce(exchangeStake);
-      jest
-        .spyOn(stakingService, 'getOnChainStakedBalance')
-        .mockResolvedValueOnce(onChainStake);
+      spyOnGetExchangeStakedBalance.mockResolvedValueOnce(exchangeStake);
+      spyOnGetOnChainStakedBalance.mockResolvedValueOnce(onChainStake);
 
       const result = await stakingService.getStakeSummary(user.id);
 
-      expect(exchangeStakeSpy).toHaveBeenCalledWith(user.id);
-      expect(stakingService.getOnChainStakedBalance).toHaveBeenCalledWith(
+      expect(spyOnGetExchangeStakedBalance).toHaveBeenCalledWith(user.id);
+      expect(spyOnGetOnChainStakedBalance).toHaveBeenCalledWith(
         user.evmAddress,
       );
       expect(result).toEqual({
-        exchangeStake: exchangeStake.toLocaleString(undefined, {
-          maximumFractionDigits: 18,
-        }),
-        onChainStake: onChainStake.toLocaleString(undefined, {
-          maximumFractionDigits: 18,
-        }),
-        minThreshold: mockStakingConfigService.minThreshold.toLocaleString(
-          undefined,
-          {
-            maximumFractionDigits: 18,
-          },
-        ),
+        exchangeStake: exchangeStake.toString(),
+        onChainStake: onChainStake.toString(),
+        minThreshold: mockStakingConfigService.minThreshold.toString(),
       });
     });
 
@@ -166,28 +161,16 @@ describe('StakingService', () => {
         ...user,
         evmAddress: null,
       } as UserEntity);
-      const exchangeStakeSpy = jest
-        .spyOn(stakingService, 'getExchangeStakedBalance')
-        .mockResolvedValueOnce(exchangeStake);
-      jest.spyOn(stakingService, 'getOnChainStakedBalance');
+      spyOnGetExchangeStakedBalance.mockResolvedValueOnce(exchangeStake);
 
       const result = await stakingService.getStakeSummary(user.id);
 
-      expect(stakingService.getOnChainStakedBalance).not.toHaveBeenCalled();
+      expect(spyOnGetOnChainStakedBalance).not.toHaveBeenCalled();
       expect(result).toEqual({
-        exchangeStake: exchangeStake.toLocaleString(undefined, {
-          maximumFractionDigits: 18,
-        }),
+        exchangeStake: exchangeStake.toString(),
         onChainStake: '0',
-        minThreshold: mockStakingConfigService.minThreshold.toLocaleString(
-          undefined,
-          {
-            maximumFractionDigits: 18,
-          },
-        ),
+        minThreshold: mockStakingConfigService.minThreshold.toString(),
       });
-
-      exchangeStakeSpy.mockRestore();
     });
   });
 
@@ -204,20 +187,18 @@ describe('StakingService', () => {
       mockWeb3Service.getSigner.mockReturnValueOnce({
         provider: mockProvider,
       } as WalletWithProvider);
-      const mockStakingClient = {
-        getStakerInfo: jest.fn().mockResolvedValue({
-          stakedAmount,
-          lockedAmount,
-        }),
-      };
-      (StakingClient.build as jest.Mock).mockResolvedValueOnce(
-        mockStakingClient,
-      );
+
+      const getStakerInfoMock = jest
+        .fn()
+        .mockResolvedValue({ stakedAmount, lockedAmount });
+      mockedStakingClient.build.mockResolvedValueOnce({
+        getStakerInfo: getStakerInfoMock,
+      } as unknown as StakingClient);
 
       const result = await stakingService.getOnChainStakedBalance(address);
 
-      expect(StakingClient.build).toHaveBeenCalledWith(mockProvider);
-      expect(mockStakingClient.getStakerInfo).toHaveBeenCalledWith(address);
+      expect(mockedStakingClient.build).toHaveBeenCalledWith(mockProvider);
+      expect(getStakerInfoMock).toHaveBeenCalledWith(address);
       expect(result).toBe(
         Number(ethers.formatEther(stakedAmount + lockedAmount)),
       );

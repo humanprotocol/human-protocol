@@ -12,6 +12,7 @@ import {
 } from '@/modules/exchange-api-keys';
 import { UserNotFoundError, UserRepository } from '@/modules/user';
 import { Web3Service } from '@/modules/web3';
+import { formatStake } from '@/utils/stake';
 
 import { StakeSummaryData } from './types';
 
@@ -73,11 +74,9 @@ export class StakingService {
     };
 
     try {
-      summary.exchangeStake = (
-        await this.getExchangeStakedBalance(userId)
-      ).toLocaleString(undefined, {
-        maximumFractionDigits: 18,
-      });
+      summary.exchangeStake = formatStake(
+        await this.getExchangeStakedBalance(userId),
+      );
     } catch (error) {
       summary.onChainError = error.message
         ? error.message
@@ -90,11 +89,9 @@ export class StakingService {
 
     if (user.evmAddress) {
       try {
-        summary.onChainStake = (
-          await this.getOnChainStakedBalance(user.evmAddress)
-        ).toLocaleString(undefined, {
-          maximumFractionDigits: 18,
-        });
+        summary.onChainStake = formatStake(
+          await this.getOnChainStakedBalance(user.evmAddress),
+        );
       } catch (error) {
         summary.onChainError = error.message
           ? error.message

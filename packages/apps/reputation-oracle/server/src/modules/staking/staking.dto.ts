@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class StakeSummaryResponseDto {
   @ApiProperty({ name: 'exchange_stake' })
@@ -10,9 +10,9 @@ export class StakeSummaryResponseDto {
   @ApiProperty({ name: 'min_threshold' })
   minThreshold: string;
 
-  @ApiProperty({ name: 'exchange_error', required: false, nullable: true })
+  @ApiPropertyOptional({ name: 'exchange_error' })
   exchangeError?: string;
 
-  @ApiProperty({ name: 'on_chain_error', required: false, nullable: true })
+  @ApiPropertyOptional({ name: 'on_chain_error' })
   onChainError?: string;
 }
