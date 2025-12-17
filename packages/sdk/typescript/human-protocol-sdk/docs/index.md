@@ -292,7 +292,3 @@ export SUBGRAPH_API_KEY="your-api-key"
 - [HUMAN Protocol Documentation](https://docs.humanprotocol.org/)
 - [Discord Community](https://discord.gg/humanprotocol)
 - [Website](https://www.humanprotocol.org/)
-
-## License
-
-MIT License - see [LICENSE](LICENSE) for details.
