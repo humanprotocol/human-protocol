@@ -6,25 +6,22 @@ import {
 } from '../components';
 
 export function useAddApiKeyModal() {
-  const { openModal } = useModal();
+  const { openModal, closeModal } = useModal();
 
   return {
-    openModal: () => openModal({ content: <AddApiKeyModal /> }),
+    openModal: () =>
+      openModal({ content: <AddApiKeyModal onClose={closeModal} /> }),
   };
 }
 
 export function useEditApiKeyModal() {
-  const { openModal, closeModal, open } = useModal();
+  const { openModal, closeModal } = useModal();
 
   return {
     openModal: (exchangeName: string) =>
       openModal({
         content: (
-          <EditApiKeyModal
-            isOpen={open}
-            onClose={closeModal}
-            exchangeName={exchangeName}
-          />
+          <EditApiKeyModal onClose={closeModal} exchangeName={exchangeName} />
         ),
       }),
   };

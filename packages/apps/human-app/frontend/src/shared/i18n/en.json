@@ -233,7 +233,7 @@
         "notStaked": "Not Staked"
       },
       "stakingInfo": {
-        "prompt": "Before you can start earning on the HUMAN App, you’ll need to stake HMT. You can stake directly on our Staking Dashboard, or connect your exchange account to stake automatically via API KEY.",
+        "prompt": "Before you can start earning on the HUMAN App, you’ll need to stake HMT. You can stake directly on our Staking Dashboard, or connect your API key having minimum balance of {{amount}} HMT in your exchange account to stake automatically via API KEY.",
         "stakeHmt": "Stake HMT",
         "stakingInfoValue": "Staking Info Value",
         "stakedAmount": "Staked amount"
@@ -245,8 +245,18 @@
         "apiKeyConnected": "Connected",
         "apiKeyNotConnected": "Not connected",
         "cancel": "Cancel",
+        "error": "Error",
+        "close": "Close",
+        "edit": "Edit",
+        "tryAgain": "Try Again",
         "connectYourApiKey": "Connect your API KEY",
         "connectApiKey": "Connect API KEY",
+        "connectSuccess": "You have successfully connected your API key",
+        "connectError": "Failed to connect API key.",
+        "editSuccess": "You have successfully edited your API key",
+        "editError": "Failed to edit API key.",
+        "deleteKeySuccess": "You have successfully deleted your API key",
+        "deleteKeyError": "Failed to delete API key.",
         "modalDescription": "To stake HMT using your exchange balance, connect your exchange account by adding your API key and secret. Your credentials are encrypted and securely stored.",
         "modalFooterAgreement": "By connecting your API KEY, you agree to HUMAN Protocol Terms of Service and consent to its Privacy Policy.",
         "deleteApiKey": "Delete API KEY",

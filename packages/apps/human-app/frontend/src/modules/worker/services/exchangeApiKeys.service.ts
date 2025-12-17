@@ -1,30 +1,17 @@
 import { authorizedHumanAppApiClient } from '@/api';
 
-interface StakeSummary {
-  exchangeStake: number;
-  onChainStake: number;
-  minThreshold: number;
-}
-
 interface ExchangeApiKey {
-  apiKey: string;
-  exchange: string;
+  api_key: string;
+  exchange_name: string;
 }
 
-// interface Exchange {
-//   name: string;
-//   displayName: string;
-// }
-
-async function getStakeSummary(): Promise<StakeSummary | null> {
-  const response = await authorizedHumanAppApiClient.get<StakeSummary>(
-    '/exchange-api-keys/stake'
-  );
-  return response || null;
+interface Exchange {
+  name: string;
+  display_name: string;
 }
 
-async function getSupportedExchanges(): Promise<string[]> {
-  const response = await authorizedHumanAppApiClient.get<string[]>(
+async function getSupportedExchanges(): Promise<Exchange[]> {
+  const response = await authorizedHumanAppApiClient.get<Exchange[]>(
     '/exchange-api-keys/supported-exchanges'
   );
   return response || [];
@@ -56,5 +43,4 @@ export {
   getExchangeApiKeys,
   deleteExchangeApiKeys,
   getSupportedExchanges,
-  getStakeSummary,
 };

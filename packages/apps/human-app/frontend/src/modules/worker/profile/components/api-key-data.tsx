@@ -15,19 +15,38 @@ export function ApiKeyData() {
   const { t } = useTranslation();
   const { openModal: openEditApiKeyModal } = useEditApiKeyModal();
   const { openModal: openDeleteApiKeyModal } = useDeleteApiKeyModal();
-  const { data: exchangeApiKeyData } = useGetExchangeApiKeys();
+  const { data: exchangeApiKeyData, isError: isExchangeApiKeyError } =
+    useGetExchangeApiKeys();
 
   const textField = isDarkMode ? (
     <CustomTextFieldDark
+      value={exchangeApiKeyData?.api_key || ''}
       disabled
       fullWidth
       placeholder={t('worker.profile.apiKeyData.connectApiKey')}
+      sx={{
+        '& .MuiInputBase-input': {
+          textOverflow: 'ellipsis',
+          overflow: 'hidden',
+          whiteSpace: 'nowrap',
+          pointerEvents: 'none',
+        },
+      }}
     />
   ) : (
     <CustomTextField
+      value={exchangeApiKeyData?.api_key || ''}
       disabled
       fullWidth
       placeholder={t('worker.profile.apiKeyData.connectApiKey')}
+      sx={{
+        '& .MuiInputBase-input': {
+          textOverflow: 'ellipsis',
+          overflow: 'hidden',
+          whiteSpace: 'nowrap',
+          pointerEvents: 'none',
+        },
+      }}
     />
   );
 
@@ -38,18 +57,32 @@ export function ApiKeyData() {
           {t('worker.profile.apiKeyData.apiKey')}
         </Typography>
         <Chip
-          label={t('worker.profile.apiKeyData.apiKeyNotConnected')}
-          backgroundColor="warning.main"
+          label={
+            isExchangeApiKeyError
+              ? t('worker.profile.apiKeyData.error')
+              : exchangeApiKeyData?.exchange_name
+                ? t('worker.profile.apiKeyData.apiKeyConnected')
+                : t('worker.profile.apiKeyData.apiKeyNotConnected')
+          }
+          backgroundColor={
+            isExchangeApiKeyError
+              ? 'error.main'
+              : exchangeApiKeyData?.exchange_name
+                ? 'success.main'
+                : 'warning.main'
+          }
         />
       </Stack>
       <Stack gap={2} direction="row" alignItems="center">
         {textField}
-        {exchangeApiKeyData?.exchange && (
+        {exchangeApiKeyData?.exchange_name && (
           <Stack direction="row" alignItems="center" gap={1}>
             <IconButton
               disableRipple
               sx={{ p: 0, '&:hover': { bgcolor: 'inherit' } }}
-              onClick={() => openEditApiKeyModal(exchangeApiKeyData.exchange)}
+              onClick={() =>
+                openEditApiKeyModal(exchangeApiKeyData.exchange_name)
+              }
             >
               <EditIcon />
             </IconButton>

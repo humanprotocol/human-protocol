@@ -18,21 +18,28 @@ import {
   useEnrollExchangeApiKeys,
   useGetSupportedExchanges,
 } from '../../hooks/use-exchange-api-keys';
+import { ModalError, ModalLoading, ModalSuccess } from './modal-states';
 
 interface EditApiKeyModalProps {
   exchangeName: string;
-  isOpen: boolean;
   onClose: () => void;
 }
 
 export function EditApiKeyModal({
-  isOpen,
   onClose,
   exchangeName,
 }: EditApiKeyModalProps) {
   const { t } = useTranslation();
   const isMobile = useIsMobile();
-  const { mutate: postExchangeApiKey } = useEnrollExchangeApiKeys();
+  const {
+    mutate: postExchangeApiKey,
+    reset: resetMutation,
+    error,
+    isSuccess,
+    isError,
+    isPending,
+    isIdle,
+  } = useEnrollExchangeApiKeys();
   const { data: supportedExchanges } = useGetSupportedExchanges();
 
   const {
@@ -56,14 +63,21 @@ export function EditApiKeyModal({
   });
 
   useEffect(() => {
-    if (isOpen) {
+    if (exchangeName && supportedExchanges) {
       reset({
         exchange: exchangeName,
         apiKey: '',
         secretKey: '',
       });
     }
-  }, [isOpen, exchangeName, reset]);
+  }, [exchangeName, reset, supportedExchanges]);
+
+  useEffect(() => {
+    return () => {
+      reset();
+      resetMutation();
+    };
+  }, [reset, resetMutation]);
 
   const onSubmit = (data: {
     exchange: string;
@@ -79,127 +93,176 @@ export function EditApiKeyModal({
         <Typography variant="h4" textAlign="center" p={1}>
           {t('worker.profile.apiKeyData.editApiKey')}
         </Typography>
-        <Typography variant="body2" textAlign="center" p={{ xs: 1, md: 0 }}>
-          {t('worker.profile.apiKeyData.modalDescription')}
-        </Typography>
-        <Stack
-          direction={{ xs: 'column', md: 'row' }}
-          gap={{ xs: 2, md: 1 }}
-          width="100%"
-        >
-          <FormControl
-            error={!!errors.exchange}
-            sx={{ width: { xs: '100%', md: '30%' } }}
-          >
-            <Controller
-              name="exchange"
-              control={control}
-              render={({ field }) => (
-                <Autocomplete
-                  options={
-                    supportedExchanges?.map((exchange) => exchange.name) || []
-                  }
-                  getOptionLabel={(option) => {
-                    const exchange = supportedExchanges?.find(
-                      (exchange) => exchange.name === option
-                    );
-                    return exchange?.displayName || option || '';
-                  }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label={t('worker.profile.apiKeyData.exchange')}
+        {isPending && <ModalLoading />}
+        {isIdle && (
+          <>
+            <Typography variant="body2" textAlign="center" p={{ xs: 1, md: 0 }}>
+              {t('worker.profile.apiKeyData.modalDescription')}
+            </Typography>
+            <Stack
+              direction={{ xs: 'column', md: 'row' }}
+              gap={{ xs: 2, md: 1 }}
+              width="100%"
+            >
+              <FormControl
+                error={!!errors.exchange}
+                sx={{ width: { xs: '100%', md: '30%' } }}
+              >
+                <Controller
+                  name="exchange"
+                  control={control}
+                  render={({ field }) => (
+                    <Autocomplete
+                      options={
+                        supportedExchanges?.map((exchange) => exchange.name) ||
+                        []
+                      }
+                      getOptionLabel={(option) => {
+                        const exchange = supportedExchanges?.find(
+                          (exchange) => exchange.name === option
+                        );
+                        return exchange?.display_name || option || '';
+                      }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          label={t('worker.profile.apiKeyData.exchange')}
+                        />
+                      )}
+                      renderOption={(props, option) => {
+                        const exchange = supportedExchanges?.find(
+                          (exchange) => exchange.name === option
+                        );
+                        return (
+                          <Box {...props} key={option} component="li">
+                            <Typography
+                              color="text.primary"
+                              variant="body1"
+                              sx={{ textTransform: 'capitalize' }}
+                            >
+                              {exchange?.display_name || exchange?.name}
+                            </Typography>
+                          </Box>
+                        );
+                      }}
+                      {...field}
+                      onChange={(_, value) => field.onChange(value)}
                     />
                   )}
-                  renderOption={(props, option) => {
-                    const exchange = supportedExchanges?.find(
-                      (exchange) => exchange.name === option
-                    );
-                    return (
-                      <Box {...props} key={option} component="li">
-                        <Typography
-                          color="text.primary"
-                          variant="body1"
-                          sx={{ textTransform: 'capitalize' }}
-                        >
-                          {exchange?.displayName || exchange?.name}
-                        </Typography>
-                      </Box>
-                    );
-                  }}
-                  {...field}
-                  disabled
-                  onChange={(_, value) => field.onChange(value)}
                 />
-              )}
-            />
-            {errors.exchange && (
-              <FormHelperText error>{errors.exchange.message}</FormHelperText>
-            )}
-          </FormControl>
-          <FormControl
-            error={!!errors.exchange}
-            sx={{ width: { xs: '100%', md: '70%' } }}
-          >
-            <Controller
-              name="apiKey"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  type="text"
-                  label={t('worker.profile.apiKeyData.apiKey')}
-                  placeholder={t('worker.profile.apiKeyData.apiKey')}
-                  multiline={isMobile}
-                  minRows={1}
-                  maxRows={4}
-                  {...field}
+                {errors.exchange && (
+                  <FormHelperText error>
+                    {errors.exchange.message}
+                  </FormHelperText>
+                )}
+              </FormControl>
+              <FormControl
+                error={!!errors.exchange}
+                sx={{ width: { xs: '100%', md: '70%' } }}
+              >
+                <Controller
+                  name="apiKey"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      type="text"
+                      label={t('worker.profile.apiKeyData.apiKey')}
+                      placeholder={t('worker.profile.apiKeyData.apiKey')}
+                      multiline={isMobile}
+                      minRows={1}
+                      maxRows={4}
+                      {...field}
+                    />
+                  )}
                 />
-              )}
-            />
-            {errors.apiKey && (
-              <FormHelperText error>{errors.apiKey.message}</FormHelperText>
-            )}
-          </FormControl>
-        </Stack>
-        <FormControl error={!!errors.secretKey} sx={{ mt: { xs: 0, md: 1 } }}>
-          <Controller
-            name="secretKey"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                type="password"
-                autoComplete="new-password" // disables autofill from browser
-                label={t('worker.profile.apiKeyData.apiSecret')}
-                placeholder={t('worker.profile.apiKeyData.apiSecret')}
-                {...field}
+                {errors.apiKey && (
+                  <FormHelperText error>{errors.apiKey.message}</FormHelperText>
+                )}
+              </FormControl>
+            </Stack>
+            <FormControl
+              error={!!errors.secretKey}
+              sx={{ mt: { xs: 0, md: 1 } }}
+            >
+              <Controller
+                name="secretKey"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    type="password"
+                    autoComplete="new-password" // disables autofill from browser
+                    label={t('worker.profile.apiKeyData.apiSecret')}
+                    placeholder={t('worker.profile.apiKeyData.apiSecret')}
+                    {...field}
+                  />
+                )}
               />
-            )}
+            </FormControl>
+          </>
+        )}
+        {isSuccess && (
+          <ModalSuccess>
+            <Typography variant="body2" textAlign="center">
+              {t('worker.profile.apiKeyData.editSuccess')}
+            </Typography>
+          </ModalSuccess>
+        )}
+        {isError && (
+          <ModalError
+            message={
+              typeof error?.message === 'string'
+                ? error?.message
+                : t('worker.profile.apiKeyData.editError')
+            }
           />
-        </FormControl>
-        <Stack
-          direction={{ xs: 'column', md: 'row' }}
-          gap={2}
-          width="100%"
-          justifyContent="center"
-        >
+        )}
+        {isIdle && (
+          <Stack
+            direction={{ xs: 'column', md: 'row' }}
+            gap={2}
+            width="100%"
+            justifyContent="center"
+          >
+            <Button
+              variant="contained"
+              size="large"
+              fullWidth={isMobile}
+              onClick={onClose}
+            >
+              {t('worker.profile.apiKeyData.cancel')}
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              size="large"
+              fullWidth={isMobile}
+              sx={{ bgcolor: 'primary.light' }}
+            >
+              {t('worker.profile.apiKeyData.saveChanges')}
+            </Button>
+          </Stack>
+        )}
+        {(isPending || isSuccess) && (
           <Button
             variant="contained"
             size="large"
-            fullWidth={isMobile}
+            disabled={isPending}
+            sx={{ width: { xs: '100%', md: 'fit-content' }, mx: 'auto' }}
             onClick={onClose}
           >
-            {t('worker.profile.apiKeyData.cancel')}
+            {t('worker.profile.apiKeyData.close')}
           </Button>
+        )}
+        {isError && (
           <Button
-            type="submit"
             variant="contained"
             size="large"
-            fullWidth={isMobile}
-            sx={{ bgcolor: 'primary.light' }}
+            sx={{ width: { xs: '100%', md: 'fit-content' }, mx: 'auto' }}
+            onClick={resetMutation}
           >
-            {t('worker.profile.apiKeyData.saveChanges')}
+            {t('worker.profile.apiKeyData.edit')}
           </Button>
-        </Stack>
+        )}
       </Stack>
     </form>
   );
