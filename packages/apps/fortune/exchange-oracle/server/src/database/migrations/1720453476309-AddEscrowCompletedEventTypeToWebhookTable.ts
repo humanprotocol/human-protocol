@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddEscrowCompletedEventTypeToWebhookTable1720453476309
-  implements MigrationInterface
-{
+export class AddEscrowCompletedEventTypeToWebhookTable1720453476309 implements MigrationInterface {
   name = 'AddEscrowCompletedEventTypeToWebhookTable1720453476309';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

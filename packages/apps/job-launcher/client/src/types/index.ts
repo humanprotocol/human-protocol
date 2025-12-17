@@ -65,22 +65,6 @@ export type CreateCvatJobRequest = {
   type: CvatJobType;
 };
 
-export type CreateAudinoJobRequest = {
-  chainId: number;
-  requesterDescription: string;
-  qualifications?: string[];
-  paymentCurrency: string;
-  paymentAmount: number;
-  escrowFundToken: string;
-  data: AudinoData;
-  labels: Array<{ name: string }>;
-  minQuality: number;
-  groundTruth: AudinoDataSource;
-  userGuide: string;
-  type: AudinoJobType;
-  segmentDuration: number;
-};
-
 export enum CreateJobStep {
   FundingMethod,
   CreateJob,
@@ -104,7 +88,6 @@ export enum JobType {
   FORTUNE = 'fortune',
   CVAT = 'cvat',
   HCAPTCHA = 'hcaptcha',
-  AUDINO = 'audino',
 }
 
 export enum CvatJobType {
@@ -121,11 +104,6 @@ export enum HCaptchaJobType {
   POINT = 'point',
   BOUNDING_BOX = 'bounding_box',
   COMPARISON = 'comparison',
-}
-
-export enum AudinoJobType {
-  AUDIO_TRANSCRIPTION = 'audio_transcription',
-  AUDIO_ATTRIBUTE_ANNOTATION = 'audio_attribute_annotation',
 }
 
 export type FortuneRequest = {
@@ -269,36 +247,12 @@ export type HCaptchaRequest = {
   };
 };
 
-type AudinoDataSource = {
-  provider: StorageProviders;
-  region: AWSRegions | GCSRegions;
-  bucketName: string;
-  path: string;
-};
-
-type AudinoData = {
-  dataset: AudinoDataSource;
-};
-
-export type AudinoRequest = {
-  labels: Array<{ name: string }>;
-  type: AudinoJobType;
-  description: string;
-  qualifications?: string[];
-  data: AudinoData;
-  groundTruth: AudinoDataSource;
-  userGuide: string;
-  accuracyTarget: number;
-  segmentDuration: number;
-};
-
 export type JobRequest = {
   jobType: JobType;
   chainId?: ChainId;
   fortuneRequest?: FortuneRequest;
   cvatRequest?: CvatRequest;
   hCaptchaRequest?: HCaptchaRequest;
-  audinoRequest?: AudinoRequest;
 };
 
 export enum JobStatus {

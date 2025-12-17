@@ -2,7 +2,7 @@ name: CVAT Exchange Oracle Lint
 
 on:
   push:
-    tags-ignore: '*'
+    branches: '**'
     paths:
       - 'packages/examples/cvat/exchange-oracle/**'
       - '.github/workflows/ci-lint-cvat-exchange-oracle.yaml'

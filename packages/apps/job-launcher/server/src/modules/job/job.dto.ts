@@ -31,7 +31,6 @@ import {
   WorkerBrowser,
   WorkerLanguage,
   Country,
-  AudinoJobType,
   CvatJobType,
   JobType,
 } from '../../common/enums/job';
@@ -214,62 +213,6 @@ export class JobCvatDto extends JobDto {
   @ApiProperty({ enum: CvatJobType })
   @IsEnumCaseInsensitive(CvatJobType)
   public type: CvatJobType;
-}
-
-class AudinoLabel {
-  @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  public name: string;
-}
-
-class AudinoDataDto {
-  @ApiProperty()
-  @IsObject()
-  @ValidateNested()
-  @Type(() => StorageDataDto)
-  public dataset: StorageDataDto;
-}
-
-export class JobAudinoDto extends JobDto {
-  @ApiProperty({ name: 'requester_description' })
-  @IsString()
-  @IsNotEmpty()
-  public requesterDescription: string;
-
-  @ApiProperty()
-  @IsObject()
-  @ValidateNested()
-  @Type(() => AudinoDataDto)
-  public data: AudinoDataDto;
-
-  @ApiProperty({ type: [AudinoLabel] })
-  @IsArray()
-  @ArrayMinSize(1)
-  public labels: AudinoLabel[];
-
-  @ApiProperty({ name: 'min_quality' })
-  @IsNumber()
-  @IsPositive()
-  @Max(1)
-  public minQuality: number;
-
-  @ApiProperty({ name: 'ground_truth' })
-  @IsObject()
-  public groundTruth: StorageDataDto;
-
-  @ApiProperty({ name: 'user_guide' })
-  @IsUrl()
-  public userGuide: string;
-
-  @ApiProperty({ enum: AudinoJobType })
-  @IsEnumCaseInsensitive(AudinoJobType)
-  public type: AudinoJobType;
-
-  @ApiProperty({ name: 'segment_duration' })
-  @IsNumber()
-  @IsPositive()
-  public segmentDuration: number;
 }
 
 export class JobCancelDto {
@@ -537,5 +480,4 @@ export type CreateJob =
   | JobQuickLaunchDto
   | JobFortuneDto
   | JobCvatDto
-  | JobAudinoDto
   | JobCaptchaDto;

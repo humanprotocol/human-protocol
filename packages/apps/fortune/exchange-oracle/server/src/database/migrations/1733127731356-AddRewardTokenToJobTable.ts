@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddRewardTokenToJobTable1733127731356
-  implements MigrationInterface
-{
+export class AddRewardTokenToJobTable1733127731356 implements MigrationInterface {
   name = 'AddRewardTokenToJobTable1733127731356';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

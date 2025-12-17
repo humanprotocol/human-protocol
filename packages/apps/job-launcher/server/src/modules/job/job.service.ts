@@ -1,3 +1,4 @@
+import { Escrow, Escrow__factory } from '@human-protocol/core/typechain-types';
 import {
   ChainId,
   EscrowClient,
@@ -26,7 +27,6 @@ import {
 import { TOKEN_ADDRESSES } from '../../common/constants/tokens';
 import { CronJobType } from '../../common/enums/cron-job';
 import {
-  AudinoJobType,
   CvatJobType,
   EscrowFundToken,
   FortuneJobType,
@@ -53,7 +53,6 @@ import { getTokenDecimals } from '../../common/utils/tokens';
 import logger from '../../logger';
 import { CronJobRepository } from '../cron-job/cron-job.repository';
 import {
-  AudinoManifestDto,
   CvatManifestDto,
   FortuneManifestDto,
   HCaptchaManifestDto,
@@ -80,7 +79,6 @@ import {
 } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
-import { Escrow, Escrow__factory } from '@human-protocol/core/typechain-types';
 
 @Injectable()
 export class JobService {
@@ -290,12 +288,7 @@ export class JobService {
     if (
       user.whitelist ||
       (
-        [
-          AudinoJobType.AUDIO_TRANSCRIPTION,
-          AudinoJobType.AUDIO_ATTRIBUTE_ANNOTATION,
-          FortuneJobType.FORTUNE,
-          HCaptchaJobType.HCAPTCHA,
-        ] as JobRequestType[]
+        [FortuneJobType.FORTUNE, HCaptchaJobType.HCAPTCHA] as JobRequestType[]
       ).includes(requestType)
     ) {
       jobEntity.status = JobStatus.MODERATION_PASSED;
@@ -594,10 +587,6 @@ export class JobService {
     } else if (requestType === HCaptchaJobType.HCAPTCHA) {
       return OracleType.HCAPTCHA;
     } else if (
-      Object.values(AudinoJobType).includes(requestType as AudinoJobType)
-    ) {
-      return OracleType.AUDINO;
-    } else if (
       Object.values(CvatJobType).includes(requestType as CvatJobType)
     ) {
       return OracleType.CVAT;
@@ -741,21 +730,6 @@ export class JobService {
         ...(manifest.qualifications &&
           manifest.qualifications?.length > 0 && {
             qualifications: manifest.qualifications,
-          }),
-      };
-    } else if (
-      Object.values(AudinoJobType).includes(
-        jobEntity.requestType as AudinoJobType,
-      )
-    ) {
-      const manifest = manifestData as AudinoManifestDto;
-      specificManifestDetails = {
-        requestType: manifest.annotation?.type,
-        submissionsRequired: manifest.annotation?.segment_duration,
-        description: manifest.annotation?.description,
-        ...(manifest.annotation?.qualifications &&
-          manifest.annotation?.qualifications?.length > 0 && {
-            qualifications: manifest.annotation?.qualifications,
           }),
       };
     } else {

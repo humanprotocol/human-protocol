@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class RenameStripeCustomerIdColumn1749498615107
-  implements MigrationInterface
-{
+export class RenameStripeCustomerIdColumn1749498615107 implements MigrationInterface {
   name = 'RenameStripeCustomerIdColumn1749498615107';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

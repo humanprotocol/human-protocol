@@ -93,24 +93,6 @@ export class Web3ConfigService {
     return this.configService.getOrThrow<string>('HCAPTCHA_ORACLE_ADDRESS');
   }
 
-  /**
-   * Address of the Audino exchange oracle.
-   */
-  get audinoExchangeOracleAddress(): string {
-    return this.configService.getOrThrow<string>(
-      'AUDINO_EXCHANGE_ORACLE_ADDRESS',
-    );
-  }
-
-  /**
-   * Address of the Audino recording oracle.
-   */
-  get audinoRecordingOracleAddress(): string {
-    return this.configService.getOrThrow<string>(
-      'AUDINO_RECORDING_ORACLE_ADDRESS',
-    );
-  }
-
   get approveAmountUsd(): number {
     return this.configService.get<number>('APPROVE_AMOUNT_USD', 0);
   }

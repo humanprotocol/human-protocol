@@ -9,8 +9,3 @@ export enum CvatJobType {
   IMAGE_SKELETONS_FROM_BOXES = 'image_skeletons_from_boxes',
   IMAGE_POLYGONS = 'image_polygons',
 }
-
-export enum AudinoJobType {
-  AUDIO_TRANSCRIPTION = 'audio_transcription',
-  AUDIO_ATTRIBUTE_ANNOTATION = 'audio_attribute_annotation',
-}
