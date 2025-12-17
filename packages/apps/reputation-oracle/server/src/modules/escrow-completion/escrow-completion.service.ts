@@ -36,14 +36,12 @@ import { EscrowCompletionRepository } from './escrow-completion.repository';
 import { EscrowPayoutsBatchEntity } from './escrow-payouts-batch.entity';
 import { EscrowPayoutsBatchRepository } from './escrow-payouts-batch.repository';
 import {
-  AudinoPayoutsCalculator,
   CvatPayoutsCalculator,
   FortunePayoutsCalculator,
   EscrowPayoutsCalculator,
   CalculatedPayout,
 } from './payouts-calculation';
 import {
-  AudinoResultsProcessor,
   CvatResultsProcessor,
   EscrowResultsProcessor,
   FortuneResultsProcessor,
@@ -63,10 +61,8 @@ export class EscrowCompletionService {
     private readonly storageService: StorageService,
     private readonly outgoingWebhookService: OutgoingWebhookService,
     private readonly reputationService: ReputationService,
-    private readonly audinoResultsProcessor: AudinoResultsProcessor,
     private readonly cvatResultsProcessor: CvatResultsProcessor,
     private readonly fortuneResultsProcessor: FortuneResultsProcessor,
-    private readonly audinoPayoutsCalculator: AudinoPayoutsCalculator,
     private readonly cvatPayoutsCalculator: CvatPayoutsCalculator,
     private readonly fortunePayoutsCalculator: FortunePayoutsCalculator,
   ) {}
@@ -481,10 +477,6 @@ export class EscrowCompletionService {
       return this.cvatResultsProcessor;
     }
 
-    if (manifestUtils.isAudinoJobType(jobRequestType)) {
-      return this.audinoResultsProcessor;
-    }
-
     throw new Error(
       `No escrow results processor defined for '${jobRequestType}' jobs`,
     );
@@ -499,10 +491,6 @@ export class EscrowCompletionService {
 
     if (manifestUtils.isCvatJobType(jobRequestType)) {
       return this.cvatPayoutsCalculator;
-    }
-
-    if (manifestUtils.isAudinoJobType(jobRequestType)) {
-      return this.audinoPayoutsCalculator;
     }
 
     throw new Error(

@@ -44,12 +44,10 @@ import {
   generateEscrowPayoutsBatch,
 } from './fixtures/escrow-completion';
 import {
-  AudinoPayoutsCalculator,
   CvatPayoutsCalculator,
   FortunePayoutsCalculator,
 } from './payouts-calculation';
 import {
-  AudinoResultsProcessor,
   CvatResultsProcessor,
   FortuneResultsProcessor,
 } from './results-processing';
@@ -124,14 +122,6 @@ describe('EscrowCompletionService', () => {
         {
           provide: CvatPayoutsCalculator,
           useValue: mockCvatPayoutsCalculator,
-        },
-        {
-          provide: AudinoResultsProcessor,
-          useValue: createMock(),
-        },
-        {
-          provide: AudinoPayoutsCalculator,
-          useValue: createMock(),
         },
       ],
     }).compile();

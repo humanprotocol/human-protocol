@@ -2,7 +2,7 @@ name: CVAT Exchange Oracle Tests
 
 on:
   push:
-    tags-ignore: '*'
+    branches: '**'
     paths:
       - 'packages/examples/cvat/exchange-oracle/**'
       - 'packages/sdk/python/human-protocol-sdk/**'

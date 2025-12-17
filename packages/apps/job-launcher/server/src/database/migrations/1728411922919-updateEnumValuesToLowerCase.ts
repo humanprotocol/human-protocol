@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class UpdateWebhookEnumValuesToLowerCase1728411922919
-  implements MigrationInterface
-{
+export class UpdateWebhookEnumValuesToLowerCase1728411922919 implements MigrationInterface {
   name = 'UpdateWebhookEnumValuesToLowerCase1728411922919';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

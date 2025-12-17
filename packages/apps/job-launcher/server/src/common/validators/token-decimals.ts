@@ -10,9 +10,7 @@ import { ChainId } from '@human-protocol/sdk';
 import { PaymentCurrency } from '../enums/payment';
 
 @ValidatorConstraint({ async: false })
-export class IsValidTokenDecimalsConstraint
-  implements ValidatorConstraintInterface
-{
+export class IsValidTokenDecimalsConstraint implements ValidatorConstraintInterface {
   validate(value: number, args: ValidationArguments) {
     const [tokenProperty] = args.constraints;
     const dto = args.object as Record<string, any>;

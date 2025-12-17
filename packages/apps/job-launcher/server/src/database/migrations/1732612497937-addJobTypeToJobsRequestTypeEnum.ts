@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddJobTypeToJobsRequestTypeEnum1732612497937
-  implements MigrationInterface
-{
+export class AddJobTypeToJobsRequestTypeEnum1732612497937 implements MigrationInterface {
   name = 'AddJobTypeToJobsRequestTypeEnum1732612497937';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
