@@ -3,7 +3,28 @@ import {
   deleteExchangeApiKeys,
   enrollExchangeApiKeys,
   getExchangeApiKeys,
+  getSupportedExchanges,
+  getStakeSummary,
 } from '../services/exchangeApiKeys.service';
+
+function useGetStakeSummary() {
+  return useQuery({
+    queryKey: ['stake-summary'],
+    queryFn: () => getStakeSummary(),
+  });
+}
+
+function useGetSupportedExchanges() {
+  return useQuery({
+    queryKey: ['supported-exchanges'],
+    queryFn: () => getSupportedExchanges(),
+    select: (data) =>
+      data.map((exchange: string) => ({
+        name: exchange,
+        displayName: exchange.charAt(0).toUpperCase() + exchange.slice(1),
+      })),
+  });
+}
 
 function useGetExchangeApiKeys() {
   return useQuery({
@@ -20,7 +41,7 @@ function useEnrollExchangeApiKeys() {
     mutationFn: (data: {
       exchange: string;
       apiKey: string;
-      apiSecret: string;
+      secretKey: string;
     }) => enrollExchangeApiKeys(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['exchange-api-keys'] });
@@ -41,6 +62,8 @@ function useDeleteExchangeApiKeys() {
 }
 
 export {
+  useGetStakeSummary,
+  useGetSupportedExchanges,
   useDeleteExchangeApiKeys,
   useGetExchangeApiKeys,
   useEnrollExchangeApiKeys,

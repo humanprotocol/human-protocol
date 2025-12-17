@@ -15,7 +15,7 @@ export function ApiKeyData() {
   const { t } = useTranslation();
   const { openModal: openEditApiKeyModal } = useEditApiKeyModal();
   const { openModal: openDeleteApiKeyModal } = useDeleteApiKeyModal();
-  const { data: exchangeApiKey } = useGetExchangeApiKeys();
+  const { data: exchangeApiKeyData } = useGetExchangeApiKeys();
 
   const textField = isDarkMode ? (
     <CustomTextFieldDark
@@ -44,27 +44,24 @@ export function ApiKeyData() {
       </Stack>
       <Stack gap={2} direction="row" alignItems="center">
         {textField}
-        <Stack
-          display={exchangeApiKey ? 'flex' : 'none'}
-          direction="row"
-          alignItems="center"
-          gap={1}
-        >
-          <IconButton
-            disableRipple
-            sx={{ p: 0, '&:hover': { bgcolor: 'inherit' } }}
-            onClick={openEditApiKeyModal}
-          >
-            <EditIcon />
-          </IconButton>
-          <IconButton
-            disableRipple
-            sx={{ p: 0, '&:hover': { bgcolor: 'inherit' } }}
-            onClick={openDeleteApiKeyModal}
-          >
-            <DeleteIcon />
-          </IconButton>
-        </Stack>
+        {exchangeApiKeyData?.exchange && (
+          <Stack direction="row" alignItems="center" gap={1}>
+            <IconButton
+              disableRipple
+              sx={{ p: 0, '&:hover': { bgcolor: 'inherit' } }}
+              onClick={() => openEditApiKeyModal(exchangeApiKeyData.exchange)}
+            >
+              <EditIcon />
+            </IconButton>
+            <IconButton
+              disableRipple
+              sx={{ p: 0, '&:hover': { bgcolor: 'inherit' } }}
+              onClick={openDeleteApiKeyModal}
+            >
+              <DeleteIcon />
+            </IconButton>
+          </Stack>
+        )}
       </Stack>
     </Stack>
   );

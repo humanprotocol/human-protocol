@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Chip } from '@/shared/components/ui/chip';
 import { env } from '@/shared/env';
 import { useAddApiKeyModal } from '../hooks/use-api-key-modals';
-import { ApiKeyData } from '.';
+import { ApiKeyData } from './';
 
 export function StakingInfo() {
   const { t } = useTranslation();

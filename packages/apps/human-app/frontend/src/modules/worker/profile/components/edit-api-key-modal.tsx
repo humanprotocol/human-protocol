@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Autocomplete,
+  Box,
   FormControl,
   FormHelperText,
   Stack,
@@ -12,40 +13,64 @@ import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 import { Button } from '@/shared/components/ui/button';
 import { useIsMobile } from '@/shared/hooks';
+import { useEffect } from 'react';
+import {
+  useEnrollExchangeApiKeys,
+  useGetSupportedExchanges,
+} from '../../hooks/use-exchange-api-keys';
 
 interface EditApiKeyModalProps {
+  exchangeName: string;
+  isOpen: boolean;
   onClose: () => void;
 }
 
-export function EditApiKeyModal({ onClose }: EditApiKeyModalProps) {
+export function EditApiKeyModal({
+  isOpen,
+  onClose,
+  exchangeName,
+}: EditApiKeyModalProps) {
   const { t } = useTranslation();
   const isMobile = useIsMobile();
+  const { mutate: postExchangeApiKey } = useEnrollExchangeApiKeys();
+  const { data: supportedExchanges } = useGetSupportedExchanges();
 
   const {
     control,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm({
     defaultValues: {
       exchange: '',
       apiKey: '',
-      apiSecret: '',
+      secretKey: '',
     },
     resolver: zodResolver(
       z.object({
         exchange: z.string().min(1, t('validation.required')),
         apiKey: z.string().min(1, t('validation.required')),
-        apiSecret: z.string().min(1, t('validation.required')),
+        secretKey: z.string().min(1, t('validation.required')),
       })
     ),
   });
 
+  useEffect(() => {
+    if (isOpen) {
+      reset({
+        exchange: exchangeName,
+        apiKey: '',
+        secretKey: '',
+      });
+    }
+  }, [isOpen, exchangeName, reset]);
+
   const onSubmit = (data: {
     exchange: string;
     apiKey: string;
-    apiSecret: string;
+    secretKey: string;
   }) => {
-    console.log(data);
+    postExchangeApiKey(data);
   };
 
   return (
@@ -71,14 +96,40 @@ export function EditApiKeyModal({ onClose }: EditApiKeyModalProps) {
               control={control}
               render={({ field }) => (
                 <Autocomplete
-                  {...field}
-                  options={[]}
+                  options={
+                    supportedExchanges?.map((exchange) => exchange.name) || []
+                  }
+                  getOptionLabel={(option) => {
+                    const exchange = supportedExchanges?.find(
+                      (exchange) => exchange.name === option
+                    );
+                    return exchange?.displayName || option || '';
+                  }}
                   renderInput={(params) => (
                     <TextField
                       {...params}
                       label={t('worker.profile.apiKeyData.exchange')}
                     />
                   )}
+                  renderOption={(props, option) => {
+                    const exchange = supportedExchanges?.find(
+                      (exchange) => exchange.name === option
+                    );
+                    return (
+                      <Box {...props} key={option} component="li">
+                        <Typography
+                          color="text.primary"
+                          variant="body1"
+                          sx={{ textTransform: 'capitalize' }}
+                        >
+                          {exchange?.displayName || exchange?.name}
+                        </Typography>
+                      </Box>
+                    );
+                  }}
+                  {...field}
+                  disabled
+                  onChange={(_, value) => field.onChange(value)}
                 />
               )}
             />
@@ -110,9 +161,9 @@ export function EditApiKeyModal({ onClose }: EditApiKeyModalProps) {
             )}
           </FormControl>
         </Stack>
-        <FormControl error={!!errors.apiSecret} sx={{ mt: { xs: 0, md: 1 } }}>
+        <FormControl error={!!errors.secretKey} sx={{ mt: { xs: 0, md: 1 } }}>
           <Controller
-            name="apiSecret"
+            name="secretKey"
             control={control}
             render={({ field }) => (
               <TextField

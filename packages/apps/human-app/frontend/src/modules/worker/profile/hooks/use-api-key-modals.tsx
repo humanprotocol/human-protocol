@@ -14,11 +14,19 @@ export function useAddApiKeyModal() {
 }
 
 export function useEditApiKeyModal() {
-  const { openModal, closeModal } = useModal();
+  const { openModal, closeModal, open } = useModal();
 
   return {
-    openModal: () =>
-      openModal({ content: <EditApiKeyModal onClose={closeModal} /> }),
+    openModal: (exchangeName: string) =>
+      openModal({
+        content: (
+          <EditApiKeyModal
+            isOpen={open}
+            onClose={closeModal}
+            exchangeName={exchangeName}
+          />
+        ),
+      }),
   };
 }
 

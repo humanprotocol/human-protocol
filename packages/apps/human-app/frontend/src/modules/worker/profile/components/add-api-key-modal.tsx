@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Autocomplete,
+  Box,
   FormControl,
   FormHelperText,
   Stack,
@@ -12,12 +13,16 @@ import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 import { Button } from '@/shared/components/ui/button';
 import { useIsMobile } from '@/shared/hooks';
-import { useEnrollExchangeApiKeys } from '../../hooks/use-exchange-api-keys';
+import {
+  useEnrollExchangeApiKeys,
+  useGetSupportedExchanges,
+} from '../../hooks/use-exchange-api-keys';
 
 export function AddApiKeyModal() {
   const { t } = useTranslation();
   const { mutate: enrollExchangeApiKey } = useEnrollExchangeApiKeys();
   const isMobile = useIsMobile();
+  const { data: supportedExchanges } = useGetSupportedExchanges();
 
   const {
     control,
@@ -27,13 +32,13 @@ export function AddApiKeyModal() {
     defaultValues: {
       exchange: '',
       apiKey: '',
-      apiSecret: '',
+      secretKey: '',
     },
     resolver: zodResolver(
       z.object({
         exchange: z.string().min(1, t('validation.required')),
         apiKey: z.string().min(1, t('validation.required')),
-        apiSecret: z.string().min(1, t('validation.required')),
+        secretKey: z.string().min(1, t('validation.required')),
       })
     ),
   });
@@ -41,7 +46,7 @@ export function AddApiKeyModal() {
   const onSubmit = (data: {
     exchange: string;
     apiKey: string;
-    apiSecret: string;
+    secretKey: string;
   }) => {
     enrollExchangeApiKey(data);
   };
@@ -71,14 +76,39 @@ export function AddApiKeyModal() {
               control={control}
               render={({ field }) => (
                 <Autocomplete
-                  {...field}
-                  options={[]}
+                  options={
+                    supportedExchanges?.map((exchange) => exchange.name) || []
+                  }
+                  getOptionLabel={(option) => {
+                    const exchange = supportedExchanges?.find(
+                      (exchange) => exchange.name === option
+                    );
+                    return exchange?.displayName || option || '';
+                  }}
                   renderInput={(params) => (
                     <TextField
                       {...params}
                       label={t('worker.profile.apiKeyData.exchange')}
                     />
                   )}
+                  renderOption={(props, option) => {
+                    const exchange = supportedExchanges?.find(
+                      (exchange) => exchange.name === option
+                    );
+                    return (
+                      <Box {...props} key={option} component="li">
+                        <Typography
+                          color="text.primary"
+                          variant="body1"
+                          sx={{ textTransform: 'capitalize' }}
+                        >
+                          {exchange?.displayName || exchange?.name}
+                        </Typography>
+                      </Box>
+                    );
+                  }}
+                  {...field}
+                  onChange={(_, value) => field.onChange(value)}
                 />
               )}
             />
@@ -107,9 +137,9 @@ export function AddApiKeyModal() {
             )}
           </FormControl>
         </Stack>
-        <FormControl error={!!errors.apiSecret} sx={{ mt: { xs: 0, md: 1 } }}>
+        <FormControl error={!!errors.secretKey} sx={{ mt: { xs: 0, md: 1 } }}>
           <Controller
-            name="apiSecret"
+            name="secretKey"
             control={control}
             render={({ field }) => (
               <TextField

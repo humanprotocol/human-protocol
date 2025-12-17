@@ -1,50 +1,60 @@
-import { ApiClientError, authorizedHumanAppApiClient } from '@/api';
+import { authorizedHumanAppApiClient } from '@/api';
 
-async function getExchangeApiKeys(): Promise<{ apiKey: string }> {
-  try {
-    const response = await authorizedHumanAppApiClient.get<{ apiKey: string }>(
-      '/exchange-api-keys'
-    );
-    return response;
-  } catch (error) {
-    if (error instanceof ApiClientError) {
-      throw error;
-    }
-    throw new Error('Failed to get exchange API keys');
-  }
+interface StakeSummary {
+  exchangeStake: number;
+  onChainStake: number;
+  minThreshold: number;
+}
+
+interface ExchangeApiKey {
+  apiKey: string;
+  exchange: string;
+}
+
+// interface Exchange {
+//   name: string;
+//   displayName: string;
+// }
+
+async function getStakeSummary(): Promise<StakeSummary | null> {
+  const response = await authorizedHumanAppApiClient.get<StakeSummary>(
+    '/exchange-api-keys/stake'
+  );
+  return response || null;
+}
+
+async function getSupportedExchanges(): Promise<string[]> {
+  const response = await authorizedHumanAppApiClient.get<string[]>(
+    '/exchange-api-keys/supported-exchanges'
+  );
+  return response || [];
+}
+
+async function getExchangeApiKeys(): Promise<ExchangeApiKey> {
+  const response =
+    await authorizedHumanAppApiClient.get<ExchangeApiKey>('/exchange-api-keys');
+  return response || null;
 }
 
 async function enrollExchangeApiKeys(data: {
   exchange: string;
   apiKey: string;
-  apiSecret: string;
-}) {
+  secretKey: string;
+}): Promise<void> {
   const { exchange, ...body } = data;
-  try {
-    const response = await authorizedHumanAppApiClient.post(
-      `/exchange-api-keys/${exchange}`,
-      {
-        body,
-      }
-    );
-    return response;
-  } catch (error) {
-    if (error instanceof ApiClientError) {
-      throw error;
-    }
-    throw new Error('Failed to enroll exchange API keys');
-  }
+  await authorizedHumanAppApiClient.post(`/exchange-api-keys/${exchange}`, {
+    body,
+  });
 }
 
 async function deleteExchangeApiKeys(): Promise<void> {
-  try {
-    await authorizedHumanAppApiClient.delete('/exchange-api-keys');
-  } catch (error) {
-    if (error instanceof ApiClientError) {
-      throw error;
-    }
-  }
-  throw new Error('Failed to delete exchange API keys');
+  await authorizedHumanAppApiClient.delete('/exchange-api-keys');
 }
 
-export { enrollExchangeApiKeys, getExchangeApiKeys, deleteExchangeApiKeys };
+export {
+  enrollExchangeApiKeys,
+  getExchangeApiKeys,
+  deleteExchangeApiKeys,
+  getSupportedExchanges,
+  getStakeSummary,
+};
