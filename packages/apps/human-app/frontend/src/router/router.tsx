@@ -20,6 +20,7 @@ import {
   workerDrawerBottomMenuItems,
   workerDrawerTopMenuItems,
 } from './components';
+import { RequireStake } from '@/modules/worker/providers/require-stake';
 
 export function Router() {
   const { user } = useAuth();
@@ -57,22 +58,24 @@ export function Router() {
           <Route
             element={
               <RequireAuth>
-                <ProtectedLayout
-                  pageHeaderProps={pageHeaderProps}
-                  renderDrawer={(open, setDrawerOpen) => (
-                    <DrawerNavigation
-                      bottomMenuItems={workerDrawerBottomMenuItems}
-                      open={open}
-                      setDrawerOpen={setDrawerOpen}
-                      signOut={handleSignOut}
-                      topMenuItems={workerDrawerTopMenuItems(user)}
-                    />
-                  )}
-                  renderHCaptchaStatisticsDrawer={(isOpen) => (
-                    <UserStatsDrawer isOpen={isOpen} />
-                  )}
-                  renderGovernanceBanner
-                />
+                <RequireStake>
+                  <ProtectedLayout
+                    pageHeaderProps={pageHeaderProps}
+                    renderDrawer={(open, setDrawerOpen) => (
+                      <DrawerNavigation
+                        bottomMenuItems={workerDrawerBottomMenuItems}
+                        open={open}
+                        setDrawerOpen={setDrawerOpen}
+                        signOut={handleSignOut}
+                        topMenuItems={workerDrawerTopMenuItems(user)}
+                      />
+                    )}
+                    renderHCaptchaStatisticsDrawer={(isOpen) => (
+                      <UserStatsDrawer isOpen={isOpen} />
+                    )}
+                    renderGovernanceBanner
+                  />
+                </RequireStake>
               </RequireAuth>
             }
             key={routerProps.path}

@@ -16,7 +16,10 @@ export const workerDrawerTopMenuItems = (user: UserData | null): MenuItem[] => {
       label: t('components.DrawerNavigation.jobs'),
       icon: <WorkIcon />,
       link: routerPaths.worker.jobsDiscovery,
-      disabled: !user?.wallet_address || user.kyc_status !== KycStatus.APPROVED,
+      disabled:
+        !user?.wallet_address ||
+        !user?.is_stake_eligible ||
+        user.kyc_status !== KycStatus.APPROVED,
     },
   ];
 };
