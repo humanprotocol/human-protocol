@@ -13,9 +13,9 @@ import {
 
 import { OperatorsOrderBy } from '../../../common/enums/operator';
 import { IsRoleValid } from './validation/role-validation';
-import { ChainIdDto } from './common.dto';
+import { ChainIdQueryDto } from './common.dto';
 
-export class OperatorsPaginationDto extends ChainIdDto {
+export class OperatorsPaginationDto extends ChainIdQueryDto {
   @ApiPropertyOptional({
     enum: OperatorsOrderBy,
     default: OperatorsOrderBy.STAKED_AMOUNT,
@@ -46,7 +46,7 @@ export class OperatorsPaginationDto extends ChainIdDto {
   public first?: number = 10;
 }
 
-export class DetailsTransactionsPaginationDto extends ChainIdDto {
+export class DetailsTransactionsPaginationDto extends ChainIdQueryDto {
   @ApiPropertyOptional({
     minimum: 0,
     default: 10,
@@ -70,7 +70,7 @@ export class DetailsTransactionsPaginationDto extends ChainIdDto {
   public skip?: number = 0;
 }
 
-export class DetailsEscrowsPaginationDto extends ChainIdDto {
+export class DetailsEscrowsPaginationDto extends ChainIdQueryDto {
   @ApiProperty()
   @IsString()
   @IsRoleValid()

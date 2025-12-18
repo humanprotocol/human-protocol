@@ -25,7 +25,7 @@ import { WalletDto } from './dto/wallet.dto';
 import { EscrowDto, EscrowPaginationDto } from './dto/escrow.dto';
 import { OperatorDto } from './dto/operator.dto';
 import { TransactionPaginationDto } from './dto/transaction.dto';
-import { ChainIdDto } from './dto/common.dto';
+import { ChainIdQueryDto } from './dto/common.dto';
 
 @ApiTags('Details')
 @Controller('/details')
@@ -68,7 +68,7 @@ export class DetailsController {
   })
   async details(
     @Param('address', AddressValidationPipe) address: string,
-    @Query() { chainId }: ChainIdDto,
+    @Query() { chainId }: ChainIdQueryDto,
   ): Promise<DetailsResponseDto> {
     const details: WalletDto | EscrowDto | OperatorDto =
       await this.detailsService.getDetails(chainId, address);
@@ -174,7 +174,7 @@ export class DetailsController {
   })
   async KVStore(
     @Param('address', AddressValidationPipe) address: string,
-    @Query() { chainId }: ChainIdDto,
+    @Query() { chainId }: ChainIdQueryDto,
   ): Promise<KVStoreDataDto[]> {
     return this.detailsService.getKVStoreData(chainId, address);
   }
