@@ -1,4 +1,4 @@
-import { ApiOperation, ApiResponse, ApiTags, ApiQuery } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   Controller,
   Get,
@@ -8,7 +8,6 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { ChainId } from '@human-protocol/sdk';
 
 import { AddressValidationPipe } from '../../common/pipes/address-validation.pipe';
 import { DetailsService } from './details.service';
@@ -26,6 +25,7 @@ import { WalletDto } from './dto/wallet.dto';
 import { EscrowDto, EscrowPaginationDto } from './dto/escrow.dto';
 import { OperatorDto } from './dto/operator.dto';
 import { TransactionPaginationDto } from './dto/transaction.dto';
+import { ChainIdDto } from './dto/common.dto';
 
 @ApiTags('Details')
 @Controller('/details')
@@ -56,7 +56,6 @@ export class DetailsController {
   }
 
   @Get('/:address')
-  @ApiQuery({ name: 'chainId', enum: ChainId })
   @HttpCode(200)
   @ApiOperation({
     summary: 'Get address details',
@@ -69,7 +68,7 @@ export class DetailsController {
   })
   async details(
     @Param('address', AddressValidationPipe) address: string,
-    @Query('chainId') chainId: ChainId,
+    @Query() { chainId }: ChainIdDto,
   ): Promise<DetailsResponseDto> {
     const details: WalletDto | EscrowDto | OperatorDto =
       await this.detailsService.getDetails(chainId, address);
@@ -167,7 +166,6 @@ export class DetailsController {
     summary: 'Get KVStore data by address',
     description: 'Returns all the data stored in KVStore for a given address.',
   })
-  @ApiQuery({ name: 'chain_id', enum: ChainId, required: true })
   @ApiResponse({
     status: 200,
     description: 'Data retrieved successfully',
@@ -176,7 +174,7 @@ export class DetailsController {
   })
   async KVStore(
     @Param('address', AddressValidationPipe) address: string,
-    @Query('chain_id') chainId: ChainId,
+    @Query() { chainId }: ChainIdDto,
   ): Promise<KVStoreDataDto[]> {
     return this.detailsService.getKVStoreData(chainId, address);
   }

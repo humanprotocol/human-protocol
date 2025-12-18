@@ -1,18 +1,18 @@
-import { ChainId } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Web3Env } from '../enums/web3';
+
 import {
-  LOCALHOST_CHAIN_IDS,
-  MAINNET_CHAIN_IDS,
-  TESTNET_CHAIN_IDS,
-} from '../utils/constants';
+  DevelopmentChainId,
+  ProductionChainId,
+  ChainIds,
+  type ChainId,
+} from '../constants';
 
 export interface TokensList {
   [key: string]: string | undefined;
 }
 export interface NetworkDto {
-  chainId: number;
+  chainId: ChainId;
   rpcUrl?: string;
 }
 
@@ -28,65 +28,53 @@ export class NetworkConfigService {
     this.networkMap = {
       ...(this.configService.get<string>('RPC_URL_ETHEREUM') && {
         ethereum: {
-          chainId: ChainId.MAINNET,
+          chainId: ProductionChainId.ETHEREUM,
           rpcUrl: this.configService.get<string>('RPC_URL_ETHEREUM'),
         },
       }),
       ...(this.configService.get<string>('RPC_URL_SEPOLIA') && {
         sepolia: {
-          chainId: ChainId.SEPOLIA,
+          chainId: DevelopmentChainId.SEPOLIA,
           rpcUrl: this.configService.get<string>('RPC_URL_SEPOLIA'),
         },
       }),
       ...(this.configService.get<string>('RPC_URL_POLYGON') && {
         polygon: {
-          chainId: ChainId.POLYGON,
+          chainId: ProductionChainId.POLYGON_MAINNET,
           rpcUrl: this.configService.get<string>('RPC_URL_POLYGON'),
         },
       }),
       ...(this.configService.get<string>('RPC_URL_POLYGON_AMOY') && {
         amoy: {
-          chainId: ChainId.POLYGON_AMOY,
+          chainId: DevelopmentChainId.POLYGON_AMOY,
           rpcUrl: this.configService.get<string>('RPC_URL_POLYGON_AMOY'),
         },
       }),
       ...(this.configService.get<string>('RPC_URL_BSC_MAINNET') && {
         bsc: {
-          chainId: ChainId.BSC_MAINNET,
+          chainId: ProductionChainId.BSC_MAINNET,
           rpcUrl: this.configService.get<string>('RPC_URL_BSC_MAINNET'),
         },
       }),
       ...(this.configService.get<string>('RPC_URL_BSC_TESTNET') && {
         bsctest: {
-          chainId: ChainId.BSC_TESTNET,
+          chainId: DevelopmentChainId.BSC_TESTNET,
           rpcUrl: this.configService.get<string>('RPC_URL_BSC_TESTNET'),
         },
       }),
       ...(this.configService.get<string>('RPC_URL_LOCALHOST') && {
         localhost: {
-          chainId: ChainId.LOCALHOST,
+          chainId: DevelopmentChainId.LOCALHOST,
           rpcUrl: this.configService.get<string>('RPC_URL_LOCALHOST'),
         },
       }),
     };
-    const validChainIds = (() => {
-      switch (this.configService.get<string>('WEB3_ENV')) {
-        case Web3Env.MAINNET:
-          return MAINNET_CHAIN_IDS;
-        case Web3Env.LOCALHOST:
-          return LOCALHOST_CHAIN_IDS;
-        default:
-          return TESTNET_CHAIN_IDS;
-      }
-    })();
 
     // Remove networks without RPC URLs
     this.networkMap = Object.keys(this.networkMap)
       .filter((network) => {
         const networkConfig = this.networkMap[network];
-        return (
-          networkConfig.rpcUrl && validChainIds.includes(networkConfig.chainId)
-        );
+        return networkConfig.rpcUrl && ChainIds.includes(networkConfig.chainId);
       })
       .reduce((newNetworkMap: NetworkMapDto, network) => {
         newNetworkMap[network] = this.networkMap[network];

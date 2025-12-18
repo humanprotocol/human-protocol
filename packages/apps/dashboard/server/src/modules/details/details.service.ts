@@ -1,5 +1,5 @@
+import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import {
-  ChainId,
   EscrowUtils,
   IEscrowsFilter,
   IOperatorsFilter,
@@ -12,14 +12,13 @@ import {
   TransactionUtils,
   WorkerUtils,
 } from '@human-protocol/sdk';
+import { HttpService } from '@nestjs/axios';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
-
-import { HMToken__factory } from '@human-protocol/core/typechain-types';
-import { HttpService } from '@nestjs/axios';
 import { ethers } from 'ethers';
 import { firstValueFrom } from 'rxjs';
+
 import { GetOperatorsPaginationOptions } from '../../common/types';
 import { EnvironmentConfigService } from '../../common/config/env-config.service';
 import { NetworkConfigService } from '../../common/config/network-config.service';
@@ -27,7 +26,8 @@ import {
   MAX_LEADERS_COUNT,
   MIN_STAKED_AMOUNT,
   REPUTATION_PLACEHOLDER,
-} from '../../common/constants/operator';
+  type ChainId,
+} from '../../common/constants';
 import * as httpUtils from '../../common/utils/http';
 import { OperatorsOrderBy } from '../../common/enums/operator';
 import { ReputationLevel } from '../../common/enums/reputation';
@@ -59,7 +59,7 @@ export class DetailsService {
     if (!network) throw new BadRequestException('Invalid chainId provided');
     const provider = new ethers.JsonRpcProvider(network.rpcUrl);
 
-    const escrowData = await EscrowUtils.getEscrow(chainId, address);
+    const escrowData = await EscrowUtils.getEscrow(chainId as number, address);
     if (escrowData) {
       const escrowDto: EscrowDto = plainToInstance(EscrowDto, escrowData, {
         excludeExtraneousValues: true,
@@ -87,7 +87,10 @@ export class DetailsService {
     const stakingClient = await StakingClient.build(provider);
     const stakingData = await stakingClient.getStakerInfo(address);
 
-    const operatorData = await OperatorUtils.getOperator(chainId, address);
+    const operatorData = await OperatorUtils.getOperator(
+      chainId as number,
+      address,
+    );
     if (operatorData) {
       const operatorDto: OperatorDto = plainToInstance(
         OperatorDto,
@@ -115,7 +118,7 @@ export class DetailsService {
       return operatorDto;
     }
 
-    const workerData = await WorkerUtils.getWorker(chainId, address);
+    const workerData = await WorkerUtils.getWorker(chainId as number, address);
 
     const walletDto: WalletDto = plainToInstance(WalletDto, {
       chainId,
@@ -158,7 +161,7 @@ export class DetailsService {
     skip: number,
   ): Promise<TransactionPaginationDto[]> {
     const transactions = await TransactionUtils.getTransactions({
-      chainId,
+      chainId: chainId as number,
       fromAddress: address,
       toAddress: address,
       first,
@@ -185,7 +188,7 @@ export class DetailsService {
     skip: number,
   ): Promise<EscrowPaginationDto[]> {
     const filter: IEscrowsFilter = {
-      chainId,
+      chainId: chainId as number,
       first,
       skip,
     };
@@ -271,7 +274,7 @@ export class DetailsService {
     first?: number,
   ): IOperatorsFilter {
     const operatorsFilter: IOperatorsFilter = {
-      chainId,
+      chainId: chainId as number,
       minStakedAmount: MIN_STAKED_AMOUNT,
       roles: [
         Role.JobLauncher,
@@ -426,7 +429,10 @@ export class DetailsService {
     chainId: ChainId,
     address: string,
   ): Promise<KVStoreDataDto[]> {
-    const kvStoreData = await KVStoreUtils.getKVStoreData(chainId, address);
+    const kvStoreData = await KVStoreUtils.getKVStoreData(
+      chainId as number,
+      address,
+    );
 
     const data: KVStoreDataDto[] = kvStoreData.map((data: any) => {
       return plainToInstance(KVStoreDataDto, {

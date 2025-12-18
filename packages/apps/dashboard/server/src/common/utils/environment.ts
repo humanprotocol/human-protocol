@@ -20,6 +20,10 @@ class Environment {
     ].includes(Environment.name as EnvironmentName);
   }
 
+  static isProduction(): boolean {
+    return Environment.name === EnvironmentName.PRODUCTION;
+  }
+
   static isTest(): boolean {
     return Environment.name === EnvironmentName.TEST;
   }

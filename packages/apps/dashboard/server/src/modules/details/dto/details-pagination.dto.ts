@@ -1,6 +1,6 @@
-import { ChainId, OrderDirection } from '@human-protocol/sdk';
+import { OrderDirection } from '@human-protocol/sdk';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Transform, Type } from 'class-transformer';
+import { Type } from 'class-transformer';
 import {
   IsEnum,
   IsIn,
@@ -13,14 +13,9 @@ import {
 
 import { OperatorsOrderBy } from '../../../common/enums/operator';
 import { IsRoleValid } from './validation/role-validation';
+import { ChainIdDto } from './common.dto';
 
-export class OperatorsPaginationDto {
-  @ApiProperty({ enum: ChainId })
-  @IsEnum(ChainId)
-  @IsIn(Object.values(ChainId).filter((id) => id !== ChainId.ALL))
-  @Transform(({ value }) => parseInt(value))
-  public chainId: ChainId;
-
+export class OperatorsPaginationDto extends ChainIdDto {
   @ApiPropertyOptional({
     enum: OperatorsOrderBy,
     default: OperatorsOrderBy.STAKED_AMOUNT,
@@ -51,13 +46,7 @@ export class OperatorsPaginationDto {
   public first?: number = 10;
 }
 
-export class DetailsTransactionsPaginationDto {
-  @ApiProperty({ enum: ChainId })
-  @IsEnum(ChainId)
-  @IsIn(Object.values(ChainId))
-  @Transform(({ value }) => parseInt(value))
-  public chainId: ChainId;
-
+export class DetailsTransactionsPaginationDto extends ChainIdDto {
   @ApiPropertyOptional({
     minimum: 0,
     default: 10,
@@ -81,13 +70,7 @@ export class DetailsTransactionsPaginationDto {
   public skip?: number = 0;
 }
 
-export class DetailsEscrowsPaginationDto {
-  @ApiProperty({ enum: ChainId })
-  @IsEnum(ChainId)
-  @IsIn(Object.values(ChainId))
-  @Transform(({ value }) => parseInt(value))
-  public chainId: ChainId;
-
+export class DetailsEscrowsPaginationDto extends ChainIdDto {
   @ApiProperty()
   @IsString()
   @IsRoleValid()
