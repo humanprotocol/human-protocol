@@ -15,7 +15,9 @@ const LEADER_FRAGMENT = gql`
     jobTypes
     registrationNeeded
     registrationInstructions
-    reputationNetworks
+    reputationNetworks {
+      address
+    }
     name
     category
     staker {
