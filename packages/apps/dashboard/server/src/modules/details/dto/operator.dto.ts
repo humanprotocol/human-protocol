@@ -1,18 +1,17 @@
+import { Role } from '@human-protocol/sdk';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Expose, Transform } from 'class-transformer';
 import {
   IsArray,
-  IsEnum,
+  IsNumber,
+  IsOptional,
   IsString,
   IsUrl,
-  IsOptional,
-  IsNumber,
 } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ChainId, Role } from '@human-protocol/sdk';
+import { ChainId, ProductionChainId } from '../../../common/constants';
 
 export class OperatorDto {
-  @ApiProperty({ example: ChainId.POLYGON_AMOY })
-  @IsEnum(ChainId)
+  @ApiProperty({ example: ProductionChainId.POLYGON_MAINNET })
   @Expose()
   public chainId: ChainId;
 

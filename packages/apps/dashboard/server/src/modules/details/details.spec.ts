@@ -1,5 +1,4 @@
 import {
-  ChainId,
   IOperator,
   KVStoreUtils,
   OperatorUtils,
@@ -13,6 +12,7 @@ import { EnvironmentConfigService } from '../../common/config/env-config.service
 import { NetworkConfigService } from '../../common/config/network-config.service';
 import { OperatorsOrderBy } from '../../common/enums/operator';
 import { DetailsService } from './details.service';
+import { DevelopmentChainId } from '../../common/constants';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -54,7 +54,7 @@ describe('DetailsService', () => {
           useValue: {
             getAvailableNetworks: jest
               .fn()
-              .mockResolvedValue([ChainId.MAINNET]),
+              .mockResolvedValue([DevelopmentChainId.SEPOLIA]),
           },
         },
         {
@@ -82,7 +82,7 @@ describe('DetailsService', () => {
       .spyOn(httpService as any, 'get')
       .mockReturnValue(of({ data: mockReputations }));
 
-    const result = await service.getOperators(ChainId.ALL);
+    const result = await service.getOperators(DevelopmentChainId.POLYGON_AMOY);
 
     expect(result).toEqual([
       expect.objectContaining({
@@ -101,7 +101,7 @@ describe('DetailsService', () => {
       .mockResolvedValue(mockOperators as IOperator[]);
     jest.spyOn(httpService as any, 'get').mockReturnValue(of({ data: [] }));
 
-    const result = await service.getOperators(ChainId.ALL);
+    const result = await service.getOperators(DevelopmentChainId.BSC_TESTNET);
 
     expect(result).toEqual([
       expect.objectContaining({
@@ -135,7 +135,7 @@ describe('DetailsService', () => {
       .spyOn(httpService as any, 'get')
       .mockReturnValue(of({ data: mockReputations }));
 
-    const result = await service.getOperators(ChainId.POLYGON_AMOY, {
+    const result = await service.getOperators(DevelopmentChainId.POLYGON_AMOY, {
       orderBy: OperatorsOrderBy.REPUTATION,
       orderDirection: OrderDirection.DESC,
       first: 5,
@@ -162,7 +162,7 @@ describe('DetailsService', () => {
       .spyOn(httpService, 'get')
       .mockReturnValue(throwError(() => new Error('API error')));
 
-    const result = await service.getOperators(ChainId.ALL);
+    const result = await service.getOperators(DevelopmentChainId.BSC_TESTNET);
 
     expect(result).toEqual([
       expect.objectContaining({
@@ -183,7 +183,10 @@ describe('DetailsService', () => {
       .spyOn(KVStoreUtils, 'getKVStoreData')
       .mockResolvedValue(mockKVStoreData);
 
-    const result = await service.getKVStoreData(ChainId.MAINNET, '0x123');
+    const result = await service.getKVStoreData(
+      DevelopmentChainId.SEPOLIA,
+      '0x123',
+    );
 
     expect(result).toEqual([
       expect.objectContaining({ key: 'key1', value: 'value1' }),

@@ -468,12 +468,15 @@ export class CronJobService {
         await this.cronJobRepository.save(cronJob);
       }
     } catch (error) {
-      this.logger.error('Error in syncJobStatuses cron job', error);
+      this.logger.error('Error in syncJobStatuses cron job', {
+        error,
+      });
     }
 
     this.logger.debug('Update jobs STOP');
     await this.completeCronJob(cronJob);
   }
+
   private async createCancellationWebhooks(
     jobEntity: JobEntity,
     oracleType: OracleType,

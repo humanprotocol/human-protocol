@@ -1,4 +1,4 @@
-import { ChainId, NETWORKS, StatisticsClient } from '@human-protocol/sdk';
+import { NETWORKS, StatisticsClient } from '@human-protocol/sdk';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable } from '@nestjs/common';
 
@@ -9,6 +9,7 @@ import {
 } from '../../common/config/env-config.service';
 import { NetworkConfigService } from '../../common/config/network-config.service';
 import { OPERATING_NETWORKS_CACHE_KEY } from '../../common/config/redis-config.service';
+import { ChainId } from '../../common/constants';
 import logger from '../../logger';
 
 @Injectable()

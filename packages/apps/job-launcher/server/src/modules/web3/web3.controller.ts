@@ -8,6 +8,7 @@ import {
   AvailableOraclesDto,
   GetAvailableOraclesDto,
   GetReputationOraclesDto,
+  validChainIds,
 } from './web3.dto';
 
 @ApiTags('Web3')
@@ -29,9 +30,7 @@ export class Web3Controller {
       type: 'array',
       items: {
         type: 'number',
-        enum: Object.values(ChainId).filter(
-          (value) => typeof value === 'number' && value > 0,
-        ) as number[],
+        enum: validChainIds,
       },
     },
   })

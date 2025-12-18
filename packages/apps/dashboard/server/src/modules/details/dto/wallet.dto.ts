@@ -1,11 +1,10 @@
-import { ChainId } from '@human-protocol/sdk';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsEnum, IsNumber, IsString } from 'class-validator';
+import { IsNumber, IsString } from 'class-validator';
+import { type ChainId, ProductionChainId } from '../../../common/constants';
 
 export class WalletDto {
-  @ApiProperty({ example: ChainId.POLYGON_AMOY })
-  @IsEnum(ChainId)
+  @ApiProperty({ example: ProductionChainId.POLYGON_MAINNET })
   public chainId: ChainId;
 
   @ApiProperty({ example: '0xb794f5ea0ba39494ce839613fffba74279579268' })

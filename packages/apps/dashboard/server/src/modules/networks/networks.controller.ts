@@ -8,7 +8,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { NetworksService } from './networks.service';
-import { ChainId } from '@human-protocol/sdk';
+import { ChainId } from '../../common/constants';
 
 @ApiTags('Networks')
 @Controller('/networks')

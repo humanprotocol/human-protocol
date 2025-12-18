@@ -12,7 +12,7 @@ const useKvstoreData = (chainId: number, address: string) => {
     queryFn: async () => {
       const { data } = await httpClient.get(
         `${apiPaths.kvstore.path}/${address}`,
-        { params: { chain_id: chainId || -1 } }
+        { params: { chainId: chainId || -1 } }
       );
 
       const validResponse = validateResponse(data, kvstoreDataSchema);

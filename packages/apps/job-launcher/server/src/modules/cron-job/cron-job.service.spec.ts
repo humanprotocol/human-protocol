@@ -1,4 +1,5 @@
 jest.mock('@human-protocol/sdk');
+jest.mock('../../logger');
 
 import { faker } from '@faker-js/faker';
 import { createMock } from '@golevelup/ts-jest';
@@ -42,6 +43,7 @@ import {
 } from '../../common/enums/job';
 import { WebhookStatus } from '../../common/enums/webhook';
 import { ConflictError } from '../../common/errors';
+import logger from '../../logger';
 import { ContentModerationRequestRepository } from '../content-moderation/content-moderation-request.repository';
 import { GCVContentModerationService } from '../content-moderation/gcv-content-moderation.service';
 import { JobEntity } from '../job/job.entity';
@@ -953,18 +955,19 @@ describe('CronJobService', () => {
     });
 
     it('should handle errors and log them', async () => {
-      const loggerErrorSpy = jest.spyOn((service as any).logger, 'error');
+      const syntheticError = new Error('Test error');
       jest
         .spyOn(EscrowUtils, 'getStatusEvents')
-        .mockRejectedValue(new Error('Test error'));
+        .mockRejectedValue(syntheticError);
 
       await service.syncJobStatuses();
 
-      expect(loggerErrorSpy).toHaveBeenCalledWith(
+      expect(logger.error).toHaveBeenCalledWith(
         'Error in syncJobStatuses cron job',
-        expect.any(Error),
+        {
+          error: syntheticError,
+        },
       );
-      loggerErrorSpy.mockRestore();
     });
 
     it('should complete the cron job entity to unlock', async () => {

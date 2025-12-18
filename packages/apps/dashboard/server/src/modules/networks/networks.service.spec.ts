@@ -1,5 +1,5 @@
 import { createMock } from '@golevelup/ts-jest';
-import { ChainId, NETWORKS, StatisticsClient } from '@human-protocol/sdk';
+import { NETWORKS, StatisticsClient } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ConfigService } from '@nestjs/config';
@@ -7,6 +7,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Cache } from 'cache-manager';
 import { EnvironmentConfigService } from '../../common/config/env-config.service';
 import { NetworkConfigService } from '../../common/config/network-config.service';
+import { DevelopmentChainId } from '../../common/constants';
 import { NetworksService } from './networks.service';
 
 jest.mock('@human-protocol/sdk', () => ({
@@ -19,10 +20,9 @@ describe('NetworksService', () => {
   let cacheManager: Cache;
 
   beforeAll(async () => {
-    process.env.RPC_URL_POLYGON = 'https://testrpc.com';
-    process.env.RPC_URL_BSC_MAINNET = 'https://testrpc.com';
-    process.env.RPC_URL_ETHEREUM = 'https://testrpc.com';
-    process.env.WEB3_ENV = 'mainnet';
+    process.env.RPC_URL_SEPOLIA = 'https://testrpc.com';
+    process.env.RPC_URL_POLYGON_AMOY = 'https://testrpc.com';
+    process.env.RPC_URL_BSC_TESTNET = 'https://testrpc.com';
   });
 
   beforeEach(async () => {
@@ -55,9 +55,9 @@ describe('NetworksService', () => {
 
   it('should regenerate network list when cache TTL expires', async () => {
     const mockNetworkList = [
-      ChainId.MAINNET,
-      ChainId.POLYGON,
-      ChainId.BSC_MAINNET,
+      DevelopmentChainId.SEPOLIA,
+      DevelopmentChainId.POLYGON_AMOY,
+      DevelopmentChainId.BSC_TESTNET,
     ];
 
     // Step 1: Initial request - populate cache
@@ -100,7 +100,10 @@ describe('NetworksService', () => {
   });
 
   it('should return cached networks if available', async () => {
-    const cachedNetworks = [ChainId.MAINNET, ChainId.POLYGON];
+    const cachedNetworks = [
+      DevelopmentChainId.SEPOLIA,
+      DevelopmentChainId.POLYGON_AMOY,
+    ];
     jest.spyOn(cacheManager, 'get').mockResolvedValue(cachedNetworks);
 
     const result = await networksService.getOperatingNetworks();
@@ -125,7 +128,10 @@ describe('NetworksService', () => {
 
     const result = await networksService.getOperatingNetworks();
     expect(result).toEqual(
-      expect.arrayContaining([ChainId.MAINNET, ChainId.POLYGON]),
+      expect.arrayContaining([
+        DevelopmentChainId.SEPOLIA,
+        DevelopmentChainId.POLYGON_AMOY,
+      ]),
     );
 
     expect(cacheManager.set).toHaveBeenCalledWith(
@@ -154,8 +160,8 @@ describe('NetworksService', () => {
   it('should handle missing network configuration gracefully', async () => {
     jest.spyOn(cacheManager, 'get').mockResolvedValue(null);
 
-    const originalNetworkConfig = NETWORKS[ChainId.MAINNET];
-    NETWORKS[ChainId.MAINNET] = undefined;
+    const originalNetworkConfig = NETWORKS[DevelopmentChainId.SEPOLIA];
+    NETWORKS[DevelopmentChainId.SEPOLIA] = undefined;
 
     const mockStatisticsClient = {
       getHMTDailyData: jest
@@ -172,10 +178,10 @@ describe('NetworksService', () => {
 
     const result = await networksService.getOperatingNetworks();
 
-    expect(result).not.toContain(ChainId.MAINNET);
+    expect(result).not.toContain(DevelopmentChainId.SEPOLIA);
     expect(result).toEqual(expect.arrayContaining([]));
 
-    NETWORKS[ChainId.MAINNET] = originalNetworkConfig;
+    NETWORKS[DevelopmentChainId.SEPOLIA] = originalNetworkConfig;
   });
 
   it('should handle errors in getHMTDailyData gracefully', async () => {

@@ -1,11 +1,10 @@
 import { Expose } from 'class-transformer';
-import { IsEnum, IsNumber, IsString, IsUrl } from 'class-validator';
+import { IsNumber, IsString, IsUrl } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { ChainId } from '@human-protocol/sdk';
+import { ChainId, ProductionChainId } from '../../../common/constants';
 
 export class EscrowDto {
-  @ApiProperty({ example: ChainId.POLYGON_AMOY })
-  @IsEnum(ChainId)
+  @ApiProperty({ example: ProductionChainId.POLYGON_MAINNET })
   @Expose()
   public chainId: ChainId;
 
@@ -86,8 +85,7 @@ export class EscrowDto {
 }
 
 export class EscrowPaginationDto {
-  @ApiProperty({ example: ChainId.POLYGON_AMOY })
-  @IsEnum(ChainId)
+  @ApiProperty({ example: ProductionChainId.POLYGON_MAINNET })
   @Expose()
   public chainId: ChainId;
 
