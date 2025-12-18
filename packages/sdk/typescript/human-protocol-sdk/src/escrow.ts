@@ -146,7 +146,7 @@ import {
  * ```
  */
 export class EscrowClient extends BaseEthersClient {
-  private escrowFactoryContract: EscrowFactory;
+  public escrowFactoryContract: EscrowFactory;
 
   /**
    * **EscrowClient constructor**

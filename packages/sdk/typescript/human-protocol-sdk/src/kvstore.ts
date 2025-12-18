@@ -96,7 +96,7 @@ import { IKVStore, SubgraphOptions } from './interfaces';
  */
 
 export class KVStoreClient extends BaseEthersClient {
-  private contract: KVStore;
+  public contract: KVStore;
 
   /**
    * **KVStoreClient constructor**
