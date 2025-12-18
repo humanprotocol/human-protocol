@@ -32,6 +32,7 @@ function useEnrollExchangeApiKeys() {
     }) => enrollExchangeApiKeys(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['exchange-api-keys'] });
+      queryClient.invalidateQueries({ queryKey: ['staking-summary'] });
     },
   });
 }
@@ -44,6 +45,7 @@ function useDeleteExchangeApiKeys() {
     mutationFn: () => deleteExchangeApiKeys(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['exchange-api-keys'] });
+      queryClient.invalidateQueries({ queryKey: ['staking-summary'] });
     },
   });
 }
