@@ -7,9 +7,16 @@ import { ApiKeyData } from './';
 import { useGetStakingSummary } from '../../hooks/use-staking';
 import { RefreshIcon } from '@/shared/components/ui/icons';
 import { useGetExchangeApiKeys } from '../../hooks/use-exchange-api-keys';
+import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
+import { useEffect, useRef } from 'react';
+import { useAccessTokenRefresh } from '@/api/hooks/use-access-token-refresh';
 
 export function StakingInfo() {
+  const { user } = useAuthenticatedUser();
+  const { refreshAccessTokenAsync } = useAccessTokenRefresh();
   const { t } = useTranslation();
+  const hasAttemptedRefresh = useRef(false);
+
   const { openModal: openAddApiKeyModal } = useAddApiKeyModal();
   const { data: exchangeApiKeyData, isLoading: isExchangeApiKeyLoading } =
     useGetExchangeApiKeys();
@@ -35,6 +42,31 @@ export function StakingInfo() {
     !!stakingSummary?.on_chain_error ||
     !!stakingSummary?.exchange_error ||
     isError;
+
+  useEffect(() => {
+    if (isRefetching || isLoading) return;
+
+    if (isStaked !== user.is_stake_eligible) {
+      if (!hasAttemptedRefresh.current) {
+        hasAttemptedRefresh.current = true;
+        refreshAccessTokenAsync({ authType: 'web2' });
+      }
+    } else {
+      hasAttemptedRefresh.current = false;
+    }
+  }, [
+    isStaked,
+    user.is_stake_eligible,
+    refreshAccessTokenAsync,
+    isRefetching,
+    isLoading,
+  ]);
+
+  const handleRefreshStakingInfo = () => {
+    if (isRefetching || isLoading) return;
+    hasAttemptedRefresh.current = false;
+    refetch();
+  };
 
   return (
     <Stack>
@@ -69,9 +101,9 @@ export function StakingInfo() {
           {t('worker.profile.stakingInfo.stakedAmount')}
         </Typography>
         <IconButton
-          disabled={isRefetching}
+          disabled={isRefetching || isLoading}
           sx={{ p: 0, bgcolor: 'rgba(20, 6, 178, 0.04)', borderRadius: '0px' }}
-          onClick={() => (isRefetching ? undefined : refetch())}
+          onClick={handleRefreshStakingInfo}
         >
           <RefreshIcon />
         </IconButton>
