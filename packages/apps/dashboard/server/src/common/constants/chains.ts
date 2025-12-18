@@ -2,18 +2,24 @@ import { ChainId as SdkChainId } from '@human-protocol/sdk';
 
 import Environment from '../utils/environment';
 
-export enum ProductionChainId {
-  POLYGON_MAINNET = SdkChainId.POLYGON,
-  BSC_MAINNET = SdkChainId.BSC_MAINNET,
-  ETHEREUM = SdkChainId.MAINNET,
-}
+export const ProductionChainId = {
+  POLYGON_MAINNET: SdkChainId.POLYGON,
+  BSC_MAINNET: SdkChainId.BSC_MAINNET,
+  ETHEREUM: SdkChainId.MAINNET,
+} as const satisfies Record<string, SdkChainId>;
 
-export enum DevelopmentChainId {
-  POLYGON_AMOY = SdkChainId.POLYGON_AMOY,
-  BSC_TESTNET = SdkChainId.BSC_TESTNET,
-  SEPOLIA = SdkChainId.SEPOLIA,
-  LOCALHOST = SdkChainId.LOCALHOST,
-}
+type ProductionChainId =
+  (typeof ProductionChainId)[keyof typeof ProductionChainId];
+
+export const DevelopmentChainId = {
+  POLYGON_AMOY: SdkChainId.POLYGON_AMOY,
+  BSC_TESTNET: SdkChainId.BSC_TESTNET,
+  SEPOLIA: SdkChainId.SEPOLIA,
+  LOCALHOST: SdkChainId.LOCALHOST,
+} as const satisfies Record<string, SdkChainId>;
+
+type DevelopmentChainId =
+  (typeof DevelopmentChainId)[keyof typeof DevelopmentChainId];
 
 export const ChainIds = Object.values(
   Environment.isProduction() ? ProductionChainId : DevelopmentChainId,

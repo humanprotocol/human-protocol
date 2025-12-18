@@ -59,7 +59,7 @@ export class DetailsService {
     if (!network) throw new BadRequestException('Invalid chainId provided');
     const provider = new ethers.JsonRpcProvider(network.rpcUrl);
 
-    const escrowData = await EscrowUtils.getEscrow(chainId as number, address);
+    const escrowData = await EscrowUtils.getEscrow(chainId, address);
     if (escrowData) {
       const escrowDto: EscrowDto = plainToInstance(EscrowDto, escrowData, {
         excludeExtraneousValues: true,
@@ -87,10 +87,7 @@ export class DetailsService {
     const stakingClient = await StakingClient.build(provider);
     const stakingData = await stakingClient.getStakerInfo(address);
 
-    const operatorData = await OperatorUtils.getOperator(
-      chainId as number,
-      address,
-    );
+    const operatorData = await OperatorUtils.getOperator(chainId, address);
     if (operatorData) {
       const operatorDto: OperatorDto = plainToInstance(
         OperatorDto,
@@ -118,7 +115,7 @@ export class DetailsService {
       return operatorDto;
     }
 
-    const workerData = await WorkerUtils.getWorker(chainId as number, address);
+    const workerData = await WorkerUtils.getWorker(chainId, address);
 
     const walletDto: WalletDto = plainToInstance(WalletDto, {
       chainId,
@@ -161,7 +158,7 @@ export class DetailsService {
     skip: number,
   ): Promise<TransactionPaginationDto[]> {
     const transactions = await TransactionUtils.getTransactions({
-      chainId: chainId as number,
+      chainId,
       fromAddress: address,
       toAddress: address,
       first,
@@ -188,7 +185,7 @@ export class DetailsService {
     skip: number,
   ): Promise<EscrowPaginationDto[]> {
     const filter: IEscrowsFilter = {
-      chainId: chainId as number,
+      chainId,
       first,
       skip,
     };
@@ -274,7 +271,7 @@ export class DetailsService {
     first?: number,
   ): IOperatorsFilter {
     const operatorsFilter: IOperatorsFilter = {
-      chainId: chainId as number,
+      chainId,
       minStakedAmount: MIN_STAKED_AMOUNT,
       roles: [
         Role.JobLauncher,
@@ -429,10 +426,7 @@ export class DetailsService {
     chainId: ChainId,
     address: string,
   ): Promise<KVStoreDataDto[]> {
-    const kvStoreData = await KVStoreUtils.getKVStoreData(
-      chainId as number,
-      address,
-    );
+    const kvStoreData = await KVStoreUtils.getKVStoreData(chainId, address);
 
     const data: KVStoreDataDto[] = kvStoreData.map((data: any) => {
       return plainToInstance(KVStoreDataDto, {
