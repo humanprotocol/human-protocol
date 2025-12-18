@@ -3,7 +3,7 @@ import { getStakingSummary } from '../services/staking.service';
 
 function useGetStakingSummary() {
   return useQuery({
-    queryKey: ['stake-summary'],
+    queryKey: ['staking-summary'],
     queryFn: () => getStakingSummary(),
   });
 }
