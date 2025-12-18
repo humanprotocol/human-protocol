@@ -20,10 +20,9 @@ describe('NetworksService', () => {
   let cacheManager: Cache;
 
   beforeAll(async () => {
-    process.env.RPC_URL_POLYGON = 'https://testrpc.com';
-    process.env.RPC_URL_BSC_MAINNET = 'https://testrpc.com';
-    process.env.RPC_URL_ETHEREUM = 'https://testrpc.com';
-    process.env.WEB3_ENV = 'mainnet';
+    process.env.RPC_URL_SEPOLIA = 'https://testrpc.com';
+    process.env.RPC_URL_POLYGON_AMOY = 'https://testrpc.com';
+    process.env.RPC_URL_BSC_TESTNET = 'https://testrpc.com';
   });
 
   beforeEach(async () => {
