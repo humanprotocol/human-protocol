@@ -16,7 +16,7 @@ export function StakingInfo() {
   const [isPromptExpanded, setIsPromptExpanded] = useState(false);
   const tokenRefreshLock = useRef(false);
 
-  const { user } = useAuthenticatedUser();
+  const { user, updateUserData } = useAuthenticatedUser();
   const { refreshAccessTokenAsync } = useAccessTokenRefresh();
   const { t } = useTranslation();
 
@@ -54,6 +54,7 @@ export function StakingInfo() {
     if (isStaked !== user.is_stake_eligible) {
       if (!tokenRefreshLock.current) {
         tokenRefreshLock.current = true;
+        updateUserData({ is_stake_eligible: isStaked });
         void refreshAccessTokenAsync({ authType: 'web2' });
       }
     } else {
@@ -65,6 +66,7 @@ export function StakingInfo() {
     refreshAccessTokenAsync,
     isRefetching,
     isLoading,
+    updateUserData,
   ]);
 
   const handleRefreshStakingInfo = () => {
