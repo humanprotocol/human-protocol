@@ -10,7 +10,7 @@ const CustomTextField = styled(TextField)(() => ({
     height: '48px',
     maxWidth: '376px',
     color: colorPalette.text.disabledSecondary,
-    WebkitTextFillColor: colorPalette.text.disabledSecondary,
+    WebkitTextFillColor: `${colorPalette.text.disabledSecondary} !important`,
   },
   '& .MuiOutlinedInput-root': {
     '& fieldset': {
@@ -27,7 +27,7 @@ const CustomTextFieldDark = styled(TextField)(() => ({
     height: '48px',
     maxWidth: '376px',
     color: darkColorPalette.text.disabledSecondary,
-    WebkitTextFillColor: darkColorPalette.text.disabledSecondary,
+    WebkitTextFillColor: `${darkColorPalette.text.disabledSecondary} !important`,
   },
   '& .MuiOutlinedInput-root': {
     '& fieldset': {
