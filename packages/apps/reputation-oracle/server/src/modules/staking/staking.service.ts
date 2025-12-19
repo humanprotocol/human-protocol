@@ -68,6 +68,7 @@ export class StakingService {
       exchangeStake: '0',
       onChainStake: '0',
       minThreshold: this.stakingConfigService.minThreshold.toString(),
+      eligibilityEnabled: this.stakingConfigService.eligibilityEnabled,
     };
 
     try {

@@ -10,6 +10,9 @@ export class StakeSummaryResponseDto {
   @ApiProperty({ name: 'min_threshold' })
   minThreshold: string;
 
+  @ApiProperty({ name: 'eligibility_enabled' })
+  eligibilityEnabled: boolean;
+
   @ApiPropertyOptional({ name: 'exchange_error' })
   exchangeError?: string;
 

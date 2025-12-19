@@ -92,6 +92,10 @@ export const envValidator = Joi.object({
     .integer()
     .min(100)
     .description('HTTP timeout for exchange staking checks in ms'),
+  STAKING_ELIGIBILITY_ENABLED: Joi.string()
+    .valid('true', 'false')
+    .default('false')
+    .description('Enable or disable staking eligibility checks'),
   // Slack notifications
   ABUSE_SLACK_WEBHOOK_URL: Joi.string()
     .uri({ scheme: ['http', 'https'] })

@@ -8,8 +8,7 @@ import { ethers } from 'ethers';
 
 import { SupportedExchange } from '@/common/constants';
 import { StakingConfigService, Web3ConfigService } from '@/config';
-import { type ExchangeClient } from '@/modules/exchange';
-import { ExchangeClientFactory } from '@/modules/exchange/exchange-client.factory';
+import { type ExchangeClient, ExchangeClientFactory } from '@/modules/exchange';
 import { ExchangeApiKeysService } from '@/modules/exchange-api-keys';
 import { UserEntity, UserNotFoundError, UserRepository } from '@/modules/user';
 import { WalletWithProvider, Web3Service } from '@/modules/web3';
@@ -150,6 +149,7 @@ describe('StakingService', () => {
         exchangeStake: exchangeStake.toString(),
         onChainStake: onChainStake.toString(),
         minThreshold: mockStakingConfigService.minThreshold.toString(),
+        eligibilityEnabled: mockStakingConfigService.eligibilityEnabled,
       });
     });
 
@@ -167,6 +167,7 @@ describe('StakingService', () => {
         exchangeStake: exchangeStake.toString(),
         onChainStake: '0',
         minThreshold: mockStakingConfigService.minThreshold.toString(),
+        eligibilityEnabled: mockStakingConfigService.eligibilityEnabled,
       });
     });
   });

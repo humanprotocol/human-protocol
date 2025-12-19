@@ -14,6 +14,10 @@ export class StakeSummaryResponse {
   @AutoMap()
   minThreshold: number;
 
+  @ApiProperty({ name: 'eligibility_enabled' })
+  @AutoMap()
+  eligibilityEnabled: boolean;
+
   @ApiProperty({ name: 'exchange_error', required: false, nullable: true })
   @AutoMap()
   exchangeError?: string;
