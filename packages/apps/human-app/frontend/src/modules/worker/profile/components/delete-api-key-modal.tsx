@@ -8,9 +8,13 @@ import { ModalError, ModalSuccess, ModalLoading } from './modal-states';
 
 interface DeleteApiKeyModalProps {
   onClose: () => void;
+  disableClose: (disable: boolean) => void;
 }
 
-export function DeleteApiKeyModal({ onClose }: DeleteApiKeyModalProps) {
+export function DeleteApiKeyModal({
+  onClose,
+  disableClose,
+}: DeleteApiKeyModalProps) {
   const { t } = useTranslation();
   const {
     mutate: deleteExchangeApiKey,
@@ -25,6 +29,10 @@ export function DeleteApiKeyModal({ onClose }: DeleteApiKeyModalProps) {
   const handleDeleteExchangeApiKey = () => {
     deleteExchangeApiKey();
   };
+
+  useEffect(() => {
+    disableClose(isPending);
+  }, [isPending, disableClose]);
 
   useEffect(() => {
     return () => {
@@ -88,7 +96,7 @@ export function DeleteApiKeyModal({ onClose }: DeleteApiKeyModalProps) {
         <Button
           variant="contained"
           size="large"
-          sx={{ width: { xs: '100%', md: 'fit-content' }, mx: 'auto' }}
+          sx={{ width: { xs: '100%', md: 'fit-content' }, mx: 'auto', mt: 2 }}
           onClick={onClose}
         >
           {t('worker.profile.apiKeyData.close')}

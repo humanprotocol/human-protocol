@@ -23,11 +23,13 @@ import { ModalError, ModalLoading, ModalSuccess } from './modal-states';
 interface EditApiKeyModalProps {
   exchangeName: string;
   onClose: () => void;
+  disableClose: (disable: boolean) => void;
 }
 
 export function EditApiKeyModal({
   onClose,
   exchangeName,
+  disableClose,
 }: EditApiKeyModalProps) {
   const { t } = useTranslation();
   const isMobile = useIsMobile();
@@ -56,8 +58,8 @@ export function EditApiKeyModal({
     resolver: zodResolver(
       z.object({
         exchange: z.string().min(1, t('validation.required')),
-        apiKey: z.string().min(1, t('validation.required')),
-        secretKey: z.string().min(1, t('validation.required')),
+        apiKey: z.string().trim().min(1, t('validation.required')),
+        secretKey: z.string().trim().min(1, t('validation.required')),
       })
     ),
   });
@@ -71,6 +73,10 @@ export function EditApiKeyModal({
       });
     }
   }, [exchangeName, reset, supportedExchanges]);
+
+  useEffect(() => {
+    disableClose(isPending);
+  }, [isPending, disableClose]);
 
   useEffect(() => {
     return () => {
@@ -197,6 +203,11 @@ export function EditApiKeyModal({
                   />
                 )}
               />
+              {errors.secretKey && (
+                <FormHelperText error>
+                  {errors.secretKey.message}
+                </FormHelperText>
+              )}
             </FormControl>
           </>
         )}

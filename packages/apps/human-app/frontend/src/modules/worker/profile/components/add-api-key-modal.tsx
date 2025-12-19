@@ -22,9 +22,10 @@ import { useEffect } from 'react';
 
 interface AddApiKeyModalProps {
   onClose: () => void;
+  disableClose: (disable: boolean) => void;
 }
 
-export function AddApiKeyModal({ onClose }: AddApiKeyModalProps) {
+export function AddApiKeyModal({ onClose, disableClose }: AddApiKeyModalProps) {
   const { t } = useTranslation();
   const {
     mutate: enrollExchangeApiKey,
@@ -37,6 +38,10 @@ export function AddApiKeyModal({ onClose }: AddApiKeyModalProps) {
   } = useEnrollExchangeApiKeys();
   const isMobile = useIsMobile();
   const { data: supportedExchanges } = useGetSupportedExchanges();
+
+  useEffect(() => {
+    disableClose(isPending);
+  }, [isPending, disableClose]);
 
   const {
     control,
@@ -52,8 +57,8 @@ export function AddApiKeyModal({ onClose }: AddApiKeyModalProps) {
     resolver: zodResolver(
       z.object({
         exchange: z.string().min(1, t('validation.required')),
-        apiKey: z.string().min(1, t('validation.required')),
-        secretKey: z.string().min(1, t('validation.required')),
+        apiKey: z.string().trim().min(1, t('validation.required')),
+        secretKey: z.string().trim().min(1, t('validation.required')),
       })
     ),
   });
@@ -182,6 +187,11 @@ export function AddApiKeyModal({ onClose }: AddApiKeyModalProps) {
                   />
                 )}
               />
+              {errors.secretKey && (
+                <FormHelperText error>
+                  {errors.secretKey.message}
+                </FormHelperText>
+              )}
             </FormControl>
           </>
         )}

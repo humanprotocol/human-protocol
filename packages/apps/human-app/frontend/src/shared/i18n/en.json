@@ -233,10 +233,13 @@
         "notStaked": "Not Staked"
       },
       "stakingInfo": {
+        "promptShort": "Before you can start earning on the HUMAN App, you'll need to stake HMT.",
         "prompt": "Before you can start earning on the HUMAN App, you’ll need to stake HMT. You can stake directly on our Staking Dashboard, or connect your API key having minimum balance of {{amount}} HMT in your exchange account to stake automatically via API KEY.",
         "stakeHmt": "Stake HMT",
         "stakingInfoValue": "Staking Info Value",
-        "stakedAmount": "Staked amount"
+        "stakedAmount": "Staked amount",
+        "readMore": "Read more",
+        "readLess": "Read less"
       },
       "apiKeyData": {
         "apiKey": "API KEY",

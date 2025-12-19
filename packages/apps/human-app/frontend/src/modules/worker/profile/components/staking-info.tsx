@@ -8,14 +8,17 @@ import { useGetStakingSummary } from '../../hooks/use-staking';
 import { RefreshIcon } from '@/shared/components/ui/icons';
 import { useGetExchangeApiKeys } from '../../hooks/use-exchange-api-keys';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAccessTokenRefresh } from '@/api/hooks/use-access-token-refresh';
+import { colorPalette } from '@/shared/styles/color-palette';
 
 export function StakingInfo() {
+  const [isPromptExpanded, setIsPromptExpanded] = useState(false);
+  const tokenRefreshLock = useRef(false);
+
   const { user } = useAuthenticatedUser();
   const { refreshAccessTokenAsync } = useAccessTokenRefresh();
   const { t } = useTranslation();
-  const hasAttemptedRefresh = useRef(false);
 
   const { openModal: openAddApiKeyModal } = useAddApiKeyModal();
   const { data: exchangeApiKeyData, isLoading: isExchangeApiKeyLoading } =
@@ -35,24 +38,26 @@ export function StakingInfo() {
     Number(stakingSummary?.on_chain_stake || 0) +
     Number(stakingSummary?.exchange_stake || 0);
 
-  const isStaked =
-    stakedAmount >= Number(stakingSummary?.min_threshold || '1000');
-
   const isStakingError =
     !!stakingSummary?.on_chain_error ||
     !!stakingSummary?.exchange_error ||
     isError;
 
+  const isStaked =
+    isLoading || isStakingError
+      ? false
+      : stakedAmount >= Number(stakingSummary?.min_threshold);
+
   useEffect(() => {
     if (isRefetching || isLoading) return;
 
     if (isStaked !== user.is_stake_eligible) {
-      if (!hasAttemptedRefresh.current) {
-        hasAttemptedRefresh.current = true;
-        refreshAccessTokenAsync({ authType: 'web2' });
+      if (!tokenRefreshLock.current) {
+        tokenRefreshLock.current = true;
+        void refreshAccessTokenAsync({ authType: 'web2' });
       }
     } else {
-      hasAttemptedRefresh.current = false;
+      tokenRefreshLock.current = false;
     }
   }, [
     isStaked,
@@ -64,7 +69,7 @@ export function StakingInfo() {
 
   const handleRefreshStakingInfo = () => {
     if (isRefetching || isLoading) return;
-    hasAttemptedRefresh.current = false;
+    tokenRefreshLock.current = false;
     refetch();
   };
 
@@ -74,8 +79,8 @@ export function StakingInfo() {
         <Typography variant="buttonLarge">
           {t('worker.profile.stakingInfo.stakeHmt')}
         </Typography>
-        {isLoading ? (
-          <Skeleton variant="text" width={100} height={24} />
+        {isLoading || isRefetching ? (
+          <Skeleton variant="text" width={100} height={23.5} />
         ) : (
           <Chip
             label={
@@ -89,31 +94,66 @@ export function StakingInfo() {
           />
         )}
       </Stack>
-      {!isStaked && (
-        <Typography variant="body2" mt={1}>
-          {t('worker.profile.stakingInfo.prompt', {
-            amount: stakingSummary?.min_threshold || '1000',
-          })}
-        </Typography>
-      )}
+      <Typography variant="body2" mt={1}>
+        {isPromptExpanded
+          ? t('worker.profile.stakingInfo.prompt', {
+              amount: stakingSummary?.min_threshold,
+            })
+          : t('worker.profile.stakingInfo.promptShort')}{' '}
+        <Button
+          variant="text"
+          size="small"
+          disableRipple
+          sx={{
+            p: 0,
+            minWidth: 'auto',
+            verticalAlign: 'baseline',
+            height: '20px',
+            textDecoration: 'underline',
+            '&:hover': {
+              textDecoration: 'underline',
+              backgroundColor: 'transparent',
+            },
+          }}
+          onClick={() => setIsPromptExpanded((prev) => !prev)}
+        >
+          {isPromptExpanded
+            ? t('worker.profile.stakingInfo.readLess')
+            : t('worker.profile.stakingInfo.readMore')}
+        </Button>
+      </Typography>
       <Stack direction="row" alignItems="center" mt={2} gap={1}>
         <Typography variant="buttonLarge">
           {t('worker.profile.stakingInfo.stakedAmount')}
         </Typography>
         <IconButton
           disabled={isRefetching || isLoading}
-          sx={{ p: 0, bgcolor: 'rgba(20, 6, 178, 0.04)', borderRadius: '0px' }}
+          sx={{
+            p: 0,
+            bgcolor: 'rgba(20, 6, 178, 0.04)',
+            borderRadius: '0px',
+            '& > svg > path': {
+              fill:
+                isRefetching || isLoading
+                  ? colorPalette.button.disabled
+                  : 'primary.main',
+            },
+          }}
           onClick={handleRefreshStakingInfo}
         >
           <RefreshIcon />
         </IconButton>
       </Stack>
-      <Typography
-        variant="buttonLarge"
-        color={isStaked ? 'primary.light' : 'error.main'}
-      >
-        <strong>{stakedAmount}</strong> HMT
-      </Typography>
+      {isLoading || isRefetching ? (
+        <Skeleton variant="text" width={100} height={22.5} />
+      ) : (
+        <Typography
+          variant="buttonLarge"
+          color={isStaked ? 'primary.light' : 'error.main'}
+        >
+          <strong>{stakedAmount}</strong> HMT
+        </Typography>
+      )}
       <Stack direction="row" gap={2} mt={2} mb={3}>
         <Button
           variant="contained"

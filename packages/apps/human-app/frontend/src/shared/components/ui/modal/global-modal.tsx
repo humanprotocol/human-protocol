@@ -3,13 +3,19 @@ import { useModal } from '../../../contexts/modal-context';
 import CloseIcon from '@mui/icons-material/Close';
 
 export function GlobalModal() {
-  const { open, closeModal, showCloseButton, content, onTransitionExited } =
-    useModal();
+  const {
+    open,
+    closeModal,
+    showCloseButton,
+    disableClose,
+    content,
+    onTransitionExited,
+  } = useModal();
 
   return (
     <Dialog
       open={open}
-      onClose={closeModal}
+      onClose={!disableClose ? closeModal : undefined}
       onTransitionExited={onTransitionExited}
       PaperProps={{
         sx: {
@@ -23,7 +29,8 @@ export function GlobalModal() {
         <IconButton
           data-testid="button-close-modal"
           aria-label="close"
-          onClick={closeModal}
+          disabled={disableClose}
+          onClick={!disableClose ? closeModal : undefined}
           sx={{
             position: 'absolute',
             top: 16,

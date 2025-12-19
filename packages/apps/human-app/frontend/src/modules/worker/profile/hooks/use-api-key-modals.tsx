@@ -6,32 +6,47 @@ import {
 } from '../components';
 
 export function useAddApiKeyModal() {
-  const { openModal, closeModal } = useModal();
+  const { openModal, closeModal, setDisableClose } = useModal();
 
   return {
     openModal: () =>
-      openModal({ content: <AddApiKeyModal onClose={closeModal} /> }),
+      openModal({
+        content: (
+          <AddApiKeyModal onClose={closeModal} disableClose={setDisableClose} />
+        ),
+      }),
   };
 }
 
 export function useEditApiKeyModal() {
-  const { openModal, closeModal } = useModal();
+  const { openModal, closeModal, setDisableClose } = useModal();
 
   return {
     openModal: (exchangeName: string) =>
       openModal({
         content: (
-          <EditApiKeyModal onClose={closeModal} exchangeName={exchangeName} />
+          <EditApiKeyModal
+            onClose={closeModal}
+            exchangeName={exchangeName}
+            disableClose={setDisableClose}
+          />
         ),
       }),
   };
 }
 
 export function useDeleteApiKeyModal() {
-  const { openModal, closeModal } = useModal();
+  const { openModal, closeModal, setDisableClose } = useModal();
 
   return {
     openModal: () =>
-      openModal({ content: <DeleteApiKeyModal onClose={closeModal} /> }),
+      openModal({
+        content: (
+          <DeleteApiKeyModal
+            onClose={closeModal}
+            disableClose={setDisableClose}
+          />
+        ),
+      }),
   };
 }

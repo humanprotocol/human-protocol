@@ -16,6 +16,8 @@ const CustomTextField = styled(TextField)(() => ({
     '& fieldset': {
       border: '1px dashed',
       borderColor: `${colorPalette.text.primary} !important`,
+      color: colorPalette.text.disabledSecondary,
+      WebkitTextFillColor: colorPalette.text.disabledSecondary,
     },
   },
 }));
@@ -31,6 +33,8 @@ const CustomTextFieldDark = styled(TextField)(() => ({
     '& fieldset': {
       border: '1px dashed',
       borderColor: `${onlyDarkModeColor.mainColorWithOpacity} !important`,
+      color: darkColorPalette.text.disabledSecondary,
+      WebkitTextFillColor: darkColorPalette.text.disabledSecondary,
     },
   },
 }));
