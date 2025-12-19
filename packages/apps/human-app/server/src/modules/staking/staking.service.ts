@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { ReputationOracleGateway } from '../../integrations/reputation-oracle/reputation-oracle.gateway';
-import { StakeSummaryResponse } from './model/staking.model';
+import {
+  StakeConfigResponse,
+  StakeSummaryResponse,
+} from './model/staking.model';
 
 @Injectable()
 export class StakingService {
@@ -8,5 +11,9 @@ export class StakingService {
 
   getStakeSummary(token: string): Promise<StakeSummaryResponse> {
     return this.reputationOracle.getStakeSummary(token);
+  }
+
+  getStakeConfig(token: string): Promise<StakeConfigResponse> {
+    return this.reputationOracle.getStakeConfig(token);
   }
 }

@@ -11,7 +11,7 @@ import { UserNotFoundError, UserRepository } from '@/modules/user';
 import { Web3Service } from '@/modules/web3';
 import { formatStake } from '@/utils/stake';
 
-import { StakeSummaryData } from './types';
+import { StakeConfigData, StakeSummaryData } from './types';
 
 @Injectable()
 export class StakingService {
@@ -67,8 +67,6 @@ export class StakingService {
     const summary: StakeSummaryData = {
       exchangeStake: '0',
       onChainStake: '0',
-      minThreshold: this.stakingConfigService.minThreshold.toString(),
-      eligibilityEnabled: this.stakingConfigService.eligibilityEnabled,
     };
 
     try {
@@ -103,5 +101,12 @@ export class StakingService {
     }
 
     return summary;
+  }
+
+  async getStakeConfig(): Promise<StakeConfigData> {
+    return {
+      minThreshold: this.stakingConfigService.minThreshold.toString(),
+      eligibilityEnabled: this.stakingConfigService.eligibilityEnabled,
+    };
   }
 }

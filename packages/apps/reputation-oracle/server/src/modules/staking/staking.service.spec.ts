@@ -148,8 +148,6 @@ describe('StakingService', () => {
       expect(result).toEqual({
         exchangeStake: exchangeStake.toString(),
         onChainStake: onChainStake.toString(),
-        minThreshold: mockStakingConfigService.minThreshold.toString(),
-        eligibilityEnabled: mockStakingConfigService.eligibilityEnabled,
       });
     });
 
@@ -166,8 +164,6 @@ describe('StakingService', () => {
       expect(result).toEqual({
         exchangeStake: exchangeStake.toString(),
         onChainStake: '0',
-        minThreshold: mockStakingConfigService.minThreshold.toString(),
-        eligibilityEnabled: mockStakingConfigService.eligibilityEnabled,
       });
     });
   });
@@ -200,6 +196,17 @@ describe('StakingService', () => {
       expect(result).toBe(
         Number(ethers.formatEther(stakedAmount + lockedAmount)),
       );
+    });
+  });
+
+  describe('getStakeConfig', () => {
+    it('returns current staking configuration', async () => {
+      const result = await stakingService.getStakeConfig();
+
+      expect(result).toEqual({
+        minThreshold: mockStakingConfigService.minThreshold.toString(),
+        eligibilityEnabled: mockStakingConfigService.eligibilityEnabled,
+      });
     });
   });
 });

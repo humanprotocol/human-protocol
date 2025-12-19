@@ -8,7 +8,7 @@ import {
 
 import type { RequestWithUser } from '@/common/types';
 
-import { StakeSummaryResponseDto } from './staking.dto';
+import { StakeConfigResponseDto, StakeSummaryResponseDto } from './staking.dto';
 import { StakingControllerErrorsFilter } from './staking.error-filter';
 import { StakingService } from './staking.service';
 
@@ -26,5 +26,12 @@ export class StakingController {
     @Req() request: RequestWithUser,
   ): Promise<StakeSummaryResponseDto> {
     return this.stakingService.getStakeSummary(request.user.id);
+  }
+
+  @ApiOperation({ summary: 'Retrieve staking configuration' })
+  @ApiResponse({ status: 200, type: StakeConfigResponseDto })
+  @Get('/config')
+  async getStakeConfig(): Promise<StakeConfigResponseDto> {
+    return this.stakingService.getStakeConfig();
   }
 }

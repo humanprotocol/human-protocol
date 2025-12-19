@@ -1,7 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ReputationOracleGateway } from '../../../integrations/reputation-oracle/reputation-oracle.gateway';
 import { StakingService } from '../staking.service';
-import { stakeSummaryResponseFixture, TOKEN } from './staking.fixtures';
+import {
+  stakeConfigResponseFixture,
+  stakeSummaryResponseFixture,
+  TOKEN,
+} from './staking.fixtures';
 
 describe('StakingService', () => {
   let service: StakingService;
@@ -10,6 +14,7 @@ describe('StakingService', () => {
   beforeEach(async () => {
     reputationOracleMock = {
       getStakeSummary: jest.fn(),
+      getStakeConfig: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -34,6 +39,17 @@ describe('StakingService', () => {
       const result = await service.getStakeSummary(TOKEN);
       expect(reputationOracleMock.getStakeSummary).toHaveBeenCalledWith(TOKEN);
       expect(result).toEqual(stakeSummaryResponseFixture);
+    });
+  });
+
+  describe('getStakeConfig', () => {
+    it('should retrieve stake config', async () => {
+      (reputationOracleMock.getStakeConfig as jest.Mock).mockResolvedValue(
+        stakeConfigResponseFixture,
+      );
+      const result = await service.getStakeConfig(TOKEN);
+      expect(reputationOracleMock.getStakeConfig).toHaveBeenCalledWith(TOKEN);
+      expect(result).toEqual(stakeConfigResponseFixture);
     });
   });
 });

@@ -166,6 +166,11 @@ export class GatewayConfigService {
               method: HttpMethod.GET,
               headers: this.JSON_HEADER,
             },
+            [ReputationOracleEndpoints.STAKE_CONFIG]: {
+              endpoint: '/staking/config',
+              method: HttpMethod.GET,
+              headers: this.JSON_HEADER,
+            },
           } as Record<ReputationOracleEndpoints, GatewayEndpointConfig>,
         },
         [ExternalApiName.HCAPTCHA_LABELING_STATS]: {

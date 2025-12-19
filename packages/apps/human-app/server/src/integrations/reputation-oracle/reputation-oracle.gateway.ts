@@ -102,7 +102,10 @@ import {
   RetrieveExchangeApiKeysResponse,
   SupportedExchangeResponse,
 } from '../../modules/exchange-api-keys/model/exchange-api-keys.model';
-import { StakeSummaryResponse } from '../../modules/staking/model/staking.model';
+import {
+  StakeConfigResponse,
+  StakeSummaryResponse,
+} from '../../modules/staking/model/staking.model';
 
 @Injectable()
 export class ReputationOracleGateway {
@@ -192,6 +195,15 @@ export class ReputationOracleGateway {
       token,
     );
     return this.handleRequestToReputationOracle<StakeSummaryResponse>(options);
+  }
+
+  async getStakeConfig(token: string): Promise<StakeConfigResponse> {
+    const options = this.getEndpointOptions(
+      ReputationOracleEndpoints.STAKE_CONFIG,
+      undefined,
+      token,
+    );
+    return this.handleRequestToReputationOracle<StakeConfigResponse>(options);
   }
 
   async supportedExchanges(

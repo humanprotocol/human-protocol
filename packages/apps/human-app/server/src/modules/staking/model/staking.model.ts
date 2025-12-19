@@ -10,14 +10,6 @@ export class StakeSummaryResponse {
   @AutoMap()
   onChainStake: number;
 
-  @ApiProperty({ name: 'min_threshold' })
-  @AutoMap()
-  minThreshold: number;
-
-  @ApiProperty({ name: 'eligibility_enabled' })
-  @AutoMap()
-  eligibilityEnabled: boolean;
-
   @ApiProperty({ name: 'exchange_error', required: false, nullable: true })
   @AutoMap()
   exchangeError?: string;
@@ -25,4 +17,14 @@ export class StakeSummaryResponse {
   @ApiProperty({ name: 'on_chain_error', required: false, nullable: true })
   @AutoMap()
   onChainError?: string;
+}
+
+export class StakeConfigResponse {
+  @ApiProperty({ name: 'min_threshold' })
+  @AutoMap()
+  minThreshold: number;
+
+  @ApiProperty({ name: 'eligibility_enabled' })
+  @AutoMap()
+  eligibilityEnabled: boolean;
 }

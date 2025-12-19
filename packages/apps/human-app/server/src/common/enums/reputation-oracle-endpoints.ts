@@ -27,6 +27,7 @@ export enum ReputationOracleEndpoints {
   EXCHANGE_API_KEYS_RETRIEVE = 'exchange_api_keys_retrieve',
   EXCHANGE_API_KEYS_SUPPORTED_EXCHANGES = 'exchange_api_keys_supported_exchanges',
   STAKE_SUMMARY = 'stake_summary',
+  STAKE_CONFIG = 'stake_config',
 }
 export enum HCaptchaLabelingStatsEndpoints {
   USER_STATS = 'user_stats',
