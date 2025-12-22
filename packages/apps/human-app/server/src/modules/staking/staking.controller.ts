@@ -4,10 +4,7 @@ import { Controller, Get, Request } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { RequestWithUser } from '../../common/interfaces/jwt';
 import { StakingService } from './staking.service';
-import {
-  StakeConfigResponse,
-  StakeSummaryResponse,
-} from './model/staking.model';
+import { StakeSummaryResponse } from './model/staking.model';
 
 @ApiTags('Staking')
 @ApiBearerAuth()
@@ -24,13 +21,5 @@ export class StakingController {
     @Request() req: RequestWithUser,
   ): Promise<StakeSummaryResponse> {
     return this.service.getStakeSummary(req.token);
-  }
-
-  @ApiOperation({ summary: 'Get staking configuration' })
-  @Get('/config')
-  async getStakeConfig(
-    @Request() req: RequestWithUser,
-  ): Promise<StakeConfigResponse> {
-    return this.service.getStakeConfig(req.token);
   }
 }

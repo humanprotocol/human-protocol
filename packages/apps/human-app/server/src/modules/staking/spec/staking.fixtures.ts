@@ -1,11 +1,11 @@
 export const TOKEN = 'test_user_token';
 
 export const stakeSummaryResponseFixture = {
-  exchangeStake: '1000',
-  onChainStake: '500',
+  exchange_stake: '1000',
+  on_chain_stake: '500',
 };
 
 export const stakeConfigResponseFixture = {
-  minThreshold: '1000',
-  eligibilityEnabled: true,
+  min_threshold: '1000',
+  eligibility_enabled: true,
 };

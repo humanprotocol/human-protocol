@@ -6,6 +6,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
+import { Public } from '@/common/decorators';
 import type { RequestWithUser } from '@/common/types';
 
 import { StakeConfigResponseDto, StakeSummaryResponseDto } from './staking.dto';
@@ -13,12 +14,12 @@ import { StakingControllerErrorsFilter } from './staking.error-filter';
 import { StakingService } from './staking.service';
 
 @ApiTags('Staking')
-@ApiBearerAuth()
 @UseFilters(StakingControllerErrorsFilter)
 @Controller('staking')
 export class StakingController {
   constructor(private readonly stakingService: StakingService) {}
 
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Retrieve aggregated staking info' })
   @ApiResponse({ status: 200, type: StakeSummaryResponseDto })
   @Get('/summary')
@@ -28,6 +29,7 @@ export class StakingController {
     return this.stakingService.getStakeSummary(request.user.id);
   }
 
+  @Public()
   @ApiOperation({ summary: 'Retrieve staking configuration' })
   @ApiResponse({ status: 200, type: StakeConfigResponseDto })
   @Get('/config')
