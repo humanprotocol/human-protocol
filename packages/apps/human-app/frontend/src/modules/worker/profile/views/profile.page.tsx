@@ -14,6 +14,8 @@ import {
   WalletConnectionControl,
   StakingInfo,
 } from '../components';
+import { PageCardLoader } from '@/shared/components/ui/page-card/page-card-loader';
+import { useUiConfig } from '@/shared/providers/ui-config-provider';
 
 export function WorkerProfilePage() {
   const { user } = useAuthenticatedUser();
@@ -21,6 +23,7 @@ export function WorkerProfilePage() {
   const { isConnected, initializing, web3ProviderMutation } =
     useWalletConnect();
   const { showNotification } = useNotification();
+  const { uiConfig, isUiConfigLoading } = useUiConfig();
 
   useEffect(() => {
     if (initializing) return;
@@ -47,6 +50,10 @@ export function WorkerProfilePage() {
     showNotification,
   ]);
 
+  if (isUiConfigLoading) {
+    return <PageCardLoader />;
+  }
+
   return (
     <Paper
       sx={{
@@ -64,7 +71,9 @@ export function WorkerProfilePage() {
         <ProfileData />
         <IdentityVerificationControl />
         <WalletConnectionControl />
-        {!!user.wallet_address && <StakingInfo />}
+        {!!user.wallet_address && uiConfig?.stakingEligibilityEnabled && (
+          <StakingInfo />
+        )}
       </Stack>
     </Paper>
   );

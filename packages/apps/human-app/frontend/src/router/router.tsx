@@ -21,9 +21,11 @@ import {
   workerDrawerTopMenuItems,
 } from './components';
 import { RequireStake } from '@/modules/worker/providers/require-stake';
+import { useUiConfig } from '@/shared/providers/ui-config-provider';
 
 export function Router() {
   const { user } = useAuth();
+  const { uiConfig } = useUiConfig();
 
   const handleSignOut = () => {
     browserAuthProvider.signOut({
@@ -67,7 +69,7 @@ export function Router() {
                         open={open}
                         setDrawerOpen={setDrawerOpen}
                         signOut={handleSignOut}
-                        topMenuItems={workerDrawerTopMenuItems(user)}
+                        topMenuItems={workerDrawerTopMenuItems(user, uiConfig)}
                       />
                     )}
                     renderHCaptchaStatisticsDrawer={(isOpen) => (

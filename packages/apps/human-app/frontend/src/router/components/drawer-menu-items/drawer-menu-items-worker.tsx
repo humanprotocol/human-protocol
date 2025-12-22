@@ -9,8 +9,12 @@ import type { UserData } from '@/modules/auth/context/auth-context';
 import { routerPaths } from '@/router/router-paths';
 import { KycStatus } from '@/modules/worker/profile/types';
 import { type MenuItem } from '../layout/protected';
+import { UiConfig } from '@/shared/services/ui-config.service';
 
-export const workerDrawerTopMenuItems = (user: UserData | null): MenuItem[] => {
+export const workerDrawerTopMenuItems = (
+  user: UserData | null,
+  uiConfig: UiConfig | undefined
+): MenuItem[] => {
   return [
     {
       label: t('components.DrawerNavigation.jobs'),
@@ -18,7 +22,7 @@ export const workerDrawerTopMenuItems = (user: UserData | null): MenuItem[] => {
       link: routerPaths.worker.jobsDiscovery,
       disabled:
         !user?.wallet_address ||
-        !user?.is_stake_eligible ||
+        (uiConfig?.stakingEligibilityEnabled && !user?.is_stake_eligible) ||
         user.kyc_status !== KycStatus.APPROVED,
     },
   ];
