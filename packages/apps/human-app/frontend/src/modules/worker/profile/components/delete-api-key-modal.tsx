@@ -97,7 +97,8 @@ export function DeleteApiKeyModal({
           variant="contained"
           size="large"
           sx={{ width: { xs: '100%', md: 'fit-content' }, mx: 'auto', mt: 2 }}
-          onClick={onClose}
+          onClick={isPending ? undefined : onClose}
+          disabled={isPending}
         >
           {t('worker.profile.apiKeyData.close')}
         </Button>
