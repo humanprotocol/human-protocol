@@ -11,6 +11,7 @@ const userDataSchema = z.object({
   user_id: z.number(),
   reputation_network: z.string(),
   exp: z.number(),
+  is_stake_eligible: z.boolean(),
 });
 
 export type UserData = z.infer<typeof userDataSchema>;

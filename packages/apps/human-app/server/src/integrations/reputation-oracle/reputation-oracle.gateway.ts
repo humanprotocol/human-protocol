@@ -197,11 +197,10 @@ export class ReputationOracleGateway {
     return this.handleRequestToReputationOracle<StakeSummaryResponse>(options);
   }
 
-  async getStakeConfig(token: string): Promise<StakeConfigResponse> {
+  async getStakeConfig(): Promise<StakeConfigResponse> {
     const options = this.getEndpointOptions(
       ReputationOracleEndpoints.STAKE_CONFIG,
       undefined,
-      token,
     );
     return this.handleRequestToReputationOracle<StakeConfigResponse>(options);
   }

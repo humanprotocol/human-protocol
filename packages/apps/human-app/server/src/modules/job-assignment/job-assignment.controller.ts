@@ -28,11 +28,16 @@ import {
 import { ChainId } from '@human-protocol/sdk';
 import axios from 'axios';
 import { JobStatus } from '../../common/enums/global-common';
+import logger from '../../logger';
 
 @ApiTags('Job-Assignment')
 @ApiBearerAuth()
 @Controller('/assignment')
 export class JobAssignmentController {
+  private readonly logger = logger.child({
+    context: JobAssignmentController.name,
+  });
+
   constructor(
     private readonly service: JobAssignmentService,
     @InjectMapper() private readonly mapper: Mapper,
@@ -85,8 +90,10 @@ export class JobAssignmentController {
           expires_at: process.env.THIRSTYFI_TASK_EXPIRATION_DATE ?? '',
         };
       } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error(error);
+        this.logger.error('Failed to assign thirstyfi job', {
+          userId: req.user.user_id,
+          error,
+        });
         throw new BadRequestException(error.response.data.error);
       }
     }

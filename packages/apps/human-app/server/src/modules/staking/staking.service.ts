@@ -13,7 +13,7 @@ export class StakingService {
     return this.reputationOracle.getStakeSummary(token);
   }
 
-  getStakeConfig(token: string): Promise<StakeConfigResponse> {
-    return this.reputationOracle.getStakeConfig(token);
+  getStakeConfig(): Promise<StakeConfigResponse> {
+    return this.reputationOracle.getStakeConfig();
   }
 }

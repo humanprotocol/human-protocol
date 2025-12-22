@@ -47,8 +47,8 @@ describe('StakingService', () => {
       (reputationOracleMock.getStakeConfig as jest.Mock).mockResolvedValue(
         stakeConfigResponseFixture,
       );
-      const result = await service.getStakeConfig(TOKEN);
-      expect(reputationOracleMock.getStakeConfig).toHaveBeenCalledWith(TOKEN);
+      const result = await service.getStakeConfig();
+      expect(reputationOracleMock.getStakeConfig).toHaveBeenCalledWith();
       expect(result).toEqual(stakeConfigResponseFixture);
     });
   });

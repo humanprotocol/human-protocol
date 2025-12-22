@@ -47,13 +47,4 @@ describe('StakingController', () => {
       expect(result).toEqual(stakingServiceMock.getStakeSummary(TOKEN));
     });
   });
-
-  describe('getStakeConfig', () => {
-    it('should call service.getStakeConfig with token and return response', async () => {
-      const req: RequestWithUser = { token: TOKEN } as RequestWithUser;
-      const result = await controller.getStakeConfig(req);
-      expect(service.getStakeConfig).toHaveBeenCalledWith(TOKEN);
-      expect(result).toEqual(stakingServiceMock.getStakeConfig(TOKEN));
-    });
-  });
 });

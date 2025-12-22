@@ -1,30 +1,21 @@
-import { AutoMap } from '@automapper/classes';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class StakeSummaryResponse {
-  @ApiProperty({ name: 'exchange_stake' })
-  @AutoMap()
-  exchangeStake: number;
+  @ApiProperty()
+  exchange_stake: number;
 
   @ApiProperty({ name: 'on_chain_stake' })
-  @AutoMap()
-  onChainStake: number;
+  on_chain_stake: number;
 
-  @ApiProperty({ name: 'exchange_error', required: false, nullable: true })
-  @AutoMap()
-  exchangeError?: string;
+  @ApiPropertyOptional()
+  exchange_error?: string | null;
 
-  @ApiProperty({ name: 'on_chain_error', required: false, nullable: true })
-  @AutoMap()
-  onChainError?: string;
+  @ApiPropertyOptional()
+  on_chain_error?: string | null;
 }
 
 export class StakeConfigResponse {
-  @ApiProperty({ name: 'min_threshold' })
-  @AutoMap()
-  minThreshold: number;
+  min_threshold: number;
 
-  @ApiProperty({ name: 'eligibility_enabled' })
-  @AutoMap()
-  eligibilityEnabled: boolean;
+  eligibility_enabled: boolean;
 }

@@ -10,9 +10,11 @@ interface ModalContextType {
   open: boolean;
   content: React.ReactNode;
   showCloseButton: boolean;
+  disableClose: boolean;
   openModal: ({ content, showCloseButton }: OpenModalProps) => void;
   closeModal: () => void;
   onTransitionExited: () => void;
+  setDisableClose: (disable: boolean) => void;
 }
 
 interface OpenModalProps {
@@ -28,6 +30,7 @@ export function ModalProvider({
   const [open, setOpen] = useState(false);
   const [content, setContent] = useState<React.ReactNode>(null);
   const [showCloseButton, setShowCloseButton] = useState(true);
+  const [disableClose, setDisableClose] = useState(false);
 
   const openModal = useCallback(
     ({
@@ -36,14 +39,16 @@ export function ModalProvider({
     }: OpenModalProps) => {
       setContent(_modalContent);
       setShowCloseButton(_showCloseButton ?? showCloseButton);
+      setDisableClose(false);
       setOpen(true);
     },
     [showCloseButton]
   );
 
   const closeModal = useCallback(() => {
+    if (disableClose) return;
     setOpen(false);
-  }, []);
+  }, [disableClose]);
 
   const onTransitionExited = useCallback(() => {
     setContent(null);
@@ -54,11 +59,21 @@ export function ModalProvider({
       open,
       content,
       showCloseButton,
+      disableClose,
       openModal,
       closeModal,
       onTransitionExited,
+      setDisableClose,
     }),
-    [open, content, showCloseButton, openModal, closeModal, onTransitionExited]
+    [
+      open,
+      content,
+      showCloseButton,
+      disableClose,
+      openModal,
+      closeModal,
+      onTransitionExited,
+    ]
   );
 
   return (

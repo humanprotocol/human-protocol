@@ -140,6 +140,13 @@ export const theme: ThemeOptions = {
         },
       },
     },
+    MuiSkeleton: {
+      styleOverrides: {
+        root: {
+          transform: 'scale(1,1)',
+        },
+      },
+    },
   },
   breakpoints: {
     values: {

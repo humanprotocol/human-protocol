@@ -9,4 +9,10 @@ export class UiConfigResponseDto {
     enumName: 'ChainId',
   })
   chainIdsEnabled: ChainId[];
+
+  @ApiProperty({
+    description:
+      'Indicated if stake eligibility check enabled on app & oracles',
+  })
+  stakingEligibilityEnabled: boolean;
 }
