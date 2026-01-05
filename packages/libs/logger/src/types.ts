@@ -23,6 +23,7 @@ type LogFn = {
 export type ChildBindings = { name?: string } & LogMeta;
 
 export interface Logger {
+  name?: string;
   debug: LogFn;
   info: LogFn;
   warn: LogFn;
