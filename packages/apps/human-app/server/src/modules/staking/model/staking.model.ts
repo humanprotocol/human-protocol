@@ -16,6 +16,5 @@ export class StakeSummaryResponse {
 
 export class StakeConfigResponse {
   min_threshold: number;
-
   eligibility_enabled: boolean;
 }

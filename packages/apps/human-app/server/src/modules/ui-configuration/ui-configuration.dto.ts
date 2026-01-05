@@ -15,4 +15,9 @@ export class UiConfigResponseDto {
       'Indicated if stake eligibility check enabled on app & oracles',
   })
   stakingEligibilityEnabled: boolean;
+
+  @ApiProperty({
+    description: 'Minimum staking threshold required for eligibility',
+  })
+  minThreshold: number;
 }

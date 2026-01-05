@@ -27,6 +27,7 @@ export class UiConfigurationController {
     return {
       chainIdsEnabled: this.environmentConfigService.chainIdsEnabled,
       stakingEligibilityEnabled: stakingRequirementConfig.eligibility_enabled,
+      minThreshold: stakingRequirementConfig.min_threshold,
     };
   }
 }
