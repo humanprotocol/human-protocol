@@ -11,6 +11,7 @@ import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-use
 import { useEffect, useRef, useState } from 'react';
 import { useAccessTokenRefresh } from '@/api/hooks/use-access-token-refresh';
 import { colorPalette } from '@/shared/styles/color-palette';
+import { useGetUiConfig } from '@/shared/hooks/use-get-ui-config';
 
 export function StakingInfo() {
   const [isPromptExpanded, setIsPromptExpanded] = useState(false);
@@ -30,6 +31,7 @@ export function StakingInfo() {
     refetch,
     isRefetching,
   } = useGetStakingSummary();
+  const { data: uiConfig } = useGetUiConfig();
 
   const isConnectButtonDisabled =
     !!exchangeApiKeyData?.exchange_name || isExchangeApiKeyLoading;
@@ -46,7 +48,7 @@ export function StakingInfo() {
   const isStaked =
     isLoading || isStakingError
       ? false
-      : stakedAmount >= Number(stakingSummary?.min_threshold);
+      : stakedAmount >= Number(uiConfig?.minThreshold || '0');
 
   useEffect(() => {
     if (isRefetching || isLoading) return;
@@ -99,7 +101,7 @@ export function StakingInfo() {
       <Typography variant="body2" mt={1}>
         {isPromptExpanded
           ? t('worker.profile.stakingInfo.prompt', {
-              amount: stakingSummary?.min_threshold,
+              amount: uiConfig?.minThreshold,
             })
           : t('worker.profile.stakingInfo.promptShort')}{' '}
         <Button
