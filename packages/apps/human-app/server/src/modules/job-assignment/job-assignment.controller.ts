@@ -9,6 +9,7 @@ import {
   Post,
   Query,
   Request,
+  ForbiddenException,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { RequestWithUser } from '../../common/interfaces/jwt';
@@ -27,11 +28,16 @@ import {
 import { ChainId } from '@human-protocol/sdk';
 import axios from 'axios';
 import { JobStatus } from '../../common/enums/global-common';
+import logger from '../../logger';
 
 @ApiTags('Job-Assignment')
 @ApiBearerAuth()
 @Controller('/assignment')
 export class JobAssignmentController {
+  private readonly logger = logger.child({
+    context: JobAssignmentController.name,
+  });
+
   constructor(
     private readonly service: JobAssignmentService,
     @InjectMapper() private readonly mapper: Mapper,
@@ -46,6 +52,10 @@ export class JobAssignmentController {
     @Body() jobAssignmentDto: JobAssignmentDto,
     @Request() req: RequestWithUser,
   ): Promise<JobAssignmentResponse> {
+    // Require stake eligibility
+    if (!req.user?.is_stake_eligible) {
+      throw new ForbiddenException('Stake requirement not met');
+    }
     // TODO: temporal - THIRSTYFI
     if (jobAssignmentDto.escrow_address === 'thirstyfi-task') {
       if (new Date(process.env.THIRSTYFI_TASK_EXPIRATION_DATE!) < new Date()) {
@@ -80,8 +90,10 @@ export class JobAssignmentController {
           expires_at: process.env.THIRSTYFI_TASK_EXPIRATION_DATE ?? '',
         };
       } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error(error);
+        this.logger.error('Failed to assign thirstyfi job', {
+          userId: req.user.user_id,
+          error,
+        });
         throw new BadRequestException(error.response.data.error);
       }
     }
@@ -103,6 +115,16 @@ export class JobAssignmentController {
     @Query() jobsAssignmentParamsDto: JobsFetchParamsDto,
     @Request() req: RequestWithUser,
   ): Promise<JobsFetchResponse> {
+    // Require stake eligibility
+    if (!req.user?.is_stake_eligible) {
+      return {
+        page: 0,
+        page_size: 1,
+        total_pages: 1,
+        total_results: 0,
+        results: [],
+      };
+    }
     // TODO: temporal - THIRSTYFI
     if (
       jobsAssignmentParamsDto.oracle_address ===
@@ -166,6 +188,10 @@ export class JobAssignmentController {
     @Body() dto: ResignJobDto,
     @Request() req: RequestWithUser,
   ) {
+    // Require stake eligibility
+    if (!req.user?.is_stake_eligible) {
+      throw new ForbiddenException('Stake requirement not met');
+    }
     const command = this.mapper.map(dto, ResignJobDto, ResignJobCommand);
     command.token = req.token;
     return this.service.resignJob(command);
@@ -180,6 +206,10 @@ export class JobAssignmentController {
     @Body() dto: RefreshJobDto,
     @Request() req: RequestWithUser,
   ) {
+    // Require stake eligibility
+    if (!req.user?.is_stake_eligible) {
+      throw new ForbiddenException('Stake requirement not met');
+    }
     const command = new JobsFetchParamsCommand();
     command.oracleAddress = dto.oracle_address;
     command.token = req.token;

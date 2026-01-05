@@ -14,11 +14,13 @@ import { AbuseModule } from './modules/abuse';
 import { AuthModule } from './modules/auth';
 import { CronJobModule } from './modules/cron-job';
 import { EscrowCompletionModule } from './modules/escrow-completion';
+import { ExchangeApiKeysModule } from './modules/exchange-api-keys';
 import { HealthModule } from './modules/health';
 import { KycModule } from './modules/kyc';
 import { NDAModule } from './modules/nda';
 import { QualificationModule } from './modules/qualification';
 import { ReputationModule } from './modules/reputation';
+import { StakingModule } from './modules/staking';
 import { UserModule } from './modules/user';
 import {
   IncomingWebhookModule,
@@ -72,6 +74,8 @@ import Environment from './utils/environment';
     CronJobModule,
     UserModule,
     NDAModule,
+    ExchangeApiKeysModule,
+    StakingModule,
     EscrowCompletionModule,
     HealthModule,
     KycModule,

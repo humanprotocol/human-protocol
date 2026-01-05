@@ -95,6 +95,17 @@ import {
   ReportAbuseParams,
   ReportedAbuseResponse,
 } from '../../modules/abuse/model/abuse.model';
+import { HttpMethod } from '../../common/enums/http-method';
+import {
+  EnrollExchangeApiKeysCommand,
+  EnrollExchangeApiKeysData,
+  RetrieveExchangeApiKeysResponse,
+  SupportedExchangeResponse,
+} from '../../modules/exchange-api-keys/model/exchange-api-keys.model';
+import {
+  StakeConfigResponse,
+  StakeSummaryResponse,
+} from '../../modules/staking/model/staking.model';
 
 @Injectable()
 export class ReputationOracleGateway {
@@ -136,6 +147,77 @@ export class ReputationOracleGateway {
     const response = await lastValueFrom(this.httpService.request(options));
     return response.data as T;
   }
+
+  async enrollExchangeApiKeys(
+    command: EnrollExchangeApiKeysCommand,
+  ): Promise<{ id: number }> {
+    const enrollExchangeApiKeysData = this.mapper.map(
+      command,
+      EnrollExchangeApiKeysCommand,
+      EnrollExchangeApiKeysData,
+    );
+    const options = this.getEndpointOptions(
+      ReputationOracleEndpoints.EXCHANGE_API_KEYS_ENROLL,
+      enrollExchangeApiKeysData,
+      command.token,
+    );
+    options.url = `${options.url}/${command.exchangeName}`;
+    return this.handleRequestToReputationOracle<{ id: number }>(options);
+  }
+
+  async deleteExchangeApiKeys(token: string) {
+    const options = this.getEndpointOptions(
+      ReputationOracleEndpoints.EXCHANGE_API_KEYS_DELETE,
+      undefined,
+      token,
+    );
+    options.method = HttpMethod.DELETE;
+    return this.handleRequestToReputationOracle<void>(options);
+  }
+
+  async retrieveExchangeApiKeys(
+    token: string,
+  ): Promise<RetrieveExchangeApiKeysResponse> {
+    const options = this.getEndpointOptions(
+      ReputationOracleEndpoints.EXCHANGE_API_KEYS_RETRIEVE,
+      undefined,
+      token,
+    );
+    return this.handleRequestToReputationOracle<RetrieveExchangeApiKeysResponse>(
+      options,
+    );
+  }
+
+  async getStakeSummary(token: string): Promise<StakeSummaryResponse> {
+    const options = this.getEndpointOptions(
+      ReputationOracleEndpoints.STAKE_SUMMARY,
+      undefined,
+      token,
+    );
+    return this.handleRequestToReputationOracle<StakeSummaryResponse>(options);
+  }
+
+  async getStakeConfig(): Promise<StakeConfigResponse> {
+    const options = this.getEndpointOptions(
+      ReputationOracleEndpoints.STAKE_CONFIG,
+      undefined,
+    );
+    return this.handleRequestToReputationOracle<StakeConfigResponse>(options);
+  }
+
+  async supportedExchanges(
+    token: string,
+  ): Promise<SupportedExchangeResponse[]> {
+    const options = this.getEndpointOptions(
+      ReputationOracleEndpoints.EXCHANGE_API_KEYS_SUPPORTED_EXCHANGES,
+      undefined,
+      token,
+    );
+    return this.handleRequestToReputationOracle<SupportedExchangeResponse[]>(
+      options,
+    );
+  }
+
   async sendWorkerSignup(command: SignupWorkerCommand): Promise<void> {
     const signupWorkerData = this.mapper.map(
       command,

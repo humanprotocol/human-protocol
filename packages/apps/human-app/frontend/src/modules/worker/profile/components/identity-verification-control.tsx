@@ -29,7 +29,7 @@ export function IdentityVerificationControl() {
   return (
     <Stack direction="row" alignItems="center" gap={1}>
       <Typography variant="buttonLarge">
-        {t('worker.profile.identityVerificationStatus')}:{' '}
+        {t('worker.profile.identityVerificationStatus')}
       </Typography>
       <Chip label={label} backgroundColor={getChipColor(status)} />
     </Stack>

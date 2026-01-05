@@ -8,7 +8,5 @@ export const shouldNavigateToRegistration = (
   oracle: Oracle,
   registrationData?: RegistrationResult
 ): boolean =>
-  Boolean(
-    oracle.registrationNeeded &&
-    !registrationData?.oracle_addresses.includes(oracle.address)
-  );
+  !!oracle.registrationNeeded &&
+  !registrationData?.oracle_addresses.includes(oracle.address);

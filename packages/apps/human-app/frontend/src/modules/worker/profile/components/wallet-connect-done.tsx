@@ -1,57 +1,97 @@
-import { Stack, TextField, Typography } from '@mui/material';
+import { IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import { t } from 'i18next';
-import styled from '@mui/material/styles/styled';
-import { colorPalette } from '@/shared/styles/color-palette';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
 import { useColorMode } from '@/shared/contexts/color-mode';
-import {
-  darkColorPalette,
-  onlyDarkModeColor,
-} from '@/shared/styles/dark-color-palette';
 import { useWalletConnect } from '@/shared/contexts/wallet-connect';
 import { Chip } from '@/shared/components/ui/chip';
-
-const CustomTextField = styled(TextField)(() => ({
-  '& .Mui-disabled': {
-    color: colorPalette.text.disabledSecondary,
-    WebkitTextFillColor: colorPalette.text.disabledSecondary,
-  },
-}));
-const CustomTextFieldDark = styled(TextField)(() => ({
-  '& .Mui-disabled': {
-    color: darkColorPalette.text.disabledSecondary,
-    WebkitTextFillColor: darkColorPalette.text.disabledSecondary,
-  },
-  '& .MuiOutlinedInput-root': {
-    '& fieldset': {
-      borderColor: `${onlyDarkModeColor.mainColorWithOpacity} !important`,
-    },
-  },
-}));
+import { CopyIcon } from '@/shared/components/ui/icons';
+import { MouseEvent, useRef, useState } from 'react';
+import { shortenEscrowAddress } from '@/shared/helpers/evm';
+import { CustomTextField, CustomTextFieldDark } from './custom-text-field';
 
 export function WalletConnectDone() {
+  const [isCopied, setIsCopied] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout>();
   const { isDarkMode } = useColorMode();
   const { address } = useWalletConnect();
-  const { user } = useAuthenticatedUser();
+  const {
+    user: { wallet_address },
+  } = useAuthenticatedUser();
+
+  if (!wallet_address) {
+    return null;
+  }
+
+  const shortAddress = shortenEscrowAddress(wallet_address, 6, 6);
+
+  const handleCopyClick = (e: MouseEvent<HTMLButtonElement>) => {
+    if (isCopied) return;
+
+    e.stopPropagation();
+    navigator.clipboard.writeText(wallet_address);
+    setIsCopied(true);
+
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    timeoutRef.current = setTimeout(() => {
+      setIsCopied(false);
+    }, 1500);
+  };
 
   const textFiled = isDarkMode ? (
-    <CustomTextFieldDark disabled fullWidth value={user.wallet_address} />
+    <CustomTextFieldDark
+      disabled
+      fullWidth
+      value={shortAddress}
+      InputProps={{
+        endAdornment: (
+          <Tooltip
+            title={t('components.copyToClipboard')}
+            open={isCopied}
+            placement="top"
+          >
+            <IconButton onClick={handleCopyClick} disabled={isCopied}>
+              <CopyIcon />
+            </IconButton>
+          </Tooltip>
+        ),
+      }}
+    />
   ) : (
-    <CustomTextField disabled fullWidth value={user.wallet_address} />
+    <CustomTextField
+      disabled
+      fullWidth
+      value={shortAddress}
+      InputProps={{
+        endAdornment: (
+          <Tooltip
+            title={t('components.copyToClipboard')}
+            open={isCopied}
+            placement="top"
+          >
+            <IconButton onClick={handleCopyClick} disabled={isCopied}>
+              <CopyIcon />
+            </IconButton>
+          </Tooltip>
+        ),
+      }}
+    />
   );
 
   return (
-    <Stack gap={3}>
+    <Stack gap={1}>
       <Stack direction="row" alignItems="center" gap={1}>
         <Typography variant="buttonLarge">
-          {t('worker.profile.wallet')}:{' '}
+          {t('worker.profile.wallet')}
         </Typography>
         <Chip
           label={t('worker.profile.walletConnected')}
           backgroundColor="success.main"
         />
       </Stack>
-      {address && !user.wallet_address ? null : textFiled}
+      {address && !wallet_address ? null : textFiled}
     </Stack>
   );
 }

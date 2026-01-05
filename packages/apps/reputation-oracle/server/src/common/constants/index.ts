@@ -12,3 +12,20 @@ export const RESEND_EMAIL_VERIFICATION_PATH =
 export const LOGOUT_PATH = '/auth/logout';
 
 export const BACKOFF_INTERVAL_SECONDS = 120;
+
+export enum SupportedExchange {
+  MEXC = 'mexc',
+  GATE = 'gate',
+}
+
+export type SupportedExchangeInfo = {
+  name: SupportedExchange;
+  displayName: string;
+};
+
+export const SUPPORTED_EXCHANGES_INFO: readonly SupportedExchangeInfo[] = [
+  { name: SupportedExchange.MEXC, displayName: 'MEXC' },
+  { name: SupportedExchange.GATE, displayName: 'Gate' },
+] as const;
+
+export const DEFAULT_TIMEOUT_MS = 5000;

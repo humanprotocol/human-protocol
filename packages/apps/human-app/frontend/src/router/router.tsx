@@ -20,9 +20,12 @@ import {
   workerDrawerBottomMenuItems,
   workerDrawerTopMenuItems,
 } from './components';
+import { RequireStake } from '@/modules/worker/providers/require-stake';
+import { useUiConfig } from '@/shared/providers/ui-config-provider';
 
 export function Router() {
   const { user } = useAuth();
+  const { uiConfig } = useUiConfig();
 
   const handleSignOut = () => {
     browserAuthProvider.signOut({
@@ -57,22 +60,24 @@ export function Router() {
           <Route
             element={
               <RequireAuth>
-                <ProtectedLayout
-                  pageHeaderProps={pageHeaderProps}
-                  renderDrawer={(open, setDrawerOpen) => (
-                    <DrawerNavigation
-                      bottomMenuItems={workerDrawerBottomMenuItems}
-                      open={open}
-                      setDrawerOpen={setDrawerOpen}
-                      signOut={handleSignOut}
-                      topMenuItems={workerDrawerTopMenuItems(user)}
-                    />
-                  )}
-                  renderHCaptchaStatisticsDrawer={(isOpen) => (
-                    <UserStatsDrawer isOpen={isOpen} />
-                  )}
-                  renderGovernanceBanner
-                />
+                <RequireStake>
+                  <ProtectedLayout
+                    pageHeaderProps={pageHeaderProps}
+                    renderDrawer={(open, setDrawerOpen) => (
+                      <DrawerNavigation
+                        bottomMenuItems={workerDrawerBottomMenuItems}
+                        open={open}
+                        setDrawerOpen={setDrawerOpen}
+                        signOut={handleSignOut}
+                        topMenuItems={workerDrawerTopMenuItems(user, uiConfig)}
+                      />
+                    )}
+                    renderHCaptchaStatisticsDrawer={(isOpen) => (
+                      <UserStatsDrawer isOpen={isOpen} />
+                    )}
+                    renderGovernanceBanner
+                  />
+                </RequireStake>
               </RequireAuth>
             }
             key={routerProps.path}

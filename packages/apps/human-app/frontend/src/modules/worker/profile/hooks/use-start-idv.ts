@@ -1,11 +1,13 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useIdvErrorNotifications } from '@/modules/worker/hooks/use-idv-notification';
 import { ApiClientError } from '@/api';
 import { useIdvStartMutation } from './use-start-idv-mutation';
+import { TopNotificationType, useNotification } from '@/shared/hooks';
+import { getErrorMessageForError } from '@/shared/errors';
 
 export function useStartIdv() {
   const [isIdvAlreadyInProgress, setIsIdvAlreadyInProgress] = useState(false);
-  const onError = useIdvErrorNotifications();
+
+  const { showNotification } = useNotification();
   const {
     data: idvStartData,
     isPending: idvStartIsPending,
@@ -28,7 +30,11 @@ export function useStartIdv() {
         setIsIdvAlreadyInProgress(true);
         return;
       }
-      onError(idvStartMutationError);
+      showNotification({
+        type: TopNotificationType.WARNING,
+        message: getErrorMessageForError(idvStartMutationError),
+        durationMs: 5000,
+      });
     }
 
     if (idvStarted && idvStartData.url) {
@@ -39,7 +45,7 @@ export function useStartIdv() {
     idvStartFailed,
     idvStarted,
     idvStartMutationError,
-    onError,
+    showNotification,
   ]);
 
   return {

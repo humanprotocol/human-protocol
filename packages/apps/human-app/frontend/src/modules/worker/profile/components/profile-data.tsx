@@ -1,5 +1,4 @@
-import Grid from '@mui/material/Grid';
-import Typography from '@mui/material/Typography';
+import { Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
@@ -13,8 +12,8 @@ export function ProfileData() {
   const { user } = useAuthenticatedUser();
   const { t } = useTranslation();
   return (
-    <Grid container flexDirection="column" gap="2rem">
-      <Grid>
+    <Stack gap={3}>
+      <Stack>
         <Typography variant="subtitle2">{t('worker.profile.email')}</Typography>
         <Typography
           color={colorPalette.text.primary}
@@ -23,11 +22,17 @@ export function ProfileData() {
         >
           {user.email}
         </Typography>
-      </Grid>
-      <Grid>
+      </Stack>
+      <Stack>
+        <Typography variant="subtitle2">
+          {t('worker.profile.password')}
+        </Typography>
         <Button
           component={Link}
+          to={routerPaths.worker.sendResetLink}
+          variant="text"
           sx={{
+            width: 'fit-content',
             padding: 0,
             color: isDarkMode
               ? onlyDarkModeColor.additionalTextColor
@@ -36,12 +41,10 @@ export function ProfileData() {
               backgroundColor: 'inherit',
             },
           }}
-          to={routerPaths.worker.sendResetLink}
-          variant="text"
         >
           {t('worker.profile.resetPassword')}
         </Button>
-      </Grid>
-    </Grid>
+      </Stack>
+    </Stack>
   );
 }
