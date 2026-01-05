@@ -6,11 +6,14 @@ import {
 } from '@nestjs/common';
 import { ModuleRef, Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
+import logger from '../../logger';
 import { AuthError, ForbiddenError } from '../errors';
 import { ApiKeyGuard } from './apikey.auth';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt-http') implements CanActivate {
+  private readonly logger = logger.child({ context: JwtAuthGuard.name });
+
   constructor(
     private readonly reflector: Reflector,
     private readonly moduleRef: ModuleRef,
@@ -29,7 +32,9 @@ export class JwtAuthGuard extends AuthGuard('jwt-http') implements CanActivate {
       try {
         return apiKeyGuard.canActivate(context);
       } catch (apiKeyError) {
-        console.error('API key auth failed:', apiKeyError);
+        this.logger.error('API key auth failed', {
+          error: apiKeyError,
+        });
       }
     }
 

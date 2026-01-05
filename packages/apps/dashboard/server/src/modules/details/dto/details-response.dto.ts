@@ -1,11 +1,11 @@
 import { IsArray, IsOptional } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ChainId } from '@human-protocol/sdk';
 
 import { EscrowDto, EscrowPaginationDto } from './escrow.dto';
 import { TransactionPaginationDto } from './transaction.dto';
 import { OperatorDto } from './operator.dto';
 import { WalletDto } from './wallet.dto';
+import { ChainId, ProductionChainId } from '../../../common/constants';
 
 export class DetailsResponseDto {
   @ApiProperty()
@@ -28,7 +28,7 @@ export class DetailsPaginationResponseDto {
   @ApiProperty({ example: '0xb794f5ea0ba39494ce839613fffba74279579268' })
   public address: string;
 
-  @ApiProperty({ example: ChainId.POLYGON_AMOY })
+  @ApiProperty({ example: ProductionChainId.POLYGON_MAINNET })
   public chainId: ChainId;
 
   @ApiProperty({ example: 10 })

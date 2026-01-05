@@ -23,17 +23,21 @@ export function IsLowercasedEmail() {
   );
 }
 
+function unknownToLowerCase(v: unknown): string {
+  return `${v}`.toLowerCase();
+}
+
 export function IsLowercasedEnum(
   entity: object,
   validationOptions?: ValidationOptions,
 ) {
   return applyDecorators(
     IsEnum(entity, validationOptions),
-    Transform(({ value }) => {
-      if (validationOptions?.each) {
-        return value.map((v: string) => v.toLowerCase());
+    Transform(({ value }: { value: unknown[] | unknown }) => {
+      if (validationOptions?.each && Array.isArray(value)) {
+        return value.map(unknownToLowerCase);
       }
-      return value.toLowerCase();
+      return unknownToLowerCase(value);
     }),
   );
 }

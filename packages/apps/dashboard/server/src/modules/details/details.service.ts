@@ -1,5 +1,5 @@
+import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import {
-  ChainId,
   EscrowUtils,
   IEscrowsFilter,
   IOperatorsFilter,
@@ -12,14 +12,13 @@ import {
   TransactionUtils,
   WorkerUtils,
 } from '@human-protocol/sdk';
+import { HttpService } from '@nestjs/axios';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
-
-import { HMToken__factory } from '@human-protocol/core/typechain-types';
-import { HttpService } from '@nestjs/axios';
 import { ethers } from 'ethers';
 import { firstValueFrom } from 'rxjs';
+
 import { GetOperatorsPaginationOptions } from '../../common/types';
 import { EnvironmentConfigService } from '../../common/config/env-config.service';
 import { NetworkConfigService } from '../../common/config/network-config.service';
@@ -27,7 +26,8 @@ import {
   MAX_LEADERS_COUNT,
   MIN_STAKED_AMOUNT,
   REPUTATION_PLACEHOLDER,
-} from '../../common/constants/operator';
+  type ChainId,
+} from '../../common/constants';
 import * as httpUtils from '../../common/utils/http';
 import { OperatorsOrderBy } from '../../common/enums/operator';
 import { ReputationLevel } from '../../common/enums/reputation';
