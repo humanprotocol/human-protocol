@@ -55,7 +55,7 @@ function serializeError(error: ErrorLike) {
 
 abstract class LoggerWrapper implements Logger {
   protected readonly bindings: LogMeta;
-  private readonly name?: string;
+  readonly name?: string;
 
   constructor(bindings: LogMeta = {}) {
     if (!isPlainObject(bindings)) {
@@ -92,7 +92,10 @@ abstract class LoggerWrapper implements Logger {
       throw new Error('Log bindings required for child logger');
     }
 
-    return this.createChild(bindings);
+    return this.createChild({
+      name: this.name,
+      ...bindings,
+    });
   }
 
   protected abstract createChild(bindings: LogMeta): Logger;
