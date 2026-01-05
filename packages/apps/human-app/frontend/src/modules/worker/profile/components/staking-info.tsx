@@ -31,7 +31,7 @@ export function StakingInfo() {
     refetch,
     isRefetching,
   } = useGetStakingSummary();
-  const { data: uiConfig } = useGetUiConfig();
+  const { data: uiConfig, isLoading: isUiConfigLoading } = useGetUiConfig();
 
   const isConnectButtonDisabled =
     !!exchangeApiKeyData?.exchange_name || isExchangeApiKeyLoading;
@@ -46,7 +46,7 @@ export function StakingInfo() {
     isError;
 
   const isStaked =
-    isLoading || isStakingError
+    isLoading || isStakingError || isUiConfigLoading
       ? false
       : stakedAmount >= Number(uiConfig?.minThreshold || '0');
 
