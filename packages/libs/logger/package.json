@@ -34,7 +34,7 @@
     "typescript-eslint": "^8.35.1"
   },
   "peerDependencies": {
-    "@nestjs/common": "^10.2.7"
+    "@nestjs/common": ">=10.0.0 <12.0.0"
   },
   "engines": {
     "node": ">=22"
