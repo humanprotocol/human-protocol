@@ -1,5 +1,13 @@
 import { EscrowUtils } from '@human-protocol/sdk';
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
+import { ethers } from 'ethers';
+
 import { HEADER_SIGNATURE_KEY } from '../constants';
 import { Role } from '../enums/role';
 import { AuthError, ValidationError } from '../errors';
@@ -13,6 +21,10 @@ export class SignatureAuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
 
     const data = request.body;
+    if (!data.chain_id || !ethers.isAddress(data.escrow_address)) {
+      throw new HttpException('Invalid payload', HttpStatus.BAD_REQUEST);
+    }
+
     const signature = request.headers[HEADER_SIGNATURE_KEY];
     const oracleAdresses: string[] = [];
     try {
