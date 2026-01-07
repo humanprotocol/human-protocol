@@ -41,6 +41,10 @@ export class SignatureAuthGuard implements CanActivate {
     const oracleAdresses: string[] = [];
 
     if (roles.includes(AuthSignatureRole.Worker)) {
+      if (!Number.isInteger(data.assignment_id)) {
+        throw new HttpException('Invalid assignment id', HttpStatus.BAD_REQUEST);
+      }
+
       const assignment = await this.assignmentRepository.findOneById(
         data.assignment_id,
       );

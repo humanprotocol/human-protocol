@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 import { ChainId, EscrowUtils } from '@human-protocol/sdk';
-import { ExecutionContext } from '@nestjs/common';
+import { ExecutionContext, HttpException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Test, TestingModule } from '@nestjs/testing';
 
@@ -110,8 +110,9 @@ describe('SignatureAuthGuard', () => {
       reflector.get = jest.fn().mockReturnValue([AuthSignatureRole.Worker]);
 
       mockRequest.headers[HEADER_SIGNATURE_KEY] = 'validSignature';
+      const assignmentId = faker.number.int();
       mockRequest.body = {
-        assignment_id: '1',
+        assignment_id: assignmentId,
       };
       (verifySignature as jest.Mock).mockReturnValue(true);
       assignmentRepository.findOneById.mockResolvedValue({
@@ -120,7 +121,22 @@ describe('SignatureAuthGuard', () => {
 
       const result = await guard.canActivate(context);
       expect(result).toBeTruthy();
-      expect(assignmentRepository.findOneById).toHaveBeenCalledWith('1');
+      expect(assignmentRepository.findOneById).toHaveBeenCalledWith(assignmentId);
+    });
+
+    it('should throw BadRequest error if assignment id is not number', async () => {
+      reflector.get = jest.fn().mockReturnValue([AuthSignatureRole.Worker]);
+
+      mockRequest.headers[HEADER_SIGNATURE_KEY] = 'validSignature';
+      mockRequest.body = {
+        assignment_id: '1',
+      };
+      (verifySignature as jest.Mock).mockReturnValue(true);
+      assignmentRepository.findOneById.mockResolvedValue(null);
+
+      const resultPromise = guard.canActivate(context);
+      await expect(resultPromise).rejects.toBeInstanceOf(HttpException);
+      await expect(resultPromise).rejects.toThrow('Invalid assignment id');
     });
 
     it('should throw AuthError if assignment is not found for Worker role', async () => {
@@ -128,7 +144,7 @@ describe('SignatureAuthGuard', () => {
 
       mockRequest.headers[HEADER_SIGNATURE_KEY] = 'validSignature';
       mockRequest.body = {
-        assignment_id: '1',
+        assignment_id: 1,
       };
       (verifySignature as jest.Mock).mockReturnValue(true);
       assignmentRepository.findOneById.mockResolvedValue(null);
