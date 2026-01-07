@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Injectable,
 } from '@nestjs/common';
+import { ethers } from 'ethers';
 
 import { HEADER_SIGNATURE_KEY } from '@/common/constants';
 import { verifySignature } from '@/utils/web3';
@@ -38,7 +39,7 @@ export class SignatureAuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
 
     const data = request.body as SignedRequestData;
-    if (!data.chain_id || !data.escrow_address) {
+    if (!data.chain_id || !ethers.isAddress(data.escrow_address)) {
       throw new HttpException('Invalid payload', HttpStatus.BAD_REQUEST);
     }
 

@@ -1,7 +1,9 @@
+import { faker } from '@faker-js/faker';
 import { ChainId, EscrowUtils } from '@human-protocol/sdk';
 import { ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Test, TestingModule } from '@nestjs/testing';
+
 import { AssignmentRepository } from '../../modules/assignment/assignment.repository';
 import { HEADER_SIGNATURE_KEY } from '../constant';
 import { AuthSignatureRole } from '../enums/role';
@@ -44,6 +46,8 @@ describe('SignatureAuthGuard', () => {
 
     guard = module.get<SignatureAuthGuard>(SignatureAuthGuard);
     reflector = module.get<Reflector>(Reflector);
+
+    (EscrowUtils.getEscrow as jest.Mock).mockClear();
   });
 
   it('should be defined', () => {
@@ -72,8 +76,9 @@ describe('SignatureAuthGuard', () => {
         .mockReturnValue([AuthSignatureRole.JobLauncher]);
 
       mockRequest.headers[HEADER_SIGNATURE_KEY] = 'validSignature';
+      const mockEscrowAddress = faker.finance.ethereumAddress();
       mockRequest.body = {
-        escrow_address: '0x123',
+        escrow_address: mockEscrowAddress,
         chain_id: ChainId.LOCALHOST,
       };
       (verifySignature as jest.Mock).mockReturnValue(true);
@@ -82,7 +87,7 @@ describe('SignatureAuthGuard', () => {
       expect(result).toBeTruthy();
       expect(EscrowUtils.getEscrow).toHaveBeenCalledWith(
         ChainId.LOCALHOST,
-        '0x123',
+        mockEscrowAddress,
       );
     });
 
@@ -93,7 +98,7 @@ describe('SignatureAuthGuard', () => {
 
       mockRequest.headers[HEADER_SIGNATURE_KEY] = 'invalidSignature';
       mockRequest.body = {
-        escrow_address: '0x123',
+        escrow_address: faker.finance.ethereumAddress(),
         chain_id: ChainId.LOCALHOST,
       };
       (verifySignature as jest.Mock).mockReturnValue(false);
@@ -138,27 +143,29 @@ describe('SignatureAuthGuard', () => {
         .fn()
         .mockReturnValue([
           AuthSignatureRole.JobLauncher,
-          AuthSignatureRole.Worker,
+          AuthSignatureRole.Recording,
         ]);
 
       mockRequest.headers[HEADER_SIGNATURE_KEY] = 'validSignature';
+      const mockEscrowAddress = faker.finance.ethereumAddress();
       mockRequest.body = {
-        escrow_address: '0x123',
+        escrow_address: mockEscrowAddress,
         chain_id: ChainId.LOCALHOST,
         assignment_id: '1',
       };
       (verifySignature as jest.Mock).mockReturnValue(true);
-      assignmentRepository.findOneById.mockResolvedValue({
-        workerAddress: '0xworkerAddress',
-      } as any);
 
       const result = await guard.canActivate(context);
       expect(result).toBeTruthy();
       expect(EscrowUtils.getEscrow).toHaveBeenCalledWith(
         ChainId.LOCALHOST,
-        '0x123',
+        mockEscrowAddress,
       );
-      expect(assignmentRepository.findOneById).toHaveBeenCalledWith('1');
+      expect(verifySignature).toHaveBeenLastCalledWith(
+        mockRequest.body,
+        mockRequest.headers[HEADER_SIGNATURE_KEY],
+        [expect.any(String), expect.any(String)],
+      );
     });
 
     it('should throw ValidationError when escrow data is missing', async () => {
@@ -170,7 +177,7 @@ describe('SignatureAuthGuard', () => {
 
       mockRequest.headers[HEADER_SIGNATURE_KEY] = 'validSignature';
       mockRequest.body = {
-        escrow_address: '0x123',
+        escrow_address: faker.finance.ethereumAddress(),
         chain_id: ChainId.LOCALHOST,
       };
 

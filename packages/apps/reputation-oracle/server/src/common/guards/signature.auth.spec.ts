@@ -201,6 +201,38 @@ describe('SignatureAuthGuard', () => {
       expect(thrownError.status).toBe(HttpStatus.UNAUTHORIZED);
     });
 
+    it('should throw bad request when escrow address is not valid', async () => {
+      const guard = new SignatureAuthGuard([AuthSignatureRole.JOB_LAUNCHER]);
+
+      mockedEscrowUtils.getEscrow.mockResolvedValueOnce(null);
+
+      body.escrow_address = body.escrow_address.slice(0, -1);
+
+      const { privateKey } = generateEthWallet();
+      const signature = await signMessage(body, privateKey);
+
+      const request = {
+        headers: {
+          'human-signature': signature,
+        },
+        body,
+      };
+      executionContextMock.__getRequest.mockReturnValueOnce(request);
+
+      let thrownError: unknown;
+      try {
+        await guard.canActivate(
+          executionContextMock as unknown as ExecutionContext,
+        );
+      } catch (error) {
+        thrownError = error;
+      }
+      expect(thrownError).toBeInstanceOf(HttpException);
+      const httpError = thrownError as HttpException;
+      expect(httpError.message).toBe('Invalid payload');
+      expect(httpError.getStatus()).toBe(HttpStatus.BAD_REQUEST);
+    });
+
     it('should throw bad request when escrow data is missing', async () => {
       const guard = new SignatureAuthGuard([AuthSignatureRole.JOB_LAUNCHER]);
 
