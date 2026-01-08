@@ -169,22 +169,17 @@ describe('StakingService', () => {
   });
 
   describe('getOnChainStakedBalance', () => {
-    it('returns total staked and locked balance', async () => {
+    it('returns total staked balance', async () => {
       const address = faker.finance.ethereumAddress();
       const stakedAmount = ethers.toBigInt(
         faker.number.int({ min: 500, max: 1000000 }),
-      );
-      const lockedAmount = ethers.toBigInt(
-        faker.number.int({ min: 500, max: 999999 }),
       );
       const mockProvider = {};
       mockWeb3Service.getSigner.mockReturnValueOnce({
         provider: mockProvider,
       } as WalletWithProvider);
 
-      const getStakerInfoMock = jest
-        .fn()
-        .mockResolvedValue({ stakedAmount, lockedAmount });
+      const getStakerInfoMock = jest.fn().mockResolvedValue({ stakedAmount });
       mockedStakingClient.build.mockResolvedValueOnce({
         getStakerInfo: getStakerInfoMock,
       } as unknown as StakingClient);
@@ -193,9 +188,7 @@ describe('StakingService', () => {
 
       expect(mockedStakingClient.build).toHaveBeenCalledWith(mockProvider);
       expect(getStakerInfoMock).toHaveBeenCalledWith(address);
-      expect(result).toBe(
-        Number(ethers.formatEther(stakedAmount + lockedAmount)),
-      );
+      expect(result).toBe(Number(ethers.formatEther(stakedAmount)));
     });
   });
 

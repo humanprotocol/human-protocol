@@ -53,9 +53,7 @@ export class StakingService {
     const stakingClient = await StakingClient.build(provider);
     const stakerInfo = await stakingClient.getStakerInfo(address);
 
-    const total =
-      (stakerInfo.stakedAmount ?? 0n) + (stakerInfo.lockedAmount ?? 0n);
-    return Number(ethers.formatEther(total));
+    return Number(ethers.formatEther(stakerInfo.stakedAmount ?? 0n));
   }
 
   async getStakeSummary(userId: number): Promise<StakeSummaryData> {
