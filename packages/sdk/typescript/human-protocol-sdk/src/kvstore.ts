@@ -26,12 +26,10 @@ import {
 import { KVStoreData } from './graphql';
 import { IKVStore, SubgraphOptions } from './interfaces';
 /**
- * ## Introduction
- *
- * This client enables performing actions on KVStore contract and obtaining information from both the contracts and subgraph.
+ * Client for interacting with the KVStore contract.
  *
  * Internally, the SDK will use one network or another according to the network ID of the `runner`.
- * To use this client, it is recommended to initialize it using the static `build` method.
+ * To use this client, it is recommended to initialize it using the static [`build`](/ts/classes/KVStoreClient/#build) method.
  *
  * ```ts
  * static async build(runner: ContractRunner): Promise<KVStoreClient>;
@@ -42,37 +40,25 @@ import { IKVStore, SubgraphOptions } from './interfaces';
  * - **Signer**: when the user wants to use this model to send transactions calling the contract functions.
  * - **Provider**: when the user wants to use this model to get information from the contracts or subgraph.
  *
- * ## Installation
+ * @example
  *
- * ### npm
- * ```bash
- * npm install @human-protocol/sdk
- * ```
+ * ###Using Signer
  *
- * ### yarn
- * ```bash
- * yarn install @human-protocol/sdk
- * ```
- *
- * ## Code example
- *
- * ### Signer
- *
- * **Using private key (backend)**
+ * ####Using private key (backend)
  *
  * ```ts
  * import { KVStoreClient } from '@human-protocol/sdk';
- * import { Wallet, providers } from 'ethers';
+ * import { Wallet, JsonRpcProvider } from 'ethers';
  *
  * const rpcUrl = 'YOUR_RPC_URL';
  * const privateKey = 'YOUR_PRIVATE_KEY';
  *
- * const provider = new providers.JsonRpcProvider(rpcUrl);
+ * const provider = new JsonRpcProvider(rpcUrl);
  * const signer = new Wallet(privateKey, provider);
  * const kvstoreClient = await KVStoreClient.build(signer);
  * ```
  *
- * **Using Wagmi (frontend)**
+ * ####Using Wagmi (frontend)
  *
  * ```ts
  * import { useSigner, useChainId } from 'wagmi';
@@ -82,15 +68,15 @@ import { IKVStore, SubgraphOptions } from './interfaces';
  * const kvstoreClient = await KVStoreClient.build(signer);
  * ```
  *
- * ### Provider
+ * ###Using Provider
  *
  * ```ts
  * import { KVStoreClient } from '@human-protocol/sdk';
- * import { providers } from 'ethers';
+ * import { JsonRpcProvider } from 'ethers';
  *
  * const rpcUrl = 'YOUR_RPC_URL';
  *
- * const provider = new providers.JsonRpcProvider(rpcUrl);
+ * const provider = new JsonRpcProvider(rpcUrl);
  * const kvstoreClient = await KVStoreClient.build(provider);
  * ```
  */
@@ -101,8 +87,8 @@ export class KVStoreClient extends BaseEthersClient {
   /**
    * **KVStoreClient constructor**
    *
-   * @param {ContractRunner} runner - The Runner object to interact with the Ethereum network
-   * @param {NetworkData} networkData - The network information required to connect to the KVStore contract
+   * @param runner - The Runner object to interact with the Ethereum network
+   * @param networkData - The network information required to connect to the KVStore contract
    */
   constructor(runner: ContractRunner, networkData: NetworkData) {
     super(runner, networkData);
@@ -116,11 +102,23 @@ export class KVStoreClient extends BaseEthersClient {
   /**
    * Creates an instance of KVStoreClient from a runner.
    *
-   * @param {ContractRunner} runner - The Runner object to interact with the Ethereum network
+   * @param runner - The Runner object to interact with the Ethereum network
+   * @returns An instance of KVStoreClient
+   * @throws ErrorProviderDoesNotExist If the provider does not exist for the provided Signer
+   * @throws ErrorUnsupportedChainID If the network's chainId is not supported
    *
-   * @returns {Promise<KVStoreClient>} - An instance of KVStoreClient
-   * @throws {ErrorProviderDoesNotExist} - Thrown if the provider does not exist for the provided Signer
-   * @throws {ErrorUnsupportedChainID} - Thrown if the network's chainId is not supported
+   * @example
+   * ```ts
+   * import { KVStoreClient } from '@human-protocol/sdk';
+   * import { Wallet, JsonRpcProvider } from 'ethers';
+   *
+   * const rpcUrl = 'YOUR_RPC_URL';
+   * const privateKey = 'YOUR_PRIVATE_KEY';
+   *
+   * const provider = new JsonRpcProvider(rpcUrl);
+   * const signer = new Wallet(privateKey, provider);
+   * const kvstoreClient = await KVStoreClient.build(signer);
+   * ```
    */
   public static async build(runner: ContractRunner): Promise<KVStoreClient> {
     if (!runner.provider) {
@@ -142,27 +140,15 @@ export class KVStoreClient extends BaseEthersClient {
   /**
    * This function sets a key-value pair associated with the address that submits the transaction.
    *
-   * @param {string} key Key of the key-value pair
-   * @param {string} value Value of the key-value pair
-   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
-   * @returns Returns void if successful. Throws error if any.
+   * @param key - Key of the key-value pair
+   * @param value - Value of the key-value pair
+   * @param txOptions - Additional transaction parameters (optional, defaults to an empty object).
+   * @returns -
+   * @throws ErrorKVStoreEmptyKey If the key is empty
+   * @throws Error If the transaction fails
    *
-   *
-   * **Code example**
-   *
-   * > Need to have available stake.
-   *
+   * @example
    * ```ts
-   * import { Wallet, providers } from 'ethers';
-   * import { KVStoreClient } from '@human-protocol/sdk';
-   *
-   * const rpcUrl = 'YOUR_RPC_URL';
-   * const privateKey = 'YOUR_PRIVATE_KEY';
-   *
-   * const provider = new providers.JsonRpcProvider(rpcUrl);
-   * const signer = new Wallet(privateKey, provider);
-   * const kvstoreClient = await KVStoreClient.build(signer);
-   *
    * await kvstoreClient.set('Role', 'RecordingOracle');
    * ```
    */
@@ -183,27 +169,16 @@ export class KVStoreClient extends BaseEthersClient {
   /**
    * This function sets key-value pairs in bulk associated with the address that submits the transaction.
    *
-   * @param {string[]} keys Array of keys (keys and value must have the same order)
-   * @param {string[]} values Array of values
-   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
-   * @returns Returns void if successful. Throws error if any.
+   * @param keys - Array of keys (keys and value must have the same order)
+   * @param values - Array of values
+   * @param txOptions - Additional transaction parameters (optional, defaults to an empty object).
+   * @returns -
+   * @throws ErrorKVStoreArrayLength If keys and values arrays have different lengths
+   * @throws ErrorKVStoreEmptyKey If any key is empty
+   * @throws Error If the transaction fails
    *
-   *
-   * **Code example**
-   *
-   * > Need to have available stake.
-   *
+   * @example
    * ```ts
-   * import { Wallet, providers } from 'ethers';
-   * import { KVStoreClient } from '@human-protocol/sdk';
-   *
-   * const rpcUrl = 'YOUR_RPC_URL';
-   * const privateKey = 'YOUR_PRIVATE_KEY';
-   *
-   * const provider = new providers.JsonRpcProvider(rpcUrl);
-   * const signer = new Wallet(privateKey, provider);
-   * const kvstoreClient = await KVStoreClient.build(signer);
-   *
    * const keys = ['role', 'webhook_url'];
    * const values = ['RecordingOracle', 'http://localhost'];
    * await kvstoreClient.setBulk(keys, values);
@@ -229,25 +204,15 @@ export class KVStoreClient extends BaseEthersClient {
   /**
    * Sets a URL value for the address that submits the transaction, and its hash.
    *
-   * @param {string} url URL to set
-   * @param {string | undefined} urlKey Configurable URL key. `url` by default.
-   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
-   * @returns Returns void if successful. Throws error if any.
+   * @param url - URL to set
+   * @param urlKey - Configurable URL key. `url` by default.
+   * @param txOptions - Additional transaction parameters (optional, defaults to an empty object).
+   * @returns -
+   * @throws ErrorInvalidUrl If the URL is invalid
+   * @throws Error If the transaction fails
    *
-   *
-   * **Code example**
-   *
+   * @example
    * ```ts
-   * import { Wallet, providers } from 'ethers';
-   * import { KVStoreClient } from '@human-protocol/sdk';
-   *
-   * const rpcUrl = 'YOUR_RPC_URL';
-   * const privateKey = 'YOUR_PRIVATE_KEY';
-   *
-   * const provider = new providers.JsonRpcProvider(rpcUrl);
-   * const signer = new Wallet(privateKey, provider);
-   * const kvstoreClient = await KVStoreClient.build(signer);
-   *
    * await kvstoreClient.setFileUrlAndHash('example.com');
    * await kvstoreClient.setFileUrlAndHash('linkedin.com/example', 'linkedin_url');
    * ```
@@ -283,26 +248,17 @@ export class KVStoreClient extends BaseEthersClient {
   /**
    * Gets the value of a key-value pair in the contract.
    *
-   * @param {string} address Address from which to get the key value.
-   * @param {string} key Key to obtain the value.
-   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
-   * @returns {string} Value of the key.
+   * @param address - Address from which to get the key value.
+   * @param key - Key to obtain the value.
+   * @returns Value of the key.
+   * @throws ErrorKVStoreEmptyKey If the key is empty
+   * @throws ErrorInvalidAddress If the address is invalid
+   * @throws Error If the contract call fails
    *
-   *
-   * **Code example**
-   *
-   * > Need to have available stake.
-   *
+   * @example
    * ```ts
-   * import { providers } from 'ethers';
-   * import { KVStoreClient } from '@human-protocol/sdk';
-   *
-   * const rpcUrl = 'YOUR_RPC_URL';
-   *
-   * const provider = new providers.JsonRpcProvider(rpcUrl);
-   * const kvstoreClient = await KVStoreClient.build(provider);
-   *
    * const value = await kvstoreClient.get('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', 'Role');
+   * console.log('Value:', value);
    * ```
    */
   public async get(address: string, key: string): Promise<string> {
@@ -320,55 +276,37 @@ export class KVStoreClient extends BaseEthersClient {
 }
 
 /**
- * ## Introduction
+ * Utility helpers for KVStore-related queries.
  *
- * Utility class for KVStore-related operations.
- *
- * ## Installation
- *
- * ### npm
- * ```bash
- * npm install @human-protocol/sdk
- * ```
- *
- * ### yarn
- * ```bash
- * yarn install @human-protocol/sdk
- * ```
- *
- * ## Code example
- *
- * ### Signer
- *
- * **Using private key (backend)**
- *
+ * @example
  * ```ts
  * import { ChainId, KVStoreUtils } from '@human-protocol/sdk';
  *
- * const KVStoreAddresses = await KVStoreUtils.getKVStoreData(
+ * const kvStoreData = await KVStoreUtils.getKVStoreData(
  *   ChainId.POLYGON_AMOY,
  *   "0x1234567890123456789012345678901234567890"
  * );
+ * console.log('KVStore data:', kvStoreData);
  * ```
  */
 export class KVStoreUtils {
   /**
    * This function returns the KVStore data for a given address.
    *
-   * @param {ChainId} chainId Network in which the KVStore is deployed
-   * @param {string} address Address of the KVStore
-   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
-   * @returns {Promise<IKVStore[]>} KVStore data
-   * @throws {ErrorUnsupportedChainID} - Thrown if the network's chainId is not supported
-   * @throws {ErrorInvalidAddress} - Thrown if the Address sent is invalid
+   * @param chainId - Network in which the KVStore is deployed
+   * @param address - Address of the KVStore
+   * @param options - Optional configuration for subgraph requests.
+   * @returns KVStore data
+   * @throws ErrorUnsupportedChainID If the network's chainId is not supported
+   * @throws ErrorInvalidAddress If the address is invalid
    *
-   * **Code example**
-   *
+   * @example
    * ```ts
-   * import { ChainId, KVStoreUtils } from '@human-protocol/sdk';
-   *
-   * const kvStoreData = await KVStoreUtils.getKVStoreData(ChainId.POLYGON_AMOY, "0x1234567890123456789012345678901234567890");
-   * console.log(kvStoreData);
+   * const kvStoreData = await KVStoreUtils.getKVStoreData(
+   *   ChainId.POLYGON_AMOY,
+   *   "0x1234567890123456789012345678901234567890"
+   * );
+   * console.log('KVStore data:', kvStoreData);
    * ```
    */
   public static async getKVStoreData(
@@ -404,26 +342,24 @@ export class KVStoreUtils {
   /**
    * Gets the value of a key-value pair in the KVStore using the subgraph.
    *
-   * @param {ChainId} chainId Network in which the KVStore is deployed
-   * @param {string} address Address from which to get the key value.
-   * @param {string} key Key to obtain the value.
-   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
-   * @returns {Promise<string>} Value of the key.
-   * @throws {ErrorUnsupportedChainID} - Thrown if the network's chainId is not supported
-   * @throws {ErrorInvalidAddress} - Thrown if the Address sent is invalid
-   * @throws {ErrorKVStoreEmptyKey} - Thrown if the key is empty
+   * @param chainId - Network in which the KVStore is deployed
+   * @param address - Address from which to get the key value.
+   * @param key - Key to obtain the value.
+   * @param options - Optional configuration for subgraph requests.
+   * @returns Value of the key.
+   * @throws ErrorUnsupportedChainID If the network's chainId is not supported
+   * @throws ErrorInvalidAddress If the address is invalid
+   * @throws ErrorKVStoreEmptyKey If the key is empty
+   * @throws InvalidKeyError If the key is not found
    *
-   * **Code example**
-   *
+   * @example
    * ```ts
-   * import { ChainId, KVStoreUtils } from '@human-protocol/sdk';
-   *
-   * const chainId = ChainId.POLYGON_AMOY;
-   * const address = '0x1234567890123456789012345678901234567890';
-   * const key = 'role';
-   *
-   * const value = await KVStoreUtils.get(chainId, address, key);
-   * console.log(value);
+   * const value = await KVStoreUtils.get(
+   *   ChainId.POLYGON_AMOY,
+   *   '0x1234567890123456789012345678901234567890',
+   *   'role'
+   * );
+   * console.log('Value:', value);
    * ```
    */
   public static async get(
@@ -458,22 +394,22 @@ export class KVStoreUtils {
   /**
    * Gets the URL value of the given entity, and verifies its hash.
    *
-   * @param {ChainId} chainId Network in which the KVStore is deployed
-   * @param {string} address Address from which to get the URL value.
-   * @param {string} urlKey Configurable URL key. `url` by default.
-   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
-   * @returns {Promise<string>} URL value for the given address if it exists, and the content is valid
+   * @param chainId - Network in which the KVStore is deployed
+   * @param address - Address from which to get the URL value.
+   * @param urlKey - Configurable URL key. `url` by default.
+   * @param options - Optional configuration for subgraph requests.
+   * @returns URL value for the given address if it exists, and the content is valid
+   * @throws ErrorInvalidAddress If the address is invalid
+   * @throws ErrorInvalidHash If the hash verification fails
+   * @throws Error If fetching URL or hash fails
    *
-   * **Code example**
-   *
+   * @example
    * ```ts
-   * import { ChainId, KVStoreUtils } from '@human-protocol/sdk';
-   *
-   * const chainId = ChainId.POLYGON_AMOY;
-   * const address = '0x1234567890123456789012345678901234567890';
-   *
-   * const url = await KVStoreUtils.getFileUrlAndVerifyHash(chainId, address);
-   * console.log(url);
+   * const url = await KVStoreUtils.getFileUrlAndVerifyHash(
+   *   ChainId.POLYGON_AMOY,
+   *   '0x1234567890123456789012345678901234567890'
+   * );
+   * console.log('Verified URL:', url);
    * ```
    */
   public static async getFileUrlAndVerifyHash(
@@ -521,20 +457,21 @@ export class KVStoreUtils {
   /**
    * Gets the public key of the given entity, and verifies its hash.
    *
-   * @param {ChainId} chainId Network in which the KVStore is deployed
-   * @param {string} address Address from which to get the public key.
-   * @returns {Promise<string>} Public key for the given address if it exists, and the content is valid
+   * @param chainId - Network in which the KVStore is deployed
+   * @param address - Address from which to get the public key.
+   * @param options - Optional configuration for subgraph requests.
+   * @returns Public key for the given address if it exists, and the content is valid
+   * @throws ErrorInvalidAddress If the address is invalid
+   * @throws ErrorInvalidHash If the hash verification fails
+   * @throws Error If fetching the public key fails
    *
-   * **Code example**
-   *
+   * @example
    * ```ts
-   * import { ChainId, KVStoreUtils } from '@human-protocol/sdk';
-   *
-   * const chainId = ChainId.POLYGON_AMOY;
-   * const address = '0x1234567890123456789012345678901234567890';
-   *
-   * const publicKey = await KVStoreUtils.getPublicKey(chainId, address);
-   * console.log(publicKey);
+   * const publicKey = await KVStoreUtils.getPublicKey(
+   *   ChainId.POLYGON_AMOY,
+   *   '0x1234567890123456789012345678901234567890'
+   * );
+   * console.log('Public key:', publicKey);
    * ```
    */
   public static async getPublicKey(

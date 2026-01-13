@@ -7,5 +7,5 @@ dist
 # Logs
 logs
 
-#Docs
 docs
+!docs/index.md

@@ -1,23 +1,17 @@
-"""
-Utility class for KVStore-related operations.
+"""Utility helpers for KVStore queries.
 
-Code Example
-------------
-
-.. code-block:: python
-
+Example:
+    ```python
     from human_protocol_sdk.constants import ChainId
     from human_protocol_sdk.kvstore import KVStoreUtils
 
     print(
         KVStoreUtils.get_kvstore_data(
             ChainId.POLYGON_AMOY,
-            "0x15d34aaf54267db7d7c367839aaf71a00a2c6a65"
+            "0x15d34aaf54267db7d7c367839aaf71a00a2c6a65",
         )
     )
-
-Module
-------
+    ```
 """
 
 from datetime import datetime
@@ -37,20 +31,24 @@ LOG = logging.getLogger("human_protocol_sdk.kvstore")
 
 
 class KVStoreData:
-    def __init__(self, key: str, value: str):
-        """
-        Initializes a KVStoreData instance.
+    """Represents a key-value pair from the KVStore.
 
-        :param key: Key
-        :param value: Value
-        """
+    Attributes:
+        key (str): The key of the key-value pair.
+        value (str): The value associated with the key.
+    """
+
+    def __init__(self, key: str, value: str):
         self.key = key
         self.value = value
 
 
 class KVStoreUtils:
-    """
-    A utility class that provides additional KVStore-related functionalities.
+    """Utility class providing KVStore-related query and data retrieval functions.
+
+    This class offers static methods to fetch KVStore data from the HUMAN Protocol
+    subgraph, including individual key-value pairs, bulk data, and specialized
+    methods for URLs with hash verification and public keys.
     """
 
     @staticmethod
@@ -59,26 +57,34 @@ class KVStoreUtils:
         address: str,
         options: Optional[SubgraphOptions] = None,
     ) -> Optional[List[KVStoreData]]:
-        """Returns the KVStore data for a given address.
+        """Retrieve all KVStore data for a given address.
 
-        :param chain_id: Network in which the KVStore data has been deployed
-        :param address: Address of the KVStore
-        :param options: Optional config for subgraph requests
+        Queries the subgraph for all key-value pairs associated with a specific address.
 
-        :return: List of KVStore data
+        Args:
+            chain_id (ChainId): Network where the KVStore data has been stored.
+            address (str): Address whose KVStore data to retrieve.
+            options (Optional[SubgraphOptions]): Optional configuration for subgraph requests
+                such as custom endpoints or timeout settings.
 
-        :example:
-            .. code-block:: python
+        Returns:
+            List of KVStore data entries if found, empty list otherwise.
 
-                from human_protocol_sdk.constants import ChainId
-                from human_protocol_sdk.kvstore import KVStoreUtils
+        Raises:
+            KVStoreClientError: If the chain ID is invalid or the address is malformed.
 
-                print(
-                    KVStoreUtils.get_kvstore_data(
-                        ChainId.POLYGON_AMOY,
-                        "0x15d34aaf54267db7d7c367839aaf71a00a2c6a65"
-                    )
-                )
+        Example:
+            ```python
+            from human_protocol_sdk.constants import ChainId
+            from human_protocol_sdk.kvstore import KVStoreUtils
+
+            data = KVStoreUtils.get_kvstore_data(
+                ChainId.POLYGON_AMOY,
+                "0x15d34aaf54267db7d7c367839aaf71a00a2c6a65",
+            )
+            for item in data:
+                print(f"{item.key}: {item.value}")
+            ```
         """
         from human_protocol_sdk.gql.kvstore import get_kvstore_by_address_query
 
@@ -120,27 +126,35 @@ class KVStoreUtils:
         key: str,
         options: Optional[SubgraphOptions] = None,
     ) -> str:
-        """Gets the value of a key-value pair in the contract.
+        """Get the value of a specific key for an address.
 
-        :param chain_id: Network in which the KVStore data has been deployed
-        :param address: The Ethereum address associated with the key-value pair
-        :param key: The key of the key-value pair to get
-        :param options: Optional config for subgraph requests
+        Queries the subgraph for a specific key-value pair associated with an address.
 
-        :return: The value of the key-value pair if it exists
+        Args:
+            chain_id (ChainId): Network where the KVStore data has been stored.
+            address (str): Ethereum address associated with the key-value pair.
+            key (str): Key to retrieve (cannot be empty).
+            options (Optional[SubgraphOptions]): Optional configuration for subgraph requests.
 
-        :example:
-            .. code-block:: python
+        Returns:
+            Value for the key if it exists.
 
-                from human_protocol_sdk.constants import ChainId
-                from human_protocol_sdk.kvstore import KVStoreUtils
+        Raises:
+            KVStoreClientError: If the key is empty, address is invalid, chain ID is invalid,
+                or the key is not found for the address.
 
-                chain_id = ChainId.POLYGON_AMOY
-                address = '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
-                key = 'role'
+        Example:
+            ```python
+            from human_protocol_sdk.constants import ChainId
+            from human_protocol_sdk.kvstore import KVStoreUtils
 
-                result = KVStoreUtils.get(chain_id, address, key)
-                print(result)
+            role = KVStoreUtils.get(
+                ChainId.POLYGON_AMOY,
+                "0x62dD51230A30401C455c8398d06F85e4EaB6309f",
+                "role",
+            )
+            print(role)
+            ```
         """
         from human_protocol_sdk.gql.kvstore import get_kvstore_by_address_and_key_query
 
@@ -178,26 +192,40 @@ class KVStoreUtils:
         key: Optional[str] = "url",
         options: Optional[SubgraphOptions] = None,
     ) -> str:
-        """Gets the URL value of the given entity, and verify its hash.
+        """Get a stored URL and verify its content hash.
 
-        :param chain_id: Network in which the KVStore data has been deployed
-        :param address: Address from which to get the URL value.
-        :param key: Configurable URL key. `url` by default.
-        :param options: Optional config for subgraph requests
+        Retrieves a URL from KVStore, fetches its content, and verifies that the
+        content hash matches the stored hash value. This ensures the file content
+        has not been tampered with.
 
-        :return url: The URL value of the given address if exists, and the content is valid
+        Args:
+            chain_id (ChainId): Network where the KVStore data has been stored.
+            address (str): Address from which to get the URL value.
+            key (Optional[str]): Configurable URL key. Defaults to ``"url"``.
+                The hash key is expected to be ``"{key}_hash"``.
+            options (Optional[SubgraphOptions]): Optional configuration for subgraph requests.
 
-        :example:
-            .. code-block:: python
+        Returns:
+            URL value if it exists and the content hash matches.
+                Returns empty string if URL is not set.
 
-                from human_protocol_sdk.constants import ChainId
-                from human_protocol_sdk.kvstore import KVStoreUtils
+        Raises:
+            KVStoreClientError: If the address is invalid, hash verification fails,
+                or the URL is unreachable.
 
-                chain_id = ChainId.POLYGON_AMOY
-                address = '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
+        Example:
+            ```python
+            from human_protocol_sdk.constants import ChainId
+            from human_protocol_sdk.kvstore import KVStoreUtils
 
-                url = KVStoreUtils.get_file_url_and_verify_hash(chain_id, address)
-                linkedin_url = KVStoreUtils.get_file_url_and_verify_hash(chain_id, address, 'linkedin_url')
+            chain_id = ChainId.POLYGON_AMOY
+            address = "0x62dD51230A30401C455c8398d06F85e4EaB6309f"
+
+            url = KVStoreUtils.get_file_url_and_verify_hash(chain_id, address)
+            linkedin_url = KVStoreUtils.get_file_url_and_verify_hash(
+                chain_id, address, "linkedin_url"
+            )
+            ```
         """
 
         if not Web3.is_address(address):
@@ -222,23 +250,34 @@ class KVStoreUtils:
 
     @staticmethod
     def get_public_key(chain_id: ChainId, address: str) -> str:
-        """Gets the public key of the given entity, and verify its hash.
+        """Get the public key of an entity from KVStore.
 
-        :param chain_id: Network in which the KVStore data has been deployed
-        :param address: Address from which to get the public key.
+        Retrieves and validates the public key stored for a given address.
+        The public key URL is fetched from the ``public_key`` key and verified
+        against its hash.
 
-        :return public_key: The public key of the given address if exists, and the content is valid
+        Args:
+            chain_id (ChainId): Network where the KVStore data has been stored.
+            address (str): Address from which to get the public key.
 
-        :example:
-            .. code-block:: python
+        Returns:
+            Public key content if it exists and is valid.
+                Returns empty string if no public key is set.
 
-                from human_protocol_sdk.constants import ChainId
-                from human_protocol_sdk.kvstore import KVStoreUtils
+        Raises:
+            KVStoreClientError: If the address is invalid or hash verification fails.
 
-                chain_id = ChainId.POLYGON_AMOY
-                address = '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
+        Example:
+            ```python
+            from human_protocol_sdk.constants import ChainId
+            from human_protocol_sdk.kvstore import KVStoreUtils
 
-                public_key = KVStoreUtils.get_public_key(chain_id, address)
+            public_key = KVStoreUtils.get_public_key(
+                ChainId.POLYGON_AMOY,
+                "0x62dD51230A30401C455c8398d06F85e4EaB6309f",
+            )
+            print(public_key)
+            ```
         """
 
         public_key_url = KVStoreUtils.get_file_url_and_verify_hash(

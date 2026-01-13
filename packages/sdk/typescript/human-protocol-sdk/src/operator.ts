@@ -26,21 +26,40 @@ import { getSubgraphUrl, customGqlFetch } from './utils';
 import { ChainId, OrderDirection } from './enums';
 import { NETWORKS } from './constants';
 
+/**
+ * Utility helpers for operator-related queries.
+ *
+ * @example
+ * ```ts
+ * import { OperatorUtils, ChainId } from '@human-protocol/sdk';
+ *
+ * const operator = await OperatorUtils.getOperator(
+ *   ChainId.POLYGON_AMOY,
+ *   '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
+ * );
+ * console.log('Operator:', operator);
+ * ```
+ */
 export class OperatorUtils {
   /**
    * This function returns the operator data for the given address.
    *
-   * @param {ChainId} chainId Network in which the operator is deployed
-   * @param {string} address Operator address.
-   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
-   * @returns {Promise<IOperator | null>} - Returns the operator details or null if not found.
+   * @param chainId - Network in which the operator is deployed
+   * @param address - Operator address.
+   * @param options - Optional configuration for subgraph requests.
+   * @returns Returns the operator details or null if not found.
+   * @throws ErrorInvalidStakerAddressProvided If the address is invalid
+   * @throws ErrorUnsupportedChainID If the chain ID is not supported
    *
-   * **Code example**
-   *
+   * @example
    * ```ts
    * import { OperatorUtils, ChainId } from '@human-protocol/sdk';
    *
-   * const operator = await OperatorUtils.getOperator(ChainId.POLYGON_AMOY, '0x62dD51230A30401C455c8398d06F85e4EaB6309f');
+   * const operator = await OperatorUtils.getOperator(
+   *   ChainId.POLYGON_AMOY,
+   *   '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
+   * );
+   * console.log('Operator:', operator);
    * ```
    */
   public static async getOperator(
@@ -74,19 +93,20 @@ export class OperatorUtils {
   /**
    * This function returns all the operator details of the protocol.
    *
-   * @param {IOperatorsFilter} filter Filter for the operators.
-   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
-   * @returns {Promise<IOperator[]>} Returns an array with all the operator details.
+   * @param filter - Filter for the operators.
+   * @param options - Optional configuration for subgraph requests.
+   * @returns Returns an array with all the operator details.
+   * @throws ErrorUnsupportedChainID If the chain ID is not supported
    *
-   * **Code example**
-   *
+   * @example
    * ```ts
-   * import { OperatorUtils, ChainId } from '@human-protocol/sdk';
+   * import { ChainId } from '@human-protocol/sdk';
    *
-   * const filter: IOperatorsFilter = {
-   *  chainId: ChainId.POLYGON
+   * const filter = {
+   *   chainId: ChainId.POLYGON_AMOY
    * };
    * const operators = await OperatorUtils.getOperators(filter);
+   * console.log('Operators:', operators.length);
    * ```
    */
   public static async getOperators(
@@ -142,18 +162,22 @@ export class OperatorUtils {
   /**
    * Retrieves the reputation network operators of the specified address.
    *
-   * @param {ChainId} chainId Network in which the reputation network is deployed
-   * @param {string} address Address of the reputation oracle.
-   * @param {string} [role] - (Optional) Role of the operator.
-   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
-   * @returns {Promise<IOperator[]>} - Returns an array of operator details.
+   * @param chainId - Network in which the reputation network is deployed
+   * @param address - Address of the reputation oracle.
+   * @param role - Role of the operator (optional).
+   * @param options - Optional configuration for subgraph requests.
+   * @returns Returns an array of operator details.
+   * @throws ErrorUnsupportedChainID If the chain ID is not supported
    *
-   * **Code example**
-   *
+   * @example
    * ```ts
    * import { OperatorUtils, ChainId } from '@human-protocol/sdk';
    *
-   * const operators = await OperatorUtils.getReputationNetworkOperators(ChainId.POLYGON_AMOY, '0x62dD51230A30401C455c8398d06F85e4EaB6309f');
+   * const operators = await OperatorUtils.getReputationNetworkOperators(
+   *   ChainId.POLYGON_AMOY,
+   *   '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
+   * );
+   * console.log('Operators:', operators.length);
    * ```
    */
   public static async getReputationNetworkOperators(
@@ -189,17 +213,22 @@ export class OperatorUtils {
   /**
    * This function returns information about the rewards for a given slasher address.
    *
-   * @param {ChainId} chainId Network in which the rewards are deployed
-   * @param {string} slasherAddress Slasher address.
-   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
-   * @returns {Promise<IReward[]>} Returns an array of Reward objects that contain the rewards earned by the user through slashing other users.
+   * @param chainId - Network in which the rewards are deployed
+   * @param slasherAddress - Slasher address.
+   * @param options - Optional configuration for subgraph requests.
+   * @returns Returns an array of Reward objects that contain the rewards earned by the user through slashing other users.
+   * @throws ErrorInvalidSlasherAddressProvided If the slasher address is invalid
+   * @throws ErrorUnsupportedChainID If the chain ID is not supported
    *
-   * **Code example**
-   *
+   * @example
    * ```ts
    * import { OperatorUtils, ChainId } from '@human-protocol/sdk';
    *
-   * const rewards = await OperatorUtils.getRewards(ChainId.POLYGON_AMOY, '0x62dD51230A30401C455c8398d06F85e4EaB6309f');
+   * const rewards = await OperatorUtils.getRewards(
+   *   ChainId.POLYGON_AMOY,
+   *   '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
+   * );
+   * console.log('Rewards:', rewards.length);
    * ```
    */
   public static async getRewards(

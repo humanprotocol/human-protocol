@@ -1,0 +1,89 @@
+site_name: HUMAN Protocol TypeScript SDK Docs
+site_url: https://sdk.humanprotocol.org/ts/
+repo_name: humanprotocol/human-protocol
+repo_url: https://github.com/humanprotocol/human-protocol
+docs_dir: ../packages/sdk/typescript/human-protocol-sdk/docs
+site_dir: ts
+theme:
+  name: material
+  custom_dir: overrides
+  logo: assets/img/logo.svg
+  favicon: assets/img/logo.svg
+  palette:
+    - scheme: default
+      primary: deep purple
+      accent: purple
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: deep purple
+      accent: purple
+      toggle:
+        icon: material/brightness-3
+        name: Switch to light mode
+  font:
+    text: Noto Sans
+    code: Roboto Mono
+  features:
+    - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.top
+    - navigation.tracking
+    - navigation.path
+    - navigation.indexes
+    - navigation.prune
+    - content.tabs
+    - content.code.copy
+    - toc.follow
+    - announce.dismiss
+extra:
+  language: typescript
+  version:
+    provider: mike
+  logo_href: https://sdk.humanprotocol.org
+markdown_extensions:
+  - toc:
+      baselevel: 1
+      permalink: true
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.magiclink
+  - attr_list
+  - md_in_html
+  - pymdownx.escapeall:
+      hardbreak: false
+      nbsp: false
+plugins:
+  - search
+  - mike
+  - section-index
+nav:
+  - Overview: index.md
+  - Encryption: 
+      - Encryption: classes/Encryption.md
+      - Encryption Utils: classes/EncryptionUtils.md
+  - Escrow: 
+      - EscrowClient: classes/EscrowClient.md
+      - EscrowUtils: classes/EscrowUtils.md
+  - KVStore:
+      - KVStoreClient: classes/KVStoreClient.md
+      - KVStoreUtils: classes/KVStoreUtils.md
+  - Operator:
+      - OperatorUtils: classes/OperatorUtils.md
+  - Staking: 
+      - StakingClient: classes/StakingClient.md
+      - StakingUtils: classes/StakingUtils.md
+  - Statistics:
+      - StatisticsUtils: classes/StatisticsUtils.md
+  - Transaction: 
+      - TransactionUtils: classes/TransactionUtils.md
+  - Worker:
+      - WorkerUtils: classes/WorkerUtils.md
+extra_css:
+  - assets/css/custom.css

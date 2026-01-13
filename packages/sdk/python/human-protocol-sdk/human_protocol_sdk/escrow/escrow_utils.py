@@ -1,11 +1,7 @@
-"""
-Utility class for escrow-related operations.
+"""Utility helpers for escrow-related queries.
 
-Code Example
-------------
-
-.. code-block:: python
-
+Example:
+    ```python
     from human_protocol_sdk.constants import ChainId
     from human_protocol_sdk.escrow import EscrowUtils, EscrowFilter, Status
 
@@ -19,9 +15,7 @@ Code Example
             )
         )
     )
-
-Module
-------
+    ```
 """
 
 import logging
@@ -47,6 +41,36 @@ LOG = logging.getLogger("human_protocol_sdk.escrow")
 
 
 class EscrowData:
+    """Represents escrow data retrieved from the subgraph.
+
+    Attributes:
+        id (str): Unique escrow identifier.
+        address (str): Escrow contract address.
+        amount_paid (int): Total amount paid out.
+        balance (int): Remaining balance in the escrow.
+        count (int): Number of payouts executed.
+        factory_address (str): Address of the factory that created this escrow.
+        final_results_url (Optional[str]): URL for final results file.
+        final_results_hash (Optional[str]): Hash of final results file.
+        intermediate_results_url (Optional[str]): URL for intermediate results file.
+        intermediate_results_hash (Optional[str]): Hash of intermediate results file.
+        launcher (str): Address of the job launcher.
+        job_requester_id (Optional[str]): Off-chain job requester identifier.
+        manifest_hash (Optional[str]): Hash of the manifest file.
+        manifest (Optional[str]): Manifest data (URL or JSON string).
+        recording_oracle (Optional[str]): Address of the recording oracle.
+        reputation_oracle (Optional[str]): Address of the reputation oracle.
+        exchange_oracle (Optional[str]): Address of the exchange oracle.
+        recording_oracle_fee (Optional[int]): Recording oracle fee percentage.
+        reputation_oracle_fee (Optional[int]): Reputation oracle fee percentage.
+        exchange_oracle_fee (Optional[int]): Exchange oracle fee percentage.
+        status (str): Current escrow status.
+        token (str): Address of the payment token.
+        total_funded_amount (int): Total amount funded to the escrow.
+        created_at (int): Creation timestamp in milliseconds.
+        chain_id (ChainId): Chain where the escrow is deployed.
+    """
+
     def __init__(
         self,
         chain_id: ChainId,
@@ -75,36 +99,6 @@ class EscrowData:
         reputation_oracle_fee: Optional[str] = None,
         exchange_oracle_fee: Optional[str] = None,
     ):
-        """
-        Initializes an EscrowData instance.
-
-        :param chain_id: Chain identifier
-        :param id: Identifier
-        :param address: Address
-        :param amount_paid: Amount paid
-        :param balance: Balance
-        :param count: Count
-        :param factory_address: Factory address
-        :param launcher: Launcher
-        :param job_requester_id: Job requester identifier
-        :param status: Status
-        :param token: Token
-        :param total_funded_amount: Total funded amount
-        :param created_at: Creation timestamp in milliseconds
-        :param final_results_url: URL for final results.
-        :param final_results_hash: Hash for final results.
-        :param intermediate_results_url: URL for intermediate results.
-        :param intermediate_results_hash: Hash for intermediate results.
-        :param manifest_hash: Manifest hash.
-        :param manifest: Manifest data (JSON/URL).
-        :param recording_oracle: Recording Oracle address.
-        :param reputation_oracle: Reputation Oracle address.
-        :param exchange_oracle: Exchange Oracle address.
-        :param recording_oracle_fee: Fee for the Recording Oracle.
-        :param reputation_oracle_fee: Fee for the Reputation Oracle.
-        :param exchange_oracle_fee: Fee for the Exchange Oracle.
-        """
-
         self.id = id
         self.address = address
         self.amount_paid = int(amount_paid)
@@ -139,13 +133,13 @@ class EscrowData:
 
 
 class StatusEvent:
-    """
-    Initializes a StatusEvent instance.
+    """Represents an escrow status change event.
 
-    :param timestamp: The timestamp of the event in milliseconds.
-    :param status: The status of the escrow.
-    :param chain_id: The chain identifier where the event occurred.
-    :param escrow_address: The address of the escrow.
+    Attributes:
+        timestamp (int): Event timestamp in milliseconds.
+        status (str): The new status of the escrow.
+        chain_id (ChainId): Chain where the event occurred.
+        escrow_address (str): Address of the escrow that changed status.
     """
 
     def __init__(
@@ -158,15 +152,14 @@ class StatusEvent:
 
 
 class Payout:
-    """
-    Initializes a Payout instance.
+    """Represents a payout distributed by an escrow.
 
-    :param id: The id of the payout.
-    :param chain_id: The chain identifier where the payout occurred.
-    :param escrow_address: The address of the escrow that executed the payout.
-    :param recipient: The address of the recipient.
-    :param amount: The amount of the payout.
-    :param created_at: The time of creation of the payout in milliseconds.
+    Attributes:
+        id (str): Unique payout identifier.
+        escrow_address (str): Address of the escrow that executed the payout.
+        recipient (str): Address of the payout recipient.
+        amount (int): Amount paid in token's smallest unit.
+        created_at (int): Payout creation timestamp in milliseconds.
     """
 
     def __init__(
@@ -180,16 +173,16 @@ class Payout:
 
 
 class CancellationRefund:
-    """
-    Represents a cancellation refund event.
+    """Represents a cancellation refund event.
 
-    :param id: The unique identifier for the cancellation refund event.
-    :param escrow_address: The address of the escrow associated with the refund.
-    :param receiver: The address of the recipient receiving the refund.
-    :param amount: The amount being refunded.
-    :param block: The block number in which the refund was processed.
-    :param timestamp: The timestamp of the refund event in milliseconds.
-    :param tx_hash: The transaction hash of the refund event.
+    Attributes:
+        id (str): Unique refund identifier.
+        escrow_address (str): Address of the escrow associated with the refund.
+        receiver (str): Address receiving the refund.
+        amount (int): Refunded amount in token's smallest unit.
+        block (int): Block number where the refund was processed.
+        timestamp (int): Refund timestamp in milliseconds.
+        tx_hash (str): Transaction hash of the refund.
     """
 
     def __init__(
@@ -212,8 +205,10 @@ class CancellationRefund:
 
 
 class EscrowUtils:
-    """
-    A utility class that provides additional escrow-related functionalities.
+    """Utility class providing escrow-related query and data retrieval functions.
+
+    This class offers static methods to fetch escrow data, status events, payouts,
+    and cancellation refunds from the Human Protocol subgraph.
     """
 
     @staticmethod
@@ -221,29 +216,37 @@ class EscrowUtils:
         filter: EscrowFilter,
         options: Optional[SubgraphOptions] = None,
     ) -> List[EscrowData]:
-        """Get an array of escrow addresses based on the specified filter parameters.
+        """Retrieve a list of escrows matching the provided filter criteria.
 
-        :param filter: Object containing all the necessary parameters to filter
-        :param options: Optional config for subgraph requests
+        Queries the subgraph for escrow contracts that match the specified parameters
+        including status, date range, and oracle addresses.
 
-        :return: List of escrows
+        Args:
+            filter (EscrowFilter): Filter parameters including chain ID, status, date range,
+                and oracle addresses.
+            options (Optional[SubgraphOptions]): Optional configuration for subgraph requests
+                such as custom endpoints or timeout settings.
 
-        :example:
-            .. code-block:: python
+        Returns:
+            A list of escrow records matching the filter criteria.
+                Returns an empty list if no matches are found.
 
-                from human_protocol_sdk.constants import ChainId
-                from human_protocol_sdk.escrow import EscrowUtils, EscrowFilter, Status
+        Example:
+            ```python
+            from human_protocol_sdk.constants import ChainId
+            from human_protocol_sdk.escrow import EscrowUtils, EscrowFilter, Status
 
-                print(
-                    EscrowUtils.get_escrows(
-                        EscrowFilter(
-                            networks=[ChainId.POLYGON_AMOY],
-                            status=Status.Pending,
-                            date_from=datetime.datetime(2023, 5, 8),
-                            date_to=datetime.datetime(2023, 6, 8),
-                        )
+            print(
+                EscrowUtils.get_escrows(
+                    EscrowFilter(
+                        networks=[ChainId.POLYGON_AMOY],
+                        status=Status.Pending,
+                        date_from=datetime.datetime(2023, 5, 8),
+                        date_to=datetime.datetime(2023, 6, 8),
                     )
                 )
+            )
+            ```
         """
         from human_protocol_sdk.gql.escrow import get_escrows_query
 
@@ -339,26 +342,33 @@ class EscrowUtils:
         escrow_address: str,
         options: Optional[SubgraphOptions] = None,
     ) -> Optional[EscrowData]:
-        """Returns the escrow for a given address.
+        """Fetch a single escrow by its address.
 
-        :param chain_id: Network in which the escrow has been deployed
-        :param escrow_address: Address of the escrow
-        :param options: Optional config for subgraph requests
+        Retrieves detailed information about a specific escrow contract from the subgraph.
 
-        :return: Escrow data
+        Args:
+            chain_id (ChainId): Network where the escrow has been deployed.
+            escrow_address (str): Address of the escrow contract.
+            options (Optional[SubgraphOptions]): Optional configuration for subgraph requests.
 
-        :example:
-            .. code-block:: python
+        Returns:
+            Escrow data if found, otherwise ``None``.
 
-                from human_protocol_sdk.constants import ChainId
-                from human_protocol_sdk.escrow import EscrowUtils
+        Raises:
+            EscrowClientError: If the chain ID is invalid or the escrow address is malformed.
 
-                print(
-                    EscrowUtils.get_escrow(
-                        ChainId.POLYGON_AMOY,
-                        "0x1234567890123456789012345678901234567890"
-                    )
+        Example:
+            ```python
+            from human_protocol_sdk.constants import ChainId
+            from human_protocol_sdk.escrow import EscrowUtils
+
+            print(
+                EscrowUtils.get_escrow(
+                    ChainId.POLYGON_AMOY,
+                    "0x1234567890123456789012345678901234567890",
                 )
+            )
+            ```
         """
         from human_protocol_sdk.gql.escrow import (
             get_escrow_query,
@@ -424,15 +434,39 @@ class EscrowUtils:
         filter: StatusEventFilter,
         options: Optional[SubgraphOptions] = None,
     ) -> List[StatusEvent]:
-        """
-        Retrieve status events for specified networks and statuses within a date range.
+        """Retrieve status change events for escrows.
 
-        :param filter: Object containing all the necessary parameters to filter status events.
-        :param options: Optional config for subgraph requests
+        Queries the subgraph for escrow status change events within the specified
+        date range and matching the provided statuses.
 
-        :return List[StatusEvent]: List of status events matching the query parameters.
+        Args:
+            filter (StatusEventFilter): Filter parameters including chain ID, statuses,
+                date range, and oracle addresses.
+            options (Optional[SubgraphOptions]): Optional configuration for subgraph requests.
 
-        :raise EscrowClientError: If an unsupported chain ID or invalid launcher address is provided.
+        Returns:
+            A list of status change events matching the filter criteria.
+                Returns an empty list if no matches are found.
+
+        Raises:
+            EscrowClientError: If an unsupported chain ID or invalid launcher address is provided.
+
+        Example:
+            ```python
+            from human_protocol_sdk.constants import ChainId, Status
+            from human_protocol_sdk.escrow import EscrowUtils
+            from human_protocol_sdk.filter import StatusEventFilter
+            import datetime
+
+            events = EscrowUtils.get_status_events(
+                StatusEventFilter(
+                    chain_id=ChainId.POLYGON_AMOY,
+                    statuses=[Status.Pending, Status.Completed],
+                    date_from=datetime.datetime(2023, 5, 8),
+                    date_to=datetime.datetime(2023, 6, 8),
+                )
+            )
+            ```
         """
         from human_protocol_sdk.gql.escrow import get_status_query
 
@@ -487,15 +521,36 @@ class EscrowUtils:
         filter: PayoutFilter,
         options: Optional[SubgraphOptions] = None,
     ) -> List[Payout]:
-        """
-        Fetch payouts from the subgraph based on the provided filter.
+        """Fetch payout records from the subgraph.
 
-        :param filter: Object containing all the necessary parameters to filter payouts.
-        :param options: Optional config for subgraph requests
+        Retrieves payout transactions for escrows based on the provided filter criteria
+        including escrow address, recipient, and date range.
 
-        :return List[Payout]: List of payouts matching the query parameters.
+        Args:
+            filter (PayoutFilter): Filter parameters including chain ID, escrow address,
+                recipient address, date range, pagination, and sorting options.
+            options (Optional[SubgraphOptions]): Optional configuration for subgraph requests.
 
-        :raise EscrowClientError: If an unsupported chain ID or invalid addresses are provided.
+        Returns:
+            A list of payout records matching the query parameters.
+                Returns an empty list if no matches are found.
+
+        Raises:
+            EscrowClientError: If an unsupported chain ID or invalid addresses are provided.
+
+        Example:
+            ```python
+            from human_protocol_sdk.constants import ChainId
+            from human_protocol_sdk.escrow import EscrowUtils
+            from human_protocol_sdk.filter import PayoutFilter
+
+            payouts = EscrowUtils.get_payouts(
+                PayoutFilter(
+                    chain_id=ChainId.POLYGON_AMOY,
+                    escrow_address="0x1234567890123456789012345678901234567890",
+                )
+            )
+            ```
         """
         from human_protocol_sdk.gql.payout import get_payouts_query
 
@@ -554,15 +609,36 @@ class EscrowUtils:
         filter: CancellationRefundFilter,
         options: Optional[SubgraphOptions] = None,
     ) -> List[CancellationRefund]:
-        """
-        Fetch cancellation refunds from the subgraph based on the provided filter.
+        """Fetch cancellation refund events from the subgraph.
 
-        :param filter: Object containing all the necessary parameters to filter cancellation refunds.
-        :param options: Optional config for subgraph requests
+        Retrieves cancellation refund transactions for escrows based on the provided
+        filter criteria including escrow address, receiver, and date range.
 
-        :return List[CancellationRefund]: List of cancellation refunds matching the query parameters.
+        Args:
+            filter (CancellationRefundFilter): Filter parameters including chain ID,
+                escrow address, receiver address, date range, pagination, and sorting options.
+            options (Optional[SubgraphOptions]): Optional configuration for subgraph requests.
 
-        :raise EscrowClientError: If an unsupported chain ID or invalid addresses are provided.
+        Returns:
+            A list of cancellation refunds matching the query parameters.
+                Returns an empty list if no matches are found.
+
+        Raises:
+            EscrowClientError: If an unsupported chain ID or invalid addresses are provided.
+
+        Example:
+            ```python
+            from human_protocol_sdk.constants import ChainId
+            from human_protocol_sdk.escrow import EscrowUtils
+            from human_protocol_sdk.filter import CancellationRefundFilter
+
+            refunds = EscrowUtils.get_cancellation_refunds(
+                CancellationRefundFilter(
+                    chain_id=ChainId.POLYGON_AMOY,
+                    escrow_address="0x1234567890123456789012345678901234567890",
+                )
+            )
+            ```
         """
         from human_protocol_sdk.gql.cancel import get_cancellation_refunds_query
 
@@ -624,27 +700,32 @@ class EscrowUtils:
         escrow_address: str,
         options: Optional[SubgraphOptions] = None,
     ) -> CancellationRefund:
-        """
-        Returns the cancellation refund for a given escrow address.
+        """Retrieve the cancellation refund for a specific escrow.
 
-        :param chain_id: Network in which the escrow has been deployed
-        :param escrow_address: Address of the escrow
-        :param options: Optional config for subgraph requests
+        Fetches the cancellation refund event associated with a given escrow address.
+        Each escrow can have at most one cancellation refund.
 
-        :return: CancellationRefund data or None
+        Args:
+            chain_id (ChainId): Network where the escrow has been deployed.
+            escrow_address (str): Address of the escrow contract.
+            options (Optional[SubgraphOptions]): Optional configuration for subgraph requests.
 
-        :raise EscrowClientError: If an unsupported chain ID or invalid address is provided.
+        Returns:
+            Cancellation refund data if found, otherwise ``None``.
 
-        :example:
-            .. code-block:: python
+        Raises:
+            EscrowClientError: If an unsupported chain ID or invalid escrow address is provided.
 
-                from human_protocol_sdk.constants import ChainId
-                from human_protocol_sdk.escrow import EscrowUtils
+        Example:
+            ```python
+            from human_protocol_sdk.constants import ChainId
+            from human_protocol_sdk.escrow import EscrowUtils
 
-                refund = EscrowUtils.get_cancellation_refund(
-                    ChainId.POLYGON_AMOY,
-                    "0x1234567890123456789012345678901234567890"
-                )
+            refund = EscrowUtils.get_cancellation_refund(
+                ChainId.POLYGON_AMOY,
+                "0x1234567890123456789012345678901234567890",
+            )
+            ```
         """
         from human_protocol_sdk.gql.cancel import (
             get_cancellation_refund_by_escrow_query,

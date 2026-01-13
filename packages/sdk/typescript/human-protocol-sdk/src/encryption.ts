@@ -4,8 +4,10 @@ import { IKeyPair } from './interfaces';
 /**
  * Type representing the data type of a message.
  * It can be either a string or a Uint8Array.
+ *
+ * @public
  */
-type MessageDataType = string | Uint8Array;
+export type MessageDataType = string | Uint8Array;
 
 function makeMessageDataBinary(message: MessageDataType): Uint8Array {
   if (typeof message === 'string') {
@@ -16,44 +18,11 @@ function makeMessageDataBinary(message: MessageDataType): Uint8Array {
 }
 
 /**
- * ## Introduction
- *
  * Class for signing and decrypting messages.
  *
  * The algorithm includes the implementation of the [PGP encryption algorithm](https://github.com/openpgpjs/openpgpjs) multi-public key encryption on typescript, and uses the vanilla [ed25519](https://en.wikipedia.org/wiki/EdDSA#Ed25519) implementation Schnorr signature for signatures and [curve25519](https://en.wikipedia.org/wiki/Curve25519) for encryption. [Learn more](https://wiki.polkadot.network/docs/learn-cryptography).
  *
- * To get an instance of this class, initialization is recommended using the static `build` method.
- *
- * ```ts
- * static async build(privateKeyArmored: string, passphrase?: string): Promise<Encryption>
- * ```
- *
- * ## Installation
- *
- * ### npm
- * ```bash
- * npm install @human-protocol/sdk
- * ```
- *
- * ### yarn
- * ```bash
- * yarn install @human-protocol/sdk
- * ```
- *
- * ## Input parameters
- *
- * - `privateKeyArmored` - The encrypted private key in armored format.
- * - `passphrase` - The passphrase for the private key.
- *
- * ## Code example
- *
- * ```ts
- * import { Encryption } from '@human-protocol/sdk';
- *
- * const privateKey = 'Armored_priv_key';
- * const passphrase = 'example_passphrase';
- * const encryption = await Encryption.build(privateKey, passphrase);
- * ```
+ * To get an instance of this class, initialization is recommended using the static [`build`](/ts/classes/Encryption/#build) method.
  */
 export class Encryption {
   private privateKey: openpgp.PrivateKey;
@@ -61,7 +30,7 @@ export class Encryption {
   /**
    * Constructor for the Encryption class.
    *
-   * @param {PrivateKey} privateKey - The private key.
+   * @param privateKey - The private key.
    */
   constructor(privateKey: openpgp.PrivateKey) {
     this.privateKey = privateKey;
@@ -70,9 +39,18 @@ export class Encryption {
   /**
    * Builds an Encryption instance by decrypting the private key from an encrypted private key and passphrase.
    *
-   * @param {string} privateKeyArmored - The encrypted private key in armored format.
-   * @param {string} passphrase - Optional: The passphrase for the private key.
-   * @returns {Promise<Encryption>} - The Encryption instance.
+   * @param privateKeyArmored - The encrypted private key in armored format.
+   * @param passphrase - The passphrase for the private key (optional).
+   * @returns The Encryption instance.
+   *
+   * @example
+   * ```ts
+   * import { Encryption } from '@human-protocol/sdk';
+   *
+   * const privateKey = 'Armored_priv_key';
+   * const passphrase = 'example_passphrase';
+   * const encryption = await Encryption.build(privateKey, passphrase);
+   * ```
    */
   public static async build(
     privateKeyArmored: string,
@@ -98,45 +76,18 @@ export class Encryption {
   /**
    * This function signs and encrypts a message using the private key used to initialize the client and the specified public keys.
    *
-   * @param {MessageDataType} message Message to sign and encrypt.
-   * @param {string[]} publicKeys Array of public keys to use for encryption.
-   * @returns {Promise<string>} Message signed and encrypted.
+   * @param message - Message to sign and encrypt.
+   * @param publicKeys - Array of public keys to use for encryption.
+   * @returns Message signed and encrypted.
    *
-   * **Code example**
-   *
+   * @example
    * ```ts
-   * import { Encryption } from '@human-protocol/sdk';
-   * import { EscrowClient } from '@human-protocol/sdk';
-   *
-   * const privateKey = 'Armored_priv_key';
-   * const passphrase = 'example_passphrase';
-   * const encryption = await Encryption.build(privateKey, passphrase);
-   * const publicKey1 = `-----BEGIN PGP PUBLIC KEY BLOCK-----
-   * xjMEZKQEMxYJKwYBBAHaRw8BAQdA5oZTq4UPlS0IXn4kEaSqQdAa9+Cq522v
-   * WYxJQn3vo1/NFEh1bWFuIDxodW1hbkBobXQuYWk+wowEEBYKAD4FAmSkBDME
-   * CwkHCAkQJBFPuuhtQo4DFQgKBBYAAgECGQECGwMCHgEWIQTQ5fbVPB9CWIdf
-   * XdYkEU+66G1CjgAAKYYA/jMyDCtJtqu6hj22kq9SW6fuV1FCT2ySJ9vBhumF
-   * X8wWAP433zVFl4VECOkgGk8qFr8BgkYxaz16GOFAqYbfO6oMBc44BGSkBDMS
-   * CisGAQQBl1UBBQEBB0AKR+A48zVVYZWQvgu7Opn2IGvzI9jePB/J8pzqRhg2
-   * YAMBCAfCeAQYFggAKgUCZKQEMwkQJBFPuuhtQo4CGwwWIQTQ5fbVPB9CWIdf
-   * XdYkEU+66G1CjgAA0xgBAK4AIahFFnmWR2Mp6A3q021cZXpGklc0Xw1Hfswc
-   * UYLqAQDfdym4kiUvKO1+REKASt0Gwykndl7hra9txqlUL5DXBQ===Vwgv
-   * -----END PGP PUBLIC KEY BLOCK-----`;
-   *
-   * const publicKey2 = `-----BEGIN PGP PUBLIC KEY BLOCK-----
-   * xjMEZKQEMxYJKwYBBAHaRw8BAQdAG6h+E+6T/RV2tIHer3FP/jKThAyGcoVx
-   * FzhnP0hncPzNFEh1bWFuIDxodW1hbkBobXQuYWk+wowEEBYKAD4FAmSkBDME
-   * CwkHCAkQPIq5xLhlTYkDFQgKBBYAAgECGQECGwMCHgEWIQTcxtMgul/AeUvH
-   * bio8irnEuGVNiQAA/HsBANpfFkxNYixpsBk8LlaaCaPy5f1/cWNPgODM9uzo
-   * ciSTAQDtAYynu4dSJO9GbMuDuc0FaUHRWJK3mS6JkvedYL4oBM44BGSkBDMS
-   * CisGAQQBl1UBBQEBB0DWbEG7DMhkeSc8ZPzrH8XNSCqS3t9y/oQidFR+xN3Z
-   * bAMBCAfCeAQYFggAKgUCZKQEMwkQPIq5xLhlTYkCGwwWIQTcxtMgul/AeUvH
-   * bio8irnEuGVNiQAAqt8BAM/4Lw0RVOb0L5Ki9CyxO/6AKvRg4ra3Q3WR+duP
-   * s/88AQCDErzvn+SOX4s3gvZcM3Vr4wh4Q2syHV8Okgx8STYPDg===DsVk
-   * -----END PGP PUBLIC KEY BLOCK-----`;
+   * const publicKey1 = '-----BEGIN PGP PUBLIC KEY BLOCK-----...';
+   * const publicKey2 = '-----BEGIN PGP PUBLIC KEY BLOCK-----...';
    *
    * const publicKeys = [publicKey1, publicKey2];
    * const resultMessage = await encryption.signAndEncrypt('message', publicKeys);
+   * console.log('Encrypted message:', resultMessage);
    * ```
    */
   public async signAndEncrypt(
@@ -163,32 +114,17 @@ export class Encryption {
   /**
    * This function decrypts messages using the private key. In addition, the public key can be added for signature verification.
    *
-   * @param {string} message Message to decrypt.
-   * @param {string} publicKey Public key used to verify signature if needed. This is optional.
-   * @returns {Promise<Uint8Array>} Message decrypted.
+   * @param message - Message to decrypt.
+   * @param publicKey - Public key used to verify signature if needed (optional).
+   * @returns Message decrypted.
+   * @throws Error If signature could not be verified when public key is provided
    *
-   * **Code example**
-   *
+   * @example
    * ```ts
-   * import { Encryption } from '@human-protocol/sdk';
+   * const publicKey = '-----BEGIN PGP PUBLIC KEY BLOCK-----...';
    *
-   * const privateKey = 'Armored_priv_key';
-   * const passphrase = 'example_passphrase';
-   * const encryption = await Encryption.build(privateKey, passphrase);
-   *
-   * const publicKey = `-----BEGIN PGP PUBLIC KEY BLOCK-----
-   * xjMEZKQEMxYJKwYBBAHaRw8BAQdA5oZTq4UPlS0IXn4kEaSqQdAa9+Cq522v
-   * WYxJQn3vo1/NFEh1bWFuIDxodW1hbkBobXQuYWk+wowEEBYKAD4FAmSkBDME
-   * CwkHCAkQJBFPuuhtQo4DFQgKBBYAAgECGQECGwMCHgEWIQTQ5fbVPB9CWIdf
-   * XdYkEU+66G1CjgAAKYYA/jMyDCtJtqu6hj22kq9SW6fuV1FCT2ySJ9vBhumF
-   * X8wWAP433zVFl4VECOkgGk8qFr8BgkYxaz16GOFAqYbfO6oMBc44BGSkBDMS
-   * CisGAQQBl1UBBQEBB0AKR+A48zVVYZWQvgu7Opn2IGvzI9jePB/J8pzqRhg2
-   * YAMBCAfCeAQYFggAKgUCZKQEMwkQJBFPuuhtQo4CGwwWIQTQ5fbVPB9CWIdf
-   * XdYkEU+66G1CjgAA0xgBAK4AIahFFnmWR2Mp6A3q021cZXpGklc0Xw1Hfswc
-   * UYLqAQDfdym4kiUvKO1+REKASt0Gwykndl7hra9txqlUL5DXBQ===Vwgv
-   * -----END PGP PUBLIC KEY BLOCK-----`;
-   *
-   * const resultMessage = await encryption.decrypt('message');
+   * const resultMessage = await encryption.decrypt('message', publicKey);
+   * console.log('Decrypted message:', resultMessage);
    * ```
    */
   public async decrypt(
@@ -233,19 +169,13 @@ export class Encryption {
   /**
    * This function signs a message using the private key used to initialize the client.
    *
-   * @param {string} message Message to sign.
-   * @returns {Promise<string>} Message signed.
+   * @param message - Message to sign.
+   * @returns Message signed.
    *
-   * **Code example**
-   *
+   * @example
    * ```ts
-   * import { Encryption } from '@human-protocol/sdk';
-   *
-   * const privateKey = 'Armored_priv_key';
-   * const passphrase = 'example_passphrase';
-   * const encryption = await Encryption.build(privateKey, passphrase);
-   *
    * const resultMessage = await encryption.sign('message');
+   * console.log('Signed message:', resultMessage);
    * ```
    */
   public async sign(message: string): Promise<string> {
@@ -263,56 +193,23 @@ export class Encryption {
 }
 
 /**
- * ## Introduction
- *
  * Utility class for encryption-related operations.
- *
- * ## Installation
- *
- * ### npm
- * ```bash
- * npm install @human-protocol/sdk
- * ```
- *
- * ### yarn
- * ```bash
- * yarn install @human-protocol/sdk
- * ```
- *
- * ## Code example
- *
- * ```ts
- * import { EncryptionUtils } from '@human-protocol/sdk';
- *
- * const keyPair = await EncryptionUtils.generateKeyPair('Human', 'human@hmt.ai');
- * ```
  */
 export class EncryptionUtils {
   /**
    * This function verifies the signature of a signed message using the public key.
    *
-   * @param {string} message Message to verify.
-   * @param {string} publicKey Public key to verify that the message was signed by a specific source.
-   * @returns {Promise<boolean>} True if verified. False if not verified.
+   * @param message - Message to verify.
+   * @param publicKey - Public key to verify that the message was signed by a specific source.
+   * @returns True if verified. False if not verified.
    *
-   * **Code example**
-   *
+   * @example
    * ```ts
    * import { EncryptionUtils } from '@human-protocol/sdk';
    *
-   * const publicKey = `-----BEGIN PGP PUBLIC KEY BLOCK-----
-   * xjMEZKQEMxYJKwYBBAHaRw8BAQdA5oZTq4UPlS0IXn4kEaSqQdAa9+Cq522v
-   * WYxJQn3vo1/NFEh1bWFuIDxodW1hbkBobXQuYWk+wowEEBYKAD4FAmSkBDME
-   * CwkHCAkQJBFPuuhtQo4DFQgKBBYAAgECGQECGwMCHgEWIQTQ5fbVPB9CWIdf
-   * XdYkEU+66G1CjgAAKYYA/jMyDCtJtqu6hj22kq9SW6fuV1FCT2ySJ9vBhumF
-   * X8wWAP433zVFl4VECOkgGk8qFr8BgkYxaz16GOFAqYbfO6oMBc44BGSkBDMS
-   * CisGAQQBl1UBBQEBB0AKR+A48zVVYZWQvgu7Opn2IGvzI9jePB/J8pzqRhg2
-   * YAMBCAfCeAQYFggAKgUCZKQEMwkQJBFPuuhtQo4CGwwWIQTQ5fbVPB9CWIdf
-   * XdYkEU+66G1CjgAA0xgBAK4AIahFFnmWR2Mp6A3q021cZXpGklc0Xw1Hfswc
-   * UYLqAQDfdym4kiUvKO1+REKASt0Gwykndl7hra9txqlUL5DXBQ===Vwgv
-   * -----END PGP PUBLIC KEY BLOCK-----`;
-   *
+   * const publicKey = '-----BEGIN PGP PUBLIC KEY BLOCK-----...';
    * const result = await EncryptionUtils.verify('message', publicKey);
+   * console.log('Verification result:', result);
    * ```
    */
   public static async verify(
@@ -337,15 +234,16 @@ export class EncryptionUtils {
   /**
    * This function gets signed data from a signed message.
    *
-   * @param {string} message Message.
-   * @returns {Promise<string>} Signed data.
+   * @param message - Message.
+   * @returns Signed data.
+   * @throws Error If data could not be extracted from the message
    *
-   * **Code example**
-   *
+   * @example
    * ```ts
    * import { EncryptionUtils } from '@human-protocol/sdk';
    *
    * const signedData = await EncryptionUtils.getSignedData('message');
+   * console.log('Signed data:', signedData);
    * ```
    */
   public static async getSignedData(message: string): Promise<string> {
@@ -363,20 +261,20 @@ export class EncryptionUtils {
   /**
    * This function generates a key pair for encryption and decryption.
    *
-   * @param {string} name Name for the key pair.
-   * @param {string} email Email for the key pair.
-   * @param {string} passphrase Passphrase to encrypt the private key. Optional.
-   * @returns {Promise<IKeyPair>} Key pair generated.
+   * @param name - Name for the key pair.
+   * @param email - Email for the key pair.
+   * @param passphrase - Passphrase to encrypt the private key (optional, defaults to empty string).
+   * @returns Key pair generated.
    *
-   * **Code example**
-   *
+   * @example
    * ```ts
    * import { EncryptionUtils } from '@human-protocol/sdk';
    *
    * const name = 'YOUR_NAME';
    * const email = 'YOUR_EMAIL';
    * const passphrase = 'YOUR_PASSPHRASE';
-   * const result = await EncryptionUtils.generateKeyPair(name, email, passphrase);
+   * const keyPair = await EncryptionUtils.generateKeyPair(name, email, passphrase);
+   * console.log('Public key:', keyPair.publicKey);
    * ```
    */
   public static async generateKeyPair(
@@ -404,41 +302,19 @@ export class EncryptionUtils {
   /**
    * This function encrypts a message using the specified public keys.
    *
-   * @param {MessageDataType} message Message to encrypt.
-   * @param {string[]} publicKeys Array of public keys to use for encryption.
-   * @returns {Promise<string>} Message encrypted.
+   * @param message - Message to encrypt.
+   * @param publicKeys - Array of public keys to use for encryption.
+   * @returns Message encrypted.
    *
-   * **Code example**
-   *
+   * @example
    * ```ts
    * import { EncryptionUtils } from '@human-protocol/sdk';
    *
-   * const publicKey1 = `-----BEGIN PGP PUBLIC KEY BLOCK-----
-   * xjMEZKQEMxYJKwYBBAHaRw8BAQdA5oZTq4UPlS0IXn4kEaSqQdAa9+Cq522v
-   * WYxJQn3vo1/NFEh1bWFuIDxodW1hbkBobXQuYWk+wowEEBYKAD4FAmSkBDME
-   * CwkHCAkQJBFPuuhtQo4DFQgKBBYAAgECGQECGwMCHgEWIQTQ5fbVPB9CWIdf
-   * XdYkEU+66G1CjgAAKYYA/jMyDCtJtqu6hj22kq9SW6fuV1FCT2ySJ9vBhumF
-   * X8wWAP433zVFl4VECOkgGk8qFr8BgkYxaz16GOFAqYbfO6oMBc44BGSkBDMS
-   * CisGAQQBl1UBBQEBB0AKR+A48zVVYZWQvgu7Opn2IGvzI9jePB/J8pzqRhg2
-   * YAMBCAfCeAQYFggAKgUCZKQEMwkQJBFPuuhtQo4CGwwWIQTQ5fbVPB9CWIdf
-   * XdYkEU+66G1CjgAA0xgBAK4AIahFFnmWR2Mp6A3q021cZXpGklc0Xw1Hfswc
-   * UYLqAQDfdym4kiUvKO1+REKASt0Gwykndl7hra9txqlUL5DXBQ===Vwgv
-   * -----END PGP PUBLIC KEY BLOCK-----`;
-   *
-   * const publicKey2 = `-----BEGIN PGP PUBLIC KEY BLOCK-----
-   * xjMEZKQEMxYJKwYBBAHaRw8BAQdAG6h+E+6T/RV2tIHer3FP/jKThAyGcoVx
-   * FzhnP0hncPzNFEh1bWFuIDxodW1hbkBobXQuYWk+wowEEBYKAD4FAmSkBDME
-   * CwkHCAkQPIq5xLhlTYkDFQgKBBYAAgECGQECGwMCHgEWIQTcxtMgul/AeUvH
-   * bio8irnEuGVNiQAA/HsBANpfFkxNYixpsBk8LlaaCaPy5f1/cWNPgODM9uzo
-   * ciSTAQDtAYynu4dSJO9GbMuDuc0FaUHRWJK3mS6JkvedYL4oBM44BGSkBDMS
-   * CisGAQQBl1UBBQEBB0DWbEG7DMhkeSc8ZPzrH8XNSCqS3t9y/oQidFR+xN3Z
-   * bAMBCAfCeAQYFggAKgUCZKQEMwkQPIq5xLhlTYkCGwwWIQTcxtMgul/AeUvH
-   * bio8irnEuGVNiQAAqt8BAM/4Lw0RVOb0L5Ki9CyxO/6AKvRg4ra3Q3WR+duP
-   * s/88AQCDErzvn+SOX4s3gvZcM3Vr4wh4Q2syHV8Okgx8STYPDg===DsVk
-   * -----END PGP PUBLIC KEY BLOCK-----`;
-   *
-   * const publicKeys = [publicKey1, publicKey2]
-   * const result = await EncryptionUtils.encrypt('message', publicKeys);
+   * const publicKey1 = '-----BEGIN PGP PUBLIC KEY BLOCK-----...';
+   * const publicKey2 = '-----BEGIN PGP PUBLIC KEY BLOCK-----...';
+   * const publicKeys = [publicKey1, publicKey2];
+   * const encryptedMessage = await EncryptionUtils.encrypt('message', publicKeys);
+   * console.log('Encrypted message:', encryptedMessage);
    * ```
    */
   public static async encrypt(
@@ -464,25 +340,15 @@ export class EncryptionUtils {
   /**
    * Verifies if a message appears to be encrypted with OpenPGP.
    *
-   * @param {string} message Message to verify.
-   * @returns {Promise<boolean>} `true` if the message appears to be encrypted, `false` if not.
+   * @param message - Message to verify.
+   * @returns `true` if the message appears to be encrypted, `false` if not.
    *
-   * **Code example:**
-   *
+   * @example
    * ```ts
-   * const message = `-----BEGIN PGP MESSAGE-----
+   * import { EncryptionUtils } from '@human-protocol/sdk';
    *
-   * wV4DqdeRpqH+jaISAQdAsvBFxikvjxRqC7ZlDe98cLd7/aeCEI/AcL8PpVKK
-   * mC0wKlwxNg/ADi55z9jcYFuMC4kKE+C/teM+JqiI8DO9AwassQUvKFtULnpx
-   * h2jaOjC/0sAQASjUsIFK8zbuDgk/P8T9Npn6px+GlJPg9K90iwtPWiIp0eyW
-   * 4zXamJZT51k2DyaUX/Rsc6P4PYhQRKjt0yxtH0jHPmKkLC/9eBeFf4GP0zlZ
-   * 18xMZ8uCpQCma708Gz0sJYxEz3u/eZdHD7Mc7tWQKyJG8MsTwM1P+fdK1X75
-   * L9UryJG2AY+6kKZhG4dqjNxiO4fWluiB2u7iMF+iLEyE3SQCEYorWMC+NDWi
-   * QIJZ7oQ2w7BaPo1a991gvTOSNm5v2x44KfqPI1uj859BjsQTCA==
-   * =tsmI
-   * -----END PGP MESSAGE-----`;
-   *
-   * const isEncrypted = await EncryptionUtils.isEncrypted(message);
+   * const message = '-----BEGIN PGP MESSAGE-----...';
+   * const isEncrypted = EncryptionUtils.isEncrypted(message);
    *
    * if (isEncrypted) {
    *   console.log('The message is encrypted with OpenPGP.');
