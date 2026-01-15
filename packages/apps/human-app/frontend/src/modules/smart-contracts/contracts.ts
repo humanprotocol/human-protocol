@@ -1,5 +1,5 @@
 // this file defines contract addresses
-// from https://docs.humanprotocol.org/human-tech-docs/architecture/components/smart-contracts/contract-addresses
+// from https://docs.humanprotocol.org/architecture/contracts/contract_addresses/
 
 import { ChainId } from '@human-protocol/sdk/src/enums';
 import { NETWORKS } from '@human-protocol/sdk/src/constants';
