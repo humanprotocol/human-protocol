@@ -10,30 +10,21 @@ from human_protocol_sdk.gql.statistics import (
     get_hmtoken_statistics_query,
 )
 from human_protocol_sdk.statistics import (
-    StatisticsClient,
+    StatisticsUtils,
     StatisticsFilter,
     HMTHoldersParam,
 )
 
 
-class TestStatisticsClient(unittest.TestCase):
-    def setUp(self):
-        self.statistics = StatisticsClient(ChainId.LOCALHOST)
-
-    def test_init_with_invalid_chain_id(self):
-        with self.assertRaises(ValueError) as cm:
-            StatisticsClient(ChainId(123))
-        self.assertEqual(f"123 is not a valid ChainId", str(cm.exception))
+class TestStatisticsUtils(unittest.TestCase):
 
     def test_get_escrow_statistics(self):
         param = StatisticsFilter(
             date_from=datetime.fromtimestamp(1683811973),
             date_to=datetime.fromtimestamp(1683812007),
         )
-        mock_function = MagicMock()
-
         with patch(
-            "human_protocol_sdk.statistics.statistics_client.custom_gql_fetch"
+            "human_protocol_sdk.statistics.statistics_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -60,7 +51,9 @@ class TestStatisticsClient(unittest.TestCase):
                 },
             ]
 
-            escrow_statistics = self.statistics.get_escrow_statistics(param)
+            escrow_statistics = StatisticsUtils.get_escrow_statistics(
+                ChainId.LOCALHOST, param
+            )
 
             mock_function.assert_any_call(
                 NETWORKS[ChainId.LOCALHOST],
@@ -100,10 +93,8 @@ class TestStatisticsClient(unittest.TestCase):
             date_from=datetime.fromtimestamp(1683811973),
             date_to=datetime.fromtimestamp(1683812007),
         )
-        mock_function = MagicMock()
-
         with patch(
-            "human_protocol_sdk.statistics.statistics_client.custom_gql_fetch"
+            "human_protocol_sdk.statistics.statistics_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -118,7 +109,9 @@ class TestStatisticsClient(unittest.TestCase):
                 },
             ]
 
-            payment_statistics = self.statistics.get_worker_statistics(param)
+            payment_statistics = StatisticsUtils.get_worker_statistics(
+                ChainId.LOCALHOST, param
+            )
 
             mock_function.assert_any_call(
                 NETWORKS[ChainId.LOCALHOST],
@@ -144,10 +137,8 @@ class TestStatisticsClient(unittest.TestCase):
             date_from=datetime.fromtimestamp(1683811973),
             date_to=datetime.fromtimestamp(1683812007),
         )
-        mock_function = MagicMock()
-
         with patch(
-            "human_protocol_sdk.statistics.statistics_client.custom_gql_fetch"
+            "human_protocol_sdk.statistics.statistics_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -164,7 +155,9 @@ class TestStatisticsClient(unittest.TestCase):
                 },
             ]
 
-            payment_statistics = self.statistics.get_payment_statistics(param)
+            payment_statistics = StatisticsUtils.get_payment_statistics(
+                ChainId.LOCALHOST, param
+            )
 
             mock_function.assert_any_call(
                 NETWORKS[ChainId.LOCALHOST],
@@ -193,10 +186,8 @@ class TestStatisticsClient(unittest.TestCase):
             )
 
     def test_get_hmt_statistics(self):
-        mock_function = MagicMock()
-
         with patch(
-            "human_protocol_sdk.statistics.statistics_client.custom_gql_fetch"
+            "human_protocol_sdk.statistics.statistics_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -210,7 +201,7 @@ class TestStatisticsClient(unittest.TestCase):
                 },
             ]
 
-            hmt_statistics = self.statistics.get_hmt_statistics()
+            hmt_statistics = StatisticsUtils.get_hmt_statistics(ChainId.LOCALHOST)
 
             mock_function.assert_any_call(
                 NETWORKS[ChainId.LOCALHOST],
@@ -227,10 +218,8 @@ class TestStatisticsClient(unittest.TestCase):
             order_direction="asc",
         )
 
-        mock_function = MagicMock()
-
         with patch(
-            "human_protocol_sdk.statistics.statistics_client.custom_gql_fetch"
+            "human_protocol_sdk.statistics.statistics_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -243,7 +232,7 @@ class TestStatisticsClient(unittest.TestCase):
                 }
             ]
 
-            holders = self.statistics.get_hmt_holders(param)
+            holders = StatisticsUtils.get_hmt_holders(ChainId.LOCALHOST, param)
 
             mock_function.assert_any_call(
                 NETWORKS[ChainId.LOCALHOST],
@@ -269,10 +258,8 @@ class TestStatisticsClient(unittest.TestCase):
             date_from=datetime.fromtimestamp(1683811973),
             date_to=datetime.fromtimestamp(1683812007),
         )
-        mock_function = MagicMock()
-
         with patch(
-            "human_protocol_sdk.statistics.statistics_client.custom_gql_fetch"
+            "human_protocol_sdk.statistics.statistics_utils.custom_gql_fetch"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -290,7 +277,9 @@ class TestStatisticsClient(unittest.TestCase):
                 },
             ]
 
-            hmt_statistics = self.statistics.get_hmt_daily_data(param)
+            hmt_statistics = StatisticsUtils.get_hmt_daily_data(
+                ChainId.LOCALHOST, param
+            )
 
             mock_function.assert_any_call(
                 NETWORKS[ChainId.LOCALHOST],

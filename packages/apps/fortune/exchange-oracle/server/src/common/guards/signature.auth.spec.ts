@@ -129,7 +129,7 @@ describe('SignatureAuthGuard', () => {
 
       mockRequest.headers[HEADER_SIGNATURE_KEY] = 'validSignature';
       mockRequest.body = {
-        assignment_id: '1',
+        assignment_id: '123abc',
       };
       (verifySignature as jest.Mock).mockReturnValue(true);
       assignmentRepository.findOneById.mockResolvedValue(null);

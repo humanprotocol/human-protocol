@@ -2,17 +2,43 @@ import { Box, Button, Grid, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useSnackbar } from '../../providers/SnackProvider';
-import { useWalletClient } from 'wagmi';
+import { useAccount, useWalletClient } from 'wagmi';
 import * as jobService from '../../services/job';
 
 const SolutionForm: React.FC = () => {
   const { assignmentId } = useParams<{ assignmentId: string }>();
 
-  const { data: signer } = useWalletClient();
+  const { address, chainId, connector, isConnected } = useAccount();
+  const { data: signer } = useWalletClient({
+    account: address,
+    chainId,
+    connector,
+    query: {
+      enabled: isConnected && !!address && !!connector,
+    },
+  });
   const [solution, setSolution] = useState('');
-  const { showError, openSnackbar } = useSnackbar();
+
+  type SnackbarApi = {
+    openSnackbar: (
+      message: string,
+      severity?: 'success' | 'error' | 'info' | 'warning',
+    ) => void;
+    showError: (error: unknown) => void;
+  };
+
+  const { showError, openSnackbar } = useSnackbar() as SnackbarApi;
 
   const handleSubmit = async () => {
+    if (!signer) {
+      openSnackbar('Please connect your wallet first', 'error');
+      return;
+    }
+
+    if (!assignmentId) {
+      openSnackbar('Missing assignment id', 'error');
+      return;
+    }
     const message = {
       solution,
       assignment_id: assignmentId,
@@ -69,7 +95,11 @@ const SolutionForm: React.FC = () => {
               sx={{ mb: 3, width: '300px' }}
             />
             <br />
-            <Button variant="contained" onClick={handleSubmit}>
+            <Button
+              variant="contained"
+              onClick={handleSubmit}
+              disabled={!signer || !assignmentId || !solution}
+            >
               Submit
             </Button>
           </Box>

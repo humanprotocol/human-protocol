@@ -113,7 +113,7 @@ $ yarn migration:show
 
 ## 📚 Documentation
 
-For detailed information about the Exchange Oracle, please refer to the [Human Protocol Tech Docs](https://human-protocol.gitbook.io/hub/human-tech-docs/architecture/components/job-launcher).
+For detailed information about the Exchange Oracle, please refer to the [Human Protocol Tech Docs](https://docs.humanprotocol.org/architecture/job_launcher/overview/).
 
 ## 📝 License
 

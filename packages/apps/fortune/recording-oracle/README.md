@@ -66,7 +66,7 @@ $ yarn run test:cov
 
 ## 📚 Documentation
 
-For detailed information about the Recording Oracle, please refer to the [Human Protocol Tech Docs](https://human-protocol.gitbook.io/hub/human-tech-docs/architecture/components/recording-oracle).
+For detailed information about the Recording Oracle, please refer to the [Human Protocol Tech Docs](https://docs.humanprotocol.org/architecture/recording_oracle/overview/).
 
 ## 📝 License
 

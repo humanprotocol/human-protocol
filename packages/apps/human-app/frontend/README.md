@@ -63,7 +63,7 @@ The Web3 setup is closely tied to contract addresses. The best explanation for t
 ```
 ...
 ## Web3 setup
-# set SC addresses according to https://human-protocol.gitbook.io/hub/human-tech-docs/architecture/components/smart-contracts/contract-addresses
+# set SC addresses according to https://docs.humanprotocol.org/architecture/contracts/contract_addresses/
 
 ## other networks
 # if you wish to add new network follow this instruction:

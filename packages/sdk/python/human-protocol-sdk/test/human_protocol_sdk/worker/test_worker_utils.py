@@ -145,7 +145,7 @@ class TestWorkerUtils(unittest.TestCase):
     def test_get_worker_invalid_address(self):
         with self.assertRaises(WorkerUtilsError) as cm:
             WorkerUtils.get_worker(ChainId.POLYGON_AMOY, "invalid_address")
-        self.assertEqual("Invalid operator address: invalid_address", str(cm.exception))
+        self.assertEqual(f"Invalid worker address: invalid_address", str(cm.exception))
 
 
 if __name__ == "__main__":

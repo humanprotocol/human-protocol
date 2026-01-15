@@ -1,5 +1,5 @@
 import { createMock } from '@golevelup/ts-jest';
-import { NETWORKS, StatisticsClient } from '@human-protocol/sdk';
+import { NETWORKS, StatisticsUtils } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ConfigService } from '@nestjs/config';
@@ -9,11 +9,6 @@ import { EnvironmentConfigService } from '../../common/config/env-config.service
 import { NetworkConfigService } from '../../common/config/network-config.service';
 import { DevelopmentChainId } from '../../common/constants';
 import { NetworksService } from './networks.service';
-
-jest.mock('@human-protocol/sdk', () => ({
-  ...jest.requireActual('@human-protocol/sdk'),
-  StatisticsClient: jest.fn(),
-}));
 
 describe('NetworksService', () => {
   let networksService: NetworksService;
@@ -53,6 +48,10 @@ describe('NetworksService', () => {
     cacheManager = module.get<Cache>(CACHE_MANAGER);
   });
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('should regenerate network list when cache TTL expires', async () => {
     const mockNetworkList = [
       DevelopmentChainId.SEPOLIA,
@@ -64,15 +63,18 @@ describe('NetworksService', () => {
     jest.spyOn(cacheManager, 'get').mockResolvedValue(null);
     jest.spyOn(cacheManager, 'set').mockResolvedValue(undefined);
 
-    const mockStatisticsClient = {
-      getHMTDailyData: jest
-        .fn()
-        .mockResolvedValue([{ totalTransactionCount: 7 }]),
-      getEscrowStatistics: jest.fn().mockResolvedValue({ totalEscrows: 1 }),
-    };
-    (StatisticsClient as jest.Mock).mockImplementation(
-      () => mockStatisticsClient,
-    );
+    jest.spyOn(StatisticsUtils, 'getHMTDailyData').mockResolvedValue([
+      {
+        timestamp: 0,
+        totalTransactionCount: 7,
+        totalTransactionAmount: 0n,
+        dailyUniqueSenders: 0,
+        dailyUniqueReceivers: 0,
+      },
+    ]);
+    jest
+      .spyOn(StatisticsUtils, 'getEscrowStatistics')
+      .mockResolvedValue({ totalEscrows: 1, dailyEscrowsData: [] });
 
     // First call should populate cache
     const firstCallResult = await networksService.getOperatingNetworks();
@@ -113,18 +115,25 @@ describe('NetworksService', () => {
 
   it('should fetch and filter available networks correctly', async () => {
     jest.spyOn(cacheManager, 'get').mockResolvedValue(null);
-    const mockStatisticsClient = {
-      getHMTDailyData: jest
-        .fn()
-        .mockResolvedValue([
-          { totalTransactionCount: 4 },
-          { totalTransactionCount: 3 },
-        ]),
-      getEscrowStatistics: jest.fn().mockResolvedValue({ totalEscrows: 1 }),
-    };
-    (StatisticsClient as jest.Mock).mockImplementation(
-      () => mockStatisticsClient,
-    );
+    jest.spyOn(StatisticsUtils, 'getHMTDailyData').mockResolvedValue([
+      {
+        timestamp: 0,
+        totalTransactionCount: 4,
+        totalTransactionAmount: 0n,
+        dailyUniqueSenders: 0,
+        dailyUniqueReceivers: 0,
+      },
+      {
+        timestamp: 0,
+        totalTransactionCount: 3,
+        totalTransactionAmount: 0n,
+        dailyUniqueSenders: 0,
+        dailyUniqueReceivers: 0,
+      },
+    ]);
+    jest
+      .spyOn(StatisticsUtils, 'getEscrowStatistics')
+      .mockResolvedValue({ totalEscrows: 1, dailyEscrowsData: [] });
 
     const result = await networksService.getOperatingNetworks();
     expect(result).toEqual(
@@ -143,15 +152,18 @@ describe('NetworksService', () => {
 
   it('should exclude networks without sufficient HMT transfers', async () => {
     jest.spyOn(cacheManager, 'get').mockResolvedValue(null);
-    const mockStatisticsClient = {
-      getHMTDailyData: jest
-        .fn()
-        .mockResolvedValue([{ totalTransactionCount: 2 }]),
-      getEscrowStatistics: jest.fn().mockResolvedValue({ totalEscrows: 1 }),
-    };
-    (StatisticsClient as jest.Mock).mockImplementation(
-      () => mockStatisticsClient,
-    );
+    jest.spyOn(StatisticsUtils, 'getHMTDailyData').mockResolvedValue([
+      {
+        timestamp: 0,
+        totalTransactionCount: 2,
+        totalTransactionAmount: 0n,
+        dailyUniqueSenders: 0,
+        dailyUniqueReceivers: 0,
+      },
+    ]);
+    jest
+      .spyOn(StatisticsUtils, 'getEscrowStatistics')
+      .mockResolvedValue({ totalEscrows: 1, dailyEscrowsData: [] });
 
     const result = await networksService.getOperatingNetworks();
     expect(result).toEqual([]);
@@ -163,18 +175,25 @@ describe('NetworksService', () => {
     const originalNetworkConfig = NETWORKS[DevelopmentChainId.SEPOLIA];
     NETWORKS[DevelopmentChainId.SEPOLIA] = undefined;
 
-    const mockStatisticsClient = {
-      getHMTDailyData: jest
-        .fn()
-        .mockResolvedValue([
-          { totalTransactionCount: 3 },
-          { totalTransactionCount: 3 },
-        ]),
-      getEscrowStatistics: jest.fn().mockResolvedValue({ totalEscrows: 1 }),
-    };
-    (StatisticsClient as jest.Mock).mockImplementation(
-      () => mockStatisticsClient,
-    );
+    jest.spyOn(StatisticsUtils, 'getHMTDailyData').mockResolvedValue([
+      {
+        timestamp: 0,
+        totalTransactionCount: 3,
+        totalTransactionAmount: 0n,
+        dailyUniqueSenders: 0,
+        dailyUniqueReceivers: 0,
+      },
+      {
+        timestamp: 0,
+        totalTransactionCount: 3,
+        totalTransactionAmount: 0n,
+        dailyUniqueSenders: 0,
+        dailyUniqueReceivers: 0,
+      },
+    ]);
+    jest
+      .spyOn(StatisticsUtils, 'getEscrowStatistics')
+      .mockResolvedValue({ totalEscrows: 1, dailyEscrowsData: [] });
 
     const result = await networksService.getOperatingNetworks();
 
@@ -186,15 +205,12 @@ describe('NetworksService', () => {
 
   it('should handle errors in getHMTDailyData gracefully', async () => {
     jest.spyOn(cacheManager, 'get').mockResolvedValue(null);
-    const mockStatisticsClient = {
-      getHMTDailyData: jest
-        .fn()
-        .mockRejectedValue(new Error('Failed to fetch HMT data')),
-      getEscrowStatistics: jest.fn().mockResolvedValue({ totalEscrows: 1 }),
-    };
-    (StatisticsClient as jest.Mock).mockImplementation(
-      () => mockStatisticsClient,
-    );
+    jest
+      .spyOn(StatisticsUtils, 'getHMTDailyData')
+      .mockRejectedValue(new Error('Failed to fetch HMT data'));
+    jest
+      .spyOn(StatisticsUtils, 'getEscrowStatistics')
+      .mockResolvedValue({ totalEscrows: 1, dailyEscrowsData: [] });
 
     const result = await networksService.getOperatingNetworks();
     expect(result).toEqual([]);
@@ -202,20 +218,25 @@ describe('NetworksService', () => {
 
   it('should handle errors in getEscrowStatistics gracefully', async () => {
     jest.spyOn(cacheManager, 'get').mockResolvedValue(null);
-    const mockStatisticsClient = {
-      getHMTDailyData: jest
-        .fn()
-        .mockResolvedValue([
-          { totalTransactionCount: 3 },
-          { totalTransactionCount: 2 },
-        ]),
-      getEscrowStatistics: jest
-        .fn()
-        .mockRejectedValue(new Error('Failed to fetch escrow stats')),
-    };
-    (StatisticsClient as jest.Mock).mockImplementation(
-      () => mockStatisticsClient,
-    );
+    jest.spyOn(StatisticsUtils, 'getHMTDailyData').mockResolvedValue([
+      {
+        timestamp: 0,
+        totalTransactionCount: 3,
+        totalTransactionAmount: 0n,
+        dailyUniqueSenders: 0,
+        dailyUniqueReceivers: 0,
+      },
+      {
+        timestamp: 0,
+        totalTransactionCount: 2,
+        totalTransactionAmount: 0n,
+        dailyUniqueSenders: 0,
+        dailyUniqueReceivers: 0,
+      },
+    ]);
+    jest
+      .spyOn(StatisticsUtils, 'getEscrowStatistics')
+      .mockRejectedValue(new Error('Failed to fetch escrow stats'));
 
     const result = await networksService.getOperatingNetworks();
     expect(result).toEqual([]);
