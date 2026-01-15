@@ -1,0 +1,5745 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://sdk.humanprotocol.org/python/6.0.0/escrow_client/">
+      
+      
+        <link rel="prev" href="../legacy_encryption/">
+      
+      
+        <link rel="next" href="../escrow_utils/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/img/logo.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
+    
+    
+      
+        <title>EscrowClient - HUMAN Protocol Python SDK Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.618322db.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Noto Sans";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../assets/css/custom.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#human_protocol_sdk.escrow.escrow_client" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+
+
+
+
+
+  
+
+
+    <div class="md-header__langswitch md-header__button" tabindex="0" data-lang-default="python">
+      <span class="md-header__langlabel">
+        Python
+      </span>
+      <span class="md-header__langcaret">▾</span>
+
+      <div class="md-header__langmenu">
+        <a href="/ts/"
+           class="md-header__langitem">
+          TypeScript
+        </a>
+        <a href="/python/"
+           class="md-header__langitem md-header__langitem--active">
+          Python
+        </a>
+      </div>
+    </div>
+
+    
+
+    <a href="https://sdk.humanprotocol.org"
+       title="HUMAN Protocol Python SDK Docs"
+       class="md-header__button md-logo"
+       aria-label="HUMAN Protocol Python SDK Docs"
+       data-md-component="logo">
+      <a href="https://sdk.humanprotocol.org"
+   class="md-header__button md-logo"
+   aria-label="HUMAN Protocol Python SDK Docs"
+   target="_self">
+  
+    <img src="../assets/img/logo.svg" alt="HUMAN Protocol Python SDK Docs">
+  
+</a>
+    </a>
+
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">HUMAN Protocol Python SDK Docs</span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              EscrowClient
+            
+          </span>
+        </div>
+      </div>
+    </div>
+
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="purple"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="purple"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9 2c-1.05 0-2.05.16-3 .46 4.06 1.27 7 5.04 7 9.54s-2.94 8.27-7 9.54c.95.3 1.95.46 3 .46a10 10 0 0 0 10-10A10 10 0 0 0 9 2"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+
+    
+
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+
+    
+      <div class="md-header__source">
+        <a href="https://github.com/humanprotocol/human-protocol" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    humanprotocol/human-protocol
+  </div>
+</a>
+      </div>
+    
+  </nav>
+
+  
+</header>
+
+  <div class="md-disclaimer">
+    <div class="md-grid">
+      <p>
+        The new styling applies starting with version 5.2.0. For earlier versions, visit
+        <a href="https://legacy-sdk.humanprotocol.org" class="md-disclaimer__link">legacy-sdk.humanprotocol.org</a>.
+      </p>
+    </div>
+  </div>
+
+<script>
+  (function () {
+    function updateLangSwitch() {
+      const path = (window.location && window.location.pathname) || "";
+      const firstSegment = path.split("/").filter(Boolean)[0] || "";
+      const switchEl = document.querySelector(".md-header__langswitch");
+      const defaultLang = (switchEl && switchEl.dataset.langDefault) || "ts";
+      const isTs = firstSegment === "ts";
+      const isPy = firstSegment === "python";
+      const currentLang = isTs ? "ts" : isPy ? "python" : defaultLang;
+      const detectedLabel = currentLang === "ts" ? "TypeScript" : "Python";
+      document.querySelectorAll(".md-header__langlabel").forEach((el) => {
+        el.textContent = detectedLabel;
+      });
+      document.querySelectorAll(".md-header__langitem").forEach((el) => {
+        const href = el.getAttribute("href") || "";
+        const active =
+          (currentLang === "ts" && href.indexOf("/ts") === 0) ||
+          (currentLang === "python" && href.indexOf("/python") === 0);
+        el.classList.toggle("md-header__langitem--active", active);
+      });
+    }
+
+    // Initial load
+    updateLangSwitch();
+
+    // Update immediately when a language item is clicked (before navigation)
+    document.querySelectorAll(".md-header__langitem").forEach((el) => {
+      el.addEventListener("click", (ev) => {
+        const href = el.getAttribute("href") || "";
+        const isTsTarget = href.indexOf("/ts") === 0;
+        const isPyTarget = href.indexOf("/python") === 0;
+        const label = document.querySelectorAll(".md-header__langlabel");
+        label.forEach((el) => {
+          if (isTsTarget) el.textContent = "TypeScript";
+          else if (isPyTarget) el.textContent = "Python";
+        });
+      });
+    });
+
+    // Re-run after client-side navigation (Material instant loading)
+    if (window.document$ && typeof window.document$.subscribe === "function") {
+      window.document$.subscribe(updateLangSwitch);
+    }
+
+    // Safety: rerun after initial paint
+    window.addEventListener("load", () => setTimeout(updateLangSwitch, 0));
+  })();
+</script>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="HUMAN Protocol Python SDK Docs" class="md-nav__button md-logo" aria-label="HUMAN Protocol Python SDK Docs" data-md-component="logo">
+      <a href="https://sdk.humanprotocol.org"
+   class="md-header__button md-logo"
+   aria-label="HUMAN Protocol Python SDK Docs"
+   target="_self">
+  
+    <img src="../assets/img/logo.svg" alt="HUMAN Protocol Python SDK Docs">
+  
+</a>
+    </a>
+    HUMAN Protocol Python SDK Docs
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/humanprotocol/human-protocol" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    humanprotocol/human-protocol
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../encryption/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Encryption
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Escrow
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Escrow
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    EscrowClient
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    EscrowClient
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        escrow_client
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowCancel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        EscrowCancel
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        EscrowClient
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="EscrowClient">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.bulk_payout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        bulk_payout
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.cancel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        cancel
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.complete" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        complete
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.create_bulk_payout_transaction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        create_bulk_payout_transaction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.create_escrow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        create_escrow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.create_fund_and_setup_escrow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        create_fund_and_setup_escrow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.ensure_correct_bulk_payout_input" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ensure_correct_bulk_payout_input
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.fund" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fund
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_balance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_balance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_exchange_oracle_address" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_exchange_oracle_address
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_factory_address" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_factory_address
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_intermediate_results_hash" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_intermediate_results_hash
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_intermediate_results_url" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_intermediate_results_url
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_job_launcher_address" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_job_launcher_address
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_manifest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_manifest
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_manifest_hash" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_manifest_hash
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_recording_oracle_address" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_recording_oracle_address
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_reputation_oracle_address" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_reputation_oracle_address
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_reserved_funds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_reserved_funds
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_results_url" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_results_url
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_status
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_token_address" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_token_address
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.request_cancellation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        request_cancellation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        setup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.store_results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        store_results
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.withdraw" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        withdraw
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClientError" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        EscrowClientError
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowConfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        EscrowConfig
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowWithdraw" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        EscrowWithdraw
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../escrow_utils/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    EscrowUtils
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../kvstore_client/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    KVStore
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../operator_utils/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operator
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../staking_client/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Staking
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../statistics_utils/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Statistics
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../transaction_utils/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Transaction
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../worker_utils/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Worker
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core utilities
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        escrow_client
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowCancel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        EscrowCancel
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        EscrowClient
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="EscrowClient">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.bulk_payout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        bulk_payout
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.cancel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        cancel
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.complete" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        complete
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.create_bulk_payout_transaction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        create_bulk_payout_transaction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.create_escrow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        create_escrow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.create_fund_and_setup_escrow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        create_fund_and_setup_escrow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.ensure_correct_bulk_payout_input" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ensure_correct_bulk_payout_input
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.fund" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fund
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_balance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_balance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_exchange_oracle_address" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_exchange_oracle_address
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_factory_address" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_factory_address
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_intermediate_results_hash" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_intermediate_results_hash
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_intermediate_results_url" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_intermediate_results_url
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_job_launcher_address" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_job_launcher_address
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_manifest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_manifest
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_manifest_hash" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_manifest_hash
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_recording_oracle_address" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_recording_oracle_address
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_reputation_oracle_address" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_reputation_oracle_address
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_reserved_funds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_reserved_funds
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_results_url" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_results_url
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_status
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_token_address" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_token_address
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.request_cancellation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        request_cancellation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        setup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.store_results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        store_results
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.withdraw" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        withdraw
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowClientError" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        EscrowClientError
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowConfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        EscrowConfig
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#human_protocol_sdk.escrow.escrow_client.EscrowWithdraw" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        EscrowWithdraw
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+        
+  
+  
+    <li class="md-path__item">
+      <a href=".." class="md-path__link">
+        
+  <span class="md-ellipsis">
+    Overview
+  </span>
+
+      </a>
+    </li>
+  
+
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="./" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Escrow
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+  <h1>EscrowClient</h1>
+
+<div class="doc doc-object doc-module">
+
+
+
+<a id="human_protocol_sdk.escrow.escrow_client"></a>
+    <div class="doc doc-contents first">
+
+        <p>Client to perform actions on Escrow contracts and obtain information from the contracts.</p>
+<p>Selects the network based on the Web3 chain id. Configure Web3 with an account
+and signer middleware for writes; read operations work without a signer.</p>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <p>With signer:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">eth_typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">URI</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">web3</span><span class="w"> </span><span class="kn">import</span> <span class="n">Web3</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">web3.middleware</span><span class="w"> </span><span class="kn">import</span> <span class="n">SignAndSendRawMiddlewareBuilder</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">web3.providers.auto</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_provider_from_uri</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="kn">from</span><span class="w"> </span><span class="nn">human_protocol_sdk.escrow</span><span class="w"> </span><span class="kn">import</span> <span class="n">EscrowClient</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="k">def</span><span class="w"> </span><span class="nf">get_w3_with_priv_key</span><span class="p">(</span><span class="n">priv_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="n">w3</span> <span class="o">=</span> <span class="n">Web3</span><span class="p">(</span><span class="n">load_provider_from_uri</span><span class="p">(</span><span class="n">URI</span><span class="p">(</span><span class="s2">&quot;http://localhost:8545&quot;</span><span class="p">)))</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="n">gas_payer</span> <span class="o">=</span> <span class="n">w3</span><span class="o">.</span><span class="n">eth</span><span class="o">.</span><span class="n">account</span><span class="o">.</span><span class="n">from_key</span><span class="p">(</span><span class="n">priv_key</span><span class="p">)</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="n">w3</span><span class="o">.</span><span class="n">eth</span><span class="o">.</span><span class="n">default_account</span> <span class="o">=</span> <span class="n">gas_payer</span><span class="o">.</span><span class="n">address</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    <span class="n">w3</span><span class="o">.</span><span class="n">middleware_onion</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>        <span class="n">SignAndSendRawMiddlewareBuilder</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">priv_key</span><span class="p">),</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>        <span class="s1">&#39;SignAndSendRawMiddlewareBuilder&#39;</span><span class="p">,</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>        <span class="n">layer</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>    <span class="p">)</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>    <span class="k">return</span> <span class="p">(</span><span class="n">w3</span><span class="p">,</span> <span class="n">gas_payer</span><span class="p">)</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="p">(</span><span class="n">w3</span><span class="p">,</span> <span class="n">gas_payer</span><span class="p">)</span> <span class="o">=</span> <span class="n">get_w3_with_priv_key</span><span class="p">(</span><span class="s1">&#39;YOUR_PRIVATE_KEY&#39;</span><span class="p">)</span>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="n">escrow_client</span> <span class="o">=</span> <span class="n">EscrowClient</span><span class="p">(</span><span class="n">w3</span><span class="p">)</span>
+</code></pre></div></p>
+<p>Read-only:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">eth_typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">URI</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">web3</span><span class="w"> </span><span class="kn">import</span> <span class="n">Web3</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">web3.providers.auto</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_provider_from_uri</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="kn">from</span><span class="w"> </span><span class="nn">human_protocol_sdk.escrow</span><span class="w"> </span><span class="kn">import</span> <span class="n">EscrowClient</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="n">w3</span> <span class="o">=</span> <span class="n">Web3</span><span class="p">(</span><span class="n">load_provider_from_uri</span><span class="p">(</span><span class="n">URI</span><span class="p">(</span><span class="s2">&quot;http://localhost:8545&quot;</span><span class="p">)))</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="n">escrow_client</span> <span class="o">=</span> <span class="n">EscrowClient</span><span class="p">(</span><span class="n">w3</span><span class="p">)</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="human_protocol_sdk.escrow.escrow_client.EscrowCancel" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">EscrowCancel</span>
+
+
+<a href="#human_protocol_sdk.escrow.escrow_client.EscrowCancel" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">EscrowCancel</span><span class="p">(</span><span class="n">tx_hash</span><span class="p">,</span> <span class="n">amount_refunded</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+
+
+        <p>Represents the result of an escrow cancellation transaction.</p>
+
+
+<p><span class="doc-section-title">Attributes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><span title="human_protocol_sdk.escrow.escrow_client.EscrowCancel.txHash">txHash</span></code></td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The hash of the transaction that cancelled the escrow.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="human_protocol_sdk.escrow.escrow_client.EscrowCancel.amountRefunded">amountRefunded</span></code></td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The amount refunded during the escrow cancellation.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="human_protocol_sdk.escrow.escrow_client.EscrowClient" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">EscrowClient</span>
+
+
+<a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">EscrowClient</span><span class="p">(</span><span class="n">web3</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+
+
+        <p>A client for interacting with escrow smart contracts.</p>
+<p>This client provides methods to create, fund, configure, and manage escrow contracts
+on the Human Protocol network. It handles transaction signing, validation, and
+event processing for escrow operations.</p>
+
+
+<p><span class="doc-section-title">Attributes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><span title="human_protocol_sdk.escrow.escrow_client.EscrowClient.w3">w3</span></code></td>
+            <td>
+                  <code><span title="web3.Web3">Web3</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Web3 instance configured for the target network.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="human_protocol_sdk.escrow.escrow_client.EscrowClient.network">network</span></code></td>
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Network configuration for the current chain.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="human_protocol_sdk.escrow.escrow_client.EscrowClient.factory_contract">factory_contract</span></code></td>
+            <td>
+                  <code><span title="Contract">Contract</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Contract instance for the escrow factory.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+        <p>Initialize an EscrowClient instance.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>web3</code>
+            </td>
+            <td>
+                  <code><span title="web3.Web3">Web3</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Web3 instance configured for the target network.
+Must have a valid provider and chain ID.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="EscrowClientError (human_protocol_sdk.escrow.escrow_client.EscrowClientError)" href="#human_protocol_sdk.escrow.escrow_client.EscrowClientError">EscrowClientError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If chain ID is invalid or network configuration is missing.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="human_protocol_sdk.escrow.escrow_client.EscrowClient.bulk_payout" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">bulk_payout</span>
+
+
+<a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.bulk_payout" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">bulk_payout</span><span class="p">(</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">escrow_address</span><span class="p">,</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">recipients</span><span class="p">,</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">amounts</span><span class="p">,</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">final_results_url</span><span class="p">,</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">final_results_hash</span><span class="p">,</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">payout_id</span><span class="p">,</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n">force_complete</span><span class="p">,</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="n">tx_options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Distribute payouts to recipients and set final results.</p>
+<p>Performs bulk payment distribution to multiple recipients and records the final
+results URL and hash.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>escrow_address</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Address of the escrow.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>recipients</code>
+            </td>
+            <td>
+                  <code><span title="typing.List">List</span>[<span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>List of recipient addresses.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>amounts</code>
+            </td>
+            <td>
+                  <code><span title="typing.List">List</span>[<span title="int">int</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Token amounts for each recipient (in token's smallest unit).</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>final_results_url</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Final results file URL.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>final_results_hash</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Final results file hash.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>payout_id</code>
+            </td>
+            <td>
+                  <code><span title="typing.Union">Union</span>[<span title="str">str</span>, <span title="int">int</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Payout identifier. String for newer contracts,
+integer transaction ID for older contracts.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>force_complete</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Whether to force completion after payout (if supported).</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>tx_options</code>
+            </td>
+            <td>
+                  <code><span title="typing.Optional">Optional</span>[<span title="web3.types.TxParams">TxParams</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional transaction parameters such as gas limit.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code>None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>None</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="EscrowClientError (human_protocol_sdk.escrow.escrow_client.EscrowClientError)" href="#human_protocol_sdk.escrow.escrow_client.EscrowClientError">EscrowClientError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If validation fails or the transaction reverts.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="example" open>
+  <summary>Example</summary>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">escrow_client</span><span class="o">.</span><span class="n">bulk_payout</span><span class="p">(</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="s2">&quot;0x62dD51230A30401C455c8398d06F85e4EaB6309f&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="p">[</span><span class="s2">&quot;0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266&quot;</span><span class="p">],</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="p">[</span><span class="n">Web3</span><span class="o">.</span><span class="n">to_wei</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;ether&quot;</span><span class="p">)],</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="s2">&quot;http://localhost/results.json&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="s2">&quot;b5dad76bf6772c0f07fd5e048f6e75a5f86ee079&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">payout_id</span><span class="o">=</span><span class="s2">&quot;payout-1&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n">force_complete</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="p">)</span>
+</code></pre></div>
+</details>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="human_protocol_sdk.escrow.escrow_client.EscrowClient.cancel" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">cancel</span>
+
+
+<a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.cancel" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">cancel</span><span class="p">(</span><span class="n">escrow_address</span><span class="p">,</span> <span class="n">tx_options</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Cancel the specified escrow and refund the balance.</p>
+<p>Finalizes the cancellation and transfers remaining funds to the canceler.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>escrow_address</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Address of the escrow to cancel.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>tx_options</code>
+            </td>
+            <td>
+                  <code><span title="typing.Optional">Optional</span>[<span title="web3.types.TxParams">TxParams</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional transaction parameters such as gas limit.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="EscrowCancel (human_protocol_sdk.escrow.escrow_client.EscrowCancel)" href="#human_protocol_sdk.escrow.escrow_client.EscrowCancel">EscrowCancel</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Cancellation details including transaction hash and refunded amount.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="EscrowClientError (human_protocol_sdk.escrow.escrow_client.EscrowClientError)" href="#human_protocol_sdk.escrow.escrow_client.EscrowClientError">EscrowClientError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If validation fails or the transfer event is missing.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="example" open>
+  <summary>Example</summary>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">escrow_cancel_data</span> <span class="o">=</span> <span class="n">escrow_client</span><span class="o">.</span><span class="n">cancel</span><span class="p">(</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="s2">&quot;0x62dD51230A30401C455c8398d06F85e4EaB6309f&quot;</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">)</span>
+</code></pre></div>
+</details>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="human_protocol_sdk.escrow.escrow_client.EscrowClient.complete" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">complete</span>
+
+
+<a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.complete" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">complete</span><span class="p">(</span><span class="n">escrow_address</span><span class="p">,</span> <span class="n">tx_options</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Set the status of an escrow to completed.</p>
+<p>Marks the escrow as completed, preventing further modifications.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>escrow_address</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Address of the escrow to complete.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>tx_options</code>
+            </td>
+            <td>
+                  <code><span title="typing.Optional">Optional</span>[<span title="web3.types.TxParams">TxParams</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional transaction parameters such as gas limit.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code>None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>None</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="EscrowClientError (human_protocol_sdk.escrow.escrow_client.EscrowClientError)" href="#human_protocol_sdk.escrow.escrow_client.EscrowClientError">EscrowClientError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If validation fails or the transaction reverts.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="example" open>
+  <summary>Example</summary>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">escrow_client</span><span class="o">.</span><span class="n">complete</span><span class="p">(</span><span class="s2">&quot;0x62dD51230A30401C455c8398d06F85e4EaB6309f&quot;</span><span class="p">)</span>
+</code></pre></div>
+</details>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="human_protocol_sdk.escrow.escrow_client.EscrowClient.create_bulk_payout_transaction" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">create_bulk_payout_transaction</span>
+
+
+<a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.create_bulk_payout_transaction" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">create_bulk_payout_transaction</span><span class="p">(</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">escrow_address</span><span class="p">,</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">recipients</span><span class="p">,</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">amounts</span><span class="p">,</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">final_results_url</span><span class="p">,</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">final_results_hash</span><span class="p">,</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">payoutId</span><span class="p">,</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n">force_complete</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="n">tx_options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Prepare an unsigned bulk payout transaction.</p>
+<p>Creates a transaction dictionary that can be signed and sent externally.
+Useful for offline signing or custom transaction handling.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>escrow_address</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Address of the escrow.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>recipients</code>
+            </td>
+            <td>
+                  <code><span title="typing.List">List</span>[<span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>List of recipient addresses.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>amounts</code>
+            </td>
+            <td>
+                  <code><span title="typing.List">List</span>[<span title="int">int</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Token amounts for each recipient (in token's smallest unit).</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>final_results_url</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Final results file URL.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>final_results_hash</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Final results file hash.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>payoutId</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Unique identifier for the payout (string signature).</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>force_complete</code>
+            </td>
+            <td>
+                  <code><span title="typing.Optional">Optional</span>[<span title="bool">bool</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Whether to force completion after payout. Defaults to False.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>tx_options</code>
+            </td>
+            <td>
+                  <code><span title="typing.Optional">Optional</span>[<span title="web3.types.TxParams">TxParams</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional transaction parameters to seed the transaction.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="web3.types.TxParams">TxParams</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A populated transaction dictionary ready to sign and send,
+including nonce, gas estimate, gas price/fees, and chain ID.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="EscrowClientError (human_protocol_sdk.escrow.escrow_client.EscrowClientError)" href="#human_protocol_sdk.escrow.escrow_client.EscrowClientError">EscrowClientError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If validation fails.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="example" open>
+  <summary>Example</summary>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">tx</span> <span class="o">=</span> <span class="n">escrow_client</span><span class="o">.</span><span class="n">create_bulk_payout_transaction</span><span class="p">(</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="s2">&quot;0x62dD51230A30401C455c8398d06F85e4EaB6309f&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="p">[</span><span class="s2">&quot;0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266&quot;</span><span class="p">],</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="p">[</span><span class="n">Web3</span><span class="o">.</span><span class="n">to_wei</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;ether&quot;</span><span class="p">)],</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="s2">&quot;http://localhost/results.json&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="s2">&quot;b5dad76bf6772c0f07fd5e048f6e75a5f86ee079&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="s2">&quot;payout-1&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n">force_complete</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="p">)</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="n">signed</span> <span class="o">=</span> <span class="n">w3</span><span class="o">.</span><span class="n">eth</span><span class="o">.</span><span class="n">account</span><span class="o">.</span><span class="n">sign_transaction</span><span class="p">(</span><span class="n">tx</span><span class="p">,</span> <span class="s2">&quot;PRIVATE_KEY&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="n">w3</span><span class="o">.</span><span class="n">eth</span><span class="o">.</span><span class="n">send_raw_transaction</span><span class="p">(</span><span class="n">signed</span><span class="o">.</span><span class="n">raw_transaction</span><span class="p">)</span>
+</code></pre></div>
+</details>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="human_protocol_sdk.escrow.escrow_client.EscrowClient.create_escrow" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">create_escrow</span>
+
+
+<a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.create_escrow" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">create_escrow</span><span class="p">(</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">token_address</span><span class="p">,</span> <span class="n">job_requester_id</span><span class="p">,</span> <span class="n">tx_options</span><span class="o">=</span><span class="kc">None</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Create a new escrow contract.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>token_address</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>ERC-20 token address to fund the escrow.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>job_requester_id</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Off-chain identifier for the job requester.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>tx_options</code>
+            </td>
+            <td>
+                  <code><span title="typing.Optional">Optional</span>[<span title="web3.types.TxParams">TxParams</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional transaction parameters such as gas limit.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Address of the newly created escrow contract.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="EscrowClientError (human_protocol_sdk.escrow.escrow_client.EscrowClientError)" href="#human_protocol_sdk.escrow.escrow_client.EscrowClientError">EscrowClientError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the token address is invalid or the transaction fails.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="example" open>
+  <summary>Example</summary>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">escrow_address</span> <span class="o">=</span> <span class="n">escrow_client</span><span class="o">.</span><span class="n">create_escrow</span><span class="p">(</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="s2">&quot;0x1234567890abcdef1234567890abcdef12345678&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="s2">&quot;job-requester&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="p">)</span>
+</code></pre></div>
+</details>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="human_protocol_sdk.escrow.escrow_client.EscrowClient.create_fund_and_setup_escrow" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">create_fund_and_setup_escrow</span>
+
+
+<a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.create_fund_and_setup_escrow" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">create_fund_and_setup_escrow</span><span class="p">(</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">token_address</span><span class="p">,</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">amount</span><span class="p">,</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">job_requester_id</span><span class="p">,</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">escrow_config</span><span class="p">,</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">tx_options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Create, fund, and configure an escrow in a single transaction.</p>
+<p>This is a convenience method that combines escrow creation, funding, and setup
+into one atomic operation.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>token_address</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>ERC-20 token address to fund the escrow.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>amount</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Token amount to fund (in token's smallest unit).</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>job_requester_id</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Off-chain identifier for the job requester.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>escrow_config</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="EscrowConfig (human_protocol_sdk.escrow.escrow_client.EscrowConfig)" href="#human_protocol_sdk.escrow.escrow_client.EscrowConfig">EscrowConfig</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Escrow configuration parameters including
+oracle addresses, fees, and manifest data.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>tx_options</code>
+            </td>
+            <td>
+                  <code><span title="typing.Optional">Optional</span>[<span title="web3.types.TxParams">TxParams</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional transaction parameters such as gas limit.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Address of the newly created and configured escrow contract.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="EscrowClientError (human_protocol_sdk.escrow.escrow_client.EscrowClientError)" href="#human_protocol_sdk.escrow.escrow_client.EscrowClientError">EscrowClientError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If inputs are invalid or the transaction fails.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="example" open>
+  <summary>Example</summary>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">escrow_address</span> <span class="o">=</span> <span class="n">escrow_client</span><span class="o">.</span><span class="n">create_fund_and_setup_escrow</span><span class="p">(</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="s2">&quot;0x1234567890abcdef1234567890abcdef12345678&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">Web3</span><span class="o">.</span><span class="n">to_wei</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;ether&quot;</span><span class="p">),</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="s2">&quot;job-requester&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">escrow_config</span><span class="p">,</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="p">)</span>
+</code></pre></div>
+</details>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="human_protocol_sdk.escrow.escrow_client.EscrowClient.ensure_correct_bulk_payout_input" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">ensure_correct_bulk_payout_input</span>
+
+
+<a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.ensure_correct_bulk_payout_input" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">ensure_correct_bulk_payout_input</span><span class="p">(</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">escrow_address</span><span class="p">,</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">recipients</span><span class="p">,</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">amounts</span><span class="p">,</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">final_results_url</span><span class="p">,</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">final_results_hash</span><span class="p">,</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Validate inputs for bulk payout operations.</p>
+<p>Performs comprehensive validation of all bulk payout parameters including
+address validity, array lengths, amounts, and escrow balance.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>escrow_address</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Address of the escrow.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>recipients</code>
+            </td>
+            <td>
+                  <code><span title="typing.List">List</span>[<span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>List of recipient addresses.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>amounts</code>
+            </td>
+            <td>
+                  <code><span title="typing.List">List</span>[<span title="int">int</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Token amounts for each recipient (in token's smallest unit).</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>final_results_url</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Final results file URL.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>final_results_hash</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Final results file hash.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code>None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>None</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="EscrowClientError (human_protocol_sdk.escrow.escrow_client.EscrowClientError)" href="#human_protocol_sdk.escrow.escrow_client.EscrowClientError">EscrowClientError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If any parameter is invalid, including:
+- Invalid escrow or recipient addresses
+- Empty or mismatched arrays
+- Too many recipients (exceeds maximum)
+- Invalid amounts (negative, zero, or exceeding escrow balance)
+- Invalid URL or hash</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="human_protocol_sdk.escrow.escrow_client.EscrowClient.fund" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">fund</span>
+
+
+<a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.fund" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">fund</span><span class="p">(</span><span class="n">escrow_address</span><span class="p">,</span> <span class="n">amount</span><span class="p">,</span> <span class="n">tx_options</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Add funds to the escrow.</p>
+<p>Transfers tokens from the caller's account to the escrow contract.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>escrow_address</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Address of the escrow to fund.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>amount</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Amount of tokens to transfer (must be positive, in token's smallest unit).</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>tx_options</code>
+            </td>
+            <td>
+                  <code><span title="typing.Optional">Optional</span>[<span title="web3.types.TxParams">TxParams</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional transaction parameters such as gas limit.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code>None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>None</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="EscrowClientError (human_protocol_sdk.escrow.escrow_client.EscrowClientError)" href="#human_protocol_sdk.escrow.escrow_client.EscrowClientError">EscrowClientError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If inputs are invalid or the transfer fails.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="example" open>
+  <summary>Example</summary>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">amount</span> <span class="o">=</span> <span class="n">Web3</span><span class="o">.</span><span class="n">to_wei</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;ether&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">escrow_client</span><span class="o">.</span><span class="n">fund</span><span class="p">(</span><span class="s2">&quot;0x62dD51230A30401C455c8398d06F85e4EaB6309f&quot;</span><span class="p">,</span> <span class="n">amount</span><span class="p">)</span>
+</code></pre></div>
+</details>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="human_protocol_sdk.escrow.escrow_client.EscrowClient.get_balance" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">get_balance</span>
+
+
+<a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_balance" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">get_balance</span><span class="p">(</span><span class="n">escrow_address</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Get the remaining balance for a specified escrow.</p>
+<p>Queries the current available balance in the escrow that can be used for payouts.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>escrow_address</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Address of the escrow.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Remaining escrow balance in token's smallest unit.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="EscrowClientError (human_protocol_sdk.escrow.escrow_client.EscrowClientError)" href="#human_protocol_sdk.escrow.escrow_client.EscrowClientError">EscrowClientError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the escrow address is invalid.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="human_protocol_sdk.escrow.escrow_client.EscrowClient.get_exchange_oracle_address" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">get_exchange_oracle_address</span>
+
+
+<a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_exchange_oracle_address" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">get_exchange_oracle_address</span><span class="p">(</span><span class="n">escrow_address</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Get the exchange oracle address of the escrow.</p>
+<p>Retrieves the address of the oracle responsible for exchange rate data.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>escrow_address</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Address of the escrow.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Exchange oracle address.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="EscrowClientError (human_protocol_sdk.escrow.escrow_client.EscrowClientError)" href="#human_protocol_sdk.escrow.escrow_client.EscrowClientError">EscrowClientError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the escrow address is invalid.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="human_protocol_sdk.escrow.escrow_client.EscrowClient.get_factory_address" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">get_factory_address</span>
+
+
+<a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_factory_address" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">get_factory_address</span><span class="p">(</span><span class="n">escrow_address</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Get the escrow factory address of the escrow.</p>
+<p>Retrieves the address of the factory contract that created this escrow.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>escrow_address</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Address of the escrow.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Escrow factory address.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="EscrowClientError (human_protocol_sdk.escrow.escrow_client.EscrowClientError)" href="#human_protocol_sdk.escrow.escrow_client.EscrowClientError">EscrowClientError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the escrow address is invalid.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="human_protocol_sdk.escrow.escrow_client.EscrowClient.get_intermediate_results_hash" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">get_intermediate_results_hash</span>
+
+
+<a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_intermediate_results_hash" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">get_intermediate_results_hash</span><span class="p">(</span><span class="n">escrow_address</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Get the intermediate results file hash.</p>
+<p>Retrieves the hash of the intermediate results file.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>escrow_address</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Address of the escrow.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Intermediate results file hash.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="EscrowClientError (human_protocol_sdk.escrow.escrow_client.EscrowClientError)" href="#human_protocol_sdk.escrow.escrow_client.EscrowClientError">EscrowClientError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the escrow address is invalid.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="human_protocol_sdk.escrow.escrow_client.EscrowClient.get_intermediate_results_url" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">get_intermediate_results_url</span>
+
+
+<a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_intermediate_results_url" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">get_intermediate_results_url</span><span class="p">(</span><span class="n">escrow_address</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Get the intermediate results file URL.</p>
+<p>Retrieves the URL where intermediate results are stored.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>escrow_address</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Address of the escrow.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Intermediate results URL.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="EscrowClientError (human_protocol_sdk.escrow.escrow_client.EscrowClientError)" href="#human_protocol_sdk.escrow.escrow_client.EscrowClientError">EscrowClientError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the escrow address is invalid.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="human_protocol_sdk.escrow.escrow_client.EscrowClient.get_job_launcher_address" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">get_job_launcher_address</span>
+
+
+<a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_job_launcher_address" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">get_job_launcher_address</span><span class="p">(</span><span class="n">escrow_address</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Get the job launcher address of the escrow.</p>
+<p>Retrieves the address of the account that launched/created this escrow.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>escrow_address</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Address of the escrow.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Job launcher address.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="EscrowClientError (human_protocol_sdk.escrow.escrow_client.EscrowClientError)" href="#human_protocol_sdk.escrow.escrow_client.EscrowClientError">EscrowClientError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the escrow address is invalid.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="human_protocol_sdk.escrow.escrow_client.EscrowClient.get_manifest" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">get_manifest</span>
+
+
+<a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_manifest" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">get_manifest</span><span class="p">(</span><span class="n">escrow_address</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Get the manifest data.</p>
+<p>Retrieves the manifest URL or JSON string that defines the job requirements.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>escrow_address</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Address of the escrow.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>str</code></td>            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Manifest data (URL or JSON string).</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="EscrowClientError (human_protocol_sdk.escrow.escrow_client.EscrowClientError)" href="#human_protocol_sdk.escrow.escrow_client.EscrowClientError">EscrowClientError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the escrow address is invalid.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="human_protocol_sdk.escrow.escrow_client.EscrowClient.get_manifest_hash" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">get_manifest_hash</span>
+
+
+<a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_manifest_hash" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">get_manifest_hash</span><span class="p">(</span><span class="n">escrow_address</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Get the manifest file hash.</p>
+<p>Retrieves the hash of the manifest that defines the job requirements.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>escrow_address</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Address of the escrow.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Manifest file hash.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="EscrowClientError (human_protocol_sdk.escrow.escrow_client.EscrowClientError)" href="#human_protocol_sdk.escrow.escrow_client.EscrowClientError">EscrowClientError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the escrow address is invalid.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="human_protocol_sdk.escrow.escrow_client.EscrowClient.get_recording_oracle_address" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">get_recording_oracle_address</span>
+
+
+<a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_recording_oracle_address" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">get_recording_oracle_address</span><span class="p">(</span><span class="n">escrow_address</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Get the recording oracle address of the escrow.</p>
+<p>Retrieves the address of the oracle responsible for recording job results.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>escrow_address</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Address of the escrow.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Recording oracle address.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="EscrowClientError (human_protocol_sdk.escrow.escrow_client.EscrowClientError)" href="#human_protocol_sdk.escrow.escrow_client.EscrowClientError">EscrowClientError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the escrow address is invalid.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="human_protocol_sdk.escrow.escrow_client.EscrowClient.get_reputation_oracle_address" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">get_reputation_oracle_address</span>
+
+
+<a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_reputation_oracle_address" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">get_reputation_oracle_address</span><span class="p">(</span><span class="n">escrow_address</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Get the reputation oracle address of the escrow.</p>
+<p>Retrieves the address of the oracle responsible for reputation tracking.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>escrow_address</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Address of the escrow.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Reputation oracle address.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="EscrowClientError (human_protocol_sdk.escrow.escrow_client.EscrowClientError)" href="#human_protocol_sdk.escrow.escrow_client.EscrowClientError">EscrowClientError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the escrow address is invalid.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="human_protocol_sdk.escrow.escrow_client.EscrowClient.get_reserved_funds" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">get_reserved_funds</span>
+
+
+<a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_reserved_funds" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">get_reserved_funds</span><span class="p">(</span><span class="n">escrow_address</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Get the reserved funds for a specified escrow.</p>
+<p>Queries the amount of funds that have been reserved for future payouts.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>escrow_address</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Address of the escrow.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Reserved funds amount in token's smallest unit.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="EscrowClientError (human_protocol_sdk.escrow.escrow_client.EscrowClientError)" href="#human_protocol_sdk.escrow.escrow_client.EscrowClientError">EscrowClientError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the escrow address is invalid.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="human_protocol_sdk.escrow.escrow_client.EscrowClient.get_results_url" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">get_results_url</span>
+
+
+<a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_results_url" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">get_results_url</span><span class="p">(</span><span class="n">escrow_address</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Get the final results file URL.</p>
+<p>Retrieves the URL where final results are stored.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>escrow_address</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Address of the escrow.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Final results URL.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="EscrowClientError (human_protocol_sdk.escrow.escrow_client.EscrowClientError)" href="#human_protocol_sdk.escrow.escrow_client.EscrowClientError">EscrowClientError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the escrow address is invalid.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="human_protocol_sdk.escrow.escrow_client.EscrowClient.get_status" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">get_status</span>
+
+
+<a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_status" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">get_status</span><span class="p">(</span><span class="n">escrow_address</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Get the current status of the escrow.</p>
+<p>Retrieves the current state of the escrow (e.g., Launched, Pending, Completed).</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>escrow_address</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Address of the escrow.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="Status (human_protocol_sdk.constants.Status)" href="../core/#human_protocol_sdk.constants.Status">Status</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Current escrow status enum value.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="EscrowClientError (human_protocol_sdk.escrow.escrow_client.EscrowClientError)" href="#human_protocol_sdk.escrow.escrow_client.EscrowClientError">EscrowClientError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the escrow address is invalid.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="human_protocol_sdk.escrow.escrow_client.EscrowClient.get_token_address" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">get_token_address</span>
+
+
+<a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.get_token_address" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">get_token_address</span><span class="p">(</span><span class="n">escrow_address</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Get the token address used to fund the escrow.</p>
+<p>Retrieves the ERC-20 token contract address used for this escrow.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>escrow_address</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Address of the escrow.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Token address used to fund the escrow.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="EscrowClientError (human_protocol_sdk.escrow.escrow_client.EscrowClientError)" href="#human_protocol_sdk.escrow.escrow_client.EscrowClientError">EscrowClientError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the escrow address is invalid.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="human_protocol_sdk.escrow.escrow_client.EscrowClient.request_cancellation" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">request_cancellation</span>
+
+
+<a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.request_cancellation" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">request_cancellation</span><span class="p">(</span><span class="n">escrow_address</span><span class="p">,</span> <span class="n">tx_options</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Request cancellation of the specified escrow.</p>
+<p>Initiates the cancellation process. If the escrow is expired, it may finalize
+immediately; otherwise, it transitions to ToCancel status.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>escrow_address</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Address of the escrow to request cancellation.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>tx_options</code>
+            </td>
+            <td>
+                  <code><span title="typing.Optional">Optional</span>[<span title="web3.types.TxParams">TxParams</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional transaction parameters such as gas limit.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code>None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>None</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="EscrowClientError (human_protocol_sdk.escrow.escrow_client.EscrowClientError)" href="#human_protocol_sdk.escrow.escrow_client.EscrowClientError">EscrowClientError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If validation fails or the transaction reverts.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="example" open>
+  <summary>Example</summary>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">escrow_client</span><span class="o">.</span><span class="n">request_cancellation</span><span class="p">(</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="s2">&quot;0x62dD51230A30401C455c8398d06F85e4EaB6309f&quot;</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">)</span>
+</code></pre></div>
+</details>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="human_protocol_sdk.escrow.escrow_client.EscrowClient.setup" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">setup</span>
+
+
+<a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.setup" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">setup</span><span class="p">(</span><span class="n">escrow_address</span><span class="p">,</span> <span class="n">escrow_config</span><span class="p">,</span> <span class="n">tx_options</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Set escrow roles, fees, and manifest metadata.</p>
+<p>Configures the escrow with oracle addresses, fee percentages, and manifest information.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>escrow_address</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Address of the escrow contract to configure.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>escrow_config</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="EscrowConfig (human_protocol_sdk.escrow.escrow_client.EscrowConfig)" href="#human_protocol_sdk.escrow.escrow_client.EscrowConfig">EscrowConfig</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Escrow configuration parameters including
+oracle addresses, fees, and manifest data.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>tx_options</code>
+            </td>
+            <td>
+                  <code><span title="typing.Optional">Optional</span>[<span title="web3.types.TxParams">TxParams</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional transaction parameters such as gas limit.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code>None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>None</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="EscrowClientError (human_protocol_sdk.escrow.escrow_client.EscrowClientError)" href="#human_protocol_sdk.escrow.escrow_client.EscrowClientError">EscrowClientError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the escrow address is invalid or the transaction fails.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="example" open>
+  <summary>Example</summary>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">escrow_client</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="s2">&quot;0xYourEscrow&quot;</span><span class="p">,</span> <span class="n">escrow_config</span><span class="p">)</span>
+</code></pre></div>
+</details>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="human_protocol_sdk.escrow.escrow_client.EscrowClient.store_results" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">store_results</span>
+
+
+<a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.store_results" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">store_results</span><span class="p">(</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">escrow_address</span><span class="p">,</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">url</span><span class="p">,</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="nb">hash</span><span class="p">,</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">funds_to_reserve</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">tx_options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Store results URL and hash, with optional funds reservation.</p>
+<p>Stores the intermediate or final results location and hash. Optionally reserves
+funds for future payouts.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>escrow_address</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Address of the escrow.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>url</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Results file URL.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>hash</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Results file hash.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>funds_to_reserve</code>
+            </td>
+            <td>
+                  <code><span title="typing.Optional">Optional</span>[<span title="int">int</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional funds to reserve for payouts.
+If None, uses legacy signature without reservation.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>tx_options</code>
+            </td>
+            <td>
+                  <code><span title="typing.Optional">Optional</span>[<span title="web3.types.TxParams">TxParams</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional transaction parameters such as gas limit.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code>None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>None</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="EscrowClientError (human_protocol_sdk.escrow.escrow_client.EscrowClientError)" href="#human_protocol_sdk.escrow.escrow_client.EscrowClientError">EscrowClientError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If validation fails or the transaction reverts.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="example" open>
+  <summary>Example</summary>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">escrow_client</span><span class="o">.</span><span class="n">store_results</span><span class="p">(</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="s2">&quot;0x62dD51230A30401C455c8398d06F85e4EaB6309f&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="s2">&quot;http://localhost/results.json&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="s2">&quot;b5dad76bf6772c0f07fd5e048f6e75a5f86ee079&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="p">)</span>
+</code></pre></div>
+</details>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="human_protocol_sdk.escrow.escrow_client.EscrowClient.withdraw" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">withdraw</span>
+
+
+<a href="#human_protocol_sdk.escrow.escrow_client.EscrowClient.withdraw" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">withdraw</span><span class="p">(</span><span class="n">escrow_address</span><span class="p">,</span> <span class="n">token_address</span><span class="p">,</span> <span class="n">tx_options</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Withdraw additional tokens from the escrow.</p>
+<p>Withdraws tokens (other than the primary escrow token) to the canceler's address.
+Useful for recovering accidentally sent tokens.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>escrow_address</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Address of the escrow to withdraw from.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>token_address</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Address of the token to withdraw.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>tx_options</code>
+            </td>
+            <td>
+                  <code><span title="typing.Optional">Optional</span>[<span title="web3.types.TxParams">TxParams</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional transaction parameters such as gas limit.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="EscrowWithdraw (human_protocol_sdk.escrow.escrow_client.EscrowWithdraw)" href="#human_protocol_sdk.escrow.escrow_client.EscrowWithdraw">EscrowWithdraw</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Withdrawal details including transaction hash, token address, and amount.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="EscrowClientError (human_protocol_sdk.escrow.escrow_client.EscrowClientError)" href="#human_protocol_sdk.escrow.escrow_client.EscrowClientError">EscrowClientError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If validation fails or transfer event is missing.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="example" open>
+  <summary>Example</summary>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">withdrawal</span> <span class="o">=</span> <span class="n">escrow_client</span><span class="o">.</span><span class="n">withdraw</span><span class="p">(</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="s2">&quot;0x62dD51230A30401C455c8398d06F85e4EaB6309f&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="s2">&quot;0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="p">)</span>
+</code></pre></div>
+</details>
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="human_protocol_sdk.escrow.escrow_client.EscrowClientError" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">EscrowClientError</span>
+
+
+<a href="#human_protocol_sdk.escrow.escrow_client.EscrowClientError" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="Exception">Exception</span></code></p>
+
+
+
+        <p>Exception raised when errors occur during escrow operations.</p>
+
+
+
+
+
+
+
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="human_protocol_sdk.escrow.escrow_client.EscrowConfig" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">EscrowConfig</span>
+
+
+<a href="#human_protocol_sdk.escrow.escrow_client.EscrowConfig" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">EscrowConfig</span><span class="p">(</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">recording_oracle_address</span><span class="p">,</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">reputation_oracle_address</span><span class="p">,</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">exchange_oracle_address</span><span class="p">,</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">recording_oracle_fee</span><span class="p">,</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">reputation_oracle_fee</span><span class="p">,</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">exchange_oracle_fee</span><span class="p">,</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n">manifest</span><span class="p">,</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="nb">hash</span><span class="p">,</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+
+
+        <p>Configuration parameters for escrow setup.</p>
+
+
+<p><span class="doc-section-title">Attributes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><span title="human_protocol_sdk.escrow.escrow_client.EscrowConfig.recording_oracle_address">recording_oracle_address</span></code></td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Address of the recording oracle.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="human_protocol_sdk.escrow.escrow_client.EscrowConfig.reputation_oracle_address">reputation_oracle_address</span></code></td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Address of the reputation oracle.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="human_protocol_sdk.escrow.escrow_client.EscrowConfig.exchange_oracle_address">exchange_oracle_address</span></code></td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Address of the exchange oracle.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="human_protocol_sdk.escrow.escrow_client.EscrowConfig.recording_oracle_fee">recording_oracle_fee</span></code></td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Recording oracle fee percentage (0-100).</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="human_protocol_sdk.escrow.escrow_client.EscrowConfig.reputation_oracle_fee">reputation_oracle_fee</span></code></td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Reputation oracle fee percentage (0-100).</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="human_protocol_sdk.escrow.escrow_client.EscrowConfig.exchange_oracle_fee">exchange_oracle_fee</span></code></td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Exchange oracle fee percentage (0-100).</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="human_protocol_sdk.escrow.escrow_client.EscrowConfig.manifest">manifest</span></code></td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Manifest payload (URL or JSON string).</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="human_protocol_sdk.escrow.escrow_client.EscrowConfig.hash">hash</span></code></td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Manifest file hash.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="EscrowClientError (human_protocol_sdk.escrow.escrow_client.EscrowClientError)" href="#human_protocol_sdk.escrow.escrow_client.EscrowClientError">EscrowClientError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If addresses are invalid, fees are out of range,
+total fees exceed 100%, or manifest data is invalid.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="human_protocol_sdk.escrow.escrow_client.EscrowWithdraw" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">EscrowWithdraw</span>
+
+
+<a href="#human_protocol_sdk.escrow.escrow_client.EscrowWithdraw" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">EscrowWithdraw</span><span class="p">(</span><span class="n">tx_hash</span><span class="p">,</span> <span class="n">token_address</span><span class="p">,</span> <span class="n">withdrawn_amount</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+
+
+        <p>Represents the result of an escrow withdrawal transaction.</p>
+
+
+<p><span class="doc-section-title">Attributes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><span title="human_protocol_sdk.escrow.escrow_client.EscrowWithdraw.txHash">txHash</span></code></td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The hash of the transaction associated with the escrow withdrawal.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="human_protocol_sdk.escrow.escrow_client.EscrowWithdraw.token_address">token_address</span></code></td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The address of the token used for the withdrawal.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="human_protocol_sdk.escrow.escrow_client.EscrowWithdraw.withdrawn_amount">withdrawn_amount</span></code></td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The amount withdrawn from the escrow.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.instant.prefetch", "navigation.top", "navigation.tracking", "navigation.path", "navigation.indexes", "navigation.prune", "content.tabs", "content.code.copy", "toc.follow", "announce.dismiss"], "search": "../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      
+    
+  </body>
+</html>
