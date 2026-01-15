@@ -14,7 +14,7 @@ Example:
     ```python
     # Deprecated - for backward compatibility only
     from human_protocol_sdk.legacy_encryption import LegacyEncryption
-    
+
     # Recommended - use this instead
     from human_protocol_sdk.encryption import Encryption
     ```
@@ -392,3 +392,4 @@ class Encryption:
         Returns:
             Value padded to 32 bytes.
         """
+        return value.rjust(32, b"\x00")

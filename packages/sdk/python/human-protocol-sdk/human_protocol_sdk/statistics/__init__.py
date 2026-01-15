@@ -2,9 +2,9 @@
 This module allows to read statistical data from the subgraph.
 """
 
-from .statistics_client import (
-    StatisticsClient,
-    StatisticsClientError,
+from .statistics_utils import (
+    StatisticsUtils,
+    StatisticsUtilsError,
     StatisticsFilter,
     DailyEscrowData,
     EscrowStatistics,
