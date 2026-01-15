@@ -1,4 +1,4 @@
-import { NETWORKS, StatisticsClient } from '@human-protocol/sdk';
+import { NETWORKS, StatisticsUtils } from '@human-protocol/sdk';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable } from '@nestjs/common';
 
@@ -46,13 +46,12 @@ export class NetworksService {
       const networkConfig = NETWORKS[network.chainId];
       if (!networkConfig) continue;
 
-      const statisticsClient = new StatisticsClient(networkConfig);
       try {
         const [hmtData, escrowStats] = await Promise.all([
-          statisticsClient.getHMTDailyData({
+          StatisticsUtils.getHMTDailyData(networkConfig, {
             from: new Date(Math.floor(filterDate.getTime() / 1000) * 1000),
           }),
-          statisticsClient.getEscrowStatistics({
+          StatisticsUtils.getEscrowStatistics(networkConfig, {
             from: new Date(Math.floor(oneMonthAgo.getTime() / 1000) * 1000),
           }),
         ]);
