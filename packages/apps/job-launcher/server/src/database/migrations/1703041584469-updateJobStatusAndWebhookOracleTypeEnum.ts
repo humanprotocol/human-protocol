@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class UpdateJobStatusAndWebhookOracleTypeEnum1703041584469
-  implements MigrationInterface
-{
+export class UpdateJobStatusAndWebhookOracleTypeEnum1703041584469 implements MigrationInterface {
   name = 'UpdateJobStatusAndWebhookOracleTypeEnum1703041584469';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

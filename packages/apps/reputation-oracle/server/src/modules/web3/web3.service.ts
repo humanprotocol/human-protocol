@@ -4,6 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { Wallet, ethers } from 'ethers';
 
 import { Web3ConfigService, Web3Network } from '@/config';
+import logger from '@/logger';
 
 import type { Chain, WalletWithProvider } from './types';
 
@@ -22,6 +23,9 @@ export class Web3Service {
   private signersByChainId: {
     [chainId: number]: WalletWithProvider;
   } = {};
+  private readonly logger = logger.child({
+    context: Web3Service.name,
+  });
 
   constructor(private readonly web3ConfigService: Web3ConfigService) {
     const privateKey = this.web3ConfigService.privateKey;

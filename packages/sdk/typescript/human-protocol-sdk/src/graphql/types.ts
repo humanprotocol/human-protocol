@@ -166,8 +166,10 @@ export interface IOperatorSubgraph {
   } | null;
 }
 
-export interface IReputationNetworkSubgraph
-  extends Omit<IReputationNetwork, 'operators'> {
+export interface IReputationNetworkSubgraph extends Omit<
+  IReputationNetwork,
+  'operators'
+> {
   operators: IOperatorSubgraph[];
 }
 

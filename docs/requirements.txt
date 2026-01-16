@@ -1,0 +1,6 @@
+mkdocs-material
+pymdown-extensions
+pyyaml
+mike
+mkdocs-section-index
+mkdocstrings[python]

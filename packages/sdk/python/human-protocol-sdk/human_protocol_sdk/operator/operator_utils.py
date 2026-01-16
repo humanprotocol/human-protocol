@@ -1,11 +1,7 @@
-"""
-Utility class for operator-related operations.
+"""Utility helpers for operator-related queries.
 
-Code Example
-------------
-
-.. code-block:: python
-
+Example:
+    ```python
     from human_protocol_sdk.constants import ChainId
     from human_protocol_sdk.operator import OperatorUtils, OperatorFilter
 
@@ -14,9 +10,7 @@ Code Example
             OperatorFilter(chain_id=ChainId.POLYGON_AMOY, roles=["Job Launcher"])
         )
     )
-
-Module
-------
+    ```
 """
 
 import logging
@@ -32,16 +26,22 @@ LOG = logging.getLogger("human_protocol_sdk.operator")
 
 
 class OperatorUtilsError(Exception):
-    """
-    Raised when an error occurs while interacting with the operator.
-    """
+    """Exception raised when errors occur during operator operations."""
 
     pass
 
 
 class OperatorFilter:
-    """
-    A class used to filter operators.
+    """Filter configuration for querying operators from the subgraph.
+
+    Attributes:
+        chain_id (ChainId): Chain ID to request data from.
+        roles (List[str]): List of roles to filter by.
+        min_staked_amount (Optional[int]): Minimum staked amount to include operators.
+        order_by (Optional[str]): Property to order results by (e.g., "role", "stakedAmount").
+        order_direction (OrderDirection): Order direction (ascending or descending).
+        first (int): Number of items per page (1-1000).
+        skip (int): Number of items to skip for pagination.
     """
 
     def __init__(
@@ -54,16 +54,19 @@ class OperatorFilter:
         first: int = 10,
         skip: int = 0,
     ):
-        """
-        Initializes a OperatorFilter instance.
+        """Configure filtering options for operator queries.
 
-        :param chain_id: Chain ID to request data
-        :param roles: Roles to filter by
-        :param min_staked_amount: Minimum amount staked to filter by
-        :param order_by: Property to order by, e.g., "role"
-        :param order_direction: Order direction of results, "asc" or "desc"
-        :param first: Number of items per page
-        :param skip: Number of items to skip (for pagination)
+        Args:
+            chain_id: Chain ID to request data.
+            roles: Roles to filter by.
+            min_staked_amount: Minimum amount staked to include.
+            order_by: Property to order by, e.g., "role".
+            order_direction: Order direction of results.
+            first: Number of items per page.
+            skip: Number of items to skip (for pagination).
+
+        Raises:
+            OperatorUtilsError: If chain ID or order direction is invalid.
         """
 
         if chain_id not in ChainId:
@@ -84,6 +87,32 @@ class OperatorFilter:
 
 
 class OperatorData:
+    """Represents operator information retrieved from the subgraph.
+
+    Attributes:
+        chain_id (ChainId): Chain where the operator is registered.
+        id (str): Unique operator identifier.
+        address (str): Operator's Ethereum address.
+        staked_amount (Optional[int]): Amount staked by the operator.
+        locked_amount (Optional[int]): Amount currently locked.
+        locked_until_timestamp (Optional[int]): Time in milliseconds until locked amount is released.
+        withdrawn_amount (Optional[int]): Total amount withdrawn.
+        slashed_amount (Optional[int]): Total amount slashed.
+        amount_jobs_processed (int): Number of jobs launched/processed by the operator.
+        role (Optional[str]): Current role of the operator (e.g., "Job Launcher", "Recording Oracle").
+        fee (Optional[int]): Operator fee percentage.
+        public_key (Optional[str]): Operator's public key.
+        webhook_url (Optional[str]): Webhook URL for notifications.
+        website (Optional[str]): Operator's website URL.
+        url (Optional[str]): Operator URL.
+        job_types (List[str]): List of supported job types.
+        registration_needed (Optional[bool]): Whether registration is required.
+        registration_instructions (Optional[str]): Instructions for registration.
+        reputation_networks (List[str]): List of reputation network addresses.
+        name (Optional[str]): Operator name.
+        category (Optional[str]): Operator category.
+    """
+
     def __init__(
         self,
         chain_id: ChainId,
@@ -108,30 +137,30 @@ class OperatorData:
         name: Optional[str] = None,
         category: Optional[str] = None,
     ):
-        """
-        Initializes a OperatorData instance.
+        """Represents operator information returned from the subgraph.
 
-        :param chain_id: Chain Identifier
-        :param id: Identifier
-        :param address: Address
-        :param staked_amount: Amount staked
-        :param locked_amount: Amount locked
-        :param locked_until_timestamp: Locked until timestamp
-        :param withdrawn_amount: Amount withdrawn
-        :param slashed_amount: Amount slashed
-        :param amount_jobs_processed: Amount of jobs launched
-        :param role: Role
-        :param fee: Fee
-        :param public_key: Public key
-        :param webhook_url: Webhook URL
-        :param website: Website URL
-        :param url: URL
-        :param job_types: Job types
-        :param registration_needed: Whether registration is needed
-        :param registration_instructions: Registration instructions
-        :param reputation_networks: List of reputation networks
-        :param name: Name
-        :param category: Category
+        Args:
+            chain_id: Chain identifier.
+            id: Operator ID.
+            address: Operator address.
+            amount_jobs_processed: Jobs launched by the operator.
+            reputation_networks: List of reputation networks.
+            staked_amount: Amount staked.
+            locked_amount: Amount locked.
+            locked_until_timestamp: Time (in seconds) until locked amount is released.
+            withdrawn_amount: Amount withdrawn.
+            slashed_amount: Amount slashed.
+            role: Current role of the operator.
+            fee: Operator fee.
+            public_key: Public key.
+            webhook_url: Webhook URL.
+            website: Website URL.
+            url: Operator URL.
+            job_types: Supported job types.
+            registration_needed: Whether registration is needed.
+            registration_instructions: Registration instructions.
+            name: Operator name.
+            category: Operator category.
         """
 
         self.chain_id = chain_id
@@ -176,25 +205,28 @@ class OperatorData:
 
 
 class RewardData:
+    """Represents a reward distributed to a slasher.
+
+    Attributes:
+        escrow_address (str): Address of the escrow that generated the reward.
+        amount (int): Reward amount in token's smallest unit.
+    """
+
     def __init__(
         self,
         escrow_address: str,
         amount: int,
     ):
-        """
-        Initializes a RewardData instance.
-
-        :param escrow_address: Escrow address
-        :param amount: Amount
-        """
-
         self.escrow_address = escrow_address
         self.amount = amount
 
 
 class OperatorUtils:
-    """
-    A utility class that provides additional operator-related functionalities.
+    """Utility class providing operator-related query and data retrieval functions.
+
+    This class offers static methods to fetch operator data, including filtered
+    operator lists, individual operator details, reputation network operators,
+    and reward information from the Human Protocol subgraph.
     """
 
     @staticmethod
@@ -202,24 +234,32 @@ class OperatorUtils:
         filter: OperatorFilter,
         options: Optional[SubgraphOptions] = None,
     ) -> List[OperatorData]:
-        """Get operators data of the protocol.
+        """Retrieve a list of operators matching the provided filter criteria.
 
-        :param filter: Operator filter
-        :param options: Optional config for subgraph requests
+        Queries the subgraph for operators that match the specified parameters
+        including roles, minimum staked amount, and ordering preferences.
 
-        :return: List of operators data
+        Args:
+            filter (OperatorFilter): Filter parameters including chain ID, roles,
+                minimum staked amount, ordering, and pagination options.
+            options (Optional[SubgraphOptions]): Optional configuration for subgraph requests
+                such as custom endpoints or timeout settings.
 
-        :example:
-            .. code-block:: python
+        Returns:
+            A list of operator records matching the filter criteria.
+                Returns an empty list if no matches are found.
 
-                from human_protocol_sdk.constants import ChainId
-                from human_protocol_sdk.operator import OperatorUtils, OperatorFilter
+        Example:
+            ```python
+            from human_protocol_sdk.constants import ChainId
+            from human_protocol_sdk.operator import OperatorUtils, OperatorFilter
 
-                print(
-                    OperatorUtils.get_operators(
-                        OperatorFilter(chain_id=ChainId.POLYGON_AMOY, roles=["Job Launcher"])
-                    )
-                )
+            operators = OperatorUtils.get_operators(
+                OperatorFilter(chain_id=ChainId.POLYGON_AMOY, roles=["Job Launcher"])
+            )
+            for operator in operators:
+                print(f"{operator.address}: {operator.role}")
+            ```
         """
 
         from human_protocol_sdk.gql.operator import get_operators_query
@@ -290,25 +330,34 @@ class OperatorUtils:
         operator_address: str,
         options: Optional[SubgraphOptions] = None,
     ) -> Optional[OperatorData]:
-        """Gets the operator details.
+        """Retrieve a single operator by their address.
 
-        :param chain_id: Network in which the operator exists
-        :param operator_address: Address of the operator
-        :param options: Optional config for subgraph requests
+        Fetches detailed information about a specific operator from the subgraph.
 
-        :return: Operator data if exists, otherwise None
+        Args:
+            chain_id (ChainId): Network where the operator is registered.
+            operator_address (str): Ethereum address of the operator.
+            options (Optional[SubgraphOptions]): Optional configuration for subgraph requests.
 
-        :example:
-            .. code-block:: python
+        Returns:
+            Operator data if found, otherwise ``None``.
 
-                from human_protocol_sdk.constants import ChainId
-                from human_protocol_sdk.operator import OperatorUtils
+        Raises:
+            OperatorUtilsError: If the chain ID is invalid or the operator address is malformed.
 
-                chain_id = ChainId.POLYGON_AMOY
-                operator_address = '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
+        Example:
+            ```python
+            from human_protocol_sdk.constants import ChainId
+            from human_protocol_sdk.operator import OperatorUtils
 
-                operator_data = OperatorUtils.get_operator(chain_id, operator_address)
-                print(operator_data)
+            chain_id = ChainId.POLYGON_AMOY
+            operator_address = "0x62dD51230A30401C455c8398d06F85e4EaB6309f"
+
+            operator_data = OperatorUtils.get_operator(chain_id, operator_address)
+            if operator_data:
+                print(f"Role: {operator_data.role}")
+                print(f"Staked: {operator_data.staked_amount}")
+            ```
         """
 
         from human_protocol_sdk.gql.operator import get_operator_query
@@ -369,26 +418,36 @@ class OperatorUtils:
         role: Optional[str] = None,
         options: Optional[SubgraphOptions] = None,
     ) -> List[OperatorData]:
-        """Get the reputation network operators of the specified address.
+        """Retrieve operators registered under a specific reputation network.
 
-        :param chain_id: Network in which the reputation network exists
-        :param address: Address of the reputation oracle
-        :param role: (Optional) Role of the operator
-        :param options: Optional config for subgraph requests
+        Fetches all operators associated with a reputation oracle, optionally
+        filtered by role.
 
-        :return: Returns an array of operator details
+        Args:
+            chain_id (ChainId): Network where the reputation network exists.
+            address (str): Ethereum address of the reputation oracle.
+            role (Optional[str]): Optional role to filter operators (e.g., "Job Launcher").
+            options (Optional[SubgraphOptions]): Optional configuration for subgraph requests.
 
-        :example:
-            .. code-block:: python
+        Returns:
+            A list of operators registered under the reputation network.
+                Returns an empty list if no operators are found.
 
-                from human_protocol_sdk.constants import ChainId
-                from human_protocol_sdk.operator import OperatorUtils
+        Raises:
+            OperatorUtilsError: If the chain ID is invalid or the reputation address is malformed.
 
-                operators = OperatorUtils.get_reputation_network_operators(
-                    ChainId.POLYGON_AMOY,
-                    '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
-                )
-                print(operators)
+        Example:
+            ```python
+            from human_protocol_sdk.constants import ChainId
+            from human_protocol_sdk.operator import OperatorUtils
+
+            operators = OperatorUtils.get_reputation_network_operators(
+                ChainId.POLYGON_AMOY,
+                "0x62dD51230A30401C455c8398d06F85e4EaB6309f",
+                role="Recording Oracle",
+            )
+            print(f"Found {len(operators)} operators")
+            ```
         """
 
         from human_protocol_sdk.gql.operator import get_reputation_network_query
@@ -454,25 +513,35 @@ class OperatorUtils:
         slasher: str,
         options: Optional[SubgraphOptions] = None,
     ) -> List[RewardData]:
-        """Get rewards of the given slasher.
+        """Retrieve rewards collected by a slasher address.
 
-        :param chain_id: Network in which the slasher exists
-        :param slasher: Address of the slasher
-        :param options: Optional config for subgraph requests
+        Fetches all reward events where the specified address acted as a slasher
+        and received rewards for detecting misbehavior.
 
-        :return: List of rewards info
+        Args:
+            chain_id (ChainId): Network where the slasher operates.
+            slasher (str): Ethereum address of the slasher.
+            options (Optional[SubgraphOptions]): Optional configuration for subgraph requests.
 
-        :example:
-            .. code-block:: python
+        Returns:
+            A list of rewards received by the slasher.
+                Returns an empty list if no rewards are found.
 
-                from human_protocol_sdk.constants import ChainId
-                from human_protocol_sdk.operator import OperatorUtils
+        Raises:
+            OperatorUtilsError: If the chain ID is invalid or the slasher address is malformed.
 
-                rewards_info = OperatorUtils.get_rewards_info(
-                    ChainId.POLYGON_AMOY,
-                    '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
-                )
-                print(rewards_info)
+        Example:
+            ```python
+            from human_protocol_sdk.constants import ChainId
+            from human_protocol_sdk.operator import OperatorUtils
+
+            rewards_info = OperatorUtils.get_rewards_info(
+                ChainId.POLYGON_AMOY,
+                "0x62dD51230A30401C455c8398d06F85e4EaB6309f",
+            )
+            total_rewards = sum(reward.amount for reward in rewards_info)
+            print(f"Total rewards: {total_rewards}")
+            ```
         """
 
         if chain_id.value not in set(chain_id.value for chain_id in ChainId):

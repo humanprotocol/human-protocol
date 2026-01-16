@@ -3,11 +3,9 @@ import {
   EscrowClient,
   EscrowStatus,
   EscrowUtils,
-  ICancellationRefund,
   KVStoreKeys,
   KVStoreUtils,
   NETWORKS,
-  StorageParams,
 } from '@human-protocol/sdk';
 import { Inject, Injectable } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
@@ -27,7 +25,6 @@ import {
 import { TOKEN_ADDRESSES } from '../../common/constants/tokens';
 import { CronJobType } from '../../common/enums/cron-job';
 import {
-  AudinoJobType,
   CvatJobType,
   EscrowFundToken,
   FortuneJobType,
@@ -54,7 +51,6 @@ import { getTokenDecimals } from '../../common/utils/tokens';
 import logger from '../../logger';
 import { CronJobRepository } from '../cron-job/cron-job.repository';
 import {
-  AudinoManifestDto,
   CvatManifestDto,
   FortuneManifestDto,
   HCaptchaManifestDto,
@@ -68,6 +64,7 @@ import { StorageService } from '../storage/storage.service';
 import { UserEntity } from '../user/user.entity';
 import { Web3Service } from '../web3/web3.service';
 import { WebhookDataDto } from '../webhook/webhook.dto';
+import { WebhookEntity } from '../webhook/webhook.entity';
 import { WebhookRepository } from '../webhook/webhook.repository';
 import { WhitelistService } from '../whitelist/whitelist.service';
 import {
@@ -80,12 +77,10 @@ import {
 } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
-import { Escrow, Escrow__factory } from '@human-protocol/core/typechain-types';
 
 @Injectable()
 export class JobService {
   private readonly logger = logger.child({ context: JobService.name });
-  public readonly storageParams: StorageParams;
   public readonly bucket: string;
   private cronJobRepository: CronJobRepository;
 
@@ -291,12 +286,7 @@ export class JobService {
     if (
       user.whitelist ||
       (
-        [
-          AudinoJobType.AUDIO_TRANSCRIPTION,
-          AudinoJobType.AUDIO_ATTRIBUTE_ANNOTATION,
-          FortuneJobType.FORTUNE,
-          HCaptchaJobType.HCAPTCHA,
-        ] as JobRequestType[]
+        [FortuneJobType.FORTUNE, HCaptchaJobType.HCAPTCHA] as JobRequestType[]
       ).includes(requestType)
     ) {
       jobEntity.status = JobStatus.MODERATION_PASSED;
@@ -367,6 +357,18 @@ export class JobService {
     jobEntity.status = JobStatus.LAUNCHED;
     jobEntity.escrowAddress = escrowAddress;
     await this.jobRepository.updateOne(jobEntity);
+
+    const oracleType = this.getOracleType(jobEntity.requestType);
+    const webhookEntity = new WebhookEntity();
+    Object.assign(webhookEntity, {
+      escrowAddress: jobEntity.escrowAddress,
+      chainId: jobEntity.chainId,
+      eventType: EventType.ESCROW_CREATED,
+      oracleType: oracleType,
+      hasSignature: oracleType !== OracleType.HCAPTCHA ? true : false,
+      oracleAddress: jobEntity.exchangeOracle,
+    });
+    await this.webhookRepository.createUnique(webhookEntity);
 
     return jobEntity;
   }
@@ -583,10 +585,6 @@ export class JobService {
     } else if (requestType === HCaptchaJobType.HCAPTCHA) {
       return OracleType.HCAPTCHA;
     } else if (
-      Object.values(AudinoJobType).includes(requestType as AudinoJobType)
-    ) {
-      return OracleType.AUDINO;
-    } else if (
       Object.values(CvatJobType).includes(requestType as CvatJobType)
     ) {
       return OracleType.CVAT;
@@ -732,21 +730,6 @@ export class JobService {
             qualifications: manifest.qualifications,
           }),
       };
-    } else if (
-      Object.values(AudinoJobType).includes(
-        jobEntity.requestType as AudinoJobType,
-      )
-    ) {
-      const manifest = manifestData as AudinoManifestDto;
-      specificManifestDetails = {
-        requestType: manifest.annotation?.type,
-        submissionsRequired: manifest.annotation?.segment_duration,
-        description: manifest.annotation?.description,
-        ...(manifest.annotation?.qualifications &&
-          manifest.annotation?.qualifications?.length > 0 && {
-            qualifications: manifest.annotation?.qualifications,
-          }),
-      };
     } else {
       const manifest = manifestData as CvatManifestDto;
       specificManifestDetails = {
@@ -878,35 +861,20 @@ export class JobService {
       PaymentType.SLASH,
     );
     if (!slash?.length) {
-      let refund: ICancellationRefund | null = null;
-      try {
-        refund = await EscrowUtils.getCancellationRefund(
-          jobEntity.chainId,
-          jobEntity.escrowAddress!,
-        );
-      } catch {
-        // Ignore error
+      const refund = await EscrowUtils.getCancellationRefund(
+        jobEntity.chainId,
+        jobEntity.escrowAddress!,
+      );
+
+      if (!refund || !refund.amount) {
+        throw new ConflictError(ErrorJob.NoRefundFound);
       }
 
-      let amount = 0n;
-
-      if (!refund) {
-        //Temp fix
-        amount = await this.getRefundAmount(
-          jobEntity.chainId,
-          jobEntity.escrowAddress!,
-          token.address,
-        );
-      } else {
-        if (!refund.amount) {
-          throw new ConflictError(ErrorJob.NoRefundFound);
-        }
-        amount = refund.amount;
-      }
-
-      if (amount > 0n) {
+      if (refund.amount > 0n) {
         await this.paymentService.createRefundPayment({
-          refundAmount: Number(ethers.formatUnits(amount, token.decimals)),
+          refundAmount: Number(
+            ethers.formatUnits(refund.amount, token.decimals),
+          ),
           refundCurrency: jobEntity.token,
           userId: jobEntity.userId,
           jobId: jobEntity.id,
@@ -916,57 +884,5 @@ export class JobService {
 
     jobEntity.status = JobStatus.CANCELED;
     await this.jobRepository.updateOne(jobEntity);
-  }
-
-  public async getRefundAmount(
-    chainId: ChainId,
-    escrowAddress: string,
-    tokenAddress: string,
-  ): Promise<bigint> {
-    const signer = this.web3Service.getSigner(chainId);
-    const provider = signer.provider!;
-    const contract: Escrow = Escrow__factory.connect(escrowAddress!, provider);
-    const fromBlock = 79278120; //This issue started at this block
-    const toBlock = 'latest';
-    const cancelledFilter = contract.filters?.Cancelled?.();
-    const cancelledLogs = await contract.queryFilter(
-      cancelledFilter,
-      fromBlock,
-      toBlock,
-    );
-
-    for (const log of cancelledLogs) {
-      const erc20Interface = new ethers.Interface([
-        'event Transfer(address indexed from, address indexed to, uint256 value)',
-      ]);
-
-      const transferTopic = erc20Interface.getEvent('Transfer')!.topicHash;
-      const receipt = await provider.getTransactionReceipt(log.transactionHash);
-
-      const transferLogs = receipt!.logs.filter(
-        (l) =>
-          l.address.toLowerCase() === tokenAddress.toLowerCase() &&
-          l.topics[0] === transferTopic,
-      );
-      for (const tlog of transferLogs) {
-        const decoded = erc20Interface.decodeEventLog(
-          'Transfer',
-          tlog.data,
-          tlog.topics,
-        );
-
-        const from = decoded.from as string;
-        const to = decoded.to as string;
-        const value = decoded.value as bigint;
-        if (
-          from.toLowerCase() === escrowAddress.toLowerCase() &&
-          to.toLowerCase() === (await signer.getAddress()).toLowerCase()
-        ) {
-          return value;
-        }
-      }
-    }
-
-    return 0n;
   }
 }

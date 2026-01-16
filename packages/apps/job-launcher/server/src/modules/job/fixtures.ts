@@ -5,19 +5,13 @@ import {
   getMockedRegion,
 } from '../../../test/fixtures/storage';
 import {
-  AudinoJobType,
   CvatJobType,
   EscrowFundToken,
   FortuneJobType,
   JobCaptchaShapeType,
 } from '../../common/enums/job';
 import { PaymentCurrency } from '../../common/enums/payment';
-import {
-  JobAudinoDto,
-  JobCaptchaDto,
-  JobCvatDto,
-  JobFortuneDto,
-} from './job.dto';
+import { JobCaptchaDto, JobCvatDto, JobFortuneDto } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobStatus } from '../../common/enums/job';
 
@@ -64,38 +58,6 @@ export const createCvatJobDto = (overrides = {}): JobCvatDto => ({
     path: faker.system.filePath(),
   },
   type: faker.helpers.arrayElement(Object.values(CvatJobType)),
-  paymentCurrency: faker.helpers.arrayElement(paymentCurrencies),
-  paymentAmount: faker.number.int({ min: 1, max: 1000 }),
-  escrowFundToken: faker.helpers.arrayElement(escrowFundTokens),
-  exchangeOracle: faker.finance.ethereumAddress(),
-  recordingOracle: faker.finance.ethereumAddress(),
-  reputationOracle: faker.finance.ethereumAddress(),
-  ...overrides,
-});
-
-export const createAudinoJobDto = (overrides = {}): JobAudinoDto => ({
-  chainId: ChainId.POLYGON_AMOY,
-  data: {
-    dataset: {
-      provider: getMockedProvider(),
-      region: getMockedRegion(),
-      bucketName: faker.lorem.word(),
-      path: faker.system.filePath(),
-    },
-  },
-  groundTruth: {
-    provider: getMockedProvider(),
-    region: getMockedRegion(),
-    bucketName: faker.lorem.word(),
-    path: faker.system.filePath(),
-  },
-  labels: [{ name: faker.lorem.word() }],
-  segmentDuration: faker.number.int({ min: 10, max: 100 }),
-  requesterDescription: faker.lorem.sentence(),
-  userGuide: faker.internet.url(),
-  qualifications: [faker.lorem.word()],
-  minQuality: faker.number.int({ min: 1, max: 100 }),
-  type: AudinoJobType.AUDIO_TRANSCRIPTION,
   paymentCurrency: faker.helpers.arrayElement(paymentCurrencies),
   paymentAmount: faker.number.int({ min: 1, max: 1000 }),
   escrowFundToken: faker.helpers.arrayElement(escrowFundTokens),

@@ -2,7 +2,7 @@ name: CVAT Recording Oracle Lint
 
 on:
   push:
-    tags-ignore: '*'
+    branches: '**'
     paths:
       - 'packages/examples/cvat/recording-oracle/**'
       - '.github/workflows/ci-lint-cvat-recording-oracle.yaml'

@@ -6,24 +6,20 @@ vi.mock('graphql-request', () => ({
 
 import { ethers } from 'ethers';
 import * as gqlFetch from 'graphql-request';
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
-import { NETWORKS } from '../src/constants';
-import { ChainId, OrderDirection } from '../src/enums';
-import { StatisticsClient } from '../src/statistics';
+import { afterEach, describe, expect, test, vi } from 'vitest';
+import { OrderDirection } from '../src/enums';
+import { StatisticsUtils } from '../src/statistics';
 import {
   GET_ESCROW_STATISTICS_QUERY,
   GET_EVENT_DAY_DATA_QUERY,
   GET_HOLDERS_QUERY,
 } from '../src/graphql/queries';
 
-describe('StatisticsClient', () => {
-  let statisticsClient: any;
-
-  beforeEach(async () => {
-    if (NETWORKS[ChainId.POLYGON]) {
-      statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON]);
-    }
-  });
+describe('StatisticsUtils', () => {
+  const networkData = {
+    subgraphUrl:
+      'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
+  } as any;
 
   afterEach(() => {
     vi.restoreAllMocks();
@@ -55,7 +51,7 @@ describe('StatisticsClient', () => {
       const from = new Date();
       const to = new Date(from.setDate(from.getDate() + 1));
 
-      const result = await statisticsClient.getEscrowStatistics({
+      const result = await StatisticsUtils.getEscrowStatistics(networkData, {
         from,
         to,
       });
@@ -100,7 +96,7 @@ describe('StatisticsClient', () => {
         .mockRejectedValueOnce(new Error('Error'));
 
       await expect(
-        statisticsClient.getEscrowStatistics({
+        StatisticsUtils.getEscrowStatistics(networkData, {
           from: new Date(),
           to: new Date(),
         })
@@ -124,7 +120,7 @@ describe('StatisticsClient', () => {
       const from = new Date();
       const to = new Date(from.setDate(from.getDate() + 1));
 
-      const result = await statisticsClient.getWorkerStatistics({
+      const result = await StatisticsUtils.getWorkerStatistics(networkData, {
         from,
         to,
       });
@@ -158,7 +154,7 @@ describe('StatisticsClient', () => {
         .mockRejectedValueOnce(new Error('Error'));
 
       await expect(
-        statisticsClient.getWorkerStatistics({
+        StatisticsUtils.getWorkerStatistics(networkData, {
           from: new Date(),
           to: new Date(),
         })
@@ -184,7 +180,7 @@ describe('StatisticsClient', () => {
       const from = new Date();
       const to = new Date(from.setDate(from.getDate() + 1));
 
-      const result = await statisticsClient.getPaymentStatistics({
+      const result = await StatisticsUtils.getPaymentStatistics(networkData, {
         from,
         to,
       });
@@ -220,7 +216,7 @@ describe('StatisticsClient', () => {
         .mockRejectedValueOnce(new Error('Error'));
 
       await expect(
-        statisticsClient.getPaymentStatistics({
+        StatisticsUtils.getPaymentStatistics(networkData, {
           from: new Date(),
           to: new Date(),
         })
@@ -240,7 +236,7 @@ describe('StatisticsClient', () => {
         },
       });
 
-      const result = await statisticsClient.getHMTStatistics();
+      const result = await StatisticsUtils.getHMTStatistics(networkData);
 
       expect(result).toEqual({
         totalTransferAmount: ethers.toBigInt(100),
@@ -254,9 +250,9 @@ describe('StatisticsClient', () => {
         .spyOn(gqlFetch, 'default')
         .mockRejectedValueOnce(new Error('Error'));
 
-      await expect(statisticsClient.getHMTStatistics()).rejects.toThrow(
-        'Error'
-      );
+      await expect(
+        StatisticsUtils.getHMTStatistics(networkData)
+      ).rejects.toThrow('Error');
 
       expect(gqlFetchSpy).toHaveBeenCalledTimes(1);
     });
@@ -277,7 +273,7 @@ describe('StatisticsClient', () => {
         ],
       });
 
-      const result = await statisticsClient.getHMTHolders();
+      const result = await StatisticsUtils.getHMTHolders(networkData);
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
         'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
@@ -312,7 +308,7 @@ describe('StatisticsClient', () => {
         ],
       });
 
-      const result = await statisticsClient.getHMTHolders({
+      const result = await StatisticsUtils.getHMTHolders(networkData, {
         address: '0x123',
       });
 
@@ -348,9 +344,8 @@ describe('StatisticsClient', () => {
         ],
       });
 
-      const result = await statisticsClient.getHMTHolders({
-        orderBy: 'balance',
-        orderDirection: 'asc',
+      const result = await StatisticsUtils.getHMTHolders(networkData, {
+        orderDirection: OrderDirection.ASC,
       });
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
@@ -358,7 +353,7 @@ describe('StatisticsClient', () => {
         GET_HOLDERS_QUERY(),
         {
           orderBy: 'balance',
-          orderDirection: 'asc',
+          orderDirection: OrderDirection.ASC,
         },
         undefined
       );
@@ -389,8 +384,8 @@ describe('StatisticsClient', () => {
         ],
       });
 
-      const result = await statisticsClient.getHMTHolders({
-        orderDirection: 'desc',
+      const result = await StatisticsUtils.getHMTHolders(networkData, {
+        orderDirection: OrderDirection.DESC,
       });
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
@@ -398,7 +393,7 @@ describe('StatisticsClient', () => {
         GET_HOLDERS_QUERY(),
         {
           orderBy: 'balance',
-          orderDirection: 'desc',
+          orderDirection: OrderDirection.DESC,
         },
         undefined
       );
@@ -420,7 +415,9 @@ describe('StatisticsClient', () => {
         .spyOn(gqlFetch, 'default')
         .mockRejectedValueOnce(new Error('Error'));
 
-      await expect(statisticsClient.getHMTHolders()).rejects.toThrow('Error');
+      await expect(StatisticsUtils.getHMTHolders(networkData)).rejects.toThrow(
+        'Error'
+      );
 
       expect(gqlFetchSpy).toHaveBeenCalledTimes(1);
     });
@@ -443,7 +440,7 @@ describe('StatisticsClient', () => {
       const from = new Date();
       const to = new Date(from.setDate(from.getDate() + 1));
 
-      const result = await statisticsClient.getHMTDailyData({
+      const result = await StatisticsUtils.getHMTDailyData(networkData, {
         from,
         to,
       });
@@ -478,7 +475,7 @@ describe('StatisticsClient', () => {
         .mockRejectedValueOnce(new Error('Error'));
 
       await expect(
-        statisticsClient.getHMTStatistics({
+        StatisticsUtils.getHMTDailyData(networkData, {
           from: new Date(),
           to: new Date(),
         })

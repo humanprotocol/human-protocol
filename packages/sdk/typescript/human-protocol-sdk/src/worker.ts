@@ -7,21 +7,40 @@ import { GET_WORKER_QUERY, GET_WORKERS_QUERY } from './graphql/queries/worker';
 import { IWorker, IWorkersFilter, SubgraphOptions } from './interfaces';
 import { getSubgraphUrl, customGqlFetch } from './utils';
 
+/**
+ * Utility class for worker-related operations.
+ *
+ * @example
+ * ```ts
+ * import { WorkerUtils, ChainId } from '@human-protocol/sdk';
+ *
+ * const worker = await WorkerUtils.getWorker(
+ *   ChainId.POLYGON_AMOY,
+ *   '0x1234567890abcdef1234567890abcdef12345678'
+ * );
+ * console.log('Worker:', worker);
+ * ```
+ */
 export class WorkerUtils {
   /**
    * This function returns the worker data for the given address.
    *
-   * @param {ChainId} chainId The chain ID.
-   * @param {string} address The worker address.
-   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
-   * @returns {Promise<IWorker | null>} - Returns the worker details or null if not found.
+   * @param chainId - The chain ID.
+   * @param address - The worker address.
+   * @param options - Optional configuration for subgraph requests.
+   * @returns Returns the worker details or null if not found.
+   * @throws ErrorUnsupportedChainID If the chain ID is not supported
+   * @throws ErrorInvalidAddress If the address is invalid
    *
-   * **Code example**
-   *
+   * @example
    * ```ts
    * import { WorkerUtils, ChainId } from '@human-protocol/sdk';
    *
-   * const worker = await WorkerUtils.getWorker(ChainId.POLYGON, '0x1234567890abcdef1234567890abcdef12345678');
+   * const worker = await WorkerUtils.getWorker(
+   *   ChainId.POLYGON_AMOY,
+   *   '0x1234567890abcdef1234567890abcdef12345678'
+   * );
+   * console.log('Worker:', worker);
    * ```
    */
   public static async getWorker(
@@ -79,21 +98,23 @@ export class WorkerUtils {
    * };
    * ```
    *
-   * @param {IWorkersFilter} filter Filter for the workers.
-   * @param {SubgraphOptions} options Optional configuration for subgraph requests.
-   * @returns {Promise<IWorker[]>} Returns an array with all the worker details.
+   * @param filter - Filter for the workers.
+   * @param options - Optional configuration for subgraph requests.
+   * @returns Returns an array with all the worker details.
+   * @throws ErrorUnsupportedChainID If the chain ID is not supported
+   * @throws ErrorInvalidAddress If the filter address is invalid
    *
-   * **Code example**
-   *
+   * @example
    * ```ts
    * import { WorkerUtils, ChainId } from '@human-protocol/sdk';
    *
-   * const filter: IWorkersFilter = {
-   *   chainId: ChainId.POLYGON,
+   * const filter = {
+   *   chainId: ChainId.POLYGON_AMOY,
    *   first: 10,
    *   skip: 0,
    * };
    * const workers = await WorkerUtils.getWorkers(filter);
+   * console.log('Workers:', workers.length);
    * ```
    */
   public static async getWorkers(

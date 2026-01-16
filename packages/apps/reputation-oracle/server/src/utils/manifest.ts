@@ -1,4 +1,4 @@
-import { AudinoJobType, CvatJobType, FortuneJobType } from '@/common/enums';
+import { CvatJobType, FortuneJobType } from '@/common/enums';
 import { JobManifest, JobRequestType } from '@/common/types';
 
 const fortuneJobTypes = Object.values(FortuneJobType);
@@ -13,17 +13,7 @@ export function isCvatJobType(value: string): value is CvatJobType {
   return cvatJobTypes.includes(value as CvatJobType);
 }
 
-const audinoJobTypes = Object.values(AudinoJobType);
-
-export function isAudinoJobType(value: string): value is AudinoJobType {
-  return audinoJobTypes.includes(value as AudinoJobType);
-}
-
-const validJobRequestTypes: string[] = [
-  ...fortuneJobTypes,
-  ...cvatJobTypes,
-  ...audinoJobTypes,
-];
+const validJobRequestTypes: string[] = [...fortuneJobTypes, ...cvatJobTypes];
 
 function assertValidJobRequestType(
   value: string,

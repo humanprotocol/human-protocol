@@ -141,6 +141,36 @@ export class GatewayConfigService {
               method: HttpMethod.GET,
               headers: this.JSON_HEADER,
             },
+            [ReputationOracleEndpoints.EXCHANGE_API_KEYS_ENROLL]: {
+              endpoint: '/exchange-api-keys',
+              method: HttpMethod.POST,
+              headers: this.JSON_HEADER,
+            },
+            [ReputationOracleEndpoints.EXCHANGE_API_KEYS_DELETE]: {
+              endpoint: '/exchange-api-keys',
+              method: HttpMethod.DELETE,
+              headers: this.JSON_HEADER,
+            },
+            [ReputationOracleEndpoints.EXCHANGE_API_KEYS_RETRIEVE]: {
+              endpoint: '/exchange-api-keys',
+              method: HttpMethod.GET,
+              headers: this.JSON_HEADER,
+            },
+            [ReputationOracleEndpoints.EXCHANGE_API_KEYS_SUPPORTED_EXCHANGES]: {
+              endpoint: '/exchange-api-keys/supported',
+              method: HttpMethod.GET,
+              headers: this.JSON_HEADER,
+            },
+            [ReputationOracleEndpoints.STAKE_SUMMARY]: {
+              endpoint: '/staking/summary',
+              method: HttpMethod.GET,
+              headers: this.JSON_HEADER,
+            },
+            [ReputationOracleEndpoints.STAKE_CONFIG]: {
+              endpoint: '/staking/config',
+              method: HttpMethod.GET,
+              headers: this.JSON_HEADER,
+            },
           } as Record<ReputationOracleEndpoints, GatewayEndpointConfig>,
         },
         [ExternalApiName.HCAPTCHA_LABELING_STATS]: {

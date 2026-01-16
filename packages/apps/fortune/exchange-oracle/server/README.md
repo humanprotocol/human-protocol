@@ -115,7 +115,7 @@ $ yarn migration:show
 
 ## 📚 Documentation
 
-For detailed information about the Exchange Oracle, please refer to the [Human Protocol Tech Docs](https://human-protocol.gitbook.io/hub/human-tech-docs/architecture/components/exchange-oracle).
+For detailed information about the Exchange Oracle, please refer to the [Human Protocol Tech Docs](https://docs.humanprotocol.org/architecture/exchange_oracle/overview/).
 
 ## 📝 License
 

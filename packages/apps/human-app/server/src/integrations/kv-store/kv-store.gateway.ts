@@ -1,8 +1,8 @@
 import {
   ChainId,
+  InvalidKeyError,
   KVStoreKeys,
   KVStoreUtils,
-  StorageClient,
 } from '@human-protocol/sdk';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { HttpException, Inject, Injectable } from '@nestjs/common';
@@ -14,6 +14,7 @@ import {
   ORACLE_URL_CACHE_KEY,
   REPUTATION_ORACLE_PUBLIC_KEY,
 } from '../../common/constants/cache';
+import { downloadFileFromUrl } from '../../common/utils/storage';
 
 @Injectable()
 export class KvStoreGateway {
@@ -34,24 +35,26 @@ export class KvStoreGateway {
       const chainId: ChainId = Number(network?.chainId);
 
       oracleUrl = await KVStoreUtils.get(chainId, address, KVStoreKeys.url);
-    } catch (e) {
-      if (e.toString().includes('Error: Invalid address')) {
+    } catch (error) {
+      if (error instanceof InvalidKeyError) {
+        oracleUrl = '';
+      } else if (error.toString().includes('Error: Invalid address')) {
         throw new HttpException(
           `Unable to retrieve URL from address: ${address}`,
           400,
         );
       } else {
         throw new Error(
-          `Error, while fetching exchange oracle URL from kv-store: ${e}`,
+          `Error, while fetching exchange oracle URL from kv-store`,
+          {
+            cause: error,
+          },
         );
       }
     }
 
     if (!oracleUrl || oracleUrl === '') {
-      throw new HttpException(
-        `Unable to retrieve URL from address: ${address}`,
-        400,
-      );
+      throw new HttpException('Oracle does not have URL set in KV store', 422);
     }
 
     oracleUrl = oracleUrl.replace(/\/$/, '');
@@ -119,7 +122,7 @@ export class KvStoreGateway {
         address,
         JWT_KVSTORE_KEY,
       );
-      publicKey = (await StorageClient.downloadFileFromUrl(url)) as string;
+      publicKey = (await downloadFileFromUrl(url)) as string;
     } catch (e) {
       if (e.toString().includes('Error: Invalid address')) {
         throw new HttpException(

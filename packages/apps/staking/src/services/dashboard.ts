@@ -3,10 +3,10 @@ import api from '../utils/api';
 
 export const getKVStoreData = async (
   address: string,
-  chainId: number
+  chainId: number,
 ): Promise<IKVStore[]> => {
   const response = await api.get(`details/kvstore/${address}`, {
-    params: { chain_id: chainId },
+    params: { chainId },
   });
 
   // Validate if response is IKVStore[]

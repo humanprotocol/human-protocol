@@ -1,5 +1,5 @@
 """
-This module enables to obtain transaction information from 
+This module enables to obtain transaction information from
 both the contracts and subgraph.
 """
 

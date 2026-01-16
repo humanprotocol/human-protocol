@@ -17,7 +17,6 @@ sphinx-autodoc-typehints = "*"
 
 [packages]
 cryptography = "*"
-minio = "*"
 validators = "*"
 web3 = "*"
 aiohttp = "<4.0.0"  # broken freeze in one of dependencies

@@ -18,7 +18,6 @@ import { ServerConfigService } from '../../common/config/server-config.service';
 import { ErrorEscrow, ErrorJob } from '../../common/constants/errors';
 import { TOKEN_ADDRESSES } from '../../common/constants/tokens';
 import {
-  AudinoJobType,
   CvatJobType,
   EscrowFundToken,
   FortuneJobType,
@@ -27,7 +26,11 @@ import {
   JobStatusFilter,
 } from '../../common/enums/job';
 import { PaymentCurrency, PaymentType } from '../../common/enums/payment';
-import { EventType, OracleType } from '../../common/enums/webhook';
+import {
+  EventType,
+  OracleType,
+  WebhookStatus,
+} from '../../common/enums/webhook';
 import {
   ConflictError,
   NotFoundError,
@@ -36,7 +39,6 @@ import {
 import { div, max, mul } from '../../common/utils/decimal';
 import { getTokenDecimals } from '../../common/utils/tokens';
 import {
-  createMockAudinoManifest,
   createMockCvatManifest,
   createMockFortuneManifest,
   createMockHcaptchaManifest,
@@ -54,7 +56,6 @@ import { WebhookRepository } from '../webhook/webhook.repository';
 import { WhitelistEntity } from '../whitelist/whitelist.entity';
 import { WhitelistService } from '../whitelist/whitelist.service';
 import {
-  createAudinoJobDto,
   createCaptchaJobDto,
   createCvatJobDto,
   createFortuneJobDto,
@@ -567,92 +568,6 @@ describe('JobService', () => {
       });
     });
 
-    describe('Audino', () => {
-      it('should create an Audino job', async () => {
-        const audinoJobDto = createAudinoJobDto();
-        const fundTokenDecimals = getTokenDecimals(
-          audinoJobDto.chainId!,
-          audinoJobDto.escrowFundToken,
-        );
-
-        const mockManifest = createMockAudinoManifest();
-        mockManifestService.createManifest.mockResolvedValueOnce(mockManifest);
-        const mockUrl = faker.internet.url();
-        const mockHash = faker.string.uuid();
-        mockManifestService.uploadManifest.mockResolvedValueOnce({
-          url: mockUrl,
-          hash: mockHash,
-        });
-        const jobEntityMock = createJobEntity();
-        mockJobRepository.createUnique = jest
-          .fn()
-          .mockResolvedValueOnce(jobEntityMock);
-        mockRateService.getRate
-          .mockResolvedValueOnce(tokenToUsdRate)
-          .mockResolvedValueOnce(usdToTokenRate);
-
-        await jobService.createJob(
-          userMock,
-          AudinoJobType.AUDIO_TRANSCRIPTION,
-          audinoJobDto,
-        );
-
-        expect(mockWeb3Service.validateChainId).toHaveBeenCalledWith(
-          audinoJobDto.chainId,
-        );
-        expect(mockRoutingProtocolService.selectOracles).not.toHaveBeenCalled();
-        expect(mockRoutingProtocolService.validateOracles).toHaveBeenCalledWith(
-          audinoJobDto.chainId,
-          audinoJobDto.type,
-          audinoJobDto.reputationOracle,
-          audinoJobDto.exchangeOracle,
-          audinoJobDto.recordingOracle,
-        );
-        expect(mockManifestService.createManifest).toHaveBeenCalledWith(
-          audinoJobDto,
-          audinoJobDto.type,
-          audinoJobDto.paymentAmount,
-          fundTokenDecimals,
-        );
-        expect(mockManifestService.uploadManifest).toHaveBeenCalledWith(
-          audinoJobDto.chainId,
-          mockManifest,
-          [
-            audinoJobDto.exchangeOracle,
-            audinoJobDto.reputationOracle,
-            audinoJobDto.recordingOracle,
-          ],
-        );
-        expect(mockPaymentService.createWithdrawalPayment).toHaveBeenCalledWith(
-          userMock.id,
-          expect.any(Number),
-          audinoJobDto.paymentCurrency,
-          tokenToUsdRate,
-        );
-        expect(mockJobRepository.updateOne).toHaveBeenCalledWith({
-          chainId: audinoJobDto.chainId,
-          userId: userMock.id,
-          manifestUrl: mockUrl,
-          manifestHash: mockHash,
-          requestType: audinoJobDto.type,
-          fee: expect.any(Number),
-          fundAmount: Number(
-            mul(
-              mul(audinoJobDto.paymentAmount, tokenToUsdRate),
-              usdToTokenRate,
-            ).toFixed(6),
-          ),
-          status: JobStatus.MODERATION_PASSED,
-          waitUntil: expect.any(Date),
-          token: audinoJobDto.escrowFundToken,
-          exchangeOracle: audinoJobDto.exchangeOracle,
-          recordingOracle: audinoJobDto.recordingOracle,
-          reputationOracle: audinoJobDto.reputationOracle,
-          payments: expect.any(Array),
-        });
-      });
-    });
-
     describe('HCaptcha', () => {
       it('should create an HCaptcha job', async () => {
         const captchaJobDto = createCaptchaJobDto();
@@ -884,6 +799,17 @@ describe('JobService', () => {
         ...jobEntity,
         status: JobStatus.LAUNCHED,
         escrowAddress,
+      });
+      expect(mockWebhookRepository.createUnique).toHaveBeenCalledWith({
+        chainId: jobEntity.chainId,
+        escrowAddress,
+        eventType: EventType.ESCROW_CREATED,
+        oracleType: OracleType.FORTUNE,
+        hasSignature: true,
+        oracleAddress: jobEntity.exchangeOracle,
+        retriesCount: 0,
+        waitUntil: expect.any(Date),
+        status: WebhookStatus.PENDING,
       });
 
       getOracleFeeSpy.mockRestore();
@@ -1318,13 +1244,6 @@ describe('JobService', () => {
       },
     );
 
-    it.each(Object.values(AudinoJobType))(
-      'should return OracleType.AUDINO for Audino job type %s',
-      (jobType) => {
-        expect(jobService.getOracleType(jobType)).toBe(OracleType.AUDINO);
-      },
-    );
-
     it.each(Object.values(HCaptchaJobType))(
       'should return OracleType.HCAPTCHA for HCaptcha job type %s',
       (jobType) => {
@@ -1741,20 +1660,16 @@ describe('JobService', () => {
       expect(mockJobRepository.updateOne).toHaveBeenCalledWith(jobEntity);
     });
 
-    it('should not create a refund and set status to CANCELED when no refund is found', async () => {
+    it('should throw ConflictError when no refund is found', async () => {
       const jobEntity = createJobEntity();
       mockPaymentService.getJobPayments.mockResolvedValueOnce([]);
       mockedEscrowUtils.getCancellationRefund.mockResolvedValueOnce(
         null as any,
       );
 
-      jest
-        .spyOn(jobService as any, 'getRefundAmount')
-        .mockResolvedValueOnce(0n);
-
-      mockJobRepository.updateOne.mockResolvedValueOnce(jobEntity);
-
-      await jobService.cancelJob(jobEntity);
+      await expect(jobService.cancelJob(jobEntity)).rejects.toThrow(
+        new ConflictError(ErrorJob.NoRefundFound),
+      );
 
       expect(mockPaymentService.getJobPayments).toHaveBeenCalledWith(
         jobEntity.id,
@@ -1765,54 +1680,7 @@ describe('JobService', () => {
         jobEntity.escrowAddress,
       );
       expect(mockPaymentService.createRefundPayment).not.toHaveBeenCalled();
-      expect(jobEntity.status).toBe(JobStatus.CANCELED);
-      expect(mockJobRepository.updateOne).toHaveBeenCalledWith(jobEntity);
-    });
-
-    it('should create a refund when on-chain refund amount is greater than 0', async () => {
-      const jobEntity = createJobEntity();
-      const tokenDecimals = (TOKEN_ADDRESSES[jobEntity.chainId as ChainId] ??
-        {})[jobEntity.token as EscrowFundToken]?.decimals;
-
-      mockPaymentService.getJobPayments.mockResolvedValueOnce([]);
-      mockedEscrowUtils.getCancellationRefund.mockResolvedValueOnce(
-        null as any,
-      );
-
-      const refundAmount = faker.number.float({
-        min: 1,
-        max: 10,
-        fractionDigits: tokenDecimals,
-      });
-
-      // Mock on-chain refund lookup to return a positive amount
-      jest
-        .spyOn(jobService as any, 'getRefundAmount')
-        .mockResolvedValueOnce(
-          ethers.parseUnits(refundAmount.toString(), tokenDecimals),
-        );
-
-      mockPaymentService.createRefundPayment.mockResolvedValueOnce(undefined);
-      mockJobRepository.updateOne.mockResolvedValueOnce(jobEntity);
-
-      await jobService.cancelJob(jobEntity);
-
-      expect(mockPaymentService.getJobPayments).toHaveBeenCalledWith(
-        jobEntity.id,
-        PaymentType.SLASH,
-      );
-      expect(EscrowUtils.getCancellationRefund).toHaveBeenCalledWith(
-        jobEntity.chainId,
-        jobEntity.escrowAddress,
-      );
-      expect(mockPaymentService.createRefundPayment).toHaveBeenCalledWith({
-        refundAmount: refundAmount,
-        refundCurrency: jobEntity.token,
-        userId: jobEntity.userId,
-        jobId: jobEntity.id,
-      });
-      expect(jobEntity.status).toBe(JobStatus.CANCELED);
-      expect(mockJobRepository.updateOne).toHaveBeenCalledWith(jobEntity);
+      expect(mockJobRepository.updateOne).not.toHaveBeenCalled();
     });
 
     it('should throw ConflictError if refund.amount is empty', async () => {

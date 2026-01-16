@@ -4,7 +4,6 @@ import { NetworkConfigService } from '../../common/config/network-config.service
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ErrorRoutingProtocol } from '../../common/constants/errors';
 import {
-  AudinoJobType,
   CvatJobType,
   HCaptchaJobType,
   JobRequestType,
@@ -175,14 +174,6 @@ export class RoutingProtocolService {
         reputationOracle: this.web3ConfigService.reputationOracleAddress,
         exchangeOracle: this.web3ConfigService.cvatExchangeOracleAddress,
         recordingOracle: this.web3ConfigService.cvatRecordingOracleAddress,
-      };
-    } else if (
-      Object.values(AudinoJobType).includes(jobType as AudinoJobType)
-    ) {
-      return {
-        reputationOracle: this.web3ConfigService.reputationOracleAddress,
-        exchangeOracle: this.web3ConfigService.audinoExchangeOracleAddress,
-        recordingOracle: this.web3ConfigService.audinoRecordingOracleAddress,
       };
     }
 

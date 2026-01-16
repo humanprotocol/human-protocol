@@ -7,9 +7,11 @@ const apiPaths = {
 
 const uiConfigSchema = z.object({
   chainIdsEnabled: z.array(z.number()),
+  stakingEligibilityEnabled: z.boolean().prefault(false),
+  minThreshold: z.string(),
 });
 
-type UiConfig = z.infer<typeof uiConfigSchema>;
+export type UiConfig = z.infer<typeof uiConfigSchema>;
 
 async function getUiConfig() {
   try {

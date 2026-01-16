@@ -1,4 +1,4 @@
-import { IDailyHMT, NETWORKS, StatisticsClient } from '@human-protocol/sdk';
+import { IDailyHMT, NETWORKS, StatisticsUtils } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
@@ -244,8 +244,9 @@ export class StatsService implements OnModuleInit {
       const operatingNetworks =
         await this.networksService.getOperatingNetworks();
       for (const network of operatingNetworks) {
-        const statisticsClient = new StatisticsClient(NETWORKS[network]);
-        const generalStats = await statisticsClient.getHMTStatistics();
+        const generalStats = await StatisticsUtils.getHMTStatistics(
+          NETWORKS[network],
+        );
         aggregatedStats.totalHolders += generalStats.totalHolders;
         aggregatedStats.totalTransactions += generalStats.totalTransferCount;
       }
@@ -295,17 +296,19 @@ export class StatsService implements OnModuleInit {
       // Fetch daily data for each network
       await Promise.all(
         operatingNetworks.map(async (network) => {
-          const statisticsClient = new StatisticsClient(NETWORKS[network]);
           let skip = 0;
           let fetchedRecords: IDailyHMT[] = [];
 
           do {
-            fetchedRecords = await statisticsClient.getHMTDailyData({
-              from,
-              to,
-              first: 1000, // Max subgraph query size
-              skip,
-            });
+            fetchedRecords = await StatisticsUtils.getHMTDailyData(
+              NETWORKS[network],
+              {
+                from,
+                to,
+                first: 1000, // Max subgraph query size
+                skip,
+              },
+            );
 
             for (const record of fetchedRecords) {
               const dailyCacheKey = `${HMT_PREFIX}${

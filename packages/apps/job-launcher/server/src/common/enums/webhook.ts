@@ -10,6 +10,7 @@ export enum EventType {
 export enum OracleType {
   FORTUNE = 'fortune',
   CVAT = 'cvat',
+  /** @deprecated Audino jobs are no longer supported. */
   AUDINO = 'audino',
   HCAPTCHA = 'hcaptcha',
 }

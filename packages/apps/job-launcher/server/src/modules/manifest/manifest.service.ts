@@ -1,9 +1,4 @@
-import {
-  ChainId,
-  Encryption,
-  KVStoreUtils,
-  StorageParams,
-} from '@human-protocol/sdk';
+import { ChainId, Encryption, KVStoreUtils } from '@human-protocol/sdk';
 import {
   ValidationError as ClassValidationError,
   Injectable,
@@ -32,7 +27,6 @@ import {
 } from '../../common/constants';
 import { ErrorJob } from '../../common/constants/errors';
 import {
-  AudinoJobType,
   CvatJobType,
   FortuneJobType,
   HCaptchaJobType,
@@ -48,7 +42,6 @@ import {
 } from '../../common/utils/storage';
 import {
   CreateJob,
-  JobAudinoDto,
   JobCaptchaAdvancedDto,
   JobCaptchaDto,
   JobCvatDto,
@@ -62,7 +55,6 @@ import {
 import { StorageService } from '../storage/storage.service';
 import { Web3Service } from '../web3/web3.service';
 import {
-  AudinoManifestDto,
   CvatManifestDto,
   FortuneManifestDto,
   HCaptchaManifestDto,
@@ -72,7 +64,6 @@ import {
 
 @Injectable()
 export class ManifestService {
-  public readonly storageParams: StorageParams;
   public readonly bucket: string;
 
   constructor(
@@ -113,10 +104,6 @@ export class ManifestService {
           fundAmount,
           decimals,
         );
-
-      case AudinoJobType.AUDIO_TRANSCRIPTION:
-      case AudinoJobType.AUDIO_ATTRIBUTE_ANNOTATION:
-        return this.createAudinoManifest(dto as JobAudinoDto, requestType);
 
       default:
         throw new ValidationError(ErrorJob.InvalidRequestType);
@@ -321,29 +308,6 @@ export class ManifestService {
         gt_url: urls.gtUrl.href,
       },
       job_bounty: jobBounty,
-    };
-  }
-
-  private async createAudinoManifest(
-    dto: JobAudinoDto,
-    requestType: AudinoJobType,
-  ): Promise<AudinoManifestDto> {
-    return {
-      annotation: {
-        description: dto.requesterDescription,
-        labels: dto.labels,
-        qualifications: dto.qualifications || [],
-        type: requestType,
-        user_guide: dto.userGuide,
-        segment_duration: dto.segmentDuration,
-      },
-      data: {
-        data_url: generateBucketUrl(dto.data.dataset, requestType).href,
-      },
-      validation: {
-        gt_url: generateBucketUrl(dto.groundTruth, requestType).href,
-        min_quality: dto.minQuality,
-      },
     };
   }
 
@@ -596,11 +560,7 @@ export class ManifestService {
 
   private async validateManifest(
     requestType: JobRequestType,
-    manifest:
-      | FortuneManifestDto
-      | CvatManifestDto
-      | HCaptchaManifestDto
-      | AudinoManifestDto,
+    manifest: FortuneManifestDto | CvatManifestDto | HCaptchaManifestDto,
   ): Promise<void> {
     let dtoCheck;
 
@@ -609,10 +569,6 @@ export class ManifestService {
     } else if (requestType === HCaptchaJobType.HCAPTCHA) {
       return;
       dtoCheck = new HCaptchaManifestDto();
-    } else if (
-      Object.values(AudinoJobType).includes(requestType as AudinoJobType)
-    ) {
-      dtoCheck = new AudinoManifestDto();
     } else {
       dtoCheck = new CvatManifestDto();
     }
@@ -628,12 +584,7 @@ export class ManifestService {
   async downloadManifest(
     manifestUrl: string,
     requestType: JobRequestType,
-  ): Promise<
-    | FortuneManifestDto
-    | CvatManifestDto
-    | HCaptchaManifestDto
-    | AudinoManifestDto
-  > {
+  ): Promise<FortuneManifestDto | CvatManifestDto | HCaptchaManifestDto> {
     const manifest = (await this.storageService.downloadJsonLikeData(
       manifestUrl,
     )) as ManifestDto;

@@ -52,8 +52,13 @@ describe('SignatureAuthGuard', () => {
       mockRequest = {
         switchToHttp: jest.fn().mockReturnThis(),
         getRequest: jest.fn().mockReturnThis(),
-        headers: {},
-        body: {},
+        headers: {
+          ['header-signature-key']: 'validSignature',
+        },
+        body: {
+          escrow_address: MOCK_ADDRESS,
+          chain_id: ChainId.LOCALHOST,
+        },
         originalUrl: '',
       };
       context = {
@@ -63,11 +68,6 @@ describe('SignatureAuthGuard', () => {
     });
 
     it('should return true if signature is verified', async () => {
-      mockRequest.headers['header-signature-key'] = 'validSignature';
-      mockRequest.body = {
-        escrow_address: MOCK_ADDRESS,
-        chain_id: ChainId.LOCALHOST,
-      };
       (verifySignature as jest.Mock).mockReturnValue(true);
 
       const result = await guard.canActivate(context as any);

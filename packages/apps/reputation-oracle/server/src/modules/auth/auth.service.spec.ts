@@ -11,10 +11,12 @@ import { SignatureType, UserStatus, UserRole } from '@/common/enums';
 import {
   AuthConfigService,
   NDAConfigService,
+  StakingConfigService,
   ServerConfigService,
   Web3ConfigService,
 } from '@/config';
 import { EmailAction, EmailService } from '@/modules/email';
+import { StakingService } from '@/modules/staking';
 import { SiteKeyRepository } from '@/modules/user';
 import { UserEntity, UserRepository, UserService } from '@/modules/user';
 import { generateOperator, generateWorkerUser } from '@/modules/user/fixtures';
@@ -41,6 +43,12 @@ const mockAuthConfigService: Omit<AuthConfigService, 'configService'> = {
   forgotPasswordExpiresIn: 86400000,
   humanAppSecretKey: faker.string.alphanumeric({ length: 42 }),
 };
+const mockStakingConfigService: Omit<StakingConfigService, 'configService'> = {
+  eligibilityEnabled: true,
+  minThreshold: 100,
+  asset: 'ETH',
+  timeoutMs: 2000,
+};
 
 const mockEmailService = createMock<EmailService>();
 
@@ -56,6 +64,7 @@ const mockSiteKeyRepository = createMock<SiteKeyRepository>();
 const mockTokenRepository = createMock<TokenRepository>();
 const mockUserRepository = createMock<UserRepository>();
 const mockUserService = createMock<UserService>();
+const mockStakingService = createMock<StakingService>();
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -85,6 +94,8 @@ describe('AuthService', () => {
         { provide: UserRepository, useValue: mockUserRepository },
         { provide: UserService, useValue: mockUserService },
         { provide: Web3ConfigService, useValue: mockWeb3ConfigService },
+        { provide: StakingService, useValue: mockStakingService },
+        { provide: StakingConfigService, useValue: mockStakingConfigService },
       ],
     }).compile();
 
@@ -626,6 +637,7 @@ describe('AuthService', () => {
         wallet_address: user.evmAddress,
         role: user.role,
         kyc_status: user.kyc?.status,
+        is_stake_eligible: true,
         nda_signed: user.ndaSignedUrl === mockNdaConfigService.latestNdaUrl,
         reputation_network: mockWeb3ConfigService.operatorAddress,
         qualifications: user.userQualifications
@@ -635,6 +647,11 @@ describe('AuthService', () => {
           : [],
       };
 
+      const spyOncheckStakeEligible = jest
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .spyOn(service as any, 'checkStakeEligible')
+        .mockImplementation();
+      spyOncheckStakeEligible.mockResolvedValueOnce(true);
       const spyOnGenerateTokens = jest
         .spyOn(service, 'generateTokens')
         .mockImplementation();
@@ -651,7 +668,129 @@ describe('AuthService', () => {
         expectedJwtPayload,
       );
 
+      expect(spyOncheckStakeEligible).toHaveBeenCalledTimes(1);
+
+      spyOncheckStakeEligible.mockRestore();
       spyOnGenerateTokens.mockRestore();
+    });
+  });
+
+  describe('checkStakeEligible', () => {
+    it('returns true when feature flag disabled', async () => {
+      const user = generateWorkerUser();
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (mockStakingConfigService as any).eligibilityEnabled = false;
+
+      const result = await service['checkStakeEligible'](user);
+
+      expect(result).toBe(true);
+      expect(
+        mockStakingService.getExchangeStakedBalance,
+      ).not.toHaveBeenCalled();
+      expect(mockStakingService.getOnChainStakedBalance).not.toHaveBeenCalled();
+    });
+
+    it('returns true when exchange balance meets threshold (no on-chain call)', async () => {
+      const user = generateWorkerUser();
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (mockStakingConfigService as any).eligibilityEnabled = true;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (mockStakingConfigService as any).minThreshold = 1000;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (mockStakingConfigService as any).asset = 'HMT';
+
+      mockStakingService.getExchangeStakedBalance.mockResolvedValueOnce(1500);
+
+      const result = await service['checkStakeEligible'](user);
+
+      expect(result).toBe(true);
+      expect(mockStakingService.getExchangeStakedBalance).toHaveBeenCalledWith(
+        user.id,
+      );
+      expect(mockStakingService.getOnChainStakedBalance).not.toHaveBeenCalled();
+    });
+
+    it('returns true when exchange balance below threshold but on-chain makes up the difference', async () => {
+      const user = generateWorkerUser({
+        privateKey: generateEthWallet().privateKey,
+      });
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (mockStakingConfigService as any).eligibilityEnabled = true;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (mockStakingConfigService as any).minThreshold = 1000;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (mockStakingConfigService as any).asset = 'HMT';
+
+      mockStakingService.getExchangeStakedBalance.mockResolvedValueOnce(400);
+      mockStakingService.getOnChainStakedBalance.mockResolvedValueOnce(600);
+
+      const result = await service['checkStakeEligible'](user);
+
+      expect(result).toBe(true);
+      expect(mockStakingService.getExchangeStakedBalance).toHaveBeenCalledWith(
+        user.id,
+      );
+      expect(mockStakingService.getOnChainStakedBalance).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(mockStakingService.getOnChainStakedBalance).toHaveBeenCalledWith(
+        user.evmAddress,
+      );
+    });
+
+    it('returns false when no exchange keys and on-chain stake below threshold', async () => {
+      const user = generateWorkerUser({
+        privateKey: generateEthWallet().privateKey,
+      });
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (mockStakingConfigService as any).eligibilityEnabled = true;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (mockStakingConfigService as any).minThreshold = 1000;
+
+      mockStakingService.getExchangeStakedBalance.mockResolvedValueOnce(0);
+      mockStakingService.getOnChainStakedBalance.mockResolvedValueOnce(500);
+
+      const result = await service['checkStakeEligible'](user);
+
+      expect(result).toBe(false);
+      expect(mockStakingService.getExchangeStakedBalance).toHaveBeenCalledWith(
+        user.id,
+      );
+      expect(mockStakingService.getOnChainStakedBalance).toHaveBeenCalledTimes(
+        1,
+      );
+    });
+
+    it('continues on exchange error and returns based on on-chain stake', async () => {
+      const user = generateWorkerUser({
+        privateKey: generateEthWallet().privateKey,
+      });
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (mockStakingConfigService as any).eligibilityEnabled = true;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (mockStakingConfigService as any).minThreshold = 1000;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (mockStakingConfigService as any).asset = 'HMT';
+
+      mockStakingService.getExchangeStakedBalance.mockRejectedValueOnce(
+        new Error('network'),
+      );
+      mockStakingService.getOnChainStakedBalance.mockResolvedValueOnce(1200);
+
+      const result = await service['checkStakeEligible'](user);
+
+      expect(result).toBe(true);
+      expect(mockStakingService.getExchangeStakedBalance).toHaveBeenCalledWith(
+        user.id,
+      );
+      expect(mockStakingService.getOnChainStakedBalance).toHaveBeenCalledTimes(
+        1,
+      );
     });
   });
 

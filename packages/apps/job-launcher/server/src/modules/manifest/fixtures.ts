@@ -4,20 +4,18 @@ import { AuthConfigService } from '../../common/config/auth-config.service';
 import { CvatConfigService } from '../../common/config/cvat-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import {
-  AudinoJobType,
   CvatJobType,
   EscrowFundToken,
   JobCaptchaRequestType,
   JobCaptchaShapeType,
 } from '../../common/enums/job';
 import { PaymentCurrency } from '../../common/enums/payment';
-import { JobAudinoDto, JobCaptchaDto, JobCvatDto } from '../job/job.dto';
+import { JobCaptchaDto, JobCvatDto } from '../job/job.dto';
 import {
   getMockedProvider,
   getMockedRegion,
 } from '../../../test/fixtures/storage';
 import {
-  AudinoManifestDto,
   CvatManifestDto,
   FortuneManifestDto,
   HCaptchaManifestDto,
@@ -70,38 +68,6 @@ export function createJobCvatDto(
     },
     type: CvatJobType.IMAGE_BOXES,
     chainId: faker.helpers.arrayElement(Object.values(ChainId)) as ChainId,
-    paymentCurrency: faker.helpers.arrayElement(Object.values(PaymentCurrency)),
-    paymentAmount: faker.number.int({ min: 1, max: 1000 }),
-    escrowFundToken: faker.helpers.arrayElement(Object.values(EscrowFundToken)),
-    ...overrides,
-  };
-}
-
-export function createJobAudinoDto(
-  overrides: Partial<JobAudinoDto> = {},
-): JobAudinoDto {
-  return {
-    data: {
-      dataset: {
-        provider: getMockedProvider(),
-        region: getMockedRegion(),
-        bucketName: faker.lorem.word(),
-        path: faker.system.filePath(),
-      },
-    },
-    groundTruth: {
-      provider: getMockedProvider(),
-      region: getMockedRegion(),
-      bucketName: faker.lorem.word(),
-      path: faker.system.filePath(),
-    },
-    labels: [{ name: faker.lorem.word() }],
-    segmentDuration: faker.number.int({ min: 10, max: 3600000 }),
-    requesterDescription: faker.lorem.sentence(),
-    userGuide: faker.internet.url(),
-    qualifications: [faker.lorem.word()],
-    minQuality: faker.number.int({ min: 1, max: 100 }),
-    type: AudinoJobType.AUDIO_TRANSCRIPTION,
     paymentCurrency: faker.helpers.arrayElement(Object.values(PaymentCurrency)),
     paymentAmount: faker.number.int({ min: 1, max: 1000 }),
     escrowFundToken: faker.helpers.arrayElement(Object.values(EscrowFundToken)),
@@ -181,29 +147,6 @@ export function createMockCvatManifest(
       gt_url: faker.internet.url(),
     },
     job_bounty: faker.finance.amount(),
-    ...overrides,
-  };
-}
-
-export function createMockAudinoManifest(
-  overrides: Partial<AudinoManifestDto> = {},
-): AudinoManifestDto {
-  return {
-    data: {
-      data_url: faker.internet.url(),
-    },
-    annotation: {
-      labels: [{ name: faker.lorem.word() }],
-      description: faker.lorem.sentence(),
-      user_guide: faker.internet.url(),
-      type: AudinoJobType.AUDIO_TRANSCRIPTION,
-      segment_duration: faker.number.int({ min: 10, max: 360000 }),
-      qualifications: [faker.lorem.word()],
-    },
-    validation: {
-      min_quality: faker.number.float({ min: 0.1, max: 1 }),
-      gt_url: faker.internet.url(),
-    },
     ...overrides,
   };
 }

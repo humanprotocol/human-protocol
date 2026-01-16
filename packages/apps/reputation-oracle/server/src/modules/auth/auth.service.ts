@@ -7,10 +7,12 @@ import {
   AuthConfigService,
   NDAConfigService,
   ServerConfigService,
+  StakingConfigService,
   Web3ConfigService,
 } from '@/config';
 import logger from '@/logger';
 import { EmailAction, EmailService } from '@/modules/email';
+import { StakingService } from '@/modules/staking';
 import {
   OperatorStatus,
   SiteKeyRepository,
@@ -56,6 +58,8 @@ export class AuthService {
     private readonly userRepository: UserRepository,
     private readonly userService: UserService,
     private readonly web3ConfigService: Web3ConfigService,
+    private readonly stakingService: StakingService,
+    private readonly stakingConfigService: StakingConfigService,
   ) {}
 
   async signup(email: string, password: string): Promise<void> {
@@ -244,6 +248,8 @@ export class AuthService {
       hCaptchaSiteKey = hCaptchaSiteKeys[0].siteKey;
     }
 
+    const stakeEligible = await this.checkStakeEligible(userEntity);
+
     const jwtPayload = {
       email: userEntity.email,
       status: userEntity.status,
@@ -253,6 +259,7 @@ export class AuthService {
       kyc_status: userEntity.kyc?.status,
       nda_signed:
         userEntity.ndaSignedUrl === this.ndaConfigService.latestNdaUrl,
+      is_stake_eligible: stakeEligible,
       reputation_network: this.web3ConfigService.operatorAddress,
       qualifications: userEntity.userQualifications
         ? userEntity.userQualifications.map(
@@ -263,6 +270,44 @@ export class AuthService {
     };
 
     return this.generateTokens(userEntity.id, jwtPayload);
+  }
+
+  private async checkStakeEligible(
+    userEntity: Web2UserEntity | UserEntity,
+  ): Promise<boolean> {
+    if (!this.stakingConfigService.eligibilityEnabled) return true;
+
+    let inspectedStakeAmount = 0;
+
+    try {
+      const exchangeBalance =
+        await this.stakingService.getExchangeStakedBalance(userEntity.id);
+      inspectedStakeAmount += exchangeBalance;
+    } catch (err) {
+      this.logger.warn('Failed to query exchange balance; continuing', {
+        userId: userEntity.id,
+        error: err,
+      });
+    }
+
+    if (
+      inspectedStakeAmount < this.stakingConfigService.minThreshold &&
+      userEntity.evmAddress
+    ) {
+      try {
+        const onChainStake = await this.stakingService.getOnChainStakedBalance(
+          userEntity.evmAddress,
+        );
+        inspectedStakeAmount += onChainStake;
+      } catch (err) {
+        this.logger.warn('Failed to query on-chain stake; continuing', {
+          userId: userEntity.id,
+          error: err,
+        });
+      }
+    }
+
+    return inspectedStakeAmount >= this.stakingConfigService.minThreshold;
   }
 
   async web3Auth(userEntity: OperatorUserEntity): Promise<AuthTokens> {

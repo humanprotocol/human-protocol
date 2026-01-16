@@ -16,7 +16,11 @@
 
 ## Documentation
 
-For detailed information about the core contracts, please refer to the [Human Protocol Tech Docs](https://docs.humanprotocol.org/hub/human-tech-docs/architecture/components/smart-contracts).
+For detailed information about the core contracts, please refer to the [Human Protocol Tech Docs](https://docs.humanprotocol.org/architecture/contracts/escrow.sol/).
+
+### Governance
+
+For the cross-chain Governance system (Hub + Spokes), deployment, and proposal lifecycle, see the root-level [GOVERNANCE.md](./GOVERNANCE.md). The in-source, detailed reference lives at [`contracts/governance/README.md`](contracts/governance/README.md).
 
 ## Deployment
 
@@ -45,7 +49,7 @@ yarn deploy:proxy --network [NETWORK_NAME]
 yarn dlx hardhat verify --network [NETWORK_NAME] [CONTRACT_ADDRESS]
 ```
 
-5. Request the Human Protocol team to include the new contract address in the document at https://tech-docs.humanprotocol.org/contracts/contract-addresses.
+5. Request the Human Protocol team to include the new contract address in the document at https://docs.humanprotocol.org/architecture/contracts/contract_addresses.
 
 ### Upgrade contracts with proxy
 
@@ -78,14 +82,6 @@ yarn upgrade:proxy --network [NETWORK_NAME]
 ```bash
 npx hardhat verify --network [NETWORK_NAME] [CONTRACT_ADDRESS]
 ```
-
-## Documentation
-
-For detailed information about core, please refer to the [Human Protocol Tech Docs](https://human-protocol.gitbook.io/hub/human-tech-docs/architecture/components/smart-contracts).
-
-### Governance
-
-For the cross-chain Governance system (Hub + Spokes), deployment, and proposal lifecycle, see the root-level [GOVERNANCE.md](./GOVERNANCE.md). The in-source, detailed reference lives at [`contracts/governance/README.md`](contracts/governance/README.md).
 
 ## License
 

@@ -1,23 +1,15 @@
-"""
-This client enables performing actions on the KVStore contract and
-obtaining information from both the contracts and subgraph.
+"""Client for interacting with the KVStore contract.
 
-Internally, the SDK will use one network or another according to the network ID of the web3.
-To use this client, you need to create a Web3 instance and configure the default account,
-as well as some middlewares.
+Selects the network based on the Web3 chain id. Configure Web3 with an account
+and signer middleware for writes; read operations work without a signer.
 
-Code Example
-------------
-
-* With Signer
-
-.. code-block:: python
-
+Examples:
+    With signer:
+    ```python
     from eth_typing import URI
     from web3 import Web3
     from web3.middleware import SignAndSendRawMiddlewareBuilder
     from web3.providers.auto import load_provider_from_uri
-
     from human_protocol_sdk.kvstore import KVStoreClient
 
     def get_w3_with_priv_key(priv_key: str):
@@ -26,29 +18,25 @@ Code Example
         w3.eth.default_account = gas_payer.address
         w3.middleware_onion.inject(
             SignAndSendRawMiddlewareBuilder.build(priv_key),
-            'SignAndSendRawMiddlewareBuilder',
+            "SignAndSendRawMiddlewareBuilder",
             layer=0,
         )
-        return (w3, gas_payer)
+        return w3
 
-    (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
+    w3 = get_w3_with_priv_key("YOUR_PRIVATE_KEY")
     kvstore_client = KVStoreClient(w3)
+    ```
 
-* Without Signer (For read operations only)
-
-.. code-block:: python
-
+    Read-only:
+    ```python
     from eth_typing import URI
     from web3 import Web3
     from web3.providers.auto import load_provider_from_uri
-
     from human_protocol_sdk.kvstore import KVStoreClient
 
     w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
     kvstore_client = KVStoreClient(w3)
-
-Module
-------
+    ```
 """
 
 import logging
@@ -71,24 +59,44 @@ LOG = logging.getLogger("human_protocol_sdk.kvstore")
 
 
 class KVStoreClientError(Exception):
-    """
-    Raises when some error happens when interacting with kvstore.
-    """
+    """Exception raised when errors occur during KVStore operations."""
 
     pass
 
 
 class KVStoreClient:
-    """
-    A class used to manage kvstore on the HUMAN network.
+    """Client for interacting with the KVStore smart contract.
+
+    This client provides methods to read and write key-value pairs on-chain,
+    supporting both individual and bulk operations, as well as URL storage with
+    content hash verification.
+
+    Attributes:
+        w3 (Web3): Web3 instance configured for the target network.
+        network (dict): Network configuration for the current chain.
+        kvstore_contract (Contract): Contract instance for the KVStore.
+        gas_limit (Optional[int]): Optional gas limit for transactions.
     """
 
     def __init__(self, web3: Web3, gas_limit: Optional[int] = None):
-        """
-        Initializes a KVStore instance.
+        """Initialize a KVStoreClient instance.
 
-        :param web3: The Web3 object
-        :param gas_limit: (Optional) Gas limit for transactions
+        Args:
+            web3 (Web3): Web3 instance configured for the target network.
+                Must have a valid provider and chain ID.
+            gas_limit (Optional[int]): Optional gas limit for transactions.
+
+        Raises:
+            KVStoreClientError: If chain ID is invalid or network configuration is missing.
+
+        Example:
+            ```python
+            from web3 import Web3
+            from human_protocol_sdk.kvstore import KVStoreClient
+
+            w3 = Web3(Web3.HTTPProvider("http://localhost:8545"))
+            kvstore_client = KVStoreClient(w3)
+            ```
         """
 
         # Initialize web3 instance
@@ -118,39 +126,25 @@ class KVStoreClient:
 
     @requires_signer
     def set(self, key: str, value: str, tx_options: Optional[TxParams] = None) -> None:
-        """
-        Sets the value of a key-value pair in the contract.
+        """Set a key-value pair in the KVStore contract.
 
-        :param key: The key of the key-value pair to set
-        :param value: The value of the key-value pair to set
-        :param tx_options: (Optional) Additional transaction parameters
+        Stores a single key-value pair on-chain associated with the sender's address.
 
-        :return: None
+        Args:
+            key (str): Key to set (cannot be empty).
+            value (str): Value to assign to the key.
+            tx_options (Optional[TxParams]): Optional transaction parameters such as gas limit.
 
-        :example:
-            .. code-block:: python
+        Returns:
+            None
 
-                from eth_typing import URI
-                from web3 import Web3
-                from web3.middleware import SignAndSendRawMiddlewareBuilder
-                from web3.providers.auto import load_provider_from_uri
+        Raises:
+            KVStoreClientError: If the key is empty or the transaction fails.
 
-                from human_protocol_sdk.kvstore import KVStoreClient
-
-                def get_w3_with_priv_key(priv_key: str):
-                    w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
-                    gas_payer = w3.eth.account.from_key(priv_key)
-                    w3.eth.default_account = gas_payer.address
-                    w3.middleware_onion.inject(
-                        SignAndSendRawMiddlewareBuilder.build(priv_key),
-                        'SignAndSendRawMiddlewareBuilder',
-                        layer=0,
-                    )
-                    return (w3, gas_payer)
-
-                (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
-                kvstore_client = KVStoreClient(w3)
-                kvstore_client.set('Role', 'RecordingOracle')
+        Example:
+            ```python
+            kvstore_client.set("Role", "RecordingOracle")
+            ```
         """
 
         if not key:
@@ -168,42 +162,30 @@ class KVStoreClient:
     def set_bulk(
         self, keys: List[str], values: List[str], tx_options: Optional[TxParams] = None
     ) -> None:
-        """
-        Sets multiple key-value pairs in the contract.
+        """Set multiple key-value pairs in the KVStore contract.
 
-        :param keys: A list of keys to set
-        :param values: A list of values to set
-        :param tx_options: (Optional) Additional transaction parameters
+        Stores multiple key-value pairs on-chain in a single transaction,
+        all associated with the sender's address.
 
-        :return: None
+        Args:
+            keys (List[str]): List of keys to set (no key can be empty).
+            values (List[str]): Corresponding list of values (must match keys length).
+            tx_options (Optional[TxParams]): Optional transaction parameters such as gas limit.
 
-        :example:
-            .. code-block:: python
+        Returns:
+            None
 
-                from eth_typing import URI
-                from web3 import Web3
-                from web3.middleware import SignAndSendRawMiddlewareBuilder
-                from web3.providers.auto import load_provider_from_uri
+        Raises:
+            KVStoreClientError: If any key is empty, arrays are empty, arrays have different
+                lengths, or the transaction fails.
 
-                from human_protocol_sdk.kvstore import KVStoreClient
-
-                def get_w3_with_priv_key(priv_key: str):
-                    w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
-                    gas_payer = w3.eth.account.from_key(priv_key)
-                    w3.eth.default_account = gas_payer.address
-                    w3.middleware_onion.inject(
-                        SignAndSendRawMiddlewareBuilder.build(priv_key),
-                        'SignAndSendRawMiddlewareBuilder',
-                        layer=0,
-                    )
-                    return (w3, gas_payer)
-
-                (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
-                kvstore_client = KVStoreClient(w3)
-
-                keys = ['Role', 'Webhook_url']
-                values = ['RecordingOracle', 'http://localhost']
-                kvstore_client.set_bulk(keys, values)
+        Example:
+            ```python
+            kvstore_client.set_bulk(
+                ["Role", "Webhook_url"],
+                ["RecordingOracle", "http://localhost"],
+            )
+            ```
         """
 
         if "" in keys:
@@ -228,43 +210,31 @@ class KVStoreClient:
         key: Optional[str] = "url",
         tx_options: Optional[TxParams] = None,
     ) -> None:
-        """
-        Sets a URL value for the address that submits the transaction, and its hash.
+        """Set a URL value and its content hash in the KVStore.
 
-        :param url: URL to set
-        :param key: Configurable URL key. `url` by default.
-        :param tx_options: (Optional) Additional transaction parameters
+        Fetches the content from the URL, computes its hash, and stores both
+        the URL and hash on-chain. The hash key is automatically generated
+        by appending ``_hash`` to the provided key.
 
-        :return: None
+        Args:
+            url (str): URL to store (must be valid and accessible).
+            key (Optional[str]): Configurable URL key. Defaults to ``"url"``.
+                The hash will be stored with key ``"{key}_hash"``.
+            tx_options (Optional[TxParams]): Optional transaction parameters such as gas limit.
 
-        :raise KVStoreClientError: If an error occurs while validating URL, or handling transaction
+        Returns:
+            None
 
-        :example:
-            .. code-block:: python
+        Raises:
+            KVStoreClientError: If the URL is invalid, unreachable, or the transaction fails.
 
-                from eth_typing import URI
-                from web3 import Web3
-                from web3.middleware import SignAndSendRawMiddlewareBuilder
-                from web3.providers.auto import load_provider_from_uri
-
-                from human_protocol_sdk.kvstore import KVStoreClient
-
-                def get_w3_with_priv_key(priv_key: str):
-                    w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
-                    gas_payer = w3.eth.account.from_key(priv_key)
-                    w3.eth.default_account = gas_payer.address
-                    w3.middleware_onion.inject(
-                        SignAndSendRawMiddlewareBuilder.build(priv_key),
-                        'SignAndSendRawMiddlewareBuilder',
-                        layer=0,
-                    )
-                    return (w3, gas_payer)
-
-                (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
-                kvstore_client = KVStoreClient(w3)
-
-                kvstore_client.set_file_url_and_hash('http://localhost')
-                kvstore_client.set_file_url_and_hash('https://linkedin.com/me', 'linkedin_url')
+        Example:
+            ```python
+            kvstore_client.set_file_url_and_hash("http://localhost/manifest.json")
+            kvstore_client.set_file_url_and_hash(
+                "https://linkedin.com/me", "linkedin_url"
+            )
+            ```
         """
         if not validate_url(url):
             raise KVStoreClientError(f"Invalid URL: {url}")
@@ -280,24 +250,28 @@ class KVStoreClient:
             handle_error(e, KVStoreClientError)
 
     def get(self, address: str, key: str) -> str:
-        """
-        Gets the value of a key-value pair in the contract.
-        :param address: The Ethereum address associated with the key-value pair
-        :param key: The key of the key-value pair to get
+        """Get the value of a key-value pair from the KVStore.
 
-        :return: The value of the key-value pair if it exists
+        Retrieves the value associated with a key for a specific address.
 
-        :example:
-            .. code-block:: python
+        Args:
+            address (str): Ethereum address associated with the key-value pair.
+            key (str): Key to retrieve (cannot be empty).
 
-                from eth_typing import URI
-                from web3 import Web3
-                from web3.providers.auto import load_provider_from_uri
-                from human_protocol_sdk.kvstore import KVStoreClient
+        Returns:
+            Value of the key-value pair if it exists, empty string otherwise.
 
-                w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
-                kvstore_client = KVStoreClient(w3)
-                role = kvstore_client.get('0x62dD51230A30401C455c8398d06F85e4EaB6309f', 'Role')
+        Raises:
+            KVStoreClientError: If the key is empty, address is invalid, or the query fails.
+
+        Example:
+            ```python
+            role = kvstore_client.get(
+                "0x62dD51230A30401C455c8398d06F85e4EaB6309f",
+                "Role",
+            )
+            print(role)  # "RecordingOracle"
+            ```
         """
 
         if not key:

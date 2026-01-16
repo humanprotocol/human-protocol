@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
 
+"""Filter classes for querying Human Protocol subgraph data.
+
+This module provides filter classes for various query operations including escrows,
+payouts, transactions, statistics, and more.
+"""
+
 from datetime import datetime
 
 from typing import List, Optional
@@ -10,16 +16,27 @@ from web3 import Web3
 
 
 class FilterError(Exception):
-    """
-    Raises when some error happens when building filter object.
-    """
+    """Exception raised when filter construction or validation fails."""
 
     pass
 
 
 class EscrowFilter:
-    """
-    A class used to filter escrow requests.
+    """Filter configuration for querying escrows from the subgraph.
+
+    Attributes:
+        chain_id (ChainId): Network to request data from.
+        launcher (Optional[str]): Launcher address to filter by.
+        reputation_oracle (Optional[str]): Reputation oracle address to filter by.
+        recording_oracle (Optional[str]): Recording oracle address to filter by.
+        exchange_oracle (Optional[str]): Exchange oracle address to filter by.
+        job_requester_id (Optional[str]): Job requester identifier to filter by.
+        status (Optional[Status | List[Status]]): Escrow status or list of statuses to filter by.
+        date_from (Optional[datetime]): Filter escrows created from this date.
+        date_to (Optional[datetime]): Filter escrows created until this date.
+        first (int): Number of items per page (max 1000).
+        skip (int): Number of items to skip for pagination.
+        order_direction (OrderDirection): Sort order for results.
     """
 
     def __init__(
@@ -38,20 +55,9 @@ class EscrowFilter:
         order_direction: OrderDirection = OrderDirection.DESC,
     ):
         """
-        Initializes a EscrowFilter instance.
-
-        :param chain_id: Network to request data
-        :param launcher: Launcher address
-        :param reputation_oracle: Reputation oracle address
-        :param recording_oracle: Recording oracle address
-        :param exchange_oracle: Exchange oracle address
-        :param job_requester_id: Job requester id
-        :param status: Escrow status
-        :param date_from: Created from date
-        :param date_to: Created to date
-        :param first: Number of items per page
-        :param skip: Page number to retrieve
-        :param order_direction: Order of results, "asc" or "desc"
+        Raises:
+            FilterError: If chain ID is invalid, addresses are malformed, date range is invalid,
+                or order direction is invalid.
         """
 
         if chain_id.value not in set(chain_id.value for chain_id in ChainId):
@@ -94,8 +100,17 @@ class EscrowFilter:
 
 
 class PayoutFilter:
-    """
-    A class used to filter payout requests.
+    """Filter configuration for querying payout events from the subgraph.
+
+    Attributes:
+        chain_id (ChainId): Chain where payouts were recorded.
+        escrow_address (Optional[str]): Escrow address to filter payouts by.
+        recipient (Optional[str]): Recipient address to filter payouts by.
+        date_from (Optional[datetime]): Filter payouts from this date.
+        date_to (Optional[datetime]): Filter payouts until this date.
+        first (int): Number of items per page.
+        skip (int): Number of items to skip for pagination.
+        order_direction (OrderDirection): Sort order for results.
     """
 
     def __init__(
@@ -110,16 +125,8 @@ class PayoutFilter:
         order_direction: OrderDirection = OrderDirection.DESC,
     ):
         """
-        Initializes a filter for payouts.
-
-        :param chain_id: The chain ID where the payouts are recorded.
-        :param escrow_address: Optional escrow address to filter payouts.
-        :param recipient: Optional recipient address to filter payouts.
-        :param date_from: Optional start date for filtering.
-        :param date_to: Optional end date for filtering.
-        :param first: Optional number of payouts per page. Default is 10.
-        :param skip: Optional number of payouts to skip. Default is 0.
-        :param order_direction: Optional order direction. Default is DESC.
+        Raises:
+            FilterError: If addresses are malformed or date range is invalid.
         """
 
         if escrow_address and not Web3.is_address(escrow_address):
@@ -144,8 +151,22 @@ class PayoutFilter:
 
 
 class TransactionFilter:
-    """
-    A class used to filter transactions.
+    """Filter configuration for querying blockchain transactions from the subgraph.
+
+    Attributes:
+        chain_id (ChainId): Chain to filter transactions from.
+        from_address (Optional[str]): Sender address to filter by.
+        to_address (Optional[str]): Recipient address to filter by.
+        start_date (Optional[datetime]): Filter transactions from this date.
+        end_date (Optional[datetime]): Filter transactions until this date.
+        start_block (Optional[int]): Filter transactions from this block number.
+        end_block (Optional[int]): Filter transactions until this block number.
+        method (Optional[str]): Method signature to filter transactions by.
+        escrow (Optional[str]): Escrow address to filter transactions by.
+        token (Optional[str]): Token address to filter transactions by.
+        first (int): Number of items per page (max 1000).
+        skip (int): Number of items to skip for pagination.
+        order_direction (OrderDirection): Sort order for results.
     """
 
     def __init__(
@@ -165,23 +186,9 @@ class TransactionFilter:
         order_direction: OrderDirection = OrderDirection.DESC,
     ):
         """
-        Initializes a TransactionsFilter instance.
-
-        :param chain_id: Chain ID to filter transactions from
-        :param from_address: Sender address
-        :param to_address: Receiver address
-        :param start_date: Start date for filtering transactions
-        :param end_date: End date for filtering transactions
-        :param start_block: Start block number for filtering transactions
-        :param end_block: End block number for filtering transactions
-        :param method: Method name to filter transactions
-        :param escrow: Escrow address to filter transactions
-        :param token: Token address to filter transactions
-        :param first: Number of items per page
-        :param skip: Page number to retrieve
-        :param order: Order of results, "asc" or "desc"
-
-        :raises ValueError: If start_date is after end_date
+        Raises:
+            ValueError: If addresses are malformed, date/block ranges are invalid,
+                or order direction is invalid.
         """
 
         if from_address and not Web3.is_address(from_address):
@@ -231,28 +238,29 @@ class TransactionFilter:
 
 
 class StatisticsFilter:
-    """
-    A class used to filter statistical data.
+    """Filter configuration for querying statistical data from the subgraph.
 
-    :param date_from: Start date for the query range.
-    :param date_to: End date for the query range.
-    :param first: Number of items per page.
-    :param skip: Page number to retrieve.
-    :param order_direction: Order of results, "asc" or "desc".
+    Attributes:
+        date_from (Optional[datetime]): Start date for the query range.
+        date_to (Optional[datetime]): End date for the query range.
+        first (int): Number of items per page (max 1000).
+        skip (int): Number of items to skip for pagination.
+        order_direction (OrderDirection): Sort order for results.
 
-    :example:
-        .. code-block:: python
+    Example:
+        ```python
+        from datetime import datetime
+        from human_protocol_sdk.filter import StatisticsFilter
+        from human_protocol_sdk.constants import OrderDirection
 
-            from datetime import datetime
-            from human_protocol_sdk.filter import StatisticsFilter
-
-            filter = StatisticsFilter(
-                date_from=datetime(2023, 1, 1),
-                date_to=datetime(2023, 12, 31),
-                first=10,
-                skip=0,
-                order_direction=OrderDirection.ASC
-            )
+        filter = StatisticsFilter(
+            date_from=datetime(2023, 1, 1),
+            date_to=datetime(2023, 12, 31),
+            first=10,
+            skip=0,
+            order_direction=OrderDirection.ASC
+        )
+        ```
     """
 
     def __init__(
@@ -263,6 +271,11 @@ class StatisticsFilter:
         skip: int = 0,
         order_direction: OrderDirection = OrderDirection.ASC,
     ):
+        """
+        Raises:
+            FilterError: If date range is invalid or order direction is invalid.
+        """
+
         if date_from and date_to and date_from > date_to:
             raise FilterError(
                 f"Invalid dates: {date_from} must be earlier than {date_to}"
@@ -281,6 +294,19 @@ class StatisticsFilter:
 
 
 class StatusEventFilter:
+    """Filter configuration for querying escrow status change events.
+
+    Attributes:
+        chain_id (ChainId): Chain where status events were recorded.
+        statuses (List[Status]): List of statuses to filter by.
+        date_from (Optional[datetime]): Filter events from this date.
+        date_to (Optional[datetime]): Filter events until this date.
+        launcher (Optional[str]): Launcher address to filter by.
+        first (int): Number of items per page.
+        skip (int): Number of items to skip for pagination.
+        order_direction (OrderDirection): Sort order for results.
+    """
+
     def __init__(
         self,
         chain_id: ChainId,
@@ -322,8 +348,15 @@ class StatusEventFilter:
 
 
 class WorkerFilter:
-    """
-    A class used to filter workers.
+    """Filter configuration for querying worker data from the subgraph.
+
+    Attributes:
+        chain_id (ChainId): Chain to request worker data from.
+        worker_address (Optional[str]): Worker address to filter by.
+        order_by (Optional[str]): Property to order results by (e.g., "payoutCount").
+        order_direction (OrderDirection): Sort order for results.
+        first (int): Number of items per page (1-1000).
+        skip (int): Number of items to skip for pagination.
     """
 
     def __init__(
@@ -336,15 +369,10 @@ class WorkerFilter:
         skip: int = 0,
     ):
         """
-        Initializes a WorkerFilter instance.
-
-        :param chain_id: Chain ID to request data
-        :param worker_address: Address to filter by
-        :param order_by: Property to order by, e.g., "payoutCount"
-        :param order_direction: Order direction of results, "asc" or "desc"
-        :param first: Number of items per page
-        :param skip: Number of items to skip (for pagination)
+        Raises:
+            FilterError: If order direction is invalid.
         """
+
         if order_direction.value not in set(
             order_direction.value for order_direction in OrderDirection
         ):
@@ -359,6 +387,24 @@ class WorkerFilter:
 
 
 class StakersFilter:
+    """Filter configuration for querying staker data from the subgraph.
+
+    Attributes:
+        chain_id (ChainId): Chain to request staker data from.
+        min_staked_amount (Optional[str]): Minimum staked amount to filter by.
+        max_staked_amount (Optional[str]): Maximum staked amount to filter by.
+        min_locked_amount (Optional[str]): Minimum locked amount to filter by.
+        max_locked_amount (Optional[str]): Maximum locked amount to filter by.
+        min_withdrawn_amount (Optional[str]): Minimum withdrawn amount to filter by.
+        max_withdrawn_amount (Optional[str]): Maximum withdrawn amount to filter by.
+        min_slashed_amount (Optional[str]): Minimum slashed amount to filter by.
+        max_slashed_amount (Optional[str]): Maximum slashed amount to filter by.
+        order_by (Optional[str]): Property to order results by (e.g., "lastDepositTimestamp").
+        order_direction (OrderDirection): Sort order for results.
+        first (Optional[int]): Number of items per page.
+        skip (Optional[int]): Number of items to skip for pagination.
+    """
+
     def __init__(
         self,
         chain_id: ChainId,
@@ -391,8 +437,17 @@ class StakersFilter:
 
 
 class CancellationRefundFilter:
-    """
-    A class used to filter cancellation refunds.
+    """Filter configuration for querying cancellation refund events.
+
+    Attributes:
+        chain_id (ChainId): Chain to request refund data from.
+        escrow_address (Optional[str]): Escrow address to filter by.
+        receiver (Optional[str]): Receiver address to filter by.
+        date_from (Optional[datetime]): Filter refunds from this date.
+        date_to (Optional[datetime]): Filter refunds until this date.
+        first (int): Number of items per page.
+        skip (int): Number of items to skip for pagination.
+        order_direction (OrderDirection): Sort order for results.
     """
 
     def __init__(
@@ -407,16 +462,11 @@ class CancellationRefundFilter:
         order_direction: OrderDirection = OrderDirection.DESC,
     ):
         """
-        Initializes a CancellationRefundFilter instance.
-        :param chain_id: Chain ID to request data
-        :param escrow_address: Address of the escrow to filter by
-        :param receiver: Address of the receiver to filter by
-        :param date_from: Start date for filtering
-        :param date_to: End date for filtering
-        :param first: Number of items per page
-        :param skip: Number of items to skip (for pagination)
-        :param order_direction: Order direction of results, "asc" or "desc"
+        Raises:
+            FilterError: If chain ID is invalid, addresses are malformed,
+                or date range is invalid.
         """
+
         if chain_id.value not in set(chain_id.value for chain_id in ChainId):
             raise FilterError(f"Invalid ChainId")
         if escrow_address and not Web3.is_address(escrow_address):

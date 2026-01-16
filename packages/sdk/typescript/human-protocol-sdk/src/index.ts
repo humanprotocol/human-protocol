@@ -1,9 +1,8 @@
 import { StakingClient, StakingUtils } from './staking';
-import { StorageClient } from './storage';
 import { KVStoreClient, KVStoreUtils } from './kvstore';
 import { EscrowClient, EscrowUtils } from './escrow';
-import { StatisticsClient } from './statistics';
-import { Encryption, EncryptionUtils } from './encryption';
+import { StatisticsUtils } from './statistics';
+import { Encryption, EncryptionUtils, MessageDataType } from './encryption';
 import { OperatorUtils } from './operator';
 import { TransactionUtils } from './transaction';
 import { WorkerUtils } from './worker';
@@ -27,16 +26,16 @@ export {
 
 export {
   StakingClient,
-  StorageClient,
   KVStoreClient,
   KVStoreUtils,
   EscrowClient,
   EscrowUtils,
-  StatisticsClient,
+  StatisticsUtils,
   Encryption,
   EncryptionUtils,
   OperatorUtils,
   TransactionUtils,
   WorkerUtils,
   StakingUtils,
+  MessageDataType,
 };

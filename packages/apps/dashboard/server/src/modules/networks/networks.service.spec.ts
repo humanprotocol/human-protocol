@@ -1,0 +1,244 @@
+import { createMock } from '@golevelup/ts-jest';
+import { NETWORKS, StatisticsUtils } from '@human-protocol/sdk';
+import { HttpService } from '@nestjs/axios';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { ConfigService } from '@nestjs/config';
+import { Test, TestingModule } from '@nestjs/testing';
+import { Cache } from 'cache-manager';
+import { EnvironmentConfigService } from '../../common/config/env-config.service';
+import { NetworkConfigService } from '../../common/config/network-config.service';
+import { DevelopmentChainId } from '../../common/constants';
+import { NetworksService } from './networks.service';
+
+describe('NetworksService', () => {
+  let networksService: NetworksService;
+  let cacheManager: Cache;
+
+  beforeAll(async () => {
+    process.env.RPC_URL_SEPOLIA = 'https://testrpc.com';
+    process.env.RPC_URL_POLYGON_AMOY = 'https://testrpc.com';
+    process.env.RPC_URL_BSC_TESTNET = 'https://testrpc.com';
+  });
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        NetworksService,
+        { provide: HttpService, useValue: createMock<HttpService>() },
+        {
+          provide: CACHE_MANAGER,
+          useValue: {
+            get: jest.fn(),
+            set: jest.fn(),
+          },
+        },
+        {
+          provide: EnvironmentConfigService,
+          useValue: {
+            networkUsageFilterMonths: 3,
+            networkOperatingCacheTtl: 1000,
+          },
+        },
+        NetworkConfigService,
+        ConfigService,
+      ],
+    }).compile();
+
+    networksService = module.get<NetworksService>(NetworksService);
+    cacheManager = module.get<Cache>(CACHE_MANAGER);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('should regenerate network list when cache TTL expires', async () => {
+    const mockNetworkList = [
+      DevelopmentChainId.SEPOLIA,
+      DevelopmentChainId.POLYGON_AMOY,
+      DevelopmentChainId.BSC_TESTNET,
+    ];
+
+    // Step 1: Initial request - populate cache
+    jest.spyOn(cacheManager, 'get').mockResolvedValue(null);
+    jest.spyOn(cacheManager, 'set').mockResolvedValue(undefined);
+
+    jest.spyOn(StatisticsUtils, 'getHMTDailyData').mockResolvedValue([
+      {
+        timestamp: 0,
+        totalTransactionCount: 7,
+        totalTransactionAmount: 0n,
+        dailyUniqueSenders: 0,
+        dailyUniqueReceivers: 0,
+      },
+    ]);
+    jest
+      .spyOn(StatisticsUtils, 'getEscrowStatistics')
+      .mockResolvedValue({ totalEscrows: 1, dailyEscrowsData: [] });
+
+    // First call should populate cache
+    const firstCallResult = await networksService.getOperatingNetworks();
+
+    expect(firstCallResult).toEqual(mockNetworkList);
+    expect(cacheManager.set).toHaveBeenCalledWith(
+      'operating-networks',
+      mockNetworkList,
+      1000,
+    );
+
+    // Step 2: Simulate TTL expiration by returning null from cache
+    jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(null);
+
+    // Second call after TTL should re-generate the network list
+    const secondCallResult = await networksService.getOperatingNetworks();
+    expect(secondCallResult).toEqual(mockNetworkList);
+
+    // Ensure the cache is set again with the regenerated network list
+    expect(cacheManager.set).toHaveBeenCalledWith(
+      'operating-networks',
+      mockNetworkList,
+      1000,
+    );
+  });
+
+  it('should return cached networks if available', async () => {
+    const cachedNetworks = [
+      DevelopmentChainId.SEPOLIA,
+      DevelopmentChainId.POLYGON_AMOY,
+    ];
+    jest.spyOn(cacheManager, 'get').mockResolvedValue(cachedNetworks);
+
+    const result = await networksService.getOperatingNetworks();
+    expect(result).toEqual(cachedNetworks);
+    expect(cacheManager.get).toHaveBeenCalledWith('operating-networks');
+  });
+
+  it('should fetch and filter available networks correctly', async () => {
+    jest.spyOn(cacheManager, 'get').mockResolvedValue(null);
+    jest.spyOn(StatisticsUtils, 'getHMTDailyData').mockResolvedValue([
+      {
+        timestamp: 0,
+        totalTransactionCount: 4,
+        totalTransactionAmount: 0n,
+        dailyUniqueSenders: 0,
+        dailyUniqueReceivers: 0,
+      },
+      {
+        timestamp: 0,
+        totalTransactionCount: 3,
+        totalTransactionAmount: 0n,
+        dailyUniqueSenders: 0,
+        dailyUniqueReceivers: 0,
+      },
+    ]);
+    jest
+      .spyOn(StatisticsUtils, 'getEscrowStatistics')
+      .mockResolvedValue({ totalEscrows: 1, dailyEscrowsData: [] });
+
+    const result = await networksService.getOperatingNetworks();
+    expect(result).toEqual(
+      expect.arrayContaining([
+        DevelopmentChainId.SEPOLIA,
+        DevelopmentChainId.POLYGON_AMOY,
+      ]),
+    );
+
+    expect(cacheManager.set).toHaveBeenCalledWith(
+      'operating-networks',
+      result,
+      1000,
+    );
+  });
+
+  it('should exclude networks without sufficient HMT transfers', async () => {
+    jest.spyOn(cacheManager, 'get').mockResolvedValue(null);
+    jest.spyOn(StatisticsUtils, 'getHMTDailyData').mockResolvedValue([
+      {
+        timestamp: 0,
+        totalTransactionCount: 2,
+        totalTransactionAmount: 0n,
+        dailyUniqueSenders: 0,
+        dailyUniqueReceivers: 0,
+      },
+    ]);
+    jest
+      .spyOn(StatisticsUtils, 'getEscrowStatistics')
+      .mockResolvedValue({ totalEscrows: 1, dailyEscrowsData: [] });
+
+    const result = await networksService.getOperatingNetworks();
+    expect(result).toEqual([]);
+  });
+
+  it('should handle missing network configuration gracefully', async () => {
+    jest.spyOn(cacheManager, 'get').mockResolvedValue(null);
+
+    const originalNetworkConfig = NETWORKS[DevelopmentChainId.SEPOLIA];
+    NETWORKS[DevelopmentChainId.SEPOLIA] = undefined;
+
+    jest.spyOn(StatisticsUtils, 'getHMTDailyData').mockResolvedValue([
+      {
+        timestamp: 0,
+        totalTransactionCount: 3,
+        totalTransactionAmount: 0n,
+        dailyUniqueSenders: 0,
+        dailyUniqueReceivers: 0,
+      },
+      {
+        timestamp: 0,
+        totalTransactionCount: 3,
+        totalTransactionAmount: 0n,
+        dailyUniqueSenders: 0,
+        dailyUniqueReceivers: 0,
+      },
+    ]);
+    jest
+      .spyOn(StatisticsUtils, 'getEscrowStatistics')
+      .mockResolvedValue({ totalEscrows: 1, dailyEscrowsData: [] });
+
+    const result = await networksService.getOperatingNetworks();
+
+    expect(result).not.toContain(DevelopmentChainId.SEPOLIA);
+    expect(result).toEqual(expect.arrayContaining([]));
+
+    NETWORKS[DevelopmentChainId.SEPOLIA] = originalNetworkConfig;
+  });
+
+  it('should handle errors in getHMTDailyData gracefully', async () => {
+    jest.spyOn(cacheManager, 'get').mockResolvedValue(null);
+    jest
+      .spyOn(StatisticsUtils, 'getHMTDailyData')
+      .mockRejectedValue(new Error('Failed to fetch HMT data'));
+    jest
+      .spyOn(StatisticsUtils, 'getEscrowStatistics')
+      .mockResolvedValue({ totalEscrows: 1, dailyEscrowsData: [] });
+
+    const result = await networksService.getOperatingNetworks();
+    expect(result).toEqual([]);
+  });
+
+  it('should handle errors in getEscrowStatistics gracefully', async () => {
+    jest.spyOn(cacheManager, 'get').mockResolvedValue(null);
+    jest.spyOn(StatisticsUtils, 'getHMTDailyData').mockResolvedValue([
+      {
+        timestamp: 0,
+        totalTransactionCount: 3,
+        totalTransactionAmount: 0n,
+        dailyUniqueSenders: 0,
+        dailyUniqueReceivers: 0,
+      },
+      {
+        timestamp: 0,
+        totalTransactionCount: 2,
+        totalTransactionAmount: 0n,
+        dailyUniqueSenders: 0,
+        dailyUniqueReceivers: 0,
+      },
+    ]);
+    jest
+      .spyOn(StatisticsUtils, 'getEscrowStatistics')
+      .mockRejectedValue(new Error('Failed to fetch escrow stats'));
+
+    const result = await networksService.getOperatingNetworks();
+    expect(result).toEqual([]);
+  });
+});

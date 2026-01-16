@@ -13,7 +13,6 @@ on:
   push:
     branches:
       - main
-    tags-ignore: '*'
     paths:
       - "packages/sdk/python/human-protocol-sdk/**"
 

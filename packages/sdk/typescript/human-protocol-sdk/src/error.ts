@@ -4,42 +4,6 @@
 export const ErrorStakingMissing = new Error('Staking contract is missing');
 
 /**
- * @constant {Error} - The Storage client not initialized.
- */
-export const ErrorStorageClientNotInitialized = new Error(
-  'Storage client not initialized'
-);
-
-/**
- * @constant {Error} - The Storage client does not exist.
- */
-export const ErrorStorageClientNotExists = new Error(
-  'Storage client does not exist'
-);
-
-/**
- * @constant {Error} - The Storage credentials are missing.
- */
-export const ErrorStorageCredentialsMissing = new Error(
-  'Storage credentials are missing'
-);
-
-/**
- * @constant {Error} - The Storage bucket not found.
- */
-export const ErrorStorageBucketNotFound = new Error('Bucket not found');
-
-/**
- * @constant {Error} - The Storage file not found.
- */
-export const ErrorStorageFileNotFound = new Error('File not found');
-
-/**
- * @constant {Error} - The Storage file not uploaded.
- */
-export const ErrorStorageFileNotUploaded = new Error('File not uploaded');
-
-/**
  * @constant {Error} - The KVStore key cannot be empty.
  */
 export const ErrorKVStoreEmptyKey = new Error('Key cannot be empty');

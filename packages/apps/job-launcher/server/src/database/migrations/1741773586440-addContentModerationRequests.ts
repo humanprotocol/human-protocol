@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddContentModerationRequests1741773586440
-  implements MigrationInterface
-{
+export class AddContentModerationRequests1741773586440 implements MigrationInterface {
   name = 'AddContentModerationRequests1741773586440';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

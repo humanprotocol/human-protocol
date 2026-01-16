@@ -5,12 +5,13 @@ import { toEventId, toPreviousEventId } from './event';
 const mainMethods: string[] = [
   'createEscrow',
   'setup',
-  'fund',
-  'bulkTransfer',
-  'storeResults',
-  'withdraw',
   'requestCancellation',
+  'withdraw',
+  'fund',
   'cancel',
+  'complete',
+  'storeResults',
+  'bulkTransfer',
   'stake',
   'unstake',
   'slash',
@@ -71,13 +72,26 @@ export function createTransaction(
     mainMethods.includes(method) &&
     Address.fromBytes(transaction.to) == to
   ) {
-    transaction.method = method;
-    transaction.from = from;
-    transaction.value = value !== null ? value : BigInt.fromI32(0);
-    transaction.token = token;
-    transaction.escrow = escrow;
-    transaction.receiver = receiver;
-    transaction.save();
+    if (mainMethods.includes(transaction.method)) {
+      const internalTransaction = new InternalTransaction(toEventId(event));
+      internalTransaction.method = method;
+      internalTransaction.from = from;
+      internalTransaction.to = to;
+      internalTransaction.value = value !== null ? value : BigInt.fromI32(0);
+      internalTransaction.transaction = transaction.txHash;
+      internalTransaction.token = token;
+      internalTransaction.escrow = escrow;
+      internalTransaction.receiver = receiver;
+      internalTransaction.save();
+    } else {
+      transaction.method = method;
+      transaction.from = from;
+      transaction.value = value !== null ? value : BigInt.fromI32(0);
+      transaction.token = token;
+      transaction.escrow = escrow;
+      transaction.receiver = receiver;
+      transaction.save();
+    }
   } else {
     if (
       transaction.method == 'set' &&
