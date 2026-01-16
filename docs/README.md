@@ -18,6 +18,9 @@
   `mike deploy -F ./docs/mkdocs-python.yaml --deploy-prefix docs/python [VERSION]`  
   `mike set-default -F ./docs/mkdocs-python.yaml --deploy-prefix docs/python [VERSION]`
 
+### Final step
+Checkout branch `gh-pages`. If there are any uncommitted files, **discard those changes** and push any pending commits.
+
 ## Deleting a deployed version
 - TypeScript: `mike delete -F ./docs/mkdocs-ts.yaml --deploy-prefix docs/ts [VERSION]`
 - Python: `mike delete -F ./docs/mkdocs-python.yaml --deploy-prefix docs/python [VERSION]`
