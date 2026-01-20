@@ -47,13 +47,15 @@ import requests
 from human_protocol_sdk.constants import NETWORKS, ChainId
 from human_protocol_sdk.decorators import requires_signer
 from human_protocol_sdk.utils import (
+    TransactionOptions,
     get_kvstore_interface,
     handle_error,
+    normalize_wait_tx_options,
     validate_url,
+    wait_for_transaction_receipt_with_confirmations,
 )
 from web3 import Web3
 from web3.middleware import ExtraDataToPOAMiddleware
-from web3.types import TxParams
 
 LOG = logging.getLogger("human_protocol_sdk.kvstore")
 
@@ -125,7 +127,9 @@ class KVStoreClient:
         self.gas_limit = gas_limit
 
     @requires_signer
-    def set(self, key: str, value: str, tx_options: Optional[TxParams] = None) -> None:
+    def set(
+        self, key: str, value: str, tx_options: Optional[TransactionOptions] = None
+    ) -> None:
         """Set a key-value pair in the KVStore contract.
 
         Stores a single key-value pair on-chain associated with the sender's address.
@@ -133,7 +137,7 @@ class KVStoreClient:
         Args:
             key (str): Key to set (cannot be empty).
             value (str): Value to assign to the key.
-            tx_options (Optional[TxParams]): Optional transaction parameters such as gas limit.
+            tx_options (Optional[TransactionOptions]): Optional transaction parameters such as gas limit.
 
         Returns:
             None
@@ -151,16 +155,27 @@ class KVStoreClient:
             raise KVStoreClientError("Key cannot be empty")
 
         try:
-            tx_hash = self.kvstore_contract.functions.set(key, value).transact(
-                tx_options
+            tx_params, wait_options = normalize_wait_tx_options(
+                tx_options, KVStoreClientError
             )
-            self.w3.eth.wait_for_transaction_receipt(tx_hash)
+            tx_hash = self.kvstore_contract.functions.set(key, value).transact(
+                tx_params
+            )
+            wait_for_transaction_receipt_with_confirmations(
+                self.w3,
+                tx_hash,
+                wait_options,
+                KVStoreClientError,
+            )
         except Exception as e:
             handle_error(e, KVStoreClientError)
 
     @requires_signer
     def set_bulk(
-        self, keys: List[str], values: List[str], tx_options: Optional[TxParams] = None
+        self,
+        keys: List[str],
+        values: List[str],
+        tx_options: Optional[TransactionOptions] = None,
     ) -> None:
         """Set multiple key-value pairs in the KVStore contract.
 
@@ -170,7 +185,7 @@ class KVStoreClient:
         Args:
             keys (List[str]): List of keys to set (no key can be empty).
             values (List[str]): Corresponding list of values (must match keys length).
-            tx_options (Optional[TxParams]): Optional transaction parameters such as gas limit.
+            tx_options (Optional[TransactionOptions]): Optional transaction parameters such as gas limit.
 
         Returns:
             None
@@ -196,10 +211,18 @@ class KVStoreClient:
             raise KVStoreClientError("Arrays must have the same length")
 
         try:
-            tx_hash = self.kvstore_contract.functions.setBulk(keys, values).transact(
-                tx_options
+            tx_params, wait_options = normalize_wait_tx_options(
+                tx_options, KVStoreClientError
             )
-            self.w3.eth.wait_for_transaction_receipt(tx_hash)
+            tx_hash = self.kvstore_contract.functions.setBulk(keys, values).transact(
+                tx_params
+            )
+            wait_for_transaction_receipt_with_confirmations(
+                self.w3,
+                tx_hash,
+                wait_options,
+                KVStoreClientError,
+            )
         except Exception as e:
             handle_error(e, KVStoreClientError)
 
@@ -208,7 +231,7 @@ class KVStoreClient:
         self,
         url: str,
         key: Optional[str] = "url",
-        tx_options: Optional[TxParams] = None,
+        tx_options: Optional[TransactionOptions] = None,
     ) -> None:
         """Set a URL value and its content hash in the KVStore.
 
@@ -220,7 +243,7 @@ class KVStoreClient:
             url (str): URL to store (must be valid and accessible).
             key (Optional[str]): Configurable URL key. Defaults to ``"url"``.
                 The hash will be stored with key ``"{key}_hash"``.
-            tx_options (Optional[TxParams]): Optional transaction parameters such as gas limit.
+            tx_options (Optional[TransactionOptions]): Optional transaction parameters such as gas limit.
 
         Returns:
             None
@@ -242,10 +265,18 @@ class KVStoreClient:
         content = requests.get(url).text
         content_hash = self.w3.keccak(text=content).hex()
         try:
+            tx_params, wait_options = normalize_wait_tx_options(
+                tx_options, KVStoreClientError
+            )
             tx_hash = self.kvstore_contract.functions.setBulk(
                 [key, key + "_hash"], [url, content_hash]
-            ).transact(tx_options)
-            self.w3.eth.wait_for_transaction_receipt(tx_hash)
+            ).transact(tx_params)
+            wait_for_transaction_receipt_with_confirmations(
+                self.w3,
+                tx_hash,
+                wait_options,
+                KVStoreClientError,
+            )
         except Exception as e:
             handle_error(e, KVStoreClientError)
 

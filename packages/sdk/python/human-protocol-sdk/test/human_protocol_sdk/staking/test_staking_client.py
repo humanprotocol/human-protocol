@@ -11,6 +11,7 @@ from human_protocol_sdk.staking import (
     StakingClient,
     StakingClientError,
 )
+from human_protocol_sdk.utils import WaitOptions
 
 from test.human_protocol_sdk.utils import (
     DEFAULT_GAS_PAYER_PRIV,
@@ -35,6 +36,49 @@ class TestStakingClient(unittest.TestCase):
         type(self.w3.eth).chain_id = PropertyMock(return_value=self.mock_chain_id)
 
         self.staking_client = StakingClient(self.w3)
+        self.staking_client.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": []}
+        )
+
+        self._wait_receipt_patcher = patch(
+            "human_protocol_sdk.staking.staking_client.wait_for_transaction_receipt_with_confirmations"
+        )
+        self.wait_for_receipt_mock = self._wait_receipt_patcher.start()
+
+        def passthrough_wait(w3, tx_hash, wait_options, error_class, *args, **kwargs):
+            return w3.eth.wait_for_transaction_receipt(tx_hash)
+
+        self.wait_for_receipt_mock.side_effect = passthrough_wait
+        self.addCleanup(self._wait_receipt_patcher.stop)
+
+    def assert_wait_called_once_with(
+        self,
+        tx_hash="tx_hash",
+        confirmations=None,
+        timeout_ms=None,
+    ):
+        self.wait_for_receipt_mock.assert_called_once()
+        args, _ = self.wait_for_receipt_mock.call_args
+        self.assertIs(args[0], self.staking_client.w3)
+        self.assertEqual(args[1], tx_hash)
+        wait_options = args[2]
+        self.assertIsInstance(wait_options, WaitOptions)
+        if confirmations is None:
+            self.assertIsNone(wait_options.confirmations)
+        else:
+            self.assertEqual(wait_options.confirmations, confirmations)
+        if timeout_ms is None:
+            self.assertIsNone(wait_options.timeout_ms)
+        else:
+            self.assertEqual(wait_options.timeout_ms, timeout_ms)
+        self.assertIs(args[3], StakingClientError)
+
+    def _wait_tx_options(self):
+        return {
+            "gas": 50000,
+            "confirmations": 3,
+            "timeout_ms": 60000,
+        }
 
     def test_init_with_valid_inputs(self):
         mock_provider = MagicMock(spec=HTTPProvider)
@@ -92,6 +136,7 @@ class TestStakingClient(unittest.TestCase):
         self.staking_client.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
+        self.assert_wait_called_once_with()
 
     def test_approve_stake_invalid_amount(self):
         with self.assertRaises(StakingClientError) as cm:
@@ -118,6 +163,32 @@ class TestStakingClient(unittest.TestCase):
         self.staking_client.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
+        self.assert_wait_called_once_with()
+
+    def test_approve_stake_with_wait_options(self):
+        mock_approve = MagicMock()
+        mock_approve.transact.return_value = "tx_hash"
+        self.staking_client.hmtoken_contract.functions.approve = MagicMock(
+            return_value=mock_approve
+        )
+        self.staking_client.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": []}
+        )
+        tx_options = self._wait_tx_options()
+
+        self.staking_client.approve_stake(100, tx_options)
+
+        self.staking_client.hmtoken_contract.functions.approve.assert_called_once_with(
+            NETWORKS[ChainId.LOCALHOST]["staking_address"], 100
+        )
+        mock_approve.transact.assert_called_once_with({"gas": tx_options["gas"]})
+        self.staking_client.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
+            "tx_hash"
+        )
+        self.assert_wait_called_once_with(
+            confirmations=tx_options["confirmations"],
+            timeout_ms=tx_options["timeout_ms"],
+        )
 
     def test_stake(self):
         mock_stake = MagicMock()
@@ -138,6 +209,7 @@ class TestStakingClient(unittest.TestCase):
         self.staking_client.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
+        self.assert_wait_called_once_with()
 
     def test_stake_invalid_amount(self):
         with self.assertRaises(StakingClientError) as cm:
@@ -164,6 +236,32 @@ class TestStakingClient(unittest.TestCase):
         self.staking_client.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
+        self.assert_wait_called_once_with()
+
+    def test_stake_with_wait_options(self):
+        mock_stake = MagicMock()
+        mock_stake.transact.return_value = "tx_hash"
+        self.staking_client.staking_contract.functions.stake = MagicMock(
+            return_value=mock_stake
+        )
+        self.staking_client.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": []}
+        )
+        tx_options = self._wait_tx_options()
+
+        self.staking_client.stake(100, tx_options)
+
+        self.staking_client.staking_contract.functions.stake.assert_called_once_with(
+            100
+        )
+        mock_stake.transact.assert_called_once_with({"gas": tx_options["gas"]})
+        self.staking_client.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
+            "tx_hash"
+        )
+        self.assert_wait_called_once_with(
+            confirmations=tx_options["confirmations"],
+            timeout_ms=tx_options["timeout_ms"],
+        )
 
     def test_unstake(self):
         mock_unstake = MagicMock()
@@ -184,6 +282,7 @@ class TestStakingClient(unittest.TestCase):
         self.staking_client.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
+        self.assert_wait_called_once_with()
 
     def test_unstake_invalid_amount(self):
         with self.assertRaises(StakingClientError) as cm:
@@ -210,6 +309,32 @@ class TestStakingClient(unittest.TestCase):
         self.staking_client.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
+        self.assert_wait_called_once_with()
+
+    def test_unstake_with_wait_options(self):
+        mock_unstake = MagicMock()
+        mock_unstake.transact.return_value = "tx_hash"
+        self.staking_client.staking_contract.functions.unstake = MagicMock(
+            return_value=mock_unstake
+        )
+        self.staking_client.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": []}
+        )
+        tx_options = self._wait_tx_options()
+
+        self.staking_client.unstake(100, tx_options)
+
+        self.staking_client.staking_contract.functions.unstake.assert_called_once_with(
+            100
+        )
+        mock_unstake.transact.assert_called_once_with({"gas": tx_options["gas"]})
+        self.staking_client.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
+            "tx_hash"
+        )
+        self.assert_wait_called_once_with(
+            confirmations=tx_options["confirmations"],
+            timeout_ms=tx_options["timeout_ms"],
+        )
 
     def test_withdraw(self):
         mock_withdraw = MagicMock()
@@ -228,6 +353,7 @@ class TestStakingClient(unittest.TestCase):
         self.staking_client.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
+        self.assert_wait_called_once_with()
 
     def test_withdraw_with_tx_options(self):
         mock_withdraw = MagicMock()
@@ -246,6 +372,30 @@ class TestStakingClient(unittest.TestCase):
         mock_withdraw.transact.assert_called_once_with(tx_options)
         self.staking_client.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
+        )
+        self.assert_wait_called_once_with()
+
+    def test_withdraw_with_wait_options(self):
+        mock_withdraw = MagicMock()
+        mock_withdraw.transact.return_value = "tx_hash"
+        self.staking_client.staking_contract.functions.withdraw = MagicMock(
+            return_value=mock_withdraw
+        )
+        self.staking_client.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": []}
+        )
+        tx_options = self._wait_tx_options()
+
+        self.staking_client.withdraw(tx_options)
+
+        self.staking_client.staking_contract.functions.withdraw.assert_called_once_with()
+        mock_withdraw.transact.assert_called_once_with({"gas": tx_options["gas"]})
+        self.staking_client.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
+            "tx_hash"
+        )
+        self.assert_wait_called_once_with(
+            confirmations=tx_options["confirmations"],
+            timeout_ms=tx_options["timeout_ms"],
         )
 
     def test_slash(self):
@@ -277,6 +427,7 @@ class TestStakingClient(unittest.TestCase):
         self.staking_client.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
+        self.assert_wait_called_once_with()
 
     def test_slash_invalid_amount(self):
         slasher = "SLASHER"
@@ -332,6 +483,43 @@ class TestStakingClient(unittest.TestCase):
         mock_slash.transact.assert_called_once_with(tx_options)
         self.staking_client.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
+        )
+        self.assert_wait_called_once_with()
+
+    def test_slash_with_wait_options(self):
+        slasher = "SLASHER"
+        staker = "STAKER"
+        escrow_address = "escrow1"
+        self.staking_client._is_valid_escrow = MagicMock(return_value=True)
+
+        mock_slash = MagicMock()
+        mock_slash.transact.return_value = "tx_hash"
+        self.staking_client.staking_contract.functions.slash = MagicMock(
+            return_value=mock_slash
+        )
+        self.staking_client.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": []}
+        )
+        tx_options = self._wait_tx_options()
+
+        self.staking_client.slash(
+            slasher=slasher,
+            staker=staker,
+            escrow_address=escrow_address,
+            amount=50,
+            tx_options=tx_options,
+        )
+
+        self.staking_client.staking_contract.functions.slash.assert_called_once_with(
+            slasher, staker, escrow_address, 50
+        )
+        mock_slash.transact.assert_called_once_with({"gas": tx_options["gas"]})
+        self.staking_client.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
+            "tx_hash"
+        )
+        self.assert_wait_called_once_with(
+            confirmations=tx_options["confirmations"],
+            timeout_ms=tx_options["timeout_ms"],
         )
 
     def test_get_staker_info(self):

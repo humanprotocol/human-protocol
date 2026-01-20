@@ -30,15 +30,17 @@ from typing import Optional
 import web3
 from web3 import Web3
 from web3.middleware import ExtraDataToPOAMiddleware
-from web3.types import TxParams
 
 from human_protocol_sdk.constants import ChainId, NETWORKS
 from human_protocol_sdk.decorators import requires_signer
 from human_protocol_sdk.utils import (
+    TransactionOptions,
     get_erc20_interface,
     get_factory_interface,
     get_staking_interface,
     handle_error,
+    normalize_wait_tx_options,
+    wait_for_transaction_receipt_with_confirmations,
 )
 
 LOG = logging.getLogger("human_protocol_sdk.staking")
@@ -125,7 +127,9 @@ class StakingClient:
         )
 
     @requires_signer
-    def approve_stake(self, amount: int, tx_options: Optional[TxParams] = None) -> None:
+    def approve_stake(
+        self, amount: int, tx_options: Optional[TransactionOptions] = None
+    ) -> None:
         """Approve HMT tokens for staking.
 
         Grants the staking contract permission to transfer HMT tokens from the caller's
@@ -134,7 +138,7 @@ class StakingClient:
         Args:
             amount (int): Amount of HMT tokens to approve in token's smallest unit
                 (must be greater than 0).
-            tx_options (Optional[TxParams]): Optional transaction parameters such as gas limit.
+            tx_options (Optional[TransactionOptions]): Optional transaction parameters such as gas limit.
 
         Returns:
             None
@@ -154,15 +158,25 @@ class StakingClient:
         if amount <= 0:
             raise StakingClientError("Amount to approve must be greater than 0")
         try:
+            tx_params, wait_options = normalize_wait_tx_options(
+                tx_options, StakingClientError
+            )
             tx_hash = self.hmtoken_contract.functions.approve(
                 self.network["staking_address"], amount
-            ).transact(tx_options)
-            self.w3.eth.wait_for_transaction_receipt(tx_hash)
+            ).transact(tx_params)
+            wait_for_transaction_receipt_with_confirmations(
+                self.w3,
+                tx_hash,
+                wait_options,
+                StakingClientError,
+            )
         except Exception as e:
             handle_error(e, StakingClientError)
 
     @requires_signer
-    def stake(self, amount: int, tx_options: Optional[TxParams] = None) -> None:
+    def stake(
+        self, amount: int, tx_options: Optional[TransactionOptions] = None
+    ) -> None:
         """Stake HMT tokens.
 
         Deposits HMT tokens into the staking contract. The tokens must be approved first
@@ -171,7 +185,7 @@ class StakingClient:
         Args:
             amount (int): Amount of HMT tokens to stake in token's smallest unit
                 (must be greater than 0 and within approved/balance limits).
-            tx_options (Optional[TxParams]): Optional transaction parameters such as gas limit.
+            tx_options (Optional[TransactionOptions]): Optional transaction parameters such as gas limit.
 
         Returns:
             None
@@ -206,13 +220,23 @@ class StakingClient:
         if amount <= 0:
             raise StakingClientError("Amount to stake must be greater than 0")
         try:
-            tx_hash = self.staking_contract.functions.stake(amount).transact(tx_options)
-            self.w3.eth.wait_for_transaction_receipt(tx_hash)
+            tx_params, wait_options = normalize_wait_tx_options(
+                tx_options, StakingClientError
+            )
+            tx_hash = self.staking_contract.functions.stake(amount).transact(tx_params)
+            wait_for_transaction_receipt_with_confirmations(
+                self.w3,
+                tx_hash,
+                wait_options,
+                StakingClientError,
+            )
         except Exception as e:
             handle_error(e, StakingClientError)
 
     @requires_signer
-    def unstake(self, amount: int, tx_options: Optional[TxParams] = None) -> None:
+    def unstake(
+        self, amount: int, tx_options: Optional[TransactionOptions] = None
+    ) -> None:
         """Unstake HMT tokens.
 
         Initiates the unstaking process for the specified amount. The tokens will be
@@ -221,7 +245,7 @@ class StakingClient:
         Args:
             amount (int): Amount of HMT tokens to unstake in token's smallest unit
                 (must be greater than 0 and less than or equal to unlocked staked amount).
-            tx_options (Optional[TxParams]): Optional transaction parameters such as gas limit.
+            tx_options (Optional[TransactionOptions]): Optional transaction parameters such as gas limit.
 
         Returns:
             None
@@ -239,22 +263,30 @@ class StakingClient:
         if amount <= 0:
             raise StakingClientError("Amount to unstake must be greater than 0")
         try:
-            tx_hash = self.staking_contract.functions.unstake(amount).transact(
-                tx_options
+            tx_params, wait_options = normalize_wait_tx_options(
+                tx_options, StakingClientError
             )
-            self.w3.eth.wait_for_transaction_receipt(tx_hash)
+            tx_hash = self.staking_contract.functions.unstake(amount).transact(
+                tx_params
+            )
+            wait_for_transaction_receipt_with_confirmations(
+                self.w3,
+                tx_hash,
+                wait_options,
+                StakingClientError,
+            )
         except Exception as e:
             handle_error(e, StakingClientError)
 
     @requires_signer
-    def withdraw(self, tx_options: Optional[TxParams] = None) -> None:
+    def withdraw(self, tx_options: Optional[TransactionOptions] = None) -> None:
         """Withdraw unlocked unstaked HMT tokens.
 
         Withdraws all available unstaked tokens that have completed the unlocking period
         and transfers them back to the caller's account.
 
         Args:
-            tx_options (Optional[TxParams]): Optional transaction parameters such as gas limit.
+            tx_options (Optional[TransactionOptions]): Optional transaction parameters such as gas limit.
 
         Returns:
             None
@@ -269,8 +301,16 @@ class StakingClient:
         """
 
         try:
-            tx_hash = self.staking_contract.functions.withdraw().transact(tx_options)
-            self.w3.eth.wait_for_transaction_receipt(tx_hash)
+            tx_params, wait_options = normalize_wait_tx_options(
+                tx_options, StakingClientError
+            )
+            tx_hash = self.staking_contract.functions.withdraw().transact(tx_params)
+            wait_for_transaction_receipt_with_confirmations(
+                self.w3,
+                tx_hash,
+                wait_options,
+                StakingClientError,
+            )
         except Exception as e:
             handle_error(e, StakingClientError)
 
@@ -281,7 +321,7 @@ class StakingClient:
         staker: str,
         escrow_address: str,
         amount: int,
-        tx_options: Optional[TxParams] = None,
+        tx_options: Optional[TransactionOptions] = None,
     ) -> None:
         """Slash a staker's stake for a given escrow.
 
@@ -294,7 +334,7 @@ class StakingClient:
             escrow_address (str): Address of the escrow associated with the violation.
             amount (int): Amount to slash in token's smallest unit
                 (must be greater than 0 and within staker's allocation to the escrow).
-            tx_options (Optional[TxParams]): Optional transaction parameters such as gas limit.
+            tx_options (Optional[TransactionOptions]): Optional transaction parameters such as gas limit.
 
         Returns:
             None
@@ -319,10 +359,18 @@ class StakingClient:
         if not self._is_valid_escrow(escrow_address):
             raise StakingClientError(f"Invalid escrow address: {escrow_address}")
         try:
+            tx_params, wait_options = normalize_wait_tx_options(
+                tx_options, StakingClientError
+            )
             tx_hash = self.staking_contract.functions.slash(
                 slasher, staker, escrow_address, amount
-            ).transact(tx_options)
-            self.w3.eth.wait_for_transaction_receipt(tx_hash)
+            ).transact(tx_params)
+            wait_for_transaction_receipt_with_confirmations(
+                self.w3,
+                tx_hash,
+                wait_options,
+                StakingClientError,
+            )
         except Exception as e:
             handle_error(e, StakingClientError)
 

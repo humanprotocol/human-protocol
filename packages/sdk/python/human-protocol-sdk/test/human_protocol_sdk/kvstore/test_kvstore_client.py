@@ -2,6 +2,7 @@ import unittest
 
 from test.human_protocol_sdk.utils import DEFAULT_GAS_PAYER_PRIV
 from unittest.mock import MagicMock, PropertyMock, patch
+from human_protocol_sdk.utils import WaitOptions
 
 from human_protocol_sdk.kvstore import KVStoreClient, KVStoreClientError
 from human_protocol_sdk.constants import ChainId, NETWORKS
@@ -29,6 +30,49 @@ class TestKVStoreClient(unittest.TestCase):
         type(self.w3.eth).chain_id = PropertyMock(return_value=self.mock_chain_id)
 
         self.kvstore = KVStoreClient(self.w3)
+        self.kvstore.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": []}
+        )
+
+        self._wait_receipt_patcher = patch(
+            "human_protocol_sdk.kvstore.kvstore_client.wait_for_transaction_receipt_with_confirmations"
+        )
+        self.wait_for_receipt_mock = self._wait_receipt_patcher.start()
+
+        def passthrough_wait(w3, tx_hash, wait_options, error_class, *args, **kwargs):
+            return w3.eth.wait_for_transaction_receipt(tx_hash)
+
+        self.wait_for_receipt_mock.side_effect = passthrough_wait
+        self.addCleanup(self._wait_receipt_patcher.stop)
+
+    def assert_wait_called_once_with(
+        self,
+        tx_hash="tx_hash",
+        confirmations=None,
+        timeout_ms=None,
+    ):
+        self.wait_for_receipt_mock.assert_called_once()
+        args, _ = self.wait_for_receipt_mock.call_args
+        self.assertIs(args[0], self.kvstore.w3)
+        self.assertEqual(args[1], tx_hash)
+        wait_options = args[2]
+        self.assertIsInstance(wait_options, WaitOptions)
+        if confirmations is None:
+            self.assertIsNone(wait_options.confirmations)
+        else:
+            self.assertEqual(wait_options.confirmations, confirmations)
+        if timeout_ms is None:
+            self.assertIsNone(wait_options.timeout_ms)
+        else:
+            self.assertEqual(wait_options.timeout_ms, timeout_ms)
+        self.assertIs(args[3], KVStoreClientError)
+
+    def _wait_tx_options(self):
+        return {
+            "gas": 50000,
+            "confirmations": 3,
+            "timeout_ms": 60000,
+        }
 
     def test_init_with_valid_inputs(self):
         mock_provider = MagicMock(spec=HTTPProvider)
@@ -82,6 +126,7 @@ class TestKVStoreClient(unittest.TestCase):
         self.kvstore.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
+        self.assert_wait_called_once_with()
 
     def test_set_empty_key(self):
         key = ""
@@ -122,6 +167,30 @@ class TestKVStoreClient(unittest.TestCase):
         self.kvstore.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
+        self.assert_wait_called_once_with()
+
+    def test_set_with_wait_options(self):
+        mock_set = MagicMock()
+        mock_set.transact.return_value = "tx_hash"
+        self.kvstore.kvstore_contract.functions.set = MagicMock(return_value=mock_set)
+        self.kvstore.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": []}
+        )
+        key = "key"
+        value = "value"
+        tx_options = self._wait_tx_options()
+
+        self.kvstore.set(key, value, tx_options)
+
+        self.kvstore.kvstore_contract.functions.set.assert_called_once_with(key, value)
+        mock_set.transact.assert_called_once_with({"gas": tx_options["gas"]})
+        self.kvstore.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
+            "tx_hash"
+        )
+        self.assert_wait_called_once_with(
+            confirmations=tx_options["confirmations"],
+            timeout_ms=tx_options["timeout_ms"],
+        )
 
     def test_set_bulk(self):
         mock_set_bulk = MagicMock()
@@ -144,6 +213,7 @@ class TestKVStoreClient(unittest.TestCase):
         self.kvstore.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
+        self.assert_wait_called_once_with()
 
     def test_set_bulk_empty_key(self):
         keys = ["key1", "", "key3"]
@@ -202,6 +272,34 @@ class TestKVStoreClient(unittest.TestCase):
         self.kvstore.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
+        self.assert_wait_called_once_with()
+
+    def test_set_bulk_with_wait_options(self):
+        mock_set_bulk = MagicMock()
+        mock_set_bulk.transact.return_value = "tx_hash"
+        self.kvstore.kvstore_contract.functions.setBulk = MagicMock(
+            return_value=mock_set_bulk
+        )
+        self.kvstore.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": []}
+        )
+        keys = ["key1", "key2", "key3"]
+        values = ["value1", "value2", "value3"]
+        tx_options = self._wait_tx_options()
+
+        self.kvstore.set_bulk(keys, values, tx_options)
+
+        self.kvstore.kvstore_contract.functions.setBulk.assert_called_once_with(
+            keys, values
+        )
+        mock_set_bulk.transact.assert_called_once_with({"gas": tx_options["gas"]})
+        self.kvstore.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
+            "tx_hash"
+        )
+        self.assert_wait_called_once_with(
+            confirmations=tx_options["confirmations"],
+            timeout_ms=tx_options["timeout_ms"],
+        )
 
     def test_set_file_url_and_hash(self):
         url = "https://example.com"
@@ -230,6 +328,7 @@ class TestKVStoreClient(unittest.TestCase):
             self.kvstore.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
                 "tx_hash"
             )
+            self.assert_wait_called_once_with()
 
     def test_set_file_url_and_hash_with_key(self):
         url = "https://example.com"
@@ -304,6 +403,40 @@ class TestKVStoreClient(unittest.TestCase):
             mock_set_bulk.transact.assert_called_once_with(tx_options)
             self.kvstore.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
                 "tx_hash"
+            )
+            self.assert_wait_called_once_with()
+
+    def test_set_file_url_and_hash_with_wait_options(self):
+        url = "https://example.com"
+        content = "example"
+        content_hash = self.w3.keccak(text=content).hex()
+        tx_options = self._wait_tx_options()
+
+        mock_set_bulk = MagicMock()
+        mock_set_bulk.transact.return_value = "tx_hash"
+        self.kvstore.kvstore_contract.functions.setBulk = MagicMock(
+            return_value=mock_set_bulk
+        )
+        self.kvstore.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": []}
+        )
+
+        with patch("requests.get") as mock_get:
+            mock_response = mock_get.return_value
+            mock_response.text = content
+
+            self.kvstore.set_file_url_and_hash(url, tx_options=tx_options)
+
+            self.kvstore.kvstore_contract.functions.setBulk.assert_called_once_with(
+                ["url", "url_hash"], [url, content_hash]
+            )
+            mock_set_bulk.transact.assert_called_once_with({"gas": tx_options["gas"]})
+            self.kvstore.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
+                "tx_hash"
+            )
+            self.assert_wait_called_once_with(
+                confirmations=tx_options["confirmations"],
+                timeout_ms=tx_options["timeout_ms"],
             )
 
     def test_get(self):

@@ -2,7 +2,7 @@ import {
   KVStore,
   KVStore__factory,
 } from '@human-protocol/core/typechain-types';
-import { ContractRunner, Overrides, ethers } from 'ethers';
+import { ContractRunner, ethers } from 'ethers';
 import { BaseEthersClient } from './base';
 import { KVStoreKeys, NETWORKS } from './constants';
 import { requiresSigner } from './decorators';
@@ -17,7 +17,7 @@ import {
   ErrorUnsupportedChainID,
   InvalidKeyError,
 } from './error';
-import { NetworkData } from './types';
+import { NetworkData, TransactionOverrides } from './types';
 import { getSubgraphUrl, customGqlFetch, isValidUrl } from './utils';
 import {
   GET_KVSTORE_BY_ADDRESS_AND_KEY_QUERY,
@@ -156,11 +156,14 @@ export class KVStoreClient extends BaseEthersClient {
   public async set(
     key: string,
     value: string,
-    txOptions: Overrides = {}
+    txOptions: TransactionOverrides = {}
   ): Promise<void> {
     if (key === '') throw ErrorKVStoreEmptyKey;
+    const [overrides, waitOptions] = this.normalizeTxOptions(txOptions);
     try {
-      await (await this.contract.set(key, value, txOptions)).wait();
+      await (
+        await this.contract.set(key, value, overrides)
+      ).wait(waitOptions.confirmations, waitOptions.timeoutMs);
     } catch (e) {
       if (e instanceof Error) throw Error(`Failed to set value: ${e.message}`);
     }
@@ -188,13 +191,17 @@ export class KVStoreClient extends BaseEthersClient {
   public async setBulk(
     keys: string[],
     values: string[],
-    txOptions: Overrides = {}
+    txOptions: TransactionOverrides = {}
   ): Promise<void> {
     if (keys.length !== values.length) throw ErrorKVStoreArrayLength;
     if (keys.includes('')) throw ErrorKVStoreEmptyKey;
 
+    const [overrides, waitOptions] = this.normalizeTxOptions(txOptions);
+
     try {
-      await (await this.contract.setBulk(keys, values, txOptions)).wait();
+      await (
+        await this.contract.setBulk(keys, values, overrides)
+      ).wait(waitOptions.confirmations, waitOptions.timeoutMs);
     } catch (e) {
       if (e instanceof Error)
         throw Error(`Failed to set bulk values: ${e.message}`);
@@ -221,7 +228,7 @@ export class KVStoreClient extends BaseEthersClient {
   public async setFileUrlAndHash(
     url: string,
     urlKey = 'url',
-    txOptions: Overrides = {}
+    txOptions: TransactionOverrides = {}
   ): Promise<void> {
     if (!isValidUrl(url)) {
       throw ErrorInvalidUrl;
@@ -232,14 +239,16 @@ export class KVStoreClient extends BaseEthersClient {
 
     const hashKey = urlKey + '_hash';
 
+    const [overrides, waitOptions] = this.normalizeTxOptions(txOptions);
+
     try {
       await (
         await this.contract.setBulk(
           [urlKey, hashKey],
           [url, contentHash],
-          txOptions
+          overrides
         )
-      ).wait();
+      ).wait(waitOptions.confirmations, waitOptions.timeoutMs);
     } catch (e) {
       if (e instanceof Error)
         throw Error(`Failed to set URL and hash: ${e.message}`);

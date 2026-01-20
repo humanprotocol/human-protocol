@@ -9,7 +9,7 @@ import {
   HMToken,
   HMToken__factory,
 } from '@human-protocol/core/typechain-types';
-import { ContractRunner, EventLog, Overrides, Signer, ethers } from 'ethers';
+import { ContractRunner, EventLog, Signer, ethers } from 'ethers';
 import { BaseEthersClient } from './base';
 import { ESCROW_BULK_PAYOUT_MAX_ITEMS, NETWORKS } from './constants';
 import { requiresSigner } from './decorators';
@@ -66,7 +66,12 @@ import {
   IEscrowWithdraw,
   SubgraphOptions,
 } from './interfaces';
-import { EscrowStatus, NetworkData, TransactionLikeWithNonce } from './types';
+import {
+  EscrowStatus,
+  NetworkData,
+  TransactionLikeWithNonce,
+  TransactionOverrides,
+} from './types';
 import {
   getSubgraphUrl,
   getUnixTimestamp,
@@ -205,20 +210,22 @@ export class EscrowClient extends BaseEthersClient {
   public async createEscrow(
     tokenAddress: string,
     jobRequesterId: string,
-    txOptions: Overrides = {}
+    txOptions: TransactionOverrides = {}
   ): Promise<string> {
     if (!ethers.isAddress(tokenAddress)) {
       throw ErrorInvalidTokenAddress;
     }
+
+    const [overrides, waitOptions] = this.normalizeTxOptions(txOptions);
 
     try {
       const result = await (
         await this.escrowFactoryContract.createEscrow(
           tokenAddress,
           jobRequesterId,
-          txOptions
+          overrides
         )
-      ).wait();
+      ).wait(waitOptions.confirmations, waitOptions.timeoutMs);
 
       const event = (
         result?.logs?.find(({ topics }) =>
@@ -340,13 +347,15 @@ export class EscrowClient extends BaseEthersClient {
     amount: bigint,
     jobRequesterId: string,
     escrowConfig: IEscrowConfig,
-    txOptions: Overrides = {}
+    txOptions: TransactionOverrides = {}
   ): Promise<string> {
     if (!ethers.isAddress(tokenAddress)) {
       throw ErrorInvalidTokenAddress;
     }
 
     this.verifySetupParameters(escrowConfig);
+
+    const [overrides, waitOptions] = this.normalizeTxOptions(txOptions);
 
     const {
       recordingOracle,
@@ -373,9 +382,9 @@ export class EscrowClient extends BaseEthersClient {
           exchangeOracleFee,
           manifest,
           manifestHash,
-          txOptions
+          overrides
         )
-      ).wait();
+      ).wait(waitOptions.confirmations, waitOptions.timeoutMs);
 
       const event = (
         result?.logs?.find(({ topics }) =>
@@ -433,7 +442,7 @@ export class EscrowClient extends BaseEthersClient {
   async setup(
     escrowAddress: string,
     escrowConfig: IEscrowConfig,
-    txOptions: Overrides = {}
+    txOptions: TransactionOverrides = {}
   ): Promise<void> {
     const {
       recordingOracle,
@@ -456,6 +465,8 @@ export class EscrowClient extends BaseEthersClient {
       throw ErrorEscrowAddressIsNotProvidedByFactory;
     }
 
+    const [overrides, waitOptions] = this.normalizeTxOptions(txOptions);
+
     try {
       const escrowContract = this.getEscrowContract(escrowAddress);
 
@@ -469,9 +480,9 @@ export class EscrowClient extends BaseEthersClient {
           exchangeOracleFee,
           manifest,
           manifestHash,
-          txOptions
+          overrides
         )
-      ).wait();
+      ).wait(waitOptions.confirmations, waitOptions.timeoutMs);
 
       return;
     } catch (e) {
@@ -502,7 +513,7 @@ export class EscrowClient extends BaseEthersClient {
   async fund(
     escrowAddress: string,
     amount: bigint,
-    txOptions: Overrides = {}
+    txOptions: TransactionOverrides = {}
   ): Promise<void> {
     if (!ethers.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
@@ -516,6 +527,8 @@ export class EscrowClient extends BaseEthersClient {
       throw ErrorEscrowAddressIsNotProvidedByFactory;
     }
 
+    const [overrides, waitOptions] = this.normalizeTxOptions(txOptions);
+
     try {
       const escrowContract = this.getEscrowContract(escrowAddress);
 
@@ -526,8 +539,8 @@ export class EscrowClient extends BaseEthersClient {
         this.runner
       );
       await (
-        await tokenContract.transfer(escrowAddress, amount, txOptions)
-      ).wait();
+        await tokenContract.transfer(escrowAddress, amount, overrides)
+      ).wait(waitOptions.confirmations, waitOptions.timeoutMs);
 
       return;
     } catch (e) {
@@ -564,7 +577,7 @@ export class EscrowClient extends BaseEthersClient {
     escrowAddress: string,
     url: string,
     hash: string,
-    txOptions?: Overrides
+    txOptions?: TransactionOverrides
   ): Promise<void>;
 
   /**
@@ -604,7 +617,7 @@ export class EscrowClient extends BaseEthersClient {
     url: string,
     hash: string,
     fundsToReserve: bigint,
-    txOptions?: Overrides
+    txOptions?: TransactionOverrides
   ): Promise<void>;
 
   @requiresSigner
@@ -612,14 +625,17 @@ export class EscrowClient extends BaseEthersClient {
     escrowAddress: string,
     url: string,
     hash: string,
-    a?: bigint | Overrides,
-    b?: Overrides
+    a?: bigint | TransactionOverrides,
+    b?: TransactionOverrides
   ): Promise<void> {
     const escrowContract = this.getEscrowContract(escrowAddress);
 
     const hasFundsToReserveParam = typeof a === 'bigint';
     const fundsToReserve = hasFundsToReserveParam ? (a as bigint) : null;
-    const txOptions = (hasFundsToReserveParam ? b : a) || {};
+    const txOptions = (hasFundsToReserveParam ? b : a) as
+      | TransactionOverrides
+      | undefined;
+    const [overrides, waitOptions] = this.normalizeTxOptions(txOptions);
     // When fundsToReserve is provided and is 0, allow empty URL.
     // In this situation not solutions might have been provided so the escrow can be straight cancelled.
     const allowEmptyUrl = hasFundsToReserveParam && fundsToReserve === 0n;
@@ -646,17 +662,17 @@ export class EscrowClient extends BaseEthersClient {
             url,
             hash,
             fundsToReserve,
-            txOptions
+            overrides
           )
-        ).wait();
+        ).wait(waitOptions.confirmations, waitOptions.timeoutMs);
       } else {
         await (
           await escrowContract['storeResults(string,string)'](
             url,
             hash,
-            txOptions
+            overrides
           )
-        ).wait();
+        ).wait(waitOptions.confirmations, waitOptions.timeoutMs);
       }
     } catch (e) {
       if (!hasFundsToReserveParam && e.reason === 'DEPRECATED_SIGNATURE') {
@@ -685,7 +701,7 @@ export class EscrowClient extends BaseEthersClient {
   @requiresSigner
   async complete(
     escrowAddress: string,
-    txOptions: Overrides = {}
+    txOptions: TransactionOverrides = {}
   ): Promise<void> {
     if (!ethers.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
@@ -695,10 +711,14 @@ export class EscrowClient extends BaseEthersClient {
       throw ErrorEscrowAddressIsNotProvidedByFactory;
     }
 
+    const [overrides, waitOptions] = this.normalizeTxOptions(txOptions);
+
     try {
       const escrowContract = this.getEscrowContract(escrowAddress);
 
-      await (await escrowContract.complete(txOptions)).wait();
+      await (
+        await escrowContract.complete(overrides)
+      ).wait(waitOptions.confirmations, waitOptions.timeoutMs);
       return;
     } catch (e) {
       return throwError(e);
@@ -759,7 +779,7 @@ export class EscrowClient extends BaseEthersClient {
     finalResultsHash: string,
     txId: number,
     forceComplete: boolean,
-    txOptions: Overrides
+    txOptions: TransactionOverrides
   ): Promise<void>;
 
   /**
@@ -817,7 +837,7 @@ export class EscrowClient extends BaseEthersClient {
     finalResultsHash: string,
     payoutId: string,
     forceComplete: boolean,
-    txOptions: Overrides
+    txOptions: TransactionOverrides
   ): Promise<void>;
 
   @requiresSigner
@@ -829,7 +849,7 @@ export class EscrowClient extends BaseEthersClient {
     finalResultsHash: string,
     id: number | string,
     forceComplete: boolean,
-    txOptions: Overrides = {}
+    txOptions: TransactionOverrides = {}
   ): Promise<void> {
     await this.ensureCorrectBulkPayoutInput(
       escrowAddress,
@@ -841,6 +861,8 @@ export class EscrowClient extends BaseEthersClient {
 
     const escrowContract = this.getEscrowContract(escrowAddress);
     const idIsString = typeof id === 'string';
+
+    const [overrides, waitOptions] = this.normalizeTxOptions(txOptions);
 
     try {
       if (idIsString) {
@@ -854,9 +876,9 @@ export class EscrowClient extends BaseEthersClient {
             finalResultsHash,
             id,
             forceComplete,
-            txOptions
+            overrides
           )
-        ).wait();
+        ).wait(waitOptions.confirmations, waitOptions.timeoutMs);
       } else {
         await (
           await escrowContract[
@@ -868,9 +890,9 @@ export class EscrowClient extends BaseEthersClient {
             finalResultsHash,
             id,
             forceComplete,
-            txOptions
+            overrides
           )
-        ).wait();
+        ).wait(waitOptions.confirmations, waitOptions.timeoutMs);
       }
     } catch (e) {
       if (!idIsString && e.reason === 'DEPRECATED_SIGNATURE') {
@@ -900,7 +922,7 @@ export class EscrowClient extends BaseEthersClient {
   @requiresSigner
   async cancel(
     escrowAddress: string,
-    txOptions: Overrides = {}
+    txOptions: TransactionOverrides = {}
   ): Promise<void> {
     if (!ethers.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
@@ -910,9 +932,13 @@ export class EscrowClient extends BaseEthersClient {
       throw ErrorEscrowAddressIsNotProvidedByFactory;
     }
 
+    const [overrides, waitOptions] = this.normalizeTxOptions(txOptions);
+
     try {
       const escrowContract = this.getEscrowContract(escrowAddress);
-      await (await escrowContract.cancel(txOptions)).wait();
+      await (
+        await escrowContract.cancel(overrides)
+      ).wait(waitOptions.confirmations, waitOptions.timeoutMs);
     } catch (e) {
       return throwError(e);
     }
@@ -936,7 +962,7 @@ export class EscrowClient extends BaseEthersClient {
   @requiresSigner
   async requestCancellation(
     escrowAddress: string,
-    txOptions: Overrides = {}
+    txOptions: TransactionOverrides = {}
   ): Promise<void> {
     if (!ethers.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
@@ -946,9 +972,13 @@ export class EscrowClient extends BaseEthersClient {
       throw ErrorEscrowAddressIsNotProvidedByFactory;
     }
 
+    const [overrides, waitOptions] = this.normalizeTxOptions(txOptions);
+
     try {
       const escrowContract = this.getEscrowContract(escrowAddress);
-      await (await escrowContract.requestCancellation(txOptions)).wait();
+      await (
+        await escrowContract.requestCancellation(overrides)
+      ).wait(waitOptions.confirmations, waitOptions.timeoutMs);
     } catch (e) {
       return throwError(e);
     }
@@ -981,7 +1011,7 @@ export class EscrowClient extends BaseEthersClient {
   async withdraw(
     escrowAddress: string,
     tokenAddress: string,
-    txOptions: Overrides = {}
+    txOptions: TransactionOverrides = {}
   ): Promise<IEscrowWithdraw> {
     if (!ethers.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
@@ -995,12 +1025,14 @@ export class EscrowClient extends BaseEthersClient {
       throw ErrorEscrowAddressIsNotProvidedByFactory;
     }
 
+    const [overrides, waitOptions] = this.normalizeTxOptions(txOptions);
+
     try {
       const escrowContract = this.getEscrowContract(escrowAddress);
 
       const transactionReceipt = await (
-        await escrowContract.withdraw(tokenAddress, txOptions)
-      ).wait();
+        await escrowContract.withdraw(tokenAddress, overrides)
+      ).wait(waitOptions.confirmations, waitOptions.timeoutMs);
 
       let amountTransferred: bigint | undefined = undefined;
 
@@ -1098,7 +1130,7 @@ export class EscrowClient extends BaseEthersClient {
     finalResultsHash: string,
     payoutId: string,
     forceComplete = false,
-    txOptions: Overrides = {}
+    txOptions: TransactionOverrides = {}
   ): Promise<TransactionLikeWithNonce> {
     await this.ensureCorrectBulkPayoutInput(
       escrowAddress,
@@ -1111,6 +1143,7 @@ export class EscrowClient extends BaseEthersClient {
     const signer = this.runner as Signer;
     try {
       const escrowContract = this.getEscrowContract(escrowAddress);
+      const [overrides] = this.normalizeTxOptions(txOptions);
 
       const populatedTransaction = await escrowContract[
         'bulkPayOut(address[],uint256[],string,string,string,bool)'
@@ -1121,7 +1154,7 @@ export class EscrowClient extends BaseEthersClient {
         finalResultsHash,
         payoutId,
         forceComplete,
-        txOptions
+        overrides
       );
 
       /**
@@ -1130,8 +1163,8 @@ export class EscrowClient extends BaseEthersClient {
        * doesn't mention it even in library docs,
        * even though it includes if from txOptions.
        */
-      if (typeof txOptions.nonce === 'number') {
-        populatedTransaction.nonce = txOptions.nonce;
+      if (typeof overrides.nonce === 'number') {
+        populatedTransaction.nonce = overrides.nonce;
       } else {
         populatedTransaction.nonce = await signer.getNonce();
       }
