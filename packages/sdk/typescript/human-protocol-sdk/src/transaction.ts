@@ -129,8 +129,8 @@ export class TransactionUtils {
    *   token?: string; // (Optional) The token address to filter transactions.
    *   startDate?: Date; // (Optional) The start date to filter transactions (inclusive).
    *   endDate?: Date; // (Optional) The end date to filter transactions (inclusive).
-   *   startBlock?: number; // (Optional) The start block number to filter transactions (inclusive).
-   *   endBlock?: number; // (Optional) The end block number to filter transactions (inclusive).
+   *   startBlock?: bigint | number; // (Optional) The start block to filter transactions (inclusive).
+   *   endBlock?: bigint | number; // (Optional) The end block to filter transactions (inclusive).
    *   first?: number; // (Optional) Number of transactions per page. Default is 10.
    *   skip?: number; // (Optional) Number of transactions to skip. Default is 0.
    *   orderDirection?: OrderDirection; // (Optional) Order of the results. Default is DESC.
@@ -220,8 +220,8 @@ export class TransactionUtils {
           ? getUnixTimestamp(filter?.startDate)
           : undefined,
         endDate: filter.endDate ? getUnixTimestamp(filter.endDate) : undefined,
-        startBlock: filter.startBlock ? filter.startBlock : undefined,
-        endBlock: filter.endBlock ? filter.endBlock : undefined,
+        startBlock: filter.startBlock ? Number(filter.startBlock) : undefined,
+        endBlock: filter.endBlock ? Number(filter.endBlock) : undefined,
         method: filter.method ? filter.method : undefined,
         escrow: filter.escrow ? filter.escrow : undefined,
         token: filter.token ? filter.token : undefined,
