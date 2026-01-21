@@ -57,10 +57,9 @@ from human_protocol_sdk.utils import (
     get_factory_interface,
     get_erc20_interface,
     handle_error,
-    normalize_wait_tx_options,
+    transact_and_wait,
     validate_json,
     validate_url,
-    wait_for_transaction_receipt_with_confirmations,
 )
 from web3 import Web3, contract
 from web3.middleware import ExtraDataToPOAMiddleware
@@ -251,16 +250,12 @@ class EscrowClient:
             raise EscrowClientError(f"Invalid token address: {token_address}")
 
         try:
-            tx_params, wait_options = normalize_wait_tx_options(
-                tx_options, EscrowClientError
-            )
-            tx_hash = self.factory_contract.functions.createEscrow(
-                token_address, job_requester_id
-            ).transact(tx_params)
-            receipt = wait_for_transaction_receipt_with_confirmations(
+            receipt = transact_and_wait(
                 self.w3,
-                tx_hash,
-                wait_options,
+                self.factory_contract.functions.createEscrow(
+                    token_address, job_requester_id
+                ),
+                tx_options,
                 EscrowClientError,
             )
             event = next(
@@ -317,26 +312,22 @@ class EscrowClient:
             raise EscrowClientError(f"Invalid token address: {token_address}")
 
         try:
-            tx_params, wait_options = normalize_wait_tx_options(
-                tx_options, EscrowClientError
-            )
-            tx_hash = self.factory_contract.functions.createFundAndSetupEscrow(
-                token_address,
-                amount,
-                job_requester_id,
-                escrow_config.reputation_oracle_address,
-                escrow_config.recording_oracle_address,
-                escrow_config.exchange_oracle_address,
-                escrow_config.reputation_oracle_fee,
-                escrow_config.recording_oracle_fee,
-                escrow_config.exchange_oracle_fee,
-                escrow_config.manifest,
-                escrow_config.hash,
-            ).transact(tx_params)
-            receipt = wait_for_transaction_receipt_with_confirmations(
+            receipt = transact_and_wait(
                 self.w3,
-                tx_hash,
-                wait_options,
+                self.factory_contract.functions.createFundAndSetupEscrow(
+                    token_address,
+                    amount,
+                    job_requester_id,
+                    escrow_config.reputation_oracle_address,
+                    escrow_config.recording_oracle_address,
+                    escrow_config.exchange_oracle_address,
+                    escrow_config.reputation_oracle_fee,
+                    escrow_config.recording_oracle_fee,
+                    escrow_config.exchange_oracle_fee,
+                    escrow_config.manifest,
+                    escrow_config.hash,
+                ),
+                tx_options,
                 EscrowClientError,
             )
             event = next(
@@ -383,12 +374,9 @@ class EscrowClient:
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
 
         try:
-            tx_params, wait_options = normalize_wait_tx_options(
-                tx_options, EscrowClientError
-            )
-            tx_hash = (
-                self._get_escrow_contract(escrow_address)
-                .functions.setup(
+            transact_and_wait(
+                self.w3,
+                self._get_escrow_contract(escrow_address).functions.setup(
                     escrow_config.reputation_oracle_address,
                     escrow_config.recording_oracle_address,
                     escrow_config.exchange_oracle_address,
@@ -397,13 +385,8 @@ class EscrowClient:
                     escrow_config.exchange_oracle_fee,
                     escrow_config.manifest,
                     escrow_config.hash,
-                )
-                .transact(tx_params)
-            )
-            wait_for_transaction_receipt_with_confirmations(
-                self.w3,
-                tx_hash,
-                wait_options,
+                ),
+                tx_options,
                 EscrowClientError,
             )
         except Exception as e:
@@ -447,16 +430,10 @@ class EscrowClient:
         token_contract = self.w3.eth.contract(token_address, abi=erc20_interface["abi"])
 
         try:
-            tx_params, wait_options = normalize_wait_tx_options(
-                tx_options, EscrowClientError
-            )
-            tx_hash = token_contract.functions.transfer(
-                escrow_address, amount
-            ).transact(tx_params)
-            wait_for_transaction_receipt_with_confirmations(
+            transact_and_wait(
                 self.w3,
-                tx_hash,
-                wait_options,
+                token_contract.functions.transfer(escrow_address, amount),
+                tx_options,
                 EscrowClientError,
             )
         except Exception as e:
@@ -516,19 +493,15 @@ class EscrowClient:
 
         contract = self._get_escrow_contract(escrow_address)
         try:
-            tx_params, wait_options = normalize_wait_tx_options(
-                tx_options, EscrowClientError
+            contract_function = (
+                contract.functions.storeResults(url, hash, funds_to_reserve)
+                if funds_to_reserve is not None
+                else contract.functions.storeResults(url, hash)
             )
-            if funds_to_reserve is not None:
-                tx_hash = contract.functions.storeResults(
-                    url, hash, funds_to_reserve
-                ).transact(tx_params)
-            else:
-                tx_hash = contract.functions.storeResults(url, hash).transact(tx_params)
-            wait_for_transaction_receipt_with_confirmations(
+            transact_and_wait(
                 self.w3,
-                tx_hash,
-                wait_options,
+                contract_function,
+                tx_options,
                 EscrowClientError,
             )
         except Exception as e:
@@ -570,18 +543,10 @@ class EscrowClient:
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
 
         try:
-            tx_params, wait_options = normalize_wait_tx_options(
-                tx_options, EscrowClientError
-            )
-            tx_hash = (
-                self._get_escrow_contract(escrow_address)
-                .functions.complete()
-                .transact(tx_params)
-            )
-            wait_for_transaction_receipt_with_confirmations(
+            transact_and_wait(
                 self.w3,
-                tx_hash,
-                wait_options,
+                self._get_escrow_contract(escrow_address).functions.complete(),
+                tx_options,
                 EscrowClientError,
             )
         except Exception as e:
@@ -640,32 +605,29 @@ class EscrowClient:
 
         contract = self._get_escrow_contract(escrow_address)
         try:
-            tx_params, wait_options = normalize_wait_tx_options(
-                tx_options, EscrowClientError
-            )
-            if isinstance(payout_id, str):
-                tx_hash = contract.functions.bulkPayOut(
+            bulk_function = (
+                contract.functions.bulkPayOut(
                     recipients,
                     amounts,
                     final_results_url,
                     final_results_hash,
                     payout_id,
                     force_complete,
-                ).transact(tx_params)
-            else:
-                tx_id = payout_id
-                tx_hash = contract.functions.bulkPayOut(
+                )
+                if isinstance(payout_id, str)
+                else contract.functions.bulkPayOut(
                     recipients,
                     amounts,
                     final_results_url,
                     final_results_hash,
-                    tx_id,
+                    payout_id,
                     force_complete,
-                ).transact(tx_params)
-            wait_for_transaction_receipt_with_confirmations(
+                )
+            )
+            transact_and_wait(
                 self.w3,
-                tx_hash,
-                wait_options,
+                bulk_function,
+                tx_options,
                 EscrowClientError,
             )
         except Exception as e:
@@ -855,18 +817,12 @@ class EscrowClient:
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
 
         try:
-            tx_params, wait_options = normalize_wait_tx_options(
-                tx_options, EscrowClientError
-            )
-            tx_hash = (
-                self._get_escrow_contract(escrow_address)
-                .functions.requestCancellation()
-                .transact(tx_params)
-            )
-            wait_for_transaction_receipt_with_confirmations(
+            transact_and_wait(
                 self.w3,
-                tx_hash,
-                wait_options,
+                self._get_escrow_contract(
+                    escrow_address
+                ).functions.requestCancellation(),
+                tx_options,
                 EscrowClientError,
             )
         except Exception as e:
@@ -901,18 +857,10 @@ class EscrowClient:
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
 
         try:
-            tx_params, wait_options = normalize_wait_tx_options(
-                tx_options, EscrowClientError
-            )
-            tx_hash = (
-                self._get_escrow_contract(escrow_address)
-                .functions.cancel()
-                .transact(tx_params)
-            )
-            wait_for_transaction_receipt_with_confirmations(
+            transact_and_wait(
                 self.w3,
-                tx_hash,
-                wait_options,
+                self._get_escrow_contract(escrow_address).functions.cancel(),
+                tx_options,
                 EscrowClientError,
             )
         except Exception as e:
@@ -957,18 +905,12 @@ class EscrowClient:
             raise EscrowClientError(f"Invalid token address: {token_address}")
 
         try:
-            tx_params, wait_options = normalize_wait_tx_options(
-                tx_options, EscrowClientError
-            )
-            tx_hash = (
-                self._get_escrow_contract(escrow_address)
-                .functions.withdraw(token_address)
-                .transact(tx_params)
-            )
-            receipt = wait_for_transaction_receipt_with_confirmations(
+            receipt = transact_and_wait(
                 self.w3,
-                tx_hash,
-                wait_options,
+                self._get_escrow_contract(escrow_address).functions.withdraw(
+                    token_address
+                ),
+                tx_options,
                 EscrowClientError,
             )
 

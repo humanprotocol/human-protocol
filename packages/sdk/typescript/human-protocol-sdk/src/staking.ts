@@ -204,16 +204,16 @@ export class StakingClient extends BaseEthersClient {
       throw ErrorInvalidStakingValueSign;
     }
 
-    const [overrides, waitOptions] = this.normalizeTxOptions(txOptions);
-
     try {
-      await (
-        await this.tokenContract.approve(
-          await this.stakingContract.getAddress(),
-          amount,
-          overrides
-        )
-      ).wait(waitOptions.confirmations, waitOptions.timeoutMs);
+      await this.sendTransaction(
+        async (overrides) =>
+          this.tokenContract.approve(
+            await this.stakingContract.getAddress(),
+            amount,
+            overrides
+          ),
+        txOptions
+      );
       return;
     } catch (e) {
       return throwError(e);
@@ -254,12 +254,11 @@ export class StakingClient extends BaseEthersClient {
       throw ErrorInvalidStakingValueSign;
     }
 
-    const [overrides, waitOptions] = this.normalizeTxOptions(txOptions);
-
     try {
-      await (
-        await this.stakingContract.stake(amount, overrides)
-      ).wait(waitOptions.confirmations, waitOptions.timeoutMs);
+      await this.sendTransaction(
+        (overrides) => this.stakingContract.stake(amount, overrides),
+        txOptions
+      );
       return;
     } catch (e) {
       return throwError(e);
@@ -299,12 +298,11 @@ export class StakingClient extends BaseEthersClient {
       throw ErrorInvalidStakingValueSign;
     }
 
-    const [overrides, waitOptions] = this.normalizeTxOptions(txOptions);
-
     try {
-      await (
-        await this.stakingContract.unstake(amount, overrides)
-      ).wait(waitOptions.confirmations, waitOptions.timeoutMs);
+      await this.sendTransaction(
+        (overrides) => this.stakingContract.unstake(amount, overrides),
+        txOptions
+      );
       return;
     } catch (e) {
       return throwError(e);
@@ -326,12 +324,11 @@ export class StakingClient extends BaseEthersClient {
    */
   @requiresSigner
   public async withdraw(txOptions: TransactionOverrides = {}): Promise<void> {
-    const [overrides, waitOptions] = this.normalizeTxOptions(txOptions);
-
     try {
-      await (
-        await this.stakingContract.withdraw(overrides)
-      ).wait(waitOptions.confirmations, waitOptions.timeoutMs);
+      await this.sendTransaction(
+        (overrides) => this.stakingContract.withdraw(overrides),
+        txOptions
+      );
       return;
     } catch (e) {
       return throwError(e);
@@ -393,18 +390,18 @@ export class StakingClient extends BaseEthersClient {
 
     await this.checkValidEscrow(escrowAddress);
 
-    const [overrides, waitOptions] = this.normalizeTxOptions(txOptions);
-
     try {
-      await (
-        await this.stakingContract.slash(
-          slasher,
-          staker,
-          escrowAddress,
-          amount,
-          overrides
-        )
-      ).wait(waitOptions.confirmations, waitOptions.timeoutMs);
+      await this.sendTransaction(
+        (overrides) =>
+          this.stakingContract.slash(
+            slasher,
+            staker,
+            escrowAddress,
+            amount,
+            overrides
+          ),
+        txOptions
+      );
 
       return;
     } catch (e) {

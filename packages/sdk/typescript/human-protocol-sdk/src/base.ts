@@ -1,4 +1,9 @@
-import { ContractRunner, Overrides } from 'ethers';
+import {
+  ContractRunner,
+  ContractTransactionReceipt,
+  ContractTransactionResponse,
+  Overrides,
+} from 'ethers';
 import { NetworkData, TransactionOverrides, WaitOptions } from './types';
 
 /**
@@ -37,5 +42,18 @@ export abstract class BaseEthersClient {
     };
 
     return [overrides as Overrides, waitOptions];
+  }
+
+  protected async sendTransaction(
+    transaction: (overrides: Overrides) => Promise<ContractTransactionResponse>,
+    txOptions?: TransactionOverrides
+  ): Promise<ContractTransactionReceipt | null> {
+    const [overrides, waitOptions] = this.normalizeTxOptions(txOptions);
+    const transactionResponse = await transaction(overrides);
+
+    return transactionResponse.wait(
+      waitOptions.confirmations,
+      waitOptions.timeoutMs
+    );
   }
 }

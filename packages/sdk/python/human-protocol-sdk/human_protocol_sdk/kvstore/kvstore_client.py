@@ -50,9 +50,8 @@ from human_protocol_sdk.utils import (
     TransactionOptions,
     get_kvstore_interface,
     handle_error,
-    normalize_wait_tx_options,
+    transact_and_wait,
     validate_url,
-    wait_for_transaction_receipt_with_confirmations,
 )
 from web3 import Web3
 from web3.middleware import ExtraDataToPOAMiddleware
@@ -155,16 +154,10 @@ class KVStoreClient:
             raise KVStoreClientError("Key cannot be empty")
 
         try:
-            tx_params, wait_options = normalize_wait_tx_options(
-                tx_options, KVStoreClientError
-            )
-            tx_hash = self.kvstore_contract.functions.set(key, value).transact(
-                tx_params
-            )
-            wait_for_transaction_receipt_with_confirmations(
+            transact_and_wait(
                 self.w3,
-                tx_hash,
-                wait_options,
+                self.kvstore_contract.functions.set(key, value),
+                tx_options,
                 KVStoreClientError,
             )
         except Exception as e:
@@ -211,16 +204,10 @@ class KVStoreClient:
             raise KVStoreClientError("Arrays must have the same length")
 
         try:
-            tx_params, wait_options = normalize_wait_tx_options(
-                tx_options, KVStoreClientError
-            )
-            tx_hash = self.kvstore_contract.functions.setBulk(keys, values).transact(
-                tx_params
-            )
-            wait_for_transaction_receipt_with_confirmations(
+            transact_and_wait(
                 self.w3,
-                tx_hash,
-                wait_options,
+                self.kvstore_contract.functions.setBulk(keys, values),
+                tx_options,
                 KVStoreClientError,
             )
         except Exception as e:
@@ -265,16 +252,12 @@ class KVStoreClient:
         content = requests.get(url).text
         content_hash = self.w3.keccak(text=content).hex()
         try:
-            tx_params, wait_options = normalize_wait_tx_options(
-                tx_options, KVStoreClientError
-            )
-            tx_hash = self.kvstore_contract.functions.setBulk(
-                [key, key + "_hash"], [url, content_hash]
-            ).transact(tx_params)
-            wait_for_transaction_receipt_with_confirmations(
+            transact_and_wait(
                 self.w3,
-                tx_hash,
-                wait_options,
+                self.kvstore_contract.functions.setBulk(
+                    [key, key + "_hash"], [url, content_hash]
+                ),
+                tx_options,
                 KVStoreClientError,
             )
         except Exception as e:

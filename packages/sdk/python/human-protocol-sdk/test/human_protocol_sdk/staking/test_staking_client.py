@@ -41,7 +41,7 @@ class TestStakingClient(unittest.TestCase):
         )
 
         self._wait_receipt_patcher = patch(
-            "human_protocol_sdk.staking.staking_client.wait_for_transaction_receipt_with_confirmations"
+            "human_protocol_sdk.utils.wait_for_transaction_receipt_with_confirmations"
         )
         self.wait_for_receipt_mock = self._wait_receipt_patcher.start()
 

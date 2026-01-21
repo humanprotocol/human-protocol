@@ -159,11 +159,11 @@ export class KVStoreClient extends BaseEthersClient {
     txOptions: TransactionOverrides = {}
   ): Promise<void> {
     if (key === '') throw ErrorKVStoreEmptyKey;
-    const [overrides, waitOptions] = this.normalizeTxOptions(txOptions);
     try {
-      await (
-        await this.contract.set(key, value, overrides)
-      ).wait(waitOptions.confirmations, waitOptions.timeoutMs);
+      await this.sendTransaction(
+        (overrides) => this.contract.set(key, value, overrides),
+        txOptions
+      );
     } catch (e) {
       if (e instanceof Error) throw Error(`Failed to set value: ${e.message}`);
     }
@@ -196,12 +196,11 @@ export class KVStoreClient extends BaseEthersClient {
     if (keys.length !== values.length) throw ErrorKVStoreArrayLength;
     if (keys.includes('')) throw ErrorKVStoreEmptyKey;
 
-    const [overrides, waitOptions] = this.normalizeTxOptions(txOptions);
-
     try {
-      await (
-        await this.contract.setBulk(keys, values, overrides)
-      ).wait(waitOptions.confirmations, waitOptions.timeoutMs);
+      await this.sendTransaction(
+        (overrides) => this.contract.setBulk(keys, values, overrides),
+        txOptions
+      );
     } catch (e) {
       if (e instanceof Error)
         throw Error(`Failed to set bulk values: ${e.message}`);
@@ -239,16 +238,16 @@ export class KVStoreClient extends BaseEthersClient {
 
     const hashKey = urlKey + '_hash';
 
-    const [overrides, waitOptions] = this.normalizeTxOptions(txOptions);
-
     try {
-      await (
-        await this.contract.setBulk(
-          [urlKey, hashKey],
-          [url, contentHash],
-          overrides
-        )
-      ).wait(waitOptions.confirmations, waitOptions.timeoutMs);
+      await this.sendTransaction(
+        (overrides) =>
+          this.contract.setBulk(
+            [urlKey, hashKey],
+            [url, contentHash],
+            overrides
+          ),
+        txOptions
+      );
     } catch (e) {
       if (e instanceof Error)
         throw Error(`Failed to set URL and hash: ${e.message}`);

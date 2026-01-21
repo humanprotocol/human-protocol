@@ -16,6 +16,7 @@ from human_protocol_sdk.constants import (
 from validators import url as URL
 from web3 import Web3
 from web3.contract import Contract
+from web3.contract.contract import ContractFunction
 from web3.exceptions import ContractLogicError
 from web3.types import TxParams, TxReceipt
 
@@ -139,6 +140,25 @@ def wait_for_transaction_receipt_with_confirmations(
             time.sleep(sleep_duration)
 
     return receipt
+
+
+def transact_and_wait(
+    w3: Web3,
+    contract_function: ContractFunction,
+    tx_options: Optional[TransactionOptions],
+    error_class: Type[Exception],
+):
+    """Send a contract transaction and wait for confirmations."""
+
+    tx_params, wait_options = normalize_wait_tx_options(tx_options, error_class)
+    tx_hash = contract_function.transact(tx_params)
+
+    return wait_for_transaction_receipt_with_confirmations(
+        w3,
+        tx_hash,
+        wait_options,
+        error_class,
+    )
 
 
 def is_indexer_error(error: Exception) -> bool:

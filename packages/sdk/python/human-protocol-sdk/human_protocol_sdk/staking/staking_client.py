@@ -39,8 +39,7 @@ from human_protocol_sdk.utils import (
     get_factory_interface,
     get_staking_interface,
     handle_error,
-    normalize_wait_tx_options,
-    wait_for_transaction_receipt_with_confirmations,
+    transact_and_wait,
 )
 
 LOG = logging.getLogger("human_protocol_sdk.staking")
@@ -158,16 +157,12 @@ class StakingClient:
         if amount <= 0:
             raise StakingClientError("Amount to approve must be greater than 0")
         try:
-            tx_params, wait_options = normalize_wait_tx_options(
-                tx_options, StakingClientError
-            )
-            tx_hash = self.hmtoken_contract.functions.approve(
-                self.network["staking_address"], amount
-            ).transact(tx_params)
-            wait_for_transaction_receipt_with_confirmations(
+            transact_and_wait(
                 self.w3,
-                tx_hash,
-                wait_options,
+                self.hmtoken_contract.functions.approve(
+                    self.network["staking_address"], amount
+                ),
+                tx_options,
                 StakingClientError,
             )
         except Exception as e:
@@ -220,14 +215,10 @@ class StakingClient:
         if amount <= 0:
             raise StakingClientError("Amount to stake must be greater than 0")
         try:
-            tx_params, wait_options = normalize_wait_tx_options(
-                tx_options, StakingClientError
-            )
-            tx_hash = self.staking_contract.functions.stake(amount).transact(tx_params)
-            wait_for_transaction_receipt_with_confirmations(
+            transact_and_wait(
                 self.w3,
-                tx_hash,
-                wait_options,
+                self.staking_contract.functions.stake(amount),
+                tx_options,
                 StakingClientError,
             )
         except Exception as e:
@@ -263,16 +254,10 @@ class StakingClient:
         if amount <= 0:
             raise StakingClientError("Amount to unstake must be greater than 0")
         try:
-            tx_params, wait_options = normalize_wait_tx_options(
-                tx_options, StakingClientError
-            )
-            tx_hash = self.staking_contract.functions.unstake(amount).transact(
-                tx_params
-            )
-            wait_for_transaction_receipt_with_confirmations(
+            transact_and_wait(
                 self.w3,
-                tx_hash,
-                wait_options,
+                self.staking_contract.functions.unstake(amount),
+                tx_options,
                 StakingClientError,
             )
         except Exception as e:
@@ -301,14 +286,10 @@ class StakingClient:
         """
 
         try:
-            tx_params, wait_options = normalize_wait_tx_options(
-                tx_options, StakingClientError
-            )
-            tx_hash = self.staking_contract.functions.withdraw().transact(tx_params)
-            wait_for_transaction_receipt_with_confirmations(
+            transact_and_wait(
                 self.w3,
-                tx_hash,
-                wait_options,
+                self.staking_contract.functions.withdraw(),
+                tx_options,
                 StakingClientError,
             )
         except Exception as e:
@@ -359,16 +340,12 @@ class StakingClient:
         if not self._is_valid_escrow(escrow_address):
             raise StakingClientError(f"Invalid escrow address: {escrow_address}")
         try:
-            tx_params, wait_options = normalize_wait_tx_options(
-                tx_options, StakingClientError
-            )
-            tx_hash = self.staking_contract.functions.slash(
-                slasher, staker, escrow_address, amount
-            ).transact(tx_params)
-            wait_for_transaction_receipt_with_confirmations(
+            transact_and_wait(
                 self.w3,
-                tx_hash,
-                wait_options,
+                self.staking_contract.functions.slash(
+                    slasher, staker, escrow_address, amount
+                ),
+                tx_options,
                 StakingClientError,
             )
         except Exception as e:
