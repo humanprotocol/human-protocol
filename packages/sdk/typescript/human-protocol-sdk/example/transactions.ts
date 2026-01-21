@@ -15,6 +15,14 @@ export const getTransactions = async () => {
   });
 
   console.log(response);
+
+  const response2 = await TransactionUtils.getTransactions({
+    chainId: ChainId.POLYGON_AMOY,
+    fromAddress: '0xF3D9a0ba9FA14273C515e519DFD0826Ff87d5164',
+    startBlock: response[0].block,
+  });
+
+  console.log(response2);
 };
 
 (async () => {

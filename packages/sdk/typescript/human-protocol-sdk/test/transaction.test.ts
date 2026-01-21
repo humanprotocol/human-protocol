@@ -367,6 +367,31 @@ describe('TransactionUtils', () => {
       expect(result).toEqual([expected]);
     });
 
+    test('should serialize bigint block filters before querying', async () => {
+      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
+        transactions: [mockTransaction],
+      });
+      const filter: ITransactionsFilter = {
+        chainId: ChainId.LOCALHOST,
+        startBlock: 12345n,
+        endBlock: 12350n,
+        first: 1,
+      };
+
+      const result = await TransactionUtils.getTransactions(filter);
+
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
+        expect.anything(),
+        expect.objectContaining({
+          startBlock: 12345,
+          endBlock: 12350,
+        }),
+        undefined
+      );
+      expect(result).toHaveLength(1);
+    });
+
     test('should return an array of transactions filtered by escrow', async () => {
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
         transactions: [mockTransaction],
