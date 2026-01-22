@@ -42,7 +42,10 @@ export class SignatureAuthGuard implements CanActivate {
 
     if (roles.includes(AuthSignatureRole.Worker)) {
       if (!Number.isInteger(Number(data.assignment_id))) {
-        throw new HttpException('Invalid assignment id', HttpStatus.BAD_REQUEST);
+        throw new HttpException(
+          'Invalid assignment id',
+          HttpStatus.BAD_REQUEST,
+        );
       }
 
       const assignment = await this.assignmentRepository.findOneById(
