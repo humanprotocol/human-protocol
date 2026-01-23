@@ -15,6 +15,7 @@ import {
 } from '../src/error';
 import { NETWORKS } from '../src/constants';
 import { StakingClient } from '../src/staking';
+import { TransactionOverrides } from '../src/types';
 import {
   DEFAULT_GAS_PAYER_PRIVKEY,
   FAKE_AMOUNT,
@@ -163,6 +164,27 @@ describe('StakingClient', () => {
       expect(mockTokenContract.approve).toHaveBeenCalledTimes(1);
     });
 
+    test('should pass wait options to wait when approving stake with overrides', async () => {
+      stakingClient.isAllowance = vi.fn().mockResolvedValue(true);
+      const waitSpy = vi.fn().mockResolvedValue(true);
+      vi.spyOn(mockTokenContract, 'approve').mockImplementation(() => ({
+        wait: waitSpy,
+      }));
+
+      const txOptions: TransactionOverrides = {
+        maxFeePerGas: 1n,
+        confirmations: 8,
+        timeoutMs: 10000,
+      };
+
+      await stakingClient.approveStake(amount, txOptions);
+
+      expect(waitSpy).toHaveBeenCalledWith(
+        txOptions.confirmations,
+        txOptions.timeoutMs
+      );
+    });
+
     test('should throw an error if the approval fails', async () => {
       stakingClient.isAllowance = vi.fn().mockResolvedValue(true);
 
@@ -226,6 +248,27 @@ describe('StakingClient', () => {
       expect(stakeSpy).toHaveBeenCalledTimes(1);
     });
 
+    test('should pass wait options to wait when staking with transaction overrides', async () => {
+      mockTokenContract.allowance.mockResolvedValueOnce(amount);
+      const waitSpy = vi.fn().mockResolvedValue(true);
+      vi.spyOn(mockStakingContract, 'stake').mockImplementation(() => ({
+        wait: waitSpy,
+      }));
+
+      const txOptions: TransactionOverrides = {
+        gasLimit: 60000,
+        confirmations: 6,
+        timeoutMs: 9000,
+      };
+
+      await stakingClient.stake(amount, txOptions);
+
+      expect(waitSpy).toHaveBeenCalledWith(
+        txOptions.confirmations,
+        txOptions.timeoutMs
+      );
+    });
+
     test('should throw an error if the stake function on the staking contract fails', async () => {
       mockTokenContract.allowance.mockResolvedValueOnce(amount);
 
@@ -282,6 +325,25 @@ describe('StakingClient', () => {
       expect(unstakeSpy).toHaveBeenCalledTimes(1);
     });
 
+    test('should pass wait options to wait when unstaking with overrides', async () => {
+      const waitSpy = vi.fn().mockResolvedValue(true);
+      vi.spyOn(mockStakingContract, 'unstake').mockImplementation(() => ({
+        wait: waitSpy,
+      }));
+
+      const txOptions: TransactionOverrides = {
+        confirmations: 3,
+        timeoutMs: 6000,
+      };
+
+      await stakingClient.unstake(amount, txOptions);
+
+      expect(waitSpy).toHaveBeenCalledWith(
+        txOptions.confirmations,
+        txOptions.timeoutMs
+      );
+    });
+
     test('should throw an error if the unstake function on the staking contract fails', async () => {
       mockStakingContract.unstake.mockRejectedValueOnce(new Error());
 
@@ -325,6 +387,25 @@ describe('StakingClient', () => {
       await expect(stakingClient.withdraw()).rejects.toThrow();
       expect(mockStakingContract.withdraw).toHaveBeenCalledWith({});
       expect(mockStakingContract.withdraw).toHaveBeenCalledTimes(1);
+    });
+
+    test('should pass wait options to wait when withdrawing with overrides', async () => {
+      const waitSpy = vi.fn().mockResolvedValue(true);
+      vi.spyOn(mockStakingContract, 'withdraw').mockImplementation(() => ({
+        wait: waitSpy,
+      }));
+
+      const txOptions: TransactionOverrides = {
+        confirmations: 4,
+        timeoutMs: 5000,
+      };
+
+      await stakingClient.withdraw(txOptions);
+
+      expect(waitSpy).toHaveBeenCalledWith(
+        txOptions.confirmations,
+        txOptions.timeoutMs
+      );
     });
   });
 
@@ -481,6 +562,32 @@ describe('StakingClient', () => {
         txOptions
       );
       expect(slashSpy).toHaveBeenCalledTimes(1);
+    });
+
+    test('should pass wait options to wait when slashing with overrides', async () => {
+      mockEscrowFactoryContract.hasEscrow.mockResolvedValueOnce(true);
+      const waitSpy = vi.fn().mockResolvedValue(true);
+      vi.spyOn(mockStakingContract, 'slash').mockImplementation(() => ({
+        wait: waitSpy,
+      }));
+
+      const txOptions: TransactionOverrides = {
+        confirmations: 5,
+        timeoutMs: 11000,
+      };
+
+      await stakingClient.slash(
+        ethers.ZeroAddress,
+        ethers.ZeroAddress,
+        ethers.ZeroAddress,
+        amount,
+        txOptions
+      );
+
+      expect(waitSpy).toHaveBeenCalledWith(
+        txOptions.confirmations,
+        txOptions.timeoutMs
+      );
     });
   });
 

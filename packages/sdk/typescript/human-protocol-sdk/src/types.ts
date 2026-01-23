@@ -1,4 +1,4 @@
-import { TransactionLike } from 'ethers';
+import { Overrides, TransactionLike } from 'ethers';
 
 /**
  * Enum for escrow statuses.
@@ -85,5 +85,20 @@ export type NetworkData = {
    */
   oldFactoryAddress: string;
 };
+
+/**
+ * Options that configure how long to wait for transaction confirmations.
+ */
+export type WaitOptions = {
+  /** Number of block confirmations to wait for. */
+  confirmations?: number;
+  /** Milliseconds to wait before aborting `tx.wait()`. */
+  timeoutMs?: number;
+};
+
+/**
+ * Extends ethers overrides with `wait()` options that control confirmation count and timeout.
+ */
+export type TransactionOverrides = Overrides & WaitOptions;
 
 export type TransactionLikeWithNonce = TransactionLike & { nonce: number };

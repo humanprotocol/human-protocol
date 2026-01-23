@@ -1,25 +1,24 @@
 import json
 import logging
 import os
-import time
 import re
-from typing import Tuple, Optional, Any, Dict, Type
+import time
 from dataclasses import dataclass
+from typing import Any, Dict, Optional, Tuple, Type, cast
 
 import requests
-from validators import url as URL
-from web3 import Web3
-from web3.contract import Contract
-from web3.types import TxReceipt
-from web3.exceptions import ContractLogicError
-from web3.types import TxParams
-from web3.middleware import SignAndSendRawMiddlewareBuilder
-
 from human_protocol_sdk.constants import (
     ARTIFACTS_FOLDER,
+    DEFAULT_CONFIRMATION_POLL_INTERVAL,
     SUBGRAPH_API_KEY_PLACEHOLDER,
     ChainId,
 )
+from validators import url as URL
+from web3 import Web3
+from web3.contract import Contract
+from web3.contract.contract import ContractFunction
+from web3.exceptions import ContractLogicError
+from web3.types import TxParams, TxReceipt
 
 logger = logging.getLogger("human_protocol_sdk.utils")
 
@@ -45,6 +44,121 @@ class SubgraphOptions:
     max_retries: Optional[int] = None
     base_delay: Optional[int] = None
     indexer_id: Optional[str] = None
+
+
+@dataclass
+class WaitOptions:
+    """Configuration for transaction receipt waiting logic."""
+
+    confirmations: Optional[int] = None
+    timeout_ms: Optional[int] = None
+
+
+class TransactionOptions(TxParams, total=False):
+    """Transaction params extended with wait configuration hints."""
+
+    confirmations: int
+    timeout_ms: int
+
+
+def normalize_wait_tx_options(
+    tx_options: Optional[TransactionOptions], error_class: Type[Exception]
+) -> Tuple[Optional[TxParams], WaitOptions]:
+    """Split tx options from wait parameters while validating their values."""
+
+    normalized: Dict[str, Any] = {}
+    if tx_options:
+        normalized = dict(tx_options)
+
+    confirmations = normalized.pop("confirmations", None)
+    raw_timeout_ms = normalized.pop("timeout_ms", None)
+
+    if confirmations is not None:
+        try:
+            confirmations = int(confirmations)
+        except (TypeError, ValueError) as exc:
+            raise error_class("confirmations must be an integer") from exc
+
+        if confirmations <= 0:
+            raise error_class("confirmations must be greater than 0")
+
+    timeout_ms: Optional[int] = None
+    if raw_timeout_ms is not None:
+        try:
+            timeout_ms = int(raw_timeout_ms)
+        except (TypeError, ValueError) as exc:
+            raise error_class("timeout_ms must be numeric") from exc
+
+        if timeout_ms <= 0:
+            raise error_class("timeout_ms must be greater than 0")
+
+    wait_options = WaitOptions(confirmations, timeout_ms)
+    tx_params = normalized or None
+    return tx_params, wait_options
+
+
+def wait_for_transaction_receipt_with_confirmations(
+    w3: Web3,
+    tx_hash: Any,
+    wait_options: WaitOptions,
+    error_class: Type[Exception],
+    poll_interval: float = DEFAULT_CONFIRMATION_POLL_INTERVAL,
+):
+    """Waits for a receipt and enforces optional confirmations & timeout."""
+
+    timeout_ms = wait_options.timeout_ms
+    timeout_seconds = (timeout_ms / 1000) if timeout_ms is not None else None
+    receipt_kwargs: Dict[str, Any] = {}
+    if timeout_seconds is not None:
+        receipt_kwargs["timeout"] = timeout_seconds
+
+    start_time = time.time()
+    receipt = w3.eth.wait_for_transaction_receipt(tx_hash, **receipt_kwargs)
+
+    confirmations = wait_options.confirmations or 1
+    if confirmations > 1:
+        target_block = receipt["blockNumber"] + confirmations - 1
+        tx_identifier = tx_hash.hex() if hasattr(tx_hash, "hex") else str(tx_hash)
+        deadline = start_time + timeout_seconds if timeout_seconds is not None else None
+
+        while w3.eth.block_number < target_block:
+            if deadline is not None:
+                remaining = deadline - time.time()
+                if remaining <= 0:
+                    elapsed = (
+                        timeout_seconds
+                        if timeout_seconds is not None
+                        else round(time.time() - start_time, 2)
+                    )
+                    raise error_class(
+                        f"Transaction {tx_identifier} did not reach {confirmations} confirmations after {elapsed} seconds"
+                    )
+                sleep_duration = min(poll_interval, remaining)
+            else:
+                sleep_duration = poll_interval
+
+            time.sleep(sleep_duration)
+
+    return receipt
+
+
+def transact_and_wait(
+    w3: Web3,
+    contract_function: ContractFunction,
+    tx_options: Optional[TransactionOptions],
+    error_class: Type[Exception],
+):
+    """Send a contract transaction and wait for confirmations."""
+
+    tx_params, wait_options = normalize_wait_tx_options(tx_options, error_class)
+    tx_hash = contract_function.transact(tx_params)
+
+    return wait_for_transaction_receipt_with_confirmations(
+        w3,
+        tx_hash,
+        wait_options,
+        error_class,
+    )
 
 
 def is_indexer_error(error: Exception) -> bool:
