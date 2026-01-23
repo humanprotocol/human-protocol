@@ -1,4 +1,4 @@
-FROM node:24-slim
+FROM node:24.13-slim
 ARG APP_PATH=packages/apps/job-launcher/server
 
 # Create app directory

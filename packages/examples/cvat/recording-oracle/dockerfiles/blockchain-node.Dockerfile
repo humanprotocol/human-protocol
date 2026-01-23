@@ -1,5 +1,5 @@
 # TODO: make this shared and part of local setup
-FROM node:24-slim
+FROM node:24.13-slim
 
 # curl is needed for healthcheck
 RUN apt-get update && apt-get install -y curl

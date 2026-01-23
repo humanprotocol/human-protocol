@@ -1,5 +1,5 @@
 # Using bullseye instead of slim because it needs Python and build tools for node-gyp
-FROM node:24-bullseye
+FROM node:24.13-bullseye
 ARG APP_PATH=packages/apps/job-launcher/client
 
 # Create app directory
