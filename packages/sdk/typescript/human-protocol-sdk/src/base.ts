@@ -44,12 +44,12 @@ export abstract class BaseEthersClient {
     return [overrides as Overrides, waitOptions];
   }
 
-  protected async sendTransaction(
-    transaction: (overrides: Overrides) => Promise<ContractTransactionResponse>,
+  protected async sendTxAndWait(
+    executeTx: (overrides: Overrides) => Promise<ContractTransactionResponse>,
     txOptions?: TransactionOverrides
   ): Promise<ContractTransactionReceipt | null> {
     const [overrides, waitOptions] = this.normalizeTxOptions(txOptions);
-    const transactionResponse = await transaction(overrides);
+    const transactionResponse = await executeTx(overrides);
 
     return transactionResponse.wait(
       waitOptions.confirmations,

@@ -160,7 +160,7 @@ export class KVStoreClient extends BaseEthersClient {
   ): Promise<void> {
     if (key === '') throw ErrorKVStoreEmptyKey;
     try {
-      await this.sendTransaction(
+      await this.sendTxAndWait(
         (overrides) => this.contract.set(key, value, overrides),
         txOptions
       );
@@ -197,7 +197,7 @@ export class KVStoreClient extends BaseEthersClient {
     if (keys.includes('')) throw ErrorKVStoreEmptyKey;
 
     try {
-      await this.sendTransaction(
+      await this.sendTxAndWait(
         (overrides) => this.contract.setBulk(keys, values, overrides),
         txOptions
       );
@@ -239,7 +239,7 @@ export class KVStoreClient extends BaseEthersClient {
     const hashKey = urlKey + '_hash';
 
     try {
-      await this.sendTransaction(
+      await this.sendTxAndWait(
         (overrides) =>
           this.contract.setBulk(
             [urlKey, hashKey],

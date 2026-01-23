@@ -205,7 +205,7 @@ export class StakingClient extends BaseEthersClient {
     }
 
     try {
-      await this.sendTransaction(
+      await this.sendTxAndWait(
         async (overrides) =>
           this.tokenContract.approve(
             await this.stakingContract.getAddress(),
@@ -255,7 +255,7 @@ export class StakingClient extends BaseEthersClient {
     }
 
     try {
-      await this.sendTransaction(
+      await this.sendTxAndWait(
         (overrides) => this.stakingContract.stake(amount, overrides),
         txOptions
       );
@@ -299,7 +299,7 @@ export class StakingClient extends BaseEthersClient {
     }
 
     try {
-      await this.sendTransaction(
+      await this.sendTxAndWait(
         (overrides) => this.stakingContract.unstake(amount, overrides),
         txOptions
       );
@@ -325,7 +325,7 @@ export class StakingClient extends BaseEthersClient {
   @requiresSigner
   public async withdraw(txOptions: TransactionOverrides = {}): Promise<void> {
     try {
-      await this.sendTransaction(
+      await this.sendTxAndWait(
         (overrides) => this.stakingContract.withdraw(overrides),
         txOptions
       );
@@ -391,7 +391,7 @@ export class StakingClient extends BaseEthersClient {
     await this.checkValidEscrow(escrowAddress);
 
     try {
-      await this.sendTransaction(
+      await this.sendTxAndWait(
         (overrides) =>
           this.stakingContract.slash(
             slasher,

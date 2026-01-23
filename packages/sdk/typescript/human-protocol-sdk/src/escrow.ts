@@ -217,7 +217,7 @@ export class EscrowClient extends BaseEthersClient {
     }
 
     try {
-      const result = await this.sendTransaction(
+      const result = await this.sendTxAndWait(
         (overrides) =>
           this.escrowFactoryContract.createEscrow(
             tokenAddress,
@@ -367,7 +367,7 @@ export class EscrowClient extends BaseEthersClient {
     } = escrowConfig;
 
     try {
-      const result = await this.sendTransaction(
+      const result = await this.sendTxAndWait(
         (overrides) =>
           this.escrowFactoryContract.createFundAndSetupEscrow(
             tokenAddress,
@@ -468,7 +468,7 @@ export class EscrowClient extends BaseEthersClient {
     try {
       const escrowContract = this.getEscrowContract(escrowAddress);
 
-      await this.sendTransaction(
+      await this.sendTxAndWait(
         (overrides) =>
           escrowContract.setup(
             reputationOracle,
@@ -536,7 +536,7 @@ export class EscrowClient extends BaseEthersClient {
         tokenAddress,
         this.runner
       );
-      await this.sendTransaction(
+      await this.sendTxAndWait(
         (overrides) => tokenContract.transfer(escrowAddress, amount, overrides),
         txOptions
       );
@@ -664,7 +664,7 @@ export class EscrowClient extends BaseEthersClient {
             )
           : escrowContract['storeResults(string,string)'](url, hash, overrides);
 
-      await this.sendTransaction(txFactory, txOptions);
+      await this.sendTxAndWait(txFactory, txOptions);
     } catch (e) {
       if (!hasFundsToReserveParam && e.reason === 'DEPRECATED_SIGNATURE') {
         throw ErrorStoreResultsVersion;
@@ -704,7 +704,7 @@ export class EscrowClient extends BaseEthersClient {
 
     try {
       const escrowContract = this.getEscrowContract(escrowAddress);
-      await this.sendTransaction(
+      await this.sendTxAndWait(
         (overrides) => escrowContract.complete(overrides),
         txOptions
       );
@@ -877,7 +877,7 @@ export class EscrowClient extends BaseEthersClient {
               overrides
             );
 
-      await this.sendTransaction(txFactory, txOptions);
+      await this.sendTxAndWait(txFactory, txOptions);
     } catch (e) {
       if (!idIsString && e.reason === 'DEPRECATED_SIGNATURE') {
         throw ErrorBulkPayOutVersion;
@@ -918,7 +918,7 @@ export class EscrowClient extends BaseEthersClient {
 
     try {
       const escrowContract = this.getEscrowContract(escrowAddress);
-      await this.sendTransaction(
+      await this.sendTxAndWait(
         (overrides) => escrowContract.cancel(overrides),
         txOptions
       );
@@ -957,7 +957,7 @@ export class EscrowClient extends BaseEthersClient {
 
     try {
       const escrowContract = this.getEscrowContract(escrowAddress);
-      await this.sendTransaction(
+      await this.sendTxAndWait(
         (overrides) => escrowContract.requestCancellation(overrides),
         txOptions
       );
@@ -1009,7 +1009,7 @@ export class EscrowClient extends BaseEthersClient {
 
     try {
       const escrowContract = this.getEscrowContract(escrowAddress);
-      const transactionReceipt = await this.sendTransaction(
+      const transactionReceipt = await this.sendTxAndWait(
         (overrides) => escrowContract.withdraw(tokenAddress, overrides),
         txOptions
       );
@@ -1110,7 +1110,7 @@ export class EscrowClient extends BaseEthersClient {
     finalResultsHash: string,
     payoutId: string,
     forceComplete = false,
-    txOptions: TransactionOverrides = {}
+    txOptions: Overrides = {}
   ): Promise<TransactionLikeWithNonce> {
     await this.ensureCorrectBulkPayoutInput(
       escrowAddress,
@@ -1123,7 +1123,6 @@ export class EscrowClient extends BaseEthersClient {
     const signer = this.runner as Signer;
     try {
       const escrowContract = this.getEscrowContract(escrowAddress);
-      const [overrides] = this.normalizeTxOptions(txOptions);
 
       const populatedTransaction = await escrowContract[
         'bulkPayOut(address[],uint256[],string,string,string,bool)'
@@ -1134,7 +1133,7 @@ export class EscrowClient extends BaseEthersClient {
         finalResultsHash,
         payoutId,
         forceComplete,
-        overrides
+        txOptions
       );
 
       /**
@@ -1143,8 +1142,8 @@ export class EscrowClient extends BaseEthersClient {
        * doesn't mention it even in library docs,
        * even though it includes if from txOptions.
        */
-      if (typeof overrides.nonce === 'number') {
-        populatedTransaction.nonce = overrides.nonce;
+      if (typeof txOptions.nonce === 'number') {
+        populatedTransaction.nonce = txOptions.nonce;
       } else {
         populatedTransaction.nonce = await signer.getNonce();
       }
