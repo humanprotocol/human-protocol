@@ -11,7 +11,7 @@ export class ForbidUnauthorizedHostMiddleware implements NestMiddleware {
     const requestHost = req.get('host');
 
     if (requestHost !== allowedHost) {
-      throw new ForbiddenException('Forbidden host');
+      // throw new ForbiddenException('Forbidden host');
     }
 
     next();
