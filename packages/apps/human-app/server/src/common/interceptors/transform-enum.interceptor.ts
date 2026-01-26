@@ -8,6 +8,11 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { plainToInstance, ClassConstructor } from 'class-transformer';
 import 'reflect-metadata';
+import {
+  PARAMTYPES_METADATA,
+  ROUTE_ARGS_METADATA,
+} from '@nestjs/common/constants';
+import { RouteParamtypes } from '@nestjs/common/enums/route-paramtypes.enum';
 
 @Injectable()
 export class TransformEnumInterceptor implements NestInterceptor {
@@ -44,19 +49,28 @@ export class TransformEnumInterceptor implements NestInterceptor {
     context: ExecutionContext,
   ): ClassConstructor<any> | null {
     const handler = context.getHandler();
-    const controller = context.getClass();
+    const prototype = context.getClass().prototype;
 
-    // Get the parameter types of the route handler
-    const routeArgs = Reflect.getMetadata(
-      'design:paramtypes',
-      controller.prototype,
-      handler.name,
-    );
+    const paramTypes =
+      Reflect.getMetadata(PARAMTYPES_METADATA, prototype, handler.name) ?? [];
+    const routeArgs =
+      Reflect.getMetadata(ROUTE_ARGS_METADATA, prototype, handler.name) ?? {};
 
-    // Return the first parameter's constructor if the handler has a class (DTO)
-    return routeArgs && routeArgs.length > 0
-      ? (routeArgs[0] as ClassConstructor<any>)
-      : null;
+    const routeArgEntries = Object.entries(routeArgs) as Array<
+      [string, { index?: number }]
+    >;
+
+    for (const [key, metadata] of routeArgEntries) {
+      const [token] = key.split(':');
+      if (
+        Number(token) === RouteParamtypes.BODY ||
+        Number(token) === RouteParamtypes.QUERY
+      ) {
+        const index = metadata.index ?? Number(key.split(':')[1]);
+        return paramTypes[index] ?? null;
+      }
+    }
+    return null;
   }
 
   private transformEnums(
