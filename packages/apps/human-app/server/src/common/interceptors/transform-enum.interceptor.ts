@@ -8,6 +8,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { plainToInstance, ClassConstructor } from 'class-transformer';
 import 'reflect-metadata';
+import { PARAMTYPES_METADATA } from '@nestjs/common/constants';
 
 @Injectable()
 export class TransformEnumInterceptor implements NestInterceptor {
@@ -44,19 +45,15 @@ export class TransformEnumInterceptor implements NestInterceptor {
     context: ExecutionContext,
   ): ClassConstructor<any> | null {
     const handler = context.getHandler();
-    const controller = context.getClass();
+    const prototype = context.getClass().prototype;
 
-    // Get the parameter types of the route handler
-    const routeArgs = Reflect.getMetadata(
-      'design:paramtypes',
-      controller.prototype,
-      handler.name,
+    const paramTypes =
+      Reflect.getMetadata(PARAMTYPES_METADATA, prototype, handler.name) ?? [];
+
+    return (
+      paramTypes.find((type: unknown) => this.isTransformableClass(type)) ??
+      null
     );
-
-    // Return the first parameter's constructor if the handler has a class (DTO)
-    return routeArgs && routeArgs.length > 0
-      ? (routeArgs[0] as ClassConstructor<any>)
-      : null;
   }
 
   private transformEnums(
@@ -112,5 +109,19 @@ export class TransformEnumInterceptor implements NestInterceptor {
       }
     }
     return bodyOrQuery;
+  }
+
+  private isTransformableClass(type: unknown): type is ClassConstructor<any> {
+    if (typeof type !== 'function') {
+      return false;
+    }
+
+    return (
+      type !== String &&
+      type !== Boolean &&
+      type !== Number &&
+      type !== Array &&
+      type !== Object
+    );
   }
 }
