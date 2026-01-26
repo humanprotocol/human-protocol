@@ -3,7 +3,6 @@ import { ethers } from 'ethers';
 import gqlFetch from 'graphql-request';
 
 import { isURL } from 'validator';
-import { SUBGRAPH_API_KEY_PLACEHOLDER } from './constants';
 import { ChainId } from './enums';
 import {
   ContractExecutionError,
@@ -17,8 +16,8 @@ import {
   TransactionReplaced,
   WarnSubgraphApiKeyNotProvided,
 } from './error';
-import { NetworkData } from './types';
 import { SubgraphOptions } from './interfaces';
+import { NetworkData } from './types';
 
 /**
  * Handles and throws appropriate error types based on the Ethereum error.
@@ -88,10 +87,7 @@ export const isValidJson = (input: string): boolean => {
 export const getSubgraphUrl = (networkData: NetworkData) => {
   let subgraphUrl = networkData.subgraphUrl;
   if (process.env.SUBGRAPH_API_KEY) {
-    subgraphUrl = networkData.subgraphUrlApiKey.replace(
-      SUBGRAPH_API_KEY_PLACEHOLDER,
-      process.env.SUBGRAPH_API_KEY
-    );
+    subgraphUrl = networkData.subgraphUrlApiKey;
   } else if (networkData.chainId !== ChainId.LOCALHOST) {
     // eslint-disable-next-line no-console
     console.warn(WarnSubgraphApiKeyNotProvided);
