@@ -219,7 +219,7 @@ export function StakingInfo() {
           Connect API KEY
         </Button>
       </Stack>
-      <ApiKeyData />
+      <ApiKeyData stakingExchangeError={stakingSummary?.exchange_error} />
     </Stack>
   );
 }
