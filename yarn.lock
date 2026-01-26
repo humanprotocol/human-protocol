@@ -310,7 +310,7 @@ __metadata:
     "@types/jest": "npm:30.0.0"
     "@types/jsonwebtoken": "npm:^9.0.7"
     "@types/node": "npm:22.10.5"
-    "@types/passport": "npm:^0"
+    "@types/passport": "npm:^1"
     "@types/passport-jwt": "npm:^4.0.1"
     "@types/pg": "npm:8.11.10"
     "@typescript-eslint/eslint-plugin": "npm:^5.0.0"
@@ -498,7 +498,7 @@ __metadata:
     "@types/jsonwebtoken": "npm:^9.0.7"
     "@types/lodash": "npm:^4.17.14"
     "@types/node": "npm:22.10.5"
-    "@types/passport": "npm:^0"
+    "@types/passport": "npm:^1"
     "@types/passport-jwt": "npm:^4.0.1"
     "@typescript-eslint/eslint-plugin": "npm:^5.0.0"
     "@typescript-eslint/parser": "npm:^8.46.3"
@@ -11693,21 +11693,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/passport@npm:*":
+"@types/passport@npm:*, @types/passport@npm:^1":
   version: 1.0.17
   resolution: "@types/passport@npm:1.0.17"
   dependencies:
     "@types/express": "npm:*"
   checksum: 10c0/09039429a9178117a80880c4e7d437abc83216eac5e0c97bc6f14a03a59193386cff484931dc880693f8b13a512c366ef7a51ecd8cc1a63f17366be68161f633
-  languageName: node
-  linkType: hard
-
-"@types/passport@npm:^0":
-  version: 0.4.7
-  resolution: "@types/passport@npm:0.4.7"
-  dependencies:
-    "@types/express": "npm:*"
-  checksum: 10c0/58ca21800b7910385961b7a3dc9071fc9db6223242b96ff88d16c9d004ce7173524e7c17c63363595565af3f85ad932ee301efc8cc3e378bea172eebc9e07703
   languageName: node
   linkType: hard
 
