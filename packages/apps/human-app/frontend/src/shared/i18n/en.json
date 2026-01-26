@@ -239,7 +239,8 @@
         "stakingInfoValue": "Staking Info Value",
         "stakedAmount": "Staked amount",
         "readMore": "Read more",
-        "readLess": "Read less"
+        "readLess": "Read less",
+        "howToCreateApiKeys": "How to create API keys?"
       },
       "apiKeyData": {
         "apiKey": "API KEY",
