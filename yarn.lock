@@ -441,7 +441,6 @@ __metadata:
     i18next: "npm:^25.8.0"
     jsdom: "npm:^25.0.1"
     jwt-decode: "npm:^4.0.0"
-    lint-staged: "npm:^16.2.7"
     lodash: "npm:^4.17.21"
     material-react-table: "npm:3.0.1"
     mui-image: "npm:^1.0.7"
