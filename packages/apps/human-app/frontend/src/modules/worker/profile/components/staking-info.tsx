@@ -66,12 +66,12 @@ export function StakingInfo() {
         message: stakingSummaryError,
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     isLoading,
     isRefetching,
     stakingSummary?.on_chain_error,
     stakingSummary?.exchange_error,
-    showNotification,
   ]);
 
   useEffect(() => {
