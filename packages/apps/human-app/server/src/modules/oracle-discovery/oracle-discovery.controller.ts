@@ -21,7 +21,6 @@ import {
   GetOraclesQuery,
 } from './model/oracle-discovery.model';
 import { OracleDiscoveryService } from './oracle-discovery.service';
-import { ChainId } from '@human-protocol/sdk';
 
 @ApiTags('Oracle-Discovery')
 @ApiBearerAuth()
@@ -51,32 +50,6 @@ export class OracleDiscoveryController {
     }
     const command = this.mapper.map(query, GetOraclesQuery, GetOraclesCommand);
     const oracles = await this.oracleDiscoveryService.getOracles(command);
-
-    // TODO: temporal - THIRSTYFI
-    const thisrtyOracle = new DiscoveredOracle({
-      id: 'thisrty-oracle',
-      address: process.env.THIRSTYFI_ORACLE_ADDRESS ?? '',
-      chainId: ChainId.POLYGON,
-      stakedAmount: 0n,
-      lockedAmount: 0n,
-      lockedUntilTimestamp: 0,
-      withdrawnAmount: 0n,
-      slashedAmount: 0n,
-      amountJobsProcessed: 0n,
-      role: 'exchange_oracle',
-      url: ' ',
-      jobTypes: ['thirstyfi'],
-      name: 'ThirstyFi',
-      registrationNeeded: false,
-      registrationInstructions: null,
-      publicKey: null,
-      webhookUrl: null,
-      website: null,
-      fee: null,
-      reputationNetworks: [],
-      category: null,
-    });
-    oracles.push(thisrtyOracle);
 
     return oracles;
   }

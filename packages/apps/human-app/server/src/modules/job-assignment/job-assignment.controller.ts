@@ -1,7 +1,6 @@
 import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
@@ -25,19 +24,11 @@ import {
   ResignJobCommand,
   ResignJobDto,
 } from './model/job-assignment.model';
-import { ChainId } from '@human-protocol/sdk';
-import axios from 'axios';
-import { JobStatus } from '../../common/enums/global-common';
-import logger from '../../logger';
 
 @ApiTags('Job-Assignment')
 @ApiBearerAuth()
 @Controller('/assignment')
 export class JobAssignmentController {
-  private readonly logger = logger.child({
-    context: JobAssignmentController.name,
-  });
-
   constructor(
     private readonly service: JobAssignmentService,
     @InjectMapper() private readonly mapper: Mapper,
@@ -55,47 +46,6 @@ export class JobAssignmentController {
     // Require stake eligibility
     if (!req.user?.is_stake_eligible) {
       throw new ForbiddenException('Stake requirement not met');
-    }
-    // TODO: temporal - THIRSTYFI
-    if (jobAssignmentDto.escrow_address === 'thirstyfi-task') {
-      if (new Date(process.env.THIRSTYFI_TASK_EXPIRATION_DATE!) < new Date()) {
-        throw new BadRequestException('Expired task');
-      }
-      try {
-        const { data } = await axios.post<any>(
-          `${process.env.THIRSTIFY_EXO}/join`,
-          {
-            walletAddress: jobAssignmentDto.wallet_address,
-            email: req.user.email,
-            apiKey: jobAssignmentDto.api_key,
-            apiSecret: jobAssignmentDto.api_secret,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${process.env.THIRSTIFY_TOKEN}`,
-              'Content-Type': 'application/json',
-            },
-          },
-        );
-
-        return {
-          assignment_id: data.id,
-          escrow_address: 'thirstyfi-task',
-          chain_id: ChainId.POLYGON,
-          job_type: 'thirstyfi',
-          status: 'ACTIVE',
-          reward_amount: '5 - 50',
-          reward_token: 'USDT',
-          created_at: new Date().toISOString(),
-          expires_at: process.env.THIRSTYFI_TASK_EXPIRATION_DATE ?? '',
-        };
-      } catch (error) {
-        this.logger.error('Failed to assign thirstyfi job', {
-          userId: req.user.user_id,
-          error,
-        });
-        throw new BadRequestException(error.response.data.error);
-      }
     }
 
     const jobAssignmentCommand = this.mapper.map(
@@ -124,50 +74,6 @@ export class JobAssignmentController {
         total_results: 0,
         results: [],
       };
-    }
-    // TODO: temporal - THIRSTYFI
-    if (
-      jobsAssignmentParamsDto.oracle_address ===
-      process.env.THIRSTYFI_ORACLE_ADDRESS
-    ) {
-      const { data } = await axios.get<any>(
-        `${process.env.THIRSTIFY_EXO}/participant`,
-        {
-          params: { email: req.user.email },
-          headers: { Authorization: `Bearer ${process.env.THIRSTIFY_TOKEN}` },
-        },
-      );
-      return Number(data?.id ?? 0) <= 0
-        ? {
-            page: 0,
-            page_size: 1,
-            total_pages: 1,
-            total_results: 0,
-            results: [],
-          }
-        : {
-            page: 0,
-            page_size: 1,
-            total_pages: 1,
-            total_results: 1,
-            results: [
-              {
-                chain_id: ChainId.POLYGON,
-                assignment_id: data.id,
-                escrow_address: 'thirstyfi-task',
-                job_type: 'thirstyfi',
-                reward_amount: '5 - 50',
-                reward_token: 'USDT',
-                status:
-                  data.status === 'pending'
-                    ? JobStatus.ACTIVE
-                    : JobStatus.COMPLETED,
-                created_at: new Date().toISOString(),
-                expires_at: process.env.THIRSTYFI_TASK_EXPIRATION_DATE,
-                url: 'https://thirsty.fi/blog/campaign-human-protocol',
-              } as any,
-            ],
-          };
     }
     const jobsAssignmentParamsCommand = this.mapper.map(
       jobsAssignmentParamsDto,
