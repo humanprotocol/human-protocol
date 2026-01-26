@@ -149,8 +149,8 @@ export interface ITransaction {
 
 export interface ITransactionsFilter extends IPagination {
   chainId: ChainId;
-  startBlock?: number;
-  endBlock?: number;
+  startBlock?: number | bigint;
+  endBlock?: number | bigint;
   startDate?: Date;
   endDate?: Date;
   fromAddress?: string;

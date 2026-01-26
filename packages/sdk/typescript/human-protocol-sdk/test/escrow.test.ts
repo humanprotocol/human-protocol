@@ -50,7 +50,7 @@ import {
   GET_ESCROW_BY_ADDRESS_QUERY,
   GET_PAYOUTS_QUERY,
 } from '../src/graphql';
-import { EscrowStatus } from '../src/types';
+import { EscrowStatus, TransactionOverrides } from '../src/types';
 import {
   DEFAULT_GAS_PAYER_PRIVKEY,
   DEFAULT_PAYOUT_ID,
@@ -291,6 +291,47 @@ describe('EscrowClient', () => {
         tokenAddress,
         jobRequesterId,
         txOptions
+      );
+      expect(result).toBe(expectedEscrowAddress);
+    });
+
+    test('should pass wait options to tx.wait when provided in transaction options', async () => {
+      const tokenAddress = ethers.ZeroAddress;
+      const expectedEscrowAddress = ethers.ZeroAddress;
+
+      const waitSpy = vi.fn().mockResolvedValue({
+        logs: [
+          {
+            topics: [ethers.id('LaunchedV2(address,address,string)')],
+            args: {
+              escrow: expectedEscrowAddress,
+            },
+          },
+        ],
+      });
+
+      vi.spyOn(
+        escrowClient.escrowFactoryContract,
+        'createEscrow'
+      ).mockImplementation(() => ({
+        wait: waitSpy,
+      }));
+
+      const txOptions: TransactionOverrides = {
+        gasLimit: 45000,
+        confirmations: 4,
+        timeoutMs: 12000,
+      };
+
+      const result = await escrowClient.createEscrow(
+        tokenAddress,
+        jobRequesterId,
+        txOptions
+      );
+
+      expect(waitSpy).toHaveBeenCalledWith(
+        txOptions.confirmations,
+        txOptions.timeoutMs
       );
       expect(result).toBe(expectedEscrowAddress);
     });
@@ -642,6 +683,46 @@ describe('EscrowClient', () => {
         escrowConfig.manifest,
         escrowConfig.manifestHash,
         txOptions
+      );
+      expect(result).toBe(expectedEscrowAddress);
+    });
+
+    test('should forward wait options when creating, funding and setting up escrow', async () => {
+      const waitSpy = vi.fn().mockResolvedValue({
+        logs: [
+          {
+            topics: [ethers.id('LaunchedV2(address,address,string)')],
+            args: {
+              escrow: expectedEscrowAddress,
+            },
+          },
+        ],
+      });
+
+      vi.spyOn(
+        escrowClient.escrowFactoryContract,
+        'createFundAndSetupEscrow'
+      ).mockImplementation(() => ({
+        wait: waitSpy,
+      }));
+
+      const txOptions: TransactionOverrides = {
+        gasLimit: 45000,
+        confirmations: 5,
+        timeoutMs: 15000,
+      };
+
+      const result = await escrowClient.createFundAndSetupEscrow(
+        tokenAddress,
+        10n,
+        jobRequesterId,
+        escrowConfig,
+        txOptions
+      );
+
+      expect(waitSpy).toHaveBeenCalledWith(
+        txOptions.confirmations,
+        txOptions.timeoutMs
       );
       expect(result).toBe(expectedEscrowAddress);
     });
@@ -1034,6 +1115,38 @@ describe('EscrowClient', () => {
         txOptions
       );
     });
+
+    test('should forward wait options when setting up escrow', async () => {
+      const escrowConfig = {
+        recordingOracle: ethers.ZeroAddress,
+        reputationOracle: ethers.ZeroAddress,
+        exchangeOracle: ethers.ZeroAddress,
+        recordingOracleFee: 10n,
+        reputationOracleFee: 10n,
+        exchangeOracleFee: 10n,
+        manifest: VALID_URL,
+        manifestHash: FAKE_HASH,
+      };
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      const waitSpy = vi.fn().mockResolvedValue(true);
+      vi.spyOn(escrowClient.escrowContract, 'setup').mockImplementation(() => ({
+        wait: waitSpy,
+      }));
+
+      const txOptions: TransactionOverrides = {
+        gasLimit: 45000,
+        confirmations: 3,
+        timeoutMs: 8000,
+      };
+
+      await escrowClient.setup(ethers.ZeroAddress, escrowConfig, txOptions);
+
+      expect(waitSpy).toHaveBeenCalledWith(
+        txOptions.confirmations,
+        txOptions.timeoutMs
+      );
+    });
   });
 
   describe('fund', () => {
@@ -1122,6 +1235,34 @@ describe('EscrowClient', () => {
         escrowAddress,
         amount,
         txOptions
+      );
+    });
+
+    test('should forward wait options when funding escrow', async () => {
+      const tokenAddress = ethers.ZeroAddress;
+      const escrowAddress = ethers.ZeroAddress;
+      const amount = 10n;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.token.mockReturnValue(tokenAddress);
+      const waitSpy = vi.fn().mockResolvedValue(true);
+      vi.spyOn(escrowClient.tokenContract, 'transfer').mockImplementation(
+        () => ({
+          wait: waitSpy,
+        })
+      );
+
+      const txOptions: TransactionOverrides = {
+        gasLimit: 45000,
+        confirmations: 2,
+        timeoutMs: 6000,
+      };
+
+      await escrowClient.fund(escrowAddress, amount, txOptions);
+
+      expect(waitSpy).toHaveBeenCalledWith(
+        txOptions.confirmations,
+        txOptions.timeoutMs
       );
     });
   });
@@ -1224,6 +1365,35 @@ describe('EscrowClient', () => {
       expect(storeResultsSpy).toHaveBeenCalledWith(url, hash, txOptions);
     });
 
+    test('should pass wait options for storeResults without fundsToReserve', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+      const url = VALID_URL;
+      const hash = FAKE_HASH;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      const waitSpy = vi.fn().mockResolvedValue(true);
+      const storeResultsSpy = vi
+        .spyOn(escrowClient.escrowContract, 'storeResults(string,string)')
+        .mockImplementation(() => ({
+          wait: waitSpy,
+        }));
+      escrowClient.escrowContract['storeResults(string,string)'] =
+        storeResultsSpy;
+
+      const txOptions: TransactionOverrides = {
+        gasLimit: 45000,
+        confirmations: 3,
+        timeoutMs: 7000,
+      };
+
+      await escrowClient.storeResults(escrowAddress, url, hash, txOptions);
+
+      expect(waitSpy).toHaveBeenCalledWith(
+        txOptions.confirmations,
+        txOptions.timeoutMs
+      );
+    });
+
     test('should successfully store results with fundsToReserve', async () => {
       const escrowAddress = ethers.ZeroAddress;
       const url = VALID_URL;
@@ -1274,6 +1444,40 @@ describe('EscrowClient', () => {
         hash,
         fundsToReserve,
         txOptions
+      );
+    });
+
+    test('should pass wait options for storeResults with fundsToReserve', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+      const url = VALID_URL;
+      const hash = FAKE_HASH;
+      const fundsToReserve = 123n;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      const waitSpy = vi.fn().mockResolvedValue(true);
+      const storeResultsWithFundsSpy = vi.fn().mockImplementation(() => ({
+        wait: waitSpy,
+      }));
+      escrowClient.escrowContract['storeResults(string,string,uint256)'] =
+        storeResultsWithFundsSpy;
+
+      const txOptions: TransactionOverrides = {
+        gasLimit: 50000,
+        confirmations: 4,
+        timeoutMs: 9000,
+      };
+
+      await escrowClient.storeResults(
+        escrowAddress,
+        url,
+        hash,
+        fundsToReserve,
+        txOptions
+      );
+
+      expect(waitSpy).toHaveBeenCalledWith(
+        txOptions.confirmations,
+        txOptions.timeoutMs
       );
     });
 
@@ -1376,6 +1580,32 @@ describe('EscrowClient', () => {
       await escrowClient.complete(escrowAddress, txOptions);
 
       expect(completeSpy).toHaveBeenCalledWith(txOptions);
+    });
+
+    test('should forward wait options when completing escrow', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+
+      const waitSpy = vi.fn().mockResolvedValue(true);
+      vi.spyOn(escrowClient.escrowContract, 'complete').mockImplementation(
+        () => ({
+          wait: waitSpy,
+        })
+      );
+
+      const txOptions: TransactionOverrides = {
+        gasLimit: 40000,
+        confirmations: 6,
+        timeoutMs: 10000,
+      };
+
+      await escrowClient.complete(escrowAddress, txOptions);
+
+      expect(waitSpy).toHaveBeenCalledWith(
+        txOptions.confirmations,
+        txOptions.timeoutMs
+      );
     });
   });
 
@@ -1800,6 +2030,85 @@ describe('EscrowClient', () => {
       );
     });
 
+    test('should pass wait options when bulkPayOut uses numeric id', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+      const recipients = [ethers.ZeroAddress, ethers.ZeroAddress];
+      const amounts = [10n, 10n];
+      const finalResultsUrl = VALID_URL;
+      const finalResultsHash = FAKE_HASH;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      const waitSpy = vi.fn().mockResolvedValue(true);
+      vi.spyOn(
+        escrowClient.escrowContract,
+        'bulkPayOut(address[],uint256[],string,string,uint256,bool)'
+      ).mockImplementation(() => ({
+        wait: waitSpy,
+      }));
+
+      const txOptions: TransactionOverrides = {
+        gasLimit: 55000,
+        confirmations: 2,
+        timeoutMs: 5000,
+      };
+
+      await escrowClient.bulkPayOut(
+        escrowAddress,
+        recipients,
+        amounts,
+        finalResultsUrl,
+        finalResultsHash,
+        DEFAULT_TX_ID,
+        false,
+        txOptions
+      );
+
+      expect(waitSpy).toHaveBeenCalledWith(
+        txOptions.confirmations,
+        txOptions.timeoutMs
+      );
+    });
+
+    test('should pass wait options when bulkPayOut uses payoutId string', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+      const recipients = [ethers.ZeroAddress, ethers.ZeroAddress];
+      const amounts = [10n, 10n];
+      const finalResultsUrl = VALID_URL;
+      const finalResultsHash = FAKE_HASH;
+      const payoutId = 'uuid-1234';
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      const waitSpy = vi.fn().mockResolvedValue(true);
+      vi.spyOn(
+        escrowClient.escrowContract,
+        'bulkPayOut(address[],uint256[],string,string,string,bool)'
+      ).mockImplementation(() => ({
+        wait: waitSpy,
+      }));
+
+      const txOptions: TransactionOverrides = {
+        gasLimit: 60000,
+        confirmations: 4,
+        timeoutMs: 12000,
+      };
+
+      await escrowClient.bulkPayOut(
+        escrowAddress,
+        recipients,
+        amounts,
+        finalResultsUrl,
+        finalResultsHash,
+        payoutId,
+        true,
+        txOptions
+      );
+
+      expect(waitSpy).toHaveBeenCalledWith(
+        txOptions.confirmations,
+        txOptions.timeoutMs
+      );
+    });
+
     test('should throw ErrorBulkPayOutVersion if DEPRECATED_SIGNATURE error and id is number', async () => {
       const escrowAddress = ethers.ZeroAddress;
       const recipients = [ethers.ZeroAddress, ethers.ZeroAddress];
@@ -2209,6 +2518,32 @@ describe('EscrowClient', () => {
         txOptions
       );
     });
+
+    test('should pass wait options when cancelling escrow', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+
+      escrowClient.escrowContract.token.mockResolvedValueOnce(
+        ethers.ZeroAddress
+      );
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+
+      const waitSpy = vi.fn().mockResolvedValue(true);
+      mockTx.wait = waitSpy;
+      escrowClient.escrowContract.cancel.mockResolvedValueOnce(mockTx);
+
+      const txOptions: TransactionOverrides = {
+        gasLimit: 35000,
+        confirmations: 2,
+        timeoutMs: 4000,
+      };
+
+      await escrowClient.cancel(escrowAddress, txOptions);
+
+      expect(waitSpy).toHaveBeenCalledWith(
+        txOptions.confirmations,
+        txOptions.timeoutMs
+      );
+    });
   });
 
   describe('requestCancellation', () => {
@@ -2281,6 +2616,30 @@ describe('EscrowClient', () => {
       expect(
         escrowClient.escrowContract.requestCancellation
       ).toHaveBeenCalledWith(txOptions);
+    });
+
+    test('should pass wait options when requesting cancellation', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      const waitSpy = vi.fn().mockResolvedValue(true);
+      mockTx.wait = waitSpy;
+      escrowClient.escrowContract.requestCancellation.mockResolvedValueOnce(
+        mockTx
+      );
+
+      const txOptions: TransactionOverrides = {
+        gasLimit: 32000,
+        confirmations: 3,
+        timeoutMs: 6_500,
+      };
+
+      await escrowClient.requestCancellation(escrowAddress, txOptions);
+
+      expect(waitSpy).toHaveBeenCalledWith(
+        txOptions.confirmations,
+        txOptions.timeoutMs
+      );
     });
   });
 
@@ -2457,6 +2816,58 @@ describe('EscrowClient', () => {
       expect(escrowClient.escrowContract.withdraw).toHaveBeenCalledWith(
         tokenAddress,
         txOptions
+      );
+    });
+
+    test('should pass wait options when withdrawing from escrow', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+      const tokenAddress = ethers.ZeroAddress;
+      const withdrawnAmount = 1n;
+
+      const log = {
+        address: tokenAddress,
+        name: 'Transfer',
+        args: [escrowAddress, ethers.ZeroAddress, withdrawnAmount],
+      };
+      const waitSpy = vi.fn().mockResolvedValue({
+        hash: FAKE_HASH,
+        logs: [log],
+      });
+      mockTx.wait = waitSpy;
+
+      const mockERC20FactoryContract = {
+        interface: {
+          parseLog: vi.fn().mockReturnValueOnce(log),
+        },
+      };
+
+      vi.spyOn(ERC20__factory, 'connect').mockReturnValue(
+        mockERC20FactoryContract as any
+      );
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.withdraw.mockResolvedValueOnce(mockTx);
+
+      const txOptions: TransactionOverrides = {
+        gasLimit: 48000,
+        confirmations: 5,
+        timeoutMs: 11000,
+      };
+
+      const result = await escrowClient.withdraw(
+        escrowAddress,
+        tokenAddress,
+        txOptions
+      );
+
+      expect(result).toStrictEqual({
+        withdrawnAmount,
+        tokenAddress,
+        txHash: FAKE_HASH,
+      });
+      expect(waitSpy).toHaveBeenCalledWith(
+        txOptions.confirmations,
+        txOptions.timeoutMs
       );
     });
   });

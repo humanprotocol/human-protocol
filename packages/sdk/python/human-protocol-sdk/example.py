@@ -10,86 +10,94 @@ from human_protocol_sdk.filter import (
     StatisticsFilter,
     WorkerFilter,
     StakersFilter,
+    TransactionFilter,
 )
 from human_protocol_sdk.statistics import (
-    StatisticsClient,
+    StatisticsUtils,
     HMTHoldersParam,
 )
 from human_protocol_sdk.operator import OperatorUtils, OperatorFilter
-from human_protocol_sdk.agreement import agreement
 from human_protocol_sdk.staking.staking_utils import StakingUtils
+from human_protocol_sdk.transaction import TransactionUtils
 from human_protocol_sdk.utils import SubgraphOptions
 
 
-def get_escrow_statistics(statistics_client: StatisticsClient):
-    print(statistics_client.get_escrow_statistics())
+def get_escrow_statistics():
+    print(StatisticsUtils.get_escrow_statistics(ChainId.POLYGON_AMOY))
     print(
-        statistics_client.get_escrow_statistics(
+        StatisticsUtils.get_escrow_statistics(
+            ChainId.POLYGON_AMOY,
             StatisticsFilter(
                 date_from=datetime.datetime(2023, 5, 8),
                 date_to=datetime.datetime(2023, 6, 8),
-            )
+            ),
         )
     )
 
 
-def get_worker_statistics(statistics_client: StatisticsClient):
-    print(statistics_client.get_worker_statistics())
+def get_worker_statistics():
+    print(StatisticsUtils.get_worker_statistics(ChainId.POLYGON_AMOY))
     print(
-        statistics_client.get_worker_statistics(
+        StatisticsUtils.get_worker_statistics(
+            ChainId.POLYGON_AMOY,
             StatisticsFilter(
                 date_from=datetime.datetime(2023, 5, 8),
                 date_to=datetime.datetime(2023, 6, 8),
-            )
+            ),
         )
     )
 
 
-def get_payment_statistics(statistics_client: StatisticsClient):
-    print(statistics_client.get_payment_statistics())
+def get_payment_statistics():
+    print(StatisticsUtils.get_payment_statistics(ChainId.POLYGON_AMOY))
     print(
-        statistics_client.get_payment_statistics(
+        StatisticsUtils.get_payment_statistics(
+            ChainId.POLYGON_AMOY,
             StatisticsFilter(
                 date_from=datetime.datetime(2023, 5, 8),
                 date_to=datetime.datetime(2023, 6, 8),
-            )
+            ),
         )
     )
 
 
-def get_hmt_statistics(statistics_client: StatisticsClient):
-    print(statistics_client.get_hmt_statistics())
+def get_hmt_statistics():
+    print(StatisticsUtils.get_hmt_statistics(ChainId.POLYGON_AMOY))
 
 
-def get_hmt_holders(statistics_client: StatisticsClient):
+def get_hmt_holders():
     print(
-        statistics_client.get_hmt_holders(
+        StatisticsUtils.get_hmt_holders(
+            ChainId.POLYGON_AMOY,
             HMTHoldersParam(
                 order_direction="desc",
-            )
+            ),
         )
     )
     print(
-        statistics_client.get_hmt_holders(
+        StatisticsUtils.get_hmt_holders(
+            ChainId.POLYGON_AMOY,
             HMTHoldersParam(
                 order_direction="asc",
-            )
+            ),
         )
     )
     print(
-        statistics_client.get_hmt_holders(
-            HMTHoldersParam(address="0xf183b3b34e70dd17859455389a3ab54d49d41e6f")
+        StatisticsUtils.get_hmt_holders(
+            ChainId.POLYGON_AMOY,
+            HMTHoldersParam(address="0xf183b3b34e70dd17859455389a3ab54d49d41e6f"),
         )
     )
 
 
-def get_hmt_daily_data(statistics_client: StatisticsClient):
+def get_hmt_daily_data():
     print(
-        statistics_client.get_hmt_daily_data(
+        StatisticsUtils.get_hmt_daily_data(
+            ChainId.POLYGON_AMOY,
             StatisticsFilter(
                 date_from=datetime.datetime(2024, 5, 8),
                 date_to=datetime.datetime(2024, 6, 8),
-            )
+            ),
         )
     )
 
@@ -216,18 +224,6 @@ def get_workers():
     print(len(workers))
 
 
-def agreement_example():
-    annotations = [
-        ["cat", "not", "cat"],
-        ["cat", "cat", "cat"],
-        ["not", "not", "not"],
-        ["cat", "nan", "not"],
-    ]
-
-    agreement_report = agreement(annotations, measure="fleiss_kappa")
-    print(agreement_report)
-
-
 def get_stakers_example():
     stakers = StakingUtils.get_stakers(
         StakersFilter(
@@ -246,8 +242,18 @@ def get_stakers_example():
         print("No stakers found.")
 
 
+def get_transactions_example():
+    first_page = TransactionUtils.get_transactions(
+        TransactionFilter(
+            chain_id=ChainId.POLYGON_AMOY,
+            from_address="0xF3D9a0ba9FA14273C515e519DFD0826Ff87d5164",
+            start_block=6282708,
+        )
+    )
+    print("Fetched", len(first_page), "transactions with start block")
+
+
 if __name__ == "__main__":
-    statistics_client = StatisticsClient()
 
     # Run single example while testing, and remove comments before commit
 
@@ -255,15 +261,13 @@ if __name__ == "__main__":
     get_operators()
     get_payouts()
     get_cancellation_refunds()
+    get_hmt_holders()
+    get_escrow_statistics()
+    get_hmt_statistics()
+    get_payment_statistics()
+    get_worker_statistics()
+    get_hmt_daily_data()
 
-    statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
-    get_hmt_holders(statistics_client)
-    get_escrow_statistics(statistics_client)
-    get_hmt_statistics(statistics_client)
-    get_payment_statistics(statistics_client)
-    get_worker_statistics(statistics_client)
-    get_hmt_daily_data(statistics_client)
-
-    agreement_example()
     get_workers()
     get_stakers_example()
+    get_transactions_example()

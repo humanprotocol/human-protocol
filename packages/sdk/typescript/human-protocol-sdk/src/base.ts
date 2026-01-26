@@ -1,5 +1,10 @@
-import { ContractRunner } from 'ethers';
-import { NetworkData } from './types';
+import {
+  ContractRunner,
+  ContractTransactionReceipt,
+  ContractTransactionResponse,
+  Overrides,
+} from 'ethers';
+import { NetworkData, TransactionOverrides, WaitOptions } from './types';
 
 /**
  * Base class for clients making on-chain calls.
@@ -19,5 +24,36 @@ export abstract class BaseEthersClient {
   constructor(runner: ContractRunner, networkData: NetworkData) {
     this.networkData = networkData;
     this.runner = runner;
+  }
+
+  protected normalizeTxOptions(
+    txOptions?: TransactionOverrides
+  ): [Overrides, WaitOptions] {
+    const options = txOptions ?? {};
+    const {
+      confirmations: waitConfirmations,
+      timeoutMs: waitTimeoutMs,
+      ...overrides
+    } = options;
+
+    const waitOptions: WaitOptions = {
+      confirmations: waitConfirmations,
+      timeoutMs: waitTimeoutMs,
+    };
+
+    return [overrides as Overrides, waitOptions];
+  }
+
+  protected async sendTxAndWait(
+    executeTx: (overrides: Overrides) => Promise<ContractTransactionResponse>,
+    txOptions?: TransactionOverrides
+  ): Promise<ContractTransactionReceipt | null> {
+    const [overrides, waitOptions] = this.normalizeTxOptions(txOptions);
+    const transactionResponse = await executeTx(overrides);
+
+    return transactionResponse.wait(
+      waitOptions.confirmations,
+      waitOptions.timeoutMs
+    );
   }
 }

@@ -247,3 +247,6 @@ class KVStoreKeys(Enum):
 
 ESCROW_BULK_PAYOUT_MAX_ITEMS = 99
 """Maximum number of recipients allowed in a single bulk payout transaction."""
+
+DEFAULT_CONFIRMATION_POLL_INTERVAL = 4
+"""Default interval (in seconds) between polling attempts for transaction confirmation."""

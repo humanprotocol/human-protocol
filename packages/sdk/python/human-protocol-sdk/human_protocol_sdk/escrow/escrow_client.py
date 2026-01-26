@@ -43,7 +43,7 @@ Examples:
 """
 
 import logging
-from typing import Optional, List, Union
+from typing import Any, List, Optional, Tuple, Union
 
 from human_protocol_sdk.constants import (
     ESCROW_BULK_PAYOUT_MAX_ITEMS,
@@ -52,17 +52,19 @@ from human_protocol_sdk.constants import (
     Status,
 )
 from human_protocol_sdk.utils import (
+    TransactionOptions,
     get_escrow_interface,
     get_factory_interface,
     get_erc20_interface,
     handle_error,
+    transact_and_wait,
     validate_json,
+    validate_url,
 )
 from web3 import Web3, contract
 from web3.middleware import ExtraDataToPOAMiddleware
 from web3.types import TxParams
 
-from human_protocol_sdk.utils import validate_url
 from human_protocol_sdk.decorators import requires_signer
 
 LOG = logging.getLogger("human_protocol_sdk.escrow")
@@ -221,14 +223,14 @@ class EscrowClient:
         self,
         token_address: str,
         job_requester_id: str,
-        tx_options: Optional[TxParams] = None,
+        tx_options: Optional[TransactionOptions] = None,
     ) -> str:
         """Create a new escrow contract.
 
         Args:
             token_address (str): ERC-20 token address to fund the escrow.
             job_requester_id (str): Off-chain identifier for the job requester.
-            tx_options (Optional[TxParams]): Optional transaction parameters such as gas limit.
+            tx_options (Optional[TransactionOptions]): Optional transaction parameters such as gas limit.
 
         Returns:
             Address of the newly created escrow contract.
@@ -248,10 +250,14 @@ class EscrowClient:
             raise EscrowClientError(f"Invalid token address: {token_address}")
 
         try:
-            tx_hash = self.factory_contract.functions.createEscrow(
-                token_address, job_requester_id
-            ).transact(tx_options)
-            receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash)
+            receipt = transact_and_wait(
+                self.w3,
+                self.factory_contract.functions.createEscrow(
+                    token_address, job_requester_id
+                ),
+                tx_options,
+                EscrowClientError,
+            )
             event = next(
                 (
                     self.factory_contract.events.LaunchedV2().process_log(log)
@@ -271,7 +277,7 @@ class EscrowClient:
         amount: int,
         job_requester_id: str,
         escrow_config: EscrowConfig,
-        tx_options: Optional[TxParams] = None,
+        tx_options: Optional[TransactionOptions] = None,
     ) -> str:
         """Create, fund, and configure an escrow in a single transaction.
 
@@ -284,7 +290,7 @@ class EscrowClient:
             job_requester_id (str): Off-chain identifier for the job requester.
             escrow_config (EscrowConfig): Escrow configuration parameters including
                 oracle addresses, fees, and manifest data.
-            tx_options (Optional[TxParams]): Optional transaction parameters such as gas limit.
+            tx_options (Optional[TransactionOptions]): Optional transaction parameters such as gas limit.
 
         Returns:
             Address of the newly created and configured escrow contract.
@@ -306,20 +312,24 @@ class EscrowClient:
             raise EscrowClientError(f"Invalid token address: {token_address}")
 
         try:
-            tx_hash = self.factory_contract.functions.createFundAndSetupEscrow(
-                token_address,
-                amount,
-                job_requester_id,
-                escrow_config.reputation_oracle_address,
-                escrow_config.recording_oracle_address,
-                escrow_config.exchange_oracle_address,
-                escrow_config.reputation_oracle_fee,
-                escrow_config.recording_oracle_fee,
-                escrow_config.exchange_oracle_fee,
-                escrow_config.manifest,
-                escrow_config.hash,
-            ).transact(tx_options)
-            receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash)
+            receipt = transact_and_wait(
+                self.w3,
+                self.factory_contract.functions.createFundAndSetupEscrow(
+                    token_address,
+                    amount,
+                    job_requester_id,
+                    escrow_config.reputation_oracle_address,
+                    escrow_config.recording_oracle_address,
+                    escrow_config.exchange_oracle_address,
+                    escrow_config.reputation_oracle_fee,
+                    escrow_config.recording_oracle_fee,
+                    escrow_config.exchange_oracle_fee,
+                    escrow_config.manifest,
+                    escrow_config.hash,
+                ),
+                tx_options,
+                EscrowClientError,
+            )
             event = next(
                 (
                     self.factory_contract.events.LaunchedV2().process_log(log)
@@ -337,7 +347,7 @@ class EscrowClient:
         self,
         escrow_address: str,
         escrow_config: EscrowConfig,
-        tx_options: Optional[TxParams] = None,
+        tx_options: Optional[TransactionOptions] = None,
     ) -> None:
         """Set escrow roles, fees, and manifest metadata.
 
@@ -347,7 +357,7 @@ class EscrowClient:
             escrow_address (str): Address of the escrow contract to configure.
             escrow_config (EscrowConfig): Escrow configuration parameters including
                 oracle addresses, fees, and manifest data.
-            tx_options (Optional[TxParams]): Optional transaction parameters such as gas limit.
+            tx_options (Optional[TransactionOptions]): Optional transaction parameters such as gas limit.
 
         Returns:
             None
@@ -364,9 +374,9 @@ class EscrowClient:
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
 
         try:
-            tx_hash = (
-                self._get_escrow_contract(escrow_address)
-                .functions.setup(
+            transact_and_wait(
+                self.w3,
+                self._get_escrow_contract(escrow_address).functions.setup(
                     escrow_config.reputation_oracle_address,
                     escrow_config.recording_oracle_address,
                     escrow_config.exchange_oracle_address,
@@ -375,10 +385,10 @@ class EscrowClient:
                     escrow_config.exchange_oracle_fee,
                     escrow_config.manifest,
                     escrow_config.hash,
-                )
-                .transact(tx_options)
+                ),
+                tx_options,
+                EscrowClientError,
             )
-            self.w3.eth.wait_for_transaction_receipt(tx_hash)
         except Exception as e:
             handle_error(e, EscrowClientError)
 
@@ -387,7 +397,7 @@ class EscrowClient:
         self,
         escrow_address: str,
         amount: int,
-        tx_options: Optional[TxParams] = None,
+        tx_options: Optional[TransactionOptions] = None,
     ) -> None:
         """Add funds to the escrow.
 
@@ -396,7 +406,7 @@ class EscrowClient:
         Args:
             escrow_address (str): Address of the escrow to fund.
             amount (int): Amount of tokens to transfer (must be positive, in token's smallest unit).
-            tx_options (Optional[TxParams]): Optional transaction parameters such as gas limit.
+            tx_options (Optional[TransactionOptions]): Optional transaction parameters such as gas limit.
 
         Returns:
             None
@@ -420,10 +430,12 @@ class EscrowClient:
         token_contract = self.w3.eth.contract(token_address, abi=erc20_interface["abi"])
 
         try:
-            tx_hash = token_contract.functions.transfer(
-                escrow_address, amount
-            ).transact(tx_options)
-            self.w3.eth.wait_for_transaction_receipt(tx_hash)
+            transact_and_wait(
+                self.w3,
+                token_contract.functions.transfer(escrow_address, amount),
+                tx_options,
+                EscrowClientError,
+            )
         except Exception as e:
             handle_error(e, EscrowClientError)
 
@@ -434,7 +446,7 @@ class EscrowClient:
         url: str,
         hash: str,
         funds_to_reserve: Optional[int] = None,
-        tx_options: Optional[TxParams] = None,
+        tx_options: Optional[TransactionOptions] = None,
     ) -> None:
         """Store results URL and hash, with optional funds reservation.
 
@@ -447,7 +459,7 @@ class EscrowClient:
             hash (str): Results file hash.
             funds_to_reserve (Optional[int]): Optional funds to reserve for payouts.
                 If None, uses legacy signature without reservation.
-            tx_options (Optional[TxParams]): Optional transaction parameters such as gas limit.
+            tx_options (Optional[TransactionOptions]): Optional transaction parameters such as gas limit.
 
         Returns:
             None
@@ -481,15 +493,17 @@ class EscrowClient:
 
         contract = self._get_escrow_contract(escrow_address)
         try:
-            if funds_to_reserve is not None:
-                tx_hash = contract.functions.storeResults(
-                    url, hash, funds_to_reserve
-                ).transact(tx_options)
-            else:
-                tx_hash = contract.functions.storeResults(url, hash).transact(
-                    tx_options
-                )
-            self.w3.eth.wait_for_transaction_receipt(tx_hash)
+            contract_function = (
+                contract.functions.storeResults(url, hash, funds_to_reserve)
+                if funds_to_reserve is not None
+                else contract.functions.storeResults(url, hash)
+            )
+            transact_and_wait(
+                self.w3,
+                contract_function,
+                tx_options,
+                EscrowClientError,
+            )
         except Exception as e:
             error_text = str(e) or ""
             if "DEPRECATED_SIGNATURE" in error_text and funds_to_reserve is None:
@@ -504,7 +518,7 @@ class EscrowClient:
 
     @requires_signer
     def complete(
-        self, escrow_address: str, tx_options: Optional[TxParams] = None
+        self, escrow_address: str, tx_options: Optional[TransactionOptions] = None
     ) -> None:
         """Set the status of an escrow to completed.
 
@@ -512,7 +526,7 @@ class EscrowClient:
 
         Args:
             escrow_address (str): Address of the escrow to complete.
-            tx_options (Optional[TxParams]): Optional transaction parameters such as gas limit.
+            tx_options (Optional[TransactionOptions]): Optional transaction parameters such as gas limit.
 
         Returns:
             None
@@ -529,12 +543,12 @@ class EscrowClient:
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
 
         try:
-            tx_hash = (
-                self._get_escrow_contract(escrow_address)
-                .functions.complete()
-                .transact(tx_options)
+            transact_and_wait(
+                self.w3,
+                self._get_escrow_contract(escrow_address).functions.complete(),
+                tx_options,
+                EscrowClientError,
             )
-            self.w3.eth.wait_for_transaction_receipt(tx_hash)
         except Exception as e:
             handle_error(e, EscrowClientError)
 
@@ -548,7 +562,7 @@ class EscrowClient:
         final_results_hash: str,
         payout_id: Union[str, int],
         force_complete: bool,
-        tx_options: Optional[TxParams] = None,
+        tx_options: Optional[TransactionOptions] = None,
     ) -> None:
         """Distribute payouts to recipients and set final results.
 
@@ -564,7 +578,7 @@ class EscrowClient:
             payout_id (Union[str, int]): Payout identifier. String for newer contracts,
                 integer transaction ID for older contracts.
             force_complete (bool): Whether to force completion after payout (if supported).
-            tx_options (Optional[TxParams]): Optional transaction parameters such as gas limit.
+            tx_options (Optional[TransactionOptions]): Optional transaction parameters such as gas limit.
 
         Returns:
             None
@@ -591,26 +605,31 @@ class EscrowClient:
 
         contract = self._get_escrow_contract(escrow_address)
         try:
-            if isinstance(payout_id, str):
-                tx_hash = contract.functions.bulkPayOut(
+            bulk_function = (
+                contract.functions.bulkPayOut(
                     recipients,
                     amounts,
                     final_results_url,
                     final_results_hash,
                     payout_id,
                     force_complete,
-                ).transact(tx_options)
-            else:
-                tx_id = payout_id
-                tx_hash = contract.functions.bulkPayOut(
+                )
+                if isinstance(payout_id, str)
+                else contract.functions.bulkPayOut(
                     recipients,
                     amounts,
                     final_results_url,
                     final_results_hash,
-                    tx_id,
+                    payout_id,
                     force_complete,
-                ).transact(tx_options)
-            self.w3.eth.wait_for_transaction_receipt(tx_hash)
+                )
+            )
+            transact_and_wait(
+                self.w3,
+                bulk_function,
+                tx_options,
+                EscrowClientError,
+            )
         except Exception as e:
             error_text = str(e) or ""
             if "DEPRECATED_SIGNATURE" in error_text and not isinstance(payout_id, str):
@@ -770,7 +789,7 @@ class EscrowClient:
 
     @requires_signer
     def request_cancellation(
-        self, escrow_address: str, tx_options: Optional[TxParams] = None
+        self, escrow_address: str, tx_options: Optional[TransactionOptions] = None
     ) -> None:
         """Request cancellation of the specified escrow.
 
@@ -779,7 +798,7 @@ class EscrowClient:
 
         Args:
             escrow_address (str): Address of the escrow to request cancellation.
-            tx_options (Optional[TxParams]): Optional transaction parameters such as gas limit.
+            tx_options (Optional[TransactionOptions]): Optional transaction parameters such as gas limit.
 
         Returns:
             None
@@ -798,18 +817,20 @@ class EscrowClient:
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
 
         try:
-            tx_hash = (
-                self._get_escrow_contract(escrow_address)
-                .functions.requestCancellation()
-                .transact(tx_options)
+            transact_and_wait(
+                self.w3,
+                self._get_escrow_contract(
+                    escrow_address
+                ).functions.requestCancellation(),
+                tx_options,
+                EscrowClientError,
             )
-            self.w3.eth.wait_for_transaction_receipt(tx_hash)
         except Exception as e:
             handle_error(e, EscrowClientError)
 
     @requires_signer
     def cancel(
-        self, escrow_address: str, tx_options: Optional[TxParams] = None
+        self, escrow_address: str, tx_options: Optional[TransactionOptions] = None
     ) -> EscrowCancel:
         """Cancel the specified escrow and refund the balance.
 
@@ -817,7 +838,7 @@ class EscrowClient:
 
         Args:
             escrow_address (str): Address of the escrow to cancel.
-            tx_options (Optional[TxParams]): Optional transaction parameters such as gas limit.
+            tx_options (Optional[TransactionOptions]): Optional transaction parameters such as gas limit.
 
         Returns:
             Cancellation details including transaction hash and refunded amount.
@@ -836,12 +857,12 @@ class EscrowClient:
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
 
         try:
-            tx_hash = (
-                self._get_escrow_contract(escrow_address)
-                .functions.cancel()
-                .transact(tx_options)
+            transact_and_wait(
+                self.w3,
+                self._get_escrow_contract(escrow_address).functions.cancel(),
+                tx_options,
+                EscrowClientError,
             )
-            self.w3.eth.wait_for_transaction_receipt(tx_hash)
         except Exception as e:
             handle_error(e, EscrowClientError)
 
@@ -850,7 +871,7 @@ class EscrowClient:
         self,
         escrow_address: str,
         token_address: str,
-        tx_options: Optional[TxParams] = None,
+        tx_options: Optional[TransactionOptions] = None,
     ) -> EscrowWithdraw:
         """Withdraw additional tokens from the escrow.
 
@@ -860,7 +881,7 @@ class EscrowClient:
         Args:
             escrow_address (str): Address of the escrow to withdraw from.
             token_address (str): Address of the token to withdraw.
-            tx_options (Optional[TxParams]): Optional transaction parameters such as gas limit.
+            tx_options (Optional[TransactionOptions]): Optional transaction parameters such as gas limit.
 
         Returns:
             Withdrawal details including transaction hash, token address, and amount.
@@ -884,12 +905,14 @@ class EscrowClient:
             raise EscrowClientError(f"Invalid token address: {token_address}")
 
         try:
-            tx_hash = (
-                self._get_escrow_contract(escrow_address)
-                .functions.withdraw(token_address)
-                .transact(tx_options)
+            receipt = transact_and_wait(
+                self.w3,
+                self._get_escrow_contract(escrow_address).functions.withdraw(
+                    token_address
+                ),
+                tx_options,
+                EscrowClientError,
             )
-            receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash)
 
             amount_transferred = None
             erc20_interface = get_erc20_interface()

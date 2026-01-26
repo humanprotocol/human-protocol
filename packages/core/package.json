@@ -82,7 +82,7 @@
     "openpgp": "6.2.2",
     "prettier": "^3.7.4",
     "prettier-plugin-solidity": "^1.3.1",
-    "solidity-coverage": "^0.8.16",
+    "solidity-coverage": "^0.8.17",
     "tenderly": "^0.9.1",
     "ts-node": "^10.9.2",
     "typechain": "^8.3.2",

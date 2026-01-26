@@ -56,7 +56,7 @@
     "pg": "8.13.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.2.0",
-    "typeorm": "^0.3.25",
+    "typeorm": "^0.3.28",
     "typeorm-naming-strategies": "^4.1.0"
   },
   "devDependencies": {

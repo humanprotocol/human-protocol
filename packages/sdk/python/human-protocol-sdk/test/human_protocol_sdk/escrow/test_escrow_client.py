@@ -2,14 +2,14 @@ import unittest
 from datetime import datetime
 from test.human_protocol_sdk.utils import DEFAULT_GAS_PAYER_PRIV
 from types import SimpleNamespace
-from unittest.mock import ANY, MagicMock, PropertyMock, patch
+from unittest.mock import MagicMock, PropertyMock, patch
 
 from human_protocol_sdk.constants import NETWORKS, ChainId, Status
 from human_protocol_sdk.decorators import RequiresSignerError
 from human_protocol_sdk.escrow import EscrowClient, EscrowClientError, EscrowConfig
 from human_protocol_sdk.filter import EscrowFilter, FilterError
+from human_protocol_sdk.utils import WaitOptions
 from web3 import Web3
-from web3.constants import ADDRESS_ZERO
 from web3.middleware import SignAndSendRawMiddlewareBuilder
 from web3.providers.rpc import HTTPProvider
 
@@ -32,6 +32,49 @@ class TestEscrowClient(unittest.TestCase):
         type(self.w3.eth).chain_id = PropertyMock(return_value=self.mock_chain_id)
 
         self.escrow = EscrowClient(self.w3)
+        self.escrow.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": []}
+        )
+
+        self._wait_receipt_patcher = patch(
+            "human_protocol_sdk.utils.wait_for_transaction_receipt_with_confirmations"
+        )
+        self.wait_for_receipt_mock = self._wait_receipt_patcher.start()
+
+        def passthrough_wait(w3, tx_hash, wait_options, error_class, *args, **kwargs):
+            return w3.eth.wait_for_transaction_receipt(tx_hash)
+
+        self.wait_for_receipt_mock.side_effect = passthrough_wait
+        self.addCleanup(self._wait_receipt_patcher.stop)
+
+    def assert_wait_called_once_with(
+        self,
+        tx_hash="tx_hash",
+        confirmations=None,
+        timeout_ms=None,
+    ):
+        self.wait_for_receipt_mock.assert_called_once()
+        args, _ = self.wait_for_receipt_mock.call_args
+        self.assertIs(args[0], self.escrow.w3)
+        self.assertEqual(args[1], tx_hash)
+        wait_options = args[2]
+        self.assertIsInstance(wait_options, WaitOptions)
+        if confirmations is None:
+            self.assertIsNone(wait_options.confirmations)
+        else:
+            self.assertEqual(wait_options.confirmations, confirmations)
+        if timeout_ms is None:
+            self.assertIsNone(wait_options.timeout_ms)
+        else:
+            self.assertEqual(wait_options.timeout_ms, timeout_ms)
+        self.assertIs(args[3], EscrowClientError)
+
+    def _wait_tx_options(self):
+        return {
+            "gas": 50000,
+            "confirmations": 3,
+            "timeout_ms": 60000,
+        }
 
     def test_init_with_valid_inputs(self):
         mock_provider = MagicMock(spec=HTTPProvider)
@@ -388,6 +431,7 @@ class TestEscrowClient(unittest.TestCase):
         self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
+        self.assert_wait_called_once_with()
         self.assertEqual(result, escrow_address)
 
     def test_create_escrow_invalid_token(self):
@@ -445,6 +489,45 @@ class TestEscrowClient(unittest.TestCase):
         mock_create.transact.assert_called_once_with(tx_options)
         self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
+        )
+        self.assert_wait_called_once_with()
+        self.assertEqual(result, escrow_address)
+
+    def test_create_escrow_with_wait_options(self):
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        token_address = "0x1234567890123456789012345678901234567890"
+        job_requester_id = "job-requester"
+        tx_options = self._wait_tx_options()
+
+        mock_create = MagicMock()
+        mock_create.transact.return_value = "tx_hash"
+        self.escrow.factory_contract.functions.createEscrow = MagicMock(
+            return_value=mock_create
+        )
+        mock_event = MagicMock()
+        mock_event.args.escrow = escrow_address
+        mock_events = MagicMock()
+        mock_events.LaunchedV2().process_log.return_value = mock_event
+        self.escrow.factory_contract.events = mock_events
+        self.escrow.network["factory_address"] = (
+            "0x1234567890123456789012345678901234567890"
+        )
+        self.escrow.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": [{"address": self.escrow.network["factory_address"]}]}
+        )
+
+        result = self.escrow.create_escrow(token_address, job_requester_id, tx_options)
+
+        self.escrow.factory_contract.functions.createEscrow.assert_called_once_with(
+            token_address, job_requester_id
+        )
+        mock_create.transact.assert_called_once_with({"gas": tx_options["gas"]})
+        self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
+            "tx_hash"
+        )
+        self.assert_wait_called_once_with(
+            confirmations=tx_options["confirmations"],
+            timeout_ms=tx_options["timeout_ms"],
         )
         self.assertEqual(result, escrow_address)
 
@@ -504,6 +587,7 @@ class TestEscrowClient(unittest.TestCase):
         self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
+        self.assert_wait_called_once_with()
         self.assertEqual(result, escrow_address)
 
     def test_create_fund_and_setup_escrow_invalid_token(self):
@@ -611,6 +695,69 @@ class TestEscrowClient(unittest.TestCase):
         self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
+        self.assert_wait_called_once_with()
+        self.assertEqual(result, escrow_address)
+
+    def test_create_fund_and_setup_escrow_with_wait_options(self):
+        mock_create = MagicMock()
+        mock_create.transact.return_value = "tx_hash"
+        self.escrow.factory_contract.functions.createFundAndSetupEscrow = MagicMock(
+            return_value=mock_create
+        )
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        token_address = "0x1234567890123456789012345678901234567890"
+        job_requester_id = "job-requester"
+        amount = 1000
+        tx_options = self._wait_tx_options()
+
+        mock_event = MagicMock()
+        mock_event.args.escrow = escrow_address
+        mock_events = MagicMock()
+        mock_events.LaunchedV2().process_log.return_value = mock_event
+        self.escrow.factory_contract.events = mock_events
+        self.escrow.network["factory_address"] = (
+            "0x1234567890123456789012345678901234567890"
+        )
+        self.escrow.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": [{"address": self.escrow.network["factory_address"]}]}
+        )
+
+        escrow_config = EscrowConfig(
+            "0x1234567890123456789012345678901234567890",
+            "0x1234567890123456789012345678901234567890",
+            "0x1234567890123456789012345678901234567890",
+            10,
+            10,
+            10,
+            "https://www.example.com/manifest",
+            "hashvalue",
+        )
+
+        result = self.escrow.create_fund_and_setup_escrow(
+            token_address, amount, job_requester_id, escrow_config, tx_options
+        )
+
+        self.escrow.factory_contract.functions.createFundAndSetupEscrow.assert_called_once_with(
+            token_address,
+            amount,
+            job_requester_id,
+            escrow_config.reputation_oracle_address,
+            escrow_config.recording_oracle_address,
+            escrow_config.exchange_oracle_address,
+            escrow_config.reputation_oracle_fee,
+            escrow_config.recording_oracle_fee,
+            escrow_config.exchange_oracle_fee,
+            escrow_config.manifest,
+            escrow_config.hash,
+        )
+        mock_create.transact.assert_called_once_with({"gas": tx_options["gas"]})
+        self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
+            "tx_hash"
+        )
+        self.assert_wait_called_once_with(
+            confirmations=tx_options["confirmations"],
+            timeout_ms=tx_options["timeout_ms"],
+        )
         self.assertEqual(result, escrow_address)
 
     def test_setup(self):
@@ -651,6 +798,7 @@ class TestEscrowClient(unittest.TestCase):
         self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
+        self.assert_wait_called_once_with()
 
     def test_setup_invalid_address(self):
         escrow_address = "test"
@@ -808,6 +956,51 @@ class TestEscrowClient(unittest.TestCase):
         self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
+        self.assert_wait_called_once_with()
+
+    def test_setup_with_wait_options(self):
+        mock_contract = MagicMock()
+        mock_setup = MagicMock()
+        mock_setup.transact.return_value = "tx_hash"
+        mock_contract.functions.setup = MagicMock(return_value=mock_setup)
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
+        self.escrow.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": []}
+        )
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        escrow_config = EscrowConfig(
+            "0x1234567890123456789012345678901234567890",
+            "0x1234567890123456789012345678901234567890",
+            "0x1234567890123456789012345678901234567890",
+            10,
+            10,
+            10,
+            "https://www.example.com/result",
+            "test",
+        )
+        tx_options = self._wait_tx_options()
+
+        self.escrow.setup(escrow_address, escrow_config, tx_options)
+
+        self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
+        mock_contract.functions.setup.assert_called_once_with(
+            escrow_config.reputation_oracle_address,
+            escrow_config.recording_oracle_address,
+            escrow_config.exchange_oracle_address,
+            escrow_config.reputation_oracle_fee,
+            escrow_config.recording_oracle_fee,
+            escrow_config.exchange_oracle_fee,
+            escrow_config.manifest,
+            escrow_config.hash,
+        )
+        mock_setup.transact.assert_called_once_with({"gas": tx_options["gas"]})
+        self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
+            "tx_hash"
+        )
+        self.assert_wait_called_once_with(
+            confirmations=tx_options["confirmations"],
+            timeout_ms=tx_options["timeout_ms"],
+        )
 
     def test_fund(self):
         escrow_address = token_address = "0x1234567890123456789012345678901234567890"
@@ -832,6 +1025,7 @@ class TestEscrowClient(unittest.TestCase):
         self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
+        self.assert_wait_called_once_with()
 
     def test_fund_invalid_address(self):
         escrow_address = "invalid_address"
@@ -891,6 +1085,36 @@ class TestEscrowClient(unittest.TestCase):
         self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
+        self.assert_wait_called_once_with()
+
+    def test_fund_with_wait_options(self):
+        escrow_address = token_address = "0x1234567890123456789012345678901234567890"
+        amount = 100
+        tx_options = self._wait_tx_options()
+        self.escrow.get_token_address = MagicMock(return_value=token_address)
+        mock_token_contract = MagicMock()
+        mock_transfer = MagicMock()
+        mock_transfer.transact.return_value = "tx_hash"
+        mock_token_contract.functions.transfer = MagicMock(return_value=mock_transfer)
+        self.escrow.w3.eth.contract = MagicMock(return_value=mock_token_contract)
+        self.escrow.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": []}
+        )
+
+        self.escrow.fund(escrow_address, amount, tx_options)
+
+        self.escrow.get_token_address.assert_called_once_with(escrow_address)
+        mock_token_contract.functions.transfer.assert_called_once_with(
+            escrow_address, amount
+        )
+        mock_transfer.transact.assert_called_once_with({"gas": tx_options["gas"]})
+        self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
+            "tx_hash"
+        )
+        self.assert_wait_called_once_with(
+            confirmations=tx_options["confirmations"],
+            timeout_ms=tx_options["timeout_ms"],
+        )
 
     def test_store_results(self):
         mock_contract = MagicMock()
@@ -913,6 +1137,7 @@ class TestEscrowClient(unittest.TestCase):
         self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
+        self.assert_wait_called_once_with()
 
     def test_store_results_invalid_address(self):
         escrow_address = "invalid_address"
@@ -1014,6 +1239,34 @@ class TestEscrowClient(unittest.TestCase):
         mock_store.transact.assert_called_once_with(tx_options)
         self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
+        )
+        self.assert_wait_called_once_with()
+
+    def test_store_results_with_wait_options(self):
+        mock_contract = MagicMock()
+        mock_store = MagicMock()
+        mock_store.transact.return_value = "tx_hash"
+        mock_contract.functions.storeResults = MagicMock(return_value=mock_store)
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
+        self.escrow.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": []}
+        )
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        url = "https://www.example.com/result"
+        hash = "test"
+        tx_options = self._wait_tx_options()
+
+        self.escrow.store_results(escrow_address, url, hash, tx_options=tx_options)
+
+        self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
+        mock_contract.functions.storeResults.assert_called_once_with(url, hash)
+        mock_store.transact.assert_called_once_with({"gas": tx_options["gas"]})
+        self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
+            "tx_hash"
+        )
+        self.assert_wait_called_once_with(
+            confirmations=tx_options["confirmations"],
+            timeout_ms=tx_options["timeout_ms"],
         )
 
     def test_store_results_with_funds_to_reserve_positive(self):
@@ -1123,6 +1376,7 @@ class TestEscrowClient(unittest.TestCase):
         self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
+        self.assert_wait_called_once_with()
 
     def test_bulk_payout_invalid_address(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
@@ -1394,6 +1648,54 @@ class TestEscrowClient(unittest.TestCase):
         self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
+        self.assert_wait_called_once_with()
+
+    def test_bulk_payout_with_wait_options(self):
+        mock_contract = MagicMock()
+        mock_bulk = MagicMock()
+        mock_bulk.transact.return_value = "tx_hash"
+        mock_contract.functions.bulkPayOut = MagicMock(return_value=mock_bulk)
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
+        self.escrow.get_balance = MagicMock(return_value=100)
+        self.escrow.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": []}
+        )
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        recipients = ["0x1234567890123456789012345678901234567890"]
+        amounts = [100]
+        final_results_url = "https://www.example.com/result"
+        final_results_hash = "test"
+        txId = 1
+        tx_options = self._wait_tx_options()
+
+        self.escrow.bulk_payout(
+            escrow_address,
+            recipients,
+            amounts,
+            final_results_url,
+            final_results_hash,
+            txId,
+            False,
+            tx_options=tx_options,
+        )
+
+        self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
+        mock_contract.functions.bulkPayOut.assert_called_once_with(
+            recipients,
+            amounts,
+            final_results_url,
+            final_results_hash,
+            txId,
+            False,
+        )
+        mock_bulk.transact.assert_called_once_with({"gas": tx_options["gas"]})
+        self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
+            "tx_hash"
+        )
+        self.assert_wait_called_once_with(
+            confirmations=tx_options["confirmations"],
+            timeout_ms=tx_options["timeout_ms"],
+        )
 
     def test_create_bulk_payout_transaction(self):
         mock_contract = MagicMock()
@@ -1584,6 +1886,7 @@ class TestEscrowClient(unittest.TestCase):
         self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
+        self.assert_wait_called_once_with()
 
     def test_complete_invalid_address(self):
         escrow_address = "invalid_address"
@@ -1656,6 +1959,32 @@ class TestEscrowClient(unittest.TestCase):
         mock_complete.transact.assert_called_once_with(tx_options)
         self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
+        )
+        self.assert_wait_called_once_with()
+
+    def test_complete_with_wait_options(self):
+        mock_contract = MagicMock()
+        mock_complete = MagicMock()
+        mock_complete.transact.return_value = "tx_hash"
+        mock_contract.functions.complete = MagicMock(return_value=mock_complete)
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
+        self.escrow.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": []}
+        )
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        tx_options = self._wait_tx_options()
+
+        self.escrow.complete(escrow_address, tx_options)
+
+        self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
+        mock_contract.functions.complete.assert_called_once_with()
+        mock_complete.transact.assert_called_once_with({"gas": tx_options["gas"]})
+        self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
+            "tx_hash"
+        )
+        self.assert_wait_called_once_with(
+            confirmations=tx_options["confirmations"],
+            timeout_ms=tx_options["timeout_ms"],
         )
 
     def test_request_cancellation(self):
@@ -1741,6 +2070,32 @@ class TestEscrowClient(unittest.TestCase):
         mock_request.transact.assert_called_once_with(tx_options)
         self.assertIsNone(result)
 
+    def test_request_cancellation_with_wait_options(self):
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        mock_contract = MagicMock()
+        mock_request = MagicMock()
+        mock_request.transact.return_value = "tx_hash"
+        mock_contract.functions.requestCancellation = MagicMock(
+            return_value=mock_request
+        )
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
+        self.escrow.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": []}
+        )
+        tx_options = self._wait_tx_options()
+
+        result = self.escrow.request_cancellation(escrow_address, tx_options)
+
+        mock_request.transact.assert_called_once_with({"gas": tx_options["gas"]})
+        self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
+            "tx_hash"
+        )
+        self.assert_wait_called_once_with(
+            confirmations=tx_options["confirmations"],
+            timeout_ms=tx_options["timeout_ms"],
+        )
+        self.assertIsNone(result)
+
     def test_cancel(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
 
@@ -1763,6 +2118,7 @@ class TestEscrowClient(unittest.TestCase):
         self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
+        self.assert_wait_called_once_with()
 
     def test_cancel_invalid_address(self):
         escrow_address = "invalid_address"
@@ -1838,6 +2194,34 @@ class TestEscrowClient(unittest.TestCase):
         self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
+        self.assert_wait_called_once_with()
+
+    def test_cancel_with_wait_options(self):
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        tx_options = self._wait_tx_options()
+
+        mock_contract = MagicMock()
+        mock_cancel = MagicMock()
+        mock_cancel.transact.return_value = "tx_hash"
+        mock_contract.functions.cancel = MagicMock(return_value=mock_cancel)
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
+        self.escrow.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value={"logs": []}
+        )
+
+        result = self.escrow.cancel(escrow_address, tx_options)
+
+        self.assertIsNone(result)
+        self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
+        mock_contract.functions.cancel.assert_called_once_with()
+        mock_cancel.transact.assert_called_once_with({"gas": tx_options["gas"]})
+        self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
+            "tx_hash"
+        )
+        self.assert_wait_called_once_with(
+            confirmations=tx_options["confirmations"],
+            timeout_ms=tx_options["timeout_ms"],
+        )
 
     def test_withdraw(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
@@ -1873,6 +2257,7 @@ class TestEscrowClient(unittest.TestCase):
         self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
         )
+        self.assert_wait_called_once_with()
         self.assertEqual(result.withdrawn_amount, amount_withdrawn)
         self.assertEqual(result.token_address, token_address)
         self.assertEqual(result.txHash, receipt["transactionHash"].hex())
@@ -1976,6 +2361,47 @@ class TestEscrowClient(unittest.TestCase):
         mock_withdraw.transact.assert_called_once_with(tx_options)
         self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
             "tx_hash"
+        )
+        self.assert_wait_called_once_with()
+        self.assertEqual(result.withdrawn_amount, amount_withdrawn)
+        self.assertEqual(result.token_address, token_address)
+        self.assertEqual(result.txHash, receipt["transactionHash"].hex())
+
+    def test_withdraw_with_wait_options(self):
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        token_address = "0x1234567890123456789012345678901234567891"
+        amount_withdrawn = 123
+        tx_options = self._wait_tx_options()
+
+        mock_contract = MagicMock()
+        mock_withdraw = MagicMock()
+        mock_withdraw.transact.return_value = "tx_hash"
+        mock_contract.functions.withdraw = MagicMock(return_value=mock_withdraw)
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
+
+        token_contract = MagicMock()
+        token_contract.events.Transfer().process_log.return_value = {
+            "event": "Transfer",
+            "args": {"from": escrow_address, "value": amount_withdrawn},
+        }
+        self.escrow.w3.eth.contract = MagicMock(return_value=token_contract)
+
+        receipt = {"transactionHash": b"tx_hash", "logs": [{"address": token_address}]}
+        self.escrow.w3.eth.wait_for_transaction_receipt = MagicMock(
+            return_value=receipt
+        )
+
+        result = self.escrow.withdraw(escrow_address, token_address, tx_options)
+
+        self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
+        mock_contract.functions.withdraw.assert_called_once_with(token_address)
+        mock_withdraw.transact.assert_called_once_with({"gas": tx_options["gas"]})
+        self.escrow.w3.eth.wait_for_transaction_receipt.assert_called_once_with(
+            "tx_hash"
+        )
+        self.assert_wait_called_once_with(
+            confirmations=tx_options["confirmations"],
+            timeout_ms=tx_options["timeout_ms"],
         )
         self.assertEqual(result.withdrawn_amount, amount_withdrawn)
         self.assertEqual(result.token_address, token_address)

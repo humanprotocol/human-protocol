@@ -25,7 +25,7 @@ import {
   ErrorUnsupportedChainID,
 } from '../src/error';
 import { KVStoreClient, KVStoreUtils } from '../src/kvstore';
-import { NetworkData } from '../src/types';
+import { NetworkData, TransactionOverrides } from '../src/types';
 import { DEFAULT_GAS_PAYER_PRIVKEY } from './utils/constants';
 import * as gqlFetch from 'graphql-request';
 import {
@@ -153,6 +153,24 @@ describe('KVStoreClient', () => {
       ).toBeUndefined();
       expect(setSpy).toHaveBeenCalledWith('key1', 'value1', txOptions);
     });
+
+    test('should forward wait options to wait when transaction overrides include wait parameters', async () => {
+      const waitSpy = vi.fn().mockResolvedValue(true);
+      mockKVStoreContract.set.mockImplementation(() => ({ wait: waitSpy }));
+
+      const txOptions: TransactionOverrides = {
+        gasLimit: 45000,
+        confirmations: 3,
+        timeoutMs: 5000,
+      };
+
+      await kvStoreClient.set('key1', 'value1', txOptions);
+
+      expect(waitSpy).toHaveBeenCalledWith(
+        txOptions.confirmations,
+        txOptions.timeoutMs
+      );
+    });
   });
 
   describe('setFileUrlAndHash', () => {
@@ -265,6 +283,30 @@ describe('KVStoreClient', () => {
         txOptions
       );
     });
+
+    test('should forward wait options when setting URL and hash with overrides', async () => {
+      const waitSpy = vi.fn().mockResolvedValue(true);
+      vi.spyOn(mockKVStoreContract, 'setBulk').mockImplementation(() => ({
+        wait: waitSpy,
+      }));
+
+      const txOptions: TransactionOverrides = {
+        gasLimit: 45000,
+        confirmations: 5,
+        timeoutMs: 7000,
+      };
+
+      await kvStoreClient.setFileUrlAndHash(
+        'https://example.com',
+        'url',
+        txOptions
+      );
+
+      expect(waitSpy).toHaveBeenCalledWith(
+        txOptions.confirmations,
+        txOptions.timeoutMs
+      );
+    });
   });
 
   describe('setBulk', () => {
@@ -347,6 +389,29 @@ describe('KVStoreClient', () => {
         ['key1', 'key2'],
         ['value1', 'value2'],
         txOptions
+      );
+    });
+
+    test('should forward wait options when calling setBulk with overrides', async () => {
+      const waitSpy = vi.fn().mockResolvedValue(true);
+      vi.spyOn(mockKVStoreContract, 'setBulk').mockImplementation(() => ({
+        wait: waitSpy,
+      }));
+
+      const txOptions: TransactionOverrides = {
+        confirmations: 2,
+        timeoutMs: 4000,
+      };
+
+      await kvStoreClient.setBulk(
+        ['key1', 'key2'],
+        ['value1', 'value2'],
+        txOptions
+      );
+
+      expect(waitSpy).toHaveBeenCalledWith(
+        txOptions.confirmations,
+        txOptions.timeoutMs
       );
     });
   });

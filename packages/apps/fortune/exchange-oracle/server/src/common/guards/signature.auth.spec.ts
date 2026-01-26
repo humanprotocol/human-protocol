@@ -121,7 +121,9 @@ describe('SignatureAuthGuard', () => {
 
       const result = await guard.canActivate(context);
       expect(result).toBeTruthy();
-      expect(assignmentRepository.findOneById).toHaveBeenCalledWith(assignmentId);
+      expect(assignmentRepository.findOneById).toHaveBeenCalledWith(
+        assignmentId,
+      );
     });
 
     it('should throw BadRequest error if assignment id is not number', async () => {
