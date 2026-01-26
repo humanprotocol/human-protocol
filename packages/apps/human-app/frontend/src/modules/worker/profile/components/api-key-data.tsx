@@ -10,7 +10,11 @@ import {
 } from '../hooks/use-api-key-modals';
 import { useGetExchangeApiKeys } from '../../hooks/use-exchange-api-keys';
 
-export function ApiKeyData() {
+export function ApiKeyData({
+  stakingExchangeError,
+}: {
+  stakingExchangeError?: string;
+}) {
   const { isDarkMode } = useColorMode();
   const { t } = useTranslation();
   const { openModal: openEditApiKeyModal } = useEditApiKeyModal();
@@ -58,14 +62,14 @@ export function ApiKeyData() {
         </Typography>
         <Chip
           label={
-            isExchangeApiKeyError
+            isExchangeApiKeyError || stakingExchangeError
               ? t('worker.profile.apiKeyData.error')
               : exchangeApiKeyData?.exchange_name
                 ? t('worker.profile.apiKeyData.apiKeyConnected')
                 : t('worker.profile.apiKeyData.apiKeyNotConnected')
           }
           backgroundColor={
-            isExchangeApiKeyError
+            isExchangeApiKeyError || stakingExchangeError
               ? 'error.main'
               : exchangeApiKeyData?.exchange_name
                 ? 'success.main'
