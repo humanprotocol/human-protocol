@@ -9,7 +9,7 @@
     "@hcaptcha/react-hcaptcha": "^1.14.0",
     "@human-protocol/sdk": "workspace:*",
     "@mui/icons-material": "^7.0.1",
-    "@mui/lab": "^5.0.0-alpha.141",
+    "@mui/lab": "^6.0.0-dev.240424162023-9968b4889d",
     "@mui/material": "^5.16.7",
     "@mui/system": "^5.15.14",
     "@mui/x-date-pickers": "^7.23.6",
