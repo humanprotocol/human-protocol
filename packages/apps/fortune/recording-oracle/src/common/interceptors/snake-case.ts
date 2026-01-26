@@ -21,7 +21,13 @@ export class SnakeCaseInterceptor implements NestInterceptor {
     }
 
     if (request.query) {
-      request.query = transformKeysFromSnakeToCamel(request.query);
+      const transformedQuery = transformKeysFromSnakeToCamel(request.query);
+      Object.defineProperty(request, 'query', {
+        value: transformedQuery,
+        configurable: true,
+        enumerable: true,
+        writable: true,
+      });
     }
 
     return next

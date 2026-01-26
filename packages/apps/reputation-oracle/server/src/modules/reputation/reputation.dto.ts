@@ -32,9 +32,9 @@ export class GetReputationsQueryDto {
   address?: string;
 
   @ApiPropertyOptional({
-    type: [ReputationEntityType],
     enum: ReputationEntityType,
     name: 'roles',
+    isArray: true,
   })
   /**
    * NOTE: Order of decorators here matters

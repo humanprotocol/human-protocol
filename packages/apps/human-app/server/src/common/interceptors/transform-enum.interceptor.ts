@@ -3,12 +3,10 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
-  BadRequestException,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { plainToInstance, ClassConstructor } from 'class-transformer';
-import { validateSync } from 'class-validator';
 import 'reflect-metadata';
 
 @Injectable()
@@ -29,7 +27,13 @@ export class TransformEnumInterceptor implements NestInterceptor {
 
       // Transform and validate enums in the query (for GET requests)
       if (query) {
-        request.query = this.transformEnums(query, targetClass);
+        const transformedQuery = this.transformEnums(query, targetClass);
+        Object.defineProperty(request, 'query', {
+          value: transformedQuery,
+          configurable: true,
+          enumerable: true,
+          writable: true,
+        });
       }
     }
 
@@ -60,22 +64,13 @@ export class TransformEnumInterceptor implements NestInterceptor {
     targetClass: ClassConstructor<any>,
   ): any {
     // Convert the body or query to an instance of the target class
-    let transformedInstance = plainToInstance(targetClass, bodyOrQuery);
-
-    // Transform the enums before validation
-    transformedInstance = this.lowercaseEnumProperties(
+    const transformedInstance = this.lowercaseEnumProperties(
       bodyOrQuery,
-      transformedInstance,
+      plainToInstance(targetClass, bodyOrQuery),
       targetClass,
     );
 
-    // Validate the transformed data
-    const validationErrors = validateSync(transformedInstance);
-    if (validationErrors.length > 0) {
-      throw new BadRequestException('Validation failed');
-    }
-
-    return bodyOrQuery;
+    return transformedInstance;
   }
 
   private lowercaseEnumProperties(

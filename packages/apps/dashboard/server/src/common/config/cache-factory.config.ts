@@ -1,8 +1,8 @@
 import { CacheModuleAsyncOptions } from '@nestjs/common/cache';
 import { ConfigModule } from '@nestjs/config';
-import { redisStore } from 'cache-manager-redis-yet';
 import * as _ from 'lodash';
 
+import KeyvRedis, { Keyv } from '@keyv/redis';
 import logger from '../../logger';
 import { RedisConfigService } from './redis-config.service';
 
@@ -17,7 +17,7 @@ export const CacheFactoryConfig: CacheModuleAsyncOptions = {
   isGlobal: true,
   imports: [ConfigModule],
   useFactory: async (configService: RedisConfigService) => {
-    const store = await redisStore({
+    const redisAdapter = new KeyvRedis({
       socket: {
         host: configService.redisHost,
         port: configService.redisPort,
@@ -26,10 +26,17 @@ export const CacheFactoryConfig: CacheModuleAsyncOptions = {
       disableOfflineQueue: true,
     });
 
-    store.client.on('error', throttledRedisErrorLog);
+    redisAdapter.on('error', throttledRedisErrorLog);
+    redisAdapter.client.on?.('error', throttledRedisErrorLog);
+
+    const keyvStore = new Keyv({
+      store: redisAdapter,
+      namespace: undefined,
+      useKeyPrefix: false,
+    });
 
     return {
-      store: () => store,
+      stores: [keyvStore],
     };
   },
   inject: [RedisConfigService],
