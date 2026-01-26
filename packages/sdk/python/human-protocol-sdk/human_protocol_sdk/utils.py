@@ -308,9 +308,7 @@ def _fetch_subgraph_data(
     """
     subgraph_api_key = os.getenv("SUBGRAPH_API_KEY", "")
     if subgraph_api_key:
-        subgraph_url = network["subgraph_url_api_key"].replace(
-            SUBGRAPH_API_KEY_PLACEHOLDER, subgraph_api_key
-        )
+        subgraph_url = network["subgraph_url_api_key"]
     else:
         logger.warning(
             "Warning: SUBGRAPH_API_KEY is not provided. It might cause issues with the subgraph."

@@ -165,10 +165,6 @@ NETWORKS = {
 }
 
 
-SUBGRAPH_API_KEY_PLACEHOLDER = "[SUBGRAPH_API_KEY]"
-"""Placeholder string in subgraph URLs that gets replaced with the actual API key from environment variables."""
-
-
 class Status(Enum):
     """Escrow contract lifecycle statuses.
 
