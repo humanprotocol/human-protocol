@@ -21079,6 +21079,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "human-protocol@workspace:."
   dependencies:
+    "@changesets/changelog-git": "npm:^0.2.1"
     "@changesets/cli": "npm:^2.29.6"
     husky: "npm:^9.1.6"
     lint-staged: "npm:^16.2.7"

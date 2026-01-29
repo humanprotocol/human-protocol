@@ -4,7 +4,7 @@
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "changelog": false,
+  "changelog": "@changesets/changelog-git",
   "bumpVersionsWithWorkspaceProtocolOnly": true,
   "privatePackages": {
     "version": true,
