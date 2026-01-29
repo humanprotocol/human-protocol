@@ -7,7 +7,49 @@ if [ -z "$WORKSPACE_NAME" ]; then
   exit 1
 fi
 
+REPO_URL="https://github.com/humanprotocol/human-protocol.git"
+
+in_git_repo() { git rev-parse --is-inside-work-tree >/dev/null 2>&1; }
+has_origin()  { git remote get-url origin >/dev/null 2>&1; }
+
+# Branch name
+CURRENT_BRANCH="${CURRENT_BRANCH:-${GITHUB_REF_NAME:-${CI_COMMIT_REF_NAME:-${BITBUCKET_BRANCH:-${VERCEL_GIT_COMMIT_REF:-${HEAD:-${BRANCH:-}}}}}}}"
+if [ -z "$CURRENT_BRANCH" ] && in_git_repo; then
+  CURRENT_BRANCH="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")"
+fi
+[ -n "$CURRENT_BRANCH" ] || CURRENT_BRANCH="unknown"
+
+# Ensure origin exists + fetch main
+if in_git_repo; then
+  if ! has_origin && [ -n "$REPO_URL" ]; then
+    git remote add origin "$REPO_URL" || true
+  fi
+  git fetch origin main >/dev/null 2>&1 || true
+fi
+
+SDK_CHANGED=false
+CORE_CHANGED=false
+LOGGER_CHANGED=false
+
+if [ "$CURRENT_BRANCH" != "main" ]; then
+  if in_git_repo && git rev-parse --verify origin/main >/dev/null 2>&1; then
+    MERGE_BASE="$(git merge-base HEAD origin/main 2>/dev/null || true)"
+    if [ -n "$MERGE_BASE" ]; then
+      if git diff --quiet "$MERGE_BASE" -- packages/sdk/typescript/human-protocol-sdk; then SDK_CHANGED=false; else SDK_CHANGED=true; fi
+      if git diff --quiet "$MERGE_BASE" -- packages/core; then CORE_CHANGED=false; else CORE_CHANGED=true; fi
+      if git diff --quiet "$MERGE_BASE" -- packages/libs/logger; then LOGGER_CHANGED=false; else LOGGER_CHANGED=true; fi
+    else
+      echo "Could not determine merge-base with origin/main. Proceeding without change flags."
+    fi
+  else
+    echo "No usable origin/main for diffs. Proceeding without change flags."
+  fi
+fi
+
 export WORKSPACE_NAME
+export SDK_CHANGED
+export CORE_CHANGED
+export LOGGER_CHANGED
 
 node <<'NODE'
 const fs = require("fs");
@@ -16,6 +58,9 @@ const cp = require("child_process");
 
 const workspace = process.env.WORKSPACE_NAME;
 const repoRoot = process.cwd();
+const sdkChanged = process.env.SDK_CHANGED === "true";
+const coreChanged = process.env.CORE_CHANGED === "true";
+const loggerChanged = process.env.LOGGER_CHANGED === "true";
 
 // Map workspace package names to their package.json paths
 const workspaceMap = {
@@ -52,6 +97,18 @@ for (const block of depBlocks) {
   if (!deps) continue;
   for (const [depName, depVersion] of Object.entries(deps)) {
     if (depVersion !== "workspace:*") continue;
+    if (depName === "@human-protocol/sdk" && sdkChanged) {
+      console.log("Skipping @human-protocol/sdk replacement due to local changes.");
+      continue;
+    }
+    if (depName === "@human-protocol/core" && coreChanged) {
+      console.log("Skipping @human-protocol/core replacement due to local changes.");
+      continue;
+    }
+    if (depName === "@human-protocol/logger" && loggerChanged) {
+      console.log("Skipping @human-protocol/logger replacement due to local changes.");
+      continue;
+    }
     let latest = "";
     try {
       latest = cp.execSync(`npm view ${depName} version`, {
