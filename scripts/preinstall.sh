@@ -19,7 +19,6 @@ if [ -z "$CURRENT_BRANCH" ] && in_git_repo; then
 fi
 [ -n "$CURRENT_BRANCH" ] || CURRENT_BRANCH="unknown"
 
-# Ensure origin exists + fetch main
 if in_git_repo; then
   if ! has_origin && [ -n "$REPO_URL" ]; then
     git remote add origin "$REPO_URL" || true
@@ -33,13 +32,11 @@ LOGGER_CHANGED=false
 
 if [ "$CURRENT_BRANCH" != "main" ]; then
   if in_git_repo && git rev-parse --verify origin/main >/dev/null 2>&1; then
-    MERGE_BASE="$(git merge-base HEAD origin/main 2>/dev/null || true)"
-    if [ -n "$MERGE_BASE" ]; then
-      if git diff --quiet "$MERGE_BASE" -- packages/sdk/typescript/human-protocol-sdk; then SDK_CHANGED=false; else SDK_CHANGED=true; fi
-      if git diff --quiet "$MERGE_BASE" -- packages/core; then CORE_CHANGED=false; else CORE_CHANGED=true; fi
-      if git diff --quiet "$MERGE_BASE" -- packages/libs/logger; then LOGGER_CHANGED=false; else LOGGER_CHANGED=true; fi
-    else
-      echo "Could not determine merge-base with origin/main. Proceeding without change flags."
+    CHANGED_FILES="$(git diff --name-only origin/main HEAD 2>/dev/null || true)"
+    if [ -n "$CHANGED_FILES" ]; then
+      echo "$CHANGED_FILES" | grep -q '^packages/sdk/typescript/human-protocol-sdk/' && SDK_CHANGED=true || true
+      echo "$CHANGED_FILES" | grep -q '^packages/core/' && CORE_CHANGED=true || true
+      echo "$CHANGED_FILES" | grep -q '^packages/libs/logger/' && LOGGER_CHANGED=true || true
     fi
   else
     echo "No usable origin/main for diffs. Proceeding without change flags."
@@ -137,5 +134,29 @@ if (updated) {
   console.log("No workspace:* dependencies found to update.");
 }
 NODE
+
+yarn_focus_list=""
+if [ "$CORE_CHANGED" = "true" ]; then
+  yarn_focus_list="$yarn_focus_list @human-protocol/core @human-protocol/sdk"
+elif [ "$SDK_CHANGED" = "true" ]; then
+  yarn_focus_list="$yarn_focus_list @human-protocol/sdk"
+fi
+if [ "$LOGGER_CHANGED" = "true" ]; then
+  yarn_focus_list="$yarn_focus_list @human-protocol/logger"
+fi
+
+if [ -n "$yarn_focus_list" ]; then
+  echo "Focusing workspaces:$yarn_focus_list"
+  yarn workspaces focus $yarn_focus_list
+  if [ "$CORE_CHANGED" = "true" ]; then
+    yarn workspace @human-protocol/core build
+    yarn workspace @human-protocol/sdk build
+  elif [ "$SDK_CHANGED" = "true" ]; then
+    yarn workspace @human-protocol/sdk build
+  fi
+  if [ "$LOGGER_CHANGED" = "true" ]; then
+    yarn workspace @human-protocol/logger build
+  fi
+fi
 
 yarn workspaces focus "$WORKSPACE_NAME"
