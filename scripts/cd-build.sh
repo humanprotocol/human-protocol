@@ -58,7 +58,14 @@ const path = require("path");
 const cp = require("child_process");
 
 const workspace = process.env.WORKSPACE_NAME;
-const repoRoot = process.cwd();
+let repoRoot = process.cwd();
+try {
+  repoRoot = cp.execSync("git rev-parse --show-toplevel", { stdio: ["ignore", "pipe", "ignore"] })
+    .toString()
+    .trim();
+} catch {
+  // Fall back to current working directory if not in a git repo.
+}
 const sdkChanged = process.env.SDK_CHANGED === "true";
 const coreChanged = process.env.CORE_CHANGED === "true";
 const loggerChanged = process.env.LOGGER_CHANGED === "true";
@@ -164,3 +171,4 @@ if [ -n "$yarn_focus_list" ]; then
 fi
 
 yarn workspaces focus "$WORKSPACE_NAME"
+yarn workspace "$WORKSPACE_NAME" build
