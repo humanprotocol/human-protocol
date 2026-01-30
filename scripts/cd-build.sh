@@ -158,7 +158,7 @@ fi
 
 if [ -n "$yarn_focus_list" ]; then
   echo "Focusing workspaces:$yarn_focus_list"
-  yarn workspaces focus $yarn_focus_list
+  yarn workspaces focus "$yarn_focus_list"
   if [ "$CORE_CHANGED" = "true" ]; then
     yarn workspace @human-protocol/core build
     yarn workspace @human-protocol/sdk build
