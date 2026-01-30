@@ -86,7 +86,7 @@ const workspaceMap = {
 const workspacePackageJson = workspaceMap[workspace];
 if (!workspacePackageJson) {
   console.error(`Workspace "${workspace}" not found in workspace map.`);
-  console.error("Add it to workspaceMap in scripts/preinstall2.sh.");
+  console.error("Add it to workspaceMap in scripts/cd-build.sh.");
   process.exit(1);
 }
 
