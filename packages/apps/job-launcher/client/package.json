@@ -12,7 +12,7 @@
     "@mui/lab": "^6.0.0-dev.240424162023-9968b4889d",
     "@mui/material": "^5.16.7",
     "@mui/system": "^5.15.14",
-    "@mui/x-date-pickers": "^7.23.6",
+    "@mui/x-date-pickers": "^8.26.0",
     "@reduxjs/toolkit": "^2.5.0",
     "@stripe/react-stripe-js": "^3.0.0",
     "@stripe/stripe-js": "^4.2.0",
