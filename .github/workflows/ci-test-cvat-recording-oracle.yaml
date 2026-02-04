@@ -5,6 +5,7 @@ on:
     branches: "**"
     paths:
       - "packages/examples/cvat/recording-oracle/**"
+      - "packages/core/**"
 
 jobs:
   cvat-exo-test:

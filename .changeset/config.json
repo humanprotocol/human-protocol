@@ -5,7 +5,7 @@
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
   "changelog": false,
-  "bumpVersionsWithWorkspaceProtocolOnly": false,
+  "bumpVersionsWithWorkspaceProtocolOnly": true,
   "privatePackages": {
     "version": true,
     "tag": false
