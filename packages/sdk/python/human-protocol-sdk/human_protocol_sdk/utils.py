@@ -10,7 +10,6 @@ import requests
 from human_protocol_sdk.constants import (
     ARTIFACTS_FOLDER,
     DEFAULT_CONFIRMATION_POLL_INTERVAL,
-    SUBGRAPH_API_KEY_PLACEHOLDER,
     ChainId,
 )
 from validators import url as URL
