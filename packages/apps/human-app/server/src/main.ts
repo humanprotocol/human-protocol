@@ -8,6 +8,23 @@ import { Cache } from 'cache-manager';
 import { AppModule } from './app.module';
 import { EnvironmentConfigService } from './common/config/environment-config.service';
 import logger, { nestLoggerOverride } from './logger';
+import fs from 'node:fs';
+import path from 'node:path';
+
+const entry = require.resolve('@human-protocol/core/typechain-types');
+let dir = path.dirname(entry);
+
+while (!fs.existsSync(path.join(dir, 'package.json'))) {
+  const parent = path.dirname(dir);
+  if (parent === dir) throw new Error('package.json not found');
+  dir = parent;
+}
+
+const pkgPath = path.join(dir, 'package.json');
+const version = JSON.parse(fs.readFileSync(pkgPath, 'utf8')).version;
+
+console.log('core resolved from:', pkgPath);
+console.log('@human core version:', version);
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -40,7 +57,6 @@ async function bootstrap() {
   }
 
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
-
   await app.listen(port, host, async () => {
     logger.info(`Human APP server is running on http://${host}:${port}`);
   });

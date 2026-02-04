@@ -23,6 +23,7 @@ on:
       - "packages/apps/**"
       - "packages/examples/**"
       - "packages/sdk/python/**"
+      - "packages/core/**"
 
 jobs:
   publish:
@@ -56,9 +57,9 @@ jobs:
       # don't have its dependency and can't be build as well,
       # so we have to build all deps in their topological order first.
       - name: Build packages
-        run: yarn workspaces foreach --all --no-private -pt run build
+        run: yarn workspaces foreach --all --no-private --exclude @human-protocol/core -pt run build
       - name: Publish packages
-        run: yarn workspaces foreach --all --no-private -pt npm publish --tolerate-republish --tag ${NPM_PUBLISH_TAG} --json | tee publish.log
+        run: yarn workspaces foreach --all --no-private --exclude @human-protocol/core -pt npm publish --tolerate-republish --tag ${NPM_PUBLISH_TAG} --json | tee publish.log
         env:
           SKIP_PREPACK: true
       - name: Tag published packages

@@ -5,10 +5,18 @@
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
   "changelog": false,
-  "bumpVersionsWithWorkspaceProtocolOnly": true,
+  "bumpVersionsWithWorkspaceProtocolOnly": false,
   "privatePackages": {
     "version": true,
     "tag": false
   },
-  "ignore": ["@apps/*", "@tools/*"]
+  "ignore": [
+    "@apps/*",
+    "@tools/*",
+    "@human-protocol/core",
+    "@apps/dashboard-server",
+    "@apps/human-app-server",
+    "@apps/reputation-oracle",
+    "@tools/subgraph"
+  ]
 }

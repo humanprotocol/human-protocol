@@ -36,8 +36,6 @@ jobs:
           cache: yarn
       - name: Install JS dependencies
         run: yarn install
-      - name: Build core package
-        run: yarn workspace @human-protocol/core build
       - name: Set up Python
         uses: actions/setup-python@v6
         with:

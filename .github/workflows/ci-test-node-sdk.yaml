@@ -2,10 +2,9 @@ name: Node.js SDK check
 
 on:
   push:
-    branches: '**'
+    branches: "**"
     paths:
-      - 'packages/core/**'
-      - 'packages/sdk/typescript/human-protocol-sdk/**'
+      - "packages/sdk/typescript/human-protocol-sdk/**"
 
 jobs:
   node-sdk-test:
@@ -19,7 +18,5 @@ jobs:
           cache: yarn
       - name: Install dependencies
         run: yarn install --immutable
-      - name: Build core package
-        run: yarn workspace @human-protocol/core build
       - name: Run Node.js SDK test
         run: yarn workspace @human-protocol/sdk test

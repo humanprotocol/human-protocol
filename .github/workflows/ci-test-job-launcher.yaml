@@ -2,9 +2,8 @@ name: Job Launcher Check
 
 on:
   push:
-    branches: '**'
+    branches: "**"
     paths:
-      - "packages/core/**"
       - "packages/sdk/typescript/human-protocol-sdk/**"
       - "packages/apps/job-launcher/**"
 

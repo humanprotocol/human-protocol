@@ -7,9 +7,12 @@ check_core_folders() {
   CORE_DIR="$PROJECT_ROOT/packages/core"
 
   if [ ! -d "$CORE_DIR/abis/legacy" ] || [ ! -d "$CORE_DIR/typechain-types" ]; then
-    echo "Libs are not built, building..."
-		yarn workspace human-protocol build:libs;
+    echo "Core is not built, building core locally..."
+		yarn workspace @human-protocol/core build;
 	fi
+
+  echo "Building shared libs (excluding core)..."
+	 yarn workspace human-protocol build:libs;
 }
 
 deploy_subgraph() {
