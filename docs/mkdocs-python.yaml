@@ -94,5 +94,6 @@ nav:
   - Worker:
       - WorkerUtils: worker_utils.md
   - Core utilities: core.md
+  - Changelog: CHANGELOG.md
 extra_css:
   - assets/css/custom.css

@@ -9,3 +9,5 @@ logs
 
 docs
 !docs/index.md
+
+docs/CHANGELOG.md
