@@ -1,3 +1,5 @@
+import path from 'path';
+
 import * as dotenv from 'dotenv';
 import { DataSource } from 'typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
@@ -12,6 +14,13 @@ dotenv.config({
 });
 
 const connectionUrl = process.env.POSTGRES_URL;
+const isTsRuntime = __filename.endsWith('.ts');
+const migrationsPath = isTsRuntime
+  ? path.join(__dirname, 'src/database/migrations/*.ts')
+  : path.join(__dirname, 'src/database/migrations/*.js');
+const entitiesPath = isTsRuntime
+  ? path.join(__dirname, 'src/modules/**/*.entity.ts')
+  : path.join(__dirname, 'src/modules/**/*.entity.js');
 
 export default new DataSource({
   type: 'postgres',
@@ -30,8 +39,8 @@ export default new DataSource({
   ssl: process.env.POSTGRES_SSL?.toLowerCase() === 'true',
   synchronize: false,
   migrationsRun: true,
-  migrations: ['src/database/migrations/*.ts'],
+  migrations: [migrationsPath],
   migrationsTableName: 'migrations_typeorm',
   namingStrategy: new SnakeNamingStrategy(),
-  entities: ['src/modules/**/*.entity.ts'],
+  entities: [entitiesPath],
 });
