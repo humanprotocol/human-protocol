@@ -45,7 +45,7 @@ jobs:
       - name: Update npm
         run: npm install -g npm@latest
       - name: Install dependencies
-        run: yarn install --immutable
+        run: yarn workspaces focus @human-protocol/core
       - name: Build core package
         run: yarn workspace @human-protocol/core build
       - name: Publish core package

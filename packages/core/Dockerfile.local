@@ -14,7 +14,7 @@ COPY .yarnrc.yml ./
 COPY package.json yarn.lock ./
 COPY ${APP_PATH}/package.json ./${APP_PATH}/
 
-RUN yarn install
+RUN yarn workspaces focus @human-protocol/core
 
 # Copy base TS config that is required to build package
 COPY tsconfig.base.json ./

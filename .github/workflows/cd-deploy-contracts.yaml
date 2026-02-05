@@ -4,10 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       network:
-        description: 'network'
+        description: "network"
         required: true
       escrowFactory:
-        description: 'deploy escrow factory'
+        description: "deploy escrow factory"
         required: true
 
 jobs:
@@ -40,7 +40,7 @@ jobs:
           node-version-file: .nvmrc
           cache: yarn
       - name: Install dependencies
-        run: yarn --immutable
+        run: yarn workspaces focus @human-protocol/core
       - name: Build core package
         run: yarn workspace @human-protocol/core build
       - name: Networks list
@@ -140,9 +140,7 @@ jobs:
         uses: EndBug/add-and-commit@v9
         with:
           add: "['./packages/core/.openzeppelin']"
-          message: 'Update upgrade file from CD'
+          message: "Update upgrade file from CD"
           default_author: github_actions
-          tag_push: '--force'
+          tag_push: "--force"
           github_token: ${{ secrets.GH_TOKEN_CD_CONTRACTS }}
-
-
