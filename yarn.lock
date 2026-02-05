@@ -4982,6 +4982,8 @@ __metadata:
 "@human-protocol/python-sdk@workspace:packages/sdk/python/human-protocol-sdk":
   version: 0.0.0-use.local
   resolution: "@human-protocol/python-sdk@workspace:packages/sdk/python/human-protocol-sdk"
+  dependencies:
+    "@human-protocol/core": "npm:^5.0.1"
   languageName: unknown
   linkType: soft
 

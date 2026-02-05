@@ -34,8 +34,6 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: yarn
-      - name: Install JS dependencies
-        run: yarn install
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
