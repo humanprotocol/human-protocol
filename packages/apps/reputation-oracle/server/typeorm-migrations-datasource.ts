@@ -14,13 +14,12 @@ dotenv.config({
 });
 
 const connectionUrl = process.env.POSTGRES_URL;
-const isTsRuntime = __filename.endsWith('.ts');
-const migrationsPath = isTsRuntime
-  ? path.join(__dirname, 'src/database/migrations/*.ts')
-  : path.join(__dirname, 'src/database/migrations/*.js');
-const entitiesPath = isTsRuntime
-  ? path.join(__dirname, 'src/modules/**/*.entity.ts')
-  : path.join(__dirname, 'src/modules/**/*.entity.js');
+const tsOrJs = path.extname(__filename).slice(1);
+const migrationsPath = path.join(
+  __dirname,
+  `src/database/migrations/*.${tsOrJs}`,
+);
+const entitiesPath = path.join(__dirname, `src/modules/**/*.entity.${tsOrJs}`);
 
 export default new DataSource({
   type: 'postgres',
