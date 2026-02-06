@@ -1,3 +1,4 @@
+# TODO: make this shared and part of local setup
 FROM node:24.13-slim
 
 # curl is needed for healthcheck
@@ -5,18 +6,16 @@ RUN apt-get update && apt-get install -y curl
 
 WORKDIR /usr/src/app
 
-ARG CORE_VERSION=latest
-
-# Use repo-managed Yarn distribution
+# Copy expected yarn dist
 COPY .yarn ./.yarn
 COPY .yarnrc.yml ./
+# Copy files for deps installation
+COPY package.json yarn.lock ./
 
-RUN corepack enable
-RUN yarn init -y
-RUN yarn add @human-protocol/core@${CORE_VERSION}
-
-WORKDIR /usr/src/app/node_modules/@human-protocol/core
-RUN yarn install
+COPY tsconfig.base.json ./
+COPY packages/core ./packages/core
+RUN yarn workspace @human-protocol/core install
+RUN yarn workspace @human-protocol/core build
 
 EXPOSE 8545
-CMD ["yarn", "local"]
+CMD yarn workspace @human-protocol/core local

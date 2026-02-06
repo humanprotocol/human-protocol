@@ -251,6 +251,7 @@ __metadata:
     hardhat: "npm:^2.26.0"
     jest: "npm:^29.7.0"
     node-cache: "npm:^5.1.2"
+    ts-jest: "npm:29.2.5"
     ts-node: "npm:^10.9.2"
     typescript: "npm:^5.8.3"
     web3: "npm:^4.12.1"

@@ -14,9 +14,7 @@ services:
   blockchain-node:
     build: 
       context: ../../../../
-      dockerfile: packages/examples/cvat/recording-oracle/dockerfiles/blockchain-node.Dockerfile
-      args:
-        CORE_VERSION: ${CORE_VERSION:-latest}
+      dockerfile: docker-setup/Dockerfile.core
     healthcheck:
       test: yarn local:readiness
       interval: 15s
