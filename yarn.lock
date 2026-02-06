@@ -155,6 +155,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@apps/dashboard-server@workspace:packages/apps/dashboard/server"
   dependencies:
+    "@golevelup/ts-jest": "npm:^1.2.1"
     "@human-protocol/core": "workspace:*"
     "@human-protocol/logger": "workspace:*"
     "@human-protocol/sdk": "workspace:*"
@@ -238,6 +239,7 @@ __metadata:
     "@human-protocol/sdk": "workspace:*"
     "@types/cors": "npm:^2.8.19"
     "@types/express": "npm:^4.17.14"
+    "@types/jest": "npm:^29.5.14"
     "@types/node": "npm:^22.15.16"
     axios: "npm:^1.3.4"
     body-parser: "npm:^1.20.0"
@@ -367,6 +369,7 @@ __metadata:
     "@nestjs/swagger": "npm:^11.2.5"
     "@nestjs/testing": "npm:^11.1.12"
     "@types/express": "npm:^4.17.13"
+    "@types/jest": "npm:^29.5.14"
     "@types/node": "npm:^22.15.16"
     axios: "npm:^1.3.1"
     body-parser: "npm:^1.20.2"
@@ -383,6 +386,7 @@ __metadata:
     prettier: "npm:^3.7.4"
     reflect-metadata: "npm:^0.2.2"
     rxjs: "npm:^7.2.0"
+    ts-jest: "npm:29.2.5"
     ts-node: "npm:^10.9.2"
     typescript: "npm:^5.8.3"
   languageName: unknown
@@ -4412,6 +4416,13 @@ __metadata:
   version: 0.6.2
   resolution: "@golevelup/ts-jest@npm:0.6.2"
   checksum: 10c0/91fd477a1bd44913178929a9aecf8f5540208cf78a939b74f52c6804069ba1098b6e134d415b02226fb4be0f621ec16a1bcf1904821f254c009accce8c70ef27
+  languageName: node
+  linkType: hard
+
+"@golevelup/ts-jest@npm:^1.2.1":
+  version: 1.2.1
+  resolution: "@golevelup/ts-jest@npm:1.2.1"
+  checksum: 10c0/44e8ba46038834705a555f2bc3fdef962f2d1d6f9ba31e0a3a72f40941877e72d834fa34b9a2ae910a7f229c60e1505aa284f9c9839bf3c0e673b42db8ecd276
   languageName: node
   linkType: hard
 
@@ -11647,6 +11658,16 @@ __metadata:
     expect: "npm:^30.0.0"
     pretty-format: "npm:^30.0.0"
   checksum: 10c0/20c6ce574154bc16f8dd6a97afacca4b8c4921a819496a3970382031c509ebe87a1b37b152a1b8475089b82d8ca951a9e95beb4b9bf78fbf579b1536f0b65969
+  languageName: node
+  linkType: hard
+
+"@types/jest@npm:^29.5.14":
+  version: 29.5.14
+  resolution: "@types/jest@npm:29.5.14"
+  dependencies:
+    expect: "npm:^29.0.0"
+    pretty-format: "npm:^29.0.0"
+  checksum: 10c0/18e0712d818890db8a8dab3d91e9ea9f7f19e3f83c2e50b312f557017dc81466207a71f3ed79cf4428e813ba939954fa26ffa0a9a7f153181ba174581b1c2aed
   languageName: node
   linkType: hard
 
@@ -19115,7 +19136,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expect@npm:^29.7.0":
+"expect@npm:^29.0.0, expect@npm:^29.7.0":
   version: 29.7.0
   resolution: "expect@npm:29.7.0"
   dependencies:
@@ -26485,7 +26506,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pretty-format@npm:^29.7.0":
+"pretty-format@npm:^29.0.0, pretty-format@npm:^29.7.0":
   version: 29.7.0
   resolution: "pretty-format@npm:29.7.0"
   dependencies:

@@ -7,12 +7,15 @@ WORKDIR /usr/src/app
 
 ARG CORE_VERSION=latest
 
-RUN npm init -y
-RUN npm install -g yarn
+# Use repo-managed Yarn distribution
+COPY .yarn ./.yarn
+COPY .yarnrc.yml ./
+
+RUN corepack enable
+RUN yarn init -y
 RUN yarn add @human-protocol/core@${CORE_VERSION}
 
 WORKDIR /usr/src/app/node_modules/@human-protocol/core
-# Install dev dependencies needed for hardhat scripts
 RUN yarn install
 
 EXPOSE 8545

@@ -21,6 +21,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@golevelup/ts-jest": "^1.2.1",
     "@human-protocol/core": "workspace:*",
     "@human-protocol/logger": "workspace:*",
     "@human-protocol/sdk": "workspace:*",
