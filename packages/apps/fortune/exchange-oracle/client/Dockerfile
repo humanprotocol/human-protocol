@@ -15,14 +15,15 @@ COPY ${APP_PATH}/package.json ./${APP_PATH}/
 
 # Some deps are referenced as "workspace:*",
 # so we need to copy and build them
+COPY packages/core ./packages/core
 COPY packages/sdk ./packages/sdk
 
-RUN yarn install
+RUN yarn workspaces focus @apps/fortune-exchange-oracle-client
 
 # Copy base TS config that is required to build packages
 COPY tsconfig.base.json ./
-# Build libs
-RUN yarn build:libs
+# Build libs (scoped)
+RUN yarn workspaces foreach -Rpt --from @apps/fortune-exchange-oracle-client run build
 
 # Copy everything else
 COPY ${APP_PATH} ./${APP_PATH}

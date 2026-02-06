@@ -21,7 +21,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@human-protocol/core": "^5.0.1",
+    "@human-protocol/core": "workspace:*",
     "@human-protocol/logger": "workspace:*",
     "@human-protocol/sdk": "workspace:*",
     "@keyv/redis": "^5.1.5",

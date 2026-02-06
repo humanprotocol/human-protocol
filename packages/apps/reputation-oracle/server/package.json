@@ -30,7 +30,7 @@
     "typeorm": "typeorm-ts-node-commonjs"
   },
   "dependencies": {
-    "@human-protocol/core": "^5.0.1",
+    "@human-protocol/core": "workspace:*",
     "@human-protocol/logger": "workspace:*",
     "@human-protocol/sdk": "workspace:*",
     "@nestjs/axios": "^4.0.1",

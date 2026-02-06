@@ -4,6 +4,7 @@ on:
   push:
     branches: "**"
     paths:
+      - "packages/core/**"
       - "packages/sdk/typescript/human-protocol-sdk/**"
       - "packages/apps/fortune/**"
 
@@ -18,9 +19,9 @@ jobs:
           node-version-file: .nvmrc
           cache: yarn
       - name: Install dependencies
-        run: yarn install --immutable
-      - name: Build libs
-        run: yarn build:libs
+        run: yarn workspaces focus @apps/fortune-exchange-oracle-server
+      - name: Build libs (scoped)
+        run: yarn workspaces foreach -Rpt --from @apps/fortune-exchange-oracle-server run build
       - name: Run Exchange Oracle tests
         run: yarn workspace @apps/fortune-exchange-oracle-server test
 
@@ -34,8 +35,8 @@ jobs:
           node-version-file: .nvmrc
           cache: yarn
       - name: Install dependencies
-        run: yarn install --immutable
-      - name: Build libs
-        run: yarn build:libs
+        run: yarn workspaces focus @apps/fortune-recording-oracle
+      - name: Build libs (scoped)
+        run: yarn workspaces foreach -Rpt --from @apps/fortune-recording-oracle run build
       - name: Run Recording Oracle tests
         run: yarn workspace @apps/fortune-recording-oracle test

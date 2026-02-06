@@ -4,6 +4,7 @@ on:
   push:
     branches: "**"
     paths:
+      - "packages/core/**"
       - "packages/sdk/typescript/human-protocol-sdk/**"
       - "packages/apps/human-app/**"
 
@@ -18,8 +19,8 @@ jobs:
           node-version-file: .nvmrc
           cache: yarn
       - name: Install dependencies
-        run: yarn install --immutable
-      - name: Build libs
-        run: yarn build:libs
+        run: yarn workspaces focus @apps/human-app-server
+      - name: Build libs (scoped)
+        run: yarn workspaces foreach -Rpt --from @apps/human-app-server run build
       - name: Run Job Human App unit tests
         run: yarn workspace @apps/human-app-server test

@@ -4,6 +4,7 @@ on:
   push:
     branches: "**"
     paths:
+      - "packages/core/**"
       - "packages/sdk/typescript/human-protocol-sdk/**"
       - "packages/apps/reputation-oracle/**"
 
@@ -18,8 +19,8 @@ jobs:
           node-version-file: .nvmrc
           cache: yarn
       - name: Install dependencies
-        run: yarn install --immutable
-      - name: Build libs
-        run: yarn build:libs
+        run: yarn workspaces focus @apps/reputation-oracle
+      - name: Build libs (scoped)
+        run: yarn workspaces foreach -Rpt --from @apps/reputation-oracle run build
       - name: Run reputation oracle test
         run: yarn workspace @apps/reputation-oracle test

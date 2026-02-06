@@ -10,13 +10,5 @@
     "version": true,
     "tag": false
   },
-  "ignore": [
-    "@apps/*",
-    "@tools/*",
-    "@human-protocol/core",
-    "@apps/dashboard-server",
-    "@apps/human-app-server",
-    "@apps/reputation-oracle",
-    "@tools/subgraph"
-  ]
+  "ignore": ["@apps/*", "@tools/*"]
 }

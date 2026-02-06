@@ -40,6 +40,7 @@ async function bootstrap() {
   }
 
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
+
   await app.listen(port, host, async () => {
     logger.info(`Human APP server is running on http://${host}:${port}`);
   });

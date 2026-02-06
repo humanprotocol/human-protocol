@@ -48,7 +48,10 @@ jobs:
           echo "::set-output name=continue::$MATCH"
       - name: Install dependencies
         if: steps.filter_networks.outputs.continue == 'true'
-        run: yarn install --immutable
+        run: yarn workspaces focus @tools/subgraph
+      - name: Build packages (scoped)
+        if: steps.filter_networks.outputs.continue == 'true'
+        run: yarn workspaces foreach -Rpt --from @tools/subgraph run build
       - name: Generate and build Subgraph
         if: steps.filter_networks.outputs.continue == 'true'
         run: yarn generate && yarn build

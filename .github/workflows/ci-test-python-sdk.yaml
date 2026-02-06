@@ -4,6 +4,7 @@ on:
   push:
     branches: "**"
     paths:
+      - "packages/core/**"
       - "packages/sdk/python/human-protocol-sdk/**"
 
 jobs:
@@ -17,7 +18,9 @@ jobs:
           node-version-file: .nvmrc
           cache: yarn
       - name: Install core package dependencies
-        run: yarn install --immutable
+        run: yarn workspaces focus @human-protocol/core
+      - name: Build core package
+        run: yarn workspace @human-protocol/core build
       - name: Set up Python 3.10
         uses: actions/setup-python@v6
         with:
