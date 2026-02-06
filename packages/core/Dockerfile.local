@@ -1,6 +1,0 @@
-# Deprecated: moved to docker-setup/Dockerfile.core
-# Keep this file only to avoid breaking references during transition.
-# Please use docker-setup/Dockerfile.core instead.
-FROM node:24.13-slim
-
-CMD ["/bin/sh", "-c", "echo 'Deprecated: use docker-setup/Dockerfile.core' && exit 1"]
