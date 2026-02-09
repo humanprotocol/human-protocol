@@ -12,7 +12,7 @@
     "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint . --fix",
     "preview": "vite preview",
-    "vercel-build": "yarn workspace human-protocol build:libs && yarn build",
+    "vercel-build": "yarn workspaces foreach -Rpt --from @apps/dashboard-client run build",
     "test": "exit 0",
     "typecheck": "tsc --noEmit"
   },
@@ -61,6 +61,7 @@
     "globals": "^16.2.0",
     "prettier": "^3.7.4",
     "sass": "^1.89.2",
+    "terser": "^5.36.0",
     "typescript": "^5.6.3",
     "typescript-eslint": "^8.33.0",
     "vite": "^6.2.4"
