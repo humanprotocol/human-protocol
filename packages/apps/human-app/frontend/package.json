@@ -10,7 +10,8 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "test": "vitest --run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "vercel-build": "yarn workspaces foreach -Rpt --from @apps/human-app-frontend run build"
   },
   "lint-staged": {
     "*.{ts,tsx}": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
