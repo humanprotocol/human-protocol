@@ -23,6 +23,6 @@ jobs:
       - name: Generate manifest for Polygon for tests
         run: NETWORK=polygon yarn workspace @tools/subgraph generate
       - name: Build packages (scoped)
-        run: yarn workspaces foreach -Rpt --from @tools/subgraph run build
+        run: yarn workspaces foreach -Rpt --from @tools/subgraph --topological-dev run build
       - name: Run subgraph test
         run: yarn workspace @tools/subgraph test
