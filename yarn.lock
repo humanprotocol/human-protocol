@@ -213,6 +213,7 @@ __metadata:
     "@mui/material": "npm:^5.16.7"
     "@types/react": "npm:^18.3.12"
     "@types/react-dom": "npm:^18.3.1"
+    "@vitejs/plugin-react": "npm:^4.3.4"
     dotenv: "npm:^17.2.2"
     eslint: "npm:^9.39.1"
     eslint-config-react-app: "npm:^7.0.1"
@@ -777,6 +778,7 @@ __metadata:
     react-router-dom: "npm:^6.24.1"
     sass: "npm:^1.89.2"
     serve: "npm:^14.2.4"
+    simplebar-react: "npm:^3.3.2"
     typescript: "npm:^5.6.3"
     viem: "npm:2.x"
     vite: "npm:^6.2.4"
@@ -12962,7 +12964,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vitejs/plugin-react@npm:^4.2.1, @vitejs/plugin-react@npm:^4.3.1":
+"@vitejs/plugin-react@npm:^4.2.1, @vitejs/plugin-react@npm:^4.3.1, @vitejs/plugin-react@npm:^4.3.4":
   version: 4.7.0
   resolution: "@vitejs/plugin-react@npm:4.7.0"
   dependencies:

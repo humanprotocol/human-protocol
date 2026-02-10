@@ -41,6 +41,7 @@
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.24.1",
     "serve": "^14.2.4",
+    "simplebar-react": "^3.3.2",
     "viem": "2.x",
     "wagmi": "^2.14.6"
   },
