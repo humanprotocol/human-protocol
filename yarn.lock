@@ -208,6 +208,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@apps/faucet-client@workspace:packages/apps/faucet/client"
   dependencies:
+    "@emotion/react": "npm:^11.14.0"
+    "@emotion/styled": "npm:^11.14.1"
     "@human-protocol/sdk": "workspace:*"
     "@mui/icons-material": "npm:^7.0.1"
     "@mui/material": "npm:^5.16.7"
@@ -754,6 +756,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@apps/staking-dashboard-client@workspace:packages/apps/staking"
   dependencies:
+    "@emotion/react": "npm:^11.14.0"
+    "@emotion/styled": "npm:^11.14.1"
     "@human-protocol/sdk": "npm:*"
     "@mui/icons-material": "npm:^7.0.1"
     "@mui/material": "npm:^5.16.7"
@@ -3436,7 +3440,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@emotion/react@npm:^11.10.5, @emotion/react@npm:^11.11.3, @emotion/react@npm:^11.11.4":
+"@emotion/react@npm:^11.10.5, @emotion/react@npm:^11.11.3, @emotion/react@npm:^11.11.4, @emotion/react@npm:^11.14.0":
   version: 11.14.0
   resolution: "@emotion/react@npm:11.14.0"
   dependencies:
@@ -3477,7 +3481,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@emotion/styled@npm:^11.10.5, @emotion/styled@npm:^11.11.0, @emotion/styled@npm:^11.11.5":
+"@emotion/styled@npm:^11.10.5, @emotion/styled@npm:^11.11.0, @emotion/styled@npm:^11.11.5, @emotion/styled@npm:^11.14.1":
   version: 11.14.1
   resolution: "@emotion/styled@npm:11.14.1"
   dependencies:
