@@ -145,7 +145,7 @@ __metadata:
     typescript-eslint: "npm:^8.33.0"
     use-debounce: "npm:^10.0.2"
     vite: "npm:^6.2.4"
-    vite-plugin-node-polyfills: "npm:^0.23.0"
+    vite-plugin-node-polyfills: "npm:^0.25.0"
     zod: "npm:^4.0.17"
     zustand: "npm:^5.0.10"
   languageName: unknown
@@ -221,7 +221,7 @@ __metadata:
     typescript: "npm:^5.8.3"
     viem: "npm:2.x"
     vite: "npm:^6.2.4"
-    vite-plugin-node-polyfills: "npm:^0.23.0"
+    vite-plugin-node-polyfills: "npm:^0.25.0"
   languageName: unknown
   linkType: soft
 
@@ -280,7 +280,7 @@ __metadata:
     typescript: "npm:^5.6.3"
     viem: "npm:2.x"
     vite: "npm:^6.2.4"
-    vite-plugin-node-polyfills: "npm:^0.23.0"
+    vite-plugin-node-polyfills: "npm:^0.25.0"
     wagmi: "npm:^2.14.6"
   languageName: unknown
   linkType: soft
@@ -580,7 +580,7 @@ __metadata:
     typescript: "npm:^5.6.3"
     viem: "npm:2.x"
     vite: "npm:^6.2.4"
-    vite-plugin-node-polyfills: "npm:^0.23.0"
+    vite-plugin-node-polyfills: "npm:^0.25.0"
     wagmi: "npm:^2.14.6"
     xml2js: "npm:^0.6.2"
     yup: "npm:^1.6.1"
@@ -768,7 +768,7 @@ __metadata:
     typescript: "npm:^5.6.3"
     viem: "npm:2.x"
     vite: "npm:^6.2.4"
-    vite-plugin-node-polyfills: "npm:^0.23.0"
+    vite-plugin-node-polyfills: "npm:^0.25.0"
     wagmi: "npm:^2.14.6"
   languageName: unknown
   linkType: soft
@@ -24706,7 +24706,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-stdlib-browser@npm:^1.2.0":
+"node-stdlib-browser@npm:^1.3.1":
   version: 1.3.1
   resolution: "node-stdlib-browser@npm:1.3.1"
   dependencies:
@@ -30966,15 +30966,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite-plugin-node-polyfills@npm:^0.23.0":
-  version: 0.23.0
-  resolution: "vite-plugin-node-polyfills@npm:0.23.0"
+"vite-plugin-node-polyfills@npm:^0.25.0":
+  version: 0.25.0
+  resolution: "vite-plugin-node-polyfills@npm:0.25.0"
   dependencies:
     "@rollup/plugin-inject": "npm:^5.0.5"
-    node-stdlib-browser: "npm:^1.2.0"
+    node-stdlib-browser: "npm:^1.3.1"
   peerDependencies:
-    vite: ^2.0.0 || ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0
-  checksum: 10c0/439088aa71852737433f360fe5e99f246884885afb11715106b2e4c3c4f0dfc162037831b6b5a2ab4be30faafe5db6a3af37bbdf7eda5788dae2fdb9a44e029e
+    vite: ^2.0.0 || ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0
+  checksum: 10c0/4009951255f2545ce4ec82f48f013b1c2b4509017e42c68cac6af8cc0d3f824ef2002915917c6da317c09ff0cde32eed6e98eb5be0d935a3c5cb0b412ebc1625
   languageName: node
   linkType: hard
 
