@@ -28,7 +28,7 @@
     "@mui/icons-material": "^7.0.1",
     "@mui/material": "^5.16.7",
     "@mui/system": "^5.15.14",
-    "@mui/x-date-pickers": "^7.23.6",
+    "@mui/x-date-pickers": "^8.26.0",
     "@reown/appkit": "^1.7.11",
     "@reown/appkit-adapter-wagmi": "^1.7.11",
     "@synaps-io/verify-sdk": "^4.0.45",

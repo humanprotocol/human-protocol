@@ -85,5 +85,6 @@ nav:
       - TransactionUtils: classes/TransactionUtils.md
   - Worker:
       - WorkerUtils: classes/WorkerUtils.md
+  - Changelog: CHANGELOG.md
 extra_css:
   - assets/css/custom.css
