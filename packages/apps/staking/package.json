@@ -28,6 +28,8 @@
     ]
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
     "@human-protocol/sdk": "*",
     "@mui/icons-material": "^7.0.1",
     "@mui/material": "^5.16.7",
@@ -41,6 +43,7 @@
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.24.1",
     "serve": "^14.2.4",
+    "simplebar-react": "^3.3.2",
     "viem": "2.x",
     "wagmi": "^2.14.6"
   },
