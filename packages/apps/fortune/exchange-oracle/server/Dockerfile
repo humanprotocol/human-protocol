@@ -18,12 +18,12 @@ COPY packages/core ./packages/core
 COPY packages/sdk ./packages/sdk
 COPY packages/libs ./packages/libs
 
-RUN yarn install
+RUN yarn workspaces focus @apps/fortune-exchange-oracle-server
 
 # Copy base TS config that is required to build packages
 COPY tsconfig.base.json ./
-# Build libs
-RUN yarn build:libs
+# Build libs (scoped)
+RUN yarn workspaces foreach -Rpt --from @apps/fortune-exchange-oracle-server run build
 
 # Copy everything else
 COPY ${APP_PATH} ./${APP_PATH}

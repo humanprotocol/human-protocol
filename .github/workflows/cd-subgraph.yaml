@@ -3,10 +3,10 @@ on:
   workflow_dispatch:
     inputs:
       label:
-        description: 'New version label'
+        description: "New version label"
         required: true
       networks:
-        description: 'Comma-separated list of networks to deploy'
+        description: "Comma-separated list of networks to deploy"
         required: true
 
 jobs:
@@ -48,10 +48,10 @@ jobs:
           echo "::set-output name=continue::$MATCH"
       - name: Install dependencies
         if: steps.filter_networks.outputs.continue == 'true'
-        run: yarn install --immutable
-      - name: Build core package
+        run: yarn workspaces focus @tools/subgraph
+      - name: Build packages (scoped)
         if: steps.filter_networks.outputs.continue == 'true'
-        run: yarn workspace @human-protocol/core build
+        run: yarn workspaces foreach -Rpt --from @tools/subgraph run build
       - name: Generate and build Subgraph
         if: steps.filter_networks.outputs.continue == 'true'
         run: yarn generate && yarn build
@@ -61,9 +61,9 @@ jobs:
       - name: Authenticate & Deploy
         if: steps.filter_networks.outputs.continue == 'true'
         env:
-          API_KEY:   ${{ secrets.HP_GRAPH_API_KEY }}
-          NETWORK:   ${{ matrix.network.name }}
-          LABEL:  ${{ github.event.inputs.label }}
+          API_KEY: ${{ secrets.HP_GRAPH_API_KEY }}
+          NETWORK: ${{ matrix.network.name }}
+          LABEL: ${{ github.event.inputs.label }}
         working-directory: ./packages/sdk/typescript/subgraph
         run: |
           yarn dlx @graphprotocol/graph-cli@0.71.2 \

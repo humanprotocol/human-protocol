@@ -17,6 +17,7 @@
     "migration:generate": "yarn typeorm migration:generate -p -d typeorm.config.ts",
     "migration:revert": "yarn typeorm migration:revert -d typeorm.config.ts",
     "migration:run": "yarn typeorm migration:run -d typeorm.config.ts",
+    "migration:run:prod": "typeorm migration:run -d dist/typeorm.config.js",
     "migration:show": "yarn typeorm migration:show -d typeorm.config.ts",
     "setup:local": "ts-node ./scripts/setup-staking.ts && LOCAL=true yarn setup:kvstore",
     "setup:kvstore": "ts-node ./scripts/setup-kv-store.ts",

@@ -2,7 +2,7 @@ name: Faucet server check
 
 on:
   push:
-    branches: '**'
+    branches: "**"
     paths:
       - "packages/core/**"
       - "packages/sdk/typescript/human-protocol-sdk/**"
@@ -19,9 +19,9 @@ jobs:
           node-version-file: .nvmrc
           cache: yarn
       - name: Install dependencies
-        run: yarn install --immutable
-      - name: Build libs
-        run: yarn build:libs
+        run: yarn workspaces focus @apps/faucet-server
+      - name: Build libs (scoped)
+        run: yarn workspaces foreach -Rpt --from @apps/faucet-server run build
       - name: Create .env file
         run: cp .env.example .env
         working-directory: packages/apps/faucet/server

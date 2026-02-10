@@ -2,7 +2,7 @@ name: Subgraph check
 
 on:
   push:
-    branches: '**'
+    branches: "**"
     paths:
       - "packages/core/**"
       - "packages/sdk/typescript/subgraph/**"
@@ -19,10 +19,10 @@ jobs:
           node-version-file: .nvmrc
           cache: yarn
       - name: Install dependencies
-        run: yarn install --immutable
-      - name: Build core package
-        run: yarn workspace @human-protocol/core build
+        run: yarn workspaces focus @tools/subgraph
       - name: Generate manifest for Polygon for tests
         run: NETWORK=polygon yarn workspace @tools/subgraph generate
+      - name: Build packages (scoped)
+        run: yarn workspaces foreach -Rpt --from @tools/subgraph --topological-dev run build
       - name: Run subgraph test
         run: yarn workspace @tools/subgraph test

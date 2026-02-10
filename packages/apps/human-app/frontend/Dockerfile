@@ -18,12 +18,12 @@ COPY ${APP_PATH}/package.json ./${APP_PATH}/
 COPY packages/core ./packages/core
 COPY packages/sdk ./packages/sdk
 
-RUN yarn install
+RUN yarn workspaces focus @apps/human-app-frontend
 
 # Copy base TS config that is required to build packages
 COPY tsconfig.base.json ./
-# Build libs
-RUN yarn build:libs
+# Build libs (scoped)
+RUN yarn workspaces foreach -Rpt --from @apps/human-app-frontend run build
 
 # Copy everything else
 COPY ${APP_PATH} ./${APP_PATH}

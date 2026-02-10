@@ -2,10 +2,10 @@ name: Node.js SDK check
 
 on:
   push:
-    branches: '**'
+    branches: "**"
     paths:
-      - 'packages/core/**'
-      - 'packages/sdk/typescript/human-protocol-sdk/**'
+      - "packages/core/**"
+      - "packages/sdk/typescript/human-protocol-sdk/**"
 
 jobs:
   node-sdk-test:
@@ -18,8 +18,8 @@ jobs:
           node-version-file: .nvmrc
           cache: yarn
       - name: Install dependencies
-        run: yarn install --immutable
-      - name: Build core package
-        run: yarn workspace @human-protocol/core build
+        run: yarn workspaces focus @human-protocol/sdk
+      - name: Build packages (scoped)
+        run: yarn workspaces foreach -Rpt --from @human-protocol/sdk run build
       - name: Run Node.js SDK test
         run: yarn workspace @human-protocol/sdk test
