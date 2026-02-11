@@ -34,7 +34,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          token: ${{ secrets.GH_GITBOOK_TOKEN }}
+          token: ${{ secrets.RELEASE_GH_TOKEN }}
       - name: Setup git identity
         run: |
           git config --global user.name "github-actions[bot]"
