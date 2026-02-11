@@ -6,6 +6,10 @@ import {
   HttpException,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import {
+  SubgraphBadIndexerError,
+  SubgraphRequestError,
+} from '@human-protocol/sdk';
 
 import logger from '../../logger';
 
@@ -23,7 +27,22 @@ export class ExceptionFilter implements IExceptionFilter {
       message: 'Internal server error',
     };
 
-    if (exception instanceof HttpException) {
+    if (exception instanceof SubgraphRequestError) {
+      status = HttpStatus.BAD_GATEWAY;
+      responseBody.message = exception.message;
+
+      if (exception instanceof SubgraphBadIndexerError) {
+        this.logger.warn('Subgraph bad indexers', {
+          error: exception,
+          path: request.url,
+        });
+      } else {
+        this.logger.error('Subgraph request failed', {
+          error: exception,
+          path: request.url,
+        });
+      }
+    } else if (exception instanceof HttpException) {
       status = exception.getStatus();
       const exceptionResponse = exception.getResponse();
       if (typeof exceptionResponse === 'string') {

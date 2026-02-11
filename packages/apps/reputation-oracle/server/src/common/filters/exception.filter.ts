@@ -1,4 +1,8 @@
 import {
+  SubgraphBadIndexerError,
+  SubgraphRequestError,
+} from '@human-protocol/sdk';
+import {
   ArgumentsHost,
   Catch,
   ExceptionFilter as IExceptionFilter,
@@ -31,6 +35,20 @@ export class ExceptionFilter implements IExceptionFilter {
         responseBody.message = 'Unprocessable entity';
       }
       this.logger.error('Database error', exception);
+    } else if (exception instanceof SubgraphRequestError) {
+      status = HttpStatus.BAD_GATEWAY;
+      responseBody.message = exception.message;
+      if (exception instanceof SubgraphBadIndexerError) {
+        this.logger.warn('Subgraph bad indexers', {
+          error: exception,
+          path: request.url,
+        });
+      } else {
+        this.logger.error('Subgraph request failed', {
+          error: exception,
+          path: request.url,
+        });
+      }
     } else if (exception instanceof HttpException) {
       status = exception.getStatus();
       const exceptionResponse = exception.getResponse();
