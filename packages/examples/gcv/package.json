@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@google-cloud/vision": "^4.3.2",
-    "@nestjs/common": "^10.2.7",
+    "@nestjs/common": "^11.1.12",
     "axios": "^1.7.2",
     "dotenv": "^17.2.2",
     "xml2js": "^0.6.2"

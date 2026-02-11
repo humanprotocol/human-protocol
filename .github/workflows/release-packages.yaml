@@ -1,0 +1,108 @@
+name: Create package releases
+
+permissions:
+  contents: write
+
+on:
+  push:
+    tags:
+      - "js/**"
+      - "python/**"
+
+jobs:
+  release:
+    name: Publish GitHub release for npm package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Check if release already exists
+        id: release_check
+        uses: actions/github-script@v8
+        with:
+          github-token: ${{ secrets.RELEASE_GH_TOKEN }}
+          script: |
+            const tag = context.ref.replace('refs/tags/', '');
+            try {
+              const release = await github.rest.repos.getReleaseByTag({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag,
+              });
+              core.notice(`Release already exists: ${release.data.html_url}`);
+              core.setOutput('exists', 'true');
+            } catch (error) {
+              if (error.status === 404) {
+                core.setOutput('exists', 'false');
+              } else {
+                throw error;
+              }
+            }
+
+      - name: Build release body from package CHANGELOG
+        id: release_body
+        if: ${{ steps.release_check.outputs.exists != 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          tag="${GITHUB_REF_NAME}"
+          body_file="${RUNNER_TEMP}/release-body.md"
+
+          if [[ "$tag" != *"@"* ]]; then
+            echo "Invalid tag '${tag}': missing '@<version>' suffix" >&2
+            exit 1
+          fi
+
+          version="${tag##*@}"
+          changelog_path=""
+
+          if [[ "$tag" == js/* ]]; then
+            pkg_and_version="${tag#js/}"
+            pkg_name="${pkg_and_version%@*}"
+            scoped_name="@human-protocol/${pkg_name}"
+            pkg_json=$(grep -R --include package.json -n "\"name\": \"${scoped_name}\"" packages | head -n 1 | cut -d: -f1 || true)
+            if [[ -n "$pkg_json" ]]; then
+              changelog_path="$(dirname "$pkg_json")/CHANGELOG.md"
+            fi
+          elif [[ "$tag" == python/* ]]; then
+            changelog_path="packages/sdk/python/human-protocol-sdk/CHANGELOG.md"
+          fi
+
+          if [[ -z "$changelog_path" ]]; then
+            echo "Unable to resolve CHANGELOG.md path for tag '${tag}'" >&2
+            exit 1
+          fi
+
+          if [[ ! -f "$changelog_path" ]]; then
+            echo "CHANGELOG.md not found at '${changelog_path}' for tag '${tag}'" >&2
+            exit 1
+          fi
+
+          # Extract the section for the exact version in the tag.
+          section_body=$(awk -v ver="$version" '
+            $0 ~ "^##[[:space:]]+" ver "[[:space:]]*$" { in_section=1; next }
+            in_section && $0 ~ "^##[[:space:]]+" { exit }
+            in_section { print }
+          ' "$changelog_path" | sed '/./,$!d' || true)
+
+          if [[ -z "$section_body" ]]; then
+            echo "No CHANGELOG entry found for version '${version}' in '${changelog_path}'" >&2
+            exit 1
+          fi
+
+          printf "%s\n" "$section_body" > "$body_file"
+
+          echo "path=$body_file" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub release
+        id: release
+        if: ${{ steps.release_check.outputs.exists != 'true' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          body_path: ${{ steps.release_body.outputs.path }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_GH_TOKEN }}

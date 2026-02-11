@@ -6,7 +6,7 @@ import {
   Staking,
   Staking__factory,
 } from '@human-protocol/core/typechain-types';
-import { ContractRunner, Overrides, ethers } from 'ethers';
+import { ContractRunner, ethers } from 'ethers';
 import { BaseEthersClient } from './base';
 import { NETWORKS } from './constants';
 import { requiresSigner } from './decorators';
@@ -29,7 +29,7 @@ import {
   SubgraphOptions,
 } from './interfaces';
 import { StakerData } from './graphql';
-import { NetworkData } from './types';
+import { NetworkData, TransactionOverrides } from './types';
 import { getSubgraphUrl, customGqlFetch, throwError } from './utils';
 import {
   GET_STAKER_BY_ADDRESS_QUERY,
@@ -194,7 +194,7 @@ export class StakingClient extends BaseEthersClient {
   @requiresSigner
   public async approveStake(
     amount: bigint,
-    txOptions: Overrides = {}
+    txOptions: TransactionOverrides = {}
   ): Promise<void> {
     if (typeof amount !== 'bigint') {
       throw ErrorInvalidStakingValueType;
@@ -205,13 +205,15 @@ export class StakingClient extends BaseEthersClient {
     }
 
     try {
-      await (
-        await this.tokenContract.approve(
-          await this.stakingContract.getAddress(),
-          amount,
-          txOptions
-        )
-      ).wait();
+      await this.sendTxAndWait(
+        async (overrides) =>
+          this.tokenContract.approve(
+            await this.stakingContract.getAddress(),
+            amount,
+            overrides
+          ),
+        txOptions
+      );
       return;
     } catch (e) {
       return throwError(e);
@@ -240,7 +242,10 @@ export class StakingClient extends BaseEthersClient {
    * ```
    */
   @requiresSigner
-  public async stake(amount: bigint, txOptions: Overrides = {}): Promise<void> {
+  public async stake(
+    amount: bigint,
+    txOptions: TransactionOverrides = {}
+  ): Promise<void> {
     if (typeof amount !== 'bigint') {
       throw ErrorInvalidStakingValueType;
     }
@@ -250,7 +255,10 @@ export class StakingClient extends BaseEthersClient {
     }
 
     try {
-      await (await this.stakingContract.stake(amount, txOptions)).wait();
+      await this.sendTxAndWait(
+        (overrides) => this.stakingContract.stake(amount, overrides),
+        txOptions
+      );
       return;
     } catch (e) {
       return throwError(e);
@@ -280,7 +288,7 @@ export class StakingClient extends BaseEthersClient {
   @requiresSigner
   public async unstake(
     amount: bigint,
-    txOptions: Overrides = {}
+    txOptions: TransactionOverrides = {}
   ): Promise<void> {
     if (typeof amount !== 'bigint') {
       throw ErrorInvalidStakingValueType;
@@ -291,7 +299,10 @@ export class StakingClient extends BaseEthersClient {
     }
 
     try {
-      await (await this.stakingContract.unstake(amount, txOptions)).wait();
+      await this.sendTxAndWait(
+        (overrides) => this.stakingContract.unstake(amount, overrides),
+        txOptions
+      );
       return;
     } catch (e) {
       return throwError(e);
@@ -312,9 +323,12 @@ export class StakingClient extends BaseEthersClient {
    * ```
    */
   @requiresSigner
-  public async withdraw(txOptions: Overrides = {}): Promise<void> {
+  public async withdraw(txOptions: TransactionOverrides = {}): Promise<void> {
     try {
-      await (await this.stakingContract.withdraw(txOptions)).wait();
+      await this.sendTxAndWait(
+        (overrides) => this.stakingContract.withdraw(overrides),
+        txOptions
+      );
       return;
     } catch (e) {
       return throwError(e);
@@ -356,7 +370,7 @@ export class StakingClient extends BaseEthersClient {
     staker: string,
     escrowAddress: string,
     amount: bigint,
-    txOptions: Overrides = {}
+    txOptions: TransactionOverrides = {}
   ): Promise<void> {
     if (typeof amount !== 'bigint') {
       throw ErrorInvalidStakingValueType;
@@ -377,15 +391,17 @@ export class StakingClient extends BaseEthersClient {
     await this.checkValidEscrow(escrowAddress);
 
     try {
-      await (
-        await this.stakingContract.slash(
-          slasher,
-          staker,
-          escrowAddress,
-          amount,
-          txOptions
-        )
-      ).wait();
+      await this.sendTxAndWait(
+        (overrides) =>
+          this.stakingContract.slash(
+            slasher,
+            staker,
+            escrowAddress,
+            amount,
+            overrides
+          ),
+        txOptions
+      );
 
       return;
     } catch (e) {

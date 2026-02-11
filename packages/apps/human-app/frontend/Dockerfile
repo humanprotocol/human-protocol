@@ -1,5 +1,5 @@
 # Using bullseye instead of slim because it needs Python and build tools for node-gyp
-FROM node:22.14-bullseye
+FROM node:24.13-bullseye
 ARG APP_PATH=packages/apps/human-app/frontend
 
 # Create app directory
@@ -18,12 +18,12 @@ COPY ${APP_PATH}/package.json ./${APP_PATH}/
 COPY packages/core ./packages/core
 COPY packages/sdk ./packages/sdk
 
-RUN yarn install
+RUN yarn workspaces focus @apps/human-app-frontend
 
 # Copy base TS config that is required to build packages
 COPY tsconfig.base.json ./
-# Build libs
-RUN yarn build:libs
+# Build libs (scoped)
+RUN yarn workspaces foreach -Rpt --from @apps/human-app-frontend run build
 
 # Copy everything else
 COPY ${APP_PATH} ./${APP_PATH}

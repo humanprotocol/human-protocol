@@ -2,10 +2,10 @@ name: Python SDK check
 
 on:
   push:
-    branches: '**'
+    branches: "**"
     paths:
-      - 'packages/core/**'
-      - 'packages/sdk/python/human-protocol-sdk/**'
+      - "packages/core/**"
+      - "packages/sdk/python/human-protocol-sdk/**"
 
 jobs:
   python-test:
@@ -13,18 +13,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version-file: .nvmrc
           cache: yarn
       - name: Install core package dependencies
-        run: yarn install --immutable
+        run: yarn workspaces focus @human-protocol/core
       - name: Build core package
         run: yarn workspace @human-protocol/core build
       - name: Set up Python 3.10
         uses: actions/setup-python@v6
         with:
-          python-version: '3.10'
+          python-version: "3.10"
       - name: Install pipenv
         run: pip install pipenv
       - name: Python test

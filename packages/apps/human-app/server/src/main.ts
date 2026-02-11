@@ -36,7 +36,7 @@ async function bootstrap() {
   const port = envConfigService.port;
   if (envConfigService.isCacheToRestart) {
     const cacheManager: Cache = app.get<Cache>(CACHE_MANAGER);
-    await cacheManager.reset();
+    await cacheManager.clear();
   }
 
   app.useGlobalPipes(new ValidationPipe({ transform: true }));

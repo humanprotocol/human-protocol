@@ -6,7 +6,15 @@ import { EscrowUtilsModule } from '../escrow/escrow-utils.module';
 import { KvStoreModule } from '../kv-store/kv-store.module';
 
 @Module({
-  imports: [HttpModule, EscrowUtilsModule, KvStoreModule],
+  imports: [
+    HttpModule.register({
+      paramsSerializer: {
+        indexes: null,
+      },
+    }),
+    EscrowUtilsModule,
+    KvStoreModule,
+  ],
   providers: [ExchangeOracleGateway, ExchangeOracleProfile],
   exports: [ExchangeOracleGateway],
 })

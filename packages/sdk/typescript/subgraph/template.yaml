@@ -2,6 +2,8 @@ specVersion: 1.0.0
 description: '{{ description }}'
 schema:
   file: ./schema.graphql
+indexerHints:
+  prune: auto
 dataSources:
   - kind: ethereum
     name: EscrowFactory

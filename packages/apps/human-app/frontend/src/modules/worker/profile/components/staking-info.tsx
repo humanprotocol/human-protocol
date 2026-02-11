@@ -1,4 +1,11 @@
-import { Button, IconButton, Skeleton, Stack, Typography } from '@mui/material';
+import {
+  Button,
+  IconButton,
+  Link,
+  Skeleton,
+  Stack,
+  Typography,
+} from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { Chip } from '@/shared/components/ui/chip';
 import { env } from '@/shared/env';
@@ -12,6 +19,10 @@ import { useEffect, useRef, useState } from 'react';
 import { useAccessTokenRefresh } from '@/api/hooks/use-access-token-refresh';
 import { colorPalette } from '@/shared/styles/color-palette';
 import { useGetUiConfig } from '@/shared/hooks/use-get-ui-config';
+import {
+  TopNotificationType,
+  useNotification,
+} from '@/shared/hooks/use-notification';
 
 export function StakingInfo() {
   const [isPromptExpanded, setIsPromptExpanded] = useState(false);
@@ -20,6 +31,7 @@ export function StakingInfo() {
   const { user, updateUserData } = useAuthenticatedUser();
   const { refreshAccessTokenAsync } = useAccessTokenRefresh();
   const { t } = useTranslation();
+  const { showNotification } = useNotification();
 
   const { openModal: openAddApiKeyModal } = useAddApiKeyModal();
   const { data: exchangeApiKeyData, isLoading: isExchangeApiKeyLoading } =
@@ -40,15 +52,27 @@ export function StakingInfo() {
     Number(stakingSummary?.on_chain_stake || 0) +
     Number(stakingSummary?.exchange_stake || 0);
 
-  const isStakingError =
-    !!stakingSummary?.on_chain_error ||
-    !!stakingSummary?.exchange_error ||
-    isError;
-
   const isStaked =
-    isLoading || isStakingError || isUiConfigLoading
+    isLoading || isError || isUiConfigLoading
       ? false
       : stakedAmount >= Number(uiConfig?.minThreshold || '0');
+
+  useEffect(() => {
+    const stakingSummaryError =
+      stakingSummary?.on_chain_error || stakingSummary?.exchange_error;
+    if (stakingSummaryError && !isLoading && !isRefetching) {
+      showNotification({
+        type: TopNotificationType.WARNING,
+        message: stakingSummaryError,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    isLoading,
+    isRefetching,
+    stakingSummary?.on_chain_error,
+    stakingSummary?.exchange_error,
+  ]);
 
   useEffect(() => {
     if (isRefetching || isLoading) return;
@@ -88,7 +112,7 @@ export function StakingInfo() {
         ) : (
           <Chip
             label={
-              isStakingError
+              isError
                 ? t('worker.profile.stakingStatusValues.error')
                 : isStaked
                   ? t('worker.profile.stakingStatusValues.staked')
@@ -104,6 +128,22 @@ export function StakingInfo() {
               amount: uiConfig?.minThreshold,
             })
           : t('worker.profile.stakingInfo.promptShort')}{' '}
+        {isPromptExpanded && (
+          <>
+            <br />
+            <Link
+              href="https://docs.humanprotocol.org/tutorials/workers/staking/#how-to-create-api-keys"
+              sx={{
+                textDecoration: 'underline',
+                fontWeight: '600',
+              }}
+              target="_blank"
+            >
+              {t('worker.profile.stakingInfo.howToCreateApiKeys')}
+            </Link>
+            <br />
+          </>
+        )}
         <Button
           variant="text"
           size="small"
@@ -179,7 +219,7 @@ export function StakingInfo() {
           Connect API KEY
         </Button>
       </Stack>
-      <ApiKeyData />
+      <ApiKeyData stakingExchangeError={stakingSummary?.exchange_error} />
     </Stack>
   );
 }

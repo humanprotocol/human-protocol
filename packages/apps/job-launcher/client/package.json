@@ -9,10 +9,10 @@
     "@hcaptcha/react-hcaptcha": "^1.14.0",
     "@human-protocol/sdk": "workspace:*",
     "@mui/icons-material": "^7.0.1",
-    "@mui/lab": "^5.0.0-alpha.141",
+    "@mui/lab": "^6.0.0-dev.240424162023-9968b4889d",
     "@mui/material": "^5.16.7",
     "@mui/system": "^5.15.14",
-    "@mui/x-date-pickers": "^7.23.6",
+    "@mui/x-date-pickers": "^8.26.0",
     "@reduxjs/toolkit": "^2.5.0",
     "@stripe/react-stripe-js": "^3.0.0",
     "@stripe/stripe-js": "^4.2.0",
@@ -50,7 +50,7 @@
     "format:prettier": "prettier --write \"**/*.{ts,tsx,js,jsx}\"",
     "format:lint": "eslint --fix \"**/*.{ts,tsx,js,jsx}\"",
     "format": "yarn format:prettier && yarn format:lint",
-    "vercel-build": "yarn workspace human-protocol build:libs && yarn build"
+    "vercel-build": "yarn workspaces foreach -Rpt --from @apps/job-launcher-client run build"
   },
   "browserslist": {
     "production": [
@@ -79,7 +79,7 @@
     "prettier": "^3.7.4",
     "resize-observer-polyfill": "^1.5.1",
     "vite": "^6.2.4",
-    "vite-plugin-node-polyfills": "^0.23.0"
+    "vite-plugin-node-polyfills": "^0.25.0"
   },
   "lint-staged": {
     "*.{ts,tsx}": [

@@ -38,7 +38,7 @@ services:
       <<: *default-logging
     build: 
       context: ../
-      dockerfile: packages/core/Dockerfile.local
+      dockerfile: docker-setup/Dockerfile.core
     healthcheck:
       test: yarn local:readiness
       interval: 15s

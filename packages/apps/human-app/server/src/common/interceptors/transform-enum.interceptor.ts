@@ -3,13 +3,12 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
-  BadRequestException,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { plainToInstance, ClassConstructor } from 'class-transformer';
-import { validateSync } from 'class-validator';
 import 'reflect-metadata';
+import { PARAMTYPES_METADATA } from '@nestjs/common/constants';
 
 @Injectable()
 export class TransformEnumInterceptor implements NestInterceptor {
@@ -29,7 +28,13 @@ export class TransformEnumInterceptor implements NestInterceptor {
 
       // Transform and validate enums in the query (for GET requests)
       if (query) {
-        request.query = this.transformEnums(query, targetClass);
+        const transformedQuery = this.transformEnums(query, targetClass);
+        Object.defineProperty(request, 'query', {
+          value: transformedQuery,
+          configurable: true,
+          enumerable: true,
+          writable: true,
+        });
       }
     }
 
@@ -40,19 +45,15 @@ export class TransformEnumInterceptor implements NestInterceptor {
     context: ExecutionContext,
   ): ClassConstructor<any> | null {
     const handler = context.getHandler();
-    const controller = context.getClass();
+    const prototype = context.getClass().prototype;
 
-    // Get the parameter types of the route handler
-    const routeArgs = Reflect.getMetadata(
-      'design:paramtypes',
-      controller.prototype,
-      handler.name,
+    const paramTypes =
+      Reflect.getMetadata(PARAMTYPES_METADATA, prototype, handler.name) ?? [];
+
+    return (
+      paramTypes.find((type: unknown) => this.isTransformableClass(type)) ??
+      null
     );
-
-    // Return the first parameter's constructor if the handler has a class (DTO)
-    return routeArgs && routeArgs.length > 0
-      ? (routeArgs[0] as ClassConstructor<any>)
-      : null;
   }
 
   private transformEnums(
@@ -60,22 +61,13 @@ export class TransformEnumInterceptor implements NestInterceptor {
     targetClass: ClassConstructor<any>,
   ): any {
     // Convert the body or query to an instance of the target class
-    let transformedInstance = plainToInstance(targetClass, bodyOrQuery);
-
-    // Transform the enums before validation
-    transformedInstance = this.lowercaseEnumProperties(
+    const transformedInstance = this.lowercaseEnumProperties(
       bodyOrQuery,
-      transformedInstance,
+      plainToInstance(targetClass, bodyOrQuery),
       targetClass,
     );
 
-    // Validate the transformed data
-    const validationErrors = validateSync(transformedInstance);
-    if (validationErrors.length > 0) {
-      throw new BadRequestException('Validation failed');
-    }
-
-    return bodyOrQuery;
+    return transformedInstance;
   }
 
   private lowercaseEnumProperties(
@@ -117,5 +109,19 @@ export class TransformEnumInterceptor implements NestInterceptor {
       }
     }
     return bodyOrQuery;
+  }
+
+  private isTransformableClass(type: unknown): type is ClassConstructor<any> {
+    if (typeof type !== 'function') {
+      return false;
+    }
+
+    return (
+      type !== String &&
+      type !== Boolean &&
+      type !== Number &&
+      type !== Array &&
+      type !== Object
+    );
   }
 }

@@ -13,7 +13,7 @@
     "format:prettier": "prettier --write \"**/*.{ts,tsx,js,jsx}\"",
     "format:lint": "eslint --fix \"**/*.{ts,tsx,js,jsx}\"",
     "format": "yarn format:prettier && yarn format:lint",
-    "vercel-build": "yarn workspace human-protocol build:libs && yarn build"
+    "vercel-build": "yarn workspaces foreach -Rpt --from @apps/staking-dashboard-client run build"
   },
   "browserslist": {
     "production": [
@@ -28,6 +28,8 @@
     ]
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
     "@human-protocol/sdk": "*",
     "@mui/icons-material": "^7.0.1",
     "@mui/material": "^5.16.7",
@@ -41,6 +43,7 @@
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.24.1",
     "serve": "^14.2.4",
+    "simplebar-react": "^3.3.2",
     "viem": "2.x",
     "wagmi": "^2.14.6"
   },
@@ -58,7 +61,7 @@
     "sass": "^1.89.2",
     "typescript": "^5.6.3",
     "vite": "^6.2.4",
-    "vite-plugin-node-polyfills": "^0.23.0"
+    "vite-plugin-node-polyfills": "^0.25.0"
   },
   "lint-staged": {
     "*.{ts,tsx}": [

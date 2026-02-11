@@ -20,7 +20,13 @@ export class TransformInterceptor implements NestInterceptor {
     }
 
     if (request.query) {
-      request.query = this.transformRequestData(request.query);
+      const transformedQuery = this.transformRequestData(request.query);
+      Object.defineProperty(request, 'query', {
+        value: transformedQuery,
+        configurable: true,
+        enumerable: true,
+        writable: true,
+      });
     }
 
     if (request.params) {

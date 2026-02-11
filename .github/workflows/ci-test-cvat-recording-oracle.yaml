@@ -2,10 +2,10 @@ name: CVAT Recording Oracle Tests
 
 on:
   push:
-    branches: '**'
+    branches: "**"
     paths:
-      - 'packages/examples/cvat/recording-oracle/**'
-      - 'packages/core/**'
+      - "packages/examples/cvat/recording-oracle/**"
+      - "packages/core/**"
 
 jobs:
   cvat-exo-test:

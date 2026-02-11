@@ -2,9 +2,9 @@ name: Protocol check
 
 on:
   push:
-    branches: '**'
+    branches: "**"
     paths:
-      - 'packages/core/**'
+      - "packages/core/**"
 
 jobs:
   core-test:
@@ -17,6 +17,6 @@ jobs:
           node-version-file: .nvmrc
           cache: yarn
       - name: Install dependencies
-        run: yarn install --immutable
+        run: yarn workspaces focus @human-protocol/core
       - name: Run protocol test
         run: yarn workspace @human-protocol/core test

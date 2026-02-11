@@ -1,4 +1,4 @@
-FROM node:22.14-slim
+FROM node:24.13-slim
 ARG APP_PATH=packages/apps/reputation-oracle/server
 
 # Create app directory
@@ -18,12 +18,12 @@ COPY packages/core ./packages/core
 COPY packages/sdk ./packages/sdk
 COPY packages/libs ./packages/libs
 
-RUN yarn install
+RUN yarn workspaces focus @apps/reputation-oracle
 
 # Copy base TS config that is required to build packages
 COPY tsconfig.base.json ./
-# Build libs
-RUN yarn build:libs
+# Build libs (scoped)
+RUN yarn workspaces foreach -Rpt --from @apps/reputation-oracle run build
 
 # Copy everything else
 COPY ${APP_PATH} ./${APP_PATH}
