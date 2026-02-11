@@ -103,4 +103,6 @@ query GetTransaction(
     }}
 }}
 {transaction_fragment}
-""".format(transaction_fragment=transaction_fragment)
+""".format(
+        transaction_fragment=transaction_fragment
+    )
