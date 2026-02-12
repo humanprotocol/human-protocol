@@ -29,3 +29,4 @@ export const SUPPORTED_EXCHANGES_INFO: readonly SupportedExchangeInfo[] = [
 ] as const;
 
 export const DEFAULT_TIMEOUT_MS = 5000;
+export const SDK_TX_TIMEOUT_MS = 90000;

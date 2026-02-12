@@ -14,7 +14,10 @@ import stringify from 'json-stable-stringify';
 import _ from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 
-import { BACKOFF_INTERVAL_SECONDS } from '@/common/constants';
+import {
+  BACKOFF_INTERVAL_SECONDS,
+  SDK_TX_TIMEOUT_MS,
+} from '@/common/constants';
 import { JobManifest, JobRequestType } from '@/common/types';
 import { ServerConfigService } from '@/config';
 import { isDuplicatedError } from '@/database';
@@ -243,10 +246,16 @@ export class EscrowCompletionService {
           const gasPrice = await this.web3Service.calculateGasPrice(chainId);
 
           if (escrowStatus === EscrowStatus.ToCancel) {
-            await escrowClient.cancel(escrowAddress, { gasPrice });
+            await escrowClient.cancel(escrowAddress, {
+              gasPrice,
+              timeoutMs: SDK_TX_TIMEOUT_MS,
+            });
             escrowStatus = EscrowStatus.Cancelled;
           } else {
-            await escrowClient.complete(escrowAddress, { gasPrice });
+            await escrowClient.complete(escrowAddress, {
+              gasPrice,
+              timeoutMs: SDK_TX_TIMEOUT_MS,
+            });
             escrowStatus = EscrowStatus.Complete;
           }
 
@@ -453,7 +462,7 @@ export class EscrowCompletionService {
 
     try {
       const transactionResponse = await signer.sendTransaction(rawTransaction);
-      await transactionResponse.wait();
+      await transactionResponse.wait(undefined, SDK_TX_TIMEOUT_MS);
 
       await this.escrowPayoutsBatchRepository.deleteOne(payoutsBatch);
     } catch (error) {

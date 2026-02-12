@@ -1,6 +1,7 @@
 import { KVStoreClient, KVStoreUtils } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 
+import { SDK_TX_TIMEOUT_MS } from '@/common/constants';
 import { SignatureType } from '@/common/enums';
 import { KycStatus, UserRole } from '@/common/enums';
 import { Web3ConfigService } from '@/config';
@@ -222,7 +223,9 @@ export class UserService {
       );
     }
 
-    await kvstore.set(operatorUser.evmAddress, OperatorStatus.ACTIVE);
+    await kvstore.set(operatorUser.evmAddress, OperatorStatus.ACTIVE, {
+      timeoutMs: SDK_TX_TIMEOUT_MS,
+    });
   }
 
   async disableOperator(userId: number, signature: string): Promise<void> {
@@ -266,7 +269,9 @@ export class UserService {
       );
     }
 
-    await kvstore.set(operatorUser.evmAddress, OperatorStatus.INACTIVE);
+    await kvstore.set(operatorUser.evmAddress, OperatorStatus.INACTIVE, {
+      timeoutMs: SDK_TX_TIMEOUT_MS,
+    });
   }
 
   async registrationInExchangeOracle(
