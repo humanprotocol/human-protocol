@@ -1,24 +1,23 @@
 {
-  "name": "@tools/subgraph",
+  "name": "@tools/staking-subgraph",
   "private": true,
-  "description": "Human Protocol Subgraph",
+  "description": "Human Protocol Staking Subgraph",
   "version": "1.0.0",
   "files": [
     "generated"
   ],
   "scripts": {
     "clean": "rm -rf build generated subgraph.yaml",
-    "generate": "sh -c 'NETWORK=${NETWORK:-polygon}; mustache ./config/$NETWORK.json template.yaml > subgraph.yaml && yarn generate-escrow && yarn generate-hmt && graph codegen'",
-    "generate-escrow": "sh -c 'NETWORK=${NETWORK:-polygon}; mustache ./config/$NETWORK.json src/mapping/EscrowTemplate.ts > src/mapping/Escrow.ts'",
-    "generate-hmt": "sh -c 'NETWORK=${NETWORK:-polygon}; mustache ./config/$NETWORK.json src/mapping/HMTokenTemplate.ts > src/mapping/HMToken.ts'",
+    "generate": "sh -c 'NETWORK=${NETWORK:-polygon}; mustache ./config/$NETWORK.json template.yaml > subgraph.yaml && yarn generate-staking && graph codegen'",
+    "generate-staking": "sh -c 'NETWORK=${NETWORK:-polygon}; mustache ./config/$NETWORK.json src/mapping/StakingTemplate.ts > src/mapping/Staking.ts'",
     "codegen": "graph codegen",
     "build": "graph build",
     "test": "NETWORK=polygon yarn generate && graph test",
-    "create-local": "graph create --node http://localhost:8020/ humanprotocol/localhost",
-    "remove-local": "graph remove --node http://localhost:8020/ humanprotocol/localhost",
-    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5010 humanprotocol/localhost -l 0",
+    "create-local": "graph create --node http://localhost:8020/ humanprotocol/staking-localhost",
+    "remove-local": "graph remove --node http://localhost:8020/ humanprotocol/staking-localhost",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5010 humanprotocol/staking-localhost -l 0",
     "health-local:node": "sh ./local-graph-status.sh node_health",
-    "health-local:subgraph": "SUBGRAPH_NAME=humanprotocol/localhost sh ./local-graph-status.sh subgraph_health",
+    "health-local:subgraph": "SUBGRAPH_NAME=humanprotocol/staking-localhost sh ./local-graph-status.sh subgraph_health",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write '**/*.{ts,json,graphql}'"
@@ -26,12 +25,13 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/humanprotocol/human-protocol.git",
-    "directory": "packages/sdk/typescript/subgraph"
+    "directory": "packages/sdk/typescript/staking-subgraph"
   },
   "keywords": [
     "human-protocol",
     "sdk",
     "subgraph",
+    "staking",
     "ethereum"
   ],
   "license": "MIT",
@@ -41,7 +41,6 @@
     "@graphql-eslint/eslint-plugin": "^3.19.1",
     "@human-protocol/core": "workspace:*",
     "eslint": "^9.39.1",
-    "ethers": "~6.15.0",
     "graphql": "^16.6.0",
     "matchstick-as": "^0.6.0",
     "mustache": "^4.2.0",

@@ -1,0 +1,9 @@
+{
+  "network": "sepolia",
+  "description": "HUMAN staking subgraph on Sepolia Ethereum Testnet",
+  "Staking": {
+    "address": "0x2163e3A40032Af1C359ac731deaB48258b317890",
+    "startBlock": 7062708,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/Staking.json"
+  }
+}

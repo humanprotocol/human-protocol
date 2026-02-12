@@ -47,8 +47,6 @@ type Operator @entity(immutable: false) {
 
   name: String
   category: String
-
-  staker: Staker @derivedFrom(field: "operator")
 }
 
 type OperatorURL @entity(immutable: false) {
@@ -253,63 +251,6 @@ type KVStore @entity(immutable: false) {
   address: Bytes!
   key: String!
   value: String!
-}
-
-# Staking
-type Staker @entity(immutable: false) {
-  id: Bytes!
-  address: Bytes! # address
-  stakedAmount: BigInt!
-  lockedAmount: BigInt!
-  withdrawnAmount: BigInt!
-  slashedAmount: BigInt!
-  lockedUntilTimestamp: BigInt!
-  lastDepositTimestamp: BigInt!
-
-  operator: Operator
-}
-
-type StakeDepositedEvent @entity(immutable: true) {
-  id: Bytes!
-  block: BigInt!
-  timestamp: BigInt!
-  txHash: Bytes!
-
-  staker: Bytes! # address
-  amount: BigInt!
-}
-
-type StakeLockedEvent @entity(immutable: true) {
-  id: Bytes!
-  block: BigInt!
-  timestamp: BigInt!
-  txHash: Bytes!
-
-  staker: Bytes! # address
-  amount: BigInt!
-  lockedUntilTimestamp: BigInt!
-}
-
-type StakeWithdrawnEvent @entity(immutable: true) {
-  id: Bytes!
-  block: BigInt!
-  timestamp: BigInt!
-  txHash: Bytes!
-
-  staker: Bytes! # address
-  amount: BigInt!
-}
-
-type StakeSlashedEvent @entity(immutable: true) {
-  id: Bytes!
-  block: BigInt!
-  timestamp: BigInt!
-  txHash: Bytes!
-
-  escrowAddress: Bytes! # address
-  staker: Bytes! # address
-  slashRequester: Bytes! # address
-  amount: BigInt!
 }
 
 ##################################################

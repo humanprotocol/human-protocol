@@ -1,4 +1,4 @@
-import { Address, BigInt, DataSourceContext } from '@graphprotocol/graph-ts';
+import { BigInt, DataSourceContext } from '@graphprotocol/graph-ts';
 import {
   afterEach,
   assert,
@@ -11,7 +11,6 @@ import {
 
 import { Operator } from '../../generated/schema';
 import { handleDataSaved } from '../../src/mapping/KVStore';
-import { createOrLoadStaker } from '../../src/mapping/Staking';
 import { toEventId } from '../../src/mapping/utils/event';
 import { toBytes } from '../../src/mapping/utils/string';
 import { createDataSavedEvent } from './fixtures';
@@ -792,27 +791,6 @@ describe('KVStore', () => {
       data2.params.sender.toHex(),
       'category',
       'market_making'
-    );
-  });
-
-  test('Should assign operator to Staker if Staker exists before Operator (KVStore)', () => {
-    const stakerAddress = '0xD979105297fB0eee83F7433fC09279cb5B94fFC7';
-
-    const staker = createOrLoadStaker(Address.fromString(stakerAddress));
-
-    const operatorEvent = createDataSavedEvent(
-      stakerAddress,
-      'role',
-      'Operator',
-      BigInt.fromI32(11)
-    );
-    handleDataSaved(operatorEvent);
-
-    assert.fieldEquals(
-      'Staker',
-      staker.address.toHex(),
-      'operator',
-      staker.address.toHex()
     );
   });
 });

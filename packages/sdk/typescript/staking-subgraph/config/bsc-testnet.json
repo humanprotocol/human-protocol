@@ -1,0 +1,9 @@
+{
+  "network": "chapel",
+  "description": "Human staking subgraph on Binance Smart Chain testnet",
+  "Staking": {
+    "address": "0xD6D347ba6987519B4e42EcED43dF98eFf5465a23",
+    "startBlock": 45938762,
+    "abi": "../../../../node_modules/@human-protocol/core/abis/Staking.json"
+  }
+}

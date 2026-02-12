@@ -1,0 +1,49 @@
+type Staker @entity(immutable: false) {
+  id: Bytes!
+  address: Bytes!
+  stakedAmount: BigInt!
+  lockedAmount: BigInt!
+  withdrawnAmount: BigInt!
+  slashedAmount: BigInt!
+  lockedUntilTimestamp: BigInt!
+  lastDepositTimestamp: BigInt!
+}
+
+type StakeDepositedEvent @entity(immutable: true) {
+  id: Bytes!
+  block: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  staker: Bytes!
+  amount: BigInt!
+}
+
+type StakeLockedEvent @entity(immutable: true) {
+  id: Bytes!
+  block: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  staker: Bytes!
+  amount: BigInt!
+  lockedUntilTimestamp: BigInt!
+}
+
+type StakeWithdrawnEvent @entity(immutable: true) {
+  id: Bytes!
+  block: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  staker: Bytes!
+  amount: BigInt!
+}
+
+type StakeSlashedEvent @entity(immutable: true) {
+  id: Bytes!
+  block: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  escrowAddress: Bytes!
+  staker: Bytes!
+  slashRequester: Bytes!
+  amount: BigInt!
+}

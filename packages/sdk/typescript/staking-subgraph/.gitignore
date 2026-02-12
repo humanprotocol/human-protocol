@@ -11,5 +11,4 @@ subgraph.yaml
 tests/.bin
 tests/.latest.json
 
-src/mapping/HMToken.ts
-src/mapping/Escrow.ts
+src/mapping/Staking.ts

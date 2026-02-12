@@ -12,7 +12,6 @@ import {
   Operator,
   OperatorURL,
   ReputationNetwork,
-  Staker,
 } from '../../generated/schema';
 import { isValidEthAddress } from './utils/ethAdrress';
 import { toEventId } from './utils/event';
@@ -27,12 +26,6 @@ export function createOrLoadOperator(address: Address): Operator {
     operator = new Operator(address);
     operator.address = address;
     operator.amountJobsProcessed = ZERO_BI;
-
-    const staker = Staker.load(address);
-    if (staker) {
-      staker.operator = operator.id;
-      staker.save();
-    }
     operator.save();
   }
 
