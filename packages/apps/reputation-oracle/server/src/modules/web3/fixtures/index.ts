@@ -18,6 +18,7 @@ export const mockWeb3ConfigService: Omit<Web3ConfigService, 'configService'> = {
   operatorAddress: testWallet.address,
   network: Web3Network.TESTNET,
   gasPriceMultiplier: faker.number.int({ min: 1, max: 42 }),
+  txTimeoutMs: faker.number.int({ min: 30000, max: 120000 }),
   reputationNetworkChainId: generateTestnetChainId(),
   getRpcUrlByChainId: () => faker.internet.url(),
 };

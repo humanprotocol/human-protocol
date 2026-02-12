@@ -25,13 +25,15 @@ import { Test } from '@nestjs/testing';
 import stringify from 'json-stable-stringify';
 import _ from 'lodash';
 
-import { SDK_TX_TIMEOUT_MS } from '@/common/constants';
 import { CvatJobType, FortuneJobType } from '@/common/enums';
-import { ServerConfigService } from '@/config';
+import { ServerConfigService, Web3ConfigService } from '@/config';
 import { ReputationService } from '@/modules/reputation';
 import { StorageService } from '@/modules/storage';
 import { WalletWithProvider, Web3Service } from '@/modules/web3';
-import { generateTestnetChainId } from '@/modules/web3/fixtures';
+import {
+  generateTestnetChainId,
+  mockWeb3ConfigService,
+} from '@/modules/web3/fixtures';
 import { OutgoingWebhookService } from '@/modules/webhook';
 import { createSignerMock, type SignerMock } from '~/test/fixtures/web3';
 
@@ -99,6 +101,10 @@ describe('EscrowCompletionService', () => {
         {
           provide: StorageService,
           useValue: mockStorageService,
+        },
+        {
+          provide: Web3ConfigService,
+          useValue: mockWeb3ConfigService,
         },
         {
           provide: OutgoingWebhookService,
@@ -1044,7 +1050,7 @@ describe('EscrowCompletionService', () => {
           paidPayoutsRecord.escrowAddress,
           {
             gasPrice: mockGasPrice,
-            timeoutMs: SDK_TX_TIMEOUT_MS,
+            timeoutMs: mockWeb3ConfigService.txTimeoutMs,
           },
         );
         expect(mockReputationService.assessEscrowParties).toHaveBeenCalledTimes(

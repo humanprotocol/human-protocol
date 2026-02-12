@@ -6,6 +6,7 @@ export const envValidator = Joi.object({
   PORT: Joi.string(),
   // Web3
   WEB3_PRIVATE_KEY: Joi.string().required(),
+  SDK_TX_TIMEOUT_MS: Joi.number(),
   RPC_URL_POLYGON: Joi.string(),
   RPC_URL_BSC: Joi.string(),
   RPC_URL_POLYGON_AMOY: Joi.string(),

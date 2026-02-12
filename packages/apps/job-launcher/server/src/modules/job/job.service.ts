@@ -14,8 +14,9 @@ import {
   validate,
 } from 'class-validator';
 import { ethers } from 'ethers';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ServerConfigService } from '../../common/config/server-config.service';
-import { CANCEL_JOB_STATUSES, SDK_TX_TIMEOUT_MS } from '../../common/constants';
+import { CANCEL_JOB_STATUSES } from '../../common/constants';
 import {
   ErrorEscrow,
   ErrorJob,
@@ -87,6 +88,7 @@ export class JobService {
   constructor(
     @Inject(Web3Service)
     private readonly web3Service: Web3Service,
+    private readonly web3ConfigService: Web3ConfigService,
     private readonly jobRepository: JobRepository,
     private readonly webhookRepository: WebhookRepository,
     private readonly paymentService: PaymentService,
@@ -347,7 +349,7 @@ export class JobService {
       escrowConfig,
       {
         gasPrice: await this.web3Service.calculateGasPrice(jobEntity.chainId),
-        timeoutMs: SDK_TX_TIMEOUT_MS,
+        timeoutMs: this.web3ConfigService.txTimeoutMs,
       },
     );
 
@@ -612,7 +614,7 @@ export class JobService {
     try {
       await (escrowClient as any).requestCancellation(escrowAddress!, {
         gasPrice: await this.web3Service.calculateGasPrice(chainId),
-        timeoutMs: SDK_TX_TIMEOUT_MS,
+        timeoutMs: this.web3ConfigService.txTimeoutMs,
       });
     } catch (error: any) {
       this.logger.warn(
@@ -626,7 +628,7 @@ export class JobService {
       );
       await (escrowClient as any).cancel(escrowAddress!, {
         gasPrice: await this.web3Service.calculateGasPrice(chainId),
-        timeoutMs: SDK_TX_TIMEOUT_MS,
+        timeoutMs: this.web3ConfigService.txTimeoutMs,
       });
     }
   }

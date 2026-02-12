@@ -11,7 +11,6 @@ import * as Minio from 'minio';
 
 import logger from '../../logger';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
-import { SDK_TX_TIMEOUT_MS } from '../../common/constants';
 import { ErrorJob } from '../../common/constants/errors';
 import { JobRequestType, SolutionError } from '../../common/enums/job';
 import { EventType } from '../../common/enums/webhook';
@@ -203,7 +202,7 @@ export class JobService {
       jobSolutionUploaded.url,
       jobSolutionUploaded.hash,
       !lastProcessedSolution?.error ? amountToReserve : 0n,
-      { timeoutMs: SDK_TX_TIMEOUT_MS },
+      { timeoutMs: this.web3ConfigService.txTimeoutMs },
     );
 
     if (
@@ -309,7 +308,7 @@ export class JobService {
       intermediateResultsURL,
       intermediateResultsHash,
       0n,
-      { timeoutMs: SDK_TX_TIMEOUT_MS },
+      { timeoutMs: this.web3ConfigService.txTimeoutMs },
     );
 
     let reputationOracleWebhook: string | null = null;

@@ -7,7 +7,6 @@ export const COINGECKO_API_URL =
   'https://api.coingecko.com/api/v3/simple/price';
 export const DEFAULT_MAX_RETRY_COUNT = 3;
 export const TX_CONFIRMATION_TRESHOLD = 1;
-export const SDK_TX_TIMEOUT_MS = 90000;
 
 export const JWT_PREFIX = 'bearer ';
 

@@ -7,7 +7,6 @@ import {
 import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
 
-import { SDK_TX_TIMEOUT_MS } from '@/common/constants';
 import { ServerConfigService } from '@/config';
 import { isDuplicatedError } from '@/database';
 import logger from '@/logger';
@@ -73,7 +72,6 @@ export class AbuseService {
       data.staker,
       data.escrowAddress,
       BigInt(ethers.parseUnits(data.amount.toString(), 18)),
-      { timeoutMs: SDK_TX_TIMEOUT_MS },
     );
   }
 
