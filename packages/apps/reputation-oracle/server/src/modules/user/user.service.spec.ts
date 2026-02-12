@@ -5,6 +5,7 @@ import { createMock } from '@golevelup/ts-jest';
 import { KVStoreClient, KVStoreUtils } from '@human-protocol/sdk';
 import { Test } from '@nestjs/testing';
 
+import { SDK_TX_TIMEOUT_MS } from '@/common/constants';
 import { SignatureType } from '@/common/enums';
 import { UserRole, KycStatus } from '@/common/enums';
 import { Web3ConfigService } from '@/config';
@@ -30,7 +31,6 @@ import {
 } from './user.error';
 import { UserRepository } from './user.repository';
 import { UserService, OperatorStatus } from './user.service';
-
 const mockUserRepository = createMock<UserRepository>();
 const mockSiteKeyRepository = createMock<SiteKeyRepository>();
 const mockHCaptchaService = createMock<HCaptchaService>();
@@ -472,6 +472,7 @@ describe('UserService', () => {
       expect(mockedKVStoreSet).toHaveBeenCalledWith(
         user.evmAddress,
         OperatorStatus.ACTIVE,
+        { timeoutMs: SDK_TX_TIMEOUT_MS },
       );
     });
   });
@@ -554,6 +555,7 @@ describe('UserService', () => {
       expect(mockedKVStoreSet).toHaveBeenCalledWith(
         user.evmAddress,
         OperatorStatus.INACTIVE,
+        { timeoutMs: SDK_TX_TIMEOUT_MS },
       );
     });
   });

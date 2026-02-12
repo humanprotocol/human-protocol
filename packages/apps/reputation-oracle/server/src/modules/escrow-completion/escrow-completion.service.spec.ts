@@ -25,6 +25,7 @@ import { Test } from '@nestjs/testing';
 import stringify from 'json-stable-stringify';
 import _ from 'lodash';
 
+import { SDK_TX_TIMEOUT_MS } from '@/common/constants';
 import { CvatJobType, FortuneJobType } from '@/common/enums';
 import { ServerConfigService } from '@/config';
 import { ReputationService } from '@/modules/reputation';
@@ -1043,6 +1044,7 @@ describe('EscrowCompletionService', () => {
           paidPayoutsRecord.escrowAddress,
           {
             gasPrice: mockGasPrice,
+            timeoutMs: SDK_TX_TIMEOUT_MS,
           },
         );
         expect(mockReputationService.assessEscrowParties).toHaveBeenCalledTimes(

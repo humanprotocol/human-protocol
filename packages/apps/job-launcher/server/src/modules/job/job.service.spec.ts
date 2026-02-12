@@ -15,6 +15,7 @@ import { Test } from '@nestjs/testing';
 import { ethers, ZeroAddress } from 'ethers';
 import { createSignerMock } from '../../../test/fixtures/web3';
 import { ServerConfigService } from '../../common/config/server-config.service';
+import { SDK_TX_TIMEOUT_MS } from '../../common/constants';
 import { ErrorEscrow, ErrorJob } from '../../common/constants/errors';
 import { TOKEN_ADDRESSES } from '../../common/constants/tokens';
 import {
@@ -791,7 +792,7 @@ describe('JobService', () => {
           manifest: jobEntity.manifestUrl,
           manifestHash: jobEntity.manifestHash,
         }),
-        { gasPrice: 1n },
+        { gasPrice: 1n, timeoutMs: SDK_TX_TIMEOUT_MS },
       );
       expect(result.status).toBe(JobStatus.LAUNCHED);
       expect(result.escrowAddress).toBe(escrowAddress);
@@ -864,7 +865,7 @@ describe('JobService', () => {
         expectedWeiAmount,
         jobEntity.userId.toString(),
         expect.any(Object),
-        { gasPrice: 1n },
+        { gasPrice: 1n, timeoutMs: SDK_TX_TIMEOUT_MS },
       );
       expect(mockJobRepository.updateOne).not.toHaveBeenCalled();
 
