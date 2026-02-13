@@ -240,13 +240,13 @@ export class EscrowCompletionService {
             EscrowStatus.ToCancel,
           ].includes(escrowStatus)
         ) {
-          const gasPrice = await this.web3Service.calculateGasPrice(chainId);
+          const feeOverrides = await this.web3Service.calculateTxFees(chainId);
 
           if (escrowStatus === EscrowStatus.ToCancel) {
-            await escrowClient.cancel(escrowAddress, { gasPrice });
+            await escrowClient.cancel(escrowAddress, feeOverrides);
             escrowStatus = EscrowStatus.Cancelled;
           } else {
-            await escrowClient.complete(escrowAddress, { gasPrice });
+            await escrowClient.complete(escrowAddress, feeOverrides);
             escrowStatus = EscrowStatus.Complete;
           }
 
@@ -439,9 +439,9 @@ export class EscrowCompletionService {
       uuidv4(), // TODO obtain it from intermediate results
       false,
       {
-        gasPrice: await this.web3Service.calculateGasPrice(
+        ...(await this.web3Service.calculateTxFees(
           escrowCompletionEntity.chainId,
-        ),
+        )),
         nonce: payoutsBatch.txNonce,
       },
     );

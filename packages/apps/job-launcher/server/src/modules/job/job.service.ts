@@ -345,9 +345,7 @@ export class JobService {
       weiAmount,
       jobEntity.userId.toString(),
       escrowConfig,
-      {
-        gasPrice: await this.web3Service.calculateGasPrice(jobEntity.chainId),
-      },
+      await this.web3Service.calculateTxFees(jobEntity.chainId),
     );
 
     if (!escrowAddress) {
@@ -609,9 +607,10 @@ export class JobService {
     // Attempt requestCancellation; on any error attempt direct cancel once.
     // TODO: Remove try-catch when requestCancellation is fully supported by all escrows
     try {
-      await (escrowClient as any).requestCancellation(escrowAddress!, {
-        gasPrice: await this.web3Service.calculateGasPrice(chainId),
-      });
+      await (escrowClient as any).requestCancellation(
+        escrowAddress!,
+        await this.web3Service.calculateTxFees(chainId),
+      );
     } catch (error: any) {
       this.logger.warn(
         'requestCancellation failed, attempting cancel fallback',
@@ -622,9 +621,10 @@ export class JobService {
           error,
         },
       );
-      await (escrowClient as any).cancel(escrowAddress!, {
-        gasPrice: await this.web3Service.calculateGasPrice(chainId),
-      });
+      await (escrowClient as any).cancel(
+        escrowAddress!,
+        await this.web3Service.calculateTxFees(chainId),
+      );
     }
   }
 

@@ -85,15 +85,26 @@ export class Web3Service {
     throw new Error(`No signer for provided chain id: ${chainId}`);
   }
 
-  async calculateGasPrice(chainId: number): Promise<bigint> {
+  async calculateTxFees(chainId: number): Promise<{
+    maxFeePerGas: bigint;
+    maxPriorityFeePerGas: bigint;
+  }> {
     const signer = this.getSigner(chainId);
-    const { gasPrice } = await signer.provider.getFeeData();
+    const feeData = await signer.provider.getFeeData();
+    const multiplier = BigInt(this.web3ConfigService.gasPriceMultiplier);
 
-    if (gasPrice) {
-      return gasPrice * BigInt(this.web3ConfigService.gasPriceMultiplier);
+    const maxFeePerGas = feeData.maxFeePerGas ?? feeData.gasPrice;
+    const maxPriorityFeePerGas =
+      feeData.maxPriorityFeePerGas ?? feeData.gasPrice;
+
+    if (maxFeePerGas && maxPriorityFeePerGas) {
+      return {
+        maxFeePerGas: maxFeePerGas * multiplier,
+        maxPriorityFeePerGas: maxPriorityFeePerGas * multiplier,
+      };
     }
 
-    throw new Error(`No gas price data for chain id: ${chainId}`);
+    throw new Error(`No transaction fee data for chain id: ${chainId}`);
   }
 
   async getTokenDecimals(

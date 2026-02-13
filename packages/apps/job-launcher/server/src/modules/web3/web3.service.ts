@@ -45,14 +45,29 @@ export class Web3Service {
     }
   }
 
-  public async calculateGasPrice(chainId: number): Promise<bigint> {
+  public async calculateTxFees(chainId: number): Promise<{
+    maxFeePerGas: bigint;
+    maxPriorityFeePerGas: bigint;
+  }> {
     const signer = this.getSigner(chainId);
-    const multiplier = this.web3ConfigService.gasPriceMultiplier;
+    const multiplier = BigInt(this.web3ConfigService.gasPriceMultiplier);
+    const feeData = await signer.provider?.getFeeData();
 
-    const gasPrice = (await signer.provider?.getFeeData())?.gasPrice;
-    if (gasPrice) {
-      return gasPrice * BigInt(multiplier);
+    if (!feeData) {
+      throw new ConflictError(ErrorWeb3.GasPriceError);
     }
+
+    const maxFeePerGas = feeData.maxFeePerGas ?? feeData.gasPrice;
+    const maxPriorityFeePerGas =
+      feeData.maxPriorityFeePerGas ?? feeData.gasPrice;
+
+    if (maxFeePerGas && maxPriorityFeePerGas) {
+      return {
+        maxFeePerGas: maxFeePerGas * multiplier,
+        maxPriorityFeePerGas: maxPriorityFeePerGas * multiplier,
+      };
+    }
+
     throw new ConflictError(ErrorWeb3.GasPriceError);
   }
 
