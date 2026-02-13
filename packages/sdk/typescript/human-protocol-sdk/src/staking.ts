@@ -30,7 +30,7 @@ import {
 } from './interfaces';
 import { StakerData } from './graphql';
 import { NetworkData, TransactionOverrides } from './types';
-import { getSubgraphUrl, customGqlFetch, throwError } from './utils';
+import { getStakingSubgraphUrl, customGqlFetch, throwError } from './utils';
 import {
   GET_STAKER_BY_ADDRESS_QUERY,
   GET_STAKERS_QUERY,
@@ -509,7 +509,7 @@ export class StakingUtils {
     }
 
     const { staker } = await customGqlFetch<{ staker: StakerData }>(
-      getSubgraphUrl(networkData),
+      getStakingSubgraphUrl(networkData),
       GET_STAKER_BY_ADDRESS_QUERY,
       { id: stakerAddress.toLowerCase() },
       options
@@ -558,7 +558,7 @@ export class StakingUtils {
     }
 
     const { stakers } = await customGqlFetch<{ stakers: StakerData[] }>(
-      getSubgraphUrl(networkData),
+      getStakingSubgraphUrl(networkData),
       GET_STAKERS_QUERY(filter),
       {
         minStakedAmount: filter.minStakedAmount

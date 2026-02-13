@@ -5,6 +5,7 @@ const LEADER_FRAGMENT = gql`
   fragment OperatorFields on Operator {
     id
     address
+    stakedAmount
     amountJobsProcessed
     role
     fee
@@ -20,14 +21,6 @@ const LEADER_FRAGMENT = gql`
     }
     name
     category
-    staker {
-      stakedAmount
-      lockedAmount
-      withdrawnAmount
-      slashedAmount
-      lockedUntilTimestamp
-      lastDepositTimestamp
-    }
   }
 `;
 
@@ -36,7 +29,7 @@ export const GET_LEADERS_QUERY = (filter: IOperatorsFilter) => {
 
   const WHERE_CLAUSE = `
     where: {
-      ${minStakedAmount ? `staker_: { stakedAmount_gte: $minStakedAmount }` : ''}
+      ${minStakedAmount ? `stakedAmount_gte: $minStakedAmount` : ''}
       ${roles ? `role_in: $roles` : ''}
     }
   `;

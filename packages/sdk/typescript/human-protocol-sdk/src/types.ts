@@ -77,6 +77,14 @@ export type NetworkData = {
    */
   subgraphUrlApiKey: string;
   /**
+   * Staking subgraph URL
+   */
+  stakingSubgraphUrl?: string;
+  /**
+   * Staking subgraph URL API key
+   */
+  stakingSubgraphUrlApiKey?: string;
+  /**
    * Old subgraph URL
    */
   oldSubgraphUrl: string;

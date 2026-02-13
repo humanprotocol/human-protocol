@@ -37,6 +37,10 @@ export const NETWORKS: {
       'https://api.studio.thegraph.com/query/74256/ethereum/version/latest',
     subgraphUrlApiKey:
       'https://gateway.thegraph.com/api/deployments/id/QmNhLQEfBJQ46fngBh4YCttk8kNkveFy5uvAeUmyAdX1kD',
+    stakingSubgraphUrl:
+      'https://api.studio.thegraph.com/query/74256/ethereum/version/latest',
+    stakingSubgraphUrlApiKey:
+      'https://gateway.thegraph.com/api/deployments/id/QmNhLQEfBJQ46fngBh4YCttk8kNkveFy5uvAeUmyAdX1kD',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },
@@ -51,6 +55,10 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/sepolia/version/latest',
     subgraphUrlApiKey:
+      'https://gateway.thegraph.com/api/deployments/id/QmQghdr7hxqrjFde8DN15TzfrJLCfwvzmUH9RzWwH1mKzk',
+    stakingSubgraphUrl:
+      'https://api.studio.thegraph.com/query/74256/sepolia/version/latest',
+    stakingSubgraphUrlApiKey:
       'https://gateway.thegraph.com/api/deployments/id/QmQghdr7hxqrjFde8DN15TzfrJLCfwvzmUH9RzWwH1mKzk',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
@@ -67,6 +75,10 @@ export const NETWORKS: {
       'https://api.studio.thegraph.com/query/74256/bsc/version/latest',
     subgraphUrlApiKey:
       'https://gateway.thegraph.com/api/deployments/id/QmTioC9Z1HzKSCnEKL3BP9iHqbgZt1ceLU2VE4Mv6sxNkd',
+    stakingSubgraphUrl:
+      'https://api.studio.thegraph.com/query/74256/bsc/version/latest',
+    stakingSubgraphUrlApiKey:
+      'https://gateway.thegraph.com/api/deployments/id/QmTioC9Z1HzKSCnEKL3BP9iHqbgZt1ceLU2VE4Mv6sxNkd',
     oldSubgraphUrl: 'https://api.thegraph.com/subgraphs/name/humanprotocol/bsc',
     oldFactoryAddress: '0xc88bC422cAAb2ac8812de03176402dbcA09533f4',
   },
@@ -81,6 +93,10 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/bsc-testnet/version/latest',
     subgraphUrlApiKey:
+      'https://gateway.thegraph.com/api/deployments/id/QmPyUYRjAvzDdeenXMGHcCRD2v4qwZbKMEkVkY3Jq6VLwn',
+    stakingSubgraphUrl:
+      'https://api.studio.thegraph.com/query/74256/bsc-testnet/version/latest',
+    stakingSubgraphUrlApiKey:
       'https://gateway.thegraph.com/api/deployments/id/QmPyUYRjAvzDdeenXMGHcCRD2v4qwZbKMEkVkY3Jq6VLwn',
     oldSubgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/bsctest',
@@ -98,6 +114,10 @@ export const NETWORKS: {
       'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
     subgraphUrlApiKey:
       'https://gateway.thegraph.com/api/deployments/id/QmQNkWNE5FPtqbtSkdtR6AEBJz9N7WDz1X7pfvQqYAcUZJ',
+    stakingSubgraphUrl:
+      'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
+    stakingSubgraphUrlApiKey:
+      'https://gateway.thegraph.com/api/deployments/id/QmQNkWNE5FPtqbtSkdtR6AEBJz9N7WDz1X7pfvQqYAcUZJ',
     oldSubgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/polygon',
     oldFactoryAddress: '0x45eBc3eAE6DA485097054ae10BA1A0f8e8c7f794',
@@ -114,6 +134,10 @@ export const NETWORKS: {
       'https://api.studio.thegraph.com/query/74256/amoy/version/latest',
     subgraphUrlApiKey:
       'https://gateway.thegraph.com/api/deployments/id/QmcLwLMw3UzCSbNbjegrpNu6PB3kAd67xquuyaVWvc5Q7Q',
+    stakingSubgraphUrl:
+      'https://api.studio.thegraph.com/query/74256/amoy/version/latest',
+    stakingSubgraphUrlApiKey:
+      'https://gateway.thegraph.com/api/deployments/id/QmcLwLMw3UzCSbNbjegrpNu6PB3kAd67xquuyaVWvc5Q7Q',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },
@@ -127,6 +151,9 @@ export const NETWORKS: {
     kvstoreAddress: '0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9',
     subgraphUrl: 'http://localhost:8000/subgraphs/name/humanprotocol/localhost',
     subgraphUrlApiKey: '',
+    stakingSubgraphUrl:
+      'http://localhost:8000/subgraphs/name/humanprotocol/staking-localhost',
+    stakingSubgraphUrlApiKey: '',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },

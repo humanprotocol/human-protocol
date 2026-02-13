@@ -11,10 +11,6 @@ export interface IOperator {
   chainId: ChainId;
   address: string;
   stakedAmount: bigint | null;
-  lockedAmount: bigint | null;
-  lockedUntilTimestamp: number | null;
-  withdrawnAmount: bigint | null;
-  slashedAmount: bigint | null;
   amountJobsProcessed: bigint | null;
   role: string | null;
   fee: bigint | null;

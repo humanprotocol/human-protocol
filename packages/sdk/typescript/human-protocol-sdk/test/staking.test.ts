@@ -694,7 +694,7 @@ describe('StakingUtils', () => {
       );
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
+        NETWORKS[ChainId.LOCALHOST]?.stakingSubgraphUrl,
         expect.anything(),
         { id: stakerAddress.toLowerCase() },
         undefined
@@ -776,7 +776,7 @@ describe('StakingUtils', () => {
       const result = await StakingUtils.getStakers(filter);
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
+        NETWORKS[ChainId.LOCALHOST]?.stakingSubgraphUrl,
         expect.anything(),
         expect.objectContaining({
           minStakedAmount: undefined,

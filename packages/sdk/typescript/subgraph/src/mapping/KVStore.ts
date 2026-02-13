@@ -25,6 +25,7 @@ export function createOrLoadOperator(address: Address): Operator {
   if (!operator) {
     operator = new Operator(address);
     operator.address = address;
+    operator.stakedAmount = ZERO_BI;
     operator.amountJobsProcessed = ZERO_BI;
     operator.save();
   }

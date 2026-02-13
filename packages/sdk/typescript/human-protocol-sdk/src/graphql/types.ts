@@ -143,6 +143,7 @@ export type StakerData = {
 export interface IOperatorSubgraph {
   id: string;
   address: string;
+  stakedAmount: string | null;
   amountJobsProcessed: string;
   role: string | null;
   fee: string | null;
@@ -156,14 +157,6 @@ export interface IOperatorSubgraph {
   category: string | null;
   jobTypes: string | string[] | null;
   reputationNetworks: { address: string }[];
-  staker: {
-    stakedAmount: string;
-    lockedAmount: string;
-    lockedUntilTimestamp: string;
-    withdrawnAmount: string;
-    slashedAmount: string;
-    lastDepositTimestamp: string;
-  } | null;
 }
 
 export interface IReputationNetworkSubgraph extends Omit<

@@ -22,6 +22,7 @@ import {
 } from '../src/error';
 import {
   getSubgraphUrl,
+  getStakingSubgraphUrl,
   getUnixTimestamp,
   customGqlFetch,
   isIndexerError,
@@ -101,6 +102,37 @@ describe('getSubgraphUrl', () => {
     const spy = vi.spyOn(console, 'warn').mockReturnValueOnce(undefined);
     getSubgraphUrl({ ...networkData, chainId: 1 });
     expect(spy).toHaveBeenCalledWith(WarnSubgraphApiKeyNotProvided);
+  });
+});
+
+describe('getStakingSubgraphUrl', () => {
+  const networkData = NETWORKS[ChainId.LOCALHOST]!;
+
+  test('returns stakingSubgraphUrl if no API key', () => {
+    delete process.env.SUBGRAPH_API_KEY;
+    expect(getStakingSubgraphUrl(networkData)).toBe(
+      networkData.stakingSubgraphUrl
+    );
+  });
+
+  test('falls back to subgraphUrl when staking subgraph URL is not set', () => {
+    delete process.env.SUBGRAPH_API_KEY;
+    const url = getStakingSubgraphUrl({
+      ...networkData,
+      stakingSubgraphUrl: undefined,
+    });
+    expect(url).toBe(networkData.subgraphUrl);
+  });
+
+  test('returns stakingSubgraphUrlApiKey with API key if present', () => {
+    process.env.SUBGRAPH_API_KEY = 'real-key';
+    const url = getStakingSubgraphUrl({
+      ...networkData,
+      stakingSubgraphUrlApiKey:
+        'http://localhost:8000/subgraphs/name/humanprotocol/staking-localhost?key=real-key',
+    });
+    expect(url).toContain('real-key');
+    delete process.env.SUBGRAPH_API_KEY;
   });
 });
 

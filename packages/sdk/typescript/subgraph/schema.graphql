@@ -32,6 +32,7 @@ type UniqueReceiver @entity(immutable: false) {
 type Operator @entity(immutable: false) {
   id: Bytes!
   address: Bytes!
+  stakedAmount: BigInt!
   amountJobsProcessed: BigInt!
   role: String
   fee: BigInt

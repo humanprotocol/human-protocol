@@ -121,15 +121,6 @@ export class OperatorUtils {
       filter.skip !== undefined && filter.skip >= 0 ? filter.skip : 0;
     const orderDirection = filter.orderDirection || OrderDirection.DESC;
 
-    let orderBy = filter.orderBy;
-    if (filter.orderBy === 'stakedAmount') orderBy = 'staker__stakedAmount';
-    else if (filter.orderBy === 'lockedAmount')
-      orderBy = 'staker__lockedAmount';
-    else if (filter.orderBy === 'withdrawnAmount')
-      orderBy = 'staker__withdrawnAmount';
-    else if (filter.orderBy === 'slashedAmount')
-      orderBy = 'staker__slashedAmount';
-
     const networkData = NETWORKS[filter.chainId];
 
     if (!networkData) {
@@ -144,7 +135,7 @@ export class OperatorUtils {
       {
         minStakedAmount: filter?.minStakedAmount,
         roles: filter?.roles,
-        orderBy: orderBy,
+        orderBy: filter?.orderBy,
         orderDirection: orderDirection,
         first: first,
         skip: skip,
@@ -268,7 +259,6 @@ export class OperatorUtils {
 }
 
 function mapOperator(operator: IOperatorSubgraph, chainId: ChainId): IOperator {
-  const staker = operator?.staker;
   let jobTypes: string[] = [];
   let reputationNetworks: string[] = [];
 
@@ -291,15 +281,7 @@ function mapOperator(operator: IOperatorSubgraph, chainId: ChainId): IOperator {
     id: operator.id,
     chainId,
     address: operator.address,
-    stakedAmount: staker?.stakedAmount ? BigInt(staker?.stakedAmount) : null,
-    lockedAmount: staker?.lockedAmount ? BigInt(staker?.lockedAmount) : null,
-    lockedUntilTimestamp: staker?.lockedUntilTimestamp
-      ? Number(staker.lockedUntilTimestamp) * 1000
-      : null,
-    withdrawnAmount: staker?.withdrawnAmount
-      ? BigInt(staker?.withdrawnAmount)
-      : null,
-    slashedAmount: staker?.slashedAmount ? BigInt(staker?.slashedAmount) : null,
+    stakedAmount: operator.stakedAmount ? BigInt(operator.stakedAmount) : null,
     amountJobsProcessed: operator.amountJobsProcessed
       ? BigInt(operator.amountJobsProcessed)
       : null,

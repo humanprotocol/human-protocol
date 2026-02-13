@@ -97,6 +97,33 @@ export const getSubgraphUrl = (networkData: NetworkData) => {
 };
 
 /**
+ * Gets the staking subgraph URL for the given network, using API key if available.
+ * Falls back to the default subgraph URL when staking-specific URLs are not configured.
+ *
+ * @param networkData - The network data containing subgraph URLs
+ * @returns The staking subgraph URL with API key if available
+ */
+export const getStakingSubgraphUrl = (networkData: NetworkData) => {
+  const stakingSubgraphUrl = networkData.stakingSubgraphUrl
+    ? networkData.stakingSubgraphUrl
+    : networkData.subgraphUrl;
+  const stakingSubgraphUrlApiKey = networkData.stakingSubgraphUrlApiKey
+    ? networkData.stakingSubgraphUrlApiKey
+    : networkData.subgraphUrlApiKey;
+
+  if (process.env.SUBGRAPH_API_KEY) {
+    return stakingSubgraphUrlApiKey;
+  }
+
+  if (networkData.chainId !== ChainId.LOCALHOST) {
+    // eslint-disable-next-line no-console
+    console.warn(WarnSubgraphApiKeyNotProvided);
+  }
+
+  return stakingSubgraphUrl;
+};
+
+/**
  * Converts a Date object to Unix timestamp (seconds since epoch).
  *
  * @param date - The date to convert
