@@ -17,10 +17,6 @@ export const response1: DiscoveredOracle = {
   registrationNeeded: true,
   registrationInstructions: 'https://instructions.com',
   stakedAmount: '0',
-  lockedAmount: '0',
-  lockedUntilTimestamp: '0',
-  withdrawnAmount: '0',
-  slashedAmount: '0',
   amountJobsProcessed: '0',
 };
 
@@ -37,10 +33,6 @@ export const response2: DiscoveredOracle = {
   registrationNeeded: false,
   registrationInstructions: undefined,
   stakedAmount: '0',
-  lockedAmount: '0',
-  lockedUntilTimestamp: '0',
-  withdrawnAmount: '0',
-  slashedAmount: '0',
   amountJobsProcessed: '0',
 };
 
@@ -57,10 +49,6 @@ export const response3: DiscoveredOracle = {
   registrationNeeded: false,
   registrationInstructions: undefined,
   stakedAmount: '0',
-  lockedAmount: '0',
-  lockedUntilTimestamp: '0',
-  withdrawnAmount: '0',
-  slashedAmount: '0',
   amountJobsProcessed: '0',
 };
 
@@ -77,10 +65,6 @@ export const response4: DiscoveredOracle = {
   registrationNeeded: false,
   registrationInstructions: undefined,
   stakedAmount: '0',
-  lockedAmount: '0',
-  lockedUntilTimestamp: '0',
-  withdrawnAmount: '0',
-  slashedAmount: '0',
   amountJobsProcessed: '0',
 };
 

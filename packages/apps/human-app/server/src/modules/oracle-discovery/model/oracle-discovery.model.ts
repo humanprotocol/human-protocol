@@ -9,10 +9,6 @@ type DiscoveredOracleCreateProps = {
   address: string;
   chainId: ChainId;
   stakedAmount: bigint | null;
-  lockedAmount: bigint | null;
-  lockedUntilTimestamp: number | null;
-  withdrawnAmount: bigint | null;
-  slashedAmount: bigint | null;
   amountJobsProcessed: bigint | null;
   role: string;
   fee: bigint | null;
@@ -40,24 +36,6 @@ export class DiscoveredOracle {
 
   @ApiPropertyOptional({ description: 'Amount staked by the operator' })
   stakedAmount?: string;
-
-  @ApiPropertyOptional({
-    description: 'Amount currently locked by the operator',
-  })
-  lockedAmount?: string;
-
-  @ApiPropertyOptional({ description: 'Timestamp until funds are locked' })
-  lockedUntilTimestamp?: string;
-
-  @ApiPropertyOptional({
-    description: 'Total amount withdrawn by the operator',
-  })
-  withdrawnAmount?: string;
-
-  @ApiPropertyOptional({
-    description: 'Total amount slashed from the operator',
-  })
-  slashedAmount?: string;
 
   @ApiPropertyOptional({
     description: 'Number of jobs processed by the operator',
@@ -131,11 +109,7 @@ export class DiscoveredOracle {
     this.jobTypes = props.jobTypes ?? [];
     this.reputationNetworks = props.reputationNetworks ?? undefined;
     this.stakedAmount = props.stakedAmount?.toString();
-    this.lockedAmount = props.lockedAmount?.toString();
-    this.withdrawnAmount = props.withdrawnAmount?.toString();
-    this.slashedAmount = props.slashedAmount?.toString();
     this.amountJobsProcessed = props.amountJobsProcessed?.toString();
-    this.lockedUntilTimestamp = props.lockedUntilTimestamp?.toString();
   }
 }
 
