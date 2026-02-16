@@ -31,6 +31,8 @@ export default tseslint.config(
       jest: jestPlugin,
     },
     rules: {
+      'no-useless-assignment': 'off',
+      'preserve-caught-error': 'off',
       'no-console': 'warn',
       '@/quotes': [
         'error',
