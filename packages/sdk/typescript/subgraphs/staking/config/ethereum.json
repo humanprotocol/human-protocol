@@ -4,6 +4,6 @@
   "Staking": {
     "address": "0xEf6Da3aB52c33925Be3F84038193a7e1331F51E6",
     "startBlock": 21464165,
-    "abi": "../../../../node_modules/@human-protocol/core/abis/Staking.json"
+    "abi": "../../../../../node_modules/@human-protocol/core/abis/Staking.json"
   }
 }

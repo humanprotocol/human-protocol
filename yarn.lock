@@ -11164,9 +11164,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tools/staking-subgraph@workspace:packages/sdk/typescript/staking-subgraph":
+"@tools/staking-subgraph@workspace:packages/sdk/typescript/subgraphs/staking":
   version: 0.0.0-use.local
-  resolution: "@tools/staking-subgraph@workspace:packages/sdk/typescript/staking-subgraph"
+  resolution: "@tools/staking-subgraph@workspace:packages/sdk/typescript/subgraphs/staking"
   dependencies:
     "@graphprotocol/graph-cli": "npm:^0.97.1"
     "@graphprotocol/graph-ts": "npm:^0.38.0"

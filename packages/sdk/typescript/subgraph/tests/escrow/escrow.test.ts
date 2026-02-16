@@ -115,18 +115,21 @@ describe('Escrow', () => {
 
     const reputationOperator = new Operator(reputationOracleAddress);
     reputationOperator.address = reputationOracleAddress;
+    reputationOperator.stakedAmount = ZERO_BI;
     reputationOperator.amountJobsProcessed = ZERO_BI;
     reputationOperator.fee = BigInt.fromI32(11);
     reputationOperator.save();
 
     const recordingOperator = new Operator(recordingOracleAddress);
     recordingOperator.address = recordingOracleAddress;
+    recordingOperator.stakedAmount = ZERO_BI;
     recordingOperator.amountJobsProcessed = ZERO_BI;
     recordingOperator.fee = BigInt.fromI32(22);
     recordingOperator.save();
 
     const exchangeOperator = new Operator(exchangeOracleAddress);
     exchangeOperator.address = exchangeOracleAddress;
+    exchangeOperator.stakedAmount = ZERO_BI;
     exchangeOperator.amountJobsProcessed = ZERO_BI;
     exchangeOperator.fee = BigInt.fromI32(33);
     exchangeOperator.save();
