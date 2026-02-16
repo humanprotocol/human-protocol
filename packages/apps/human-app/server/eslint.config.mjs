@@ -30,6 +30,8 @@ const config = tseslint.config(
       jest: jestPlugin,
     },
     rules: {
+      'no-useless-assignment': 'off',
+      'preserve-caught-error': 'off',
       'no-console': 'warn',
       'prettier/prettier': 'error',
       '@typescript-eslint/explicit-module-boundary-types': 'off',

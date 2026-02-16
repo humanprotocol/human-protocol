@@ -35,6 +35,8 @@ const config = tseslint.config(
       'react-refresh': reactRefreshPlugin,
     },
     rules: {
+      'no-useless-assignment': 'off',
+      'preserve-caught-error': 'off',
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
       'react-refresh/only-export-components': [

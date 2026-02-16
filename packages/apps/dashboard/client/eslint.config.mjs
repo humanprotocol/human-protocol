@@ -46,6 +46,8 @@ export default tseslint.config(
       },
     },
     rules: {
+      'no-useless-assignment': 'off',
+      'preserve-caught-error': 'off',
       'react/prop-types': 'off',
       'react/display-name': 'off',
       'react/react-in-jsx-scope': 'off',

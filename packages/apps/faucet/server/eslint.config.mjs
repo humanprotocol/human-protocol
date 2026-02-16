@@ -24,6 +24,8 @@ export default tseslint.config(
       },
     },
     rules: {
+      'no-useless-assignment': 'off',
+      'preserve-caught-error': 'off',
       'no-console': 'warn',
       'prettier/prettier': 'error',
       '@/quotes': [
