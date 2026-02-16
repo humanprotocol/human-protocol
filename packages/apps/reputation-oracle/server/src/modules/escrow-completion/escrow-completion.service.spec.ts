@@ -1005,8 +1005,11 @@ describe('EscrowCompletionService', () => {
           recordingOracle: recordingOracleAddress,
         } as unknown as IEscrow);
         mockGetEscrowStatus.mockResolvedValueOnce(escrowStatus);
-        const mockGasPrice = faker.number.bigInt();
-        mockWeb3Service.calculateGasPrice.mockResolvedValueOnce(mockGasPrice);
+        const mockFees = {
+          maxFeePerGas: faker.number.bigInt(),
+          maxPriorityFeePerGas: faker.number.bigInt(),
+        };
+        mockWeb3Service.calculateTxFees.mockResolvedValueOnce(mockFees);
 
         const paidPayoutsRecord = generateEscrowCompletion(
           EscrowCompletionStatus.PAID,
@@ -1049,7 +1052,7 @@ describe('EscrowCompletionService', () => {
         expect(mockCompleteEscrow).toHaveBeenCalledWith(
           paidPayoutsRecord.escrowAddress,
           {
-            gasPrice: mockGasPrice,
+            ...mockFees,
             timeoutMs: mockWeb3ConfigService.txTimeoutMs,
           },
         );

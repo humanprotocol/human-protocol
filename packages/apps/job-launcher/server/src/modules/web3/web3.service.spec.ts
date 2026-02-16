@@ -36,6 +36,7 @@ jest.mock('@human-protocol/sdk', () => {
 describe('Web3Service', () => {
   let configService: ConfigService;
   let web3Service: Web3Service;
+  let web3ConfigService: Web3ConfigService;
   const mockRateService = {
     getRate: jest.fn(),
   };
@@ -66,6 +67,7 @@ describe('Web3Service', () => {
     }).compile();
 
     web3Service = moduleRef.get<Web3Service>(Web3Service);
+    web3ConfigService = moduleRef.get<Web3ConfigService>(Web3ConfigService);
     configService = moduleRef.get<ConfigService>(ConfigService);
   });
 
@@ -115,40 +117,76 @@ describe('Web3Service', () => {
     });
   });
 
-  describe('calculateGasPrice', () => {
-    it('should return gas price multiplied by the multiplier', async () => {
+  describe('calculateTxFees', () => {
+    it('should return transaction fees multiplied by the multiplier', async () => {
       jest.spyOn(configService, 'get').mockImplementation((key: string) => {
         if (key === 'GAS_PRICE_MULTIPLIER') return 1;
         return mockConfig[key];
       });
-      const mockGasPrice = BigInt(1000000000);
+      const mockMaxFeePerGas = faker.number.bigInt();
+      const mockMaxPriorityFeePerGas = faker.number.bigInt();
 
       web3Service.getSigner = jest.fn().mockReturnValue({
         address: MOCK_ADDRESS,
         getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
         provider: {
-          getFeeData: jest
-            .fn()
-            .mockResolvedValueOnce({ gasPrice: mockGasPrice }),
+          getFeeData: jest.fn().mockResolvedValueOnce({
+            maxFeePerGas: mockMaxFeePerGas,
+            maxPriorityFeePerGas: mockMaxPriorityFeePerGas,
+          }),
         },
       });
 
-      const result = await web3Service.calculateGasPrice(ChainId.POLYGON_AMOY);
-      expect(result).toBe(mockGasPrice * BigInt(1));
+      const result = await web3Service.calculateTxFees(ChainId.POLYGON_AMOY);
+      expect(result).toEqual({
+        maxFeePerGas:
+          mockMaxFeePerGas * BigInt(web3ConfigService.gasPriceMultiplier),
+        maxPriorityFeePerGas:
+          mockMaxPriorityFeePerGas *
+          BigInt(web3ConfigService.gasPriceMultiplier),
+      });
     });
 
-    it('should throw an error if gasPrice is undefined', async () => {
+    it('should throw an error if transaction fees are missing', async () => {
       web3Service.getSigner = jest.fn().mockReturnValue({
         address: MOCK_ADDRESS,
         getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
         provider: {
-          getFeeData: jest.fn().mockResolvedValueOnce({ gasPrice: undefined }),
+          getFeeData: jest.fn().mockResolvedValueOnce({
+            maxFeePerGas: undefined,
+            maxPriorityFeePerGas: undefined,
+          }),
         },
       });
 
       await expect(
-        web3Service.calculateGasPrice(ChainId.POLYGON_AMOY),
+        web3Service.calculateTxFees(ChainId.POLYGON_AMOY),
       ).rejects.toThrow(new ConflictError(ErrorWeb3.GasPriceError));
+    });
+
+    it('should fallback to legacy gasPrice data', async () => {
+      const mockGasPrice = faker.number.bigInt();
+
+      web3Service.getSigner = jest.fn().mockReturnValue({
+        address: MOCK_ADDRESS,
+        getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
+        provider: {
+          getFeeData: jest.fn().mockResolvedValueOnce({
+            gasPrice: mockGasPrice,
+            maxFeePerGas: null,
+            maxPriorityFeePerGas: null,
+          }),
+        },
+      });
+
+      await expect(
+        web3Service.calculateTxFees(ChainId.POLYGON_AMOY),
+      ).resolves.toEqual({
+        maxFeePerGas:
+          mockGasPrice * BigInt(web3ConfigService.gasPriceMultiplier),
+        maxPriorityFeePerGas:
+          mockGasPrice * BigInt(web3ConfigService.gasPriceMultiplier),
+      });
     });
   });
 

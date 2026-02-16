@@ -348,7 +348,7 @@ export class JobService {
       jobEntity.userId.toString(),
       escrowConfig,
       {
-        gasPrice: await this.web3Service.calculateGasPrice(jobEntity.chainId),
+        ...(await this.web3Service.calculateTxFees(jobEntity.chainId)),
         timeoutMs: this.web3ConfigService.txTimeoutMs,
       },
     );
@@ -613,7 +613,7 @@ export class JobService {
     // TODO: Remove try-catch when requestCancellation is fully supported by all escrows
     try {
       await (escrowClient as any).requestCancellation(escrowAddress!, {
-        gasPrice: await this.web3Service.calculateGasPrice(chainId),
+        ...(await this.web3Service.calculateTxFees(chainId)),
         timeoutMs: this.web3ConfigService.txTimeoutMs,
       });
     } catch (error: any) {
@@ -627,7 +627,7 @@ export class JobService {
         },
       );
       await (escrowClient as any).cancel(escrowAddress!, {
-        gasPrice: await this.web3Service.calculateGasPrice(chainId),
+        ...(await this.web3Service.calculateTxFees(chainId)),
         timeoutMs: this.web3ConfigService.txTimeoutMs,
       });
     }

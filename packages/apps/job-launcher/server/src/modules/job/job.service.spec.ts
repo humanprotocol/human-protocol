@@ -759,7 +759,10 @@ describe('JobService', () => {
       } as unknown as EscrowClient);
 
       mockWeb3Service.ensureEscrowAllowance.mockResolvedValueOnce(undefined);
-      mockWeb3Service.calculateGasPrice.mockResolvedValueOnce(1n);
+      mockWeb3Service.calculateTxFees.mockResolvedValueOnce({
+        maxFeePerGas: 1n,
+        maxPriorityFeePerGas: 1n,
+      });
 
       const token = (TOKEN_ADDRESSES[jobEntity.chainId as ChainId] ?? {})[
         jobEntity.token as EscrowFundToken
@@ -779,7 +782,7 @@ describe('JobService', () => {
         expectedWeiAmount,
         NETWORKS[jobEntity.chainId as ChainId]!.factoryAddress,
       );
-      expect(mockWeb3Service.calculateGasPrice).toHaveBeenCalledWith(
+      expect(mockWeb3Service.calculateTxFees).toHaveBeenCalledWith(
         jobEntity.chainId,
       );
       expect(createFundAndSetupEscrowMock).toHaveBeenCalledWith(
@@ -796,7 +799,11 @@ describe('JobService', () => {
           manifest: jobEntity.manifestUrl,
           manifestHash: jobEntity.manifestHash,
         }),
-        { gasPrice: 1n, timeoutMs: mockWeb3ConfigService.txTimeoutMs },
+        {
+          maxFeePerGas: 1n,
+          maxPriorityFeePerGas: 1n,
+          timeoutMs: mockWeb3ConfigService.txTimeoutMs,
+        },
       );
       expect(result.status).toBe(JobStatus.LAUNCHED);
       expect(result.escrowAddress).toBe(escrowAddress);
@@ -842,7 +849,10 @@ describe('JobService', () => {
       } as unknown as EscrowClient);
 
       mockWeb3Service.ensureEscrowAllowance.mockResolvedValueOnce(undefined);
-      mockWeb3Service.calculateGasPrice.mockResolvedValueOnce(1n);
+      mockWeb3Service.calculateTxFees.mockResolvedValueOnce({
+        maxFeePerGas: 1n,
+        maxPriorityFeePerGas: 1n,
+      });
 
       const token = (TOKEN_ADDRESSES[jobEntity.chainId as ChainId] ?? {})[
         jobEntity.token as EscrowFundToken
@@ -869,7 +879,11 @@ describe('JobService', () => {
         expectedWeiAmount,
         jobEntity.userId.toString(),
         expect.any(Object),
-        { gasPrice: 1n, timeoutMs: mockWeb3ConfigService.txTimeoutMs },
+        {
+          maxFeePerGas: 1n,
+          maxPriorityFeePerGas: 1n,
+          timeoutMs: mockWeb3ConfigService.txTimeoutMs,
+        },
       );
       expect(mockJobRepository.updateOne).not.toHaveBeenCalled();
 
@@ -1267,7 +1281,10 @@ describe('JobService', () => {
   describe('processEscrowCancellation', () => {
     it('should process escrow cancellation', async () => {
       const jobEntity = createJobEntity();
-      mockWeb3Service.calculateGasPrice.mockResolvedValueOnce(1n);
+      mockWeb3Service.calculateTxFees.mockResolvedValueOnce({
+        maxFeePerGas: 1n,
+        maxPriorityFeePerGas: 1n,
+      });
       const getStatusMock = jest.fn().mockResolvedValueOnce('Active');
       const requestCancellationMock = jest
         .fn()
@@ -1288,7 +1305,10 @@ describe('JobService', () => {
 
     it('should throw if escrow status is not Active', async () => {
       const jobEntity = createJobEntity();
-      mockWeb3Service.calculateGasPrice.mockResolvedValueOnce(1n);
+      mockWeb3Service.calculateTxFees.mockResolvedValueOnce({
+        maxFeePerGas: 1n,
+        maxPriorityFeePerGas: 1n,
+      });
       mockedEscrowClient.build.mockResolvedValueOnce({
         getStatus: jest.fn().mockResolvedValueOnce(EscrowStatus.Complete),
         requestCancellation: jest.fn(),
@@ -1304,7 +1324,7 @@ describe('JobService', () => {
     // TODO: Re-enable when cancellation is removed from processEscrowCancellation
     // it('should throw if requestCancellation throws an error', async () => {
     //   const jobEntity = createJobEntity();
-    //   mockWeb3Service.calculateGasPrice.mockResolvedValueOnce(1n);
+    //   mockWeb3Service.calculateTxFees.mockResolvedValueOnce({ maxFeePerGas: 1n, maxPriorityFeePerGas: 1n });
     //   mockedEscrowClient.build.mockResolvedValueOnce({
     //     getStatus: jest.fn().mockResolvedValueOnce(EscrowStatus.Pending),
     //     requestCancellation: jest
