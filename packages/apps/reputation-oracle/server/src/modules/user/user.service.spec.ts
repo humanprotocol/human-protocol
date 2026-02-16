@@ -30,7 +30,6 @@ import {
 } from './user.error';
 import { UserRepository } from './user.repository';
 import { UserService, OperatorStatus } from './user.service';
-
 const mockUserRepository = createMock<UserRepository>();
 const mockSiteKeyRepository = createMock<SiteKeyRepository>();
 const mockHCaptchaService = createMock<HCaptchaService>();
@@ -472,6 +471,7 @@ describe('UserService', () => {
       expect(mockedKVStoreSet).toHaveBeenCalledWith(
         user.evmAddress,
         OperatorStatus.ACTIVE,
+        { timeoutMs: mockWeb3ConfigService.txTimeoutMs },
       );
     });
   });
@@ -554,6 +554,7 @@ describe('UserService', () => {
       expect(mockedKVStoreSet).toHaveBeenCalledWith(
         user.evmAddress,
         OperatorStatus.INACTIVE,
+        { timeoutMs: mockWeb3ConfigService.txTimeoutMs },
       );
     });
   });

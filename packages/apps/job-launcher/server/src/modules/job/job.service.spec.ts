@@ -15,6 +15,7 @@ import { Test } from '@nestjs/testing';
 import { ethers, ZeroAddress } from 'ethers';
 import { createSignerMock } from '../../../test/fixtures/web3';
 import { ServerConfigService } from '../../common/config/server-config.service';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ErrorEscrow, ErrorJob } from '../../common/constants/errors';
 import { TOKEN_ADDRESSES } from '../../common/constants/tokens';
 import {
@@ -82,6 +83,9 @@ const mockRateService = createMock<RateService>();
 const mockRoutingProtocolService = createMock<RoutingProtocolService>();
 const mockManifestService = createMock<ManifestService>();
 const mockWhitelistService = createMock<WhitelistService>();
+const mockWeb3ConfigService = {
+  txTimeoutMs: faker.number.int({ min: 30000, max: 120000 }),
+};
 
 const mockedEscrowClient = jest.mocked(EscrowClient);
 const mockedEscrowUtils = jest.mocked(EscrowUtils);
@@ -129,6 +133,7 @@ describe('JobService', () => {
           provide: ManifestService,
           useValue: mockManifestService,
         },
+        { provide: Web3ConfigService, useValue: mockWeb3ConfigService },
       ],
     }).compile();
 
@@ -794,7 +799,11 @@ describe('JobService', () => {
           manifest: jobEntity.manifestUrl,
           manifestHash: jobEntity.manifestHash,
         }),
-        { maxFeePerGas: 1n, maxPriorityFeePerGas: 1n },
+        {
+          maxFeePerGas: 1n,
+          maxPriorityFeePerGas: 1n,
+          timeoutMs: mockWeb3ConfigService.txTimeoutMs,
+        },
       );
       expect(result.status).toBe(JobStatus.LAUNCHED);
       expect(result.escrowAddress).toBe(escrowAddress);
@@ -870,7 +879,11 @@ describe('JobService', () => {
         expectedWeiAmount,
         jobEntity.userId.toString(),
         expect.any(Object),
-        { maxFeePerGas: 1n, maxPriorityFeePerGas: 1n },
+        {
+          maxFeePerGas: 1n,
+          maxPriorityFeePerGas: 1n,
+          timeoutMs: mockWeb3ConfigService.txTimeoutMs,
+        },
       );
       expect(mockJobRepository.updateOne).not.toHaveBeenCalled();
 

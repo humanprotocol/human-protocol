@@ -14,6 +14,7 @@ import {
   validate,
 } from 'class-validator';
 import { ethers } from 'ethers';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { CANCEL_JOB_STATUSES } from '../../common/constants';
 import {
@@ -87,6 +88,7 @@ export class JobService {
   constructor(
     @Inject(Web3Service)
     private readonly web3Service: Web3Service,
+    private readonly web3ConfigService: Web3ConfigService,
     private readonly jobRepository: JobRepository,
     private readonly webhookRepository: WebhookRepository,
     private readonly paymentService: PaymentService,
@@ -345,7 +347,10 @@ export class JobService {
       weiAmount,
       jobEntity.userId.toString(),
       escrowConfig,
-      await this.web3Service.calculateTxFees(jobEntity.chainId),
+      {
+        ...(await this.web3Service.calculateTxFees(jobEntity.chainId)),
+        timeoutMs: this.web3ConfigService.txTimeoutMs,
+      },
     );
 
     if (!escrowAddress) {
@@ -607,10 +612,10 @@ export class JobService {
     // Attempt requestCancellation; on any error attempt direct cancel once.
     // TODO: Remove try-catch when requestCancellation is fully supported by all escrows
     try {
-      await (escrowClient as any).requestCancellation(
-        escrowAddress!,
-        await this.web3Service.calculateTxFees(chainId),
-      );
+      await (escrowClient as any).requestCancellation(escrowAddress!, {
+        ...(await this.web3Service.calculateTxFees(chainId)),
+        timeoutMs: this.web3ConfigService.txTimeoutMs,
+      });
     } catch (error: any) {
       this.logger.warn(
         'requestCancellation failed, attempting cancel fallback',
@@ -621,10 +626,10 @@ export class JobService {
           error,
         },
       );
-      await (escrowClient as any).cancel(
-        escrowAddress!,
-        await this.web3Service.calculateTxFees(chainId),
-      );
+      await (escrowClient as any).cancel(escrowAddress!, {
+        ...(await this.web3Service.calculateTxFees(chainId)),
+        timeoutMs: this.web3ConfigService.txTimeoutMs,
+      });
     }
   }
 

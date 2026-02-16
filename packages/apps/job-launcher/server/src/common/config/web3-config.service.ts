@@ -96,4 +96,12 @@ export class Web3ConfigService {
   get approveAmountUsd(): number {
     return this.configService.get<number>('APPROVE_AMOUNT_USD', 0);
   }
+
+  /**
+   *  Timeout for web3 transactions in milliseconds.
+   * Default: 60000 (60 seconds)
+   */
+  get txTimeoutMs(): number {
+    return +this.configService.get<number>('SDK_TX_TIMEOUT_MS', 60000);
+  }
 }

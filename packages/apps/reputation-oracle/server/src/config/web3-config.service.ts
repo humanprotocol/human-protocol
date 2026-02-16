@@ -56,6 +56,14 @@ export class Web3ConfigService {
     return Number(this.configService.get('GAS_PRICE_MULTIPLIER')) || 1;
   }
 
+  /**
+   *  Timeout for web3 transactions in milliseconds.
+   * Default: 60000 (60 seconds)
+   */
+  get txTimeoutMs(): number {
+    return +this.configService.get<number>('SDK_TX_TIMEOUT_MS', 60000);
+  }
+
   getRpcUrlByChainId(chainId: number): string | undefined {
     const rpcUrlsByChainId: Record<string, string | undefined> = {
       [ChainId.POLYGON]: this.configService.get('RPC_URL_POLYGON'),

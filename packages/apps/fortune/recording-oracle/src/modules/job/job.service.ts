@@ -202,6 +202,7 @@ export class JobService {
       jobSolutionUploaded.url,
       jobSolutionUploaded.hash,
       !lastProcessedSolution?.error ? amountToReserve : 0n,
+      { timeoutMs: this.web3ConfigService.txTimeoutMs },
     );
 
     if (
@@ -307,6 +308,7 @@ export class JobService {
       intermediateResultsURL,
       intermediateResultsHash,
       0n,
+      { timeoutMs: this.web3ConfigService.txTimeoutMs },
     );
 
     let reputationOracleWebhook: string | null = null;

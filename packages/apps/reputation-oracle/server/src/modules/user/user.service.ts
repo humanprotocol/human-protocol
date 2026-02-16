@@ -222,7 +222,9 @@ export class UserService {
       );
     }
 
-    await kvstore.set(operatorUser.evmAddress, OperatorStatus.ACTIVE);
+    await kvstore.set(operatorUser.evmAddress, OperatorStatus.ACTIVE, {
+      timeoutMs: this.web3ConfigService.txTimeoutMs,
+    });
   }
 
   async disableOperator(userId: number, signature: string): Promise<void> {
@@ -266,7 +268,9 @@ export class UserService {
       );
     }
 
-    await kvstore.set(operatorUser.evmAddress, OperatorStatus.INACTIVE);
+    await kvstore.set(operatorUser.evmAddress, OperatorStatus.INACTIVE, {
+      timeoutMs: this.web3ConfigService.txTimeoutMs,
+    });
   }
 
   async registrationInExchangeOracle(
