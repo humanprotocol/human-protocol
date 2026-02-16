@@ -107,7 +107,7 @@ __metadata:
     "@emotion/styled": "npm:^11.11.5"
     "@eslint/js": "npm:^10.0.1"
     "@human-protocol/sdk": "workspace:*"
-    "@mui/icons-material": "npm:^7.2.0"
+    "@mui/icons-material": "npm:^7.3.8"
     "@mui/material": "npm:^7.2.0"
     "@mui/styled-engine-sc": "npm:7.2.0"
     "@mui/system": "npm:^7.2.0"
@@ -211,7 +211,7 @@ __metadata:
     "@emotion/react": "npm:^11.14.0"
     "@emotion/styled": "npm:^11.14.1"
     "@human-protocol/sdk": "workspace:*"
-    "@mui/icons-material": "npm:^7.0.1"
+    "@mui/icons-material": "npm:^7.3.8"
     "@mui/material": "npm:^5.16.7"
     "@types/react": "npm:^18.3.12"
     "@types/react-dom": "npm:^18.3.1"
@@ -269,7 +269,7 @@ __metadata:
     "@emotion/react": "npm:^11.11.3"
     "@emotion/styled": "npm:^11.11.0"
     "@human-protocol/sdk": "workspace:^"
-    "@mui/icons-material": "npm:^7.0.1"
+    "@mui/icons-material": "npm:^7.3.8"
     "@mui/material": "npm:^5.16.7"
     "@tanstack/query-sync-storage-persister": "npm:^5.68.0"
     "@tanstack/react-query": "npm:^5.67.2"
@@ -426,7 +426,7 @@ __metadata:
     "@hcaptcha/react-hcaptcha": "npm:^1.14.0"
     "@hookform/resolvers": "npm:^5.1.0"
     "@human-protocol/sdk": "workspace:*"
-    "@mui/icons-material": "npm:^7.0.1"
+    "@mui/icons-material": "npm:^7.3.8"
     "@mui/material": "npm:^5.16.7"
     "@mui/system": "npm:^5.15.14"
     "@mui/x-date-pickers": "npm:^8.26.0"
@@ -553,7 +553,7 @@ __metadata:
     "@emotion/styled": "npm:^11.10.5"
     "@hcaptcha/react-hcaptcha": "npm:^1.14.0"
     "@human-protocol/sdk": "workspace:*"
-    "@mui/icons-material": "npm:^7.0.1"
+    "@mui/icons-material": "npm:^7.3.8"
     "@mui/lab": "npm:^6.0.0-dev.240424162023-9968b4889d"
     "@mui/material": "npm:^5.16.7"
     "@mui/system": "npm:^5.15.14"
@@ -759,7 +759,7 @@ __metadata:
     "@emotion/react": "npm:^11.14.0"
     "@emotion/styled": "npm:^11.14.1"
     "@human-protocol/sdk": "npm:*"
-    "@mui/icons-material": "npm:^7.0.1"
+    "@mui/icons-material": "npm:^7.3.8"
     "@mui/material": "npm:^5.16.7"
     "@mui/x-data-grid": "npm:^8.7.0"
     "@tanstack/query-sync-storage-persister": "npm:^5.68.0"
@@ -2893,7 +2893,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/runtime@npm:^7.24.4":
+"@babel/runtime@npm:^7.24.4, @babel/runtime@npm:^7.28.6":
   version: 7.28.6
   resolution: "@babel/runtime@npm:7.28.6"
   checksum: 10c0/358cf2429992ac1c466df1a21c1601d595c46930a13c1d4662fde908d44ee78ec3c183aaff513ecb01ef8c55c3624afe0309eeeb34715672dbfadb7feedb2c0d
@@ -6560,19 +6560,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/icons-material@npm:^7.0.1, @mui/icons-material@npm:^7.2.0":
-  version: 7.3.4
-  resolution: "@mui/icons-material@npm:7.3.4"
+"@mui/icons-material@npm:^7.3.8":
+  version: 7.3.8
+  resolution: "@mui/icons-material@npm:7.3.8"
   dependencies:
-    "@babel/runtime": "npm:^7.28.4"
+    "@babel/runtime": "npm:^7.28.6"
   peerDependencies:
-    "@mui/material": ^7.3.4
+    "@mui/material": ^7.3.8
     "@types/react": ^17.0.0 || ^18.0.0 || ^19.0.0
     react: ^17.0.0 || ^18.0.0 || ^19.0.0
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: 10c0/09c5708f0a96979dafeefdfbaef4950463e987bdc283874831d67ae0ce32cbc946bf408ba5084bd7a8f57af0cb87c3fdfddcf4c21e0946bb5e17c34abfd49d80
+  checksum: 10c0/3c972ef066ddd0fbfc9ed3c26afa7ad769126ba19add9e89d50007671865238581d23d3c45fec901527642e086f8887404de38444d9b0bf1524d8fc5ffce2f6e
   languageName: node
   linkType: hard
 
