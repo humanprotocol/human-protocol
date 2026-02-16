@@ -5,10 +5,7 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import {
-  SubgraphBadIndexerError,
-  SubgraphRequestError,
-} from '@human-protocol/sdk';
+import { SubgraphRequestError } from '@human-protocol/sdk';
 import logger from '../../logger';
 import { AxiosError } from 'axios';
 import * as errorUtils from '../utils/error';
@@ -29,17 +26,10 @@ export class ExceptionFilter implements IExceptionFilter {
       status = HttpStatus.BAD_GATEWAY;
       message = exception.message;
 
-      if (exception instanceof SubgraphBadIndexerError) {
-        this.logger.warn('Subgraph bad indexers', {
-          error: errorUtils.formatError(exception),
-          path: request.url,
-        });
-      } else {
-        this.logger.error('Subgraph request failed', {
-          error: errorUtils.formatError(exception),
-          path: request.url,
-        });
-      }
+      this.logger.error('Subgraph request failed', {
+        error: errorUtils.formatError(exception),
+        path: request.url,
+      });
     } else if (exception instanceof HttpException) {
       status = exception.getStatus();
       message = exception.getResponse();

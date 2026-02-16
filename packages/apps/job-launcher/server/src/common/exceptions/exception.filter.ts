@@ -5,10 +5,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import {
-  SubgraphBadIndexerError,
-  SubgraphRequestError,
-} from '@human-protocol/sdk';
+import { SubgraphRequestError } from '@human-protocol/sdk';
 
 import {
   ValidationError,
@@ -57,12 +54,7 @@ export class ExceptionFilter implements IExceptionFilter {
     const status = this.getStatus(exception);
     const message = exception.message || 'Internal server error';
 
-    if (exception instanceof SubgraphBadIndexerError) {
-      this.logger.warn('Subgraph bad indexers', {
-        error: exception,
-        path: request.url,
-      });
-    } else if (exception instanceof SubgraphRequestError) {
+    if (exception instanceof SubgraphRequestError) {
       this.logger.error('Subgraph request failed', {
         error: exception,
         path: request.url,
