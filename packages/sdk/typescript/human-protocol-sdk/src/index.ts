@@ -1,12 +1,3 @@
-import { StakingClient, StakingUtils } from './staking';
-import { KVStoreClient, KVStoreUtils } from './kvstore';
-import { EscrowClient, EscrowUtils } from './escrow';
-import { StatisticsUtils } from './statistics';
-import { Encryption, EncryptionUtils, MessageDataType } from './encryption';
-import { OperatorUtils } from './operator';
-import { TransactionUtils } from './transaction';
-import { WorkerUtils } from './worker';
-
 export * from './constants';
 export * from './types';
 export * from './enums';
@@ -24,18 +15,12 @@ export {
   InvalidKeyError,
 } from './error';
 
-export {
-  StakingClient,
-  KVStoreClient,
-  KVStoreUtils,
-  EscrowClient,
-  EscrowUtils,
-  StatisticsUtils,
-  Encryption,
-  EncryptionUtils,
-  OperatorUtils,
-  TransactionUtils,
-  WorkerUtils,
-  StakingUtils,
-  MessageDataType,
-};
+export { StakingClient, StakingUtils } from './staking';
+export { KVStoreClient, KVStoreUtils } from './kvstore';
+export { EscrowClient, EscrowUtils } from './escrow';
+export { StatisticsUtils } from './statistics';
+export { Encryption, EncryptionUtils } from './encryption';
+export type { MessageDataType } from './encryption';
+export { OperatorUtils } from './operator';
+export { TransactionUtils } from './transaction';
+export { WorkerUtils } from './worker';
