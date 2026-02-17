@@ -111,11 +111,11 @@ export const NETWORKS: {
     stakingAddress: '0x01D115E9E8bF0C58318793624CC662a030D07F1D',
     kvstoreAddress: '0xbcB28672F826a50B03EE91B28145EAbddA73B2eD',
     subgraphUrl:
-      'https://api.studio.thegraph.com/query/118155/staking/version/latest',
+      'https://api.studio.thegraph.com/query/74256/human-polygon/version/latest',
     subgraphUrlApiKey:
       'https://gateway.thegraph.com/api/deployments/id/QmQNkWNE5FPtqbtSkdtR6AEBJz9N7WDz1X7pfvQqYAcUZJ',
     stakingSubgraphUrl:
-      'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
+      'https://api.studio.thegraph.com/query/118155/staking/version/latest',
     stakingSubgraphUrlApiKey:
       'https://gateway.thegraph.com/api/deployments/id/QmQNkWNE5FPtqbtSkdtR6AEBJz9N7WDz1X7pfvQqYAcUZJ',
     oldSubgraphUrl:
