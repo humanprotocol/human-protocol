@@ -24,6 +24,7 @@ build-services: check-env-file
 
 services-up: check-env-file
 	@service_names="$(wordlist 2, $(words $(MAKECMDGOALS)), $(MAKECMDGOALS))"; \
+	@# TODO: Revisit compose-native parallel builds once Docker Compose v5 parallel limits are reliable again.
 	if [ -n "$$service_names" ]; then \
 		printf '%s\n' $$service_names | xargs -n 1 -P $(DOCKER_PARALLEL) docker compose --env-file .env.compose.local up -d; \
 	else \
