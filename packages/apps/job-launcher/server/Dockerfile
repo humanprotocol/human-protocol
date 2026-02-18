@@ -23,7 +23,7 @@ RUN yarn workspaces focus @apps/job-launcher-server
 # Copy base TS config that is required to build packages
 COPY tsconfig.base.json ./
 # Build libs (scoped)
-RUN yarn workspaces foreach -Rpt --from @apps/job-launcher-server run build
+RUN yarn workspaces foreach -Rpt --from @apps/job-launcher-server --exclude @apps/job-launcher-server run build
 
 # Copy everything else
 COPY ${APP_PATH} ./${APP_PATH}

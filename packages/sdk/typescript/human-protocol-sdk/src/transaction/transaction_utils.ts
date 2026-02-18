@@ -1,23 +1,23 @@
 import { ethers } from 'ethers';
-import { NETWORKS } from './constants';
-import { ChainId, OrderDirection } from './enums';
+import { NETWORKS } from '../constants';
+import { ChainId, OrderDirection } from '../enums';
 import {
   ErrorCannotUseDateAndBlockSimultaneously,
   ErrorInvalidHashProvided,
   ErrorUnsupportedChainID,
-} from './error';
-import { TransactionData } from './graphql';
+} from '../error';
+import { TransactionData } from '../graphql';
 import {
   GET_TRANSACTION_QUERY,
   GET_TRANSACTIONS_QUERY,
-} from './graphql/queries/transaction';
+} from '../graphql/queries/transaction';
 import {
   InternalTransaction,
   ITransaction,
   ITransactionsFilter,
   SubgraphOptions,
-} from './interfaces';
-import { getSubgraphUrl, getUnixTimestamp, customGqlFetch } from './utils';
+} from '../interfaces';
+import { getSubgraphUrl, getUnixTimestamp, customGqlFetch } from '../utils';
 
 /**
  * Utility class for transaction-related queries.

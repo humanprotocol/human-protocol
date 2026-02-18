@@ -23,7 +23,7 @@ RUN yarn workspaces focus @apps/human-app-server
 # Copy base TS config that is required to build packages
 COPY tsconfig.base.json ./
 # Build libs (scoped)
-RUN yarn workspaces foreach -Rpt --from @apps/human-app-server run build
+RUN yarn workspaces foreach -Rpt --from @apps/human-app-server --exclude @apps/human-app-server run build
 
 # Copy everything else
 COPY ${APP_PATH} ./${APP_PATH}

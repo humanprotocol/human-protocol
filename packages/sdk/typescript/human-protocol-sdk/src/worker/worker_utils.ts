@@ -1,11 +1,11 @@
 import { ethers } from 'ethers';
-import { NETWORKS } from './constants';
-import { ChainId, OrderDirection } from './enums';
-import { ErrorInvalidAddress, ErrorUnsupportedChainID } from './error';
-import { WorkerData } from './graphql';
-import { GET_WORKER_QUERY, GET_WORKERS_QUERY } from './graphql/queries/worker';
-import { IWorker, IWorkersFilter, SubgraphOptions } from './interfaces';
-import { getSubgraphUrl, customGqlFetch } from './utils';
+import { NETWORKS } from '../constants';
+import { ChainId, OrderDirection } from '../enums';
+import { ErrorInvalidAddress, ErrorUnsupportedChainID } from '../error';
+import { WorkerData } from '../graphql';
+import { GET_WORKER_QUERY, GET_WORKERS_QUERY } from '../graphql/queries/worker';
+import { IWorker, IWorkersFilter, SubgraphOptions } from '../interfaces';
+import { getSubgraphUrl, customGqlFetch } from '../utils';
 
 /**
  * Utility class for worker-related operations.

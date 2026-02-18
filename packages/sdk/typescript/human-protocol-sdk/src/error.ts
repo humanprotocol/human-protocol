@@ -349,3 +349,17 @@ export class InvalidKeyError extends Error {
     super(`Key "${key}" not found for address ${address}`);
   }
 }
+
+export class SubgraphRequestError extends Error {
+  public readonly statusCode?: number;
+  public readonly url: string;
+
+  constructor(message: string, url: string, statusCode?: number) {
+    super(message);
+    this.name = this.constructor.name;
+    this.url = url;
+    this.statusCode = statusCode;
+  }
+}
+
+export class SubgraphBadIndexerError extends SubgraphRequestError {}

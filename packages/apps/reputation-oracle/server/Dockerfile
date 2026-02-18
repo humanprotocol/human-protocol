@@ -22,8 +22,9 @@ RUN yarn workspaces focus @apps/reputation-oracle
 
 # Copy base TS config that is required to build packages
 COPY tsconfig.base.json ./
-# Build libs (scoped)
-RUN yarn workspaces foreach -Rpt --from @apps/reputation-oracle run build
+# Build only dependency workspaces; the app itself is built later
+# after its full source (including tsconfig.json) is copied.
+RUN yarn workspaces foreach -Rpt --from @apps/reputation-oracle --exclude @apps/reputation-oracle run build
 
 # Copy everything else
 COPY ${APP_PATH} ./${APP_PATH}
