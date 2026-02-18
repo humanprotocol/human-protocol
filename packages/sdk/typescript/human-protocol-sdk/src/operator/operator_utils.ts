@@ -4,27 +4,27 @@ import {
   IOperatorsFilter,
   IReward,
   SubgraphOptions,
-} from './interfaces';
-import { GET_REWARD_ADDED_EVENTS_QUERY } from './graphql/queries/reward';
+} from '../interfaces';
+import { GET_REWARD_ADDED_EVENTS_QUERY } from '../graphql/queries/reward';
 import {
   IOperatorSubgraph,
   IReputationNetworkSubgraph,
   RewardAddedEventData,
-} from './graphql';
+} from '../graphql';
 import {
   GET_LEADER_QUERY,
   GET_LEADERS_QUERY,
   GET_REPUTATION_NETWORK_QUERY,
-} from './graphql/queries/operator';
+} from '../graphql/queries/operator';
 import { ethers } from 'ethers';
 import {
   ErrorInvalidSlasherAddressProvided,
   ErrorInvalidStakerAddressProvided,
   ErrorUnsupportedChainID,
-} from './error';
-import { getSubgraphUrl, customGqlFetch } from './utils';
-import { ChainId, OrderDirection } from './enums';
-import { NETWORKS } from './constants';
+} from '../error';
+import { getSubgraphUrl, customGqlFetch } from '../utils';
+import { ChainId, OrderDirection } from '../enums';
+import { NETWORKS } from '../constants';
 
 /**
  * Utility helpers for operator-related queries.

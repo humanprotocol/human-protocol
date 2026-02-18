@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { OrderDirection } from './enums';
+import { OrderDirection } from '../enums';
 import {
   EscrowStatisticsData,
   EventDayData,
@@ -9,7 +9,7 @@ import {
   GET_HOLDERS_QUERY,
   HMTHolderData,
   HMTStatisticsData,
-} from './graphql';
+} from '../graphql';
 import {
   IDailyHMT,
   IEscrowStatistics,
@@ -20,14 +20,14 @@ import {
   IStatisticsFilter,
   IWorkerStatistics,
   SubgraphOptions,
-} from './interfaces';
-import { NetworkData } from './types';
+} from '../interfaces';
+import { NetworkData } from '../types';
 import {
   getSubgraphUrl,
   getUnixTimestamp,
   customGqlFetch,
   throwError,
-} from './utils';
+} from '../utils';
 
 /**
  * Utility class for statistics-related queries.
