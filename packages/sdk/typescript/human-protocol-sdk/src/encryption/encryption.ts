@@ -1,5 +1,13 @@
 import * as openpgp from 'openpgp';
 import { makeMessageDataBinary, MessageDataType } from './types';
+
+/**
+ * Class for signing and decrypting messages.
+ *
+ * The algorithm includes the implementation of the [PGP encryption algorithm](https://github.com/openpgpjs/openpgpjs) multi-public key encryption on typescript, and uses the vanilla [ed25519](https://en.wikipedia.org/wiki/EdDSA#Ed25519) implementation Schnorr signature for signatures and [curve25519](https://en.wikipedia.org/wiki/Curve25519) for encryption. [Learn more](https://wiki.polkadot.network/docs/learn-cryptography).
+ *
+ * To get an instance of this class, initialization is recommended using the static [`build`](/ts/classes/Encryption/#build) method.
+ */
 export class Encryption {
   private privateKey: openpgp.PrivateKey;
 

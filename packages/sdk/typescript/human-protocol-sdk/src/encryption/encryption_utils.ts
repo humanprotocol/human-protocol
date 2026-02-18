@@ -1,6 +1,10 @@
 import * as openpgp from 'openpgp';
 import { IKeyPair } from '../interfaces';
 import { makeMessageDataBinary, MessageDataType } from './types';
+
+/**
+ * Utility class for encryption-related operations.
+ */
 export class EncryptionUtils {
   /**
    * This function verifies the signature of a signed message using the public key.
