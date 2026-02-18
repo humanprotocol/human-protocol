@@ -28,7 +28,7 @@ export class ExceptionFilter implements IExceptionFilter {
       status = HttpStatus.BAD_GATEWAY;
       responseBody.message = exception.message;
 
-      this.logger.error('Unhandled subgraph error', {
+      this.logger.error('Subgraph request failed', {
         error: exception,
         path: request.url,
       });
