@@ -19,6 +19,8 @@ import {
   WarnSubgraphApiKeyNotProvided,
   ErrorRetryParametersMissing,
   ErrorRoutingRequestsToIndexerRequiresApiKey,
+  SubgraphBadIndexerError,
+  SubgraphRequestError,
 } from '../src/error';
 import {
   getSubgraphUrl,
@@ -340,7 +342,7 @@ describe('customGqlFetch', () => {
         maxRetries: 3,
         baseDelay: 10,
       })
-    ).rejects.toThrow('Regular GraphQL error');
+    ).rejects.toThrow(SubgraphRequestError);
 
     expect(gqlFetchSpy).toHaveBeenCalledTimes(1);
   });
@@ -360,7 +362,7 @@ describe('customGqlFetch', () => {
         maxRetries: 2,
         baseDelay: 10,
       })
-    ).rejects.toEqual(badIndexerError);
+    ).rejects.toThrow(SubgraphBadIndexerError);
 
     expect(gqlFetchSpy).toHaveBeenCalledTimes(3);
   });
@@ -400,8 +402,20 @@ describe('customGqlFetch', () => {
         maxRetries: 1,
         baseDelay: 10,
       })
-    ).rejects.toEqual(badIndexerError);
+    ).rejects.toThrow(SubgraphBadIndexerError);
 
     expect(gqlFetchSpy).toHaveBeenCalledTimes(2);
+  });
+
+  test('wraps subgraph request errors even when no retry config is provided', async () => {
+    const gqlFetchSpy = vi
+      .spyOn(gqlFetch, 'default')
+      .mockRejectedValue(new Error('fetch failed'));
+
+    await expect(
+      customGqlFetch(mockUrl, mockQuery, mockVariables)
+    ).rejects.toThrow(SubgraphRequestError);
+
+    expect(gqlFetchSpy).toHaveBeenCalledTimes(1);
   });
 });

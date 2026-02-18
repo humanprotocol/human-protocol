@@ -1,3 +1,4 @@
+import { SubgraphRequestError } from '@human-protocol/sdk';
 import {
   ArgumentsHost,
   Catch,
@@ -31,6 +32,13 @@ export class ExceptionFilter implements IExceptionFilter {
         responseBody.message = 'Unprocessable entity';
       }
       this.logger.error('Database error', exception);
+    } else if (exception instanceof SubgraphRequestError) {
+      status = HttpStatus.BAD_GATEWAY;
+      responseBody.message = exception.message;
+      this.logger.error('Subgraph request failed', {
+        error: exception,
+        path: request.url,
+      });
     } else if (exception instanceof HttpException) {
       status = exception.getStatus();
       const exceptionResponse = exception.getResponse();

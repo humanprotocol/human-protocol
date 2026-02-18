@@ -13,6 +13,8 @@ import {
   NonceExpired,
   NumericFault,
   ReplacementUnderpriced,
+  SubgraphBadIndexerError,
+  SubgraphRequestError,
   TransactionReplaced,
   WarnSubgraphApiKeyNotProvided,
 } from './error';
@@ -117,6 +119,38 @@ export const isIndexerError = (error: any): boolean => {
   return errorMessage.toLowerCase().includes('bad indexers');
 };
 
+const getSubgraphErrorMessage = (error: any): string => {
+  return (
+    error?.response?.errors?.[0]?.message ||
+    error?.message ||
+    error?.toString?.() ||
+    'Subgraph request failed'
+  );
+};
+
+const getSubgraphStatusCode = (error: any): number | undefined => {
+  if (typeof error?.response?.status === 'number') {
+    return error.response.status;
+  }
+
+  if (typeof error?.status === 'number') {
+    return error.status;
+  }
+
+  return undefined;
+};
+
+const toSubgraphError = (error: any, url: string): Error => {
+  const message = getSubgraphErrorMessage(error);
+  const statusCode = getSubgraphStatusCode(error);
+
+  if (isIndexerError(error)) {
+    return new SubgraphBadIndexerError(message, url, statusCode);
+  }
+
+  return new SubgraphRequestError(message, url, statusCode);
+};
+
 const sleep = (ms: number): Promise<void> => {
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
@@ -154,7 +188,11 @@ export const customGqlFetch = async <T = any>(
     : undefined;
 
   if (!options) {
-    return await gqlFetch<T>(url, query, variables, headers);
+    try {
+      return await gqlFetch<T>(url, query, variables, headers);
+    } catch (error) {
+      throw toSubgraphError(error, url);
+    }
   }
 
   const hasMaxRetries = options.maxRetries !== undefined;
@@ -177,10 +215,11 @@ export const customGqlFetch = async <T = any>(
     try {
       return await gqlFetch<T>(targetUrl, query, variables, headers);
     } catch (error) {
-      lastError = error;
+      const wrappedError = toSubgraphError(error, targetUrl);
+      lastError = wrappedError;
 
       if (attempt === maxRetries || !isIndexerError(error)) {
-        throw error;
+        throw wrappedError;
       }
 
       const delay = baseDelay * attempt;

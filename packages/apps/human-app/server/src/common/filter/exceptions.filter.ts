@@ -5,6 +5,7 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
+import { SubgraphRequestError } from '@human-protocol/sdk';
 import logger from '../../logger';
 import { AxiosError } from 'axios';
 import * as errorUtils from '../utils/error';
@@ -21,7 +22,15 @@ export class ExceptionFilter implements IExceptionFilter {
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let message: any = 'Internal Server Error';
 
-    if (exception instanceof HttpException) {
+    if (exception instanceof SubgraphRequestError) {
+      status = HttpStatus.BAD_GATEWAY;
+      message = exception.message;
+
+      this.logger.error('Subgraph request failed', {
+        error: errorUtils.formatError(exception),
+        path: request.url,
+      });
+    } else if (exception instanceof HttpException) {
       status = exception.getStatus();
       message = exception.getResponse();
     } else if (exception instanceof AxiosError) {

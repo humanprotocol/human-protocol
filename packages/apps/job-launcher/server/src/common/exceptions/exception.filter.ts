@@ -5,6 +5,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { SubgraphRequestError } from '@human-protocol/sdk';
 
 import {
   ValidationError,
@@ -36,6 +37,8 @@ export class ExceptionFilter implements IExceptionFilter {
       return HttpStatus.UNPROCESSABLE_ENTITY;
     } else if (exception instanceof DatabaseError) {
       return HttpStatus.UNPROCESSABLE_ENTITY;
+    } else if (exception instanceof SubgraphRequestError) {
+      return HttpStatus.BAD_GATEWAY;
     }
 
     const exceptionStatusCode = exception.statusCode || exception.status;
@@ -51,7 +54,12 @@ export class ExceptionFilter implements IExceptionFilter {
     const status = this.getStatus(exception);
     const message = exception.message || 'Internal server error';
 
-    if (status === HttpStatus.INTERNAL_SERVER_ERROR) {
+    if (exception instanceof SubgraphRequestError) {
+      this.logger.error('Subgraph request failed', {
+        error: exception,
+        path: request.url,
+      });
+    } else if (status === HttpStatus.INTERNAL_SERVER_ERROR) {
       this.logger.error('Unhandled exception', {
         error: exception,
         path: request.url,
