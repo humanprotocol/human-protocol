@@ -2,31 +2,10 @@
 #                    Entities                    #
 ##################################################
 
-type Holder @entity(immutable: false) {
-  id: Bytes!
-  address: Bytes! # address
-  balance: BigInt!
-}
-
 type Worker @entity(immutable: false) {
   id: Bytes!
   address: Bytes!
-  totalHMTAmountReceived: BigInt!
   payoutCount: BigInt!
-}
-
-type UniqueSender @entity(immutable: false) {
-  id: Bytes!
-  address: Bytes!
-  transferCount: BigInt!
-  timestamp: BigInt!
-}
-
-type UniqueReceiver @entity(immutable: false) {
-  id: Bytes!
-  address: Bytes!
-  receiveCount: BigInt!
-  timestamp: BigInt!
 }
 
 type Operator @entity(immutable: false) {
@@ -110,49 +89,6 @@ type DailyWorker @entity(immutable: true) {
 ##################################################
 #                     Events                     #
 ##################################################
-
-# HMToken
-type HMTTransferEvent @entity(immutable: true) {
-  id: Bytes!
-  block: BigInt!
-  timestamp: BigInt!
-  txHash: Bytes!
-
-  from: Bytes! # address
-  to: Bytes! # address
-  amount: BigInt!
-}
-
-type HMTBulkTransferEvent @entity(immutable: true) {
-  id: Bytes!
-  block: BigInt!
-  timestamp: BigInt!
-  txHash: Bytes!
-
-  txId: BigInt!
-  bulkCount: BigInt!
-}
-
-type HMTApprovalEvent @entity(immutable: true) {
-  id: Bytes!
-  block: BigInt!
-  timestamp: BigInt!
-  txHash: Bytes!
-
-  owner: Bytes! # address
-  spender: Bytes! # address
-  amount: BigInt!
-}
-
-type HMTBulkApprovalEvent @entity(immutable: true) {
-  id: Bytes!
-  block: BigInt!
-  timestamp: BigInt!
-  txHash: Bytes!
-
-  txId: BigInt!
-  bulkCount: BigInt!
-}
 
 # Escrow
 type FundEvent @entity(immutable: true) {
@@ -316,16 +252,6 @@ type StakeSlashedEvent @entity(immutable: true) {
 #                   Statistics                   #
 ##################################################
 
-type HMTokenStatistics @entity(immutable: false) {
-  id: Bytes!
-  totalTransferEventCount: BigInt!
-  totalBulkTransferEventCount: BigInt!
-  totalApprovalEventCount: BigInt!
-  totalBulkApprovalEventCount: BigInt!
-  totalValueTransfered: BigInt!
-  holders: BigInt!
-}
-
 type EscrowStatistics @entity(immutable: false) {
   id: Bytes!
   fundEventCount: BigInt!
@@ -357,11 +283,6 @@ type EventDayData @entity(immutable: false) {
   dailyEscrowCount: BigInt!
   dailyWorkerCount: BigInt!
   dailyPayoutCount: BigInt!
-  dailyHMTPayoutAmount: BigInt!
-  dailyHMTTransferCount: BigInt!
-  dailyHMTTransferAmount: BigInt!
-  dailyUniqueSenders: BigInt!
-  dailyUniqueReceivers: BigInt!
 }
 
 ##################################################

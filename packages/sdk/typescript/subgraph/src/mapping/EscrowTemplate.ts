@@ -43,7 +43,6 @@ import { createTransaction } from './utils/transaction';
 import { toBytes } from './utils/string';
 import { createOrLoadOperator } from './KVStore';
 
-export const HMT_ADDRESS = Address.fromString('{{ HMToken.address }}');
 export const STATISTICS_ENTITY_ID = toBytes('escrow-statistics-id');
 
 function constructStatsEntity(): EscrowStatistics {
@@ -80,7 +79,6 @@ export function createOrLoadWorker(address: Address): Worker {
   if (!worker) {
     worker = new Worker(address);
     worker.address = address;
-    worker.totalHMTAmountReceived = ZERO_BI;
     worker.payoutCount = ZERO_BI;
   }
 
@@ -547,21 +545,18 @@ function handleBulkTransferCommon(
       }
       eventDayData.save();
 
-      // If the escrow is non-HMT, create the internal transaction
-      if (Address.fromBytes(escrowEntity.token) != HMT_ADDRESS) {
-        const internalTransaction = new InternalTransaction(
-          event.transaction.hash
-            .concatI32(i)
-            .concatI32(event.block.timestamp.toI32())
-        );
-        internalTransaction.from = Address.fromBytes(escrowEntity.address);
-        internalTransaction.to = recipient;
-        internalTransaction.value = amount;
-        internalTransaction.transaction = transaction.id;
-        internalTransaction.method = 'transfer';
-        internalTransaction.escrow = Address.fromBytes(escrowEntity.address);
-        internalTransaction.save();
-      }
+      const internalTransaction = new InternalTransaction(
+        event.transaction.hash
+          .concatI32(i)
+          .concatI32(event.block.timestamp.toI32())
+      );
+      internalTransaction.from = Address.fromBytes(escrowEntity.address);
+      internalTransaction.to = recipient;
+      internalTransaction.value = amount;
+      internalTransaction.transaction = transaction.id;
+      internalTransaction.method = 'transfer';
+      internalTransaction.escrow = Address.fromBytes(escrowEntity.address);
+      internalTransaction.save();
     }
 
     // Assign finalResultsUrl directly from the event
@@ -685,11 +680,7 @@ export function handleCompleted(event: Completed): void {
       null,
       Address.fromBytes(escrowEntity.address)
     );
-    if (
-      escrowEntity.balance &&
-      escrowEntity.balance.gt(ZERO_BI) &&
-      escrowEntity.token != HMT_ADDRESS
-    ) {
+    if (escrowEntity.balance && escrowEntity.balance.gt(ZERO_BI)) {
       const internalTransaction = new InternalTransaction(toEventId(event));
       internalTransaction.from = escrowEntity.address;
       internalTransaction.to = escrowEntity.launcher;
@@ -743,9 +734,7 @@ export function handleFund(event: Fund): void {
   // Update escrow entity
   escrowEntity.totalFundedAmount = event.params.amount;
 
-  if (escrowEntity.token != HMT_ADDRESS) {
-    escrowEntity.balance = event.params.amount;
-  }
+  escrowEntity.balance = event.params.amount;
 
   escrowEntity.save();
 }
@@ -841,18 +830,15 @@ export function handleCancellationRefund(event: CancellationRefund): void {
     event.params.amount,
     Address.fromBytes(escrowEntity.token)
   );
-  if (Address.fromBytes(escrowEntity.token) != HMT_ADDRESS) {
-    // If escrow is funded with HMT, balance is already tracked by HMT transfer
-    const internalTransaction = new InternalTransaction(toEventId(event));
-    internalTransaction.from = escrowEntity.address;
-    internalTransaction.to = Address.fromBytes(escrowEntity.token);
-    internalTransaction.receiver = escrowEntity.canceler;
-    internalTransaction.value = escrowEntity.balance;
-    internalTransaction.transaction = transaction.id;
-    internalTransaction.method = 'transfer';
-    internalTransaction.token = Address.fromBytes(escrowEntity.token);
-    internalTransaction.save();
-  }
+  const internalTransaction = new InternalTransaction(toEventId(event));
+  internalTransaction.from = escrowEntity.address;
+  internalTransaction.to = Address.fromBytes(escrowEntity.token);
+  internalTransaction.receiver = escrowEntity.canceler;
+  internalTransaction.value = escrowEntity.balance;
+  internalTransaction.transaction = transaction.id;
+  internalTransaction.method = 'transfer';
+  internalTransaction.token = Address.fromBytes(escrowEntity.token);
+  internalTransaction.save();
   escrowEntity.balance = escrowEntity.balance.minus(event.params.amount);
   escrowEntity.save();
 

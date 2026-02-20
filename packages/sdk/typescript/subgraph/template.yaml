@@ -34,46 +34,6 @@ dataSources:
         - event: LaunchedV2(address,address,string)
           handler: handleLaunchedV2
   - kind: ethereum
-    name: HMToken
-    network: '{{ network }}'
-    source:
-      abi: HMToken
-      address: '{{ HMToken.address }}'
-      startBlock: {{ HMToken.startBlock }}
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.7
-      language: wasm/assemblyscript
-      entities:
-        - DailyWorker
-        - Escrow
-        - EventDayData
-        - HMTApprovalEvent
-        - HMTBulkApprovalEvent
-        - HMTBulkTransferEvent
-        - HMTTransferEvent
-        - HMTokenStatistics
-        - Holder
-        - Payout
-        - UniqueReceiver
-        - UniqueSender
-        - Worker
-        - Transaction
-        - InternalTransaction
-      abis:
-        - name: HMToken
-          file: '{{{ HMToken.abi }}}'
-      eventHandlers:
-        - event: Approval(indexed address,indexed address,uint256)
-          handler: handleApproval
-        - event: BulkApproval(indexed uint256,uint256)
-          handler: handleBulkApproval
-        - event: BulkTransfer(indexed uint256,uint256)
-          handler: handleBulkTransfer
-        - event: Transfer(indexed address,indexed address,uint256)
-          handler: handleTransfer
-      file: ./src/mapping/HMToken.ts
-  - kind: ethereum
     name: KVStore
     network: '{{ network }}'
     source:

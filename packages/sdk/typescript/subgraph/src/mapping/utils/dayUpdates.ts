@@ -26,11 +26,6 @@ export function getEventDayData(event: ethereum.Event): EventDayData {
     eventDayData.dailyEscrowCount = ZERO_BI;
     eventDayData.dailyWorkerCount = ZERO_BI;
     eventDayData.dailyPayoutCount = ZERO_BI;
-    eventDayData.dailyHMTPayoutAmount = ZERO_BI;
-    eventDayData.dailyHMTTransferCount = ZERO_BI;
-    eventDayData.dailyHMTTransferAmount = ZERO_BI;
-    eventDayData.dailyUniqueSenders = ZERO_BI;
-    eventDayData.dailyUniqueReceivers = ZERO_BI;
   }
   return eventDayData;
 }
