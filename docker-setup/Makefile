@@ -3,7 +3,7 @@
 	build-services services-up services-stop
 
 export COMPOSE_BAKE=false
-DOCKER_PARALLEL ?= 4
+DOCKER_PARALLEL ?= 2
 
 check-env-file:
 	@if [ ! -f "./.env.compose.local" ]; then \
@@ -19,16 +19,16 @@ infra-stop:
 build-services: check-env-file
 	@# TODO: Revisit compose-native parallel builds once Docker Compose v5 parallel limits are reliable again.
 	@docker compose --env-file .env.compose.local config --services | \
-		xargs -n 1 -P $(DOCKER_PARALLEL) docker compose --env-file .env.compose.local build
+		xargs -n $(DOCKER_PARALLEL) docker compose --env-file .env.compose.local build
 	@docker compose --env-file .env.compose.local up --no-start
 
 services-up: check-env-file
 	@service_names="$(wordlist 2, $(words $(MAKECMDGOALS)), $(MAKECMDGOALS))"; \
 	@# TODO: Revisit compose-native parallel builds once Docker Compose v5 parallel limits are reliable again.
 	if [ -n "$$service_names" ]; then \
-		printf '%s\n' $$service_names | xargs -n 1 -P $(DOCKER_PARALLEL) docker compose --env-file .env.compose.local up -d; \
+		printf '%s\n' $$service_names | xargs -n $(DOCKER_PARALLEL) docker compose --env-file .env.compose.local up -d; \
 	else \
-		docker compose --env-file .env.compose.local config --services | xargs -n 1 -P $(DOCKER_PARALLEL) docker compose --env-file .env.compose.local up -d; \
+		docker compose --env-file .env.compose.local config --services | xargs -n $(DOCKER_PARALLEL) docker compose --env-file .env.compose.local up -d; \
 	fi
 
 services-stop:
