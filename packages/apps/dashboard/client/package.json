@@ -22,7 +22,7 @@
     "@human-protocol/sdk": "workspace:*",
     "@mui/icons-material": "^7.3.8",
     "@mui/material": "^7.2.0",
-    "@mui/styled-engine-sc": "7.2.0",
+    "@mui/styled-engine-sc": "7.3.8",
     "@mui/system": "^7.2.0",
     "@mui/x-data-grid": "^8.7.0",
     "@mui/x-date-pickers": "^8.26.0",
