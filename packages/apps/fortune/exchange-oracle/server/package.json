@@ -64,7 +64,7 @@
     "@golevelup/ts-jest": "^0.6.1",
     "@nestjs/cli": "^11.0.16",
     "@nestjs/schematics": "^11.0.9",
-    "@nestjs/testing": "^11.1.12",
+    "@nestjs/testing": "^11.1.14",
     "@types/body-parser": "^1",
     "@types/express": "^5.0.6",
     "@types/jest": "30.0.0",
