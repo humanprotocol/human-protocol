@@ -3,7 +3,7 @@
 	build-services services-up services-stop
 
 export COMPOSE_BAKE=false
-DOCKER_PARALLEL ?= 4
+DOCKER_PARALLEL ?= 2
 
 check-env-file:
 	@if [ ! -f "./.env.compose.local" ]; then \
@@ -17,11 +17,19 @@ infra-stop:
 	@docker compose --env-file .env.compose.local stop postgres redis minio minio-client
 
 build-services: check-env-file
-	@docker compose --env-file .env.compose.local --parallel $(DOCKER_PARALLEL) up --no-start
+	@# TODO: Revisit compose-native parallel builds once Docker Compose v5 parallel limits are reliable again.
+	@docker compose --env-file .env.compose.local config --services | \
+		xargs -n $(DOCKER_PARALLEL) docker compose --env-file .env.compose.local build
+	@docker compose --env-file .env.compose.local up --no-start
 
 services-up: check-env-file
 	@service_names="$(wordlist 2, $(words $(MAKECMDGOALS)), $(MAKECMDGOALS))"; \
-	docker compose --env-file .env.compose.local --parallel $(DOCKER_PARALLEL) up -d $$service_names
+	@# TODO: Revisit compose-native parallel builds once Docker Compose v5 parallel limits are reliable again.
+	if [ -n "$$service_names" ]; then \
+		printf '%s\n' $$service_names | xargs -n $(DOCKER_PARALLEL) docker compose --env-file .env.compose.local up -d; \
+	else \
+		docker compose --env-file .env.compose.local config --services | xargs -n $(DOCKER_PARALLEL) docker compose --env-file .env.compose.local up -d; \
+	fi
 
 services-stop:
 	@service_names="$(wordlist 2, $(words $(MAKECMDGOALS)), $(MAKECMDGOALS))"; \
