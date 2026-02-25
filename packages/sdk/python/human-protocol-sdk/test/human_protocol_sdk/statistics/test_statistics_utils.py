@@ -1,12 +1,13 @@
 import unittest
 from datetime import datetime
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 from human_protocol_sdk.constants import NETWORKS, ChainId
 from human_protocol_sdk.gql.hmtoken import get_holders_query
 from human_protocol_sdk.gql.statistics import (
     get_event_day_data_query,
     get_escrow_statistics_query,
+    get_hmt_event_day_data_query,
     get_hmtoken_statistics_query,
 )
 from human_protocol_sdk.statistics import (
@@ -147,7 +148,6 @@ class TestStatisticsUtils(unittest.TestCase):
                             {
                                 "timestamp": 1,
                                 "dailyPayoutCount": "4",
-                                "dailyHMTPayoutAmount": "100",
                                 "dailyWorkerCount": "4",
                             },
                         ],
@@ -177,13 +177,7 @@ class TestStatisticsUtils(unittest.TestCase):
                 payment_statistics.daily_payments_data[0].timestamp,
                 datetime.fromtimestamp(1),
             )
-            self.assertEqual(
-                payment_statistics.daily_payments_data[0].total_amount_paid, 100
-            )
             self.assertEqual(payment_statistics.daily_payments_data[0].total_count, 4)
-            self.assertEqual(
-                payment_statistics.daily_payments_data[0].average_amount_per_worker, 25
-            )
 
     def test_get_hmt_statistics(self):
         with patch(
@@ -207,6 +201,7 @@ class TestStatisticsUtils(unittest.TestCase):
                 NETWORKS[ChainId.LOCALHOST],
                 query=get_hmtoken_statistics_query,
                 options=None,
+                use_hmt_subgraph=True,
             )
 
             self.assertEqual(hmt_statistics.total_transfer_amount, 100)
@@ -245,6 +240,7 @@ class TestStatisticsUtils(unittest.TestCase):
                     "orderDirection": param.order_direction,
                 },
                 options=None,
+                use_hmt_subgraph=True,
             )
 
             self.assertEqual(len(holders), 2)
@@ -283,7 +279,7 @@ class TestStatisticsUtils(unittest.TestCase):
 
             mock_function.assert_any_call(
                 NETWORKS[ChainId.LOCALHOST],
-                query=get_event_day_data_query(param),
+                query=get_hmt_event_day_data_query(param),
                 params={
                     "from": 1683811973,
                     "to": 1683812007,
@@ -292,6 +288,7 @@ class TestStatisticsUtils(unittest.TestCase):
                     "orderDirection": "asc",
                 },
                 options=None,
+                use_hmt_subgraph=True,
             )
 
             self.assertEqual(len(hmt_statistics), 1)

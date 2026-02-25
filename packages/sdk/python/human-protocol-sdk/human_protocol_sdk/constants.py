@@ -143,6 +143,12 @@ NETWORKS = {
         "subgraph_url_api_key": (
             "https://gateway.thegraph.com/api/deployments/id/QmcLwLMw3UzCSbNbjegrpNu6PB3kAd67xquuyaVWvc5Q7Q"
         ),
+        "hmt_subgraph_url": (
+            "https://api.studio.thegraph.com/query/74256/hmt-stats-amoy/version/latest"
+        ),
+        "hmt_subgraph_url_api_key": (
+            "https://gateway.thegraph.com/api/deployments/id/QmZJYBQKyrsEJHQwNQ8JhkKcB5G8zQdrcwnr7ecGRNTBit"
+        ),
         "hmt_address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
         "factory_address": "0xAFf5a986A530ff839d49325A5dF69F96627E8D29",
         "staking_address": "0xffE496683F842a923110415b7278ded3F265f2C5",
