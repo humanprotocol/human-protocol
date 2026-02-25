@@ -95,7 +95,10 @@ export type EventDayData = {
   dailyEscrowCount: string;
   dailyWorkerCount: string;
   dailyPayoutCount: string;
-  dailyHMTPayoutAmount: string;
+};
+
+export type HMTEventDayData = {
+  timestamp: string;
   dailyHMTTransferCount: string;
   dailyHMTTransferAmount: string;
   dailyUniqueSenders: string;

@@ -3,8 +3,10 @@ import { OrderDirection } from '../enums';
 import {
   EscrowStatisticsData,
   EventDayData,
+  HMTEventDayData,
   GET_ESCROW_STATISTICS_QUERY,
   GET_EVENT_DAY_DATA_QUERY,
+  GET_HMT_EVENT_DAY_DATA_QUERY,
   GET_HMTOKEN_STATISTICS_QUERY,
   GET_HOLDERS_QUERY,
   HMTHolderData,
@@ -23,6 +25,7 @@ import {
 } from '../interfaces';
 import { NetworkData } from '../types';
 import {
+  getHMTSubgraphUrl,
   getSubgraphUrl,
   getUnixTimestamp,
   customGqlFetch,
@@ -253,9 +256,7 @@ export class StatisticsUtils {
    * ```ts
    * interface IDailyPayment {
    *   timestamp: number;
-   *   totalAmountPaid: bigint;
    *   totalCount: number;
-   *   averageAmountPerWorker: bigint;
    * };
    *
    * interface IPaymentStatistics {
@@ -274,14 +275,7 @@ export class StatisticsUtils {
    *
    * const networkData = NETWORKS[ChainId.POLYGON_AMOY];
    * const paymentStats = await StatisticsUtils.getPaymentStatistics(networkData);
-   * console.log(
-   *   'Payment statistics:',
-   *   paymentStats.dailyPaymentsData.map((p) => ({
-   *     ...p,
-   *     totalAmountPaid: p.totalAmountPaid.toString(),
-   *     averageAmountPerWorker: p.averageAmountPerWorker.toString(),
-   *   }))
-   * );
+   * console.log('Payment statistics:', paymentStats.dailyPaymentsData);
    *
    * const paymentStatsRange = await StatisticsUtils.getPaymentStatistics(
    *   networkData,
@@ -323,13 +317,7 @@ export class StatisticsUtils {
       return {
         dailyPaymentsData: eventDayDatas.map((eventDayData) => ({
           timestamp: +eventDayData.timestamp * 1000,
-          totalAmountPaid: BigInt(eventDayData.dailyHMTPayoutAmount),
           totalCount: +eventDayData.dailyPayoutCount,
-          averageAmountPerWorker:
-            eventDayData.dailyWorkerCount === '0'
-              ? BigInt(0)
-              : BigInt(eventDayData.dailyHMTPayoutAmount) /
-                BigInt(eventDayData.dailyWorkerCount),
         })),
       };
     } catch (e: any) {
@@ -369,7 +357,7 @@ export class StatisticsUtils {
     options?: SubgraphOptions
   ): Promise<IHMTStatistics> {
     try {
-      const subgraphUrl = getSubgraphUrl(networkData);
+      const subgraphUrl = getHMTSubgraphUrl(networkData);
       const { hmtokenStatistics } = await customGqlFetch<{
         hmtokenStatistics: HMTStatisticsData;
       }>(subgraphUrl, GET_HMTOKEN_STATISTICS_QUERY, options);
@@ -412,7 +400,7 @@ export class StatisticsUtils {
     options?: SubgraphOptions
   ): Promise<IHMTHolder[]> {
     try {
-      const subgraphUrl = getSubgraphUrl(networkData);
+      const subgraphUrl = getHMTSubgraphUrl(networkData);
       const { address, orderDirection } = params;
       const query = GET_HOLDERS_QUERY(address);
 
@@ -490,17 +478,17 @@ export class StatisticsUtils {
     options?: SubgraphOptions
   ): Promise<IDailyHMT[]> {
     try {
-      const subgraphUrl = getSubgraphUrl(networkData);
+      const subgraphUrl = getHMTSubgraphUrl(networkData);
       const first =
         filter.first !== undefined ? Math.min(filter.first, 1000) : 10;
       const skip = filter.skip || 0;
       const orderDirection = filter.orderDirection || OrderDirection.ASC;
 
       const { eventDayDatas } = await customGqlFetch<{
-        eventDayDatas: EventDayData[];
+        eventDayDatas: HMTEventDayData[];
       }>(
         subgraphUrl,
-        GET_EVENT_DAY_DATA_QUERY(filter),
+        GET_HMT_EVENT_DAY_DATA_QUERY(filter),
         {
           from: filter.from ? getUnixTimestamp(filter.from) : undefined,
           to: filter.to ? getUnixTimestamp(filter.to) : undefined,

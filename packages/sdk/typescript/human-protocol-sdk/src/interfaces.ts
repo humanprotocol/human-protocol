@@ -254,9 +254,7 @@ export interface IWorkerStatistics {
 
 export interface IDailyPayment {
   timestamp: number;
-  totalAmountPaid: bigint;
   totalCount: number;
-  averageAmountPerWorker: bigint;
 }
 
 export interface IPaymentStatistics {

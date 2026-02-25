@@ -99,6 +99,26 @@ export const getSubgraphUrl = (networkData: NetworkData) => {
 };
 
 /**
+ * Gets the HMT statistics subgraph URL for the given network.
+ * Falls back to the default subgraph URL when a dedicated HMT endpoint is not configured.
+ *
+ * @param networkData - The network data containing subgraph URLs
+ * @returns The HMT statistics subgraph URL with API key if available
+ */
+export const getHMTSubgraphUrl = (networkData: NetworkData) => {
+  let subgraphUrl = networkData.hmtSubgraphUrl || networkData.subgraphUrl;
+  if (process.env.SUBGRAPH_API_KEY) {
+    subgraphUrl =
+      networkData.hmtSubgraphUrlApiKey || networkData.subgraphUrlApiKey;
+  } else if (networkData.chainId !== ChainId.LOCALHOST) {
+    // eslint-disable-next-line no-console
+    console.warn(WarnSubgraphApiKeyNotProvided);
+  }
+
+  return subgraphUrl;
+};
+
+/**
  * Converts a Date object to Unix timestamp (seconds since epoch).
  *
  * @param date - The date to convert

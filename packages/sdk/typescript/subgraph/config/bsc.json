@@ -7,11 +7,7 @@
     "abi": "../../../../node_modules/@human-protocol/core/abis/EscrowFactory.json"
   },
   "HMToken": {
-    "address": "0x711Fd6ab6d65A98904522d4e3586F492B989c527",
-    "startBlock": 25383172,
-    "abi": "../../../../node_modules/@human-protocol/core/abis/HMToken.json",
-    "totalSupply": "0",
-    "contractDeployer": "bridge"
+    "address": "0x711Fd6ab6d65A98904522d4e3586F492B989c527"
   },
   "Escrow": {
     "abi": "../../../../node_modules/@human-protocol/core/abis/Escrow.json"
