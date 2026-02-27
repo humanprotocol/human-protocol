@@ -86,7 +86,7 @@
     "@types/node": "22.10.5",
     "@types/uuid": "^10.0.0",
     "@types/zxcvbn": "4.4.5",
-    "eslint": "^10.0.1",
+    "eslint": "^9.0.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-import": "^2.32.0",
@@ -100,7 +100,7 @@
     "tsconfig-paths": "^4.2.0",
     "type-fest": "^4.37.0",
     "typescript": "^5.9.2",
-    "typescript-eslint": "^8.39.1"
+    "typescript-eslint": "^8.46.2"
   },
   "lint-staged": {
     "*.ts": [
