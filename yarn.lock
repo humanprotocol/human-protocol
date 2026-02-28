@@ -446,7 +446,7 @@ __metadata:
     "@typescript-eslint/parser": "npm:^8.46.3"
     "@vercel/style-guide": "npm:^6.0.0"
     "@vitejs/plugin-react": "npm:^4.2.1"
-    "@wagmi/core": "npm:^2.17.1"
+    "@wagmi/core": "npm:^3.4.0"
     date-fns: "npm:^4.1.0"
     eslint: "npm:^9.39.1"
     eslint-config-prettier: "npm:^9.1.0"
@@ -13089,7 +13089,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@wagmi/core@npm:2.22.1, @wagmi/core@npm:^2.17.1":
+"@wagmi/core@npm:2.22.1":
   version: 2.22.1
   resolution: "@wagmi/core@npm:2.22.1"
   dependencies:
@@ -13106,6 +13106,29 @@ __metadata:
     typescript:
       optional: true
   checksum: 10c0/0a68b77f544b64057f8779e1e8ade38babf2ffa6585539a980b3e8101def962b69f9688c87a345113362dbc534c2b15a8df6d751b6867ffa5c9daf12e32b2fb2
+  languageName: node
+  linkType: hard
+
+"@wagmi/core@npm:^3.4.0":
+  version: 3.4.0
+  resolution: "@wagmi/core@npm:3.4.0"
+  dependencies:
+    eventemitter3: "npm:5.0.1"
+    mipd: "npm:0.0.7"
+    zustand: "npm:5.0.0"
+  peerDependencies:
+    "@tanstack/query-core": ">=5.0.0"
+    ox: ">=0.11.1"
+    typescript: ">=5.7.3"
+    viem: 2.x
+  peerDependenciesMeta:
+    "@tanstack/query-core":
+      optional: true
+    ox:
+      optional: true
+    typescript:
+      optional: true
+  checksum: 10c0/27b1751d4e7e3c75b7448e95f2cf908339a04efaa9aeb5a4d364b41c88996194b8593aead25dd4bbb02e9703bd2af02e8790747bbbdff26ebebb6c6db21d7deb
   languageName: node
   linkType: hard
 
