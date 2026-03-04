@@ -12,6 +12,7 @@ import {
   IntermediateStorage,
   Pending,
   PendingV2,
+  PendingV3,
   Withdraw,
 } from '../../generated/templates/Escrow/Escrow';
 import { generateUniqueHash } from '../../tests/utils';
@@ -94,6 +95,74 @@ export function createPendingV2Event(
   newPendingEvent.parameters.push(reputationOracleAddressParam);
   newPendingEvent.parameters.push(recordingOracleAddressParam);
   newPendingEvent.parameters.push(exchangeOracleAddressParam);
+
+  return newPendingEvent;
+}
+
+export function createPendingV3Event(
+  sender: Address,
+  manifest: string,
+  hash: string,
+  reputationOracleAddress: Address,
+  recordingOracleAddress: Address,
+  exchangeOracleAddress: Address,
+  reputationOracleFeePercentage: i32,
+  recordingOracleFeePercentage: i32,
+  exchangeOracleFeePercentage: i32,
+  timestamp: BigInt
+): PendingV3 {
+  const newPendingEvent = changetype<PendingV3>(newMockEvent());
+  newPendingEvent.transaction.hash = generateUniqueHash(
+    sender.toString(),
+    timestamp,
+    newPendingEvent.transaction.nonce
+  );
+
+  newPendingEvent.transaction.from = sender;
+
+  newPendingEvent.parameters = [];
+
+  const manifestParam = new ethereum.EventParam(
+    'manifest',
+    ethereum.Value.fromString(manifest)
+  );
+  const hashParam = new ethereum.EventParam(
+    'hash',
+    ethereum.Value.fromString(hash)
+  );
+  const reputationOracleAddressParam = new ethereum.EventParam(
+    'reputationOracleAddress',
+    ethereum.Value.fromAddress(reputationOracleAddress)
+  );
+  const recordingOracleAddressParam = new ethereum.EventParam(
+    'recordingOracleAddress',
+    ethereum.Value.fromAddress(recordingOracleAddress)
+  );
+  const exchangeOracleAddressParam = new ethereum.EventParam(
+    'exchangeOracleAddress',
+    ethereum.Value.fromAddress(exchangeOracleAddress)
+  );
+  const reputationOracleFeePercentageParam = new ethereum.EventParam(
+    'reputationOracleFeePercentage',
+    ethereum.Value.fromI32(reputationOracleFeePercentage)
+  );
+  const recordingOracleFeePercentageParam = new ethereum.EventParam(
+    'recordingOracleFeePercentage',
+    ethereum.Value.fromI32(recordingOracleFeePercentage)
+  );
+  const exchangeOracleFeePercentageParam = new ethereum.EventParam(
+    'exchangeOracleFeePercentage',
+    ethereum.Value.fromI32(exchangeOracleFeePercentage)
+  );
+
+  newPendingEvent.parameters.push(manifestParam);
+  newPendingEvent.parameters.push(hashParam);
+  newPendingEvent.parameters.push(reputationOracleAddressParam);
+  newPendingEvent.parameters.push(recordingOracleAddressParam);
+  newPendingEvent.parameters.push(exchangeOracleAddressParam);
+  newPendingEvent.parameters.push(reputationOracleFeePercentageParam);
+  newPendingEvent.parameters.push(recordingOracleFeePercentageParam);
+  newPendingEvent.parameters.push(exchangeOracleFeePercentageParam);
 
   return newPendingEvent;
 }

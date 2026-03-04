@@ -1007,7 +1007,13 @@ class EscrowClient:
         if not Web3.is_address(escrow_address):
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
 
-        return self._get_escrow_contract(escrow_address).functions.manifestUrl().call()
+        escrow_contract = self._get_escrow_contract(escrow_address)
+
+        try:
+            return escrow_contract.functions.manifest().call()
+        except Exception:
+            # Backward compatibility with legacy escrows exposing manifestUrl().
+            return escrow_contract.functions.manifestUrl().call()
 
     def get_results_url(self, escrow_address: str) -> str:
         """Get the final results file URL.

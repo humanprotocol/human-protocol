@@ -2289,9 +2289,26 @@ class TestEscrowClient(unittest.TestCase):
 
     def test_get_manifest(self):
         mock_contract = MagicMock()
+        mock_contract.functions.manifest = MagicMock()
+        mock_contract.functions.manifest.return_value.call.return_value = "mock_value"
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
+        escrow_address = "0x1234567890123456789012345678901234567890"
+
+        result = self.escrow.get_manifest(escrow_address)
+
+        self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
+        mock_contract.functions.manifest.assert_called_once_with()
+        self.assertEqual(result, "mock_value")
+
+    def test_get_manifest_fallback_to_manifest_url(self):
+        mock_contract = MagicMock()
+        mock_contract.functions.manifest = MagicMock()
+        mock_contract.functions.manifest.return_value.call.side_effect = Exception(
+            "manifest() not found"
+        )
         mock_contract.functions.manifestUrl = MagicMock()
         mock_contract.functions.manifestUrl.return_value.call.return_value = (
-            "mock_value"
+            "legacy_manifest"
         )
         self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
         escrow_address = "0x1234567890123456789012345678901234567890"
@@ -2299,8 +2316,9 @@ class TestEscrowClient(unittest.TestCase):
         result = self.escrow.get_manifest(escrow_address)
 
         self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
+        mock_contract.functions.manifest.assert_called_once_with()
         mock_contract.functions.manifestUrl.assert_called_once_with()
-        self.assertEqual(result, "mock_value")
+        self.assertEqual(result, "legacy_manifest")
 
     def test_get_manifest_invalid_address(self):
         with self.assertRaises(EscrowClientError) as cm:
@@ -2315,17 +2333,15 @@ class TestEscrowClient(unittest.TestCase):
 
         escrowClient = EscrowClient(w3)
         mock_contract = MagicMock()
-        mock_contract.functions.manifestUrl = MagicMock()
-        mock_contract.functions.manifestUrl.return_value.call.return_value = (
-            "mock_value"
-        )
+        mock_contract.functions.manifest = MagicMock()
+        mock_contract.functions.manifest.return_value.call.return_value = "mock_value"
         escrowClient._get_escrow_contract = MagicMock(return_value=mock_contract)
         escrow_address = "0x1234567890123456789012345678901234567890"
 
         result = escrowClient.get_manifest(escrow_address)
 
         escrowClient._get_escrow_contract.assert_called_once_with(escrow_address)
-        mock_contract.functions.manifestUrl.assert_called_once_with()
+        mock_contract.functions.manifest.assert_called_once_with()
         self.assertEqual(result, "mock_value")
 
     def test_get_manifest_invalid_escrow(self):

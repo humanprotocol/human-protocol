@@ -369,13 +369,16 @@ describe('EscrowFactory', function () {
         await expect(tx)
           .to.emit(escrowFactory, 'LaunchedV2')
           .withArgs(tokenAddress, escrowAddress, FIXTURE_REQUESTER_ID)
-          .to.emit(escrow, 'PendingV2')
+          .to.emit(escrow, 'PendingV3')
           .withArgs(
             manifestUrl,
             manifestHash,
             reputationOracleAddress,
             recordingOracleAddress,
-            exchangeOracleAddress
+            exchangeOracleAddress,
+            5,
+            5,
+            5
           )
           .to.emit(escrow, 'Fund')
           .withArgs(fundAmount);

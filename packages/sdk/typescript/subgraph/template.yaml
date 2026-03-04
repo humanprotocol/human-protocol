@@ -196,6 +196,8 @@ templates:
           handler: handlePending
         - event: PendingV2(string,string,address,address,address)
           handler: handlePendingV2
+        - event: PendingV3(string,string,address,address,address,uint8,uint8,uint8)
+          handler: handlePendingV3
         - event: BulkTransfer(indexed uint256,address[],uint256[],bool)
           handler: handleBulkTransfer
         - event: BulkTransferV2(indexed uint256,address[],uint256[],bool,string)

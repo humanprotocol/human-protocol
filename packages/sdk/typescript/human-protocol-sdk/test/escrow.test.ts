@@ -74,6 +74,7 @@ describe('EscrowClient', () => {
     mockProvider = {
       provider: {
         getNetwork: vi.fn().mockResolvedValue({ chainId: ChainId.LOCALHOST }),
+        call: vi.fn(),
       },
     };
     mockSigner = {
@@ -103,7 +104,7 @@ describe('EscrowClient', () => {
       remainingFunds: vi.fn(),
       reservedFunds: vi.fn(),
       manifestHash: vi.fn(),
-      manifestUrl: vi.fn(),
+      manifest: vi.fn(),
       finalResultsUrl: vi.fn(),
       token: vi.fn(),
       status: vi.fn(),
@@ -118,6 +119,7 @@ describe('EscrowClient', () => {
       intermediateResultsHash: vi.fn(),
       launcher: vi.fn(),
       escrowFactory: vi.fn(),
+      target: ethers.ZeroAddress,
     };
 
     mockEscrowFactoryContract = {
@@ -2863,41 +2865,58 @@ describe('EscrowClient', () => {
       );
     });
 
-    test('should successfully getManifestUrl', async () => {
+    test('should successfully getManifest via manifest()', async () => {
       const escrowAddress = ethers.ZeroAddress;
       const url = FAKE_URL;
+      const manifestInterface = new ethers.Interface([
+        'function manifest() view returns (string)',
+        'function manifestUrl() view returns (string)',
+      ]);
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
-      escrowClient.escrowContract.manifestUrl.mockReturnValue(url);
+      mockProvider.provider.call.mockResolvedValueOnce(
+        manifestInterface.encodeFunctionResult('manifest', [url])
+      );
 
       const manifestUrl = await escrowClient.getManifest(escrowAddress);
 
       expect(manifestUrl).toEqual(url);
-      expect(escrowClient.escrowContract.manifestUrl).toHaveBeenCalledWith();
+      expect(mockProvider.provider.call).toHaveBeenCalledTimes(1);
     });
 
-    test('should return the manifest string', async () => {
+    test('should fallback to manifestUrl() for legacy contracts', async () => {
       const escrowAddress = ethers.ZeroAddress;
       const manifestString = '{"foo":"bar"}';
+      const manifestInterface = new ethers.Interface([
+        'function manifest() view returns (string)',
+        'function manifestUrl() view returns (string)',
+      ]);
+
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
-      escrowClient.escrowContract.manifestUrl = vi
-        .fn()
-        .mockReturnValue(manifestString);
+      mockProvider.provider.call
+        .mockRejectedValueOnce(new Error('manifest() not found'))
+        .mockResolvedValueOnce(
+          manifestInterface.encodeFunctionResult('manifestUrl', [
+            manifestString,
+          ])
+        );
+
       const result = await escrowClient.getManifest(escrowAddress);
+
       expect(result).toBe(manifestString);
+      expect(mockProvider.provider.call).toHaveBeenCalledTimes(2);
     });
 
-    test('should throw an error if getManifestUrl fails', async () => {
+    test('should throw an error if manifest() and manifestUrl() fail', async () => {
       const escrowAddress = ethers.ZeroAddress;
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
-      escrowClient.escrowContract.manifestUrl.mockRejectedValueOnce(
-        new Error()
-      );
+      mockProvider.provider.call
+        .mockRejectedValueOnce(new Error('manifest() failed'))
+        .mockRejectedValueOnce(new Error('manifestUrl() failed'));
 
       await expect(escrowClient.getManifest(escrowAddress)).rejects.toThrow();
-
-      expect(escrowClient.escrowContract.manifestUrl).toHaveBeenCalledWith();
+      expect(mockProvider.provider.call).toHaveBeenCalledTimes(2);
     });
   });
 

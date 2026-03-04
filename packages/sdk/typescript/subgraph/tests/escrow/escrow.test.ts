@@ -31,6 +31,7 @@ import {
   handleIntermediateStorage,
   handlePending,
   handlePendingV2,
+  handlePendingV3,
   handleWithdraw,
 } from '../../src/mapping/Escrow';
 import { toEventId } from '../../src/mapping/utils/event';
@@ -47,6 +48,7 @@ import {
   createISEvent,
   createPendingEvent,
   createPendingV2Event,
+  createPendingV3Event,
   createWithdrawEvent,
 } from './fixtures';
 
@@ -855,6 +857,58 @@ describe('Escrow', () => {
       exchangeOracleAddressString,
       'amountJobsProcessed',
       '2'
+    );
+  });
+
+  test('Should properly handle PendingV3 event with fee percentages from event', () => {
+    const URL = 'test-v3.com';
+    const HASH = 'is_hash_v3_1';
+
+    const newPending1 = createPendingV3Event(
+      operatorAddress,
+      URL,
+      HASH,
+      reputationOracleAddress,
+      recordingOracleAddress,
+      exchangeOracleAddress,
+      7,
+      8,
+      9,
+      BigInt.fromI32(51)
+    );
+
+    handlePendingV3(newPending1);
+
+    const id = toEventId(newPending1).toHex();
+
+    assert.fieldEquals('PendingEvent', id, 'sender', operatorAddressString);
+    assert.fieldEquals('EscrowStatusEvent', id, 'status', 'Pending');
+    assert.fieldEquals('Escrow', escrowAddress.toHex(), 'status', 'Pending');
+    assert.fieldEquals('Escrow', escrowAddress.toHex(), 'manifest', URL);
+    assert.fieldEquals('Escrow', escrowAddress.toHex(), 'manifestHash', HASH);
+    assert.fieldEquals(
+      'Escrow',
+      escrowAddress.toHex(),
+      'reputationOracleFee',
+      '7'
+    );
+    assert.fieldEquals(
+      'Escrow',
+      escrowAddress.toHex(),
+      'recordingOracleFee',
+      '8'
+    );
+    assert.fieldEquals(
+      'Escrow',
+      escrowAddress.toHex(),
+      'exchangeOracleFee',
+      '9'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      newPending1.transaction.hash.toHex(),
+      'method',
+      'setup'
     );
   });
 
@@ -1853,6 +1907,49 @@ describe('Escrow', () => {
         );
       });
 
+      assert.fieldEquals(
+        'EscrowStatistics',
+        STATISTICS_ENTITY_ID.toHex(),
+        'totalEventCount',
+        '4'
+      );
+    });
+
+    test('Should properly calculate setup & pending in statistics for PendingV3', () => {
+      const newPending1 = createPendingV3Event(
+        operatorAddress,
+        'test.com',
+        'is_hash_1',
+        reputationOracleAddress,
+        recordingOracleAddress,
+        exchangeOracleAddress,
+        5,
+        5,
+        5,
+        BigInt.fromI32(21)
+      );
+      const newPending2 = createPendingV3Event(
+        operatorAddress,
+        'test.com',
+        'is_hash_2',
+        reputationOracleAddress,
+        recordingOracleAddress,
+        exchangeOracleAddress,
+        10,
+        10,
+        10,
+        BigInt.fromI32(22)
+      );
+
+      handlePendingV3(newPending1);
+      handlePendingV3(newPending2);
+
+      assert.fieldEquals(
+        'EscrowStatistics',
+        STATISTICS_ENTITY_ID.toHex(),
+        'pendingStatusEventCount',
+        '2'
+      );
       assert.fieldEquals(
         'EscrowStatistics',
         STATISTICS_ENTITY_ID.toHex(),

@@ -9,6 +9,7 @@ import {
   Pending,
   Fund,
   PendingV2,
+  PendingV3,
   Withdraw,
   CancellationRequested,
   CancellationRefund,
@@ -144,7 +145,10 @@ function updateEscrowEntityForPending(
   manifestHash: string,
   reputationOracle: Address | null = null,
   recordingOracle: Address | null = null,
-  exchangeOracle: Address | null = null
+  exchangeOracle: Address | null = null,
+  reputationOracleFee: BigInt | null = null,
+  recordingOracleFee: BigInt | null = null,
+  exchangeOracleFee: BigInt | null = null
 ): void {
   escrowEntity.manifest = manifest;
   escrowEntity.manifestHash = manifestHash;
@@ -153,25 +157,37 @@ function updateEscrowEntityForPending(
   // Update oracles if provided
   if (reputationOracle) {
     escrowEntity.reputationOracle = reputationOracle;
-    const reputationOracleEntity = Operator.load(reputationOracle);
-    if (reputationOracleEntity) {
-      escrowEntity.reputationOracleFee = reputationOracleEntity.fee;
+    if (reputationOracleFee) {
+      escrowEntity.reputationOracleFee = reputationOracleFee;
+    } else {
+      const reputationOracleEntity = Operator.load(reputationOracle);
+      if (reputationOracleEntity) {
+        escrowEntity.reputationOracleFee = reputationOracleEntity.fee;
+      }
     }
   }
 
   if (recordingOracle) {
     escrowEntity.recordingOracle = recordingOracle;
-    const recordingOracleEntity = Operator.load(recordingOracle);
-    if (recordingOracleEntity) {
-      escrowEntity.recordingOracleFee = recordingOracleEntity.fee;
+    if (recordingOracleFee) {
+      escrowEntity.recordingOracleFee = recordingOracleFee;
+    } else {
+      const recordingOracleEntity = Operator.load(recordingOracle);
+      if (recordingOracleEntity) {
+        escrowEntity.recordingOracleFee = recordingOracleEntity.fee;
+      }
     }
   }
 
   if (exchangeOracle) {
     escrowEntity.exchangeOracle = exchangeOracle;
-    const exchangeOracleEntity = Operator.load(exchangeOracle);
-    if (exchangeOracleEntity) {
-      escrowEntity.exchangeOracleFee = exchangeOracleEntity.fee;
+    if (exchangeOracleFee) {
+      escrowEntity.exchangeOracleFee = exchangeOracleFee;
+    } else {
+      const exchangeOracleEntity = Operator.load(exchangeOracle);
+      if (exchangeOracleEntity) {
+        escrowEntity.exchangeOracleFee = exchangeOracleEntity.fee;
+      }
     }
   }
 
@@ -270,6 +286,43 @@ export function handlePendingV2(event: PendingV2): void {
       event.params.reputationOracle,
       event.params.recordingOracle,
       event.params.exchangeOracle
+    );
+
+    createTransaction(
+      event,
+      'setup',
+      event.transaction.from,
+      Address.fromBytes(escrowEntity.address),
+      null,
+      Address.fromBytes(escrowEntity.address)
+    );
+  }
+}
+
+export function handlePendingV3(event: PendingV3): void {
+  // Create common entities for setup and status
+  const escrowStatusEvent = createCommonEntitiesForPending(event, 'Pending');
+
+  // Update statistics
+  updateStatisticsForPending();
+
+  // Update event day data
+  updateEventDayDataForPending(event);
+
+  // Update escrow entity
+  const escrowEntity = Escrow.load(dataSource.address());
+  if (escrowEntity) {
+    updateEscrowEntityForPending(
+      escrowEntity,
+      escrowStatusEvent,
+      event.params.manifest,
+      event.params.hash,
+      event.params.reputationOracle,
+      event.params.recordingOracle,
+      event.params.exchangeOracle,
+      BigInt.fromI32(event.params.reputationOracleFeePercentage),
+      BigInt.fromI32(event.params.recordingOracleFeePercentage),
+      BigInt.fromI32(event.params.exchangeOracleFeePercentage)
     );
 
     createTransaction(

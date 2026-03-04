@@ -43,6 +43,16 @@ contract Escrow is IEscrow, ReentrancyGuard {
         address recordingOracle,
         address exchangeOracle
     );
+    event PendingV3(
+        string manifest,
+        string hash,
+        address reputationOracle,
+        address recordingOracle,
+        address exchangeOracle,
+        uint8 reputationOracleFeePercentage,
+        uint8 recordingOracleFeePercentage,
+        uint8 exchangeOracleFeePercentage
+    );
     event BulkTransfer(
         uint256 indexed txId,
         address[] recipients,
@@ -87,7 +97,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
     uint8 public recordingOracleFeePercentage;
     uint8 public exchangeOracleFeePercentage;
 
-    string public manifestUrl;
+    string public manifest;
     string public manifestHash;
     string public intermediateResultsUrl;
     string public intermediateResultsHash;
@@ -149,15 +159,15 @@ contract Escrow is IEscrow, ReentrancyGuard {
      * @param _reputationOracle Address of the reputation oracle.
      * @param _recordingOracle Address of the recording oracle.
      * @param _exchangeOracle Address of the exchange oracle.
-     * @param _url URL for the escrow manifest.
-     * @param _hash Hash of the escrow manifest.
+     * @param _manifest Manifest or URL for the escrow manifest.
+     * @param _manifestHash Hash of the escrow manifest.
      */
     function setup(
         address _reputationOracle,
         address _recordingOracle,
         address _exchangeOracle,
-        string calldata _url,
-        string calldata _hash
+        string calldata _manifest,
+        string calldata _manifestHash
     ) external override adminLauncherOrFactory notExpired {
         require(_reputationOracle != address(0), 'Invalid reputation oracle');
         require(_recordingOracle != address(0), 'Invalid recording oracle');
@@ -167,10 +177,6 @@ contract Escrow is IEscrow, ReentrancyGuard {
         uint8 _recordingOracleFeePercentage = _getOracleFee(_recordingOracle);
         uint8 _exchangeOracleFeePercentage = _getOracleFee(_exchangeOracle);
 
-        uint256 totalFeePercentage = uint256(_reputationOracleFeePercentage) +
-            uint256(_recordingOracleFeePercentage) +
-            uint256(_exchangeOracleFeePercentage);
-        require(totalFeePercentage <= 100, 'Percentage out of bounds');
         require(status == EscrowStatuses.Launched, 'Wrong status');
 
         reputationOracle = _reputationOracle;
@@ -181,19 +187,22 @@ contract Escrow is IEscrow, ReentrancyGuard {
         recordingOracleFeePercentage = _recordingOracleFeePercentage;
         exchangeOracleFeePercentage = _exchangeOracleFeePercentage;
 
-        manifestUrl = _url;
-        manifestHash = _hash;
+        manifest = _manifest;
+        manifestHash = _manifestHash;
         status = EscrowStatuses.Pending;
 
         remainingFunds = getBalance();
         require(remainingFunds > 0, 'Zero balance');
 
-        emit PendingV2(
-            _url,
-            _hash,
+        emit PendingV3(
+            _manifest,
+            _manifestHash,
             _reputationOracle,
             _recordingOracle,
-            _exchangeOracle
+            _exchangeOracle,
+            _reputationOracleFeePercentage,
+            _recordingOracleFeePercentage,
+            _exchangeOracleFeePercentage
         );
         emit Fund(remainingFunds);
     }

@@ -312,19 +312,22 @@ describe('Escrow', function () {
               FIXTURE_HASH
             )
         )
-          .to.emit(escrow, 'PendingV2')
+          .to.emit(escrow, 'PendingV3')
           .withArgs(
             FIXTURE_URL,
             FIXTURE_HASH,
             reputationOracleAddress,
             recordingOracleAddress,
-            exchangeOracleAddress
+            exchangeOracleAddress,
+            3,
+            3,
+            3
           )
           .to.emit(escrow, 'Fund')
           .withArgs(amount);
 
         expect(await escrow.status()).to.equal(Status.Pending);
-        expect(await escrow.manifestUrl()).to.equal(FIXTURE_URL);
+        expect(await escrow.manifest()).to.equal(FIXTURE_URL);
         expect(await escrow.manifestHash()).to.equal(FIXTURE_HASH);
       });
 
@@ -341,19 +344,22 @@ describe('Escrow', function () {
               FIXTURE_HASH
             )
         )
-          .to.emit(escrow, 'PendingV2')
+          .to.emit(escrow, 'PendingV3')
           .withArgs(
             FIXTURE_URL,
             FIXTURE_HASH,
             reputationOracleAddress,
             recordingOracleAddress,
-            exchangeOracleAddress
+            exchangeOracleAddress,
+            3,
+            3,
+            3
           )
           .to.emit(escrow, 'Fund')
           .withArgs(amount);
 
         expect(await escrow.status()).to.equal(Status.Pending);
-        expect(await escrow.manifestUrl()).to.equal(FIXTURE_URL);
+        expect(await escrow.manifest()).to.equal(FIXTURE_URL);
         expect(await escrow.manifestHash()).to.equal(FIXTURE_HASH);
       });
     });
