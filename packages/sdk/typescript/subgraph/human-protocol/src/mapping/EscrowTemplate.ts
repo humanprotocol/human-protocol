@@ -556,6 +556,8 @@ function handleBulkTransferCommon(
       internalTransaction.transaction = transaction.id;
       internalTransaction.method = 'transfer';
       internalTransaction.escrow = Address.fromBytes(escrowEntity.address);
+      internalTransaction.token = Address.fromBytes(escrowEntity.token);
+      internalTransaction.receiver = recipient;
       internalTransaction.save();
     }
 
@@ -689,6 +691,7 @@ export function handleCompleted(event: Completed): void {
       internalTransaction.method = 'transfer';
       internalTransaction.escrow = escrowEntity.address;
       internalTransaction.token = escrowEntity.token;
+      internalTransaction.receiver = escrowEntity.launcher;
       internalTransaction.save();
 
       escrowEntity.balance = ZERO_BI;
