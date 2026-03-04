@@ -115,9 +115,6 @@ class TestEscrowClient(unittest.TestCase):
         recording_oracle_address = "0x1234567890123456789012345678901234567890"
         reputation_oracle_address = "0x1234567890123456789012345678901234567890"
         exchange_oracle_address = "0x1234567890123456789012345678901234567890"
-        recording_oracle_fee = 10
-        reputation_oracle_fee = 10
-        exchange_oracle_fee = 10
         manifest = "https://www.example.com/result"
         hash = "test"
 
@@ -125,9 +122,6 @@ class TestEscrowClient(unittest.TestCase):
             recording_oracle_address,
             reputation_oracle_address,
             exchange_oracle_address,
-            recording_oracle_fee,
-            reputation_oracle_fee,
-            exchange_oracle_fee,
             manifest,
             hash,
         )
@@ -139,9 +133,6 @@ class TestEscrowClient(unittest.TestCase):
             escrow_config.reputation_oracle_address, reputation_oracle_address
         )
         self.assertEqual(escrow_config.exchange_oracle_address, exchange_oracle_address)
-        self.assertEqual(escrow_config.recording_oracle_fee, recording_oracle_fee)
-        self.assertEqual(escrow_config.reputation_oracle_fee, reputation_oracle_fee)
-        self.assertEqual(escrow_config.exchange_oracle_fee, exchange_oracle_fee)
         self.assertEqual(escrow_config.manifest, manifest)
         self.assertEqual(escrow_config.hash, hash)
 
@@ -149,9 +140,6 @@ class TestEscrowClient(unittest.TestCase):
         recording_oracle_address = "0x1234567890123456789012345678901234567890"
         reputation_oracle_address = "0x1234567890123456789012345678901234567890"
         exchange_oracle_address = "0x1234567890123456789012345678901234567890"
-        recording_oracle_fee = 10
-        reputation_oracle_fee = 10
-        exchange_oracle_fee = 10
         manifest = '{"foo": "bar"}'
         hash = "test"
 
@@ -159,9 +147,6 @@ class TestEscrowClient(unittest.TestCase):
             recording_oracle_address,
             reputation_oracle_address,
             exchange_oracle_address,
-            recording_oracle_fee,
-            reputation_oracle_fee,
-            exchange_oracle_fee,
             manifest,
             hash,
         )
@@ -171,9 +156,6 @@ class TestEscrowClient(unittest.TestCase):
         recording_oracle_address = "0x1234567890123456789012345678901234567890"
         reputation_oracle_address = "0x1234567890123456789012345678901234567890"
         exchange_oracle_address = "0x1234567890123456789012345678901234567890"
-        recording_oracle_fee = 10
-        reputation_oracle_fee = 10
-        exchange_oracle_fee = 10
         manifest = "http://test:6000"
         hash = "test"
 
@@ -181,9 +163,6 @@ class TestEscrowClient(unittest.TestCase):
             recording_oracle_address,
             reputation_oracle_address,
             exchange_oracle_address,
-            recording_oracle_fee,
-            reputation_oracle_fee,
-            exchange_oracle_fee,
             manifest,
             hash,
         )
@@ -195,18 +174,12 @@ class TestEscrowClient(unittest.TestCase):
             escrow_config.reputation_oracle_address, reputation_oracle_address
         )
         self.assertEqual(escrow_config.exchange_oracle_address, exchange_oracle_address)
-        self.assertEqual(escrow_config.recording_oracle_fee, recording_oracle_fee)
-        self.assertEqual(escrow_config.reputation_oracle_fee, reputation_oracle_fee)
-        self.assertEqual(escrow_config.exchange_oracle_fee, exchange_oracle_fee)
         self.assertEqual(escrow_config.manifest, manifest)
         self.assertEqual(escrow_config.hash, hash)
 
     def test_escrow_config_invalid_address(self):
         invalid_address = "invalid_address"
         valid_address = "0x1234567890123456789012345678901234567890"
-        recording_oracle_fee = 10
-        reputation_oracle_fee = 10
-        exchange_oracle_fee = 10
         manifest_url = "https://www.example.com/result"
         hash = "test"
 
@@ -215,9 +188,6 @@ class TestEscrowClient(unittest.TestCase):
                 invalid_address,
                 valid_address,
                 valid_address,
-                recording_oracle_fee,
-                reputation_oracle_fee,
-                exchange_oracle_fee,
                 manifest_url,
                 hash,
             )
@@ -230,9 +200,6 @@ class TestEscrowClient(unittest.TestCase):
                 valid_address,
                 invalid_address,
                 valid_address,
-                recording_oracle_fee,
-                reputation_oracle_fee,
-                exchange_oracle_fee,
                 manifest_url,
                 hash,
             )
@@ -245,9 +212,6 @@ class TestEscrowClient(unittest.TestCase):
                 valid_address,
                 valid_address,
                 invalid_address,
-                recording_oracle_fee,
-                reputation_oracle_fee,
-                exchange_oracle_fee,
                 manifest_url,
                 hash,
             )
@@ -255,112 +219,10 @@ class TestEscrowClient(unittest.TestCase):
             f"Invalid exchange oracle address: {invalid_address}", str(cm.exception)
         )
 
-    def test_escrow_config_invalid_fee(self):
-        recording_oracle_address = "0x1234567890123456789012345678901234567890"
-        reputation_oracle_address = "0x1234567890123456789012345678901234567890"
-        exchange_oracle_address = "0x1234567890123456789012345678901234567890"
-        valid_oracle_fee = 10
-        manifest_url = "https://www.example.com/result"
-        hash = "test"
-
-        with self.assertRaises(EscrowClientError) as cm:
-            EscrowConfig(
-                recording_oracle_address,
-                reputation_oracle_address,
-                exchange_oracle_address,
-                (-2),
-                valid_oracle_fee,
-                valid_oracle_fee,
-                manifest_url,
-                hash,
-            )
-        self.assertEqual("Fee must be between 0 and 100", str(cm.exception))
-
-        with self.assertRaises(EscrowClientError) as cm:
-            EscrowConfig(
-                recording_oracle_address,
-                reputation_oracle_address,
-                exchange_oracle_address,
-                1000,
-                valid_oracle_fee,
-                valid_oracle_fee,
-                manifest_url,
-                hash,
-            )
-        self.assertEqual("Fee must be between 0 and 100", str(cm.exception))
-
-        with self.assertRaises(EscrowClientError) as cm:
-            EscrowConfig(
-                recording_oracle_address,
-                reputation_oracle_address,
-                exchange_oracle_address,
-                valid_oracle_fee,
-                (-2),
-                valid_oracle_fee,
-                manifest_url,
-                hash,
-            )
-        self.assertEqual("Fee must be between 0 and 100", str(cm.exception))
-
-        with self.assertRaises(EscrowClientError) as cm:
-            EscrowConfig(
-                recording_oracle_address,
-                reputation_oracle_address,
-                exchange_oracle_address,
-                valid_oracle_fee,
-                1000,
-                valid_oracle_fee,
-                manifest_url,
-                hash,
-            )
-        self.assertEqual("Fee must be between 0 and 100", str(cm.exception))
-
-        with self.assertRaises(EscrowClientError) as cm:
-            EscrowConfig(
-                recording_oracle_address,
-                reputation_oracle_address,
-                exchange_oracle_address,
-                valid_oracle_fee,
-                valid_oracle_fee,
-                (-2),
-                manifest_url,
-                hash,
-            )
-        self.assertEqual("Fee must be between 0 and 100", str(cm.exception))
-
-        with self.assertRaises(EscrowClientError) as cm:
-            EscrowConfig(
-                recording_oracle_address,
-                reputation_oracle_address,
-                exchange_oracle_address,
-                valid_oracle_fee,
-                valid_oracle_fee,
-                1000,
-                manifest_url,
-                hash,
-            )
-        self.assertEqual("Fee must be between 0 and 100", str(cm.exception))
-
-        with self.assertRaises(EscrowClientError) as cm:
-            EscrowConfig(
-                recording_oracle_address,
-                reputation_oracle_address,
-                exchange_oracle_address,
-                40,
-                40,
-                40,
-                manifest_url,
-                hash,
-            )
-        self.assertEqual("Total fee must be less than 100", str(cm.exception))
-
     def test_escrow_config_invalid_manifest(self):
         recording_oracle_address = "0x1234567890123456789012345678901234567890"
         reputation_oracle_address = "0x1234567890123456789012345678901234567890"
         exchange_oracle_address = "0x1234567890123456789012345678901234567890"
-        recording_oracle_fee = 10
-        reputation_oracle_fee = 10
-        exchange_oracle_fee = 10
         manifest = ""
         hash = "test"
 
@@ -369,9 +231,6 @@ class TestEscrowClient(unittest.TestCase):
                 recording_oracle_address,
                 reputation_oracle_address,
                 exchange_oracle_address,
-                recording_oracle_fee,
-                reputation_oracle_fee,
-                exchange_oracle_fee,
                 manifest,
                 hash,
             )
@@ -381,9 +240,6 @@ class TestEscrowClient(unittest.TestCase):
         recording_oracle_address = "0x1234567890123456789012345678901234567890"
         reputation_oracle_address = "0x1234567890123456789012345678901234567890"
         exchange_oracle_address = "0x1234567890123456789012345678901234567890"
-        recording_oracle_fee = 10
-        reputation_oracle_fee = 10
-        exchange_oracle_fee = 10
         manifest_url = "https://www.example.com/result"
         hash = ""
 
@@ -392,9 +248,6 @@ class TestEscrowClient(unittest.TestCase):
                 recording_oracle_address,
                 reputation_oracle_address,
                 exchange_oracle_address,
-                recording_oracle_fee,
-                reputation_oracle_fee,
-                exchange_oracle_fee,
                 manifest_url,
                 hash,
             )
@@ -559,9 +412,6 @@ class TestEscrowClient(unittest.TestCase):
             "0x1234567890123456789012345678901234567890",
             "0x1234567890123456789012345678901234567890",
             "0x1234567890123456789012345678901234567890",
-            10,
-            10,
-            10,
             "https://www.example.com/manifest",
             "hashvalue",
         )
@@ -577,9 +427,6 @@ class TestEscrowClient(unittest.TestCase):
             escrow_config.reputation_oracle_address,
             escrow_config.recording_oracle_address,
             escrow_config.exchange_oracle_address,
-            escrow_config.reputation_oracle_fee,
-            escrow_config.recording_oracle_fee,
-            escrow_config.exchange_oracle_fee,
             escrow_config.manifest,
             escrow_config.hash,
         )
@@ -599,9 +446,6 @@ class TestEscrowClient(unittest.TestCase):
             "0x1234567890123456789012345678901234567890",
             "0x1234567890123456789012345678901234567890",
             "0x1234567890123456789012345678901234567890",
-            10,
-            10,
-            10,
             "https://www.example.com/manifest",
             "hashvalue",
         )
@@ -627,9 +471,6 @@ class TestEscrowClient(unittest.TestCase):
             "0x1234567890123456789012345678901234567890",
             "0x1234567890123456789012345678901234567890",
             "0x1234567890123456789012345678901234567890",
-            10,
-            10,
-            10,
             "https://www.example.com/manifest",
             "hashvalue",
         )
@@ -667,9 +508,6 @@ class TestEscrowClient(unittest.TestCase):
             "0x1234567890123456789012345678901234567890",
             "0x1234567890123456789012345678901234567890",
             "0x1234567890123456789012345678901234567890",
-            10,
-            10,
-            10,
             "https://www.example.com/manifest",
             "hashvalue",
         )
@@ -685,9 +523,6 @@ class TestEscrowClient(unittest.TestCase):
             escrow_config.reputation_oracle_address,
             escrow_config.recording_oracle_address,
             escrow_config.exchange_oracle_address,
-            escrow_config.reputation_oracle_fee,
-            escrow_config.recording_oracle_fee,
-            escrow_config.exchange_oracle_fee,
             escrow_config.manifest,
             escrow_config.hash,
         )
@@ -726,9 +561,6 @@ class TestEscrowClient(unittest.TestCase):
             "0x1234567890123456789012345678901234567890",
             "0x1234567890123456789012345678901234567890",
             "0x1234567890123456789012345678901234567890",
-            10,
-            10,
-            10,
             "https://www.example.com/manifest",
             "hashvalue",
         )
@@ -744,9 +576,6 @@ class TestEscrowClient(unittest.TestCase):
             escrow_config.reputation_oracle_address,
             escrow_config.recording_oracle_address,
             escrow_config.exchange_oracle_address,
-            escrow_config.reputation_oracle_fee,
-            escrow_config.recording_oracle_fee,
-            escrow_config.exchange_oracle_fee,
             escrow_config.manifest,
             escrow_config.hash,
         )
@@ -774,9 +603,6 @@ class TestEscrowClient(unittest.TestCase):
             "0x1234567890123456789012345678901234567890",
             "0x1234567890123456789012345678901234567890",
             "0x1234567890123456789012345678901234567890",
-            10,
-            10,
-            10,
             "https://www.example.com/result",
             "test",
         )
@@ -788,9 +614,6 @@ class TestEscrowClient(unittest.TestCase):
             escrow_config.reputation_oracle_address,
             escrow_config.recording_oracle_address,
             escrow_config.exchange_oracle_address,
-            escrow_config.reputation_oracle_fee,
-            escrow_config.recording_oracle_fee,
-            escrow_config.exchange_oracle_fee,
             escrow_config.manifest,
             escrow_config.hash,
         )
@@ -806,9 +629,6 @@ class TestEscrowClient(unittest.TestCase):
             "0x1234567890123456789012345678901234567890",
             "0x1234567890123456789012345678901234567890",
             "0x1234567890123456789012345678901234567890",
-            10,
-            10,
-            10,
             "https://www.example.com/result",
             "test",
         )
@@ -833,9 +653,6 @@ class TestEscrowClient(unittest.TestCase):
             "0x1234567890123456789012345678901234567890",
             "0x1234567890123456789012345678901234567890",
             "0x1234567890123456789012345678901234567890",
-            10,
-            10,
-            10,
             "https://www.example.com/result",
             "test",
         )
@@ -856,9 +673,6 @@ class TestEscrowClient(unittest.TestCase):
             "0x1234567890123456789012345678901234567890",
             "0x1234567890123456789012345678901234567890",
             "0x1234567890123456789012345678901234567890",
-            10,
-            10,
-            10,
             "https://www.example.com/result",
             "test",
         )
@@ -878,9 +692,6 @@ class TestEscrowClient(unittest.TestCase):
             "0x1234567890123456789012345678901234567890",
             "0x1234567890123456789012345678901234567890",
             "0x1234567890123456789012345678901234567890",
-            10,
-            10,
-            10,
             "https://www.example.com/result",
             "test",
         )
@@ -904,9 +715,6 @@ class TestEscrowClient(unittest.TestCase):
             "0x1234567890123456789012345678901234567890",
             "0x1234567890123456789012345678901234567890",
             "0x1234567890123456789012345678901234567890",
-            10,
-            10,
-            10,
             "https://www.example.com/result",
             "test",
         )
@@ -931,9 +739,6 @@ class TestEscrowClient(unittest.TestCase):
             "0x1234567890123456789012345678901234567890",
             "0x1234567890123456789012345678901234567890",
             "0x1234567890123456789012345678901234567890",
-            10,
-            10,
-            10,
             "https://www.example.com/result",
             "test",
         )
@@ -946,9 +751,6 @@ class TestEscrowClient(unittest.TestCase):
             escrow_config.reputation_oracle_address,
             escrow_config.recording_oracle_address,
             escrow_config.exchange_oracle_address,
-            escrow_config.reputation_oracle_fee,
-            escrow_config.recording_oracle_fee,
-            escrow_config.exchange_oracle_fee,
             escrow_config.manifest,
             escrow_config.hash,
         )
@@ -972,9 +774,6 @@ class TestEscrowClient(unittest.TestCase):
             "0x1234567890123456789012345678901234567890",
             "0x1234567890123456789012345678901234567890",
             "0x1234567890123456789012345678901234567890",
-            10,
-            10,
-            10,
             "https://www.example.com/result",
             "test",
         )
@@ -987,9 +786,6 @@ class TestEscrowClient(unittest.TestCase):
             escrow_config.reputation_oracle_address,
             escrow_config.recording_oracle_address,
             escrow_config.exchange_oracle_address,
-            escrow_config.reputation_oracle_fee,
-            escrow_config.recording_oracle_fee,
-            escrow_config.exchange_oracle_fee,
             escrow_config.manifest,
             escrow_config.hash,
         )

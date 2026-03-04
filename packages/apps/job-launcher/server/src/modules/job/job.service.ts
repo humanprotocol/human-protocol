@@ -317,20 +317,8 @@ export class JobService {
 
     const escrowConfig = {
       recordingOracle: jobEntity.recordingOracle,
-      recordingOracleFee: await this.getOracleFee(
-        jobEntity.recordingOracle,
-        jobEntity.chainId,
-      ),
       reputationOracle: jobEntity.reputationOracle,
-      reputationOracleFee: await this.getOracleFee(
-        jobEntity.reputationOracle,
-        jobEntity.chainId,
-      ),
       exchangeOracle: jobEntity.exchangeOracle,
-      exchangeOracleFee: await this.getOracleFee(
-        jobEntity.exchangeOracle,
-        jobEntity.chainId,
-      ),
       manifest: jobEntity.manifestUrl,
       manifestHash: jobEntity.manifestHash,
     };

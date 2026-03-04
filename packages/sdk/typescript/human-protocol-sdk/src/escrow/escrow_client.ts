@@ -34,7 +34,6 @@ import {
   ErrorRecipientCannotBeEmptyArray,
   ErrorStoreResultsVersion,
   ErrorTooManyRecipients,
-  ErrorTotalFeeMustBeLessThanHundred,
   ErrorTransferEventNotFoundInTransactionLogs,
   ErrorUnsupportedChainID,
   InvalidEthereumAddressError,
@@ -216,9 +215,6 @@ export class EscrowClient extends BaseEthersClient {
       recordingOracle,
       reputationOracle,
       exchangeOracle,
-      recordingOracleFee,
-      reputationOracleFee,
-      exchangeOracleFee,
       manifest,
       manifestHash,
     } = escrowConfig;
@@ -233,18 +229,6 @@ export class EscrowClient extends BaseEthersClient {
 
     if (!ethers.isAddress(exchangeOracle)) {
       throw ErrorInvalidExchangeOracleAddressProvided;
-    }
-
-    if (
-      recordingOracleFee <= 0 ||
-      reputationOracleFee <= 0 ||
-      exchangeOracleFee <= 0
-    ) {
-      throw ErrorAmountMustBeGreaterThanZero;
-    }
-
-    if (recordingOracleFee + reputationOracleFee + exchangeOracleFee > 100) {
-      throw ErrorTotalFeeMustBeLessThanHundred;
     }
 
     const isManifestValid = isValidUrl(manifest) || isValidJson(manifest);
@@ -271,8 +255,6 @@ export class EscrowClient extends BaseEthersClient {
    * @throws ErrorInvalidRecordingOracleAddressProvided If the recording oracle address is invalid
    * @throws ErrorInvalidReputationOracleAddressProvided If the reputation oracle address is invalid
    * @throws ErrorInvalidExchangeOracleAddressProvided If the exchange oracle address is invalid
-   * @throws ErrorAmountMustBeGreaterThanZero If any oracle fee is less than or equal to zero
-   * @throws ErrorTotalFeeMustBeLessThanHundred If the total oracle fees exceed 100
    * @throws ErrorInvalidManifest If the manifest is not a valid URL or JSON string
    * @throws ErrorHashIsEmptyString If the manifest hash is empty
    * @throws ErrorLaunchedEventIsNotEmitted If the LaunchedV2 event is not emitted
@@ -293,9 +275,6 @@ export class EscrowClient extends BaseEthersClient {
    *   recordingOracle: '0xRecordingOracleAddress',
    *   reputationOracle: '0xReputationOracleAddress',
    *   exchangeOracle: '0xExchangeOracleAddress',
-   *   recordingOracleFee: 5n,
-   *   reputationOracleFee: 5n,
-   *   exchangeOracleFee: 5n,
    *   manifest: 'https://example.com/manifest.json',
    *   manifestHash: 'manifestHash-123',
    * };
@@ -327,9 +306,6 @@ export class EscrowClient extends BaseEthersClient {
       recordingOracle,
       reputationOracle,
       exchangeOracle,
-      recordingOracleFee,
-      reputationOracleFee,
-      exchangeOracleFee,
       manifest,
       manifestHash,
     } = escrowConfig;
@@ -344,9 +320,6 @@ export class EscrowClient extends BaseEthersClient {
             reputationOracle,
             recordingOracle,
             exchangeOracle,
-            reputationOracleFee,
-            recordingOracleFee,
-            exchangeOracleFee,
             manifest,
             manifestHash,
             overrides
@@ -382,8 +355,6 @@ export class EscrowClient extends BaseEthersClient {
    * @throws ErrorInvalidRecordingOracleAddressProvided If the recording oracle address is invalid
    * @throws ErrorInvalidReputationOracleAddressProvided If the reputation oracle address is invalid
    * @throws ErrorInvalidExchangeOracleAddressProvided If the exchange oracle address is invalid
-   * @throws ErrorAmountMustBeGreaterThanZero If any oracle fee is less than or equal to zero
-   * @throws ErrorTotalFeeMustBeLessThanHundred If the total oracle fees exceed 100
    * @throws ErrorInvalidManifest If the manifest is not a valid URL or JSON string
    * @throws ErrorHashIsEmptyString If the manifest hash is empty
    * @throws ErrorInvalidEscrowAddressProvided If the escrow address is invalid
@@ -397,9 +368,6 @@ export class EscrowClient extends BaseEthersClient {
    *    recordingOracle: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
    *    reputationOracle: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
    *    exchangeOracle: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
-   *    recordingOracleFee: 10n,
-   *    reputationOracleFee: 10n,
-   *    exchangeOracleFee: 10n,
    *    manifest: 'http://localhost/manifest.json',
    *    manifestHash: 'b5dad76bf6772c0f07fd5e048f6e75a5f86ee079',
    * };
@@ -416,9 +384,6 @@ export class EscrowClient extends BaseEthersClient {
       recordingOracle,
       reputationOracle,
       exchangeOracle,
-      recordingOracleFee,
-      reputationOracleFee,
-      exchangeOracleFee,
       manifest,
       manifestHash,
     } = escrowConfig;
@@ -442,9 +407,6 @@ export class EscrowClient extends BaseEthersClient {
             reputationOracle,
             recordingOracle,
             exchangeOracle,
-            reputationOracleFee,
-            recordingOracleFee,
-            exchangeOracleFee,
             manifest,
             manifestHash,
             overrides

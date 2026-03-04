@@ -8,6 +8,13 @@ import '@openzeppelin/contracts/utils/ReentrancyGuard.sol';
 
 import './interfaces/IEscrow.sol';
 
+interface IKVStore {
+    function get(
+        address _account,
+        string memory _key
+    ) external view returns (string memory);
+}
+
 struct Fees {
     uint256 reputation;
     uint256 recording;
@@ -23,6 +30,8 @@ contract Escrow is IEscrow, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     string private constant ERROR_ZERO_ADDRESS = 'Zero address';
+    string private constant FEE_KEY = 'fee';
+    uint8 private constant MAX_ORACLE_FEE = 25;
     uint32 private constant BULK_MAX_COUNT = 100;
 
     event IntermediateStorage(string url, string hash);
@@ -72,6 +81,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
     address public immutable admin;
     address public immutable escrowFactory;
     address public immutable token;
+    address public immutable kvstore;
 
     uint8 public reputationOracleFeePercentage;
     uint8 public recordingOracleFeePercentage;
@@ -94,21 +104,25 @@ contract Escrow is IEscrow, ReentrancyGuard {
      * @param _launcher  Creator of the escrow.
      * @param _admin     Admin address for the escrow.
      * @param _duration  Escrow lifetime (seconds).
+     * @param _kvstore   KVStore contract address.
      */
     constructor(
         address _token,
         address _launcher,
         address _admin,
-        uint256 _duration
+        uint256 _duration,
+        address _kvstore
     ) {
         require(_launcher != address(0), ERROR_ZERO_ADDRESS);
         require(_admin != address(0), ERROR_ZERO_ADDRESS);
         require(_token != address(0), ERROR_ZERO_ADDRESS);
+        require(_kvstore != address(0), ERROR_ZERO_ADDRESS);
         require(_duration > 0, 'Duration is 0');
 
         token = _token;
         launcher = _launcher;
         admin = _admin;
+        kvstore = _kvstore;
         escrowFactory = msg.sender;
 
         status = EscrowStatuses.Launched;
@@ -135,9 +149,6 @@ contract Escrow is IEscrow, ReentrancyGuard {
      * @param _reputationOracle Address of the reputation oracle.
      * @param _recordingOracle Address of the recording oracle.
      * @param _exchangeOracle Address of the exchange oracle.
-     * @param _reputationOracleFeePercentage Fee percentage for the reputation oracle.
-     * @param _recordingOracleFeePercentage Fee percentage for the recording oracle.
-     * @param _exchangeOracleFeePercentage Fee percentage for the exchange oracle.
      * @param _url URL for the escrow manifest.
      * @param _hash Hash of the escrow manifest.
      */
@@ -145,9 +156,6 @@ contract Escrow is IEscrow, ReentrancyGuard {
         address _reputationOracle,
         address _recordingOracle,
         address _exchangeOracle,
-        uint8 _reputationOracleFeePercentage,
-        uint8 _recordingOracleFeePercentage,
-        uint8 _exchangeOracleFeePercentage,
         string calldata _url,
         string calldata _hash
     ) external override adminLauncherOrFactory notExpired {
@@ -155,9 +163,13 @@ contract Escrow is IEscrow, ReentrancyGuard {
         require(_recordingOracle != address(0), 'Invalid recording oracle');
         require(_exchangeOracle != address(0), 'Invalid exchange oracle');
 
-        uint256 totalFeePercentage = _reputationOracleFeePercentage +
-            _recordingOracleFeePercentage +
-            _exchangeOracleFeePercentage;
+        uint8 _reputationOracleFeePercentage = _getOracleFee(_reputationOracle);
+        uint8 _recordingOracleFeePercentage = _getOracleFee(_recordingOracle);
+        uint8 _exchangeOracleFeePercentage = _getOracleFee(_exchangeOracle);
+
+        uint256 totalFeePercentage = uint256(_reputationOracleFeePercentage) +
+            uint256(_recordingOracleFeePercentage) +
+            uint256(_exchangeOracleFeePercentage);
         require(totalFeePercentage <= 100, 'Percentage out of bounds');
         require(status == EscrowStatuses.Launched, 'Wrong status');
 
@@ -184,6 +196,25 @@ contract Escrow is IEscrow, ReentrancyGuard {
             _exchangeOracle
         );
         emit Fund(remainingFunds);
+    }
+
+    function _getOracleFee(address _oracle) private view returns (uint8) {
+        return _parseUint8(IKVStore(kvstore).get(_oracle, FEE_KEY));
+    }
+
+    function _parseUint8(string memory _value) private pure returns (uint8) {
+        bytes memory valueBytes = bytes(_value);
+        require(valueBytes.length > 0, 'Invalid oracle fee');
+
+        uint256 parsedValue = 0;
+        for (uint256 i = 0; i < valueBytes.length; i++) {
+            uint8 c = uint8(valueBytes[i]);
+            require(c >= 48 && c <= 57, 'Invalid oracle fee');
+            parsedValue = parsedValue * 10 + (c - 48);
+            require(parsedValue <= MAX_ORACLE_FEE, 'Percentage out of bounds');
+        }
+
+        return uint8(parsedValue);
     }
 
     /**

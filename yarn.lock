@@ -4969,6 +4969,7 @@ __metadata:
     ts-node: "npm:^10.9.2"
     typechain: "npm:^8.3.2"
     typescript: "npm:^5.8.3"
+    typescript-eslint: "npm:^8.39.1"
     xdeployer: "npm:3.1.6"
   peerDependencies:
     ethers: ~6.15.0

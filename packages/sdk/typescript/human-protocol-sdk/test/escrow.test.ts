@@ -37,7 +37,6 @@ import {
   ErrorSigner,
   ErrorStoreResultsVersion,
   ErrorTooManyRecipients,
-  ErrorTotalFeeMustBeLessThanHundred,
   ErrorUnsupportedChainID,
   ErrorInvalidManifest,
   InvalidEthereumAddressError,
@@ -431,94 +430,6 @@ describe('EscrowClient', () => {
       ).rejects.toThrow(ErrorInvalidExchangeOracleAddressProvided);
     });
 
-    test('should throw an error if recordingOracleFee <= 0', async () => {
-      const escrowConfig = {
-        recordingOracle: ethers.ZeroAddress,
-        reputationOracle: ethers.ZeroAddress,
-        exchangeOracle: ethers.ZeroAddress,
-        recordingOracleFee: 0n,
-        reputationOracleFee: 10n,
-        exchangeOracleFee: 10n,
-        manifest: VALID_URL,
-        manifestHash: FAKE_HASH,
-      };
-
-      await expect(
-        escrowClient.createFundAndSetupEscrow(
-          tokenAddress,
-          10n,
-          jobRequesterId,
-          escrowConfig
-        )
-      ).rejects.toThrow(ErrorAmountMustBeGreaterThanZero);
-    });
-
-    test('should throw an error if reputationOracleFee <= 0', async () => {
-      const escrowConfig = {
-        recordingOracle: ethers.ZeroAddress,
-        reputationOracle: ethers.ZeroAddress,
-        exchangeOracle: ethers.ZeroAddress,
-        recordingOracleFee: 10n,
-        reputationOracleFee: 0n,
-        exchangeOracleFee: 10n,
-        manifest: VALID_URL,
-        hash: FAKE_HASH,
-      };
-
-      await expect(
-        escrowClient.createFundAndSetupEscrow(
-          tokenAddress,
-          10n,
-          jobRequesterId,
-          escrowConfig
-        )
-      ).rejects.toThrow(ErrorAmountMustBeGreaterThanZero);
-    });
-
-    test('should throw an error if exchangeOracleFee <= 0', async () => {
-      const escrowConfig = {
-        recordingOracle: ethers.ZeroAddress,
-        reputationOracle: ethers.ZeroAddress,
-        exchangeOracle: ethers.ZeroAddress,
-        recordingOracleFee: 10n,
-        reputationOracleFee: 10n,
-        exchangeOracleFee: 0n,
-        manifest: VALID_URL,
-        manifestHash: FAKE_HASH,
-      };
-
-      await expect(
-        escrowClient.createFundAndSetupEscrow(
-          tokenAddress,
-          10n,
-          jobRequesterId,
-          escrowConfig
-        )
-      ).rejects.toThrow(ErrorAmountMustBeGreaterThanZero);
-    });
-
-    test('should throw an error if total fee > 100', async () => {
-      const escrowConfig = {
-        recordingOracle: ethers.ZeroAddress,
-        reputationOracle: ethers.ZeroAddress,
-        exchangeOracle: ethers.ZeroAddress,
-        recordingOracleFee: 40n,
-        reputationOracleFee: 40n,
-        exchangeOracleFee: 40n,
-        manifest: VALID_URL,
-        manifestHash: FAKE_HASH,
-      };
-
-      await expect(
-        escrowClient.createFundAndSetupEscrow(
-          tokenAddress,
-          10n,
-          jobRequesterId,
-          escrowConfig
-        )
-      ).rejects.toThrow(ErrorTotalFeeMustBeLessThanHundred);
-    });
-
     test('should throw an error if manifest is an empty string', async () => {
       const escrowConfig = {
         recordingOracle: ethers.ZeroAddress,
@@ -595,9 +506,6 @@ describe('EscrowClient', () => {
         escrowConfig.reputationOracle,
         escrowConfig.recordingOracle,
         escrowConfig.exchangeOracle,
-        escrowConfig.reputationOracleFee,
-        escrowConfig.recordingOracleFee,
-        escrowConfig.exchangeOracleFee,
         escrowConfig.manifest,
         escrowConfig.manifestHash,
         {}
@@ -634,9 +542,6 @@ describe('EscrowClient', () => {
         escrowConfig.reputationOracle,
         escrowConfig.recordingOracle,
         escrowConfig.exchangeOracle,
-        escrowConfig.reputationOracleFee,
-        escrowConfig.recordingOracleFee,
-        escrowConfig.exchangeOracleFee,
         escrowConfig.manifest,
         escrowConfig.manifestHash,
         {}
@@ -677,9 +582,6 @@ describe('EscrowClient', () => {
         escrowConfig.reputationOracle,
         escrowConfig.recordingOracle,
         escrowConfig.exchangeOracle,
-        escrowConfig.reputationOracleFee,
-        escrowConfig.recordingOracleFee,
-        escrowConfig.exchangeOracleFee,
         escrowConfig.manifest,
         escrowConfig.manifestHash,
         txOptions
@@ -767,9 +669,6 @@ describe('EscrowClient', () => {
         escrowConfig.reputationOracle,
         escrowConfig.recordingOracle,
         escrowConfig.exchangeOracle,
-        escrowConfig.reputationOracleFee,
-        escrowConfig.recordingOracleFee,
-        escrowConfig.exchangeOracleFee,
         escrowConfig.manifest,
         escrowConfig.manifestHash,
         {}
@@ -866,82 +765,6 @@ describe('EscrowClient', () => {
       ).rejects.toThrow(ErrorEscrowAddressIsNotProvidedByFactory);
     });
 
-    test('should throw an error if recordingOracleFee <= 0', async () => {
-      const escrowConfig = {
-        recordingOracle: ethers.ZeroAddress,
-        reputationOracle: ethers.ZeroAddress,
-        exchangeOracle: ethers.ZeroAddress,
-        recordingOracleFee: 0n,
-        reputationOracleFee: 10n,
-        exchangeOracleFee: 10n,
-        manifest: VALID_URL,
-        manifestHash: FAKE_HASH,
-      };
-
-      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
-
-      await expect(
-        escrowClient.setup(ethers.ZeroAddress, escrowConfig)
-      ).rejects.toThrow(ErrorAmountMustBeGreaterThanZero);
-    });
-
-    test('should throw an error if reputationOracleFee <= 0', async () => {
-      const escrowConfig = {
-        recordingOracle: ethers.ZeroAddress,
-        reputationOracle: ethers.ZeroAddress,
-        exchangeOracle: ethers.ZeroAddress,
-        recordingOracleFee: 10n,
-        reputationOracleFee: 0n,
-        exchangeOracleFee: 10n,
-        manifest: VALID_URL,
-        manifestHash: FAKE_HASH,
-      };
-
-      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
-
-      await expect(
-        escrowClient.setup(ethers.ZeroAddress, escrowConfig)
-      ).rejects.toThrow(ErrorAmountMustBeGreaterThanZero);
-    });
-
-    test('should throw an error if exchangeOracleFee <= 0', async () => {
-      const escrowConfig = {
-        recordingOracle: ethers.ZeroAddress,
-        reputationOracle: ethers.ZeroAddress,
-        exchangeOracle: ethers.ZeroAddress,
-        recordingOracleFee: 10n,
-        reputationOracleFee: 10n,
-        exchangeOracleFee: 0n,
-        manifest: VALID_URL,
-        manifestHash: FAKE_HASH,
-      };
-
-      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
-
-      await expect(
-        escrowClient.setup(ethers.ZeroAddress, escrowConfig)
-      ).rejects.toThrow(ErrorAmountMustBeGreaterThanZero);
-    });
-
-    test('should throw an error if total fee > 100', async () => {
-      const escrowConfig = {
-        recordingOracle: ethers.ZeroAddress,
-        reputationOracle: ethers.ZeroAddress,
-        exchangeOracle: ethers.ZeroAddress,
-        recordingOracleFee: 40n,
-        reputationOracleFee: 40n,
-        exchangeOracleFee: 40n,
-        manifest: VALID_URL,
-        manifestHash: FAKE_HASH,
-      };
-
-      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
-
-      await expect(
-        escrowClient.setup(ethers.ZeroAddress, escrowConfig)
-      ).rejects.toThrow(ErrorTotalFeeMustBeLessThanHundred);
-    });
-
     test('should throw an error if manifest is an empty string', async () => {
       const escrowConfig = {
         recordingOracle: ethers.ZeroAddress,
@@ -986,9 +809,6 @@ describe('EscrowClient', () => {
         ethers.ZeroAddress,
         ethers.ZeroAddress,
         ethers.ZeroAddress,
-        10n,
-        10n,
-        10n,
         '{"foo":"bar"}',
         FAKE_HASH,
         {}
@@ -1039,9 +859,6 @@ describe('EscrowClient', () => {
         ethers.ZeroAddress,
         ethers.ZeroAddress,
         ethers.ZeroAddress,
-        10n,
-        10n,
-        10n,
         VALID_URL,
         FAKE_HASH,
         {}
@@ -1071,9 +888,6 @@ describe('EscrowClient', () => {
         ethers.ZeroAddress,
         ethers.ZeroAddress,
         ethers.ZeroAddress,
-        10n,
-        10n,
-        10n,
         VALID_URL,
         FAKE_HASH,
         {}
@@ -1107,9 +921,6 @@ describe('EscrowClient', () => {
         ethers.ZeroAddress,
         ethers.ZeroAddress,
         ethers.ZeroAddress,
-        10n,
-        10n,
-        10n,
         VALID_URL,
         FAKE_HASH,
         txOptions

@@ -87,9 +87,6 @@ export interface IEscrowConfig {
   recordingOracle: string;
   reputationOracle: string;
   exchangeOracle: string;
-  recordingOracleFee: bigint;
-  reputationOracleFee: bigint;
-  exchangeOracleFee: bigint;
   manifest: string;
   manifestHash: string;
 }

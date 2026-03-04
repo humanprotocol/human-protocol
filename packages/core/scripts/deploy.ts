@@ -23,12 +23,18 @@ async function main() {
   await stakingContract.waitForDeployment();
   console.log('Staking Address: ', await stakingContract.getAddress());
 
+  const KVStore = await ethers.getContractFactory('KVStore');
+  const kvStoreContract = await KVStore.deploy();
+  await kvStoreContract.waitForDeployment();
+  const kvStoreAddress = await kvStoreContract.getAddress();
+  console.log('KVStore Address: ', kvStoreAddress);
+
   const EscrowFactory = await ethers.getContractFactory(
     'contracts/EscrowFactory.sol:EscrowFactory'
   );
   const escrowFactoryContract = await upgrades.deployProxy(
     EscrowFactory,
-    [await stakingContract.getAddress(), 1],
+    [await stakingContract.getAddress(), 1, kvStoreAddress],
     { initializer: 'initialize', kind: 'uups' }
   );
   await escrowFactoryContract.waitForDeployment();
@@ -42,12 +48,6 @@ async function main() {
       await escrowFactoryContract.getAddress()
     )
   );
-
-  const KVStore = await ethers.getContractFactory('KVStore');
-  const kvStoreContract = await KVStore.deploy();
-  await kvStoreContract.waitForDeployment();
-
-  console.log('KVStore Address: ', await kvStoreContract.getAddress());
 
   for (const account of accounts) {
     await (HMTokenContract as HMToken).transfer(

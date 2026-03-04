@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { ethers } from 'hardhat';
 import { Signer, ZeroAddress } from 'ethers';
-import { Escrow, HMToken } from '../typechain-types';
+import { Escrow, HMToken, KVStore } from '../typechain-types';
 import { faker } from '@faker-js/faker';
 
 const BULK_MAX_COUNT = 100;
@@ -41,8 +41,10 @@ let adminAddress: string;
 let token: HMToken;
 let token2: HMToken;
 let escrow: Escrow;
+let kvStore: KVStore;
 let tokenAddress: string;
 let tokenAddress2: string;
+let kvStoreAddress: string;
 
 async function deployEscrow(
   tokenAddr: string = tokenAddress,
@@ -55,7 +57,8 @@ async function deployEscrow(
     tokenAddr,
     launcherAddr,
     adminAddr,
-    duration
+    duration,
+    kvStoreAddress
   )) as Escrow;
 }
 
@@ -69,9 +72,6 @@ async function fundEscrow(
 }
 
 async function setupEscrow(
-  repFee = 3,
-  recFee = 3,
-  excFee = 3,
   url: string = FIXTURE_URL,
   hash: string = FIXTURE_HASH
 ) {
@@ -81,9 +81,6 @@ async function setupEscrow(
       reputationOracleAddress,
       recordingOracleAddress,
       exchangeOracleAddress,
-      repFee,
-      recFee,
-      excFee,
       url,
       hash
     );
@@ -133,6 +130,14 @@ describe('Escrow', function () {
     tokenAddress = await token.getAddress();
     token2 = (await HMToken.deploy(1000000000, 'Token2', 18, 'TK2')) as HMToken;
     tokenAddress2 = await token2.getAddress();
+
+    const KVStore = await ethers.getContractFactory('KVStore');
+    kvStore = (await KVStore.deploy()) as KVStore;
+    kvStoreAddress = await kvStore.getAddress();
+
+    await kvStore.connect(reputationOracle).set('fee', '3');
+    await kvStore.connect(recordingOracle).set('fee', '3');
+    await kvStore.connect(exchangeOracle).set('fee', '3');
   });
 
   describe('deployment', () => {
@@ -192,9 +197,6 @@ describe('Escrow', function () {
               reputationOracleAddress,
               recordingOracleAddress,
               exchangeOracleAddress,
-              3,
-              3,
-              3,
               FIXTURE_URL,
               FIXTURE_HASH
             )
@@ -206,9 +208,6 @@ describe('Escrow', function () {
               reputationOracleAddress,
               recordingOracleAddress,
               exchangeOracleAddress,
-              3,
-              3,
-              3,
               FIXTURE_URL,
               FIXTURE_HASH
             )
@@ -220,9 +219,6 @@ describe('Escrow', function () {
               reputationOracleAddress,
               recordingOracleAddress,
               exchangeOracleAddress,
-              3,
-              3,
-              3,
               FIXTURE_URL,
               FIXTURE_HASH
             )
@@ -234,9 +230,6 @@ describe('Escrow', function () {
               reputationOracleAddress,
               recordingOracleAddress,
               exchangeOracleAddress,
-              3,
-              3,
-              3,
               FIXTURE_URL,
               FIXTURE_HASH
             )
@@ -251,9 +244,6 @@ describe('Escrow', function () {
               ethers.ZeroAddress,
               recordingOracleAddress,
               exchangeOracleAddress,
-              3,
-              3,
-              3,
               FIXTURE_URL,
               FIXTURE_HASH
             )
@@ -268,9 +258,6 @@ describe('Escrow', function () {
               reputationOracleAddress,
               ethers.ZeroAddress,
               exchangeOracleAddress,
-              3,
-              3,
-              3,
               FIXTURE_URL,
               FIXTURE_HASH
             )
@@ -285,16 +272,16 @@ describe('Escrow', function () {
               reputationOracleAddress,
               recordingOracleAddress,
               ethers.ZeroAddress,
-              3,
-              3,
-              3,
               FIXTURE_URL,
               FIXTURE_HASH
             )
         ).to.be.revertedWith('Invalid exchange oracle');
       });
 
-      it('reverts when total fee > 100', async () => {
+      it('reverts when an oracle fee > 25', async () => {
+        await kvStore.connect(reputationOracle).set('fee', '50');
+        await kvStore.connect(recordingOracle).set('fee', '20');
+        await kvStore.connect(exchangeOracle).set('fee', '20');
         await expect(
           escrow
             .connect(launcher)
@@ -302,13 +289,13 @@ describe('Escrow', function () {
               reputationOracleAddress,
               recordingOracleAddress,
               exchangeOracleAddress,
-              60,
-              30,
-              20,
               FIXTURE_URL,
               FIXTURE_HASH
             )
         ).to.be.revertedWith('Percentage out of bounds');
+        await kvStore.connect(reputationOracle).set('fee', '3');
+        await kvStore.connect(recordingOracle).set('fee', '3');
+        await kvStore.connect(exchangeOracle).set('fee', '3');
       });
     });
     describe('succeeds', () => {
@@ -321,9 +308,6 @@ describe('Escrow', function () {
               reputationOracleAddress,
               recordingOracleAddress,
               exchangeOracleAddress,
-              5,
-              5,
-              5,
               FIXTURE_URL,
               FIXTURE_HASH
             )
@@ -353,9 +337,6 @@ describe('Escrow', function () {
               reputationOracleAddress,
               recordingOracleAddress,
               exchangeOracleAddress,
-              5,
-              5,
-              5,
               FIXTURE_URL,
               FIXTURE_HASH
             )
