@@ -19,7 +19,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/humanprotocol/human-protocol.git",
-    "directory": "packages/sdk/typescript/subgraph-hmt-stats"
+    "directory": "packages/sdk/typescript/subgraph/hmt"
   },
   "keywords": [
     "human-protocol",

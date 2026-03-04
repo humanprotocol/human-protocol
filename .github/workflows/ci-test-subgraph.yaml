@@ -9,9 +9,15 @@ on:
 
 jobs:
   subgraph-test:
-    name: Subgraph Test
+    name: Subgraph Test (${{ matrix.workspace }})
     # TODO: Use ubuntu-latest when graph binary is not failing on ubuntu 24.04
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        workspace:
+          - "@tools/subgraph"
+          - "@tools/subgraph-hmt-stats"
+      fail-fast: true
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
@@ -19,10 +25,10 @@ jobs:
           node-version-file: .nvmrc
           cache: yarn
       - name: Install dependencies
-        run: yarn workspaces focus @tools/subgraph
+        run: yarn workspaces focus @tools/subgraph @tools/subgraph-hmt-stats
       - name: Build core package
         run: yarn workspace @human-protocol/core build
       - name: Generate manifest for Polygon for tests
-        run: NETWORK=polygon yarn workspace @tools/subgraph generate
+        run: NETWORK=polygon yarn workspace ${{ matrix.workspace }} generate
       - name: Run subgraph test
-        run: yarn workspace @tools/subgraph test
+        run: yarn workspace ${{ matrix.workspace }} test
