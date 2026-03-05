@@ -202,31 +202,41 @@ describe('DetailsService', () => {
   });
 
   it('should format transactions using token decimals and symbol', async () => {
-    jest.spyOn(TransactionUtils, 'getTransactions').mockResolvedValue([
+    const walletAddress = '0xA';
+    const senderAddress = '0xB';
+    const receiverAddress = '0xC';
+    const tokenAddress = '0xD';
+    const txHash = '0x1';
+
+    const mockTransactions = [
       {
         block: 123n,
-        txHash: '0x',
-        from: '0x1230000000000000000000000000000000000000',
-        to: '0x9990000000000000000000000000000000000000',
+        txHash,
+        from: senderAddress,
+        to: walletAddress,
         timestamp: Date.now(),
         value: 1234567n,
         method: 'bulkTransfer',
         receiver: null,
         escrow: null,
-        token: '0x1111111111111111111111111111111111111111',
+        token: tokenAddress,
         internalTransactions: [
           {
-            from: '0x1230000000000000000000000000000000000000',
-            to: '0x4560000000000000000000000000000000000000',
+            from: senderAddress,
+            to: receiverAddress,
             value: 345678n,
             method: 'transfer',
             receiver: null,
             escrow: null,
-            token: '0x1111111111111111111111111111111111111111',
+            token: tokenAddress,
           },
         ],
       },
-    ]);
+    ];
+
+    jest
+      .spyOn(TransactionUtils, 'getTransactions')
+      .mockResolvedValue(mockTransactions);
 
     jest.spyOn(service as any, 'getTokenData').mockResolvedValue({
       decimals: 6,
@@ -235,7 +245,7 @@ describe('DetailsService', () => {
 
     const result = await service.getTransactions(
       DevelopmentChainId.SEPOLIA,
-      '0x9990000000000000000000000000000000000000',
+      walletAddress,
       10,
       0,
     );
