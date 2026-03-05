@@ -11162,9 +11162,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tools/subgraph-hmt-stats@workspace:packages/sdk/typescript/subgraph/hmt":
+"@tools/subgraph-hmt-stats@workspace:packages/subgraph/hmt":
   version: 0.0.0-use.local
-  resolution: "@tools/subgraph-hmt-stats@workspace:packages/sdk/typescript/subgraph/hmt"
+  resolution: "@tools/subgraph-hmt-stats@workspace:packages/subgraph/hmt"
   dependencies:
     "@graphprotocol/graph-cli": "npm:^0.97.1"
     "@graphprotocol/graph-ts": "npm:^0.38.0"
@@ -11179,9 +11179,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@tools/subgraph@workspace:packages/sdk/typescript/subgraph/human-protocol":
+"@tools/subgraph@workspace:packages/subgraph/human-protocol":
   version: 0.0.0-use.local
-  resolution: "@tools/subgraph@workspace:packages/sdk/typescript/subgraph/human-protocol"
+  resolution: "@tools/subgraph@workspace:packages/subgraph/human-protocol"
   dependencies:
     "@graphprotocol/graph-cli": "npm:^0.97.1"
     "@graphprotocol/graph-ts": "npm:^0.38.0"

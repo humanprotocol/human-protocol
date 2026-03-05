@@ -4,30 +4,30 @@
   "EscrowFactory": {
     "address": "0xBDBfD2cC708199C5640C6ECdf3B0F4A4C67AdfcB",
     "startBlock": 38858552,
-    "abi": "../../../../../node_modules/@human-protocol/core/abis/EscrowFactory.json"
+    "abi": "../../../node_modules/@human-protocol/core/abis/EscrowFactory.json"
   },
   "HMToken": {
     "address": "0xc748B2A084F8eFc47E086ccdDD9b7e67aEb571Bf"
   },
   "Escrow": {
-    "abi": "../../../../../node_modules/@human-protocol/core/abis/Escrow.json"
+    "abi": "../../../node_modules/@human-protocol/core/abis/Escrow.json"
   },
   "Staking": {
     "address": "0x01D115E9E8bF0C58318793624CC662a030D07F1D",
     "startBlock": 65832028,
-    "abi": "../../../../../node_modules/@human-protocol/core/abis/Staking.json"
+    "abi": "../../../node_modules/@human-protocol/core/abis/Staking.json"
   },
   "KVStore": {
     "address": "0xbcB28672F826a50B03EE91B28145EAbddA73B2eD",
     "startBlock": 50567977,
-    "abi": "../../../../../node_modules/@human-protocol/core/abis/KVStore.json"
+    "abi": "../../../node_modules/@human-protocol/core/abis/KVStore.json"
   },
   "LegacyEscrowFactory": {
     "address": "0x45eBc3eAE6DA485097054ae10BA1A0f8e8c7f794",
     "startBlock": 25426566,
-    "abi": "../../../../../node_modules/@human-protocol/core/abis/legacy/EscrowFactory.json"
+    "abi": "../../../node_modules/@human-protocol/core/abis/legacy/EscrowFactory.json"
   },
   "LegacyEscrow": {
-    "abi": "../../../../../node_modules/@human-protocol/core/abis/legacy/Escrow.json"
+    "abi": "../../../node_modules/@human-protocol/core/abis/legacy/Escrow.json"
   }
 }

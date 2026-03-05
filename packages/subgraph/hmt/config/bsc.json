@@ -4,6 +4,6 @@
   "HMToken": {
     "address": "0x711Fd6ab6d65A98904522d4e3586F492B989c527",
     "startBlock": 25383172,
-    "abi": "../../../../../node_modules/@human-protocol/core/abis/HMToken.json"
+    "abi": "../../../node_modules/@human-protocol/core/abis/HMToken.json"
   }
 }
