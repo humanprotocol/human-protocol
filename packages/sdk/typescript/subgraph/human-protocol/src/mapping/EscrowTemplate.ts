@@ -710,6 +710,17 @@ export function handleFund(event: Fund): void {
     return;
   }
 
+  createTransaction(
+    event,
+    'fund',
+    event.transaction.from,
+    Address.fromBytes(escrowEntity.address),
+    null,
+    Address.fromBytes(escrowEntity.address),
+    event.params.amount,
+    Address.fromBytes(escrowEntity.token)
+  );
+
   // Create FundEvent entity
   const fundEventEntity = new FundEvent(toEventId(event));
   fundEventEntity.block = event.block.number;

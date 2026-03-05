@@ -324,7 +324,7 @@ export function createFundEvent(
 ): Fund {
   const newFundEvent = changetype<Fund>(newMockEvent());
   newFundEvent.transaction.hash = generateUniqueHash(
-    sender.toString(),
+    sender.toString() + '-fund',
     timestamp,
     newFundEvent.transaction.nonce
   );
@@ -386,7 +386,7 @@ export function createCancellationRequestedEvent(
 ): CancellationRequested {
   const event = changetype<CancellationRequested>(newMockEvent());
   event.transaction.hash = generateUniqueHash(
-    sender.toString(),
+    sender.toString() + '-cancellation-requested',
     timestamp,
     event.transaction.nonce
   );

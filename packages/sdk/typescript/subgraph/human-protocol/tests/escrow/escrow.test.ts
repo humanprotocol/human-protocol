@@ -660,6 +660,26 @@ describe('Escrow', () => {
     assert.fieldEquals('FundEvent', id, 'sender', operatorAddressString);
     assert.fieldEquals('FundEvent', id, 'amount', '100');
 
+    // Transaction
+    assert.fieldEquals(
+      'Transaction',
+      fund.transaction.hash.toHex(),
+      'method',
+      'fund'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      fund.transaction.hash.toHex(),
+      'to',
+      escrowAddressString
+    );
+    assert.fieldEquals(
+      'Transaction',
+      fund.transaction.hash.toHex(),
+      'value',
+      '100'
+    );
+
     // Escrow
     assert.fieldEquals('Escrow', escrowAddressString, 'balance', '100');
     assert.fieldEquals(
