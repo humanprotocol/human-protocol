@@ -12,6 +12,7 @@ import { StatisticsUtils } from '../src/statistics';
 import {
   GET_ESCROW_STATISTICS_QUERY,
   GET_EVENT_DAY_DATA_QUERY,
+  GET_HMT_EVENT_DAY_DATA_QUERY,
   GET_HOLDERS_QUERY,
 } from '../src/graphql/queries';
 
@@ -171,8 +172,6 @@ describe('StatisticsUtils', () => {
           {
             timestamp: 1,
             dailyPayoutCount: '4',
-            dailyHMTPayoutAmount: '100',
-            dailyWorkerCount: '4',
           },
         ],
       });
@@ -202,9 +201,7 @@ describe('StatisticsUtils', () => {
         dailyPaymentsData: [
           {
             timestamp: 1000,
-            totalAmountPaid: ethers.toBigInt(100),
             totalCount: 4,
-            averageAmountPerWorker: ethers.toBigInt(25),
           },
         ],
       });
@@ -447,7 +444,7 @@ describe('StatisticsUtils', () => {
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
         'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
-        GET_EVENT_DAY_DATA_QUERY({ from, to }),
+        GET_HMT_EVENT_DAY_DATA_QUERY({ from, to }),
         {
           from: Math.floor(from.getTime() / 1000),
           to: Math.floor(to.getTime() / 1000),

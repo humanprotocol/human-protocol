@@ -1,0 +1,38 @@
+type HMTokenStatistics @entity(immutable: false) {
+  id: Bytes!
+  totalTransferEventCount: BigInt!
+  totalBulkTransferEventCount: BigInt!
+  totalApprovalEventCount: BigInt!
+  totalBulkApprovalEventCount: BigInt!
+  totalValueTransfered: BigInt!
+  holders: BigInt!
+}
+
+type Holder @entity(immutable: false) {
+  id: Bytes!
+  address: Bytes!
+  balance: BigInt!
+}
+
+type UniqueSender @entity(immutable: false) {
+  id: Bytes!
+  address: Bytes!
+  transferCount: BigInt!
+  timestamp: BigInt!
+}
+
+type UniqueReceiver @entity(immutable: false) {
+  id: Bytes!
+  address: Bytes!
+  receiveCount: BigInt!
+  timestamp: BigInt!
+}
+
+type EventDayData @entity(immutable: false) {
+  id: Bytes!
+  timestamp: Int!
+  dailyHMTTransferCount: BigInt!
+  dailyHMTTransferAmount: BigInt!
+  dailyUniqueSenders: BigInt!
+  dailyUniqueReceivers: BigInt!
+}

@@ -38,14 +38,7 @@ import { ChainId } from '../src/enums';
   const paymentStatistics =
     await StatisticsUtils.getPaymentStatistics(networkData);
 
-  console.log('Payment statistics:', {
-    ...paymentStatistics,
-    dailyPaymentsData: paymentStatistics.dailyPaymentsData.map((p) => ({
-      ...p,
-      totalAmountPaid: p.totalAmountPaid.toString(),
-      averageAmountPerWorker: p.averageAmountPerWorker.toString(),
-    })),
-  });
+  console.log('Payment statistics:', paymentStatistics);
 
   const paymentStatisticsRange = await StatisticsUtils.getPaymentStatistics(
     networkData,
@@ -55,14 +48,7 @@ import { ChainId } from '../src/enums';
     }
   );
 
-  console.log('Payment statistics from 5/8 - 6/8:', {
-    ...paymentStatisticsRange,
-    dailyPaymentsData: paymentStatisticsRange.dailyPaymentsData.map((p) => ({
-      ...p,
-      totalAmountPaid: p.totalAmountPaid.toString(),
-      averageAmountPerWorker: p.averageAmountPerWorker.toString(),
-    })),
-  });
+  console.log('Payment statistics from 5/8 - 6/8:', paymentStatisticsRange);
 
   const hmtStatistics = await StatisticsUtils.getHMTStatistics(networkData);
 

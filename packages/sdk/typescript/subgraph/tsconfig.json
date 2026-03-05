@@ -1,8 +1,0 @@
-{
-  "extends": "../../../../tsconfig.base.json",
-  "compilerOptions": {
-    "baseUrl": ".",
-    "types": ["@graphprotocol/graph-ts", "node"]
-  },
-  "include": ["src", "tests"]
-}

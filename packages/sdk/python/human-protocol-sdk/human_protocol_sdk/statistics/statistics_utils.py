@@ -127,22 +127,16 @@ class DailyPaymentData:
 
     Attributes:
         timestamp (datetime): Day boundary timestamp.
-        total_amount_paid (int): Total amount paid out on this day.
         total_count (int): Number of payment transactions.
-        average_amount_per_worker (int): Average payout amount per worker.
     """
 
     def __init__(
         self,
         timestamp: datetime,
-        total_amount_paid: int,
         total_count: int,
-        average_amount_per_worker: int,
     ):
         self.timestamp = timestamp
-        self.total_amount_paid = total_amount_paid
         self.total_count = total_count
-        self.average_amount_per_worker = average_amount_per_worker
 
 
 class PaymentStatistics:
@@ -446,8 +440,7 @@ class StatisticsUtils:
                 )
             )
             for day_data in stats.daily_payments_data:
-                print(f"{day_data.timestamp}: {day_data.total_amount_paid} paid")
-                print(f"  Average per worker: {day_data.average_amount_per_worker}")
+                print(f"{day_data.total_count}: {day_data.total_count} payments")
             ```
         """
         if chain_id.value not in [cid.value for cid in ChainId]:
@@ -481,16 +474,7 @@ class StatisticsUtils:
                     timestamp=datetime.fromtimestamp(
                         int(event_day_data.get("timestamp", 0))
                     ),
-                    total_amount_paid=int(
-                        event_day_data.get("dailyHMTPayoutAmount", 0)
-                    ),
                     total_count=int(event_day_data.get("dailyPayoutCount", 0)),
-                    average_amount_per_worker=(
-                        int(event_day_data.get("dailyHMTPayoutAmount", 0))
-                        / int(event_day_data.get("dailyWorkerCount"))
-                        if event_day_data.get("dailyWorkerCount", "0") != "0"
-                        else 0
-                    ),
                 )
                 for event_day_data in event_day_datas
             ],
@@ -540,6 +524,7 @@ class StatisticsUtils:
             network,
             query=get_hmtoken_statistics_query,
             options=options,
+            use_hmt_subgraph=True,
         )
         hmtoken_statistics = hmtoken_statistics_data["data"]["hmtokenStatistics"]
 
@@ -612,6 +597,7 @@ class StatisticsUtils:
                 "orderDirection": param.order_direction,
             },
             options=options,
+            use_hmt_subgraph=True,
         )
 
         holders = holders_data["data"]["holders"]
@@ -675,12 +661,12 @@ class StatisticsUtils:
             raise StatisticsUtilsError("Empty network configuration")
 
         from human_protocol_sdk.gql.statistics import (
-            get_event_day_data_query,
+            get_hmt_event_day_data_query,
         )
 
         event_day_datas_data = custom_gql_fetch(
             network,
-            query=get_event_day_data_query(filter),
+            query=get_hmt_event_day_data_query(filter),
             params={
                 "from": int(filter.date_from.timestamp()) if filter.date_from else None,
                 "to": int(filter.date_to.timestamp()) if filter.date_to else None,
@@ -689,6 +675,7 @@ class StatisticsUtils:
                 "orderDirection": filter.order_direction.value,
             },
             options=options,
+            use_hmt_subgraph=True,
         )
         event_day_datas = event_day_datas_data["data"]["eventDayDatas"]
 

@@ -1,0 +1,53 @@
+{
+  "name": "@tools/subgraph-hmt-stats",
+  "private": true,
+  "description": "Human Protocol HMT Statistics Subgraph",
+  "version": "1.0.0",
+  "files": [
+    "generated"
+  ],
+  "scripts": {
+    "clean": "rm -rf build generated subgraph.yaml",
+    "generate": "mustache ./config/$NETWORK.json template.yaml > subgraph.yaml && graph codegen",
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "test": "NETWORK=polygon yarn generate && graph test",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write '**/*.{ts,json,graphql,yaml}'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/humanprotocol/human-protocol.git",
+    "directory": "packages/sdk/typescript/subgraph/hmt"
+  },
+  "keywords": [
+    "human-protocol",
+    "sdk",
+    "subgraph",
+    "hmt",
+    "statistics"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@graphprotocol/graph-cli": "^0.97.1",
+    "@graphprotocol/graph-ts": "^0.38.0",
+    "@graphql-eslint/eslint-plugin": "^3.19.1",
+    "@human-protocol/core": "workspace:*",
+    "eslint": "^9.39.1",
+    "ethers": "~6.15.0",
+    "graphql": "^16.6.0",
+    "matchstick-as": "^0.6.0",
+    "mustache": "^4.2.0",
+    "prettier": "^3.8.1"
+  },
+  "lint-staged": {
+    "*.{ts,graphql}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "*.{yaml,json}": [
+      "prettier --write"
+    ]
+  }
+}

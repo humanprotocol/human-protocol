@@ -111,11 +111,15 @@ export const NETWORKS: {
     stakingAddress: '0xffE496683F842a923110415b7278ded3F265f2C5',
     kvstoreAddress: '0x724AeFC243EdacCA27EAB86D3ec5a76Af4436Fc7',
     subgraphUrl:
-      'https://api.studio.thegraph.com/query/74256/amoy/version/latest',
+      'https://api.studio.thegraph.com/query/74256/human-amoy/version/latest',
     subgraphUrlApiKey:
-      'https://gateway.thegraph.com/api/deployments/id/QmcLwLMw3UzCSbNbjegrpNu6PB3kAd67xquuyaVWvc5Q7Q',
+      'https://gateway.thegraph.com/api/deployments/id/QmP7D2irmx3WP2pP97QTcQxiv91KEyTGftHBy98Foh7WHg',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
+    hmtSubgraphUrl:
+      'https://api.studio.thegraph.com/query/74256/hmt-stats-amoy/version/latest',
+    hmtSubgraphUrlApiKey:
+      'https://gateway.thegraph.com/api/deployments/id/QmZJYBQKyrsEJHQwNQ8JhkKcB5G8zQdrcwnr7ecGRNTBit',
   },
   [ChainId.LOCALHOST]: {
     chainId: ChainId.LOCALHOST,

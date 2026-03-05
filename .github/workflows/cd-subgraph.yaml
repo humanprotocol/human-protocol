@@ -55,7 +55,7 @@ jobs:
       - name: Generate and build Subgraph
         if: steps.filter_networks.outputs.continue == 'true'
         run: yarn generate && yarn build
-        working-directory: ./packages/sdk/typescript/subgraph
+        working-directory: ./packages/sdk/typescript/subgraph/human-protocol
         env:
           NETWORK: ${{ matrix.network.name }}
       - name: Authenticate & Deploy
@@ -64,7 +64,7 @@ jobs:
           API_KEY: ${{ secrets.HP_GRAPH_API_KEY }}
           NETWORK: ${{ matrix.network.name }}
           LABEL: ${{ github.event.inputs.label }}
-        working-directory: ./packages/sdk/typescript/subgraph
+        working-directory: ./packages/sdk/typescript/subgraph/human-protocol
         run: |
           yarn dlx @graphprotocol/graph-cli@0.71.2 \
             auth --studio "$API_KEY"
