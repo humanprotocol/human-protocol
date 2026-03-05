@@ -3,6 +3,7 @@ import {
   KVStoreUtils,
   OperatorUtils,
   OrderDirection,
+  TransactionUtils,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
@@ -55,6 +56,12 @@ describe('DetailsService', () => {
             getAvailableNetworks: jest
               .fn()
               .mockResolvedValue([DevelopmentChainId.SEPOLIA]),
+            networks: [
+              {
+                chainId: DevelopmentChainId.SEPOLIA,
+                rpcUrl: 'http://localhost:8545',
+              },
+            ],
           },
         },
         {
@@ -191,6 +198,59 @@ describe('DetailsService', () => {
     expect(result).toEqual([
       expect.objectContaining({ key: 'key1', value: 'value1' }),
       expect.objectContaining({ key: 'key2', value: 'value2' }),
+    ]);
+  });
+
+  it('should format transactions using token decimals and symbol', async () => {
+    jest.spyOn(TransactionUtils, 'getTransactions').mockResolvedValue([
+      {
+        block: 123n,
+        txHash: '0x',
+        from: '0x1230000000000000000000000000000000000000',
+        to: '0x9990000000000000000000000000000000000000',
+        timestamp: Date.now(),
+        value: 1234567n,
+        method: 'bulkTransfer',
+        receiver: null,
+        escrow: null,
+        token: '0x1111111111111111111111111111111111111111',
+        internalTransactions: [
+          {
+            from: '0x1230000000000000000000000000000000000000',
+            to: '0x4560000000000000000000000000000000000000',
+            value: 345678n,
+            method: 'transfer',
+            receiver: null,
+            escrow: null,
+            token: '0x1111111111111111111111111111111111111111',
+          },
+        ],
+      },
+    ]);
+
+    jest.spyOn(service as any, 'getTokenData').mockResolvedValue({
+      decimals: 6,
+      symbol: 'USDC',
+    });
+
+    const result = await service.getTransactions(
+      DevelopmentChainId.SEPOLIA,
+      '0x9990000000000000000000000000000000000000',
+      10,
+      0,
+    );
+
+    expect(result).toEqual([
+      expect.objectContaining({
+        value: '1.234567',
+        tokenSymbol: 'USDC',
+        internalTransactions: [
+          expect.objectContaining({
+            value: '0.345678',
+            tokenSymbol: 'USDC',
+          }),
+        ],
+      }),
     ]);
   });
 });

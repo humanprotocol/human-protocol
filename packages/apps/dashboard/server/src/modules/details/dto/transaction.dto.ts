@@ -24,6 +24,9 @@ export class InternalTransaction {
   @ApiProperty()
   @Expose()
   token: string | null;
+  @ApiProperty({ required: false, nullable: true, example: 'USDC' })
+  @Expose()
+  tokenSymbol: string | null;
 }
 
 export class TransactionPaginationDto {
@@ -65,6 +68,9 @@ export class TransactionPaginationDto {
   })
   @Expose()
   value: string;
+  @ApiProperty({ required: false, nullable: true, example: 'HMT' })
+  @Expose()
+  tokenSymbol: string | null;
 
   @ApiProperty({
     type: [Object],

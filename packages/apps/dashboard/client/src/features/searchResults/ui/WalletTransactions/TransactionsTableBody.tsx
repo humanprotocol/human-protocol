@@ -114,6 +114,7 @@ const TransactionsTableBody: FC<Props> = ({ data, isLoading, error }) => {
               <TransactionsTableCellValue
                 value={elem.value}
                 method={elem.method}
+                tokenSymbol={elem.tokenSymbol}
               />
             </TableCell>
           </TableRow>
@@ -150,6 +151,7 @@ const TransactionsTableBody: FC<Props> = ({ data, isLoading, error }) => {
                 <TransactionsTableCellValue
                   value={internalTx.value}
                   method={internalTx.method}
+                  tokenSymbol={internalTx.tokenSymbol}
                 />
               </TableCell>
             </TableRow>

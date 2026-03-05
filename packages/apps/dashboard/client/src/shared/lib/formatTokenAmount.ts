@@ -1,7 +1,9 @@
-import { formatEther } from 'ethers';
+const formatTokenAmount = (value: string) => {
+  const formattedValue = Number(value);
 
-const formatHmtDecimals = (value: string) => {
-  const formattedValue = Number(formatEther(value));
+  if (Number.isNaN(formattedValue)) {
+    return value;
+  }
 
   if (Number.isInteger(formattedValue)) {
     return formattedValue.toString();
@@ -23,4 +25,4 @@ const formatHmtDecimals = (value: string) => {
     : formattedValue.toString();
 };
 
-export default formatHmtDecimals;
+export default formatTokenAmount;
