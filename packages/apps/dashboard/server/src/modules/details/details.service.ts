@@ -26,6 +26,7 @@ import {
   MAX_LEADERS_COUNT,
   MIN_STAKED_AMOUNT,
   REPUTATION_PLACEHOLDER,
+  TOKEN_CACHE_PREFIX,
   type ChainId,
 } from '../../common/constants';
 import { OperatorsOrderBy } from '../../common/enums/operator';
@@ -49,6 +50,10 @@ export class DetailsService {
       symbol: string;
     }
   >();
+  private readonly inFlightTokenData = new Map<
+    string,
+    Promise<{ decimals: number; symbol: string | null }>
+  >();
 
   constructor(
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
@@ -69,7 +74,7 @@ export class DetailsService {
         excludeExtraneousValues: true,
       });
 
-      const { decimals, symbol } = await this.getTokenData(
+      const { decimals, symbol } = await this.getTokenDataOrDefault(
         provider,
         chainId,
         escrowData.token,
@@ -447,17 +452,17 @@ export class DetailsService {
     return data;
   }
 
-  private async getTokenData(
+  private async getTokenDataOrDefault(
     provider: ethers.JsonRpcProvider,
     chainId: ChainId,
-    tokenAddress?: string,
+    tokenAddress: string | null,
   ): Promise<{ decimals: number; symbol: string | null }> {
     if (!tokenAddress || !ethers.isAddress(tokenAddress)) {
       return { decimals: 18, symbol: null };
     }
 
     const normalizedTokenAddress = tokenAddress.toLowerCase();
-    const tokenCacheKey = `token:${chainId}:${normalizedTokenAddress}`;
+    const tokenCacheKey = `${TOKEN_CACHE_PREFIX}:${chainId}:${normalizedTokenAddress}`;
 
     const tokenDataInMemory = this.tokenData.get(tokenCacheKey);
     if (tokenDataInMemory) {
@@ -467,41 +472,58 @@ export class DetailsService {
       };
     }
 
-    const cachedData = await this.cacheManager.get<{
-      decimals: number;
-      symbol: string;
-    }>(tokenCacheKey);
-    if (cachedData) {
-      this.tokenData.set(tokenCacheKey, {
-        decimals: cachedData.decimals,
-        symbol: cachedData.symbol,
-      });
-      return cachedData;
+    const inFlightTokenData = this.inFlightTokenData.get(tokenCacheKey);
+    if (inFlightTokenData) {
+      return inFlightTokenData;
     }
 
-    try {
-      const erc20Contract = HMToken__factory.connect(tokenAddress, provider);
-      const [decimals, symbol] = await Promise.all([
-        erc20Contract.decimals(),
-        erc20Contract.symbol(),
-      ]);
-      const resolvedTokenData = { decimals: Number(decimals), symbol };
+    const tokenDataPromise = (async () => {
+      try {
+        const cachedData = await this.cacheManager.get<{
+          decimals: number;
+          symbol: string;
+        }>(tokenCacheKey);
+        if (cachedData) {
+          this.tokenData.set(tokenCacheKey, {
+            decimals: cachedData.decimals,
+            symbol: cachedData.symbol,
+          });
+          return cachedData;
+        }
 
-      this.tokenData.set(tokenCacheKey, {
-        decimals: resolvedTokenData.decimals,
-        symbol: resolvedTokenData.symbol,
-      });
-      await this.cacheManager.set(tokenCacheKey, resolvedTokenData);
+        try {
+          const erc20Contract = HMToken__factory.connect(
+            tokenAddress,
+            provider,
+          );
+          const [decimals, symbol] = await Promise.all([
+            erc20Contract.decimals(),
+            erc20Contract.symbol(),
+          ]);
+          const resolvedTokenData = { decimals: Number(decimals), symbol };
 
-      return resolvedTokenData;
-    } catch (error) {
-      this.logger.warn('Failed to fetch token metadata.', {
-        chainId,
-        tokenAddress,
-        error: error instanceof Error ? error.message : String(error),
-      });
-      return { decimals: 18, symbol: null };
-    }
+          this.tokenData.set(tokenCacheKey, {
+            decimals: resolvedTokenData.decimals,
+            symbol: resolvedTokenData.symbol,
+          });
+          await this.cacheManager.set(tokenCacheKey, resolvedTokenData);
+
+          return resolvedTokenData;
+        } catch (error) {
+          this.logger.warn('Failed to fetch token metadata.', {
+            chainId,
+            tokenAddress,
+            error: error instanceof Error ? error.message : String(error),
+          });
+          return { decimals: 18, symbol: null };
+        }
+      } finally {
+        this.inFlightTokenData.delete(tokenCacheKey);
+      }
+    })();
+
+    this.inFlightTokenData.set(tokenCacheKey, tokenDataPromise);
+    return tokenDataPromise;
   }
 
   private getProvider(chainId: ChainId): ethers.JsonRpcProvider {
@@ -520,14 +542,14 @@ export class DetailsService {
     provider: ethers.JsonRpcProvider,
     transaction: ITransaction,
   ): Promise<Record<string, unknown>> {
-    const tokenData = await this.getTokenData(
+    const tokenData = await this.getTokenDataOrDefault(
       provider,
       chainId,
       transaction.token,
     );
     const internalTransactions = await Promise.all(
       transaction.internalTransactions.map(async (internalTransaction) => {
-        const tokenData = await this.getTokenData(
+        const tokenData = await this.getTokenDataOrDefault(
           provider,
           chainId,
           internalTransaction.token,

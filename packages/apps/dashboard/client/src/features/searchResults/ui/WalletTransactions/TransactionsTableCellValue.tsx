@@ -1,7 +1,7 @@
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import Typography from '@mui/material/Typography';
 
-import formatTokenAmount from '@/shared/lib/formatTokenAmount';
+import formatTokenDecimals from '@/shared/lib/formatTokenDecimals';
 import CustomTooltip from '@/shared/ui/CustomTooltip';
 
 const InfoTooltip = ({ title }: { title: string }) => (
@@ -30,7 +30,7 @@ const TransactionsTableCellValue = ({
         '-'
       ) : (
         <>
-          {formatTokenAmount(value)}
+          {formatTokenDecimals(value)}
           <Typography variant="body2" component="span">
             {tokenSymbol}
           </Typography>

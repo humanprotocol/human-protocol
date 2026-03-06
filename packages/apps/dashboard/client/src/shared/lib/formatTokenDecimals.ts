@@ -1,4 +1,4 @@
-const formatTokenAmount = (value: string) => {
+const formatTokenDecimals = (value: string) => {
   const formattedValue = Number(value);
 
   if (Number.isNaN(formattedValue)) {
@@ -25,4 +25,4 @@ const formatTokenAmount = (value: string) => {
     : formattedValue.toString();
 };
 
-export default formatTokenAmount;
+export default formatTokenDecimals;

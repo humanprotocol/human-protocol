@@ -1,3 +1,4 @@
+import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import {
   IOperator,
   KVStoreUtils,
@@ -33,8 +34,14 @@ jest.mock('../../common/constants/operator', () => ({
 describe('DetailsService', () => {
   let service: DetailsService;
   let httpService: HttpService;
+  let cacheManager: { get: jest.Mock; set: jest.Mock };
 
   beforeEach(async () => {
+    cacheManager = {
+      get: jest.fn(),
+      set: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DetailsService,
@@ -66,10 +73,7 @@ describe('DetailsService', () => {
         },
         {
           provide: CACHE_MANAGER,
-          useValue: {
-            get: jest.fn(),
-            set: jest.fn(),
-          },
+          useValue: cacheManager,
         },
       ],
     }).compile();
@@ -238,7 +242,7 @@ describe('DetailsService', () => {
       .spyOn(TransactionUtils, 'getTransactions')
       .mockResolvedValue(mockTransactions);
 
-    jest.spyOn(service as any, 'getTokenData').mockResolvedValue({
+    jest.spyOn(service as any, 'getTokenDataOrDefault').mockResolvedValue({
       decimals: 6,
       symbol: 'USDC',
     });
@@ -262,5 +266,50 @@ describe('DetailsService', () => {
         ],
       }),
     ]);
+  });
+
+  it('should deduplicate concurrent in-flight token metadata fetches', async () => {
+    const tokenAddress = '0x000000000000000000000000000000000000000d';
+    const provider = (service as any).getProvider(DevelopmentChainId.SEPOLIA);
+    const tokenCacheKey = `token:${DevelopmentChainId.SEPOLIA}:${tokenAddress.toLowerCase()}`;
+
+    cacheManager.get.mockResolvedValue(null);
+    cacheManager.set.mockResolvedValue(undefined);
+
+    const decimals = jest.fn().mockImplementation(
+      async () =>
+        await new Promise<bigint>((resolve) => {
+          setTimeout(() => resolve(6n), 5);
+        }),
+    );
+    const symbol = jest.fn().mockResolvedValue('USDC');
+    const connectSpy = jest
+      .spyOn(HMToken__factory, 'connect')
+      .mockReturnValue({ decimals, symbol } as any);
+
+    const first = (service as any).getTokenDataOrDefault(
+      provider,
+      DevelopmentChainId.SEPOLIA,
+      tokenAddress,
+    );
+    const second = (service as any).getTokenDataOrDefault(
+      provider,
+      DevelopmentChainId.SEPOLIA,
+      tokenAddress,
+    );
+
+    const [firstResult, secondResult] = await Promise.all([first, second]);
+
+    expect(firstResult).toEqual({ decimals: 6, symbol: 'USDC' });
+    expect(secondResult).toEqual({ decimals: 6, symbol: 'USDC' });
+    expect(connectSpy).toHaveBeenCalledTimes(1);
+    expect(decimals).toHaveBeenCalledTimes(1);
+    expect(symbol).toHaveBeenCalledTimes(1);
+    expect(cacheManager.get).toHaveBeenCalledTimes(1);
+    expect(cacheManager.set).toHaveBeenCalledWith(tokenCacheKey, {
+      decimals: 6,
+      symbol: 'USDC',
+    });
+    expect((service as any).inFlightTokenData.size).toBe(0);
   });
 });
