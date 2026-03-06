@@ -1,7 +1,6 @@
 import { CvatJobType, JobRequestType } from '../../common/enums/job';
 import {
   CvatDataDto,
-  JobCaptchaDto,
   JobCvatDto,
   JobFortuneDto,
   StorageDataDto,
@@ -10,7 +9,7 @@ import { JobEntity } from './job.entity';
 
 export interface RequestAction {
   createManifest: (
-    dto: JobFortuneDto | JobCvatDto | JobCaptchaDto,
+    dto: JobFortuneDto | JobCvatDto,
     requestType: JobRequestType,
     fundAmount: number,
     decimals: number,

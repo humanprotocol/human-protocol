@@ -6,7 +6,6 @@ import {
   CvatRequest,
   JobStatus,
   JobDetailsResponse,
-  HCaptchaRequest,
   FortuneFinalResult,
 } from '../types';
 import api from '../utils/api';
@@ -54,16 +53,6 @@ export const createCvatJob = async (
     qualifications: data.qualifications,
   };
   await api.post('/job/cvat', body);
-};
-
-export const createHCaptchaJob = async (
-  chainId: number,
-  data: HCaptchaRequest,
-) => {
-  await api.post('/job/hCaptcha', {
-    chainId,
-    ...data,
-  });
 };
 
 export const getJobList = async ({

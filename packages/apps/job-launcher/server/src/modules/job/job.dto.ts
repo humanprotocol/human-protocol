@@ -1,47 +1,39 @@
+import { ChainId } from '@human-protocol/sdk';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform, Type } from 'class-transformer';
 import {
+  ArrayMinSize,
   IsArray,
+  IsEthereumAddress,
+  IsIn,
+  IsNotEmpty,
   IsNumber,
+  IsNumberString,
+  IsObject,
+  IsOptional,
   IsPositive,
   IsString,
   IsUrl,
-  IsDateString,
-  IsOptional,
-  IsObject,
-  IsNumberString,
-  IsIn,
-  Min,
   Max,
-  IsNotEmpty,
-  IsEthereumAddress,
+  Min,
   ValidateNested,
-  IsDefined,
-  IsNotEmptyObject,
-  ArrayMinSize,
 } from 'class-validator';
-import { Type } from 'class-transformer';
-import { ChainId } from '@human-protocol/sdk';
+import { IsEnumCaseInsensitive } from '../../common/decorators';
 import {
-  JobCaptchaShapeType,
+  CvatJobType,
   EscrowFundToken,
   JobRequestType,
   JobSortField,
   JobStatus,
   JobStatusFilter,
-  WorkerBrowser,
-  WorkerLanguage,
-  Country,
-  CvatJobType,
   JobType,
 } from '../../common/enums/job';
-import { Transform } from 'class-transformer';
+import { PaymentCurrency } from '../../common/enums/payment';
 import { AWSRegions, StorageProviders } from '../../common/enums/storage';
 import { PageOptionsDto } from '../../common/pagination/pagination.dto';
-import { IsEnumCaseInsensitive } from '../../common/decorators';
-import { PaymentCurrency } from '../../common/enums/payment';
+import { IsValidTokenDecimals } from '../../common/validators/token-decimals';
 import { IsValidToken } from '../../common/validators/tokens';
 import { Label, ManifestDetails } from '../manifest/manifest.dto';
-import { IsValidTokenDecimals } from '../../common/validators/token-decimals';
 
 export class JobDto {
   @ApiProperty({ enum: ChainId, required: false, name: 'chain_id' })
@@ -372,112 +364,4 @@ export class GetJobsDto extends PageOptionsDto {
   status?: JobStatusFilter;
 }
 
-export class JobCaptchaAdvancedDto {
-  @ApiProperty({
-    enum: WorkerLanguage,
-    name: 'worker_language',
-  })
-  @IsEnumCaseInsensitive(WorkerLanguage)
-  @IsOptional()
-  workerLanguage?: WorkerLanguage;
-
-  @ApiProperty({
-    enum: Country,
-    name: 'worker_location',
-  })
-  @IsEnumCaseInsensitive(Country)
-  @IsOptional()
-  workerLocation?: Country;
-
-  @ApiProperty({
-    enum: WorkerBrowser,
-    name: 'target_browser',
-  })
-  @IsEnumCaseInsensitive(WorkerBrowser)
-  @IsOptional()
-  targetBrowser?: WorkerBrowser;
-}
-
-class JobCaptchaAnnotationsDto {
-  @ApiProperty({
-    enum: JobCaptchaShapeType,
-    name: 'type_of_job',
-  })
-  @IsEnumCaseInsensitive(JobCaptchaShapeType)
-  typeOfJob: JobCaptchaShapeType;
-
-  @ApiProperty({ name: 'task_bid_price' })
-  @IsNumber()
-  @IsPositive()
-  taskBidPrice: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  label?: string;
-
-  @ApiProperty({ name: 'labeling_prompt' })
-  @IsString()
-  labelingPrompt: string;
-
-  @ApiProperty({ name: 'ground_truths' })
-  @IsString()
-  groundTruths: string;
-
-  @ApiProperty({ name: 'example_images' })
-  @IsOptional()
-  @IsArray()
-  exampleImages?: string[];
-}
-
-export class JobCaptchaDto extends JobDto {
-  @ApiProperty()
-  @IsObject()
-  @ValidateNested()
-  @Type(() => StorageDataDto)
-  data: StorageDataDto;
-
-  @ApiProperty({ name: 'accuracy_target' })
-  @IsNumber()
-  @IsPositive()
-  @Max(1)
-  accuracyTarget: number;
-
-  @ApiProperty({ name: 'completion_date' })
-  @IsDateString()
-  @IsOptional()
-  completionDate: Date;
-
-  @ApiProperty({ name: 'min_requests' })
-  @IsNumber()
-  @IsPositive()
-  @Max(100)
-  minRequests: number;
-
-  @ApiProperty({ name: 'max_requests' })
-  @IsNumber()
-  @IsPositive()
-  @Max(100)
-  maxRequests: number;
-
-  @ApiProperty()
-  @IsDefined()
-  @IsObject()
-  @ValidateNested()
-  @Type(() => JobCaptchaAdvancedDto)
-  advanced: JobCaptchaAdvancedDto;
-
-  @ApiProperty()
-  @IsDefined()
-  @IsNotEmptyObject()
-  @IsObject()
-  @ValidateNested()
-  @Type(() => JobCaptchaAnnotationsDto)
-  annotations: JobCaptchaAnnotationsDto;
-}
-
-export type CreateJob =
-  | JobQuickLaunchDto
-  | JobFortuneDto
-  | JobCvatDto
-  | JobCaptchaDto;
+export type CreateJob = JobQuickLaunchDto | JobFortuneDto | JobCvatDto;
