@@ -23,7 +23,6 @@ import {
   handlePending,
   handleBulkTransfer,
 } from '../../../src/mapping/legacy/Escrow';
-import { toEventId } from '../../../src/mapping/utils/event';
 import { ZERO_BI } from '../../../src/mapping/utils/number';
 import {
   createISEvent,
@@ -112,35 +111,6 @@ describe('Escrow', () => {
 
     handlePending(newPending1);
 
-    const id = toEventId(newPending1).toHex();
-
-    // PendingEvent
-    assert.fieldEquals(
-      'PendingEvent',
-      id,
-      'block',
-      newPending1.block.number.toString()
-    );
-    assert.fieldEquals(
-      'PendingEvent',
-      id,
-      'timestamp',
-      newPending1.block.timestamp.toString()
-    );
-    assert.fieldEquals(
-      'PendingEvent',
-      id,
-      'txHash',
-      newPending1.transaction.hash.toHex()
-    );
-    assert.fieldEquals(
-      'PendingEvent',
-      id,
-      'escrowAddress',
-      escrowAddressString
-    );
-    assert.fieldEquals('PendingEvent', id, 'sender', operatorAddressString);
-
     // Escrow
     assert.fieldEquals('Escrow', escrowAddress.toHex(), 'status', 'Pending');
     assert.fieldEquals('Escrow', escrowAddress.toHex(), 'manifest', URL);
@@ -194,35 +164,6 @@ describe('Escrow', () => {
     const newIS = createISEvent(workerAddress, URL, 'is_hash_1');
     handleIntermediateStorage(newIS);
 
-    const id = toEventId(newIS).toHex();
-
-    // StoreResultsEvent
-    assert.fieldEquals(
-      'StoreResultsEvent',
-      id,
-      'block',
-      newIS.block.number.toString()
-    );
-    assert.fieldEquals(
-      'StoreResultsEvent',
-      id,
-      'timestamp',
-      newIS.block.timestamp.toString()
-    );
-    assert.fieldEquals(
-      'StoreResultsEvent',
-      id,
-      'txHash',
-      newIS.transaction.hash.toHex()
-    );
-    assert.fieldEquals(
-      'StoreResultsEvent',
-      id,
-      'escrowAddress',
-      escrowAddressString
-    );
-    assert.fieldEquals('StoreResultsEvent', id, 'sender', workerAddressString);
-    assert.fieldEquals('StoreResultsEvent', id, 'intermediateResultsUrl', URL);
     assert.fieldEquals(
       'Transaction',
       newIS.transaction.hash.toHex(),
@@ -269,37 +210,6 @@ describe('Escrow', () => {
     );
 
     handleBulkTransfer(bulk1);
-
-    const id1 = toEventId(bulk1).toHex();
-
-    // BulkPayoutEvent
-    assert.fieldEquals(
-      'BulkPayoutEvent',
-      id1,
-      'block',
-      bulk1.block.number.toString()
-    );
-    assert.fieldEquals(
-      'BulkPayoutEvent',
-      id1,
-      'timestamp',
-      bulk1.block.timestamp.toString()
-    );
-    assert.fieldEquals(
-      'BulkPayoutEvent',
-      id1,
-      'txHash',
-      bulk1.transaction.hash.toHex()
-    );
-    assert.fieldEquals(
-      'BulkPayoutEvent',
-      id1,
-      'escrowAddress',
-      escrowAddressString
-    );
-    assert.fieldEquals('BulkPayoutEvent', id1, 'sender', operatorAddressString);
-    assert.fieldEquals('BulkPayoutEvent', id1, 'payoutId', '1');
-    assert.fieldEquals('BulkPayoutEvent', id1, 'bulkCount', '2');
 
     // Escrow
     assert.fieldEquals(
@@ -354,37 +264,6 @@ describe('Escrow', () => {
     );
 
     handleBulkTransfer(bulk1);
-
-    const id1 = toEventId(bulk1).toHex();
-
-    // BulkPayoutEvent
-    assert.fieldEquals(
-      'BulkPayoutEvent',
-      id1,
-      'block',
-      bulk1.block.number.toString()
-    );
-    assert.fieldEquals(
-      'BulkPayoutEvent',
-      id1,
-      'timestamp',
-      bulk1.block.timestamp.toString()
-    );
-    assert.fieldEquals(
-      'BulkPayoutEvent',
-      id1,
-      'txHash',
-      bulk1.transaction.hash.toHex()
-    );
-    assert.fieldEquals(
-      'BulkPayoutEvent',
-      id1,
-      'escrowAddress',
-      escrowAddressString
-    );
-    assert.fieldEquals('BulkPayoutEvent', id1, 'sender', operatorAddressString);
-    assert.fieldEquals('BulkPayoutEvent', id1, 'payoutId', '1');
-    assert.fieldEquals('BulkPayoutEvent', id1, 'bulkCount', '2');
 
     // Escrow
     assert.fieldEquals('Escrow', escrowAddress.toHex(), 'status', 'Paid');

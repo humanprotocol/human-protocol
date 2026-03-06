@@ -46,7 +46,6 @@ dataSources:
       language: wasm/assemblyscript
       entities:
         - KVStore
-        - KVStoreSetEvent
         - Operator
         - OperatorURL
         - ReputationNetwork
@@ -69,10 +68,6 @@ dataSources:
       apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
-        - StakeDepositedEvent
-        - StakeLockedEvent
-        - StakeWithdrawnEvent
-        - StakeSlashedEvent
         - FeeWithdrawn
         - Operator
         - OperatorStatistics
@@ -136,14 +131,9 @@ templates:
         - Worker
         - EscrowStatistics
         - EventDayData
-        - PendingEvent
         - EscrowStatusEvent
         - Operator
-        - StoreResultsEvent
-        - BulkPayoutEvent
         - DailyWorker
-        - FundEvent
-        - WithdrawEvent
         - Transaction
         - InternalTransaction
       abis:
@@ -194,8 +184,6 @@ templates:
         - Escrow
         - Transaction
         - InternalTransaction
-        - StoreResultsEvent
-        - BulkPayoutEvent
       abis:
         - name: Escrow
           file: '{{{ LegacyEscrow.abi }}}'

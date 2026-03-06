@@ -46,65 +46,6 @@ describe('KVStore', () => {
 
     handleDataSaved(data1);
     handleDataSaved(data2);
-
-    const id1 = toEventId(data1).toHex();
-    const id2 = toEventId(data2).toHex();
-
-    // Data 1
-    assert.fieldEquals(
-      'KVStoreSetEvent',
-      id1,
-      'block',
-      data1.block.number.toString()
-    );
-    assert.fieldEquals(
-      'KVStoreSetEvent',
-      id1,
-      'timestamp',
-      data1.block.timestamp.toString()
-    );
-    assert.fieldEquals(
-      'KVStoreSetEvent',
-      id1,
-      'txHash',
-      data1.transaction.hash.toHex()
-    );
-    assert.fieldEquals(
-      'KVStoreSetEvent',
-      id1,
-      'operatorAddress',
-      data1.params.sender.toHex()
-    );
-    assert.fieldEquals('KVStoreSetEvent', id1, 'key', 'role');
-    assert.fieldEquals('KVStoreSetEvent', id1, 'value', 'Operator');
-
-    // Data 2
-    assert.fieldEquals(
-      'KVStoreSetEvent',
-      id2,
-      'block',
-      data2.block.number.toString()
-    );
-    assert.fieldEquals(
-      'KVStoreSetEvent',
-      id2,
-      'timestamp',
-      data2.block.timestamp.toString()
-    );
-    assert.fieldEquals(
-      'KVStoreSetEvent',
-      id2,
-      'txHash',
-      data2.transaction.hash.toHex()
-    );
-    assert.fieldEquals(
-      'KVStoreSetEvent',
-      id2,
-      'operatorAddress',
-      data2.params.sender.toHex()
-    );
-    assert.fieldEquals('KVStoreSetEvent', id2, 'key', 'role');
-    assert.fieldEquals('KVStoreSetEvent', id2, 'value', 'job_launcher');
   });
 
   test('Should properly create a transaction with set method', () => {

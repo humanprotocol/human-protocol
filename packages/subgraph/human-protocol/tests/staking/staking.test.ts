@@ -18,7 +18,6 @@ import {
   handleFeeWithdrawn,
   TOKEN_ADDRESS,
 } from '../../src/mapping/Staking';
-import { toEventId } from '../../src/mapping/utils/event';
 import { ZERO_BI } from '../../src/mapping/utils/number';
 import {
   createFeeWithdrawnEvent,
@@ -89,63 +88,6 @@ describe('Staking', () => {
 
     handleStakeDeposited(data1);
     handleStakeDeposited(data2);
-
-    const id1 = toEventId(data1).toHex();
-    const id2 = toEventId(data2).toHex();
-
-    // Data 1
-    assert.fieldEquals(
-      'StakeDepositedEvent',
-      id1,
-      'block',
-      data1.block.number.toString()
-    );
-    assert.fieldEquals(
-      'StakeDepositedEvent',
-      id1,
-      'timestamp',
-      data1.block.timestamp.toString()
-    );
-    assert.fieldEquals(
-      'StakeDepositedEvent',
-      id1,
-      'txHash',
-      data1.transaction.hash.toHex()
-    );
-    assert.fieldEquals(
-      'StakeDepositedEvent',
-      id1,
-      'staker',
-      data1.params.staker.toHex()
-    );
-    assert.fieldEquals('StakeDepositedEvent', id1, 'amount', '100');
-
-    // Data 2
-    assert.fieldEquals(
-      'StakeDepositedEvent',
-      id2,
-      'block',
-      data2.block.number.toString()
-    );
-    assert.fieldEquals(
-      'StakeDepositedEvent',
-      id2,
-      'timestamp',
-      data2.block.timestamp.toString()
-    );
-    assert.fieldEquals(
-      'StakeDepositedEvent',
-      id2,
-      'txHash',
-      data2.transaction.hash.toHex()
-    );
-    assert.fieldEquals(
-      'StakeDepositedEvent',
-      id2,
-      'staker',
-      data2.params.staker.toHex()
-    );
-    assert.fieldEquals('StakeDepositedEvent', id2, 'amount', '200');
 
     // Operator
     assert.fieldEquals(
@@ -224,65 +166,6 @@ describe('Staking', () => {
 
     handleStakeLocked(data1);
     handleStakeLocked(data2);
-
-    const id1 = toEventId(data1).toHex();
-    const id2 = toEventId(data2).toHex();
-
-    // Data 1
-    assert.fieldEquals(
-      'StakeLockedEvent',
-      id1,
-      'block',
-      data1.block.number.toString()
-    );
-    assert.fieldEquals(
-      'StakeLockedEvent',
-      id1,
-      'timestamp',
-      data1.block.timestamp.toString()
-    );
-    assert.fieldEquals(
-      'StakeLockedEvent',
-      id1,
-      'txHash',
-      data1.transaction.hash.toHex()
-    );
-    assert.fieldEquals(
-      'StakeLockedEvent',
-      id1,
-      'staker',
-      data1.params.staker.toHex()
-    );
-    assert.fieldEquals('StakeLockedEvent', id1, 'amount', '50');
-    assert.fieldEquals('StakeLockedEvent', id1, 'lockedUntilTimestamp', '30');
-
-    // Data 2
-    assert.fieldEquals(
-      'StakeLockedEvent',
-      id2,
-      'block',
-      data2.block.number.toString()
-    );
-    assert.fieldEquals(
-      'StakeLockedEvent',
-      id2,
-      'timestamp',
-      data2.block.timestamp.toString()
-    );
-    assert.fieldEquals(
-      'StakeLockedEvent',
-      id2,
-      'txHash',
-      data2.transaction.hash.toHex()
-    );
-    assert.fieldEquals(
-      'StakeLockedEvent',
-      id2,
-      'staker',
-      data2.params.staker.toHex()
-    );
-    assert.fieldEquals('StakeLockedEvent', id2, 'amount', '100');
-    assert.fieldEquals('StakeLockedEvent', id2, 'lockedUntilTimestamp', '31');
 
     // Operator
     assert.fieldEquals(
@@ -376,63 +259,6 @@ describe('Staking', () => {
 
     handleStakeWithdrawn(data1);
     handleStakeWithdrawn(data2);
-
-    const id1 = toEventId(data1).toHex();
-    const id2 = toEventId(data2).toHex();
-
-    // Data 1
-    assert.fieldEquals(
-      'StakeWithdrawnEvent',
-      id1,
-      'block',
-      data1.block.number.toString()
-    );
-    assert.fieldEquals(
-      'StakeWithdrawnEvent',
-      id1,
-      'timestamp',
-      data1.block.timestamp.toString()
-    );
-    assert.fieldEquals(
-      'StakeWithdrawnEvent',
-      id1,
-      'txHash',
-      data1.transaction.hash.toHex()
-    );
-    assert.fieldEquals(
-      'StakeWithdrawnEvent',
-      id1,
-      'staker',
-      data1.params.staker.toHex()
-    );
-    assert.fieldEquals('StakeWithdrawnEvent', id1, 'amount', '30');
-
-    // Data 2
-    assert.fieldEquals(
-      'StakeWithdrawnEvent',
-      id2,
-      'block',
-      data2.block.number.toString()
-    );
-    assert.fieldEquals(
-      'StakeWithdrawnEvent',
-      id2,
-      'timestamp',
-      data2.block.timestamp.toString()
-    );
-    assert.fieldEquals(
-      'StakeWithdrawnEvent',
-      id2,
-      'txHash',
-      data2.transaction.hash.toHex()
-    );
-    assert.fieldEquals(
-      'StakeWithdrawnEvent',
-      id2,
-      'staker',
-      data2.params.staker.toHex()
-    );
-    assert.fieldEquals('StakeWithdrawnEvent', id2, 'amount', '100');
 
     // Operator
     assert.fieldEquals(
@@ -542,87 +368,6 @@ describe('Staking', () => {
 
     handleStakeSlashed(data1);
     handleStakeSlashed(data2);
-
-    const id1 = toEventId(data1).toHex();
-    const id2 = toEventId(data2).toHex();
-
-    // Data 1
-    assert.fieldEquals(
-      'StakeSlashedEvent',
-      id1,
-      'block',
-      data1.block.number.toString()
-    );
-    assert.fieldEquals(
-      'StakeSlashedEvent',
-      id1,
-      'timestamp',
-      data1.block.timestamp.toString()
-    );
-    assert.fieldEquals(
-      'StakeSlashedEvent',
-      id1,
-      'txHash',
-      data1.transaction.hash.toHex()
-    );
-    assert.fieldEquals(
-      'StakeSlashedEvent',
-      id1,
-      'staker',
-      data1.params.staker.toHex()
-    );
-    assert.fieldEquals('StakeSlashedEvent', id1, 'amount', '10');
-    assert.fieldEquals(
-      'StakeSlashedEvent',
-      id1,
-      'escrowAddress',
-      data1.params.escrowAddress.toHex()
-    );
-    assert.fieldEquals(
-      'StakeSlashedEvent',
-      id1,
-      'slashRequester',
-      data1.params.slashRequester.toHex()
-    );
-
-    // Data 2
-    assert.fieldEquals(
-      'StakeSlashedEvent',
-      id2,
-      'block',
-      data2.block.number.toString()
-    );
-    assert.fieldEquals(
-      'StakeSlashedEvent',
-      id2,
-      'timestamp',
-      data2.block.timestamp.toString()
-    );
-    assert.fieldEquals(
-      'StakeSlashedEvent',
-      id2,
-      'txHash',
-      data2.transaction.hash.toHex()
-    );
-    assert.fieldEquals(
-      'StakeSlashedEvent',
-      id2,
-      'staker',
-      data2.params.staker.toHex()
-    );
-    assert.fieldEquals('StakeSlashedEvent', id2, 'amount', '10');
-    assert.fieldEquals(
-      'StakeSlashedEvent',
-      id2,
-      'escrowAddress',
-      data2.params.escrowAddress.toHex()
-    );
-    assert.fieldEquals(
-      'StakeSlashedEvent',
-      id2,
-      'slashRequester',
-      data2.params.slashRequester.toHex()
-    );
 
     // Operator
     assert.fieldEquals(

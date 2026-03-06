@@ -8,14 +8,12 @@ import {
 import { DataSaved } from '../../generated/KVStore/KVStore';
 import {
   KVStore,
-  KVStoreSetEvent,
   Operator,
   OperatorURL,
   ReputationNetwork,
   Staker,
 } from '../../generated/schema';
 import { isValidEthAddress } from './utils/ethAdrress';
-import { toEventId } from './utils/event';
 import { toBytes } from './utils/string';
 import { createTransaction } from './utils/transaction';
 import { store } from '@graphprotocol/graph-ts';
@@ -93,15 +91,6 @@ export function createOrUpdateKVStore(event: DataSaved): void {
 
 export function handleDataSaved(event: DataSaved): void {
   createTransaction(event, 'set', event.transaction.from, dataSource.address());
-  // Create KVStoreSetEvent entity
-  const eventEntity = new KVStoreSetEvent(toEventId(event));
-  eventEntity.block = event.block.number;
-  eventEntity.timestamp = event.block.timestamp;
-  eventEntity.txHash = event.transaction.hash;
-  eventEntity.operatorAddress = event.params.sender;
-  eventEntity.key = event.params.key;
-  eventEntity.value = event.params.value;
-  eventEntity.save();
 
   // Update KVStore entity
   createOrUpdateKVStore(event);

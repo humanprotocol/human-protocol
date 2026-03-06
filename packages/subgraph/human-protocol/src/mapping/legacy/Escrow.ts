@@ -6,15 +6,9 @@ import {
   IntermediateStorage,
   Pending,
 } from '../../../generated/templates/LegacyEscrow/Escrow';
-import {
-  BulkPayoutEvent,
-  Escrow,
-  PendingEvent,
-  StoreResultsEvent,
-} from '../../../generated/schema';
+import { Escrow } from '../../../generated/schema';
 import { createOrLoadEscrowStatistics } from '../Escrow';
 import { ONE_BI } from '../utils/number';
-import { toEventId } from '../utils/event';
 import { getEventDayData } from '../utils/dayUpdates';
 import { createTransaction } from '../utils/transaction';
 
@@ -28,15 +22,6 @@ enum EscrowStatuses {
 }
 
 export function handlePending(event: Pending): void {
-  // Create PendingEvent entity
-  const pendingEventEntity = new PendingEvent(toEventId(event));
-  pendingEventEntity.block = event.block.number;
-  pendingEventEntity.timestamp = event.block.timestamp;
-  pendingEventEntity.txHash = event.transaction.hash;
-  pendingEventEntity.escrowAddress = dataSource.address();
-  pendingEventEntity.sender = event.transaction.from;
-  pendingEventEntity.save();
-
   // Updates escrow statistics
   const statsEntity = createOrLoadEscrowStatistics();
   statsEntity.pendingStatusEventCount =
@@ -88,17 +73,6 @@ export function handlePending(event: Pending): void {
 }
 
 export function handleIntermediateStorage(event: IntermediateStorage): void {
-  // Create StoreResultsEvent entity
-  const eventEntity = new StoreResultsEvent(toEventId(event));
-  eventEntity.block = event.block.number;
-  eventEntity.timestamp = event.block.timestamp;
-  eventEntity.txHash = event.transaction.hash;
-  eventEntity.escrowAddress = event.address;
-  eventEntity.sender = event.transaction.from;
-  eventEntity.intermediateResultsUrl = event.params._url;
-  eventEntity.intermediateResultsHash = event.params._hash;
-  eventEntity.save();
-
   // Updates escrow statistics
   const statsEntity = createOrLoadEscrowStatistics();
   statsEntity.storeResultsEventCount =
@@ -133,17 +107,6 @@ export function handleIntermediateStorage(event: IntermediateStorage): void {
 }
 
 export function handleBulkTransfer(event: BulkTransfer): void {
-  // Create BulkPayoutEvent entity
-  const eventEntity = new BulkPayoutEvent(toEventId(event));
-  eventEntity.block = event.block.number;
-  eventEntity.timestamp = event.block.timestamp;
-  eventEntity.txHash = event.transaction.hash;
-  eventEntity.escrowAddress = event.address;
-  eventEntity.sender = event.transaction.from;
-  eventEntity.payoutId = event.params._txId.toString();
-  eventEntity.bulkCount = event.params._bulkCount;
-  eventEntity.save();
-
   // Update escrow statistics
   const statsEntity = createOrLoadEscrowStatistics();
   statsEntity.bulkPayoutEventCount =
