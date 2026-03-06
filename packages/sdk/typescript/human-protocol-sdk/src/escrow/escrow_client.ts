@@ -1283,31 +1283,28 @@ export class EscrowClient extends BaseEthersClient {
 
     try {
       const escrowContract = this.getEscrowContract(escrowAddress);
+
+      try {
+        return await escrowContract.manifest();
+      } catch {
+        // Fallback for legacy escrows exposing `manifestUrl()` instead of `manifest()`.
+      }
+
       const provider = this.runner.provider;
       if (!provider) {
         throw ErrorProviderDoesNotExist;
       }
 
       const manifestInterface = new ethers.Interface([
-        'function manifest() view returns (string)',
         'function manifestUrl() view returns (string)',
       ]);
       const target = escrowContract.target as string;
-
-      const readManifestField = async (field: 'manifest' | 'manifestUrl') => {
-        const data = manifestInterface.encodeFunctionData(field);
-        const result = await provider.call({ to: target, data });
-        return manifestInterface.decodeFunctionResult(
-          field,
-          result
-        )[0] as string;
-      };
-
-      try {
-        return await readManifestField('manifest');
-      } catch {
-        return await readManifestField('manifestUrl');
-      }
+      const data = manifestInterface.encodeFunctionData('manifestUrl');
+      const result = await provider.call({ to: target, data });
+      return manifestInterface.decodeFunctionResult(
+        'manifestUrl',
+        result
+      )[0] as string;
     } catch (e) {
       return throwError(e);
     }
