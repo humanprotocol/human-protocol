@@ -3542,7 +3542,7 @@ describe('EscrowUtils', () => {
       }));
       expect(result).toEqual(expected);
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        'https://api.studio.thegraph.com/query/74256/amoy/version/latest',
+        NETWORKS[ChainId.POLYGON_AMOY]?.subgraphUrl,
         GET_ESCROWS_QUERY(filter),
         {
           chainId: ChainId.POLYGON_AMOY,
@@ -3853,7 +3853,7 @@ describe('EscrowUtils', () => {
       }));
       expect(result).toEqual(expected);
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        'https://api.studio.thegraph.com/query/74256/amoy/version/latest',
+        NETWORKS[ChainId.POLYGON_AMOY]?.subgraphUrl,
         GET_ESCROWS_QUERY(filter),
         {
           chainId: ChainId.POLYGON_AMOY,
@@ -3959,7 +3959,7 @@ describe('EscrowUtils', () => {
       }));
       expect(result).toEqual(expected);
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        'https://api.studio.thegraph.com/query/74256/amoy/version/latest',
+        NETWORKS[ChainId.POLYGON_AMOY]?.subgraphUrl,
         GET_ESCROWS_QUERY(filter),
         {
           chainId: ChainId.POLYGON_AMOY,
@@ -4295,7 +4295,7 @@ describe('EscrowUtils', () => {
       }));
       expect(result).toEqual(expected);
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        'https://api.studio.thegraph.com/query/74256/amoy/version/latest',
+        NETWORKS[ChainId.POLYGON_AMOY]?.subgraphUrl,
         GET_PAYOUTS_QUERY(filter),
         {
           escrowAddress: undefined,
@@ -4344,7 +4344,7 @@ describe('EscrowUtils', () => {
       }));
       expect(result).toEqual(expected);
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        'https://api.studio.thegraph.com/query/74256/amoy/version/latest',
+        NETWORKS[ChainId.POLYGON_AMOY]?.subgraphUrl,
         GET_PAYOUTS_QUERY(filter),
         {
           escrowAddress: filter.escrowAddress.toLowerCase(),
@@ -4398,7 +4398,7 @@ describe('EscrowUtils', () => {
       }));
       expect(result).toEqual(expected);
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        'https://api.studio.thegraph.com/query/74256/amoy/version/latest',
+        NETWORKS[ChainId.POLYGON_AMOY]?.subgraphUrl,
         GET_PAYOUTS_QUERY(filter),
         {
           escrowAddress: undefined,
@@ -4452,7 +4452,7 @@ describe('EscrowUtils', () => {
       }));
       expect(result).toEqual(expected);
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        'https://api.studio.thegraph.com/query/74256/amoy/version/latest',
+        NETWORKS[ChainId.POLYGON_AMOY]?.subgraphUrl,
         GET_PAYOUTS_QUERY(filter),
         {
           escrowAddress: undefined,
