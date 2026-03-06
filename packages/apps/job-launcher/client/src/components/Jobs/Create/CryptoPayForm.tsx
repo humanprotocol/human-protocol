@@ -218,13 +218,7 @@ export const CryptoPayForm = ({
         }
 
         // create job
-        const {
-          jobType,
-          chainId,
-          fortuneRequest,
-          cvatRequest,
-          hCaptchaRequest,
-        } = jobRequest;
+        const { jobType, chainId, fortuneRequest, cvatRequest } = jobRequest;
         if (jobType === JobType.FORTUNE && fortuneRequest) {
           await jobService.createFortuneJob(
             chainId,
@@ -241,8 +235,6 @@ export const CryptoPayForm = ({
             Number(amount),
             fundTokenSymbol,
           );
-        } else if (jobType === JobType.HCAPTCHA && hCaptchaRequest) {
-          await jobService.createHCaptchaJob(chainId, hCaptchaRequest);
         }
         onFinish();
       } catch (err) {

@@ -42,7 +42,6 @@ import { getTokenDecimals } from '../../common/utils/tokens';
 import {
   createMockCvatManifest,
   createMockFortuneManifest,
-  createMockHcaptchaManifest,
 } from '../manifest/fixtures';
 import { ManifestService } from '../manifest/manifest.service';
 import { PaymentRepository } from '../payment/payment.repository';
@@ -57,7 +56,6 @@ import { WebhookRepository } from '../webhook/webhook.repository';
 import { WhitelistEntity } from '../whitelist/whitelist.entity';
 import { WhitelistService } from '../whitelist/whitelist.service';
 import {
-  createCaptchaJobDto,
   createCvatJobDto,
   createFortuneJobDto,
   createJobEntity,
@@ -568,92 +566,6 @@ describe('JobService', () => {
           exchangeOracle: cvatJobDto.exchangeOracle,
           recordingOracle: cvatJobDto.recordingOracle,
           reputationOracle: cvatJobDto.reputationOracle,
-          payments: expect.any(Array),
-        });
-      });
-    });
-
-    describe('HCaptcha', () => {
-      it('should create an HCaptcha job', async () => {
-        const captchaJobDto = createCaptchaJobDto();
-        const fundTokenDecimals = getTokenDecimals(
-          captchaJobDto.chainId!,
-          captchaJobDto.escrowFundToken,
-        );
-
-        const mockManifest = createMockHcaptchaManifest();
-        mockManifestService.createManifest.mockResolvedValueOnce(mockManifest);
-        const mockUrl = faker.internet.url();
-        const mockHash = faker.string.uuid();
-        mockManifestService.uploadManifest.mockResolvedValueOnce({
-          url: mockUrl,
-          hash: mockHash,
-        });
-        const jobEntityMock = createJobEntity();
-        mockJobRepository.createUnique = jest
-          .fn()
-          .mockResolvedValueOnce(jobEntityMock);
-        mockRateService.getRate
-          .mockResolvedValueOnce(tokenToUsdRate)
-          .mockResolvedValueOnce(usdToTokenRate);
-
-        await jobService.createJob(
-          userMock,
-          HCaptchaJobType.HCAPTCHA,
-          captchaJobDto,
-        );
-
-        expect(mockWeb3Service.validateChainId).toHaveBeenCalledWith(
-          captchaJobDto.chainId,
-        );
-        expect(mockRoutingProtocolService.selectOracles).not.toHaveBeenCalled();
-        expect(mockRoutingProtocolService.validateOracles).toHaveBeenCalledWith(
-          captchaJobDto.chainId,
-          HCaptchaJobType.HCAPTCHA,
-          captchaJobDto.reputationOracle,
-          captchaJobDto.exchangeOracle,
-          captchaJobDto.recordingOracle,
-        );
-        expect(mockManifestService.createManifest).toHaveBeenCalledWith(
-          captchaJobDto,
-          HCaptchaJobType.HCAPTCHA,
-          captchaJobDto.paymentAmount,
-          fundTokenDecimals,
-        );
-        expect(mockManifestService.uploadManifest).toHaveBeenCalledWith(
-          captchaJobDto.chainId,
-          mockManifest,
-          [
-            captchaJobDto.exchangeOracle,
-            captchaJobDto.reputationOracle,
-            captchaJobDto.recordingOracle,
-          ],
-        );
-        expect(mockPaymentService.createWithdrawalPayment).toHaveBeenCalledWith(
-          userMock.id,
-          expect.any(Number),
-          captchaJobDto.paymentCurrency,
-          tokenToUsdRate,
-        );
-        expect(mockJobRepository.updateOne).toHaveBeenCalledWith({
-          chainId: captchaJobDto.chainId,
-          userId: userMock.id,
-          manifestUrl: mockUrl,
-          manifestHash: mockHash,
-          requestType: HCaptchaJobType.HCAPTCHA,
-          fee: expect.any(Number),
-          fundAmount: Number(
-            mul(
-              mul(captchaJobDto.paymentAmount, tokenToUsdRate),
-              usdToTokenRate,
-            ).toFixed(6),
-          ),
-          status: JobStatus.MODERATION_PASSED,
-          waitUntil: expect.any(Date),
-          token: captchaJobDto.escrowFundToken,
-          exchangeOracle: captchaJobDto.exchangeOracle,
-          recordingOracle: captchaJobDto.recordingOracle,
-          reputationOracle: captchaJobDto.reputationOracle,
           payments: expect.any(Array),
         });
       });

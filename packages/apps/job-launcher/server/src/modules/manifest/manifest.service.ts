@@ -5,34 +5,13 @@ import {
 } from '@nestjs/common';
 import { validate } from 'class-validator';
 import { ethers } from 'ethers';
-import { v4 as uuidv4 } from 'uuid';
-import { AuthConfigService } from '../../common/config/auth-config.service';
 import { CvatConfigService } from '../../common/config/cvat-config.service';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
-import { Web3ConfigService } from '../../common/config/web3-config.service';
-import {
-  HCAPTCHA_BOUNDING_BOX_MAX_POINTS,
-  HCAPTCHA_BOUNDING_BOX_MIN_POINTS,
-  HCAPTCHA_IMMO_MAX_LENGTH,
-  HCAPTCHA_IMMO_MIN_LENGTH,
-  HCAPTCHA_LANDMARK_MAX_POINTS,
-  HCAPTCHA_LANDMARK_MIN_POINTS,
-  HCAPTCHA_MAX_SHAPES_PER_IMAGE,
-  HCAPTCHA_MINIMUM_SELECTION_AREA_PER_SHAPE,
-  HCAPTCHA_MIN_SHAPES_PER_IMAGE,
-  HCAPTCHA_NOT_PRESENTED_LABEL,
-  HCAPTCHA_ORACLE_STAKE,
-  HCAPTCHA_POLYGON_MAX_POINTS,
-  HCAPTCHA_POLYGON_MIN_POINTS,
-} from '../../common/constants';
 import { ErrorJob } from '../../common/constants/errors';
 import {
   CvatJobType,
   FortuneJobType,
   HCaptchaJobType,
-  JobCaptchaMode,
-  JobCaptchaRequestType,
-  JobCaptchaShapeType,
   JobRequestType,
 } from '../../common/enums/job';
 import { ConflictError, ValidationError } from '../../common/errors';
@@ -40,12 +19,7 @@ import {
   generateBucketUrl,
   listObjectsInBucket,
 } from '../../common/utils/storage';
-import {
-  CreateJob,
-  JobCaptchaAdvancedDto,
-  JobCaptchaDto,
-  JobCvatDto,
-} from '../job/job.dto';
+import { CreateJob, JobCvatDto } from '../job/job.dto';
 import {
   CvatAnnotationData,
   CvatCalculateJobBounty,
@@ -59,7 +33,6 @@ import {
   FortuneManifestDto,
   HCaptchaManifestDto,
   ManifestDto,
-  RestrictedAudience,
 } from './manifest.dto';
 
 @Injectable()
@@ -68,8 +41,6 @@ export class ManifestService {
 
   constructor(
     private readonly web3Service: Web3Service,
-    private readonly authConfigService: AuthConfigService,
-    private readonly web3ConfigService: Web3ConfigService,
     private readonly cvatConfigService: CvatConfigService,
     private readonly pgpConfigService: PGPConfigService,
     private readonly storageService: StorageService,
@@ -83,9 +54,6 @@ export class ManifestService {
     decimals: number,
   ): Promise<any> {
     switch (requestType) {
-      case HCaptchaJobType.HCAPTCHA:
-        return this.createHCaptchaManifest(dto as JobCaptchaDto);
-
       case FortuneJobType.FORTUNE:
         return {
           ...dto,
@@ -309,226 +277,6 @@ export class ManifestService {
       },
       job_bounty: jobBounty,
     };
-  }
-
-  private async createHCaptchaManifest(
-    jobDto: JobCaptchaDto,
-  ): Promise<HCaptchaManifestDto> {
-    const jobType = jobDto.annotations.typeOfJob;
-    const dataUrl = generateBucketUrl(jobDto.data, HCaptchaJobType.HCAPTCHA);
-    const objectsInBucket = await listObjectsInBucket(dataUrl);
-
-    const commonManifestProperties = {
-      job_mode: JobCaptchaMode.BATCH,
-      requester_accuracy_target: jobDto.accuracyTarget,
-      request_config: {},
-      restricted_audience: this.buildHCaptchaRestrictedAudience(
-        jobDto.advanced,
-      ),
-      requester_max_repeats: jobDto.maxRequests,
-      requester_min_repeats: jobDto.minRequests,
-      requester_question: { en: jobDto.annotations.labelingPrompt },
-      job_total_tasks: objectsInBucket.length,
-      task_bid_price: jobDto.annotations.taskBidPrice,
-      taskdata_uri: await this.generateAndUploadTaskData(
-        dataUrl.href,
-        objectsInBucket,
-      ),
-      public_results: true,
-      oracle_stake: HCAPTCHA_ORACLE_STAKE,
-      repo_uri: this.web3ConfigService.hCaptchaReputationOracleURI,
-      ro_uri: this.web3ConfigService.hCaptchaRecordingOracleURI,
-      ...(jobDto.qualifications && {
-        qualifications: jobDto.qualifications,
-      }),
-    };
-
-    let groundTruthsData;
-    if (jobDto.annotations.groundTruths) {
-      groundTruthsData = await this.storageService.downloadJsonLikeData(
-        jobDto.annotations.groundTruths,
-      );
-    }
-
-    switch (jobType) {
-      case JobCaptchaShapeType.COMPARISON:
-        return {
-          ...commonManifestProperties,
-          request_type: JobCaptchaRequestType.IMAGE_LABEL_BINARY,
-          groundtruth_uri: jobDto.annotations.groundTruths,
-          requester_restricted_answer_set: {},
-          requester_question_example: jobDto.annotations.exampleImages || [],
-        };
-
-      case JobCaptchaShapeType.CATEGORIZATION:
-        return {
-          ...commonManifestProperties,
-          request_type: JobCaptchaRequestType.IMAGE_LABEL_MULTIPLE_CHOICE,
-          groundtruth_uri: jobDto.annotations.groundTruths,
-          requester_restricted_answer_set:
-            this.buildHCaptchaRestrictedAnswerSet(groundTruthsData),
-        };
-
-      case JobCaptchaShapeType.POLYGON:
-        if (!jobDto.annotations.label) {
-          throw new ValidationError(ErrorJob.JobParamsValidationFailed);
-        }
-
-        return {
-          ...commonManifestProperties,
-          request_type: JobCaptchaRequestType.IMAGE_LABEL_AREA_SELECT,
-          request_config: {
-            shape_type: JobCaptchaShapeType.POLYGON,
-            min_shapes_per_image: HCAPTCHA_MIN_SHAPES_PER_IMAGE,
-            max_shapes_per_image: HCAPTCHA_MAX_SHAPES_PER_IMAGE,
-            min_points: HCAPTCHA_POLYGON_MIN_POINTS,
-            max_points: HCAPTCHA_POLYGON_MAX_POINTS,
-            minimum_selection_area_per_shape:
-              HCAPTCHA_MINIMUM_SELECTION_AREA_PER_SHAPE,
-          },
-          groundtruth_uri: jobDto.annotations.groundTruths,
-          requester_restricted_answer_set: {
-            [jobDto.annotations.label!]: { en: jobDto.annotations.label },
-          },
-          requester_question_example: jobDto.annotations.exampleImages || [],
-        };
-
-      case JobCaptchaShapeType.POINT:
-        if (!jobDto.annotations.label) {
-          throw new ValidationError(ErrorJob.JobParamsValidationFailed);
-        }
-
-        return {
-          ...commonManifestProperties,
-          request_type: JobCaptchaRequestType.IMAGE_LABEL_AREA_SELECT,
-          request_config: {
-            shape_type: jobType,
-            min_shapes_per_image: HCAPTCHA_MIN_SHAPES_PER_IMAGE,
-            max_shapes_per_image: HCAPTCHA_MAX_SHAPES_PER_IMAGE,
-            min_points: HCAPTCHA_LANDMARK_MIN_POINTS,
-            max_points: HCAPTCHA_LANDMARK_MAX_POINTS,
-          },
-          groundtruth_uri: jobDto.annotations.groundTruths,
-          requester_restricted_answer_set: {
-            [jobDto.annotations.label!]: { en: jobDto.annotations.label },
-          },
-          requester_question_example: jobDto.annotations.exampleImages || [],
-        };
-
-      case JobCaptchaShapeType.BOUNDING_BOX:
-        if (!jobDto.annotations.label) {
-          throw new ValidationError(ErrorJob.JobParamsValidationFailed);
-        }
-
-        return {
-          ...commonManifestProperties,
-          request_type: JobCaptchaRequestType.IMAGE_LABEL_AREA_SELECT,
-          request_config: {
-            shape_type: jobType,
-            min_shapes_per_image: HCAPTCHA_MIN_SHAPES_PER_IMAGE,
-            max_shapes_per_image: HCAPTCHA_MAX_SHAPES_PER_IMAGE,
-            min_points: HCAPTCHA_BOUNDING_BOX_MIN_POINTS,
-            max_points: HCAPTCHA_BOUNDING_BOX_MAX_POINTS,
-          },
-          groundtruth_uri: jobDto.annotations.groundTruths,
-          requester_restricted_answer_set: {
-            [jobDto.annotations.label!]: { en: jobDto.annotations.label },
-          },
-          requester_question_example: jobDto.annotations.exampleImages || [],
-        };
-
-      case JobCaptchaShapeType.IMMO:
-        if (!jobDto.annotations.label) {
-          throw new ValidationError(ErrorJob.JobParamsValidationFailed);
-        }
-
-        return {
-          ...commonManifestProperties,
-          request_type: JobCaptchaRequestType.TEXT_FREEE_NTRY,
-          request_config: {
-            multiple_choice_max_choices: 1,
-            multiple_choice_min_choices: 1,
-            overlap_threshold: null,
-            answer_type: 'str',
-            max_length: HCAPTCHA_IMMO_MAX_LENGTH,
-            min_length: HCAPTCHA_IMMO_MIN_LENGTH,
-          },
-          requester_restricted_answer_set: {
-            [jobDto.annotations.label!]: { en: jobDto.annotations.label },
-          },
-          taskdata: [],
-        };
-
-      default:
-        throw new ValidationError(ErrorJob.HCaptchaInvalidJobType);
-    }
-  }
-
-  private buildHCaptchaRestrictedAudience(advanced: JobCaptchaAdvancedDto) {
-    const restrictedAudience: RestrictedAudience = {};
-
-    restrictedAudience.sitekey = [
-      {
-        [this.authConfigService.hCaptchaSiteKey]: {
-          score: 1,
-        },
-      },
-    ];
-
-    if (advanced.workerLanguage) {
-      restrictedAudience.lang = [{ [advanced.workerLanguage]: { score: 1 } }];
-    }
-
-    if (advanced.workerLocation) {
-      restrictedAudience.country = [
-        { [advanced.workerLocation]: { score: 1 } },
-      ];
-    }
-
-    if (advanced.targetBrowser) {
-      restrictedAudience.browser = [{ [advanced.targetBrowser]: { score: 1 } }];
-    }
-
-    return restrictedAudience;
-  }
-
-  private buildHCaptchaRestrictedAnswerSet(groundTruthsData: any) {
-    const maxElements = 3;
-    const outputObject: any = {};
-
-    let elementCount = 0;
-
-    for (const key of Object.keys(groundTruthsData)) {
-      if (elementCount >= maxElements) {
-        break;
-      }
-
-      const value = groundTruthsData[key][0][0];
-      outputObject[value] = { en: value, answer_example_uri: key };
-      elementCount++;
-    }
-
-    // Default case
-    outputObject['0'] = { en: HCAPTCHA_NOT_PRESENTED_LABEL };
-
-    return outputObject;
-  }
-
-  private async generateAndUploadTaskData(
-    dataUrl: string,
-    objectNames: string[],
-  ) {
-    const data = objectNames.map((objectName) => {
-      return {
-        datapoint_uri: `${dataUrl}/${objectName}`,
-        datapoint_hash: 'undefined-hash',
-        task_key: uuidv4(),
-      };
-    });
-
-    const { url } = await this.storageService.uploadJsonLikeData(data);
-
-    return url;
   }
 
   async uploadManifest(
