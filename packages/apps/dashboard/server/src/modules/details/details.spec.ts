@@ -242,7 +242,7 @@ describe('DetailsService', () => {
       .spyOn(TransactionUtils, 'getTransactions')
       .mockResolvedValue(mockTransactions);
 
-    jest.spyOn(service as any, 'getTokenDataOrDefault').mockResolvedValue({
+    jest.spyOn(service as any, 'getTokenData').mockResolvedValue({
       decimals: 6,
       symbol: 'USDC',
     });
@@ -268,13 +268,12 @@ describe('DetailsService', () => {
     ]);
   });
 
-  it('should deduplicate concurrent in-flight token metadata fetches', async () => {
+  it('should deduplicate concurrent token metadata fetches and reuse resolved promises', async () => {
     const tokenAddress = '0x000000000000000000000000000000000000000d';
     const provider = (service as any).getProvider(DevelopmentChainId.SEPOLIA);
     const tokenCacheKey = `token:${DevelopmentChainId.SEPOLIA}:${tokenAddress.toLowerCase()}`;
 
     cacheManager.get.mockResolvedValue(null);
-    cacheManager.set.mockResolvedValue(undefined);
 
     const decimals = jest.fn().mockImplementation(
       async () =>
@@ -287,21 +286,27 @@ describe('DetailsService', () => {
       .spyOn(HMToken__factory, 'connect')
       .mockReturnValue({ decimals, symbol } as any);
 
-    const first = (service as any).getTokenDataOrDefault(
+    const first = (service as any).getTokenData(
       provider,
       DevelopmentChainId.SEPOLIA,
       tokenAddress,
     );
-    const second = (service as any).getTokenDataOrDefault(
+    const second = (service as any).getTokenData(
       provider,
       DevelopmentChainId.SEPOLIA,
       tokenAddress,
     );
 
     const [firstResult, secondResult] = await Promise.all([first, second]);
+    const thirdResult = await (service as any).getTokenData(
+      provider,
+      DevelopmentChainId.SEPOLIA,
+      tokenAddress,
+    );
 
     expect(firstResult).toEqual({ decimals: 6, symbol: 'USDC' });
     expect(secondResult).toEqual({ decimals: 6, symbol: 'USDC' });
+    expect(thirdResult).toEqual({ decimals: 6, symbol: 'USDC' });
     expect(connectSpy).toHaveBeenCalledTimes(1);
     expect(decimals).toHaveBeenCalledTimes(1);
     expect(symbol).toHaveBeenCalledTimes(1);
@@ -310,6 +315,6 @@ describe('DetailsService', () => {
       decimals: 6,
       symbol: 'USDC',
     });
-    expect((service as any).inFlightTokenData.size).toBe(0);
+    expect((service as any).tokenData.size).toBe(1);
   });
 });

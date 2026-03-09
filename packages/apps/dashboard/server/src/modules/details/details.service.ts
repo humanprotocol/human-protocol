@@ -45,13 +45,6 @@ export class DetailsService {
   private readonly logger = logger.child({ context: DetailsService.name });
   private readonly tokenData = new Map<
     string,
-    {
-      decimals: number;
-      symbol: string;
-    }
-  >();
-  private readonly inFlightTokenData = new Map<
-    string,
     Promise<{ decimals: number; symbol: string | null }>
   >();
 
@@ -74,7 +67,7 @@ export class DetailsService {
         excludeExtraneousValues: true,
       });
 
-      const { decimals, symbol } = await this.getTokenDataOrDefault(
+      const { decimals, symbol } = await this.getTokenData(
         provider,
         chainId,
         escrowData.token,
@@ -452,13 +445,13 @@ export class DetailsService {
     return data;
   }
 
-  private async getTokenDataOrDefault(
+  private async getTokenData(
     provider: ethers.JsonRpcProvider,
     chainId: ChainId,
-    tokenAddress: string | null,
+    tokenAddress: string,
   ): Promise<{ decimals: number; symbol: string | null }> {
-    if (!tokenAddress || !ethers.isAddress(tokenAddress)) {
-      return { decimals: 18, symbol: null };
+    if (!ethers.isAddress(tokenAddress)) {
+      throw new Error(`Invalid token address: ${tokenAddress}`);
     }
 
     const normalizedTokenAddress = tokenAddress.toLowerCase();
@@ -466,15 +459,7 @@ export class DetailsService {
 
     const tokenDataInMemory = this.tokenData.get(tokenCacheKey);
     if (tokenDataInMemory) {
-      return {
-        decimals: tokenDataInMemory.decimals,
-        symbol: tokenDataInMemory.symbol,
-      };
-    }
-
-    const inFlightTokenData = this.inFlightTokenData.get(tokenCacheKey);
-    if (inFlightTokenData) {
-      return inFlightTokenData;
+      return tokenDataInMemory;
     }
 
     const tokenDataPromise = (async () => {
@@ -484,45 +469,25 @@ export class DetailsService {
           symbol: string;
         }>(tokenCacheKey);
         if (cachedData) {
-          this.tokenData.set(tokenCacheKey, {
-            decimals: cachedData.decimals,
-            symbol: cachedData.symbol,
-          });
           return cachedData;
         }
 
-        try {
-          const erc20Contract = HMToken__factory.connect(
-            tokenAddress,
-            provider,
-          );
-          const [decimals, symbol] = await Promise.all([
-            erc20Contract.decimals(),
-            erc20Contract.symbol(),
-          ]);
-          const resolvedTokenData = { decimals: Number(decimals), symbol };
+        const erc20Contract = HMToken__factory.connect(tokenAddress, provider);
+        const [decimals, symbol] = await Promise.all([
+          erc20Contract.decimals(),
+          erc20Contract.symbol(),
+        ]);
+        const resolvedTokenData = { decimals: Number(decimals), symbol };
+        await this.cacheManager.set(tokenCacheKey, resolvedTokenData);
 
-          this.tokenData.set(tokenCacheKey, {
-            decimals: resolvedTokenData.decimals,
-            symbol: resolvedTokenData.symbol,
-          });
-          await this.cacheManager.set(tokenCacheKey, resolvedTokenData);
-
-          return resolvedTokenData;
-        } catch (error) {
-          this.logger.warn('Failed to fetch token metadata.', {
-            chainId,
-            tokenAddress,
-            error: error instanceof Error ? error.message : String(error),
-          });
-          return { decimals: 18, symbol: null };
-        }
-      } finally {
-        this.inFlightTokenData.delete(tokenCacheKey);
+        return resolvedTokenData;
+      } catch (error) {
+        this.tokenData.delete(tokenCacheKey);
+        throw error;
       }
     })();
 
-    this.inFlightTokenData.set(tokenCacheKey, tokenDataPromise);
+    this.tokenData.set(tokenCacheKey, tokenDataPromise);
     return tokenDataPromise;
   }
 
@@ -542,19 +507,29 @@ export class DetailsService {
     provider: ethers.JsonRpcProvider,
     transaction: ITransaction,
   ): Promise<Record<string, unknown>> {
-    const tokenData = await this.getTokenDataOrDefault(
-      provider,
-      chainId,
-      transaction.token,
-    );
+    const getFormattedTokenData = async (tokenAddress: string | null) => {
+      if (!tokenAddress) {
+        return { decimals: 18, symbol: null };
+      }
+
+      try {
+        return await this.getTokenData(provider, chainId, tokenAddress);
+      } catch (error) {
+        this.logger.warn('Failed to resolve token metadata.', {
+          chainId,
+          tokenAddress,
+          txHash: transaction.txHash,
+          error: error instanceof Error ? error.message : String(error),
+        });
+        return { decimals: 18, symbol: null };
+      }
+    };
+
     const internalTransactions = await Promise.all(
       transaction.internalTransactions.map(async (internalTransaction) => {
-        const tokenData = await this.getTokenDataOrDefault(
-          provider,
-          chainId,
+        const tokenData = await getFormattedTokenData(
           internalTransaction.token,
         );
-
         return {
           ...internalTransaction,
           value: ethers.formatUnits(
@@ -565,6 +540,7 @@ export class DetailsService {
         };
       }),
     );
+    const tokenData = await getFormattedTokenData(transaction.token);
 
     return {
       ...transaction,
