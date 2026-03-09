@@ -522,7 +522,7 @@ export class DetailsService {
           txHash: transaction.txHash,
           error: error instanceof Error ? error.message : String(error),
         });
-        throw error;
+        throw new Error('Failed to resolve token metadata');
       }
     };
 
