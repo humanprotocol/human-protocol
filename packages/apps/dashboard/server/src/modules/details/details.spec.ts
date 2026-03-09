@@ -268,6 +268,96 @@ describe('DetailsService', () => {
     ]);
   });
 
+  it('should omit tokenSymbol when transaction has no token', async () => {
+    const walletAddress = '0xA';
+    const senderAddress = '0xB';
+    const receiverAddress = '0xC';
+
+    const mockTransactions = [
+      {
+        block: 123n,
+        txHash: '0x1',
+        from: senderAddress,
+        to: walletAddress,
+        timestamp: Date.now(),
+        value: 1234567n,
+        method: 'bulkTransfer',
+        receiver: null,
+        escrow: null,
+        token: null,
+        internalTransactions: [
+          {
+            from: senderAddress,
+            to: receiverAddress,
+            value: 345678n,
+            method: 'transfer',
+            receiver: null,
+            escrow: null,
+            token: null,
+          },
+        ],
+      },
+    ];
+
+    jest
+      .spyOn(TransactionUtils, 'getTransactions')
+      .mockResolvedValue(mockTransactions);
+
+    const result = await service.getTransactions(
+      DevelopmentChainId.SEPOLIA,
+      walletAddress,
+      10,
+      0,
+    );
+
+    expect(result[0].value).toBe('0.000000000001234567');
+    expect(result[0].tokenSymbol).toBeUndefined();
+    expect(JSON.parse(JSON.stringify(result[0]))).not.toHaveProperty(
+      'tokenSymbol',
+    );
+    expect(result[0].internalTransactions[0].value).toBe(
+      '0.000000000000345678',
+    );
+    expect(result[0].internalTransactions[0].tokenSymbol).toBeUndefined();
+    expect(
+      JSON.parse(JSON.stringify(result[0].internalTransactions[0])),
+    ).not.toHaveProperty('tokenSymbol');
+  });
+
+  it('should throw when token metadata cannot be resolved for a tokenized transaction', async () => {
+    const walletAddress = '0xA';
+    const senderAddress = '0xB';
+    const tokenAddress = '0x000000000000000000000000000000000000000d';
+
+    const mockTransactions = [
+      {
+        block: 123n,
+        txHash: '0x1',
+        from: senderAddress,
+        to: walletAddress,
+        timestamp: Date.now(),
+        value: 1234567n,
+        method: 'bulkTransfer',
+        receiver: null,
+        escrow: null,
+        token: tokenAddress,
+        internalTransactions: [],
+      },
+    ];
+
+    jest
+      .spyOn(TransactionUtils, 'getTransactions')
+      .mockResolvedValue(mockTransactions);
+
+    jest
+      .spyOn(service as any, 'getTokenData')
+      .mockRejectedValue(new Error('Failed to fetch token metadata'));
+
+    await expect(
+      service.getTransactions(DevelopmentChainId.SEPOLIA, walletAddress, 10, 0),
+    ).rejects.toThrow('Failed to fetch token metadata');
+  });
+
   it('should deduplicate concurrent token metadata fetches and reuse resolved promises', async () => {
     const tokenAddress = '0x000000000000000000000000000000000000000d';
     const provider = (service as any).getProvider(DevelopmentChainId.SEPOLIA);

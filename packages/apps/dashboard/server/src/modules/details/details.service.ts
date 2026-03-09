@@ -457,38 +457,39 @@ export class DetailsService {
     const normalizedTokenAddress = tokenAddress.toLowerCase();
     const tokenCacheKey = `${TOKEN_CACHE_PREFIX}:${chainId}:${normalizedTokenAddress}`;
 
-    const tokenDataInMemory = this.tokenData.get(tokenCacheKey);
-    if (tokenDataInMemory) {
-      return tokenDataInMemory;
+    if (!this.tokenData.has(tokenCacheKey)) {
+      const tokenDataPromise = (async () => {
+        try {
+          const cachedData = await this.cacheManager.get<{
+            decimals: number;
+            symbol: string;
+          }>(tokenCacheKey);
+          if (cachedData) {
+            return cachedData;
+          }
+
+          const erc20Contract = HMToken__factory.connect(
+            tokenAddress,
+            provider,
+          );
+          const [decimals, symbol] = await Promise.all([
+            erc20Contract.decimals(),
+            erc20Contract.symbol(),
+          ]);
+          const resolvedTokenData = { decimals: Number(decimals), symbol };
+          await this.cacheManager.set(tokenCacheKey, resolvedTokenData);
+
+          return resolvedTokenData;
+        } catch (error) {
+          this.tokenData.delete(tokenCacheKey);
+          throw error;
+        }
+      })();
+
+      this.tokenData.set(tokenCacheKey, tokenDataPromise);
     }
 
-    const tokenDataPromise = (async () => {
-      try {
-        const cachedData = await this.cacheManager.get<{
-          decimals: number;
-          symbol: string;
-        }>(tokenCacheKey);
-        if (cachedData) {
-          return cachedData;
-        }
-
-        const erc20Contract = HMToken__factory.connect(tokenAddress, provider);
-        const [decimals, symbol] = await Promise.all([
-          erc20Contract.decimals(),
-          erc20Contract.symbol(),
-        ]);
-        const resolvedTokenData = { decimals: Number(decimals), symbol };
-        await this.cacheManager.set(tokenCacheKey, resolvedTokenData);
-
-        return resolvedTokenData;
-      } catch (error) {
-        this.tokenData.delete(tokenCacheKey);
-        throw error;
-      }
-    })();
-
-    this.tokenData.set(tokenCacheKey, tokenDataPromise);
-    return tokenDataPromise;
+    return this.tokenData.get(tokenCacheKey)!;
   }
 
   private getProvider(chainId: ChainId): ethers.JsonRpcProvider {
@@ -509,7 +510,7 @@ export class DetailsService {
   ): Promise<Record<string, unknown>> {
     const getFormattedTokenData = async (tokenAddress: string | null) => {
       if (!tokenAddress) {
-        return { decimals: 18, symbol: null };
+        return null;
       }
 
       try {
@@ -521,7 +522,7 @@ export class DetailsService {
           txHash: transaction.txHash,
           error: error instanceof Error ? error.message : String(error),
         });
-        return { decimals: 18, symbol: null };
+        throw error;
       }
     };
 
@@ -534,9 +535,9 @@ export class DetailsService {
           ...internalTransaction,
           value: ethers.formatUnits(
             internalTransaction.value,
-            tokenData.decimals,
+            tokenData?.decimals ?? 18,
           ),
-          tokenSymbol: tokenData.symbol,
+          ...(tokenData ? { tokenSymbol: tokenData.symbol } : {}),
         };
       }),
     );
@@ -544,8 +545,8 @@ export class DetailsService {
 
     return {
       ...transaction,
-      value: ethers.formatUnits(transaction.value, tokenData.decimals),
-      tokenSymbol: tokenData.symbol,
+      value: ethers.formatUnits(transaction.value, tokenData?.decimals ?? 18),
+      ...(tokenData ? { tokenSymbol: tokenData.symbol } : {}),
       internalTransactions,
     };
   }
