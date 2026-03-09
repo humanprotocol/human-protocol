@@ -15,19 +15,14 @@ import {
   CancellationRefund,
 } from '../../generated/templates/Escrow/Escrow';
 import {
-  BulkPayoutEvent,
   CancellationRefundEvent,
   Escrow,
   EscrowStatistics,
   EscrowStatusEvent,
-  FundEvent,
-  PendingEvent,
-  StoreResultsEvent,
   Worker,
   Payout,
   DailyWorker,
   InternalTransaction,
-  WithdrawEvent,
   Operator,
 } from '../../generated/schema';
 import {
@@ -113,15 +108,6 @@ function createCommonEntitiesForPending(
   event: ethereum.Event,
   status: string
 ): EscrowStatusEvent {
-  // Create pendingEvent entity
-  const pendingEventEntity = new PendingEvent(toEventId(event));
-  pendingEventEntity.block = event.block.number;
-  pendingEventEntity.timestamp = event.block.timestamp;
-  pendingEventEntity.txHash = event.transaction.hash;
-  pendingEventEntity.escrowAddress = event.address;
-  pendingEventEntity.sender = event.transaction.from;
-  pendingEventEntity.save();
-
   // Create EscrowStatusEvent entity
   const statusEventEntity = new EscrowStatusEvent(toEventId(event));
   statusEventEntity.block = event.block.number;
@@ -335,17 +321,6 @@ export function handlePendingV3(event: PendingV3): void {
 }
 
 export function handleIntermediateStorage(event: IntermediateStorage): void {
-  // Create StoreResultsEvent entity
-  const eventEntity = new StoreResultsEvent(toEventId(event));
-  eventEntity.block = event.block.number;
-  eventEntity.timestamp = event.block.timestamp;
-  eventEntity.txHash = event.transaction.hash;
-  eventEntity.escrowAddress = event.address;
-  eventEntity.sender = event.transaction.from;
-  eventEntity.intermediateResultsUrl = event.params.url;
-  eventEntity.intermediateResultsHash = event.params.hash;
-  eventEntity.save();
-
   // Updates escrow statistics
   const statsEntity = createOrLoadEscrowStatistics();
   statsEntity.storeResultsEventCount =
@@ -376,23 +351,6 @@ export function handleIntermediateStorage(event: IntermediateStorage): void {
       Address.fromBytes(escrowEntity.address)
     );
   }
-}
-
-// Create BulkPayoutEvent entity
-function createBulkPayoutEvent(
-  event: ethereum.Event,
-  payoutId: string,
-  recipientsLength: number
-): void {
-  const eventEntity = new BulkPayoutEvent(toEventId(event));
-  eventEntity.block = event.block.number;
-  eventEntity.timestamp = event.block.timestamp;
-  eventEntity.txHash = event.transaction.hash;
-  eventEntity.escrowAddress = event.address;
-  eventEntity.sender = event.transaction.from;
-  eventEntity.payoutId = payoutId;
-  eventEntity.bulkCount = BigInt.fromI32(<i32>recipientsLength);
-  eventEntity.save();
 }
 
 // Update escrow statistics
@@ -480,13 +438,6 @@ function updateEscrowEntityForBulkTransfer(
 }
 
 export function handleBulkTransfer(event: BulkTransfer): void {
-  // Create BulkPayoutEvent entity
-  createBulkPayoutEvent(
-    event,
-    event.params.txId.toString(),
-    event.params.recipients.length
-  );
-
   // Update escrow statistics
   updateEscrowStatisticsForBulkTransfer(event.params.isPartial);
 
@@ -527,16 +478,12 @@ export function handleBulkTransfer(event: BulkTransfer): void {
 
 function handleBulkTransferCommon(
   event: ethereum.Event,
-  payoutId: string,
   recipients: Address[],
   amounts: BigInt[],
   isPartial: boolean,
   finalResultsUrl: string,
   finalResultsHash: string | null
 ): void {
-  // Create BulkPayoutEvent entity
-  createBulkPayoutEvent(event, payoutId, recipients.length);
-
   // Update escrow statistics
   updateEscrowStatisticsForBulkTransfer(isPartial);
 
@@ -634,7 +581,6 @@ function handleBulkTransferCommon(
 export function handleBulkTransferV2(event: BulkTransferV2): void {
   handleBulkTransferCommon(
     event,
-    event.params.txId.toString(),
     event.params.recipients,
     event.params.amounts,
     event.params.isPartial,
@@ -646,7 +592,6 @@ export function handleBulkTransferV2(event: BulkTransferV2): void {
 export function handleBulkTransferV3(event: BulkTransferV3): void {
   handleBulkTransferCommon(
     event,
-    event.params.payoutId.toHex(),
     event.params.recipients,
     event.params.amounts,
     event.params.isPartial,
@@ -774,16 +719,6 @@ export function handleFund(event: Fund): void {
     Address.fromBytes(escrowEntity.token)
   );
 
-  // Create FundEvent entity
-  const fundEventEntity = new FundEvent(toEventId(event));
-  fundEventEntity.block = event.block.number;
-  fundEventEntity.timestamp = event.block.timestamp;
-  fundEventEntity.txHash = event.transaction.hash;
-  fundEventEntity.escrowAddress = event.address;
-  fundEventEntity.sender = event.transaction.from;
-  fundEventEntity.amount = event.params.amount;
-  fundEventEntity.save();
-
   // Update escrow statistics
   const statsEntity = createOrLoadEscrowStatistics();
   statsEntity.fundEventCount = statsEntity.fundEventCount.plus(ONE_BI);
@@ -823,18 +758,6 @@ export function handleWithdraw(event: Withdraw): void {
     event.params.amount,
     event.params.token
   );
-
-  // Create WithdrawEvent entity
-  const withdrawEventEntity = new WithdrawEvent(toEventId(event));
-  withdrawEventEntity.block = event.block.number;
-  withdrawEventEntity.timestamp = event.block.timestamp;
-  withdrawEventEntity.txHash = event.transaction.hash;
-  withdrawEventEntity.escrowAddress = event.address;
-  withdrawEventEntity.sender = event.transaction.from;
-  withdrawEventEntity.receiver = escrowEntity.canceler;
-  withdrawEventEntity.amount = event.params.amount;
-  withdrawEventEntity.token = event.params.token;
-  withdrawEventEntity.save();
 }
 
 export function handleCancellationRequested(

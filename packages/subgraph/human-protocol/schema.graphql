@@ -90,51 +90,6 @@ type DailyWorker @entity(immutable: true) {
 #                     Events                     #
 ##################################################
 
-# Escrow
-type FundEvent @entity(immutable: true) {
-  id: Bytes!
-  block: BigInt!
-  timestamp: BigInt!
-  txHash: Bytes!
-
-  escrowAddress: Bytes! # address
-  sender: Bytes! # address
-  amount: BigInt!
-}
-
-type PendingEvent @entity(immutable: true) {
-  id: Bytes!
-  block: BigInt!
-  timestamp: BigInt!
-  txHash: Bytes!
-
-  escrowAddress: Bytes! # address
-  sender: Bytes! # address
-}
-
-type StoreResultsEvent @entity(immutable: true) {
-  id: Bytes!
-  block: BigInt!
-  timestamp: BigInt!
-  txHash: Bytes!
-
-  escrowAddress: Bytes! # address
-  sender: Bytes! # address
-  intermediateResultsUrl: String! # string
-  intermediateResultsHash: String! # string
-}
-
-type BulkPayoutEvent @entity(immutable: true) {
-  id: Bytes!
-  block: BigInt!
-  timestamp: BigInt!
-  txHash: Bytes!
-  escrowAddress: Bytes!
-  sender: Bytes!
-  payoutId: String!
-  bulkCount: BigInt!
-}
-
 type EscrowStatusEvent @entity(immutable: true) {
   id: Bytes!
   block: BigInt!
@@ -145,19 +100,6 @@ type EscrowStatusEvent @entity(immutable: true) {
   launcher: Bytes # address
   sender: Bytes! # address
   status: String!
-}
-
-type WithdrawEvent @entity(immutable: true) {
-  id: Bytes!
-  block: BigInt!
-  timestamp: BigInt!
-  txHash: Bytes!
-
-  escrowAddress: Bytes! # address
-  sender: Bytes! # address
-  receiver: Bytes! # address
-  token: Bytes! # address
-  amount: BigInt!
 }
 
 type CancellationRefundEvent @entity(immutable: true) {
@@ -171,17 +113,6 @@ type CancellationRefundEvent @entity(immutable: true) {
 }
 
 # KVStore
-type KVStoreSetEvent @entity(immutable: true) {
-  id: Bytes!
-  block: BigInt!
-  timestamp: BigInt!
-  txHash: Bytes!
-
-  operatorAddress: Bytes! # address
-  key: String!
-  value: String!
-}
-
 type KVStore @entity(immutable: false) {
   id: Bytes!
   block: BigInt!
@@ -203,49 +134,6 @@ type Staker @entity(immutable: false) {
   lastDepositTimestamp: BigInt!
 
   operator: Operator
-}
-
-type StakeDepositedEvent @entity(immutable: true) {
-  id: Bytes!
-  block: BigInt!
-  timestamp: BigInt!
-  txHash: Bytes!
-
-  staker: Bytes! # address
-  amount: BigInt!
-}
-
-type StakeLockedEvent @entity(immutable: true) {
-  id: Bytes!
-  block: BigInt!
-  timestamp: BigInt!
-  txHash: Bytes!
-
-  staker: Bytes! # address
-  amount: BigInt!
-  lockedUntilTimestamp: BigInt!
-}
-
-type StakeWithdrawnEvent @entity(immutable: true) {
-  id: Bytes!
-  block: BigInt!
-  timestamp: BigInt!
-  txHash: Bytes!
-
-  staker: Bytes! # address
-  amount: BigInt!
-}
-
-type StakeSlashedEvent @entity(immutable: true) {
-  id: Bytes!
-  block: BigInt!
-  timestamp: BigInt!
-  txHash: Bytes!
-
-  escrowAddress: Bytes! # address
-  staker: Bytes! # address
-  slashRequester: Bytes! # address
-  amount: BigInt!
 }
 
 ##################################################
