@@ -91,7 +91,7 @@ export const TOKEN_ADDRESSES: {
       symbol: EscrowFundToken.HMT,
     },
     [EscrowFundToken.USDC]: {
-      address: '0x64544969ed7EBf5f083679233325356EbE738930ho',
+      address: '0x64544969ed7EBf5f083679233325356EbE738930',
       decimals: 6,
       symbol: EscrowFundToken.USDC,
     },
