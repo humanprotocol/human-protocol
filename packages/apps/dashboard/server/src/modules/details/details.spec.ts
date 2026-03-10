@@ -349,13 +349,11 @@ describe('DetailsService', () => {
       .spyOn(TransactionUtils, 'getTransactions')
       .mockResolvedValue(mockTransactions);
 
-    jest
-      .spyOn(service as any, 'getTokenData')
-      .mockRejectedValue(new Error('Failed to fetch token metadata'));
+    jest.spyOn(service as any, 'getTokenData').mockRejectedValue(new Error());
 
     await expect(
       service.getTransactions(DevelopmentChainId.SEPOLIA, walletAddress, 10, 0),
-    ).rejects.toThrow('Failed to fetch token metadata');
+    ).rejects.toThrow('Failed to resolve token metadata');
   });
 
   it('should deduplicate concurrent token metadata fetches and reuse resolved promises', async () => {
