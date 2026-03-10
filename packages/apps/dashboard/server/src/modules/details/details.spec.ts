@@ -1,8 +1,10 @@
+import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import {
   IOperator,
   KVStoreUtils,
   OperatorUtils,
   OrderDirection,
+  TransactionUtils,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
@@ -32,8 +34,14 @@ jest.mock('../../common/constants/operator', () => ({
 describe('DetailsService', () => {
   let service: DetailsService;
   let httpService: HttpService;
+  let cacheManager: { get: jest.Mock; set: jest.Mock };
 
   beforeEach(async () => {
+    cacheManager = {
+      get: jest.fn(),
+      set: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DetailsService,
@@ -55,14 +63,17 @@ describe('DetailsService', () => {
             getAvailableNetworks: jest
               .fn()
               .mockResolvedValue([DevelopmentChainId.SEPOLIA]),
+            networks: [
+              {
+                chainId: DevelopmentChainId.SEPOLIA,
+                rpcUrl: 'http://localhost:8545',
+              },
+            ],
           },
         },
         {
           provide: CACHE_MANAGER,
-          useValue: {
-            get: jest.fn(),
-            set: jest.fn(),
-          },
+          useValue: cacheManager,
         },
       ],
     }).compile();
@@ -192,5 +203,206 @@ describe('DetailsService', () => {
       expect.objectContaining({ key: 'key1', value: 'value1' }),
       expect.objectContaining({ key: 'key2', value: 'value2' }),
     ]);
+  });
+
+  it('should format transactions using token decimals and symbol', async () => {
+    const walletAddress = '0xA';
+    const senderAddress = '0xB';
+    const receiverAddress = '0xC';
+    const tokenAddress = '0xD';
+    const txHash = '0x1';
+
+    const mockTransactions = [
+      {
+        block: 123n,
+        txHash,
+        from: senderAddress,
+        to: walletAddress,
+        timestamp: Date.now(),
+        value: 1234567n,
+        method: 'bulkTransfer',
+        receiver: null,
+        escrow: null,
+        token: tokenAddress,
+        internalTransactions: [
+          {
+            from: senderAddress,
+            to: receiverAddress,
+            value: 345678n,
+            method: 'transfer',
+            receiver: null,
+            escrow: null,
+            token: tokenAddress,
+          },
+        ],
+      },
+    ];
+
+    jest
+      .spyOn(TransactionUtils, 'getTransactions')
+      .mockResolvedValue(mockTransactions);
+
+    jest.spyOn(service as any, 'getTokenData').mockResolvedValue({
+      decimals: 6,
+      symbol: 'USDC',
+    });
+
+    const result = await service.getTransactions(
+      DevelopmentChainId.SEPOLIA,
+      walletAddress,
+      10,
+      0,
+    );
+
+    expect(result).toEqual([
+      expect.objectContaining({
+        value: '1.234567',
+        tokenSymbol: 'USDC',
+        internalTransactions: [
+          expect.objectContaining({
+            value: '0.345678',
+            tokenSymbol: 'USDC',
+          }),
+        ],
+      }),
+    ]);
+  });
+
+  it('should omit tokenSymbol when transaction has no token', async () => {
+    const walletAddress = '0xA';
+    const senderAddress = '0xB';
+    const receiverAddress = '0xC';
+
+    const mockTransactions = [
+      {
+        block: 123n,
+        txHash: '0x1',
+        from: senderAddress,
+        to: walletAddress,
+        timestamp: Date.now(),
+        value: 1234567n,
+        method: 'bulkTransfer',
+        receiver: null,
+        escrow: null,
+        token: null,
+        internalTransactions: [
+          {
+            from: senderAddress,
+            to: receiverAddress,
+            value: 345678n,
+            method: 'transfer',
+            receiver: null,
+            escrow: null,
+            token: null,
+          },
+        ],
+      },
+    ];
+
+    jest
+      .spyOn(TransactionUtils, 'getTransactions')
+      .mockResolvedValue(mockTransactions);
+
+    const result = await service.getTransactions(
+      DevelopmentChainId.SEPOLIA,
+      walletAddress,
+      10,
+      0,
+    );
+
+    expect(result[0].value).toBe('0.000000000001234567');
+    expect(result[0].tokenSymbol).toBeUndefined();
+    expect(JSON.parse(JSON.stringify(result[0]))).not.toHaveProperty(
+      'tokenSymbol',
+    );
+    expect(result[0].internalTransactions[0].value).toBe(
+      '0.000000000000345678',
+    );
+    expect(result[0].internalTransactions[0].tokenSymbol).toBeUndefined();
+    expect(
+      JSON.parse(JSON.stringify(result[0].internalTransactions[0])),
+    ).not.toHaveProperty('tokenSymbol');
+  });
+
+  it('should throw when token metadata cannot be resolved for a tokenized transaction', async () => {
+    const walletAddress = '0xA';
+    const senderAddress = '0xB';
+    const tokenAddress = '0x000000000000000000000000000000000000000d';
+
+    const mockTransactions = [
+      {
+        block: 123n,
+        txHash: '0x1',
+        from: senderAddress,
+        to: walletAddress,
+        timestamp: Date.now(),
+        value: 1234567n,
+        method: 'bulkTransfer',
+        receiver: null,
+        escrow: null,
+        token: tokenAddress,
+        internalTransactions: [],
+      },
+    ];
+
+    jest
+      .spyOn(TransactionUtils, 'getTransactions')
+      .mockResolvedValue(mockTransactions);
+
+    jest.spyOn(service as any, 'getTokenData').mockRejectedValue(new Error());
+
+    await expect(
+      service.getTransactions(DevelopmentChainId.SEPOLIA, walletAddress, 10, 0),
+    ).rejects.toThrow('Failed to resolve token metadata');
+  });
+
+  it('should deduplicate concurrent token metadata fetches and reuse resolved promises', async () => {
+    const tokenAddress = '0x000000000000000000000000000000000000000d';
+    const provider = (service as any).getProvider(DevelopmentChainId.SEPOLIA);
+    const tokenCacheKey = `token:${DevelopmentChainId.SEPOLIA}:${tokenAddress.toLowerCase()}`;
+
+    cacheManager.get.mockResolvedValue(null);
+
+    const decimals = jest.fn().mockImplementation(
+      async () =>
+        await new Promise<bigint>((resolve) => {
+          setTimeout(() => resolve(6n), 5);
+        }),
+    );
+    const symbol = jest.fn().mockResolvedValue('USDC');
+    const connectSpy = jest
+      .spyOn(HMToken__factory, 'connect')
+      .mockReturnValue({ decimals, symbol } as any);
+
+    const first = (service as any).getTokenData(
+      provider,
+      DevelopmentChainId.SEPOLIA,
+      tokenAddress,
+    );
+    const second = (service as any).getTokenData(
+      provider,
+      DevelopmentChainId.SEPOLIA,
+      tokenAddress,
+    );
+
+    const [firstResult, secondResult] = await Promise.all([first, second]);
+    const thirdResult = await (service as any).getTokenData(
+      provider,
+      DevelopmentChainId.SEPOLIA,
+      tokenAddress,
+    );
+
+    expect(firstResult).toEqual({ decimals: 6, symbol: 'USDC' });
+    expect(secondResult).toEqual({ decimals: 6, symbol: 'USDC' });
+    expect(thirdResult).toEqual({ decimals: 6, symbol: 'USDC' });
+    expect(connectSpy).toHaveBeenCalledTimes(1);
+    expect(decimals).toHaveBeenCalledTimes(1);
+    expect(symbol).toHaveBeenCalledTimes(1);
+    expect(cacheManager.get).toHaveBeenCalledTimes(1);
+    expect(cacheManager.set).toHaveBeenCalledWith(tokenCacheKey, {
+      decimals: 6,
+      symbol: 'USDC',
+    });
+    expect((service as any).tokenData.size).toBe(1);
   });
 });
