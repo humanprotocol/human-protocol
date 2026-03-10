@@ -1,5 +1,5 @@
 {
-  "name": "@tools/subgraph-hmt-stats",
+  "name": "@tools/subgraph-hmt",
   "private": true,
   "description": "Human Protocol HMT Statistics Subgraph",
   "version": "1.0.0",

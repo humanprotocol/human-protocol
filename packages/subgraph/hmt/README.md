@@ -20,8 +20,8 @@ yarn install && yarn workspace human-protocol build:core
 Generate and build artifacts for a network:
 
 ```bash
-NETWORK=polygon yarn workspace @tools/subgraph-hmt-stats generate
-NETWORK=polygon yarn workspace @tools/subgraph-hmt-stats build
+NETWORK=polygon yarn workspace @tools/subgraph-hmt generate
+NETWORK=polygon yarn workspace @tools/subgraph-hmt build
 ```
 
 ### Tests
@@ -29,8 +29,8 @@ NETWORK=polygon yarn workspace @tools/subgraph-hmt-stats build
 To run subgraph tests:
 
 ```bash
-NETWORK=polygon yarn workspace @tools/subgraph-hmt-stats generate
-yarn workspace @tools/subgraph-hmt-stats test
+NETWORK=polygon yarn workspace @tools/subgraph-hmt generate
+yarn workspace @tools/subgraph-hmt test
 ```
 
 This subgraph does not use staking/escrow templates.
@@ -62,5 +62,5 @@ This subgraph does not use staking/escrow templates.
    - `HMToken.address`
    - `HMToken.startBlock`
    - `HMToken.abi`
-3. Generate artifacts: `NETWORK=NETWORK yarn workspace @tools/subgraph-hmt-stats generate`.
-4. Build subgraph: `yarn workspace @tools/subgraph-hmt-stats build`.
+3. Generate artifacts: `NETWORK=NETWORK yarn workspace @tools/subgraph-hmt generate`.
+4. Build subgraph: `yarn workspace @tools/subgraph-hmt build`.

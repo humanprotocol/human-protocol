@@ -1,5 +1,5 @@
 {
-  "name": "@tools/subgraph",
+  "name": "@tools/subgraph-human-protocol",
   "private": true,
   "description": "Human Protocol Subgraph",
   "version": "1.0.0",

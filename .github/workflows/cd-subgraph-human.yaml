@@ -1,4 +1,5 @@
-name: Subgraph deployment
+name: Human Protocol Subgraph Deployment
+
 on:
   workflow_dispatch:
     inputs:
@@ -11,7 +12,7 @@ on:
 
 jobs:
   subgraph:
-    name: Deploy Subgraph
+    name: Deploy Human Protocol Subgraph
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -45,17 +46,17 @@ jobs:
             fi
           done
           echo "Match found: $MATCH"
-          echo "::set-output name=continue::$MATCH"
+          echo "continue=$MATCH" >> "$GITHUB_OUTPUT"
       - name: Install dependencies
         if: steps.filter_networks.outputs.continue == 'true'
-        run: yarn workspaces focus @tools/subgraph
+        run: yarn workspaces focus @tools/subgraph-human-protocol
       - name: Build packages (scoped)
         if: steps.filter_networks.outputs.continue == 'true'
-        run: yarn workspaces foreach -Rpt --from @tools/subgraph run build
+        run: yarn workspaces foreach -Rpt --from @tools/subgraph-human-protocol run build
       - name: Generate and build Subgraph
         if: steps.filter_networks.outputs.continue == 'true'
         run: yarn generate && yarn build
-        working-directory: ./packages/sdk/typescript/subgraph/human-protocol
+        working-directory: ./packages/subgraph/human-protocol
         env:
           NETWORK: ${{ matrix.network.name }}
       - name: Authenticate & Deploy
@@ -64,9 +65,9 @@ jobs:
           API_KEY: ${{ secrets.HP_GRAPH_API_KEY }}
           NETWORK: ${{ matrix.network.name }}
           LABEL: ${{ github.event.inputs.label }}
-        working-directory: ./packages/sdk/typescript/subgraph/human-protocol
+        working-directory: ./packages/subgraph/human-protocol
         run: |
           yarn dlx @graphprotocol/graph-cli@0.71.2 \
             auth --studio "$API_KEY"
           yarn dlx @graphprotocol/graph-cli@0.71.2 \
-            deploy --studio ${NETWORK} -l ${LABEL}
+            deploy --studio human-${NETWORK} -l ${LABEL}
