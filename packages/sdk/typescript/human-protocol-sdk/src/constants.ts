@@ -49,11 +49,15 @@ export const NETWORKS: {
     stakingAddress: '0x2163e3A40032Af1C359ac731deaB48258b317890',
     kvstoreAddress: '0xCc0AF0635aa19fE799B6aFDBe28fcFAeA7f00a60',
     subgraphUrl:
-      'https://api.studio.thegraph.com/query/74256/sepolia/version/latest',
+      'https://api.studio.thegraph.com/query/74256/human-sepolia/version/latest',
     subgraphUrlApiKey:
-      'https://gateway.thegraph.com/api/deployments/id/QmQghdr7hxqrjFde8DN15TzfrJLCfwvzmUH9RzWwH1mKzk',
+      'https://gateway.thegraph.com/api/deployments/id/QmQEbyGSf8VG9pdskowsK6C977wkcyJSxw9q6EDctKEkUw',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
+    hmtSubgraphUrl:
+      'https://api.studio.thegraph.com/query/74256/hmt-stats-sepolia/version/latest',
+    hmtSubgraphUrlApiKey:
+      'https://gateway.thegraph.com/api/deployments/id/QmYkPnYxbZ5ZTtKz7PTyxh6x5sK2H6yzx6vXDCrErpa9gB',
   },
   [ChainId.BSC_MAINNET]: {
     chainId: ChainId.BSC_MAINNET,
@@ -79,12 +83,16 @@ export const NETWORKS: {
     stakingAddress: '0xD6D347ba6987519B4e42EcED43dF98eFf5465a23',
     kvstoreAddress: '0x32e27177BA6Ea91cf28dfd91a0Da9822A4b74EcF',
     subgraphUrl:
-      'https://api.studio.thegraph.com/query/74256/bsc-testnet/version/latest',
+      'https://api.studio.thegraph.com/query/74256/human-bsc-testnet/version/latest',
     subgraphUrlApiKey:
-      'https://gateway.thegraph.com/api/deployments/id/QmPyUYRjAvzDdeenXMGHcCRD2v4qwZbKMEkVkY3Jq6VLwn',
+      'https://gateway.thegraph.com/api/deployments/id/QmdQJog9vMghK2o39U9YJL8vpU9VZnkJa7jGg7wnsod7qV',
     oldSubgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/bsctest',
     oldFactoryAddress: '0xaae6a2646c1f88763e62e0cd08ad050ea66ac46f',
+    hmtSubgraphUrl:
+      'https://api.studio.thegraph.com/query/74256/hmt-stats-bsc-testnet/version/latest',
+    hmtSubgraphUrlApiKey:
+      'https://gateway.thegraph.com/api/deployments/id/QmPMRbrXKp7a1i5x27dzBHbomxqKYDg5eU3djv1DXB5heq',
   },
   [ChainId.POLYGON]: {
     chainId: ChainId.POLYGON,
@@ -113,13 +121,13 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/human-amoy/version/latest',
     subgraphUrlApiKey:
-      'https://gateway.thegraph.com/api/deployments/id/QmP7D2irmx3WP2pP97QTcQxiv91KEyTGftHBy98Foh7WHg',
+      'https://gateway.thegraph.com/api/deployments/id/QmRx5WSi7o9FtENWnE5eEz8Dr7kYUazk4TNPRt65UZkKkB',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
     hmtSubgraphUrl:
       'https://api.studio.thegraph.com/query/74256/hmt-stats-amoy/version/latest',
     hmtSubgraphUrlApiKey:
-      'https://gateway.thegraph.com/api/deployments/id/QmZJYBQKyrsEJHQwNQ8JhkKcB5G8zQdrcwnr7ecGRNTBit',
+      'https://gateway.thegraph.com/api/deployments/id/QmZze6UWMJna8dQ183TVounSfGwc9C36RgQCGWhFzgrW3y',
   },
   [ChainId.LOCALHOST]: {
     chainId: ChainId.LOCALHOST,
