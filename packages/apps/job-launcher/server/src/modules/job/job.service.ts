@@ -14,8 +14,8 @@ import {
   validate,
 } from 'class-validator';
 import { ethers } from 'ethers';
-import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ServerConfigService } from '../../common/config/server-config.service';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { CANCEL_JOB_STATUSES } from '../../common/constants';
 import {
   ErrorEscrow,
@@ -38,6 +38,7 @@ import {
   PaymentCurrency,
   PaymentType,
 } from '../../common/enums/payment';
+import { Web3Env } from '../../common/enums/web3';
 import { EventType, OracleType } from '../../common/enums/webhook';
 import {
   ConflictError,
@@ -115,8 +116,8 @@ export class JobService {
   ): Promise<number> {
     // DISABLE HMT
     if (
+      this.web3ConfigService.env === Web3Env.MAINNET &&
       requestType !== HCaptchaJobType.HCAPTCHA &&
-      dto.chainId !== ChainId.LOCALHOST &&
       (dto.escrowFundToken === EscrowFundToken.HMT ||
         dto.paymentCurrency === PaymentCurrency.HMT)
     ) {

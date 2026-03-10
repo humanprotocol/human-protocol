@@ -8,6 +8,7 @@ const internalTransactionSchema = z.object({
   receiver: z.string().nullable(),
   escrow: z.string().nullable(),
   token: z.string().nullable(),
+  tokenSymbol: z.string().nullable().optional(),
 });
 
 const transactionDetailsSchema = z.object({
@@ -18,6 +19,7 @@ const transactionDetailsSchema = z.object({
   receiver: z.string().nullable(),
   block: z.number(),
   value: z.string(),
+  tokenSymbol: z.string().nullable().optional(),
   internalTransactions: z.array(internalTransactionSchema),
 });
 

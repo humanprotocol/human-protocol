@@ -3,6 +3,7 @@ import {
   EscrowUtils,
   IEscrowsFilter,
   IOperatorsFilter,
+  ITransaction,
   KVStoreUtils,
   NETWORKS,
   OperatorUtils,
@@ -19,18 +20,19 @@ import { plainToInstance } from 'class-transformer';
 import { ethers } from 'ethers';
 import { firstValueFrom } from 'rxjs';
 
-import { GetOperatorsPaginationOptions } from '../../common/types';
 import { EnvironmentConfigService } from '../../common/config/env-config.service';
 import { NetworkConfigService } from '../../common/config/network-config.service';
 import {
   MAX_LEADERS_COUNT,
   MIN_STAKED_AMOUNT,
   REPUTATION_PLACEHOLDER,
+  TOKEN_CACHE_PREFIX,
   type ChainId,
 } from '../../common/constants';
-import * as httpUtils from '../../common/utils/http';
 import { OperatorsOrderBy } from '../../common/enums/operator';
 import { ReputationLevel } from '../../common/enums/reputation';
+import { GetOperatorsPaginationOptions } from '../../common/types';
+import * as httpUtils from '../../common/utils/http';
 import logger from '../../logger';
 import { KVStoreDataDto } from './dto/details-response.dto';
 import { EscrowDto, EscrowPaginationDto } from './dto/escrow.dto';
@@ -41,6 +43,10 @@ import { WalletDto } from './dto/wallet.dto';
 @Injectable()
 export class DetailsService {
   private readonly logger = logger.child({ context: DetailsService.name });
+  private readonly tokenData = new Map<
+    string,
+    Promise<{ decimals: number; symbol: string | null }>
+  >();
 
   constructor(
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
@@ -53,11 +59,7 @@ export class DetailsService {
     chainId: ChainId,
     address: string,
   ): Promise<WalletDto | EscrowDto | OperatorDto> {
-    const network = this.networkConfig.networks.find(
-      (network) => network.chainId === chainId,
-    );
-    if (!network) throw new BadRequestException('Invalid chainId provided');
-    const provider = new ethers.JsonRpcProvider(network.rpcUrl);
+    const provider = this.getProvider(chainId);
 
     const escrowData = await EscrowUtils.getEscrow(chainId, address);
     if (escrowData) {
@@ -66,9 +68,9 @@ export class DetailsService {
       });
 
       const { decimals, symbol } = await this.getTokenData(
+        provider,
         chainId,
         escrowData.token,
-        provider,
       );
 
       escrowDto.balance = ethers.formatUnits(escrowData.balance, decimals);
@@ -139,11 +141,7 @@ export class DetailsService {
     chainId: ChainId,
     hmtAddress: string,
   ): Promise<string> {
-    const network = this.networkConfig.networks.find(
-      (network) => network.chainId === chainId,
-    );
-    if (!network) throw new BadRequestException('Invalid chainId provided');
-    const provider = new ethers.JsonRpcProvider(network.rpcUrl);
+    const provider = this.getProvider(chainId);
     const hmtContract = HMToken__factory.connect(
       NETWORKS[chainId].hmtAddress,
       provider,
@@ -157,6 +155,7 @@ export class DetailsService {
     first: number,
     skip: number,
   ): Promise<TransactionPaginationDto[]> {
+    const provider = this.getProvider(chainId);
     const transactions = await TransactionUtils.getTransactions({
       chainId,
       fromAddress: address,
@@ -164,15 +163,23 @@ export class DetailsService {
       first,
       skip,
     });
-    const result = transactions.map((transaction) => {
-      const transactionPaginationObject: TransactionPaginationDto =
-        plainToInstance(
-          TransactionPaginationDto,
-          { ...transaction, currentAddress: address },
-          { excludeExtraneousValues: true },
+
+    const result = await Promise.all(
+      transactions.map(async (transaction) => {
+        const formattedTransaction = await this.formatTransactionValues(
+          chainId,
+          provider,
+          transaction,
         );
-      return transactionPaginationObject;
-    });
+        const transactionPaginationObject: TransactionPaginationDto =
+          plainToInstance(
+            TransactionPaginationDto,
+            { ...formattedTransaction, currentAddress: address },
+            { excludeExtraneousValues: true },
+          );
+        return transactionPaginationObject;
+      }),
+    );
 
     return result;
   }
@@ -439,24 +446,108 @@ export class DetailsService {
   }
 
   private async getTokenData(
+    provider: ethers.JsonRpcProvider,
     chainId: ChainId,
     tokenAddress: string,
-    provider: ethers.JsonRpcProvider,
-  ): Promise<{ decimals: number; symbol: string }> {
-    const tokenCacheKey = `token:${chainId}:${tokenAddress.toLowerCase()}`;
-    let data = await this.cacheManager.get<{
-      decimals: number;
-      symbol: string;
-    }>(tokenCacheKey);
-    if (!data) {
-      const erc20Contract = HMToken__factory.connect(tokenAddress, provider);
-      const [decimals, symbol] = await Promise.all([
-        erc20Contract.decimals(),
-        erc20Contract.symbol(),
-      ]);
-      data = { decimals: Number(decimals), symbol };
-      await this.cacheManager.set(tokenCacheKey, data);
+  ): Promise<{ decimals: number; symbol: string | null }> {
+    if (!ethers.isAddress(tokenAddress)) {
+      throw new Error(`Invalid token address: ${tokenAddress}`);
     }
-    return data;
+
+    const normalizedTokenAddress = tokenAddress.toLowerCase();
+    const tokenCacheKey = `${TOKEN_CACHE_PREFIX}:${chainId}:${normalizedTokenAddress}`;
+
+    if (!this.tokenData.has(tokenCacheKey)) {
+      const tokenDataPromise = (async () => {
+        try {
+          const cachedData = await this.cacheManager.get<{
+            decimals: number;
+            symbol: string;
+          }>(tokenCacheKey);
+          if (cachedData) {
+            return cachedData;
+          }
+
+          const erc20Contract = HMToken__factory.connect(
+            tokenAddress,
+            provider,
+          );
+          const [decimals, symbol] = await Promise.all([
+            erc20Contract.decimals(),
+            erc20Contract.symbol(),
+          ]);
+          const resolvedTokenData = { decimals: Number(decimals), symbol };
+          await this.cacheManager.set(tokenCacheKey, resolvedTokenData);
+
+          return resolvedTokenData;
+        } catch (error) {
+          this.tokenData.delete(tokenCacheKey);
+          throw error;
+        }
+      })();
+
+      this.tokenData.set(tokenCacheKey, tokenDataPromise);
+    }
+
+    return this.tokenData.get(tokenCacheKey)!;
+  }
+
+  private getProvider(chainId: ChainId): ethers.JsonRpcProvider {
+    const network = this.networkConfig.networks.find(
+      (network) => network.chainId === chainId,
+    );
+    if (!network?.rpcUrl) {
+      throw new BadRequestException('Invalid chainId provided');
+    }
+
+    return new ethers.JsonRpcProvider(network.rpcUrl);
+  }
+
+  private async formatTransactionValues(
+    chainId: ChainId,
+    provider: ethers.JsonRpcProvider,
+    transaction: ITransaction,
+  ): Promise<Record<string, unknown>> {
+    const getFormattedTokenData = async (tokenAddress: string | null) => {
+      if (!tokenAddress) {
+        return null;
+      }
+
+      try {
+        return await this.getTokenData(provider, chainId, tokenAddress);
+      } catch (error) {
+        this.logger.warn('Failed to resolve token metadata.', {
+          chainId,
+          tokenAddress,
+          txHash: transaction.txHash,
+          error: error instanceof Error ? error.message : String(error),
+        });
+        throw new Error('Failed to resolve token metadata');
+      }
+    };
+
+    const internalTransactions = await Promise.all(
+      transaction.internalTransactions.map(async (internalTransaction) => {
+        const tokenData = await getFormattedTokenData(
+          internalTransaction.token,
+        );
+        return {
+          ...internalTransaction,
+          value: ethers.formatUnits(
+            internalTransaction.value,
+            tokenData?.decimals ?? 18,
+          ),
+          ...(tokenData ? { tokenSymbol: tokenData.symbol } : {}),
+        };
+      }),
+    );
+    const tokenData = await getFormattedTokenData(transaction.token);
+
+    return {
+      ...transaction,
+      value: ethers.formatUnits(transaction.value, tokenData?.decimals ?? 18),
+      ...(tokenData ? { tokenSymbol: tokenData.symbol } : {}),
+      internalTransactions,
+    };
   }
 }

@@ -98,14 +98,6 @@ export enum CvatJobType {
   IMAGE_SKELETONS_FROM_BOXES = 'image_skeletons_from_boxes',
 }
 
-export enum HCaptchaJobType {
-  POLYGON = 'polygon',
-  CATEGORIZATION = 'categorization',
-  POINT = 'point',
-  BOUNDING_BOX = 'bounding_box',
-  COMPARISON = 'comparison',
-}
-
 export type FortuneRequest = {
   title: string;
   fortunesRequested: number;
@@ -225,34 +217,11 @@ export type CvatRequest = {
   accuracyTarget: number;
 };
 
-export type HCaptchaRequest = {
-  dataUrl: string;
-  accuracyTarget: number;
-  completionDate: Date;
-  minRequests: number;
-  maxRequests: number;
-  qualifications?: string[];
-  advanced: {
-    workerLanguage: string;
-    workerLocation: string;
-    targetBrowser: string;
-  };
-  annotations: {
-    typeOfJob: string;
-    taskBidPrice: number;
-    label: string;
-    labelingPrompt: string;
-    groundTruths: string;
-    exampleImages: string[];
-  };
-};
-
 export type JobRequest = {
   jobType: JobType;
   chainId?: ChainId;
   fortuneRequest?: FortuneRequest;
   cvatRequest?: CvatRequest;
-  hCaptchaRequest?: HCaptchaRequest;
 };
 
 export enum JobStatus {

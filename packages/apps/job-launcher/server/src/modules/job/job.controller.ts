@@ -37,7 +37,6 @@ import {
   JobFortuneDto,
   JobIdDto,
   JobListDto,
-  // JobCaptchaDto,
   JobQuickLaunchDto,
 } from './job.dto';
 import { JobService } from './job.service';
@@ -175,49 +174,6 @@ export class JobController {
       },
     );
   }
-
-  // @ApiOperation({
-  //   summary: 'Create a hCaptcha job',
-  //   description: 'Endpoint to create a new hCaptcha job.',
-  // })
-  // @ApiBody({ type: JobCaptchaDto })
-  // @ApiResponse({
-  //   status: 201,
-  //   description: 'ID of the created hCaptcha job.',
-  //   type: Number,
-  // })
-  // @ApiResponse({
-  //   status: 400,
-  //   description: 'Bad Request. Invalid input parameters.',
-  // })
-  // @ApiResponse({
-  //   status: 401,
-  //   description: 'Unauthorized. Missing or invalid credentials.',
-  // })
-  // @ApiResponse({
-  //   status: 409,
-  //   description: 'Conflict. Conflict with the current state of the server.',
-  // })
-  // @Post('/hCaptcha')
-  // public async createCaptchaJob(
-  //   @Body() data: JobCaptchaDto,
-  //   @Request() req: RequestWithUser,
-  // ): Promise<number> {
-  //   throw new ForbiddenError(
-  //     'Hcaptcha jobs disabled temporally',
-  //   );
-  //   return await this.mutexManagerService.runExclusive(
-  //     `user${req.user.id}`,
-  //     MUTEX_TIMEOUT,
-  //     async () => {
-  //       return await this.jobService.createJob(
-  //         req.user,
-  //         JobRequestType.HCAPTCHA,
-  //         data,
-  //       );
-  //     },
-  //   );
-  // }
 
   @ApiOperation({
     summary: 'Get a list of jobs',
