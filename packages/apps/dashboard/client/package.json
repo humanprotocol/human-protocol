@@ -38,7 +38,7 @@
     "react-router-dom": "^7.13.0",
     "recharts": "^2.13.0-alpha.4",
     "simplebar-react": "^3.3.2",
-    "styled-components": "^6.1.11",
+    "styled-components": "^6.3.11",
     "swiper": "^11.1.3",
     "use-debounce": "^10.1.0",
     "vite-plugin-node-polyfills": "^0.25.0",
