@@ -209,7 +209,7 @@ export class JobService {
       recordingOracleSolutions.filter((solution) => !solution.error).length >=
       submissionsRequired
     ) {
-      let reputationOracleWebhook: string | null = null;
+      let reputationOracleWebhook: string | undefined;
       try {
         const reputationOracleAddress =
           await escrowClient.getReputationOracleAddress(webhook.escrowAddress);
@@ -239,7 +239,7 @@ export class JobService {
     }
 
     if (errorSolutions.length) {
-      let exchangeOracleURL: string | null = null;
+      let exchangeOracleURL: string | undefined;
       try {
         exchangeOracleURL = (await KVStoreUtils.get(
           webhook.chainId,
@@ -311,7 +311,7 @@ export class JobService {
       { timeoutMs: this.web3ConfigService.txTimeoutMs },
     );
 
-    let reputationOracleWebhook: string | null = null;
+    let reputationOracleWebhook: string | undefined;
     try {
       const reputationOracleAddress =
         await escrowClient.getReputationOracleAddress(webhook.escrowAddress);

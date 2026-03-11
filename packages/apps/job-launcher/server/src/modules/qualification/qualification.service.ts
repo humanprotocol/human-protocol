@@ -25,7 +25,7 @@ export class QualificationService {
   public async getQualifications(
     chainId: ChainId,
   ): Promise<QualificationDto[]> {
-    let reputationOracleUrl = '';
+    let reputationOracleUrl: string | undefined;
     this.web3Service.validateChainId(chainId);
 
     try {
@@ -38,7 +38,7 @@ export class QualificationService {
       // Ignore error
     }
 
-    if (!reputationOracleUrl || reputationOracleUrl === '') {
+    if (!reputationOracleUrl) {
       throw new ServerError(ErrorWeb3.ReputationOracleUrlNotSet);
     }
 

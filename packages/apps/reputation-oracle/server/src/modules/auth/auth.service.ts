@@ -113,7 +113,7 @@ export class AuthService {
     }
 
     const chainId = this.web3ConfigService.reputationNetworkChainId;
-    let role = '';
+    let role: string | undefined;
     try {
       role = await KVStoreUtils.get(chainId, address, KVStoreKeys.role);
     } catch {
@@ -125,13 +125,13 @@ export class AuthService {
       Role.JobLauncher,
       Role.ExchangeOracle,
       Role.RecordingOracle,
-    ].includes(role);
+    ].includes(role || '');
 
     if (!isValidRole) {
       throw new InvalidOperatorRoleError(role);
     }
 
-    let fee = '';
+    let fee: string | undefined;
     try {
       fee = await KVStoreUtils.get(chainId, address, KVStoreKeys.fee);
     } catch {
@@ -141,7 +141,7 @@ export class AuthService {
       throw new InvalidOperatorFeeError(fee);
     }
 
-    let url = '';
+    let url: string | undefined;
     try {
       url = await KVStoreUtils.get(chainId, address, KVStoreKeys.url);
     } catch {
@@ -317,7 +317,7 @@ export class AuthService {
      * and subgraph does not have the actual value yet,
      * the status can be outdated
      */
-    let operatorStatus = OperatorStatus.INACTIVE;
+    let operatorStatus: OperatorStatus | undefined;
     try {
       operatorStatus = (await KVStoreUtils.get(
         this.web3ConfigService.reputationNetworkChainId,
@@ -327,6 +327,7 @@ export class AuthService {
     } catch {
       // noop
     }
+    operatorStatus = operatorStatus || OperatorStatus.INACTIVE;
 
     const jwtPayload = {
       status: userEntity.status,
