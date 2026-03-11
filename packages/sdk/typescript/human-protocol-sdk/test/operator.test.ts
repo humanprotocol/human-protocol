@@ -6,7 +6,7 @@ vi.mock('graphql-request', () => {
 
 import { ethers } from 'ethers';
 import * as gqlFetch from 'graphql-request';
-import { describe, expect, test, vi } from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { NETWORKS, Role } from '../src/constants';
 import { ChainId, OrderDirection } from '../src/enums';
 import {
@@ -32,6 +32,10 @@ const stakerAddress = ethers.ZeroAddress;
 const invalidAddress = 'InvalidAddress';
 
 describe('OperatorUtils', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   const mockOperatorSubgraph: IOperatorSubgraph = {
     id: stakerAddress,
     address: stakerAddress,
