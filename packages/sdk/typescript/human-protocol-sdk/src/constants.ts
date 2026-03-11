@@ -34,11 +34,15 @@ export const NETWORKS: {
     stakingAddress: '0xEf6Da3aB52c33925Be3F84038193a7e1331F51E6',
     kvstoreAddress: '0xB6d36B1CDaD50302BCB3DB43bAb0D349458e1b8D',
     subgraphUrl:
-      'https://api.studio.thegraph.com/query/74256/ethereum/version/latest',
+      'https://api.studio.thegraph.com/query/74256/human-ethereum/version/latest',
     subgraphUrlApiKey:
-      'https://gateway.thegraph.com/api/deployments/id/QmNhLQEfBJQ46fngBh4YCttk8kNkveFy5uvAeUmyAdX1kD',
+      'https://gateway.thegraph.com/api/deployments/id/QmQZ3yL1FzydDwaB56ozgTiBESciTNFsMLyTBfHXzNd1gg',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
+    hmtSubgraphUrl:
+      'https://api.studio.thegraph.com/query/74256/hmt-stats-ethereum/version/latest',
+    hmtSubgraphUrlApiKey:
+      'https://gateway.thegraph.com/api/deployments/id/QmdcTW7XhgULq5yJZGA65mjTwQogdyzLJaZ69ttDJz5JeE',
   },
   [ChainId.SEPOLIA]: {
     chainId: ChainId.SEPOLIA,
@@ -68,11 +72,15 @@ export const NETWORKS: {
     stakingAddress: '0xE24e5C08E28331D24758b69A5E9f383D2bDD1c98',
     kvstoreAddress: '0x21A0C4CED7aE447fCf87D9FE3A29FA9B3AB20Ff1',
     subgraphUrl:
-      'https://api.studio.thegraph.com/query/74256/bsc/version/latest',
+      'https://api.studio.thegraph.com/query/74256/human-bsc/version/latest',
     subgraphUrlApiKey:
-      'https://gateway.thegraph.com/api/deployments/id/QmTioC9Z1HzKSCnEKL3BP9iHqbgZt1ceLU2VE4Mv6sxNkd',
+      'https://gateway.thegraph.com/api/deployments/id/QmV3nZUM51NGt7F8RpZP9GxKPpKox3F24iJ8H1ekPb6ha4',
     oldSubgraphUrl: 'https://api.thegraph.com/subgraphs/name/humanprotocol/bsc',
     oldFactoryAddress: '0xc88bC422cAAb2ac8812de03176402dbcA09533f4',
+    hmtSubgraphUrl:
+      'https://api.studio.thegraph.com/query/74256/hmt-stats-bsc/version/latest',
+    hmtSubgraphUrlApiKey:
+      'https://gateway.thegraph.com/api/deployments/id/QmUnHgNShyv45S2dQ21W9jLvRA8xWT6XfeuP25fXJoNoEa',
   },
   [ChainId.BSC_TESTNET]: {
     chainId: ChainId.BSC_TESTNET,
@@ -103,12 +111,16 @@ export const NETWORKS: {
     stakingAddress: '0x01D115E9E8bF0C58318793624CC662a030D07F1D',
     kvstoreAddress: '0xbcB28672F826a50B03EE91B28145EAbddA73B2eD',
     subgraphUrl:
-      'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
+      'https://api.studio.thegraph.com/query/74256/human-polygon/version/latest',
     subgraphUrlApiKey:
-      'https://gateway.thegraph.com/api/deployments/id/QmQNkWNE5FPtqbtSkdtR6AEBJz9N7WDz1X7pfvQqYAcUZJ',
+      'https://gateway.thegraph.com/api/deployments/id/QmSu7B48kgGgMgXaD6Yb4fXjbnsJNmobKAU9qZgescZXid',
     oldSubgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/polygon',
     oldFactoryAddress: '0x45eBc3eAE6DA485097054ae10BA1A0f8e8c7f794',
+    hmtSubgraphUrl:
+      'https://api.studio.thegraph.com/query/74256/hmt-stats-polygon/version/latest',
+    hmtSubgraphUrlApiKey:
+      'https://gateway.thegraph.com/api/deployments/id/QmcTTTq2reYDBP5j5P2eToc5FmYbJ5ZSMhPaRB6NLriNjR',
   },
   [ChainId.POLYGON_AMOY]: {
     chainId: ChainId.POLYGON_AMOY,

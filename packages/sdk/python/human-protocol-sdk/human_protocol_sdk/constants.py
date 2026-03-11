@@ -54,10 +54,10 @@ NETWORKS = {
         "title": "Ethereum",
         "scan_url": "https://etherscan.io",
         "subgraph_url": (
-            "https://api.studio.thegraph.com/query/74256/ethereum/version/latest"
+            "https://api.studio.thegraph.com/query/74256/human-ethereum/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway.thegraph.com/api/deployments/id/QmNhLQEfBJQ46fngBh4YCttk8kNkveFy5uvAeUmyAdX1kD"
+            "https://gateway.thegraph.com/api/deployments/id/QmQZ3yL1FzydDwaB56ozgTiBESciTNFsMLyTBfHXzNd1gg"
         ),
         "hmt_address": "0xd1ba9BAC957322D6e8c07a160a3A8dA11A0d2867",
         "factory_address": "0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a",
@@ -65,15 +65,17 @@ NETWORKS = {
         "kvstore_address": "0xB6d36B1CDaD50302BCB3DB43bAb0D349458e1b8D",
         "old_subgraph_url": "",
         "old_factory_address": "",
+        "hmt_subgraph_url": "https://api.studio.thegraph.com/query/74256/human-ethereum/version/latest",
+        "hmt_subgraph_url_api_key": "https://gateway.thegraph.com/api/deployments/id/QmdcTW7XhgULq5yJZGA65mjTwQogdyzLJaZ69ttDJz5JeE",
     },
     ChainId.SEPOLIA: {
         "title": "Sepolia",
         "scan_url": "https://sepolia.etherscan.io",
         "subgraph_url": (
-            "https://api.studio.thegraph.com/query/74256/sepolia/version/latest"
+            "https://api.studio.thegraph.com/query/74256/human-sepolia/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway.thegraph.com/api/deployments/id/QmQghdr7hxqrjFde8DN15TzfrJLCfwvzmUH9RzWwH1mKzk"
+            "https://gateway.thegraph.com/api/deployments/id/QmQEbyGSf8VG9pdskowsK6C977wkcyJSxw9q6EDctKEkUw"
         ),
         "hmt_address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
         "factory_address": "0x5987A5558d961ee674efe4A8c8eB7B1b5495D3bf",
@@ -81,15 +83,17 @@ NETWORKS = {
         "kvstore_address": "0xCc0AF0635aa19fE799B6aFDBe28fcFAeA7f00a60",
         "old_subgraph_url": (""),
         "old_factory_address": "0x98108c28B7767a52BE38B4860832dd4e11A7ecad",
+        "hmt_subgraph_url": "https://api.studio.thegraph.com/query/74256/hmt-stats-sepolia/version/latest",
+        "hmt_subgraph_url_api_key": "https://gateway.thegraph.com/api/deployments/id/QmYkPnYxbZ5ZTtKz7PTyxh6x5sK2H6yzx6vXDCrErpa9gB",
     },
     ChainId.BSC_MAINNET: {
         "title": "Binance Smart Chain",
         "scan_url": "https://bscscan.com",
         "subgraph_url": (
-            "https://api.studio.thegraph.com/query/74256/bsc/version/latest"
+            "https://api.studio.thegraph.com/query/74256/human-bsc/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway.thegraph.com/api/deployments/id/QmTioC9Z1HzKSCnEKL3BP9iHqbgZt1ceLU2VE4Mv6sxNkd"
+            "https://gateway.thegraph.com/api/deployments/id/QmV3nZUM51NGt7F8RpZP9GxKPpKox3F24iJ8H1ekPb6ha4"
         ),
         "hmt_address": "0x711Fd6ab6d65A98904522d4e3586F492B989c527",
         "factory_address": "0x92FD968AcBd521c232f5fB8c33b342923cC72714",
@@ -97,15 +101,17 @@ NETWORKS = {
         "kvstore_address": "0x21A0C4CED7aE447fCf87D9FE3A29FA9B3AB20Ff1",
         "old_subgraph_url": "https://api.thegraph.com/subgraphs/name/humanprotocol/bsc",
         "old_factory_address": "0xc88bC422cAAb2ac8812de03176402dbcA09533f4",
+        "hmt_subgraph_url": "https://api.studio.thegraph.com/query/74256/hmt-stats-bsc/version/latest",
+        "hmt_subgraph_url_api_key": "https://gateway.thegraph.com/api/deployments/id/QmUnHgNShyv45S2dQ21W9jLvRA8xWT6XfeuP25fXJoNoEa",
     },
     ChainId.BSC_TESTNET: {
         "title": "Binance Smart Chain (Testnet)",
         "scan_url": "https://testnet.bscscan.com",
         "subgraph_url": (
-            "https://api.studio.thegraph.com/query/74256/bsc-testnet/version/latest"
+            "https://api.studio.thegraph.com/query/74256/human-bsc-testnet/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway.thegraph.com/api/deployments/id/QmPyUYRjAvzDdeenXMGHcCRD2v4qwZbKMEkVkY3Jq6VLwn"
+            "https://gateway.thegraph.com/api/deployments/id/QmdQJog9vMghK2o39U9YJL8vpU9VZnkJa7jGg7wnsod7qV"
         ),
         "hmt_address": "0xE3D74BBFa45B4bCa69FF28891fBE392f4B4d4e4d",
         "factory_address": "0x2bfA592DBDaF434DDcbb893B1916120d181DAD18",
@@ -115,15 +121,17 @@ NETWORKS = {
             "https://api.thegraph.com/subgraphs/name/humanprotocol/bsctest"
         ),
         "old_factory_address": "0xaae6a2646c1f88763e62e0cd08ad050ea66ac46f",
+        "hmt_subgraph_url": "https://api.studio.thegraph.com/query/74256/hmt-stats-bsc-testnet/version/latest",
+        "hmt_subgraph_url_api_key": "https://gateway.thegraph.com/api/deployments/id/QmPMRbrXKp7a1i5x27dzBHbomxqKYDg5eU3djv1DXB5heq",
     },
     ChainId.POLYGON: {
         "title": "Polygon",
         "scan_url": "https://polygonscan.com",
         "subgraph_url": (
-            "https://api.studio.thegraph.com/query/74256/polygon/version/latest"
+            "https://api.studio.thegraph.com/query/74256/human-polygon/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway.thegraph.com/api/deployments/id/QmQNkWNE5FPtqbtSkdtR6AEBJz9N7WDz1X7pfvQqYAcUZJ"
+            "https://gateway.thegraph.com/api/deployments/id/QmSu7B48kgGgMgXaD6Yb4fXjbnsJNmobKAU9qZgescZXid"
         ),
         "hmt_address": "0xc748B2A084F8eFc47E086ccdDD9b7e67aEb571BF",
         "factory_address": "0xBDBfD2cC708199C5640C6ECdf3B0F4A4C67AdfcB",
@@ -133,21 +141,17 @@ NETWORKS = {
             "https://api.thegraph.com/subgraphs/name/humanprotocol/polygon"
         ),
         "old_factory_address": "0x45eBc3eAE6DA485097054ae10BA1A0f8e8c7f794",
+        "hmt_subgraph_url": "https://api.studio.thegraph.com/query/74256/hmt-stats-polygon/version/latest",
+        "hmt_subgraph_url_api_key": "https://gateway.thegraph.com/api/deployments/id/QmcTTTq2reYDBP5j5P2eToc5FmYbJ5ZSMhPaRB6NLriNjR",
     },
     ChainId.POLYGON_AMOY: {
         "title": "Polygon Amoy",
         "scan_url": "https://amoy.polygonscan.com",
         "subgraph_url": (
-            "https://api.studio.thegraph.com/query/74256/amoy/version/latest"
+            "https://api.studio.thegraph.com/query/74256/human-amoy/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway.thegraph.com/api/deployments/id/QmcLwLMw3UzCSbNbjegrpNu6PB3kAd67xquuyaVWvc5Q7Q"
-        ),
-        "hmt_subgraph_url": (
-            "https://api.studio.thegraph.com/query/74256/hmt-stats-amoy/version/latest"
-        ),
-        "hmt_subgraph_url_api_key": (
-            "https://gateway.thegraph.com/api/deployments/id/QmZJYBQKyrsEJHQwNQ8JhkKcB5G8zQdrcwnr7ecGRNTBit"
+            "https://gateway.thegraph.com/api/deployments/id/QmRx5WSi7o9FtENWnE5eEz8Dr7kYUazk4TNPRt65UZkKkB"
         ),
         "hmt_address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
         "factory_address": "0xAFf5a986A530ff839d49325A5dF69F96627E8D29",
@@ -155,6 +159,8 @@ NETWORKS = {
         "kvstore_address": "0x724AeFC243EdacCA27EAB86D3ec5a76Af4436Fc7",
         "old_subgraph_url": "",
         "old_factory_address": "",
+        "hmt_subgraph_url": "https://api.studio.thegraph.com/query/74256/hmt-stats-amoy/version/latest",
+        "hmt_subgraph_url_api_key": "https://gateway.thegraph.com/api/deployments/id/QmZze6UWMJna8dQ183TVounSfGwc9C36RgQCGWhFzgrW3y",
     },
     ChainId.LOCALHOST: {
         "title": "Localhost",
