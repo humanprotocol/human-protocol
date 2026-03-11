@@ -1,5 +1,5 @@
 import * as gqlFetch from 'graphql-request';
-import { describe, expect, test, vi } from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { NETWORKS } from '../src/constants';
 import { ChainId, OrderDirection } from '../src/enums';
 import { ErrorInvalidAddress } from '../src/error';
@@ -18,6 +18,10 @@ vi.mock('graphql-request', () => {
 });
 
 describe('WorkerUtils', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   describe('getWorker', () => {
     const workerAddress = '0x1234567890abcdef1234567890abcdef12345678';
     const mockWorker: WorkerData = {

@@ -6,7 +6,7 @@ vi.mock('graphql-request', () => ({
 
 import { ethers } from 'ethers';
 import * as gqlFetch from 'graphql-request';
-import { afterEach, describe, expect, test, vi } from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { OrderDirection } from '../src/enums';
 import { StatisticsUtils } from '../src/statistics';
 import {
@@ -21,8 +21,8 @@ describe('StatisticsUtils', () => {
       'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
   } as any;
 
-  afterEach(() => {
-    vi.restoreAllMocks();
+  beforeEach(() => {
+    vi.clearAllMocks();
   });
 
   describe('getEscrowStatistics', () => {
