@@ -617,14 +617,16 @@ describe('KVStoreUtils', () => {
       ).rejects.toThrow(ErrorInvalidAddress);
     });
 
-    test('should return empty string if the URL is not set', async () => {
+    test('should throw if the URL is not set', async () => {
       KVStoreUtils.get = vi.fn().mockResolvedValueOnce('');
 
-      const result = await KVStoreUtils.getFileUrlAndVerifyHash(
-        ChainId.LOCALHOST,
-        '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71'
-      );
-      expect(result).toBe('');
+      await expect(
+        KVStoreUtils.getFileUrlAndVerifyHash(
+          ChainId.LOCALHOST,
+          '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71'
+        )
+      ).rejects.toThrow('No URL found for the given address and key');
+
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
         ChainId.LOCALHOST,
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',
@@ -693,8 +695,10 @@ describe('KVStoreUtils', () => {
         ethers.toUtf8Bytes('invalid-example')
       );
 
-      KVStoreUtils.get = vi.fn().mockResolvedValueOnce('example.com');
-      KVStoreUtils.get = vi.fn().mockResolvedValueOnce(invalidHash);
+      KVStoreUtils.get = vi
+        .fn()
+        .mockResolvedValueOnce('example.com')
+        .mockResolvedValueOnce(invalidHash);
 
       await expect(
         KVStoreUtils.getFileUrlAndVerifyHash(
@@ -744,14 +748,16 @@ describe('KVStoreUtils', () => {
       ).rejects.toThrow(ErrorInvalidAddress);
     });
 
-    test('should return empty string if the public key is not set', async () => {
-      KVStoreUtils.get = vi.fn().mockResolvedValueOnce('');
+    test('should throw if the public key is not set', async () => {
+      KVStoreUtils.get = vi.fn().mockResolvedValueOnce(undefined);
 
-      const result = await KVStoreUtils.getPublicKey(
-        ChainId.LOCALHOST,
-        '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71'
-      );
-      expect(result).toBe('');
+      await expect(
+        KVStoreUtils.getPublicKey(
+          ChainId.LOCALHOST,
+          '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71'
+        )
+      ).rejects.toThrow('No URL found for the given address and key');
+
       expect(KVStoreUtils.get).toHaveBeenCalledWith(
         ChainId.LOCALHOST,
         '0x42d75a16b04a02d1abd7f2386b1c5b567bc7ef71',

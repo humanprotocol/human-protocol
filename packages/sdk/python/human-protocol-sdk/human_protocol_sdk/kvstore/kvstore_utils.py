@@ -89,7 +89,7 @@ class KVStoreUtils:
         from human_protocol_sdk.gql.kvstore import get_kvstore_by_address_query
 
         if chain_id.value not in set(chain_id.value for chain_id in ChainId):
-            raise KVStoreClientError(f"Invalid ChainId")
+            raise KVStoreClientError("Invalid ChainId")
 
         if not Web3.is_address(address):
             raise KVStoreClientError(f"Invalid KVStore address: {address}")
@@ -125,7 +125,7 @@ class KVStoreUtils:
         address: str,
         key: str,
         options: Optional[SubgraphOptions] = None,
-    ) -> str:
+    ) -> Optional[str]:
         """Get the value of a specific key for an address.
 
         Queries the subgraph for a specific key-value pair associated with an address.
@@ -181,7 +181,7 @@ class KVStoreUtils:
             or "kvstores" not in kvstore_data["data"]
             or len(kvstore_data["data"]["kvstores"]) == 0
         ):
-            raise KVStoreClientError(f"Key '{key}' not found for address {address}")
+            return None
 
         return kvstore_data["data"]["kvstores"][0]["value"]
 
@@ -232,10 +232,13 @@ class KVStoreUtils:
             raise KVStoreClientError(f"Invalid address: {address}")
 
         url = KVStoreUtils.get(chain_id, address, key, options=options)
+        if url is None:
+            raise KVStoreClientError("No URL found for the given address and key")
+
         hash = KVStoreUtils.get(chain_id, address, key + "_hash", options=options)
 
-        if len(url) == 0:
-            return url
+        if hash is None:
+            raise KVStoreClientError("No hash found for the given address and url")
 
         content = requests.get(url).text
         content_hash = Web3.keccak(text=content).hex()

@@ -12,7 +12,6 @@ export {
   TransactionReplaced,
   ContractExecutionError,
   InvalidEthereumAddressError,
-  InvalidKeyError,
   SubgraphBadIndexerError,
   SubgraphRequestError,
 } from './error';

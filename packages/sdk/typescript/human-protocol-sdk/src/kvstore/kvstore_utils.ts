@@ -6,7 +6,6 @@ import {
   ErrorInvalidHash,
   ErrorKVStoreEmptyKey,
   ErrorUnsupportedChainID,
-  InvalidKeyError,
 } from '../error';
 import { KVStoreData } from '../graphql';
 import {
@@ -86,11 +85,10 @@ export class KVStoreUtils {
    * @param address - Address from which to get the key value.
    * @param key - Key to obtain the value.
    * @param options - Optional configuration for subgraph requests.
-   * @returns Value of the key.
+   * @returns Value of the key or undefined if does not exist.
    * @throws ErrorUnsupportedChainID If the network's chainId is not supported
    * @throws ErrorInvalidAddress If the address is invalid
    * @throws ErrorKVStoreEmptyKey If the key is empty
-   * @throws InvalidKeyError If the key is not found
    *
    * @example
    * ```ts
@@ -107,7 +105,7 @@ export class KVStoreUtils {
     address: string,
     key: string,
     options?: SubgraphOptions
-  ): Promise<string> {
+  ): Promise<string | undefined> {
     if (key === '') throw ErrorKVStoreEmptyKey;
     if (!ethers.isAddress(address)) throw ErrorInvalidAddress;
 
@@ -125,7 +123,7 @@ export class KVStoreUtils {
     );
 
     if (!kvstores || kvstores.length === 0) {
-      throw new InvalidKeyError(key, address);
+      return undefined;
     }
 
     return kvstores[0].value;
@@ -161,24 +159,31 @@ export class KVStoreUtils {
     if (!ethers.isAddress(address)) throw ErrorInvalidAddress;
     const hashKey = urlKey + '_hash';
 
-    let url = '',
-      hash = '';
+    let url: string | undefined;
 
     try {
       url = await this.get(chainId, address, urlKey, options);
     } catch (e) {
-      if (e instanceof Error) throw Error(`Failed to get URL: ${e.message}`);
+      if (e instanceof Error) {
+        throw Error(`Failed to get URL: ${e.message}`);
+      }
     }
 
-    // Return empty string
-    if (!url?.length) {
-      return '';
+    if (!url) {
+      throw new Error('No URL found for the given address and key');
     }
 
+    let hash: string | undefined;
     try {
       hash = await this.get(chainId, address, hashKey);
     } catch (e) {
-      if (e instanceof Error) throw Error(`Failed to get Hash: ${e.message}`);
+      if (e instanceof Error) {
+        throw Error(`Failed to get Hash: ${e.message}`);
+      }
+    }
+
+    if (!hash) {
+      throw new Error('No hash found for the given address and url');
     }
 
     const content = await fetch(url).then((res) => res.text());
