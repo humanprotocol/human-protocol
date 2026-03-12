@@ -113,13 +113,8 @@ export class AuthService {
     }
 
     const chainId = this.web3ConfigService.reputationNetworkChainId;
-    let role: string | undefined;
-    try {
-      role = await KVStoreUtils.get(chainId, address, KVStoreKeys.role);
-    } catch {
-      // noop
-    }
 
+    const role = await KVStoreUtils.get(chainId, address, KVStoreKeys.role);
     // We need to exclude ReputationOracle role
     const isValidRole = [
       Role.JobLauncher,
@@ -131,22 +126,12 @@ export class AuthService {
       throw new InvalidOperatorRoleError(role);
     }
 
-    let fee: string | undefined;
-    try {
-      fee = await KVStoreUtils.get(chainId, address, KVStoreKeys.fee);
-    } catch {
-      // noop
-    }
+    const fee = await KVStoreUtils.get(chainId, address, KVStoreKeys.fee);
     if (!fee) {
       throw new InvalidOperatorFeeError(fee);
     }
 
-    let url: string | undefined;
-    try {
-      url = await KVStoreUtils.get(chainId, address, KVStoreKeys.url);
-    } catch {
-      // noop
-    }
+    const url = await KVStoreUtils.get(chainId, address, KVStoreKeys.url);
     if (!url || !httpUtils.isValidHttpUrl(url)) {
       throw new InvalidOperatorUrlError(url);
     }
@@ -317,17 +302,12 @@ export class AuthService {
      * and subgraph does not have the actual value yet,
      * the status can be outdated
      */
-    let operatorStatus: OperatorStatus | undefined;
-    try {
-      operatorStatus = (await KVStoreUtils.get(
+    const operatorStatus =
+      (await KVStoreUtils.get(
         this.web3ConfigService.reputationNetworkChainId,
         this.web3ConfigService.operatorAddress,
         userEntity.evmAddress,
-      )) as OperatorStatus;
-    } catch {
-      // noop
-    }
-    operatorStatus = operatorStatus || OperatorStatus.INACTIVE;
+      )) || OperatorStatus.INACTIVE;
 
     const jwtPayload = {
       status: userEntity.status,

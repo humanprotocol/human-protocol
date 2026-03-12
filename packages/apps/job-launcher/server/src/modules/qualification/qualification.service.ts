@@ -25,18 +25,13 @@ export class QualificationService {
   public async getQualifications(
     chainId: ChainId,
   ): Promise<QualificationDto[]> {
-    let reputationOracleUrl: string | undefined;
     this.web3Service.validateChainId(chainId);
 
-    try {
-      reputationOracleUrl = await KVStoreUtils.get(
-        chainId,
-        this.web3ConfigService.reputationOracleAddress,
-        KVStoreKeys.url,
-      );
-    } catch {
-      // Ignore error
-    }
+    const reputationOracleUrl = await KVStoreUtils.get(
+      chainId,
+      this.web3ConfigService.reputationOracleAddress,
+      KVStoreKeys.url,
+    );
 
     if (!reputationOracleUrl) {
       throw new ServerError(ErrorWeb3.ReputationOracleUrlNotSet);

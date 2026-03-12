@@ -198,7 +198,7 @@ describe('AuthService', () => {
             return faker.internet.url();
           }
 
-          throw new Error('Invalid key');
+          return undefined;
         },
       );
 
@@ -278,7 +278,7 @@ describe('AuthService', () => {
             return mockedRole;
           }
 
-          throw new Error('Invalid key');
+          return undefined;
         },
       );
 
@@ -301,9 +301,7 @@ describe('AuthService', () => {
 
       mockUserRepository.findOneByAddress.mockResolvedValueOnce(null);
       const mockedRole = faker.string.alpha();
-      mockKVStoreUtils.get.mockImplementation(async () => {
-        throw new Error('Invalid key');
-      });
+      mockKVStoreUtils.get.mockResolvedValueOnce(undefined);
 
       await expect(
         service.web3Signup(signature, ethWallet.address),
@@ -332,7 +330,7 @@ describe('AuthService', () => {
             return '';
           }
 
-          throw new Error('Invalid key');
+          return undefined;
         },
       );
 
@@ -360,7 +358,7 @@ describe('AuthService', () => {
             return Role.ExchangeOracle;
           }
 
-          throw new Error('Invalid key');
+          return undefined;
         },
       );
 
@@ -400,7 +398,7 @@ describe('AuthService', () => {
               return invalidUrl;
             }
 
-            throw new Error('Invalid key');
+            return undefined;
           },
         );
 
@@ -432,7 +430,7 @@ describe('AuthService', () => {
             return String(faker.number.int({ min: 1, max: 50 }));
           }
 
-          throw new Error('Invalid key');
+          return undefined;
         },
       );
 
@@ -821,7 +819,7 @@ describe('AuthService', () => {
             return mockedOperatorStatus;
           }
 
-          throw new Error('Invalid key');
+          return undefined;
         },
       );
 
@@ -855,9 +853,7 @@ describe('AuthService', () => {
         accessToken: faker.string.alpha(),
         refreshToken: faker.string.uuid(),
       });
-      mockKVStoreUtils.get.mockImplementation(async () => {
-        throw new Error('Invalid key');
-      });
+      mockKVStoreUtils.get.mockResolvedValueOnce(undefined);
 
       await service.web3Auth(operator);
 
