@@ -198,7 +198,7 @@ describe('AuthService', () => {
             return faker.internet.url();
           }
 
-          return undefined;
+          return '';
         },
       );
 
@@ -278,7 +278,7 @@ describe('AuthService', () => {
             return mockedRole;
           }
 
-          return undefined;
+          return '';
         },
       );
 
@@ -301,7 +301,7 @@ describe('AuthService', () => {
 
       mockUserRepository.findOneByAddress.mockResolvedValueOnce(null);
       const mockedRole = faker.string.alpha();
-      mockKVStoreUtils.get.mockResolvedValueOnce(undefined);
+      mockKVStoreUtils.get.mockResolvedValueOnce('');
 
       await expect(
         service.web3Signup(signature, ethWallet.address),
@@ -330,7 +330,7 @@ describe('AuthService', () => {
             return '';
           }
 
-          return undefined;
+          return '';
         },
       );
 
@@ -358,7 +358,7 @@ describe('AuthService', () => {
             return Role.ExchangeOracle;
           }
 
-          return undefined;
+          return '';
         },
       );
 
@@ -398,7 +398,7 @@ describe('AuthService', () => {
               return invalidUrl;
             }
 
-            return undefined;
+            return '';
           },
         );
 
@@ -430,7 +430,7 @@ describe('AuthService', () => {
             return String(faker.number.int({ min: 1, max: 50 }));
           }
 
-          return undefined;
+          return '';
         },
       );
 
@@ -819,7 +819,7 @@ describe('AuthService', () => {
             return mockedOperatorStatus;
           }
 
-          return undefined;
+          return '';
         },
       );
 
@@ -853,7 +853,7 @@ describe('AuthService', () => {
         accessToken: faker.string.alpha(),
         refreshToken: faker.string.uuid(),
       });
-      mockKVStoreUtils.get.mockResolvedValueOnce(undefined);
+      mockKVStoreUtils.get.mockResolvedValueOnce('');
 
       await service.web3Auth(operator);
 

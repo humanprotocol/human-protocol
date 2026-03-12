@@ -749,7 +749,7 @@ describe('KVStoreUtils', () => {
     });
 
     test('should throw if the public key is not set', async () => {
-      KVStoreUtils.get = vi.fn().mockResolvedValueOnce(undefined);
+      KVStoreUtils.get = vi.fn().mockResolvedValueOnce('');
 
       await expect(
         KVStoreUtils.getPublicKey(

@@ -85,7 +85,7 @@ export class KVStoreUtils {
    * @param address - Address from which to get the key value.
    * @param key - Key to obtain the value.
    * @param options - Optional configuration for subgraph requests.
-   * @returns Value of the key or undefined if does not exist.
+   * @returns Value of the key.
    * @throws ErrorUnsupportedChainID If the network's chainId is not supported
    * @throws ErrorInvalidAddress If the address is invalid
    * @throws ErrorKVStoreEmptyKey If the key is empty
@@ -105,7 +105,7 @@ export class KVStoreUtils {
     address: string,
     key: string,
     options?: SubgraphOptions
-  ): Promise<string | undefined> {
+  ): Promise<string> {
     if (key === '') throw ErrorKVStoreEmptyKey;
     if (!ethers.isAddress(address)) throw ErrorInvalidAddress;
 
@@ -123,7 +123,7 @@ export class KVStoreUtils {
     );
 
     if (!kvstores || kvstores.length === 0) {
-      return undefined;
+      return '';
     }
 
     return kvstores[0].value;
@@ -159,7 +159,7 @@ export class KVStoreUtils {
     if (!ethers.isAddress(address)) throw ErrorInvalidAddress;
     const hashKey = urlKey + '_hash';
 
-    let url: string | undefined;
+    let url: string;
 
     try {
       url = await this.get(chainId, address, urlKey, options);
@@ -167,19 +167,21 @@ export class KVStoreUtils {
       if (e instanceof Error) {
         throw Error(`Failed to get URL: ${e.message}`);
       }
+      throw e;
     }
 
     if (!url) {
       throw new Error('No URL found for the given address and key');
     }
 
-    let hash: string | undefined;
+    let hash: string;
     try {
       hash = await this.get(chainId, address, hashKey);
     } catch (e) {
       if (e instanceof Error) {
         throw Error(`Failed to get Hash: ${e.message}`);
       }
+      throw e;
     }
 
     if (!hash) {

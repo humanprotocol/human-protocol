@@ -23,7 +23,7 @@ export class KvStoreGateway {
     if (cachedData) {
       return cachedData;
     }
-    let oracleUrl: string | undefined;
+    let oracleUrl: string;
     try {
       const runner = new ethers.JsonRpcProvider(this.configService.rpcUrl);
       const network = await runner.provider?.getNetwork();
@@ -71,7 +71,7 @@ export class KvStoreGateway {
       return cachedData;
     }
 
-    let jobTypes: string | undefined;
+    let jobTypes: string;
     try {
       jobTypes = await KVStoreUtils.get(chainId, address, KVStoreKeys.jobTypes);
     } catch (e) {

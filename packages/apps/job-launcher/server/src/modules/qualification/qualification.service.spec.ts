@@ -105,7 +105,7 @@ describe.only('QualificationService', () => {
     });
 
     it('should throw a ServerError when reputation oracle url not set', async () => {
-      (KVStoreUtils.get as any).mockResolvedValueOnce(undefined);
+      (KVStoreUtils.get as any).mockResolvedValueOnce('');
 
       await expect(
         qualificationService.getQualifications(ChainId.LOCALHOST),

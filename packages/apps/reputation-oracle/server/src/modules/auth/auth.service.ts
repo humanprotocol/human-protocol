@@ -120,7 +120,7 @@ export class AuthService {
       Role.JobLauncher,
       Role.ExchangeOracle,
       Role.RecordingOracle,
-    ].includes(role || '');
+    ].includes(role);
 
     if (!isValidRole) {
       throw new InvalidOperatorRoleError(role);
