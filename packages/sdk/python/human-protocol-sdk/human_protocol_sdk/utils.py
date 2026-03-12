@@ -632,6 +632,25 @@ def handle_error(e: Exception, exception_class: Type[Exception]) -> None:
         raise exception_class(f"Transaction failed: {msg}")
 
 
+def get_error_message(error: Exception) -> str:
+    """Extract a readable error message from an exception-like object."""
+
+    message = getattr(error, "message", None)
+    if isinstance(message, str) and message:
+        return message
+
+    error_args = getattr(error, "args", None)
+    if (
+        error_args
+        and isinstance(error_args, tuple)
+        and isinstance(error_args[0], dict)
+        and "message" in error_args[0]
+    ):
+        return str(error_args[0]["message"])
+
+    return str(error)
+
+
 def validate_url(url: str) -> bool:
     """Validate whether a string is a properly formatted URL.
 

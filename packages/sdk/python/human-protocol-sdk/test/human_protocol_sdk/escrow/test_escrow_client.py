@@ -2320,6 +2320,31 @@ class TestEscrowClient(unittest.TestCase):
         mock_contract.functions.manifestUrl.assert_called_once_with()
         self.assertEqual(result, "legacy_manifest")
 
+    def test_get_manifest_raises_combined_error_if_manifest_and_fallback_fail(self):
+        mock_contract = MagicMock()
+        mock_contract.functions.manifest = MagicMock()
+        mock_contract.functions.manifest.return_value.call.side_effect = Exception(
+            "manifest() failed"
+        )
+        mock_contract.functions.manifestUrl = MagicMock()
+        mock_contract.functions.manifestUrl.return_value.call.side_effect = Exception(
+            "manifestUrl() failed"
+        )
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
+        escrow_address = "0x1234567890123456789012345678901234567890"
+
+        with self.assertRaises(EscrowClientError) as cm:
+            self.escrow.get_manifest(escrow_address)
+
+        self.assertEqual(
+            "Failed to fetch manifest using both manifest() and manifestUrl(). "
+            "manifest() error: manifest() failed. "
+            "manifestUrl() error: manifestUrl() failed.",
+            str(cm.exception),
+        )
+        mock_contract.functions.manifest.assert_called_once_with()
+        mock_contract.functions.manifestUrl.assert_called_once_with()
+
     def test_get_manifest_invalid_address(self):
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.get_manifest("invalid_address")

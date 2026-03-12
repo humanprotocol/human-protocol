@@ -53,6 +53,7 @@ from human_protocol_sdk.constants import (
 )
 from human_protocol_sdk.utils import (
     TransactionOptions,
+    get_error_message,
     get_escrow_interface,
     get_factory_interface,
     get_erc20_interface,
@@ -1011,9 +1012,16 @@ class EscrowClient:
 
         try:
             return escrow_contract.functions.manifest().call()
-        except Exception:
+        except Exception as manifest_error:
             # Backward compatibility with legacy escrows exposing manifestUrl().
-            return escrow_contract.functions.manifestUrl().call()
+            try:
+                return escrow_contract.functions.manifestUrl().call()
+            except Exception as fallback_error:
+                raise EscrowClientError(
+                    "Failed to fetch manifest using both manifest() and manifestUrl(). "
+                    f"manifest() error: {get_error_message(manifest_error)}. "
+                    f"manifestUrl() error: {get_error_message(fallback_error)}."
+                ) from fallback_error
 
     def get_results_url(self, escrow_address: str) -> str:
         """Get the final results file URL.

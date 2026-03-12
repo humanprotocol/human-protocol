@@ -46,7 +46,7 @@ import {
   TransactionLikeWithNonce,
   TransactionOverrides,
 } from '../types';
-import { isValidJson, isValidUrl, throwError } from '../utils';
+import { getErrorMessage, isValidJson, isValidUrl, throwError } from '../utils';
 
 /**
  * Client to perform actions on Escrow contracts and obtain information from the contracts.
@@ -1286,25 +1286,32 @@ export class EscrowClient extends BaseEthersClient {
 
       try {
         return await escrowContract.manifest();
-      } catch {
+      } catch (manifestError) {
         // Fallback for legacy escrows exposing `manifestUrl()` instead of `manifest()`.
-      }
+        try {
+          const provider = this.runner.provider;
+          if (!provider) {
+            throw ErrorProviderDoesNotExist;
+          }
 
-      const provider = this.runner.provider;
-      if (!provider) {
-        throw ErrorProviderDoesNotExist;
+          const manifestInterface = new ethers.Interface([
+            'function manifestUrl() view returns (string)',
+          ]);
+          const target = escrowContract.target as string;
+          const data = manifestInterface.encodeFunctionData('manifestUrl');
+          const result = await provider.call({ to: target, data });
+          return manifestInterface.decodeFunctionResult(
+            'manifestUrl',
+            result
+          )[0] as string;
+        } catch (fallbackError) {
+          throw new Error(
+            `Failed to fetch manifest using both manifest() and manifestUrl(). ` +
+              `manifest() error: ${getErrorMessage(manifestError)}. ` +
+              `manifestUrl() error: ${getErrorMessage(fallbackError)}.`
+          );
+        }
       }
-
-      const manifestInterface = new ethers.Interface([
-        'function manifestUrl() view returns (string)',
-      ]);
-      const target = escrowContract.target as string;
-      const data = manifestInterface.encodeFunctionData('manifestUrl');
-      const result = await provider.call({ to: target, data });
-      return manifestInterface.decodeFunctionResult(
-        'manifestUrl',
-        result
-      )[0] as string;
     } catch (e) {
       return throwError(e);
     }

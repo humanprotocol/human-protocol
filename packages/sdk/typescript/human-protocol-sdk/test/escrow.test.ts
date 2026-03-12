@@ -2912,7 +2912,9 @@ describe('EscrowClient', () => {
         new Error('manifestUrl() failed')
       );
 
-      await expect(escrowClient.getManifest(escrowAddress)).rejects.toThrow();
+      await expect(escrowClient.getManifest(escrowAddress)).rejects.toThrow(
+        /Failed to fetch manifest using both manifest\(\) and manifestUrl\(\). .*manifest\(\) error: manifest\(\) failed\. .*manifestUrl\(\) error: manifestUrl\(\) failed\./
+      );
       expect(escrowClient.escrowContract.manifest).toHaveBeenCalledTimes(1);
       expect(mockProvider.provider.call).toHaveBeenCalledTimes(1);
     });

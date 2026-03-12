@@ -81,6 +81,24 @@ export const isValidJson = (input: string): boolean => {
 };
 
 /**
+ * Extracts a readable message from unknown error values.
+ *
+ * @param error - Unknown error value
+ * @returns Human-readable error message
+ */
+export const getErrorMessage = (error: unknown): string => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  try {
+    return JSON.stringify(error);
+  } catch {
+    return String(error);
+  }
+};
+
+/**
  * Gets the subgraph URL for the given network, using API key if available.
  *
  * @param networkData - The network data containing subgraph URLs
