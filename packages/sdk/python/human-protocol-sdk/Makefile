@@ -11,10 +11,10 @@ format:
 	pipenv run black .
 
 unit-test:
-	make build-contracts
 	./scripts/run-unit-test.sh
 
 run-test:
+	make build-contracts
 	make unit-test
 
 build-package:

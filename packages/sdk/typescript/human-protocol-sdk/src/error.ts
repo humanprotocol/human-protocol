@@ -330,12 +330,6 @@ export class InvalidEthereumAddressError extends Error {
   }
 }
 
-export class InvalidKeyError extends Error {
-  constructor(key: string, address: string) {
-    super(`Key "${key}" not found for address ${address}`);
-  }
-}
-
 export class SubgraphRequestError extends Error {
   public readonly statusCode?: number;
   public readonly url: string;

@@ -151,13 +151,17 @@ export class KVStoreClient extends BaseEthersClient {
     txOptions: TransactionOverrides = {}
   ): Promise<void> {
     if (key === '') throw ErrorKVStoreEmptyKey;
+
     try {
       await this.sendTxAndWait(
         (overrides) => this.contract.set(key, value, overrides),
         txOptions
       );
     } catch (e) {
-      if (e instanceof Error) throw Error(`Failed to set value: ${e.message}`);
+      if (e instanceof Error) {
+        throw Error(`Failed to set value: ${e.message}`);
+      }
+      throw e;
     }
   }
 
@@ -194,8 +198,10 @@ export class KVStoreClient extends BaseEthersClient {
         txOptions
       );
     } catch (e) {
-      if (e instanceof Error)
+      if (e instanceof Error) {
         throw Error(`Failed to set bulk values: ${e.message}`);
+      }
+      throw e;
     }
   }
 
@@ -241,8 +247,10 @@ export class KVStoreClient extends BaseEthersClient {
         txOptions
       );
     } catch (e) {
-      if (e instanceof Error)
+      if (e instanceof Error) {
         throw Error(`Failed to set URL and hash: ${e.message}`);
+      }
+      throw e;
     }
   }
   /**
@@ -262,15 +270,22 @@ export class KVStoreClient extends BaseEthersClient {
    * ```
    */
   public async get(address: string, key: string): Promise<string> {
-    if (key === '') throw ErrorKVStoreEmptyKey;
-    if (!ethers.isAddress(address)) throw ErrorInvalidAddress;
+    if (key === '') {
+      throw ErrorKVStoreEmptyKey;
+    }
+
+    if (!ethers.isAddress(address)) {
+      throw ErrorInvalidAddress;
+    }
 
     try {
       const result = await this.contract?.get(address, key);
       return result;
     } catch (e) {
-      if (e instanceof Error) throw Error(`Failed to get value: ${e.message}`);
-      return e;
+      if (e instanceof Error) {
+        throw Error(`Failed to get value: ${e.message}`);
+      }
+      throw e;
     }
   }
 }

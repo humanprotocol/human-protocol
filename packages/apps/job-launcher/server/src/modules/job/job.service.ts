@@ -780,17 +780,11 @@ export class JobService {
     oracleAddress: string,
     chainId: ChainId,
   ): Promise<bigint> {
-    let feeValue: string | undefined;
-
-    try {
-      feeValue = await KVStoreUtils.get(
-        chainId,
-        oracleAddress,
-        KVStoreKeys.fee,
-      );
-    } catch {
-      // Ignore error
-    }
+    const feeValue = await KVStoreUtils.get(
+      chainId,
+      oracleAddress,
+      KVStoreKeys.fee,
+    );
 
     return BigInt(feeValue ? feeValue : 1);
   }

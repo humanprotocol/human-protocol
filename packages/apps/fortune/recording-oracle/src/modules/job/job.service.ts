@@ -209,18 +209,11 @@ export class JobService {
       recordingOracleSolutions.filter((solution) => !solution.error).length >=
       submissionsRequired
     ) {
-      let reputationOracleWebhook: string | null = null;
-      try {
-        const reputationOracleAddress =
-          await escrowClient.getReputationOracleAddress(webhook.escrowAddress);
-        reputationOracleWebhook = (await KVStoreUtils.get(
-          webhook.chainId,
-          reputationOracleAddress,
-          KVStoreKeys.webhookUrl,
-        )) as string;
-      } catch {
-        //Ignore the error
-      }
+      const reputationOracleWebhook = await KVStoreUtils.get(
+        webhook.chainId,
+        await escrowClient.getReputationOracleAddress(webhook.escrowAddress),
+        KVStoreKeys.webhookUrl,
+      );
 
       if (reputationOracleWebhook) {
         await sendWebhook(
@@ -239,16 +232,11 @@ export class JobService {
     }
 
     if (errorSolutions.length) {
-      let exchangeOracleURL: string | null = null;
-      try {
-        exchangeOracleURL = (await KVStoreUtils.get(
-          webhook.chainId,
-          await escrowClient.getExchangeOracleAddress(webhook.escrowAddress),
-          KVStoreKeys.webhookUrl,
-        )) as string;
-      } catch {
-        //Ignore the error
-      }
+      const exchangeOracleURL = await KVStoreUtils.get(
+        webhook.chainId,
+        await escrowClient.getExchangeOracleAddress(webhook.escrowAddress),
+        KVStoreKeys.webhookUrl,
+      );
 
       if (exchangeOracleURL) {
         const eventData: AssignmentRejection[] = errorSolutions.map(
@@ -311,18 +299,11 @@ export class JobService {
       { timeoutMs: this.web3ConfigService.txTimeoutMs },
     );
 
-    let reputationOracleWebhook: string | null = null;
-    try {
-      const reputationOracleAddress =
-        await escrowClient.getReputationOracleAddress(webhook.escrowAddress);
-      reputationOracleWebhook = (await KVStoreUtils.get(
-        webhook.chainId,
-        reputationOracleAddress,
-        KVStoreKeys.webhookUrl,
-      )) as string;
-    } catch {
-      //Ignore the error
-    }
+    const reputationOracleWebhook = await KVStoreUtils.get(
+      webhook.chainId,
+      await escrowClient.getReputationOracleAddress(webhook.escrowAddress),
+      KVStoreKeys.webhookUrl,
+    );
 
     if (reputationOracleWebhook) {
       await sendWebhook(
