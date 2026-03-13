@@ -149,7 +149,7 @@ class TestKVStoreUtils(unittest.TestCase):
 
         result = KVStoreUtils.get(ChainId.LOCALHOST, address, key)
 
-        self.assertIsNone(result)
+        self.assertEqual(result, "")
 
         mock_function.assert_called_once_with(
             NETWORKS[ChainId.LOCALHOST],
