@@ -125,7 +125,7 @@ class KVStoreUtils:
         address: str,
         key: str,
         options: Optional[SubgraphOptions] = None,
-    ) -> Optional[str]:
+    ) -> str:
         """Get the value of a specific key for an address.
 
         Queries the subgraph for a specific key-value pair associated with an address.
@@ -181,7 +181,7 @@ class KVStoreUtils:
             or "kvstores" not in kvstore_data["data"]
             or len(kvstore_data["data"]["kvstores"]) == 0
         ):
-            return None
+            return ""
 
         return kvstore_data["data"]["kvstores"][0]["value"]
 
@@ -232,12 +232,12 @@ class KVStoreUtils:
             raise KVStoreClientError(f"Invalid address: {address}")
 
         url = KVStoreUtils.get(chain_id, address, key, options=options)
-        if url is None:
+        if url == "":
             raise KVStoreClientError("No URL found for the given address and key")
 
         hash = KVStoreUtils.get(chain_id, address, key + "_hash", options=options)
 
-        if hash is None:
+        if hash == "":
             raise KVStoreClientError("No hash found for the given address and url")
 
         content = requests.get(url).text
