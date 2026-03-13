@@ -1,0 +1,12 @@
+# Graph build
+build/
+
+# Graph generated
+generated/
+
+# Mustache generated
+subgraph.yaml
+
+# Graph test generated
+tests/.bin
+tests/.latest.json

@@ -18,11 +18,8 @@ interface IEscrow {
         address _reputationOracle,
         address _recordingOracle,
         address _exchangeOracle,
-        uint8 _reputationOracleFeePercentage,
-        uint8 _recordingOracleFeePercentage,
-        uint8 _exchangeOracleFeePercentage,
-        string calldata _url,
-        string calldata _hash
+        string calldata _manifest,
+        string calldata _manifestHash
     ) external;
 
     function requestCancellation() external;

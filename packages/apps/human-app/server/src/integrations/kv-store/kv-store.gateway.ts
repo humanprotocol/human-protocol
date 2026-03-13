@@ -1,9 +1,4 @@
-import {
-  ChainId,
-  InvalidKeyError,
-  KVStoreKeys,
-  KVStoreUtils,
-} from '@human-protocol/sdk';
+import { ChainId, KVStoreKeys, KVStoreUtils } from '@human-protocol/sdk';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { HttpException, Inject, Injectable } from '@nestjs/common';
 import { Cache } from 'cache-manager';
@@ -36,9 +31,7 @@ export class KvStoreGateway {
 
       oracleUrl = await KVStoreUtils.get(chainId, address, KVStoreKeys.url);
     } catch (error) {
-      if (error instanceof InvalidKeyError) {
-        oracleUrl = '';
-      } else if (error.toString().includes('Error: Invalid address')) {
+      if (error.toString().includes('Error: Invalid address')) {
         throw new HttpException(
           `Unable to retrieve URL from address: ${address}`,
           400,
@@ -53,7 +46,7 @@ export class KvStoreGateway {
       }
     }
 
-    if (!oracleUrl || oracleUrl === '') {
+    if (!oracleUrl) {
       throw new HttpException('Oracle does not have URL set in KV store', 422);
     }
 
@@ -92,7 +85,7 @@ export class KvStoreGateway {
       }
     }
 
-    if (!jobTypes || jobTypes === '') {
+    if (!jobTypes) {
       return;
     } else {
       await this.cacheManager.set(

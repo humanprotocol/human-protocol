@@ -53,6 +53,7 @@ from human_protocol_sdk.constants import (
 )
 from human_protocol_sdk.utils import (
     TransactionOptions,
+    get_error_message,
     get_escrow_interface,
     get_factory_interface,
     get_erc20_interface,
@@ -111,9 +112,6 @@ class EscrowConfig:
         recording_oracle_address (str): Address of the recording oracle.
         reputation_oracle_address (str): Address of the reputation oracle.
         exchange_oracle_address (str): Address of the exchange oracle.
-        recording_oracle_fee (int): Recording oracle fee percentage (0-100).
-        reputation_oracle_fee (int): Reputation oracle fee percentage (0-100).
-        exchange_oracle_fee (int): Exchange oracle fee percentage (0-100).
         manifest (str): Manifest payload (URL or JSON string).
         hash (str): Manifest file hash.
     """
@@ -123,16 +121,12 @@ class EscrowConfig:
         recording_oracle_address: str,
         reputation_oracle_address: str,
         exchange_oracle_address: str,
-        recording_oracle_fee: int,
-        reputation_oracle_fee: int,
-        exchange_oracle_fee: int,
-        manifest: str,
-        hash: str,
+        manifest: str = "",
+        hash: str = "",
     ):
         """
         Raises:
-            EscrowClientError: If addresses are invalid, fees are out of range,
-                total fees exceed 100%, or manifest data is invalid.
+            EscrowClientError: If addresses are invalid or manifest data is invalid.
         """
         if not Web3.is_address(recording_oracle_address):
             raise EscrowClientError(
@@ -147,14 +141,6 @@ class EscrowConfig:
                 f"Invalid exchange oracle address: {exchange_oracle_address}"
             )
 
-        if (
-            not (0 <= recording_oracle_fee <= 100)
-            or not (0 <= reputation_oracle_fee <= 100)
-            or not (0 <= exchange_oracle_fee <= 100)
-        ):
-            raise EscrowClientError("Fee must be between 0 and 100")
-        if recording_oracle_fee + reputation_oracle_fee + exchange_oracle_fee > 100:
-            raise EscrowClientError("Total fee must be less than 100")
         if not validate_url(manifest) and not validate_json(manifest):
             raise EscrowClientError("Invalid empty manifest")
         if not hash:
@@ -163,9 +149,6 @@ class EscrowConfig:
         self.recording_oracle_address = recording_oracle_address
         self.reputation_oracle_address = reputation_oracle_address
         self.exchange_oracle_address = exchange_oracle_address
-        self.recording_oracle_fee = recording_oracle_fee
-        self.reputation_oracle_fee = reputation_oracle_fee
-        self.exchange_oracle_fee = exchange_oracle_fee
         self.manifest = manifest
         self.hash = hash
 
@@ -289,7 +272,7 @@ class EscrowClient:
             amount (int): Token amount to fund (in token's smallest unit).
             job_requester_id (str): Off-chain identifier for the job requester.
             escrow_config (EscrowConfig): Escrow configuration parameters including
-                oracle addresses, fees, and manifest data.
+                oracle addresses and manifest data.
             tx_options (Optional[TransactionOptions]): Optional transaction parameters such as gas limit.
 
         Returns:
@@ -321,9 +304,6 @@ class EscrowClient:
                     escrow_config.reputation_oracle_address,
                     escrow_config.recording_oracle_address,
                     escrow_config.exchange_oracle_address,
-                    escrow_config.reputation_oracle_fee,
-                    escrow_config.recording_oracle_fee,
-                    escrow_config.exchange_oracle_fee,
                     escrow_config.manifest,
                     escrow_config.hash,
                 ),
@@ -349,14 +329,14 @@ class EscrowClient:
         escrow_config: EscrowConfig,
         tx_options: Optional[TransactionOptions] = None,
     ) -> None:
-        """Set escrow roles, fees, and manifest metadata.
+        """Set escrow roles and manifest metadata.
 
-        Configures the escrow with oracle addresses, fee percentages, and manifest information.
+        Configures the escrow with oracle addresses and manifest information.
 
         Args:
             escrow_address (str): Address of the escrow contract to configure.
             escrow_config (EscrowConfig): Escrow configuration parameters including
-                oracle addresses, fees, and manifest data.
+                oracle addresses and manifest data.
             tx_options (Optional[TransactionOptions]): Optional transaction parameters such as gas limit.
 
         Returns:
@@ -380,9 +360,6 @@ class EscrowClient:
                     escrow_config.reputation_oracle_address,
                     escrow_config.recording_oracle_address,
                     escrow_config.exchange_oracle_address,
-                    escrow_config.reputation_oracle_fee,
-                    escrow_config.recording_oracle_fee,
-                    escrow_config.exchange_oracle_fee,
                     escrow_config.manifest,
                     escrow_config.hash,
                 ),
@@ -1031,7 +1008,20 @@ class EscrowClient:
         if not Web3.is_address(escrow_address):
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
 
-        return self._get_escrow_contract(escrow_address).functions.manifestUrl().call()
+        escrow_contract = self._get_escrow_contract(escrow_address)
+
+        try:
+            return escrow_contract.functions.manifest().call()
+        except Exception as manifest_error:
+            # Backward compatibility with legacy escrows exposing manifestUrl().
+            try:
+                return escrow_contract.functions.manifestUrl().call()
+            except Exception as fallback_error:
+                raise EscrowClientError(
+                    "Failed to fetch manifest using both manifest() and manifestUrl(). "
+                    f"manifest() error: {get_error_message(manifest_error)}. "
+                    f"manifestUrl() error: {get_error_message(fallback_error)}."
+                ) from fallback_error
 
     def get_results_url(self, escrow_address: str) -> str:
         """Get the final results file URL.

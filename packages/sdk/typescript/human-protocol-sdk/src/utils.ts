@@ -81,6 +81,24 @@ export const isValidJson = (input: string): boolean => {
 };
 
 /**
+ * Extracts a readable message from unknown error values.
+ *
+ * @param error - Unknown error value
+ * @returns Human-readable error message
+ */
+export const getErrorMessage = (error: unknown): string => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  try {
+    return JSON.stringify(error);
+  } catch {
+    return String(error);
+  }
+};
+
+/**
  * Gets the subgraph URL for the given network, using API key if available.
  *
  * @param networkData - The network data containing subgraph URLs
@@ -90,6 +108,26 @@ export const getSubgraphUrl = (networkData: NetworkData) => {
   let subgraphUrl = networkData.subgraphUrl;
   if (process.env.SUBGRAPH_API_KEY) {
     subgraphUrl = networkData.subgraphUrlApiKey;
+  } else if (networkData.chainId !== ChainId.LOCALHOST) {
+    // eslint-disable-next-line no-console
+    console.warn(WarnSubgraphApiKeyNotProvided);
+  }
+
+  return subgraphUrl;
+};
+
+/**
+ * Gets the HMT statistics subgraph URL for the given network.
+ * Falls back to the default subgraph URL when a dedicated HMT endpoint is not configured.
+ *
+ * @param networkData - The network data containing subgraph URLs
+ * @returns The HMT statistics subgraph URL with API key if available
+ */
+export const getHMTSubgraphUrl = (networkData: NetworkData) => {
+  let subgraphUrl = networkData.hmtSubgraphUrl || networkData.subgraphUrl;
+  if (process.env.SUBGRAPH_API_KEY) {
+    subgraphUrl =
+      networkData.hmtSubgraphUrlApiKey || networkData.subgraphUrlApiKey;
   } else if (networkData.chainId !== ChainId.LOCALHOST) {
     // eslint-disable-next-line no-console
     console.warn(WarnSubgraphApiKeyNotProvided);

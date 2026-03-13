@@ -703,11 +703,8 @@ describe('JobService', () => {
         jobEntity.userId.toString(),
         expect.objectContaining({
           recordingOracle: jobEntity.recordingOracle,
-          recordingOracleFee: 1n,
           reputationOracle: jobEntity.reputationOracle,
-          reputationOracleFee: 1n,
           exchangeOracle: jobEntity.exchangeOracle,
-          exchangeOracleFee: 1n,
           manifest: jobEntity.manifestUrl,
           manifestHash: jobEntity.manifestHash,
         }),

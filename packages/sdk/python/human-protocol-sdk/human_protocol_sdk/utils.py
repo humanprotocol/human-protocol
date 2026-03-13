@@ -207,11 +207,30 @@ def is_indexer_error(error: Exception) -> bool:
     return "bad indexers" in message.lower()
 
 
+def _resolve_subgraph_urls(
+    network: Dict[str, Any], use_hmt_subgraph: bool = False
+) -> Tuple[str, str]:
+    """Resolve public/API-key URLs for either default or HMT subgraph."""
+    if not use_hmt_subgraph:
+        return network["subgraph_url"], network["subgraph_url_api_key"]
+
+    hmt_subgraph_url = network.get("hmt_subgraph_url")
+    hmt_subgraph_url_api_key = network.get("hmt_subgraph_url_api_key")
+
+    public_url = hmt_subgraph_url or network["subgraph_url"]
+    api_key_url = (
+        hmt_subgraph_url_api_key or hmt_subgraph_url or network["subgraph_url_api_key"]
+    )
+
+    return public_url, api_key_url
+
+
 def custom_gql_fetch(
     network: Dict[str, Any],
     query: str,
     params: Optional[Dict[str, Any]] = None,
     options: Optional[SubgraphOptions] = None,
+    use_hmt_subgraph: bool = False,
 ) -> Dict[str, Any]:
     """Fetch data from the subgraph with optional retry logic and indexer routing.
 
@@ -220,6 +239,7 @@ def custom_gql_fetch(
         query (str): GraphQL query string to execute.
         params (Optional[Dict[str, Any]]): Optional query parameters/variables dictionary.
         options (Optional[SubgraphOptions]): Optional subgraph configuration for retries and indexer selection.
+        use_hmt_subgraph (bool): If true, resolves URL using HMT subgraph keys with fallback.
 
     Returns:
         JSON response from the subgraph containing the query results.
@@ -250,7 +270,12 @@ def custom_gql_fetch(
     subgraph_api_key = os.getenv("SUBGRAPH_API_KEY", "")
 
     if not options:
-        return _fetch_subgraph_data(network, query, params)
+        return _fetch_subgraph_data(
+            network,
+            query,
+            params,
+            use_hmt_subgraph=use_hmt_subgraph,
+        )
 
     has_max_retries = options.max_retries is not None
     has_base_delay = options.base_delay is not None
@@ -272,7 +297,13 @@ def custom_gql_fetch(
 
     for attempt in range(max_retries + 1):
         try:
-            return _fetch_subgraph_data(network, query, params, options.indexer_id)
+            return _fetch_subgraph_data(
+                network,
+                query,
+                params,
+                options.indexer_id,
+                use_hmt_subgraph,
+            )
         except Exception as error:
             last_error = error
 
@@ -290,6 +321,7 @@ def _fetch_subgraph_data(
     query: str,
     params: Optional[Dict[str, Any]] = None,
     indexer_id: Optional[str] = None,
+    use_hmt_subgraph: bool = False,
 ) -> Dict[str, Any]:
     """Internal function to fetch data from the subgraph API.
 
@@ -298,6 +330,7 @@ def _fetch_subgraph_data(
         query (str): GraphQL query string to execute.
         params (Optional[Dict[str, Any]]): Optional query parameters/variables dictionary.
         indexer_id (Optional[str]): Optional indexer ID to route the request to.
+        use_hmt_subgraph (bool): If true, resolves URL using HMT subgraph keys with fallback.
 
     Returns:
         JSON response from the subgraph.
@@ -305,14 +338,17 @@ def _fetch_subgraph_data(
     Raises:
         Exception: If the HTTP request fails or returns a non-200 status code.
     """
+    default_subgraph_url, default_subgraph_url_api_key = _resolve_subgraph_urls(
+        network, use_hmt_subgraph
+    )
     subgraph_api_key = os.getenv("SUBGRAPH_API_KEY", "")
     if subgraph_api_key:
-        subgraph_url = network["subgraph_url_api_key"]
+        subgraph_url = default_subgraph_url_api_key
     else:
         logger.warning(
             "Warning: SUBGRAPH_API_KEY is not provided. It might cause issues with the subgraph."
         )
-        subgraph_url = network["subgraph_url"]
+        subgraph_url = default_subgraph_url
 
     subgraph_url = _attach_indexer_id(subgraph_url, indexer_id)
 
@@ -594,6 +630,25 @@ def handle_error(e: Exception, exception_class: Type[Exception]) -> None:
             msg = e.args[0]["message"]
         msg = extract_reason(msg)
         raise exception_class(f"Transaction failed: {msg}")
+
+
+def get_error_message(error: Exception) -> str:
+    """Extract a readable error message from an exception-like object."""
+
+    message = getattr(error, "message", None)
+    if isinstance(message, str) and message:
+        return message
+
+    error_args = getattr(error, "args", None)
+    if (
+        error_args
+        and isinstance(error_args, tuple)
+        and isinstance(error_args[0], dict)
+        and "message" in error_args[0]
+    ):
+        return str(error_args[0]["message"])
+
+    return str(error)
 
 
 def validate_url(url: str) -> bool:

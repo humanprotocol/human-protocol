@@ -87,9 +87,6 @@ export interface IEscrowConfig {
   recordingOracle: string;
   reputationOracle: string;
   exchangeOracle: string;
-  recordingOracleFee: bigint;
-  reputationOracleFee: bigint;
-  exchangeOracleFee: bigint;
   manifest: string;
   manifestHash: string;
 }
@@ -254,9 +251,7 @@ export interface IWorkerStatistics {
 
 export interface IDailyPayment {
   timestamp: number;
-  totalAmountPaid: bigint;
   totalCount: number;
-  averageAmountPerWorker: bigint;
 }
 
 export interface IPaymentStatistics {

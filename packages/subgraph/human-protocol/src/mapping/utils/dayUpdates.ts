@@ -1,0 +1,31 @@
+import { Bytes, ethereum } from '@graphprotocol/graph-ts';
+import { EventDayData } from '../../../generated/schema';
+import { ZERO_BI, ONE_DAY } from './number';
+
+export function getEventDayData(event: ethereum.Event): EventDayData {
+  const timestamp = event.block.timestamp.toI32();
+  const dayID = timestamp / ONE_DAY;
+  const dayStartTimestamp = dayID * ONE_DAY;
+
+  const eventDayDataID = Bytes.fromI32(dayID);
+
+  let eventDayData = EventDayData.load(eventDayDataID);
+  if (eventDayData === null) {
+    eventDayData = new EventDayData(eventDayDataID);
+    eventDayData.timestamp = dayStartTimestamp;
+    eventDayData.dailyFundEventCount = ZERO_BI;
+    eventDayData.dailyStoreResultsEventCount = ZERO_BI;
+    eventDayData.dailyBulkPayoutEventCount = ZERO_BI;
+    eventDayData.dailyPendingStatusEventCount = ZERO_BI;
+    eventDayData.dailyToCancelStatusEventCount = ZERO_BI;
+    eventDayData.dailyCancelledStatusEventCount = ZERO_BI;
+    eventDayData.dailyPartialStatusEventCount = ZERO_BI;
+    eventDayData.dailyPaidStatusEventCount = ZERO_BI;
+    eventDayData.dailyCompletedStatusEventCount = ZERO_BI;
+    eventDayData.dailyTotalEventCount = ZERO_BI;
+    eventDayData.dailyEscrowCount = ZERO_BI;
+    eventDayData.dailyWorkerCount = ZERO_BI;
+    eventDayData.dailyPayoutCount = ZERO_BI;
+  }
+  return eventDayData;
+}

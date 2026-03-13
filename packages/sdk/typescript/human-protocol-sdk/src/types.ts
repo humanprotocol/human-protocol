@@ -77,6 +77,14 @@ export type NetworkData = {
    */
   subgraphUrlApiKey: string;
   /**
+   * HMT statistics subgraph URL
+   */
+  hmtSubgraphUrl?: string;
+  /**
+   * HMT statistics subgraph URL API key
+   */
+  hmtSubgraphUrlApiKey?: string;
+  /**
    * Old subgraph URL
    */
   oldSubgraphUrl: string;

@@ -318,20 +318,8 @@ export class JobService {
 
     const escrowConfig = {
       recordingOracle: jobEntity.recordingOracle,
-      recordingOracleFee: await this.getOracleFee(
-        jobEntity.recordingOracle,
-        jobEntity.chainId,
-      ),
       reputationOracle: jobEntity.reputationOracle,
-      reputationOracleFee: await this.getOracleFee(
-        jobEntity.reputationOracle,
-        jobEntity.chainId,
-      ),
       exchangeOracle: jobEntity.exchangeOracle,
-      exchangeOracleFee: await this.getOracleFee(
-        jobEntity.exchangeOracle,
-        jobEntity.chainId,
-      ),
       manifest: jobEntity.manifestUrl,
       manifestHash: jobEntity.manifestHash,
     };
@@ -792,17 +780,11 @@ export class JobService {
     oracleAddress: string,
     chainId: ChainId,
   ): Promise<bigint> {
-    let feeValue: string | undefined;
-
-    try {
-      feeValue = await KVStoreUtils.get(
-        chainId,
-        oracleAddress,
-        KVStoreKeys.fee,
-      );
-    } catch {
-      // Ignore error
-    }
+    const feeValue = await KVStoreUtils.get(
+      chainId,
+      oracleAddress,
+      KVStoreKeys.fee,
+    );
 
     return BigInt(feeValue ? feeValue : 1);
   }

@@ -20,6 +20,7 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
     address public staking;
     uint256 public minimumStake;
     address public admin;
+    address public kvstore;
 
     using SafeERC20 for IERC20;
 
@@ -27,6 +28,7 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
     event LaunchedV2(address token, address escrow, string jobRequesterId);
     event SetStakingAddress(address indexed stakingAddress);
     event SetMinumumStake(uint256 indexed minimumStake);
+    event SetKVStoreAddress(address indexed kvStoreAddress);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -35,10 +37,12 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
 
     function initialize(
         address _staking,
-        uint256 _minimumStake
+        uint256 _minimumStake,
+        address _kvstore
     ) external payable virtual initializer {
         __Ownable_init_unchained();
         require(_staking != address(0), ERROR_ZERO_ADDRESS);
+        _setKVStoreAddress(_kvstore);
         _setStakingAddress(_staking);
         _setMinimumStake(_minimumStake);
         _setEscrowAdmin(msg.sender);
@@ -58,7 +62,8 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
             _token,
             msg.sender,
             admin,
-            STANDARD_DURATION
+            STANDARD_DURATION,
+            kvstore
         );
         counter++;
         escrowCounters[address(escrow)] = counter;
@@ -92,9 +97,6 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
      * @param _reputationOracle Address of the reputation oracle.
      * @param _recordingOracle Address of the recording oracle.
      * @param _exchangeOracle Address of the exchange oracle.
-     * @param _reputationOracleFeePercentage Fee percentage for the reputation oracle.
-     * @param _recordingOracleFeePercentage Fee percentage for the recording oracle.
-     * @param _exchangeOracleFeePercentage Fee percentage for the exchange oracle.
      * @param _url URL for the escrow manifest.
      * @param _hash Hash of the escrow manifest.
      * @return The address of the newly created Escrow contract.
@@ -106,9 +108,6 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
         address _reputationOracle,
         address _recordingOracle,
         address _exchangeOracle,
-        uint8 _reputationOracleFeePercentage,
-        uint8 _recordingOracleFeePercentage,
-        uint8 _exchangeOracleFeePercentage,
         string calldata _url,
         string calldata _hash
     ) external returns (address) {
@@ -124,9 +123,6 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
             _reputationOracle,
             _recordingOracle,
             _exchangeOracle,
-            _reputationOracleFeePercentage,
-            _recordingOracleFeePercentage,
-            _exchangeOracleFeePercentage,
             _url,
             _hash
         );
@@ -179,6 +175,16 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
         admin = _admin;
     }
 
+    function setKVStoreAddress(address _kvstore) external onlyOwner {
+        _setKVStoreAddress(_kvstore);
+    }
+
+    function _setKVStoreAddress(address _kvstore) private {
+        require(_kvstore != address(0), ERROR_ZERO_ADDRESS);
+        kvstore = _kvstore;
+        emit SetKVStoreAddress(_kvstore);
+    }
+
     function _authorizeUpgrade(address) internal override onlyOwner {}
 
     /**
@@ -186,5 +192,5 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
      * variables without shifting down storage in the inheritance chain.
      * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
      */
-    uint256[44] private __gap;
+    uint256[43] private __gap;
 }

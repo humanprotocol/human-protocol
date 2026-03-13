@@ -1,0 +1,31 @@
+name: Human Protocol Subgraph check
+
+on:
+  push:
+    branches: "**"
+    paths:
+      - "packages/core/**"
+      - "packages/subgraph/human-protocol/**"
+
+permissions:
+  contents: read
+
+jobs:
+  subgraph-test:
+    name: Human Protocol Subgraph Test
+    # TODO: Use ubuntu-latest when graph binary is not failing on ubuntu 24.04
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+      - name: Install dependencies
+        run: yarn workspaces focus @tools/subgraph-human-protocol
+      - name: Build core package
+        run: yarn workspace @human-protocol/core build
+      - name: Generate manifest for Polygon for tests
+        run: NETWORK=polygon yarn workspace @tools/subgraph-human-protocol generate
+      - name: Run subgraph test
+        run: yarn workspace @tools/subgraph-human-protocol test

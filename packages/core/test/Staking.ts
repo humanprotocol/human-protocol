@@ -2,7 +2,7 @@ import { anyValue } from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import { expect } from 'chai';
 import { ethers, upgrades } from 'hardhat';
 import { EventLog, Signer } from 'ethers';
-import { EscrowFactory, HMToken, Staking } from '../typechain-types';
+import { EscrowFactory, HMToken, KVStore, Staking } from '../typechain-types';
 
 const mineNBlocks = async (n: number) => {
   await Promise.all(
@@ -30,6 +30,7 @@ describe('Staking', function () {
     recordingOracle: Signer;
 
   let token: HMToken, escrowFactory: EscrowFactory, staking: Staking;
+  let kvStore: KVStore;
 
   this.beforeAll(async () => {
     [
@@ -91,10 +92,12 @@ describe('Staking', function () {
     const EscrowFactory = await ethers.getContractFactory(
       'contracts/EscrowFactory.sol:EscrowFactory'
     );
+    const KVStore = await ethers.getContractFactory('KVStore');
+    kvStore = (await KVStore.deploy()) as KVStore;
 
     escrowFactory = (await upgrades.deployProxy(
       EscrowFactory,
-      [await staking.getAddress(), minimumStake],
+      [await staking.getAddress(), minimumStake, await kvStore.getAddress()],
       { kind: 'uups', initializer: 'initialize' }
     )) as unknown as EscrowFactory;
 

@@ -5128,6 +5128,7 @@ __metadata:
     ts-node: "npm:^10.9.2"
     typechain: "npm:^8.3.2"
     typescript: "npm:^5.8.3"
+    typescript-eslint: "npm:^8.39.1"
     xdeployer: "npm:3.1.6"
   peerDependencies:
     ethers: ~6.15.0
@@ -11302,9 +11303,26 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tools/subgraph@workspace:packages/sdk/typescript/subgraph":
+"@tools/subgraph-hmt@workspace:packages/subgraph/hmt":
   version: 0.0.0-use.local
-  resolution: "@tools/subgraph@workspace:packages/sdk/typescript/subgraph"
+  resolution: "@tools/subgraph-hmt@workspace:packages/subgraph/hmt"
+  dependencies:
+    "@graphprotocol/graph-cli": "npm:^0.97.1"
+    "@graphprotocol/graph-ts": "npm:^0.38.0"
+    "@graphql-eslint/eslint-plugin": "npm:^3.19.1"
+    "@human-protocol/core": "workspace:*"
+    eslint: "npm:^9.39.1"
+    ethers: "npm:~6.15.0"
+    graphql: "npm:^16.6.0"
+    matchstick-as: "npm:^0.6.0"
+    mustache: "npm:^4.2.0"
+    prettier: "npm:^3.8.1"
+  languageName: unknown
+  linkType: soft
+
+"@tools/subgraph-human-protocol@workspace:packages/subgraph/human-protocol":
+  version: 0.0.0-use.local
+  resolution: "@tools/subgraph-human-protocol@workspace:packages/subgraph/human-protocol"
   dependencies:
     "@graphprotocol/graph-cli": "npm:^0.97.1"
     "@graphprotocol/graph-ts": "npm:^0.38.0"
