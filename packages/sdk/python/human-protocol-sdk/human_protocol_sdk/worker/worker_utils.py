@@ -141,7 +141,6 @@ class WorkerUtils:
                 WorkerData(
                     id=worker.get("id"),
                     address=worker.get("address"),
-                    total_amount_received=worker.get("totalHMTAmountReceived"),
                     payout_count=worker.get("payoutCount"),
                 )
             )
@@ -215,6 +214,5 @@ class WorkerUtils:
         return WorkerData(
             id=worker.get("id"),
             address=worker.get("address"),
-            total_amount_received=worker.get("totalHMTAmountReceived"),
             payout_count=worker.get("payoutCount"),
         )

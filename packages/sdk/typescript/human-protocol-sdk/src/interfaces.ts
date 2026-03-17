@@ -181,7 +181,6 @@ export interface IStatusEventFilter extends IPagination {
 export interface IWorker {
   id: string;
   address: string;
-  totalHMTAmountReceived: bigint;
   payoutCount: number;
 }
 

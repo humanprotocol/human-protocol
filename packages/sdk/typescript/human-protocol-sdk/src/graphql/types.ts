@@ -30,7 +30,6 @@ export type EscrowData = {
 export type WorkerData = {
   id: string;
   address: string;
-  totalHMTAmountReceived: string;
   payoutCount: string;
 };
 

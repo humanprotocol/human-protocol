@@ -30,7 +30,7 @@ const WalletAddress: FC<Props> = ({ data }) => {
     reputation,
     withdrawableAmount,
   } = data;
-  const isWallet = 'totalHMTAmountReceived' in data;
+  const isWallet = 'payoutCount' in data;
 
   return (
     <>
@@ -51,10 +51,10 @@ const WalletAddress: FC<Props> = ({ data }) => {
           </TitleSectionWrapper>
           {isWallet && (
             <TitleSectionWrapper
-              title="Earned Payouts"
-              tooltip="Total amount earned by participating in jobs"
+              title="Payouts received"
+              tooltip="Total count of payouts received by participating in jobs"
             >
-              <TokenAmount amount={data?.totalHMTAmountReceived} />
+              <TokenAmount amount={data?.payoutCount} />
             </TitleSectionWrapper>
           )}
         </Stack>
