@@ -23,7 +23,7 @@ RUN yarn workspaces focus @apps/fortune-recording-oracle
 # Copy base TS config that is required to build packages
 COPY tsconfig.base.json ./
 # Build libs (scoped)
-RUN yarn workspaces foreach -Rpt --from @apps/fortune-recording-oracle run build
+RUN yarn workspaces foreach -Rpt --from @apps/fortune-recording-oracle --exclude @apps/fortune-recording-oracle run build
 
 # Copy everything else
 COPY ${APP_PATH} ./${APP_PATH}

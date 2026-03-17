@@ -47,7 +47,7 @@
     "openpgp": "^6.2.2",
     "secp256k1": "^5.0.1",
     "validator": "^13.12.0",
-    "vitest": "^3.0.9"
+    "vitest": "^4.0.18"
   },
   "devDependencies": {
     "@types/validator": "^13.15.4",
@@ -55,7 +55,7 @@
     "eslint-plugin-jest": "^28.9.0",
     "eslint-plugin-prettier": "^5.5.5",
     "glob": "^13.0.0",
-    "prettier": "^3.7.4",
+    "prettier": "^3.8.1",
     "ts-node": "^10.9.2",
     "typedoc": "^0.28.15",
     "typedoc-plugin-markdown": "^4.9.0",

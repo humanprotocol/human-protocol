@@ -2,15 +2,15 @@
 import { ethers, upgrades } from 'hardhat';
 
 async function main() {
-  const hmtAddress = process.env.HMT_ADDRESS;
-  if (!hmtAddress) {
-    console.error('HMT_ADDRESS env variable missing');
-    return;
-  }
-
   const stakingAddress = process.env.STAKING_ADDRESS;
   if (!stakingAddress) {
     console.error('STAKING_ADDRESS env variable missing');
+    return;
+  }
+
+  const kvStoreAddress = process.env.KVSTORE_ADDRESS;
+  if (!kvStoreAddress) {
+    console.error('KVSTORE_ADDRESS env variable missing');
     return;
   }
 
@@ -19,7 +19,7 @@ async function main() {
   );
   const escrowFactoryContract = await upgrades.deployProxy(
     EscrowFactory,
-    [stakingAddress, 1],
+    [stakingAddress, 1, kvStoreAddress],
     { initializer: 'initialize', kind: 'uups' }
   );
   await escrowFactoryContract.waitForDeployment();
@@ -33,11 +33,6 @@ async function main() {
       await escrowFactoryContract.getAddress()
     )
   );
-
-  const KVStore = await ethers.getContractFactory('KVStore');
-  const kvStoreContract = await KVStore.deploy();
-
-  console.log('KVStore Address: ', await kvStoreContract.getAddress());
 }
 
 main().catch((error) => {

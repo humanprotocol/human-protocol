@@ -22,11 +22,14 @@ import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
 
 import { ChainId } from '@human-protocol/sdk';
-import { ErrorPayment } from 'src/common/constants/errors';
 import { ServerConfigService } from '../../common/config/server-config.service';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
+import { ErrorPayment } from '../../common/constants/errors';
 import { TOKEN_ADDRESSES } from '../../common/constants/tokens';
 import { ApiKey } from '../../common/decorators';
+import { EscrowFundToken } from '../../common/enums/job';
+import { Web3Env } from '../../common/enums/web3';
 import {
   ConflictError,
   ServerError,
@@ -51,7 +54,6 @@ import {
   UserBalanceDto,
 } from './payment.dto';
 import { PaymentService } from './payment.service';
-import { EscrowFundToken } from '../../common/enums/job';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -61,6 +63,7 @@ export class PaymentController {
   constructor(
     private readonly paymentService: PaymentService,
     private readonly serverConfigService: ServerConfigService,
+    private readonly web3ConfigService: Web3ConfigService,
     private readonly rateService: RateService,
   ) {}
 
@@ -452,7 +455,7 @@ export class PaymentController {
       throw new ValidationError(ErrorPayment.InvalidChainId);
     }
 
-    if (chainId === ChainId.LOCALHOST) {
+    if (this.web3ConfigService.env !== Web3Env.MAINNET) {
       return tokens;
     }
 

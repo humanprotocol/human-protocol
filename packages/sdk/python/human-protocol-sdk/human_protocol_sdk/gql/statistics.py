@@ -41,7 +41,12 @@ fragment EventDayDataFields on EventDayData {
     dailyEscrowCount
     dailyWorkerCount
     dailyPayoutCount
-    dailyHMTPayoutAmount
+}
+"""
+
+hmt_event_day_data_fragment = """
+fragment HMTEventDayDataFields on EventDayData {
+    timestamp
     dailyHMTTransferCount
     dailyHMTTransferAmount
     dailyUniqueSenders
@@ -97,6 +102,36 @@ query GetEscrowDayData(
 {event_day_data_fragment}
 """.format(
         event_day_data_fragment=event_day_data_fragment,
+        from_clause="timestamp_gte: $from" if filter.date_from else "",
+        to_clause="timestamp_lte: $to" if filter.date_to else "",
+    )
+
+
+def get_hmt_event_day_data_query(filter: StatisticsFilter) -> str:
+    return """
+query GetHMTDayData(
+    $from: Int
+    $to: Int
+    $orderDirection: String
+    $first: Int
+    $skip: Int
+) {{
+    eventDayDatas(
+        where: {{
+            {from_clause}
+            {to_clause}
+        }},
+        orderBy: timestamp,
+        orderDirection: $orderDirection
+        first: $first
+        skip: $skip
+    ) {{
+      ...HMTEventDayDataFields
+    }}
+}}
+{hmt_event_day_data_fragment}
+""".format(
+        hmt_event_day_data_fragment=hmt_event_day_data_fragment,
         from_clause="timestamp_gte: $from" if filter.date_from else "",
         to_clause="timestamp_lte: $to" if filter.date_to else "",
     )

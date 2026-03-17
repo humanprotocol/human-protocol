@@ -1,0 +1,9 @@
+{
+  "network": "polygon-amoy",
+  "description": "HUMAN subgraph on Amoy Testnet",
+  "HMToken": {
+    "address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
+    "startBlock": 5769546,
+    "abi": "../../../node_modules/@human-protocol/core/abis/HMToken.json"
+  }
+}

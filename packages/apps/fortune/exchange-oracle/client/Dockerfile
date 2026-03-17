@@ -23,7 +23,7 @@ RUN yarn workspaces focus @apps/fortune-exchange-oracle-client
 # Copy base TS config that is required to build packages
 COPY tsconfig.base.json ./
 # Build libs (scoped)
-RUN yarn workspaces foreach -Rpt --from @apps/fortune-exchange-oracle-client run build
+RUN yarn workspaces foreach -Rpt --from @apps/fortune-exchange-oracle-client --exclude @apps/fortune-exchange-oracle-client run build
 
 # Copy everything else
 COPY ${APP_PATH} ./${APP_PATH}

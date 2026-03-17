@@ -15,7 +15,7 @@ check_core_folders() {
 deploy_subgraph() {
   echo "Waiting for graph node to be healthy..."
   retries=0
-  while ! yarn workspace @tools/subgraph health-local:node
+  while ! yarn workspace @tools/subgraph-human-protocol health-local:node
   do
     ((retries++))
     if [ "$retries" -ge 10 ]; then
@@ -26,9 +26,9 @@ deploy_subgraph() {
 
   echo "Deploying subgraph..."
 
-  NETWORK=localhost yarn workspace @tools/subgraph generate
-  yarn workspace @tools/subgraph create-local
-  yarn workspace @tools/subgraph deploy-local
+  NETWORK=localhost yarn workspace @tools/subgraph-human-protocol generate
+  yarn workspace @tools/subgraph-human-protocol create-local
+  yarn workspace @tools/subgraph-human-protocol deploy-local
 }
 
 setup_oracles() {

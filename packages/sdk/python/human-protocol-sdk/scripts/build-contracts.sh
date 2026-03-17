@@ -6,5 +6,7 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../../.." && pwd)"
 
 yarn --cwd "$REPO_ROOT" workspaces focus @human-protocol/python-sdk
 
+yarn --cwd "$REPO_ROOT" workspaces foreach -Rpt --from @human-protocol/python-sdk run build
+
 rm -rf artifacts
 cp -r "${REPO_ROOT}/node_modules/@human-protocol/core/artifacts" .

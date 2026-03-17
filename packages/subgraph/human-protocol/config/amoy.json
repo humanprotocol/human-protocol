@@ -1,0 +1,25 @@
+{
+  "network": "polygon-amoy",
+  "description": "HUMAN subgraph on Amoy Testnet",
+  "EscrowFactory": {
+    "address": "0xAFf5a986A530ff839d49325A5dF69F96627E8D29",
+    "startBlock": 5773000,
+    "abi": "../../../node_modules/@human-protocol/core/abis/EscrowFactory.json"
+  },
+  "HMToken": {
+    "address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33"
+  },
+  "Escrow": {
+    "abi": "../../../node_modules/@human-protocol/core/abis/Escrow.json"
+  },
+  "KVStore": {
+    "address": "0x724AeFC243EdacCA27EAB86D3ec5a76Af4436Fc7",
+    "startBlock": 5773002,
+    "abi": "../../../node_modules/@human-protocol/core/abis/KVStore.json"
+  },
+  "Staking": {
+    "address": "0xffE496683F842a923110415b7278ded3F265f2C5",
+    "startBlock": 14983952,
+    "abi": "../../../node_modules/@human-protocol/core/abis/Staking.json"
+  }
+}

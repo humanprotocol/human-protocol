@@ -5,7 +5,7 @@ vi.mock('graphql-request', () => {
 });
 
 import * as gqlFetch from 'graphql-request';
-import { describe, expect, test, vi } from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { NETWORKS } from '../src/constants';
 import { ChainId, OrderDirection } from '../src/enums';
 import {
@@ -18,6 +18,10 @@ import { ITransaction, ITransactionsFilter } from '../src/interfaces';
 import { TransactionUtils } from '../src/transaction';
 
 describe('TransactionUtils', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   describe('getTransaction', () => {
     const txHash = '0x62dD51230A30401C455c8398d06F85e4EaB6309f';
     const invalidHash = 'InvalidHash';

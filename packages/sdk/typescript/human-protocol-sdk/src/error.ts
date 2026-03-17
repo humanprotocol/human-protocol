@@ -181,20 +181,6 @@ export const ErrorInvalidManifest = new Error('Invalid manifest');
 export const ErrorNoURLprovided = new Error('No URL provided');
 
 /**
- * @constant {Error} - Fee must be between 0 and 100.
- */
-export const ErrorFeeMustBeBetweenZeroAndHundred = new Error(
-  'Fee must be between 0 and 100'
-);
-
-/**
- * @constant {Error} - Total fee must be less than 100.
- */
-export const ErrorTotalFeeMustBeLessThanHundred = new Error(
-  'Total fee must be less than 100'
-);
-
-/**
  * @constant {Error} - Recipient cannot be an empty array.
  */
 export const ErrorRecipientCannotBeEmptyArray = new Error(
@@ -344,8 +330,16 @@ export class InvalidEthereumAddressError extends Error {
   }
 }
 
-export class InvalidKeyError extends Error {
-  constructor(key: string, address: string) {
-    super(`Key "${key}" not found for address ${address}`);
+export class SubgraphRequestError extends Error {
+  public readonly statusCode?: number;
+  public readonly url: string;
+
+  constructor(message: string, url: string, statusCode?: number) {
+    super(message);
+    this.name = this.constructor.name;
+    this.url = url;
+    this.statusCode = statusCode;
   }
 }
+
+export class SubgraphBadIndexerError extends SubgraphRequestError {}

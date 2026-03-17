@@ -42,7 +42,12 @@ const EVENT_DAY_DATA_FRAGMENT = gql`
     dailyEscrowCount
     dailyWorkerCount
     dailyPayoutCount
-    dailyHMTPayoutAmount
+  }
+`;
+
+const HMT_EVENT_DAY_DATA_FRAGMENT = gql`
+  fragment HMTEventDayDataFields on EventDayData {
+    timestamp
     dailyHMTTransferCount
     dailyHMTTransferAmount
     dailyUniqueSenders
@@ -100,5 +105,36 @@ export const GET_EVENT_DAY_DATA_QUERY = (params: IStatisticsFilter) => {
       }
     }
     ${EVENT_DAY_DATA_FRAGMENT}
+  `;
+};
+
+export const GET_HMT_EVENT_DAY_DATA_QUERY = (params: IStatisticsFilter) => {
+  const { from, to } = params;
+  const WHERE_CLAUSE = `
+    where: {
+      ${from !== undefined ? `timestamp_gte: $from` : ''}
+      ${to !== undefined ? `timestamp_lte: $to` : ''}
+    }
+  `;
+
+  return gql`
+    query GetHMTDayData(
+        $from: Int, 
+        $to: Int,
+        $orderDirection: String
+        $first: Int
+        $skip: Int
+    ) {
+      eventDayDatas(
+        ${WHERE_CLAUSE},
+        orderBy: timestamp,
+        orderDirection: $orderDirection,
+        first: $first,
+        skip: $skip
+      ) {
+        ...HMTEventDayDataFields
+      }
+    }
+    ${HMT_EVENT_DAY_DATA_FRAGMENT}
   `;
 };

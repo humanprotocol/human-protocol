@@ -72,7 +72,12 @@ class TestGetDataFromSubgraph(unittest.TestCase):
             result = custom_gql_fetch(self.network, self.query, self.variables)
 
         self.assertEqual(result, expected)
-        mock_fetch.assert_called_once_with(self.network, self.query, self.variables)
+        mock_fetch.assert_called_once_with(
+            self.network,
+            self.query,
+            self.variables,
+            use_hmt_subgraph=False,
+        )
 
     def test_retries_on_indexer_error_and_succeeds(self):
         options = SubgraphOptions(max_retries=2, base_delay=100)
@@ -151,7 +156,7 @@ class TestGetDataFromSubgraph(unittest.TestCase):
 
         self.assertEqual(result, expected)
         mock_fetch.assert_called_once_with(
-            self.network, self.query, self.variables, "0xabc123"
+            self.network, self.query, self.variables, "0xabc123", False
         )
 
     def test_raises_when_indexer_without_api_key(self):
@@ -183,6 +188,70 @@ class TestGetDataFromSubgraph(unittest.TestCase):
             mock_post.call_args.kwargs.get("headers"),
             {"Authorization": "Bearer token"},
         )
+
+    def test_fetch_hmt_subgraph_uses_hmt_public_url_without_api_key(self):
+        network = {
+            "subgraph_url": "http://subgraph",
+            "subgraph_url_api_key": "http://subgraph-with-key",
+            "hmt_subgraph_url": "http://hmt-subgraph",
+            "hmt_subgraph_url_api_key": "http://hmt-subgraph-with-key",
+        }
+
+        with patch("human_protocol_sdk.utils.requests.post") as mock_post:
+            mock_post.return_value.status_code = 200
+            mock_post.return_value.json.return_value = {"data": {}}
+
+            _fetch_subgraph_data(
+                network,
+                self.query,
+                self.variables,
+                use_hmt_subgraph=True,
+            )
+
+        self.assertEqual(mock_post.call_args.args[0], "http://hmt-subgraph")
+
+    def test_fetch_hmt_subgraph_uses_hmt_api_key_url_with_api_key(self):
+        network = {
+            "subgraph_url": "http://subgraph",
+            "subgraph_url_api_key": "http://subgraph-with-key",
+            "hmt_subgraph_url": "http://hmt-subgraph",
+            "hmt_subgraph_url_api_key": "http://hmt-subgraph-with-key",
+        }
+
+        with patch.dict(os.environ, {"SUBGRAPH_API_KEY": "token"}, clear=True):
+            with patch("human_protocol_sdk.utils.requests.post") as mock_post:
+                mock_post.return_value.status_code = 200
+                mock_post.return_value.json.return_value = {"data": {}}
+
+                _fetch_subgraph_data(
+                    network,
+                    self.query,
+                    self.variables,
+                    use_hmt_subgraph=True,
+                )
+
+        self.assertEqual(mock_post.call_args.args[0], "http://hmt-subgraph-with-key")
+
+    def test_fetch_hmt_subgraph_falls_back_to_hmt_public_url_for_api_key_mode(self):
+        network = {
+            "subgraph_url": "http://subgraph",
+            "subgraph_url_api_key": "http://subgraph-with-key",
+            "hmt_subgraph_url": "http://hmt-subgraph",
+        }
+
+        with patch.dict(os.environ, {"SUBGRAPH_API_KEY": "token"}, clear=True):
+            with patch("human_protocol_sdk.utils.requests.post") as mock_post:
+                mock_post.return_value.status_code = 200
+                mock_post.return_value.json.return_value = {"data": {}}
+
+                _fetch_subgraph_data(
+                    network,
+                    self.query,
+                    self.variables,
+                    use_hmt_subgraph=True,
+                )
+
+        self.assertEqual(mock_post.call_args.args[0], "http://hmt-subgraph")
 
 
 class TestAttachIndexerId(unittest.TestCase):

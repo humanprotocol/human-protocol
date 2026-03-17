@@ -2,7 +2,7 @@ import { anyValue } from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import { expect } from 'chai';
 import { EventLog, Signer, ZeroAddress } from 'ethers';
 import { ethers, upgrades } from 'hardhat';
-import { EscrowFactory, HMToken, Staking } from '../typechain-types';
+import { EscrowFactory, HMToken, KVStore, Staking } from '../typechain-types';
 import { faker } from '@faker-js/faker';
 
 let owner: Signer,
@@ -16,8 +16,11 @@ let exchangeOracleAddress: string,
   recordingOracleAddress: string,
   reputationOracleAddress: string;
 
-let token: HMToken, escrowFactory: EscrowFactory, staking: Staking;
-let stakingAddress: string, tokenAddress: string;
+let token: HMToken,
+  escrowFactory: EscrowFactory,
+  staking: Staking,
+  kvStore: KVStore;
+let stakingAddress: string, tokenAddress: string, kvStoreAddress: string;
 
 const MINIMUM_STAKE = ethers.parseEther('10');
 const LOCK_PERIOD = 2;
@@ -77,11 +80,19 @@ describe('EscrowFactory', function () {
       'contracts/EscrowFactory.sol:EscrowFactory'
     );
 
+    const KVStore = await ethers.getContractFactory('KVStore');
+    kvStore = (await KVStore.deploy()) as KVStore;
+    kvStoreAddress = await kvStore.getAddress();
+
     escrowFactory = (await upgrades.deployProxy(
       EscrowFactory,
-      [await staking.getAddress(), MINIMUM_STAKE],
+      [await staking.getAddress(), MINIMUM_STAKE, kvStoreAddress],
       { kind: 'uups', initializer: 'initialize' }
     )) as unknown as EscrowFactory;
+
+    await kvStore.connect(reputationOracle).set('fee', '5');
+    await kvStore.connect(recordingOracle).set('fee', '5');
+    await kvStore.connect(exchangeOracle).set('fee', '5');
   });
 
   describe('deployment', () => {
@@ -92,10 +103,14 @@ describe('EscrowFactory', function () {
         );
 
         await expect(
-          upgrades.deployProxy(EscrowFactory, [ZeroAddress, MINIMUM_STAKE], {
-            kind: 'uups',
-            initializer: 'initialize',
-          }) as unknown as EscrowFactory
+          upgrades.deployProxy(
+            EscrowFactory,
+            [ZeroAddress, MINIMUM_STAKE, kvStoreAddress],
+            {
+              kind: 'uups',
+              initializer: 'initialize',
+            }
+          ) as unknown as EscrowFactory
         ).revertedWith('Zero Address');
       });
     });
@@ -108,7 +123,7 @@ describe('EscrowFactory', function () {
 
         const escrowFactory = (await upgrades.deployProxy(
           EscrowFactory,
-          [stakingAddress, MINIMUM_STAKE],
+          [stakingAddress, MINIMUM_STAKE, kvStoreAddress],
           {
             kind: 'uups',
             initializer: 'initialize',
@@ -252,7 +267,6 @@ describe('EscrowFactory', function () {
   });
 
   describe('createFundAndSetupEscrow()', () => {
-    const fee = faker.number.int({ min: 1, max: 5 });
     const manifestUrl = faker.internet.url();
     const manifestHash = faker.string.alphanumeric(46);
     const fundAmount = ethers.parseEther(
@@ -270,9 +284,6 @@ describe('EscrowFactory', function () {
               reputationOracleAddress,
               recordingOracleAddress,
               exchangeOracleAddress,
-              fee,
-              fee,
-              fee,
               manifestUrl,
               manifestHash
             )
@@ -290,9 +301,6 @@ describe('EscrowFactory', function () {
               reputationOracleAddress,
               recordingOracleAddress,
               exchangeOracleAddress,
-              fee,
-              fee,
-              fee,
               manifestUrl,
               manifestHash
             )
@@ -315,9 +323,6 @@ describe('EscrowFactory', function () {
               reputationOracleAddress,
               recordingOracleAddress,
               exchangeOracleAddress,
-              fee,
-              fee,
-              fee,
               manifestUrl,
               manifestHash
             )
@@ -342,9 +347,6 @@ describe('EscrowFactory', function () {
             reputationOracleAddress,
             recordingOracleAddress,
             exchangeOracleAddress,
-            fee,
-            fee,
-            fee,
             manifestUrl,
             manifestHash
           );
@@ -367,13 +369,16 @@ describe('EscrowFactory', function () {
         await expect(tx)
           .to.emit(escrowFactory, 'LaunchedV2')
           .withArgs(tokenAddress, escrowAddress, FIXTURE_REQUESTER_ID)
-          .to.emit(escrow, 'PendingV2')
+          .to.emit(escrow, 'PendingV3')
           .withArgs(
             manifestUrl,
             manifestHash,
             reputationOracleAddress,
             recordingOracleAddress,
-            exchangeOracleAddress
+            exchangeOracleAddress,
+            5,
+            5,
+            5
           )
           .to.emit(escrow, 'Fund')
           .withArgs(fundAmount);

@@ -26,19 +26,19 @@ export class InvalidOperatorSignupDataError extends BaseError {
 }
 
 export class InvalidOperatorRoleError extends InvalidOperatorSignupDataError {
-  constructor(role: string) {
+  constructor(role?: string) {
     super(`Invalid role: ${role}`);
   }
 }
 
 export class InvalidOperatorFeeError extends InvalidOperatorSignupDataError {
-  constructor(fee: string) {
+  constructor(fee?: string) {
     super(`Invalid fee: ${fee}`);
   }
 }
 
 export class InvalidOperatorUrlError extends InvalidOperatorSignupDataError {
-  constructor(url: string) {
+  constructor(url?: string) {
     super(`Invalid url: ${url}`);
   }
 }

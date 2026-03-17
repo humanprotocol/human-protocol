@@ -204,16 +204,11 @@ export class UserService {
     const signer = this.web3Service.getSigner(chainId);
     const kvstore = await KVStoreClient.build(signer);
 
-    let status: string | undefined;
-    try {
-      status = await KVStoreUtils.get(
-        chainId,
-        signer.address,
-        operatorUser.evmAddress,
-      );
-    } catch {
-      // noop
-    }
+    const status = await KVStoreUtils.get(
+      chainId,
+      signer.address,
+      operatorUser.evmAddress,
+    );
 
     if (status === OperatorStatus.ACTIVE) {
       throw new UserError(
@@ -222,7 +217,9 @@ export class UserService {
       );
     }
 
-    await kvstore.set(operatorUser.evmAddress, OperatorStatus.ACTIVE);
+    await kvstore.set(operatorUser.evmAddress, OperatorStatus.ACTIVE, {
+      timeoutMs: this.web3ConfigService.txTimeoutMs,
+    });
   }
 
   async disableOperator(userId: number, signature: string): Promise<void> {
@@ -266,7 +263,9 @@ export class UserService {
       );
     }
 
-    await kvstore.set(operatorUser.evmAddress, OperatorStatus.INACTIVE);
+    await kvstore.set(operatorUser.evmAddress, OperatorStatus.INACTIVE, {
+      timeoutMs: this.web3ConfigService.txTimeoutMs,
+    });
   }
 
   async registrationInExchangeOracle(

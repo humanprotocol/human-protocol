@@ -12,6 +12,7 @@ contract EscrowFactoryV0 is OwnableUpgradeable, UUPSUpgradeable {
     // all Escrows will have this duration.
     uint256 constant STANDARD_DURATION = 8640000;
     string constant ERROR_ZERO_ADDRESS = 'EscrowFactory: Zero Address';
+    address constant DUMMY_KVSTORE = address(1);
 
     uint256 public counter;
     mapping(address => uint256) public escrowCounters;
@@ -64,8 +65,9 @@ contract EscrowFactoryV0 is OwnableUpgradeable, UUPSUpgradeable {
         Escrow escrow = new Escrow(
             token,
             msg.sender,
-            payable(msg.sender),
-            STANDARD_DURATION
+            msg.sender,
+            STANDARD_DURATION,
+            DUMMY_KVSTORE
         );
         counter++;
         escrowCounters[address(escrow)] = counter;

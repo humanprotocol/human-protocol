@@ -117,9 +117,6 @@ config = EscrowConfig(
     recording_oracle_address="0x...",
     reputation_oracle_address="0x...",
     exchange_oracle_address="0x...",
-    recording_oracle_fee=10,
-    reputation_oracle_fee=10,
-    exchange_oracle_fee=10,
     manifest="https://example.com/manifest.json",
     hash="manifest_hash",
 )

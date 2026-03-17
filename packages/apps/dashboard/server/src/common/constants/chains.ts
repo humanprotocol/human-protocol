@@ -26,3 +26,5 @@ export const ChainIds = Object.values(
 ).filter((value): value is ChainId => typeof value === 'number');
 
 export type ChainId = ProductionChainId | DevelopmentChainId;
+
+export const TOKEN_CACHE_PREFIX = 'token';

@@ -147,11 +147,9 @@ class TestKVStoreUtils(unittest.TestCase):
         address = Web3.to_checksum_address("0x1234567890123456789012345678901234567890")
         key = "key"
 
-        with self.assertRaises(KVStoreClientError) as cm:
-            KVStoreUtils.get(ChainId.LOCALHOST, address, key)
-        self.assertEqual(
-            f"Key '{key}' not found for address {address}", str(cm.exception)
-        )
+        result = KVStoreUtils.get(ChainId.LOCALHOST, address, key)
+
+        self.assertEqual(result, "")
 
         mock_function.assert_called_once_with(
             NETWORKS[ChainId.LOCALHOST],
@@ -245,7 +243,7 @@ class TestKVStoreUtils(unittest.TestCase):
         with self.assertRaises(KVStoreClientError) as cm:
             KVStoreUtils.get_file_url_and_verify_hash(ChainId.LOCALHOST, address)
         self.assertEqual(
-            f"Key '{key}' not found for address {address}", str(cm.exception)
+            "No URL found for the given address and key", str(cm.exception)
         )
 
     @patch("human_protocol_sdk.kvstore.kvstore_utils.custom_gql_fetch")
@@ -313,12 +311,10 @@ class TestKVStoreUtils(unittest.TestCase):
 
         address = Web3.to_checksum_address("0x1234567890123456789012345678901234567890")
 
-        key = "public_key"
-
         with self.assertRaises(KVStoreClientError) as cm:
             KVStoreUtils.get_public_key(ChainId.LOCALHOST, address)
         self.assertEqual(
-            f"Key '{key}' not found for address {address}", str(cm.exception)
+            "No URL found for the given address and key", str(cm.exception)
         )
 
     @patch("human_protocol_sdk.kvstore.kvstore_utils.custom_gql_fetch")

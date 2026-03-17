@@ -104,12 +104,21 @@ describe.only('QualificationService', () => {
       expect(result).toEqual(qualifications);
     });
 
-    it('should throw a ServerError when KVStoreUtils.get fails', async () => {
-      (KVStoreUtils.get as any).mockRejectedValue(new Error('KV store error'));
+    it('should throw a ServerError when reputation oracle url not set', async () => {
+      (KVStoreUtils.get as any).mockResolvedValueOnce('');
 
       await expect(
         qualificationService.getQualifications(ChainId.LOCALHOST),
       ).rejects.toThrow(new ServerError(ErrorWeb3.ReputationOracleUrlNotSet));
+    });
+
+    it('should throw a ServerError when KVStoreUtils.get fails', async () => {
+      const syntheticError = new Error('KV store error');
+      (KVStoreUtils.get as any).mockRejectedValue(syntheticError);
+
+      await expect(
+        qualificationService.getQualifications(ChainId.LOCALHOST),
+      ).rejects.toThrow(new ServerError(syntheticError.message));
     });
 
     it('should throw a ServerError when HTTP request fails', async () => {

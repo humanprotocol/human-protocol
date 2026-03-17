@@ -1,0 +1,206 @@
+##################################################
+#                    Entities                    #
+##################################################
+
+type Worker @entity(immutable: false) {
+  id: Bytes!
+  address: Bytes!
+  payoutCount: BigInt!
+}
+
+type Operator @entity(immutable: false) {
+  id: Bytes!
+  address: Bytes!
+  amountJobsProcessed: BigInt!
+  role: String
+  fee: BigInt
+  publicKey: String
+  webhookUrl: String
+  website: String
+  jobTypes: [String!]
+  url: String
+  urls: [OperatorURL!]! @derivedFrom(field: "operator")
+  reputationNetworks: [ReputationNetwork!]
+  registrationNeeded: Boolean
+  registrationInstructions: String
+
+  name: String
+  category: String
+
+  staker: Staker @derivedFrom(field: "operator")
+}
+
+type OperatorURL @entity(immutable: false) {
+  id: Bytes!
+  key: String
+  url: String
+  operator: Operator!
+}
+
+type ReputationNetwork @entity(immutable: false) {
+  id: Bytes!
+  address: Bytes!
+  operators: [Operator!]! @derivedFrom(field: "reputationNetworks")
+}
+
+type Escrow @entity(immutable: false) {
+  id: Bytes!
+  address: Bytes! # address
+  token: Bytes! # address
+  factoryAddress: Bytes! # address
+  launcher: Bytes! # address
+  canceler: Bytes! # address
+  count: BigInt!
+  balance: BigInt!
+  totalFundedAmount: BigInt!
+  amountPaid: BigInt!
+  status: String! # string
+  manifest: String # string
+  manifestHash: String # string
+  reputationOracle: Bytes # address
+  recordingOracle: Bytes # address
+  exchangeOracle: Bytes # address
+  reputationOracleFee: BigInt
+  recordingOracleFee: BigInt
+  exchangeOracleFee: BigInt
+  intermediateResultsUrl: String # string
+  intermediateResultsHash: String # string
+  finalResultsUrl: String # string
+  finalResultsHash: String # string
+  jobRequesterId: String # string
+  createdAt: BigInt!
+}
+
+type Payout @entity(immutable: true) {
+  id: Bytes!
+  escrowAddress: Bytes! # address
+  recipient: Bytes! # address
+  amount: BigInt!
+  createdAt: BigInt!
+}
+
+type DailyWorker @entity(immutable: true) {
+  id: Bytes!
+  timestamp: BigInt!
+  address: Bytes! # address
+  escrowAddress: Bytes! # address
+}
+
+##################################################
+#                     Events                     #
+##################################################
+
+type EscrowStatusEvent @entity(immutable: true) {
+  id: Bytes!
+  block: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+
+  escrowAddress: Bytes! # address
+  launcher: Bytes # address
+  sender: Bytes! # address
+  status: String!
+}
+
+type CancellationRefundEvent @entity(immutable: true) {
+  id: Bytes!
+  block: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  escrowAddress: Bytes!
+  receiver: Bytes!
+  amount: BigInt!
+}
+
+# KVStore
+type KVStore @entity(immutable: false) {
+  id: Bytes!
+  block: BigInt!
+  timestamp: BigInt!
+  address: Bytes!
+  key: String!
+  value: String!
+}
+
+# Staking
+type Staker @entity(immutable: false) {
+  id: Bytes!
+  address: Bytes! # address
+  stakedAmount: BigInt!
+  lockedAmount: BigInt!
+  withdrawnAmount: BigInt!
+  slashedAmount: BigInt!
+  lockedUntilTimestamp: BigInt!
+  lastDepositTimestamp: BigInt!
+
+  operator: Operator
+}
+
+##################################################
+#                   Statistics                   #
+##################################################
+
+type EscrowStatistics @entity(immutable: false) {
+  id: Bytes!
+  fundEventCount: BigInt!
+  storeResultsEventCount: BigInt!
+  bulkPayoutEventCount: BigInt!
+  pendingStatusEventCount: BigInt!
+  toCancelStatusEventCount: BigInt!
+  cancelledStatusEventCount: BigInt!
+  partialStatusEventCount: BigInt!
+  paidStatusEventCount: BigInt!
+  completedStatusEventCount: BigInt!
+  totalEventCount: BigInt!
+  totalEscrowCount: BigInt!
+}
+
+type EventDayData @entity(immutable: false) {
+  id: Bytes!
+  timestamp: Int!
+  dailyFundEventCount: BigInt!
+  dailyStoreResultsEventCount: BigInt!
+  dailyBulkPayoutEventCount: BigInt!
+  dailyPendingStatusEventCount: BigInt!
+  dailyToCancelStatusEventCount: BigInt!
+  dailyCancelledStatusEventCount: BigInt!
+  dailyPartialStatusEventCount: BigInt!
+  dailyPaidStatusEventCount: BigInt!
+  dailyCompletedStatusEventCount: BigInt!
+  dailyTotalEventCount: BigInt!
+  dailyEscrowCount: BigInt!
+  dailyWorkerCount: BigInt!
+  dailyPayoutCount: BigInt!
+}
+
+##################################################
+#                 Transactions                   #
+##################################################
+
+type Transaction @entity(immutable: false) {
+  id: Bytes!
+  block: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  from: Bytes!
+  to: Bytes!
+  receiver: Bytes
+  escrow: Bytes
+  value: BigInt!
+  method: String!
+  token: Bytes
+  internalTransactions: [InternalTransaction!]
+    @derivedFrom(field: "transaction")
+}
+
+type InternalTransaction @entity(immutable: false) {
+  id: Bytes!
+  from: Bytes!
+  to: Bytes!
+  receiver: Bytes
+  escrow: Bytes
+  value: BigInt!
+  token: Bytes
+  method: String!
+  transaction: Transaction!
+}

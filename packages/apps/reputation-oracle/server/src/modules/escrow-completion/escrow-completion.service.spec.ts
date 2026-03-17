@@ -26,11 +26,14 @@ import stringify from 'json-stable-stringify';
 import _ from 'lodash';
 
 import { CvatJobType, FortuneJobType } from '@/common/enums';
-import { ServerConfigService } from '@/config';
+import { ServerConfigService, Web3ConfigService } from '@/config';
 import { ReputationService } from '@/modules/reputation';
 import { StorageService } from '@/modules/storage';
 import { WalletWithProvider, Web3Service } from '@/modules/web3';
-import { generateTestnetChainId } from '@/modules/web3/fixtures';
+import {
+  generateTestnetChainId,
+  mockWeb3ConfigService,
+} from '@/modules/web3/fixtures';
 import { OutgoingWebhookService } from '@/modules/webhook';
 import { createSignerMock, type SignerMock } from '~/test/fixtures/web3';
 
@@ -98,6 +101,10 @@ describe('EscrowCompletionService', () => {
         {
           provide: StorageService,
           useValue: mockStorageService,
+        },
+        {
+          provide: Web3ConfigService,
+          useValue: mockWeb3ConfigService,
         },
         {
           provide: OutgoingWebhookService,
@@ -998,8 +1005,11 @@ describe('EscrowCompletionService', () => {
           recordingOracle: recordingOracleAddress,
         } as unknown as IEscrow);
         mockGetEscrowStatus.mockResolvedValueOnce(escrowStatus);
-        const mockGasPrice = faker.number.bigInt();
-        mockWeb3Service.calculateGasPrice.mockResolvedValueOnce(mockGasPrice);
+        const mockFees = {
+          maxFeePerGas: faker.number.bigInt(),
+          maxPriorityFeePerGas: faker.number.bigInt(),
+        };
+        mockWeb3Service.calculateTxFees.mockResolvedValueOnce(mockFees);
 
         const paidPayoutsRecord = generateEscrowCompletion(
           EscrowCompletionStatus.PAID,
@@ -1042,7 +1052,8 @@ describe('EscrowCompletionService', () => {
         expect(mockCompleteEscrow).toHaveBeenCalledWith(
           paidPayoutsRecord.escrowAddress,
           {
-            gasPrice: mockGasPrice,
+            ...mockFees,
+            timeoutMs: mockWeb3ConfigService.txTimeoutMs,
           },
         );
         expect(mockReputationService.assessEscrowParties).toHaveBeenCalledTimes(

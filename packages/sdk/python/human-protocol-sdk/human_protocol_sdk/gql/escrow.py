@@ -97,7 +97,9 @@ query GetEscrow(
     }}
 }}
 {escrow_fragment}
-""".format(escrow_fragment=escrow_fragment)
+""".format(
+        escrow_fragment=escrow_fragment
+    )
 
 
 def get_status_query(

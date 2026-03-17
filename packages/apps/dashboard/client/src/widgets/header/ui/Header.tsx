@@ -65,7 +65,7 @@ const Header: FC = () => {
           p={1}
           gap={2}
         >
-          <NavLink href={env.VITE_NAVBAR_LINK_GITBOOK}>GitBook</NavLink>
+          <NavLink href={env.VITE_NAVBAR_LINK_DOCS}>Docs</NavLink>
           <NavLink href={env.VITE_NAVBAR_LINK_FAUCETS}>Faucet</NavLink>
           <NavLink href={env.VITE_NAVBAR_LINK_HUMAN_WEBSITE}>
             HUMAN Website
@@ -113,7 +113,7 @@ const Header: FC = () => {
             </Box>
 
             <Box display="flex" flexDirection="column" gap={2}>
-              <NavLink href={env.VITE_NAVBAR_LINK_GITBOOK}>GitBook</NavLink>
+              <NavLink href={env.VITE_NAVBAR_LINK_DOCS}>Docs</NavLink>
               <NavLink href={env.VITE_NAVBAR_LINK_FAUCETS}>Faucet</NavLink>
               <NavLink href={env.VITE_NAVBAR_LINK_HUMAN_WEBSITE}>
                 HUMAN Website

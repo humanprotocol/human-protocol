@@ -15,6 +15,7 @@ import {
 } from 'class-validator';
 import { ethers } from 'ethers';
 import { ServerConfigService } from '../../common/config/server-config.service';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { CANCEL_JOB_STATUSES } from '../../common/constants';
 import {
   ErrorEscrow,
@@ -37,6 +38,7 @@ import {
   PaymentCurrency,
   PaymentType,
 } from '../../common/enums/payment';
+import { Web3Env } from '../../common/enums/web3';
 import { EventType, OracleType } from '../../common/enums/webhook';
 import {
   ConflictError,
@@ -87,6 +89,7 @@ export class JobService {
   constructor(
     @Inject(Web3Service)
     private readonly web3Service: Web3Service,
+    private readonly web3ConfigService: Web3ConfigService,
     private readonly jobRepository: JobRepository,
     private readonly webhookRepository: WebhookRepository,
     private readonly paymentService: PaymentService,
@@ -113,8 +116,8 @@ export class JobService {
   ): Promise<number> {
     // DISABLE HMT
     if (
+      this.web3ConfigService.env === Web3Env.MAINNET &&
       requestType !== HCaptchaJobType.HCAPTCHA &&
-      dto.chainId !== ChainId.LOCALHOST &&
       (dto.escrowFundToken === EscrowFundToken.HMT ||
         dto.paymentCurrency === PaymentCurrency.HMT)
     ) {
@@ -315,20 +318,8 @@ export class JobService {
 
     const escrowConfig = {
       recordingOracle: jobEntity.recordingOracle,
-      recordingOracleFee: await this.getOracleFee(
-        jobEntity.recordingOracle,
-        jobEntity.chainId,
-      ),
       reputationOracle: jobEntity.reputationOracle,
-      reputationOracleFee: await this.getOracleFee(
-        jobEntity.reputationOracle,
-        jobEntity.chainId,
-      ),
       exchangeOracle: jobEntity.exchangeOracle,
-      exchangeOracleFee: await this.getOracleFee(
-        jobEntity.exchangeOracle,
-        jobEntity.chainId,
-      ),
       manifest: jobEntity.manifestUrl,
       manifestHash: jobEntity.manifestHash,
     };
@@ -346,7 +337,8 @@ export class JobService {
       jobEntity.userId.toString(),
       escrowConfig,
       {
-        gasPrice: await this.web3Service.calculateGasPrice(jobEntity.chainId),
+        ...(await this.web3Service.calculateTxFees(jobEntity.chainId)),
+        timeoutMs: this.web3ConfigService.txTimeoutMs,
       },
     );
 
@@ -610,7 +602,8 @@ export class JobService {
     // TODO: Remove try-catch when requestCancellation is fully supported by all escrows
     try {
       await (escrowClient as any).requestCancellation(escrowAddress!, {
-        gasPrice: await this.web3Service.calculateGasPrice(chainId),
+        ...(await this.web3Service.calculateTxFees(chainId)),
+        timeoutMs: this.web3ConfigService.txTimeoutMs,
       });
     } catch (error: any) {
       this.logger.warn(
@@ -623,7 +616,8 @@ export class JobService {
         },
       );
       await (escrowClient as any).cancel(escrowAddress!, {
-        gasPrice: await this.web3Service.calculateGasPrice(chainId),
+        ...(await this.web3Service.calculateTxFees(chainId)),
+        timeoutMs: this.web3ConfigService.txTimeoutMs,
       });
     }
   }
@@ -786,17 +780,11 @@ export class JobService {
     oracleAddress: string,
     chainId: ChainId,
   ): Promise<bigint> {
-    let feeValue: string | undefined;
-
-    try {
-      feeValue = await KVStoreUtils.get(
-        chainId,
-        oracleAddress,
-        KVStoreKeys.fee,
-      );
-    } catch {
-      // Ignore error
-    }
+    const feeValue = await KVStoreUtils.get(
+      chainId,
+      oracleAddress,
+      KVStoreKeys.fee,
+    );
 
     return BigInt(feeValue ? feeValue : 1);
   }
