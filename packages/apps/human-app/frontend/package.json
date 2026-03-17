@@ -27,7 +27,7 @@
     "@human-protocol/sdk": "workspace:*",
     "@mui/icons-material": "^7.3.8",
     "@mui/material": "^5.16.7",
-    "@mui/system": "^5.15.14",
+    "@mui/system": "^7.3.9",
     "@mui/x-date-pickers": "^8.26.0",
     "@reown/appkit": "^1.7.11",
     "@reown/appkit-adapter-wagmi": "^1.7.11",
