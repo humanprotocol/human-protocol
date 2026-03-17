@@ -2,7 +2,7 @@ import { ZodError, z } from 'zod';
 
 const envSchema = z.object({
   VITE_API_URL: z.string(),
-  VITE_NAVBAR_LINK_GITBOOK: z.string(),
+  VITE_NAVBAR_LINK_DOCS: z.string(),
   VITE_NAVBAR_LINK_FAUCETS: z.string(),
   VITE_NAVBAR_LINK_HUMAN_WEBSITE: z.string(),
   VITE_NAVBAR_LINK_LAUNCH_JOBS: z.string(),
