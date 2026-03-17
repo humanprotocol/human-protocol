@@ -23,7 +23,7 @@ function normalizeEmptyAddressFields<T>(payload: T): T {
 }
 
 export function applyRpcAddressWorkaround(): void {
-  const provider = ethers.provider as typeof ethers.provider & {
+  const provider = ethers.provider as unknown as {
     _hardhatProvider?: { send?: JsonRpcSend; [PATCH_FLAG]?: boolean };
   };
 
