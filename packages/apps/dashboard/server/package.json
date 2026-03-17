@@ -39,7 +39,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "0.14.1",
     "dayjs": "^1.11.12",
-    "ethers": "~6.15.0",
+    "ethers": "~6.16.0",
     "joi": "^17.13.3",
     "keyv": "^5.5.5",
     "lodash": "^4.17.21",
