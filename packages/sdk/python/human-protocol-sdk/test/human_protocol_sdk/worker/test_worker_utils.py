@@ -50,6 +50,8 @@ class TestWorkerUtils(unittest.TestCase):
             self.assertEqual(len(workers), 2)
             self.assertEqual(workers[0].id, "worker1")
             self.assertEqual(workers[1].id, "worker2")
+            self.assertEqual(workers[0].payout_count, 5)
+            self.assertEqual(workers[1].payout_count, 10)
 
     def test_get_workers_empty_response(self):
         with patch(
@@ -112,6 +114,7 @@ class TestWorkerUtils(unittest.TestCase):
             self.assertEqual(
                 worker.address, "0x1234567890123456789012345678901234567890"
             )
+            self.assertEqual(worker.payout_count, 5)
 
     def test_get_worker_empty_data(self):
         with patch(
