@@ -1,8 +1,11 @@
 /* eslint-disable no-console */
 import 'dotenv/config';
 import { ethers, upgrades } from 'hardhat';
+import { applyRpcAddressWorkaround } from './rpc-workarounds';
 
 async function main() {
+  applyRpcAddressWorkaround();
+
   const governorProxy = process.env.GOVERNOR_ADDRESS;
   const fqName =
     process.env.GOVERNOR_FQN ||
