@@ -18,9 +18,7 @@ query GetWorker($address: String!) {{
     }}
 }}
 {worker_fragment}
-""".format(
-        worker_fragment=worker_fragment
-    )
+""".format(worker_fragment=worker_fragment)
 
 
 def get_workers_query(filter: WorkerFilter) -> str:
