@@ -73,7 +73,7 @@
     "concurrently": "^9.1.2",
     "eslint": "^9.39.1",
     "eslint-plugin-prettier": "^5.5.5",
-    "ethers": "~6.15.0",
+    "ethers": "~6.16.0",
     "hardhat": "^2.26.0",
     "hardhat-abi-exporter": "^2.10.1",
     "hardhat-contract-sizer": "^2.6.1",
@@ -91,7 +91,7 @@
     "xdeployer": "3.1.6"
   },
   "peerDependencies": {
-    "ethers": "~6.15.0"
+    "ethers": "~6.16.0"
   },
   "lint-staged": {
     "*.sol": [
