@@ -30,16 +30,22 @@
   ],
   "license": "MIT",
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@graphprotocol/graph-cli": "^0.97.1",
     "@graphprotocol/graph-ts": "^0.38.0",
     "@graphql-eslint/eslint-plugin": "^3.19.1",
     "@human-protocol/core": "workspace:*",
     "eslint": "^10.0.3",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.5",
     "ethers": "~6.16.0",
+    "globals": "^16.3.0",
     "graphql": "^16.6.0",
     "matchstick-as": "^0.6.0",
     "mustache": "^4.2.0",
-    "prettier": "^3.8.1"
+    "prettier": "^3.8.1",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.57.0"
   },
   "lint-staged": {
     "*.{ts,graphql}": [
