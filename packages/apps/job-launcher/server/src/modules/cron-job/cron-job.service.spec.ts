@@ -885,7 +885,7 @@ describe('CronJobService', () => {
       escrowEventMock = {
         chainId: ChainId.LOCALHOST,
         escrowAddress: MOCK_ADDRESS,
-        status: EscrowStatus.Partial,
+        status: 'Partial',
       };
 
       jest.spyOn(repository, 'findOneByType').mockResolvedValue(null);

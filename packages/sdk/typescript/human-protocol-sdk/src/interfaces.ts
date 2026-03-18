@@ -281,7 +281,7 @@ export interface IDailyHMT {
 export interface IStatusEvent {
   timestamp: number;
   escrowAddress: string;
-  status: EscrowStatus;
+  status: keyof typeof EscrowStatus;
   chainId: ChainId;
   block: bigint;
   txHash: string;

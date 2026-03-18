@@ -268,7 +268,7 @@ export class EscrowUtils {
     return data['escrowStatusEvents'].map((event) => ({
       timestamp: Number(event.timestamp) * 1000,
       escrowAddress: event.escrowAddress,
-      status: EscrowStatus[event.status as keyof typeof EscrowStatus],
+      status: event.status as keyof typeof EscrowStatus,
       chainId,
       block: BigInt(event.block),
       txHash: event.txHash,

@@ -4104,7 +4104,7 @@ describe('EscrowUtils', () => {
       });
       const expectedResults = pendingEvents.map((event) => ({
         ...event,
-        status: EscrowStatus.Pending,
+        status: EscrowStatus[EscrowStatus.Pending],
         timestamp: +event.timestamp * 1000,
         block: BigInt(event.block),
         chainId: ChainId.LOCALHOST,
@@ -4146,7 +4146,7 @@ describe('EscrowUtils', () => {
 
       const expectedResults = pendingEvents.map((event) => ({
         ...event,
-        status: EscrowStatus.Pending,
+        status: EscrowStatus[EscrowStatus.Pending],
         timestamp: +event.timestamp * 1000,
         block: BigInt(event.block),
         chainId: ChainId.POLYGON_AMOY,
@@ -4189,7 +4189,7 @@ describe('EscrowUtils', () => {
 
       const expectedResults = partialEvents.map((event) => ({
         ...event,
-        status: EscrowStatus.Partial,
+        status: EscrowStatus[EscrowStatus.Partial],
         timestamp: +event.timestamp * 1000,
         block: BigInt(event.block),
         chainId: ChainId.POLYGON_AMOY,
@@ -4231,7 +4231,7 @@ describe('EscrowUtils', () => {
 
       const expectedResults = pendingEvents.map((event) => ({
         ...event,
-        status: EscrowStatus.Pending,
+        status: EscrowStatus[EscrowStatus.Pending],
         timestamp: +event.timestamp * 1000,
         block: BigInt(event.block),
         chainId: ChainId.POLYGON_AMOY,
