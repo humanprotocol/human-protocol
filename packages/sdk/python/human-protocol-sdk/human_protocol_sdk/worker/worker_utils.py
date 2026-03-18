@@ -9,7 +9,7 @@ Example:
         WorkerFilter(chain_id=ChainId.POLYGON_AMOY)
     )
     for worker in workers:
-        print(f"{worker.address}: {worker.total_amount_received}")
+        print(f"{worker.address}: {worker.payout_count}")
     ```
 """
 
@@ -37,7 +37,6 @@ class WorkerData:
     Attributes:
         id (str): Unique worker identifier.
         address (str): Worker's Ethereum address.
-        total_amount_received (int): Total amount of HMT tokens received by the worker.
         payout_count (int): Number of payouts the worker has received.
     """
 
@@ -45,12 +44,10 @@ class WorkerData:
         self,
         id: str,
         address: str,
-        total_amount_received: str,
         payout_count: str,
     ):
         self.id = id
         self.address = address
-        self.total_amount_received = int(total_amount_received)
         self.payout_count = int(payout_count)
 
 
@@ -94,7 +91,7 @@ class WorkerUtils:
                 WorkerFilter(chain_id=ChainId.POLYGON_AMOY)
             )
             for worker in workers:
-                print(f"{worker.address}: {worker.total_amount_received} HMT")
+                print(f"{worker.address}: {worker.payout_count} payouts")
 
             # Get specific worker
             workers = WorkerUtils.get_workers(
@@ -141,7 +138,6 @@ class WorkerUtils:
                 WorkerData(
                     id=worker.get("id"),
                     address=worker.get("address"),
-                    total_amount_received=worker.get("totalHMTAmountReceived"),
                     payout_count=worker.get("payoutCount"),
                 )
             )
@@ -180,7 +176,6 @@ class WorkerUtils:
                 "0x1234567890123456789012345678901234567890",
             )
             if worker:
-                print(f"Total received: {worker.total_amount_received} HMT")
                 print(f"Payout count: {worker.payout_count}")
             ```
         """
@@ -215,6 +210,5 @@ class WorkerUtils:
         return WorkerData(
             id=worker.get("id"),
             address=worker.get("address"),
-            total_amount_received=worker.get("totalHMTAmountReceived"),
             payout_count=worker.get("payoutCount"),
         )
