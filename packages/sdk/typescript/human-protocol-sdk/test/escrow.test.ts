@@ -4083,13 +4083,15 @@ describe('EscrowUtils', () => {
           escrowAddress: '0x1',
           timestamp: '1234567890',
           status: 'Pending',
-          chainId: ChainId.LOCALHOST,
+          block: '123456',
+          txHash: '0x123',
         },
         {
           escrowAddress: '0x2',
           timestamp: '1234567891',
           status: 'Pending',
-          chainId: ChainId.LOCALHOST,
+          block: '123457',
+          txHash: '0x124',
         },
       ];
 
@@ -4104,6 +4106,8 @@ describe('EscrowUtils', () => {
         ...event,
         status: EscrowStatus.Pending,
         timestamp: +event.timestamp * 1000,
+        block: BigInt(event.block),
+        chainId: ChainId.LOCALHOST,
       }));
       expect(result).toEqual(expectedResults);
       expect(gqlFetchSpy).toHaveBeenCalled();
@@ -4118,13 +4122,15 @@ describe('EscrowUtils', () => {
           escrowAddress: '0x1',
           timestamp: '1234567890',
           status: 'Pending',
-          chainId: ChainId.POLYGON_AMOY,
+          block: '123456',
+          txHash: '0x123',
         },
         {
           escrowAddress: '0x2',
           timestamp: '1234567891',
           status: 'Pending',
-          chainId: ChainId.POLYGON_AMOY,
+          block: '123457',
+          txHash: '0x124',
         },
       ];
 
@@ -4142,6 +4148,8 @@ describe('EscrowUtils', () => {
         ...event,
         status: EscrowStatus.Pending,
         timestamp: +event.timestamp * 1000,
+        block: BigInt(event.block),
+        chainId: ChainId.POLYGON_AMOY,
       }));
       expect(result).toEqual(expectedResults);
       expect(gqlFetchSpy).toHaveBeenCalled();
@@ -4156,13 +4164,15 @@ describe('EscrowUtils', () => {
           escrowAddress: '0x1',
           timestamp: '1234567890',
           status: 'Partial',
-          chainId: ChainId.POLYGON_AMOY,
+          block: '123456',
+          txHash: '0x123',
         },
         {
           escrowAddress: '0x2',
           timestamp: '1234567891',
           status: 'Partial',
-          chainId: ChainId.POLYGON_AMOY,
+          block: '123457',
+          txHash: '0x124',
         },
       ];
 
@@ -4181,6 +4191,8 @@ describe('EscrowUtils', () => {
         ...event,
         status: EscrowStatus.Partial,
         timestamp: +event.timestamp * 1000,
+        block: BigInt(event.block),
+        chainId: ChainId.POLYGON_AMOY,
       }));
       expect(result).toEqual(expectedResults);
       expect(gqlFetchSpy).toHaveBeenCalled();
@@ -4195,13 +4207,15 @@ describe('EscrowUtils', () => {
           escrowAddress: '0x1',
           timestamp: '1234567890',
           status: 'Pending',
-          chainId: ChainId.POLYGON_AMOY,
+          block: '123456',
+          txHash: '0x123',
         },
         {
           escrowAddress: '0x2',
           timestamp: '1234567891',
           status: 'Pending',
-          chainId: ChainId.POLYGON_AMOY,
+          block: '123457',
+          txHash: '0x124',
         },
       ];
 
@@ -4219,6 +4233,8 @@ describe('EscrowUtils', () => {
         ...event,
         status: EscrowStatus.Pending,
         timestamp: +event.timestamp * 1000,
+        block: BigInt(event.block),
+        chainId: ChainId.POLYGON_AMOY,
       }));
       expect(result).toEqual(expectedResults);
       expect(gqlFetchSpy).toHaveBeenCalled();

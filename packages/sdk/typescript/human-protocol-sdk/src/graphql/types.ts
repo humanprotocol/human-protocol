@@ -121,6 +121,8 @@ export type StatusEvent = {
   timestamp: string;
   escrowAddress: string;
   status: string;
+  block: string;
+  txHash: string;
 };
 
 export type KVStoreData = {

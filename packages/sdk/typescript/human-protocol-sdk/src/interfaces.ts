@@ -176,6 +176,7 @@ export interface IStatusEventFilter extends IPagination {
   from?: Date;
   to?: Date;
   launcher?: string;
+  escrowAddress?: string;
 }
 
 export interface IWorker {
@@ -282,6 +283,8 @@ export interface IStatusEvent {
   escrowAddress: string;
   status: EscrowStatus;
   chainId: ChainId;
+  block: bigint;
+  txHash: string;
 }
 
 export interface ICancellationRefund {
