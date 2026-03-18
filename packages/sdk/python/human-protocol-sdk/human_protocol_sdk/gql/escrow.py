@@ -97,11 +97,16 @@ query GetEscrow(
     }}
 }}
 {escrow_fragment}
-""".format(escrow_fragment=escrow_fragment)
+""".format(
+        escrow_fragment=escrow_fragment
+    )
 
 
 def get_status_query(
-    from_: datetime = None, to_: datetime = None, launcher: str = None
+    from_: datetime = None,
+    to_: datetime = None,
+    launcher: str = None,
+    escrow_address: str = None,
 ):
     return """
 query getStatus(
@@ -109,6 +114,7 @@ query getStatus(
     $from: Int
     $to: Int
     $launcher: String
+    $escrowAddress: String
     $orderDirection: String
     $first: Int
     $skip: Int
@@ -119,20 +125,25 @@ query getStatus(
             {from_clause}
             {to_clause}
             {launcher_clause}
+            {escrow_address_clause}
         }}
         orderBy: timestamp
         orderDirection: $orderDirection
         first: $first
         skip: $skip
     ) {{
-        id
         escrowAddress
         timestamp
         status
+        block
+        txHash
     }}
 }}
 """.format(
         from_clause="timestamp_gte: $from" if from_ else "",
         to_clause="timestamp_lte: $to" if to_ else "",
         launcher_clause=f"launcher: $launcher" if launcher else "",
+        escrow_address_clause=(
+            f"escrowAddress: $escrowAddress" if escrow_address else ""
+        ),
     )
