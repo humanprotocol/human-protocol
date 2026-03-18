@@ -27,8 +27,7 @@ describe('WorkerUtils', () => {
     const mockWorker: WorkerData = {
       id: workerAddress,
       address: workerAddress,
-      totalHMTAmountReceived: '1000',
-      payoutCount: 10,
+      payoutCount: '10',
     };
 
     test('should return worker details', async () => {
@@ -51,7 +50,7 @@ describe('WorkerUtils', () => {
       );
       const expected: IWorker = {
         ...mockWorker,
-        totalHMTAmountReceived: BigInt(mockWorker.totalHMTAmountReceived || 0),
+        payoutCount: Number(mockWorker.payoutCount || 0),
       };
       expect(result).toEqual(expected);
     });
@@ -100,14 +99,12 @@ describe('WorkerUtils', () => {
       {
         id: '0x1234567890abcdef1234567890abcdef12345678',
         address: '0x1234567890abcdef1234567890abcdef12345678',
-        totalHMTAmountReceived: '1000',
-        payoutCount: 10,
+        payoutCount: '10',
       },
       {
         id: '0xabcdefabcdefabcdefabcdefabcdefabcdef',
         address: '0xabcdefabcdefabcdefabcdefabcdefabcdef',
-        totalHMTAmountReceived: '2000',
-        payoutCount: 20,
+        payoutCount: '20',
       },
     ];
 
@@ -120,7 +117,7 @@ describe('WorkerUtils', () => {
         chainId: ChainId.LOCALHOST,
         first: 10,
         skip: 0,
-        orderBy: 'totalHMTAmountReceived',
+        orderBy: 'payoutCount',
         orderDirection: OrderDirection.ASC,
       };
 
@@ -133,14 +130,14 @@ describe('WorkerUtils', () => {
           address: undefined,
           first: 10,
           skip: 0,
-          orderBy: 'totalHMTAmountReceived',
+          orderBy: 'payoutCount',
           orderDirection: 'asc',
         },
         undefined
       );
       const expected: IWorker[] = mockWorkers.map((mockWorker) => ({
         ...mockWorker,
-        totalHMTAmountReceived: BigInt(mockWorker.totalHMTAmountReceived || 0),
+        payoutCount: Number(mockWorker.payoutCount || 0),
       }));
       expect(result).toEqual(expected);
     });
@@ -215,7 +212,7 @@ describe('WorkerUtils', () => {
 
       const expected: IWorker[] = mockWorkers.map((mockWorker) => ({
         ...mockWorker,
-        totalHMTAmountReceived: BigInt(mockWorker.totalHMTAmountReceived || 0),
+        payoutCount: Number(mockWorker.payoutCount || 0),
       }));
       expect(result).toEqual(expected);
     });

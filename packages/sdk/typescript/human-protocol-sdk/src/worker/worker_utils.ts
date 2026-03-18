@@ -93,7 +93,6 @@ export class WorkerUtils {
    * type IWorker = {
    *   id: string;
    *   address: string;
-   *   totalHMTAmountReceived: bigint;
    *   payoutCount: number;
    * };
    * ```
@@ -162,7 +161,6 @@ function mapWorker(w: WorkerData): IWorker {
   return {
     id: w.id,
     address: w.address,
-    totalHMTAmountReceived: BigInt(w.totalHMTAmountReceived || 0),
     payoutCount: Number(w.payoutCount || 0),
   };
 }

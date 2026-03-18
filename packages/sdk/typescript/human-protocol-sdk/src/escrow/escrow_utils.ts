@@ -212,12 +212,17 @@ export class EscrowUtils {
       from,
       to,
       launcher,
+      escrowAddress,
       first = 10,
       skip = 0,
       orderDirection = OrderDirection.DESC,
     } = filter;
 
     if (launcher && !ethers.isAddress(launcher)) {
+      throw ErrorInvalidAddress;
+    }
+
+    if (escrowAddress && !ethers.isAddress(escrowAddress)) {
       throw ErrorInvalidAddress;
     }
 
@@ -242,12 +247,13 @@ export class EscrowUtils {
       escrowStatusEvents: StatusEvent[];
     }>(
       getSubgraphUrl(networkData),
-      GET_STATUS_UPDATES_QUERY(from, to, launcher),
+      GET_STATUS_UPDATES_QUERY(from, to, launcher, escrowAddress),
       {
         status: statusNames,
         from: from ? getUnixTimestamp(from) : undefined,
         to: to ? getUnixTimestamp(to) : undefined,
         launcher: launcher || undefined,
+        escrowAddress: escrowAddress || undefined,
         orderDirection,
         first: Math.min(first, 1000),
         skip,
@@ -262,8 +268,10 @@ export class EscrowUtils {
     return data['escrowStatusEvents'].map((event) => ({
       timestamp: Number(event.timestamp) * 1000,
       escrowAddress: event.escrowAddress,
-      status: EscrowStatus[event.status as keyof typeof EscrowStatus],
+      status: event.status as keyof typeof EscrowStatus,
       chainId,
+      block: BigInt(event.block),
+      txHash: event.txHash,
     }));
   }
 

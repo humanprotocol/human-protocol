@@ -143,12 +143,20 @@ class StatusEvent:
     """
 
     def __init__(
-        self, timestamp: int, status: str, chain_id: ChainId, escrow_address: str
+        self,
+        timestamp: int,
+        status: str,
+        chain_id: ChainId,
+        escrow_address: str,
+        block: str,
+        tx_hash: str,
     ):
         self.timestamp = timestamp * 1000
         self.status = status
         self.chain_id = chain_id
         self.escrow_address = escrow_address
+        self.block = int(block)
+        self.tx_hash = tx_hash
 
 
 class Payout:
@@ -473,6 +481,9 @@ class EscrowUtils:
         if filter.launcher and not Web3.is_address(filter.launcher):
             raise EscrowClientError("Invalid Address")
 
+        if filter.escrow_address and not Web3.is_address(filter.escrow_address):
+            raise EscrowClientError("Invalid Address")
+
         network = NETWORKS.get(filter.chain_id)
         if not network:
             raise EscrowClientError("Unsupported Chain ID")
@@ -481,12 +492,17 @@ class EscrowUtils:
 
         data = custom_gql_fetch(
             network,
-            get_status_query(filter.date_from, filter.date_to, filter.launcher),
+            get_status_query(
+                filter.date_from, filter.date_to, filter.launcher, filter.escrow_address
+            ),
             {
                 "status": status_names,
                 "from": int(filter.date_from.timestamp()) if filter.date_from else None,
                 "to": int(filter.date_to.timestamp()) if filter.date_to else None,
                 "launcher": filter.launcher.lower() if filter.launcher else None,
+                "escrowAddress": (
+                    filter.escrow_address.lower() if filter.escrow_address else None
+                ),
                 "first": filter.first,
                 "skip": filter.skip,
                 "orderDirection": filter.order_direction.value,
@@ -510,6 +526,8 @@ class EscrowUtils:
                 escrow_address=event["escrowAddress"],
                 status=event["status"],
                 chain_id=filter.chain_id,
+                block=event["block"],
+                tx_hash=event["txHash"],
             )
             for event in status_events
         ]

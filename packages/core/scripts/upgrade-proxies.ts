@@ -1,8 +1,11 @@
 /* eslint-disable no-console */
 import { ethers, upgrades } from 'hardhat';
 import type { EscrowFactory } from '../typechain-types';
+import { applyRpcAddressWorkaround } from './rpc-workarounds';
 
 async function main() {
+  applyRpcAddressWorkaround();
+
   const escrowFactoryAddress = process.env.ESCROW_FACTORY_ADDRESS;
   const kvStoreAddress = process.env.KVSTORE_ADDRESS;
 
@@ -21,9 +24,13 @@ async function main() {
       EscrowFactory
     );
     const contract = await escrowFactoryContract.waitForDeployment();
-    const hash = contract.deploymentTransaction()?.hash;
-    if (hash) {
-      await ethers.provider.getTransactionReceipt(hash);
+    const upgradeTx = contract.deploymentTransaction();
+    if (upgradeTx) {
+      console.log(
+        'Waiting for upgrade transaction confirmation...',
+        upgradeTx.hash
+      );
+      await upgradeTx.wait();
     }
 
     const escrowFactory = (await ethers.getContractAt(

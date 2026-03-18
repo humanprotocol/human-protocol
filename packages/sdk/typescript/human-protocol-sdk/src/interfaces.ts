@@ -176,12 +176,12 @@ export interface IStatusEventFilter extends IPagination {
   from?: Date;
   to?: Date;
   launcher?: string;
+  escrowAddress?: string;
 }
 
 export interface IWorker {
   id: string;
   address: string;
-  totalHMTAmountReceived: bigint;
   payoutCount: number;
 }
 
@@ -280,8 +280,10 @@ export interface IDailyHMT {
 export interface IStatusEvent {
   timestamp: number;
   escrowAddress: string;
-  status: EscrowStatus;
+  status: keyof typeof EscrowStatus;
   chainId: ChainId;
+  block: bigint;
+  txHash: string;
 }
 
 export interface ICancellationRefund {

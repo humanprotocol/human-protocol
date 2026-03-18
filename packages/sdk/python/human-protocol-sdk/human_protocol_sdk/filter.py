@@ -302,6 +302,7 @@ class StatusEventFilter:
         date_from (Optional[datetime]): Filter events from this date.
         date_to (Optional[datetime]): Filter events until this date.
         launcher (Optional[str]): Launcher address to filter by.
+        escrow_address (Optional[str]): Escrow address to filter by.
         first (int): Number of items per page.
         skip (int): Number of items to skip for pagination.
         order_direction (OrderDirection): Sort order for results.
@@ -314,6 +315,7 @@ class StatusEventFilter:
         date_from: Optional[datetime] = None,
         date_to: Optional[datetime] = None,
         launcher: Optional[str] = None,
+        escrow_address: Optional[str] = None,
         first: int = 10,
         skip: int = 0,
         order_direction: OrderDirection = OrderDirection.DESC,
@@ -326,6 +328,7 @@ class StatusEventFilter:
         :param date_from: Optional start date for filtering.
         :param date_to: Optional end date for filtering.
         :param launcher: Optional launcher address to filter by.
+        :param escrow_address: Optional escrow address to filter by.
         :param first: Optional number of events per page. Default is 10.
         :param skip: Optional number of events to skip. Default is 0.
         :param order_direction: Optional order direction. Default is DESC.
@@ -342,6 +345,7 @@ class StatusEventFilter:
         self.date_from = date_from
         self.date_to = date_to
         self.launcher = launcher
+        self.escrow_address = escrow_address
         self.first = first
         self.skip = skip
         self.order_direction = order_direction

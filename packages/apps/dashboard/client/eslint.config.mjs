@@ -1,9 +1,10 @@
 import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
+import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript';
+import { createNodeResolver, importX } from 'eslint-plugin-import-x';
 import reactPlugin from 'eslint-plugin-react';
 import reactHooksPlugin from 'eslint-plugin-react-hooks';
 import prettierPlugin from 'eslint-plugin-prettier';
-import importPlugin from 'eslint-plugin-import';
 import globals from 'globals';
 
 export default tseslint.config(
@@ -33,17 +34,18 @@ export default tseslint.config(
       react: reactPlugin,
       'react-hooks': reactHooksPlugin,
       prettier: prettierPlugin,
-      import: importPlugin,
+      'import-x': importX,
     },
     settings: {
       react: {
         version: 'detect',
       },
-      'import/resolver': {
-        typescript: {
+      'import-x/resolver-next': [
+        createTypeScriptImportResolver({
           alwaysTryTypes: true,
-        },
-      },
+        }),
+        createNodeResolver(),
+      ],
     },
     rules: {
       'no-useless-assignment': 'off',
@@ -53,7 +55,7 @@ export default tseslint.config(
       'react/react-in-jsx-scope': 'off',
       'react-hooks/exhaustive-deps': 'warn',
       'react-hooks/rules-of-hooks': 'error',
-      'import/order': [
+      'import-x/order': [
         'error',
         {
           groups: [
@@ -79,8 +81,8 @@ export default tseslint.config(
           },
         },
       ],
-      'import/no-duplicates': 'error',
-      'import/no-unresolved': 'error',
+      'import-x/no-duplicates': 'error',
+      'import-x/no-unresolved': 'error',
       '@typescript-eslint/consistent-type-imports': 'error',
       '@typescript-eslint/no-unused-vars': [
         'error',

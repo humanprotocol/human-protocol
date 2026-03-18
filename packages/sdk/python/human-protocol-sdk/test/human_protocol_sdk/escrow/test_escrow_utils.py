@@ -381,6 +381,8 @@ class TestEscrowUtils(unittest.TestCase):
                             "timestamp": 1620000000,
                             "escrowAddress": "0x123",
                             "status": "Pending",
+                            "block": "123456",
+                            "txHash": "0xabc",
                         }
                     ]
                 }
@@ -396,6 +398,8 @@ class TestEscrowUtils(unittest.TestCase):
             self.assertEqual(result[0].escrow_address, "0x123")
             self.assertEqual(result[0].status, "Pending")
             self.assertEqual(result[0].chain_id, ChainId.POLYGON_AMOY)
+            self.assertEqual(result[0].block, 123456)
+            self.assertEqual(result[0].tx_hash, "0xabc")
 
     def test_get_status_events_with_date_range(self):
         with patch(
@@ -408,6 +412,8 @@ class TestEscrowUtils(unittest.TestCase):
                             "timestamp": 1620000000,
                             "escrowAddress": "0x123",
                             "status": "Pending",
+                            "block": "123456",
+                            "txHash": "0xabc",
                         }
                     ]
                 }
@@ -429,6 +435,8 @@ class TestEscrowUtils(unittest.TestCase):
             self.assertEqual(result[0].escrow_address, "0x123")
             self.assertEqual(result[0].status, "Pending")
             self.assertEqual(result[0].chain_id, ChainId.POLYGON_AMOY)
+            self.assertEqual(result[0].block, 123456)
+            self.assertEqual(result[0].tx_hash, "0xabc")
 
     def test_get_status_events_no_data(self):
         with patch(
@@ -454,6 +462,8 @@ class TestEscrowUtils(unittest.TestCase):
                             "timestamp": 1620000000,
                             "escrowAddress": "0x123",
                             "status": "Pending",
+                            "block": "123456",
+                            "txHash": "0xabc",
                         }
                     ]
                 }
@@ -471,6 +481,8 @@ class TestEscrowUtils(unittest.TestCase):
             self.assertEqual(result[0].escrow_address, "0x123")
             self.assertEqual(result[0].status, "Pending")
             self.assertEqual(result[0].chain_id, ChainId.POLYGON_AMOY)
+            self.assertEqual(result[0].block, 123456)
+            self.assertEqual(result[0].tx_hash, "0xabc")
 
     def test_get_payouts_unsupported_chain_id(self):
         filter = PayoutFilter(chain_id=9999)

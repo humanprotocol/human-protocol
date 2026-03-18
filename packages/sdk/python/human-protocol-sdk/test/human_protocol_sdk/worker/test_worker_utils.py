@@ -15,13 +15,11 @@ class TestWorkerUtils(unittest.TestCase):
             mock_worker_1 = {
                 "id": "worker1",
                 "address": "0x1234567890123456789012345678901234567890",
-                "totalHMTAmountReceived": "1000",
                 "payoutCount": 5,
             }
             mock_worker_2 = {
                 "id": "worker2",
                 "address": "0x9876543210987654321098765432109876543210",
-                "totalHMTAmountReceived": "2000",
                 "payoutCount": 10,
             }
 
@@ -31,7 +29,7 @@ class TestWorkerUtils(unittest.TestCase):
 
             filter = WorkerFilter(
                 chain_id=ChainId.POLYGON_AMOY,
-                order_by="totalHMTAmountReceived",
+                order_by="payoutCount",
                 order_direction=OrderDirection.ASC,
             )
 
@@ -44,7 +42,7 @@ class TestWorkerUtils(unittest.TestCase):
                     "address": None,
                     "first": 10,
                     "skip": 0,
-                    "orderBy": "totalHMTAmountReceived",
+                    "orderBy": "payoutCount",
                     "orderDirection": "asc",
                 },
                 options=None,
@@ -52,6 +50,8 @@ class TestWorkerUtils(unittest.TestCase):
             self.assertEqual(len(workers), 2)
             self.assertEqual(workers[0].id, "worker1")
             self.assertEqual(workers[1].id, "worker2")
+            self.assertEqual(workers[0].payout_count, 5)
+            self.assertEqual(workers[1].payout_count, 10)
 
     def test_get_workers_empty_response(self):
         with patch(
@@ -93,7 +93,6 @@ class TestWorkerUtils(unittest.TestCase):
             mock_worker = {
                 "id": "worker1",
                 "address": "0x1234567890123456789012345678901234567890",
-                "totalHMTAmountReceived": "1000",
                 "payoutCount": 5,
             }
 
@@ -115,6 +114,7 @@ class TestWorkerUtils(unittest.TestCase):
             self.assertEqual(
                 worker.address, "0x1234567890123456789012345678901234567890"
             )
+            self.assertEqual(worker.payout_count, 5)
 
     def test_get_worker_empty_data(self):
         with patch(

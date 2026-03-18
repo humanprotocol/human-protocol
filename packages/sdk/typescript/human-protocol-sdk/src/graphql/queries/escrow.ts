@@ -107,7 +107,8 @@ export const GET_ESCROWS_QUERY = (filter: IEscrowsFilter) => {
 export const GET_STATUS_UPDATES_QUERY = (
   from?: Date,
   to?: Date,
-  launcher?: string
+  launcher?: string,
+  escrowAddress?: string
 ) => {
   const WHERE_CLAUSE = `
     where: {
@@ -115,6 +116,7 @@ export const GET_STATUS_UPDATES_QUERY = (
       ${from ? `timestamp_gte: $from` : ''}
       ${to ? `timestamp_lte: $to` : ''}
       ${launcher ? `launcher: $launcher` : ''}
+      ${escrowAddress ? `escrowAddress: $escrowAddress` : ''}
     }
   `;
   return gql`
@@ -123,6 +125,7 @@ export const GET_STATUS_UPDATES_QUERY = (
       $from: Int
       $to: Int
       $launcher: String
+      $escrowAddress: String
       $orderDirection: String
       $first: Int
       $skip: Int
@@ -137,6 +140,8 @@ export const GET_STATUS_UPDATES_QUERY = (
         escrowAddress,
         timestamp,
         status,
+        block,
+        txHash,
       }
     }
   `;

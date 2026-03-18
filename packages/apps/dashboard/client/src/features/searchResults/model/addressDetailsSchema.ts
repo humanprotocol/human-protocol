@@ -11,7 +11,6 @@ const walletSchema = z.object({
   lockedAmount: z.string(),
   withdrawableAmount: z.string(),
   reputation: reputationSchema,
-  totalHMTAmountReceived: z.string(),
   payoutCount: z.number().or(z.string()),
 });
 

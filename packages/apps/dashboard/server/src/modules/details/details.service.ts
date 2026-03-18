@@ -128,9 +128,6 @@ export class DetailsService {
       withdrawableAmount: ethers.formatEther(stakingData.withdrawableAmount),
       reputation: (await this.fetchOperatorReputation(chainId, address))
         .reputation,
-      totalHMTAmountReceived: ethers.formatEther(
-        workerData?.totalHMTAmountReceived || 0,
-      ),
       payoutCount: workerData?.payoutCount || 0,
     });
 
