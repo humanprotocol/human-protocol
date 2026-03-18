@@ -1,5 +1,16 @@
 # @human-protocol/sdk
 
+## 7.1.0
+
+### Minor Changes
+
+- 7da7b12: Extended SDK to return block and tx hash for "getStatusEvents".
+  Fixed "status" field in return value to be consistent in SDKs.
+
+### Patch Changes
+
+- a49202f: Delete references to totalHMTAmountReceived that was removed from subgraph
+
 ## 7.0.0
 
 ### Major Changes
