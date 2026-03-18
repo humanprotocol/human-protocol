@@ -3,7 +3,6 @@ import globals from 'globals';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import reactHooks from 'eslint-plugin-react-hooks';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
-import eslintPluginImport from 'eslint-plugin-import';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
@@ -31,7 +30,6 @@ export default tseslint.config(
       '@typescript-eslint': tseslint.plugin,
       'react-hooks': reactHooks,
       'jsx-a11y': jsxA11y,
-      import: eslintPluginImport,
     },
     rules: {
       'no-useless-assignment': 'off',

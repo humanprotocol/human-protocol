@@ -7,7 +7,7 @@ import { AesEncryptionService } from '@/modules/encryption/aes-encryption.servic
 import { mockEncryptionConfigService } from '@/modules/encryption/fixtures';
 import { ExchangeClientFactory } from '@/modules/exchange/exchange-client.factory';
 
-// eslint-disable-next-line import/order
+// eslint-disable-next-line import-x/order
 import { ExchangeApiKeysService } from './exchange-api-keys.service';
 import { UserEntity, UserNotFoundError, UserRepository } from '@/modules/user';
 

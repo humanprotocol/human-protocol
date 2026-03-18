@@ -123,7 +123,8 @@ __metadata:
     clsx: "npm:^2.1.1"
     dayjs: "npm:^1.11.11"
     eslint: "npm:^10.0.3"
-    eslint-plugin-import: "npm:^2.31.0"
+    eslint-import-resolver-typescript: "npm:^4.4.4"
+    eslint-plugin-import-x: "npm:^4.16.2"
     eslint-plugin-prettier: "npm:^5.5.5"
     eslint-plugin-react: "npm:^7.37.5"
     eslint-plugin-react-hooks: "npm:^5.2.0"
@@ -220,8 +221,6 @@ __metadata:
     eslint: "npm:^10.0.3"
     eslint-config-prettier: "npm:^10.1.8"
     eslint-config-react-app: "npm:^7.0.1"
-    eslint-import-resolver-typescript: "npm:^3.7.0"
-    eslint-plugin-import: "npm:^2.29.0"
     eslint-plugin-prettier: "npm:^5.5.5"
     eslint-plugin-react: "npm:^7.34.3"
     eslint-plugin-react-hooks: "npm:^5.1.0"
@@ -471,7 +470,6 @@ __metadata:
     date-fns: "npm:^4.1.0"
     eslint: "npm:^10.0.3"
     eslint-config-prettier: "npm:^9.1.0"
-    eslint-plugin-import: "npm:^2.32.0"
     eslint-plugin-jsx-a11y: "npm:^6.10.2"
     eslint-plugin-prettier: "npm:^5.5.5"
     eslint-plugin-react-hooks: "npm:^5.2.0"
@@ -604,8 +602,6 @@ __metadata:
     eslint: "npm:^10.0.3"
     eslint-config-prettier: "npm:^10.1.8"
     eslint-config-react-app: "npm:^7.0.1"
-    eslint-import-resolver-typescript: "npm:^3.7.0"
-    eslint-plugin-import: "npm:^2.29.0"
     eslint-plugin-jsx-a11y: "npm:^6.10.2"
     eslint-plugin-prettier: "npm:^5.5.5"
     eslint-plugin-react: "npm:^7.34.3"
@@ -755,7 +751,7 @@ __metadata:
     eslint: "npm:^10.0.3"
     eslint-config-prettier: "npm:^10.1.8"
     eslint-import-resolver-typescript: "npm:^4.4.4"
-    eslint-plugin-import: "npm:^2.32.0"
+    eslint-plugin-import-x: "npm:^4.16.2"
     eslint-plugin-prettier: "npm:^5.5.5"
     ethers: "npm:~6.16.0"
     globals: "npm:^16.3.0"
@@ -5169,7 +5165,7 @@ __metadata:
     eslint: "npm:^10.0.3"
     eslint-config-prettier: "npm:^10.1.5"
     eslint-import-resolver-typescript: "npm:^4.4.4"
-    eslint-plugin-import: "npm:^2.32.0"
+    eslint-plugin-import-x: "npm:^4.16.2"
     eslint-plugin-prettier: "npm:^5.5.5"
     globals: "npm:^16.3.0"
     pino: "npm:^10.3.1"
@@ -5220,7 +5216,6 @@ __metadata:
     axios: "npm:^1.4.0"
     eslint: "npm:^10.0.3"
     eslint-config-prettier: "npm:^10.1.8"
-    eslint-plugin-import: "npm:^2.32.0"
     eslint-plugin-jest: "npm:^29.15.0"
     eslint-plugin-prettier: "npm:^5.5.5"
     ethers: "npm:~6.16.0"
@@ -8542,6 +8537,13 @@ __metadata:
   bin:
     openzeppelin-upgrades-core: dist/cli/cli.js
   checksum: 10c0/4ff49400aa3e87106b9e653976d1ec4b261e242b974fe022bf290f9f783f0dbcb8c2b306e73028c0f364b83428b3dc1d66d0c668d4a05cce0446a40d418187a4
+  languageName: node
+  linkType: hard
+
+"@package-json/types@npm:^0.0.12":
+  version: 0.0.12
+  resolution: "@package-json/types@npm:0.0.12"
+  checksum: 10c0/d9bba086efe7b9901f02f1cff7a68ab23269aeddfb7ee92a16930e219f705bfc188b9fec2dd47265033dbda45ed1514d8a46f46363f38f1ad56bc993754126da
   languageName: node
   linkType: hard
 
@@ -12721,7 +12723,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/types@npm:8.57.1, @typescript-eslint/types@npm:^8.57.1":
+"@typescript-eslint/types@npm:8.57.1, @typescript-eslint/types@npm:^8.56.0, @typescript-eslint/types@npm:^8.57.1":
   version: 8.57.1
   resolution: "@typescript-eslint/types@npm:8.57.1"
   checksum: 10c0/f447015276a31871440b07e328c2bbcee8337d72dca90ae00ac91e87d09e28a8a9c2fe44726a5226fcaa7db9d5347aafa650d59f7577a074dc65ea1414d24da1
@@ -16601,6 +16603,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"comment-parser@npm:^1.4.1":
+  version: 1.4.5
+  resolution: "comment-parser@npm:1.4.5"
+  checksum: 10c0/6a6a74697c79927e3bd42bde9608a471f1a9d4995affbc22fa3364cc42b4017f82ef477431a1558b0b6bef959f9bb6964c01c1bbfc06a58ba1730dec9c423b44
+  languageName: node
+  linkType: hard
+
 "compare-versions@npm:^6.0.0":
   version: 6.1.1
   resolution: "compare-versions@npm:6.1.1"
@@ -18539,7 +18548,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-import-context@npm:^0.1.8":
+"eslint-import-context@npm:^0.1.8, eslint-import-context@npm:^0.1.9":
   version: 0.1.9
   resolution: "eslint-import-context@npm:0.1.9"
   dependencies:
@@ -18574,7 +18583,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-import-resolver-typescript@npm:^3.6.1, eslint-import-resolver-typescript@npm:^3.7.0":
+"eslint-import-resolver-typescript@npm:^3.6.1":
   version: 3.10.1
   resolution: "eslint-import-resolver-typescript@npm:3.10.1"
   dependencies:
@@ -18660,7 +18669,34 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-import@npm:^2.25.3, eslint-plugin-import@npm:^2.29.0, eslint-plugin-import@npm:^2.29.1, eslint-plugin-import@npm:^2.31.0, eslint-plugin-import@npm:^2.32.0":
+"eslint-plugin-import-x@npm:^4.16.2":
+  version: 4.16.2
+  resolution: "eslint-plugin-import-x@npm:4.16.2"
+  dependencies:
+    "@package-json/types": "npm:^0.0.12"
+    "@typescript-eslint/types": "npm:^8.56.0"
+    comment-parser: "npm:^1.4.1"
+    debug: "npm:^4.4.1"
+    eslint-import-context: "npm:^0.1.9"
+    is-glob: "npm:^4.0.3"
+    minimatch: "npm:^9.0.3 || ^10.1.2"
+    semver: "npm:^7.7.2"
+    stable-hash-x: "npm:^0.2.0"
+    unrs-resolver: "npm:^1.9.2"
+  peerDependencies:
+    "@typescript-eslint/utils": ^8.56.0
+    eslint: ^8.57.0 || ^9.0.0 || ^10.0.0
+    eslint-import-resolver-node: "*"
+  peerDependenciesMeta:
+    "@typescript-eslint/utils":
+      optional: true
+    eslint-import-resolver-node:
+      optional: true
+  checksum: 10c0/b51b814323a6005c5230fccdffef9a8adc3691ad7a475de6ba635f5ef776fc1f5d1a1c7e65e2c98c6033155cc7e8f8b9f2f507fe31fc038972d535355673e83e
+  languageName: node
+  linkType: hard
+
+"eslint-plugin-import@npm:^2.25.3, eslint-plugin-import@npm:^2.29.1":
   version: 2.32.0
   resolution: "eslint-plugin-import@npm:2.32.0"
   dependencies:
@@ -24414,7 +24450,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minimatch@npm:^10.2.2, minimatch@npm:^10.2.4":
+"minimatch@npm:^10.2.2, minimatch@npm:^10.2.4, minimatch@npm:^9.0.3 || ^10.1.2":
   version: 10.2.4
   resolution: "minimatch@npm:10.2.4"
   dependencies:
@@ -28296,6 +28332,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"semver@npm:^7.7.2":
+  version: 7.7.4
+  resolution: "semver@npm:7.7.4"
+  bin:
+    semver: bin/semver.js
+  checksum: 10c0/5215ad0234e2845d4ea5bb9d836d42b03499546ddafb12075566899fc617f68794bb6f146076b6881d755de17d6c6cc73372555879ec7dce2c2feee947866ad2
+  languageName: node
+  linkType: hard
+
 "send@npm:^1.1.0, send@npm:^1.2.0":
   version: 1.2.0
   resolution: "send@npm:1.2.0"
@@ -30863,7 +30908,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"unrs-resolver@npm:^1.6.2, unrs-resolver@npm:^1.7.11":
+"unrs-resolver@npm:^1.6.2, unrs-resolver@npm:^1.7.11, unrs-resolver@npm:^1.9.2":
   version: 1.11.1
   resolution: "unrs-resolver@npm:1.11.1"
   dependencies:
