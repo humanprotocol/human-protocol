@@ -241,7 +241,7 @@ export function handlePending(event: Pending): void {
     createTransaction(
       event,
       'setup',
-      event.transaction.from,
+      Address.fromBytes(escrowEntity.launcher),
       Address.fromBytes(escrowEntity.address),
       null,
       Address.fromBytes(escrowEntity.address)
@@ -275,7 +275,7 @@ export function handlePendingV2(event: PendingV2): void {
     createTransaction(
       event,
       'setup',
-      event.transaction.from,
+      Address.fromBytes(escrowEntity.launcher),
       Address.fromBytes(escrowEntity.address),
       null,
       Address.fromBytes(escrowEntity.address)
@@ -312,7 +312,7 @@ export function handlePendingV3(event: PendingV3): void {
     createTransaction(
       event,
       'setup',
-      event.transaction.from,
+      Address.fromBytes(escrowEntity.launcher),
       Address.fromBytes(escrowEntity.address),
       null,
       Address.fromBytes(escrowEntity.address)
@@ -711,7 +711,7 @@ export function handleFund(event: Fund): void {
   createTransaction(
     event,
     'fund',
-    event.transaction.from,
+    Address.fromBytes(escrowEntity.launcher),
     Address.fromBytes(escrowEntity.address),
     null,
     Address.fromBytes(escrowEntity.address),
