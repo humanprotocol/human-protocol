@@ -254,7 +254,7 @@ describe('Escrow', () => {
       'Transaction',
       newPending1.transaction.hash.toHex(),
       'from',
-      newPending1.transaction.from.toHex()
+      launcherAddressString
     );
     assert.fieldEquals(
       'Transaction',
@@ -380,7 +380,7 @@ describe('Escrow', () => {
       'Transaction',
       newPending1.transaction.hash.toHex(),
       'from',
-      newPending1.transaction.from.toHex()
+      launcherAddressString
     );
     assert.fieldEquals(
       'Transaction',
@@ -530,7 +530,7 @@ describe('Escrow', () => {
       'Transaction',
       newPending1.transaction.hash.toHex(),
       'from',
-      newPending1.transaction.from.toHex()
+      launcherAddressString
     );
     assert.fieldEquals(
       'Transaction',
@@ -573,6 +573,12 @@ describe('Escrow', () => {
       fund.transaction.hash.toHex(),
       'method',
       'fund'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      fund.transaction.hash.toHex(),
+      'from',
+      launcherAddressString
     );
     assert.fieldEquals(
       'Transaction',
@@ -728,7 +734,7 @@ describe('Escrow', () => {
       'Transaction',
       newPending1.transaction.hash.toHex(),
       'from',
-      newPending1.transaction.from.toHex()
+      launcherAddressString
     );
     assert.fieldEquals(
       'Transaction',
@@ -808,6 +814,12 @@ describe('Escrow', () => {
       newPending1.transaction.hash.toHex(),
       'method',
       'setup'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      newPending1.transaction.hash.toHex(),
+      'from',
+      launcherAddressString
     );
   });
 
