@@ -578,7 +578,7 @@ describe('Escrow', () => {
       'Transaction',
       fund.transaction.hash.toHex(),
       'from',
-      launcherAddressString
+      operatorAddressString
     );
     assert.fieldEquals(
       'Transaction',

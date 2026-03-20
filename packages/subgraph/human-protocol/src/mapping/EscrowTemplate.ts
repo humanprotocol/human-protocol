@@ -711,7 +711,7 @@ export function handleFund(event: Fund): void {
   createTransaction(
     event,
     'fund',
-    Address.fromBytes(escrowEntity.launcher),
+    event.transaction.from,
     Address.fromBytes(escrowEntity.address),
     null,
     Address.fromBytes(escrowEntity.address),
