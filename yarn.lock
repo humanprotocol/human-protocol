@@ -412,29 +412,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@apps/gcv@workspace:packages/examples/gcv":
-  version: 0.0.0-use.local
-  resolution: "@apps/gcv@workspace:packages/examples/gcv"
-  dependencies:
-    "@eslint/js": "npm:^10.0.1"
-    "@google-cloud/vision": "npm:^4.3.2"
-    "@nestjs/common": "npm:^11.1.12"
-    "@types/xml2js": "npm:^0.4.14"
-    axios: "npm:^1.7.2"
-    dotenv: "npm:^17.2.2"
-    eslint: "npm:^10.0.3"
-    eslint-config-prettier: "npm:^10.1.8"
-    eslint-plugin-jest: "npm:^29.15.0"
-    eslint-plugin-prettier: "npm:^5.5.5"
-    globals: "npm:^16.3.0"
-    jest: "npm:^29.7.0"
-    prettier: "npm:^3.8.1"
-    typescript: "npm:^5.8.3"
-    typescript-eslint: "npm:^8.57.0"
-    xml2js: "npm:^0.6.2"
-  languageName: unknown
-  linkType: soft
-
 "@apps/human-app-frontend@workspace:packages/apps/human-app/frontend":
   version: 0.0.0-use.local
   resolution: "@apps/human-app-frontend@workspace:packages/apps/human-app/frontend"
