@@ -31,7 +31,7 @@
     "@types/jest": "^29.5.14",
     "@types/node": "^22.15.16",
     "concurrently": "^9.1.2",
-    "eslint": "^10.0.3",
+    "eslint": "^10.1.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
     "globals": "^16.3.0",
