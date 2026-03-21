@@ -26,7 +26,7 @@
     "@mui/system": "^7.3.9",
     "@mui/x-data-grid": "^8.7.0",
     "@mui/x-date-pickers": "^8.26.0",
-    "@tanstack/react-query": "^5.67.2",
+    "@tanstack/react-query": "^5.91.3",
     "@types/react-router-dom": "^5.3.3",
     "@types/recharts": "^1.8.29",
     "axios": "^1.7.2",
