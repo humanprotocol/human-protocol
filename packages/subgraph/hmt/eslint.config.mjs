@@ -1,9 +1,10 @@
 import eslint from '@eslint/js';
+import { configs as graphqlConfigs } from '@graphql-eslint/eslint-plugin';
 import globals from 'globals';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import tseslint from 'typescript-eslint';
-import { flatConfigs as graphqlFlatConfigs } from '@graphql-eslint/eslint-plugin';
-const graphqlOperations = graphqlFlatConfigs['operations-recommended'];
+
+const graphqlOperations = graphqlConfigs['flat/operations-recommended'];
 
 export default tseslint.config(
   {

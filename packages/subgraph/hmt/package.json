@@ -33,7 +33,7 @@
     "@eslint/js": "^10.0.1",
     "@graphprotocol/graph-cli": "^0.97.1",
     "@graphprotocol/graph-ts": "^0.38.0",
-    "@graphql-eslint/eslint-plugin": "^3.19.1",
+    "@graphql-eslint/eslint-plugin": "^4.4.0",
     "@human-protocol/core": "workspace:*",
     "eslint": "^10.1.0",
     "eslint-config-prettier": "^10.1.8",
