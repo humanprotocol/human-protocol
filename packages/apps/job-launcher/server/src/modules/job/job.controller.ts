@@ -32,7 +32,6 @@ import {
   FortuneFinalResultDto,
   GetJobsDto,
   JobCancelDto,
-  JobCvatDto,
   JobDetailsDto,
   JobFortuneDto,
   JobIdDto,
@@ -134,43 +133,6 @@ export class JobController {
           FortuneJobType.FORTUNE,
           data,
         );
-      },
-    );
-  }
-
-  @ApiOperation({
-    summary: 'Create a CVAT job',
-    description: 'Endpoint to create a new CVAT job.',
-  })
-  @ApiBody({ type: JobCvatDto })
-  @ApiResponse({
-    status: 201,
-    description: 'ID of the created CVAT job.',
-    type: Number,
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Bad Request. Invalid input parameters.',
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized. Missing or invalid credentials.',
-  })
-  @ApiResponse({
-    status: 409,
-    description: 'Conflict. Conflict with the current state of the server.',
-  })
-  @Post('/cvat')
-  public async createCvatJob(
-    @Body() data: JobCvatDto,
-    @Request() req: RequestWithUser,
-  ): Promise<number> {
-    throw new ForbiddenError('Disabled');
-    return await this.mutexManagerService.runExclusive(
-      `user${req.user.id}`,
-      MUTEX_TIMEOUT,
-      async () => {
-        return await this.jobService.createJob(req.user, data.type, data);
       },
     );
   }

@@ -8,10 +8,6 @@ import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import {
   MOCK_ADDRESS,
-  MOCK_CVAT_JOB_SIZE,
-  MOCK_CVAT_MAX_TIME,
-  MOCK_CVAT_SKELETONS_JOB_SIZE_MULTIPLIER,
-  MOCK_CVAT_VAL_SIZE,
   MOCK_EXPIRES_IN,
   MOCK_HCAPTCHA_SITE_KEY,
   MOCK_MAX_RETRY_COUNT,
@@ -70,11 +66,6 @@ describe('WebhookController', () => {
       HCAPTCHA_REPUTATION_ORACLE_URI: MOCK_REPUTATION_ORACLE_URL,
       HCAPTCHA_SECRET: MOCK_SECRET,
       JWT_ACCESS_TOKEN_EXPIRES_IN: MOCK_EXPIRES_IN,
-      CVAT_JOB_SIZE: MOCK_CVAT_JOB_SIZE,
-      CVAT_MAX_TIME: MOCK_CVAT_MAX_TIME,
-      CVAT_VAL_SIZE: MOCK_CVAT_VAL_SIZE,
-      CVAT_SKELETONS_JOB_SIZE_MULTIPLIER:
-        MOCK_CVAT_SKELETONS_JOB_SIZE_MULTIPLIER,
     };
 
     const module: TestingModule = await Test.createTestingModule({
