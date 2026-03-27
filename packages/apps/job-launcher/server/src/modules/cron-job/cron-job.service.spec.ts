@@ -47,7 +47,6 @@ import { PaymentRepository } from '../payment/payment.repository';
 import { PaymentService } from '../payment/payment.service';
 import { QualificationService } from '../qualification/qualification.service';
 import { RateService } from '../rate/rate.service';
-import { RoutingProtocolService } from '../routing-protocol/routing-protocol.service';
 import { StorageService } from '../storage/storage.service';
 import { Web3Service } from '../web3/web3.service';
 import { WebhookEntity } from '../webhook/webhook.entity';
@@ -124,10 +123,6 @@ describe('CronJobService', () => {
         { provide: PaymentService, useValue: createMock<PaymentService>() },
         { provide: WhitelistService, useValue: createMock<WhitelistService>() },
         { provide: ConfigService, useValue: mockConfigService },
-        {
-          provide: RoutingProtocolService,
-          useValue: createMock<RoutingProtocolService>(),
-        },
         {
           provide: WebhookRepository,
           useValue: createMock<WebhookRepository>(),

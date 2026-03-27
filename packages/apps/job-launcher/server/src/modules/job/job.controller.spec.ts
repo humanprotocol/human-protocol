@@ -1,3 +1,4 @@
+import { ChainId } from '@human-protocol/sdk';
 import { Test, TestingModule } from '@nestjs/testing';
 import { JobController } from './job.controller';
 import { JobService } from './job.service';
@@ -84,6 +85,7 @@ describe('JobController', () => {
   describe('quickLaunch', () => {
     it('should create a job and return job ID', async () => {
       const jobDto: JobQuickLaunchDto = {
+        chainId: ChainId.POLYGON_AMOY,
         requestType: 'type_a' as JobRequestType,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
@@ -119,6 +121,7 @@ describe('JobController', () => {
 
     it('should throw a conflict error if mutex manager fails', async () => {
       const jobDto: JobQuickLaunchDto = {
+        chainId: ChainId.POLYGON_AMOY,
         requestType: 'type_a' as JobRequestType,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
@@ -159,6 +162,7 @@ describe('JobController', () => {
 
     it('should return unauthorized error if user is not authenticated', async () => {
       const jobDto: JobQuickLaunchDto = {
+        chainId: ChainId.POLYGON_AMOY,
         requestType: 'type_a' as JobRequestType,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
@@ -185,6 +189,7 @@ describe('JobController', () => {
 
   describe('createFortuneJob', () => {
     const jobFortuneDto: JobFortuneDto = {
+      chainId: ChainId.POLYGON_AMOY,
       requesterTitle: MOCK_REQUESTER_TITLE,
       requesterDescription: MOCK_REQUESTER_DESCRIPTION,
       submissionsRequired: 10,
