@@ -66,6 +66,14 @@ export const LOGOUT_PATH = '/auth/logout';
 
 export const MUTEX_TIMEOUT = 2000; //ms
 
-export const GS_PROTOCOL = 'gs://';
-export const GCV_CONTENT_MODERATION_ASYNC_BATCH_SIZE = 100;
-export const GCV_CONTENT_MODERATION_BATCH_SIZE_PER_TASK = 2000;
+/**
+ * Regex for GCS URL in subdomain format: https://<bucket>.storage.googleapis.com/<object_path>
+ */
+export const GCS_HTTP_REGEX_SUBDOMAIN =
+  /^https:\/\/([a-zA-Z0-9\-.]+)\.storage\.googleapis\.com\/?(.*)$/;
+
+/**
+ * Regex for GCS URL in path-based format: https://storage.googleapis.com/<bucket>/<object_path>
+ */
+export const GCS_HTTP_REGEX_PATH_BASED =
+  /^https:\/\/storage\.googleapis\.com\/([^/]+)\/?(.*)$/;

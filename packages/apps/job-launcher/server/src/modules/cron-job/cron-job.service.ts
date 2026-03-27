@@ -94,7 +94,6 @@ export class CronJobService {
 
     try {
       const jobEntities = await this.jobRepository.findByStatus(JobStatus.PAID);
-      console.log('jobEntities', jobEntities);
       for (const jobEntity of jobEntities) {
         try {
           await this.jobService.createEscrow(jobEntity);
