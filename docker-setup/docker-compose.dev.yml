@@ -102,7 +102,7 @@ services:
     container_name: hp-dev-graph-node
     # In case of issues on Mac M1 rebuild the image for it locally
     # https://github.com/graphprotocol/graph-node/blob/master/docker/README.md#running-graph-node-on-an-macbook-m1
-    image: graphprotocol/graph-node
+    image: graphprotocol/graph-node:v0.41.1
     restart: *default-restart
     logging:
       <<: *default-logging

@@ -28,6 +28,8 @@ dataSources:
       abis:
         - name: EscrowFactory
           file: '{{{ EscrowFactory.abi }}}'
+        - name: Escrow
+          file: '{{{ Escrow.abi }}}'
       eventHandlers:
         - event: Launched(address,address)
           handler: handleLaunched
