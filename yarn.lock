@@ -5317,7 +5317,7 @@ __metadata:
     hardhat-contract-sizer: "npm:^2.6.1"
     hardhat-dependency-compiler: "npm:^1.2.1"
     hardhat-gas-reporter: "npm:^2.0.2"
-    openpgp: "npm:6.2.2"
+    openpgp: "npm:6.3.0"
     prettier: "npm:^3.8.1"
     prettier-plugin-solidity: "npm:^1.3.1"
     solidity-coverage: "npm:^0.8.17"
@@ -5400,7 +5400,7 @@ __metadata:
     graphql: "npm:^16.8.1"
     graphql-request: "npm:^7.3.4"
     graphql-tag: "npm:^2.12.6"
-    openpgp: "npm:^6.2.2"
+    openpgp: "npm:^6.3.0"
     prettier: "npm:^3.8.1"
     secp256k1: "npm:^5.0.1"
     ts-node: "npm:^10.9.2"
@@ -25494,10 +25494,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"openpgp@npm:6.2.2, openpgp@npm:^6.2.2":
-  version: 6.2.2
-  resolution: "openpgp@npm:6.2.2"
-  checksum: 10c0/dd284ff20ad087c341ec86369e12d5c210056aa28edacba192b20bd0d20892ce21c6aef83c6d79f082f533343e80b8ad63a58ee9ebf5d7651173890e70833ae2
+"openpgp@npm:6.3.0, openpgp@npm:^6.3.0":
+  version: 6.3.0
+  resolution: "openpgp@npm:6.3.0"
+  checksum: 10c0/0528cb57d7cfd10ef4ab8ce868a0244a4930019d50feed9158028debfd85e5e1a621a4cc5ae254a0b1820a355b12fc7adbe04c950c731d9bb63ca9a9ed44a948
   languageName: node
   linkType: hard
 
