@@ -156,7 +156,7 @@ __metadata:
   resolution: "@apps/dashboard-server@workspace:packages/apps/dashboard/server"
   dependencies:
     "@eslint/js": "npm:^10.0.1"
-    "@golevelup/ts-jest": "npm:^1.2.1"
+    "@golevelup/ts-jest": "npm:^3.0.0"
     "@human-protocol/core": "workspace:*"
     "@human-protocol/logger": "workspace:*"
     "@human-protocol/sdk": "workspace:*"
@@ -313,7 +313,7 @@ __metadata:
   resolution: "@apps/fortune-exchange-oracle-server@workspace:packages/apps/fortune/exchange-oracle/server"
   dependencies:
     "@eslint/js": "npm:^10.0.1"
-    "@golevelup/ts-jest": "npm:^0.6.1"
+    "@golevelup/ts-jest": "npm:^3.0.0"
     "@human-protocol/logger": "workspace:*"
     "@human-protocol/sdk": "workspace:*"
     "@nestjs/axios": "npm:^4.0.1"
@@ -614,7 +614,7 @@ __metadata:
   dependencies:
     "@eslint/js": "npm:^10.0.1"
     "@faker-js/faker": "npm:^9.8.0"
-    "@golevelup/ts-jest": "npm:^0.6.1"
+    "@golevelup/ts-jest": "npm:^3.0.0"
     "@google-cloud/storage": "npm:^7.19.0"
     "@google-cloud/vision": "npm:^4.3.2"
     "@human-protocol/logger": "workspace:*"
@@ -689,7 +689,7 @@ __metadata:
   dependencies:
     "@eslint/js": "npm:^10.0.1"
     "@faker-js/faker": "npm:^9.8.0"
-    "@golevelup/ts-jest": "npm:^0.6.1"
+    "@golevelup/ts-jest": "npm:^3.0.0"
     "@human-protocol/core": "workspace:*"
     "@human-protocol/logger": "workspace:*"
     "@human-protocol/sdk": "workspace:*"
@@ -4736,17 +4736,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@golevelup/ts-jest@npm:^0.6.1":
-  version: 0.6.2
-  resolution: "@golevelup/ts-jest@npm:0.6.2"
-  checksum: 10c0/91fd477a1bd44913178929a9aecf8f5540208cf78a939b74f52c6804069ba1098b6e134d415b02226fb4be0f621ec16a1bcf1904821f254c009accce8c70ef27
-  languageName: node
-  linkType: hard
-
-"@golevelup/ts-jest@npm:^1.2.1":
-  version: 1.2.1
-  resolution: "@golevelup/ts-jest@npm:1.2.1"
-  checksum: 10c0/44e8ba46038834705a555f2bc3fdef962f2d1d6f9ba31e0a3a72f40941877e72d834fa34b9a2ae910a7f229c60e1505aa284f9c9839bf3c0e673b42db8ecd276
+"@golevelup/ts-jest@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "@golevelup/ts-jest@npm:3.0.0"
+  checksum: 10c0/778393f6fde351795de42bf50c37caaf9dea5b0afa7302bd3d72634a0cb488164f052bc3897d1edf86fbbca0ea1a1e37d183445532a6e35af4f2d2e38e54e898
   languageName: node
   linkType: hard
 
