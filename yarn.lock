@@ -15002,26 +15002,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:^0.21.1, axios@npm:^0.21.4":
-  version: 0.21.4
-  resolution: "axios@npm:0.21.4"
-  dependencies:
-    follow-redirects: "npm:^1.14.0"
-  checksum: 10c0/fbcff55ec68f71f02d3773d467db2fcecdf04e749826c82c2427a232f9eba63242150a05f15af9ef15818352b814257541155de0281f8fb2b7e8a5b79f7f2142
-  languageName: node
-  linkType: hard
-
-"axios@npm:^0.27.2":
-  version: 0.27.2
-  resolution: "axios@npm:0.27.2"
-  dependencies:
-    follow-redirects: "npm:^1.14.9"
-    form-data: "npm:^4.0.0"
-  checksum: 10c0/76d673d2a90629944b44d6f345f01e58e9174690f635115d5ffd4aca495d99bcd8f95c590d5ccb473513f5ebc1d1a6e8934580d0c57cdd0498c3a101313ef771
-  languageName: node
-  linkType: hard
-
-"axios@npm:^1.1.3, axios@npm:^1.11.0, axios@npm:^1.12.0, axios@npm:^1.12.2, axios@npm:^1.3.1, axios@npm:^1.3.4, axios@npm:^1.4.0, axios@npm:^1.6.7, axios@npm:^1.7.2, axios@npm:^1.7.4, axios@npm:^1.8.1":
+"axios@npm:1.13.1":
   version: 1.13.1
   resolution: "axios@npm:1.13.1"
   dependencies:
@@ -19956,7 +19937,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"follow-redirects@npm:^1.12.1, follow-redirects@npm:^1.14.0, follow-redirects@npm:^1.14.9, follow-redirects@npm:^1.15.6":
+"follow-redirects@npm:^1.12.1, follow-redirects@npm:^1.15.6":
   version: 1.15.11
   resolution: "follow-redirects@npm:1.15.11"
   peerDependenciesMeta:
