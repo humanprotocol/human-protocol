@@ -8,6 +8,7 @@ import {
   IsNotEmpty,
   IsNumber,
   IsNumberString,
+  IsObject,
   IsOptional,
   IsPositive,
   IsString,
@@ -29,13 +30,21 @@ import { AWSRegions, StorageProviders } from '../../common/enums/storage';
 import { PageOptionsDto } from '../../common/pagination/pagination.dto';
 import { IsValidTokenDecimals } from '../../common/validators/token-decimals';
 import { IsValidToken } from '../../common/validators/tokens';
-import { ManifestDetails } from '../manifest/manifest.dto';
+import { ManifestDetails, ManifestDto } from '../manifest/manifest.dto';
 
 export class JobDto {
   @ApiProperty({ enum: ChainId, required: false, name: 'chain_id' })
   @IsEnumCaseInsensitive(ChainId)
   @IsOptional()
   public chainId?: ChainId;
+
+  @ApiProperty({
+    description: 'Request type',
+    name: 'request_type',
+    enum: JobType,
+  })
+  @IsEnumCaseInsensitive(JobType)
+  public requestType: JobRequestType;
 
   @ApiPropertyOptional()
   @IsArray()
@@ -85,14 +94,6 @@ export class JobDto {
 }
 
 export class JobQuickLaunchDto extends JobDto {
-  @ApiProperty({
-    description: 'Request type',
-    name: 'request_type',
-    enum: JobType,
-  })
-  @IsEnumCaseInsensitive(JobType)
-  public requestType: JobRequestType;
-
   @ApiProperty({ name: 'manifest_url' })
   @IsUrl()
   @IsNotEmpty()
@@ -100,25 +101,15 @@ export class JobQuickLaunchDto extends JobDto {
 
   @ApiProperty({ name: 'manifest_hash' })
   @IsString()
-  @IsOptional()
+  @IsNotEmpty()
   public manifestHash: string;
 }
 
-export class JobFortuneDto extends JobDto {
-  @ApiProperty({ name: 'requester_title' })
-  @IsString()
+export class JobManifestDto extends JobDto {
+  @ApiProperty({ type: Object })
+  @IsObject()
   @IsNotEmpty()
-  public requesterTitle: string;
-
-  @ApiProperty({ name: 'requester_description' })
-  @IsString()
-  @IsNotEmpty()
-  public requesterDescription: string;
-
-  @ApiProperty({ name: 'submissions_required' })
-  @IsNumber()
-  @IsPositive()
-  public submissionsRequired: number;
+  public manifest: ManifestDto;
 }
 
 export class StorageDataDto {
@@ -298,4 +289,4 @@ export class GetJobsDto extends PageOptionsDto {
   status?: JobStatusFilter;
 }
 
-export type CreateJob = JobQuickLaunchDto | JobFortuneDto;
+export type CreateJob = JobQuickLaunchDto | JobManifestDto;

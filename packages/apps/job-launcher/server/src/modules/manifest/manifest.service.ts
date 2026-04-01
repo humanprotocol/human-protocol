@@ -4,6 +4,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { validate } from 'class-validator';
+import { plainToInstance } from 'class-transformer';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { ErrorJob } from '../../common/constants/errors';
 import {
@@ -12,7 +13,6 @@ import {
   JobRequestType,
 } from '../../common/enums/job';
 import { ValidationError } from '../../common/errors';
-import { JobFortuneDto } from '../job/job.dto';
 import { StorageService } from '../storage/storage.service';
 import { Web3Service } from '../web3/web3.service';
 import {
@@ -32,22 +32,6 @@ export class ManifestService {
     private readonly storageService: StorageService,
     private readonly encryption: Encryption,
   ) {}
-
-  async createManifest(
-    dto: JobFortuneDto,
-    requestType: JobRequestType,
-    fundAmount: number,
-  ): Promise<FortuneManifestDto> {
-    if (requestType !== FortuneJobType.FORTUNE) {
-      throw new ValidationError(ErrorJob.InvalidRequestType);
-    }
-
-    return {
-      ...dto,
-      requestType,
-      fundAmount,
-    };
-  }
 
   async uploadManifest(
     chainId: ChainId,
@@ -75,24 +59,22 @@ export class ManifestService {
     return this.storageService.uploadJsonLikeData(manifestFile);
   }
 
-  private async validateManifest(
+  public async validateManifest(
     requestType: JobRequestType,
     manifest: ManifestDto,
   ): Promise<void> {
     let dtoCheck;
 
     if (requestType === FortuneJobType.FORTUNE) {
-      dtoCheck = new FortuneManifestDto();
+      dtoCheck = plainToInstance(FortuneManifestDto, manifest);
     } else if (requestType === HCaptchaJobType.HCAPTCHA) {
-      return;
-      dtoCheck = new HCaptchaManifestDto();
+      dtoCheck = plainToInstance(HCaptchaManifestDto, manifest);
     } else {
-      dtoCheck = new CvatManifestDto();
+      dtoCheck = plainToInstance(CvatManifestDto, manifest);
     }
 
-    Object.assign(dtoCheck, manifest);
-
     const validationErrors: ClassValidationError[] = await validate(dtoCheck);
+
     if (validationErrors.length > 0) {
       throw new ValidationError(ErrorJob.ManifestValidationFailed);
     }

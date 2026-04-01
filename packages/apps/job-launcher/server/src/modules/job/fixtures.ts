@@ -2,7 +2,8 @@ import { faker } from '@faker-js/faker';
 import { ChainId } from '@human-protocol/sdk';
 import { EscrowFundToken, FortuneJobType } from '../../common/enums/job';
 import { PaymentCurrency } from '../../common/enums/payment';
-import { JobFortuneDto } from './job.dto';
+import { createMockFortuneManifest } from '../manifest/fixtures';
+import { JobManifestDto } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobStatus } from '../../common/enums/job';
 
@@ -14,11 +15,10 @@ const escrowFundTokens = (
   Object.values(EscrowFundToken) as EscrowFundToken[]
 ).filter((c) => c !== EscrowFundToken.HMT);
 
-export const createFortuneJobDto = (overrides = {}): JobFortuneDto => ({
+export const createJobManifestDto = (overrides = {}): JobManifestDto => ({
   chainId: ChainId.POLYGON_AMOY,
-  submissionsRequired: faker.number.int({ min: 1, max: 10 }),
-  requesterTitle: faker.lorem.words(3),
-  requesterDescription: faker.lorem.sentence(),
+  requestType: FortuneJobType.FORTUNE,
+  manifest: createMockFortuneManifest(),
   paymentAmount: faker.number.float({ min: 1, max: 100, fractionDigits: 6 }),
   paymentCurrency: faker.helpers.arrayElement(paymentCurrencies),
   escrowFundToken: faker.helpers.arrayElement(escrowFundTokens),

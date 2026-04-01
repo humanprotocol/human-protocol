@@ -4,13 +4,18 @@ import { Encryption } from '@human-protocol/sdk';
 import { Test } from '@nestjs/testing';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { ErrorJob } from '../../common/constants/errors';
-import { CvatJobType, FortuneJobType } from '../../common/enums/job';
+import {
+  CvatJobType,
+  FortuneJobType,
+  HCaptchaJobType,
+  JobCaptchaRequestType,
+} from '../../common/enums/job';
 import { ServerError, ValidationError } from '../../common/errors';
-import { JobFortuneDto } from '../job/job.dto';
 import { StorageService } from '../storage/storage.service';
 import { Web3Service } from '../web3/web3.service';
-import { ManifestService } from './manifest.service';
+import { createMockCvatManifest, createMockFortuneManifest } from './fixtures';
 import { ManifestDto } from './manifest.dto';
+import { ManifestService } from './manifest.service';
 
 describe('ManifestService', () => {
   let manifestService: ManifestService;
@@ -37,46 +42,107 @@ describe('ManifestService', () => {
     jest.clearAllMocks();
   });
 
-  describe('createManifest', () => {
-    it('should create a fortune manifest', async () => {
-      const dto: JobFortuneDto = {
-        requesterTitle: faker.lorem.sentence(),
-        requesterDescription: faker.lorem.sentence(),
-        submissionsRequired: faker.number.int({ min: 1, max: 100 }),
-        paymentCurrency: faker.helpers.arrayElement([0, 1]) as any,
-        paymentAmount: faker.number.int({ min: 1, max: 1000 }),
-        escrowFundToken: faker.helpers.arrayElement(['HMT', 'USDC']) as any,
+  describe('validateManifest', () => {
+    it('should validate a fortune manifest successfully', async () => {
+      await expect(
+        manifestService.validateManifest(
+          FortuneJobType.FORTUNE,
+          createMockFortuneManifest(),
+        ),
+      ).resolves.toBeUndefined();
+    });
+
+    it('should validate a cvat manifest successfully', async () => {
+      const manifest = createMockCvatManifest();
+      manifest.annotation.type = CvatJobType.IMAGE_BOXES;
+
+      await expect(
+        manifestService.validateManifest(CvatJobType.IMAGE_BOXES, manifest),
+      ).resolves.toBeUndefined();
+    });
+
+    it('should validate an hcaptcha manifest successfully', async () => {
+      const manifest = {
+        job_mode: faker.lorem.word(),
+        request_type: JobCaptchaRequestType.IMAGE_LABEL_BINARY,
+        request_config: {},
+        requester_accuracy_target: faker.number.float({
+          min: 0.5,
+          max: 1,
+          fractionDigits: 2,
+        }),
+        requester_max_repeats: faker.number.int({ min: 2, max: 10 }),
+        requester_min_repeats: faker.number.int({ min: 1, max: 1 }),
+        requester_question: { en: faker.lorem.sentence() },
+        taskdata_uri: faker.internet.url(),
+        job_total_tasks: faker.number.int({ min: 1, max: 100 }),
+        task_bid_price: faker.number.int({ min: 1, max: 10 }),
+        public_results: faker.datatype.boolean(),
+        oracle_stake: faker.number.int({ min: 1, max: 10 }),
+        repo_uri: faker.internet.url(),
+        ro_uri: faker.internet.url(),
+        restricted_audience: {},
+        requester_restricted_answer_set: {},
       };
 
       await expect(
-        manifestService.createManifest(
-          dto,
-          FortuneJobType.FORTUNE,
-          dto.paymentAmount,
-        ),
-      ).resolves.toEqual({
-        ...dto,
-        requestType: FortuneJobType.FORTUNE,
-        fundAmount: dto.paymentAmount,
-      });
+        manifestService.validateManifest(HCaptchaJobType.HCAPTCHA, manifest),
+      ).resolves.toBeUndefined();
     });
 
-    it('should reject non-fortune request types', async () => {
+    it('should throw when a required fortune property is missing', async () => {
+      const manifest = createMockFortuneManifest();
+      delete (manifest as Partial<typeof manifest>).fundAmount;
+
       await expect(
-        manifestService.createManifest(
-          {} as JobFortuneDto,
-          CvatJobType.IMAGE_BOXES,
-          1,
+        manifestService.validateManifest(FortuneJobType.FORTUNE, manifest),
+      ).rejects.toThrow(new ValidationError(ErrorJob.ManifestValidationFailed));
+    });
+
+    it('should throw when a required cvat property is missing', async () => {
+      const manifest = createMockCvatManifest();
+      delete (manifest.validation as Partial<(typeof manifest)['validation']>)
+        .gt_url;
+
+      await expect(
+        manifestService.validateManifest(CvatJobType.IMAGE_BOXES, manifest),
+      ).rejects.toThrow(new ValidationError(ErrorJob.ManifestValidationFailed));
+    });
+
+    it('should throw when a required hcaptcha property is missing', async () => {
+      const manifest = {
+        job_mode: faker.lorem.word(),
+        request_type: JobCaptchaRequestType.IMAGE_LABEL_BINARY,
+        request_config: {},
+        requester_accuracy_target: faker.number.float({
+          min: 0.5,
+          max: 1,
+          fractionDigits: 2,
+        }),
+        requester_max_repeats: faker.number.int({ min: 2, max: 10 }),
+        requester_min_repeats: faker.number.int({ min: 1, max: 1 }),
+        requester_question: { en: faker.lorem.sentence() },
+        job_total_tasks: faker.number.int({ min: 1, max: 100 }),
+        task_bid_price: faker.number.int({ min: 1, max: 10 }),
+        public_results: faker.datatype.boolean(),
+        oracle_stake: faker.number.int({ min: 1, max: 10 }),
+        repo_uri: faker.internet.url(),
+        ro_uri: faker.internet.url(),
+        restricted_audience: {},
+        requester_restricted_answer_set: {},
+      };
+
+      await expect(
+        manifestService.validateManifest(
+          HCaptchaJobType.HCAPTCHA,
+          manifest as unknown as ManifestDto,
         ),
-      ).rejects.toThrow(new ValidationError(ErrorJob.InvalidRequestType));
+      ).rejects.toThrow(new ValidationError(ErrorJob.ManifestValidationFailed));
     });
   });
 
   describe('uploadManifest', () => {
     it('should upload a manifest successfully', async () => {
-      const mockChainId = faker.number.int();
-      const mockData = { key: faker.lorem.word() };
-      const mockOracleAddresses: string[] = [];
       const mockManifestData = {
         url: faker.internet.url(),
         hash: faker.string.uuid(),
@@ -87,33 +153,24 @@ describe('ManifestService', () => {
       );
 
       const result = await manifestService.uploadManifest(
-        mockChainId,
-        mockData,
-        mockOracleAddresses,
+        faker.number.int(),
+        { key: faker.lorem.word() },
+        [],
       );
 
-      expect(result).toEqual(
-        expect.objectContaining({
-          url: mockManifestData.url,
-          hash: mockManifestData.hash,
-        }),
-      );
+      expect(result).toEqual(mockManifestData);
     });
 
     it('should throw an error if upload fails', async () => {
-      const mockChainId = faker.number.int();
-      const mockData = { key: faker.lorem.word() };
-      const mockOracleAddresses: string[] = [];
-
-      mockStorageService.uploadJsonLikeData.mockRejectedValue(
+      mockStorageService.uploadJsonLikeData.mockRejectedValueOnce(
         new ServerError('File not uploaded'),
       );
 
       await expect(
         manifestService.uploadManifest(
-          mockChainId,
-          mockData,
-          mockOracleAddresses,
+          faker.number.int(),
+          { key: faker.lorem.word() },
+          [],
         ),
       ).rejects.toThrow(ServerError);
     });
@@ -121,42 +178,33 @@ describe('ManifestService', () => {
 
   describe('downloadManifest', () => {
     it('should download and validate a manifest successfully', async () => {
-      const mockManifestUrl = faker.internet.url();
-      const mockRequestType = FortuneJobType.FORTUNE;
-      const mockManifest: ManifestDto = {
-        submissionsRequired: faker.number.int({ min: 1, max: 100 }),
-        requesterTitle: faker.lorem.words(3),
-        requesterDescription: faker.lorem.sentence(),
-        fundAmount: faker.number.float({ min: 1, max: 1000 }),
-        requestType: FortuneJobType.FORTUNE,
-        qualifications: [faker.lorem.word(), faker.lorem.word()],
-      };
+      const mockManifest: ManifestDto = createMockFortuneManifest();
+
       mockStorageService.downloadJsonLikeData.mockResolvedValueOnce(
         mockManifest,
       );
+
       const result = await manifestService.downloadManifest(
-        mockManifestUrl,
-        mockRequestType,
+        faker.internet.url(),
+        FortuneJobType.FORTUNE,
       );
+
       expect(result).toEqual(mockManifest);
     });
 
-    it('should throw an error if validation fails', async () => {
-      const mockManifestUrl = faker.internet.url();
-      const mockRequestType = CvatJobType.IMAGE_BOXES;
-      const mockManifest: ManifestDto = {
-        submissionsRequired: faker.number.int({ min: 1, max: 100 }),
-        requesterTitle: faker.lorem.words(3),
-        requesterDescription: faker.lorem.sentence(),
-        fundAmount: faker.number.float({ min: 1, max: 1000 }),
-        requestType: FortuneJobType.FORTUNE,
-        qualifications: [faker.lorem.word(), faker.lorem.word()],
-      };
+    it('should throw if downloaded manifest is invalid', async () => {
+      const mockManifest = createMockFortuneManifest();
+      delete (mockManifest as Partial<typeof mockManifest>).fundAmount;
+
       mockStorageService.downloadJsonLikeData.mockResolvedValueOnce(
         mockManifest,
       );
+
       await expect(
-        manifestService.downloadManifest(mockManifestUrl, mockRequestType),
+        manifestService.downloadManifest(
+          faker.internet.url(),
+          FortuneJobType.FORTUNE,
+        ),
       ).rejects.toThrow(new ValidationError(ErrorJob.ManifestValidationFailed));
     });
   });

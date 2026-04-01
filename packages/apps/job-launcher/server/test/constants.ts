@@ -2,8 +2,6 @@ import { FortuneJobType } from '../src/common/enums/job';
 import { Web3Env } from '../src/common/enums/web3';
 import { FortuneManifestDto } from '../src/modules/manifest/manifest.dto';
 
-export const MOCK_REQUESTER_TITLE = 'Mock job title';
-export const MOCK_REQUESTER_DESCRIPTION = 'Mock job description';
 export const MOCK_ADDRESS = '0xCf88b3f1992458C2f5a229573c768D0E9F70C44e';
 export const MOCK_FILE_URL = 'http://mockedFileUrl.test/bucket/file.json';
 export const MOCK_FILE_HASH = 'mockedFileHash';

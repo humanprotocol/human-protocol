@@ -1,15 +1,29 @@
 import { ChainId } from '@human-protocol/sdk';
 import {
-  CreateFortuneJobRequest,
+  CreateJobRequest,
   CreateCvatJobRequest,
   FortuneRequest,
   CvatRequest,
   JobStatus,
   JobDetailsResponse,
   FortuneFinalResult,
+  FortuneManifest,
+  JobType,
 } from '../types';
 import api from '../utils/api';
 import { getFilenameFromContentDisposition } from '../utils/string';
+
+const buildFortuneManifest = (
+  data: FortuneRequest,
+  fundAmount: number,
+): FortuneManifest => ({
+  submissionsRequired: Number(data.fortunesRequested),
+  requesterTitle: data.title,
+  requesterDescription: data.description,
+  fundAmount,
+  requestType: JobType.FORTUNE,
+  qualifications: data.qualifications,
+});
 
 export const createFortuneJob = async (
   chainId: number,
@@ -17,18 +31,18 @@ export const createFortuneJob = async (
   paymentCurrency: string,
   paymentAmount: number | string,
   escrowFundToken: string,
+  fundAmount: number,
 ) => {
-  const body: CreateFortuneJobRequest = {
+  const body: CreateJobRequest<FortuneManifest> = {
     chainId,
-    submissionsRequired: Number(data.fortunesRequested),
-    requesterTitle: data.title,
-    requesterDescription: data.description,
+    requestType: JobType.FORTUNE,
     paymentCurrency,
     paymentAmount: Number(paymentAmount),
     escrowFundToken,
     qualifications: data.qualifications,
+    manifest: buildFortuneManifest(data, fundAmount),
   };
-  await api.post('/job/fortune', body);
+  await api.post('/job', body);
 };
 
 export const createCvatJob = async (

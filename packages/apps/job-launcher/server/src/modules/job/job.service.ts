@@ -47,7 +47,6 @@ import {
   ValidationError,
 } from '../../common/errors';
 import { PageDto } from '../../common/pagination/pagination.dto';
-import { parseUrl } from '../../common/utils';
 import { add, div, max, mul } from '../../common/utils/decimal';
 import { getTokenDecimals } from '../../common/utils/tokens';
 import logger from '../../logger';
@@ -56,6 +55,7 @@ import {
   CvatManifestDto,
   FortuneManifestDto,
   HCaptchaManifestDto,
+  ManifestDto,
 } from '../manifest/manifest.dto';
 import { ManifestService } from '../manifest/manifest.service';
 import { PaymentService } from '../payment/payment.service';
@@ -75,7 +75,6 @@ import {
   GetJobsDto,
   JobDetailsDto,
   JobListDto,
-  JobQuickLaunchDto,
 } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
@@ -235,35 +234,31 @@ export class JobService {
 
     let jobEntity = new JobEntity();
 
-    if (dto instanceof JobQuickLaunchDto) {
+    if ('manifestUrl' in dto) {
+      await this.manifestService.downloadManifest(dto.manifestUrl, requestType);
+
       if (!dto.manifestHash) {
-        const { filename } = parseUrl(dto.manifestUrl);
-
-        if (!filename) {
-          throw new ValidationError(ErrorJob.ManifestHashNotExist);
-        }
-
-        jobEntity.manifestHash = filename;
-      } else {
-        jobEntity.manifestHash = dto.manifestHash;
+        throw new ValidationError(ErrorJob.ManifestHashNotExist);
       }
 
+      jobEntity.manifestHash = dto.manifestHash;
       jobEntity.manifestUrl = dto.manifestUrl;
-    } else {
-      const manifestOrigin = await this.manifestService.createManifest(
-        dto,
+    } else if ('manifest' in dto) {
+      await this.manifestService.validateManifest(
         requestType,
-        fundTokenAmount,
+        dto.manifest as ManifestDto,
       );
 
       const { url, hash } = await this.manifestService.uploadManifest(
         chainId,
-        manifestOrigin,
+        dto.manifest,
         [exchangeOracle, reputationOracle, recordingOracle],
       );
 
       jobEntity.manifestUrl = url;
       jobEntity.manifestHash = hash;
+    } else {
+      throw new ValidationError(ErrorJob.InvalidRequestType);
     }
 
     const paymentEntity = await this.paymentService.createWithdrawalPayment(

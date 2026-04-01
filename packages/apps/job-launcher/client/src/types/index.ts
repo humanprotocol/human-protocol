@@ -39,15 +39,23 @@ export type FiatPaymentRequest = {
   paymentMethodId: string;
 };
 
-export type CreateFortuneJobRequest = {
-  chainId: number;
+export type FortuneManifest = {
   submissionsRequired: number;
   requesterTitle: string;
   requesterDescription: string;
+  fundAmount: number;
+  requestType: JobType.FORTUNE;
+  qualifications?: string[];
+};
+
+export type CreateJobRequest<TManifest = Record<string, unknown>> = {
+  chainId: number;
+  requestType: JobType;
   paymentCurrency: string;
   paymentAmount: number;
   escrowFundToken: string;
   qualifications?: string[];
+  manifest: TManifest;
 };
 
 export type CreateCvatJobRequest = {

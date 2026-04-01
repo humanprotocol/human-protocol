@@ -39,7 +39,10 @@ import {
 } from '../../common/errors';
 import { div, max, mul } from '../../common/utils/decimal';
 import { getTokenDecimals } from '../../common/utils/tokens';
-import { createMockFortuneManifest } from '../manifest/fixtures';
+import {
+  createMockCvatManifest,
+  createMockFortuneManifest,
+} from '../manifest/fixtures';
 import { ManifestService } from '../manifest/manifest.service';
 import { PaymentRepository } from '../payment/payment.repository';
 import { PaymentService } from '../payment/payment.service';
@@ -52,11 +55,11 @@ import { Web3Service } from '../web3/web3.service';
 import { WebhookRepository } from '../webhook/webhook.repository';
 import { WhitelistEntity } from '../whitelist/whitelist.entity';
 import { WhitelistService } from '../whitelist/whitelist.service';
-import { createFortuneJobDto, createJobEntity } from './fixtures';
+import { createJobEntity, createJobManifestDto } from './fixtures';
 import {
   FortuneFinalResultDto,
   GetJobsDto,
-  JobFortuneDto,
+  JobManifestDto,
   JobQuickLaunchDto,
 } from './job.dto';
 import { JobRepository } from './job.repository';
@@ -142,22 +145,15 @@ describe('JobService', () => {
 
     describe('Fortune', () => {
       it('should create a Fortune job successfully paid and funded with the same currency', async () => {
-        const fortuneJobDto: JobFortuneDto = createFortuneJobDto({
+        const jobManifestDto: JobManifestDto = createJobManifestDto({
           paymentCurrency: PaymentCurrency.USDC,
           escrowFundToken: EscrowFundToken.USDC,
         });
         const fundTokenDecimals = getTokenDecimals(
-          fortuneJobDto.chainId!,
-          fortuneJobDto.escrowFundToken,
+          jobManifestDto.chainId!,
+          jobManifestDto.escrowFundToken,
         );
 
-        const mockManifest = createMockFortuneManifest({
-          submissionsRequired: fortuneJobDto.submissionsRequired,
-          requesterTitle: fortuneJobDto.requesterTitle,
-          requesterDescription: fortuneJobDto.requesterDescription,
-          fundAmount: fortuneJobDto.paymentAmount,
-        });
-        mockManifestService.createManifest.mockResolvedValueOnce(mockManifest);
         const mockUrl = faker.internet.url();
         const mockHash = faker.string.uuid();
         mockManifestService.uploadManifest.mockResolvedValueOnce({
@@ -174,50 +170,49 @@ describe('JobService', () => {
         const result = await jobService.createJob(
           userMock,
           FortuneJobType.FORTUNE,
-          fortuneJobDto,
+          jobManifestDto,
         );
 
         const paymentCurrencyFee = Number(
           max(
             div(mockServerConfigService.minimumFeeUsd, tokenToUsdRate),
-            mul(div(1, 100), fortuneJobDto.paymentAmount),
+            mul(div(1, 100), jobManifestDto.paymentAmount),
           ).toFixed(18),
         );
 
         expect(result).toBe(jobEntityMock.id);
         expect(mockWeb3Service.validateChainId).toHaveBeenCalledWith(
-          fortuneJobDto.chainId,
+          jobManifestDto.chainId,
         );
         expect(mockRoutingProtocolService.selectOracles).not.toHaveBeenCalled();
         expect(mockRoutingProtocolService.validateOracles).toHaveBeenCalledWith(
-          fortuneJobDto.chainId,
+          jobManifestDto.chainId,
           FortuneJobType.FORTUNE,
-          fortuneJobDto.reputationOracle,
-          fortuneJobDto.exchangeOracle,
-          fortuneJobDto.recordingOracle,
+          jobManifestDto.reputationOracle,
+          jobManifestDto.exchangeOracle,
+          jobManifestDto.recordingOracle,
         );
-        expect(mockManifestService.createManifest).toHaveBeenCalledWith(
-          fortuneJobDto,
+        expect(mockManifestService.validateManifest).toHaveBeenCalledWith(
           FortuneJobType.FORTUNE,
-          fortuneJobDto.paymentAmount,
+          jobManifestDto.manifest,
         );
         expect(mockManifestService.uploadManifest).toHaveBeenCalledWith(
-          fortuneJobDto.chainId,
-          mockManifest,
+          jobManifestDto.chainId,
+          jobManifestDto.manifest,
           [
-            fortuneJobDto.exchangeOracle,
-            fortuneJobDto.reputationOracle,
-            fortuneJobDto.recordingOracle,
+            jobManifestDto.exchangeOracle,
+            jobManifestDto.reputationOracle,
+            jobManifestDto.recordingOracle,
           ],
         );
         expect(mockPaymentService.createWithdrawalPayment).toHaveBeenCalledWith(
           userMock.id,
           expect.any(Number),
-          fortuneJobDto.paymentCurrency,
+          jobManifestDto.paymentCurrency,
           tokenToUsdRate,
         );
         expect(mockJobRepository.updateOne).toHaveBeenCalledWith({
-          chainId: fortuneJobDto.chainId,
+          chainId: jobManifestDto.chainId,
           userId: userMock.id,
           manifestUrl: mockUrl,
           manifestHash: mockHash,
@@ -228,35 +223,28 @@ describe('JobService', () => {
               usdToTokenRate,
             ).toFixed(fundTokenDecimals),
           ),
-          fundAmount: fortuneJobDto.paymentAmount,
+          fundAmount: jobManifestDto.paymentAmount,
           status: JobStatus.PAID,
           waitUntil: expect.any(Date),
-          token: fortuneJobDto.escrowFundToken,
-          exchangeOracle: fortuneJobDto.exchangeOracle,
-          recordingOracle: fortuneJobDto.recordingOracle,
-          reputationOracle: fortuneJobDto.reputationOracle,
+          token: jobManifestDto.escrowFundToken,
+          exchangeOracle: jobManifestDto.exchangeOracle,
+          recordingOracle: jobManifestDto.recordingOracle,
+          reputationOracle: jobManifestDto.reputationOracle,
           payments: expect.any(Array),
         });
       });
 
       it('should create a Fortune job successfully paid and funded with different currencies', async () => {
-        const fortuneJobDto: JobFortuneDto = createFortuneJobDto({
+        const jobManifestDto: JobManifestDto = createJobManifestDto({
           paymentCurrency: PaymentCurrency.USD,
           escrowFundToken: EscrowFundToken.USDC,
         });
 
         const fundTokenDecimals = getTokenDecimals(
-          fortuneJobDto.chainId!,
-          fortuneJobDto.escrowFundToken,
+          jobManifestDto.chainId!,
+          jobManifestDto.escrowFundToken,
         );
 
-        const mockManifest = createMockFortuneManifest({
-          submissionsRequired: fortuneJobDto.submissionsRequired,
-          requesterTitle: fortuneJobDto.requesterTitle,
-          requesterDescription: fortuneJobDto.requesterDescription,
-          fundAmount: fortuneJobDto.paymentAmount,
-        });
-        mockManifestService.createManifest.mockResolvedValueOnce(mockManifest);
         const mockUrl = faker.internet.url();
         const mockHash = faker.string.uuid();
         mockManifestService.uploadManifest.mockResolvedValueOnce({
@@ -273,51 +261,50 @@ describe('JobService', () => {
         const result = await jobService.createJob(
           userMock,
           FortuneJobType.FORTUNE,
-          fortuneJobDto,
+          jobManifestDto,
         );
 
         const paymentCurrencyFee = Number(
           max(
             div(mockServerConfigService.minimumFeeUsd, tokenToUsdRate),
-            mul(div(1, 100), fortuneJobDto.paymentAmount),
+            mul(div(1, 100), jobManifestDto.paymentAmount),
           ).toFixed(18),
         );
 
         expect(result).toBe(jobEntityMock.id);
 
         expect(mockWeb3Service.validateChainId).toHaveBeenCalledWith(
-          fortuneJobDto.chainId,
+          jobManifestDto.chainId,
         );
         expect(mockRoutingProtocolService.selectOracles).not.toHaveBeenCalled();
         expect(mockRoutingProtocolService.validateOracles).toHaveBeenCalledWith(
-          fortuneJobDto.chainId,
+          jobManifestDto.chainId,
           FortuneJobType.FORTUNE,
-          fortuneJobDto.reputationOracle,
-          fortuneJobDto.exchangeOracle,
-          fortuneJobDto.recordingOracle,
+          jobManifestDto.reputationOracle,
+          jobManifestDto.exchangeOracle,
+          jobManifestDto.recordingOracle,
         );
-        expect(mockManifestService.createManifest).toHaveBeenCalledWith(
-          fortuneJobDto,
+        expect(mockManifestService.validateManifest).toHaveBeenCalledWith(
           FortuneJobType.FORTUNE,
-          Number(fortuneJobDto.paymentAmount.toFixed(6)),
+          jobManifestDto.manifest,
         );
         expect(mockManifestService.uploadManifest).toHaveBeenCalledWith(
-          fortuneJobDto.chainId,
-          mockManifest,
+          jobManifestDto.chainId,
+          jobManifestDto.manifest,
           [
-            fortuneJobDto.exchangeOracle,
-            fortuneJobDto.reputationOracle,
-            fortuneJobDto.recordingOracle,
+            jobManifestDto.exchangeOracle,
+            jobManifestDto.reputationOracle,
+            jobManifestDto.recordingOracle,
           ],
         );
         expect(mockPaymentService.createWithdrawalPayment).toHaveBeenCalledWith(
           userMock.id,
           expect.any(Number),
-          fortuneJobDto.paymentCurrency,
+          jobManifestDto.paymentCurrency,
           tokenToUsdRate,
         );
         expect(mockJobRepository.updateOne).toHaveBeenCalledWith({
-          chainId: fortuneJobDto.chainId,
+          chainId: jobManifestDto.chainId,
           userId: userMock.id,
           manifestUrl: mockUrl,
           manifestHash: mockHash,
@@ -330,22 +317,22 @@ describe('JobService', () => {
           ),
           fundAmount: Number(
             mul(
-              mul(fortuneJobDto.paymentAmount, tokenToUsdRate),
+              mul(jobManifestDto.paymentAmount, tokenToUsdRate),
               usdToTokenRate,
             ).toFixed(6),
           ),
           status: JobStatus.PAID,
           waitUntil: expect.any(Date),
-          token: fortuneJobDto.escrowFundToken,
-          exchangeOracle: fortuneJobDto.exchangeOracle,
-          recordingOracle: fortuneJobDto.recordingOracle,
-          reputationOracle: fortuneJobDto.reputationOracle,
+          token: jobManifestDto.escrowFundToken,
+          exchangeOracle: jobManifestDto.exchangeOracle,
+          recordingOracle: jobManifestDto.recordingOracle,
+          reputationOracle: jobManifestDto.reputationOracle,
           payments: expect.any(Array),
         });
       });
 
       it('should select the right oracles when no oracle addresses provided', async () => {
-        const fortuneJobDto: JobFortuneDto = createFortuneJobDto({
+        const jobManifestDto: JobManifestDto = createJobManifestDto({
           paymentCurrency: EscrowFundToken.USDC,
           escrowFundToken: EscrowFundToken.USDC,
           exchangeOracle: null,
@@ -354,17 +341,10 @@ describe('JobService', () => {
         });
 
         const fundTokenDecimals = getTokenDecimals(
-          fortuneJobDto.chainId!,
-          fortuneJobDto.escrowFundToken,
+          jobManifestDto.chainId!,
+          jobManifestDto.escrowFundToken,
         );
 
-        const mockManifest = createMockFortuneManifest({
-          submissionsRequired: fortuneJobDto.submissionsRequired,
-          requesterTitle: fortuneJobDto.requesterTitle,
-          requesterDescription: fortuneJobDto.requesterDescription,
-          fundAmount: fortuneJobDto.paymentAmount,
-        });
-        mockManifestService.createManifest.mockResolvedValueOnce(mockManifest);
         const mockUrl = faker.internet.url();
         const mockHash = faker.string.uuid();
         mockManifestService.uploadManifest.mockResolvedValueOnce({
@@ -391,35 +371,34 @@ describe('JobService', () => {
         const result = await jobService.createJob(
           userMock,
           FortuneJobType.FORTUNE,
-          fortuneJobDto,
+          jobManifestDto,
         );
         const paymentCurrencyFee = Number(
           max(
             div(mockServerConfigService.minimumFeeUsd, tokenToUsdRate),
-            mul(div(1, 100), fortuneJobDto.paymentAmount),
+            mul(div(1, 100), jobManifestDto.paymentAmount),
           ).toFixed(18),
         );
 
         expect(result).toBe(jobEntityMock.id);
 
         expect(mockWeb3Service.validateChainId).toHaveBeenCalledWith(
-          fortuneJobDto.chainId,
+          jobManifestDto.chainId,
         );
         expect(mockRoutingProtocolService.selectOracles).toHaveBeenCalledWith(
-          fortuneJobDto.chainId,
+          jobManifestDto.chainId,
           FortuneJobType.FORTUNE,
         );
         expect(
           mockRoutingProtocolService.validateOracles,
         ).not.toHaveBeenCalled();
-        expect(mockManifestService.createManifest).toHaveBeenCalledWith(
-          fortuneJobDto,
+        expect(mockManifestService.validateManifest).toHaveBeenCalledWith(
           FortuneJobType.FORTUNE,
-          fortuneJobDto.paymentAmount,
+          jobManifestDto.manifest,
         );
         expect(mockManifestService.uploadManifest).toHaveBeenCalledWith(
-          fortuneJobDto.chainId,
-          mockManifest,
+          jobManifestDto.chainId,
+          jobManifestDto.manifest,
           [
             mockOracles.exchangeOracle,
             mockOracles.reputationOracle,
@@ -429,11 +408,11 @@ describe('JobService', () => {
         expect(mockPaymentService.createWithdrawalPayment).toHaveBeenCalledWith(
           userMock.id,
           expect.any(Number),
-          fortuneJobDto.paymentCurrency,
+          jobManifestDto.paymentCurrency,
           tokenToUsdRate,
         );
         expect(mockJobRepository.updateOne).toHaveBeenCalledWith({
-          chainId: fortuneJobDto.chainId,
+          chainId: jobManifestDto.chainId,
           userId: userMock.id,
           manifestUrl: mockUrl,
           manifestHash: mockHash,
@@ -444,10 +423,10 @@ describe('JobService', () => {
               usdToTokenRate,
             ).toFixed(fundTokenDecimals),
           ),
-          fundAmount: fortuneJobDto.paymentAmount,
+          fundAmount: jobManifestDto.paymentAmount,
           status: JobStatus.PAID,
           waitUntil: expect.any(Date),
-          token: fortuneJobDto.escrowFundToken,
+          token: jobManifestDto.escrowFundToken,
           exchangeOracle: mockOracles.exchangeOracle,
           recordingOracle: mockOracles.recordingOracle,
           reputationOracle: mockOracles.reputationOracle,
@@ -457,12 +436,12 @@ describe('JobService', () => {
 
       it('should throw if user is not whitelisted and has no payment method', async () => {
         mockWhitelistService.isUserWhitelisted.mockResolvedValueOnce(false);
-        const fortuneJobDto: JobFortuneDto = createFortuneJobDto();
+        const jobManifestDto: JobManifestDto = createJobManifestDto();
         await expect(
           jobService.createJob(
             createUser({ paymentProviderId: null }),
             FortuneJobType.FORTUNE,
-            fortuneJobDto,
+            jobManifestDto,
           ),
         ).rejects.toThrow(new ValidationError(ErrorJob.NotActiveCard));
       });
@@ -472,10 +451,102 @@ describe('JobService', () => {
         mockWeb3Service.validateChainId.mockImplementationOnce(() => {
           throw randomError;
         });
-        const dto = createFortuneJobDto();
+        const dto = createJobManifestDto();
         await expect(
           jobService.createJob(createUser(), FortuneJobType.FORTUNE, dto),
         ).rejects.toThrow(randomError);
+      });
+    });
+
+    describe('CVAT', () => {
+      it('should create a CVAT job successfully with a manifest JSON body', async () => {
+        const cvatManifest = createMockCvatManifest();
+        cvatManifest.annotation.type = CvatJobType.IMAGE_BOXES;
+
+        const jobManifestDto: JobManifestDto = createJobManifestDto({
+          requestType: CvatJobType.IMAGE_BOXES,
+          manifest: cvatManifest,
+          paymentCurrency: PaymentCurrency.USDC,
+          escrowFundToken: EscrowFundToken.USDC,
+        });
+        const fundTokenDecimals = getTokenDecimals(
+          jobManifestDto.chainId!,
+          jobManifestDto.escrowFundToken,
+        );
+        const mockUrl = faker.internet.url();
+        const mockHash = faker.string.uuid();
+        mockManifestService.uploadManifest.mockResolvedValueOnce({
+          url: mockUrl,
+          hash: mockHash,
+        });
+        const jobEntityMock = createJobEntity({
+          requestType: CvatJobType.IMAGE_BOXES,
+        });
+        mockJobRepository.updateOne.mockResolvedValueOnce(jobEntityMock);
+        mockRateService.getRate
+          .mockResolvedValueOnce(tokenToUsdRate)
+          .mockResolvedValueOnce(usdToTokenRate);
+        mockedKVStoreUtils.get.mockResolvedValueOnce('1');
+
+        const result = await jobService.createJob(
+          userMock,
+          CvatJobType.IMAGE_BOXES,
+          jobManifestDto,
+        );
+
+        const paymentCurrencyFee = Number(
+          max(
+            div(mockServerConfigService.minimumFeeUsd, tokenToUsdRate),
+            mul(div(1, 100), jobManifestDto.paymentAmount),
+          ).toFixed(fundTokenDecimals),
+        );
+
+        expect(result).toBe(jobEntityMock.id);
+        expect(mockWeb3Service.validateChainId).toHaveBeenCalledWith(
+          jobManifestDto.chainId,
+        );
+        expect(mockRoutingProtocolService.validateOracles).toHaveBeenCalledWith(
+          jobManifestDto.chainId,
+          CvatJobType.IMAGE_BOXES,
+          jobManifestDto.reputationOracle,
+          jobManifestDto.exchangeOracle,
+          jobManifestDto.recordingOracle,
+        );
+        expect(mockManifestService.validateManifest).toHaveBeenCalledWith(
+          CvatJobType.IMAGE_BOXES,
+          jobManifestDto.manifest,
+        );
+        expect(mockManifestService.uploadManifest).toHaveBeenCalledWith(
+          jobManifestDto.chainId,
+          jobManifestDto.manifest,
+          [
+            jobManifestDto.exchangeOracle,
+            jobManifestDto.reputationOracle,
+            jobManifestDto.recordingOracle,
+          ],
+        );
+        expect(mockPaymentService.createWithdrawalPayment).toHaveBeenCalledWith(
+          userMock.id,
+          expect.any(Number),
+          jobManifestDto.paymentCurrency,
+          tokenToUsdRate,
+        );
+        expect(mockJobRepository.updateOne).toHaveBeenCalledWith({
+          chainId: jobManifestDto.chainId,
+          userId: userMock.id,
+          manifestUrl: mockUrl,
+          manifestHash: mockHash,
+          requestType: CvatJobType.IMAGE_BOXES,
+          fee: paymentCurrencyFee,
+          fundAmount: jobManifestDto.paymentAmount,
+          status: JobStatus.PAID,
+          waitUntil: expect.any(Date),
+          token: jobManifestDto.escrowFundToken,
+          exchangeOracle: jobManifestDto.exchangeOracle,
+          recordingOracle: jobManifestDto.recordingOracle,
+          reputationOracle: jobManifestDto.reputationOracle,
+          payments: expect.any(Array),
+        });
       });
     });
 
@@ -522,7 +593,11 @@ describe('JobService', () => {
           jobQuickLaunchDto.exchangeOracle,
           jobQuickLaunchDto.recordingOracle,
         );
-        expect(mockManifestService.createManifest).not.toHaveBeenCalled();
+        expect(mockManifestService.downloadManifest).toHaveBeenCalledWith(
+          jobQuickLaunchDto.manifestUrl,
+          HCaptchaJobType.HCAPTCHA,
+        );
+        expect(mockManifestService.validateManifest).not.toHaveBeenCalled();
         expect(mockManifestService.uploadManifest).not.toHaveBeenCalled();
         expect(mockPaymentService.createWithdrawalPayment).toHaveBeenCalledWith(
           userMock.id,
