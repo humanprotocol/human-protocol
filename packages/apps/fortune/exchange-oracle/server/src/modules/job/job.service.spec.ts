@@ -1,6 +1,11 @@
 import { createMock } from '@golevelup/ts-jest';
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
-import { Encryption, EscrowClient, OperatorUtils } from '@human-protocol/sdk';
+import {
+  Encryption,
+  EncryptionUtils,
+  EscrowClient,
+  OperatorUtils,
+} from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
@@ -142,6 +147,11 @@ describe('JobService', () => {
     assignmentRepository =
       moduleRef.get<AssignmentRepository>(AssignmentRepository);
     webhookRepository = moduleRef.get<WebhookRepository>(WebhookRepository);
+  });
+
+  afterEach(() => {
+    (jobService as any).manifestCache.clear();
+    jest.clearAllMocks();
   });
 
   describe('createJob', () => {
@@ -497,7 +507,6 @@ describe('JobService', () => {
         .mockResolvedValue(solutionsUrl);
 
       await jobService.solveJob(assignment.id, 'solution');
-      expect(web3Service.getSigner).toHaveBeenCalledWith(chainId);
       expect(webhookRepository.createUnique).toHaveBeenCalledWith({
         escrowAddress,
         chainId,
@@ -515,7 +524,6 @@ describe('JobService', () => {
       await expect(jobService.solveJob(1, 'solution')).rejects.toThrow(
         new ConflictError(ErrorAssignment.InvalidStatus),
       );
-      expect(web3Service.getSigner).toHaveBeenCalledWith(chainId);
     });
 
     it('should fail if user is not assigned to the job', async () => {
@@ -556,7 +564,6 @@ describe('JobService', () => {
       await expect(jobService.solveJob(1, 'solution')).rejects.toThrow(
         'This job has already been completed',
       );
-      expect(web3Service.getSigner).toHaveBeenCalledWith(chainId);
     });
 
     it('should fail if user has already submitted a solution', async () => {
@@ -589,7 +596,100 @@ describe('JobService', () => {
       await expect(jobService.solveJob(1, 'solution')).rejects.toThrow(
         new ValidationError(ErrorJob.SolutionAlreadySubmitted),
       );
-      expect(web3Service.getSigner).toHaveBeenCalledWith(chainId);
+    });
+  });
+
+  describe('getManifest', () => {
+    const downloadFileFromUrlMock = jest.mocked(downloadFileFromUrl);
+
+    it('should fetch and parse a non encrypted manifest', async () => {
+      const manifest: ManifestDto = {
+        requesterTitle: 'Example Title',
+        requesterDescription: 'Example Description',
+        submissionsRequired: 5,
+        fundAmount: 100,
+      };
+
+      downloadFileFromUrlMock.mockResolvedValue(JSON.stringify(manifest));
+      EncryptionUtils.isEncrypted = jest.fn().mockReturnValue(false);
+
+      const result = await jobService.getManifest(
+        chainId,
+        escrowAddress,
+        MOCK_MANIFEST_URL,
+      );
+
+      expect(result).toEqual(manifest);
+      expect(Encryption.build).not.toHaveBeenCalled();
+    });
+
+    it('should fetch and decrypt an encrypted manifest', async () => {
+      const manifest: ManifestDto = {
+        requesterTitle: 'Example Title',
+        requesterDescription: 'Example Description',
+        submissionsRequired: 5,
+        fundAmount: 100,
+      };
+
+      downloadFileFromUrlMock.mockResolvedValue('encrypted-content');
+      EncryptionUtils.isEncrypted = jest.fn().mockReturnValue(true);
+      (Encryption.build as any).mockImplementation(() => ({
+        decrypt: jest.fn().mockResolvedValue(JSON.stringify(manifest)),
+      }));
+
+      const result = await jobService.getManifest(
+        chainId,
+        escrowAddress,
+        MOCK_MANIFEST_URL,
+      );
+
+      expect(result).toEqual(manifest);
+      expect(Encryption.build).toHaveBeenCalled();
+    });
+
+    it('should cache the manifest in memory for repeated requests', async () => {
+      const manifest: ManifestDto = {
+        requesterTitle: 'Example Title',
+        requesterDescription: 'Example Description',
+        submissionsRequired: 5,
+        fundAmount: 100,
+      };
+
+      downloadFileFromUrlMock.mockResolvedValue(manifest);
+
+      const firstManifest = await jobService.getManifest(
+        chainId,
+        escrowAddress,
+        MOCK_MANIFEST_URL,
+      );
+      const secondManifest = await jobService.getManifest(
+        chainId,
+        escrowAddress,
+        MOCK_MANIFEST_URL,
+      );
+
+      expect(firstManifest).toEqual(manifest);
+      expect(secondManifest).toEqual(manifest);
+      expect(downloadFileFromUrlMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('should retry downloading the manifest after a failed request', async () => {
+      downloadFileFromUrlMock.mockRejectedValue(
+        new Error('Storage file not found'),
+      );
+      jest
+        .spyOn(webhookRepository, 'createUnique')
+        .mockResolvedValue({} as any);
+
+      await expect(
+        jobService.getManifest(chainId, escrowAddress, MOCK_MANIFEST_URL),
+      ).rejects.toThrow(ErrorJob.ManifestNotFound);
+      await expect(
+        jobService.getManifest(chainId, escrowAddress, MOCK_MANIFEST_URL),
+      ).rejects.toThrow(ErrorJob.ManifestNotFound);
+
+      expect(downloadFileFromUrlMock).toHaveBeenCalledTimes(2);
+      expect(webhookRepository.createUnique).toHaveBeenCalledTimes(2);
     });
   });
 
