@@ -15,14 +15,10 @@ import {
 import api from '../utils/api';
 import { getFilenameFromContentDisposition } from '../utils/string';
 
-const buildFortuneManifest = (
-  data: FortuneRequest,
-  fundAmount: number,
-): FortuneManifest => ({
+const buildFortuneManifest = (data: FortuneRequest): FortuneManifest => ({
   submissionsRequired: Number(data.fortunesRequested),
   requesterTitle: data.title,
   requesterDescription: data.description,
-  fundAmount,
   requestType: JobType.FORTUNE,
   qualifications: data.qualifications,
 });
@@ -76,7 +72,6 @@ export const createFortuneJob = async (
   paymentCurrency: string,
   paymentAmount: number | string,
   escrowFundToken: string,
-  fundAmount: number,
 ) => {
   const body: CreateJobRequest<FortuneManifest> = {
     chainId,
@@ -85,7 +80,7 @@ export const createFortuneJob = async (
     paymentAmount: Number(paymentAmount),
     escrowFundToken,
     qualifications: data.qualifications,
-    manifest: buildFortuneManifest(data, fundAmount),
+    manifest: buildFortuneManifest(data),
   };
   await api.post('/job', body);
 };

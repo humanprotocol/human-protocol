@@ -43,7 +43,7 @@ export type FortuneManifest = {
   submissionsRequired: number;
   requesterTitle: string;
   requesterDescription: string;
-  fundAmount: number;
+  fundAmount?: number;
   requestType: JobType.FORTUNE;
   qualifications?: string[];
 };

@@ -253,7 +253,6 @@ export const FiatPayForm = ({
           CURRENCY.usd,
           amount,
           tokenSymbol,
-          fundAmount,
         );
       } else if (jobType === JobType.CVAT && cvatRequest) {
         await createCvatJob(

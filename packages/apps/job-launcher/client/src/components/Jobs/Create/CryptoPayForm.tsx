@@ -226,7 +226,6 @@ export const CryptoPayForm = ({
             paymentTokenSymbol,
             Number(amount),
             fundTokenSymbol,
-            fundAmount,
           );
         } else if (jobType === JobType.CVAT && cvatRequest) {
           await jobService.createCvatJob(

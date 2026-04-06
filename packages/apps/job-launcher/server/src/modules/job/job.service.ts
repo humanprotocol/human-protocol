@@ -249,11 +249,16 @@ export class JobService {
 
       jobEntity.manifestUrl = dto.manifestUrl;
     } else if ('manifest' in dto) {
-      await this.manifestService.validateManifest(requestType, dto.manifest);
+      const manifest = dto.manifest;
+      if (requestType === FortuneJobType.FORTUNE) {
+        (manifest as FortuneManifestDto).fundAmount = fundTokenAmount;
+      }
+
+      await this.manifestService.validateManifest(requestType, manifest);
 
       const { url, hash } = await this.manifestService.uploadManifest(
         chainId,
-        dto.manifest,
+        manifest,
         [exchangeOracle, reputationOracle, recordingOracle],
       );
 
