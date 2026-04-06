@@ -74,7 +74,6 @@ jest.mock('minio', () => {
 
 describe('JobService', () => {
   let jobService: JobService;
-  let web3Service: Web3Service;
   let storageService: StorageService;
   let jobRepository: JobRepository;
   let assignmentRepository: AssignmentRepository;
@@ -141,7 +140,6 @@ describe('JobService', () => {
     }).compile();
 
     jobService = moduleRef.get<JobService>(JobService);
-    web3Service = moduleRef.get<Web3Service>(Web3Service);
     storageService = moduleRef.get<StorageService>(StorageService);
     jobRepository = moduleRef.get<JobRepository>(JobRepository);
     assignmentRepository =
