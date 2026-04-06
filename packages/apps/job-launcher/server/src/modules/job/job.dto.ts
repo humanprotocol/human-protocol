@@ -101,8 +101,8 @@ export class JobQuickLaunchDto extends JobDto {
 
   @ApiProperty({ name: 'manifest_hash' })
   @IsString()
-  @IsNotEmpty()
-  public manifestHash: string;
+  @IsOptional()
+  public manifestHash?: string;
 }
 
 export class JobManifestDto extends JobDto {

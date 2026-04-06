@@ -47,6 +47,7 @@ import {
   ValidationError,
 } from '../../common/errors';
 import { PageDto } from '../../common/pagination/pagination.dto';
+import { parseUrl } from '../../common/utils';
 import { add, div, max, mul } from '../../common/utils/decimal';
 import { getTokenDecimals } from '../../common/utils/tokens';
 import logger from '../../logger';
@@ -55,7 +56,6 @@ import {
   CvatManifestDto,
   FortuneManifestDto,
   HCaptchaManifestDto,
-  ManifestDto,
 } from '../manifest/manifest.dto';
 import { ManifestService } from '../manifest/manifest.service';
 import { PaymentService } from '../payment/payment.service';
@@ -235,19 +235,21 @@ export class JobService {
     let jobEntity = new JobEntity();
 
     if ('manifestUrl' in dto) {
-      await this.manifestService.downloadManifest(dto.manifestUrl, requestType);
-
       if (!dto.manifestHash) {
-        throw new ValidationError(ErrorJob.ManifestHashNotExist);
+        const { filename } = parseUrl(dto.manifestUrl);
+
+        if (!filename) {
+          throw new ValidationError(ErrorJob.ManifestHashNotExist);
+        }
+
+        jobEntity.manifestHash = filename;
+      } else {
+        jobEntity.manifestHash = dto.manifestHash;
       }
 
-      jobEntity.manifestHash = dto.manifestHash;
       jobEntity.manifestUrl = dto.manifestUrl;
     } else if ('manifest' in dto) {
-      await this.manifestService.validateManifest(
-        requestType,
-        dto.manifest as ManifestDto,
-      );
+      await this.manifestService.validateManifest(requestType, dto.manifest);
 
       const { url, hash } = await this.manifestService.uploadManifest(
         chainId,
