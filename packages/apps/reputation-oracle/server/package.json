@@ -75,7 +75,7 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@faker-js/faker": "^9.8.0",
-    "@golevelup/ts-jest": "^0.6.1",
+    "@golevelup/ts-jest": "^3.0.0",
     "@nestjs/cli": "^11.0.16",
     "@nestjs/schematics": "^11.0.9",
     "@nestjs/testing": "^11.1.14",
