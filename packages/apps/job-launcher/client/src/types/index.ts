@@ -39,30 +39,47 @@ export type FiatPaymentRequest = {
   paymentMethodId: string;
 };
 
-export type CreateFortuneJobRequest = {
-  chainId: number;
+export type FortuneManifest = {
   submissionsRequired: number;
   requesterTitle: string;
   requesterDescription: string;
-  paymentCurrency: string;
-  paymentAmount: number;
-  escrowFundToken: string;
+  fundAmount?: number;
+  requestType: JobType.FORTUNE;
   qualifications?: string[];
 };
 
-export type CreateCvatJobRequest = {
+export type JobRequestType = JobType.FORTUNE | JobType.HCAPTCHA | CvatJobType;
+
+export type CreateJobRequest<TManifest = Record<string, unknown>> = {
   chainId: number;
-  requesterDescription: string;
-  qualifications?: string[];
+  requestType: JobRequestType;
   paymentCurrency: string;
   paymentAmount: number;
   escrowFundToken: string;
-  data: CvatData;
-  labels: Label[];
-  minQuality: number;
-  groundTruth: CvatDataSource;
-  userGuide: string;
-  type: CvatJobType;
+  qualifications?: string[];
+  manifest: TManifest;
+};
+
+export type CvatManifest = {
+  data: {
+    dataUrl: string;
+    pointsUrl?: string;
+    boxesUrl?: string;
+  };
+  annotation: {
+    labels: Label[];
+    description: string;
+    userGuide: string;
+    type: CvatJobType;
+    jobSize: number;
+    qualifications?: string[];
+  };
+  validation: {
+    minQuality: number;
+    valSize: number;
+    gtUrl: string;
+  };
+  jobBounty: string;
 };
 
 export enum CreateJobStep {
@@ -215,6 +232,7 @@ export type CvatRequest = {
   groundTruth: CvatDataSource;
   userGuide: string;
   accuracyTarget: number;
+  jobBounty: number;
 };
 
 export type JobRequest = {

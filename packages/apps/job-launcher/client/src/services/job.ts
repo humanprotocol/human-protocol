@@ -1,15 +1,70 @@
 import { ChainId } from '@human-protocol/sdk';
+import { CVAT_JOB_SIZE, CVAT_VAL_SIZE } from '../constants/cvat';
 import {
-  CreateFortuneJobRequest,
-  CreateCvatJobRequest,
+  CreateJobRequest,
   FortuneRequest,
   CvatRequest,
   JobStatus,
   JobDetailsResponse,
   FortuneFinalResult,
+  FortuneManifest,
+  CvatManifest,
+  JobType,
+  StorageProviders,
 } from '../types';
 import api from '../utils/api';
 import { getFilenameFromContentDisposition } from '../utils/string';
+
+const buildFortuneManifest = (data: FortuneRequest): FortuneManifest => ({
+  submissionsRequired: Number(data.fortunesRequested),
+  requesterTitle: data.title,
+  requesterDescription: data.description,
+  requestType: JobType.FORTUNE,
+  qualifications: data.qualifications,
+});
+
+const buildBucketUrl = ({
+  provider,
+  region,
+  bucketName,
+  path,
+}: CvatRequest['data']['dataset']) => {
+  if (provider === StorageProviders.AWS) {
+    return `https://${bucketName}.s3.${region}.amazonaws.com${
+      path ? `/${path.replace(/\/$/, '')}` : ''
+    }`;
+  }
+
+  return `https://${bucketName}.storage.googleapis.com${path ? `/${path}` : ''}`;
+};
+
+const buildCvatManifest = (data: CvatRequest): CvatManifest => ({
+  data: {
+    dataUrl: buildBucketUrl(data.data.dataset),
+    ...(data.data.points && {
+      pointsUrl: buildBucketUrl(data.data.points),
+    }),
+    ...(data.data.boxes && {
+      boxesUrl: buildBucketUrl(data.data.boxes),
+    }),
+  },
+  annotation: {
+    labels: data.labels,
+    description: data.description,
+    userGuide: data.userGuide,
+    type: data.type,
+    jobSize: CVAT_JOB_SIZE,
+    ...(data.qualifications?.length && {
+      qualifications: data.qualifications,
+    }),
+  },
+  validation: {
+    minQuality: Number(data.accuracyTarget) / 100,
+    valSize: CVAT_VAL_SIZE,
+    gtUrl: buildBucketUrl(data.groundTruth),
+  },
+  jobBounty: String(data.jobBounty),
+});
 
 export const createFortuneJob = async (
   chainId: number,
@@ -18,17 +73,16 @@ export const createFortuneJob = async (
   paymentAmount: number | string,
   escrowFundToken: string,
 ) => {
-  const body: CreateFortuneJobRequest = {
+  const body: CreateJobRequest<FortuneManifest> = {
     chainId,
-    submissionsRequired: Number(data.fortunesRequested),
-    requesterTitle: data.title,
-    requesterDescription: data.description,
+    requestType: JobType.FORTUNE,
     paymentCurrency,
     paymentAmount: Number(paymentAmount),
     escrowFundToken,
     qualifications: data.qualifications,
+    manifest: buildFortuneManifest(data),
   };
-  await api.post('/job/fortune', body);
+  await api.post('/job', body);
 };
 
 export const createCvatJob = async (
@@ -38,21 +92,16 @@ export const createCvatJob = async (
   paymentAmount: number | string,
   escrowFundToken: string,
 ) => {
-  const body: CreateCvatJobRequest = {
+  const body: CreateJobRequest<CvatManifest> = {
     chainId,
-    requesterDescription: data.description,
+    requestType: data.type,
     paymentCurrency,
     paymentAmount: Number(paymentAmount),
     escrowFundToken,
-    data: data.data,
-    labels: data.labels,
-    minQuality: Number(data.accuracyTarget) / 100,
-    groundTruth: data.groundTruth,
-    userGuide: data.userGuide,
-    type: data.type,
     qualifications: data.qualifications,
+    manifest: buildCvatManifest(data),
   };
-  await api.post('/job/cvat', body);
+  await api.post('/job', body);
 };
 
 export const getJobList = async ({

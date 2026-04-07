@@ -75,7 +75,6 @@ import {
   GetJobsDto,
   JobDetailsDto,
   JobListDto,
-  JobQuickLaunchDto,
 } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
@@ -218,7 +217,7 @@ export class JobService {
 
     let jobEntity = new JobEntity();
 
-    if (dto instanceof JobQuickLaunchDto) {
+    if ('manifestUrl' in dto) {
       if (!dto.manifestHash) {
         const { filename } = parseUrl(dto.manifestUrl);
 
@@ -232,21 +231,24 @@ export class JobService {
       }
 
       jobEntity.manifestUrl = dto.manifestUrl;
-    } else {
-      const manifestOrigin = await this.manifestService.createManifest(
-        dto,
-        requestType,
-        fundTokenAmount,
-      );
+    } else if ('manifest' in dto) {
+      const manifest = dto.manifest;
+      if (requestType === FortuneJobType.FORTUNE) {
+        (manifest as FortuneManifestDto).fundAmount = fundTokenAmount;
+      }
+
+      await this.manifestService.validateManifest(requestType, manifest);
 
       const { url, hash } = await this.manifestService.uploadManifest(
         chainId,
-        manifestOrigin,
+        manifest,
         [exchangeOracle, reputationOracle, recordingOracle],
       );
 
       jobEntity.manifestUrl = url;
       jobEntity.manifestHash = hash;
+    } else {
+      throw new ValidationError(ErrorJob.InvalidRequestType);
     }
 
     const paymentEntity = await this.paymentService.createWithdrawalPayment(
