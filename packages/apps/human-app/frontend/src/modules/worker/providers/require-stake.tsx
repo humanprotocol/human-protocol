@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
 import { routerPaths } from '@/router/router-paths';
 import { protectedRoutes } from '@/router/routes';
@@ -8,9 +9,7 @@ const stakeProtectedPaths = protectedRoutes
   .map((route) => route.routerProps.path)
   .filter((path) => path !== routerPaths.worker.profile);
 
-export function RequireStake({
-  children,
-}: Readonly<{ children: JSX.Element }>) {
+export function RequireStake({ children }: Readonly<{ children: ReactNode }>) {
   const { user } = useAuthenticatedUser();
   const location = useLocation();
   const { uiConfig } = useUiConfig();
