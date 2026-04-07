@@ -6,6 +6,7 @@ import {
   KVStoreKeys,
   KVStoreUtils,
   NETWORKS,
+  Role,
 } from '@human-protocol/sdk';
 import { Inject, Injectable } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
@@ -61,7 +62,6 @@ import { ManifestService } from '../manifest/manifest.service';
 import { PaymentService } from '../payment/payment.service';
 import { QualificationService } from '../qualification/qualification.service';
 import { RateService } from '../rate/rate.service';
-import { RoutingProtocolService } from '../routing-protocol/routing-protocol.service';
 import { StorageService } from '../storage/storage.service';
 import { UserEntity } from '../user/user.entity';
 import { Web3Service } from '../web3/web3.service';
@@ -94,7 +94,6 @@ export class JobService {
     private readonly webhookRepository: WebhookRepository,
     private readonly paymentService: PaymentService,
     private readonly serverConfigService: ServerConfigService,
-    private readonly routingProtocolService: RoutingProtocolService,
     private readonly storageService: StorageService,
     private readonly rateService: RateService,
     private readonly whitelistService: WhitelistService,
@@ -124,10 +123,8 @@ export class JobService {
       throw new ValidationError(ErrorPayment.HMTTokenDisabled);
     }
 
-    let { chainId, reputationOracle, exchangeOracle, recordingOracle } = dto;
-
-    // Select network
-    chainId = chainId || this.routingProtocolService.selectNetwork();
+    const { chainId } = dto;
+    let { reputationOracle, exchangeOracle, recordingOracle } = dto;
     this.web3Service.validateChainId(chainId);
 
     // Check if not whitelisted user has an active payment method
@@ -197,25 +194,11 @@ export class JobService {
             ).toFixed(fundTokenDecimals),
           );
 
-    // Select oracles
     if (!reputationOracle || !exchangeOracle || !recordingOracle) {
-      const selectedOracles = await this.routingProtocolService.selectOracles(
-        chainId,
-        requestType,
-      );
-
-      exchangeOracle = exchangeOracle || selectedOracles.exchangeOracle;
-      recordingOracle = recordingOracle || selectedOracles.recordingOracle;
-      reputationOracle = reputationOracle || selectedOracles.reputationOracle;
-    } else {
-      // Validate if all oracles are provided
-      await this.routingProtocolService.validateOracles(
-        chainId,
-        requestType,
-        reputationOracle,
-        exchangeOracle,
-        recordingOracle,
-      );
+      const defaultOracles = await this.getDefaultOracles(chainId, requestType);
+      reputationOracle = reputationOracle ?? defaultOracles.reputationOracle;
+      exchangeOracle = exchangeOracle ?? defaultOracles.exchangeOracle;
+      recordingOracle = recordingOracle ?? defaultOracles.recordingOracle;
     }
 
     if (dto.qualifications) {
@@ -290,6 +273,49 @@ export class JobService {
     jobEntity = await this.jobRepository.updateOne(jobEntity);
 
     return jobEntity.id;
+  }
+
+  private async getDefaultOracles(
+    chainId: ChainId,
+    requestType: JobRequestType,
+  ): Promise<{
+    reputationOracle: string;
+    exchangeOracle: string;
+    recordingOracle: string;
+  }> {
+    if (requestType === HCaptchaJobType.HCAPTCHA) {
+      const oracleAddress = this.web3ConfigService.hCaptchaOracleAddress;
+      return {
+        reputationOracle: oracleAddress,
+        exchangeOracle: oracleAddress,
+        recordingOracle: oracleAddress,
+      };
+    }
+
+    if (Object.values(CvatJobType).includes(requestType as CvatJobType)) {
+      return {
+        reputationOracle: this.web3ConfigService.reputationOracleAddress,
+        exchangeOracle: this.web3ConfigService.cvatExchangeOracleAddress,
+        recordingOracle: this.web3ConfigService.cvatRecordingOracleAddress,
+      };
+    }
+
+    const reputationOracle = this.web3ConfigService.reputationOracleAddress;
+    const availableOracles = await this.web3Service.findAvailableOracles(
+      chainId,
+      requestType,
+      reputationOracle,
+    );
+
+    return {
+      reputationOracle,
+      exchangeOracle:
+        availableOracles.find((oracle) => oracle.role === Role.ExchangeOracle)
+          ?.address || '',
+      recordingOracle:
+        availableOracles.find((oracle) => oracle.role === Role.RecordingOracle)
+          ?.address || '',
+    };
   }
 
   public async createEscrow(jobEntity: JobEntity): Promise<JobEntity> {

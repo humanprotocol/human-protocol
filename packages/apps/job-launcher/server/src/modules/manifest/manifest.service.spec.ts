@@ -40,6 +40,7 @@ describe('ManifestService', () => {
   describe('createManifest', () => {
     it('should create a fortune manifest', async () => {
       const dto: JobFortuneDto = {
+        chainId: faker.number.int({ min: 1, max: 100 }),
         requesterTitle: faker.lorem.sentence(),
         requesterDescription: faker.lorem.sentence(),
         submissionsRequired: faker.number.int({ min: 1, max: 100 }),
