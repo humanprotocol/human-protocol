@@ -24,8 +24,6 @@ import {
 
 @Injectable()
 export class ManifestService {
-  public readonly bucket: string;
-
   constructor(
     private readonly web3Service: Web3Service,
     private readonly pgpConfigService: PGPConfigService,

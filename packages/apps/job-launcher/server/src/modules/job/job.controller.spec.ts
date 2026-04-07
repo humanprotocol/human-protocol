@@ -1,4 +1,5 @@
-import { faker } from '@faker-js/faker/.';
+import { faker } from '@faker-js/faker';
+import { ChainId } from '@human-protocol/sdk';
 import {
   BadRequestException,
   ConflictException,
@@ -78,6 +79,7 @@ describe('JobController', () => {
   describe('quickLaunch', () => {
     it('should create a job and return job ID', async () => {
       const jobDto: JobQuickLaunchDto = {
+        chainId: ChainId.POLYGON_AMOY,
         requestType: 'type_a' as JobRequestType,
         manifestUrl: faker.internet.url(),
         manifestHash: faker.string.uuid(),
@@ -113,6 +115,7 @@ describe('JobController', () => {
 
     it('should throw a conflict error if mutex manager fails', async () => {
       const jobDto: JobQuickLaunchDto = {
+        chainId: ChainId.POLYGON_AMOY,
         requestType: 'type_a' as JobRequestType,
         manifestUrl: faker.internet.url(),
         manifestHash: faker.string.uuid(),
@@ -159,6 +162,7 @@ describe('JobController', () => {
 
     it('should return unauthorized error if user is not authenticated', async () => {
       const jobDto: JobQuickLaunchDto = {
+        chainId: ChainId.POLYGON_AMOY,
         requestType: 'type_a' as JobRequestType,
         manifestUrl: faker.internet.url(),
         manifestHash: faker.string.uuid(),
@@ -189,6 +193,7 @@ describe('JobController', () => {
 
   describe('createJob', () => {
     const jobManifestDto: JobManifestDto = {
+      chainId: ChainId.POLYGON_AMOY,
       requestType: FortuneJobType.FORTUNE,
       manifest: createMockFortuneManifest({
         requesterTitle: faker.string.sample(),
@@ -230,6 +235,7 @@ describe('JobController', () => {
       cvatManifest.annotation.type = CvatJobType.IMAGE_BOXES;
 
       const cvatJobManifestDto: JobManifestDto = {
+        chainId: ChainId.POLYGON_AMOY,
         requestType: CvatJobType.IMAGE_BOXES,
         manifest: cvatManifest,
         paymentCurrency: faker.helpers.arrayElement(

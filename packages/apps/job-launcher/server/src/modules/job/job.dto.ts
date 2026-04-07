@@ -8,13 +8,13 @@ import {
   IsNotEmpty,
   IsNumber,
   IsNumberString,
-  IsObject,
   IsOptional,
   IsPositive,
   IsString,
   Min,
   IsUrl,
   ValidateNested,
+  IsObject,
 } from 'class-validator';
 import { IsEnumCaseInsensitive } from '../../common/decorators';
 import {
@@ -33,10 +33,9 @@ import { IsValidToken } from '../../common/validators/tokens';
 import { ManifestDetails, ManifestDto } from '../manifest/manifest.dto';
 
 export class JobDto {
-  @ApiProperty({ enum: ChainId, required: false, name: 'chain_id' })
+  @ApiProperty({ enum: ChainId, name: 'chain_id' })
   @IsEnumCaseInsensitive(ChainId)
-  @IsOptional()
-  public chainId?: ChainId;
+  public chainId: ChainId;
 
   @ApiProperty({
     description: 'Request type',

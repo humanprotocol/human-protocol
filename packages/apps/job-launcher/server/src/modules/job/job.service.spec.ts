@@ -10,6 +10,7 @@ import {
   IEscrow,
   KVStoreUtils,
   NETWORKS,
+  Role,
 } from '@human-protocol/sdk';
 import { Test } from '@nestjs/testing';
 import { ethers, ZeroAddress } from 'ethers';
@@ -48,7 +49,6 @@ import { PaymentRepository } from '../payment/payment.repository';
 import { PaymentService } from '../payment/payment.service';
 import { QualificationService } from '../qualification/qualification.service';
 import { RateService } from '../rate/rate.service';
-import { RoutingProtocolService } from '../routing-protocol/routing-protocol.service';
 import { StorageService } from '../storage/storage.service';
 import { createUser } from '../user/fixtures';
 import { Web3Service } from '../web3/web3.service';
@@ -74,11 +74,14 @@ const mockPaymentRepository = createMock<PaymentRepository>();
 const mockStorageService = createMock<StorageService>();
 const mockPaymentService = createMock<PaymentService>();
 const mockRateService = createMock<RateService>();
-const mockRoutingProtocolService = createMock<RoutingProtocolService>();
 const mockManifestService = createMock<ManifestService>();
 const mockWhitelistService = createMock<WhitelistService>();
 const mockWeb3ConfigService = {
   txTimeoutMs: faker.number.int({ min: 30000, max: 120000 }),
+  reputationOracleAddress: faker.finance.ethereumAddress(),
+  cvatExchangeOracleAddress: faker.finance.ethereumAddress(),
+  cvatRecordingOracleAddress: faker.finance.ethereumAddress(),
+  hCaptchaOracleAddress: faker.finance.ethereumAddress(),
 };
 
 const mockedEscrowClient = jest.mocked(EscrowClient);
@@ -119,10 +122,6 @@ describe('JobService', () => {
         { provide: PaymentService, useValue: mockPaymentService },
         { provide: StorageService, useValue: mockStorageService },
         { provide: WhitelistService, useValue: mockWhitelistService },
-        {
-          provide: RoutingProtocolService,
-          useValue: mockRoutingProtocolService,
-        },
         {
           provide: ManifestService,
           useValue: mockManifestService,
@@ -190,14 +189,6 @@ describe('JobService', () => {
         expect(result).toBe(jobEntityMock.id);
         expect(mockWeb3Service.validateChainId).toHaveBeenCalledWith(
           jobManifestDto.chainId,
-        );
-        expect(mockRoutingProtocolService.selectOracles).not.toHaveBeenCalled();
-        expect(mockRoutingProtocolService.validateOracles).toHaveBeenCalledWith(
-          jobManifestDto.chainId,
-          FortuneJobType.FORTUNE,
-          jobManifestDto.reputationOracle,
-          jobManifestDto.exchangeOracle,
-          jobManifestDto.recordingOracle,
         );
         expect(mockManifestService.validateManifest).toHaveBeenCalledWith(
           FortuneJobType.FORTUNE,
@@ -296,14 +287,6 @@ describe('JobService', () => {
         expect(mockWeb3Service.validateChainId).toHaveBeenCalledWith(
           jobManifestDto.chainId,
         );
-        expect(mockRoutingProtocolService.selectOracles).not.toHaveBeenCalled();
-        expect(mockRoutingProtocolService.validateOracles).toHaveBeenCalledWith(
-          jobManifestDto.chainId,
-          FortuneJobType.FORTUNE,
-          jobManifestDto.reputationOracle,
-          jobManifestDto.exchangeOracle,
-          jobManifestDto.recordingOracle,
-        );
         expect(mockManifestService.validateManifest).toHaveBeenCalledWith(
           FortuneJobType.FORTUNE,
           expectedManifest,
@@ -377,13 +360,20 @@ describe('JobService', () => {
         const mockOracles = {
           recordingOracle: faker.finance.ethereumAddress(),
           exchangeOracle: faker.finance.ethereumAddress(),
-          reputationOracle: faker.finance.ethereumAddress(),
+          reputationOracle: mockWeb3ConfigService.reputationOracleAddress,
         };
-        mockRoutingProtocolService.selectOracles.mockResolvedValueOnce({
-          recordingOracle: mockOracles.recordingOracle,
-          exchangeOracle: mockOracles.exchangeOracle,
-          reputationOracle: mockOracles.reputationOracle,
-        });
+        mockWeb3Service.findAvailableOracles.mockResolvedValueOnce([
+          {
+            address: mockOracles.exchangeOracle,
+            role: Role.ExchangeOracle,
+            url: null,
+          },
+          {
+            address: mockOracles.recordingOracle,
+            role: Role.RecordingOracle,
+            url: null,
+          },
+        ]);
         mockedKVStoreUtils.get.mockResolvedValueOnce('1');
 
         const result = await jobService.createJob(
@@ -407,13 +397,11 @@ describe('JobService', () => {
         expect(mockWeb3Service.validateChainId).toHaveBeenCalledWith(
           jobManifestDto.chainId,
         );
-        expect(mockRoutingProtocolService.selectOracles).toHaveBeenCalledWith(
+        expect(mockWeb3Service.findAvailableOracles).toHaveBeenCalledWith(
           jobManifestDto.chainId,
           FortuneJobType.FORTUNE,
+          mockOracles.reputationOracle,
         );
-        expect(
-          mockRoutingProtocolService.validateOracles,
-        ).not.toHaveBeenCalled();
         expect(mockManifestService.validateManifest).toHaveBeenCalledWith(
           FortuneJobType.FORTUNE,
           expectedManifest,
@@ -527,13 +515,6 @@ describe('JobService', () => {
         expect(mockWeb3Service.validateChainId).toHaveBeenCalledWith(
           jobManifestDto.chainId,
         );
-        expect(mockRoutingProtocolService.validateOracles).toHaveBeenCalledWith(
-          jobManifestDto.chainId,
-          CvatJobType.IMAGE_BOXES,
-          jobManifestDto.reputationOracle,
-          jobManifestDto.exchangeOracle,
-          jobManifestDto.recordingOracle,
-        );
         expect(mockManifestService.validateManifest).toHaveBeenCalledWith(
           CvatJobType.IMAGE_BOXES,
           jobManifestDto.manifest,
@@ -606,14 +587,6 @@ describe('JobService', () => {
 
         expect(mockWeb3Service.validateChainId).toHaveBeenCalledWith(
           jobQuickLaunchDto.chainId,
-        );
-        expect(mockRoutingProtocolService.selectOracles).not.toHaveBeenCalled();
-        expect(mockRoutingProtocolService.validateOracles).toHaveBeenCalledWith(
-          jobQuickLaunchDto.chainId,
-          HCaptchaJobType.HCAPTCHA,
-          jobQuickLaunchDto.reputationOracle,
-          jobQuickLaunchDto.exchangeOracle,
-          jobQuickLaunchDto.recordingOracle,
         );
         expect(mockManifestService.downloadManifest).not.toHaveBeenCalled();
         expect(mockManifestService.validateManifest).not.toHaveBeenCalled();
