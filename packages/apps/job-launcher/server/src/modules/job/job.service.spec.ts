@@ -506,9 +506,7 @@ describe('JobService', () => {
           hash: mockHash,
         });
         const jobEntityMock = createJobEntity();
-        mockJobRepository.createUnique = jest
-          .fn()
-          .mockResolvedValueOnce(jobEntityMock);
+        mockJobRepository.updateOne.mockResolvedValueOnce(jobEntityMock);
         mockRateService.getRate
           .mockResolvedValueOnce(tokenToUsdRate)
           .mockResolvedValueOnce(usdToTokenRate);
@@ -590,9 +588,7 @@ describe('JobService', () => {
         jobQuickLaunchDto.reputationOracle = faker.finance.ethereumAddress();
 
         const jobEntityMock = createJobEntity();
-        mockJobRepository.createUnique = jest
-          .fn()
-          .mockResolvedValueOnce(jobEntityMock);
+        mockJobRepository.updateOne.mockResolvedValueOnce(jobEntityMock);
         mockRateService.getRate
           .mockResolvedValueOnce(tokenToUsdRate)
           .mockResolvedValueOnce(usdToTokenRate);
