@@ -2,14 +2,14 @@ import { HttpStatus } from '@nestjs/common';
 import axios, { AxiosError } from 'axios';
 import { parseString } from 'xml2js';
 import { StorageDataDto } from '../../modules/job/job.dto';
+import {
+  GCS_HTTP_REGEX_PATH_BASED,
+  GCS_HTTP_REGEX_SUBDOMAIN,
+} from '../constants';
 import { ErrorBucket } from '../constants/errors';
 import { CvatJobType, JobRequestType } from '../enums/job';
 import { AWSRegions, StorageProviders } from '../enums/storage';
 import { ValidationError } from '../errors';
-import {
-  GCS_HTTP_REGEX_PATH_BASED,
-  GCS_HTTP_REGEX_SUBDOMAIN,
-} from './gcstorage';
 import { formatAxiosError } from './http';
 
 function parseXml(xml: string): Promise<any> {

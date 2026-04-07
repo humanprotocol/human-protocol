@@ -254,7 +254,6 @@ export class JobService {
         dto,
         requestType,
         fundTokenAmount,
-        fundTokenDecimals,
       );
 
       const { url, hash } = await this.manifestService.uploadManifest(
@@ -286,16 +285,7 @@ export class JobService {
     jobEntity.token = dto.escrowFundToken;
     jobEntity.waitUntil = new Date();
 
-    if (
-      user.whitelist ||
-      (
-        [FortuneJobType.FORTUNE, HCaptchaJobType.HCAPTCHA] as JobRequestType[]
-      ).includes(requestType)
-    ) {
-      jobEntity.status = JobStatus.MODERATION_PASSED;
-    } else {
-      jobEntity.status = JobStatus.PAID;
-    }
+    jobEntity.status = JobStatus.PAID;
 
     jobEntity = await this.jobRepository.updateOne(jobEntity);
 
