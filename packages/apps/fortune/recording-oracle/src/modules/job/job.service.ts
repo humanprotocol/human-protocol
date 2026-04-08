@@ -194,7 +194,8 @@ export class JobService {
       throw new ValidationError('Escrow not found');
     }
 
-    const amountToReserve = escrow.totalFundedAmount / BigInt(submissionsRequired);
+    const amountToReserve =
+      escrow.totalFundedAmount / BigInt(submissionsRequired);
 
     await escrowClient.storeResults(
       webhook.escrowAddress,
