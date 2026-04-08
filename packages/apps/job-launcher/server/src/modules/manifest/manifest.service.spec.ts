@@ -92,7 +92,7 @@ describe('ManifestService', () => {
 
     it('should throw when a required fortune property is missing', async () => {
       const manifest = createMockFortuneManifest();
-      delete (manifest as Partial<typeof manifest>).fundAmount;
+      delete (manifest as Partial<typeof manifest>).requesterDescription;
 
       await expect(
         manifestService.validateManifest(FortuneJobType.FORTUNE, manifest),
@@ -194,7 +194,8 @@ describe('ManifestService', () => {
 
     it('should throw if downloaded manifest is invalid', async () => {
       const mockManifest = createMockFortuneManifest();
-      delete (mockManifest as Partial<typeof mockManifest>).fundAmount;
+      delete (mockManifest as Partial<typeof mockManifest>)
+        .requesterDescription;
 
       mockStorageService.downloadJsonLikeData.mockResolvedValueOnce(
         mockManifest,

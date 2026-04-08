@@ -19,7 +19,6 @@ export class Web3Service {
 
   private signers: { [key: number]: Wallet } = {};
   readonly signerAddress: string;
-  readonly currentWeb3Env: string;
 
   constructor(
     private readonly web3ConfigService: Web3ConfigService,
