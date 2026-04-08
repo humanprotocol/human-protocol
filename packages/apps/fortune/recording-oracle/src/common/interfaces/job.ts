@@ -4,7 +4,6 @@ export interface IManifest {
   submissionsRequired: number;
   requesterTitle: string;
   requesterDescription: string;
-  fundAmount: string;
   requestType: JobRequestType;
 }
 

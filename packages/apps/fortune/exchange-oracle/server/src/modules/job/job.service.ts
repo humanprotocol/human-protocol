@@ -7,10 +7,11 @@ import {
   Encryption,
   EncryptionUtils,
   EscrowClient,
+  EscrowUtils,
 } from '@human-protocol/sdk';
 import { Inject, Injectable } from '@nestjs/common';
+import { ethers } from 'ethers';
 
-import { downloadFileFromUrl } from '../../common/utils/storage';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { ErrorAssignment, ErrorJob } from '../../common/constant/errors';
 import { SortDirection } from '../../common/enums/collection';
@@ -30,6 +31,7 @@ import {
 } from '../../common/errors';
 import { ISolution } from '../../common/interfaces/job';
 import { PageDto } from '../../common/pagination/pagination.dto';
+import { downloadFileFromUrl } from '../../common/utils/storage';
 import { AssignmentEntity } from '../assignment/assignment.entity';
 import { AssignmentRepository } from '../assignment/assignment.repository';
 import { StorageService } from '../storage/storage.service';
@@ -184,7 +186,11 @@ export class JobService {
             data.sortField === JobSortField.REWARD_AMOUNT
           ) {
             job.rewardAmount = (
-              manifest.fundAmount / manifest.submissionsRequired
+              await this.getRewardAmount(
+                entity.chainId,
+                entity.escrowAddress,
+                manifest.submissionsRequired,
+              )
             ).toString();
           }
           if (data.fields?.includes(JobFieldName.RewardToken)) {
@@ -382,5 +388,26 @@ export class JobService {
     }
 
     return manifest;
+  }
+
+  public async getRewardAmount(
+    chainId: number,
+    escrowAddress: string,
+    submissionsRequired: number,
+  ): Promise<number> {
+    const escrow = await EscrowUtils.getEscrow(chainId, escrowAddress);
+    if (!escrow) {
+      throw new NotFoundError(ErrorJob.NotFound);
+    }
+
+    const decimals = await HMToken__factory.connect(
+      escrow.token,
+      this.web3Service.getSigner(chainId),
+    ).decimals();
+
+    return (
+      Number(ethers.formatUnits(escrow.totalFundedAmount, decimals)) /
+      submissionsRequired
+    );
   }
 }

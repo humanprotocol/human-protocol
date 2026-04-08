@@ -37,7 +37,6 @@ export const MOCK_MANIFEST: IManifest = {
   submissionsRequired: 2,
   requesterTitle: 'Fortune',
   requesterDescription: 'Some desc',
-  fundAmount: '8',
   requestType: JobRequestType.FORTUNE,
 };
 export const MOCK_ENCRYPTION_PRIVATE_KEY = 'private-key';
