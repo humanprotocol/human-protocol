@@ -1,7 +1,7 @@
 {
   "name": "@human-protocol/sdk",
   "description": "Human Protocol SDK",
-  "version": "7.1.0",
+  "version": "7.2.0",
   "files": [
     "src",
     "dist"
