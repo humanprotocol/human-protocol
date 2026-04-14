@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { useLocation, Navigate } from 'react-router-dom';
 import { createContext } from 'react';
 import { routerPaths } from '@/router/router-paths';
@@ -10,7 +11,7 @@ export const ConnectedWalletContext =
 
 export function RequireWalletConnect({
   children,
-}: Readonly<{ children: JSX.Element }>) {
+}: Readonly<{ children: ReactNode }>) {
   const walletConnect = useWalletConnect();
   const location = useLocation();
 

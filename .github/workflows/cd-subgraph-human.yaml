@@ -53,9 +53,9 @@ jobs:
       - name: Install dependencies
         if: steps.filter_networks.outputs.continue == 'true'
         run: yarn workspaces focus @tools/subgraph-human-protocol
-      - name: Build packages (scoped)
+      - name: Build core dependency
         if: steps.filter_networks.outputs.continue == 'true'
-        run: yarn workspaces foreach -Rpt --from @tools/subgraph-human-protocol run build
+        run: yarn workspace @human-protocol/core build
       - name: Generate and build Subgraph
         if: steps.filter_networks.outputs.continue == 'true'
         run: yarn generate && yarn build

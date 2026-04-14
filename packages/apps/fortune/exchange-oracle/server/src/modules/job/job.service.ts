@@ -43,6 +43,8 @@ import { JobRepository } from './job.repository';
 
 @Injectable()
 export class JobService {
+  private readonly manifestCache = new Map<string, Promise<ManifestDto>>();
+
   constructor(
     private readonly pgpConfigService: PGPConfigService,
     public readonly jobRepository: JobRepository,
@@ -341,6 +343,32 @@ export class JobService {
   }
 
   public async getManifest(
+    chainId: number,
+    escrowAddress: string,
+    manifestUrl: string,
+  ): Promise<ManifestDto> {
+    const cacheKey = `${chainId}:${escrowAddress}`;
+
+    const cachedManifest = this.manifestCache.get(cacheKey);
+    if (cachedManifest) {
+      return cachedManifest;
+    }
+
+    const manifestRequest = this.fetchManifest(
+      chainId,
+      escrowAddress,
+      manifestUrl,
+    ).catch((error) => {
+      this.manifestCache.delete(cacheKey);
+      throw error;
+    });
+
+    this.manifestCache.set(cacheKey, manifestRequest);
+
+    return manifestRequest;
+  }
+
+  private async fetchManifest(
     chainId: number,
     escrowAddress: string,
     manifestUrl: string,

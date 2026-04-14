@@ -254,7 +254,7 @@ describe('Escrow', () => {
       'Transaction',
       newPending1.transaction.hash.toHex(),
       'from',
-      newPending1.transaction.from.toHex()
+      launcherAddressString
     );
     assert.fieldEquals(
       'Transaction',
@@ -380,7 +380,7 @@ describe('Escrow', () => {
       'Transaction',
       newPending1.transaction.hash.toHex(),
       'from',
-      newPending1.transaction.from.toHex()
+      launcherAddressString
     );
     assert.fieldEquals(
       'Transaction',
@@ -530,7 +530,7 @@ describe('Escrow', () => {
       'Transaction',
       newPending1.transaction.hash.toHex(),
       'from',
-      newPending1.transaction.from.toHex()
+      launcherAddressString
     );
     assert.fieldEquals(
       'Transaction',
@@ -573,6 +573,12 @@ describe('Escrow', () => {
       fund.transaction.hash.toHex(),
       'method',
       'fund'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      fund.transaction.hash.toHex(),
+      'from',
+      operatorAddressString
     );
     assert.fieldEquals(
       'Transaction',
@@ -728,7 +734,7 @@ describe('Escrow', () => {
       'Transaction',
       newPending1.transaction.hash.toHex(),
       'from',
-      newPending1.transaction.from.toHex()
+      launcherAddressString
     );
     assert.fieldEquals(
       'Transaction',
@@ -808,6 +814,12 @@ describe('Escrow', () => {
       newPending1.transaction.hash.toHex(),
       'method',
       'setup'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      newPending1.transaction.hash.toHex(),
+      'from',
+      launcherAddressString
     );
   });
 
@@ -1304,6 +1316,12 @@ describe('Escrow', () => {
     assert.fieldEquals('EscrowStatusEvent', id, 'status', 'ToCancel');
 
     // Escrow
+    assert.fieldEquals(
+      'Escrow',
+      escrowAddress.toHex(),
+      'cancellationRequestedAt',
+      cancellationRequested.block.timestamp.toString()
+    );
     assert.fieldEquals('Escrow', escrowAddress.toHex(), 'status', 'ToCancel');
     assert.fieldEquals(
       'Transaction',

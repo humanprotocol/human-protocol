@@ -1,4 +1,9 @@
-import { Address, BigInt, DataSourceContext } from '@graphprotocol/graph-ts';
+import {
+  Address,
+  BigInt,
+  DataSourceContext,
+  ethereum,
+} from '@graphprotocol/graph-ts';
 import {
   describe,
   test,
@@ -7,12 +12,16 @@ import {
   afterAll,
   dataSourceMock,
   beforeAll,
+  createMockedFunction,
 } from 'matchstick-as/assembly';
 
 import { STATISTICS_ENTITY_ID } from '../../src/mapping/Escrow';
-import { handleLaunched } from '../../src/mapping/EscrowFactory';
+import {
+  handleLaunched,
+  handleLaunchedV2,
+} from '../../src/mapping/EscrowFactory';
 import { toEventId } from '../../src/mapping/utils/event';
-import { createLaunchedEvent } from './fixtures';
+import { createLaunchedEvent, createLaunchedV2Event } from './fixtures';
 
 const factoryAddressString = '0x92a2eef7ff696bcef98957a0189872680600a958';
 const factoryAddress = Address.fromString(factoryAddressString);
@@ -24,6 +33,9 @@ const escrow1AddressString = '0xd979105297fb0eee83f7475fc09279cb5b94ffc6';
 const escrow1Address = Address.fromString(escrow1AddressString);
 const escrow2AddressString = '0xd979105297fb0eee83f7433fc09279cb5b94ffc7';
 const escrow2Address = Address.fromString(escrow2AddressString);
+const escrow3AddressString = '0xd979105297fb0eee83f7433fc09279cb5b94ffc8';
+const escrow3Address = Address.fromString(escrow3AddressString);
+const jobRequesterId = 'requester-123';
 
 describe('EscrowFactory', () => {
   beforeAll(() => {
@@ -52,6 +64,17 @@ describe('EscrowFactory', () => {
       escrow2Address,
       BigInt.fromI32(11)
     );
+
+    createMockedFunction(
+      escrow1Address,
+      'launcher',
+      'launcher():(address)'
+    ).returns([ethereum.Value.fromAddress(launcherAddress)]);
+    createMockedFunction(
+      escrow2Address,
+      'launcher',
+      'launcher():(address)'
+    ).returns([ethereum.Value.fromAddress(launcherAddress)]);
 
     handleLaunched(data1);
     handleLaunched(data2);
@@ -208,7 +231,7 @@ describe('EscrowFactory', () => {
       'Transaction',
       data1.transaction.hash.toHex(),
       'from',
-      data1.transaction.from.toHex()
+      launcherAddressString
     );
 
     assert.fieldEquals(
@@ -233,13 +256,75 @@ describe('EscrowFactory', () => {
       'Transaction',
       data2.transaction.hash.toHex(),
       'from',
-      data2.transaction.from.toHex()
+      launcherAddressString
     );
     assert.fieldEquals(
       'Transaction',
       data2.transaction.hash.toHex(),
       'to',
       factoryAddressString
+    );
+  });
+
+  test('Should properly handle LaunchedV2 event using escrow launcher', () => {
+    const launchedV2 = createLaunchedV2Event(
+      factoryAddress,
+      factoryAddress,
+      tokenAddress,
+      escrow3Address,
+      jobRequesterId,
+      BigInt.fromI32(12)
+    );
+
+    createMockedFunction(
+      escrow3Address,
+      'launcher',
+      'launcher():(address)'
+    ).returns([ethereum.Value.fromAddress(launcherAddress)]);
+
+    handleLaunchedV2(launchedV2);
+
+    assert.fieldEquals(
+      'Escrow',
+      escrow3AddressString,
+      'launcher',
+      launcherAddressString
+    );
+    assert.fieldEquals(
+      'Escrow',
+      escrow3AddressString,
+      'canceler',
+      launcherAddressString
+    );
+    assert.fieldEquals(
+      'Escrow',
+      escrow3AddressString,
+      'jobRequesterId',
+      jobRequesterId
+    );
+    assert.fieldEquals(
+      'Transaction',
+      launchedV2.transaction.hash.toHex(),
+      'from',
+      launcherAddressString
+    );
+    assert.fieldEquals(
+      'Transaction',
+      launchedV2.transaction.hash.toHex(),
+      'method',
+      'createEscrow'
+    );
+    assert.fieldEquals(
+      'Operator',
+      launcherAddressString,
+      'amountJobsProcessed',
+      '3'
+    );
+    assert.fieldEquals(
+      'EscrowStatistics',
+      STATISTICS_ENTITY_ID.toHex(),
+      'totalEscrowCount',
+      '3'
     );
   });
 });

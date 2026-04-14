@@ -68,6 +68,8 @@ class EscrowData:
         token (str): Address of the payment token.
         total_funded_amount (int): Total amount funded to the escrow.
         created_at (int): Creation timestamp in milliseconds.
+        cancellation_requested_at (Optional[int]): Cancellation request timestamp in
+            milliseconds.
         chain_id (ChainId): Chain where the escrow is deployed.
     """
 
@@ -86,6 +88,7 @@ class EscrowData:
         token: str,
         total_funded_amount: str,
         created_at: str,
+        cancellation_requested_at: Optional[str] = None,
         final_results_url: Optional[str] = None,
         final_results_hash: Optional[str] = None,
         intermediate_results_url: Optional[str] = None,
@@ -129,6 +132,11 @@ class EscrowData:
         self.token = token
         self.total_funded_amount = int(total_funded_amount)
         self.created_at = int(created_at) * 1000
+        self.cancellation_requested_at = (
+            int(cancellation_requested_at) * 1000
+            if cancellation_requested_at is not None
+            else None
+        )
         self.chain_id = chain_id
 
 
@@ -325,6 +333,7 @@ class EscrowUtils:
                     token=escrow.get("token"),
                     total_funded_amount=escrow.get("totalFundedAmount"),
                     created_at=escrow.get("createdAt"),
+                    cancellation_requested_at=escrow.get("cancellationRequestedAt"),
                     final_results_url=escrow.get("finalResultsUrl"),
                     final_results_hash=escrow.get("finalResultsHash"),
                     intermediate_results_url=escrow.get("intermediateResultsUrl"),
@@ -423,6 +432,7 @@ class EscrowUtils:
             token=escrow.get("token"),
             total_funded_amount=escrow.get("totalFundedAmount"),
             created_at=escrow.get("createdAt"),
+            cancellation_requested_at=escrow.get("cancellationRequestedAt"),
             final_results_url=escrow.get("finalResultsUrl"),
             final_results_hash=escrow.get("finalResultsHash"),
             intermediate_results_url=escrow.get("intermediateResultsUrl"),

@@ -4,19 +4,29 @@ import {
 } from '../../generated/EscrowFactory/EscrowFactory';
 import { Escrow, EscrowStatusEvent } from '../../generated/schema';
 import { Escrow as EscrowTemplate } from '../../generated/templates';
+import { Escrow as EscrowContract } from '../../generated/templates/Escrow/Escrow';
 import { createOrLoadEscrowStatistics } from './Escrow';
 import { createOrLoadOperator } from './KVStore';
 import { createTransaction } from './utils/transaction';
 import { getEventDayData } from './utils/dayUpdates';
 import { toEventId } from './utils/event';
 import { ONE_BI, ZERO_BI } from './utils/number';
-import { dataSource } from '@graphprotocol/graph-ts';
+import { Address, dataSource } from '@graphprotocol/graph-ts';
+
+function getEscrowLauncher(escrowAddress: Address): Address {
+  const escrowContract = EscrowContract.bind(escrowAddress);
+  const launcher = escrowContract.try_launcher();
+
+  return launcher.value;
+}
 
 export function handleLaunched(event: Launched): void {
+  const launcher = getEscrowLauncher(event.params.escrow);
+
   createTransaction(
     event,
     'createEscrow',
-    event.transaction.from,
+    launcher,
     dataSource.address(),
     null,
     event.params.escrow
@@ -28,7 +38,7 @@ export function handleLaunched(event: Launched): void {
   statusEventEntity.txHash = event.transaction.hash;
   statusEventEntity.escrowAddress = event.params.escrow;
   statusEventEntity.sender = event.transaction.from;
-  statusEventEntity.launcher = event.transaction.from;
+  statusEventEntity.launcher = launcher;
   statusEventEntity.status = 'Launched';
   statusEventEntity.save();
 
@@ -39,8 +49,8 @@ export function handleLaunched(event: Launched): void {
   entity.address = event.params.escrow;
   entity.token = event.params.token;
   entity.factoryAddress = event.address;
-  entity.launcher = event.transaction.from;
-  entity.canceler = event.transaction.from;
+  entity.launcher = launcher;
+  entity.canceler = launcher;
 
   entity.balance = ZERO_BI;
   entity.amountPaid = ZERO_BI;
@@ -65,16 +75,18 @@ export function handleLaunched(event: Launched): void {
   eventDayData.save();
 
   // Increase amount of jobs launched by operator
-  const operator = createOrLoadOperator(event.transaction.from);
+  const operator = createOrLoadOperator(launcher);
   operator.amountJobsProcessed = operator.amountJobsProcessed.plus(ONE_BI);
   operator.save();
 }
 
 export function handleLaunchedV2(event: LaunchedV2): void {
+  const launcher = getEscrowLauncher(event.params.escrow);
+
   createTransaction(
     event,
     'createEscrow',
-    event.transaction.from,
+    launcher,
     dataSource.address(),
     null,
     event.params.escrow
@@ -87,8 +99,8 @@ export function handleLaunchedV2(event: LaunchedV2): void {
   entity.token = event.params.token;
   entity.jobRequesterId = event.params.jobRequesterId;
   entity.factoryAddress = event.address;
-  entity.launcher = event.transaction.from;
-  entity.canceler = event.transaction.from;
+  entity.launcher = launcher;
+  entity.canceler = launcher;
 
   entity.balance = ZERO_BI;
   entity.amountPaid = ZERO_BI;
@@ -113,7 +125,7 @@ export function handleLaunchedV2(event: LaunchedV2): void {
   eventDayData.save();
 
   // Increase amount of jobs launched by operator
-  const operator = createOrLoadOperator(event.transaction.from);
+  const operator = createOrLoadOperator(launcher);
   operator.amountJobsProcessed = operator.amountJobsProcessed.plus(ONE_BI);
   operator.save();
 }

@@ -513,6 +513,9 @@ function mapEscrow(e: EscrowData, chainId: ChainId | number): IEscrow {
     token: e.token,
     totalFundedAmount: BigInt(e.totalFundedAmount),
     createdAt: Number(e.createdAt) * 1000,
+    cancellationRequestedAt: e.cancellationRequestedAt
+      ? Number(e.cancellationRequestedAt) * 1000
+      : null,
     chainId: Number(chainId),
   };
 }

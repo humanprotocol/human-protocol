@@ -75,7 +75,7 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@faker-js/faker": "^9.8.0",
-    "@golevelup/ts-jest": "^0.6.1",
+    "@golevelup/ts-jest": "^3.0.0",
     "@nestjs/cli": "^11.0.16",
     "@nestjs/schematics": "^11.0.9",
     "@nestjs/testing": "^11.1.14",
@@ -86,7 +86,7 @@
     "@types/node": "22.10.5",
     "@types/uuid": "^10.0.0",
     "@types/zxcvbn": "4.4.5",
-    "eslint": "^10.0.3",
+    "eslint": "^10.1.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-import-x": "^4.16.2",
