@@ -2,6 +2,10 @@ export enum FortuneJobType {
   FORTUNE = 'fortune',
 }
 
+export enum MarketingJobType {
+  SOCIAL_MEDIA_PROMOTION = 'social_media_promotion',
+}
+
 export enum CvatJobType {
   IMAGE_BOXES = 'image_boxes',
   IMAGE_POINTS = 'image_points',
