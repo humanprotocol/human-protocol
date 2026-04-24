@@ -4,7 +4,7 @@ export type FortuneFinalResult = {
   error?: 'duplicated' | 'curse_word';
 };
 
-export enum MarketingDecisionStatus {
+export enum VerificationResult {
   Accepted = 'accepted',
   Rejected = 'rejected',
 }
@@ -12,7 +12,7 @@ export enum MarketingDecisionStatus {
 export type MarketingFinalResult = {
   workerAddress: string;
   postUrl: string;
-  status: MarketingDecisionStatus;
+  verificationResult: VerificationResult;
   rejectionReason?: string;
 };
 

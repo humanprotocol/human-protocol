@@ -3,9 +3,9 @@ import { Injectable } from '@nestjs/common';
 import type { OverrideProperties } from 'type-fest';
 
 import {
-  MarketingDecisionStatus,
   MarketingFinalResult,
   MarketingManifest,
+  VerificationResult,
 } from '@/common/types';
 import { StorageService } from '@/modules/storage';
 import { Web3Service } from '@/modules/web3';
@@ -29,6 +29,7 @@ export class MarketingPayoutsCalculator implements EscrowPayoutsCalculator {
   ) {}
 
   async calculate({
+    manifest,
     chainId,
     escrowAddress,
     finalResultsUrl,
@@ -41,7 +42,9 @@ export class MarketingPayoutsCalculator implements EscrowPayoutsCalculator {
       );
 
     const recipients = finalResults
-      .filter((result) => result.status === MarketingDecisionStatus.Accepted)
+      .filter(
+        (result) => result.verificationResult === VerificationResult.Accepted,
+      )
       .map((item) => item.workerAddress);
 
     if (!recipients.length) {
@@ -49,7 +52,7 @@ export class MarketingPayoutsCalculator implements EscrowPayoutsCalculator {
     }
 
     const reservedFunds = await escrowClient.getReservedFunds(escrowAddress);
-    const payoutAmount = reservedFunds / BigInt(recipients.length);
+    const payoutAmount = reservedFunds / BigInt(manifest.submissions_required);
 
     return recipients.map((recipient) => ({
       address: recipient,
