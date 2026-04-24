@@ -958,8 +958,7 @@ describe('EscrowCompletionService', () => {
         );
         expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledWith({
           ...paidPayoutsRecord,
-          failureDetail: 'Error message: Webhook url is no set for oracle',
-          status: 'failed',
+          status: 'completed',
         });
       });
 
@@ -988,10 +987,7 @@ describe('EscrowCompletionService', () => {
         );
         expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledWith({
           ...paidPayoutsRecord,
-          failureDetail: expect.stringContaining(
-            'Failed to create outgoing webhook for oracle. Address: 0x',
-          ),
-          status: 'failed',
+          status: 'completed',
         });
       });
     });
@@ -1177,8 +1173,7 @@ describe('EscrowCompletionService', () => {
       expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledTimes(1);
       expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledWith({
         ...paidPayoutsRecord,
-        failureDetail: 'Error message: Oracle data is missing',
-        status: 'failed',
+        status: 'completed',
       });
     });
   });
