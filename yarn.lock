@@ -398,7 +398,7 @@ __metadata:
     eslint-plugin-jest: "npm:^29.15.1"
     eslint-plugin-prettier: "npm:^5.5.5"
     globals: "npm:^16.3.0"
-    helmet: "npm:^7.1.0"
+    helmet: "npm:^8.1.0"
     jest: "npm:^29.7.0"
     joi: "npm:^17.13.3"
     minio: "npm:8.0.6"
@@ -656,7 +656,7 @@ __metadata:
     eslint-plugin-jest: "npm:^29.15.1"
     eslint-plugin-prettier: "npm:^5.5.5"
     globals: "npm:^16.3.0"
-    helmet: "npm:^7.1.0"
+    helmet: "npm:^8.1.0"
     jest: "npm:^29.7.0"
     joi: "npm:^17.13.3"
     json-stable-stringify: "npm:^1.2.1"
@@ -732,7 +732,7 @@ __metadata:
     eslint-plugin-prettier: "npm:^5.5.5"
     ethers: "npm:~6.16.0"
     globals: "npm:^16.3.0"
-    helmet: "npm:^7.1.0"
+    helmet: "npm:^8.1.0"
     jest: "npm:^29.7.0"
     joi: "npm:^17.13.3"
     json-stable-stringify: "npm:^1.2.1"
@@ -21159,10 +21159,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"helmet@npm:^7.1.0":
-  version: 7.2.0
-  resolution: "helmet@npm:7.2.0"
-  checksum: 10c0/7ba8503519cabc1d6410330b710da3ac01a4ff66e7e10cb68c4d73c96803a2e86ce45c71f3127dfb8ef3ea2e91c7b8316726191873f80d0572f8826878b2854e
+"helmet@npm:^8.1.0":
+  version: 8.1.0
+  resolution: "helmet@npm:8.1.0"
+  checksum: 10c0/94d3a7ebc88dbda1421635bdf33f00724adb5252269e93c5ab296ec0db11336d01265659ad3739ab1a1e881fb23a686ff7e788aac6a5fb929285134f157df763
   languageName: node
   linkType: hard
 
