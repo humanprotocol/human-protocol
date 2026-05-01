@@ -69,7 +69,7 @@
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.3",
     "@vercel/style-guide": "^6.0.0",
-    "@vitejs/plugin-react": "^4.2.1",
+    "@vitejs/plugin-react": "^6.0.1",
     "eslint": "^10.1.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
