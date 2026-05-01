@@ -128,7 +128,7 @@ __metadata:
     eslint-plugin-prettier: "npm:^5.5.5"
     eslint-plugin-react: "npm:^7.37.5"
     eslint-plugin-react-hooks: "npm:^5.2.0"
-    eslint-plugin-react-refresh: "npm:^0.4.11"
+    eslint-plugin-react-refresh: "npm:^0.5.2"
     globals: "npm:^16.2.0"
     prettier: "npm:^3.8.1"
     react: "npm:^19.2.4"
@@ -291,7 +291,7 @@ __metadata:
     axios: "npm:^1.7.2"
     eslint: "npm:^10.1.0"
     eslint-plugin-react-hooks: "npm:^5.1.0"
-    eslint-plugin-react-refresh: "npm:^0.4.11"
+    eslint-plugin-react-refresh: "npm:^0.5.2"
     ethers: "npm:^6.16.0"
     globals: "npm:^16.3.0"
     prettier: "npm:^3.8.1"
@@ -450,7 +450,7 @@ __metadata:
     eslint-plugin-jsx-a11y: "npm:^6.10.2"
     eslint-plugin-prettier: "npm:^5.5.5"
     eslint-plugin-react-hooks: "npm:^5.2.0"
-    eslint-plugin-react-refresh: "npm:^0.4.11"
+    eslint-plugin-react-refresh: "npm:^0.5.2"
     ethers: "npm:^6.16.0"
     globals: "npm:^16.3.0"
     husky: "npm:^9.1.6"
@@ -780,7 +780,7 @@ __metadata:
     axios: "npm:^1.7.2"
     eslint: "npm:^10.1.0"
     eslint-plugin-react-hooks: "npm:^5.1.0"
-    eslint-plugin-react-refresh: "npm:^0.4.11"
+    eslint-plugin-react-refresh: "npm:^0.5.2"
     ethers: "npm:^6.16.0"
     globals: "npm:^16.3.0"
     prettier: "npm:^3.8.1"
@@ -18871,12 +18871,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-react-refresh@npm:^0.4.11":
-  version: 0.4.24
-  resolution: "eslint-plugin-react-refresh@npm:0.4.24"
+"eslint-plugin-react-refresh@npm:^0.5.2":
+  version: 0.5.2
+  resolution: "eslint-plugin-react-refresh@npm:0.5.2"
   peerDependencies:
-    eslint: ">=8.40"
-  checksum: 10c0/7471a25663cdec2886b5aec53cff6319475a6704616f96db4eef7ada3cba1236abeb71b4c2db6396e48a3a8a3a416a0266b2eac06bb6ef77d8b5674604ece7fb
+    eslint: ^9 || ^10
+  checksum: 10c0/6e5b1b8ad673535ea1134fa16ecda986c389a045b87ca935e6c5f69070b1889218f3116bfb8b793ec10f37c286f28904d0b5b1d62a76760e465aa32e73e6010e
   languageName: node
   linkType: hard
 
