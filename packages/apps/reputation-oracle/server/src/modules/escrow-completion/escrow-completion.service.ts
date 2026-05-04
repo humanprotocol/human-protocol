@@ -294,7 +294,11 @@ export class EscrowCompletionService {
 
           const { webhookUrl } = oracleData;
           if (!webhookUrl) {
-            throw new Error('Webhook url is no set for oracle');
+            this.logger.error('Webhook url is not set for this oracle', {
+              escrowCompletionEntityId: escrowCompletionEntity.id,
+              oracleAddress,
+            });
+            continue;
           }
 
           try {

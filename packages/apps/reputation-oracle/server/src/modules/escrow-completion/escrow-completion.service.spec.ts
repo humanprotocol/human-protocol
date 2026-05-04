@@ -958,8 +958,7 @@ describe('EscrowCompletionService', () => {
         );
         expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledWith({
           ...paidPayoutsRecord,
-          failureDetail: 'Error message: Webhook url is no set for oracle',
-          status: 'failed',
+          status: 'completed',
         });
       });
 
