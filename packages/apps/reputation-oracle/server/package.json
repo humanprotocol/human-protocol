@@ -63,7 +63,7 @@
     "minio": "8.0.6",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
-    "pg": "8.13.1",
+    "pg": "8.20.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.2.0",
     "typeorm": "^0.3.28",
