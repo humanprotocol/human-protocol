@@ -268,9 +268,6 @@ export class EscrowCompletionService {
           );
         }
 
-        escrowCompletionEntity.status = EscrowCompletionStatus.COMPLETED;
-        await this.escrowCompletionRepository.updateOne(escrowCompletionEntity);
-
         const oracleAddresses: string[] = [
           escrowData.launcher as string,
           escrowData.exchangeOracle as string,
@@ -285,17 +282,14 @@ export class EscrowCompletionService {
               : OutgoingWebhookEventType.ESCROW_COMPLETED,
         };
 
+        let allWebhooksCreated = true;
         for (const oracleAddress of oracleAddresses) {
           const oracleData = await OperatorUtils.getOperator(
             chainId,
             oracleAddress,
           );
           if (!oracleData) {
-            this.logger.error('Oracle data is missing', {
-              escrowCompletionEntityId: escrowCompletionEntity.id,
-              oracleAddress,
-            });
-            continue;
+            throw new Error('Oracle data is missing');
           }
 
           const { webhookUrl } = oracleData;
@@ -318,14 +312,32 @@ export class EscrowCompletionService {
                * Already created. Noop.
                */
               continue;
-            }
+            } else {
+              this.logger.error(
+                'Failed to create outgoing webhook for oracle',
+                {
+                  error,
+                  escrowCompletionEntityId: escrowCompletionEntity.id,
+                  oracleAddress,
+                },
+              );
 
-            this.logger.error('Failed to create outgoing webhook for oracle', {
-              error,
-              escrowCompletionEntityId: escrowCompletionEntity.id,
-              oracleAddress,
-            });
+              await this.handleEscrowCompletionError(
+                escrowCompletionEntity,
+                `Failed to create outgoing webhook for oracle. Address: ${oracleAddress}.`,
+              );
+              allWebhooksCreated = false;
+              break;
+            }
           }
+        }
+
+        // Only set the status to COMPLETED if all webhooks were created successfully
+        if (allWebhooksCreated) {
+          escrowCompletionEntity.status = EscrowCompletionStatus.COMPLETED;
+          await this.escrowCompletionRepository.updateOne(
+            escrowCompletionEntity,
+          );
         }
       } catch (error) {
         this.logger.error('Failed to process paid escrow completion', {
