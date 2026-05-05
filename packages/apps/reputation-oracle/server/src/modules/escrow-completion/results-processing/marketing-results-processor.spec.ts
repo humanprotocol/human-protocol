@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker';
 import { createMock } from '@golevelup/ts-jest';
 import { Test } from '@nestjs/testing';
 
-import { MarketingDecisionStatus } from '@/common/types';
+import { VerificationResult } from '@/common/types';
 import { PgpEncryptionService } from '@/modules/encryption';
 import { StorageService } from '@/modules/storage';
 import { Web3Service } from '@/modules/web3';
@@ -95,8 +95,8 @@ describe('MarketingResultsProcessor', () => {
         processor['assertResultsComplete'](
           Buffer.from(
             JSON.stringify([
-              generateMarketingResult(MarketingDecisionStatus.Accepted),
-              generateMarketingResult(MarketingDecisionStatus.Rejected),
+              generateMarketingResult(VerificationResult.Accepted),
+              generateMarketingResult(VerificationResult.Rejected),
             ]),
           ),
           testManifest,
@@ -109,7 +109,7 @@ describe('MarketingResultsProcessor', () => {
         processor['assertResultsComplete'](
           Buffer.from(
             JSON.stringify([
-              generateMarketingResult(MarketingDecisionStatus.Rejected),
+              generateMarketingResult(VerificationResult.Rejected),
             ]),
           ),
           testManifest,

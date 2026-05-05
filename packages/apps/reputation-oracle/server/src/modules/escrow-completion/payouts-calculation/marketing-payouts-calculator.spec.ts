@@ -5,7 +5,7 @@ import { createMock } from '@golevelup/ts-jest';
 import { EscrowClient } from '@human-protocol/sdk';
 import { Test } from '@nestjs/testing';
 
-import { MarketingDecisionStatus } from '@/common/types';
+import { VerificationResult } from '@/common/types';
 import { StorageService } from '@/modules/storage';
 import { Web3Service } from '@/modules/web3';
 import { generateTestnetChainId } from '@/modules/web3/fixtures';
@@ -57,26 +57,27 @@ describe('MarketingPayoutsCalculator', () => {
 
     it('should properly calculate payouts for accepted results only', async () => {
       const acceptedResults = [
-        generateMarketingResult(MarketingDecisionStatus.Accepted),
-        generateMarketingResult(MarketingDecisionStatus.Accepted),
+        generateMarketingResult(VerificationResult.Accepted),
+        generateMarketingResult(VerificationResult.Accepted),
       ];
       mockedStorageService.downloadJsonLikeData.mockResolvedValueOnce(
         faker.helpers.shuffle([
           ...acceptedResults,
-          generateMarketingResult(MarketingDecisionStatus.Rejected),
+          generateMarketingResult(VerificationResult.Rejected),
         ]),
       );
 
+      const manifest = generateMarketingManifest();
       const payouts = await calculator.calculate({
         chainId: generateTestnetChainId(),
         escrowAddress: faker.finance.ethereumAddress(),
         finalResultsUrl: faker.internet.url(),
-        manifest: generateMarketingManifest(),
+        manifest: manifest,
       });
 
       const expectedPayouts = acceptedResults.map((result) => ({
         address: result.workerAddress,
-        amount: balance / BigInt(acceptedResults.length),
+        amount: balance / BigInt(manifest.submissions_required),
       }));
 
       const normalize = (items: { address: string; amount: bigint }[]) =>
@@ -92,8 +93,8 @@ describe('MarketingPayoutsCalculator', () => {
 
     it('should return an empty list when there are no accepted results', async () => {
       mockedStorageService.downloadJsonLikeData.mockResolvedValueOnce([
-        generateMarketingResult(MarketingDecisionStatus.Rejected),
-        generateMarketingResult(MarketingDecisionStatus.Rejected),
+        generateMarketingResult(VerificationResult.Rejected),
+        generateMarketingResult(VerificationResult.Rejected),
       ]);
 
       const payouts = await calculator.calculate({
