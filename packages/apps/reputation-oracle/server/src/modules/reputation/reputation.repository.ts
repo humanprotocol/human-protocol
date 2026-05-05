@@ -1,6 +1,6 @@
 import { ChainId } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
-import { DataSource, FindManyOptions, In } from 'typeorm';
+import { DataSource, FindManyOptions, In, Raw } from 'typeorm';
 
 import { SortDirection } from '@/common/enums';
 import { JobRequestType } from '@/common/types';
@@ -9,6 +9,12 @@ import { BaseRepository } from '@/database';
 import { ReputationEntityType, ReputationOrderBy } from './constants';
 import { ReputationEntity } from './reputation.entity';
 import type { ExclusiveReputationCriteria } from './types';
+
+function caseInsensitiveAddress(address: string) {
+  return Raw((addressAlias) => `LOWER(${addressAlias}) = LOWER(:address)`, {
+    address,
+  });
+}
 
 @Injectable()
 export class ReputationRepository extends BaseRepository<ReputationEntity> {
@@ -25,7 +31,7 @@ export class ReputationRepository extends BaseRepository<ReputationEntity> {
     return this.findOne({
       where: {
         chainId,
-        address,
+        address: caseInsensitiveAddress(address),
         type,
         jobRequestType,
       },
@@ -57,7 +63,7 @@ export class ReputationRepository extends BaseRepository<ReputationEntity> {
       query.jobRequestType = In(filters.jobRequestTypes);
     }
     if (filters.address) {
-      query.address = filters.address;
+      query.address = caseInsensitiveAddress(filters.address);
     }
 
     return this.find({
