@@ -40,11 +40,13 @@ import {
   FortunePayoutsCalculator,
   EscrowPayoutsCalculator,
   CalculatedPayout,
+  MarketingPayoutsCalculator,
 } from './payouts-calculation';
 import {
   CvatResultsProcessor,
   EscrowResultsProcessor,
   FortuneResultsProcessor,
+  MarketingResultsProcessor,
 } from './results-processing';
 
 @Injectable()
@@ -64,8 +66,10 @@ export class EscrowCompletionService {
     private readonly reputationService: ReputationService,
     private readonly cvatResultsProcessor: CvatResultsProcessor,
     private readonly fortuneResultsProcessor: FortuneResultsProcessor,
+    private readonly marketingResultsProcessor: MarketingResultsProcessor,
     private readonly cvatPayoutsCalculator: CvatPayoutsCalculator,
     private readonly fortunePayoutsCalculator: FortunePayoutsCalculator,
+    private readonly marketingPayoutsCalculator: MarketingPayoutsCalculator,
   ) {}
 
   async createEscrowCompletion(
@@ -487,6 +491,10 @@ export class EscrowCompletionService {
       return this.fortuneResultsProcessor;
     }
 
+    if (manifestUtils.isMarketingJobType(jobRequestType)) {
+      return this.marketingResultsProcessor;
+    }
+
     if (manifestUtils.isCvatJobType(jobRequestType)) {
       return this.cvatResultsProcessor;
     }
@@ -501,6 +509,10 @@ export class EscrowCompletionService {
   ): EscrowPayoutsCalculator {
     if (manifestUtils.isFortuneJobType(jobRequestType)) {
       return this.fortunePayoutsCalculator;
+    }
+
+    if (manifestUtils.isMarketingJobType(jobRequestType)) {
+      return this.marketingPayoutsCalculator;
     }
 
     if (manifestUtils.isCvatJobType(jobRequestType)) {
