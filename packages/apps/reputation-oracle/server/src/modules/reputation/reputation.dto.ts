@@ -3,7 +3,13 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsEthereumAddress, IsOptional, Max, Min } from 'class-validator';
 
-import { SortDirection } from '@/common/enums';
+import {
+  CvatJobType,
+  FortuneJobType,
+  MarketingJobType,
+  SortDirection,
+} from '@/common/enums';
+import type { JobRequestType } from '@/common/types';
 import { IsChainId, IsLowercasedEnum } from '@/common/validators';
 
 import {
@@ -46,6 +52,29 @@ export class GetReputationsQueryDto {
   @IsLowercasedEnum(ReputationEntityType, { each: true })
   @IsOptional()
   roles?: ReputationEntityType[];
+
+  @ApiPropertyOptional({
+    enum: [
+      ...Object.values(FortuneJobType),
+      ...Object.values(MarketingJobType),
+      ...Object.values(CvatJobType),
+    ],
+    name: 'job_request_types',
+    isArray: true,
+  })
+  /**
+   * NOTE: Order of decorators here matters
+   *
+   * Query param is parsed as string if single value passed
+   * and as array if multiple
+   */
+  @Transform(({ value }) => (Array.isArray(value) ? value : [value]))
+  @IsLowercasedEnum(
+    { ...FortuneJobType, ...MarketingJobType, ...CvatJobType },
+    { each: true },
+  )
+  @IsOptional()
+  jobRequestTypes?: JobRequestType[];
 
   @ApiPropertyOptional({
     name: 'order_by',
@@ -94,4 +123,14 @@ export class ReputationResponseDto {
 
   @ApiProperty({ enum: ReputationEntityType })
   role: ReputationEntityType;
+
+  @ApiProperty({
+    enum: [
+      ...Object.values(FortuneJobType),
+      ...Object.values(MarketingJobType),
+      ...Object.values(CvatJobType),
+    ],
+    name: 'job_request_type',
+  })
+  jobRequestType: JobRequestType;
 }

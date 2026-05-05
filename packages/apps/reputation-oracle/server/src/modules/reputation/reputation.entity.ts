@@ -1,12 +1,14 @@
 import { Column, Entity, Index } from 'typeorm';
 
 import { DATABASE_SCHEMA_NAME } from '@/common/constants';
+import { CvatJobType } from '@/common/enums';
+import type { JobRequestType } from '@/common/types';
 import { BaseEntity } from '@/database';
 
 import { ReputationEntityType } from './constants';
 
 @Entity({ schema: DATABASE_SCHEMA_NAME, name: 'reputation' })
-@Index(['chainId', 'address', 'type'], { unique: true })
+@Index(['chainId', 'address', 'type', 'jobRequestType'], { unique: true })
 export class ReputationEntity extends BaseEntity {
   @Column({ type: 'int' })
   chainId: number;
@@ -19,6 +21,9 @@ export class ReputationEntity extends BaseEntity {
     enum: ReputationEntityType,
   })
   type: ReputationEntityType;
+
+  @Column({ type: 'varchar', default: CvatJobType.IMAGE_BOXES })
+  jobRequestType: JobRequestType;
 
   @Column({ type: 'int' })
   reputationPoints: number;

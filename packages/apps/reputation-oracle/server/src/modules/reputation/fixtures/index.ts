@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker';
 
+import { CvatJobType } from '@/common/enums';
 import { generateTestnetChainId } from '@/modules/web3/fixtures';
 
 import { ReputationEntityType } from '../constants';
@@ -20,6 +21,7 @@ export function generateReputationEntity(score?: number): ReputationEntity {
     chainId: generateTestnetChainId(),
     address: faker.finance.ethereumAddress(),
     type: generateReputationEntityType(),
+    jobRequestType: CvatJobType.IMAGE_BOXES,
     reputationPoints: score || generateRandomScorePoints(),
     createdAt: faker.date.recent(),
     updatedAt: new Date(),

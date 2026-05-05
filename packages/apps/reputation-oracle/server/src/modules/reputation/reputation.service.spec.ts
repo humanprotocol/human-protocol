@@ -5,6 +5,7 @@ import { createMock } from '@golevelup/ts-jest';
 import { EscrowClient } from '@human-protocol/sdk';
 import { Test } from '@nestjs/testing';
 
+import { CvatJobType } from '@/common/enums';
 import { ReputationConfigService, Web3ConfigService } from '@/config';
 import { Web3Service } from '@/modules/web3';
 import {
@@ -90,18 +91,21 @@ describe('ReputationService', () => {
         chainId: withLowScore.chainId,
         address: withLowScore.address,
         role: withLowScore.type,
+        jobRequestType: withLowScore.jobRequestType,
         level: 'low',
       });
       expect(reputations[1]).toEqual({
         chainId: withMediumScore.chainId,
         address: withMediumScore.address,
         role: withMediumScore.type,
+        jobRequestType: withMediumScore.jobRequestType,
         level: 'medium',
       });
       expect(reputations[2]).toEqual({
         chainId: withHighScore.chainId,
         address: withHighScore.address,
         role: withHighScore.type,
+        jobRequestType: withHighScore.jobRequestType,
         level: 'high',
       });
     });
@@ -129,6 +133,7 @@ describe('ReputationService', () => {
                 chainId: generateTestnetChainId(),
                 address: faker.finance.ethereumAddress(),
                 type: generateReputationEntityType(),
+                jobRequestType: CvatJobType.IMAGE_BOXES,
               },
               score,
             ),
@@ -145,6 +150,7 @@ describe('ReputationService', () => {
           chainId: generateTestnetChainId(),
           address: faker.finance.ethereumAddress(),
           type: generateReputationEntityType(),
+          jobRequestType: CvatJobType.IMAGE_BOXES,
         };
         const score = generateRandomScorePoints();
 
@@ -174,6 +180,7 @@ describe('ReputationService', () => {
           chainId: generateTestnetChainId(),
           address: mockWeb3ConfigService.operatorAddress,
           type: ReputationEntityType.REPUTATION_ORACLE,
+          jobRequestType: CvatJobType.IMAGE_BOXES,
         };
         const score = generateRandomScorePoints();
 
@@ -206,6 +213,7 @@ describe('ReputationService', () => {
           chainId: reputationEntity.chainId,
           address: reputationEntity.address,
           type: reputationEntity.type,
+          jobRequestType: reputationEntity.jobRequestType,
         };
         const score = generateRandomScorePoints();
         const initialEntityScore = reputationEntity.reputationPoints;
@@ -234,6 +242,7 @@ describe('ReputationService', () => {
                 chainId: generateTestnetChainId(),
                 address: faker.finance.ethereumAddress(),
                 type: generateReputationEntityType(),
+                jobRequestType: CvatJobType.IMAGE_BOXES,
               },
               score,
             ),
@@ -253,6 +262,7 @@ describe('ReputationService', () => {
           chainId: generateTestnetChainId(),
           address: faker.finance.ethereumAddress(),
           type: generateReputationEntityType(),
+          jobRequestType: CvatJobType.IMAGE_BOXES,
         };
         const score = generateRandomScorePoints();
 
@@ -285,6 +295,7 @@ describe('ReputationService', () => {
           chainId: reputationEntity.chainId,
           address: reputationEntity.address,
           type: reputationEntity.type,
+          jobRequestType: reputationEntity.jobRequestType,
         };
         const score = generateRandomScorePoints();
         const initialEntityScore = reputationEntity.reputationPoints;
@@ -307,6 +318,7 @@ describe('ReputationService', () => {
           chainId: generateTestnetChainId(),
           address: mockWeb3ConfigService.operatorAddress,
           type: ReputationEntityType.REPUTATION_ORACLE,
+          jobRequestType: CvatJobType.IMAGE_BOXES,
         };
         const score = generateRandomScorePoints();
 
@@ -356,6 +368,7 @@ describe('ReputationService', () => {
         jobLauncherAddress,
         exchangeOracleAddress,
         recordingOracleAddress,
+        CvatJobType.IMAGE_BOXES,
       );
 
       expect(spyOnIncreaseReputation).toHaveBeenCalledTimes(4);
@@ -364,6 +377,7 @@ describe('ReputationService', () => {
           chainId,
           address: jobLauncherAddress,
           type: ReputationEntityType.JOB_LAUNCHER,
+          jobRequestType: CvatJobType.IMAGE_BOXES,
         },
         1,
       );
@@ -372,6 +386,7 @@ describe('ReputationService', () => {
           chainId,
           address: exchangeOracleAddress,
           type: ReputationEntityType.EXCHANGE_ORACLE,
+          jobRequestType: CvatJobType.IMAGE_BOXES,
         },
         1,
       );
@@ -380,6 +395,7 @@ describe('ReputationService', () => {
           chainId,
           address: recordingOracleAddress,
           type: ReputationEntityType.RECORDING_ORACLE,
+          jobRequestType: CvatJobType.IMAGE_BOXES,
         },
         1,
       );
@@ -388,6 +404,7 @@ describe('ReputationService', () => {
           chainId,
           address: mockWeb3ConfigService.operatorAddress,
           type: ReputationEntityType.REPUTATION_ORACLE,
+          jobRequestType: CvatJobType.IMAGE_BOXES,
         },
         1,
       );

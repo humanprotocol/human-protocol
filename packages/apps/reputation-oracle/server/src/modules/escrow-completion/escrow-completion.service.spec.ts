@@ -28,6 +28,7 @@ import _ from 'lodash';
 import { CvatJobType, FortuneJobType, MarketingJobType } from '@/common/enums';
 import { ServerConfigService, Web3ConfigService } from '@/config';
 import { ReputationService } from '@/modules/reputation';
+import { ReputationEntityType } from '@/modules/reputation/constants';
 import { StorageService } from '@/modules/storage';
 import { WalletWithProvider, Web3Service } from '@/modules/web3';
 import {
@@ -708,6 +709,7 @@ describe('EscrowCompletionService', () => {
     let mockedSigner: SignerMock;
     const mockedCreateBulkPayoutTransaction = jest.fn();
     let mockedRawTransaction: { nonce: number };
+    let jobRequestType: FortuneJobType;
 
     beforeEach(() => {
       mockedSigner = createSignerMock();
@@ -725,6 +727,13 @@ describe('EscrowCompletionService', () => {
       mockedCreateBulkPayoutTransaction.mockResolvedValueOnce(
         mockedRawTransaction,
       );
+
+      const manifest = generateFortuneManifest();
+      jobRequestType = manifest.requestType;
+      mockedEscrowUtils.getEscrow.mockResolvedValue({
+        manifest: faker.internet.url(),
+      } as unknown as IEscrow);
+      mockStorageService.downloadJsonLikeData.mockResolvedValue(manifest);
     });
 
     it('should succesfully process payouts batch', async () => {
@@ -732,6 +741,16 @@ describe('EscrowCompletionService', () => {
         EscrowCompletionStatus.AWAITING_PAYOUTS,
       );
       const payoutsBatch = generateEscrowPayoutsBatch();
+      payoutsBatch.payouts = [
+        {
+          address: faker.finance.ethereumAddress(),
+          amount: faker.number.bigInt({ min: 1n }).toString(),
+        },
+        {
+          address: faker.finance.ethereumAddress(),
+          amount: faker.number.bigInt({ min: 1n }).toString(),
+        },
+      ];
 
       await service['processPayoutsBatch'](awaitingPayoutsRecord, {
         ...payoutsBatch,
@@ -759,6 +778,21 @@ describe('EscrowCompletionService', () => {
           id: payoutsBatch.id,
         }),
       );
+
+      expect(mockReputationService.increaseReputation).toHaveBeenCalledTimes(
+        payoutsBatch.payouts.length,
+      );
+      for (const payout of payoutsBatch.payouts) {
+        expect(mockReputationService.increaseReputation).toHaveBeenCalledWith(
+          {
+            chainId: awaitingPayoutsRecord.chainId,
+            address: payout.address,
+            type: ReputationEntityType.WORKER,
+            jobRequestType,
+          },
+          1,
+        );
+      }
     });
 
     it('should reset nonce if expired', async () => {
@@ -859,6 +893,9 @@ describe('EscrowCompletionService', () => {
       launcherAddress = faker.finance.ethereumAddress();
       exchangeOracleAddress = faker.finance.ethereumAddress();
       recordingOracleAddress = faker.finance.ethereumAddress();
+      mockStorageService.downloadJsonLikeData.mockResolvedValue(
+        generateFortuneManifest(),
+      );
     });
 
     describe('handle failures', () => {
@@ -1075,6 +1112,7 @@ describe('EscrowCompletionService', () => {
           launcherAddress,
           exchangeOracleAddress,
           recordingOracleAddress,
+          FortuneJobType.FORTUNE,
         );
 
         const expectedWebhookData = {
