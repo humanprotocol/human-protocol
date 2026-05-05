@@ -29,6 +29,7 @@ import {
   handleCompleted,
   handleFund,
   handleIntermediateStorage,
+  handleOracleFeeTransfer,
   handlePending,
   handlePendingV2,
   handlePendingV3,
@@ -46,6 +47,7 @@ import {
   createCompletedEvent,
   createFundEvent,
   createISEvent,
+  createOracleFeeTransferEvent,
   createPendingEvent,
   createPendingV2Event,
   createPendingV3Event,
@@ -1411,6 +1413,127 @@ describe('Escrow', () => {
       cancellationRefund.transaction.hash.toHex(),
       'value',
       amount.toString()
+    );
+  });
+
+  test('Should properly handle OracleFeeTransfer event', () => {
+    const escrow = Escrow.load(escrowAddress);
+    escrow!.balance = BigInt.fromI32(100);
+    escrow!.token = tokenAddress;
+    escrow!.save();
+
+    const oracleFeeTransfer = createOracleFeeTransferEvent(
+      escrowAddress,
+      operatorAddress,
+      [reputationOracleAddress, recordingOracleAddress, exchangeOracleAddress],
+      [3, 3, 0],
+      BigInt.fromI32(86400)
+    );
+
+    handleOracleFeeTransfer(oracleFeeTransfer);
+
+    const secondTransferTransactionId = oracleFeeTransfer.transaction.hash
+      .concatI32(oracleFeeTransfer.logIndex.toI32() + 1000001)
+      .concatI32(oracleFeeTransfer.block.timestamp.toI32())
+      .toHex();
+    const firstTransferTransactionId = oracleFeeTransfer.transaction.hash
+      .concatI32(oracleFeeTransfer.logIndex.toI32() + 1000000)
+      .concatI32(oracleFeeTransfer.block.timestamp.toI32())
+      .toHex();
+    const skippedTransferTransactionId = oracleFeeTransfer.transaction.hash
+      .concatI32(oracleFeeTransfer.logIndex.toI32() + 1000002)
+      .concatI32(oracleFeeTransfer.block.timestamp.toI32())
+      .toHex();
+
+    assert.fieldEquals(
+      'Payout',
+      firstTransferTransactionId,
+      'escrowAddress',
+      escrowAddressString
+    );
+    assert.fieldEquals(
+      'Payout',
+      firstTransferTransactionId,
+      'recipient',
+      reputationOracleAddressString
+    );
+    assert.fieldEquals('Payout', firstTransferTransactionId, 'amount', '3');
+    assert.fieldEquals(
+      'Payout',
+      secondTransferTransactionId,
+      'recipient',
+      recordingOracleAddressString
+    );
+    assert.fieldEquals('Payout', secondTransferTransactionId, 'amount', '3');
+    assert.notInStore('Payout', skippedTransferTransactionId);
+
+    assert.fieldEquals('Escrow', escrowAddressString, 'balance', '94');
+    assert.fieldEquals(
+      'Transaction',
+      oracleFeeTransfer.transaction.hash.toHex(),
+      'method',
+      'multimethod'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      oracleFeeTransfer.transaction.hash.toHex(),
+      'to',
+      escrowAddressString
+    );
+    assert.fieldEquals(
+      'InternalTransaction',
+      firstTransferTransactionId,
+      'method',
+      'transfer'
+    );
+    assert.fieldEquals(
+      'InternalTransaction',
+      firstTransferTransactionId,
+      'receiver',
+      reputationOracleAddressString
+    );
+    assert.fieldEquals(
+      'InternalTransaction',
+      firstTransferTransactionId,
+      'transaction',
+      oracleFeeTransfer.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'InternalTransaction',
+      secondTransferTransactionId,
+      'receiver',
+      recordingOracleAddressString
+    );
+    assert.notInStore('InternalTransaction', skippedTransferTransactionId);
+    assert.notInStore('Transaction', firstTransferTransactionId);
+    assert.fieldEquals(
+      'EventDayData',
+      Bytes.fromI32(1).toHex(),
+      'dailyPayoutCount',
+      '2'
+    );
+
+    const completed = createCompletedEvent(
+      operatorAddress,
+      BigInt.fromI32(86400)
+    );
+    completed.transaction.hash = oracleFeeTransfer.transaction.hash;
+    completed.block.timestamp = oracleFeeTransfer.block.timestamp;
+    completed.logIndex = oracleFeeTransfer.logIndex.plus(BigInt.fromI32(1));
+
+    handleCompleted(completed);
+
+    assert.fieldEquals(
+      'Transaction',
+      oracleFeeTransfer.transaction.hash.toHex(),
+      'method',
+      'complete'
+    );
+    assert.fieldEquals(
+      'InternalTransaction',
+      firstTransferTransactionId,
+      'method',
+      'transfer'
     );
   });
 

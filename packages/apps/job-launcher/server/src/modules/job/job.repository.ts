@@ -18,7 +18,7 @@ import {
   JobCountDto,
 } from '../statistic/statistic.dto';
 import { convertToDatabaseSortDirection } from '../../database/database.utils';
-import { PaymentSource } from 'src/common/enums/payment';
+import { PaymentSource } from '../../common/enums/payment';
 
 @Injectable()
 export class JobRepository extends BaseRepository<JobEntity> {

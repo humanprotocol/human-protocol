@@ -38,7 +38,10 @@ import {
   ValidationError,
 } from '../../common/errors';
 import { div, max, mul } from '../../common/utils/decimal';
-import { getTokenDecimals } from '../../common/utils/tokens';
+import {
+  calculateNetFundAmount,
+  getTokenDecimals,
+} from '../../common/utils/tokens';
 import {
   createMockCvatManifest,
   createMockFortuneManifest,
@@ -176,7 +179,16 @@ describe('JobService', () => {
         mockRateService.getRate
           .mockResolvedValueOnce(tokenToUsdRate)
           .mockResolvedValueOnce(usdToTokenRate);
-        mockedKVStoreUtils.get.mockResolvedValueOnce('1');
+        const oracleFeePercentages = [
+          BigInt(faker.number.int({ min: 1, max: 25 })),
+          BigInt(faker.number.int({ min: 1, max: 25 })),
+          BigInt(faker.number.int({ min: 1, max: 25 })),
+        ];
+        mockedKVStoreUtils.get
+          .mockResolvedValueOnce('1')
+          .mockResolvedValueOnce(oracleFeePercentages[0].toString())
+          .mockResolvedValueOnce(oracleFeePercentages[1].toString())
+          .mockResolvedValueOnce(oracleFeePercentages[2].toString());
 
         const result = await jobService.createJob(
           userMock,
@@ -206,7 +218,11 @@ describe('JobService', () => {
         expect(mockManifestService.createManifest).toHaveBeenCalledWith(
           fortuneJobDto,
           FortuneJobType.FORTUNE,
-          fortuneJobDto.paymentAmount,
+          calculateNetFundAmount(
+            fortuneJobDto.paymentAmount,
+            fundTokenDecimals,
+            oracleFeePercentages,
+          ),
           fundTokenDecimals,
         );
         expect(mockManifestService.uploadManifest).toHaveBeenCalledWith(
@@ -276,7 +292,16 @@ describe('JobService', () => {
         mockRateService.getRate
           .mockResolvedValueOnce(tokenToUsdRate)
           .mockResolvedValueOnce(usdToTokenRate);
-        mockedKVStoreUtils.get.mockResolvedValueOnce('1');
+        const oracleFeePercentages = [
+          BigInt(faker.number.int({ min: 1, max: 25 })),
+          BigInt(faker.number.int({ min: 1, max: 25 })),
+          BigInt(faker.number.int({ min: 1, max: 25 })),
+        ];
+        mockedKVStoreUtils.get
+          .mockResolvedValueOnce('1')
+          .mockResolvedValueOnce(oracleFeePercentages[0].toString())
+          .mockResolvedValueOnce(oracleFeePercentages[1].toString())
+          .mockResolvedValueOnce(oracleFeePercentages[2].toString());
 
         const result = await jobService.createJob(
           userMock,
@@ -307,7 +332,11 @@ describe('JobService', () => {
         expect(mockManifestService.createManifest).toHaveBeenCalledWith(
           fortuneJobDto,
           FortuneJobType.FORTUNE,
-          Number(fortuneJobDto.paymentAmount.toFixed(6)),
+          calculateNetFundAmount(
+            Number(fortuneJobDto.paymentAmount.toFixed(6)),
+            fundTokenDecimals,
+            oracleFeePercentages,
+          ),
           fundTokenDecimals,
         );
         expect(mockManifestService.uploadManifest).toHaveBeenCalledWith(
@@ -395,7 +424,16 @@ describe('JobService', () => {
           exchangeOracle: mockOracles.exchangeOracle,
           reputationOracle: mockOracles.reputationOracle,
         });
-        mockedKVStoreUtils.get.mockResolvedValueOnce('1');
+        const oracleFeePercentages = [
+          BigInt(faker.number.int({ min: 1, max: 25 })),
+          BigInt(faker.number.int({ min: 1, max: 25 })),
+          BigInt(faker.number.int({ min: 1, max: 25 })),
+        ];
+        mockedKVStoreUtils.get
+          .mockResolvedValueOnce('1')
+          .mockResolvedValueOnce(oracleFeePercentages[0].toString())
+          .mockResolvedValueOnce(oracleFeePercentages[1].toString())
+          .mockResolvedValueOnce(oracleFeePercentages[2].toString());
 
         const result = await jobService.createJob(
           userMock,
@@ -424,7 +462,11 @@ describe('JobService', () => {
         expect(mockManifestService.createManifest).toHaveBeenCalledWith(
           fortuneJobDto,
           FortuneJobType.FORTUNE,
-          fortuneJobDto.paymentAmount,
+          calculateNetFundAmount(
+            fortuneJobDto.paymentAmount,
+            fundTokenDecimals,
+            oracleFeePercentages,
+          ),
           fundTokenDecimals,
         );
         expect(mockManifestService.uploadManifest).toHaveBeenCalledWith(
@@ -510,6 +552,16 @@ describe('JobService', () => {
         mockRateService.getRate
           .mockResolvedValueOnce(tokenToUsdRate)
           .mockResolvedValueOnce(usdToTokenRate);
+        const oracleFeePercentages = [
+          BigInt(faker.number.int({ min: 1, max: 25 })),
+          BigInt(faker.number.int({ min: 1, max: 25 })),
+          BigInt(faker.number.int({ min: 1, max: 25 })),
+        ];
+        mockedKVStoreUtils.get
+          .mockResolvedValueOnce('1')
+          .mockResolvedValueOnce(oracleFeePercentages[0].toString())
+          .mockResolvedValueOnce(oracleFeePercentages[1].toString())
+          .mockResolvedValueOnce(oracleFeePercentages[2].toString());
 
         await jobService.createJob(userMock, cvatJobDto.type, cvatJobDto);
 
@@ -527,7 +579,11 @@ describe('JobService', () => {
         expect(mockManifestService.createManifest).toHaveBeenCalledWith(
           cvatJobDto,
           cvatJobDto.type,
-          cvatJobDto.paymentAmount,
+          calculateNetFundAmount(
+            cvatJobDto.paymentAmount,
+            fundTokenDecimals,
+            oracleFeePercentages,
+          ),
           fundTokenDecimals,
         );
         expect(mockManifestService.uploadManifest).toHaveBeenCalledWith(

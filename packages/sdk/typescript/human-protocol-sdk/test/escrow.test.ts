@@ -101,6 +101,7 @@ describe('EscrowClient', () => {
       requestCancellation: vi.fn(),
       withdraw: vi.fn(),
       getBalance: vi.fn(),
+      fundAmount: vi.fn(),
       remainingFunds: vi.fn(),
       reservedFunds: vi.fn(),
       manifestHash: vi.fn(),
@@ -2795,6 +2796,74 @@ describe('EscrowClient', () => {
       ).rejects.toThrow();
 
       expect(escrowClient.escrowContract.reservedFunds).toHaveBeenCalledWith();
+    });
+  });
+
+  describe('getRemainingFunds', () => {
+    test('should throw an error if escrowAddress is an invalid address', async () => {
+      const escrowAddress = FAKE_ADDRESS;
+
+      await expect(
+        escrowClient.getRemainingFunds(escrowAddress)
+      ).rejects.toThrow(ErrorInvalidEscrowAddressProvided);
+    });
+
+    test('should throw an error if hasEscrow returns false', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(false);
+
+      await expect(
+        escrowClient.getRemainingFunds(escrowAddress)
+      ).rejects.toThrow(ErrorEscrowAddressIsNotProvidedByFactory);
+    });
+
+    test('should successfully getRemainingFunds', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+      const remainingFunds = 123n;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.remainingFunds.mockResolvedValueOnce(
+        remainingFunds
+      );
+
+      const result = await escrowClient.getRemainingFunds(escrowAddress);
+
+      expect(result).toEqual(remainingFunds);
+      expect(escrowClient.escrowContract.remainingFunds).toHaveBeenCalledWith();
+    });
+  });
+
+  describe('getFundAmount', () => {
+    test('should throw an error if escrowAddress is an invalid address', async () => {
+      const escrowAddress = FAKE_ADDRESS;
+
+      await expect(escrowClient.getFundAmount(escrowAddress)).rejects.toThrow(
+        ErrorInvalidEscrowAddressProvided
+      );
+    });
+
+    test('should throw an error if hasEscrow returns false', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(false);
+
+      await expect(escrowClient.getFundAmount(escrowAddress)).rejects.toThrow(
+        ErrorEscrowAddressIsNotProvidedByFactory
+      );
+    });
+
+    test('should successfully getFundAmount', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+      const fundAmount = 456n;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.fundAmount.mockResolvedValueOnce(fundAmount);
+
+      const result = await escrowClient.getFundAmount(escrowAddress);
+
+      expect(result).toEqual(fundAmount);
+      expect(escrowClient.escrowContract.fundAmount).toHaveBeenCalledWith();
     });
   });
 

@@ -49,7 +49,10 @@ import {
 import { PageDto } from '../../common/pagination/pagination.dto';
 import { parseUrl } from '../../common/utils';
 import { add, div, max, mul } from '../../common/utils/decimal';
-import { getTokenDecimals } from '../../common/utils/tokens';
+import {
+  calculateNetFundAmount,
+  getTokenDecimals,
+} from '../../common/utils/tokens';
 import logger from '../../logger';
 import { CronJobRepository } from '../cron-job/cron-job.repository';
 import {
@@ -83,8 +86,7 @@ import { JobRepository } from './job.repository';
 @Injectable()
 export class JobService {
   private readonly logger = logger.child({ context: JobService.name });
-  public readonly bucket: string;
-  private cronJobRepository: CronJobRepository;
+  private cronJobRepository!: CronJobRepository;
 
   constructor(
     @Inject(Web3Service)
@@ -218,6 +220,17 @@ export class JobService {
       );
     }
 
+    const oracleFeePercentages = await Promise.all([
+      this.getOracleFee(reputationOracle, chainId),
+      this.getOracleFee(recordingOracle, chainId),
+      this.getOracleFee(exchangeOracle, chainId),
+    ]);
+    const netFundAmount = calculateNetFundAmount(
+      fundTokenAmount,
+      fundTokenDecimals,
+      oracleFeePercentages,
+    );
+
     if (dto.qualifications) {
       const validQualifications =
         await this.qualificationService.getQualifications(chainId);
@@ -253,7 +266,7 @@ export class JobService {
       const manifestOrigin = await this.manifestService.createManifest(
         dto,
         requestType,
-        fundTokenAmount,
+        netFundAmount,
         fundTokenDecimals,
       );
 
@@ -454,7 +467,7 @@ export class JobService {
       });
 
       return new PageDto(data.page!, data.pageSize!, itemCount, jobs);
-    } catch (error) {
+    } catch (error: any) {
       throw new ServerError(error.message, error.stack);
     }
   }

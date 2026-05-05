@@ -9,6 +9,7 @@ import {
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
+import { ethers } from 'ethers';
 import { of, throwError } from 'rxjs';
 import {
   MOCK_ADDRESS,
@@ -316,7 +317,7 @@ describe('JobService', () => {
           .fn()
           .mockResolvedValue('http://example.com/results'),
         storeResults: jest.fn().mockResolvedValue(true),
-        getTokenAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+        getRemainingFunds: jest.fn().mockResolvedValue(ethers.parseEther('10')),
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
 
@@ -370,7 +371,7 @@ describe('JobService', () => {
         getManifest: jest.fn().mockResolvedValue('http://example.com/manifest'),
         getIntermediateResultsUrl: jest.fn().mockResolvedValue(''),
         storeResults: jest.fn().mockResolvedValue(true),
-        getTokenAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+        getRemainingFunds: jest.fn().mockResolvedValue(ethers.parseEther('10')),
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
 
@@ -426,7 +427,7 @@ describe('JobService', () => {
           .fn()
           .mockResolvedValue('http://existing-solutions'),
         storeResults: jest.fn().mockResolvedValue(true),
-        getTokenAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+        getRemainingFunds: jest.fn().mockResolvedValue(ethers.parseEther('10')),
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
 
@@ -504,7 +505,7 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue('http://existing-solutions'),
       storeResults: jest.fn().mockResolvedValue(true),
-      getTokenAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+      getRemainingFunds: jest.fn().mockResolvedValue(ethers.parseEther('10')),
     };
     (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
 
@@ -594,7 +595,7 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue('http://existing-solutions'),
       storeResults: jest.fn().mockResolvedValue(true),
-      getTokenAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+      getRemainingFunds: jest.fn().mockResolvedValue(ethers.parseEther('10')),
     };
     (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
     KVStoreUtils.get = jest
@@ -676,7 +677,7 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue('http://existing-solutions'),
       storeResults: jest.fn().mockResolvedValue(true),
-      getTokenAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+      getRemainingFunds: jest.fn().mockResolvedValue(ethers.parseEther('10')),
     };
     (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
     KVStoreUtils.get = jest

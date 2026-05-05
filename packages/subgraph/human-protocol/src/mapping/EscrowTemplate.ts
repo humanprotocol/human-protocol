@@ -13,6 +13,7 @@ import {
   Withdraw,
   CancellationRequested,
   CancellationRefund,
+  OracleFeeTransfer,
 } from '../../generated/templates/Escrow/Escrow';
 import {
   CancellationRefundEvent,
@@ -24,6 +25,7 @@ import {
   DailyWorker,
   InternalTransaction,
   Operator,
+  Transaction,
 } from '../../generated/schema';
 import {
   Address,
@@ -841,4 +843,59 @@ export function handleCancellationRefund(event: CancellationRefund): void {
   entity.receiver = escrowEntity.launcher;
   entity.amount = event.params.amount;
   entity.save();
+}
+
+export function handleOracleFeeTransfer(event: OracleFeeTransfer): void {
+  const escrowEntity = Escrow.load(dataSource.address());
+  if (!escrowEntity) return;
+
+  const eventDayData = getEventDayData(event);
+  const originalLogIndex = event.logIndex;
+
+  for (let i = 0; i < event.params.oracles.length; i++) {
+    const oracle = event.params.oracles[i];
+    const amount = event.params.amounts[i];
+
+    if (amount.equals(ZERO_BI)) {
+      continue;
+    }
+
+    event.logIndex = originalLogIndex.plus(BigInt.fromI32(1000000 + i));
+    const payoutId = toEventId(event);
+    const payout = new Payout(payoutId);
+    payout.escrowAddress = event.address;
+    payout.recipient = oracle;
+    payout.amount = amount;
+    payout.createdAt = event.block.timestamp;
+    payout.save();
+
+    createTransaction(
+      event,
+      'transfer',
+      Address.fromBytes(escrowEntity.address),
+      oracle,
+      oracle,
+      Address.fromBytes(escrowEntity.address),
+      amount,
+      Address.fromBytes(escrowEntity.token)
+    );
+
+    escrowEntity.balance = escrowEntity.balance.minus(amount);
+    escrowEntity.amountPaid = escrowEntity.amountPaid.plus(amount);
+    eventDayData.dailyPayoutCount = eventDayData.dailyPayoutCount.plus(ONE_BI);
+  }
+
+  event.logIndex = originalLogIndex;
+  const transaction = Transaction.load(event.transaction.hash);
+  if (
+    transaction &&
+    transaction.method == 'multimethod' &&
+    Address.fromBytes(transaction.to) == Address.zero()
+  ) {
+    transaction.to = escrowEntity.address;
+    transaction.save();
+  }
+
+  escrowEntity.save();
+  eventDayData.save();
 }
