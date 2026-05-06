@@ -373,7 +373,6 @@ describe('JobService', () => {
         requesterTitle: 'Example Title',
         requesterDescription: 'Example Description',
         submissionsRequired: 5,
-        fundAmount: 100,
       };
 
       jest.spyOn(jobService, 'getManifest').mockResolvedValue(manifest);
@@ -473,7 +472,6 @@ describe('JobService', () => {
         requesterTitle: 'Example Title',
         requesterDescription: 'Example Description',
         submissionsRequired: 5,
-        fundAmount: 100,
       };
 
       jest
@@ -531,7 +529,6 @@ describe('JobService', () => {
         requesterTitle: 'Example Title',
         requesterDescription: 'Example Description',
         submissionsRequired: 1,
-        fundAmount: 100,
       };
 
       assignment.status = AssignmentStatus.ACTIVE;
@@ -564,7 +561,6 @@ describe('JobService', () => {
         requesterTitle: 'Example Title',
         requesterDescription: 'Example Description',
         submissionsRequired: 5,
-        fundAmount: 100,
       };
 
       assignment.status = AssignmentStatus.ACTIVE;

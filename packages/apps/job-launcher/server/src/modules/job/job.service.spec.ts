@@ -147,9 +147,7 @@ describe('JobService', () => {
         const jobManifestDto: JobManifestDto = createJobManifestDto({
           paymentCurrency: PaymentCurrency.USDC,
           escrowFundToken: EscrowFundToken.USDC,
-          manifest: createMockFortuneManifest({
-            fundAmount: undefined as unknown as number,
-          }),
+          manifest: createMockFortuneManifest(),
         });
         const fundTokenDecimals = getTokenDecimals(
           jobManifestDto.chainId!,
@@ -181,22 +179,17 @@ describe('JobService', () => {
             mul(div(1, 100), jobManifestDto.paymentAmount),
           ).toFixed(18),
         );
-        const expectedManifest = {
-          ...jobManifestDto.manifest,
-          fundAmount: jobManifestDto.paymentAmount,
-        };
-
         expect(result).toBe(jobEntityMock.id);
         expect(mockWeb3Service.validateChainId).toHaveBeenCalledWith(
           jobManifestDto.chainId,
         );
         expect(mockManifestService.validateManifest).toHaveBeenCalledWith(
           FortuneJobType.FORTUNE,
-          expectedManifest,
+          jobManifestDto.manifest,
         );
         expect(mockManifestService.uploadManifest).toHaveBeenCalledWith(
           jobManifestDto.chainId,
-          expectedManifest,
+          jobManifestDto.manifest,
           [
             jobManifestDto.exchangeOracle,
             jobManifestDto.reputationOracle,
@@ -236,9 +229,7 @@ describe('JobService', () => {
         const jobManifestDto: JobManifestDto = createJobManifestDto({
           paymentCurrency: PaymentCurrency.USD,
           escrowFundToken: EscrowFundToken.USDC,
-          manifest: createMockFortuneManifest({
-            fundAmount: undefined,
-          }),
+          manifest: createMockFortuneManifest(),
         });
 
         const fundTokenDecimals = getTokenDecimals(
@@ -277,11 +268,6 @@ describe('JobService', () => {
             usdToTokenRate,
           ).toFixed(6),
         );
-        const expectedManifest = {
-          ...jobManifestDto.manifest,
-          fundAmount: expectedFundAmount,
-        };
-
         expect(result).toBe(jobEntityMock.id);
 
         expect(mockWeb3Service.validateChainId).toHaveBeenCalledWith(
@@ -289,11 +275,11 @@ describe('JobService', () => {
         );
         expect(mockManifestService.validateManifest).toHaveBeenCalledWith(
           FortuneJobType.FORTUNE,
-          expectedManifest,
+          jobManifestDto.manifest,
         );
         expect(mockManifestService.uploadManifest).toHaveBeenCalledWith(
           jobManifestDto.chainId,
-          expectedManifest,
+          jobManifestDto.manifest,
           [
             jobManifestDto.exchangeOracle,
             jobManifestDto.reputationOracle,
@@ -336,9 +322,7 @@ describe('JobService', () => {
           exchangeOracle: null,
           recordingOracle: null,
           reputationOracle: null,
-          manifest: createMockFortuneManifest({
-            fundAmount: undefined,
-          }),
+          manifest: createMockFortuneManifest(),
         });
 
         const fundTokenDecimals = getTokenDecimals(
@@ -387,11 +371,6 @@ describe('JobService', () => {
             mul(div(1, 100), jobManifestDto.paymentAmount),
           ).toFixed(18),
         );
-        const expectedManifest = {
-          ...jobManifestDto.manifest,
-          fundAmount: jobManifestDto.paymentAmount,
-        };
-
         expect(result).toBe(jobEntityMock.id);
 
         expect(mockWeb3Service.validateChainId).toHaveBeenCalledWith(
@@ -404,11 +383,11 @@ describe('JobService', () => {
         );
         expect(mockManifestService.validateManifest).toHaveBeenCalledWith(
           FortuneJobType.FORTUNE,
-          expectedManifest,
+          jobManifestDto.manifest,
         );
         expect(mockManifestService.uploadManifest).toHaveBeenCalledWith(
           jobManifestDto.chainId,
-          expectedManifest,
+          jobManifestDto.manifest,
           [
             mockOracles.exchangeOracle,
             mockOracles.reputationOracle,
@@ -1317,9 +1296,7 @@ describe('JobService', () => {
         18,
       );
 
-      const manifestMock = createMockFortuneManifest({
-        fundAmount: jobEntity.fundAmount,
-      });
+      const manifestMock = createMockFortuneManifest();
 
       const getEscrowData = {
         token: faker.finance.ethereumAddress(),
@@ -1375,9 +1352,7 @@ describe('JobService', () => {
     it('should return job details without escrow address successfully', async () => {
       const jobEntity = createJobEntity({ escrowAddress: null });
 
-      const manifestMock = createMockFortuneManifest({
-        fundAmount: jobEntity.fundAmount,
-      });
+      const manifestMock = createMockFortuneManifest();
 
       mockJobRepository.findOneByIdAndUserId.mockResolvedValueOnce(jobEntity);
       mockManifestService.downloadManifest.mockResolvedValueOnce(manifestMock);

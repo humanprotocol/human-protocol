@@ -3,6 +3,7 @@ import {
   EscrowStatus,
   KVStoreKeys,
   KVStoreUtils,
+  EscrowUtils,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { Inject, Injectable } from '@nestjs/common';
@@ -25,7 +26,6 @@ import {
   SolutionEventData,
   WebhookDto,
 } from '../webhook/webhook.dto';
-import { HMToken__factory } from '@human-protocol/core/typechain-types';
 
 @Injectable()
 export class JobService {
@@ -121,7 +121,7 @@ export class JobService {
     }
 
     const manifestUrl = await escrowClient.getManifest(webhook.escrowAddress);
-    const { submissionsRequired, requestType, fundAmount }: IManifest =
+    const { submissionsRequired, requestType }: IManifest =
       await this.storageService.download(manifestUrl);
 
     if (!submissionsRequired || !requestType) {
@@ -186,16 +186,16 @@ export class JobService {
         s.solution === lastExchangeSolution.solution,
     );
 
-    const tokenAddress = await escrowClient.getTokenAddress(
+    const escrow = await EscrowUtils.getEscrow(
+      webhook.chainId,
       webhook.escrowAddress,
     );
-    const tokenContract = HMToken__factory.connect(
-      tokenAddress,
-      this.web3Service.getSigner(webhook.chainId),
-    );
-    const decimals = await tokenContract.decimals();
-    const fundAmountInWei = ethers.parseUnits(fundAmount.toString(), decimals);
-    const amountToReserve = fundAmountInWei / BigInt(submissionsRequired);
+    if (!escrow) {
+      throw new ValidationError('Escrow not found');
+    }
+
+    const amountToReserve =
+      escrow.totalFundedAmount / BigInt(submissionsRequired);
 
     await escrowClient.storeResults(
       webhook.escrowAddress,

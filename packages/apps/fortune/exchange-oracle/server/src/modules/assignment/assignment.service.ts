@@ -79,6 +79,11 @@ export class AssignmentService {
       data.escrowAddress,
       jobEntity.manifestUrl,
     );
+    const rewardAmount = await this.jobService.getRewardAmount(
+      data.chainId,
+      data.escrowAddress,
+      manifest.submissionsRequired,
+    );
 
     // Check if all required qualifications are present
     const userQualificationsSet = new Set(jwtUser.qualifications);
@@ -110,8 +115,7 @@ export class AssignmentService {
     newAssignmentEntity.job = jobEntity;
     newAssignmentEntity.workerAddress = jwtUser.address;
     newAssignmentEntity.status = AssignmentStatus.ACTIVE;
-    newAssignmentEntity.rewardAmount =
-      manifest.fundAmount / manifest.submissionsRequired;
+    newAssignmentEntity.rewardAmount = rewardAmount;
     newAssignmentEntity.expiresAt = expirationDate;
     return this.assignmentRepository.createUnique(newAssignmentEntity);
   }

@@ -44,7 +44,6 @@ export const MOCK_MANIFEST: FortuneManifestDto = {
   submissionsRequired: 2,
   requesterTitle: 'Fortune',
   requesterDescription: 'Some desc',
-  fundAmount: 10,
   requestType: FortuneJobType.FORTUNE,
 };
 

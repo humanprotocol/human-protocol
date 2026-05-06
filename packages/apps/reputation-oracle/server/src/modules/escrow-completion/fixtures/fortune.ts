@@ -6,7 +6,6 @@ import { FortuneFinalResult, FortuneManifest } from '@/common/types';
 export function generateFortuneManifest(): FortuneManifest {
   return {
     requestType: FortuneJobType.FORTUNE,
-    fundAmount: Number(faker.finance.amount()),
     submissionsRequired: faker.number.int({ min: 2, max: 5 }),
   };
 }
