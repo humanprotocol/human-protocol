@@ -5,7 +5,7 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
-import { JobDto } from 'src/modules/job/job.dto';
+import { JobDto } from '../../modules/job/job.dto';
 import { TOKEN_ADDRESSES } from '../constants/tokens';
 import { ChainId } from '@human-protocol/sdk';
 

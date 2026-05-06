@@ -17,6 +17,7 @@
     "outDir": "build",
     "useUnknownInCatchVariables": false,
     "strictNullChecks": false,
-    "allowJs": true
+    "allowJs": true,
+    "types": ["node", "jest"]
   }
 }
