@@ -10,7 +10,6 @@
     "target": "es2024",
     "rootDir": ".",
     "outDir": "./dist",
-    "baseUrl": "./",
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": true,
@@ -18,16 +17,16 @@
     "noImplicitAny": true,
     "strictBindCallApply": true,
     "isolatedModules": true,
+    "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
       "~/test/*": ["test/*"]
     },
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "types": ["node", "jest"]
   },
   "ts-node": {
     "files": true,
-    "require": [
-      "tsconfig-paths/register"
-    ]
+    "require": ["tsconfig-paths/register"]
   }
 }

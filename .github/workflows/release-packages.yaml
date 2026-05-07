@@ -19,7 +19,7 @@ jobs:
 
       - name: Check if release already exists
         id: release_check
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           github-token: ${{ secrets.RELEASE_GH_TOKEN }}
           script: |
@@ -99,7 +99,7 @@ jobs:
       - name: Create GitHub release
         id: release
         if: ${{ steps.release_check.outputs.exists != 'true' }}
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ github.ref_name }}
           name: ${{ github.ref_name }}

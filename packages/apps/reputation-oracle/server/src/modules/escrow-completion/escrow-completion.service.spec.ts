@@ -25,7 +25,7 @@ import { Test } from '@nestjs/testing';
 import stringify from 'json-stable-stringify';
 import _ from 'lodash';
 
-import { CvatJobType, FortuneJobType } from '@/common/enums';
+import { CvatJobType, FortuneJobType, MarketingJobType } from '@/common/enums';
 import { ServerConfigService, Web3ConfigService } from '@/config';
 import { ReputationService } from '@/modules/reputation';
 import { StorageService } from '@/modules/storage';
@@ -49,10 +49,12 @@ import {
 import {
   CvatPayoutsCalculator,
   FortunePayoutsCalculator,
+  MarketingPayoutsCalculator,
 } from './payouts-calculation';
 import {
   CvatResultsProcessor,
   FortuneResultsProcessor,
+  MarketingResultsProcessor,
 } from './results-processing';
 
 const mockServerConfigService = {
@@ -68,8 +70,10 @@ const mockOutgoingWebhookService = createMock<OutgoingWebhookService>();
 const mockReputationService = createMock<ReputationService>();
 const mockFortuneResultsProcessor = createMock<FortuneResultsProcessor>();
 const mockCvatResultsProcessor = createMock<CvatResultsProcessor>();
+const mockMarketingResultsProcessor = createMock<MarketingResultsProcessor>();
 const mockFortunePayoutsCalculator = createMock<FortunePayoutsCalculator>();
 const mockCvatPayoutsCalculator = createMock<CvatPayoutsCalculator>();
+const mockMarketingPayoutsCalculator = createMock<MarketingPayoutsCalculator>();
 
 const mockedEscrowClient = jest.mocked(EscrowClient);
 const mockedEscrowUtils = jest.mocked(EscrowUtils);
@@ -123,12 +127,20 @@ describe('EscrowCompletionService', () => {
           useValue: mockCvatResultsProcessor,
         },
         {
+          provide: MarketingResultsProcessor,
+          useValue: mockMarketingResultsProcessor,
+        },
+        {
           provide: FortunePayoutsCalculator,
           useValue: mockFortunePayoutsCalculator,
         },
         {
           provide: CvatPayoutsCalculator,
           useValue: mockCvatPayoutsCalculator,
+        },
+        {
+          provide: MarketingPayoutsCalculator,
+          useValue: mockMarketingPayoutsCalculator,
         },
       ],
     }).compile();
@@ -958,8 +970,7 @@ describe('EscrowCompletionService', () => {
         );
         expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledWith({
           ...paidPayoutsRecord,
-          failureDetail: 'Error message: Webhook url is no set for oracle',
-          status: 'failed',
+          status: 'completed',
         });
       });
 
@@ -1200,6 +1211,14 @@ describe('EscrowCompletionService', () => {
         );
       },
     );
+    it.each(Object.values(MarketingJobType))(
+      'should return marketing processor for "%s" job type',
+      (jobRequestType) => {
+        expect(service['getEscrowResultsProcessor'](jobRequestType)).toBe(
+          mockMarketingResultsProcessor,
+        );
+      },
+    );
   });
 
   describe('getEscrowPayoutsCalculator', () => {
@@ -1216,6 +1235,14 @@ describe('EscrowCompletionService', () => {
       (jobRequestType) => {
         expect(service['getEscrowPayoutsCalculator'](jobRequestType)).toBe(
           mockCvatPayoutsCalculator,
+        );
+      },
+    );
+    it.each(Object.values(MarketingJobType))(
+      'should return marketing calculator for "%s" job type',
+      (jobRequestType) => {
+        expect(service['getEscrowPayoutsCalculator'](jobRequestType)).toBe(
+          mockMarketingPayoutsCalculator,
         );
       },
     );

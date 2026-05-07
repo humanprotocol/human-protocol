@@ -16,7 +16,7 @@ const RPC_URL = isLocalEnv
   : process.env.RPC_URL_POLYGON_AMOY;
 
 const DEFAULT_SUPPORTED_JOB_TYPES =
-  'fortune,image_boxes,image_boxes_from_points,image_points,image_polygons,image_skeletons_from_boxes';
+  'fortune,social_media_promotion,image_boxes,image_boxes_from_points,image_points,image_polygons,image_skeletons_from_boxes';
 const ROLE = Role.ReputationOracle;
 
 async function setupCommonValues(kvStoreClient: KVStoreClient): Promise<void> {
