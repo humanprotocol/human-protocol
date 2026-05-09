@@ -169,7 +169,7 @@ __metadata:
     "@nestjs/core": "npm:^11.1.12"
     "@nestjs/mapped-types": "npm:^2.1.0"
     "@nestjs/platform-express": "npm:^11.1.12"
-    "@nestjs/schedule": "npm:^6.1.1"
+    "@nestjs/schedule": "npm:^6.1.3"
     "@nestjs/schematics": "npm:^11.0.9"
     "@nestjs/swagger": "npm:^11.2.5"
     "@nestjs/testing": "npm:^11.1.19"
@@ -323,7 +323,7 @@ __metadata:
     "@nestjs/core": "npm:^11.1.12"
     "@nestjs/passport": "npm:^11.0.5"
     "@nestjs/platform-express": "npm:^11.1.12"
-    "@nestjs/schedule": "npm:^6.1.1"
+    "@nestjs/schedule": "npm:^6.1.3"
     "@nestjs/schematics": "npm:^11.0.9"
     "@nestjs/swagger": "npm:^11.2.5"
     "@nestjs/terminus": "npm:^11.1.1"
@@ -504,7 +504,7 @@ __metadata:
     "@nestjs/core": "npm:^11.1.12"
     "@nestjs/passport": "npm:^11.0.5"
     "@nestjs/platform-express": "npm:^11.1.12"
-    "@nestjs/schedule": "npm:^6.1.1"
+    "@nestjs/schedule": "npm:^6.1.3"
     "@nestjs/schematics": "npm:^11.0.9"
     "@nestjs/swagger": "npm:^11.2.5"
     "@nestjs/terminus": "npm:^11.1.1"
@@ -627,7 +627,7 @@ __metadata:
     "@nestjs/jwt": "npm:^11.0.2"
     "@nestjs/passport": "npm:^11.0.5"
     "@nestjs/platform-express": "npm:^11.1.12"
-    "@nestjs/schedule": "npm:^6.1.1"
+    "@nestjs/schedule": "npm:^6.1.3"
     "@nestjs/schematics": "npm:^11.0.9"
     "@nestjs/swagger": "npm:^11.2.5"
     "@nestjs/terminus": "npm:^11.1.1"
@@ -701,7 +701,7 @@ __metadata:
     "@nestjs/jwt": "npm:^11.0.2"
     "@nestjs/passport": "npm:^11.0.5"
     "@nestjs/platform-express": "npm:^11.1.12"
-    "@nestjs/schedule": "npm:^6.1.1"
+    "@nestjs/schedule": "npm:^6.1.3"
     "@nestjs/schematics": "npm:^11.0.9"
     "@nestjs/swagger": "npm:^11.2.5"
     "@nestjs/terminus": "npm:^11.1.1"
@@ -7699,15 +7699,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nestjs/schedule@npm:^6.1.1":
-  version: 6.1.1
-  resolution: "@nestjs/schedule@npm:6.1.1"
+"@nestjs/schedule@npm:^6.1.3":
+  version: 6.1.3
+  resolution: "@nestjs/schedule@npm:6.1.3"
   dependencies:
     cron: "npm:4.4.0"
   peerDependencies:
     "@nestjs/common": ^10.0.0 || ^11.0.0
     "@nestjs/core": ^10.0.0 || ^11.0.0
-  checksum: 10c0/0185efe4824bd353fea792954ea04d2d4cb99836c93c6d42d76fe9d57a6fd97eb7ba9d874be6f7f94b6f8bbca11badab16993f30e9b1f94b4c341639407578de
+  checksum: 10c0/de6da8d0246f486f7fdefaf6991fea18718f7a2d2eb698cf40094bfaa21e028107e37a27352af4571370c14cd757ca7402b5398af544438cc046d28575dee827
   languageName: node
   linkType: hard
 
