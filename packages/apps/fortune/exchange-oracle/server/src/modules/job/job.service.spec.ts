@@ -601,7 +601,6 @@ describe('JobService', () => {
         requesterTitle: 'Example Title',
         requesterDescription: 'Example Description',
         submissionsRequired: 5,
-        fundAmount: 100,
       };
 
       downloadFileFromUrlMock.mockResolvedValue(JSON.stringify(manifest));
@@ -622,7 +621,6 @@ describe('JobService', () => {
         requesterTitle: 'Example Title',
         requesterDescription: 'Example Description',
         submissionsRequired: 5,
-        fundAmount: 100,
       };
 
       downloadFileFromUrlMock.mockResolvedValue('encrypted-content');
@@ -646,7 +644,6 @@ describe('JobService', () => {
         requesterTitle: 'Example Title',
         requesterDescription: 'Example Description',
         submissionsRequired: 5,
-        fundAmount: 100,
       };
 
       downloadFileFromUrlMock.mockResolvedValue(manifest);
