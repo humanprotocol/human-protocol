@@ -102,7 +102,6 @@ describe('AssignmentService', () => {
       requesterTitle: 'Example Title',
       requesterDescription: 'Example Description',
       submissionsRequired: 5,
-      fundAmount: 100,
     };
 
     beforeAll(async () => {
@@ -128,6 +127,7 @@ describe('AssignmentService', () => {
         .mockResolvedValue(null);
       jest.spyOn(assignmentRepository, 'countByJobId').mockResolvedValue(0);
       jest.spyOn(jobService, 'getManifest').mockResolvedValue(manifest);
+      jest.spyOn(jobService, 'getRewardAmount').mockResolvedValue(20);
       (Escrow__factory.connect as any).mockImplementation(() => ({
         duration: jest
           .fn()
@@ -150,12 +150,17 @@ describe('AssignmentService', () => {
         workerAddress: workerAddress,
         status: AssignmentStatus.ACTIVE,
         expiresAt: expect.any(Date),
-        rewardAmount: manifest.fundAmount / manifest.submissionsRequired,
+        rewardAmount: 20,
       });
       expect(jobService.getManifest).toHaveBeenCalledWith(
         chainId,
         escrowAddress,
         MOCK_MANIFEST_URL,
+      );
+      expect(jobService.getRewardAmount).toHaveBeenCalledWith(
+        chainId,
+        escrowAddress,
+        manifest.submissionsRequired,
       );
     });
 
@@ -371,7 +376,6 @@ describe('AssignmentService', () => {
         requesterTitle: 'Example Title',
         requesterDescription: 'Example Description',
         submissionsRequired: 5,
-        fundAmount: 100,
       };
 
       jest.spyOn(jobService, 'getManifest').mockResolvedValue(manifest);

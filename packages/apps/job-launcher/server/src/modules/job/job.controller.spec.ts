@@ -1,34 +1,30 @@
+import { faker } from '@faker-js/faker';
 import { ChainId } from '@human-protocol/sdk';
-import { Test, TestingModule } from '@nestjs/testing';
-import { JobController } from './job.controller';
-import { JobService } from './job.service';
 import {
   BadRequestException,
   ConflictException,
   ExecutionContext,
   UnauthorizedException,
 } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
 import { MUTEX_TIMEOUT } from '../../common/constants';
-import { MutexManagerService } from '../mutex/mutex-manager.service';
-import { RequestWithUser } from '../../common/types';
-import { JwtAuthGuard } from '../../common/guards';
-import { JobFortuneDto, JobQuickLaunchDto } from './job.dto';
 import {
-  // CvatJobType,
+  CvatJobType,
   EscrowFundToken,
   FortuneJobType,
   JobRequestType,
 } from '../../common/enums/job';
-import {
-  MOCK_FILE_HASH,
-  MOCK_FILE_URL,
-  MOCK_REQUESTER_DESCRIPTION,
-  MOCK_REQUESTER_TITLE,
-} from '../../../test/constants';
-// import { AWSRegions, StorageProviders } from '../../common/enums/storage';
-import { Web3ConfigService } from '../../common/config/web3-config.service';
-import { ConfigService } from '@nestjs/config';
 import { PaymentCurrency } from '../../common/enums/payment';
+import { JwtAuthGuard } from '../../common/guards';
+import { RequestWithUser } from '../../common/types';
+import {
+  createMockCvatManifest,
+  createMockFortuneManifest,
+} from '../manifest/fixtures';
+import { MutexManagerService } from '../mutex/mutex-manager.service';
+import { JobController } from './job.controller';
+import { JobManifestDto, JobQuickLaunchDto } from './job.dto';
+import { JobService } from './job.service';
 
 describe('JobController', () => {
   let jobController: JobController;
@@ -57,8 +53,6 @@ describe('JobController', () => {
           provide: MutexManagerService,
           useValue: mockMutexManagerService,
         },
-        Web3ConfigService,
-        ConfigService,
       ],
     })
       .overrideGuard(JwtAuthGuard)
@@ -87,10 +81,10 @@ describe('JobController', () => {
       const jobDto: JobQuickLaunchDto = {
         chainId: ChainId.POLYGON_AMOY,
         requestType: 'type_a' as JobRequestType,
-        manifestUrl: MOCK_FILE_URL,
-        manifestHash: MOCK_FILE_HASH,
+        manifestUrl: faker.internet.url(),
+        manifestHash: faker.string.uuid(),
         paymentCurrency: PaymentCurrency.USD,
-        paymentAmount: 500,
+        paymentAmount: faker.number.int({ min: 100, max: 1000 }),
         escrowFundToken: EscrowFundToken.HMT,
       };
 
@@ -123,10 +117,12 @@ describe('JobController', () => {
       const jobDto: JobQuickLaunchDto = {
         chainId: ChainId.POLYGON_AMOY,
         requestType: 'type_a' as JobRequestType,
-        manifestUrl: MOCK_FILE_URL,
-        manifestHash: MOCK_FILE_HASH,
-        paymentCurrency: PaymentCurrency.USD,
-        paymentAmount: 500,
+        manifestUrl: faker.internet.url(),
+        manifestHash: faker.string.uuid(),
+        paymentCurrency: faker.helpers.arrayElement(
+          Object.values(PaymentCurrency),
+        ),
+        paymentAmount: faker.number.int({ min: 100, max: 1000 }),
         escrowFundToken: EscrowFundToken.HMT,
       };
 
@@ -145,9 +141,13 @@ describe('JobController', () => {
         requestType: '', // Invalid input
         manifestUrl: '',
         manifestHash: '',
-        paymentCurrency: PaymentCurrency.USD,
-        paymentAmount: 500,
-        escrowFundToken: EscrowFundToken.HMT,
+        paymentCurrency: faker.helpers.arrayElement(
+          Object.values(PaymentCurrency),
+        ),
+        paymentAmount: faker.number.int({ min: 100, max: 1000 }),
+        escrowFundToken: faker.helpers.arrayElement(
+          Object.values(EscrowFundToken),
+        ),
       };
 
       mockMutexManagerService.runExclusive.mockRejectedValueOnce(
@@ -164,11 +164,15 @@ describe('JobController', () => {
       const jobDto: JobQuickLaunchDto = {
         chainId: ChainId.POLYGON_AMOY,
         requestType: 'type_a' as JobRequestType,
-        manifestUrl: MOCK_FILE_URL,
-        manifestHash: MOCK_FILE_HASH,
-        paymentCurrency: PaymentCurrency.USD,
-        paymentAmount: 500,
-        escrowFundToken: EscrowFundToken.HMT,
+        manifestUrl: faker.internet.url(),
+        manifestHash: faker.string.uuid(),
+        paymentCurrency: faker.helpers.arrayElement(
+          Object.values(PaymentCurrency),
+        ),
+        paymentAmount: faker.number.int({ min: 100, max: 1000 }),
+        escrowFundToken: faker.helpers.arrayElement(
+          Object.values(EscrowFundToken),
+        ),
       };
 
       mockMutexManagerService.runExclusive.mockRejectedValueOnce(
@@ -187,27 +191,31 @@ describe('JobController', () => {
     });
   });
 
-  describe('createFortuneJob', () => {
-    const jobFortuneDto: JobFortuneDto = {
+  describe('createJob', () => {
+    const jobManifestDto: JobManifestDto = {
       chainId: ChainId.POLYGON_AMOY,
-      requesterTitle: MOCK_REQUESTER_TITLE,
-      requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-      submissionsRequired: 10,
-      paymentCurrency: PaymentCurrency.HMT,
-      paymentAmount: 500,
-      escrowFundToken: EscrowFundToken.HMT,
+      requestType: FortuneJobType.FORTUNE,
+      manifest: createMockFortuneManifest({
+        requesterTitle: faker.string.sample(),
+        requesterDescription: faker.string.sample(),
+        submissionsRequired: faker.number.int({ min: 1, max: 10 }),
+      }),
+      paymentCurrency: faker.helpers.arrayElement(
+        Object.values(PaymentCurrency),
+      ),
+      paymentAmount: faker.number.int({ min: 100, max: 1000 }),
+      escrowFundToken: faker.helpers.arrayElement(
+        Object.values(EscrowFundToken),
+      ),
     };
 
-    it('should create a fortune job successfully', async () => {
+    it('should create a job successfully', async () => {
       mockJobService.createJob.mockResolvedValue(1);
       mockMutexManagerService.runExclusive.mockImplementation(
         async (_lock, _timeout, fn) => await fn(),
       );
 
-      const result = await jobController.createFortuneJob(
-        jobFortuneDto,
-        mockRequest,
-      );
+      const result = await jobController.createJob(jobManifestDto, mockRequest);
 
       expect(result).toBe(1);
       expect(mockMutexManagerService.runExclusive).toHaveBeenCalledWith(
@@ -217,8 +225,43 @@ describe('JobController', () => {
       );
       expect(mockJobService.createJob).toHaveBeenCalledWith(
         mockRequest.user,
-        FortuneJobType.FORTUNE,
-        jobFortuneDto,
+        jobManifestDto.requestType,
+        jobManifestDto,
+      );
+    });
+
+    it('should create a CVAT job successfully', async () => {
+      const cvatManifest = createMockCvatManifest();
+      cvatManifest.annotation.type = CvatJobType.IMAGE_BOXES;
+
+      const cvatJobManifestDto: JobManifestDto = {
+        chainId: ChainId.POLYGON_AMOY,
+        requestType: CvatJobType.IMAGE_BOXES,
+        manifest: cvatManifest,
+        paymentCurrency: faker.helpers.arrayElement(
+          Object.values(PaymentCurrency),
+        ),
+        paymentAmount: faker.number.int({ min: 100, max: 1000 }),
+        escrowFundToken: faker.helpers.arrayElement(
+          Object.values(EscrowFundToken),
+        ),
+      };
+
+      mockJobService.createJob.mockResolvedValue(2);
+      mockMutexManagerService.runExclusive.mockImplementation(
+        async (_lock, _timeout, fn) => await fn(),
+      );
+
+      const result = await jobController.createJob(
+        cvatJobManifestDto,
+        mockRequest,
+      );
+
+      expect(result).toBe(2);
+      expect(mockJobService.createJob).toHaveBeenCalledWith(
+        mockRequest.user,
+        cvatJobManifestDto.requestType,
+        cvatJobManifestDto,
       );
     });
 
@@ -228,7 +271,7 @@ describe('JobController', () => {
       );
 
       await expect(
-        jobController.createFortuneJob(jobFortuneDto, mockRequest),
+        jobController.createJob(jobManifestDto, mockRequest),
       ).rejects.toThrow(UnauthorizedException);
 
       expect(mockMutexManagerService.runExclusive).toHaveBeenCalledWith(
@@ -245,7 +288,7 @@ describe('JobController', () => {
       );
 
       await expect(
-        jobController.createFortuneJob(jobFortuneDto, mockRequest),
+        jobController.createJob(jobManifestDto, mockRequest),
       ).rejects.toThrow(ConflictException);
 
       expect(mockMutexManagerService.runExclusive).toHaveBeenCalledWith(
@@ -262,7 +305,7 @@ describe('JobController', () => {
       );
 
       await expect(
-        jobController.createFortuneJob(jobFortuneDto, mockRequest),
+        jobController.createJob(jobManifestDto, mockRequest),
       ).rejects.toThrow(BadRequestException);
 
       expect(mockMutexManagerService.runExclusive).toHaveBeenCalledWith(
@@ -273,109 +316,4 @@ describe('JobController', () => {
       expect(mockJobService.createJob).not.toHaveBeenCalled();
     });
   });
-
-  //disabled CVAT jobs
-  // describe('createCvatJob', () => {
-  //   const jobCvatDto: JobCvatDto = {
-  //     requesterDescription: 'Sample description',
-  //     data: {
-  //       dataset: {
-  //         provider: 'AWS' as StorageProviders,
-  //         region: 'us-east-1' as AWSRegions,
-  //         bucketName: 'sample-bucket',
-  //         path: 'path/to/dataset',
-  //       },
-  //     },
-  //     labels: [
-  //       {
-  //         name: 'Label 1',
-  //         nodes: ['node1', 'node2'],
-  //       },
-  //     ],
-  //     minQuality: 90,
-  //     groundTruth: {
-  //       provider: 'AWS' as StorageProviders,
-  //       region: 'us-west-1' as AWSRegions,
-  //       bucketName: 'ground-truth-bucket',
-  //       path: 'path/to/groundtruth',
-  //     },
-  //     userGuide: 'https://example.com/user-guide',
-  //     type: CvatJobType.IMAGE_BOXES,
-  //     paymentCurrency: PaymentCurrency.USDC,
-  //     paymentAmount: 500,
-  //     escrowFundToken: EscrowFundToken.USDC,
-  //   };
-
-  //   it('should create a CVAT job successfully', async () => {
-  //     mockJobService.createJob.mockResolvedValue(1);
-  //     mockMutexManagerService.runExclusive.mockImplementation(
-  //       async (_lock, _timeout, fn) => await fn(),
-  //     );
-
-  //     const result = await jobController.createCvatJob(jobCvatDto, mockRequest);
-
-  //     expect(result).toBe(1);
-  //     expect(mockMutexManagerService.runExclusive).toHaveBeenCalledWith(
-  //       `user${mockRequest.user.id}`,
-  //       expect.any(Number),
-  //       expect.any(Function),
-  //     );
-  //     expect(mockJobService.createJob).toHaveBeenCalledWith(
-  //       mockRequest.user,
-  //       CvatJobType.IMAGE_BOXES,
-  //       jobCvatDto,
-  //     );
-  //   });
-
-  //   it('should throw UnauthorizedException if user is not authorized', async () => {
-  //     mockMutexManagerService.runExclusive.mockRejectedValueOnce(
-  //       new UnauthorizedException(),
-  //     );
-
-  //     await expect(
-  //       jobController.createCvatJob(jobCvatDto, mockRequest),
-  //     ).rejects.toThrow(UnauthorizedException);
-
-  //     expect(mockMutexManagerService.runExclusive).toHaveBeenCalledWith(
-  //       `user${mockRequest.user.id}`,
-  //       expect.any(Number),
-  //       expect.any(Function),
-  //     );
-  //     expect(mockJobService.createJob).not.toHaveBeenCalled();
-  //   });
-
-  //   it('should throw ConflictException if there is a conflict', async () => {
-  //     mockMutexManagerService.runExclusive.mockRejectedValueOnce(
-  //       new ConflictException(),
-  //     );
-
-  //     await expect(
-  //       jobController.createCvatJob(jobCvatDto, mockRequest),
-  //     ).rejects.toThrow(ConflictException);
-
-  //     expect(mockMutexManagerService.runExclusive).toHaveBeenCalledWith(
-  //       `user${mockRequest.user.id}`,
-  //       expect.any(Number),
-  //       expect.any(Function),
-  //     );
-  //     expect(mockJobService.createJob).not.toHaveBeenCalled();
-  //   });
-
-  //   it('should throw BadRequestException for invalid input', async () => {
-  //     mockMutexManagerService.runExclusive.mockRejectedValueOnce(
-  //       new BadRequestException(),
-  //     );
-
-  //     await expect(
-  //       jobController.createCvatJob(jobCvatDto, mockRequest),
-  //     ).rejects.toThrow(BadRequestException);
-
-  //     expect(mockMutexManagerService.runExclusive).toHaveBeenCalledWith(
-  //       `user${mockRequest.user.id}`,
-  //       expect.any(Number),
-  //       expect.any(Function),
-  //     );
-  //     expect(mockJobService.createJob).not.toHaveBeenCalled();
-  //   });
-  // });
 });

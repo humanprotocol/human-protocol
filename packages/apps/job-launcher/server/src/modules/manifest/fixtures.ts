@@ -9,7 +9,6 @@ export function createMockFortuneManifest(
     submissionsRequired: faker.number.int({ min: 1, max: 100 }),
     requesterTitle: faker.lorem.sentence(),
     requesterDescription: faker.lorem.sentence(),
-    fundAmount: faker.number.int({ min: 1, max: 100000 }),
     requestType: FortuneJobType.FORTUNE,
     ...overrides,
   };

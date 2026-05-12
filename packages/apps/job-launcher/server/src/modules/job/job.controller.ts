@@ -18,12 +18,8 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { MUTEX_TIMEOUT } from '../../common/constants';
 import { ApiKey } from '../../common/decorators';
-import { FortuneJobType } from '../../common/enums/job';
-import { Web3Env } from '../../common/enums/web3';
-import { ForbiddenError } from '../../common/errors';
 import { JwtAuthGuard } from '../../common/guards';
 import { PageDto } from '../../common/pagination/pagination.dto';
 import { RequestWithUser } from '../../common/types';
@@ -33,9 +29,9 @@ import {
   GetJobsDto,
   JobCancelDto,
   JobDetailsDto,
-  JobFortuneDto,
   JobIdDto,
   JobListDto,
+  JobManifestDto,
   JobQuickLaunchDto,
 } from './job.dto';
 import { JobService } from './job.service';
@@ -49,7 +45,6 @@ export class JobController {
   constructor(
     private readonly jobService: JobService,
     private readonly mutexManagerService: MutexManagerService,
-    private readonly web3ConfigService: Web3ConfigService,
   ) {}
 
   @ApiOperation({
@@ -94,13 +89,13 @@ export class JobController {
   }
 
   @ApiOperation({
-    summary: 'Create a fortune job',
-    description: 'Endpoint to create a new fortune job.',
+    summary: 'Create a job',
+    description: 'Endpoint to create a new job using a manifest JSON body.',
   })
-  @ApiBody({ type: JobFortuneDto })
+  @ApiBody({ type: JobManifestDto })
   @ApiResponse({
     status: 201,
-    description: 'ID of the created fortune job.',
+    description: 'ID of the created job.',
     type: Number,
   })
   @ApiResponse({
@@ -115,22 +110,18 @@ export class JobController {
     status: 409,
     description: 'Conflict. Conflict with the current state of the server.',
   })
-  @Post('/fortune')
-  public async createFortuneJob(
-    @Body() data: JobFortuneDto,
+  @Post()
+  public async createJob(
+    @Body() data: JobManifestDto,
     @Request() req: RequestWithUser,
   ): Promise<number> {
-    if (this.web3ConfigService.env === Web3Env.MAINNET) {
-      throw new ForbiddenError('Disabled');
-    }
-
     return await this.mutexManagerService.runExclusive(
       `user${req.user.id}`,
       MUTEX_TIMEOUT,
       async () => {
         return await this.jobService.createJob(
           req.user,
-          FortuneJobType.FORTUNE,
+          data.requestType,
           data,
         );
       },

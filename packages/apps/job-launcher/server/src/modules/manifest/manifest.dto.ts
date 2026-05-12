@@ -35,11 +35,6 @@ export class FortuneManifestDto {
   @IsString()
   public requesterDescription: string;
 
-  @ApiProperty({ name: 'fund_amount' })
-  @IsNumber()
-  @IsPositive()
-  public fundAmount: number;
-
   @ApiProperty({ enum: FortuneJobType, name: 'request_type' })
   @IsEnumCaseInsensitive(FortuneJobType)
   public requestType: FortuneJobType;
