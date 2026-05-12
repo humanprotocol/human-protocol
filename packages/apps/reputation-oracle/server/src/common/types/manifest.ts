@@ -2,7 +2,6 @@ import { CvatJobType, FortuneJobType, MarketingJobType } from '@/common/enums';
 
 export type FortuneManifest = {
   submissionsRequired: number;
-  fundAmount: number;
   requestType: FortuneJobType;
 };
 

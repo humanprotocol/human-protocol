@@ -8,7 +8,6 @@ import { UserEntity } from '../modules/user/user.entity';
 
 import { TypeOrmLoggerModule, TypeOrmLoggerService } from './typeorm';
 import { JobEntity } from '../modules/job/job.entity';
-import { ContentModerationRequestEntity } from '../modules/content-moderation/content-moderation-request.entity';
 import { PaymentEntity } from '../modules/payment/payment.entity';
 import { DatabaseConfigService } from '../common/config/database-config.service';
 import { ApiKeyEntity } from '../modules/auth/apikey.entity';
@@ -40,7 +39,6 @@ import { WhitelistEntity } from '../modules/whitelist/whitelist.entity';
             ApiKeyEntity,
             UserEntity,
             JobEntity,
-            ContentModerationRequestEntity,
             PaymentEntity,
             WebhookEntity,
             CronJobEntity,

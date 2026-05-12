@@ -27,23 +27,6 @@ export enum ErrorJob {
 }
 
 /**
- * Represents error messages associated with a job moderation.
- */
-export enum ErrorContentModeration {
-  ErrorProcessingDataset = 'Error processing dataset',
-  InappropriateContent = 'Job cannot be processed due to inappropriate content',
-  ContentModerationFailed = 'Job cannot be processed due to failure in content moderation',
-  NoDestinationURIFound = 'No destination URI found in the response',
-  InvalidBucketUrl = 'Invalid bucket URL',
-  DataMustBeStoredInGCS = 'Data must be stored in Google Cloud Storage',
-  NoResultsFound = 'No results found',
-  ResultsParsingFailed = 'Results parsing failed',
-  JobModerationFailed = 'Job moderation failed',
-  ProcessContentModerationRequestFailed = 'Process content moderation request failed',
-  CompleteContentModerationFailed = 'Complete content moderation failed',
-}
-
-/**
  * Represents error messages associated to webhook.
  */
 export enum ErrorWebhook {
@@ -164,15 +147,6 @@ export enum ErrorWeb3 {
   InvalidChainId = 'Invalid chain id provided for the configured environment',
   GasPriceError = 'Error calculating gas price',
   ReputationOracleUrlNotSet = 'Reputation oracle URL not set',
-}
-
-/**
- * Represents error messages related to routing protocol.
- */
-export enum ErrorRoutingProtocol {
-  ReputationOracleNotFound = 'The specified Reputation Oracle address is not found in the set of available oracles. Ensure the address is correct and check available oracles for this network.',
-  ExchangeOracleNotFound = 'The specified Exchange Oracle address is not found in the set of available oracles. Ensure the address is correct and part of the available oracle pool.',
-  RecordingOracleNotFound = 'The specified Recording Oracle address is not found in the set of available oracles. Ensure the address is correct and part of the available oracle pool.',
 }
 
 /**

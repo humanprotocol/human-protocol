@@ -19,6 +19,10 @@ export const CvatJobRequestValidationSchema = Yup.object().shape({
     .required('Accuracy target is required')
     .moreThan(0, 'Accuracy target must be greater than 0')
     .max(100, 'Accuracy target must be less than or equal to 100'),
+  jobBounty: Yup.number()
+    .typeError('Job bounty is required')
+    .required('Job bounty is required')
+    .moreThan(0, 'Job bounty must be greater than 0'),
   qualifications: Yup.array().of(Yup.object()),
 });
 

@@ -34,7 +34,6 @@ import { StorageService } from '../storage/storage.service';
 import { Web3Service } from '../web3/web3.service';
 import { WebhookDto } from '../webhook/webhook.dto';
 import { JobService } from './job.service';
-import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import { downloadFileFromUrl } from '@/common/utils/storage';
 
 jest.mock('minio', () => {
@@ -60,6 +59,11 @@ jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
   EscrowClient: {
     build: jest.fn().mockImplementation(() => ({})),
+  },
+  EscrowUtils: {
+    getEscrow: jest.fn().mockResolvedValue({
+      totalFundedAmount: 8n,
+    }),
   },
   KVStoreUtils: {
     get: jest.fn(),
@@ -130,13 +134,6 @@ describe('JobService', () => {
   });
 
   describe('processJobSolution', () => {
-    beforeAll(() => {
-      const decimalsMock = jest.fn().mockResolvedValue(18);
-      const tokenContractMock = { decimals: decimalsMock };
-      jest
-        .spyOn(HMToken__factory, 'connect')
-        .mockReturnValue(tokenContractMock as any);
-    });
     afterEach(() => {
       jest.clearAllMocks();
     });
@@ -241,7 +238,6 @@ describe('JobService', () => {
         submissionsRequired: 2,
         requesterTitle: MOCK_REQUESTER_TITLE,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        fundAmount: '10',
         requestType: JobRequestType.FORTUNE,
       };
 
@@ -303,7 +299,6 @@ describe('JobService', () => {
         submissionsRequired: 2,
         requesterTitle: MOCK_REQUESTER_TITLE,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        fundAmount: '10',
         requestType: JobRequestType.FORTUNE,
       };
 
@@ -316,7 +311,6 @@ describe('JobService', () => {
           .fn()
           .mockResolvedValue('http://example.com/results'),
         storeResults: jest.fn().mockResolvedValue(true),
-        getTokenAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
 
@@ -370,7 +364,6 @@ describe('JobService', () => {
         getManifest: jest.fn().mockResolvedValue('http://example.com/manifest'),
         getIntermediateResultsUrl: jest.fn().mockResolvedValue(''),
         storeResults: jest.fn().mockResolvedValue(true),
-        getTokenAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
 
@@ -378,7 +371,6 @@ describe('JobService', () => {
         submissionsRequired: 3,
         requesterTitle: MOCK_REQUESTER_TITLE,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        fundAmount: '10',
         requestType: JobRequestType.FORTUNE,
       };
 
@@ -426,7 +418,6 @@ describe('JobService', () => {
           .fn()
           .mockResolvedValue('http://existing-solutions'),
         storeResults: jest.fn().mockResolvedValue(true),
-        getTokenAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
 
@@ -438,7 +429,6 @@ describe('JobService', () => {
         submissionsRequired: 2,
         requesterTitle: MOCK_REQUESTER_TITLE,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        fundAmount: '10',
         requestType: JobRequestType.FORTUNE,
       };
 
@@ -504,7 +494,6 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue('http://existing-solutions'),
       storeResults: jest.fn().mockResolvedValue(true),
-      getTokenAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
     };
     (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
 
@@ -512,7 +501,6 @@ describe('JobService', () => {
       submissionsRequired: 4,
       requesterTitle: MOCK_REQUESTER_TITLE,
       requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-      fundAmount: '10',
       requestType: JobRequestType.FORTUNE,
     };
 
@@ -594,7 +582,6 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue('http://existing-solutions'),
       storeResults: jest.fn().mockResolvedValue(true),
-      getTokenAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
     };
     (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
     KVStoreUtils.get = jest
@@ -606,7 +593,6 @@ describe('JobService', () => {
       submissionsRequired: 3,
       requesterTitle: MOCK_REQUESTER_TITLE,
       requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-      fundAmount: '10',
       requestType: JobRequestType.FORTUNE,
     };
 
@@ -676,7 +662,6 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue('http://existing-solutions'),
       storeResults: jest.fn().mockResolvedValue(true),
-      getTokenAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
     };
     (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
     KVStoreUtils.get = jest
@@ -688,7 +673,6 @@ describe('JobService', () => {
       submissionsRequired: 3,
       requesterTitle: MOCK_REQUESTER_TITLE,
       requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-      fundAmount: '10',
       requestType: JobRequestType.FORTUNE,
     };
 

@@ -2,25 +2,22 @@ import { ChainId } from '@human-protocol/sdk';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import {
-  ArrayMinSize,
   IsArray,
   IsEthereumAddress,
   IsIn,
   IsNotEmpty,
   IsNumber,
   IsNumberString,
-  IsObject,
   IsOptional,
   IsPositive,
   IsString,
-  IsUrl,
-  Max,
   Min,
+  IsUrl,
   ValidateNested,
+  IsObject,
 } from 'class-validator';
 import { IsEnumCaseInsensitive } from '../../common/decorators';
 import {
-  CvatJobType,
   EscrowFundToken,
   JobRequestType,
   JobSortField,
@@ -33,13 +30,20 @@ import { AWSRegions, StorageProviders } from '../../common/enums/storage';
 import { PageOptionsDto } from '../../common/pagination/pagination.dto';
 import { IsValidTokenDecimals } from '../../common/validators/token-decimals';
 import { IsValidToken } from '../../common/validators/tokens';
-import { Label, ManifestDetails } from '../manifest/manifest.dto';
+import { ManifestDetails, ManifestDto } from '../manifest/manifest.dto';
 
 export class JobDto {
-  @ApiProperty({ enum: ChainId, required: false, name: 'chain_id' })
+  @ApiProperty({ enum: ChainId, name: 'chain_id' })
   @IsEnumCaseInsensitive(ChainId)
-  @IsOptional()
-  public chainId?: ChainId;
+  public chainId: ChainId;
+
+  @ApiProperty({
+    description: 'Request type',
+    name: 'request_type',
+    enum: JobType,
+  })
+  @IsEnumCaseInsensitive(JobType)
+  public requestType: JobRequestType;
 
   @ApiPropertyOptional()
   @IsArray()
@@ -89,14 +93,6 @@ export class JobDto {
 }
 
 export class JobQuickLaunchDto extends JobDto {
-  @ApiProperty({
-    description: 'Request type',
-    name: 'request_type',
-    enum: JobType,
-  })
-  @IsEnumCaseInsensitive(JobType)
-  public requestType: JobRequestType;
-
   @ApiProperty({ name: 'manifest_url' })
   @IsUrl()
   @IsNotEmpty()
@@ -105,24 +101,14 @@ export class JobQuickLaunchDto extends JobDto {
   @ApiProperty({ name: 'manifest_hash' })
   @IsString()
   @IsOptional()
-  public manifestHash: string;
+  public manifestHash?: string;
 }
 
-export class JobFortuneDto extends JobDto {
-  @ApiProperty({ name: 'requester_title' })
-  @IsString()
+export class JobManifestDto extends JobDto {
+  @ApiProperty({ type: Object })
+  @IsObject()
   @IsNotEmpty()
-  public requesterTitle: string;
-
-  @ApiProperty({ name: 'requester_description' })
-  @IsString()
-  @IsNotEmpty()
-  public requesterDescription: string;
-
-  @ApiProperty({ name: 'submissions_required' })
-  @IsNumber()
-  @IsPositive()
-  public submissionsRequired: number;
+  public manifest: ManifestDto;
 }
 
 export class StorageDataDto {
@@ -143,68 +129,6 @@ export class StorageDataDto {
   @IsOptional()
   @IsString()
   public path?: string;
-}
-
-export class CvatDataDto {
-  @ApiProperty()
-  @IsObject()
-  @ValidateNested()
-  @Type(() => StorageDataDto)
-  public dataset: StorageDataDto;
-
-  @ApiPropertyOptional()
-  @IsObject()
-  @IsOptional()
-  @ValidateNested()
-  @Type(() => StorageDataDto)
-  public points?: StorageDataDto;
-
-  @ApiPropertyOptional()
-  @IsObject()
-  @IsOptional()
-  @ValidateNested()
-  @Type(() => StorageDataDto)
-  public boxes?: StorageDataDto;
-}
-
-export class JobCvatDto extends JobDto {
-  @ApiProperty({ name: 'requester_description' })
-  @IsString()
-  @IsNotEmpty()
-  public requesterDescription: string;
-
-  @ApiProperty()
-  @IsObject()
-  @ValidateNested()
-  @Type(() => CvatDataDto)
-  public data: CvatDataDto;
-
-  @ApiProperty({ type: [Label] })
-  @IsArray()
-  @ArrayMinSize(1)
-  @ValidateNested({ each: true })
-  @Type(() => Label)
-  public labels: Label[];
-
-  @ApiProperty({ name: 'min_quality' })
-  @IsNumber()
-  @IsPositive()
-  @Max(1)
-  public minQuality: number;
-
-  @ApiProperty({ name: 'ground_truth' })
-  @IsObject()
-  @ValidateNested()
-  @Type(() => StorageDataDto)
-  public groundTruth: StorageDataDto;
-
-  @ApiProperty({ name: 'user_guide' })
-  @IsUrl()
-  public userGuide: string;
-
-  @ApiProperty({ enum: CvatJobType })
-  @IsEnumCaseInsensitive(CvatJobType)
-  public type: CvatJobType;
 }
 
 export class JobCancelDto {
@@ -364,4 +288,4 @@ export class GetJobsDto extends PageOptionsDto {
   status?: JobStatusFilter;
 }
 
-export type CreateJob = JobQuickLaunchDto | JobFortuneDto | JobCvatDto;
+export type CreateJob = JobQuickLaunchDto | JobManifestDto;

@@ -81,7 +81,6 @@ export class JobRepository extends BaseRepository<JobEntity> {
         waitUntil: SortDirection.ASC,
       },
       ...(take && { take }),
-      relations: ['contentModerationRequests'],
     });
   }
 
@@ -108,12 +107,7 @@ export class JobRepository extends BaseRepository<JobEntity> {
 
     switch (data.status) {
       case JobStatusFilter.PENDING:
-        statusFilter = [
-          JobStatus.PAID,
-          JobStatus.UNDER_MODERATION,
-          JobStatus.MODERATION_PASSED,
-          JobStatus.POSSIBLE_ABUSE_IN_REVIEW,
-        ];
+        statusFilter = [JobStatus.PAID];
         break;
       case JobStatusFilter.CANCELED:
         statusFilter = [
