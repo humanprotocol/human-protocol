@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { type ReactElement, useEffect, useState } from 'react';
 
 import Stack from '@mui/material/Stack';
 import { AxiosError } from 'axios';
@@ -38,7 +38,7 @@ const renderCurrentResultType = (
 
   const renderType: Record<
     keyof AddressDetails,
-    { title: string; icon: JSX.Element }
+    { title: string; icon: ReactElement }
   > = {
     operator: {
       title: 'Wallet Address',

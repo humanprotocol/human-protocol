@@ -4,7 +4,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { Stack } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { t } from 'i18next';
-import type { Dispatch, SetStateAction } from 'react';
+import type { Dispatch, ReactElement, SetStateAction } from 'react';
 import { HumanLogoNavbarIcon } from '@/shared/components/ui/icons';
 import { Button } from '@/shared/components/ui/button';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
@@ -18,12 +18,12 @@ export interface DrawerItem {
   label: string;
   link?: string;
   href?: string;
-  icon?: JSX.Element;
+  icon?: ReactElement;
   disabled?: boolean;
   onClick?: () => void;
 }
 
-export type MenuItem = DrawerItem | JSX.Element;
+export type MenuItem = DrawerItem | ReactElement;
 interface DrawerNavigationProps {
   open: boolean;
   setDrawerOpen: Dispatch<SetStateAction<boolean>>;

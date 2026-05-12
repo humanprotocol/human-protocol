@@ -799,6 +799,7 @@ export function handleCancellationRequested(
       null,
       Address.fromBytes(escrowEntity.address)
     );
+    escrowEntity.cancellationRequestedAt = event.block.timestamp;
     escrowEntity.status = 'ToCancel';
     escrowEntity.save();
     statusEventEntity.launcher = escrowEntity.launcher;

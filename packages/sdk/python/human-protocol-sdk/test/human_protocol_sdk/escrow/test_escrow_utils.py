@@ -49,6 +49,7 @@ class TestEscrowUtils(unittest.TestCase):
                 "token": "0x1234567890123456789012345678901234567891",
                 "totalFundedAmount": "1000000000000000000",
                 "createdAt": "1683811973",
+                "cancellationRequestedAt": "1683812000",
             }
 
             def side_effect(subgraph_url, query, params, options):
@@ -134,6 +135,10 @@ class TestEscrowUtils(unittest.TestCase):
             self.assertEqual(
                 int(filtered[0].created_at), int(mock_escrow["createdAt"]) * 1000
             )
+            self.assertEqual(
+                int(filtered[0].cancellation_requested_at),
+                int(mock_escrow["cancellationRequestedAt"]) * 1000,
+            )
 
             filter = EscrowFilter(chain_id=ChainId.POLYGON_AMOY)
 
@@ -184,6 +189,7 @@ class TestEscrowUtils(unittest.TestCase):
                 "token": "0x1234567890123456789012345678901234567891",
                 "totalFundedAmount": "1000000000000000000",
                 "createdAt": "1672531200000",
+                "cancellationRequestedAt": None,
             }
             mock_escrow_2 = {
                 "id": "0x1234567890123456789012345678901234567891",
@@ -204,6 +210,7 @@ class TestEscrowUtils(unittest.TestCase):
                 "token": "0x1234567890123456789012345678901234567891",
                 "totalFundedAmount": "1000000000000000000",
                 "createdAt": "1672531200000",
+                "cancellationRequestedAt": None,
             }
 
             def side_effect(subgraph_url, query, params, options):
@@ -239,6 +246,8 @@ class TestEscrowUtils(unittest.TestCase):
             self.assertEqual(len(filtered), 2)
             self.assertEqual(filtered[0].address, mock_escrow_1["address"])
             self.assertEqual(filtered[1].address, mock_escrow_2["address"])
+            self.assertIsNone(filtered[0].cancellation_requested_at)
+            self.assertIsNone(filtered[1].cancellation_requested_at)
 
     def test_get_escrow(self):
         with patch(
@@ -268,6 +277,7 @@ class TestEscrowUtils(unittest.TestCase):
                 "token": "0x1234567890123456789012345678901234567891",
                 "totalFundedAmount": "1000000000000000000",
                 "createdAt": "1683813973",
+                "cancellationRequestedAt": "1683814000",
             }
 
             mock_function.return_value = {
@@ -325,6 +335,10 @@ class TestEscrowUtils(unittest.TestCase):
             )
             self.assertEqual(
                 int(escrow.created_at), int(mock_escrow["createdAt"]) * 1000
+            )
+            self.assertEqual(
+                int(escrow.cancellation_requested_at),
+                int(mock_escrow["cancellationRequestedAt"]) * 1000,
             )
 
     def test_get_escrow_empty_data(self):

@@ -3,7 +3,7 @@ import { useLocation, Navigate } from 'react-router-dom';
 import { useAppSelector } from '../../state';
 import { UserStatus } from '../../state/auth/types';
 
-export function ProtectedRoute({ children }: { children: JSX.Element }) {
+export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthed, user } = useAppSelector((state) => state.auth);
   const location = useLocation();
 

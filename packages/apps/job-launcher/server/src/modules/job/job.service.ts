@@ -82,8 +82,7 @@ import { JobRepository } from './job.repository';
 @Injectable()
 export class JobService {
   private readonly logger = logger.child({ context: JobService.name });
-  public readonly bucket: string;
-  private cronJobRepository: CronJobRepository;
+  private cronJobRepository!: CronJobRepository;
 
   constructor(
     @Inject(Web3Service)
@@ -467,7 +466,7 @@ export class JobService {
       });
 
       return new PageDto(data.page!, data.pageSize!, itemCount, jobs);
-    } catch (error) {
+    } catch (error: any) {
       throw new ServerError(error.message, error.stack);
     }
   }

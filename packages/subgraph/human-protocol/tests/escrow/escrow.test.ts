@@ -1316,6 +1316,12 @@ describe('Escrow', () => {
     assert.fieldEquals('EscrowStatusEvent', id, 'status', 'ToCancel');
 
     // Escrow
+    assert.fieldEquals(
+      'Escrow',
+      escrowAddress.toHex(),
+      'cancellationRequestedAt',
+      cancellationRequested.block.timestamp.toString()
+    );
     assert.fieldEquals('Escrow', escrowAddress.toHex(), 'status', 'ToCancel');
     assert.fieldEquals(
       'Transaction',

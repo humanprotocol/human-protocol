@@ -15,6 +15,7 @@ export enum JobType {
   POLYGONS = 'image_polygons',
   AUDIO_TRANSCRIPTION = 'audio_transcription',
   AUDIO_ATTRIBUTE_ANNOTATION = 'audio_attribute_annotation',
+  SOCIAL_MEDIA_PROMOTION = 'social_media_promotion',
 }
 
 export const EthKVStoreKeys = {

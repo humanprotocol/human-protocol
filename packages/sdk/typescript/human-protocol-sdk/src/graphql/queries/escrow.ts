@@ -27,6 +27,7 @@ const ESCROW_FRAGMENT = gql`
     token
     totalFundedAmount
     createdAt
+    cancellationRequestedAt
   }
 `;
 

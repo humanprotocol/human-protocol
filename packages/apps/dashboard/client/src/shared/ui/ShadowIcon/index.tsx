@@ -1,11 +1,11 @@
-import type { FC } from 'react';
+import type { FC, ReactElement } from 'react';
 
 import clsx from 'clsx';
 
 const ShadowIcon: FC<{
   className?: string;
   title?: string;
-  img: string | JSX.Element;
+  img: string | ReactElement;
 }> = ({ className, title, img }) => {
   return (
     <div className={clsx('shadow-icon', className)}>

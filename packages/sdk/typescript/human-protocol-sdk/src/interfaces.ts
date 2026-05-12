@@ -68,6 +68,7 @@ export interface IEscrow {
   token: string;
   totalFundedAmount: bigint;
   createdAt: number;
+  cancellationRequestedAt: number | null;
   chainId: number;
 }
 

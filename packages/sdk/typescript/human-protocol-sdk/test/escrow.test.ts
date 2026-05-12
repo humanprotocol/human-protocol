@@ -3472,6 +3472,7 @@ describe('EscrowUtils', () => {
           token: '0x0',
           totalFundedAmount: '3',
           createdAt: '1',
+          cancellationRequestedAt: '2',
           finalResultsHash: null,
           finalResultsUrl: null,
           intermediateResultsHash: null,
@@ -3498,6 +3499,7 @@ describe('EscrowUtils', () => {
           token: '0x0',
           totalFundedAmount: '3',
           createdAt: '1',
+          cancellationRequestedAt: null,
           finalResultsHash: null,
           finalResultsUrl: null,
           intermediateResultsHash: null,
@@ -3529,6 +3531,9 @@ describe('EscrowUtils', () => {
         count: Number(e.count),
         totalFundedAmount: BigInt(e.totalFundedAmount),
         createdAt: Number(e.createdAt) * 1000,
+        cancellationRequestedAt: e.cancellationRequestedAt
+          ? Number(e.cancellationRequestedAt) * 1000
+          : null,
         recordingOracleFee: e.recordingOracleFee
           ? Number(e.recordingOracleFee)
           : null,
@@ -3570,6 +3575,7 @@ describe('EscrowUtils', () => {
           balance: '0',
           count: '1',
           createdAt: '1',
+          cancellationRequestedAt: null,
           factoryAddress: '0x0',
           launcher: '0x0',
           status: 'Pending',
@@ -3596,6 +3602,7 @@ describe('EscrowUtils', () => {
           balance: '0',
           count: '1',
           createdAt: '1',
+          cancellationRequestedAt: null,
           factoryAddress: '0x0',
           launcher: '0x0',
           status: 'Complete',
@@ -3632,6 +3639,9 @@ describe('EscrowUtils', () => {
         count: Number(e.count),
         totalFundedAmount: BigInt(e.totalFundedAmount),
         createdAt: Number(e.createdAt) * 1000,
+        cancellationRequestedAt: e.cancellationRequestedAt
+          ? Number(e.cancellationRequestedAt) * 1000
+          : null,
         recordingOracleFee: e.recordingOracleFee
           ? Number(e.recordingOracleFee)
           : null,
@@ -3656,6 +3666,7 @@ describe('EscrowUtils', () => {
           balance: '0',
           count: '1',
           createdAt: '1',
+          cancellationRequestedAt: null,
           factoryAddress: '0x0',
           launcher: '0x0',
           status: 'Completed',
@@ -3692,6 +3703,9 @@ describe('EscrowUtils', () => {
         count: Number(e.count),
         totalFundedAmount: BigInt(e.totalFundedAmount),
         createdAt: Number(e.createdAt) * 1000,
+        cancellationRequestedAt: e.cancellationRequestedAt
+          ? Number(e.cancellationRequestedAt) * 1000
+          : null,
         recordingOracleFee: e.recordingOracleFee
           ? Number(e.recordingOracleFee)
           : null,
@@ -3717,6 +3731,7 @@ describe('EscrowUtils', () => {
           count: '1',
           jobRequesterId: '1',
           createdAt: '1',
+          cancellationRequestedAt: null,
           factoryAddress: '0x0',
           launcher: '0x0',
           status: 'Completed',
@@ -3752,6 +3767,9 @@ describe('EscrowUtils', () => {
         count: Number(e.count),
         totalFundedAmount: BigInt(e.totalFundedAmount),
         createdAt: Number(e.createdAt) * 1000,
+        cancellationRequestedAt: e.cancellationRequestedAt
+          ? Number(e.cancellationRequestedAt) * 1000
+          : null,
         recordingOracleFee: e.recordingOracleFee
           ? Number(e.recordingOracleFee)
           : null,
@@ -3776,6 +3794,7 @@ describe('EscrowUtils', () => {
           balance: '0',
           count: '1',
           createdAt: '1',
+          cancellationRequestedAt: null,
           factoryAddress: '0x0',
           launcher: '0x0',
           status: 'Completed',
@@ -3802,6 +3821,7 @@ describe('EscrowUtils', () => {
           balance: '3',
           count: '2',
           createdAt: '1',
+          cancellationRequestedAt: null,
           factoryAddress: '0x0',
           launcher: '0x0',
           status: 'Pending',
@@ -3840,6 +3860,9 @@ describe('EscrowUtils', () => {
         count: Number(e.count),
         totalFundedAmount: BigInt(e.totalFundedAmount),
         createdAt: Number(e.createdAt) * 1000,
+        cancellationRequestedAt: e.cancellationRequestedAt
+          ? Number(e.cancellationRequestedAt) * 1000
+          : null,
         recordingOracleFee: e.recordingOracleFee
           ? Number(e.recordingOracleFee)
           : null,
@@ -3881,6 +3904,7 @@ describe('EscrowUtils', () => {
           balance: '0',
           count: '1',
           createdAt: '1',
+          cancellationRequestedAt: null,
           factoryAddress: '0x0',
           launcher: '0x0',
           status: 'Completed',
@@ -3907,6 +3931,7 @@ describe('EscrowUtils', () => {
           balance: '3',
           count: '2',
           createdAt: '1',
+          cancellationRequestedAt: null,
           factoryAddress: '0x0',
           launcher: '0x0',
           status: 'Pending',
@@ -3946,6 +3971,9 @@ describe('EscrowUtils', () => {
         count: Number(e.count),
         totalFundedAmount: BigInt(e.totalFundedAmount),
         createdAt: Number(e.createdAt) * 1000,
+        cancellationRequestedAt: e.cancellationRequestedAt
+          ? Number(e.cancellationRequestedAt) * 1000
+          : null,
         recordingOracleFee: e.recordingOracleFee
           ? Number(e.recordingOracleFee)
           : undefined,
@@ -4025,6 +4053,7 @@ describe('EscrowUtils', () => {
         manifest: null,
         manifestHash: null,
         createdAt: '0',
+        cancellationRequestedAt: '12',
       };
       const gqlFetchSpy = vi
         .spyOn(gqlFetch, 'default')
@@ -4042,6 +4071,7 @@ describe('EscrowUtils', () => {
         reputationOracleFee: 1,
         exchangeOracleFee: 1,
         createdAt: 0,
+        cancellationRequestedAt: 12000,
         chainId,
         jobRequesterId: null,
         manifest: null,

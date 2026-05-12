@@ -1,4 +1,4 @@
-import { CvatJobType, FortuneJobType } from '@/common/enums';
+import { CvatJobType, FortuneJobType, MarketingJobType } from '@/common/enums';
 import { JobManifest, JobRequestType } from '@/common/types';
 
 const fortuneJobTypes = Object.values(FortuneJobType);
@@ -7,13 +7,23 @@ export function isFortuneJobType(value: string): value is FortuneJobType {
   return fortuneJobTypes.includes(value as FortuneJobType);
 }
 
+const marketingJobTypes = Object.values(MarketingJobType);
+
+export function isMarketingJobType(value: string): value is MarketingJobType {
+  return marketingJobTypes.includes(value as MarketingJobType);
+}
+
 const cvatJobTypes = Object.values(CvatJobType);
 
 export function isCvatJobType(value: string): value is CvatJobType {
   return cvatJobTypes.includes(value as CvatJobType);
 }
 
-const validJobRequestTypes: string[] = [...fortuneJobTypes, ...cvatJobTypes];
+const validJobRequestTypes: string[] = [
+  ...fortuneJobTypes,
+  ...marketingJobTypes,
+  ...cvatJobTypes,
+];
 
 function assertValidJobRequestType(
   value: string,
@@ -30,6 +40,8 @@ export function getJobRequestType(manifest: JobManifest): JobRequestType {
 
   if ('requestType' in manifest) {
     jobRequestType = manifest.requestType;
+  } else if ('job_type' in manifest) {
+    jobRequestType = manifest.job_type;
   } else if ('annotation' in manifest) {
     jobRequestType = manifest.annotation.type;
   }

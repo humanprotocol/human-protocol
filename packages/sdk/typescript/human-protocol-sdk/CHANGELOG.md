@@ -1,5 +1,11 @@
 # @human-protocol/sdk
 
+## 7.2.0
+
+### Minor Changes
+
+- af6ec22: Add cancellationRequestedAt field to Escrow data model
+
 ## 7.1.0
 
 ### Minor Changes

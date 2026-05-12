@@ -468,9 +468,7 @@ describe('JobService', () => {
           url: mockUrl,
           hash: mockHash,
         });
-        const jobEntityMock = createJobEntity({
-          requestType: CvatJobType.IMAGE_BOXES,
-        });
+        const jobEntityMock = createJobEntity();
         mockJobRepository.updateOne.mockResolvedValueOnce(jobEntityMock);
         mockRateService.getRate
           .mockResolvedValueOnce(tokenToUsdRate)
@@ -551,9 +549,7 @@ describe('JobService', () => {
         jobQuickLaunchDto.reputationOracle = faker.finance.ethereumAddress();
 
         const jobEntityMock = createJobEntity();
-        mockJobRepository.createUnique = jest
-          .fn()
-          .mockResolvedValueOnce(jobEntityMock);
+        mockJobRepository.updateOne.mockResolvedValueOnce(jobEntityMock);
         mockRateService.getRate
           .mockResolvedValueOnce(tokenToUsdRate)
           .mockResolvedValueOnce(usdToTokenRate);

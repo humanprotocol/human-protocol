@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { useLocation, Navigate } from 'react-router-dom';
 import { createContext } from 'react';
 import { routerPaths } from '@/router/router-paths';
@@ -11,7 +12,7 @@ export const Web3AuthenticatedUserContext =
 
 export function RequireWeb3Auth({
   children,
-}: Readonly<{ children: JSX.Element }>) {
+}: Readonly<{ children: ReactNode }>) {
   const web3Auth = useWeb3Auth();
   const location = useLocation();
 

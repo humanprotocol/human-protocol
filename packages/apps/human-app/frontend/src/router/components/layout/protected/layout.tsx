@@ -1,5 +1,5 @@
 import { Grid, styled } from '@mui/material';
-import type { Dispatch, SetStateAction } from 'react';
+import type { Dispatch, ReactElement, SetStateAction } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
@@ -43,11 +43,11 @@ export function ProtectedLayout({
   renderDrawer: (
     open: boolean,
     setDrawerOpen: Dispatch<SetStateAction<boolean>>
-  ) => JSX.Element;
-  renderHCaptchaStatisticsDrawer?: (isOpen: boolean) => JSX.Element;
+  ) => ReactElement;
+  renderHCaptchaStatisticsDrawer?: (isOpen: boolean) => ReactElement;
   renderGovernanceBanner?: boolean;
 }>) {
-  const layoutElementRef = useRef<HTMLDivElement>();
+  const layoutElementRef = useRef<HTMLDivElement | null>(null);
   const isHCaptchaLabelingPage = useIsHCaptchaLabelingPage();
   const isMobile = useIsMobile();
   const [drawerOpen, setDrawerOpen] = useState(!isMobile);
@@ -123,12 +123,7 @@ export function ProtectedLayout({
           <Grid item>
             <PageHeader {...pageHeaderProps} />
           </Grid>
-          <Grid
-            component="div"
-            // @ts-expect-error -- MUI accepts this prop even if it's not typed
-            ref={layoutElementRef}
-            sx={{ height: '100%' }}
-          >
+          <Grid component="div" ref={layoutElementRef} sx={{ height: '100%' }}>
             <Outlet />
           </Grid>
         </Grid>

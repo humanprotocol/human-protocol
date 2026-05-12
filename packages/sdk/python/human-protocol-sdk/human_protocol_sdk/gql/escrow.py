@@ -27,6 +27,7 @@ fragment EscrowFields on Escrow {
     token
     totalFundedAmount
     createdAt
+    cancellationRequestedAt
 }
 """
 

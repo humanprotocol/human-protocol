@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { useLocation, Navigate } from 'react-router-dom';
 import { createContext } from 'react';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
@@ -9,7 +10,7 @@ import { type UserData } from '../context/auth-context';
 export const AuthenticatedUserContext =
   createContext<AuthenticatedUserContextType<UserData> | null>(null);
 
-export function RequireAuth({ children }: Readonly<{ children: JSX.Element }>) {
+export function RequireAuth({ children }: Readonly<{ children: ReactNode }>) {
   const auth = useAuth();
   const location = useLocation();
 

@@ -67,6 +67,7 @@ type Escrow @entity(immutable: false) {
   intermediateResultsHash: String # string
   finalResultsUrl: String # string
   finalResultsHash: String # string
+  cancellationRequestedAt: BigInt
   jobRequesterId: String # string
   createdAt: BigInt!
 }

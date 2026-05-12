@@ -4,6 +4,18 @@ export type FortuneFinalResult = {
   error?: 'duplicated' | 'curse_word';
 };
 
+export enum VerificationResult {
+  Accepted = 'accepted',
+  Rejected = 'rejected',
+}
+
+export type MarketingFinalResult = {
+  workerAddress: string;
+  postUrl: string;
+  verificationResult: VerificationResult;
+  rejectionReason?: string;
+};
+
 type CvatAnnotationMetaJob = {
   job_id: number;
   final_result_id: number;

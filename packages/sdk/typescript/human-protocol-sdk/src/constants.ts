@@ -36,7 +36,7 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/human-ethereum/version/latest',
     subgraphUrlApiKey:
-      'https://gateway.thegraph.com/api/deployments/id/QmQZ3yL1FzydDwaB56ozgTiBESciTNFsMLyTBfHXzNd1gg',
+      'https://gateway.thegraph.com/api/deployments/id/QmceuRi331MC3NMajeLejepHShGNRaK87VRiePtHRbNsVV',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
     hmtSubgraphUrl:
@@ -55,7 +55,7 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/human-sepolia/version/latest',
     subgraphUrlApiKey:
-      'https://gateway.thegraph.com/api/deployments/id/QmQEbyGSf8VG9pdskowsK6C977wkcyJSxw9q6EDctKEkUw',
+      'https://gateway.thegraph.com/api/deployments/id/QmdsJaanpNKXd3ov2Cp6vmpu8uvA69iBfwxswFMu4ZcmNJ',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
     hmtSubgraphUrl:
@@ -74,7 +74,7 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/human-bsc/version/latest',
     subgraphUrlApiKey:
-      'https://gateway.thegraph.com/api/deployments/id/QmV3nZUM51NGt7F8RpZP9GxKPpKox3F24iJ8H1ekPb6ha4',
+      'https://gateway.thegraph.com/api/deployments/id/QmcEAT53JPUfddhdxAdFMcHjEtQYpbzNiLkP5dMHZ9Stm7',
     oldSubgraphUrl: 'https://api.thegraph.com/subgraphs/name/humanprotocol/bsc',
     oldFactoryAddress: '0xc88bC422cAAb2ac8812de03176402dbcA09533f4',
     hmtSubgraphUrl:
@@ -93,7 +93,7 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/human-bsc-testnet/version/latest',
     subgraphUrlApiKey:
-      'https://gateway.thegraph.com/api/deployments/id/QmdQJog9vMghK2o39U9YJL8vpU9VZnkJa7jGg7wnsod7qV',
+      'https://gateway.thegraph.com/api/deployments/id/QmNNb3ZQdJiziXksfUNiKYKio7A9u8eMTJYB8jpWQza2uv',
     oldSubgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/bsctest',
     oldFactoryAddress: '0xaae6a2646c1f88763e62e0cd08ad050ea66ac46f',
@@ -113,7 +113,7 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/human-polygon/version/latest',
     subgraphUrlApiKey:
-      'https://gateway.thegraph.com/api/deployments/id/QmSu7B48kgGgMgXaD6Yb4fXjbnsJNmobKAU9qZgescZXid',
+      'https://gateway.thegraph.com/api/deployments/id/QmXPEzDjLTU8AiJ3Zemcodq8hVax3BvC3wskAqjULrgX7Z',
     oldSubgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/polygon',
     oldFactoryAddress: '0x45eBc3eAE6DA485097054ae10BA1A0f8e8c7f794',
@@ -133,7 +133,7 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/human-amoy/version/latest',
     subgraphUrlApiKey:
-      'https://gateway.thegraph.com/api/deployments/id/QmRx5WSi7o9FtENWnE5eEz8Dr7kYUazk4TNPRt65UZkKkB',
+      'https://gateway.thegraph.com/api/deployments/id/QmW3KQfZu1sGz1CedPKC9okCuMFvi8EbrjKncoHn3UPFry',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
     hmtSubgraphUrl:

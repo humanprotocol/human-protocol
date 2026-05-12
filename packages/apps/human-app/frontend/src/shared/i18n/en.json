@@ -505,6 +505,7 @@
     "image_skeletons_from_boxes": "Skeletons from Bounding Boxes",
     "image_polygons": "Polygons",
     "audio_transcription": "Audio Transcription",
-    "audio_attribute_annotation": "Audio Attribute Annotation"
+    "audio_attribute_annotation": "Audio Attribute Annotation",
+    "social_media_promotion": "Social Media Promotion"
   }
 }

@@ -1,8 +1,10 @@
+import type { ReactNode } from 'react';
+
 export function MailTo({
   children,
   mail,
 }: {
-  children?: JSX.Element;
+  children?: ReactNode;
   mail: string;
 }) {
   return (

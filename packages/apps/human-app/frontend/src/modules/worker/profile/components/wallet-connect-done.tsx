@@ -11,7 +11,7 @@ import { CustomTextField, CustomTextFieldDark } from './custom-text-field';
 
 export function WalletConnectDone() {
   const [isCopied, setIsCopied] = useState(false);
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { isDarkMode } = useColorMode();
   const { address } = useWalletConnect();
   const {

@@ -25,6 +25,7 @@ export type EscrowData = {
   token: string;
   totalFundedAmount: string;
   createdAt: string;
+  cancellationRequestedAt: string | null;
 };
 
 export type WorkerData = {
