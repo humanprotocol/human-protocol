@@ -326,9 +326,10 @@ describe('EscrowCompletionService', () => {
       } as unknown as IEscrow);
 
       const fortuneManifest = generateFortuneManifest();
-      mockStorageService.downloadJsonLikeData.mockResolvedValueOnce(
-        fortuneManifest,
-      );
+      mockStorageService.downloadManifest.mockResolvedValueOnce({
+        manifest: fortuneManifest,
+        encrypted: true,
+      });
       const finalResultsUrl = faker.internet.url();
       const finalResultsHash = faker.string.hexadecimal({ length: 42 });
       mockFortuneResultsProcessor.storeResults.mockResolvedValueOnce({
@@ -351,7 +352,7 @@ describe('EscrowCompletionService', () => {
         pendingRecord.chainId,
         pendingRecord.escrowAddress,
       );
-      expect(mockStorageService.downloadJsonLikeData).toHaveBeenCalledWith(
+      expect(mockStorageService.downloadManifest).toHaveBeenCalledWith(
         manifestUrl,
       );
       expect(mockFortuneResultsProcessor.storeResults).toHaveBeenCalledTimes(1);
@@ -359,6 +360,7 @@ describe('EscrowCompletionService', () => {
         pendingRecord.chainId,
         pendingRecord.escrowAddress,
         fortuneManifest,
+        true,
       );
       expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -407,9 +409,10 @@ describe('EscrowCompletionService', () => {
       mockedEscrowUtils.getEscrow.mockResolvedValueOnce(
         {} as unknown as IEscrow,
       );
-      mockStorageService.downloadJsonLikeData.mockResolvedValueOnce(
-        generateFortuneManifest(),
-      );
+      mockStorageService.downloadManifest.mockResolvedValueOnce({
+        manifest: generateFortuneManifest(),
+        encrypted: false,
+      });
 
       const firstAddressPayout = {
         address: `0x1${faker.finance.ethereumAddress().slice(3)}`,

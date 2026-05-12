@@ -213,6 +213,60 @@ describe('BaseEscrowResultsProcessor', () => {
         'text/plain',
       );
     });
+
+    it('should store unencrypted results when encryption is disabled for results', async () => {
+      const chainId = generateTestnetChainId();
+      const escrowAddress = faker.finance.ethereumAddress();
+
+      const baseResultsUrl = faker.internet.url();
+      mockedGetIntermediateResultsUrl.mockResolvedValueOnce(baseResultsUrl);
+
+      const resultsUrl = `${baseResultsUrl}/${faker.system.fileName()}`;
+      processor.constructIntermediateResultsUrl.mockReturnValueOnce(resultsUrl);
+
+      const resultsFileContent = Buffer.from(faker.lorem.sentence());
+      mockedStorageService.downloadFile.mockResolvedValueOnce(
+        resultsFileContent,
+      );
+
+      processor.assertResultsComplete.mockResolvedValueOnce(undefined);
+
+      mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
+        launcher: faker.finance.ethereumAddress(),
+        status: EscrowStatus[EscrowStatus.Launched],
+      } as unknown as IEscrow);
+
+      const resultsHash = crypto
+        .createHash('sha256')
+        .update(resultsFileContent)
+        .digest('hex');
+      const storedResultsFileName = `${resultsHash}.${faker.system.fileExt()}`;
+      processor.getFinalResultsFileName.mockReturnValueOnce(
+        storedResultsFileName,
+      );
+
+      const storedResultsUrl = faker.internet.url();
+      mockedStorageService.uploadData.mockResolvedValueOnce(storedResultsUrl);
+
+      const manifest = {} as JobManifest;
+      const storedResultMeta = await processor.storeResults(
+        chainId,
+        escrowAddress,
+        manifest,
+        false,
+      );
+
+      expect(storedResultMeta.url).toBe(storedResultsUrl);
+      expect(storedResultMeta.hash).toBe(resultsHash);
+
+      expect(mockedPgpEncryptionService.encrypt).not.toHaveBeenCalled();
+      expect(mockedStorageService.uploadData).toHaveBeenCalledWith(
+        resultsFileContent,
+        storedResultsFileName,
+        'text/plain',
+      );
+    });
+
     it('should NOT call assertResultsComplete if status is ToCancel', async () => {
       /** ARRANGE */
       const chainId = generateTestnetChainId();

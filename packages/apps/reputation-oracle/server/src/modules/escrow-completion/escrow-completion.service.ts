@@ -15,7 +15,7 @@ import _ from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 
 import { BACKOFF_INTERVAL_SECONDS } from '@/common/constants';
-import { JobManifest, JobRequestType } from '@/common/types';
+import { JobRequestType } from '@/common/types';
 import { ServerConfigService, Web3ConfigService } from '@/config';
 import { isDuplicatedError } from '@/database';
 import logger from '@/logger';
@@ -137,8 +137,8 @@ export class EscrowCompletionService {
             throw new Error('Escrow data is missing');
           }
 
-          const manifest =
-            await this.storageService.downloadJsonLikeData<JobManifest>(
+          const { manifest, encrypted: isManifestEncrypted } =
+            await this.storageService.downloadManifest(
               escrowData.manifest as string,
             );
           const jobRequestType = manifestUtils.getJobRequestType(manifest);
@@ -151,6 +151,7 @@ export class EscrowCompletionService {
               escrowCompletionEntity.chainId,
               escrowCompletionEntity.escrowAddress,
               manifest,
+              isManifestEncrypted,
             );
 
             escrowCompletionEntity.finalResultsUrl = url;
