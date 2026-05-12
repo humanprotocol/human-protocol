@@ -21,6 +21,7 @@
     "strictNullChecks": true,
     "strictPropertyInitialization": false,
     "baseUrl": ".",
+    "types": ["node", "jest"],
     "paths": {
       "@/*": ["src/*"]
     }
