@@ -10,6 +10,7 @@ export enum ErrorJob {
   SolutionAlreadyExists = 'Solution already exists',
   AllSolutionsHaveAlreadyBeenSent = 'All solutions have already been sent',
   ManifestNotFound = 'Manifest not found',
+  NotFound = 'Job not found',
 }
 
 /**

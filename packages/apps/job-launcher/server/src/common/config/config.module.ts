@@ -11,8 +11,6 @@ import { S3ConfigService } from './s3-config.service';
 import { SendgridConfigService } from './sendgrid-config.service';
 import { PaymentProviderConfigService } from './payment-provider-config.service';
 import { Web3ConfigService } from './web3-config.service';
-import { SlackConfigService } from './slack-config.service';
-import { VisionConfigService } from './vision-config.service';
 
 @Global()
 @Module({
@@ -28,8 +26,6 @@ import { VisionConfigService } from './vision-config.service';
     CvatConfigService,
     PGPConfigService,
     NetworkConfigService,
-    SlackConfigService,
-    VisionConfigService,
   ],
   exports: [
     ConfigService,
@@ -43,8 +39,6 @@ import { VisionConfigService } from './vision-config.service';
     CvatConfigService,
     PGPConfigService,
     NetworkConfigService,
-    SlackConfigService,
-    VisionConfigService,
   ],
 })
 export class EnvConfigModule {}

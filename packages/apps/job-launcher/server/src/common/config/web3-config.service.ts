@@ -38,14 +38,6 @@ export class Web3ConfigService {
   }
 
   /**
-   * List of reputation oracle addresses, typically comma-separated.
-   * Required
-   */
-  get reputationOracles(): string {
-    return this.configService.getOrThrow<string>('REPUTATION_ORACLES');
-  }
-
-  /**
    * URI for the hCaptcha recording oracle service.
    * Required
    */

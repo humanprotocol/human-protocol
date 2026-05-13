@@ -99,6 +99,7 @@ export const CvatJobRequestForm = () => {
     gtPath,
     userGuide,
     accuracyTarget,
+    jobBounty,
   }: ReturnType<typeof mapCvatFormValues>) => {
     let bp = undefined;
     if (type === CvatJobType.IMAGE_BOXES_FROM_POINTS) {
@@ -154,7 +155,8 @@ export const CvatJobRequestForm = () => {
           path: gtPath,
         },
         userGuide,
-        accuracyTarget,
+        accuracyTarget: Number(accuracyTarget),
+        jobBounty: Number(jobBounty),
       },
     });
     goToNextStep();
@@ -819,6 +821,35 @@ export const CvatJobRequestForm = () => {
                         endAdornment: (
                           <InputAdornment position="end">
                             <Tooltip title="Result accuracy tooltip here.">
+                              <HelpOutlineIcon
+                                color="secondary"
+                                sx={{ cursor: 'pointer' }}
+                              />
+                            </Tooltip>
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={12} md={6}>
+                  <FormControl fullWidth>
+                    <TextField
+                      name="jobBounty"
+                      label="Job bounty"
+                      placeholder="Job bounty"
+                      type="number"
+                      value={values.jobBounty}
+                      onChange={(e) =>
+                        setFieldValue('jobBounty', e.target.value)
+                      }
+                      onBlur={handleBlur}
+                      error={touched.jobBounty && Boolean(errors.jobBounty)}
+                      helperText={errors.jobBounty}
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <Tooltip title="Reward per CVAT job chunk used in the manifest.">
                               <HelpOutlineIcon
                                 color="secondary"
                                 sx={{ cursor: 'pointer' }}

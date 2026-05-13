@@ -15,7 +15,6 @@ import { WebhookRepository } from '../webhook/webhook.repository';
 import { MutexManagerService } from '../mutex/mutex-manager.service';
 import { QualificationModule } from '../qualification/qualification.module';
 import { WhitelistModule } from '../whitelist/whitelist.module';
-import { RoutingProtocolModule } from '../routing-protocol/routing-protocol.module';
 import { RateModule } from '../rate/rate.module';
 import { ManifestModule } from '../manifest/manifest.module';
 
@@ -29,7 +28,6 @@ import { ManifestModule } from '../manifest/manifest.module';
     StorageModule,
     QualificationModule,
     WhitelistModule,
-    RoutingProtocolModule,
     RateModule,
     ManifestModule,
   ],

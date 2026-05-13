@@ -24,6 +24,7 @@ export const mapCvatFormValues = (
       : [],
     userGuide: cvatRequest?.userGuide || '',
     accuracyTarget: cvatRequest?.accuracyTarget || 80,
+    jobBounty: cvatRequest?.jobBounty || 0,
     dataProvider: cvatRequest?.data?.dataset?.provider || StorageProviders.AWS,
     dataRegion:
       (cvatRequest?.data?.dataset?.region as AWSRegions | GCSRegions) || '',

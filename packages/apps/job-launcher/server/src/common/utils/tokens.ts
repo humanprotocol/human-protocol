@@ -1,5 +1,4 @@
 import { ChainId } from '@human-protocol/sdk';
-import { ethers } from 'ethers';
 import { TOKEN_ADDRESSES } from '../constants/tokens';
 import { EscrowFundToken } from '../enums/job';
 
@@ -16,19 +15,4 @@ export function getTokenDecimals(
     TOKEN_ADDRESSES[chainId]?.[symbol]?.decimals ?? defaultDecimals,
     defaultDecimals,
   );
-}
-
-export function calculateNetFundAmount(
-  fundAmount: number,
-  decimals: number,
-  oracleFeePercentages: bigint[],
-): number {
-  const fundAmountInWei = ethers.parseUnits(fundAmount.toString(), decimals);
-  const oracleFees = oracleFeePercentages.reduce(
-    (totalFees, feePercentage) =>
-      totalFees + (fundAmountInWei * feePercentage) / 100n,
-    0n,
-  );
-
-  return Number(ethers.formatUnits(fundAmountInWei - oracleFees, decimals));
 }

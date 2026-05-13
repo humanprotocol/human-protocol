@@ -3,6 +3,7 @@ import {
   EscrowStatus,
   KVStoreKeys,
   KVStoreUtils,
+  EscrowUtils,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { Inject, Injectable } from '@nestjs/common';
@@ -185,10 +186,12 @@ export class JobService {
         s.solution === lastExchangeSolution.solution,
     );
 
-    const remainingFunds = await escrowClient.getRemainingFunds(
+    const netFundAmount = await this.getNetFundAmount(
+      escrowClient,
+      webhook.chainId,
       webhook.escrowAddress,
     );
-    const amountToReserve = remainingFunds / BigInt(submissionsRequired);
+    const amountToReserve = netFundAmount / BigInt(submissionsRequired);
 
     await escrowClient.storeResults(
       webhook.escrowAddress,
@@ -311,5 +314,32 @@ export class JobService {
       );
       return 'The requested job is canceled.';
     }
+  }
+
+  private async getNetFundAmount(
+    escrowClient: EscrowClient,
+    chainId: number,
+    escrowAddress: string,
+  ): Promise<bigint> {
+    const fundAmount = await escrowClient.getFundAmount(escrowAddress);
+    const escrow = await EscrowUtils.getEscrow(chainId, escrowAddress);
+    if (!escrow) {
+      this.logger.error(ErrorJob.NotFound, {
+        chainId,
+        escrowAddress,
+      });
+      throw new ConflictError(ErrorJob.NotFound);
+    }
+    const oracleFees = [
+      escrow.recordingOracleFee,
+      escrow.reputationOracleFee,
+      escrow.exchangeOracleFee,
+    ];
+
+    return oracleFees.reduce(
+      (netFundAmount, fee) =>
+        netFundAmount - (fundAmount * BigInt(fee || 1)) / 100n,
+      fundAmount,
+    );
   }
 }
