@@ -321,7 +321,6 @@ export class JobService {
     chainId: number,
     escrowAddress: string,
   ): Promise<bigint> {
-    const fundAmount = await escrowClient.getFundAmount(escrowAddress);
     const escrow = await EscrowUtils.getEscrow(chainId, escrowAddress);
     if (!escrow) {
       this.logger.error(ErrorJob.NotFound, {
@@ -338,8 +337,8 @@ export class JobService {
 
     return oracleFees.reduce(
       (netFundAmount, fee) =>
-        netFundAmount - (fundAmount * BigInt(fee || 1)) / 100n,
-      fundAmount,
+        netFundAmount - (escrow.totalFundedAmount * BigInt(fee || 1)) / 100n,
+      escrow.totalFundedAmount,
     );
   }
 }

@@ -332,7 +332,6 @@ describe('JobService', () => {
           .fn()
           .mockResolvedValue('http://example.com/results'),
         storeResults: jest.fn().mockResolvedValue(true),
-        getFundAmount: jest.fn().mockResolvedValue(ethers.parseEther('10')),
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
 
@@ -387,11 +386,10 @@ describe('JobService', () => {
         getManifest: jest.fn().mockResolvedValue('http://example.com/manifest'),
         getIntermediateResultsUrl: jest.fn().mockResolvedValue(''),
         storeResults: jest.fn().mockResolvedValue(true),
-        getFundAmount: jest.fn().mockResolvedValue(fundAmount),
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
       mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
-        totalFundedAmount: 8n,
+        totalFundedAmount: fundAmount,
         recordingOracleFee: oracleFees[0],
         reputationOracleFee: oracleFees[1],
         exchangeOracleFee: oracleFees[2],
@@ -463,11 +461,10 @@ describe('JobService', () => {
           .fn()
           .mockResolvedValue('http://existing-solutions'),
         storeResults: jest.fn().mockResolvedValue(true),
-        getFundAmount: jest.fn().mockResolvedValue(fundAmount),
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
       mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
-        totalFundedAmount: 8n,
+        totalFundedAmount: fundAmount,
         recordingOracleFee: oracleFees[0],
         reputationOracleFee: oracleFees[1],
         exchangeOracleFee: oracleFees[2],
@@ -558,7 +555,6 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue('http://existing-solutions'),
       storeResults: jest.fn().mockResolvedValue(true),
-      getFundAmount: jest.fn().mockResolvedValue(ethers.parseEther('10')),
     };
     (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
     KVStoreUtils.get = jest
@@ -651,11 +647,10 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue('http://existing-solutions'),
       storeResults: jest.fn().mockResolvedValue(true),
-      getFundAmount: jest.fn().mockResolvedValue(fundAmount),
     };
     (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
     mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
-      totalFundedAmount: 8n,
+      totalFundedAmount: fundAmount,
       recordingOracleFee: oracleFees[0],
       reputationOracleFee: oracleFees[1],
       exchangeOracleFee: oracleFees[2],
@@ -744,7 +739,6 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue('http://existing-solutions'),
       storeResults: jest.fn().mockResolvedValue(true),
-      getFundAmount: jest.fn().mockResolvedValue(ethers.parseEther('10')),
     };
     (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
     KVStoreUtils.get = jest
