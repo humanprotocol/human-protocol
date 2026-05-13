@@ -29,4 +29,4 @@ export type CvatManifest = {
 
 export type JobManifest = FortuneManifest | MarketingManifest | CvatManifest;
 
-export type JobRequestType = (typeof JobType)[keyof typeof JobType];
+export type JobRequestType = (typeof JobType)[number];
