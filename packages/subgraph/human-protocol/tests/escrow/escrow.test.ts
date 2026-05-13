@@ -1433,15 +1433,15 @@ describe('Escrow', () => {
     handleOracleFeeTransfer(oracleFeeTransfer);
 
     const secondTransferTransactionId = oracleFeeTransfer.transaction.hash
-      .concatI32(oracleFeeTransfer.logIndex.toI32() + 1000001)
+      .concatI32(oracleFeeTransfer.logIndex.toI32() + 10001)
       .concatI32(oracleFeeTransfer.block.timestamp.toI32())
       .toHex();
     const firstTransferTransactionId = oracleFeeTransfer.transaction.hash
-      .concatI32(oracleFeeTransfer.logIndex.toI32() + 1000000)
+      .concatI32(oracleFeeTransfer.logIndex.toI32() + 10000)
       .concatI32(oracleFeeTransfer.block.timestamp.toI32())
       .toHex();
     const skippedTransferTransactionId = oracleFeeTransfer.transaction.hash
-      .concatI32(oracleFeeTransfer.logIndex.toI32() + 1000002)
+      .concatI32(oracleFeeTransfer.logIndex.toI32() + 10002)
       .concatI32(oracleFeeTransfer.block.timestamp.toI32())
       .toHex();
 

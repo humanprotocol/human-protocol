@@ -852,6 +852,24 @@ export function handleOracleFeeTransfer(event: OracleFeeTransfer): void {
   const eventDayData = getEventDayData(event);
   const originalLogIndex = event.logIndex;
 
+  // OracleFeeTransfer is emitted before Complete/Cancel in the same transaction.
+  // Create a temporary multimethod parent so oracle fee transfers are stored as
+  // internal transactions until the main Complete/Cancel handler replaces it.
+  let transaction = Transaction.load(event.transaction.hash);
+  if (!transaction) {
+    transaction = new Transaction(event.transaction.hash);
+    transaction.txHash = event.transaction.hash;
+    transaction.block = event.block.number;
+    transaction.timestamp = event.block.timestamp;
+    transaction.from = event.transaction.from;
+    transaction.to = escrowEntity.address;
+    transaction.method = 'multimethod';
+    transaction.value = ZERO_BI;
+    transaction.token = null;
+    transaction.escrow = null;
+    transaction.save();
+  }
+
   for (let i = 0; i < event.params.oracles.length; i++) {
     const oracle = event.params.oracles[i];
     const amount = event.params.amounts[i];
@@ -860,7 +878,7 @@ export function handleOracleFeeTransfer(event: OracleFeeTransfer): void {
       continue;
     }
 
-    event.logIndex = originalLogIndex.plus(BigInt.fromI32(1000000 + i));
+    event.logIndex = originalLogIndex.plus(BigInt.fromI32(10000 + i));
     const payoutId = toEventId(event);
     const payout = new Payout(payoutId);
     payout.escrowAddress = event.address;
@@ -886,16 +904,6 @@ export function handleOracleFeeTransfer(event: OracleFeeTransfer): void {
   }
 
   event.logIndex = originalLogIndex;
-  const transaction = Transaction.load(event.transaction.hash);
-  if (
-    transaction &&
-    transaction.method == 'multimethod' &&
-    Address.fromBytes(transaction.to) == Address.zero()
-  ) {
-    transaction.to = escrowEntity.address;
-    transaction.save();
-  }
-
   escrowEntity.save();
   eventDayData.save();
 }

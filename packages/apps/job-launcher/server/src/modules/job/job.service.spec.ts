@@ -348,13 +348,13 @@ describe('JobService', () => {
         };
         mockWeb3Service.findAvailableOracles.mockResolvedValueOnce([
           {
-            role: Role.ExchangeOracle,
             address: mockOracles.exchangeOracle,
+            role: Role.ExchangeOracle,
             url: null,
           },
           {
-            role: Role.RecordingOracle,
             address: mockOracles.recordingOracle,
+            role: Role.RecordingOracle,
             url: null,
           },
         ]);
@@ -487,6 +487,7 @@ describe('JobService', () => {
             mul(div(1, 100), jobManifestDto.paymentAmount),
           ).toFixed(fundTokenDecimals),
         );
+
         expect(result).toBe(jobEntityMock.id);
         expect(mockWeb3Service.validateChainId).toHaveBeenCalledWith(
           jobManifestDto.chainId,
