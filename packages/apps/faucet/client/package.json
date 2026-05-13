@@ -27,7 +27,7 @@
     "react-dom": "^19.2.4",
     "react-loading-skeleton": "^3.3.1",
     "react-router-dom": "^7.13.0",
-    "serve": "^14.2.4",
+    "serve": "^14.2.6",
     "viem": "2.x"
   },
   "devDependencies": {
