@@ -478,10 +478,12 @@ export class EscrowCompletionService {
       );
 
       await this.escrowPayoutsBatchRepository.deleteOne(payoutsBatch);
-      const jobRequestType = await this.getJobRequestTypeForEscrow(
+      const escrowData = await EscrowUtils.getEscrow(
         escrowCompletionEntity.chainId,
         escrowCompletionEntity.escrowAddress,
       );
+      const jobRequestType =
+        await this.getJobRequestTypeFromEscrowData(escrowData);
       await this.increasePayoutRecipientsReputation(
         escrowCompletionEntity.chainId,
         Array.from(recipientToAmountMap.keys()),
@@ -522,18 +524,6 @@ export class EscrowCompletionService {
         });
       }
     }
-  }
-
-  private async getJobRequestTypeForEscrow(
-    chainId: ChainId,
-    escrowAddress: string,
-  ): Promise<JobRequestType> {
-    const escrowData = await EscrowUtils.getEscrow(chainId, escrowAddress);
-    if (!escrowData) {
-      throw new Error('Escrow data is missing');
-    }
-
-    return this.getJobRequestTypeFromEscrowData(escrowData);
   }
 
   private async getJobRequestTypeFromEscrowData(

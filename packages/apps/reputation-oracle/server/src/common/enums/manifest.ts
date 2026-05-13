@@ -13,3 +13,9 @@ export enum CvatJobType {
   IMAGE_SKELETONS_FROM_BOXES = 'image_skeletons_from_boxes',
   IMAGE_POLYGONS = 'image_polygons',
 }
+
+export const JobType = [
+  ...Object.values(FortuneJobType),
+  ...Object.values(MarketingJobType),
+  ...Object.values(CvatJobType),
+] as const;

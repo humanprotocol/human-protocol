@@ -1,4 +1,9 @@
-import { CvatJobType, FortuneJobType, MarketingJobType } from '@/common/enums';
+import {
+  CvatJobType,
+  FortuneJobType,
+  JobType,
+  MarketingJobType,
+} from '@/common/enums';
 
 export type FortuneManifest = {
   submissionsRequired: number;
@@ -24,4 +29,4 @@ export type CvatManifest = {
 
 export type JobManifest = FortuneManifest | MarketingManifest | CvatManifest;
 
-export type JobRequestType = FortuneJobType | MarketingJobType | CvatJobType;
+export type JobRequestType = (typeof JobType)[keyof typeof JobType];
