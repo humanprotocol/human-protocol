@@ -3,7 +3,9 @@ import { Injectable } from '@nestjs/common';
 import { DataSource, FindManyOptions, In } from 'typeorm';
 
 import { SortDirection } from '@/common/enums';
+import { JobRequestType } from '@/common/types';
 import { BaseRepository } from '@/database';
+import { caseInsensitiveAddress } from '@/utils/database';
 
 import { ReputationEntityType, ReputationOrderBy } from './constants';
 import { ReputationEntity } from './reputation.entity';
@@ -19,12 +21,14 @@ export class ReputationRepository extends BaseRepository<ReputationEntity> {
     chainId,
     address,
     type,
+    jobRequestType,
   }: ExclusiveReputationCriteria): Promise<ReputationEntity | null> {
     return this.findOne({
       where: {
         chainId,
-        address,
+        address: caseInsensitiveAddress(address),
         type,
+        jobRequestType,
       },
     });
   }
@@ -33,6 +37,7 @@ export class ReputationRepository extends BaseRepository<ReputationEntity> {
     filters: {
       address?: string;
       chainId?: ChainId;
+      jobRequestTypes?: JobRequestType[];
       types?: ReputationEntityType[];
     },
     options?: {
@@ -49,8 +54,11 @@ export class ReputationRepository extends BaseRepository<ReputationEntity> {
     if (filters.types) {
       query.type = In(filters.types);
     }
+    if (filters.jobRequestTypes) {
+      query.jobRequestType = In(filters.jobRequestTypes);
+    }
     if (filters.address) {
-      query.address = filters.address;
+      query.address = caseInsensitiveAddress(filters.address);
     }
 
     return this.find({

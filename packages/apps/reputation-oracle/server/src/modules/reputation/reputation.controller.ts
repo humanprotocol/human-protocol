@@ -47,6 +47,7 @@ export class ReputationController {
     const {
       chainId,
       address,
+      jobRequestTypes,
       roles,
       orderBy = GetReputationQueryOrderBy.CREATED_AT,
       orderDirection = SortDirection.DESC,
@@ -58,6 +59,7 @@ export class ReputationController {
       {
         chainId,
         address,
+        jobRequestTypes,
         types: roles,
       },
       {

@@ -20,6 +20,7 @@ import { ServerConfigService, Web3ConfigService } from '@/config';
 import { isDuplicatedError } from '@/database';
 import logger from '@/logger';
 import { ReputationService } from '@/modules/reputation';
+import { ReputationEntityType } from '@/modules/reputation/constants';
 import { StorageService } from '@/modules/storage';
 import { Web3Service } from '@/modules/web3';
 /**
@@ -264,11 +265,14 @@ export class EscrowCompletionService {
           /**
            * This operation can fail and lost, so it's "at most once"
            */
+          const jobRequestType =
+            await this.getJobRequestTypeFromEscrowData(escrowData);
           await this.reputationService.assessEscrowParties(
             chainId,
             escrowData.launcher,
             escrowData.exchangeOracle!,
             escrowData.recordingOracle!,
+            jobRequestType,
           );
         }
 
@@ -474,6 +478,17 @@ export class EscrowCompletionService {
       );
 
       await this.escrowPayoutsBatchRepository.deleteOne(payoutsBatch);
+      const escrowData = await EscrowUtils.getEscrow(
+        escrowCompletionEntity.chainId,
+        escrowCompletionEntity.escrowAddress,
+      );
+      const jobRequestType =
+        await this.getJobRequestTypeFromEscrowData(escrowData);
+      await this.increasePayoutRecipientsReputation(
+        escrowCompletionEntity.chainId,
+        Array.from(recipientToAmountMap.keys()),
+        jobRequestType,
+      );
     } catch (error) {
       if (ethers.isError(error, 'NONCE_EXPIRED')) {
         payoutsBatch.txNonce = null;
@@ -482,6 +497,48 @@ export class EscrowCompletionService {
 
       throw error;
     }
+  }
+
+  private async increasePayoutRecipientsReputation(
+    chainId: ChainId,
+    recipients: string[],
+    jobRequestType: JobRequestType,
+  ): Promise<void> {
+    for (const address of recipients) {
+      try {
+        await this.reputationService.increaseReputation(
+          {
+            chainId,
+            address,
+            type: ReputationEntityType.WORKER,
+            jobRequestType,
+          },
+          1,
+        );
+      } catch (error) {
+        this.logger.error('Failed to increase payout recipient reputation', {
+          error,
+          address,
+          chainId,
+          jobRequestType,
+        });
+      }
+    }
+  }
+
+  private async getJobRequestTypeFromEscrowData(
+    escrowData: Awaited<ReturnType<typeof EscrowUtils.getEscrow>>,
+  ): Promise<JobRequestType> {
+    if (!escrowData) {
+      throw new Error('Escrow data is missing');
+    }
+
+    const manifest =
+      await this.storageService.downloadJsonLikeData<JobManifest>(
+        escrowData.manifest as string,
+      );
+
+    return manifestUtils.getJobRequestType(manifest);
   }
 
   private getEscrowResultsProcessor(

@@ -2,6 +2,7 @@ import { ChainId } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 
 import { SortDirection } from '@/common/enums';
+import { JobRequestType } from '@/common/types';
 import { ReputationConfigService, Web3ConfigService } from '@/config';
 import { isDuplicatedError } from '@/database';
 import { Web3Service } from '@/modules/web3';
@@ -53,12 +54,12 @@ export class ReputationService {
    * If the entity doesn't exist in the database - creates it first.
    */
   async increaseReputation(
-    { chainId, address, type }: ExclusiveReputationCriteria,
+    { chainId, address, type, jobRequestType }: ExclusiveReputationCriteria,
     points: number,
   ): Promise<void> {
     assertAdjustableReputationPoints(points);
 
-    const searchCriteria = { chainId, address, type };
+    const searchCriteria = { chainId, address, type, jobRequestType };
 
     let existingEntity =
       await this.reputationRepository.findExclusive(searchCriteria);
@@ -76,6 +77,7 @@ export class ReputationService {
       reputationEntity.chainId = chainId;
       reputationEntity.address = address;
       reputationEntity.type = type;
+      reputationEntity.jobRequestType = jobRequestType;
       reputationEntity.reputationPoints = initialReputation;
 
       try {
@@ -104,7 +106,7 @@ export class ReputationService {
    * If the entity doesn't exist in the database - creates it first.
    */
   async decreaseReputation(
-    { chainId, address, type }: ExclusiveReputationCriteria,
+    { chainId, address, type, jobRequestType }: ExclusiveReputationCriteria,
     points: number,
   ): Promise<void> {
     assertAdjustableReputationPoints(points);
@@ -116,7 +118,7 @@ export class ReputationService {
       return;
     }
 
-    const searchCriteria = { chainId, address, type };
+    const searchCriteria = { chainId, address, type, jobRequestType };
 
     let existingEntity =
       await this.reputationRepository.findExclusive(searchCriteria);
@@ -126,6 +128,7 @@ export class ReputationService {
       reputationEntity.chainId = chainId;
       reputationEntity.address = address;
       reputationEntity.type = type;
+      reputationEntity.jobRequestType = jobRequestType;
       reputationEntity.reputationPoints = INITIAL_REPUTATION;
 
       try {
@@ -157,6 +160,7 @@ export class ReputationService {
     filter: {
       address?: string;
       chainId?: ChainId;
+      jobRequestTypes?: JobRequestType[];
       types?: ReputationEntityType[];
     },
     options?: {
@@ -175,6 +179,7 @@ export class ReputationService {
       chainId: reputation.chainId,
       address: reputation.address,
       role: reputation.type,
+      jobRequestType: reputation.jobRequestType,
       level: this.getReputationLevel(reputation.reputationPoints),
     }));
   }
@@ -184,6 +189,7 @@ export class ReputationService {
     jobLauncherAddress: string,
     exchangeOracleAddress: string,
     recordingOracleAddress: string,
+    jobRequestType: JobRequestType,
   ): Promise<void> {
     const reputationTypeToAddress = new Map([
       [ReputationEntityType.JOB_LAUNCHER, jobLauncherAddress],
@@ -200,7 +206,7 @@ export class ReputationService {
       address,
     ] of reputationTypeToAddress.entries()) {
       await this.increaseReputation(
-        { chainId, address, type: reputationEntityType },
+        { chainId, address, type: reputationEntityType, jobRequestType },
         1,
       );
     }
