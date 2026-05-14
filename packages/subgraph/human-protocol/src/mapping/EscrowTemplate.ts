@@ -825,9 +825,9 @@ export function handleCancellationRefund(event: CancellationRefund): void {
   );
   const internalTransaction = new InternalTransaction(toEventId(event));
   internalTransaction.from = escrowEntity.address;
-  internalTransaction.to = Address.fromBytes(escrowEntity.token);
+  internalTransaction.to = escrowEntity.canceler;
   internalTransaction.receiver = escrowEntity.canceler;
-  internalTransaction.value = escrowEntity.balance;
+  internalTransaction.value = event.params.amount;
   internalTransaction.transaction = transaction.id;
   internalTransaction.method = 'transfer';
   internalTransaction.token = Address.fromBytes(escrowEntity.token);
