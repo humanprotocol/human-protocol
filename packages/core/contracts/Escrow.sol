@@ -299,6 +299,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
      */
     function cancel() external override notExpired adminOrReputationOracle {
         require(status == EscrowStatuses.ToCancel, 'Invalid status');
+        require(reservedFunds == 0, 'Reserved funds');
         _finalize();
     }
 
@@ -331,6 +332,9 @@ contract Escrow is IEscrow, ReentrancyGuard {
             recordingOracleFeePercentage) / 100;
         uint256 _exchangeOracleFee = (fundAmount *
             exchangeOracleFeePercentage) / 100;
+        uint256 _totalOracleFee = _reputationOracleFee +
+            _recordingOracleFee +
+            _exchangeOracleFee;
 
         IERC20 tokenContract = IERC20(token);
 
@@ -338,33 +342,38 @@ contract Escrow is IEscrow, ReentrancyGuard {
         remainingFunds = 0;
         reservedFunds = 0;
 
-        if (_reputationOracleFee > 0) {
-            tokenContract.safeTransfer(reputationOracle, _reputationOracleFee);
-        }
-        if (_recordingOracleFee > 0) {
-            tokenContract.safeTransfer(recordingOracle, _recordingOracleFee);
-        }
-        if (_exchangeOracleFee > 0) {
-            tokenContract.safeTransfer(exchangeOracle, _exchangeOracleFee);
-        }
-        if (
-            _reputationOracleFee > 0 ||
-            _recordingOracleFee > 0 ||
-            _exchangeOracleFee > 0
-        ) {
+        if (bytes(intermediateResultsUrl).length != 0) {
             address[] memory oracles = new address[](3);
             uint256[] memory amounts = new uint256[](3);
 
             oracles[0] = reputationOracle;
             oracles[1] = recordingOracle;
             oracles[2] = exchangeOracle;
-
             amounts[0] = _reputationOracleFee;
             amounts[1] = _recordingOracleFee;
             amounts[2] = _exchangeOracleFee;
 
+            if (_reputationOracleFee > 0) {
+                tokenContract.safeTransfer(
+                    reputationOracle,
+                    _reputationOracleFee
+                );
+            }
+            if (_recordingOracleFee > 0) {
+                tokenContract.safeTransfer(
+                    recordingOracle,
+                    _recordingOracleFee
+                );
+            }
+            if (_exchangeOracleFee > 0) {
+                tokenContract.safeTransfer(exchangeOracle, _exchangeOracleFee);
+            }
+
             emit OracleFeeTransfer(oracles, amounts);
+        } else {
+            _remainingFunds += _totalOracleFee;
         }
+
         if (_remainingFunds > 0) {
             tokenContract.safeTransfer(launcher, _remainingFunds);
             if (_status == EscrowStatuses.ToCancel) {
@@ -478,8 +487,8 @@ contract Escrow is IEscrow, ReentrancyGuard {
         bytes32 payoutId = keccak256(bytes(_payoutId));
         require(remainingFunds != 0, 'No funds');
         require(!payouts[payoutId], 'payoutId already exists');
-        require(_recipients.length == _amounts.length, 'Length mismatch');
         uint256 length = _amounts.length;
+        require(_recipients.length == length, 'Length mismatch');
         require(length > 0, 'Empty amounts');
         require(length <= BULK_MAX_COUNT, 'Too many recipients');
         require(
