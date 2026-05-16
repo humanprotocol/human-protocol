@@ -30,7 +30,7 @@
     "@nestjs/common": "^11.1.12",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.1.12",
-    "@nestjs/mapped-types": "^2.1.0",
+    "@nestjs/mapped-types": "^2.1.1",
     "@nestjs/platform-express": "^11.1.12",
     "@nestjs/schedule": "^6.1.3",
     "@nestjs/swagger": "^11.2.5",
