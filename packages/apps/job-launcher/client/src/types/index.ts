@@ -290,9 +290,10 @@ export type JobDetailsResults = JobDetailsResponse & {
 };
 
 export type FortuneFinalResult = {
-  exchangeAddress: string;
   workerAddress: string;
   solution: string;
+  verificationResult: 'accepted' | 'rejected';
+  rejectionReason?: string;
 };
 
 export type Qualification = {

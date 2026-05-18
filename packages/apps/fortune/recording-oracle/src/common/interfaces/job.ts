@@ -11,9 +11,16 @@ export interface ISolution {
   workerAddress: string;
   solution: string;
   error?: boolean | SolutionError;
+  verificationResult?: VerificationResult;
+  rejectionReason?: SolutionError;
 }
 
 export interface ISolutionsFile {
   exchangeAddress: string;
   solutions: ISolution[];
+}
+
+export enum VerificationResult {
+  Accepted = 'accepted',
+  Rejected = 'rejected',
 }
