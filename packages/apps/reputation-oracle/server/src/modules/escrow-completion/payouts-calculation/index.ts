@@ -1,4 +1,4 @@
 export { CvatPayoutsCalculator } from './cvat-payouts-calculator';
-export { FortunePayoutsCalculator } from './fortune-payouts-calculator';
-export { MarketingPayoutsCalculator } from './marketing-payouts-calculator';
+export { DefaultPayoutsCalculator } from './default-payouts-calculator';
+export { FinalResultsPayoutsCalculator } from './final-results-payouts-calculator';
 export * from './types';

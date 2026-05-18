@@ -4,20 +4,11 @@ import { StorageModule } from '@/modules/storage';
 import { Web3Module } from '@/modules/web3';
 
 import { CvatPayoutsCalculator } from './cvat-payouts-calculator';
-import { FortunePayoutsCalculator } from './fortune-payouts-calculator';
-import { MarketingPayoutsCalculator } from './marketing-payouts-calculator';
+import { DefaultPayoutsCalculator } from './default-payouts-calculator';
 
 @Module({
   imports: [StorageModule, Web3Module],
-  providers: [
-    CvatPayoutsCalculator,
-    FortunePayoutsCalculator,
-    MarketingPayoutsCalculator,
-  ],
-  exports: [
-    CvatPayoutsCalculator,
-    FortunePayoutsCalculator,
-    MarketingPayoutsCalculator,
-  ],
+  providers: [CvatPayoutsCalculator, DefaultPayoutsCalculator],
+  exports: [CvatPayoutsCalculator, DefaultPayoutsCalculator],
 })
 export class EscrowPayoutsCalculationModule {}

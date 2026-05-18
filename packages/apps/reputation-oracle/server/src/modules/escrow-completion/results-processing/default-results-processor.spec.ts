@@ -8,23 +8,25 @@ import { StorageService } from '@/modules/storage';
 import { Web3Service } from '@/modules/web3';
 
 import {
+  generateFortuneManifest,
+  generateFortuneSolution,
   generateMarketingManifest,
   generateMarketingResult,
 } from '../fixtures';
+import { DefaultResultsProcessor } from './default-results-processor';
 import { BaseEscrowResultsProcessor } from './escrow-results-processor';
-import { MarketingResultsProcessor } from './marketing-results-processor';
 
 const mockedStorageService = createMock<StorageService>();
 const mockedPgpEncryptionService = createMock<PgpEncryptionService>();
 const mockedWeb3Service = createMock<Web3Service>();
 
-describe('MarketingResultsProcessor', () => {
-  let processor: MarketingResultsProcessor;
+describe('DefaultResultsProcessor', () => {
+  let processor: DefaultResultsProcessor;
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
-        MarketingResultsProcessor,
+        DefaultResultsProcessor,
         {
           provide: StorageService,
           useValue: mockedStorageService,
@@ -40,9 +42,7 @@ describe('MarketingResultsProcessor', () => {
       ],
     }).compile();
 
-    processor = moduleRef.get<MarketingResultsProcessor>(
-      MarketingResultsProcessor,
-    );
+    processor = moduleRef.get<DefaultResultsProcessor>(DefaultResultsProcessor);
   });
 
   it('should be properly initialized', () => {
@@ -61,13 +61,13 @@ describe('MarketingResultsProcessor', () => {
   });
 
   describe('assertResultsComplete', () => {
-    const testManifest = generateMarketingManifest();
+    const marketingManifest = generateMarketingManifest();
 
     it('throws if results is not json', async () => {
       await expect(
         processor['assertResultsComplete'](
           Buffer.from(faker.lorem.words()),
-          testManifest,
+          marketingManifest,
         ),
       ).rejects.toThrow('Failed to parse results data');
     });
@@ -76,7 +76,7 @@ describe('MarketingResultsProcessor', () => {
       await expect(
         processor['assertResultsComplete'](
           Buffer.from(JSON.stringify({})),
-          testManifest,
+          marketingManifest,
         ),
       ).rejects.toThrow('No final results found');
     });
@@ -85,36 +85,64 @@ describe('MarketingResultsProcessor', () => {
       await expect(
         processor['assertResultsComplete'](
           Buffer.from(JSON.stringify([])),
-          testManifest,
+          marketingManifest,
         ),
       ).rejects.toThrow('No final results found');
     });
 
-    it('passes when there are accepted and rejected results', async () => {
+    it('passes for marketing when results are not empty', async () => {
       await expect(
         processor['assertResultsComplete'](
           Buffer.from(
             JSON.stringify([
-              generateMarketingResult(VerificationResult.Accepted),
               generateMarketingResult(VerificationResult.Rejected),
             ]),
           ),
-          testManifest,
+          marketingManifest,
         ),
       ).resolves.not.toThrow();
     });
 
-    it('passes when there are only rejected results', async () => {
+    it('throws for fortune if accepted results are below required submissions', async () => {
+      const fortuneManifest = generateFortuneManifest();
+      const results = Array.from(
+        { length: fortuneManifest.submissionsRequired },
+        () => generateFortuneSolution(faker.string.sample()),
+      );
+      results.push(generateFortuneSolution());
+
       await expect(
         processor['assertResultsComplete'](
-          Buffer.from(
-            JSON.stringify([
-              generateMarketingResult(VerificationResult.Rejected),
-            ]),
-          ),
-          testManifest,
+          Buffer.from(JSON.stringify(results)),
+          fortuneManifest,
+        ),
+      ).rejects.toThrow('Not all required results have been sent');
+    });
+
+    it('passes for fortune when required accepted results are present', async () => {
+      const fortuneManifest = generateFortuneManifest();
+      const results = Array.from(
+        { length: fortuneManifest.submissionsRequired },
+        () => generateFortuneSolution(),
+      );
+      results.push(generateFortuneSolution(faker.string.sample()));
+
+      await expect(
+        processor['assertResultsComplete'](
+          Buffer.from(JSON.stringify(results)),
+          fortuneManifest,
         ),
       ).resolves.not.toThrow();
+    });
+  });
+
+  describe('getFinalResultsFileName', () => {
+    it('should return hash with extension', () => {
+      const hash = faker.string.hexadecimal({ prefix: '', length: 40 });
+
+      const name = processor['getFinalResultsFileName'](hash);
+
+      expect(name).toBe(`${hash}.json`);
     });
   });
 });

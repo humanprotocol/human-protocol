@@ -1,10 +1,8 @@
 import { EscrowClient } from '@human-protocol/sdk';
-import { Injectable } from '@nestjs/common';
-import type { OverrideProperties } from 'type-fest';
 
 import {
-  MarketingFinalResult,
-  MarketingManifest,
+  BaseFinalResult,
+  JobManifest,
   VerificationResult,
 } from '@/common/types';
 import { StorageService } from '@/modules/storage';
@@ -16,14 +14,11 @@ import {
   EscrowPayoutsCalculator,
 } from './types';
 
-type CalculateMarketingPayoutsInput = OverrideProperties<
-  CalclulatePayoutsInput,
-  { manifest: MarketingManifest }
->;
-
-@Injectable()
-export class MarketingPayoutsCalculator implements EscrowPayoutsCalculator {
-  constructor(
+export abstract class FinalResultsPayoutsCalculator<
+  TFinalResult extends BaseFinalResult,
+  TManifest extends JobManifest,
+> implements EscrowPayoutsCalculator {
+  protected constructor(
     private readonly storageService: StorageService,
     private readonly web3Service: Web3Service,
   ) {}
@@ -33,11 +28,13 @@ export class MarketingPayoutsCalculator implements EscrowPayoutsCalculator {
     chainId,
     escrowAddress,
     finalResultsUrl,
-  }: CalculateMarketingPayoutsInput): Promise<CalculatedPayout[]> {
+  }: CalclulatePayoutsInput & { manifest: TManifest }): Promise<
+    CalculatedPayout[]
+  > {
     const signer = this.web3Service.getSigner(chainId);
     const escrowClient = await EscrowClient.build(signer);
     const finalResults =
-      await this.storageService.downloadJsonLikeData<MarketingFinalResult[]>(
+      await this.storageService.downloadJsonLikeData<TFinalResult[]>(
         finalResultsUrl,
       );
 
@@ -52,11 +49,17 @@ export class MarketingPayoutsCalculator implements EscrowPayoutsCalculator {
     }
 
     const reservedFunds = await escrowClient.getReservedFunds(escrowAddress);
-    const payoutAmount = reservedFunds / BigInt(manifest.submissions_required);
+    const payoutAmount =
+      reservedFunds / BigInt(this.getPayoutDivisor(manifest, recipients));
 
     return recipients.map((recipient) => ({
       address: recipient,
       amount: payoutAmount,
     }));
   }
+
+  protected abstract getPayoutDivisor(
+    manifest: TManifest,
+    recipients: string[],
+  ): number;
 }
