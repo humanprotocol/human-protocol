@@ -682,7 +682,7 @@ export function handleCompleted(event: Completed): void {
       Address.fromBytes(escrowEntity.address)
     );
     if (escrowEntity.balance && escrowEntity.balance.gt(ZERO_BI)) {
-      const internalTransaction = new InternalTransaction(toEventId(event));
+      const internalTransaction = new InternalTransaction(toEventId(event, 1));
       internalTransaction.from = escrowEntity.address;
       internalTransaction.to = escrowEntity.launcher;
       internalTransaction.value = escrowEntity.balance;
@@ -812,25 +812,16 @@ export function handleCancellationRefund(event: CancellationRefund): void {
   const escrowEntity = Escrow.load(dataSource.address());
   if (!escrowEntity) return;
 
-  const transaction = createTransaction(
+  createTransaction(
     event,
-    'cancellationRefund',
+    'transfer',
     event.transaction.from,
-    Address.fromBytes(escrowEntity.address),
-    Address.fromBytes(escrowEntity.launcher),
+    Address.fromBytes(escrowEntity.canceler),
+    Address.fromBytes(escrowEntity.canceler),
     Address.fromBytes(escrowEntity.address),
     event.params.amount,
     Address.fromBytes(escrowEntity.token)
   );
-  const internalTransaction = new InternalTransaction(toEventId(event));
-  internalTransaction.from = escrowEntity.address;
-  internalTransaction.to = escrowEntity.canceler;
-  internalTransaction.receiver = escrowEntity.canceler;
-  internalTransaction.value = event.params.amount;
-  internalTransaction.transaction = transaction.id;
-  internalTransaction.method = 'transfer';
-  internalTransaction.token = Address.fromBytes(escrowEntity.token);
-  internalTransaction.save();
   escrowEntity.balance = escrowEntity.balance.minus(event.params.amount);
   escrowEntity.save();
 

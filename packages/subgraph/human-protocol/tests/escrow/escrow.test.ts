@@ -1394,7 +1394,7 @@ describe('Escrow', () => {
       'Transaction',
       cancellationRefund.transaction.hash.toHex(),
       'method',
-      'cancellationRefund'
+      'multimethod'
     );
     assert.fieldEquals(
       'Transaction',
@@ -1405,12 +1405,27 @@ describe('Escrow', () => {
     assert.fieldEquals(
       'Transaction',
       cancellationRefund.transaction.hash.toHex(),
-      'receiver',
-      launcherAddress.toHex()
+      'value',
+      '0'
+    );
+
+    const transferId = toEventId(cancellationRefund).toHex();
+    assert.fieldEquals('InternalTransaction', transferId, 'method', 'transfer');
+    assert.fieldEquals(
+      'InternalTransaction',
+      transferId,
+      'escrow',
+      escrowAddressString
     );
     assert.fieldEquals(
-      'Transaction',
-      cancellationRefund.transaction.hash.toHex(),
+      'InternalTransaction',
+      transferId,
+      'receiver',
+      launcherAddressString
+    );
+    assert.fieldEquals(
+      'InternalTransaction',
+      transferId,
       'value',
       amount.toString()
     );
@@ -1512,28 +1527,212 @@ describe('Escrow', () => {
       'dailyPayoutCount',
       '2'
     );
+  });
 
-    const completed = createCompletedEvent(
+  test('Should keep oracle fee and cancellation refund transfers internal when cancel follows OracleFeeTransfer', () => {
+    const escrow = Escrow.load(escrowAddress);
+    escrow!.balance = BigInt.fromI32(100);
+    escrow!.token = tokenAddress;
+    escrow!.launcher = launcherAddress;
+    escrow!.canceler = launcherAddress;
+    escrow!.save();
+
+    const oracleFeeTransfer = createOracleFeeTransferEvent(
+      escrowAddress,
       operatorAddress,
-      BigInt.fromI32(86400)
+      [reputationOracleAddress, recordingOracleAddress, exchangeOracleAddress],
+      [3, 3, 0],
+      BigInt.fromI32(86401)
     );
-    completed.transaction.hash = oracleFeeTransfer.transaction.hash;
-    completed.block.timestamp = oracleFeeTransfer.block.timestamp;
-    completed.logIndex = oracleFeeTransfer.logIndex.plus(BigInt.fromI32(1));
 
-    handleCompleted(completed);
+    handleOracleFeeTransfer(oracleFeeTransfer);
+
+    const firstOracleFeeTransferId = oracleFeeTransfer.transaction.hash
+      .concatI32(oracleFeeTransfer.logIndex.toI32() + 10000)
+      .concatI32(oracleFeeTransfer.block.timestamp.toI32())
+      .toHex();
+    const secondOracleFeeTransferId = oracleFeeTransfer.transaction.hash
+      .concatI32(oracleFeeTransfer.logIndex.toI32() + 10001)
+      .concatI32(oracleFeeTransfer.block.timestamp.toI32())
+      .toHex();
+
+    const cancellationRefund = createCancellationRefundEvent(
+      escrowAddress,
+      operatorAddress,
+      94,
+      BigInt.fromI32(86401)
+    );
+    cancellationRefund.transaction.hash = oracleFeeTransfer.transaction.hash;
+    cancellationRefund.transaction.to = escrowAddress;
+    cancellationRefund.block.timestamp = oracleFeeTransfer.block.timestamp;
+    cancellationRefund.logIndex = oracleFeeTransfer.logIndex.plus(
+      BigInt.fromI32(1)
+    );
+
+    handleCancellationRefund(cancellationRefund);
+
+    const cancelled = createCancelledEvent(operatorAddress);
+    cancelled.address = escrowAddress;
+    cancelled.transaction.hash = oracleFeeTransfer.transaction.hash;
+    cancelled.transaction.to = escrowAddress;
+    cancelled.block.timestamp = oracleFeeTransfer.block.timestamp;
+    cancelled.logIndex = oracleFeeTransfer.logIndex.plus(BigInt.fromI32(2));
+
+    handleCancelled(cancelled);
+
+    const cancellationRefundTransferId = toEventId(cancellationRefund).toHex();
 
     assert.fieldEquals(
       'Transaction',
       oracleFeeTransfer.transaction.hash.toHex(),
       'method',
+      'cancel'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      oracleFeeTransfer.transaction.hash.toHex(),
+      'escrow',
+      escrowAddressString
+    );
+    assert.fieldEquals(
+      'InternalTransaction',
+      firstOracleFeeTransferId,
+      'escrow',
+      escrowAddressString
+    );
+    assert.fieldEquals(
+      'InternalTransaction',
+      secondOracleFeeTransferId,
+      'escrow',
+      escrowAddressString
+    );
+    assert.fieldEquals(
+      'InternalTransaction',
+      cancellationRefundTransferId,
+      'method',
+      'transfer'
+    );
+    assert.fieldEquals(
+      'InternalTransaction',
+      cancellationRefundTransferId,
+      'escrow',
+      escrowAddressString
+    );
+    assert.fieldEquals(
+      'InternalTransaction',
+      cancellationRefundTransferId,
+      'receiver',
+      launcherAddressString
+    );
+    assert.fieldEquals(
+      'InternalTransaction',
+      cancellationRefundTransferId,
+      'transaction',
+      oracleFeeTransfer.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'CancellationRefundEvent',
+      cancellationRefundTransferId,
+      'amount',
+      '94'
+    );
+  });
+
+  test('Should keep complete and refund internal when force-complete follows bulk payout', () => {
+    const escrow = Escrow.load(escrowAddress);
+    escrow!.balance = BigInt.fromI32(100);
+    escrow!.token = tokenAddress;
+    escrow!.launcher = launcherAddress;
+    escrow!.save();
+
+    const bulkTransfer = createBulkTransferV3Event(
+      operatorAddress,
+      Bytes.fromUTF8('force-complete-payout'),
+      [workerAddress],
+      [49],
+      false,
+      'test.com',
+      'test-hash',
+      BigInt.fromI32(86402)
+    );
+    bulkTransfer.address = escrowAddress;
+    bulkTransfer.transaction.to = escrowAddress;
+
+    handleBulkTransferV3(bulkTransfer);
+
+    const oracleFeeTransfer = createOracleFeeTransferEvent(
+      escrowAddress,
+      operatorAddress,
+      [reputationOracleAddress, recordingOracleAddress, exchangeOracleAddress],
+      [3, 3, 0],
+      BigInt.fromI32(86402)
+    );
+    oracleFeeTransfer.transaction.hash = bulkTransfer.transaction.hash;
+    oracleFeeTransfer.transaction.to = escrowAddress;
+    oracleFeeTransfer.logIndex = bulkTransfer.logIndex.plus(BigInt.fromI32(1));
+
+    handleOracleFeeTransfer(oracleFeeTransfer);
+
+    const completed = createCompletedEvent(
+      operatorAddress,
+      BigInt.fromI32(86402)
+    );
+    completed.address = escrowAddress;
+    completed.transaction.hash = bulkTransfer.transaction.hash;
+    completed.transaction.to = escrowAddress;
+    completed.block.timestamp = bulkTransfer.block.timestamp;
+    completed.logIndex = oracleFeeTransfer.logIndex.plus(BigInt.fromI32(1));
+
+    handleCompleted(completed);
+
+    const workerTransferId = bulkTransfer.transaction.hash
+      .concatI32(0)
+      .concatI32(bulkTransfer.block.timestamp.toI32())
+      .toHex();
+    const completeInternalId = toEventId(completed).toHex();
+    const launcherRefundTransferId = toEventId(completed).concatI32(1).toHex();
+
+    assert.fieldEquals(
+      'Transaction',
+      bulkTransfer.transaction.hash.toHex(),
+      'method',
+      'bulkTransfer'
+    );
+    assert.fieldEquals(
+      'InternalTransaction',
+      workerTransferId,
+      'method',
+      'transfer'
+    );
+    assert.fieldEquals(
+      'InternalTransaction',
+      completeInternalId,
+      'method',
       'complete'
     );
     assert.fieldEquals(
       'InternalTransaction',
-      firstTransferTransactionId,
+      completeInternalId,
+      'escrow',
+      escrowAddressString
+    );
+    assert.fieldEquals(
+      'InternalTransaction',
+      launcherRefundTransferId,
       'method',
       'transfer'
+    );
+    assert.fieldEquals(
+      'InternalTransaction',
+      launcherRefundTransferId,
+      'receiver',
+      launcherAddressString
+    );
+    assert.fieldEquals(
+      'InternalTransaction',
+      launcherRefundTransferId,
+      'escrow',
+      escrowAddressString
     );
   });
 

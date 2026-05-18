@@ -1,10 +1,12 @@
 import { BigInt, Bytes, ethereum } from '@graphprotocol/graph-ts';
 import { ONE_DAY } from './number';
 
-export function toEventId(event: ethereum.Event): Bytes {
-  return event.transaction.hash
+export function toEventId(event: ethereum.Event, suffix: i32 = 0): Bytes {
+  const id = event.transaction.hash
     .concatI32(event.logIndex.toI32())
     .concatI32(event.block.timestamp.toI32());
+
+  return suffix == 0 ? id : id.concatI32(suffix);
 }
 
 export function toPreviousEventId(event: ethereum.Event): Bytes {

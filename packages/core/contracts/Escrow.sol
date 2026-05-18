@@ -435,14 +435,16 @@ contract Escrow is IEscrow, ReentrancyGuard {
         emit IntermediateStorage(_url, _hash);
 
         if (status == EscrowStatuses.ToCancel) {
+            if (_fundsToReserve == 0) {
+                _finalize();
+                return;
+            }
+
             uint256 unreservedFunds = remainingFunds - reservedFunds;
             if (unreservedFunds > 0) {
                 IERC20(token).safeTransfer(launcher, unreservedFunds);
                 emit CancellationRefund(unreservedFunds);
                 remainingFunds = reservedFunds;
-            }
-            if (remainingFunds == 0) {
-                _finalize();
             }
         }
     }

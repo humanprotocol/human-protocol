@@ -540,6 +540,8 @@ describe('Escrow', function () {
         await expect(storeResults('', '', 0n))
           .to.emit(escrow, 'IntermediateStorage')
           .withArgs('', '')
+          .to.emit(escrow, 'CancellationRefund')
+          .withArgs(initialEscrowBalance)
           .to.emit(escrow, 'Cancelled');
 
         const finalOracleBalances = await Promise.all(
@@ -580,7 +582,20 @@ describe('Escrow', function () {
           .to.emit(escrow, 'IntermediateStorage')
           .withArgs(FIXTURE_URL, FIXTURE_HASH)
           .to.emit(escrow, 'CancellationRefund')
-          .withArgs(workerFunds);
+          .withArgs(workerFunds)
+          .to.emit(escrow, 'OracleFeeTransfer')
+          .withArgs(
+            [
+              reputationOracleAddress,
+              recordingOracleAddress,
+              exchangeOracleAddress,
+            ],
+            [
+              calculateOracleFee(FIXTURE_FUND_AMOUNT),
+              calculateOracleFee(FIXTURE_FUND_AMOUNT),
+              calculateOracleFee(FIXTURE_FUND_AMOUNT),
+            ]
+          );
 
         const finalOracleBalances = await Promise.all(
           [
@@ -1256,7 +1271,15 @@ describe('Escrow', function () {
 
         await escrow.connect(launcher).requestCancellation();
 
-        await storeResults(FIXTURE_URL, FIXTURE_HASH, totalAmount);
+        const workerFunds = await escrow.remainingFunds();
+        const storeResultsTx = await storeResults(
+          FIXTURE_URL,
+          FIXTURE_HASH,
+          totalAmount
+        );
+        await expect(storeResultsTx)
+          .to.emit(escrow, 'CancellationRefund')
+          .withArgs(workerFunds - totalAmount);
         await expect(
           escrow
             .connect(reputationOracle)
