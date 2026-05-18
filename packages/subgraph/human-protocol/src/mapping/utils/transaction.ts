@@ -1,4 +1,4 @@
-import { Address, BigInt, ethereum } from '@graphprotocol/graph-ts';
+import { Address, BigInt, Bytes, ethereum } from '@graphprotocol/graph-ts';
 import { Transaction, InternalTransaction } from '../../../generated/schema';
 import { toEventId, toPreviousEventId } from './event';
 
@@ -20,6 +20,29 @@ const mainMethods: string[] = [
   'approve',
 ];
 
+function createInternalTransaction(
+  id: Bytes,
+  transactionId: Bytes,
+  method: string,
+  from: Bytes,
+  to: Bytes,
+  value: BigInt,
+  receiver: Bytes | null = null,
+  escrow: Bytes | null = null,
+  token: Bytes | null = null
+): void {
+  const internalTransaction = new InternalTransaction(id);
+  internalTransaction.method = method;
+  internalTransaction.from = from;
+  internalTransaction.to = to;
+  internalTransaction.value = value;
+  internalTransaction.transaction = transactionId;
+  internalTransaction.token = token;
+  internalTransaction.escrow = escrow;
+  internalTransaction.receiver = receiver;
+  internalTransaction.save();
+}
+
 export function createTransaction(
   event: ethereum.Event,
   method: string,
@@ -31,6 +54,17 @@ export function createTransaction(
   token: Address | null = null
 ): Transaction {
   let transaction = Transaction.load(event.transaction.hash);
+  const transactionTo = Address.fromBytes(event.transaction.to!);
+  const isMainMethod = mainMethods.includes(method);
+  // Escrow finalization can emit token transfers before the status event, so
+  // keep those transfers internal until cancel/complete can claim the tx.
+  const isEscrowScopedInternal =
+    escrow !== null &&
+    transactionTo == escrow &&
+    transactionTo != to &&
+    !isMainMethod;
+  const zeroValue = BigInt.fromI32(0);
+
   if (transaction == null) {
     transaction = new Transaction(event.transaction.hash);
     transaction.txHash = event.transaction.hash;
@@ -39,54 +73,71 @@ export function createTransaction(
     transaction.from = from;
     transaction.to = event.transaction.to!;
 
-    if (
-      Address.fromBytes(transaction.to) != to &&
+    if (isEscrowScopedInternal) {
+      transaction.method = 'multimethod';
+      transaction.value = zeroValue;
+      transaction.token = null;
+      transaction.escrow = escrow;
+      transaction.receiver = null;
+
+      createInternalTransaction(
+        toEventId(event),
+        transaction.txHash,
+        method,
+        from,
+        to,
+        value !== null ? value : zeroValue,
+        receiver,
+        escrow,
+        token
+      );
+    } else if (
+      transactionTo != to &&
       (escrow === null || Address.fromBytes(transaction.to) != escrow) &&
       (token === null || Address.fromBytes(transaction.to) != token)
     ) {
       transaction.method = 'multimethod';
-      transaction.value = BigInt.fromI32(0);
+      transaction.value = zeroValue;
       transaction.token = null;
       transaction.escrow = null;
 
-      const internalTransaction = new InternalTransaction(toEventId(event));
-      internalTransaction.method = method;
-      internalTransaction.from = from;
-      internalTransaction.to = to;
-      internalTransaction.value = value !== null ? value : BigInt.fromI32(0);
-      internalTransaction.transaction = transaction.txHash;
-      internalTransaction.token = token;
-      internalTransaction.escrow = escrow;
-      internalTransaction.receiver = receiver;
-      internalTransaction.save();
+      createInternalTransaction(
+        toEventId(event),
+        transaction.txHash,
+        method,
+        from,
+        to,
+        value !== null ? value : zeroValue,
+        receiver,
+        escrow,
+        token
+      );
     } else {
       transaction.to = to;
       transaction.method = method;
-      transaction.value = value !== null ? value : BigInt.fromI32(0);
+      transaction.value = value !== null ? value : zeroValue;
       transaction.token = token;
       transaction.escrow = escrow;
       transaction.receiver = receiver;
     }
     transaction.save();
-  } else if (
-    mainMethods.includes(method) &&
-    Address.fromBytes(transaction.to) == to
-  ) {
+  } else if (isMainMethod && Address.fromBytes(transaction.to) == to) {
     if (mainMethods.includes(transaction.method)) {
-      const internalTransaction = new InternalTransaction(toEventId(event));
-      internalTransaction.method = method;
-      internalTransaction.from = from;
-      internalTransaction.to = to;
-      internalTransaction.value = value !== null ? value : BigInt.fromI32(0);
-      internalTransaction.transaction = transaction.txHash;
-      internalTransaction.token = token;
-      internalTransaction.escrow = escrow;
-      internalTransaction.receiver = receiver;
-      internalTransaction.save();
+      createInternalTransaction(
+        toEventId(event),
+        transaction.txHash,
+        method,
+        from,
+        to,
+        value !== null ? value : zeroValue,
+        receiver,
+        escrow,
+        token
+      );
     } else {
       transaction.method = method;
       transaction.from = from;
-      transaction.value = value !== null ? value : BigInt.fromI32(0);
+      transaction.value = value !== null ? value : zeroValue;
       transaction.token = token;
       transaction.escrow = escrow;
       transaction.receiver = receiver;
@@ -98,31 +149,30 @@ export function createTransaction(
       method == 'set' &&
       transaction.to == to
     ) {
-      const internalTransaction = new InternalTransaction(
-        toPreviousEventId(event)
+      createInternalTransaction(
+        toPreviousEventId(event),
+        transaction.txHash,
+        transaction.method,
+        transaction.from,
+        Address.fromBytes(transaction.to),
+        transaction.value
       );
-      internalTransaction.method = transaction.method;
-      internalTransaction.from = transaction.from;
-      internalTransaction.to = transaction.to;
-      internalTransaction.value = transaction.value;
-      internalTransaction.transaction = transaction.txHash;
-      internalTransaction.save();
 
       transaction.method = 'setBulk';
       transaction.save();
     }
 
-    const internalTransaction = new InternalTransaction(toEventId(event));
-    internalTransaction.method = method;
-    internalTransaction.from = from;
-    internalTransaction.to = to;
-    internalTransaction.value =
-      value !== null ? value : event.transaction.value;
-    internalTransaction.transaction = transaction.txHash;
-    internalTransaction.token = token;
-    internalTransaction.escrow = escrow;
-    internalTransaction.receiver = receiver;
-    internalTransaction.save();
+    createInternalTransaction(
+      toEventId(event),
+      transaction.txHash,
+      method,
+      from,
+      to,
+      value !== null ? value : event.transaction.value,
+      receiver,
+      escrow,
+      token
+    );
   }
 
   return transaction;
