@@ -1409,7 +1409,7 @@ describe('Escrow', () => {
       '0'
     );
 
-    const transferId = toEventId(cancellationRefund).toHex();
+    const transferId = toEventId(cancellationRefund, 'transfer').toHex();
     assert.fieldEquals('InternalTransaction', transferId, 'method', 'transfer');
     assert.fieldEquals(
       'InternalTransaction',
@@ -1448,16 +1448,31 @@ describe('Escrow', () => {
     handleOracleFeeTransfer(oracleFeeTransfer);
 
     const secondTransferTransactionId = oracleFeeTransfer.transaction.hash
-      .concatI32(oracleFeeTransfer.logIndex.toI32() + 10001)
+      .concatI32(oracleFeeTransfer.logIndex.toI32() + 1)
       .concatI32(oracleFeeTransfer.block.timestamp.toI32())
       .toHex();
     const firstTransferTransactionId = oracleFeeTransfer.transaction.hash
-      .concatI32(oracleFeeTransfer.logIndex.toI32() + 10000)
+      .concatI32(oracleFeeTransfer.logIndex.toI32())
       .concatI32(oracleFeeTransfer.block.timestamp.toI32())
       .toHex();
     const skippedTransferTransactionId = oracleFeeTransfer.transaction.hash
-      .concatI32(oracleFeeTransfer.logIndex.toI32() + 10002)
+      .concatI32(oracleFeeTransfer.logIndex.toI32() + 2)
       .concatI32(oracleFeeTransfer.block.timestamp.toI32())
+      .toHex();
+    const firstInternalTransactionId = oracleFeeTransfer.transaction.hash
+      .concatI32(oracleFeeTransfer.logIndex.toI32())
+      .concatI32(oracleFeeTransfer.block.timestamp.toI32())
+      .concat(Bytes.fromUTF8('transfer'))
+      .toHex();
+    const secondInternalTransactionId = oracleFeeTransfer.transaction.hash
+      .concatI32(oracleFeeTransfer.logIndex.toI32() + 1)
+      .concatI32(oracleFeeTransfer.block.timestamp.toI32())
+      .concat(Bytes.fromUTF8('transfer'))
+      .toHex();
+    const skippedInternalTransactionId = oracleFeeTransfer.transaction.hash
+      .concatI32(oracleFeeTransfer.logIndex.toI32() + 2)
+      .concatI32(oracleFeeTransfer.block.timestamp.toI32())
+      .concat(Bytes.fromUTF8('transfer'))
       .toHex();
 
     assert.fieldEquals(
@@ -1497,29 +1512,29 @@ describe('Escrow', () => {
     );
     assert.fieldEquals(
       'InternalTransaction',
-      firstTransferTransactionId,
+      firstInternalTransactionId,
       'method',
       'transfer'
     );
     assert.fieldEquals(
       'InternalTransaction',
-      firstTransferTransactionId,
+      firstInternalTransactionId,
       'receiver',
       reputationOracleAddressString
     );
     assert.fieldEquals(
       'InternalTransaction',
-      firstTransferTransactionId,
+      firstInternalTransactionId,
       'transaction',
       oracleFeeTransfer.transaction.hash.toHex()
     );
     assert.fieldEquals(
       'InternalTransaction',
-      secondTransferTransactionId,
+      secondInternalTransactionId,
       'receiver',
       recordingOracleAddressString
     );
-    assert.notInStore('InternalTransaction', skippedTransferTransactionId);
+    assert.notInStore('InternalTransaction', skippedInternalTransactionId);
     assert.notInStore('Transaction', firstTransferTransactionId);
     assert.fieldEquals(
       'EventDayData',
@@ -1548,12 +1563,14 @@ describe('Escrow', () => {
     handleOracleFeeTransfer(oracleFeeTransfer);
 
     const firstOracleFeeTransferId = oracleFeeTransfer.transaction.hash
-      .concatI32(oracleFeeTransfer.logIndex.toI32() + 10000)
+      .concatI32(oracleFeeTransfer.logIndex.toI32())
       .concatI32(oracleFeeTransfer.block.timestamp.toI32())
+      .concat(Bytes.fromUTF8('transfer'))
       .toHex();
     const secondOracleFeeTransferId = oracleFeeTransfer.transaction.hash
-      .concatI32(oracleFeeTransfer.logIndex.toI32() + 10001)
+      .concatI32(oracleFeeTransfer.logIndex.toI32() + 1)
       .concatI32(oracleFeeTransfer.block.timestamp.toI32())
+      .concat(Bytes.fromUTF8('transfer'))
       .toHex();
 
     const cancellationRefund = createCancellationRefundEvent(
@@ -1580,7 +1597,11 @@ describe('Escrow', () => {
 
     handleCancelled(cancelled);
 
-    const cancellationRefundTransferId = toEventId(cancellationRefund).toHex();
+    const cancellationRefundId = toEventId(cancellationRefund).toHex();
+    const cancellationRefundTransferId = toEventId(
+      cancellationRefund,
+      'transfer'
+    ).toHex();
 
     assert.fieldEquals(
       'Transaction',
@@ -1632,7 +1653,7 @@ describe('Escrow', () => {
     );
     assert.fieldEquals(
       'CancellationRefundEvent',
-      cancellationRefundTransferId,
+      cancellationRefundId,
       'amount',
       '94'
     );
@@ -1689,8 +1710,8 @@ describe('Escrow', () => {
       .concatI32(0)
       .concatI32(bulkTransfer.block.timestamp.toI32())
       .toHex();
-    const completeInternalId = toEventId(completed).toHex();
-    const launcherRefundTransferId = toEventId(completed).concatI32(1).toHex();
+    const completeInternalId = toEventId(completed, 'complete').toHex();
+    const launcherRefundTransferId = toEventId(completed, 'transfer').toHex();
 
     assert.fieldEquals(
       'Transaction',

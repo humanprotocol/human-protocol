@@ -81,7 +81,7 @@ export function createTransaction(
       transaction.receiver = null;
 
       createInternalTransaction(
-        toEventId(event),
+        toEventId(event, method),
         transaction.txHash,
         method,
         from,
@@ -102,7 +102,7 @@ export function createTransaction(
       transaction.escrow = null;
 
       createInternalTransaction(
-        toEventId(event),
+        toEventId(event, method),
         transaction.txHash,
         method,
         from,
@@ -124,7 +124,7 @@ export function createTransaction(
   } else if (isMainMethod && Address.fromBytes(transaction.to) == to) {
     if (mainMethods.includes(transaction.method)) {
       createInternalTransaction(
-        toEventId(event),
+        toEventId(event, method),
         transaction.txHash,
         method,
         from,
@@ -163,7 +163,7 @@ export function createTransaction(
     }
 
     createInternalTransaction(
-      toEventId(event),
+      toEventId(event, method),
       transaction.txHash,
       method,
       from,

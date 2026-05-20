@@ -323,7 +323,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
      * and updating the status to Complete or Cancelled.
      */
     function _finalize() private {
-        EscrowStatuses _status = status;
+        bool isCancellation = status == EscrowStatuses.ToCancel;
         uint256 _remainingFunds = remainingFunds;
 
         uint256 _reputationOracleFee = (fundAmount *
@@ -376,12 +376,12 @@ contract Escrow is IEscrow, ReentrancyGuard {
 
         if (_remainingFunds > 0) {
             tokenContract.safeTransfer(launcher, _remainingFunds);
-            if (_status == EscrowStatuses.ToCancel) {
+            if (isCancellation) {
                 emit CancellationRefund(_remainingFunds);
             }
         }
 
-        if (_status == EscrowStatuses.ToCancel) {
+        if (isCancellation) {
             status = EscrowStatuses.Cancelled;
             emit Cancelled();
         } else {

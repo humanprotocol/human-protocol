@@ -682,7 +682,9 @@ export function handleCompleted(event: Completed): void {
       Address.fromBytes(escrowEntity.address)
     );
     if (escrowEntity.balance && escrowEntity.balance.gt(ZERO_BI)) {
-      const internalTransaction = new InternalTransaction(toEventId(event, 1));
+      const internalTransaction = new InternalTransaction(
+        toEventId(event, 'transfer')
+      );
       internalTransaction.from = escrowEntity.address;
       internalTransaction.to = escrowEntity.launcher;
       internalTransaction.value = escrowEntity.balance;
@@ -850,7 +852,7 @@ export function handleOracleFeeTransfer(event: OracleFeeTransfer): void {
       continue;
     }
 
-    event.logIndex = originalLogIndex.plus(BigInt.fromI32(10000 + i));
+    event.logIndex = originalLogIndex.plus(BigInt.fromI32(i));
     const payoutId = toEventId(event);
     const payout = new Payout(payoutId);
     payout.escrowAddress = event.address;
