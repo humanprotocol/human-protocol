@@ -112,7 +112,7 @@ __metadata:
     "@mui/styled-engine-sc": "npm:7.3.8"
     "@mui/system": "npm:^7.3.9"
     "@mui/x-data-grid": "npm:^8.7.0"
-    "@mui/x-date-pickers": "npm:^9.0.4"
+    "@mui/x-date-pickers": "npm:^9.2.0"
     "@tanstack/react-query": "npm:^5.91.3"
     "@types/react": "npm:^19.2.2"
     "@types/react-dom": "npm:^19.2.3"
@@ -257,7 +257,7 @@ __metadata:
     eslint-config-prettier: "npm:^10.1.8"
     eslint-plugin-prettier: "npm:^5.5.5"
     express: "npm:^5.2.1"
-    express-rate-limit: "npm:^7.3.0"
+    express-rate-limit: "npm:^8.5.2"
     globals: "npm:^16.3.0"
     hardhat: "npm:^2.26.0"
     jest: "npm:^29.7.0"
@@ -428,7 +428,7 @@ __metadata:
     "@mui/icons-material": "npm:^7.3.8"
     "@mui/material": "npm:^5.16.7"
     "@mui/system": "npm:^7.3.9"
-    "@mui/x-date-pickers": "npm:^9.0.4"
+    "@mui/x-date-pickers": "npm:^9.2.0"
     "@reown/appkit": "npm:^1.7.11"
     "@reown/appkit-adapter-wagmi": "npm:^1.7.11"
     "@synaps-io/verify-sdk": "npm:^4.0.45"
@@ -560,10 +560,10 @@ __metadata:
     "@mui/lab": "npm:^7.0.0-beta.17"
     "@mui/material": "npm:^5.16.7"
     "@mui/system": "npm:^7.3.9"
-    "@mui/x-date-pickers": "npm:^9.0.4"
+    "@mui/x-date-pickers": "npm:^9.2.0"
     "@reduxjs/toolkit": "npm:^2.5.0"
     "@stripe/react-stripe-js": "npm:^3.0.0"
-    "@stripe/stripe-js": "npm:^9.5.0"
+    "@stripe/stripe-js": "npm:^9.6.0"
     "@tanstack/query-sync-storage-persister": "npm:^5.68.0"
     "@tanstack/react-query": "npm:^5.91.3"
     "@tanstack/react-query-persist-client": "npm:^5.80.7"
@@ -7281,6 +7281,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@mui/utils@npm:9.0.1":
+  version: 9.0.1
+  resolution: "@mui/utils@npm:9.0.1"
+  dependencies:
+    "@babel/runtime": "npm:^7.29.2"
+    "@mui/types": "npm:^9.0.0"
+    "@types/prop-types": "npm:^15.7.15"
+    clsx: "npm:^2.1.1"
+    prop-types: "npm:^15.8.1"
+    react-is: "npm:^19.2.4"
+  peerDependencies:
+    "@types/react": ^17.0.0 || ^18.0.0 || ^19.0.0
+    react: ^17.0.0 || ^18.0.0 || ^19.0.0
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+  checksum: 10c0/be6d3c6ce7e5767a7d01583ff8780222f1bafa2f5ee8c549e3a25e7e283ba9fb7cb8c95d39ddbd9a57820722f5cfb5f5322cd37c580290d44d0f6e3a464cf23d
+  languageName: node
+  linkType: hard
+
 "@mui/utils@npm:^5.17.1":
   version: 5.17.1
   resolution: "@mui/utils@npm:5.17.1"
@@ -7368,13 +7388,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/x-date-pickers@npm:^9.0.4":
-  version: 9.0.4
-  resolution: "@mui/x-date-pickers@npm:9.0.4"
+"@mui/x-date-pickers@npm:^9.2.0":
+  version: 9.2.0
+  resolution: "@mui/x-date-pickers@npm:9.2.0"
   dependencies:
     "@babel/runtime": "npm:^7.29.2"
-    "@mui/utils": "npm:9.0.0"
-    "@mui/x-internals": "npm:^9.0.4"
+    "@mui/utils": "npm:9.0.1"
+    "@mui/x-internals": "npm:^9.1.0"
     "@types/react-transition-group": "npm:^4.4.12"
     clsx: "npm:^2.1.1"
     prop-types: "npm:^15.8.1"
@@ -7412,7 +7432,7 @@ __metadata:
       optional: true
     moment-jalaali:
       optional: true
-  checksum: 10c0/0b21740373d367de3c25ed2c00f7579efde85ebff6822c0135a8d9b7a3596e005191082ae728e86e0c24a4a5c012b28455b465a01e69565ce0904eefd8a68590
+  checksum: 10c0/12a4dc4fe2f10be399cffc51bd1b42a76d91e5703d86caf034116e8bc5f1f7e03dc04eddb674e27c48140fe947218db6d1cf8cea0393a85fb8b10be2d8890948
   languageName: node
   linkType: hard
 
@@ -7430,9 +7450,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/x-internals@npm:^9.0.4":
-  version: 9.0.4
-  resolution: "@mui/x-internals@npm:9.0.4"
+"@mui/x-internals@npm:^9.1.0":
+  version: 9.1.0
+  resolution: "@mui/x-internals@npm:9.1.0"
   dependencies:
     "@babel/runtime": "npm:^7.29.2"
     "@mui/utils": "npm:9.0.0"
@@ -7440,7 +7460,7 @@ __metadata:
     use-sync-external-store: "npm:^1.6.0"
   peerDependencies:
     react: ^17.0.0 || ^18.0.0 || ^19.0.0
-  checksum: 10c0/24347005e74e73a131a032c8e34c8e1edcaecc05d00d3f8f8450d5b3a6ca35bc3c0c849ac08d3283a8b72d8abc4d002196320cc8ad20b6e96abf81e73525a893
+  checksum: 10c0/3494fb8794b11e3d10e17310dcfb4affa95e73be00908b6e27f6016f13569bd643bc41b02ac032e7bd2dbbe44c8ba211a348fff4110548d7af6450650814eb3e
   languageName: node
   linkType: hard
 
@@ -11104,10 +11124,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@stripe/stripe-js@npm:^9.5.0":
-  version: 9.5.0
-  resolution: "@stripe/stripe-js@npm:9.5.0"
-  checksum: 10c0/b37fe330bbea0b328f8822d439229760e40df893606fcaffa2c161cebd7cb85caf610f4a2518e0af23d70a60f0d9d78fec7162e9dced35f129644c64e72f6100
+"@stripe/stripe-js@npm:^9.6.0":
+  version: 9.6.0
+  resolution: "@stripe/stripe-js@npm:9.6.0"
+  checksum: 10c0/d76b1139f01473824287be2938be9627ebf5990acc51f5a0c250976c61e506b95d492d4bc43d2032a127888d674cc5e36ca3df64d1e55a40cc01e0719609d178
   languageName: node
   linkType: hard
 
@@ -19506,12 +19526,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"express-rate-limit@npm:^7.3.0":
-  version: 7.5.1
-  resolution: "express-rate-limit@npm:7.5.1"
+"express-rate-limit@npm:^8.5.2":
+  version: 8.5.2
+  resolution: "express-rate-limit@npm:8.5.2"
+  dependencies:
+    ip-address: "npm:^10.2.0"
   peerDependencies:
     express: ">= 4.11"
-  checksum: 10c0/b07de84d700a2c07c4bf2f040e7558ed5a1f660f03ed5f30bf8ff7b51e98ba7a85215640e70fc48cbbb9151066ea51239d9a1b41febc9b84d98c7915b0186161
+  checksum: 10c0/c98c49b93e94627940cf5e7c2578718b94d77163357161c3343d148e46257136c988933a96d6e1e728a010683133a58f68cad46928b063cf8d99521c8772578d
   languageName: node
   linkType: hard
 
@@ -21651,6 +21673,13 @@ __metadata:
   version: 10.0.1
   resolution: "ip-address@npm:10.0.1"
   checksum: 10c0/1634d79dae18394004775cb6d699dc46b7c23df6d2083164025a2b15240c1164fccde53d0e08bd5ee4fc53913d033ab6b5e395a809ad4b956a940c446e948843
+  languageName: node
+  linkType: hard
+
+"ip-address@npm:^10.2.0":
+  version: 10.2.0
+  resolution: "ip-address@npm:10.2.0"
+  checksum: 10c0/5a00aada6e922c9c69dfc800ed5d0fa3348675ebdeed0e1575f503f27ca385b5f534363c9af7ad1daf64c1f1409388cdd3cc2e9b9b0fe1c924a431378d55075a
   languageName: node
   linkType: hard
 

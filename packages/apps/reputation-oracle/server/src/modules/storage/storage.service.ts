@@ -1,7 +1,9 @@
+import { EncryptionUtils } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 import * as Minio from 'minio';
 
 import { ContentType } from '@/common/enums';
+import { JobManifest } from '@/common/types';
 import { S3ConfigService } from '@/config';
 import logger from '@/logger';
 import { PgpEncryptionService } from '@/modules/encryption';
@@ -75,6 +77,30 @@ export class StorageService {
       return JSON.parse(fileContent.toString());
     } catch (error) {
       const errorMessage = 'Error downloading json like data';
+      this.logger.error(errorMessage, {
+        error,
+        url,
+      });
+      throw new Error(errorMessage);
+    }
+  }
+
+  async downloadManifest(
+    url: string,
+  ): Promise<{ manifest: JobManifest; encrypted: boolean }> {
+    try {
+      let fileContent = await httpUtils.downloadFile(url);
+      const encrypted = EncryptionUtils.isEncrypted(fileContent.toString());
+
+      fileContent =
+        await this.pgpEncryptionService.maybeDecryptFile(fileContent);
+
+      return {
+        manifest: JSON.parse(fileContent.toString()) as JobManifest,
+        encrypted,
+      };
+    } catch (error) {
+      const errorMessage = 'Error downloading manifest';
       this.logger.error(errorMessage, {
         error,
         url,
