@@ -52,9 +52,9 @@
     "react-number-format": "^5.4.5",
     "react-router-dom": "^7.13.0",
     "serve": "^14.2.6",
-    "viem": "^2.31.4",
+    "viem": "^2.43.0",
     "vite-plugin-svgr": "^4.2.0",
-    "wagmi": "^2.15.6",
+    "wagmi": "^3.6.15",
     "zod": "^4.0.17",
     "zustand": "^5.0.10"
   },
