@@ -55,7 +55,7 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/human-sepolia/version/latest',
     subgraphUrlApiKey:
-      'https://gateway.thegraph.com/api/deployments/id/QmdsJaanpNKXd3ov2Cp6vmpu8uvA69iBfwxswFMu4ZcmNJ',
+      'https://gateway.thegraph.com/api/deployments/id/QmSTMqRb3fYLikBMWkbQn6FErxtX6NqPiTsdU8WTL8BvDd',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
     hmtSubgraphUrl:
@@ -93,7 +93,7 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/human-bsc-testnet/version/latest',
     subgraphUrlApiKey:
-      'https://gateway.thegraph.com/api/deployments/id/QmNNb3ZQdJiziXksfUNiKYKio7A9u8eMTJYB8jpWQza2uv',
+      'https://gateway.thegraph.com/api/deployments/id/QmSXHJtARcEauWWh29nVYLixWtxMytMWfoRrbrsPpya7PC',
     oldSubgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/bsctest',
     oldFactoryAddress: '0xaae6a2646c1f88763e62e0cd08ad050ea66ac46f',
@@ -133,7 +133,7 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/human-amoy/version/latest',
     subgraphUrlApiKey:
-      'https://gateway.thegraph.com/api/deployments/id/QmW3KQfZu1sGz1CedPKC9okCuMFvi8EbrjKncoHn3UPFry',
+      'https://gateway.thegraph.com/api/deployments/id/QmXndE4LdPAtrh237cPYAr1z8SNaXCqzyzX1XuVPZR3wBQ',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
     hmtSubgraphUrl:
