@@ -304,7 +304,7 @@ __metadata:
     viem: "npm:2.x"
     vite: "npm:^6.2.4"
     vite-plugin-node-polyfills: "npm:^0.25.0"
-    wagmi: "npm:^2.14.6"
+    wagmi: "npm:^3.6.15"
   languageName: unknown
   linkType: soft
 
@@ -478,7 +478,7 @@ __metadata:
     vite: "npm:^6.2.4"
     vite-plugin-svgr: "npm:^4.2.0"
     vitest: "npm:^4.0.18"
-    wagmi: "npm:^2.15.6"
+    wagmi: "npm:^3.6.15"
     zod: "npm:^4.0.17"
     zustand: "npm:^5.0.10"
   languageName: unknown
@@ -602,7 +602,7 @@ __metadata:
     viem: "npm:2.x"
     vite: "npm:^6.2.4"
     vite-plugin-node-polyfills: "npm:^0.25.0"
-    wagmi: "npm:^2.14.6"
+    wagmi: "npm:^3.6.15"
     xml2js: "npm:^0.6.2"
     yup: "npm:^1.6.1"
   languageName: unknown
@@ -795,7 +795,7 @@ __metadata:
     viem: "npm:2.x"
     vite: "npm:^6.2.4"
     vite-plugin-node-polyfills: "npm:^0.25.0"
-    wagmi: "npm:^2.14.6"
+    wagmi: "npm:^3.6.15"
   languageName: unknown
   linkType: soft
 
@@ -13311,7 +13311,45 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@wagmi/connectors@npm:6.1.3, @wagmi/connectors@npm:>=5.9.9":
+"@wagmi/connectors@npm:8.0.14":
+  version: 8.0.14
+  resolution: "@wagmi/connectors@npm:8.0.14"
+  peerDependencies:
+    "@base-org/account": ^2.5.1
+    "@coinbase/wallet-sdk": ^4.3.6
+    "@metamask/connect-evm": ^1.0.0
+    "@safe-global/safe-apps-provider": ~0.18.6
+    "@safe-global/safe-apps-sdk": ^9.1.0
+    "@wagmi/core": 3.4.12
+    "@walletconnect/ethereum-provider": ^2.21.1
+    accounts: ~0.10
+    porto: ~0.2.35
+    typescript: ">=5.7.3"
+    viem: 2.x
+  peerDependenciesMeta:
+    "@base-org/account":
+      optional: true
+    "@coinbase/wallet-sdk":
+      optional: true
+    "@metamask/connect-evm":
+      optional: true
+    "@safe-global/safe-apps-provider":
+      optional: true
+    "@safe-global/safe-apps-sdk":
+      optional: true
+    "@walletconnect/ethereum-provider":
+      optional: true
+    accounts:
+      optional: true
+    porto:
+      optional: true
+    typescript:
+      optional: true
+  checksum: 10c0/0c8f6bc6ee9ef127fb8c4bbe37accd10ab0e909944228a153fae0b2b60e0af10e345362737c8ba191ee7d07e4759155499ba2b1c1cf833aaeced6c2dfc4ff1f2
+  languageName: node
+  linkType: hard
+
+"@wagmi/connectors@npm:>=5.9.9":
   version: 6.1.3
   resolution: "@wagmi/connectors@npm:6.1.3"
   dependencies:
@@ -13335,23 +13373,26 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@wagmi/core@npm:2.22.1":
-  version: 2.22.1
-  resolution: "@wagmi/core@npm:2.22.1"
+"@wagmi/core@npm:3.4.12":
+  version: 3.4.12
+  resolution: "@wagmi/core@npm:3.4.12"
   dependencies:
     eventemitter3: "npm:5.0.1"
     mipd: "npm:0.0.7"
     zustand: "npm:5.0.0"
   peerDependencies:
     "@tanstack/query-core": ">=5.0.0"
-    typescript: ">=5.0.4"
+    accounts: ~0.12
+    typescript: ">=5.7.3"
     viem: 2.x
   peerDependenciesMeta:
     "@tanstack/query-core":
       optional: true
+    accounts:
+      optional: true
     typescript:
       optional: true
-  checksum: 10c0/0a68b77f544b64057f8779e1e8ade38babf2ffa6585539a980b3e8101def962b69f9688c87a345113362dbc534c2b15a8df6d751b6867ffa5c9daf12e32b2fb2
+  checksum: 10c0/6424ff0c8ad5268bae04f4d2babdeb3ed5589921594869de77e3dcb26203b5550881278efad37d271b946257781657101d03e57ac94c9fb222f711cd5189a84d
   languageName: node
   linkType: hard
 
@@ -31722,22 +31763,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"wagmi@npm:^2.14.6, wagmi@npm:^2.15.6":
-  version: 2.19.2
-  resolution: "wagmi@npm:2.19.2"
+"wagmi@npm:^3.6.15":
+  version: 3.6.15
+  resolution: "wagmi@npm:3.6.15"
   dependencies:
-    "@wagmi/connectors": "npm:6.1.3"
-    "@wagmi/core": "npm:2.22.1"
+    "@wagmi/connectors": "npm:8.0.14"
+    "@wagmi/core": "npm:3.4.12"
     use-sync-external-store: "npm:1.4.0"
   peerDependencies:
     "@tanstack/react-query": ">=5.0.0"
     react: ">=18"
-    typescript: ">=5.0.4"
+    typescript: ">=5.7.3"
     viem: 2.x
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: 10c0/c09538148b9d91e3e60cc8b1744f0800fe94708a29fdd4a6aa85a5d400fbe905f4696455e2be9b79a85a58c3cb133d143154cf088bf29c398fee9f2e4bdab39e
+  checksum: 10c0/67e6938867defa72198b787f60a8c80c04696b514d5e5d7f4d5b3ebd41b7df36064c5b465f0adad87ff2b6ddf4eb9b592ea6fe547cd359f6491a5678fa7064f3
   languageName: node
   linkType: hard
 
