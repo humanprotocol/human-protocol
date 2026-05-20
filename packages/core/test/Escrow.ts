@@ -656,6 +656,14 @@ describe('Escrow', function () {
           escrow.connect(launcher).requestCancellation()
         ).to.be.revertedWith('Invalid status');
       });
+
+      it('reverts when cancellation has already been requested', async function () {
+        await escrow.connect(launcher).requestCancellation();
+
+        await expect(
+          escrow.connect(launcher).requestCancellation()
+        ).to.be.revertedWith('Invalid status');
+      });
     });
 
     describe('Succeeds', async function () {

@@ -245,7 +245,8 @@ contract Escrow is IEscrow, ReentrancyGuard {
         nonReentrant
     {
         require(
-            remainingFunds != 0 || status == EscrowStatuses.Launched,
+            status != EscrowStatuses.ToCancel &&
+                (remainingFunds != 0 || status == EscrowStatuses.Launched),
             'Invalid status'
         );
 
