@@ -15,7 +15,7 @@ import _ from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 
 import { BACKOFF_INTERVAL_SECONDS } from '@/common/constants';
-import { JobRequestType } from '@/common/types';
+import { JobManifest, JobRequestType } from '@/common/types';
 import { ServerConfigService, Web3ConfigService } from '@/config';
 import { isDuplicatedError } from '@/database';
 import logger from '@/logger';

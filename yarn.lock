@@ -563,7 +563,7 @@ __metadata:
     "@mui/x-date-pickers": "npm:^9.2.0"
     "@reduxjs/toolkit": "npm:^2.5.0"
     "@stripe/react-stripe-js": "npm:^3.0.0"
-    "@stripe/stripe-js": "npm:^4.2.0"
+    "@stripe/stripe-js": "npm:^9.6.0"
     "@tanstack/query-sync-storage-persister": "npm:^5.68.0"
     "@tanstack/react-query": "npm:^5.91.3"
     "@tanstack/react-query-persist-client": "npm:^5.80.7"
@@ -11124,10 +11124,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@stripe/stripe-js@npm:^4.2.0":
-  version: 4.10.0
-  resolution: "@stripe/stripe-js@npm:4.10.0"
-  checksum: 10c0/d437c367b753b53158fe9070885424821787f627d74a1f3b526feb51614be3e26d042b8dc6827ee59e8288a94e08dd852f6011106ea28d082066b1de89aa4ba1
+"@stripe/stripe-js@npm:^9.6.0":
+  version: 9.6.0
+  resolution: "@stripe/stripe-js@npm:9.6.0"
+  checksum: 10c0/d76b1139f01473824287be2938be9627ebf5990acc51f5a0c250976c61e506b95d492d4bc43d2032a127888d674cc5e36ca3df64d1e55a40cc01e0719609d178
   languageName: node
   linkType: hard
 
