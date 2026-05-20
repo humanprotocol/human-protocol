@@ -228,10 +228,18 @@ export class FortuneFinalResultDto {
   @IsString()
   public solution: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    name: 'verification_result',
+    enum: ['accepted', 'rejected'],
+  })
+  @IsNotEmpty()
+  @IsIn(['accepted', 'rejected'])
+  public verificationResult: string;
+
+  @ApiPropertyOptional({ name: 'rejection_reason' })
   @IsOptional()
   @IsString()
-  public error?: string;
+  public rejectionReason?: string;
 }
 
 export class JobListDto {

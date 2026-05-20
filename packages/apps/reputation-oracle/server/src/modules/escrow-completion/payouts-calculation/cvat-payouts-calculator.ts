@@ -9,13 +9,13 @@ import { StorageService } from '@/modules/storage';
 import { Web3Service } from '@/modules/web3';
 
 import {
-  CalclulatePayoutsInput,
   CalculatedPayout,
+  CalculatePayoutsInput,
   EscrowPayoutsCalculator,
 } from './types';
 
 type CalculateCvatPayoutsInput = OverrideProperties<
-  CalclulatePayoutsInput,
+  CalculatePayoutsInput,
   { manifest: CvatManifest }
 >;
 

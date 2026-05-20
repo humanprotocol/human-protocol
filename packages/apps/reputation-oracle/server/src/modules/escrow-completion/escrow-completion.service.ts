@@ -38,16 +38,14 @@ import { EscrowPayoutsBatchEntity } from './escrow-payouts-batch.entity';
 import { EscrowPayoutsBatchRepository } from './escrow-payouts-batch.repository';
 import {
   CvatPayoutsCalculator,
-  FortunePayoutsCalculator,
+  DefaultPayoutsCalculator,
   EscrowPayoutsCalculator,
   CalculatedPayout,
-  MarketingPayoutsCalculator,
 } from './payouts-calculation';
 import {
   CvatResultsProcessor,
+  DefaultResultsProcessor,
   EscrowResultsProcessor,
-  FortuneResultsProcessor,
-  MarketingResultsProcessor,
 } from './results-processing';
 
 @Injectable()
@@ -66,11 +64,9 @@ export class EscrowCompletionService {
     private readonly outgoingWebhookService: OutgoingWebhookService,
     private readonly reputationService: ReputationService,
     private readonly cvatResultsProcessor: CvatResultsProcessor,
-    private readonly fortuneResultsProcessor: FortuneResultsProcessor,
-    private readonly marketingResultsProcessor: MarketingResultsProcessor,
+    private readonly defaultResultsProcessor: DefaultResultsProcessor,
     private readonly cvatPayoutsCalculator: CvatPayoutsCalculator,
-    private readonly fortunePayoutsCalculator: FortunePayoutsCalculator,
-    private readonly marketingPayoutsCalculator: MarketingPayoutsCalculator,
+    private readonly defaultPayoutsCalculator: DefaultPayoutsCalculator,
   ) {}
 
   async createEscrowCompletion(
@@ -545,40 +541,20 @@ export class EscrowCompletionService {
   private getEscrowResultsProcessor(
     jobRequestType: JobRequestType,
   ): EscrowResultsProcessor {
-    if (manifestUtils.isFortuneJobType(jobRequestType)) {
-      return this.fortuneResultsProcessor;
-    }
-
-    if (manifestUtils.isMarketingJobType(jobRequestType)) {
-      return this.marketingResultsProcessor;
-    }
-
     if (manifestUtils.isCvatJobType(jobRequestType)) {
       return this.cvatResultsProcessor;
     }
 
-    throw new Error(
-      `No escrow results processor defined for '${jobRequestType}' jobs`,
-    );
+    return this.defaultResultsProcessor;
   }
 
   private getEscrowPayoutsCalculator(
     jobRequestType: JobRequestType,
   ): EscrowPayoutsCalculator {
-    if (manifestUtils.isFortuneJobType(jobRequestType)) {
-      return this.fortunePayoutsCalculator;
-    }
-
-    if (manifestUtils.isMarketingJobType(jobRequestType)) {
-      return this.marketingPayoutsCalculator;
-    }
-
     if (manifestUtils.isCvatJobType(jobRequestType)) {
       return this.cvatPayoutsCalculator;
     }
 
-    throw new Error(
-      `No escrow payouts calculator defined for '${jobRequestType}' jobs`,
-    );
+    return this.defaultPayoutsCalculator;
   }
 }

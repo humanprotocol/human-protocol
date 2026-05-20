@@ -5,16 +5,18 @@ import {
   MarketingJobType,
 } from '@/common/enums';
 
-export type FortuneManifest = {
+export interface BaseManifest<
+  TJobType extends FortuneJobType | MarketingJobType,
+> {
   submissionsRequired: number;
-  requestType: FortuneJobType;
-};
+  jobType: TJobType;
+}
 
-export type MarketingManifest = {
-  job_type: MarketingJobType;
-  submissions_required: number;
-  end_date?: string;
-};
+export type FortuneManifest = BaseManifest<FortuneJobType>;
+
+export interface MarketingManifest extends BaseManifest<MarketingJobType> {
+  endDate?: string;
+}
 
 export type CvatManifest = {
   annotation: {

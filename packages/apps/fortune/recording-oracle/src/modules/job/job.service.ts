@@ -16,7 +16,11 @@ import { ErrorJob } from '../../common/constants/errors';
 import { JobRequestType, SolutionError } from '../../common/enums/job';
 import { EventType } from '../../common/enums/webhook';
 import { ConflictError, ValidationError } from '../../common/errors';
-import { IManifest, ISolution } from '../../common/interfaces/job';
+import {
+  IManifest,
+  ISolution,
+  VerificationResult,
+} from '../../common/interfaces/job';
 import { checkCurseWords } from '../../common/utils/curseWords';
 import { sendWebhook } from '../../common/utils/webhook';
 import { StorageService } from '../storage/storage.service';
@@ -48,8 +52,8 @@ export class JobService {
     const errorSolutions: ISolution[] = [];
     const uniqueSolutions: ISolution[] = [];
 
-    const filteredExchangeSolution = exchangeSolutions.filter(
-      (exchangeSolution) => !exchangeSolution.error,
+    const filteredExchangeSolution = exchangeSolutions.filter((solution) =>
+      this.isAcceptedSolution(solution),
     );
 
     filteredExchangeSolution.forEach((exchangeSolution) => {
@@ -86,6 +90,30 @@ export class JobService {
       } else uniqueSolutions.push(exchangeSolution);
     });
     return { errorSolutions, uniqueSolutions };
+  }
+
+  private isAcceptedSolution(solution: ISolution): boolean {
+    return (
+      !solution.error &&
+      solution.verificationResult !== VerificationResult.Rejected
+    );
+  }
+
+  private toFinalResult(solution: ISolution): ISolution {
+    const rejectionReason =
+      solution.error ||
+      solution.verificationResult === VerificationResult.Rejected
+        ? solution.rejectionReason || (solution.error as SolutionError)
+        : undefined;
+
+    return {
+      workerAddress: solution.workerAddress,
+      solution: solution.solution,
+      verificationResult: rejectionReason
+        ? VerificationResult.Rejected
+        : VerificationResult.Accepted,
+      ...(rejectionReason ? { rejectionReason } : {}),
+    };
   }
 
   async processJobSolution(webhook: WebhookDto): Promise<string> {
@@ -149,7 +177,11 @@ export class JobService {
       );
     }
 
-    if (existingJobSolutions.length >= submissionsRequired) {
+    if (
+      existingJobSolutions.filter((solution) =>
+        this.isAcceptedSolution(solution),
+      ).length >= submissionsRequired
+    ) {
       logger.warn(ErrorJob.AllSolutionsHaveAlreadyBeenSent, {
         submissionsRequired,
         nExistingJobSolutions: existingJobSolutions.length,
@@ -175,7 +207,7 @@ export class JobService {
     const jobSolutionUploaded = await this.storageService.uploadJobSolutions(
       webhook.escrowAddress,
       webhook.chainId,
-      recordingOracleSolutions,
+      recordingOracleSolutions.map((solution) => this.toFinalResult(solution)),
     );
 
     const lastExchangeSolution =
@@ -206,8 +238,9 @@ export class JobService {
     );
 
     if (
-      recordingOracleSolutions.filter((solution) => !solution.error).length >=
-      submissionsRequired
+      recordingOracleSolutions.filter((solution) =>
+        this.isAcceptedSolution(solution),
+      ).length >= submissionsRequired
     ) {
       const reputationOracleWebhook = await KVStoreUtils.get(
         webhook.chainId,

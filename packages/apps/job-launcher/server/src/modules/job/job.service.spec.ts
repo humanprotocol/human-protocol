@@ -950,11 +950,13 @@ describe('JobService', () => {
         {
           workerAddress: faker.finance.ethereumAddress(),
           solution: 'good',
+          verificationResult: 'accepted',
         },
         {
           workerAddress: faker.finance.ethereumAddress(),
           solution: 'bad',
-          error: 'wrong answer',
+          verificationResult: 'rejected',
+          rejectionReason: 'wrong answer',
         },
       ];
 

@@ -7,7 +7,7 @@ export type CalculatedPayout = {
   amount: bigint;
 };
 
-export type CalclulatePayoutsInput = {
+export type CalculatePayoutsInput = {
   manifest: JobManifest;
   chainId: ChainId;
   escrowAddress: string;
@@ -15,5 +15,5 @@ export type CalclulatePayoutsInput = {
 };
 
 export interface EscrowPayoutsCalculator {
-  calculate(input: CalclulatePayoutsInput): Promise<CalculatedPayout[]>;
+  calculate(input: CalculatePayoutsInput): Promise<CalculatedPayout[]>;
 }

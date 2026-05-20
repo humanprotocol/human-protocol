@@ -248,11 +248,14 @@ export default function JobDetail() {
                   },
                   { id: 'solution', label: 'Fortune' },
                   {
-                    id: 'error',
+                    id: 'verificationResult',
                     label: 'Status',
-                    render: ({ error }) => (error ? 'Refused' : 'Accepted'),
+                    render: ({ verificationResult }) =>
+                      verificationResult === 'rejected'
+                        ? 'Rejected'
+                        : 'Accepted',
                   },
-                  { id: 'error', label: 'Refused reason' },
+                  { id: 'rejectionReason', label: 'Rejection reason' },
                 ]}
                 data={data}
                 page={page}

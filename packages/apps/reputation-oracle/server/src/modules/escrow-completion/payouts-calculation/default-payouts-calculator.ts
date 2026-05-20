@@ -1,9 +1,9 @@
 import { EscrowClient } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
-import type { OverrideProperties } from 'type-fest';
 
 import {
-  MarketingFinalResult,
+  BaseFinalResult,
+  FortuneManifest,
   MarketingManifest,
   VerificationResult,
 } from '@/common/types';
@@ -11,18 +11,15 @@ import { StorageService } from '@/modules/storage';
 import { Web3Service } from '@/modules/web3';
 
 import {
-  CalclulatePayoutsInput,
   CalculatedPayout,
+  CalculatePayoutsInput,
   EscrowPayoutsCalculator,
 } from './types';
 
-type CalculateMarketingPayoutsInput = OverrideProperties<
-  CalclulatePayoutsInput,
-  { manifest: MarketingManifest }
->;
+type DefaultPayoutsManifest = FortuneManifest | MarketingManifest;
 
 @Injectable()
-export class MarketingPayoutsCalculator implements EscrowPayoutsCalculator {
+export class DefaultPayoutsCalculator implements EscrowPayoutsCalculator {
   constructor(
     private readonly storageService: StorageService,
     private readonly web3Service: Web3Service,
@@ -33,11 +30,13 @@ export class MarketingPayoutsCalculator implements EscrowPayoutsCalculator {
     chainId,
     escrowAddress,
     finalResultsUrl,
-  }: CalculateMarketingPayoutsInput): Promise<CalculatedPayout[]> {
+  }: CalculatePayoutsInput & {
+    manifest: DefaultPayoutsManifest;
+  }): Promise<CalculatedPayout[]> {
     const signer = this.web3Service.getSigner(chainId);
     const escrowClient = await EscrowClient.build(signer);
     const finalResults =
-      await this.storageService.downloadJsonLikeData<MarketingFinalResult[]>(
+      await this.storageService.downloadJsonLikeData<BaseFinalResult[]>(
         finalResultsUrl,
       );
 
@@ -52,7 +51,7 @@ export class MarketingPayoutsCalculator implements EscrowPayoutsCalculator {
     }
 
     const reservedFunds = await escrowClient.getReservedFunds(escrowAddress);
-    const payoutAmount = reservedFunds / BigInt(manifest.submissions_required);
+    const payoutAmount = reservedFunds / BigInt(manifest.submissionsRequired);
 
     return recipients.map((recipient) => ({
       address: recipient,
