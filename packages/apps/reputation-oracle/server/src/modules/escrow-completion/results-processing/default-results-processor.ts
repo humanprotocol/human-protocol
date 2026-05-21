@@ -33,7 +33,7 @@ export class DefaultResultsProcessor extends BaseEscrowResultsProcessor<DefaultR
       throw new Error('No final results found');
     }
 
-    if (manifest.jobType !== FortuneJobType.FORTUNE) {
+    if (manifest.requestType !== FortuneJobType.FORTUNE) {
       return;
     }
 
