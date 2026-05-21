@@ -17,4 +17,5 @@ export enum OrderDirection {
 export enum OperatorCategory {
   MACHINE_LEARNING = 'machine_learning',
   MARKET_MAKING = 'market_making',
+  MARKETING = 'marketing',
 }

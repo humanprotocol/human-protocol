@@ -47,6 +47,7 @@ class OperatorCategory(Enum):
 
     MACHINE_LEARNING = "machine_learning"
     MARKET_MAKING = "market_making"
+    MARKETING = "marketing"
 
 
 NETWORKS = {
