@@ -15,12 +15,6 @@ interface IKVStore {
     ) external view returns (string memory);
 }
 
-struct Fees {
-    uint256 reputation;
-    uint256 recording;
-    uint256 exchange;
-}
-
 /**
  * @title Escrow Contract
  * @dev This contract manages the lifecycle of an escrow, including funding,
@@ -80,6 +74,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
     event Withdraw(address token, uint256 amount);
     event CancellationRequested();
     event CancellationRefund(uint256 amount);
+    event OracleFeeTransfer(address[] oracles, uint256[] amounts);
 
     EscrowStatuses public override status;
 
@@ -106,6 +101,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
 
     uint256 public duration;
     mapping(bytes32 => bool) private payouts;
+    uint256 public fundAmount;
     uint256 public remainingFunds;
     uint256 public reservedFunds;
 
@@ -191,8 +187,21 @@ contract Escrow is IEscrow, ReentrancyGuard {
         manifestHash = _manifestHash;
         status = EscrowStatuses.Pending;
 
-        remainingFunds = getBalance();
-        require(remainingFunds > 0, 'Zero balance');
+        uint256 balance = getBalance();
+        require(balance > 0, 'Zero balance');
+
+        fundAmount = balance;
+        uint256 reputationOracleFee = (balance *
+            _reputationOracleFeePercentage) / 100;
+        uint256 recordingOracleFee = (balance * _recordingOracleFeePercentage) /
+            100;
+        uint256 exchangeOracleFee = (balance * _exchangeOracleFeePercentage) /
+            100;
+        remainingFunds =
+            balance -
+            reputationOracleFee -
+            recordingOracleFee -
+            exchangeOracleFee;
 
         emit PendingV3(
             _manifest,
@@ -204,7 +213,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
             _recordingOracleFeePercentage,
             _exchangeOracleFeePercentage
         );
-        emit Fund(remainingFunds);
+        emit Fund(balance);
     }
 
     function _getOracleFee(address _oracle) private view returns (uint8) {
@@ -236,7 +245,8 @@ contract Escrow is IEscrow, ReentrancyGuard {
         nonReentrant
     {
         require(
-            remainingFunds != 0 || status == EscrowStatuses.Launched,
+            status != EscrowStatuses.ToCancel &&
+                (remainingFunds != 0 || status == EscrowStatuses.Launched),
             'Invalid status'
         );
 
@@ -269,8 +279,12 @@ contract Escrow is IEscrow, ReentrancyGuard {
         uint256 amount;
         if (_token == token) {
             uint256 balance = getBalance();
-            require(balance > remainingFunds, 'No funds');
-            amount = balance - remainingFunds;
+            uint256 lockedFunds = remainingFunds +
+                ((fundAmount * reputationOracleFeePercentage) / 100) +
+                ((fundAmount * recordingOracleFeePercentage) / 100) +
+                ((fundAmount * exchangeOracleFeePercentage) / 100);
+            require(balance > lockedFunds, 'No funds');
+            amount = balance - lockedFunds;
         } else {
             amount = getTokenBalance(_token);
         }
@@ -286,6 +300,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
      */
     function cancel() external override notExpired adminOrReputationOracle {
         require(status == EscrowStatuses.ToCancel, 'Invalid status');
+        require(reservedFunds == 0, 'Reserved funds');
         _finalize();
     }
 
@@ -309,20 +324,65 @@ contract Escrow is IEscrow, ReentrancyGuard {
      * and updating the status to Complete or Cancelled.
      */
     function _finalize() private {
-        EscrowStatuses _status = status;
-        uint256 _remaining = remainingFunds;
+        bool isCancellation = status == EscrowStatuses.ToCancel;
+        uint256 _remainingFunds = remainingFunds;
 
-        if (_remaining > 0) {
-            IERC20 tokenContract = IERC20(token);
-            tokenContract.safeTransfer(launcher, _remaining);
-            if (_status == EscrowStatuses.ToCancel) {
-                emit CancellationRefund(_remaining);
+        uint256 _reputationOracleFee = (fundAmount *
+            reputationOracleFeePercentage) / 100;
+        uint256 _recordingOracleFee = (fundAmount *
+            recordingOracleFeePercentage) / 100;
+        uint256 _exchangeOracleFee = (fundAmount *
+            exchangeOracleFeePercentage) / 100;
+        uint256 _totalOracleFee = _reputationOracleFee +
+            _recordingOracleFee +
+            _exchangeOracleFee;
+
+        IERC20 tokenContract = IERC20(token);
+
+        fundAmount = 0;
+        remainingFunds = 0;
+        reservedFunds = 0;
+
+        if (bytes(intermediateResultsUrl).length != 0) {
+            address[] memory oracles = new address[](3);
+            uint256[] memory amounts = new uint256[](3);
+
+            oracles[0] = reputationOracle;
+            oracles[1] = recordingOracle;
+            oracles[2] = exchangeOracle;
+            amounts[0] = _reputationOracleFee;
+            amounts[1] = _recordingOracleFee;
+            amounts[2] = _exchangeOracleFee;
+
+            if (_reputationOracleFee > 0) {
+                tokenContract.safeTransfer(
+                    reputationOracle,
+                    _reputationOracleFee
+                );
             }
-            remainingFunds = 0;
-            reservedFunds = 0;
+            if (_recordingOracleFee > 0) {
+                tokenContract.safeTransfer(
+                    recordingOracle,
+                    _recordingOracleFee
+                );
+            }
+            if (_exchangeOracleFee > 0) {
+                tokenContract.safeTransfer(exchangeOracle, _exchangeOracleFee);
+            }
+
+            emit OracleFeeTransfer(oracles, amounts);
+        } else {
+            _remainingFunds += _totalOracleFee;
         }
 
-        if (_status == EscrowStatuses.ToCancel) {
+        if (_remainingFunds > 0) {
+            tokenContract.safeTransfer(launcher, _remainingFunds);
+            if (isCancellation) {
+                emit CancellationRefund(_remainingFunds);
+            }
+        }
+
+        if (isCancellation) {
             status = EscrowStatuses.Cancelled;
             emit Cancelled();
         } else {
@@ -376,29 +436,16 @@ contract Escrow is IEscrow, ReentrancyGuard {
         emit IntermediateStorage(_url, _hash);
 
         if (status == EscrowStatuses.ToCancel) {
+            if (_fundsToReserve == 0) {
+                _finalize();
+                return;
+            }
+
             uint256 unreservedFunds = remainingFunds - reservedFunds;
             if (unreservedFunds > 0) {
                 IERC20(token).safeTransfer(launcher, unreservedFunds);
                 emit CancellationRefund(unreservedFunds);
                 remainingFunds = reservedFunds;
-            }
-            if (remainingFunds == 0) {
-                status = EscrowStatuses.Cancelled;
-                emit Cancelled();
-            }
-        }
-    }
-
-    function _calculateTotalBulkAmount(
-        uint256[] calldata amounts
-    ) internal pure returns (uint256 total) {
-        uint256 len = amounts.length;
-        for (uint256 i; i < len; ) {
-            uint256 amount = amounts[i];
-            require(amount > 0, 'Zero amount');
-            total += amount;
-            unchecked {
-                ++i;
             }
         }
     }
@@ -443,78 +490,40 @@ contract Escrow is IEscrow, ReentrancyGuard {
         bytes32 payoutId = keccak256(bytes(_payoutId));
         require(remainingFunds != 0, 'No funds');
         require(!payouts[payoutId], 'payoutId already exists');
-        require(_recipients.length == _amounts.length, 'Length mismatch');
-        require(_amounts.length > 0, 'Empty amounts');
-        require(_recipients.length <= BULK_MAX_COUNT, 'Too many recipients');
+        uint256 length = _amounts.length;
+        require(_recipients.length == length, 'Length mismatch');
+        require(length > 0, 'Empty amounts');
+        require(length <= BULK_MAX_COUNT, 'Too many recipients');
         require(
             bytes(_url).length != 0 && bytes(_hash).length != 0,
             'Empty url/hash'
         );
 
-        uint256 totalBulkAmount = _calculateTotalBulkAmount(_amounts);
-        require(totalBulkAmount <= reservedFunds, 'Not enough funds');
-
-        uint256 length = _recipients.length;
-        uint256[] memory netAmounts = new uint256[](length + 3);
-        address[] memory eventRecipients = new address[](length + 3);
-
         IERC20 erc20 = IERC20(token);
-        Fees memory fees;
+        uint256 totalBulkAmount;
 
         for (uint256 i; i < length; ) {
             uint256 amount = _amounts[i];
-            uint256 reputationOracleFee = (reputationOracleFeePercentage *
-                amount) / 100;
-            uint256 recordingOracleFee = (recordingOracleFeePercentage *
-                amount) / 100;
-            uint256 exchangeOracleFee = (exchangeOracleFeePercentage * amount) /
-                100;
-
-            fees.reputation += reputationOracleFee;
-            fees.recording += recordingOracleFee;
-            fees.exchange += exchangeOracleFee;
-
-            uint256 net = amount -
-                reputationOracleFee -
-                recordingOracleFee -
-                exchangeOracleFee;
-            netAmounts[i] = net;
-            address to = _recipients[i];
-            eventRecipients[i] = to;
-
-            erc20.safeTransfer(to, net);
+            require(amount > 0, 'Zero amount');
+            totalBulkAmount += amount;
             unchecked {
                 ++i;
             }
         }
 
-        if (reputationOracleFeePercentage > 0) {
-            erc20.safeTransfer(reputationOracle, fees.reputation);
-            eventRecipients[length] = reputationOracle;
-            netAmounts[length] = fees.reputation;
-            unchecked {
-                ++length;
-            }
-        }
-        if (recordingOracleFeePercentage > 0) {
-            erc20.safeTransfer(recordingOracle, fees.recording);
-            eventRecipients[length] = recordingOracle;
-            netAmounts[length] = fees.recording;
-            unchecked {
-                ++length;
-            }
-        }
-        if (exchangeOracleFeePercentage > 0) {
-            erc20.safeTransfer(exchangeOracle, fees.exchange);
-            eventRecipients[length] = exchangeOracle;
-            netAmounts[length] = fees.exchange;
-            unchecked {
-                ++length;
-            }
+        require(totalBulkAmount <= reservedFunds, 'Not enough funds');
+
+        unchecked {
+            remainingFunds -= totalBulkAmount;
+            reservedFunds -= totalBulkAmount;
         }
 
-        remainingFunds -= totalBulkAmount;
-        reservedFunds -= totalBulkAmount;
+        for (uint256 i; i < length; ) {
+            erc20.safeTransfer(_recipients[i], _amounts[i]);
+            unchecked {
+                ++i;
+            }
+        }
 
         finalResultsUrl = _url;
         finalResultsHash = _hash;
@@ -524,8 +533,8 @@ contract Escrow is IEscrow, ReentrancyGuard {
 
         emit BulkTransferV3(
             payoutId,
-            eventRecipients,
-            netAmounts,
+            _recipients,
+            _amounts,
             isPartial,
             _url,
             _hash

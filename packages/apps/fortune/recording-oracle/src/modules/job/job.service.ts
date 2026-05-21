@@ -218,16 +218,12 @@ export class JobService {
         s.solution === lastExchangeSolution.solution,
     );
 
-    const escrow = await EscrowUtils.getEscrow(
+    const netFundAmount = await this.getNetFundAmount(
+      escrowClient,
       webhook.chainId,
       webhook.escrowAddress,
     );
-    if (!escrow) {
-      throw new ValidationError('Escrow not found');
-    }
-
-    const amountToReserve =
-      escrow.totalFundedAmount / BigInt(submissionsRequired);
+    const amountToReserve = netFundAmount / BigInt(submissionsRequired);
 
     await escrowClient.storeResults(
       webhook.escrowAddress,
@@ -351,5 +347,31 @@ export class JobService {
       );
       return 'The requested job is canceled.';
     }
+  }
+
+  private async getNetFundAmount(
+    escrowClient: EscrowClient,
+    chainId: number,
+    escrowAddress: string,
+  ): Promise<bigint> {
+    const escrow = await EscrowUtils.getEscrow(chainId, escrowAddress);
+    if (!escrow) {
+      this.logger.error(ErrorJob.NotFound, {
+        chainId,
+        escrowAddress,
+      });
+      throw new ConflictError(ErrorJob.NotFound);
+    }
+    const oracleFees = [
+      escrow.recordingOracleFee,
+      escrow.reputationOracleFee,
+      escrow.exchangeOracleFee,
+    ];
+
+    return oracleFees.reduce(
+      (netFundAmount, fee) =>
+        netFundAmount - (escrow.totalFundedAmount * BigInt(fee || 1)) / 100n,
+      escrow.totalFundedAmount,
+    );
   }
 }

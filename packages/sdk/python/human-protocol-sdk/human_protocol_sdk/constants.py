@@ -75,7 +75,7 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/human-sepolia/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway.thegraph.com/api/deployments/id/QmdsJaanpNKXd3ov2Cp6vmpu8uvA69iBfwxswFMu4ZcmNJ"
+            "https://gateway.thegraph.com/api/deployments/id/QmSTMqRb3fYLikBMWkbQn6FErxtX6NqPiTsdU8WTL8BvDd"
         ),
         "hmt_address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
         "factory_address": "0x5987A5558d961ee674efe4A8c8eB7B1b5495D3bf",
@@ -111,7 +111,7 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/human-bsc-testnet/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway.thegraph.com/api/deployments/id/QmNNb3ZQdJiziXksfUNiKYKio7A9u8eMTJYB8jpWQza2uv"
+            "https://gateway.thegraph.com/api/deployments/id/QmSXHJtARcEauWWh29nVYLixWtxMytMWfoRrbrsPpya7PC"
         ),
         "hmt_address": "0xE3D74BBFa45B4bCa69FF28891fBE392f4B4d4e4d",
         "factory_address": "0x2bfA592DBDaF434DDcbb893B1916120d181DAD18",
@@ -151,7 +151,7 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/human-amoy/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway.thegraph.com/api/deployments/id/QmW3KQfZu1sGz1CedPKC9okCuMFvi8EbrjKncoHn3UPFry"
+            "https://gateway.thegraph.com/api/deployments/id/QmXndE4LdPAtrh237cPYAr1z8SNaXCqzyzX1XuVPZR3wBQ"
         ),
         "hmt_address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
         "factory_address": "0xAFf5a986A530ff839d49325A5dF69F96627E8D29",

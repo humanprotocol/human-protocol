@@ -10,6 +10,7 @@ import {
   Completed,
   Fund,
   IntermediateStorage,
+  OracleFeeTransfer,
   Pending,
   PendingV2,
   PendingV3,
@@ -487,5 +488,40 @@ export function createCancellationRefundEvent(
   );
 
   event.parameters.push(amountParam);
+  return event;
+}
+
+export function createOracleFeeTransferEvent(
+  escrowAddress: Address,
+  sender: Address,
+  oracles: Address[],
+  amounts: i32[],
+  timestamp: BigInt
+): OracleFeeTransfer {
+  const event = changetype<OracleFeeTransfer>(newMockEvent());
+  event.address = escrowAddress;
+  event.transaction.from = sender;
+  event.transaction.to = escrowAddress;
+  event.transaction.hash = generateUniqueHash(
+    sender.toString() + '-oracle-fee-transfer',
+    timestamp,
+    event.transaction.nonce
+  );
+  event.block.timestamp = timestamp;
+
+  event.parameters = [];
+
+  const oraclesParam = new ethereum.EventParam(
+    'oracles',
+    ethereum.Value.fromAddressArray(oracles)
+  );
+  const amountsParam = new ethereum.EventParam(
+    'amounts',
+    ethereum.Value.fromI32Array(amounts)
+  );
+
+  event.parameters.push(oraclesParam);
+  event.parameters.push(amountsParam);
+
   return event;
 }

@@ -948,6 +948,44 @@ class EscrowClient:
 
         return self._get_escrow_contract(escrow_address).functions.getBalance().call()
 
+    def get_remaining_funds(self, escrow_address: str) -> int:
+        """Get the remaining worker funds for a specified escrow.
+
+        Args:
+            escrow_address (str): Address of the escrow.
+
+        Returns:
+            Remaining worker funds in token's smallest unit.
+
+        Raises:
+            EscrowClientError: If the escrow address is invalid.
+        """
+
+        if not Web3.is_address(escrow_address):
+            raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
+
+        return (
+            self._get_escrow_contract(escrow_address).functions.remainingFunds().call()
+        )
+
+    def get_fund_amount(self, escrow_address: str) -> int:
+        """Get the original funded amount for a specified escrow.
+
+        Args:
+            escrow_address (str): Address of the escrow.
+
+        Returns:
+            Original funded amount in token's smallest unit.
+
+        Raises:
+            EscrowClientError: If the escrow address is invalid.
+        """
+
+        if not Web3.is_address(escrow_address):
+            raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
+
+        return self._get_escrow_contract(escrow_address).functions.fundAmount().call()
+
     def get_reserved_funds(self, escrow_address: str) -> int:
         """Get the reserved funds for a specified escrow.
 
