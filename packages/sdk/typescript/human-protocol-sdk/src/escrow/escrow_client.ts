@@ -1196,6 +1196,56 @@ export class EscrowClient extends BaseEthersClient {
   }
 
   /**
+   * This function returns the remaining funds for a specified escrow address.
+   *
+   * @param escrowAddress - Address of the escrow.
+   * @returns Remaining worker funds of the escrow.
+   * @throws ErrorInvalidEscrowAddressProvided If the escrow address is invalid
+   * @throws ErrorEscrowAddressIsNotProvidedByFactory If the escrow is not provided by the factory
+   */
+  async getRemainingFunds(escrowAddress: string): Promise<bigint> {
+    if (!ethers.isAddress(escrowAddress)) {
+      throw ErrorInvalidEscrowAddressProvided;
+    }
+
+    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
+      throw ErrorEscrowAddressIsNotProvidedByFactory;
+    }
+
+    try {
+      const escrowContract = this.getEscrowContract(escrowAddress);
+      return await escrowContract.remainingFunds();
+    } catch (e) {
+      return throwError(e);
+    }
+  }
+
+  /**
+   * This function returns the original funded amount for a specified escrow address.
+   *
+   * @param escrowAddress - Address of the escrow.
+   * @returns Original amount used to fund the escrow.
+   * @throws ErrorInvalidEscrowAddressProvided If the escrow address is invalid
+   * @throws ErrorEscrowAddressIsNotProvidedByFactory If the escrow is not provided by the factory
+   */
+  async getFundAmount(escrowAddress: string): Promise<bigint> {
+    if (!ethers.isAddress(escrowAddress)) {
+      throw ErrorInvalidEscrowAddressProvided;
+    }
+
+    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
+      throw ErrorEscrowAddressIsNotProvidedByFactory;
+    }
+
+    try {
+      const escrowContract = this.getEscrowContract(escrowAddress);
+      return await escrowContract.fundAmount();
+    } catch (e) {
+      return throwError(e);
+    }
+  }
+
+  /**
    * This function returns the reserved funds for a specified escrow address.
    *
    * @param escrowAddress - Address of the escrow.

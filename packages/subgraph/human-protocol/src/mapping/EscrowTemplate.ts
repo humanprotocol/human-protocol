@@ -13,6 +13,7 @@ import {
   Withdraw,
   CancellationRequested,
   CancellationRefund,
+  OracleFeeTransfer,
 } from '../../generated/templates/Escrow/Escrow';
 import {
   CancellationRefundEvent,
@@ -681,7 +682,9 @@ export function handleCompleted(event: Completed): void {
       Address.fromBytes(escrowEntity.address)
     );
     if (escrowEntity.balance && escrowEntity.balance.gt(ZERO_BI)) {
-      const internalTransaction = new InternalTransaction(toEventId(event));
+      const internalTransaction = new InternalTransaction(
+        toEventId(event, 'transfer')
+      );
       internalTransaction.from = escrowEntity.address;
       internalTransaction.to = escrowEntity.launcher;
       internalTransaction.value = escrowEntity.balance;
@@ -811,25 +814,16 @@ export function handleCancellationRefund(event: CancellationRefund): void {
   const escrowEntity = Escrow.load(dataSource.address());
   if (!escrowEntity) return;
 
-  const transaction = createTransaction(
+  createTransaction(
     event,
-    'cancellationRefund',
+    'transfer',
     event.transaction.from,
-    Address.fromBytes(escrowEntity.address),
-    Address.fromBytes(escrowEntity.launcher),
+    Address.fromBytes(escrowEntity.canceler),
+    Address.fromBytes(escrowEntity.canceler),
     Address.fromBytes(escrowEntity.address),
     event.params.amount,
     Address.fromBytes(escrowEntity.token)
   );
-  const internalTransaction = new InternalTransaction(toEventId(event));
-  internalTransaction.from = escrowEntity.address;
-  internalTransaction.to = Address.fromBytes(escrowEntity.token);
-  internalTransaction.receiver = escrowEntity.canceler;
-  internalTransaction.value = escrowEntity.balance;
-  internalTransaction.transaction = transaction.id;
-  internalTransaction.method = 'transfer';
-  internalTransaction.token = Address.fromBytes(escrowEntity.token);
-  internalTransaction.save();
   escrowEntity.balance = escrowEntity.balance.minus(event.params.amount);
   escrowEntity.save();
 
@@ -841,4 +835,49 @@ export function handleCancellationRefund(event: CancellationRefund): void {
   entity.receiver = escrowEntity.launcher;
   entity.amount = event.params.amount;
   entity.save();
+}
+
+export function handleOracleFeeTransfer(event: OracleFeeTransfer): void {
+  const escrowEntity = Escrow.load(dataSource.address());
+  if (!escrowEntity) return;
+
+  const eventDayData = getEventDayData(event);
+  const originalLogIndex = event.logIndex;
+
+  for (let i = 0; i < event.params.oracles.length; i++) {
+    const oracle = event.params.oracles[i];
+    const amount = event.params.amounts[i];
+
+    if (amount.equals(ZERO_BI)) {
+      continue;
+    }
+
+    event.logIndex = originalLogIndex.plus(BigInt.fromI32(i));
+    const payoutId = toEventId(event);
+    const payout = new Payout(payoutId);
+    payout.escrowAddress = event.address;
+    payout.recipient = oracle;
+    payout.amount = amount;
+    payout.createdAt = event.block.timestamp;
+    payout.save();
+
+    createTransaction(
+      event,
+      'transfer',
+      Address.fromBytes(escrowEntity.address),
+      oracle,
+      oracle,
+      Address.fromBytes(escrowEntity.address),
+      amount,
+      Address.fromBytes(escrowEntity.token)
+    );
+
+    escrowEntity.balance = escrowEntity.balance.minus(amount);
+    escrowEntity.amountPaid = escrowEntity.amountPaid.plus(amount);
+    eventDayData.dailyPayoutCount = eventDayData.dailyPayoutCount.plus(ONE_BI);
+  }
+
+  event.logIndex = originalLogIndex;
+  escrowEntity.save();
+  eventDayData.save();
 }

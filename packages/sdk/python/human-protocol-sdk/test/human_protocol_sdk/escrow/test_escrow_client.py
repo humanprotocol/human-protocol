@@ -2267,6 +2267,60 @@ class TestEscrowClient(unittest.TestCase):
         mock_contract.functions.remainingFunds.assert_called_once_with()
         self.assertEqual(result, 100)
 
+    def test_get_remaining_funds(self):
+        mock_contract = MagicMock()
+        mock_contract.functions.remainingFunds = MagicMock()
+        mock_contract.functions.remainingFunds.return_value.call.return_value = 100
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
+        escrow_address = "0x1234567890123456789012345678901234567890"
+
+        result = self.escrow.get_remaining_funds(escrow_address)
+
+        self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
+        mock_contract.functions.remainingFunds.assert_called_once_with()
+        self.assertEqual(result, 100)
+
+    def test_get_remaining_funds_invalid_address(self):
+        with self.assertRaises(EscrowClientError) as cm:
+            self.escrow.get_remaining_funds("invalid_address")
+        self.assertEqual(f"Invalid escrow address: invalid_address", str(cm.exception))
+
+    def test_get_remaining_funds_invalid_escrow(self):
+        self.escrow.factory_contract.functions.hasEscrow = MagicMock(return_value=False)
+        with self.assertRaises(EscrowClientError) as cm:
+            self.escrow.get_remaining_funds(
+                "0x1234567890123456789012345678901234567890"
+            )
+        self.assertEqual(
+            "Escrow address is not provided by the factory", str(cm.exception)
+        )
+
+    def test_get_fund_amount(self):
+        mock_contract = MagicMock()
+        mock_contract.functions.fundAmount = MagicMock()
+        mock_contract.functions.fundAmount.return_value.call.return_value = 100
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
+        escrow_address = "0x1234567890123456789012345678901234567890"
+
+        result = self.escrow.get_fund_amount(escrow_address)
+
+        self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
+        mock_contract.functions.fundAmount.assert_called_once_with()
+        self.assertEqual(result, 100)
+
+    def test_get_fund_amount_invalid_address(self):
+        with self.assertRaises(EscrowClientError) as cm:
+            self.escrow.get_fund_amount("invalid_address")
+        self.assertEqual(f"Invalid escrow address: invalid_address", str(cm.exception))
+
+    def test_get_fund_amount_invalid_escrow(self):
+        self.escrow.factory_contract.functions.hasEscrow = MagicMock(return_value=False)
+        with self.assertRaises(EscrowClientError) as cm:
+            self.escrow.get_fund_amount("0x1234567890123456789012345678901234567890")
+        self.assertEqual(
+            "Escrow address is not provided by the factory", str(cm.exception)
+        )
+
     def test_get_manifest_hash(self):
         mock_contract = MagicMock()
         mock_contract.functions.manifestHash = MagicMock()
