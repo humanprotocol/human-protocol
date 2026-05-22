@@ -1,6 +1,6 @@
 import CloseIcon from '@mui/icons-material/Close';
 import { Box, Button, Dialog, IconButton, Typography } from '@mui/material';
-import { useConnect } from 'wagmi';
+import { useConnect, useConnectors } from 'wagmi';
 import coinbaseSvg from '../../assets/coinbase.svg';
 import metaMaskSvg from '../../assets/metamask.svg';
 import walletConnectSvg from '../../assets/walletconnect.svg';
@@ -18,7 +18,20 @@ export default function WalletModal({
   open: boolean;
   onClose: () => void;
 }) {
-  const { connect, connectors, error } = useConnect();
+  const connectors = useConnectors();
+  const { mutateAsync: connect, error, isPending, variables } = useConnect();
+
+  const handleConnect = async (connector: (typeof connectors)[number]) => {
+    try {
+      if (connector.id === 'walletConnect') {
+        onClose();
+      }
+
+      await connect({ connector });
+    } catch {
+      // wagmi exposes the connection error through `error`.
+    }
+  };
 
   return (
     <Dialog
@@ -75,13 +88,8 @@ export default function WalletModal({
                   },
                 }}
                 key={connector.id}
-                onClick={() => {
-                  connect({ connector });
-
-                  if (connector.id === 'walletConnect') {
-                    onClose();
-                  }
-                }}
+                disabled={isPending && variables?.connector.id === connector.id}
+                onClick={() => handleConnect(connector)}
               >
                 <img
                   src={connector.icon ?? WALLET_ICONS[connector.id]}
