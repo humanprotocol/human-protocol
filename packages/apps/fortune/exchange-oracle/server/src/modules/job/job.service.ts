@@ -433,9 +433,18 @@ export class JobService {
       this.web3Service.getSigner(chainId),
     ).decimals();
 
+    const netFundAmount = [
+      escrow.recordingOracleFee,
+      escrow.reputationOracleFee,
+      escrow.exchangeOracleFee,
+    ].reduce(
+      (amount, fee) =>
+        amount - (escrow.totalFundedAmount * BigInt(fee ?? 0)) / 100n,
+      escrow.totalFundedAmount,
+    );
+
     return (
-      Number(ethers.formatUnits(escrow.totalFundedAmount, decimals)) /
-      submissionsRequired
+      Number(ethers.formatUnits(netFundAmount, decimals)) / submissionsRequired
     );
   }
 }
