@@ -114,7 +114,7 @@ __metadata:
     "@mui/x-data-grid": "npm:^8.7.0"
     "@mui/x-date-pickers": "npm:^9.2.0"
     "@tanstack/react-query": "npm:^5.91.3"
-    "@types/react": "npm:^19.2.2"
+    "@types/react": "npm:^19.2.15"
     "@types/react-dom": "npm:^19.2.3"
     "@types/react-router-dom": "npm:^5.3.3"
     "@types/recharts": "npm:^1.8.29"
@@ -131,7 +131,7 @@ __metadata:
     eslint-plugin-react-refresh: "npm:^0.5.2"
     globals: "npm:^16.2.0"
     prettier: "npm:^3.8.1"
-    react: "npm:^19.2.4"
+    react: "npm:^19.2.6"
     react-dom: "npm:^19.2.4"
     react-number-format: "npm:^5.4.5"
     react-router-dom: "npm:^7.13.0"
@@ -214,7 +214,7 @@ __metadata:
     "@human-protocol/sdk": "workspace:*"
     "@mui/icons-material": "npm:^7.3.8"
     "@mui/material": "npm:^5.16.7"
-    "@types/react": "npm:^19.2.2"
+    "@types/react": "npm:^19.2.15"
     "@types/react-dom": "npm:^19.2.3"
     "@vitejs/plugin-react": "npm:^4.3.4"
     dotenv: "npm:^17.2.2"
@@ -226,7 +226,7 @@ __metadata:
     eslint-plugin-react-hooks: "npm:^5.1.0"
     globals: "npm:^16.3.0"
     prettier: "npm:^3.8.1"
-    react: "npm:^19.2.4"
+    react: "npm:^19.2.6"
     react-dom: "npm:^19.2.4"
     react-loading-skeleton: "npm:^3.3.1"
     react-router-dom: "npm:^7.13.0"
@@ -284,7 +284,7 @@ __metadata:
     "@tanstack/query-sync-storage-persister": "npm:^5.68.0"
     "@tanstack/react-query": "npm:^5.91.3"
     "@tanstack/react-query-persist-client": "npm:^5.80.7"
-    "@types/react": "npm:^19.2.2"
+    "@types/react": "npm:^19.2.15"
     "@types/react-dom": "npm:^19.2.3"
     "@types/react-router-dom": "npm:^5.3.3"
     "@vitejs/plugin-react": "npm:^4.3.1"
@@ -295,7 +295,7 @@ __metadata:
     ethers: "npm:^6.16.0"
     globals: "npm:^16.3.0"
     prettier: "npm:^3.8.1"
-    react: "npm:^19.2.4"
+    react: "npm:^19.2.6"
     react-dom: "npm:^19.2.4"
     react-router-dom: "npm:^7.13.0"
     serve: "npm:^14.2.6"
@@ -439,7 +439,7 @@ __metadata:
     "@types/mui-image": "npm:^1.0.5"
     "@types/node": "npm:^22.10.5"
     "@types/prop-types": "npm:^15"
-    "@types/react": "npm:^19.2.2"
+    "@types/react": "npm:^19.2.15"
     "@types/react-dom": "npm:^19.2.3"
     "@vercel/style-guide": "npm:^6.0.0"
     "@vitejs/plugin-react": "npm:^4.2.1"
@@ -464,7 +464,7 @@ __metadata:
     prettier: "npm:^3.8.1"
     prop-types: "npm:^15.8.1"
     query-string: "npm:^9.0.0"
-    react: "npm:^19.2.4"
+    react: "npm:^19.2.6"
     react-dom: "npm:^19.2.4"
     react-hook-form: "npm:^7.71.1"
     react-i18next: "npm:^15.1.0"
@@ -569,7 +569,7 @@ __metadata:
     "@tanstack/react-query": "npm:^5.91.3"
     "@tanstack/react-query-persist-client": "npm:^5.80.7"
     "@types/file-saver": "npm:^2.0.7"
-    "@types/react": "npm:^19.2.2"
+    "@types/react": "npm:^19.2.15"
     "@types/react-dom": "npm:^19.2.3"
     "@types/xml2js": "npm:^0.4.14"
     "@vitejs/plugin-react": "npm:^4.2.1"
@@ -590,7 +590,7 @@ __metadata:
     globals: "npm:^16.3.0"
     jwt-decode: "npm:^4.0.0"
     prettier: "npm:^3.8.1"
-    react: "npm:^19.2.4"
+    react: "npm:^19.2.6"
     react-dom: "npm:^19.2.4"
     react-redux: "npm:^9.1.0"
     react-router-dom: "npm:^7.13.0"
@@ -774,7 +774,7 @@ __metadata:
     "@tanstack/query-sync-storage-persister": "npm:^5.68.0"
     "@tanstack/react-query": "npm:^5.91.3"
     "@tanstack/react-query-persist-client": "npm:^5.80.7"
-    "@types/react": "npm:^19.2.2"
+    "@types/react": "npm:^19.2.15"
     "@types/react-dom": "npm:^19.2.3"
     "@types/react-router-dom": "npm:^5.3.3"
     "@vitejs/plugin-react": "npm:^4.3.1"
@@ -785,7 +785,7 @@ __metadata:
     ethers: "npm:^6.16.0"
     globals: "npm:^16.3.0"
     prettier: "npm:^3.8.1"
-    react: "npm:^19.2.4"
+    react: "npm:^19.2.6"
     react-dom: "npm:^19.2.4"
     react-router-dom: "npm:^7.13.0"
     sass: "npm:^1.89.2"
@@ -12444,12 +12444,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:^19.2.2":
-  version: 19.2.14
-  resolution: "@types/react@npm:19.2.14"
+"@types/react@npm:^19.2.15":
+  version: 19.2.15
+  resolution: "@types/react@npm:19.2.15"
   dependencies:
     csstype: "npm:^3.2.2"
-  checksum: 10c0/7d25bf41b57719452d86d2ac0570b659210402707313a36ee612666bf11275a1c69824f8c3ee1fdca077ccfe15452f6da8f1224529b917050eb2d861e52b59b7
+  checksum: 10c0/b554eab715bb14e581f0ae60e5cefe91e1a5e06c31022b543a9806cf224aa056f21e4fb46208e46eb934d86ca0b247ebc82377192a0dead303cb28b8764c6e67
   languageName: node
   linkType: hard
 
@@ -27658,10 +27658,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react@npm:^19.2.4":
-  version: 19.2.4
-  resolution: "react@npm:19.2.4"
-  checksum: 10c0/cd2c9ff67a720799cc3b38a516009986f7fc4cb8d3e15716c6211cf098d1357ee3e348ab05ad0600042bbb0fd888530ba92e329198c92eafa0994f5213396596
+"react@npm:^19.2.6":
+  version: 19.2.6
+  resolution: "react@npm:19.2.6"
+  checksum: 10c0/66afde33b9a9ee87b1e1cae39d8e7e040d1262e719524fd70660c4d4ce79929c532ac19fc3df5a911edaf02768fdf2c49de4ede1ba99bc6aad72796e0e26e798
   languageName: node
   linkType: hard
 
