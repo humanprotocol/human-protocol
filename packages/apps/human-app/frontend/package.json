@@ -30,7 +30,7 @@
     "@mui/system": "^7.3.9",
     "@mui/x-date-pickers": "^9.2.0",
     "@reown/appkit": "^1.7.11",
-    "@reown/appkit-adapter-wagmi": "^1.7.11",
+    "@reown/appkit-adapter-wagmi": "^1.8.20",
     "@synaps-io/verify-sdk": "^4.0.45",
     "@tanstack/react-query": "^5.91.3",
     "@wagmi/core": "^3.4.0",
