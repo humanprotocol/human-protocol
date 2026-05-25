@@ -13,6 +13,8 @@ const getCategoryLabel = (category: string) => {
       return 'Machine Learning';
     case 'market_making':
       return 'Market Making';
+    case 'marketing':
+      return 'Marketing';
     default:
       return category;
   }
@@ -24,6 +26,8 @@ const getCategoryColor = (category: string) => {
       return 'primary';
     case 'market_making':
       return 'success';
+    case 'marketing':
+      return 'secondary';
     default:
       return 'default';
   }
