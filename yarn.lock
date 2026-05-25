@@ -132,7 +132,7 @@ __metadata:
     globals: "npm:^16.2.0"
     prettier: "npm:^3.8.1"
     react: "npm:^19.2.6"
-    react-dom: "npm:^19.2.4"
+    react-dom: "npm:^19.2.6"
     react-number-format: "npm:^5.4.5"
     react-router-dom: "npm:^7.13.0"
     recharts: "npm:^2.13.0-alpha.4"
@@ -227,7 +227,7 @@ __metadata:
     globals: "npm:^16.3.0"
     prettier: "npm:^3.8.1"
     react: "npm:^19.2.6"
-    react-dom: "npm:^19.2.4"
+    react-dom: "npm:^19.2.6"
     react-loading-skeleton: "npm:^3.3.1"
     react-router-dom: "npm:^7.13.0"
     serve: "npm:^14.2.6"
@@ -296,7 +296,7 @@ __metadata:
     globals: "npm:^16.3.0"
     prettier: "npm:^3.8.1"
     react: "npm:^19.2.6"
-    react-dom: "npm:^19.2.4"
+    react-dom: "npm:^19.2.6"
     react-router-dom: "npm:^7.13.0"
     serve: "npm:^14.2.6"
     typescript: "npm:^5.6.3"
@@ -465,7 +465,7 @@ __metadata:
     prop-types: "npm:^15.8.1"
     query-string: "npm:^9.0.0"
     react: "npm:^19.2.6"
-    react-dom: "npm:^19.2.4"
+    react-dom: "npm:^19.2.6"
     react-hook-form: "npm:^7.71.1"
     react-i18next: "npm:^15.1.0"
     react-imask: "npm:^7.4.0"
@@ -591,7 +591,7 @@ __metadata:
     jwt-decode: "npm:^4.0.0"
     prettier: "npm:^3.8.1"
     react: "npm:^19.2.6"
-    react-dom: "npm:^19.2.4"
+    react-dom: "npm:^19.2.6"
     react-redux: "npm:^9.1.0"
     react-router-dom: "npm:^7.13.0"
     recharts: "npm:^2.7.2"
@@ -786,7 +786,7 @@ __metadata:
     globals: "npm:^16.3.0"
     prettier: "npm:^3.8.1"
     react: "npm:^19.2.6"
-    react-dom: "npm:^19.2.4"
+    react-dom: "npm:^19.2.6"
     react-router-dom: "npm:^7.13.0"
     sass: "npm:^1.89.2"
     serve: "npm:^14.2.6"
@@ -27452,14 +27452,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dom@npm:^19.2.4":
-  version: 19.2.4
-  resolution: "react-dom@npm:19.2.4"
+"react-dom@npm:^19.2.6":
+  version: 19.2.6
+  resolution: "react-dom@npm:19.2.6"
   dependencies:
     scheduler: "npm:^0.27.0"
   peerDependencies:
-    react: ^19.2.4
-  checksum: 10c0/f0c63f1794dedb154136d4d0f59af00b41907f4859571c155940296808f4b94bf9c0c20633db75b5b2112ec13d8d7dd4f9bf57362ed48782f317b11d05a44f35
+    react: ^19.2.6
+  checksum: 10c0/dbf2aef67857c03a612bc9316a4562e5066f43fa04bf28f7f0734963fc1350da2c9f8eb973930655453281079f30cc8222bab383dbec4b5097084e2c081e3334
   languageName: node
   linkType: hard
 
