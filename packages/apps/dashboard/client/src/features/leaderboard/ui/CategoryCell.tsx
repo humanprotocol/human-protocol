@@ -27,7 +27,7 @@ const getCategoryColor = (category: string) => {
     case 'market_making':
       return 'success';
     case 'marketing':
-      return 'primary';
+      return 'secondary';
     default:
       return 'default';
   }
