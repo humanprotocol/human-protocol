@@ -31,7 +31,7 @@
     "@types/recharts": "^1.8.29",
     "axios": "^1.7.2",
     "clsx": "^2.1.1",
-    "dayjs": "^1.11.11",
+    "dayjs": "^1.11.20",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-number-format": "^5.4.5",
