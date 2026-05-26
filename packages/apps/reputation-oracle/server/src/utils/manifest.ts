@@ -38,8 +38,8 @@ function assertValidJobRequestType(
 export function getJobRequestType(manifest: JobManifest): JobRequestType {
   let jobRequestType: string | undefined;
 
-  if ('jobType' in manifest) {
-    jobRequestType = manifest.jobType;
+  if ('requestType' in manifest) {
+    jobRequestType = manifest.requestType;
   } else if ('annotation' in manifest) {
     jobRequestType = manifest.annotation.type;
   }

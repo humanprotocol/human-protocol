@@ -9,7 +9,7 @@ import {
 
 export function generateMarketingManifest(): MarketingManifest {
   return {
-    jobType: MarketingJobType.SOCIAL_MEDIA_PROMOTION,
+    requestType: MarketingJobType.SOCIAL_MEDIA_PROMOTION,
     submissionsRequired: faker.number.int({ min: 2, max: 5 }),
   };
 }

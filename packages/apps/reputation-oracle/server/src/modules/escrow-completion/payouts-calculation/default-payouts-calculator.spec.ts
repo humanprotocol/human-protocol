@@ -71,7 +71,7 @@ describe('DefaultPayoutsCalculator', () => {
         rejectedResult,
       ]);
       const manifest: BaseManifest<MarketingJobType> = {
-        jobType: MarketingJobType.SOCIAL_MEDIA_PROMOTION,
+        requestType: MarketingJobType.SOCIAL_MEDIA_PROMOTION,
         submissionsRequired: faker.number.int({ min: 2, max: 5 }),
       };
 
@@ -105,7 +105,7 @@ describe('DefaultPayoutsCalculator', () => {
         escrowAddress: faker.finance.ethereumAddress(),
         finalResultsUrl: faker.internet.url(),
         manifest: {
-          jobType: MarketingJobType.SOCIAL_MEDIA_PROMOTION,
+          requestType: MarketingJobType.SOCIAL_MEDIA_PROMOTION,
           submissionsRequired: faker.number.int({ min: 2, max: 5 }),
         },
       });

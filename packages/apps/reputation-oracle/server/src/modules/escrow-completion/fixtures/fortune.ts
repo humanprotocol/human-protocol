@@ -9,7 +9,7 @@ import {
 
 export function generateFortuneManifest(): FortuneManifest {
   return {
-    jobType: FortuneJobType.FORTUNE,
+    requestType: FortuneJobType.FORTUNE,
     submissionsRequired: faker.number.int({ min: 2, max: 5 }),
   };
 }

@@ -720,7 +720,7 @@ describe('EscrowCompletionService', () => {
       );
 
       const manifest = generateFortuneManifest();
-      jobRequestType = manifest.jobType;
+      jobRequestType = manifest.requestType;
       mockedEscrowUtils.getEscrow.mockResolvedValue({
         manifest: faker.internet.url(),
       } as unknown as IEscrow);

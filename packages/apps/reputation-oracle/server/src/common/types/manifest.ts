@@ -6,10 +6,10 @@ import {
 } from '@/common/enums';
 
 export interface BaseManifest<
-  TJobType extends FortuneJobType | MarketingJobType,
+  TRequestType extends FortuneJobType | MarketingJobType,
 > {
   submissionsRequired: number;
-  jobType: TJobType;
+  requestType: TRequestType;
 }
 
 export type FortuneManifest = BaseManifest<FortuneJobType>;
