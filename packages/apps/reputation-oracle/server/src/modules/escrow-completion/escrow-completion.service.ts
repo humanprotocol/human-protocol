@@ -122,6 +122,7 @@ export class EscrowCompletionService {
         const escrowStatus = await escrowClient.getStatus(
           escrowCompletionEntity.escrowAddress,
         );
+        let toComplete = false;
         if (
           escrowStatus === EscrowStatus.Pending ||
           escrowStatus === EscrowStatus.ToCancel
@@ -167,6 +168,7 @@ export class EscrowCompletionService {
             finalResultsUrl: escrowCompletionEntity.finalResultsUrl,
           });
 
+          toComplete = calculatedPayouts.length === 0;
           /**
            * When creating payout batches we need to guarantee deterministic result,
            * so order it first.
@@ -198,7 +200,7 @@ export class EscrowCompletionService {
         }
 
         escrowCompletionEntity.status = EscrowCompletionStatus.AWAITING_PAYOUTS;
-        if (escrowStatus === EscrowStatus.Cancelled) {
+        if (escrowStatus === EscrowStatus.Cancelled || toComplete) {
           escrowCompletionEntity.status = EscrowCompletionStatus.PAID;
         }
         await this.escrowCompletionRepository.updateOne(escrowCompletionEntity);
@@ -241,6 +243,7 @@ export class EscrowCompletionService {
             EscrowStatus.Partial,
             EscrowStatus.Paid,
             EscrowStatus.ToCancel,
+            EscrowStatus.Pending,
           ].includes(escrowStatus)
         ) {
           const feeOverrides = await this.web3Service.calculateTxFees(chainId);
