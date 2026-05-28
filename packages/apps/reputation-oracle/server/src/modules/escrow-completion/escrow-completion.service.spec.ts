@@ -1035,7 +1035,7 @@ describe('EscrowCompletionService', () => {
       });
     });
 
-    it.each([EscrowStatus.Partial, EscrowStatus.Paid])(
+    it.each([EscrowStatus.Partial, EscrowStatus.Paid, EscrowStatus.Pending])(
       'should properly complete escrow with status "%s"',
       async (escrowStatus) => {
         mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
@@ -1123,12 +1123,8 @@ describe('EscrowCompletionService', () => {
       },
     );
 
-    it.each([
-      EscrowStatus.Cancelled,
-      EscrowStatus.Pending,
-      EscrowStatus.Complete,
-    ])(
-      'should not comlete escrow if its status is not partial or paid [%#]',
+    it.each([EscrowStatus.Cancelled, EscrowStatus.Complete])(
+      'should not complete escrow if its status is not completable [%#]',
       async (escrowStatus) => {
         mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
           launcher: launcherAddress,
