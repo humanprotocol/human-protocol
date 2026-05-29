@@ -58,7 +58,7 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/human-ethereum/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway.thegraph.com/api/deployments/id/QmceuRi331MC3NMajeLejepHShGNRaK87VRiePtHRbNsVV"
+            "https://gateway.thegraph.com/api/deployments/id/QmSfNJ8xWEjzsXYXRAsWgBRBpmswWTnHiM2Td5okkwymLu"
         ),
         "hmt_address": "0xd1ba9BAC957322D6e8c07a160a3A8dA11A0d2867",
         "factory_address": "0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a",
@@ -94,7 +94,7 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/human-bsc/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway.thegraph.com/api/deployments/id/QmcEAT53JPUfddhdxAdFMcHjEtQYpbzNiLkP5dMHZ9Stm7"
+            "https://gateway.thegraph.com/api/deployments/id/QmTwqGpwdNBMX1d31jdFHTZCyZGuTPuUVQR7P8o1rzocyC"
         ),
         "hmt_address": "0x711Fd6ab6d65A98904522d4e3586F492B989c527",
         "factory_address": "0x92FD968AcBd521c232f5fB8c33b342923cC72714",
@@ -132,7 +132,7 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/human-polygon/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway.thegraph.com/api/deployments/id/QmXPEzDjLTU8AiJ3Zemcodq8hVax3BvC3wskAqjULrgX7Z"
+            "https://gateway.thegraph.com/api/deployments/id/QmWQVxanu9aRM2CNmUjuWR4a3jrGcWkGX5dm6FPeSRTH3g"
         ),
         "hmt_address": "0xc748B2A084F8eFc47E086ccdDD9b7e67aEb571BF",
         "factory_address": "0xBDBfD2cC708199C5640C6ECdf3B0F4A4C67AdfcB",
