@@ -1,5 +1,13 @@
 # @human-protocol/core
 
+## 7.0.0
+
+### Major Changes
+
+- e0cd1db: Update escrow oracle fee handling so oracle fees are reserved independently from worker payouts.
+
+  The escrow contract now reserves oracle fees separately from worker payouts and transfers them on finalization, including when worker submissions are rejected. The SDK adds escrow fund amount accessors so clients and oracles can read the original funded amount and remaining worker payout funds.
+
 ## 6.0.0
 
 ### Major Changes
