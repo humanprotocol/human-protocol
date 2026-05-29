@@ -30,7 +30,7 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
-    "@human-protocol/sdk": "*",
+    "@human-protocol/sdk": "workspace:*",
     "@mui/icons-material": "^7.3.8",
     "@mui/material": "^5.16.7",
     "@mui/x-data-grid": "^8.7.0",
