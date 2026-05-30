@@ -350,7 +350,7 @@ __metadata:
     globals: "npm:^16.3.0"
     jest: "npm:^29.7.0"
     joi: "npm:^17.13.3"
-    jsonwebtoken: "npm:^9.0.2"
+    jsonwebtoken: "npm:^9.0.3"
     minio: "npm:8.0.6"
     passport: "npm:^0.7.0"
     passport-jwt: "npm:^4.0.1"
@@ -528,7 +528,7 @@ __metadata:
     globals: "npm:^16.3.0"
     jest: "npm:^29.7.0"
     joi: "npm:^17.13.3"
-    jsonwebtoken: "npm:^9.0.2"
+    jsonwebtoken: "npm:^9.0.3"
     jwt-decode: "npm:^4.0.0"
     keyv: "npm:^5.5.5"
     lodash: "npm:^4.17.21"
@@ -23474,7 +23474,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jsonwebtoken@npm:9.0.3":
+"jsonwebtoken@npm:9.0.3, jsonwebtoken@npm:^9.0.3":
   version: 9.0.3
   resolution: "jsonwebtoken@npm:9.0.3"
   dependencies:
@@ -23492,7 +23492,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jsonwebtoken@npm:^9, jsonwebtoken@npm:^9.0.0, jsonwebtoken@npm:^9.0.2":
+"jsonwebtoken@npm:^9, jsonwebtoken@npm:^9.0.0":
   version: 9.0.2
   resolution: "jsonwebtoken@npm:9.0.2"
   dependencies:
