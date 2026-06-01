@@ -3,6 +3,7 @@ import {
   EscrowStatus,
   KVStoreKeys,
   KVStoreUtils,
+  EscrowUtils,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { Inject, Injectable } from '@nestjs/common';
@@ -15,7 +16,11 @@ import { ErrorJob } from '../../common/constants/errors';
 import { JobRequestType, SolutionError } from '../../common/enums/job';
 import { EventType } from '../../common/enums/webhook';
 import { ConflictError, ValidationError } from '../../common/errors';
-import { IManifest, ISolution } from '../../common/interfaces/job';
+import {
+  IManifest,
+  ISolution,
+  VerificationResult,
+} from '../../common/interfaces/job';
 import { checkCurseWords } from '../../common/utils/curseWords';
 import { sendWebhook } from '../../common/utils/webhook';
 import { StorageService } from '../storage/storage.service';
@@ -25,7 +30,6 @@ import {
   SolutionEventData,
   WebhookDto,
 } from '../webhook/webhook.dto';
-import { HMToken__factory } from '@human-protocol/core/typechain-types';
 
 @Injectable()
 export class JobService {
@@ -48,8 +52,8 @@ export class JobService {
     const errorSolutions: ISolution[] = [];
     const uniqueSolutions: ISolution[] = [];
 
-    const filteredExchangeSolution = exchangeSolutions.filter(
-      (exchangeSolution) => !exchangeSolution.error,
+    const filteredExchangeSolution = exchangeSolutions.filter((solution) =>
+      this.isAcceptedSolution(solution),
     );
 
     filteredExchangeSolution.forEach((exchangeSolution) => {
@@ -88,6 +92,30 @@ export class JobService {
     return { errorSolutions, uniqueSolutions };
   }
 
+  private isAcceptedSolution(solution: ISolution): boolean {
+    return (
+      !solution.error &&
+      solution.verificationResult !== VerificationResult.Rejected
+    );
+  }
+
+  private toFinalResult(solution: ISolution): ISolution {
+    const rejectionReason =
+      solution.error ||
+      solution.verificationResult === VerificationResult.Rejected
+        ? solution.rejectionReason || (solution.error as SolutionError)
+        : undefined;
+
+    return {
+      workerAddress: solution.workerAddress,
+      solution: solution.solution,
+      verificationResult: rejectionReason
+        ? VerificationResult.Rejected
+        : VerificationResult.Accepted,
+      ...(rejectionReason ? { rejectionReason } : {}),
+    };
+  }
+
   async processJobSolution(webhook: WebhookDto): Promise<string> {
     const logger = this.logger.child({
       action: 'processJobSolution',
@@ -121,7 +149,7 @@ export class JobService {
     }
 
     const manifestUrl = await escrowClient.getManifest(webhook.escrowAddress);
-    const { submissionsRequired, requestType, fundAmount }: IManifest =
+    const { submissionsRequired, requestType }: IManifest =
       await this.storageService.download(manifestUrl);
 
     if (!submissionsRequired || !requestType) {
@@ -149,7 +177,11 @@ export class JobService {
       );
     }
 
-    if (existingJobSolutions.length >= submissionsRequired) {
+    if (
+      existingJobSolutions.filter((solution) =>
+        this.isAcceptedSolution(solution),
+      ).length >= submissionsRequired
+    ) {
       logger.warn(ErrorJob.AllSolutionsHaveAlreadyBeenSent, {
         submissionsRequired,
         nExistingJobSolutions: existingJobSolutions.length,
@@ -175,7 +207,7 @@ export class JobService {
     const jobSolutionUploaded = await this.storageService.uploadJobSolutions(
       webhook.escrowAddress,
       webhook.chainId,
-      recordingOracleSolutions,
+      recordingOracleSolutions.map((solution) => this.toFinalResult(solution)),
     );
 
     const lastExchangeSolution =
@@ -186,16 +218,12 @@ export class JobService {
         s.solution === lastExchangeSolution.solution,
     );
 
-    const tokenAddress = await escrowClient.getTokenAddress(
+    const netFundAmount = await this.getNetFundAmount(
+      escrowClient,
+      webhook.chainId,
       webhook.escrowAddress,
     );
-    const tokenContract = HMToken__factory.connect(
-      tokenAddress,
-      this.web3Service.getSigner(webhook.chainId),
-    );
-    const decimals = await tokenContract.decimals();
-    const fundAmountInWei = ethers.parseUnits(fundAmount.toString(), decimals);
-    const amountToReserve = fundAmountInWei / BigInt(submissionsRequired);
+    const amountToReserve = netFundAmount / BigInt(submissionsRequired);
 
     await escrowClient.storeResults(
       webhook.escrowAddress,
@@ -206,8 +234,9 @@ export class JobService {
     );
 
     if (
-      recordingOracleSolutions.filter((solution) => !solution.error).length >=
-      submissionsRequired
+      recordingOracleSolutions.filter((solution) =>
+        this.isAcceptedSolution(solution),
+      ).length >= submissionsRequired
     ) {
       const reputationOracleWebhook = await KVStoreUtils.get(
         webhook.chainId,
@@ -318,5 +347,31 @@ export class JobService {
       );
       return 'The requested job is canceled.';
     }
+  }
+
+  private async getNetFundAmount(
+    escrowClient: EscrowClient,
+    chainId: number,
+    escrowAddress: string,
+  ): Promise<bigint> {
+    const escrow = await EscrowUtils.getEscrow(chainId, escrowAddress);
+    if (!escrow) {
+      this.logger.error(ErrorJob.NotFound, {
+        chainId,
+        escrowAddress,
+      });
+      throw new ConflictError(ErrorJob.NotFound);
+    }
+    const oracleFees = [
+      escrow.recordingOracleFee,
+      escrow.reputationOracleFee,
+      escrow.exchangeOracleFee,
+    ];
+
+    return oracleFees.reduce(
+      (netFundAmount, fee) =>
+        netFundAmount - (escrow.totalFundedAmount * BigInt(fee || 1)) / 100n,
+      escrow.totalFundedAmount,
+    );
   }
 }

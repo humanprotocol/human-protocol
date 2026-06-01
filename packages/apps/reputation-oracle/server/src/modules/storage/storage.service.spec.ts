@@ -248,4 +248,51 @@ describe('StorageService', () => {
       expect(downloadedData).toEqual(data);
     });
   });
+
+  describe('downloadManifest', () => {
+    const EXPECTED_DOWNLOAD_ERROR_MESSAGE = 'Error downloading manifest';
+    let spyOnDownloadFile: jest.SpyInstance;
+
+    beforeAll(() => {
+      spyOnDownloadFile = jest.spyOn(httpUtils, 'downloadFile');
+      spyOnDownloadFile.mockImplementation();
+    });
+
+    afterAll(() => {
+      spyOnDownloadFile.mockRestore();
+    });
+
+    it('should throw custom error when fails to load manifest', async () => {
+      spyOnDownloadFile.mockRejectedValueOnce(new Error(faker.lorem.word()));
+
+      await expect(
+        storageService.downloadManifest(faker.internet.url()),
+      ).rejects.toThrow(EXPECTED_DOWNLOAD_ERROR_MESSAGE);
+    });
+
+    it('should download manifest with encryption state', async () => {
+      const manifest = {
+        requestType: faker.string.sample(),
+      };
+
+      const fileUrl = faker.internet.url();
+      spyOnDownloadFile.mockImplementation(async (url) => {
+        if (url === fileUrl) {
+          return Buffer.from(JSON.stringify(manifest));
+        }
+
+        throw new Error('File not found');
+      });
+      mockedPgpEncryptionService.maybeDecryptFile.mockImplementationOnce(
+        async (c) => c,
+      );
+
+      const downloadedManifest = await storageService.downloadManifest(fileUrl);
+
+      expect(downloadedManifest).toEqual({
+        manifest,
+        encrypted: false,
+      });
+    });
+  });
 });

@@ -1,16 +1,22 @@
-import { CvatJobType, FortuneJobType, MarketingJobType } from '@/common/enums';
+import {
+  CvatJobType,
+  FortuneJobType,
+  JobType,
+  MarketingJobType,
+} from '@/common/enums';
 
-export type FortuneManifest = {
+export interface BaseManifest<
+  TRequestType extends FortuneJobType | MarketingJobType,
+> {
   submissionsRequired: number;
-  fundAmount: number;
-  requestType: FortuneJobType;
-};
+  requestType: TRequestType;
+}
 
-export type MarketingManifest = {
-  job_type: MarketingJobType;
-  submissions_required: number;
-  end_date?: string;
-};
+export type FortuneManifest = BaseManifest<FortuneJobType>;
+
+export interface MarketingManifest extends BaseManifest<MarketingJobType> {
+  endDate?: string;
+}
 
 export type CvatManifest = {
   annotation: {
@@ -24,4 +30,4 @@ export type CvatManifest = {
 
 export type JobManifest = FortuneManifest | MarketingManifest | CvatManifest;
 
-export type JobRequestType = FortuneJobType | MarketingJobType | CvatJobType;
+export type JobRequestType = (typeof JobType)[number];

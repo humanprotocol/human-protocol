@@ -15,7 +15,6 @@ import {
   MOCK_ADDRESS,
   MOCK_EXCHANGE_ORACLE_URL,
   MOCK_RECORDING_ORACLE_URL,
-  MOCK_REPUTATION_ORACLES,
   mockConfig,
 } from './../../../test/constants';
 import { RateService } from '../rate/rate.service';
@@ -359,12 +358,6 @@ describe('Web3Service', () => {
   });
 
   describe('getReputationOraclesByJobType', () => {
-    beforeEach(async () => {
-      jest
-        .spyOn(web3Service.web3ConfigService, 'reputationOracles', 'get')
-        .mockReturnValue(MOCK_REPUTATION_ORACLES);
-    });
-
     afterEach(() => {
       jest.clearAllMocks();
     });
@@ -485,20 +478,6 @@ describe('Web3Service', () => {
       (OperatorUtils.getOperator as jest.Mock).mockRejectedValueOnce(
         new Error('Failed to fetch operator'),
       );
-
-      const result = await web3Service.getReputationOraclesByJobType(
-        ChainId.POLYGON_AMOY,
-        'Points',
-      );
-
-      expect(result).toEqual([]);
-      expect(OperatorUtils.getOperator).toHaveBeenCalledTimes(1);
-    });
-
-    it('should return an empty array if no reputation oracles are configured', async () => {
-      jest
-        .spyOn(web3Service.web3ConfigService, 'reputationOracles', 'get')
-        .mockReturnValue('');
 
       const result = await web3Service.getReputationOraclesByJobType(
         ChainId.POLYGON_AMOY,

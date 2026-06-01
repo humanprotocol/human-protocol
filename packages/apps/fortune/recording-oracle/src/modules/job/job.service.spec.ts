@@ -4,11 +4,13 @@ import {
   EncryptionUtils,
   EscrowClient,
   EscrowStatus,
+  EscrowUtils,
   KVStoreUtils,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
+import { ethers } from 'ethers';
 import { of, throwError } from 'rxjs';
 import {
   MOCK_ADDRESS,
@@ -34,7 +36,6 @@ import { StorageService } from '../storage/storage.service';
 import { Web3Service } from '../web3/web3.service';
 import { WebhookDto } from '../webhook/webhook.dto';
 import { JobService } from './job.service';
-import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import { downloadFileFromUrl } from '@/common/utils/storage';
 
 jest.mock('minio', () => {
@@ -61,6 +62,11 @@ jest.mock('@human-protocol/sdk', () => ({
   EscrowClient: {
     build: jest.fn().mockImplementation(() => ({})),
   },
+  EscrowUtils: {
+    getEscrow: jest.fn().mockResolvedValue({
+      totalFundedAmount: 8n,
+    }),
+  },
   KVStoreUtils: {
     get: jest.fn(),
     getPublicKey: jest.fn().mockResolvedValue('publicKey'),
@@ -70,9 +76,24 @@ jest.mock('@human-protocol/sdk', () => ({
   },
 }));
 
+const calculateAmountToReserve = (
+  fundAmount: bigint,
+  submissionsRequired: number,
+  oracleFees: number[],
+): bigint => {
+  const netFundAmount = oracleFees.reduce(
+    (netAmount, fee) => netAmount - (fundAmount * BigInt(fee)) / 100n,
+    fundAmount,
+  );
+
+  return netFundAmount / BigInt(submissionsRequired);
+};
+
 describe('JobService', () => {
   let jobService: JobService;
   const downloadFileFromUrlMock = jest.mocked(downloadFileFromUrl);
+  const mockedEscrowUtils = jest.mocked(EscrowUtils);
+  let web3ConfigService: Web3ConfigService;
 
   jest
     .spyOn(Web3ConfigService.prototype, 'privateKey', 'get')
@@ -94,7 +115,10 @@ describe('JobService', () => {
         {
           provide: ConfigService,
           useValue: {
-            get: jest.fn((key: string) => mockConfig[key]),
+            get: jest.fn(
+              (key: string, defaultValue?: unknown) =>
+                mockConfig[key] ?? defaultValue,
+            ),
             getOrThrow: jest.fn((key: string) => {
               if (!mockConfig[key]) {
                 throw new Error(`Configuration key "${key}" does not exist`);
@@ -127,16 +151,10 @@ describe('JobService', () => {
     }).compile();
 
     jobService = moduleRef.get<JobService>(JobService);
+    web3ConfigService = moduleRef.get<Web3ConfigService>(Web3ConfigService);
   });
 
   describe('processJobSolution', () => {
-    beforeAll(() => {
-      const decimalsMock = jest.fn().mockResolvedValue(18);
-      const tokenContractMock = { decimals: decimalsMock };
-      jest
-        .spyOn(HMToken__factory, 'connect')
-        .mockReturnValue(tokenContractMock as any);
-    });
     afterEach(() => {
       jest.clearAllMocks();
     });
@@ -241,7 +259,6 @@ describe('JobService', () => {
         submissionsRequired: 2,
         requesterTitle: MOCK_REQUESTER_TITLE,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        fundAmount: '10',
         requestType: JobRequestType.FORTUNE,
       };
 
@@ -303,7 +320,6 @@ describe('JobService', () => {
         submissionsRequired: 2,
         requesterTitle: MOCK_REQUESTER_TITLE,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        fundAmount: '10',
         requestType: JobRequestType.FORTUNE,
       };
 
@@ -316,7 +332,6 @@ describe('JobService', () => {
           .fn()
           .mockResolvedValue('http://example.com/results'),
         storeResults: jest.fn().mockResolvedValue(true),
-        getTokenAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
 
@@ -363,22 +378,27 @@ describe('JobService', () => {
     });
 
     it('should return solution are recorded when one solution is sent', async () => {
+      const fundAmount = ethers.parseEther('10');
+      const oracleFees = [2, 3, 5];
       const escrowClient = {
         getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-        getReputationOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
         getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
         getManifest: jest.fn().mockResolvedValue('http://example.com/manifest'),
         getIntermediateResultsUrl: jest.fn().mockResolvedValue(''),
         storeResults: jest.fn().mockResolvedValue(true),
-        getTokenAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
+      mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
+        totalFundedAmount: fundAmount,
+        recordingOracleFee: oracleFees[0],
+        reputationOracleFee: oracleFees[1],
+        exchangeOracleFee: oracleFees[2],
+      } as any);
 
       const manifest: IManifest = {
         submissionsRequired: 3,
         requesterTitle: MOCK_REQUESTER_TITLE,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        fundAmount: '10',
         requestType: JobRequestType.FORTUNE,
       };
 
@@ -412,11 +432,26 @@ describe('JobService', () => {
       };
 
       const result = await jobService.processJobSolution(jobSolution);
+      const expectedAmountToReserve = calculateAmountToReserve(
+        fundAmount,
+        manifest.submissionsRequired,
+        oracleFees,
+      );
+
       expect(result).toEqual('Solutions recorded.');
+      expect(escrowClient.storeResults).toHaveBeenCalledWith(
+        jobSolution.escrowAddress,
+        expect.any(String),
+        expect.any(String),
+        expectedAmountToReserve,
+        { timeoutMs: web3ConfigService.txTimeoutMs },
+      );
       expect(httpServicePostMock).not.toHaveBeenCalled();
     });
 
     it('should call send webhook method when all solutions are recorded', async () => {
+      const fundAmount = ethers.parseEther('10');
+      const oracleFees = [4, 6, 10];
       const escrowClient = {
         getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
         getReputationOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
@@ -426,9 +461,14 @@ describe('JobService', () => {
           .fn()
           .mockResolvedValue('http://existing-solutions'),
         storeResults: jest.fn().mockResolvedValue(true),
-        getTokenAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
+      mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
+        totalFundedAmount: fundAmount,
+        recordingOracleFee: oracleFees[0],
+        reputationOracleFee: oracleFees[1],
+        exchangeOracleFee: oracleFees[2],
+      } as any);
 
       KVStoreUtils.get = jest
         .fn()
@@ -438,7 +478,6 @@ describe('JobService', () => {
         submissionsRequired: 2,
         requesterTitle: MOCK_REQUESTER_TITLE,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        fundAmount: '10',
         requestType: JobRequestType.FORTUNE,
       };
 
@@ -472,6 +511,11 @@ describe('JobService', () => {
       };
 
       const result = await jobService.processJobSolution(jobSolution);
+      const expectedAmountToReserve = calculateAmountToReserve(
+        fundAmount,
+        manifest.submissionsRequired,
+        oracleFees,
+      );
 
       const expectedBody = {
         chain_id: jobSolution.chainId,
@@ -479,6 +523,13 @@ describe('JobService', () => {
         event_type: EventType.JOB_COMPLETED,
       };
       expect(result).toEqual('The requested job is completed.');
+      expect(escrowClient.storeResults).toHaveBeenCalledWith(
+        jobSolution.escrowAddress,
+        expect.any(String),
+        expect.any(String),
+        expectedAmountToReserve,
+        { timeoutMs: web3ConfigService.txTimeoutMs },
+      );
       expect(httpServicePostMock).toHaveBeenCalledWith(
         MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
         expectedBody,
@@ -504,15 +555,16 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue('http://existing-solutions'),
       storeResults: jest.fn().mockResolvedValue(true),
-      getTokenAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
     };
     (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
+    KVStoreUtils.get = jest
+      .fn()
+      .mockResolvedValue(MOCK_REPUTATION_ORACLE_WEBHOOK_URL);
 
     const manifest: IManifest = {
       submissionsRequired: 4,
       requesterTitle: MOCK_REQUESTER_TITLE,
       requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-      fundAmount: '10',
       requestType: JobRequestType.FORTUNE,
     };
 
@@ -584,19 +636,25 @@ describe('JobService', () => {
   });
 
   it('should call exchange oracle endpoint when solution is wrong', async () => {
+    const fundAmount = ethers.parseEther('10');
+    const oracleFees = [2, 3, 5];
     const escrowClient = {
       getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       getExchangeOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-      getReputationOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
       getManifest: jest.fn().mockResolvedValue('http://example.com/manifest'),
       getIntermediateResultsUrl: jest
         .fn()
         .mockResolvedValue('http://existing-solutions'),
       storeResults: jest.fn().mockResolvedValue(true),
-      getTokenAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
     };
     (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
+    mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
+      totalFundedAmount: fundAmount,
+      recordingOracleFee: oracleFees[0],
+      reputationOracleFee: oracleFees[1],
+      exchangeOracleFee: oracleFees[2],
+    } as any);
     KVStoreUtils.get = jest
       .fn()
       .mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
@@ -606,7 +664,6 @@ describe('JobService', () => {
       submissionsRequired: 3,
       requesterTitle: MOCK_REQUESTER_TITLE,
       requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-      fundAmount: '10',
       requestType: JobRequestType.FORTUNE,
     };
 
@@ -654,6 +711,13 @@ describe('JobService', () => {
       },
     };
     expect(result).toEqual('Solutions recorded.');
+    expect(escrowClient.storeResults).toHaveBeenCalledWith(
+      jobSolution.escrowAddress,
+      expect.any(String),
+      expect.any(String),
+      0n,
+      { timeoutMs: web3ConfigService.txTimeoutMs },
+    );
     expect(httpServicePostMock).toHaveBeenCalledWith(
       MOCK_EXCHANGE_ORACLE_WEBHOOK_URL,
       expectedBody,
@@ -669,14 +733,12 @@ describe('JobService', () => {
     const escrowClient = {
       getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       getExchangeOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-      getReputationOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
       getManifest: jest.fn().mockResolvedValue('http://example.com/manifest'),
       getIntermediateResultsUrl: jest
         .fn()
         .mockResolvedValue('http://existing-solutions'),
       storeResults: jest.fn().mockResolvedValue(true),
-      getTokenAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
     };
     (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
     KVStoreUtils.get = jest
@@ -688,7 +750,6 @@ describe('JobService', () => {
       submissionsRequired: 3,
       requesterTitle: MOCK_REQUESTER_TITLE,
       requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-      fundAmount: '10',
       requestType: JobRequestType.FORTUNE,
     };
 

@@ -20,6 +20,7 @@ import { ServerConfigService, Web3ConfigService } from '@/config';
 import { isDuplicatedError } from '@/database';
 import logger from '@/logger';
 import { ReputationService } from '@/modules/reputation';
+import { ReputationEntityType } from '@/modules/reputation/constants';
 import { StorageService } from '@/modules/storage';
 import { Web3Service } from '@/modules/web3';
 /**
@@ -37,16 +38,14 @@ import { EscrowPayoutsBatchEntity } from './escrow-payouts-batch.entity';
 import { EscrowPayoutsBatchRepository } from './escrow-payouts-batch.repository';
 import {
   CvatPayoutsCalculator,
-  FortunePayoutsCalculator,
+  DefaultPayoutsCalculator,
   EscrowPayoutsCalculator,
   CalculatedPayout,
-  MarketingPayoutsCalculator,
 } from './payouts-calculation';
 import {
   CvatResultsProcessor,
+  DefaultResultsProcessor,
   EscrowResultsProcessor,
-  FortuneResultsProcessor,
-  MarketingResultsProcessor,
 } from './results-processing';
 
 @Injectable()
@@ -65,11 +64,9 @@ export class EscrowCompletionService {
     private readonly outgoingWebhookService: OutgoingWebhookService,
     private readonly reputationService: ReputationService,
     private readonly cvatResultsProcessor: CvatResultsProcessor,
-    private readonly fortuneResultsProcessor: FortuneResultsProcessor,
-    private readonly marketingResultsProcessor: MarketingResultsProcessor,
+    private readonly defaultResultsProcessor: DefaultResultsProcessor,
     private readonly cvatPayoutsCalculator: CvatPayoutsCalculator,
-    private readonly fortunePayoutsCalculator: FortunePayoutsCalculator,
-    private readonly marketingPayoutsCalculator: MarketingPayoutsCalculator,
+    private readonly defaultPayoutsCalculator: DefaultPayoutsCalculator,
   ) {}
 
   async createEscrowCompletion(
@@ -125,6 +122,7 @@ export class EscrowCompletionService {
         const escrowStatus = await escrowClient.getStatus(
           escrowCompletionEntity.escrowAddress,
         );
+        let toComplete = false;
         if (
           escrowStatus === EscrowStatus.Pending ||
           escrowStatus === EscrowStatus.ToCancel
@@ -137,8 +135,8 @@ export class EscrowCompletionService {
             throw new Error('Escrow data is missing');
           }
 
-          const manifest =
-            await this.storageService.downloadJsonLikeData<JobManifest>(
+          const { manifest, encrypted: isManifestEncrypted } =
+            await this.storageService.downloadManifest(
               escrowData.manifest as string,
             );
           const jobRequestType = manifestUtils.getJobRequestType(manifest);
@@ -151,6 +149,7 @@ export class EscrowCompletionService {
               escrowCompletionEntity.chainId,
               escrowCompletionEntity.escrowAddress,
               manifest,
+              isManifestEncrypted,
             );
 
             escrowCompletionEntity.finalResultsUrl = url;
@@ -169,6 +168,7 @@ export class EscrowCompletionService {
             finalResultsUrl: escrowCompletionEntity.finalResultsUrl,
           });
 
+          toComplete = calculatedPayouts.length === 0;
           /**
            * When creating payout batches we need to guarantee deterministic result,
            * so order it first.
@@ -200,7 +200,7 @@ export class EscrowCompletionService {
         }
 
         escrowCompletionEntity.status = EscrowCompletionStatus.AWAITING_PAYOUTS;
-        if (escrowStatus === EscrowStatus.Cancelled) {
+        if (escrowStatus === EscrowStatus.Cancelled || toComplete) {
           escrowCompletionEntity.status = EscrowCompletionStatus.PAID;
         }
         await this.escrowCompletionRepository.updateOne(escrowCompletionEntity);
@@ -243,6 +243,7 @@ export class EscrowCompletionService {
             EscrowStatus.Partial,
             EscrowStatus.Paid,
             EscrowStatus.ToCancel,
+            EscrowStatus.Pending,
           ].includes(escrowStatus)
         ) {
           const feeOverrides = await this.web3Service.calculateTxFees(chainId);
@@ -264,11 +265,14 @@ export class EscrowCompletionService {
           /**
            * This operation can fail and lost, so it's "at most once"
            */
+          const jobRequestType =
+            await this.getJobRequestTypeFromEscrowData(escrowData);
           await this.reputationService.assessEscrowParties(
             chainId,
             escrowData.launcher,
             escrowData.exchangeOracle!,
             escrowData.recordingOracle!,
+            jobRequestType,
           );
         }
 
@@ -474,6 +478,17 @@ export class EscrowCompletionService {
       );
 
       await this.escrowPayoutsBatchRepository.deleteOne(payoutsBatch);
+      const escrowData = await EscrowUtils.getEscrow(
+        escrowCompletionEntity.chainId,
+        escrowCompletionEntity.escrowAddress,
+      );
+      const jobRequestType =
+        await this.getJobRequestTypeFromEscrowData(escrowData);
+      await this.increasePayoutRecipientsReputation(
+        escrowCompletionEntity.chainId,
+        Array.from(recipientToAmountMap.keys()),
+        jobRequestType,
+      );
     } catch (error) {
       if (ethers.isError(error, 'NONCE_EXPIRED')) {
         payoutsBatch.txNonce = null;
@@ -484,43 +499,65 @@ export class EscrowCompletionService {
     }
   }
 
+  private async increasePayoutRecipientsReputation(
+    chainId: ChainId,
+    recipients: string[],
+    jobRequestType: JobRequestType,
+  ): Promise<void> {
+    for (const address of recipients) {
+      try {
+        await this.reputationService.increaseReputation(
+          {
+            chainId,
+            address,
+            type: ReputationEntityType.WORKER,
+            jobRequestType,
+          },
+          1,
+        );
+      } catch (error) {
+        this.logger.error('Failed to increase payout recipient reputation', {
+          error,
+          address,
+          chainId,
+          jobRequestType,
+        });
+      }
+    }
+  }
+
+  private async getJobRequestTypeFromEscrowData(
+    escrowData: Awaited<ReturnType<typeof EscrowUtils.getEscrow>>,
+  ): Promise<JobRequestType> {
+    if (!escrowData) {
+      throw new Error('Escrow data is missing');
+    }
+
+    const manifest =
+      await this.storageService.downloadJsonLikeData<JobManifest>(
+        escrowData.manifest as string,
+      );
+
+    return manifestUtils.getJobRequestType(manifest);
+  }
+
   private getEscrowResultsProcessor(
     jobRequestType: JobRequestType,
   ): EscrowResultsProcessor {
-    if (manifestUtils.isFortuneJobType(jobRequestType)) {
-      return this.fortuneResultsProcessor;
-    }
-
-    if (manifestUtils.isMarketingJobType(jobRequestType)) {
-      return this.marketingResultsProcessor;
-    }
-
     if (manifestUtils.isCvatJobType(jobRequestType)) {
       return this.cvatResultsProcessor;
     }
 
-    throw new Error(
-      `No escrow results processor defined for '${jobRequestType}' jobs`,
-    );
+    return this.defaultResultsProcessor;
   }
 
   private getEscrowPayoutsCalculator(
     jobRequestType: JobRequestType,
   ): EscrowPayoutsCalculator {
-    if (manifestUtils.isFortuneJobType(jobRequestType)) {
-      return this.fortunePayoutsCalculator;
-    }
-
-    if (manifestUtils.isMarketingJobType(jobRequestType)) {
-      return this.marketingPayoutsCalculator;
-    }
-
     if (manifestUtils.isCvatJobType(jobRequestType)) {
       return this.cvatPayoutsCalculator;
     }
 
-    throw new Error(
-      `No escrow payouts calculator defined for '${jobRequestType}' jobs`,
-    );
+    return this.defaultPayoutsCalculator;
   }
 }

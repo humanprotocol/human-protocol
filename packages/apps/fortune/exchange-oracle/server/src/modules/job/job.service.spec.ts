@@ -4,6 +4,7 @@ import {
   Encryption,
   EncryptionUtils,
   EscrowClient,
+  EscrowUtils,
   OperatorUtils,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
@@ -381,7 +382,6 @@ describe('JobService', () => {
         requesterTitle: 'Example Title',
         requesterDescription: 'Example Description',
         submissionsRequired: 5,
-        fundAmount: 100,
       };
 
       jest.spyOn(jobService, 'getManifest').mockResolvedValue(manifest);
@@ -416,6 +416,45 @@ describe('JobService', () => {
         escrowAddress,
         MOCK_MANIFEST_URL,
       );
+    });
+
+    it('should calculate reward amount from net funded amount', async () => {
+      const manifest: ManifestDto = {
+        requesterTitle: 'Example Title',
+        requesterDescription: 'Example Description',
+        submissionsRequired: 5,
+      };
+
+      jest.spyOn(jobService, 'getManifest').mockResolvedValue(manifest);
+      jest.spyOn(EscrowUtils, 'getEscrow').mockResolvedValue({
+        token: MOCK_ADDRESS,
+        totalFundedAmount: 100000000000000000000n,
+        recordingOracleFee: 2,
+        reputationOracleFee: 3,
+        exchangeOracleFee: 5,
+      } as any);
+      jest.spyOn(HMToken__factory, 'connect').mockReturnValue({
+        decimals: jest.fn().mockResolvedValue(18),
+      } as any);
+      jest
+        .spyOn(jobRepository, 'fetchFiltered')
+        .mockResolvedValueOnce({ entities: jobs as any, itemCount: 1 });
+
+      const result = await jobService.getJobList(
+        {
+          chainId,
+          jobType: JobType.FORTUNE,
+          fields: [JobFieldName.RewardAmount],
+          escrowAddress,
+          status: JobStatus.ACTIVE,
+          page: 0,
+          pageSize: 10,
+          skip: 0,
+        },
+        workerAddress,
+      );
+
+      expect(result.results[0].rewardAmount).toBe('18');
     });
 
     it('should return an array of jobs without calling the manifest', async () => {
@@ -481,7 +520,6 @@ describe('JobService', () => {
         requesterTitle: 'Example Title',
         requesterDescription: 'Example Description',
         submissionsRequired: 5,
-        fundAmount: 100,
       };
 
       jest
@@ -537,7 +575,6 @@ describe('JobService', () => {
         requesterTitle: 'Example Title',
         requesterDescription: 'Example Description',
         submissionsRequired: 1,
-        fundAmount: 100,
       };
 
       assignment.status = AssignmentStatus.ACTIVE;
@@ -569,7 +606,6 @@ describe('JobService', () => {
         requesterTitle: 'Example Title',
         requesterDescription: 'Example Description',
         submissionsRequired: 5,
-        fundAmount: 100,
       };
 
       assignment.status = AssignmentStatus.ACTIVE;
@@ -605,7 +641,6 @@ describe('JobService', () => {
         requesterTitle: 'Example Title',
         requesterDescription: 'Example Description',
         submissionsRequired: 5,
-        fundAmount: 100,
       };
 
       downloadFileFromUrlMock.mockResolvedValue(JSON.stringify(manifest));
@@ -626,7 +661,6 @@ describe('JobService', () => {
         requesterTitle: 'Example Title',
         requesterDescription: 'Example Description',
         submissionsRequired: 5,
-        fundAmount: 100,
       };
 
       downloadFileFromUrlMock.mockResolvedValue('encrypted-content');
@@ -650,7 +684,6 @@ describe('JobService', () => {
         requesterTitle: 'Example Title',
         requesterDescription: 'Example Description',
         submissionsRequired: 5,
-        fundAmount: 100,
       };
 
       downloadFileFromUrlMock.mockResolvedValue(manifest);

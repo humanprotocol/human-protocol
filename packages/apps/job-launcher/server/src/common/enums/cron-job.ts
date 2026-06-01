@@ -1,5 +1,4 @@
 export enum CronJobType {
-  ContentModeration = 'content-moderation',
   CreateEscrow = 'create-escrow',
   CancelEscrow = 'cancel-escrow',
   ProcessPendingWebhook = 'process-pending-webhook',

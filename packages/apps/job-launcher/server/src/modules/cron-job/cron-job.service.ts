@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import {
-  ErrorContentModeration,
   ErrorCronJob,
   ErrorEscrow,
   ErrorJob,
@@ -19,7 +18,6 @@ import {
 } from '../../common/enums/webhook';
 import { ConflictError, NotFoundError } from '../../common/errors';
 import logger from '../../logger';
-import { GCVContentModerationService } from '../content-moderation/gcv-content-moderation.service';
 import { JobEntity } from '../job/job.entity';
 import { JobRepository } from '../job/job.repository';
 import { JobService } from '../job/job.service';
@@ -39,7 +37,6 @@ export class CronJobService {
     private readonly cronJobRepository: CronJobRepository,
     private readonly jobService: JobService,
     private readonly jobRepository: JobRepository,
-    private readonly contentModerationService: GCVContentModerationService,
     private readonly webhookService: WebhookService,
     private readonly web3Service: Web3Service,
     private readonly paymentService: PaymentService,
@@ -83,45 +80,6 @@ export class CronJobService {
   }
 
   @Cron('*/2 * * * *')
-  public async moderateContentCronJob() {
-    if (await this.isCronJobRunning(CronJobType.ContentModeration)) {
-      return;
-    }
-
-    const cronJobEntity = await this.startCronJob(
-      CronJobType.ContentModeration,
-    );
-
-    try {
-      const jobs = await this.jobRepository.findByStatus([
-        JobStatus.PAID,
-        JobStatus.UNDER_MODERATION,
-      ]);
-
-      await Promise.all(
-        jobs.map(async (jobEntity) => {
-          try {
-            await this.contentModerationService.moderateJob(jobEntity);
-          } catch (error) {
-            this.logger.error('Error parse job moderation results job', {
-              jobId: jobEntity.id,
-              error,
-            });
-            await this.jobService.handleProcessJobFailure(
-              jobEntity,
-              ErrorContentModeration.ResultsParsingFailed,
-            );
-          }
-        }),
-      );
-    } catch (error) {
-      this.logger.error('Error in moderateContentCronJob', error);
-    }
-
-    await this.completeCronJob(cronJobEntity);
-  }
-
-  @Cron('*/2 * * * *')
   public async createEscrowCronJob() {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.CreateEscrow,
@@ -135,9 +93,7 @@ export class CronJobService {
     const cronJob = await this.startCronJob(CronJobType.CreateEscrow);
 
     try {
-      const jobEntities = await this.jobRepository.findByStatus(
-        JobStatus.MODERATION_PASSED,
-      );
+      const jobEntities = await this.jobRepository.findByStatus(JobStatus.PAID);
       for (const jobEntity of jobEntities) {
         try {
           await this.jobService.createEscrow(jobEntity);

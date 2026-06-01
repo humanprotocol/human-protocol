@@ -12,7 +12,7 @@ import {
 import { Operator } from '../../generated/schema';
 import { handleDataSaved } from '../../src/mapping/KVStore';
 import { createOrLoadStaker } from '../../src/mapping/Staking';
-import { toEventId } from '../../src/mapping/utils/event';
+import { toPreviousEventId } from '../../src/mapping/utils/event';
 import { toBytes } from '../../src/mapping/utils/string';
 import { createDataSavedEvent } from './fixtures';
 
@@ -175,7 +175,7 @@ describe('KVStore', () => {
       kvStoreAddressString
     );
 
-    const internalTransactionId = toEventId(data1).toHex();
+    const internalTransactionId = toPreviousEventId(data2).toHex();
     assert.fieldEquals(
       'InternalTransaction',
       internalTransactionId,

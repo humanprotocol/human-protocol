@@ -28,6 +28,7 @@ import _ from 'lodash';
 import { CvatJobType, FortuneJobType, MarketingJobType } from '@/common/enums';
 import { ServerConfigService, Web3ConfigService } from '@/config';
 import { ReputationService } from '@/modules/reputation';
+import { ReputationEntityType } from '@/modules/reputation/constants';
 import { StorageService } from '@/modules/storage';
 import { WalletWithProvider, Web3Service } from '@/modules/web3';
 import {
@@ -48,13 +49,11 @@ import {
 } from './fixtures/escrow-completion';
 import {
   CvatPayoutsCalculator,
-  FortunePayoutsCalculator,
-  MarketingPayoutsCalculator,
+  DefaultPayoutsCalculator,
 } from './payouts-calculation';
 import {
   CvatResultsProcessor,
-  FortuneResultsProcessor,
-  MarketingResultsProcessor,
+  DefaultResultsProcessor,
 } from './results-processing';
 
 const mockServerConfigService = {
@@ -68,12 +67,10 @@ const mockWeb3Service = createMock<Web3Service>();
 const mockStorageService = createMock<StorageService>();
 const mockOutgoingWebhookService = createMock<OutgoingWebhookService>();
 const mockReputationService = createMock<ReputationService>();
-const mockFortuneResultsProcessor = createMock<FortuneResultsProcessor>();
 const mockCvatResultsProcessor = createMock<CvatResultsProcessor>();
-const mockMarketingResultsProcessor = createMock<MarketingResultsProcessor>();
-const mockFortunePayoutsCalculator = createMock<FortunePayoutsCalculator>();
+const mockDefaultResultsProcessor = createMock<DefaultResultsProcessor>();
 const mockCvatPayoutsCalculator = createMock<CvatPayoutsCalculator>();
-const mockMarketingPayoutsCalculator = createMock<MarketingPayoutsCalculator>();
+const mockDefaultPayoutsCalculator = createMock<DefaultPayoutsCalculator>();
 
 const mockedEscrowClient = jest.mocked(EscrowClient);
 const mockedEscrowUtils = jest.mocked(EscrowUtils);
@@ -119,28 +116,20 @@ describe('EscrowCompletionService', () => {
           useValue: mockReputationService,
         },
         {
-          provide: FortuneResultsProcessor,
-          useValue: mockFortuneResultsProcessor,
+          provide: DefaultResultsProcessor,
+          useValue: mockDefaultResultsProcessor,
         },
         {
           provide: CvatResultsProcessor,
           useValue: mockCvatResultsProcessor,
         },
         {
-          provide: MarketingResultsProcessor,
-          useValue: mockMarketingResultsProcessor,
-        },
-        {
-          provide: FortunePayoutsCalculator,
-          useValue: mockFortunePayoutsCalculator,
+          provide: DefaultPayoutsCalculator,
+          useValue: mockDefaultPayoutsCalculator,
         },
         {
           provide: CvatPayoutsCalculator,
           useValue: mockCvatPayoutsCalculator,
-        },
-        {
-          provide: MarketingPayoutsCalculator,
-          useValue: mockMarketingPayoutsCalculator,
         },
       ],
     }).compile();
@@ -326,12 +315,13 @@ describe('EscrowCompletionService', () => {
       } as unknown as IEscrow);
 
       const fortuneManifest = generateFortuneManifest();
-      mockStorageService.downloadJsonLikeData.mockResolvedValueOnce(
-        fortuneManifest,
-      );
+      mockStorageService.downloadManifest.mockResolvedValueOnce({
+        manifest: fortuneManifest,
+        encrypted: true,
+      });
       const finalResultsUrl = faker.internet.url();
       const finalResultsHash = faker.string.hexadecimal({ length: 42 });
-      mockFortuneResultsProcessor.storeResults.mockResolvedValueOnce({
+      mockDefaultResultsProcessor.storeResults.mockResolvedValueOnce({
         url: finalResultsUrl,
         hash: finalResultsHash,
       });
@@ -341,7 +331,7 @@ describe('EscrowCompletionService', () => {
           amount: faker.number.bigInt(),
         },
       ];
-      mockFortunePayoutsCalculator.calculate.mockResolvedValueOnce(
+      mockDefaultPayoutsCalculator.calculate.mockResolvedValueOnce(
         calculatedPayouts,
       );
 
@@ -351,14 +341,15 @@ describe('EscrowCompletionService', () => {
         pendingRecord.chainId,
         pendingRecord.escrowAddress,
       );
-      expect(mockStorageService.downloadJsonLikeData).toHaveBeenCalledWith(
+      expect(mockStorageService.downloadManifest).toHaveBeenCalledWith(
         manifestUrl,
       );
-      expect(mockFortuneResultsProcessor.storeResults).toHaveBeenCalledTimes(1);
-      expect(mockFortuneResultsProcessor.storeResults).toHaveBeenCalledWith(
+      expect(mockDefaultResultsProcessor.storeResults).toHaveBeenCalledTimes(1);
+      expect(mockDefaultResultsProcessor.storeResults).toHaveBeenCalledWith(
         pendingRecord.chainId,
         pendingRecord.escrowAddress,
         fortuneManifest,
+        true,
       );
       expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -368,8 +359,8 @@ describe('EscrowCompletionService', () => {
         }),
       );
 
-      expect(mockFortunePayoutsCalculator.calculate).toHaveBeenCalledTimes(1);
-      expect(mockFortunePayoutsCalculator.calculate).toHaveBeenCalledWith({
+      expect(mockDefaultPayoutsCalculator.calculate).toHaveBeenCalledTimes(1);
+      expect(mockDefaultPayoutsCalculator.calculate).toHaveBeenCalledWith({
         manifest: fortuneManifest,
         finalResultsUrl,
         chainId: pendingRecord.chainId,
@@ -407,9 +398,10 @@ describe('EscrowCompletionService', () => {
       mockedEscrowUtils.getEscrow.mockResolvedValueOnce(
         {} as unknown as IEscrow,
       );
-      mockStorageService.downloadJsonLikeData.mockResolvedValueOnce(
-        generateFortuneManifest(),
-      );
+      mockStorageService.downloadManifest.mockResolvedValueOnce({
+        manifest: generateFortuneManifest(),
+        encrypted: false,
+      });
 
       const firstAddressPayout = {
         address: `0x1${faker.finance.ethereumAddress().slice(3)}`,
@@ -424,7 +416,7 @@ describe('EscrowCompletionService', () => {
         amount: faker.number.bigInt(),
       };
 
-      mockFortunePayoutsCalculator.calculate.mockResolvedValueOnce(
+      mockDefaultPayoutsCalculator.calculate.mockResolvedValueOnce(
         faker.helpers.shuffle([
           firstAddressPayout,
           secondAddressPayout,
@@ -708,6 +700,7 @@ describe('EscrowCompletionService', () => {
     let mockedSigner: SignerMock;
     const mockedCreateBulkPayoutTransaction = jest.fn();
     let mockedRawTransaction: { nonce: number };
+    let jobRequestType: FortuneJobType;
 
     beforeEach(() => {
       mockedSigner = createSignerMock();
@@ -725,6 +718,13 @@ describe('EscrowCompletionService', () => {
       mockedCreateBulkPayoutTransaction.mockResolvedValueOnce(
         mockedRawTransaction,
       );
+
+      const manifest = generateFortuneManifest();
+      jobRequestType = manifest.requestType;
+      mockedEscrowUtils.getEscrow.mockResolvedValue({
+        manifest: faker.internet.url(),
+      } as unknown as IEscrow);
+      mockStorageService.downloadJsonLikeData.mockResolvedValue(manifest);
     });
 
     it('should succesfully process payouts batch', async () => {
@@ -732,6 +732,16 @@ describe('EscrowCompletionService', () => {
         EscrowCompletionStatus.AWAITING_PAYOUTS,
       );
       const payoutsBatch = generateEscrowPayoutsBatch();
+      payoutsBatch.payouts = [
+        {
+          address: faker.finance.ethereumAddress(),
+          amount: faker.number.bigInt({ min: 1n }).toString(),
+        },
+        {
+          address: faker.finance.ethereumAddress(),
+          amount: faker.number.bigInt({ min: 1n }).toString(),
+        },
+      ];
 
       await service['processPayoutsBatch'](awaitingPayoutsRecord, {
         ...payoutsBatch,
@@ -759,6 +769,21 @@ describe('EscrowCompletionService', () => {
           id: payoutsBatch.id,
         }),
       );
+
+      expect(mockReputationService.increaseReputation).toHaveBeenCalledTimes(
+        payoutsBatch.payouts.length,
+      );
+      for (const payout of payoutsBatch.payouts) {
+        expect(mockReputationService.increaseReputation).toHaveBeenCalledWith(
+          {
+            chainId: awaitingPayoutsRecord.chainId,
+            address: payout.address,
+            type: ReputationEntityType.WORKER,
+            jobRequestType,
+          },
+          1,
+        );
+      }
     });
 
     it('should reset nonce if expired', async () => {
@@ -859,6 +884,9 @@ describe('EscrowCompletionService', () => {
       launcherAddress = faker.finance.ethereumAddress();
       exchangeOracleAddress = faker.finance.ethereumAddress();
       recordingOracleAddress = faker.finance.ethereumAddress();
+      mockStorageService.downloadJsonLikeData.mockResolvedValue(
+        generateFortuneManifest(),
+      );
     });
 
     describe('handle failures', () => {
@@ -1007,7 +1035,7 @@ describe('EscrowCompletionService', () => {
       });
     });
 
-    it.each([EscrowStatus.Partial, EscrowStatus.Paid])(
+    it.each([EscrowStatus.Partial, EscrowStatus.Paid, EscrowStatus.Pending])(
       'should properly complete escrow with status "%s"',
       async (escrowStatus) => {
         mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
@@ -1075,6 +1103,7 @@ describe('EscrowCompletionService', () => {
           launcherAddress,
           exchangeOracleAddress,
           recordingOracleAddress,
+          FortuneJobType.FORTUNE,
         );
 
         const expectedWebhookData = {
@@ -1094,12 +1123,8 @@ describe('EscrowCompletionService', () => {
       },
     );
 
-    it.each([
-      EscrowStatus.Cancelled,
-      EscrowStatus.Pending,
-      EscrowStatus.Complete,
-    ])(
-      'should not comlete escrow if its status is not partial or paid [%#]',
+    it.each([EscrowStatus.Cancelled, EscrowStatus.Complete])(
+      'should not complete escrow if its status is not completable [%#]',
       async (escrowStatus) => {
         mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
           launcher: launcherAddress,
@@ -1195,14 +1220,6 @@ describe('EscrowCompletionService', () => {
   });
 
   describe('getEscrowResultsProcessor', () => {
-    it.each(Object.values(FortuneJobType))(
-      'should return fortune processor for "%s" job type',
-      (jobRequestType) => {
-        expect(service['getEscrowResultsProcessor'](jobRequestType)).toBe(
-          mockFortuneResultsProcessor,
-        );
-      },
-    );
     it.each(Object.values(CvatJobType))(
       'should return cvat processor for "%s" job type',
       (jobRequestType) => {
@@ -1211,25 +1228,20 @@ describe('EscrowCompletionService', () => {
         );
       },
     );
-    it.each(Object.values(MarketingJobType))(
-      'should return marketing processor for "%s" job type',
+    it.each([
+      ...Object.values(FortuneJobType),
+      ...Object.values(MarketingJobType),
+    ])(
+      'should return default processor for "%s" job type',
       (jobRequestType) => {
         expect(service['getEscrowResultsProcessor'](jobRequestType)).toBe(
-          mockMarketingResultsProcessor,
+          mockDefaultResultsProcessor,
         );
       },
     );
   });
 
   describe('getEscrowPayoutsCalculator', () => {
-    it.each(Object.values(FortuneJobType))(
-      'should return fortune calculator for "%s" job type',
-      (jobRequestType) => {
-        expect(service['getEscrowPayoutsCalculator'](jobRequestType)).toBe(
-          mockFortunePayoutsCalculator,
-        );
-      },
-    );
     it.each(Object.values(CvatJobType))(
       'should return cvat calculator for "%s" job type',
       (jobRequestType) => {
@@ -1238,11 +1250,14 @@ describe('EscrowCompletionService', () => {
         );
       },
     );
-    it.each(Object.values(MarketingJobType))(
-      'should return marketing calculator for "%s" job type',
+    it.each([
+      ...Object.values(FortuneJobType),
+      ...Object.values(MarketingJobType),
+    ])(
+      'should return default calculator for "%s" job type',
       (jobRequestType) => {
         expect(service['getEscrowPayoutsCalculator'](jobRequestType)).toBe(
-          mockMarketingPayoutsCalculator,
+          mockDefaultPayoutsCalculator,
         );
       },
     );

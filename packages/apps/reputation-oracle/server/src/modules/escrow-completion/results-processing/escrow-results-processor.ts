@@ -24,6 +24,7 @@ export interface EscrowResultsProcessor {
     chainId: ChainId,
     escrowAddress: string,
     manifest: JobManifest,
+    encryptResults?: boolean,
   ): Promise<EscrowFinalResultsDetails>;
 }
 
@@ -41,6 +42,7 @@ export abstract class BaseEscrowResultsProcessor<
     chainId: ChainId,
     escrowAddress: string,
     manifest: TManifest,
+    encryptResults = true,
   ): Promise<EscrowFinalResultsDetails> {
     const signer = this.web3Service.getSigner(chainId);
     const escrowClient = await EscrowClient.build(signer);
@@ -66,21 +68,18 @@ export abstract class BaseEscrowResultsProcessor<
       await this.assertResultsComplete(fileContent, manifest);
     }
 
-    const encryptedResults = await this.pgpEncryptionService.encrypt(
-      fileContent,
-      chainId,
-      [escrowData.launcher as string],
-    );
+    const finalResults = encryptResults
+      ? await this.pgpEncryptionService.encrypt(fileContent, chainId, [
+          escrowData.launcher as string,
+        ])
+      : fileContent;
 
-    const hash = crypto
-      .createHash('sha256')
-      .update(encryptedResults)
-      .digest('hex');
+    const hash = crypto.createHash('sha256').update(finalResults).digest('hex');
 
     const fileName = this.getFinalResultsFileName(hash);
 
     const url = await this.storageService.uploadData(
-      encryptedResults,
+      finalResults,
       fileName,
       ContentType.PLAIN_TEXT,
     );

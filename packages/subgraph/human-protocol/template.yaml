@@ -160,6 +160,8 @@ templates:
           handler: handleCancellationRequested
         - event: CancellationRefund(uint256)
           handler: handleCancellationRefund
+        - event: OracleFeeTransfer(address[],uint256[])
+          handler: handleOracleFeeTransfer
         - event: Cancelled()
           handler: handleCancelled
         - event: Completed()

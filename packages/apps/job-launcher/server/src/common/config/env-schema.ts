@@ -30,7 +30,6 @@ export const envValidator = Joi.object({
   GAS_PRICE_MULTIPLIER: Joi.number(),
   APPROVE_AMOUNT_USD: Joi.number(),
   REPUTATION_ORACLE_ADDRESS: Joi.string().required(),
-  REPUTATION_ORACLES: Joi.string().required(),
   CVAT_EXCHANGE_ORACLE_ADDRESS: Joi.string().required(),
   CVAT_RECORDING_ORACLE_ADDRESS: Joi.string().required(),
   HCAPTCHA_ORACLE_ADDRESS: Joi.string().required(),
@@ -67,11 +66,6 @@ export const envValidator = Joi.object({
   SENDGRID_API_KEY: Joi.string().required(),
   SENDGRID_FROM_EMAIL: Joi.string(),
   SENDGRID_FROM_NAME: Joi.string(),
-  // CVAT
-  CVAT_JOB_SIZE: Joi.string(),
-  CVAT_MAX_TIME: Joi.string(),
-  CVAT_VAL_SIZE: Joi.string(),
-  CVAT_SKELETONS_JOB_SIZE_MULTIPLIER: Joi.string(),
   //PGP
   PGP_ENCRYPT: Joi.boolean(),
   PGP_PRIVATE_KEY: Joi.string().optional(),
@@ -82,12 +76,4 @@ export const envValidator = Joi.object({
   //COIN API KEYS
   RATE_CACHE_TIME: Joi.number().optional(),
   COINGECKO_API_KEY: Joi.string().optional(),
-  // Google
-  GOOGLE_PROJECT_ID: Joi.string().required(),
-  GOOGLE_PRIVATE_KEY: Joi.string().required(),
-  GOOGLE_CLIENT_EMAIL: Joi.string().required(),
-  GCV_MODERATION_RESULTS_FILES_PATH: Joi.string().required(),
-  GCV_MODERATION_RESULTS_BUCKET: Joi.string().required(),
-  // Slack
-  SLACK_ABUSE_NOTIFICATION_WEBHOOK_URL: Joi.string().required(),
 });

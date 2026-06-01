@@ -1,20 +1,21 @@
-export type FortuneFinalResult = {
-  workerAddress: string;
-  solution: string;
-  error?: 'duplicated' | 'curse_word';
-};
-
 export enum VerificationResult {
   Accepted = 'accepted',
   Rejected = 'rejected',
 }
 
-export type MarketingFinalResult = {
-  workerAddress: string;
-  postUrl: string;
-  verificationResult: VerificationResult;
+export class BaseFinalResult {
+  workerAddress!: string;
+  verificationResult!: VerificationResult;
   rejectionReason?: string;
-};
+}
+
+export class FortuneFinalResult extends BaseFinalResult {
+  solution!: string;
+}
+
+export class MarketingFinalResult extends BaseFinalResult {
+  postUrl!: string;
+}
 
 type CvatAnnotationMetaJob = {
   job_id: number;
