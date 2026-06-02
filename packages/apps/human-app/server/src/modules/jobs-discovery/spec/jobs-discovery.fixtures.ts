@@ -5,6 +5,7 @@ import {
   JobsDiscoveryParamsDto,
   JobsDiscoveryResponse,
   JobsDiscoveryResponseItem,
+  DiscoveredJob,
 } from '../model/jobs-discovery.model';
 import {
   JobDiscoveryFieldName,
@@ -17,6 +18,9 @@ const EXCHANGE_ORACLE_URL = 'https://www.test_url.org';
 const ESCROW_ADDRESS1 = 'test_address1';
 const ESCROW_ADDRESS2 = 'test_address2';
 const ESCROW_ADDRESS3 = 'test_address3';
+const JOB_DESCRIPTION = 'Test job description';
+const REWARD_TOKEN_HMT = 'HMT';
+const REWARD_TOKEN_USDC = 'USDC';
 const CHAIN_ID = 1;
 const PAGE_SIZE = 10;
 const PAGE = 0;
@@ -101,6 +105,42 @@ export const responseItemsFixture: JobsDiscoveryResponseItem[] = [
   responseItemFixture2,
   responseItemFixture3,
 ];
+export const hmtRewardAmountResponseItemFixture: DiscoveredJob = {
+  ...responseItemFixture1,
+  escrow_address: ESCROW_ADDRESS1,
+  created_at: responseItemFixture1.created_at ?? '',
+  job_description: JOB_DESCRIPTION,
+  reward_amount: '1',
+  reward_token: REWARD_TOKEN_HMT,
+  updated_at: '2025-03-18T01:00:00.000Z',
+};
+export const usdcRewardAmountResponseItemFixture: DiscoveredJob = {
+  ...responseItemFixture1,
+  escrow_address: ESCROW_ADDRESS1,
+  created_at: responseItemFixture1.created_at ?? '',
+  job_description: JOB_DESCRIPTION,
+  reward_amount: '2',
+  reward_token: REWARD_TOKEN_USDC,
+  updated_at: '2025-03-18T01:00:00.000Z',
+};
+export const invalidRewardAmountResponseItemFixture: DiscoveredJob = {
+  ...responseItemFixture1,
+  escrow_address: ESCROW_ADDRESS1,
+  created_at: responseItemFixture1.created_at ?? '',
+  job_description: JOB_DESCRIPTION,
+  reward_amount: 'NaN',
+  reward_token: REWARD_TOKEN_HMT,
+  updated_at: '2025-03-18T01:00:00.000Z',
+};
+export const validRewardAmountResponseItemFixture: DiscoveredJob = {
+  ...responseItemFixture1,
+  escrow_address: ESCROW_ADDRESS1,
+  created_at: responseItemFixture1.created_at ?? '',
+  job_description: JOB_DESCRIPTION,
+  reward_amount: '1',
+  reward_token: REWARD_TOKEN_HMT,
+  updated_at: '2025-03-18T01:00:00.000Z',
+};
 export const responseFixture: JobsDiscoveryResponse = {
   results: responseItemsFixture,
   page: PAGE,
