@@ -4,6 +4,7 @@ export enum FortuneJobType {
 
 export enum MarketingJobType {
   SOCIAL_MEDIA_PROMOTION = 'social_media_promotion',
+  SOCIAL_MEDIA_ENGAGEMENT = 'social_media_engagement',
 }
 
 export enum CvatJobType {
