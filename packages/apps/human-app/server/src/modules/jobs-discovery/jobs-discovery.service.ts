@@ -16,7 +16,6 @@ import {
   JobDiscoveryFieldName,
   JobDiscoverySortField,
 } from '../../common/enums/global-common';
-import { ethers } from 'ethers';
 
 @Injectable()
 export class JobsDiscoveryService {
@@ -39,7 +38,11 @@ export class JobsDiscoveryService {
 
     let iteratee: JobDiscoverySortField | Iteratee<DiscoveredJob>;
     if (sortField === JobDiscoverySortField.REWARD_AMOUNT) {
-      iteratee = (job: DiscoveredJob) => ethers.parseUnits(job[sortField], 18);
+      iteratee = (job: DiscoveredJob) => {
+        const rewardAmount = Number(job[sortField].trim());
+
+        return Number.isFinite(rewardAmount) ? rewardAmount : 0;
+      };
     } else {
       iteratee = sortField;
     }
