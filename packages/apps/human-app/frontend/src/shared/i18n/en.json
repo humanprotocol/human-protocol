@@ -506,6 +506,7 @@
     "image_polygons": "Polygons",
     "audio_transcription": "Audio Transcription",
     "audio_attribute_annotation": "Audio Attribute Annotation",
-    "social_media_promotion": "Social Media Promotion"
+    "social_media_promotion": "Social Media Promotion",
+    "social_media_engagement": "Social Media Engagement"
   }
 }
