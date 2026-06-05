@@ -4,12 +4,21 @@ import { JobsDiscoveryService } from '../jobs-discovery.service';
 import { ExchangeOracleGateway } from '../../../integrations/exchange-oracle/exchange-oracle.gateway';
 import { Test, TestingModule } from '@nestjs/testing';
 import {
+  hmtRewardAmountResponseItemFixture,
+  invalidRewardAmountResponseItemFixture,
   jobsDiscoveryParamsCommandFixture,
   responseItemsFixture,
   responseItemFixture1,
   responseItemFixture3,
+  usdcRewardAmountResponseItemFixture,
+  validRewardAmountResponseItemFixture,
 } from './jobs-discovery.fixtures';
 import { EnvironmentConfigService } from '../../../common/config/environment-config.service';
+import {
+  JobDiscoveryFieldName,
+  JobDiscoverySortField,
+  SortOrder,
+} from '../../../common/enums/global-common';
 
 describe('JobsDiscoveryService', () => {
   let service: JobsDiscoveryService;
@@ -60,6 +69,64 @@ describe('JobsDiscoveryService', () => {
       expect(result.results).toEqual([
         responseItemFixture3,
         responseItemFixture1,
+      ]);
+    });
+
+    it('should sort reward amounts using human-readable units', async () => {
+      const command = {
+        ...jobsDiscoveryParamsCommandFixture,
+        data: {
+          ...jobsDiscoveryParamsCommandFixture.data,
+          fields: [
+            JobDiscoveryFieldName.RewardAmount,
+            JobDiscoveryFieldName.RewardToken,
+          ],
+          sort: SortOrder.DESC,
+          sortField: JobDiscoverySortField.REWARD_AMOUNT,
+        },
+      };
+
+      jest
+        .spyOn(service as any, 'getCachedJobs')
+        .mockReturnValue([
+          hmtRewardAmountResponseItemFixture,
+          usdcRewardAmountResponseItemFixture,
+        ]);
+
+      const result = await service.processJobsDiscovery(command);
+
+      expect(result.results).toEqual([
+        usdcRewardAmountResponseItemFixture,
+        hmtRewardAmountResponseItemFixture,
+      ]);
+    });
+
+    it('should use zero for invalid reward amounts', async () => {
+      const command = {
+        ...jobsDiscoveryParamsCommandFixture,
+        data: {
+          ...jobsDiscoveryParamsCommandFixture.data,
+          fields: [
+            JobDiscoveryFieldName.RewardAmount,
+            JobDiscoveryFieldName.RewardToken,
+          ],
+          sort: SortOrder.DESC,
+          sortField: JobDiscoverySortField.REWARD_AMOUNT,
+        },
+      };
+
+      jest
+        .spyOn(service as any, 'getCachedJobs')
+        .mockReturnValue([
+          invalidRewardAmountResponseItemFixture,
+          validRewardAmountResponseItemFixture,
+        ]);
+
+      const result = await service.processJobsDiscovery(command);
+
+      expect(result.results).toEqual([
+        validRewardAmountResponseItemFixture,
+        invalidRewardAmountResponseItemFixture,
       ]);
     });
   });

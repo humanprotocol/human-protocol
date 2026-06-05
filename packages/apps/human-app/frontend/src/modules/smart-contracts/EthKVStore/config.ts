@@ -16,6 +16,7 @@ export enum JobType {
   AUDIO_TRANSCRIPTION = 'audio_transcription',
   AUDIO_ATTRIBUTE_ANNOTATION = 'audio_attribute_annotation',
   SOCIAL_MEDIA_PROMOTION = 'social_media_promotion',
+  SOCIAL_MEDIA_ENGAGEMENT = 'social_media_engagement',
 }
 
 export const EthKVStoreKeys = {
