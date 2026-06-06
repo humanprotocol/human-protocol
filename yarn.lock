@@ -5434,7 +5434,7 @@ __metadata:
     ethers: "npm:~6.16.0"
     glob: "npm:^13.0.0"
     globals: "npm:^16.3.0"
-    graphql: "npm:^16.8.1"
+    graphql: "npm:^16.14.1"
     graphql-request: "npm:^7.3.4"
     graphql-tag: "npm:^2.12.6"
     openpgp: "npm:^6.3.0"
@@ -11798,7 +11798,7 @@ __metadata:
     eslint-plugin-prettier: "npm:^5.5.5"
     ethers: "npm:~6.16.0"
     globals: "npm:^16.3.0"
-    graphql: "npm:^16.6.0"
+    graphql: "npm:^16.14.1"
     matchstick-as: "npm:^0.6.0"
     mustache: "npm:^4.2.0"
     prettier: "npm:^3.8.1"
@@ -11821,7 +11821,7 @@ __metadata:
     eslint-plugin-prettier: "npm:^5.5.5"
     ethers: "npm:~6.16.0"
     globals: "npm:^16.3.0"
-    graphql: "npm:^16.6.0"
+    graphql: "npm:^16.14.1"
     matchstick-as: "npm:^0.6.0"
     mustache: "npm:^4.2.0"
     prettier: "npm:^3.8.1"
@@ -21103,7 +21103,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"graphql@npm:^16.6.0, graphql@npm:^16.8.1":
+"graphql@npm:^16.14.1":
+  version: 16.14.1
+  resolution: "graphql@npm:16.14.1"
+  checksum: 10c0/a67358b4c6bbda0876903d3f6bbba46058ac7bc00c043ae0b435148e2a00481e9c7716f54f271659786f27f58bf355245216938d98ade980fd141885c907efff
+  languageName: node
+  linkType: hard
+
+"graphql@npm:^16.6.0":
   version: 16.12.0
   resolution: "graphql@npm:16.12.0"
   checksum: 10c0/b6fffa4e8a4e4a9933ebe85e7470b346dbf49050c1a482fac5e03e4a1a7bed2ecd3a4c97e29f04457af929464bc5e4f2aac991090c2f320111eef26e902a5c75
