@@ -21,7 +21,7 @@
     "@emotion/styled": "^11.11.5",
     "@human-protocol/sdk": "workspace:*",
     "@mui/icons-material": "^7.3.8",
-    "@mui/material": "^7.2.0",
+    "@mui/material": "^9.1.0",
     "@mui/styled-engine-sc": "9.0.1",
     "@mui/system": "^9.0.1",
     "@mui/x-data-grid": "^8.7.0",

@@ -22,7 +22,7 @@
     "@emotion/styled": "^11.14.1",
     "@human-protocol/sdk": "workspace:*",
     "@mui/icons-material": "^7.3.8",
-    "@mui/material": "^5.16.7",
+    "@mui/material": "^9.1.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-loading-skeleton": "^3.3.1",

@@ -31,7 +31,7 @@
     "@emotion/styled": "^11.11.0",
     "@human-protocol/sdk": "workspace:^",
     "@mui/icons-material": "^7.3.8",
-    "@mui/material": "^5.16.7",
+    "@mui/material": "^9.1.0",
     "@tanstack/query-sync-storage-persister": "^5.68.0",
     "@tanstack/react-query": "^5.91.3",
     "@tanstack/react-query-persist-client": "^5.80.7",
