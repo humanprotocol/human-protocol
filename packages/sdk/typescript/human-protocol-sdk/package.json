@@ -41,7 +41,7 @@
     "@human-protocol/core": "workspace:*",
     "axios": "^1.4.0",
     "ethers": "~6.16.0",
-    "graphql": "^16.8.1",
+    "graphql": "^16.14.1",
     "graphql-request": "^7.3.4",
     "graphql-tag": "^2.12.6",
     "openpgp": "^6.3.0",
