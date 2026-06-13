@@ -44,7 +44,7 @@
     "react-router-dom": "^7.13.0",
     "serve": "^14.2.6",
     "simplebar-react": "^3.3.2",
-    "viem": "^2.43.0",
+    "viem": "^2.52.2",
     "wagmi": "^3.6.15"
   },
   "devDependencies": {
