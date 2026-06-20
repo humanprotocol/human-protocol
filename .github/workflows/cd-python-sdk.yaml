@@ -23,7 +23,7 @@ jobs:
     env:
       PUSH_GIT_TAGS: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.push_git_tags || 'true' }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           token: ${{ secrets.RELEASE_GH_TOKEN }}
       - name: Setup git identity
