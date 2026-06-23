@@ -1135,6 +1135,9 @@ describe('EscrowCompletionService', () => {
 
         await service.processPaidEscrows();
 
+        expect(mockStorageService.downloadManifest).toHaveBeenCalledWith(
+          manifestUrl,
+        );
         expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledTimes(
           1,
         );
@@ -1305,10 +1308,6 @@ describe('EscrowCompletionService', () => {
         launcher,
         exchangeOracle,
       } as unknown as IEscrow);
-      mockStorageService.downloadManifest.mockResolvedValueOnce({
-        manifest: generateFortuneManifest(),
-        encrypted: false,
-      });
 
       mockedOperatorUtils.getOperator.mockResolvedValueOnce(null);
 
