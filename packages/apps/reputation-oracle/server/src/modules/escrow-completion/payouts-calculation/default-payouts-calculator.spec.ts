@@ -54,7 +54,7 @@ describe('DefaultPayoutsCalculator', () => {
       .fn()
       .mockImplementation(async () => reservedFunds);
 
-    beforeAll(() => {
+    beforeEach(() => {
       mockedEscrowClient.build.mockResolvedValue({
         getReservedFunds: mockedGetReservedFunds,
       } as unknown as EscrowClient);
@@ -86,7 +86,50 @@ describe('DefaultPayoutsCalculator', () => {
 
       const expectedPayouts = acceptedResults.map((result) => ({
         address: result.workerAddress,
-        amount: reservedFunds / BigInt(manifest.submissionsRequired),
+        amount: reservedFunds / BigInt(acceptedResults.length),
+      }));
+
+      expect(normalizePayouts(payouts)).toEqual(
+        normalizePayouts(expectedPayouts),
+      );
+    });
+
+    it('should split reserved funds by accepted results when fewer than required submissions are accepted', async () => {
+      const acceptedCount = faker.number.int({ min: 1, max: 10 });
+      const rejectedCount = faker.number.int({ min: 1, max: 10 });
+      const submissionsRequired = faker.number.int({
+        min: acceptedCount + 1,
+        max: acceptedCount + 10,
+      });
+      const payoutAmount = BigInt(faker.number.int({ min: 1000, max: 100000 }));
+      const reservedFunds = payoutAmount * BigInt(acceptedCount);
+      const acceptedResults = Array.from({ length: acceptedCount }, () =>
+        generateFinalResult(VerificationResult.Accepted),
+      );
+      const rejectedResults = Array.from({ length: rejectedCount }, () =>
+        generateFinalResult(VerificationResult.Rejected),
+      );
+      const manifest: BaseManifest<MarketingJobType> = {
+        requestType: MarketingJobType.SOCIAL_MEDIA_PROMOTION,
+        submissionsRequired,
+      };
+
+      mockedGetReservedFunds.mockResolvedValueOnce(reservedFunds);
+      mockedStorageService.downloadJsonLikeData.mockResolvedValueOnce([
+        ...acceptedResults,
+        ...rejectedResults,
+      ]);
+
+      const payouts = await calculator.calculate({
+        chainId: generateTestnetChainId(),
+        escrowAddress: faker.finance.ethereumAddress(),
+        finalResultsUrl: faker.internet.url(),
+        manifest,
+      });
+
+      const expectedPayouts = acceptedResults.map((result) => ({
+        address: result.workerAddress,
+        amount: payoutAmount,
       }));
 
       expect(normalizePayouts(payouts)).toEqual(
