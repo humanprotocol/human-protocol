@@ -28,7 +28,7 @@
     "react-loading-skeleton": "^3.3.1",
     "react-router-dom": "^7.13.0",
     "serve": "^14.2.6",
-    "viem": "^2.43.0"
+    "viem": "^2.52.2"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
