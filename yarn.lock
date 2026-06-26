@@ -718,7 +718,6 @@ __metadata:
     "@types/lodash": "npm:^4.17.14"
     "@types/node": "npm:22.10.5"
     "@types/passport-jwt": "npm:^4.0.1"
-    "@types/uuid": "npm:^10.0.0"
     "@types/zxcvbn": "npm:4.4.5"
     axios: "npm:^1.8.1"
     bcrypt: "npm:^6.0.0"
@@ -754,7 +753,6 @@ __metadata:
     typeorm-naming-strategies: "npm:^4.1.0"
     typescript: "npm:^5.9.2"
     typescript-eslint: "npm:^8.57.0"
-    uuid: "npm:^11.1.0"
     validator: "npm:^13.12.0"
     zxcvbn: "npm:^4.4.2"
   languageName: unknown
