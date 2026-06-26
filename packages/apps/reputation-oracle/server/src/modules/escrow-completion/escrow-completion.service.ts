@@ -12,7 +12,6 @@ import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
 import stringify from 'json-stable-stringify';
 import _ from 'lodash';
-import { v4 as uuidv4 } from 'uuid';
 
 import { BACKOFF_INTERVAL_SECONDS } from '@/common/constants';
 import { JobManifest, JobRequestType } from '@/common/types';
@@ -455,7 +454,7 @@ export class EscrowCompletionService {
       Array.from(recipientToAmountMap.values()),
       escrowCompletionEntity.finalResultsUrl as string,
       escrowCompletionEntity.finalResultsHash as string,
-      uuidv4(), // TODO obtain it from intermediate results
+      crypto.randomUUID(), // TODO obtain it from intermediate results
       false,
       {
         ...(await this.web3Service.calculateTxFees(
