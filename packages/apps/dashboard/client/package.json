@@ -43,7 +43,7 @@
     "use-debounce": "^10.1.0",
     "vite-plugin-node-polyfills": "^0.25.0",
     "zod": "^4.0.17",
-    "zustand": "^5.0.10"
+    "zustand": "^5.0.14"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
