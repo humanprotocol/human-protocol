@@ -77,7 +77,7 @@
     "eslint-plugin-prettier": "^5.5.6",
     "ethers": "~6.16.0",
     "globals": "^16.3.0",
-    "hardhat": "^2.26.0",
+    "hardhat": "^3.9.0",
     "hardhat-abi-exporter": "^2.10.1",
     "hardhat-contract-sizer": "^2.6.1",
     "hardhat-dependency-compiler": "^1.2.1",
