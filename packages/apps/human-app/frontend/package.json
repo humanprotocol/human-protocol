@@ -19,7 +19,7 @@
   "dependencies": {
     "@emotion/react": "^11.11.3",
     "@emotion/styled": "^11.11.0",
-    "@faker-js/faker": "^9.7.0",
+    "@faker-js/faker": "^10.5.0",
     "@fontsource/inter": "^5.0.17",
     "@fontsource/roboto": "^5.2.10",
     "@hcaptcha/react-hcaptcha": "^1.14.0",
