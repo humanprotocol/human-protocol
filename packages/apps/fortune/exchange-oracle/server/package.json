@@ -51,7 +51,7 @@
     "ethers": "~6.16.0",
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.3",
-    "minio": "8.0.6",
+    "minio": "8.0.7",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "pg": "8.20.0",
