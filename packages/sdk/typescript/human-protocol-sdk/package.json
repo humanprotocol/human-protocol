@@ -57,7 +57,7 @@
     "eslint-plugin-jest": "^29.15.2",
     "eslint-plugin-prettier": "^5.5.6",
     "glob": "^13.0.0",
-    "globals": "^16.3.0",
+    "globals": "^17.7.0",
     "prettier": "^3.8.1",
     "ts-node": "^10.9.2",
     "typedoc": "^0.28.15",
