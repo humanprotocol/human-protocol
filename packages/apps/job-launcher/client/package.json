@@ -24,7 +24,7 @@
     "copy-to-clipboard": "^4.0.2",
     "dayjs": "^1.11.20",
     "decimal.js": "^10.6.0",
-    "ethers": "^6.16.0",
+    "ethers": "^6.17.0",
     "file-saver": "^2.0.5",
     "formik": "^2.4.2",
     "jwt-decode": "^4.0.0",

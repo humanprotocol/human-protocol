@@ -75,7 +75,7 @@
     "eslint": "^10.1.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.6",
-    "ethers": "~6.16.0",
+    "ethers": "~6.17.0",
     "globals": "^17.7.0",
     "hardhat": "^2.26.0",
     "hardhat-abi-exporter": "^2.10.1",
@@ -94,7 +94,7 @@
     "xdeployer": "3.1.6"
   },
   "peerDependencies": {
-    "ethers": "~6.16.0"
+    "ethers": "~6.17.0"
   },
   "lint-staged": {
     "*.sol": [
