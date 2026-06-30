@@ -15,8 +15,8 @@ from src.core.annotation_meta import ANNOTATION_RESULTS_METAFILE_NAME, Annotatio
 from src.core.config import Config
 from src.core.manifest import TaskManifest
 from src.core.storage import compose_data_bucket_filename
+from src.core.tasks.cvat_formats import DM_DATASET_FORMAT_MAPPING
 from src.core.types import TaskTypes
-from src.handlers.job_creation import DM_DATASET_FORMAT_MAPPING
 from src.models.cvat import Image, Job
 from src.services.cloud import make_client as make_cloud_client
 from src.services.cloud.utils import BucketAccessInfo

@@ -63,9 +63,11 @@ class ServiceIntegrationTest(unittest.TestCase):
         with (
             patch("src.chain.escrow.get_escrow") as mock_escrow,
             open("tests/utils/manifest.json") as data,
-            patch("src.handlers.job_creation.get_escrow_manifest") as mock_get_manifest,
-            patch("src.handlers.job_creation.cvat_api") as mock_cvat_api,
-            patch("src.handlers.job_creation.cloud_service.make_client") as mock_make_cloud_client,
+            patch("src.handlers.job_creation.factory.get_escrow_manifest") as mock_get_manifest,
+            patch("src.handlers.job_creation.builders.vision.basic.cvat_api") as mock_cvat_api,
+            patch(
+                "src.handlers.job_creation.builders.vision.basic.cloud_service.make_client"
+            ) as mock_make_cloud_client,
         ):
             manifest = json.load(data)
             mock_get_manifest.return_value = manifest
@@ -247,11 +249,13 @@ class ServiceIntegrationTest(unittest.TestCase):
         with (
             patch("src.chain.escrow.get_escrow") as mock_escrow,
             open("tests/utils/manifest.json") as data,
-            patch("src.handlers.job_creation.get_escrow_manifest") as mock_get_manifest,
-            patch("src.handlers.job_creation.cvat_api") as mock_cvat_api,
-            patch("src.handlers.job_creation.cloud_service.make_client") as mock_make_cloud_client,
+            patch("src.handlers.job_creation.factory.get_escrow_manifest") as mock_get_manifest,
+            patch("src.handlers.job_creation.builders.vision.basic.cvat_api") as mock_cvat_api,
             patch(
-                "src.handlers.job_creation.db_service.add_project_images",
+                "src.handlers.job_creation.builders.vision.basic.cloud_service.make_client"
+            ) as mock_make_cloud_client,
+            patch(
+                "src.handlers.job_creation.builders.vision.basic.db_service.add_project_images",
                 side_effect=Exception("Error"),
             ),
         ):
