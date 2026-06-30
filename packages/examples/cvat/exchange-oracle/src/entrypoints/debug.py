@@ -1,7 +1,9 @@
 import datetime
 import inspect
 import json
+import sys
 import uuid
+from argparse import ArgumentParser
 from collections.abc import Generator
 from contextlib import ExitStack, contextmanager
 from logging import Logger
@@ -24,14 +26,16 @@ from src.utils.time import utcnow
 
 @contextmanager
 def _mock_cvat_cloud_storage_params(logger: Logger) -> Generator[None, None, None]:
-    from src.handlers.job_creation import (
+    from src.handlers.job_creation.utils import (
         _make_cvat_cloud_storage_params as original_make_cvat_cloud_storage_params,
     )
 
     def patched_make_cvat_cloud_storage_params(bucket_info: BucketAccessInfo) -> dict:
         original_host_url = bucket_info.host_url
 
-        if Config.development_config.cvat_in_docker:
+        if Config.development_config.cvat_in_docker and (
+            "localhost" in original_host_url or "127.0.0.1" in original_host_url
+        ):
             bucket_info.host_url = str(
                 URL(original_host_url).copy_with(
                     host=Config.development_config.exchange_oracle_host
@@ -46,10 +50,15 @@ def _mock_cvat_cloud_storage_params(logger: Logger) -> Generator[None, None, Non
         finally:
             bucket_info.host_url = original_host_url
 
-    with mock.patch(
-        "src.handlers.job_creation._make_cvat_cloud_storage_params",
-        patched_make_cvat_cloud_storage_params,
-    ):
+    # The helper is looked up in each builder module that imports it, so patch all of them.
+    patch_targets = [
+        "src.handlers.job_creation.builders.vision.basic._make_cvat_cloud_storage_params",
+        "src.handlers.job_creation.builders.vision.boxes_from_points._make_cvat_cloud_storage_params",
+        "src.handlers.job_creation.builders.vision.skeletons_from_boxes._make_cvat_cloud_storage_params",
+    ]
+    with ExitStack() as stack:
+        for target in patch_targets:
+            stack.enter_context(mock.patch(target, patched_make_cvat_cloud_storage_params))
         yield
 
 
@@ -234,7 +243,7 @@ def _mock_human_app_keys(_: Logger) -> Generator[None, None, None]:
     from tests.api.test_exchange_api import generate_ecdsa_keys
 
     # generating keys for local development
-    repo_root = Path(__file__).parent
+    repo_root = Path(__file__).parents[2]
     dev_dir = repo_root / "dev"
     dev_dir.mkdir(exist_ok=True)
 
@@ -279,7 +288,20 @@ def apply_local_development_patches() -> Generator[None, None, None]:
         yield
 
 
-if __name__ == "__main__":
+def run_server():
+    uvicorn.run(
+        app="src.apps.exchange_oracle:app",
+        host="0.0.0.0",  # noqa: S104
+        port=int(Config.port),
+        workers=Config.workers_amount,
+    )
+
+
+def main(args: list[str] | None = None) -> int:
+    parser = ArgumentParser()
+    parser.add_argument("-e", "--entrypoint", default=run_server)
+    parsed_args = parser.parse_args(args)
+
     with ExitStack() as es:
         is_dev = Config.environment == "development"
         if is_dev:
@@ -288,9 +310,10 @@ if __name__ == "__main__":
         Config.validate()
         register_in_kvstore()
 
-        uvicorn.run(
-            app="src:app",
-            host="0.0.0.0",  # noqa: S104
-            port=int(Config.port),
-            workers=Config.workers_amount,
-        )
+        parsed_args.entrypoint()
+
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

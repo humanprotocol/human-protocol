@@ -30,7 +30,7 @@ docker compose -f docker-compose.dev.yml up -d
 ./bin/start_debug.sh
 ```
 
-When running service from `./bin/start_debug.sh` (`debug.py`), simplified development flow is available:
+When running service from `./bin/start_debug.sh` (`src/entrypoints/debug.py`), simplified development flow is available:
 
 - When JWT token is required, simple JSON can be used instead of JWT token.
 - When webhook signature is required, `{oracle_name}:unique_string` can be used

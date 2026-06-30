@@ -6,7 +6,7 @@ from typing import NamedTuple
 
 from sqlalchemy.orm import Session
 
-from src import Config
+from src.core.config import Config
 from src.db import SessionLocal
 from src.log import get_logger_name
 

@@ -9,7 +9,7 @@ if __name__ == "__main__":
     register_in_kvstore()
 
     uvicorn.run(
-        app="src:app",
+        app="src.apps.exchange_oracle:app",
         host="0.0.0.0",  # noqa: S104
         port=int(Config.port),
         workers=Config.workers_amount,
