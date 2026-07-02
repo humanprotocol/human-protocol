@@ -9,7 +9,8 @@ import pytest
 from fastapi import HTTPException
 from pydantic import ValidationError
 
-from src.core.types import AssignmentStatuses, JobStatuses, Networks, TaskTypes
+from src.core.tasks import TaskTypes
+from src.core.types import AssignmentStatuses, JobStatuses, Networks
 from src.db import SessionLocal
 from src.endpoints.serializers import serialize_job
 from src.models.cvat import Assignment, User

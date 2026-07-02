@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from src.chain.escrow import get_escrow_manifest
-from src.core.types import TaskTypes
+from src.core.tasks import TaskTypes
 from src.handlers.job_creation.builders.audio.transcription import AudioTranscriptionTaskBuilder
 from src.handlers.job_creation.builders.vision.basic import (
     PointsTaskBuilder,

@@ -4,7 +4,7 @@ from typing import Any, Literal
 from pydantic import AnyUrl, BaseModel, Field, model_validator
 
 from src.core.manifest.shared import BucketUrl, LabelInfo, LabelTypes
-from src.core.types import TaskTypes
+from src.core.tasks import TaskTypes
 
 
 class DataInfo(BaseModel):

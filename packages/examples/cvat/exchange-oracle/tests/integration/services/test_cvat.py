@@ -6,13 +6,13 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import UnmappedInstanceError
 
 import src.services.cvat as cvat_service
+from src.core.tasks import TaskTypes
 from src.core.types import (
     AssignmentStatuses,
     JobStatuses,
     Networks,
     ProjectStatuses,
     TaskStatuses,
-    TaskTypes,
 )
 from src.db import SessionLocal
 from src.models.cvat import (

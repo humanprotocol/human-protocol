@@ -1,14 +1,8 @@
 from urllib.parse import urljoin
 
 from src.core.config import Config
-from src.core.manifest import TaskManifest, TaskTypes
-from src.core.manifest import parse_manifest as _parse_manifest
-from src.core.tasks import skeletons_from_boxes
+from src.core.tasks import TaskTypes, skeletons_from_boxes
 from src.models.cvat import Project
-
-
-def parse_manifest(manifest: dict) -> TaskManifest:
-    return _parse_manifest(manifest)
 
 
 def compose_assignment_url(task_id: int, job_id: int, *, project: Project) -> str:
@@ -34,12 +28,3 @@ def get_default_assignment_timeout(task_type: TaskTypes) -> int:
         timeout_seconds *= skeletons_from_boxes.DEFAULT_ASSIGNMENT_SIZE_MULTIPLIER
 
     return timeout_seconds
-
-
-def get_default_assignment_size(manifest: TaskManifest) -> int:
-    job_size = manifest.annotation.job_size + manifest.validation.val_size
-
-    if job_size == TaskTypes.image_skeletons_from_boxes:
-        job_size *= skeletons_from_boxes.DEFAULT_ASSIGNMENT_SIZE_MULTIPLIER
-
-    return job_size

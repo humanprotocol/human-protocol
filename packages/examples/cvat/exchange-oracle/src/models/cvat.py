@@ -5,6 +5,7 @@ from sqlalchemy import JSON, Column, DateTime, Enum, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, relationship
 from sqlalchemy.sql import func
 
+from src.core.tasks import TaskTypes
 from src.core.types import (
     AssignmentStatuses,
     CvatWebhookStatuses,
@@ -13,7 +14,6 @@ from src.core.types import (
     Networks,
     ProjectStatuses,
     TaskStatuses,
-    TaskTypes,
 )
 from src.db import Base, BaseUUID, ChildOf
 from src.utils.time import utcnow

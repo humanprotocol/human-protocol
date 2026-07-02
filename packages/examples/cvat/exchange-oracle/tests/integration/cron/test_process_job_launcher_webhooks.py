@@ -7,6 +7,7 @@ from human_protocol_sdk.constants import Status
 from sqlalchemy.sql import select
 
 from src.core.storage import compose_data_bucket_prefix, compose_results_bucket_prefix
+from src.core.tasks import TaskTypes
 from src.core.types import (
     ExchangeOracleEventTypes,
     JobLauncherEventTypes,
@@ -16,7 +17,6 @@ from src.core.types import (
     OracleWebhookTypes,
     ProjectStatuses,
     TaskStatuses,
-    TaskTypes,
 )
 from src.crons.webhooks.job_launcher import (
     process_incoming_job_launcher_webhooks,

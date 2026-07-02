@@ -4,7 +4,8 @@ from datetime import timedelta
 import src.cvat.api_calls as cvat_api
 import src.services.cvat as cvat_service
 from src.chain.escrow import get_escrow_manifest
-from src.core.types import JobStatuses, Networks, ProjectStatuses, TaskTypes
+from src.core.tasks import TaskTypes
+from src.core.types import JobStatuses, Networks, ProjectStatuses
 from src.db import SessionLocal
 from src.db.utils import ForUpdateParams
 from src.models.cvat import Job

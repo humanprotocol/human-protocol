@@ -4,7 +4,8 @@ from enum import Enum
 from pydantic import BaseModel, Field
 from strenum import StrEnum  # added in python 3.11
 
-from src.core.types import Networks, TaskTypes
+from src.core.tasks import TaskTypes
+from src.core.types import Networks
 from src.utils.enums import BetterEnumMeta
 
 

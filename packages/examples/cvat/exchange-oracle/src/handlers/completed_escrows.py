@@ -19,7 +19,8 @@ from src.core.oracle_events import (
     ExchangeOracleEvent_JobFinished,
 )
 from src.core.storage import compose_results_bucket_filename
-from src.core.types import EscrowValidationStatuses, OracleWebhookTypes, TaskTypes
+from src.core.tasks import TaskTypes
+from src.core.types import EscrowValidationStatuses, OracleWebhookTypes
 from src.db import SessionLocal
 from src.db.utils import ForUpdateParams
 from src.handlers.job_export import (

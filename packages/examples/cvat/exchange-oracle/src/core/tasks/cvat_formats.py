@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from src.core.types import TaskTypes
+from src.core.tasks.types import TaskTypes
 
 DM_DATASET_FORMAT_MAPPING = {
     TaskTypes.image_label_binary: "cvat_images",

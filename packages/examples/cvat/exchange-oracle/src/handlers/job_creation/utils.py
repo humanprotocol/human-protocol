@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, TypeVar
 from datumaro.util.image import IMAGE_EXTENSIONS
 
 import src.cvat.api_calls as cvat_api
-from src.core.types import TaskTypes
+from src.core.tasks import TaskTypes
 from src.services.cloud import CloudProviders
 
 if TYPE_CHECKING:

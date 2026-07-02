@@ -31,16 +31,6 @@ class JobStatuses(str, Enum, metaclass=BetterEnumMeta):
     completed = "completed"
 
 
-class TaskTypes(str, Enum, metaclass=BetterEnumMeta):
-    image_label_binary = "image_label_binary"
-    image_points = "image_points"
-    image_boxes = "image_boxes"
-    image_boxes_from_points = "image_boxes_from_points"
-    image_skeletons_from_boxes = "image_skeletons_from_boxes"
-    image_polygons = "image_polygons"
-    audio_transcription = "audio_transcription"
-
-
 class OracleWebhookTypes(str, Enum, metaclass=BetterEnumMeta):
     exchange_oracle = "exchange_oracle"
     job_launcher = "job_launcher"

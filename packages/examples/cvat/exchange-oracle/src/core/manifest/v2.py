@@ -4,7 +4,7 @@ from typing import Any, Literal
 from pydantic import AnyUrl, BaseModel, ConfigDict, Field, model_validator
 
 from src.core.manifest.shared import BucketUrl, LabelInfo, LabelTypes
-from src.core.types import TaskTypes
+from src.core.tasks import TaskTypes
 from src.utils.enums import BetterEnumMeta
 
 

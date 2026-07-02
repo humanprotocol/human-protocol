@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, patch
 
 from sqlalchemy.sql import select
 
+from src.core.tasks import TaskTypes
 from src.core.types import (
     AssignmentStatuses,
     EscrowValidationStatuses,
@@ -16,7 +17,6 @@ from src.core.types import (
     ProjectStatuses,
     RecordingOracleEventTypes,
     TaskStatuses,
-    TaskTypes,
 )
 from src.crons.webhooks.recording_oracle import (
     process_incoming_recording_oracle_webhook_job_completed,

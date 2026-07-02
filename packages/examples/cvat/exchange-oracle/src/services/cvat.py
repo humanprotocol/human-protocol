@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql.functions import coalesce
 
 from src.core.config import Config
+from src.core.tasks import TaskTypes
 from src.core.types import (
     AssignmentStatuses,
     CvatWebhookStatuses,
@@ -22,7 +23,6 @@ from src.core.types import (
     JobStatuses,
     ProjectStatuses,
     TaskStatuses,
-    TaskTypes,
 )
 from src.db import Base, ChildOf
 from src.db import engine as db_engine

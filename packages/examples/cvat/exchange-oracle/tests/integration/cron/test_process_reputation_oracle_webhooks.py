@@ -5,6 +5,7 @@ from cvat_sdk.api_client.exceptions import NotFoundException
 from sqlalchemy import select
 
 from src.core.storage import compose_data_bucket_prefix, compose_results_bucket_prefix
+from src.core.tasks import TaskTypes
 from src.core.types import (
     ExchangeOracleEventTypes,
     JobStatuses,
@@ -14,7 +15,6 @@ from src.core.types import (
     ProjectStatuses,
     ReputationOracleEventTypes,
     TaskStatuses,
-    TaskTypes,
 )
 from src.crons.webhooks.reputation_oracle import process_incoming_reputation_oracle_webhooks
 from src.cvat import api_calls

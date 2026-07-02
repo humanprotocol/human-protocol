@@ -15,7 +15,8 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from src.core.config import Config
-from src.core.types import AssignmentStatuses, JobStatuses, ProjectStatuses, TaskTypes
+from src.core.tasks import TaskTypes
+from src.core.types import AssignmentStatuses, JobStatuses, ProjectStatuses
 from src.models.cvat import Assignment, Job, Project, Task, User
 from src.schemas.exchange import AssignmentStatuses as APIAssignmentStatuses
 from src.schemas.exchange import JobStatuses as APIJobStatuses

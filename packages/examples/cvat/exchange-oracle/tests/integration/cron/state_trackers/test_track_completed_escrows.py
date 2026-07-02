@@ -13,6 +13,7 @@ import datumaro as dm
 import pytest
 from sqlalchemy import select
 
+from src.core.tasks import TaskTypes
 from src.core.types import (
     AssignmentStatuses,
     EscrowValidationStatuses,
@@ -21,7 +22,6 @@ from src.core.types import (
     Networks,
     ProjectStatuses,
     TaskStatuses,
-    TaskTypes,
 )
 from src.crons import track_completed_escrows
 from src.crons.cvat.state_trackers import track_escrow_validations
