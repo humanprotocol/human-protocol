@@ -1,5 +1,11 @@
 # @human-protocol/core
 
+## 7.1.0
+
+### Minor Changes
+
+- 3818511: chore: dependencies bump
+
 ## 7.0.0
 
 ### Major Changes

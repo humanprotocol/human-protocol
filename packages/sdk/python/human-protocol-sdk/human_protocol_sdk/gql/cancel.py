@@ -70,4 +70,6 @@ query GetCancellationRefundEventByEscrow(
     }}
 }}
 {cancellation_refund_fragment}
-""".format(cancellation_refund_fragment=cancellation_refund_fragment)
+""".format(
+        cancellation_refund_fragment=cancellation_refund_fragment
+    )

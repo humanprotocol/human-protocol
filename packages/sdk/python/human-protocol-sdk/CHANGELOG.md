@@ -1,5 +1,12 @@
 # @human-protocol/python-sdk
 
+## 7.3.1
+
+### Patch Changes
+
+- Updated dependencies [3818511]
+  - @human-protocol/core@7.1.0
+
 ## 7.3.0
 
 ### Minor Changes
