@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import math
 import os
+from abc import abstractmethod
 from tempfile import TemporaryDirectory
 from typing import TYPE_CHECKING
 
@@ -34,34 +35,18 @@ from src.handlers.job_creation.utils import (
     MaybeUnset,
     filter_image_files,
     make_cvat_cloud_storage_params,
-    make_label_configuration,
+    make_cvat_label_configuration,
     unset,
 )
 
 
 class SimpleTaskBuilder(TaskBuilderBase):
     """
-    Handles task creation for the IMAGE_BOXES task type
+    Base builder for simple image tasks with a single annotation type and no extra processing.
     """
 
-    def _upload_task_meta(self, gt_dataset: dm.Dataset):
-        layout = simple_task.TaskMetaLayout()
-        serializer = simple_task.TaskMetaSerializer()
-
-        file_list = []
-        file_list.append(
-            (
-                serializer.serialize_gt_annotations(gt_dataset),
-                layout.GT_FILENAME,
-            )
-        )
-
-        storage_client = self._make_cloud_storage_client(self._oracle_data_bucket)
-        for file_data, filename in file_list:
-            storage_client.create_file(
-                compose_data_bucket_filename(self.escrow_address, self.chain_id, filename),
-                file_data,
-            )
+    @abstractmethod
+    def _upload_task_meta(self, gt_dataset: dm.Dataset) -> None: ...
 
     def _parse_gt_dataset(
         self, gt_file_data: bytes, *, add_prefix: str | None = None
@@ -110,6 +95,9 @@ class SimpleTaskBuilder(TaskBuilderBase):
 
         return list(matched_gt_filenames)
 
+    def _prepare_cvat_label_configuration(self) -> list[dict]:
+        return make_cvat_label_configuration(self.manifest)
+
     def build(self):
         manifest = self.manifest
         escrow_address = self.escrow_address
@@ -133,7 +121,7 @@ class SimpleTaskBuilder(TaskBuilderBase):
         # Create task configuration
         gt_filenames = self._get_gt_filenames(gt_dataset, data_filenames, manifest=manifest)
         data_to_be_annotated = [f for f in data_filenames if f not in set(gt_filenames)]
-        label_configuration = make_label_configuration(manifest)
+        label_configuration = self._prepare_cvat_label_configuration()
 
         self._upload_task_meta(gt_dataset)
 
@@ -205,6 +193,32 @@ class SimpleTaskBuilder(TaskBuilderBase):
 
                 db_service.create_data_upload(session, cvat_task.id)
             db_service.touch(session, Project, [project_id])
+
+
+class LabelBinaryTaskBuilder(TaskBuilderBase):
+    def build(self):
+        raise NotImplementedError
+
+
+class BoxesTaskBuilder(SimpleTaskBuilder):
+    def _upload_task_meta(self, gt_dataset: dm.Dataset):
+        layout = simple_task.TaskMetaLayout()
+        serializer = simple_task.TaskMetaSerializer()
+
+        file_list = []
+        file_list.append(
+            (
+                serializer.serialize_gt_annotations(gt_dataset),
+                layout.GT_FILENAME,
+            )
+        )
+
+        storage_client = self._make_cloud_storage_client(self._oracle_data_bucket)
+        for file_data, filename in file_list:
+            storage_client.create_file(
+                compose_data_bucket_filename(self.escrow_address, self.chain_id, filename),
+                file_data,
+            )
 
 
 class PointsTaskBuilder(SimpleTaskBuilder):
@@ -321,7 +335,7 @@ class PointsTaskBuilder(SimpleTaskBuilder):
         return super().build()
 
 
-class PolygonTaskBuilder(SimpleTaskBuilder):
+class PolygonTaskBuilder(BoxesTaskBuilder):
     def _setup_quality_settings(self, task_id: int, **overrides) -> None:
         values = {"iou_threshold": Config.cvat_config.iou_threshold, **overrides}
         super()._setup_quality_settings(task_id, **values)

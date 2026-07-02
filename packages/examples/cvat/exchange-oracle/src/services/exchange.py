@@ -4,12 +4,13 @@ from datetime import timedelta
 import src.cvat.api_calls as cvat_api
 import src.services.cvat as cvat_service
 from src.chain.escrow import get_escrow_manifest
+from src.core.manifest import parse_manifest
 from src.core.tasks import TaskTypes
 from src.core.types import JobStatuses, Networks, ProjectStatuses
 from src.db import SessionLocal
 from src.db.utils import ForUpdateParams
 from src.models.cvat import Job
-from src.utils.assignments import get_default_assignment_timeout, parse_manifest
+from src.utils.assignments import get_default_assignment_timeout
 from src.utils.requests import get_or_404
 from src.utils.time import utcnow
 

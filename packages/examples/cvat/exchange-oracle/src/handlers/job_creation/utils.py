@@ -74,7 +74,7 @@ def strip_bucket_prefix(data_filenames: list[str], prefix: str) -> list[str]:
     return [os.path.relpath(fn, prefix) for fn in data_filenames]
 
 
-def make_label_configuration(manifest: JobManifest) -> list[dict]:
+def make_cvat_label_configuration(manifest: JobManifest) -> list[dict]:
     return [
         {
             "name": label.name,

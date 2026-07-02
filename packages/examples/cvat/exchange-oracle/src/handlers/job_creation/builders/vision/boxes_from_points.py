@@ -51,7 +51,7 @@ from src.handlers.job_creation.utils import (
     MaybeUnset,
     filter_image_files,
     make_cvat_cloud_storage_params,
-    make_label_configuration,
+    make_cvat_label_configuration,
     strip_bucket_prefix,
     unset,
 )
@@ -804,7 +804,7 @@ class BoxesFromPointsTaskBuilder(TaskBuilderBase):
         ]
 
     def _prepare_label_configuration(self):
-        self._label_configuration = make_label_configuration(self.manifest)
+        self._label_configuration = make_cvat_label_configuration(self.manifest)
 
     def _upload_task_meta(self):
         layout = boxes_from_points_task.TaskMetaLayout()

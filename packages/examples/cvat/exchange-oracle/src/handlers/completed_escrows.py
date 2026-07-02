@@ -14,6 +14,7 @@ import src.services.webhook as oracle_db_service
 from src.chain.escrow import get_escrow_manifest, validate_escrow
 from src.core.annotation_meta import ANNOTATION_RESULTS_METAFILE_NAME, RESULTING_ANNOTATIONS_FILE
 from src.core.config import CronConfig, StorageConfig
+from src.core.manifest import parse_manifest
 from src.core.oracle_events import (
     ExchangeOracleEvent_EscrowRecorded,
     ExchangeOracleEvent_JobFinished,
@@ -31,7 +32,6 @@ from src.handlers.job_export import (
 )
 from src.models.cvat import Job, Project
 from src.services.cloud.types import BucketAccessInfo
-from src.utils.assignments import parse_manifest
 
 
 def _download_with_retries(
