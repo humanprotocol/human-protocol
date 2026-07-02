@@ -1,5 +1,16 @@
 # @human-protocol/sdk
 
+## 7.4.0
+
+### Minor Changes
+
+- 3818511: chore: dependencies bump
+
+### Patch Changes
+
+- Updated dependencies [3818511]
+  - @human-protocol/core@7.1.0
+
 ## 7.3.0
 
 ### Minor Changes
