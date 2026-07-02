@@ -11,7 +11,7 @@ from src.core.tasks import TaskTypes
 from src.services.cloud import CloudProviders
 
 if TYPE_CHECKING:
-    from src.core.manifest import TaskManifest
+    from src.core.manifest.v1 import JobManifest
     from src.services.cloud.utils import BucketAccessInfo
 
 LABEL_TYPE_MAPPING = {

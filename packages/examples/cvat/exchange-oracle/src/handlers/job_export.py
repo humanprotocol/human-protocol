@@ -13,7 +13,7 @@ import src.core.tasks.skeletons_from_boxes as skeletons_from_boxes_task
 import src.utils.annotations as annotation_utils
 from src.core.annotation_meta import ANNOTATION_RESULTS_METAFILE_NAME, AnnotationMeta, JobMeta
 from src.core.config import Config
-from src.core.manifest import TaskManifest
+from src.core.manifest.v1 import JobManifest
 from src.core.storage import compose_data_bucket_filename
 from src.core.tasks import TaskTypes
 from src.core.tasks.cvat_formats import DM_DATASET_FORMAT_MAPPING
@@ -75,7 +75,7 @@ class _TaskProcessor:
         annotations: Sequence[FileDescriptor],
         merged_annotation: FileDescriptor,
         *,
-        manifest: TaskManifest,
+        manifest: JobManifest,
         project_images: list[Image],
     ) -> None:
         self.escrow_address = escrow_address
@@ -594,7 +594,7 @@ def postprocess_annotations(
     annotations: Sequence[FileDescriptor],
     merged_annotation: FileDescriptor,
     *,
-    manifest: TaskManifest,
+    manifest: JobManifest,
     project_images: list[Image],
 ) -> None:
     """
