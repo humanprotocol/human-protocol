@@ -382,6 +382,47 @@ describe('EscrowCompletionService', () => {
       expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledTimes(2);
     });
 
+    it('should correctly process escrow with inline manifest', async () => {
+      const pendingRecord = generateEscrowCompletion(
+        EscrowCompletionStatus.PENDING,
+      );
+      mockEscrowCompletionRepository.findByStatus.mockResolvedValueOnce([
+        {
+          ...pendingRecord,
+        },
+      ]);
+      mockGetEscrowStatus.mockResolvedValue(EscrowStatus.Pending);
+
+      const fortuneManifest = generateFortuneManifest();
+      mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
+        manifest: JSON.stringify(fortuneManifest),
+      } as unknown as IEscrow);
+
+      const finalResultsUrl = faker.internet.url();
+      const finalResultsHash = faker.string.hexadecimal({ length: 42 });
+      mockDefaultResultsProcessor.storeResults.mockResolvedValueOnce({
+        url: finalResultsUrl,
+        hash: finalResultsHash,
+      });
+      mockDefaultPayoutsCalculator.calculate.mockResolvedValueOnce([]);
+
+      await service.processPendingRecords();
+
+      expect(mockStorageService.downloadManifest).not.toHaveBeenCalled();
+      expect(mockDefaultResultsProcessor.storeResults).toHaveBeenCalledWith(
+        pendingRecord.chainId,
+        pendingRecord.escrowAddress,
+        fortuneManifest,
+        false,
+      );
+      expect(mockDefaultPayoutsCalculator.calculate).toHaveBeenCalledWith({
+        manifest: fortuneManifest,
+        finalResultsUrl,
+        chainId: pendingRecord.chainId,
+        escrowAddress: pendingRecord.escrowAddress,
+      });
+    });
+
     it('should prepare multiple batches if amount of receivers exceeds the limit', async () => {
       const pendingRecord = generateEscrowCompletion(
         EscrowCompletionStatus.PENDING,
@@ -395,9 +436,10 @@ describe('EscrowCompletionService', () => {
         },
       ]);
       mockGetEscrowStatus.mockResolvedValue(EscrowStatus.Pending);
-      mockedEscrowUtils.getEscrow.mockResolvedValueOnce(
-        {} as unknown as IEscrow,
-      );
+      const manifestUrl = faker.internet.url();
+      mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
+        manifest: manifestUrl,
+      } as unknown as IEscrow);
       mockStorageService.downloadManifest.mockResolvedValueOnce({
         manifest: generateFortuneManifest(),
         encrypted: false,
@@ -724,7 +766,10 @@ describe('EscrowCompletionService', () => {
       mockedEscrowUtils.getEscrow.mockResolvedValue({
         manifest: faker.internet.url(),
       } as unknown as IEscrow);
-      mockStorageService.downloadJsonLikeData.mockResolvedValue(manifest);
+      mockStorageService.downloadManifest.mockResolvedValue({
+        manifest,
+        encrypted: false,
+      });
     });
 
     it('should succesfully process payouts batch', async () => {
@@ -884,9 +929,10 @@ describe('EscrowCompletionService', () => {
       launcherAddress = faker.finance.ethereumAddress();
       exchangeOracleAddress = faker.finance.ethereumAddress();
       recordingOracleAddress = faker.finance.ethereumAddress();
-      mockStorageService.downloadJsonLikeData.mockResolvedValue(
-        generateFortuneManifest(),
-      );
+      mockStorageService.downloadManifest.mockResolvedValue({
+        manifest: generateFortuneManifest(),
+        encrypted: false,
+      });
     });
 
     describe('handle failures', () => {
@@ -895,6 +941,7 @@ describe('EscrowCompletionService', () => {
       beforeEach(() => {
         mockGetEscrowStatus.mockRejectedValue(testError);
         mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
+          manifest: faker.internet.url(),
           launcher: launcherAddress,
           exchangeOracle: exchangeOracleAddress,
           recordingOracle: recordingOracleAddress,
@@ -1038,11 +1085,18 @@ describe('EscrowCompletionService', () => {
     it.each([EscrowStatus.Partial, EscrowStatus.Paid, EscrowStatus.Pending])(
       'should properly complete escrow with status "%s"',
       async (escrowStatus) => {
+        const manifestUrl = faker.internet.url();
+        const manifest = generateFortuneManifest();
         mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
+          manifest: manifestUrl,
           launcher: launcherAddress,
           exchangeOracle: exchangeOracleAddress,
           recordingOracle: recordingOracleAddress,
         } as unknown as IEscrow);
+        mockStorageService.downloadManifest.mockResolvedValueOnce({
+          manifest,
+          encrypted: false,
+        });
         mockGetEscrowStatus.mockResolvedValueOnce(escrowStatus);
         const mockFees = {
           maxFeePerGas: faker.number.bigInt(),
@@ -1081,6 +1135,9 @@ describe('EscrowCompletionService', () => {
 
         await service.processPaidEscrows();
 
+        expect(mockStorageService.downloadManifest).toHaveBeenCalledWith(
+          manifestUrl,
+        );
         expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledTimes(
           1,
         );
@@ -1103,7 +1160,7 @@ describe('EscrowCompletionService', () => {
           launcherAddress,
           exchangeOracleAddress,
           recordingOracleAddress,
-          FortuneJobType.FORTUNE,
+          manifest.requestType,
         );
 
         const expectedWebhookData = {
@@ -1122,6 +1179,50 @@ describe('EscrowCompletionService', () => {
         ).toHaveBeenCalledWith(expectedWebhookData, exchangeOracleWebhookUrl);
       },
     );
+
+    it('should properly complete escrow when manifest is inline json', async () => {
+      const manifest = generateFortuneManifest();
+      mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
+        manifest: JSON.stringify(manifest),
+        launcher: launcherAddress,
+        exchangeOracle: exchangeOracleAddress,
+        recordingOracle: recordingOracleAddress,
+      } as unknown as IEscrow);
+      mockGetEscrowStatus.mockResolvedValueOnce(EscrowStatus.Paid);
+      const mockFees = {
+        maxFeePerGas: faker.number.bigInt(),
+        maxPriorityFeePerGas: faker.number.bigInt(),
+      };
+      mockWeb3Service.calculateTxFees.mockResolvedValueOnce(mockFees);
+
+      const paidPayoutsRecord = generateEscrowCompletion(
+        EscrowCompletionStatus.PAID,
+      );
+      mockEscrowCompletionRepository.findByStatus.mockResolvedValueOnce([
+        {
+          ...paidPayoutsRecord,
+        },
+      ]);
+
+      mockedOperatorUtils.getOperator.mockResolvedValue({
+        webhookUrl: faker.internet.url(),
+      } as IOperator);
+
+      await service.processPaidEscrows();
+
+      expect(mockStorageService.downloadManifest).not.toHaveBeenCalled();
+      expect(mockReputationService.assessEscrowParties).toHaveBeenCalledWith(
+        paidPayoutsRecord.chainId,
+        launcherAddress,
+        exchangeOracleAddress,
+        recordingOracleAddress,
+        manifest.requestType,
+      );
+      expect(mockEscrowCompletionRepository.updateOne).toHaveBeenCalledWith({
+        ...paidPayoutsRecord,
+        status: 'completed',
+      });
+    });
 
     it.each([EscrowStatus.Cancelled, EscrowStatus.Complete])(
       'should not complete escrow if its status is not completable [%#]',
@@ -1201,7 +1302,9 @@ describe('EscrowCompletionService', () => {
 
       const launcher = faker.finance.ethereumAddress();
       const exchangeOracle = faker.finance.ethereumAddress();
+      const manifestUrl = faker.internet.url();
       mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
+        manifest: manifestUrl,
         launcher,
         exchangeOracle,
       } as unknown as IEscrow);

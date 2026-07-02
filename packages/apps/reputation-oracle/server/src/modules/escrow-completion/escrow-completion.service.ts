@@ -12,7 +12,6 @@ import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
 import stringify from 'json-stable-stringify';
 import _ from 'lodash';
-import { v4 as uuidv4 } from 'uuid';
 
 import { BACKOFF_INTERVAL_SECONDS } from '@/common/constants';
 import { JobManifest, JobRequestType } from '@/common/types';
@@ -29,6 +28,7 @@ import { Web3Service } from '@/modules/web3';
 import { OutgoingWebhookEventType } from '@/modules/webhook/types';
 import { OutgoingWebhookService } from '@/modules/webhook/webhook-outgoing.service';
 import { calculateExponentialBackoffMs } from '@/utils/backoff';
+import { isValidHttpUrl } from '@/utils/http';
 import * as manifestUtils from '@/utils/manifest';
 
 import { EscrowCompletionStatus } from './constants';
@@ -136,9 +136,7 @@ export class EscrowCompletionService {
           }
 
           const { manifest, encrypted: isManifestEncrypted } =
-            await this.storageService.downloadManifest(
-              escrowData.manifest as string,
-            );
+            await this.resolveManifest(escrowData.manifest as string);
           const jobRequestType = manifestUtils.getJobRequestType(manifest);
 
           if (!escrowCompletionEntity.finalResultsUrl) {
@@ -455,7 +453,7 @@ export class EscrowCompletionService {
       Array.from(recipientToAmountMap.values()),
       escrowCompletionEntity.finalResultsUrl as string,
       escrowCompletionEntity.finalResultsHash as string,
-      uuidv4(), // TODO obtain it from intermediate results
+      crypto.randomUUID(), // TODO obtain it from intermediate results
       false,
       {
         ...(await this.web3Service.calculateTxFees(
@@ -533,12 +531,24 @@ export class EscrowCompletionService {
       throw new Error('Escrow data is missing');
     }
 
-    const manifest =
-      await this.storageService.downloadJsonLikeData<JobManifest>(
-        escrowData.manifest as string,
-      );
+    const { manifest } = await this.resolveManifest(
+      escrowData.manifest as string,
+    );
 
     return manifestUtils.getJobRequestType(manifest);
+  }
+
+  private async resolveManifest(
+    manifestSource: string,
+  ): Promise<{ manifest: JobManifest; encrypted: boolean }> {
+    if (isValidHttpUrl(manifestSource)) {
+      return this.storageService.downloadManifest(manifestSource);
+    }
+
+    return {
+      manifest: JSON.parse(manifestSource) as JobManifest,
+      encrypted: false,
+    };
   }
 
   private getEscrowResultsProcessor(

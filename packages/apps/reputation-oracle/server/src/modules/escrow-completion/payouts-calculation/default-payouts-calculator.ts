@@ -1,12 +1,7 @@
 import { EscrowClient } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 
-import {
-  BaseFinalResult,
-  FortuneManifest,
-  MarketingManifest,
-  VerificationResult,
-} from '@/common/types';
+import { BaseFinalResult, VerificationResult } from '@/common/types';
 import { StorageService } from '@/modules/storage';
 import { Web3Service } from '@/modules/web3';
 
@@ -16,8 +11,6 @@ import {
   EscrowPayoutsCalculator,
 } from './types';
 
-type DefaultPayoutsManifest = FortuneManifest | MarketingManifest;
-
 @Injectable()
 export class DefaultPayoutsCalculator implements EscrowPayoutsCalculator {
   constructor(
@@ -26,13 +19,10 @@ export class DefaultPayoutsCalculator implements EscrowPayoutsCalculator {
   ) {}
 
   async calculate({
-    manifest,
     chainId,
     escrowAddress,
     finalResultsUrl,
-  }: CalculatePayoutsInput & {
-    manifest: DefaultPayoutsManifest;
-  }): Promise<CalculatedPayout[]> {
+  }: CalculatePayoutsInput): Promise<CalculatedPayout[]> {
     const signer = this.web3Service.getSigner(chainId);
     const escrowClient = await EscrowClient.build(signer);
     const finalResults =
@@ -51,7 +41,7 @@ export class DefaultPayoutsCalculator implements EscrowPayoutsCalculator {
     }
 
     const reservedFunds = await escrowClient.getReservedFunds(escrowAddress);
-    const payoutAmount = reservedFunds / BigInt(manifest.submissionsRequired);
+    const payoutAmount = reservedFunds / BigInt(recipients.length);
 
     return recipients.map((recipient) => ({
       address: recipient,

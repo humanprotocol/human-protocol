@@ -1,5 +1,6 @@
+import crypto from 'crypto';
+
 import { Injectable } from '@nestjs/common';
-import { v4 as uuidV4 } from 'uuid';
 
 import { UserStatus } from '@/common/enums';
 import { ServerConfigService } from '@/config';
@@ -35,7 +36,7 @@ export class QualificationService {
     expiresAt?: Date;
   }): Promise<Qualification> {
     const newQualification = new QualificationEntity();
-    newQualification.reference = uuidV4();
+    newQualification.reference = crypto.randomUUID();
     newQualification.title = qualification.title;
     newQualification.description = qualification.description;
 
