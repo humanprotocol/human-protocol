@@ -36,10 +36,10 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
     from pathlib import Path
 
-    from src.core.manifest import TaskManifest
+    from src.core.manifest.v1 import JobManifest
 
 from src.core.tasks.cvat_formats import DM_GT_DATASET_FORMAT_MAPPING
-from src.handlers.job_creation.builders.vision.base import _TaskBuilderBase
+from src.handlers.job_creation.builders.vision.base import TaskBuilderBase
 from src.handlers.job_creation.exceptions import (
     DatasetValidationError,
     InvalidCoordinates,
@@ -48,50 +48,50 @@ from src.handlers.job_creation.exceptions import (
     TooFewSamples,
 )
 from src.handlers.job_creation.utils import (
-    _ExcludedAnnotationsInfo,
-    _make_cvat_cloud_storage_params,
-    _MaybeUnset,
-    _unset,
+    ExcludedAnnotationsInfo,
+    MaybeUnset,
     filter_image_files,
+    make_cvat_cloud_storage_params,
     strip_bucket_prefix,
+    unset,
 )
 
 
-class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
+class SkeletonsFromBoxesTaskBuilder(TaskBuilderBase):
     @dataclass
     class _TaskParams:
         label_id: int
         roi_ids: list[int]
         roi_gt_ids: list[int]
 
-    def __init__(self, manifest: TaskManifest, escrow_address: str, chain_id: int) -> None:
+    def __init__(self, manifest: JobManifest, escrow_address: str, chain_id: int) -> None:
         super().__init__(manifest=manifest, escrow_address=escrow_address, chain_id=chain_id)
 
-        self._input_gt_data: _MaybeUnset[bytes] = _unset
-        self._input_boxes_data: _MaybeUnset[bytes] = _unset
+        self._input_gt_data: MaybeUnset[bytes] = unset
+        self._input_boxes_data: MaybeUnset[bytes] = unset
 
-        self._data_filenames: _MaybeUnset[Sequence[str]] = _unset
-        self._input_gt_dataset: _MaybeUnset[dm.Dataset] = _unset
-        self._gt_dataset: _MaybeUnset[dm.Dataset] = _unset
-        self._boxes_dataset: _MaybeUnset[dm.Dataset] = _unset
+        self._data_filenames: MaybeUnset[Sequence[str]] = unset
+        self._input_gt_dataset: MaybeUnset[dm.Dataset] = unset
+        self._gt_dataset: MaybeUnset[dm.Dataset] = unset
+        self._boxes_dataset: MaybeUnset[dm.Dataset] = unset
 
-        self._skeleton_bbox_mapping: _MaybeUnset[skeletons_from_boxes_task.SkeletonBboxMapping] = (
-            _unset
+        self._skeleton_bbox_mapping: MaybeUnset[skeletons_from_boxes_task.SkeletonBboxMapping] = (
+            unset
         )
-        self._roi_infos: _MaybeUnset[skeletons_from_boxes_task.RoiInfos] = _unset
-        self._roi_info_by_id: _MaybeUnset[dict[int, skeletons_from_boxes_task.RoiInfo]] = _unset
+        self._roi_infos: MaybeUnset[skeletons_from_boxes_task.RoiInfos] = unset
+        self._roi_info_by_id: MaybeUnset[dict[int, skeletons_from_boxes_task.RoiInfo]] = unset
 
-        self._gt_points_per_label: _MaybeUnset[
+        self._gt_points_per_label: MaybeUnset[
             dict[tuple[int, str], Sequence[tuple[int, dm.Points]]]
-        ] = _unset
+        ] = unset
         "(skeleton_label_id, point_label_name) to [(skeleton_id, point), ...]"
 
-        self._roi_filenames: _MaybeUnset[dict[int, str]] = _unset
+        self._roi_filenames: MaybeUnset[dict[int, str]] = unset
 
-        self._task_params: _MaybeUnset[list[self._TaskParams]] = _unset
+        self._task_params: MaybeUnset[list[self._TaskParams]] = unset
 
-        self._excluded_gt_info: _MaybeUnset[_ExcludedAnnotationsInfo] = _unset
-        self._excluded_boxes_info: _MaybeUnset[_ExcludedAnnotationsInfo] = _unset
+        self._excluded_gt_info: MaybeUnset[ExcludedAnnotationsInfo] = unset
+        self._excluded_boxes_info: MaybeUnset[ExcludedAnnotationsInfo] = unset
 
         # Configuration / constants
         self.job_size_mult = skeletons_from_boxes_task.DEFAULT_ASSIGNMENT_SIZE_MULTIPLIER
@@ -170,7 +170,7 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
         return dm.Dataset.import_from(annotation_filename, format=dataset_format)
 
     def _parse_gt(self):
-        assert self._input_gt_data is not _unset
+        assert self._input_gt_data is not unset
 
         self._input_gt_dataset = self._parse_dataset(
             self._input_gt_data,
@@ -178,7 +178,7 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
         )
 
     def _parse_boxes(self):
-        assert self._input_boxes_data is not _unset
+        assert self._input_boxes_data is not unset
 
         self._boxes_dataset = self._parse_dataset(
             self._input_boxes_data, dataset_format=self.boxes_format
@@ -268,7 +268,7 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
 
         label_cat: dm.LabelCategories = self._input_gt_dataset.categories()[dm.AnnotationType.label]
 
-        excluded_gt_info = _ExcludedAnnotationsInfo()
+        excluded_gt_info = ExcludedAnnotationsInfo()
         excluded_samples = set()
         visited_ids = set()
         for gt_sample in self._input_gt_dataset:
@@ -333,8 +333,8 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
         self._excluded_gt_info = excluded_gt_info
 
     def _validate_gt(self):
-        assert self._data_filenames is not _unset
-        assert self._input_gt_dataset is not _unset
+        assert self._data_filenames is not unset
+        assert self._input_gt_dataset is not unset
 
         self._validate_gt_filenames()
         self._validate_gt_labels()
@@ -379,7 +379,7 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
         self._boxes_dataset.transform(InstanceSegmentsToBbox)
         self._boxes_dataset.init_cache()
 
-        excluded_boxes_info = _ExcludedAnnotationsInfo()
+        excluded_boxes_info = ExcludedAnnotationsInfo()
 
         label_cat: dm.LabelCategories = self._boxes_dataset.categories()[dm.AnnotationType.label]
 
@@ -519,8 +519,8 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
         self._excluded_boxes_info = excluded_boxes_info
 
     def _validate_boxes(self):
-        assert self._data_filenames is not _unset
-        assert self._boxes_dataset is not _unset
+        assert self._data_filenames is not unset
+        assert self._boxes_dataset is not unset
 
         self._validate_boxes_categories()
         self._validate_boxes_filenames()
@@ -698,9 +698,9 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
 
             return matched_skeletons
 
-        assert self._data_filenames is not _unset
-        assert self._boxes_dataset is not _unset
-        assert self._input_gt_dataset is not _unset
+        assert self._data_filenames is not unset
+        assert self._boxes_dataset is not unset
+        assert self._input_gt_dataset is not unset
         assert [
             label.name
             for label in self._input_gt_dataset.categories()[dm.AnnotationType.label]
@@ -723,7 +723,7 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
             categories=self._input_gt_dataset.categories(), media_type=dm.Image
         )
 
-        excluded_boxes_info = _ExcludedAnnotationsInfo()  # local for the function
+        excluded_boxes_info = ExcludedAnnotationsInfo()  # local for the function
         excluded_gt_info = self._excluded_gt_info
         gt_count_per_class = {}
         skeleton_bbox_mapping = {}  # skeleton id -> bbox id
@@ -808,8 +808,8 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
         self._skeleton_bbox_mapping = skeleton_bbox_mapping
 
     def _prepare_roi_infos(self):
-        assert self._gt_dataset is not _unset
-        assert self._boxes_dataset is not _unset
+        assert self._gt_dataset is not unset
+        assert self._boxes_dataset is not unset
 
         rois: list[skeletons_from_boxes_task.RoiInfo] = []
         for sample in self._boxes_dataset:
@@ -857,7 +857,7 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
         Mangle filenames in the dataset to make them less recognizable by annotators
         and hide private dataset info
         """
-        assert self._roi_infos is not _unset
+        assert self._roi_infos is not unset
 
         # TODO: maybe add different names for the same GT images in
         # different jobs to make them even less recognizable
@@ -878,9 +878,9 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
         return super()._job_val_frames_count * self.job_size_mult
 
     def _prepare_task_params(self):
-        assert self._roi_infos is not _unset
-        assert self._skeleton_bbox_mapping is not _unset
-        assert self._input_gt_dataset is not _unset
+        assert self._roi_infos is not unset
+        assert self._skeleton_bbox_mapping is not unset
+        assert self._input_gt_dataset is not unset
 
         # This list can be different from what is selected for validation
         input_gt_filenames = set(sample.media.path for sample in self._input_gt_dataset)
@@ -927,7 +927,7 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
                 self._point_labels[(skeleton_label.name, point_name)] = point_name
 
     def _prepare_gt_points_mapping(self):
-        assert self._gt_dataset is not _unset
+        assert self._gt_dataset is not unset
 
         self._gt_points_per_label = {}
 
@@ -1060,8 +1060,8 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
         )
 
     def _extract_and_upload_rois(self):
-        assert self._roi_filenames is not _unset
-        assert self._roi_infos is not _unset
+        assert self._roi_filenames is not unset
+        assert self._roi_infos is not unset
 
         src_bucket = BucketAccessInfo.parse_obj(self.manifest.data.data_url)
         src_prefix = src_bucket.path
@@ -1158,7 +1158,7 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
         point_label_name: str,
         skeleton_label_id: int,
     ) -> dm.Dataset:
-        assert self._gt_points_per_label is not _unset
+        assert self._gt_points_per_label is not unset
 
         # Change annotations to Points for validation in CVAT,
         # as annotators will use this annotation type
@@ -1222,9 +1222,9 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
         super()._setup_quality_settings(task_id, **values)
 
     def _create_on_cvat(self):
-        assert self._task_params is not _unset
-        assert self._point_labels is not _unset
-        assert self._gt_points_per_label is not _unset
+        assert self._task_params is not unset
+        assert self._point_labels is not unset
+        assert self._gt_points_per_label is not unset
 
         def _task_params_label_key(ts):
             return ts.label_id
@@ -1251,7 +1251,7 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
 
         # Register cloud storage on CVAT to pass user dataset
         cvat_cloud_storage = cvat_api.create_cloudstorage(
-            **_make_cvat_cloud_storage_params(oracle_bucket)
+            **make_cvat_cloud_storage_params(oracle_bucket)
         )
 
         segment_size = self._task_segment_size

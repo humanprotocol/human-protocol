@@ -22,24 +22,24 @@ from src.services.cloud.utils import BucketAccessInfo
 from src.utils.logging import format_sequence
 
 if TYPE_CHECKING:
-    from src.core.manifest import TaskManifest
+    from src.core.manifest.v1 import JobManifest
 
 from src.core.tasks.cvat_formats import DM_GT_DATASET_FORMAT_MAPPING
-from src.handlers.job_creation.builders.vision.base import _TaskBuilderBase
+from src.handlers.job_creation.builders.vision.base import TaskBuilderBase
 from src.handlers.job_creation.exceptions import (
     DatasetValidationError,
     TooFewSamples,
 )
 from src.handlers.job_creation.utils import (
-    _make_cvat_cloud_storage_params,
-    _MaybeUnset,
-    _unset,
+    MaybeUnset,
     filter_image_files,
+    make_cvat_cloud_storage_params,
     make_label_configuration,
+    unset,
 )
 
 
-class SimpleTaskBuilder(_TaskBuilderBase):
+class SimpleTaskBuilder(TaskBuilderBase):
     """
     Handles task creation for the IMAGE_BOXES task type
     """
@@ -88,7 +88,7 @@ class SimpleTaskBuilder(_TaskBuilderBase):
             return gt_dataset
 
     def _get_gt_filenames(
-        self, gt_dataset: dm.Dataset, data_filenames: list[str], *, manifest: TaskManifest
+        self, gt_dataset: dm.Dataset, data_filenames: list[str], *, manifest: JobManifest
     ) -> list[str]:
         gt_filenames = set(s.id + s.media.ext for s in gt_dataset)
         known_data_filenames = set(data_filenames)
@@ -138,7 +138,7 @@ class SimpleTaskBuilder(_TaskBuilderBase):
         self._upload_task_meta(gt_dataset)
 
         # Register cloud storage on CVAT to pass user dataset
-        cloud_storage = cvat_api.create_cloudstorage(**_make_cvat_cloud_storage_params(data_bucket))
+        cloud_storage = cvat_api.create_cloudstorage(**make_cvat_cloud_storage_params(data_bucket))
 
         # Create a project
         cvat_project = cvat_api.create_project(
@@ -208,10 +208,10 @@ class SimpleTaskBuilder(_TaskBuilderBase):
 
 
 class PointsTaskBuilder(SimpleTaskBuilder):
-    def __init__(self, manifest: TaskManifest, escrow_address: str, chain_id: int) -> None:
+    def __init__(self, manifest: JobManifest, escrow_address: str, chain_id: int) -> None:
         super().__init__(manifest=manifest, escrow_address=escrow_address, chain_id=chain_id)
 
-        self._mean_gt_bbox_radius_estimation: _MaybeUnset[float] = _unset
+        self._mean_gt_bbox_radius_estimation: MaybeUnset[float] = unset
 
     def _parse_gt_dataset(self, gt_file_data, *, add_prefix=None):
         gt_dataset = super()._parse_gt_dataset(gt_file_data, add_prefix=add_prefix)
@@ -279,7 +279,7 @@ class PointsTaskBuilder(SimpleTaskBuilder):
         )
 
     def _setup_quality_settings(self, task_id: int, **overrides) -> None:
-        assert self._mean_gt_bbox_radius_estimation is not _unset
+        assert self._mean_gt_bbox_radius_estimation is not unset
 
         values = {
             # We have at most 1 annotation per frame, so accuracy on each frame is either 0 or 1,

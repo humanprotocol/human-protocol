@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from src.handlers.job_creation.builders.vision.base import _TaskBuilderBase
+from src.handlers.job_creation.builders.vision.base import TaskBuilderBase
 
 
-class AudioTranscriptionTaskBuilder(_TaskBuilderBase):
+class AudioTranscriptionTaskBuilder(TaskBuilderBase):
     """
     Handles task creation for the AUDIO_TRANSCRIPTION task type.
 

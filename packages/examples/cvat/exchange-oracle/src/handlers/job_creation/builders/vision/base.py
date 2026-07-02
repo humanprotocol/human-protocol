@@ -24,11 +24,11 @@ if TYPE_CHECKING:
 
     import datumaro as dm
 
-    from src.core.manifest import TaskManifest
+    from src.core.manifest import ManifestBase
 
 
-class _TaskBuilderBase(metaclass=ABCMeta):
-    def __init__(self, manifest: TaskManifest, escrow_address: str, chain_id: int) -> None:
+class TaskBuilderBase(metaclass=ABCMeta):
+    def __init__(self, manifest: ManifestBase, escrow_address: str, chain_id: int) -> None:
         self.exit_stack = ExitStack()
         self.manifest = manifest
         self.escrow_address = escrow_address

@@ -27,7 +27,7 @@ from src.utils.time import utcnow
 @contextmanager
 def _mock_cvat_cloud_storage_params(logger: Logger) -> Generator[None, None, None]:
     from src.handlers.job_creation.utils import (
-        _make_cvat_cloud_storage_params as original_make_cvat_cloud_storage_params,
+        make_cvat_cloud_storage_params as original_make_cvat_cloud_storage_params,
     )
 
     def patched_make_cvat_cloud_storage_params(bucket_info: BucketAccessInfo) -> dict:
@@ -52,9 +52,9 @@ def _mock_cvat_cloud_storage_params(logger: Logger) -> Generator[None, None, Non
 
     # The helper is looked up in each builder module that imports it, so patch all of them.
     patch_targets = [
-        "src.handlers.job_creation.builders.vision.basic._make_cvat_cloud_storage_params",
-        "src.handlers.job_creation.builders.vision.boxes_from_points._make_cvat_cloud_storage_params",
-        "src.handlers.job_creation.builders.vision.skeletons_from_boxes._make_cvat_cloud_storage_params",
+        "src.handlers.job_creation.builders.vision.basic.make_cvat_cloud_storage_params",
+        "src.handlers.job_creation.builders.vision.boxes_from_points.make_cvat_cloud_storage_params",
+        "src.handlers.job_creation.builders.vision.skeletons_from_boxes.make_cvat_cloud_storage_params",
     ]
     with ExitStack() as stack:
         for target in patch_targets:

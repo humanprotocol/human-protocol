@@ -32,21 +32,21 @@ class _Undefined:
         return False
 
 
-_unset = _Undefined()
+unset = _Undefined()
 
-_MaybeUnset = T | _Undefined
+MaybeUnset = T | _Undefined
 
 
 @dataclass
-class _ExcludedAnnotationInfo:
+class ExcludedAnnotationInfo:
     message: str
     sample_id: str = field(kw_only=True)
     sample_subset: str = field(kw_only=True)
 
 
 @dataclass
-class _ExcludedAnnotationsInfo:
-    messages: list[_ExcludedAnnotationInfo] = field(default_factory=list)
+class ExcludedAnnotationsInfo:
+    messages: list[ExcludedAnnotationInfo] = field(default_factory=list)
 
     excluded_count: int = 0
     "The number of excluded annotations. Can be different from len(messages)"
@@ -55,7 +55,7 @@ class _ExcludedAnnotationsInfo:
 
     def add_message(self, message: str, *, sample_id: str, sample_subset: str):
         self.messages.append(
-            _ExcludedAnnotationInfo(
+            ExcludedAnnotationInfo(
                 message=message, sample_id=sample_id, sample_subset=sample_subset
             )
         )
@@ -74,7 +74,7 @@ def strip_bucket_prefix(data_filenames: list[str], prefix: str) -> list[str]:
     return [os.path.relpath(fn, prefix) for fn in data_filenames]
 
 
-def make_label_configuration(manifest: TaskManifest) -> list[dict]:
+def make_label_configuration(manifest: JobManifest) -> list[dict]:
     return [
         {
             "name": label.name,
@@ -84,7 +84,7 @@ def make_label_configuration(manifest: TaskManifest) -> list[dict]:
     ]
 
 
-def _make_cvat_cloud_storage_params(bucket_info: BucketAccessInfo) -> dict:
+def make_cvat_cloud_storage_params(bucket_info: BucketAccessInfo) -> dict:
     CLOUD_PROVIDER_TO_CVAT_CLOUD_PROVIDER = {
         CloudProviders.aws: "AWS_S3_BUCKET",
         CloudProviders.gcs: "GOOGLE_CLOUD_STORAGE",
