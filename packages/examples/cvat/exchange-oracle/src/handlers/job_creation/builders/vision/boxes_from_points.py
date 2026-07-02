@@ -4,6 +4,7 @@ import math
 import os
 import uuid
 from concurrent.futures import Future, ThreadPoolExecutor
+from dataclasses import dataclass, field
 from itertools import groupby
 from math import ceil
 from pathlib import Path
@@ -57,6 +58,51 @@ from src.handlers.job_creation.utils import (
 )
 
 
+@dataclass
+class BoxesFromPointsConfig:
+    roi_file_ext: str = ".png"  # supposed to be lossless and reasonably compressing
+    "File extension for RoI images, with leading dot (.) included"
+
+    roi_size_mult: float = 1.1
+    "Additional point ROI size multiplier"
+
+    min_roi_size: tuple[int, int] = field(
+        default_factory=lambda: (
+            Config.core_config.min_roi_size_w,
+            Config.core_config.min_roi_size_h,
+        )
+    )
+    "Minimum absolute ROI size, (w, h)"
+
+    points_format: str = "coco_person_keypoints"
+
+    embed_point_in_roi_image: bool = True
+    "Put a small point into the extracted RoI images for the original point"
+
+    embedded_point_radius: int = 15
+    min_embedded_point_radius_percent: float = 0.005
+    max_embedded_point_radius_percent: float = 0.01
+    embedded_point_color: tuple[int, int, int] = (0, 255, 255)
+    roi_background_color: tuple[int, int, int] = (245, 240, 242)  # BGR - CVAT background color
+
+    min_class_samples_for_roi_estimation: int = 25
+
+    max_class_roi_image_side_threshold: float = 0.5
+    """
+    The maximum allowed percent of the image for the estimated class RoI,
+    before the default RoI is used. Too big RoI estimations reduce the overall
+    prediction quality, making them unreliable.
+    """
+
+    max_discarded_threshold: float = 0.5
+    """
+    The maximum allowed percent of discarded
+    GT boxes, points, or samples for successful job launch
+    """
+
+    # TODO: consider adding an absolute number of minimum GT RoIs
+
+
 class BoxesFromPointsTaskBuilder(TaskBuilderBase):
     def __init__(self, manifest: JobManifest, escrow_address: str, chain_id: int) -> None:
         super().__init__(manifest=manifest, escrow_address=escrow_address, chain_id=chain_id)
@@ -89,52 +135,7 @@ class BoxesFromPointsTaskBuilder(TaskBuilderBase):
         self._excluded_points_info: MaybeUnset[ExcludedAnnotationsInfo] = unset
         self._excluded_gt_info: MaybeUnset[ExcludedAnnotationsInfo] = unset
 
-        # Configuration / constants
-        # TODO: consider WebP if produced files are too big
-        self.roi_file_ext = ".png"  # supposed to be lossless and reasonably compressing
-        "File extension for RoI images, with leading dot (.) included"
-
-        self.list_display_threshold = 5
-        "The maximum number of rendered list items in a message"
-
-        self.roi_size_mult = 1.1
-        "Additional point ROI size multiplier"
-
-        self.min_roi_size = (
-            Config.core_config.min_roi_size_w,
-            Config.core_config.min_roi_size_h,
-        )
-        "Minimum absolute ROI size, (w, h)"
-
-        self.points_format = "coco_person_keypoints"
-
-        self.embed_point_in_roi_image = True
-        "Put a small point into the extracted RoI images for the original point"
-
-        self.embedded_point_radius = 15
-        self.min_embedded_point_radius_percent = 0.005
-        self.max_embedded_point_radius_percent = 0.01
-        self.embedded_point_color = (0, 255, 255)
-        self.roi_background_color = (245, 240, 242)  # BGR - CVAT background color
-
-        self.oracle_data_bucket = BucketAccessInfo.parse_obj(Config.storage_config)
-
-        self.min_class_samples_for_roi_estimation = 25
-
-        self.max_class_roi_image_side_threshold = 0.5
-        """
-        The maximum allowed percent of the image for the estimated class RoI,
-        before the default RoI is used. Too big RoI estimations reduce the overall
-        prediction quality, making them unreliable.
-        """
-
-        self.max_discarded_threshold = 0.5
-        """
-        The maximum allowed percent of discarded
-        GT boxes, points, or samples for successful job launch
-        """
-
-        # TODO: probably, need to also add an absolute number of minimum GT RoIs
+        self.config = BoxesFromPointsConfig()
 
     def _download_input_data(self):
         data_bucket = BucketAccessInfo.parse_obj(self.manifest.data.data_url)
@@ -175,7 +176,7 @@ class BoxesFromPointsTaskBuilder(TaskBuilderBase):
         assert self._input_points_data is not unset
 
         self._points_dataset = self._parse_dataset(
-            self._input_points_data, dataset_format=self.points_format
+            self._input_points_data, dataset_format=self.config.points_format
         )
 
     def _validate_gt_labels(self):
@@ -276,7 +277,7 @@ class BoxesFromPointsTaskBuilder(TaskBuilderBase):
             )
 
         if excluded_gt_info.excluded_count > ceil(
-            excluded_gt_info.total_count * self.max_discarded_threshold
+            excluded_gt_info.total_count * self.config.max_discarded_threshold
         ):
             raise TooFewSamples(
                 "Too many GT boxes discarded, canceling job creation. Errors: {}".format(
@@ -422,7 +423,7 @@ class BoxesFromPointsTaskBuilder(TaskBuilderBase):
             )
 
         if excluded_points_info.excluded_count > ceil(
-            excluded_points_info.total_count * self.max_discarded_threshold
+            excluded_points_info.total_count * self.config.max_discarded_threshold
         ):
             raise TooFewSamples(
                 "Too many points discarded, canceling job creation. Errors: {}".format(
@@ -620,7 +621,7 @@ class BoxesFromPointsTaskBuilder(TaskBuilderBase):
             )
 
         if excluded_gt_info.excluded_count > ceil(
-            excluded_gt_info.total_count * self.max_discarded_threshold
+            excluded_gt_info.total_count * self.config.max_discarded_threshold
         ):
             raise DatasetValidationError(
                 "Too many GT boxes discarded ({} out of {}). "
@@ -683,16 +684,16 @@ class BoxesFromPointsTaskBuilder(TaskBuilderBase):
         roi_size_estimations_per_label = {}  # label id -> (w, h)
         default_roi_size = (2, 2)  # 2 will yield just the image size after halving
         for label_id, label_sizes in bbox_sizes_per_label.items():
-            if len(label_sizes) < self.min_class_samples_for_roi_estimation:
+            if len(label_sizes) < self.config.min_class_samples_for_roi_estimation:
                 estimated_size = default_roi_size
                 classes_with_default_roi[label_id] = "too few GT provided"
             else:
                 max_bbox = np.max(label_sizes, axis=0)
-                if np.any(max_bbox > self.max_class_roi_image_side_threshold):
+                if np.any(max_bbox > self.config.max_class_roi_image_side_threshold):
                     estimated_size = default_roi_size
                     classes_with_default_roi[label_id] = "estimated RoI is unreliable"
                 else:
-                    estimated_size = 2 * max_bbox * self.roi_size_mult
+                    estimated_size = 2 * max_bbox * self.config.roi_size_mult
 
             roi_size_estimations_per_label[label_id] = estimated_size
 
@@ -739,8 +740,8 @@ class BoxesFromPointsTaskBuilder(TaskBuilderBase):
                 roi_est_w, roi_est_h = self._roi_size_estimations[point_label_id]
                 roi_est_w *= image_w
                 roi_est_h *= image_h
-                roi_est_w = max(roi_est_w, self.min_roi_size[0])
-                roi_est_h = max(roi_est_h, self.min_roi_size[1])
+                roi_est_w = max(roi_est_w, self.config.min_roi_size[0])
+                roi_est_h = max(roi_est_h, self.config.min_roi_size[1])
 
                 roi_left = max(0, original_point_x - int(roi_est_w / 2))
                 roi_top = max(0, original_point_y - int(roi_est_h / 2))
@@ -778,7 +779,7 @@ class BoxesFromPointsTaskBuilder(TaskBuilderBase):
         # TODO: maybe add different names for the same GT images in
         # different jobs to make them even less recognizable
         self._roi_filenames = {
-            roi.point_id: str(uuid.uuid4()) + self.roi_file_ext for roi in self._rois
+            roi.point_id: str(uuid.uuid4()) + self.config.roi_file_ext for roi in self._rois
         }
 
     def _prepare_job_layout(self):
@@ -829,7 +830,7 @@ class BoxesFromPointsTaskBuilder(TaskBuilderBase):
             (serializer.serialize_roi_filenames(self._roi_filenames), layout.ROI_FILENAMES_FILENAME)
         )
 
-        storage_client = self._make_cloud_storage_client(self.oracle_data_bucket)
+        storage_client = self._make_cloud_storage_client(self._oracle_data_bucket)
         for file_data, filename in file_list:
             storage_client.create_file(
                 compose_data_bucket_filename(self.escrow_address, self.chain_id, filename),
@@ -853,7 +854,7 @@ class BoxesFromPointsTaskBuilder(TaskBuilderBase):
             # Coords can be outside the original image
             # In this case a border should be added to RoI, so that the image was centered on bbox
             wrapped_roi_pixels = np.zeros((roi_info.roi_h, roi_info.roi_w, 3), dtype=np.float32)
-            wrapped_roi_pixels[:, :] = self.roi_background_color
+            wrapped_roi_pixels[:, :] = self.config.roi_background_color
 
             dst_y = max(-roi_info.roi_y, 0)
             dst_x = max(-roi_info.roi_x, 0)
@@ -876,8 +877,11 @@ class BoxesFromPointsTaskBuilder(TaskBuilderBase):
         roi_r = (roi_info.roi_w**2 + roi_info.roi_h**2) ** 0.5 / 2
         point_size = int(
             min(
-                self.max_embedded_point_radius_percent * roi_r,
-                max(self.embedded_point_radius, self.min_embedded_point_radius_percent * roi_r),
+                self.config.max_embedded_point_radius_percent * roi_r,
+                max(
+                    self.config.embedded_point_radius,
+                    self.config.min_embedded_point_radius_percent * roi_r,
+                ),
             )
         )
 
@@ -893,7 +897,7 @@ class BoxesFromPointsTaskBuilder(TaskBuilderBase):
             roi_pixels,
             center,
             point_size,
-            self.embedded_point_color,
+            self.config.embedded_point_color,
             cv2.FILLED,
         )
 
@@ -905,7 +909,7 @@ class BoxesFromPointsTaskBuilder(TaskBuilderBase):
 
         src_bucket = BucketAccessInfo.parse_obj(self.manifest.data.data_url)
         src_prefix = src_bucket.path
-        dst_bucket = self.oracle_data_bucket
+        dst_bucket = self._oracle_data_bucket
 
         src_client = self._make_cloud_storage_client(src_bucket)
         dst_client = self._make_cloud_storage_client(dst_bucket)
@@ -942,7 +946,7 @@ class BoxesFromPointsTaskBuilder(TaskBuilderBase):
             for roi_info in image_roi_infos:
                 roi_pixels = self._extract_roi(image_pixels, roi_info)
 
-                if self.embed_point_in_roi_image:
+                if self.config.embed_point_in_roi_image:
                     roi_pixels = self._draw_roi_point(roi_pixels, roi_info)
 
                 roi_filename = self._roi_filenames[roi_info.point_id]
@@ -1024,7 +1028,7 @@ class BoxesFromPointsTaskBuilder(TaskBuilderBase):
         assert self._label_configuration is not unset
         assert self._gt_roi_dataset is not unset
 
-        oracle_bucket = self.oracle_data_bucket
+        oracle_bucket = self._oracle_data_bucket
 
         # Register cloud storage on CVAT to pass user dataset
         cvat_cloud_storage = cvat_api.create_cloudstorage(

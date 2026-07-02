@@ -5,7 +5,7 @@ import os
 import random
 import uuid
 from concurrent.futures import Future, ThreadPoolExecutor
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from itertools import chain, groupby
 from math import ceil
 from queue import Queue
@@ -57,13 +57,62 @@ from src.handlers.job_creation.utils import (
 )
 
 
-class SkeletonsFromBoxesTaskBuilder(TaskBuilderBase):
-    @dataclass
-    class _TaskParams:
-        label_id: int
-        roi_ids: list[int]
-        roi_gt_ids: list[int]
+@dataclass
+class _TaskParams:
+    label_id: int
+    roi_ids: list[int]
+    roi_gt_ids: list[int]
 
+
+@dataclass
+class SkeletonsFromBoxesConfig:
+    job_size_mult: int = skeletons_from_boxes_task.DEFAULT_ASSIGNMENT_SIZE_MULTIPLIER
+    "Job size multiplier"
+
+    roi_file_ext: str = ".png"  # supposed to be lossless and reasonably compressing
+    "File extension for RoI images, with leading dot (.) included"
+
+    roi_size_mult: float = 1.1
+    "Additional point ROI size multiplier"
+
+    min_roi_size: tuple[int, int] = field(
+        default_factory=lambda: (
+            Config.core_config.min_roi_size_w,
+            Config.core_config.min_roi_size_h,
+        )
+    )
+    "Minimum absolute ROI size, (w, h)"
+
+    boxes_format: str = "coco_person_keypoints"
+
+    embed_bbox_in_roi_image: bool = True
+    "Put a bbox into the extracted skeleton RoI images"
+
+    embed_tile_border: bool = True
+
+    embedded_point_radius: int = 15
+    min_embedded_point_radius_percent: float = 0.005
+    max_embedded_point_radius_percent: float = 0.01
+    embedded_point_color: tuple[int, int, int] = (0, 255, 255)
+
+    roi_embedded_bbox_color: tuple[int, int, int] = (0, 255, 255)  # BGR
+    roi_background_color: tuple[int, int, int] = (245, 240, 242)  # BGR - CVAT background color
+
+    min_label_gt_samples: int = 2  # TODO: find good threshold
+
+    max_discarded_threshold: float = 0.5
+    """
+    The maximum allowed percent of discarded
+    GT annotations or samples for successful job launch
+    """
+
+    gt_id_attribute: str = "object_id"
+    "An additional way to match GT skeletons with input boxes"
+
+    # TODO: consider adding an absolute number of minimum GT RoIs
+
+
+class SkeletonsFromBoxesTaskBuilder(TaskBuilderBase):
     def __init__(self, manifest: JobManifest, escrow_address: str, chain_id: int) -> None:
         super().__init__(manifest=manifest, escrow_address=escrow_address, chain_id=chain_id)
 
@@ -88,60 +137,12 @@ class SkeletonsFromBoxesTaskBuilder(TaskBuilderBase):
 
         self._roi_filenames: MaybeUnset[dict[int, str]] = unset
 
-        self._task_params: MaybeUnset[list[self._TaskParams]] = unset
+        self._task_params: MaybeUnset[list[_TaskParams]] = unset
 
         self._excluded_gt_info: MaybeUnset[ExcludedAnnotationsInfo] = unset
         self._excluded_boxes_info: MaybeUnset[ExcludedAnnotationsInfo] = unset
 
-        # Configuration / constants
-        self.job_size_mult = skeletons_from_boxes_task.DEFAULT_ASSIGNMENT_SIZE_MULTIPLIER
-        "Job size multiplier"
-
-        # TODO: consider WebP if produced files are too big
-        self.roi_file_ext = ".png"  # supposed to be lossless and reasonably compressing
-        "File extension for RoI images, with leading dot (.) included"
-
-        self.list_display_threshold = 5
-        "The maximum number of rendered list items in a message"
-
-        self.roi_size_mult = 1.1
-        "Additional point ROI size multiplier"
-
-        self.min_roi_size = (
-            Config.core_config.min_roi_size_w,
-            Config.core_config.min_roi_size_h,
-        )
-        "Minimum absolute ROI size, (w, h)"
-
-        self.boxes_format = "coco_person_keypoints"
-
-        self.embed_bbox_in_roi_image = True
-        "Put a bbox into the extracted skeleton RoI images"
-
-        self.embed_tile_border = True
-
-        self.embedded_point_radius = 15
-        self.min_embedded_point_radius_percent = 0.005
-        self.max_embedded_point_radius_percent = 0.01
-        self.embedded_point_color = (0, 255, 255)
-
-        self.roi_embedded_bbox_color = (0, 255, 255)  # BGR
-        self.roi_background_color = (245, 240, 242)  # BGR - CVAT background color
-
-        self.oracle_data_bucket = BucketAccessInfo.parse_obj(Config.storage_config)
-
-        self.min_label_gt_samples = 2  # TODO: find good threshold
-
-        self.max_discarded_threshold = 0.5
-        """
-        The maximum allowed percent of discarded
-        GT annotations or samples for successful job launch
-        """
-
-        self.gt_id_attribute = "object_id"
-        "An additional way to match GT skeletons with input boxes"
-
-        # TODO: probably, need to also add an absolute number of minimum GT RoIs per class
+        self.config = SkeletonsFromBoxesConfig()
 
     def _download_input_data(self):
         data_bucket = BucketAccessInfo.parse_obj(self.manifest.data.data_url)
@@ -181,7 +182,7 @@ class SkeletonsFromBoxesTaskBuilder(TaskBuilderBase):
         assert self._input_boxes_data is not unset
 
         self._boxes_dataset = self._parse_dataset(
-            self._input_boxes_data, dataset_format=self.boxes_format
+            self._input_boxes_data, dataset_format=self.config.boxes_format
         )
 
     def _validate_gt_labels(self):
@@ -320,7 +321,7 @@ class SkeletonsFromBoxesTaskBuilder(TaskBuilderBase):
             )
 
         if excluded_gt_info.excluded_count > ceil(
-            excluded_gt_info.total_count * self.max_discarded_threshold
+            excluded_gt_info.total_count * self.config.max_discarded_threshold
         ):
             raise TooFewSamples(
                 "Too many GT skeletons discarded, canceling job creation. Errors: {}".format(
@@ -493,7 +494,7 @@ class SkeletonsFromBoxesTaskBuilder(TaskBuilderBase):
                 )
 
         if excluded_boxes_info.excluded_count > ceil(
-            excluded_boxes_info.total_count * self.max_discarded_threshold
+            excluded_boxes_info.total_count * self.config.max_discarded_threshold
         ):
             raise TooFewSamples(
                 "Too many boxes discarded, canceling job creation. Errors: {}".format(
@@ -586,8 +587,10 @@ class SkeletonsFromBoxesTaskBuilder(TaskBuilderBase):
                     )
                     and (
                         # a way to customize matching if the default method is too rough
-                        not (bbox_id := input_bbox.attributes.get(self.gt_id_attribute))
-                        or not (skeleton_id := gt_skeleton.attributes.get(self.gt_id_attribute))
+                        not (bbox_id := input_bbox.attributes.get(self.config.gt_id_attribute))
+                        or not (
+                            skeleton_id := gt_skeleton.attributes.get(self.config.gt_id_attribute)
+                        )
                         or bbox_id == skeleton_id
                     )
                     for gt_skeleton in gt_skeletons
@@ -770,7 +773,7 @@ class SkeletonsFromBoxesTaskBuilder(TaskBuilderBase):
             )
 
         if excluded_gt_info.excluded_count > ceil(
-            self.max_discarded_threshold * excluded_gt_info.total_count
+            self.config.max_discarded_threshold * excluded_gt_info.total_count
         ):
             raise DatasetValidationError(
                 "Too many GT skeletons discarded ({} out of {}). "
@@ -795,7 +798,7 @@ class SkeletonsFromBoxesTaskBuilder(TaskBuilderBase):
         labels_with_few_gt = [
             gt_label_cat[label_id]
             for label_id, label_count in gt_count_per_class.items()
-            if label_count < self.min_label_gt_samples
+            if label_count < self.config.min_label_gt_samples
         ]
         if labels_with_few_gt:
             raise DatasetValidationError(
@@ -822,10 +825,10 @@ class SkeletonsFromBoxesTaskBuilder(TaskBuilderBase):
                 original_bbox_cx = int(bbox.x + bbox.w / 2)
                 original_bbox_cy = int(bbox.y + bbox.h / 2)
 
-                roi_w = ceil(bbox.w * self.roi_size_mult)
-                roi_h = ceil(bbox.h * self.roi_size_mult)
-                roi_w = max(roi_w, self.min_roi_size[0])
-                roi_h = max(roi_h, self.min_roi_size[1])
+                roi_w = ceil(bbox.w * self.config.roi_size_mult)
+                roi_h = ceil(bbox.h * self.config.roi_size_mult)
+                roi_w = max(roi_w, self.config.min_roi_size[0])
+                roi_h = max(roi_h, self.config.min_roi_size[1])
 
                 roi_x = original_bbox_cx - int(roi_w / 2)
                 roi_y = original_bbox_cy - int(roi_h / 2)
@@ -862,7 +865,8 @@ class SkeletonsFromBoxesTaskBuilder(TaskBuilderBase):
         # TODO: maybe add different names for the same GT images in
         # different jobs to make them even less recognizable
         self._roi_filenames = {
-            roi_info.bbox_id: str(uuid.uuid4()) + self.roi_file_ext for roi_info in self._roi_infos
+            roi_info.bbox_id: str(uuid.uuid4()) + self.config.roi_file_ext
+            for roi_info in self._roi_infos
         }
 
     @property
@@ -871,11 +875,11 @@ class SkeletonsFromBoxesTaskBuilder(TaskBuilderBase):
         # is supposed to be simple and the assignment is expected
         # to take little time with the default job size.
         # Then, we add a percent of job tiles for validation, keeping the requested ratio.
-        return super()._task_segment_size * self.job_size_mult
+        return super()._task_segment_size * self.config.job_size_mult
 
     @property
     def _job_val_frames_count(self) -> int:
-        return super()._job_val_frames_count * self.job_size_mult
+        return super()._job_val_frames_count * self.config.job_size_mult
 
     def _prepare_task_params(self):
         assert self._roi_infos is not unset
@@ -888,7 +892,7 @@ class SkeletonsFromBoxesTaskBuilder(TaskBuilderBase):
             sample.attributes["id"]: sample.media.path for sample in self._boxes_dataset
         }
 
-        task_params: list[self._TaskParams] = []
+        task_params: list[_TaskParams] = []
         segment_size = self._task_segment_size
         for label_id, _ in enumerate(self.manifest.annotation.labels):
             label_gt_roi_ids = set(
@@ -908,7 +912,7 @@ class SkeletonsFromBoxesTaskBuilder(TaskBuilderBase):
 
             task_params.extend(
                 [
-                    self._TaskParams(
+                    _TaskParams(
                         label_id=label_id, roi_ids=task_data_roi_ids, roi_gt_ids=label_gt_roi_ids
                     )
                     for task_data_roi_ids in take_by(
@@ -982,7 +986,7 @@ class SkeletonsFromBoxesTaskBuilder(TaskBuilderBase):
             (serializer.serialize_point_labels(self._point_labels), layout.POINT_LABELS_FILENAME)
         )
 
-        storage_client = self._make_cloud_storage_client(self.oracle_data_bucket)
+        storage_client = self._make_cloud_storage_client(self._oracle_data_bucket)
         for file_data, filename in file_list:
             storage_client.create_file(
                 compose_data_bucket_filename(self.escrow_address, self.chain_id, filename),
@@ -1006,7 +1010,7 @@ class SkeletonsFromBoxesTaskBuilder(TaskBuilderBase):
             # Coords can be outside the original image
             # In this case a border should be added to RoI, so that the image was centered on bbox
             wrapped_roi_pixels = np.zeros((roi_info.roi_h, roi_info.roi_w, 3), dtype=np.float32)
-            wrapped_roi_pixels[:, :] = self.roi_background_color
+            wrapped_roi_pixels[:, :] = self.config.roi_background_color
 
             dst_y = max(-roi_info.roi_y, 0)
             dst_x = max(-roi_info.roi_x, 0)
@@ -1028,7 +1032,7 @@ class SkeletonsFromBoxesTaskBuilder(TaskBuilderBase):
             roi_image,
             tuple(map(int, (roi_cx - bbox.w / 2, roi_cy - bbox.h / 2))),
             tuple(map(int, (roi_cx + bbox.w / 2, roi_cy + bbox.h / 2))),
-            self.roi_embedded_bbox_color,
+            self.config.roi_embedded_bbox_color,
             1,
             cv2.LINE_4,
         )
@@ -1037,8 +1041,11 @@ class SkeletonsFromBoxesTaskBuilder(TaskBuilderBase):
         roi_r = (roi_image.shape[0] ** 2 + roi_image.shape[1] ** 2) ** 0.5 / 2
         radius = int(
             min(
-                self.max_embedded_point_radius_percent * roi_r,
-                max(self.embedded_point_radius, self.min_embedded_point_radius_percent * roi_r),
+                self.config.max_embedded_point_radius_percent * roi_r,
+                max(
+                    self.config.embedded_point_radius,
+                    self.config.min_embedded_point_radius_percent * roi_r,
+                ),
             )
         )
 
@@ -1054,7 +1061,7 @@ class SkeletonsFromBoxesTaskBuilder(TaskBuilderBase):
             roi_image,
             tuple(map(int, (point[0], point[1]))),
             radius,
-            self.embedded_point_color,
+            self.config.embedded_point_color,
             -1,
             cv2.LINE_4,
         )
@@ -1065,7 +1072,7 @@ class SkeletonsFromBoxesTaskBuilder(TaskBuilderBase):
 
         src_bucket = BucketAccessInfo.parse_obj(self.manifest.data.data_url)
         src_prefix = src_bucket.path
-        dst_bucket = self.oracle_data_bucket
+        dst_bucket = self._oracle_data_bucket
 
         src_client = self._make_cloud_storage_client(src_bucket)
         dst_client = self._make_cloud_storage_client(dst_bucket)
@@ -1110,7 +1117,7 @@ class SkeletonsFromBoxesTaskBuilder(TaskBuilderBase):
             for roi_info in image_roi_infos:
                 roi_pixels = self._extract_roi(image_pixels, roi_info)
 
-                if self.embed_bbox_in_roi_image:
+                if self.config.embed_bbox_in_roi_image:
                     roi_pixels = self._draw_roi_bbox(roi_pixels, bbox_by_id[roi_info.bbox_id])
                     roi_pixels = self._draw_roi_point(
                         roi_pixels, (roi_info.point_x, roi_info.point_y)
@@ -1247,7 +1254,7 @@ class SkeletonsFromBoxesTaskBuilder(TaskBuilderBase):
             for skeleton_label_id, skeleton_label in enumerate(self.manifest.annotation.labels)
         }
 
-        oracle_bucket = self.oracle_data_bucket
+        oracle_bucket = self._oracle_data_bucket
 
         # Register cloud storage on CVAT to pass user dataset
         cvat_cloud_storage = cvat_api.create_cloudstorage(
