@@ -76,6 +76,7 @@ class TranscriptionTaskSpecification(BaseModel):
 
     labels: list[str]
     shared_attributes: list = Field(default_factory=list)
+    user_guide: str = ""
 
     validation: TranscriptionTaskValidation
 
@@ -126,6 +127,7 @@ def parse_audio_manifest(manifest: JobManifest) -> TranscriptionTaskSpecificatio
         ),
         labels=[label.name for label in annotation.labels],
         shared_attributes=list(annotation.shared_attributes),
+        user_guide=annotation.user_guide_url,
         validation=TranscriptionTaskValidation(
             target_metric=validation.target_metric.value,
             target_score=validation.target_score,

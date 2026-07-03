@@ -56,32 +56,39 @@ if TYPE_CHECKING:
 
 
 def _bundle_regions(
-    regions: list[InputRegion], *, min_duration: float
+    regions: list[InputRegion], *, min_duration: float, max_duration: float
 ) -> list[tuple[float, float, list[InputRegion]]]:
     """
     Bundle consecutive input regions (sorted by start) into groups >= min_duration;
     a region already >= min_duration stays alone. Returns (start_s, stop_s, members) per bundle.
+
+    A bundle's span (first ROI start .. last ROI stop) includes the gaps between its members, so
+    two limits keep bundles from ballooning over sparse input:
+    - max_duration caps the presented span (a longer bundle would fail input validation anyway);
+    - the join gap is capped at min_duration, so we never bridge a long silence between ROIs.
     """
 
     def span(group: list[InputRegion]) -> float:
         return group[-1].stop.total_seconds() - group[0].start.total_seconds()
+
+    def joinable(group: list[InputRegion], region: InputRegion) -> bool:
+        gap = region.start.total_seconds() - group[-1].stop.total_seconds()
+        reach = region.stop.total_seconds() - group[0].start.total_seconds()
+        return span(group) < min_duration and gap <= min_duration and reach <= max_duration
 
     out: list[list[InputRegion]] = []
     bundle: list[InputRegion] | None = None
     for region in regions:
         if bundle is None:
             bundle = [region]
-        elif span(bundle) < min_duration:
+        elif joinable(bundle, region):
             bundle.append(region)
         else:
             out.append(bundle)
             bundle = [region]
 
-    if bundle is not None:
-        if out and span(bundle) < min_duration:
-            out[-1].extend(bundle)
-        else:
-            out.append(bundle)
+    if bundle is not None:  # trailing bundle may stay shorter than min_duration
+        out.append(bundle)
 
     return [(g[0].start.total_seconds(), g[-1].stop.total_seconds(), g) for g in out]
 
@@ -92,6 +99,7 @@ def select_honeypots(
     source_filename: str,
     val_fraction: float,
     min_duration: float,
+    max_duration: float,
     random_seed: int = 0,
 ) -> list[PresentedRegion]:
     """
@@ -102,7 +110,7 @@ def select_honeypots(
     """
 
     regions = sorted(regions, key=lambda r: r.start)
-    bundles = _bundle_regions(regions, min_duration=min_duration)
+    bundles = _bundle_regions(regions, min_duration=min_duration, max_duration=max_duration)
 
     rng = random.Random(random_seed)  # noqa: S311  # not cryptographic
     idxs = list(range(len(bundles)))
@@ -304,6 +312,7 @@ class AudioTranscriptionTaskBuilder(TaskBuilderBase):
                     source_filename=filename,
                     val_fraction=1.0,  # use all GT as honeypots (rotation is a future feature)
                     min_duration=self.spec.details.roi_min_duration.total_seconds(),
+                    max_duration=self.spec.details.roi_max_duration.total_seconds(),
                     random_seed=self.spec.details.random_seed,
                 )
             )
@@ -362,6 +371,7 @@ class AudioTranscriptionTaskBuilder(TaskBuilderBase):
             bundled = _bundle_regions(
                 rows,
                 min_duration=self.spec.details.roi_min_duration.total_seconds(),
+                max_duration=self.spec.details.roi_max_duration.total_seconds(),
             )
             for start, stop, members in bundled:
                 ds_regions.append(
@@ -447,7 +457,9 @@ class AudioTranscriptionTaskBuilder(TaskBuilderBase):
             clip_path = self._media_dir / assignment.clip_filename
             storage_client.create_file(
                 compose_data_bucket_filename(
-                    self.escrow_address, self.chain_id, assignment.clip_filename
+                    self.escrow_address,
+                    self.chain_id,
+                    f"{self._meta_layout.CLIPS_DIR}/{assignment.clip_filename}",
                 ),
                 clip_path.read_bytes(),
             )
@@ -481,10 +493,9 @@ class AudioTranscriptionTaskBuilder(TaskBuilderBase):
         )
 
         if Config.debug:
-            self._upload_debug_cuts(storage_client)
+            self._upload_roi_cuts(storage_client)
 
-    def _upload_debug_cuts(self, storage_client) -> None:
-        """Upload each DS/GT region as its own clip into debug dirs, for inspection."""
+    def _upload_roi_cuts(self, storage_client) -> None:
         assert self._media_dir is not unset
         assert self._media_paths is not unset
         assert self._ds_regions is not unset
@@ -532,7 +543,9 @@ class AudioTranscriptionTaskBuilder(TaskBuilderBase):
             shared_attributes=self.spec.shared_attributes,
         )
 
-        cvat_project = cvat_api.create_project(escrow_address, labels=label_configuration)
+        cvat_project = cvat_api.create_project(
+            escrow_address, labels=label_configuration, user_guide=self.spec.user_guide
+        )
         cvat_webhook = cvat_api.create_cvat_webhook(cvat_project.id)
         cloud_storage = cvat_api.create_cloudstorage(
             **make_cvat_cloud_storage_params(self._oracle_data_bucket)
@@ -565,7 +578,9 @@ class AudioTranscriptionTaskBuilder(TaskBuilderBase):
 
             for assignment in self._assignments:
                 clip_key = compose_data_bucket_filename(
-                    escrow_address, chain_id, assignment.clip_filename
+                    escrow_address,
+                    chain_id,
+                    f"{self._meta_layout.CLIPS_DIR}/{assignment.clip_filename}",
                 )
                 cvat_task = cvat_api.create_task(cvat_project.id, escrow_address)
                 task_id = db_service.create_task(

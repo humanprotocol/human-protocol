@@ -141,6 +141,7 @@ def _placed_from_dict(d: dict) -> PlacedRegion:
 
 
 class TaskMetaLayout:
+    CLIPS_DIR = "clips"  # assignment clips subdir on the oracle bucket
     GT_FILENAME = "gt.tsv"
     REGIONS_TSV_FILENAME = "regions.tsv"
     REGIONS_FILENAME = "regions.json"
