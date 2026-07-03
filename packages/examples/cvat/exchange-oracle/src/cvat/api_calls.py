@@ -50,6 +50,7 @@ class LabelType(str, Enum, metaclass=BetterEnumMeta):
     points = "points"
     rectangle = "rectangle"
     polygon = "polygon"
+    interval = "interval"
 
 
 class WebhookEventType(str, Enum, metaclass=BetterEnumMeta):
@@ -340,15 +341,19 @@ def create_task(
     project_id: int,
     name: str,
     *,
-    segment_size: int,
+    segment_size: int | None = None,
 ) -> models.TaskRead:
     logger = logging.getLogger("app")
     with get_api_client() as api_client:
+        kwargs = {}
+        if segment_size is not None:
+            kwargs["segment_size"] = segment_size
+
         task_write_request = models.TaskWriteRequest(
             name=name,
             project_id=project_id,
             overlap=0,
-            segment_size=segment_size,
+            **kwargs,
         )
         try:
             (task_info, _) = api_client.tasks_api.create(task_write_request)

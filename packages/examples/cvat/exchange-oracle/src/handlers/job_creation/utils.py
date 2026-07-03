@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, TypeVar
 
 from datumaro.util.image import IMAGE_EXTENSIONS
@@ -35,30 +34,6 @@ class _Undefined:
 unset = _Undefined()
 
 MaybeUnset = T | _Undefined
-
-
-@dataclass
-class ExcludedAnnotationInfo:
-    message: str
-    sample_id: str = field(kw_only=True)
-    sample_subset: str = field(kw_only=True)
-
-
-@dataclass
-class ExcludedAnnotationsInfo:
-    messages: list[ExcludedAnnotationInfo] = field(default_factory=list)
-
-    excluded_count: int = 0
-    "The number of excluded annotations. Can be different from len(messages)"
-
-    total_count: int = 0
-
-    def add_message(self, message: str, *, sample_id: str, sample_subset: str):
-        self.messages.append(
-            ExcludedAnnotationInfo(
-                message=message, sample_id=sample_id, sample_subset=sample_subset
-            )
-        )
 
 
 def is_image(path: str) -> bool:

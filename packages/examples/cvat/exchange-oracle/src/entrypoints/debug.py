@@ -55,6 +55,7 @@ def _mock_cvat_cloud_storage_params(logger: Logger) -> Generator[None, None, Non
         "src.handlers.job_creation.builders.vision.basic.make_cvat_cloud_storage_params",
         "src.handlers.job_creation.builders.vision.boxes_from_points.make_cvat_cloud_storage_params",
         "src.handlers.job_creation.builders.vision.skeletons_from_boxes.make_cvat_cloud_storage_params",
+        "src.handlers.job_creation.builders.audio.transcription.make_cvat_cloud_storage_params",
     ]
     with ExitStack() as stack:
         for target in patch_targets:

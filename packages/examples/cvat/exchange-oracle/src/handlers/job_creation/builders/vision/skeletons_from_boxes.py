@@ -42,13 +42,13 @@ from src.core.tasks.cvat_formats import DM_GT_DATASET_FORMAT_MAPPING
 from src.handlers.job_creation.builders.vision.base import TaskBuilderBase
 from src.handlers.job_creation.exceptions import (
     DatasetValidationError,
+    ExcludedAnnotationsInfo,
     InvalidCoordinates,
     InvalidImageInfo,
     MismatchingAnnotations,
     TooFewSamples,
 )
 from src.handlers.job_creation.utils import (
-    ExcludedAnnotationsInfo,
     MaybeUnset,
     filter_image_files,
     make_cvat_cloud_storage_params,

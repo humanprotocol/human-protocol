@@ -67,6 +67,9 @@ class TranscriptionDetails(BaseModel):
     transcription_attr_name: str = "transcription"
     "The name of the output attribute for transcriptions in CVAT tasks and annotations"
 
+    random_seed: int = 0
+    "Seed for deterministic honeypot selection and assignment mixing"
+
 
 class TranscriptionTaskSpecification(BaseModel):
     data: TranscriptionTaskData
