@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-from typing import cast
-
 from src.chain.escrow import get_escrow_manifest
-from src.core import manifest as manifest_utils
+from src.core.manifest import get_manifest_task_type, parse_manifest
 from src.core.tasks import TaskTypes
 from src.handlers.job_creation.builders.audio.transcription import AudioTranscriptionTaskBuilder
 from src.handlers.job_creation.builders.vision.basic import (
@@ -25,16 +23,8 @@ module_logger = f"{ROOT_LOGGER_NAME}.cron.cvat"
 def create_task(escrow_address: str, chain_id: int) -> None:
     logger = get_function_logger(module_logger)
 
-    manifest = manifest_utils.parse_manifest(get_escrow_manifest(chain_id, escrow_address))
-
-    if manifest.version == 1:
-        manifest = cast("manifest_utils.v1.JobManifest", manifest)
-        task_type = manifest.annotation.type
-    elif manifest.version == 2:
-        manifest = cast("manifest_utils.v2.JobManifest", manifest)
-        task_type = manifest.job_type
-    else:
-        raise NotImplementedError(f"Unknown manifest version '{manifest.version}'")
+    manifest = parse_manifest(get_escrow_manifest(chain_id, escrow_address))
+    task_type = get_manifest_task_type(manifest)
 
     match task_type:
         case TaskTypes.image_boxes:

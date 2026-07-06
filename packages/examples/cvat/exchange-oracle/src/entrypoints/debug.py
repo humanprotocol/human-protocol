@@ -228,6 +228,8 @@ def _mock_endpoint_auth(logger: Logger) -> Generator[None, None, None]:
                 token_data["wallet_address"] = None
                 token_data["email"] = ""
 
+            token_data.setdefault("qualifications", [])
+
             logger.info(f"DEV: Decoded plain JSON auth token: {token_data}")
             return token_data
         except (ValueError, TypeError):

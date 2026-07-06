@@ -1,26 +1,48 @@
+"""Image task exporters.
+
+Each exporter owns both the orchestration (download annotations, upload results, notify the
+recording oracle) and its task-specific datumaro postprocessing. ``ImageJobExporter`` holds the
+shared export flow + the generic CVAT->datumaro conversion pipeline; per-task subclasses override
+only the parts that differ.
+"""
+
+from __future__ import annotations
+
 import io
 import os
 import zipfile
-from collections.abc import Sequence
-from dataclasses import dataclass
 from tempfile import TemporaryDirectory
+from typing import TYPE_CHECKING
 
 import datumaro as dm
-from datumaro.components.dataset import Dataset
 
 import src.core.tasks.boxes_from_points as boxes_from_points_task
 import src.core.tasks.skeletons_from_boxes as skeletons_from_boxes_task
+import src.services.cvat as cvat_service
 import src.utils.annotations as annotation_utils
-from src.core.annotation_meta import ANNOTATION_RESULTS_METAFILE_NAME, AnnotationMeta, JobMeta
+from src.core.annotation_meta import RESULTING_ANNOTATIONS_FILE
 from src.core.config import Config
-from src.core.manifest.v1 import JobManifest
+from src.core.manifest import get_manifest_task_type
 from src.core.storage import compose_data_bucket_filename
 from src.core.tasks import TaskTypes
 from src.core.tasks.cvat_formats import DM_DATASET_FORMAT_MAPPING
-from src.models.cvat import Image, Job
+from src.handlers.job_export.downloading import (
+    download_job_annotations,
+    download_project_annotations,
+)
+from src.handlers.job_export.exporters.base import JobExporter
+from src.handlers.job_export.results import FileDescriptor, prepare_annotation_metafile
 from src.services.cloud import make_client as make_cloud_client
 from src.services.cloud.utils import BucketAccessInfo
 from src.utils.zip_archive import extract_zip_archive, write_dir_to_zip_archive
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+    from datumaro.components.dataset import Dataset
+    from sqlalchemy.orm import Session
+
+    from src.models.cvat import Image, Project
 
 CVAT_EXPORT_FORMAT_MAPPING = {
     TaskTypes.image_label_binary: "CVAT for images 1.1",
@@ -37,65 +59,114 @@ CVAT_EXPORT_FORMAT_TO_DM_MAPPING = {
 }
 
 
-@dataclass
-class FileDescriptor:
-    filename: str
-    file: io.RawIOBase | None
+class ImageJobExporter(JobExporter):
+    """Base image exporter: download the single project + per-job annotations, run the datumaro
+    conversion pipeline, upload the results, and notify the recording oracle."""
 
+    def export(self, session: Session, escrow_projects: Sequence[Project]) -> None:
+        escrow_address = self.escrow_address
+        chain_id = self.chain_id
 
-def prepare_annotation_metafile(jobs: list[Job]) -> FileDescriptor:
-    """
-    Prepares a task/project annotation descriptor file with annotator mapping.
-    """
+        escrow_creation = cvat_service.get_escrow_creation_by_escrow_address(
+            session, escrow_address, chain_id, active=False
+        )
+        if not escrow_creation:
+            raise AssertionError(f"Can't find escrow creation for escrow '{escrow_address}'")
 
-    meta = AnnotationMeta(
-        jobs=[
-            JobMeta(
-                job_id=job.cvat_id,
-                annotator_wallet_address=job.latest_assignment.user_wallet_address,
-                assignment_id=job.latest_assignment.id,
-                task_id=job.cvat_task_id,
-                start_frame=job.start_frame,
-                stop_frame=job.stop_frame,
+        jobs = cvat_service.get_jobs_by_escrow_address(session, escrow_address, chain_id)
+        if len(jobs) != escrow_creation.total_jobs:
+            raise AssertionError(
+                f"Unexpected number of jobs fetched for escrow "
+                f"'{escrow_address}': {len(jobs)}, expected {escrow_creation.total_jobs}"
             )
-            for job in jobs
-        ]
-    )
 
-    return FileDescriptor(
-        ANNOTATION_RESULTS_METAFILE_NAME, file=io.BytesIO(meta.model_dump_json().encode())
-    )
+        self.logger.debug(f"Downloading results for the escrow ({escrow_address=})")
 
+        annotation_format = self._annotation_format
+        # FUTURE-TODO: probably can be removed in the future since
+        # these annotations are no longer used in Recording Oracle
+        job_annotations = download_job_annotations(self.logger, annotation_format, jobs)
 
-class _TaskProcessor:
-    def __init__(
+        project_annotations_file, project_images = self._collect_project_annotations(
+            session, escrow_projects, annotation_format
+        )
+
+        resulting_annotations_file_desc = FileDescriptor(
+            filename=RESULTING_ANNOTATIONS_FILE,
+            file=project_annotations_file,
+        )
+        annotations = (resulting_annotations_file_desc, *job_annotations.values())
+
+        self.logger.debug(f"Postprocessing results for the escrow ({escrow_address=})")
+
+        self._merged_annotation_file = resulting_annotations_file_desc
+        self._project_images = project_images
+        self._prepare()
+        self._postprocess(annotations)
+
+        self.logger.debug(f"Uploading annotations for the escrow ({escrow_address=})")
+
+        self._upload_results(files=(*annotations, prepare_annotation_metafile(jobs=jobs)))
+
+        self._emit_escrow_recorded(session)
+
+        self.logger.info(
+            f"The escrow ({escrow_address=}) is completed, "
+            f"resulting annotations are processed successfully"
+        )
+
+    # -- formats ----------------------------------------------------------- #
+
+    @property
+    def _task_type(self) -> TaskTypes:
+        return get_manifest_task_type(self.manifest)
+
+    @property
+    def _annotation_format(self) -> str:
+        return CVAT_EXPORT_FORMAT_MAPPING[self._task_type]
+
+    @property
+    def _input_format(self) -> str:
+        return CVAT_EXPORT_FORMAT_TO_DM_MAPPING[self._annotation_format]
+
+    @property
+    def _output_format(self) -> str:
+        return DM_DATASET_FORMAT_MAPPING[self._task_type]
+
+    # -- project annotations ----------------------------------------------- #
+
+    def _collect_project_annotations(
         self,
-        escrow_address: str,
-        chain_id: int,
-        annotations: Sequence[FileDescriptor],
-        merged_annotation: FileDescriptor,
-        *,
-        manifest: JobManifest,
-        project_images: list[Image],
-    ) -> None:
-        self.escrow_address = escrow_address
-        self.chain_id = chain_id
-        self.annotation_files = annotations
-        self.merged_annotation_file = merged_annotation
-        self.manifest = manifest
-        self.project_images = project_images
+        session: Session,
+        escrow_projects: Sequence[Project],
+        annotation_format: str,
+    ) -> tuple[io.RawIOBase | None, list[Image] | None]:
+        # escrows with simple task types must have only one project
+        try:
+            (project,) = escrow_projects
+        except ValueError:
+            raise NotImplementedError(
+                f"{self._task_type} is expected to have exactly one project,"
+                f" not {len(escrow_projects)}"
+            )
 
-        self.input_format = CVAT_EXPORT_FORMAT_TO_DM_MAPPING[
-            CVAT_EXPORT_FORMAT_MAPPING[manifest.annotation.type]
-        ]
-        self.output_format = DM_DATASET_FORMAT_MAPPING[manifest.annotation.type]
+        project_annotations_file = download_project_annotations(
+            self.logger, annotation_format, project.cvat_id
+        )
+        project_images = cvat_service.get_project_images(session, project.cvat_id)
+        return project_annotations_file, project_images
 
-    def _is_merged_dataset(self, ann_descriptor: FileDescriptor) -> bool:
-        return ann_descriptor == self.merged_annotation_file
+    # -- datumaro conversion pipeline -------------------------------------- #
 
-    def process(self):
+    def _prepare(self) -> None:
+        """Download any task-specific meta needed for postprocessing (default: nothing)."""
+
+    def _postprocess(self, annotations: Sequence[FileDescriptor]) -> None:
+        self._run_pipeline(annotations)
+
+    def _run_pipeline(self, annotations: Sequence[FileDescriptor]) -> None:
         with TemporaryDirectory() as tempdir:
-            for ann_descriptor in self.annotation_files:
+            for ann_descriptor in annotations:
                 if not zipfile.is_zipfile(ann_descriptor.file):
                     raise ValueError("Annotation files must be zip files")
                 ann_descriptor.file.seek(0)
@@ -119,6 +190,9 @@ class _TaskProcessor:
 
                 ann_descriptor.file = converted_dataset_archive
 
+    def _is_merged_dataset(self, ann_descriptor: FileDescriptor) -> bool:
+        return ann_descriptor == self._merged_annotation_file
+
     def _process_annotation_file(
         self, ann_descriptor: FileDescriptor, input_dir: str, output_dir: str
     ):
@@ -127,10 +201,10 @@ class _TaskProcessor:
         self._export_dataset(output_dataset, output_dir)
 
     def _parse_dataset(self, ann_descriptor: FileDescriptor, dataset_dir: str) -> dm.Dataset:  # noqa: ARG002
-        return dm.Dataset.import_from(dataset_dir, self.input_format)
+        return dm.Dataset.import_from(dataset_dir, self._input_format)
 
     def _export_dataset(self, dataset: dm.Dataset, output_dir: str):
-        dataset.export(output_dir, self.output_format, save_media=False)
+        dataset.export(output_dir, self._output_format, save_media=False)
 
     def _process_dataset(
         self, dataset: dm.Dataset, *, ann_descriptor: FileDescriptor
@@ -149,23 +223,23 @@ class _TaskProcessor:
     def _process_merged_dataset(self, input_dataset: dm.Dataset) -> dm.Dataset:
         return annotation_utils.remove_duplicated_gt_frames(
             input_dataset,
-            known_frames=[image.filename for image in self.project_images],
+            known_frames=[image.filename for image in self._project_images],
         )
 
 
-class _LabelsTaskProcessor(_TaskProcessor):
+class LabelsJobExporter(ImageJobExporter):
     pass
 
 
-class _BoxesTaskProcessor(_TaskProcessor):
+class BoxesJobExporter(ImageJobExporter):
     pass
 
 
-class _PolygonsTaskProcessor(_TaskProcessor):
+class PolygonsJobExporter(ImageJobExporter):
     pass
 
 
-class _PointsTaskProcessor(_TaskProcessor):
+class PointsJobExporter(ImageJobExporter):
     def _parse_dataset(self, ann_descriptor: FileDescriptor, dataset_dir: str) -> Dataset:
         annotation_utils.prepare_cvat_annotations_for_dm(dataset_dir)
         return super()._parse_dataset(ann_descriptor, dataset_dir)
@@ -182,10 +256,8 @@ class _PointsTaskProcessor(_TaskProcessor):
         return super()._process_dataset(dataset, ann_descriptor=ann_descriptor)
 
 
-class _BoxesFromPointsTaskProcessor(_TaskProcessor):
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-
+class BoxesFromPointsJobExporter(ImageJobExporter):
+    def _prepare(self) -> None:
         roi_filenames, roi_infos, points_dataset = self._download_task_meta()
 
         self.points_dataset = points_dataset
@@ -288,10 +360,21 @@ class _BoxesFromPointsTaskProcessor(_TaskProcessor):
         return merged_sample_dataset
 
 
-class _SkeletonsFromBoxesTaskProcessor(_TaskProcessor):
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+class SkeletonsJobExporter(ImageJobExporter):
+    """image_skeletons_from_boxes: annotations are accumulated into a merged dataset from the
+    per-job files here, so there is no single project export to download."""
 
+    def _collect_project_annotations(
+        self,
+        session: Session,
+        escrow_projects: Sequence[Project],
+        annotation_format: str,
+    ) -> tuple[io.RawIOBase | None, list[Image] | None]:
+        assert escrow_projects  # unused, but must hold the lock
+        del session, annotation_format  # the jobs are self-merged, no project export
+        return None, None
+
+    def _prepare(self) -> None:
         roi_filenames, roi_infos, boxes_dataset, job_label_mapping = self._download_task_meta()
 
         self.boxes_dataset = boxes_dataset
@@ -559,22 +642,19 @@ class _SkeletonsFromBoxesTaskProcessor(_TaskProcessor):
     def _process_merged_dataset(self, merged_dataset: Dataset) -> Dataset:
         return merged_dataset
 
-    def process(self):
-        assert self.merged_annotation_file.file is None
+    def _postprocess(self, annotations: Sequence[FileDescriptor]) -> None:
+        assert self._merged_annotation_file.file is None
 
         # Accumulate points from separate job annotations, then export the resulting dataset
         self._init_merged_dataset()
 
-        self.annotation_files = [
-            fd for fd in self.annotation_files if not self._is_merged_dataset(fd)
-        ]
-        super().process()
-        self.annotation_files.append(self.merged_annotation_file)
+        job_files = [fd for fd in annotations if not self._is_merged_dataset(fd)]
+        self._run_pipeline(job_files)
 
         with TemporaryDirectory() as tempdir:
             export_dir = os.path.join(
                 tempdir,
-                os.path.splitext(os.path.basename(self.merged_annotation_file.filename))[0]
+                os.path.splitext(os.path.basename(self._merged_annotation_file.filename))[0]
                 + "_conv",
             )
 
@@ -585,37 +665,4 @@ class _SkeletonsFromBoxesTaskProcessor(_TaskProcessor):
             write_dir_to_zip_archive(export_dir, converted_dataset_archive)
             converted_dataset_archive.seek(0)
 
-            self.merged_annotation_file.file = converted_dataset_archive
-
-
-def postprocess_annotations(
-    escrow_address: str,
-    chain_id: int,
-    annotations: Sequence[FileDescriptor],
-    merged_annotation: FileDescriptor,
-    *,
-    manifest: JobManifest,
-    project_images: list[Image],
-) -> None:
-    """
-    Processes annotations and updates the files list inplace
-    """
-    processor_classes: dict[TaskTypes, type[_TaskProcessor]] = {
-        TaskTypes.image_label_binary: _LabelsTaskProcessor,
-        TaskTypes.image_boxes: _BoxesTaskProcessor,
-        TaskTypes.image_polygons: _PolygonsTaskProcessor,
-        TaskTypes.image_points: _PointsTaskProcessor,
-        TaskTypes.image_boxes_from_points: _BoxesFromPointsTaskProcessor,
-        TaskTypes.image_skeletons_from_boxes: _SkeletonsFromBoxesTaskProcessor,
-    }
-
-    task_type = manifest.annotation.type
-    processor = processor_classes[task_type](
-        escrow_address=escrow_address,
-        chain_id=chain_id,
-        annotations=annotations,
-        merged_annotation=merged_annotation,
-        manifest=manifest,
-        project_images=project_images,
-    )
-    processor.process()
+            self._merged_annotation_file.file = converted_dataset_archive

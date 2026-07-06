@@ -92,6 +92,7 @@ def _get_annotations(
     *,
     attempt_interval: int = 5,
     timeout: int | None = _NOTSET,
+    expect_zip: bool = True,
 ) -> io.RawIOBase:
     """
     Downloads annotations.
@@ -133,9 +134,12 @@ def _get_annotations(
         request_auths=list(api_client.configuration.auth_settings().values()),
         body="",
     )
+
     response = api_client.rest_client.GET(request_info.result_url, headers=headers)
     file_buffer = io.BytesIO(response.data)
-    assert zipfile.is_zipfile(file_buffer)
+    if expect_zip:
+        assert zipfile.is_zipfile(file_buffer)
+
     file_buffer.seek(0)
     return file_buffer
 
@@ -524,19 +528,26 @@ def request_job_annotations(cvat_id: int, format_name: str) -> str:
             raise
 
 
-def get_job_annotations(request_id: str, *, timeout: int | None = _NOTSET) -> io.RawIOBase:
+def get_job_annotations(
+    request_id: str, *, timeout: int | None = _NOTSET, expect_zip: bool = True
+) -> io.RawIOBase:
     """
     Downloads annotations.
     The dataset preparation can take some time (e.g. 10 min), so it must be used like this:
 
     request_id = request_job_annotations(...):
     get_job_annotations(request_id, ...)
+
+    Some export formats (e.g. "Generic TSV 1.0") return a plain file instead of a zip archive;
+    pass ``expect_zip=False`` for those.
     """
 
     logger = logging.getLogger("app")
     with get_api_client() as api_client:
         try:
-            return _get_annotations(api_client, request_id=request_id, timeout=timeout)
+            return _get_annotations(
+                api_client, request_id=request_id, timeout=timeout, expect_zip=expect_zip
+            )
         except exceptions.ApiException as e:
             logger.exception(f"Exception when calling JobsApi.retrieve_annotations: {e}\n")
             raise
@@ -613,17 +624,12 @@ def clear_job_annotations(job_id: int) -> None:
 
     with get_api_client() as api_client:
         try:
-            api_client.jobs_api.update_annotations(
-                id=job_id,
-                job_annotations_update_request=models.JobAnnotationsUpdateRequest(
-                    tags=[], shapes=[], tracks=[]
-                ),
-            )
+            api_client.jobs_api.destroy_annotations(id=job_id)
         except exceptions.ApiException as e:
             if e.status == 404:
                 return
 
-            logger.exception(f"Exception when calling JobsApi.partial_update_annotations(): {e}\n")
+            logger.exception(f"Exception when calling JobsApi.destroy_annotations(): {e}\n")
             raise
 
 
