@@ -15,11 +15,22 @@ from src.handlers.job_export.exporters.vision import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+    from sqlalchemy.orm import Session
+
     from src.core.manifest import ManifestBase
     from src.handlers.job_export.exporters.base import JobExporter
+    from src.models.cvat import Project
 
 
-def create_exporter(manifest: ManifestBase, escrow_address: str, chain_id: int) -> JobExporter:
+def create_exporter(
+    manifest: ManifestBase,
+    escrow_address: str,
+    chain_id: int,
+    session: Session,
+    escrow_projects: Sequence[Project],
+) -> JobExporter:
     task_type = get_manifest_task_type(manifest)
 
     match task_type:
@@ -38,6 +49,6 @@ def create_exporter(manifest: ManifestBase, escrow_address: str, chain_id: int) 
         case TaskTypes.audio_transcription:
             exporter_type = AudioTranscriptionJobExporter
         case _:
-            raise Exception(f"Unsupported task type {task_type}")
+            raise NotImplementedError(f"Unsupported task type '{task_type}'")
 
-    return exporter_type(manifest, escrow_address, chain_id)
+    return exporter_type(manifest, escrow_address, chain_id, session, escrow_projects)

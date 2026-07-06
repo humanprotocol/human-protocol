@@ -73,11 +73,7 @@ def download_project_annotations(
 
 
 def download_job_annotations(
-    logger: logging.Logger,
-    annotation_format: str,
-    jobs: Sequence[Job],
-    *,
-    expect_zip: bool = True,
+    logger: logging.Logger, annotation_format: str, jobs: Sequence[Job]
 ) -> dict[int, FileDescriptor]:
     # Collect raw annotations from CVAT, validate and convert them
     # into a recording oracle suitable format
@@ -102,9 +98,7 @@ def download_job_annotations(
 
             job_annotations_file = download_with_retries(
                 logger,
-                download_callback=partial(
-                    cvat_api.get_job_annotations, request_id=request_id, expect_zip=expect_zip
-                ),
+                download_callback=partial(cvat_api.get_job_annotations, request_id=request_id),
                 retry_callback=partial(_request_export, job),
             )
 

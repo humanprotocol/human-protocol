@@ -7,16 +7,49 @@ source media after mixing.
 
 from __future__ import annotations
 
+import time
+from datetime import timedelta
 from enum import Enum
-from typing import TYPE_CHECKING
 
 from attrs import Factory, frozen
 from datumaro.util import dump_json, parse_json
 
 from src.utils.enums import BetterEnumMeta
 
-if TYPE_CHECKING:
-    from datetime import timedelta
+CVAT_EXPORT_FORMAT = "Generic TSV 1.0"
+
+
+def parse_time(value: str) -> timedelta:
+    """Parse an ``H:MM:SS(.ffffff)`` timestamp (as used in the region/GT TSVs)."""
+    for fmt_string in ("%H:%M:%S.%f", "%H:%M:%S"):
+        try:
+            parsed_time = time.strptime(value, fmt_string)
+            if fmt_string.endswith(".%f"):
+                # time.strptime drops sub-second precision, so recover it from the raw string.
+                frac = value.split(".", maxsplit=1)[-1]
+                microseconds = int(frac.ljust(6, "0")[:6])
+            else:
+                microseconds = 0
+        except ValueError:
+            continue
+        else:
+            return timedelta(
+                hours=parsed_time.tm_hour,
+                minutes=parsed_time.tm_min,
+                seconds=parsed_time.tm_sec,
+                microseconds=microseconds,
+            )
+
+    raise ValueError(f"Failed to parse timestamp '{value}'")
+
+
+def format_time(value: timedelta) -> str:
+    """Render a timedelta as an ``H:MM:SS.ffffff`` timestamp."""
+    total = value.total_seconds()
+    h = int(total // 3600)
+    m = int((total % 3600) // 60)
+    s = total - h * 3600 - m * 60
+    return f"{h}:{m:02d}:{s:09.6f}"
 
 
 @frozen(kw_only=True)

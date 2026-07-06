@@ -3,8 +3,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import src.services.cvat as cvat_service
-from src.chain.escrow import validate_escrow
+from src.chain.escrow import get_escrow_manifest, validate_escrow
 from src.core.config import CronConfig
+from src.core.manifest import parse_manifest
 from src.core.types import EscrowValidationStatuses
 from src.db import SessionLocal
 from src.db.utils import ForUpdateParams
@@ -34,7 +35,10 @@ def _handle_escrow_validation(
     if not escrow_projects:
         raise AssertionError(f"Can't find projects for escrow '{escrow_address}'")
 
+    manifest = parse_manifest(get_escrow_manifest(chain_id, escrow_address))
+
     with create_validator(
+        manifest=manifest,
         escrow_address=escrow_address,
         chain_id=chain_id,
         session=session,

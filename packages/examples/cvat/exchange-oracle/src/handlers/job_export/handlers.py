@@ -28,6 +28,12 @@ def handle_escrow_export(
 
     manifest = parse_manifest(get_escrow_manifest(chain_id, escrow_address))
 
-    with create_exporter(manifest, escrow_address, chain_id) as exporter:
+    with create_exporter(
+        manifest=manifest,
+        escrow_address=escrow_address,
+        chain_id=chain_id,
+        session=session,
+        escrow_projects=escrow_projects,
+    ) as exporter:
         exporter.set_logger(logger)
-        exporter.export(session, escrow_projects)
+        exporter.export()

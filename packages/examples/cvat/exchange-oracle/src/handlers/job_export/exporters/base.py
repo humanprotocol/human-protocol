@@ -22,17 +22,20 @@ if TYPE_CHECKING:
 
 
 class JobExporter(metaclass=ABCMeta):
-    """
-    Base for task-specific escrow annotation exporters.
-
-    Subclasses must implement :meth:`export`
-    """
-
-    def __init__(self, manifest: ManifestBase, escrow_address: str, chain_id: int) -> None:
+    def __init__(
+        self,
+        manifest: ManifestBase,
+        escrow_address: str,
+        chain_id: int,
+        session: Session,
+        escrow_projects: Sequence[Project],
+    ) -> None:
         self.exit_stack = ExitStack()
         self.manifest = manifest
         self.escrow_address = escrow_address
         self.chain_id = chain_id
+        self.session = session
+        self.escrow_projects = escrow_projects
 
         self.logger: Logger = NullLogger()
 
@@ -50,16 +53,16 @@ class JobExporter(metaclass=ABCMeta):
         return self
 
     @abstractmethod
-    def export(self, session: Session, escrow_projects: Sequence[Project]) -> None: ...
+    def export(self) -> None: ...
 
     def _upload_results(self, files: Sequence[FileDescriptor]) -> None:
         upload_escrow_results(
             files=files, chain_id=self.chain_id, escrow_address=self.escrow_address
         )
 
-    def _emit_escrow_recorded(self, session: Session) -> None:
+    def _emit_escrow_recorded(self) -> None:
         oracle_db_service.outbox.create_webhook(
-            session,
+            self.session,
             escrow_address=self.escrow_address,
             chain_id=self.chain_id,
             type=OracleWebhookTypes.recording_oracle,

@@ -42,7 +42,7 @@ def create_task(escrow_address: str, chain_id: int) -> None:
         case TaskTypes.audio_transcription:
             builder_type = AudioTranscriptionTaskBuilder
         case _:
-            raise Exception(f"Unsupported task type {task_type}")
+            raise NotImplementedError(f"Unsupported task type '{task_type}'")
 
     with builder_type(manifest, escrow_address, chain_id) as task_builder:
         task_builder.set_logger(logger)

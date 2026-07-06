@@ -26,6 +26,9 @@ from src.utils.time import utcnow
 
 _NOTSET = object()
 
+_PLAIN_FILE_EXPORT_FORMATS = frozenset({"Generic TSV 1.0"})
+"Export formats that return a plain file instead of a zip archive"
+
 
 class CVATException(Exception):
     """Indicates that CVAT API returned unexpected response"""
@@ -92,7 +95,6 @@ def _get_annotations(
     *,
     attempt_interval: int = 5,
     timeout: int | None = _NOTSET,
-    expect_zip: bool = True,
 ) -> io.RawIOBase:
     """
     Downloads annotations.
@@ -137,7 +139,10 @@ def _get_annotations(
 
     response = api_client.rest_client.GET(request_info.result_url, headers=headers)
     file_buffer = io.BytesIO(response.data)
-    if expect_zip:
+
+    # Validate the data received. Most formats return a zip archive, but some return contents
+    # directly.
+    if request_info.operation.format not in _PLAIN_FILE_EXPORT_FORMATS:
         assert zipfile.is_zipfile(file_buffer)
 
     file_buffer.seek(0)
@@ -528,26 +533,19 @@ def request_job_annotations(cvat_id: int, format_name: str) -> str:
             raise
 
 
-def get_job_annotations(
-    request_id: str, *, timeout: int | None = _NOTSET, expect_zip: bool = True
-) -> io.RawIOBase:
+def get_job_annotations(request_id: str, *, timeout: int | None = _NOTSET) -> io.RawIOBase:
     """
     Downloads annotations.
     The dataset preparation can take some time (e.g. 10 min), so it must be used like this:
 
     request_id = request_job_annotations(...):
     get_job_annotations(request_id, ...)
-
-    Some export formats (e.g. "Generic TSV 1.0") return a plain file instead of a zip archive;
-    pass ``expect_zip=False`` for those.
     """
 
     logger = logging.getLogger("app")
     with get_api_client() as api_client:
         try:
-            return _get_annotations(
-                api_client, request_id=request_id, timeout=timeout, expect_zip=expect_zip
-            )
+            return _get_annotations(api_client, request_id=request_id, timeout=timeout)
         except exceptions.ApiException as e:
             logger.exception(f"Exception when calling JobsApi.retrieve_annotations: {e}\n")
             raise

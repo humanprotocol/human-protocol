@@ -3,10 +3,8 @@ from __future__ import annotations
 import csv
 import io
 import random
-import time
 import uuid
 from collections import Counter
-from datetime import timedelta
 from math import ceil
 from pathlib import Path, PurePosixPath
 from tempfile import TemporaryDirectory
@@ -26,6 +24,7 @@ from src.core.tasks.audio_transcription.meta import (
     RegionKind,
     TaskMetaLayout,
     TaskMetaSerializer,
+    parse_time,
 )
 from src.core.tasks.audio_transcription.spec import parse_audio_manifest
 from src.core.types import TaskStatuses
@@ -610,29 +609,6 @@ class AudioTranscriptionTaskBuilder(TaskBuilderBase):
 # --------------------------------------------------------------------------- #
 
 
-def _parse_time(v: str) -> timedelta:
-    for fmt_string in ("%H:%M:%S.%f", "%H:%M:%S"):
-        try:
-            parsed_time = time.strptime(v, fmt_string)
-            if fmt_string.endswith(".%f"):
-                # time.strptime drops sub-second precision, so recover it from the raw string.
-                frac = v.split(".", maxsplit=1)[-1]
-                microseconds = int(frac.ljust(6, "0")[:6])
-            else:
-                microseconds = 0
-        except ValueError:
-            continue
-        else:
-            return timedelta(
-                hours=parsed_time.tm_hour,
-                minutes=parsed_time.tm_min,
-                seconds=parsed_time.tm_sec,
-                microseconds=microseconds,
-            )
-
-    raise ValueError(f"Failed to parse timestamp '{v}'")
-
-
 def _read_tsv(data: bytes) -> list[dict[str, str]]:
     reader = csv.DictReader(io.StringIO(data.decode("utf-8")), delimiter="\t")
     return list(reader)
@@ -646,8 +622,8 @@ def _parse_regions_tsv(data: bytes) -> dict[str, list[InputRegion]]:
             InputRegion(
                 filename=filename,
                 row_idx=row_idx,
-                start=_parse_time(row["start"]),
-                stop=_parse_time(row["stop"]),
+                start=parse_time(row["start"]),
+                stop=parse_time(row["stop"]),
                 label=(row.get("label") or "").strip() or None,
             )
         )
@@ -662,8 +638,8 @@ def _parse_gt_tsv(data: bytes) -> dict[str, list[InputGtRegion]]:
             InputGtRegion(
                 filename=filename,
                 row_idx=row_idx,
-                start=_parse_time(row["start"]),
-                stop=_parse_time(row["stop"]),
+                start=parse_time(row["start"]),
+                stop=parse_time(row["stop"]),
                 label=(row.get("label") or "").strip() or None,
                 text=(row.get("text") or "").strip(),
             )

@@ -40,9 +40,8 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from datumaro.components.dataset import Dataset
-    from sqlalchemy.orm import Session
 
-    from src.models.cvat import Image, Project
+    from src.models.cvat import Image
 
 CVAT_EXPORT_FORMAT_MAPPING = {
     TaskTypes.image_label_binary: "CVAT for images 1.1",
@@ -63,17 +62,17 @@ class ImageJobExporter(JobExporter):
     """Base image exporter: download the single project + per-job annotations, run the datumaro
     conversion pipeline, upload the results, and notify the recording oracle."""
 
-    def export(self, session: Session, escrow_projects: Sequence[Project]) -> None:
+    def export(self) -> None:
         escrow_address = self.escrow_address
         chain_id = self.chain_id
 
         escrow_creation = cvat_service.get_escrow_creation_by_escrow_address(
-            session, escrow_address, chain_id, active=False
+            self.session, escrow_address, chain_id, active=False
         )
         if not escrow_creation:
             raise AssertionError(f"Can't find escrow creation for escrow '{escrow_address}'")
 
-        jobs = cvat_service.get_jobs_by_escrow_address(session, escrow_address, chain_id)
+        jobs = cvat_service.get_jobs_by_escrow_address(self.session, escrow_address, chain_id)
         if len(jobs) != escrow_creation.total_jobs:
             raise AssertionError(
                 f"Unexpected number of jobs fetched for escrow "
@@ -88,7 +87,7 @@ class ImageJobExporter(JobExporter):
         job_annotations = download_job_annotations(self.logger, annotation_format, jobs)
 
         project_annotations_file, project_images = self._collect_project_annotations(
-            session, escrow_projects, annotation_format
+            annotation_format
         )
 
         resulting_annotations_file_desc = FileDescriptor(
@@ -108,7 +107,7 @@ class ImageJobExporter(JobExporter):
 
         self._upload_results(files=(*annotations, prepare_annotation_metafile(jobs=jobs)))
 
-        self._emit_escrow_recorded(session)
+        self._emit_escrow_recorded()
 
         self.logger.info(
             f"The escrow ({escrow_address=}) is completed, "
@@ -136,24 +135,21 @@ class ImageJobExporter(JobExporter):
     # -- project annotations ----------------------------------------------- #
 
     def _collect_project_annotations(
-        self,
-        session: Session,
-        escrow_projects: Sequence[Project],
-        annotation_format: str,
+        self, annotation_format: str
     ) -> tuple[io.RawIOBase | None, list[Image] | None]:
         # escrows with simple task types must have only one project
         try:
-            (project,) = escrow_projects
+            (project,) = self.escrow_projects
         except ValueError:
             raise NotImplementedError(
                 f"{self._task_type} is expected to have exactly one project,"
-                f" not {len(escrow_projects)}"
+                f" not {len(self.escrow_projects)}"
             )
 
         project_annotations_file = download_project_annotations(
             self.logger, annotation_format, project.cvat_id
         )
-        project_images = cvat_service.get_project_images(session, project.cvat_id)
+        project_images = cvat_service.get_project_images(self.session, project.cvat_id)
         return project_annotations_file, project_images
 
     # -- datumaro conversion pipeline -------------------------------------- #
@@ -361,17 +357,13 @@ class BoxesFromPointsJobExporter(ImageJobExporter):
 
 
 class SkeletonsJobExporter(ImageJobExporter):
-    """image_skeletons_from_boxes: annotations are accumulated into a merged dataset from the
-    per-job files here, so there is no single project export to download."""
+    # Reconstruct skeletons from per-point annotation jobs
 
     def _collect_project_annotations(
-        self,
-        session: Session,
-        escrow_projects: Sequence[Project],
-        annotation_format: str,
+        self, annotation_format: str
     ) -> tuple[io.RawIOBase | None, list[Image] | None]:
-        assert escrow_projects  # unused, but must hold the lock
-        del session, annotation_format  # the jobs are self-merged, no project export
+        assert self.escrow_projects  # unused, but must hold the lock
+        del annotation_format  # the jobs are self-merged, no project export
         return None, None
 
     def _prepare(self) -> None:

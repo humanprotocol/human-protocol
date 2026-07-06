@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import src.services.cvat as cvat_service
+from src.core.tasks.audio_transcription.meta import CVAT_EXPORT_FORMAT
 from src.handlers.job_completion.validators.base import JobValidator
 from src.handlers.job_export.downloading import download_job_annotations
 from src.handlers.job_export.results import (
@@ -13,8 +14,6 @@ from src.handlers.job_export.results import (
 
 if TYPE_CHECKING:
     from src.models.cvat import Job
-
-CVAT_AUDIO_EXPORT_FORMAT = "Generic TSV 1.0"
 
 # subdir (in the escrow results dir) for the per-assignment transcription TSVs
 ASSIGNMENTS_DIR = "assignments"
@@ -33,7 +32,7 @@ class AudioTranscriptionJobValidator(JobValidator):
             f"(escrow_address={self.escrow_address})"
         )
         cvat_job_annotations = download_job_annotations(
-            self.logger, CVAT_AUDIO_EXPORT_FORMAT, cvat_jobs, expect_zip=False
+            self.logger, CVAT_EXPORT_FORMAT, cvat_jobs
         )
 
         result_files: list[FileDescriptor] = [
