@@ -26,7 +26,7 @@ from src.core.types import (
 from src.crons import track_completed_escrows
 from src.crons.cvat.state_trackers import track_escrow_validations
 from src.db import SessionLocal
-from src.handlers.completed_escrows import handle_escrow_export
+from src.handlers.job_completion import handle_escrow_export
 from src.models.cvat import (
     Assignment,
     EscrowCreation,
@@ -263,8 +263,8 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         with (
-            patch("src.handlers.completed_escrows.validate_escrow"),
-            patch("src.handlers.completed_escrows.cloud_service") as mock_cloud_service,
+            patch("src.handlers.job_completion.validate_escrow"),
+            patch("src.handlers.job_completion.cloud_service") as mock_cloud_service,
         ):
             mock_storage_client = Mock()
             mock_storage_client.create_file = Mock()
@@ -373,8 +373,8 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         with (
-            patch("src.handlers.completed_escrows.validate_escrow"),
-            patch("src.handlers.completed_escrows.cloud_service") as mock_cloud_service,
+            patch("src.handlers.job_completion.validate_escrow"),
+            patch("src.handlers.job_completion.cloud_service") as mock_cloud_service,
             patch("src.services.cloud.make_client"),
         ):
             mock_cloud_service.make_client.return_value.create_file.side_effect = _TestException()
@@ -466,8 +466,8 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         with (
-            patch("src.handlers.completed_escrows.validate_escrow"),
-            patch("src.handlers.completed_escrows.cloud_service") as mock_cloud_service,
+            patch("src.handlers.job_completion.validate_escrow"),
+            patch("src.handlers.job_completion.cloud_service") as mock_cloud_service,
         ):
             mock_storage_client = Mock()
             mock_storage_client.create_file = Mock()
@@ -573,10 +573,10 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         with (
             open("tests/assets/manifests/manifest.json") as data,
-            patch("src.handlers.completed_escrows.get_escrow_manifest") as mock_get_manifest,
-            patch("src.handlers.completed_escrows.validate_escrow"),
-            patch("src.handlers.completed_escrows.cvat_api") as mock_cvat_api,
-            patch("src.handlers.completed_escrows.cloud_service") as mock_cloud_service,
+            patch("src.handlers.job_completion.get_escrow_manifest") as mock_get_manifest,
+            patch("src.handlers.job_completion.validate_escrow"),
+            patch("src.handlers.job_completion.cvat_api") as mock_cvat_api,
+            patch("src.handlers.job_completion.cloud_service") as mock_cloud_service,
         ):
             manifest = json.load(data)
             mock_get_manifest.return_value = manifest
@@ -701,12 +701,12 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         with (
             open("tests/assets/manifests/manifest.json") as data,
-            patch("src.handlers.completed_escrows.get_escrow_manifest") as mock_get_manifest,
-            patch("src.handlers.completed_escrows.validate_escrow"),
+            patch("src.handlers.job_completion.get_escrow_manifest") as mock_get_manifest,
+            patch("src.handlers.job_completion.validate_escrow"),
             patch(
-                "src.handlers.completed_escrows.cvat_api.request_job_annotations"
+                "src.handlers.job_completion.cvat_api.request_job_annotations"
             ) as mock_request_job_annotations,
-            patch("src.handlers.completed_escrows.cloud_service") as mock_cloud_service,
+            patch("src.handlers.job_completion.cloud_service") as mock_cloud_service,
         ):
             manifest = json.load(data)
             mock_get_manifest.return_value = manifest
@@ -824,10 +824,10 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         with (
             open("tests/assets/manifests/manifest.json") as data,
-            patch("src.handlers.completed_escrows.get_escrow_manifest") as mock_get_manifest,
-            patch("src.handlers.completed_escrows.validate_escrow"),
-            patch("src.handlers.completed_escrows.cvat_api") as mock_cvat_api,
-            patch("src.handlers.completed_escrows.cloud_service") as mock_cloud_service,
+            patch("src.handlers.job_completion.get_escrow_manifest") as mock_get_manifest,
+            patch("src.handlers.job_completion.validate_escrow"),
+            patch("src.handlers.job_completion.cvat_api") as mock_cvat_api,
+            patch("src.handlers.job_completion.cloud_service") as mock_cloud_service,
             patch("src.services.cloud.make_client"),
         ):
             manifest = json.load(data)
@@ -949,12 +949,12 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         with (
             open("tests/assets/manifests/manifest.json") as manifest_data,
-            patch("src.handlers.completed_escrows.get_escrow_manifest") as mock_get_manifest,
-            patch("src.handlers.completed_escrows.validate_escrow"),
-            patch("src.handlers.completed_escrows.cvat_api") as mock_cvat_api,
-            patch("src.handlers.completed_escrows.cloud_service") as mock_cloud_service,
+            patch("src.handlers.job_completion.get_escrow_manifest") as mock_get_manifest,
+            patch("src.handlers.job_completion.validate_escrow"),
+            patch("src.handlers.job_completion.cvat_api") as mock_cvat_api,
+            patch("src.handlers.job_completion.cloud_service") as mock_cloud_service,
             patch(
-                "src.handlers.completed_escrows.postprocess_annotations"
+                "src.handlers.job_completion.postprocess_annotations"
             ) as mock_postprocess_annotations,
         ):
             manifest = json.load(manifest_data)
