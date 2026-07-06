@@ -146,8 +146,8 @@ class TaskMetaLayout:
     REGIONS_TSV_FILENAME = "regions.tsv"
     REGIONS_FILENAME = "regions.json"
     ASSIGNMENTS_FILENAME = "assignments.json"
-    DEBUG_DS_CUTS_DIR = "debug/ds_cuts"  # per-region DS clips (debug only)
-    DEBUG_GT_CUTS_DIR = "debug/gt_cuts"  # per-region GT clips (debug only)
+    DS_CUTS_DIR = "ds_cuts"
+    GT_CUTS_DIR = "gt_cuts"
 
 
 class TaskMetaSerializer:

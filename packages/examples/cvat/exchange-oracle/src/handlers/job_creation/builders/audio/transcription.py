@@ -502,8 +502,8 @@ class AudioTranscriptionTaskBuilder(TaskBuilderBase):
         assert self._honeypots is not unset
 
         pairs = (
-            (self._meta_layout.DEBUG_DS_CUTS_DIR, self._ds_regions),
-            (self._meta_layout.DEBUG_GT_CUTS_DIR, self._honeypots),
+            (self._meta_layout.DS_CUTS_DIR, self._ds_regions),
+            (self._meta_layout.GT_CUTS_DIR, self._honeypots),
         )
         for subdir, regions in pairs:
             for i, region in enumerate(regions):
