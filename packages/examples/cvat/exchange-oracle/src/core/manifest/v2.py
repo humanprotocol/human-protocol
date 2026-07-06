@@ -116,44 +116,35 @@ class AnnotationInfo(BaseModel):
     details: ImageJobDetails | AudioJobDetails | None = None
     "Task-specific details"
 
-    @model_validator(mode="before")
-    @classmethod
-    def validate_label_type(cls, values: dict[str, Any]) -> dict[str, Any]:
-        if not isinstance(values, dict):
-            raise NotImplementedError
-
-        default_label_type = LabelTypes.plain
-        if values["type"] == TaskTypes.image_skeletons_from_boxes:
-            default_label_type = LabelTypes.skeleton
-
-        # Add default value for labels, if none provided.
-        # pydantic can't do this for tagged unions
-        try:
-            labels = values["labels"]
-            for label_info in labels:
-                label_info["type"] = label_info.get("type", default_label_type)
-        except KeyError:
-            pass
-
-        return values
-
 
 class JobManifest(BaseModel):
     version: Literal[2]
 
-    task_type: TaskTypes
+    job_type: TaskTypes
     data: DataInfo
     annotation: AnnotationInfo
 
     @model_validator(mode="before")
     @classmethod
-    def validate_task_details(cls, values: dict[str, Any]) -> dict[str, Any]:
+    def parse_task_specific_params(cls, values: dict[str, Any]) -> dict[str, Any]:
         if not isinstance(values, dict):
             raise NotImplementedError
+
+        job_type = values.get("job_type")
 
         annotation = values.get("annotation")
         if not isinstance(annotation, dict):
             raise NotImplementedError
+
+        # Default label types (pydantic can't do this for tagged unions).
+        default_label_type = (
+            LabelTypes.skeleton
+            if job_type == TaskTypes.image_skeletons_from_boxes
+            else LabelTypes.plain
+        )
+        for label_info in annotation.get("labels", []):
+            if isinstance(label_info, dict):
+                label_info.setdefault("type", default_label_type)
 
         if details := annotation.get("details"):
             if not isinstance(details, dict):
@@ -161,7 +152,7 @@ class JobManifest(BaseModel):
 
             details_cls = (
                 AudioJobDetails
-                if values.get("job_type") == TaskTypes.audio_transcription
+                if job_type == TaskTypes.audio_transcription
                 else ImageJobDetails
             )
             annotation["details"] = details_cls.model_validate(details)
