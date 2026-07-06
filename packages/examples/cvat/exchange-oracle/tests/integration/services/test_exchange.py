@@ -41,7 +41,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         with (
-            open("tests/utils/manifest.json") as data,
+            open("tests/assets/manifests/manifest.json") as data,
             patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
             patch(
                 "src.endpoints.serializers.get_escrow_fund_token_symbol"
@@ -100,7 +100,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         with (
-            open("tests/utils/manifest.json") as data,
+            open("tests/assets/manifests/manifest.json") as data,
             patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
             patch("src.services.exchange.cvat_api"),
         ):
@@ -155,7 +155,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         with (
-            open("tests/utils/manifest.json") as data,
+            open("tests/assets/manifests/manifest.json") as data,
             patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
             patch("src.services.exchange.cvat_api"),
         ):
@@ -194,7 +194,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         with (
-            open("tests/utils/manifest.json") as data,
+            open("tests/assets/manifests/manifest.json") as data,
             patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
         ):
             manifest = json.load(data)
@@ -213,7 +213,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         with (
-            open("tests/utils/manifest.json") as data,
+            open("tests/assets/manifests/manifest.json") as data,
             patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
         ):
             manifest = json.load(data)
@@ -243,7 +243,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         with (
-            open("tests/utils/manifest.json") as data,
+            open("tests/assets/manifests/manifest.json") as data,
             patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
             patch("src.services.exchange.cvat_api"),
         ):
@@ -296,7 +296,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         with (
-            open("tests/utils/manifest.json") as data,
+            open("tests/assets/manifests/manifest.json") as data,
             patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
             patch("src.services.exchange.cvat_api"),
         ):
@@ -334,7 +334,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         with (
-            open("tests/utils/manifest.json") as data,
+            open("tests/assets/manifests/manifest.json") as data,
             patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
             patch("src.services.exchange.cvat_api"),
         ):
@@ -384,7 +384,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         with (
-            open("tests/utils/manifest.json") as data,
+            open("tests/assets/manifests/manifest.json") as data,
             patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
             patch("src.services.exchange.cvat_api"),
         ):
@@ -429,7 +429,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         with (
-            open("tests/utils/manifest.json") as data,
+            open("tests/assets/manifests/manifest.json") as data,
             patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
             patch("src.services.exchange.cvat_api"),
         ):
@@ -467,7 +467,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         with (
-            open("tests/utils/manifest.json") as data,
+            open("tests/assets/manifests/manifest.json") as data,
             patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
             patch("src.services.exchange.cvat_api"),
         ):
@@ -514,7 +514,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         with (
-            open("tests/utils/manifest.json") as data,
+            open("tests/assets/manifests/manifest.json") as data,
             patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
             patch("src.services.exchange.cvat_api"),
         ):

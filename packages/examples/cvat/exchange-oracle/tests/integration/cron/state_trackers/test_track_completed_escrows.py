@@ -572,7 +572,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         with (
-            open("tests/utils/manifest.json") as data,
+            open("tests/assets/manifests/manifest.json") as data,
             patch("src.handlers.completed_escrows.get_escrow_manifest") as mock_get_manifest,
             patch("src.handlers.completed_escrows.validate_escrow"),
             patch("src.handlers.completed_escrows.cvat_api") as mock_cvat_api,
@@ -700,7 +700,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         with (
-            open("tests/utils/manifest.json") as data,
+            open("tests/assets/manifests/manifest.json") as data,
             patch("src.handlers.completed_escrows.get_escrow_manifest") as mock_get_manifest,
             patch("src.handlers.completed_escrows.validate_escrow"),
             patch(
@@ -823,7 +823,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         with (
-            open("tests/utils/manifest.json") as data,
+            open("tests/assets/manifests/manifest.json") as data,
             patch("src.handlers.completed_escrows.get_escrow_manifest") as mock_get_manifest,
             patch("src.handlers.completed_escrows.validate_escrow"),
             patch("src.handlers.completed_escrows.cvat_api") as mock_cvat_api,
@@ -948,7 +948,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         with (
-            open("tests/utils/manifest.json") as manifest_data,
+            open("tests/assets/manifests/manifest.json") as manifest_data,
             patch("src.handlers.completed_escrows.get_escrow_manifest") as mock_get_manifest,
             patch("src.handlers.completed_escrows.validate_escrow"),
             patch("src.handlers.completed_escrows.cvat_api") as mock_cvat_api,
