@@ -4,7 +4,7 @@
 
 Prerequisites:
 ```
-1. poetry shell
+1. poetry config virtualenvs.in-project true  # create .venv inside the project so editors/debuggers pick it up
 2. poetry install
 3. pre-commit install
 4. Make sure you have postgres-devel packages installed on your OS. It is required for psycopg2 build phase.
