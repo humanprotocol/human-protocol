@@ -63,7 +63,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         with (
             patch("src.chain.escrow.get_escrow") as mock_escrow,
             open("tests/assets/manifests/manifest.json") as data,
-            patch("src.handlers.job_creation.factory.get_escrow_manifest") as mock_get_manifest,
+            patch("src.handlers.job_creation.handlers.get_escrow_manifest") as mock_get_manifest,
             patch("src.handlers.job_creation.builders.vision.basic.cvat_api") as mock_cvat_api,
             patch(
                 "src.handlers.job_creation.builders.vision.basic.cloud_service.make_client"
@@ -249,7 +249,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         with (
             patch("src.chain.escrow.get_escrow") as mock_escrow,
             open("tests/assets/manifests/manifest.json") as data,
-            patch("src.handlers.job_creation.factory.get_escrow_manifest") as mock_get_manifest,
+            patch("src.handlers.job_creation.handlers.get_escrow_manifest") as mock_get_manifest,
             patch("src.handlers.job_creation.builders.vision.basic.cvat_api") as mock_cvat_api,
             patch(
                 "src.handlers.job_creation.builders.vision.basic.cloud_service.make_client"

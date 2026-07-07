@@ -9,7 +9,7 @@ from src.core.manifest import parse_manifest
 from src.core.types import EscrowValidationStatuses
 from src.db import SessionLocal
 from src.db.utils import ForUpdateParams
-from src.handlers.job_completion.factory import create_validator
+from src.handlers.job_completion.validators.factory import create_validator
 from src.utils.logging import get_function_logger
 
 if TYPE_CHECKING:

@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from src.chain.escrow import get_escrow_manifest
-from src.core.manifest import get_manifest_task_type, parse_manifest
+from typing import TYPE_CHECKING
+
+from src.core.manifest import get_manifest_task_type
 from src.core.tasks import TaskTypes
 from src.handlers.job_creation.builders.audio.transcription import AudioTranscriptionTaskBuilder
 from src.handlers.job_creation.builders.vision.basic import (
@@ -14,16 +15,17 @@ from src.handlers.job_creation.builders.vision.boxes_from_points import BoxesFro
 from src.handlers.job_creation.builders.vision.skeletons_from_boxes import (
     SkeletonsFromBoxesTaskBuilder,
 )
-from src.log import ROOT_LOGGER_NAME
-from src.utils.logging import get_function_logger
 
-module_logger = f"{ROOT_LOGGER_NAME}.cron.cvat"
+if TYPE_CHECKING:
+    from src.core.manifest import ManifestBase
+    from src.handlers.job_creation.builders.vision.base import TaskBuilderBase
 
 
-def create_task(escrow_address: str, chain_id: int) -> None:
-    logger = get_function_logger(module_logger)
-
-    manifest = parse_manifest(get_escrow_manifest(chain_id, escrow_address))
+def create_builder(
+    manifest: ManifestBase,
+    escrow_address: str,
+    chain_id: int,
+) -> TaskBuilderBase:
     task_type = get_manifest_task_type(manifest)
 
     match task_type:
@@ -44,6 +46,4 @@ def create_task(escrow_address: str, chain_id: int) -> None:
         case _:
             raise NotImplementedError(f"Unsupported task type '{task_type}'")
 
-    with builder_type(manifest, escrow_address, chain_id) as task_builder:
-        task_builder.set_logger(logger)
-        task_builder.build()
+    return builder_type(manifest, escrow_address, chain_id)

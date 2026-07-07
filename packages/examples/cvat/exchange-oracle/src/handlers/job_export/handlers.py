@@ -6,7 +6,7 @@ import src.services.cvat as cvat_service
 from src.chain.escrow import get_escrow_manifest, validate_escrow
 from src.core.manifest import parse_manifest
 from src.db.utils import ForUpdateParams
-from src.handlers.job_export.factory import create_exporter
+from src.handlers.job_export.exporters.factory import create_exporter
 
 if TYPE_CHECKING:
     import logging
