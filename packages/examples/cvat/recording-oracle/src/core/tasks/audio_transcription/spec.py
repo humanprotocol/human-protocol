@@ -16,7 +16,23 @@ if TYPE_CHECKING:
 
 
 class NormalizerPreset(str, Enum, metaclass=BetterEnumMeta):
-    basic = "basic"
+    basic = "basic"  # universal Unicode + case + whitespace fold
+    # Tier-1 language presets (BASIC plus per-language rules)
+    en = "en"
+    es = "es"
+    fr = "fr"
+    de = "de"
+    it = "it"
+    pt = "pt"
+    nl = "nl"
+    pl = "pl"
+    ru = "ru"
+    tr = "tr"
+    zh = "zh"
+    ja = "ja"
+    ko = "ko"
+    hi = "hi"
+    ar = "ar"
 
 
 class TranscriptionTaskData(BaseModel):

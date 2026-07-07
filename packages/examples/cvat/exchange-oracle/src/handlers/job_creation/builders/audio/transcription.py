@@ -24,6 +24,7 @@ from src.core.tasks.audio_transcription.meta import (
     RegionKind,
     TaskMetaLayout,
     TaskMetaSerializer,
+    parse_gt_tsv,
     parse_time,
 )
 from src.core.tasks.audio_transcription.spec import parse_audio_manifest
@@ -632,18 +633,8 @@ def _parse_regions_tsv(data: bytes) -> dict[str, list[InputRegion]]:
 
 def _parse_gt_tsv(data: bytes) -> dict[str, list[InputGtRegion]]:
     by_file: dict[str, list[InputGtRegion]] = {}
-    for row_idx, row in enumerate(_read_tsv(data)):
-        filename = row["filename"].strip()
-        by_file.setdefault(filename, []).append(
-            InputGtRegion(
-                filename=filename,
-                row_idx=row_idx,
-                start=parse_time(row["start"]),
-                stop=parse_time(row["stop"]),
-                label=(row.get("label") or "").strip() or None,
-                text=(row.get("text") or "").strip(),
-            )
-        )
+    for region in parse_gt_tsv(data):
+        by_file.setdefault(region.filename, []).append(region)
     return by_file
 
 

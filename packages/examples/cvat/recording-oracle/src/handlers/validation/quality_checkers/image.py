@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 import src.cvat.api_calls as cvat_api
 from src.core.gt_stats import GtKey, ValidationFrameStats
-from src.core.validation_errors import LowAccuracyError, TooFewGtError
+from src.core.validation_errors import LowQualityError, TooFewGtError
 from src.handlers.validation.common import UNKNOWN_QUALITY
 from src.handlers.validation.quality_checkers.base import TaskQualityChecker
 
@@ -107,7 +107,7 @@ class ImageTaskQualityChecker(TaskQualityChecker):
             job_results[cvat_job_id] = accuracy
 
             if accuracy < min_quality:
-                rejected_jobs[cvat_job_id] = LowAccuracyError()
+                rejected_jobs[cvat_job_id] = LowQualityError()
 
         for gt_stat in self._gt_stats.values():
             gt_stat.total_uses = max(

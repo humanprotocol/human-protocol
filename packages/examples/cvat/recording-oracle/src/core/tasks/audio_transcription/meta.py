@@ -7,6 +7,8 @@ source media after mixing.
 
 from __future__ import annotations
 
+import csv
+import io
 import time
 from datetime import timedelta
 from enum import Enum
@@ -81,6 +83,22 @@ class InputGtRegion:
     @property
     def id(self) -> str:
         return f"{self.filename}:{self.row_idx}"
+
+
+def parse_gt_tsv(data: bytes) -> list[InputGtRegion]:
+    "Parse a GT transcription TSV (columns: filename, start, stop, label, text) into regions."
+    reader = csv.DictReader(io.StringIO(data.decode("utf-8")), delimiter="\t")
+    return [
+        InputGtRegion(
+            filename=row["filename"].strip(),
+            row_idx=row_idx,
+            start=parse_time(row["start"]),
+            stop=parse_time(row["stop"]),
+            label=(row.get("label") or "").strip() or None,
+            text=(row.get("text") or "").strip(),
+        )
+        for row_idx, row in enumerate(reader)
+    ]
 
 
 class RegionKind(str, Enum, metaclass=BetterEnumMeta):
@@ -181,6 +199,17 @@ class TaskMetaLayout:
     ASSIGNMENTS_FILENAME = "assignments.json"
     DS_CUTS_DIR = "ds_cuts"
     GT_CUTS_DIR = "gt_cuts"
+
+
+class TaskResultsLayout:
+    "Layout of the escrow results dir on the oracle bucket."
+
+    ASSIGNMENTS_DIR = "assignments"  # per-assignment annotation TSVs (one per CVAT job)
+
+    @classmethod
+    def assignment_annotation_filename(cls, job_id: int, assignment_id: str) -> str:
+        "Path (relative to the results dir) of a job's per-assignment annotation TSV."
+        return f"{cls.ASSIGNMENTS_DIR}/{job_id}-{assignment_id}.tsv"
 
 
 class TaskMetaSerializer:
