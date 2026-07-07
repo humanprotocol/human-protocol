@@ -9,7 +9,7 @@ import src.core.validation_meta as validation
 import src.services.webhook as oracle_db_service
 from src.chain import escrow
 from src.core.config import Config
-from src.core.manifest import TaskManifest, parse_manifest
+from src.core.manifest import ManifestBase, parse_manifest
 from src.core.oracle_events import (
     RecordingOracleEvent_JobCompleted,
 )
@@ -34,7 +34,7 @@ module_logger_name = f"{ROOT_LOGGER_NAME}.cron.webhook"
 
 class _TaskUploader:
     def __init__(
-        self, escrow_address: str, chain_id: int, manifest: TaskManifest, db_session: Session
+        self, escrow_address: str, chain_id: int, manifest: ManifestBase, db_session: Session
     ) -> None:
         self.escrow_address = escrow_address
         self.chain_id = chain_id

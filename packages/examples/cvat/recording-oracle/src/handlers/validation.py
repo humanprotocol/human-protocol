@@ -1,15 +1,17 @@
 import io
 from collections import Counter
 from logging import Logger
+from typing import cast
 
 from sqlalchemy.orm import Session
 
 import src.core.annotation_meta as annotation
+import src.core.manifest as manifest_utils
 import src.core.validation_meta as validation
 import src.services.webhook as oracle_db_service
 from src.chain import escrow
 from src.core.config import Config
-from src.core.manifest import TaskManifest, parse_manifest
+from src.core.manifest import ManifestBase
 from src.core.oracle_events import (
     RecordingOracleEvent_JobCompleted,
     RecordingOracleEvent_SubmissionRejected,
@@ -35,7 +37,7 @@ module_logger_name = f"{ROOT_LOGGER_NAME}.cron.webhook"
 
 class _TaskValidator:
     def __init__(
-        self, escrow_address: str, chain_id: int, manifest: TaskManifest, db_session: Session
+        self, escrow_address: str, chain_id: int, manifest: ManifestBase, db_session: Session
     ) -> None:
         self.escrow_address = escrow_address
         self.chain_id = chain_id
@@ -137,6 +139,15 @@ class _TaskValidator:
                 job_meta.job_id: job_meta.assignment_id for job_meta in self.annotation_meta.jobs
             }
 
+            if self.manifest.version == 1:
+                manifest = cast(manifest_utils.v1.JobManifest, self.manifest)
+                quality_threshold = manifest.validation.min_quality
+            elif self.manifest.version == 2:
+                manifest = cast(manifest_utils.v2.JobManifest, self.manifest)
+                quality_threshold = manifest.annotation.validation.target_score
+            else:
+                raise NotImplementedError(f"Unknown manifest version '{manifest.version}'")
+
             oracle_db_service.outbox.create_webhook(
                 db_session,
                 escrow_address,
@@ -149,7 +160,7 @@ class _TaskValidator:
                             assignment_id=job_id_to_assignment_id[rejected_job_id],
                             reason=self._LOW_QUALITY_REASON_MESSAGE_TEMPLATE.format(
                                 validation_result.job_results[rejected_job_id],
-                                self.manifest.validation.min_quality,
+                                quality_threshold,
                             ),
                         )
                         for rejected_job_id, reason in validation_result.rejected_jobs.items()
@@ -168,7 +179,7 @@ def validate_results(
 ):
     logger = get_function_logger(module_logger_name)
 
-    manifest = parse_manifest(escrow.get_escrow_manifest(chain_id, escrow_address))
+    manifest = manifest_utils.parse_manifest(escrow.get_escrow_manifest(chain_id, escrow_address))
 
     validator = _TaskValidator(
         escrow_address=escrow_address, chain_id=chain_id, manifest=manifest, db_session=db_session

@@ -11,7 +11,7 @@ import pydantic
 from httpx import URL
 
 from src.core.config import Config, StorageConfig
-from src.core.manifest import shared
+from src.core.manifest.shared import BucketUrl, BucketUrlBase
 from src.services.cloud.gcs import DEFAULT_GCS_HOST
 from src.services.cloud.s3 import DEFAULT_S3_HOST
 from src.utils.enums import BetterEnumMeta
@@ -174,14 +174,14 @@ class BucketAccessInfo:
         )
 
     @classmethod
-    def from_bucket_url(cls, bucket_url: shared.BucketUrl) -> BucketAccessInfo:
+    def from_bucket_url(cls, bucket_url: BucketUrl) -> BucketAccessInfo:
         return cls._from_dict(bucket_url.model_dump())
 
     @classmethod
     def parse_obj(
-        cls, data: str | type[StorageConfig] | shared.BucketUrl | pydantic.AnyUrl
+        cls, data: str | type[StorageConfig] | BucketUrl | pydantic.AnyUrl
     ) -> BucketAccessInfo:
-        if isinstance(data, shared.BucketUrlBase):
+        if isinstance(data, BucketUrlBase):
             return cls.from_bucket_url(data)
         elif isinstance(data, str):
             return cls.from_url(data)

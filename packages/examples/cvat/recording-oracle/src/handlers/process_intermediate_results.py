@@ -19,7 +19,9 @@ import src.services.validation as db_service
 from src.core.annotation_meta import AnnotationMeta
 from src.core.config import Config
 from src.core.gt_stats import GtKey, GtStats, ValidationFrameStats
-from src.core.types import TaskTypes
+from src.core.manifest import get_manifest_task_type
+from src.core.tasks import TaskTypes
+from src.core.tasks.cvat_formats import DM_DATASET_FORMAT_MAPPING, DM_GT_DATASET_FORMAT_MAPPING
 from src.core.validation_errors import (
     DatasetValidationError,
     LowAccuracyError,
@@ -41,26 +43,8 @@ if TYPE_CHECKING:
 
     from sqlalchemy.orm import Session
 
-    from src.core.manifest import TaskManifest
+    from src.core.manifest import ManifestBase
     from src.cvat.interface import QualityReportData
-
-DM_DATASET_FORMAT_MAPPING = {
-    TaskTypes.image_label_binary: "cvat_images",
-    TaskTypes.image_polygons: "coco_instances",
-    TaskTypes.image_points: "coco_person_keypoints",
-    TaskTypes.image_boxes: "coco_instances",
-    TaskTypes.image_boxes_from_points: "coco_instances",
-    TaskTypes.image_skeletons_from_boxes: "coco_person_keypoints",
-}
-
-DM_GT_DATASET_FORMAT_MAPPING = {
-    TaskTypes.image_label_binary: "cvat_images",
-    TaskTypes.image_points: "coco_instances",  # we compare points against boxes
-    TaskTypes.image_polygons: "coco_instances",
-    TaskTypes.image_boxes: "coco_instances",
-    TaskTypes.image_boxes_from_points: "coco_instances",
-    TaskTypes.image_skeletons_from_boxes: "coco_person_keypoints",
-}
 
 _JobResults = dict[int, float]
 
@@ -94,7 +78,7 @@ class _TaskHandler:
         self,
         escrow_address: str,
         chain_id: int,
-        manifest: TaskManifest,
+        manifest: ManifestBase,
     ) -> None:
         self.escrow_address = escrow_address
         self.chain_id = chain_id
@@ -115,7 +99,7 @@ class _TaskValidator(_TaskHandler):
         self,
         escrow_address: str,
         chain_id: int,
-        manifest: TaskManifest,
+        manifest: ManifestBase,
         *,
         meta: AnnotationMeta,
         gt_stats: GtStats | None = None,
@@ -133,6 +117,8 @@ class _TaskValidator(_TaskHandler):
     def _validate_jobs(self):
         manifest = self._require_field(self.manifest)
         meta = self._require_field(self._meta)
+        if manifest.version != 1:
+            raise NotImplementedError
 
         job_results: _JobResults = {}
         rejected_jobs: _RejectedJobs = {}
@@ -260,7 +246,7 @@ class _TaskAnnotationMerger(_TaskHandler):
         self,
         escrow_address: str,
         chain_id: int,
-        manifest: TaskManifest,
+        manifest: ManifestBase,
         *,
         merged_annotations: io.IOBase,
     ) -> None:
@@ -281,7 +267,7 @@ class _TaskAnnotationMerger(_TaskHandler):
 
             gt_dataset = dm.Dataset.import_from(
                 gt_filename,
-                format=DM_GT_DATASET_FORMAT_MAPPING[self.manifest.annotation.type],
+                format=DM_GT_DATASET_FORMAT_MAPPING[get_manifest_task_type(self.manifest)],
             )
 
             gt_dataset.init_cache()
@@ -324,7 +310,7 @@ class _TaskAnnotationMerger(_TaskHandler):
         input_gt_dataset = self._require_field(self._input_gt_dataset)
 
         merged_dataset_path = tempdir / "merged"
-        merged_dataset_format = DM_DATASET_FORMAT_MAPPING[manifest.annotation.type]
+        merged_dataset_format = DM_DATASET_FORMAT_MAPPING[get_manifest_task_type(manifest)]
         extract_zip_archive(merged_annotations, merged_dataset_path)
 
         merged_dataset = dm.Dataset.import_from(
@@ -346,13 +332,13 @@ class _TaskAnnotationMerger(_TaskHandler):
 
     @classmethod
     def _put_gt_into_merged_dataset(
-        cls, input_gt_dataset: dm.Dataset, merged_dataset: dm.Dataset, *, manifest: TaskManifest
+        cls, input_gt_dataset: dm.Dataset, merged_dataset: dm.Dataset, *, manifest: ManifestBase
     ) -> None:
         """
         Updates the merged dataset inplace, writing GT annotations corresponding to the task type.
         """
 
-        match manifest.annotation.type:
+        match get_manifest_task_type(manifest):
             case TaskTypes.image_boxes.value | TaskTypes.image_polygons.value:
                 merged_dataset.update(input_gt_dataset)
             case TaskTypes.image_points.value:
@@ -398,7 +384,7 @@ class _TaskAnnotationMerger(_TaskHandler):
                 )
                 merged_dataset.update(input_gt_dataset)
             case _:
-                raise AssertionError(f"Unknown task type {manifest.annotation.type}")
+                raise AssertionError(f"Unknown task type {get_manifest_task_type(manifest)}")
 
     def merge_results(self) -> io.IOBase:
         with TemporaryDirectory() as tempdir:
@@ -423,7 +409,7 @@ class _TaskHoneypotManager:
     def __init__(
         self,
         task: db_models.Task,
-        manifest: TaskManifest,
+        manifest: ManifestBase,
         *,
         annotation_meta: AnnotationMeta,
         gt_stats: GtStats,
@@ -744,7 +730,7 @@ def process_intermediate_results(  # noqa: PLR0912
     escrow_address: str,
     chain_id: int,
     meta: AnnotationMeta,
-    manifest: TaskManifest,
+    manifest: ManifestBase,
     logger: logging.Logger,
 ) -> ValidationSuccess | ValidationFailure:
     should_complete = False
@@ -953,7 +939,7 @@ def process_final_results(
     chain_id: int,
     meta: AnnotationMeta,
     merged_annotations: io.RawIOBase,
-    manifest: TaskManifest,
+    manifest: ManifestBase,
     logger: logging.Logger,
 ) -> FinalResult:
     assert logger  # unused
