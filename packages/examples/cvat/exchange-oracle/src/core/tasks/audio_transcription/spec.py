@@ -6,7 +6,8 @@ from typing import TYPE_CHECKING
 
 from pydantic import AnyUrl, BaseModel, Field
 
-from src.core.manifest.shared import BucketUrl  # noqa: TC001  # runtime-needed by pydantic
+from src.core.manifest.shared import BucketUrl  # noqa: TCH001  # runtime-needed by pydantic
+from src.core.manifest.v2 import TargetMetrics  # noqa: TCH001  # runtime-needed by pydantic
 from src.core.tasks.errors import UnsupportedManifestError
 from src.utils.enums import BetterEnumMeta
 
@@ -25,7 +26,7 @@ class TranscriptionTaskData(BaseModel):
 
 
 class TranscriptionTaskValidation(BaseModel):
-    target_metric: str
+    target_metric: TargetMetrics
     target_score: float
 
 
@@ -129,7 +130,7 @@ def parse_audio_manifest(manifest: JobManifest) -> TranscriptionTaskSpecificatio
         shared_attributes=list(annotation.shared_attributes),
         user_guide=annotation.user_guide_url,
         validation=TranscriptionTaskValidation(
-            target_metric=validation.target_metric.value,
+            target_metric=validation.target_metric,
             target_score=validation.target_score,
         ),
         details=TranscriptionDetails(**details_fields),
