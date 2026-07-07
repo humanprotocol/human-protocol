@@ -3,8 +3,7 @@ name = "exchange-oracle"
 version = "0.1.0"
 description = "An example of decentralized exchange oracle with CVAT as annotation instrument"
 authors = ["Sergey Dzeranov <sergey@hmt.ai>"]
-readme = "README.md"
-packages = [{include = "exchange_oracle"}]
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.10,<3.13"
