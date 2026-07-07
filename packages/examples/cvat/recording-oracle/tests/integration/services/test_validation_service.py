@@ -24,7 +24,7 @@ from src.core.validation_errors import TooSlowAnnotationError
 from src.core.validation_results import ValidationFailure, ValidationSuccess
 from src.cvat import api_calls as cvat_api
 from src.db import SessionLocal
-from src.handlers.process_intermediate_results import (
+from src.handlers.validation import (
     process_final_results,
     process_intermediate_results,
 )
@@ -129,7 +129,7 @@ class ManifestChangeTest:
             logger = mock.Mock(Logger)
 
             common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.BucketAccessInfo.parse_obj")
+                mock.patch("src.handlers.validation.final_results.BucketAccessInfo.parse_obj")
             )
 
             common_lock_es.enter_context(
@@ -137,13 +137,13 @@ class ManifestChangeTest:
             )
 
             mock_make_cloud_client = common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.make_cloud_client")
+                mock.patch("src.handlers.validation.final_results.make_cloud_client")
             )
             mock_make_cloud_client.return_value.download_file = mock.Mock(return_value=b"")
 
             mock_get_task_validation_layout = common_lock_es.enter_context(
                 mock.patch(
-                    "src.handlers.process_intermediate_results.cvat_api.get_task_validation_layout"
+                    "src.handlers.validation.quality_checkers.image.cvat_api.get_task_validation_layout"
                 )
             )
             mock_get_task_validation_layout.return_value = mock.Mock(
@@ -156,7 +156,7 @@ class ManifestChangeTest:
             )
 
             mock_get_task_data_meta = common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.cvat_api.get_task_data_meta")
+                mock.patch("src.handlers.validation.quality_checkers.image.cvat_api.get_task_data_meta")
             )
             mock_get_task_data_meta.return_value = mock.Mock(
                 cvat_api.models.IDataMetaRead,
@@ -164,7 +164,7 @@ class ManifestChangeTest:
             )
 
             mock_get_task_labels = common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.cvat_api.get_task_labels")
+                mock.patch("src.handlers.validation.quality_checkers.image.cvat_api.get_task_labels")
             )
             mock_get_task_labels.return_value = [label.name for label in manifest.annotation.labels]
 
@@ -183,16 +183,16 @@ class ManifestChangeTest:
 
             with (
                 mock.patch(
-                    "src.handlers.process_intermediate_results.cvat_api.get_task_quality_report"
+                    "src.handlers.validation.quality_checkers.image.cvat_api.get_task_quality_report"
                 ) as mock_get_task_quality_report,
                 mock.patch(
-                    "src.handlers.process_intermediate_results.cvat_api.get_quality_report_data"
+                    "src.handlers.validation.quality_checkers.image.cvat_api.get_quality_report_data"
                 ) as mock_get_quality_report_data,
                 mock.patch(
-                    "src.handlers.process_intermediate_results.cvat_api.get_jobs_quality_reports"
+                    "src.handlers.validation.quality_checkers.image.cvat_api.get_jobs_quality_reports"
                 ) as mock_get_jobs_quality_reports,
                 mock.patch(
-                    "src.handlers.process_intermediate_results.cvat_api.update_task_validation_layout"
+                    "src.handlers.validation.quality_checkers.image.cvat_api.update_task_validation_layout"
                 ),
                 mock.patch("src.core.config.ValidationConfig.min_available_gt_threshold", 0),
                 mock.patch("src.core.config.ValidationConfig.max_gt_share", 1),
@@ -233,13 +233,13 @@ class ManifestChangeTest:
 
             with (
                 mock.patch(
-                    "src.handlers.process_intermediate_results.cvat_api.get_task_quality_report"
+                    "src.handlers.validation.quality_checkers.image.cvat_api.get_task_quality_report"
                 ) as mock_get_task_quality_report,
                 mock.patch(
-                    "src.handlers.process_intermediate_results.cvat_api.get_quality_report_data"
+                    "src.handlers.validation.quality_checkers.image.cvat_api.get_quality_report_data"
                 ) as mock_get_quality_report_data,
                 mock.patch(
-                    "src.handlers.process_intermediate_results.cvat_api.get_jobs_quality_reports"
+                    "src.handlers.validation.quality_checkers.image.cvat_api.get_jobs_quality_reports"
                 ) as mock_get_jobs_quality_reports,
             ):
                 mock_get_task_quality_report.return_value = mock.Mock(
@@ -333,17 +333,17 @@ class ValidationLogicTest:
             logger = mock.Mock(Logger)
 
             common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.BucketAccessInfo.parse_obj")
+                mock.patch("src.handlers.validation.final_results.BucketAccessInfo.parse_obj")
             )
 
             mock_make_cloud_client = common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.make_cloud_client")
+                mock.patch("src.handlers.validation.final_results.make_cloud_client")
             )
             mock_make_cloud_client.return_value.download_file = mock.Mock(return_value=b"")
 
             mock_get_task_validation_layout = common_lock_es.enter_context(
                 mock.patch(
-                    "src.handlers.process_intermediate_results.cvat_api.get_task_validation_layout"
+                    "src.handlers.validation.quality_checkers.image.cvat_api.get_task_validation_layout"
                 )
             )
             mock_get_task_validation_layout.return_value = mock.Mock(
@@ -357,7 +357,7 @@ class ValidationLogicTest:
             )
 
             mock_get_task_data_meta = common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.cvat_api.get_task_data_meta")
+                mock.patch("src.handlers.validation.quality_checkers.image.cvat_api.get_task_data_meta")
             )
             mock_get_task_data_meta.return_value = mock.Mock(
                 cvat_api.models.IDataMetaRead,
@@ -365,7 +365,7 @@ class ValidationLogicTest:
             )
 
             mock_get_task_labels = common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.cvat_api.get_task_labels")
+                mock.patch("src.handlers.validation.quality_checkers.image.cvat_api.get_task_labels")
             )
             mock_get_task_labels.return_value = [label.name for label in manifest.annotation.labels]
 
@@ -388,16 +388,16 @@ class ValidationLogicTest:
 
             with (
                 mock.patch(
-                    "src.handlers.process_intermediate_results.cvat_api.get_task_quality_report"
+                    "src.handlers.validation.quality_checkers.image.cvat_api.get_task_quality_report"
                 ) as mock_get_task_quality_report,
                 mock.patch(
-                    "src.handlers.process_intermediate_results.cvat_api.get_quality_report_data"
+                    "src.handlers.validation.quality_checkers.image.cvat_api.get_quality_report_data"
                 ) as mock_get_quality_report_data,
                 mock.patch(
-                    "src.handlers.process_intermediate_results.cvat_api.get_jobs_quality_reports"
+                    "src.handlers.validation.quality_checkers.image.cvat_api.get_jobs_quality_reports"
                 ) as mock_get_jobs_quality_reports,
                 mock.patch(
-                    "src.handlers.process_intermediate_results.cvat_api.update_task_validation_layout"
+                    "src.handlers.validation.quality_checkers.image.cvat_api.update_task_validation_layout"
                 ) as mock_update_task_validation_layout,
                 mock.patch("src.core.config.ValidationConfig.min_available_gt_threshold", 0),
                 mock.patch("src.core.config.ValidationConfig.max_gt_share", 1),
@@ -568,17 +568,17 @@ class ValidationLogicTest:
             logger = mock.Mock(Logger)
 
             common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.BucketAccessInfo.parse_obj")
+                mock.patch("src.handlers.validation.final_results.BucketAccessInfo.parse_obj")
             )
 
             mock_make_cloud_client = common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.make_cloud_client")
+                mock.patch("src.handlers.validation.final_results.make_cloud_client")
             )
             mock_make_cloud_client.return_value.download_file = mock.Mock(return_value=b"")
 
             mock_get_task_validation_layout = common_lock_es.enter_context(
                 mock.patch(
-                    "src.handlers.process_intermediate_results.cvat_api.get_task_validation_layout"
+                    "src.handlers.validation.quality_checkers.image.cvat_api.get_task_validation_layout"
                 )
             )
             mock_get_task_validation_layout.return_value = mock.Mock(
@@ -591,7 +591,7 @@ class ValidationLogicTest:
             )
 
             mock_get_task_data_meta = common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.cvat_api.get_task_data_meta")
+                mock.patch("src.handlers.validation.quality_checkers.image.cvat_api.get_task_data_meta")
             )
             mock_get_task_data_meta.return_value = mock.Mock(
                 cvat_api.models.IDataMetaRead,
@@ -599,7 +599,7 @@ class ValidationLogicTest:
             )
 
             mock_get_task_labels = common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.cvat_api.get_task_labels")
+                mock.patch("src.handlers.validation.quality_checkers.image.cvat_api.get_task_labels")
             )
             mock_get_task_labels.return_value = [label.name for label in manifest.annotation.labels]
 
@@ -618,16 +618,16 @@ class ValidationLogicTest:
 
             with (
                 mock.patch(
-                    "src.handlers.process_intermediate_results.cvat_api.get_task_quality_report"
+                    "src.handlers.validation.quality_checkers.image.cvat_api.get_task_quality_report"
                 ) as mock_get_task_quality_report,
                 mock.patch(
-                    "src.handlers.process_intermediate_results.cvat_api.get_quality_report_data"
+                    "src.handlers.validation.quality_checkers.image.cvat_api.get_quality_report_data"
                 ) as mock_get_quality_report_data,
                 mock.patch(
-                    "src.handlers.process_intermediate_results.cvat_api.get_jobs_quality_reports"
+                    "src.handlers.validation.quality_checkers.image.cvat_api.get_jobs_quality_reports"
                 ) as mock_get_jobs_quality_reports,
                 mock.patch(
-                    "src.handlers.process_intermediate_results.cvat_api.update_task_validation_layout"
+                    "src.handlers.validation.quality_checkers.image.cvat_api.update_task_validation_layout"
                 ),
                 mock.patch("src.core.config.ValidationConfig.min_available_gt_threshold", 0),
                 mock.patch("src.core.config.ValidationConfig.max_gt_share", 1),
@@ -685,18 +685,18 @@ class ValidationLogicTest:
             logger = mock.Mock(Logger)
 
             common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.BucketAccessInfo.parse_obj")
+                mock.patch("src.handlers.validation.final_results.BucketAccessInfo.parse_obj")
             )
 
             mock_make_cloud_client = common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.make_cloud_client")
+                mock.patch("src.handlers.validation.final_results.make_cloud_client")
             )
             mock_make_cloud_client.return_value.download_file = mock.Mock(return_value=b"")
 
             # All tasks have the same validation layout
             mock_get_task_validation_layout = common_lock_es.enter_context(
                 mock.patch(
-                    "src.handlers.process_intermediate_results.cvat_api.get_task_validation_layout",
+                    "src.handlers.validation.quality_checkers.image.cvat_api.get_task_validation_layout",
                 )
             )
             mock_get_task_validation_layout.return_value = mock.Mock(
@@ -710,7 +710,7 @@ class ValidationLogicTest:
 
             # All tasks have the same frames
             mock_get_task_data_meta = common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.cvat_api.get_task_data_meta")
+                mock.patch("src.handlers.validation.quality_checkers.image.cvat_api.get_task_data_meta")
             )
             mock_get_task_data_meta.return_value = mock.Mock(
                 cvat_api.models.IDataMetaRead,
@@ -722,7 +722,7 @@ class ValidationLogicTest:
 
             common_lock_es.enter_context(
                 mock.patch(
-                    "src.handlers.process_intermediate_results.cvat_api.get_task_labels",
+                    "src.handlers.validation.quality_checkers.image.cvat_api.get_task_labels",
                     patched_get_task_labels,
                 )
             )
@@ -782,19 +782,19 @@ class ValidationLogicTest:
 
             with (
                 mock.patch(
-                    "src.handlers.process_intermediate_results.cvat_api.get_task_quality_report",
+                    "src.handlers.validation.quality_checkers.image.cvat_api.get_task_quality_report",
                     side_effect=patched_get_task_quality_report,
                 ) as mock_get_task_quality_report,
                 mock.patch(
-                    "src.handlers.process_intermediate_results.cvat_api.get_quality_report_data",
+                    "src.handlers.validation.quality_checkers.image.cvat_api.get_quality_report_data",
                     patched_get_quality_report_data,
                 ),
                 mock.patch(
-                    "src.handlers.process_intermediate_results.cvat_api.get_jobs_quality_reports",
+                    "src.handlers.validation.quality_checkers.image.cvat_api.get_jobs_quality_reports",
                     patched_get_jobs_quality_reports,
                 ),
                 mock.patch(
-                    "src.handlers.process_intermediate_results.cvat_api.update_task_validation_layout"
+                    "src.handlers.validation.quality_checkers.image.cvat_api.update_task_validation_layout"
                 ) as mock_update_task_validation_layout,
                 mock.patch("src.core.config.ValidationConfig.min_available_gt_threshold", 0),
                 mock.patch("src.core.config.ValidationConfig.max_gt_share", 1),
@@ -866,18 +866,18 @@ class ValidationLogicTest:
             logger = logging.getLogger()
 
             common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.BucketAccessInfo.parse_obj")
+                mock.patch("src.handlers.validation.final_results.BucketAccessInfo.parse_obj")
             )
 
             mock_make_cloud_client = common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.make_cloud_client")
+                mock.patch("src.handlers.validation.final_results.make_cloud_client")
             )
             mock_make_cloud_client.return_value.download_file = mock.Mock(return_value=b"")
 
             # All tasks have the same validation layout
             mock_get_task_validation_layout = common_lock_es.enter_context(
                 mock.patch(
-                    "src.handlers.process_intermediate_results.cvat_api.get_task_validation_layout",
+                    "src.handlers.validation.quality_checkers.image.cvat_api.get_task_validation_layout",
                 )
             )
             mock_get_task_validation_layout.return_value = mock.Mock(
@@ -891,7 +891,7 @@ class ValidationLogicTest:
 
             # All tasks have the same frames
             mock_get_task_data_meta = common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.cvat_api.get_task_data_meta")
+                mock.patch("src.handlers.validation.quality_checkers.image.cvat_api.get_task_data_meta")
             )
             mock_get_task_data_meta.return_value = mock.Mock(
                 cvat_api.models.IDataMetaRead,
@@ -903,7 +903,7 @@ class ValidationLogicTest:
 
             common_lock_es.enter_context(
                 mock.patch(
-                    "src.handlers.process_intermediate_results.cvat_api.get_task_labels",
+                    "src.handlers.validation.quality_checkers.image.cvat_api.get_task_labels",
                     patched_get_task_labels,
                 )
             )
@@ -963,19 +963,19 @@ class ValidationLogicTest:
 
             with (
                 mock.patch(
-                    "src.handlers.process_intermediate_results.cvat_api.get_task_quality_report",
+                    "src.handlers.validation.quality_checkers.image.cvat_api.get_task_quality_report",
                     side_effect=patched_get_task_quality_report,
                 ),
                 mock.patch(
-                    "src.handlers.process_intermediate_results.cvat_api.get_quality_report_data",
+                    "src.handlers.validation.quality_checkers.image.cvat_api.get_quality_report_data",
                     patched_get_quality_report_data,
                 ),
                 mock.patch(
-                    "src.handlers.process_intermediate_results.cvat_api.get_jobs_quality_reports",
+                    "src.handlers.validation.quality_checkers.image.cvat_api.get_jobs_quality_reports",
                     patched_get_jobs_quality_reports,
                 ),
                 mock.patch(
-                    "src.handlers.process_intermediate_results.cvat_api.update_task_validation_layout"
+                    "src.handlers.validation.quality_checkers.image.cvat_api.update_task_validation_layout"
                 ) as mock_update_task_validation_layout,
                 mock.patch("src.core.config.ValidationConfig.min_available_gt_threshold", 0.7),
                 mock.patch("src.core.config.ValidationConfig.max_gt_share", 1),
@@ -1020,18 +1020,18 @@ class ValidationLogicTest:
             logger = logging.getLogger()
 
             common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.BucketAccessInfo.parse_obj")
+                mock.patch("src.handlers.validation.final_results.BucketAccessInfo.parse_obj")
             )
 
             mock_make_cloud_client = common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.make_cloud_client")
+                mock.patch("src.handlers.validation.final_results.make_cloud_client")
             )
             mock_make_cloud_client.return_value.download_file = mock.Mock(return_value=b"")
 
             # All tasks have the same validation layout
             mock_get_task_validation_layout = common_lock_es.enter_context(
                 mock.patch(
-                    "src.handlers.process_intermediate_results.cvat_api.get_task_validation_layout",
+                    "src.handlers.validation.quality_checkers.image.cvat_api.get_task_validation_layout",
                 )
             )
             mock_get_task_validation_layout.return_value = mock.Mock(
@@ -1045,7 +1045,7 @@ class ValidationLogicTest:
 
             # All tasks have the same frames
             mock_get_task_data_meta = common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.cvat_api.get_task_data_meta")
+                mock.patch("src.handlers.validation.quality_checkers.image.cvat_api.get_task_data_meta")
             )
             mock_get_task_data_meta.return_value = mock.Mock(
                 cvat_api.models.IDataMetaRead,
@@ -1057,7 +1057,7 @@ class ValidationLogicTest:
 
             common_lock_es.enter_context(
                 mock.patch(
-                    "src.handlers.process_intermediate_results.cvat_api.get_task_labels",
+                    "src.handlers.validation.quality_checkers.image.cvat_api.get_task_labels",
                     patched_get_task_labels,
                 )
             )
@@ -1101,19 +1101,19 @@ class ValidationLogicTest:
 
             with (
                 mock.patch(
-                    "src.handlers.process_intermediate_results.cvat_api.get_task_quality_report",
+                    "src.handlers.validation.quality_checkers.image.cvat_api.get_task_quality_report",
                     side_effect=patched_get_task_quality_report,
                 ),
                 mock.patch(
-                    "src.handlers.process_intermediate_results.cvat_api.get_quality_report_data",
+                    "src.handlers.validation.quality_checkers.image.cvat_api.get_quality_report_data",
                     patched_get_quality_report_data,
                 ),
                 mock.patch(
-                    "src.handlers.process_intermediate_results.cvat_api.get_jobs_quality_reports",
+                    "src.handlers.validation.quality_checkers.image.cvat_api.get_jobs_quality_reports",
                     patched_get_jobs_quality_reports,
                 ),
                 mock.patch(
-                    "src.handlers.process_intermediate_results.cvat_api.update_task_validation_layout"
+                    "src.handlers.validation.quality_checkers.image.cvat_api.update_task_validation_layout"
                 ) as mock_update_task_validation_layout,
                 mock.patch("src.core.config.ValidationConfig.min_available_gt_threshold", 0),
                 mock.patch("src.core.config.ValidationConfig.max_gt_share", 1),
@@ -1174,15 +1174,15 @@ class AnnotationMergingTest:
             self._updated_merged_dataset_archive = io.BytesIO(b"test")
 
         with (
-            mock.patch("src.handlers.process_intermediate_results.BucketAccessInfo.parse_obj"),
+            mock.patch("src.handlers.validation.final_results.BucketAccessInfo.parse_obj"),
             mock.patch(
-                "src.handlers.process_intermediate_results.make_cloud_client"
+                "src.handlers.validation.final_results.make_cloud_client"
             ) as mock_make_cloud_client,
-            mock.patch("src.handlers.process_intermediate_results.dm.Dataset.import_from"),
-            mock.patch("src.handlers.process_intermediate_results.extract_zip_archive"),
-            mock.patch("src.handlers.process_intermediate_results.write_dir_to_zip_archive"),
+            mock.patch("src.handlers.validation.final_results.dm.Dataset.import_from"),
+            mock.patch("src.handlers.validation.final_results.extract_zip_archive"),
+            mock.patch("src.handlers.validation.final_results.write_dir_to_zip_archive"),
             mock.patch(
-                "src.handlers.process_intermediate_results._TaskAnnotationMerger._prepare_merged_dataset",
+                "src.handlers.validation.final_results._TaskAnnotationMerger._prepare_merged_dataset",
                 patched_prepare_merged_dataset,
             ),
         ):

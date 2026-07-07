@@ -18,7 +18,7 @@ from src.core.storage import (
 )
 from src.core.types import OracleWebhookTypes
 from src.core.validation_results import FinalResult
-from src.handlers.process_intermediate_results import (
+from src.handlers.validation import (
     parse_annotation_metafile,
     process_final_results,
     serialize_validation_meta,

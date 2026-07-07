@@ -22,11 +22,8 @@ from src.core.storage import (
 from src.core.types import OracleWebhookTypes
 from src.core.validation_errors import TooFewGtError
 from src.core.validation_results import ValidationFailure, ValidationSuccess
-from src.handlers.process_intermediate_results import (
-    parse_annotation_metafile,
-    process_intermediate_results,
-    serialize_validation_meta,
-)
+from src.handlers.validation.intermediate_results import process_intermediate_results
+from src.handlers.validation.meta import parse_annotation_metafile, serialize_validation_meta
 from src.log import ROOT_LOGGER_NAME
 from src.services.cloud import make_client as make_cloud_client
 from src.services.cloud.utils import BucketAccessInfo
@@ -35,7 +32,7 @@ from src.utils.logging import NullLogger, get_function_logger
 module_logger_name = f"{ROOT_LOGGER_NAME}.cron.webhook"
 
 
-class _TaskValidator:
+class _EscrowValidator:
     def __init__(
         self, escrow_address: str, chain_id: int, manifest: ManifestBase, db_session: Session
     ) -> None:
@@ -181,7 +178,7 @@ def validate_results(
 
     manifest = manifest_utils.parse_manifest(escrow.get_escrow_manifest(chain_id, escrow_address))
 
-    validator = _TaskValidator(
+    validator = _EscrowValidator(
         escrow_address=escrow_address, chain_id=chain_id, manifest=manifest, db_session=db_session
     )
     validator.set_logger(logger)
