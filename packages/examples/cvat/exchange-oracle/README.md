@@ -36,7 +36,7 @@ When running service from `./bin/start_debug.sh` (`src/entrypoints/debug.py`), s
 - When webhook signature is required, `{oracle_name}:unique_string` can be used
 - You can upload manifest.json to minio `manifests` bucket and use its filename as an escrow_address
 
-### Environemt
+### Environment
 Env example file: [.env.example](https://github.com/humanprotocol/human-protocol/blob/feat/cvat/exchange-oracle/packages/examples/cvat/exchange-oracle/src/.env.example)
 
 Config: [config file](https://github.com/humanprotocol/human-protocol/blob/feat/cvat/exchange-oracle/packages/examples/cvat/exchange-oracle/src/config.py)
