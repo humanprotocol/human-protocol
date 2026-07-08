@@ -7,28 +7,32 @@ from tempfile import TemporaryDirectory
 from typing import TYPE_CHECKING
 
 import datumaro as dm
-import numpy as np
 
-import src.services.validation as db_service
+from src.core.annotation_meta import RESULTING_ANNOTATIONS_FILE
 from src.core.manifest import get_manifest_task_type
 from src.core.tasks import TaskTypes
 from src.core.tasks.cvat_formats import DM_DATASET_FORMAT_MAPPING, DM_GT_DATASET_FORMAT_MAPPING
-from src.core.validation_meta import JobMeta, ResultMeta, ValidationMeta
-from src.core.validation_results import FinalResult
-from src.db.utils import ForUpdateParams
-from src.handlers.validation.common import UNKNOWN_QUALITY, _JobResults, _TaskHandler
+from src.handlers.completion.task_exporters.base import TaskExporter
+from src.handlers.validation.common import _TaskHandler
 from src.services.cloud import make_client as make_cloud_client
 from src.services.cloud.utils import BucketAccessInfo
 from src.utils.annotations import ProjectLabels
 from src.utils.zip_archive import extract_zip_archive, write_dir_to_zip_archive
 
 if TYPE_CHECKING:
-    import logging
-
-    from sqlalchemy.orm import Session
-
-    from src.core.annotation_meta import AnnotationMeta
     from src.core.manifest import ManifestBase
+
+
+class ImageTaskExporter(TaskExporter):
+    def export(self) -> bytes:
+        merged = self._download_annotation_result_file(RESULTING_ANNOTATIONS_FILE)
+        merger = _TaskAnnotationMerger(
+            escrow_address=self.escrow_address,
+            chain_id=self.chain_id,
+            manifest=self.manifest,
+            merged_annotations=io.BytesIO(merged),
+        )
+        return merger.merge_results().read()
 
 
 class _TaskAnnotationMerger(_TaskHandler):
@@ -184,99 +188,3 @@ class _TaskAnnotationMerger(_TaskHandler):
             self._prepare_merged_dataset()
 
         return self._require_field(self._updated_merged_dataset_archive)
-
-
-def process_final_results(
-    session: Session,
-    *,
-    escrow_address: str,
-    chain_id: int,
-    meta: AnnotationMeta,
-    merged_annotations: io.RawIOBase,
-    manifest: ManifestBase,
-    logger: logging.Logger,
-) -> FinalResult:
-    assert logger  # unused
-
-    task = db_service.get_task_by_escrow_address(
-        session,
-        escrow_address,
-        for_update=ForUpdateParams(
-            nowait=True
-        ),  # should not happen, but waiting should not block processing
-    )
-    if not task:
-        raise AssertionError(f"Validation results for escrow {escrow_address} not found")
-
-    merger = _TaskAnnotationMerger(
-        escrow_address=escrow_address,
-        chain_id=chain_id,
-        manifest=manifest,
-        merged_annotations=merged_annotations,
-    )
-
-    merged_annotations = merger.merge_results()
-
-    job_final_result_ids: dict[str, str] = {}
-
-    for job_meta in meta.jobs:
-        job = db_service.get_job_by_cvat_id(session, job_meta.job_id)
-        if not job:
-            raise AssertionError(
-                f"Can't find validation results for job " f"{job_meta.job_id} ({escrow_address=})"
-            )
-
-        assignment_validation_result = db_service.get_validation_result_by_assignment_id(
-            session, job_meta.assignment_id
-        )
-        if not assignment_validation_result:
-            raise AssertionError(
-                f"Can't find validation results for assignments "
-                f"{job_meta.assignment_id} ({escrow_address=})"
-            )
-
-        job_final_result_ids[job.id] = assignment_validation_result.id
-
-    task_jobs = task.jobs
-
-    task_validation_results = db_service.get_task_validation_results(session, task.id)
-
-    job_id_to_meta_id = {job.id: i for i, job in enumerate(task_jobs)}
-
-    validation_result_id_to_meta_id = {r.id: i for i, r in enumerate(task_validation_results)}
-
-    validation_meta = ValidationMeta(
-        jobs=[
-            JobMeta(
-                job_id=job_id_to_meta_id[job.id],
-                final_result_id=validation_result_id_to_meta_id[job_final_result_ids[job.id]],
-            )
-            for job in task_jobs
-        ],
-        results=[
-            ResultMeta(
-                id=validation_result_id_to_meta_id[r.id],
-                job_id=job_id_to_meta_id[r.job.id],
-                annotator_wallet_address=r.annotator_wallet_address,
-                annotation_quality=r.annotation_quality,
-            )
-            for r in task_validation_results
-        ],
-    )
-
-    # Include final results for all jobs
-    job_results: _JobResults = {
-        job.cvat_id: task_validation_results[
-            validation_result_id_to_meta_id[job_final_result_ids[job.id]]
-        ].annotation_quality
-        for job in task_jobs
-    }
-
-    return FinalResult(
-        job_results=job_results,
-        validation_meta=validation_meta,
-        resulting_annotations=merged_annotations.read(),
-        average_quality=np.mean(
-            [v for v in job_results.values() if v != UNKNOWN_QUALITY and v >= 0] or [0]
-        ),
-    )

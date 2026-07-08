@@ -205,6 +205,7 @@ class TaskResultsLayout:
     "Layout of the escrow results dir on the oracle bucket."
 
     ASSIGNMENTS_DIR = "assignments"  # per-assignment annotation TSVs (one per CVAT job)
+    ANNOTATIONS_FILENAME = "annotations.tsv"  # merged annotations (without honeypots or GT)
 
     @classmethod
     def assignment_annotation_filename(cls, job_id: int, assignment_id: str) -> str:

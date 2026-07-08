@@ -12,6 +12,7 @@ from src.core.tasks.audio_transcription.meta import (
     CVAT_EXPORT_FORMAT,
     TaskMetaLayout,
     TaskMetaSerializer,
+    TaskResultsLayout,
     format_time,
     parse_time,
 )
@@ -29,9 +30,6 @@ from src.services.cloud.utils import BucketAccessInfo
 if TYPE_CHECKING:
     from src.core.tasks.audio_transcription.meta import Assignment, PlacedRegion
 
-
-# merged resulting annotations file (in the escrow results dir), GT-annotations structure
-RESULTING_ANNOTATIONS_FILE = "annotations.tsv"
 
 _LEADING_COLUMNS = ["id", "input_region_ids", "filename", "start", "stop", "label"]
 
@@ -69,7 +67,9 @@ class AudioTranscriptionJobExporter(JobExporter):
         self.logger.debug(f"Uploading merged annotations for the escrow ({self.escrow_address=})")
         upload_escrow_results(
             files=[
-                FileDescriptor(filename=RESULTING_ANNOTATIONS_FILE, file=io.BytesIO(merged)),
+                FileDescriptor(
+                    filename=TaskResultsLayout.ANNOTATIONS_FILENAME, file=io.BytesIO(merged)
+                ),
                 prepare_annotation_metafile(jobs=jobs),
             ],
             chain_id=self.chain_id,

@@ -24,8 +24,8 @@ from src.core.validation_errors import TooSlowAnnotationError
 from src.core.validation_results import ValidationFailure, ValidationSuccess
 from src.cvat import api_calls as cvat_api
 from src.db import SessionLocal
+from src.handlers.completion.final_results import process_final_results
 from src.handlers.validation import (
-    process_final_results,
     process_intermediate_results,
 )
 from src.services.validation import (
@@ -129,7 +129,7 @@ class ManifestChangeTest:
             logger = mock.Mock(Logger)
 
             common_lock_es.enter_context(
-                mock.patch("src.handlers.validation.final_results.BucketAccessInfo.parse_obj")
+                mock.patch("src.handlers.completion.task_exporters.image.BucketAccessInfo.parse_obj")
             )
 
             common_lock_es.enter_context(
@@ -137,7 +137,7 @@ class ManifestChangeTest:
             )
 
             mock_make_cloud_client = common_lock_es.enter_context(
-                mock.patch("src.handlers.validation.final_results.make_cloud_client")
+                mock.patch("src.handlers.completion.task_exporters.image.make_cloud_client")
             )
             mock_make_cloud_client.return_value.download_file = mock.Mock(return_value=b"")
 
@@ -333,11 +333,11 @@ class ValidationLogicTest:
             logger = mock.Mock(Logger)
 
             common_lock_es.enter_context(
-                mock.patch("src.handlers.validation.final_results.BucketAccessInfo.parse_obj")
+                mock.patch("src.handlers.completion.task_exporters.image.BucketAccessInfo.parse_obj")
             )
 
             mock_make_cloud_client = common_lock_es.enter_context(
-                mock.patch("src.handlers.validation.final_results.make_cloud_client")
+                mock.patch("src.handlers.completion.task_exporters.image.make_cloud_client")
             )
             mock_make_cloud_client.return_value.download_file = mock.Mock(return_value=b"")
 
@@ -568,11 +568,11 @@ class ValidationLogicTest:
             logger = mock.Mock(Logger)
 
             common_lock_es.enter_context(
-                mock.patch("src.handlers.validation.final_results.BucketAccessInfo.parse_obj")
+                mock.patch("src.handlers.completion.task_exporters.image.BucketAccessInfo.parse_obj")
             )
 
             mock_make_cloud_client = common_lock_es.enter_context(
-                mock.patch("src.handlers.validation.final_results.make_cloud_client")
+                mock.patch("src.handlers.completion.task_exporters.image.make_cloud_client")
             )
             mock_make_cloud_client.return_value.download_file = mock.Mock(return_value=b"")
 
@@ -685,11 +685,11 @@ class ValidationLogicTest:
             logger = mock.Mock(Logger)
 
             common_lock_es.enter_context(
-                mock.patch("src.handlers.validation.final_results.BucketAccessInfo.parse_obj")
+                mock.patch("src.handlers.completion.task_exporters.image.BucketAccessInfo.parse_obj")
             )
 
             mock_make_cloud_client = common_lock_es.enter_context(
-                mock.patch("src.handlers.validation.final_results.make_cloud_client")
+                mock.patch("src.handlers.completion.task_exporters.image.make_cloud_client")
             )
             mock_make_cloud_client.return_value.download_file = mock.Mock(return_value=b"")
 
@@ -866,11 +866,11 @@ class ValidationLogicTest:
             logger = logging.getLogger()
 
             common_lock_es.enter_context(
-                mock.patch("src.handlers.validation.final_results.BucketAccessInfo.parse_obj")
+                mock.patch("src.handlers.completion.task_exporters.image.BucketAccessInfo.parse_obj")
             )
 
             mock_make_cloud_client = common_lock_es.enter_context(
-                mock.patch("src.handlers.validation.final_results.make_cloud_client")
+                mock.patch("src.handlers.completion.task_exporters.image.make_cloud_client")
             )
             mock_make_cloud_client.return_value.download_file = mock.Mock(return_value=b"")
 
@@ -1020,11 +1020,11 @@ class ValidationLogicTest:
             logger = logging.getLogger()
 
             common_lock_es.enter_context(
-                mock.patch("src.handlers.validation.final_results.BucketAccessInfo.parse_obj")
+                mock.patch("src.handlers.completion.task_exporters.image.BucketAccessInfo.parse_obj")
             )
 
             mock_make_cloud_client = common_lock_es.enter_context(
-                mock.patch("src.handlers.validation.final_results.make_cloud_client")
+                mock.patch("src.handlers.completion.task_exporters.image.make_cloud_client")
             )
             mock_make_cloud_client.return_value.download_file = mock.Mock(return_value=b"")
 
@@ -1174,15 +1174,18 @@ class AnnotationMergingTest:
             self._updated_merged_dataset_archive = io.BytesIO(b"test")
 
         with (
-            mock.patch("src.handlers.validation.final_results.BucketAccessInfo.parse_obj"),
+            # base downloads the exchange-oracle result file; the merger (image) downloads GT
+            mock.patch("src.handlers.completion.task_exporters.base.BucketAccessInfo.parse_obj"),
+            mock.patch("src.handlers.completion.task_exporters.base.make_cloud_client"),
+            mock.patch("src.handlers.completion.task_exporters.image.BucketAccessInfo.parse_obj"),
             mock.patch(
-                "src.handlers.validation.final_results.make_cloud_client"
+                "src.handlers.completion.task_exporters.image.make_cloud_client"
             ) as mock_make_cloud_client,
-            mock.patch("src.handlers.validation.final_results.dm.Dataset.import_from"),
-            mock.patch("src.handlers.validation.final_results.extract_zip_archive"),
-            mock.patch("src.handlers.validation.final_results.write_dir_to_zip_archive"),
+            mock.patch("src.handlers.completion.task_exporters.image.dm.Dataset.import_from"),
+            mock.patch("src.handlers.completion.task_exporters.image.extract_zip_archive"),
+            mock.patch("src.handlers.completion.task_exporters.image.write_dir_to_zip_archive"),
             mock.patch(
-                "src.handlers.validation.final_results._TaskAnnotationMerger._prepare_merged_dataset",
+                "src.handlers.completion.task_exporters.image._TaskAnnotationMerger._prepare_merged_dataset",
                 patched_prepare_merged_dataset,
             ),
         ):
@@ -1215,7 +1218,6 @@ class AnnotationMergingTest:
                 chain_id=chain_id,
                 meta=annotation_meta,
                 manifest=manifest,
-                merged_annotations=io.BytesIO(),
                 logger=mock.Mock(Logger),
             )
 
