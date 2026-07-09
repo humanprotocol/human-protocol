@@ -1,0 +1,19 @@
+services:
+  blockchain-node:
+    build:
+      context: ../../../../
+      dockerfile: docker-setup/Dockerfile.core
+    healthcheck:
+      test: yarn local:readiness
+      interval: 15s
+      timeout: 30s
+      retries: 0
+    networks:
+      - test-network
+
+  # Only tests that hit the chain need the node. Including this file adds the dependency;
+  # omit it to run the rest of the suite without building/starting the blockchain node.
+  test:
+    depends_on:
+      blockchain-node:
+        condition: service_healthy

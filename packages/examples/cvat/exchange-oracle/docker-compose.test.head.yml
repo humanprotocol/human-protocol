@@ -1,0 +1,35 @@
+services:
+  test:
+    build:
+      context: ./
+      dockerfile: dockerfiles/test.ci.Dockerfile
+    environment:
+      SQLALCHEMY_SILENCE_UBER_WARNING: 1
+      ENVIRONMENT: 'test'
+      PG_PORT: 5432
+      PG_HOST: 'postgres'
+      PG_USER: 'test'
+      PG_PASSWORD: 'test'
+      PG_DB: 'exchange_oracle_test'
+      WEB3_HTTP_PROVIDER_URI: 'http://blockchain-node:8545'
+      STORAGE_ENDPOINT_URL: 'host.docker.internal:9000'
+      STORAGE_ACCESS_KEY: 'dev'
+      STORAGE_SECRET_KEY: 'devdevdev'
+      STORAGE_RESULTS_BUCKET_NAME: 'results'
+      STORAGE_USE_SSL: 'False'
+      STORAGE_PROVIDER: 'aws'
+      ENABLE_CUSTOM_CLOUD_HOST: 'Yes'
+      REDIS_HOST: 'redis'
+    depends_on:
+      postgres:
+        condition: service_started
+      redis:
+        condition: service_started
+      minio-mc:
+        condition: service_completed_successfully
+    # Used to reference localhost since minio:9000 is rejected by the SDK URL validator
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - test-network
+    tty: true
