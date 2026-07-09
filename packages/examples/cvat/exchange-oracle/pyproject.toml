@@ -15,7 +15,6 @@ psycopg2 = "^2.9.6"
 sqlalchemy-utils = "^0.41.1"
 alembic = "^1.11.1"
 httpx = "^0.24.1"
-pytest = "^7.2.2"
 cvat-sdk = "2.37.0"
 sqlalchemy = "^2.0.16"
 apscheduler = "^3.10.1"
@@ -41,6 +40,7 @@ human-protocol-sdk = "^7.3.1"
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.0.4"
 ruff = "^0.6.0"
+pytest = "^7.2.2"
 pytest-mock = "^3.14.0"
 
 [tool.ruff]
