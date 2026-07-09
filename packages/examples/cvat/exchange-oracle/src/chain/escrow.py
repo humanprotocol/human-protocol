@@ -1,16 +1,34 @@
 import json
 from functools import partial
 
+import httpx
 from human_protocol_sdk.constants import ChainId, Status
 from human_protocol_sdk.encryption import Encryption, EncryptionUtils
 from human_protocol_sdk.escrow import EscrowData, EscrowUtils
-from human_protocol_sdk.storage import StorageUtils
+from human_protocol_sdk.utils import validate_url
 
 from src.chain.web3 import get_token_symbol
 from src.core.config import Config
 from src.core.types import OracleWebhookTypes
 from src.services.cache import Cache
 
+
+class ManifestNotAvailableError(Exception):
+    """Raised when the escrow manifest cannot be retrieved."""
+
+
+def _get_manifest_content(manifest: str) -> str:
+    if validate_url(manifest):
+        try:
+            response = httpx.get(manifest, follow_redirects=True)
+            response.raise_for_status()
+        except Exception as e:
+            raise ManifestNotAvailableError(
+                f"failed to download manifest from {manifest}: {e}"
+            ) from e
+        return response.text
+
+    return manifest
 
 def get_escrow(chain_id: int, escrow_address: str) -> EscrowData:
     escrow = EscrowUtils.get_escrow(ChainId(chain_id), escrow_address)
@@ -48,7 +66,7 @@ def validate_escrow(
 def download_manifest(chain_id: int, escrow_address: str) -> dict:
     escrow = get_escrow(chain_id, escrow_address)
 
-    manifest_content = StorageUtils.download_file_from_url(escrow.manifest).decode("utf-8")
+    manifest_content = _get_manifest_content(escrow.manifest)
 
     if EncryptionUtils.is_encrypted(manifest_content):
         encryption = Encryption(
