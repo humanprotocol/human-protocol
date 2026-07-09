@@ -78,11 +78,21 @@ class AudioJobDetails(DetailsInfoBase):
     max_segment_duration: int | None = None
     "Maximum audio segment duration, seconds"
 
+    min_gt_span_duration: int | None = None
+    """
+    Minimum duration of densely-annotated GT regions, in seconds.
+    Each is expected to contain 1 or more annotated intervals inside.
+    A span is identified by the span_id field.
+    """
+
     min_composition: MinComposition | None = None
     "Minimal composition of a job"
 
     validation_overhead: int | None = None
     "Extra validation samples added on top of the required amount"
+
+    boundary_tolerance: int | None = None
+    "Allowed annotation/GT interval boundary misalignment at honeypots, milliseconds"
 
 
 DetailsInfo = ImageJobDetails | AudioJobDetails

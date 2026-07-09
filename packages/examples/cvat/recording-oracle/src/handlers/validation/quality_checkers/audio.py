@@ -41,7 +41,7 @@ from src.services.cloud.utils import BucketAccessInfo
 
 if TYPE_CHECKING:
     from src.core.annotation_meta import JobMeta
-    from src.core.tasks.audio_transcription.meta import Assignment, PlacedRegion
+    from src.core.tasks.audio_transcription.meta import Clip, PlacedRegion
     from src.services.cloud.client import StorageClient
 
 # Groups are keyed by the presented honeypot so each honeypot's transcription is aligned in
@@ -54,9 +54,7 @@ class AudioTaskQualityChecker(TaskQualityChecker):
     Scores audio-transcription assignments. CVAT doesn't support quality computation for such tasks
     yet, so the computations are performed in the oracle.
 
-    For each job it reconstructs the annotator's honeypot transcriptions (from the per-assignment
-    TSV + the assignment/clip mapping), aligns them against the ground truth per presented honeypot,
-    and computes the WER/CER error rate.
+    Each assignment annotations are scored per their honeypots, computing the WER/CER metrics.
 
     Honeypot rotation is not used.
     """
@@ -96,24 +94,36 @@ class AudioTaskQualityChecker(TaskQualityChecker):
             text_attribute=transcription_attr,
             normalizer=self._normalizer_config(spec.details.normalizer),
             grouping=GroupingConfig(attribute=_GROUP_ATTR, strategy=GroupingStrategy.JOIN),
+            overlap_tolerance_ms=round(spec.details.boundary_tolerance.total_seconds() * 1000),
         )
         normalizer = Normalizer(req.normalizer)
 
         client = make_cloud_client(
             BucketAccessInfo.parse_obj(Config.exchange_oracle_storage_config)
         )
-        gt_rows = self._load_gt(client)
-        assignments = self._load_assignments(client)
-        annotations = self._download_assignment_tsvs(client)
+        gt_annotations = self._load_gt(client)
+        clips_by_id = self._load_clips_meta(client)
+        task_clips = self._load_task_clips(client)
+        annotation_bytes = self._download_assignment_annotations(client)
 
         job_results: dict[int, float] = {}
         rejected_jobs: dict[int, object] = {}
 
         for job_meta in self._meta.jobs:
+            ds_annotations = self._parse_annotations(annotation_bytes[job_meta.job_id])
+            # Each CVAT task holds exactly one clip; join the job to its clip via the EO-recorded
+            # task -> clip mapping. An empty submission still resolves here, so its honeypots score
+            # as full deletions (rate 1.0) instead of being treated as unverifiable.
+            clip_meta = clips_by_id[task_clips[job_meta.task_id]]
+
             gt_intervals, hyp_intervals = self._build_intervals(
-                annotations[job_meta.job_id], assignments, gt_rows, transcription_attr
+                ds_annotations,
+                gt_annotations,
+                clip_meta=clip_meta,
+                transcription_attr=transcription_attr,
             )
             if not gt_intervals:
+                # No honeypots available - not expected by construction.
                 job_results[job_meta.job_id] = UNKNOWN_QUALITY
                 rejected_jobs[job_meta.job_id] = TooFewGtError()
                 continue
@@ -155,28 +165,39 @@ class AudioTaskQualityChecker(TaskQualityChecker):
         )
         return {region.id: region for region in parse_gt_tsv(data)}
 
-    def _load_assignments(self, client: StorageClient) -> dict[str, Assignment]:
+    def _load_clips_meta(self, client: StorageClient) -> dict[str, Clip]:
+        "Returns clip id -> clip meta mapping."
+
         data = client.download_file(
             compose_data_bucket_filename(
-                self.escrow_address, self.chain_id, TaskMetaLayout.ASSIGNMENTS_FILENAME
+                self.escrow_address, self.chain_id, TaskMetaLayout.CLIPS_FILENAME
             )
         )
-        return {a.clip_filename: a for a in TaskMetaSerializer().parse_assignments(data)}
+        return {a.id: a for a in TaskMetaSerializer().parse_clips(data)}
+
+    def _load_task_clips(self, client: StorageClient) -> dict[int, str]:
+        "Returns CVAT task id -> clip id mapping."
+
+        data = client.download_file(
+            compose_data_bucket_filename(
+                self.escrow_address, self.chain_id, TaskMetaLayout.TASK_CLIPS_FILENAME
+            )
+        )
+        return TaskMetaSerializer().parse_task_clips(data)
+
+    @staticmethod
+    def _parse_annotations(annotation: bytes) -> list[dict]:
+        return list(csv.DictReader(io.StringIO(annotation.decode("utf-8")), delimiter="\t"))
 
     def _build_intervals(
         self,
-        annotation: bytes,
-        assignments: dict[str, Assignment],
-        gt_rows: dict[str, InputGtRegion],
-        attr: str,
+        ds_annotations: list[dict],
+        gt_annotations: dict[str, InputGtRegion],
+        *,
+        clip_meta: Clip,
+        transcription_attr: str,
     ) -> tuple[list[Interval], list[Interval]]:
-        rows = list(csv.DictReader(io.StringIO(annotation.decode("utf-8")), delimiter="\t"))
-
-        assignment = self._resolve_assignment(rows, assignments)
-        if assignment is None:
-            return [], []
-
-        gt_placements = [p for p in assignment.placed if p.kind == RegionKind.gt]
+        gt_placements = [p for p in clip_meta.placed if p.kind == RegionKind.gt]
 
         # Ground-truth reference intervals for every presented honeypot (built regardless of what
         # the annotator produced, so an omitted honeypot becomes a missing group = full errors).
@@ -185,16 +206,20 @@ class AudioTaskQualityChecker(TaskQualityChecker):
         for placed in gt_placements:
             honeypot_id = self._honeypot_id(placed)
             for region_id in placed.input_ids:
-                gt = gt_rows.get(region_id)
-                if gt is None:
-                    continue
+                try:
+                    gt = gt_annotations[region_id]
+                except KeyError as e:
+                    raise AssertionError(
+                        f"Honeypot region '{region_id}' is missing from gt.tsv"
+                    ) from e
+
                 gt_intervals.append(
                     Interval(
                         id=counter,
                         start=gt.start.total_seconds() * 1000.0,
                         stop=gt.stop.total_seconds() * 1000.0,
-                        label=gt.label or "",
-                        extra={attr: gt.text, _GROUP_ATTR: honeypot_id},
+                        label=gt.label,
+                        extra={transcription_attr: gt.text, _GROUP_ATTR: honeypot_id},
                     )
                 )
                 counter += 1
@@ -202,21 +227,21 @@ class AudioTaskQualityChecker(TaskQualityChecker):
         # Annotator (hypothesis) intervals: only rows falling inside a honeypot window, mapped from
         # clip-time back to source-file time.
         hyp_intervals: list[Interval] = []
-        for row in rows:
+        for row in ds_annotations:
             start_s = parse_time(row["start"]).total_seconds()
             stop_s = parse_time(row["stop"]).total_seconds()
-            placed = self._placed_at(assignment, start_s)
-            if placed is None or placed.kind != RegionKind.gt:
+            placed = self._honeypot_at(clip_meta, start_s, stop_s)
+            if placed is None:
                 continue
-            offset = placed.file_start - placed.clip_start
+            offset = placed.source_start - placed.clip_start
             hyp_intervals.append(
                 Interval(
                     id=counter,
                     start=(start_s + offset) * 1000.0,
                     stop=(stop_s + offset) * 1000.0,
-                    label=row.get("label", "") or "",
+                    label=row["label"],
                     extra={
-                        attr: row.get(attr, "") or "",
+                        transcription_attr: row[transcription_attr],
                         _GROUP_ATTR: self._honeypot_id(placed),
                     },
                 )
@@ -225,7 +250,7 @@ class AudioTaskQualityChecker(TaskQualityChecker):
 
         return gt_intervals, hyp_intervals
 
-    def _download_assignment_tsvs(self, client: StorageClient) -> dict[int, bytes]:
+    def _download_assignment_annotations(self, client: StorageClient) -> dict[int, bytes]:
         "Download every job's per-assignment annotation TSV up front, keyed by cvat job id."
         return {
             job_meta.job_id: self._download_assignment_tsv(client, job_meta)
@@ -244,27 +269,37 @@ class AudioTaskQualityChecker(TaskQualityChecker):
         )
 
     @staticmethod
-    def _resolve_assignment(
-        rows: list[dict], assignments: dict[str, Assignment]
-    ) -> Assignment | None:
-        for row in rows:
-            clip = row["filename"].rsplit("/", 1)[-1]
-            if clip in assignments:
-                return assignments[clip]
-        return None
-
-    @staticmethod
     def _honeypot_id(placed: PlacedRegion) -> str:
         # A gt placement is always built from >=1 GT input ROI, so input_ids is non-empty.
         assert placed.input_ids, f"honeypot placement has no input regions: {placed}"
         return ",".join(placed.input_ids)
 
     @staticmethod
-    def _placed_at(assignment: Assignment, clip_time_s: float) -> PlacedRegion | None:
-        return next(
-            (p for p in assignment.placed if p.clip_start <= clip_time_s < p.clip_stop),
-            None,
-        )
+    def _honeypot_at(clip: Clip, start_s: float, stop_s: float) -> PlacedRegion | None:
+        """
+        Return the honeypot placement that fully contains the annotator interval ``[start_s,
+        stop_s]`` within its inclusion window.
+
+        Each honeypot window is extended by half of the join pause to the adjacent region on each
+        side (``[hp_start - pause/2, hp_stop + pause/2]``); an interval counts for the honeypot only
+        if both its endpoints fall inside. Annotator segment boundaries don't align with the
+        synthetic cut/pause boundaries: the half-pause margin keeps a segment that drifts into the
+        surrounding pause, while requiring both endpoints inside excludes one that spills into an
+        adjacent region.
+        """
+        regions = sorted(clip.placed, key=lambda p: p.clip_start)
+        for idx, p in enumerate(regions):
+            if p.kind != RegionKind.gt:
+                continue
+            lo = p.clip_start
+            hi = p.clip_stop
+            if idx > 0:
+                lo -= (p.clip_start - regions[idx - 1].clip_stop) / 2
+            if idx < len(regions) - 1:
+                hi += (regions[idx + 1].clip_start - p.clip_stop) / 2
+            if lo <= start_s and stop_s <= hi:
+                return p
+        return None
 
     def _job_error_rate(self, report, req: TranscriptionRequirement, normalizer) -> float:
         """
@@ -299,6 +334,6 @@ class AudioTaskQualityChecker(TaskQualityChecker):
     @staticmethod
     def _group_units(group: list[Interval], req: TranscriptionRequirement, normalizer) -> list[str]:
         joined = req.grouping.join_separator.join(
-            iv.extra.get(req.text_attribute, "") for iv in sorted(group, key=lambda i: i.start)
+            iv.extra[req.text_attribute] for iv in sorted(group, key=lambda i: i.start)
         )
         return tokenize(normalizer(joined), granularity=req.granularity)

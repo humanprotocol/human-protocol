@@ -125,6 +125,8 @@ ignore = [
     "ANN001",  # |
     "ANN003",  # |
     "ARG001",  # |
+    "ARG002",  # Allow unused args in test doubles mirroring real signatures
+    "RET504",  # Allow assign-before-return for readability in tests
     "FBT001",  # Allow bool-annotated positional args in functions
     "SLF001",  # Allow private attrs access
     "PLR2004", # Allow magic values

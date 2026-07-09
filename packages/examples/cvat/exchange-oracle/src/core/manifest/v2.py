@@ -91,6 +91,9 @@ class AudioJobDetails(DetailsInfoBase):
     validation_overhead: int | None = None
     "Extra validation samples added on top of the required amount"
 
+    boundary_tolerance: int | None = None
+    "Allowed annotation/GT interval boundary misalignment at honeypots, milliseconds"
+
 
 DetailsInfo = ImageJobDetails | AudioJobDetails
 

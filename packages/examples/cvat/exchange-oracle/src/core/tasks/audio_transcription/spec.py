@@ -75,6 +75,9 @@ class TranscriptionDetails(BaseModel):
     roi_join_pause: timedelta = timedelta(milliseconds=700)
     "Silence inserted between concatenated regions in an assignment clip"
 
+    boundary_tolerance: timedelta = timedelta(milliseconds=200)
+    "Allowed joined annotation/GT interval boundary misalignment when matching transcriptions"
+
     standard_assignment_duration: timedelta = timedelta(seconds=60)
     "Target audio duration per assignment"
 
@@ -135,6 +138,10 @@ def parse_audio_manifest(manifest: JobManifest) -> TranscriptionTaskSpecificatio
         if manifest_details.min_gt_span_duration is not None:
             details_fields["min_gt_span_duration"] = timedelta(
                 seconds=manifest_details.min_gt_span_duration
+            )
+        if manifest_details.boundary_tolerance is not None:
+            details_fields["boundary_tolerance"] = timedelta(
+                milliseconds=manifest_details.boundary_tolerance
             )
         if manifest_details.validation_overhead is not None:
             details_fields["validation_overhead"] = manifest_details.validation_overhead / 100.0
