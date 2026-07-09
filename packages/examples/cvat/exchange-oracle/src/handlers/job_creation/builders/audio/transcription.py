@@ -740,7 +740,7 @@ def _validate_gt_regions(
     for span_id, span_members in by_span.items():
         span_duration = _get_span_duration(span_members)
 
-        if span_duration > min_span_duration:
+        if span_duration < min_span_duration:
             excluded.excluded_count += len(span_members)
             excluded.add_message(
                 f"GT span '{span_id}' ({span_duration:.3f}s) - shorter "
