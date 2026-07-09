@@ -1,8 +1,15 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 from urllib.parse import urljoin
 
 from src.core.config import Config
+from src.core.manifest import get_manifest_task_type
 from src.core.tasks import TaskTypes, skeletons_from_boxes
-from src.models.cvat import Project
+
+if TYPE_CHECKING:
+    from src.core.manifest import ManifestBase
+    from src.models.cvat import Project
 
 
 def compose_assignment_url(task_id: int, job_id: int, *, project: Project) -> str:
@@ -28,3 +35,15 @@ def get_default_assignment_timeout(task_type: TaskTypes) -> int:
         timeout_seconds *= skeletons_from_boxes.DEFAULT_ASSIGNMENT_SIZE_MULTIPLIER
 
     return timeout_seconds
+
+
+def get_assignment_timeout(manifest: ManifestBase) -> int:
+    """
+    Get assignment expiration timeout, in seconds.
+    """
+    details = getattr(getattr(manifest, "annotation", None), "details", None)
+    max_time = getattr(details, "max_time", None)
+    if max_time is not None:
+        return max_time
+
+    return get_default_assignment_timeout(get_manifest_task_type(manifest))
