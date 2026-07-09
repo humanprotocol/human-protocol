@@ -177,7 +177,7 @@ __metadata:
     "@types/jest": "npm:30.0.0"
     "@types/node": "npm:22.10.5"
     axios: "npm:^1.3.1"
-    cache-manager: "npm:7.2.8"
+    cache-manager: "npm:7.2.9"
     class-transformer: "npm:^0.5.1"
     class-validator: "npm:0.14.1"
     dayjs: "npm:^1.11.20"
@@ -517,7 +517,7 @@ __metadata:
     "@types/passport": "npm:^1"
     "@types/passport-jwt": "npm:^4.0.1"
     axios: "npm:^1.7.2"
-    cache-manager: "npm:7.2.8"
+    cache-manager: "npm:7.2.9"
     class-transformer: "npm:^0.5.1"
     class-validator: "npm:0.14.1"
     eslint: "npm:^10.1.0"
@@ -3182,13 +3182,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cacheable/utils@npm:^2.3.3":
-  version: 2.3.3
-  resolution: "@cacheable/utils@npm:2.3.3"
+"@cacheable/utils@npm:^2.5.0":
+  version: 2.5.0
+  resolution: "@cacheable/utils@npm:2.5.0"
   dependencies:
-    hashery: "npm:^1.3.0"
-    keyv: "npm:^5.5.5"
-  checksum: 10c0/aa6198dcbd799055465efcaa9c91b11266218bd674bc889665efe7a230ecbce17fda2502aed51bd65062f20ad3af464841a72a93e8609d579535736526e3988c
+    hashery: "npm:^1.5.1"
+    keyv: "npm:^5.6.0"
+  checksum: 10c0/99e901accd71eeb0bce91484d6c66d7ef2c731b541561eb5dc9ea7fed78bdc0b65e5dd2a80edde50191143bcfc5f238fc4742475b32e82d43b43eea224038e35
   languageName: node
   linkType: hard
 
@@ -16174,13 +16174,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cache-manager@npm:7.2.8":
-  version: 7.2.8
-  resolution: "cache-manager@npm:7.2.8"
+"cache-manager@npm:7.2.9":
+  version: 7.2.9
+  resolution: "cache-manager@npm:7.2.9"
   dependencies:
-    "@cacheable/utils": "npm:^2.3.3"
-    keyv: "npm:^5.5.5"
-  checksum: 10c0/d620f8489cbdd549574c5b42ce27eb5a99841af059b1ed0ffcceaa897e7f5093aff68186e1af306d125685f4e565ae96da2c3e632bb23b45938bdd5a01d5b7f3
+    "@cacheable/utils": "npm:^2.5.0"
+    keyv: "npm:^5.6.0"
+  checksum: 10c0/b4146edb102c7f49f9eb804c48ffb370405594e36f3e391093c35f5589b25fcd51cb33291589e453882745b60d669f7be21411c86864746d74ef9287ef238af8
   languageName: node
   linkType: hard
 
@@ -21427,12 +21427,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hashery@npm:^1.3.0":
-  version: 1.4.0
-  resolution: "hashery@npm:1.4.0"
+"hashery@npm:^1.5.1":
+  version: 1.5.1
+  resolution: "hashery@npm:1.5.1"
   dependencies:
-    hookified: "npm:^1.14.0"
-  checksum: 10c0/34e0c72f7eac78676ee81f7b4f8263cbc591d2eb66229c3fd8812d006362a43436038b07e07580d6cfa512954d674a01a045e0d4c6968cc13c1d817d638bfcbf
+    hookified: "npm:^1.15.0"
+  checksum: 10c0/ab4225b655a7b0d05df99b1a59d5b3a51fe433f82422ca25e6f3f4c4ddd30adb49ebd38e0047ef9bded93319c1e9fc857e16aa382e554929c871cb77d39fc463
   languageName: node
   linkType: hard
 
@@ -21516,10 +21516,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hookified@npm:^1.13.0, hookified@npm:^1.14.0":
+"hookified@npm:^1.13.0":
   version: 1.15.0
   resolution: "hookified@npm:1.15.0"
   checksum: 10c0/bb8e2b34d6e6c1a00fd946ebbb3988fd826ac1c7ae103507d3402ab94defdb09d1fafb37cec6eae48e60ba56217ef89b803b885ccf4156c149e499d05a7741ec
+  languageName: node
+  linkType: hard
+
+"hookified@npm:^1.15.0":
+  version: 1.15.1
+  resolution: "hookified@npm:1.15.1"
+  checksum: 10c0/6b691374fa97ae57169fb29f90e723499fda5e85494654fbe55c4768b3ccbf3e14c0adc8d0f365f32c503b60d7c06f907781f5966c03d41c423575eb5e16860c
   languageName: node
   linkType: hard
 
@@ -23771,7 +23778,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"keyv@npm:^5.5.5":
+"keyv@npm:^5.5.5, keyv@npm:^5.6.0":
   version: 5.6.0
   resolution: "keyv@npm:5.6.0"
   dependencies:
