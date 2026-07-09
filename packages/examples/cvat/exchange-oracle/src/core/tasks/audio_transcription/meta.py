@@ -76,9 +76,10 @@ class InputGtRegion:
     filename: str
     start: timedelta
     stop: timedelta
-    label: str | None = None
-    text: str = ""
+    label: str
+    text: str
     row_idx: int
+    span_id: str
 
     @property
     def id(self) -> str:
@@ -86,7 +87,6 @@ class InputGtRegion:
 
 
 def parse_gt_tsv(data: bytes) -> list[InputGtRegion]:
-    "Parse a GT transcription TSV (columns: filename, start, stop, label, text) into regions."
     reader = csv.DictReader(io.StringIO(data.decode("utf-8")), delimiter="\t")
     return [
         InputGtRegion(
@@ -94,8 +94,9 @@ def parse_gt_tsv(data: bytes) -> list[InputGtRegion]:
             row_idx=row_idx,
             start=parse_time(row["start"]),
             stop=parse_time(row["stop"]),
-            label=(row.get("label") or "").strip() or None,
-            text=(row.get("text") or "").strip(),
+            label=row["label"].strip(),
+            text=row["text"].strip(),
+            span_id=row["span_id"].strip(),
         )
         for row_idx, row in enumerate(reader)
     ]
@@ -127,17 +128,17 @@ class PlacedRegion:
 
     index: int  # 0-based position within the assignment clip
     source_filename: str
-    file_start: float
-    file_stop: float
+    source_start: float
+    source_stop: float
     clip_start: float
     clip_stop: float
-    kind: RegionKind = RegionKind.ds
+    kind: RegionKind
     input_ids: list[str] = Factory(list)  # ids of the input ROIs this bundle was built from
 
 
 @frozen(kw_only=True)
-class Assignment:
-    """One CVAT task: a single concatenated clip built from ``placed`` regions."""
+class Clip:
+    """A single concatenated audio clip built from ``placed`` regions (one per CVAT task)."""
 
     id: str
     clip_filename: str
@@ -169,8 +170,8 @@ def _placed_to_dict(r: PlacedRegion) -> dict:
     return {
         "index": r.index,
         "source_filename": r.source_filename,
-        "file_start": r.file_start,
-        "file_stop": r.file_stop,
+        "source_start": r.source_start,
+        "source_stop": r.source_stop,
         "clip_start": r.clip_start,
         "clip_stop": r.clip_stop,
         "kind": r.kind.value,
@@ -182,8 +183,8 @@ def _placed_from_dict(d: dict) -> PlacedRegion:
     return PlacedRegion(
         index=d["index"],
         source_filename=d["source_filename"],
-        file_start=d["file_start"],
-        file_stop=d["file_stop"],
+        source_start=d["source_start"],
+        source_stop=d["source_stop"],
         clip_start=d["clip_start"],
         clip_stop=d["clip_stop"],
         kind=RegionKind(d["kind"]),
@@ -196,7 +197,8 @@ class TaskMetaLayout:
     GT_FILENAME = "gt.tsv"
     REGIONS_TSV_FILENAME = "regions.tsv"
     REGIONS_FILENAME = "regions.json"
-    ASSIGNMENTS_FILENAME = "assignments.json"
+    CLIPS_FILENAME = "assignments.json"
+    TASK_CLIPS_FILENAME = "task_clips.json"
     DS_CUTS_DIR = "ds_cuts"
     GT_CUTS_DIR = "gt_cuts"
 
@@ -205,7 +207,7 @@ class TaskResultsLayout:
     "Layout of the escrow results dir on the oracle bucket."
 
     ASSIGNMENTS_DIR = "assignments"  # per-assignment annotation TSVs (one per CVAT job)
-    ANNOTATIONS_FILENAME = "annotations.tsv"  # merged final annotations (DS rows + GT)
+    ANNOTATIONS_FILENAME = "annotations.tsv"  # merged annotations (without honeypots or GT)
 
     @classmethod
     def assignment_annotation_filename(cls, job_id: int, assignment_id: str) -> str:
@@ -220,22 +222,22 @@ class TaskMetaSerializer:
     def parse_regions(self, data: bytes) -> list[PresentedRegion]:
         return [_region_from_dict(d) for d in parse_json(data)]
 
-    def serialize_assignments(self, assignments: list[Assignment]) -> bytes:
+    def serialize_clips(self, clips: list[Clip]) -> bytes:
         return dump_json(
             [
                 {
-                    "id": a.id,
-                    "clip_filename": a.clip_filename,
-                    "clip_dur": a.clip_duration,
-                    "placed": [_placed_to_dict(p) for p in a.placed],
+                    "id": clip.id,
+                    "clip_filename": clip.clip_filename,
+                    "clip_dur": clip.clip_duration,
+                    "placed": [_placed_to_dict(p) for p in clip.placed],
                 }
-                for a in assignments
+                for clip in clips
             ]
         )
 
-    def parse_assignments(self, data: bytes) -> list[Assignment]:
+    def parse_clips(self, data: bytes) -> list[Clip]:
         return [
-            Assignment(
+            Clip(
                 id=d["id"],
                 clip_filename=d["clip_filename"],
                 clip_duration=d["clip_dur"],
@@ -243,3 +245,9 @@ class TaskMetaSerializer:
             )
             for d in parse_json(data)
         ]
+
+    def serialize_task_clips(self, task_clips: dict[int, str]) -> bytes:
+        return dump_json({str(task_id): clip_id for task_id, clip_id in task_clips.items()})
+
+    def parse_task_clips(self, data: bytes) -> dict[int, str]:
+        return {int(task_id): clip_id for task_id, clip_id in parse_json(data).items()}

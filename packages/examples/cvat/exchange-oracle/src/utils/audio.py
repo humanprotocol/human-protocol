@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import subprocess
 from dataclasses import dataclass
+from datetime import timedelta
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -20,18 +21,18 @@ class FfmpegError(RuntimeError):
 
 @dataclass(frozen=True)
 class RegionCut:
-    """A slice [start, stop) (seconds) to take from a source media file."""
+    """A slice [start, stop) to take from a source media file."""
 
     media: Path
-    start: float
-    stop: float
+    start: timedelta
+    stop: timedelta
 
     @property
-    def duration(self) -> float:
+    def duration(self) -> timedelta:
         return self.stop - self.start
 
 
-def probe_duration(path: Path) -> float:
+def probe_duration(path: Path) -> timedelta:
     """Return media duration in seconds"""
 
     cmd = [
@@ -48,7 +49,7 @@ def probe_duration(path: Path) -> float:
     if result.returncode != 0:
         raise FfmpegError(f"ffprobe failed for {path}:\n{result.stderr[-800:]}")
 
-    return float(result.stdout.strip())
+    return timedelta(seconds=float(result.stdout.strip()))
 
 
 def cut_and_concat(
@@ -86,7 +87,8 @@ def cut_and_concat(
     for i, region in enumerate(regions):
         inp = idx_of[str(region.media)]
         filter_parts.append(
-            f"[{inp}:a]atrim={region.start:.3f}:{region.stop:.3f},asetpts=PTS-STARTPTS,"
+            f"[{inp}:a]atrim={region.start.total_seconds():.3f}:{region.stop.total_seconds():.3f},"
+            "asetpts=PTS-STARTPTS,"
             f"aresample={sample_rate},aformat=channel_layouts=mono[s{i}]"
         )
         segment_labels.append(f"[s{i}]")

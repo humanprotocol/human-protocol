@@ -59,6 +59,13 @@ class TranscriptionDetails(BaseModel):
     min_composition: tuple[int, int] = (2, 2)
     "(gt, ds): minimum number of honeypot and DS regions per assignment"
 
+    min_gt_span_duration: timedelta = timedelta(seconds=30)
+    """
+    Minimum duration of densely-annotated GT regions, in seconds.
+    Each is expected to contain 1 or more annotated intervals inside.
+    A span is identified by the span_id field.
+    """
+
     roi_min_duration: timedelta = timedelta(seconds=5)
     "Minimum presented region duration. Smaller segments are bundled together"
 
@@ -124,6 +131,10 @@ def parse_audio_manifest(manifest: JobManifest) -> TranscriptionTaskSpecificatio
         if manifest_details.max_segment_duration is not None:
             details_fields["roi_max_duration"] = timedelta(
                 seconds=manifest_details.max_segment_duration
+            )
+        if manifest_details.min_gt_span_duration is not None:
+            details_fields["min_gt_span_duration"] = timedelta(
+                seconds=manifest_details.min_gt_span_duration
             )
         if manifest_details.validation_overhead is not None:
             details_fields["validation_overhead"] = manifest_details.validation_overhead / 100.0

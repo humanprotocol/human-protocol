@@ -2,13 +2,15 @@ from __future__ import annotations
 
 import csv
 import io
-import random
 import uuid
 from collections import Counter
+from datetime import timedelta
 from math import ceil
 from pathlib import Path, PurePosixPath
 from tempfile import TemporaryDirectory
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypeVar
+
+import numpy as np
 
 import src.cvat.api_calls as cvat_api
 import src.services.cvat as db_service
@@ -16,7 +18,7 @@ from src.core.config import Config
 from src.core.storage import compose_data_bucket_filename
 from src.core.tasks import TaskTypes
 from src.core.tasks.audio_transcription.meta import (
-    Assignment,
+    Clip,
     InputGtRegion,
     InputRegion,
     PlacedRegion,
@@ -47,41 +49,54 @@ from src.utils.audio import RegionCut, cut_and_concat, probe_duration
 from src.utils.logging import format_sequence
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from src.core.manifest import ManifestBase
 
 
 # --------------------------------------------------------------------------- #
-# Assignment construction
+# Clip construction
 # --------------------------------------------------------------------------- #
 
 
+_RegionT = TypeVar("_RegionT", bound=InputRegion | InputGtRegion)
+
+
 def _bundle_regions(
-    regions: list[InputRegion], *, min_duration: float, max_duration: float
-) -> list[tuple[float, float, list[InputRegion]]]:
+    regions: list[_RegionT],
+    *,
+    min_duration: timedelta,
+    max_duration: timedelta,
+    can_bundle: Callable[[_RegionT, _RegionT], bool] = lambda _a, _b: True
+) -> list[tuple[timedelta, timedelta, list[_RegionT]]]:
     """
     Bundle consecutive input regions (sorted by start) into groups >= min_duration;
-    a region already >= min_duration stays alone. Returns (start_s, stop_s, members) per bundle.
+    a region already >= min_duration stays alone. Returns (start, stop, members) per bundle.
 
     A bundle's span (first ROI start .. last ROI stop) includes the gaps between its members, so
     two limits keep bundles from ballooning over sparse input:
     - max_duration caps the presented span (a longer bundle would fail input validation anyway);
     - the join gap is capped at min_duration, so we never bridge a long silence between ROIs.
+
+    A custom ``can_bundle`` callback can be passed to specify additional constraints on the ROIs
+    that can be joined.
     """
 
-    def span(group: list[InputRegion]) -> float:
-        return group[-1].stop.total_seconds() - group[0].start.total_seconds()
+    def can_append_region(bundle: list[_RegionT], region: _RegionT) -> bool:
+        if not can_bundle(bundle[-1], region):
+            return False
 
-    def joinable(group: list[InputRegion], region: InputRegion) -> bool:
-        gap = region.start.total_seconds() - group[-1].stop.total_seconds()
-        reach = region.stop.total_seconds() - group[0].start.total_seconds()
-        return span(group) < min_duration and gap <= min_duration and reach <= max_duration
+        gap = region.start - bundle[-1].stop
+        reach = region.stop - bundle[0].start
+        span = _get_span_duration(bundle)
+        return span < min_duration and gap <= min_duration and reach <= max_duration
 
-    out: list[list[InputRegion]] = []
-    bundle: list[InputRegion] | None = None
+    out: list[list[_RegionT]] = []
+    bundle: list[_RegionT] | None = None
     for region in regions:
         if bundle is None:
             bundle = [region]
-        elif joinable(bundle, region):
+        elif can_append_region(bundle, region):
             bundle.append(region)
         else:
             out.append(bundle)
@@ -90,7 +105,7 @@ def _bundle_regions(
     if bundle is not None:  # trailing bundle may stay shorter than min_duration
         out.append(bundle)
 
-    return [(g[0].start.total_seconds(), g[-1].stop.total_seconds(), g) for g in out]
+    return [(g[0].start, g[-1].stop, g) for g in out]
 
 
 def select_honeypots(
@@ -98,11 +113,13 @@ def select_honeypots(
     *,
     source_filename: str,
     val_fraction: float,
-    min_duration: float,
-    max_duration: float,
+    min_duration: timedelta,
+    max_duration: timedelta,
     random_seed: int = 0,
 ) -> list[PresentedRegion]:
     """
+    Pick GT regions for the honeypot pool.
+
     Bundle GT cues into >= min_duration groups, then pick ~val_fraction of the bundles (by count)
     as honeypots. A bundle spans its first cue start to its last cue stop (including inter-cue
     gaps); we never pad into unannotated media, so a bundle may stay shorter than min_duration when
@@ -110,9 +127,17 @@ def select_honeypots(
     """
 
     regions = sorted(regions, key=lambda r: r.start)
-    bundles = _bundle_regions(regions, min_duration=min_duration, max_duration=max_duration)
+    bundles = _bundle_regions(
+        regions,
+        min_duration=min_duration,
+        max_duration=max_duration,
+        can_bundle=(
+            # we can only bundle regions if they belong to the same span
+            lambda a, b: a.span_id == b.span_id
+        )
+    )
 
-    rng = random.Random(random_seed)  # noqa: S311  # not cryptographic
+    rng = np.random.Generator(np.random.MT19937(random_seed)) # pin the rng used for stable results
     idxs = list(range(len(bundles)))
     rng.shuffle(idxs)
     n_select = ceil(val_fraction * len(bundles))
@@ -124,8 +149,8 @@ def select_honeypots(
         honeypots.append(
             PresentedRegion(
                 source_filename=source_filename,
-                start=s,
-                stop=e,
+                start=s.total_seconds(),
+                stop=e.total_seconds(),
                 kind=RegionKind.gt,
                 input_ids=[m.id for m in members],
             )
@@ -137,61 +162,70 @@ def plan_assignments(
     ds_regions: list[PresentedRegion],
     honeypots: list[PresentedRegion],
     *,
-    composition: tuple[int, int],
+    min_composition: tuple[int, int],
     validation_overhead: float,
-    max_audio_duration: float,
+    max_audio_duration: timedelta,
     random_seed: int = 0,
 ) -> list[list[PresentedRegion]]:
     """
     Mix DS and honeypots into assignments. Returns ordered region lists.
     """
 
-    # 1. shuffle DS
-    rng = random.Random(random_seed)  # noqa: S311  # not cryptographic
-    ds_order = list(range(len(ds_regions)))
-    rng.shuffle(ds_order)
+    # 1. shuffle inputs
+    rng = np.random.Generator(np.random.MT19937(random_seed)) # pin the rng used for stable results
+
+    def sort_key(r: PresentedRegion) -> tuple:
+        return (r.source_filename, r.start)
+
+    ds_regions = sorted(ds_regions, key=sort_key)
+    rng.shuffle(ds_regions)
+
+    honeypots = sorted(honeypots, key=sort_key)
+    rng.shuffle(honeypots)
 
     # 2. Reservoir-pack each assignment up to the DS budget (>= K_min), inject least-used honeypots
     # up to the validation overhead (>= H_min), then shuffle region order. Deterministic.
-    ds_budget = max_audio_duration * (1.0 - validation_overhead)
-    hp_target = validation_overhead * max_audio_duration
-    h_min, k_min = composition
+    ds_budget = max_audio_duration.total_seconds() * (1.0 - validation_overhead)
+    hp_target = validation_overhead * max_audio_duration.total_seconds()
+    h_min, k_min = min_composition
 
     hp_use: Counter = Counter()
     assignments: list[list[PresentedRegion]] = []
-    di = 0
-    while di < len(ds_order):
-        chosen: list[PresentedRegion] = []
-        ds_dur = 0.0
-        while di < len(ds_order):
-            r = ds_regions[ds_order[di]]
-            d = r.duration
-            if len(chosen) >= k_min and ds_dur + d > ds_budget:
-                break
-            chosen.append(r)
-            ds_dur += d
-            di += 1
-        if len(chosen) < k_min:
-            break  # DS stream exhausted - can't form a full assignment
 
-        hp_dur = 0.0
+    ds_idx = 0
+    while ds_idx < len(ds_regions):
+        pick: list[PresentedRegion] = []
+        pick_duration = 0.0
+        while ds_idx < len(ds_regions):
+            ds_region = ds_regions[ds_idx]
+            if len(pick) >= k_min and pick_duration + ds_region.duration > ds_budget:
+                break
+
+            pick.append(ds_region)
+            pick_duration += ds_region.duration
+            ds_idx += 1
+
+        if not pick:
+            break  # DS stream exhausted - nothing left to place
+
         # least-used honeypots first, randomized within each use-count tier
+        hp_duration = 0.0
         hp_ranked = sorted(range(len(honeypots)), key=lambda i: (hp_use[i], rng.random()))
         for n_hp, i in enumerate(hp_ranked):
-            if (hp_dur >= hp_target and n_hp >= h_min) or n_hp >= len(honeypots):
+            if (hp_duration >= hp_target and n_hp >= h_min) or n_hp >= len(honeypots):
                 break
-            chosen.append(honeypots[i])
-            hp_dur += honeypots[i].duration
+            pick.append(honeypots[i])
+            hp_duration += honeypots[i].duration
             hp_use[i] += 1
 
-        rng.shuffle(chosen)
-        assignments.append(chosen)
+        rng.shuffle(pick)
+        assignments.append(pick)
 
     return assignments
 
 
 def place_regions(
-    regions: list[PresentedRegion], *, pause_s: float
+    regions: list[PresentedRegion], *, pause: timedelta
 ) -> tuple[list[PlacedRegion], float]:
     """Clip-time placement of concatenated regions (region durations + inter-region pauses)."""
     placed: list[PlacedRegion] = []
@@ -203,8 +237,8 @@ def place_regions(
             PlacedRegion(
                 index=i,
                 source_filename=region.source_filename,
-                file_start=region.start,
-                file_stop=region.stop,
+                source_start=region.start,
+                source_stop=region.stop,
                 clip_start=t,
                 clip_stop=t + dur,
                 kind=region.kind,
@@ -213,7 +247,7 @@ def place_regions(
         )
         t += dur
         if i < n - 1:
-            t += pause_s
+            t += pause.total_seconds()
     return placed, t
 
 
@@ -240,7 +274,7 @@ class AudioTranscriptionTaskBuilder(TaskBuilderBase):
         self._gt_tsv_data: MaybeUnset[bytes] = unset  # raw input GT TSV
         self._ds_regions: MaybeUnset[list[PresentedRegion]] = unset
         self._honeypots: MaybeUnset[list[PresentedRegion]] = unset
-        self._assignments: MaybeUnset[list[Assignment]] = unset
+        self._assignments: MaybeUnset[list[Clip]] = unset
         self._excluded_gt_info: MaybeUnset[ExcludedAnnotationsInfo] = unset
 
         self._meta_serializer = TaskMetaSerializer()
@@ -298,10 +332,11 @@ class AudioTranscriptionTaskBuilder(TaskBuilderBase):
             file_duration = probe_duration(self._media_paths[filename])
             valid_regions = _validate_gt_regions(
                 self._gt_by_file[filename],
-                filename,
-                file_duration,
-                self.spec.details.roi_max_duration.total_seconds(),
-                excluded_gt,
+                filename=filename,
+                file_duration=file_duration,
+                max_duration=self.spec.details.roi_max_duration,
+                min_span_duration=self.spec.details.min_gt_span_duration,
+                excluded=excluded_gt,
             )
             if not valid_regions:
                 continue
@@ -310,9 +345,9 @@ class AudioTranscriptionTaskBuilder(TaskBuilderBase):
                 select_honeypots(
                     valid_regions,
                     source_filename=filename,
-                    val_fraction=1.0,  # use all GT as honeypots (rotation is a future feature)
-                    min_duration=self.spec.details.roi_min_duration.total_seconds(),
-                    max_duration=self.spec.details.roi_max_duration.total_seconds(),
+                    val_fraction=1.0,  # use all spans, honeypot rotation is a future feature
+                    min_duration=self.spec.details.roi_min_duration,
+                    max_duration=self.spec.details.roi_max_duration,
                     random_seed=self.spec.details.random_seed,
                 )
             )
@@ -370,15 +405,15 @@ class AudioTranscriptionTaskBuilder(TaskBuilderBase):
             )
             bundled = _bundle_regions(
                 rows,
-                min_duration=self.spec.details.roi_min_duration.total_seconds(),
-                max_duration=self.spec.details.roi_max_duration.total_seconds(),
+                min_duration=self.spec.details.roi_min_duration,
+                max_duration=self.spec.details.roi_max_duration,
             )
             for start, stop, members in bundled:
                 ds_regions.append(
                     PresentedRegion(
                         source_filename=filename,
-                        start=start,
-                        stop=stop,
+                        start=start.total_seconds(),
+                        stop=stop.total_seconds(),
                         kind=RegionKind.ds,
                         input_ids=[m.id for m in members],
                     )
@@ -403,9 +438,9 @@ class AudioTranscriptionTaskBuilder(TaskBuilderBase):
         region_lists = plan_assignments(
             self._ds_regions,
             self._honeypots,
-            composition=self.spec.details.min_composition,
+            min_composition=self.spec.details.min_composition,
             validation_overhead=self.spec.details.validation_overhead,
-            max_audio_duration=self.spec.details.standard_assignment_duration.total_seconds(),
+            max_audio_duration=self.spec.details.standard_assignment_duration,
             random_seed=self.spec.details.random_seed,
         )
         if not region_lists:
@@ -415,23 +450,27 @@ class AudioTranscriptionTaskBuilder(TaskBuilderBase):
 
         pause = self.spec.details.roi_join_pause
         pause_ms = round(pause.total_seconds() * 1000)
-        assignments: list[Assignment] = []
+        assignments: list[Clip] = []
         for regions in region_lists:
             assignment_id = uuid.uuid4().hex
             clip_filename = f"{assignment_id}.wav"
             clip_path = self._media_dir / clip_filename
 
             cuts = [
-                RegionCut(media=self._media_paths[r.source_filename], start=r.start, stop=r.stop)
+                RegionCut(
+                    media=self._media_paths[r.source_filename],
+                    start=timedelta(seconds=r.start),
+                    stop=timedelta(seconds=r.stop),
+                )
                 for r in regions
             ]
             cut_and_concat(
                 cuts, clip_path, pause_ms=pause_ms, sample_rate=self.spec.details.sample_rate
             )
 
-            placed, clip_duration = place_regions(regions, pause_s=pause.total_seconds())
+            placed, clip_duration = place_regions(regions, pause=pause)
             assignments.append(
-                Assignment(
+                Clip(
                     id=assignment_id,
                     clip_filename=clip_filename,
                     clip_duration=clip_duration,
@@ -487,9 +526,9 @@ class AudioTranscriptionTaskBuilder(TaskBuilderBase):
         )
         storage_client.create_file(
             compose_data_bucket_filename(
-                self.escrow_address, self.chain_id, self._meta_layout.ASSIGNMENTS_FILENAME
+                self.escrow_address, self.chain_id, self._meta_layout.CLIPS_FILENAME
             ),
-            self._meta_serializer.serialize_assignments(self._assignments),
+            self._meta_serializer.serialize_clips(self._assignments),
         )
 
         if Config.debug:
@@ -514,8 +553,8 @@ class AudioTranscriptionTaskBuilder(TaskBuilderBase):
                     [
                         RegionCut(
                             media=self._media_paths[region.source_filename],
-                            start=region.start,
-                            stop=region.stop,
+                            start=timedelta(seconds=region.start),
+                            stop=timedelta(seconds=region.stop),
                         )
                     ],
                     cut_path,
@@ -576,6 +615,7 @@ class AudioTranscriptionTaskBuilder(TaskBuilderBase):
             )
             db_service.get_project_by_id(session, project_id, for_update=True)  # lock the row
 
+            task_clips: dict[int, str] = {}  # CVAT task id -> clip id
             for assignment in self._assignments:
                 clip_key = compose_data_bucket_filename(
                     escrow_address,
@@ -591,7 +631,19 @@ class AudioTranscriptionTaskBuilder(TaskBuilderBase):
                 cvat_api.put_task_data(cvat_task.id, cloud_storage.id, filenames=[clip_key])
                 db_service.create_data_upload(session, cvat_task.id)
 
+                task_clips[cvat_task.id] = assignment.id
+
             db_service.touch(session, Project, [project_id])
+
+        # Persist the CVAT task -> clip mapping so the recording oracle can join each annotated job
+        # (keyed by its CVAT task id) back to its clip metadata for scoring.
+        storage_client = self._make_cloud_storage_client(self._oracle_data_bucket)
+        storage_client.create_file(
+            compose_data_bucket_filename(
+                escrow_address, chain_id, self._meta_layout.TASK_CLIPS_FILENAME
+            ),
+            self._meta_serializer.serialize_task_clips(task_clips),
+        )
 
     # -- orchestration ----------------------------------------------------- #
 
@@ -644,9 +696,11 @@ def _parse_gt_tsv(data: bytes) -> dict[str, list[InputGtRegion]]:
 
 def _validate_gt_regions(
     regions: list[InputGtRegion],
+    *,
     filename: str,
-    file_duration: float,
-    max_duration: float,
+    file_duration: timedelta,
+    max_duration: timedelta,
+    min_span_duration: timedelta,
     excluded: ExcludedAnnotationsInfo,
 ) -> list[InputGtRegion]:
     valid: list[InputGtRegion] = []
@@ -656,7 +710,7 @@ def _validate_gt_regions(
 
         excluded.total_count += 1
 
-        if not (0 <= start < stop <= file_duration + 1e-6):
+        if not (0 <= start < stop <= file_duration.total_seconds() + 1e-6):
             excluded.excluded_count += 1
             excluded.add_message(
                 f"GT region '{region.row_idx}' ({region.label}) [{start:.3f}, {stop:.3f}] "
@@ -666,17 +720,37 @@ def _validate_gt_regions(
             )
             continue
 
-        if stop - start > max_duration:
+        if stop - start > max_duration.total_seconds():
             excluded.excluded_count += 1
             excluded.add_message(
                 f"GT region '{region.row_idx}' ({region.label}) [{start:.3f}, {stop:.3f}] "
-                f"- longer than the maximum region duration ({max_duration:.3f}s)",
+                f"- longer than the maximum region duration ({max_duration.total_seconds():.3f}s)",
                 sample_id=filename,
                 sample_subset="",
             )
             continue
 
         valid.append(region)
+
+    by_span: dict[str, list[InputGtRegion]] = {}
+    for region in valid:
+        by_span.setdefault(region.span_id, []).append(region)
+
+    valid.clear()
+    for span_id, span_members in by_span.items():
+        span_duration = _get_span_duration(span_members)
+
+        if span_duration > min_span_duration:
+            excluded.excluded_count += len(span_members)
+            excluded.add_message(
+                f"GT span '{span_id}' ({span_duration:.3f}s) - shorter "
+                f"than the minimum span duration ({min_span_duration.total_seconds():.3f}s)",
+                sample_id=filename,
+                sample_subset="",
+            )
+            continue
+
+        valid.extend(span_members)
 
     return valid
 
@@ -724,3 +798,6 @@ def _make_cvat_audio_label_configuration(
             }
         )
     return label_config
+
+def _get_span_duration(group: list[InputRegion | InputGtRegion]) -> timedelta:
+    return group[-1].stop - group[0].start

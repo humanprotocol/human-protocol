@@ -28,7 +28,7 @@ from src.services.cloud import make_client as make_cloud_client
 from src.services.cloud.utils import BucketAccessInfo
 
 if TYPE_CHECKING:
-    from src.core.tasks.audio_transcription.meta import Assignment, PlacedRegion
+    from src.core.tasks.audio_transcription.meta import Clip, PlacedRegion
 
 
 _LEADING_COLUMNS = ["id", "input_region_ids", "filename", "start", "stop", "label"]
@@ -79,12 +79,12 @@ class AudioTranscriptionJobExporter(JobExporter):
         self._emit_escrow_recorded()
         self.logger.info(f"The escrow ({self.escrow_address=}) is completed, annotations merged")
 
-    def _load_assignments(self) -> dict[str, Assignment]:
+    def _load_assignments(self) -> dict[str, Clip]:
         storage_client = make_cloud_client(BucketAccessInfo.parse_obj(Config.storage_config))
-        assignments = TaskMetaSerializer().parse_assignments(
+        assignments = TaskMetaSerializer().parse_clips(
             storage_client.download_file(
                 compose_data_bucket_filename(
-                    self.escrow_address, self.chain_id, TaskMetaLayout().ASSIGNMENTS_FILENAME
+                    self.escrow_address, self.chain_id, TaskMetaLayout().CLIPS_FILENAME
                 )
             )
         )
@@ -93,7 +93,7 @@ class AudioTranscriptionJobExporter(JobExporter):
     def _annotation_rows(
         self,
         annotations: FileDescriptor,
-        assignments_by_clip: dict[str, Assignment],
+        assignments_by_clip: dict[str, Clip],
         attr_names: list[str],
     ) -> list[dict]:
         annotations.file.seek(0)
@@ -115,7 +115,7 @@ class AudioTranscriptionJobExporter(JobExporter):
                 # outside any region, or a honeypot -> dropped
                 continue
 
-            offset = placed.file_start - placed.clip_start
+            offset = placed.source_start - placed.clip_start
             rows.append(
                 {
                     "filename": placed.source_filename,
@@ -130,7 +130,7 @@ class AudioTranscriptionJobExporter(JobExporter):
         return rows
 
     @staticmethod
-    def _placed_at(assignment: Assignment, clip_time_s: float) -> PlacedRegion | None:
+    def _placed_at(assignment: Clip, clip_time_s: float) -> PlacedRegion | None:
         return next(
             (
                 p
