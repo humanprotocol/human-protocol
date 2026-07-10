@@ -44,7 +44,7 @@ export function Password(props: PasswordProps) {
         },
       }}
       onKeyDown={(e) => {
-        if (e.key === 'Space') {
+        if (e.key === ' ' || e.code === 'Space') {
           e.preventDefault();
           e.stopPropagation();
         }

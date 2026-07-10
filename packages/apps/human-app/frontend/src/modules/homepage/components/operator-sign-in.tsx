@@ -26,7 +26,6 @@ export function OperatorSignIn() {
   }, [address, isConnected, signInMutation]);
 
   const getSnackBar = () => {
-    console.log('1');
     return (
       <Snackbar
         message={getErrorMessageForError(signInMutationError)}

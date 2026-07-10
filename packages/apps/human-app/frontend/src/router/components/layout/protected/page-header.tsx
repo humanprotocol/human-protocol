@@ -19,7 +19,7 @@ export function PageHeader({
     <Grid
       container
       sx={{
-        alignItems: 'space-between',
+        alignContent: 'space-between',
         justifyContent: 'space-between',
         px: 4,
         gap: 2,
