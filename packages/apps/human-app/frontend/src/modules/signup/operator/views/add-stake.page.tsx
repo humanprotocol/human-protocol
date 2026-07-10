@@ -88,12 +88,12 @@ export function AddStakeOperatorPage() {
           {t('operator.addStake.label')}
         </Typography>
         <Typography
-          color={
-            isDarkMode
-              ? onlyDarkModeColor.additionalTextColor
-              : colorPalette.primary.light
-          }
           variant="body5"
+          sx={{
+            color: isDarkMode
+              ? onlyDarkModeColor.additionalTextColor
+              : colorPalette.primary.light,
+          }}
         >
           {stakedAmountFormatter(stakedAmount)}
         </Typography>

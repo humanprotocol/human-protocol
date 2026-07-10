@@ -15,9 +15,8 @@ export function Sorting({ sortingOptions, clear }: SortingMenuProps) {
   return (
     <List sx={{ padding: 0 }}>
       <Typography
-        color={colorPalette.text.secondary}
-        sx={{ padding: '0.5rem' }}
         variant="body2"
+        sx={{ color: colorPalette.text.secondary, p: 1 }}
       >
         {t('components.table.sort')}
       </Typography>
@@ -30,7 +29,10 @@ export function Sorting({ sortingOptions, clear }: SortingMenuProps) {
             }}
             sx={{ padding: '0.2rem 0.5rem', cursor: 'pointer' }}
           >
-            <Typography color={colorPalette.primary.main} variant="subtitle2">
+            <Typography
+              variant="subtitle2"
+              sx={{ color: colorPalette.primary.main }}
+            >
               {label}
             </Typography>
           </ListItemText>
@@ -39,9 +41,11 @@ export function Sorting({ sortingOptions, clear }: SortingMenuProps) {
       <Divider component="li" variant="fullWidth" />
       <ListItemText sx={{ padding: '0.5rem', cursor: 'pointer' }}>
         <Typography
-          color={colorPalette.primary.main}
-          onClick={clear}
           variant="buttonMedium"
+          sx={{ color: colorPalette.primary.main }}
+          onClick={() => {
+            clear();
+          }}
         >
           {t('components.table.clearBtn')}
         </Typography>

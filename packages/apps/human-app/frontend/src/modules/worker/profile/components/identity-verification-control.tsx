@@ -27,7 +27,7 @@ export function IdentityVerificationControl() {
   }
 
   return (
-    <Stack direction="row" alignItems="center" gap={1}>
+    <Stack direction="row" sx={{ alignItems: 'center', gap: 1 }}>
       <Typography variant="buttonLarge">
         {t('worker.profile.identityVerificationStatus')}
       </Typography>

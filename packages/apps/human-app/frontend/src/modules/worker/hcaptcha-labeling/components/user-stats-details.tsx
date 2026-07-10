@@ -25,22 +25,20 @@ export function UserStatsDetails({
   return (
     <Stack>
       <Divider sx={{ borderBottomWidth: '2px' }} />
-      <Stack py={3}>
-        <Stack gap={{ xs: 3, md: 2 }}>
+      <Stack sx={{ py: 3 }}>
+        <Stack sx={{ gap: { xs: 3, md: 2 } }}>
           <Typography variant={isMobile ? 'mobileHeaderLarge' : 'body7'}>
             {t('worker.hcaptchaLabelingStats.allTime')}
           </Typography>
           <Stack
             direction="row"
-            flexWrap="wrap"
-            gap="1rem"
-            justifyContent="space-between"
+            sx={{ flexWrap: 'wrap', gap: 2, justifyContent: 'space-between' }}
           >
             <Stack>
               <Typography variant="caption">
                 {t('worker.hcaptchaLabelingStats.jobsServed')}
               </Typography>
-              <Typography color={statsColor} variant="h6">
+              <Typography variant="h6" sx={{ color: statsColor }}>
                 {stats.served}
               </Typography>
             </Stack>
@@ -48,7 +46,7 @@ export function UserStatsDetails({
               <Typography variant="caption">
                 {t('worker.hcaptchaLabelingStats.jobsComplete')}
               </Typography>
-              <Typography color={statsColor} variant="h6">
+              <Typography variant="h6" sx={{ color: statsColor }}>
                 {stats.solved}
               </Typography>
             </Stack>
@@ -56,7 +54,7 @@ export function UserStatsDetails({
               <Typography variant="caption">
                 {t('worker.hcaptchaLabelingStats.hmtEarned')}
               </Typography>
-              <Typography color={statsColor} variant="h6">
+              <Typography variant="h6" sx={{ color: statsColor }}>
                 {stats.balance.total}{' '}
                 <span style={{ color: colorPalette.text.primary }}>
                   {t('inputMasks.humanCurrencySuffix')}
@@ -67,14 +65,14 @@ export function UserStatsDetails({
         </Stack>
         <Divider sx={{ mt: { xs: 2, md: 3 }, mb: { xs: 4, md: 2 } }} />
         <Stack>
-          <Typography variant="body7" mb={{ xs: 3, md: 2 }}>
+          <Typography variant="body7" sx={{ mb: { xs: 3, md: 2 } }}>
             {t('worker.hcaptchaLabelingStats.lastHour')}
           </Typography>
           <Stack>
             <Typography variant="caption">
               {t('worker.hcaptchaLabelingStats.earnedLastHour')}
             </Typography>
-            <Typography color={statsColor} variant="h6">
+            <Typography variant="h6" sx={{ color: statsColor }}>
               {stats.balance.recent}{' '}
               <span style={{ color: colorPalette.text.primary }}>
                 {t('inputMasks.humanCurrencySuffix')}
@@ -84,15 +82,16 @@ export function UserStatsDetails({
         </Stack>
         <Stack
           direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-          mt={3}
-          gap={{ xs: 1, md: 2 }}
+          sx={{
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            mt: 3,
+            gap: { xs: 1, md: 2 },
+          }}
         >
           <Typography
             variant="body8"
-            lineHeight="1.3"
-            sx={{ whiteSpace: 'pre-line' }}
+            sx={{ lineHeight: '1.3', whiteSpace: 'pre-line' }}
           >
             {t('worker.hcaptchaLabelingStats.statisticsNotLive')}
           </Typography>

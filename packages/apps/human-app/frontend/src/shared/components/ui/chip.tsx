@@ -23,8 +23,12 @@ export function Chip({ label, backgroundColor }: Readonly<ChipProps>) {
       }}
     >
       <Typography
-        color={backgroundColor ? colorPalette.white : colorPalette.text.primary}
         variant="chip"
+        sx={{
+          color: backgroundColor
+            ? colorPalette.white
+            : colorPalette.text.primary,
+        }}
       >
         {label}
       </Typography>

@@ -72,6 +72,7 @@ export function DrawerNavigation({
       <CssBaseline />
       <Drawer
         anchor="left"
+        variant="persistent"
         open={open}
         sx={{
           width: drawerWidth,
@@ -82,12 +83,10 @@ export function DrawerNavigation({
             paddingTop: '44px',
           },
         }}
-        variant="persistent"
       >
         {!isMobile && (
           <Stack
-            alignItems="flex-start"
-            sx={{ paddingLeft: '26px', cursor: 'pointer' }}
+            sx={{ alignItems: 'flex-start', pl: 3, cursor: 'pointer' }}
             onClick={() => {
               handleMainNavIconClick();
             }}
@@ -96,8 +95,8 @@ export function DrawerNavigation({
           </Stack>
         )}
         <Stack
-          justifyContent="space-between"
           sx={{
+            justifyContent: 'space-between',
             height: '100%',
           }}
         >

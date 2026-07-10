@@ -40,21 +40,22 @@ export function ProfileListItem({
           <Chips data={paragraph} />
         ) : (
           <Stack
-            alignItems="center"
             direction="row"
             sx={{
-              marginBottom: '10px',
+              alignItems: 'center',
+              mb: '10px',
             }}
           >
             <Typography
-              color={
-                isStatusListItem === false
-                  ? colorPalette.text.secondary
-                  : colorPalette.text.primary
-              }
               component="span"
-              sx={{ wordBreak: 'break-all' }}
               variant="body1"
+              sx={{
+                color:
+                  isStatusListItem === false
+                    ? colorPalette.text.secondary
+                    : colorPalette.text.primary,
+                wordBreak: 'break-all',
+              }}
             >
               {paragraph}
             </Typography>

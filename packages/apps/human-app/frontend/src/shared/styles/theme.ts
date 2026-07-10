@@ -9,7 +9,6 @@ export const theme: ThemeOptions = {
       defaultProps: {
         variant: 'body1',
         color: colorPalette.primary.main,
-        fontFamily: 'Inter',
         variantMapping: {
           subtitle1: 'p',
           subtitle2: 'p',

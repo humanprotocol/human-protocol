@@ -16,9 +16,9 @@ export function Buttons({
   return (
     <Grid
       container
-      gap="1rem"
       sx={{
-        flex: '1',
+        flex: 1,
+        gap: 2,
         flexWrap: 'nowrap',
         [breakpoints.mobile]: {
           flexWrap: 'wrap',
@@ -26,19 +26,19 @@ export function Buttons({
       }}
     >
       <Button
+        variant="contained"
         fullWidth
         onClick={() => {
           openForm();
         }}
-        variant="contained"
       >
         {t('operator.addStake.actionBtn')}
       </Button>
       <Button
         component={Link}
-        fullWidth
         to={routerPaths.operator.addKeys}
         variant="outlined"
+        fullWidth
       >
         {isStaked
           ? t('operator.addStake.nextBtn')

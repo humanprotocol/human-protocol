@@ -30,22 +30,15 @@ export function Input({
       render={({ field, fieldState }) => (
         <TextField
           {...field}
-          FormHelperTextProps={{ component: 'div' }}
-          InputProps={
-            mask
-              ? {
-                  inputComponent: mask as any,
-                }
-              : undefined
-          }
+          variant="outlined"
           autoComplete={autoComplete ?? name}
           error={Boolean(fieldState.error)}
           fullWidth
           helperText={
             <Typography
-              color={customError ? undefined : colorPalette.error.main}
               component="div"
               variant="helperText"
+              sx={{ color: customError ? undefined : colorPalette.error.main }}
             >
               {customError ? customError : fieldState.error?.message}
             </Typography>
@@ -62,8 +55,18 @@ export function Input({
               },
             },
           }}
-          variant="outlined"
           {...rest}
+          slotProps={{
+            ...rest.slotProps,
+            formHelperText: {
+              component: 'div',
+              ...rest.slotProps?.formHelperText,
+            },
+            input: {
+              ...rest.slotProps?.input,
+              ...(mask ? { inputComponent: mask as any } : {}),
+            },
+          }}
         />
       )}
     />

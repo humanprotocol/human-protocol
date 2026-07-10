@@ -45,18 +45,20 @@ export function WalletConnectDone() {
       disabled
       fullWidth
       value={shortAddress}
-      InputProps={{
-        endAdornment: (
-          <Tooltip
-            title={t('components.copyToClipboard')}
-            open={isCopied}
-            placement="top"
-          >
-            <IconButton onClick={handleCopyClick} disabled={isCopied}>
-              <CopyIcon />
-            </IconButton>
-          </Tooltip>
-        ),
+      slotProps={{
+        input: {
+          endAdornment: (
+            <Tooltip
+              title={t('components.copyToClipboard')}
+              open={isCopied}
+              placement="top"
+            >
+              <IconButton onClick={handleCopyClick} disabled={isCopied}>
+                <CopyIcon />
+              </IconButton>
+            </Tooltip>
+          ),
+        },
       }}
     />
   ) : (
@@ -64,25 +66,27 @@ export function WalletConnectDone() {
       disabled
       fullWidth
       value={shortAddress}
-      InputProps={{
-        endAdornment: (
-          <Tooltip
-            title={t('components.copyToClipboard')}
-            open={isCopied}
-            placement="top"
-          >
-            <IconButton onClick={handleCopyClick} disabled={isCopied}>
-              <CopyIcon />
-            </IconButton>
-          </Tooltip>
-        ),
+      slotProps={{
+        input: {
+          endAdornment: (
+            <Tooltip
+              title={t('components.copyToClipboard')}
+              open={isCopied}
+              placement="top"
+            >
+              <IconButton onClick={handleCopyClick} disabled={isCopied}>
+                <CopyIcon />
+              </IconButton>
+            </Tooltip>
+          ),
+        },
       }}
     />
   );
 
   return (
-    <Stack gap={1}>
-      <Stack direction="row" alignItems="center" gap={1}>
+    <Stack sx={{ gap: 1 }}>
+      <Stack direction="row" sx={{ alignItems: 'center', gap: 1 }}>
         <Typography variant="buttonLarge">
           {t('worker.profile.wallet')}
         </Typography>

@@ -64,11 +64,11 @@ export function Navbar({
 
   return (
     <Stack
-      alignItems="center"
       component="header"
       direction="row"
-      justifyContent="space-between"
       sx={{
+        alignItems: 'center',
+        justifyContent: 'space-between',
         backgroundColor: colorPalette.backgroundColor,
         display: { xs: 'flex', md: 'none' },
         width: '100%',
@@ -80,7 +80,7 @@ export function Navbar({
       }}
     >
       <Grid
-        sx={{ cursor: 'pointer', paddingLeft: '8px' }}
+        sx={{ cursor: 'pointer', pl: 1 }}
         onClick={() => {
           if (isMobile) {
             setOpen(false);
@@ -97,7 +97,7 @@ export function Navbar({
         sx={{
           display: 'flex',
           justifyContent: 'center',
-          gap: '1rem',
+          gap: 2,
         }}
       >
         {isHCaptchaLabelingPage && toggleUserStatsDrawer ? (

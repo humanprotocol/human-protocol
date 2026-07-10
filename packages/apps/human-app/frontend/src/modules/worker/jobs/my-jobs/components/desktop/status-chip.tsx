@@ -19,7 +19,7 @@ export function StatusChip({ status }: Readonly<{ status: MyJob['status'] }>) {
         borderRadius: '16px',
       }}
     >
-      <Typography color={colorPalette.white} variant="chip">
+      <Typography variant="chip" sx={{ color: colorPalette.white }}>
         {status}
       </Typography>
     </Box>

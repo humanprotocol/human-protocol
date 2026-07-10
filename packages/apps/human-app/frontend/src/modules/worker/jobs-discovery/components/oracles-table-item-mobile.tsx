@@ -1,4 +1,4 @@
-import { Grid, Paper, type SxProps, Typography } from '@mui/material';
+import { Stack, Paper, type SxProps, Typography } from '@mui/material';
 import { t } from 'i18next';
 import { Chips } from '@/shared/components/ui/chips';
 import { TableButton } from '@/shared/components/ui/table-button';
@@ -14,13 +14,13 @@ interface OraclesTableItemMobileProps {
 }
 
 const styles: SxProps = {
-  px: '16px',
-  py: '32px',
-  marginBottom: '20px',
+  px: 2,
+  py: 4,
+  mb: 2.5,
   borderRadius: '20px',
   display: 'flex',
   flexDirection: 'column',
-  gap: '1rem',
+  gap: 2,
   boxShadow: 'none',
 };
 
@@ -32,7 +32,7 @@ export function OraclesTableItemMobile({
 
   return (
     <Paper sx={{ ...styles, backgroundColor: colorPalette.backgroundColor }}>
-      <Grid item>
+      <Stack>
         <ListItem label={t('worker.oraclesTable.oracleAddress')}>
           <EvmAddress address={oracle.address} />
         </ListItem>
@@ -46,7 +46,7 @@ export function OraclesTableItemMobile({
             )}
           />
         </ListItem>
-      </Grid>
+      </Stack>
       <TableButton
         fullWidth
         onClick={() => {

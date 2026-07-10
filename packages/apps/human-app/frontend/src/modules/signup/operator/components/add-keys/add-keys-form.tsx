@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material';
+import { Grid, Stack } from '@mui/material';
 import { t } from 'i18next';
 import { Link } from 'react-router-dom';
 import { routerPaths } from '@/router/router-paths';
@@ -27,13 +27,11 @@ export function AddKeysForm({
   });
 
   return (
-    <Grid container gap="2rem">
-      <div
-        style={{
+    <Grid container spacing={2}>
+      <Stack
+        sx={{
           width: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '3rem',
+          gap: 6,
         }}
       >
         {hasSomeNotEmptyKeys ? <ExistingKeysForm keysData={keysData} /> : null}
@@ -47,7 +45,7 @@ export function AddKeysForm({
             {t('operator.addKeysPage.skipBtn')}
           </Button>
         ) : null}
-      </div>
+      </Stack>
     </Grid>
   );
 }

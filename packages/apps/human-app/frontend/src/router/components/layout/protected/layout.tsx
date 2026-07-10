@@ -1,4 +1,4 @@
-import { Grid, styled } from '@mui/material';
+import { Box, Stack, styled } from '@mui/material';
 import type { Dispatch, ReactElement, SetStateAction } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { Outlet } from 'react-router-dom';
@@ -74,15 +74,12 @@ export function ProtectedLayout({
   }, [setGrayBackground]);
 
   return (
-    <Grid
-      alignItems="center"
-      container
-      direction="column"
-      flexWrap="nowrap"
-      justifyContent="space-between"
+    <Stack
       sx={{
         display: 'flex',
-        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'nowrap',
         minHeight: '100vh',
         height: '100%',
         width: '100%',
@@ -103,32 +100,28 @@ export function ProtectedLayout({
         ? renderHCaptchaStatisticsDrawer(hcaptchaDrawerOpen)
         : null}
       <Main isMobile={isMobile} open={drawerOpen}>
-        <Grid
-          component="div"
-          container
+        <Stack
           sx={{
+            width: '100%',
             margin: !isMobile ? '5.2rem 0 1rem 0' : '1rem 0',
-            display: 'flex',
-            gap: '2rem',
-            flexDirection: 'column',
-            padding: '0 2rem',
+            py: 0,
+            px: 4,
+            gap: 4,
             flexWrap: 'nowrap',
             [breakpoints.mobile]: {
-              gap: '1rem',
-              padding: '0 1rem',
+              gap: 2,
+              px: 2,
             },
           }}
         >
           {renderGovernanceBanner && <GovernanceBanner />}
-          <Grid item>
-            <PageHeader {...pageHeaderProps} />
-          </Grid>
-          <Grid component="div" ref={layoutElementRef} sx={{ height: '100%' }}>
+          <PageHeader {...pageHeaderProps} />
+          <Box ref={layoutElementRef} sx={{ height: '100%' }}>
             <Outlet />
-          </Grid>
-        </Grid>
+          </Box>
+        </Stack>
       </Main>
       <Footer displayChatIcon={!isMobile || !drawerOpen} isProtected />
-    </Grid>
+    </Stack>
   );
 }

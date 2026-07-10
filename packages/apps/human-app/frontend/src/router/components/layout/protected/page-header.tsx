@@ -1,4 +1,4 @@
-import { Grid, Typography } from '@mui/material';
+import { Box, Grid, Typography } from '@mui/material';
 import React from 'react';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { breakpoints } from '@/shared/styles/breakpoints';
@@ -13,55 +13,57 @@ export function PageHeader({
   headerIcon,
   headerText,
   headerItem,
-}: Readonly<PageHeaderProps>) {
+}: PageHeaderProps) {
   const isMobile = useIsMobile();
   return (
     <Grid
-      alignContent="space-between"
       container
-      gap="1rem"
-      justifyContent="space-between"
       sx={{
-        padding: '0 34px',
+        alignItems: 'space-between',
+        justifyContent: 'space-between',
+        px: 4,
+        gap: 2,
         [breakpoints.mobile]: {
-          padding: '0',
+          px: 0,
         },
       }}
     >
-      <div>
-        <Grid alignContent="center" container gap="1rem" justifyContent="start">
-          <Grid
+      <Grid
+        container
+        sx={{ alignItems: 'center', justifyContent: 'start', gap: 2 }}
+      >
+        <Grid
+          sx={{
+            height: '76px',
+            width: '70px',
+            position: 'relative',
+          }}
+        >
+          <Box
+            component="span"
             sx={{
-              height: '76px',
-              width: '70px',
-              position: 'relative',
+              position: 'absolute',
+              top: '30%',
+              left: '50%',
+              transform: 'translate(-50%,-30%)',
             }}
           >
-            <span
-              style={{
-                position: 'absolute',
-                top: '30%',
-                left: '50%',
-                transform: 'translate(-50%,-30%)',
-              }}
-            >
-              {headerIcon}
-            </span>
-          </Grid>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              flexWrap: 'nowrap',
-            }}
-          >
-            <Typography sx={{ textWrap: 'nowrap' }} variant="h3">
-              {headerText}
-            </Typography>
-          </div>
+            {headerIcon}
+          </Box>
         </Grid>
-      </div>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexWrap: 'nowrap',
+          }}
+        >
+          <Typography sx={{ textWrap: 'nowrap' }} variant="h3">
+            {headerText}
+          </Typography>
+        </Box>
+      </Grid>
       {!isMobile ? <Grid>{headerItem}</Grid> : null}
     </Grid>
   );

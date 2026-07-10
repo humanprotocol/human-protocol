@@ -1,4 +1,4 @@
-import Grid from '@mui/material/Grid/Grid';
+import { Grid } from '@mui/material';
 import { FiltersIcon } from '@/shared/components/ui/icons';
 
 export type IconType = 'filter';

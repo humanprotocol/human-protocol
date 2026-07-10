@@ -40,34 +40,34 @@ export function AvailableJobsListMobile() {
   }, [resetFilterParams]);
 
   return (
-    <Stack flexDirection="column">
+    <Stack>
       {isTableError && (
         <Alert color="error" severity="error">
           {getErrorMessageForError(tableError)}
         </Alert>
       )}
       {tableStatus === 'pending' && (
-        <Stack alignItems="center" justifyContent="center">
+        <Stack sx={{ alignItems: 'center', justifyContent: 'center' }}>
           <Loader size={90} />
         </Stack>
       )}
-
       {allPages.map((d) => (
         <Paper
           key={`${d.escrow_address}-${d.chain_id}-${d.job_type}`}
           sx={{
-            px: '16px',
-            py: '32px',
-            marginBottom: '20px',
+            px: 2,
+            py: 4,
+            mb: 2.5,
             borderRadius: '20px',
             boxShadow: 'unset',
           }}
         >
           <List>
-            <Grid columnSpacing="2rem" container>
-              <Grid item xs={12}>
+            <Grid container sx={{ columnSpacing: 4 }}>
+              <Grid size={12}>
                 <ListItem label={t('worker.jobs.jobDescription')}>
                   <Typography
+                    variant="subtitle1"
                     sx={{
                       textOverflow: 'ellipsis',
                       overflow: 'hidden',
@@ -75,13 +75,12 @@ export function AvailableJobsListMobile() {
                       wordBreak: 'break-word',
                       overflowWrap: 'anywhere',
                     }}
-                    variant="subtitle1"
                   >
                     {d.job_description}
                   </Typography>
                 </ListItem>
               </Grid>
-              <Grid item xs={6}>
+              <Grid size={6}>
                 <ListItem label={t('worker.jobs.escrowAddress')}>
                   <EvmAddress address={d.escrow_address} />
                 </ListItem>
@@ -93,22 +92,22 @@ export function AvailableJobsListMobile() {
                   />
                 </ListItem>
               </Grid>
-              <Grid item xs={6}>
+              <Grid size={6}>
                 <ListItem label={t('worker.jobs.network')}>
                   <Typography
-                    color={colorPalette.secondary.light}
                     variant="body2"
+                    sx={{ color: colorPalette.secondary.light }}
                   >
                     {getNetworkName(d.chain_id)}
                   </Typography>
                 </ListItem>
               </Grid>
-              <Grid item xs={12}>
+              <Grid size={12}>
                 <ListItem label={t('worker.jobs.jobType')}>
                   <Chip label={t(`jobTypeLabels.${d.job_type as JobType}`)} />
                 </ListItem>
               </Grid>
-              <Grid item xs={12}>
+              <Grid size={12}>
                 <AvailableJobsAssignJobButtonMobile
                   assignJobPayload={{
                     escrow_address: d.escrow_address,
@@ -122,11 +121,11 @@ export function AvailableJobsListMobile() {
       ))}
       {hasNextPage ? (
         <Button
+          variant="outlined"
           onClick={() => {
             setPageParams(filterParams.page + 1, filterParams.page_size);
             void fetchNextPage();
           }}
-          variant="outlined"
         >
           {t('worker.jobs.next')}
         </Button>

@@ -1,4 +1,4 @@
-import { Container, Grid } from '@mui/material';
+import { Container, Stack } from '@mui/material';
 import { Outlet } from 'react-router-dom';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { breakpoints } from '@/shared/styles/breakpoints';
@@ -27,16 +27,14 @@ export function UnprotectedLayout({
   })();
 
   return (
-    <Grid
-      alignItems="center"
-      container
-      direction="column"
-      flexWrap="nowrap"
+    <Stack
       sx={{
+        alignItems: 'center',
+        flexWrap: 'nowrap',
         height: '100%',
         minHeight: '100vh',
         width: '100%',
-        pt: '0',
+        pt: 0,
         px: isMobile ? 0 : '120px',
         backgroundColor: layoutBackgroundColor,
       }}
@@ -46,19 +44,19 @@ export function UnprotectedLayout({
         component="main"
         maxWidth="xl"
         sx={{
-          p: '0',
+          p: 0,
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
           flex: 1,
           [breakpoints.mobile]: {
-            pt: '32px',
+            pt: 4,
           },
         }}
       >
         <Outlet />
       </Container>
       <Footer />
-    </Grid>
+    </Stack>
   );
 }

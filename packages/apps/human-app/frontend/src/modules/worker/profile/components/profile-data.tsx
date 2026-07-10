@@ -12,13 +12,12 @@ export function ProfileData() {
   const { user } = useAuthenticatedUser();
   const { t } = useTranslation();
   return (
-    <Stack gap={3}>
+    <Stack sx={{ gap: 3 }}>
       <Stack>
         <Typography variant="subtitle2">{t('worker.profile.email')}</Typography>
         <Typography
-          color={colorPalette.text.primary}
-          sx={{ wordBreak: 'break-all' }}
           variant="subtitle1"
+          sx={{ color: colorPalette.text.primary, wordBreak: 'break-all' }}
         >
           {user.email}
         </Typography>
