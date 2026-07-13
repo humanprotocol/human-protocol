@@ -922,13 +922,13 @@ test-randomorder = ["pytest-randomly"]
 
 [[package]]
 name = "cvat-sdk"
-version = "2.69.0"
-description = "Software Development Kit for CVAT"
+version = "2.37.0"
+description = "CVAT REST API"
 optional = false
-python-versions = ">=3.10"
+python-versions = ">=3.9"
 files = [
-    {file = "cvat_sdk-2.69.0-py3-none-any.whl", hash = "sha256:f239d3cb609f45e4fc1d7cce1e49fe920d515be19058648fb79eba923ba0023e"},
-    {file = "cvat_sdk-2.69.0.tar.gz", hash = "sha256:799ff1a763e1444a515edafcd162b7ab2fa89638211872bad139c63796a9dc7a"},
+    {file = "cvat_sdk-2.37.0-py3-none-any.whl", hash = "sha256:faa94cfd6678089814179a8da828761dfa3daf08eb752490ee85551a1045dac5"},
+    {file = "cvat_sdk-2.37.0.tar.gz", hash = "sha256:e990908a473c499eb6d7b84f7f2e640ea729ef027d4c4cc32a5a925752532689"},
 ]
 
 [package.dependencies]
@@ -937,7 +937,9 @@ packaging = ">=21.3"
 Pillow = ">=10.3.0"
 platformdirs = ">=2.1.0"
 python_dateutil = ">=2.5.3"
+setuptools = ">=21.0.0"
 tqdm = ">=4.64.0"
+tuspy = "0.2.5"
 typing_extensions = ">=4.2.0"
 urllib3 = ">=1.25.3"
 
@@ -1774,6 +1776,17 @@ files = [
     {file = "frozenlist-1.8.0-cp39-cp39-win_arm64.whl", hash = "sha256:b4f3b365f31c6cd4af24545ca0a244a53688cad8834e32f56831c4923b50a103"},
     {file = "frozenlist-1.8.0-py3-none-any.whl", hash = "sha256:0c18a16eab41e82c295618a77502e17b195883241c563b00f0aa5106fc4eaa0d"},
     {file = "frozenlist-1.8.0.tar.gz", hash = "sha256:3ede829ed8d842f6cd48fc7081d7a41001a56f1f38603f9d49bf3020d59a31ad"},
+]
+
+[[package]]
+name = "future"
+version = "1.0.0"
+description = "Clean single-source support for Python 3 and 2"
+optional = false
+python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
+files = [
+    {file = "future-1.0.0-py3-none-any.whl", hash = "sha256:929292d34f5872e70396626ef385ec22355a1fae8ad29e1a734c3e43f9fbc216"},
+    {file = "future-1.0.0.tar.gz", hash = "sha256:bd2968309307861edae1458a4f8a4f3598c03be43b97521076aebf5d94c07b05"},
 ]
 
 [[package]]
@@ -4699,6 +4712,26 @@ doc = ["intersphinx_registry", "jupyterlite-pyodide-kernel", "jupyterlite-sphinx
 test = ["Cython", "array-api-strict (>=2.0,<2.1.1)", "asv", "gmpy2", "hypothesis (>=6.30)", "meson", "mpmath", "ninja", "pooch", "pytest", "pytest-cov", "pytest-timeout", "pytest-xdist", "scikit-umfpack", "threadpoolctl"]
 
 [[package]]
+name = "setuptools"
+version = "83.0.0"
+description = "Most extensible Python build backend with support for C/C++ extension modules"
+optional = false
+python-versions = ">=3.10"
+files = [
+    {file = "setuptools-83.0.0-py3-none-any.whl", hash = "sha256:29b23c360f22f414dc7336bb39178cc7bcbf6021ed2733cde173f09dba19abb3"},
+    {file = "setuptools-83.0.0.tar.gz", hash = "sha256:025bccbbf0fa05b6192bc64ae1e7b16e001fd6d6d4d5de03c97b1c1ade523bef"},
+]
+
+[package.extras]
+check = ["pytest-checkdocs (>=2.14)", "pytest-ruff (>=0.2.1)", "ruff (>=0.13.0)"]
+core = ["importlib_metadata (>=6)", "jaraco.functools (>=4)", "jaraco.text (>=3.7)", "more_itertools", "more_itertools (>=8.8)", "packaging (>=24.2)", "tomli (>=2.0.1)", "wheel (>=0.43.0)"]
+cover = ["pytest-cov"]
+doc = ["furo", "jaraco.packaging (>=9.3)", "jaraco.tidelift (>=1.4)", "pygments-github-lexers (==0.0.5)", "pyproject-hooks (!=1.1)", "rst.linker (>=1.9)", "sphinx (>=3.5)", "sphinx-favicon", "sphinx-inline-tabs", "sphinx-lint", "sphinx-notfound-page (>=1,<2)", "sphinx-reredirects", "sphinxcontrib-towncrier", "towncrier (<24.7)"]
+enabler = ["pytest-enabler (>=3.4)"]
+test = ["build[virtualenv] (>=1.0.3)", "filelock (>=3.4.0)", "ini2toml[lite] (>=0.14)", "jaraco.develop (>=7.21)", "jaraco.envs (>=2.2)", "jaraco.path (>=3.7.2)", "jaraco.test (>=5.5)", "packaging (>=24.2)", "pip (>=19.1)", "pyproject-hooks (!=1.1)", "pytest (>=6,!=8.1.*)", "pytest-home (>=0.5)", "pytest-perf", "pytest-subprocess", "pytest-timeout", "pytest-xdist (>=3)", "tomli-w (>=1.0.0)", "virtualenv (>=13.0.0)", "wheel (>=0.44.0)"]
+type = ["importlib_metadata (>=7.0.2)", "jaraco.develop (>=7.21)", "mypy (==1.18.*)", "pytest-mypy (>=1.0.1)"]
+
+[[package]]
 name = "shellingham"
 version = "1.5.4"
 description = "Tool to Detect Surrounding Shell"
@@ -4905,6 +4938,17 @@ packaging = "*"
 protobuf = ">=3.20"
 
 [[package]]
+name = "tinydb"
+version = "4.8.2"
+description = "TinyDB is a tiny, document oriented database optimized for your happiness :)"
+optional = false
+python-versions = "<4.0,>=3.8"
+files = [
+    {file = "tinydb-4.8.2-py3-none-any.whl", hash = "sha256:f97030ee5cbc91eeadd1d7af07ab0e48ceb04aa63d4a983adbaca4cba16e86c3"},
+    {file = "tinydb-4.8.2.tar.gz", hash = "sha256:f7dfc39b8d7fda7a1ca62a8dbb449ffd340a117c1206b68c50b1a481fb95181d"},
+]
+
+[[package]]
 name = "tomli"
 version = "2.4.1"
 description = "A lil' TOML parser"
@@ -4990,6 +5034,28 @@ discord = ["envwrap", "requests"]
 notebook = ["ipywidgets (>=6)"]
 slack = ["envwrap", "slack-sdk"]
 telegram = ["envwrap", "requests"]
+
+[[package]]
+name = "tuspy"
+version = "0.2.5"
+description = "A Python client for the tus resumable upload protocol ->  http://tus.io"
+optional = false
+python-versions = "*"
+files = [
+    {file = "tuspy-0.2.5-py3-none-any.whl", hash = "sha256:8ce106dd139ac77a097e8728f15f90d99df7408d9e67ac780ce44aefb9b5dd8d"},
+    {file = "tuspy-0.2.5.tar.gz", hash = "sha256:1f238f65d444c0688f57e1dd704d9aa11cf5747eec33669e917627150170b9b8"},
+]
+
+[package.dependencies]
+certifi = ">=2018.1.18"
+future = ">=0.16.0"
+requests = ">=2.18.4"
+six = ">=1.11.0"
+tinydb = ">=3.5.0"
+
+[package.extras]
+dev = ["Sphinx (==1.7.1)", "sphinx-autobuild (==0.7.1)", "tox (>=2.3.1)"]
+test = ["coverage (>=4.2)", "mock (>=2.0.0)", "pytest (>=3.0.3)", "pytest-cov (>=2.3.1,<2.6)", "responses (>=0.5.1)"]
 
 [[package]]
 name = "typer"
@@ -5561,4 +5627,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10,<3.13"
-content-hash = "e9469d22ecf7b753946d0a9a78b8e597ef90123dde33916b2ec5c0a6571081af"
+content-hash = "84f9ce0ad56ffab8a5101eba4d9102f9df7d27d3663fdc08aaeafa49f7f467ab"
