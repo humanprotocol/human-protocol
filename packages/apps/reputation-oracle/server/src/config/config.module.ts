@@ -13,7 +13,6 @@ import { ReputationConfigService } from './reputation-config.service';
 import { S3ConfigService } from './s3-config.service';
 import { ServerConfigService } from './server-config.service';
 import { SlackConfigService } from './slack-config.service';
-import { StakingConfigService } from './staking-config.service';
 import { Web3ConfigService } from './web3-config.service';
 
 @Global()
@@ -29,7 +28,6 @@ import { Web3ConfigService } from './web3-config.service';
     NDAConfigService,
     PGPConfigService,
     ReputationConfigService,
-    StakingConfigService,
     S3ConfigService,
     ServerConfigService,
     SlackConfigService,
@@ -45,7 +43,6 @@ import { Web3ConfigService } from './web3-config.service';
     NDAConfigService,
     PGPConfigService,
     ReputationConfigService,
-    StakingConfigService,
     S3ConfigService,
     ServerConfigService,
     SlackConfigService,
