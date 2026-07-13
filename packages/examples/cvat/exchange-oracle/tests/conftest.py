@@ -8,14 +8,14 @@ os.environ["DEBUG"] = "1"
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import TextClause, text
+from sqlalchemy import TextClause, inspect, text
 from sqlalchemy.orm import Session
 from sqlalchemy_utils import create_database, database_exists, drop_database
 
 from alembic import command as alembic_command
 from alembic.config import Config
 from src import app
-from src.db import SessionLocal, engine
+from src.db import Base, SessionLocal, engine
 
 alembic_config = Config(Path(__file__).parent.parent / "alembic.ini")
 # Don't let Alembic's fileConfig() disable the app's loggers when migrations run in-process,
@@ -52,39 +52,49 @@ def setup_db(alembic) -> None:
     if database_exists(engine.url):
         drop_database(engine.url)
     create_database(engine.url)
-    yield  # Run the test cases
 
-    # Upgrade to the latest version after all tests are done,
-    # this helps with inspection of the latest schema.
-    with engine.connect() as connection:
-        connection.execute(alembic.upgrade)
-
-
-@pytest.fixture(autouse=True)
-def init_db(alembic) -> None:
-    """
-    Runs the recorded Alembic upgrade and downgrade SQL for each test.
-    This ensures correctness of alembic migrations.
-    """
+    # Apply the schema once for the whole session. Per-test resets only truncate the DB.
     try:
         with engine.connect() as connection:
+            # Validate the migration round-trip once
+            connection.execute(alembic.upgrade)
+            connection.execute(alembic.downgrade)
+
             connection.execute(alembic.upgrade)
     except Exception as e:
         raise RuntimeError(
-            "Failed to upgrade migrations, `alembic upgrade head` would fail."
-            " inspect the cause error and change migrations accordingly."
+            "Alembic migrations must upgrade and downgrade cleanly "
+            "(`alembic upgrade head` / `alembic downgrade base`). Fix the migrations."
         ) from e
 
-    yield  # Run the test case
+    # The per-test cleanup only DELETEs rows; it does not reset sequences. Guard that assumption so
+    # that a future migration adding a serial/identity column fails loudly here rather than silently
+    # leaking sequence state (e.g. auto-increment ids) across tests.
+    sequences = inspect(engine).get_sequence_names()
+    assert not sequences, (
+        f"Found DB sequences {sequences}: the per-test cleanup DELETEs rows without resetting "
+        "sequences, so ids would leak between tests. Reset them per test (e.g. TRUNCATE ... "
+        "RESTART IDENTITY, or ALTER SEQUENCE) and update the cleanup."
+    )
 
-    try:
-        with engine.connect() as connection:
-            connection.execute(alembic.downgrade)
-    except Exception as e:
-        raise RuntimeError(
-            "Failed to downgrade migrations, `alembic downgrade head:base` would fail."
-            " inspect the cause error and change migrations accordingly."
-        ) from e
+
+# Clear every table between tests. DELETE in reverse dependency order is dramatically faster than
+# TRUNCATE on this schema: TRUNCATE does per-table file truncation + fsync (~270ms for all tables),
+# while DELETE on already-empty tables is ~0. No table uses an autoincrement primary key, so there
+# are no sequences to reset (guarded in setup_db). Each DELETE is a single SQL expression.
+_CLEANUP_SQL = text(
+    ";\n".join(
+        str(table.delete().compile(dialect=engine.dialect))
+        for table in reversed(Base.metadata.sorted_tables)
+    )
+)
+
+
+@pytest.fixture(autouse=True)
+def init_db() -> None:
+    """Reset the database to an empty, migrated schema before each test."""
+    with engine.begin() as connection:
+        connection.execute(_CLEANUP_SQL)
 
 
 @pytest.fixture(scope="module")
