@@ -98,9 +98,7 @@ def _mock_get_manifests_from_minio(logger: Logger) -> Generator[None, None, None
             status="Pending",
             token="HMT",  # noqa: S106
             total_funded_amount=10,
-            created_at=int(
-                datetime.datetime(2023, 1, 1, tzinfo=datetime.timezone.utc).timestamp()
-            ),
+            created_at=int(datetime.datetime(2023, 1, 1, tzinfo=datetime.timezone.utc).timestamp()),
             manifest=(f"http://{Config.storage_config.endpoint_url}/manifests/{manifest_file}"),
         )
 

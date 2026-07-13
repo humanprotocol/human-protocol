@@ -30,6 +30,7 @@ def _get_manifest_content(manifest: str) -> str:
 
     return manifest
 
+
 def get_escrow(chain_id: int, escrow_address: str) -> EscrowData:
     escrow = EscrowUtils.get_escrow(ChainId(chain_id), escrow_address)
     if not escrow:
