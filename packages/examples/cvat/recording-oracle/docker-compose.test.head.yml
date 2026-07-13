@@ -11,7 +11,7 @@ services:
       PG_USER: 'test'
       PG_PASSWORD: 'test'
       PG_DB: 'recording_oracle_test'
-      WEB3_HTTP_PROVIDER_URI: 'http://blockchain-node:8545'
+      WEB3_HTTP_PROVIDER_URI: 'http://localhost:8545'
       STORAGE_ENDPOINT_URL: 'host.docker.internal:9000'
       STORAGE_ACCESS_KEY: 'dev'
       STORAGE_SECRET_KEY: 'devdevdev'

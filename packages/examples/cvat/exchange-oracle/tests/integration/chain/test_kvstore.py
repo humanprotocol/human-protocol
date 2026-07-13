@@ -40,10 +40,11 @@ class ServiceIntegrationTest:
             count=0,
             factory_address=FACTORY_ADDRESS,
             launcher=JOB_LAUNCHER_ADDRESS,
+            job_requester_id=JOB_LAUNCHER_ADDRESS,
             status=Status.Pending.name,
             token=TOKEN_ADDRESS,
             total_funded_amount=1000,
-            created_at="",
+            created_at="0",
             recording_oracle=RECORDING_ORACLE_ADDRESS,
             reputation_oracle=REPUTATION_ORACLE_ADDRESS,
         )

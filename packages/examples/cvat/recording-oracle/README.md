@@ -68,24 +68,18 @@ Available at `/docs` route
 
 ### Tests
 
-The blockchain node is split into `docker-compose.test.blockchain.yml`. Include it for tests that
-hit the chain (most integration tests); omit it to run the rest of the suite without building and
-starting the node.
-
 #### "oneshot" run
 
 A single command to build, run, and tear down the test suite:
 
 ```sh
 docker compose -p "test" \
-     -f docker-compose.test.yml \
-     -f docker-compose.test.blockchain.yml \
-     -f docker-compose.test.head.yml \
-      up --build test --attach test --exit-code-from test; \
-   docker compose -p "test" \
-     -f docker-compose.test.yml \
-     -f docker-compose.test.blockchain.yml \
-     -f docker-compose.test.head.yml down
+    -f docker-compose.test.yml \
+    -f docker-compose.test.head.yml \
+    up --build test --attach test --exit-code-from test; \
+  docker compose -p "test" \
+    -f docker-compose.test.yml \
+    -f docker-compose.test.head.yml down
 ```
 
 Use this option for CI and for clean single time test runs.
@@ -99,14 +93,11 @@ commands allow running just the services, build, tear down, and run the test sui
 # run services
 docker compose -p "test" \
   -f docker-compose.test.yml \
-  -f docker-compose.test.blockchain.yml \
-  -f docker-compose.test.head.yml \
-  up -d --build postgres minio minio-mc blockchain-node
+  up -d --build
 
 # run the tests
 docker compose -p "test" \
   -f docker-compose.test.yml \
-  -f docker-compose.test.blockchain.yml \
   -f docker-compose.test.head.yml \
   -f docker-compose.test.head.dev.yml \
   up --build test --attach test --exit-code-from test
@@ -114,7 +105,6 @@ docker compose -p "test" \
 # tear down
 docker compose -p "test" \
   -f docker-compose.test.yml \
-  -f docker-compose.test.blockchain.yml \
   -f docker-compose.test.head.yml \
   -f docker-compose.test.head.dev.yml \
   down
