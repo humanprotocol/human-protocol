@@ -5,7 +5,7 @@ import src.cvat.api_calls as cvat_api
 import src.services.cvat as cvat_service
 from src.chain.escrow import get_escrow_manifest
 from src.core.manifest import parse_manifest
-from src.core.types import JobStatuses, Networks
+from src.core.types import JobStatuses, Networks, ProjectStatuses
 from src.db import SessionLocal
 from src.db.utils import ForUpdateParams
 from src.models.cvat import Job
@@ -50,6 +50,14 @@ def create_assignment(
             raise UserHasUnfinishedAssignmentError(
                 "The user already has an unfinished assignment in this project"
             )
+
+        get_or_404(
+            cvat_service.get_project_by_escrow_address(
+                session, escrow_address, status_in=[ProjectStatuses.annotation]
+            ),
+            escrow_address,
+            object_type_name="job",
+        )
 
         unassigned_job = cvat_service.get_free_job(
             session,
