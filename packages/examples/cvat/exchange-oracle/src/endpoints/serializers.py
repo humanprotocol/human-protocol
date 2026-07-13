@@ -57,7 +57,7 @@ def serialize_job(
             job_type=project.job_type,
             status=api_status,
             job_description=manifest.annotation.description if manifest else None,
-            reward_amount=str(manifest.job_bounty) if manifest and getattr(manifest, "version", 1) == 1 else None,
+            reward_amount=str(manifest.job_bounty) if manifest else None,
             reward_token=reward_token,
             created_at=project.created_at,
             updated_at=project.updated_at,
@@ -127,7 +127,7 @@ def serialize_assignment(
             chain_id=project.chain_id,
             job_type=project.job_type,
             status=api_status,
-            reward_amount=str(manifest.job_bounty) if manifest and getattr(manifest, "version", 1) == 1 else None,
+            reward_amount=str(manifest.job_bounty) if manifest else None,
             reward_token=reward_token,
             url=compose_assignment_url(
                 task_id=assignment.job.cvat_task_id,
