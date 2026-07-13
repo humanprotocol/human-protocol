@@ -15,7 +15,7 @@ services:
       STORAGE_ENDPOINT_URL: 'host.docker.internal:9000'
       STORAGE_ACCESS_KEY: 'dev'
       STORAGE_SECRET_KEY: 'devdevdev'
-      STORAGE_RESULTS_BUCKET_NAME: 'results'
+      STORAGE_BUCKET_NAME: 'excor-data'
       STORAGE_USE_SSL: 'False'
       STORAGE_PROVIDER: 'aws'
       ENABLE_CUSTOM_CLOUD_HOST: 'Yes'

@@ -18,11 +18,11 @@ services:
       MINIO_ROOT_USER: dev
       MINIO_ROOT_PASSWORD: devdevdev
     volumes:
-      - ./tests/utils/manifest.json:/tmp/manifests/manifest.json
-      - ./tests/utils/intermediate-results.json:/tmp/results/intermediate-results.json
+      # Each subdirectory under the shared assets dir seeds a same-named bucket.
+      - ./tests/assets/cloud:/tmp/cloud:ro
     entrypoint: 'sh'
     command:
-      -c "mkdir -p /data/manifests && cp /tmp/manifests/manifest.json /data/manifests/manifest.json && mkdir -p /data/results && cp /tmp/results/intermediate-results.json /data/results/intermediate-results.json && minio server /data --console-address ':9001'"
+      -c "mkdir -p /data && cp -r /tmp/cloud/. /data/ && minio server /data --console-address ':9001'"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 5s
@@ -40,8 +40,11 @@ services:
     entrypoint: >
       /bin/sh -c "
       /usr/bin/mc config host add myminio http://minio:9000 dev devdevdev;
+      /usr/bin/mc mb -p myminio/datasets myminio/manifests myminio/excor-data myminio/recor-data;
+      /usr/bin/mc anonymous set public myminio/datasets;
       /usr/bin/mc anonymous set public myminio/manifests;
-      /usr/bin/mc anonymous set public myminio/results;
+      /usr/bin/mc anonymous set public myminio/excor-data;
+      /usr/bin/mc anonymous set public myminio/recor-data;
       "
     networks:
       - test-network
