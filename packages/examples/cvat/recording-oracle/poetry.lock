@@ -279,6 +279,24 @@ files = [
 ]
 
 [[package]]
+name = "audio-qe"
+version = "0.1.0"
+description = "Audio transcription quality estimation"
+optional = false
+python-versions = "^3.10, <3.13"
+files = []
+develop = true
+
+[package.dependencies]
+numpy = "^1.25.2"
+regex = "^2024.11.6"
+scipy = "^1.13.1"
+
+[package.source]
+type = "directory"
+url = "libs/audio_qe"
+
+[[package]]
 name = "bitarray"
 version = "3.9.0"
 description = "efficient arrays of booleans -- C extension"
@@ -5748,4 +5766,8 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10, <3.13"
+<<<<<<< HEAD
 content-hash = "ca66b76fc0588549ac6cd3cab97075d1dec23a0808aed9bb633e30f03356fee2"
+=======
+content-hash = "7f165837785af6689800e00dfc6170fdaa1687cff3d83ed0c69c69accc8b058b"
+>>>>>>> 7c6ce118d (chore(cvat): relock poetry for the audio feature deps)
