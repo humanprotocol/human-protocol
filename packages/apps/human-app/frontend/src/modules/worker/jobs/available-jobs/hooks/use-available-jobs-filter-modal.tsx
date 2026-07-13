@@ -1,17 +1,17 @@
 import { useModal } from '@/shared/contexts/modal-context';
-import { useUiConfig } from '@/shared/providers/ui-config-provider';
+import { useGetUiConfig } from '@/shared/hooks';
 import { AvailableJobsFilterModal } from '../available-jobs-filter-modal';
 
 export function useAvailableJobsFilterModal() {
   const { openModal, closeModal } = useModal();
-  const { uiConfig } = useUiConfig();
+  const { data: uiConfigData } = useGetUiConfig();
 
   return {
     openModal: () => {
       openModal({
         content: (
           <AvailableJobsFilterModal
-            chainIdsEnabled={uiConfig?.chainIdsEnabled ?? []}
+            chainIdsEnabled={uiConfigData?.chainIdsEnabled ?? []}
             close={closeModal}
           />
         ),

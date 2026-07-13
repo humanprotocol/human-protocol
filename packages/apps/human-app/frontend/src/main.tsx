@@ -23,7 +23,6 @@ import { HomePageStateProvider } from '@/shared/contexts/homepage-state';
 import { NotificationProvider } from '@/shared/providers/notifications-provider';
 import { ModalProvider } from './shared/contexts/modal-context';
 import { GlobalModal } from './shared/components/ui/modal/global-modal';
-import { UiConfigProvider } from './shared/providers/ui-config-provider';
 
 const root = document.getElementById('root');
 if (!root) throw Error('root element is undefined');
@@ -40,30 +39,25 @@ createRoot(root).render(
     <ColorModeProvider>
       <CssBaseline />
       <QueryClientProvider client={queryClient}>
-        <UiConfigProvider>
-          <NotificationProvider>
-            <BrowserRouter>
-              <WalletConnectProvider>
-                <HomePageStateProvider>
-                  <ModalProvider>
-                    <Web3AuthProvider>
-                      <AuthProvider>
-                        <GlobalModal />
-                        <JWTExpirationCheck>
-                          <Router />
-                        </JWTExpirationCheck>
-                      </AuthProvider>
-                    </Web3AuthProvider>
-                  </ModalProvider>
-                </HomePageStateProvider>
-                <ReactQueryDevtools
-                  client={queryClient}
-                  initialIsOpen={false}
-                />
-              </WalletConnectProvider>
-            </BrowserRouter>
-          </NotificationProvider>
-        </UiConfigProvider>
+        <NotificationProvider>
+          <BrowserRouter>
+            <WalletConnectProvider>
+              <HomePageStateProvider>
+                <ModalProvider>
+                  <Web3AuthProvider>
+                    <AuthProvider>
+                      <GlobalModal />
+                      <JWTExpirationCheck>
+                        <Router />
+                      </JWTExpirationCheck>
+                    </AuthProvider>
+                  </Web3AuthProvider>
+                </ModalProvider>
+              </HomePageStateProvider>
+              <ReactQueryDevtools client={queryClient} initialIsOpen={false} />
+            </WalletConnectProvider>
+          </BrowserRouter>
+        </NotificationProvider>
       </QueryClientProvider>
     </ColorModeProvider>
   </StrictMode>
