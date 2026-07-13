@@ -263,7 +263,12 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         with (
+            open("tests/assets/cloud/manifests/manifest-v1.json") as manifest_data,
             patch("src.handlers.job_completion.handlers.validate_escrow"),
+            patch(
+                "src.handlers.job_completion.handlers.get_escrow_manifest",
+                return_value=json.load(manifest_data),
+            ),
             patch("src.handlers.job_export.results.cloud_service") as mock_cloud_service,
         ):
             mock_storage_client = Mock()
@@ -373,7 +378,12 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         with (
+            open("tests/assets/cloud/manifests/manifest-v1.json") as manifest_data,
             patch("src.handlers.job_completion.handlers.validate_escrow"),
+            patch(
+                "src.handlers.job_completion.handlers.get_escrow_manifest",
+                return_value=json.load(manifest_data),
+            ),
             patch("src.handlers.job_export.results.cloud_service") as mock_cloud_service,
             patch("src.services.cloud.make_client"),
         ):
@@ -466,7 +476,12 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         with (
+            open("tests/assets/cloud/manifests/manifest-v1.json") as manifest_data,
             patch("src.handlers.job_completion.handlers.validate_escrow"),
+            patch(
+                "src.handlers.job_completion.handlers.get_escrow_manifest",
+                return_value=json.load(manifest_data),
+            ),
             patch("src.handlers.job_export.results.cloud_service") as mock_cloud_service,
         ):
             mock_storage_client = Mock()

@@ -60,11 +60,15 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         self.session.add(webhook)
         self.session.commit()
+        # The task builder is split across the `basic` and `base` modules, both of which import
+        # `cvat_api`; share a single mock across both so all CVAT calls are intercepted.
+        mock_cvat_api = MagicMock()
         with (
             patch("src.chain.escrow.get_escrow") as mock_escrow,
             open("tests/assets/cloud/manifests/manifest-v1.json") as data,
             patch("src.handlers.job_creation.handlers.get_escrow_manifest") as mock_get_manifest,
-            patch("src.handlers.job_creation.builders.vision.basic.cvat_api") as mock_cvat_api,
+            patch("src.handlers.job_creation.builders.vision.basic.cvat_api", mock_cvat_api),
+            patch("src.handlers.job_creation.builders.vision.base.cvat_api", mock_cvat_api),
             patch(
                 "src.handlers.job_creation.builders.vision.basic.cloud_service.make_client"
             ) as mock_make_cloud_client,
