@@ -18,6 +18,9 @@ from src import app
 from src.db import SessionLocal, engine
 
 alembic_config = Config(Path(__file__).parent.parent / "alembic.ini")
+# Don't let Alembic's fileConfig() disable the app's loggers when migrations run in-process,
+# otherwise swallowed cron/webhook handler errors are hidden from the pytest report.
+alembic_config.attributes["disable_existing_loggers"] = False
 
 
 @dataclass
