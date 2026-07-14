@@ -29,5 +29,5 @@ jobs:
           python-version: '3.10'
           cache: 'poetry'
           cache-dependency-path: ${{ env.WORKING_DIR }}/poetry.lock
-      - run: poetry install --no-root --only lint
+      - run: poetry install --no-root --only dev
       - run: poetry run pre-commit run --all-files

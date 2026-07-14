@@ -14,7 +14,6 @@ python-dotenv = "^1.0.0"
 SQLAlchemy = "^2.0.17"
 psycopg2 = "^2.9.6"
 APScheduler = "^3.10.1"
-pytest = "^7.4.0"
 alembic = "^1.11.1"
 pydantic = ">=2.6.1,<2.7.0"
 httpx = "^0.24.1"
@@ -26,12 +25,10 @@ hexbytes = ">=1.2.0" # required for to_0x_hex() function
 starlette = ">=0.40.0" # avoid the vulnerability with multipart/form-data
 cvat-sdk = "2.37.0"
 cryptography = "<44.0.0" # human-protocol-sdk -> pgpy dep requires cryptography < 45
-human-protocol-sdk = "^4.3.0"
+human-protocol-sdk = "^7.3.1"
 
 [tool.poetry.group.dev.dependencies]
-hypothesis = "^6.82.6"
-
-[tool.poetry.group.lint.dependencies]
+pytest = "^7.4.0"
 pre-commit = "^3.3.3"
 ruff = "^0.6.0"
 

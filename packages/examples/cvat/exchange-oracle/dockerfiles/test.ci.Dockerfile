@@ -18,4 +18,6 @@ RUN python -m pip uninstall -y poetry pip
 
 COPY . .
 
-CMD ["sh", "./bin/start_dev.sh"]
+RUN rm -f ./src/.env
+
+CMD ["pytest"]

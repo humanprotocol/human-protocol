@@ -1,9 +1,12 @@
+# Local dev test image: only dependencies are baked in; the source tree is bind-mounted at
+# runtime by docker-compose.test.head.dev.yml. Skipping the source COPY keeps rebuilds fast when
+# iterating locally. For CI / clean self-contained runs, use test.ci.Dockerfile instead.
 FROM python:3.10
 
 WORKDIR /app
 
 RUN apt-get update -y && \
-    apt-get install -y jq ffmpeg libsm6 libxext6 && \
+    apt-get install -y jq libgl1 libsm6 libxext6 && \
     rm -rf /var/lib/apt/lists/*
 
 RUN pip install --no-cache 'poetry==1.8.5'
@@ -16,6 +19,4 @@ RUN --mount=type=cache,target=/root/.cache \
 
 RUN python -m pip uninstall -y poetry pip
 
-COPY . .
-
-CMD ["sh", "./bin/start_dev.sh"]
+CMD ["pytest"]
