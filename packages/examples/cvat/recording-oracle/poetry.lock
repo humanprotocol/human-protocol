@@ -5081,6 +5081,22 @@ typing-extensions = {version = ">=4.10.0", markers = "python_version < \"3.13\""
 full = ["httpx (>=0.27.0,<0.29.0)", "httpx2 (>=2.0.0)", "itsdangerous", "jinja2", "python-multipart (>=0.0.18)", "pyyaml"]
 
 [[package]]
+name = "strenum"
+version = "0.4.15"
+description = "An Enum that inherits from str."
+optional = false
+python-versions = "*"
+files = [
+    {file = "StrEnum-0.4.15-py3-none-any.whl", hash = "sha256:a30cda4af7cc6b5bf52c8055bc4bf4b2b6b14a93b574626da33df53cf7740659"},
+    {file = "StrEnum-0.4.15.tar.gz", hash = "sha256:878fb5ab705442070e4dd1929bb5e2249511c0bcf2b0eeacf3bcd80875c82eff"},
+]
+
+[package.extras]
+docs = ["myst-parser[linkify]", "sphinx", "sphinx-rtd-theme"]
+release = ["twine"]
+test = ["pylint", "pytest", "pytest-black", "pytest-cov", "pytest-pylint"]
+
+[[package]]
 name = "tensorboardx"
 version = "2.6.5"
 description = "TensorBoardX lets you watch Tensors Flow without Tensorflow"
@@ -5767,7 +5783,11 @@ propcache = ">=0.2.1"
 lock-version = "2.0"
 python-versions = "^3.10, <3.13"
 <<<<<<< HEAD
+<<<<<<< HEAD
 content-hash = "ca66b76fc0588549ac6cd3cab97075d1dec23a0808aed9bb633e30f03356fee2"
 =======
 content-hash = "7f165837785af6689800e00dfc6170fdaa1687cff3d83ed0c69c69accc8b058b"
 >>>>>>> 7c6ce118d (chore(cvat): relock poetry for the audio feature deps)
+=======
+content-hash = "677d6c5f1b1ced0f0a0365a765be4b611ea9ee532d6bba80bd57c57b80327e72"
+>>>>>>> 04a350c3b (Refactor str enums, format code)

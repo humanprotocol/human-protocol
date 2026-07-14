@@ -6,7 +6,6 @@ from collections.abc import Generator
 from contextlib import contextmanager
 from contextvars import ContextVar
 from datetime import datetime, timedelta, timezone
-from enum import Enum
 from http import HTTPStatus
 from io import BytesIO
 from pathlib import Path
@@ -21,7 +20,7 @@ from cvat_sdk.core.uploading import AnnotationUploader
 from httpx import URL
 
 from src.core.config import Config
-from src.utils.enums import BetterEnumMeta
+from src.utils.enums import BetterEnumMeta, StrEnum
 from src.utils.time import utcnow
 
 _NOTSET = object()
@@ -34,21 +33,21 @@ class CVATException(Exception):
     """Indicates that CVAT API returned unexpected response"""
 
 
-class RequestStatus(str, Enum, metaclass=BetterEnumMeta):
+class RequestStatus(StrEnum, metaclass=BetterEnumMeta):
     QUEUED = "Queued"
     STARTED = "Started"
     FINISHED = "Finished"
     FAILED = "Failed"
 
 
-class JobStatus(str, Enum, metaclass=BetterEnumMeta):
+class JobStatus(StrEnum, metaclass=BetterEnumMeta):
     new = "new"
     in_progress = "in progress"
     rejected = "rejected"
     completed = "completed"
 
 
-class LabelType(str, Enum, metaclass=BetterEnumMeta):
+class LabelType(StrEnum, metaclass=BetterEnumMeta):
     tag = "tag"
     points = "points"
     rectangle = "rectangle"
@@ -56,7 +55,7 @@ class LabelType(str, Enum, metaclass=BetterEnumMeta):
     interval = "interval"
 
 
-class WebhookEventType(str, Enum, metaclass=BetterEnumMeta):
+class WebhookEventType(StrEnum, metaclass=BetterEnumMeta):
     update_job = "update:job"
     ping = "ping"
 

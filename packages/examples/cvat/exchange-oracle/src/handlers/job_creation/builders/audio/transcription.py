@@ -67,7 +67,7 @@ def _bundle_regions(
     *,
     min_duration: timedelta,
     max_duration: timedelta,
-    can_bundle: Callable[[_RegionT, _RegionT], bool] = lambda _a, _b: True
+    can_bundle: Callable[[_RegionT, _RegionT], bool] = lambda _a, _b: True,
 ) -> list[tuple[timedelta, timedelta, list[_RegionT]]]:
     """
     Bundle consecutive input regions (sorted by start) into groups >= min_duration;
@@ -134,10 +134,10 @@ def select_honeypots(
         can_bundle=(
             # we can only bundle regions if they belong to the same span
             lambda a, b: a.span_id == b.span_id
-        )
+        ),
     )
 
-    rng = np.random.Generator(np.random.MT19937(random_seed)) # pin the rng used for stable results
+    rng = np.random.Generator(np.random.MT19937(random_seed))  # pin the rng used for stable results
     idxs = list(range(len(bundles)))
     rng.shuffle(idxs)
     n_select = ceil(val_fraction * len(bundles))
@@ -172,7 +172,7 @@ def plan_assignments(
     """
 
     # 1. shuffle inputs
-    rng = np.random.Generator(np.random.MT19937(random_seed)) # pin the rng used for stable results
+    rng = np.random.Generator(np.random.MT19937(random_seed))  # pin the rng used for stable results
 
     def sort_key(r: PresentedRegion) -> tuple:
         return (r.source_filename, r.start)
@@ -694,6 +694,7 @@ def _parse_gt_tsv(data: bytes) -> dict[str, list[InputGtRegion]]:
 # Helpers
 # --------------------------------------------------------------------------- #
 
+
 def _validate_gt_regions(
     regions: list[InputGtRegion],
     *,
@@ -759,6 +760,7 @@ def _bucket_key(prefix: str, filename: str) -> str:
     """Join a bucket prefix and a filename into a POSIX-style object key."""
     return str(PurePosixPath(prefix, filename))
 
+
 def _make_cvat_audio_label_configuration(
     labels: list[str],
     *,
@@ -798,6 +800,7 @@ def _make_cvat_audio_label_configuration(
             }
         )
     return label_config
+
 
 def _get_span_duration(group: list[InputRegion | InputGtRegion]) -> timedelta:
     return group[-1].stop - group[0].start

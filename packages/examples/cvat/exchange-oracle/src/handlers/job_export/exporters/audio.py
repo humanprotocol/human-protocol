@@ -57,9 +57,7 @@ class AudioTranscriptionJobExporter(JobExporter):
         rows: list[dict] = []
         for job in jobs:
             rows.extend(
-                self._annotation_rows(
-                    job_annotations[job.cvat_id], assignments_by_clip, attr_names
-                )
+                self._annotation_rows(job_annotations[job.cvat_id], assignments_by_clip, attr_names)
             )
         rows.sort(key=lambda r: (r["filename"], r["_start_s"]))
         merged = self._render_tsv([*_LEADING_COLUMNS, *attr_names], rows)
@@ -132,20 +130,14 @@ class AudioTranscriptionJobExporter(JobExporter):
     @staticmethod
     def _placed_at(assignment: Clip, clip_time_s: float) -> PlacedRegion | None:
         return next(
-            (
-                p
-                for p in assignment.placed
-                if p.clip_start <= clip_time_s < p.clip_stop
-            ),
+            (p for p in assignment.placed if p.clip_start <= clip_time_s < p.clip_stop),
             None,
         )
 
     @staticmethod
     def _render_tsv(columns: list[str], rows: list[dict]) -> bytes:
         buffer = io.StringIO()
-        writer = csv.DictWriter(
-            buffer, fieldnames=columns, delimiter="\t", extrasaction="ignore"
-        )
+        writer = csv.DictWriter(buffer, fieldnames=columns, delimiter="\t", extrasaction="ignore")
         writer.writeheader()
         for global_id, row in enumerate(rows):
             writer.writerow({**row, "id": global_id})

@@ -11,12 +11,11 @@ import csv
 import io
 import time
 from datetime import timedelta
-from enum import Enum
 
 from attrs import Factory, frozen
 from datumaro.util import dump_json, parse_json
 
-from src.utils.enums import BetterEnumMeta
+from src.utils.enums import BetterEnumMeta, StrEnum
 
 CVAT_EXPORT_FORMAT = "Generic TSV 1.0"
 
@@ -102,7 +101,7 @@ def parse_gt_tsv(data: bytes) -> list[InputGtRegion]:
     ]
 
 
-class RegionKind(str, Enum, metaclass=BetterEnumMeta):
+class RegionKind(StrEnum, metaclass=BetterEnumMeta):
     gt = "gt"  # ground-truth honeypot region
     ds = "ds"  # regular dataset region to annotate
 

@@ -1,9 +1,9 @@
-from enum import Enum
+from strenum import StrEnum
 
 from src.utils.enums import BetterEnumMeta
 
 
-class TaskTypes(str, Enum, metaclass=BetterEnumMeta):
+class TaskTypes(StrEnum, metaclass=BetterEnumMeta):
     image_label_binary = "image_label_binary"
     image_points = "image_points"
     image_boxes = "image_boxes"

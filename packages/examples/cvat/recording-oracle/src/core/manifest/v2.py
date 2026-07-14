@@ -1,11 +1,10 @@
-from enum import Enum
 from typing import Any, Literal
 
 from pydantic import AnyUrl, BaseModel, ConfigDict, Field, model_validator
 
 from src.core.manifest.shared import BucketUrl, LabelInfo, LabelTypes
 from src.core.tasks import TaskTypes
-from src.utils.enums import BetterEnumMeta
+from src.utils.enums import BetterEnumMeta, StrEnum
 
 
 class DataInfo(BaseModel):
@@ -34,7 +33,7 @@ class DataInfo(BaseModel):
     """
 
 
-class TargetMetrics(str, Enum, metaclass=BetterEnumMeta):
+class TargetMetrics(StrEnum, metaclass=BetterEnumMeta):
     accuracy = "accuracy"
     wer = "wer"
     cer = "cer"
@@ -161,9 +160,7 @@ class JobManifest(BaseModel):
                 raise NotImplementedError
 
             details_cls = (
-                AudioJobDetails
-                if job_type == TaskTypes.audio_transcription
-                else ImageJobDetails
+                AudioJobDetails if job_type == TaskTypes.audio_transcription else ImageJobDetails
             )
             annotation["details"] = details_cls.model_validate(details)
 

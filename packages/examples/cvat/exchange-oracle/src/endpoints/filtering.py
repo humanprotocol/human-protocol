@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from enum import Enum
 from typing import TYPE_CHECKING, Any, ClassVar, TypeVar
 
 import fastapi
@@ -11,13 +10,15 @@ from fastapi_filter import FilterDepends, with_prefix
 from fastapi_filter.contrib.sqlalchemy import Filter as _Filter
 from pydantic import BaseModel, Field, ValidationInfo, field_validator
 
-from src.utils.enums import BetterEnumMeta
+from src.utils.enums import BetterEnumMeta, StrEnum
 
 if TYPE_CHECKING:
+    from enum import Enum
+
     from pydantic.fields import FieldInfo
 
 
-class OrderingDirection(str, Enum, metaclass=BetterEnumMeta):
+class OrderingDirection(StrEnum, metaclass=BetterEnumMeta):
     asc = "ASC"
     desc = "DESC"
 

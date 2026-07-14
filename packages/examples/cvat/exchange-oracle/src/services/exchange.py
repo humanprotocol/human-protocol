@@ -77,8 +77,7 @@ def create_assignment(
             session,
             wallet_address=user.wallet_address,
             cvat_job_id=unassigned_job.cvat_id,
-            expires_at=utcnow()
-            + timedelta(seconds=get_assignment_timeout(manifest)),
+            expires_at=utcnow() + timedelta(seconds=get_assignment_timeout(manifest)),
         )
 
         cvat_service.update_job_status(session, unassigned_job.id, status=JobStatuses.in_progress)

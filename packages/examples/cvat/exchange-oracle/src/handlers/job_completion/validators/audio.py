@@ -25,12 +25,9 @@ class AudioTranscriptionJobValidator(JobValidator):
         )
 
         self.logger.debug(
-            f"Downloading annotations for the escrow "
-            f"(escrow_address={self.escrow_address})"
+            f"Downloading annotations for the escrow (escrow_address={self.escrow_address})"
         )
-        cvat_job_annotations = download_job_annotations(
-            self.logger, CVAT_EXPORT_FORMAT, cvat_jobs
-        )
+        cvat_job_annotations = download_job_annotations(self.logger, CVAT_EXPORT_FORMAT, cvat_jobs)
 
         result_files: list[FileDescriptor] = [
             self._make_annotation_descriptor(job, cvat_job_annotations[job.cvat_id])
@@ -39,8 +36,7 @@ class AudioTranscriptionJobValidator(JobValidator):
         result_files.append(prepare_annotation_metafile(jobs=cvat_jobs))
 
         self.logger.debug(
-            f"Recording annotations for the escrow "
-            f"(escrow_address={self.escrow_address})"
+            f"Recording annotations for the escrow (escrow_address={self.escrow_address})"
         )
         upload_escrow_results(
             files=result_files, chain_id=self.chain_id, escrow_address=self.escrow_address

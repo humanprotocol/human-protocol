@@ -1,12 +1,11 @@
-from enum import Enum
 from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, Field, model_validator
 
-from src.utils.enums import BetterEnumMeta
+from src.utils.enums import BetterEnumMeta, StrEnum
 
 
-class BucketProviders(str, Enum):
+class BucketProviders(StrEnum):
     aws = "AWS"
     gcs = "GCS"
 
@@ -32,7 +31,7 @@ class GcsBucketUrl(BucketUrlBase, BaseModel):
 BucketUrl = Annotated[AwsBucketUrl | GcsBucketUrl, Field(discriminator="provider")]
 
 
-class LabelTypes(str, Enum, metaclass=BetterEnumMeta):
+class LabelTypes(StrEnum, metaclass=BetterEnumMeta):
     plain = "plain"
     skeleton = "skeleton"
 

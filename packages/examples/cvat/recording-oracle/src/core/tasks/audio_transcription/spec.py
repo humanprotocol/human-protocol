@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from datetime import timedelta
-from enum import Enum
 from typing import TYPE_CHECKING
 
 from pydantic import AnyUrl, BaseModel, Field
@@ -9,13 +8,13 @@ from pydantic import AnyUrl, BaseModel, Field
 from src.core.manifest.shared import BucketUrl  # noqa: TCH001  # runtime-needed by pydantic
 from src.core.manifest.v2 import TargetMetrics  # noqa: TCH001  # runtime-needed by pydantic
 from src.core.tasks.errors import UnsupportedManifestError
-from src.utils.enums import BetterEnumMeta
+from src.utils.enums import BetterEnumMeta, StrEnum
 
 if TYPE_CHECKING:
     from src.core.manifest.v2 import JobManifest
 
 
-class NormalizerPreset(str, Enum, metaclass=BetterEnumMeta):
+class NormalizerPreset(StrEnum, metaclass=BetterEnumMeta):
     basic = "basic"  # universal Unicode + case + whitespace fold
     # Tier-1 language presets (BASIC plus per-language rules)
     en = "en"
