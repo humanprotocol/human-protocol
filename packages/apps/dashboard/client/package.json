@@ -25,7 +25,7 @@
     "@mui/styled-engine-sc": "9.0.1",
     "@mui/system": "^9.0.1",
     "@mui/x-data-grid": "^8.7.0",
-    "@mui/x-date-pickers": "^9.2.0",
+    "@mui/x-date-pickers": "^9.9.0",
     "@tanstack/react-query": "^5.91.3",
     "@types/react-router-dom": "^5.3.3",
     "@types/recharts": "^1.8.29",
