@@ -1176,7 +1176,9 @@ class AnnotationMergingTest:
         with (
             # base downloads the exchange-oracle result file; the merger (image) downloads GT
             mock.patch("src.handlers.completion.task_exporters.base.BucketAccessInfo.parse_obj"),
-            mock.patch("src.handlers.completion.task_exporters.base.make_cloud_client"),
+            mock.patch(
+                "src.handlers.completion.task_exporters.base.make_cloud_client"
+            ) as mock_base_make_cloud_client,
             mock.patch("src.handlers.completion.task_exporters.image.BucketAccessInfo.parse_obj"),
             mock.patch(
                 "src.handlers.completion.task_exporters.image.make_cloud_client"
@@ -1190,6 +1192,7 @@ class AnnotationMergingTest:
             ),
         ):
             mock_make_cloud_client.return_value.download_file = mock.Mock(return_value=b"")
+            mock_base_make_cloud_client.return_value.download_file = mock.Mock(return_value=b"")
 
             annotation_meta = AnnotationMeta(
                 jobs=[
