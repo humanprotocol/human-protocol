@@ -12,5 +12,3 @@ export const RESEND_EMAIL_VERIFICATION_PATH =
 export const LOGOUT_PATH = '/auth/logout';
 
 export const BACKOFF_INTERVAL_SECONDS = 120;
-
-export const DEFAULT_TIMEOUT_MS = 5000;
