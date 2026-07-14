@@ -73,11 +73,11 @@ Available at `/docs` route
 A single command to build, run, and tear down the test suite:
 
 ```sh
-docker compose -p "test" \
+docker compose -p ro-test \
     -f docker-compose.test.yml \
     -f docker-compose.test.head.yml \
     up --build test --attach test --exit-code-from test; \
-  docker compose -p "test" \
+  docker compose -p ro-test \
     -f docker-compose.test.yml \
     -f docker-compose.test.head.yml down
 ```
@@ -91,19 +91,19 @@ commands allow running just the services, build, tear down, and run the test sui
 
 ```sh
 # run services
-docker compose -p "test" \
+docker compose -p ro-test \
   -f docker-compose.test.yml \
   up -d --build
 
 # run the tests
-docker compose -p "test" \
+docker compose -p ro-test \
   -f docker-compose.test.yml \
   -f docker-compose.test.head.yml \
   -f docker-compose.test.head.dev.yml \
   up --build test --attach test --exit-code-from test
 
 # tear down
-docker compose -p "test" \
+docker compose -p ro-test \
   -f docker-compose.test.yml \
   -f docker-compose.test.head.yml \
   -f docker-compose.test.head.dev.yml \

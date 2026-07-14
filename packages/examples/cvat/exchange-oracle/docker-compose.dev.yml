@@ -32,7 +32,7 @@ services:
     ports:
       - 6380:6379
     networks:
-      - test-network
+      - oracle-network
 
   minio:
     container_name: minio
@@ -54,7 +54,7 @@ services:
       timeout: 5s
       retries: 3
     networks:
-      - test-network
+      - oracle-network
       - cvat-human-bridge
 
   minio-mc:
@@ -78,7 +78,7 @@ services:
       /usr/bin/mc anonymous set public myminio/launcher;
       "
     networks:
-      - test-network
+      - oracle-network
 
 volumes:
   postgres:
@@ -86,7 +86,7 @@ volumes:
   minio:
 
 networks:
-  test-network:
+  oracle-network:
   cvat-human-bridge:
     name: cvat-human-bridge
     external: true
