@@ -73,16 +73,18 @@ export function EscrowAddressSearchForm({
     >
       <FormProvider {...methods}>
         <Input
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Search sx={{ fill: colorPalette.text.primary }} />
-              </InputAdornment>
-            ),
-          }}
           fullWidth
           label={label}
           name="searchValue"
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search sx={{ fill: colorPalette.text.primary }} />
+                </InputAdornment>
+              ),
+            },
+          }}
           onChange={(e) => {
             methods.setValue('searchValue', e.target.value);
           }}

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Popover from '@mui/material/Popover';
-import type { TableCellBaseProps } from '@mui/material/TableCell/TableCell';
+import type { TableCellBaseProps } from '@mui/material/TableCell';
 import { type IconType, TextHeaderWithIcon } from '../text-header-with-icon';
 
 type CommonProps = TableCellBaseProps & {

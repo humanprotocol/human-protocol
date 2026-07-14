@@ -30,15 +30,15 @@ export function OperatorInfo({
       }}
     >
       <Typography
-        color={colorPalette.text.primary}
+        variant="h5"
         sx={{
           fontWeight: 600,
+          color: colorPalette.text.primary,
         }}
-        variant="h5"
       >
         {t('operator.profile.about.header')}
       </Typography>
-      <Stack flexDirection="row">
+      <Stack direction="row">
         <List sx={{ overflow: 'hidden' }}>
           <ProfileListItem
             header={t('operator.profile.about.role')}

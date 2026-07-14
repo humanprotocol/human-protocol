@@ -69,21 +69,21 @@ export function MyJobsListMobile() {
         updater={setSearchEscrowAddress}
       />
       <Grid container spacing={2}>
-        <Grid item xs={6}>
+        <Grid size={6}>
           <Button
+            variant="outlined"
             fullWidth
             onClick={openModal}
             sx={{
-              marginBottom: '32px',
-              marginTop: '21px',
+              mb: 4,
+              mt: 2.5,
             }}
-            variant="outlined"
           >
             {t('worker.jobs.mobileFilterDrawer.filters')}
             <FiltersButtonIcon />
           </Button>
         </Grid>
-        <Grid item xs={6}>
+        <Grid size={6}>
           <Button
             fullWidth
             size="small"
@@ -106,14 +106,14 @@ export function MyJobsListMobile() {
         </Grid>
       </Grid>
 
-      <Stack flexDirection="column">
+      <Stack>
         {isTableError ? (
           <Alert color="error" severity="error">
             {getErrorMessageForError(tableError)}
           </Alert>
         ) : null}
         {tableStatus === 'pending' ? (
-          <Stack alignItems="center" justifyContent="center">
+          <Stack sx={{ alignItems: 'center', justifyContent: 'center' }}>
             <Loader size={90} />
           </Stack>
         ) : null}
@@ -131,7 +131,7 @@ export function MyJobsListMobile() {
             >
               <List>
                 <Grid container>
-                  <Grid item xs={6}>
+                  <Grid size={6}>
                     <ListItem label={t('worker.jobs.escrowAddress')}>
                       <EvmAddress address={d.escrow_address} />
                     </ListItem>
@@ -148,11 +148,11 @@ export function MyJobsListMobile() {
                       />
                     </ListItem>
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid size={6}>
                     <ListItem label={t('worker.jobs.network')}>
                       <Typography
-                        color={colorPalette.primary.light}
                         variant="body2"
+                        sx={{ color: colorPalette.primary.light }}
                       >
                         {getNetworkName(d.chain_id)}
                       </Typography>
@@ -164,7 +164,10 @@ export function MyJobsListMobile() {
                           colorPalette
                         )}
                         label={
-                          <Typography color={colorPalette.white} variant="chip">
+                          <Typography
+                            variant="chip"
+                            sx={{ color: colorPalette.white }}
+                          >
                             {d.status}
                           </Typography>
                         }

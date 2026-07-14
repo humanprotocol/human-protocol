@@ -72,12 +72,13 @@ export function BottomMenuItemsList({
               }}
             >
               <Stack
-                alignItems="center"
                 direction="row"
-                gap="32px"
-                justifyContent="center"
                 sx={{
-                  padding: '8px 16px',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 4,
+                  py: 1,
+                  px: 2,
                 }}
               >
                 {icon}

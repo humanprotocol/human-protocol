@@ -55,7 +55,7 @@ export function RegistrationForm({
       <Box>{t('worker.registrationInExchangeOracle.completeMessage')}</Box>
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit}>
-          <Stack alignItems="center" spacing={2}>
+          <Stack sx={{ alignItems: 'center', gap: 2 }}>
             <HCaptchaForm error={error} name="h_captcha_token" />
             <Button
               disabled={disabled}

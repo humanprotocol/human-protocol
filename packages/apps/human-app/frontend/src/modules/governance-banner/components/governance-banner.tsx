@@ -17,6 +17,7 @@ function getProposalStatus(proposal: ProposalResponse): ProposalStatus {
   if (voteStart <= now && now < voteEnd) return 'active';
   return 'pending';
 }
+
 export function GovernanceBanner() {
   const { t } = useTranslation();
   const { data: proposal, isLoading, isError } = useProposalQuery();
@@ -53,45 +54,49 @@ export function GovernanceBanner() {
   return (
     <Grid
       container
-      alignItems={{ xs: 'flex-start', sm: 'center' }}
-      justifyContent={{ xs: 'flex-start', sm: 'space-between' }}
-      bgcolor={background.primary}
-      color={text.secondary}
-      borderRadius="8px"
-      p={2}
-      gap={2}
-      mt={{ xs: 0, md: -8 }}
+      sx={{
+        alignItems: { xs: 'flex-start', sm: 'center' },
+        justifyContent: { xs: 'flex-start', sm: 'space-between' },
+        bgcolor: background.primary,
+        color: text.secondary,
+        borderRadius: '8px',
+        p: 2,
+        gap: 2,
+        mt: { xs: 0, md: -8 },
+      }}
     >
       {/* Left side: Countdown & "X votes" */}
       <Grid
-        item
-        xs={12}
-        sm="auto"
-        display="flex"
-        alignItems="center"
-        flexWrap={{ xs: 'wrap', sm: 'nowrap' }}
-        gap={{ xs: 2, md: 0 }}
+        size={{ xs: 12, sm: 'auto' }}
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          flexWrap: { xs: 'wrap', sm: 'nowrap' },
+          gap: { xs: 2, md: 0 },
+        }}
       >
-        <Box display="flex" alignItems="center">
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <AccessTimeIcon sx={{ mr: 1 }} />
-          <Typography variant="body2" color={text.secondary}>
+          <Typography variant="body2" sx={{ color: text.secondary }}>
             {status === 'pending'
               ? t('governance.timeToStart', 'Voting starts in')
               : t('governance.timeToReveal', 'Time to reveal vote')}
             :
           </Typography>
-          <Typography variant="body1" ml={1} color={text.primary}>
+          <Typography variant="body1" sx={{ ml: 1, color: text.primary }}>
             {timeRemaining}
           </Typography>
         </Box>
         {status === 'active' && (
           <Typography
             variant="body1"
-            ml={{ xs: 0, md: 8 }}
-            color={text.primary}
-            bgcolor={background.secondary}
-            borderRadius="8px"
-            padding="4px 8px"
+            sx={{
+              ml: { xs: 0, md: 8 },
+              color: text.primary,
+              bgcolor: background.secondary,
+              borderRadius: '8px',
+              p: '4px 8px',
+            }}
           >
             {totalVotes} {t('governance.votes', 'votes')}
           </Typography>
@@ -100,19 +105,24 @@ export function GovernanceBanner() {
 
       {/* Right side: "More details" link */}
       <Grid
-        item
-        xs={12}
-        sm
-        display="flex"
-        justifyContent={{ xs: 'flex-start', sm: 'flex-end' }}
+        size={{ xs: 12, sm: 12 }}
+        sx={{
+          display: 'flex',
+          justifyContent: { xs: 'flex-start', sm: 'flex-end' },
+        }}
       >
         <MuiLink
           href={env.VITE_GOVERNANCE_URL}
-          underline="none"
           target="_blank"
           rel="noopener noreferrer"
-          color={text.secondary}
-          fontWeight={500}
+          sx={{
+            color: text.secondary,
+            fontWeight: 500,
+            textDecoration: 'none',
+            '&:hover': {
+              textDecoration: 'underline',
+            },
+          }}
         >
           {t('governance.moreDetails', 'More details')} &rarr;
         </MuiLink>

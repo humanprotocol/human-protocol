@@ -34,9 +34,8 @@ export function Filtering<T>({
     <List sx={{ padding: 0 }}>
       {showTitle ? (
         <Typography
-          color={colorPalette.text.secondary}
-          sx={{ padding: '0.5rem' }}
           variant="body2"
+          sx={{ color: colorPalette.text.secondary, p: 1 }}
         >
           {t('components.table.filter')}
         </Typography>
@@ -54,15 +53,18 @@ export function Filtering<T>({
                 }
                 setFiltering(option);
               }}
-              sx={{ paddingLeft: 0, ':hover': { background: 'none' } }}
+              sx={{ pl: 0, ':hover': { background: 'none' } }}
             />
             <ListItem
               component="span"
               sx={{
-                paddingLeft: 0,
+                pl: 0,
               }}
             >
-              <Typography color={colorPalette.primary.main} variant="body1">
+              <Typography
+                variant="body1"
+                sx={{ color: colorPalette.primary.main }}
+              >
                 {name}
               </Typography>
             </ListItem>
@@ -74,11 +76,11 @@ export function Filtering<T>({
           <Divider component="li" variant="fullWidth" />
           <ListItem sx={{ padding: '0.5rem', cursor: 'pointer' }}>
             <Typography
-              color={colorPalette.primary.main}
+              variant="buttonMedium"
+              sx={{ color: colorPalette.primary.main }}
               onClick={() => {
                 clear();
               }}
-              variant="buttonMedium"
             >
               {t('components.table.clearBtn')}
             </Typography>

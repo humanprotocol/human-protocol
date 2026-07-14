@@ -1,5 +1,4 @@
-import Paper from '@mui/material/Paper';
-import Grid from '@mui/material/Grid';
+import { Paper, Stack } from '@mui/material';
 import { Navigate } from 'react-router-dom';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { useWorkerIdentityVerificationStatus } from '@/modules/worker/profile/hooks';
@@ -15,21 +14,20 @@ export function JobsDiscoveryPage() {
   }
 
   return (
-    <Grid alignItems="center" container justifyContent="center">
-      <Grid item xs={12}>
-        <Paper
-          sx={{
-            height: '100%',
-            boxShadow: 'none',
-            padding: isMobile ? '20px' : '64px 144px',
-            minHeight: '800px',
-            borderRadius: '20px',
-          }}
-        >
-          <OraclesTableJobTypesSelect />
-          <OraclesTable />
-        </Paper>
-      </Grid>
-    </Grid>
+    <Stack sx={{ alignItems: 'center', justifyContent: 'center' }}>
+      <Paper
+        elevation={0}
+        sx={{
+          width: '100%',
+          height: '100%',
+          padding: isMobile ? '20px' : '64px 144px',
+          minHeight: '800px',
+          borderRadius: '20px',
+        }}
+      >
+        <OraclesTableJobTypesSelect />
+        <OraclesTable />
+      </Paper>
+    </Stack>
   );
 }

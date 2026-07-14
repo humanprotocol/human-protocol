@@ -17,7 +17,7 @@ export function RewardAmount({
   const isNumeric = Number.isFinite(parsedReward);
   if (!isNumeric) {
     return (
-      <Typography color={color} variant="body2">
+      <Typography variant="body2" sx={{ color }}>
         {`${reward_amount} ${reward_token}`}
       </Typography>
     );
@@ -26,14 +26,14 @@ export function RewardAmount({
   if (hasDecimals) {
     return (
       <Tooltip title={`${reward_amount} ${reward_token}`}>
-        <Typography color={color} variant="body2">
+        <Typography variant="body2" sx={{ color }}>
           {`${parsedReward.toFixed(2)} ${reward_token}`}
         </Typography>
       </Tooltip>
     );
   }
   return (
-    <Typography color={color} variant="body2">
+    <Typography variant="body2" sx={{ color }}>
       {`${reward_amount} ${reward_token}`}
     </Typography>
   );

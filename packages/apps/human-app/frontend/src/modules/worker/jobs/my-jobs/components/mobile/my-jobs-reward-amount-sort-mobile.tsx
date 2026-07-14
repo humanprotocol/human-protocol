@@ -14,7 +14,7 @@ export function MyJobsRewardAmountSortMobile() {
   return (
     <Sorting
       label={
-        <Typography color={colorPalette.text.secondary} variant="body2">
+        <Typography variant="body2" sx={{ color: colorPalette.text.secondary }}>
           {t('worker.jobs.rewardAmount')}
         </Typography>
       }

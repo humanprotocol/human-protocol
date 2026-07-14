@@ -1,6 +1,5 @@
 import { Grid } from '@mui/material';
 import { useEffect } from 'react';
-import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { useBackgroundContext } from '@/shared/contexts/background';
 import { SignInSection } from './sign-in-section';
@@ -9,7 +8,6 @@ import { LogoSection } from './logo-section';
 export function Welcome() {
   const { isDarkMode } = useColorMode();
   const { setWhiteBackground } = useBackgroundContext();
-  const isMobile = useIsMobile('lg');
 
   useEffect(() => {
     if (!isDarkMode) {
@@ -20,13 +18,13 @@ export function Welcome() {
   return (
     <Grid
       container
-      spacing={isMobile ? 0 : 10}
-      sx={{ paddingBottom: isMobile ? '44px' : 0 }}
+      spacing={{ xs: 0, lg: 10 }}
+      sx={{ width: '100%', pb: { xs: '44px', lg: 0 } }}
     >
-      <Grid container item justifyContent="center" xs={isMobile ? 12 : 6}>
+      <Grid size={{ xs: 12, lg: 6 }} sx={{ justifyContent: 'center' }}>
         <LogoSection />
       </Grid>
-      <Grid item justifyContent="flex-end" xs={isMobile ? 12 : 6}>
+      <Grid size={{ xs: 12, lg: 6 }} sx={{ justifyContent: 'flex-end' }}>
         <SignInSection />
       </Grid>
     </Grid>

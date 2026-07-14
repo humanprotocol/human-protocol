@@ -18,7 +18,7 @@ export function Checkbox({ name, label = '', ...rest }: InputProps) {
     <Controller
       name={name}
       render={({ field: { value, ...restField }, fieldState }) => (
-        <Stack alignItems="center" direction="row" display="inline">
+        <Stack direction="row" sx={{ display: 'inline', alignItems: 'center' }}>
           <FormControlLabel
             control={
               <CheckboxMui

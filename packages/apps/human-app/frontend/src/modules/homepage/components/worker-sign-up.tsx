@@ -1,24 +1,23 @@
-import { Grid, Typography, List, ListItemText, Button } from '@mui/material';
+import {
+  Grid,
+  Typography,
+  List,
+  ListItemText,
+  Button,
+  Stack,
+} from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { routerPaths } from '@/router/router-paths';
 import { useColorMode } from '@/shared/contexts/color-mode';
-import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { onlyDarkModeColor } from '@/shared/styles/dark-color-palette';
 
 export function WorkerSignUp() {
   const { colorPalette, isDarkMode } = useColorMode();
   const { t } = useTranslation();
-  const isMobile = useIsMobile('lg');
 
   return (
-    <Grid
-      item
-      sx={{
-        paddingTop: '44px',
-      }}
-      xs={isMobile ? 12 : 6}
-    >
+    <Grid size={{ xs: 12, lg: 6 }}>
       <Grid
         sx={{
           display: 'flex',
@@ -27,14 +26,14 @@ export function WorkerSignUp() {
           justifyContent: 'space-between',
         }}
       >
-        <div>
+        <Stack>
           <Typography
-            color={
-              isDarkMode
-                ? onlyDarkModeColor.additionalTextColor
-                : colorPalette.primary.light
-            }
             variant="h6"
+            sx={{
+              color: isDarkMode
+                ? onlyDarkModeColor.additionalTextColor
+                : colorPalette.primary.light,
+            }}
           >
             {t('homepage.iWantToEarn')}
           </Typography>
@@ -42,45 +41,48 @@ export function WorkerSignUp() {
             sx={{
               listStyleType: 'disc',
               listStylePosition: 'inside',
-              paddingLeft: '0.5rem',
+              pl: '0.5rem',
             }}
           >
             <ListItemText
               primary={t('homepage.completeTask')}
-              primaryTypographyProps={{
-                variant: 'subtitle2',
-                sx: {
-                  display: 'list-item',
+              slotProps={{
+                primary: {
+                  variant: 'subtitle2',
+                  sx: {
+                    display: 'list-item',
+                  },
                 },
               }}
             />
             <ListItemText
               primary={t('homepage.workAnywhere')}
-              primaryTypographyProps={{
-                variant: 'subtitle2',
-                sx: {
-                  display: 'list-item',
+              slotProps={{
+                primary: {
+                  variant: 'subtitle2',
+                  sx: {
+                    display: 'list-item',
+                  },
                 },
               }}
             />
           </List>
-        </div>
+        </Stack>
         <Grid
+          size={12}
           sx={{
             display: 'flex',
             alignItems: 'flex-end',
             justifyContent: 'flex-end',
-            paddingTop: '2rem',
+            pt: 4,
           }}
-          xs={12}
         >
           <Button
             component={Link}
-            fullWidth
-            size="large"
-            sx={{ fontFamily: 'Inter' }}
             to={routerPaths.worker.signUp}
             variant="contained"
+            size="large"
+            fullWidth
           >
             {t('homepage.signUpToComplete')}
           </Button>

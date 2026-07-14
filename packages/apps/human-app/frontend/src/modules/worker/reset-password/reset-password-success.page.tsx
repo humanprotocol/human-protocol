@@ -33,7 +33,7 @@ export function ResetPasswordWorkerSuccessPage() {
         </Grid>
       }
     >
-      <Grid container gap="1.5rem">
+      <Grid container sx={{ gap: 3 }}>
         <Typography variant="body1">
           {t('worker.resetPasswordSuccess.description')}
         </Typography>

@@ -34,7 +34,7 @@ export function HomePage() {
   })();
 
   return (
-    <Box width="100%">
+    <Box sx={{ width: '100%' }}>
       <Paper
         sx={{
           backgroundColor:

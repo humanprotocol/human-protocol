@@ -107,9 +107,9 @@ export function EditExistingKeysForm({
         {noChangesError ? (
           <div>
             <Typography
-              color={colorPalette.error.main}
               component="div"
               variant="helperText"
+              sx={{ color: colorPalette.error.main }}
             >
               {noChangesError}
             </Typography>
@@ -117,7 +117,10 @@ export function EditExistingKeysForm({
         ) : null}
         <div>
           <Button {...formButtonProps}>
-            <Typography color={colorPalette.white} variant="buttonMedium">
+            <Typography
+              variant="buttonMedium"
+              sx={{ color: colorPalette.white }}
+            >
               {t('operator.addKeysPage.editKeysForm.btn')}
             </Typography>
           </Button>

@@ -6,7 +6,7 @@ export function EmptyPlaceholder() {
   const { colorPalette } = useColorMode();
 
   return (
-    <Typography color={colorPalette.text.disabled} variant="helperText">
+    <Typography variant="helperText" sx={{ color: colorPalette.text.disabled }}>
       {t('operator.addKeysPage.existingKeys.noValue')}
     </Typography>
   );

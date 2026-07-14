@@ -4,7 +4,6 @@ import { Paper, Typography } from '@mui/material';
 import { t } from 'i18next';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useRef } from 'react';
-import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { env } from '@/shared/env';
 import { breakpoints } from '@/shared/styles/breakpoints';
 import { Counter } from '@/shared/components/ui/counter';
@@ -67,7 +66,6 @@ export function HcaptchaLabelingPage() {
     error: dailyHmtSpentError,
   } = useDailyHmtSpent();
 
-  const isMobile = useIsMobile();
   const navigate = useNavigate();
 
   const canSolveCaptcha =
@@ -102,17 +100,14 @@ export function HcaptchaLabelingPage() {
 
   return (
     <Grid
-      alignItems="center"
-      height="100%"
-      item
-      justifyContent="center"
-      xs={12}
+      size={12}
+      sx={{ alignItems: 'center', justifyContent: 'center', height: '100%' }}
     >
       <Paper
         sx={{
           height: '100%',
           boxShadow: 'none',
-          padding: isMobile ? '20px' : '40px',
+          padding: { xs: 2.5, md: 5 },
           borderRadius: '20px',
         }}
       >
@@ -155,11 +150,11 @@ export function HcaptchaLabelingPage() {
                 />
               </Grid>
             ) : (
-              <Grid container sx={{ flexDirection: 'column', gap: '24px' }}>
+              <Grid container sx={{ flexDirection: 'column', gap: 3 }}>
                 <Typography variant="subtitle2">
                   {t('worker.hcaptchaLabeling.noJobs')}
                 </Typography>
-                <Typography color={statsColor} variant="h4">
+                <Typography variant="h4" sx={{ color: statsColor }}>
                   <Counter
                     date={getTomorrowDate().toISOString()}
                     onFinish={() => {

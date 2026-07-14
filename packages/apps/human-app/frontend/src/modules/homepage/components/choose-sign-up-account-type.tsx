@@ -27,7 +27,7 @@ export function ChooseSignUpAccountType() {
       title={<Typography variant="h4">{t('homepage.welcome')} 👋</Typography>}
     >
       <Grid container spacing={4}>
-        <Grid item sx={{ paddingBottom: '16px' }} xs={12}>
+        <Grid size={12} sx={{ pb: 2 }}>
           <Typography variant="h4">{t('homepage.howWillUse')}</Typography>
         </Grid>
         <WorkerSignUp />

@@ -1,6 +1,6 @@
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import React, { useState } from 'react';
+import { useState, MouseEvent } from 'react';
 import InputAdornment from '@mui/material/InputAdornment';
 import IconButton from '@mui/material/IconButton';
 import { Input, type InputProps } from '@/shared/components/data-entry/input';
@@ -16,41 +16,35 @@ export function Password(props: PasswordProps) {
     setShowPassword((show) => !show);
   };
 
-  const handleMouseDownPassword = (
-    event: React.MouseEvent<HTMLButtonElement>
-  ) => {
+  const handleMouseDownPassword = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
   };
 
   return (
     <Input
       {...props}
-      InputProps={{
-        endAdornment: (
-          <InputAdornment
-            position="end"
-            sx={{
-              marginLeft: 0,
-            }}
-          >
-            <IconButton
-              aria-label="toggle password visibility"
-              edge="end"
-              onClick={handleClickShowPassword}
-              onMouseDown={handleMouseDownPassword}
-            >
-              {showPassword ? (
-                <VisibilityOff sx={{ fill: colorPalette.primary.dark }} />
-              ) : (
-                <Visibility sx={{ fill: colorPalette.primary.dark }} />
-              )}
-            </IconButton>
-          </InputAdornment>
-        ),
+      slotProps={{
+        input: {
+          endAdornment: (
+            <InputAdornment position="end" sx={{ ml: 0 }}>
+              <IconButton
+                aria-label="toggle password visibility"
+                edge="end"
+                onClick={handleClickShowPassword}
+                onMouseDown={handleMouseDownPassword}
+              >
+                {showPassword ? (
+                  <VisibilityOff sx={{ fill: colorPalette.primary.dark }} />
+                ) : (
+                  <Visibility sx={{ fill: colorPalette.primary.dark }} />
+                )}
+              </IconButton>
+            </InputAdornment>
+          ),
+        },
       }}
       onKeyDown={(e) => {
-        // ignore space
-        if (e.keyCode === 32) {
+        if (e.key === ' ' || e.code === 'Space') {
           e.preventDefault();
           e.stopPropagation();
         }

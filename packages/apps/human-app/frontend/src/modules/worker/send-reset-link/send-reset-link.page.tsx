@@ -58,7 +58,7 @@ export function SendResetLinkWorkerPage() {
             void methods.handleSubmit(handleWorkerSendResetLink)(event);
           }}
         >
-          <Grid container gap="1.5rem">
+          <Grid container sx={{ gap: 3 }}>
             <Typography variant="body1">
               {t('worker.sendResetLinkForm.description')}
             </Typography>

@@ -60,30 +60,30 @@ export function SendResetLinkWorkerSuccessPage() {
             void methods.handleSubmit(handleWorkerSendResetLink)(event);
           }}
         >
-          <Grid container gap="1.5rem">
+          <Grid container sx={{ gap: 3 }}>
             <Typography>
               <Trans
                 components={{
-                  1: <Typography component="span" fontWeight={600} />,
+                  1: <Typography component="span" sx={{ fontWeight: 600 }} />,
                 }}
                 i18nKey="worker.sendResetLinkSuccess.paragraph1"
                 values={{ email }}
               />
             </Typography>
             <Typography
-              color={
-                isDarkMode
-                  ? onlyDarkModeColor.additionalTextColor
-                  : colorPalette.primary.light
-              }
               variant="body1"
+              sx={{
+                color: isDarkMode
+                  ? onlyDarkModeColor.additionalTextColor
+                  : colorPalette.primary.light,
+              }}
             >
               {t('worker.sendResetLinkSuccess.paragraph2')}
             </Typography>
             <Typography variant="body1">
               <Trans
                 components={{
-                  1: <Typography component="span" fontWeight={600} />,
+                  1: <Typography component="span" sx={{ fontWeight: 600 }} />,
                 }}
                 i18nKey="worker.sendResetLinkSuccess.paragraph3"
                 values={{ email }}
@@ -107,7 +107,7 @@ export function SendResetLinkWorkerSuccessPage() {
             <Typography variant="body1">
               <Trans
                 components={{
-                  1: <Typography component="span" fontWeight={600} />,
+                  1: <Typography component="span" sx={{ fontWeight: 600 }} />,
                   2: <MailTo mail={env.VITE_HUMAN_PROTOCOL_HELP_URL} />,
                 }}
                 i18nKey="worker.sendResetLinkSuccess.paragraph4"

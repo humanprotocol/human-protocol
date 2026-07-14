@@ -14,7 +14,7 @@ export function EmailVerificationSuccessMessage() {
       showCancelButton={false}
       title={<SuccessLabel>{t('worker.emailVerification.title')}</SuccessLabel>}
     >
-      <Grid container gap="2rem">
+      <Grid container sx={{ gap: 4 }}>
         <Typography variant="body1">
           {t('worker.emailVerification.description')}
         </Typography>

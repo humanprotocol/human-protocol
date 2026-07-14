@@ -6,7 +6,7 @@ export function SuccessLabel({ children }: { children: string }) {
   const { colorPalette } = useColorMode();
 
   return (
-    <Grid container gap="1rem" sx={{ alignItems: 'center' }}>
+    <Grid container sx={{ alignItems: 'center', gap: '1rem' }}>
       <span>{children}</span>
       <CheckCircleIcon
         fontSize="large"

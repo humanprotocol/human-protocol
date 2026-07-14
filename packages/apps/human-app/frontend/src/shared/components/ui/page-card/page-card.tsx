@@ -49,7 +49,7 @@ export function PageCard({
   cancelNavigation = routerPaths.homePage,
   showCancelButton = true,
   showBackButton = true,
-}: Readonly<PageCardProps>) {
+}: PageCardProps) {
   const { isDarkMode, colorPalette } = useColorMode();
   const navigate = useNavigate();
   const isMobile = useIsMobile('md');
@@ -125,11 +125,8 @@ export function PageCard({
         <Grid
           container
           sx={{
-            rowGap: '1rem',
             columnGap: '1rem',
-            [breakpoints.mobile]: {
-              rowGap: '0.4rem',
-            },
+            rowGap: { xs: '0.4rem', md: '1rem' },
           }}
         >
           <Grid
@@ -166,36 +163,33 @@ export function PageCard({
               </Button>
             )}
           </Grid>
-          <Grid item md={1} order={{ xs: 3, md: 1 }} xs={12} />
+          <Grid size={{ xs: 12, md: 1 }} sx={{ order: { xs: 3, md: 1 } }} />
           <Grid
-            item
-            md={10}
-            order={{ xs: 2, md: 2 }}
+            size={{ xs: 12, md: 10 }}
             sx={{
               minHeight: '3rem',
               width: '100%',
+              order: 2,
               [breakpoints.mobile]: {
                 height: 'auto',
                 minHeight: 'unset',
               },
             }}
-            xs={12}
           >
             <Grid sx={contentStyles}>{alert && <>{alert}</>}</Grid>
           </Grid>
           <Grid
-            item
-            md={1}
-            order={{ xs: 1, md: 3 }}
+            size={{ xs: 12, md: 1 }}
             sx={{
               display: 'flex',
               justifyContent: 'flex-end',
               mt: '5px',
+              order: 3,
               [breakpoints.mobile]: {
                 display: 'none',
+                order: 1,
               },
             }}
-            xs={12}
           >
             {showBackButton && (
               <IconWrapper
@@ -210,19 +204,17 @@ export function PageCard({
               </IconWrapper>
             )}
           </Grid>
-          <Grid
-            item
-            md={10}
-            order={{ xs: 4, md: 4 }}
-            sx={{ marginBottom: '24px' }}
-            xs={12}
-          >
+          <Grid size={{ xs: 12, md: 10 }} sx={{ mb: 3, order: 4 }}>
             <Grid sx={contentStyles}>
-              <Typography variant="h4">{title}</Typography>
+              {typeof title === 'string' ? (
+                <Typography variant="h4">{title}</Typography>
+              ) : (
+                title
+              )}
             </Grid>
           </Grid>
-          <Grid item md={1} order={{ xs: 5, md: 5 }} xs={1} />
-          <Grid item md={10} order={{ xs: 6, md: 6 }} xs={12}>
+          <Grid size={1} sx={{ order: 5 }} />
+          <Grid size={{ xs: 12, md: 10 }} sx={{ order: 6 }}>
             <Grid sx={contentStyles}>{children}</Grid>
           </Grid>
         </Grid>

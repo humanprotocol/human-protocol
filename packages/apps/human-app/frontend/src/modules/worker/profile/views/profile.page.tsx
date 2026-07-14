@@ -59,7 +59,7 @@ export function WorkerProfilePage() {
         justifyContent: 'center',
       }}
     >
-      <Stack width="100%" maxWidth="450px" gap={3}>
+      <Stack sx={{ width: '100%', maxWidth: '450px', gap: 3 }}>
         <ProfileData />
         <IdentityVerificationControl />
         <WalletConnectionControl />

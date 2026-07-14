@@ -64,13 +64,13 @@ export function JobsPage() {
   }
 
   return (
-    <Grid alignItems="center" container justifyContent="center">
-      <Grid item xs={12}>
+    <Grid container sx={{ alignItems: 'center', justifyContent: 'center' }}>
+      <Grid sx={{ width: '100%' }}>
         <Paper
           sx={{
             display: 'flex',
             flexDirection: 'column',
-            gap: '24px',
+            gap: 3,
             height: '100%',
             boxShadow: 'none',
             padding: isMobile ? '20px' : '64px 144px',

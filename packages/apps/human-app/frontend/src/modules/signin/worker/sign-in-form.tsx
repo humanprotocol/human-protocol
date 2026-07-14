@@ -1,5 +1,5 @@
 import { FormProvider, useForm } from 'react-hook-form';
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, Grid, Link as MuiLink, Typography } from '@mui/material';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -44,7 +44,7 @@ export function SignInForm({
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit}>
-        <Grid container gap="1.5rem">
+        <Grid container sx={{ gap: 3 }}>
           <Input
             fullWidth
             label={t('worker.signInForm.fields.email')}
@@ -55,18 +55,19 @@ export function SignInForm({
             label={t('worker.signInForm.fields.password')}
             name="password"
           />
-          <Box width="100%">
+          <Box sx={{ width: '100%' }}>
             <Typography variant="body1">
-              <Link
-                style={{
+              <MuiLink
+                component={Link}
+                to={routerPaths.worker.sendResetLink}
+                sx={{
                   textDecoration: 'none',
                   fontWeight: 600,
                   color: 'inherit',
                 }}
-                to={routerPaths.worker.sendResetLink}
               >
                 {t('worker.signInForm.forgotPassword')}
-              </Link>
+              </MuiLink>
             </Typography>
           </Box>
           <HCaptchaForm error={error} name="h_captcha_token" />

@@ -18,7 +18,7 @@ const existingKeysConfig: Record<
   (values: GetEthKVStoreValuesSuccessResponse) => React.ReactElement
 > = {
   [EthKVStoreKeys.Fee]: ({ fee }) => (
-    <Grid container sx={{ flexDirection: 'column', gap: '0.75rem' }}>
+    <Grid container sx={{ flexDirection: 'column', gap: 1.5 }}>
       <Typography variant="subtitle2">
         {t('operator.addKeysPage.existingKeys.fee')}
       </Typography>
@@ -30,38 +30,38 @@ const existingKeysConfig: Record<
     </Grid>
   ),
   [EthKVStoreKeys.PublicKey]: ({ public_key }) => (
-    <Grid container sx={{ flexDirection: 'column', gap: '0.75rem' }}>
-      <Typography variant="subtitle2" width="100%">
+    <Grid container sx={{ flexDirection: 'column', gap: 1.5 }}>
+      <Typography variant="subtitle2" sx={{ width: '100%' }}>
         {t('operator.addKeysPage.existingKeys.publicKey')}
       </Typography>
-      <Typography variant="body1" width="100%">
+      <Typography variant="body1" sx={{ width: '100%' }}>
         <OptionalText text={public_key} />
       </Typography>
     </Grid>
   ),
   [EthKVStoreKeys.Url]: ({ url }) => (
-    <Grid container sx={{ flexDirection: 'column', gap: '0.75rem' }}>
-      <Typography variant="subtitle2" width="100%">
+    <Grid container sx={{ flexDirection: 'column', gap: 1.5 }}>
+      <Typography variant="subtitle2" sx={{ width: '100%' }}>
         {t('operator.addKeysPage.existingKeys.url')}
       </Typography>
-      <Typography variant="body1" width="100%">
+      <Typography variant="body1" sx={{ width: '100%' }}>
         <OptionalText text={url} />
       </Typography>
     </Grid>
   ),
   [EthKVStoreKeys.WebhookUrl]: ({ webhook_url }) => (
     <Grid container sx={{ flexDirection: 'column', gap: '0.75rem' }}>
-      <Typography variant="subtitle2" width="100%">
+      <Typography variant="subtitle2" sx={{ width: '100%' }}>
         {t('operator.addKeysPage.existingKeys.webhookUrl')}
       </Typography>
-      <Typography variant="body1" width="100%">
+      <Typography variant="body1" sx={{ width: '100%' }}>
         <OptionalText text={webhook_url} />
       </Typography>
     </Grid>
   ),
   [EthKVStoreKeys.Role]: ({ role }) => (
     <Grid container sx={{ flexDirection: 'column', gap: '0.75rem' }}>
-      <Typography variant="subtitle2" width="100%">
+      <Typography variant="subtitle2" sx={{ width: '100%' }}>
         {t('operator.addKeysPage.existingKeys.role')}
       </Typography>
       <div>{role ? <Chip label={role} /> : <EmptyPlaceholder />}</div>
@@ -69,7 +69,7 @@ const existingKeysConfig: Record<
   ),
   [EthKVStoreKeys.JobTypes]: ({ job_types }) => (
     <Grid container sx={{ flexDirection: 'column', gap: '0.75rem' }}>
-      <Typography variant="subtitle2" width="100%">
+      <Typography variant="subtitle2" sx={{ width: '100%' }}>
         {t('operator.addKeysPage.existingKeys.jobType')}
       </Typography>
       <div>{job_types ? <Chips data={job_types} /> : <EmptyPlaceholder />}</div>
@@ -94,7 +94,7 @@ export function ExistingKeys({
   );
 
   return (
-    <Grid container sx={{ flexDirection: 'column', gap: '2rem' }}>
+    <Grid container sx={{ flexDirection: 'column', gap: 4 }}>
       <Typography variant="body4">
         {t('operator.addKeysPage.existingKeys.title')}
       </Typography>
@@ -111,7 +111,7 @@ export function ExistingKeys({
           startIcon={<ModeEditIcon sx={{ fill: colorPalette.white }} />}
           variant="contained"
         >
-          <Typography color={colorPalette.white} variant="buttonMedium">
+          <Typography variant="buttonMedium" sx={{ color: colorPalette.white }}>
             {t('operator.addKeysPage.existingKeys.editBtn')}
           </Typography>
         </Button>
