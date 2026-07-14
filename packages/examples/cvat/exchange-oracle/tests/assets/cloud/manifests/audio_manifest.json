@@ -1,0 +1,28 @@
+{
+  "version": 2,
+  "job_type": "audio_transcription",
+  "data": {
+    "media_url": "placeholder",
+    "regions_url": "placeholder",
+    "gt_url": "placeholder"
+  },
+  "annotation": {
+    "description": "Audio transcription task",
+    "user_guide_url": "https://localhost/audio-transcription-guide.md",
+    "labels": [{ "name": "speech" }],
+    "shared_attributes": [],
+    "validation": {
+      "target_score": 0.5,
+      "target_metric": "wer"
+    },
+    "qualifications": [],
+    "details": {
+      "max_time": 1800,
+      "normalizer": "basic",
+      "max_segment_duration": 120,
+      "min_gt_span_duration": 20,
+      "min_composition": { "gt": 2, "ds": 2 },
+      "validation_overhead": 20
+    }
+  }
+}

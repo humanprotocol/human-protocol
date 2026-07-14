@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import Any, Literal
 
 from pydantic import AnyUrl, BaseModel, ConfigDict, Field, model_validator
@@ -138,6 +139,8 @@ class JobManifest(BaseModel):
     def parse_task_specific_params(cls, values: dict[str, Any]) -> dict[str, Any]:
         if not isinstance(values, dict):
             raise NotImplementedError
+
+        values = deepcopy(values)  # copy before mutating
 
         job_type = values.get("job_type")
 
