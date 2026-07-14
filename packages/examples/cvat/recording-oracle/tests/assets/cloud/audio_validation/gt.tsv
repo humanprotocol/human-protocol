@@ -1,0 +1,7 @@
+filename	start	stop	label	text	span_id
+audio1.wav	0:01:30.000000	0:01:52.000000	speech	gt s1 0 text	s1
+audio2.wav	0:01:30.000000	0:01:38.000000	speech	gt s2 1 text	s2
+audio2.wav	0:01:46.000000	0:01:52.000000	speech	gt s2 1 text	s2
+audio3.wav	0:01:20.000000	0:01:26.000000	speech	gt s3 2 text	s3
+audio3.wav	0:01:32.000000	0:01:38.000000	speech	gt s3 2 text	s3
+audio3.wav	0:01:44.000000	0:01:50.000000	speech	gt s3 2 text	s3

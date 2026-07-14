@@ -21,20 +21,18 @@ from src.handlers.job_creation import handlers
 from src.handlers.job_creation.builders.audio.transcription import _parse_regions_tsv
 from src.services.cloud.utils import BucketAccessInfo, make_client
 
+from tests.utils.audio_transcription import (
+    MEDIA_DURATION_S,
+    MEDIA_FILES,
+    build_gt_tsv,
+    build_regions_tsv,
+)
 from tests.utils.constants import ESCROW_ADDRESS
 from tests.utils.setup_cvat import get_session
 
 CHAIN_ID = Networks.localhost.value
 
 MANIFEST_PATH = "tests/assets/cloud/manifests/audio_manifest.json"
-
-
-def _ts(seconds: float) -> str:
-    """Render seconds as an ``H:MM:SS.ffffff`` timestamp (the region/GT TSV format)."""
-    h = int(seconds // 3600)
-    m = int((seconds % 3600) // 60)
-    s = seconds - h * 3600 - m * 60
-    return f"{h}:{m:02d}:{s:09.6f}"
 
 
 def _generate_wav(path: Path, *, duration_s: int) -> None:
@@ -81,35 +79,8 @@ def fxt_audio_transcription_input(tmp_path: Path):
     input_bucket = "datasets"
     input_prefix = "audio_test"
 
-    media_duration_s = 120
-    ds_len = 10.0
-    ds_rois = {
-        "audio1.wav": [30.0, 45.0, 60.0, 75.0],
-        "audio2.wav": [30.0, 45.0, 60.0],
-        "audio3.wav": [10.0, 25.0, 40.0, 55.0],
-        "audio4.wav": [10.0, 25.0, 40.0],
-        "audio5.wav": [10.0, 25.0],
-    }
-    ds_rois_tsv = "filename\tstart\tstop\tlabel\n" + "".join(
-        f"{filename}\t{_ts(start)}\t{_ts(start + ds_len)}\tspeech\n"
-        for filename, starts in ds_rois.items()
-        for start in starts
-    )
-    media_files = list(ds_rois)
-
-    # 3 GT spans (the honeypot source) with 1, 2 and 3 regions respectively. Each span covers
-    # >= min_gt_span_duration=20s (first region start .. last region stop), and all sit after their
-    # recording's DS regions so GT and DS stay disjoint.
-    gt_rois = [
-        ("s1", "audio1.wav", [(90.0, 112.0)]),
-        ("s2", "audio2.wav", [(90.0, 98.0), (106.0, 112.0)]),
-        ("s3", "audio3.wav", [(80.0, 86.0), (92.0, 98.0), (104.0, 110.0)]),
-    ]
-    gt_tsv = "filename\tstart\tstop\tlabel\ttext\tspan_id\n" + "".join(
-        f"{filename}\t{_ts(start)}\t{_ts(stop)}\tspeech\tgt {span_id} {roi_idx} text\t{span_id}\n"
-        for roi_idx, (span_id, filename, regions) in enumerate(gt_rois)
-        for start, stop in regions
-    )
+    ds_rois_tsv = build_regions_tsv()
+    gt_tsv = build_gt_tsv()
 
     with open(MANIFEST_PATH) as f:
         manifest = json.load(f)
@@ -122,9 +93,9 @@ def fxt_audio_transcription_input(tmp_path: Path):
 
     try:
         client = make_client(BucketAccessInfo.parse_obj(parse_manifest(manifest).data.media_url))
-        for filename in media_files:
+        for filename in MEDIA_FILES:
             wav_path = tmp_path / filename
-            _generate_wav(wav_path, duration_s=media_duration_s)
+            _generate_wav(wav_path, duration_s=MEDIA_DURATION_S)
             client.create_file(f"{input_prefix}/media/{filename}", wav_path.read_bytes())
 
         client.create_file(f"{input_prefix}/regions.tsv", ds_rois_tsv.encode())
