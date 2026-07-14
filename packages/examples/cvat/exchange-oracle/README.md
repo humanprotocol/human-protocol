@@ -130,7 +130,7 @@ command, applies migrations, and writes to a mounted output dir (the recording-o
 visible in the container, so mount it and pass its path):
 
 ```sh
-docker compose -p "test" \
+docker compose -p eo-test \
   -f docker-compose.test.yml \
   -f docker-compose.test.head.yml \
   -f docker-compose.test.head.dev.yml \

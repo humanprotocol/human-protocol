@@ -9,7 +9,7 @@ Run this script whenever the builder output layout or the shared audio task setu
 Easiest is to run it inside the test suite container. It reuses the test service, and writes the
 fixture to a mounted output dir. Call from the exchange-oracle dir:
 
-    docker compose -p test \
+    docker compose -p eo-test \
       -f docker-compose.test.yml \\ -f docker-compose.test.head.yml \\ -f
       docker-compose.test.head.dev.yml \\ run --rm \\ -v
       "$(pwd)/../recording-oracle/tests/assets/cloud/audio_validation:/out" \\ test sh -c "alembic
