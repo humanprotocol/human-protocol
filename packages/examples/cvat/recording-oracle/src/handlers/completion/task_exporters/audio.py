@@ -66,9 +66,7 @@ class AudioTaskExporter(TaskExporter):
         rows.sort(key=lambda r: (r["filename"], parse_time(r["start"]).total_seconds()))
 
         buffer = io.StringIO()
-        writer = csv.DictWriter(
-            buffer, fieldnames=columns, delimiter="\t", extrasaction="ignore"
-        )
+        writer = csv.DictWriter(buffer, fieldnames=columns, delimiter="\t", extrasaction="ignore")
         writer.writeheader()
         for global_id, row in enumerate(rows):
             writer.writerow({**{c: "" for c in columns}, **row, "id": global_id})

@@ -129,7 +129,9 @@ class ManifestChangeTest:
             logger = mock.Mock(Logger)
 
             common_lock_es.enter_context(
-                mock.patch("src.handlers.completion.task_exporters.image.BucketAccessInfo.parse_obj")
+                mock.patch(
+                    "src.handlers.completion.task_exporters.image.BucketAccessInfo.parse_obj"
+                )
             )
 
             common_lock_es.enter_context(
@@ -156,7 +158,9 @@ class ManifestChangeTest:
             )
 
             mock_get_task_data_meta = common_lock_es.enter_context(
-                mock.patch("src.handlers.validation.quality_checkers.image.cvat_api.get_task_data_meta")
+                mock.patch(
+                    "src.handlers.validation.quality_checkers.image.cvat_api.get_task_data_meta"
+                )
             )
             mock_get_task_data_meta.return_value = mock.Mock(
                 cvat_api.models.IDataMetaRead,
@@ -164,7 +168,9 @@ class ManifestChangeTest:
             )
 
             mock_get_task_labels = common_lock_es.enter_context(
-                mock.patch("src.handlers.validation.quality_checkers.image.cvat_api.get_task_labels")
+                mock.patch(
+                    "src.handlers.validation.quality_checkers.image.cvat_api.get_task_labels"
+                )
             )
             mock_get_task_labels.return_value = [label.name for label in manifest.annotation.labels]
 
@@ -333,7 +339,9 @@ class ValidationLogicTest:
             logger = mock.Mock(Logger)
 
             common_lock_es.enter_context(
-                mock.patch("src.handlers.completion.task_exporters.image.BucketAccessInfo.parse_obj")
+                mock.patch(
+                    "src.handlers.completion.task_exporters.image.BucketAccessInfo.parse_obj"
+                )
             )
 
             mock_make_cloud_client = common_lock_es.enter_context(
@@ -357,7 +365,9 @@ class ValidationLogicTest:
             )
 
             mock_get_task_data_meta = common_lock_es.enter_context(
-                mock.patch("src.handlers.validation.quality_checkers.image.cvat_api.get_task_data_meta")
+                mock.patch(
+                    "src.handlers.validation.quality_checkers.image.cvat_api.get_task_data_meta"
+                )
             )
             mock_get_task_data_meta.return_value = mock.Mock(
                 cvat_api.models.IDataMetaRead,
@@ -365,7 +375,9 @@ class ValidationLogicTest:
             )
 
             mock_get_task_labels = common_lock_es.enter_context(
-                mock.patch("src.handlers.validation.quality_checkers.image.cvat_api.get_task_labels")
+                mock.patch(
+                    "src.handlers.validation.quality_checkers.image.cvat_api.get_task_labels"
+                )
             )
             mock_get_task_labels.return_value = [label.name for label in manifest.annotation.labels]
 
@@ -568,7 +580,9 @@ class ValidationLogicTest:
             logger = mock.Mock(Logger)
 
             common_lock_es.enter_context(
-                mock.patch("src.handlers.completion.task_exporters.image.BucketAccessInfo.parse_obj")
+                mock.patch(
+                    "src.handlers.completion.task_exporters.image.BucketAccessInfo.parse_obj"
+                )
             )
 
             mock_make_cloud_client = common_lock_es.enter_context(
@@ -591,7 +605,9 @@ class ValidationLogicTest:
             )
 
             mock_get_task_data_meta = common_lock_es.enter_context(
-                mock.patch("src.handlers.validation.quality_checkers.image.cvat_api.get_task_data_meta")
+                mock.patch(
+                    "src.handlers.validation.quality_checkers.image.cvat_api.get_task_data_meta"
+                )
             )
             mock_get_task_data_meta.return_value = mock.Mock(
                 cvat_api.models.IDataMetaRead,
@@ -599,7 +615,9 @@ class ValidationLogicTest:
             )
 
             mock_get_task_labels = common_lock_es.enter_context(
-                mock.patch("src.handlers.validation.quality_checkers.image.cvat_api.get_task_labels")
+                mock.patch(
+                    "src.handlers.validation.quality_checkers.image.cvat_api.get_task_labels"
+                )
             )
             mock_get_task_labels.return_value = [label.name for label in manifest.annotation.labels]
 
@@ -685,7 +703,9 @@ class ValidationLogicTest:
             logger = mock.Mock(Logger)
 
             common_lock_es.enter_context(
-                mock.patch("src.handlers.completion.task_exporters.image.BucketAccessInfo.parse_obj")
+                mock.patch(
+                    "src.handlers.completion.task_exporters.image.BucketAccessInfo.parse_obj"
+                )
             )
 
             mock_make_cloud_client = common_lock_es.enter_context(
@@ -710,7 +730,9 @@ class ValidationLogicTest:
 
             # All tasks have the same frames
             mock_get_task_data_meta = common_lock_es.enter_context(
-                mock.patch("src.handlers.validation.quality_checkers.image.cvat_api.get_task_data_meta")
+                mock.patch(
+                    "src.handlers.validation.quality_checkers.image.cvat_api.get_task_data_meta"
+                )
             )
             mock_get_task_data_meta.return_value = mock.Mock(
                 cvat_api.models.IDataMetaRead,
@@ -866,7 +888,9 @@ class ValidationLogicTest:
             logger = logging.getLogger()
 
             common_lock_es.enter_context(
-                mock.patch("src.handlers.completion.task_exporters.image.BucketAccessInfo.parse_obj")
+                mock.patch(
+                    "src.handlers.completion.task_exporters.image.BucketAccessInfo.parse_obj"
+                )
             )
 
             mock_make_cloud_client = common_lock_es.enter_context(
@@ -891,7 +915,9 @@ class ValidationLogicTest:
 
             # All tasks have the same frames
             mock_get_task_data_meta = common_lock_es.enter_context(
-                mock.patch("src.handlers.validation.quality_checkers.image.cvat_api.get_task_data_meta")
+                mock.patch(
+                    "src.handlers.validation.quality_checkers.image.cvat_api.get_task_data_meta"
+                )
             )
             mock_get_task_data_meta.return_value = mock.Mock(
                 cvat_api.models.IDataMetaRead,
@@ -1020,7 +1046,9 @@ class ValidationLogicTest:
             logger = logging.getLogger()
 
             common_lock_es.enter_context(
-                mock.patch("src.handlers.completion.task_exporters.image.BucketAccessInfo.parse_obj")
+                mock.patch(
+                    "src.handlers.completion.task_exporters.image.BucketAccessInfo.parse_obj"
+                )
             )
 
             mock_make_cloud_client = common_lock_es.enter_context(
@@ -1045,7 +1073,9 @@ class ValidationLogicTest:
 
             # All tasks have the same frames
             mock_get_task_data_meta = common_lock_es.enter_context(
-                mock.patch("src.handlers.validation.quality_checkers.image.cvat_api.get_task_data_meta")
+                mock.patch(
+                    "src.handlers.validation.quality_checkers.image.cvat_api.get_task_data_meta"
+                )
             )
             mock_get_task_data_meta.return_value = mock.Mock(
                 cvat_api.models.IDataMetaRead,

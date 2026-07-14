@@ -71,7 +71,7 @@ class AudioTaskQualityChecker(TaskQualityChecker):
             "granularity": Granularity.CHARACTER,
             "align": AlignMode.CHAR,
             "metric": Metric.EQUALITY,
-        }
+        },
     }
 
     def _validate_jobs(self) -> None:
@@ -81,8 +81,7 @@ class AudioTaskQualityChecker(TaskQualityChecker):
         if metric not in self.ALLOWED_METRICS:
             raise NotImplementedError(
                 "Audio transcription validation only supports {} metrics, got '{}'".format(
-                    ', '.join(v.value for v in self.ALLOWED_METRICS),
-                    metric.value
+                    ", ".join(v.value for v in self.ALLOWED_METRICS), metric.value
                 )
             )
 
