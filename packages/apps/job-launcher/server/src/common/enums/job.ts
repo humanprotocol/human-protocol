@@ -32,11 +32,13 @@ export enum HCaptchaJobType {
 }
 
 export enum CvatJobType {
+  IMAGE_LABEL_BINARY = 'image_label_binary',
   IMAGE_POINTS = 'image_points',
   IMAGE_POLYGONS = 'image_polygons',
   IMAGE_BOXES = 'image_boxes',
   IMAGE_BOXES_FROM_POINTS = 'image_boxes_from_points',
   IMAGE_SKELETONS_FROM_BOXES = 'image_skeletons_from_boxes',
+  AUDIO_TRANSCRIPTION = 'audio_transcription',
 }
 
 /** @deprecated Audino jobs are no longer supported. */
@@ -45,12 +47,14 @@ export enum AudinoJobType {
   AUDIO_ATTRIBUTE_ANNOTATION = 'audio_attribute_annotation',
 }
 
-export const JobType = [
-  ...Object.values(CvatJobType),
-  ...Object.values(FortuneJobType),
-  ...Object.values(HCaptchaJobType),
-  ...Object.values(AudinoJobType),
-];
+export const JobType = Array.from(
+  new Set([
+    ...Object.values(CvatJobType),
+    ...Object.values(FortuneJobType),
+    ...Object.values(HCaptchaJobType),
+    ...Object.values(AudinoJobType),
+  ]),
+);
 
 export type JobRequestType = CvatJobType | FortuneJobType | HCaptchaJobType;
 
@@ -62,7 +66,7 @@ export enum JobCaptchaRequestType {
   IMAGE_LABEL_BINARY = 'image_label_binary',
   IMAGE_LABEL_MULTIPLE_CHOICE = 'image_label_multiple_choice',
   IMAGE_LABEL_AREA_SELECT = 'image_label_area_select',
-  TEXT_FREEE_NTRY = 'text_free_entry',
+  TEXT_FREE_ENTRY = 'text_free_entry',
 }
 
 export enum JobCaptchaShapeType {

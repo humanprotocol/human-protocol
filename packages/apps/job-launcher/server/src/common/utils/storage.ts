@@ -31,11 +31,13 @@ export function generateBucketUrl(
   if (
     (
       [
+        CvatJobType.IMAGE_LABEL_BINARY,
         CvatJobType.IMAGE_POLYGONS,
         CvatJobType.IMAGE_BOXES,
         CvatJobType.IMAGE_POINTS,
         CvatJobType.IMAGE_BOXES_FROM_POINTS,
         CvatJobType.IMAGE_SKELETONS_FROM_BOXES,
+        CvatJobType.AUDIO_TRANSCRIPTION,
       ] as JobRequestType[]
     ).includes(jobType) &&
     storageData.provider != StorageProviders.AWS &&
