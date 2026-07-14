@@ -7,7 +7,7 @@ import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { NoRecords } from '@/shared/components/ui/no-records';
 import { PageCardLoader } from '@/shared/components/ui/page-card';
-import { useUiConfig } from '@/shared/providers/ui-config-provider';
+import { useGetUiConfig } from '@/shared/hooks';
 import { useGetOracles } from '../hooks';
 import { useGetOraclesNotifications } from '../hooks/use-get-oracles-notifications';
 import { TabPanel } from './components';
@@ -30,15 +30,19 @@ export function JobsPage() {
     error,
   } = useGetOracles();
 
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useUiConfig();
+  const {
+    data: uiConfigData,
+    isPending: isPendingUiConfig,
+    isError: isErrorUiConfig,
+  } = useGetUiConfig();
 
   const { address: oracle_address } = useParams<{ address: string }>();
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState(0);
   const isMobile = useIsMobile();
 
-  const isError = isErrorGetOracles || isUiConfigError;
-  const isPending = isPendingGetOracles || isUiConfigLoading;
+  const isError = isErrorGetOracles || isErrorUiConfig;
+  const isPending = isPendingGetOracles || isPendingUiConfig;
   const { onError } = useGetOraclesNotifications();
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
@@ -115,7 +119,7 @@ export function JobsPage() {
                     <NoRecords />
                   ) : (
                     <AvailableJobsView
-                      chainIdsEnabled={uiConfig?.chainIdsEnabled ?? []}
+                      chainIdsEnabled={uiConfigData.chainIdsEnabled}
                     />
                   )}
                 </TabPanel>
@@ -124,7 +128,7 @@ export function JobsPage() {
                     <NoRecords />
                   ) : (
                     <MyJobsView
-                      chainIdsEnabled={uiConfig?.chainIdsEnabled ?? []}
+                      chainIdsEnabled={uiConfigData.chainIdsEnabled}
                     />
                   )}
                 </TabPanel>

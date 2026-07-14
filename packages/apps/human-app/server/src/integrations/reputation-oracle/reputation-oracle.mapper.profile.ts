@@ -62,10 +62,6 @@ import {
   ReportAbuseData,
   ReportAbuseParams,
 } from '../../modules/abuse/model/abuse.model';
-import {
-  EnrollExchangeApiKeysCommand,
-  EnrollExchangeApiKeysData,
-} from '../../modules/exchange-api-keys/model/exchange-api-keys.model';
 
 @Injectable()
 export class ReputationOracleProfile extends AutomapperProfile {
@@ -165,15 +161,6 @@ export class ReputationOracleProfile extends AutomapperProfile {
         mapper,
         ReportAbuseParams,
         ReportAbuseData,
-        namingConventions({
-          source: new CamelCaseNamingConvention(),
-          destination: new SnakeCaseNamingConvention(),
-        }),
-      );
-      createMap(
-        mapper,
-        EnrollExchangeApiKeysCommand,
-        EnrollExchangeApiKeysData,
         namingConventions({
           source: new CamelCaseNamingConvention(),
           destination: new SnakeCaseNamingConvention(),
