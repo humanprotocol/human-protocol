@@ -1134,14 +1134,19 @@ test-randomorder = ["pytest-randomly"]
 [[package]]
 name = "cvat-sdk"
 <<<<<<< HEAD
+<<<<<<< HEAD
 version = "2.70.0"
 =======
 version = "2.69.0"
 >>>>>>> 7c6ce118d (chore(cvat): relock poetry for the audio feature deps)
+=======
+version = "2.70.0"
+>>>>>>> cbbad7c89 (Bump cvat sdk)
 description = "Software Development Kit for CVAT"
 optional = false
 python-versions = ">=3.10"
 files = [
+<<<<<<< HEAD
 <<<<<<< HEAD
     {file = "cvat_sdk-2.70.0-py3-none-any.whl", hash = "sha256:6098b01bda86433d96e177cfce5e28dce2c19f7c0bd3b0e814b8d7e45b8e1a46"},
     {file = "cvat_sdk-2.70.0.tar.gz", hash = "sha256:4d9304bd8334b05b5e5504466cedf1f538a667f5274544398dec78bba4b47e83"},
@@ -1149,6 +1154,10 @@ files = [
     {file = "cvat_sdk-2.69.0-py3-none-any.whl", hash = "sha256:f239d3cb609f45e4fc1d7cce1e49fe920d515be19058648fb79eba923ba0023e"},
     {file = "cvat_sdk-2.69.0.tar.gz", hash = "sha256:799ff1a763e1444a515edafcd162b7ab2fa89638211872bad139c63796a9dc7a"},
 >>>>>>> 7c6ce118d (chore(cvat): relock poetry for the audio feature deps)
+=======
+    {file = "cvat_sdk-2.70.0-py3-none-any.whl", hash = "sha256:6098b01bda86433d96e177cfce5e28dce2c19f7c0bd3b0e814b8d7e45b8e1a46"},
+    {file = "cvat_sdk-2.70.0.tar.gz", hash = "sha256:4d9304bd8334b05b5e5504466cedf1f538a667f5274544398dec78bba4b47e83"},
+>>>>>>> cbbad7c89 (Bump cvat sdk)
 ]
 
 [package.dependencies]
@@ -6835,7 +6844,11 @@ propcache = ">=0.2.1"
 lock-version = "2.0"
 python-versions = "^3.10,<3.13"
 <<<<<<< HEAD
+<<<<<<< HEAD
 content-hash = "9a7cd1771fe2f604ab5a55485a5f9338797c503e9ec389cefd8ff8030e6bb288"
 =======
 content-hash = "e9469d22ecf7b753946d0a9a78b8e597ef90123dde33916b2ec5c0a6571081af"
 >>>>>>> 7c6ce118d (chore(cvat): relock poetry for the audio feature deps)
+=======
+content-hash = "843f77239edc1007d9c112b8555d0e7043b08d083f046a6d76ccaf1adeb5ded6"
+>>>>>>> cbbad7c89 (Bump cvat sdk)
