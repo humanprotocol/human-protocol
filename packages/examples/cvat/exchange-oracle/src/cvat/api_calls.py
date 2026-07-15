@@ -590,7 +590,7 @@ def get_task_upload_status(cvat_id: int) -> tuple[RequestStatus, str]:
                 # Double check task status - the request can be removed already
                 # TODO: remove this workaround when there is a stable replacement
                 task = api_client.tasks_api.retrieve(cvat_id)[0]
-                if task.size > 0:
+                if task.media_type:
                     status = RequestStatus.FINISHED
                     reason = ""
                 else:
