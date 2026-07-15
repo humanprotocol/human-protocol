@@ -303,6 +303,7 @@ class AudioTranscriptionTaskBuilder(TaskBuilderBase):
         media_paths: dict[str, Path] = {}
         for filename in sorted(referenced):
             local_path = media_dir / PurePosixPath(filename)
+            local_path = local_path.resolve().relative_to(media_dir)
             local_path.parent.mkdir(parents=True, exist_ok=True)
 
             data = media_client.download_file(_bucket_key(media_bucket.path, filename))
