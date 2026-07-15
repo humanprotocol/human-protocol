@@ -32,7 +32,6 @@ export enum HCaptchaJobType {
 }
 
 export enum CvatJobType {
-  IMAGE_LABEL_BINARY = 'image_label_binary',
   IMAGE_POINTS = 'image_points',
   IMAGE_POLYGONS = 'image_polygons',
   IMAGE_BOXES = 'image_boxes',
@@ -63,7 +62,6 @@ export enum JobCaptchaMode {
 }
 
 export enum JobCaptchaRequestType {
-  IMAGE_LABEL_BINARY = 'image_label_binary',
   IMAGE_LABEL_MULTIPLE_CHOICE = 'image_label_multiple_choice',
   IMAGE_LABEL_AREA_SELECT = 'image_label_area_select',
   TEXT_FREE_ENTRY = 'text_free_entry',

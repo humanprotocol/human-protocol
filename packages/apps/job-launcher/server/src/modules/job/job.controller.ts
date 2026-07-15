@@ -148,7 +148,7 @@ export class JobController {
     status: 401,
     description: 'Unauthorized. Missing or invalid credentials.',
   })
-  @Post('/unknown-manifest')
+  @Post('/manifest-quick-launch')
   public async createJobWithUnknownManifest(
     @Body() data: JobUnknownManifestDto,
     @Request() req: RequestWithUser,

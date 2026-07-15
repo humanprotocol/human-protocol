@@ -31,7 +31,6 @@ export function generateBucketUrl(
   if (
     (
       [
-        CvatJobType.IMAGE_LABEL_BINARY,
         CvatJobType.IMAGE_POLYGONS,
         CvatJobType.IMAGE_BOXES,
         CvatJobType.IMAGE_POINTS,

@@ -26,7 +26,6 @@ export const SENDGRID_API_KEY_DISABLED = 'sendgrid-disabled';
 export const HEADER_SIGNATURE_KEY = 'human-signature';
 
 export const CVAT_JOB_TYPES = [
-  CvatJobType.IMAGE_LABEL_BINARY,
   CvatJobType.IMAGE_POLYGONS,
   CvatJobType.IMAGE_BOXES,
   CvatJobType.IMAGE_POINTS,

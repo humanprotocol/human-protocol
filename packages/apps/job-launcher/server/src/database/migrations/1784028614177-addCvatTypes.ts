@@ -10,7 +10,6 @@ export class AddCvatTypes1784028614177 implements MigrationInterface {
         `);
     await queryRunner.query(`
             CREATE TYPE "hmt"."jobs_request_type_enum" AS ENUM(
-                'image_label_binary',
                 'image_points',
                 'image_polygons',
                 'image_boxes',
