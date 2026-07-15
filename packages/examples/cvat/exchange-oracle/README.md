@@ -116,18 +116,10 @@ docker compose -p eo-test \
 
 The dev setup mounts the local directory to speed the things up.
 
-#### Regenerating the audio-validation fixture
+#### Regenerating the test fixtures
 
-The recording oracle's audio-transcription validation test runs against a golden fixture — real
-builder output (`gt.tsv`, `assignments.json`, `task_clips.json`, `manifest.json`) vendored under
-`recording-oracle/tests/assets/cloud/audio_validation/`. Regenerate it whenever the builder output
-layout or the shared audio task setup (`tests/utils/audio_transcription.py`) changes.
-
-The wrapper script `tests/assets/utils/gen_audio_validation_fixture.py` runs the real EO builder
-once (against a mocked CVAT) and writes the fixture. Easiest is to run it inside the test-suite
-container, which already has the env, minio and postgres — it overrides the service's `pytest`
-command, applies migrations, and writes to a mounted output dir (the recording-oracle tree isn't
-visible in the container, so mount it and pass its path):
+Recording Oracle tests run against the fixtures produced by the Exchange Oracle implementation.
+Regenerate them whenever the builder output layout or the shared task setups change.
 
 ```sh
 docker compose -p eo-test \
@@ -139,13 +131,3 @@ docker compose -p eo-test \
   test sh -c "alembic upgrade head && PYTHONPATH=. \
     python tests/assets/utils/gen_audio_validation_fixture.py /out"
 ```
-
-To run it directly instead (against your own reachable minio + postgres, with the test-service env
-exported and migrations applied):
-
-```sh
-PYTHONPATH=. python tests/assets/utils/gen_audio_validation_fixture.py [OUTPUT_DIR]
-```
-
-`OUTPUT_DIR` defaults to the recording-oracle assets tree; pass a path to write elsewhere (e.g. a
-scratch dir to diff before committing).

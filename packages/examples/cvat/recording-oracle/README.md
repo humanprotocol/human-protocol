@@ -110,3 +110,19 @@ docker compose -p ro-test \
 ```
 
 The dev setup mounts the local directory to speed the things up.
+
+#### Regenerating the test fixtures
+
+Recording Oracle tests run against the fixtures produced by the Exchange Oracle implementation.
+Regenerate them whenever the builder output layout or the shared task setups change.
+
+```sh
+cd ../exchange-oracle && docker compose -p eo-test \
+  -f docker-compose.test.yml \
+  -f docker-compose.test.head.yml \
+  -f docker-compose.test.head.dev.yml \
+  run --rm \
+  -v "$(pwd)/../recording-oracle/tests/assets/cloud/audio_validation:/out" \
+  test sh -c "alembic upgrade head && PYTHONPATH=. \
+    python tests/assets/utils/gen_audio_validation_fixture.py /out"
+```
