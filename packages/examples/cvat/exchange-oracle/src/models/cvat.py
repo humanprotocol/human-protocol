@@ -30,6 +30,7 @@ class Project(BaseUUID):
     )  # TODO: extract into a separate model
     chain_id = Column(Integer, Enum(Networks), nullable=False)
     bucket_url = Column(String, nullable=False)
+    assignment_bounty = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     cvat_webhook_id = Column(Integer, nullable=True)

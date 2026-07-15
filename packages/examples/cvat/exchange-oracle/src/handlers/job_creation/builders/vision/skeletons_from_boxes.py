@@ -51,6 +51,7 @@ from src.handlers.job_creation.exceptions import (
 from src.handlers.job_creation.utils import (
     MaybeUnset,
     filter_image_files,
+    get_assignment_bounty,
     make_cvat_cloud_storage_params,
     strip_bucket_prefix,
     unset,
@@ -1328,14 +1329,20 @@ class SkeletonsFromBoxesTaskBuilder(TaskBuilderBase):
                     project_id = db_service.create_project(
                         session,
                         cvat_project.id,
-                        cvat_cloud_storage.id,
-                        self.manifest.annotation.type,
-                        self.escrow_address,
-                        self.chain_id,
-                        oracle_bucket.to_url().rstrip("/")
+                        cvat_cloudstorage_id=cvat_cloud_storage.id,
+                        job_type=self.manifest.annotation.type,
+                        escrow_address=self.escrow_address,
+                        chain_id=self.chain_id,
+                        bucket_url=oracle_bucket.to_url().rstrip("/")
                         + "/"
                         + compose_data_bucket_prefix(self.escrow_address, self.chain_id),
                         cvat_webhook_id=cvat_webhook.id,
+                        assignment_bounty=get_assignment_bounty(
+                            self.manifest,
+                            escrow_address=self.escrow_address,
+                            chain_id=self.chain_id,
+                            job_count=total_jobs,
+                        ),
                     )
                     created_projects.append(project_id)
 

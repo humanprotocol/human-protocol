@@ -1,15 +1,18 @@
 from __future__ import annotations
 
 import os
+from decimal import Decimal
 from typing import TYPE_CHECKING, TypeVar
 
 from datumaro.util.image import IMAGE_EXTENSIONS
 
 import src.cvat.api_calls as cvat_api
+from src.chain.escrow import get_escrow
 from src.core.tasks import TaskTypes
 from src.services.cloud import CloudProviders
 
 if TYPE_CHECKING:
+    from src.core.manifest import ManifestBase
     from src.core.manifest.v1 import JobManifest
     from src.services.cloud.utils import BucketAccessInfo
 
@@ -34,6 +37,29 @@ class _Undefined:
 unset = _Undefined()
 
 MaybeUnset = T | _Undefined
+
+
+def get_assignment_bounty(
+    manifest: ManifestBase, escrow_address: str, chain_id: int, *, job_count: int
+) -> str | None:
+    match manifest.version:
+        case 1:
+            return str(manifest.job_bounty)
+        case 2:
+            return _get_assignment_bounty_from_escrow(escrow_address, chain_id, job_count)
+        case _ as version:
+            raise NotImplementedError(f"Unexpected manifest version '{version}'")
+
+
+def _get_assignment_bounty_from_escrow(
+    escrow_address: str, chain_id: int, job_count: int
+) -> str | None:
+    # TODO: refine (fees, already-paid amount, token decimals). Rough split of the escrow's total
+    # funds across the jobs.
+    if not job_count:
+        return None
+    escrow = get_escrow(chain_id, escrow_address)
+    return str(Decimal(escrow.total_funded_amount) / job_count)
 
 
 def is_image(path: str) -> bool:

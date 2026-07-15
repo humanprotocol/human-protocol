@@ -34,6 +34,7 @@ from src.handlers.job_creation.exceptions import (
 from src.handlers.job_creation.utils import (
     MaybeUnset,
     filter_image_files,
+    get_assignment_bounty,
     make_cvat_cloud_storage_params,
     make_cvat_label_configuration,
     unset,
@@ -154,12 +155,15 @@ class SimpleTaskBuilder(TaskBuilderBase):
             project_id = db_service.create_project(
                 session,
                 cvat_project.id,
-                cloud_storage.id,
-                manifest.annotation.type,
-                escrow_address,
-                chain_id,
-                data_bucket.to_url(),
+                cvat_cloudstorage_id=cloud_storage.id,
+                job_type=manifest.annotation.type,
+                escrow_address=escrow_address,
+                chain_id=chain_id,
+                bucket_url=data_bucket.to_url(),
                 cvat_webhook_id=cvat_webhook.id,
+                assignment_bounty=get_assignment_bounty(
+                    manifest, escrow_address=escrow_address, chain_id=chain_id, job_count=total_jobs
+                ),
             )
 
             db_service.get_project_by_id(session, project_id, for_update=True)  # lock the row

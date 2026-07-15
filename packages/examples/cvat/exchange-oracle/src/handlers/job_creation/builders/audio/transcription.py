@@ -40,6 +40,7 @@ from src.handlers.job_creation.exceptions import (
 )
 from src.handlers.job_creation.utils import (
     MaybeUnset,
+    get_assignment_bounty,
     make_cvat_cloud_storage_params,
     unset,
 )
@@ -606,12 +607,18 @@ class AudioTranscriptionTaskBuilder(TaskBuilderBase):
             project_id = db_service.create_project(
                 session,
                 cvat_project.id,
-                cloud_storage.id,
-                TaskTypes.audio_transcription,
-                escrow_address,
-                chain_id,
-                self._oracle_data_bucket.to_url(),
+                cvat_cloudstorage_id=cloud_storage.id,
+                job_type=TaskTypes.audio_transcription,
+                escrow_address=escrow_address,
+                chain_id=chain_id,
+                bucket_url=self._oracle_data_bucket.to_url(),
                 cvat_webhook_id=cvat_webhook.id,
+                assignment_bounty=get_assignment_bounty(
+                    self.manifest,
+                    escrow_address=escrow_address,
+                    chain_id=chain_id,
+                    job_count=len(self._assignments),
+                ),
             )
             db_service.get_project_by_id(session, project_id, for_update=True)  # lock the row
 

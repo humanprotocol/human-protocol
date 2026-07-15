@@ -54,6 +54,7 @@ def batched(iterable: Iterable, *, batch_size: int) -> Iterable[Any]:
 def create_project(
     session: Session,
     cvat_id: int,
+    *,
     cvat_cloudstorage_id: int,
     job_type: str,
     escrow_address: str,
@@ -61,6 +62,7 @@ def create_project(
     bucket_url: str,
     cvat_webhook_id: int | None = None,
     status: ProjectStatuses = ProjectStatuses.creation,
+    assignment_bounty: str | None = None,
 ) -> str:
     """
     Create a project from CVAT.
@@ -76,6 +78,7 @@ def create_project(
         chain_id=chain_id,
         bucket_url=bucket_url,
         cvat_webhook_id=cvat_webhook_id,
+        assignment_bounty=assignment_bounty,
     )
 
     session.add(project)

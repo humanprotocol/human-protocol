@@ -9,8 +9,6 @@ services:
       PGDATA: '/var/lib/postgresql/data/pgdata'
     networks:
       - test-network
-    ports:
-      - 5432:5432
 
   redis:
     container_name: oracle-redis
@@ -21,8 +19,6 @@ services:
       "--save", "60", "100",
       "--appendonly", "yes",
     ]
-    ports:
-      - 6379:6379
     networks:
       - test-network
 

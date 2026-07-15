@@ -20,6 +20,7 @@ services:
       STORAGE_PROVIDER: 'aws'
       ENABLE_CUSTOM_CLOUD_HOST: 'Yes'
       REDIS_HOST: 'redis'
+      REDIS_PORT: 6379
     depends_on:
       postgres:
         condition: service_started
