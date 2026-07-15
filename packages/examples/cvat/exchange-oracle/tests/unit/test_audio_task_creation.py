@@ -147,9 +147,7 @@ def test_create_audio_transcription_task(fxt_audio_transcription_input):
     with (
         patch.object(handlers, "get_escrow_manifest", return_value=manifest),
         patch("src.handlers.job_creation.builders.audio.transcription.cvat_api", cvat_api),
-        patch(
-            "src.handlers.job_creation.utils.get_escrow", return_value=escrow
-        ) as mock_get_escrow,
+        patch("src.handlers.job_creation.utils.get_escrow", return_value=escrow) as mock_get_escrow,
     ):
         handlers.create_task(ESCROW_ADDRESS, CHAIN_ID)
 

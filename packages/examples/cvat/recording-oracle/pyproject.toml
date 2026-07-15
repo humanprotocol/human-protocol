@@ -38,12 +38,13 @@ virtualenv = "<21"  # 21.x drops APIs that poetry's build isolation relies on
 [tool.ruff]
 line-length = 100
 target-version = "py310"
+extend-exclude = ["libs/"]
 
 
 [tool.ruff.lint]
 select = ["ALL"]
 unfixable = [
-    "RUF005",  # messes up concantenation with numpy structures
+    "RUF005",  # messes up concatenation with numpy structures
 ]
 ignore = [
     "W191",    # Rules conflicting with ruff format (https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules)
