@@ -1,5 +1,4 @@
 import hmac
-import json
 import uuid
 from collections.abc import Generator, Sequence
 from contextlib import ExitStack, contextmanager
@@ -17,14 +16,12 @@ from src.models.cvat import Assignment, Job, Project, Task, User
 from tests.utils.constants import ESCROW_ADDRESS
 
 
-def generate_cvat_signature(data: dict):
-    b_data = json.dumps(data).encode("utf-8")
-
+def generate_cvat_signature(body: bytes) -> str:
     return (
         "sha256="
         + hmac.new(
             CvatConfig.webhook_secret.encode("utf-8"),
-            b_data,
+            body,
             digestmod=sha256,
         ).hexdigest()
     )

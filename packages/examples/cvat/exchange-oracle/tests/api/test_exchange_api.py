@@ -1540,9 +1540,9 @@ def test_can_list_jobs_200_check_updated_at(client: TestClient, session: Session
                     "chain_id": cvat_project.chain_id,
                 },
             )
-            assert (
-                response.status_code == 200
-            ), f"Status: {response.status_code}, reason: {response.text}"
+            assert response.status_code == 200, (
+                f"Status: {response.status_code}, reason: {response.text}"
+            )
 
             response = client.get(
                 "/job",

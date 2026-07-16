@@ -16,8 +16,7 @@ from src.utils.time import utcnow
 class UserHasUnfinishedAssignmentError(Exception):
     def __str__(self) -> str:
         return (
-            "There are unfinished assignments in this escrow. "
-            "Please complete or resign them first."
+            "There are unfinished assignments in this escrow. Please complete or resign them first."
         )
 
 

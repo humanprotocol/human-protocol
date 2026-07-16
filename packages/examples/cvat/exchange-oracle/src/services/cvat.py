@@ -789,9 +789,9 @@ def put_user(session: Session, wallet_address: str, cvat_email: str, cvat_id: in
     """
     Bind a CVAT username to a HUMAN App user
     """
-    assert not (
-        bool(cvat_email) ^ bool(cvat_id)
-    ), "cvat_email and cvat_id cannot be used separately"
+    assert not (bool(cvat_email) ^ bool(cvat_id)), (
+        "cvat_email and cvat_id cannot be used separately"
+    )
 
     user = User(wallet_address=wallet_address, cvat_email=cvat_email, cvat_id=cvat_id)
 
@@ -1181,9 +1181,9 @@ class CvatWebhookQueue:
         limit: int = 10,
         for_update: bool | ForUpdateParams = False,
     ) -> list[CvatWebhook]:
-        assert not (
-            event_type_in and event_type_not_in
-        ), f"{event_type_in} and {event_type_not_in} cannot be used together"
+        assert not (event_type_in and event_type_not_in), (
+            f"{event_type_in} and {event_type_not_in} cannot be used together"
+        )
 
         return (
             _maybe_for_update(session.query(CvatWebhook), enable=for_update)

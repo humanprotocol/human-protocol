@@ -70,4 +70,4 @@ class Page(fastapi_pagination.default.Page[T]):
         return super().create(items, params, total=total, **kwargs)
 
 
-__all__ = ["PaginationParams", "Page", "paginate"]
+__all__ = ["Page", "PaginationParams", "paginate"]
