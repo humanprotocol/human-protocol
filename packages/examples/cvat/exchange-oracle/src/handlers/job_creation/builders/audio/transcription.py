@@ -299,11 +299,11 @@ class AudioTranscriptionTaskBuilder(TaskBuilderBase):
 
         # download only the referenced media files
         referenced = set(regions_by_file) | set(gt_by_file)
-        media_dir = Path(self.exit_stack.enter_context(TemporaryDirectory()))
+        media_dir = Path(self.exit_stack.enter_context(TemporaryDirectory())).resolve()
         media_paths: dict[str, Path] = {}
         for filename in sorted(referenced):
-            local_path = media_dir / PurePosixPath(filename)
-            local_path = local_path.resolve().relative_to(media_dir)
+            local_path = (media_dir / PurePosixPath(filename)).resolve()
+            local_path.relative_to(media_dir)  # guard against path traversal attacks
             local_path.parent.mkdir(parents=True, exist_ok=True)
 
             data = media_client.download_file(_bucket_key(media_bucket.path, filename))
