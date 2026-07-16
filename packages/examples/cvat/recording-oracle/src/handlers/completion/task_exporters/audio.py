@@ -69,5 +69,5 @@ class AudioTaskExporter(TaskExporter):
         writer = csv.DictWriter(buffer, fieldnames=columns, delimiter="\t", extrasaction="ignore")
         writer.writeheader()
         for global_id, row in enumerate(rows):
-            writer.writerow({**{c: "" for c in columns}, **row, "id": global_id})
+            writer.writerow({**dict.fromkeys(columns, ""), **row, "id": global_id})
         return buffer.getvalue().encode("utf-8")

@@ -137,10 +137,10 @@ class _EscrowValidator:
             }
 
             if self.manifest.version == 1:
-                manifest = cast(manifest_utils.v1.JobManifest, self.manifest)
+                manifest = cast("manifest_utils.v1.JobManifest", self.manifest)
                 quality_threshold = manifest.validation.min_quality
             elif self.manifest.version == 2:
-                manifest = cast(manifest_utils.v2.JobManifest, self.manifest)
+                manifest = cast("manifest_utils.v2.JobManifest", self.manifest)
                 quality_threshold = manifest.annotation.validation.target_score
             else:
                 raise NotImplementedError(f"Unknown manifest version '{manifest.version}'")

@@ -5,8 +5,8 @@ from typing import TYPE_CHECKING
 
 from pydantic import AnyUrl, BaseModel, Field
 
-from src.core.manifest.shared import BucketUrl  # noqa: TCH001  # runtime-needed by pydantic
-from src.core.manifest.v2 import TargetMetrics  # noqa: TCH001  # runtime-needed by pydantic
+from src.core.manifest.shared import BucketUrl
+from src.core.manifest.v2 import TargetMetrics
 from src.core.tasks.errors import UnsupportedManifestError
 from src.utils.enums import BetterEnumMeta, StrEnum
 
