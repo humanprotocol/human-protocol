@@ -1,6 +1,5 @@
-from __future__ import annotations
-
-from typing import TYPE_CHECKING, Any, TypeVar
+from collections.abc import Sequence
+from typing import Any, TypeVar
 
 import fastapi_pagination.bases
 import fastapi_pagination.default
@@ -9,9 +8,6 @@ from fastapi_pagination.ext.sqlalchemy import paginate
 from pydantic import Field
 
 from src.core.config import Config
-
-if TYPE_CHECKING:
-    from collections.abc import Sequence
 
 FIRST_PAGE = 0
 
@@ -69,7 +65,7 @@ class Page(fastapi_pagination.default.Page[T]):
         *,
         total: int | None = None,
         **kwargs: Any,
-    ) -> Page[T]:
+    ) -> "Page[T]":
         assert isinstance(params, PaginationParams)
         return super().create(items, params, total=total, **kwargs)
 
