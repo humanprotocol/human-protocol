@@ -1,4 +1,5 @@
 import json
+import re
 import unittest
 import uuid
 from datetime import datetime, timedelta
@@ -217,7 +218,9 @@ class ServiceIntegrationTest(unittest.TestCase):
             manifest = json.load(data)
             manifest["annotation"]["qualifications"] = ["random_qualification"]
             mock_get_manifest.return_value = manifest
-            with pytest.raises(Exception, match="User doesn't have required qualifications."):
+            with pytest.raises(
+                Exception, match=re.escape("User doesn't have required qualifications.")
+            ):
                 create_assignment(ESCROW_ADDRESS, Networks.localhost, user_address, [])
 
     def test_create_assignment_with_required_qualifications(self):

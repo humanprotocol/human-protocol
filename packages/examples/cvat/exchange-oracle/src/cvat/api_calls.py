@@ -231,7 +231,7 @@ def create_cloudstorage(
             **request_kwargs,
         )  # CloudStorageWriteRequest
         try:
-            (data, response) = api_client.cloudstorages_api.create(
+            (data, _) = api_client.cloudstorages_api.create(
                 cloud_storage_write_request,
                 _content_type="multipart/form-data",
             )
@@ -253,7 +253,7 @@ def create_project(
             kwargs["labels"] = labels
 
         try:
-            (project, response) = api_client.projects_api.create(
+            (project, _) = api_client.projects_api.create(
                 models.ProjectWriteRequest(name=name, **kwargs)
             )
             if user_guide:
@@ -327,7 +327,7 @@ def create_cvat_webhook(project_id: int) -> models.WebhookRead:
             ],
         )  # WebhookWriteRequest
         try:
-            (data, response) = api_client.webhooks_api.create(
+            (data, _) = api_client.webhooks_api.create(
                 webhook_write_request,
             )
             return data
@@ -365,7 +365,7 @@ def get_cloudstorage_contents(cloudstorage_id: int) -> list[str]:
         try:
             (
                 content_data,
-                response,
+                _,
             ) = api_client.cloudstorages_api.retrieve_content(cloudstorage_id)
             return content_data
         except exceptions.ApiException as e:

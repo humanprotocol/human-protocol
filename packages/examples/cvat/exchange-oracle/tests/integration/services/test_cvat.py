@@ -366,7 +366,7 @@ class ServiceIntegrationTest:
     def test_can_get_free_job_if_exists(self):
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
 
-        (cvat_project, cvat_task, cvat_job) = create_project_task_and_job(
+        (cvat_project, _, cvat_job) = create_project_task_and_job(
             self.session, escrow_address, cvat_id=1
         )
         chain_id = cvat_project.chain_id
@@ -384,7 +384,7 @@ class ServiceIntegrationTest:
     def test_cannot_get_free_job_if_all_completed_and_not_project_checked_yet(self):
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
 
-        (cvat_project, cvat_task, cvat_job) = create_project_task_and_job(
+        (cvat_project, _, cvat_job) = create_project_task_and_job(
             self.session, escrow_address, cvat_id=1
         )
         chain_id = cvat_project.chain_id

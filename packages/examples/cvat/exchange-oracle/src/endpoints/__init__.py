@@ -14,7 +14,7 @@ from src.schemas import MetaResponse, ResponseError, ValidationErrorResponse
 greet_router = APIRouter()
 
 
-@greet_router.get("/", description="Endpoint describing the API", response_model=MetaResponse)
+@greet_router.get("/", description="Endpoint describing the API")
 def meta_route() -> MetaResponse:
     networks = [Config.polygon_mainnet, Config.polygon_amoy]
 
