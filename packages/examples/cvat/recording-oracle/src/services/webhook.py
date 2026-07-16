@@ -43,9 +43,9 @@ class OracleWebhookQueue:
         Creates a webhook in a database
         """
         assert not event_data or event_type, "'event_data' requires 'event_type'"
-        assert bool(event) ^ bool(
-            event_type
-        ), "'event' and 'event_type' cannot be used together. Please use only one of the fields"
+        assert bool(event) ^ bool(event_type), (
+            "'event' and 'event_type' cannot be used together. Please use only one of the fields"
+        )
 
         if event_type:
             if self.direction == OracleWebhookDirectionTags.incoming:
@@ -97,9 +97,9 @@ class OracleWebhookQueue:
         limit: int = 10,
         for_update: bool | ForUpdateParams = False,
     ) -> list[Webhook]:
-        assert not (
-            event_type_in and event_type_not_in
-        ), f"{event_type_in} and {event_type_not_in} cannot be used together"
+        assert not (event_type_in and event_type_not_in), (
+            f"{event_type_in} and {event_type_not_in} cannot be used together"
+        )
 
         return (
             _maybe_for_update(session.query(Webhook), enable=for_update)

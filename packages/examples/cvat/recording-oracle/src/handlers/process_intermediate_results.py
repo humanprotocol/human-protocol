@@ -983,7 +983,7 @@ def process_final_results(
         job = db_service.get_job_by_cvat_id(session, job_meta.job_id)
         if not job:
             raise AssertionError(
-                f"Can't find validation results for job " f"{job_meta.job_id} ({escrow_address=})"
+                f"Can't find validation results for job {job_meta.job_id} ({escrow_address=})"
             )
 
         assignment_validation_result = db_service.get_validation_result_by_assignment_id(

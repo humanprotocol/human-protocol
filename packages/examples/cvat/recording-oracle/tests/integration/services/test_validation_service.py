@@ -496,7 +496,7 @@ class ValidationLogicTest:
         output_task_honeypots = []
         output_task_honeypot_real_frames = []
 
-        validation_frame_uses = {fn: 0 for fn in task_validation_frame_names}
+        validation_frame_uses = dict.fromkeys(task_validation_frame_names, 0)
         jobs = []
         for job_frame_names in take_by(
             task_frame_names[: frame_count - validation_frames_count], job_size

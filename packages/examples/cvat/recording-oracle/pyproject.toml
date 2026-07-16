@@ -8,29 +8,30 @@ packages = [{include = "recording_oracle"}]
 
 [tool.poetry.dependencies]
 python = "^3.10, <3.13"
-fastapi = {version = "^0.115.4", extras = ["standard"]}
+fastapi = {version = "~0.136.0", extras = ["standard"]}  # <0.137: avoids the alpha router refactor (breaks fastapi-pagination)
 uvicorn = ">=0.32.1" # post https://github.com/encode/uvicorn/pull/2397, where using several workers was fixed. Read more https://github.com/encode/uvicorn/discussions/2450
 python-dotenv = "^1.0.0"
 SQLAlchemy = "^2.0.17"
 psycopg2 = "^2.9.6"
 APScheduler = "^3.10.1"
 alembic = "^1.11.1"
-pydantic = ">=2.6.1,<2.7.0"
-httpx = "^0.24.1"
+pydantic = "^2.9.0"
+httpx = "^0.28.1"
 numpy = "^1.25.2"
 boto3 = "^1.28.40"
 google-cloud-storage = "^2.14.0"
 datumaro = {git = "https://github.com/cvat-ai/datumaro.git", rev = "ff83c00c2c1bc4b8fdfcc55067fcab0a9b5b6b11"}
 hexbytes = ">=1.2.0" # required for to_0x_hex() function
-starlette = ">=0.40.0" # avoid the vulnerability with multipart/form-data
-cvat-sdk = "2.37.0"
+starlette = ">=1.3.1" # avoid the vulnerability with multipart/form-data
+cvat-sdk = "2.70.0"
 cryptography = "<44.0.0" # human-protocol-sdk -> pgpy dep requires cryptography < 45
 human-protocol-sdk = "^7.3.1"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^7.4.0"
-pre-commit = "^3.3.3"
-ruff = "^0.6.0"
+pytest = "^9.0.0"
+pre-commit = "^4.6.0"
+ruff = "^0.15.21"
+virtualenv = "<21"  # 21.x drops APIs that poetry's build isolation (local audio-qe pkg) relies on
 
 [tool.ruff]
 line-length = 100
@@ -57,12 +58,10 @@ ignore = [
     "COM819",  # |
     "ISC001",  # |
     "ISC002",  # |
-    "ANN101",  # Method args annotations (mypy will take care of that)
-    "ANN001",  # |
+    "ANN001",  # Method args annotations (mypy will take care of that)
     "ANN202",  # |
     "ANN201",  # |
     "ANN401",  # |
-    "ANN102",  # |
     "RUF001",  # Allow cyrillic letters in comments
 
     "B904",    # Raise from: modern pythons preserve previous exceptions
@@ -109,6 +108,11 @@ ignore = [
     "PTH119",  # `os.path.basename()` should be replaced by `Path.name`
     "PTH122",  # `os.path.splitext()` should be replaced by `Path.suffix`, `Path.stem`, and `Path.parent`
     "PTH207",  # Replace `glob` with `Path.glob` or `Path.rglob`
+    "RET505",  # Unnecessary elif/else statements after/before raise/return.
+    "PLC0415", # import-outside-top-level
+    "INP001",  # implicit-namespace-package (app is not packaged; package-mode = false)
+    "FBT001",  # boolean-typed positional argument
+    "DTZ901",  # datetime.min/max without tzinfo
 ]
 
 
@@ -143,6 +147,11 @@ forced-separate = ["tests"]
 
 [tool.ruff.lint.flake8-tidy-imports]
 ban-relative-imports = "all"
+
+[tool.ruff.lint.flake8-type-checking]
+# pydantic models evaluate annotations at runtime, so imports used only in their field types must
+# stay at runtime
+runtime-evaluated-base-classes = ["pydantic.BaseModel"]
 
 [build-system]
 requires = ["poetry-core"]
