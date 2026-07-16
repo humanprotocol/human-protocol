@@ -107,7 +107,6 @@ export enum JobType {
 }
 
 export enum CvatJobType {
-  IMAGE_LABEL_BINARY = 'image_label_binary',
   IMAGE_POINTS = 'image_points',
   IMAGE_POLYGONS = 'image_polygons',
   IMAGE_BOXES = 'image_boxes',
