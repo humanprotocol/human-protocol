@@ -3,45 +3,46 @@ name = "exchange-oracle"
 version = "0.1.0"
 description = "An example of decentralized exchange oracle with CVAT as annotation instrument"
 authors = ["Sergey Dzeranov <sergey@hmt.ai>"]
-readme = "README.md"
-packages = [{include = "exchange_oracle"}]
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.10,<3.13"
-fastapi = {version = "^0.115.4", extras = ["standard"]}
+fastapi = {version = "~0.136.0", extras = ["standard"]}  # <0.137: avoids the alpha router refactor (breaks fastapi-pagination), >=0.122 finally fixed https://github.com/fastapi/fastapi/issues/2026
 uvicorn = ">=0.32.1" # post https://github.com/encode/uvicorn/pull/2397, where using several workers was fixed. Read more https://github.com/encode/uvicorn/discussions/2450
 python-dotenv = "^1.0.0"
 psycopg2 = "^2.9.6"
-sqlalchemy-utils = "^0.41.1"
+sqlalchemy-utils = "^0.42.1"
 alembic = "^1.11.1"
-httpx = "^0.24.1"
-cvat-sdk = "2.37.0"
+httpx = "0.28.1"  # transitive for fastapi, pinned to the last known secure release
+httpx2 = "^2.7.0"  # httpx gone, the successor
+cvat-sdk = "2.70.0"
 sqlalchemy = "^2.0.16"
 apscheduler = "^3.10.1"
-xmltodict = "^0.13.0"
-datumaro = {git = "https://github.com/cvat-ai/datumaro.git", rev = "ff83c00c2c1bc4b8fdfcc55067fcab0a9b5b6b11"}
+datumaro ={git = "https://github.com/cvat-ai/datumaro.git", rev = "ff83c00c2c1bc4b8fdfcc55067fcab0a9b5b6b11"}
+numpy = "^1.25.2"
 boto3 = "^1.28.33"
 google-cloud-storage = "^2.14.0"
-pyinstrument = "^4.6.2"
+pyinstrument = "^5.1.2"
 hexbytes = ">=1.2.0" # required for to_0x_hex() function
-pydantic = ">=2.6.1,<2.7.0"
-fastapi-pagination = "^0.12.17"
+pydantic = "^2.9.0"
+fastapi-pagination = "^0.15.15"
 fastapi-filter = "^1.1.0"
-fastapi-limiter = "^0.1.6"
+fastapi-limiter = "^0.1.6"  # 0.2.0 is a breaking API redesign (FastAPILimiter removed)
 strenum = "^0.4.15"
 pyjwt = "^2.9.0"
-starlette = ">=0.40.0" # avoid the vulnerability with multipart/form-data
+starlette = ">=1.3.1" # avoid the vulnerability with multipart/form-data
 cryptography = "<44.0.0" # human-protocol-sdk -> pgpy dep requires cryptography < 45
 aiocache = {extras = ["msgpack", "redis"], version = "^0.12.3"}  # convenient api for redis (async)
-cachelib = "^0.13.0" # convenient api for redis (sync)
+cachelib = "^0.14.0" # convenient api for redis (sync)
 human-protocol-sdk = "^7.3.1"
 
 
 [tool.poetry.group.dev.dependencies]
-pre-commit = "^3.0.4"
-ruff = "^0.6.0"
-pytest = "^7.2.2"
+pre-commit = "^4.6.0"
+ruff = "^0.15.21"
+pytest = "^9.0.0"
 pytest-mock = "^3.14.0"
+virtualenv = "<21"  # 21.x drops APIs that poetry's build isolation relies on
 
 [tool.ruff]
 line-length = 100
@@ -68,12 +69,10 @@ ignore = [
     "COM819",  # |
     "ISC001",  # |
     "ISC002",  # |
-    "ANN101",  # Method args annotations (mypy will take care of that)
-    "ANN001",  # |
+    "ANN001",  # Method args annotations (mypy will take care of that)
     "ANN202",  # |
     "ANN201",  # |
     "ANN401",  # |
-    "ANN102",  # |
     "RUF001",  # Allow cyrillic letters in comments
 
     "B904",    # Raise from: modern pythons preserve previous exceptions
@@ -109,6 +108,7 @@ ignore = [
     "ANN204",  # Missing return type annotation for special method
     "ERA001",  # Found commented-out code
     "N801",    # Class name should use CapWords convention
+    "PLR0913", # Too many arguments in function definition
     "PLR0915", # Too many statements
     "PLR2004", # Magic value used in comparison, consider replacing with a constant variable
     "ANN002",  # Missing type annotation for `*args`
@@ -123,6 +123,10 @@ ignore = [
     "UP032",   # Upgrades .format() to f-strings. Disabling until it ignores line-length
     "C401",    # set comprehensions are apparently can be hard to distinguish from dict comprehensions
     "RET505",  # Unnecessary elif/else statements after/before raise/return.
+    "PLC0415", # import-outside-top-level
+    "INP001",  # implicit-namespace-package (app is not packaged; package-mode = false)
+    "FBT001",  # boolean-typed positional argument
+    "DTZ901",  # datetime.min/max without tzinfo
 ]
 
 
@@ -142,6 +146,8 @@ ignore = [
 ]
 # alembic is not a package in a traditional sense, so putting __init__.py there doesn't make sense
 "alembic/*" = ["INP001"]
+# Standalone maintenance scripts: not importable packages (INP001) and print to stdout (T201).
+"tests/assets/utils/*" = ["INP001", "T201"]
 "__init__.py" = ["F401"]
 
 [tool.ruff.lint.pep8-naming]
@@ -158,6 +164,11 @@ forced-separate = ["tests"]
 
 [tool.ruff.lint.flake8-tidy-imports]
 ban-relative-imports = "all"
+
+[tool.ruff.lint.flake8-type-checking]
+# pydantic models evaluate annotations at runtime, so imports used only in their field types must
+# stay at runtime
+runtime-evaluated-base-classes = ["pydantic.BaseModel"]
 
 [build-system]
 requires = ["poetry-core"]

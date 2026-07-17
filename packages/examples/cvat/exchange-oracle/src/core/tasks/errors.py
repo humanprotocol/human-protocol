@@ -1,0 +1,2 @@
+class UnsupportedManifestError(Exception):
+    pass

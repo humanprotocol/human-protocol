@@ -24,4 +24,4 @@ def add_throttling(app: FastAPI):
     return register_lifespan_context(app, lifespan_context=lifespan)
 
 
-__all__ = ["add_throttling", "RateLimiter"]
+__all__ = ["RateLimiter", "add_throttling"]

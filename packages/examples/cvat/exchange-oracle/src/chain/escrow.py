@@ -1,7 +1,7 @@
 import json
 from functools import partial
 
-import httpx
+import httpx2
 from human_protocol_sdk.constants import ChainId, Status
 from human_protocol_sdk.encryption import Encryption, EncryptionUtils
 from human_protocol_sdk.escrow import EscrowData, EscrowUtils
@@ -20,7 +20,7 @@ class ManifestNotAvailableError(Exception):
 def _get_manifest_content(manifest: str) -> str:
     if validate_url(manifest):
         try:
-            response = httpx.get(manifest, follow_redirects=True)
+            response = httpx2.get(manifest, follow_redirects=True)
             response.raise_for_status()
         except Exception as e:
             raise ManifestNotAvailableError(

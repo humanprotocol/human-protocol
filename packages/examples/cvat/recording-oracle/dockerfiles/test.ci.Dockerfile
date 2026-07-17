@@ -8,6 +8,8 @@ RUN apt-get update -y && \
 
 RUN pip install --no-cache 'poetry==1.8.5'
 
+COPY libs ./libs
+
 COPY pyproject.toml poetry.lock ./
 
 RUN --mount=type=cache,target=/root/.cache \

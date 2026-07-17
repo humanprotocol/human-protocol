@@ -7,6 +7,7 @@ from human_protocol_sdk.constants import Status
 from sqlalchemy.sql import select
 
 from src.core.storage import compose_data_bucket_prefix, compose_results_bucket_prefix
+from src.core.tasks import TaskTypes
 from src.core.types import (
     ExchangeOracleEventTypes,
     JobLauncherEventTypes,
@@ -16,7 +17,6 @@ from src.core.types import (
     OracleWebhookTypes,
     ProjectStatuses,
     TaskStatuses,
-    TaskTypes,
 )
 from src.crons.webhooks.job_launcher import (
     process_incoming_job_launcher_webhooks,
@@ -60,12 +60,18 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         self.session.add(webhook)
         self.session.commit()
+        # The task builder is split across the `basic` and `base` modules, both of which import
+        # `cvat_api`; share a single mock across both so all CVAT calls are intercepted.
+        mock_cvat_api = MagicMock()
         with (
             patch("src.chain.escrow.get_escrow") as mock_escrow,
-            open("tests/utils/manifest.json") as data,
-            patch("src.handlers.job_creation.get_escrow_manifest") as mock_get_manifest,
-            patch("src.handlers.job_creation.cvat_api") as mock_cvat_api,
-            patch("src.handlers.job_creation.cloud_service.make_client") as mock_make_cloud_client,
+            open("tests/assets/cloud/manifests/manifest-v1.json") as data,
+            patch("src.handlers.job_creation.handlers.get_escrow_manifest") as mock_get_manifest,
+            patch("src.handlers.job_creation.builders.vision.basic.cvat_api", mock_cvat_api),
+            patch("src.handlers.job_creation.builders.vision.base.cvat_api", mock_cvat_api),
+            patch(
+                "src.handlers.job_creation.builders.vision.basic.cloud_service.make_client"
+            ) as mock_make_cloud_client,
         ):
             manifest = json.load(data)
             mock_get_manifest.return_value = manifest
@@ -246,12 +252,14 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
         with (
             patch("src.chain.escrow.get_escrow") as mock_escrow,
-            open("tests/utils/manifest.json") as data,
-            patch("src.handlers.job_creation.get_escrow_manifest") as mock_get_manifest,
-            patch("src.handlers.job_creation.cvat_api") as mock_cvat_api,
-            patch("src.handlers.job_creation.cloud_service.make_client") as mock_make_cloud_client,
+            open("tests/assets/cloud/manifests/manifest-v1.json") as data,
+            patch("src.handlers.job_creation.handlers.get_escrow_manifest") as mock_get_manifest,
+            patch("src.handlers.job_creation.builders.vision.basic.cvat_api") as mock_cvat_api,
             patch(
-                "src.handlers.job_creation.db_service.add_project_images",
+                "src.handlers.job_creation.builders.vision.basic.cloud_service.make_client"
+            ) as mock_make_cloud_client,
+            patch(
+                "src.handlers.job_creation.builders.vision.basic.db_service.add_project_images",
                 side_effect=Exception("Error"),
             ),
         ):
@@ -635,7 +643,7 @@ class ServiceIntegrationTest(unittest.TestCase):
                 "src.crons.webhooks.job_launcher.get_job_launcher_url",
                 return_value=DEFAULT_MANIFEST_URL,
             ),
-            patch("httpx.Client.post") as mock_httpx_post,
+            patch("httpx2.Client.post") as mock_httpx_post,
         ):
             mock_response = MagicMock()
             mock_response.raise_for_status.return_value = None

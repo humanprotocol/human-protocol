@@ -3,44 +3,48 @@ name = "recording-oracle"
 version = "0.1.0"
 description = "An example of recording with with CVAT as an annotation instrument"
 authors = ["Sergey Dzeranov <sergey.dzeranov@gmail.com>", "Marius Hamacher <marius.hamacher@outlook.de>"]
-readme = "README.md"
-packages = [{include = "recording_oracle"}]
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.10, <3.13"
-fastapi = {version = "^0.115.4", extras = ["standard"]}
+fastapi = {version = "~0.136.0", extras = ["standard"]}  # <0.137: avoids the alpha router refactor (breaks fastapi-pagination)
 uvicorn = ">=0.32.1" # post https://github.com/encode/uvicorn/pull/2397, where using several workers was fixed. Read more https://github.com/encode/uvicorn/discussions/2450
 python-dotenv = "^1.0.0"
 SQLAlchemy = "^2.0.17"
 psycopg2 = "^2.9.6"
 APScheduler = "^3.10.1"
 alembic = "^1.11.1"
-pydantic = ">=2.6.1,<2.7.0"
-httpx = "^0.24.1"
+pydantic = "^2.9.0"
+httpx = "0.28.1"  # transitive for fastapi, pinned to the last known secure release
+httpx2 = "^2.7.0"  # httpx gone, the successor
 numpy = "^1.25.2"
 boto3 = "^1.28.40"
 google-cloud-storage = "^2.14.0"
 datumaro = {git = "https://github.com/cvat-ai/datumaro.git", rev = "ff83c00c2c1bc4b8fdfcc55067fcab0a9b5b6b11"}
 hexbytes = ">=1.2.0" # required for to_0x_hex() function
-starlette = ">=0.40.0" # avoid the vulnerability with multipart/form-data
-cvat-sdk = "2.37.0"
+starlette = ">=1.3.1" # avoid the vulnerability with multipart/form-data
+cvat-sdk = "2.70.0"
 cryptography = "<44.0.0" # human-protocol-sdk -> pgpy dep requires cryptography < 45
 human-protocol-sdk = "^7.3.1"
+strenum = "^0.4.15"
+audio-qe = {path = "libs/audio_qe", develop = true}
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^7.4.0"
-pre-commit = "^3.3.3"
-ruff = "^0.6.0"
+pytest = "^9.0.0"
+pre-commit = "^4.6.0"
+ruff = "^0.15.21"
+virtualenv = "<21"  # 21.x drops APIs that poetry's build isolation (local audio-qe pkg) relies on
 
 [tool.ruff]
 line-length = 100
 target-version = "py310"
+extend-exclude = ["libs/"]
 
 
 [tool.ruff.lint]
 select = ["ALL"]
 unfixable = [
-    "RUF005",  # messes up concantenation with numpy structures
+    "RUF005",  # messes up concatenation with numpy structures
 ]
 ignore = [
     "W191",    # Rules conflicting with ruff format (https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules)
@@ -57,12 +61,10 @@ ignore = [
     "COM819",  # |
     "ISC001",  # |
     "ISC002",  # |
-    "ANN101",  # Method args annotations (mypy will take care of that)
-    "ANN001",  # |
+    "ANN001",  # Method args annotations (mypy will take care of that)
     "ANN202",  # |
     "ANN201",  # |
     "ANN401",  # |
-    "ANN102",  # |
     "RUF001",  # Allow cyrillic letters in comments
 
     "B904",    # Raise from: modern pythons preserve previous exceptions
@@ -109,6 +111,11 @@ ignore = [
     "PTH119",  # `os.path.basename()` should be replaced by `Path.name`
     "PTH122",  # `os.path.splitext()` should be replaced by `Path.suffix`, `Path.stem`, and `Path.parent`
     "PTH207",  # Replace `glob` with `Path.glob` or `Path.rglob`
+    "RET505",  # Unnecessary elif/else statements after/before raise/return.
+    "PLC0415", # import-outside-top-level
+    "INP001",  # implicit-namespace-package (app is not packaged; package-mode = false)
+    "FBT001",  # boolean-typed positional argument
+    "DTZ901",  # datetime.min/max without tzinfo
 ]
 
 
@@ -120,6 +127,8 @@ ignore = [
     "ANN001",  # |
     "ANN003",  # |
     "ARG001",  # |
+    "ARG002",  # Allow unused args in test doubles mirroring real signatures
+    "RET504",  # Allow assign-before-return for readability in tests
     "FBT001",  # Allow bool-annotated positional args in functions
     "SLF001",  # Allow private attrs access
     "PLR2004", # Allow magic values
@@ -143,6 +152,11 @@ forced-separate = ["tests"]
 
 [tool.ruff.lint.flake8-tidy-imports]
 ban-relative-imports = "all"
+
+[tool.ruff.lint.flake8-type-checking]
+# pydantic models evaluate annotations at runtime, so imports used only in their field types must
+# stay at runtime
+runtime-evaluated-base-classes = ["pydantic.BaseModel"]
 
 [build-system]
 requires = ["poetry-core"]

@@ -41,7 +41,7 @@ class ServiceIntegrationTest(unittest.TestCase):
     def test_process_reputation_oracle_webhooks(self):
         expected_url = "expected_url"
         with (
-            patch("src.crons._utils.httpx.Client.post") as mock_httpx,
+            patch("src.crons._utils.httpx2.Client.post") as mock_httpx,
             patch("src.crons._utils.prepare_signed_message") as mock_signature,
             patch(
                 "src.crons.process_reputation_oracle_webhooks.get_reputation_oracle_url"

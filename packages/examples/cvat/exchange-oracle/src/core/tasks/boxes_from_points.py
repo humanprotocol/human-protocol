@@ -97,9 +97,9 @@ class TaskMetaSerializer:
 __all__ = [
     "OUTPUT_OBJECT_ID_ATTR",
     "BboxPointMapping",
+    "RoiFilenames",
     "RoiInfo",
     "RoiInfos",
-    "RoiFilenames",
     "TaskMetaLayout",
     "TaskMetaSerializer",
 ]

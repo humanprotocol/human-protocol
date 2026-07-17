@@ -1,6 +1,6 @@
 from collections.abc import Iterable
 
-from src.core.manifest import TaskManifest, parse_manifest
+from src.core.manifest import ManifestBase, parse_manifest
 
 
 def generate_manifest(
@@ -9,7 +9,7 @@ def generate_manifest(
     job_size: int = 10,
     validation_frames_per_job: int = 2,
     labels: int | Iterable[int] = 1,
-) -> TaskManifest:
+) -> ManifestBase:
     label_definitions = []
     if isinstance(labels, int):
         label_definitions.extend({"name": f"label_{i}"} for i in range(labels))

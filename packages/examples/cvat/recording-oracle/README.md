@@ -4,14 +4,13 @@
 
 Prerequisites:
 ```
-1. poetry shell
+1. poetry config virtualenvs.in-project true  # create .venv inside the project so editors/debuggers pick it up
 2. poetry install
 3. pre-commit install
 4. Make sure you have postgres-devel packages installed on your OS. It is required for psycopg2 build phase.
    `libpq-dev` in Debian/Ubuntu, `libpq-devel` on Centos/Fedora/Cygwin/Babun.)
    `postgres` package in the homebrew for macOS
-```   
-   
+```
 
 For deployment it is required to have PostgreSQL(v14.4)
 
@@ -30,7 +29,7 @@ docker compose -f docker-compose.dev.yml up -d
 ./bin/start_debug.sh
 ```
 
-When running service from `./bin/start_debug.sh` (`debug.py`), simplified development flow is available:
+When running service from `./bin/start_debug.sh`, simplified development flow is available:
 
 - When webhook signature is required, `{oracle_name}:unique_string` can be used
 - You can upload manifest.json to minio `manifests` bucket and use its filename as an escrow_address
@@ -73,11 +72,11 @@ Available at `/docs` route
 A single command to build, run, and tear down the test suite:
 
 ```sh
-docker compose -p "test" \
+docker compose -p ro-test \
     -f docker-compose.test.yml \
     -f docker-compose.test.head.yml \
     up --build test --attach test --exit-code-from test; \
-  docker compose -p "test" \
+  docker compose -p ro-test \
     -f docker-compose.test.yml \
     -f docker-compose.test.head.yml down
 ```
@@ -91,19 +90,19 @@ commands allow running just the services, build, tear down, and run the test sui
 
 ```sh
 # run services
-docker compose -p "test" \
+docker compose -p ro-test \
   -f docker-compose.test.yml \
   up -d --build
 
 # run the tests
-docker compose -p "test" \
+docker compose -p ro-test \
   -f docker-compose.test.yml \
   -f docker-compose.test.head.yml \
   -f docker-compose.test.head.dev.yml \
   up --build test --attach test --exit-code-from test
 
 # tear down
-docker compose -p "test" \
+docker compose -p ro-test \
   -f docker-compose.test.yml \
   -f docker-compose.test.head.yml \
   -f docker-compose.test.head.dev.yml \
@@ -111,3 +110,19 @@ docker compose -p "test" \
 ```
 
 The dev setup mounts the local directory to speed the things up.
+
+#### Regenerating the test fixtures
+
+Recording Oracle tests run against the fixtures produced by the Exchange Oracle implementation.
+Regenerate them whenever the builder output layout or the shared task setups change.
+
+```sh
+cd ../exchange-oracle && docker compose -p eo-test \
+  -f docker-compose.test.yml \
+  -f docker-compose.test.head.yml \
+  -f docker-compose.test.head.dev.yml \
+  run --rm \
+  -v "$(pwd)/../recording-oracle/tests/assets/cloud/audio_validation:/out" \
+  test sh -c "alembic upgrade head && PYTHONPATH=. \
+    python tests/assets/utils/gen_audio_validation_fixture.py /out"
+```
