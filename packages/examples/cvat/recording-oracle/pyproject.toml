@@ -32,7 +32,7 @@ human-protocol-sdk = "^7.3.1"
 pytest = "^9.0.0"
 pre-commit = "^4.6.0"
 ruff = "^0.15.21"
-virtualenv = "<21"  # 21.x drops APIs that poetry's build isolation (local audio-qe pkg) relies on
+virtualenv = "<21"  # 21.x drops APIs that poetry's build isolation relies on
 
 [tool.ruff]
 line-length = 100
