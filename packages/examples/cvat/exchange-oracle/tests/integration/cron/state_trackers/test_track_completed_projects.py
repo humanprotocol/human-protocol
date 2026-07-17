@@ -3,7 +3,8 @@ import uuid
 
 from sqlalchemy.sql import select
 
-from src.core.types import Networks, ProjectStatuses, TaskStatuses, TaskTypes
+from src.core.tasks import TaskTypes
+from src.core.types import Networks, ProjectStatuses, TaskStatuses
 from src.crons.cvat.state_trackers import track_completed_projects
 from src.db import SessionLocal
 from src.models.cvat import Project, Task

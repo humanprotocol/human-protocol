@@ -3,8 +3,7 @@ name = "recording-oracle"
 version = "0.1.0"
 description = "An example of recording with with CVAT as an annotation instrument"
 authors = ["Sergey Dzeranov <sergey.dzeranov@gmail.com>", "Marius Hamacher <marius.hamacher@outlook.de>"]
-readme = "README.md"
-packages = [{include = "recording_oracle"}]
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.10, <3.13"
@@ -27,22 +26,25 @@ starlette = ">=1.3.1" # avoid the vulnerability with multipart/form-data
 cvat-sdk = "2.70.0"
 cryptography = "<44.0.0" # human-protocol-sdk -> pgpy dep requires cryptography < 45
 human-protocol-sdk = "^7.3.1"
+strenum = "^0.4.15"
+audio-qe = {path = "libs/audio_qe", develop = true}
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^9.0.0"
 pre-commit = "^4.6.0"
 ruff = "^0.15.21"
-virtualenv = "<21"  # 21.x drops APIs that poetry's build isolation relies on
+virtualenv = "<21"  # 21.x drops APIs that poetry's build isolation (local audio-qe pkg) relies on
 
 [tool.ruff]
 line-length = 100
 target-version = "py310"
+extend-exclude = ["libs/"]
 
 
 [tool.ruff.lint]
 select = ["ALL"]
 unfixable = [
-    "RUF005",  # messes up concantenation with numpy structures
+    "RUF005",  # messes up concatenation with numpy structures
 ]
 ignore = [
     "W191",    # Rules conflicting with ruff format (https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules)
@@ -125,6 +127,8 @@ ignore = [
     "ANN001",  # |
     "ANN003",  # |
     "ARG001",  # |
+    "ARG002",  # Allow unused args in test doubles mirroring real signatures
+    "RET504",  # Allow assign-before-return for readability in tests
     "FBT001",  # Allow bool-annotated positional args in functions
     "SLF001",  # Allow private attrs access
     "PLR2004", # Allow magic values

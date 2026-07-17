@@ -15,7 +15,8 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from src.core.config import Config
-from src.core.types import AssignmentStatuses, JobStatuses, ProjectStatuses, TaskTypes
+from src.core.tasks import TaskTypes
+from src.core.types import AssignmentStatuses, JobStatuses, ProjectStatuses
 from src.models.cvat import Assignment, Job, Project, Task, User
 from src.schemas.exchange import AssignmentStatuses as APIAssignmentStatuses
 from src.schemas.exchange import JobStatuses as APIJobStatuses
@@ -174,7 +175,7 @@ def test_can_list_jobs_200_with_address_and_pagination(
         session.commit()
 
     with (
-        open("tests/utils/manifest.json") as data,
+        open("tests/assets/cloud/manifests/manifest-v1.json") as data,
         patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
         patch(
             "src.endpoints.serializers.get_escrow_fund_token_symbol"
@@ -239,7 +240,7 @@ def test_can_list_jobs_200_without_escrows_in_hidden_states(
     session.commit()
 
     with (
-        open("tests/utils/manifest.json") as data,
+        open("tests/assets/cloud/manifests/manifest-v1.json") as data,
         patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
         patch(
             "src.endpoints.serializers.get_escrow_fund_token_symbol"
@@ -297,7 +298,7 @@ def test_can_list_jobs_200_with_only_one_entry_per_escrow_address_if_several_pro
     session.commit()
 
     with (
-        open("tests/utils/manifest.json") as data,
+        open("tests/assets/cloud/manifests/manifest-v1.json") as data,
         patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
         patch(
             "src.endpoints.serializers.get_escrow_fund_token_symbol"
@@ -337,7 +338,7 @@ def test_can_list_jobs_200_with_fields(client: TestClient, session: Session) -> 
     session.commit()
 
     with (
-        open("tests/utils/manifest.json") as data,
+        open("tests/assets/cloud/manifests/manifest-v1.json") as data,
         patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
         patch(
             "src.endpoints.serializers.get_escrow_fund_token_symbol"
@@ -420,7 +421,7 @@ def test_can_list_jobs_200_with_sorting(client: TestClient, session: Session) ->
     } == {(obj.__class__.__name__, obj.id): True for obj in cvat_jobs + cvat_tasks + cvat_projects}
 
     with (
-        open("tests/utils/manifest.json") as data,
+        open("tests/assets/cloud/manifests/manifest-v1.json") as data,
         patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
         patch(
             "src.endpoints.serializers.get_escrow_fund_token_symbol"
@@ -540,7 +541,7 @@ def test_can_list_jobs_200_with_filters(client: TestClient, session: Session):
     post_init_time = utcnow() + timedelta(seconds=1)
 
     with (
-        open("tests/utils/manifest.json") as data,
+        open("tests/assets/cloud/manifests/manifest-v1.json") as data,
         patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
         patch(
             "src.endpoints.serializers.get_escrow_fund_token_symbol"
@@ -631,7 +632,7 @@ def test_can_list_jobs_200_can_show_only_active_jobs_with_free_assignments(
     session.commit()
 
     with (
-        open("tests/utils/manifest.json") as data,
+        open("tests/assets/cloud/manifests/manifest-v1.json") as data,
         patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
         patch(
             "src.endpoints.serializers.get_escrow_fund_token_symbol"
@@ -680,7 +681,7 @@ def test_can_list_jobs_200_check_values(client: TestClient, session: Session) ->
         session.commit()
 
     with (
-        open("tests/utils/manifest.json") as data,
+        open("tests/assets/cloud/manifests/manifest-v1.json") as data,
         patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
         patch(
             "src.endpoints.serializers.get_escrow_fund_token_symbol"
@@ -739,7 +740,7 @@ def test_can_list_jobs_200_without_address(client: TestClient, session: Session)
     session.commit()
 
     with (
-        open("tests/utils/manifest.json") as data,
+        open("tests/assets/cloud/manifests/manifest-v1.json") as data,
         patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
         patch(
             "src.endpoints.serializers.get_escrow_fund_token_symbol"
@@ -874,7 +875,7 @@ def test_can_create_assignment_200(client: TestClient, session: Session) -> None
     session.commit()
 
     with (
-        open("tests/utils/manifest.json") as data,
+        open("tests/assets/cloud/manifests/manifest-v1.json") as data,
         patch("src.endpoints.serializers.get_escrow_manifest") as mock_serializer_get_manifest,
         patch("src.services.exchange.get_escrow_manifest") as mock_exchange_get_manifest,
         patch(
@@ -979,7 +980,7 @@ def test_cannot_create_assignment_400_when_has_unfinished_assignments(
     session.commit()
 
     with (
-        open("tests/utils/manifest.json") as data,
+        open("tests/assets/cloud/manifests/manifest-v1.json") as data,
         patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
     ):
         manifest = json.load(data)
@@ -1074,7 +1075,7 @@ def test_can_list_assignments_200(client: TestClient, session: Session) -> None:
     post_init_time = utcnow() + timedelta(seconds=1)
 
     with (
-        open("tests/utils/manifest.json") as data,
+        open("tests/assets/cloud/manifests/manifest-v1.json") as data,
         patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
         patch(
             "src.endpoints.serializers.get_escrow_fund_token_symbol"
@@ -1155,7 +1156,7 @@ def test_can_list_assignments_200_with_sorting(client: TestClient, session: Sess
         session.commit()
 
     with (
-        open("tests/utils/manifest.json") as data,
+        open("tests/assets/cloud/manifests/manifest-v1.json") as data,
         patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
         patch(
             "src.endpoints.serializers.get_escrow_fund_token_symbol"
@@ -1512,7 +1513,7 @@ def test_can_list_jobs_200_check_updated_at(client: TestClient, session: Session
     session.commit()
 
     with (
-        open("tests/utils/manifest.json") as data,
+        open("tests/assets/cloud/manifests/manifest-v1.json") as data,
         patch("src.endpoints.serializers.get_escrow_manifest") as mock_serializer_get_manifest,
         patch("src.services.exchange.get_escrow_manifest") as mock_exchange_get_manifest,
         patch(

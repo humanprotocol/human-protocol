@@ -1,7 +1,6 @@
 import datetime
 import uuid
 from collections.abc import Sequence
-from enum import Enum
 
 from attrs import define
 from sqlalchemy import case, update
@@ -14,11 +13,11 @@ from src.core.types import OracleWebhookStatuses, OracleWebhookTypes
 from src.db.utils import ForUpdateParams
 from src.db.utils import maybe_for_update as _maybe_for_update
 from src.models.webhook import Webhook
-from src.utils.enums import BetterEnumMeta
+from src.utils.enums import BetterEnumMeta, StrEnum
 from src.utils.time import utcnow
 
 
-class OracleWebhookDirectionTags(str, Enum, metaclass=BetterEnumMeta):
+class OracleWebhookDirectionTags(StrEnum, metaclass=BetterEnumMeta):
     incoming = "incoming"
     outgoing = "outgoing"
 

@@ -8,7 +8,7 @@ from src.chain.escrow import (
     get_escrow_fund_token_symbol,
     get_escrow_manifest,
 )
-from src.core.manifest import parse_manifest
+from src.core.manifest import ManifestBase, parse_manifest
 from src.core.types import AssignmentStatuses, ProjectStatuses
 from src.db import SessionLocal
 from src.schemas import exchange as service_api
@@ -50,19 +50,41 @@ def serialize_job(
         else:
             raise AssertionError(f"Unexpected project status '{project.status}'")
 
+        bounty = get_assignment_bounty(project, manifest=manifest)
         reward_token = get_escrow_fund_token_symbol(project.chain_id, project.escrow_address)
+
         return service_api.JobResponse(
             escrow_address=project.escrow_address,
             chain_id=project.chain_id,
             job_type=project.job_type,
             status=api_status,
             job_description=manifest.annotation.description if manifest else None,
-            reward_amount=str(manifest.job_bounty) if manifest else None,
+            reward_amount=bounty,
             reward_token=reward_token,
             created_at=project.created_at,
             updated_at=project.updated_at,
             qualifications=manifest.annotation.qualifications if manifest else [],
         )
+
+
+def get_assignment_bounty(
+    project: cvat_service.Project, *, manifest: ManifestBase | None = None
+) -> str | None:
+    if project.assignment_bounty is not None:
+        assignment_bounty = project.assignment_bounty
+    else:
+        with suppress(ManifestNotAvailableError):
+            if not manifest:
+                manifest = parse_manifest(
+                    get_escrow_manifest(project.chain_id, project.escrow_address)
+                )
+
+            assignment_bounty = getattr(manifest, "job_bounty", None)
+
+    if assignment_bounty is not None:
+        assignment_bounty = str(assignment_bounty)
+
+    return assignment_bounty
 
 
 ASSIGNMENT_PROJECT_VALIDATION_STATUSES = [
@@ -101,9 +123,6 @@ def serialize_assignment(
                 f"or a cvat_service.Project instance, not {project!r}"
             )
 
-        with suppress(ManifestNotAvailableError):
-            manifest = parse_manifest(get_escrow_manifest(project.chain_id, project.escrow_address))
-
         assignment_status_mapping = {
             AssignmentStatuses.created: service_api.AssignmentStatuses.active,
             AssignmentStatuses.completed: service_api.AssignmentStatuses.completed,
@@ -119,6 +138,7 @@ def serialize_assignment(
         else:
             api_status = assignment_status_mapping[assignment.status]
 
+        bounty = get_assignment_bounty(project)
         reward_token = get_escrow_fund_token_symbol(project.chain_id, project.escrow_address)
 
         return service_api.AssignmentResponse(
@@ -127,7 +147,7 @@ def serialize_assignment(
             chain_id=project.chain_id,
             job_type=project.job_type,
             status=api_status,
-            reward_amount=str(manifest.job_bounty) if manifest else None,
+            reward_amount=bounty,
             reward_token=reward_token,
             url=compose_assignment_url(
                 task_id=assignment.job.cvat_task_id,

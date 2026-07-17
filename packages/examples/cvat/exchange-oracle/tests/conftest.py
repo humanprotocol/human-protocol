@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy_utils import create_database, database_exists, drop_database
 
 from alembic import command as alembic_command
-from src import app
+from src.apps.exchange_oracle import app
 from src.db import Base, SessionLocal, engine
 
 alembic_config = Config(Path(__file__).parent.parent / "alembic.ini")

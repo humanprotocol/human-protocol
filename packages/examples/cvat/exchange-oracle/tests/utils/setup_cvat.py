@@ -9,7 +9,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql import select
 
 from src.core.config import CvatConfig
-from src.core.types import AssignmentStatuses, JobStatuses, ProjectStatuses, TaskStatuses, TaskTypes
+from src.core.tasks import TaskTypes
+from src.core.types import AssignmentStatuses, JobStatuses, ProjectStatuses, TaskStatuses
 from src.db import SessionLocal
 from src.models.cvat import Assignment, Job, Project, Task, User
 

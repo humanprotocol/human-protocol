@@ -6,7 +6,6 @@ from collections.abc import Generator
 from contextlib import contextmanager
 from contextvars import ContextVar
 from datetime import datetime, timedelta, timezone
-from enum import Enum
 from http import HTTPStatus
 from io import BytesIO
 from pathlib import Path
@@ -21,38 +20,42 @@ from cvat_sdk.core.uploading import AnnotationUploader
 from httpx import URL
 
 from src.core.config import Config
-from src.utils.enums import BetterEnumMeta
+from src.utils.enums import BetterEnumMeta, StrEnum
 from src.utils.time import utcnow
 
 _NOTSET = object()
+
+_PLAIN_FILE_EXPORT_FORMATS = frozenset({"Generic TSV 1.0"})
+"Export formats that return a plain file instead of a zip archive"
 
 
 class CVATException(Exception):
     """Indicates that CVAT API returned unexpected response"""
 
 
-class RequestStatus(str, Enum, metaclass=BetterEnumMeta):
+class RequestStatus(StrEnum, metaclass=BetterEnumMeta):
     QUEUED = "Queued"
     STARTED = "Started"
     FINISHED = "Finished"
     FAILED = "Failed"
 
 
-class JobStatus(str, Enum, metaclass=BetterEnumMeta):
+class JobStatus(StrEnum, metaclass=BetterEnumMeta):
     new = "new"
     in_progress = "in progress"
     rejected = "rejected"
     completed = "completed"
 
 
-class LabelType(str, Enum, metaclass=BetterEnumMeta):
+class LabelType(StrEnum, metaclass=BetterEnumMeta):
     tag = "tag"
     points = "points"
     rectangle = "rectangle"
     polygon = "polygon"
+    interval = "interval"
 
 
-class WebhookEventType(str, Enum, metaclass=BetterEnumMeta):
+class WebhookEventType(StrEnum, metaclass=BetterEnumMeta):
     update_job = "update:job"
     ping = "ping"
 
@@ -132,9 +135,15 @@ def _get_annotations(
         request_auths=list(api_client.configuration.auth_settings().values()),
         body="",
     )
+
     response = api_client.rest_client.GET(request_info.result_url, headers=headers)
     file_buffer = io.BytesIO(response.data)
-    assert zipfile.is_zipfile(file_buffer)
+
+    # Validate the data received. Most formats return a zip archive, but some return contents
+    # directly.
+    if request_info.operation.format not in _PLAIN_FILE_EXPORT_FORMATS:
+        assert zipfile.is_zipfile(file_buffer)
+
     file_buffer.seek(0)
     return file_buffer
 
@@ -340,15 +349,19 @@ def create_task(
     project_id: int,
     name: str,
     *,
-    segment_size: int,
+    segment_size: int | None = None,
 ) -> models.TaskRead:
     logger = logging.getLogger("app")
     with get_api_client() as api_client:
+        kwargs = {}
+        if segment_size is not None:
+            kwargs["segment_size"] = segment_size
+
         task_write_request = models.TaskWriteRequest(
             name=name,
             project_id=project_id,
             overlap=0,
-            segment_size=segment_size,
+            **kwargs,
         )
         try:
             (task_info, _) = api_client.tasks_api.create(task_write_request)
@@ -608,17 +621,12 @@ def clear_job_annotations(job_id: int) -> None:
 
     with get_api_client() as api_client:
         try:
-            api_client.jobs_api.update_annotations(
-                id=job_id,
-                job_annotations_update_request=models.JobAnnotationsUpdateRequest(
-                    tags=[], shapes=[], tracks=[]
-                ),
-            )
+            api_client.jobs_api.destroy_annotations(id=job_id)
         except exceptions.ApiException as e:
             if e.status == 404:
                 return
 
-            logger.exception(f"Exception when calling JobsApi.partial_update_annotations(): {e}\n")
+            logger.exception(f"Exception when calling JobsApi.destroy_annotations(): {e}\n")
             raise
 
 

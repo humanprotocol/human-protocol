@@ -4,11 +4,12 @@ from datetime import timedelta
 import src.cvat.api_calls as cvat_api
 import src.services.cvat as cvat_service
 from src.chain.escrow import get_escrow_manifest
-from src.core.types import JobStatuses, Networks, ProjectStatuses, TaskTypes
+from src.core.manifest import parse_manifest
+from src.core.types import JobStatuses, Networks, ProjectStatuses
 from src.db import SessionLocal
 from src.db.utils import ForUpdateParams
 from src.models.cvat import Job
-from src.utils.assignments import get_default_assignment_timeout, parse_manifest
+from src.utils.assignments import get_assignment_timeout
 from src.utils.requests import get_or_404
 from src.utils.time import utcnow
 
@@ -50,9 +51,7 @@ def create_assignment(
                 "The user already has an unfinished assignment in this project"
             )
 
-        # TODO: Try to put into 1 request. SQLAlchemy generates 2 queries with simple
-        # .options(selectinload(Job.project))
-        project = get_or_404(
+        get_or_404(
             cvat_service.get_project_by_escrow_address(
                 session, escrow_address, status_in=[ProjectStatuses.annotation]
             ),
@@ -78,13 +77,7 @@ def create_assignment(
             session,
             wallet_address=user.wallet_address,
             cvat_job_id=unassigned_job.cvat_id,
-            expires_at=utcnow()
-            + timedelta(
-                seconds=get_default_assignment_timeout(
-                    TaskTypes(project.job_type)
-                    # TODO: need to update this if we have multiple job types per escrow
-                )
-            ),
+            expires_at=utcnow() + timedelta(seconds=get_assignment_timeout(manifest)),
         )
 
         cvat_service.update_job_status(session, unassigned_job.id, status=JobStatuses.in_progress)

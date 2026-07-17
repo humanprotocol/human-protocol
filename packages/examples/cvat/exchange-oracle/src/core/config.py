@@ -4,7 +4,6 @@
 import inspect
 import os
 from collections.abc import Iterable
-from enum import Enum
 from os import getenv
 from typing import ClassVar, Optional
 
@@ -14,6 +13,7 @@ from human_protocol_sdk.encryption import Encryption
 from web3 import Web3
 from web3.providers.rpc import HTTPProvider
 
+from src.utils.enums import StrEnum
 from src.utils.logging import parse_log_level
 from src.utils.net import is_ipv4
 
@@ -321,7 +321,7 @@ class DevelopmentConfig:
     """
 
 
-class Environment(str, Enum):
+class Environment(StrEnum):
     PRODUCTION = "production"
     DEVELOPMENT = "development"
     TEST = "test"

@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "audio-qe"
+version = "0.1.0"
+description = "Audio transcription quality estimation"
+authors = ["CVAT.ai Corporation"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "audio_qe"}]
+
+[tool.poetry.dependencies]
+python = "^3.10, <3.13"
+numpy = "^1.25.2"
+regex = "^2024.11.6"
+scipy = "^1.13.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

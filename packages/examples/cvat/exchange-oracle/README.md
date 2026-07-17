@@ -4,7 +4,7 @@
 
 Prerequisites:
 ```
-1. poetry shell
+1. poetry config virtualenvs.in-project true  # create .venv inside the project so editors/debuggers pick it up
 2. poetry install
 3. pre-commit install
 4. Make sure you have postgres-devel packages installed on your OS. It is required for psycopg2 build phase.
@@ -30,13 +30,13 @@ docker compose -f docker-compose.dev.yml up -d
 ./bin/start_debug.sh
 ```
 
-When running service from `./bin/start_debug.sh` (`debug.py`), simplified development flow is available:
+When running service from `./bin/start_debug.sh` (`src/entrypoints/debug.py`), simplified development flow is available:
 
 - When JWT token is required, simple JSON can be used instead of JWT token.
 - When webhook signature is required, `{oracle_name}:unique_string` can be used
 - You can upload manifest.json to minio `manifests` bucket and use its filename as an escrow_address
 
-### Environemt
+### Environment
 Env example file: [.env.example](https://github.com/humanprotocol/human-protocol/blob/feat/cvat/exchange-oracle/packages/examples/cvat/exchange-oracle/src/.env.example)
 
 Config: [config file](https://github.com/humanprotocol/human-protocol/blob/feat/cvat/exchange-oracle/packages/examples/cvat/exchange-oracle/src/config.py)
@@ -115,3 +115,19 @@ docker compose -p eo-test \
 ```
 
 The dev setup mounts the local directory to speed the things up.
+
+#### Regenerating the test fixtures
+
+Recording Oracle tests run against the fixtures produced by the Exchange Oracle implementation.
+Regenerate them whenever the builder output layout or the shared task setups change.
+
+```sh
+docker compose -p eo-test \
+  -f docker-compose.test.yml \
+  -f docker-compose.test.head.yml \
+  -f docker-compose.test.head.dev.yml \
+  run --rm \
+  -v "$(pwd)/../recording-oracle/tests/assets/cloud/audio_validation:/out" \
+  test sh -c "alembic upgrade head && PYTHONPATH=. \
+    python tests/assets/utils/gen_audio_validation_fixture.py /out"
+```
