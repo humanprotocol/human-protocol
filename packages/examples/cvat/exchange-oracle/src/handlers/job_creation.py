@@ -1020,8 +1020,7 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
                 if not matched_skeletons:
                     # Handle unmatched skeletons
                     excluded_gt_info.add_message(
-                        "Sample '{}': GT bbox #{} ({}) skipped - "
-                        "no matching points found".format(
+                        "Sample '{}': GT bbox #{} ({}) skipped - no matching points found".format(
                             gt_sample.id,
                             gt_bbox.id,
                             gt_label_cat[gt_bbox.label].name,
@@ -1174,7 +1173,7 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
             image_h, image_w = self._points_dataset.get(sample.id, sample.subset).image.size
 
             for gt_bbox in sample.annotations:
-                gt_bbox = cast(dm.Bbox, gt_bbox)
+                gt_bbox = cast("dm.Bbox", gt_bbox)
                 bbox_sizes_per_label.setdefault(gt_bbox.label, []).append(
                     (
                         gt_bbox.w / image_w,
@@ -3046,11 +3045,11 @@ def create_task(escrow_address: str, chain_id: int) -> None:
         builder_type = SimpleTaskBuilder
     elif manifest.annotation.type is TaskTypes.image_polygons:
         builder_type = PolygonTaskBuilder
-    elif manifest.annotation.type in [TaskTypes.image_points]:
+    elif manifest.annotation.type is TaskTypes.image_points:
         builder_type = PointsTaskBuilder
-    elif manifest.annotation.type in [TaskTypes.image_boxes_from_points]:
+    elif manifest.annotation.type is TaskTypes.image_boxes_from_points:
         builder_type = BoxesFromPointsTaskBuilder
-    elif manifest.annotation.type in [TaskTypes.image_skeletons_from_boxes]:
+    elif manifest.annotation.type is TaskTypes.image_skeletons_from_boxes:
         builder_type = SkeletonsFromBoxesTaskBuilder
     else:
         raise Exception(f"Unsupported task type {manifest.annotation.type}")

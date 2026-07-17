@@ -157,4 +157,4 @@ def _get_field_info(klass: type[BaseModel], field_name: str):
     return klass.model_fields[field_name]
 
 
-__all__ = ["Filter", "FilterDepends", "with_prefix", "OrderingDirection"]
+__all__ = ["Filter", "FilterDepends", "OrderingDirection", "with_prefix"]

@@ -69,8 +69,7 @@ def _mock_get_manifests_from_minio(logger: Logger) -> Generator[None, None, None
             fn
             for fn in minio_manifests
             if (
-                "/" in escrow_address
-                and fn == f"{escrow_address}.json"
+                ("/" in escrow_address and fn == f"{escrow_address}.json")
                 or PurePosixPath(fn).name == f"{escrow_address}.json"
             )
         ]

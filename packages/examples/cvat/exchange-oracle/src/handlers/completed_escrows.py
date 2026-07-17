@@ -188,7 +188,7 @@ def _request_escrow_validation(
         event=ExchangeOracleEvent_JobFinished(),
     )
 
-    logger.info(f"The escrow ({escrow_address=}) annotation is finished, " f"requesting validation")
+    logger.info(f"The escrow ({escrow_address=}) annotation is finished, requesting validation")
 
 
 def _upload_escrow_results(
