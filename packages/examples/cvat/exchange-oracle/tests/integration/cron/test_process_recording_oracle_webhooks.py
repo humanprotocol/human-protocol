@@ -442,7 +442,7 @@ class ServiceIntegrationTest(unittest.TestCase):
                 "src.crons.webhooks.recording_oracle.get_recording_oracle_url",
                 return_value=DEFAULT_MANIFEST_URL,
             ),
-            patch("httpx.Client.post") as mock_httpx_post,
+            patch("httpx2.Client.post") as mock_httpx_post,
         ):
             mock_response = MagicMock()
             mock_response.raise_for_status.return_value = None

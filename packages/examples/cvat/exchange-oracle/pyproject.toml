@@ -14,8 +14,9 @@ python-dotenv = "^1.0.0"
 psycopg2 = "^2.9.6"
 sqlalchemy-utils = "^0.42.1"
 alembic = "^1.11.1"
-httpx = "^0.28.1"
-cvat-sdk = "2.37.0"
+httpx = "0.28.1"  # transitive for fastapi, pinned to the last known secure release
+httpx2 = "^2.7.0"  # httpx gone, the successor
+cvat-sdk = "2.70.0"
 sqlalchemy = "^2.0.16"
 apscheduler = "^3.10.1"
 datumaro ={git = "https://github.com/cvat-ai/datumaro.git", rev = "ff83c00c2c1bc4b8fdfcc55067fcab0a9b5b6b11"}

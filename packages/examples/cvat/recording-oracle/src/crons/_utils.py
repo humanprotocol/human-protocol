@@ -4,7 +4,7 @@ from collections.abc import Callable
 from contextlib import contextmanager, nullcontext
 from functools import wraps
 
-import httpx
+import httpx2
 from sqlalchemy.orm import Session
 
 import src.services.webhook as oracle_db_service
@@ -109,7 +109,7 @@ def send_webhook(url: str, webhook: Webhook, *, with_timestamp: bool = True) -> 
         body=body,
     )
     headers = {"human-signature": signature}
-    with httpx.Client() as client:
+    with httpx2.Client() as client:
         response = client.post(url, headers=headers, json=body)
         response.raise_for_status()
 

@@ -2,7 +2,7 @@ import logging
 from collections.abc import Callable
 from contextlib import contextmanager
 
-import httpx
+import httpx2
 from sqlalchemy.orm import Session
 
 from src.core.types import OracleWebhookTypes
@@ -60,7 +60,7 @@ def _send_webhook(url: str, webhook: Webhook, *, with_timestamp: bool = True) ->
         body=body,
     )
     headers = {"human-signature": signature}
-    with httpx.Client() as client:
+    with httpx2.Client() as client:
         response = client.post(url, headers=headers, json=body)
         response.raise_for_status()
 

@@ -525,14 +525,19 @@ files = [
 [[package]]
 name = "boto3"
 <<<<<<< HEAD
+<<<<<<< HEAD
 version = "1.34.30"
 =======
 version = "1.43.49"
 >>>>>>> 182d5f573 (update lockfiles)
+=======
+version = "1.43.50"
+>>>>>>> 507dde6dc (migrate to httpx2)
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">= 3.8"
 files = [
+<<<<<<< HEAD
 <<<<<<< HEAD
     {file = "boto3-1.34.30-py3-none-any.whl", hash = "sha256:cd6173380768faaecf6236dbdcec15d8d032cbb162ce354fdb111056a74fc298"},
     {file = "boto3-1.34.30.tar.gz", hash = "sha256:9e1476ce2b26437881a0381bf2daa54de619ac74ab4bd74278668acda6004a64"},
@@ -548,6 +553,14 @@ botocore = ">=1.34.30,<1.35.0"
 [package.dependencies]
 botocore = ">=1.43.49,<1.44.0"
 >>>>>>> 182d5f573 (update lockfiles)
+=======
+    {file = "boto3-1.43.50-py3-none-any.whl", hash = "sha256:779eb5cfa8bd1d615f36051465f8182860219eef78b4ab8ca2c666bb56702325"},
+    {file = "boto3-1.43.50.tar.gz", hash = "sha256:a6865b9cd1d15511f6aad89cef964105acecff2160a3e29ae53c10d9821416af"},
+]
+
+[package.dependencies]
+botocore = ">=1.43.50,<1.44.0"
+>>>>>>> 507dde6dc (migrate to httpx2)
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.10.0,<0.11.0"
 
@@ -557,14 +570,19 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 [[package]]
 name = "botocore"
 <<<<<<< HEAD
+<<<<<<< HEAD
 version = "1.34.30"
 =======
 version = "1.43.49"
 >>>>>>> 182d5f573 (update lockfiles)
+=======
+version = "1.43.50"
+>>>>>>> 507dde6dc (migrate to httpx2)
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">= 3.8"
 files = [
+<<<<<<< HEAD
 <<<<<<< HEAD
     {file = "botocore-1.34.30-py3-none-any.whl", hash = "sha256:caf82d91c2ff61235284a07ffdfba006873e0752e00896052f901a37720cefa4"},
     {file = "botocore-1.34.30.tar.gz", hash = "sha256:e071a9766e7fc2221ca42ec01dfc54368a7518610787342ea622f6edc57f7891"},
@@ -572,6 +590,10 @@ files = [
     {file = "botocore-1.43.49-py3-none-any.whl", hash = "sha256:16b6838ac2fbbab85fb265c1f2e37906527aca07f461b1d293d3f8ab82f992dc"},
     {file = "botocore-1.43.49.tar.gz", hash = "sha256:7de02863c95b8008b1400c92a1a00996f25ad38944c07f7b620949f8798d1fdf"},
 >>>>>>> 182d5f573 (update lockfiles)
+=======
+    {file = "botocore-1.43.50-py3-none-any.whl", hash = "sha256:4a57a1e0dd4a8be855c29183fc0e029c18e9ec84cd4ac172869f3e800f972528"},
+    {file = "botocore-1.43.50.tar.gz", hash = "sha256:7b07c423c44b1ab3815af103f11fa28ea317e28dda1335718a02ecde371a25e9"},
+>>>>>>> 507dde6dc (migrate to httpx2)
 ]
 
 [package.dependencies]
@@ -1918,20 +1940,29 @@ files = [
 [[package]]
 name = "filelock"
 <<<<<<< HEAD
+<<<<<<< HEAD
 version = "3.13.1"
 =======
 version = "3.30.0"
 >>>>>>> 182d5f573 (update lockfiles)
+=======
+version = "3.30.2"
+>>>>>>> 507dde6dc (migrate to httpx2)
 description = "A platform independent file lock."
 optional = false
 python-versions = ">=3.8"
 files = [
+<<<<<<< HEAD
 <<<<<<< HEAD
     {file = "filelock-3.13.1-py3-none-any.whl", hash = "sha256:57dbda9b35157b05fb3e58ee91448612eb674172fab98ee235ccb0b5bee19a1c"},
     {file = "filelock-3.13.1.tar.gz", hash = "sha256:521f5f56c50f8426f5e03ad3b281b490a87ef15bc6c526f168290f0c7148d44e"},
 =======
     {file = "filelock-3.30.0-py3-none-any.whl", hash = "sha256:40632998f0772e64183bb819f086a1b9def6be1090cf1dcb9d45f46806ef279b"},
     {file = "filelock-3.30.0.tar.gz", hash = "sha256:1774e682dbe443bd60f9609162fc596e2c80dc84ffc2957068953406d0520090"},
+=======
+    {file = "filelock-3.30.2-py3-none-any.whl", hash = "sha256:a64b58f75048ec39589983e97f5117163f822261dcb6ba843e098f05aac9663f"},
+    {file = "filelock-3.30.2.tar.gz", hash = "sha256:1ea7c857465c897a4a6e64c1aace28ff6b83f5bc66c1c06ea148efa65bc2ec5d"},
+>>>>>>> 507dde6dc (migrate to httpx2)
 ]
 
 [[package]]
@@ -2177,13 +2208,22 @@ files = [
 
 [[package]]
 name = "google-api-core"
+<<<<<<< HEAD
 version = "2.17.1"
+=======
+version = "2.32.0"
+>>>>>>> 507dde6dc (migrate to httpx2)
 description = "Google API client core library"
 optional = false
 python-versions = ">=3.7"
 files = [
+<<<<<<< HEAD
     {file = "google-api-core-2.17.1.tar.gz", hash = "sha256:9df18a1f87ee0df0bc4eea2770ebc4228392d8cc4066655b320e2cfccb15db95"},
     {file = "google_api_core-2.17.1-py3-none-any.whl", hash = "sha256:610c5b90092c360736baccf17bd3efbcb30dd380e7a6dc28a71059edb8bd0d8e"},
+=======
+    {file = "google_api_core-2.32.0-py3-none-any.whl", hash = "sha256:ae1f0d58a6c8869350bf469f8eb3092e7f8c494a942d9525494afb6c162b0904"},
+    {file = "google_api_core-2.32.0.tar.gz", hash = "sha256:2b33aad226b19272458c46abfe5c5a38d9531ece0c44502129a1463ce83674ac"},
+>>>>>>> 507dde6dc (migrate to httpx2)
 ]
 
 [package.dependencies]
@@ -2559,6 +2599,27 @@ socks = ["socksio (==1.*)"]
 trio = ["trio (>=0.22.0,<1.0)"]
 
 [[package]]
+name = "httpcore2"
+version = "2.7.0"
+description = "A minimal low-level HTTP client."
+optional = false
+python-versions = ">=3.10"
+files = [
+    {file = "httpcore2-2.7.0-py3-none-any.whl", hash = "sha256:1452f589fe23f55b44546cd884294c41a29330af902bc0b71a761fd52d18f92b"},
+    {file = "httpcore2-2.7.0.tar.gz", hash = "sha256:6dc0fedf329a52a990930a5579edfebaea81118ea700ea0dd7de2b5e5be49efc"},
+]
+
+[package.dependencies]
+h11 = ">=0.16"
+truststore = ">=0.10"
+
+[package.extras]
+asyncio = ["anyio (>=4.5.0,<5.0)"]
+http2 = ["h2 (>=3,<5)"]
+socks = ["socksio (==1.*)"]
+trio = ["trio (>=0.22.0,<1.0)"]
+
+[[package]]
 name = "httptools"
 version = "0.6.4"
 description = "A collection of framework independent HTTP protocol utils."
@@ -2635,6 +2696,32 @@ brotli = ["brotli", "brotlicffi"]
 cli = ["click (==8.*)", "pygments (==2.*)", "rich (>=10,<14)"]
 http2 = ["h2 (>=3,<5)"]
 socks = ["socksio (==1.*)"]
+zstd = ["zstandard (>=0.18.0)"]
+
+[[package]]
+name = "httpx2"
+version = "2.7.0"
+description = "The next generation HTTP client."
+optional = false
+python-versions = ">=3.10"
+files = [
+    {file = "httpx2-2.7.0-py3-none-any.whl", hash = "sha256:ed2a2719c696789e09493bd8e2bec3d8bd925cc6e26b68389ec25ade132f7bf4"},
+    {file = "httpx2-2.7.0.tar.gz", hash = "sha256:8b30709aed5c8465b0dd3b95c09ce301c8f79e7e7a2d00ab0af551e0d0375b07"},
+]
+
+[package.dependencies]
+anyio = ">=4.10"
+httpcore2 = "2.7.0"
+idna = ">=3.18"
+truststore = ">=0.10"
+typing-extensions = {version = ">=4.5.0", markers = "python_version < \"3.13\""}
+
+[package.extras]
+brotli = ["brotli", "brotlicffi"]
+cli = ["click (>=8.4)", "pygments (==2.*)", "rich (>=10,<16)"]
+http2 = ["h2 (>=3,<5)"]
+socks = ["socksio (==1.*)"]
+ws = ["wsproto (>=1.2)"]
 zstd = ["zstandard (>=0.18.0)"]
 
 [[package]]
@@ -5658,10 +5745,24 @@ telegram = ["requests"]
 
 [[package]]
 <<<<<<< HEAD
+<<<<<<< HEAD
 name = "tuspy"
 version = "0.2.5"
 description = "A Python client for the tus resumable upload protocol ->  http://tus.io"
 =======
+=======
+name = "truststore"
+version = "0.10.4"
+description = "Verify certificates using native system trust stores"
+optional = false
+python-versions = ">=3.10"
+files = [
+    {file = "truststore-0.10.4-py3-none-any.whl", hash = "sha256:adaeaecf1cbb5f4de3b1959b42d41f6fab57b2b1666adb59e89cb0b53361d981"},
+    {file = "truststore-0.10.4.tar.gz", hash = "sha256:9d91bd436463ad5e4ee4aba766628dd6cd7010cf3e2461756b3303710eebc301"},
+]
+
+[[package]]
+>>>>>>> 507dde6dc (migrate to httpx2)
 name = "typer"
 version = "0.27.0"
 description = "Typer, build great CLIs. Easy to code. Based on Python type hints."
@@ -6242,7 +6343,11 @@ propcache = ">=0.2.0"
 lock-version = "2.0"
 python-versions = "^3.10,<3.13"
 <<<<<<< HEAD
+<<<<<<< HEAD
 content-hash = "84f9ce0ad56ffab8a5101eba4d9102f9df7d27d3663fdc08aaeafa49f7f467ab"
 =======
 content-hash = "30376bf9458153da9a7775985b02a69b62e0674daaa5eb0e34d1997dee064a99"
 >>>>>>> 182d5f573 (update lockfiles)
+=======
+content-hash = "9a7cd1771fe2f604ab5a55485a5f9338797c503e9ec389cefd8ff8030e6bb288"
+>>>>>>> 507dde6dc (migrate to httpx2)
