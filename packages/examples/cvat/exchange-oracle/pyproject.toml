@@ -42,11 +42,7 @@ pre-commit = "^4.6.0"
 ruff = "^0.15.21"
 pytest = "^9.0.0"
 pytest-mock = "^3.14.0"
-<<<<<<< HEAD
 virtualenv = "<21"  # 21.x drops APIs that poetry's build isolation relies on
-=======
-virtualenv = "<21"  # 21.x drops APIs that poetry's build isolation relies on (parity with RO)
->>>>>>> dd0ac7159 (Bump EO deps, migrate)
 
 [tool.ruff]
 line-length = 100
