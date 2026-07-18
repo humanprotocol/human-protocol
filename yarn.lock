@@ -487,7 +487,7 @@ __metadata:
   dependencies:
     "@automapper/classes": "npm:^8.8.1"
     "@automapper/core": "npm:^8.8.1"
-    "@automapper/nestjs": "npm:^8.8.1"
+    "@automapper/nestjs": "npm:^9.0.2"
     "@eslint/js": "npm:^10.0.1"
     "@human-protocol/core": "workspace:*"
     "@human-protocol/logger": "workspace:*"
@@ -852,14 +852,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@automapper/nestjs@npm:^8.8.1":
-  version: 8.8.1
-  resolution: "@automapper/nestjs@npm:8.8.1"
+"@automapper/nestjs@npm:^9.0.2":
+  version: 9.0.2
+  resolution: "@automapper/nestjs@npm:9.0.2"
   peerDependencies:
-    "@automapper/core": 8.8.1
-    "@nestjs/common": ^7.0.0 || ^8.0.0 || ^9.0.0 || ^10.0.0
-    "@nestjs/core": ^7.0.0 || ^8.0.0  || ^9.0.0 || ^10.0.0
-  checksum: 10c0/a05842e3a7511b67e6a79df517b5a86c0c9faebbd8877de2e8af5537746933aafe1a8a88d58dd096b464c73f25657813d87ab3ac2b97cc8a393acd5ed5e12640
+    "@automapper/core": ^9.0.2
+    "@nestjs/common": ^10.0.0 || ^11.0.0
+    "@nestjs/core": ^10.0.0 || ^11.0.0
+  checksum: 10c0/94ee89632c00973992c97e5ac74c60660fcb7985706b3d66a03497c5fb01a48e2f923e0f969d821d76631064b9cd97ab45ef1bbb82a8329f6f5bf7433d3b9673
   languageName: node
   linkType: hard
 
