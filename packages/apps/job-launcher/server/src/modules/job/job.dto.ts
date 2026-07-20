@@ -111,6 +111,13 @@ export class JobManifestDto extends JobDto {
   public manifest: ManifestDto;
 }
 
+export class JobUnknownManifestDto extends JobDto {
+  @ApiProperty({ type: Object })
+  @IsObject()
+  @IsNotEmpty()
+  public manifest: Record<string, unknown>;
+}
+
 export class StorageDataDto {
   @ApiProperty({ enum: StorageProviders })
   @IsEnumCaseInsensitive(StorageProviders)

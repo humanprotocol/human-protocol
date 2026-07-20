@@ -7,7 +7,7 @@ export function OptionalText({ text }: { text?: string }) {
   }
 
   return (
-    <Grid sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }} width="100%">
+    <Grid sx={{ width: '100%', overflow: 'hidden', textOverflow: 'ellipsis' }}>
       {text}
     </Grid>
   );

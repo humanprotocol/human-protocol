@@ -38,7 +38,7 @@ export function UserStatsDrawer({
           },
         }}
       >
-        <Box position="relative">
+        <Box sx={{ position: 'relative' }}>
           {isHcaptchaUserStatsRefetching && (
             <LoadingOverlay
               sx={{
@@ -51,10 +51,10 @@ export function UserStatsDrawer({
               }}
             />
           )}
-          <Stack px={6.5} py={3}>
+          <Stack sx={{ px: 6.5, py: 3 }}>
             {hcaptchaUserStatsStatus === 'success' ? (
               <>
-                <Typography variant="mobileHeaderLarge" mb={3}>
+                <Typography variant="mobileHeaderLarge" sx={{ mb: 3 }}>
                   {t('worker.hcaptchaLabelingStats.hCapchaStatistics')}
                 </Typography>
                 <UserStatsDetails

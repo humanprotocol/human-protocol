@@ -55,7 +55,7 @@ export function StakeForm({
             void methods.handleSubmit(addStake)(event);
           }}
         >
-          <Grid container gap="2rem">
+          <Grid container sx={{ gap: 4 }}>
             <Input
               fullWidth
               label={t('operator.stakeForm.label')}
@@ -65,9 +65,9 @@ export function StakeForm({
             />
             <Grid
               container
-              gap="1rem"
               sx={{
-                flex: '1',
+                flex: 1,
+                gap: 2,
                 flexWrap: 'nowrap',
                 [breakpoints.mobile]: {
                   flexWrap: 'wrap',

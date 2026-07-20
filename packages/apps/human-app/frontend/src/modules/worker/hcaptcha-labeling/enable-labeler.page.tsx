@@ -3,7 +3,6 @@ import Paper from '@mui/material/Paper';
 import { t } from 'i18next';
 import Typography from '@mui/material/Typography';
 import { Navigate } from 'react-router-dom';
-import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { Button } from '@/shared/components/ui/button';
 import { PageCardError } from '@/shared/components/ui/page-card';
 import { getErrorMessageForError } from '@/shared/errors';
@@ -13,7 +12,6 @@ import { routerPaths } from '@/router/router-paths';
 import { useEnableHCaptchaLabelingMutation } from './hooks';
 
 export function EnableLabelerPage() {
-  const isMobile = useIsMobile();
   const { user } = useAuthenticatedUser();
   const { mutate, error, isError, isPending } =
     useEnableHCaptchaLabelingMutation();
@@ -28,17 +26,14 @@ export function EnableLabelerPage() {
 
   return (
     <Grid
-      alignItems="center"
-      height="100%"
-      item
-      justifyContent="center"
-      xs={12}
+      size={12}
+      sx={{ alignItems: 'center', height: '100%', justifyContent: 'center' }}
     >
       <Paper
         sx={{
           height: '100%',
           boxShadow: 'none',
-          padding: isMobile ? '20px' : '40px',
+          padding: { xs: 2.5, md: 5 },
           borderRadius: '20px',
         }}
       >
@@ -69,12 +64,12 @@ export function EnableLabelerPage() {
             </Typography>
 
             <Button
+              variant="contained"
               fullWidth
               loading={isPending}
               onClick={() => {
                 mutate();
               }}
-              variant="contained"
             >
               {t('worker.enableHCaptchaLabeling.enableButton')}
             </Button>

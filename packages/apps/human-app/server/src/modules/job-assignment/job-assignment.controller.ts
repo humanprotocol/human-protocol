@@ -8,7 +8,6 @@ import {
   Post,
   Query,
   Request,
-  ForbiddenException,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { RequestWithUser } from '../../common/interfaces/jwt';
@@ -43,11 +42,6 @@ export class JobAssignmentController {
     @Body() jobAssignmentDto: JobAssignmentDto,
     @Request() req: RequestWithUser,
   ): Promise<JobAssignmentResponse> {
-    // Require stake eligibility
-    if (!req.user?.is_stake_eligible) {
-      throw new ForbiddenException('Stake requirement not met');
-    }
-
     const jobAssignmentCommand = this.mapper.map(
       jobAssignmentDto,
       JobAssignmentDto,
@@ -65,16 +59,6 @@ export class JobAssignmentController {
     @Query() jobsAssignmentParamsDto: JobsFetchParamsDto,
     @Request() req: RequestWithUser,
   ): Promise<JobsFetchResponse> {
-    // Require stake eligibility
-    if (!req.user?.is_stake_eligible) {
-      return {
-        page: 0,
-        page_size: 1,
-        total_pages: 1,
-        total_results: 0,
-        results: [],
-      };
-    }
     const jobsAssignmentParamsCommand = this.mapper.map(
       jobsAssignmentParamsDto,
       JobsFetchParamsDto,
@@ -94,10 +78,6 @@ export class JobAssignmentController {
     @Body() dto: ResignJobDto,
     @Request() req: RequestWithUser,
   ) {
-    // Require stake eligibility
-    if (!req.user?.is_stake_eligible) {
-      throw new ForbiddenException('Stake requirement not met');
-    }
     const command = this.mapper.map(dto, ResignJobDto, ResignJobCommand);
     command.token = req.token;
     return this.service.resignJob(command);
@@ -112,10 +92,6 @@ export class JobAssignmentController {
     @Body() dto: RefreshJobDto,
     @Request() req: RequestWithUser,
   ) {
-    // Require stake eligibility
-    if (!req.user?.is_stake_eligible) {
-      throw new ForbiddenException('Stake requirement not met');
-    }
     const command = new JobsFetchParamsCommand();
     command.oracleAddress = dto.oracle_address;
     command.token = req.token;

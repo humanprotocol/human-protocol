@@ -25,7 +25,7 @@ HMT_SYMBOL = "HMT"
 WALLET_ADDRESS1 = "0x86e83d346041E8806e352681f3F14549C0d2BC69"
 WALLET_ADDRESS2 = "0x86e83d346041E8806e352681f3F14549C0d2BC70"
 
-DEFAULT_MANIFEST_URL = "http://host.docker.internal:9000/manifests/manifest.json"
+DEFAULT_MANIFEST_URL = "http://host.docker.internal:9000/manifests/manifest-v1.json"
 DEFAULT_HASH = "test"
 
 SIGNATURE = (

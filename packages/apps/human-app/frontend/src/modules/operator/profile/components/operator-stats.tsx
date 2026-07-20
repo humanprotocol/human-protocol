@@ -2,7 +2,6 @@ import { Paper, Typography, Stack, List } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { ProfileListItem } from '@/shared/components/ui/profile';
 import { useColorMode } from '@/shared/contexts/color-mode';
-import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { type OperatorStatsResponse } from '../types';
 
 export function OperatorStats({
@@ -10,7 +9,6 @@ export function OperatorStats({
 }: Readonly<{
   statsData: OperatorStatsResponse;
 }>) {
-  const isMobile = useIsMobile('lg');
   const { colorPalette } = useColorMode();
   const { t } = useTranslation();
 
@@ -22,21 +20,21 @@ export function OperatorStats({
         width: '100%',
         display: 'flex',
         flexDirection: 'column',
-        padding: isMobile ? '20px' : '40px',
+        padding: { xs: 2.5, md: 5 },
         borderRadius: '20px',
       }}
     >
       <Typography
-        color={colorPalette.text.primary}
         sx={{
           fontWeight: 600,
           width: '100%',
+          color: colorPalette.text.primary,
         }}
         variant="h5"
       >
         {t('operator.profile.statistics.header')}
       </Typography>
-      <Stack flexDirection="row" justifyContent="space-between">
+      <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
         <List>
           <ProfileListItem
             header={t('operator.profile.statistics.escrowsProcessed')}

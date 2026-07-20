@@ -6,7 +6,7 @@ RUN apt-get update -y && \
     apt-get install -y jq ffmpeg libsm6 libxext6 && \
     rm -rf /var/lib/apt/lists/*
 
-RUN pip install --no-cache poetry
+RUN pip install --no-cache 'poetry==1.8.5'
 
 COPY pyproject.toml poetry.lock ./
 

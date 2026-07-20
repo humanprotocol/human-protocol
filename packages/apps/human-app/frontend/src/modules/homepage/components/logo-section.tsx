@@ -15,55 +15,65 @@ export function LogoSection() {
   const isMobile = useIsMobile('lg');
 
   return (
-    <Grid container direction="column" justifyContent="center">
+    <Grid
+      container
+      sx={{
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: { xs: 'center', lg: 'flex-start' },
+      }}
+    >
       {isMobile ? (
         <Stack
-          alignItems="center"
           direction="row"
-          justifyContent="center"
-          sx={{ svg: { margin: '-1.4rem' } }}
+          sx={{
+            alignItems: 'center',
+            justifyContent: 'center',
+            svg: { margin: '-1.4rem' },
+          }}
         >
           <MobileHomeIcons />
         </Stack>
       ) : (
         <Stack
           direction="row"
-          maxHeight="80px"
-          mb="1.5rem"
-          sx={{ transform: 'translateX(-4.5%)' }}
+          sx={{
+            maxHeight: '80px',
+            mb: 3,
+            transform: 'translateX(-4.5%)',
+          }}
         >
-          <Grid sx={{ mx: '24px' }}>
+          <Grid sx={{ mx: 3 }}>
             <HomepageWorkIcon />
           </Grid>
-          <Grid sx={{ mx: '24px' }}>
+          <Grid sx={{ mx: 3 }}>
             <HomepageUserIcon />
           </Grid>
-          <Grid sx={{ mx: '24px' }}>
+          <Grid sx={{ mx: 3 }}>
             <HomepageLogoIcon />
           </Grid>
         </Stack>
       )}
       <Stack
         direction="row"
-        justifyContent={isMobile ? 'center' : 'flex-start'}
-        sx={{ marginTop: '0' }}
+        sx={{
+          justifyContent: { xs: 'center', md: 'flex-start' },
+          mt: 0,
+        }}
       >
         <Typography variant="h1">{logoTextSplit[0]}</Typography>
-        <Typography
-          sx={{ fontWeight: '400', marginLeft: '1.25rem' }}
-          variant="h1"
-        >
+        <Typography variant="h1" sx={{ fontWeight: '400', ml: 2.5 }}>
           {logoTextSplit[1]}
         </Typography>
       </Stack>
       <Typography
-        sx={{
-          marginTop: '1.875rem',
-          marginBottom: '3.8125rem',
-          typography: { md: 'h5' },
-        }}
-        textAlign={isMobile ? 'center' : 'left'}
         variant="h6"
+        sx={{
+          mt: '1.875rem',
+          mb: '3.8125rem',
+          typography: { md: 'h5' },
+          textAlign: { xs: 'center', md: 'left' },
+        }}
       >
         {t('homepage.completeJobs')}
       </Typography>

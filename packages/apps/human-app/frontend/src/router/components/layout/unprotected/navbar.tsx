@@ -28,8 +28,8 @@ export function Navbar({ withNavigation }: Readonly<NavbarProps>) {
 
   return (
     <Box
-      position="static"
       sx={{
+        position: 'static',
         background: 'transparent',
         margin: '20px 0',
         width: '100%',

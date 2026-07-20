@@ -20,7 +20,6 @@ export const darkTheme: ThemeOptions = {
       defaultProps: {
         variant: 'body1',
         color: darkColorPalette.text.primary,
-        fontFamily: 'Inter',
         variantMapping: {
           subtitle1: 'p',
           subtitle2: 'p',

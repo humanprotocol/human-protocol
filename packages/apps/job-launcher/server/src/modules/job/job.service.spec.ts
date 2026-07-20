@@ -61,6 +61,7 @@ import {
   GetJobsDto,
   JobManifestDto,
   JobQuickLaunchDto,
+  JobUnknownManifestDto,
 } from './job.dto';
 import { JobRepository } from './job.repository';
 import { JobService } from './job.service';
@@ -137,6 +138,122 @@ describe('JobService', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+    jest.restoreAllMocks();
+  });
+
+  describe('createJobWithUnknownManifest', () => {
+    it('should upload an unknown manifest and create a job without format validation', async () => {
+      const userMock = createUser({ whitelist: new WhitelistEntity() });
+      const dto: JobUnknownManifestDto = {
+        chainId: ChainId.POLYGON_AMOY,
+        requestType: FortuneJobType.FORTUNE,
+        manifest: {
+          arbitrary: faker.string.sample(),
+          schema: {
+            value: faker.number.int(),
+          },
+        },
+        reputationOracle: faker.finance.ethereumAddress(),
+        exchangeOracle: faker.finance.ethereumAddress(),
+        recordingOracle: faker.finance.ethereumAddress(),
+        paymentCurrency: PaymentCurrency.USD,
+        paymentAmount: faker.number.int({ min: 100, max: 1000 }),
+        escrowFundToken: EscrowFundToken.HMT,
+      };
+      const uploadedFile = {
+        url: faker.internet.url(),
+        hash: faker.string.uuid(),
+      };
+      const jobId = faker.number.int({ min: 1 });
+      const createJobSpy = jest
+        .spyOn(jobService, 'createJob')
+        .mockResolvedValueOnce(jobId);
+
+      mockManifestService.uploadManifest.mockResolvedValueOnce(uploadedFile);
+
+      const result = await jobService.createJobWithUnknownManifest(
+        userMock,
+        dto,
+      );
+
+      expect(result).toBe(jobId);
+      expect(mockWeb3Service.validateChainId).toHaveBeenCalledWith(dto.chainId);
+      expect(mockManifestService.validateManifest).not.toHaveBeenCalled();
+      expect(mockManifestService.uploadManifest).toHaveBeenCalledWith(
+        dto.chainId,
+        dto.manifest,
+        [dto.exchangeOracle, dto.reputationOracle, dto.recordingOracle],
+      );
+      expect(createJobSpy).toHaveBeenCalledWith(
+        userMock,
+        dto.requestType,
+        expect.objectContaining({
+          chainId: dto.chainId,
+          requestType: dto.requestType,
+          reputationOracle: dto.reputationOracle,
+          exchangeOracle: dto.exchangeOracle,
+          recordingOracle: dto.recordingOracle,
+          paymentCurrency: dto.paymentCurrency,
+          paymentAmount: dto.paymentAmount,
+          escrowFundToken: dto.escrowFundToken,
+          manifestUrl: uploadedFile.url,
+          manifestHash: uploadedFile.hash,
+        }),
+      );
+      expect(createJobSpy.mock.calls[0][2]).not.toHaveProperty('manifest');
+    });
+
+    it('should use default oracles when creating a job with an unknown manifest', async () => {
+      const userMock = createUser({ whitelist: new WhitelistEntity() });
+      const dto: JobUnknownManifestDto = {
+        chainId: ChainId.POLYGON_AMOY,
+        requestType: HCaptchaJobType.HCAPTCHA,
+        manifest: {
+          custom: faker.string.sample(),
+        },
+        paymentCurrency: PaymentCurrency.USD,
+        paymentAmount: faker.number.int({ min: 100, max: 1000 }),
+        escrowFundToken: EscrowFundToken.HMT,
+      };
+      const uploadedFile = {
+        url: faker.internet.url(),
+        hash: faker.string.uuid(),
+      };
+      const createJobSpy = jest
+        .spyOn(jobService, 'createJob')
+        .mockResolvedValueOnce(faker.number.int({ min: 1 }));
+
+      mockManifestService.uploadManifest.mockResolvedValueOnce(uploadedFile);
+
+      await jobService.createJobWithUnknownManifest(userMock, dto);
+
+      expect(mockManifestService.uploadManifest).toHaveBeenCalledWith(
+        dto.chainId,
+        dto.manifest,
+        [
+          mockWeb3ConfigService.hCaptchaOracleAddress,
+          mockWeb3ConfigService.hCaptchaOracleAddress,
+          mockWeb3ConfigService.hCaptchaOracleAddress,
+        ],
+      );
+      expect(createJobSpy).toHaveBeenCalledWith(
+        userMock,
+        dto.requestType,
+        expect.objectContaining({
+          chainId: dto.chainId,
+          requestType: dto.requestType,
+          reputationOracle: mockWeb3ConfigService.hCaptchaOracleAddress,
+          exchangeOracle: mockWeb3ConfigService.hCaptchaOracleAddress,
+          recordingOracle: mockWeb3ConfigService.hCaptchaOracleAddress,
+          paymentCurrency: dto.paymentCurrency,
+          paymentAmount: dto.paymentAmount,
+          escrowFundToken: dto.escrowFundToken,
+          manifestUrl: uploadedFile.url,
+          manifestHash: uploadedFile.hash,
+        }),
+      );
+      expect(createJobSpy.mock.calls[0][2]).not.toHaveProperty('manifest');
+    });
   });
 
   describe('createJob', () => {

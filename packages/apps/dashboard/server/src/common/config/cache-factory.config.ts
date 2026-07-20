@@ -1,4 +1,4 @@
-import { CacheModuleAsyncOptions } from '@nestjs/common/cache';
+import { CacheModuleAsyncOptions } from '@nestjs/cache-manager';
 import { ConfigModule } from '@nestjs/config';
 import * as _ from 'lodash';
 

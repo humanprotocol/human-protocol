@@ -39,11 +39,11 @@ export function ResendVerificationEmailForm({
           void methods.handleSubmit(handleResend)(event);
         }}
       >
-        <Grid container gap="2rem" sx={{ paddingTop: '1rem' }}>
+        <Grid container sx={{ gap: 4, pt: 2 }}>
           <Typography>
             <Trans
               components={{
-                1: <Typography component="span" fontWeight={600} />,
+                1: <Typography component="span" sx={{ fontWeight: 600 }} />,
               }}
               i18nKey="worker.verifyEmail.paragraph1"
               values={{ email }}
@@ -55,7 +55,7 @@ export function ResendVerificationEmailForm({
           <Typography variant="body1">
             <Trans
               components={{
-                1: <Typography component="span" fontWeight={600} />,
+                1: <Typography component="span" sx={{ fontWeight: 600 }} />,
               }}
               i18nKey="worker.verifyEmail.paragraph3"
             />
@@ -66,8 +66,8 @@ export function ResendVerificationEmailForm({
                 1: (
                   <Typography
                     component="span"
-                    fontWeight={600}
                     variant="body1"
+                    sx={{ fontWeight: 600 }}
                   />
                 ),
                 2: <MailTo mail={env.VITE_HUMAN_SUPPORT_EMAIL} />,

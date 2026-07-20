@@ -6,6 +6,9 @@ export function TableButton(props: CustomButtonProps) {
     <Button
       {...props}
       size="small"
+      type="button"
+      variant="contained"
+      color="secondary"
       sx={{
         paddingTop: '0.4rem',
         paddingBottom: '0.4rem',
@@ -14,9 +17,6 @@ export function TableButton(props: CustomButtonProps) {
         fontSize: '13px',
         ...props.sx,
       }}
-      type="button"
-      variant="contained"
-      color="secondary"
     >
       <div>{props.children}</div>
     </Button>

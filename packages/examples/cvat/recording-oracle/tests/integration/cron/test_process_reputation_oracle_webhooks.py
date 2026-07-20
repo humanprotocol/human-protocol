@@ -3,9 +3,6 @@ import uuid
 from unittest.mock import MagicMock, patch
 
 from sqlalchemy.sql import select
-from web3 import Web3
-from web3.middleware import SignAndSendRawMiddlewareBuilder
-from web3.providers.rpc import HTTPProvider
 
 from src.core.types import (
     Networks,
@@ -18,23 +15,12 @@ from src.db import SessionLocal
 from src.models.webhook import Webhook
 from src.services.webhook import OracleWebhookDirectionTags
 
-from tests.utils.constants import DEFAULT_GAS_PAYER_PRIV, SIGNATURE
-from tests.utils.setup_escrow import create_escrow
-from tests.utils.setup_kvstore import store_kvstore_value
+from tests.utils.constants import ESCROW_ADDRESS, SIGNATURE
 
 
 class ServiceIntegrationTest(unittest.TestCase):
     def setUp(self):
         self.session = SessionLocal()
-        self.w3 = Web3(HTTPProvider())
-
-        self.gas_payer = self.w3.eth.account.from_key(DEFAULT_GAS_PAYER_PRIV)
-        self.w3.middleware_onion.inject(
-            SignAndSendRawMiddlewareBuilder.build(DEFAULT_GAS_PAYER_PRIV),
-            "SignAndSendRawMiddlewareBuilder",
-            layer=0,
-        )
-        self.w3.eth.default_account = self.gas_payer.address
 
     def tearDown(self):
         self.session.close()
@@ -55,7 +41,7 @@ class ServiceIntegrationTest(unittest.TestCase):
     def test_process_reputation_oracle_webhooks(self):
         expected_url = "expected_url"
         with (
-            patch("src.crons._utils.httpx.Client.post") as mock_httpx,
+            patch("src.crons._utils.httpx2.Client.post") as mock_httpx,
             patch("src.crons._utils.prepare_signed_message") as mock_signature,
             patch(
                 "src.crons.process_reputation_oracle_webhooks.get_reputation_oracle_url"
@@ -67,8 +53,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             mock_get_repo_url.return_value = expected_url
 
             chain_id = Networks.localhost.value
-            escrow_address = create_escrow(self.w3)
-            store_kvstore_value("webhook_url", expected_url)
+            escrow_address = ESCROW_ADDRESS
             event_data = {}
             mock_signature.return_value = (None, SIGNATURE)
 
@@ -122,7 +107,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         ) as mock_get_repo_url:
             mock_get_repo_url.return_value = "https://not.a.real/url/existing.somewhere"
 
-            webhook = self.get_webhook(create_escrow(self.w3), Networks.localhost.value, {})
+            webhook = self.get_webhook(ESCROW_ADDRESS, Networks.localhost.value, {})
             self.session.add(webhook)
             self.session.commit()
             process_outgoing_reputation_oracle_webhooks()

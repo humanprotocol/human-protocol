@@ -73,6 +73,7 @@ declare module '@mui/material/styles' {
 }
 
 export const typography: ThemeOptions['typography'] = {
+  fontFamily: 'Inter',
   h1: {
     fontSize: 80,
     fontWeight: 800,

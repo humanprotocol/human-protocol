@@ -12,16 +12,14 @@ config = context.config
 config.set_main_option("sqlalchemy.url", Config.postgres_config.connection_url())
 
 # Interpret the config file for Python logging.
-# This line sets up loggers basically.
 if config.config_file_name is not None:
-    fileConfig(config.config_file_name)
+    fileConfig(
+        config.config_file_name,
+        disable_existing_loggers=config.attributes.get("disable_existing_loggers", True),
+    )
 
+import src.models  # noqa: E402, F401  (registers all models on Base.metadata for autogenerate)
 from src.db import Base  # noqa: E402
-
-# add your model's MetaData object here
-# for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
 
 target_metadata = Base.metadata
 

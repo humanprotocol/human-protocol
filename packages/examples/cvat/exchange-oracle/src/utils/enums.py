@@ -1,5 +1,12 @@
 from enum import EnumMeta
 
+from strenum import StrEnum  # added in python 3.11
+
+__all__ = [
+    "BetterEnumMeta",
+    "StrEnum",
+]
+
 
 class BetterEnumMeta(EnumMeta):
     """

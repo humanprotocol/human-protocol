@@ -55,7 +55,7 @@ export function SignUpWorkerPage() {
     >
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit}>
-          <Grid container gap="1.5rem">
+          <Grid container sx={{ gap: 3 }}>
             <Input label={t('worker.signUpForm.fields.email')} name="email" />
             <Password
               label={t('worker.signUpForm.fields.password')}
@@ -66,7 +66,7 @@ export function SignUpWorkerPage() {
               name="confirmPassword"
             />
             <Grid>
-              <Typography fontSize="0.75rem" variant="textField">
+              <Typography variant="textField" sx={{ fontSize: '0.75rem' }}>
                 <Trans
                   components={{
                     1: (

@@ -3,14 +3,14 @@ repos:
       hooks:
         - id: lint
           name: lint
-          entry: ruff check --fix --unsafe-fixes --show-fixes
+          entry: ruff check --force-exclude --fix --unsafe-fixes --show-fixes
           language: system
           require_serial: true
           files: "^packages/examples/cvat/recording-oracle/.*"
           types: [python]
         - id: format
           name: format
-          entry: ruff format
+          entry: ruff format --force-exclude
           require_serial: true
           language: system
           files: "^packages/examples/cvat/recording-oracle/.*"

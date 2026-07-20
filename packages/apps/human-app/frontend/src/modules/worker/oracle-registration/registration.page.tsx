@@ -53,10 +53,10 @@ export function RegistrationPage() {
   }
 
   return (
-    <Grid alignItems="center" container justifyContent="center">
-      <Grid item xs={12}>
+    <Grid container sx={{ alignItems: 'center', justifyContent: 'center' }}>
+      <Grid size={12}>
         <Paper sx={styles}>
-          <Stack maxWidth="350px" spacing={2}>
+          <Stack sx={{ gap: 2, maxWidth: '350px' }}>
             <Box>
               {t('worker.registrationInExchangeOracle.requiredMessage')}
             </Box>

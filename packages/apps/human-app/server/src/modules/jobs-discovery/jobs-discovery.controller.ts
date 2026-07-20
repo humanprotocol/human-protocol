@@ -49,17 +49,6 @@ export class JobsDiscoveryController {
       );
     }
 
-    // Require stake eligibility
-    if (!req.user?.is_stake_eligible) {
-      return {
-        page: 0,
-        page_size: 1,
-        total_pages: 1,
-        total_results: 0,
-        results: [],
-      };
-    }
-
     const jobsDiscoveryParamsCommand: JobsDiscoveryParamsCommand =
       this.mapper.map(
         jobsDiscoveryParamsDto,

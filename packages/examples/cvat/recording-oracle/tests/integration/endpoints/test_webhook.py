@@ -2,6 +2,7 @@ import random
 import unittest
 from unittest.mock import MagicMock, patch
 
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from src.chain.web3 import sign_message
@@ -17,7 +18,11 @@ class ServiceIntegrationTest(unittest.TestCase):
     def setUp(self):
         random.seed(42)
         self.session = SessionLocal()
-        self.client = TestClient(router)
+        # Wrap the router in an app so request.body() has the middleware stack (required by
+        # newer Starlette; a bare router lacks it).
+        app = FastAPI()
+        app.include_router(router)
+        self.client = TestClient(app)
         self.mock_escrow = MagicMock()
         self.mock_escrow.exchange_oracle = DEFAULT_GAS_PAYER
         self.mock_escrow.status = "Pending"

@@ -63,7 +63,7 @@ export function EditExistingKeysSuccessPage() {
       showCancelButton={false}
       title={t('operator.editExistingKeysSuccess.title')}
     >
-      <Grid container gap="2rem">
+      <Grid container sx={{ gap: 4 }}>
         <Grid>
           <Typography variant="subtitle1">
             {t('operator.editExistingKeysSuccess.paragraph1')}

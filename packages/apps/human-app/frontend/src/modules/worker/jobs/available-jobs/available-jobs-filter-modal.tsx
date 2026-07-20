@@ -43,16 +43,15 @@ export function AvailableJobsFilterModal({
         variant="persistent"
       >
         <Stack
-          alignItems="center"
           component="header"
           direction="row"
-          justifyContent="space-between"
           sx={{
             position: 'absolute',
             left: '0',
             top: '0',
             background: colorPalette.backgroundColor,
-            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
             width: '100%',
             px: '44px',
             pt: '32px',
@@ -99,7 +98,7 @@ export function AvailableJobsFilterModal({
         <Typography variant="mobileHeaderMid">
           {t('worker.jobs.network')}
         </Typography>
-        <Stack alignItems="center" flexDirection="row">
+        <Stack direction="row" sx={{ alignItems: 'center' }}>
           <AvailableJobsNetworkFilter chainIdsEnabled={chainIdsEnabled} />
         </Stack>
 
@@ -112,7 +111,7 @@ export function AvailableJobsFilterModal({
         <Typography variant="mobileHeaderMid">
           {t('worker.jobs.jobType')}
         </Typography>
-        <Stack alignItems="center" flexDirection="row">
+        <Stack direction="row" sx={{ alignItems: 'center' }}>
           <AvailableJobsJobTypeFilter />
         </Stack>
       </Drawer>

@@ -45,24 +45,23 @@ function ErrorState({ error }: { error: string }) {
   const errorColor = colorPalette.error.main;
 
   return (
-    <Stack alignItems="center" textAlign="center" gap={2} my={5}>
+    <Stack sx={{ alignItems: 'center', textAlign: 'center', gap: 2, my: 5 }}>
       <ErrorIcon sx={{ color: errorColor, width: 40, height: 40 }} />
       {isAbuseError ? (
         <>
           <Typography
             component="p"
             variant="h5"
-            fontWeight={700}
-            color={errorColor}
+            sx={{ fontWeight: 700, color: errorColor }}
           >
             {t('worker.reportAbuse.modalHeaderAlreadyReportedError')}
           </Typography>
-          <Typography variant="body1" color={errorColor}>
+          <Typography variant="body1" sx={{ color: errorColor }}>
             {t('worker.reportAbuse.modalParagraphAlreadyReportedError')}
           </Typography>
         </>
       ) : (
-        <Typography variant="body1" color={errorColor}>
+        <Typography variant="body1" sx={{ color: errorColor }}>
           {t('worker.reportAbuse.modalUnknownError')}
         </Typography>
       )}
@@ -73,11 +72,11 @@ function ErrorState({ error }: { error: string }) {
 function SuccessState() {
   const { t } = useTranslation();
   return (
-    <Stack alignItems="center" textAlign="center" gap={2} my={5}>
+    <Stack sx={{ alignItems: 'center', textAlign: 'center', gap: 2, my: 5 }}>
       <SuccessIcon
         sx={{ color: colorPalette.success.main, width: 40, height: 40 }}
       />
-      <Typography component="p" variant="h5" fontWeight={700}>
+      <Typography component="p" variant="h5" sx={{ fontWeight: 700 }}>
         {t('worker.reportAbuse.modalSuccessHeader')}
       </Typography>
       <Typography variant="body1">
@@ -129,17 +128,22 @@ export function ReportAbuseModal({
 
   return (
     <Stack
-      px={{ xs: 1, md: 5 }}
-      pt={{ xs: 0, md: 3.5 }}
-      pb={{ xs: 1.5, md: 5.5 }}
-      alignItems="center"
+      sx={{
+        px: { xs: 1, md: 5 },
+        pt: { xs: 0, md: 3.5 },
+        pb: { xs: 1.5, md: 5.5 },
+        alignItems: 'center',
+      }}
     >
-      <Typography variant="h4" mb={2}>
+      <Typography variant="h4" sx={{ mb: 2 }}>
         {t('worker.reportAbuse.modalHeader')}
       </Typography>
       {isIdleOrLoading && (
         <>
-          <Typography variant={isMobile ? 'body2' : 'body1'} textAlign="center">
+          <Typography
+            variant={isMobile ? 'body2' : 'body1'}
+            sx={{ textAlign: 'center' }}
+          >
             {t('worker.reportAbuse.modalParagraph')}
           </Typography>
           <FormControl fullWidth sx={{ my: { xs: 2, md: 3 } }}>
@@ -162,7 +166,7 @@ export function ReportAbuseModal({
       {isPending && <CircularProgress size={40} sx={{ mx: 'auto', my: 7 }} />}
       {isError && <ErrorState error={error} />}
       {isSuccess && <SuccessState />}
-      <Box display="flex" gap={2} width="100%">
+      <Box sx={{ display: 'flex', gap: 2, width: '100%' }}>
         <Button
           fullWidth
           onClick={close}

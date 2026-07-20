@@ -2,7 +2,8 @@ import uuid
 
 from sqlalchemy.orm import Session
 
-from src.core.types import JobStatuses, Networks, ProjectStatuses, TaskStatuses, TaskTypes
+from src.core.tasks import TaskTypes
+from src.core.types import JobStatuses, Networks, ProjectStatuses, TaskStatuses
 from src.models.cvat import Job, Project, Task
 
 

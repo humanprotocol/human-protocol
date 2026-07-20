@@ -28,16 +28,12 @@ export function TopMenuItemsList({
   const location = useLocation();
 
   return (
-    <List
-      sx={{
-        marginTop: isMobile ? '66px' : '16px',
-      }}
-    >
-      {items?.map((item, index) => {
+    <List sx={{ mt: { xs: 8, md: 2 } }}>
+      {items?.map((item) => {
         if (!isDrawerItem(item)) {
           return (
             <ListItem key={`list-item-${item.key}`}>
-              <Stack direction="row" ml={{ xs: 7, md: 2 }}>
+              <Stack direction="row" sx={{ ml: { xs: 7, md: 2 } }}>
                 {item}
               </Stack>
             </ListItem>
@@ -51,7 +47,13 @@ export function TopMenuItemsList({
           <ListItem
             disablePadding
             key={label}
-            sx={{ padding: '0 8px', borderRadius: '4px' }}
+            sx={{
+              padding: '0 8px',
+              borderRadius: '4px',
+              '&:first-of-type .MuiListItemText-root': {
+                ml: '10px',
+              },
+            }}
           >
             <ListItemButton
               disabled={disabled}
@@ -70,12 +72,13 @@ export function TopMenuItemsList({
               }}
             >
               <Stack
-                alignItems="center"
                 direction="row"
-                gap="32px"
-                justifyContent="center"
                 sx={{
-                  padding: '8px 16px',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  py: 1,
+                  px: 2,
+                  gap: 4,
                 }}
               >
                 {icon}
@@ -89,9 +92,6 @@ export function TopMenuItemsList({
                       {label}
                     </Typography>
                   }
-                  sx={{
-                    marginLeft: index === 0 ? '10px' : '0px',
-                  }}
                 />
               </Stack>
             </ListItemButton>

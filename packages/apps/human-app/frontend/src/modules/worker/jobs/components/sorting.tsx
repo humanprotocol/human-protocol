@@ -85,12 +85,12 @@ export function Sorting({
         >
           <Button>
             <Typography
-              color={colorPalette.primary.main}
+              variant="buttonMedium"
               onClick={clear}
               sx={{
+                color: colorPalette.primary.main,
                 cursor: 'pointer',
               }}
-              variant="buttonMedium"
             >
               {t('components.table.clearBtn')}
             </Typography>

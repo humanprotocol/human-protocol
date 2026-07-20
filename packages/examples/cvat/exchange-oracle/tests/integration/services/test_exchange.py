@@ -1,4 +1,5 @@
 import json
+import re
 import unittest
 import uuid
 from datetime import datetime, timedelta
@@ -8,7 +9,8 @@ import pytest
 from fastapi import HTTPException
 from pydantic import ValidationError
 
-from src.core.types import AssignmentStatuses, JobStatuses, Networks, TaskTypes
+from src.core.tasks import TaskTypes
+from src.core.types import AssignmentStatuses, JobStatuses, Networks
 from src.db import SessionLocal
 from src.endpoints.serializers import serialize_job
 from src.models.cvat import Assignment, User
@@ -39,7 +41,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         with (
-            open("tests/utils/manifest.json") as data,
+            open("tests/assets/cloud/manifests/manifest-v1.json") as data,
             patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
             patch(
                 "src.endpoints.serializers.get_escrow_fund_token_symbol"
@@ -98,7 +100,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         with (
-            open("tests/utils/manifest.json") as data,
+            open("tests/assets/cloud/manifests/manifest-v1.json") as data,
             patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
             patch("src.services.exchange.cvat_api"),
         ):
@@ -153,7 +155,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         with (
-            open("tests/utils/manifest.json") as data,
+            open("tests/assets/cloud/manifests/manifest-v1.json") as data,
             patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
             patch("src.services.exchange.cvat_api"),
         ):
@@ -192,7 +194,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         with (
-            open("tests/utils/manifest.json") as data,
+            open("tests/assets/cloud/manifests/manifest-v1.json") as data,
             patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
         ):
             manifest = json.load(data)
@@ -211,13 +213,15 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         with (
-            open("tests/utils/manifest.json") as data,
+            open("tests/assets/cloud/manifests/manifest-v1.json") as data,
             patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
         ):
             manifest = json.load(data)
             manifest["annotation"]["qualifications"] = ["random_qualification"]
             mock_get_manifest.return_value = manifest
-            with pytest.raises(Exception, match="User doesn't have required qualifications."):
+            with pytest.raises(
+                Exception, match=re.escape("User doesn't have required qualifications.")
+            ):
                 create_assignment(ESCROW_ADDRESS, Networks.localhost, user_address, [])
 
     def test_create_assignment_with_required_qualifications(self):
@@ -239,7 +243,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         with (
-            open("tests/utils/manifest.json") as data,
+            open("tests/assets/cloud/manifests/manifest-v1.json") as data,
             patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
             patch("src.services.exchange.cvat_api"),
         ):
@@ -292,7 +296,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         with (
-            open("tests/utils/manifest.json") as data,
+            open("tests/assets/cloud/manifests/manifest-v1.json") as data,
             patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
             patch("src.services.exchange.cvat_api"),
         ):
@@ -330,7 +334,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         with (
-            open("tests/utils/manifest.json") as data,
+            open("tests/assets/cloud/manifests/manifest-v1.json") as data,
             patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
             patch("src.services.exchange.cvat_api"),
         ):
@@ -380,7 +384,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         with (
-            open("tests/utils/manifest.json") as data,
+            open("tests/assets/cloud/manifests/manifest-v1.json") as data,
             patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
             patch("src.services.exchange.cvat_api"),
         ):
@@ -425,7 +429,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         with (
-            open("tests/utils/manifest.json") as data,
+            open("tests/assets/cloud/manifests/manifest-v1.json") as data,
             patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
             patch("src.services.exchange.cvat_api"),
         ):
@@ -463,7 +467,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         with (
-            open("tests/utils/manifest.json") as data,
+            open("tests/assets/cloud/manifests/manifest-v1.json") as data,
             patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
             patch("src.services.exchange.cvat_api"),
         ):
@@ -510,7 +514,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         with (
-            open("tests/utils/manifest.json") as data,
+            open("tests/assets/cloud/manifests/manifest-v1.json") as data,
             patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
             patch("src.services.exchange.cvat_api"),
         ):

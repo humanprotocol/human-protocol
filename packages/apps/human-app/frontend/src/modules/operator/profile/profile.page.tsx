@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { Grid } from '@mui/material';
-import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { useGetKeys } from '@/modules/operator/hooks/use-get-keys';
 import {
   PageCardError,
@@ -11,7 +10,6 @@ import { useGetOperatorStats } from './hooks';
 import { OperatorInfo, OperatorStats } from './components';
 
 export function OperatorProfilePage() {
-  const isMobile = useIsMobile('lg');
   const {
     data: keysData,
     error: keysError,
@@ -47,10 +45,10 @@ export function OperatorProfilePage() {
 
   return (
     <Grid container spacing={4}>
-      <Grid item xs={isMobile ? 12 : 8}>
+      <Grid size={{ xs: 12, md: 8 }}>
         <OperatorInfo keysData={keysData} />
       </Grid>
-      <Grid item xs={isMobile ? 12 : 4}>
+      <Grid size={{ xs: 12, md: 4 }}>
         <OperatorStats statsData={statsData} />
       </Grid>
     </Grid>

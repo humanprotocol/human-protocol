@@ -51,7 +51,7 @@ export function OraclesTable() {
   }
 
   return isMobile ? (
-    <Stack flexDirection="column">
+    <Stack direction="column">
       {oraclesData.map((oracle) => (
         <OraclesTableItemMobile
           key={`${oracle.address}-${oracle.chainId}`}

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Grid } from '@mui/material';
+import { Grid, Stack } from '@mui/material';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormProvider, useForm } from 'react-hook-form';
 import type { GetEthKVStoreValuesSuccessResponse } from '@/modules/operator/hooks/use-get-keys';
@@ -31,13 +31,11 @@ export function ExistingKeysForm({
   useResetMutationErrors(existingKeysMethods.watch, existingKeysMutation.reset);
 
   return (
-    <Grid container gap="2rem">
-      <div
-        style={{
+    <Grid container sx={{ gap: 4 }}>
+      <Stack
+        sx={{
           width: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '3rem',
+          gap: 6,
         }}
       >
         <FormProvider {...existingKeysMethods}>
@@ -66,7 +64,7 @@ export function ExistingKeysForm({
             )}
           </form>
         </FormProvider>
-      </div>
+      </Stack>
     </Grid>
   );
 }
