@@ -31,6 +31,7 @@ export const CVAT_JOB_TYPES = [
   CvatJobType.IMAGE_POINTS,
   CvatJobType.IMAGE_BOXES_FROM_POINTS,
   CvatJobType.IMAGE_SKELETONS_FROM_BOXES,
+  CvatJobType.AUDIO_TRANSCRIPTION,
 ];
 
 export const CANCEL_JOB_STATUSES = [

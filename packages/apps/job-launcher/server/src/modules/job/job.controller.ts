@@ -33,6 +33,7 @@ import {
   JobListDto,
   JobManifestDto,
   JobQuickLaunchDto,
+  JobUnknownManifestDto,
 } from './job.dto';
 import { JobService } from './job.service';
 
@@ -122,6 +123,42 @@ export class JobController {
         return await this.jobService.createJob(
           req.user,
           data.requestType,
+          data,
+        );
+      },
+    );
+  }
+
+  @ApiOperation({
+    summary: 'Create a job with an unknown manifest',
+    description:
+      'Endpoint to create a job using a manifest JSON body without validating its format.',
+  })
+  @ApiBody({ type: JobUnknownManifestDto })
+  @ApiResponse({
+    status: 201,
+    description: 'ID of the created job.',
+    type: Number,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request. Invalid input parameters.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Missing or invalid credentials.',
+  })
+  @Post('/manifest-quick-launch')
+  public async createJobWithUnknownManifest(
+    @Body() data: JobUnknownManifestDto,
+    @Request() req: RequestWithUser,
+  ): Promise<number> {
+    return await this.mutexManagerService.runExclusive(
+      `user${req.user.id}`,
+      MUTEX_TIMEOUT,
+      async () => {
+        return await this.jobService.createJobWithUnknownManifest(
+          req.user,
           data,
         );
       },
