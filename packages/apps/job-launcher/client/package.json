@@ -8,7 +8,7 @@
     "@emotion/styled": "^11.10.5",
     "@hcaptcha/react-hcaptcha": "^1.14.0",
     "@human-protocol/sdk": "workspace:*",
-    "@metamask/connect-evm": "^1.0.0",
+    "@metamask/connect-evm": "^2.1.1",
     "@mui/icons-material": "^7.3.8",
     "@mui/lab": "^7.0.0-beta.17",
     "@mui/material": "^5.16.7",

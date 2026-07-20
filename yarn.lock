@@ -553,7 +553,7 @@ __metadata:
     "@eslint/js": "npm:^10.0.1"
     "@hcaptcha/react-hcaptcha": "npm:^1.14.0"
     "@human-protocol/sdk": "workspace:*"
-    "@metamask/connect-evm": "npm:^1.0.0"
+    "@metamask/connect-evm": "npm:^2.1.1"
     "@mui/icons-material": "npm:^7.3.8"
     "@mui/lab": "npm:^7.0.0-beta.17"
     "@mui/material": "npm:^5.16.7"
@@ -6627,31 +6627,32 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@metamask/analytics@npm:^0.5.0":
-  version: 0.5.0
-  resolution: "@metamask/analytics@npm:0.5.0"
+"@metamask/analytics@npm:^0.6.0":
+  version: 0.6.0
+  resolution: "@metamask/analytics@npm:0.6.0"
   dependencies:
     openapi-fetch: "npm:^0.13.5"
-  checksum: 10c0/ea87fb1043bdf686f985c3512c0dd071396aad6b8c767601b7240df940a940e538ce697bebf9c35662ff582c4b258bdd84877ae02d78a29aff0c93c2af5294b3
+  checksum: 10c0/da230e39c5d05180ee430b0bfa38c70f027baec16ee9bf30544a1e757dbf5e2232d991c59989096e5f7abab6d98478dccddbe7182c8aa6dbc5b57fa730b3c9ef
   languageName: node
   linkType: hard
 
-"@metamask/connect-evm@npm:^1.0.0":
-  version: 1.3.1
-  resolution: "@metamask/connect-evm@npm:1.3.1"
+"@metamask/connect-evm@npm:^2.1.1":
+  version: 2.1.1
+  resolution: "@metamask/connect-evm@npm:2.1.1"
   dependencies:
-    "@metamask/analytics": "npm:^0.5.0"
-    "@metamask/connect-multichain": "npm:^0.14.0"
+    "@metamask/analytics": "npm:^0.6.0"
+    "@metamask/connect-multichain": "npm:^1.2.0"
     "@metamask/utils": "npm:^11.8.1"
-  checksum: 10c0/be9838cf35d95ad6a728118cdabb714e38232e1c5172b48ba12ca8380f1207f2752defdd1d46b8f4b107aafa4a3f4ed9cdb952f8d07050b93bc97584a551cb31
+    semver: "npm:^7.7.4"
+  checksum: 10c0/d04a8a9d1a3f04feb521367d5f80ebe2c2ee53364af377921cb3a3b2f2a2e9d8aa3356987ba8abe6fc680c190b0c0b18902ad353f99b8dbf4a6a9fd03944733d
   languageName: node
   linkType: hard
 
-"@metamask/connect-multichain@npm:^0.14.0":
-  version: 0.14.0
-  resolution: "@metamask/connect-multichain@npm:0.14.0"
+"@metamask/connect-multichain@npm:^1.2.0":
+  version: 1.2.0
+  resolution: "@metamask/connect-multichain@npm:1.2.0"
   dependencies:
-    "@metamask/analytics": "npm:^0.5.0"
+    "@metamask/analytics": "npm:^0.6.0"
     "@metamask/mobile-wallet-protocol-core": "npm:^0.4.0"
     "@metamask/mobile-wallet-protocol-dapp-client": "npm:^0.3.0"
     "@metamask/multichain-api-client": "npm:^0.10.1"
@@ -6673,7 +6674,7 @@ __metadata:
   peerDependenciesMeta:
     "@react-native-async-storage/async-storage":
       optional: true
-  checksum: 10c0/5abca1f3fa94785f988b2f11f6b4cb23d7e2fd91cef9db77806ea55977b35b67a77d5dd879c410f333ba10e63034f28b6b2b4b11210ef124ca2a14456a6fd154
+  checksum: 10c0/9417e14ea0adb0c480fe2d3481e2942f46d87ec7260f2dde25c8a3a764fd1d6a5b9726c6cfa0b60269e38171c3fc6e34be47cac0fddd694baf40883ee118b382
   languageName: node
   linkType: hard
 
@@ -28838,6 +28839,15 @@ __metadata:
   bin:
     semver: bin/semver.js
   checksum: 10c0/5215ad0234e2845d4ea5bb9d836d42b03499546ddafb12075566899fc617f68794bb6f146076b6881d755de17d6c6cc73372555879ec7dce2c2feee947866ad2
+  languageName: node
+  linkType: hard
+
+"semver@npm:^7.7.4":
+  version: 7.8.5
+  resolution: "semver@npm:7.8.5"
+  bin:
+    semver: bin/semver.js
+  checksum: 10c0/b1f3127a5be8125a94f37188b361c212466c292c6910adce3ec106cff5dc211ccaedc4739c11bb70fda59d6fc1f040a9bca289f4e093451521a2372e5231fe0c
   languageName: node
   linkType: hard
 
