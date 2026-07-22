@@ -36,7 +36,6 @@ export function EmailVerificationSuccessMessage() {
           variant="body1"
           sx={{
             color: colorPalette.text.primary,
-            fontSize: 16,
             fontWeight: 600,
             lineHeight: '26px',
           }}
