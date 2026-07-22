@@ -32,7 +32,7 @@ export function Input({
           {...field}
           variant="outlined"
           autoComplete={autoComplete ?? name}
-          error={Boolean(fieldState.error)}
+          error={!!fieldState.error}
           fullWidth
           helperText={
             <Typography
@@ -49,7 +49,6 @@ export function Input({
             input: {
               '&:-webkit-autofill': {
                 WebkitBoxShadow: `0 0 0 30px transparent inset !important`,
-                WebkitTextFillColor: `${colorPalette.text.primary} !important`,
                 transition:
                   'background-color 5000s ease-in-out 0s, color 5000s ease-in-out 0s',
               },

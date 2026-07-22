@@ -12,10 +12,11 @@ export function RegisterAddressBtn() {
 
   return (
     <Button
+      variant="contained"
+      color="accent"
       fullWidth
       loading={isPending}
       onClick={mutate.bind(undefined, undefined)}
-      variant="contained"
     >
       {t('worker.profile.registerAddress')}
     </Button>

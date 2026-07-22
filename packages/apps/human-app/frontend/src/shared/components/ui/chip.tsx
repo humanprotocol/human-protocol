@@ -19,6 +19,7 @@ export function Chip({ label, backgroundColor }: Readonly<ChipProps>) {
         py: '2px',
         borderRadius: '16px',
         display: 'flex',
+        flexShrink: 0,
         wordBreak: 'break-word',
       }}
     >

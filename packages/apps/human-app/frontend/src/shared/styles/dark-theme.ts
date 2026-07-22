@@ -23,7 +23,6 @@ export const darkTheme: ThemeOptions = {
         variantMapping: {
           subtitle1: 'p',
           subtitle2: 'p',
-          textField: 'p',
         },
       },
     },

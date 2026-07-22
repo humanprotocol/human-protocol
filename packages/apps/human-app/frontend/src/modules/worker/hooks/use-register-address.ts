@@ -1,12 +1,12 @@
 import { useMutation } from '@tanstack/react-query';
 import { t } from 'i18next';
-import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
 import { useAccessTokenRefresh } from '@/api/hooks/use-access-token-refresh';
 import type { ResponseError } from '@/shared/types/global.type';
 import { useWalletConnect } from '@/shared/contexts/wallet-connect';
 import { usePrepareSignature } from '@/shared/hooks';
 import { PrepareSignatureType } from '@/shared/services/signature.service';
 import * as profileService from '../profile/services/profile.service';
+import { useAuth } from '@/modules/auth/hooks/use-auth';
 
 interface RegisterAddressCallbacks {
   onSuccess: () => void | Promise<void>;
@@ -14,7 +14,7 @@ interface RegisterAddressCallbacks {
 }
 
 function useRegisterAddressMutation(callbacks: RegisterAddressCallbacks) {
-  const { user, updateUserData } = useAuthenticatedUser();
+  const { user, updateUserData } = useAuth();
   const { refreshAccessTokenAsync } = useAccessTokenRefresh();
   const { address, chainId, signMessage } = useWalletConnect();
   const { prepareSignature } = usePrepareSignature(
@@ -51,7 +51,7 @@ function useRegisterAddressMutation(callbacks: RegisterAddressCallbacks) {
     onError: async (error: ResponseError) => {
       await callbacks.onError(error);
     },
-    mutationKey: [user.wallet_address],
+    mutationKey: [user?.wallet_address],
   });
 }
 

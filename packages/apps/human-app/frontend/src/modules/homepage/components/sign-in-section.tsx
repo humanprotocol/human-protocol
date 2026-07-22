@@ -1,42 +1,45 @@
-import { Paper, Button, Divider } from '@mui/material';
+import { Paper, Button } from '@mui/material';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useColorMode } from '@/shared/contexts/color-mode';
-import { useHomePageState } from '@/shared/contexts/homepage-state';
-import { useIsMobile } from '@/shared/hooks/use-is-mobile';
-import { OperatorSignIn } from './operator-sign-in';
-import { WorkerSignIn } from './worker-sign-in';
+import { routerPaths } from '@/router/router-paths';
 
 export function SignInSection() {
-  const isMobile = useIsMobile('lg');
   const { colorPalette } = useColorMode();
-  const { setPageView } = useHomePageState();
   const { t } = useTranslation();
 
   return (
     <Paper
       sx={{
-        px: isMobile ? '16px' : '4.1875rem',
-        py: isMobile ? '32px' : '4.8125rem',
+        display: 'flex',
+        flexDirection: 'column',
+        px: { xs: 2, lg: 8 },
+        py: { xs: 4, lg: 10 },
         backgroundColor: colorPalette.paper.light,
         boxShadow: 'none',
         borderRadius: '20px',
+        gap: 2,
       }}
     >
       <Button
+        component={Link}
+        to={routerPaths.worker.signUp}
+        variant="contained"
+        size="large"
         color="secondary"
         fullWidth
-        onClick={() => {
-          setPageView('chooseSignUpAccountType');
-        }}
-        size="large"
-        sx={{ mb: '1.5625rem' }}
-        variant="contained"
       >
         {t('homepage.signUp')}
       </Button>
-      <Divider component="div" sx={{ mb: '1.5625rem' }} variant="middle" />
-      <WorkerSignIn />
-      <OperatorSignIn />
+      <Button
+        component={Link}
+        to={routerPaths.worker.signIn}
+        variant="contained"
+        size="large"
+        fullWidth
+      >
+        {t('homepage.signIn')}
+      </Button>
     </Paper>
   );
 }

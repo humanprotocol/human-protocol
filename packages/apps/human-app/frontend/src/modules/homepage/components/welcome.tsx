@@ -19,7 +19,7 @@ export function Welcome() {
     <Grid
       container
       spacing={{ xs: 0, lg: 10 }}
-      sx={{ width: '100%', pb: { xs: '44px', lg: 0 } }}
+      sx={{ width: '100%', alignItems: 'center', pb: { xs: 5, lg: 0 } }}
     >
       <Grid size={{ xs: 12, lg: 6 }} sx={{ justifyContent: 'center' }}>
         <LogoSection />

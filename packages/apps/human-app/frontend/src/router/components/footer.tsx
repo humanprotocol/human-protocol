@@ -1,9 +1,7 @@
 import { Grid, Link, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { env } from '@/shared/env';
 import { Chat } from '@/modules/homepage/components/chat';
-import { breakpoints } from '@/shared/styles/breakpoints';
 import { useColorMode } from '@/shared/contexts/color-mode';
 
 interface FooterProps {
@@ -12,9 +10,10 @@ interface FooterProps {
 }
 
 export function Footer({ isProtected, displayChatIcon = true }: FooterProps) {
-  const { colorPalette } = useColorMode();
+  const { colorPalette, isDarkMode } = useColorMode();
   const { t } = useTranslation();
-  const isMobile = useIsMobile('md');
+
+  const footerTextColor = isDarkMode ? 'rgba(255, 255, 255, 0.70)' : '#676767';
 
   return (
     <Grid
@@ -22,110 +21,74 @@ export function Footer({ isProtected, displayChatIcon = true }: FooterProps) {
       container
       sx={{
         width: '100%',
-        pr: 0,
-        pl: { xs: 0, md: isProtected ? '200px' : '0' },
-        pb: { xs: 0, md: 4 },
-        [breakpoints.mobile]: {
-          p: 4,
-          backgroundColor: colorPalette.paper.main,
+        py: { xs: 2, md: 4 },
+        pr: 3,
+        pl: { xs: 3, md: isProtected ? '200px' : 3 },
+        bgcolor: { xs: colorPalette.paper.main, md: 'transparent' },
+        borderTop: {
+          xs: !isProtected ? '1px solid rgba(209, 209, 209, 0.32)' : 'none',
+          md: 'none',
         },
       }}
     >
       <Grid
-        size={{ xs: 12, md: 11 }}
+        size={12}
         sx={{
-          alignItems: 'flex-start',
+          alignItems: { xs: 'flex-start', md: 'center' },
           display: 'flex',
-          flexDirection: 'column',
+          flexDirection: { xs: 'column', md: 'row' },
           justifyContent: 'center',
+          gap: { xs: 1.5, md: 3 },
         }}
       >
         <Stack
-          direction={{ xs: 'column', md: 'row' }}
+          direction="row"
           sx={{
-            gap: 3,
-            lineHeight: '166%',
-            [breakpoints.mobile]: {
-              gap: 2.5,
-            },
+            gap: { xs: 1.5, md: 3 },
           }}
         >
           <Link
+            variant="caption"
             href={env.VITE_PRIVACY_POLICY_URL}
             rel="noreferrer"
             target="_blank"
             sx={{
               textDecoration: 'none',
+              color: footerTextColor,
             }}
           >
-            <Typography
-              variant="caption"
-              sx={{ color: colorPalette.text.secondary }}
-            >
-              {t('components.footer.privacyPolicy')}
-            </Typography>
+            {t('components.footer.privacyPolicy')}
           </Link>
           <Link
+            variant="caption"
             href={env.VITE_TERMS_OF_SERVICE_URL}
             rel="noreferrer"
             target="_blank"
             sx={{
               textDecoration: 'none',
+              color: footerTextColor,
             }}
           >
-            <Typography
-              variant="caption"
-              sx={{ color: colorPalette.text.secondary }}
-            >
-              {t('components.footer.termsOfService')}
-            </Typography>
+            {t('components.footer.termsOfService')}
           </Link>
           <Link
+            variant="caption"
             href={env.VITE_HUMAN_PROTOCOL_URL}
             target="_blank"
             rel="noreferrer"
             sx={{
-              mb: { xs: '10px', md: 0 },
               textDecoration: 'none',
+              color: footerTextColor,
             }}
           >
-            <Typography
-              variant="caption"
-              sx={{ color: colorPalette.text.secondary }}
-            >
-              {t('components.footer.humanProtocol')}
-            </Typography>
+            {t('components.footer.humanProtocol')}
           </Link>
-          {isMobile ? (
-            <Typography
-              variant="caption"
-              sx={{ color: colorPalette.text.secondary }}
-            >
-              {t('components.footer.copyrightNote')}
-            </Typography>
-          ) : null}
         </Stack>
-        {!isMobile ? (
-          <Typography
-            variant="caption"
-            sx={{ color: colorPalette.text.secondary }}
-          >
-            {t('components.footer.copyrightNote')}
-          </Typography>
-        ) : null}
+        <Typography variant="caption" sx={{ color: footerTextColor }}>
+          {t('components.footer.copyrightNote')}
+        </Typography>
       </Grid>
-      <Grid
-        size={{ xs: 12, md: 1 }}
-        sx={{
-          position: { xs: 'absolute', md: 'relative' },
-          right: { xs: '32px', md: 0 },
-          display: 'flex',
-          justifyContent: 'flex-end',
-          alignItems: 'center',
-        }}
-      >
-        <Chat displayChatIcon={displayChatIcon} />
-      </Grid>
+      <Chat displayChatIcon={displayChatIcon} />
     </Grid>
   );
 }

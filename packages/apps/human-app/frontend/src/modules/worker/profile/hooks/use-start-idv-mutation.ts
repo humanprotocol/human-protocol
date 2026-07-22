@@ -1,12 +1,12 @@
 import { useMutation } from '@tanstack/react-query';
-import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
 import * as profileService from '../services/profile.service';
+import { useAuth } from '@/modules/auth/hooks/use-auth';
 
 export function useIdvStartMutation() {
-  const { user } = useAuthenticatedUser();
+  const { user } = useAuth();
 
   return useMutation({
     mutationFn: async () => profileService.startIdv(),
-    mutationKey: ['idvStart', user.email],
+    mutationKey: ['idvStart', user?.email],
   });
 }

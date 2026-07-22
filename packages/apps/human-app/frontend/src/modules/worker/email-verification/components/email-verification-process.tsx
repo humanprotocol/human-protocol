@@ -13,7 +13,7 @@ interface EmailVerificationProcessProps {
 
 export function EmailVerificationProcess({
   token,
-}: Readonly<EmailVerificationProcessProps>) {
+}: EmailVerificationProcessProps) {
   const {
     error,
     isError,

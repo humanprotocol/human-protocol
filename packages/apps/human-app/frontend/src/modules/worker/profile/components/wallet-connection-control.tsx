@@ -1,40 +1,36 @@
 import { useTranslation } from 'react-i18next';
-import { Grid } from '@mui/material';
+import { Stack, Typography } from '@mui/material';
 import { Button } from '@/shared/components/ui/button';
-import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
 import { useWalletConnect } from '@/shared/contexts/wallet-connect';
-import { useWorkerIdentityVerificationStatus } from '../hooks';
-import { WalletConnectDone } from './wallet-connect-done';
-import { RegisterAddressBtn } from './buttons';
+import { RegisterAddressBtn } from './buttons/register-address-btn';
+import { useAuth } from '@/modules/auth/hooks/use-auth';
+import { useColorMode } from '@/shared/contexts/color-mode';
 
 export function WalletConnectionControl() {
   const { t } = useTranslation();
-  const { user } = useAuthenticatedUser();
-  const { isVerificationCompleted } = useWorkerIdentityVerificationStatus();
+  const { user } = useAuth();
   const { isConnected, openModal } = useWalletConnect();
+  const { colorPalette } = useColorMode();
 
-  const { wallet_address: walletAddress } = user;
-  const hasWalletAddress = Boolean(walletAddress);
+  const hasWalletAddress = !!user?.wallet_address;
 
-  if (hasWalletAddress) {
-    return <WalletConnectDone />;
-  }
-
-  if (isVerificationCompleted && isConnected) {
+  if (isConnected && !hasWalletAddress) {
     return (
-      <Grid>
+      <Stack sx={{ gap: 2 }}>
         <RegisterAddressBtn />
-        <Grid>{t('worker.profile.walletAddressMessage')}</Grid>
-      </Grid>
+        <Typography sx={{ color: colorPalette.text.auxiliary100 }}>
+          {t('worker.profile.walletAddressMessage')}
+        </Typography>
+      </Stack>
     );
   }
 
   return (
     <Button
-      disabled={!isVerificationCompleted}
+      variant="contained"
+      color="accent"
       fullWidth
       onClick={() => void openModal()}
-      variant="contained"
     >
       {t('components.wallet.connectBtn.connect')}
     </Button>

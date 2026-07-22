@@ -1,7 +1,6 @@
 import { forwardRef, useImperativeHandle, useRef } from 'react';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { env } from '@/shared/env';
-import { useColorMode } from '@/shared/contexts/color-mode';
 
 export interface CustomHCaptchaRef {
   reset: () => void;
@@ -15,7 +14,6 @@ function InternalHCaptcha(
   { onVerify }: CustomHCaptchaProps,
   ref: React.Ref<unknown>
 ) {
-  const { isDarkMode } = useColorMode();
   const captchaRef = useRef<HCaptcha>(null);
 
   useImperativeHandle(ref, () => ({
@@ -33,7 +31,7 @@ function InternalHCaptcha(
       }}
       ref={captchaRef}
       sitekey={env.VITE_H_CAPTCHA_SITE_KEY}
-      theme={isDarkMode ? 'dark' : 'light'}
+      theme="contrast"
     />
   );
 }
