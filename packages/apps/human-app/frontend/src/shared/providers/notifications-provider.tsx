@@ -2,6 +2,7 @@ import { type ReactNode } from 'react';
 import { SnackbarProvider } from 'notistack';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
+import WarningIcon from '@mui/icons-material/Warning';
 import { TopNotificationType } from '@/shared/hooks/use-notification';
 import { colorPalette as lightColorPalette } from '@/shared/styles/color-palette';
 import { handleUnreachableCase } from '@/shared/helpers/handle-unreachable-case';
@@ -21,8 +22,9 @@ const getNotificationIconByType = (
   switch (type) {
     case TopNotificationType.SUCCESS:
       return <CheckCircleIcon sx={{ fill: lightColorPalette.white, ...sx }} />;
-
     case TopNotificationType.WARNING:
+      return <WarningIcon sx={{ fill: lightColorPalette.white, ...sx }} />;
+    case TopNotificationType.ERROR:
       return <ErrorIcon sx={{ fill: lightColorPalette.white, ...sx }} />;
 
     default: {
@@ -34,7 +36,7 @@ const getNotificationIconByType = (
 export function NotificationProvider({
   children,
   maxSnacks = MAX_NOTIFICATIONS_VISIBLE,
-}: Readonly<NotificationProviderProps>) {
+}: NotificationProviderProps) {
   const isMobile = useIsMobile();
 
   return (

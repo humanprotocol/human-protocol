@@ -9,6 +9,8 @@ export const darkColorPalette = {
     secondary: '#6C6978',
     disabled: 'rgba(212, 207, 255, 0.5)',
     disabledSecondary: 'rgba(147, 135, 255, 1)',
+    auxiliary100: '#ffffff',
+    auxiliary200: '#a0a0a0',
   },
   primary: {
     main: '#CDC7FF',
@@ -22,6 +24,19 @@ export const darkColorPalette = {
     dark: '#3A009F',
     light: '#BB94FF',
     contrastText: 'rgba(255, 255, 255, 0.87)',
+  },
+  background: {
+    default: '#100735',
+    paper: '#251d47',
+    subtle: '#2d284e',
+  },
+  accent: {
+    main: '#fa2a75',
+    dark: '#af1d51',
+    contrastText: '#ffffff',
+  },
+  border: {
+    main: 'rgba(255, 255, 255, 0.07)',
   },
   error: {
     main: '#F65A93',

@@ -38,7 +38,7 @@ export function DrawerNavigation({
   topMenuItems,
   bottomMenuItems,
   signOut,
-}: Readonly<DrawerNavigationProps>) {
+}: DrawerNavigationProps) {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const handleMainNavIconClick = useHandleMainNavIconClick();
@@ -87,9 +87,7 @@ export function DrawerNavigation({
         {!isMobile && (
           <Stack
             sx={{ alignItems: 'flex-start', pl: 3, cursor: 'pointer' }}
-            onClick={() => {
-              handleMainNavIconClick();
-            }}
+            onClick={handleMainNavIconClick}
           >
             <HumanLogoNavbarIcon />
           </Stack>

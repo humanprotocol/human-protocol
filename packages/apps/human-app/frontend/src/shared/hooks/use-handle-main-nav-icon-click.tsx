@@ -1,11 +1,9 @@
 import { useNavigate } from 'react-router-dom';
 import { routerPaths } from '@/router/router-paths';
-import { useHomePageState } from '../contexts/homepage-state/use-homepage-state';
 import { browserAuthProvider } from '../contexts/browser-auth-provider';
 
 export const useHandleMainNavIconClick = () => {
   const navigate = useNavigate();
-  const { setPageView } = useHomePageState();
 
   const handleIconClick = () => {
     const type = browserAuthProvider.getAuthType();
@@ -21,7 +19,6 @@ export const useHandleMainNavIconClick = () => {
       return;
     }
 
-    setPageView('welcome');
     navigate(routerPaths.homePage);
   };
 

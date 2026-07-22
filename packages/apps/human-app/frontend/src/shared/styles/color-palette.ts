@@ -7,6 +7,8 @@ export const colorPalette = {
     secondary: '#B2AFC1',
     disabled: '#CBCFE6',
     disabledSecondary: '#8494C3',
+    auxiliary100: '#000000',
+    auxiliary200: '#676767',
   },
   primary: {
     main: '#320A8D',
@@ -20,6 +22,19 @@ export const colorPalette = {
     dark: '#4506B2',
     light: '#8409FF',
     contrastText: '#FFFFFF',
+  },
+  background: {
+    default: '#f6f7fe',
+    paper: '#ffffff',
+    subtle: '#fcfcfc',
+  },
+  accent: {
+    main: '#fa2a75',
+    dark: '#af1d51',
+    contrastText: '#ffffff',
+  },
+  border: {
+    main: '#d9d9d9',
   },
   error: {
     main: '#FA2A75',

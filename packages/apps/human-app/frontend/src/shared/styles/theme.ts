@@ -2,6 +2,12 @@ import type { ThemeOptions } from '@mui/material';
 import { colorPalette } from '@/shared/styles/color-palette';
 import { typography } from '@/shared/styles/typography';
 
+declare module '@mui/material/Button' {
+  interface ButtonPropsColorOverrides {
+    accent: true;
+  }
+}
+
 export const theme: ThemeOptions = {
   typography,
   components: {
@@ -12,7 +18,6 @@ export const theme: ThemeOptions = {
         variantMapping: {
           subtitle1: 'p',
           subtitle2: 'p',
-          textField: 'p',
         },
       },
     },
@@ -24,6 +29,10 @@ export const theme: ThemeOptions = {
           fontSize: '14px',
           fontWeight: 600,
           textTransform: 'none',
+          boxShadow: 'none',
+          '&:hover': {
+            boxShadow: 'none',
+          },
           '&.Mui-disabled': {
             backgroundColor: colorPalette.button.disabled,
             color: colorPalette.text.secondary,
@@ -83,8 +92,28 @@ export const theme: ThemeOptions = {
     },
     MuiOutlinedInput: {
       styleOverrides: {
+        root: {
+          color: '#000000',
+          '&:hover fieldset': {
+            borderColor: '#000000 !important',
+          },
+          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+            borderColor: '#000000',
+          },
+        },
         notchedOutline: {
-          borderColor: colorPalette.primary.main,
+          //borderColor: colorPalette.primary.main,
+          borderColor: '#676767',
+        },
+      },
+    },
+    MuiInputLabel: {
+      styleOverrides: {
+        root: {
+          color: '#676767',
+          '&.Mui-focused': {
+            color: '#000000',
+          },
         },
       },
     },

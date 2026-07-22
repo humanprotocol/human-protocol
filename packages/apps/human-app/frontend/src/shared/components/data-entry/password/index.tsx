@@ -1,15 +1,12 @@
+import { useState, MouseEvent } from 'react';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import { useState, MouseEvent } from 'react';
-import InputAdornment from '@mui/material/InputAdornment';
-import IconButton from '@mui/material/IconButton';
+import { IconButton, InputAdornment } from '@mui/material';
 import { Input, type InputProps } from '@/shared/components/data-entry/input';
-import { useColorMode } from '@/shared/contexts/color-mode';
 
 type PasswordProps = InputProps & { type?: never };
 
 export function Password(props: PasswordProps) {
-  const { colorPalette } = useColorMode();
   const [showPassword, setShowPassword] = useState(false);
 
   const handleClickShowPassword = () => {
@@ -34,9 +31,9 @@ export function Password(props: PasswordProps) {
                 onMouseDown={handleMouseDownPassword}
               >
                 {showPassword ? (
-                  <VisibilityOff sx={{ fill: colorPalette.primary.dark }} />
+                  <VisibilityOff sx={{ fill: '#fa2a75' }} />
                 ) : (
-                  <Visibility sx={{ fill: colorPalette.primary.dark }} />
+                  <Visibility sx={{ fill: '#fa2a75' }} />
                 )}
               </IconButton>
             </InputAdornment>

@@ -1,153 +1,82 @@
-import { useState } from 'react';
-import { Box, Drawer, Grid, IconButton } from '@mui/material';
+import { Box, Container } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import MenuIcon from '@mui/icons-material/Menu';
 import { Link } from 'react-router-dom';
-import {
-  HumanLogoIcon,
-  HumanLogoNavbarIcon,
-} from '@/shared/components/ui/icons';
-import { useIsMobile } from '@/shared/hooks/use-is-mobile';
+import { HumanLogoNavbarIcon } from '@/shared/components/ui/icons';
 import { Button } from '@/shared/components/ui/button';
-import { breakpoints } from '@/shared/styles/breakpoints';
 import { env } from '@/shared/env';
-import { DarkModeSwitch } from '@/shared/components/ui/dark-mode-switch';
+import { ColorModeSwitch } from '@/shared/components/ui/dark-mode-switch';
 import { useHandleMainNavIconClick } from '@/shared/hooks/use-handle-main-nav-icon-click';
-import { useHomePageState } from '@/shared/contexts/homepage-state';
+import { useIsMainPage } from '@/router/hooks/use-is-main-page';
 
-interface NavbarProps {
-  withNavigation: boolean;
-}
-
-export function Navbar({ withNavigation }: Readonly<NavbarProps>) {
-  const { isMainPage } = useHomePageState();
+export function Navbar() {
   const { t } = useTranslation();
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const isMobile = useIsMobile();
   const handleMainNavIconClick = useHandleMainNavIconClick();
+  const isMainPage = useIsMainPage();
 
   return (
-    <Box
+    <Container
+      maxWidth="xl"
+      component="nav"
       sx={{
         position: 'static',
-        background: 'transparent',
-        margin: '20px 0',
-        width: '100%',
         display: 'flex',
         justifyContent: 'space-between',
-        flexDirection: 'row',
         alignItems: 'center',
-        pr: isMobile ? '44px' : 0,
-        pl: isMobile ? '44px' : '8px',
-        [breakpoints.mobile]: {
-          height: '104px',
-          margin: '0',
-        },
+        my: { xs: 2, md: 3 },
+        height: { xs: '84px', md: 'unset' },
+        background: 'transparent',
       }}
     >
-      <Grid
-        sx={{ cursor: 'pointer' }}
-        onClick={() => {
-          handleMainNavIconClick();
+      <Button
+        variant="text"
+        aria-label={t('components.navbar.home')}
+        disableRipple
+        onClick={handleMainNavIconClick}
+        sx={{
+          flexShrink: 0,
+          background: 'none',
+          p: 0,
         }}
-        role="button"
-        tabIndex={0}
-        aria-hidden="true"
       >
-        {isMobile ? <HumanLogoIcon /> : <HumanLogoNavbarIcon />}
-      </Grid>
-      {withNavigation ? (
+        <HumanLogoNavbarIcon />
+      </Button>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'flex-end',
+          width: '100%',
+          height: '44px',
+          gap: 3,
+          whiteSpace: 'nowrap',
+        }}
+      >
         <Box
           sx={{
-            display: 'flex',
-            alignItems: 'center',
+            display: { xs: 'none', md: isMainPage ? 'flex' : 'none' },
           }}
         >
-          <Box
-            sx={{
-              display: {
-                width: '100%',
-                xs: 'none',
-                md: 'flex',
-                height: '2rem',
-                gap: '1.5rem',
-                whiteSpace: 'nowrap',
-              },
-            }}
+          <Button
+            component={Link}
+            to={env.VITE_NAVBAR__LINK__PROTOCOL_URL}
+            variant="text"
+            size="large"
+            disableRipple
           >
-            {isMainPage ? (
-              <>
-                <div>
-                  <Button
-                    component={Link}
-                    size="large"
-                    to={env.VITE_NAVBAR__LINK__PROTOCOL_URL}
-                    variant="text"
-                  >
-                    {t('components.navbar.humanProtocol')}
-                  </Button>
-                </div>
-                <div>
-                  <Button
-                    component={Link}
-                    size="large"
-                    to={env.VITE_NAVBAR__LINK__HOW_IT_WORK_URL}
-                    variant="text"
-                  >
-                    {t('components.navbar.howItWorks')}
-                  </Button>
-                </div>
-                <DarkModeSwitch />
-              </>
-            ) : null}
-          </Box>
-          <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
-            <IconButton
-              color="primary"
-              onClick={() => {
-                setIsDrawerOpen(!isDrawerOpen);
-              }}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Drawer
-              anchor="right"
-              onClose={() => {
-                setIsDrawerOpen(false);
-              }}
-              open={isDrawerOpen}
-            >
-              <Box
-                sx={{
-                  width: 200,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  p: 2,
-                  alignItems: 'flex-end',
-                }}
-              >
-                <Button
-                  component={Link}
-                  size="large"
-                  to={env.VITE_NAVBAR__LINK__PROTOCOL_URL}
-                  variant="text"
-                >
-                  {t('components.navbar.humanProtocol')}
-                </Button>
-                <Button
-                  component={Link}
-                  size="large"
-                  to={env.VITE_NAVBAR__LINK__HOW_IT_WORK_URL}
-                  variant="text"
-                >
-                  {t('components.navbar.howItWorks')}
-                </Button>
-                <DarkModeSwitch />
-              </Box>
-            </Drawer>
-          </Box>
+            {t('components.navbar.humanProtocol')}
+          </Button>
+          <Button
+            component={Link}
+            to={env.VITE_NAVBAR__LINK__HOW_IT_WORK_URL}
+            variant="text"
+            size="large"
+            disableRipple
+          >
+            {t('components.navbar.howItWorks')}
+          </Button>
         </Box>
-      ) : null}
-    </Box>
+        <ColorModeSwitch />
+      </Box>
+    </Container>
   );
 }

@@ -10,7 +10,7 @@ export function Loader({ ...props }: CircularProgressProps) {
       {...props}
       sx={{
         '.MuiCircularProgress-circle': {
-          color: colorPalette.primary.main,
+          color: colorPalette.accent.main,
         },
       }}
     />

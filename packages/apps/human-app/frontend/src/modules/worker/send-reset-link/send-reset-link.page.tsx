@@ -49,7 +49,7 @@ export function SendResetLinkWorkerPage() {
           </Alert>
         ) : undefined
       }
-      cancelNavigation={routerPaths.worker.profile}
+      backNavigation={routerPaths.worker.profile}
       title={t('worker.sendResetLinkForm.title')}
     >
       <FormProvider {...methods}>

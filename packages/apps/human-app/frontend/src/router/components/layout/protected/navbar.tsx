@@ -2,7 +2,7 @@ import { Grid, IconButton, Stack } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import { t } from 'i18next';
-import { HumanLogoIcon } from '@/shared/components/ui/icons';
+import { HumanLogoNavbarIcon } from '@/shared/components/ui/icons';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { Button } from '@/shared/components/ui/button';
 import { useIsHCaptchaLabelingPage } from '@/shared/hooks/use-is-hcaptcha-labeling-page';
@@ -21,7 +21,7 @@ export function Navbar({
   open,
   userStatsDrawerOpen,
   toggleUserStatsDrawer,
-}: Readonly<NavbarProps>) {
+}: NavbarProps) {
   const handleMainNavIconClick = useHandleMainNavIconClick();
   const { colorPalette } = useColorMode();
   const isMobile = useIsMobile();
@@ -67,32 +67,35 @@ export function Navbar({
       component="header"
       direction="row"
       sx={{
+        display: { xs: 'flex', md: 'none' },
         alignItems: 'center',
         justifyContent: 'space-between',
         backgroundColor: colorPalette.backgroundColor,
-        display: { xs: 'flex', md: 'none' },
         width: '100%',
-        px: isMobile ? 4 : 0,
-        py: isMobile ? 3 : 0,
+        px: 2,
+        py: 3,
         zIndex: '130',
         position: open ? 'sticky' : 'relative',
         top: open ? '0' : 'unset',
       }}
     >
-      <Grid
-        sx={{ cursor: 'pointer', pl: 1 }}
+      <Button
+        variant="text"
+        aria-label={t('components.navbar.home')}
+        disableRipple
+        sx={{
+          background: 'none',
+          p: 0,
+        }}
         onClick={() => {
           if (isMobile) {
             setOpen(false);
           }
           handleMainNavIconClick();
         }}
-        role="button"
-        tabIndex={0}
-        aria-hidden="true"
       >
-        <HumanLogoIcon />
-      </Grid>
+        <HumanLogoNavbarIcon />
+      </Button>
       <Grid
         sx={{
           display: 'flex',

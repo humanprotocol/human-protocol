@@ -60,7 +60,6 @@ export function EditExistingKeysSuccessPage() {
         ) : undefined
       }
       showBackButton={false}
-      showCancelButton={false}
       title={t('operator.editExistingKeysSuccess.title')}
     >
       <Grid container sx={{ gap: 4 }}>
