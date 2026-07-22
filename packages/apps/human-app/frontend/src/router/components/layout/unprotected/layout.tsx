@@ -1,25 +1,16 @@
 import { Container, Stack } from '@mui/material';
 import { Outlet } from 'react-router-dom';
-import { useIsMobile } from '@/shared/hooks/use-is-mobile';
-import { breakpoints } from '@/shared/styles/breakpoints';
 import { useColorMode } from '@/shared/contexts/color-mode';
-import { useHomePageState } from '@/shared/contexts/homepage-state';
 import { Footer } from '../../footer';
 import { Navbar } from './navbar';
+import { useIsMainPage } from '@/router/hooks/use-is-main-page';
 
-interface LayoutProps {
-  withNavigation?: boolean;
-}
-
-export function UnprotectedLayout({
-  withNavigation = true,
-}: Readonly<LayoutProps>) {
+export function UnprotectedLayout() {
   const { colorPalette, isDarkMode } = useColorMode();
-  const { isMainPage } = useHomePageState();
+  const isMainPage = useIsMainPage();
 
-  const isMobile = useIsMobile();
   const layoutBackgroundColor = (() => {
-    if (isDarkMode || isMobile || isMainPage) {
+    if (isDarkMode || isMainPage) {
       return colorPalette.backgroundColor;
     }
 
@@ -31,27 +22,26 @@ export function UnprotectedLayout({
       sx={{
         alignItems: 'center',
         flexWrap: 'nowrap',
-        height: '100%',
-        minHeight: '100vh',
+        height: { xs: '100%', md: '100dvh' },
+        minHeight: { xs: '100vh', md: 0 },
         width: '100%',
         pt: 0,
-        px: isMobile ? 0 : '120px',
+        px: { xs: 0, md: 15 },
         backgroundColor: layoutBackgroundColor,
       }}
     >
-      <Navbar withNavigation={withNavigation} />
+      <Navbar />
       <Container
         component="main"
         maxWidth="xl"
         sx={{
           p: 0,
+          pt: { xs: 4, md: 0 },
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
           flex: 1,
-          [breakpoints.mobile]: {
-            pt: 4,
-          },
+          minHeight: 0,
         }}
       >
         <Outlet />

@@ -7,7 +7,7 @@ import omit from 'lodash/omit';
 import { useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 import { Button } from '@/shared/components/ui/button';
-import { Password } from '@/shared/components/data-entry/password/password';
+import { Password } from '@/shared/components/data-entry/password';
 import { PageCard } from '@/shared/components/ui/page-card';
 import { Alert } from '@/shared/components/ui/alert';
 import { getErrorMessageForError } from '@/shared/errors';
@@ -56,8 +56,7 @@ export function ResetPasswordWorkerPage() {
           </Alert>
         ) : undefined
       }
-      cancelNavigation={routerPaths.worker.profile}
-      showBackButton={false}
+      backNavigation={routerPaths.worker.profile}
       title={t('worker.resetPassword.title')}
     >
       <FormProvider {...methods}>

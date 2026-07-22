@@ -7,6 +7,7 @@ export function useSignIn() {
   const {
     mutate: signInWorkerMutate,
     error: signInWorkerError,
+    isSuccess: isSignInWorkerSuccess,
     isError: isSignInWorkerError,
     isPending: isSignInWorkerPending,
     reset: signInWorkerMutationReset,
@@ -23,6 +24,7 @@ export function useSignIn() {
   return {
     signIn: handleWorkerSignIn,
     error: signInWorkerError,
+    isSuccess: isSignInWorkerSuccess,
     isError: isSignInWorkerError,
     isLoading: isSignInWorkerPending,
     reset: signInWorkerMutationReset,

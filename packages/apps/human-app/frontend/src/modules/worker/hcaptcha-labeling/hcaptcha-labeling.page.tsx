@@ -1,8 +1,7 @@
 import HCaptcha from '@hcaptcha/react-hcaptcha';
-import Grid from '@mui/material/Grid';
-import { Paper, Typography } from '@mui/material';
+import { Grid, Paper, Typography } from '@mui/material';
 import { t } from 'i18next';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useRef } from 'react';
 import { env } from '@/shared/env';
 import { breakpoints } from '@/shared/styles/breakpoints';
@@ -10,11 +9,9 @@ import { Counter } from '@/shared/components/ui/counter';
 import { getErrorMessageForError } from '@/shared/errors';
 import { getTomorrowDate } from '@/shared/helpers/date';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
-import { useWorkerIdentityVerificationStatus } from '@/modules/worker/profile/hooks';
 import { useHCaptchaLabelingNotifications } from '@/modules/worker/hooks/use-hcaptcha-labeling-notifications';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { onlyDarkModeColor } from '@/shared/styles/dark-color-palette';
-import { routerPaths } from '@/router/router-paths';
 import {
   PageCardLoader,
   PageCardError,
@@ -29,7 +26,6 @@ export function HcaptchaLabelingPage() {
   const { colorPalette, isDarkMode } = useColorMode();
   const captchaRef = useRef<HCaptcha>(null);
   const { user } = useAuthenticatedUser();
-  const { isVerificationCompleted } = useWorkerIdentityVerificationStatus();
   const { onSuccess, onError } = useHCaptchaLabelingNotifications();
   const statsColor = isDarkMode
     ? onlyDarkModeColor.additionalTextColor
@@ -78,10 +74,6 @@ export function HcaptchaLabelingPage() {
   const hcaptchaOnSuccess = (token: string) => {
     solveHCaptchaMutation({ token });
   };
-
-  if (!isVerificationCompleted) {
-    return <Navigate to={routerPaths.worker.profile} replace />;
-  }
 
   if (isHcaptchaUserStatsPending || isDailyHmtSpentPending) {
     return <PageCardLoader />;
