@@ -38,7 +38,7 @@ export function useStartIdv() {
     }
 
     if (idvStarted && idvStartData.url) {
-      window.open(idvStartData.url, '_blank');
+      window.open(idvStartData.url, '_blank', 'noopener,noreferrer');
     }
   }, [
     idvStartData?.url,
