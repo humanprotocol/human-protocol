@@ -1,7 +1,7 @@
 import { t } from 'i18next';
 import { HelpIcon, UserOutlinedIcon } from '@/shared/components/ui/icons';
 import { routerPaths } from '@/router/router-paths';
-import { DarkModeSwitch } from '@/shared/components/ui/dark-mode-switch';
+import { ColorModeSwitch } from '@/shared/components/ui/dark-mode-switch';
 import { type MenuItem } from '../layout/protected';
 
 export const operatorDrawerBottomMenuItems: MenuItem[] = [
@@ -21,5 +21,5 @@ export const operatorDrawerBottomMenuItems: MenuItem[] = [
       }
     },
   },
-  <DarkModeSwitch key="dark-mode-switch" />,
+  <ColorModeSwitch key="color-mode-switch" />,
 ];

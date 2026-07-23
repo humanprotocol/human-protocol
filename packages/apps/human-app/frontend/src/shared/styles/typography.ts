@@ -4,22 +4,13 @@ import { breakpoints } from '@/shared/styles/breakpoints';
 
 declare module '@mui/material/Typography' {
   interface TypographyPropsVariantOverrides {
-    textField: true;
-    body3: true;
     body4: true;
     body5: true;
-    body6: true;
     body7: true;
     body8: true;
     buttonLarge: true;
     buttonMedium: true;
-    buttonSmall: true;
-    inputLabel: true;
     helperText: true;
-    avatarLetter: true;
-    inputText: true;
-    tooltip: true;
-    inputUnderline: true;
     chip: true;
     mobileHeaderLarge: true;
     mobileHeaderMid: true;
@@ -29,21 +20,13 @@ declare module '@mui/material/Typography' {
 declare module '@mui/material/styles' {
   interface TypographyVariants {
     textField: CSSProperties;
-    body3: CSSProperties;
     body4: CSSProperties;
     body5: CSSProperties;
-    body6: CSSProperties;
     body7: CSSProperties;
     body8: CSSProperties;
     buttonLarge: CSSProperties;
     buttonMedium: CSSProperties;
-    buttonSmall: CSSProperties;
-    inputLabel: CSSProperties;
     helperText: CSSProperties;
-    avatarLetter: CSSProperties;
-    inputText: CSSProperties;
-    tooltip: CSSProperties;
-    inputUnderline: CSSProperties;
     chip: CSSProperties;
     mobileHeaderLarge: CSSProperties;
     mobileHeaderMid: CSSProperties;
@@ -51,21 +34,13 @@ declare module '@mui/material/styles' {
 
   interface TypographyVariantsOptions {
     textField?: CSSProperties;
-    body3?: CSSProperties;
     body4?: CSSProperties;
     body5?: CSSProperties;
-    body6?: CSSProperties;
     body7?: CSSProperties;
     body8?: CSSProperties;
     buttonLarge?: CSSProperties;
     buttonMedium?: CSSProperties;
-    buttonSmall?: CSSProperties;
-    inputLabel?: CSSProperties;
     helperText?: CSSProperties;
-    avatarLetter?: CSSProperties;
-    inputText?: CSSProperties;
-    tooltip?: CSSProperties;
-    inputUnderline?: CSSProperties;
     chip?: CSSProperties;
     mobileHeaderLarge?: CSSProperties;
     mobileHeaderMid?: CSSProperties;
@@ -156,9 +131,6 @@ export const typography: ThemeOptions['typography'] = {
     fontSize: 16,
     fontWeight: 400,
     letterSpacing: 0.15,
-    [breakpoints.mobile]: {
-      fontSize: 16,
-    },
   },
   body2: {
     fontSize: 14,
@@ -168,11 +140,6 @@ export const typography: ThemeOptions['typography'] = {
       fontSize: 14,
     },
   },
-  body3: {
-    fontSize: 16,
-    fontWeight: 500,
-    letterSpacing: 0.15,
-  },
   body4: {
     fontSize: 24,
     fontWeight: 600,
@@ -181,11 +148,6 @@ export const typography: ThemeOptions['typography'] = {
   body5: {
     fontSize: 20,
     fontWeight: 500,
-    letterSpacing: 0.15,
-  },
-  body6: {
-    fontSize: 24,
-    fontWeight: 600,
     letterSpacing: 0.15,
   },
   body7: {
@@ -210,52 +172,15 @@ export const typography: ThemeOptions['typography'] = {
     fontWeight: 600,
     letterSpacing: 0.1,
   },
-  buttonSmall: {
-    fontSize: 13,
-    fontWeight: 600,
-    letterSpacing: 0.1,
-  },
   caption: {
     fontSize: 12,
     fontWeight: 400,
     letterSpacing: 0.4,
   },
-  overline: {
-    fontSize: 12,
-    fontWeight: 400,
-    letterSpacing: 0.4,
-    textTransform: 'uppercase',
-  },
-  avatarLetter: {
-    fontSize: 20,
-    fontWeight: 400,
-    letterSpacing: 0.14,
-  },
-  inputLabel: {
-    fontSize: 12,
-    fontWeight: 400,
-    letterSpacing: 0.15,
-  },
   helperText: {
     fontSize: 12,
     fontWeight: 400,
     letterSpacing: 0.4,
-  },
-  inputText: {
-    fontSize: 16,
-    fontWeight: 400,
-    letterSpacing: 0.15,
-  },
-  tooltip: {
-    fontSize: 10,
-    fontWeight: 500,
-    letterSpacing: 0,
-  },
-  inputUnderline: {
-    fontSize: 12,
-    fontWeight: 600,
-    letterSpacing: 0.15,
-    textDecoration: 'underline',
   },
   chip: {
     fontSize: 13,

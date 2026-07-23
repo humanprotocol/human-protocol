@@ -5,7 +5,6 @@
     "percentSuffix": "%",
     "plusPrefix": "+"
   },
-  "dashboard": {},
   "protectedPagesHeaders": {
     "profile": "Profile",
     "jobsDiscovery": "Tasks",
@@ -55,7 +54,8 @@
     },
     "navbar": {
       "humanProtocol": "HUMAN Protocol",
-      "howItWorks": "How It Works"
+      "howItWorks": "How It Works",
+      "home": "Home"
     },
     "DrawerNavigation": {
       "jobs": "Tasks",
@@ -99,7 +99,7 @@
     "logIn": "Log In",
     "signUp": "Sign Up",
     "signIn": "Sign In",
-    "workerSignIn": "Worker Sign In",
+    "workerSignIn": "Sign In",
     "operatorSignIn": "Operator Sign In",
     "welcome": "Welcome",
     "howWillUse": "How will you use HUMAN App?",
@@ -129,7 +129,10 @@
       "title": "Sign Up",
       "submitBtn": "Sign Up",
       "passwordDetailedValidation": "Password must contain at least:",
-      "termsOfServiceAndPrivacyPolicy": "By clicking Sign Up, you agree to our <1>Terms of Service</1> and that you have read our <2>Privacy Policy</2>"
+      "termsOfServiceAndPrivacyPolicy": "By clicking Sign Up, you agree to our <1>Terms of Service</1> and that you have read our <2>Privacy Policy</2>",
+      "or": "Or",
+      "alreadyHaveAccount": "Already have an account?",
+      "signIn": "Sign In"
     },
     "signInForm": {
       "fields": {
@@ -141,22 +144,24 @@
       },
       "title": "Sign In",
       "submitBtn": "Sign In",
-      "forgotPassword": "Forgot Password?"
+      "forgotPassword": "Forgot Password?",
+      "or": "Or",
+      "dontHaveAccount": "Don't have an account?",
+      "signUp": "Sign Up"
     },
     "verifyEmail": {
       "title": "Verify Email",
-      "btn": "Resend Verification Email",
-      "paragraph1": "We've sent an email to <1>{{email}}</1>, please check your inbox and verify your email.",
-      "paragraph2": "The verification link is valid for 24 hours.",
-      "paragraph3": "<1>Can't find our email?</1> If you can't find the email in your inbox please check the spam folder.",
-      "paragraph4": "<1>Having trouble?</1> Please <2>Contact Support</2>",
+      "checkYourInbox": "Check your inbox",
+      "backToSignUp": "Back to Sign Up",
+      "btn": "Resend Email",
+      "paragraph1": "We sent a verification link to <1>{{email}}</1>",
+      "paragraph2": "Click the link in the email to verify your account. The link expires in 24 hours.",
       "successResent": "Verification email has been successfully resent.",
       "authError": "Log in before you resend email verification",
       "emailError": "No email provided."
     },
     "emailVerification": {
-      "title": "Email Verified",
-      "description": "You are ready to go. Your email has been successfully verified!",
+      "title": "Verified",
       "btn": "Sign In",
       "errors": {
         "noToken": "No token provided."
@@ -202,11 +207,19 @@
       "password": "Password",
       "wallet": "Wallet",
       "resetPassword": "Reset Password",
+      "beforeWeGetStarted": "Before we get started",
+      "identityVerification": "Identity verification",
+      "veriffCopy": "We use Veriff to verify your identity. You'll need: keep your phone & Government ID handy.",
+      "poweredBy": "Powered by",
       "completeIdentityVerification": "Complete Identity Verification",
-      "identityVerificationInProgress": "Identity verification in progress",
+      "verificationOpenedInNewTab": "Verification opened in a new tab",
+      "completeYourVerification": "Complete your verification there, then return here to continue",
+      "waitingForVerification": "Waiting for verification...",
+      "checkVerificationStatus": "Check Verification Status",
+      "verificationDeclined": "We were unable to verify your identity with the information provided. Please <1>contact support</1>",
       "confirmEmail": "Confirm email",
-      "identityVerificationStatus": "Identity verification",
       "walletAddressMessage": "This address is the wallet address where you will receive payments for completing tasks.",
+      "connectYourWallet": "Connect your wallet",
       "connectWallet": "Connect Wallet",
       "walletConnected": "Connected",
       "addKYCInfoOnChain": "Add KYC Info On-chain",
@@ -214,7 +227,6 @@
       "kycInfoOnChainAdded": "KYC Info On-Chain Added",
       "registerAddress": "Register Address",
       "emailNotifications": "Email Notifications",
-      "notificationsConsent": "I would like to be notified about News and Offers",
       "topNotifications": {
         "completeSteps": "Please set up your profile by completing the steps below."
       },

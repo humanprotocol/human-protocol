@@ -7,7 +7,6 @@ import {
   useCallback,
 } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material';
-import { BackgroundProvider } from '@/shared/contexts/background';
 import { theme } from '@/shared/styles/theme';
 import { colorPalette as defaultColorPalette } from '@/shared/styles/color-palette';
 import { darkTheme } from '@/shared/styles/dark-theme';
@@ -34,9 +33,7 @@ interface ColorModeProviderProps {
   children: ReactNode;
 }
 
-export function ColorModeProvider({
-  children,
-}: Readonly<ColorModeProviderProps>) {
+export function ColorModeProvider({ children }: ColorModeProviderProps) {
   const [isDarkMode, setIsDarkMode] = useState<boolean>(isDarkColorMode());
 
   const handleColorSchemePrefsChange = (prefersDarkScheme: boolean) => {
@@ -85,9 +82,7 @@ export function ColorModeProvider({
   return (
     <ThemeProvider theme={themes}>
       <ColorModeContext.Provider value={contextValue}>
-        <BackgroundProvider colorPalette={colorPalette} isDarkMode={isDarkMode}>
-          {children}
-        </BackgroundProvider>
+        {children}
       </ColorModeContext.Provider>
     </ThemeProvider>
   );

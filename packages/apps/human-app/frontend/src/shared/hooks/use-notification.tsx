@@ -1,11 +1,13 @@
 import { useCallback } from 'react';
 import { type SnackbarKey, useSnackbar } from 'notistack';
 import CloseIcon from '@mui/icons-material/Close';
-import { useColorMode } from '@/shared/contexts/color-mode';
-import { colorPalette as lightColorPalette } from '@/shared/styles/color-palette';
+
+import { ColorPalette } from '@/shared/styles/color-palette';
+import { useColorMode } from '../contexts/color-mode';
 
 export enum TopNotificationType {
   SUCCESS = 'success',
+  ERROR = 'error',
   WARNING = 'warning',
 }
 
@@ -16,11 +18,26 @@ export interface ShowNotifProps {
 }
 
 const AUTO_HIDE_NOTIFICATION_MS = 6000;
-const FONT_COLOR = lightColorPalette.white;
+
+const mapTopNotificationTypeToColor = (
+  type: TopNotificationType,
+  colorPalette: ColorPalette
+) => {
+  switch (type) {
+    case TopNotificationType.SUCCESS:
+      return colorPalette.success.main;
+    case TopNotificationType.WARNING:
+      return colorPalette.secondary.main;
+    case TopNotificationType.ERROR:
+      return '#FF6262';
+    default:
+      return colorPalette.secondary.main;
+  }
+};
 
 export const useNotification = () => {
-  const { colorPalette } = useColorMode();
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+  const { colorPalette } = useColorMode();
 
   const action = useCallback(
     (snackbarId: SnackbarKey) => (
@@ -55,11 +72,8 @@ export const useNotification = () => {
           flexWrap: 'nowrap',
           width: '100%',
           maxWidth: '100%',
-          backgroundColor:
-            type === TopNotificationType.SUCCESS
-              ? colorPalette.success.main
-              : colorPalette.secondary.main,
-          color: FONT_COLOR,
+          backgroundColor: mapTopNotificationTypeToColor(type, colorPalette),
+          color: colorPalette.white,
           fontSize: 14,
           fontWeight: 600,
           letterSpacing: 0.1,
@@ -67,7 +81,7 @@ export const useNotification = () => {
         action,
       });
     },
-    [enqueueSnackbar, colorPalette, action]
+    [enqueueSnackbar, action, colorPalette]
   );
 
   return { showNotification };

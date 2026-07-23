@@ -38,7 +38,7 @@ export function useStartIdv() {
     }
 
     if (idvStarted && idvStartData.url) {
-      window.location.href = idvStartData.url;
+      window.open(idvStartData.url, '_blank', 'noopener,noreferrer');
     }
   }, [
     idvStartData?.url,
@@ -50,6 +50,7 @@ export function useStartIdv() {
 
   return {
     isIdvAlreadyInProgress,
+    idvStarted,
     idvStartIsPending,
     startIdv,
   };

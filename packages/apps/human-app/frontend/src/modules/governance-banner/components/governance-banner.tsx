@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { env } from '@/shared/env';
 import { useColorMode } from '@/shared/contexts/color-mode';
-import { useWorkerIdentityVerificationStatus } from '@/modules/worker/profile/hooks';
 import { useProposalQuery } from '../hooks/use-proposal-query';
 import { formatCountdown } from '../../../shared/utils/time';
 import { type ProposalResponse } from '../services/governance.service';
@@ -21,7 +20,6 @@ function getProposalStatus(proposal: ProposalResponse): ProposalStatus {
 export function GovernanceBanner() {
   const { t } = useTranslation();
   const { data: proposal, isLoading, isError } = useProposalQuery();
-  const { isVerificationCompleted } = useWorkerIdentityVerificationStatus();
   const { colorPalette } = useColorMode();
   const { text, background } = colorPalette.banner;
   const [timeRemaining, setTimeRemaining] = useState('00:00:00');
@@ -42,7 +40,7 @@ export function GovernanceBanner() {
     };
   }, [proposal]);
 
-  if (!isVerificationCompleted || isLoading || isError || !proposal) {
+  if (isLoading || isError || !proposal) {
     return null;
   }
 

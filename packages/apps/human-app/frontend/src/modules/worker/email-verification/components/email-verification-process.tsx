@@ -7,13 +7,7 @@ import { getErrorMessageForError } from '@/shared/errors';
 import { useVerifyEmailMutation } from '../hooks';
 import { EmailVerificationSuccessMessage } from './email-verification-success-message';
 
-interface EmailVerificationProcessProps {
-  token: string;
-}
-
-export function EmailVerificationProcess({
-  token,
-}: Readonly<EmailVerificationProcessProps>) {
+export function EmailVerificationProcess({ token }: { token: string }) {
   const {
     error,
     isError,

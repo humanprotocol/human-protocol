@@ -1,18 +1,10 @@
 import { Grid, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import {
-  MobileHomeIcons,
-  HomepageWorkIcon,
-  HomepageUserIcon,
-  HomepageLogoIcon,
-} from '@/shared/components/ui/icons';
-import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 
 export function LogoSection() {
   const { t } = useTranslation();
   const logoText: string = t('homepage.humanApp');
   const logoTextSplit: string[] = logoText.split(' ');
-  const isMobile = useIsMobile('lg');
 
   return (
     <Grid
@@ -23,37 +15,6 @@ export function LogoSection() {
         alignItems: { xs: 'center', lg: 'flex-start' },
       }}
     >
-      {isMobile ? (
-        <Stack
-          direction="row"
-          sx={{
-            alignItems: 'center',
-            justifyContent: 'center',
-            svg: { margin: '-1.4rem' },
-          }}
-        >
-          <MobileHomeIcons />
-        </Stack>
-      ) : (
-        <Stack
-          direction="row"
-          sx={{
-            maxHeight: '80px',
-            mb: 3,
-            transform: 'translateX(-4.5%)',
-          }}
-        >
-          <Grid sx={{ mx: 3 }}>
-            <HomepageWorkIcon />
-          </Grid>
-          <Grid sx={{ mx: 3 }}>
-            <HomepageUserIcon />
-          </Grid>
-          <Grid sx={{ mx: 3 }}>
-            <HomepageLogoIcon />
-          </Grid>
-        </Stack>
-      )}
       <Stack
         direction="row"
         sx={{
@@ -69,8 +30,8 @@ export function LogoSection() {
       <Typography
         variant="h6"
         sx={{
-          mt: '1.875rem',
-          mb: '3.8125rem',
+          mt: 4,
+          mb: 8,
           typography: { md: 'h5' },
           textAlign: { xs: 'center', md: 'left' },
         }}

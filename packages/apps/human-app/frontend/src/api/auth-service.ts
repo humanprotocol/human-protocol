@@ -31,7 +31,7 @@ export class AuthService implements AuthProvider {
 
   constructor(private readonly httpClient: HttpApiClient) {}
 
-  async signIn(data: SignInDto): Promise<void> {
+  async signIn(data: SignInDto): Promise<AuthTokensSuccessResponse> {
     const res = await this.httpClient.post<AuthTokensSuccessResponse>(
       apiPaths.worker.signIn.path,
       {
@@ -40,7 +40,7 @@ export class AuthService implements AuthProvider {
       }
     );
 
-    this.browserAuthProvider.signIn(res, 'web2');
+    return res;
   }
 
   async getAccessToken(): Promise<string | null> {

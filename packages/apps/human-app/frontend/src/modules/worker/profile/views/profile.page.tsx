@@ -8,11 +8,7 @@ import {
   TopNotificationType,
   useNotification,
 } from '@/shared/hooks/use-notification';
-import {
-  ProfileData,
-  IdentityVerificationControl,
-  WalletConnectionControl,
-} from '../components';
+import { ProfileData } from '../components';
 
 export function WorkerProfilePage() {
   const { user } = useAuthenticatedUser();
@@ -61,8 +57,6 @@ export function WorkerProfilePage() {
     >
       <Stack sx={{ width: '100%', maxWidth: '450px', gap: 3 }}>
         <ProfileData />
-        <IdentityVerificationControl />
-        <WalletConnectionControl />
       </Stack>
     </Paper>
   );

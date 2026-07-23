@@ -47,5 +47,6 @@ export function useAccessTokenRefresh() {
   return {
     refreshAccessToken: mutation.mutate,
     refreshAccessTokenAsync: mutation.mutateAsync,
+    isRefreshingAccessToken: mutation.isPending,
   };
 }

@@ -1,9 +1,11 @@
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import WarningIcon from '@mui/icons-material/Warning';
 import ErrorIcon from '@mui/icons-material/Error';
-import MuiAlert from '@mui/material/Alert';
-import type { AlertProps as MuiAlertProps } from '@mui/material/Alert';
-import { Typography } from '@mui/material';
+import {
+  Alert as MuiAlert,
+  type AlertProps as MuiAlertProps,
+  Typography,
+} from '@mui/material';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { darkColorPalette } from '@/shared/styles/dark-color-palette';
 
