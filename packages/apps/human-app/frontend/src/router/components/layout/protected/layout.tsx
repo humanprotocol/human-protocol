@@ -3,13 +3,13 @@ import type { Dispatch, ReactElement, SetStateAction } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
-import { useBackgroundContext } from '@/shared/contexts/background';
 import { breakpoints } from '@/shared/styles/breakpoints';
 import { useIsHCaptchaLabelingPage } from '@/shared/hooks/use-is-hcaptcha-labeling-page';
 import { GovernanceBanner } from '@/modules/governance-banner/components/governance-banner';
 import { Footer } from '../../footer';
 import { Navbar } from './navbar';
 import { type PageHeaderProps, PageHeader } from './page-header';
+import { useColorMode } from '@/shared/contexts/color-mode/use-color-mode';
 
 const Main = styled('main', {
   shouldForwardProp: (prop) => prop !== 'open' && prop !== 'isMobile',
@@ -52,7 +52,7 @@ export function ProtectedLayout({
   const isMobile = useIsMobile();
   const [drawerOpen, setDrawerOpen] = useState(!isMobile);
   const [hcaptchaDrawerOpen, setHcaptchaDrawerOpen] = useState(false);
-  const { backgroundColor, setGrayBackground } = useBackgroundContext();
+  const { colorPalette } = useColorMode();
   const toggleUserStatsDrawer = isHCaptchaLabelingPage
     ? () => {
         setHcaptchaDrawerOpen((state) => !state);
@@ -69,14 +69,9 @@ export function ProtectedLayout({
     }
   }, [isMobile]);
 
-  useEffect(() => {
-    setGrayBackground();
-  }, [setGrayBackground]);
-
   return (
     <Stack
       sx={{
-        display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         flexWrap: 'nowrap',
@@ -86,7 +81,9 @@ export function ProtectedLayout({
         pt: '0',
         pl: isMobile ? 0 : '120px',
         pr: isMobile ? 0 : '20px',
-        backgroundColor,
+        backgroundColor: isMobile
+          ? colorPalette.background.paper
+          : colorPalette.background.default,
       }}
     >
       <Navbar
