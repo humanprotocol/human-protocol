@@ -26,7 +26,7 @@ export function Footer({ isProtected, displayChatIcon = true }: FooterProps) {
         pl: { xs: 3, md: isProtected ? '200px' : 3 },
         bgcolor: { xs: colorPalette.paper.main, md: 'transparent' },
         borderTop: {
-          xs: !isProtected ? '1px solid rgba(209, 209, 209, 0.32)' : 'none',
+          xs: '1px solid rgba(209, 209, 209, 0.32)',
           md: 'none',
         },
       }}
