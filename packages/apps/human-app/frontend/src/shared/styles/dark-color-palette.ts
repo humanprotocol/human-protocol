@@ -3,7 +3,7 @@ import type { colorPalette } from '@/shared/styles/color-palette';
 export const darkColorPalette = {
   white: '#FFFFFF',
   black: '#000000',
-  backgroundColor: 'rgba(16, 7, 53, 1)',
+  backgroundColor: '#100735',
   text: {
     primary: '#D4CFFF',
     secondary: '#6C6978',

@@ -30,8 +30,8 @@ export function LogoSection() {
       <Typography
         variant="h6"
         sx={{
-          mt: '1.875rem',
-          mb: '3.8125rem',
+          mt: 4,
+          mb: 8,
           typography: { md: 'h5' },
           textAlign: { xs: 'center', md: 'left' },
         }}
