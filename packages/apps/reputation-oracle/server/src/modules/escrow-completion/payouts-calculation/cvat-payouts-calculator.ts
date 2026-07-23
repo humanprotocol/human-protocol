@@ -62,19 +62,11 @@ export class CvatPayoutsCalculator implements EscrowPayoutsCalculator {
 
     for (const jobFinalResult of matchedJobResults) {
       // TODO: enable annotation quality validation when ready
-      if (
-        jobFinalResult
-        // && jobFinalResult.annotation_quality >= manifest.validation.min_quality
-      ) {
-        const workerAddress = jobFinalResult.annotator_wallet_address;
+      const workerAddress = jobFinalResult.annotator_wallet_address;
 
-        const currentWorkerBounty = workersBounties.get(workerAddress) || 0n;
+      const currentWorkerBounty = workersBounties.get(workerAddress) || 0n;
 
-        workersBounties.set(
-          workerAddress,
-          currentWorkerBounty + jobBountyValue,
-        );
-      }
+      workersBounties.set(workerAddress, currentWorkerBounty + jobBountyValue);
     }
 
     return Array.from(workersBounties.entries()).map(

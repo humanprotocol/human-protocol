@@ -60,14 +60,6 @@ describe('CvatPayoutsCalculator', () => {
       } as unknown as EscrowClient);
     });
 
-    afterEach(() => {
-      jest.resetAllMocks();
-      mockedEscrowClient.build.mockResolvedValue({
-        getIntermediateResultsUrl: mockedGetIntermediateResultsUrl,
-        getReservedFunds: mockedGetReservedFunds,
-      } as unknown as EscrowClient);
-    });
-
     it('throws when invalid annotation meta downloaded from valid url', async () => {
       const intermediateResultsUrl = faker.internet.url();
       mockedGetIntermediateResultsUrl.mockResolvedValueOnce(
@@ -102,7 +94,6 @@ describe('CvatPayoutsCalculator', () => {
       const jobsPerAnnotator = faker.number.int({ min: 1, max: 3 });
       const jobCount = jobsPerAnnotator * annotators.length;
       const payoutPerJob = BigInt(faker.number.int({ min: 1000, max: 100000 }));
-      const reservedFunds = payoutPerJob * BigInt(jobCount);
 
       const annotationsMeta: CvatAnnotationMeta = {
         jobs: Array.from({ length: jobCount }, (_v, index: number) => ({
@@ -139,12 +130,13 @@ describe('CvatPayoutsCalculator', () => {
         annotationsMeta,
       );
 
-      mockedGetReservedFunds.mockResolvedValueOnce(reservedFunds);
-      const manifest = generateCvatManifest();
+      mockedGetReservedFunds.mockResolvedValueOnce(
+        payoutPerJob * BigInt(jobCount),
+      );
       const payouts = await calculator.calculate({
         chainId,
         escrowAddress,
-        manifest: manifest,
+        manifest: generateCvatManifest(),
         finalResultsUrl: faker.internet.url(),
       });
 
@@ -245,12 +237,12 @@ describe('CvatPayoutsCalculator', () => {
         jobs: [
           {
             job_id: faker.number.int(),
-            final_result_id: faker.number.int(),
+            final_result_id: 1,
           },
         ],
         results: [
           {
-            id: faker.number.int(),
+            id: 2,
             job_id: faker.number.int(),
             annotator_wallet_address: faker.finance.ethereumAddress(),
             annotation_quality: faker.number.float(),
