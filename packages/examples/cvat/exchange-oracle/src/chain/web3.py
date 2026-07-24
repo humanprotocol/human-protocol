@@ -19,6 +19,16 @@ symbol_abi = [
     }
 ]  # ABI for fetching token symbol
 
+decimals_abi = [
+    {
+        "constant": True,
+        "inputs": [],
+        "name": "decimals",
+        "outputs": [{"name": "", "type": "uint8"}],
+        "type": "function",
+    }
+]  # ABI for fetching token decimals (ERC-20 optional method; https://eips.ethereum.org/EIPS/eip-20)
+
 
 def get_web3(chain_id: int | Networks):
     match chain_id:
@@ -83,3 +93,9 @@ def get_token_symbol(chain_id: int, token_address: str) -> str:
     w3 = get_web3(chain_id)
     contract = w3.eth.contract(address=w3.to_checksum_address(token_address), abi=symbol_abi)
     return contract.functions.symbol().call()
+
+
+def get_token_decimals(chain_id: int, token_address: str) -> int:
+    w3 = get_web3(chain_id)
+    contract = w3.eth.contract(address=w3.to_checksum_address(token_address), abi=decimals_abi)
+    return contract.functions.decimals().call()

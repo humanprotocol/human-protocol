@@ -6,6 +6,7 @@ import uuid
 from argparse import ArgumentParser
 from collections.abc import Generator
 from contextlib import ExitStack, contextmanager
+from decimal import Decimal
 from logging import Logger
 from pathlib import Path, PurePosixPath
 from typing import Any
@@ -118,6 +119,9 @@ def _mock_get_manifests_from_minio(logger: Logger) -> Generator[None, None, None
         mock.patch.object(EscrowUtils, "get_escrow", patched_get_escrow),
         mock.patch("src.chain.escrow.get_token_symbol", return_value="HMT"),
         mock.patch("src.chain.web3.get_token_symbol", return_value="HMT"),
+        mock.patch(
+            "src.handlers.job_creation.utils.get_remaining_escrow_funds", return_value=Decimal(100)
+        ),
     ):
         yield
 

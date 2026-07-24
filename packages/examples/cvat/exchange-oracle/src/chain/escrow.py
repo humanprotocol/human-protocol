@@ -1,13 +1,14 @@
 import json
+from decimal import Decimal
 from functools import partial
 
 import httpx2
 from human_protocol_sdk.constants import ChainId, Status
 from human_protocol_sdk.encryption import Encryption, EncryptionUtils
-from human_protocol_sdk.escrow import EscrowData, EscrowUtils
+from human_protocol_sdk.escrow import EscrowClient, EscrowData, EscrowUtils
 from human_protocol_sdk.utils import validate_url
 
-from src.chain.web3 import get_token_symbol
+from src.chain.web3 import get_token_decimals, get_token_symbol, get_web3
 from src.core.config import Config
 from src.core.types import OracleWebhookTypes
 from src.services.cache import Cache
@@ -108,3 +109,25 @@ def get_escrow_fund_token_symbol(chain_id: int, escrow_address: str) -> str:
         token_address=escrow.token,
         set_callback=partial(get_token_symbol, chain_id, escrow.token),
     )
+
+
+def get_escrow_fund_token_decimals(chain_id: int, escrow_address: str) -> int:
+    """
+    ERC-20 decimals: divide the raw token amount by 10**decimals for the user representation
+    (https://eips.ethereum.org/EIPS/eip-20).
+    """
+
+    escrow = get_escrow(chain_id, escrow_address)
+    return get_token_decimals(chain_id, escrow.token)
+
+
+def get_remaining_escrow_funds(chain_id: int, escrow_address: str) -> Decimal | None:
+    web3 = get_web3(chain_id)
+    client = EscrowClient(web3)
+
+    remaining_funds = client.get_remaining_funds(escrow_address)
+    if remaining_funds is None:
+        return None
+
+    token_decimals = get_escrow_fund_token_decimals(chain_id, escrow_address)
+    return Decimal(remaining_funds) / Decimal(10**token_decimals)

@@ -1,5 +1,6 @@
 import json
 import subprocess
+from decimal import Decimal
 from pathlib import Path
 from unittest.mock import Mock, patch
 
@@ -143,16 +144,18 @@ def test_create_audio_transcription_task(fxt_audio_transcription_input):
     manifest, ds_rois_tsv, gt_tsv = fxt_audio_transcription_input
 
     cvat_api = _make_cvat_api_mock()
-    escrow = Mock(total_funded_amount="40")
     with (
         patch.object(handlers, "get_escrow_manifest", return_value=manifest),
         patch("src.handlers.job_creation.builders.audio.transcription.cvat_api", cvat_api),
-        patch("src.handlers.job_creation.utils.get_escrow", return_value=escrow) as mock_get_escrow,
+        patch(
+            "src.handlers.job_creation.utils.get_remaining_escrow_funds",
+            return_value=Decimal(40),
+        ) as mock_remaining_funds,
     ):
         handlers.create_task(ESCROW_ADDRESS, CHAIN_ID)
 
     # v2 manifest → per-assignment bounty derived from escrow funds / job count
-    mock_get_escrow.assert_called_once_with(CHAIN_ID, ESCROW_ADDRESS)
+    mock_remaining_funds.assert_called_once_with(CHAIN_ID, ESCROW_ADDRESS)
 
     # Check CVAT API calls
     cvat_api.create_project.assert_called_once()
@@ -172,7 +175,7 @@ def test_create_audio_transcription_task(fxt_audio_transcription_input):
         assert project.cvat_cloudstorage_id == 100
         assert project.job_type == TaskTypes.audio_transcription.value
         assert project.chain_id == CHAIN_ID
-        assert project.assignment_bounty == "10"  # 40 escrow funds / 4 assignments
+        assert project.assignment_bounty == "10"  # 40 tokens remaining / 4 assignments
 
         tasks = db_service.get_tasks_by_cvat_project_id(session, project.cvat_id)
         assert len(tasks) == assignment_count
