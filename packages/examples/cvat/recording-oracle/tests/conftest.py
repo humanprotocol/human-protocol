@@ -5,7 +5,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import inspect, text
 from sqlalchemy.orm import Session
 
-from src import app
+from src.apps.recording_oracle import app
 from src.db import Base, SessionLocal, engine
 
 
