@@ -1,17 +1,10 @@
 import type { RouteProps } from 'react-router-dom';
-import { t } from 'i18next';
 import { routerPaths } from '@/router/router-paths';
 import { env } from '@/shared/env';
 import { RegistrationPage } from '@/modules/worker/oracle-registration';
 import {
-  HandIcon,
-  ProfileIcon,
-  WorkHeaderIcon,
-} from '@/shared/components/ui/icons';
-import type { PageHeaderProps } from '@/router/components/layout/protected/page-header';
-import {
   HcaptchaLabelingPage,
-  UserStatsAccordion,
+  //UserStatsAccordion,
   EnableLabelerPage,
 } from '@/modules/worker/hcaptcha-labeling';
 import {
@@ -27,7 +20,6 @@ import { HomePage } from '@/modules/homepage';
 import {
   AddKeysOperatorPage,
   AddStakeOperatorPage,
-  ConnectWalletOperatorPage,
   EditExistingKeysSuccessPage,
   SetUpOperatorPage,
 } from '@/modules/signup/operator';
@@ -53,10 +45,6 @@ export const unprotectedRoutes: RouteProps[] = [
   {
     path: routerPaths.worker.signUp,
     element: <SignUpWorkerPage />,
-  },
-  {
-    path: routerPaths.operator.connectWallet,
-    element: <ConnectWalletOperatorPage />,
   },
   {
     path: routerPaths.worker.emailVerification,
@@ -86,16 +74,11 @@ export const unprotectedRoutes: RouteProps[] = [
 
 export const protectedRoutes: {
   routerProps: RouteProps;
-  pageHeaderProps: PageHeaderProps;
 }[] = [
   {
     routerProps: {
       path: routerPaths.worker.jobsDiscovery,
       element: <JobsDiscoveryPage />,
-    },
-    pageHeaderProps: {
-      headerIcon: <WorkHeaderIcon />,
-      headerText: t('protectedPagesHeaders.jobsDiscovery'),
     },
   },
   ...(env.VITE_FEATURE_FLAG_JOBS_DISCOVERY
@@ -105,19 +88,11 @@ export const protectedRoutes: {
             path: `${routerPaths.worker.jobs}/:address`,
             element: <JobsPage />,
           },
-          pageHeaderProps: {
-            headerIcon: <WorkHeaderIcon />,
-            headerText: t('protectedPagesHeaders.jobs'),
-          },
         },
         {
           routerProps: {
             path: `${routerPaths.worker.registrationInExchangeOracle}/:address`,
             element: <RegistrationPage />,
-          },
-          pageHeaderProps: {
-            headerIcon: <WorkHeaderIcon />,
-            headerText: t('protectedPagesHeaders.registrationInExchangeOracle'),
           },
         },
       ]
@@ -127,20 +102,11 @@ export const protectedRoutes: {
       path: routerPaths.worker.profile,
       element: <WorkerProfilePage />,
     },
-    pageHeaderProps: {
-      headerIcon: <ProfileIcon />,
-      headerText: t('protectedPagesHeaders.profile'),
-    },
   },
   {
     routerProps: {
       path: routerPaths.worker.HcaptchaLabeling,
       element: <HcaptchaLabelingPage />,
-    },
-    pageHeaderProps: {
-      headerIcon: <HandIcon />,
-      headerText: t('protectedPagesHeaders.hcaptchaLabeling'),
-      headerItem: <UserStatsAccordion />,
     },
   },
   {
@@ -148,26 +114,16 @@ export const protectedRoutes: {
       path: routerPaths.worker.enableLabeler,
       element: <EnableLabelerPage />,
     },
-    pageHeaderProps: {
-      headerIcon: <HandIcon />,
-      headerText: t('protectedPagesHeaders.hcaptchaLabeling'),
-      headerItem: <UserStatsAccordion />,
-    },
   },
 ];
 
 export const web3ProtectedRoutes: {
   routerProps: RouteProps;
-  pageHeaderProps: PageHeaderProps;
 }[] = [
   {
     routerProps: {
       path: routerPaths.operator.profile,
       element: <OperatorProfilePage />,
-    },
-    pageHeaderProps: {
-      headerIcon: <ProfileIcon />,
-      headerText: t('web3ProtectedPagesHeaders.profile'),
     },
   },
 ];

@@ -1,13 +1,12 @@
 import { Box, Stack, styled } from '@mui/material';
-import type { Dispatch, ReactElement, SetStateAction } from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactElement } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
+
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { useIsHCaptchaLabelingPage } from '@/shared/hooks/use-is-hcaptcha-labeling-page';
 import { GovernanceBanner } from '@/modules/governance-banner/components/governance-banner';
 import { Footer } from '../../footer';
 import { Navbar } from './navbar';
-//import { type PageHeaderProps, PageHeader } from './page-header';
 import { useColorMode } from '@/shared/contexts/color-mode/use-color-mode';
 import { DesktopAsideBar } from './desktop-aside-bar';
 import { ProfileBottomTray } from '@/modules/worker/profile/components/profile-bottom-tray';
@@ -35,16 +34,9 @@ const Main = styled('main', {
 }));
 
 export function ProtectedLayout({
-  // pageHeaderProps,
-  // renderDrawer,
   renderHCaptchaStatisticsDrawer,
   renderGovernanceBanner,
 }: {
-  //pageHeaderProps: PageHeaderProps;
-  renderDrawer: (
-    open: boolean,
-    setDrawerOpen: Dispatch<SetStateAction<boolean>>
-  ) => ReactElement;
   renderHCaptchaStatisticsDrawer?: (isOpen: boolean) => ReactElement;
   renderGovernanceBanner?: boolean;
 }) {
@@ -102,7 +94,6 @@ export function ProtectedLayout({
       )}
 
       {!isMobile && <DesktopAsideBar />}
-      {/* {renderDrawer(drawerOpen, setDrawerOpen)} */}
       {isHCaptchaLabelingPage && renderHCaptchaStatisticsDrawer
         ? renderHCaptchaStatisticsDrawer(hcaptchaDrawerOpen)
         : null}
@@ -110,7 +101,6 @@ export function ProtectedLayout({
         sx={{
           flex: 1,
           py: { xs: 0, md: 4 },
-          //px: { xs: 2, md: 4 },
           gap: { xs: 0, md: 3 },
           bgcolor: colorPalette.background.paper,
           borderRadius: { xs: '0px', md: '30px' },
@@ -128,7 +118,6 @@ export function ProtectedLayout({
             }}
           >
             {renderGovernanceBanner && <GovernanceBanner />}
-            {/* <PageHeader {...pageHeaderProps} /> */}
             <Box ref={layoutElementRef} sx={{ height: '100%' }}>
               <Outlet />
             </Box>

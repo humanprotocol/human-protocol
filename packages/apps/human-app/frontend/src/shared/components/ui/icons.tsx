@@ -2,20 +2,12 @@ import { SvgIcon, SvgIconProps } from '@mui/material';
 
 import HumanLogoIconLight from '@/assets/icons/icons-human-logo/human-logo.svg';
 import HumanLogoIconDark from '@/assets/icons-dark-mode/icons-human-logo/human-logo.svg';
-import HandIconLight from '@/assets/icons/hand.svg';
-import HandIconDark from '@/assets/icons-dark-mode/hand.svg';
 import RefreshIconLight from '@/assets/icons/refresh.svg';
 import RefreshIconDark from '@/assets/icons-dark-mode/refresh.svg';
-import UserOutlinedIconLight from '@/assets/icons/user-outlined.svg';
-import UserOutlinedIconDark from '@/assets/icons-dark-mode/user-outlined.svg';
-import WorkIconLight from '@/assets/icons/work.svg';
-import WorkIconDark from '@/assets/icons-dark-mode/work.svg';
 import HumanLogoNavbarIconLight from '@/assets/icons/icons-navbar/human-logo-navbar.svg';
 import HumanLogoNavbarIconDark from '@/assets/icons-dark-mode/icons-navbar/human-logo-navbar.svg';
 import HelpIconLight from '@/assets/icons/help.svg';
 import HelpIconDark from '@/assets/icons-dark-mode/help.svg';
-import ProfileIconLight from '@/assets/icons/profile-icon.svg';
-import ProfileIconDark from '@/assets/icons-dark-mode/profile-icon.svg';
 import CheckmarkIcon from '@/assets/icons/checkmark-icon.svg';
 import LockerIconLight from '@/assets/icons/locker-icon.svg';
 import LockerIconDark from '@/assets/icons-dark-mode/locker-icon.svg';
@@ -30,8 +22,6 @@ import SunIconLight from '@/assets/icons/sun.svg';
 import MoonIconDark from '@/assets/icons-dark-mode/moon.svg';
 import MoonIconLight from '@/assets/icons/moon.svg';
 import { useColorMode } from '@/shared/contexts/color-mode';
-import WorkHeaderDark from '@/assets/icons-dark-mode/work-header.svg';
-import WorkHeaderLight from '@/assets/icons/work-header.svg';
 import CopyIconLight from '@/assets/icons/content-copy.svg';
 import CopyIconDark from '@/assets/icons-dark-mode/content-copy.svg';
 import EditIconLight from '@/assets/icons/edit-icon.svg';
@@ -56,37 +46,13 @@ function HumanLogoNavbarIcon() {
     <HumanLogoNavbarIconLight />
   );
 }
-function WorkHeaderIcon() {
-  const { isDarkMode } = useColorMode();
-  return isDarkMode ? <WorkHeaderDark /> : <WorkHeaderLight />;
-}
-function HandIcon() {
-  const { isDarkMode } = useColorMode();
-  return isDarkMode ? <HandIconDark /> : <HandIconLight />;
-}
 function RefreshIcon() {
   const { isDarkMode } = useColorMode();
   return isDarkMode ? <RefreshIconDark /> : <RefreshIconLight />;
 }
-function InverseRefreshIcon() {
-  const { isDarkMode } = useColorMode();
-  return isDarkMode ? <RefreshIconLight /> : <RefreshIconDark />;
-}
-function UserOutlinedIcon() {
-  const { isDarkMode } = useColorMode();
-  return isDarkMode ? <UserOutlinedIconDark /> : <UserOutlinedIconLight />;
-}
-function WorkIcon() {
-  const { isDarkMode } = useColorMode();
-  return isDarkMode ? <WorkIconDark /> : <WorkIconLight />;
-}
 function HelpIcon() {
   const { isDarkMode } = useColorMode();
   return isDarkMode ? <HelpIconDark /> : <HelpIconLight />;
-}
-function ProfileIcon() {
-  const { isDarkMode } = useColorMode();
-  return isDarkMode ? <ProfileIconDark /> : <ProfileIconLight />;
 }
 function LockerIcon() {
   const { isDarkMode } = useColorMode();
@@ -189,13 +155,8 @@ function HourglassIcon() {
 export {
   HumanLogoIcon,
   HumanLogoNavbarIcon,
-  HandIcon,
   RefreshIcon,
-  InverseRefreshIcon,
-  UserOutlinedIcon,
-  WorkIcon,
   HelpIcon,
-  ProfileIcon,
   CheckmarkIcon,
   LockerIcon,
   FiltersButtonIcon,
@@ -203,7 +164,6 @@ export {
   FiltersIcon,
   SunIcon,
   MoonIcon,
-  WorkHeaderIcon,
   CopyIcon,
   EditIcon,
   DeleteIcon,
