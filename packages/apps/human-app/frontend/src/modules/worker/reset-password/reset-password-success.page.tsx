@@ -11,12 +11,13 @@ import { useColorMode } from '@/shared/contexts/color-mode';
 
 export function ResetPasswordWorkerSuccessPage() {
   const { colorPalette } = useColorMode();
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
 
   useEffect(() => {
-    signOut();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (user) {
+      signOut();
+    }
+  }, [user, signOut]);
 
   return (
     <Paper
