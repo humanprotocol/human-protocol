@@ -28,11 +28,7 @@ export function Footer({
         py: { xs: 2, md: isProtected ? 0 : 3 },
         bgcolor: { xs: colorPalette.background.paper, md: 'transparent' },
         borderTop: {
-          xs: '1px solid rgba(209, 209, 209, 0.32)',
-          md: 'none',
-        },
-        borderTopColor: {
-          xs: colorPalette.border.main,
+          xs: `1px solid ${colorPalette.border.main}`,
           md: 'none',
         },
       }}
