@@ -36,6 +36,7 @@ import {
   JobUnknownManifestDto,
 } from './job.dto';
 import { JobService } from './job.service';
+import { SkipSnakeCaseTransform } from '../../common/interceptors/snake-case';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -135,6 +136,7 @@ export class JobController {
       'Endpoint to create a job using a manifest JSON body without validating its format.',
   })
   @ApiBody({ type: JobUnknownManifestDto })
+  @SkipSnakeCaseTransform({ body: ['manifest'] })
   @ApiResponse({
     status: 201,
     description: 'ID of the created job.',
