@@ -1,13 +1,13 @@
-import { Grid, IconButton, Stack } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
-import CloseIcon from '@mui/icons-material/Close';
+import { Stack } from '@mui/material';
+// import MenuIcon from '@mui/icons-material/Menu';
+// import CloseIcon from '@mui/icons-material/Close';
 import { t } from 'i18next';
 import { HumanLogoNavbarIcon } from '@/shared/components/ui/icons';
-import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { Button } from '@/shared/components/ui/button';
-import { useIsHCaptchaLabelingPage } from '@/shared/hooks/use-is-hcaptcha-labeling-page';
+//import { useIsHCaptchaLabelingPage } from '@/shared/hooks/use-is-hcaptcha-labeling-page';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { useHandleMainNavIconClick } from '@/shared/hooks/use-handle-main-nav-icon-click';
+import { ColorModeSwitch } from '@/shared/components/ui/dark-mode-switch';
 
 interface NavbarProps {
   open: boolean;
@@ -19,48 +19,47 @@ interface NavbarProps {
 export function Navbar({
   setOpen,
   open,
-  userStatsDrawerOpen,
-  toggleUserStatsDrawer,
+  // userStatsDrawerOpen,
+  // toggleUserStatsDrawer,
 }: NavbarProps) {
   const handleMainNavIconClick = useHandleMainNavIconClick();
   const { colorPalette } = useColorMode();
-  const isMobile = useIsMobile();
-  const isHCaptchaLabelingPage = useIsHCaptchaLabelingPage();
+  //const isHCaptchaLabelingPage = useIsHCaptchaLabelingPage();
 
-  let iconButton = null;
-  if (open) {
-    iconButton = (
-      <IconButton
-        onClick={() => {
-          setOpen(false);
-        }}
-      >
-        <CloseIcon />
-      </IconButton>
-    );
-  } else if (userStatsDrawerOpen) {
-    iconButton = (
-      <IconButton
-        onClick={() => {
-          if (toggleUserStatsDrawer) {
-            toggleUserStatsDrawer();
-          }
-        }}
-      >
-        <CloseIcon />
-      </IconButton>
-    );
-  } else {
-    iconButton = (
-      <IconButton
-        onClick={() => {
-          setOpen(true);
-        }}
-      >
-        <MenuIcon />
-      </IconButton>
-    );
-  }
+  // let iconButton = null;
+  // if (open) {
+  //   iconButton = (
+  //     <IconButton
+  //       onClick={() => {
+  //         setOpen(false);
+  //       }}
+  //     >
+  //       <CloseIcon />
+  //     </IconButton>
+  //   );
+  // } else if (userStatsDrawerOpen) {
+  //   iconButton = (
+  //     <IconButton
+  //       onClick={() => {
+  //         if (toggleUserStatsDrawer) {
+  //           toggleUserStatsDrawer();
+  //         }
+  //       }}
+  //     >
+  //       <CloseIcon />
+  //     </IconButton>
+  //   );
+  // } else {
+  //   iconButton = (
+  //     <IconButton
+  //       onClick={() => {
+  //         setOpen(true);
+  //       }}
+  //     >
+  //       <MenuIcon />
+  //     </IconButton>
+  //   );
+  // }
 
   return (
     <Stack
@@ -70,10 +69,10 @@ export function Navbar({
         display: { xs: 'flex', md: 'none' },
         alignItems: 'center',
         justifyContent: 'space-between',
-        backgroundColor: colorPalette.backgroundColor,
+        backgroundColor: colorPalette.background.paper,
         width: '100%',
         px: 2,
-        py: 3,
+        pt: 4,
         zIndex: '130',
         position: open ? 'sticky' : 'relative',
         top: open ? '0' : 'unset',
@@ -88,15 +87,14 @@ export function Navbar({
           p: 0,
         }}
         onClick={() => {
-          if (isMobile) {
-            setOpen(false);
-          }
+          setOpen(false);
           handleMainNavIconClick();
         }}
       >
         <HumanLogoNavbarIcon />
       </Button>
-      <Grid
+      <ColorModeSwitch />
+      {/* <Grid
         sx={{
           display: 'flex',
           justifyContent: 'center',
@@ -114,7 +112,7 @@ export function Navbar({
           </Button>
         ) : null}
         {iconButton}
-      </Grid>
+      </Grid> */}
     </Stack>
   );
 }

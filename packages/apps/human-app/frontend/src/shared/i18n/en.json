@@ -202,11 +202,14 @@
       "btn": "Sign In"
     },
     "profile": {
-      "profileHeader": "Profile",
+      "profileHeader": "Account",
+      "accountVerified": "Account verified",
       "email": "Email",
       "password": "Password",
       "wallet": "Wallet",
+      "walletAddress": "Wallet address",
       "resetPassword": "Reset Password",
+      "logout": "Logout",
       "beforeWeGetStarted": "Before we get started",
       "identityVerification": "Identity verification",
       "veriffCopy": "We use Veriff to verify your identity. You'll need: keep your phone & Government ID handy.",

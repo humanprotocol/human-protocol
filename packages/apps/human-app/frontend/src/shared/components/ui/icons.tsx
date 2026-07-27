@@ -42,6 +42,7 @@ import VeriffIconLight from '@/assets/icons/veriff.svg';
 import VeriffIconDark from '@/assets/icons-dark-mode/veriff.svg';
 import HourglassIconLight from '@/assets/icons/hourglass.svg';
 import HourglassIconDark from '@/assets/icons-dark-mode/hourglass.svg';
+import LogoutIcon from '@/assets/icons/logout.svg';
 
 function HumanLogoIcon() {
   const { isDarkMode } = useColorMode();
@@ -210,4 +211,5 @@ export {
   SuccessIcon,
   VeriffIcon,
   HourglassIcon,
+  LogoutIcon,
 };

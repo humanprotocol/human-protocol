@@ -11,8 +11,9 @@ import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { useHandleMainNavIconClick } from '@/shared/hooks/use-handle-main-nav-icon-click';
 import { TopMenuItemsList } from './top-menu-items-list';
 import { BottomMenuItemsList } from './bottom-menu-items-list';
+import { useColorMode } from '@/shared/contexts/color-mode';
 
-const drawerWidth = 240;
+const drawerWidth = 330;
 
 export interface DrawerItem {
   label: string;
@@ -42,6 +43,7 @@ export function DrawerNavigation({
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const handleMainNavIconClick = useHandleMainNavIconClick();
+  const { colorPalette } = useColorMode();
 
   const handleItemClick = ({ disabled, href, link, onClick }: DrawerItem) => {
     if (disabled) return;
@@ -73,14 +75,24 @@ export function DrawerNavigation({
       <Drawer
         anchor="left"
         variant="persistent"
-        open={open}
+        open={open && !isMobile}
         sx={{
           width: drawerWidth,
           flexShrink: 0,
-          '& .MuiDrawer-paper': {
-            width: isMobile ? '100%' : drawerWidth,
-            boxSizing: 'border-box',
-            paddingTop: '44px',
+        }}
+        slotProps={{
+          paper: {
+            elevation: 0,
+            sx: {
+              width: isMobile ? '100%' : drawerWidth,
+              ml: 2,
+              my: 2,
+              boxSizing: 'border-box',
+              pt: 8,
+              borderRadius: '30px',
+              border: '1px solid',
+              borderColor: colorPalette.border.main,
+            },
           },
         }}
       >

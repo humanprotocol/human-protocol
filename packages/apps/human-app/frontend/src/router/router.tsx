@@ -52,13 +52,13 @@ export function Router() {
           />
         ))}
       </Route>
-      {protectedRoutes.map(({ routerProps, pageHeaderProps }) => {
+      {protectedRoutes.map(({ routerProps }) => {
         return (
           <Route
             element={
               <RequireAuth>
                 <ProtectedLayout
-                  pageHeaderProps={pageHeaderProps}
+                  //pageHeaderProps={pageHeaderProps}
                   renderDrawer={(open, setDrawerOpen) => (
                     <DrawerNavigation
                       bottomMenuItems={workerDrawerBottomMenuItems}
@@ -82,13 +82,13 @@ export function Router() {
           </Route>
         );
       })}
-      {web3ProtectedRoutes.map(({ routerProps, pageHeaderProps }) => (
+      {web3ProtectedRoutes.map(({ routerProps }) => (
         <Route
           element={
             <RequireWalletConnect>
               <RequireWeb3Auth>
                 <ProtectedLayout
-                  pageHeaderProps={pageHeaderProps}
+                  //pageHeaderProps={pageHeaderProps}
                   renderDrawer={(open, setDrawerOpen) => (
                     <DrawerNavigation
                       bottomMenuItems={operatorDrawerBottomMenuItems}
