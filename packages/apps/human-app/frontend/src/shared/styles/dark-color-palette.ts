@@ -37,6 +37,7 @@ export const darkColorPalette = {
   },
   border: {
     main: 'rgba(255, 255, 255, 0.07)',
+    strong: '#3a2e6f',
   },
   error: {
     main: '#F65A93',

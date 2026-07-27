@@ -9,7 +9,10 @@ interface FooterProps {
   isProtected?: boolean;
 }
 
-export function Footer({ isProtected, displayChatIcon = true }: FooterProps) {
+export function Footer({
+  displayChatIcon = true,
+  isProtected = false,
+}: FooterProps) {
   const { colorPalette, isDarkMode } = useColorMode();
   const { t } = useTranslation();
 
@@ -21,12 +24,15 @@ export function Footer({ isProtected, displayChatIcon = true }: FooterProps) {
       container
       sx={{
         width: '100%',
-        py: { xs: 2, md: 4 },
-        pr: 3,
-        pl: { xs: 3, md: isProtected ? '200px' : 3 },
-        bgcolor: { xs: colorPalette.paper.main, md: 'transparent' },
+        px: { xs: 3, md: 0 },
+        py: { xs: 2, md: isProtected ? 0 : 3 },
+        bgcolor: { xs: colorPalette.background.paper, md: 'transparent' },
         borderTop: {
           xs: '1px solid rgba(209, 209, 209, 0.32)',
+          md: 'none',
+        },
+        borderTopColor: {
+          xs: colorPalette.border.main,
           md: 'none',
         },
       }}

@@ -141,6 +141,7 @@ export function SignInWorkerPage() {
             >
               <BackButton onClick={handleBackButton} />
               <Typography
+                component="h3"
                 sx={{
                   color: colorPalette.text.auxiliary100,
                   fontSize: { xs: '20px', md: '34px' },
