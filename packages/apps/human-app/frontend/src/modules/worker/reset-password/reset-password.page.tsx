@@ -111,7 +111,7 @@ export function ResetPasswordWorkerPage() {
               lineHeight: { xs: '150%', md: 'normal' },
             }}
           >
-            {t('worker.sendResetLinkForm.title')}
+            {t('worker.resetPassword.title')}
           </Typography>
         </Box>
         <FormProvider {...methods}>

@@ -64,6 +64,15 @@ export function WorkerProfilePage() {
   };
 
   useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     if (initializing) return;
 
     if (!isConnected || !user.wallet_address) {
