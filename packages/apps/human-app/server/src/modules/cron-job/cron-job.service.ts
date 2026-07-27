@@ -35,7 +35,6 @@ function assertJobsDiscoveryResponseItemsFormat(
       item.reward_amount,
       item.reward_token,
       item.created_at,
-      item.updated_at,
     ].includes(undefined)
   ) {
     throw new Error('Job discovery response items missing expected fields');
@@ -129,7 +128,6 @@ export class CronJobService {
         JobDiscoveryFieldName.RewardAmount,
         JobDiscoveryFieldName.RewardToken,
         JobDiscoveryFieldName.CreatedAt,
-        JobDiscoveryFieldName.UpdatedAt,
       ];
       command.data.status = JobStatus.ACTIVE;
       const initialResponse =
