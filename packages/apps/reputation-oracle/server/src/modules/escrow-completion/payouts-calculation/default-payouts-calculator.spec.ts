@@ -49,10 +49,7 @@ describe('DefaultPayoutsCalculator', () => {
   });
 
   describe('calculate', () => {
-    const reservedFunds = BigInt(faker.number.int({ min: 1000 }).toString());
-    const mockedGetReservedFunds = jest
-      .fn()
-      .mockImplementation(async () => reservedFunds);
+    const mockedGetReservedFunds = jest.fn().mockResolvedValue(0n);
 
     beforeEach(() => {
       mockedEscrowClient.build.mockResolvedValue({
@@ -74,7 +71,9 @@ describe('DefaultPayoutsCalculator', () => {
         requestType: MarketingJobType.SOCIAL_MEDIA_PROMOTION,
         submissionsRequired: faker.number.int({ min: 2, max: 5 }),
       };
+      const reservedFunds = BigInt(faker.number.int({ min: 1000 }).toString());
 
+      mockedGetReservedFunds.mockResolvedValueOnce(reservedFunds);
       mockedStorageService.downloadJsonLikeData.mockResolvedValueOnce(results);
 
       const payouts = await calculator.calculate({

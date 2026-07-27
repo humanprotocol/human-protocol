@@ -4,7 +4,6 @@ import { faker } from '@faker-js/faker';
 import { createMock } from '@golevelup/ts-jest';
 import { EscrowClient } from '@human-protocol/sdk';
 import { Test } from '@nestjs/testing';
-import { ethers } from 'ethers';
 import _ from 'lodash';
 
 import { CvatAnnotationMeta } from '@/common/types';
@@ -48,14 +47,16 @@ describe('CvatPayoutsCalculator', () => {
     const mockedGetIntermediateResultsUrl = jest
       .fn()
       .mockImplementation(async () => faker.internet.url());
-    const mockedGetTokenAddress = jest.fn().mockImplementation(async () => {
-      return faker.finance.ethereumAddress();
-    });
+    const mockedGetReservedFunds = jest
+      .fn()
+      .mockImplementation(async () =>
+        BigInt(faker.number.int({ min: 1000, max: 100000 })),
+      );
 
     beforeAll(() => {
       mockedEscrowClient.build.mockResolvedValue({
         getIntermediateResultsUrl: mockedGetIntermediateResultsUrl,
-        getTokenAddress: mockedGetTokenAddress,
+        getReservedFunds: mockedGetReservedFunds,
       } as unknown as EscrowClient);
     });
 
@@ -84,23 +85,21 @@ describe('CvatPayoutsCalculator', () => {
       );
     });
 
-    it('should properly calculate workers bounties trimming the decimals', async () => {
+    it('should properly calculate workers bounties', async () => {
       const annotators = [
         faker.finance.ethereumAddress(),
         faker.finance.ethereumAddress(),
       ];
 
       const jobsPerAnnotator = faker.number.int({ min: 1, max: 3 });
-      const tokenDecimals = BigInt(6);
+      const jobCount = jobsPerAnnotator * annotators.length;
+      const payoutPerJob = BigInt(faker.number.int({ min: 1000, max: 100000 }));
 
       const annotationsMeta: CvatAnnotationMeta = {
-        jobs: Array.from(
-          { length: jobsPerAnnotator * annotators.length },
-          (_v, index: number) => ({
-            job_id: index,
-            final_result_id: faker.number.int(),
-          }),
-        ),
+        jobs: Array.from({ length: jobCount }, (_v, index: number) => ({
+          job_id: index,
+          final_result_id: faker.number.int(),
+        })),
         results: [],
       };
       for (const job of annotationsMeta.jobs) {
@@ -130,26 +129,20 @@ describe('CvatPayoutsCalculator', () => {
       mockedStorageService.downloadJsonLikeData.mockResolvedValueOnce(
         annotationsMeta,
       );
-      mockedWeb3Service.getTokenDecimals.mockResolvedValueOnce(tokenDecimals);
 
-      const mockedJobBounty = '0.123456789'; // more decimals than token has
-      const manifest = {
-        ...generateCvatManifest(),
-        job_bounty: mockedJobBounty,
-      };
-
+      mockedGetReservedFunds.mockResolvedValueOnce(
+        payoutPerJob * BigInt(jobCount),
+      );
       const payouts = await calculator.calculate({
         chainId,
         escrowAddress,
-        manifest,
+        manifest: generateCvatManifest(),
         finalResultsUrl: faker.internet.url(),
       });
 
-      const trimmedBounty = '0.123456';
-
+      const expectedJobBounty = payoutPerJob;
       const expectedAmountPerAnnotator =
-        BigInt(jobsPerAnnotator) *
-        ethers.parseUnits(trimmedBounty, tokenDecimals);
+        BigInt(jobsPerAnnotator) * expectedJobBounty;
 
       const expectedPayouts = annotators.map((address) => ({
         address,
@@ -168,7 +161,9 @@ describe('CvatPayoutsCalculator', () => {
       ];
 
       const jobsPerAnnotator = faker.number.int({ min: 1, max: 3 });
-      const tokenDecimals = BigInt(faker.number.int({ min: 6, max: 18 }));
+      const reservedFunds = BigInt(
+        faker.number.int({ min: 1000, max: 100000 }).toString(),
+      );
 
       const annotationsMeta: CvatAnnotationMeta = {
         jobs: Array.from(
@@ -207,7 +202,7 @@ describe('CvatPayoutsCalculator', () => {
       mockedStorageService.downloadJsonLikeData.mockResolvedValueOnce(
         annotationsMeta,
       );
-      mockedWeb3Service.getTokenDecimals.mockResolvedValueOnce(tokenDecimals);
+      mockedGetReservedFunds.mockResolvedValueOnce(reservedFunds);
 
       const manifest = generateCvatManifest();
 
@@ -218,9 +213,14 @@ describe('CvatPayoutsCalculator', () => {
         finalResultsUrl: faker.internet.url(),
       });
 
+      const matchedJobCount = annotationsMeta.jobs.filter((job) =>
+        annotationsMeta.results.some(
+          (result) => result.id === job.final_result_id,
+        ),
+      ).length;
+      const expectedJobBounty = reservedFunds / BigInt(matchedJobCount);
       const expectedAmountPerAnnotator =
-        BigInt(jobsPerAnnotator) *
-        ethers.parseUnits(manifest.job_bounty, tokenDecimals);
+        BigInt(jobsPerAnnotator) * expectedJobBounty;
 
       const expectedPayouts = annotators.map((address) => ({
         address,
@@ -230,6 +230,34 @@ describe('CvatPayoutsCalculator', () => {
       expect(_.sortBy(payouts, 'address')).toEqual(
         _.sortBy(expectedPayouts, 'address'),
       );
+    });
+
+    it('throws when there are no jobs with matching final results', async () => {
+      mockedStorageService.downloadJsonLikeData.mockResolvedValueOnce({
+        jobs: [
+          {
+            job_id: faker.number.int(),
+            final_result_id: 1,
+          },
+        ],
+        results: [
+          {
+            id: 2,
+            job_id: faker.number.int(),
+            annotator_wallet_address: faker.finance.ethereumAddress(),
+            annotation_quality: faker.number.float(),
+          },
+        ],
+      } as CvatAnnotationMeta);
+
+      await expect(
+        calculator.calculate({
+          chainId,
+          escrowAddress,
+          manifest: generateCvatManifest(),
+          finalResultsUrl: faker.internet.url(),
+        }),
+      ).rejects.toThrow('Invalid annotation meta');
     });
   });
 });
