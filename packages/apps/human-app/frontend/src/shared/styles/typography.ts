@@ -94,9 +94,6 @@ export const typography: ThemeOptions['typography'] = {
     fontSize: 24,
     fontWeight: 400,
     letterSpacing: 0,
-    [breakpoints.mobile]: {
-      fontSize: 24,
-    },
   },
   mobileHeaderMid: {
     fontSize: 22,

@@ -35,6 +35,7 @@ export const colorPalette = {
   },
   border: {
     main: '#d9d9d9',
+    strong: 'rgba(50, 10, 141, 0.30)',
   },
   error: {
     main: '#FA2A75',
