@@ -377,6 +377,53 @@ def test_can_list_jobs_200_with_fields(client: TestClient, session: Session) -> 
             )
 
 
+def test_can_list_jobs_200_with_fields_comma_separated_and_repeated_are_equivalent(
+    client: TestClient, session: Session
+) -> None:
+    session.begin()
+    user = User(
+        wallet_address=WALLET_ADDRESS1,
+        cvat_email=cvat_email,
+        cvat_id=1,
+    )
+    session.add(user)
+
+    _, _, cvat_job = create_project_task_and_job(
+        session, "0x86e83d346041E8806e352681f3F14549C0d2BC66", 1
+    )
+    assignment = Assignment(
+        id=str(uuid.uuid4()),
+        user_wallet_address=WALLET_ADDRESS1,
+        cvat_job_id=cvat_job.cvat_id,
+        expires_at=utcnow() + timedelta(days=1),
+    )
+    session.add(assignment)
+    session.commit()
+
+    with (
+        open("tests/assets/cloud/manifests/manifest-v1.json") as data,
+        patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
+        patch(
+            "src.endpoints.serializers.get_escrow_fund_token_symbol"
+        ) as mock_get_escrow_fund_token_symbol,
+    ):
+        manifest = json.load(data)
+        mock_get_manifest.return_value = manifest
+        mock_get_escrow_fund_token_symbol.return_value = "HMT"
+
+        fields = ["job_description", "created_at", "reward_amount"]
+
+        # same field set requested two ways: "?fields=a,b,c" vs "?fields=a&fields=b&fields=c"
+        comma_response = client.get(
+            "/job", headers=get_auth_header(), params={"fields": ",".join(fields)}
+        )
+        repeated_response = client.get("/job", headers=get_auth_header(), params={"fields": fields})
+
+        assert comma_response.status_code == 200
+        assert repeated_response.status_code == 200
+        assert comma_response.json() == repeated_response.json()
+
+
 def test_can_list_jobs_200_with_sorting(client: TestClient, session: Session) -> None:
     # sort: ASC, DESC; sort_field: chain_id|job_type|created_at|updated_at
     session.begin()
