@@ -2,7 +2,7 @@ import { ChainId } from '@human-protocol/sdk';
 import { AutoMap } from '@automapper/classes';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsArray, IsOptional } from 'class-validator';
-import { Exclude, Transform } from 'class-transformer';
+import { Transform } from 'class-transformer';
 
 type DiscoveredOracleCreateProps = {
   id: string;
@@ -29,89 +29,28 @@ type DiscoveredOracleCreateProps = {
 };
 
 export class DiscoveredOracle {
-  @ApiProperty({ description: 'Unique identifier of the oracle operator' })
   id: string;
-
-  @ApiProperty({ description: 'Address of the oracle operator' })
   address: string;
-
-  @ApiProperty({ description: 'Chain ID where the oracle is registered' })
   chainId: ChainId;
-
-  @ApiPropertyOptional({ description: 'Amount staked by the operator' })
   stakedAmount?: string;
-
-  @ApiPropertyOptional({
-    description: 'Amount currently locked by the operator',
-  })
   lockedAmount?: string;
-
-  @ApiPropertyOptional({ description: 'Timestamp until funds are locked' })
   lockedUntilTimestamp?: string;
-
-  @ApiPropertyOptional({
-    description: 'Total amount withdrawn by the operator',
-  })
   withdrawnAmount?: string;
-
-  @ApiPropertyOptional({
-    description: 'Total amount slashed from the operator',
-  })
   slashedAmount?: string;
-
-  @ApiPropertyOptional({
-    description: 'Number of jobs processed by the operator',
-  })
   amountJobsProcessed?: string;
-
-  @ApiPropertyOptional({ description: 'Fee charged by the operator' })
   fee?: string;
-
-  @ApiPropertyOptional({ description: 'Public key of the operator' })
   publicKey?: string;
-
-  @ApiPropertyOptional({ description: 'Webhook URL of the operator' })
   webhookUrl?: string;
-
-  @ApiPropertyOptional({ description: 'Website of the operator' })
   website?: string;
-
-  @ApiProperty({ description: 'URL of the oracle operator' })
   url: string;
-
-  @ApiProperty({ description: 'Role of the oracle operator' })
   role: string;
-
-  @ApiPropertyOptional({
-    type: [String],
-    description: 'Types of jobs the oracle supports',
-  })
   jobTypes: string[];
-
-  @ApiPropertyOptional({ description: 'Indicates if registration is needed' })
   registrationNeeded?: boolean;
-
-  @ApiPropertyOptional({
-    description: 'Instructions for registration, if needed',
-  })
   registrationInstructions?: string;
-
-  @ApiPropertyOptional({
-    type: [String],
-    description: 'Reputation networks the operator belongs to',
-  })
   reputationNetworks?: string[];
-
-  @ApiProperty({ description: 'Name of the operator' })
   name: string;
-
-  @ApiPropertyOptional({ description: 'Category of the operator' })
   category?: string;
-
-  @Exclude()
   retriesCount = 0;
-
-  @Exclude()
   executionsToSkip = 0;
 
   constructor(props: DiscoveredOracleCreateProps) {
@@ -151,4 +90,53 @@ export class GetOraclesCommand {
   @AutoMap()
   @Transform(({ value }) => (Array.isArray(value) ? value : [value]))
   selectedJobTypes?: string[];
+}
+
+export class GetOraclesResponseItem {
+  @ApiProperty({ description: 'Unique identifier of the oracle operator' })
+  id: string;
+
+  @ApiProperty({ description: 'Address of the oracle operator' })
+  address: string;
+
+  @ApiProperty({ description: 'Chain ID where the oracle is registered' })
+  chainId: ChainId;
+
+  @ApiProperty({ description: 'Role of the oracle operator' })
+  role: string;
+
+  @ApiProperty({ description: 'URL of the oracle operator' })
+  url: string;
+
+  @ApiPropertyOptional({
+    type: [String],
+    description: 'Types of jobs the oracle supports',
+  })
+  jobTypes: string[];
+
+  @ApiPropertyOptional({ description: 'Indicates if registration is needed' })
+  registrationNeeded?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Instructions for registration, if needed',
+  })
+  registrationInstructions?: string;
+
+  @ApiProperty({ description: 'Name of the operator' })
+  name: string;
+
+  @ApiPropertyOptional({ description: 'Category of the operator' })
+  category?: string;
+
+  @ApiProperty()
+  nTasks: number;
+
+  @ApiProperty()
+  minRewardAmount: string;
+
+  @ApiProperty()
+  maxRewardAmount: string;
+
+  @ApiProperty()
+  rewardToken: string;
 }

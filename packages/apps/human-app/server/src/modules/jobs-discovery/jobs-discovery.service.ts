@@ -92,7 +92,7 @@ export class JobsDiscoveryService {
   }
 
   static makeCacheKeyForOracle(oracleAddress: string): string {
-    return `${JOB_DISCOVERY_CACHE_KEY}:${oracleAddress}`;
+    return `${JOB_DISCOVERY_CACHE_KEY}:${oracleAddress.toLowerCase()}`;
   }
 
   async getCachedJobs(oracleAddress: string): Promise<DiscoveredJob[]> {
