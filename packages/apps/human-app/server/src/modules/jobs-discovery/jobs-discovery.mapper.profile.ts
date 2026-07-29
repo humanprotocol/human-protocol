@@ -1,5 +1,3 @@
-import { AutomapperProfile, InjectMapper } from '@automapper/nestjs';
-import { Injectable } from '@nestjs/common';
 import {
   CamelCaseNamingConvention,
   createMap,
@@ -9,10 +7,12 @@ import {
   namingConventions,
   SnakeCaseNamingConvention,
 } from '@automapper/core';
+import { AutomapperProfile, InjectMapper } from '@automapper/nestjs';
+import { Injectable } from '@nestjs/common';
 import {
-  JobsDiscoveryParams,
-  JobsDiscoveryParamsCommand,
-  JobsDiscoveryParamsDto,
+  GetJobsCommand,
+  GetJobsParams,
+  GetJobsQueryDto,
 } from './model/jobs-discovery.model';
 
 @Injectable()
@@ -25,8 +25,8 @@ export class JobsDiscoveryProfile extends AutomapperProfile {
     return (mapper: Mapper) => {
       createMap(
         mapper,
-        JobsDiscoveryParamsDto,
-        JobsDiscoveryParams,
+        GetJobsQueryDto,
+        GetJobsParams,
         // forMember usage cause: https://github.com/nartc/mapper/issues/583
         forMember(
           (destination) => destination.pageSize,
@@ -36,11 +36,6 @@ export class JobsDiscoveryProfile extends AutomapperProfile {
           (destination) => destination.sortField,
           mapFrom((source) => source.sort_field),
         ),
-        // Automapper has problem with mapping arrays, thus explicit conversion
-        forMember(
-          (destination) => destination.fields,
-          mapFrom((source) => source.fields),
-        ),
         namingConventions({
           source: new SnakeCaseNamingConvention(),
           destination: new CamelCaseNamingConvention(),
@@ -48,12 +43,12 @@ export class JobsDiscoveryProfile extends AutomapperProfile {
       );
       createMap(
         mapper,
-        JobsDiscoveryParamsDto,
-        JobsDiscoveryParamsCommand,
+        GetJobsQueryDto,
+        GetJobsCommand,
         forMember(
           (destination) => destination.data,
-          mapFrom((source: JobsDiscoveryParamsDto) =>
-            mapper.map(source, JobsDiscoveryParamsDto, JobsDiscoveryParams),
+          mapFrom((source: GetJobsQueryDto) =>
+            mapper.map(source, GetJobsQueryDto, GetJobsParams),
           ),
         ),
         namingConventions({

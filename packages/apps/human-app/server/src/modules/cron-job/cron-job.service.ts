@@ -3,41 +3,51 @@ import { SchedulerRegistry } from '@nestjs/schedule';
 import { AxiosError } from 'axios';
 import { CronJob } from 'cron';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
-import {
-  JobDiscoveryFieldName,
-  JobStatus,
-} from '../../common/enums/global-common';
+import { JobStatus } from '../../common/enums/global-common';
 import * as errorUtils from '../../common/utils/error';
 import { ExchangeOracleGateway } from '../../integrations/exchange-oracle/exchange-oracle.gateway';
+import {
+  FetchJobsCommand,
+  FetchJobsFieldName,
+  FetchJobsParams,
+  FetchJobsResponse,
+} from '../../integrations/exchange-oracle/model/exchange-oracle.model';
 import { ReputationOracleGateway } from '../../integrations/reputation-oracle/reputation-oracle.gateway';
 import logger from '../../logger';
 import { JobsDiscoveryService } from '../jobs-discovery/jobs-discovery.service';
-import {
-  DiscoveredJob,
-  JobsDiscoveryParams,
-  JobsDiscoveryParamsCommand,
-  JobsDiscoveryResponse,
-} from '../jobs-discovery/model/jobs-discovery.model';
+import { DiscoveredJob } from '../jobs-discovery/model/jobs-discovery.model';
 import { DiscoveredOracle } from '../oracle-discovery/model/oracle-discovery.model';
 import { OracleDiscoveryService } from '../oracle-discovery/oracle-discovery.service';
 
-function assertJobsDiscoveryResponseItemsFormat(
-  items: JobsDiscoveryResponse['results'],
+const DISCOVERED_JOB_REQUIRED_KEYS = [
+  'escrow_address',
+  'chain_id',
+  'job_type',
+  'status',
+  'job_description',
+  'reward_amount',
+  'reward_token',
+  'created_at',
+] as const;
+
+function assertDiscoveredJobsFormat(
+  items: FetchJobsResponse['results'],
 ): asserts items is DiscoveredJob[] {
   if (items.length === 0) {
     return;
   }
 
-  const item = items[0];
-  if (
-    [
-      item.job_description,
-      item.reward_amount,
-      item.reward_token,
-      item.created_at,
-    ].includes(undefined)
-  ) {
-    throw new Error('Job discovery response items missing expected fields');
+  const missingKeys: string[] = [];
+  for (const requiredKey of DISCOVERED_JOB_REQUIRED_KEYS) {
+    if (items[0][requiredKey] === undefined) {
+      missingKeys.push(requiredKey);
+    }
+  }
+
+  if (missingKeys.length) {
+    throw new Error(
+      `Jobs response items missing expected fields: ${missingKeys.join()}`,
+    );
   }
 }
 
@@ -117,23 +127,23 @@ export class CronJobService {
       let allResults: DiscoveredJob[] = [];
 
       // Initial fetch to determine the total number of pages
-      const command = new JobsDiscoveryParamsCommand();
+      const command = new FetchJobsCommand();
       command.oracleAddress = oracle.address;
       command.token = token;
-      command.data = new JobsDiscoveryParams();
+      command.data = new FetchJobsParams();
       command.data.page = 0;
-      command.data.pageSize = command.data.pageSize || 10; // Max value for Exchange Oracle
+      command.data.pageSize = 10; // Max value for Exchange Oracle
       command.data.fields = [
-        JobDiscoveryFieldName.JobDescription,
-        JobDiscoveryFieldName.RewardAmount,
-        JobDiscoveryFieldName.RewardToken,
-        JobDiscoveryFieldName.CreatedAt,
+        FetchJobsFieldName.JobDescription,
+        FetchJobsFieldName.RewardAmount,
+        FetchJobsFieldName.RewardToken,
+        FetchJobsFieldName.CreatedAt,
       ];
       command.data.status = JobStatus.ACTIVE;
       const initialResponse =
         await this.exchangeOracleGateway.fetchJobs(command);
 
-      assertJobsDiscoveryResponseItemsFormat(initialResponse.results);
+      assertDiscoveredJobsFormat(initialResponse.results);
 
       allResults = this.mergeJobs(allResults, initialResponse.results);
 
@@ -148,7 +158,7 @@ export class CronJobService {
 
       const remainingResponses = await Promise.all(pageFetches);
       for (const response of remainingResponses) {
-        assertJobsDiscoveryResponseItemsFormat(response.results);
+        assertDiscoveredJobsFormat(response.results);
         allResults = this.mergeJobs(allResults, response.results);
       }
 

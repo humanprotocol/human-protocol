@@ -1,21 +1,18 @@
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable } from '@nestjs/common';
+import { Cache } from 'cache-manager';
+import { EnvironmentConfigService } from '../../common/config/environment-config.service';
+import { JOB_DISCOVERY_CACHE_KEY } from '../../common/constants/cache';
 import {
   Iteratee,
   paginateAndSortResults,
 } from '../../common/utils/pagination.utils';
 import {
   DiscoveredJob,
-  JobsDiscoveryParamsCommand,
-  JobsDiscoveryResponse,
-} from './model/jobs-discovery.model';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
-import { EnvironmentConfigService } from '../../common/config/environment-config.service';
-import { JOB_DISCOVERY_CACHE_KEY } from '../../common/constants/cache';
-import {
-  JobDiscoveryFieldName,
+  GetJobsCommand,
+  GetJobsResponseDto,
   JobDiscoverySortField,
-} from '../../common/enums/global-common';
+} from './model/jobs-discovery.model';
 
 @Injectable()
 export class JobsDiscoveryService {
@@ -24,9 +21,7 @@ export class JobsDiscoveryService {
     private configService: EnvironmentConfigService,
   ) {}
 
-  async processJobsDiscovery(
-    command: JobsDiscoveryParamsCommand,
-  ): Promise<JobsDiscoveryResponse> {
+  async getJobs(command: GetJobsCommand): Promise<GetJobsResponseDto> {
     const allJobs = await this.getCachedJobs(command.oracleAddress);
     let filteredJobs = this.applyFilters(allJobs, command.data);
     filteredJobs = filteredJobs.filter((job) =>
@@ -58,54 +53,42 @@ export class JobsDiscoveryService {
 
   private applyFilters(
     jobs: DiscoveredJob[],
-    filters: JobsDiscoveryParamsCommand['data'],
+    filters: GetJobsCommand['data'],
   ): DiscoveredJob[] {
-    const difference = Object.values(JobDiscoveryFieldName).filter(
-      (value) => !filters.fields?.includes(value),
-    );
-    return jobs
-      .filter((job) => {
-        let matches = true;
+    return jobs.filter((job) => {
+      let matches = true;
 
-        if (filters.escrowAddress) {
-          matches = matches && job.escrow_address === filters.escrowAddress;
-        }
+      if (filters.escrowAddress) {
+        matches = matches && job.escrow_address === filters.escrowAddress;
+      }
 
-        if (filters.chainId !== undefined && filters.chainId !== null) {
-          matches = matches && job.chain_id === filters.chainId;
-        }
+      if (filters.chainId !== undefined && filters.chainId !== null) {
+        matches = matches && job.chain_id === filters.chainId;
+      }
 
-        if (filters.jobType) {
-          matches = matches && job.job_type === filters.jobType;
-        }
+      if (filters.jobType) {
+        matches = matches && job.job_type === filters.jobType;
+      }
 
-        if (filters.status !== undefined && filters.status !== null) {
-          matches = matches && job.status === filters.status;
-        }
+      if (filters.status !== undefined && filters.status !== null) {
+        matches = matches && job.status === filters.status;
+      }
 
-        if (
-          filters.qualifications !== undefined &&
-          filters.qualifications !== null
-        ) {
-          if (job.qualifications && job.qualifications.length > 0) {
-            matches =
-              matches &&
-              job.qualifications.every((qualification) =>
-                filters.qualifications?.includes(qualification),
-              );
-          }
+      if (
+        filters.qualifications !== undefined &&
+        filters.qualifications !== null
+      ) {
+        if (job.qualifications && job.qualifications.length > 0) {
+          matches =
+            matches &&
+            job.qualifications.every((qualification) =>
+              filters.qualifications?.includes(qualification),
+            );
         }
+      }
 
-        return matches;
-      })
-      .map((job) => {
-        if (difference && difference.length > 0) {
-          difference.forEach((field) => {
-            delete job[field];
-          });
-        }
-        return job;
-      });
+      return matches;
+    });
   }
 
   static makeCacheKeyForOracle(oracleAddress: string): string {

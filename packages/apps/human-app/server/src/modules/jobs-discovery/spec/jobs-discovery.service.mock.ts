@@ -1,5 +1,5 @@
 import { responseFixture } from './jobs-discovery.fixtures';
 
 export const jobsDiscoveryServiceMock = {
-  processJobsDiscovery: jest.fn().mockReturnValue(responseFixture),
+  getJobs: jest.fn().mockReturnValue(responseFixture),
 };
