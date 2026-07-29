@@ -79,7 +79,8 @@ export function OracleJobCard({ oracle }: { oracle: Oracle }) {
         }}
       >
         <Typography
-          variant={isMobile ? 'body1' : 'h5'}
+          variant={isMobile ? 'body1' : 'h6'}
+          component="p"
           sx={{
             color: colorPalette.text.auxiliary100,
             fontWeight: 600,
@@ -252,6 +253,7 @@ export function OracleJobCard({ oracle }: { oracle: Oracle }) {
                 const label = t(`jobTypeLabels.${element}`);
                 return (
                   <Chip
+                    key={label}
                     label={label}
                     backgroundColor={colorPalette.accent.main}
                   />

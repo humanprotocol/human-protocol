@@ -4,7 +4,6 @@ import { t } from 'i18next';
 import { useNavigate } from 'react-router-dom';
 import { useRef } from 'react';
 import { env } from '@/shared/env';
-import { breakpoints } from '@/shared/styles/breakpoints';
 import { Counter } from '@/shared/components/ui/counter';
 import { getErrorMessageForError } from '@/shared/errors';
 import { getTomorrowDate } from '@/shared/helpers/date';
@@ -118,11 +117,8 @@ export function HcaptchaLabelingPage() {
               alignItems: 'flex-start',
               justifyContent: 'center',
               height: '100%',
-              width: '376px',
-              gap: '52px',
-              [breakpoints.mobile]: {
-                width: 'unset',
-              },
+              width: { xs: 'unset', md: '376px' },
+              gap: 6,
             }}
           >
             <Typography variant="body1">
@@ -138,7 +134,7 @@ export function HcaptchaLabelingPage() {
                   ref={captchaRef}
                   reportapi={env.VITE_H_CAPTCHA_LABELING_BASE_URL}
                   sitekey={user.site_key ?? ''}
-                  theme={isDarkMode ? 'dark' : 'light'}
+                  theme="contrast"
                 />
               </Grid>
             ) : (

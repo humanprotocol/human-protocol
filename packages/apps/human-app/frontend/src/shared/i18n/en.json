@@ -266,6 +266,12 @@
         "gettingOracles": "There was an error while fetching oracles, please try again later."
       }
     },
+    "hcaptchaWidget": {
+      "title": "hCaptcha task available!",
+      "description": "Complete image labeling challenges and earn rewards by helping train privacy-preserving hCaptcha models.",
+      "shortDescription": "Complete image labeling challenges and earn rewards.",
+      "startTask": "Start Task"
+    },
     "registrationInExchangeOracle": {
       "requiredMessage": "This oracle requires a registration process. Click on the button below to see the registration tutorial:",
       "instructionsButton": "See registration tutorial",

@@ -32,6 +32,7 @@ import HourglassIconLight from '@/assets/icons/hourglass.svg';
 import HourglassIconDark from '@/assets/icons-dark-mode/hourglass.svg';
 import LogoutIcon from '@/assets/icons/logout.svg';
 import TriangleIcon from '@/assets/icons/triangle.svg';
+import HcaptchaIconAsset from '@/assets/icons/hcaptcha.svg';
 
 function HumanLogoIcon() {
   const { isDarkMode } = useColorMode();
@@ -92,6 +93,9 @@ function VeriffIcon() {
 function HourglassIcon() {
   const { isDarkMode } = useColorMode();
   return isDarkMode ? <HourglassIconDark /> : <HourglassIconLight />;
+}
+function HcaptchaIcon() {
+  return <HcaptchaIconAsset />;
 }
 
 function InboxIcon(props: SvgIconProps) {
@@ -272,4 +276,5 @@ export {
   OracleAddressIcon,
   OracleRewardIcon,
   MenuIcon,
+  HcaptchaIcon,
 };
