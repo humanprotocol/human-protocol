@@ -65,7 +65,7 @@ export class KvStoreGateway {
     chainId: ChainId,
     address: string,
   ): Promise<string | void> {
-    const key = `jobTypes:${address}`;
+    const key = `jobTypes:${chainId}:${address}`;
     const cachedData: string | undefined = await this.cacheManager.get(key);
     if (cachedData) {
       return cachedData;
