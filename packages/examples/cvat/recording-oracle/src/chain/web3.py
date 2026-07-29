@@ -9,6 +9,16 @@ from web3.providers.rpc import HTTPProvider
 from src.core.config import Config
 from src.core.types import Networks
 
+decimals_abi = [
+    {
+        "constant": True,
+        "inputs": [],
+        "name": "decimals",
+        "outputs": [{"name": "", "type": "uint8"}],
+        "type": "function",
+    }
+]  # ABI for fetching token decimals (ERC-20 optional method; https://eips.ethereum.org/EIPS/eip-20)
+
 
 def get_web3(chain_id: Networks):
     match chain_id:
@@ -81,3 +91,9 @@ def validate_address(escrow_address: str) -> str:
     if not Web3.is_address(escrow_address):
         raise ValueError(f"{escrow_address} is not a correct Web3 address")
     return Web3.to_checksum_address(escrow_address)
+
+
+def get_token_decimals(chain_id: int, token_address: str) -> int:
+    w3 = get_web3(chain_id)
+    contract = w3.eth.contract(address=w3.to_checksum_address(token_address), abi=decimals_abi)
+    return contract.functions.decimals().call()

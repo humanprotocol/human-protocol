@@ -79,10 +79,11 @@ def _mock_escrow_results_saving(logger: Logger) -> Generator[None, None, None]:
         escrow_address,
         url,
         hash,
+        funds_to_reserve=None,
     ) -> None:
         logger.info(
             f"DEV: Would store results for escrow '{escrow_address}@{chain_id}' "
-            f"on chain: {url}, {hash}"
+            f"on chain: {url}, {hash}, reserving {funds_to_reserve}"
         )
 
     with mock.patch("src.chain.escrow.store_results", patched_store_results):
