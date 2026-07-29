@@ -121,13 +121,14 @@ def get_escrow_fund_token_decimals(chain_id: int, escrow_address: str) -> int:
     return get_token_decimals(chain_id, escrow.token)
 
 
-def get_remaining_escrow_funds(chain_id: int, escrow_address: str) -> Decimal | None:
+def get_raw_remaining_escrow_funds(chain_id: int, escrow_address: str) -> int:
     web3 = get_web3(chain_id)
-    client = EscrowClient(web3)
+    escrow_client = EscrowClient(web3)
 
-    remaining_funds = client.get_remaining_funds(escrow_address)
-    if remaining_funds is None:
-        return None
+    return escrow_client.get_remaining_funds(escrow_address)
 
+
+def get_remaining_escrow_funds(chain_id: int, escrow_address: str) -> Decimal:
+    remaining_funds = get_raw_remaining_escrow_funds(chain_id, escrow_address)
     token_decimals = get_escrow_fund_token_decimals(chain_id, escrow_address)
     return Decimal(remaining_funds) / Decimal(10**token_decimals)
