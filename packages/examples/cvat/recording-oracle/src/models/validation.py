@@ -53,6 +53,8 @@ class ValidationResult(Base):
     assignment_id = Column(String, unique=True, nullable=False)
     annotator_wallet_address = Column(String, nullable=False)
     annotation_quality = Column(Float, nullable=False)
+    assignment_bounty = Column(String, nullable=True)
+    "Assignment reward, a decimal value in the escrow fund token units"
 
     job: Mapped[Job] = relationship(back_populates="validation_results")
 

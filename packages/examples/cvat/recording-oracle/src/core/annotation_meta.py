@@ -18,6 +18,8 @@ class JobMeta(BaseModel):
     assignment_id: str
     start_frame: int
     stop_frame: int
+    assignment_bounty: str | None = None
+    "Assignment reward, a decimal value in the escrow fund token units"
 
     @property
     def job_frame_range(self) -> Iterator[int]:

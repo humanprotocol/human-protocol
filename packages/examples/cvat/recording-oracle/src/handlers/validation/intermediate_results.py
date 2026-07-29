@@ -473,6 +473,7 @@ def process_intermediate_results(  # noqa: PLR0912
                 annotator_wallet_address=job_meta.annotator_wallet_address,
                 annotation_quality=job_results[job_meta.job_id],
                 assignment_id=job_meta.assignment_id,
+                assignment_bounty=job_meta.assignment_bounty,
             )
         else:
             assignment_validation_result_id = assignment_validation_result.id

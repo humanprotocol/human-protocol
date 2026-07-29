@@ -98,6 +98,7 @@ def create_validation_result(
     annotator_wallet_address: str,
     annotation_quality: float,
     assignment_id: str,
+    assignment_bounty: str | None = None,
 ) -> str:
     obj_id = str(uuid.uuid4())
     obj = ValidationResult(
@@ -106,6 +107,7 @@ def create_validation_result(
         annotator_wallet_address=annotator_wallet_address,
         annotation_quality=annotation_quality,
         assignment_id=assignment_id,
+        assignment_bounty=assignment_bounty,
     )
 
     session.add(obj)
