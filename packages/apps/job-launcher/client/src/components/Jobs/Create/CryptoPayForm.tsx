@@ -18,7 +18,7 @@ import {
 } from '@mui/material';
 import { Decimal } from 'decimal.js';
 import { ethers } from 'ethers';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Address } from 'viem';
 import { readContract } from 'viem/actions';
 import { useAccount, useWalletClient, usePublicClient } from 'wagmi';
@@ -49,6 +49,10 @@ export const CryptoPayForm = ({
   const [isLoading, setIsLoading] = useState(false);
   const [jobLauncherAddress, setJobLauncherAddress] = useState<string>();
   const [jobLauncherFee, setJobLauncherFee] = useState<string>();
+  const [configurationError, setConfigurationError] = useState<string>();
+  const [configurationRetry, setConfigurationRetry] = useState(0);
+  const [feeError, setFeeError] = useState<string>();
+  const [feeRetry, setFeeRetry] = useState(0);
   const [minFee, setMinFee] = useState<number>(0.01);
   const { data: signer } = useWalletClient();
   const publicClient = usePublicClient();
@@ -57,19 +61,24 @@ export const CryptoPayForm = ({
   const [fundTokenRate, setFundTokenRate] = useState<number>(0);
   const [decimals, setDecimals] = useState<number>(6);
   const [tokenDecimals, setTokenDecimals] = useState<number>(18);
-  const onErrorRef = useRef(onError);
-  onErrorRef.current = onError;
 
   useEffect(() => {
     const fetchJobLauncherData = async () => {
-      const address = await paymentService.getOperatorAddress();
-      const fee = await paymentService.getFee();
-      setJobLauncherAddress(address);
-      setMinFee(fee);
+      setConfigurationError(undefined);
+      try {
+        const address = await paymentService.getOperatorAddress();
+        const fee = await paymentService.getFee();
+        setJobLauncherAddress(address);
+        setMinFee(fee);
+      } catch {
+        setConfigurationError(
+          'Unable to load the payment configuration. Please try again.',
+        );
+      }
     };
 
     fetchJobLauncherData();
-  }, []);
+  }, [configurationRetry]);
 
   useEffect(() => {
     const fetchRates = async () => {
@@ -107,29 +116,45 @@ export const CryptoPayForm = ({
   }, [tokenDecimals]);
 
   useEffect(() => {
-    if (!signer || !jobLauncherAddress || !jobRequest.chainId) return;
+    if (!signer || !publicClient || !jobLauncherAddress || !jobRequest.chainId)
+      return;
 
     let ignore = false;
 
     const fetchJobLauncherFee = async () => {
-      const fee = await readContract(signer, {
-        address: NETWORKS[jobRequest.chainId!]?.kvstoreAddress as Address,
-        abi: KVStoreABI,
-        functionName: 'get',
-        args: [jobLauncherAddress, KVStoreKeys.fee],
-      });
+      setFeeError(undefined);
+      setJobLauncherFee(undefined);
+      try {
+        const parameters = {
+          address: NETWORKS[jobRequest.chainId!]?.kvstoreAddress as Address,
+          abi: KVStoreABI,
+          functionName: 'get',
+          args: [jobLauncherAddress, KVStoreKeys.fee],
+        } as const;
 
-      if (!ignore) {
-        setJobLauncherFee(fee as string);
+        let fee: string;
+        try {
+          fee = (await readContract(signer, parameters)) as string;
+        } catch {
+          fee = (await readContract(publicClient, parameters)) as string;
+        }
+
+        if (!ignore) {
+          setJobLauncherFee(fee);
+        }
+      } catch {
+        if (!ignore) {
+          setFeeError('Unable to load the job launcher fee. Please try again.');
+        }
       }
     };
 
-    fetchJobLauncherFee().catch(onErrorRef.current);
+    fetchJobLauncherFee();
 
     return () => {
       ignore = true;
     };
-  }, [jobLauncherAddress, jobRequest.chainId, signer]);
+  }, [feeRetry, jobLauncherAddress, jobRequest.chainId, publicClient, signer]);
 
   const minFeeToken = useMemo(() => {
     if (minFee && paymentTokenRate)
@@ -257,7 +282,7 @@ export const CryptoPayForm = ({
     }
   };
 
-  if (!chain || chain.id !== jobRequest.chainId)
+  if (isConnected && (!chain || chain.id !== jobRequest.chainId))
     return (
       <Box textAlign="center">
         <Typography textAlign="center">
@@ -270,7 +295,32 @@ export const CryptoPayForm = ({
       </Box>
     );
 
-  if (!jobLauncherAddress || jobLauncherFee == null)
+  if (configurationError || feeError)
+    return (
+      <Box textAlign="center" minHeight={400}>
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {configurationError || feeError}
+        </Alert>
+        <Button
+          variant="contained"
+          onClick={() => {
+            if (configurationError) {
+              setConfigurationRetry((retry) => retry + 1);
+            }
+            if (feeError) {
+              setFeeRetry((retry) => retry + 1);
+            }
+          }}
+        >
+          Try again
+        </Button>
+      </Box>
+    );
+
+  if (
+    !jobLauncherAddress ||
+    (isConnected && (!signer || jobLauncherFee == null))
+  )
     return (
       <Box
         display="flex"
@@ -414,7 +464,7 @@ export const CryptoPayForm = ({
                 >
                   <Typography>Fee</Typography>
                   <Typography color="text.secondary">
-                    ({Number(jobLauncherFee)}%){' '}
+                    ({jobLauncherFee == null ? '—' : Number(jobLauncherFee)}%){' '}
                     {paymentTokenSymbol
                       ? `${Number(feeAmount.toFixed(6))} ${paymentTokenSymbol?.toUpperCase()}`
                       : ''}
