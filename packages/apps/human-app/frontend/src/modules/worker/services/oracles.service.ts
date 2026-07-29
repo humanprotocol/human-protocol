@@ -38,6 +38,51 @@ const H_CAPTCHA_ORACLE: Oracle = {
   registrationNeeded: false,
 };
 
+const MOCKED_ORACLES: Oracle[] = [
+  {
+    address: '0x1111111111111111111111111111111111111111',
+    chainId: isTestnet ? TestnetChains[0].chainId : MainnetChains[0].chainId,
+    jobTypes: ['image_points'],
+    role: 'Recording Oracle',
+    url: 'https://example.com/oracle-1',
+    name: 'Mock Oracle 1',
+    registrationNeeded: false,
+  },
+  {
+    address: '0x2222222222222222222222222222222222222222',
+    chainId: isTestnet ? TestnetChains[0].chainId : MainnetChains[0].chainId,
+    jobTypes: ['image_points', 'image_boxes'],
+    role: 'Recording Oracle',
+    url: 'https://example.com/oracle-2',
+    name: 'Mock Oracle 2',
+    registrationNeeded: false,
+  },
+  {
+    address: '0x3333333333333333333333333333333333333333',
+    chainId: isTestnet ? TestnetChains[0].chainId : MainnetChains[0].chainId,
+    jobTypes: ['image_points', 'image_boxes'],
+    role: 'Recording Oracle',
+    url: 'https://example.com/oracle-3',
+    name: 'Mock Oracle 3',
+    registrationNeeded: false,
+  },
+  {
+    address: '0x4444444444444444444444444444444444444444',
+    chainId: isTestnet ? TestnetChains[0].chainId : MainnetChains[0].chainId,
+    jobTypes: [
+      'image_points',
+      'image_boxes',
+      'image_polygons',
+      'social_media_engagement',
+    ],
+    role: 'Recording Oracle',
+    url: 'https://example.com/oracle-4',
+    name: 'Mock Oracle 4',
+    registrationNeeded: false,
+  },
+  // repeat 4 more with unique addresses/names
+];
+
 async function getOracles(selectedJobTypes: string[]) {
   try {
     const params = selectedJobTypes.length
@@ -52,7 +97,8 @@ async function getOracles(selectedJobTypes: string[]) {
       selectedJobTypes.length === 0 ||
       selectedJobTypes.some((t) => H_CAPTCHA_ORACLE.jobTypes.includes(t))
     ) {
-      oracles.push(H_CAPTCHA_ORACLE);
+      //oracles.push(H_CAPTCHA_ORACLE);
+      oracles.push(...MOCKED_ORACLES);
     }
 
     if (env.VITE_FEATURE_FLAG_JOBS_DISCOVERY) {

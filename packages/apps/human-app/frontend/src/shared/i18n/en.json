@@ -61,6 +61,8 @@
       "jobs": "Tasks",
       "captchaLabeling": "hCaptcha labeling",
       "jobsDiscovery": "Jobs discovery",
+      "availableJobs": "Available Jobs",
+      "myJobs": "My Jobs",
       "profile": "Profile",
       "help": "Help",
       "logout": "Log Out"
@@ -91,7 +93,8 @@
       "reload": "Reload",
       "goHome": "Home Page"
     },
-    "copyToClipboard": "Copied"
+    "copyToClipboard": "Copied",
+    "noRecords": "No records to display"
   },
   "homepage": {
     "humanApp": "HUMAN App",
@@ -242,6 +245,16 @@
         "expired": "Expired",
         "abandoned": "Abandoned"
       }
+    },
+    "oraclesList": {
+      "jobOracles": "Job Oracles",
+      "address": "Address",
+      "reward": "Reward",
+      "taskTypes": "Task types",
+      "taskType": "Task type",
+      "exploreTasks": "Explore Tasks",
+      "source": "source",
+      "sources": "sources"
     },
     "oraclesTable": {
       "annotationTool": "Annotation tool",

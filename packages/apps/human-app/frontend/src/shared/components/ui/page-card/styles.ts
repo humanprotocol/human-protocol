@@ -8,7 +8,7 @@ export const commonPageCardStyles: SxProps<Theme> = {
   justifyContent: 'center',
   alignItems: 'center',
   borderRadius: '20px',
-  minHeight: '70vh',
+  //minHeight: '70vh',
   maxWidth: '1600px',
   width: '100%',
   background: constColorPalette.white,

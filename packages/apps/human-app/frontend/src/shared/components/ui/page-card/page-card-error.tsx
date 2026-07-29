@@ -1,8 +1,7 @@
-import { Grid, Stack } from '@mui/material';
+import { Grid } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { t } from 'i18next';
 import { Button } from '@/shared/components/ui/button';
-import { routerPaths } from '@/router/router-paths';
 import { Alert } from '@/shared/components/ui/alert';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { commonDarkPageCardStyles, commonPageCardStyles } from './styles';
@@ -24,31 +23,20 @@ export function PageCardError({
     : commonStyleForTheme;
 
   return (
-    <Grid container sx={{ ...sx, gap: 4 }}>
+    <Grid container sx={{ ...sx, gap: 2 }}>
       <Alert color="error" severity="error">
         {errorMessage}
       </Alert>
-      <Stack direction="row" spacing={2}>
-        <Button
-          variant="outlined"
-          sx={{ width: '150px' }}
-          onClick={() => {
-            navigate(routerPaths.homePage);
-          }}
-        >
-          {t('components.pageCardError.goHome')}
-        </Button>
-        <Button
-          variant="contained"
-          color="accent"
-          sx={{ width: '150px' }}
-          onClick={() => {
-            navigate(0);
-          }}
-        >
-          {t('components.pageCardError.reload')}
-        </Button>
-      </Stack>
+      <Button
+        variant="outlined"
+        color="primary"
+        sx={{ width: '150px' }}
+        onClick={() => {
+          navigate(0);
+        }}
+      >
+        {t('components.pageCardError.reload')}
+      </Button>
     </Grid>
   );
 }
