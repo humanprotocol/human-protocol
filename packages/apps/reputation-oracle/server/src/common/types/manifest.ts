@@ -19,13 +19,11 @@ export interface MarketingManifest extends BaseManifest<MarketingJobType> {
 }
 
 export type CvatManifest = {
-  annotation: {
-    type: CvatJobType;
-  };
-  validation: {
-    min_quality: number;
-  };
-  job_bounty: string;
+  version: 2;
+  job_type: CvatJobType;
+  // not necessary for RepO
+  data: unknown;
+  annotation: unknown;
 };
 
 export type JobManifest = FortuneManifest | MarketingManifest | CvatManifest;

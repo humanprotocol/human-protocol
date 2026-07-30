@@ -204,12 +204,10 @@ describe('CvatPayoutsCalculator', () => {
       );
       mockedGetReservedFunds.mockResolvedValueOnce(reservedFunds);
 
-      const manifest = generateCvatManifest();
-
       const payouts = await calculator.calculate({
         chainId,
         escrowAddress,
-        manifest,
+        manifest: generateCvatManifest(),
         finalResultsUrl: faker.internet.url(),
       });
 
