@@ -5,8 +5,8 @@ import { Injectable } from '@nestjs/common';
 import { AxiosError, AxiosRequestConfig } from 'axios';
 import { lastValueFrom } from 'rxjs';
 import { HttpMethod } from '../../common/enums/http-method';
-import { toCleanObjParams } from '../../common/utils/gateway-common.utils';
 import * as errorUtils from '../../common/utils/error';
+import { toCleanObjParams } from '../../common/utils/gateway-common.utils';
 import logger from '../../logger';
 import {
   JobAssignmentCommand,
@@ -21,12 +21,6 @@ import {
   ResignJobData,
 } from '../../modules/job-assignment/model/job-assignment.model';
 import {
-  JobsDiscoveryParams,
-  JobsDiscoveryParamsCommand,
-  JobsDiscoveryParamsData,
-  JobsDiscoveryResponse,
-} from '../../modules/jobs-discovery/model/jobs-discovery.model';
-import {
   OracleStatisticsCommand,
   OracleStatisticsResponse,
 } from '../../modules/statistics/model/oracle-statistics.model';
@@ -40,6 +34,12 @@ import {
 } from '../../modules/user-worker/model/worker-registration.model';
 import { EscrowUtilsGateway } from '../escrow/escrow-utils-gateway.service';
 import { KvStoreGateway } from '../kv-store/kv-store.gateway';
+import {
+  FetchJobsCommand,
+  FetchJobsParams,
+  FetchJobsParamsData,
+  FetchJobsResponse,
+} from './model/exchange-oracle.model';
 
 @Injectable()
 export class ExchangeOracleGateway {
@@ -169,15 +169,13 @@ export class ExchangeOracleGateway {
     return this.callExternalHttpUtilRequest(options);
   }
 
-  async fetchJobs(
-    command: JobsDiscoveryParamsCommand,
-  ): Promise<JobsDiscoveryResponse> {
-    const jobsDiscoveryParamsData = this.mapper.map(
+  async fetchJobs(command: FetchJobsCommand): Promise<FetchJobsResponse> {
+    const fetchJobsParamsData = this.mapper.map(
       command.data,
-      JobsDiscoveryParams,
-      JobsDiscoveryParamsData,
+      FetchJobsParams,
+      FetchJobsParamsData,
     );
-    const reducedParams = toCleanObjParams(jobsDiscoveryParamsData);
+    const reducedParams = toCleanObjParams(fetchJobsParamsData);
     const options: AxiosRequestConfig = {
       method: HttpMethod.GET,
       url: `${await this.kvStoreGateway.getExchangeOracleUrlByAddress(
@@ -189,7 +187,7 @@ export class ExchangeOracleGateway {
         Accept: 'application/json',
       },
     };
-    return this.callExternalHttpUtilRequest<JobsDiscoveryResponse>(options);
+    return this.callExternalHttpUtilRequest<FetchJobsResponse>(options);
   }
 
   async sendRegistrationInExchangeOracle(

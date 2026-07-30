@@ -11,8 +11,8 @@ import { JobsDiscoveryController } from '../jobs-discovery.controller';
 import { JobsDiscoveryProfile } from '../jobs-discovery.mapper.profile';
 import { JobsDiscoveryService } from '../jobs-discovery.service';
 import {
-  dtoFixture,
-  jobsDiscoveryParamsCommandFixture,
+  queryDtoFixture,
+  getJobsCommandFixture,
   responseFixture,
 } from './jobs-discovery.fixtures';
 import { jobsDiscoveryServiceMock } from './jobs-discovery.service.mock';
@@ -68,22 +68,19 @@ describe('JobsDiscoveryController', () => {
     expect(controller).toBeDefined();
   });
 
-  describe('processJobsDiscovery', () => {
-    it('should call service processJobsDiscovery method with proper fields set', async () => {
-      const dto = dtoFixture;
-      const command = jobsDiscoveryParamsCommandFixture;
+  describe('getJobs', () => {
+    it('should call service getJobs method with proper fields set', async () => {
+      const dto = queryDtoFixture;
+      const command = getJobsCommandFixture;
       await controller.getJobs(dto, {
         user: { qualifications: [] },
-        token: command.token,
       } as any);
       command.data.qualifications = [];
-      expect(jobsDiscoveryService.processJobsDiscovery).toHaveBeenCalledWith(
-        command,
-      );
+      expect(jobsDiscoveryService.getJobs).toHaveBeenCalledWith(command);
     });
 
     it('should throw an error if jobsDiscoveryFlag is disabled', async () => {
-      const dto = dtoFixture;
+      const dto = queryDtoFixture;
       (configServiceMock as any).jobsDiscoveryFlag = false;
       await expect(
         controller.getJobs(dto, { user: { qualifications: [] } } as any),

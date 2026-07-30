@@ -1,5 +1,3 @@
-import { AutomapperProfile, InjectMapper } from '@automapper/nestjs';
-import { Injectable } from '@nestjs/common';
 import {
   CamelCaseNamingConvention,
   createMap,
@@ -9,6 +7,8 @@ import {
   namingConventions,
   SnakeCaseNamingConvention,
 } from '@automapper/core';
+import { AutomapperProfile, InjectMapper } from '@automapper/nestjs';
+import { Injectable } from '@nestjs/common';
 import {
   JobAssignmentData,
   JobAssignmentParams,
@@ -18,13 +18,13 @@ import {
   ResignJobData,
 } from '../../modules/job-assignment/model/job-assignment.model';
 import {
-  JobsDiscoveryParams,
-  JobsDiscoveryParamsData,
-} from '../../modules/jobs-discovery/model/jobs-discovery.model';
-import {
   RegistrationInExchangeOracleCommand,
   RegistrationInExchangeOracleData,
 } from '../../modules/user-worker/model/worker-registration.model';
+import {
+  FetchJobsParams,
+  FetchJobsParamsData,
+} from './model/exchange-oracle.model';
 
 @Injectable()
 export class ExchangeOracleProfile extends AutomapperProfile {
@@ -63,8 +63,8 @@ export class ExchangeOracleProfile extends AutomapperProfile {
       );
       createMap(
         mapper,
-        JobsDiscoveryParams,
-        JobsDiscoveryParamsData,
+        FetchJobsParams,
+        FetchJobsParamsData,
         // Automapper has problem with mapping arrays, thus explicit conversion
         forMember(
           (destination) => destination.fields,

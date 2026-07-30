@@ -4,7 +4,7 @@ import {
   DiscoveredOracle,
 } from '../model/oracle-discovery.model';
 
-export const response1: DiscoveredOracle = {
+const response1: DiscoveredOracle = {
   id: '1',
   address: '0xd06eac24a0c47c776Ce6826A93162c4AfC029047',
   chainId: ChainId.POLYGON_AMOY,
@@ -24,7 +24,7 @@ export const response1: DiscoveredOracle = {
   amountJobsProcessed: '0',
 };
 
-export const response2: DiscoveredOracle = {
+const response2: DiscoveredOracle = {
   id: '2',
   address: '0xd10c3402155c058D78e4D5fB5f50E125F06eb39d',
   chainId: ChainId.POLYGON_AMOY,
@@ -44,7 +44,7 @@ export const response2: DiscoveredOracle = {
   amountJobsProcessed: '0',
 };
 
-export const response3: DiscoveredOracle = {
+const response3: DiscoveredOracle = {
   id: '3',
   address: '0xd83422155c058D78e4D5fB5f50E125F06eb39d',
   chainId: ChainId.POLYGON_AMOY,
@@ -64,7 +64,7 @@ export const response3: DiscoveredOracle = {
   amountJobsProcessed: '0',
 };
 
-export const response4: DiscoveredOracle = {
+const response4: DiscoveredOracle = {
   id: '4',
   address: '0xd83422155c058D78e4D5fB5f50E125F06eb39d',
   chainId: ChainId.BSC_TESTNET,

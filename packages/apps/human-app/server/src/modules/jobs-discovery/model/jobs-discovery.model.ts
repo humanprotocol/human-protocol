@@ -1,115 +1,122 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { AutoMap } from '@automapper/classes';
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsEnumCaseInsensitive } from '../../../common/decorators';
+import { JobStatus } from '../../../common/enums/global-common';
 import {
-  JobDiscoveryFieldName,
-  JobDiscoverySortField,
-  JobStatus,
-} from '../../../common/enums/global-common';
-import {
-  PageableData,
   PageableDto,
   PageableParams,
   PageableResponse,
 } from '../../../common/utils/pageable.model';
-import { IsEnumCaseInsensitive } from '../../../common/decorators';
+import { FetchJobsResponseItem } from '../../../integrations/exchange-oracle/model/exchange-oracle.model';
 
-export class JobsDiscoveryParamsDto extends PageableDto {
+export enum JobDiscoverySortField {
+  REWARD_AMOUNT = 'reward_amount',
+  CREATED_AT = 'created_at',
+}
+
+export class GetJobsQueryDto extends PageableDto {
   @AutoMap()
   @IsString()
   @ApiProperty()
-  oracle_address?: string;
+  oracle_address: string;
+
   @AutoMap()
   @IsOptional()
   @IsString()
   @ApiPropertyOptional()
   escrow_address?: string;
+
   @AutoMap()
   @Type(() => Number)
   @IsNumber()
   @IsOptional()
   @ApiPropertyOptional()
   chain_id?: number;
-  @AutoMap()
-  @IsOptional()
-  @IsEnumCaseInsensitive(JobDiscoverySortField)
-  @ApiPropertyOptional({ enum: JobDiscoverySortField })
-  sort_field?: JobDiscoverySortField;
+
   @AutoMap()
   @IsString()
   @IsOptional()
   @ApiPropertyOptional()
   job_type?: string;
-  @AutoMap()
-  @IsOptional()
-  @IsEnumCaseInsensitive(JobDiscoveryFieldName, { each: true })
-  @ApiPropertyOptional({ enum: JobDiscoveryFieldName, isArray: true })
-  fields: JobDiscoveryFieldName[];
+
   @AutoMap()
   @ApiPropertyOptional({ enum: JobStatus })
   @IsEnumCaseInsensitive(JobStatus)
   @IsOptional()
   status: JobStatus;
+
+  @AutoMap()
+  @IsOptional()
+  @IsEnumCaseInsensitive(JobDiscoverySortField)
+  @ApiPropertyOptional({ enum: JobDiscoverySortField })
+  sort_field?: JobDiscoverySortField;
 }
 
-export class JobsDiscoveryParams extends PageableParams {
+export class GetJobsParams extends PageableParams {
   @AutoMap()
   escrowAddress?: string;
+
   @AutoMap()
   chainId?: number;
-  @AutoMap()
-  sortField?: JobDiscoverySortField;
+
   @AutoMap()
   jobType?: string;
-  @AutoMap()
-  fields: JobDiscoveryFieldName[];
+
   @AutoMap()
   status: JobStatus;
+
   @AutoMap()
-  updatedAfter?: string;
+  sortField?: JobDiscoverySortField;
+
   qualifications?: string[];
 }
-export class JobsDiscoveryParamsData extends PageableData {
-  @AutoMap()
-  escrow_address?: string;
-  @AutoMap()
-  chain_id?: number;
-  @AutoMap()
-  sort_field?: JobDiscoverySortField;
-  @AutoMap()
-  job_type?: string;
-  @AutoMap()
-  fields: JobDiscoveryFieldName[];
-  @AutoMap()
-  status: JobStatus;
-  @AutoMap()
-  updated_after?: string;
-}
-export class JobsDiscoveryParamsCommand {
+
+export class GetJobsCommand {
   @AutoMap()
   oracleAddress: string;
+
   @AutoMap()
-  token: string;
-  @AutoMap()
-  data: JobsDiscoveryParams;
+  data: GetJobsParams;
 }
 
-export type JobsDiscoveryResponseItem = {
+export class DiscoveredJob implements Required<FetchJobsResponseItem> {
+  @ApiProperty()
   escrow_address: string;
-  chain_id: number;
-  job_type: string;
-  status: JobStatus;
-  job_description?: string;
-  reward_amount?: string;
-  reward_token?: string;
-  created_at?: string;
-  updated_at?: string;
-  qualifications: string[];
-};
 
-export class JobsDiscoveryResponse extends PageableResponse {
-  results: JobsDiscoveryResponseItem[];
+  @ApiProperty()
+  chain_id: number;
+
+  @ApiProperty()
+  job_type: string;
+
+  @ApiProperty()
+  status: JobStatus;
+
+  @ApiProperty()
+  job_description: string;
+
+  @ApiProperty()
+  reward_amount: string;
+
+  @ApiProperty()
+  reward_token: string;
+
+  @ApiProperty()
+  created_at: string;
+
+  @ApiProperty()
+  updated_at: string;
+
+  @ApiProperty()
+  qualifications: string[];
 }
 
-export type DiscoveredJob = Required<JobsDiscoveryResponseItem>;
+export class GetJobsResponseDto extends PageableResponse {
+  @ApiProperty({
+    type: DiscoveredJob,
+    isArray: true,
+  })
+  results: DiscoveredJob[];
+}
