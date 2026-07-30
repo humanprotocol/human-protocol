@@ -40,8 +40,8 @@ export function getJobRequestType(manifest: JobManifest): JobRequestType {
 
   if ('requestType' in manifest) {
     jobRequestType = manifest.requestType;
-  } else if ('annotation' in manifest) {
-    jobRequestType = manifest.annotation.type;
+  } else if ('job_type' in manifest) {
+    jobRequestType = manifest.job_type;
   }
 
   if (!jobRequestType) {

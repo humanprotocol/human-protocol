@@ -8,11 +8,13 @@ export enum MarketingJobType {
 }
 
 export enum CvatJobType {
-  IMAGE_BOXES = 'image_boxes',
+  IMAGE_LABEL_BINARY = 'image_label_binary',
   IMAGE_POINTS = 'image_points',
+  IMAGE_BOXES = 'image_boxes',
   IMAGE_BOXES_FROM_POINTS = 'image_boxes_from_points',
   IMAGE_SKELETONS_FROM_BOXES = 'image_skeletons_from_boxes',
   IMAGE_POLYGONS = 'image_polygons',
+  AUDIO_TRANSCRIPTION = 'audio_transcription',
 }
 
 export const JobType = [
