@@ -268,9 +268,13 @@
     },
     "hcaptchaWidget": {
       "title": "hCaptcha task available!",
+      "titleDisabled": "No hCaptcha task available",
       "description": "Complete image labeling challenges and earn rewards by helping train privacy-preserving hCaptcha models.",
       "shortDescription": "Complete image labeling challenges and earn rewards.",
-      "startTask": "Start Task"
+      "descriptionDisabled": "You have reached the daily limit for the hCaptcha tasks, Please come back later.",
+      "startTask": "Start Task",
+      "nextAvailable": "Next Available in",
+      "nextIn": "Next in"
     },
     "registrationInExchangeOracle": {
       "requiredMessage": "This oracle requires a registration process. Click on the button below to see the registration tutorial:",

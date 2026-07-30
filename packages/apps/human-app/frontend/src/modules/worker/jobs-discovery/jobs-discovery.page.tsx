@@ -42,9 +42,9 @@ export function JobsDiscoveryPage() {
         sx={{
           justifyContent: 'center',
           alignItems: 'space-between',
-          pt: { xs: 2, md: 0 },
-          pb: { xs: 2, md: 4 },
-          px: { xs: 1, md: 4 },
+          pt: { xs: 0, md: 0 },
+          pb: { xs: 0, md: 4 },
+          px: { xs: 0, md: 4 },
           mx: { xs: 2, md: 0 },
           borderRadius: { xs: '10px', md: 0 },
           border: {

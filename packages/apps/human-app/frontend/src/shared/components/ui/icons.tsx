@@ -33,6 +33,8 @@ import HourglassIconDark from '@/assets/icons-dark-mode/hourglass.svg';
 import LogoutIcon from '@/assets/icons/logout.svg';
 import TriangleIcon from '@/assets/icons/triangle.svg';
 import HcaptchaIconAsset from '@/assets/icons/hcaptcha.svg';
+import HcaptchaDisabledIconLight from '@/assets/icons/hcaptcha-disabled-icon.svg';
+import HcaptchaDisabledIconDark from '@/assets/icons-dark-mode/hcaptcha-disabled-icon.svg';
 
 function HumanLogoIcon() {
   const { isDarkMode } = useColorMode();
@@ -96,6 +98,14 @@ function HourglassIcon() {
 }
 function HcaptchaIcon() {
   return <HcaptchaIconAsset />;
+}
+function HcaptchaDisabledIcon() {
+  const { isDarkMode } = useColorMode();
+  return isDarkMode ? (
+    <HcaptchaDisabledIconDark />
+  ) : (
+    <HcaptchaDisabledIconLight />
+  );
 }
 
 function InboxIcon(props: SvgIconProps) {
@@ -277,4 +287,5 @@ export {
   OracleRewardIcon,
   MenuIcon,
   HcaptchaIcon,
+  HcaptchaDisabledIcon,
 };
