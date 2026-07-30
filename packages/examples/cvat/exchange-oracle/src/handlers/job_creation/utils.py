@@ -57,9 +57,6 @@ def _get_assignment_bounty_from_escrow(
         return None
 
     funds = get_remaining_escrow_funds(chain_id, escrow_address)
-    if funds is None:
-        return None
-
     return str(funds / job_count)
 
 

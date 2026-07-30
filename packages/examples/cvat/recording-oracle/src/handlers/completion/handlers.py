@@ -1,11 +1,13 @@
 import io
 import os
+from decimal import Decimal
 from logging import Logger
 
 from sqlalchemy.orm import Session
 
 import src.core.annotation_meta as annotation
 import src.core.validation_meta as validation
+import src.services.validation as db_service
 import src.services.webhook as oracle_db_service
 from src.chain import escrow
 from src.core.config import Config
@@ -80,6 +82,66 @@ class _EscrowExporter:
     def _compose_validation_results_bucket_filename(self, filename: str) -> str:
         return f"{self.escrow_address}@{self.chain_id}/{filename}"
 
+    def _compute_total_bounty(self) -> Decimal | None:
+        """
+        Computes the total reward for the final assignments.
+        Returns None, if the reward is unknown for the assignments.
+        """
+
+        assert self.annotation_meta is not None
+
+        assignment_bounties = {
+            job_meta.assignment_id: db_service.get_validation_result_by_assignment_id(
+                self.db_session, job_meta.assignment_id
+            ).assignment_bounty
+            for job_meta in self.annotation_meta.jobs
+        }
+
+        assignments_without_bounty = [
+            assignment_id for assignment_id, bounty in assignment_bounties.items() if bounty is None
+        ]
+        if assignments_without_bounty:
+            # The assignment rewards are expected to be either known for all the assignments
+            # or unknown for all of them, otherwise the total reward can't be computed
+            if len(assignments_without_bounty) != len(assignment_bounties):
+                raise Exception(
+                    f"Result uploading for escrow_address={self.escrow_address}: "
+                    f"{len(assignments_without_bounty)} of {len(assignment_bounties)} assignments "
+                    "have no reward specified. "
+                    "Either all the assignments must have bounty specified or none of them."
+                )
+
+            return None
+
+        return sum((Decimal(bounty) for bounty in assignment_bounties.values()), start=Decimal(0))
+
+    def _compute_funds_to_reserve(self, total_bounty: Decimal | None) -> int:
+        """
+        Returns the escrow funds to be reserved for the payouts, in the raw token units.
+        All the remaining funds are reserved, the requested reward is only validated.
+        """
+
+        remaining_funds = escrow.get_raw_remaining_escrow_funds(self.chain_id, self.escrow_address)
+
+        if total_bounty is not None:
+            token_decimals = escrow.get_escrow_fund_token_decimals(
+                self.chain_id, self.escrow_address
+            )
+            requested_funds = total_bounty * 10**token_decimals
+            if requested_funds > remaining_funds:
+                raise Exception(
+                    f"Result uploading for escrow_address={self.escrow_address}: "
+                    f"the total assignment reward ({requested_funds}) exceeds "
+                    f"the remaining escrow funds ({remaining_funds})"
+                )
+
+        self.logger.info(
+            f"Result uploading for escrow_address={self.escrow_address}: "
+            f"will reserve {remaining_funds} funds on the escrow."
+        )
+
+        return remaining_funds
+
     def _handle_result(self, export_result: FinalResult):
         logger = self.logger
         escrow_address = self.escrow_address
@@ -112,11 +174,14 @@ class _EscrowExporter:
             validation_metafile,
         )
 
+        funds_to_reserve = self._compute_funds_to_reserve(self._compute_total_bounty())
+
         escrow.store_results(
             chain_id,
             escrow_address,
             Config.storage_config.bucket_url() + os.path.dirname(recor_merged_annotations_path),  # noqa: PTH120
             compute_resulting_annotations_hash(export_result.resulting_annotations),
+            funds_to_reserve=funds_to_reserve,
         )
 
         oracle_db_service.outbox.create_webhook(

@@ -43,6 +43,7 @@ def prepare_annotation_metafile(jobs: list[Job]) -> FileDescriptor:
                 task_id=job.cvat_task_id,
                 start_frame=job.start_frame,
                 stop_frame=job.stop_frame,
+                assignment_bounty=job.project.assignment_bounty,
             )
             for job in jobs
         ]

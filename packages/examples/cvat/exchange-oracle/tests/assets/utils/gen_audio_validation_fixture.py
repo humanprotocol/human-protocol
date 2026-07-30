@@ -25,6 +25,7 @@ sets (see docker-compose.test.head.yml), apply migrations (``alembic upgrade hea
 from __future__ import annotations
 
 import tempfile
+from decimal import Decimal
 from pathlib import Path
 
 INPUT_BUCKET = "datasets"
@@ -115,6 +116,10 @@ def main(output_dir: Path = DEFAULT_OUTPUT_DIR) -> None:
         with (
             patch.object(handlers, "get_escrow_manifest", return_value=manifest),
             patch("src.handlers.job_creation.builders.audio.transcription.cvat_api", cvat_api),
+            patch(
+                "src.handlers.job_creation.utils.get_remaining_escrow_funds",
+                return_value=Decimal(10),
+            ),
         ):
             handlers.create_task(ESCROW_ADDRESS, chain_id)
 

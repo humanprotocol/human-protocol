@@ -130,7 +130,26 @@ class ServiceIntegrationTest(unittest.TestCase):
                 store_results(chain_id, escrow_address, DEFAULT_MANIFEST_URL, DEFAULT_HASH) is None
             )
             mock_client_cls.return_value.store_results.assert_called_once_with(
-                escrow_address, DEFAULT_MANIFEST_URL, DEFAULT_HASH
+                escrow_address, DEFAULT_MANIFEST_URL, DEFAULT_HASH, funds_to_reserve=None
+            )
+
+    def test_store_results_with_funds_to_reserve(self):
+        with (
+            patch("src.chain.escrow.get_web3"),
+            patch("src.chain.escrow.EscrowClient") as mock_client_cls,
+        ):
+            assert (
+                store_results(
+                    chain_id,
+                    escrow_address,
+                    DEFAULT_MANIFEST_URL,
+                    DEFAULT_HASH,
+                    funds_to_reserve=42,
+                )
+                is None
+            )
+            mock_client_cls.return_value.store_results.assert_called_once_with(
+                escrow_address, DEFAULT_MANIFEST_URL, DEFAULT_HASH, funds_to_reserve=42
             )
 
     def test_store_results_invalid_url(self):
