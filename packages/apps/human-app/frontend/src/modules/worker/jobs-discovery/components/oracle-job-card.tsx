@@ -57,6 +57,10 @@ export function OracleJobCard({ oracle }: { oracle: Oracle }) {
   const { colorPalette } = useColorMode();
   const isMobile = useIsMobile();
 
+  const isRewardAmountsEqual =
+    oracle.minRewardAmount === oracle.maxRewardAmount;
+  const hasTasks = oracle.nTasks > 0;
+
   return (
     <Card
       variant="outlined"
@@ -142,7 +146,16 @@ export function OracleJobCard({ oracle }: { oracle: Oracle }) {
                 letterSpacing: '0.12px',
               }}
             >
-              1 HMT - 2 HMT
+              {isRewardAmountsEqual ? (
+                <>
+                  {oracle.minRewardAmount} {oracle.rewardToken}
+                </>
+              ) : (
+                <>
+                  {oracle.minRewardAmount} {oracle.rewardToken} -{' '}
+                  {oracle.maxRewardAmount} {oracle.rewardToken}
+                </>
+              )}
             </Typography>
           </Box>
         </Stack>
@@ -151,7 +164,7 @@ export function OracleJobCard({ oracle }: { oracle: Oracle }) {
             py: { xs: 2, md: 1 },
             px: { xs: 2, md: 0 },
             mx: { xs: -2, md: 0 },
-            gap: isTaskTypesOpen ? 1 : 0,
+            gap: isTaskTypesOpen && hasTasks ? 1 : 0,
             borderTop: {
               xs: `1px solid ${colorPalette.border.main}`,
               md: 'none',
@@ -173,6 +186,7 @@ export function OracleJobCard({ oracle }: { oracle: Oracle }) {
                 startIcon={
                   <ExpandMoreIcon
                     sx={{
+                      display: hasTasks ? 'block' : 'none',
                       mr: -0.5,
                       color: 'inherit',
                       transform: isTaskTypesOpen
@@ -186,19 +200,17 @@ export function OracleJobCard({ oracle }: { oracle: Oracle }) {
                   bgcolor: 'transparent',
                   color: colorPalette.text.auxiliary200,
                 }}
-                onClick={() => setIsTaskTypesOpen(!isTaskTypesOpen)}
+                onClick={() => hasTasks && setIsTaskTypesOpen(!isTaskTypesOpen)}
               >
-                {oracle.jobTypes.length}{' '}
-                {oracle.jobTypes.length > 1
-                  ? t('worker.oraclesList.taskTypes')
-                  : t('worker.oraclesList.taskType')}
+                {oracle.nTasks}{' '}
+                {oracle.nTasks === 1
+                  ? t('worker.oraclesList.task')
+                  : t('worker.oraclesList.tasks')}
               </Button>
             ) : (
               <Tooltip
                 title={<JobTypesTooltipTitle jobTypes={oracle.jobTypes} />}
-                disableHoverListener={isMobile}
-                disableFocusListener={isMobile}
-                disableTouchListener={isMobile}
+                disableHoverListener={isMobile || !hasTasks}
                 slotProps={{
                   tooltip: {
                     sx: {
@@ -219,14 +231,16 @@ export function OracleJobCard({ oracle }: { oracle: Oracle }) {
                     gap: 0.75,
                     color: colorPalette.text.auxiliary200,
                     fontWeight: 600,
-                    cursor: { xs: 'default', md: 'pointer' },
+                    cursor: hasTasks
+                      ? { xs: 'default', md: 'pointer' }
+                      : 'default',
                   }}
                 >
                   <MenuIcon sx={{ color: 'inherit', fontSize: 20 }} />
-                  {oracle.jobTypes.length}{' '}
-                  {oracle.jobTypes.length > 1
-                    ? t('worker.oraclesList.taskTypes')
-                    : t('worker.oraclesList.taskType')}
+                  {oracle.nTasks}{' '}
+                  {oracle.nTasks === 1
+                    ? t('worker.oraclesList.task')
+                    : t('worker.oraclesList.tasks')}
                 </Typography>
               </Tooltip>
             )}
@@ -234,6 +248,7 @@ export function OracleJobCard({ oracle }: { oracle: Oracle }) {
               variant="text"
               disableRipple
               sx={{
+                display: hasTasks ? 'flex' : 'none',
                 p: 0,
                 gap: 0.5,
                 bgcolor: 'transparent',
@@ -246,7 +261,7 @@ export function OracleJobCard({ oracle }: { oracle: Oracle }) {
               />
             </Button>
           </Stack>
-          <Collapse in={isMobile && isTaskTypesOpen}>
+          <Collapse in={isMobile && isTaskTypesOpen && hasTasks}>
             <Stack direction="row" sx={{ gap: 1, flexWrap: 'wrap' }}>
               {oracle.jobTypes.map((jobType) => {
                 const element = JOB_TYPES.find((j) => j === jobType) as JobType;

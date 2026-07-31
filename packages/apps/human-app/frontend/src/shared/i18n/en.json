@@ -250,8 +250,8 @@
       "jobOracles": "Job Oracles",
       "address": "Address",
       "reward": "Reward",
-      "taskTypes": "Task types",
-      "taskType": "Task type",
+      "tasks": "Tasks",
+      "task": "Task",
       "exploreTasks": "Explore Tasks",
       "source": "source",
       "sources": "sources"
