@@ -72,7 +72,7 @@ export function HCaptchaWidget() {
       <Stack
         sx={{
           width: '100%',
-          height: { xs: '108px', md: '80px' },
+          height: { xs: '108px', md: '71px' },
           alignItems: 'center',
           justifyContent: 'center',
         }}

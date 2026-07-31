@@ -1,80 +1,98 @@
-import { Box, CssBaseline, Drawer, Stack, Typography } from '@mui/material';
+import { Box, Drawer, IconButton, Stack, Typography } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import { t } from 'i18next';
+
 import { Loader } from '@/shared/components/ui/loader';
 import { Alert } from '@/shared/components/ui/alert';
 import { getErrorMessageForError } from '@/shared/errors';
 import { useHCaptchaUserStats } from '../hooks';
 import { UserStatsDetails } from './user-stats-details';
 import { LoadingOverlay } from './user-stats-loading-overlay';
+import { useColorMode } from '@/shared/contexts/color-mode';
 
-export interface UserStatsDrawerNavigationProps {
+type Props = {
   isOpen: boolean;
-}
+  onClose: () => void;
+};
 
-export function UserStatsDrawer({
-  isOpen,
-}: Readonly<UserStatsDrawerNavigationProps>) {
+export function UserStatsDrawer({ isOpen, onClose }: Props) {
+  const { colorPalette } = useColorMode();
+
   const {
     data: hcaptchaUserStats,
     error: hcaptchaUserStatsError,
-    status: hcaptchaUserStatsStatus,
+    isSuccess,
+    isPending,
     refetch: hcaptchaUserStatsRefetch,
     isRefetching: isHcaptchaUserStatsRefetching,
   } = useHCaptchaUserStats();
 
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-      <CssBaseline />
-      <Drawer
-        anchor="left"
-        variant="persistent"
-        open={isOpen}
-        sx={{
+    <Drawer
+      anchor="bottom"
+      open={isOpen}
+      onClose={onClose}
+      sx={{
+        zIndex: (theme) => theme.zIndex.drawer,
+        '& .MuiDrawer-paper': {
           width: '100%',
-          flexShrink: 0,
-          '& .MuiDrawer-paper': {
-            width: '100%',
-            paddingTop: 11,
-          },
-        }}
-      >
-        <Box sx={{ position: 'relative' }}>
-          {isHcaptchaUserStatsRefetching && (
-            <LoadingOverlay
-              sx={{
-                width: 'calc(100% - 16px)',
-                height: 'calc(100% - 8px)',
-                top: 0,
-                left: '8px',
-                right: '8px',
-                bottom: '8px',
-              }}
+          minHeight: '60dvh',
+          borderTopLeftRadius: '20px',
+          borderTopRightRadius: '20px',
+        },
+      }}
+    >
+      <Stack sx={{ position: 'relative', flex: 1, height: '100%' }}>
+        {isHcaptchaUserStatsRefetching && (
+          <LoadingOverlay
+            sx={{
+              width: '100%',
+              height: '100%',
+              top: 0,
+              left: 0,
+              borderRadius: '0px',
+              borderTopLeftRadius: '20px',
+              borderTopRightRadius: '20px',
+            }}
+          />
+        )}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            p: 2,
+            borderBottom: `1px solid ${colorPalette.border.strong}`,
+          }}
+        >
+          <Typography variant="h6">
+            {t('worker.hcaptchaLabelingStats.hCapchaStatistics')}
+          </Typography>
+          <IconButton
+            aria-label="Close"
+            disableRipple
+            sx={{ p: 0, bgcolor: 'transparent' }}
+            onClick={onClose}
+          >
+            <CloseIcon />
+          </IconButton>
+        </Box>
+        <Stack sx={{ px: 2, my: isSuccess ? 0 : 'auto' }}>
+          {isSuccess && (
+            <UserStatsDetails
+              refetch={() => void hcaptchaUserStatsRefetch()}
+              stats={hcaptchaUserStats}
+              isRefetching={isHcaptchaUserStatsRefetching}
             />
           )}
-          <Stack sx={{ px: 6.5, py: 3 }}>
-            {hcaptchaUserStatsStatus === 'success' ? (
-              <>
-                <Typography variant="mobileHeaderLarge" sx={{ mb: 3 }}>
-                  {t('worker.hcaptchaLabelingStats.hCapchaStatistics')}
-                </Typography>
-                <UserStatsDetails
-                  refetch={() => void hcaptchaUserStatsRefetch()}
-                  stats={hcaptchaUserStats}
-                  isRefetching={isHcaptchaUserStatsRefetching}
-                />
-              </>
-            ) : null}
-            {hcaptchaUserStatsStatus === 'error' ? (
-              <Alert color="error" severity="error">
-                {getErrorMessageForError(hcaptchaUserStatsError)}
-              </Alert>
-            ) : null}
-            {hcaptchaUserStatsStatus === 'pending' ? (
-              <Loader sx={{ zIndex: '55' }} />
-            ) : null}
-          </Stack>
-        </Box>
-      </Drawer>
-    </Box>
+          {!!hcaptchaUserStatsError && (
+            <Alert color="error" severity="error">
+              {getErrorMessageForError(hcaptchaUserStatsError)}
+            </Alert>
+          )}
+          {isPending && <Loader sx={{ zIndex: '55' }} />}
+        </Stack>
+      </Stack>
+    </Drawer>
   );
 }

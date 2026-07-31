@@ -271,7 +271,7 @@
       "titleDisabled": "No hCaptcha task available",
       "description": "Complete image labeling challenges and earn rewards by helping train privacy-preserving hCaptcha models.",
       "shortDescription": "Complete image labeling challenges and earn rewards.",
-      "descriptionDisabled": "You have reached the daily limit for the hCaptcha tasks, Please come back later.",
+      "descriptionDisabled": "You have reached the daily limit for the hCaptcha tasks, please come back later.",
       "startTask": "Start Task",
       "nextAvailable": "Next Available in",
       "nextIn": "Next in"
@@ -283,9 +283,10 @@
       "completeButton": "Complete"
     },
     "jobs": {
+      "hCaptcha": "hCaptcha",
       "successFullyAssignedJob": "Successfully assigned a task!",
       "errorFetchingData": "There was an error while fetching data, please try again",
-      "availableJobs": "Available Tasks",
+      "availableJobs": "Available Jobs",
       "myJobs": "My Tasks",
       "jobsDiscovery": "Jobs Discovery",
       "jobDescription": "Job description",
@@ -333,7 +334,10 @@
     },
     "hcaptchaLabeling": {
       "description": "HMT payouts are automatically computed by an oracle based on correctness and volume of tasks completed. Payout timing depends on total job size, and can take as little as an hour or as long as a week or so, depending on overall job status.",
-      "noJobs": "No jobs available at the moment. Please come back in:"
+      "noJobs": "You have reached the daily limit for the hCaptcha tasks, please come back later.",
+      "waitFor": "Wait for",
+      "browseAvailableJobs": "Browse Available Jobs",
+      "or": "Or"
     },
     "enableHCaptchaLabeling": {
       "description": "CAPTCHA tasks involve the correct labeling of images in a group of images. Read the instructional prompt, and select the images that best correspond to that prompt.",
