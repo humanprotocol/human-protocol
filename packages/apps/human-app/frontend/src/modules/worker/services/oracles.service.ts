@@ -80,7 +80,6 @@ const MOCKED_ORACLES: Oracle[] = [
     name: 'Mock Oracle 4',
     registrationNeeded: false,
   },
-  // repeat 4 more with unique addresses/names
 ];
 
 async function getOracles(selectedJobTypes: string[]) {
@@ -97,7 +96,6 @@ async function getOracles(selectedJobTypes: string[]) {
       selectedJobTypes.length === 0 ||
       selectedJobTypes.some((t) => H_CAPTCHA_ORACLE.jobTypes.includes(t))
     ) {
-      //oracles.push(H_CAPTCHA_ORACLE);
       oracles.push(...MOCKED_ORACLES);
     }
 

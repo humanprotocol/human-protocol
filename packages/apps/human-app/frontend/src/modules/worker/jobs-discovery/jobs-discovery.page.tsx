@@ -2,12 +2,12 @@ import { useEffect } from 'react';
 import { Box, Stack, Typography } from '@mui/material';
 import { t } from 'i18next';
 
-import { OraclesList } from './components';
+import { OraclesList } from './components/oracles-list';
+import { HCaptchaWidget } from './components/hcaptha-widget';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
-import { useGetOracles } from '../hooks';
+import { useGetOracles } from '../hooks/use-get-oracles';
 import { useGetOraclesNotifications } from '../hooks/use-get-oracles-notifications';
-import { HCaptchaWidget } from './components/hcaptha-widget';
 
 const bull = (
   <Box component="span" sx={{ display: 'inline-block', mx: 0.75 }}>
@@ -41,7 +41,6 @@ export function JobsDiscoveryPage() {
       <Stack
         sx={{
           justifyContent: 'center',
-          alignItems: 'space-between',
           pt: { xs: 0, md: 0 },
           pb: { xs: 0, md: 4 },
           px: { xs: 0, md: 4 },
@@ -52,7 +51,6 @@ export function JobsDiscoveryPage() {
             md: 'none',
           },
           borderBottom: {
-            xs: `1px solid ${colorPalette.border.main}`,
             md: `1px solid ${colorPalette.border.main}`,
           },
         }}

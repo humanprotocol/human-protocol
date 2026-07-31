@@ -45,7 +45,10 @@ export function OraclesList({ data, isError, isPending }: OraclesListProps) {
   return (
     <Grid container spacing={{ xs: 1.5, md: 4 }}>
       {data.map((oracle) => (
-        <Grid size={{ xs: 12, sm: 6, lg: 4 }} key={oracle.address}>
+        <Grid
+          size={{ xs: 12, sm: 6, lg: 4 }}
+          key={`${oracle.address}-${oracle.chainId}`}
+        >
           <OracleJobCard oracle={oracle} />
         </Grid>
       ))}

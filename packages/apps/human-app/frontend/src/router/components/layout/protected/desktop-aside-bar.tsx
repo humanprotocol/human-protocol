@@ -7,8 +7,7 @@ import {
   Stack,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { t } from 'i18next';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 import { ProfileData } from '@/modules/worker/profile/components/profile-data';
 import { routerPaths } from '@/router/router-paths';
@@ -24,18 +23,19 @@ import { useHandleMainNavIconClick } from '@/shared/hooks/use-handle-main-nav-ic
 
 const menuItems = [
   {
-    label: t('components.DrawerNavigation.availableJobs'),
+    labelKey: 'components.DrawerNavigation.availableJobs',
     href: routerPaths.worker.jobsDiscovery,
   },
   {
-    label: t('components.DrawerNavigation.myJobs'),
+    labelKey: 'components.DrawerNavigation.myJobs',
     href: routerPaths.worker.myJobs,
   },
-];
+] as const;
 
 export function DesktopAsideBar() {
   const { colorPalette, isDarkMode } = useColorMode();
   const { t } = useTranslation();
+  const { pathname } = useLocation();
   const handleMainNavIconClick = useHandleMainNavIconClick();
 
   const activeLinkGradient = isDarkMode
@@ -75,11 +75,11 @@ export function DesktopAsideBar() {
         <Box sx={{ height: '100px' }}>
           <List sx={{ p: 0 }}>
             {menuItems.map((item) => {
-              const { href, label } = item;
-              const isActive = window.location.pathname === href;
+              const { href, labelKey } = item;
+              const isActive = pathname === href;
               return (
                 <ListItem
-                  key={item.label}
+                  key={href}
                   sx={{
                     p: 0,
                     background: isActive ? activeLinkGradient : 'transparent',
@@ -102,7 +102,7 @@ export function DesktopAsideBar() {
                     }}
                   >
                     {isActive && <TriangleIcon />}
-                    {label}
+                    {t(labelKey)}
                   </ListItemButton>
                 </ListItem>
               );

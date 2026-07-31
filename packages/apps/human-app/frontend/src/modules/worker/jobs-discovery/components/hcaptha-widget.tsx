@@ -72,7 +72,7 @@ export function HCaptchaWidget() {
       <Stack
         sx={{
           width: '100%',
-          height: { xs: '108px', md: '71px' },
+          height: { xs: '104px', md: '71px' },
           alignItems: 'center',
           justifyContent: 'center',
         }}
@@ -119,7 +119,7 @@ export function HCaptchaWidget() {
             <HcaptchaDisabledIcon />
             <Stack
               sx={{
-                alignItems: 'space-between',
+                justifyContent: 'space-between',
                 maxWidth: { xs: '100%', md: '350px', lg: '450px' },
               }}
             >
@@ -224,7 +224,7 @@ export function HCaptchaWidget() {
             <HcaptchaIcon />
             <Stack
               sx={{
-                alignItems: 'space-between',
+                justifyContent: 'space-between',
                 maxWidth: { xs: '100%', md: '350px', lg: '450px' },
               }}
             >
