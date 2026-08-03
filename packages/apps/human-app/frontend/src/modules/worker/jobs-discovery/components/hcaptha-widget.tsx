@@ -41,7 +41,6 @@ const renderDescription = (color: string, isMobile: boolean) => {
         color,
         fontSize: { xs: 12, md: 16 },
         fontWeight: 500,
-        letterSpacing: '0.12px',
         lineHeight: 'normal',
       }}
     >
@@ -128,18 +127,15 @@ export function HCaptchaWidget() {
                 sx={{
                   color: colorPalette.text.auxiliary200,
                   fontWeight: 700,
-                  letterSpacing: '0.12px',
                 }}
               >
                 {t('worker.hcaptchaWidget.titleDisabled')}
               </Typography>
               {!isMobile && (
                 <Typography
+                  variant="body1"
                   sx={{
                     color: colorPalette.text.auxiliary100,
-                    fontSize: 16,
-                    fontWeight: 400,
-                    letterSpacing: '0.12px',
                     opacity: 0.5,
                   }}
                 >
@@ -230,10 +226,7 @@ export function HCaptchaWidget() {
             >
               <Typography
                 variant={isMobile ? 'body2' : 'h6'}
-                sx={{
-                  fontWeight: 700,
-                  letterSpacing: '0.12px',
-                }}
+                sx={{ fontWeight: 700 }}
               >
                 {t('worker.hcaptchaWidget.title')}
               </Typography>

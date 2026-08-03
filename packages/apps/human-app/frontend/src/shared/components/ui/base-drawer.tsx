@@ -28,6 +28,9 @@ export function BaseDrawer({
       open={open}
       onClose={handleClose}
       anchor="bottom"
+      sx={{
+        zIndex: (theme) => theme.zIndex.drawer,
+      }}
       slotProps={{
         backdrop: {
           sx: {
@@ -54,7 +57,7 @@ export function BaseDrawer({
           position: 'absolute',
           top: 16,
           right: 16,
-          p: 0,
+          p: 0.5,
           ...closeButtonSx,
         }}
       >

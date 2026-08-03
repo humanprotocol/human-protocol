@@ -36,8 +36,7 @@ export function EnableLabelerPage() {
         sx={{
           display: 'flex',
           width: '100%',
-          pt: { xs: 2, md: 2 },
-          pb: { xs: 2, md: 6 },
+          py: { xs: 2, md: 6 },
           px: { xs: 2, md: 4 },
           borderBottom: {
             xs: 'none',

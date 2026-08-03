@@ -41,9 +41,7 @@ export function JobsDiscoveryPage() {
       <Stack
         sx={{
           justifyContent: 'center',
-          pt: { xs: 0, md: 0 },
-          pb: { xs: 0, md: 4 },
-          px: { xs: 0, md: 4 },
+          p: { xs: 0, md: 4 },
           mx: { xs: 2, md: 0 },
           borderRadius: { xs: '10px', md: 0 },
           border: {

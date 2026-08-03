@@ -8,7 +8,7 @@ export function TableButton(props: CustomButtonProps) {
       size="small"
       type="button"
       variant="contained"
-      color="secondary"
+      color="accent"
       sx={{
         paddingTop: '0.4rem',
         paddingBottom: '0.4rem',

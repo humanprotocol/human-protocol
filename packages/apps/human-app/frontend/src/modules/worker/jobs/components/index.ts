@@ -6,3 +6,4 @@ export * from './reward-amount';
 export * from './sorting';
 export * from './more-button';
 export * from './report-abuse-modal';
+export * from './network-name';

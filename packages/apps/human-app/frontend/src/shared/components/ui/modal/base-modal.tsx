@@ -52,7 +52,8 @@ export function BaseModal({
       <Paper
         elevation={0}
         sx={{
-          py: 6,
+          flexShrink: 0,
+          py: 4,
           px: 4,
           width: 640,
           maxHeight: '700px',
@@ -67,10 +68,10 @@ export function BaseModal({
           disabled={isLoading}
           onClick={handleClose}
           sx={{
-            p: 0,
+            p: 0.5,
             color: 'neutral.100',
             position: 'absolute',
-            top: 48,
+            top: 32,
             right: 32,
             '&:hover': {
               bgcolor: 'unset',

@@ -94,8 +94,7 @@ export function HcaptchaLabelingPage() {
           justifyContent: 'space-between',
           gap: 2,
           width: '100%',
-          pt: { xs: 2, md: 0 },
-          pb: { xs: 2, md: 4 },
+          py: { xs: 2, md: 6 },
           px: { xs: 2, md: 4 },
           borderBottom: {
             xs: 'none',

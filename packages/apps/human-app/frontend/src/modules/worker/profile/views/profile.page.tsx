@@ -67,7 +67,7 @@ export function WorkerProfilePage() {
   ]);
 
   return (
-    <Stack sx={{ px: { xs: 2, md: 4 } }}>
+    <Stack sx={{ px: { xs: 2, md: 4 }, py: { xs: 0, md: 4 } }}>
       <Box
         sx={{
           display: 'flex',

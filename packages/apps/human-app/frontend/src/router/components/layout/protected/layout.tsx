@@ -51,7 +51,6 @@ export function ProtectedLayout() {
       <Stack
         sx={{
           flex: 1,
-          py: { xs: 0, md: 4 },
           gap: { xs: 0, md: 3 },
           bgcolor: colorPalette.background.paper,
           borderRadius: { xs: '0px', md: '30px' },
@@ -75,7 +74,7 @@ export function ProtectedLayout() {
           </Stack>
           {isBottomTrayVisible && <ProfileBottomTray />}
         </Main>
-        <Footer displayChatIcon={!isMobile} isProtected />
+        <Footer displayChatIcon={!isMobile} />
       </Stack>
     </Stack>
   );

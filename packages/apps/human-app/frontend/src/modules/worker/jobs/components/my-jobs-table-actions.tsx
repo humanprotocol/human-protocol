@@ -1,17 +1,16 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+
 import { TableButton } from '@/shared/components/ui/table-button';
 import { MyJobStatus } from '../types';
 import { type MyJob } from '../schemas';
 import { MoreButton } from './more-button';
 
-interface MyJobsTableRejectActionProps {
+type Props = {
   job: MyJob;
-}
+};
 
-export function MyJobsTableActions({
-  job,
-}: Readonly<MyJobsTableRejectActionProps>) {
+export function MyJobsTableActions({ job }: Props) {
   const { t } = useTranslation();
   const isDisabled = job.status !== MyJobStatus.ACTIVE;
 
