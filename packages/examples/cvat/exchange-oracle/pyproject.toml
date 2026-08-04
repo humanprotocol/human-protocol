@@ -35,6 +35,7 @@ cryptography = "<44.0.0" # human-protocol-sdk -> pgpy dep requires cryptography 
 aiocache = {extras = ["msgpack", "redis"], version = "^0.12.3"}  # convenient api for redis (async)
 cachelib = "^0.14.0" # convenient api for redis (sync)
 human-protocol-sdk = "^7.3.1"
+aiohttp = ">=3.14.3" # TODO: remove once aiohttp is bumped in human-protocol-sdk
 
 
 [tool.poetry.group.dev.dependencies]
