@@ -10,8 +10,6 @@ export function getChipStatusColor(
       return colorPalette.secondary.main;
     case MyJobStatus.COMPLETED:
       return colorPalette.success.main;
-    case MyJobStatus.VALIDATION:
-      return colorPalette.error.light;
     default:
       return colorPalette.error.main;
   }
