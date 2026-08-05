@@ -2,14 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { Box, Grid, Paper, Stack, Tab, Tabs, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { TableQueryContextProvider } from '@/shared/components/ui/table/table-query-context';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { useColorMode } from '@/shared/contexts/color-mode';
-import { NoRecords } from '@/shared/components/ui/no-records';
 import { PageCardLoader } from '@/shared/components/ui/page-card';
 import { useGetOracles } from '../hooks';
 import { useGetOraclesNotifications } from '../hooks/use-get-oracles-notifications';
-import { TabPanel } from './components';
 
 function generateTabA11yProps(index: number) {
   return {
@@ -82,37 +79,29 @@ export function JobsPage() {
             </Box>
           )}
           <Stack>
-            <TableQueryContextProvider>
-              <Box sx={{ width: '100%' }}>
-                <Box
-                  sx={{
-                    borderBottom: 1,
-                    borderColor: isDarkMode ? '#CBCFE8CC' : 'divider',
-                  }}
+            <Box sx={{ width: '100%' }}>
+              <Box
+                sx={{
+                  borderBottom: 1,
+                  borderColor: isDarkMode ? '#CBCFE8CC' : 'divider',
+                }}
+              >
+                <Tabs
+                  aria-label="jobs-tabs"
+                  onChange={handleTabChange}
+                  value={activeTab}
                 >
-                  <Tabs
-                    aria-label="jobs-tabs"
-                    onChange={handleTabChange}
-                    value={activeTab}
-                  >
-                    <Tab
-                      label={t('worker.jobs.availableJobs')}
-                      {...generateTabA11yProps(0)}
-                    />
-                    <Tab
-                      label={t('worker.jobs.myJobs')}
-                      {...generateTabA11yProps(1)}
-                    />
-                  </Tabs>
-                </Box>
-                <TabPanel activeTab={activeTab} index={0}>
-                  {isError ? <NoRecords /> : null}
-                </TabPanel>
-                <TabPanel activeTab={activeTab} index={1}>
-                  {isError ? <NoRecords /> : null}
-                </TabPanel>
+                  <Tab
+                    label={t('worker.jobs.availableJobs')}
+                    {...generateTabA11yProps(0)}
+                  />
+                  <Tab
+                    label={t('worker.jobs.myJobs')}
+                    {...generateTabA11yProps(1)}
+                  />
+                </Tabs>
               </Box>
-            </TableQueryContextProvider>
+            </Box>
           </Stack>
         </Paper>
       </Grid>

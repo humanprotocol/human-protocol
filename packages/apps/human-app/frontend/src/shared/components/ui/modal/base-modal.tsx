@@ -1,5 +1,4 @@
 import { type PropsWithChildren, useCallback } from 'react';
-
 import CloseIcon from '@mui/icons-material/Close';
 import {
   IconButton,
@@ -8,6 +7,8 @@ import {
   type SxProps,
   type Theme,
 } from '@mui/material';
+
+import { useColorMode } from '@/shared/contexts/color-mode/use-color-mode';
 
 type Props = {
   open: boolean;
@@ -25,6 +26,8 @@ export function BaseModal({
   closeButtonSx,
   children,
 }: PropsWithChildren<Props>) {
+  const { colorPalette } = useColorMode();
+
   const handleClose = useCallback(() => {
     if (isLoading) return;
     onClose();
@@ -61,6 +64,7 @@ export function BaseModal({
           borderRadius: '20px',
           position: 'relative',
           boxShadow: 'none',
+          bgcolor: colorPalette.background.paper,
           ...sx,
         }}
       >
@@ -69,7 +73,7 @@ export function BaseModal({
           onClick={handleClose}
           sx={{
             p: 0.5,
-            color: 'neutral.100',
+            color: colorPalette.text.auxiliary100,
             position: 'absolute',
             top: 32,
             right: 32,
@@ -86,5 +90,3 @@ export function BaseModal({
     </Modal>
   );
 }
-
-export default BaseModal;

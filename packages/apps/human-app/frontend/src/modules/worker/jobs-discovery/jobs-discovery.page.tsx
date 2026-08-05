@@ -3,11 +3,12 @@ import { Box, Stack, Typography } from '@mui/material';
 import { t } from 'i18next';
 
 import { OraclesList } from './components/oracles-list';
-import { HCaptchaWidget } from './components/hcaptha-widget';
+import { HCaptchaWidget } from './components/hcaptcha-widget';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { useGetOracles } from '../hooks/use-get-oracles';
 import { useGetOraclesNotifications } from '../hooks/use-get-oracles-notifications';
+import { JobsSwitcherMobile } from '@/router/components/layout/protected/jobs-switcher-mobile';
 
 const bull = (
   <Box component="span" sx={{ display: 'inline-block', mx: 0.75 }}>
@@ -55,7 +56,18 @@ export function JobsDiscoveryPage() {
       >
         <HCaptchaWidget />
       </Stack>
-      <Stack sx={{ gap: { xs: 2.5, md: 4 }, px: { xs: 2, md: 4 }, py: 4 }}>
+      {isMobile && (
+        <Stack sx={{ width: '100%', my: 2.5, px: 2 }}>
+          <JobsSwitcherMobile />
+        </Stack>
+      )}
+      <Stack
+        sx={{
+          gap: { xs: 2.5, md: 4 },
+          px: { xs: 2, md: 4 },
+          py: { xs: 0, md: 4 },
+        }}
+      >
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Typography
             component="h1"

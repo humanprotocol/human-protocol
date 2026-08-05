@@ -284,25 +284,51 @@
     },
     "jobs": {
       "hCaptcha": "hCaptcha",
-      "successFullyAssignedJob": "Successfully assigned a task!",
+      "successfullyAssignedJob": "Successfully claimed the task!",
       "errorFetchingData": "There was an error while fetching data, please try again",
       "availableJobs": "Available Jobs",
-      "myJobs": "My Tasks",
+      "myJobs": "My Jobs",
       "jobsDiscovery": "Jobs Discovery",
       "jobDescription": "Job description",
+      "action": "Action",
+      "taskDescription": "Task Desc.",
+      "taskDescriptionTitle": "Task Description",
+      "oracles": "Oracles",
+      "address": "Address",
       "escrowAddress": "Escrow address",
       "network": "Network",
+      "reward": "Reward",
       "rewardAmount": "Reward amount",
       "jobType": "Task type",
       "expiresAt": "Expires at",
+      "expiryTime": "Expiry Time",
+      "expired": "Expired",
       "refresh": "Refresh",
       "status": "Status",
       "selectJob": "Select Task",
+      "claimTask": "Claim Task",
       "searchEscrowAddress": "Search escrow address",
       "resign": "Resign",
       "solve": "Solve",
       "filter": "Filter",
+      "jobsFilter": "Jobs Filter",
+      "applyFilters": "Apply Filters",
       "escrowAddressColumnId": "escrowAddress",
+      "statusFilter": {
+        "all": "All",
+        "inProgress": "In Progress",
+        "completed": "Completed"
+      },
+      "timeUntil": {
+        "day": "day",
+        "days": "days",
+        "hour": "hour",
+        "hours": "hours",
+        "minute": "minute",
+        "minutes": "minutes",
+        "second": "second",
+        "seconds": "seconds"
+      },
       "Ethereum": "Ethereum",
       "Polygon": "Polygon",
       "sortDirection": {
@@ -330,7 +356,8 @@
           "fortune": "Fortune"
         }
       },
-      "next": "Next"
+      "next": "Next",
+      "jobsFor": "Jobs for"
     },
     "hcaptchaLabeling": {
       "description": "HMT payouts are automatically computed by an oracle based on correctness and volume of tasks completed. Payout timing depends on total job size, and can take as little as an hour or as long as a week or so, depending on overall job status.",

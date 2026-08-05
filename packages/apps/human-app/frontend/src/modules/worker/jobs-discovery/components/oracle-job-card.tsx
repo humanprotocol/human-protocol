@@ -3,6 +3,7 @@ import {
   Box,
   Card,
   CardContent,
+  Chip,
   Collapse,
   Stack,
   Tooltip,
@@ -19,13 +20,13 @@ import {
   OracleRewardIcon,
 } from '@/shared/components/ui/icons';
 import { useColorMode } from '@/shared/contexts/color-mode';
-import { shortenEscrowAddress } from '@/shared/helpers/evm';
 import { CopyToClipboardButton } from '@/shared/components/ui/copy-to-clipboard-button';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { Button } from '@/shared/components/ui/button';
 import { JOB_TYPES } from '@/shared/consts';
 import { JobType } from '@/modules/smart-contracts/EthKVStore/config';
-import { Chip } from '@/shared/components/ui/chip';
+import { ExploreTasksDialog } from './explore-tasks-dialog';
+import { EvmAddress, RewardAmount } from '../../jobs/components';
 
 function JobTypesTooltipTitle({ jobTypes }: { jobTypes: string[] }) {
   return (
@@ -40,7 +41,6 @@ function JobTypesTooltipTitle({ jobTypes }: { jobTypes: string[] }) {
             sx={{
               color: 'text.primary',
               fontWeight: 500,
-              letterSpacing: '0.12px',
             }}
           >
             {label}
@@ -52,6 +52,7 @@ function JobTypesTooltipTitle({ jobTypes }: { jobTypes: string[] }) {
 }
 
 export function OracleJobCard({ oracle }: { oracle: Oracle }) {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isTaskTypesOpen, setIsTaskTypesOpen] = useState(false);
 
   const { colorPalette } = useColorMode();
@@ -78,7 +79,7 @@ export function OracleJobCard({ oracle }: { oracle: Oracle }) {
           display: 'flex',
           flexDirection: 'column',
           p: 0,
-          gap: 2.5,
+          gap: 1.5,
           '&:last-child': { pb: 0 },
         }}
       >
@@ -88,7 +89,6 @@ export function OracleJobCard({ oracle }: { oracle: Oracle }) {
           sx={{
             color: colorPalette.text.auxiliary100,
             fontWeight: 600,
-            letterSpacing: '0.12px',
           }}
         >
           {oracle.name}
@@ -101,21 +101,11 @@ export function OracleJobCard({ oracle }: { oracle: Oracle }) {
               sx={{
                 color: colorPalette.text.primary,
                 fontWeight: 500,
-                letterSpacing: '0.12px',
               }}
             >
               {t('worker.oraclesList.address')}:
             </Typography>
-            <Typography
-              variant="body2"
-              sx={{
-                color: colorPalette.text.auxiliary200,
-                fontWeight: 500,
-                letterSpacing: '0.12px',
-              }}
-            >
-              {shortenEscrowAddress(oracle.address, 4, 4)}
-            </Typography>
+            <EvmAddress address={oracle.address} />
             <CopyToClipboardButton
               value={oracle.address}
               sx={{
@@ -133,7 +123,6 @@ export function OracleJobCard({ oracle }: { oracle: Oracle }) {
               sx={{
                 color: colorPalette.text.primary,
                 fontWeight: 500,
-                letterSpacing: '0.12px',
               }}
             >
               {t('worker.oraclesList.reward')}:
@@ -141,19 +130,29 @@ export function OracleJobCard({ oracle }: { oracle: Oracle }) {
             <Typography
               variant="body2"
               sx={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 0.5,
                 color: colorPalette.text.auxiliary200,
                 fontWeight: 500,
-                letterSpacing: '0.12px',
               }}
             >
               {isRewardAmountsEqual ? (
-                <>
-                  {oracle.minRewardAmount} {oracle.rewardToken}
-                </>
+                <RewardAmount
+                  reward_amount={oracle.minRewardAmount}
+                  reward_token={oracle.rewardToken}
+                />
               ) : (
                 <>
-                  {oracle.minRewardAmount} {oracle.rewardToken} -{' '}
-                  {oracle.maxRewardAmount} {oracle.rewardToken}
+                  <RewardAmount
+                    reward_amount={oracle.minRewardAmount}
+                    reward_token={oracle.rewardToken}
+                  />
+                  -{' '}
+                  <RewardAmount
+                    reward_amount={oracle.maxRewardAmount}
+                    reward_token={oracle.rewardToken}
+                  />
                 </>
               )}
             </Typography>
@@ -161,7 +160,8 @@ export function OracleJobCard({ oracle }: { oracle: Oracle }) {
         </Stack>
         <Stack
           sx={{
-            py: { xs: 2, md: 1 },
+            height: { xs: 'auto', md: 40 },
+            py: { xs: 1.5, md: 1 },
             px: { xs: 2, md: 0 },
             mx: { xs: -2, md: 0 },
             gap: isTaskTypesOpen && hasTasks ? 1 : 0,
@@ -254,6 +254,7 @@ export function OracleJobCard({ oracle }: { oracle: Oracle }) {
                 bgcolor: 'transparent',
                 color: colorPalette.accent.main,
               }}
+              onClick={() => setIsDialogOpen(true)}
             >
               {t('worker.oraclesList.exploreTasks')}{' '}
               <ArrowForwardIcon
@@ -270,7 +271,14 @@ export function OracleJobCard({ oracle }: { oracle: Oracle }) {
                   <Chip
                     key={label}
                     label={label}
-                    backgroundColor={colorPalette.accent.main}
+                    sx={{
+                      typography: 'body2',
+                      fontWeight: 500,
+                      color: colorPalette.text.primary,
+                      bgcolor: colorPalette.background.subtle,
+                      borderRadius: '99px',
+                      border: `0.5px solid ${colorPalette.border.main}`,
+                    }}
                   />
                 );
               })}
@@ -278,6 +286,11 @@ export function OracleJobCard({ oracle }: { oracle: Oracle }) {
           </Collapse>
         </Stack>
       </CardContent>
+      <ExploreTasksDialog
+        open={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        oracle={oracle}
+      />
     </Card>
   );
 }

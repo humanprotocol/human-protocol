@@ -27,7 +27,7 @@ export function MyJobsTableActions({ job }: Props) {
         target="_blank"
         to={job.url}
         sx={{
-          height: { xs: '48px', md: '30px' },
+          height: { xs: '44px', md: '30px' },
           maxWidth: { xs: 'unset', sm: '160px' },
           flex: { xs: 1, md: 'unset' },
         }}

@@ -23,7 +23,11 @@ export function RewardAmount({
 
   if (!isNumeric) {
     return (
-      <Typography variant={variant} sx={{ color, fontWeight: 500 }}>
+      <Typography
+        component="span"
+        variant={variant}
+        sx={{ color, fontWeight: 500 }}
+      >
         {`${reward_amount} ${reward_token}`}
       </Typography>
     );
@@ -33,7 +37,11 @@ export function RewardAmount({
   if (hasDecimals) {
     return (
       <Tooltip title={`${reward_amount} ${reward_token}`}>
-        <Typography variant={variant} sx={{ color, fontWeight: 500 }}>
+        <Typography
+          component="span"
+          variant={variant}
+          sx={{ color, fontWeight: 500 }}
+        >
           {`${parsedReward.toFixed(2)} ${reward_token}`}
         </Typography>
       </Tooltip>
@@ -41,7 +49,11 @@ export function RewardAmount({
   }
 
   return (
-    <Typography variant={variant} sx={{ color, fontWeight: 500 }}>
+    <Typography
+      component="span"
+      variant={variant}
+      sx={{ color, fontWeight: 500 }}
+    >
       {`${reward_amount} ${reward_token}`}
     </Typography>
   );

@@ -35,6 +35,8 @@ import TriangleIcon from '@/assets/icons/triangle.svg';
 import HcaptchaIconAsset from '@/assets/icons/hcaptcha.svg';
 import HcaptchaDisabledIconLight from '@/assets/icons/hcaptcha-disabled-icon.svg';
 import HcaptchaDisabledIconDark from '@/assets/icons-dark-mode/hcaptcha-disabled-icon.svg';
+import EthereumIcon from '@/assets/icons/ethereum-icon.svg';
+import PolygonIcon from '@/assets/icons/polygon-icon.svg';
 
 function HumanLogoIcon() {
   const { isDarkMode } = useColorMode();
@@ -262,6 +264,83 @@ function MenuIcon(props: SvgIconProps) {
   );
 }
 
+function FilterIcon(props: SvgIconProps) {
+  return (
+    <SvgIcon {...props} viewBox="0 0 24 24" fill="none">
+      <path
+        fill="none"
+        d="M12 5H2M6 12H18M9 19H15M16 5H22M19 8V2"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </SvgIcon>
+  );
+}
+
+function JobExpiryTimeIcon(props: SvgIconProps) {
+  return (
+    <SvgIcon {...props} viewBox="0 0 20 20" fill="none">
+      <path
+        fill="none"
+        d="M6.98108 2.5C6.80282 2.56661 6.62752 2.63927 6.45541 2.71772M17.266 13.5843C17.3512 13.3999 17.4298 13.2119 17.5013 13.0204M15.4169 16.1372C15.56 16.0037 15.6983 15.8651 15.8316 15.7217M12.7254 17.8102C12.8871 17.7493 13.0464 17.6833 13.203 17.6126M10.1313 18.3282C9.93887 18.3349 9.74511 18.3349 9.55266 18.3282M6.49073 17.617C6.6414 17.6848 6.79449 17.7482 6.94984 17.8069M3.8951 15.7673C4.009 15.888 4.12655 16.0053 4.24755 16.119M2.19522 13.0538C2.25762 13.2185 2.32519 13.3807 2.39774 13.5402M1.67211 10.4211C1.6667 10.2477 1.66671 10.0732 1.67211 9.89951M2.18917 7.28095C2.25048 7.11804 2.31684 6.9576 2.38806 6.79983M3.88132 4.56603C4.00187 4.43762 4.12651 4.3131 4.25505 4.1927"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        fill="none"
+        d="M11.25 10C11.25 10.6904 10.6904 11.25 10 11.25C9.30964 11.25 8.75 10.6904 8.75 10C8.75 9.30964 9.30964 8.75 10 8.75M11.25 10C11.25 9.30964 10.6904 8.75 10 8.75M11.25 10H13.3333M10 8.75V5"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+      />
+      <path
+        fill="none"
+        d="M18.3333 9.99996C18.3333 5.39759 14.6024 1.66663 10 1.66663"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+      />
+    </SvgIcon>
+  );
+}
+
+function JobStatusIcon(props: SvgIconProps) {
+  return (
+    <SvgIcon {...props} viewBox="0 0 24 24" fill="none">
+      <circle
+        cx="12"
+        cy="12"
+        r="10"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        fill="none"
+        d="M12 16v-4"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        fill="none"
+        d="M12 8h.01"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </SvgIcon>
+  );
+}
+
 export {
   HumanLogoIcon,
   HumanLogoNavbarIcon,
@@ -288,4 +367,9 @@ export {
   MenuIcon,
   HcaptchaIcon,
   HcaptchaDisabledIcon,
+  FilterIcon,
+  JobExpiryTimeIcon,
+  JobStatusIcon,
+  EthereumIcon,
+  PolygonIcon,
 };

@@ -1,21 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 
 export function useCombinePages<T>(
-  tableData: { pages: { results: T[] }[] } | undefined,
-  page: number
+  tableData: { pages: { results: T[] }[] } | undefined
 ) {
-  const [allPages, setAllPages] = useState<T[]>([]);
-
-  useEffect(() => {
-    if (!tableData) return;
-    const pagesFromRes = tableData.pages.flatMap((pages) => pages.results);
-
-    if (page === 0) {
-      setAllPages(pagesFromRes);
-    } else {
-      setAllPages((state) => [...state, ...pagesFromRes]);
-    }
-  }, [tableData, page]);
-
-  return allPages;
+  return useMemo(
+    () => tableData?.pages.flatMap((page) => page.results) ?? [],
+    [tableData?.pages]
+  );
 }
