@@ -94,7 +94,6 @@ function SuccessState() {
     <Stack
       sx={{
         alignItems: 'center',
-        //textAlign: 'center',
         gap: 2,
         my: { xs: 3, md: 5 },
         px: 2,

@@ -44,10 +44,7 @@ export function AvailableJobsListMobile({
         </Stack>
       )}
       {allPages.map((d) => (
-        <AvailableJobsCard
-          key={`${d.escrow_address}-${d.chain_id}-${d.job_type}`}
-          job={d}
-        />
+        <AvailableJobsCard key={d.escrow_address} job={d} />
       ))}
       {hasNextPage && (
         <Button

@@ -9,7 +9,6 @@ import {
 import { type MyJob } from '../../../schemas';
 import { useColorMode } from '@/shared/contexts/color-mode/use-color-mode';
 import { JobType } from '@/modules/smart-contracts/EthKVStore/config';
-import { JOB_TYPES } from '@/shared/consts';
 import { TimeUntil } from '../time-until';
 import { ChainIcon } from '@/shared/components/ui/chain-icon';
 import {
@@ -55,8 +54,7 @@ export function MyJobsCardMobile({ job }: { job: MyJob }) {
   const { colorPalette } = useColorMode();
   const { t } = useTranslation();
 
-  const jobType = JOB_TYPES.find((j) => j === job.job_type) as JobType;
-  const jobTypeLabel = t(`jobTypeLabels.${jobType}`);
+  const jobTypeLabel = t(`jobTypeLabels.${job.job_type as JobType}`);
 
   const hasUrl = !!job.url;
 

@@ -1,87 +1,41 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { formatDistanceToNow } from 'date-fns';
+import { enUS } from 'date-fns/locale';
 
 const SECOND_IN_MS = 1000;
-const MINUTE_IN_SECONDS = 60;
-const HOUR_IN_SECONDS = 60 * MINUTE_IN_SECONDS;
-const DAY_IN_SECONDS = 24 * HOUR_IN_SECONDS;
 
-const UNIT_LABEL_KEYS = {
-  days: {
-    singular: 'worker.jobs.timeUntil.day',
-    plural: 'worker.jobs.timeUntil.days',
-  },
-  hours: {
-    singular: 'worker.jobs.timeUntil.hour',
-    plural: 'worker.jobs.timeUntil.hours',
-  },
-  minutes: {
-    singular: 'worker.jobs.timeUntil.minute',
-    plural: 'worker.jobs.timeUntil.minutes',
-  },
-  seconds: {
-    singular: 'worker.jobs.timeUntil.second',
-    plural: 'worker.jobs.timeUntil.seconds',
-  },
+const DATE_FNS_LOCALES = {
+  en: enUS,
 } as const;
 
-type TimeUnit = keyof typeof UNIT_LABEL_KEYS;
-
-function getRemainingTime(
-  targetTime: number,
-  now: number
-): {
-  value: number;
-  unit: TimeUnit;
-} {
-  const totalSeconds = Math.max(
-    0,
-    Math.floor((targetTime - now) / SECOND_IN_MS)
-  );
-
-  if (totalSeconds >= DAY_IN_SECONDS) {
-    return {
-      value: Math.floor(totalSeconds / DAY_IN_SECONDS),
-      unit: 'days',
-    };
-  }
-
-  if (totalSeconds >= HOUR_IN_SECONDS) {
-    return {
-      value: Math.floor(totalSeconds / HOUR_IN_SECONDS),
-      unit: 'hours',
-    };
-  }
-
-  if (totalSeconds >= MINUTE_IN_SECONDS) {
-    return {
-      value: Math.floor(totalSeconds / MINUTE_IN_SECONDS),
-      unit: 'minutes',
-    };
-  }
-
-  return {
-    value: totalSeconds,
-    unit: 'seconds',
-  };
-}
-
 export function TimeUntil({ date }: { date?: string | null }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [now, setNow] = useState(Date.now());
 
-  const targetTime = useMemo(() => {
+  const dateFnsLocale = useMemo(() => {
+    const language = i18n.resolvedLanguage ?? i18n.language;
+    const baseLanguage = language.split(
+      '-'
+    )[0] as keyof typeof DATE_FNS_LOCALES;
+
+    return DATE_FNS_LOCALES[baseLanguage] ?? enUS;
+  }, [i18n.language, i18n.resolvedLanguage]);
+
+  const targetDate = useMemo(() => {
     if (!date) {
       return null;
     }
 
-    const parsedTime = new Date(date).getTime();
+    const parsedDate = new Date(date);
 
-    return Number.isNaN(parsedTime) ? null : parsedTime;
+    return Number.isNaN(parsedDate.getTime()) ? null : parsedDate;
   }, [date]);
 
   useEffect(() => {
-    if (targetTime === null || targetTime <= Date.now()) {
+    const targetTime = targetDate?.getTime();
+
+    if (targetTime == null || targetTime <= Date.now()) {
       return;
     }
 
@@ -100,21 +54,18 @@ export function TimeUntil({ date }: { date?: string | null }) {
     return () => {
       clearInterval(intervalId);
     };
-  }, [targetTime]);
+  }, [targetDate]);
 
-  if (targetTime === null || targetTime <= now) {
+  if (targetDate === null || targetDate.getTime() <= now) {
     return t('worker.jobs.expired');
   }
 
-  const remainingTime = getRemainingTime(targetTime, now);
-  const unitLabelKey =
-    UNIT_LABEL_KEYS[remainingTime.unit][
-      remainingTime.value === 1 ? 'singular' : 'plural'
-    ];
-
   return (
     <>
-      {remainingTime.value} {t(unitLabelKey)}
+      {formatDistanceToNow(targetDate, {
+        includeSeconds: true,
+        locale: dateFnsLocale,
+      })}
     </>
   );
 }

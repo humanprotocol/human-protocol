@@ -29,16 +29,6 @@ export type Oracle = OracleBase & {
   name: string;
 };
 
-// const H_CAPTCHA_ORACLE: Oracle = {
-//   address: env.VITE_H_CAPTCHA_ORACLE_ADDRESS,
-//   chainId: isTestnet ? TestnetChains[0].chainId : MainnetChains[0].chainId,
-//   jobTypes: env.VITE_H_CAPTCHA_ORACLE_TASK_TYPES,
-//   role: env.VITE_H_CAPTCHA_ORACLE_ROLE,
-//   url: env.VITE_H_CAPTCHA_ORACLE_ANNOTATION_TOOL,
-//   name: 'hCaptcha',
-//   registrationNeeded: false,
-// };
-
 async function getOracles() {
   try {
     let oracles: Oracle[] = [];

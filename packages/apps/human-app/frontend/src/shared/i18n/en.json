@@ -319,16 +319,6 @@
         "inProgress": "In Progress",
         "completed": "Completed"
       },
-      "timeUntil": {
-        "day": "day",
-        "days": "days",
-        "hour": "hour",
-        "hours": "hours",
-        "minute": "minute",
-        "minutes": "minutes",
-        "second": "second",
-        "seconds": "seconds"
-      },
       "Ethereum": "Ethereum",
       "Polygon": "Polygon",
       "sortDirection": {

@@ -69,7 +69,7 @@ export function AvailableJobsCard({ job }: { job: AvailableJob }) {
 
   return (
     <Paper
-      key={`${job.escrow_address}-${job.chain_id}-${job.job_type}`}
+      key={job.escrow_address}
       elevation={0}
       sx={{
         mb: 2.5,
