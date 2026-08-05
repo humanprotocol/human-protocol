@@ -29,6 +29,7 @@ const hourglassSpin = keyframes`
   }
 `;
 
+// TODO: Extend to 30 seconds
 const CHECK_STATUS_COOLDOWN_TIME = 10000;
 
 export function IdentityVerificationControl({
