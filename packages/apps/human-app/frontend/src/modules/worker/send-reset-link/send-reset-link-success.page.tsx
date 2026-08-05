@@ -79,14 +79,11 @@ export function SendResetLinkWorkerSuccessPage() {
         overflow: 'hidden',
       }}
     >
-      <Stack sx={{ width: { xs: '100%', md: '400px' } }}>
+      <Stack sx={{ width: { xs: '100%', md: '400px' }, gap: 3 }}>
         <Typography
           component="h1"
           variant="h4"
-          sx={{
-            color: colorPalette.text.auxiliary100,
-            mb: 3,
-          }}
+          sx={{ color: colorPalette.text.auxiliary100 }}
         >
           {t('worker.sendResetLinkForm.title')}
         </Typography>
