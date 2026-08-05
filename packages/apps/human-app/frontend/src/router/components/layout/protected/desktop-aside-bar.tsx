@@ -1,16 +1,46 @@
+import {
+  Box,
+  IconButton,
+  List,
+  ListItem,
+  ListItemButton,
+  Stack,
+} from '@mui/material';
+import { useTranslation } from 'react-i18next';
+import { Link, useLocation } from 'react-router-dom';
+
 import { ProfileData } from '@/modules/worker/profile/components/profile-data';
+import { routerPaths } from '@/router/router-paths';
 import { Button } from '@/shared/components/ui/button';
 import { ColorModeSwitch } from '@/shared/components/ui/dark-mode-switch';
-import { HelpIcon, HumanLogoNavbarIcon } from '@/shared/components/ui/icons';
+import {
+  HelpIcon,
+  HumanLogoNavbarIcon,
+  TriangleIcon,
+} from '@/shared/components/ui/icons';
 import { useColorMode } from '@/shared/contexts/color-mode/use-color-mode';
 import { useHandleMainNavIconClick } from '@/shared/hooks/use-handle-main-nav-icon-click';
-import { Box, IconButton, Stack } from '@mui/material';
-import { useTranslation } from 'react-i18next';
+
+const menuItems = [
+  {
+    labelKey: 'components.DrawerNavigation.availableJobs',
+    href: routerPaths.worker.jobsDiscovery,
+  },
+  {
+    labelKey: 'components.DrawerNavigation.myJobs',
+    href: routerPaths.worker.myJobs,
+  },
+] as const;
 
 export function DesktopAsideBar() {
-  const { colorPalette } = useColorMode();
+  const { colorPalette, isDarkMode } = useColorMode();
   const { t } = useTranslation();
+  const { pathname } = useLocation();
   const handleMainNavIconClick = useHandleMainNavIconClick();
+
+  const activeLinkGradient = isDarkMode
+    ? 'linear-gradient(90deg, rgba(212, 207, 255, 0.10) 0%, rgba(37, 29, 71, 0.10) 90%)'
+    : 'linear-gradient(90deg, rgba(50, 10, 141, 0.10) 0%, rgba(255, 255, 255, 0.10) 90%)';
 
   return (
     <Stack
@@ -42,7 +72,43 @@ export function DesktopAsideBar() {
         </IconButton>
       </Box>
       <Stack sx={{ justifyContent: 'space-between', flex: 1 }}>
-        <Box sx={{ height: '100px' }}></Box>
+        <Box sx={{ height: '100px' }}>
+          <List sx={{ p: 0 }}>
+            {menuItems.map((item) => {
+              const { href, labelKey } = item;
+              const isActive = pathname === href;
+              return (
+                <ListItem
+                  key={href}
+                  sx={{
+                    p: 0,
+                    background: isActive ? activeLinkGradient : 'transparent',
+                  }}
+                >
+                  <ListItemButton
+                    component={Link}
+                    to={item.href}
+                    sx={{
+                      alignItems: 'center',
+                      px: 4,
+                      py: 2,
+                      gap: 1,
+                      fontSize: 16,
+                      fontWeight: 600,
+                      color: isActive
+                        ? colorPalette.text.primary
+                        : colorPalette.text.auxiliary100,
+                      letterSpacing: 0,
+                    }}
+                  >
+                    {isActive && <TriangleIcon />}
+                    {t(labelKey)}
+                  </ListItemButton>
+                </ListItem>
+              );
+            })}
+          </List>
+        </Box>
         <Stack
           sx={{
             height: 160,

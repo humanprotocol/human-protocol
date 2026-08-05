@@ -7,6 +7,7 @@ export const darkColorPalette = {
   text: {
     primary: '#D4CFFF',
     secondary: '#6C6978',
+    light: '#9387ff',
     disabled: 'rgba(212, 207, 255, 0.5)',
     disabledSecondary: 'rgba(147, 135, 255, 1)',
     auxiliary100: '#ffffff',
@@ -72,11 +73,3 @@ export const darkColorPalette = {
   // for 'warning', 'info' native colors from MUI were pointed as expected
   // 'info' native colors from MUI were pointed as expected
 } satisfies typeof colorPalette;
-
-// if Figma design was inconsistent for some reasons and there are extra colors for dark mode should be included in this object
-export const onlyDarkModeColor = {
-  backArrowBg: 'rgba(246, 247, 254, 0.1)',
-  additionalTextColor: '#9387FF',
-  mainColorWithOpacity: '#CDC7FFCC',
-  listItemColor: '#CDC7FF29',
-};

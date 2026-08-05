@@ -1,9 +1,8 @@
-import { Box, Stack, styled } from '@mui/material';
-import { useEffect, useRef, useState, type ReactElement } from 'react';
+import { useRef } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
+import { Box, Stack, styled } from '@mui/material';
 
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
-import { useIsHCaptchaLabelingPage } from '@/shared/hooks/use-is-hcaptcha-labeling-page';
 import { GovernanceBanner } from '@/modules/governance-banner/components/governance-banner';
 import { Footer } from '../../footer';
 import { Navbar } from './navbar';
@@ -13,58 +12,21 @@ import { ProfileBottomTray } from '@/modules/worker/profile/components/profile-b
 import { MOBILE_BOTTOM_TRAY_HEIGHT } from '@/shared/consts';
 import { routerPaths } from '@/router/router-paths';
 
-const Main = styled('main', {
-  shouldForwardProp: (prop) => prop !== 'open',
-})<{
-  open?: boolean;
-}>(({ theme, open }) => ({
-  width: '100%',
+const Main = styled('main')({
   display: 'flex',
   flex: '1',
-  transition: theme.transitions.create('margin', {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-  ...(open && {
-    transition: theme.transitions.create('margin', {
-      easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-  }),
-}));
+  width: '100%',
+});
 
-export function ProtectedLayout({
-  renderHCaptchaStatisticsDrawer,
-  renderGovernanceBanner,
-}: {
-  renderHCaptchaStatisticsDrawer?: (isOpen: boolean) => ReactElement;
-  renderGovernanceBanner?: boolean;
-}) {
+export function ProtectedLayout() {
   const layoutElementRef = useRef<HTMLDivElement | null>(null);
-  const isHCaptchaLabelingPage = useIsHCaptchaLabelingPage();
+
   const isMobile = useIsMobile();
-  const [drawerOpen, setDrawerOpen] = useState(!isMobile);
-  const [hcaptchaDrawerOpen, setHcaptchaDrawerOpen] = useState(false);
   const { colorPalette } = useColorMode();
   const location = useLocation();
-  const toggleUserStatsDrawer = isHCaptchaLabelingPage
-    ? () => {
-        setHcaptchaDrawerOpen((state) => !state);
-      }
-    : undefined;
 
   const isProfilePage = location.pathname === routerPaths.worker.profile;
   const isBottomTrayVisible = isMobile && !isProfilePage;
-
-  useEffect(() => {
-    if (isMobile) {
-      setHcaptchaDrawerOpen(false);
-      setDrawerOpen(false);
-    } else {
-      setHcaptchaDrawerOpen(false);
-      setDrawerOpen(true);
-    }
-  }, [isMobile]);
 
   return (
     <Stack
@@ -84,23 +46,11 @@ export function ProtectedLayout({
         },
       }}
     >
-      {isMobile && (
-        <Navbar
-          open={drawerOpen}
-          setOpen={setDrawerOpen}
-          toggleUserStatsDrawer={toggleUserStatsDrawer}
-          userStatsDrawerOpen={hcaptchaDrawerOpen}
-        />
-      )}
-
+      {isMobile && <Navbar />}
       {!isMobile && <DesktopAsideBar />}
-      {isHCaptchaLabelingPage && renderHCaptchaStatisticsDrawer
-        ? renderHCaptchaStatisticsDrawer(hcaptchaDrawerOpen)
-        : null}
       <Stack
         sx={{
           flex: 1,
-          py: { xs: 0, md: 4 },
           gap: { xs: 0, md: 3 },
           bgcolor: colorPalette.background.paper,
           borderRadius: { xs: '0px', md: '30px' },
@@ -110,21 +60,21 @@ export function ProtectedLayout({
           },
         }}
       >
-        <Main open={drawerOpen}>
+        <Main>
           <Stack
             sx={{
               width: '100%',
               flexWrap: 'nowrap',
             }}
           >
-            {renderGovernanceBanner && <GovernanceBanner />}
+            <GovernanceBanner />
             <Box ref={layoutElementRef} sx={{ height: '100%' }}>
               <Outlet />
             </Box>
           </Stack>
           {isBottomTrayVisible && <ProfileBottomTray />}
         </Main>
-        <Footer displayChatIcon={!isMobile || !drawerOpen} isProtected />
+        <Footer displayChatIcon={!isMobile} />
       </Stack>
     </Stack>
   );

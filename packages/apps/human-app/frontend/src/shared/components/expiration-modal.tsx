@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/shared/components/ui/button';
 import { routerPaths } from '@/router/router-paths';
 import { browserAuthProvider } from '@/shared/contexts/browser-auth-provider';
-import { breakpoints } from '@/shared/styles/breakpoints';
 import { useModal } from '@/shared/contexts/modal-context';
 import { useColorMode } from '../contexts/color-mode';
 
@@ -24,10 +23,7 @@ export function ExpirationModal() {
       sx={{
         alignItems: 'center',
         justifyContent: 'center',
-        p: 15,
-        [breakpoints.mobile]: {
-          p: 2,
-        },
+        p: { xs: 2, md: 15 },
       }}
     >
       <Stack

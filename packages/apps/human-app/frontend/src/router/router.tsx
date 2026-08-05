@@ -8,7 +8,6 @@ import {
 import { RequireAuth } from '@/modules/auth/providers/require-auth';
 import { RequireWalletConnect } from '@/shared/contexts/wallet-connect';
 import { RequireWeb3Auth } from '@/modules/auth-web3/providers/require-web3-auth';
-import { UserStatsDrawer } from '@/modules/worker/hcaptcha-labeling';
 import { routerPaths } from './router-paths';
 import { ProtectedLayout, UnprotectedLayout } from './components';
 
@@ -38,12 +37,7 @@ export function Router() {
           <Route
             element={
               <RequireAuth>
-                <ProtectedLayout
-                  renderHCaptchaStatisticsDrawer={(isOpen) => (
-                    <UserStatsDrawer isOpen={isOpen} />
-                  )}
-                  renderGovernanceBanner
-                />
+                <ProtectedLayout />
               </RequireAuth>
             }
             key={routerProps.path}

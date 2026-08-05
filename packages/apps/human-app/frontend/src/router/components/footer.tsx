@@ -6,13 +6,9 @@ import { useColorMode } from '@/shared/contexts/color-mode';
 
 interface FooterProps {
   displayChatIcon?: boolean;
-  isProtected?: boolean;
 }
 
-export function Footer({
-  displayChatIcon = true,
-  isProtected = false,
-}: FooterProps) {
+export function Footer({ displayChatIcon = true }: FooterProps) {
   const { colorPalette, isDarkMode } = useColorMode();
   const { t } = useTranslation();
 
@@ -24,8 +20,8 @@ export function Footer({
       container
       sx={{
         width: '100%',
-        px: { xs: 3, md: 0 },
-        py: { xs: 2, md: isProtected ? 0 : 3 },
+        px: { xs: 3, md: 2 },
+        py: { xs: 2, md: 3 },
         bgcolor: { xs: colorPalette.background.paper, md: 'transparent' },
         borderTop: {
           xs: `1px solid ${colorPalette.border.main}`,

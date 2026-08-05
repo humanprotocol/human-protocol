@@ -1,5 +1,5 @@
-import { Box, IconButton, Stack, Tooltip, Typography } from '@mui/material';
-import { useEffect, useRef, useState, type MouseEvent } from 'react';
+import { useEffect } from 'react';
+import { Box, Stack, Typography } from '@mui/material';
 import { t } from 'i18next';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -11,22 +11,16 @@ import {
 } from '@/shared/hooks/use-notification';
 import { useColorMode } from '@/shared/contexts/color-mode/use-color-mode';
 import { ProfileData } from '../components/profile-data';
-import {
-  CheckmarkIcon,
-  CopyIcon,
-  LogoutIcon,
-} from '@/shared/components/ui/icons';
+import { CheckmarkIcon, LogoutIcon } from '@/shared/components/ui/icons';
 import { shortenEscrowAddress } from '@/shared/helpers/evm';
 import { Button } from '@/shared/components/ui/button';
 import { browserAuthProvider } from '@/shared/contexts/browser-auth-provider';
 import { routerPaths } from '@/router/router-paths';
 import { BackButton } from '@/shared/components/ui/page-card/back-button';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
+import { CopyToClipboardButton } from '@/shared/components/ui/copy-to-clipboard-button';
 
 export function WorkerProfilePage() {
-  const [isCopied, setIsCopied] = useState(false);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
   const { user } = useAuthenticatedUser();
   const { colorPalette } = useColorMode();
   const { isConnected, initializing, web3ProviderMutation } =
@@ -39,22 +33,6 @@ export function WorkerProfilePage() {
     navigate(routerPaths.worker.jobsDiscovery);
   };
 
-  const handleCopyClick = (e: MouseEvent<HTMLButtonElement>) => {
-    if (isCopied) return;
-
-    e.stopPropagation();
-    navigator.clipboard.writeText(user.wallet_address ?? '');
-    setIsCopied(true);
-
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
-    timeoutRef.current = setTimeout(() => {
-      setIsCopied(false);
-    }, 1500);
-  };
-
   const handleSignOut = () => {
     browserAuthProvider.signOut({
       callback: () => {
@@ -62,15 +40,6 @@ export function WorkerProfilePage() {
       },
     });
   };
-
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-        timeoutRef.current = null;
-      }
-    };
-  }, []);
 
   useEffect(() => {
     if (initializing) return;
@@ -98,7 +67,7 @@ export function WorkerProfilePage() {
   ]);
 
   return (
-    <Stack sx={{ px: { xs: 2, md: 4 } }}>
+    <Stack sx={{ px: { xs: 2, md: 4 }, py: { xs: 0, md: 4 } }}>
       <Box
         sx={{
           display: 'flex',
@@ -200,25 +169,20 @@ export function WorkerProfilePage() {
               <Typography
                 variant="body1"
                 sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
                   fontWeight: 500,
                   color: colorPalette.text.primary,
                 }}
               >
                 {shortenEscrowAddress(user.wallet_address ?? '', 9, 8)}
-                <Tooltip
-                  title={t('components.copyToClipboard')}
-                  open={isCopied}
-                  placement="top"
-                >
-                  <IconButton
-                    onClick={handleCopyClick}
-                    disabled={isCopied}
-                    disableRipple
-                    sx={{ p: 0, ml: 1, '& svg': { width: 16, height: 16 } }}
-                  >
-                    <CopyIcon />
-                  </IconButton>
-                </Tooltip>
+                <CopyToClipboardButton
+                  value={user.wallet_address ?? ''}
+                  sx={{
+                    '& svg': { color: colorPalette.text.primary, fontSize: 20 },
+                  }}
+                />
               </Typography>
             </Stack>
           </Stack>

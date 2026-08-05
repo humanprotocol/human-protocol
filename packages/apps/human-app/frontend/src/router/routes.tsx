@@ -4,7 +4,6 @@ import { env } from '@/shared/env';
 import { RegistrationPage } from '@/modules/worker/oracle-registration';
 import {
   HcaptchaLabelingPage,
-  //UserStatsAccordion,
   EnableLabelerPage,
 } from '@/modules/worker/hcaptcha-labeling';
 import {
@@ -13,6 +12,7 @@ import {
 } from '@/modules/worker/email-verification';
 import { SignInWorkerPage } from '@/modules/signin/worker';
 import { JobsDiscoveryPage } from '@/modules/worker/jobs-discovery';
+import { MyJobsPage } from '@/modules/worker/jobs/my-jobs/my-jobs.page';
 import { WorkerProfilePage } from '@/modules/worker/profile';
 import { SignUpWorkerPage } from '@/modules/signup/worker';
 import { OperatorProfilePage } from '@/modules/operator/profile';
@@ -79,6 +79,12 @@ export const protectedRoutes: {
     routerProps: {
       path: routerPaths.worker.jobsDiscovery,
       element: <JobsDiscoveryPage />,
+    },
+  },
+  {
+    routerProps: {
+      path: routerPaths.worker.myJobs,
+      element: <MyJobsPage />,
     },
   },
   ...(env.VITE_FEATURE_FLAG_JOBS_DISCOVERY

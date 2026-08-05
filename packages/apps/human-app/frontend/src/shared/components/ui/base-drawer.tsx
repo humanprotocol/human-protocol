@@ -1,6 +1,7 @@
 import { useCallback, type PropsWithChildren } from 'react';
 import { Drawer, IconButton, type SxProps, type Theme } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import { useColorMode } from '@/shared/contexts/color-mode/use-color-mode';
 
 type Props = {
   open: boolean;
@@ -18,6 +19,8 @@ export function BaseDrawer({
   closeButtonSx,
   children,
 }: PropsWithChildren<Props>) {
+  const { colorPalette } = useColorMode();
+
   const handleClose = useCallback(() => {
     if (isLoading) return;
     onClose();
@@ -28,6 +31,9 @@ export function BaseDrawer({
       open={open}
       onClose={handleClose}
       anchor="bottom"
+      sx={{
+        zIndex: (theme) => theme.zIndex.drawer,
+      }}
       slotProps={{
         backdrop: {
           sx: {
@@ -43,6 +49,7 @@ export function BaseDrawer({
             borderTopRightRadius: '16px',
             border: 'none',
             height: '75dvh',
+            bgcolor: `${colorPalette.background.paper} !important`,
             ...sx,
           },
         },
@@ -54,11 +61,12 @@ export function BaseDrawer({
           position: 'absolute',
           top: 16,
           right: 16,
-          p: 0,
+          p: 0.5,
+          color: colorPalette.text.auxiliary100,
           ...closeButtonSx,
         }}
       >
-        <CloseIcon sx={{ color: 'neutral.100' }} />
+        <CloseIcon />
       </IconButton>
       {children}
     </Drawer>

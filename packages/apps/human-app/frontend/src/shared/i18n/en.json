@@ -61,6 +61,8 @@
       "jobs": "Tasks",
       "captchaLabeling": "hCaptcha labeling",
       "jobsDiscovery": "Jobs discovery",
+      "availableJobs": "Available Jobs",
+      "myJobs": "My Jobs",
       "profile": "Profile",
       "help": "Help",
       "logout": "Log Out"
@@ -91,7 +93,8 @@
       "reload": "Reload",
       "goHome": "Home Page"
     },
-    "copyToClipboard": "Copied"
+    "copyToClipboard": "Copied",
+    "noRecords": "No records to display"
   },
   "homepage": {
     "humanApp": "HUMAN App",
@@ -243,6 +246,16 @@
         "abandoned": "Abandoned"
       }
     },
+    "oraclesList": {
+      "jobOracles": "Job Oracles",
+      "address": "Address",
+      "reward": "Reward",
+      "tasks": "Tasks",
+      "task": "Task",
+      "exploreTasks": "Explore Tasks",
+      "source": "source",
+      "sources": "sources"
+    },
     "oraclesTable": {
       "annotationTool": "Annotation tool",
       "oracleAddress": "Oracle address",
@@ -253,6 +266,16 @@
         "gettingOracles": "There was an error while fetching oracles, please try again later."
       }
     },
+    "hcaptchaWidget": {
+      "title": "hCaptcha task available!",
+      "titleDisabled": "No hCaptcha task available",
+      "description": "Complete image labeling challenges and earn rewards by helping train privacy-preserving hCaptcha models.",
+      "shortDescription": "Complete image labeling challenges and earn rewards.",
+      "descriptionDisabled": "You have reached the daily limit for the hCaptcha tasks, please come back later.",
+      "startTask": "Start Task",
+      "nextAvailable": "Next Available in",
+      "nextIn": "Next in"
+    },
     "registrationInExchangeOracle": {
       "requiredMessage": "This oracle requires a registration process. Click on the button below to see the registration tutorial:",
       "instructionsButton": "See registration tutorial",
@@ -260,25 +283,42 @@
       "completeButton": "Complete"
     },
     "jobs": {
-      "successFullyAssignedJob": "Successfully assigned a task!",
+      "hCaptcha": "hCaptcha",
+      "successfullyAssignedJob": "Successfully claimed the task!",
       "errorFetchingData": "There was an error while fetching data, please try again",
-      "availableJobs": "Available Tasks",
-      "myJobs": "My Tasks",
+      "availableJobs": "Available Jobs",
+      "myJobs": "My Jobs",
       "jobsDiscovery": "Jobs Discovery",
       "jobDescription": "Job description",
+      "action": "Action",
+      "taskDescription": "Task Desc.",
+      "taskDescriptionTitle": "Task Description",
+      "oracles": "Oracles",
+      "address": "Address",
       "escrowAddress": "Escrow address",
       "network": "Network",
+      "reward": "Reward",
       "rewardAmount": "Reward amount",
       "jobType": "Task type",
       "expiresAt": "Expires at",
+      "expiryTime": "Expiry Time",
+      "expired": "Expired",
       "refresh": "Refresh",
       "status": "Status",
       "selectJob": "Select Task",
+      "claimTask": "Claim Task",
       "searchEscrowAddress": "Search escrow address",
       "resign": "Resign",
       "solve": "Solve",
       "filter": "Filter",
+      "jobsFilter": "Jobs Filter",
+      "applyFilters": "Apply Filters",
       "escrowAddressColumnId": "escrowAddress",
+      "statusFilter": {
+        "all": "All",
+        "inProgress": "In Progress",
+        "completed": "Completed"
+      },
       "Ethereum": "Ethereum",
       "Polygon": "Polygon",
       "sortDirection": {
@@ -306,11 +346,15 @@
           "fortune": "Fortune"
         }
       },
-      "next": "Next"
+      "next": "Next",
+      "jobsFor": "Jobs for"
     },
     "hcaptchaLabeling": {
       "description": "HMT payouts are automatically computed by an oracle based on correctness and volume of tasks completed. Payout timing depends on total job size, and can take as little as an hour or as long as a week or so, depending on overall job status.",
-      "noJobs": "No jobs available at the moment. Please come back in:"
+      "noJobs": "You have reached the daily limit for the hCaptcha tasks, please come back later.",
+      "waitFor": "Wait for",
+      "browseAvailableJobs": "Browse Available Jobs",
+      "or": "Or"
     },
     "enableHCaptchaLabeling": {
       "description": "CAPTCHA tasks involve the correct labeling of images in a group of images. Read the instructional prompt, and select the images that best correspond to that prompt.",

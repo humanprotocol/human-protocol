@@ -1,39 +1,33 @@
+import { useMemo } from 'react';
 import type { MRT_ColumnDef } from 'material-react-table';
 import { t } from 'i18next';
-import { Grid } from '@mui/material';
-import { useMemo } from 'react';
-import { getNetworkName } from '@/modules/smart-contracts/get-network-name';
-import { Chip } from '@/shared/components/ui/chip';
+import { Box, Chip, Stack, Typography } from '@mui/material';
+
 import { TableButton } from '@/shared/components/ui/table-button';
-import { TableHeaderCell } from '@/shared/components/ui/table/table-header-cell';
 import type { JobType } from '@/modules/smart-contracts/EthKVStore/config';
 import { useJobsNotifications } from '../../hooks';
 import { EvmAddress, RewardAmount } from '../../components';
-import {
-  AvailableJobsNetworkFilter,
-  AvailableJobsRewardAmountSort,
-  AvailableJobsJobTypeFilter,
-} from '../components';
 import { type AvailableJob } from '../../types';
 import { useAssignJobMutation } from './use-assign-job';
+import { Button } from '@/shared/components/ui/button';
+import { useColorMode } from '@/shared/contexts/color-mode';
+import { useModal } from '@/shared/contexts/modal-context';
+import { ChainIcon } from '@/shared/components/ui/chain-icon';
 
-const COL_SIZE = 100;
-const COL_SIZE_LG = 200;
+const COL_SIZE = 50;
+const COL_SIZE_MD = 100;
+const COL_SIZE_LG = 150;
+const COL_SIZE_XL = 250;
 
-export const useGetAvailableJobsColumns = (
-  chainIdsEnabled: number[]
-): MRT_ColumnDef<AvailableJob>[] => {
+export const useGetAvailableJobsColumns = (): MRT_ColumnDef<AvailableJob>[] => {
+  const { colorPalette } = useColorMode();
+  const { openModal } = useModal();
+
   return useMemo(
     () => [
       {
-        accessorKey: 'job_description',
-        header: t('worker.jobs.jobDescription'),
-        size: COL_SIZE,
-        enableSorting: false,
-      },
-      {
         accessorKey: 'escrow_address',
-        header: t('worker.jobs.escrowAddress'),
+        header: t('worker.jobs.address'),
         size: COL_SIZE,
         enableSorting: false,
         Cell: (props) => {
@@ -46,26 +40,13 @@ export const useGetAvailableJobsColumns = (
         size: COL_SIZE,
         enableSorting: false,
         Cell: (props) => {
-          return getNetworkName(props.row.original.chain_id);
+          return <ChainIcon chainId={props.row.original.chain_id} />;
         },
-        Header: (
-          <TableHeaderCell
-            headerText={t('worker.jobs.network')}
-            iconType="filter"
-            popoverContent={
-              <AvailableJobsNetworkFilter
-                chainIdsEnabled={chainIdsEnabled}
-                showClearButton
-                showTitle
-              />
-            }
-          />
-        ),
       },
       {
         accessorKey: 'reward_amount',
-        header: t('worker.jobs.rewardAmount'),
-        size: COL_SIZE,
+        header: t('worker.jobs.reward'),
+        size: COL_SIZE_MD,
         enableSorting: false,
         Cell: (props) => {
           const { reward_amount, reward_token } = props.row.original;
@@ -73,16 +54,10 @@ export const useGetAvailableJobsColumns = (
             <RewardAmount
               reward_amount={reward_amount}
               reward_token={reward_token}
+              color={colorPalette.text.auxiliary100}
             />
           );
         },
-        Header: (
-          <TableHeaderCell
-            headerText={t('worker.jobs.rewardAmount')}
-            iconType="filter"
-            popoverContent={<AvailableJobsRewardAmountSort />}
-          />
-        ),
       },
       {
         accessorKey: 'job_type',
@@ -91,26 +66,31 @@ export const useGetAvailableJobsColumns = (
         enableSorting: false,
         Cell: ({ row }) => {
           const label = t(`jobTypeLabels.${row.original.job_type as JobType}`);
-          return <Chip label={label} />;
+          return (
+            <Chip
+              label={label}
+              sx={{
+                typography: 'body2',
+                fontWeight: 500,
+                color: colorPalette.text.primary,
+                bgcolor: colorPalette.background.subtle,
+                borderRadius: '99px',
+                border: `0.5px solid ${colorPalette.border.strong}`,
+                maxWidth: { xs: 'fit-content', md: '150px', lg: 'fit-content' },
+              }}
+            />
+          );
         },
-        Header: (
-          <TableHeaderCell
-            headerText={t('worker.jobs.jobType')}
-            iconType="filter"
-            popoverContent={
-              <AvailableJobsJobTypeFilter showClearButton showTitle />
-            }
-          />
-        ),
       },
       {
         accessorKey: 'escrow_address',
         id: 'selectJobAction',
-        header: '',
-        size: COL_SIZE,
+        header: t('worker.jobs.action'),
+        size: COL_SIZE_XL,
         enableSorting: false,
         Cell: (props) => {
-          const { escrow_address, chain_id } = props.row.original;
+          const { escrow_address, chain_id, job_description } =
+            props.row.original;
           const { onJobAssignmentError, onJobAssignmentSuccess } =
             useJobsNotifications();
           const { mutate: assignJobMutation, isPending } = useAssignJobMutation(
@@ -120,21 +100,53 @@ export const useGetAvailableJobsColumns = (
             },
             [`assignJob-${escrow_address}`]
           );
+          const description = job_description?.trim() || '';
+
+          const handleOpenTaskDescription = () => {
+            openModal({
+              content: (
+                <Stack sx={{ gap: 2 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                    {t('worker.jobs.jobDescription')}
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      color: colorPalette.text.auxiliary100,
+                      whiteSpace: 'pre-wrap',
+                    }}
+                  >
+                    {description}
+                  </Typography>
+                </Stack>
+              ),
+            });
+          };
 
           return (
-            <Grid sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1.5 }}>
+              {description && (
+                <Button
+                  size="small"
+                  variant="outlined"
+                  disabled={isPending}
+                  onClick={handleOpenTaskDescription}
+                >
+                  {t('worker.jobs.taskDescription')}
+                </Button>
+              )}
               <TableButton
                 sx={{ width: '94px' }}
-                loading={isPending}
+                disabled={isPending}
                 onClick={() => assignJobMutation({ escrow_address, chain_id })}
               >
-                {t('worker.jobs.selectJob')}
+                {t('worker.jobs.claimTask')}
               </TableButton>
-            </Grid>
+            </Box>
           );
         },
       },
     ],
-    [chainIdsEnabled]
+    [colorPalette, openModal]
   );
 };

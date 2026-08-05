@@ -22,8 +22,6 @@ import SunIconLight from '@/assets/icons/sun.svg';
 import MoonIconDark from '@/assets/icons-dark-mode/moon.svg';
 import MoonIconLight from '@/assets/icons/moon.svg';
 import { useColorMode } from '@/shared/contexts/color-mode';
-import CopyIconLight from '@/assets/icons/content-copy.svg';
-import CopyIconDark from '@/assets/icons-dark-mode/content-copy.svg';
 import EditIconLight from '@/assets/icons/edit-icon.svg';
 import EditIconDark from '@/assets/icons-dark-mode/edit-icon.svg';
 import DeleteIconLight from '@/assets/icons/delete-icon.svg';
@@ -33,6 +31,12 @@ import VeriffIconDark from '@/assets/icons-dark-mode/veriff.svg';
 import HourglassIconLight from '@/assets/icons/hourglass.svg';
 import HourglassIconDark from '@/assets/icons-dark-mode/hourglass.svg';
 import LogoutIcon from '@/assets/icons/logout.svg';
+import TriangleIcon from '@/assets/icons/triangle.svg';
+import HcaptchaIconAsset from '@/assets/icons/hcaptcha.svg';
+import HcaptchaDisabledIconLight from '@/assets/icons/hcaptcha-disabled-icon.svg';
+import HcaptchaDisabledIconDark from '@/assets/icons-dark-mode/hcaptcha-disabled-icon.svg';
+import EthereumIcon from '@/assets/icons/ethereum-icon.svg';
+import PolygonIcon from '@/assets/icons/polygon-icon.svg';
 
 function HumanLogoIcon() {
   const { isDarkMode } = useColorMode();
@@ -78,10 +82,6 @@ function MoonIcon() {
   const { isDarkMode } = useColorMode();
   return isDarkMode ? <MoonIconDark /> : <MoonIconLight />;
 }
-function CopyIcon() {
-  const { isDarkMode } = useColorMode();
-  return isDarkMode ? <CopyIconDark /> : <CopyIconLight />;
-}
 function EditIcon() {
   const { isDarkMode } = useColorMode();
   return isDarkMode ? <EditIconDark /> : <EditIconLight />;
@@ -90,6 +90,26 @@ function DeleteIcon() {
   const { isDarkMode } = useColorMode();
   return isDarkMode ? <DeleteIconDark /> : <DeleteIconLight />;
 }
+function VeriffIcon() {
+  const { isDarkMode } = useColorMode();
+  return isDarkMode ? <VeriffIconDark /> : <VeriffIconLight />;
+}
+function HourglassIcon() {
+  const { isDarkMode } = useColorMode();
+  return isDarkMode ? <HourglassIconDark /> : <HourglassIconLight />;
+}
+function HcaptchaIcon() {
+  return <HcaptchaIconAsset />;
+}
+function HcaptchaDisabledIcon() {
+  const { isDarkMode } = useColorMode();
+  return isDarkMode ? (
+    <HcaptchaDisabledIconDark />
+  ) : (
+    <HcaptchaDisabledIconLight />
+  );
+}
+
 function InboxIcon(props: SvgIconProps) {
   return (
     <SvgIcon {...props} viewBox="0 0 54 54" fill="none">
@@ -142,14 +162,183 @@ function SuccessIcon(props: SvgIconProps) {
   );
 }
 
-function VeriffIcon() {
-  const { isDarkMode } = useColorMode();
-  return isDarkMode ? <VeriffIconDark /> : <VeriffIconLight />;
+function CopyIcon(props: SvgIconProps) {
+  return (
+    <SvgIcon {...props} viewBox="0 0 16 16" fill="none">
+      <g opacity="0.7" clipPath="url(#clip0_281_2824)">
+        <path
+          fill="none"
+          d="M6 10C6 8.11438 6 7.17157 6.58579 6.58579C7.17157 6 8.11438 6 10 6L10.6667 6C12.5523 6 13.4951 6 14.0809 6.58579C14.6667 7.17157 14.6667 8.11438 14.6667 10V10.6667C14.6667 12.5523 14.6667 13.4951 14.0809 14.0809C13.4951 14.6667 12.5523 14.6667 10.6667 14.6667H10C8.11438 14.6667 7.17157 14.6667 6.58579 14.0809C6 13.4951 6 12.5523 6 10.6667L6 10Z"
+          stroke="currentColor"
+          strokeOpacity="0.7"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          fill="none"
+          d="M11.3339 6.00016C11.3323 4.02877 11.3025 3.00764 10.7287 2.30845C10.6179 2.17342 10.4941 2.04961 10.359 1.9388C9.62147 1.3335 8.52564 1.3335 6.33399 1.3335C4.14233 1.3335 3.0465 1.3335 2.30894 1.9388C2.17391 2.04961 2.0501 2.17342 1.93929 2.30845C1.33398 3.04601 1.33398 4.14184 1.33398 6.3335C1.33398 8.52515 1.33398 9.62098 1.93929 10.3585C2.0501 10.4936 2.17391 10.6174 2.30894 10.7282C3.00812 11.302 4.02926 11.3319 6.00065 11.3334"
+          stroke="currentColor"
+          strokeOpacity="0.7"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </g>
+      <defs>
+        <clipPath id="clip0_281_2824">
+          <rect width="16" height="16" fill="white" />
+        </clipPath>
+      </defs>
+    </SvgIcon>
+  );
 }
 
-function HourglassIcon() {
-  const { isDarkMode } = useColorMode();
-  return isDarkMode ? <HourglassIconDark /> : <HourglassIconLight />;
+function OracleAddressIcon(props: SvgIconProps) {
+  return (
+    <SvgIcon {...props} viewBox="0 0 20 20" fill="none">
+      <path
+        fill="none"
+        d="M9.9987 14.1666C10.1877 14.1666 10.3635 14.0782 10.715 13.9016L13.5401 12.4816C14.7903 11.8533 15.4154 11.5391 15.4154 11.0416V4.79156M9.9987 14.1666C9.80965 14.1666 9.63391 14.0782 9.28243 13.9016L6.45725 12.4816C5.20711 11.8533 4.58203 11.5391 4.58203 11.0416V4.79156M9.9987 14.1666V7.91656M15.4154 4.79156C15.4154 4.29404 14.7903 3.97987 13.5401 3.35153L10.715 1.93156C10.3635 1.7549 10.1877 1.66656 9.9987 1.66656C9.80965 1.66656 9.63391 1.7549 9.28243 1.93156L6.45725 3.35153C5.20711 3.97987 4.58203 4.29404 4.58203 4.79156M4.58203 4.79156C4.58203 5.28908 5.20711 5.60326 6.45725 6.2316L9.28243 7.65157C9.63391 7.82823 9.80965 7.91656 9.9987 7.91656C10.1877 7.91656 10.3635 7.82823 10.715 7.65157L13.5401 6.2316C14.7903 5.60326 15.4154 5.28908 15.4154 4.79156"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M8.33268 17.2916C8.33268 16.7163 8.79905 16.2499 9.37435 16.2499H10.6243C11.1996 16.2499 11.666 16.7163 11.666 17.2916M8.33268 17.2916C8.33268 17.8669 8.79905 18.3333 9.37435 18.3333H10.6243C11.1996 18.3333 11.666 17.8669 11.666 17.2916M8.33268 17.2916H4.16602M11.666 17.2916H15.8327"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+      />
+    </SvgIcon>
+  );
+}
+
+function OracleRewardIcon(props: SvgIconProps) {
+  return (
+    <SvgIcon {...props} viewBox="0 0 20 20" fill="none">
+      <path
+        fill="none"
+        d="M4.81787 3.48494C5.35774 3.06933 5.62768 2.86152 5.93925 2.72769C6.08052 2.66701 6.22741 2.61798 6.37817 2.58117C6.71069 2.5 7.06327 2.5 7.76843 2.5H12.2303C12.9354 2.5 13.288 2.5 13.6205 2.58117C13.7713 2.61798 13.9182 2.66701 14.0594 2.72769C14.371 2.86152 14.641 3.06933 15.1808 3.48494C16.9697 4.86207 17.8641 5.55064 18.1708 6.44232C18.3071 6.83894 18.3581 7.25607 18.3208 7.67051C18.237 8.60223 17.5309 9.45496 16.1188 11.1604L12.7909 15.1794C11.5098 16.7265 10.8693 17.5 9.99935 17.5C9.12938 17.5 8.48887 16.7265 7.20783 15.1794L3.87994 11.1604C2.46775 9.45496 1.76165 8.60223 1.67785 7.67051C1.64058 7.25607 1.69155 6.83894 1.82793 6.44232C2.13455 5.55064 3.02899 4.86207 4.81787 3.48494Z"
+        stroke="currentColor"
+        strokeWidth="1.25"
+      />
+      <path
+        fill="none"
+        d="M8.33203 7.08337H11.6654"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </SvgIcon>
+  );
+}
+
+function MenuIcon(props: SvgIconProps) {
+  return (
+    <SvgIcon {...props} viewBox="0 0 20 20" fill="none">
+      <path
+        fill="none"
+        d="M5 5.83331L15 5.83331"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        fill="none"
+        d="M5 9.99994L15 9.99994"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        fill="none"
+        d="M5 14.1666L15 14.1666"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </SvgIcon>
+  );
+}
+
+function FilterIcon(props: SvgIconProps) {
+  return (
+    <SvgIcon {...props} viewBox="0 0 24 24" fill="none">
+      <path
+        fill="none"
+        d="M12 5H2M6 12H18M9 19H15M16 5H22M19 8V2"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </SvgIcon>
+  );
+}
+
+function JobExpiryTimeIcon(props: SvgIconProps) {
+  return (
+    <SvgIcon {...props} viewBox="0 0 20 20" fill="none">
+      <path
+        fill="none"
+        d="M6.98108 2.5C6.80282 2.56661 6.62752 2.63927 6.45541 2.71772M17.266 13.5843C17.3512 13.3999 17.4298 13.2119 17.5013 13.0204M15.4169 16.1372C15.56 16.0037 15.6983 15.8651 15.8316 15.7217M12.7254 17.8102C12.8871 17.7493 13.0464 17.6833 13.203 17.6126M10.1313 18.3282C9.93887 18.3349 9.74511 18.3349 9.55266 18.3282M6.49073 17.617C6.6414 17.6848 6.79449 17.7482 6.94984 17.8069M3.8951 15.7673C4.009 15.888 4.12655 16.0053 4.24755 16.119M2.19522 13.0538C2.25762 13.2185 2.32519 13.3807 2.39774 13.5402M1.67211 10.4211C1.6667 10.2477 1.66671 10.0732 1.67211 9.89951M2.18917 7.28095C2.25048 7.11804 2.31684 6.9576 2.38806 6.79983M3.88132 4.56603C4.00187 4.43762 4.12651 4.3131 4.25505 4.1927"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        fill="none"
+        d="M11.25 10C11.25 10.6904 10.6904 11.25 10 11.25C9.30964 11.25 8.75 10.6904 8.75 10C8.75 9.30964 9.30964 8.75 10 8.75M11.25 10C11.25 9.30964 10.6904 8.75 10 8.75M11.25 10H13.3333M10 8.75V5"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+      />
+      <path
+        fill="none"
+        d="M18.3333 9.99996C18.3333 5.39759 14.6024 1.66663 10 1.66663"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+      />
+    </SvgIcon>
+  );
+}
+
+function JobStatusIcon(props: SvgIconProps) {
+  return (
+    <SvgIcon {...props} viewBox="0 0 24 24" fill="none">
+      <circle
+        cx="12"
+        cy="12"
+        r="10"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        fill="none"
+        d="M12 16v-4"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        fill="none"
+        d="M12 8h.01"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </SvgIcon>
+  );
 }
 
 export {
@@ -172,4 +361,15 @@ export {
   VeriffIcon,
   HourglassIcon,
   LogoutIcon,
+  TriangleIcon,
+  OracleAddressIcon,
+  OracleRewardIcon,
+  MenuIcon,
+  HcaptchaIcon,
+  HcaptchaDisabledIcon,
+  FilterIcon,
+  JobExpiryTimeIcon,
+  JobStatusIcon,
+  EthereumIcon,
+  PolygonIcon,
 };

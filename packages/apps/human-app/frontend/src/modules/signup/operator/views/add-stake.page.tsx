@@ -10,7 +10,6 @@ import {
 import { getErrorMessageForError } from '@/shared/errors';
 import { Alert } from '@/shared/components/ui/alert';
 import { useColorMode } from '@/shared/contexts/color-mode';
-import { onlyDarkModeColor } from '@/shared/styles/dark-color-palette';
 import {
   useAddStakeMutationState,
   useGetStakedAmount,
@@ -20,7 +19,7 @@ import { StakeForm, Buttons } from '../components/add-stake';
 import { stakedAmountFormatter } from '../utils';
 
 export function AddStakeOperatorPage() {
-  const { colorPalette, isDarkMode } = useColorMode();
+  const { colorPalette } = useColorMode();
   const [displayForm, setDisplayForm] = useState(false);
   const {
     data: stakedAmount,
@@ -87,14 +86,7 @@ export function AddStakeOperatorPage() {
         <Typography variant="subtitle2">
           {t('operator.addStake.label')}
         </Typography>
-        <Typography
-          variant="body5"
-          sx={{
-            color: isDarkMode
-              ? onlyDarkModeColor.additionalTextColor
-              : colorPalette.primary.light,
-          }}
-        >
+        <Typography variant="body5" sx={{ color: colorPalette.text.light }}>
           {stakedAmountFormatter(stakedAmount)}
         </Typography>
         {displayForm ? (

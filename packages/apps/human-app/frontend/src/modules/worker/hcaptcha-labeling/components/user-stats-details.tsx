@@ -1,33 +1,29 @@
 import { Divider, IconButton, Stack, Typography } from '@mui/material';
 import { t } from 'i18next';
+
 import { RefreshIcon } from '@/shared/components/ui/icons';
-import { onlyDarkModeColor } from '@/shared/styles/dark-color-palette';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { useIsMobile } from '@/shared/hooks';
 import { type HCaptchaUserStatsSuccess } from '../types';
 
-export function UserStatsDetails({
-  stats,
-  refetch,
-  isRefetching,
-}: Readonly<{
+type Props = {
   stats: HCaptchaUserStatsSuccess;
   refetch: () => void;
   isRefetching: boolean;
-}>) {
-  const { colorPalette, isDarkMode } = useColorMode();
-  const isMobile = useIsMobile();
+};
 
-  const statsColor = isDarkMode
-    ? onlyDarkModeColor.additionalTextColor
-    : colorPalette.primary.light;
+export function UserStatsDetails({ stats, refetch, isRefetching }: Props) {
+  const { colorPalette } = useColorMode();
+  const isMobile = useIsMobile();
 
   return (
     <Stack>
-      <Divider sx={{ borderBottomWidth: '2px' }} />
-      <Stack sx={{ py: 3 }}>
-        <Stack sx={{ gap: { xs: 3, md: 2 } }}>
-          <Typography variant={isMobile ? 'mobileHeaderLarge' : 'body7'}>
+      {!isMobile && (
+        <Divider sx={{ height: '1px', bgcolor: colorPalette.border.strong }} />
+      )}
+      <Stack sx={{ py: { xs: 2, md: 3 } }}>
+        <Stack sx={{ gap: 2 }}>
+          <Typography variant="h6">
             {t('worker.hcaptchaLabelingStats.allTime')}
           </Typography>
           <Stack
@@ -38,7 +34,7 @@ export function UserStatsDetails({
               <Typography variant="caption">
                 {t('worker.hcaptchaLabelingStats.jobsServed')}
               </Typography>
-              <Typography variant="h6" sx={{ color: statsColor }}>
+              <Typography variant="h6" sx={{ color: colorPalette.text.light }}>
                 {stats.served}
               </Typography>
             </Stack>
@@ -46,7 +42,7 @@ export function UserStatsDetails({
               <Typography variant="caption">
                 {t('worker.hcaptchaLabelingStats.jobsComplete')}
               </Typography>
-              <Typography variant="h6" sx={{ color: statsColor }}>
+              <Typography variant="h6" sx={{ color: colorPalette.text.light }}>
                 {stats.solved}
               </Typography>
             </Stack>
@@ -54,29 +50,41 @@ export function UserStatsDetails({
               <Typography variant="caption">
                 {t('worker.hcaptchaLabelingStats.hmtEarned')}
               </Typography>
-              <Typography variant="h6" sx={{ color: statsColor }}>
+              <Typography variant="h6" sx={{ color: colorPalette.text.light }}>
                 {stats.balance.total}{' '}
-                <span style={{ color: colorPalette.text.primary }}>
+                <Typography
+                  component="span"
+                  sx={{ color: colorPalette.text.primary }}
+                >
                   {t('inputMasks.humanCurrencySuffix')}
-                </span>
+                </Typography>
               </Typography>
             </Stack>
           </Stack>
         </Stack>
-        <Divider sx={{ mt: { xs: 2, md: 3 }, mb: { xs: 4, md: 2 } }} />
+        <Divider
+          sx={{
+            mt: { xs: 2, md: 3 },
+            mb: 2,
+            bgcolor: colorPalette.border.strong,
+          }}
+        />
         <Stack>
-          <Typography variant="body7" sx={{ mb: { xs: 3, md: 2 } }}>
+          <Typography variant="h6" sx={{ mb: 2 }}>
             {t('worker.hcaptchaLabelingStats.lastHour')}
           </Typography>
           <Stack>
             <Typography variant="caption">
               {t('worker.hcaptchaLabelingStats.earnedLastHour')}
             </Typography>
-            <Typography variant="h6" sx={{ color: statsColor }}>
+            <Typography variant="h6" sx={{ color: colorPalette.text.light }}>
               {stats.balance.recent}{' '}
-              <span style={{ color: colorPalette.text.primary }}>
+              <Typography
+                component="span"
+                sx={{ color: colorPalette.text.primary }}
+              >
                 {t('inputMasks.humanCurrencySuffix')}
-              </span>
+              </Typography>
             </Typography>
           </Stack>
         </Stack>
