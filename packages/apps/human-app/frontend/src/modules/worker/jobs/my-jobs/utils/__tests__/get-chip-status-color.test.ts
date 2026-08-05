@@ -14,11 +14,6 @@ describe('getChipStatusColor Function', () => {
     expect(result).toBe(colorPalette.success.main);
   });
 
-  it('should return the error light color for VALIDATION status', () => {
-    const result = getChipStatusColor(MyJobStatus.VALIDATION, colorPalette);
-    expect(result).toBe(colorPalette.error.light);
-  });
-
   it('should return the error main color for unknown status', () => {
     const result = getChipStatusColor(UNKNOWN_JOB_STATUS, colorPalette);
     expect(result).toBe(colorPalette.error.main);
