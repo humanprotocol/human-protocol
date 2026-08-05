@@ -1,11 +1,14 @@
-import Accordion from '@mui/material/Accordion';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import Typography from '@mui/material/Typography';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import Grid from '@mui/material/Grid';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { t } from 'i18next';
+import {
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Grid,
+  Typography,
+} from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+
 import {
   TopNotificationType,
   useNotification,
@@ -16,10 +19,14 @@ import { useHCaptchaUserStats } from '../hooks';
 import { UserStatsDetails } from './user-stats-details';
 import { LoadingOverlay } from './user-stats-loading-overlay';
 
-const accordionWidth = { width: '284px' };
+const ACCORDION_WIDTH = '284px';
+const ACCORDION_HEIGHT = '48px';
 
 export function UserStatsAccordion() {
+  const [isExpanded, setIsExpanded] = useState(false);
   const { colorPalette } = useColorMode();
+  const { showNotification } = useNotification();
+
   const {
     data: hcaptchaUserStats,
     isPending: isHcaptchaUserStatsPending,
@@ -28,28 +35,32 @@ export function UserStatsAccordion() {
     refetch: refetchUserStats,
     isRefetching: isHcaptchaUserStatsRefetching,
   } = useHCaptchaUserStats();
-  const { showNotification } = useNotification();
 
   useEffect(() => {
     if (isHcaptchaUserStatsError) {
       showNotification({
-        type: TopNotificationType.WARNING,
+        type: TopNotificationType.ERROR,
         message: getErrorMessageForError(hcaptchaUserStatsError),
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- ...
-  }, [isHcaptchaUserStatsError, hcaptchaUserStatsError]);
+  }, [isHcaptchaUserStatsError, hcaptchaUserStatsError, showNotification]);
 
   return (
-    <Grid sx={{ height: '76px' }}>
+    <Grid sx={{ height: ACCORDION_HEIGHT }}>
       <Accordion
+        expanded={isExpanded}
+        onChange={(_, expanded) => {
+          setIsExpanded(expanded);
+        }}
         sx={{
-          ...accordionWidth,
           position: 'relative',
           overflow: 'hidden',
+          width: ACCORDION_WIDTH,
+          minHeight: ACCORDION_HEIGHT,
+          zIndex: 1,
         }}
       >
-        {isHcaptchaUserStatsRefetching && (
+        {isExpanded && isHcaptchaUserStatsRefetching && (
           <LoadingOverlay
             sx={{
               width: '100%',
@@ -61,7 +72,11 @@ export function UserStatsAccordion() {
         )}
         <AccordionSummary
           aria-controls="panel1-content"
-          disabled={isHcaptchaUserStatsPending || isHcaptchaUserStatsError}
+          disabled={
+            isHcaptchaUserStatsPending ||
+            isHcaptchaUserStatsRefetching ||
+            isHcaptchaUserStatsError
+          }
           expandIcon={
             <ExpandMoreIcon
               sx={{
@@ -70,14 +85,22 @@ export function UserStatsAccordion() {
             />
           }
           id="panel1-header"
-          sx={{ ...accordionWidth, height: '76px' }}
+          sx={{
+            width: ACCORDION_WIDTH,
+            height: ACCORDION_HEIGHT,
+            py: 1.5,
+            '& > .MuiAccordionSummary-content': {
+              m: 0,
+            },
+            '&.Mui-expanded': { minHeight: ACCORDION_HEIGHT },
+          }}
         >
           <Typography variant="subtitle2">
             {t('worker.hcaptchaLabelingStats.statistics')}
           </Typography>
         </AccordionSummary>
         {hcaptchaUserStats ? (
-          <AccordionDetails sx={{ ...accordionWidth }}>
+          <AccordionDetails sx={{ width: ACCORDION_WIDTH }}>
             <UserStatsDetails
               refetch={() => void refetchUserStats()}
               stats={hcaptchaUserStats}

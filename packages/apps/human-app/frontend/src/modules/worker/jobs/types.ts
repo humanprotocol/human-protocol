@@ -13,6 +13,8 @@ export enum MyJobStatus {
   REJECTED = 'REJECTED',
 }
 
+export type StatusFilterType = '' | MyJobStatus.ACTIVE | MyJobStatus.COMPLETED;
+
 export const UNKNOWN_JOB_STATUS = 'UNKNOWN';
 
 export enum SortField {

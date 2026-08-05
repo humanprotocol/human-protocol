@@ -1,8 +1,5 @@
 import type { ThemeOptions } from '@mui/material';
-import {
-  darkColorPalette,
-  onlyDarkModeColor,
-} from '@/shared/styles/dark-color-palette';
+import { darkColorPalette } from '@/shared/styles/dark-color-palette';
 import { typography } from '@/shared/styles/typography';
 import { breakpoints } from '@/shared/styles/breakpoints';
 
@@ -153,7 +150,7 @@ export const darkTheme: ThemeOptions = {
     MuiInputBase: {
       styleOverrides: {
         root: {
-          borderColor: onlyDarkModeColor.mainColorWithOpacity,
+          borderColor: '#cdc7ffcc',
           '&:hover': {
             borderColor: 'white',
           },

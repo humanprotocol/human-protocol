@@ -1,7 +1,7 @@
-import { Grid, Typography } from '@mui/material';
+import { Grid, Stack, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { useColorMode } from '@/shared/contexts/color-mode';
-import { commonDarkPageCardStyles, commonPageCardStyles } from './styles';
+
+import { commonStyles } from './styles';
 import { BackButton } from './back-button';
 
 type NavigationTarget = string | (() => void);
@@ -26,7 +26,6 @@ export function PageCard({
   childrenMaxWidth = '486px',
   showBackButton = true,
 }: PageCardProps) {
-  const { isDarkMode } = useColorMode();
   const navigate = useNavigate();
 
   const contentStyles = {
@@ -51,10 +50,9 @@ export function PageCard({
   };
 
   return (
-    <Grid
-      container
+    <Stack
       sx={{
-        ...(isDarkMode ? commonDarkPageCardStyles : commonPageCardStyles),
+        ...commonStyles,
         padding: { xs: '0 2rem 7.25rem 2rem', md: '2rem 2rem 7.7rem 2rem' },
       }}
     >
@@ -124,6 +122,6 @@ export function PageCard({
           </Grid>
         </Grid>
       </Grid>
-    </Grid>
+    </Stack>
   );
 }

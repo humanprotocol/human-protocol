@@ -1,37 +1,32 @@
+import { useEffect, useMemo } from 'react';
 import {
   MaterialReactTable,
   useMaterialReactTable,
 } from 'material-react-table';
-import { t } from 'i18next';
-import { useEffect, useMemo } from 'react';
+
 import { createTableDarkMode } from '@/shared/styles/create-table-dark-mode';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { useJobsFilterStore } from '../../../hooks';
-import { EscrowAddressSearchForm } from '../../../components';
 import { useGetAvailableJobsData } from '../../hooks/use-get-available-jobs-data';
 import { useGetAvailableJobsColumns } from '../../hooks';
 import { useAvailableJobsPagination } from '../../hooks/use-available-jobs-pagination';
 
-interface AvailableJobsTableProps {
-  chainIdsEnabled: number[];
-}
-
 export function AvailableJobsTableDesktop({
-  chainIdsEnabled,
-}: Readonly<AvailableJobsTableProps>) {
+  oracleAddress,
+}: {
+  oracleAddress: string;
+}) {
   const { colorPalette, isDarkMode } = useColorMode();
-  const { data: tableData, status: tableStatus } = useGetAvailableJobsData();
-  const {
-    setSearchEscrowAddress,
-    setPageParams,
-    filterParams,
-    resetFilterParams,
-  } = useJobsFilterStore();
+  const { data: tableData, status: tableStatus } = useGetAvailableJobsData({
+    oracleAddress,
+  });
+  const { setPageParams, filterParams, resetFilterParams } =
+    useJobsFilterStore();
   const { paginationState, setPaginationState } = useAvailableJobsPagination({
     setPageParams,
     filterParams,
   });
-  const columns = useGetAvailableJobsColumns(chainIdsEnabled);
+  const columns = useGetAvailableJobsColumns();
 
   const memoizedTableDataResults = useMemo(
     () => tableData?.results ?? [],
@@ -52,51 +47,85 @@ export function AvailableJobsTableDesktop({
       showAlertBanner: tableStatus === 'error',
       pagination: paginationState,
     },
-    enablePagination: Boolean(tableData?.total_pages),
+    enablePagination: !!tableData?.total_pages,
     manualPagination: true,
     onPaginationChange: setPaginationState,
     muiPaginationProps: {
       SelectProps: {
         sx: {
+          '.MuiSelect-select': {
+            color: colorPalette.text.auxiliary100,
+          },
           '.MuiSelect-icon': {
             ':hover': {
               backgroundColor: 'blue',
             },
-            fill: colorPalette.text.primary,
+            fill: colorPalette.text.auxiliary100,
           },
         },
       },
       rowsPerPageOptions: [5, 10],
     },
+    muiBottomToolbarProps: {
+      sx: {
+        bgcolor: colorPalette.background.paper,
+        boxShadow: 'none',
+        color: colorPalette.text.auxiliary100,
+      },
+    },
     pageCount: tableData?.total_pages ?? -1,
     rowCount: tableData?.total_results,
     enableColumnActions: false,
     enableColumnFilters: false,
-    enableSorting: true,
-    manualSorting: true,
-    renderTopToolbar: () => (
-      <EscrowAddressSearchForm
-        columnId={t('worker.jobs.escrowAddressColumnId')}
-        label={t('worker.jobs.searchEscrowAddress')}
-        placeholder={t('worker.jobs.searchEscrowAddress')}
-        updater={(address) => {
-          setSearchEscrowAddress(address);
-        }}
-      />
-    ),
+    enableSorting: false,
+    manualSorting: false,
+    renderTopToolbar: false,
+    muiTablePaperProps: {
+      sx: {
+        boxShadow: 'none',
+      },
+    },
+    muiTableHeadProps: {
+      sx: {
+        backgroundColor: colorPalette.background.default,
+      },
+    },
+    muiTableHeadRowProps: {
+      sx: {
+        backgroundColor: 'inherit',
+        boxShadow: 'none',
+      },
+    },
     muiTableHeadCellProps: {
       sx: {
-        borderColor: colorPalette.paper.text,
+        paddingTop: '8px',
+        paddingBottom: '8px',
+        paddingLeft: '12px',
+        paddingRight: '12px',
+        borderColor: colorPalette.background.paper,
+        color: colorPalette.text.auxiliary200,
+        typography: 'body1',
+        fontWeight: 500,
+        '& .Mui-TableHeadCell-Content': {
+          justifyContent: 'center',
+          textAlign: 'center',
+        },
       },
     },
     muiTableBodyCellProps: {
+      align: 'center',
       sx: {
-        borderColor: colorPalette.paper.text,
+        textAlign: 'center',
+        borderBottom: `1px solid ${colorPalette.border.main}`,
       },
     },
-    muiTablePaperProps: {
+    muiTableBodyRowProps: {
       sx: {
-        boxShadow: '0px 2px 2px 0px #E9EBFA80',
+        bgcolor: colorPalette.background.paper,
+        borderBottom: `1px solid ${colorPalette.border.main}`,
+        '&:last-of-type': {
+          borderBottom: 'none',
+        },
       },
     },
     ...(isDarkMode ? createTableDarkMode(colorPalette) : {}),

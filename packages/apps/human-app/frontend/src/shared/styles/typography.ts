@@ -77,12 +77,13 @@ export const typography: ThemeOptions['typography'] = {
   },
   h4: {
     fontSize: 34,
-    fontWeight: 600,
-    letterSpacing: 0.25,
+    fontWeight: 800,
+    lineHeight: 'normal',
+    letterSpacing: 0,
     [breakpoints.mobile]: {
-      fontSize: 28,
-      fontWeight: 600,
-      letterSpacing: 0.15,
+      fontSize: 20,
+      fontWeight: 700,
+      lineHeight: '150%',
     },
   },
   mobileHeaderLarge: {
@@ -103,10 +104,8 @@ export const typography: ThemeOptions['typography'] = {
   h6: {
     fontSize: 20,
     fontWeight: 500,
-    letterSpacing: 0.15,
-    [breakpoints.mobile]: {
-      fontSize: 20,
-    },
+    lineHeight: 'normal',
+    letterSpacing: 0.12,
   },
   subtitle1: {
     fontSize: 16,
@@ -127,15 +126,14 @@ export const typography: ThemeOptions['typography'] = {
   body1: {
     fontSize: 16,
     fontWeight: 400,
-    letterSpacing: 0.15,
+    lineHeight: 'normal',
+    letterSpacing: 0.12,
   },
   body2: {
     fontSize: 14,
     fontWeight: 400,
-    letterSpacing: 0.15,
-    [breakpoints.mobile]: {
-      fontSize: 14,
-    },
+    lineHeight: 'normal',
+    letterSpacing: 0.12,
   },
   body4: {
     fontSize: 24,

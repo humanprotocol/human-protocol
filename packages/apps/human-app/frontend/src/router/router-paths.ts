@@ -12,6 +12,7 @@ export const routerPaths = {
     profile: '/worker/profile',
     jobsDiscovery: '/worker/jobs-discovery',
     jobs: '/worker/jobs-discovery',
+    myJobs: '/worker/my-jobs',
     HcaptchaLabeling: '/worker/hcaptcha-labeling',
     enableLabeler: '/worker/enable-labeler',
     registrationInExchangeOracle: '/worker/registration-in-exchange-oracle',

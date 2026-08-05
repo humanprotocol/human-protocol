@@ -8,30 +8,10 @@ import {
 import { RequireAuth } from '@/modules/auth/providers/require-auth';
 import { RequireWalletConnect } from '@/shared/contexts/wallet-connect';
 import { RequireWeb3Auth } from '@/modules/auth-web3/providers/require-web3-auth';
-import { DrawerNavigation } from '@/router/components/layout/protected/drawer-navigation';
-import { operatorDrawerBottomMenuItems } from '@/router/components/drawer-menu-items/drawer-menu-items-operator';
-import { browserAuthProvider } from '@/shared/contexts/browser-auth-provider';
-import { useAuth } from '@/modules/auth/hooks/use-auth';
-import { UserStatsDrawer } from '@/modules/worker/hcaptcha-labeling';
 import { routerPaths } from './router-paths';
-import {
-  ProtectedLayout,
-  UnprotectedLayout,
-  workerDrawerBottomMenuItems,
-  workerDrawerTopMenuItems,
-} from './components';
+import { ProtectedLayout, UnprotectedLayout } from './components';
 
 export function Router() {
-  const { user } = useAuth();
-
-  const handleSignOut = () => {
-    browserAuthProvider.signOut({
-      callback: () => {
-        window.location.reload();
-      },
-    });
-  };
-
   return (
     <Routes>
       <Route element={<UnprotectedLayout />}>
@@ -52,27 +32,12 @@ export function Router() {
           />
         ))}
       </Route>
-      {protectedRoutes.map(({ routerProps, pageHeaderProps }) => {
+      {protectedRoutes.map(({ routerProps }) => {
         return (
           <Route
             element={
               <RequireAuth>
-                <ProtectedLayout
-                  pageHeaderProps={pageHeaderProps}
-                  renderDrawer={(open, setDrawerOpen) => (
-                    <DrawerNavigation
-                      bottomMenuItems={workerDrawerBottomMenuItems}
-                      open={open}
-                      setDrawerOpen={setDrawerOpen}
-                      signOut={handleSignOut}
-                      topMenuItems={workerDrawerTopMenuItems(user)}
-                    />
-                  )}
-                  renderHCaptchaStatisticsDrawer={(isOpen) => (
-                    <UserStatsDrawer isOpen={isOpen} />
-                  )}
-                  renderGovernanceBanner
-                />
+                <ProtectedLayout />
               </RequireAuth>
             }
             key={routerProps.path}
@@ -82,22 +47,12 @@ export function Router() {
           </Route>
         );
       })}
-      {web3ProtectedRoutes.map(({ routerProps, pageHeaderProps }) => (
+      {web3ProtectedRoutes.map(({ routerProps }) => (
         <Route
           element={
             <RequireWalletConnect>
               <RequireWeb3Auth>
-                <ProtectedLayout
-                  pageHeaderProps={pageHeaderProps}
-                  renderDrawer={(open, setDrawerOpen) => (
-                    <DrawerNavigation
-                      bottomMenuItems={operatorDrawerBottomMenuItems}
-                      open={open}
-                      setDrawerOpen={setDrawerOpen}
-                      signOut={handleSignOut}
-                    />
-                  )}
-                />
+                <ProtectedLayout />
               </RequireWeb3Auth>
             </RequireWalletConnect>
           }

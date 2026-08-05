@@ -8,6 +8,12 @@ declare module '@mui/material/Button' {
   }
 }
 
+declare module '@mui/material/Radio' {
+  interface RadioPropsColorOverrides {
+    accent: true;
+  }
+}
+
 export const theme: ThemeOptions = {
   typography,
   components: {

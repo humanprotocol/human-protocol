@@ -10,7 +10,7 @@ export const useJobsNotifications = () => {
 
   const onJobAssignmentSuccess = () => {
     showNotification({
-      message: t('worker.jobs.successFullyAssignedJob'),
+      message: t('worker.jobs.successfullyAssignedJob'),
       type: TopNotificationType.SUCCESS,
       durationMs: 5000,
     });
@@ -19,7 +19,7 @@ export const useJobsNotifications = () => {
   const onJobAssignmentError = (error: Error) => {
     showNotification({
       message: getErrorMessageForError(error),
-      type: TopNotificationType.WARNING,
+      type: TopNotificationType.ERROR,
       durationMs: 5000,
     });
   };

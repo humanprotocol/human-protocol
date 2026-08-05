@@ -31,13 +31,6 @@ const envSchema = z.object({
   }),
   VITE_NETWORK: z.enum(['mainnet', 'testnet']),
   VITE_GOVERNANCE_URL: z.string(),
-  VITE_H_CAPTCHA_ORACLE_ANNOTATION_TOOL: z.string(),
-  VITE_H_CAPTCHA_ORACLE_ROLE: z.string(),
-  VITE_H_CAPTCHA_ORACLE_ADDRESS: z.string(),
-  VITE_H_CAPTCHA_ORACLE_TASK_TYPES: z.string().transform((value) => {
-    const jobTypesArray = value.split(',');
-    return jobTypesArray;
-  }),
   VITE_FEATURE_FLAG_JOBS_DISCOVERY: z
     .string()
     .prefault('false')

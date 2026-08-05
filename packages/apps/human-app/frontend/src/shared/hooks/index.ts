@@ -1,7 +1,6 @@
 export * from './use-combine-pages';
 export * from './use-count-down';
 export * from './use-handle-main-nav-icon-click';
-export * from './use-is-hcaptcha-labeling-page';
 export * from './use-notification';
 export * from './use-is-mobile';
 export * from './use-reset-mutation-errors';
