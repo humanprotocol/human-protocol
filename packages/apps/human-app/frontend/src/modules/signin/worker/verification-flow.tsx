@@ -8,9 +8,9 @@ import {
   IdentityVerificationControl,
   WalletConnectionControl,
 } from '@/modules/worker/profile/components';
-import { useWorkerIdentityVerificationStatus } from '@/modules/worker/profile/hooks';
 import { KycStatus } from '@/modules/worker/profile/types/profile-types';
 import { useIsMobile } from '@/shared/hooks';
+import { useAuth } from '@/modules/auth/hooks/use-auth';
 
 type VerificationStep = 'kyc' | 'wallet';
 
@@ -34,13 +34,17 @@ export function VerificationFlow({
     isKycApproved ? 'wallet' : 'kyc'
   );
 
+  const { user } = useAuth();
   const { colorPalette } = useColorMode();
-  const { status } = useWorkerIdentityVerificationStatus();
   const isMobile = useIsMobile();
 
-  const label = t(`worker.profile.idvStatusValues.${status}`);
-  const isKycDeclined = status === KycStatus.DECLINED;
-  const isKycStarted = status !== KycStatus.NONE;
+  const kycStatus = user?.kyc_status as KycStatus;
+
+  const label = kycStatus
+    ? t(`worker.profile.idvStatusValues.${kycStatus}`)
+    : '';
+  const isKycDeclined = kycStatus === KycStatus.DECLINED;
+  const isKycStarted = kycStatus !== KycStatus.NONE;
 
   const handleKycApproved = useCallback(() => {
     setStep('wallet');
@@ -94,11 +98,11 @@ export function VerificationFlow({
           >
             {t('worker.profile.identityVerification')}
             {isKycStarted && (
-              <Chip label={label} backgroundColor={getChipColor(status)} />
+              <Chip label={label} backgroundColor={getChipColor(kycStatus)} />
             )}
           </Typography>
           <IdentityVerificationControl
-            kycStatus={status}
+            kycStatus={kycStatus}
             onKycApproved={handleKycApproved}
           />
         </>
