@@ -110,12 +110,9 @@ export function WorkerProfilePage() {
         {isMobile && <BackButton onClick={handleBack} />}
         <Typography
           component="h1"
-          variant="h5"
+          variant="h6"
           sx={{
-            fontSize: 20,
             fontWeight: 700,
-            lineHeight: 'normal',
-            letterSpacing: '0.12px',
             color: {
               xs: colorPalette.text.auxiliary100,
               md: colorPalette.text.primary,
@@ -125,7 +122,6 @@ export function WorkerProfilePage() {
           {t('worker.profile.profileHeader')}
         </Typography>
       </Box>
-
       <Stack
         sx={{
           borderRadius: '20px',
@@ -147,15 +143,13 @@ export function WorkerProfilePage() {
         >
           <ProfileData variant="expanded" />
           <Typography
+            variant="body2"
             sx={{
               display: 'flex',
               flexShrink: 0,
               alignItems: 'center',
               gap: { xs: 0.5, md: 1 },
-              fontSize: { xs: 12, md: 14 },
               fontWeight: 500,
-              lineHeight: 'normal',
-              letterSpacing: '0.12px',
               color: colorPalette.success.main,
             }}
           >
@@ -163,12 +157,11 @@ export function WorkerProfilePage() {
             {t('worker.profile.accountVerified')}
           </Typography>
         </Box>
-        <Box
+        <Stack
+          direction={{ xs: 'column', md: 'row' }}
           sx={{
-            display: 'flex',
             alignItems: { xs: 'flex-start', md: 'center' },
             justifyContent: 'space-between',
-            flexDirection: { xs: 'column', md: 'row' },
             gap: { xs: 4, md: 3 },
             p: { xs: 2, md: 3 },
           }}
@@ -176,20 +169,18 @@ export function WorkerProfilePage() {
           <Stack sx={{ gap: { xs: 3, md: 4 } }}>
             <Stack sx={{ gap: 1 }}>
               <Typography
+                variant="body2"
                 sx={{
-                  fontSize: 14,
                   fontWeight: 500,
-                  lineHeight: 'normal',
                   color: colorPalette.text.auxiliary200,
                 }}
               >
                 {t('worker.profile.email')}
               </Typography>
               <Typography
+                variant="body1"
                 sx={{
-                  fontSize: 16,
                   fontWeight: 500,
-                  lineHeight: 'normal',
                   color: colorPalette.text.primary,
                 }}
               >
@@ -198,20 +189,18 @@ export function WorkerProfilePage() {
             </Stack>
             <Stack sx={{ gap: 1 }}>
               <Typography
+                variant="body2"
                 sx={{
-                  fontSize: 14,
                   fontWeight: 500,
-                  lineHeight: 'normal',
                   color: colorPalette.text.auxiliary200,
                 }}
               >
                 {t('worker.profile.walletAddress')}
               </Typography>
               <Typography
+                variant="body1"
                 sx={{
-                  fontSize: 16,
                   fontWeight: 500,
-                  lineHeight: 'normal',
                   color: colorPalette.text.primary,
                 }}
               >
@@ -255,7 +244,7 @@ export function WorkerProfilePage() {
               {t('worker.profile.resetPassword')}
             </Button>
           </Stack>
-        </Box>
+        </Stack>
       </Stack>
     </Stack>
   );

@@ -40,16 +40,14 @@ export const darkColorPalette = {
     strong: '#3a2e6f',
   },
   error: {
-    main: '#F65A93',
-    dark: '#F3206E',
-    light: '#F76DA0',
-    contrastText: '#FFFFFF',
+    main: '#ff6262',
+    dark: '#ff6262cc',
+    contrastText: '#ffffff',
   },
   success: {
-    main: '#58CAA8',
-    dark: '#1F916F',
-    light: '#5FD1AF',
-    contrastText: 'rgba(255, 255, 255, 0.87)',
+    main: '#43ba96',
+    dark: '#43ba96cc',
+    contrastText: '#ffffff',
   },
   paper: {
     main: '#1c133f',

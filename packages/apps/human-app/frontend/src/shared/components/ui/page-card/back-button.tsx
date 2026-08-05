@@ -15,6 +15,7 @@ export function BackButton({ onClick }: { onClick: () => void }) {
         height: { xs: '32px', md: '40px' },
         borderRadius: '50%',
         fontSize: '24px',
+        transition: 'none',
         color: isDarkMode
           ? colorPalette.text.auxiliary100
           : colorPalette.text.primary,

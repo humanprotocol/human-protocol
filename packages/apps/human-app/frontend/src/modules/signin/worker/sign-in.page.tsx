@@ -141,13 +141,9 @@ export function SignInWorkerPage() {
             >
               <BackButton onClick={handleBackButton} />
               <Typography
-                component="h3"
-                sx={{
-                  color: colorPalette.text.auxiliary100,
-                  fontSize: { xs: '20px', md: '34px' },
-                  fontWeight: { xs: 700, md: 800 },
-                  lineHeight: { xs: '150%', md: 'normal' },
-                }}
+                component="h1"
+                variant="h4"
+                sx={{ color: colorPalette.text.auxiliary100 }}
               >
                 {t('worker.signInForm.title')}
               </Typography>

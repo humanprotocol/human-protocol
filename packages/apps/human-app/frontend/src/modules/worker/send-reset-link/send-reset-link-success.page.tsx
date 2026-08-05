@@ -81,12 +81,10 @@ export function SendResetLinkWorkerSuccessPage() {
     >
       <Stack sx={{ width: { xs: '100%', md: '400px' } }}>
         <Typography
-          component="h3"
+          component="h1"
+          variant="h4"
           sx={{
             color: colorPalette.text.auxiliary100,
-            fontSize: { xs: '20px', md: '34px' },
-            fontWeight: { xs: 700, md: 800 },
-            lineHeight: { xs: '150%', md: 'normal' },
             mb: 3,
           }}
         >

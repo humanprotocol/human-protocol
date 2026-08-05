@@ -95,13 +95,11 @@ export function EmailVerificationFormContainer() {
               sx={{ mb: 2.5, color: colorPalette.primary.main, fontSize: 54 }}
             />
             <Typography
+              component="h1"
               variant="h4"
               sx={{
                 mb: 1,
                 color: colorPalette.text.auxiliary100,
-                fontSize: { xs: '32px', md: '34px' },
-                fontWeight: { xs: 700, md: 800 },
-                lineHeight: 'normal',
                 textTransform: { xs: 'capitalize', md: 'none' },
               }}
             >

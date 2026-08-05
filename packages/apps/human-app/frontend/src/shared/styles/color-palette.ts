@@ -38,16 +38,14 @@ export const colorPalette = {
     strong: 'rgba(50, 10, 141, 0.30)',
   },
   error: {
-    main: '#FA2A75',
-    dark: '#F20D5F',
-    light: '#FF5995',
-    contrastText: '#FFFFFF',
+    main: '#ff6262',
+    dark: '#ff6262cc',
+    contrastText: '#ffffff',
   },
   success: {
-    main: '#0AD397',
-    dark: '#0E976E',
-    light: '#00EDA6',
-    contrastText: '#FFFFFF',
+    main: '#43ba96',
+    dark: '#43ba96cc',
+    contrastText: '#ffffff',
   },
   paper: {
     main: '#F6F7FE',
