@@ -8,3 +8,4 @@ export * from './use-web3-provider';
 export * from './use-expiration-modal';
 export * from './use-prepare-signature';
 export * from './use-get-ui-config';
+export * from './use-is-user-verified';

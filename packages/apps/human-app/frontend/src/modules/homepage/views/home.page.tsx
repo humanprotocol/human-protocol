@@ -1,21 +1,17 @@
 import { Box, Container, Grid, Paper } from '@mui/material';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '@/modules/auth/hooks/use-auth';
+
 import { routerPaths } from '@/router/router-paths';
 import { useColorMode } from '@/shared/contexts/color-mode';
-import { KycStatus } from '@/modules/worker/profile/types/profile-types';
 import { LogoSection } from '../components/logo-section';
 import { SignInSection } from '../components/sign-in-section';
+import { useIsUserVerified } from '@/shared/hooks';
 
 export function HomePage() {
   const { colorPalette } = useColorMode();
-  const { user: worker } = useAuth();
+  const isUserVerified = useIsUserVerified();
 
-  if (
-    worker &&
-    worker.kyc_status === KycStatus.APPROVED &&
-    worker.wallet_address
-  ) {
+  if (isUserVerified) {
     return <Navigate replace to={routerPaths.worker.profile} />;
   }
 

@@ -6,6 +6,7 @@ import { routerPaths } from '@/router/router-paths';
 import { PageCardLoader } from '@/shared/components/ui/page-card';
 import { type AuthenticatedUserContextType } from '@/shared/contexts/generic-auth-context';
 import { type UserData } from '../context/auth-context';
+import { useIsUserVerified } from '@/shared/hooks';
 
 export const AuthenticatedUserContext =
   createContext<AuthenticatedUserContextType<UserData> | null>(null);
@@ -13,6 +14,7 @@ export const AuthenticatedUserContext =
 export function RequireAuth({ children }: Readonly<{ children: ReactNode }>) {
   const auth = useAuth();
   const location = useLocation();
+  const isUserVerified = useIsUserVerified();
 
   if (auth.status === 'loading') {
     return <PageCardLoader />;
@@ -32,6 +34,10 @@ export function RequireAuth({ children }: Readonly<{ children: ReactNode }>) {
         to={routerPaths.worker.verifyEmail}
       />
     );
+  }
+
+  if (!isUserVerified) {
+    return <Navigate replace to={routerPaths.worker.signIn} />;
   }
 
   return (

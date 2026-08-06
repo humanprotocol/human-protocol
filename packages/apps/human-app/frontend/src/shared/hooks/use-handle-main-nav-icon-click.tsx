@@ -1,13 +1,16 @@
 import { useNavigate } from 'react-router-dom';
 import { routerPaths } from '@/router/router-paths';
 import { browserAuthProvider } from '../contexts/browser-auth-provider';
+import { useIsUserVerified } from './use-is-user-verified';
 
 export const useHandleMainNavIconClick = () => {
   const navigate = useNavigate();
+  const isUserVerified = useIsUserVerified();
 
   const handleIconClick = () => {
     const type = browserAuthProvider.getAuthType();
-    const isAuthenticated = browserAuthProvider.isAuthenticated;
+    const isAuthenticated =
+      browserAuthProvider.isAuthenticated && isUserVerified;
 
     if (type === 'web3' && isAuthenticated) {
       navigate(routerPaths.operator.profile);

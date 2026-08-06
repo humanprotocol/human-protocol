@@ -18,6 +18,7 @@ import { VerificationFlow } from './verification-flow';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
 import { KycStatus } from '@/modules/worker/profile/types';
 import { routerPaths } from '@/router/router-paths';
+import { useIsUserVerified } from '@/shared/hooks';
 
 function formattedSignInErrorMessage(
   unknownError: unknown
@@ -29,11 +30,14 @@ function formattedSignInErrorMessage(
 
 export function SignInWorkerPage() {
   const [isVerificationRequired, setIsVerificationRequired] = useState(false);
-  const { signIn, error, isSuccess, isError, isLoading, reset } = useSignIn();
+
   const { showNotification } = useNotification();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { colorPalette } = useColorMode();
+  const isUserVerified = useIsUserVerified();
+
+  const { signIn, error, isSuccess, isError, isLoading, reset } = useSignIn();
 
   useEffect(() => {
     if (isError) {
@@ -60,13 +64,13 @@ export function SignInWorkerPage() {
       return;
     }
 
-    if (user.kyc_status === KycStatus.APPROVED && user.wallet_address) {
+    if (isUserVerified) {
       navigate(routerPaths.worker.profile);
       return;
     }
 
     setIsVerificationRequired(true);
-  }, [isSuccess, user, navigate]);
+  }, [isSuccess, user, navigate, isUserVerified]);
 
   const handleBackButton = () => {
     navigate(-1);

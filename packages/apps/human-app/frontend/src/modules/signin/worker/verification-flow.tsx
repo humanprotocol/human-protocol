@@ -97,7 +97,7 @@ export function VerificationFlow({
             }}
           >
             {t('worker.profile.identityVerification')}
-            {isKycStarted && (
+            {isKycStarted && label && (
               <Chip label={label} backgroundColor={getChipColor(kycStatus)} />
             )}
           </Typography>
