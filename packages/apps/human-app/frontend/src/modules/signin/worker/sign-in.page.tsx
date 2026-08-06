@@ -53,6 +53,13 @@ export function SignInWorkerPage() {
       return;
     }
 
+    if (user.status === 'pending' && !user.kyc_status) {
+      navigate(routerPaths.worker.verifyEmail, {
+        state: { routerState: { email: user.email } },
+      });
+      return;
+    }
+
     if (user.kyc_status === KycStatus.APPROVED && user.wallet_address) {
       navigate(routerPaths.worker.profile);
       return;

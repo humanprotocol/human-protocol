@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { FormProvider } from 'react-hook-form';
-import { Box, Grid, Paper, Typography } from '@mui/material';
+import { Box, Paper, Stack, Typography } from '@mui/material';
 
 import { PageCardLoader } from '@/shared/components/ui/page-card';
 import { getErrorMessageForError } from '@/shared/errors';
@@ -84,13 +84,7 @@ export function EmailVerificationFormContainer() {
             void methods.handleSubmit(handleResend)(event);
           }}
         >
-          <Grid
-            container
-            sx={{
-              width: { xs: '100%', md: 400 },
-              flexDirection: 'column',
-            }}
-          >
+          <Stack sx={{ width: { xs: '100%', md: 400 } }}>
             <InboxIcon
               sx={{ mb: 2.5, color: colorPalette.primary.main, fontSize: 54 }}
             />
@@ -147,19 +141,14 @@ export function EmailVerificationFormContainer() {
               </Button>
             </Box>
             {!!user && (
-              <>
+              <Stack sx={{ mt: 3, gap: 3 }}>
                 <HCaptchaForm name="h_captcha_token" />
-                <Button
-                  type="submit"
-                  variant="outlined"
-                  color="accent"
-                  fullWidth
-                >
+                <Button type="submit" variant="outlined" fullWidth>
                   {t('worker.verifyEmail.btn')}
                 </Button>
-              </>
+              </Stack>
             )}
-          </Grid>
+          </Stack>
         </form>
       </FormProvider>
     </Paper>
