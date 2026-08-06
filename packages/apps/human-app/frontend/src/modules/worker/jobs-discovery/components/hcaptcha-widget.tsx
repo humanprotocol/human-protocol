@@ -22,9 +22,7 @@ import { Counter } from '@/shared/components/ui/counter';
 import { Loader } from '@/shared/components/ui/loader';
 
 const getHCaptchaPagePath = (siteKey: string | null | undefined): string =>
-  siteKey
-    ? routerPaths.worker.HcaptchaLabeling
-    : routerPaths.worker.enableLabeler;
+  siteKey ? routerPaths.HcaptchaLabeling : routerPaths.enableLabeler;
 
 const renderDescription = (color: string, isMobile: boolean) => {
   let description = '';

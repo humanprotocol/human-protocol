@@ -1,7 +1,7 @@
 import { SvgIcon, SvgIconProps } from '@mui/material';
 
-import HumanLogoIconLight from '@/assets/icons/icons-human-logo/human-logo.svg';
-import HumanLogoIconDark from '@/assets/icons-dark-mode/icons-human-logo/human-logo.svg';
+import { useColorMode } from '@/shared/contexts/color-mode';
+
 import RefreshIconLight from '@/assets/icons/refresh.svg';
 import RefreshIconDark from '@/assets/icons-dark-mode/refresh.svg';
 import HumanLogoNavbarIconLight from '@/assets/icons/icons-navbar/human-logo-navbar.svg';
@@ -9,23 +9,10 @@ import HumanLogoNavbarIconDark from '@/assets/icons-dark-mode/icons-navbar/human
 import HelpIconLight from '@/assets/icons/help.svg';
 import HelpIconDark from '@/assets/icons-dark-mode/help.svg';
 import CheckmarkIcon from '@/assets/icons/checkmark-icon.svg';
-import LockerIconLight from '@/assets/icons/locker-icon.svg';
-import LockerIconDark from '@/assets/icons-dark-mode/locker-icon.svg';
-import FiltersButtonIconLight from '@/assets/icons/filters-button-icon.svg';
-import FiltersButtonIconDark from '@/assets/icons-dark-mode/filters-button-icon.svg';
-import SortArrowLight from '@/assets/icons/sort-arrow.svg';
-import SortArrowDark from '@/assets/icons-dark-mode/sort-arrow.svg';
-import FiltersIconLight from '@/assets/icons/filters-icon.svg';
-import FiltersIconDark from '@/assets/icons-dark-mode/filters-icon.svg';
 import SunIconDark from '@/assets/icons-dark-mode/sun.svg';
 import SunIconLight from '@/assets/icons/sun.svg';
 import MoonIconDark from '@/assets/icons-dark-mode/moon.svg';
 import MoonIconLight from '@/assets/icons/moon.svg';
-import { useColorMode } from '@/shared/contexts/color-mode';
-import EditIconLight from '@/assets/icons/edit-icon.svg';
-import EditIconDark from '@/assets/icons-dark-mode/edit-icon.svg';
-import DeleteIconLight from '@/assets/icons/delete-icon.svg';
-import DeleteIconDark from '@/assets/icons-dark-mode/delete-icon.svg';
 import VeriffIconLight from '@/assets/icons/veriff.svg';
 import VeriffIconDark from '@/assets/icons-dark-mode/veriff.svg';
 import HourglassIconLight from '@/assets/icons/hourglass.svg';
@@ -38,10 +25,6 @@ import HcaptchaDisabledIconDark from '@/assets/icons-dark-mode/hcaptcha-disabled
 import EthereumIcon from '@/assets/icons/ethereum-icon.svg';
 import PolygonIcon from '@/assets/icons/polygon-icon.svg';
 
-function HumanLogoIcon() {
-  const { isDarkMode } = useColorMode();
-  return isDarkMode ? <HumanLogoIconDark /> : <HumanLogoIconLight />;
-}
 function HumanLogoNavbarIcon() {
   const { isDarkMode } = useColorMode();
   return isDarkMode ? (
@@ -58,22 +41,6 @@ function HelpIcon() {
   const { isDarkMode } = useColorMode();
   return isDarkMode ? <HelpIconDark /> : <HelpIconLight />;
 }
-function LockerIcon() {
-  const { isDarkMode } = useColorMode();
-  return isDarkMode ? <LockerIconDark /> : <LockerIconLight />;
-}
-function FiltersButtonIcon() {
-  const { isDarkMode } = useColorMode();
-  return isDarkMode ? <FiltersButtonIconDark /> : <FiltersButtonIconLight />;
-}
-function SortArrow() {
-  const { isDarkMode } = useColorMode();
-  return isDarkMode ? <SortArrowDark /> : <SortArrowLight />;
-}
-function FiltersIcon() {
-  const { isDarkMode } = useColorMode();
-  return isDarkMode ? <FiltersIconDark /> : <FiltersIconLight />;
-}
 function SunIcon() {
   const { isDarkMode } = useColorMode();
   return isDarkMode ? <SunIconDark /> : <SunIconLight />;
@@ -81,14 +48,6 @@ function SunIcon() {
 function MoonIcon() {
   const { isDarkMode } = useColorMode();
   return isDarkMode ? <MoonIconDark /> : <MoonIconLight />;
-}
-function EditIcon() {
-  const { isDarkMode } = useColorMode();
-  return isDarkMode ? <EditIconDark /> : <EditIconLight />;
-}
-function DeleteIcon() {
-  const { isDarkMode } = useColorMode();
-  return isDarkMode ? <DeleteIconDark /> : <DeleteIconLight />;
 }
 function VeriffIcon() {
   const { isDarkMode } = useColorMode();
@@ -342,20 +301,13 @@ function JobStatusIcon(props: SvgIconProps) {
 }
 
 export {
-  HumanLogoIcon,
   HumanLogoNavbarIcon,
   RefreshIcon,
   HelpIcon,
   CheckmarkIcon,
-  LockerIcon,
-  FiltersButtonIcon,
-  SortArrow,
-  FiltersIcon,
   SunIcon,
   MoonIcon,
   CopyIcon,
-  EditIcon,
-  DeleteIcon,
   InboxIcon,
   SuccessIcon,
   VeriffIcon,

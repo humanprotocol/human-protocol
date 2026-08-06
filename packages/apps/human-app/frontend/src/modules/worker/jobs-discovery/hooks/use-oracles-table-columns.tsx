@@ -2,9 +2,7 @@ import { useMemo } from 'react';
 import { t } from 'i18next';
 import { Grid } from '@mui/material';
 import type { MRT_ColumnDef } from 'material-react-table';
-import { Chips } from '@/shared/components/ui/chips';
 import { TableButton } from '@/shared/components/ui/table-button';
-import { type JobType } from '@/modules/smart-contracts/EthKVStore/config';
 import { EvmAddress } from '../../jobs/components';
 import { type Oracle } from '../../services/oracles.service';
 import { useSelectOracleNavigation } from './use-select-oracle-navigation';
@@ -26,18 +24,6 @@ export const useOraclesTableColumns = (): MRT_ColumnDef<Oracle>[] => {
         size: 100,
         enableSorting: true,
         Cell: (props) => <EvmAddress address={props.row.original.address} />,
-      },
-      {
-        accessorKey: 'jobTypes',
-        header: t('worker.oraclesTable.jobTypes'),
-        size: 100,
-        enableSorting: false,
-        Cell: ({ row }) => {
-          const jobTypes = row.original.jobTypes.map((jobType) =>
-            t(`jobTypeLabels.${jobType as JobType}`)
-          );
-          return <Chips data={jobTypes} />;
-        },
       },
       {
         accessorKey: 'url',

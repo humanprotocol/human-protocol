@@ -4,7 +4,7 @@ import { t } from 'i18next';
 import { Box, Chip, Stack, Typography } from '@mui/material';
 
 import { TableButton } from '@/shared/components/ui/table-button';
-import type { JobType } from '@/modules/smart-contracts/EthKVStore/config';
+import type { JobType } from '@/shared/types/entity.type';
 import { useJobsNotifications } from '../../hooks';
 import { EvmAddress, RewardAmount } from '../../components';
 import { type AvailableJob } from '../../types';

@@ -19,7 +19,7 @@ function Wrapper({
     return (
       <Link
         component={RouterLink}
-        to={routerPaths.worker.profile}
+        to={routerPaths.profile}
         sx={{ textDecoration: 'none' }}
       >
         {children}
@@ -39,7 +39,7 @@ export function ProfileData({
   const { colorPalette } = useColorMode();
   const location = useLocation();
 
-  const isProfilePage = location.pathname === routerPaths.worker.profile;
+  const isProfilePage = location.pathname === routerPaths.profile;
   const isCompact = variant === 'compact';
 
   return (

@@ -25,7 +25,7 @@ export function ProtectedLayout() {
   const { colorPalette } = useColorMode();
   const location = useLocation();
 
-  const isProfilePage = location.pathname === routerPaths.worker.profile;
+  const isProfilePage = location.pathname === routerPaths.profile;
   const isBottomTrayVisible = isMobile && !isProfilePage;
 
   return (

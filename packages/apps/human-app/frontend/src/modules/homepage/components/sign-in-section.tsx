@@ -23,7 +23,7 @@ export function SignInSection() {
     >
       <Button
         component={Link}
-        to={routerPaths.worker.signUp}
+        to={routerPaths.signUp}
         variant="contained"
         size="large"
         color="primary"
@@ -33,7 +33,7 @@ export function SignInSection() {
       </Button>
       <Button
         component={Link}
-        to={routerPaths.worker.signIn}
+        to={routerPaths.signIn}
         variant="contained"
         size="large"
         color="accent"

@@ -63,7 +63,7 @@ export function SignInForm({
           <Box sx={{ width: '100%' }}>
             <MuiLink
               component={Link}
-              to={routerPaths.worker.sendResetLink}
+              to={routerPaths.sendResetLink}
               variant="body1"
               sx={{
                 color: colorPalette.text.primary,
@@ -129,7 +129,7 @@ export function SignInForm({
             </Typography>{' '}
             <MuiLink
               component={Link}
-              to={routerPaths.worker.signUp}
+              to={routerPaths.signUp}
               sx={{
                 color: colorPalette.accent.main,
                 fontSize: '14px',

@@ -44,11 +44,6 @@
     "cannotSignMessage": "Cannot sign message."
   },
   "components": {
-    "multiSelect": {
-      "allFields": "All fields",
-      "andMore": "(and {{number}} more)",
-      "clearAll": "Clear all"
-    },
     "breadcrumb": {
       "back": "Back"
     },

@@ -16,7 +16,7 @@ export function useEnableHCaptchaLabelingMutation() {
       return result;
     },
     onSuccess: () => {
-      navigate(routerPaths.worker.HcaptchaLabeling);
+      navigate(routerPaths.HcaptchaLabeling);
     },
   });
 

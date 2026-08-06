@@ -20,7 +20,7 @@ import { BackButton } from '@/shared/components/ui/page-card/back-button';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { CopyToClipboardButton } from '@/shared/components/ui/copy-to-clipboard-button';
 
-export function WorkerProfilePage() {
+export function ProfilePage() {
   const { user } = useAuthenticatedUser();
   const { colorPalette } = useColorMode();
   const { isConnected, initializing, web3ProviderMutation } =
@@ -30,7 +30,7 @@ export function WorkerProfilePage() {
   const navigate = useNavigate();
 
   const handleBack = () => {
-    navigate(routerPaths.worker.jobsDiscovery);
+    navigate(routerPaths.jobsDiscovery);
   };
 
   const handleSignOut = () => {
@@ -201,7 +201,7 @@ export function WorkerProfilePage() {
             </Button>
             <Button
               component={Link}
-              to={routerPaths.worker.sendResetLink}
+              to={routerPaths.sendResetLink}
               variant="outlined"
               fullWidth
             >

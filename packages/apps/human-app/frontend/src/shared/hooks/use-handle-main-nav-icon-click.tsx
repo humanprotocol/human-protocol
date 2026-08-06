@@ -12,13 +12,8 @@ export const useHandleMainNavIconClick = () => {
     const isAuthenticated =
       browserAuthProvider.isAuthenticated && isUserVerified;
 
-    if (type === 'web3' && isAuthenticated) {
-      navigate(routerPaths.operator.profile);
-      return;
-    }
-
     if (type === 'web2' && isAuthenticated) {
-      navigate(routerPaths.worker.profile);
+      navigate(routerPaths.profile);
       return;
     }
 

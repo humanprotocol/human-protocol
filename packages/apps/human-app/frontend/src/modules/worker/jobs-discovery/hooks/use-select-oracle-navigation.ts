@@ -14,12 +14,12 @@ export const useSelectOracleNavigation = () => {
     (oracle: Oracle) => {
       if (shouldNavigateToRegistration(oracle, data)) {
         navigate(
-          `${routerPaths.worker.registrationInExchangeOracle}/${oracle.address}`
+          `${routerPaths.registrationInExchangeOracle}/${oracle.address}`
         );
         return;
       }
 
-      navigate(`${routerPaths.worker.jobs}/${oracle.address}`, {
+      navigate(`${routerPaths.jobs}/${oracle.address}`, {
         state: { oracle },
       });
     },

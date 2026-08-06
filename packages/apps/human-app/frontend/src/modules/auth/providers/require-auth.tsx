@@ -7,20 +7,26 @@ import { PageCardLoader } from '@/shared/components/ui/page-card';
 import { type AuthenticatedUserContextType } from '@/shared/contexts/generic-auth-context';
 import { type UserData } from '../context/auth-context';
 import { useIsUserVerified } from '@/shared/hooks';
+import { KycStatus } from '@/modules/worker/profile/types/profile-types';
 
 export const AuthenticatedUserContext =
   createContext<AuthenticatedUserContextType<UserData> | null>(null);
 
-export function RequireAuth({ children }: Readonly<{ children: ReactNode }>) {
+export function RequireAuth({ children }: { children: ReactNode }) {
   const auth = useAuth();
   const location = useLocation();
   const isUserVerified = useIsUserVerified();
+
+  const isKycApproved = auth.user?.kyc_status === KycStatus.APPROVED;
+  const isWalletConnected = auth.user?.wallet_address !== null;
+
+  const isUserReady = isKycApproved && isWalletConnected;
 
   if (auth.status === 'loading') {
     return <PageCardLoader />;
   }
 
-  if (!auth.user) {
+  if (!auth.user || !isUserReady) {
     return (
       <Navigate replace state={{ from: location }} to={routerPaths.homePage} />
     );
@@ -31,13 +37,13 @@ export function RequireAuth({ children }: Readonly<{ children: ReactNode }>) {
       <Navigate
         replace
         state={{ routerState: { email: auth.user.email } }}
-        to={routerPaths.worker.verifyEmail}
+        to={routerPaths.verifyEmail}
       />
     );
   }
 
   if (!isUserVerified) {
-    return <Navigate replace to={routerPaths.worker.verifyUser} />;
+    return <Navigate replace to={routerPaths.verifyUser} />;
   }
 
   return (

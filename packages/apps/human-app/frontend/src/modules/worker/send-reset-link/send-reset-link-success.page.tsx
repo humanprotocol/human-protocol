@@ -22,7 +22,7 @@ import {
   useNotification,
 } from '@/shared/hooks/use-notification';
 
-export function SendResetLinkWorkerSuccessPage() {
+export function SendResetLinkSuccessPage() {
   const { colorPalette } = useColorMode();
   const { t } = useTranslation();
   const { showNotification } = useNotification();

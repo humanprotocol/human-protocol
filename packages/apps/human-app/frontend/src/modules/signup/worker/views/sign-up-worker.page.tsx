@@ -31,7 +31,7 @@ function handleSignupError(unknownError: unknown) {
   }
 }
 
-export function SignUpWorkerPage() {
+export function SignUpPage() {
   const { showNotification } = useNotification();
   const navigate = useNavigate();
   const { colorPalette } = useColorMode();
@@ -218,7 +218,7 @@ export function SignUpWorkerPage() {
                   </Typography>{' '}
                   <Link
                     component={RouterLink}
-                    to={routerPaths.worker.signIn}
+                    to={routerPaths.signIn}
                     sx={{
                       fontSize: '14px',
                       fontWeight: 600,

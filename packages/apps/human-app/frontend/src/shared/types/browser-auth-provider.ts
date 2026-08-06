@@ -1,4 +1,3 @@
-import type { Web3UserData } from '@/modules/auth-web3/context/web3-auth-context';
 import type { UserData } from '@/modules/auth/context/auth-context';
 import { type AuthTokensSuccessResponse } from '../schemas';
 
@@ -20,6 +19,6 @@ export interface BrowserAuthProvider {
   getAccessToken: () => string | null;
   getRefreshToken: () => string | null;
   getAuthType: () => AuthType | null;
-  setUserData: (userData: UserData | Web3UserData) => void;
+  setUserData: (userData: UserData) => void;
   getUserData: () => { data: unknown };
 }

@@ -5,7 +5,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import { browserAuthProvider } from '@/shared/contexts/browser-auth-provider';
 import { type AuthTokensSuccessResponse } from '@/shared/schemas';
 import { type UserData } from '@/modules/auth/context/auth-context';
-import { type Web3UserData } from '@/modules/auth-web3/context/web3-auth-context';
 import { type AuthType } from '../types/browser-auth-provider';
 import { useExpirationModal } from '../hooks';
 
@@ -31,7 +30,7 @@ export interface UnauthenticatedUserContextType<T> extends AuthContextType<T> {
   user: null;
 }
 
-export function createAuthProvider<T extends UserData | Web3UserData>(config: {
+export function createAuthProvider<T extends UserData>(config: {
   authType: AuthType;
   schema: ZodType<T>;
 }) {

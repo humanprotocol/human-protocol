@@ -44,7 +44,7 @@ export function EmailVerificationSuccessMessage() {
         </Typography>
         <Button
           component={Link}
-          to={routerPaths.worker.signIn}
+          to={routerPaths.signIn}
           variant="contained"
           color="accent"
           fullWidth

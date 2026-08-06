@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import omit from 'lodash/omit';
+
 import { browserAuthProvider } from '@/shared/contexts/browser-auth-provider';
 import { type SignUpDto } from '../schema';
 import { useSignUpMutation } from './use-sign-up-mutation';

@@ -5,7 +5,7 @@ import { EthereumIcon, PolygonIcon } from './icons';
 import { Stack, Tooltip } from '@mui/material';
 import { getNetworkName } from '@/modules/smart-contracts/get-network-name';
 
-export const CHAIN_ICONS: Partial<Record<number, ReactElement>> = {
+const CHAIN_ICONS: Partial<Record<number, ReactElement>> = {
   [ChainId.MAINNET]: <EthereumIcon />,
   [ChainId.SEPOLIA]: <EthereumIcon />,
   [ChainId.POLYGON]: <PolygonIcon />,

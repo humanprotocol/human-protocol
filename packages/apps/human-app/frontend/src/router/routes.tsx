@@ -1,36 +1,31 @@
 import type { RouteProps } from 'react-router-dom';
+
 import { routerPaths } from '@/router/router-paths';
 import { env } from '@/shared/env';
+
 import { RegistrationPage } from '@/modules/worker/oracle-registration';
 import {
   HcaptchaLabelingPage,
   EnableLabelerPage,
 } from '@/modules/worker/hcaptcha-labeling';
 import {
-  WorkerEmailVerificationProcessPage,
-  WorkerVerifyEmailPage,
+  EmailVerificationProcessPage,
+  VerifyEmailPage,
 } from '@/modules/worker/email-verification';
-import { SignInWorkerPage, VerifyUserPage } from '@/modules/signin/worker';
+import { SignInPage, VerifyUserPage } from '@/modules/signin/worker';
 import { JobsDiscoveryPage } from '@/modules/worker/jobs-discovery';
 import { MyJobsPage } from '@/modules/worker/jobs/my-jobs/my-jobs.page';
-import { WorkerProfilePage } from '@/modules/worker/profile';
-import { SignUpWorkerPage } from '@/modules/signup/worker';
-import { OperatorProfilePage } from '@/modules/operator/profile';
+import { ProfilePage } from '@/modules/worker/profile';
+import { SignUpPage } from '@/modules/signup/worker';
 import { HomePage } from '@/modules/homepage';
-import {
-  AddKeysOperatorPage,
-  AddStakeOperatorPage,
-  EditExistingKeysSuccessPage,
-  SetUpOperatorPage,
-} from '@/modules/signup/operator';
 import { JobsPage } from '@/modules/worker/jobs';
 import {
-  ResetPasswordWorkerPage,
-  ResetPasswordWorkerSuccessPage,
+  ResetPasswordPage,
+  ResetPasswordSuccessPage,
 } from '@/modules/worker/reset-password';
 import {
-  SendResetLinkWorkerPage,
-  SendResetLinkWorkerSuccessPage,
+  SendResetLinkPage,
+  SendResetLinkSuccessPage,
 } from '@/modules/worker/send-reset-link';
 
 export const unprotectedRoutes: RouteProps[] = [
@@ -39,40 +34,40 @@ export const unprotectedRoutes: RouteProps[] = [
     element: <HomePage />,
   },
   {
-    path: routerPaths.worker.signIn,
-    element: <SignInWorkerPage />,
+    path: routerPaths.signIn,
+    element: <SignInPage />,
   },
   {
-    path: routerPaths.worker.signUp,
-    element: <SignUpWorkerPage />,
+    path: routerPaths.signUp,
+    element: <SignUpPage />,
   },
   {
-    path: routerPaths.worker.emailVerification,
-    element: <WorkerEmailVerificationProcessPage />,
+    path: routerPaths.emailVerification,
+    element: <EmailVerificationProcessPage />,
   },
   {
-    path: routerPaths.worker.verifyEmail,
-    element: <WorkerVerifyEmailPage />,
+    path: routerPaths.verifyEmail,
+    element: <VerifyEmailPage />,
   },
   {
-    path: routerPaths.worker.verifyUser,
+    path: routerPaths.verifyUser,
     element: <VerifyUserPage />,
   },
   {
-    path: routerPaths.worker.sendResetLink,
-    element: <SendResetLinkWorkerPage />,
+    path: routerPaths.sendResetLink,
+    element: <SendResetLinkPage />,
   },
   {
-    path: routerPaths.worker.resetPassword,
-    element: <ResetPasswordWorkerPage />,
+    path: routerPaths.resetPassword,
+    element: <ResetPasswordPage />,
   },
   {
-    path: routerPaths.worker.sendResetLinkSuccess,
-    element: <SendResetLinkWorkerSuccessPage />,
+    path: routerPaths.sendResetLinkSuccess,
+    element: <SendResetLinkSuccessPage />,
   },
   {
-    path: routerPaths.worker.resetPasswordSuccess,
-    element: <ResetPasswordWorkerSuccessPage />,
+    path: routerPaths.resetPasswordSuccess,
+    element: <ResetPasswordSuccessPage />,
   },
 ];
 
@@ -81,13 +76,13 @@ export const protectedRoutes: {
 }[] = [
   {
     routerProps: {
-      path: routerPaths.worker.jobsDiscovery,
+      path: routerPaths.jobsDiscovery,
       element: <JobsDiscoveryPage />,
     },
   },
   {
     routerProps: {
-      path: routerPaths.worker.myJobs,
+      path: routerPaths.myJobs,
       element: <MyJobsPage />,
     },
   },
@@ -95,13 +90,13 @@ export const protectedRoutes: {
     ? [
         {
           routerProps: {
-            path: `${routerPaths.worker.jobs}/:address`,
+            path: `${routerPaths.jobs}/:address`,
             element: <JobsPage />,
           },
         },
         {
           routerProps: {
-            path: `${routerPaths.worker.registrationInExchangeOracle}/:address`,
+            path: `${routerPaths.registrationInExchangeOracle}/:address`,
             element: <RegistrationPage />,
           },
         },
@@ -109,50 +104,20 @@ export const protectedRoutes: {
     : []),
   {
     routerProps: {
-      path: routerPaths.worker.profile,
-      element: <WorkerProfilePage />,
+      path: routerPaths.profile,
+      element: <ProfilePage />,
     },
   },
   {
     routerProps: {
-      path: routerPaths.worker.HcaptchaLabeling,
+      path: routerPaths.HcaptchaLabeling,
       element: <HcaptchaLabelingPage />,
     },
   },
   {
     routerProps: {
-      path: routerPaths.worker.enableLabeler,
+      path: routerPaths.enableLabeler,
       element: <EnableLabelerPage />,
     },
-  },
-];
-
-export const web3ProtectedRoutes: {
-  routerProps: RouteProps;
-}[] = [
-  {
-    routerProps: {
-      path: routerPaths.operator.profile,
-      element: <OperatorProfilePage />,
-    },
-  },
-];
-
-export const walletConnectRoutes: RouteProps[] = [
-  {
-    path: routerPaths.operator.addStake,
-    element: <AddStakeOperatorPage />,
-  },
-  {
-    path: routerPaths.operator.addKeys,
-    element: <AddKeysOperatorPage />,
-  },
-  {
-    path: routerPaths.operator.editExistingKeysSuccess,
-    element: <EditExistingKeysSuccessPage />,
-  },
-  {
-    path: routerPaths.operator.setUpOperator,
-    element: <SetUpOperatorPage />,
   },
 ];

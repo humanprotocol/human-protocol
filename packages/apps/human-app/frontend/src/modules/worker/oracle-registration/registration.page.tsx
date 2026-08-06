@@ -26,7 +26,7 @@ export function RegistrationPage() {
   const { registered, isPending } = useIsAlreadyRegistered(oracleAddress);
 
   const oracleData = data?.find((o) => o.address === oracleAddress);
-  const backRoute = routerPaths.worker.jobsDiscovery;
+  const backRoute = routerPaths.jobsDiscovery;
 
   if (oracleData === undefined || !isAddress(oracleAddress)) {
     return <Navigate to={backRoute} />;
