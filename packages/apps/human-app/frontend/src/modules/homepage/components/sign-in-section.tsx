@@ -26,7 +26,7 @@ export function SignInSection() {
         to={routerPaths.worker.signUp}
         variant="contained"
         size="large"
-        color="secondary"
+        color="primary"
         fullWidth
       >
         {t('homepage.signUp')}
@@ -36,6 +36,7 @@ export function SignInSection() {
         to={routerPaths.worker.signIn}
         variant="contained"
         size="large"
+        color="accent"
         fullWidth
       >
         {t('homepage.signIn')}
