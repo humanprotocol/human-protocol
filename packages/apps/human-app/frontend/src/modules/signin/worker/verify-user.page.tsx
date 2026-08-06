@@ -25,7 +25,7 @@ export function VerifyUserPage() {
     }
 
     if (isEmailVerificationPending) {
-      navigate(routerPaths.worker.verifyEmail, {
+      navigate(routerPaths.verifyEmail, {
         replace: true,
         state: { routerState: { email: user.email } },
       });
@@ -33,7 +33,7 @@ export function VerifyUserPage() {
     }
 
     if (isUserVerified) {
-      navigate(routerPaths.worker.profile, { replace: true });
+      navigate(routerPaths.profile, { replace: true });
     }
   }, [status, user, navigate, isUserVerified, isEmailVerificationPending]);
 
@@ -41,7 +41,7 @@ export function VerifyUserPage() {
     status === 'loading' || isEmailVerificationPending || isUserVerified;
 
   if (!isLoading && !user) {
-    return <Navigate replace to={routerPaths.worker.signIn} />;
+    return <Navigate replace to={routerPaths.signIn} />;
   }
 
   return (
