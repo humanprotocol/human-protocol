@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Card,
@@ -27,6 +28,9 @@ import { JOB_TYPES } from '@/shared/consts';
 import { JobType } from '@/modules/smart-contracts/EthKVStore/config';
 import { ExploreTasksDialog } from './explore-tasks-dialog';
 import { EvmAddress, RewardAmount } from '../../jobs/components';
+import { useGetRegistrationDataInOracles } from '../hooks/use-get-registration-data-oracles';
+import { shouldNavigateToRegistration } from '../helpers';
+import { routerPaths } from '@/router/router-paths';
 
 function JobTypesTooltipTitle({ jobTypes }: { jobTypes: string[] }) {
   return (
@@ -55,12 +59,28 @@ export function OracleJobCard({ oracle }: { oracle: Oracle }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isTaskTypesOpen, setIsTaskTypesOpen] = useState(false);
 
+  const navigate = useNavigate();
   const { colorPalette } = useColorMode();
   const isMobile = useIsMobile();
+
+  const { data, isLoading } = useGetRegistrationDataInOracles();
 
   const isRewardAmountsEqual =
     oracle.minRewardAmount === oracle.maxRewardAmount;
   const hasTasks = oracle.nTasks > 0;
+
+  const handleClickOnExploreTasks = () => {
+    if (isLoading) return;
+
+    if (shouldNavigateToRegistration(oracle, data)) {
+      navigate(
+        `${routerPaths.worker.registrationInExchangeOracle}/${oracle.address}`
+      );
+      return;
+    }
+
+    setIsDialogOpen(true);
+  };
 
   return (
     <Card
@@ -247,19 +267,18 @@ export function OracleJobCard({ oracle }: { oracle: Oracle }) {
             <Button
               variant="text"
               disableRipple
+              disabled={isLoading}
               sx={{
                 display: hasTasks ? 'flex' : 'none',
-                p: 0,
+                p: 0.5,
                 gap: 0.5,
                 bgcolor: 'transparent',
                 color: colorPalette.accent.main,
               }}
-              onClick={() => setIsDialogOpen(true)}
+              onClick={handleClickOnExploreTasks}
             >
               {t('worker.oraclesList.exploreTasks')}{' '}
-              <ArrowForwardIcon
-                sx={{ color: colorPalette.accent.main, fontSize: 20 }}
-              />
+              <ArrowForwardIcon sx={{ color: 'inherit', fontSize: 20 }} />
             </Button>
           </Stack>
           <Collapse in={isMobile && isTaskTypesOpen && hasTasks}>
