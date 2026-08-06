@@ -1,6 +1,7 @@
 import { useEffect, useState, type SubmitEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  Box,
   FormControlLabel,
   IconButton,
   Radio,
@@ -80,6 +81,7 @@ export function MyJobsFilters() {
       <IconButton
         disabled={isPending}
         sx={{
+          position: 'relative',
           p: 1.5,
           bgcolor: 'transparent',
           borderRadius: '50%',
@@ -88,6 +90,16 @@ export function MyJobsFilters() {
         onClick={() => setIsOpen(!isOpen)}
       >
         <FilterIcon sx={{ color: colorPalette.text.auxiliary200 }} />
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 2,
+            right: 2,
+            p: 0.5,
+            borderRadius: '50%',
+            bgcolor: colorPalette.accent.main,
+          }}
+        />
       </IconButton>
       <ResponsiveOverlay
         open={isOpen}

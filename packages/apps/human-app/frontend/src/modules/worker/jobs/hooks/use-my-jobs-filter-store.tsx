@@ -22,7 +22,7 @@ const initialFiltersState = {
   page: 0,
   page_size: 5,
   sort_field: SortField.CREATED_AT,
-  sort_direction: SortDirection.DESC,
+  sort: SortDirection.DESC,
 } as const;
 
 export const useMyJobsFilterStore = create<MyJobsFilterStoreProps>((set) => ({

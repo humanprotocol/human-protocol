@@ -69,6 +69,7 @@ export function MyJobsTable() {
             color: colorPalette.text.auxiliary100,
           },
           '.MuiSelect-icon': {
+            transition: 'none',
             ':hover': {
               backgroundColor: 'blue',
             },
@@ -82,6 +83,7 @@ export function MyJobsTable() {
         bgcolor: colorPalette.background.paper,
         boxShadow: 'none',
         color: colorPalette.text.auxiliary100,
+        transition: 'none',
       },
     },
     pageCount: tableData?.total_pages ?? -1,
@@ -133,6 +135,7 @@ export function MyJobsTable() {
       sx: {
         bgcolor: colorPalette.background.paper,
         borderBottom: `1px solid ${colorPalette.border.main}`,
+        transition: 'none',
         '&:last-of-type': {
           borderBottom: 'none',
         },

@@ -72,6 +72,7 @@ export const useGetMyJobsColumns = (): MRT_ColumnDef<MyJob>[] => {
                 bgcolor: colorPalette.background.subtle,
                 borderRadius: '99px',
                 border: `0.5px solid ${colorPalette.border.strong}`,
+                transition: 'none',
               }}
             />
           );

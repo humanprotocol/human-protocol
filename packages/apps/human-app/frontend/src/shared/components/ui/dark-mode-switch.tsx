@@ -28,9 +28,7 @@ export function ColorModeSwitch() {
           borderRadius: '90px',
           bgcolor: isDarkMode ? 'transparent' : '#fa2a75',
         }}
-        onClick={() => {
-          if (isDarkMode) switchMode();
-        }}
+        onClick={switchMode}
       >
         <SunIcon />
       </IconButton>
@@ -42,9 +40,7 @@ export function ColorModeSwitch() {
           borderRadius: '90px',
           bgcolor: isDarkMode ? '#fa2a75' : 'transparent',
         }}
-        onClick={() => {
-          if (!isDarkMode) switchMode();
-        }}
+        onClick={switchMode}
       >
         <MoonIcon />
       </IconButton>
