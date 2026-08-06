@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { t } from 'i18next';
 import { useNavigate } from 'react-router-dom';
 import { Box, Grid, Paper, Typography } from '@mui/material';
@@ -14,9 +14,7 @@ import {
 } from '@/shared/hooks/use-notification';
 import { BackButton } from '@/shared/components/ui/page-card/back-button';
 import { useColorMode } from '@/shared/contexts/color-mode';
-import { VerificationFlow } from './verification-flow';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
-import { KycStatus } from '@/modules/worker/profile/types';
 import { routerPaths } from '@/router/router-paths';
 import { useIsUserVerified } from '@/shared/hooks';
 
@@ -29,15 +27,13 @@ function formattedSignInErrorMessage(
 }
 
 export function SignInWorkerPage() {
-  const [isVerificationRequired, setIsVerificationRequired] = useState(false);
-
   const { showNotification } = useNotification();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, status } = useAuth();
   const { colorPalette } = useColorMode();
   const isUserVerified = useIsUserVerified();
 
-  const { signIn, error, isSuccess, isError, isLoading, reset } = useSignIn();
+  const { signIn, error, isError, isLoading, reset } = useSignIn();
 
   useEffect(() => {
     if (isError) {
@@ -53,7 +49,7 @@ export function SignInWorkerPage() {
   }, [isError, error, showNotification]);
 
   useEffect(() => {
-    if (!isSuccess || !user) {
+    if (status === 'loading' || !user) {
       return;
     }
 
@@ -69,8 +65,8 @@ export function SignInWorkerPage() {
       return;
     }
 
-    setIsVerificationRequired(true);
-  }, [isSuccess, user, navigate, isUserVerified]);
+    navigate(routerPaths.worker.verifyUser);
+  }, [user, navigate, isUserVerified, status]);
 
   const handleBackButton = () => {
     navigate(-1);
@@ -83,10 +79,7 @@ export function SignInWorkerPage() {
         display: 'flex',
         flex: 1,
         alignSelf: 'stretch',
-        alignItems: {
-          xs: isVerificationRequired ? 'flex-start' : 'center',
-          md: 'center',
-        },
+        alignItems: 'center',
         justifyContent: 'center',
         my: { xs: 0, md: 4 },
         bgcolor: colorPalette.background.paper,
@@ -101,73 +94,67 @@ export function SignInWorkerPage() {
         overflow: 'hidden',
       }}
     >
-      {isVerificationRequired ? (
-        <VerificationFlow
-          isKycApproved={user?.kyc_status === KycStatus.APPROVED}
-        />
-      ) : (
+      <Grid
+        container
+        sx={{
+          flex: 1,
+          minWidth: 0,
+          minHeight: 0,
+          height: '100%',
+          alignItems: 'stretch',
+        }}
+      >
+        <Grid size={{ xs: 0, md: 6 }} sx={{ position: 'relative' }}>
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundImage: `url(${signInImage})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+            }}
+          />
+        </Grid>
         <Grid
-          container
+          size={{ xs: 12, md: 6 }}
           sx={{
-            flex: 1,
-            minWidth: 0,
-            minHeight: 0,
+            pt: { xs: '4vh', md: '5vh' },
+            pb: { xs: '10vh', md: '5vh' },
+            px: { xs: 2, md: '4vw' },
             height: '100%',
-            alignItems: 'stretch',
+            minHeight: 0,
+            overflowY: 'auto',
           }}
         >
-          <Grid size={{ xs: 0, md: 6 }} sx={{ position: 'relative' }}>
-            <Box
-              sx={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                backgroundImage: `url(${signInImage})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
-              }}
-            />
-          </Grid>
-          <Grid
-            size={{ xs: 12, md: 6 }}
+          <Box
             sx={{
-              pt: { xs: '4vh', md: '5vh' },
-              pb: { xs: '10vh', md: '5vh' },
-              px: { xs: 2, md: '4vw' },
-              height: '100%',
-              minHeight: 0,
-              overflowY: 'auto',
+              display: 'flex',
+              alignItems: 'center',
+              mb: { xs: 3, md: 6 },
+              gap: 1.5,
             }}
           >
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                mb: { xs: 3, md: 6 },
-                gap: 1.5,
-              }}
+            <BackButton onClick={handleBackButton} />
+            <Typography
+              component="h1"
+              variant="h4"
+              sx={{ color: colorPalette.text.auxiliary100 }}
             >
-              <BackButton onClick={handleBackButton} />
-              <Typography
-                component="h1"
-                variant="h4"
-                sx={{ color: colorPalette.text.auxiliary100 }}
-              >
-                {t('worker.signInForm.title')}
-              </Typography>
-            </Box>
-            <SignInForm
-              onSubmit={signIn}
-              error={error}
-              isLoading={isLoading}
-              resetMutation={reset}
-            />
-          </Grid>
+              {t('worker.signInForm.title')}
+            </Typography>
+          </Box>
+          <SignInForm
+            onSubmit={signIn}
+            error={error}
+            isLoading={isLoading}
+            resetMutation={reset}
+          />
         </Grid>
-      )}
+      </Grid>
     </Paper>
   );
 }

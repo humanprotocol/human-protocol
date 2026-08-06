@@ -37,7 +37,7 @@ export function RequireAuth({ children }: Readonly<{ children: ReactNode }>) {
   }
 
   if (!isUserVerified) {
-    return <Navigate replace to={routerPaths.worker.signIn} />;
+    return <Navigate replace to={routerPaths.worker.verifyUser} />;
   }
 
   return (

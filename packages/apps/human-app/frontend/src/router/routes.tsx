@@ -10,7 +10,7 @@ import {
   WorkerEmailVerificationProcessPage,
   WorkerVerifyEmailPage,
 } from '@/modules/worker/email-verification';
-import { SignInWorkerPage } from '@/modules/signin/worker';
+import { SignInWorkerPage, VerifyUserPage } from '@/modules/signin/worker';
 import { JobsDiscoveryPage } from '@/modules/worker/jobs-discovery';
 import { MyJobsPage } from '@/modules/worker/jobs/my-jobs/my-jobs.page';
 import { WorkerProfilePage } from '@/modules/worker/profile';
@@ -53,6 +53,10 @@ export const unprotectedRoutes: RouteProps[] = [
   {
     path: routerPaths.worker.verifyEmail,
     element: <WorkerVerifyEmailPage />,
+  },
+  {
+    path: routerPaths.worker.verifyUser,
+    element: <VerifyUserPage />,
   },
   {
     path: routerPaths.worker.sendResetLink,
