@@ -73,9 +73,7 @@ export function OracleJobCard({ oracle }: { oracle: Oracle }) {
     if (isLoading) return;
 
     if (shouldNavigateToRegistration(oracle, data)) {
-      navigate(
-        `${routerPaths.worker.registrationInExchangeOracle}/${oracle.address}`
-      );
+      navigate(`${routerPaths.registrationInExchangeOracle}/${oracle.address}`);
       return;
     }
 

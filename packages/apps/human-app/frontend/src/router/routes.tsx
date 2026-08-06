@@ -18,7 +18,6 @@ import { MyJobsPage } from '@/modules/worker/jobs/my-jobs/my-jobs.page';
 import { ProfilePage } from '@/modules/worker/profile';
 import { SignUpPage } from '@/modules/signup/worker';
 import { HomePage } from '@/modules/homepage';
-import { JobsPage } from '@/modules/worker/jobs';
 import {
   ResetPasswordPage,
   ResetPasswordSuccessPage,
@@ -88,12 +87,6 @@ export const protectedRoutes: {
   },
   ...(env.VITE_FEATURE_FLAG_JOBS_DISCOVERY
     ? [
-        {
-          routerProps: {
-            path: `${routerPaths.jobs}/:address`,
-            element: <JobsPage />,
-          },
-        },
         {
           routerProps: {
             path: `${routerPaths.registrationInExchangeOracle}/:address`,
