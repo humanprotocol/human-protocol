@@ -12,7 +12,7 @@ export function useEnableHCaptchaLabelingMutation() {
   const mutation = useMutation({
     mutationFn: async () => {
       const result = await hCaptchaLabelingService.enableHCaptchaLabeling();
-      await refreshAccessTokenAsync({ authType: 'web2' });
+      await refreshAccessTokenAsync();
       return result;
     },
     onSuccess: () => {

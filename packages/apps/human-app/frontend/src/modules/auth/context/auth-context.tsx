@@ -16,6 +16,5 @@ const userDataSchema = z.object({
 export type UserData = z.infer<typeof userDataSchema>;
 
 export const { AuthContext, AuthProvider } = createAuthProvider<UserData>({
-  authType: 'web2',
   schema: userDataSchema,
 });

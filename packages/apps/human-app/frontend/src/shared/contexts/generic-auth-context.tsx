@@ -5,7 +5,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import { browserAuthProvider } from '@/shared/contexts/browser-auth-provider';
 import { type AuthTokensSuccessResponse } from '@/shared/schemas';
 import { type UserData } from '@/modules/auth/context/auth-context';
-import { type AuthType } from '../types/browser-auth-provider';
 import { useExpirationModal } from '../hooks';
 
 type AuthStatus = 'loading' | 'error' | 'success' | 'idle';
@@ -31,10 +30,9 @@ export interface UnauthenticatedUserContextType<T> extends AuthContextType<T> {
 }
 
 export function createAuthProvider<T extends UserData>(config: {
-  authType: AuthType;
   schema: ZodType<T>;
 }) {
-  const { authType, schema } = config;
+  const { schema } = config;
   const AuthContext = createContext<
     AuthenticatedUserContextType<T> | UnauthenticatedUserContextType<T> | null
   >(null);
@@ -58,9 +56,8 @@ export function createAuthProvider<T extends UserData>(config: {
     const handleSignIn = () => {
       try {
         const accessToken = browserAuthProvider.getAccessToken();
-        const currentAuthType = browserAuthProvider.getAuthType();
 
-        if (!accessToken || currentAuthType !== authType) {
+        if (!accessToken) {
           setAuthState({ user: null, status: 'idle' });
           return;
         }
@@ -80,7 +77,7 @@ export function createAuthProvider<T extends UserData>(config: {
     };
 
     const signIn = (signInSuccess: AuthTokensSuccessResponse) => {
-      browserAuthProvider.signIn(signInSuccess, authType);
+      browserAuthProvider.signIn(signInSuccess);
       handleSignIn();
     };
 

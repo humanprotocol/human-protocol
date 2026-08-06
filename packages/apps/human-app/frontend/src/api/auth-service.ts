@@ -66,12 +66,6 @@ export class AuthService implements AuthProvider {
   }
 
   async refreshAccessToken(): Promise<void> {
-    const authType = this.browserAuthProvider.getAuthType();
-
-    if (!authType) {
-      throw new Error('Auth type not found');
-    }
-
     if (!AuthService.refreshPromise) {
       AuthService.refreshPromise = this.fetchTokenRefresh();
     }
@@ -84,7 +78,7 @@ export class AuthService implements AuthProvider {
       throw new Error('Failed to refresh access token');
     }
 
-    browserAuthProvider.signIn(tokens, authType);
+    browserAuthProvider.signIn(tokens);
   }
 
   private async fetchTokenRefresh(): Promise<AuthTokensSuccessResponse | null> {

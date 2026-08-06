@@ -25,7 +25,6 @@ export function JWTExpirationCheck({
 
     if (isTokenExpired) {
       refreshAccessToken({
-        authType: 'web2',
         throwExpirationModalOnSignOut: checksOnProfile.current < 1,
       });
     }
