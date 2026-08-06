@@ -65,7 +65,8 @@ export function JobsDiscoveryPage() {
         sx={{
           gap: { xs: 2.5, md: 4 },
           px: { xs: 2, md: 4 },
-          py: { xs: 0, md: 4 },
+          pt: { xs: 0, md: 4 },
+          pb: 4,
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center' }}>

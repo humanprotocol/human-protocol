@@ -47,8 +47,12 @@ export function DesktopAsideBar() {
       component="aside"
       sx={{
         flexShrink: 0,
-        alignSelf: 'stretch',
-        width: 330,
+        alignSelf: 'flex-start',
+        position: 'sticky',
+        top: '16px',
+        height: 'calc(100dvh - 32px)',
+        overflow: 'hidden',
+        width: 'clamp(260px, 20vw, 330px)',
         backgroundColor: colorPalette.background.paper,
         borderRadius: '30px',
         border: '1px solid',
