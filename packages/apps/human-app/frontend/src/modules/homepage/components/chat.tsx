@@ -13,21 +13,27 @@ export function Chat({
       const chatElement = document.querySelector('[data-id="zsalesiq"]') as
         | HTMLElement
         | undefined;
-      if (chatElement) {
-        chatElement.style.opacity = displayChatIcon ? '1' : '0';
-        chatElement.style.pointerEvents = displayChatIcon ? 'auto' : 'none';
-        chatElement.childNodes.forEach((element, idx) => {
-          if (element instanceof HTMLElement) {
-            element.style.right = isMobile ? '16px' : '24px';
-            if (idx === 1) {
-              element.style.bottom = isMobile ? '16px' : '20px';
-            }
-          }
-        });
-        return true;
+      if (!chatElement) {
+        return false;
       }
 
-      return false;
+      chatElement.style.opacity = '1';
+      chatElement.style.pointerEvents = 'auto';
+
+      window.$zoho?.salesiq?.floatbutton?.visible?.(
+        displayChatIcon ? 'show' : 'hide'
+      );
+
+      chatElement.childNodes.forEach((element, idx) => {
+        if (element instanceof HTMLElement) {
+          element.style.right = isMobile ? '16px' : '24px';
+          if (idx === 1) {
+            element.style.bottom = isMobile ? '80px' : '20px';
+          }
+        }
+      });
+
+      return true;
     };
 
     if (applyVisibility()) {

@@ -150,10 +150,8 @@ export function DesktopAsideBar() {
                 disableRipple
                 sx={{ height: 32, p: 0, bgcolor: 'transparent' }}
                 onClick={() => {
-                  // @ts-expect-error -- ...
-                  if ($zoho?.salesiq?.chat?.start) {
-                    // @ts-expect-error -- ...
-                    $zoho.salesiq.chat.start();
+                  if (window.$zoho?.salesiq?.chat?.start) {
+                    window.$zoho.salesiq.chat.start();
                   }
                 }}
               >

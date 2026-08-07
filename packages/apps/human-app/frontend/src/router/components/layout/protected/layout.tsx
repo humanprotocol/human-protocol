@@ -74,7 +74,7 @@ export function ProtectedLayout() {
           </Stack>
           {isBottomTrayVisible && <ProfileBottomTray />}
         </Main>
-        <Footer displayChatIcon={!isMobile} />
+        <Footer displayChatIcon={!isMobile || isProfilePage} />
       </Stack>
     </Stack>
   );
