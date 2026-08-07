@@ -11,10 +11,7 @@ export const saveColorMode = (mode: ColorMode) => {
 
 export const isDarkColorMode = () => {
   const mode = localStorage.getItem(MODE_LOCAL_STORAGE_KEY);
-  if (mode === ColorMode.DARK) {
-    return true;
-  }
-  return false;
+  return mode === ColorMode.DARK;
 };
 
 export const hasColorMode = () => {

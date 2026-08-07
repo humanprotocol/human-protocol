@@ -1,7 +1,6 @@
 export * from './use-combine-pages';
 export * from './use-count-down';
 export * from './use-handle-main-nav-icon-click';
-export * from './use-is-hcaptcha-labeling-page';
 export * from './use-notification';
 export * from './use-is-mobile';
 export * from './use-reset-mutation-errors';
@@ -9,3 +8,4 @@ export * from './use-web3-provider';
 export * from './use-expiration-modal';
 export * from './use-prepare-signature';
 export * from './use-get-ui-config';
+export * from './use-is-user-verified';

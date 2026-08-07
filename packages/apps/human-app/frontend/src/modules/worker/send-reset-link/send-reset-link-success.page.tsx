@@ -1,28 +1,31 @@
-import { Grid, Typography } from '@mui/material';
+import { useEffect } from 'react';
+import { Grid, Paper, Stack, Typography } from '@mui/material';
 import { Trans, useTranslation } from 'react-i18next';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormProvider, useForm } from 'react-hook-form';
-import { PageCard } from '@/shared/components/ui/page-card';
 import { Button } from '@/shared/components/ui/button';
 import { useLocationState } from '@/modules/worker/hooks/use-location-state';
 import { env } from '@/shared/env';
-import { Alert } from '@/shared/components/ui/alert';
 import { getErrorMessageForError } from '@/shared/errors';
 import { HCaptchaForm } from '@/shared/components/hcaptcha';
 import { MailTo } from '@/shared/components/ui/mail-to';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
 import { useColorMode } from '@/shared/contexts/color-mode';
-import { onlyDarkModeColor } from '@/shared/styles/dark-color-palette';
 import { useSendResetLinkMutation } from './hooks';
 import {
   sendResetLinkHcaptchaDtoSchema,
   type SendResetLinkHcaptcha,
 } from './schemas';
+import {
+  TopNotificationType,
+  useNotification,
+} from '@/shared/hooks/use-notification';
 
-export function SendResetLinkWorkerSuccessPage() {
-  const { colorPalette, isDarkMode } = useColorMode();
+export function SendResetLinkSuccessPage() {
+  const { colorPalette } = useColorMode();
   const { t } = useTranslation();
+  const { showNotification } = useNotification();
   const { field: email } = useLocationState({
     keyInStorage: 'email',
     schema: z.email(),
@@ -43,79 +46,106 @@ export function SendResetLinkWorkerSuccessPage() {
 
   useResetMutationErrors(methods.watch, reset);
 
-  return (
-    <PageCard
-      alert={
-        isError ? (
-          <Alert color="error" severity="error">
-            {getErrorMessageForError(error)}
-          </Alert>
-        ) : undefined
-      }
-      title={t('worker.sendResetLinkForm.title')}
-    >
-      <FormProvider {...methods}>
-        <form
-          onSubmit={(event) => {
-            void methods.handleSubmit(handleWorkerSendResetLink)(event);
-          }}
-        >
-          <Grid container sx={{ gap: 3 }}>
-            <Typography>
-              <Trans
-                components={{
-                  1: <Typography component="span" sx={{ fontWeight: 600 }} />,
-                }}
-                i18nKey="worker.sendResetLinkSuccess.paragraph1"
-                values={{ email }}
-              />
-            </Typography>
-            <Typography
-              variant="body1"
-              sx={{
-                color: isDarkMode
-                  ? onlyDarkModeColor.additionalTextColor
-                  : colorPalette.primary.light,
-              }}
-            >
-              {t('worker.sendResetLinkSuccess.paragraph2')}
-            </Typography>
-            <Typography variant="body1">
-              <Trans
-                components={{
-                  1: <Typography component="span" sx={{ fontWeight: 600 }} />,
-                }}
-                i18nKey="worker.sendResetLinkSuccess.paragraph3"
-                values={{ email }}
-              />
-            </Typography>
-            <HCaptchaForm error={error} name="h_captcha_token" />
-            <Button
-              disabled={!email}
-              fullWidth
-              loading={isPending}
-              type="submit"
-              variant="outlined"
-            >
-              {methods.formState.submitCount > 0 ? (
-                <>{t('worker.sendResetLinkSuccess.btnAfterSend')}</>
-              ) : (
-                <>{t('worker.sendResetLinkSuccess.btn')}</>
-              )}
-            </Button>
+  useEffect(() => {
+    if (isError) {
+      showNotification({
+        type: TopNotificationType.ERROR,
+        message: getErrorMessageForError(error),
+      });
+    }
+  }, [isError, error, showNotification]);
 
-            <Typography variant="body1">
-              <Trans
-                components={{
-                  1: <Typography component="span" sx={{ fontWeight: 600 }} />,
-                  2: <MailTo mail={env.VITE_HUMAN_PROTOCOL_HELP_URL} />,
+  return (
+    <Paper
+      elevation={0}
+      sx={{
+        display: 'flex',
+        flex: 1,
+        alignSelf: 'stretch',
+        justifyContent: 'center',
+        alignItems: { xs: 'flex-start', md: 'center' },
+        my: { xs: 0, md: 4 },
+        py: { xs: 3, md: 0 },
+        px: { xs: 2, md: 0 },
+        bgcolor: colorPalette.background.paper,
+        borderRadius: '30px',
+        borderBottomLeftRadius: { xs: 0, md: '30px' },
+        borderBottomRightRadius: { xs: 0, md: '30px' },
+        border: { xs: 'none', md: '1px solid' },
+        borderColor: {
+          xs: 'none',
+          md: colorPalette.border.main,
+        },
+        overflow: 'hidden',
+      }}
+    >
+      <Stack sx={{ width: { xs: '100%', md: '400px' }, gap: 3 }}>
+        <Typography
+          component="h1"
+          variant="h4"
+          sx={{ color: colorPalette.text.auxiliary100 }}
+        >
+          {t('worker.sendResetLinkForm.title')}
+        </Typography>
+        <FormProvider {...methods}>
+          <form
+            onSubmit={(event) => {
+              void methods.handleSubmit(handleWorkerSendResetLink)(event);
+            }}
+          >
+            <Grid container sx={{ gap: { xs: 2, md: 3 } }}>
+              <Typography sx={{ color: colorPalette.text.auxiliary100 }}>
+                <Trans
+                  components={{
+                    1: <Typography component="span" sx={{ fontWeight: 600 }} />,
+                  }}
+                  i18nKey="worker.sendResetLinkSuccess.paragraph1"
+                  values={{ email }}
+                />
+              </Typography>
+              <Typography
+                sx={{
+                  color: colorPalette.text.auxiliary200,
                 }}
-                i18nKey="worker.sendResetLinkSuccess.paragraph4"
-              />
-            </Typography>
-          </Grid>
-        </form>
-      </FormProvider>
-    </PageCard>
+              >
+                {t('worker.sendResetLinkSuccess.paragraph2')}
+              </Typography>
+              <Typography sx={{ color: colorPalette.text.auxiliary100 }}>
+                <Trans
+                  components={{
+                    1: <Typography component="span" sx={{ fontWeight: 600 }} />,
+                  }}
+                  i18nKey="worker.sendResetLinkSuccess.paragraph3"
+                  values={{ email }}
+                />
+              </Typography>
+              <HCaptchaForm error={error} name="h_captcha_token" />
+              <Button
+                type="submit"
+                variant="outlined"
+                disabled={!email}
+                fullWidth
+                loading={isPending}
+              >
+                {methods.formState.submitCount > 0 ? (
+                  <>{t('worker.sendResetLinkSuccess.btnAfterSend')}</>
+                ) : (
+                  <>{t('worker.sendResetLinkSuccess.btn')}</>
+                )}
+              </Button>
+              <Typography sx={{ color: colorPalette.text.auxiliary100 }}>
+                <Trans
+                  components={{
+                    1: <Typography component="span" sx={{ fontWeight: 600 }} />,
+                    2: <MailTo mail={env.VITE_HUMAN_PROTOCOL_HELP_URL} />,
+                  }}
+                  i18nKey="worker.sendResetLinkSuccess.paragraph4"
+                />
+              </Typography>
+            </Grid>
+          </form>
+        </FormProvider>
+      </Stack>
+    </Paper>
   );
 }

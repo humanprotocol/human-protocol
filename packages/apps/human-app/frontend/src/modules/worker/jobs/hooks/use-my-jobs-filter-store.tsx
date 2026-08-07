@@ -1,31 +1,24 @@
 import { create } from 'zustand';
 import type { PageSize } from '@/shared/types/entity.type';
-import { SortDirection, SortField, type MyJobStatus } from '../types';
+import { SortDirection, SortField, type StatusFilterType } from '../types';
 
 export interface MyJobsFilterStoreProps {
   filterParams: {
-    sort?: SortDirection;
-    sort_field?: SortField;
-    job_type?: string;
-    status?: MyJobStatus;
-    escrow_address?: string;
+    status?: StatusFilterType;
+    oracle_address?: string;
     page: number;
     page_size: PageSize;
-    chain_id?: number;
   };
-  availableJobTypes: string[];
   setFilterParams: (
     partialParams: Partial<MyJobsFilterStoreProps['filterParams']>
   ) => void;
   resetFilterParams: () => void;
-  setSearchEscrowAddress: (escrow_address: string) => void;
-  setOracleAddress: (oracleAddress: string) => void;
-  setAvailableJobTypes: (jobTypes: string[]) => void;
   setPageParams: (pageIndex: number, pageSize: PageSize) => void;
 }
 
 const initialFiltersState = {
-  escrow_address: '',
+  oracle_address: undefined,
+  status: '',
   page: 0,
   page_size: 5,
   sort_field: SortField.CREATED_AT,
@@ -34,7 +27,6 @@ const initialFiltersState = {
 
 export const useMyJobsFilterStore = create<MyJobsFilterStoreProps>((set) => ({
   filterParams: initialFiltersState,
-  availableJobTypes: [],
   setFilterParams: (
     partialParams: Partial<MyJobsFilterStoreProps['filterParams']>
   ) => {
@@ -48,40 +40,25 @@ export const useMyJobsFilterStore = create<MyJobsFilterStoreProps>((set) => ({
     }));
   },
   setPageParams: (pageIndex: number, pageSize: PageSize) => {
-    set((state) => ({
-      ...state,
-      filterParams: {
-        ...state.filterParams,
-        page: pageIndex,
-        page_size: pageSize,
-      },
-    }));
+    set((state) => {
+      if (
+        state.filterParams.page === pageIndex &&
+        state.filterParams.page_size === pageSize
+      ) {
+        return state;
+      }
+
+      return {
+        ...state,
+        filterParams: {
+          ...state.filterParams,
+          page: pageIndex,
+          page_size: pageSize,
+        },
+      };
+    });
   },
   resetFilterParams: () => {
     set({ filterParams: initialFiltersState });
-  },
-  setSearchEscrowAddress: (escrow_address: string) => {
-    set((state) => ({
-      ...state,
-      filterParams: {
-        ...state.filterParams,
-        escrow_address,
-      },
-    }));
-  },
-  setOracleAddress: (oracleAddress: string) => {
-    set((state) => ({
-      ...state,
-      filterParams: {
-        ...state.filterParams,
-        address: oracleAddress,
-      },
-    }));
-  },
-  setAvailableJobTypes: (jobTypes: string[]) => {
-    set((state) => ({
-      ...state,
-      jobTypes,
-    }));
   },
 }));

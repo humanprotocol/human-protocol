@@ -1,49 +1,128 @@
-import { Stack, Typography } from '@mui/material';
-import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
-import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
-import { Button } from '@/shared/components/ui/button';
-import { routerPaths } from '@/router/router-paths';
-import { useColorMode } from '@/shared/contexts/color-mode';
-import { onlyDarkModeColor } from '@/shared/styles/dark-color-palette';
+import { Box, Link, Stack, Typography } from '@mui/material';
+import { Link as RouterLink, useLocation } from 'react-router-dom';
 
-export function ProfileData() {
-  const { colorPalette, isDarkMode } = useColorMode();
+import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
+import { useColorMode } from '@/shared/contexts/color-mode';
+import { shortenEscrowAddress } from '@/shared/helpers/evm';
+import { routerPaths } from '@/router/router-paths';
+
+function Wrapper({
+  isCompact,
+  isProfilePage,
+  children,
+}: {
+  isCompact: boolean;
+  isProfilePage: boolean;
+  children: React.ReactNode;
+}) {
+  if (isCompact && !isProfilePage) {
+    return (
+      <Link
+        component={RouterLink}
+        to={routerPaths.profile}
+        sx={{ textDecoration: 'none' }}
+      >
+        {children}
+      </Link>
+    );
+  }
+
+  return <>{children}</>;
+}
+
+export function ProfileData({
+  variant = 'compact',
+}: {
+  variant?: 'compact' | 'expanded';
+}) {
   const { user } = useAuthenticatedUser();
-  const { t } = useTranslation();
+  const { colorPalette } = useColorMode();
+  const location = useLocation();
+
+  const isProfilePage = location.pathname === routerPaths.profile;
+  const isCompact = variant === 'compact';
+
   return (
-    <Stack sx={{ gap: 3 }}>
-      <Stack>
-        <Typography variant="subtitle2">{t('worker.profile.email')}</Typography>
-        <Typography
-          variant="subtitle1"
-          sx={{ color: colorPalette.text.primary, wordBreak: 'break-all' }}
-        >
-          {user.email}
-        </Typography>
-      </Stack>
-      <Stack>
-        <Typography variant="subtitle2">
-          {t('worker.profile.password')}
-        </Typography>
-        <Button
-          component={Link}
-          to={routerPaths.worker.sendResetLink}
-          variant="text"
+    <Wrapper isCompact={isCompact} isProfilePage={isProfilePage}>
+      <Stack
+        direction="row"
+        sx={{
+          gap: { xs: 1, md: 1.5 },
+          alignItems: 'center',
+          minWidth: 0,
+          flex: isCompact ? undefined : '1 1 auto',
+        }}
+      >
+        <Box
           sx={{
-            width: 'fit-content',
-            padding: 0,
-            color: isDarkMode
-              ? onlyDarkModeColor.additionalTextColor
-              : colorPalette.secondary.main,
-            ':hover': {
-              backgroundColor: 'inherit',
+            flexShrink: 0,
+            textAlign: 'center',
+            verticalAlign: 'middle',
+            width: { xs: '38px', md: isCompact ? '48px' : '76px' },
+            height: { xs: '38px', md: isCompact ? '48px' : '76px' },
+            borderRadius: '50%',
+            backgroundColor: colorPalette.white,
+            border: `1px solid ${colorPalette.border.strong}`,
+            opacity: 0.8,
+          }}
+        >
+          <Typography
+            sx={{
+              fontSize: { xs: '14px', md: isCompact ? '24px' : '30px' },
+              fontWeight: 500,
+              lineHeight: { xs: '38px', md: isCompact ? '48px' : '76px' },
+              color: colorPalette.accent.main,
+            }}
+          >
+            {user?.email.charAt(0).toUpperCase()}
+          </Typography>
+        </Box>
+        <Stack
+          sx={{
+            gap: { xs: 0.5, md: 1 },
+            minWidth: 0,
+            '&:hover > :first-of-type': {
+              textDecoration:
+                isCompact && !isProfilePage ? 'underline' : 'none',
             },
           }}
         >
-          {t('worker.profile.resetPassword')}
-        </Button>
+          <Typography
+            sx={{
+              fontSize: { xs: isCompact ? 14 : 16, md: isCompact ? 16 : 32 },
+              fontWeight: { xs: 700, md: 600 },
+              lineHeight: 'normal',
+              color: {
+                xs: colorPalette.text.primary,
+                md: isCompact
+                  ? colorPalette.text.auxiliary100
+                  : colorPalette.text.primary,
+              },
+              ...(!isCompact && {
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }),
+            }}
+          >
+            {user.email}
+          </Typography>
+          <Typography
+            sx={{
+              fontSize: { xs: 12, md: isCompact ? 14 : 16 },
+              fontWeight: 500,
+              lineHeight: 'normal',
+              color: colorPalette.text.auxiliary200,
+            }}
+          >
+            {shortenEscrowAddress(
+              user.wallet_address ?? '',
+              isCompact ? 9 : 6,
+              isCompact ? 8 : 5
+            )}
+          </Typography>
+        </Stack>
       </Stack>
-    </Stack>
+    </Wrapper>
   );
 }

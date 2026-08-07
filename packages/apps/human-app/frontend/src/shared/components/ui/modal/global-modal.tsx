@@ -17,6 +17,7 @@ export function GlobalModal() {
       open={open}
       onClose={!disableClose ? closeModal : undefined}
       onTransitionExited={onTransitionExited}
+      sx={{ zIndex: (theme) => theme.zIndex.modal }}
       slotProps={{
         paper: {
           sx: {

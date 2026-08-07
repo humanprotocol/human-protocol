@@ -1,7 +1,6 @@
-import Tooltip from '@mui/material/Tooltip';
-import Typography from '@mui/material/Typography';
+import { Tooltip, Typography } from '@mui/material';
+
 import { shortenEscrowAddress } from '@/shared/helpers/evm';
-import { breakpoints } from '@/shared/styles/breakpoints';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { useColorMode } from '@/shared/contexts/color-mode';
 
@@ -9,19 +8,13 @@ export function EvmAddress({ address }: { address: string }) {
   const { colorPalette } = useColorMode();
 
   const isMobile = useIsMobile();
-  const shortAddress = isMobile
-    ? shortenEscrowAddress(address, 4, 4)
-    : shortenEscrowAddress(address);
+  const shortAddress = shortenEscrowAddress(address, 4, 4);
 
   return (
     <Tooltip title={address}>
       <Typography
-        sx={{
-          [breakpoints.mobile]: {
-            color: colorPalette.text.primary,
-          },
-        }}
-        variant="body2"
+        variant={isMobile ? 'body2' : 'body1'}
+        sx={{ color: colorPalette.text.auxiliary100, fontWeight: 500 }}
       >
         {shortAddress}
       </Typography>
