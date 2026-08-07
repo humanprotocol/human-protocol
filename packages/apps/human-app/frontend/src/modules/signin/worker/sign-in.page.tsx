@@ -17,6 +17,7 @@ import { useColorMode } from '@/shared/contexts/color-mode';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
 import { routerPaths } from '@/router/router-paths';
 import { useIsUserVerified } from '@/shared/hooks';
+import { browserAuthProvider } from '@/shared/contexts/browser-auth-provider';
 
 function formattedSignInErrorMessage(
   unknownError: unknown
@@ -29,7 +30,7 @@ function formattedSignInErrorMessage(
 export function SignInWorkerPage() {
   const { showNotification } = useNotification();
   const navigate = useNavigate();
-  const { user, status } = useAuth();
+  const { user, status, signOut } = useAuth();
   const { colorPalette } = useColorMode();
   const isUserVerified = useIsUserVerified();
 
@@ -53,6 +54,11 @@ export function SignInWorkerPage() {
       return;
     }
 
+    if (!browserAuthProvider.getAccessToken()) {
+      signOut({ throwExpirationModal: false });
+      return;
+    }
+
     if (user.status === 'pending' && !user.kyc_status) {
       navigate(routerPaths.worker.verifyEmail, {
         state: { routerState: { email: user.email } },
@@ -66,7 +72,7 @@ export function SignInWorkerPage() {
     }
 
     navigate(routerPaths.worker.verifyUser);
-  }, [user, navigate, isUserVerified, status]);
+  }, [user, status, signOut, navigate, isUserVerified]);
 
   const handleBackButton = () => {
     navigate(-1);
