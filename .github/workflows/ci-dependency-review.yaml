@@ -16,6 +16,5 @@ jobs:
       - name: Dependency Review
         uses: actions/dependency-review-action@v5.0.0
         with:
-          show-openssf-scorecard: false
-          allow-ghsas:
-            - GHSA-qwww-vcr4-c8h2 # we don't use vulnerable functionality
+          config-file: './.github/dependency-review-config.yml'
+          
