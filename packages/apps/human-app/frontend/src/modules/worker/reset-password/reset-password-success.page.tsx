@@ -9,7 +9,7 @@ import { routerPaths } from '@/router/router-paths';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
 import { useColorMode } from '@/shared/contexts/color-mode';
 
-export function ResetPasswordWorkerSuccessPage() {
+export function ResetPasswordSuccessPage() {
   const { colorPalette } = useColorMode();
   const { signOut, user } = useAuth();
 
@@ -72,7 +72,7 @@ export function ResetPasswordWorkerSuccessPage() {
           </Typography>
           <Button
             component={Link}
-            to={routerPaths.worker.signIn}
+            to={routerPaths.signIn}
             variant="contained"
             color="accent"
             fullWidth

@@ -24,11 +24,11 @@ import { useHandleMainNavIconClick } from '@/shared/hooks/use-handle-main-nav-ic
 const menuItems = [
   {
     labelKey: 'components.DrawerNavigation.availableJobs',
-    href: routerPaths.worker.jobsDiscovery,
+    href: routerPaths.jobsDiscovery,
   },
   {
     labelKey: 'components.DrawerNavigation.myJobs',
-    href: routerPaths.worker.myJobs,
+    href: routerPaths.myJobs,
   },
 ] as const;
 

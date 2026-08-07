@@ -23,7 +23,7 @@ import {
   useNotification,
 } from '@/shared/hooks/use-notification';
 
-export function ResetPasswordWorkerPage() {
+export function ResetPasswordPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const { token } = queryString.parse(location.search);
@@ -56,7 +56,7 @@ export function ResetPasswordWorkerPage() {
   };
 
   const handleBackButton = () => {
-    navigate(routerPaths.worker.profile);
+    navigate(routerPaths.profile);
   };
 
   useEffect(() => {

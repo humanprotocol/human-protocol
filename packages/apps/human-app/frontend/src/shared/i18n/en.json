@@ -1,5 +1,4 @@
 {
-  "humanCurrencySymbol": "HMT",
   "inputMasks": {
     "humanCurrencySuffix": "HMT",
     "percentSuffix": "%",
@@ -11,9 +10,6 @@
     "hcaptchaLabeling": "Labeling",
     "jobs": "Tasks",
     "registrationInExchangeOracle": "Registration in Oracle"
-  },
-  "web3ProtectedPagesHeaders": {
-    "profile": "Profile"
   },
   "validation": {
     "required": "Required",
@@ -44,11 +40,6 @@
     "cannotSignMessage": "Cannot sign message."
   },
   "components": {
-    "multiSelect": {
-      "allFields": "All fields",
-      "andMore": "(and {{number}} more)",
-      "clearAll": "Clear all"
-    },
     "breadcrumb": {
       "back": "Back"
     },
@@ -73,16 +64,6 @@
       "humanProtocol": "HUMAN Protocol",
       "copyrightNote": "© 2021 HPF. HUMAN Protocol® is a registered trademark"
     },
-    "table": {
-      "clearBtn": "Clear",
-      "sort": "Sort",
-      "filter": "Filter"
-    },
-    "modal": {
-      "header": {
-        "closeBtn": "Cancel"
-      }
-    },
     "wallet": {
       "connectBtn": {
         "disconnect": "Disconnect Wallet",
@@ -99,24 +80,8 @@
   "homepage": {
     "humanApp": "HUMAN App",
     "completeJobs": "Complete jobs, earn HMT.",
-    "logIn": "Log In",
     "signUp": "Sign Up",
-    "signIn": "Sign In",
-    "workerSignIn": "Sign In",
-    "operatorSignIn": "Operator Sign In",
-    "welcome": "Welcome",
-    "howWillUse": "How will you use HUMAN App?",
-    "selectOption": "Please select an option below.",
-    "iWantToEarn": "I want to complete tasks, and earn HMT",
-    "completeTask": "Complete multiple task types, and get paid.",
-    "workAnywhere": "Work anywhere, any time.",
-    "signUpToComplete": "Worker Sign Up",
-    "joinAsOperator": "I want to join as an operator",
-    "runAsOracle": "Run an oracle, or other essential service, and earn fees.",
-    "becomePartner": "Become a HUMAN App operator.",
-    "signAsOperator": "Operator Sign Up",
-    "termsAndConditions": "Terms & conditions",
-    "cancel": "Cancel"
+    "signIn": "Sign In"
   },
   "worker": {
     "signUpForm": {
@@ -230,7 +195,6 @@
       "walletConnected": "Connected",
       "addKYCInfoOnChain": "Add KYC Info On-chain",
       "wrongWalletAddress": "Selected wallet address doesn't match the address assigned to the account.",
-      "kycInfoOnChainAdded": "KYC Info On-Chain Added",
       "registerAddress": "Register Address",
       "emailNotifications": "Email Notifications",
       "topNotifications": {
@@ -321,31 +285,6 @@
       },
       "Ethereum": "Ethereum",
       "Polygon": "Polygon",
-      "sortDirection": {
-        "fromHighest": "From highest",
-        "fromLowest": "From lowest",
-        "furthestToNow": "Furthest to now",
-        "closestToNow": "Closest to now"
-      },
-      "mobileFilterDrawer": {
-        "sortBy": "Sort by",
-        "filters": "Filters",
-        "jobsStatus": {
-          "active": "Active",
-          "validation": "Validation",
-          "completed": "Completed",
-          "expired": "Expired",
-          "canceled": "Canceled",
-          "rejected": "Rejected"
-        },
-        "network": {
-          "matic": "Matic",
-          "polygon": "Polygon"
-        },
-        "jobType": {
-          "fortune": "Fortune"
-        }
-      },
       "next": "Next",
       "jobsFor": "Jobs for"
     },
@@ -403,111 +342,6 @@
         "criminal_activity": "Criminal activity"
       }
     }
-  },
-  "operator": {
-    "profile": {
-      "profileHeader": "Profile",
-      "about": {
-        "header": "About",
-        "role": "Role",
-        "status": {
-          "statusHeader": "Status",
-          "statusActivated": "Active",
-          "statusDeactivated": "Deactivated",
-          "statusActivateButton": "Activate",
-          "statusDeactivateButton": "Deactivate"
-        },
-        "fee": "Fee",
-        "url": "URL",
-        "webhookUrl": "Webhook URL",
-        "jobTypes": "Job Types",
-        "publicKey": "Public Key"
-      },
-      "activate": {
-        "activateBtn": "Activate",
-        "cannotActivate": "Cannot activate operator"
-      },
-      "disable": {
-        "disableBtn": "Deactivate",
-        "cannotDisable": "Cannot deactivate operator"
-      },
-      "statistics": {
-        "header": "Statistics",
-        "escrowsProcessed": "Escrows processed",
-        "escrowsActive": "Escrows active",
-        "escrowsCancelled": "Escrows cancelled",
-        "workersAmount": "Workers amount",
-        "assignmentsCompleted": "Assignments completed",
-        "assignmentsRejected": "Assignments rejected",
-        "assignmentsExpired": "Assignments expired"
-      }
-    },
-    "connectWallet": {
-      "title": "Setup Operator",
-      "description": "Please use the button below to connect your wallet and sign up as an operator.",
-      "connect": "Connect Wallet",
-      "disconnect": "Disconnect",
-      "successAlert": "Wallet successfully connected",
-      "setupOperator": "Setup Operator"
-    },
-    "addStake": {
-      "title": "Setup Operator",
-      "formHeader": "Stake",
-      "label": "Staked amount",
-      "description": "Please add the amount to stake below",
-      "actionBtn": "Add Stake",
-      "nextBtn": "Next",
-      "skipBtn": "Skip"
-    },
-    "stakeForm": {
-      "formBtn": "Add Stake",
-      "skipBtn": "Skip",
-      "nextBtn": "Next",
-      "label": "Stake amount",
-      "description": "Please add the amount to stake below",
-      "successAlert": "You have successfully staked {{amount}} HMT",
-      "invalidDecimals": "Incorrect decimal expansion. HMT token has {{decimals}} decimals"
-    },
-    "addKeysPage": {
-      "title": "Setup Operator",
-      "btn": " Add New Keys to KVStore",
-      "skipBtn": "Skip",
-      "pendingKeys": {
-        "title": "Pending Keys",
-        "fee": "Fee",
-        "publicKey": "Public Key",
-        "webhookUrl": "Webhook URL",
-        "role": "Role",
-        "jobType": "Job type"
-      },
-      "existingKeys": {
-        "title": "Existing keys",
-        "fee": "Fee",
-        "publicKey": "Public Key",
-        "url": "Url",
-        "webhookUrl": "Webhook URL",
-        "role": "Role",
-        "jobType": "Job type",
-        "noValue": "no value",
-        "editBtn": "Edit"
-      },
-      "editKeysForm": {
-        "btn": "Save",
-        "error": "No changes"
-      }
-    },
-    "editExistingKeysSuccess": {
-      "title": "Setup Operator",
-      "paragraph1": "Congratulations 🎉!",
-      "paragraph2": "Operator setup is completed, please press the button below to finish sign up.",
-      "btn": "Finish"
-    }
-  },
-  "walletConnectModal": {
-    "header": "Connect Wallet",
-    "paragraph": "HUMAN App is a multichain platform, please provide a wallet address which will be compatible with different chains.",
-    "connectBtn": "Connect Wallet",
-    "cancelBtn": "Cancel"
   },
   "expirationModal": {
     "header": "Session Expired",

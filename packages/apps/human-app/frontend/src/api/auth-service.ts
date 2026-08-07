@@ -7,7 +7,6 @@ import {
 } from '@/shared/schemas';
 import { type BrowserAuthProvider } from '@/shared/types/browser-auth-provider';
 import { type HttpApiClient } from './http-api-client';
-import { commonApiPaths } from './common-api-paths';
 
 export interface AuthProvider {
   getAccessToken: () => Promise<string | null>;
@@ -15,12 +14,9 @@ export interface AuthProvider {
 }
 
 const apiPaths = {
-  worker: {
-    signIn: {
-      path: '/auth/signin',
-    },
-  },
-} as const;
+  signIn: '/auth/signin',
+  refresh: '/auth/refresh',
+};
 
 export class AuthService implements AuthProvider {
   private readonly browserAuthProvider: BrowserAuthProvider =
@@ -33,7 +29,7 @@ export class AuthService implements AuthProvider {
 
   async signIn(data: SignInDto): Promise<AuthTokensSuccessResponse> {
     const res = await this.httpClient.post<AuthTokensSuccessResponse>(
-      apiPaths.worker.signIn.path,
+      apiPaths.signIn,
       {
         successSchema: authTokensSuccessResponseSchema,
         body: data,
@@ -70,12 +66,6 @@ export class AuthService implements AuthProvider {
   }
 
   async refreshAccessToken(): Promise<void> {
-    const authType = this.browserAuthProvider.getAuthType();
-
-    if (!authType) {
-      throw new Error('Auth type not found');
-    }
-
     if (!AuthService.refreshPromise) {
       AuthService.refreshPromise = this.fetchTokenRefresh();
     }
@@ -88,7 +78,7 @@ export class AuthService implements AuthProvider {
       throw new Error('Failed to refresh access token');
     }
 
-    browserAuthProvider.signIn(tokens, authType);
+    browserAuthProvider.signIn(tokens);
   }
 
   private async fetchTokenRefresh(): Promise<AuthTokensSuccessResponse | null> {
@@ -100,7 +90,7 @@ export class AuthService implements AuthProvider {
 
     try {
       const response = await this.httpClient.post<AuthTokensSuccessResponse>(
-        commonApiPaths.auth.refresh.path,
+        apiPaths.refresh,
         {
           body: {
             refresh_token: refreshToken,

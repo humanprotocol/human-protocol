@@ -95,6 +95,7 @@ export function MyJobsTable() {
     muiTablePaperProps: {
       sx: {
         boxShadow: 'none',
+        transition: 'none',
       },
     },
     muiTableHeadProps: {

@@ -13,7 +13,6 @@ import '@fontsource/inter/800.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import { WalletConnectProvider } from '@/shared/contexts/wallet-connect';
-import { Web3AuthProvider } from '@/modules/auth-web3/context/web3-auth-context';
 import { JWTExpirationCheck } from '@/shared/contexts/jwt-expiration-check';
 import { ColorModeProvider } from '@/shared/contexts/color-mode';
 import { NotificationProvider } from '@/shared/providers/notifications-provider';
@@ -39,14 +38,12 @@ createRoot(root).render(
           <BrowserRouter>
             <WalletConnectProvider>
               <ModalProvider>
-                <Web3AuthProvider>
-                  <AuthProvider>
-                    <GlobalModal />
-                    <JWTExpirationCheck>
-                      <Router />
-                    </JWTExpirationCheck>
-                  </AuthProvider>
-                </Web3AuthProvider>
+                <AuthProvider>
+                  <GlobalModal />
+                  <JWTExpirationCheck>
+                    <Router />
+                  </JWTExpirationCheck>
+                </AuthProvider>
               </ModalProvider>
             </WalletConnectProvider>
           </BrowserRouter>

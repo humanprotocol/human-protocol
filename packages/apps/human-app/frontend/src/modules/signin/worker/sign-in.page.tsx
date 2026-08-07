@@ -27,7 +27,7 @@ function formattedSignInErrorMessage(
   }
 }
 
-export function SignInWorkerPage() {
+export function SignInPage() {
   const { showNotification } = useNotification();
   const navigate = useNavigate();
   const { user, status, signOut } = useAuth();
@@ -60,18 +60,18 @@ export function SignInWorkerPage() {
     }
 
     if (user.status === 'pending' && !user.kyc_status) {
-      navigate(routerPaths.worker.verifyEmail, {
+      navigate(routerPaths.verifyEmail, {
         state: { routerState: { email: user.email } },
       });
       return;
     }
 
     if (isUserVerified) {
-      navigate(routerPaths.worker.profile);
+      navigate(routerPaths.profile);
       return;
     }
 
-    navigate(routerPaths.worker.verifyUser);
+    navigate(routerPaths.verifyUser);
   }, [user, status, signOut, navigate, isUserVerified]);
 
   const handleBackButton = () => {

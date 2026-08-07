@@ -1,6 +1,6 @@
-import type { ReactNode } from 'react';
+import { createContext, type ReactNode } from 'react';
 import { useLocation, Navigate } from 'react-router-dom';
-import { createContext } from 'react';
+
 import { useAuth } from '@/modules/auth/hooks/use-auth';
 import { routerPaths } from '@/router/router-paths';
 import { PageCardLoader } from '@/shared/components/ui/page-card';
@@ -11,7 +11,7 @@ import { useIsUserVerified } from '@/shared/hooks';
 export const AuthenticatedUserContext =
   createContext<AuthenticatedUserContextType<UserData> | null>(null);
 
-export function RequireAuth({ children }: Readonly<{ children: ReactNode }>) {
+export function RequireAuth({ children }: { children: ReactNode }) {
   const auth = useAuth();
   const location = useLocation();
   const isUserVerified = useIsUserVerified();
@@ -31,13 +31,13 @@ export function RequireAuth({ children }: Readonly<{ children: ReactNode }>) {
       <Navigate
         replace
         state={{ routerState: { email: auth.user.email } }}
-        to={routerPaths.worker.verifyEmail}
+        to={routerPaths.verifyEmail}
       />
     );
   }
 
   if (!isUserVerified) {
-    return <Navigate replace to={routerPaths.worker.verifyUser} />;
+    return <Navigate replace to={routerPaths.verifyUser} />;
   }
 
   return (

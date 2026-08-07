@@ -241,7 +241,7 @@ export function HcaptchaLabelingPage() {
                     <Stack sx={{ p: 3, alignItems: 'center' }}>
                       <Button
                         component={RouterLink}
-                        to={routerPaths.worker.jobsDiscovery}
+                        to={routerPaths.jobsDiscovery}
                         variant="contained"
                         color="accent"
                         fullWidth

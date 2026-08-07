@@ -8,11 +8,11 @@ import { Link, useLocation } from 'react-router-dom';
 const BUTTONS = [
   {
     label: 'worker.jobs.availableJobs',
-    path: routerPaths.worker.jobsDiscovery,
+    path: routerPaths.jobsDiscovery,
   },
   {
     label: 'worker.jobs.myJobs',
-    path: routerPaths.worker.myJobs,
+    path: routerPaths.myJobs,
   },
 ] as const satisfies { label: string; path: string }[];
 

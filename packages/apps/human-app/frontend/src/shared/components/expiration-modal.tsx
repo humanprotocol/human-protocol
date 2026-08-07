@@ -14,7 +14,7 @@ export function ExpirationModal() {
 
   const handleOnSignInClick = () => {
     browserAuthProvider.signOut();
-    navigate(routerPaths.worker.signIn, { replace: true });
+    navigate(routerPaths.signIn, { replace: true });
     closeModal();
   };
 

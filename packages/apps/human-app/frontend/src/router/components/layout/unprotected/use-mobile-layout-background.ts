@@ -4,17 +4,17 @@ import signinBackground from '@/assets/background-images/signin-background-mobil
 import { routerPaths } from '@/router/router-paths';
 
 const signupRoutes = [
-  routerPaths.worker.signUp,
-  routerPaths.worker.emailVerification,
-  routerPaths.worker.verifyEmail,
+  routerPaths.signUp,
+  routerPaths.emailVerification,
+  routerPaths.verifyEmail,
 ] as string[];
 
 const signinRoutes = [
-  routerPaths.worker.signIn,
-  routerPaths.worker.sendResetLink,
-  routerPaths.worker.resetPassword,
-  routerPaths.worker.sendResetLinkSuccess,
-  routerPaths.worker.resetPasswordSuccess,
+  routerPaths.signIn,
+  routerPaths.sendResetLink,
+  routerPaths.resetPassword,
+  routerPaths.sendResetLinkSuccess,
+  routerPaths.resetPasswordSuccess,
 ] as string[];
 
 export function useMobileLayoutBackground() {

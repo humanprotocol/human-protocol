@@ -20,7 +20,7 @@ import {
   useNotification,
 } from '@/shared/hooks/use-notification';
 
-export function SendResetLinkWorkerPage() {
+export function SendResetLinkPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { colorPalette } = useColorMode();
@@ -36,31 +36,31 @@ export function SendResetLinkWorkerPage() {
   });
 
   const {
-    mutate: sendResetLinkWorkerMutate,
-    error: sendResetLinkWorkerError,
-    isError: isSendResetLinkWorkerError,
-    isPending: isSendResetLinkWorkerPending,
-    reset: sendResetLinkWorkerMutateReset,
+    mutate: sendResetLinkMutate,
+    error: sendResetLinkError,
+    isError: isSendResetLinkError,
+    isPending: isSendResetLinkPending,
+    reset,
   } = useSendResetLinkMutation();
 
-  useResetMutationErrors(methods.watch, sendResetLinkWorkerMutateReset);
+  useResetMutationErrors(methods.watch, reset);
 
   useEffect(() => {
-    if (isSendResetLinkWorkerError) {
-      const errorMessage = getErrorMessageForError(sendResetLinkWorkerError);
+    if (isSendResetLinkError) {
+      const errorMessage = getErrorMessageForError(sendResetLinkError);
       showNotification({
         type: TopNotificationType.ERROR,
         message: errorMessage,
       });
     }
-  }, [isSendResetLinkWorkerError, sendResetLinkWorkerError, showNotification]);
+  }, [isSendResetLinkError, sendResetLinkError, showNotification]);
 
   function handleWorkerSendResetLink(data: SendResetLinkDto) {
-    sendResetLinkWorkerMutate(data);
+    sendResetLinkMutate(data);
   }
 
   const handleBackButton = () => {
-    navigate(routerPaths.worker.profile);
+    navigate(routerPaths.profile);
   };
 
   return (
@@ -123,16 +123,13 @@ export function SendResetLinkWorkerPage() {
                 label={t('worker.sendResetLinkForm.fields.email')}
                 name="email"
               />
-              <HCaptchaForm
-                error={sendResetLinkWorkerError}
-                name="h_captcha_token"
-              />
+              <HCaptchaForm error={sendResetLinkError} name="h_captcha_token" />
               <Button
                 type="submit"
                 variant="contained"
                 color="accent"
                 fullWidth
-                loading={isSendResetLinkWorkerPending}
+                loading={isSendResetLinkPending}
               >
                 {t('worker.sendResetLinkForm.submitBtn')}
               </Button>

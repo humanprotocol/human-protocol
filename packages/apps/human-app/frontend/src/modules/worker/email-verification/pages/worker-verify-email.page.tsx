@@ -1,5 +1,5 @@
 import { EmailVerificationFormContainer } from '../components';
 
-export function WorkerVerifyEmailPage() {
+export function VerifyEmailPage() {
   return <EmailVerificationFormContainer />;
 }

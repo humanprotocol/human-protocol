@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { useLocationState } from '@/modules/worker/hooks/use-location-state';
 
-export const tokenSchema = z.string().transform((value, ctx) => {
+const tokenSchema = z.string().transform((value, ctx) => {
   const token = value.split('=')[1];
   if (!token) {
     ctx.addIssue({

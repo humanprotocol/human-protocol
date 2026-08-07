@@ -8,7 +8,7 @@ import {
 } from '../../../components';
 import { type MyJob } from '../../../schemas';
 import { useColorMode } from '@/shared/contexts/color-mode/use-color-mode';
-import { JobType } from '@/modules/smart-contracts/EthKVStore/config';
+import { JobType } from '@/shared/types/entity.type';
 import { TimeUntil } from '../time-until';
 import { ChainIcon } from '@/shared/components/ui/chain-icon';
 import {

@@ -3,7 +3,7 @@ import { PageCardError } from '@/shared/components/ui/page-card';
 import { EmailVerificationProcess } from '../components';
 import { useEmailVerificationToken } from '../hooks';
 
-export function WorkerEmailVerificationProcessPage() {
+export function EmailVerificationProcessPage() {
   const { t } = useTranslation();
   const { token } = useEmailVerificationToken();
 

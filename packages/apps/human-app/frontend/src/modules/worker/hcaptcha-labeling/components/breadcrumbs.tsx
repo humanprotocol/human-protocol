@@ -12,7 +12,7 @@ export function Breadcrumbs() {
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
       <Link
         component={RouterLink}
-        to={routerPaths.worker.jobsDiscovery}
+        to={routerPaths.jobsDiscovery}
         variant="body1"
         sx={{
           color: colorPalette.text.auxiliary200,

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Chip, Paper, Stack, Typography } from '@mui/material';
 
 import { AvailableJob } from '../../../types';
-import { JobType } from '@/modules/smart-contracts/EthKVStore/config';
+import { JobType } from '@/shared/types/entity.type';
 import { useColorMode } from '@/shared/contexts/color-mode/use-color-mode';
 import {
   OracleAddressIcon,

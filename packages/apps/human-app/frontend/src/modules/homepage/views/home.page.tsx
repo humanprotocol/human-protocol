@@ -12,7 +12,7 @@ export function HomePage() {
   const isUserVerified = useIsUserVerified();
 
   if (isUserVerified) {
-    return <Navigate replace to={routerPaths.worker.profile} />;
+    return <Navigate replace to={routerPaths.profile} />;
   }
 
   return (

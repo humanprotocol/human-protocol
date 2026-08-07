@@ -8,17 +8,11 @@ export const useHandleMainNavIconClick = () => {
   const isUserVerified = useIsUserVerified();
 
   const handleIconClick = () => {
-    const type = browserAuthProvider.getAuthType();
     const isAuthenticated =
       browserAuthProvider.isAuthenticated && isUserVerified;
 
-    if (type === 'web3' && isAuthenticated) {
-      navigate(routerPaths.operator.profile);
-      return;
-    }
-
-    if (type === 'web2' && isAuthenticated) {
-      navigate(routerPaths.worker.profile);
+    if (isAuthenticated) {
+      navigate(routerPaths.profile);
       return;
     }
 

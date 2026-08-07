@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Chip, Grid, Typography } from '@mui/material';
 import { type MRT_ColumnDef } from 'material-react-table';
 
-import type { JobType } from '@/modules/smart-contracts/EthKVStore/config';
+import type { JobType } from '@/shared/types/entity.type';
 import { EvmAddress, RewardAmount, MyJobsTableActions } from '../../components';
 import { type MyJob } from '../../schemas';
 import { useColorMode } from '@/shared/contexts/color-mode';

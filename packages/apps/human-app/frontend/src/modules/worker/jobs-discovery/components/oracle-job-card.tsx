@@ -25,7 +25,7 @@ import { CopyToClipboardButton } from '@/shared/components/ui/copy-to-clipboard-
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { Button } from '@/shared/components/ui/button';
 import { JOB_TYPES } from '@/shared/consts';
-import { JobType } from '@/modules/smart-contracts/EthKVStore/config';
+import { JobType } from '@/shared/types/entity.type';
 import { ExploreTasksDialog } from './explore-tasks-dialog';
 import { EvmAddress, RewardAmount } from '../../jobs/components';
 import { useGetRegistrationDataInOracles } from '../hooks/use-get-registration-data-oracles';
@@ -73,9 +73,7 @@ export function OracleJobCard({ oracle }: { oracle: Oracle }) {
     if (isLoading) return;
 
     if (shouldNavigateToRegistration(oracle, data)) {
-      navigate(
-        `${routerPaths.worker.registrationInExchangeOracle}/${oracle.address}`
-      );
+      navigate(`${routerPaths.registrationInExchangeOracle}/${oracle.address}`);
       return;
     }
 
