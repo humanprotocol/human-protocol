@@ -1,4 +1,5 @@
 import { Grid } from '@mui/material';
+import { t } from 'i18next';
 import { useColorMode } from '@/shared/contexts/color-mode';
 
 export function NoRecords() {
@@ -7,13 +8,13 @@ export function NoRecords() {
   return (
     <Grid
       sx={{
-        padding: '20px',
+        p: 2.5,
         textAlign: 'center',
         fontStyle: 'italic',
-        color: colorPalette.text.secondary,
+        color: colorPalette.text.auxiliary100,
       }}
     >
-      <span>No records to display</span>
+      <span>{t('components.noRecords')}</span>
     </Grid>
   );
 }

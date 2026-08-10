@@ -30,12 +30,12 @@
     "typeorm": "typeorm-ts-node-commonjs"
   },
   "dependencies": {
-    "@google-cloud/storage": "^7.19.0",
+    "@google-cloud/storage": "^7.21.0",
     "@google-cloud/vision": "^4.3.2",
     "@human-protocol/logger": "workspace:*",
     "@human-protocol/sdk": "workspace:*",
     "@nestjs/axios": "^4.0.1",
-    "@nestjs/common": "^11.1.12",
+    "@nestjs/common": "^11.1.27",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.1.12",
     "@nestjs/jwt": "^11.0.2",

@@ -19,12 +19,17 @@ export function Chip({ label, backgroundColor }: Readonly<ChipProps>) {
         py: '2px',
         borderRadius: '16px',
         display: 'flex',
+        flexShrink: 0,
         wordBreak: 'break-word',
       }}
     >
       <Typography
-        color={backgroundColor ? colorPalette.white : colorPalette.text.primary}
         variant="chip"
+        sx={{
+          color: backgroundColor
+            ? colorPalette.white
+            : colorPalette.text.primary,
+        }}
       >
         {label}
       </Typography>

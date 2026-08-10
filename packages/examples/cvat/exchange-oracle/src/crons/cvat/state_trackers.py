@@ -14,8 +14,8 @@ from src.crons._cron_job import cron_job
 from src.db import SessionLocal
 from src.db import errors as db_errors
 from src.db.utils import ForUpdateParams
-from src.handlers.completed_escrows import handle_escrows_validations
 from src.handlers.cvat_events import cvat_webhook_handler
+from src.handlers.job_completion import handle_escrows_validations
 from src.utils.logging import format_sequence
 from src.utils.time import utcnow
 

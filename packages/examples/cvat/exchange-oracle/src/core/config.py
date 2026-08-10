@@ -4,8 +4,8 @@
 import inspect
 import os
 from collections.abc import Iterable
-from enum import Enum
 from os import getenv
+from pathlib import Path
 from typing import ClassVar, Optional
 
 from attrs.converters import to_bool
@@ -14,15 +14,29 @@ from human_protocol_sdk.encryption import Encryption
 from web3 import Web3
 from web3.providers.rpc import HTTPProvider
 
+from src.utils.enums import StrEnum
 from src.utils.logging import parse_log_level
 from src.utils.net import is_ipv4
 
+
+def find_default_dotenv() -> Path | None:
+    # Check the default location in the project
+    dotenv_path = Path(__file__).parents[1] / ".env"
+    if dotenv_path.is_file():
+        return str(dotenv_path)
+    else:
+        return None
+
+
 dotenv_path = getenv("DOTENV_PATH", None)
+
+if dotenv_path is None:
+    dotenv_path = find_default_dotenv()
+
 if dotenv_path and not os.path.exists(dotenv_path):  # noqa: PTH110
     raise FileNotFoundError(dotenv_path)
 
 load_dotenv(dotenv_path)
-
 
 # TODO: add some logic to report unused/deprecated env vars on startup
 
@@ -321,7 +335,7 @@ class DevelopmentConfig:
     """
 
 
-class Environment(str, Enum):
+class Environment(StrEnum):
     PRODUCTION = "production"
     DEVELOPMENT = "development"
     TEST = "test"

@@ -3,12 +3,15 @@ import type { colorPalette } from '@/shared/styles/color-palette';
 export const darkColorPalette = {
   white: '#FFFFFF',
   black: '#000000',
-  backgroundColor: 'rgba(16, 7, 53, 1)',
+  backgroundColor: '#100735',
   text: {
     primary: '#D4CFFF',
     secondary: '#6C6978',
+    light: '#9387ff',
     disabled: 'rgba(212, 207, 255, 0.5)',
     disabledSecondary: 'rgba(147, 135, 255, 1)',
+    auxiliary100: '#ffffff',
+    auxiliary200: '#a0a0a0',
   },
   primary: {
     main: '#CDC7FF',
@@ -23,17 +26,29 @@ export const darkColorPalette = {
     light: '#BB94FF',
     contrastText: 'rgba(255, 255, 255, 0.87)',
   },
+  background: {
+    default: '#100735',
+    paper: '#251d47',
+    subtle: '#2d284e',
+  },
+  accent: {
+    main: '#fa2a75',
+    dark: '#af1d51',
+    contrastText: '#ffffff',
+  },
+  border: {
+    main: 'rgba(255, 255, 255, 0.07)',
+    strong: '#3a2e6f',
+  },
   error: {
-    main: '#F65A93',
-    dark: '#F3206E',
-    light: '#F76DA0',
-    contrastText: '#FFFFFF',
+    main: '#ff6262',
+    dark: '#ff6262cc',
+    contrastText: '#ffffff',
   },
   success: {
-    main: '#58CAA8',
-    dark: '#1F916F',
-    light: '#5FD1AF',
-    contrastText: 'rgba(255, 255, 255, 0.87)',
+    main: '#43ba96',
+    dark: '#43ba96cc',
+    contrastText: '#ffffff',
   },
   paper: {
     main: '#1c133f',
@@ -58,11 +73,3 @@ export const darkColorPalette = {
   // for 'warning', 'info' native colors from MUI were pointed as expected
   // 'info' native colors from MUI were pointed as expected
 } satisfies typeof colorPalette;
-
-// if Figma design was inconsistent for some reasons and there are extra colors for dark mode should be included in this object
-export const onlyDarkModeColor = {
-  backArrowBg: 'rgba(246, 247, 254, 0.1)',
-  additionalTextColor: '#9387FF',
-  mainColorWithOpacity: '#CDC7FFCC',
-  listItemColor: '#CDC7FF29',
-};

@@ -1,28 +1,8 @@
-import { Grid, Typography, styled } from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { Grid, Stack, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { t } from 'i18next';
-import { Button } from '@/shared/components/ui/button';
-import { breakpoints } from '@/shared/styles/breakpoints';
-import { routerPaths } from '@/router/router-paths';
-import { onlyDarkModeColor } from '@/shared/styles/dark-color-palette';
-import { useColorMode } from '@/shared/contexts/color-mode';
-import { useIsMobile } from '@/shared/hooks/use-is-mobile';
-import { commonDarkPageCardStyles, commonPageCardStyles } from './styles';
 
-const IconWrapper = styled('div')(() => ({
-  width: '40px',
-  height: '40px',
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  borderRadius: '50%',
-  cursor: 'pointer',
-  ':hover': {
-    cursor: 'pointer',
-  },
-  fontSize: '26px',
-}));
+import { commonStyles } from './styles';
+import { BackButton } from './back-button';
 
 type NavigationTarget = string | (() => void);
 
@@ -33,8 +13,6 @@ interface PageCardProps {
   title?: React.JSX.Element | string;
   alert?: React.JSX.Element;
   backNavigation?: NavigationTarget;
-  cancelNavigation?: NavigationTarget;
-  showCancelButton?: boolean;
   showBackButton?: boolean;
   loader?: boolean;
 }
@@ -46,20 +24,13 @@ export function PageCard({
   backNavigation,
   maxContentWidth = '376px',
   childrenMaxWidth = '486px',
-  cancelNavigation = routerPaths.homePage,
-  showCancelButton = true,
   showBackButton = true,
-}: Readonly<PageCardProps>) {
-  const { isDarkMode, colorPalette } = useColorMode();
+}: PageCardProps) {
   const navigate = useNavigate();
-  const isMobile = useIsMobile('md');
 
   const contentStyles = {
-    maxWidth: maxContentWidth,
+    maxWidth: { xs: 'unset', md: maxContentWidth },
     width: '100%',
-    [breakpoints.mobile]: {
-      maxWidth: 'unset',
-    },
   };
 
   const goBack = (navigationTarget: NavigationTarget | undefined) => {
@@ -78,155 +49,79 @@ export function PageCard({
     goBack(backNavigation);
   };
 
-  const handleCancelButton = () => {
-    goBack(cancelNavigation);
-  };
-
   return (
-    <Grid
-      container
+    <Stack
       sx={{
-        ...(isDarkMode ? commonDarkPageCardStyles : commonPageCardStyles),
-        padding: isMobile ? '0 2rem 7.25rem 2rem' : '2rem 2rem 7.7rem 2rem',
+        ...commonStyles,
+        padding: { xs: '0 2rem 7.25rem 2rem', md: '2rem 2rem 7.7rem 2rem' },
       }}
     >
-      {showCancelButton && (
-        <Grid
-          sx={{
-            display: 'flex',
-            justifyContent: 'flex-end',
-            width: '100%',
-            [breakpoints.mobile]: {
-              display: 'none',
-            },
-          }}
-        >
-          <Button onClick={handleCancelButton}>
-            <Typography variant="buttonMedium">
-              {t('components.modal.header.closeBtn')}
-            </Typography>
-          </Button>
-        </Grid>
-      )}
       <Grid
         container
         sx={{
           flexDirection: 'column',
           flexGrow: 1,
-          maxWidth: childrenMaxWidth,
+          maxWidth: { xs: '100%', md: childrenMaxWidth },
           width: '100%',
           justifyContent: 'center',
           alignItems: 'center',
-          [breakpoints.mobile]: {
-            maxWidth: '100%',
-          },
         }}
       >
         <Grid
           container
           sx={{
-            rowGap: '1rem',
             columnGap: '1rem',
-            [breakpoints.mobile]: {
-              rowGap: '0.4rem',
-            },
+            rowGap: { xs: '0.4rem', md: '1rem' },
           }}
         >
           <Grid
             sx={{
-              display: 'none',
-              [breakpoints.mobile]: {
-                display: 'flex',
-                width: '100%',
-                justifyContent: backNavigation ? 'space-between' : 'flex-end',
-                alignItems: 'center',
-              },
+              display: { xs: 'flex', md: 'none' },
+              width: '100%',
+              justifyContent: backNavigation ? 'space-between' : 'flex-end',
+              alignItems: 'center',
             }}
           >
-            {showBackButton && (
-              <IconWrapper
-                onClick={handleBackButton}
-                sx={{
-                  width: '25px',
-                  height: '25px',
-                  fontSize: '18px',
-                  backgroundColor: isDarkMode
-                    ? onlyDarkModeColor.backArrowBg
-                    : colorPalette.paper.main,
-                }}
-              >
-                <ArrowBackIcon fontSize="inherit" />
-              </IconWrapper>
-            )}
-            {showCancelButton && (
-              <Button onClick={handleCancelButton}>
-                <Typography variant="buttonMedium">
-                  {t('components.modal.header.closeBtn')}
-                </Typography>
-              </Button>
-            )}
+            {showBackButton && <BackButton onClick={handleBackButton} />}
           </Grid>
-          <Grid item md={1} order={{ xs: 3, md: 1 }} xs={12} />
+          <Grid size={{ xs: 12, md: 1 }} sx={{ order: { xs: 3, md: 1 } }} />
           <Grid
-            item
-            md={10}
-            order={{ xs: 2, md: 2 }}
+            size={{ xs: 12, md: 10 }}
             sx={{
-              minHeight: '3rem',
+              minHeight: { xs: 'unset', md: '3rem' },
+              height: { xs: 'auto', md: 'unset' },
               width: '100%',
-              [breakpoints.mobile]: {
-                height: 'auto',
-                minHeight: 'unset',
-              },
+              order: 2,
             }}
-            xs={12}
           >
             <Grid sx={contentStyles}>{alert && <>{alert}</>}</Grid>
           </Grid>
           <Grid
-            item
-            md={1}
-            order={{ xs: 1, md: 3 }}
+            size={{ xs: 12, md: 1 }}
             sx={{
-              display: 'flex',
+              display: { xs: 'none', md: 'flex' },
               justifyContent: 'flex-end',
               mt: '5px',
-              [breakpoints.mobile]: {
-                display: 'none',
-              },
+              order: { xs: 1, md: 3 },
             }}
-            xs={12}
           >
-            {showBackButton && (
-              <IconWrapper
-                onClick={handleBackButton}
-                sx={{
-                  backgroundColor: isDarkMode
-                    ? onlyDarkModeColor.backArrowBg
-                    : colorPalette.paper.main,
-                }}
-              >
-                <ArrowBackIcon fontSize="inherit" />
-              </IconWrapper>
-            )}
+            {showBackButton && <BackButton onClick={handleBackButton} />}
           </Grid>
-          <Grid
-            item
-            md={10}
-            order={{ xs: 4, md: 4 }}
-            sx={{ marginBottom: '24px' }}
-            xs={12}
-          >
+          <Grid size={{ xs: 12, md: 10 }} sx={{ mb: 3, order: 4 }}>
             <Grid sx={contentStyles}>
-              <Typography variant="h4">{title}</Typography>
+              {typeof title === 'string' ? (
+                <Typography variant="h4">{title}</Typography>
+              ) : (
+                title
+              )}
             </Grid>
           </Grid>
-          <Grid item md={1} order={{ xs: 5, md: 5 }} xs={1} />
-          <Grid item md={10} order={{ xs: 6, md: 6 }} xs={12}>
+          <Grid size={1} sx={{ order: 5 }} />
+          <Grid size={{ xs: 12, md: 10 }} sx={{ order: 6 }}>
             <Grid sx={contentStyles}>{children}</Grid>
           </Grid>
         </Grid>
       </Grid>
-    </Grid>
+    </Stack>
   );
 }

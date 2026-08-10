@@ -11,10 +11,9 @@ import { JobsDiscoveryController } from '../jobs-discovery.controller';
 import { JobsDiscoveryProfile } from '../jobs-discovery.mapper.profile';
 import { JobsDiscoveryService } from '../jobs-discovery.service';
 import {
-  dtoFixture,
-  jobsDiscoveryParamsCommandFixture,
+  queryDtoFixture,
+  getJobsCommandFixture,
   responseFixture,
-  jobDiscoveryToken,
 } from './jobs-discovery.fixtures';
 import { jobsDiscoveryServiceMock } from './jobs-discovery.service.mock';
 
@@ -69,22 +68,19 @@ describe('JobsDiscoveryController', () => {
     expect(controller).toBeDefined();
   });
 
-  describe('processJobsDiscovery', () => {
-    it('should call service processJobsDiscovery method with proper fields set', async () => {
-      const dto = dtoFixture;
-      const command = jobsDiscoveryParamsCommandFixture;
+  describe('getJobs', () => {
+    it('should call service getJobs method with proper fields set', async () => {
+      const dto = queryDtoFixture;
+      const command = getJobsCommandFixture;
       await controller.getJobs(dto, {
-        user: { qualifications: [], is_stake_eligible: true },
-        token: command.token,
+        user: { qualifications: [] },
       } as any);
       command.data.qualifications = [];
-      expect(jobsDiscoveryService.processJobsDiscovery).toHaveBeenCalledWith(
-        command,
-      );
+      expect(jobsDiscoveryService.getJobs).toHaveBeenCalledWith(command);
     });
 
     it('should throw an error if jobsDiscoveryFlag is disabled', async () => {
-      const dto = dtoFixture;
+      const dto = queryDtoFixture;
       (configServiceMock as any).jobsDiscoveryFlag = false;
       await expect(
         controller.getJobs(dto, { user: { qualifications: [] } } as any),
@@ -92,21 +88,6 @@ describe('JobsDiscoveryController', () => {
         new HttpException('Jobs discovery is disabled', HttpStatus.FORBIDDEN),
       );
       (configServiceMock as any).jobsDiscoveryFlag = true;
-    });
-
-    it('should return empty results if user is not stake eligible', async () => {
-      const dto = dtoFixture;
-      const result = await controller.getJobs(dto, {
-        user: { qualifications: [], is_stake_eligible: false },
-        token: jobDiscoveryToken,
-      } as any);
-      expect(result).toEqual({
-        page: 0,
-        page_size: 1,
-        total_pages: 1,
-        total_results: 0,
-        results: [],
-      });
     });
   });
 });

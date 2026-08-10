@@ -7,6 +7,7 @@ import {
   Box,
   Button,
   Checkbox,
+  CircularProgress,
   FormControl,
   FormControlLabel,
   Grid,
@@ -19,12 +20,8 @@ import { Decimal } from 'decimal.js';
 import { ethers } from 'ethers';
 import { useEffect, useMemo, useState } from 'react';
 import { Address } from 'viem';
-import {
-  useAccount,
-  useReadContract,
-  useWalletClient,
-  usePublicClient,
-} from 'wagmi';
+import { readContract } from 'viem/actions';
+import { useAccount, useWalletClient, usePublicClient } from 'wagmi';
 import { TokenSelect } from '../../../components/TokenSelect';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
 import * as jobService from '../../../services/job';
@@ -51,6 +48,11 @@ export const CryptoPayForm = ({
   const [amount, setAmount] = useState<string>();
   const [isLoading, setIsLoading] = useState(false);
   const [jobLauncherAddress, setJobLauncherAddress] = useState<string>();
+  const [jobLauncherFee, setJobLauncherFee] = useState<string>();
+  const [configurationError, setConfigurationError] = useState<string>();
+  const [configurationRetry, setConfigurationRetry] = useState(0);
+  const [feeError, setFeeError] = useState<string>();
+  const [feeRetry, setFeeRetry] = useState(0);
   const [minFee, setMinFee] = useState<number>(0.01);
   const { data: signer } = useWalletClient();
   const publicClient = usePublicClient();
@@ -62,14 +64,21 @@ export const CryptoPayForm = ({
 
   useEffect(() => {
     const fetchJobLauncherData = async () => {
-      const address = await paymentService.getOperatorAddress();
-      const fee = await paymentService.getFee();
-      setJobLauncherAddress(address);
-      setMinFee(fee);
+      setConfigurationError(undefined);
+      try {
+        const address = await paymentService.getOperatorAddress();
+        const fee = await paymentService.getFee();
+        setJobLauncherAddress(address);
+        setMinFee(fee);
+      } catch {
+        setConfigurationError(
+          'Unable to load the payment configuration. Please try again.',
+        );
+      }
     };
 
     fetchJobLauncherData();
-  }, []);
+  }, [configurationRetry]);
 
   useEffect(() => {
     const fetchRates = async () => {
@@ -106,17 +115,46 @@ export const CryptoPayForm = ({
     setDecimals(Math.min(tokenDecimals, 6));
   }, [tokenDecimals]);
 
-  const { data: jobLauncherFee } = useReadContract({
-    address: NETWORKS[jobRequest.chainId!]?.kvstoreAddress as Address,
-    abi: KVStoreABI,
-    functionName: 'get',
-    args: jobLauncherAddress
-      ? [jobLauncherAddress, KVStoreKeys.fee]
-      : undefined,
-    query: {
-      enabled: !!jobLauncherAddress,
-    },
-  });
+  useEffect(() => {
+    if (!signer || !publicClient || !jobLauncherAddress || !jobRequest.chainId)
+      return;
+
+    let ignore = false;
+
+    const fetchJobLauncherFee = async () => {
+      setFeeError(undefined);
+      setJobLauncherFee(undefined);
+      try {
+        const parameters = {
+          address: NETWORKS[jobRequest.chainId!]?.kvstoreAddress as Address,
+          abi: KVStoreABI,
+          functionName: 'get',
+          args: [jobLauncherAddress, KVStoreKeys.fee],
+        } as const;
+
+        let fee: string;
+        try {
+          fee = (await readContract(signer, parameters)) as string;
+        } catch {
+          fee = (await readContract(publicClient, parameters)) as string;
+        }
+
+        if (!ignore) {
+          setJobLauncherFee(fee);
+        }
+      } catch {
+        if (!ignore) {
+          setFeeError('Unable to load the job launcher fee. Please try again.');
+        }
+      }
+    };
+
+    fetchJobLauncherFee();
+
+    return () => {
+      ignore = true;
+    };
+  }, [feeRetry, jobLauncherAddress, jobRequest.chainId, publicClient, signer]);
 
   const minFeeToken = useMemo(() => {
     if (minFee && paymentTokenRate)
@@ -125,7 +163,7 @@ export const CryptoPayForm = ({
   }, [minFee, paymentTokenRate]);
 
   const feeAmount = useMemo(() => {
-    if (!amount) return 0;
+    if (!amount || jobLauncherFee == null) return 0;
     const amountDecimal = new Decimal(amount);
     const feeDecimal = new Decimal(jobLauncherFee as string).div(100);
     return Number(
@@ -244,7 +282,7 @@ export const CryptoPayForm = ({
     }
   };
 
-  if (!chain || chain.id !== jobRequest.chainId)
+  if (isConnected && (!chain || chain.id !== jobRequest.chainId))
     return (
       <Box textAlign="center">
         <Typography textAlign="center">
@@ -254,6 +292,43 @@ export const CryptoPayForm = ({
         <Button variant="outlined" onClick={goToPrevStep}>
           Back
         </Button>
+      </Box>
+    );
+
+  if (configurationError || feeError)
+    return (
+      <Box textAlign="center" minHeight={400}>
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {configurationError || feeError}
+        </Alert>
+        <Button
+          variant="contained"
+          onClick={() => {
+            if (configurationError) {
+              setConfigurationRetry((retry) => retry + 1);
+            }
+            if (feeError) {
+              setFeeRetry((retry) => retry + 1);
+            }
+          }}
+        >
+          Try again
+        </Button>
+      </Box>
+    );
+
+  if (
+    !jobLauncherAddress ||
+    (isConnected && (!signer || jobLauncherFee == null))
+  )
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight={400}
+      >
+        <CircularProgress />
       </Box>
     );
 
@@ -389,7 +464,7 @@ export const CryptoPayForm = ({
                 >
                   <Typography>Fee</Typography>
                   <Typography color="text.secondary">
-                    ({Number(jobLauncherFee)}%){' '}
+                    ({jobLauncherFee == null ? '—' : Number(jobLauncherFee)}%){' '}
                     {paymentTokenSymbol
                       ? `${Number(feeAmount.toFixed(6))} ${paymentTokenSymbol?.toUpperCase()}`
                       : ''}
@@ -476,6 +551,7 @@ export const CryptoPayForm = ({
               !paymentTokenAddress ||
               !fundTokenSymbol ||
               !amount ||
+              jobLauncherFee == null ||
               jobRequest.chainId !== chain?.id
             }
             loading={isLoading}

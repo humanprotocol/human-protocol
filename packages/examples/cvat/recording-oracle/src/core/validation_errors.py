@@ -11,7 +11,7 @@ class TooFewGtError(DatasetValidationError):
         )
 
 
-class LowAccuracyError(DatasetValidationError):
+class LowQualityError(DatasetValidationError):
     pass
 
 

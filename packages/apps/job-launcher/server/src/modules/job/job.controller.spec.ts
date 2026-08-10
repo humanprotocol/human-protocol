@@ -23,7 +23,11 @@ import {
 } from '../manifest/fixtures';
 import { MutexManagerService } from '../mutex/mutex-manager.service';
 import { JobController } from './job.controller';
-import { JobManifestDto, JobQuickLaunchDto } from './job.dto';
+import {
+  JobManifestDto,
+  JobQuickLaunchDto,
+  JobUnknownManifestDto,
+} from './job.dto';
 import { JobService } from './job.service';
 
 describe('JobController', () => {
@@ -31,6 +35,7 @@ describe('JobController', () => {
 
   const mockJobService = {
     createJob: jest.fn(),
+    createJobWithUnknownManifest: jest.fn(),
   };
 
   const mockMutexManagerService = {
@@ -314,6 +319,47 @@ describe('JobController', () => {
         expect.any(Function),
       );
       expect(mockJobService.createJob).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('createJobWithUnknownManifest', () => {
+    it('should create a job with an unknown manifest and return job ID', async () => {
+      const jobUnknownManifestDto: JobUnknownManifestDto = {
+        chainId: ChainId.POLYGON_AMOY,
+        requestType: FortuneJobType.FORTUNE,
+        manifest: {
+          custom: faker.string.sample(),
+          nested: {
+            value: faker.number.int(),
+          },
+        },
+        paymentCurrency: PaymentCurrency.USD,
+        paymentAmount: faker.number.int({ min: 100, max: 1000 }),
+        escrowFundToken: EscrowFundToken.HMT,
+      };
+
+      mockMutexManagerService.runExclusive.mockImplementationOnce(
+        async (_id, _timeout, fn) => {
+          return await fn();
+        },
+      );
+      mockJobService.createJobWithUnknownManifest.mockResolvedValueOnce(1);
+
+      const result = await jobController.createJobWithUnknownManifest(
+        jobUnknownManifestDto,
+        mockRequest,
+      );
+
+      expect(result).toBe(1);
+      expect(mockJobService.createJobWithUnknownManifest).toHaveBeenCalledWith(
+        mockRequest.user,
+        jobUnknownManifestDto,
+      );
+      expect(mockMutexManagerService.runExclusive).toHaveBeenCalledWith(
+        `user${mockRequest.user.id}`,
+        MUTEX_TIMEOUT,
+        expect.any(Function),
+      );
     });
   });
 });

@@ -1,14 +1,15 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 from urllib.parse import urljoin
 
 from src.core.config import Config
-from src.core.manifest import TaskManifest, TaskTypes
-from src.core.manifest import parse_manifest as _parse_manifest
-from src.core.tasks import skeletons_from_boxes
-from src.models.cvat import Project
+from src.core.manifest import get_manifest_task_type
+from src.core.tasks import TaskTypes, skeletons_from_boxes
 
-
-def parse_manifest(manifest: dict) -> TaskManifest:
-    return _parse_manifest(manifest)
+if TYPE_CHECKING:
+    from src.core.manifest import ManifestBase
+    from src.models.cvat import Project
 
 
 def compose_assignment_url(task_id: int, job_id: int, *, project: Project) -> str:
@@ -36,10 +37,13 @@ def get_default_assignment_timeout(task_type: TaskTypes) -> int:
     return timeout_seconds
 
 
-def get_default_assignment_size(manifest: TaskManifest) -> int:
-    job_size = manifest.annotation.job_size + manifest.validation.val_size
+def get_assignment_timeout(manifest: ManifestBase) -> int:
+    """
+    Get assignment expiration timeout, in seconds.
+    """
+    details = getattr(getattr(manifest, "annotation", None), "details", None)
+    max_time = getattr(details, "max_time", None)
+    if max_time is not None:
+        return max_time
 
-    if job_size == TaskTypes.image_skeletons_from_boxes:
-        job_size *= skeletons_from_boxes.DEFAULT_ASSIGNMENT_SIZE_MULTIPLIER
-
-    return job_size
+    return get_default_assignment_timeout(get_manifest_task_type(manifest))

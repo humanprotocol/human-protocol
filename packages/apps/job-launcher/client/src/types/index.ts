@@ -112,6 +112,7 @@ export enum CvatJobType {
   IMAGE_BOXES = 'image_boxes',
   IMAGE_BOXES_FROM_POINTS = 'image_boxes_from_points',
   IMAGE_SKELETONS_FROM_BOXES = 'image_skeletons_from_boxes',
+  AUDIO_TRANSCRIPTION = 'audio_transcription',
 }
 
 export type FortuneRequest = {

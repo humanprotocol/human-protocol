@@ -7,8 +7,3 @@ export enum KycStatus {
   EXPIRED = 'expired',
   ABANDONED = 'abandoned',
 }
-
-export interface WorkerItentityVerificationStatus {
-  isVerificationCompleted: boolean;
-  status: (typeof KycStatus)[keyof typeof KycStatus];
-}

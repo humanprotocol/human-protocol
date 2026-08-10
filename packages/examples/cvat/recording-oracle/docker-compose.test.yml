@@ -11,30 +11,21 @@ services:
     networks:
       - test-network
 
-  blockchain-node:
-    build: 
-      context: ../../../../
-      dockerfile: docker-setup/Dockerfile.core
-    healthcheck:
-      test: yarn local:readiness
-      interval: 15s
-      timeout: 30s
-      retries: 0
-    networks:
-      - test-network
-
   minio:
     container_name: minio
-    image: minio/minio:RELEASE.2022-05-26T05-48-41Z
+    image: minio/minio:RELEASE.2025-09-07T16-13-09Z
+    ports:
+      - 9001:9001
+      - 9000:9000
     environment:
       MINIO_ROOT_USER: dev
       MINIO_ROOT_PASSWORD: devdevdev
     volumes:
-      - ./tests/utils/manifest.json:/tmp/manifests/manifest.json
-      - ./tests/utils/intermediate-results.json:/tmp/results/intermediate-results.json
+      # Each subdirectory under the shared assets dir seeds a same-named bucket.
+      - ./tests/assets/cloud:/tmp/cloud:ro
     entrypoint: 'sh'
     command:
-      -c "mkdir -p /data/manifests && cp /tmp/manifests/manifest.json /data/manifests/manifest.json && mkdir -p /data/results && cp /tmp/results/intermediate-results.json /data/results/intermediate-results.json && minio server /data --console-address ':9001'"
+      -c "mkdir -p /data && cp -r /tmp/cloud/. /data/ && minio server /data --console-address ':9001'"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 5s
@@ -52,51 +43,15 @@ services:
     entrypoint: >
       /bin/sh -c "
       /usr/bin/mc config host add myminio http://minio:9000 dev devdevdev;
+      /usr/bin/mc mb -p myminio/datasets myminio/manifests myminio/excor-data myminio/recor-data;
+      /usr/bin/mc anonymous set public myminio/datasets;
       /usr/bin/mc anonymous set public myminio/manifests;
-      /usr/bin/mc anonymous set public myminio/results;
+      /usr/bin/mc anonymous set public myminio/excor-data;
+      /usr/bin/mc anonymous set public myminio/recor-data;
       "
     networks:
       - test-network
 
-  test:
-    build:
-      context: ./
-      dockerfile: dockerfiles/test.Dockerfile
-    environment:
-      SQLALCHEMY_SILENCE_UBER_WARNING: 1
-      ENVIRONMENT: 'test'
-      PG_PORT: 5432
-      PG_HOST: 'postgres'
-      PG_USER: 'test'
-      PG_PASSWORD: 'test'
-      PG_DB: 'recording_oracle_test'
-      WEB3_HTTP_PROVIDER_URI: 'http://blockchain-node:8545'
-      STORAGE_ENDPOINT_URL: 'host.docker.internal:9000'
-      STORAGE_ACCESS_KEY: 'dev'
-      STORAGE_SECRET_KEY: 'devdevdev'
-      STORAGE_RESULTS_BUCKET_NAME: 'results'
-      STORAGE_PROVIDER: 'aws'
-      STORAGE_USE_SSL: False
-      EXCHANGE_ORACLE_STORAGE_ENDPOINT_URL: 'host.docker.internal:9000'
-      EXCHANGE_ORACLE_STORAGE_ACCESS_KEY: 'dev'
-      EXCHANGE_ORACLE_STORAGE_SECRET_KEY: 'devdevdev'
-      EXCHANGE_ORACLE_STORAGE_RESULTS_BUCKET_NAME: 'results'
-      EXCHANGE_ORACLE_STORAGE_USE_SSL: False
-      EXCHANGE_ORACLE_STORAGE_PROVIDER: 'aws'
-    depends_on:
-      postgres:
-        condition: service_started
-      blockchain-node:
-        condition: service_healthy
-      minio-mc:
-        condition: service_completed_successfully
-    # Used to reference localhost since minio:9000 is rejected by the SDK URL validator.
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    networks:
-      - test-network
-    tty: true
-  
 networks:
   test-network:
     driver: bridge

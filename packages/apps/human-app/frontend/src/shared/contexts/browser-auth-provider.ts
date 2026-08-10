@@ -1,29 +1,21 @@
-import type {
-  AuthType,
-  BrowserAuthProvider,
-} from '@/shared/types/browser-auth-provider';
+import type { BrowserAuthProvider } from '@/shared/types/browser-auth-provider';
 import { type AuthTokensSuccessResponse } from '../schemas';
 
 const accessTokenKey = 'ro_access_token';
 const refreshTokenKey = 'ro_refresh_token';
-const authTypeKey = 'ro_auth_type';
 const userDataKey = 'ro_extendable_user_data';
 
 const browserAuthProvider: BrowserAuthProvider = {
   isAuthenticated: false,
-  authType: 'web2',
   signOutSubscription: undefined,
 
   signIn(
     { access_token, refresh_token }: AuthTokensSuccessResponse,
-    authType,
     signOutSubscription
   ) {
     browserAuthProvider.isAuthenticated = true;
-    browserAuthProvider.authType = authType;
     localStorage.setItem(accessTokenKey, access_token);
     localStorage.setItem(refreshTokenKey, refresh_token);
-    localStorage.setItem(authTypeKey, authType);
 
     if (signOutSubscription) {
       this.signOutSubscription = signOutSubscription;
@@ -34,7 +26,6 @@ const browserAuthProvider: BrowserAuthProvider = {
     browserAuthProvider.isAuthenticated = false;
     localStorage.removeItem(accessTokenKey);
     localStorage.removeItem(refreshTokenKey);
-    localStorage.removeItem(authTypeKey);
     localStorage.removeItem(userDataKey);
 
     if (args?.callback) {
@@ -65,16 +56,6 @@ const browserAuthProvider: BrowserAuthProvider = {
     }
 
     return refreshToken;
-  },
-
-  getAuthType(): AuthType | null {
-    const authType = localStorage.getItem(authTypeKey);
-
-    if (!authType) {
-      return null;
-    }
-
-    return authType as AuthType;
   },
 
   setUserData(userData) {

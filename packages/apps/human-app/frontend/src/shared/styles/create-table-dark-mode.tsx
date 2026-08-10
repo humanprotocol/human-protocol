@@ -41,6 +41,7 @@ export const createTableDarkMode = (colorPalette: ColorPalette) => {
     muiTablePaperProps: {
       sx: {
         boxShadow: 'none',
+        transition: 'none !important',
       },
     },
   };

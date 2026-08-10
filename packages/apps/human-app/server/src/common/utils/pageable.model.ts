@@ -40,6 +40,7 @@ export abstract class PageableDto {
   @IsOptional()
   abstract sort_field?: any;
 }
+
 export abstract class PageableParams {
   @AutoMap()
   page?: number;
@@ -52,6 +53,7 @@ export abstract class PageableParams {
 
   abstract sortField?: any;
 }
+
 export abstract class PageableData {
   @AutoMap()
   page?: number;
@@ -64,6 +66,7 @@ export abstract class PageableData {
 
   abstract sort_field?: any;
 }
+
 export abstract class PageableResponse {
   page: number;
   page_size: number;

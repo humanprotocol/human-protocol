@@ -80,8 +80,7 @@ class ChildOf(BaseUUID, Generic[ParentT]):
                 case InstrumentedAttribute(prop=Relationship(argument=t)) if t is parent_type:
                     return attr_value, parent_type
         raise AttributeError(
-            f"Could not find relationship with parent type"
-            f" {parent_type.__name__} on {cls.__name__}"
+            f"Could not find relationship with parent type {parent_type.__name__} on {cls.__name__}"
         )
 
 

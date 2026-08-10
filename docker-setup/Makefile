@@ -16,15 +16,15 @@ infra-up: check-env-file
 infra-stop:
 	@docker compose --env-file .env.compose.local stop postgres redis minio minio-client
 
+# TODO: Revisit compose-native parallel builds once Docker Compose v5 parallel limits are reliable again.
 build-services: check-env-file
-	@# TODO: Revisit compose-native parallel builds once Docker Compose v5 parallel limits are reliable again.
 	@docker compose --env-file .env.compose.local config --services | \
 		xargs -n $(DOCKER_PARALLEL) docker compose --env-file .env.compose.local build
 	@docker compose --env-file .env.compose.local up --no-start
 
+# TODO: Revisit compose-native parallel builds once Docker Compose v5 parallel limits are reliable again.
 services-up: check-env-file
 	@service_names="$(wordlist 2, $(words $(MAKECMDGOALS)), $(MAKECMDGOALS))"; \
-	@# TODO: Revisit compose-native parallel builds once Docker Compose v5 parallel limits are reliable again.
 	if [ -n "$$service_names" ]; then \
 		printf '%s\n' $$service_names | xargs -n $(DOCKER_PARALLEL) docker compose --env-file .env.compose.local up -d; \
 	else \

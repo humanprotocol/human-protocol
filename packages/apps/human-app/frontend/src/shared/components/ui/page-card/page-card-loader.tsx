@@ -1,26 +1,24 @@
-import { Grid } from '@mui/material';
+import { Stack } from '@mui/material';
+
 import { Loader } from '@/shared/components/ui/loader';
-import { useColorMode } from '@/shared/contexts/color-mode';
-import { commonDarkPageCardStyles, commonPageCardStyles } from './styles';
+import { useIsMobile } from '@/shared/hooks';
+
+import { commonStyles } from './styles';
 import { type CommonProps } from './types';
 
 export function PageCardLoader({ cardMaxWidth = '100%' }: CommonProps) {
-  const { isDarkMode } = useColorMode();
-
-  const commonStyleForTheme = isDarkMode
-    ? commonDarkPageCardStyles
-    : commonPageCardStyles;
+  const isMobile = useIsMobile();
 
   const sx = cardMaxWidth
     ? {
-        ...commonStyleForTheme,
+        ...commonStyles,
         maxWidth: cardMaxWidth,
       }
-    : commonStyleForTheme;
+    : commonStyles;
 
   return (
-    <Grid container sx={sx}>
-      <Loader size={90} />
-    </Grid>
+    <Stack sx={sx}>
+      <Loader size={isMobile ? 54 : 72} />
+    </Stack>
   );
 }

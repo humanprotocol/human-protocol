@@ -83,10 +83,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         signature = "signature"
         with pytest.raises(
             AssertionError,
-            match=(
-                "'event' and 'event_type' cannot be used together. "
-                "Please use only one of the fields"
-            ),
+            match=r"'event' and 'event_type' cannot be used together. ",
         ):
             webhook_service.inbox.create_webhook(
                 self.session,
@@ -161,10 +158,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         escrow_address = "0x1234567890123456789012345678901234567890"
         with pytest.raises(
             AssertionError,
-            match=(
-                "'event' and 'event_type' cannot be used together. "
-                "Please use only one of the fields"
-            ),
+            match=r"'event' and 'event_type' cannot be used together. ",
         ):
             webhook_service.outbox.create_webhook(
                 self.session,

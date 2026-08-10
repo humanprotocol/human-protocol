@@ -6,13 +6,13 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import UnmappedInstanceError
 
 import src.services.cvat as cvat_service
+from src.core.tasks import TaskTypes
 from src.core.types import (
     AssignmentStatuses,
     JobStatuses,
     Networks,
     ProjectStatuses,
     TaskStatuses,
-    TaskTypes,
 )
 from src.db import SessionLocal
 from src.models.cvat import (
@@ -59,11 +59,11 @@ class ServiceIntegrationTest:
         p_id = cvat_service.create_project(
             self.session,
             cvat_id,
-            cvat_cloudstorage_id,
-            job_type,
-            escrow_address,
-            chain_id,
-            bucket_url,
+            cvat_cloudstorage_id=cvat_cloudstorage_id,
+            job_type=job_type,
+            escrow_address=escrow_address,
+            chain_id=chain_id,
+            bucket_url=bucket_url,
         )
 
         project = self.session.query(Project).filter_by(id=p_id).first()
@@ -87,22 +87,22 @@ class ServiceIntegrationTest:
         cvat_service.create_project(
             self.session,
             cvat_id,
-            cvat_cloudstorage_id,
-            job_type,
-            escrow_address,
-            chain_id,
-            bucket_url,
+            cvat_cloudstorage_id=cvat_cloudstorage_id,
+            job_type=job_type,
+            escrow_address=escrow_address,
+            chain_id=chain_id,
+            bucket_url=bucket_url,
         )
         self.session.commit()
 
         cvat_service.create_project(
             self.session,
             cvat_id,
-            cvat_cloudstorage_id,
-            job_type,
-            escrow_address,
-            chain_id,
-            bucket_url,
+            cvat_cloudstorage_id=cvat_cloudstorage_id,
+            job_type=job_type,
+            escrow_address=escrow_address,
+            chain_id=chain_id,
+            bucket_url=bucket_url,
         )
         with pytest.raises(IntegrityError):
             self.session.commit()
@@ -116,11 +116,11 @@ class ServiceIntegrationTest:
         cvat_service.create_project(
             self.session,
             None,
-            cvat_cloudstorage_id,
-            job_type,
-            escrow_address,
-            chain_id,
-            bucket_url,
+            cvat_cloudstorage_id=cvat_cloudstorage_id,
+            job_type=job_type,
+            escrow_address=escrow_address,
+            chain_id=chain_id,
+            bucket_url=bucket_url,
         )
         with pytest.raises(IntegrityError):
             self.session.commit()
@@ -134,11 +134,11 @@ class ServiceIntegrationTest:
         cvat_service.create_project(
             self.session,
             cvat_id,
-            None,
-            job_type,
-            escrow_address,
-            chain_id,
-            bucket_url,
+            cvat_cloudstorage_id=None,
+            job_type=job_type,
+            escrow_address=escrow_address,
+            chain_id=chain_id,
+            bucket_url=bucket_url,
         )
         with pytest.raises(IntegrityError):
             self.session.commit()
@@ -152,11 +152,11 @@ class ServiceIntegrationTest:
         cvat_service.create_project(
             self.session,
             cvat_id,
-            cvat_cloudstorage_id,
-            None,
-            escrow_address,
-            chain_id,
-            bucket_url,
+            cvat_cloudstorage_id=cvat_cloudstorage_id,
+            job_type=None,
+            escrow_address=escrow_address,
+            chain_id=chain_id,
+            bucket_url=bucket_url,
         )
         with pytest.raises(IntegrityError):
             self.session.commit()
@@ -170,11 +170,11 @@ class ServiceIntegrationTest:
         cvat_service.create_project(
             self.session,
             cvat_id,
-            cvat_cloudstorage_id,
-            job_type,
-            None,
-            chain_id,
-            bucket_url,
+            cvat_cloudstorage_id=cvat_cloudstorage_id,
+            job_type=job_type,
+            escrow_address=None,
+            chain_id=chain_id,
+            bucket_url=bucket_url,
         )
         with pytest.raises(IntegrityError):
             self.session.commit()
@@ -189,11 +189,11 @@ class ServiceIntegrationTest:
         cvat_service.create_project(
             self.session,
             cvat_id,
-            cvat_cloudstorage_id,
-            job_type,
-            escrow_address,
-            None,
-            bucket_url,
+            cvat_cloudstorage_id=cvat_cloudstorage_id,
+            job_type=job_type,
+            escrow_address=escrow_address,
+            chain_id=None,
+            bucket_url=bucket_url,
         )
         with pytest.raises(IntegrityError):
             self.session.commit()
@@ -207,11 +207,11 @@ class ServiceIntegrationTest:
         cvat_service.create_project(
             self.session,
             cvat_id,
-            cvat_cloudstorage_id,
-            job_type,
-            escrow_address,
-            chain_id,
-            None,
+            cvat_cloudstorage_id=cvat_cloudstorage_id,
+            job_type=job_type,
+            escrow_address=escrow_address,
+            chain_id=chain_id,
+            bucket_url=None,
         )
         with pytest.raises(IntegrityError):
             self.session.commit()
@@ -226,11 +226,11 @@ class ServiceIntegrationTest:
         p_id = cvat_service.create_project(
             self.session,
             cvat_id,
-            cvat_cloudstorage_id,
-            job_type,
-            escrow_address,
-            chain_id,
-            bucket_url,
+            cvat_cloudstorage_id=cvat_cloudstorage_id,
+            job_type=job_type,
+            escrow_address=escrow_address,
+            chain_id=chain_id,
+            bucket_url=bucket_url,
             status=ProjectStatuses.annotation,
         )
 
@@ -276,11 +276,11 @@ class ServiceIntegrationTest:
         p_id = cvat_service.create_project(
             self.session,
             cvat_id,
-            cvat_cloudstorage_id,
-            job_type,
-            escrow_address,
-            chain_id,
-            bucket_url,
+            cvat_cloudstorage_id=cvat_cloudstorage_id,
+            job_type=job_type,
+            escrow_address=escrow_address,
+            chain_id=chain_id,
+            bucket_url=bucket_url,
             status=ProjectStatuses.annotation,
         )
 
@@ -309,11 +309,11 @@ class ServiceIntegrationTest:
         p_id = cvat_service.create_project(
             self.session,
             cvat_id,
-            cvat_cloudstorage_id,
-            job_type,
-            escrow_address,
-            chain_id,
-            bucket_url,
+            cvat_cloudstorage_id=cvat_cloudstorage_id,
+            job_type=job_type,
+            escrow_address=escrow_address,
+            chain_id=chain_id,
+            bucket_url=bucket_url,
             status=ProjectStatuses.annotation,
         )
 
@@ -325,11 +325,11 @@ class ServiceIntegrationTest:
         cvat_service.create_project(
             self.session,
             cvat_id,
-            cvat_cloudstorage_id,
-            job_type,
-            escrow_address,
-            chain_id,
-            bucket_url,
+            cvat_cloudstorage_id=cvat_cloudstorage_id,
+            job_type=job_type,
+            escrow_address=escrow_address,
+            chain_id=chain_id,
+            bucket_url=bucket_url,
             status=ProjectStatuses.annotation,
         )
 
@@ -341,11 +341,11 @@ class ServiceIntegrationTest:
         cvat_service.create_project(
             self.session,
             cvat_id,
-            cvat_cloudstorage_id,
-            job_type,
-            escrow_address,
-            chain_id,
-            bucket_url,
+            cvat_cloudstorage_id=cvat_cloudstorage_id,
+            job_type=job_type,
+            escrow_address=escrow_address,
+            chain_id=chain_id,
+            bucket_url=bucket_url,
             status=ProjectStatuses.annotation,
         )
 
@@ -366,7 +366,7 @@ class ServiceIntegrationTest:
     def test_can_get_free_job_if_exists(self):
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
 
-        (cvat_project, cvat_task, cvat_job) = create_project_task_and_job(
+        (cvat_project, _, cvat_job) = create_project_task_and_job(
             self.session, escrow_address, cvat_id=1
         )
         chain_id = cvat_project.chain_id
@@ -384,7 +384,7 @@ class ServiceIntegrationTest:
     def test_cannot_get_free_job_if_all_completed_and_not_project_checked_yet(self):
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
 
-        (cvat_project, cvat_task, cvat_job) = create_project_task_and_job(
+        (cvat_project, _, cvat_job) = create_project_task_and_job(
             self.session, escrow_address, cvat_id=1
         )
         chain_id = cvat_project.chain_id
@@ -494,11 +494,11 @@ class ServiceIntegrationTest:
         p_id = cvat_service.create_project(
             self.session,
             cvat_id,
-            cvat_cloudstorage_id,
-            job_type,
-            escrow_address,
-            chain_id,
-            bucket_url,
+            cvat_cloudstorage_id=cvat_cloudstorage_id,
+            job_type=job_type,
+            escrow_address=escrow_address,
+            chain_id=chain_id,
+            bucket_url=bucket_url,
         )
 
         cvat_service.update_project_status(self.session, p_id, ProjectStatuses.completed)

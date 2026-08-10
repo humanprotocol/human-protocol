@@ -30,22 +30,15 @@ export function Input({
       render={({ field, fieldState }) => (
         <TextField
           {...field}
-          FormHelperTextProps={{ component: 'div' }}
-          InputProps={
-            mask
-              ? {
-                  inputComponent: mask as any,
-                }
-              : undefined
-          }
+          variant="outlined"
           autoComplete={autoComplete ?? name}
-          error={Boolean(fieldState.error)}
+          error={!!fieldState.error}
           fullWidth
           helperText={
             <Typography
-              color={customError ? undefined : colorPalette.error.main}
               component="div"
               variant="helperText"
+              sx={{ color: customError ? undefined : colorPalette.error.main }}
             >
               {customError ? customError : fieldState.error?.message}
             </Typography>
@@ -56,14 +49,23 @@ export function Input({
             input: {
               '&:-webkit-autofill': {
                 WebkitBoxShadow: `0 0 0 30px transparent inset !important`,
-                WebkitTextFillColor: `${colorPalette.text.primary} !important`,
                 transition:
                   'background-color 5000s ease-in-out 0s, color 5000s ease-in-out 0s',
               },
             },
           }}
-          variant="outlined"
           {...rest}
+          slotProps={{
+            ...rest.slotProps,
+            formHelperText: {
+              component: 'div',
+              ...rest.slotProps?.formHelperText,
+            },
+            input: {
+              ...rest.slotProps?.input,
+              ...(mask ? { inputComponent: mask as any } : {}),
+            },
+          }}
         />
       )}
     />

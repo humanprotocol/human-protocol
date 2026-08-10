@@ -30,9 +30,9 @@ export function HCaptchaForm({ name, error }: Readonly<HCaptchaFormProps>) {
     <div>
       <CustomHCaptcha onVerify={setCaptchaValue} ref={customCaptchaRef} />
       <Typography
-        color={colorPalette.error.main}
         component="div"
         variant="helperText"
+        sx={{ color: colorPalette.error.main }}
       >
         {formState.errors[name]?.message}
       </Typography>

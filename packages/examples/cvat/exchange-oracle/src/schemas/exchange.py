@@ -1,11 +1,10 @@
 from datetime import datetime
-from enum import Enum
 
 from pydantic import BaseModel, Field
-from strenum import StrEnum  # added in python 3.11
 
-from src.core.types import Networks, TaskTypes
-from src.utils.enums import BetterEnumMeta
+from src.core.tasks import TaskTypes
+from src.core.types import Networks
+from src.utils.enums import BetterEnumMeta, StrEnum
 
 
 class JobStatuses(StrEnum, metaclass=BetterEnumMeta):
@@ -41,7 +40,7 @@ class AssignmentIdRequest(BaseModel):
     assignment_id: str
 
 
-class AssignmentStatuses(str, Enum, metaclass=BetterEnumMeta):
+class AssignmentStatuses(StrEnum, metaclass=BetterEnumMeta):
     active = "active"
     validation = "validation"
     completed = "completed"

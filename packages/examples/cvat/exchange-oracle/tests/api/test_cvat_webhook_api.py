@@ -1,3 +1,4 @@
+import json
 from datetime import timedelta
 
 from fastapi.testclient import TestClient
@@ -22,10 +23,14 @@ PING_EVENT_DATA = {
 
 def test_ping_incoming_webhook(client: TestClient) -> None:
     # Should respond with 200 status to a "ping" event
+    body = json.dumps(PING_EVENT_DATA).encode()
     response = client.post(
         "/cvat-webhook",
-        headers={"X-Signature-256": generate_cvat_signature(PING_EVENT_DATA)},
-        json=PING_EVENT_DATA,
+        headers={
+            "X-Signature-256": generate_cvat_signature(body),
+            "Content-Type": "application/json",
+        },
+        content=body,
     )
 
     assert response.status_code == 200
@@ -59,10 +64,14 @@ def test_can_accept_incoming_job_update_webhook(client: TestClient) -> None:
         "webhook_id": 1,
     }
 
+    body = json.dumps(data).encode()
     response = client.post(
         "/cvat-webhook",
-        headers={"X-Signature-256": generate_cvat_signature(data)},
-        json=data,
+        headers={
+            "X-Signature-256": generate_cvat_signature(body),
+            "Content-Type": "application/json",
+        },
+        content=body,
     )
 
     assert response.status_code == 200

@@ -209,7 +209,7 @@ def get_task_labels(task_id: int) -> list[str]:
             project_id = task.project_id
 
             return [
-                cast(models.ILabel, label).name
+                cast("models.ILabel", label).name
                 for label in get_paginated_collection(
                     api_client.labels_api.list_endpoint,
                     **({"project_id": project_id} if project_id else {"task_id": task_id}),

@@ -2,6 +2,7 @@ import KVStoreABI from '@human-protocol/core/abis/KVStore.json';
 import { KVStoreKeys, NETWORKS } from '@human-protocol/sdk';
 import { LoadingButton } from '@mui/lab';
 import {
+  Alert,
   Box,
   Button,
   Checkbox,
@@ -142,6 +143,8 @@ export const FiatPayForm = ({
     data: jobLauncherFee,
     error,
     isError,
+    isFetching: isFeeFetching,
+    refetch: refetchJobLauncherFee,
   } = useReadContract({
     address: NETWORKS[jobRequest.chainId!]?.kvstoreAddress as Address,
     abi: KVStoreABI,
@@ -276,7 +279,9 @@ export const FiatPayForm = ({
 
   return (
     <Box sx={{ width: '100%' }}>
-      {loadingInitialData ? (
+      {loadingInitialData ||
+      !jobLauncherAddress ||
+      (!isError && (isFeeFetching || jobLauncherFee == null)) ? (
         <Box
           display="flex"
           justifyContent="center"
@@ -284,6 +289,16 @@ export const FiatPayForm = ({
           minHeight={400}
         >
           <CircularProgress />
+        </Box>
+      ) : isError ? (
+        <Box textAlign="center" minHeight={400}>
+          <Alert severity="error" sx={{ mb: 2 }}>
+            Unable to load the job launcher fee from MetaMask or the public
+            network provider.
+          </Alert>
+          <Button variant="contained" onClick={() => refetchJobLauncherFee()}>
+            Try again
+          </Button>
         </Box>
       ) : (
         <Box>
@@ -522,6 +537,8 @@ export const FiatPayForm = ({
                   !amount ||
                   (!payWithAccountBalance && !selectedCard) ||
                   hasError ||
+                  isFeeFetching ||
+                  jobLauncherFee == null ||
                   !tokenSymbol
                 }
               >

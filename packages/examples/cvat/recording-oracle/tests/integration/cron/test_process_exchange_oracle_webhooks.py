@@ -4,11 +4,7 @@ from datetime import datetime, timezone
 from unittest.mock import MagicMock, call, patch
 
 from sqlalchemy.sql import select
-from web3 import Web3
-from web3.middleware import SignAndSendRawMiddlewareBuilder
-from web3.providers.rpc import HTTPProvider
 
-from src.core.config import Config
 from src.core.storage import compose_data_bucket_prefix, compose_results_bucket_prefix
 from src.core.types import (
     ExchangeOracleEventTypes,
@@ -26,22 +22,12 @@ from src.models.webhook import Webhook
 from src.services.cloud import StorageClient
 from src.services.webhook import OracleWebhookDirectionTags
 
-from tests.utils.constants import DEFAULT_GAS_PAYER_PRIV, ESCROW_ADDRESS, SIGNATURE
-from tests.utils.setup_escrow import create_escrow, fund_escrow, setup_escrow
+from tests.utils.constants import ESCROW_ADDRESS, SIGNATURE
 
 
 class ServiceIntegrationTest(unittest.TestCase):
     def setUp(self):
         self.session = SessionLocal()
-        self.w3 = Web3(HTTPProvider(Config.localhost.rpc_api))
-
-        self.gas_payer = self.w3.eth.account.from_key(DEFAULT_GAS_PAYER_PRIV)
-        self.w3.middleware_onion.inject(
-            SignAndSendRawMiddlewareBuilder.build(DEFAULT_GAS_PAYER_PRIV),
-            "SignAndSendRawMiddlewareBuilder",
-            layer=0,
-        )
-        self.w3.eth.default_account = self.gas_payer.address
 
     def tearDown(self):
         self.session.close()
@@ -60,9 +46,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         )
 
     def test_process_exchange_oracle_webhook(self):
-        escrow_address = create_escrow(self.w3)
-        fund_escrow(self.w3, escrow_address)
-        setup_escrow(self.w3, escrow_address)
+        escrow_address = ESCROW_ADDRESS
 
         webhook = self.make_webhook(escrow_address)
         self.session.add(webhook)
@@ -175,7 +159,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         assert updated_webhook.attempts == 1
 
     def test_process_recording_oracle_webhooks_invalid_escrow_balance(self):
-        escrow_address = create_escrow(self.w3)
+        escrow_address = ESCROW_ADDRESS
 
         webhook = self.make_webhook(escrow_address)
 
@@ -195,16 +179,21 @@ class ServiceIntegrationTest(unittest.TestCase):
         assert updated_webhook.attempts == 1
 
     def test_process_job_launcher_webhooks_invalid_manifest_url(self):
-        escrow_address = create_escrow(self.w3)
-        fund_escrow(self.w3, escrow_address)
-        setup_escrow(self.w3, escrow_address, manifest="http://localhost/invalid/url")
+        escrow_address = ESCROW_ADDRESS
 
         webhook = self.make_webhook(escrow_address)
 
         self.session.add(webhook)
         self.session.commit()
 
-        process_incoming_exchange_oracle_webhooks()
+        with (
+            patch("src.crons.process_exchange_oracle_webhooks.validate_escrow"),
+            patch(
+                "src.crons.process_exchange_oracle_webhooks.validate_results",
+                side_effect=Exception("failed to download manifest"),
+            ),
+        ):
+            process_incoming_exchange_oracle_webhooks()
 
         updated_webhook = (
             self.session.execute(select(Webhook).where(Webhook.id == webhook.id)).scalars().first()

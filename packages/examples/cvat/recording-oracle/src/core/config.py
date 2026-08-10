@@ -5,6 +5,7 @@ import inspect
 import os
 from collections.abc import Iterable
 from os import getenv
+from pathlib import Path
 from typing import ClassVar
 
 from attrs.converters import to_bool
@@ -16,7 +17,21 @@ from web3.providers.rpc import HTTPProvider
 from src.utils.logging import parse_log_level
 from src.utils.net import is_ipv4
 
+
+def find_default_dotenv() -> Path | None:
+    # Check the default location in the project
+    dotenv_path = Path(__file__).parents[1] / ".env"
+    if dotenv_path.is_file():
+        return str(dotenv_path)
+    else:
+        return None
+
+
 dotenv_path = getenv("DOTENV_PATH", None)
+
+if dotenv_path is None:
+    dotenv_path = find_default_dotenv()
+
 if dotenv_path and not os.path.exists(dotenv_path):  # noqa: PTH110
     raise FileNotFoundError(dotenv_path)
 

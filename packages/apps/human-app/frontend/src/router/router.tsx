@@ -1,40 +1,11 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import {
-  protectedRoutes,
-  walletConnectRoutes,
-  unprotectedRoutes,
-  web3ProtectedRoutes,
-} from '@/router/routes';
+
+import { protectedRoutes, unprotectedRoutes } from '@/router/routes';
 import { RequireAuth } from '@/modules/auth/providers/require-auth';
-import { RequireWalletConnect } from '@/shared/contexts/wallet-connect';
-import { RequireWeb3Auth } from '@/modules/auth-web3/providers/require-web3-auth';
-import { DrawerNavigation } from '@/router/components/layout/protected/drawer-navigation';
-import { operatorDrawerBottomMenuItems } from '@/router/components/drawer-menu-items/drawer-menu-items-operator';
-import { browserAuthProvider } from '@/shared/contexts/browser-auth-provider';
-import { useAuth } from '@/modules/auth/hooks/use-auth';
-import { UserStatsDrawer } from '@/modules/worker/hcaptcha-labeling';
 import { routerPaths } from './router-paths';
-import {
-  ProtectedLayout,
-  UnprotectedLayout,
-  workerDrawerBottomMenuItems,
-  workerDrawerTopMenuItems,
-} from './components';
-import { RequireStake } from '@/modules/worker/providers/require-stake';
-import { useUiConfig } from '@/shared/providers/ui-config-provider';
+import { ProtectedLayout, UnprotectedLayout } from './components';
 
 export function Router() {
-  const { user } = useAuth();
-  const { uiConfig } = useUiConfig();
-
-  const handleSignOut = () => {
-    browserAuthProvider.signOut({
-      callback: () => {
-        window.location.reload();
-      },
-    });
-  };
-
   return (
     <Routes>
       <Route element={<UnprotectedLayout />}>
@@ -42,42 +13,12 @@ export function Router() {
           <Route element={route.element} key={route.path} path={route.path} />
         ))}
       </Route>
-      <Route element={<UnprotectedLayout />}>
-        {walletConnectRoutes.map((route) => (
-          <Route
-            element={
-              <RequireWalletConnect>
-                <>{route.element}</>
-              </RequireWalletConnect>
-            }
-            key={route.path}
-            path={route.path}
-          />
-        ))}
-      </Route>
-      {protectedRoutes.map(({ routerProps, pageHeaderProps }) => {
+      {protectedRoutes.map(({ routerProps }) => {
         return (
           <Route
             element={
               <RequireAuth>
-                <RequireStake>
-                  <ProtectedLayout
-                    pageHeaderProps={pageHeaderProps}
-                    renderDrawer={(open, setDrawerOpen) => (
-                      <DrawerNavigation
-                        bottomMenuItems={workerDrawerBottomMenuItems}
-                        open={open}
-                        setDrawerOpen={setDrawerOpen}
-                        signOut={handleSignOut}
-                        topMenuItems={workerDrawerTopMenuItems(user, uiConfig)}
-                      />
-                    )}
-                    renderHCaptchaStatisticsDrawer={(isOpen) => (
-                      <UserStatsDrawer isOpen={isOpen} />
-                    )}
-                    renderGovernanceBanner
-                  />
-                </RequireStake>
+                <ProtectedLayout />
               </RequireAuth>
             }
             key={routerProps.path}
@@ -87,31 +28,6 @@ export function Router() {
           </Route>
         );
       })}
-      {web3ProtectedRoutes.map(({ routerProps, pageHeaderProps }) => (
-        <Route
-          element={
-            <RequireWalletConnect>
-              <RequireWeb3Auth>
-                <ProtectedLayout
-                  pageHeaderProps={pageHeaderProps}
-                  renderDrawer={(open, setDrawerOpen) => (
-                    <DrawerNavigation
-                      bottomMenuItems={operatorDrawerBottomMenuItems}
-                      open={open}
-                      setDrawerOpen={setDrawerOpen}
-                      signOut={handleSignOut}
-                    />
-                  )}
-                />
-              </RequireWeb3Auth>
-            </RequireWalletConnect>
-          }
-          key={routerProps.path}
-          path={routerProps.path}
-        >
-          <Route element={routerProps.element} path={routerProps.path} />
-        </Route>
-      ))}
 
       <Route element={<Navigate to={routerPaths.homePage} />} path="*" />
     </Routes>

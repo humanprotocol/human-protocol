@@ -17,11 +17,14 @@ export function GlobalModal() {
       open={open}
       onClose={!disableClose ? closeModal : undefined}
       onTransitionExited={onTransitionExited}
-      PaperProps={{
-        sx: {
-          flex: 1,
-          maxWidth: '800px',
-          position: 'relative',
+      sx={{ zIndex: (theme) => theme.zIndex.modal }}
+      slotProps={{
+        paper: {
+          sx: {
+            flex: 1,
+            maxWidth: '800px',
+            position: 'relative',
+          },
         },
       }}
     >

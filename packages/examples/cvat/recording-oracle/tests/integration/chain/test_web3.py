@@ -1,3 +1,4 @@
+import re
 import unittest
 from unittest.mock import patch
 
@@ -56,7 +57,9 @@ class ServiceIntegrationTest(unittest.TestCase):
         assert w3.manager._provider.endpoint_uri == LocalhostConfig.rpc_api
 
     def test_get_web3_invalid_chain_id(self):
-        with pytest.raises(ValueError, match="1234 is not in available list of networks."):
+        with pytest.raises(
+            ValueError, match=re.escape("1234 is not in available list of networks.")
+        ):
             get_web3(1234)
 
     def test_sign_message_polygon(self):
@@ -84,7 +87,9 @@ class ServiceIntegrationTest(unittest.TestCase):
         assert signed_message == SIGNATURE
 
     def test_sign_message_invalid_chain_id(self):
-        with pytest.raises(ValueError, match="1234 is not in available list of networks."):
+        with pytest.raises(
+            ValueError, match=re.escape("1234 is not in available list of networks.")
+        ):
             sign_message(1234, "message")
 
     def test_recover_signer(self):

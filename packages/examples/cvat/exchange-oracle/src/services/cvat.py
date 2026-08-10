@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql.functions import coalesce
 
 from src.core.config import Config
+from src.core.tasks import TaskTypes
 from src.core.types import (
     AssignmentStatuses,
     CvatWebhookStatuses,
@@ -22,7 +23,6 @@ from src.core.types import (
     JobStatuses,
     ProjectStatuses,
     TaskStatuses,
-    TaskTypes,
 )
 from src.db import Base, ChildOf
 from src.db import engine as db_engine
@@ -54,6 +54,7 @@ def batched(iterable: Iterable, *, batch_size: int) -> Iterable[Any]:
 def create_project(
     session: Session,
     cvat_id: int,
+    *,
     cvat_cloudstorage_id: int,
     job_type: str,
     escrow_address: str,
@@ -61,6 +62,7 @@ def create_project(
     bucket_url: str,
     cvat_webhook_id: int | None = None,
     status: ProjectStatuses = ProjectStatuses.creation,
+    assignment_bounty: str | None = None,
 ) -> str:
     """
     Create a project from CVAT.
@@ -76,6 +78,7 @@ def create_project(
         chain_id=chain_id,
         bucket_url=bucket_url,
         cvat_webhook_id=cvat_webhook_id,
+        assignment_bounty=assignment_bounty,
     )
 
     session.add(project)
@@ -789,9 +792,9 @@ def put_user(session: Session, wallet_address: str, cvat_email: str, cvat_id: in
     """
     Bind a CVAT username to a HUMAN App user
     """
-    assert not (
-        bool(cvat_email) ^ bool(cvat_id)
-    ), "cvat_email and cvat_id cannot be used separately"
+    assert not (bool(cvat_email) ^ bool(cvat_id)), (
+        "cvat_email and cvat_id cannot be used separately"
+    )
 
     user = User(wallet_address=wallet_address, cvat_email=cvat_email, cvat_id=cvat_id)
 
@@ -1181,9 +1184,9 @@ class CvatWebhookQueue:
         limit: int = 10,
         for_update: bool | ForUpdateParams = False,
     ) -> list[CvatWebhook]:
-        assert not (
-            event_type_in and event_type_not_in
-        ), f"{event_type_in} and {event_type_not_in} cannot be used together"
+        assert not (event_type_in and event_type_not_in), (
+            f"{event_type_in} and {event_type_not_in} cannot be used together"
+        )
 
         return (
             _maybe_for_update(session.query(CvatWebhook), enable=for_update)

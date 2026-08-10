@@ -1,7 +1,6 @@
 import datetime
 import uuid
 from collections.abc import Sequence
-from enum import Enum
 
 from attrs import define
 from sqlalchemy import case, update
@@ -14,11 +13,11 @@ from src.core.types import OracleWebhookStatuses, OracleWebhookTypes
 from src.db.utils import ForUpdateParams
 from src.db.utils import maybe_for_update as _maybe_for_update
 from src.models.webhook import Webhook
-from src.utils.enums import BetterEnumMeta
+from src.utils.enums import BetterEnumMeta, StrEnum
 from src.utils.time import utcnow
 
 
-class OracleWebhookDirectionTags(str, Enum, metaclass=BetterEnumMeta):
+class OracleWebhookDirectionTags(StrEnum, metaclass=BetterEnumMeta):
     incoming = "incoming"
     outgoing = "outgoing"
 
@@ -43,9 +42,9 @@ class OracleWebhookQueue:
         Creates a webhook in a database
         """
         assert not event_data or event_type, "'event_data' requires 'event_type'"
-        assert bool(event) ^ bool(
-            event_type
-        ), "'event' and 'event_type' cannot be used together. Please use only one of the fields"
+        assert bool(event) ^ bool(event_type), (
+            "'event' and 'event_type' cannot be used together. Please use only one of the fields"
+        )
 
         if event_type:
             if self.direction == OracleWebhookDirectionTags.incoming:
@@ -97,9 +96,9 @@ class OracleWebhookQueue:
         limit: int = 10,
         for_update: bool | ForUpdateParams = False,
     ) -> list[Webhook]:
-        assert not (
-            event_type_in and event_type_not_in
-        ), f"{event_type_in} and {event_type_not_in} cannot be used together"
+        assert not (event_type_in and event_type_not_in), (
+            f"{event_type_in} and {event_type_not_in} cannot be used together"
+        )
 
         return (
             _maybe_for_update(session.query(Webhook), enable=for_update)

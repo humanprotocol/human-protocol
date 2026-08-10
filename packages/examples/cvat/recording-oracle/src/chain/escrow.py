@@ -1,13 +1,33 @@
 import json
+from decimal import Decimal
 
+import httpx2
 from human_protocol_sdk.constants import ChainId, Status
 from human_protocol_sdk.encryption import Encryption, EncryptionUtils
 from human_protocol_sdk.escrow import EscrowClient, EscrowData, EscrowUtils
-from human_protocol_sdk.storage import StorageUtils
+from human_protocol_sdk.utils import validate_url
 
-from src.chain.web3 import get_web3
+from src.chain.web3 import get_token_decimals, get_web3
 from src.core.config import Config
 from src.core.types import OracleWebhookTypes
+
+
+class ManifestNotAvailableError(Exception):
+    """Raised when the escrow manifest cannot be retrieved."""
+
+
+def _get_manifest_content(manifest: str) -> str:
+    if validate_url(manifest):
+        try:
+            response = httpx2.get(manifest, follow_redirects=True)
+            response.raise_for_status()
+        except Exception as e:
+            raise ManifestNotAvailableError(
+                f"failed to download manifest from {manifest}: {e}"
+            ) from e
+        return response.text
+
+    return manifest
 
 
 def get_escrow(chain_id: int, escrow_address: str) -> EscrowData:
@@ -46,7 +66,7 @@ def validate_escrow(
 def get_escrow_manifest(chain_id: int, escrow_address: str) -> dict:
     escrow = get_escrow(chain_id, escrow_address)
 
-    manifest_content = StorageUtils.download_file_from_url(escrow.manifest).decode("utf-8")
+    manifest_content = _get_manifest_content(escrow.manifest)
 
     if EncryptionUtils.is_encrypted(manifest_content):
         encryption = Encryption(
@@ -58,11 +78,36 @@ def get_escrow_manifest(chain_id: int, escrow_address: str) -> dict:
     return json.loads(manifest_content)
 
 
-def store_results(chain_id: int, escrow_address: str, url: str, hash: str) -> None:
+def get_escrow_fund_token_decimals(chain_id: int, escrow_address: str) -> int:
+    """
+    ERC-20 decimals: divide the raw token amount by 10**decimals for the user representation
+    (https://eips.ethereum.org/EIPS/eip-20).
+    """
+
+    escrow = get_escrow(chain_id, escrow_address)
+    return get_token_decimals(chain_id, escrow.token)
+
+
+def get_raw_remaining_escrow_funds(chain_id: int, escrow_address: str) -> int:
     web3 = get_web3(chain_id)
     escrow_client = EscrowClient(web3)
 
-    escrow_client.store_results(escrow_address, url, hash)
+    return escrow_client.get_remaining_funds(escrow_address)
+
+
+def get_remaining_escrow_funds(chain_id: int, escrow_address: str) -> Decimal:
+    remaining_funds = get_raw_remaining_escrow_funds(chain_id, escrow_address)
+    token_decimals = get_escrow_fund_token_decimals(chain_id, escrow_address)
+    return Decimal(remaining_funds) / Decimal(10**token_decimals)
+
+
+def store_results(
+    chain_id: int, escrow_address: str, url: str, hash: str, funds_to_reserve: int | None = None
+) -> None:
+    web3 = get_web3(chain_id)
+    escrow_client = EscrowClient(web3)
+
+    escrow_client.store_results(escrow_address, url, hash, funds_to_reserve=funds_to_reserve)
 
 
 def get_available_webhook_types(

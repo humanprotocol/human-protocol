@@ -1,15 +1,13 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { HttpService } from '@nestjs/axios';
-import { ExchangeOracleGateway } from '../exchange-oracle.gateway';
-import {
-  statisticsExchangeOracleUrl,
-  generalUserStatsCommandFixture,
-  oracleStatsCommandFixture,
-} from '../../../modules/statistics/spec/statistics.fixtures';
-import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
+import { AutomapperModule } from '@automapper/nestjs';
+import { HttpService } from '@nestjs/axios';
+import { GoneException, HttpException } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
+import { AxiosResponse } from 'axios';
 import nock, { RequestBodyMatcher } from 'nock';
 import { of, throwError } from 'rxjs';
+import { HttpMethod } from '../../../common/enums/http-method';
+import { ResignJobData } from '../../../modules/job-assignment/model/job-assignment.model';
 import {
   jobAssignmentCommandFixture,
   jobAssignmentDataFixture,
@@ -19,26 +17,28 @@ import {
   jobsFetchParamsDataFixtureAsString,
   workerRegisterUrl,
 } from '../../../modules/job-assignment/spec/job-assignment.fixtures';
-import { ExchangeOracleProfile } from '../exchange-oracle.mapper.profile';
 import {
-  jobsDiscoveryParamsCommandFixture,
-  paramsDataFixture,
-  paramsDataFixtureAsString,
-  responseFixture,
-} from '../../../modules/jobs-discovery/spec/jobs-discovery.fixtures';
-import { GoneException, HttpException } from '@nestjs/common';
-import { HttpMethod } from '../../../common/enums/http-method';
-import { KvStoreGateway } from '../../kv-store/kv-store.gateway';
-import { EscrowUtilsGateway } from '../../escrow/escrow-utils-gateway.service';
-import { ResignJobData } from '../../../modules/job-assignment/model/job-assignment.model';
-import { JobsDiscoveryParamsData } from '../../../modules/jobs-discovery/model/jobs-discovery.model';
-import { AxiosResponse } from 'axios';
+  generalUserStatsCommandFixture,
+  oracleStatsCommandFixture,
+  statisticsExchangeOracleUrl,
+} from '../../../modules/statistics/spec/statistics.fixtures';
 import { RegistrationInExchangeOracleData } from '../../../modules/user-worker/model/worker-registration.model';
 import {
   registerWorkerCommandFixture,
   registerWorkerDataFixture,
   responseWorkerFixture,
 } from '../../../modules/user-worker/spec/worker.fixtures';
+import { EscrowUtilsGateway } from '../../escrow/escrow-utils-gateway.service';
+import { KvStoreGateway } from '../../kv-store/kv-store.gateway';
+import { ExchangeOracleGateway } from '../exchange-oracle.gateway';
+import { ExchangeOracleProfile } from '../exchange-oracle.mapper.profile';
+import { FetchJobsParamsData } from '../model/exchange-oracle.model';
+import {
+  fetchJobsCommandFixture,
+  paramsDataFixture,
+  paramsDataFixtureAsString,
+  responseFixture,
+} from './exchange-oracle.fixtures';
 
 describe('ExchangeOracleApiGateway', () => {
   let gateway: ExchangeOracleGateway;
@@ -232,8 +232,8 @@ describe('ExchangeOracleApiGateway', () => {
           config: {},
         } as AxiosResponse),
       );
-      const command = jobsDiscoveryParamsCommandFixture;
-      const expectedMappedData: JobsDiscoveryParamsData = paramsDataFixture;
+      const command = fetchJobsCommandFixture;
+      const expectedMappedData: FetchJobsParamsData = paramsDataFixture;
       nock(jobAssignmentOracleUrl)
         .get(`/assignment${paramsDataFixtureAsString}`)
         .reply(200, responseFixture);

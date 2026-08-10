@@ -75,6 +75,8 @@ import {
   GetJobsDto,
   JobDetailsDto,
   JobListDto,
+  JobQuickLaunchDto,
+  JobUnknownManifestDto,
 } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
@@ -269,6 +271,41 @@ export class JobService {
     jobEntity = await this.jobRepository.updateOne(jobEntity);
 
     return jobEntity.id;
+  }
+
+  public async createJobWithUnknownManifest(
+    user: UserEntity,
+    dto: JobUnknownManifestDto,
+  ): Promise<number> {
+    const { chainId, requestType, manifest } = dto;
+    let { reputationOracle, exchangeOracle, recordingOracle } = dto;
+
+    this.web3Service.validateChainId(chainId);
+
+    if (!reputationOracle || !exchangeOracle || !recordingOracle) {
+      const defaultOracles = await this.getDefaultOracles(chainId, requestType);
+      reputationOracle = reputationOracle ?? defaultOracles.reputationOracle;
+      exchangeOracle = exchangeOracle ?? defaultOracles.exchangeOracle;
+      recordingOracle = recordingOracle ?? defaultOracles.recordingOracle;
+    }
+
+    const { url, hash } = await this.manifestService.uploadManifest(
+      chainId,
+      manifest,
+      [exchangeOracle, reputationOracle, recordingOracle],
+    );
+
+    const { manifest: _manifest, ...jobDto } = dto;
+    const quickLaunchDto: JobQuickLaunchDto = {
+      ...jobDto,
+      reputationOracle,
+      exchangeOracle,
+      recordingOracle,
+      manifestUrl: url,
+      manifestHash: hash,
+    };
+
+    return this.createJob(user, dto.requestType, quickLaunchDto);
   }
 
   private async getDefaultOracles(

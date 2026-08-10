@@ -1,14 +1,15 @@
 import { useState } from 'react';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import { Button, MenuList, ListItemButton, Popover } from '@mui/material';
-import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useModal } from '@/shared/contexts/modal-context';
+
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { TopNotificationType, useNotification } from '@/shared/hooks';
 import { useResignJobMutation } from '../my-jobs/hooks';
 import { type MyJob } from '../schemas';
-import { ReportAbuseModal } from './report-abuse-modal';
+import { useColorMode } from '@/shared/contexts/color-mode/use-color-mode';
+import { useMyJobsFilterStore } from '../hooks';
+import { ReportAbuseDialog } from './report-abuse-dialog';
 
 interface MoreButtonProps {
   job: MyJob;
@@ -17,12 +18,15 @@ interface MoreButtonProps {
 
 export function MoreButton({ job, isDisabled }: MoreButtonProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
-  const { address: oracleAddress } = useParams<{ address: string }>();
-  const { mutateAsync: rejectTaskMutation } = useResignJobMutation();
-  const { openModal, closeModal } = useModal();
-  const isMobile = useIsMobile();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const { colorPalette } = useColorMode();
   const { t } = useTranslation();
+  const isMobile = useIsMobile();
   const { showNotification } = useNotification();
+
+  const { filterParams } = useMyJobsFilterStore();
+  const { mutateAsync: rejectTaskMutation } = useResignJobMutation();
 
   const isOpen = Boolean(anchorEl);
 
@@ -30,7 +34,7 @@ export function MoreButton({ job, isDisabled }: MoreButtonProps) {
     setAnchorEl(null);
     try {
       await rejectTaskMutation({
-        oracle_address: oracleAddress ?? '',
+        oracle_address: filterParams.oracle_address ?? '',
         assignment_id: job.assignment_id,
       });
     } catch {
@@ -44,16 +48,7 @@ export function MoreButton({ job, isDisabled }: MoreButtonProps) {
 
   const handleOpenReportAbuseModal = () => {
     setAnchorEl(null);
-    openModal({
-      content: (
-        <ReportAbuseModal
-          close={closeModal}
-          escrowAddress={job.escrow_address}
-          chainId={job.chain_id}
-        />
-      ),
-      showCloseButton: false,
-    });
+    setIsDialogOpen(true);
   };
 
   return (
@@ -62,12 +57,12 @@ export function MoreButton({ job, isDisabled }: MoreButtonProps) {
         disabled={isDisabled}
         sx={{
           minWidth: 'unset',
-          width: { xs: '48px', md: '30px' },
-          height: { xs: '48px', md: '30px' },
+          width: { xs: '44px', md: '30px' },
+          height: { xs: '44px', md: '30px' },
           p: 1,
-          border: isMobile ? '1px solid #858ec6' : 'none',
+          border: { xs: `1px solid ${colorPalette.border.main}`, md: 'none' },
           borderRadius: '4px',
-          color: '#858ec6',
+          color: colorPalette.text.auxiliary100,
         }}
         onClick={(e) => {
           if (!isDisabled) {
@@ -95,7 +90,7 @@ export function MoreButton({ job, isDisabled }: MoreButtonProps) {
           paper: {
             elevation: 8,
             sx: {
-              mt: isMobile ? -1 : 1,
+              mt: { xs: -1, md: 1 },
             },
           },
         }}
@@ -109,6 +104,12 @@ export function MoreButton({ job, isDisabled }: MoreButtonProps) {
           </ListItemButton>
         </MenuList>
       </Popover>
+      <ReportAbuseDialog
+        open={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        escrowAddress={job.escrow_address}
+        chainId={job.chain_id}
+      />
     </>
   );
 }

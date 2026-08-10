@@ -1,6 +1,5 @@
 import { EscrowClient } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
-import { ethers } from 'ethers';
 import type { OverrideProperties } from 'type-fest';
 
 import { CVAT_VALIDATION_META_FILENAME } from '@/common/constants';
@@ -27,7 +26,6 @@ export class CvatPayoutsCalculator implements EscrowPayoutsCalculator {
   ) {}
 
   async calculate({
-    manifest,
     chainId,
     escrowAddress,
   }: CalculateCvatPayoutsInput): Promise<CalculatedPayout[]> {
@@ -41,40 +39,34 @@ export class CvatPayoutsCalculator implements EscrowPayoutsCalculator {
       await this.storageService.downloadJsonLikeData<CvatAnnotationMeta>(
         `${intermediateResultsUrl}/${CVAT_VALIDATION_META_FILENAME}`,
       );
-
     if (!annotations.jobs.length || !annotations.results.length) {
       throw new Error('Invalid annotation meta');
     }
 
-    const tokenAddress = await escrowClient.getTokenAddress(escrowAddress);
-    const tokenDecimals = await this.web3Service.getTokenDecimals(
-      chainId,
-      tokenAddress,
-    );
-    const jobBountyValue = this.parseJobBounty(
-      manifest.job_bounty,
-      Number(tokenDecimals),
-    );
+    const reservedFunds = await escrowClient.getReservedFunds(escrowAddress);
+
+    const matchedJobResults = annotations.jobs
+      .map((job) =>
+        annotations.results.find((result) => result.id === job.final_result_id),
+      )
+      .filter((result): result is CvatAnnotationMeta['results'][number] =>
+        Boolean(result),
+      );
+
+    if (!matchedJobResults.length) {
+      throw new Error('Invalid annotation meta');
+    }
+
+    const jobBountyValue = reservedFunds / BigInt(matchedJobResults.length);
     const workersBounties = new Map<string, bigint>();
 
-    for (const job of annotations.jobs) {
-      const jobFinalResult = annotations.results.find(
-        (result) => result.id === job.final_result_id,
-      );
+    for (const jobFinalResult of matchedJobResults) {
       // TODO: enable annotation quality validation when ready
-      if (
-        jobFinalResult
-        // && jobFinalResult.annotation_quality >= manifest.validation.min_quality
-      ) {
-        const workerAddress = jobFinalResult.annotator_wallet_address;
+      const workerAddress = jobFinalResult.annotator_wallet_address;
 
-        const currentWorkerBounty = workersBounties.get(workerAddress) || 0n;
+      const currentWorkerBounty = workersBounties.get(workerAddress) || 0n;
 
-        workersBounties.set(
-          workerAddress,
-          currentWorkerBounty + jobBountyValue,
-        );
-      }
+      workersBounties.set(workerAddress, currentWorkerBounty + jobBountyValue);
     }
 
     return Array.from(workersBounties.entries()).map(
@@ -83,22 +75,5 @@ export class CvatPayoutsCalculator implements EscrowPayoutsCalculator {
         amount: bountyAmount,
       }),
     );
-  }
-
-  private parseJobBounty(jobBounty: string, tokenDecimals: number): bigint {
-    const parts = jobBounty.split('.');
-    if (parts.length > 1) {
-      const decimalsInBounty = parts[1].length;
-      if (decimalsInBounty > tokenDecimals) {
-        if (tokenDecimals === 0) {
-          return ethers.parseUnits(parts[0], tokenDecimals);
-        }
-        return ethers.parseUnits(
-          `${parts[0]}.${parts[1].slice(0, tokenDecimals)}`,
-          tokenDecimals,
-        );
-      }
-    }
-    return ethers.parseUnits(jobBounty, tokenDecimals);
   }
 }

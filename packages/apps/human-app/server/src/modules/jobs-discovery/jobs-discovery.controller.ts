@@ -18,9 +18,9 @@ import { EnvironmentConfigService } from '../../common/config/environment-config
 import { RequestWithUser } from '../../common/interfaces/jwt';
 import { JobsDiscoveryService } from './jobs-discovery.service';
 import {
-  JobsDiscoveryParamsCommand,
-  JobsDiscoveryParamsDto,
-  JobsDiscoveryResponse,
+  GetJobsCommand,
+  GetJobsQueryDto,
+  GetJobsResponseDto,
 } from './model/jobs-discovery.model';
 
 @Controller()
@@ -37,11 +37,11 @@ export class JobsDiscoveryController {
   @ApiOperation({
     summary: 'Retrieve a list of jobs for given Exchange Oracle',
   })
-  @ApiOkResponse({ type: JobsDiscoveryResponse, description: 'List of jobs' })
+  @ApiOkResponse({ type: GetJobsResponseDto, description: 'List of jobs' })
   public async getJobs(
-    @Query() jobsDiscoveryParamsDto: JobsDiscoveryParamsDto,
+    @Query() query: GetJobsQueryDto,
     @Request() req: RequestWithUser,
-  ): Promise<JobsDiscoveryResponse> {
+  ): Promise<GetJobsResponseDto> {
     if (!this.environmentConfigService.jobsDiscoveryFlag) {
       throw new HttpException(
         'Jobs discovery is disabled',
@@ -49,25 +49,12 @@ export class JobsDiscoveryController {
       );
     }
 
-    // Require stake eligibility
-    if (!req.user?.is_stake_eligible) {
-      return {
-        page: 0,
-        page_size: 1,
-        total_pages: 1,
-        total_results: 0,
-        results: [],
-      };
-    }
-
-    const jobsDiscoveryParamsCommand: JobsDiscoveryParamsCommand =
-      this.mapper.map(
-        jobsDiscoveryParamsDto,
-        JobsDiscoveryParamsDto,
-        JobsDiscoveryParamsCommand,
-      );
-    jobsDiscoveryParamsCommand.token = req.token;
-    jobsDiscoveryParamsCommand.data.qualifications = req.user.qualifications;
-    return await this.service.processJobsDiscovery(jobsDiscoveryParamsCommand);
+    const getJobsCommand: GetJobsCommand = this.mapper.map(
+      query,
+      GetJobsQueryDto,
+      GetJobsCommand,
+    );
+    getJobsCommand.data.qualifications = req.user.qualifications;
+    return await this.service.getJobs(getJobsCommand);
   }
 }

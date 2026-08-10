@@ -12,6 +12,10 @@ describe('shouldNavigateToRegistration Helper', () => {
     url: faker.internet.url(),
     jobTypes: [faker.word.noun()],
     name: faker.company.name(),
+    nTasks: faker.number.int({ min: 1, max: 10 }),
+    minRewardAmount: faker.finance.amount(),
+    maxRewardAmount: faker.finance.amount(),
+    rewardToken: faker.finance.currencyCode(),
   };
 
   const oracleWithNoRegistration: Oracle = {

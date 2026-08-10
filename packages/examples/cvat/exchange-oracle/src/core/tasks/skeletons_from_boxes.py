@@ -29,7 +29,7 @@ class RoiInfo:
 
     # RoI is centered on the bbox center
     # Coordinates can be out of image boundaries.
-    # In this case RoI includes extra margins to be centered on bbox center
+    # In this case RoI includes extra margins to be centered on bbox center.
     roi_x: int
     roi_y: int
     roi_w: int
@@ -138,11 +138,11 @@ class TaskMetaSerializer:
 
 __all__ = [
     "OUTPUT_OBJECT_ID_ATTR",
-    "SkeletonBboxMapping",
+    "PointLabelsMapping",
+    "RoiFilenames",
     "RoiInfo",
     "RoiInfos",
-    "RoiFilenames",
-    "PointLabelsMapping",
+    "SkeletonBboxMapping",
     "TaskMetaLayout",
     "TaskMetaSerializer",
 ]

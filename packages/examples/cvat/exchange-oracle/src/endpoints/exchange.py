@@ -14,7 +14,8 @@ import src.cvat.api_calls as cvat_api
 import src.services.cvat as cvat_service
 import src.services.exchange as oracle_service
 from src.core.config import Config
-from src.core.types import ProjectStatuses, TaskTypes
+from src.core.tasks import TaskTypes
+from src.core.types import ProjectStatuses
 from src.db import SessionLocal
 from src.db import engine as db_engine
 from src.endpoints.authentication import (
@@ -79,11 +80,19 @@ class JobsFilter(Filter):
                 # NOTE: default_factory=list should not be used since
                 # FilterDepends changes valid types from list to str
                 default=None,
-                description="Comma separated fields to be returned for every available job",
+                description=(
+                    "Fields to be returned for every available job. "
+                    "Accepts both a comma-separated list (?fields=a,b) "
+                    "and repeated params (?fields=a&fields=b). Available fields: "
+                    f"{', '.join(SelectableFields.__members__.values())}"
+                ),
                 openapi_examples={
                     "one_field": Example(value=SelectableFields.job_description),
-                    "several_fields": Example(
+                    "several_fields_csv": Example(
                         value=f"{SelectableFields.job_description},{SelectableFields.created_at}"
+                    ),
+                    "several_fields_repeated": Example(
+                        value=[SelectableFields.job_description, SelectableFields.created_at]
                     ),
                 },
             ),

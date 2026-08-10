@@ -43,10 +43,11 @@ class ServiceIntegrationTest(unittest.TestCase):
             count=0,
             factory_address=FACTORY_ADDRESS,
             launcher=JOB_LAUNCHER_ADDRESS,
+            job_requester_id=JOB_LAUNCHER_ADDRESS,
             status=Status.Pending.name,
             token=TOKEN_ADDRESS,
             total_funded_amount=1000,
-            created_at="",
+            created_at="0",
             recording_oracle=RECORDING_ORACLE_ADDRESS,
             exchange_oracle=EXCHANGE_ORACLE_ADDRESS,
             reputation_oracle=REPUTATION_ORACLE_ADDRESS,
@@ -83,9 +84,9 @@ class ServiceIntegrationTest(unittest.TestCase):
     def test_get_escrow_manifest(self):
         with (
             patch("src.chain.escrow.EscrowUtils.get_escrow") as mock_function,
-            patch("src.chain.escrow.StorageUtils.download_file_from_url") as mock_download,
+            patch("src.chain.escrow._get_manifest_content") as mock_download,
         ):
-            mock_download.return_value = json.dumps({"title": "test"}).encode()
+            mock_download.return_value = json.dumps({"title": "test"})
             mock_function.return_value = self.escrow_data
             manifest = get_escrow_manifest(chain_id, escrow_address)
             assert isinstance(manifest, dict)
@@ -94,7 +95,7 @@ class ServiceIntegrationTest(unittest.TestCase):
     def test_get_encrypted_escrow_manifest(self):
         with (
             patch("src.chain.escrow.EscrowUtils.get_escrow") as mock_function,
-            patch("src.chain.escrow.StorageUtils.download_file_from_url") as mock_download,
+            patch("src.chain.escrow._get_manifest_content") as mock_download,
             patch("src.core.config.Config.encryption_config.pgp_private_key", PGP_PRIVATE_KEY1),
             patch("src.core.config.Config.encryption_config.pgp_passphrase", PGP_PASSPHRASE),
             patch(
@@ -112,7 +113,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             )
             assert encrypted_manifest != original_manifest
 
-            mock_download.return_value = encrypted_manifest.encode()
+            mock_download.return_value = encrypted_manifest
             downloaded_manifest_content = get_escrow_manifest(chain_id, escrow_address)
             assert downloaded_manifest_content == original_manifest_content
 

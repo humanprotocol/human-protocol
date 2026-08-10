@@ -9,8 +9,8 @@ from urllib.parse import urlparse
 
 import pydantic
 
-from src.core import manifest
 from src.core.config import Config, IStorageConfig
+from src.core.manifest.shared import BucketUrl, BucketUrlBase
 from src.services.cloud.gcs import DEFAULT_GCS_HOST
 from src.services.cloud.s3 import DEFAULT_S3_HOST
 from src.utils.enums import BetterEnumMeta
@@ -171,14 +171,14 @@ class BucketAccessInfo:
         )
 
     @classmethod
-    def from_bucket_url(cls, bucket_url: manifest.BucketUrl) -> BucketAccessInfo:
+    def from_bucket_url(cls, bucket_url: BucketUrl) -> BucketAccessInfo:
         return cls._from_dict(bucket_url.model_dump())
 
     @classmethod
     def parse_obj(
-        cls, data: str | type[IStorageConfig] | manifest.BucketUrl | pydantic.AnyUrl
+        cls, data: str | type[IStorageConfig] | BucketUrl | pydantic.AnyUrl
     ) -> BucketAccessInfo:
-        if isinstance(data, manifest.BucketUrlBase):
+        if isinstance(data, BucketUrlBase):
             return cls.from_bucket_url(data)
         if isinstance(data, str):
             return cls.from_url(data)

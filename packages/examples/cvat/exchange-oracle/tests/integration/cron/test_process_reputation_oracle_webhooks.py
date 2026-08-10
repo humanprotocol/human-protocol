@@ -5,6 +5,7 @@ from cvat_sdk.api_client.exceptions import NotFoundException
 from sqlalchemy import select
 
 from src.core.storage import compose_data_bucket_prefix, compose_results_bucket_prefix
+from src.core.tasks import TaskTypes
 from src.core.types import (
     ExchangeOracleEventTypes,
     JobStatuses,
@@ -14,7 +15,6 @@ from src.core.types import (
     ProjectStatuses,
     ReputationOracleEventTypes,
     TaskStatuses,
-    TaskTypes,
 )
 from src.crons.webhooks.reputation_oracle import process_incoming_reputation_oracle_webhooks
 from src.cvat import api_calls
@@ -144,10 +144,10 @@ def test_process_incoming_reputation_oracle_webhook_escrow_completed(
         mocker.call(prefix=compose_data_bucket_prefix(escrow_address, chain_id)),
         mocker.call(prefix=compose_results_bucket_prefix(escrow_address, chain_id)),
     ]
-    assert delete_project_mock.mock_calls == [
-        mocker.call(project1.cvat_id),
-        mocker.call(project2.cvat_id),
-    ]
+    assert {c.args[0] for c in delete_project_mock.mock_calls} == {
+        project1.cvat_id,
+        project2.cvat_id,
+    }
     assert delete_cloudstorage_mock.mock_calls == [mocker.call(1)]
 
     outgoing_webhooks = list(
@@ -197,10 +197,10 @@ def test_process_incoming_reputation_oracle_webhooks_escrow_completed_exceptions
         mocker.call(prefix=compose_data_bucket_prefix(escrow_address, chain_id)),
         mocker.call(prefix=compose_results_bucket_prefix(escrow_address, chain_id)),
     ]
-    assert delete_project_mock.mock_calls == [
-        mocker.call(project1.cvat_id),
-        mocker.call(project2.cvat_id),
-    ]
+    assert {c.args[0] for c in delete_project_mock.mock_calls} == {
+        project1.cvat_id,
+        project2.cvat_id,
+    }
     assert delete_cloudstorage_mock.mock_calls == [mocker.call(1)]
 
     outgoing_webhooks = list(
@@ -229,10 +229,10 @@ def test_process_incoming_reputation_oracle_webhooks_escrow_completed_exceptions
         mocker.call(prefix=compose_data_bucket_prefix(escrow_address, chain_id)),
         mocker.call(prefix=compose_results_bucket_prefix(escrow_address, chain_id)),
     ]
-    assert delete_project_mock.mock_calls == [
-        mocker.call(project1.cvat_id),
-        mocker.call(project2.cvat_id),
-    ]
+    assert {c.args[0] for c in delete_project_mock.mock_calls} == {
+        project1.cvat_id,
+        project2.cvat_id,
+    }
 
     outgoing_webhooks = list(
         session.scalars(

@@ -5,8 +5,11 @@ export const colorPalette = {
   text: {
     primary: '#320A8D',
     secondary: '#B2AFC1',
+    light: '#6309ff',
     disabled: '#CBCFE6',
     disabledSecondary: '#8494C3',
+    auxiliary100: '#000000',
+    auxiliary200: '#676767',
   },
   primary: {
     main: '#320A8D',
@@ -21,17 +24,29 @@ export const colorPalette = {
     light: '#8409FF',
     contrastText: '#FFFFFF',
   },
+  background: {
+    default: '#f6f7fe',
+    paper: '#ffffff',
+    subtle: '#fcfcfc',
+  },
+  accent: {
+    main: '#fa2a75',
+    dark: '#af1d51',
+    contrastText: '#ffffff',
+  },
+  border: {
+    main: '#d9d9d9',
+    strong: 'rgba(50, 10, 141, 0.30)',
+  },
   error: {
-    main: '#FA2A75',
-    dark: '#F20D5F',
-    light: '#FF5995',
-    contrastText: '#FFFFFF',
+    main: '#ff6262',
+    dark: '#ff6262cc',
+    contrastText: '#ffffff',
   },
   success: {
-    main: '#0AD397',
-    dark: '#0E976E',
-    light: '#00EDA6',
-    contrastText: '#FFFFFF',
+    main: '#43ba96',
+    dark: '#43ba96cc',
+    contrastText: '#ffffff',
   },
   paper: {
     main: '#F6F7FE',

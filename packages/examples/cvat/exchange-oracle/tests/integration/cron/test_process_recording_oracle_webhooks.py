@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, patch
 
 from sqlalchemy.sql import select
 
+from src.core.tasks import TaskTypes
 from src.core.types import (
     AssignmentStatuses,
     EscrowValidationStatuses,
@@ -16,7 +17,6 @@ from src.core.types import (
     ProjectStatuses,
     RecordingOracleEventTypes,
     TaskStatuses,
-    TaskTypes,
 )
 from src.crons.webhooks.recording_oracle import (
     process_incoming_recording_oracle_webhook_job_completed,
@@ -442,7 +442,7 @@ class ServiceIntegrationTest(unittest.TestCase):
                 "src.crons.webhooks.recording_oracle.get_recording_oracle_url",
                 return_value=DEFAULT_MANIFEST_URL,
             ),
-            patch("httpx.Client.post") as mock_httpx_post,
+            patch("httpx2.Client.post") as mock_httpx_post,
         ):
             mock_response = MagicMock()
             mock_response.raise_for_status.return_value = None

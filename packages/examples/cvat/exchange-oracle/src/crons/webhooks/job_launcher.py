@@ -18,7 +18,10 @@ from src.crons._cron_job import cron_job
 from src.crons.webhooks._common import handle_webhook, process_outgoing_webhooks
 from src.db.utils import ForUpdateParams
 from src.handlers.escrow_cleanup import cleanup_escrow
+from src.log import get_logger_name
 from src.models.webhook import Webhook
+
+logger = logging.getLogger(get_logger_name(__name__))
 
 
 def handle_failure(session: Session, webhook: Webhook, exc: Exception) -> None:
@@ -26,7 +29,7 @@ def handle_failure(session: Session, webhook: Webhook, exc: Exception) -> None:
         webhook.event_type == JobLauncherEventTypes.escrow_created
         and webhook.attempts + 1 >= Config.webhook_max_retries
     ):
-        logging.error(
+        logger.error(
             f"Exceeded maximum retries for {webhook.escrow_address=} creation. "
             f"Notifying job launcher."
         )

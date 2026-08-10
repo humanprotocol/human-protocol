@@ -1,5 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
+
 import { routerPaths } from '@/router/router-paths';
 import * as signupService from '@/modules/signup/services/signup.service';
 import { type SignUpDto } from '../schema';
@@ -9,10 +10,10 @@ export function useSignUpMutation() {
 
   return useMutation({
     mutationFn: async (data: Omit<SignUpDto, 'confirmPassword'>) => {
-      return signupService.workerSignUp(data);
+      return signupService.signUp(data);
     },
     onSuccess: (_, { email }) => {
-      navigate(routerPaths.worker.verifyEmail, {
+      navigate(routerPaths.verifyEmail, {
         state: { routerState: { email } },
       });
     },

@@ -1,24 +1,21 @@
 import { ChainId } from '@human-protocol/sdk';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { JobsDiscoveryService } from '../jobs-discovery.service';
-import { ExchangeOracleGateway } from '../../../integrations/exchange-oracle/exchange-oracle.gateway';
 import { Test, TestingModule } from '@nestjs/testing';
+import { EnvironmentConfigService } from '../../../common/config/environment-config.service';
+import { SortOrder } from '../../../common/enums/global-common';
+import { ExchangeOracleGateway } from '../../../integrations/exchange-oracle/exchange-oracle.gateway';
+import { JobsDiscoveryService } from '../jobs-discovery.service';
 import {
   hmtRewardAmountResponseItemFixture,
   invalidRewardAmountResponseItemFixture,
-  jobsDiscoveryParamsCommandFixture,
-  responseItemsFixture,
+  getJobsCommandFixture,
   responseItemFixture1,
   responseItemFixture3,
+  responseItemsFixture,
   usdcRewardAmountResponseItemFixture,
   validRewardAmountResponseItemFixture,
 } from './jobs-discovery.fixtures';
-import { EnvironmentConfigService } from '../../../common/config/environment-config.service';
-import {
-  JobDiscoveryFieldName,
-  JobDiscoverySortField,
-  SortOrder,
-} from '../../../common/enums/global-common';
+import { JobDiscoverySortField } from '../model/jobs-discovery.model';
 
 describe('JobsDiscoveryService', () => {
   let service: JobsDiscoveryService;
@@ -51,20 +48,23 @@ describe('JobsDiscoveryService', () => {
 
     service = module.get<JobsDiscoveryService>(JobsDiscoveryService);
   });
+
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
-  describe('processJobsDiscovery', () => {
+
+  describe('getJobs', () => {
     it('should get oracle url and call api for jobs fetch', async () => {
-      const command = jobsDiscoveryParamsCommandFixture;
+      const command = getJobsCommandFixture;
 
       jest
         .spyOn(service as any, 'getCachedJobs')
         .mockReturnValue(responseItemsFixture);
 
-      const result = await service.processJobsDiscovery(command);
+      const result = await service.getJobs(command);
+
       expect(service.getCachedJobs).toHaveBeenCalledWith(
-        jobsDiscoveryParamsCommandFixture.oracleAddress,
+        getJobsCommandFixture.oracleAddress,
       );
       expect(result.results).toEqual([
         responseItemFixture3,
@@ -74,13 +74,9 @@ describe('JobsDiscoveryService', () => {
 
     it('should sort reward amounts using human-readable units', async () => {
       const command = {
-        ...jobsDiscoveryParamsCommandFixture,
+        ...getJobsCommandFixture,
         data: {
-          ...jobsDiscoveryParamsCommandFixture.data,
-          fields: [
-            JobDiscoveryFieldName.RewardAmount,
-            JobDiscoveryFieldName.RewardToken,
-          ],
+          ...getJobsCommandFixture.data,
           sort: SortOrder.DESC,
           sortField: JobDiscoverySortField.REWARD_AMOUNT,
         },
@@ -93,7 +89,7 @@ describe('JobsDiscoveryService', () => {
           usdcRewardAmountResponseItemFixture,
         ]);
 
-      const result = await service.processJobsDiscovery(command);
+      const result = await service.getJobs(command);
 
       expect(result.results).toEqual([
         usdcRewardAmountResponseItemFixture,
@@ -103,13 +99,9 @@ describe('JobsDiscoveryService', () => {
 
     it('should use zero for invalid reward amounts', async () => {
       const command = {
-        ...jobsDiscoveryParamsCommandFixture,
+        ...getJobsCommandFixture,
         data: {
-          ...jobsDiscoveryParamsCommandFixture.data,
-          fields: [
-            JobDiscoveryFieldName.RewardAmount,
-            JobDiscoveryFieldName.RewardToken,
-          ],
+          ...getJobsCommandFixture.data,
           sort: SortOrder.DESC,
           sortField: JobDiscoverySortField.REWARD_AMOUNT,
         },
@@ -122,7 +114,7 @@ describe('JobsDiscoveryService', () => {
           validRewardAmountResponseItemFixture,
         ]);
 
-      const result = await service.processJobsDiscovery(command);
+      const result = await service.getJobs(command);
 
       expect(result.results).toEqual([
         validRewardAmountResponseItemFixture,

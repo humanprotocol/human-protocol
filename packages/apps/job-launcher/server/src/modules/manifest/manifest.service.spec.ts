@@ -64,7 +64,7 @@ describe('ManifestService', () => {
     it('should validate an hcaptcha manifest successfully', async () => {
       const manifest = {
         job_mode: faker.lorem.word(),
-        request_type: JobCaptchaRequestType.IMAGE_LABEL_BINARY,
+        request_type: JobCaptchaRequestType.IMAGE_LABEL_AREA_SELECT,
         request_config: {},
         requester_accuracy_target: faker.number.float({
           min: 0.5,
@@ -112,7 +112,7 @@ describe('ManifestService', () => {
     it('should throw when a required hcaptcha property is missing', async () => {
       const manifest = {
         job_mode: faker.lorem.word(),
-        request_type: JobCaptchaRequestType.IMAGE_LABEL_BINARY,
+        request_type: JobCaptchaRequestType.IMAGE_LABEL_AREA_SELECT,
         request_config: {},
         requester_accuracy_target: faker.number.float({
           min: 0.5,

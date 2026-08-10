@@ -16,4 +16,5 @@ jobs:
       - name: Dependency Review
         uses: actions/dependency-review-action@v5.0.0
         with:
-          show-openssf-scorecard: false
+          config-file: './.github/dependency-review-config.yml'
+          

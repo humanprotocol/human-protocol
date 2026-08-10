@@ -1,11 +1,3 @@
-export enum JobDiscoveryFieldName {
-  JobDescription = 'job_description',
-  RewardAmount = 'reward_amount',
-  RewardToken = 'reward_token',
-  CreatedAt = 'created_at',
-  UpdatedAt = 'updated_at',
-}
-
 export enum JobStatus {
   ACTIVE = 'active',
   COMPLETED = 'completed',
@@ -19,13 +11,6 @@ export enum AssignmentStatus {
   EXPIRED = 'expired',
   CANCELED = 'canceled',
   REJECTED = 'rejected',
-}
-
-export enum JobDiscoverySortField {
-  CHAIN_ID = 'chain_id',
-  JOB_TYPE = 'job_type',
-  REWARD_AMOUNT = 'reward_amount',
-  CREATED_AT = 'created_at',
 }
 
 export enum SortOrder {

@@ -1,22 +1,22 @@
 import { ChainId } from '@human-protocol/sdk';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { Test, TestingModule } from '@nestjs/testing';
-import { CronJobService } from '../cron-job.service';
+import { EnvironmentConfigService } from '../../../common/config/environment-config.service';
+import { JobStatus } from '../../../common/enums/global-common';
 import { ExchangeOracleGateway } from '../../../integrations/exchange-oracle/exchange-oracle.gateway';
 import { ReputationOracleGateway } from '../../../integrations/reputation-oracle/reputation-oracle.gateway';
-import { OracleDiscoveryService } from '../../../modules/oracle-discovery/oracle-discovery.service';
-import { EnvironmentConfigService } from '../../../common/config/environment-config.service';
-import {
-  DiscoveredJob,
-  JobsDiscoveryParamsCommand,
-  JobsDiscoveryResponse,
-  JobsDiscoveryResponseItem,
-} from '../../../modules/jobs-discovery/model/jobs-discovery.model';
-import { JobStatus } from '../../../common/enums/global-common';
 import { JobsDiscoveryService } from '../../../modules/jobs-discovery/jobs-discovery.service';
+import { DiscoveredJob } from '../../../modules/jobs-discovery/model/jobs-discovery.model';
+import { OracleDiscoveryService } from '../../../modules/oracle-discovery/oracle-discovery.service';
 import { generateOracleDiscoveryResponseBody } from '../../../modules/oracle-discovery/spec/oracle-discovery.fixture';
+import { CronJobService } from '../cron-job.service';
 
 import { HMT_TOKEN_SYMBOL } from '../../../common/constants/hmt';
+import {
+  FetchJobsCommand,
+  FetchJobsResponse,
+  FetchJobsResponseItem,
+} from '../../../integrations/exchange-oracle/model/exchange-oracle.model';
 
 jest.mock('cron', () => {
   return {
@@ -174,7 +174,7 @@ describe('CronJobService', () => {
 
     it('should fetch all jobs and update the cache', async () => {
       const now = new Date();
-      const initialResponse: JobsDiscoveryResponse = {
+      const initialResponse: FetchJobsResponse = {
         results: [
           {
             escrow_address: '0xabc',
@@ -201,7 +201,7 @@ describe('CronJobService', () => {
       await service.updateJobsListCache(oracle, token);
 
       expect(exchangeOracleGatewayMock.fetchJobs).toHaveBeenCalledWith(
-        expect.any(JobsDiscoveryParamsCommand),
+        expect.any(FetchJobsCommand),
       );
       expect(jobDiscoveryServiceMock.setCachedJobs).toHaveBeenCalledWith(
         oracle.address,
@@ -236,7 +236,7 @@ describe('CronJobService', () => {
 
     it('should reset retries count after successful job fetch', async () => {
       const now = new Date();
-      const initialResponse: JobsDiscoveryResponse = {
+      const initialResponse: FetchJobsResponse = {
         results: [
           {
             escrow_address: '0xabc',
@@ -290,7 +290,7 @@ describe('CronJobService', () => {
         },
       ];
 
-      const newJobs: JobsDiscoveryResponseItem[] = [
+      const newJobs: FetchJobsResponseItem[] = [
         {
           escrow_address: '0xdef',
           chain_id: 1,
@@ -329,7 +329,7 @@ describe('CronJobService', () => {
           qualifications: [],
         },
       ];
-      const newJobs: JobsDiscoveryResponseItem[] = [
+      const newJobs: FetchJobsResponseItem[] = [
         {
           escrow_address: '0xabc',
           chain_id: 1,

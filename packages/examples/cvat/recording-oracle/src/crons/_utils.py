@@ -4,7 +4,7 @@ from collections.abc import Callable
 from contextlib import contextmanager, nullcontext
 from functools import wraps
 
-import httpx
+import httpx2
 from sqlalchemy.orm import Session
 
 import src.services.webhook as oracle_db_service
@@ -39,14 +39,14 @@ def cron_job(logger_name: str) -> Callable[[Callable[..., None]], Callable[[], N
         parameters = dict(inspect.signature(fn).parameters)
         session_param = parameters.pop("session", None)
         if session_param is not None:
-            assert (
-                session_param.annotation == Session
-            ), f"{cron_repr} session argument type muse be of type {Session.__qualname__}"
+            assert session_param.annotation == Session, (
+                f"{cron_repr} session argument type muse be of type {Session.__qualname__}"
+            )
         logger_param = parameters.pop("logger", None)
         assert logger_param is not None, f"{cron_repr} must have logger argument"
-        assert (
-            logger_param.annotation == logging.Logger
-        ), f"{cron_repr} logger argument type muse be of type {logging.Logger}"
+        assert logger_param.annotation == logging.Logger, (
+            f"{cron_repr} logger argument type muse be of type {logging.Logger}"
+        )
         assert not parameters, (
             f"{cron_repr} expected to have only have logger and session arguments,"
             f" not {set(parameters.keys())}"
@@ -109,7 +109,7 @@ def send_webhook(url: str, webhook: Webhook, *, with_timestamp: bool = True) -> 
         body=body,
     )
     headers = {"human-signature": signature}
-    with httpx.Client() as client:
+    with httpx2.Client() as client:
         response = client.post(url, headers=headers, json=body)
         response.raise_for_status()
 
