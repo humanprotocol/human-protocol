@@ -137,7 +137,7 @@ export function SendResetLinkSuccessPage() {
                 <Trans
                   components={{
                     1: <Typography component="span" sx={{ fontWeight: 600 }} />,
-                    2: <MailTo mail={env.VITE_HUMAN_PROTOCOL_HELP_URL} />,
+                    2: <MailTo mail={env.VITE_HUMAN_SUPPORT_EMAIL} />,
                   }}
                   i18nKey="worker.sendResetLinkSuccess.paragraph4"
                 />
