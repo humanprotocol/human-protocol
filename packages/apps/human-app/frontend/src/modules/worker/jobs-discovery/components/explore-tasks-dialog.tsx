@@ -3,7 +3,6 @@ import { Stack, Typography } from '@mui/material';
 
 import { ResponsiveOverlay } from '@/shared/components/ui/responsive-overlay';
 import { Oracle } from '../../services/oracles.service';
-import { useColorMode } from '@/shared/contexts/color-mode';
 import { shortenEscrowAddress } from '@/shared/helpers/evm';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { AvailableJobsTableDesktop } from '../../jobs/available-jobs/components/desktop';
@@ -16,7 +15,6 @@ type Props = {
 };
 
 export function ExploreTasksDialog({ open, onClose, oracle }: Props) {
-  const { colorPalette } = useColorMode();
   const { t } = useTranslation();
   const isMobile = useIsMobile();
 
@@ -45,13 +43,13 @@ export function ExploreTasksDialog({ open, onClose, oracle }: Props) {
           gap: { xs: 1, md: 3 },
           px: { xs: 2, md: 4 },
           pb: 3,
-          bgcolor: colorPalette.background.paper,
+          bgcolor: 'background.paper',
         }}
       >
         <Typography
           variant="h6"
           sx={{
-            color: colorPalette.text.auxiliary100,
+            color: 'text.auxiliary100',
             fontWeight: 400,
           }}
         >
@@ -61,7 +59,7 @@ export function ExploreTasksDialog({ open, onClose, oracle }: Props) {
             variant="h6"
             sx={{
               fontWeight: 700,
-              color: colorPalette.text.primary,
+              color: 'text.primary',
             }}
           >
             {oracle.name}
@@ -70,7 +68,7 @@ export function ExploreTasksDialog({ open, onClose, oracle }: Props) {
         <Typography
           variant="body2"
           sx={{
-            color: colorPalette.text.auxiliary200,
+            color: 'text.auxiliary200',
             fontWeight: 500,
           }}
         >
@@ -78,7 +76,7 @@ export function ExploreTasksDialog({ open, onClose, oracle }: Props) {
           <Typography
             component="span"
             variant="body1"
-            sx={{ color: colorPalette.text.primary, fontWeight: 700 }}
+            sx={{ color: 'text.primary', fontWeight: 700 }}
           >
             {shortenEscrowAddress(oracle.address, 4, 4)}
           </Typography>

@@ -3,11 +3,8 @@ import { Link as RouterLink } from 'react-router-dom';
 import { t } from 'i18next';
 
 import { routerPaths } from '@/router/router-paths';
-import { useColorMode } from '@/shared/contexts/color-mode/use-color-mode';
 
 export function Breadcrumbs() {
-  const { colorPalette } = useColorMode();
-
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
       <Link
@@ -15,7 +12,7 @@ export function Breadcrumbs() {
         to={routerPaths.jobsDiscovery}
         variant="body1"
         sx={{
-          color: colorPalette.text.auxiliary200,
+          color: 'text.auxiliary200',
           fontWeight: 500,
           textDecoration: 'none',
           '&:hover': {
@@ -27,13 +24,13 @@ export function Breadcrumbs() {
       </Link>
       <Typography
         variant="body1"
-        sx={{ color: colorPalette.text.auxiliary200, fontWeight: 500 }}
+        sx={{ color: 'text.auxiliary200', fontWeight: 500 }}
       >
         {'>'}
       </Typography>
       <Typography
         variant="body1"
-        sx={{ color: colorPalette.text.primary, fontWeight: 700 }}
+        sx={{ color: 'text.primary', fontWeight: 700 }}
       >
         {t('worker.jobs.hCaptcha')}
       </Typography>

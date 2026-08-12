@@ -3,8 +3,8 @@ import { SnackbarProvider } from 'notistack';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
 import WarningIcon from '@mui/icons-material/Warning';
+
 import { TopNotificationType } from '@/shared/hooks/use-notification';
-import { colorPalette as lightColorPalette } from '@/shared/styles/color-palette';
 import { handleUnreachableCase } from '@/shared/helpers/handle-unreachable-case';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 
@@ -21,11 +21,11 @@ const getNotificationIconByType = (
 ) => {
   switch (type) {
     case TopNotificationType.SUCCESS:
-      return <CheckCircleIcon sx={{ fill: lightColorPalette.white, ...sx }} />;
+      return <CheckCircleIcon sx={{ color: 'white', ...sx }} />;
     case TopNotificationType.WARNING:
-      return <WarningIcon sx={{ fill: lightColorPalette.white, ...sx }} />;
+      return <WarningIcon sx={{ color: 'white', ...sx }} />;
     case TopNotificationType.ERROR:
-      return <ErrorIcon sx={{ fill: lightColorPalette.white, ...sx }} />;
+      return <ErrorIcon sx={{ color: 'white', ...sx }} />;
 
     default: {
       handleUnreachableCase(type);

@@ -10,7 +10,6 @@ import { getErrorMessageForError } from '@/shared/errors';
 import { getTomorrowDate } from '@/shared/helpers/date';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
 import { useHCaptchaLabelingNotifications } from '@/modules/worker/hooks/use-hcaptcha-labeling-notifications';
-import { useColorMode } from '@/shared/contexts/color-mode';
 import {
   PageCardLoader,
   PageCardError,
@@ -31,7 +30,6 @@ export function HcaptchaLabelingPage() {
   const [isStatsDrawerOpen, setIsStatsDrawerOpen] = useState(false);
   const captchaRef = useRef<HCaptcha>(null);
 
-  const { colorPalette } = useColorMode();
   const { user } = useAuthenticatedUser();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
@@ -96,10 +94,10 @@ export function HcaptchaLabelingPage() {
           width: '100%',
           py: { xs: 2, md: 6 },
           px: { xs: 2, md: 4 },
-          borderBottom: {
+          borderBottom: (theme) => ({
             xs: 'none',
-            md: `1px solid ${colorPalette.border.main}`,
-          },
+            md: `1px solid ${theme.palette.border.main}`,
+          }),
         }}
       >
         <Breadcrumbs />
@@ -131,12 +129,12 @@ export function HcaptchaLabelingPage() {
             flex: 1,
             alignItems: 'center',
             justifyContent: 'center',
-            bgcolor: { xs: 'transparent', md: colorPalette.background.subtle },
+            bgcolor: { xs: 'transparent', md: 'background.subtle' },
             borderRadius: '20px',
-            border: {
+            border: (theme) => ({
               xs: 'none',
-              md: `1px solid ${colorPalette.border.strong}`,
-            },
+              md: `1px solid ${theme.palette.border.strong}`,
+            }),
           }}
         >
           {isPending && !isError && <PageCardLoader />}
@@ -162,7 +160,7 @@ export function HcaptchaLabelingPage() {
                     variant="body1"
                     sx={{
                       mb: { xs: 3, md: 6 },
-                      color: colorPalette.text.auxiliary100,
+                      color: 'text.auxiliary100',
                     }}
                   >
                     {t('worker.hcaptchaLabeling.description')}
@@ -184,26 +182,27 @@ export function HcaptchaLabelingPage() {
                 <Stack sx={{ gap: { xs: 3, md: 5 } }}>
                   <Typography
                     variant="body1"
-                    sx={{ color: colorPalette.text.auxiliary100 }}
+                    sx={{ color: 'text.auxiliary100' }}
                   >
                     {t('worker.hcaptchaLabeling.noJobs')}
                   </Typography>
                   <Stack
                     sx={{
                       borderRadius: '15px',
-                      border: `1px solid ${colorPalette.border.main}`,
+                      border: (theme) =>
+                        `1px solid ${theme.palette.border.main}`,
                     }}
                   >
                     <Stack sx={{ p: 3 }}>
                       <Typography
                         variant="subtitle2"
-                        sx={{ color: colorPalette.text.auxiliary200 }}
+                        sx={{ color: 'text.auxiliary200' }}
                       >
                         {t('worker.hcaptchaLabeling.waitFor')}
                       </Typography>
                       <Typography
                         sx={{
-                          color: colorPalette.text.primary,
+                          color: 'text.primary',
                           fontSize: { xs: 16, md: 32 },
                           fontWeight: 700,
                           lineHeight: 'normal',
@@ -220,19 +219,19 @@ export function HcaptchaLabelingPage() {
                       </Typography>
                     </Stack>
                     <Box sx={{ position: 'relative', width: '100%' }}>
-                      <Divider sx={{ bgcolor: colorPalette.border.main }} />
+                      <Divider sx={{ bgcolor: 'border.main' }} />
                       <Typography
                         sx={{
                           fontSize: '12px',
                           fontWeight: 700,
                           lineHeight: '125%',
                           letterSpacing: '0.25px',
-                          color: colorPalette.text.primary,
+                          color: 'text.primary',
                           position: 'absolute',
                           top: '50%',
                           left: '50%',
                           transform: 'translate(-50%, -50%)',
-                          bgcolor: colorPalette.background.subtle,
+                          bgcolor: 'background.subtle',
                         }}
                       >
                         {t('worker.hcaptchaLabeling.or')}

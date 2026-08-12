@@ -11,7 +11,6 @@ import {
 } from '@mui/material';
 
 import { FilterIcon } from '@/shared/components/ui/icons';
-import { useColorMode } from '@/shared/contexts/color-mode';
 import { ResponsiveOverlay } from '@/shared/components/ui/responsive-overlay';
 import { useGetOracles } from '@/modules/worker/hooks/use-get-oracles';
 import { Alert } from '@/shared/components/ui/alert';
@@ -42,7 +41,6 @@ export function MyJobsFilters() {
   const [draftOracleAddress, setDraftOracleAddress] = useState('');
   const [draftStatus, setDraftStatus] = useState<StatusFilterType>('');
 
-  const { colorPalette } = useColorMode();
   const { t } = useTranslation();
   const isMobile = useIsMobile();
   const { filterParams, setFilterParams } = useMyJobsFilterStore();
@@ -85,11 +83,11 @@ export function MyJobsFilters() {
           p: 1.5,
           bgcolor: 'transparent',
           borderRadius: '50%',
-          border: `1px solid ${colorPalette.border.main}`,
+          border: (theme) => `1px solid ${theme.palette.border.main}`,
         }}
         onClick={() => setIsOpen(!isOpen)}
       >
-        <FilterIcon sx={{ color: colorPalette.text.auxiliary200 }} />
+        <FilterIcon sx={{ color: 'text.auxiliary200' }} />
         <Box
           sx={{
             position: 'absolute',
@@ -97,7 +95,7 @@ export function MyJobsFilters() {
             right: 2,
             p: 0.5,
             borderRadius: '50%',
-            bgcolor: colorPalette.accent.main,
+            bgcolor: 'accent.main',
           }}
         />
       </IconButton>
@@ -115,7 +113,7 @@ export function MyJobsFilters() {
             <Stack sx={{ gap: 1 }}>
               <Typography
                 variant="body1"
-                sx={{ color: colorPalette.text.auxiliary200, fontWeight: 500 }}
+                sx={{ color: 'text.auxiliary200', fontWeight: 500 }}
               >
                 {t('worker.jobs.oracles')}
               </Typography>
@@ -137,7 +135,7 @@ export function MyJobsFilters() {
                     label={
                       <Typography
                         variant="body1"
-                        sx={{ color: colorPalette.text.auxiliary100 }}
+                        sx={{ color: 'text.auxiliary100' }}
                       >
                         {oracle.name}
                       </Typography>
@@ -152,7 +150,7 @@ export function MyJobsFilters() {
                 <Typography
                   variant="body1"
                   sx={{
-                    color: colorPalette.text.auxiliary200,
+                    color: 'text.auxiliary200',
                     fontWeight: 500,
                   }}
                 >
@@ -171,7 +169,7 @@ export function MyJobsFilters() {
                       label={
                         <Typography
                           variant="body1"
-                          sx={{ color: colorPalette.text.auxiliary100 }}
+                          sx={{ color: 'text.auxiliary100' }}
                         >
                           {t(option.labelKey)}
                         </Typography>
@@ -188,7 +186,7 @@ export function MyJobsFilters() {
             sx={{
               p: 2,
               justifyContent: 'flex-end',
-              borderTop: `1px solid ${colorPalette.border.main}`,
+              borderTop: (theme) => `1px solid ${theme.palette.border.main}`,
             }}
           >
             <Button

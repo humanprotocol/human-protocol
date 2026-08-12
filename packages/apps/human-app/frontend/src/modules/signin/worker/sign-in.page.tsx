@@ -13,7 +13,6 @@ import {
   useNotification,
 } from '@/shared/hooks/use-notification';
 import { BackButton } from '@/shared/components/ui/page-card/back-button';
-import { useColorMode } from '@/shared/contexts/color-mode';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
 import { routerPaths } from '@/router/router-paths';
 import { useIsUserVerified } from '@/shared/hooks';
@@ -31,7 +30,6 @@ export function SignInPage() {
   const { showNotification } = useNotification();
   const navigate = useNavigate();
   const { user, status, signOut } = useAuth();
-  const { colorPalette } = useColorMode();
   const isUserVerified = useIsUserVerified();
 
   const { signIn, error, isError, isLoading, reset } = useSignIn();
@@ -88,15 +86,14 @@ export function SignInPage() {
         alignItems: 'center',
         justifyContent: 'center',
         my: { xs: 0, md: 4 },
-        bgcolor: colorPalette.background.paper,
         borderRadius: '30px',
         borderBottomLeftRadius: { xs: 0, md: '30px' },
         borderBottomRightRadius: { xs: 0, md: '30px' },
         border: { xs: 'none', md: '1px solid' },
-        borderColor: {
+        borderColor: (theme) => ({
           xs: 'none',
-          md: colorPalette.border.main,
-        },
+          md: theme.palette.border.main,
+        }),
         overflow: 'hidden',
       }}
     >
@@ -148,7 +145,7 @@ export function SignInPage() {
             <Typography
               component="h1"
               variant="h4"
-              sx={{ color: colorPalette.text.auxiliary100 }}
+              sx={{ color: 'text.auxiliary100' }}
             >
               {t('worker.signInForm.title')}
             </Typography>

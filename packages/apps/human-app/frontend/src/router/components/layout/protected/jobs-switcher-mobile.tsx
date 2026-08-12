@@ -17,7 +17,7 @@ const BUTTONS = [
 ] as const satisfies { label: string; path: string }[];
 
 export function JobsSwitcherMobile() {
-  const { colorPalette, isDarkMode } = useColorMode();
+  const { isDarkMode } = useColorMode();
   const { t } = useTranslation();
   const { pathname } = useLocation();
 
@@ -36,7 +36,7 @@ export function JobsSwitcherMobile() {
         maxWidth: '500px',
         mx: 'auto',
         borderRadius: '90px',
-        bgcolor: colorPalette.background.default,
+        bgcolor: 'background.default',
       }}
     >
       {BUTTONS.map((button) => {
@@ -48,11 +48,11 @@ export function JobsSwitcherMobile() {
             to={button.path}
             fullWidth
             sx={{
-              color: colorPalette.text.primary,
+              color: 'text.primary',
               opacity: isActive ? 1 : 0.8,
               fontSize: '14px',
               fontWeight: isActive ? 700 : 600,
-              bgcolor: isActive ? colorPalette.background.paper : 'transparent',
+              bgcolor: isActive ? 'background.paper' : 'transparent',
               borderRadius: '90px',
               boxShadow: isActive ? `3px 3px 24px 0px ${shadowColor}` : 'none',
             }}

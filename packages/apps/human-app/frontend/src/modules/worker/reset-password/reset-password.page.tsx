@@ -17,7 +17,6 @@ import { useResetPasswordMutation } from './hooks';
 import { resetPasswordDtoSchema } from './schemas';
 import { type ResetPasswordDto } from './types';
 import { BackButton } from '@/shared/components/ui/page-card/back-button';
-import { useColorMode } from '@/shared/contexts/color-mode';
 import {
   TopNotificationType,
   useNotification,
@@ -27,7 +26,6 @@ export function ResetPasswordPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const { token } = queryString.parse(location.search);
-  const { colorPalette } = useColorMode();
   const { showNotification } = useNotification();
 
   const methods = useForm({
@@ -80,15 +78,14 @@ export function ResetPasswordPage() {
         my: { xs: 0, md: 4 },
         py: { xs: 3, md: 0 },
         px: { xs: 2, md: 0 },
-        bgcolor: colorPalette.background.paper,
         borderRadius: '30px',
         borderBottomLeftRadius: { xs: 0, md: '30px' },
         borderBottomRightRadius: { xs: 0, md: '30px' },
         border: { xs: 'none', md: '1px solid' },
-        borderColor: {
+        borderColor: (theme) => ({
           xs: 'none',
-          md: colorPalette.border.main,
-        },
+          md: theme.palette.border.main,
+        }),
         overflow: 'hidden',
       }}
     >
@@ -105,7 +102,7 @@ export function ResetPasswordPage() {
           <Typography
             component="h1"
             variant="h4"
-            sx={{ color: colorPalette.text.auxiliary100 }}
+            sx={{ color: 'text.auxiliary100' }}
           >
             {t('worker.resetPassword.title')}
           </Typography>
@@ -117,10 +114,7 @@ export function ResetPasswordPage() {
             }}
           >
             <Stack sx={{ gap: 3 }}>
-              <Typography
-                variant="body1"
-                sx={{ color: colorPalette.text.auxiliary100 }}
-              >
+              <Typography variant="body1" sx={{ color: 'text.auxiliary100' }}>
                 {t('worker.resetPassword.description')}
               </Typography>
               <Password

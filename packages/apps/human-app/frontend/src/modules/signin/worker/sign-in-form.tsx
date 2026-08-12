@@ -8,7 +8,6 @@ import { Link } from 'react-router-dom';
 import { Input } from '@/shared/components/data-entry/input';
 import { Button } from '@/shared/components/ui/button';
 import { Password } from '@/shared/components/data-entry/password';
-import { useColorMode } from '@/shared/contexts/color-mode/use-color-mode';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
 import { HCaptchaForm } from '@/shared/components/hcaptcha';
 import { routerPaths } from '@/router/router-paths';
@@ -29,7 +28,6 @@ export function SignInForm({
   resetMutation,
 }: SignInFormProps) {
   const { t } = useTranslation();
-  const { colorPalette } = useColorMode();
 
   const methods = useForm({
     defaultValues: {
@@ -64,11 +62,9 @@ export function SignInForm({
             <MuiLink
               component={Link}
               to={routerPaths.sendResetLink}
-              variant="body1"
+              variant="body2"
               sx={{
-                color: colorPalette.text.primary,
-                fontSize: '14px',
-                lineHeight: '150%',
+                color: 'text.primary',
                 fontWeight: 600,
                 textDecoration: 'underline',
               }}
@@ -94,12 +90,12 @@ export function SignInForm({
                 fontWeight: 700,
                 lineHeight: '125%',
                 letterSpacing: '0.25px',
-                color: colorPalette.text.primary,
+                color: 'text.primary',
                 position: 'absolute',
                 top: '50%',
                 left: '50%',
                 transform: 'translate(-50%, -50%)',
-                bgcolor: colorPalette.background.paper,
+                bgcolor: 'background.paper',
               }}
             >
               {t('worker.signInForm.or')}
@@ -117,12 +113,10 @@ export function SignInForm({
             }}
           >
             <Typography
+              variant="body2"
               sx={{
-                fontSize: '14px',
                 fontWeight: 500,
-                lineHeight: '26px',
-                letterSpacing: '0.1px',
-                color: colorPalette.text.auxiliary200,
+                color: 'text.auxiliary200',
               }}
             >
               {t('worker.signInForm.dontHaveAccount')}
@@ -130,12 +124,10 @@ export function SignInForm({
             <MuiLink
               component={Link}
               to={routerPaths.signUp}
+              variant="body2"
               sx={{
-                color: colorPalette.accent.main,
-                fontSize: '14px',
+                color: 'accent.main',
                 fontWeight: 600,
-                lineHeight: '26px',
-                letterSpacing: '0.1px',
                 textDecoration: 'underline',
               }}
             >

@@ -4,7 +4,6 @@ import { Box, Paper, Stack, Typography } from '@mui/material';
 
 import { Button } from '@/shared/components/ui/button';
 import { getErrorMessageForError } from '@/shared/errors';
-import { useColorMode } from '@/shared/contexts/color-mode/use-color-mode';
 import {
   TopNotificationType,
   useNotification,
@@ -13,7 +12,6 @@ import { useEnableHCaptchaLabelingMutation } from './hooks';
 import { Breadcrumbs } from './components/breadcrumbs';
 
 export function EnableLabelerPage() {
-  const { colorPalette } = useColorMode();
   const { showNotification } = useNotification();
   const { mutate, error, isError, isPending, reset } =
     useEnableHCaptchaLabelingMutation();
@@ -38,10 +36,10 @@ export function EnableLabelerPage() {
           width: '100%',
           py: { xs: 2, md: 6 },
           px: { xs: 2, md: 4 },
-          borderBottom: {
+          borderBottom: (theme) => ({
             xs: 'none',
-            md: `1px solid ${colorPalette.border.main}`,
-          },
+            md: `1px solid ${theme.palette.border.main}`,
+          }),
         }}
       >
         <Breadcrumbs />
@@ -61,12 +59,12 @@ export function EnableLabelerPage() {
             flex: 1,
             alignItems: 'center',
             justifyContent: 'center',
-            bgcolor: { xs: 'transparent', md: colorPalette.background.subtle },
+            bgcolor: { xs: 'transparent', md: 'background.subtle' },
             borderRadius: '20px',
-            border: {
+            border: (theme) => ({
               xs: 'none',
-              md: `1px solid ${colorPalette.border.strong}`,
-            },
+              md: `1px solid ${theme.palette.border.strong}`,
+            }),
           }}
         >
           <Stack
@@ -75,10 +73,7 @@ export function EnableLabelerPage() {
               gap: { xs: 3, md: 5 },
             }}
           >
-            <Typography
-              variant="body1"
-              sx={{ color: colorPalette.text.auxiliary100 }}
-            >
+            <Typography variant="body1" sx={{ color: 'text.auxiliary100' }}>
               {t('worker.enableHCaptchaLabeling.description')}
             </Typography>
             <Button

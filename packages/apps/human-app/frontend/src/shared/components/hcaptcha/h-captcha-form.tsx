@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { Typography } from '@mui/material';
-import { useColorMode } from '@/shared/contexts/color-mode';
+
 import { ApiClientError } from '@/api';
 import { CustomHCaptcha, type CustomHCaptchaRef } from './h-captcha';
 
@@ -11,7 +11,6 @@ interface HCaptchaFormProps {
 }
 
 export function HCaptchaForm({ name, error }: Readonly<HCaptchaFormProps>) {
-  const { colorPalette } = useColorMode();
   const { setValue, formState } = useFormContext<Record<string, unknown>>();
   const customCaptchaRef = useRef<CustomHCaptchaRef>(null);
 
@@ -32,7 +31,7 @@ export function HCaptchaForm({ name, error }: Readonly<HCaptchaFormProps>) {
       <Typography
         component="div"
         variant="helperText"
-        sx={{ color: colorPalette.error.main }}
+        sx={{ color: 'error.main' }}
       >
         {formState.errors[name]?.message}
       </Typography>

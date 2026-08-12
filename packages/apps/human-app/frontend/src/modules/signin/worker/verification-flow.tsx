@@ -1,9 +1,7 @@
 import { useCallback, useState } from 'react';
-import { Box, Stack, Typography } from '@mui/material';
+import { Box, Chip, Stack, Typography } from '@mui/material';
 import { t } from 'i18next';
 
-import { Chip } from '@/shared/components/ui/chip';
-import { useColorMode } from '@/shared/contexts/color-mode/use-color-mode';
 import {
   IdentityVerificationControl,
   WalletConnectionControl,
@@ -35,7 +33,6 @@ export function VerificationFlow({
   );
 
   const { user } = useAuth();
-  const { colorPalette } = useColorMode();
   const isMobile = useIsMobile();
 
   const kycStatus = user?.kyc_status as KycStatus;
@@ -54,7 +51,7 @@ export function VerificationFlow({
     <Stack sx={{ mt: { xs: 3, md: 0 }, px: 2, width: 400 }}>
       <Typography
         variant="h4"
-        sx={{ color: colorPalette.text.auxiliary100, mb: { xs: 2.5, md: 5 } }}
+        sx={{ color: 'text.auxiliary100', mb: { xs: 2.5, md: 5 } }}
       >
         {t('worker.profile.beforeWeGetStarted')}
       </Typography>
@@ -67,7 +64,7 @@ export function VerificationFlow({
             width: 90,
             height: 10,
             borderRadius: '7px',
-            bgcolor: colorPalette.primary.main,
+            bgcolor: 'primary.main',
           }}
         />
         <Box
@@ -75,10 +72,7 @@ export function VerificationFlow({
             width: 90,
             height: 10,
             borderRadius: '7px',
-            bgcolor:
-              step === 'wallet'
-                ? colorPalette.primary.main
-                : colorPalette.background.default,
+            bgcolor: step === 'wallet' ? 'primary.main' : 'background.default',
           }}
         />
       </Stack>
@@ -91,14 +85,21 @@ export function VerificationFlow({
               display: 'flex',
               alignItems: 'center',
               gap: 1,
-              color: colorPalette.text.auxiliary100,
+              color: 'text.auxiliary100',
               fontWeight: 600,
               mb: { xs: 3, md: 2 },
             }}
           >
             {t('worker.profile.identityVerification')}
             {isKycStarted && label && (
-              <Chip label={label} backgroundColor={getChipColor(kycStatus)} />
+              <Chip
+                label={label}
+                sx={{
+                  bgcolor: getChipColor(kycStatus),
+                  border: 'none',
+                  color: 'common.white',
+                }}
+              />
             )}
           </Typography>
           <IdentityVerificationControl
@@ -113,7 +114,7 @@ export function VerificationFlow({
             component="h6"
             variant={isMobile ? 'body1' : 'h6'}
             sx={{
-              color: colorPalette.text.auxiliary100,
+              color: 'text.auxiliary100',
               fontWeight: 600,
               mb: { xs: 3, md: 5 },
             }}

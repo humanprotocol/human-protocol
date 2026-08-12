@@ -1,9 +1,7 @@
 import { Controller } from 'react-hook-form';
-import type { TextFieldProps } from '@mui/material/TextField';
-import TextField from '@mui/material/TextField';
-import { Typography } from '@mui/material';
+import { type TextFieldProps, TextField, Typography } from '@mui/material';
+
 import { type InputMask } from '@/shared/components/data-entry/input-masks';
-import { useColorMode } from '@/shared/contexts/color-mode';
 
 type OmittedProps = Omit<TextFieldProps, 'name' | 'error' | 'helperText'>;
 export interface InputProps extends OmittedProps {
@@ -22,8 +20,6 @@ export function Input({
   mask,
   ...rest
 }: InputProps) {
-  const { colorPalette } = useColorMode();
-
   return (
     <Controller
       name={name}
@@ -38,7 +34,7 @@ export function Input({
             <Typography
               component="div"
               variant="helperText"
-              sx={{ color: customError ? undefined : colorPalette.error.main }}
+              sx={{ color: customError ? undefined : 'error.main' }}
             >
               {customError ? customError : fieldState.error?.message}
             </Typography>

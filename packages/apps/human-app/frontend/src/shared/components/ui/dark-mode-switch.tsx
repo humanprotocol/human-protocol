@@ -3,7 +3,7 @@ import { MoonIcon, SunIcon } from '@/shared/components/ui/icons';
 import { useColorMode } from '@/shared/contexts/color-mode';
 
 export function ColorModeSwitch() {
-  const { switchMode, colorPalette, isDarkMode } = useColorMode();
+  const { switchMode, isDarkMode } = useColorMode();
 
   return (
     <Box
@@ -14,10 +14,10 @@ export function ColorModeSwitch() {
         height: '32px',
         p: '3px',
         gap: 1,
+        bgcolor: 'background.subtle',
         borderRadius: '90px',
         border: '1px solid',
-        borderColor: colorPalette.border.main,
-        bgcolor: isDarkMode ? '#2d284e' : '#ffffff',
+        borderColor: 'border.main',
       }}
     >
       <IconButton

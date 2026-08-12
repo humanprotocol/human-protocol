@@ -6,7 +6,6 @@ import { type MRT_ColumnDef } from 'material-react-table';
 import type { JobType } from '@/shared/types/entity.type';
 import { EvmAddress, RewardAmount, MyJobsTableActions } from '../../components';
 import { type MyJob } from '../../schemas';
-import { useColorMode } from '@/shared/contexts/color-mode';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { ChainIcon } from '@/shared/components/ui/chain-icon';
 import { TimeUntil } from '../components/time-until';
@@ -16,7 +15,6 @@ const COL_SIZE = 100;
 const COL_SIZE_MD = 150;
 
 export const useGetMyJobsColumns = (): MRT_ColumnDef<MyJob>[] => {
-  const { colorPalette } = useColorMode();
   const isMobile = useIsMobile();
   const { t } = useTranslation();
 
@@ -50,7 +48,7 @@ export const useGetMyJobsColumns = (): MRT_ColumnDef<MyJob>[] => {
             <RewardAmount
               reward_amount={reward_amount}
               reward_token={reward_token}
-              color={colorPalette.text.auxiliary100}
+              color="text.auxiliary100"
             />
           );
         },
@@ -66,13 +64,9 @@ export const useGetMyJobsColumns = (): MRT_ColumnDef<MyJob>[] => {
             <Chip
               label={label}
               sx={{
-                typography: 'body2',
-                fontWeight: 500,
-                color: colorPalette.text.primary,
-                bgcolor: colorPalette.background.subtle,
-                borderRadius: '99px',
-                border: `0.5px solid ${colorPalette.border.strong}`,
-                transition: 'none',
+                color: 'text.primary',
+                bgcolor: 'background.subtle',
+                border: 'border.strong',
               }}
             />
           );
@@ -89,7 +83,7 @@ export const useGetMyJobsColumns = (): MRT_ColumnDef<MyJob>[] => {
               variant={isMobile ? 'body2' : 'body1'}
               sx={{
                 fontWeight: 500,
-                color: colorPalette.text.auxiliary100,
+                color: 'text.auxiliary100',
                 fontVariantNumeric: 'tabular-nums',
               }}
             >
@@ -109,7 +103,7 @@ export const useGetMyJobsColumns = (): MRT_ColumnDef<MyJob>[] => {
               variant={isMobile ? 'body2' : 'body1'}
               sx={{
                 fontWeight: 500,
-                color: colorPalette.text.auxiliary100,
+                color: 'text.auxiliary100',
                 textTransform: 'capitalize',
               }}
             >
@@ -137,6 +131,6 @@ export const useGetMyJobsColumns = (): MRT_ColumnDef<MyJob>[] => {
         ),
       },
     ],
-    [colorPalette, t, isMobile]
+    [t, isMobile]
   );
 };

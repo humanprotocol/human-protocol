@@ -7,7 +7,6 @@ import { Loader } from '@/shared/components/ui/loader';
 import { routerPaths } from '@/router/router-paths';
 import { useGetOracles } from '../hooks';
 import { useIsAlreadyRegistered } from './hooks';
-import { useColorMode } from '@/shared/contexts/color-mode/use-color-mode';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { BackButton } from '@/shared/components/ui/page-card/back-button';
 
@@ -17,7 +16,6 @@ function isAddress(address: string | undefined): address is string {
 
 export function RegistrationPage() {
   const { t } = useTranslation();
-  const { colorPalette } = useColorMode();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { address: oracleAddress } = useParams<{ address: string }>();
@@ -49,10 +47,10 @@ export function RegistrationPage() {
           p: { xs: 0, md: 4 },
           mx: { xs: 2, md: 0 },
           gap: { xs: 1, md: 0 },
-          borderBottom: {
+          borderBottom: (theme) => ({
             xs: 'none',
-            md: `1px solid ${colorPalette.border.main}`,
-          },
+            md: `1px solid ${theme.palette.border.main}`,
+          }),
         }}
       >
         {isMobile && <BackButton onClick={handleBack} />}
@@ -77,7 +75,7 @@ export function RegistrationPage() {
             maxWidth: { xs: '100%', md: '350px' },
           }}
         >
-          <Typography sx={{ color: colorPalette.text.auxiliary100 }}>
+          <Typography sx={{ color: 'text.auxiliary100' }}>
             {t('worker.registrationInExchangeOracle.requiredMessage')}
           </Typography>
           <RegistrationForm

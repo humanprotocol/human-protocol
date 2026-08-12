@@ -4,7 +4,6 @@ import { Chip, Paper, Stack, Typography } from '@mui/material';
 
 import { AvailableJob } from '../../../types';
 import { JobType } from '@/shared/types/entity.type';
-import { useColorMode } from '@/shared/contexts/color-mode/use-color-mode';
 import {
   OracleAddressIcon,
   OracleRewardIcon,
@@ -26,7 +25,6 @@ function DescriptionDrawer({
   description: string | undefined;
 }) {
   const { t } = useTranslation();
-  const { colorPalette } = useColorMode();
 
   return (
     <BaseDrawer
@@ -34,16 +32,10 @@ function DescriptionDrawer({
       onClose={onClose}
       sx={{ maxHeight: '50dvh', px: 2 }}
     >
-      <Typography
-        variant="h6"
-        sx={{ color: colorPalette.text.auxiliary100, mb: 4 }}
-      >
+      <Typography variant="h6" sx={{ color: 'text.auxiliary100', mb: 4 }}>
         {t('worker.jobs.taskDescriptionTitle')}
       </Typography>
-      <Typography
-        variant="body2"
-        sx={{ color: colorPalette.text.auxiliary100 }}
-      >
+      <Typography variant="body2" sx={{ color: 'text.auxiliary100' }}>
         {description}
       </Typography>
     </BaseDrawer>
@@ -54,7 +46,6 @@ export function AvailableJobsCard({ job }: { job: AvailableJob }) {
   const [showDescriptionDialog, setShowDescriptionDialog] = useState(false);
 
   const { t } = useTranslation();
-  const { colorPalette } = useColorMode();
 
   const { onJobAssignmentError, onJobAssignmentSuccess } =
     useJobsNotifications();
@@ -74,7 +65,7 @@ export function AvailableJobsCard({ job }: { job: AvailableJob }) {
       sx={{
         mb: 2.5,
         borderRadius: '20px',
-        border: `1px solid ${colorPalette.border.strong}`,
+        border: (theme) => `1px solid ${theme.palette.border.strong}`,
       }}
     >
       <Stack sx={{ p: 2, gap: 2 }}>
@@ -89,13 +80,9 @@ export function AvailableJobsCard({ job }: { job: AvailableJob }) {
           <Chip
             label={t(`jobTypeLabels.${job.job_type as JobType}`)}
             sx={{
-              typography: 'body2',
-              fontWeight: 500,
-              color: colorPalette.text.primary,
-              bgcolor: colorPalette.background.subtle,
-              width: 'fit-content',
-              borderRadius: '99px',
-              border: `0.5px solid ${colorPalette.border.strong}`,
+              color: 'text.primary',
+              bgcolor: 'background.subtle',
+              borderColor: 'border.strong',
             }}
           />
           <ChainIcon chainId={job.chain_id} />
@@ -104,14 +91,14 @@ export function AvailableJobsCard({ job }: { job: AvailableJob }) {
           <Stack direction="row" sx={{ alignItems: 'center', gap: 0.75 }}>
             <OracleAddressIcon
               sx={{
-                color: colorPalette.text.auxiliary200,
+                color: 'text.auxiliary200',
                 fontSize: '20px',
               }}
             />
             <Typography
               variant="body2"
               sx={{
-                color: colorPalette.text.auxiliary200,
+                color: 'text.auxiliary200',
                 fontWeight: 500,
               }}
             >
@@ -122,14 +109,14 @@ export function AvailableJobsCard({ job }: { job: AvailableJob }) {
           <Stack direction="row" sx={{ alignItems: 'center', gap: 0.75 }}>
             <OracleRewardIcon
               sx={{
-                color: colorPalette.text.auxiliary200,
+                color: 'text.auxiliary200',
                 fontSize: '20px',
               }}
             />
             <Typography
               variant="body2"
               sx={{
-                color: colorPalette.text.auxiliary200,
+                color: 'text.auxiliary200',
                 fontWeight: 500,
               }}
             >
@@ -138,7 +125,7 @@ export function AvailableJobsCard({ job }: { job: AvailableJob }) {
             <RewardAmount
               reward_amount={job.reward_amount}
               reward_token={job.reward_token}
-              color={colorPalette.text.auxiliary100}
+              color="text.auxiliary100"
             />
           </Stack>
         </Stack>
@@ -148,7 +135,7 @@ export function AvailableJobsCard({ job }: { job: AvailableJob }) {
         sx={{
           p: 2,
           gap: 2,
-          borderTop: `1px solid ${colorPalette.border.main}`,
+          borderTop: (theme) => `1px solid ${theme.palette.border.main}`,
         }}
       >
         {!!job.job_description && (

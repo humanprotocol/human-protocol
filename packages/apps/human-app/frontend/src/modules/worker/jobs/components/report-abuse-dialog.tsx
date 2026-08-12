@@ -15,7 +15,6 @@ import { ResponsiveOverlay } from '@/shared/components/ui/responsive-overlay';
 import { useReportAbuseMutation } from '../available-jobs/hooks/use-report-abuse';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { Button } from '@/shared/components/ui/button';
-import { useColorMode } from '@/shared/contexts/color-mode/use-color-mode';
 import { Loader } from '@/shared/components/ui/loader';
 
 type Props = {
@@ -43,10 +42,8 @@ const REASON_OPTIONS = [
 
 function ErrorState({ error }: { error: string }) {
   const { t } = useTranslation();
-  const { colorPalette } = useColorMode();
 
   const isAbuseError = error === ABUSE_ERROR;
-  const errorColor = colorPalette.error.main;
 
   return (
     <Stack
@@ -58,27 +55,27 @@ function ErrorState({ error }: { error: string }) {
         px: 2,
       }}
     >
-      <ErrorIcon sx={{ color: errorColor, width: 40, height: 40 }} />
+      <ErrorIcon sx={{ color: 'error.main', width: 40, height: 40 }} />
       {isAbuseError ? (
         <>
           <Typography
             component="p"
             variant="h5"
-            sx={{ fontWeight: 700, color: errorColor }}
+            sx={{ fontWeight: 700, color: 'error.main' }}
           >
             {t('worker.reportAbuse.modalHeaderAlreadyReportedError')}
           </Typography>
           <Typography
             variant="body1"
             sx={{
-              color: errorColor,
+              color: 'error.main',
             }}
           >
             {t('worker.reportAbuse.modalParagraphAlreadyReportedError')}
           </Typography>
         </>
       ) : (
-        <Typography variant="body1" sx={{ color: errorColor }}>
+        <Typography variant="body1" sx={{ color: 'error.main' }}>
           {t('worker.reportAbuse.modalUnknownError')}
         </Typography>
       )}
@@ -88,7 +85,6 @@ function ErrorState({ error }: { error: string }) {
 
 function SuccessState() {
   const { t } = useTranslation();
-  const { colorPalette } = useColorMode();
 
   return (
     <Stack
@@ -99,20 +95,15 @@ function SuccessState() {
         px: 2,
       }}
     >
-      <SuccessIcon
-        sx={{ color: colorPalette.success.main, width: 40, height: 40 }}
-      />
+      <SuccessIcon sx={{ color: 'success.main', width: 40, height: 40 }} />
       <Typography
         component="p"
         variant="h5"
-        sx={{ fontWeight: 700, color: colorPalette.text.auxiliary100 }}
+        sx={{ fontWeight: 700, color: 'text.auxiliary100' }}
       >
         {t('worker.reportAbuse.modalSuccessHeader')}
       </Typography>
-      <Typography
-        variant="body1"
-        sx={{ color: colorPalette.text.auxiliary100 }}
-      >
+      <Typography variant="body1" sx={{ color: 'text.auxiliary100' }}>
         {t('worker.reportAbuse.modalSuccessParagraph')}
       </Typography>
     </Stack>
@@ -129,7 +120,6 @@ export function ReportAbuseDialog({
   const [error, setError] = useState('');
 
   const { t } = useTranslation();
-  const { colorPalette } = useColorMode();
   const isMobile = useIsMobile();
 
   const {
@@ -172,7 +162,7 @@ export function ReportAbuseDialog({
       <Stack sx={{ px: 2 }}>
         <Typography
           variant="h6"
-          sx={{ mb: 4, color: colorPalette.text.auxiliary100, fontWeight: 700 }}
+          sx={{ mb: 4, color: 'text.auxiliary100', fontWeight: 700 }}
         >
           {t('worker.reportAbuse.modalHeader')}
         </Typography>
@@ -180,7 +170,7 @@ export function ReportAbuseDialog({
           <>
             <Typography
               variant={isMobile ? 'body2' : 'body1'}
-              sx={{ color: colorPalette.text.auxiliary200 }}
+              sx={{ color: 'text.auxiliary200' }}
             >
               {t('worker.reportAbuse.modalParagraph')}
             </Typography>
@@ -189,12 +179,12 @@ export function ReportAbuseDialog({
                 value={reason}
                 displayEmpty
                 sx={{
-                  color: colorPalette.text.auxiliary100,
+                  color: 'text.auxiliary100',
                   '& .MuiSelect-select': {
-                    color: colorPalette.text.auxiliary100,
+                    color: 'text.auxiliary100',
                   },
                   '& .MuiOutlinedInput-notchedOutline': {
-                    borderColor: colorPalette.text.auxiliary100,
+                    borderColor: 'text.auxiliary100',
                   },
                 }}
                 onChange={(e) => {
@@ -225,7 +215,7 @@ export function ReportAbuseDialog({
           p: 2,
           gap: 2,
           width: '100%',
-          borderTop: `1px solid ${colorPalette.border.main}`,
+          borderTop: (theme) => `1px solid ${theme.palette.border.main}`,
         }}
       >
         <Button
@@ -233,8 +223,8 @@ export function ReportAbuseDialog({
           fullWidth
           disabled={isPending}
           sx={{
-            color: colorPalette.text.auxiliary100,
-            borderColor: colorPalette.text.auxiliary100,
+            color: 'text.auxiliary100',
+            borderColor: 'text.auxiliary100',
           }}
           onClick={onClose}
         >

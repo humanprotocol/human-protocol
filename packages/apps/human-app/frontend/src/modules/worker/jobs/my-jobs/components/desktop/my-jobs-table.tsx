@@ -5,13 +5,10 @@ import {
   useMaterialReactTable,
 } from 'material-react-table';
 
-import { useColorMode } from '@/shared/contexts/color-mode';
-import { createTableDarkMode } from '@/shared/styles/create-table-dark-mode';
 import { useGetMyJobsData, useMyJobsFilterStore } from '../../../hooks';
 import { useGetMyJobsColumns } from '../../hooks/use-get-my-jobs-columns';
 
 export function MyJobsTable() {
-  const { colorPalette, isDarkMode } = useColorMode();
   const { data: tableData, isPending, isError } = useGetMyJobsData();
   const { setPageParams, filterParams } = useMyJobsFilterStore();
   const [paginationState, setPaginationState] = useState<MRT_PaginationState>(
@@ -66,23 +63,20 @@ export function MyJobsTable() {
       SelectProps: {
         sx: {
           '.MuiSelect-select': {
-            color: colorPalette.text.auxiliary100,
+            color: 'text.auxiliary100',
           },
           '.MuiSelect-icon': {
             transition: 'none',
-            ':hover': {
-              backgroundColor: 'blue',
-            },
-            fill: colorPalette.text.auxiliary100,
+            fill: 'text.auxiliary100',
           },
         },
       },
     },
     muiBottomToolbarProps: {
       sx: {
-        bgcolor: colorPalette.background.paper,
+        bgcolor: 'background.paper',
         boxShadow: 'none',
-        color: colorPalette.text.auxiliary100,
+        color: 'text.auxiliary100',
         transition: 'none',
       },
     },
@@ -100,7 +94,7 @@ export function MyJobsTable() {
     },
     muiTableHeadProps: {
       sx: {
-        backgroundColor: colorPalette.background.default,
+        backgroundColor: 'background.default',
       },
     },
     muiTableHeadRowProps: {
@@ -115,8 +109,8 @@ export function MyJobsTable() {
         paddingBottom: '8px',
         paddingLeft: '12px',
         paddingRight: '12px',
-        borderColor: colorPalette.background.paper,
-        color: colorPalette.text.auxiliary200,
+        borderColor: 'background.paper',
+        color: 'text.auxiliary200',
         typography: 'body1',
         fontWeight: 500,
         '& .Mui-TableHeadCell-Content': {
@@ -129,20 +123,19 @@ export function MyJobsTable() {
       align: 'center',
       sx: {
         textAlign: 'center',
-        borderBottom: `1px solid ${colorPalette.border.main}`,
+        borderBottom: (theme) => `1px solid ${theme.palette.border.main}`,
       },
     },
     muiTableBodyRowProps: {
       sx: {
-        bgcolor: colorPalette.background.paper,
-        borderBottom: `1px solid ${colorPalette.border.main}`,
+        bgcolor: 'background.paper',
+        borderBottom: (theme) => `1px solid ${theme.palette.border.main}`,
         transition: 'none',
         '&:last-of-type': {
           borderBottom: 'none',
         },
       },
     },
-    ...(isDarkMode ? createTableDarkMode(colorPalette) : {}),
   });
 
   return <MaterialReactTable table={table} />;

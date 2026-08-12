@@ -11,7 +11,6 @@ import { getErrorMessageForError } from '@/shared/errors';
 import { HCaptchaForm } from '@/shared/components/hcaptcha';
 import { MailTo } from '@/shared/components/ui/mail-to';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
-import { useColorMode } from '@/shared/contexts/color-mode';
 import { useSendResetLinkMutation } from './hooks';
 import {
   sendResetLinkHcaptchaDtoSchema,
@@ -23,7 +22,6 @@ import {
 } from '@/shared/hooks/use-notification';
 
 export function SendResetLinkSuccessPage() {
-  const { colorPalette } = useColorMode();
   const { t } = useTranslation();
   const { showNotification } = useNotification();
   const { field: email } = useLocationState({
@@ -67,15 +65,14 @@ export function SendResetLinkSuccessPage() {
         my: { xs: 0, md: 4 },
         py: { xs: 3, md: 0 },
         px: { xs: 2, md: 0 },
-        bgcolor: colorPalette.background.paper,
         borderRadius: '30px',
         borderBottomLeftRadius: { xs: 0, md: '30px' },
         borderBottomRightRadius: { xs: 0, md: '30px' },
         border: { xs: 'none', md: '1px solid' },
-        borderColor: {
+        borderColor: (theme) => ({
           xs: 'none',
-          md: colorPalette.border.main,
-        },
+          md: theme.palette.border.main,
+        }),
         overflow: 'hidden',
       }}
     >
@@ -83,7 +80,7 @@ export function SendResetLinkSuccessPage() {
         <Typography
           component="h1"
           variant="h4"
-          sx={{ color: colorPalette.text.auxiliary100 }}
+          sx={{ color: 'text.auxiliary100' }}
         >
           {t('worker.sendResetLinkForm.title')}
         </Typography>
@@ -94,7 +91,7 @@ export function SendResetLinkSuccessPage() {
             }}
           >
             <Grid container sx={{ gap: { xs: 2, md: 3 } }}>
-              <Typography sx={{ color: colorPalette.text.auxiliary100 }}>
+              <Typography sx={{ color: 'text.auxiliary100' }}>
                 <Trans
                   components={{
                     1: <Typography component="span" sx={{ fontWeight: 600 }} />,
@@ -103,14 +100,10 @@ export function SendResetLinkSuccessPage() {
                   values={{ email }}
                 />
               </Typography>
-              <Typography
-                sx={{
-                  color: colorPalette.text.auxiliary200,
-                }}
-              >
+              <Typography sx={{ color: 'text.auxiliary200' }}>
                 {t('worker.sendResetLinkSuccess.paragraph2')}
               </Typography>
-              <Typography sx={{ color: colorPalette.text.auxiliary100 }}>
+              <Typography sx={{ color: 'text.auxiliary100' }}>
                 <Trans
                   components={{
                     1: <Typography component="span" sx={{ fontWeight: 600 }} />,
@@ -133,7 +126,7 @@ export function SendResetLinkSuccessPage() {
                   <>{t('worker.sendResetLinkSuccess.btn')}</>
                 )}
               </Button>
-              <Typography sx={{ color: colorPalette.text.auxiliary100 }}>
+              <Typography sx={{ color: 'text.auxiliary100' }}>
                 <Trans
                   components={{
                     1: <Typography component="span" sx={{ fontWeight: 600 }} />,

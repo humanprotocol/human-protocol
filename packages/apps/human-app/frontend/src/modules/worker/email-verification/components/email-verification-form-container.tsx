@@ -11,7 +11,6 @@ import {
   useNotification,
 } from '@/shared/hooks/use-notification';
 import { useResendEmailRouterParams, useResendEmail } from '../hooks';
-import { useColorMode } from '@/shared/contexts/color-mode';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
 import { routerPaths } from '@/router/router-paths';
 import { InboxIcon } from '@/shared/components/ui/icons';
@@ -23,7 +22,6 @@ export function EmailVerificationFormContainer() {
   const { methods, handleResend, isError, error, isSuccess } = useResendEmail();
   const { showNotification } = useNotification();
   const { t } = useTranslation();
-  const { colorPalette } = useColorMode();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
@@ -66,15 +64,14 @@ export function EmailVerificationFormContainer() {
         my: { xs: 0, md: 4 },
         py: { xs: 8, md: 0 },
         px: { xs: 2, md: 0 },
-        bgcolor: colorPalette.background.paper,
         borderRadius: '30px',
         borderBottomLeftRadius: { xs: 0, md: '30px' },
         borderBottomRightRadius: { xs: 0, md: '30px' },
         border: { xs: 'none', md: '1px solid' },
-        borderColor: {
+        borderColor: (theme) => ({
           xs: 'none',
-          md: colorPalette.border.main,
-        },
+          md: theme.palette.border.main,
+        }),
         overflow: 'hidden',
       }}
     >
@@ -85,28 +82,26 @@ export function EmailVerificationFormContainer() {
           }}
         >
           <Stack sx={{ width: { xs: '100%', md: 400 } }}>
-            <InboxIcon
-              sx={{ mb: 2.5, color: colorPalette.primary.main, fontSize: 54 }}
-            />
+            <InboxIcon sx={{ mb: 2.5, color: 'primary.main', fontSize: 54 }} />
             <Typography
               component="h1"
               variant="h4"
               sx={{
                 mb: 1,
-                color: colorPalette.text.auxiliary100,
+                color: 'text.auxiliary100',
                 textTransform: { xs: 'capitalize', md: 'none' },
               }}
             >
               {t('worker.verifyEmail.checkYourInbox')}
             </Typography>
-            <Typography sx={{ mb: 3, color: colorPalette.text.auxiliary200 }}>
+            <Typography sx={{ mb: 3, color: 'text.auxiliary200' }}>
               <Trans
                 components={{
                   1: (
                     <Typography
                       component="span"
                       sx={{
-                        color: colorPalette.primary.main,
+                        color: 'primary.main',
                         fontWeight: 600,
                       }}
                     />
@@ -119,10 +114,8 @@ export function EmailVerificationFormContainer() {
             <Typography
               variant="body2"
               sx={{
-                fontSize: 14,
                 fontWeight: { xs: 600, md: 500 },
-                lineHeight: { xs: '20px', md: '24px' },
-                color: colorPalette.text.auxiliary100,
+                color: 'text.auxiliary100',
                 mb: 3,
               }}
             >

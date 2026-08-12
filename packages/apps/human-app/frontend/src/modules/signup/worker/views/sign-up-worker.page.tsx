@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Box, Divider, Grid, Link, Paper, Typography } from '@mui/material';
 import { Trans } from 'react-i18next';
 import { t } from 'i18next';
+
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/data-entry/input';
 import { Password } from '@/shared/components/data-entry/password';
@@ -17,13 +18,11 @@ import { ApiClientError } from '@/api';
 import { signUpDtoSchema } from '../schema';
 import signUpImage from '@/assets/background-images/signup-background.png';
 import { BackButton } from '@/shared/components/ui/page-card/back-button';
-
 import { routerPaths } from '@/router/router-paths';
 import {
   TopNotificationType,
   useNotification,
 } from '@/shared/hooks/use-notification';
-import { useColorMode } from '@/shared/contexts/color-mode';
 
 function handleSignupError(unknownError: unknown) {
   if (unknownError instanceof ApiClientError && unknownError.status === 409) {
@@ -34,7 +33,6 @@ function handleSignupError(unknownError: unknown) {
 export function SignUpPage() {
   const { showNotification } = useNotification();
   const navigate = useNavigate();
-  const { colorPalette } = useColorMode();
   const { signUp, error, isError, isLoading, reset } = useSignUpWorker();
   const methods = useForm({
     defaultValues: {
@@ -73,15 +71,14 @@ export function SignUpPage() {
         display: 'flex',
         alignSelf: 'stretch',
         my: { xs: 0, md: 4 },
-        bgcolor: colorPalette.background.paper,
         borderRadius: '30px',
         borderBottomLeftRadius: { xs: 0, md: '30px' },
         borderBottomRightRadius: { xs: 0, md: '30px' },
         border: { xs: 'none', md: '1px solid' },
-        borderColor: {
+        borderColor: (theme) => ({
           xs: 'none',
-          md: colorPalette.border.main,
-        },
+          md: theme.palette.border.main,
+        }),
         overflow: 'hidden',
       }}
     >
@@ -118,7 +115,7 @@ export function SignUpPage() {
             <Typography
               component="h1"
               variant="h4"
-              sx={{ color: colorPalette.text.auxiliary100 }}
+              sx={{ color: 'text.auxiliary100' }}
             >
               {t('worker.signUpForm.title')}
             </Typography>
@@ -141,7 +138,7 @@ export function SignUpPage() {
                 <Typography
                   sx={{
                     fontSize: '12px !important',
-                    color: colorPalette.text.auxiliary100,
+                    color: 'text.auxiliary100',
                   }}
                 >
                   <Trans
@@ -183,12 +180,12 @@ export function SignUpPage() {
                       fontWeight: 700,
                       lineHeight: '125%',
                       letterSpacing: '0.25px',
-                      color: colorPalette.text.primary,
+                      color: 'text.primary',
                       position: 'absolute',
                       top: '50%',
                       left: '50%',
                       transform: 'translate(-50%, -50%)',
-                      bgcolor: colorPalette.background.paper,
+                      bgcolor: 'background.paper',
                     }}
                   >
                     {t('worker.signUpForm.or')}
@@ -206,12 +203,10 @@ export function SignUpPage() {
                   }}
                 >
                   <Typography
+                    variant="body2"
                     sx={{
-                      fontSize: '14px',
                       fontWeight: 500,
-                      lineHeight: '26px',
-                      letterSpacing: '0.1px',
-                      color: colorPalette.text.auxiliary200,
+                      color: 'text.auxiliary200',
                     }}
                   >
                     {t('worker.signUpForm.alreadyHaveAccount')}
@@ -219,12 +214,10 @@ export function SignUpPage() {
                   <Link
                     component={RouterLink}
                     to={routerPaths.signIn}
+                    variant="body2"
                     sx={{
-                      fontSize: '14px',
                       fontWeight: 600,
-                      lineHeight: '26px',
-                      letterSpacing: '0.1px',
-                      color: colorPalette.accent.main,
+                      color: 'accent.main',
                       textDecoration: 'underline',
                     }}
                   >

@@ -6,14 +6,12 @@ import { useAuth } from '@/modules/auth/hooks/use-auth';
 import { KycStatus } from '@/modules/worker/profile/types';
 import { routerPaths } from '@/router/router-paths';
 import { useIsUserVerified } from '@/shared/hooks';
-import { useColorMode } from '@/shared/contexts/color-mode';
 import { VerificationFlow } from './verification-flow';
 import { Loader } from '@/shared/components/ui/loader';
 
 export function VerifyUserPage() {
   const navigate = useNavigate();
   const { user, status } = useAuth();
-  const { colorPalette } = useColorMode();
   const isUserVerified = useIsUserVerified();
 
   const isEmailVerificationPending =
@@ -57,15 +55,14 @@ export function VerifyUserPage() {
         },
         justifyContent: 'center',
         my: { xs: 0, md: 4 },
-        bgcolor: colorPalette.background.paper,
         borderRadius: '30px',
         borderBottomLeftRadius: { xs: 0, md: '30px' },
         borderBottomRightRadius: { xs: 0, md: '30px' },
         border: { xs: 'none', md: '1px solid' },
-        borderColor: {
+        borderColor: (theme) => ({
           xs: 'none',
-          md: colorPalette.border.main,
-        },
+          md: theme.palette.border.main,
+        }),
         overflow: 'hidden',
       }}
     >

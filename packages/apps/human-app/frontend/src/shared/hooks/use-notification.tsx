@@ -1,9 +1,7 @@
 import { useCallback } from 'react';
 import { type SnackbarKey, useSnackbar } from 'notistack';
 import CloseIcon from '@mui/icons-material/Close';
-
-import { ColorPalette } from '@/shared/styles/color-palette';
-import { useColorMode } from '../contexts/color-mode';
+import { Palette, useTheme } from '@mui/material';
 
 export enum TopNotificationType {
   SUCCESS = 'success',
@@ -21,23 +19,23 @@ const AUTO_HIDE_NOTIFICATION_MS = 6000;
 
 const mapTopNotificationTypeToColor = (
   type: TopNotificationType,
-  colorPalette: ColorPalette
+  palette: Palette
 ) => {
   switch (type) {
     case TopNotificationType.SUCCESS:
-      return colorPalette.success.main;
+      return palette.success.main;
     case TopNotificationType.WARNING:
-      return colorPalette.secondary.main;
+      return palette.secondary.main;
     case TopNotificationType.ERROR:
-      return '#FF6262';
+      return palette.error.main;
     default:
-      return colorPalette.secondary.main;
+      return palette.secondary.main;
   }
 };
 
 export const useNotification = () => {
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
-  const { colorPalette } = useColorMode();
+  const theme = useTheme();
 
   const action = useCallback(
     (snackbarId: SnackbarKey) => (
@@ -72,8 +70,8 @@ export const useNotification = () => {
           flexWrap: 'nowrap',
           width: '100%',
           maxWidth: '100%',
-          backgroundColor: mapTopNotificationTypeToColor(type, colorPalette),
-          color: colorPalette.white,
+          backgroundColor: mapTopNotificationTypeToColor(type, theme.palette),
+          color: theme.palette.common.white,
           fontSize: 14,
           fontWeight: 600,
           letterSpacing: 0.1,
@@ -81,7 +79,7 @@ export const useNotification = () => {
         action,
       });
     },
-    [enqueueSnackbar, action, colorPalette]
+    [enqueueSnackbar, action, theme.palette]
   );
 
   return { showNotification };

@@ -4,13 +4,11 @@ import { Button } from '@/shared/components/ui/button';
 import { useWalletConnect } from '@/shared/contexts/wallet-connect';
 import { RegisterAddressBtn } from './buttons/register-address-btn';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
-import { useColorMode } from '@/shared/contexts/color-mode';
 
 export function WalletConnectionControl() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { isConnected, openModal } = useWalletConnect();
-  const { colorPalette } = useColorMode();
 
   const hasWalletAddress = !!user?.wallet_address;
 
@@ -18,7 +16,7 @@ export function WalletConnectionControl() {
     return (
       <Stack sx={{ gap: 2 }}>
         <RegisterAddressBtn />
-        <Typography sx={{ color: colorPalette.text.auxiliary100 }}>
+        <Typography sx={{ color: 'text.auxiliary100' }}>
           {t('worker.profile.walletAddressMessage')}
         </Typography>
       </Stack>

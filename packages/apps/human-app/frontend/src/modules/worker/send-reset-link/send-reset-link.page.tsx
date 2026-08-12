@@ -12,7 +12,6 @@ import { routerPaths } from '@/router/router-paths';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
 import { useSendResetLinkMutation } from './hooks';
 import { type SendResetLinkDto, sendResetLinkDtoSchema } from './schemas';
-import { useColorMode } from '@/shared/contexts/color-mode';
 import { BackButton } from '@/shared/components/ui/page-card/back-button';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -23,7 +22,6 @@ import {
 export function SendResetLinkPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { colorPalette } = useColorMode();
   const { showNotification } = useNotification();
   const navigate = useNavigate();
 
@@ -75,15 +73,14 @@ export function SendResetLinkPage() {
         my: { xs: 0, md: 4 },
         py: { xs: 3, md: 0 },
         px: { xs: 2, md: 0 },
-        bgcolor: colorPalette.background.paper,
         borderRadius: '30px',
         borderBottomLeftRadius: { xs: 0, md: '30px' },
         borderBottomRightRadius: { xs: 0, md: '30px' },
         border: { xs: 'none', md: '1px solid' },
-        borderColor: {
+        borderColor: (theme) => ({
           xs: 'none',
-          md: colorPalette.border.main,
-        },
+          md: theme.palette.border.main,
+        }),
         overflow: 'hidden',
       }}
     >
@@ -100,7 +97,7 @@ export function SendResetLinkPage() {
           <Typography
             component="h1"
             variant="h4"
-            sx={{ color: colorPalette.text.auxiliary100 }}
+            sx={{ color: 'text.auxiliary100' }}
           >
             {t('worker.sendResetLinkForm.title')}
           </Typography>
@@ -112,10 +109,7 @@ export function SendResetLinkPage() {
             }}
           >
             <Grid container sx={{ gap: 3 }}>
-              <Typography
-                variant="body1"
-                sx={{ color: colorPalette.text.auxiliary100 }}
-              >
+              <Typography variant="body1" sx={{ color: 'text.auxiliary100' }}>
                 {t('worker.sendResetLinkForm.description')}
               </Typography>
               <Input
