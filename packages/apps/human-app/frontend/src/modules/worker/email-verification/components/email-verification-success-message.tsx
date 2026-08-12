@@ -1,30 +1,18 @@
 import { t } from 'i18next';
 import { Link } from 'react-router-dom';
-import { Paper, Stack, Typography } from '@mui/material';
+import { Stack, Typography } from '@mui/material';
 
 import { Button } from '@/shared/components/ui/button';
 import { SuccessIcon } from '@/shared/components/ui/icons';
 import { routerPaths } from '@/router/router-paths';
+import { PageCard } from '@/shared/components/ui/page-card';
 
 export function EmailVerificationSuccessMessage() {
   return (
-    <Paper
-      elevation={0}
+    <PageCard
       sx={{
-        display: 'flex',
-        flex: 1,
-        alignSelf: 'stretch',
         alignItems: 'center',
         justifyContent: 'center',
-        my: { xs: 0, md: 4 },
-        borderRadius: '30px',
-        borderBottomLeftRadius: { xs: 0, md: '30px' },
-        borderBottomRightRadius: { xs: 0, md: '30px' },
-        border: { xs: 'none', md: '1px solid' },
-        borderColor: (theme) => ({
-          xs: 'none',
-          md: theme.palette.border.main,
-        }),
       }}
     >
       <Stack sx={{ gap: 2.5, alignItems: 'center' }}>
@@ -49,6 +37,6 @@ export function EmailVerificationSuccessMessage() {
           {t('worker.emailVerification.btn')}
         </Button>
       </Stack>
-    </Paper>
+    </PageCard>
   );
 }

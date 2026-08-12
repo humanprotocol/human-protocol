@@ -2,9 +2,9 @@ import { useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { FormProvider } from 'react-hook-form';
-import { Box, Paper, Stack, Typography } from '@mui/material';
+import { Box, Stack, Typography } from '@mui/material';
 
-import { PageCardLoader } from '@/shared/components/ui/page-card';
+import { PageCard, PageCardLoader } from '@/shared/components/ui/page-card';
 import { getErrorMessageForError } from '@/shared/errors';
 import {
   TopNotificationType,
@@ -53,26 +53,10 @@ export function EmailVerificationFormContainer() {
   }
 
   return (
-    <Paper
-      elevation={0}
+    <PageCard
       sx={{
-        display: 'flex',
-        alignSelf: 'stretch',
-        flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        my: { xs: 0, md: 4 },
-        py: { xs: 8, md: 0 },
-        px: { xs: 2, md: 0 },
-        borderRadius: '30px',
-        borderBottomLeftRadius: { xs: 0, md: '30px' },
-        borderBottomRightRadius: { xs: 0, md: '30px' },
-        border: { xs: 'none', md: '1px solid' },
-        borderColor: (theme) => ({
-          xs: 'none',
-          md: theme.palette.border.main,
-        }),
-        overflow: 'hidden',
       }}
     >
       <FormProvider {...methods}>
@@ -144,6 +128,6 @@ export function EmailVerificationFormContainer() {
           </Stack>
         </form>
       </FormProvider>
-    </Paper>
+    </PageCard>
   );
 }

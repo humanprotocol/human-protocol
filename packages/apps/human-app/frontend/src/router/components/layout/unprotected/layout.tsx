@@ -28,7 +28,7 @@ export function UnprotectedLayout() {
         minHeight: { xs: '100vh', md: 0 },
         width: '100%',
         pt: 0,
-        px: { xs: 0, md: 15 },
+        px: { xs: 0, md: 10, lg: 15 },
         backgroundColor: layoutBackgroundColor,
       }}
     >

@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Box, Divider, Grid, Link, Paper, Typography } from '@mui/material';
+import { Box, Divider, Grid, Link, Typography } from '@mui/material';
 import { Trans } from 'react-i18next';
 import { t } from 'i18next';
 
@@ -23,6 +23,7 @@ import {
   TopNotificationType,
   useNotification,
 } from '@/shared/hooks/use-notification';
+import { PageCard } from '@/shared/components/ui/page-card';
 
 function handleSignupError(unknownError: unknown) {
   if (unknownError instanceof ApiClientError && unknownError.status === 409) {
@@ -65,23 +66,7 @@ export function SignUpPage() {
   };
 
   return (
-    <Paper
-      elevation={0}
-      sx={{
-        display: 'flex',
-        alignSelf: 'stretch',
-        my: { xs: 0, md: 4 },
-        borderRadius: '30px',
-        borderBottomLeftRadius: { xs: 0, md: '30px' },
-        borderBottomRightRadius: { xs: 0, md: '30px' },
-        border: { xs: 'none', md: '1px solid' },
-        borderColor: (theme) => ({
-          xs: 'none',
-          md: theme.palette.border.main,
-        }),
-        overflow: 'hidden',
-      }}
-    >
+    <PageCard>
       <Grid
         container
         sx={{
@@ -244,6 +229,6 @@ export function SignUpPage() {
           />
         </Grid>
       </Grid>
-    </Paper>
+    </PageCard>
   );
 }

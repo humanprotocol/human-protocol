@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Box, Paper, Stack, Typography } from '@mui/material';
+import { Box, Stack, Typography } from '@mui/material';
 import { t } from 'i18next';
 import omit from 'lodash/omit';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -21,6 +21,7 @@ import {
   TopNotificationType,
   useNotification,
 } from '@/shared/hooks/use-notification';
+import { PageCard } from '@/shared/components/ui/page-card';
 
 export function ResetPasswordPage() {
   const location = useLocation();
@@ -67,26 +68,12 @@ export function ResetPasswordPage() {
   }, [isResetPasswordWorkerError, resetPasswordWorkerError, showNotification]);
 
   return (
-    <Paper
-      elevation={0}
+    <PageCard
       sx={{
-        display: 'flex',
-        flex: 1,
-        alignSelf: 'stretch',
         justifyContent: 'center',
         alignItems: { xs: 'flex-start', md: 'center' },
-        my: { xs: 0, md: 4 },
         py: { xs: 3, md: 0 },
         px: { xs: 2, md: 0 },
-        borderRadius: '30px',
-        borderBottomLeftRadius: { xs: 0, md: '30px' },
-        borderBottomRightRadius: { xs: 0, md: '30px' },
-        border: { xs: 'none', md: '1px solid' },
-        borderColor: (theme) => ({
-          xs: 'none',
-          md: theme.palette.border.main,
-        }),
-        overflow: 'hidden',
       }}
     >
       <Stack sx={{ width: { xs: '100%', md: '400px' } }}>
@@ -142,6 +129,6 @@ export function ResetPasswordPage() {
           </form>
         </FormProvider>
       </Stack>
-    </Paper>
+    </PageCard>
   );
 }

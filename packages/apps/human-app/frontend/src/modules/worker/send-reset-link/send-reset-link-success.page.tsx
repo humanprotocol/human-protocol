@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Grid, Paper, Stack, Typography } from '@mui/material';
+import { Grid, Stack, Typography } from '@mui/material';
 import { Trans, useTranslation } from 'react-i18next';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -20,6 +20,7 @@ import {
   TopNotificationType,
   useNotification,
 } from '@/shared/hooks/use-notification';
+import { PageCard } from '@/shared/components/ui/page-card';
 
 export function SendResetLinkSuccessPage() {
   const { t } = useTranslation();
@@ -54,26 +55,12 @@ export function SendResetLinkSuccessPage() {
   }, [isError, error, showNotification]);
 
   return (
-    <Paper
-      elevation={0}
+    <PageCard
       sx={{
-        display: 'flex',
-        flex: 1,
-        alignSelf: 'stretch',
-        justifyContent: 'center',
         alignItems: { xs: 'flex-start', md: 'center' },
-        my: { xs: 0, md: 4 },
+        justifyContent: 'center',
         py: { xs: 3, md: 0 },
         px: { xs: 2, md: 0 },
-        borderRadius: '30px',
-        borderBottomLeftRadius: { xs: 0, md: '30px' },
-        borderBottomRightRadius: { xs: 0, md: '30px' },
-        border: { xs: 'none', md: '1px solid' },
-        borderColor: (theme) => ({
-          xs: 'none',
-          md: theme.palette.border.main,
-        }),
-        overflow: 'hidden',
       }}
     >
       <Stack sx={{ width: { xs: '100%', md: '400px' }, gap: 3 }}>
@@ -139,6 +126,6 @@ export function SendResetLinkSuccessPage() {
           </form>
         </FormProvider>
       </Stack>
-    </Paper>
+    </PageCard>
   );
 }

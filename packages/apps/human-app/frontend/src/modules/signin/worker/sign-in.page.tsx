@@ -1,12 +1,12 @@
 import { useEffect } from 'react';
 import { t } from 'i18next';
 import { useNavigate } from 'react-router-dom';
-import { Box, Grid, Paper, Typography } from '@mui/material';
+import { Box, Grid, Typography } from '@mui/material';
+
 import { getErrorMessageForError } from '@/shared/errors';
 import { ApiClientError } from '@/api';
 import { useSignIn } from './use-sign-in';
 import { SignInForm } from './sign-in-form';
-
 import signInImage from '@/assets/background-images/signin-background.png';
 import {
   TopNotificationType,
@@ -17,6 +17,7 @@ import { useAuth } from '@/modules/auth/hooks/use-auth';
 import { routerPaths } from '@/router/router-paths';
 import { useIsUserVerified } from '@/shared/hooks';
 import { browserAuthProvider } from '@/shared/contexts/browser-auth-provider';
+import { PageCard } from '@/shared/components/ui/page-card';
 
 function formattedSignInErrorMessage(
   unknownError: unknown
@@ -77,24 +78,10 @@ export function SignInPage() {
   };
 
   return (
-    <Paper
-      elevation={0}
+    <PageCard
       sx={{
-        display: 'flex',
-        flex: 1,
-        alignSelf: 'stretch',
         alignItems: 'center',
         justifyContent: 'center',
-        my: { xs: 0, md: 4 },
-        borderRadius: '30px',
-        borderBottomLeftRadius: { xs: 0, md: '30px' },
-        borderBottomRightRadius: { xs: 0, md: '30px' },
-        border: { xs: 'none', md: '1px solid' },
-        borderColor: (theme) => ({
-          xs: 'none',
-          md: theme.palette.border.main,
-        }),
-        overflow: 'hidden',
       }}
     >
       <Grid
@@ -158,6 +145,6 @@ export function SignInPage() {
           />
         </Grid>
       </Grid>
-    </Paper>
+    </PageCard>
   );
 }

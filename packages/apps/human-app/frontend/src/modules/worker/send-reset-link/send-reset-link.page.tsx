@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { Box, Grid, Paper, Stack, Typography } from '@mui/material';
+import { Box, Grid, Stack, Typography } from '@mui/material';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
 import { Input } from '@/shared/components/data-entry/input';
@@ -18,6 +18,7 @@ import {
   TopNotificationType,
   useNotification,
 } from '@/shared/hooks/use-notification';
+import { PageCard } from '@/shared/components/ui/page-card';
 
 export function SendResetLinkPage() {
   const { t } = useTranslation();
@@ -62,26 +63,12 @@ export function SendResetLinkPage() {
   };
 
   return (
-    <Paper
-      elevation={0}
+    <PageCard
       sx={{
-        display: 'flex',
-        flex: 1,
-        alignSelf: 'stretch',
-        justifyContent: 'center',
         alignItems: { xs: 'flex-start', md: 'center' },
-        my: { xs: 0, md: 4 },
+        justifyContent: 'center',
         py: { xs: 3, md: 0 },
         px: { xs: 2, md: 0 },
-        borderRadius: '30px',
-        borderBottomLeftRadius: { xs: 0, md: '30px' },
-        borderBottomRightRadius: { xs: 0, md: '30px' },
-        border: { xs: 'none', md: '1px solid' },
-        borderColor: (theme) => ({
-          xs: 'none',
-          md: theme.palette.border.main,
-        }),
-        overflow: 'hidden',
       }}
     >
       <Stack sx={{ width: { xs: '100%', md: '400px' } }}>
@@ -131,6 +118,6 @@ export function SendResetLinkPage() {
           </form>
         </FormProvider>
       </Stack>
-    </Paper>
+    </PageCard>
   );
 }
