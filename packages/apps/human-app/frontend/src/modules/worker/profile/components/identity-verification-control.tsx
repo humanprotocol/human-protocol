@@ -64,7 +64,7 @@ export function IdentityVerificationControl({
     }, CHECK_STATUS_COOLDOWN_TIME);
 
     try {
-      await refreshAccessTokenAsync();
+      await refreshAccessTokenAsync({});
       const accessToken = browserAuthProvider.getAccessToken();
 
       if (!accessToken) {
