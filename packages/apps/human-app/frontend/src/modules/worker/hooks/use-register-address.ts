@@ -15,7 +15,7 @@ interface RegisterAddressCallbacks {
 
 function useRegisterAddressMutation(callbacks: RegisterAddressCallbacks) {
   const { user, updateUserData } = useAuth();
-  const { refreshAccessTokenAsync } = useAccessTokenRefresh();
+  const { mutateAsync: refreshAccessTokenAsync } = useAccessTokenRefresh();
   const { address, chainId, signMessage } = useWalletConnect();
   const { prepareSignature } = usePrepareSignature(
     PrepareSignatureType.REGISTER_ADDRESS

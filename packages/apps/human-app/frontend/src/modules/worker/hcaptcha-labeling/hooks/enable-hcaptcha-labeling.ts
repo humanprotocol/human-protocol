@@ -7,7 +7,7 @@ import * as hCaptchaLabelingService from '../services/hcaptcha-labeling.service'
 
 export function useEnableHCaptchaLabelingMutation() {
   const navigate = useNavigate();
-  const { refreshAccessTokenAsync } = useAccessTokenRefresh();
+  const { mutateAsync: refreshAccessTokenAsync } = useAccessTokenRefresh();
 
   const mutation = useMutation({
     mutationFn: async () => {

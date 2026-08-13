@@ -12,7 +12,7 @@ export function JWTExpirationCheck({
   const checksOnProfile = useRef(0);
   const auth = useAuth();
   const location = useLocation();
-  const { refreshAccessToken } = useAccessTokenRefresh();
+  const { mutate: refreshAccessToken } = useAccessTokenRefresh();
 
   useEffect(() => {
     if (location.pathname.includes('profile') && auth.user) {

@@ -47,8 +47,10 @@ export function IdentityVerificationControl({
   const { t } = useTranslation();
   const { isIdvAlreadyInProgress, idvStarted, idvStartIsPending, startIdv } =
     useStartIdv();
-  const { refreshAccessTokenAsync, isRefreshingAccessToken } =
-    useAccessTokenRefresh();
+  const {
+    mutateAsync: refreshAccessTokenAsync,
+    isPending: isRefreshingAccessToken,
+  } = useAccessTokenRefresh();
   const { updateUserData } = useAuth();
   const { colorPalette } = useColorMode();
 
