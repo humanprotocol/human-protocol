@@ -13,10 +13,10 @@ export function useAccessTokenRefresh() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
 
-  const mutation = useMutation({
-    mutationFn: async (params?: RefreshAccessTokenParams) => {
+  return useMutation({
+    mutationFn: async (params: RefreshAccessTokenParams = {}) => {
       const throwExpirationModalOnSignOut =
-        params?.throwExpirationModalOnSignOut ?? true;
+        params.throwExpirationModalOnSignOut ?? true;
 
       try {
         await authService.refreshAccessToken();
@@ -37,18 +37,4 @@ export function useAccessTokenRefresh() {
       id: 'refresh-access-token',
     },
   });
-
-  return {
-    refreshAccessToken: (
-      params?: RefreshAccessTokenParams,
-      options?: Parameters<typeof mutation.mutate>[1]
-    ) => {
-      mutation.mutate(params, options);
-    },
-    refreshAccessTokenAsync: (
-      params?: RefreshAccessTokenParams,
-      options?: Parameters<typeof mutation.mutateAsync>[1]
-    ) => mutation.mutateAsync(params, options),
-    isRefreshingAccessToken: mutation.isPending,
-  };
 }

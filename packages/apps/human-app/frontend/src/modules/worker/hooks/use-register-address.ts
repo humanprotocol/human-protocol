@@ -15,7 +15,7 @@ interface RegisterAddressCallbacks {
 
 function useRegisterAddressMutation(callbacks: RegisterAddressCallbacks) {
   const { user, updateUserData } = useAuth();
-  const { refreshAccessTokenAsync } = useAccessTokenRefresh();
+  const { mutateAsync: refreshAccessTokenAsync } = useAccessTokenRefresh();
   const { address, chainId, signMessage } = useWalletConnect();
   const { prepareSignature } = usePrepareSignature(
     PrepareSignatureType.REGISTER_ADDRESS
@@ -37,7 +37,7 @@ function useRegisterAddressMutation(callbacks: RegisterAddressCallbacks) {
     // wallet address is part of the JWT payload
     // so we need to refresh the token after the address is registered
     await profileService.registerAddress({ address, chainId, signature });
-    await refreshAccessTokenAsync();
+    await refreshAccessTokenAsync({});
     updateUserData({
       wallet_address: address,
     });
