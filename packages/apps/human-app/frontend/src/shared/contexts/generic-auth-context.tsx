@@ -65,6 +65,8 @@ export function createAuthProvider<T extends UserData>(config: {
 
         const validUserData = schema.parse(userData);
 
+        queryClient.setDefaultOptions({ queries: { enabled: true } });
+
         setAuthState({ user: validUserData, status: 'success' });
 
         browserAuthProvider.signOutSubscription = displayExpirationModal;
