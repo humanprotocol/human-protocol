@@ -115,6 +115,7 @@ export function HCaptchaWidget() {
               sx={{
                 justifyContent: 'space-between',
                 maxWidth: { xs: '100%', md: '350px', lg: '450px' },
+                gap: { xs: 0, md: 1 },
               }}
             >
               <Typography
@@ -216,6 +217,7 @@ export function HCaptchaWidget() {
               sx={{
                 justifyContent: 'space-between',
                 maxWidth: { xs: '100%', md: '350px', lg: '450px' },
+                gap: { xs: 0, md: 1 },
               }}
             >
               <Typography
