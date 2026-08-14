@@ -67,7 +67,6 @@ export function ProfileData({
           <Typography
             sx={{
               fontSize: { xs: '14px', md: isCompact ? '24px' : '30px' },
-              fontWeight: 500,
               lineHeight: { xs: '38px', md: isCompact ? '48px' : '76px' },
               color: 'accent.main',
             }}
@@ -89,7 +88,6 @@ export function ProfileData({
             sx={{
               fontSize: { xs: isCompact ? 14 : 16, md: isCompact ? 16 : 32 },
               fontWeight: { xs: 700, md: 600 },
-              lineHeight: 'normal',
               color: {
                 xs: 'text.primary',
                 md: isCompact ? 'text.auxiliary100' : 'text.primary',
@@ -107,7 +105,6 @@ export function ProfileData({
             sx={{
               fontSize: { xs: 12, md: isCompact ? 14 : 16 },
               fontWeight: 500,
-              lineHeight: 'normal',
               color: 'text.auxiliary200',
             }}
           >

@@ -97,10 +97,8 @@ export function DesktopAsideBar() {
                       px: 4,
                       py: 2,
                       gap: 1,
-                      fontSize: 16,
-                      fontWeight: 600,
+                      typography: 'body3',
                       color: isActive ? 'text.primary' : 'text.auxiliary100',
-                      letterSpacing: 0,
                     }}
                   >
                     {isActive && <TriangleIcon />}

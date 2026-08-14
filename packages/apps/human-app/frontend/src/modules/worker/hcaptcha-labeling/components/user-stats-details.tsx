@@ -89,10 +89,7 @@ export function UserStatsDetails({ stats, refetch, isRefetching }: Props) {
             gap: { xs: 1, md: 2 },
           }}
         >
-          <Typography
-            variant="body8"
-            sx={{ lineHeight: '1.3', whiteSpace: 'pre-line' }}
-          >
+          <Typography variant="body6" sx={{ whiteSpace: 'pre-line' }}>
             {t('worker.hcaptchaLabelingStats.statisticsNotLive')}
           </Typography>
           <IconButton

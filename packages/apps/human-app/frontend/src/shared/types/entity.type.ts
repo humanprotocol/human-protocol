@@ -12,3 +12,13 @@ export enum JobType {
   SOCIAL_MEDIA_PROMOTION = 'social_media_promotion',
   SOCIAL_MEDIA_ENGAGEMENT = 'social_media_engagement',
 }
+
+export enum KycStatus {
+  NONE = 'none',
+  APPROVED = 'approved',
+  RESUBMISSION_REQUESTED = 'resubmission_requested',
+  DECLINED = 'declined',
+  REVIEW = 'review',
+  EXPIRED = 'expired',
+  ABANDONED = 'abandoned',
+}

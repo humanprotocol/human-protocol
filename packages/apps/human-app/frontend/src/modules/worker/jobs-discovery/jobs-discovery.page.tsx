@@ -68,24 +68,13 @@ export function JobsDiscoveryPage() {
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Typography
-            component="h1"
-            variant={isMobile ? 'body1' : 'h6'}
-            sx={{
-              fontWeight: { xs: 700, md: 600 },
-              lineHeight: { xs: 'normal', md: '24px' },
-            }}
-          >
+          <Typography variant="pageHeading">
             {t('worker.oraclesList.jobOracles')}
           </Typography>
           {isSuccess && (
             <>
               {bull}
-              <Typography
-                component="span"
-                variant="body1"
-                sx={{ fontWeight: 600 }}
-              >
+              <Typography component="span" variant="body3">
                 {oraclesCount}{' '}
                 {oraclesCount === 1
                   ? t('worker.oraclesList.source')

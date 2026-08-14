@@ -132,7 +132,7 @@ export const createAppTheme = (mode: PaletteMode) => {
             },
             text: {
               primary: '#d4cfff',
-              secondary: '#6c6978',
+              secondary: 'rgba(212, 207, 255, 0.70)',
               light: '#9387ff',
               disabled: 'rgba(212, 207, 255, 0.5)',
               auxiliary100: '#ffffff',
@@ -175,8 +175,10 @@ export const createAppTheme = (mode: PaletteMode) => {
           variant: 'body1',
           color: 'primary.main',
           variantMapping: {
+            body5: 'p',
             subtitle1: 'p',
             subtitle2: 'p',
+            pageHeading: 'h1',
           },
         },
       },
@@ -194,7 +196,7 @@ export const createAppTheme = (mode: PaletteMode) => {
             },
             '&.Mui-disabled': {
               bgcolor: theme.palette.button.disabled,
-              color: theme.palette.text.secondary,
+              color: theme.palette.text.disabled,
             },
           }),
         },
@@ -242,6 +244,7 @@ export const createAppTheme = (mode: PaletteMode) => {
               : theme.palette.text.auxiliary200;
             return {
               color: theme.palette.text.auxiliary100,
+              fontWeight: 400,
               '&:hover fieldset': {
                 borderColor: borderColor,
               },
@@ -252,6 +255,7 @@ export const createAppTheme = (mode: PaletteMode) => {
           },
           notchedOutline: ({ theme }) => ({
             borderColor: theme.palette.text.auxiliary200,
+            fontWeight: 400,
           }),
         },
       },
@@ -259,6 +263,7 @@ export const createAppTheme = (mode: PaletteMode) => {
         styleOverrides: {
           root: ({ theme }) => ({
             color: theme.palette.text.auxiliary200,
+            fontWeight: 400,
             '&.Mui-focused': {
               color: theme.palette.text.auxiliary100,
             },

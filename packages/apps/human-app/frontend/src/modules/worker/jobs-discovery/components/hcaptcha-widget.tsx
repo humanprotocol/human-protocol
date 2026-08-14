@@ -38,7 +38,6 @@ const renderDescription = (isMobile: boolean) => {
         color: 'text.auxiliary200',
         fontSize: { xs: 12, md: 16 },
         fontWeight: 500,
-        lineHeight: 'normal',
       }}
     >
       {description}
@@ -119,17 +118,18 @@ export function HCaptchaWidget() {
               }}
             >
               <Typography
+                component="h6"
                 variant={isMobile ? 'body2' : 'h6'}
                 sx={{
                   color: 'text.auxiliary200',
-                  fontWeight: 700,
+                  fontWeight: { xs: 600, md: 700 },
                 }}
               >
                 {t('worker.hcaptchaWidget.titleDisabled')}
               </Typography>
               {!isMobile && (
                 <Typography
-                  variant="body1"
+                  variant="body4"
                   sx={{
                     color: 'text.auxiliary100',
                     opacity: 0.5,
@@ -166,10 +166,9 @@ export function HCaptchaWidget() {
             }}
           >
             <Typography
-              variant={isMobile ? 'body2' : 'subtitle2'}
+              variant={isMobile ? 'body5' : 'subtitle2'}
               sx={{
                 color: 'text.auxiliary200',
-                fontSize: { xs: 12, md: 14 },
                 fontWeight: { xs: 500, md: 600 },
               }}
             >
@@ -182,7 +181,6 @@ export function HCaptchaWidget() {
                 color: 'text.primary',
                 fontSize: { xs: 16, md: 32 },
                 fontWeight: 700,
-                lineHeight: 'normal',
                 letterSpacing: '0.25px',
                 fontVariantNumeric: 'tabular-nums',
               }}

@@ -78,22 +78,22 @@ export function SendResetLinkSuccessPage() {
             }}
           >
             <Grid container sx={{ gap: { xs: 2, md: 3 } }}>
-              <Typography sx={{ color: 'text.auxiliary100' }}>
+              <Typography variant="body4" sx={{ color: 'text.auxiliary100' }}>
                 <Trans
                   components={{
-                    1: <Typography component="span" sx={{ fontWeight: 600 }} />,
+                    1: <Typography variant="body3" component="span" />,
                   }}
                   i18nKey="worker.sendResetLinkSuccess.paragraph1"
                   values={{ email }}
                 />
               </Typography>
-              <Typography sx={{ color: 'text.auxiliary200' }}>
+              <Typography variant="body4" sx={{ color: 'text.auxiliary200' }}>
                 {t('worker.sendResetLinkSuccess.paragraph2')}
               </Typography>
-              <Typography sx={{ color: 'text.auxiliary100' }}>
+              <Typography variant="body4" sx={{ color: 'text.auxiliary100' }}>
                 <Trans
                   components={{
-                    1: <Typography component="span" sx={{ fontWeight: 600 }} />,
+                    1: <Typography variant="body3" component="span" />,
                   }}
                   i18nKey="worker.sendResetLinkSuccess.paragraph3"
                   values={{ email }}
@@ -113,10 +113,10 @@ export function SendResetLinkSuccessPage() {
                   <>{t('worker.sendResetLinkSuccess.btn')}</>
                 )}
               </Button>
-              <Typography sx={{ color: 'text.auxiliary100' }}>
+              <Typography variant="body4" sx={{ color: 'text.auxiliary100' }}>
                 <Trans
                   components={{
-                    1: <Typography component="span" sx={{ fontWeight: 600 }} />,
+                    1: <Typography component="span" variant="body3" />,
                     2: <MailTo mail={env.VITE_HUMAN_SUPPORT_EMAIL} />,
                   }}
                   i18nKey="worker.sendResetLinkSuccess.paragraph4"

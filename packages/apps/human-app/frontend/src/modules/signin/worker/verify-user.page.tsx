@@ -2,11 +2,11 @@ import { useEffect } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { Stack } from '@mui/material';
 
-import { useAuth } from '@/modules/auth/hooks/use-auth';
-import { KycStatus } from '@/modules/worker/profile/types';
-import { routerPaths } from '@/router/router-paths';
-import { useIsUserVerified } from '@/shared/hooks';
 import { VerificationFlow } from './verification-flow';
+import { useAuth } from '@/modules/auth/hooks/use-auth';
+import { routerPaths } from '@/router/router-paths';
+import { KycStatus } from '@/shared/types/entity.type';
+import { useIsUserVerified } from '@/shared/hooks';
 import { Loader } from '@/shared/components/ui/loader';
 import { PageCard } from '@/shared/components/ui/page-card';
 

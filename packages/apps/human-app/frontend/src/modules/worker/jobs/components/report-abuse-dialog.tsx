@@ -65,12 +65,7 @@ function ErrorState({ error }: { error: string }) {
           >
             {t('worker.reportAbuse.modalHeaderAlreadyReportedError')}
           </Typography>
-          <Typography
-            variant="body1"
-            sx={{
-              color: 'error.main',
-            }}
-          >
+          <Typography variant="body1" sx={{ color: 'error.main' }}>
             {t('worker.reportAbuse.modalParagraphAlreadyReportedError')}
           </Typography>
         </>
@@ -160,10 +155,7 @@ export function ReportAbuseDialog({
       mobileSx={{ px: 0, pt: 2, pb: 0, height: '60dvh' }}
     >
       <Stack sx={{ px: 2 }}>
-        <Typography
-          variant="h6"
-          sx={{ mb: 4, color: 'text.auxiliary100', fontWeight: 700 }}
-        >
+        <Typography variant="h6" sx={{ mb: 4, color: 'text.auxiliary100' }}>
           {t('worker.reportAbuse.modalHeader')}
         </Typography>
         {isIdleOrLoading && (

@@ -29,7 +29,12 @@ export const useGetAvailableJobsColumns = (): MRT_ColumnDef<AvailableJob>[] => {
         size: COL_SIZE,
         enableSorting: false,
         Cell: (props) => {
-          return <EvmAddress address={props.cell.getValue() as string} />;
+          return (
+            <EvmAddress
+              address={props.cell.getValue() as string}
+              size="medium"
+            />
+          );
         },
       },
       {
@@ -101,7 +106,7 @@ export const useGetAvailableJobsColumns = (): MRT_ColumnDef<AvailableJob>[] => {
             openModal({
               content: (
                 <Stack sx={{ gap: 2 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                  <Typography variant="h6">
                     {t('worker.jobs.jobDescription')}
                   </Typography>
                   <Typography

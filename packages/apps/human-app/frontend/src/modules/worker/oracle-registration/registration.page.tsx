@@ -54,7 +54,7 @@ export function RegistrationPage() {
         }}
       >
         {isMobile && <BackButton onClick={handleBack} />}
-        <Typography variant="h6" sx={{ fontWeight: 700 }}>
+        <Typography variant="pageHeading">
           {t('protectedPagesHeaders.registrationInExchangeOracle')}
         </Typography>
       </Stack>

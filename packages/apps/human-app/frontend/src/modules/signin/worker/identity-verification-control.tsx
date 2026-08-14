@@ -4,7 +4,7 @@ import { Box, keyframes, Link, Stack, Typography } from '@mui/material';
 import { jwtDecode } from 'jwt-decode';
 
 import { useStartIdv } from '../hooks';
-import { KycStatus } from '../types';
+import { KycStatus } from '@/shared/types/entity.type';
 import { env } from '@/shared/env';
 import { HourglassIcon, VeriffIcon } from '@/shared/components/ui/icons';
 import { Button } from '@/shared/components/ui/button';
@@ -12,6 +12,7 @@ import { useAccessTokenRefresh } from '@/api/hooks/use-access-token-refresh';
 import { browserAuthProvider } from '@/shared/contexts/browser-auth-provider';
 import { UserData } from '@/modules/auth/context/auth-context';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
+import { useColorMode } from '@/shared/contexts/color-mode/use-color-mode';
 
 const hourglassSpin = keyframes`
   0% {
@@ -43,6 +44,8 @@ export function IdentityVerificationControl({
   const cooldownTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const { t } = useTranslation();
+  const { isDarkMode } = useColorMode();
+
   const { isIdvAlreadyInProgress, idvStarted, idvStartIsPending, startIdv } =
     useStartIdv();
   const {
@@ -102,7 +105,10 @@ export function IdentityVerificationControl({
 
   if (kycStatus === KycStatus.DECLINED) {
     return (
-      <Typography variant="body1" sx={{ color: 'text.auxiliary200' }}>
+      <Typography
+        variant="body1"
+        sx={{ color: isDarkMode ? 'text.auxiliary100' : 'text.auxiliary200' }}
+      >
         <Trans
           components={{
             1: <Link href={`mailto:${env.VITE_HUMAN_SUPPORT_EMAIL}`} />,
@@ -128,17 +134,13 @@ export function IdentityVerificationControl({
             borderColor: 'border.main',
           }}
         >
-          <Typography
-            variant="h6"
-            sx={{ color: 'text.primary', fontWeight: 600, mb: 1 }}
-          >
+          <Typography variant="h6" sx={{ color: 'text.primary', mb: 1 }}>
             {t('worker.profile.verificationOpenedInNewTab')}
           </Typography>
           <Typography
-            variant="body1"
+            variant="body4"
             sx={{
               color: 'text.auxiliary200',
-              fontWeight: 400,
               mb: 2,
             }}
           >
@@ -155,10 +157,9 @@ export function IdentityVerificationControl({
               <HourglassIcon />
             </Box>
             <Typography
-              variant="body1"
+              variant="body4"
               sx={{
                 color: 'text.auxiliary200',
-                fontWeight: 400,
                 fontStyle: 'italic',
               }}
             >
@@ -184,7 +185,7 @@ export function IdentityVerificationControl({
   return (
     <Stack>
       <Typography
-        variant="body1"
+        variant="body4"
         sx={{ color: 'text.auxiliary200', mb: { xs: 3, md: 5 } }}
       >
         {t('worker.profile.veriffCopy')}
@@ -199,13 +200,8 @@ export function IdentityVerificationControl({
       >
         <Typography
           component="span"
-          sx={{
-            color: 'text.auxiliary200',
-            fontSize: 12,
-            fontWeight: 400,
-            letterSpacing: 0.15,
-            lineHeight: '150%',
-          }}
+          variant="body5"
+          sx={{ color: isDarkMode ? 'text.auxiliary100' : 'text.auxiliary200' }}
         >
           {t('worker.profile.poweredBy')}
         </Typography>

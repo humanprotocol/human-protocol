@@ -26,7 +26,7 @@ export function ColorModeSwitch() {
           py: 0.5,
           px: 1,
           borderRadius: '90px',
-          bgcolor: isDarkMode ? 'transparent' : '#fa2a75',
+          bgcolor: isDarkMode ? 'transparent' : 'accent.main',
         }}
         onClick={switchMode}
       >
@@ -38,7 +38,7 @@ export function ColorModeSwitch() {
           py: 0.5,
           px: 1,
           borderRadius: '90px',
-          bgcolor: isDarkMode ? '#fa2a75' : 'transparent',
+          bgcolor: isDarkMode ? 'accent.main' : 'transparent',
         }}
         onClick={switchMode}
       >

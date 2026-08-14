@@ -21,9 +21,15 @@ export function LogoSection() {
           justifyContent: { xs: 'center', md: 'flex-start' },
         }}
       >
-        <Typography variant="h1">{logoTextSplit[0]}</Typography>
-        <Typography variant="h1" sx={{ fontWeight: '400', ml: 2.5 }}>
-          {logoTextSplit[1]}
+        <Typography variant="h1">
+          {logoTextSplit[0]}
+          <Typography
+            component="span"
+            variant="h1"
+            sx={{ fontWeight: '400', ml: 2.5 }}
+          >
+            {logoTextSplit[1]}
+          </Typography>
         </Typography>
       </Stack>
       <Typography variant="h5" sx={{ textAlign: { xs: 'center', md: 'left' } }}>

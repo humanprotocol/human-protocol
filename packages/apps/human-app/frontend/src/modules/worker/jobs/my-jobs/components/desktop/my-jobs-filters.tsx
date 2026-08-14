@@ -107,14 +107,11 @@ export function MyJobsFilters() {
       >
         <Stack component="form" onSubmit={handleSubmit} sx={{ gap: 3 }}>
           <Stack sx={{ py: { xs: 2, md: 4 }, px: 2, gap: 3 }}>
-            <Typography variant="h6" sx={{ fontWeight: 700 }}>
+            <Typography variant="pageHeading">
               {t('worker.jobs.jobsFilter')}
             </Typography>
             <Stack sx={{ gap: 1 }}>
-              <Typography
-                variant="body1"
-                sx={{ color: 'text.auxiliary200', fontWeight: 500 }}
-              >
+              <Typography variant="body1" sx={{ color: 'text.auxiliary200' }}>
                 {t('worker.jobs.oracles')}
               </Typography>
               {isError && (
@@ -147,13 +144,7 @@ export function MyJobsFilters() {
             </Stack>
             {isMobile && (
               <Stack sx={{ gap: 1 }}>
-                <Typography
-                  variant="body1"
-                  sx={{
-                    color: 'text.auxiliary200',
-                    fontWeight: 500,
-                  }}
-                >
+                <Typography variant="body1" sx={{ color: 'text.auxiliary200' }}>
                   {t('worker.jobs.status')}
                 </Typography>
                 <RadioGroup

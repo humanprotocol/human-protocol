@@ -26,7 +26,12 @@ export const useGetMyJobsColumns = (): MRT_ColumnDef<MyJob>[] => {
         size: COL_SIZE,
         enableSorting: true,
         Cell: (props) => {
-          return <EvmAddress address={props.row.original.escrow_address} />;
+          return (
+            <EvmAddress
+              address={props.row.original.escrow_address}
+              size="medium"
+            />
+          );
         },
       },
       {
@@ -82,7 +87,6 @@ export const useGetMyJobsColumns = (): MRT_ColumnDef<MyJob>[] => {
             <Typography
               variant={isMobile ? 'body2' : 'body1'}
               sx={{
-                fontWeight: 500,
                 color: 'text.auxiliary100',
                 fontVariantNumeric: 'tabular-nums',
               }}
@@ -102,7 +106,6 @@ export const useGetMyJobsColumns = (): MRT_ColumnDef<MyJob>[] => {
             <Typography
               variant={isMobile ? 'body2' : 'body1'}
               sx={{
-                fontWeight: 500,
                 color: 'text.auxiliary100',
                 textTransform: 'capitalize',
               }}

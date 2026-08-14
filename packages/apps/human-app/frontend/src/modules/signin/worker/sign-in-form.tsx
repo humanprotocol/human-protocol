@@ -11,7 +11,6 @@ import { Password } from '@/shared/components/data-entry/password';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
 import { HCaptchaForm } from '@/shared/components/hcaptcha';
 import { routerPaths } from '@/router/router-paths';
-
 import { type SignInDto, signInDtoSchema } from './schemas';
 
 interface SignInFormProps {
@@ -64,7 +63,6 @@ export function SignInForm({
               to={routerPaths.sendResetLink}
               variant="body2"
               sx={{
-                color: 'text.primary',
                 fontWeight: 600,
                 textDecoration: 'underline',
               }}
@@ -83,19 +81,16 @@ export function SignInForm({
             {t('worker.signInForm.submitBtn')}
           </Button>
           <Box sx={{ position: 'relative', width: '100%' }}>
-            <Divider sx={{ bgcolor: '#c9c9c9' }} />
+            <Divider sx={{ bgcolor: 'border.main' }} />
             <Typography
+              variant="body2"
               sx={{
-                fontSize: '12px',
-                fontWeight: 700,
-                lineHeight: '125%',
-                letterSpacing: '0.25px',
-                color: 'text.primary',
                 position: 'absolute',
                 top: '50%',
                 left: '50%',
                 transform: 'translate(-50%, -50%)',
                 bgcolor: 'background.paper',
+                fontWeight: 700,
               }}
             >
               {t('worker.signInForm.or')}
@@ -112,13 +107,7 @@ export function SignInForm({
               },
             }}
           >
-            <Typography
-              variant="body2"
-              sx={{
-                fontWeight: 500,
-                color: 'text.auxiliary200',
-              }}
-            >
+            <Typography variant="body2" sx={{ color: 'text.auxiliary200' }}>
               {t('worker.signInForm.dontHaveAccount')}
             </Typography>{' '}
             <MuiLink

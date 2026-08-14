@@ -65,13 +65,7 @@ export function ExploreTasksDialog({ open, onClose, oracle }: Props) {
             {oracle.name}
           </Typography>
         </Typography>
-        <Typography
-          variant="body2"
-          sx={{
-            color: 'text.auxiliary200',
-            fontWeight: 500,
-          }}
-        >
+        <Typography variant="body2" sx={{ color: 'text.auxiliary200' }}>
           {t('worker.jobs.address')}:{' '}
           <Typography
             component="span"

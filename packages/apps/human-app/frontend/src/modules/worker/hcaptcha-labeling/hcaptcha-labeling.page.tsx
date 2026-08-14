@@ -157,7 +157,7 @@ export function HcaptchaLabelingPage() {
               {canSolveCaptcha ? (
                 <>
                   <Typography
-                    variant="body1"
+                    variant="body4"
                     sx={{
                       mb: { xs: 3, md: 6 },
                       color: 'text.auxiliary100',
@@ -181,7 +181,7 @@ export function HcaptchaLabelingPage() {
               ) : (
                 <Stack sx={{ gap: { xs: 3, md: 5 } }}>
                   <Typography
-                    variant="body1"
+                    variant="body4"
                     sx={{ color: 'text.auxiliary100' }}
                   >
                     {t('worker.hcaptchaLabeling.noJobs')}
@@ -205,7 +205,6 @@ export function HcaptchaLabelingPage() {
                           color: 'text.primary',
                           fontSize: { xs: 16, md: 32 },
                           fontWeight: 700,
-                          lineHeight: 'normal',
                           letterSpacing: '0.25px',
                           fontVariantNumeric: 'tabular-nums',
                         }}
@@ -221,17 +220,14 @@ export function HcaptchaLabelingPage() {
                     <Box sx={{ position: 'relative', width: '100%' }}>
                       <Divider sx={{ bgcolor: 'border.main' }} />
                       <Typography
+                        variant="body2"
                         sx={{
-                          fontSize: '12px',
-                          fontWeight: 700,
-                          lineHeight: '125%',
-                          letterSpacing: '0.25px',
-                          color: 'text.primary',
                           position: 'absolute',
                           top: '50%',
                           left: '50%',
                           transform: 'translate(-50%, -50%)',
                           bgcolor: 'background.subtle',
+                          fontWeight: 700,
                         }}
                       >
                         {t('worker.hcaptchaLabeling.or')}

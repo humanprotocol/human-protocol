@@ -111,9 +111,9 @@ export function GovernanceBanner() {
           href={env.VITE_GOVERNANCE_URL}
           target="_blank"
           rel="noopener noreferrer"
+          variant="body1"
           sx={{
             color: 'common.white',
-            fontWeight: 500,
             textDecoration: 'none',
             '&:hover': {
               textDecoration: 'underline',

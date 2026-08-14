@@ -49,9 +49,7 @@ export function MyJobsPage() {
           },
         }}
       >
-        <Typography variant="h6" sx={{ fontWeight: 700 }}>
-          {t('worker.jobs.myJobs')}
-        </Typography>
+        <Typography variant="pageHeading">{t('worker.jobs.myJobs')}</Typography>
       </Stack>
       <Stack sx={{ gap: { xs: 2.5, md: 4 }, px: 0, py: 4 }}>
         <Stack

@@ -99,7 +99,6 @@ export function AvailableJobsTableDesktop({
         borderColor: 'background.paper',
         color: 'text.auxiliary200',
         typography: 'body1',
-        fontWeight: 500,
         '& .Mui-TableHeadCell-Content': {
           justifyContent: 'center',
           textAlign: 'center',

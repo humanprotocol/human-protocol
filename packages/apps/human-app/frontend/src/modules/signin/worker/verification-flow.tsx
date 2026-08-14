@@ -2,11 +2,9 @@ import { useCallback, useState } from 'react';
 import { Box, Chip, Stack, Typography } from '@mui/material';
 import { t } from 'i18next';
 
-import {
-  IdentityVerificationControl,
-  WalletConnectionControl,
-} from '@/modules/worker/profile/components';
-import { KycStatus } from '@/modules/worker/profile/types/profile-types';
+import { IdentityVerificationControl } from './identity-verification-control';
+import { WalletConnectionControl } from './wallet-connection-control';
+import { KycStatus } from '@/shared/types/entity.type';
 import { useIsMobile } from '@/shared/hooks';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
 
@@ -80,13 +78,12 @@ export function VerificationFlow({
         <>
           <Typography
             component="h6"
-            variant={isMobile ? 'body1' : 'h6'}
+            variant={isMobile ? 'body3' : 'h6'}
             sx={{
               display: 'flex',
               alignItems: 'center',
               gap: 1,
               color: 'text.auxiliary100',
-              fontWeight: 600,
               mb: { xs: 3, md: 2 },
             }}
           >
@@ -112,10 +109,9 @@ export function VerificationFlow({
         <>
           <Typography
             component="h6"
-            variant={isMobile ? 'body1' : 'h6'}
+            variant={isMobile ? 'body3' : 'h6'}
             sx={{
               color: 'text.auxiliary100',
-              fontWeight: 600,
               mb: { xs: 3, md: 5 },
             }}
           >

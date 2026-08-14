@@ -37,10 +37,7 @@ const Row = ({
       }}
     >
       {icon}
-      <Typography
-        variant="body2"
-        sx={{ color: 'text.auxiliary200', fontWeight: 500 }}
-      >
+      <Typography variant="body2" sx={{ color: 'text.auxiliary200' }}>
         {label}:{' '}
       </Typography>
       {children}
@@ -102,10 +99,7 @@ export function MyJobsCardMobile({ job }: { job: MyJob }) {
             <JobExpiryTimeIcon sx={{ fontSize: '20px', color: 'inherit' }} />
           }
         >
-          <Typography
-            variant="body2"
-            sx={{ color: 'text.auxiliary100', fontWeight: 500 }}
-          >
+          <Typography variant="body2" sx={{ color: 'text.auxiliary100' }}>
             <TimeUntil date={job.expires_at} />
           </Typography>
         </Row>
@@ -117,7 +111,6 @@ export function MyJobsCardMobile({ job }: { job: MyJob }) {
             variant="body2"
             sx={{
               color: 'text.auxiliary100',
-              fontWeight: 500,
               textTransform: 'capitalize',
             }}
           >

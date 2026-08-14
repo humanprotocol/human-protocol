@@ -38,14 +38,7 @@ function JobTypesTooltipTitle({ jobTypes }: { jobTypes: string[] }) {
         const element = JOB_TYPES.find((j) => j === jobType) as JobType;
         const label = t(`jobTypeLabels.${element}`);
         return (
-          <Typography
-            key={jobType}
-            variant="body2"
-            sx={{
-              color: 'text.primary',
-              fontWeight: 500,
-            }}
-          >
+          <Typography key={jobType} variant="body2">
             {label}
           </Typography>
         );
@@ -100,25 +93,16 @@ export function OracleJobCard({ oracle }: { oracle: Oracle }) {
         }}
       >
         <Typography
-          variant={isMobile ? 'body1' : 'h6'}
+          variant={isMobile ? 'body3' : 'h6'}
           component="p"
-          sx={{
-            color: 'text.auxiliary100',
-            fontWeight: 600,
-          }}
+          sx={{ color: 'text.auxiliary100' }}
         >
           {oracle.name}
         </Typography>
         <Stack sx={{ gap: 1 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
             <OracleAddressIcon sx={{ color: 'text.primary' }} />
-            <Typography
-              variant="body2"
-              sx={{
-                color: 'text.primary',
-                fontWeight: 500,
-              }}
-            >
+            <Typography variant="body2">
               {t('worker.oraclesList.address')}:
             </Typography>
             <EvmAddress address={oracle.address} />
@@ -134,13 +118,7 @@ export function OracleJobCard({ oracle }: { oracle: Oracle }) {
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
             <OracleRewardIcon sx={{ color: 'text.primary' }} />
-            <Typography
-              variant="body2"
-              sx={{
-                color: 'text.primary',
-                fontWeight: 500,
-              }}
-            >
+            <Typography variant="body2">
               {t('worker.oraclesList.reward')}:
             </Typography>
             <Typography
@@ -149,8 +127,7 @@ export function OracleJobCard({ oracle }: { oracle: Oracle }) {
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 0.5,
-                color: 'text.auxiliary200',
-                fontWeight: 500,
+                color: 'text.auxiliary100',
               }}
             >
               {isRewardAmountsEqual ? (

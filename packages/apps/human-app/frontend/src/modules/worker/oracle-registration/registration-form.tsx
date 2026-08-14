@@ -54,7 +54,7 @@ export function RegistrationForm({
       <Button variant="contained" fullWidth onClick={handleInstructionsView}>
         {t('worker.registrationInExchangeOracle.instructionsButton')}
       </Button>
-      <Typography sx={{ color: 'text.auxiliary100' }}>
+      <Typography variant="body4" sx={{ color: 'text.auxiliary100' }}>
         {t('worker.registrationInExchangeOracle.completeMessage')}
       </Typography>
       <FormProvider {...methods}>

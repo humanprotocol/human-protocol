@@ -101,7 +101,7 @@ export function ResetPasswordPage() {
             }}
           >
             <Stack sx={{ gap: 3 }}>
-              <Typography variant="body1" sx={{ color: 'text.auxiliary100' }}>
+              <Typography variant="body4" sx={{ color: 'text.auxiliary100' }}>
                 {t('worker.resetPassword.description')}
               </Typography>
               <Password

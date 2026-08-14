@@ -95,13 +95,7 @@ export function AvailableJobsCard({ job }: { job: AvailableJob }) {
                 fontSize: '20px',
               }}
             />
-            <Typography
-              variant="body2"
-              sx={{
-                color: 'text.auxiliary200',
-                fontWeight: 500,
-              }}
-            >
+            <Typography variant="body2" sx={{ color: 'text.auxiliary200' }}>
               {t('worker.oraclesList.address')}:
             </Typography>
             <EvmAddress address={job.escrow_address} />
@@ -113,13 +107,7 @@ export function AvailableJobsCard({ job }: { job: AvailableJob }) {
                 fontSize: '20px',
               }}
             />
-            <Typography
-              variant="body2"
-              sx={{
-                color: 'text.auxiliary200',
-                fontWeight: 500,
-              }}
-            >
+            <Typography variant="body2" sx={{ color: 'text.auxiliary200' }}>
               {t('worker.oraclesList.reward')}:
             </Typography>
             <RewardAmount

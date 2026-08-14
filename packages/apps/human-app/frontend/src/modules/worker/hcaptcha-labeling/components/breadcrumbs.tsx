@@ -13,7 +13,6 @@ export function Breadcrumbs() {
         variant="body1"
         sx={{
           color: 'text.auxiliary200',
-          fontWeight: 500,
           textDecoration: 'none',
           '&:hover': {
             textDecoration: 'underline',
@@ -22,10 +21,7 @@ export function Breadcrumbs() {
       >
         {t('worker.jobs.availableJobs')}
       </Link>
-      <Typography
-        variant="body1"
-        sx={{ color: 'text.auxiliary200', fontWeight: 500 }}
-      >
+      <Typography variant="body1" sx={{ color: 'text.auxiliary200' }}>
         {'>'}
       </Typography>
       <Typography

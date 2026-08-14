@@ -16,6 +16,7 @@ import { routerPaths } from '@/router/router-paths';
 import { InboxIcon } from '@/shared/components/ui/icons';
 import { Button } from '@/shared/components/ui/button';
 import { HCaptchaForm } from '@/shared/components/hcaptcha/h-captcha-form';
+import { useColorMode } from '@/shared/contexts/color-mode/use-color-mode';
 
 export function EmailVerificationFormContainer() {
   const { email } = useResendEmailRouterParams() ?? {};
@@ -24,6 +25,7 @@ export function EmailVerificationFormContainer() {
   const { t } = useTranslation();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const { isDarkMode } = useColorMode();
 
   useEffect(() => {
     if (isError) {
@@ -84,10 +86,8 @@ export function EmailVerificationFormContainer() {
                   1: (
                     <Typography
                       component="span"
-                      sx={{
-                        color: 'primary.main',
-                        fontWeight: 600,
-                      }}
+                      variant="body3"
+                      sx={{ color: 'text.primary' }}
                     />
                   ),
                 }}
@@ -98,9 +98,9 @@ export function EmailVerificationFormContainer() {
             <Typography
               variant="body2"
               sx={{
-                fontWeight: { xs: 600, md: 500 },
-                color: 'text.auxiliary100',
+                color: isDarkMode ? 'text.auxiliary100' : 'text.auxiliary200',
                 mb: 3,
+                lineHeight: '1.5',
               }}
             >
               {t('worker.verifyEmail.paragraph2')}

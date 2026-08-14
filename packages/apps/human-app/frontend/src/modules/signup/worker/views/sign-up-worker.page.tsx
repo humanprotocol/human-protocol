@@ -24,6 +24,7 @@ import {
   useNotification,
 } from '@/shared/hooks/use-notification';
 import { PageCard } from '@/shared/components/ui/page-card';
+import { useColorMode } from '@/shared/contexts/color-mode';
 
 function handleSignupError(unknownError: unknown) {
   if (unknownError instanceof ApiClientError && unknownError.status === 409) {
@@ -34,7 +35,10 @@ function handleSignupError(unknownError: unknown) {
 export function SignUpPage() {
   const { showNotification } = useNotification();
   const navigate = useNavigate();
+  const { isDarkMode } = useColorMode();
+
   const { signUp, error, isError, isLoading, reset } = useSignUpWorker();
+
   const methods = useForm({
     defaultValues: {
       email: '',
@@ -121,9 +125,11 @@ export function SignUpPage() {
                   name="confirmPassword"
                 />
                 <Typography
+                  variant="body5"
                   sx={{
-                    fontSize: '12px !important',
-                    color: 'text.auxiliary100',
+                    color: isDarkMode
+                      ? 'text.auxiliary100'
+                      : 'text.auxiliary200',
                   }}
                 >
                   <Trans
@@ -131,14 +137,14 @@ export function SignUpPage() {
                       1: (
                         <Link
                           href={env.VITE_TERMS_OF_SERVICE_URL}
-                          sx={{ textDecoration: 'underline' }}
+                          sx={{ textDecoration: 'underline', fontWeight: 500 }}
                           target="_blank"
                         />
                       ),
                       2: (
                         <Link
                           href={env.VITE_TERMS_OF_SERVICE_URL}
-                          sx={{ textDecoration: 'underline' }}
+                          sx={{ textDecoration: 'underline', fontWeight: 500 }}
                           target="_blank"
                         />
                       ),
@@ -158,19 +164,16 @@ export function SignUpPage() {
                   {t('worker.signUpForm.submitBtn')}
                 </Button>
                 <Box sx={{ position: 'relative', width: '100%' }}>
-                  <Divider sx={{ bgcolor: '#c9c9c9' }} />
+                  <Divider sx={{ bgcolor: 'border.main' }} />
                   <Typography
+                    variant="body2"
                     sx={{
-                      fontSize: '12px',
-                      fontWeight: 700,
-                      lineHeight: '125%',
-                      letterSpacing: '0.25px',
-                      color: 'text.primary',
                       position: 'absolute',
                       top: '50%',
                       left: '50%',
                       transform: 'translate(-50%, -50%)',
                       bgcolor: 'background.paper',
+                      fontWeight: 700,
                     }}
                   >
                     {t('worker.signUpForm.or')}
@@ -189,10 +192,7 @@ export function SignUpPage() {
                 >
                   <Typography
                     variant="body2"
-                    sx={{
-                      fontWeight: 500,
-                      color: 'text.auxiliary200',
-                    }}
+                    sx={{ color: 'text.auxiliary200' }}
                   >
                     {t('worker.signUpForm.alreadyHaveAccount')}
                   </Typography>{' '}

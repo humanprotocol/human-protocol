@@ -17,13 +17,7 @@ export function EmailVerificationSuccessMessage() {
     >
       <Stack sx={{ gap: 2.5, alignItems: 'center' }}>
         <SuccessIcon sx={{ fontSize: { xs: 56, md: 72 } }} />
-        <Typography
-          variant="body1"
-          sx={{
-            color: 'text.primary',
-            fontWeight: 600,
-          }}
-        >
+        <Typography component="h3" variant="body3">
           {t('worker.emailVerification.title')}
         </Typography>
         <Button
