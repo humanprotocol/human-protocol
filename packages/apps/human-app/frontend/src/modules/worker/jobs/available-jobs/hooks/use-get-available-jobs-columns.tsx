@@ -58,6 +58,7 @@ export const useGetAvailableJobsColumns = (): MRT_ColumnDef<AvailableJob>[] => {
               reward_amount={reward_amount}
               reward_token={reward_token}
               color="text.auxiliary100"
+              size="medium"
             />
           );
         },

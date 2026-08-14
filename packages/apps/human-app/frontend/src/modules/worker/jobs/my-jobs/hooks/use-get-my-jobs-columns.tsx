@@ -54,6 +54,7 @@ export const useGetMyJobsColumns = (): MRT_ColumnDef<MyJob>[] => {
               reward_amount={reward_amount}
               reward_token={reward_token}
               color="text.auxiliary100"
+              size="medium"
             />
           );
         },
