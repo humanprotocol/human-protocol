@@ -2,7 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import { env } from '@/shared/env';
 import { AuthService, HttpApiClient } from '@/api';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
-import { type SignInDto } from './schemas';
+import { type SignInDto } from '../schemas';
 
 function signInMutationFn(data: SignInDto) {
   const httpClient = new HttpApiClient(env.VITE_API_URL);

@@ -3,7 +3,7 @@ import { useTranslation, Trans } from 'react-i18next';
 import { Box, keyframes, Link, Stack, Typography } from '@mui/material';
 import { jwtDecode } from 'jwt-decode';
 
-import { useStartIdv } from '../hooks';
+import { useStartIdv } from '../hooks/use-start-idv';
 import { KycStatus } from '@/shared/types/entity.type';
 import { env } from '@/shared/env';
 import { HourglassIcon, VeriffIcon } from '@/shared/components/ui/icons';

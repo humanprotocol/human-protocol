@@ -11,7 +11,7 @@ import { Password } from '@/shared/components/data-entry/password';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
 import { HCaptchaForm } from '@/shared/components/hcaptcha';
 import { routerPaths } from '@/router/router-paths';
-import { type SignInDto, signInDtoSchema } from './schemas';
+import { type SignInDto, signInDtoSchema } from '../schemas';
 
 interface SignInFormProps {
   onSubmit: (data: SignInDto) => void;

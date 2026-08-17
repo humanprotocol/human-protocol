@@ -12,11 +12,12 @@ import {
   EmailVerificationProcessPage,
   VerifyEmailPage,
 } from '@/modules/worker/email-verification';
-import { SignInPage, VerifyUserPage } from '@/modules/signin/worker';
+import { SignInPage } from '@/modules/signin/sign-in.page';
+import { VerifyUserPage } from '@/modules/verify-user/verify-user.page';
 import { JobsDiscoveryPage } from '@/modules/worker/jobs-discovery';
 import { MyJobsPage } from '@/modules/worker/jobs/my-jobs/my-jobs.page';
 import { ProfilePage } from '@/modules/worker/profile';
-// import { SignUpPage } from '@/modules/signup/worker';
+//import { SignUpPage } from '@/modules/signup/sign-up.page';
 import { HomePage } from '@/modules/homepage';
 import {
   ResetPasswordPage,
