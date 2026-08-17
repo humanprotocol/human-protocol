@@ -1,5 +1,5 @@
 import { jwtDecode } from 'jwt-decode';
-import { type SignInDto } from '@/modules/signin/worker/schemas';
+import { type SignInDto } from '@/modules/signin/schemas';
 import { browserAuthProvider } from '@/shared/contexts/browser-auth-provider';
 import {
   type AuthTokensSuccessResponse,

@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
+
 import { browserAuthProvider } from '@/shared/contexts/browser-auth-provider';
 import { useSignInMutation } from './use-sign-in-mutation';
-import { type SignInDto } from './schemas';
+import { type SignInDto } from '../schemas';
 
 export function useSignIn() {
   const {

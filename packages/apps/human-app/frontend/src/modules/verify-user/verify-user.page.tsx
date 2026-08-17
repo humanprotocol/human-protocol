@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { Stack } from '@mui/material';
 
-import { VerificationFlow } from './verification-flow';
+import { VerificationFlow } from './components/verification-flow';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
 import { routerPaths } from '@/router/router-paths';
 import { KycStatus } from '@/shared/types/entity.type';

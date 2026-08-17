@@ -1,8 +1,9 @@
 import { useTranslation } from 'react-i18next';
 import { Stack, Typography } from '@mui/material';
+
+import { RegisterAddressBtn } from './register-address-btn';
 import { Button } from '@/shared/components/ui/button';
 import { useWalletConnect } from '@/shared/contexts/wallet-connect';
-import { RegisterAddressBtn } from '../worker/register-address-btn';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
 
 export function WalletConnectionControl() {

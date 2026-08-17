@@ -1,5 +1,5 @@
 import { ApiClientError, humanAppApiClient } from '@/api';
-import { type SignUpDto } from '../worker/schema';
+import { type SignUpDto } from '../schema';
 
 const signUpPath = '/auth/signup';
 
