@@ -1,9 +1,10 @@
 import { IconButton } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+
 import { useColorMode } from '@/shared/contexts/color-mode';
 
 export function BackButton({ onClick }: { onClick: () => void }) {
-  const { isDarkMode, colorPalette } = useColorMode();
+  const { isDarkMode } = useColorMode();
 
   return (
     <IconButton
@@ -16,12 +17,10 @@ export function BackButton({ onClick }: { onClick: () => void }) {
         borderRadius: '50%',
         fontSize: '24px',
         transition: 'none',
-        color: isDarkMode
-          ? colorPalette.text.auxiliary100
-          : colorPalette.text.primary,
-        bgcolor: colorPalette.background.default,
+        color: isDarkMode ? 'text.auxiliary100' : 'text.primary',
+        bgcolor: 'background.default',
         '&:hover': {
-          bgcolor: colorPalette.background.default,
+          bgcolor: 'background.default',
         },
       }}
     >

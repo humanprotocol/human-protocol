@@ -9,7 +9,6 @@ import {
   HcaptchaDisabledIcon,
   HcaptchaIcon,
 } from '@/shared/components/ui/icons';
-import { useColorMode } from '@/shared/contexts/color-mode';
 import { routerPaths } from '@/router/router-paths';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
@@ -24,7 +23,7 @@ import { Loader } from '@/shared/components/ui/loader';
 const getHCaptchaPagePath = (siteKey: string | null | undefined): string =>
   siteKey ? routerPaths.HcaptchaLabeling : routerPaths.enableLabeler;
 
-const renderDescription = (color: string, isMobile: boolean) => {
+const renderDescription = (isMobile: boolean) => {
   let description = '';
 
   if (isMobile) {
@@ -36,10 +35,9 @@ const renderDescription = (color: string, isMobile: boolean) => {
   return (
     <Typography
       sx={{
-        color,
+        color: 'text.auxiliary200',
         fontSize: { xs: 12, md: 16 },
         fontWeight: 500,
-        lineHeight: 'normal',
       }}
     >
       {description}
@@ -48,7 +46,6 @@ const renderDescription = (color: string, isMobile: boolean) => {
 };
 
 export function HCaptchaWidget() {
-  const { colorPalette } = useColorMode();
   const { user } = useAuthenticatedUser();
   const isMobile = useIsMobile();
   const navigate = useNavigate();
@@ -118,22 +115,24 @@ export function HCaptchaWidget() {
               sx={{
                 justifyContent: 'space-between',
                 maxWidth: { xs: '100%', md: '350px', lg: '450px' },
+                gap: { xs: 0, md: 1 },
               }}
             >
               <Typography
+                component="h6"
                 variant={isMobile ? 'body2' : 'h6'}
                 sx={{
-                  color: colorPalette.text.auxiliary200,
-                  fontWeight: 700,
+                  color: 'text.auxiliary200',
+                  fontWeight: { xs: 600, md: 700 },
                 }}
               >
                 {t('worker.hcaptchaWidget.titleDisabled')}
               </Typography>
               {!isMobile && (
                 <Typography
-                  variant="body1"
+                  variant="body4"
                   sx={{
-                    color: colorPalette.text.auxiliary100,
+                    color: 'text.auxiliary100',
                     opacity: 0.5,
                   }}
                 >
@@ -151,27 +150,26 @@ export function HCaptchaWidget() {
               py: { xs: 0.75, md: 1.5 },
               px: { xs: 1.5, md: 2 },
               bgcolor: {
-                xs: colorPalette.background.default,
-                md: colorPalette.background.subtle,
+                xs: 'background.default',
+                md: 'background.subtle',
               },
               borderRadius: { xs: '0px', md: '15px' },
               borderBottomLeftRadius: { xs: '10px', md: '15px' },
               borderBottomRightRadius: { xs: '10px', md: '15px' },
-              border: {
+              border: (theme) => ({
                 xs: 'none',
-                md: `1px solid ${colorPalette.border.strong}`,
-              },
-              borderTop: {
-                xs: `1px solid ${colorPalette.border.main}`,
-                md: `1px solid ${colorPalette.border.strong}`,
-              },
+                md: `1px solid ${theme.palette.border.strong}`,
+              }),
+              borderTop: (theme) => ({
+                xs: `1px solid ${theme.palette.border.main}`,
+                md: `1px solid ${theme.palette.border.strong}`,
+              }),
             }}
           >
             <Typography
-              variant={isMobile ? 'body2' : 'subtitle2'}
+              variant={isMobile ? 'body5' : 'subtitle2'}
               sx={{
-                color: colorPalette.text.auxiliary200,
-                fontSize: { xs: 12, md: 14 },
+                color: 'text.auxiliary200',
                 fontWeight: { xs: 500, md: 600 },
               }}
             >
@@ -181,10 +179,9 @@ export function HCaptchaWidget() {
             </Typography>
             <Typography
               sx={{
-                color: colorPalette.text.primary,
+                color: 'text.primary',
                 fontSize: { xs: 16, md: 32 },
                 fontWeight: 700,
-                lineHeight: 'normal',
                 letterSpacing: '0.25px',
                 fontVariantNumeric: 'tabular-nums',
               }}
@@ -220,6 +217,7 @@ export function HCaptchaWidget() {
               sx={{
                 justifyContent: 'space-between',
                 maxWidth: { xs: '100%', md: '350px', lg: '450px' },
+                gap: { xs: 0, md: 1 },
               }}
             >
               <Typography
@@ -228,8 +226,7 @@ export function HCaptchaWidget() {
               >
                 {t('worker.hcaptchaWidget.title')}
               </Typography>
-              {!isMobile &&
-                renderDescription(colorPalette.text.auxiliary200, isMobile)}
+              {!isMobile && renderDescription(isMobile)}
             </Stack>
           </Box>
           <Box
@@ -243,8 +240,7 @@ export function HCaptchaWidget() {
               width: { xs: '100%', md: 'auto' },
             }}
           >
-            {isMobile &&
-              renderDescription(colorPalette.text.auxiliary200, isMobile)}
+            {isMobile && renderDescription(isMobile)}
             <Button
               component={Link}
               to={hCaptchaPagePath}

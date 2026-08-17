@@ -6,22 +6,21 @@ import {
   type AlertProps as MuiAlertProps,
   Typography,
 } from '@mui/material';
+
 import { useColorMode } from '@/shared/contexts/color-mode';
-import { darkColorPalette } from '@/shared/styles/dark-color-palette';
 
 const getIcon = (severity: MuiAlertProps['severity'], isDarkMode: boolean) => {
+  const iconSx = {
+    ...(isDarkMode ? { fill: 'white' } : null),
+  };
+
   switch (severity) {
     case 'success':
-      return (
-        <CheckCircleIcon sx={isDarkMode ? { fill: 'white' } : undefined} />
-      );
-
+      return <CheckCircleIcon sx={iconSx} />;
     case 'error':
-      return <ErrorIcon sx={isDarkMode ? { fill: 'white' } : undefined} />;
-
+      return <ErrorIcon sx={iconSx} />;
     case 'warning':
-      return <WarningIcon sx={isDarkMode ? { fill: 'white' } : undefined} />;
-
+      return <WarningIcon sx={iconSx} />;
     default:
       return undefined;
   }
@@ -33,36 +32,31 @@ export function Alert({
   children,
   ...rest
 }: Omit<MuiAlertProps, 'color'> & { color: 'success' | 'error' }) {
-  const { colorPalette, isDarkMode } = useColorMode();
+  const { isDarkMode } = useColorMode();
+
   const icon = getIcon(severity, isDarkMode);
-  const fontColor = (() => {
-    if (isDarkMode) {
-      return 'white';
-    }
-    return color === 'error' ? colorPalette.error.main : 'inherit';
-  })();
-
-  const sxForDarkMode = {
-    backgroundColor: (() => {
-      switch (color) {
-        case 'error':
-          return darkColorPalette.error.main;
-
-        case 'success':
-          return darkColorPalette.success.main;
-      }
-    })(),
-  };
 
   return (
     <MuiAlert
+      variant="standard"
       color={color}
       icon={icon}
       {...rest}
-      sx={isDarkMode ? sxForDarkMode : undefined}
-      variant="standard"
+      sx={{
+        bgcolor: (theme) =>
+          isDarkMode ? theme.palette[color].main : undefined,
+      }}
     >
-      <Typography sx={{ color: `${fontColor} !important` }} variant="subtitle2">
+      <Typography
+        variant="subtitle2"
+        sx={{
+          color: isDarkMode
+            ? 'white'
+            : color === 'error'
+              ? 'error.main'
+              : 'inherit',
+        }}
+      >
         {children}
       </Typography>
     </MuiAlert>

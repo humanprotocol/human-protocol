@@ -6,7 +6,6 @@ import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { GovernanceBanner } from '@/modules/governance-banner/components/governance-banner';
 import { Footer } from '../../footer';
 import { Navbar } from './navbar';
-import { useColorMode } from '@/shared/contexts/color-mode/use-color-mode';
 import { DesktopAsideBar } from './desktop-aside-bar';
 import { ProfileBottomTray } from '@/modules/worker/profile/components/profile-bottom-tray';
 import { MOBILE_BOTTOM_TRAY_HEIGHT } from '@/shared/consts';
@@ -22,7 +21,6 @@ export function ProtectedLayout() {
   const layoutElementRef = useRef<HTMLDivElement | null>(null);
 
   const isMobile = useIsMobile();
-  const { colorPalette } = useColorMode();
   const location = useLocation();
 
   const isProfilePage = location.pathname === routerPaths.profile;
@@ -41,8 +39,8 @@ export function ProtectedLayout() {
         pb: { xs: isBottomTrayVisible ? MOBILE_BOTTOM_TRAY_HEIGHT : 0, md: 2 },
         gap: 2,
         bgcolor: {
-          xs: colorPalette.background.paper,
-          md: colorPalette.background.default,
+          xs: 'background.paper',
+          md: 'background.default',
         },
       }}
     >
@@ -52,12 +50,12 @@ export function ProtectedLayout() {
         sx={{
           flex: 1,
           gap: { xs: 0, md: 3 },
-          bgcolor: colorPalette.background.paper,
+          bgcolor: 'background.paper',
           borderRadius: { xs: '0px', md: '30px' },
-          border: {
+          border: (theme) => ({
             xs: 'none',
-            md: `1px solid ${colorPalette.border.main}`,
-          },
+            md: `1px solid ${theme.palette.border.main}`,
+          }),
         }}
       >
         <Main>

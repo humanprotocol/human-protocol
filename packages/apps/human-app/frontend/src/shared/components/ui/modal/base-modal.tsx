@@ -8,8 +8,6 @@ import {
   type Theme,
 } from '@mui/material';
 
-import { useColorMode } from '@/shared/contexts/color-mode/use-color-mode';
-
 type Props = {
   open: boolean;
   onClose: () => void;
@@ -26,8 +24,6 @@ export function BaseModal({
   closeButtonSx,
   children,
 }: PropsWithChildren<Props>) {
-  const { colorPalette } = useColorMode();
-
   const handleClose = useCallback(() => {
     if (isLoading) return;
     onClose();
@@ -64,7 +60,7 @@ export function BaseModal({
           borderRadius: '20px',
           position: 'relative',
           boxShadow: 'none',
-          bgcolor: colorPalette.background.paper,
+          bgcolor: 'background.paper',
           ...sx,
         }}
       >
@@ -73,7 +69,7 @@ export function BaseModal({
           onClick={handleClose}
           sx={{
             p: 0.5,
-            color: colorPalette.text.auxiliary100,
+            color: 'text.auxiliary100',
             position: 'absolute',
             top: 32,
             right: 32,

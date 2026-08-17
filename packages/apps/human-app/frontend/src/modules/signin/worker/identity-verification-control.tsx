@@ -4,8 +4,7 @@ import { Box, keyframes, Link, Stack, Typography } from '@mui/material';
 import { jwtDecode } from 'jwt-decode';
 
 import { useStartIdv } from '../hooks';
-import { KycStatus } from '../types';
-import { useColorMode } from '@/shared/contexts/color-mode';
+import { KycStatus } from '@/shared/types/entity.type';
 import { env } from '@/shared/env';
 import { HourglassIcon, VeriffIcon } from '@/shared/components/ui/icons';
 import { Button } from '@/shared/components/ui/button';
@@ -13,6 +12,7 @@ import { useAccessTokenRefresh } from '@/api/hooks/use-access-token-refresh';
 import { browserAuthProvider } from '@/shared/contexts/browser-auth-provider';
 import { UserData } from '@/modules/auth/context/auth-context';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
+import { useColorMode } from '@/shared/contexts/color-mode/use-color-mode';
 
 const hourglassSpin = keyframes`
   0% {
@@ -29,8 +29,7 @@ const hourglassSpin = keyframes`
   }
 `;
 
-// TODO: Extend to 30 seconds
-const CHECK_STATUS_COOLDOWN_TIME = 10000;
+const CHECK_STATUS_COOLDOWN_TIME = 30000;
 
 export function IdentityVerificationControl({
   kycStatus,
@@ -45,6 +44,8 @@ export function IdentityVerificationControl({
   const cooldownTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const { t } = useTranslation();
+  const { isDarkMode } = useColorMode();
+
   const { isIdvAlreadyInProgress, idvStarted, idvStartIsPending, startIdv } =
     useStartIdv();
   const {
@@ -52,7 +53,6 @@ export function IdentityVerificationControl({
     isPending: isRefreshingAccessToken,
   } = useAccessTokenRefresh();
   const { updateUserData } = useAuth();
-  const { colorPalette } = useColorMode();
 
   const handleCheckVerificationStatus = useCallback(async () => {
     if (isRefreshingAccessToken || isCheckStatusCoolingDown) {
@@ -107,7 +107,7 @@ export function IdentityVerificationControl({
     return (
       <Typography
         variant="body1"
-        sx={{ color: colorPalette.text.auxiliary200 }}
+        sx={{ color: isDarkMode ? 'text.auxiliary100' : 'text.auxiliary200' }}
       >
         <Trans
           components={{
@@ -131,20 +131,16 @@ export function IdentityVerificationControl({
             p: 2.5,
             borderRadius: '10px',
             border: '1px solid',
-            borderColor: colorPalette.border.main,
+            borderColor: 'border.main',
           }}
         >
-          <Typography
-            variant="h6"
-            sx={{ color: colorPalette.text.primary, fontWeight: 600, mb: 1 }}
-          >
+          <Typography variant="h6" sx={{ color: 'text.primary', mb: 1 }}>
             {t('worker.profile.verificationOpenedInNewTab')}
           </Typography>
           <Typography
-            variant="body1"
+            variant="body4"
             sx={{
-              color: colorPalette.text.auxiliary200,
-              fontWeight: 400,
+              color: 'text.auxiliary200',
               mb: 2,
             }}
           >
@@ -161,10 +157,9 @@ export function IdentityVerificationControl({
               <HourglassIcon />
             </Box>
             <Typography
-              variant="body1"
+              variant="body4"
               sx={{
-                color: colorPalette.text.auxiliary200,
-                fontWeight: 400,
+                color: 'text.auxiliary200',
                 fontStyle: 'italic',
               }}
             >
@@ -190,8 +185,8 @@ export function IdentityVerificationControl({
   return (
     <Stack>
       <Typography
-        variant="body1"
-        sx={{ color: colorPalette.text.auxiliary200, mb: { xs: 3, md: 5 } }}
+        variant="body4"
+        sx={{ color: 'text.auxiliary200', mb: { xs: 3, md: 5 } }}
       >
         {t('worker.profile.veriffCopy')}
       </Typography>
@@ -205,13 +200,8 @@ export function IdentityVerificationControl({
       >
         <Typography
           component="span"
-          sx={{
-            color: colorPalette.text.auxiliary200,
-            fontSize: 12,
-            fontWeight: 400,
-            letterSpacing: 0.15,
-            lineHeight: '150%',
-          }}
+          variant="body5"
+          sx={{ color: isDarkMode ? 'text.auxiliary100' : 'text.auxiliary200' }}
         >
           {t('worker.profile.poweredBy')}
         </Typography>

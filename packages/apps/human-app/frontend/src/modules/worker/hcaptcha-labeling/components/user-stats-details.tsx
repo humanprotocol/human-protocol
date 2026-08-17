@@ -2,7 +2,6 @@ import { Divider, IconButton, Stack, Typography } from '@mui/material';
 import { t } from 'i18next';
 
 import { RefreshIcon } from '@/shared/components/ui/icons';
-import { useColorMode } from '@/shared/contexts/color-mode';
 import { useIsMobile } from '@/shared/hooks';
 import { type HCaptchaUserStatsSuccess } from '../types';
 
@@ -13,13 +12,12 @@ type Props = {
 };
 
 export function UserStatsDetails({ stats, refetch, isRefetching }: Props) {
-  const { colorPalette } = useColorMode();
   const isMobile = useIsMobile();
 
   return (
     <Stack>
       {!isMobile && (
-        <Divider sx={{ height: '1px', bgcolor: colorPalette.border.strong }} />
+        <Divider sx={{ height: '1px', bgcolor: 'border.strong' }} />
       )}
       <Stack sx={{ py: { xs: 2, md: 3 } }}>
         <Stack sx={{ gap: 2 }}>
@@ -34,7 +32,7 @@ export function UserStatsDetails({ stats, refetch, isRefetching }: Props) {
               <Typography variant="caption">
                 {t('worker.hcaptchaLabelingStats.jobsServed')}
               </Typography>
-              <Typography variant="h6" sx={{ color: colorPalette.text.light }}>
+              <Typography variant="h6" sx={{ color: 'text.light' }}>
                 {stats.served}
               </Typography>
             </Stack>
@@ -42,7 +40,7 @@ export function UserStatsDetails({ stats, refetch, isRefetching }: Props) {
               <Typography variant="caption">
                 {t('worker.hcaptchaLabelingStats.jobsComplete')}
               </Typography>
-              <Typography variant="h6" sx={{ color: colorPalette.text.light }}>
+              <Typography variant="h6" sx={{ color: 'text.light' }}>
                 {stats.solved}
               </Typography>
             </Stack>
@@ -50,12 +48,9 @@ export function UserStatsDetails({ stats, refetch, isRefetching }: Props) {
               <Typography variant="caption">
                 {t('worker.hcaptchaLabelingStats.hmtEarned')}
               </Typography>
-              <Typography variant="h6" sx={{ color: colorPalette.text.light }}>
+              <Typography variant="h6" sx={{ color: 'text.light' }}>
                 {stats.balance.total}{' '}
-                <Typography
-                  component="span"
-                  sx={{ color: colorPalette.text.primary }}
-                >
+                <Typography component="span" sx={{ color: 'text.primary' }}>
                   {t('inputMasks.humanCurrencySuffix')}
                 </Typography>
               </Typography>
@@ -66,7 +61,7 @@ export function UserStatsDetails({ stats, refetch, isRefetching }: Props) {
           sx={{
             mt: { xs: 2, md: 3 },
             mb: 2,
-            bgcolor: colorPalette.border.strong,
+            bgcolor: 'border.strong',
           }}
         />
         <Stack>
@@ -77,12 +72,9 @@ export function UserStatsDetails({ stats, refetch, isRefetching }: Props) {
             <Typography variant="caption">
               {t('worker.hcaptchaLabelingStats.earnedLastHour')}
             </Typography>
-            <Typography variant="h6" sx={{ color: colorPalette.text.light }}>
+            <Typography variant="h6" sx={{ color: 'text.light' }}>
               {stats.balance.recent}{' '}
-              <Typography
-                component="span"
-                sx={{ color: colorPalette.text.primary }}
-              >
+              <Typography component="span" sx={{ color: 'text.primary' }}>
                 {t('inputMasks.humanCurrencySuffix')}
               </Typography>
             </Typography>
@@ -97,10 +89,7 @@ export function UserStatsDetails({ stats, refetch, isRefetching }: Props) {
             gap: { xs: 1, md: 2 },
           }}
         >
-          <Typography
-            variant="body8"
-            sx={{ lineHeight: '1.3', whiteSpace: 'pre-line' }}
-          >
+          <Typography variant="body6" sx={{ whiteSpace: 'pre-line' }}>
             {t('worker.hcaptchaLabelingStats.statisticsNotLive')}
           </Typography>
           <IconButton

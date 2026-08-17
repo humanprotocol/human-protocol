@@ -7,7 +7,6 @@ import {
   RewardAmount,
 } from '../../../components';
 import { type MyJob } from '../../../schemas';
-import { useColorMode } from '@/shared/contexts/color-mode/use-color-mode';
 import { JobType } from '@/shared/types/entity.type';
 import { TimeUntil } from '../time-until';
 import { ChainIcon } from '@/shared/components/ui/chain-icon';
@@ -27,7 +26,6 @@ const Row = ({
   icon: React.ReactNode;
   children: React.ReactNode;
 }) => {
-  const { colorPalette } = useColorMode();
   return (
     <Stack
       direction="row"
@@ -35,14 +33,11 @@ const Row = ({
         width: '100%',
         alignItems: 'center',
         gap: 1,
-        color: colorPalette.text.auxiliary200,
+        color: 'text.auxiliary200',
       }}
     >
       {icon}
-      <Typography
-        variant="body2"
-        sx={{ color: colorPalette.text.auxiliary200, fontWeight: 500 }}
-      >
+      <Typography variant="body2" sx={{ color: 'text.auxiliary200' }}>
         {label}:{' '}
       </Typography>
       {children}
@@ -51,7 +46,6 @@ const Row = ({
 };
 
 export function MyJobsCardMobile({ job }: { job: MyJob }) {
-  const { colorPalette } = useColorMode();
   const { t } = useTranslation();
 
   const jobTypeLabel = t(`jobTypeLabels.${job.job_type as JobType}`);
@@ -66,7 +60,7 @@ export function MyJobsCardMobile({ job }: { job: MyJob }) {
         pt: 2,
         boxShadow: 'none',
         borderRadius: '20px',
-        border: `1px solid ${colorPalette.border.main}`,
+        border: (theme) => `1px solid ${theme.palette.border.main}`,
       }}
     >
       <Stack
@@ -83,12 +77,9 @@ export function MyJobsCardMobile({ job }: { job: MyJob }) {
         <Chip
           label={jobTypeLabel}
           sx={{
-            typography: 'body2',
-            fontWeight: 500,
-            color: colorPalette.text.primary,
-            bgcolor: colorPalette.background.subtle,
-            borderRadius: '99px',
-            border: `0.5px solid ${colorPalette.border.main}`,
+            color: 'text.primary',
+            bgcolor: 'background.subtle',
+            borderColor: 'border.main',
           }}
         />
         <ChainIcon chainId={job.chain_id} />
@@ -108,10 +99,7 @@ export function MyJobsCardMobile({ job }: { job: MyJob }) {
             <JobExpiryTimeIcon sx={{ fontSize: '20px', color: 'inherit' }} />
           }
         >
-          <Typography
-            variant="body2"
-            sx={{ color: colorPalette.text.auxiliary100, fontWeight: 500 }}
-          >
+          <Typography variant="body2" sx={{ color: 'text.auxiliary100' }}>
             <TimeUntil date={job.expires_at} />
           </Typography>
         </Row>
@@ -122,8 +110,7 @@ export function MyJobsCardMobile({ job }: { job: MyJob }) {
           <Typography
             variant="body2"
             sx={{
-              color: colorPalette.text.auxiliary100,
-              fontWeight: 500,
+              color: 'text.auxiliary100',
               textTransform: 'capitalize',
             }}
           >
@@ -139,7 +126,7 @@ export function MyJobsCardMobile({ job }: { job: MyJob }) {
           <RewardAmount
             reward_amount={job.reward_amount}
             reward_token={job.reward_token}
-            color={colorPalette.primary.light}
+            color="primary.light"
           />
         </Row>
       </Stack>
@@ -152,7 +139,7 @@ export function MyJobsCardMobile({ job }: { job: MyJob }) {
             px: 2,
             gap: 1,
             width: '100%',
-            borderTop: `1px solid ${colorPalette.border.main}`,
+            borderTop: (theme) => `1px solid ${theme.palette.border.main}`,
           }}
         >
           <MyJobsTableActions job={job} />

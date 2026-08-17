@@ -10,7 +10,6 @@ import { EvmAddress, RewardAmount } from '../../components';
 import { type AvailableJob } from '../../types';
 import { useAssignJobMutation } from './use-assign-job';
 import { Button } from '@/shared/components/ui/button';
-import { useColorMode } from '@/shared/contexts/color-mode';
 import { useModal } from '@/shared/contexts/modal-context';
 import { ChainIcon } from '@/shared/components/ui/chain-icon';
 
@@ -20,7 +19,6 @@ const COL_SIZE_LG = 150;
 const COL_SIZE_XL = 250;
 
 export const useGetAvailableJobsColumns = (): MRT_ColumnDef<AvailableJob>[] => {
-  const { colorPalette } = useColorMode();
   const { openModal } = useModal();
 
   return useMemo(
@@ -31,7 +29,12 @@ export const useGetAvailableJobsColumns = (): MRT_ColumnDef<AvailableJob>[] => {
         size: COL_SIZE,
         enableSorting: false,
         Cell: (props) => {
-          return <EvmAddress address={props.cell.getValue() as string} />;
+          return (
+            <EvmAddress
+              address={props.cell.getValue() as string}
+              size="medium"
+            />
+          );
         },
       },
       {
@@ -54,7 +57,8 @@ export const useGetAvailableJobsColumns = (): MRT_ColumnDef<AvailableJob>[] => {
             <RewardAmount
               reward_amount={reward_amount}
               reward_token={reward_token}
-              color={colorPalette.text.auxiliary100}
+              color="text.auxiliary100"
+              size="medium"
             />
           );
         },
@@ -70,12 +74,9 @@ export const useGetAvailableJobsColumns = (): MRT_ColumnDef<AvailableJob>[] => {
             <Chip
               label={label}
               sx={{
-                typography: 'body2',
-                fontWeight: 500,
-                color: colorPalette.text.primary,
-                bgcolor: colorPalette.background.subtle,
-                borderRadius: '99px',
-                border: `0.5px solid ${colorPalette.border.strong}`,
+                color: 'text.primary',
+                bgcolor: 'background.subtle',
+                borderColor: 'border.strong',
                 maxWidth: { xs: 'fit-content', md: '150px', lg: 'fit-content' },
               }}
             />
@@ -106,13 +107,13 @@ export const useGetAvailableJobsColumns = (): MRT_ColumnDef<AvailableJob>[] => {
             openModal({
               content: (
                 <Stack sx={{ gap: 2 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                  <Typography variant="h6">
                     {t('worker.jobs.jobDescription')}
                   </Typography>
                   <Typography
                     variant="body1"
                     sx={{
-                      color: colorPalette.text.auxiliary100,
+                      color: 'text.auxiliary100',
                       whiteSpace: 'pre-wrap',
                     }}
                   >
@@ -147,6 +148,6 @@ export const useGetAvailableJobsColumns = (): MRT_ColumnDef<AvailableJob>[] => {
         },
       },
     ],
-    [colorPalette, openModal]
+    [openModal]
   );
 };

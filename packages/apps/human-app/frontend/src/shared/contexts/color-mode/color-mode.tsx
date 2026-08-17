@@ -1,16 +1,13 @@
-import type { ReactNode } from 'react';
 import {
   createContext,
   useEffect,
   useMemo,
   useState,
   useCallback,
+  type ReactNode,
 } from 'react';
-import { ThemeProvider, createTheme } from '@mui/material';
-import { theme } from '@/shared/styles/theme';
-import { colorPalette as defaultColorPalette } from '@/shared/styles/color-palette';
-import { darkTheme } from '@/shared/styles/dark-theme';
-import { darkColorPalette } from '@/shared/styles/dark-color-palette';
+import { ThemeProvider } from '@mui/material';
+
 import {
   ColorMode,
   hasColorMode,
@@ -18,10 +15,10 @@ import {
   saveColorMode,
 } from './color-mode-settings';
 import { addColorSchemePrefsListener } from './color-mode-handlers';
+import { createAppTheme } from '@/shared/styles/theme';
 
 export interface ColorModeContextProps {
   isDarkMode: boolean;
-  colorPalette: typeof defaultColorPalette;
   switchMode: () => void;
 }
 
@@ -66,21 +63,18 @@ export function ColorModeProvider({ children }: ColorModeProviderProps) {
     });
   }, []);
 
-  const themes = useMemo(
-    () => (isDarkMode ? createTheme(darkTheme) : createTheme(theme)),
+  const theme = useMemo(
+    () => createAppTheme(isDarkMode ? ColorMode.DARK : ColorMode.LIGHT),
     [isDarkMode]
   );
-  const colorPalette = useMemo(
-    () => (isDarkMode ? darkColorPalette : defaultColorPalette),
-    [isDarkMode]
-  );
+
   const contextValue = useMemo(
-    () => ({ isDarkMode, colorPalette, switchMode }),
-    [isDarkMode, colorPalette, switchMode]
+    () => ({ isDarkMode, switchMode }),
+    [isDarkMode, switchMode]
   );
 
   return (
-    <ThemeProvider theme={themes}>
+    <ThemeProvider theme={theme}>
       <ColorModeContext.Provider value={contextValue}>
         {children}
       </ColorModeContext.Provider>

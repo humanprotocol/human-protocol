@@ -1,19 +1,18 @@
 import { useEffect } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { Paper, Stack } from '@mui/material';
+import { Stack } from '@mui/material';
 
-import { useAuth } from '@/modules/auth/hooks/use-auth';
-import { KycStatus } from '@/modules/worker/profile/types';
-import { routerPaths } from '@/router/router-paths';
-import { useIsUserVerified } from '@/shared/hooks';
-import { useColorMode } from '@/shared/contexts/color-mode';
 import { VerificationFlow } from './verification-flow';
+import { useAuth } from '@/modules/auth/hooks/use-auth';
+import { routerPaths } from '@/router/router-paths';
+import { KycStatus } from '@/shared/types/entity.type';
+import { useIsUserVerified } from '@/shared/hooks';
 import { Loader } from '@/shared/components/ui/loader';
+import { PageCard } from '@/shared/components/ui/page-card';
 
 export function VerifyUserPage() {
   const navigate = useNavigate();
   const { user, status } = useAuth();
-  const { colorPalette } = useColorMode();
   const isUserVerified = useIsUserVerified();
 
   const isEmailVerificationPending =
@@ -45,28 +44,13 @@ export function VerifyUserPage() {
   }
 
   return (
-    <Paper
-      elevation={0}
+    <PageCard
       sx={{
-        display: 'flex',
-        flex: 1,
-        alignSelf: 'stretch',
         alignItems: {
           xs: 'flex-start',
           md: 'center',
         },
         justifyContent: 'center',
-        my: { xs: 0, md: 4 },
-        bgcolor: colorPalette.background.paper,
-        borderRadius: '30px',
-        borderBottomLeftRadius: { xs: 0, md: '30px' },
-        borderBottomRightRadius: { xs: 0, md: '30px' },
-        border: { xs: 'none', md: '1px solid' },
-        borderColor: {
-          xs: 'none',
-          md: colorPalette.border.main,
-        },
-        overflow: 'hidden',
       }}
     >
       {isLoading ? (
@@ -84,6 +68,6 @@ export function VerifyUserPage() {
           isKycApproved={user?.kyc_status === KycStatus.APPROVED}
         />
       )}
-    </Paper>
+    </PageCard>
   );
 }

@@ -1,16 +1,15 @@
 import { t } from 'i18next';
 import { Stack, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+
 import { Button } from '@/shared/components/ui/button';
 import { routerPaths } from '@/router/router-paths';
 import { browserAuthProvider } from '@/shared/contexts/browser-auth-provider';
 import { useModal } from '@/shared/contexts/modal-context';
-import { useColorMode } from '../contexts/color-mode';
 
 export function ExpirationModal() {
   const { closeModal } = useModal();
   const navigate = useNavigate();
-  const { colorPalette } = useColorMode();
 
   const handleOnSignInClick = () => {
     browserAuthProvider.signOut();
@@ -33,11 +32,11 @@ export function ExpirationModal() {
           maxWidth: '352px',
         }}
       >
-        <Typography variant="h4" sx={{ color: colorPalette.text.auxiliary100 }}>
+        <Typography variant="h4" sx={{ color: 'text.auxiliary100' }}>
           {t('expirationModal.header')}
         </Typography>
         <Stack sx={{ gap: 5 }}>
-          <Typography sx={{ color: colorPalette.text.auxiliary100 }}>
+          <Typography sx={{ color: 'text.auxiliary100' }}>
             {t('expirationModal.description')}
           </Typography>
           <Button

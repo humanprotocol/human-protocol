@@ -4,7 +4,6 @@ import { t } from 'i18next';
 
 import { OraclesList } from './components/oracles-list';
 import { HCaptchaWidget } from './components/hcaptcha-widget';
-import { useColorMode } from '@/shared/contexts/color-mode';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { useGetOracles } from '../hooks/use-get-oracles';
 import { useGetOraclesNotifications } from '../hooks/use-get-oracles-notifications';
@@ -17,7 +16,6 @@ const bull = (
 );
 
 export function JobsDiscoveryPage() {
-  const { colorPalette } = useColorMode();
   const isMobile = useIsMobile();
 
   const { onError } = useGetOraclesNotifications();
@@ -45,13 +43,13 @@ export function JobsDiscoveryPage() {
           p: { xs: 0, md: 4 },
           mx: { xs: 2, md: 0 },
           borderRadius: { xs: '10px', md: 0 },
-          border: {
-            xs: `1px solid ${colorPalette.border.main}`,
+          border: (theme) => ({
+            xs: `1px solid ${theme.palette.border.main}`,
             md: 'none',
-          },
-          borderBottom: {
-            md: `1px solid ${colorPalette.border.main}`,
-          },
+          }),
+          borderBottom: (theme) => ({
+            md: `1px solid ${theme.palette.border.main}`,
+          }),
         }}
       >
         <HCaptchaWidget />
@@ -70,24 +68,13 @@ export function JobsDiscoveryPage() {
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Typography
-            component="h1"
-            variant={isMobile ? 'body1' : 'h6'}
-            sx={{
-              fontWeight: { xs: 700, md: 600 },
-              lineHeight: { xs: 'normal', md: '24px' },
-            }}
-          >
+          <Typography variant="pageHeading">
             {t('worker.oraclesList.jobOracles')}
           </Typography>
           {isSuccess && (
             <>
               {bull}
-              <Typography
-                component="span"
-                variant="body1"
-                sx={{ fontWeight: 600 }}
-              >
+              <Typography component="span" variant="body3">
                 {oraclesCount}{' '}
                 {oraclesCount === 1
                   ? t('worker.oraclesList.source')

@@ -4,8 +4,6 @@ import {
   useMaterialReactTable,
 } from 'material-react-table';
 
-import { createTableDarkMode } from '@/shared/styles/create-table-dark-mode';
-import { useColorMode } from '@/shared/contexts/color-mode';
 import { useJobsFilterStore } from '../../../hooks';
 import { useGetAvailableJobsData } from '../../hooks/use-get-available-jobs-data';
 import { useGetAvailableJobsColumns } from '../../hooks';
@@ -16,7 +14,6 @@ export function AvailableJobsTableDesktop({
 }: {
   oracleAddress: string;
 }) {
-  const { colorPalette, isDarkMode } = useColorMode();
   const { data: tableData, status: tableStatus } = useGetAvailableJobsData({
     oracleAddress,
   });
@@ -54,13 +51,10 @@ export function AvailableJobsTableDesktop({
       SelectProps: {
         sx: {
           '.MuiSelect-select': {
-            color: colorPalette.text.auxiliary100,
+            color: 'text.auxiliary100',
           },
           '.MuiSelect-icon': {
-            ':hover': {
-              backgroundColor: 'blue',
-            },
-            fill: colorPalette.text.auxiliary100,
+            fill: 'text.auxiliary100',
           },
         },
       },
@@ -68,9 +62,9 @@ export function AvailableJobsTableDesktop({
     },
     muiBottomToolbarProps: {
       sx: {
-        bgcolor: colorPalette.background.paper,
+        bgcolor: 'background.paper',
         boxShadow: 'none',
-        color: colorPalette.text.auxiliary100,
+        color: 'text.auxiliary100',
       },
     },
     pageCount: tableData?.total_pages ?? -1,
@@ -87,7 +81,7 @@ export function AvailableJobsTableDesktop({
     },
     muiTableHeadProps: {
       sx: {
-        backgroundColor: colorPalette.background.default,
+        backgroundColor: 'background.default',
       },
     },
     muiTableHeadRowProps: {
@@ -102,10 +96,9 @@ export function AvailableJobsTableDesktop({
         paddingBottom: '8px',
         paddingLeft: '12px',
         paddingRight: '12px',
-        borderColor: colorPalette.background.paper,
-        color: colorPalette.text.auxiliary200,
+        borderColor: 'background.paper',
+        color: 'text.auxiliary200',
         typography: 'body1',
-        fontWeight: 500,
         '& .Mui-TableHeadCell-Content': {
           justifyContent: 'center',
           textAlign: 'center',
@@ -116,19 +109,18 @@ export function AvailableJobsTableDesktop({
       align: 'center',
       sx: {
         textAlign: 'center',
-        borderBottom: `1px solid ${colorPalette.border.main}`,
+        borderBottom: (theme) => `1px solid ${theme.palette.border.main}`,
       },
     },
     muiTableBodyRowProps: {
       sx: {
-        bgcolor: colorPalette.background.paper,
-        borderBottom: `1px solid ${colorPalette.border.main}`,
+        bgcolor: 'background.paper',
+        borderBottom: (theme) => `1px solid ${theme.palette.border.main}`,
         '&:last-of-type': {
           borderBottom: 'none',
         },
       },
     },
-    ...(isDarkMode ? createTableDarkMode(colorPalette) : {}),
   });
 
   return <MaterialReactTable table={table} />;
