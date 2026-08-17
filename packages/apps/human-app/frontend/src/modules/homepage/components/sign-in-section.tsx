@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Paper, Button } from '@mui/material';
+import { Paper, Button, Typography } from '@mui/material';
 
 import { routerPaths } from '@/router/router-paths';
 
@@ -21,7 +21,7 @@ export function SignInSection() {
         gap: 2,
       }}
     >
-      <Button
+      {/* <Button
         component={Link}
         to={routerPaths.signUp}
         variant="contained"
@@ -30,7 +30,7 @@ export function SignInSection() {
         fullWidth
       >
         {t('homepage.signUp')}
-      </Button>
+      </Button> */}
       <Button
         component={Link}
         to={routerPaths.signIn}
@@ -41,6 +41,9 @@ export function SignInSection() {
       >
         {t('homepage.signIn')}
       </Button>
+      <Typography variant="body2" sx={{ textAlign: 'center' }}>
+        {t('homepage.signUpClosed')}
+      </Typography>
     </Paper>
   );
 }

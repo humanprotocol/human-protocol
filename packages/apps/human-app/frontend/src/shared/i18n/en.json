@@ -81,6 +81,7 @@
     "humanApp": "HUMAN App",
     "completeJobs": "Complete jobs, earn HMT.",
     "signUp": "Sign Up",
+    "signUpClosed": "Registrations are currently closed. We are not accepting new users at this time.",
     "signIn": "Sign In"
   },
   "worker": {
