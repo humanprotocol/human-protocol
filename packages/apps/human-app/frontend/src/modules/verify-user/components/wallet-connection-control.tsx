@@ -18,7 +18,7 @@ export function WalletConnectionControl() {
       <Stack sx={{ gap: 2 }}>
         <RegisterAddressBtn />
         <Typography sx={{ color: 'text.auxiliary100' }}>
-          {t('worker.profile.walletAddressMessage')}
+          {t('verifyUser.walletAddressMessage')}
         </Typography>
       </Stack>
     );
@@ -31,7 +31,7 @@ export function WalletConnectionControl() {
       fullWidth
       onClick={() => void openModal()}
     >
-      {t('components.wallet.connectBtn.connect')}
+      {t('verifyUser.connectWallet')}
     </Button>
   );
 }

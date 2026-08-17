@@ -12,7 +12,7 @@ export function useRegisterAddressNotifications() {
   const onSuccess = () => {
     showNotification({
       type: TopNotificationType.SUCCESS,
-      message: t('worker.registerAddress.success'),
+      message: t('verifyUser.registerAddressSuccess'),
     });
   };
   const onError = (error: ResponseError) => {

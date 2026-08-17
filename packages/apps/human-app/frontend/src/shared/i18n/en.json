@@ -15,27 +15,18 @@
     "required": "Required",
     "min": "Password should have at least eight characters.",
     "max": "Max {{count}} characters",
-    "passwordWeak": "Password should be at least 8 characters long and contain at least one uppercase and one lowercase letter, one number and one special character",
     "passwordMismatch": "Passwords are not the same",
     "captcha": "Please complete the captcha",
     "passwordMissing": "Please enter your password.",
     "invalidEmail": "Please enter a valid email address.",
-    "invalidOracleAddress": "Invalid oracle address.",
-    "publicKeyLengthError": "Public key must be exactly 128 characters long",
-    "publicKeyHexadecimalStringError": "Public key must be a valid hexadecimal string",
-    "urlValidationError": "Invalid URL",
-    "feeValidationError": "Fee value must be an integer between 0 and 100",
-    "notANumber": "Not a number"
+    "invalidOracleAddress": "Invalid oracle address."
   },
   "errors": {
-    "errorWithMessage": "Error with message: {{message}}",
     "errorWithStatusCode": "Error with status code: {{code}}",
     "unknown": "An error occurred, please try again.",
-    "unknownNetwork": "Unknown network",
     "jsonRpcError": "JSON-RPC error",
     "unsupportedNetwork": "Network selected in wallet is unsupported.",
     "unsupportedNetworkWithName": "Network '{{networkName}}' is unsupported.",
-    "invalidEscrowAddress": "Please enter a valid escrow address.",
     "noAddress": "No wallet address found.",
     "cannotSignMessage": "Cannot sign message."
   },
@@ -64,12 +55,6 @@
       "humanProtocol": "HUMAN Protocol",
       "copyrightNote": "© 2021 HPF. HUMAN Protocol® is a registered trademark"
     },
-    "wallet": {
-      "connectBtn": {
-        "disconnect": "Disconnect Wallet",
-        "connect": "Connect Wallet"
-      }
-    },
     "pageCardError": {
       "reload": "Reload",
       "goHome": "Home Page"
@@ -83,40 +68,66 @@
     "signUp": "Sign Up",
     "signIn": "Sign In"
   },
+  "signUpForm": {
+    "fields": {
+      "createPassword": "Create Password",
+      "password": "Create Password",
+      "confirmPassword": "Confirm Password",
+      "email": "your@email.com"
+    },
+    "errors": {
+      "emailTaken": "Email is already taken. Please sign in."
+    },
+    "title": "Sign Up",
+    "submitBtn": "Sign Up",
+    "passwordDetailedValidation": "Password must contain at least:",
+    "termsOfServiceAndPrivacyPolicy": "By clicking Sign Up, you agree to our <1>Terms of Service</1> and that you have read our <2>Privacy Policy</2>",
+    "or": "Or",
+    "alreadyHaveAccount": "Already have an account?",
+    "signIn": "Sign In"
+  },
+  "signInForm": {
+    "fields": {
+      "password": "Password",
+      "email": "your@email.com"
+    },
+    "errors": {
+      "invalidCredentials": "Incorrect email or password!"
+    },
+    "title": "Sign In",
+    "submitBtn": "Sign In",
+    "forgotPassword": "Forgot Password?",
+    "or": "Or",
+    "dontHaveAccount": "Don't have an account?",
+    "signUp": "Sign Up"
+  },
+  "verifyUser": {
+    "beforeWeGetStarted": "Before we get started",
+    "identityVerification": "Identity verification",
+    "connectYourWallet": "Connect your wallet",
+    "veriffCopy": "We use Veriff to verify your identity. You'll need: keep your phone & Government ID handy.",
+    "poweredBy": "Powered by",
+    "completeIdentityVerification": "Complete Identity Verification",
+    "verificationOpenedInNewTab": "Verification opened in a new tab",
+    "completeYourVerification": "Complete your verification there, then return here to continue",
+    "waitingForVerification": "Waiting for verification...",
+    "checkVerificationStatus": "Check Verification Status",
+    "verificationDeclined": "We were unable to verify your identity with the information provided. Please <1>contact support</1>",
+    "walletAddressMessage": "This address is the wallet address where you will receive payments for completing tasks.",
+    "connectWallet": "Connect Wallet",
+    "registerAddress": "Register Address",
+    "registerAddressSuccess": "The address has been successfully registered.",
+    "idvStatusValues": {
+      "none": "Not Started",
+      "approved": "Completed",
+      "resubmission_requested": "Resubmission Required",
+      "declined": "Failed",
+      "review": "Under Review",
+      "expired": "Expired",
+      "abandoned": "Abandoned"
+    }
+  }, 
   "worker": {
-    "signUpForm": {
-      "fields": {
-        "createPassword": "Create Password",
-        "password": "Create Password",
-        "confirmPassword": "Confirm Password",
-        "email": "your@email.com"
-      },
-      "errors": {
-        "emailTaken": "Email is already taken. Please sign in."
-      },
-      "title": "Sign Up",
-      "submitBtn": "Sign Up",
-      "passwordDetailedValidation": "Password must contain at least:",
-      "termsOfServiceAndPrivacyPolicy": "By clicking Sign Up, you agree to our <1>Terms of Service</1> and that you have read our <2>Privacy Policy</2>",
-      "or": "Or",
-      "alreadyHaveAccount": "Already have an account?",
-      "signIn": "Sign In"
-    },
-    "signInForm": {
-      "fields": {
-        "password": "Password",
-        "email": "your@email.com"
-      },
-      "errors": {
-        "invalidCredentials": "Incorrect email or password!"
-      },
-      "title": "Sign In",
-      "submitBtn": "Sign In",
-      "forgotPassword": "Forgot Password?",
-      "or": "Or",
-      "dontHaveAccount": "Don't have an account?",
-      "signUp": "Sign Up"
-    },
     "verifyEmail": {
       "title": "Verify Email",
       "checkYourInbox": "Check your inbox",
@@ -178,36 +189,8 @@
       "walletAddress": "Wallet address",
       "resetPassword": "Reset Password",
       "logout": "Logout",
-      "beforeWeGetStarted": "Before we get started",
-      "identityVerification": "Identity verification",
-      "veriffCopy": "We use Veriff to verify your identity. You'll need: keep your phone & Government ID handy.",
-      "poweredBy": "Powered by",
-      "completeIdentityVerification": "Complete Identity Verification",
-      "verificationOpenedInNewTab": "Verification opened in a new tab",
-      "completeYourVerification": "Complete your verification there, then return here to continue",
-      "waitingForVerification": "Waiting for verification...",
-      "checkVerificationStatus": "Check Verification Status",
-      "verificationDeclined": "We were unable to verify your identity with the information provided. Please <1>contact support</1>",
-      "confirmEmail": "Confirm email",
-      "walletAddressMessage": "This address is the wallet address where you will receive payments for completing tasks.",
-      "connectYourWallet": "Connect your wallet",
-      "connectWallet": "Connect Wallet",
-      "walletConnected": "Connected",
-      "addKYCInfoOnChain": "Add KYC Info On-chain",
-      "wrongWalletAddress": "Selected wallet address doesn't match the address assigned to the account.",
-      "registerAddress": "Register Address",
-      "emailNotifications": "Email Notifications",
       "topNotifications": {
         "completeSteps": "Please set up your profile by completing the steps below."
-      },
-      "idvStatusValues": {
-        "none": "Not Started",
-        "approved": "Completed",
-        "resubmission_requested": "Resubmission Required",
-        "declined": "Failed",
-        "review": "Under Review",
-        "expired": "Expired",
-        "abandoned": "Abandoned"
       }
     },
     "oraclesList": {
@@ -311,9 +294,6 @@
       "statisticsNotLive": "Statistics are not live.\nPlease refresh to view live statistics.",
       "solvedSuccess": "HCaptcha solved!",
       "loadingLiveStatistics": "Loading live statistics"
-    },
-    "registerAddress": {
-      "success": "The address has been successfully registered."
     },
     "reportAbuse": {
       "modalHeader": "Report Abuse",
