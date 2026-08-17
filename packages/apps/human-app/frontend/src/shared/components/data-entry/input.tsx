@@ -1,3 +1,4 @@
+import { type ReactNode } from 'react';
 import { Controller } from 'react-hook-form';
 import { type TextFieldProps, TextField, Typography } from '@mui/material';
 
@@ -8,7 +9,7 @@ export interface InputProps extends OmittedProps {
   name: string;
   label?: string;
   autoComplete?: string;
-  customError?: React.ReactNode;
+  customError?: ReactNode;
   mask?: InputMask;
 }
 

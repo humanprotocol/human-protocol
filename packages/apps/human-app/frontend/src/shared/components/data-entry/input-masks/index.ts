@@ -4,5 +4,3 @@ import { PercentsInputMask } from '@/shared/components/data-entry/input-masks/pe
 export type InputMask =
   | typeof HumanCurrencyInputMask
   | typeof PercentsInputMask;
-
-export { HumanCurrencyInputMask, PercentsInputMask };

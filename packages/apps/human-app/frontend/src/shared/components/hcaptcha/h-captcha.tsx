@@ -1,4 +1,4 @@
-import { forwardRef, useImperativeHandle, useRef } from 'react';
+import { forwardRef, useImperativeHandle, useRef, type Ref } from 'react';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { env } from '@/shared/env';
 
@@ -12,7 +12,7 @@ interface CustomHCaptchaProps {
 
 function InternalHCaptcha(
   { onVerify }: CustomHCaptchaProps,
-  ref: React.Ref<unknown>
+  ref: Ref<unknown>
 ) {
   const captchaRef = useRef<HCaptcha>(null);
 

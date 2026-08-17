@@ -1,3 +1,4 @@
+import { type ReactNode } from 'react';
 import { Chip, Paper, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
@@ -23,8 +24,8 @@ const Row = ({
   children,
 }: {
   label: string;
-  icon: React.ReactNode;
-  children: React.ReactNode;
+  icon: ReactNode;
+  children: ReactNode;
 }) => {
   return (
     <Stack

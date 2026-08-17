@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, type SubmitEvent } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -65,7 +65,7 @@ export function SignUpPage() {
     navigate(-1);
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: SubmitEvent) => {
     void methods.handleSubmit(signUp)(event);
   };
 
