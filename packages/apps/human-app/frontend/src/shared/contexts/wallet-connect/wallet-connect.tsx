@@ -1,9 +1,10 @@
-import React, {
+import {
   createContext,
   useCallback,
   useEffect,
   useMemo,
   useState,
+  type ReactNode,
 } from 'react';
 import {
   useAppKit,
@@ -15,6 +16,7 @@ import {
 import { WagmiProvider } from 'wagmi';
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
 import { polygonAmoy, polygon } from '@reown/appkit/networks';
+
 import { env } from '@/shared/env';
 import { useWeb3Provider } from '@/shared/hooks/use-web3-provider';
 import { JsonRpcError } from '@/modules/smart-contracts/json-rpc-error';
@@ -52,7 +54,7 @@ export const WalletConnectContext = createContext<
   | null
 >(null);
 
-function AppKitWrapper({ children }: { children: React.ReactNode }) {
+function AppKitWrapper({ children }: { children: ReactNode }) {
   const [initializing, setInitializing] = useState(true);
   const web3ProviderMutation = useWeb3Provider();
   const { open } = useAppKit();
@@ -125,11 +127,7 @@ function AppKitWrapper({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function WalletConnectProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function WalletConnectProvider({ children }: { children: ReactNode }) {
   return (
     <WagmiProvider config={wagmiAdapter.wagmiConfig}>
       <AppKitWrapper>{children}</AppKitWrapper>

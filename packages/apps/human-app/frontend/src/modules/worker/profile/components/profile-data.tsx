@@ -1,3 +1,4 @@
+import { type ReactNode } from 'react';
 import { Box, Link, Stack, Typography } from '@mui/material';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
 
@@ -12,7 +13,7 @@ function Wrapper({
 }: {
   isCompact: boolean;
   isProfilePage: boolean;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   if (isCompact && !isProfilePage) {
     return (
