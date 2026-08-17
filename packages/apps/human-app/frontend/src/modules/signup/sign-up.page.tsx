@@ -28,7 +28,7 @@ import { useColorMode } from '@/shared/contexts/color-mode';
 
 function handleSignupError(unknownError: unknown) {
   if (unknownError instanceof ApiClientError && unknownError.status === 409) {
-    return t('worker.signUpForm.errors.emailTaken');
+    return t('signUpForm.errors.emailTaken');
   }
 }
 
@@ -106,22 +106,19 @@ export function SignUpPage() {
               variant="h4"
               sx={{ color: 'text.auxiliary100' }}
             >
-              {t('worker.signUpForm.title')}
+              {t('signUpForm.title')}
             </Typography>
           </Box>
           <FormProvider {...methods}>
             <form onSubmit={handleSubmit}>
               <Grid container sx={{ gap: 3 }}>
-                <Input
-                  label={t('worker.signUpForm.fields.email')}
-                  name="email"
-                />
+                <Input label={t('signUpForm.fields.email')} name="email" />
                 <Password
-                  label={t('worker.signUpForm.fields.password')}
+                  label={t('signUpForm.fields.password')}
                   name="password"
                 />
                 <Password
-                  label={t('worker.signUpForm.fields.confirmPassword')}
+                  label={t('signUpForm.fields.confirmPassword')}
                   name="confirmPassword"
                 />
                 <Typography
@@ -149,7 +146,7 @@ export function SignUpPage() {
                         />
                       ),
                     }}
-                    i18nKey="worker.signUpForm.termsOfServiceAndPrivacyPolicy"
+                    i18nKey="signUpForm.termsOfServiceAndPrivacyPolicy"
                   />
                 </Typography>
                 <HCaptchaForm error={error} name="hCaptchaToken" />
@@ -161,7 +158,7 @@ export function SignUpPage() {
                   fullWidth
                   loading={isLoading}
                 >
-                  {t('worker.signUpForm.submitBtn')}
+                  {t('signUpForm.submitBtn')}
                 </Button>
                 <Box sx={{ position: 'relative', width: '100%' }}>
                   <Divider sx={{ bgcolor: 'border.main' }} />
@@ -176,7 +173,7 @@ export function SignUpPage() {
                       fontWeight: 700,
                     }}
                   >
-                    {t('worker.signUpForm.or')}
+                    {t('signUpForm.or')}
                   </Typography>
                 </Box>
                 <Box
@@ -194,7 +191,7 @@ export function SignUpPage() {
                     variant="body2"
                     sx={{ color: 'text.auxiliary200' }}
                   >
-                    {t('worker.signUpForm.alreadyHaveAccount')}
+                    {t('signUpForm.alreadyHaveAccount')}
                   </Typography>{' '}
                   <Link
                     component={RouterLink}
@@ -206,7 +203,7 @@ export function SignUpPage() {
                       textDecoration: 'underline',
                     }}
                   >
-                    {t('worker.signUpForm.signIn')}
+                    {t('signUpForm.signIn')}
                   </Link>
                 </Box>
               </Grid>

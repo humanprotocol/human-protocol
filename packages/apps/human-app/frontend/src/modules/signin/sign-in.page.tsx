@@ -23,7 +23,7 @@ function formattedSignInErrorMessage(
   unknownError: unknown
 ): string | undefined {
   if (unknownError instanceof ApiClientError && unknownError.status === 401) {
-    return t('worker.signInForm.errors.invalidCredentials');
+    return t('signInForm.errors.invalidCredentials');
   }
 }
 
@@ -134,7 +134,7 @@ export function SignInPage() {
               variant="h4"
               sx={{ color: 'text.auxiliary100' }}
             >
-              {t('worker.signInForm.title')}
+              {t('signInForm.title')}
             </Typography>
           </Box>
           <SignInForm

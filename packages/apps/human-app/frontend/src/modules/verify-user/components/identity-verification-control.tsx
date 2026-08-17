@@ -113,7 +113,7 @@ export function IdentityVerificationControl({
           components={{
             1: <Link href={`mailto:${env.VITE_HUMAN_SUPPORT_EMAIL}`} />,
           }}
-          i18nKey="worker.profile.verificationDeclined"
+          i18nKey="verifyUser.verificationDeclined"
         />
       </Typography>
     );
@@ -135,7 +135,7 @@ export function IdentityVerificationControl({
           }}
         >
           <Typography variant="h6" sx={{ color: 'text.primary', mb: 1 }}>
-            {t('worker.profile.verificationOpenedInNewTab')}
+            {t('verifyUser.verificationOpenedInNewTab')}
           </Typography>
           <Typography
             variant="body4"
@@ -144,7 +144,7 @@ export function IdentityVerificationControl({
               mb: 2,
             }}
           >
-            {t('worker.profile.completeYourVerification')}
+            {t('verifyUser.completeYourVerification')}
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Box
@@ -163,7 +163,7 @@ export function IdentityVerificationControl({
                 fontStyle: 'italic',
               }}
             >
-              {t('worker.profile.waitingForVerification')}
+              {t('verifyUser.waitingForVerification')}
             </Typography>
           </Box>
         </Stack>
@@ -175,7 +175,7 @@ export function IdentityVerificationControl({
             loading={isRefreshingAccessToken}
             onClick={handleCheckVerificationStatus}
           >
-            {t('worker.profile.checkVerificationStatus')}
+            {t('verifyUser.checkVerificationStatus')}
           </Button>
         </Stack>
       </>
@@ -188,7 +188,7 @@ export function IdentityVerificationControl({
         variant="body4"
         sx={{ color: 'text.auxiliary200', mb: { xs: 3, md: 5 } }}
       >
-        {t('worker.profile.veriffCopy')}
+        {t('verifyUser.veriffCopy')}
       </Typography>
       <Box
         sx={{
@@ -203,7 +203,7 @@ export function IdentityVerificationControl({
           variant="body5"
           sx={{ color: isDarkMode ? 'text.auxiliary100' : 'text.auxiliary200' }}
         >
-          {t('worker.profile.poweredBy')}
+          {t('verifyUser.poweredBy')}
         </Typography>
         <VeriffIcon />
       </Box>
@@ -214,7 +214,7 @@ export function IdentityVerificationControl({
         loading={idvStartIsPending}
         onClick={startIdv}
       >
-        {t('worker.profile.completeIdentityVerification')}
+        {t('verifyUser.completeIdentityVerification')}
       </Button>
     </Stack>
   );
