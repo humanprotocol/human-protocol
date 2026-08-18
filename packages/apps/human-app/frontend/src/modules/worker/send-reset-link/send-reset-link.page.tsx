@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { Box, Grid, Paper, Stack, Typography } from '@mui/material';
+import { Box, Grid, Stack, Typography } from '@mui/material';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
 import { Input } from '@/shared/components/data-entry/input';
@@ -12,18 +12,17 @@ import { routerPaths } from '@/router/router-paths';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
 import { useSendResetLinkMutation } from './hooks';
 import { type SendResetLinkDto, sendResetLinkDtoSchema } from './schemas';
-import { useColorMode } from '@/shared/contexts/color-mode';
 import { BackButton } from '@/shared/components/ui/page-card/back-button';
 import { useNavigate } from 'react-router-dom';
 import {
   TopNotificationType,
   useNotification,
 } from '@/shared/hooks/use-notification';
+import { PageCard } from '@/shared/components/ui/page-card';
 
 export function SendResetLinkPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { colorPalette } = useColorMode();
   const { showNotification } = useNotification();
   const navigate = useNavigate();
 
@@ -64,27 +63,12 @@ export function SendResetLinkPage() {
   };
 
   return (
-    <Paper
-      elevation={0}
+    <PageCard
       sx={{
-        display: 'flex',
-        flex: 1,
-        alignSelf: 'stretch',
-        justifyContent: 'center',
         alignItems: { xs: 'flex-start', md: 'center' },
-        my: { xs: 0, md: 4 },
+        justifyContent: 'center',
         py: { xs: 3, md: 0 },
         px: { xs: 2, md: 0 },
-        bgcolor: colorPalette.background.paper,
-        borderRadius: '30px',
-        borderBottomLeftRadius: { xs: 0, md: '30px' },
-        borderBottomRightRadius: { xs: 0, md: '30px' },
-        border: { xs: 'none', md: '1px solid' },
-        borderColor: {
-          xs: 'none',
-          md: colorPalette.border.main,
-        },
-        overflow: 'hidden',
       }}
     >
       <Stack sx={{ width: { xs: '100%', md: '400px' } }}>
@@ -100,7 +84,7 @@ export function SendResetLinkPage() {
           <Typography
             component="h1"
             variant="h4"
-            sx={{ color: colorPalette.text.auxiliary100 }}
+            sx={{ color: 'text.auxiliary100' }}
           >
             {t('worker.sendResetLinkForm.title')}
           </Typography>
@@ -112,10 +96,7 @@ export function SendResetLinkPage() {
             }}
           >
             <Grid container sx={{ gap: 3 }}>
-              <Typography
-                variant="body1"
-                sx={{ color: colorPalette.text.auxiliary100 }}
-              >
+              <Typography variant="body4" sx={{ color: 'text.auxiliary100' }}>
                 {t('worker.sendResetLinkForm.description')}
               </Typography>
               <Input
@@ -137,6 +118,6 @@ export function SendResetLinkPage() {
           </form>
         </FormProvider>
       </Stack>
-    </Paper>
+    </PageCard>
   );
 }

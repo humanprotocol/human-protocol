@@ -14,7 +14,6 @@ import {
   useNotification,
 } from '@/shared/hooks/use-notification';
 import { getErrorMessageForError } from '@/shared/errors';
-import { useColorMode } from '@/shared/contexts/color-mode';
 import { useHCaptchaUserStats } from '../hooks';
 import { UserStatsDetails } from './user-stats-details';
 import { LoadingOverlay } from './user-stats-loading-overlay';
@@ -24,7 +23,6 @@ const ACCORDION_HEIGHT = '48px';
 
 export function UserStatsAccordion() {
   const [isExpanded, setIsExpanded] = useState(false);
-  const { colorPalette } = useColorMode();
   const { showNotification } = useNotification();
 
   const {
@@ -77,13 +75,7 @@ export function UserStatsAccordion() {
             isHcaptchaUserStatsRefetching ||
             isHcaptchaUserStatsError
           }
-          expandIcon={
-            <ExpandMoreIcon
-              sx={{
-                fill: colorPalette.text.primary,
-              }}
-            />
-          }
+          expandIcon={<ExpandMoreIcon sx={{ color: 'text.primary' }} />}
           id="panel1-header"
           sx={{
             width: ACCORDION_WIDTH,

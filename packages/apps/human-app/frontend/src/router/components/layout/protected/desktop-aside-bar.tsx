@@ -33,7 +33,7 @@ const menuItems = [
 ] as const;
 
 export function DesktopAsideBar() {
-  const { colorPalette, isDarkMode } = useColorMode();
+  const { isDarkMode } = useColorMode();
   const { t } = useTranslation();
   const { pathname } = useLocation();
   const handleMainNavIconClick = useHandleMainNavIconClick();
@@ -53,10 +53,10 @@ export function DesktopAsideBar() {
         height: 'calc(100dvh - 32px)',
         overflow: 'hidden',
         width: 'clamp(260px, 20vw, 330px)',
-        backgroundColor: colorPalette.background.paper,
+        bgcolor: 'background.paper',
         borderRadius: '30px',
         border: '1px solid',
-        borderColor: colorPalette.border.main,
+        borderColor: 'border.main',
       }}
     >
       <Box
@@ -97,12 +97,8 @@ export function DesktopAsideBar() {
                       px: 4,
                       py: 2,
                       gap: 1,
-                      fontSize: 16,
-                      fontWeight: 600,
-                      color: isActive
-                        ? colorPalette.text.primary
-                        : colorPalette.text.auxiliary100,
-                      letterSpacing: 0,
+                      typography: 'body3',
+                      color: isActive ? 'text.primary' : 'text.auxiliary100',
                     }}
                   >
                     {isActive && <TriangleIcon />}
@@ -119,7 +115,7 @@ export function DesktopAsideBar() {
             borderTopLeftRadius: '20px',
             borderTopRightRadius: '20px',
             borderTop: '1px solid',
-            borderColor: colorPalette.border.main,
+            borderColor: 'border.main',
           }}
         >
           <Box
@@ -127,7 +123,7 @@ export function DesktopAsideBar() {
               display: 'flex',
               height: 70,
               borderBottom: '1px solid',
-              borderColor: colorPalette.border.main,
+              borderColor: 'border.main',
             }}
           >
             <Stack
@@ -136,7 +132,7 @@ export function DesktopAsideBar() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 borderRight: '1px solid',
-                borderColor: colorPalette.border.main,
+                borderColor: 'border.main',
               }}
             >
               <ColorModeSwitch />

@@ -1,10 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, type SubmitEvent } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Box, Divider, Grid, Link, Paper, Typography } from '@mui/material';
+import { Box, Divider, Grid, Link, Typography } from '@mui/material';
 import { Trans } from 'react-i18next';
 import { t } from 'i18next';
+
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/data-entry/input';
 import { Password } from '@/shared/components/data-entry/password';
@@ -12,30 +13,32 @@ import { env } from '@/shared/env';
 import { getErrorMessageForError } from '@/shared/errors';
 import { HCaptchaForm } from '@/shared/components/hcaptcha';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
-import { useSignUpWorker } from '@/modules/signup/worker/hooks/use-sign-up-worker';
+import { useSignUpWorker } from './hooks/use-sign-up-worker';
 import { ApiClientError } from '@/api';
-import { signUpDtoSchema } from '../schema';
+import { signUpDtoSchema } from './schema';
 import signUpImage from '@/assets/background-images/signup-background.png';
 import { BackButton } from '@/shared/components/ui/page-card/back-button';
-
 import { routerPaths } from '@/router/router-paths';
 import {
   TopNotificationType,
   useNotification,
 } from '@/shared/hooks/use-notification';
+import { PageCard } from '@/shared/components/ui/page-card';
 import { useColorMode } from '@/shared/contexts/color-mode';
 
 function handleSignupError(unknownError: unknown) {
   if (unknownError instanceof ApiClientError && unknownError.status === 409) {
-    return t('worker.signUpForm.errors.emailTaken');
+    return t('signUpForm.errors.emailTaken');
   }
 }
 
 export function SignUpPage() {
   const { showNotification } = useNotification();
   const navigate = useNavigate();
-  const { colorPalette } = useColorMode();
+  const { isDarkMode } = useColorMode();
+
   const { signUp, error, isError, isLoading, reset } = useSignUpWorker();
+
   const methods = useForm({
     defaultValues: {
       email: '',
@@ -62,29 +65,12 @@ export function SignUpPage() {
     navigate(-1);
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: SubmitEvent) => {
     void methods.handleSubmit(signUp)(event);
   };
 
   return (
-    <Paper
-      elevation={0}
-      sx={{
-        display: 'flex',
-        alignSelf: 'stretch',
-        my: { xs: 0, md: 4 },
-        bgcolor: colorPalette.background.paper,
-        borderRadius: '30px',
-        borderBottomLeftRadius: { xs: 0, md: '30px' },
-        borderBottomRightRadius: { xs: 0, md: '30px' },
-        border: { xs: 'none', md: '1px solid' },
-        borderColor: {
-          xs: 'none',
-          md: colorPalette.border.main,
-        },
-        overflow: 'hidden',
-      }}
-    >
+    <PageCard>
       <Grid
         container
         sx={{
@@ -118,30 +104,29 @@ export function SignUpPage() {
             <Typography
               component="h1"
               variant="h4"
-              sx={{ color: colorPalette.text.auxiliary100 }}
+              sx={{ color: 'text.auxiliary100' }}
             >
-              {t('worker.signUpForm.title')}
+              {t('signUpForm.title')}
             </Typography>
           </Box>
           <FormProvider {...methods}>
             <form onSubmit={handleSubmit}>
               <Grid container sx={{ gap: 3 }}>
-                <Input
-                  label={t('worker.signUpForm.fields.email')}
-                  name="email"
-                />
+                <Input label={t('signUpForm.fields.email')} name="email" />
                 <Password
-                  label={t('worker.signUpForm.fields.password')}
+                  label={t('signUpForm.fields.password')}
                   name="password"
                 />
                 <Password
-                  label={t('worker.signUpForm.fields.confirmPassword')}
+                  label={t('signUpForm.fields.confirmPassword')}
                   name="confirmPassword"
                 />
                 <Typography
+                  variant="body5"
                   sx={{
-                    fontSize: '12px !important',
-                    color: colorPalette.text.auxiliary100,
+                    color: isDarkMode
+                      ? 'text.auxiliary100'
+                      : 'text.auxiliary200',
                   }}
                 >
                   <Trans
@@ -149,19 +134,19 @@ export function SignUpPage() {
                       1: (
                         <Link
                           href={env.VITE_TERMS_OF_SERVICE_URL}
-                          sx={{ textDecoration: 'underline' }}
+                          sx={{ textDecoration: 'underline', fontWeight: 500 }}
                           target="_blank"
                         />
                       ),
                       2: (
                         <Link
                           href={env.VITE_TERMS_OF_SERVICE_URL}
-                          sx={{ textDecoration: 'underline' }}
+                          sx={{ textDecoration: 'underline', fontWeight: 500 }}
                           target="_blank"
                         />
                       ),
                     }}
-                    i18nKey="worker.signUpForm.termsOfServiceAndPrivacyPolicy"
+                    i18nKey="signUpForm.termsOfServiceAndPrivacyPolicy"
                   />
                 </Typography>
                 <HCaptchaForm error={error} name="hCaptchaToken" />
@@ -173,25 +158,22 @@ export function SignUpPage() {
                   fullWidth
                   loading={isLoading}
                 >
-                  {t('worker.signUpForm.submitBtn')}
+                  {t('signUpForm.submitBtn')}
                 </Button>
                 <Box sx={{ position: 'relative', width: '100%' }}>
-                  <Divider sx={{ bgcolor: '#c9c9c9' }} />
+                  <Divider sx={{ bgcolor: 'border.main' }} />
                   <Typography
+                    variant="body2"
                     sx={{
-                      fontSize: '12px',
-                      fontWeight: 700,
-                      lineHeight: '125%',
-                      letterSpacing: '0.25px',
-                      color: colorPalette.text.primary,
                       position: 'absolute',
                       top: '50%',
                       left: '50%',
                       transform: 'translate(-50%, -50%)',
-                      bgcolor: colorPalette.background.paper,
+                      bgcolor: 'background.paper',
+                      fontWeight: 700,
                     }}
                   >
-                    {t('worker.signUpForm.or')}
+                    {t('signUpForm.or')}
                   </Typography>
                 </Box>
                 <Box
@@ -206,29 +188,22 @@ export function SignUpPage() {
                   }}
                 >
                   <Typography
-                    sx={{
-                      fontSize: '14px',
-                      fontWeight: 500,
-                      lineHeight: '26px',
-                      letterSpacing: '0.1px',
-                      color: colorPalette.text.auxiliary200,
-                    }}
+                    variant="body2"
+                    sx={{ color: 'text.auxiliary200' }}
                   >
-                    {t('worker.signUpForm.alreadyHaveAccount')}
+                    {t('signUpForm.alreadyHaveAccount')}
                   </Typography>{' '}
                   <Link
                     component={RouterLink}
                     to={routerPaths.signIn}
+                    variant="body2"
                     sx={{
-                      fontSize: '14px',
                       fontWeight: 600,
-                      lineHeight: '26px',
-                      letterSpacing: '0.1px',
-                      color: colorPalette.accent.main,
+                      color: 'accent.main',
                       textDecoration: 'underline',
                     }}
                   >
-                    {t('worker.signUpForm.signIn')}
+                    {t('signUpForm.signIn')}
                   </Link>
                 </Box>
               </Grid>
@@ -251,6 +226,6 @@ export function SignUpPage() {
           />
         </Grid>
       </Grid>
-    </Paper>
+    </PageCard>
   );
 }

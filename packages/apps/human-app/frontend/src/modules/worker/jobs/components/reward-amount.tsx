@@ -1,18 +1,17 @@
 import { Tooltip, Typography } from '@mui/material';
 
-import { useIsMobile } from '@/shared/hooks/use-is-mobile';
-
 export function RewardAmount({
   reward_amount,
   reward_token,
   color,
+  size = 'small',
 }: {
   reward_amount?: string;
   reward_token?: string;
   color?: string;
+  size?: 'small' | 'medium';
 }) {
-  const isMobile = useIsMobile();
-  const variant = isMobile ? 'body2' : 'body1';
+  const variant = size === 'small' ? 'body2' : 'body1';
 
   if (!(reward_amount !== undefined && reward_token)) {
     return '';
@@ -23,11 +22,7 @@ export function RewardAmount({
 
   if (!isNumeric) {
     return (
-      <Typography
-        component="span"
-        variant={variant}
-        sx={{ color, fontWeight: 500 }}
-      >
+      <Typography component="span" variant={variant} sx={{ color }}>
         {`${reward_amount} ${reward_token}`}
       </Typography>
     );
@@ -37,11 +32,7 @@ export function RewardAmount({
   if (hasDecimals) {
     return (
       <Tooltip title={`${reward_amount} ${reward_token}`}>
-        <Typography
-          component="span"
-          variant={variant}
-          sx={{ color, fontWeight: 500 }}
-        >
+        <Typography component="span" variant={variant} sx={{ color }}>
           {`${parsedReward.toFixed(2)} ${reward_token}`}
         </Typography>
       </Tooltip>
@@ -49,11 +40,7 @@ export function RewardAmount({
   }
 
   return (
-    <Typography
-      component="span"
-      variant={variant}
-      sx={{ color, fontWeight: 500 }}
-    >
+    <Typography component="span" variant={variant} sx={{ color }}>
       {`${reward_amount} ${reward_token}`}
     </Typography>
   );

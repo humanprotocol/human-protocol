@@ -8,7 +8,6 @@ import { getErrorMessageForError } from '@/shared/errors';
 import { useHCaptchaUserStats } from '../hooks';
 import { UserStatsDetails } from './user-stats-details';
 import { LoadingOverlay } from './user-stats-loading-overlay';
-import { useColorMode } from '@/shared/contexts/color-mode';
 
 type Props = {
   isOpen: boolean;
@@ -16,8 +15,6 @@ type Props = {
 };
 
 export function UserStatsDrawer({ isOpen, onClose }: Props) {
-  const { colorPalette } = useColorMode();
-
   const {
     data: hcaptchaUserStats,
     error: hcaptchaUserStatsError,
@@ -62,7 +59,7 @@ export function UserStatsDrawer({ isOpen, onClose }: Props) {
             alignItems: 'center',
             justifyContent: 'space-between',
             p: 2,
-            borderBottom: `1px solid ${colorPalette.border.strong}`,
+            borderBottom: (theme) => `1px solid ${theme.palette.border.strong}`,
           }}
         >
           <Typography variant="h6">

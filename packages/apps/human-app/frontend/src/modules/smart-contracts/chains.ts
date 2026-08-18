@@ -5,14 +5,13 @@
 // function
 import { ChainId } from '@human-protocol/sdk/src/enums';
 import { NETWORKS } from '@human-protocol/sdk/src/constants';
-import { env } from '@/shared/env';
 import {
   MainnetContracts,
   TestnetContracts,
   type ContractsAddresses,
 } from '@/modules/smart-contracts/contracts';
 
-export interface Chain {
+interface Chain {
   explorerUrl: string;
   name: string;
   chainId: number;
@@ -23,22 +22,22 @@ export type ChainWithAddresses = Chain & {
   addresses: ContractsAddresses;
 };
 
-export const TestnetChainsIds = [
+const TestnetChainsIds = [
   ChainId.POLYGON_AMOY,
   ChainId.SEPOLIA,
   ChainId.BSC_TESTNET,
   ChainId.LOCALHOST,
 ] as const;
 
-export const MainnetChainsIds = [
+const MainnetChainsIds = [
   ChainId.POLYGON,
   ChainId.MAINNET,
   ChainId.BSC_MAINNET,
   ChainId.ALL,
 ] as const;
 
-export type TestnetNarrow = Exclude<ChainId, (typeof MainnetChainsIds)[number]>;
-export type MainnetNarrow = Exclude<ChainId, (typeof TestnetChainsIds)[number]>;
+type TestnetNarrow = Exclude<ChainId, (typeof MainnetChainsIds)[number]>;
+type MainnetNarrow = Exclude<ChainId, (typeof TestnetChainsIds)[number]>;
 
 export const TestnetChains: readonly ChainWithAddresses[] = [
   {
@@ -87,28 +86,3 @@ function getChainConfigsForChainIds<T extends TestnetNarrow | MainnetNarrow>(
   }
   return result;
 }
-
-const handleFilterChains = (
-  chainsArr: ChainWithAddresses[],
-  chainIdsEnabled: number[]
-) => {
-  return chainsArr.filter((chain) =>
-    chainIdsEnabled.some((el) => el === chain.chainId)
-  );
-};
-
-export const getTestnetChainsEnabled = (chainIdsEnabled: number[]) => {
-  return handleFilterChains(AllTestnetsChains, chainIdsEnabled);
-};
-
-export const getMainnetChainsEnabled = (chainIdsEnabled: number[]) => {
-  return handleFilterChains(AllMainnetChains, chainIdsEnabled);
-};
-
-export const getEnabledChainsByUiConfig = (
-  chainIdsEnabled: number[]
-): Chain[] =>
-  (env.VITE_NETWORK === 'mainnet'
-    ? getMainnetChainsEnabled(chainIdsEnabled)
-    : getTestnetChainsEnabled(chainIdsEnabled)
-  ).map(({ addresses: _, ...chainData }) => chainData);

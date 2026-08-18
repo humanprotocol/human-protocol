@@ -27,7 +27,7 @@ const prepareSignatureSuccessSchema = z.object({
   nonce: z.unknown(),
 });
 
-export type SignatureData = z.infer<typeof prepareSignatureSuccessSchema>;
+type SignatureData = z.infer<typeof prepareSignatureSuccessSchema>;
 
 async function prepareSignature(data: PrepareSignatureBody) {
   try {

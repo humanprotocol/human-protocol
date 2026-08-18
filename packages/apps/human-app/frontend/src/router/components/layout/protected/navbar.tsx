@@ -3,12 +3,10 @@ import { t } from 'i18next';
 
 import { HumanLogoNavbarIcon } from '@/shared/components/ui/icons';
 import { Button } from '@/shared/components/ui/button';
-import { useColorMode } from '@/shared/contexts/color-mode';
 import { useHandleMainNavIconClick } from '@/shared/hooks/use-handle-main-nav-icon-click';
 import { ColorModeSwitch } from '@/shared/components/ui/dark-mode-switch';
 
 export function Navbar() {
-  const { colorPalette } = useColorMode();
   const handleMainNavIconClick = useHandleMainNavIconClick();
 
   return (
@@ -19,7 +17,7 @@ export function Navbar() {
         display: { xs: 'flex', md: 'none' },
         alignItems: 'center',
         justifyContent: 'space-between',
-        backgroundColor: colorPalette.background.paper,
+        backgroundColor: 'background.paper',
         width: '100%',
         p: 2,
         zIndex: '130',

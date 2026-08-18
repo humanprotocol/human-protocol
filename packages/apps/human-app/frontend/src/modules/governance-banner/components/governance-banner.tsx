@@ -1,9 +1,9 @@
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import { Box, Grid, Link as MuiLink, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import { Box, Grid, Link as MuiLink, Typography } from '@mui/material';
+
 import { env } from '@/shared/env';
-import { useColorMode } from '@/shared/contexts/color-mode';
 import { useProposalQuery } from '../hooks/use-proposal-query';
 import { formatCountdown } from '../../../shared/utils/time';
 import { type ProposalResponse } from '../services/governance.service';
@@ -20,8 +20,6 @@ function getProposalStatus(proposal: ProposalResponse): ProposalStatus {
 export function GovernanceBanner() {
   const { t } = useTranslation();
   const { data: proposal, isLoading, isError } = useProposalQuery();
-  const { colorPalette } = useColorMode();
-  const { text, background } = colorPalette.banner;
   const [timeRemaining, setTimeRemaining] = useState('00:00:00');
 
   useEffect(() => {
@@ -55,8 +53,8 @@ export function GovernanceBanner() {
       sx={{
         alignItems: { xs: 'flex-start', sm: 'center' },
         justifyContent: { xs: 'flex-start', sm: 'space-between' },
-        bgcolor: background.primary,
-        color: text.secondary,
+        bgcolor: 'primary.main',
+        color: 'common.white',
         borderRadius: '8px',
         p: 2,
         gap: 2,
@@ -75,13 +73,13 @@ export function GovernanceBanner() {
       >
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <AccessTimeIcon sx={{ mr: 1 }} />
-          <Typography variant="body2" sx={{ color: text.secondary }}>
+          <Typography variant="body2" sx={{ color: 'common.white' }}>
             {status === 'pending'
               ? t('governance.timeToStart', 'Voting starts in')
               : t('governance.timeToReveal', 'Time to reveal vote')}
             :
           </Typography>
-          <Typography variant="body1" sx={{ ml: 1, color: text.primary }}>
+          <Typography variant="body1" sx={{ ml: 1, color: 'text.primary' }}>
             {timeRemaining}
           </Typography>
         </Box>
@@ -90,8 +88,8 @@ export function GovernanceBanner() {
             variant="body1"
             sx={{
               ml: { xs: 0, md: 8 },
-              color: text.primary,
-              bgcolor: background.secondary,
+              color: 'text.primary',
+              bgcolor: 'background.paper',
               borderRadius: '8px',
               p: '4px 8px',
             }}
@@ -113,9 +111,9 @@ export function GovernanceBanner() {
           href={env.VITE_GOVERNANCE_URL}
           target="_blank"
           rel="noopener noreferrer"
+          variant="body1"
           sx={{
-            color: text.secondary,
-            fontWeight: 500,
+            color: 'common.white',
             textDecoration: 'none',
             '&:hover': {
               textDecoration: 'underline',

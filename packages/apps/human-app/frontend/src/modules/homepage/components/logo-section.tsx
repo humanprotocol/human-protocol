@@ -1,43 +1,40 @@
-import { Grid, Stack, Typography } from '@mui/material';
+import { Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
 export function LogoSection() {
   const { t } = useTranslation();
-  const logoText: string = t('homepage.humanApp');
-  const logoTextSplit: string[] = logoText.split(' ');
+
+  const logoText = t('homepage.humanApp');
+  const logoTextSplit = logoText.split(' ');
 
   return (
-    <Grid
-      container
+    <Stack
       sx={{
-        flexDirection: 'column',
         justifyContent: 'center',
         alignItems: { xs: 'center', lg: 'flex-start' },
+        gap: 4,
       }}
     >
       <Stack
         direction="row"
         sx={{
           justifyContent: { xs: 'center', md: 'flex-start' },
-          mt: 0,
         }}
       >
-        <Typography variant="h1">{logoTextSplit[0]}</Typography>
-        <Typography variant="h1" sx={{ fontWeight: '400', ml: 2.5 }}>
-          {logoTextSplit[1]}
+        <Typography variant="h1">
+          {logoTextSplit[0]}
+          <Typography
+            component="span"
+            variant="h1"
+            sx={{ fontWeight: '400', ml: 2.5 }}
+          >
+            {logoTextSplit[1]}
+          </Typography>
         </Typography>
       </Stack>
-      <Typography
-        variant="h6"
-        sx={{
-          mt: 4,
-          mb: 8,
-          typography: { md: 'h5' },
-          textAlign: { xs: 'center', md: 'left' },
-        }}
-      >
+      <Typography variant="h5" sx={{ textAlign: { xs: 'center', md: 'left' } }}>
         {t('homepage.completeJobs')}
       </Typography>
-    </Grid>
+    </Stack>
   );
 }

@@ -1,14 +1,10 @@
-import type React from 'react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
+
 import { useAccessTokenRefresh } from '@/api/hooks/use-access-token-refresh';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
 
-export function JWTExpirationCheck({
-  children,
-}: {
-  children: React.ReactElement;
-}) {
+export function JWTExpirationCheck({ children }: { children: ReactNode }) {
   const checksOnProfile = useRef(0);
   const auth = useAuth();
   const location = useLocation();

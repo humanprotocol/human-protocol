@@ -12,7 +12,6 @@ import {
   oracleRegistrationFormSchema,
   type OracleRegistrationFormValues,
 } from './schema';
-import { useColorMode } from '@/shared/contexts/color-mode/use-color-mode';
 
 export function RegistrationForm({
   address,
@@ -22,7 +21,6 @@ export function RegistrationForm({
   oracleInstructions: string | URL | null | undefined;
 }) {
   const { t } = useTranslation();
-  const { colorPalette } = useColorMode();
 
   const { hasViewedInstructions, handleInstructionsView } =
     useOracleInstructions(oracleInstructions);
@@ -56,7 +54,7 @@ export function RegistrationForm({
       <Button variant="contained" fullWidth onClick={handleInstructionsView}>
         {t('worker.registrationInExchangeOracle.instructionsButton')}
       </Button>
-      <Typography sx={{ color: colorPalette.text.auxiliary100 }}>
+      <Typography variant="body4" sx={{ color: 'text.auxiliary100' }}>
         {t('worker.registrationInExchangeOracle.completeMessage')}
       </Typography>
       <FormProvider {...methods}>

@@ -9,7 +9,6 @@ import {
   TopNotificationType,
   useNotification,
 } from '@/shared/hooks/use-notification';
-import { useColorMode } from '@/shared/contexts/color-mode/use-color-mode';
 import { ProfileData } from '../components/profile-data';
 import { CheckmarkIcon, LogoutIcon } from '@/shared/components/ui/icons';
 import { shortenEscrowAddress } from '@/shared/helpers/evm';
@@ -22,7 +21,6 @@ import { CopyToClipboardButton } from '@/shared/components/ui/copy-to-clipboard-
 
 export function ProfilePage() {
   const { user } = useAuthenticatedUser();
-  const { colorPalette } = useColorMode();
   const { isConnected, initializing, web3ProviderMutation } =
     useWalletConnect();
   const { showNotification } = useNotification();
@@ -77,24 +75,14 @@ export function ProfilePage() {
         }}
       >
         {isMobile && <BackButton onClick={handleBack} />}
-        <Typography
-          component="h1"
-          variant="h6"
-          sx={{
-            fontWeight: 700,
-            color: {
-              xs: colorPalette.text.auxiliary100,
-              md: colorPalette.text.primary,
-            },
-          }}
-        >
+        <Typography variant="pageHeading">
           {t('worker.profile.profileHeader')}
         </Typography>
       </Box>
       <Stack
         sx={{
           borderRadius: '20px',
-          border: `1px solid ${colorPalette.border.strong}`,
+          border: (theme) => `1px solid ${theme.palette.border.strong}`,
           overflow: 'hidden',
         }}
       >
@@ -107,7 +95,7 @@ export function ProfilePage() {
             py: 2,
             px: { xs: 2, md: 3 },
             gap: 2,
-            borderBottom: `1px solid ${colorPalette.border.strong}`,
+            borderBottom: (theme) => `1px solid ${theme.palette.border.strong}`,
           }}
         >
           <ProfileData variant="expanded" />
@@ -118,8 +106,7 @@ export function ProfilePage() {
               flexShrink: 0,
               alignItems: 'center',
               gap: { xs: 0.5, md: 1 },
-              fontWeight: 500,
-              color: colorPalette.success.main,
+              color: 'success.main',
             }}
           >
             <CheckmarkIcon />
@@ -137,33 +124,13 @@ export function ProfilePage() {
         >
           <Stack sx={{ gap: { xs: 3, md: 4 } }}>
             <Stack sx={{ gap: 1 }}>
-              <Typography
-                variant="body2"
-                sx={{
-                  fontWeight: 500,
-                  color: colorPalette.text.auxiliary200,
-                }}
-              >
+              <Typography variant="body2" sx={{ color: 'text.auxiliary200' }}>
                 {t('worker.profile.email')}
               </Typography>
-              <Typography
-                variant="body1"
-                sx={{
-                  fontWeight: 500,
-                  color: colorPalette.text.primary,
-                }}
-              >
-                {user.email}
-              </Typography>
+              <Typography variant="body1">{user.email}</Typography>
             </Stack>
             <Stack sx={{ gap: 1 }}>
-              <Typography
-                variant="body2"
-                sx={{
-                  fontWeight: 500,
-                  color: colorPalette.text.auxiliary200,
-                }}
-              >
+              <Typography variant="body2" sx={{ color: 'text.auxiliary200' }}>
                 {t('worker.profile.walletAddress')}
               </Typography>
               <Typography
@@ -172,15 +139,13 @@ export function ProfilePage() {
                   display: 'flex',
                   alignItems: 'center',
                   gap: 1,
-                  fontWeight: 500,
-                  color: colorPalette.text.primary,
                 }}
               >
                 {shortenEscrowAddress(user.wallet_address ?? '', 9, 8)}
                 <CopyToClipboardButton
                   value={user.wallet_address ?? ''}
                   sx={{
-                    '& svg': { color: colorPalette.text.primary, fontSize: 20 },
+                    '& svg': { color: 'text.primary', fontSize: 20 },
                   }}
                 />
               </Typography>

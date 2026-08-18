@@ -1,8 +1,8 @@
+import { type ReactNode } from 'react';
 import { Box, Link, Stack, Typography } from '@mui/material';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
 
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
-import { useColorMode } from '@/shared/contexts/color-mode';
 import { shortenEscrowAddress } from '@/shared/helpers/evm';
 import { routerPaths } from '@/router/router-paths';
 
@@ -13,7 +13,7 @@ function Wrapper({
 }: {
   isCompact: boolean;
   isProfilePage: boolean;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   if (isCompact && !isProfilePage) {
     return (
@@ -36,7 +36,6 @@ export function ProfileData({
   variant?: 'compact' | 'expanded';
 }) {
   const { user } = useAuthenticatedUser();
-  const { colorPalette } = useColorMode();
   const location = useLocation();
 
   const isProfilePage = location.pathname === routerPaths.profile;
@@ -61,17 +60,16 @@ export function ProfileData({
             width: { xs: '38px', md: isCompact ? '48px' : '76px' },
             height: { xs: '38px', md: isCompact ? '48px' : '76px' },
             borderRadius: '50%',
-            backgroundColor: colorPalette.white,
-            border: `1px solid ${colorPalette.border.strong}`,
+            bgcolor: 'common.white',
+            border: (theme) => `1px solid ${theme.palette.border.strong}`,
             opacity: 0.8,
           }}
         >
           <Typography
             sx={{
               fontSize: { xs: '14px', md: isCompact ? '24px' : '30px' },
-              fontWeight: 500,
               lineHeight: { xs: '38px', md: isCompact ? '48px' : '76px' },
-              color: colorPalette.accent.main,
+              color: 'accent.main',
             }}
           >
             {user?.email.charAt(0).toUpperCase()}
@@ -91,12 +89,9 @@ export function ProfileData({
             sx={{
               fontSize: { xs: isCompact ? 14 : 16, md: isCompact ? 16 : 32 },
               fontWeight: { xs: 700, md: 600 },
-              lineHeight: 'normal',
               color: {
-                xs: colorPalette.text.primary,
-                md: isCompact
-                  ? colorPalette.text.auxiliary100
-                  : colorPalette.text.primary,
+                xs: 'text.primary',
+                md: isCompact ? 'text.auxiliary100' : 'text.primary',
               },
               ...(!isCompact && {
                 overflow: 'hidden',
@@ -111,8 +106,7 @@ export function ProfileData({
             sx={{
               fontSize: { xs: 12, md: isCompact ? 14 : 16 },
               fontWeight: 500,
-              lineHeight: 'normal',
-              color: colorPalette.text.auxiliary200,
+              color: 'text.auxiliary200',
             }}
           >
             {shortenEscrowAddress(

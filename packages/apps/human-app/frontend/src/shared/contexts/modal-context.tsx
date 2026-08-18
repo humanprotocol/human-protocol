@@ -1,4 +1,5 @@
-import React, {
+import {
+  type ReactNode,
   createContext,
   useCallback,
   useContext,
@@ -8,7 +9,7 @@ import React, {
 
 interface ModalContextType {
   open: boolean;
-  content: React.ReactNode;
+  content: ReactNode;
   showCloseButton: boolean;
   disableClose: boolean;
   openModal: ({ content, showCloseButton }: OpenModalProps) => void;
@@ -18,17 +19,15 @@ interface ModalContextType {
 }
 
 interface OpenModalProps {
-  content: React.ReactNode;
+  content: ReactNode;
   showCloseButton?: boolean;
 }
 
 const ModalContext = createContext<ModalContextType | undefined>(undefined);
 
-export function ModalProvider({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+export function ModalProvider({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
-  const [content, setContent] = useState<React.ReactNode>(null);
+  const [content, setContent] = useState<ReactNode>(null);
   const [showCloseButton, setShowCloseButton] = useState(true);
   const [disableClose, setDisableClose] = useState(false);
 

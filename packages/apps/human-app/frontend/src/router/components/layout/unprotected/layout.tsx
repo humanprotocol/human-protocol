@@ -1,21 +1,23 @@
+import { useMemo } from 'react';
 import { Container, Stack } from '@mui/material';
 import { Outlet } from 'react-router-dom';
-import { useColorMode } from '@/shared/contexts/color-mode';
+
 import { Footer } from '../../footer';
 import { Navbar } from './navbar';
+import { useColorMode } from '@/shared/contexts/color-mode';
 import { useIsMainPage } from '@/router/hooks/use-is-main-page';
 
 export function UnprotectedLayout() {
-  const { colorPalette, isDarkMode } = useColorMode();
+  const { isDarkMode } = useColorMode();
   const isMainPage = useIsMainPage();
 
-  const layoutBackgroundColor = (() => {
-    if (isDarkMode || isMainPage) {
-      return colorPalette.backgroundColor;
+  const layoutBackgroundColor = useMemo(() => {
+    if (isDarkMode || !isMainPage) {
+      return 'background.default';
+    } else {
+      return 'background.paper';
     }
-
-    return colorPalette.paper.main;
-  })();
+  }, [isDarkMode, isMainPage]);
 
   return (
     <Stack
@@ -26,7 +28,7 @@ export function UnprotectedLayout() {
         minHeight: { xs: '100vh', md: 0 },
         width: '100%',
         pt: 0,
-        px: { xs: 0, md: 15 },
+        px: { xs: 0, md: 10, lg: 15 },
         backgroundColor: layoutBackgroundColor,
       }}
     >

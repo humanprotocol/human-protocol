@@ -3,9 +3,8 @@ import { useTranslation, Trans } from 'react-i18next';
 import { Box, keyframes, Link, Stack, Typography } from '@mui/material';
 import { jwtDecode } from 'jwt-decode';
 
-import { useStartIdv } from '../hooks';
-import { KycStatus } from '../types';
-import { useColorMode } from '@/shared/contexts/color-mode';
+import { useStartIdv } from '../hooks/use-start-idv';
+import { KycStatus } from '@/shared/types/entity.type';
 import { env } from '@/shared/env';
 import { HourglassIcon, VeriffIcon } from '@/shared/components/ui/icons';
 import { Button } from '@/shared/components/ui/button';
@@ -13,6 +12,7 @@ import { useAccessTokenRefresh } from '@/api/hooks/use-access-token-refresh';
 import { browserAuthProvider } from '@/shared/contexts/browser-auth-provider';
 import { UserData } from '@/modules/auth/context/auth-context';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
+import { useColorMode } from '@/shared/contexts/color-mode/use-color-mode';
 
 const hourglassSpin = keyframes`
   0% {
@@ -29,8 +29,7 @@ const hourglassSpin = keyframes`
   }
 `;
 
-// TODO: Extend to 30 seconds
-const CHECK_STATUS_COOLDOWN_TIME = 10000;
+const CHECK_STATUS_COOLDOWN_TIME = 30000;
 
 export function IdentityVerificationControl({
   kycStatus,
@@ -45,6 +44,8 @@ export function IdentityVerificationControl({
   const cooldownTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const { t } = useTranslation();
+  const { isDarkMode } = useColorMode();
+
   const { isIdvAlreadyInProgress, idvStarted, idvStartIsPending, startIdv } =
     useStartIdv();
   const {
@@ -52,7 +53,6 @@ export function IdentityVerificationControl({
     isPending: isRefreshingAccessToken,
   } = useAccessTokenRefresh();
   const { updateUserData } = useAuth();
-  const { colorPalette } = useColorMode();
 
   const handleCheckVerificationStatus = useCallback(async () => {
     if (isRefreshingAccessToken || isCheckStatusCoolingDown) {
@@ -107,13 +107,13 @@ export function IdentityVerificationControl({
     return (
       <Typography
         variant="body1"
-        sx={{ color: colorPalette.text.auxiliary200 }}
+        sx={{ color: isDarkMode ? 'text.auxiliary100' : 'text.auxiliary200' }}
       >
         <Trans
           components={{
             1: <Link href={`mailto:${env.VITE_HUMAN_SUPPORT_EMAIL}`} />,
           }}
-          i18nKey="worker.profile.verificationDeclined"
+          i18nKey="verifyUser.verificationDeclined"
         />
       </Typography>
     );
@@ -131,24 +131,20 @@ export function IdentityVerificationControl({
             p: 2.5,
             borderRadius: '10px',
             border: '1px solid',
-            borderColor: colorPalette.border.main,
+            borderColor: 'border.main',
           }}
         >
-          <Typography
-            variant="h6"
-            sx={{ color: colorPalette.text.primary, fontWeight: 600, mb: 1 }}
-          >
-            {t('worker.profile.verificationOpenedInNewTab')}
+          <Typography variant="h6" sx={{ color: 'text.primary', mb: 1 }}>
+            {t('verifyUser.verificationOpenedInNewTab')}
           </Typography>
           <Typography
-            variant="body1"
+            variant="body4"
             sx={{
-              color: colorPalette.text.auxiliary200,
-              fontWeight: 400,
+              color: 'text.auxiliary200',
               mb: 2,
             }}
           >
-            {t('worker.profile.completeYourVerification')}
+            {t('verifyUser.completeYourVerification')}
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Box
@@ -161,14 +157,13 @@ export function IdentityVerificationControl({
               <HourglassIcon />
             </Box>
             <Typography
-              variant="body1"
+              variant="body4"
               sx={{
-                color: colorPalette.text.auxiliary200,
-                fontWeight: 400,
+                color: 'text.auxiliary200',
                 fontStyle: 'italic',
               }}
             >
-              {t('worker.profile.waitingForVerification')}
+              {t('verifyUser.waitingForVerification')}
             </Typography>
           </Box>
         </Stack>
@@ -180,7 +175,7 @@ export function IdentityVerificationControl({
             loading={isRefreshingAccessToken}
             onClick={handleCheckVerificationStatus}
           >
-            {t('worker.profile.checkVerificationStatus')}
+            {t('verifyUser.checkVerificationStatus')}
           </Button>
         </Stack>
       </>
@@ -190,10 +185,10 @@ export function IdentityVerificationControl({
   return (
     <Stack>
       <Typography
-        variant="body1"
-        sx={{ color: colorPalette.text.auxiliary200, mb: { xs: 3, md: 5 } }}
+        variant="body4"
+        sx={{ color: 'text.auxiliary200', mb: { xs: 3, md: 5 } }}
       >
-        {t('worker.profile.veriffCopy')}
+        {t('verifyUser.veriffCopy')}
       </Typography>
       <Box
         sx={{
@@ -205,15 +200,10 @@ export function IdentityVerificationControl({
       >
         <Typography
           component="span"
-          sx={{
-            color: colorPalette.text.auxiliary200,
-            fontSize: 12,
-            fontWeight: 400,
-            letterSpacing: 0.15,
-            lineHeight: '150%',
-          }}
+          variant="body5"
+          sx={{ color: isDarkMode ? 'text.auxiliary100' : 'text.auxiliary200' }}
         >
-          {t('worker.profile.poweredBy')}
+          {t('verifyUser.poweredBy')}
         </Typography>
         <VeriffIcon />
       </Box>
@@ -224,7 +214,7 @@ export function IdentityVerificationControl({
         loading={idvStartIsPending}
         onClick={startIdv}
       >
-        {t('worker.profile.completeIdentityVerification')}
+        {t('verifyUser.completeIdentityVerification')}
       </Button>
     </Stack>
   );

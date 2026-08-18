@@ -1,29 +1,29 @@
 import { useEffect } from 'react';
 import { t } from 'i18next';
 import { useNavigate } from 'react-router-dom';
-import { Box, Grid, Paper, Typography } from '@mui/material';
+import { Box, Grid, Typography } from '@mui/material';
+
 import { getErrorMessageForError } from '@/shared/errors';
 import { ApiClientError } from '@/api';
-import { useSignIn } from './use-sign-in';
-import { SignInForm } from './sign-in-form';
-
+import { useSignIn } from './hooks/use-sign-in';
+import { SignInForm } from './components/sign-in-form';
 import signInImage from '@/assets/background-images/signin-background.png';
 import {
   TopNotificationType,
   useNotification,
 } from '@/shared/hooks/use-notification';
 import { BackButton } from '@/shared/components/ui/page-card/back-button';
-import { useColorMode } from '@/shared/contexts/color-mode';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
 import { routerPaths } from '@/router/router-paths';
 import { useIsUserVerified } from '@/shared/hooks';
 import { browserAuthProvider } from '@/shared/contexts/browser-auth-provider';
+import { PageCard } from '@/shared/components/ui/page-card';
 
 function formattedSignInErrorMessage(
   unknownError: unknown
 ): string | undefined {
   if (unknownError instanceof ApiClientError && unknownError.status === 401) {
-    return t('worker.signInForm.errors.invalidCredentials');
+    return t('signInForm.errors.invalidCredentials');
   }
 }
 
@@ -31,7 +31,6 @@ export function SignInPage() {
   const { showNotification } = useNotification();
   const navigate = useNavigate();
   const { user, status, signOut } = useAuth();
-  const { colorPalette } = useColorMode();
   const isUserVerified = useIsUserVerified();
 
   const { signIn, error, isError, isLoading, reset } = useSignIn();
@@ -79,25 +78,10 @@ export function SignInPage() {
   };
 
   return (
-    <Paper
-      elevation={0}
+    <PageCard
       sx={{
-        display: 'flex',
-        flex: 1,
-        alignSelf: 'stretch',
         alignItems: 'center',
         justifyContent: 'center',
-        my: { xs: 0, md: 4 },
-        bgcolor: colorPalette.background.paper,
-        borderRadius: '30px',
-        borderBottomLeftRadius: { xs: 0, md: '30px' },
-        borderBottomRightRadius: { xs: 0, md: '30px' },
-        border: { xs: 'none', md: '1px solid' },
-        borderColor: {
-          xs: 'none',
-          md: colorPalette.border.main,
-        },
-        overflow: 'hidden',
       }}
     >
       <Grid
@@ -148,9 +132,9 @@ export function SignInPage() {
             <Typography
               component="h1"
               variant="h4"
-              sx={{ color: colorPalette.text.auxiliary100 }}
+              sx={{ color: 'text.auxiliary100' }}
             >
-              {t('worker.signInForm.title')}
+              {t('signInForm.title')}
             </Typography>
           </Box>
           <SignInForm
@@ -161,6 +145,6 @@ export function SignInPage() {
           />
         </Grid>
       </Grid>
-    </Paper>
+    </PageCard>
   );
 }

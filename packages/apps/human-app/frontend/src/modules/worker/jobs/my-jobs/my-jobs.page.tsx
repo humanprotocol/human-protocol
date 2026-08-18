@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { Stack, Typography } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 
-import { useColorMode } from '@/shared/contexts/color-mode/use-color-mode';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { Button } from '@/shared/components/ui/button';
 import { MyJobsListMobile } from './components/mobile/my-jobs-list-mobile';
@@ -15,7 +14,6 @@ import { useMyJobsFilterStore } from '../hooks';
 import { JobsSwitcherMobile } from '@/router/components/layout/protected/jobs-switcher-mobile';
 
 export function MyJobsPage() {
-  const { colorPalette } = useColorMode();
   const isMobile = useIsMobile();
   const { t } = useTranslation();
 
@@ -47,13 +45,11 @@ export function MyJobsPage() {
           mx: { xs: 2, md: 0 },
           borderBottom: {
             xs: 'none',
-            md: `1px solid ${colorPalette.border.main}`,
+            md: (theme) => `1px solid ${theme.palette.border.main}`,
           },
         }}
       >
-        <Typography variant="h6" sx={{ fontWeight: 700 }}>
-          {t('worker.jobs.myJobs')}
-        </Typography>
+        <Typography variant="pageHeading">{t('worker.jobs.myJobs')}</Typography>
       </Stack>
       <Stack sx={{ gap: { xs: 2.5, md: 4 }, px: 0, py: 4 }}>
         <Stack

@@ -1,5 +1,5 @@
 import { useAuth } from '@/modules/auth/hooks/use-auth';
-import { KycStatus } from '@/modules/worker/profile/types/profile-types';
+import { KycStatus } from '@/shared/types/entity.type';
 
 export function useIsUserVerified() {
   const { user } = useAuth();

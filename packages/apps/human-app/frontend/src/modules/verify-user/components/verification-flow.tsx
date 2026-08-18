@@ -1,14 +1,10 @@
 import { useCallback, useState } from 'react';
-import { Box, Stack, Typography } from '@mui/material';
+import { Box, Chip, Stack, Typography } from '@mui/material';
 import { t } from 'i18next';
 
-import { Chip } from '@/shared/components/ui/chip';
-import { useColorMode } from '@/shared/contexts/color-mode/use-color-mode';
-import {
-  IdentityVerificationControl,
-  WalletConnectionControl,
-} from '@/modules/worker/profile/components';
-import { KycStatus } from '@/modules/worker/profile/types/profile-types';
+import { IdentityVerificationControl } from './identity-verification-control';
+import { WalletConnectionControl } from './wallet-connection-control';
+import { KycStatus } from '@/shared/types/entity.type';
 import { useIsMobile } from '@/shared/hooks';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
 
@@ -35,14 +31,11 @@ export function VerificationFlow({
   );
 
   const { user } = useAuth();
-  const { colorPalette } = useColorMode();
   const isMobile = useIsMobile();
 
   const kycStatus = user?.kyc_status as KycStatus;
 
-  const label = kycStatus
-    ? t(`worker.profile.idvStatusValues.${kycStatus}`)
-    : '';
+  const label = kycStatus ? t(`verifyUser.idvStatusValues.${kycStatus}`) : '';
   const isKycDeclined = kycStatus === KycStatus.DECLINED;
   const isKycStarted = kycStatus !== KycStatus.NONE;
 
@@ -54,9 +47,9 @@ export function VerificationFlow({
     <Stack sx={{ mt: { xs: 3, md: 0 }, px: 2, width: 400 }}>
       <Typography
         variant="h4"
-        sx={{ color: colorPalette.text.auxiliary100, mb: { xs: 2.5, md: 5 } }}
+        sx={{ color: 'text.auxiliary100', mb: { xs: 2.5, md: 5 } }}
       >
-        {t('worker.profile.beforeWeGetStarted')}
+        {t('verifyUser.beforeWeGetStarted')}
       </Typography>
       <Stack
         direction="row"
@@ -67,7 +60,7 @@ export function VerificationFlow({
             width: 90,
             height: 10,
             borderRadius: '7px',
-            bgcolor: colorPalette.primary.main,
+            bgcolor: 'primary.main',
           }}
         />
         <Box
@@ -75,10 +68,7 @@ export function VerificationFlow({
             width: 90,
             height: 10,
             borderRadius: '7px',
-            bgcolor:
-              step === 'wallet'
-                ? colorPalette.primary.main
-                : colorPalette.background.default,
+            bgcolor: step === 'wallet' ? 'primary.main' : 'background.default',
           }}
         />
       </Stack>
@@ -86,19 +76,25 @@ export function VerificationFlow({
         <>
           <Typography
             component="h6"
-            variant={isMobile ? 'body1' : 'h6'}
+            variant={isMobile ? 'body3' : 'h6'}
             sx={{
               display: 'flex',
               alignItems: 'center',
               gap: 1,
-              color: colorPalette.text.auxiliary100,
-              fontWeight: 600,
+              color: 'text.auxiliary100',
               mb: { xs: 3, md: 2 },
             }}
           >
-            {t('worker.profile.identityVerification')}
+            {t('verifyUser.identityVerification')}
             {isKycStarted && label && (
-              <Chip label={label} backgroundColor={getChipColor(kycStatus)} />
+              <Chip
+                label={label}
+                sx={{
+                  bgcolor: getChipColor(kycStatus),
+                  border: 'none',
+                  color: 'common.white',
+                }}
+              />
             )}
           </Typography>
           <IdentityVerificationControl
@@ -111,14 +107,13 @@ export function VerificationFlow({
         <>
           <Typography
             component="h6"
-            variant={isMobile ? 'body1' : 'h6'}
+            variant={isMobile ? 'body3' : 'h6'}
             sx={{
-              color: colorPalette.text.auxiliary100,
-              fontWeight: 600,
+              color: 'text.auxiliary100',
               mb: { xs: 3, md: 5 },
             }}
           >
-            {t('worker.profile.connectYourWallet')}
+            {t('verifyUser.connectYourWallet')}
           </Typography>
           <WalletConnectionControl />
         </>

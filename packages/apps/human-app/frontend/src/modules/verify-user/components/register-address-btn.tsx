@@ -1,7 +1,8 @@
 import { t } from 'i18next';
+
 import { Button } from '@/shared/components/ui/button';
-import { useRegisterAddress } from '@/modules/worker/hooks/use-register-address';
-import { useRegisterAddressNotifications } from '@/modules/worker/hooks/use-register-address-notifications';
+import { useRegisterAddress } from '../hooks/use-register-address';
+import { useRegisterAddressNotifications } from '../hooks/use-register-address-notifications';
 
 export function RegisterAddressBtn() {
   const { onSuccess, onError } = useRegisterAddressNotifications();
@@ -18,7 +19,7 @@ export function RegisterAddressBtn() {
       loading={isPending}
       onClick={mutate.bind(undefined, undefined)}
     >
-      {t('worker.profile.registerAddress')}
+      {t('verifyUser.registerAddress')}
     </Button>
   );
 }

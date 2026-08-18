@@ -7,7 +7,6 @@ import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { TopNotificationType, useNotification } from '@/shared/hooks';
 import { useResignJobMutation } from '../my-jobs/hooks';
 import { type MyJob } from '../schemas';
-import { useColorMode } from '@/shared/contexts/color-mode/use-color-mode';
 import { useMyJobsFilterStore } from '../hooks';
 import { ReportAbuseDialog } from './report-abuse-dialog';
 
@@ -20,7 +19,6 @@ export function MoreButton({ job, isDisabled }: MoreButtonProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const { colorPalette } = useColorMode();
   const { t } = useTranslation();
   const isMobile = useIsMobile();
   const { showNotification } = useNotification();
@@ -60,9 +58,12 @@ export function MoreButton({ job, isDisabled }: MoreButtonProps) {
           width: { xs: '44px', md: '30px' },
           height: { xs: '44px', md: '30px' },
           p: 1,
-          border: { xs: `1px solid ${colorPalette.border.main}`, md: 'none' },
+          border: (theme) => ({
+            xs: `1px solid ${theme.palette.border.main}`,
+            md: 'none',
+          }),
           borderRadius: '4px',
-          color: colorPalette.text.auxiliary100,
+          color: 'text.auxiliary100',
         }}
         onClick={(e) => {
           if (!isDisabled) {

@@ -20,7 +20,6 @@ import {
   OracleAddressIcon,
   OracleRewardIcon,
 } from '@/shared/components/ui/icons';
-import { useColorMode } from '@/shared/contexts/color-mode';
 import { CopyToClipboardButton } from '@/shared/components/ui/copy-to-clipboard-button';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { Button } from '@/shared/components/ui/button';
@@ -39,14 +38,7 @@ function JobTypesTooltipTitle({ jobTypes }: { jobTypes: string[] }) {
         const element = JOB_TYPES.find((j) => j === jobType) as JobType;
         const label = t(`jobTypeLabels.${element}`);
         return (
-          <Typography
-            key={jobType}
-            variant="body2"
-            sx={{
-              color: 'text.primary',
-              fontWeight: 500,
-            }}
-          >
+          <Typography key={jobType} variant="body2">
             {label}
           </Typography>
         );
@@ -60,7 +52,6 @@ export function OracleJobCard({ oracle }: { oracle: Oracle }) {
   const [isTaskTypesOpen, setIsTaskTypesOpen] = useState(false);
 
   const navigate = useNavigate();
-  const { colorPalette } = useColorMode();
   const isMobile = useIsMobile();
 
   const { data, isLoading } = useGetRegistrationDataInOracles();
@@ -88,8 +79,8 @@ export function OracleJobCard({ oracle }: { oracle: Oracle }) {
         pt: { xs: 2, md: 3 },
         pb: { xs: 0, md: 2 },
         borderRadius: '20px',
-        borderColor: colorPalette.border.strong,
-        bgcolor: colorPalette.background.subtle,
+        borderColor: 'border.strong',
+        bgcolor: 'background.subtle',
       }}
     >
       <CardContent
@@ -102,25 +93,16 @@ export function OracleJobCard({ oracle }: { oracle: Oracle }) {
         }}
       >
         <Typography
-          variant={isMobile ? 'body1' : 'h6'}
+          variant={isMobile ? 'body3' : 'h6'}
           component="p"
-          sx={{
-            color: colorPalette.text.auxiliary100,
-            fontWeight: 600,
-          }}
+          sx={{ color: 'text.auxiliary100' }}
         >
           {oracle.name}
         </Typography>
         <Stack sx={{ gap: 1 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-            <OracleAddressIcon sx={{ color: colorPalette.text.primary }} />
-            <Typography
-              variant="body2"
-              sx={{
-                color: colorPalette.text.primary,
-                fontWeight: 500,
-              }}
-            >
+            <OracleAddressIcon sx={{ color: 'text.primary' }} />
+            <Typography variant="body2">
               {t('worker.oraclesList.address')}:
             </Typography>
             <EvmAddress address={oracle.address} />
@@ -128,21 +110,15 @@ export function OracleJobCard({ oracle }: { oracle: Oracle }) {
               value={oracle.address}
               sx={{
                 '& svg': {
-                  color: colorPalette.text.auxiliary100,
+                  color: 'text.auxiliary100',
                   fontSize: 16,
                 },
               }}
             />
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-            <OracleRewardIcon sx={{ color: colorPalette.text.primary }} />
-            <Typography
-              variant="body2"
-              sx={{
-                color: colorPalette.text.primary,
-                fontWeight: 500,
-              }}
-            >
+            <OracleRewardIcon sx={{ color: 'text.primary' }} />
+            <Typography variant="body2">
               {t('worker.oraclesList.reward')}:
             </Typography>
             <Typography
@@ -151,8 +127,7 @@ export function OracleJobCard({ oracle }: { oracle: Oracle }) {
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 0.5,
-                color: colorPalette.text.auxiliary200,
-                fontWeight: 500,
+                color: 'text.auxiliary100',
               }}
             >
               {isRewardAmountsEqual ? (
@@ -183,10 +158,10 @@ export function OracleJobCard({ oracle }: { oracle: Oracle }) {
             px: { xs: 2, md: 0 },
             mx: { xs: -2, md: 0 },
             gap: isTaskTypesOpen && hasTasks ? 1 : 0,
-            borderTop: {
-              xs: `1px solid ${colorPalette.border.main}`,
+            borderTop: (theme) => ({
+              xs: `1px solid ${theme.palette.border.main}`,
               md: 'none',
-            },
+            }),
           }}
         >
           <Stack
@@ -216,7 +191,7 @@ export function OracleJobCard({ oracle }: { oracle: Oracle }) {
                 sx={{
                   p: 0,
                   bgcolor: 'transparent',
-                  color: colorPalette.text.auxiliary200,
+                  color: 'text.auxiliary200',
                 }}
                 onClick={() => hasTasks && setIsTaskTypesOpen(!isTaskTypesOpen)}
               >
@@ -233,10 +208,11 @@ export function OracleJobCard({ oracle }: { oracle: Oracle }) {
                   tooltip: {
                     sx: {
                       p: 1.5,
-                      bgcolor: colorPalette.background.paper,
+                      bgcolor: 'background.paper',
                       boxShadow: 'none',
                       borderRadius: '15px',
-                      border: `1px solid ${colorPalette.border.main}`,
+                      border: (theme) =>
+                        `1px solid ${theme.palette.border.main}`,
                     },
                   },
                 }}
@@ -247,7 +223,7 @@ export function OracleJobCard({ oracle }: { oracle: Oracle }) {
                     display: 'flex',
                     alignItems: 'center',
                     gap: 0.75,
-                    color: colorPalette.text.auxiliary200,
+                    color: 'text.auxiliary200',
                     fontWeight: 600,
                     cursor: hasTasks
                       ? { xs: 'default', md: 'pointer' }
@@ -264,6 +240,7 @@ export function OracleJobCard({ oracle }: { oracle: Oracle }) {
             )}
             <Button
               variant="text"
+              color="accent"
               disableRipple
               disabled={isLoading}
               sx={{
@@ -271,7 +248,6 @@ export function OracleJobCard({ oracle }: { oracle: Oracle }) {
                 p: 0.5,
                 gap: 0.5,
                 bgcolor: 'transparent',
-                color: colorPalette.accent.main,
               }}
               onClick={handleClickOnExploreTasks}
             >
@@ -289,12 +265,9 @@ export function OracleJobCard({ oracle }: { oracle: Oracle }) {
                     key={label}
                     label={label}
                     sx={{
-                      typography: 'body2',
-                      fontWeight: 500,
-                      color: colorPalette.text.primary,
-                      bgcolor: colorPalette.background.subtle,
-                      borderRadius: '99px',
-                      border: `0.5px solid ${colorPalette.border.main}`,
+                      color: 'text.primary',
+                      bgcolor: 'background.subtle',
+                      borderColor: 'border.strong',
                     }}
                   />
                 );

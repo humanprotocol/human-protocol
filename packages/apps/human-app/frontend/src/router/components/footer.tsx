@@ -9,10 +9,10 @@ interface FooterProps {
 }
 
 export function Footer({ displayChatIcon = true }: FooterProps) {
-  const { colorPalette, isDarkMode } = useColorMode();
+  const { isDarkMode } = useColorMode();
   const { t } = useTranslation();
 
-  const footerTextColor = isDarkMode ? 'rgba(255, 255, 255, 0.70)' : '#676767';
+  const footerTextColor = isDarkMode ? 'text.secondary' : 'text.auxiliary200';
 
   return (
     <Grid
@@ -22,11 +22,11 @@ export function Footer({ displayChatIcon = true }: FooterProps) {
         width: '100%',
         px: { xs: 3, md: 2 },
         py: { xs: 2, md: 3 },
-        bgcolor: { xs: colorPalette.background.paper, md: 'transparent' },
-        borderTop: {
-          xs: `1px solid ${colorPalette.border.main}`,
+        bgcolor: { xs: 'background.paper', md: 'transparent' },
+        borderTop: (theme) => ({
+          xs: `1px solid ${theme.palette.border.main}`,
           md: 'none',
-        },
+        }),
       }}
     >
       <Grid

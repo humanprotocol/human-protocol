@@ -1,7 +1,8 @@
-import React, { createContext, useState, useEffect } from 'react';
+import { createContext, useState, useEffect, type ReactNode } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import { type ZodType } from 'zod';
 import { useQueryClient } from '@tanstack/react-query';
+
 import { browserAuthProvider } from '@/shared/contexts/browser-auth-provider';
 import { type AuthTokensSuccessResponse } from '@/shared/schemas';
 import { type UserData } from '@/modules/auth/context/auth-context';
@@ -37,7 +38,7 @@ export function createAuthProvider<T extends UserData>(config: {
     AuthenticatedUserContextType<T> | UnauthenticatedUserContextType<T> | null
   >(null);
 
-  function AuthProvider({ children }: Readonly<{ children: React.ReactNode }>) {
+  function AuthProvider({ children }: { children: ReactNode }) {
     const queryClient = useQueryClient();
     const [authState, setAuthState] = useState<{
       user: T | null;

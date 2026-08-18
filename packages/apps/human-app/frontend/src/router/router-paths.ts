@@ -1,7 +1,7 @@
 export const routerPaths = {
   homePage: '/',
   signIn: '/sign-in',
-  signUp: '/sign-up',
+  // signUp: '/sign-up',
   resetPassword: '/reset-password',
   resetPasswordSuccess: '/reset-password-success',
   sendResetLink: '/send-reset-link',
