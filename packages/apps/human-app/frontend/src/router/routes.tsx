@@ -16,7 +16,7 @@ import { SignInPage, VerifyUserPage } from '@/modules/signin/worker';
 import { JobsDiscoveryPage } from '@/modules/worker/jobs-discovery';
 import { MyJobsPage } from '@/modules/worker/jobs/my-jobs/my-jobs.page';
 import { ProfilePage } from '@/modules/worker/profile';
-import { SignUpPage } from '@/modules/signup/worker';
+// import { SignUpPage } from '@/modules/signup/worker';
 import { HomePage } from '@/modules/homepage';
 import {
   ResetPasswordPage,
@@ -36,10 +36,10 @@ export const unprotectedRoutes: RouteProps[] = [
     path: routerPaths.signIn,
     element: <SignInPage />,
   },
-  {
-    path: routerPaths.signUp,
-    element: <SignUpPage />,
-  },
+  // {
+  //   path: routerPaths.signUp,
+  //   element: <SignUpPage />,
+  // },
   {
     path: routerPaths.emailVerification,
     element: <EmailVerificationProcessPage />,

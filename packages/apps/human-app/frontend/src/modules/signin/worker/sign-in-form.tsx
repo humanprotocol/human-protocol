@@ -1,6 +1,6 @@
 import { type SubmitEvent } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { Box, Divider, Grid, Link as MuiLink, Typography } from '@mui/material';
+import { Box, Grid, Link as MuiLink } from '@mui/material';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -80,7 +80,7 @@ export function SignInForm({
           >
             {t('worker.signInForm.submitBtn')}
           </Button>
-          <Box sx={{ position: 'relative', width: '100%' }}>
+          {/* <Box sx={{ position: 'relative', width: '100%' }}>
             <Divider sx={{ bgcolor: 'border.main' }} />
             <Typography
               variant="body2"
@@ -122,7 +122,7 @@ export function SignInForm({
             >
               {t('worker.signInForm.signUp')}
             </MuiLink>
-          </Box>
+          </Box> */}
         </Grid>
       </form>
     </FormProvider>
