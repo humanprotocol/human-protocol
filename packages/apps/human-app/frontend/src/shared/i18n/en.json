@@ -122,6 +122,7 @@
       "title": "Verify Email",
       "checkYourInbox": "Check your inbox",
       "backToSignUp": "Back to Sign Up",
+      "backToSignIn": "Back to Sign In",
       "btn": "Resend Email",
       "paragraph1": "We sent a verification link to <1>{{email}}</1>",
       "paragraph2": "Click the link in the email to verify your account. The link expires in 24 hours.",

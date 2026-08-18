@@ -114,7 +114,7 @@ export function EmailVerificationFormContainer() {
               }}
             >
               <Button variant="outlined" fullWidth onClick={handleCancel}>
-                {t('worker.verifyEmail.backToSignUp')}
+                {t('worker.verifyEmail.backToSignIn')}
               </Button>
             </Box>
             {!!user && (
